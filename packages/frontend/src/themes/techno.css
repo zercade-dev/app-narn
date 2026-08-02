@@ -1,0 +1,409 @@
+/* Techno theme. Near-black blue surfaces, cyan/magenta neon, subtle glow,
+   Chakra Petch headings + Orbitron display. Loaded lazily by theme-registry. */
+/* Techno light = bright cool-cyan workspace with a DARK neon console sidebar —
+   the light mode keeps the cyberpunk identity instead of collapsing into the
+   default palette. */
+:root[data-theme='techno'] {
+  --background: oklch(0.955 0.015 210);
+  --foreground: oklch(0.18 0.04 260);
+  --card: oklch(0.99 0.006 210);
+  --card-foreground: oklch(0.18 0.04 260);
+  --popover: oklch(0.99 0.006 210);
+  --popover-foreground: oklch(0.18 0.04 260);
+  --primary: oklch(0.45 0.16 215);
+  --primary-foreground: oklch(0.97 0.01 200);
+  --secondary: oklch(0.9 0.03 210);
+  --secondary-foreground: oklch(0.25 0.05 250);
+  --muted: oklch(0.91 0.025 210);
+  --muted-foreground: oklch(0.44 0.04 250);
+  --accent: oklch(0.89 0.07 330);
+  --accent-foreground: oklch(0.32 0.14 330);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.82 0.05 210);
+  --input: oklch(0.82 0.05 210);
+  --ring: oklch(0.55 0.15 215);
+  --type-ui: oklch(0.5 0.15 215);
+  --type-dialogue: oklch(0.53 0.2 330);
+  --type-lore: oklch(0.5 0.15 175);
+  --type-default: oklch(0.45 0.04 250);
+  --type-achievement: oklch(0.58 0.16 85);
+  --type-other: oklch(0.5 0.15 175);
+  --status-pass: oklch(0.53 0.15 175);
+  --status-warn: oklch(0.47 0.14 80);
+  --status-fail: oklch(0.55 0.21 15);
+  --status-info: oklch(0.5 0.15 215);
+  --chart-1: oklch(0.5 0.15 215);
+  --chart-2: oklch(0.53 0.2 330);
+  --chart-3: oklch(0.53 0.15 175);
+  --chart-4: oklch(0.6 0.15 85);
+  --chart-5: oklch(0.5 0.15 280);
+  --radius: 0.375rem;
+  --sidebar: oklch(0.16 0.025 260);
+  --sidebar-foreground: oklch(0.88 0.03 200);
+  --sidebar-primary: oklch(0.8 0.14 195);
+  --sidebar-primary-foreground: oklch(0.14 0.03 260);
+  --sidebar-accent: oklch(0.26 0.05 260);
+  --sidebar-accent-foreground: oklch(0.92 0.05 195);
+  --sidebar-border: oklch(0.8 0.14 195 / 18%);
+  --sidebar-ring: oklch(0.8 0.14 195);
+  --shadow-card: 0 0 0 1px oklch(0.55 0.15 215 / 0.14), 0 4px 16px -4px oklch(0.55 0.15 215 / 0.25);
+  --theme-font-heading: 'Chakra Petch', 'Geist Variable', sans-serif;
+  --theme-font-display: 'Orbitron', 'Chakra Petch', sans-serif;
+}
+
+:root[data-theme='techno'].dark {
+  --background: oklch(0.13 0.02 260);
+  --foreground: oklch(0.93 0.02 200);
+  --card: oklch(0.17 0.025 260);
+  --card-foreground: oklch(0.93 0.02 200);
+  --popover: oklch(0.17 0.025 260);
+  --popover-foreground: oklch(0.93 0.02 200);
+  --primary: oklch(0.8 0.14 195);
+  --primary-foreground: oklch(0.14 0.03 260);
+  --secondary: oklch(0.23 0.03 260);
+  --secondary-foreground: oklch(0.93 0.02 200);
+  --muted: oklch(0.23 0.03 260);
+  --muted-foreground: oklch(0.68 0.04 220);
+  --accent: oklch(0.3 0.08 330);
+  --accent-foreground: oklch(0.9 0.08 330);
+  --destructive: oklch(0.68 0.21 15);
+  --border: oklch(0.8 0.14 195 / 20%);
+  --input: oklch(0.8 0.14 195 / 25%);
+  --ring: oklch(0.8 0.14 195);
+  --type-ui: oklch(0.8 0.14 195);
+  --type-dialogue: oklch(0.72 0.2 330);
+  --type-lore: oklch(0.78 0.14 175);
+  --type-default: oklch(0.75 0.04 220);
+  --type-achievement: oklch(0.8 0.15 85);
+  --type-other: oklch(0.78 0.14 175);
+  --status-pass: oklch(0.78 0.15 175);
+  --status-warn: oklch(0.8 0.15 85);
+  --status-fail: oklch(0.7 0.2 15);
+  --status-info: oklch(0.8 0.14 195);
+  --chart-1: oklch(0.8 0.14 195);
+  --chart-2: oklch(0.72 0.2 330);
+  --chart-3: oklch(0.78 0.14 175);
+  --chart-4: oklch(0.8 0.15 85);
+  --chart-5: oklch(0.65 0.16 280);
+  --sidebar: oklch(0.11 0.02 260);
+  --sidebar-foreground: oklch(0.9 0.02 200);
+  --sidebar-primary: oklch(0.8 0.14 195);
+  --sidebar-primary-foreground: oklch(0.14 0.03 260);
+  --sidebar-accent: oklch(0.26 0.06 330);
+  --sidebar-accent-foreground: oklch(0.9 0.08 330);
+  --sidebar-border: oklch(0.8 0.14 195 / 12%);
+  --sidebar-ring: oklch(0.8 0.14 195);
+  --shadow-card: 0 0 0 1px oklch(0.8 0.14 195 / 0.12), 0 0 16px -4px oklch(0.8 0.14 195 / 0.3);
+}
+
+[data-theme='techno'] :is(button, [role='tab'], a):focus-visible {
+  box-shadow: 0 0 8px 0 color-mix(in oklab, var(--ring) 50%, transparent);
+}
+
+/* Neon-outlined checkbox: unchecked reads as an empty HUD slot, checked ignites.
+   [data-slot='checkbox'] also carries Tailwind's `border-input` (border-color:var(--input),
+   0,1,0), `dark:border-white/25` (border-color:#ffffff40 behind :is(.dark *), 0,2,0), and
+   `dark:data-[checked]:border-primary` (border-color:var(--primary) behind
+   :is(.dark *)[data-checked], 0,3,0) from checkbox.tsx's cn() — all verified against a
+   `pnpm build` of packages/frontend (dist/assets/index-*.css). The doubled data-slot
+   attribute used to reach only 0,3,0: enough to unconditionally outrank border-input and
+   dark:border-white/25, but an EXACT TIE with dark:data-[checked]:border-primary, decided
+   only by source order (theme CSS is lazy-loaded after the main bundle via
+   theme-registry.ts's dynamic import(), so it happened to win — but that was incidental,
+   and no test exercised the checked+dark-mode combination to catch a regression). Tripled
+   to three data-slot attributes (0,4,0) so it wins that combination unconditionally too;
+   the checked + dark-mode border-color case is covered by a parity test. One rule
+   therefore governs the border in both light and dark techno, checked or not, without a
+   separate `.dark` arm. Checked and indeterminate both render bg-primary/border-primary in
+   checkbox.tsx, so both ignite here; the doubled data-checked/data-indeterminate attribute
+   on the box-shadow rule below (0,3,0) likewise clears the compiled
+   `.data-\[checked\]\:bg-primary[data-checked]` utility (0,2,0) for background-color — a
+   property that rule doesn't touch. The REAL competitor for that rule's box-shadow is
+   checkbox.tsx's keyboard focus ring, `.focus-visible\:ring-2:focus-visible` (0,2,0):
+   box-shadow is a single-value property (competing rules replace, not merge), so at 0,3,0
+   this rule used to replace the ring outright, silently suppressing the focus indicator on
+   checked/indeterminate techno checkboxes. Fixed by composing instead of replacing — see
+   pixel.css's checkbox comment for the full var(--tw-ring-shadow)/
+   var(--tw-ring-offset-shadow) composition mechanism (same fix, same reasoning). */
+[data-theme='techno'] [data-slot='checkbox'][data-slot='checkbox'][data-slot='checkbox'] {
+  border-color: color-mix(in oklab, var(--primary) 55%, transparent);
+}
+/* A parity test locates this rule by matching this exact single-line box-shadow
+   text — keep it on one line; prettier-ignored below. */
+/* prettier-ignore */
+[data-theme='techno'] [data-slot='checkbox'][data-checked],
+[data-theme='techno'] [data-slot='checkbox'][data-indeterminate] {
+  box-shadow: 0 0 10px -1px color-mix(in oklab, var(--primary) 75%, transparent), var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000);
+}
+
+/* Neon-edged overlays with a cyan bloom instead of a drop shadow. Same reported gap as
+   pixel.css's overlay block ("tooltips don't look …", "same with dropdown options", plus the
+   Compare keyboard-shortcuts Popover) — see that comment for the full portal-matching
+   rationale (tooltip-content/popover-content/select-content are Base-UI-portaled under
+   document.body, itself a descendant of <html data-theme='techno'>, so the plain descendant
+   selector below still reaches them) and the focus-ring analysis (none of the three elements
+   carry a `focus-visible:` box-shadow of their own, so replacing box-shadow outright is safe
+   — verified the same way, against tooltip.tsx/popover.tsx/select.tsx).
+
+   Compiled Tailwind utilities competing here, verified against the same `pnpm build` of
+   packages/frontend (dist/assets/index-*.css) — quoted as class-name / property pairs, not
+   literal rule syntax, so this comment can't be mistaken for a real rule by the (deliberately
+   naive) brace-matching rule parser the theming tests use to pull selectors out of this file:
+     .border sets border-style and border-width:1px, specificity 0,1,0 — popover-content
+     .shadow-md and .ring-1 both set box-shadow via the shared --tw-*-shadow composition
+       chain, specificity 0,1,0 each — popover-content / select-content
+
+   Unlike pixel, this block intentionally does NOT touch border-radius: techno keeps its
+   rounded corners (--radius stays 0.375rem) — locked by a parity test.
+
+   Selector is `[data-theme='techno'] :is([data-slot='tooltip-content'], …)` — two
+   selector-level components (0,1,0 each) = (0,2,0) total, unconditionally beating every
+   0,1,0 utility above. No tie, no doubling needed.
+
+   border-width/border-style/border-color are three longhands rather than the equivalent
+   `border: 1px solid color-mix(...)` shorthand — see pixel.css's overlay comment for why
+   (jsdom invalidates an entire border shorthand when any component is non-literal, e.g. a
+   color-mix()/var() expression; splitting into longhands keeps width/style verifiable without
+   changing real-browser rendering). */
+[data-theme='techno']
+  :is([data-slot='tooltip-content'], [data-slot='popover-content'], [data-slot='select-content']) {
+  border-width: 1px;
+  border-style: solid;
+  border-color: color-mix(in oklab, var(--primary) 35%, transparent);
+  box-shadow: 0 0 18px -4px color-mix(in oklab, var(--primary) 45%, transparent);
+}
+
+/* Tooltip arrow follow-up: same gap as pixel's overlay follow-up above (see that comment for
+   the full corner-mapping/visible-half derivation and the `data-slot='tooltip-arrow'`
+   disambiguation rationale — base-ui's TooltipArrow and TooltipPopup share the exact same
+   `data-side`/`data-open`/`data-closed` attribute names, so `[data-side=...]` alone can't
+   distinguish the arrow from the popup box it sits on). The neon-edged overlay treatment above
+   only gives tooltip-content a thin bright border + cyan bloom; the arrow diamond
+   (`rotate-45 rounded-[2px] bg-foreground`) was left plain. This adds the SAME border-color as
+   the popup, on the two edges of the diamond that form its visible (outward-pointing) half —
+   not all four, which would draw a border line across the hidden half and show through as a
+   stray diagonal crossing the popup near the seam.
+
+   Unlike pixel, this does NOT touch border-radius (techno keeps rounded corners everywhere,
+   including the arrow's existing `rounded-[2px]` — consistent with the overlay rule above,
+   which also leaves border-radius alone; locked by the "keeps rounded corners" test below) and
+   does NOT add a box-shadow bloom to the arrow itself: bloom is a diffuse box-shadow that
+   would radiate from the WHOLE element (both the visible and the hidden, popup-embedded half),
+   so it would risk a faint halo bleeding out from behind the popup's own edge — the "thin
+   bright edge" the arrow needs is fully carried by border-color alone.
+
+   border-*-width/style/color are longhands, same jsdom var()/color-mix()-in-shorthand
+   reasoning as the overlay rule above. */
+[data-theme='techno'] [data-slot='tooltip-arrow'][data-side='top'] {
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: color-mix(in oklab, var(--primary) 35%, transparent);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: color-mix(in oklab, var(--primary) 35%, transparent);
+}
+[data-theme='techno'] [data-slot='tooltip-arrow'][data-side='bottom'] {
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: color-mix(in oklab, var(--primary) 35%, transparent);
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: color-mix(in oklab, var(--primary) 35%, transparent);
+}
+[data-theme='techno'] [data-slot='tooltip-arrow'][data-side='left'],
+[data-theme='techno'] [data-slot='tooltip-arrow'][data-side='inline-start'] {
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-top-color: color-mix(in oklab, var(--primary) 35%, transparent);
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: color-mix(in oklab, var(--primary) 35%, transparent);
+}
+[data-theme='techno'] [data-slot='tooltip-arrow'][data-side='right'],
+[data-theme='techno'] [data-slot='tooltip-arrow'][data-side='inline-end'] {
+  border-left-width: 1px;
+  border-left-style: solid;
+  border-left-color: color-mix(in oklab, var(--primary) 35%, transparent);
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: color-mix(in oklab, var(--primary) 35%, transparent);
+}
+
+/* Row actions (Compare/Translations table): a "command deck" — solid neon tiles with
+   an angled corner-cut and Orbitron micro-caps. ComparisonCell.tsx's CellActions renders these
+   as bare `<button type="button" className="p-1.5 rounded text-muted-foreground/70 hover:…
+   disabled:opacity-40">` elements directly — NOT the cva-based Button component in
+   components/ui/button.tsx (confirmed by reading ComparisonCell.tsx; no Button/cn import used
+   for these five buttons). Owner-approved constraint: only PRIMARY and DESTRUCTIVE actions get
+   filled neon tiles — SECONDARY (the base rule below, `data-row-action-intent` absent or
+   'secondary') stays a low-chroma "ghost" fill using the muted `--secondary` token, so a row
+   never carries more than ~2 high-intensity tiles competing with the translation text next to
+   them (retranslate=primary, clear=destructive; undo/mark-reviewed/edit=secondary, see
+   ComparisonCell.tsx's `data-row-action-intent` attributes).
+
+   Specificity — verified against a real `pnpm build` of packages/frontend
+   (dist/assets/index-*.css), not guessed — quoted here as class-name / property pairs, not
+   literal rule syntax, so this comment can't be mistaken for a real rule by the (deliberately
+   naive) brace-matching rule parser the theming tests use to pull selectors out of this file:
+     the base rule sets `background`/`color` (the ghost secondary fill), which competes for the
+     SAME properties (background-color/color) as this button's own per-action hover utilities —
+     one text/bg pair each for status-info, status-warn, status-pass, status-fail, and
+     foreground/muted (e.g. .hover\:text-status-info:hover, .hover\:bg-status-info\/10:hover) —
+     each (0,2,0). A plain `[data-theme='techno'] [data-row-action]` base rule is ALSO (0,2,0): an
+     EXACT TIE, decided only by source order (the theme stylesheet loads after the main bundle
+     via theme-registry.ts's dynamic import(), so it would happen to win — but incidentally,
+     exactly the untested-tie failure mode flagged elsewhere in this file). Doubled to
+     `[data-row-action][data-row-action]` (0,3,0) to win unconditionally — this file's
+     established self-doubling-attribute-selector convention (see the checkbox/tooltip blocks
+     above). The intent-specific primary/destructive rules, which must in turn beat this
+     doubled base rule for the SAME background/color properties on primary/destructive
+     buttons (both selectors match simultaneously there), are quadrupled to
+     `[data-row-action][data-row-action][data-row-action-intent='…']` (0,4,0) for the same
+     unconditional-win reason — a single doubling would only tie the doubled base rule at
+     (0,3,0). Pixel's equivalent rule (pixel.css) does NOT need any of this: its base rule sets
+     no background/color, so it never competes with these hover utilities in the first place. */
+[data-theme='techno'] [data-row-action][data-row-action] {
+  border: 0;
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px));
+  font-family: var(--font-display, 'Orbitron', sans-serif);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+[data-theme='techno'] [data-row-action][data-row-action][data-row-action-intent='primary'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-theme='techno'] [data-row-action][data-row-action][data-row-action-intent='destructive'] {
+  background: var(--destructive);
+  color: var(--primary-foreground);
+}
+/* Review fix: this rule USED to set `box-shadow` for the hover glow, but the base rule above
+   applies `clip-path` to the same element — and clip-path clips box-shadow (painted as part of
+   the box, so it's restricted to the clip region) but not outline, exactly per the
+   accessibility-fix comment just below this rule. That reasoning was written for the
+   focus-visible ring but never carried over to hover, so the box-shadow hover glow was being
+   silently clipped to nothing — hovering a techno row-action tile produced no visible neon
+   bloom at all, the one interactive flourish "command deck" design was built around. Rerouted
+   to `filter: drop-shadow(...)` instead: unlike box-shadow, drop-shadow follows the element's
+   actual rendered (post-clip-path) alpha shape, so the bloom traces the notched silhouette
+   rather than being clipped away. (outline was the other clip-path-surviving option used for
+   focus below, but a hard-edged ring reads worse as a "glow/bloom" than a blurred drop-shadow.)
+   drop-shadow has no spread-radius component (box-shadow's `-1px` fourth value doesn't carry
+   over); the blur radius here is tuned down from the old box-shadow's 16px to compensate. */
+[data-theme='techno'] [data-row-action]:hover {
+  filter: drop-shadow(0 0 10px color-mix(in oklab, var(--primary) 80%, transparent));
+}
+/* Accessibility fix: clip-path clips box-shadow but NOT outline (verified against real Chrome
+   rendering — clip-path restricts the box's own paint region, which box-shadow is subject to
+   since it's painted as part of that box, but outline is explicitly excluded and paints outside
+   the clip). This file's existing generic rule near the top — `:is(button, [role='tab'], a)
+   :focus-visible`, setting a `box-shadow` glow — DOES still match these buttons (they're real
+   `<button>` elements) and is not overridden by anything above — but its box-shadow glow is
+   silently clipped away to nothing by this rule's `clip-path`, since the whole box (and
+   anything painted as part of it) is
+   restricted to the notched-corner polygon. Rather than leave the keyboard focus indicator
+   invisible on these tiles, this adds an explicit `outline`-based ring scoped to
+   `[data-row-action]` — a different property from `box-shadow`, so it can't be clobbered by
+   (and doesn't need to compose with) the generic rule or the hover bloom above; it simply
+   survives the clip-path where box-shadow cannot. No specificity tie here — no other rule in
+   this file sets `outline` on this element.
+
+   outline-width/outline-style/outline-offset are separate longhands rather than the equivalent
+   `outline: 2px solid var(--ring)` shorthand — same jsdom var()-in-shorthand invalidation
+   reasoning as the overlay/tooltip-arrow blocks above (verified directly: jsdom invalidates the
+   whole `outline` shorthand when any component is a var() reference, leaving `outlineWidth`/
+   `outlineStyle` stuck at the initial `medium`/`none` even while genuinely `:focus-visible`;
+   longhands let those two resolve correctly per real focus state, leaving only the var()-bearing
+   `outline-color` longhand itself unresolved, same as `border-color` elsewhere in this file). */
+[data-theme='techno'] [data-row-action]:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: var(--ring);
+  outline-offset: 2px;
+}
+
+/* LQA three-state indicator. Same data reality as pixel.css's version of this rule
+   above — LQAResult carries no 0-100 score, so the per-cell badge (`data-testid=
+   'lqa-issue-badge'` in StringTableRow.tsx's Cell) is a three-state intact/cracked/broken
+   "shield" bound to the real `data-lqa-variant` attribute, never a meter. Techno gets a
+   notched/neon identity, consistent with the row-action "command deck" tiles above: squared
+   corners plus an angled corner-cut via clip-path.
+
+   Cell renders the badge as a Base UI TooltipTrigger (rendered as a plain span via its `render`
+   prop) carrying the compiled
+   Tailwind utilities `absolute top-0.5 right-0.5 w-4 h-4 rounded-full cursor-help bg-background`
+   — verified by reading StringTableRow.tsx directly. Only `.rounded-full`
+   (border-radius:3.40282e38px, specificity 0,1,0 — confirmed against a real `pnpm build` of
+   packages/frontend, dist/assets/index-*.css) competes with this rule; `bg-background` sets
+   background-color, a property this rule never touches. The selector below,
+   `[data-theme='techno'] [data-testid='lqa-issue-badge']`, is (0,2,0) — unconditionally beats
+   `.rounded-full`'s (0,1,0) with no tie. Unlike the row-action base rule above (which sets
+   background/color and therefore ties its own hover utilities, forcing the doubled-attribute
+   fix), this rule sets neither, so no doubling is needed here — same margin as pixel's version
+   of this rule and the tooltip-content overlay rule further up this file.
+
+   Focus/hover — the clip-path/box-shadow trap this file's row-action follow-up comments warn
+   about does NOT apply here: this span is a Base UI TooltipTrigger, not a `<button>`/
+   `[role='tab']`/`<a>`, so this file's generic `:is(button, [role='tab'], a):focus-visible`
+   box-shadow rule (top of file) never matches it, and Cell's own className carries no
+   `focus-visible:`/`hover:` box-shadow or ring utility on this element (verified by reading
+   StringTableRow.tsx — only the four listed classes are present). There is therefore no
+   existing box-shadow-based interactive effect for `clip-path` to silently clip away, so — unlike
+   the row-action fix above — no outline-rerouting or `filter: drop-shadow` substitution is
+   needed; clip-path only reshapes the (already unstyled-for-interaction) badge box itself. */
+[data-theme='techno'] [data-testid='lqa-issue-badge'] {
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 5px 100%, 0 calc(100% - 5px));
+}
+
+/* Judge-score meter. Same data reality as pixel.css's version of this rule above —
+   JudgeVerdict really does carry a 0-100 `score` (packages/shared/src/types/judge.ts), so this
+   is a legitimate meter rendered alongside (never replacing) the existing numeric `Badge` in
+   TranslationAiReviewTab.tsx's JudgeVerdictCard, reusing `scoreTint()`'s existing 85/70 tiers
+   verbatim. 5 units at 20 points each is coarser than the raw score; the exact number lives in
+   the container's `aria-label`, not implied by unit count. Techno gets a "shield segment"
+   identity — skewed slabs, consistent with the row-action "command deck" tiles above.
+
+   Unlike the row-action tiles above, this rule uses `transform: skewX()`, NOT `clip-path`, on
+   the element that also carries `box-shadow` (the filled-state glow below) — so the
+   clip-path/box-shadow trap documented on the row-action rules (clip-path clips box-shadow but
+   not outline/filter: drop-shadow) does not apply to this rule at all: transform reshapes the
+   box's own painted region (including its box-shadow) without clipping anything away, unlike
+   clip-path. This is also a `role='img'` decorative `<span>`, not a `<button>`/`[role='tab']`/
+   `<a>`, so techno's generic `:is(button, [role='tab'], a):focus-visible` box-shadow rule (top of
+   file) never matches it, and neither this rule nor JudgeVerdictCard.tsx's className sets any
+   focus/hover state on it — no interactive box-shadow effect exists here for anything to disturb.
+
+   Container/per-unit specificity: same as pixel — the container carries only Tailwind's
+   `inline-flex items-center gap-0.5` plus `scoreTint()`'s status tint, and per-unit spans carry
+   only `size-3` (width/height only, compiled Tailwind confirmed via `pnpm build`), which sets
+   neither background, transform, nor box-shadow, so there is no specificity tie for this rule to
+   resolve and no self-doubling-attribute fix is needed — also confirmed no bare `span` reset rule
+   exists anywhere in the compiled output (dist/assets/index-*.css and the techno chunk itself).
+
+   Specificity (per this repo's `specificity()` test helper, which counts a `>` child combinator's
+   right-hand type selector): `[data-theme='techno'] [data-testid='judge-score-meter'] > span` is
+   (0,2,1) — two attribute selectors plus the `span` type selector. The filled variant
+   (`data-filled='true'`) adds one more attribute selector, (0,3,1), which unconditionally beats
+   (0,2,1) with no tie (also correct in source order, filled after base). */
+[data-theme='techno'] [data-testid='judge-score-meter'] > span {
+  background: currentColor;
+  transform: skewX(-16deg);
+  opacity: 0.2;
+}
+[data-theme='techno'] [data-testid='judge-score-meter'] > span[data-filled='true'] {
+  opacity: 1;
+  box-shadow: 0 0 7px 0 currentColor;
+}
+
+[data-theme='techno'] * {
+  scrollbar-color: var(--primary) transparent;
+}
+[data-theme='techno'] ::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 0;
+  box-shadow: 0 0 6px 0 var(--primary);
+}

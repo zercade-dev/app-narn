@@ -1,0 +1,16 @@
+{
+  "id": "pseudo",
+  "name": "Pseudo-localization",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "capabilities": ["translate", "batch"],
+  "costTier": "free",
+  "instanceable": false,
+  "configSchema": {
+    "expansionRatio": {
+      "type": "string",
+      "default": "1.4",
+      "description": "Target length multiplier for padding (e.g. 1.4 makes the output ~40% longer than the source). Values are clamped to the 1–4 range; invalid input falls back to 1.4."
+    }
+  }
+}

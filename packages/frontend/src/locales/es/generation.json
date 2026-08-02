@@ -1,0 +1,17 @@
+{
+  "contextLabel": "Incluir contexto de la entrada",
+  "contextHint": "Añade detalles de la entrada al prompt para mejorar las sugerencias.",
+  "fieldContext": "Notas de contexto",
+  "fieldSources": "Etiquetas de origen",
+  "fieldCategories": "Categorías asignadas",
+  "languagesLabel": "Enviar traducciones existentes como contexto",
+  "languagesHint": "Envía las traducciones terminadas de cada entrada en los idiomas seleccionados como contexto adicional.",
+  "selectAllLanguages": "Seleccionar todo",
+  "deselectAllLanguages": "Deseleccionar todo",
+  "skipCategoriesLabel": "Omitir categorías",
+  "skipCategoriesHint": "Las entradas con cualquiera de estas categorías se excluyen por completo de la solicitud.",
+  "skipCategoriesPlaceholder": "Ninguna seleccionada",
+  "ignoreGlossariesLabel": "Ignorar glosarios existentes",
+  "ignoreGlossariesHint": "Los términos de los glosarios seleccionados se tratan como terminología ya conocida: en la generación de glosarios se envían como ya conocidos para que el modelo no los vuelva a sugerir; en la generación de categorías, las entradas que coinciden con esos términos se excluyen por completo de la solicitud.",
+  "ignoreGlossariesPlaceholder": "Ninguno seleccionado"
+}

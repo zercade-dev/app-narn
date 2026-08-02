@@ -1,0 +1,321 @@
+{
+  "id": "genshin-creation-factions",
+  "name": "Creation factions",
+  "readOnly": true,
+  "createdAt": 1783555200000,
+  "updatedAt": 1783555200000,
+  "terms": [
+    {
+      "id": "genshin-creation-factions-slime",
+      "source": "Slime",
+      "translations": {
+        "zh-hans": "史莱姆",
+        "zh-hant": "史萊姆",
+        "ko": "슬라임",
+        "ja": "スライム",
+        "es": "Slime",
+        "fr": "Blob",
+        "ru": "Слайм",
+        "th": "Slime",
+        "vi": "Slime",
+        "de": "Schleim",
+        "id": "Slime",
+        "pt-br": "Slime",
+        "tr": "Bodurlop",
+        "it": "Melmoso"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-hilichurl",
+      "source": "Hilichurl",
+      "translations": {
+        "zh-hans": "丘丘人",
+        "zh-hant": "丘丘人",
+        "ko": "츄츄족",
+        "ja": "ヒルチャール",
+        "es": "Hilichurl",
+        "fr": "Brutocollinus",
+        "ru": "Хиличурл",
+        "th": "Hilichurl",
+        "vi": "Hilichurl",
+        "de": "Hilichurl",
+        "id": "Hilichurl",
+        "pt-br": "Hilichurl",
+        "tr": "Dağ Yabanisi",
+        "it": "Hilichurl"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-mitachurl",
+      "source": "Mitachurl",
+      "translations": {
+        "zh-hans": "丘丘暴徒",
+        "zh-hant": "丘丘暴徒",
+        "ko": "츄츄 폭도",
+        "ja": "ヒルチャール暴徒",
+        "es": "Mitachurl",
+        "fr": "Brutoviandu",
+        "ru": "Митачурл",
+        "th": "Mitachurl",
+        "vi": "Bạo Đồ Hilichurl",
+        "de": "Mitachurl",
+        "id": "Mitachurl",
+        "pt-br": "Mitachurl",
+        "tr": "Dağ Azmanı",
+        "it": "Mitachurl"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-samachurl",
+      "source": "Samachurl",
+      "translations": {
+        "zh-hans": "丘丘萨满",
+        "zh-hant": "丘丘薩滿",
+        "ko": "츄츄 샤먼",
+        "ja": "ヒルチャールシャーマン",
+        "es": "Samachurl",
+        "fr": "Brutoshaman",
+        "ru": "Шамачурл",
+        "th": "Samachurl",
+        "vi": "Phù Thủy Hilichurl",
+        "de": "Samachurl",
+        "id": "Samachurl",
+        "pt-br": "Samachurl",
+        "tr": "Dağ Şamanı",
+        "it": "Sciamachurl"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-lawachurl",
+      "source": "Lawachurl",
+      "translations": {
+        "es": "Lawachurl",
+        "ru": "Лавачурл",
+        "th": "Lawachurl",
+        "de": "Lawachurl",
+        "id": "Lawachurl",
+        "pt-br": "Lawachurl",
+        "tr": "Dağ Reisi",
+        "it": "Lawachurl"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-abyss-mage",
+      "source": "Abyss Mage",
+      "translations": {
+        "zh-hans": "深渊法师",
+        "zh-hant": "深淵法師",
+        "ko": "심연 메이지",
+        "ja": "アビスの魔術師",
+        "es": "Mago del Abismo",
+        "fr": "Mage de l'Abîme",
+        "ru": "Маг Бездны",
+        "th": "Abyss Mage",
+        "vi": "Pháp Sư Vực Sâu",
+        "de": "Abgrundmagier",
+        "id": "Abyss Mage",
+        "pt-br": "Feiticeiro do Abismo",
+        "it": "Mago dell'Abisso"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-abyss-herald",
+      "source": "Abyss Herald",
+      "translations": {
+        "zh-hans": "深渊使徒",
+        "zh-hant": "深淵使徒",
+        "ko": "심연 사도",
+        "ja": "アビスの使徒",
+        "es": "Emisario del Abismo",
+        "fr": "Apôtre de l'Abîme",
+        "ru": "Вестник Бездны",
+        "th": "Abyss Herald",
+        "vi": "Sứ Đồ Vực Sâu",
+        "de": "Abgrundbote",
+        "id": "Abyss Herald",
+        "pt-br": "Apóstolo do Abismo",
+        "tr": "Hiçliğin Habercisi",
+        "it": "Apostolo dell'Abisso"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-abyss-lector",
+      "source": "Abyss Lector",
+      "translations": {
+        "zh-hans": "深渊咏者",
+        "zh-hant": "深淵詠者",
+        "ko": "심연 봉독자",
+        "ja": "アビスの詠唱者",
+        "es": "Bardo del Abismo",
+        "fr": "Chantre de l'Abîme",
+        "ru": "Чтец Бездны",
+        "th": "Abyss Lector",
+        "vi": "Học Sĩ Vực Sâu",
+        "de": "Abgrundsänger",
+        "id": "Abyss Lector",
+        "pt-br": "Bardo do Abismo",
+        "tr": "Hiçlik Vaizi",
+        "it": "Cantore dell'Abisso"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-whopperflower",
+      "source": "Whopperflower",
+      "translations": {
+        "zh-hans": "骗骗花",
+        "zh-hant": "騙騙花",
+        "ko": "구라구라꽃",
+        "ja": "トリックフラワー",
+        "es": "Megaflora",
+        "fr": "Fleur mensongère",
+        "ru": "Попрыгунья",
+        "th": "Whopperflower",
+        "vi": "Hoa Lừa Dối",
+        "de": "Vaniloqua",
+        "id": "Whopperflower",
+        "pt-br": "Flor Gigante",
+        "it": "Malefiore"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-fatui-skirmisher",
+      "source": "Fatui Skirmisher",
+      "translations": {
+        "zh-hans": "愚人众先遣队",
+        "zh-hant": "愚人眾先遣隊",
+        "ko": "우인단 선발대",
+        "ja": "ファデュイ先遣隊",
+        "es": "Soldado Fatui",
+        "fr": "Tirailleur Fatui",
+        "ru": "Застрельщик Фатуи",
+        "th": "Fatui Skirmisher",
+        "vi": "Đội Tiên Phong Fatui",
+        "de": "Fatui-Plänkler",
+        "id": "Fatui Skirmisher",
+        "pt-br": "Soldado dos Fatui",
+        "tr": "Fatui Avcı Eri",
+        "it": "Schermagliatore dei Fatui"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-eremite",
+      "source": "Eremite",
+      "translations": {
+        "zh-hans": "镀金旅团",
+        "zh-hant": "鍍金旅團",
+        "ko": "도금 여단",
+        "ja": "エルマイト旅団",
+        "es": "Eremita",
+        "fr": "Érémites",
+        "ru": "Пустынник",
+        "th": "Eremite",
+        "vi": "Eremite",
+        "de": "Goldbrigade",
+        "id": "Eremite",
+        "pt-br": "Eremita",
+        "tr": "Münzevi",
+        "it": "Eremita"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-treasure-hoarder",
+      "source": "Treasure Hoarder",
+      "translations": {
+        "zh-hans": "盗宝团",
+        "zh-hant": "盜寶團",
+        "ko": "보물 사냥단",
+        "ja": "宝盗団",
+        "es": "Ladrón de Tesoros",
+        "fr": "Pilleurs de trésors",
+        "ru": "Похититель сокровищ",
+        "th": "กองโจรล่าสมบัติ",
+        "vi": "Đạo Bảo Đoàn",
+        "de": "Schatzräuber",
+        "id": "Treasure Hoarder",
+        "pt-br": "Ladrões de Tesouro",
+        "tr": "Hazine Avcısı",
+        "it": "Cacciatore di tesori"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-kairagi",
+      "source": "Kairagi",
+      "translations": {
+        "zh-hans": "海乱鬼",
+        "zh-hant": "海亂鬼",
+        "ko": "해란귀",
+        "ja": "海乱鬼",
+        "es": "Samurái Kairagi",
+        "fr": "Oni des mers",
+        "ru": "Кайраги",
+        "th": "Kairagi",
+        "vi": "Kairagi",
+        "de": "Kairagi",
+        "id": "Kairagi",
+        "pt-br": "Kairagi",
+        "tr": "Kairagi",
+        "it": "Kairagi"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-nobushi",
+      "source": "Nobushi",
+      "translations": {
+        "zh-hans": "野伏",
+        "zh-hant": "野伏",
+        "ko": "노부시",
+        "ja": "野伏",
+        "es": "Nobushi",
+        "fr": "Nobushi",
+        "ru": "Нобуси",
+        "th": "Nobushi",
+        "vi": "Nobushi",
+        "de": "Nobushi",
+        "id": "Nobushi",
+        "pt-br": "Nobushi",
+        "tr": "Nobushi",
+        "it": "Nobushi"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-ruin-guard",
+      "source": "Ruin Guard",
+      "translations": {
+        "zh-hans": "遗迹守卫",
+        "zh-hant": "遺蹟守衛",
+        "ko": "유적 가디언",
+        "ja": "遺跡守衛",
+        "es": "Guardián de las Ruinas",
+        "fr": "Gardien des ruines",
+        "ru": "Страж руин",
+        "th": "Ruin Guard",
+        "vi": "Thủ Vệ Di Tích",
+        "de": "Ruinenwächter",
+        "id": "Ruin Guard",
+        "pt-br": "Guarda das Ruínas",
+        "tr": "Harabe Muhafızı",
+        "it": "Guardia delle rovine"
+      }
+    },
+    {
+      "id": "genshin-creation-factions-wayob-manifestation",
+      "source": "Wayob Manifestation",
+      "translations": {
+        "zh-hans": "大灵显化身",
+        "zh-hant": "大靈顯化身",
+        "ko": "대영혼의 화신",
+        "ja": "大霊の化身",
+        "es": "Manifestación Wayob",
+        "fr": "Wayob",
+        "ru": "Воплощение Вайоб",
+        "th": "Wayob Manifestation",
+        "vi": "Hóa Thân Wayob",
+        "de": "Wayob-Verkörperung",
+        "id": "Wayob Manifestation",
+        "pt-br": "Manifestação Wayob",
+        "tr": "Wayob Tezahürü",
+        "it": "Wayob"
+      }
+    }
+  ]
+}

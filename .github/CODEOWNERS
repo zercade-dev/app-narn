@@ -1,0 +1,24 @@
+# CODEOWNERS — narn (open-core app workspace)
+#
+# Requires owner review on narn's CI/CD and its highest-trust source surfaces:
+# the server security middleware (host/CSRF/vault gate + session/validation) and
+# the shared AI SDK provider layer (every LLM module routes through it). Pair with
+# branch protection ("Require review from Code Owners") so these cannot merge
+# without @zercade or @zercad. Paths are relative to this repo root.
+#
+# Last matching pattern wins (gitignore-style).
+
+# CI/CD: workflows, actionlint/dependabot config, and this file itself.
+/.github/                                  @zercade @zercad
+
+# Self-hosted build surface: the production image build + the build/ops scripts
+# (e.g. scripts/docker-publish.sh) that run on the self-hosted CI runner.
+# Force owner review so a change here cannot ship without a look from @zercade or @zercad.
+/Dockerfile*                               @zercade @zercad
+/scripts/                                  @zercade @zercad
+
+# Server security middleware (host guard, CSRF/origin guard, vault gate, session).
+/packages/server/src/middleware/           @zercade @zercad
+
+# Shared AI SDK provider layer (all LLM modules depend on it).
+/packages/shared/src/ai-sdk-provider/      @zercade @zercad

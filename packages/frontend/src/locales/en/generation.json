@@ -1,0 +1,17 @@
+{
+  "contextLabel": "Include entry context",
+  "contextHint": "Add extra entry details to the prompt to improve suggestions.",
+  "fieldContext": "Context notes",
+  "fieldSources": "Source labels",
+  "fieldCategories": "Assigned categories",
+  "languagesLabel": "Send existing translations as context",
+  "languagesHint": "Send each entry's finished translations in the selected languages as extra context.",
+  "selectAllLanguages": "Select all",
+  "deselectAllLanguages": "Deselect all",
+  "skipCategoriesLabel": "Skip categories",
+  "skipCategoriesHint": "Entries carrying any of these categories are left out of the request entirely.",
+  "skipCategoriesPlaceholder": "None selected",
+  "ignoreGlossariesLabel": "Ignore existing glossaries",
+  "ignoreGlossariesHint": "Selected glossaries' terms are treated as already-known terminology: for glossary generation they're sent as already known so the model doesn't re-suggest them; for category generation, entries matching those terms are left out of the request entirely.",
+  "ignoreGlossariesPlaceholder": "None selected"
+}

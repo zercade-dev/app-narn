@@ -1,0 +1,78 @@
+version: 2
+updates:
+  # GitHub Actions SHA pins (narn's own workflows: ci, security, docker-build,
+  # publish-image, release, release-image).
+  - package-ecosystem: github-actions
+    directory: /
+    # Features and dependency bumps integrate on `develop`; `main` is release-only.
+    target-branch: develop
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 20
+    # Don't PR a just-published action tag: a hijacked release (moved tag / new
+    # version) ages a day before dependabot proposes it — same supply-chain
+    # rationale as the npm cooldown below.
+    cooldown:
+      default-days: 1
+
+  # npm — the open-core app pnpm workspace (root: @zercade-dev/narn-* packages +
+  # frontend/server/shared + modules; catalog: versions in pnpm-workspace.yaml).
+  - package-ecosystem: npm
+    directory: /
+    # Features and dependency bumps integrate on `develop`; `main` is release-only.
+    target-branch: develop
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 20
+    # Don't open a PR until a release is ≥1 day old — matches the pnpm
+    # `minimumReleaseAge: 1440` (24h) supply-chain policy. Without it, same-day
+    # releases open PRs whose frozen-lockfile install fails the policy until the
+    # package ages out (ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION).
+    cooldown:
+      default-days: 1
+    groups:
+      # Bump the whole AI SDK generation in ONE PR. The `ai` core + every
+      # `@ai-sdk/*` provider share a `@ai-sdk/provider@N` contract; mixing majors
+      # (e.g. one provider on provider@4 / LanguageModelV4 while the rest stay on
+      # provider@3 / v2-v3) breaks the shared LanguageModel typing in
+      # packages/shared/src/ai-sdk-provider/model-factory.ts. Grouping (all
+      # update-types, incl. major) keeps them in lockstep.
+      ai-sdk:
+        patterns:
+          - 'ai'
+          - '@ai-sdk/*'
+
+      # Bump React and its DOM renderer in ONE PR. React hard-fails when `react`
+      # and `react-dom` differ ("must have the exact same version") — it throws at
+      # import time, so a PR that lands one without the other doesn't fail a check,
+      # it stops every module that imports React from loading at all. That happened
+      # on 2026-07-26: react-dom 19.2.8 merged while the matching react bump did
+      # not, and nothing that renders would load until the pair was re-matched.
+      #
+      # The @types packages ride along to keep the generation coherent; they
+      # version independently of react itself, and a types-only update still gets
+      # its own PR (a group PR only bundles members that actually have updates).
+      #
+      # EXACT names only — never a `react*` glob. `react-i18next`,
+      # `react-markdown`, `lucide-react`, `@tanstack/react-virtual` and
+      # `@base-ui/react` are unrelated packages on their own release cadences and
+      # must NOT be dragged into this group.
+      react:
+        patterns:
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
+          - '@types/react-dom'
+
+  # docker — narn's runtime image (Dockerfile: node base-image digest pins).
+  - package-ecosystem: docker
+    directory: /
+    # Features and dependency bumps integrate on `develop`; `main` is release-only.
+    target-branch: develop
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 20
+    # Don't PR a just-published base-image digest: give a compromised image tag a
+    # day to be caught before proposing the bump (same rationale as above).
+    cooldown:
+      default-days: 1

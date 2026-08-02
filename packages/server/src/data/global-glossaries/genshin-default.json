@@ -1,0 +1,329 @@
+{
+  "id": "genshin-default",
+  "name": "Default UI Labels",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1700000000000,
+  "terms": [
+    {
+      "id": "genshin-default-colorful-surprise-box",
+      "source": "Colorful Surprise Box",
+      "translations": {
+        "zh-hans": "缤纷惊喜礼盒",
+        "zh-hant": "繽紛驚喜禮盒",
+        "ko": "알록달록 선물함",
+        "ja": "多彩なサプライズボックス",
+        "es": "Caja de las mil sorpresas",
+        "fr": "Boîte de surprise merveilleuse",
+        "ru": "Пёстрый сюрприз",
+        "th": "กล่องของขวัญเซอร์ไพรส์หลากสี",
+        "vi": "Hộp Quà Bất Ngờ",
+        "de": "Bunte Überraschungsgeschenkbox",
+        "id": "Colorful Surprise Box",
+        "pt-br": "Caixa de Surpresa Colorida",
+        "tr": "Renkli Sürpriz Kutusu",
+        "it": "Scatola colorata delle meraviglie"
+      }
+    },
+    {
+      "id": "genshin-default-creation-faction",
+      "source": "Creation Faction",
+      "translations": {
+        "zh-hans": "造物阵营",
+        "zh-hant": "造物陣營",
+        "ko": "피조물 진영",
+        "ja": "創造物陣営",
+        "es": "Facción de creación",
+        "fr": "Faction de création",
+        "ru": "Фракция создания",
+        "th": "ฝ่ายผลงานรังสรรค์",
+        "vi": "Phe Tạo Vật",
+        "de": "Werkefraktion",
+        "id": "Faksi Ciptaan",
+        "pt-br": "Facção de Criação",
+        "tr": "Oluşum Bağlılığı",
+        "it": "Fazione creazione"
+      }
+    },
+    {
+      "id": "genshin-default-default-achievements",
+      "source": "Default Achievements",
+      "translations": {
+        "zh-hans": "默认成就",
+        "zh-hant": "預設成就",
+        "ko": "기본 업적",
+        "ja": "デフォルトアチーブメント",
+        "es": "Logros predeterminados",
+        "fr": "Succès par défaut",
+        "ru": "Стандартное достижение",
+        "th": "ความสำเร็จเริ่มต้น",
+        "vi": "Thành Tựu Mặc Định",
+        "de": "Standard-Errungenschaften",
+        "id": "Achievement Semula",
+        "pt-br": "Conquistas Padrão",
+        "tr": "Varsayılan Başarımlar",
+        "it": "Obiettivi predefiniti"
+      }
+    },
+    {
+      "id": "genshin-default-default-leaderboard",
+      "source": "Default Leaderboard",
+      "translations": {
+        "zh-hans": "默认排行榜",
+        "zh-hant": "預設排行榜",
+        "ko": "기본 랭킹",
+        "ja": "デフォルトランキング",
+        "es": "Clasificación predeterminada",
+        "fr": "Classement par défaut",
+        "ru": "Рейтинг по умолчанию",
+        "th": "กระดานจัดอันดับเริ่มต้น",
+        "vi": "Bảng Xếp Hạng Mặc Định",
+        "de": "Standard-Rangliste",
+        "id": "Papan Peringkat Default",
+        "pt-br": "Placar Padrão",
+        "tr": "Varsayılan Sıralama",
+        "it": "Classifica predefinita"
+      }
+    },
+    {
+      "id": "genshin-default-default-ultimate-achievement",
+      "source": "Default Ultimate Achievement",
+      "translations": {
+        "zh-hans": "默认极致成就",
+        "zh-hant": "預設極致成就",
+        "ko": "기본 초월 업적",
+        "ja": "デフォルトマスターアチーブメント",
+        "es": "Logro supremo predeterminado",
+        "fr": "Succès ultime par défaut",
+        "ru": "Стандартное высшее достижение",
+        "th": "ความสำเร็จขั้นสูงสุดเริ่มต้น",
+        "vi": "Thành Tựu Đỉnh Cao Mặc Định",
+        "de": "Ultimative Errungenschaft – Standard",
+        "id": "Ultimate Achievement Semula",
+        "pt-br": "Conquista Suprema Padrão",
+        "tr": "Varsayılan Üstün Başarım",
+        "it": "Obiettivo supremo predefinito"
+      }
+    },
+    {
+      "id": "genshin-default-global",
+      "source": "Global",
+      "translations": {
+        "zh-hans": "全局",
+        "zh-hant": "全域",
+        "ko": "전체",
+        "ja": "グローバル",
+        "es": "Global",
+        "fr": "Global",
+        "ru": "Глобальное",
+        "th": "ทั้งหมด",
+        "vi": "Toàn Thể",
+        "de": "Global",
+        "id": "Global",
+        "pt-br": "Global",
+        "tr": "Global",
+        "it": "Globale"
+      }
+    },
+    {
+      "id": "genshin-default-gorgeous-performance-box",
+      "source": "Gorgeous Performance Box",
+      "translations": {
+        "zh-hans": "华丽演绎礼盒",
+        "zh-hant": "華麗演繹禮盒",
+        "ko": "화려한 선물함",
+        "ja": "華麗なパフォーマンスボックス",
+        "es": "Caja de actuación espléndida",
+        "fr": "Boîte de performance superbe",
+        "ru": "Подарок роскошного выступления",
+        "th": "กล่องของขวัญการแสดงสุดหรู",
+        "vi": "Hộp Quà Trình Diễn",
+        "de": "Prächtige Inszenierungsgeschenkbox",
+        "id": "Gorgeous Performance Box",
+        "pt-br": "Caixa de Desempenho Maravilhosa",
+        "tr": "Muhteşem Gösteri Kutusu",
+        "it": "Scatola Esibizione splendida"
+      }
+    },
+    {
+      "id": "genshin-default-hello",
+      "source": "Hello!",
+      "translations": {
+        "zh-hans": "你好！",
+        "zh-hant": "你好！",
+        "ko": "안녕!",
+        "ja": "こんにちは！",
+        "es": "¡Hola!",
+        "fr": "Bonjour !",
+        "ru": "Привет!",
+        "th": "สวัสดี!",
+        "vi": "Chào nhé!",
+        "de": "Hallöchen!",
+        "id": "Salam kenal!",
+        "pt-br": "E aí!",
+        "tr": "Selam!",
+        "it": "Ehilà!"
+      }
+    },
+    {
+      "id": "genshin-default-initial-creation-faction",
+      "source": "Initial Creation Faction",
+      "translations": {
+        "zh-hans": "初始造物阵营",
+        "zh-hant": "初始造物陣營",
+        "ko": "초기 피조물 진영",
+        "ja": "初期創造物陣営",
+        "es": "Facción de creación inicial",
+        "fr": "Faction initiale de création",
+        "ru": "Начальная фракция создания",
+        "th": "ฝ่ายผลงานรังสรรค์เริ่มต้น",
+        "vi": "Phe Tạo Vật Ban Đầu",
+        "de": "Anfängliche Werkefraktion",
+        "id": "Faksi Ciptaan Awal",
+        "pt-br": "Facção de Criação Inicial",
+        "tr": "Başlangıç Oluşum Bağlılığı",
+        "it": "Fazione iniziale delle creazioni"
+      }
+    },
+    {
+      "id": "genshin-default-initial-object-faction",
+      "source": "Initial Object Faction",
+      "translations": {
+        "zh-hans": "初始物件阵营",
+        "zh-hant": "初始物件陣營",
+        "ko": "초기 오브젝트 진영",
+        "ja": "初期オブジェクト陣営",
+        "es": "Facción de objeto inicial",
+        "fr": "Faction initiale d'objet",
+        "ru": "Начальная фракция предмета",
+        "th": "ฝ่ายวัตถุเริ่มต้น",
+        "vi": "Phe Vật Phẩm Ban Đầu",
+        "de": "Anfängliche Gegenstandsfraktion",
+        "id": "Faksi Objek Awal",
+        "pt-br": "Facção de Objeto Inicial",
+        "tr": "Başlangıç Nesne Grubu",
+        "it": "Oggetto della fazione iniziale"
+      }
+    },
+    {
+      "id": "genshin-default-initial-player-faction",
+      "source": "Initial Player Faction",
+      "translations": {
+        "zh-hans": "初始玩家阵营",
+        "zh-hant": "初始玩家陣營",
+        "ko": "초기 플레이어 진영",
+        "ja": "初期プレイヤー陣営",
+        "es": "Facción del jugador inicial",
+        "fr": "Faction initiale de joueur",
+        "ru": "Начальная фракция игрока",
+        "th": "ฝ่ายผู้เล่นเริ่มต้น",
+        "vi": "Phe Người Chơi Ban Đầu",
+        "de": "Anfängliche Spielerfraktion",
+        "id": "Faksi Pemain Awal",
+        "pt-br": "Facção de Jogador Inicial",
+        "tr": "Başlangıç Oyuncu Bağlılığı",
+        "it": "Fazione iniziale del giocatore"
+      }
+    },
+    {
+      "id": "genshin-default-object-faction-1",
+      "source": "Object Faction 1",
+      "translations": {
+        "zh-hans": "物件阵营1",
+        "zh-hant": "物件陣營1",
+        "ko": "오브젝트 진영 1",
+        "ja": "オブジェクト陣営1",
+        "es": "Facción de objeto 1",
+        "fr": "Faction d'objet 1",
+        "ru": "Фракция предметов 1",
+        "th": "ฝ่ายวัตถุ 1",
+        "vi": "Phe Vật Phẩm 1",
+        "de": "Gegenstandsfraktion 1",
+        "id": "Faksi Objek 1",
+        "pt-br": "Facção de Objeto 1",
+        "tr": "Nesne Grubu 1",
+        "it": "Oggetto fazione 1"
+      }
+    },
+    {
+      "id": "genshin-default-object-faction-2",
+      "source": "Object Faction 2",
+      "translations": {
+        "zh-hans": "物件阵营2",
+        "zh-hant": "物件陣營2",
+        "ko": "오브젝트 진영 2",
+        "ja": "オブジェクト陣営2",
+        "es": "Facción de objeto 2",
+        "fr": "Faction d'objet 2",
+        "ru": "Фракция предметов 2",
+        "th": "ฝ่ายวัตถุ 2",
+        "vi": "Phe Vật Phẩm 2",
+        "de": "Gegenstandsfraktion 2",
+        "id": "Faksi Objek 2",
+        "pt-br": "Facção de Objeto 2",
+        "tr": "Nesne Grubu 2",
+        "it": "Oggetto fazione 2"
+      }
+    },
+    {
+      "id": "genshin-default-object-faction-3",
+      "source": "Object Faction 3",
+      "translations": {
+        "zh-hans": "物件阵营3",
+        "zh-hant": "物件陣營3",
+        "ko": "오브젝트 진영 3",
+        "ja": "オブジェクト陣営3",
+        "es": "Facción de objeto 3",
+        "fr": "Faction d'objet 3",
+        "ru": "Фракция предметов 3",
+        "th": "ฝ่ายวัตถุ 3",
+        "vi": "Phe Vật Phẩm 3",
+        "de": "Gegenstandsfraktion 3",
+        "id": "Faksi Objek 3",
+        "pt-br": "Facção de Objeto 3",
+        "tr": "Nesne Grubu 3",
+        "it": "Oggetto fazione 3"
+      }
+    },
+    {
+      "id": "genshin-default-player-faction",
+      "source": "Player Faction",
+      "translations": {
+        "zh-hans": "玩家阵营",
+        "zh-hant": "玩家陣營",
+        "ko": "플레이어 진영",
+        "ja": "プレイヤー陣営",
+        "es": "Facción del jugador",
+        "fr": "Faction de joueur",
+        "ru": "Фракция игрока",
+        "th": "ฝ่ายผู้เล่น",
+        "vi": "Phe Người Chơi",
+        "de": "Spielerfraktion",
+        "id": "Faksi Pengembara",
+        "pt-br": "Facção de Jogador",
+        "tr": "Oyuncu Bağlılığı",
+        "it": "Fazione giocatore"
+      }
+    },
+    {
+      "id": "genshin-default-prismatic-crystal",
+      "source": "Prismatic Crystal",
+      "translations": {
+        "zh-hans": "奇丽凝晶",
+        "zh-hant": "奇麗凝晶",
+        "ko": "영롱한 결정",
+        "ja": "煌めく結晶",
+        "es": "Cristal resplandeciente",
+        "fr": "Cristal prismatique",
+        "ru": "Призматические кристаллы",
+        "th": "Prismatic Crystal",
+        "vi": "Pha Lê Kỳ Diệu",
+        "de": "Spektralkristall",
+        "id": "Prismatic Crystal",
+        "pt-br": "Cristal Prismático",
+        "tr": "Prizmatik Kristal",
+        "it": "Cristallo prismatico"
+      }
+    }
+  ]
+}

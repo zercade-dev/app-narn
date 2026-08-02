@@ -1,0 +1,42 @@
+{
+  "title": "Settings",
+  "appearance": "Appearance",
+  "appearanceDescription": "Choose how narn looks on this device.",
+  "theme": "Theme",
+  "mode": "Mode",
+  "switchToLight": "Switch to light mode",
+  "switchToDark": "Switch to dark mode",
+  "languageTitle": "Language",
+  "languageDescription": "Language of the user interface.",
+  "preview": "Preview",
+  "previewHint": "Sample controls rendered with the selected theme.",
+  "previewSamples": {
+    "heading": "Heading",
+    "body": "Body text shows the base font and colors.",
+    "muted": "Muted text looks like this.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "pass": "Passed",
+    "warn": "Warning",
+    "fail": "Failed",
+    "info": "Info",
+    "inputPlaceholder": "Text field",
+    "selectOptionA": "First option",
+    "selectOptionB": "Second option",
+    "checkbox": "Checkbox",
+    "badgeDefault": "Default",
+    "badgeSecondary": "Secondary",
+    "badgeOutline": "Outline",
+    "badgeDestructive": "Destructive",
+    "scrollHint": "Scroll to see the themed scrollbar",
+    "iconsLabel": "Icons"
+  },
+  "themes": {
+    "default": { "name": "Default", "description": "The classic narn look." },
+    "pixel": { "name": "Pixel", "description": "Chunky 8-bit console vibes." },
+    "techno": { "name": "Techno", "description": "Neon cyberpunk terminal." },
+    "minimal": { "name": "Minimal", "description": "Flat, quiet, monochrome." }
+  }
+}

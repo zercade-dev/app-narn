@@ -1,0 +1,589 @@
+{
+  "id": "genshin-reactions",
+  "name": "Genshin Reactions",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1783008627197,
+  "terms": [
+    {
+      "id": "genshin-reactions-aggravate",
+      "source": "Aggravate",
+      "translations": {
+        "zh-hans": "超激化",
+        "zh-hant": "超激化",
+        "ko": "촉진",
+        "ja": "超激化",
+        "es": "Intensificación",
+        "fr": "Suractivation",
+        "ru": "Обострение",
+        "th": "บีบอัด",
+        "vi": "Tăng Cường",
+        "de": "Suprawuchs",
+        "id": "Aggravate",
+        "pt-br": "Intensificação",
+        "tr": "Şiddetlenme",
+        "it": "Accentuazione"
+      }
+    },
+    {
+      "id": "genshin-reactions-ascendant-gleam",
+      "source": "Ascendant Gleam",
+      "translations": {
+        "zh-hans": "满辉",
+        "zh-hant": "滿輝",
+        "ko": "보름",
+        "ja": "満照",
+        "es": "Resplandor ascendente",
+        "fr": "Lueur ascendante",
+        "ru": "Высшее сияние",
+        "th": "จรัสแสง",
+        "vi": "Rực Sáng",
+        "de": "Reifer Glanz",
+        "id": "Ascendant Gleam",
+        "pt-br": "Reluzir Cheio",
+        "tr": "Yükselen Parıltı",
+        "it": "Barlume ascendente"
+      }
+    },
+    {
+      "id": "genshin-reactions-bloom",
+      "source": "Bloom",
+      "translations": {
+        "zh-hans": "绽放",
+        "zh-hant": "綻放",
+        "ko": "개화",
+        "ja": "開花",
+        "es": "Florecimiento",
+        "fr": "Fleurissement",
+        "ru": "Бутонизация",
+        "th": "งอกเงย",
+        "vi": "Sum Suê",
+        "de": "Sprießen",
+        "id": "Bloom",
+        "pt-br": "Florescimento",
+        "tr": "Çiçeklenme",
+        "it": "Fioritura"
+      }
+    },
+    {
+      "id": "genshin-reactions-burgeon",
+      "source": "Burgeon",
+      "translations": {
+        "zh-hans": "烈绽放",
+        "zh-hant": "烈綻放",
+        "ko": "발화",
+        "ja": "烈開花",
+        "es": "Crepitar",
+        "fr": "Bourgeonnement",
+        "ru": "Цветение",
+        "th": "เบ่งบาน",
+        "vi": "Bung Tỏa",
+        "de": "Flammenspross",
+        "id": "Burgeon",
+        "pt-br": "Germinação",
+        "tr": "Filizlenme",
+        "it": "Germinazione"
+      }
+    },
+    {
+      "id": "genshin-reactions-burning",
+      "source": "Burning",
+      "translations": {
+        "zh-hans": "燃烧",
+        "zh-hant": "燃燒",
+        "ko": "연소",
+        "ja": "燃焼",
+        "es": "Quemadura",
+        "fr": "Brûlure",
+        "ru": "Горение",
+        "th": "ติดไฟ",
+        "vi": "Thiêu Đốt",
+        "de": "In Flammen",
+        "id": "Burning",
+        "pt-br": "Queimadura",
+        "tr": "Yandı",
+        "it": "Ustione"
+      }
+    },
+    {
+      "id": "genshin-reactions-catalyze",
+      "source": "Catalyze",
+      "translations": {
+        "zh-hans": "激化",
+        "zh-hant": "激化",
+        "ko": "격화",
+        "ja": "激化",
+        "es": "Catalización",
+        "fr": "Catalyse",
+        "ru": "Катализ",
+        "th": "กระตุ้น",
+        "vi": "Xúc Tác",
+        "de": "Wildwuchs",
+        "id": "Catalyze",
+        "pt-br": "Catalisação",
+        "tr": "Dönüştürme",
+        "it": "Catalizzazione"
+      }
+    },
+    {
+      "id": "genshin-reactions-crystallize",
+      "source": "Crystallize",
+      "translations": {
+        "zh-hans": "结晶",
+        "zh-hant": "結晶",
+        "ko": "결정",
+        "ja": "結晶",
+        "es": "Cristalización",
+        "fr": "Cristallisation",
+        "ru": "Кристалл",
+        "th": "ตกผลึก",
+        "vi": "Kết Tinh",
+        "de": "Kristallisation",
+        "id": "Crystallize",
+        "pt-br": "Cristalização",
+        "tr": "Kristalleşme",
+        "it": "Cristallizzazione"
+      }
+    },
+    {
+      "id": "genshin-reactions-electro-charged",
+      "source": "Electro-Charged",
+      "translations": {
+        "zh-hans": "感电",
+        "zh-hant": "感電",
+        "ko": "감전",
+        "ja": "感電",
+        "es": "Electrocargado",
+        "fr": "Électrocution",
+        "ru": "Заряжен",
+        "th": "ชาร์จไฟฟ้า",
+        "vi": "Điện Cảm",
+        "de": "Unter Strom",
+        "id": "Electro-Charged",
+        "pt-br": "Eletricamente Carregado",
+        "tr": "Elektrik Yüklü",
+        "it": "Electrocarica"
+      }
+    },
+    {
+      "id": "genshin-reactions-elemental-reaction",
+      "source": "Elemental Reaction",
+      "translations": {
+        "zh-hans": "元素反应",
+        "zh-hant": "元素反應",
+        "ko": "원소 반응",
+        "ja": "元素反応",
+        "es": "Reacción Elemental",
+        "fr": "Réaction élémentaire",
+        "ru": "Элементальная реакция",
+        "th": "ปฏิกิริยาทางธาตุ",
+        "vi": "Phản Ứng Nguyên Tố",
+        "de": "Elementarreaktion",
+        "id": "Reaksi Elemental",
+        "pt-br": "Reação Elemental",
+        "tr": "Element Tepkimeleri",
+        "it": "Reazioni elementali"
+      }
+    },
+    {
+      "id": "genshin-reactions-frozen",
+      "source": "Frozen",
+      "translations": {
+        "zh-hans": "冻结",
+        "zh-hant": "凍結",
+        "ko": "빙결",
+        "ja": "凍結",
+        "es": "Congelado",
+        "fr": "Gel",
+        "ru": "Заморозка",
+        "th": "แช่แข็ง",
+        "vi": "Đóng Băng",
+        "de": "Gefroren",
+        "id": "Frozen",
+        "pt-br": "Congelado",
+        "tr": "Donma",
+        "it": "Congelamento"
+      }
+    },
+    {
+      "id": "genshin-reactions-hexerei",
+      "source": "Hexerei",
+      "translations": {
+        "zh-hans": "魔导",
+        "zh-hant": "魔導",
+        "ko": "마도",
+        "ja": "魔導",
+        "es": "Taumatúrgico",
+        "fr": "Hexerei",
+        "ru": "Ведьмовство",
+        "th": "มนตรา",
+        "vi": "Hexerei",
+        "de": "Hexerei",
+        "id": "Hexerei",
+        "pt-br": "Mágico",
+        "tr": "Cadılık",
+        "it": "Hexerei"
+      }
+    },
+    {
+      "id": "genshin-reactions-hyperbloom",
+      "source": "Hyperbloom",
+      "translations": {
+        "zh-hans": "超绽放",
+        "zh-hant": "超綻放",
+        "ko": "만개",
+        "ja": "超開花",
+        "es": "Sobreflorecimiento",
+        "fr": "Exubérance",
+        "ru": "Вегетация",
+        "th": "ไฮเปอร์บลูม",
+        "vi": "Nở Rộ",
+        "de": "Supraspross",
+        "id": "Hyperbloom",
+        "pt-br": "Superflorescimento",
+        "tr": "Aşırı Çiçeklenme",
+        "it": "Iperfioritura"
+      }
+    },
+    {
+      "id": "genshin-reactions-lunar-bloom",
+      "source": "Lunar-Bloom",
+      "translations": {
+        "zh-hans": "月绽放",
+        "zh-hant": "月綻放",
+        "ko": "달 개화",
+        "ja": "月開花",
+        "es": "Florecimiento Lunar",
+        "fr": "Sélénofleurissement",
+        "ru": "Лунная бутонизация",
+        "th": "งอกเงยจันทรา",
+        "vi": "Nguyệt-Sum Suê",
+        "de": "Mondspross",
+        "id": "Lunar-Bloom",
+        "pt-br": "Florescimento Lunar",
+        "tr": "Ay Çiçeklenmesi",
+        "it": "Fioritura lunare"
+      }
+    },
+    {
+      "id": "genshin-reactions-lunar-charged",
+      "source": "Lunar-Charged",
+      "translations": {
+        "zh-hans": "月感电",
+        "zh-hant": "月感電",
+        "ko": "달 감전",
+        "ja": "月感電",
+        "es": "Electrocargado Lunar",
+        "fr": "Sélénocution",
+        "ru": "Лунный заряд",
+        "th": "ชาร์จจันทรา",
+        "vi": "Nguyệt-Điện Cảm",
+        "de": "Mond unter Strom",
+        "id": "Lunar-Charged",
+        "pt-br": "Carga Lunar",
+        "tr": "Ay Yüklü",
+        "it": "Carica lunare"
+      }
+    },
+    {
+      "id": "genshin-reactions-lunar-crystallize",
+      "source": "Lunar-Crystallize",
+      "translations": {
+        "zh-hans": "月结晶",
+        "zh-hant": "月結晶",
+        "ko": "달 결정",
+        "ja": "月結晶",
+        "es": "Cristalización Lunar",
+        "fr": "Sélénocristallisation",
+        "ru": "Лунный кристалл",
+        "th": "ตกผลึกจันทรา",
+        "vi": "Nguyệt-Kết Tinh",
+        "de": "Mond-Kristallisation",
+        "id": "Lunar-Crystallize",
+        "pt-br": "Cristalização Lunar",
+        "tr": "Ay Kristalleşmesi",
+        "it": "Cristallizzazione lunare"
+      }
+    },
+    {
+      "id": "genshin-reactions-lunar-reaction",
+      "source": "Lunar Reaction",
+      "translations": {
+        "zh-hans": "月曜反应",
+        "zh-hant": "月曜反應",
+        "ko": "달빛 반응",
+        "ja": "月反応",
+        "es": "Reacción Lunar",
+        "fr": "Réaction Sélène",
+        "ru": "Лунные Реакции",
+        "th": "ปฏิกิริยาประกายจันทร์",
+        "vi": "Phản Ứng Nguyệt",
+        "de": "Mondleuchten-Reaktionen",
+        "id": "Reaksi Lunar",
+        "pt-br": "Reações Lunares",
+        "tr": "Ay Tepkimesi",
+        "it": "Reazione Lunare"
+      }
+    },
+    {
+      "id": "genshin-reactions-lunar-reaction-dmg",
+      "source": "Lunar Reaction DMG",
+      "translations": {
+        "zh-hans": "月曜反应伤害",
+        "zh-hant": "月曜反應傷害",
+        "ko": "달빛 반응 피해",
+        "ja": "月反応ダメージ",
+        "es": "Daño de Reacción Lunar",
+        "fr": "DGT de réaction sélène",
+        "ru": "Урон Лунных реакций",
+        "th": "ความเสียหายปฏิกิริยาประกายจันทร์",
+        "vi": "Sát thương phản ứng Nguyệt",
+        "de": "SCH von Mondleuchten-Reaktionen",
+        "id": "DMG Reaksi Lunar",
+        "pt-br": "Dano de Reações Lunares",
+        "tr": "Ay Tepkimesi Hasarı",
+        "it": "DAN da reazione lunare"
+      }
+    },
+    {
+      "id": "genshin-reactions-melt",
+      "source": "Melt",
+      "translations": {
+        "zh-hans": "融化",
+        "zh-hant": "融化",
+        "ko": "융해",
+        "ja": "溶解",
+        "es": "Derretido",
+        "fr": "Fonte",
+        "ru": "Таяние",
+        "th": "ละลาย",
+        "vi": "Tan Chảy",
+        "de": "Schmelzen",
+        "id": "Melt",
+        "pt-br": "Fusão",
+        "tr": "Erime",
+        "it": "Fusione"
+      }
+    },
+    {
+      "id": "genshin-reactions-moonsign",
+      "source": "Moonsign",
+      "translations": {
+        "zh-hans": "月兆",
+        "zh-hant": "月兆",
+        "ko": "달빛 징조",
+        "ja": "月兆",
+        "es": "Presagio lunar",
+        "fr": "Signelune",
+        "ru": "Лунное знамение",
+        "th": "ลัคนาจันทร์",
+        "vi": "Nguyệt Triệu",
+        "de": "Mondomen",
+        "id": "Moonsign",
+        "pt-br": "Presságio Lunar",
+        "tr": "Ay Sembolü",
+        "it": "Presagio lunare"
+      }
+    },
+    {
+      "id": "genshin-reactions-nascent-gleam",
+      "source": "Nascent Gleam",
+      "translations": {
+        "zh-hans": "初辉",
+        "zh-hant": "初輝",
+        "ko": "초승",
+        "ja": "初照",
+        "es": "Resplandor naciente",
+        "fr": "Lueur naissante",
+        "ru": "Зарождающееся сияние",
+        "th": "แย้มแสง",
+        "vi": "Hé Sáng",
+        "de": "Anfänglicher Glanz",
+        "id": "Nascent Gleam",
+        "pt-br": "Reluzir Inicial",
+        "tr": "İlk Parıltı",
+        "it": "Barlume nascente"
+      }
+    },
+    {
+      "id": "genshin-reactions-overloaded",
+      "source": "Overloaded",
+      "translations": {
+        "zh-hans": "超载",
+        "zh-hant": "超載",
+        "ko": "과부하",
+        "ja": "過負荷",
+        "es": "Sobrecargado",
+        "fr": "Surcharge",
+        "ru": "Перегрузка",
+        "th": "โอเวอร์โหลด",
+        "vi": "Quá Tải",
+        "de": "Überladen",
+        "id": "Overloaded",
+        "pt-br": "Sobrecarregado",
+        "tr": "Yüksek Voltajlı",
+        "it": "Sovraccarico"
+      }
+    },
+    {
+      "id": "genshin-reactions-quicken",
+      "source": "Quicken",
+      "translations": {
+        "zh-hans": "原激化",
+        "zh-hant": "原激化",
+        "ko": "활성",
+        "ja": "原激化",
+        "es": "Aceleración",
+        "fr": "Stimulation",
+        "ru": "Стимуляция",
+        "th": "ปลุกเร้า",
+        "vi": "Sinh Trưởng",
+        "de": "Urwuchs",
+        "id": "Quicken",
+        "pt-br": "Aceleração",
+        "tr": "Hızlanma",
+        "it": "Vivificazione"
+      }
+    },
+    {
+      "id": "genshin-reactions-shatter",
+      "source": "Shatter",
+      "translations": {
+        "zh-hans": "碎冰",
+        "zh-hant": "碎冰",
+        "ko": "쇄빙",
+        "ja": "氷砕き",
+        "es": "Rompehielo",
+        "fr": "Brise-glace",
+        "ru": "Разбит",
+        "th": "น้ำแข็งแตก",
+        "vi": "Băng Vỡ",
+        "de": "Eisbrecher",
+        "id": "Shatter",
+        "pt-br": "Quebrar Gelo",
+        "tr": "Tuzla Buz",
+        "it": "Rompigelo"
+      }
+    },
+    {
+      "id": "genshin-reactions-spread",
+      "source": "Spread",
+      "translations": {
+        "zh-hans": "蔓激化",
+        "zh-hant": "蔓激化",
+        "ko": "발산",
+        "ja": "草激化",
+        "es": "Propagación",
+        "fr": "Propagation",
+        "ru": "Разрастание",
+        "th": "แพร่ขยาย",
+        "vi": "Lan Tràn",
+        "de": "Rankenwuchs",
+        "id": "Spread",
+        "pt-br": "Propagação",
+        "tr": "Yayılma",
+        "it": "Propagazione"
+      }
+    },
+    {
+      "id": "genshin-reactions-stellar-conduct",
+      "source": "Stellar-Conduct",
+      "translations": {
+        "zh-hans": "星超导",
+        "zh-hant": "星超導",
+        "ko": "별 초전도",
+        "ja": "星電導",
+        "es": "Superconductor Estelar",
+        "fr": "Astroconduction",
+        "ru": "Звездный проводник",
+        "th": "นำไฟฟ้าดารา",
+        "vi": "Tinh–Siêu Dẫn",
+        "de": "Stellar-Supraleiter",
+        "id": "Stellar-Conduct",
+        "pt-br": "Supercondutor Estelar",
+        "tr": "Yıldız İletimi",
+        "it": "Astroconduzione"
+      }
+    },
+    {
+      "id": "genshin-reactions-superconduct",
+      "source": "Superconduct",
+      "translations": {
+        "zh-hans": "超导",
+        "zh-hant": "超導",
+        "ko": "초전도",
+        "ja": "超電導",
+        "es": "Superconductor",
+        "fr": "Supraconduction",
+        "ru": "Сверхпроводник",
+        "th": "นำไฟฟ้า",
+        "vi": "Siêu Dẫn",
+        "de": "Supraleiter",
+        "id": "Superconduct",
+        "pt-br": "Supercondutor",
+        "tr": "Süper İletim",
+        "it": "Superconduzione"
+      }
+    },
+    {
+      "id": "genshin-reactions-swirl",
+      "source": "Swirl",
+      "translations": {
+        "zh-hans": "扩散",
+        "zh-hant": "擴散",
+        "ko": "확산",
+        "ja": "拡散",
+        "es": "Torbellino",
+        "fr": "Dispersion",
+        "ru": "Рассеивание",
+        "th": "กระจาย",
+        "vi": "Khuếch Tán",
+        "de": "Verwirbelung",
+        "id": "Swirl",
+        "pt-br": "Redemoinho",
+        "tr": "Girdap",
+        "it": "Turbinio"
+      }
+    },
+    {
+      "id": "genshin-reactions-vaporize",
+      "source": "Vaporize",
+      "translations": {
+        "zh-hans": "蒸发",
+        "zh-hant": "蒸發",
+        "ko": "증발",
+        "ja": "蒸発",
+        "es": "Vaporización",
+        "fr": "Évaporation",
+        "ru": "Пар",
+        "th": "ระเหย",
+        "vi": "Bốc Hơi",
+        "de": "Verdampfen",
+        "id": "Vaporize",
+        "pt-br": "Vaporizar",
+        "tr": "Buharlaşma",
+        "it": "Vaporizzazione"
+      }
+    },
+    {
+      "id": "genshin-reactions-wet",
+      "source": "Wet",
+      "translations": {
+        "zh-hans": "潮湿",
+        "zh-hant": "潮濕",
+        "ko": "습기",
+        "ja": "湿潤",
+        "es": "Mojado",
+        "fr": "Trempé",
+        "ru": "Мокрый",
+        "th": "เปียกชุ่ม",
+        "vi": "Ẩm Ướt",
+        "de": "Nass",
+        "id": "Wet",
+        "pt-br": "Molhado",
+        "tr": "Islandı",
+        "it": "Umidità"
+      }
+    }
+  ]
+}

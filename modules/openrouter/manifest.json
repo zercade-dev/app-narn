@@ -1,0 +1,36 @@
+{
+  "id": "openrouter",
+  "name": "OpenRouter",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "capabilities": ["translate", "batch"],
+  "costTier": "medium",
+  "configSchema": {
+    "model": {
+      "type": "string",
+      "description": "OpenRouter model slug, vendor-prefixed (e.g. 'anthropic/claude-sonnet-4.5', 'openai/gpt-4o-mini'). Free text accepted for new/custom models. The model picker lists the live catalog with per-model pricing; only text-generation models are shown."
+    },
+    "reasoningEffort": {
+      "type": "string",
+      "default": "disabled",
+      "description": "Reasoning effort level. Only applies to models that support reasoning; 'disabled' turns it off."
+    },
+    "verbose": {
+      "type": "boolean",
+      "default": false,
+      "description": "Log full prompts and responses"
+    },
+    "batchMode": {
+      "type": "string",
+      "enum": ["language", "entry"],
+      "default": "entry",
+      "description": "Batch by target language or by entry"
+    },
+    "useStructuredOutput": {
+      "type": "boolean",
+      "default": false,
+      "description": "Force JSON-array output via a json_schema response_format. Only enable for models/routes that honor response_format; leave off otherwise."
+    }
+  },
+  "requiredEnvVars": ["OPENROUTER_API_KEY"]
+}

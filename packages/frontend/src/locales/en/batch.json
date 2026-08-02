@@ -1,0 +1,10 @@
+{
+  "translateSelected": "Translate Selected",
+  "toTranslateCount": "{{count}} to translate",
+  "progressAriaLabel": "{{completed}} of {{total}} translated",
+  "cancelRun": "Cancel Run",
+  "runCancelled": "Run cancelled:",
+  "runCompleted": "Translation done — {{completed}} of {{total}} succeeded.",
+  "runCompletedWithErrors": "Translation done — {{completed}} succeeded, {{failed}} failed.",
+  "savedRulesNotice": "Runs use saved routing rules — unsaved edits in the rule editor have no effect."
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Bienvenue sur Narn",
+  "intro": "Parcourez les guides ci-dessous avant de commencer, ou passez directement à la configuration de votre coffre de credentials quand vous serez prêt.",
+  "guidesHeading": "Guides",
+  "browseGuides": "Parcourir les guides",
+  "setupVaultHeading": "Prêt à traduire ?",
+  "setupVaultBody": "Configurez votre coffre de credentials pour ajouter les clés des fournisseurs d'IA que vos traductions utiliseront.",
+  "setupVaultButton": "Configurer le coffre"
+}

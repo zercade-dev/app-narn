@@ -1,0 +1,36 @@
+{
+  "id": "anthropic",
+  "name": "Anthropic (Claude)",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "capabilities": ["translate", "batch"],
+  "costTier": "medium",
+  "configSchema": {
+    "model": {
+      "type": "string",
+      "description": "Anthropic model id (e.g. claude-3-5-sonnet-20241022, claude-3-haiku-20240307, claude-opus-4-5). Left blank until live discovery selects the cheapest available model."
+    },
+    "reasoningEffort": {
+      "type": "string",
+      "default": "disabled",
+      "description": "Reasoning effort level (model-specific). Common values: disabled, low, medium, high, xhigh"
+    },
+    "verbose": {
+      "type": "boolean",
+      "default": false,
+      "description": "Log full prompts and responses"
+    },
+    "batchMode": {
+      "type": "string",
+      "enum": ["language", "entry"],
+      "default": "entry",
+      "description": "Batch by target language or by entry"
+    },
+    "useStructuredOutput": {
+      "type": "boolean",
+      "default": false,
+      "description": "No effect for Claude: Anthropic has no JSON-schema response_format compatible with this module's text-parsing flow (its tool-shim path returns a tool call, not text), so this flag is currently a no-op. Kept for config parity with the other LLM providers."
+    }
+  },
+  "requiredEnvVars": ["ANTHROPIC_API_KEY"]
+}

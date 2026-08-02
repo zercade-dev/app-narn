@@ -1,0 +1,36 @@
+{
+  "id": "google",
+  "name": "Google AI (Gemini)",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "capabilities": ["translate", "batch"],
+  "costTier": "low",
+  "configSchema": {
+    "model": {
+      "type": "string",
+      "description": "Gemini model id. Free text accepted for preview/custom models. See ai.google.dev/gemini-api/docs/models for the full list. Left blank until live discovery selects the cheapest available model."
+    },
+    "reasoningEffort": {
+      "type": "string",
+      "default": "disabled",
+      "description": "Reasoning effort level. Maps to thinkingLevel (Gemini 3) or thinkingBudget tokens (Gemini 2.5). 'disabled' turns off thinking."
+    },
+    "verbose": {
+      "type": "boolean",
+      "default": false,
+      "description": "Log full prompts and responses"
+    },
+    "batchMode": {
+      "type": "string",
+      "enum": ["language", "entry"],
+      "default": "entry",
+      "description": "Batch by target language or by entry"
+    },
+    "useStructuredOutput": {
+      "type": "boolean",
+      "default": true,
+      "description": "Request a JSON-constrained reply via Gemini's native structured outputs: responseSchema for fixed-shape replies, plain JSON mode for map-shaped ones Gemini's schema dialect cannot express. Greatly reduces 'malformed JSON from provider' errors. On by default — turn off only if a custom endpoint or preview model rejects structured output."
+    }
+  },
+  "requiredEnvVars": ["GOOGLE_API_KEY"]
+}

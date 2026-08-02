@@ -1,0 +1,629 @@
+{
+  "id": "genshin-stats",
+  "name": "Genshin Stats",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1700000000000,
+  "terms": [
+    {
+      "id": "genshin-stats-anemo-dmg-bonus",
+      "source": "Anemo DMG Bonus",
+      "translations": {
+        "zh-hans": "风元素伤害加成",
+        "zh-hant": "風元素傷害加成",
+        "ko": "바람 원소 피해 보너스",
+        "ja": "風元素ダメージ",
+        "es": "Bono de Daño Anemo",
+        "fr": "Bonus de DGT Anémo",
+        "ru": "Бонус Анемо урона",
+        "th": "โบนัสความเสียหายลม",
+        "vi": "Tăng ST Nguyên Tố Phong",
+        "de": "Anemo-SCH-Bonus",
+        "id": "Anemo DMG Bonus",
+        "pt-br": "Bônus de Dano Anemo",
+        "tr": "Rüzgar Hasarı Bonusu",
+        "it": "Bonus DAN da Anemo"
+      }
+    },
+    {
+      "id": "genshin-stats-anemo-res",
+      "source": "Anemo RES",
+      "translations": {
+        "zh-hans": "风元素抗性",
+        "zh-hant": "風元素抗性",
+        "ko": "바람 원소 내성",
+        "ja": "風元素耐性",
+        "es": "RES Anemo",
+        "fr": "RÉS Anémo",
+        "ru": "Анемо сопротивление",
+        "th": "ความต้านทานลม",
+        "vi": "Kháng Nguyên Tố Phong",
+        "de": "Anemo-WDS",
+        "id": "Anemo RES",
+        "pt-br": "RES Anemo",
+        "tr": "Rüzgar Direnci",
+        "it": "RES ad Anemo"
+      }
+    },
+    {
+      "id": "genshin-stats-atk",
+      "source": "ATK",
+      "translations": {
+        "zh-hans": "攻击力",
+        "zh-hant": "攻擊力",
+        "ko": "공격력",
+        "ja": "攻撃力",
+        "es": "ATQ",
+        "fr": "ATQ",
+        "ru": "Сила атаки",
+        "th": "พลังโจมตี",
+        "vi": "Tấn Công",
+        "de": "ANG",
+        "id": "ATK",
+        "pt-br": "ATQ",
+        "tr": "Saldırı",
+        "it": "ATT"
+      }
+    },
+    {
+      "id": "genshin-stats-base-atk",
+      "source": "Base ATK",
+      "translations": {
+        "zh-hans": "基础攻击力",
+        "zh-hant": "基礎攻擊力",
+        "ko": "기초 공격력",
+        "ja": "基礎攻撃力",
+        "es": "ATQ Base",
+        "fr": "ATQ de base",
+        "ru": "Базовая атака",
+        "th": "พลังโจมตีพื้นฐาน",
+        "vi": "Tấn Công Căn Bản",
+        "de": "Basis-ANG",
+        "id": "Base ATK",
+        "pt-br": "ATQ Básico",
+        "tr": "Temel Saldırı",
+        "it": "ATT di base"
+      }
+    },
+    {
+      "id": "genshin-stats-base-def",
+      "source": "Base DEF",
+      "translations": {
+        "zh-hans": "基础防御力",
+        "zh-hant": "基礎防禦力",
+        "ko": "기초 방어력",
+        "ja": "基礎防御力",
+        "es": "DEF Base",
+        "fr": "DÉF de base",
+        "ru": "Базовая защита",
+        "th": "พลังป้องกันพื้นฐาน",
+        "vi": "Phòng Ngự Cơ Bản",
+        "de": "Basis-VTD",
+        "id": "Base DEF",
+        "pt-br": "DEF Base",
+        "tr": "Temel Savunma",
+        "it": "DIF di base"
+      }
+    },
+    {
+      "id": "genshin-stats-base-hp",
+      "source": "Base HP",
+      "translations": {
+        "zh-hans": "基础生命值",
+        "zh-hant": "基礎生命值",
+        "ko": "기초 HP",
+        "ja": "基礎HP",
+        "es": "Vida Base",
+        "fr": "PV de base",
+        "ru": "Базовое HP",
+        "th": "พลังชีวิตพื้นฐาน",
+        "vi": "HP Cơ Bản",
+        "de": "Basis-LP",
+        "id": "Base HP",
+        "pt-br": "Vida Base",
+        "tr": "Temel Can",
+        "it": "PS di base"
+      }
+    },
+    {
+      "id": "genshin-stats-cd-reduction",
+      "source": "CD Reduction",
+      "translations": {
+        "zh-hans": "冷却缩减",
+        "zh-hant": "冷卻縮減",
+        "ko": "재사용 대기시간 감소",
+        "ja": "クールタイム短縮",
+        "es": "Reducción de TdE",
+        "fr": "Réduction du TdR",
+        "ru": "Снижение времени отката",
+        "th": "การลดคูลดาวน์",
+        "vi": "Giảm CD",
+        "de": "Schnelles Abklingen",
+        "id": "Reduce CD",
+        "pt-br": "Redução de Recarga",
+        "tr": "BS Azaltımı",
+        "it": "Riduzione TdR"
+      }
+    },
+    {
+      "id": "genshin-stats-crit-dmg",
+      "source": "CRIT DMG",
+      "translations": {
+        "zh-hans": "暴击伤害",
+        "zh-hant": "暴擊傷害",
+        "ko": "치명타 피해",
+        "ja": "会心ダメージ",
+        "es": "Daño CRIT",
+        "fr": "DGT CRIT",
+        "ru": "Крит. урон",
+        "th": "ความแรงคริ",
+        "vi": "ST Bạo Kích",
+        "de": "KSCH",
+        "id": "CRIT DMG",
+        "pt-br": "Dano Crítico",
+        "tr": "Kritik Hasar",
+        "it": "DAN da CRIT"
+      }
+    },
+    {
+      "id": "genshin-stats-crit-rate",
+      "source": "CRIT Rate",
+      "translations": {
+        "zh-hans": "暴击率",
+        "zh-hant": "暴擊率",
+        "ko": "치명타 확률",
+        "ja": "会心率",
+        "es": "Prob. CRIT",
+        "fr": "Taux CRIT",
+        "ru": "Шанс крит. попадания",
+        "th": "อัตราคริ",
+        "vi": "Tỷ Lệ Bạo Kích",
+        "de": "KT",
+        "id": "CRIT Rate",
+        "pt-br": "Taxa Crítica",
+        "tr": "Kritik Oranı",
+        "it": "Tasso di CRIT"
+      }
+    },
+    {
+      "id": "genshin-stats-cryo-dmg-bonus",
+      "source": "Cryo DMG Bonus",
+      "translations": {
+        "zh-hans": "冰元素伤害加成",
+        "zh-hant": "冰元素傷害加成",
+        "ko": "얼음 원소 피해 보너스",
+        "ja": "氷元素ダメージ",
+        "es": "Bono de Daño Cryo",
+        "fr": "Bonus de DGT Cryo",
+        "ru": "Бонус Крио урона",
+        "th": "โบนัสความเสียหายน้ำแข็ง",
+        "vi": "Tăng ST Nguyên Tố Băng",
+        "de": "Kryo-SCH-Bonus",
+        "id": "Cryo DMG Bonus",
+        "pt-br": "Bônus de Dano Cryo",
+        "tr": "Buz Hasarı Bonusu",
+        "it": "Bonus DAN da Cryo"
+      }
+    },
+    {
+      "id": "genshin-stats-cryo-res",
+      "source": "Cryo RES",
+      "translations": {
+        "zh-hans": "冰元素抗性",
+        "zh-hant": "冰元素抗性",
+        "ko": "얼음 원소 내성",
+        "ja": "氷元素耐性",
+        "es": "RES Cryo",
+        "fr": "RÉS Cryo",
+        "ru": "Крио сопротивление",
+        "th": "ความต้านทานน้ำแข็ง",
+        "vi": "Kháng Nguyên Tố Băng",
+        "de": "Kryo-WDS",
+        "id": "Cryo RES",
+        "pt-br": "RES Cryo",
+        "tr": "Buz Direnci",
+        "it": "RES a Cryo"
+      }
+    },
+    {
+      "id": "genshin-stats-def",
+      "source": "DEF",
+      "translations": {
+        "zh-hans": "防御力",
+        "zh-hant": "防禦力",
+        "ko": "방어력",
+        "ja": "防御力",
+        "es": "DEF",
+        "fr": "DÉF",
+        "ru": "Защита",
+        "th": "พลังป้องกัน",
+        "vi": "Phòng Ngự",
+        "de": "VTD",
+        "id": "DEF",
+        "pt-br": "DEF",
+        "tr": "Savunma",
+        "it": "DIF"
+      }
+    },
+    {
+      "id": "genshin-stats-dendro-dmg-bonus",
+      "source": "Dendro DMG Bonus",
+      "translations": {
+        "zh-hans": "草元素伤害加成",
+        "zh-hant": "草元素傷害加成",
+        "ko": "풀 원소 피해 보너스",
+        "ja": "草元素ダメージ",
+        "es": "Bono de Daño Dendro",
+        "fr": "Bonus de DGT Dendro",
+        "ru": "Бонус Дендро урона",
+        "th": "โบนัสความเสียหายไม้",
+        "vi": "Tăng ST Nguyên Tố Thảo",
+        "de": "Dendro-SCH-Bonus",
+        "id": "Dendro DMG Bonus",
+        "pt-br": "Bônus de Dano Dendro",
+        "tr": "Doğa Hasarı Bonusu",
+        "it": "Bonus DAN da Dendro"
+      }
+    },
+    {
+      "id": "genshin-stats-dendro-res",
+      "source": "Dendro RES",
+      "translations": {
+        "zh-hans": "草元素抗性",
+        "zh-hant": "草元素抗性",
+        "ko": "풀 원소 내성",
+        "ja": "草元素耐性",
+        "es": "RES Dendro",
+        "fr": "RÉS Dendro",
+        "ru": "Дендро сопротивление",
+        "th": "ความต้านทานไม้",
+        "vi": "Kháng Nguyên Tố Thảo",
+        "de": "Dendro-WDS",
+        "id": "Dendro RES",
+        "pt-br": "RES Dendro",
+        "tr": "Doğa Direnci",
+        "it": "RES a Dendro"
+      }
+    },
+    {
+      "id": "genshin-stats-electro-dmg-bonus",
+      "source": "Electro DMG Bonus",
+      "translations": {
+        "zh-hans": "雷元素伤害加成",
+        "zh-hant": "雷元素傷害加成",
+        "ko": "번개 원소 피해 보너스",
+        "ja": "雷元素ダメージ",
+        "es": "Bono de Daño Electro",
+        "fr": "Bonus de DGT Électro",
+        "ru": "Бонус Электро урона",
+        "th": "โบนัสความเสียหายไฟฟ้า",
+        "vi": "Tăng ST Nguyên Tố Lôi",
+        "de": "Elektro-SCH-Bonus",
+        "id": "Electro DMG Bonus",
+        "pt-br": "Bônus de Dano Electro",
+        "tr": "Elektrik Hasarı Bonusu",
+        "it": "Bonus DAN da Electro"
+      }
+    },
+    {
+      "id": "genshin-stats-electro-res",
+      "source": "Electro RES",
+      "translations": {
+        "zh-hans": "雷元素抗性",
+        "zh-hant": "雷元素抗性",
+        "ko": "번개 원소 내성",
+        "ja": "雷元素耐性",
+        "es": "RES Electro",
+        "fr": "RÉS Électro",
+        "ru": "Электро сопротивление",
+        "th": "ความต้านทานไฟฟ้า",
+        "vi": "Kháng Nguyên Tố Lôi",
+        "de": "Elektro-WDS",
+        "id": "Electro RES",
+        "pt-br": "RES Electro",
+        "tr": "Elektrik Direnci",
+        "it": "RES a Electro"
+      }
+    },
+    {
+      "id": "genshin-stats-elemental-mastery",
+      "source": "Elemental Mastery",
+      "translations": {
+        "zh-hans": "元素精通",
+        "zh-hant": "元素精通",
+        "ko": "원소 마스터리",
+        "ja": "元素熟知",
+        "es": "Maestría Elemental",
+        "fr": "Maîtrise élémentaire",
+        "ru": "Мастерство стихий",
+        "th": "ความชำนาญธาตุ",
+        "vi": "Tinh Thông Nguyên Tố",
+        "de": "Elementarkunde",
+        "id": "Elemental Mastery",
+        "pt-br": "Proficiência Elemental",
+        "tr": "Element Ustalığı",
+        "it": "Maestria elementale"
+      }
+    },
+    {
+      "id": "genshin-stats-energy-recharge",
+      "source": "Energy Recharge",
+      "translations": {
+        "zh-hans": "元素充能效率",
+        "zh-hant": "元素充能效率",
+        "ko": "원소 충전 효율",
+        "ja": "元素チャージ効率",
+        "es": "Recarga de Energía",
+        "fr": "Recharge d'énergie",
+        "ru": "Восст. энергии",
+        "th": "การฟื้นฟูพลังงาน",
+        "vi": "Hiệu Quả Nạp Nguyên Tố",
+        "de": "Aufladerate",
+        "id": "Energy Recharge",
+        "pt-br": "Recarga de Energia",
+        "tr": "Enerji Yüklemesi",
+        "it": "Ricarica di energia"
+      }
+    },
+    {
+      "id": "genshin-stats-geo-dmg-bonus",
+      "source": "Geo DMG Bonus",
+      "translations": {
+        "zh-hans": "岩元素伤害加成",
+        "zh-hant": "岩元素傷害加成",
+        "ko": "바위 원소 피해 보너스",
+        "ja": "岩元素ダメージ",
+        "es": "Bono de Daño Geo",
+        "fr": "Bonus de DGT Géo",
+        "ru": "Бонус Гео урона",
+        "th": "โบนัสความเสียหายหิน",
+        "vi": "Tăng ST Nguyên Tố Nham",
+        "de": "Geo-SCH-Bonus",
+        "id": "Geo DMG Bonus",
+        "pt-br": "Bônus de Dano Geo",
+        "tr": "Toprak Hasarı Bonusu",
+        "it": "Bonus DAN da Geo"
+      }
+    },
+    {
+      "id": "genshin-stats-geo-res",
+      "source": "Geo RES",
+      "translations": {
+        "zh-hans": "岩元素抗性",
+        "zh-hant": "岩元素抗性",
+        "ko": "바위 원소 내성",
+        "ja": "岩元素耐性",
+        "es": "RES Geo",
+        "fr": "RÉS Géo",
+        "ru": "Гео сопротивление",
+        "th": "ความต้านทานหิน",
+        "vi": "Kháng Nguyên Tố Nham",
+        "de": "Geo-WDS",
+        "id": "Geo RES",
+        "pt-br": "RES Geo",
+        "tr": "Toprak Direnci",
+        "it": "RES a Geo"
+      }
+    },
+    {
+      "id": "genshin-stats-healing-bonus",
+      "source": "Healing Bonus",
+      "translations": {
+        "zh-hans": "治疗加成",
+        "zh-hant": "治療加成",
+        "ko": "치유 보너스",
+        "ja": "与える治療効果",
+        "es": "Bono de Curación",
+        "fr": "Bonus de soins",
+        "ru": "Бонус лечения",
+        "th": "โบนัสการรักษา",
+        "vi": "Tăng Trị Liệu",
+        "de": "Heilungsbonus",
+        "id": "Healing Bonus",
+        "pt-br": "Bônus de Cura",
+        "tr": "İyileştirme Bonusu",
+        "it": "Bonus di guarigione"
+      }
+    },
+    {
+      "id": "genshin-stats-hp",
+      "source": "HP",
+      "translations": {
+        "zh-hans": "生命值",
+        "zh-hant": "生命值",
+        "ko": "HP",
+        "ja": "HP",
+        "es": "Vida",
+        "fr": "PV",
+        "ru": "HP",
+        "th": "พลังชีวิต",
+        "vi": "HP",
+        "de": "LP",
+        "id": "HP",
+        "pt-br": "Vida",
+        "tr": "Can",
+        "it": "PS"
+      }
+    },
+    {
+      "id": "genshin-stats-hydro-dmg-bonus",
+      "source": "Hydro DMG Bonus",
+      "translations": {
+        "zh-hans": "水元素伤害加成",
+        "zh-hant": "水元素傷害加成",
+        "ko": "물 원소 피해 보너스",
+        "ja": "水元素ダメージ",
+        "es": "Bono de Daño Hydro",
+        "fr": "Bonus de DGT Hydro",
+        "ru": "Бонус Гидро урона",
+        "th": "โบนัสความเสียหายน้ำ",
+        "vi": "Tăng ST Nguyên Tố Thủy",
+        "de": "Hydro-SCH-Bonus",
+        "id": "Hydro DMG Bonus",
+        "pt-br": "Bônus de Dano Hydro",
+        "tr": "Su Hasarı Bonusu",
+        "it": "Bonus DAN da Hydro"
+      }
+    },
+    {
+      "id": "genshin-stats-hydro-res",
+      "source": "Hydro RES",
+      "translations": {
+        "zh-hans": "水元素抗性",
+        "zh-hant": "水元素抗性",
+        "ko": "물 원소 내성",
+        "ja": "水元素耐性",
+        "es": "RES Hydro",
+        "fr": "RÉS Hydro",
+        "ru": "Гидро сопротивление",
+        "th": "ความต้านทานน้ำ",
+        "vi": "Kháng Nguyên Tố Thủy",
+        "de": "Hydro-WDS",
+        "id": "Hydro RES",
+        "pt-br": "RES Hydro",
+        "tr": "Su Direnci",
+        "it": "RES a Hydro"
+      }
+    },
+    {
+      "id": "genshin-stats-incoming-healing-bonus",
+      "source": "Incoming Healing Bonus",
+      "translations": {
+        "zh-hans": "受治疗加成",
+        "zh-hant": "受治療加成",
+        "ko": "받는 치유 보너스",
+        "ja": "受ける治療効果",
+        "es": "Bono de Curación recibida",
+        "fr": "Bonus de soins reçus",
+        "ru": "Бонус получаемого лечения",
+        "th": "โบนัสการถูกรักษา",
+        "vi": "Tăng Nhận Trị Liệu",
+        "de": "Passiver Heilungsbonus",
+        "id": "Incoming Healing Bonus",
+        "pt-br": "Bônus de Cura Recebida",
+        "tr": "Gelen İyileştirme Bonusu",
+        "it": "Bonus di guarigione ricevuta"
+      }
+    },
+    {
+      "id": "genshin-stats-max-hp",
+      "source": "Max HP",
+      "translations": {
+        "zh-hans": "生命值上限",
+        "zh-hant": "生命值上限",
+        "ko": "HP 최대치",
+        "ja": "HP上限",
+        "es": "Vida Máx.",
+        "fr": "PV max",
+        "ru": "Макс. HP",
+        "th": "พลังชีวิตสูงสุด",
+        "vi": "Giới Hạn HP",
+        "de": "Max. LP",
+        "id": "Max HP",
+        "pt-br": "Vida Máxima",
+        "tr": "Maks. Can",
+        "it": "PS max"
+      }
+    },
+    {
+      "id": "genshin-stats-physical-dmg-bonus",
+      "source": "Physical DMG Bonus",
+      "translations": {
+        "zh-hans": "物理伤害加成",
+        "zh-hant": "物理傷害加成",
+        "ko": "물리 피해 보너스",
+        "ja": "物理ダメージ",
+        "es": "Bono de Daño Físico",
+        "fr": "Bonus de DGT physiques",
+        "ru": "Бонус физ. урона",
+        "th": "โบนัสความเสียหายกายภาพ",
+        "vi": "Tăng Sát Thương Vật Lý",
+        "de": "Physischer SCH-Bonus",
+        "id": "Physical DMG Bonus",
+        "pt-br": "Bônus de Dano Físico",
+        "tr": "Fiziksel Hasar Bonusu",
+        "it": "Bonus DAN fisici"
+      }
+    },
+    {
+      "id": "genshin-stats-physical-res",
+      "source": "Physical RES",
+      "translations": {
+        "zh-hans": "物理抗性",
+        "zh-hant": "物理抗性",
+        "ko": "물리 내성",
+        "ja": "物理耐性",
+        "es": "RES Física",
+        "fr": "RÉS physique",
+        "ru": "Физ. сопротивление",
+        "th": "ความต้านทานกายภาพ",
+        "vi": "Kháng Vật Lý",
+        "de": "Physischer WDS",
+        "id": "Physical RES",
+        "pt-br": "RES Física",
+        "tr": "Fiziksel Direnç",
+        "it": "RES fisica"
+      }
+    },
+    {
+      "id": "genshin-stats-pyro-dmg-bonus",
+      "source": "Pyro DMG Bonus",
+      "translations": {
+        "zh-hans": "火元素伤害加成",
+        "zh-hant": "火元素傷害加成",
+        "ko": "불 원소 피해 보너스",
+        "ja": "炎元素ダメージ",
+        "es": "Bono de Daño Pyro",
+        "fr": "Bonus de DGT Pyro",
+        "ru": "Бонус Пиро урона",
+        "th": "โบนัสความเสียหายไฟ",
+        "vi": "Tăng ST Nguyên Tố Hỏa",
+        "de": "Pyro-SCH-Bonus",
+        "id": "Pyro DMG Bonus",
+        "pt-br": "Bônus de Dano Pyro",
+        "tr": "Ateş Hasarı Bonusu",
+        "it": "Bonus DAN da Pyro"
+      }
+    },
+    {
+      "id": "genshin-stats-pyro-res",
+      "source": "Pyro RES",
+      "translations": {
+        "zh-hans": "火元素抗性",
+        "zh-hant": "火元素抗性",
+        "ko": "불 원소 내성",
+        "ja": "炎元素耐性",
+        "es": "RES Pyro",
+        "fr": "RÉS Pyro",
+        "ru": "Пиро сопротивление",
+        "th": "ความต้านทานไฟ",
+        "vi": "Kháng Nguyên Tố Hỏa",
+        "de": "Pyro-WDS",
+        "id": "Pyro RES",
+        "pt-br": "RES Pyro",
+        "tr": "Ateş Direnci",
+        "it": "RES a Pyro"
+      }
+    },
+    {
+      "id": "genshin-stats-shield-strength",
+      "source": "Shield Strength",
+      "translations": {
+        "zh-hans": "护盾强效",
+        "zh-hant": "護盾強效",
+        "ko": "보호막 강화 효과",
+        "ja": "シールド強化",
+        "es": "Protección de Escudo",
+        "fr": "Force du bouclier",
+        "ru": "Прочность щита",
+        "th": "ประสิทธิภาพโล่",
+        "vi": "Hiệu Quả Khiên",
+        "de": "Schildeffizienz",
+        "id": "Kekuatan Perisai",
+        "pt-br": "Força do Escudo",
+        "tr": "Kalkan Gücü",
+        "it": "Efficacia scudo"
+      }
+    }
+  ]
+}

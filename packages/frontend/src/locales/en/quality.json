@@ -1,0 +1,74 @@
+{
+  "title": "Quality Dashboard",
+  "loading": "Loading quality summary…",
+  "error": "Failed to load quality summary: {{message}}",
+  "empty": "No LQA results yet. Run a translation to populate this dashboard.",
+  "overview": "{{results}} LQA result(s) across {{entries}} entry/entries — overall pass rate {{passRate}}.",
+  "overallStat": {
+    "passRateLabel": "Overall pass rate",
+    "results": "{{count}} LQA results",
+    "entries": "{{count}} entries",
+    "legendPassed": "Passed {{count}}",
+    "legendFailed": "Failed {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "Most common issues",
+    "description": "Issue-type counts across all languages."
+  },
+  "other": "Other",
+  "drillDownHint": "Click to view the matching entries",
+  "columns": {
+    "language": "Language",
+    "source": "Source",
+    "module": "Module",
+    "passRate": "Pass rate"
+  },
+  "legend": {
+    "tierHigh": "High pass rate (≥ 90%)",
+    "tierMid": "Mid pass rate (70–89%)",
+    "tierLow": "Low pass rate (< 70%)",
+    "passed": "Passed",
+    "failed": "Failed"
+  },
+  "checkLabels": {
+    "tag-equality": "Tag equality",
+    "overflow": "Length overflow",
+    "length-limit": "Length limit",
+    "glossary-adherence": "Glossary adherence",
+    "forbidden-terms": "Forbidden terms",
+    "regex-assertions": "Regex assertions",
+    "number-parity": "Number parity",
+    "whitespace-parity": "Whitespace parity",
+    "line-break-parity": "Line-break parity",
+    "end-punctuation": "End punctuation",
+    "double-spacing": "Double spacing",
+    "double-words": "Double words",
+    "untranslated": "Untranslated",
+    "mask-integrity": "Mask integrity",
+    "tag-mismatch": "Tag mismatch",
+    "too-long": "Too long",
+    "glossary-term-missing": "Glossary term missing",
+    "forbidden-term": "Forbidden term",
+    "regex-assertion-failed": "Regex assertion failed",
+    "regex-config-error": "Regex config error",
+    "number-missing": "Number missing",
+    "number-added": "Number added",
+    "whitespace-leading": "Leading whitespace",
+    "whitespace-trailing": "Trailing whitespace",
+    "line-break-mismatch": "Line-break mismatch",
+    "end-punctuation-mismatch": "End punctuation mismatch",
+    "mask-mismatch": "Mask mismatch"
+  },
+  "byLanguage": {
+    "title": "Pass rate by language",
+    "description": "Worst first. Click a language to inspect its failed entries."
+  },
+  "bySource": {
+    "title": "Issues by source",
+    "description": "Worst first. Click a source to inspect its failed entries."
+  },
+  "byModule": {
+    "title": "Quality by module",
+    "description": "Pass rate and issues grouped by the translation module that produced each translation."
+  }
+}

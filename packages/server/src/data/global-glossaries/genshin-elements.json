@@ -1,0 +1,149 @@
+{
+  "id": "genshin-elements",
+  "name": "Genshin Elements",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1700000000000,
+  "terms": [
+    {
+      "id": "genshin-elements-anemo",
+      "source": "Anemo",
+      "translations": {
+        "zh-hans": "风元素",
+        "zh-hant": "風元素",
+        "ko": "바람 원소",
+        "ja": "風元素",
+        "es": "Anemo",
+        "fr": "Anémo",
+        "ru": "Анемо",
+        "th": "ธาตุลม",
+        "vi": "Nguyên Tố Phong",
+        "de": "Anemo",
+        "id": "Anemo",
+        "pt-br": "Anemo",
+        "tr": "Rüzgar",
+        "it": "Anemo"
+      }
+    },
+    {
+      "id": "genshin-elements-cryo",
+      "source": "Cryo",
+      "translations": {
+        "zh-hans": "冰元素",
+        "zh-hant": "冰元素",
+        "ko": "얼음 원소",
+        "ja": "氷元素",
+        "es": "Cryo",
+        "fr": "Cryo",
+        "ru": "Крио",
+        "th": "ธาตุน้ำแข็ง",
+        "vi": "‍Nguyên Tố Băng",
+        "de": "Kryo",
+        "id": "Cryo",
+        "pt-br": "Cryo",
+        "tr": "Buz",
+        "it": "Cryo"
+      }
+    },
+    {
+      "id": "genshin-elements-dendro",
+      "source": "Dendro",
+      "translations": {
+        "zh-hans": "草元素",
+        "zh-hant": "草元素",
+        "ko": "풀 원소",
+        "ja": "草元素",
+        "es": "Dendro",
+        "fr": "Dendro",
+        "ru": "Дендро",
+        "th": "ธาตุไม้",
+        "vi": "‍Nguyên Tố Thảo",
+        "de": "Dendro",
+        "id": "Dendro",
+        "pt-br": "Dendro",
+        "tr": "Doğa",
+        "it": "Dendro"
+      }
+    },
+    {
+      "id": "genshin-elements-electro",
+      "source": "Electro",
+      "translations": {
+        "zh-hans": "雷元素",
+        "zh-hant": "雷元素",
+        "ko": "번개 원소",
+        "ja": "雷元素",
+        "es": "Electro",
+        "fr": "Électro",
+        "ru": "Электро",
+        "th": "ธาตุไฟฟ้า",
+        "vi": "Nguyên Tố ‍Lôi",
+        "de": "Elektro",
+        "id": "Electro",
+        "pt-br": "Electro",
+        "tr": "Elektrik",
+        "it": "Electro"
+      }
+    },
+    {
+      "id": "genshin-elements-geo",
+      "source": "Geo",
+      "translations": {
+        "zh-hans": "岩元素",
+        "zh-hant": "岩元素",
+        "ko": "바위 원소",
+        "ja": "岩元素",
+        "es": "Geo",
+        "fr": "Géo",
+        "ru": "Гео",
+        "th": "ธาตุหิน",
+        "vi": "Nguyên Tố Nham",
+        "de": "Geo",
+        "id": "Geo",
+        "pt-br": "Geo",
+        "tr": "Toprak",
+        "it": "Geo"
+      }
+    },
+    {
+      "id": "genshin-elements-hydro",
+      "source": "Hydro",
+      "translations": {
+        "zh-hans": "水元素",
+        "zh-hant": "水元素",
+        "ko": "물 원소",
+        "ja": "水元素",
+        "es": "Hydro",
+        "fr": "Hydro",
+        "ru": "Гидро",
+        "th": "ธาตุน้ำ",
+        "vi": "Nguyên Tố Thủy",
+        "de": "Hydro",
+        "id": "Hydro",
+        "pt-br": "Hydro",
+        "tr": "Su",
+        "it": "Hydro"
+      }
+    },
+    {
+      "id": "genshin-elements-pyro",
+      "source": "Pyro",
+      "translations": {
+        "zh-hans": "火元素",
+        "zh-hant": "火元素",
+        "ko": "불 원소",
+        "ja": "炎元素",
+        "es": "Pyro",
+        "fr": "Pyro",
+        "ru": "Пиро",
+        "th": "ธาตุไฟ",
+        "vi": "‍Nguyên Tố Hỏa",
+        "de": "Pyro",
+        "id": "Pyro",
+        "pt-br": "Pyro",
+        "tr": "Ateş",
+        "it": "Pyro"
+      }
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+# Self-contained LOCAL stack for narn (the open-core app): the app plus its own
+# Postgres, with no external services required. Run it from this file's own
+# directory, the root of a narn checkout.
+#
+#   docker compose up -d               # pull narn's image + start app + db
+#   # then open http://127.0.0.1:3001  # the server serves the SPA and /api
+#
+# PULL-FIRST: defaults to narn's own prebuilt image, ghcr.io/zercade-dev/narn:main.
+# `:main` is written by .github/workflows/release.yml when develop is merged to main,
+# so it tracks the latest RELEASE; that same workflow also publishes immutable
+# `:X.Y.Z` tags for pinning. If the image is not public for your account, run
+# `docker login ghcr.io` once first (a token with `read:packages`). To run your local
+# working tree instead, uncomment `build: .` on the app service (needs a narn
+# checkout, no registry/auth).
+#
+# Postgres is REQUIRED: the storage layer is Postgres-everywhere
+# (packages/server/src/storage/registry.ts wires every store to a Pg*Store), and
+# the server throws on boot without DATABASE_URL. Migrations — including the
+# tenant-RLS schema — apply automatically on first connect; standalone resolves a
+# single implicit local tenant, so no external identity provider / cloud
+# parent is involved.
+#
+# ISOLATION: Postgres publishes NO host port and sits on an `internal` Docker
+# network (`backend`), so it has no route off the host — it is reachable ONLY by
+# the app container, never from the host, the LAN, or any other container /
+# compose project on this machine. The app is the only service with a host port
+# (loopback-only) and with outbound (egress) access for LLM API calls.
+name: narn-local
+
+services:
+  app:
+    # narn's own prebuilt image. `:main` = the latest release; immutable `:X.Y.Z`
+    # tags are published alongside it for pinning. `docker compose pull` refreshes
+    # it. Same artifact narn's CI built and its release workflow promoted.
+    image: ghcr.io/zercade-dev/narn:main
+    # The published image is amd64-only; on Apple Silicon Docker runs it via emulation.
+    platform: linux/amd64
+    # To run THIS checkout's code instead of the pulled image, comment out the
+    # `image:` + `platform:` lines above and uncomment the next line (no auth needed):
+    # build: .
+    # SECURITY: the host bind MUST stay 127.0.0.1 — the API has no auth (single-user
+    # design). 0.0.0.0 would expose an unauthenticated API to the LAN.
+    ports:
+      - '127.0.0.1:3001:3001' # host loopback only — preserves the single-user posture
+    networks:
+      - egress # outbound to LLM APIs; the host-published loopback port lives here too
+      - backend # private app<->postgres link (the internal network defined below)
+    environment:
+      HOST: '0.0.0.0' # bind all interfaces INSIDE the container so Docker can forward to it
+      PORT: '3001'
+      # Postgres reachable on the compose network at host `postgres` (the service below).
+      DATABASE_URL: 'postgres://translator:translator@postgres:5432/translator'
+      # SSRF-guard escape hatch (default off). Set to "true" ONLY if your LLM
+      # endpoint is legitimately on a link-local/internal/metadata host on a
+      # trusted network. Operator-only: it is never read from per-project/global
+      # config, so an imported project cannot enable it.
+      ALLOW_INTERNAL_LLM_HOSTS: 'false'
+    volumes:
+      - translator-data:/data # local vault file + per-project backups/auto-snapshots
+    # --- hardening: read-only root filesystem, dropped Linux capabilities, no new privileges ---
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777 # backup.ts streams ZIPs to os.tmpdir() → /tmp; root FS is read-only
+    cap_drop:
+      - ALL
+    security_opt:
+      - 'no-new-privileges:true'
+    pids_limit: 256
+    mem_limit: 1g # contains a memory-amplification/ReDoS bug as a self-limited failure
+    restart: unless-stopped
+    # The app's healthcheck (GET /api/health) is baked into the image's Dockerfile.
+    # Wait for Postgres to pass its own healthcheck before starting the app.
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17-bookworm
+    # NO `ports:` — Postgres is deliberately not published to the host. It joins
+    # ONLY the internal `backend` network, so nothing outside this compose project
+    # (host, LAN, or other containers) can reach it; only `app` can.
+    networks:
+      - backend
+    environment:
+      POSTGRES_USER: translator
+      POSTGRES_PASSWORD: translator
+      POSTGRES_DB: translator
+    volumes:
+      - translator-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U translator -d translator']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+networks:
+  egress:
+    driver: bridge # normal bridge: NAT egress so the app can reach LLM APIs
+  backend:
+    driver: bridge
+    internal: true # no gateway off the host — the DB has no inbound/outbound external route
+
+volumes:
+  translator-data: {}
+  translator-db: {}

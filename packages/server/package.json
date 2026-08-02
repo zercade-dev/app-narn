@@ -1,0 +1,71 @@
+{
+  "name": "@zercade-dev/narn-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["dist"],
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./http": {
+      "types": "./dist/src/http/extra-routes.d.ts",
+      "default": "./dist/src/http/extra-routes.js"
+    },
+    "./identity": {
+      "types": "./dist/src/identity/index.d.ts",
+      "default": "./dist/src/identity/index.js"
+    },
+    "./storage": {
+      "types": "./dist/src/storage/index.d.ts",
+      "default": "./dist/src/storage/index.js"
+    },
+    "./metrics": {
+      "types": "./dist/src/modules/ops-metrics.d.ts",
+      "default": "./dist/src/modules/ops-metrics.js"
+    }
+  },
+  "scripts": {
+    "dev": "tsx watch --tsconfig tsconfig.dev.json src/index.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "start:secure": "UP=\"$(node -p 'require(\"path\").join(require(\"os\").tmpdir(),\"translator-backup-uploads\")')\" && mkdir -p projects logs .cache \"$UP\" && node --permission --allow-fs-read=\"$PWD\" --allow-fs-read=\"$PWD/../../node_modules\" --allow-fs-read=\"$PWD/../shared\" --allow-fs-read=\"$PWD/../../modules\" --allow-fs-read=\"$PWD/../frontend/dist\" --allow-fs-write=\"$PWD/projects\" --allow-fs-write=\"$PWD/logs\" --allow-fs-write=\"$PWD/.cache\" --allow-fs-write=\"$PWD/.translator-vault.json*\" --allow-fs-write=\"$PWD/global-config.json*\" --allow-fs-read=\"$UP\" --allow-fs-write=\"$UP\" dist/src/index.js"
+  },
+  "dependencies": {
+    "@zercade-dev/narn-module-anthropic": "workspace:*",
+    "@zercade-dev/narn-module-copilot": "workspace:*",
+    "@zercade-dev/narn-module-deepl": "workspace:*",
+    "@zercade-dev/narn-module-deepseek": "workspace:*",
+    "@zercade-dev/narn-module-generic-ai": "workspace:*",
+    "@zercade-dev/narn-module-google": "workspace:*",
+    "@zercade-dev/narn-module-openai": "workspace:*",
+    "@zercade-dev/narn-module-openrouter": "workspace:*",
+    "@zercade-dev/narn-module-pseudo": "workspace:*",
+    "@zercade-dev/narn-shared": "workspace:*",
+    "cors": "catalog:",
+    "dotenv": "catalog:",
+    "express": "catalog:",
+    "helmet": "catalog:",
+    "multer": "catalog:",
+    "papaparse": "catalog:",
+    "pg": "catalog:",
+    "yauzl": "catalog:",
+    "yazl": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/cors": "catalog:",
+    "@types/express": "catalog:",
+    "@types/multer": "catalog:",
+    "@types/node": "catalog:",
+    "@types/papaparse": "catalog:",
+    "@types/pg": "catalog:",
+    "@types/yauzl": "catalog:",
+    "@types/yazl": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "countdown": {
+    "message": "⚠️ The service will restart shortly to apply an update — please save your work now. In-progress translations will be interrupted; completed entries are kept, so re-run anything unfinished afterward.",
+    "collapse": "Collapse",
+    "expand": "Expand"
+  },
+  "restarted": {
+    "message": "The service was restarted recently to apply an update; some activity may have been interrupted — re-run anything that looks incomplete.",
+    "dismiss": "Dismiss"
+  },
+  "cancelled": {
+    "message": "The scheduled service restart was cancelled — you can keep working as normal.",
+    "dismiss": "Dismiss"
+  },
+  "slot": {
+    "aria": "You are using the {{label}} environment"
+  }
+}

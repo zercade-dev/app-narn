@@ -1,0 +1,35 @@
+{
+  "name": "translator-v2",
+  "version": "1.61.0",
+  "license": "BUSL-1.1",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.2.2",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm run --parallel --filter @zercade-dev/narn-server --filter @zercade-dev/narn-frontend dev",
+    "prebuild": "pnpm run clean",
+    "build": "pnpm -r build",
+    "clean": "pnpm run --recursive clean",
+    "lint": "eslint 'packages/*/src/**/*.{ts,tsx}'",
+    "format": "prettier --write \"packages/*/src/**/*.{ts,tsx,css,json}\" \"*.{json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"packages/*/src/**/*.{ts,tsx,css,json}\" \"*.{json,md,yaml,yml}\"",
+    "reset": "bash scripts/reset.sh",
+    "lint:deps": "tsx scripts/check-catalog.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "catalog:",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "globals": "catalog:",
+    "playwright": "catalog:",
+    "prettier": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+.nyc_output/
+.vite/
+test_output.txt
+*.log

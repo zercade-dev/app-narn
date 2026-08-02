@@ -1,0 +1,18 @@
+{
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "close": "Cerrar",
+  "discard": "Descartar",
+  "loading": "Cargando…",
+  "changelogEntryError": "No se pudo cargar esta entrada del registro de cambios.",
+  "changelogShowOlder": "Ver versiones anteriores ({{count}})",
+  "saving": "Guardando…",
+  "rows": "filas",
+  "thinking": "Pensando… {{seconds}}s",
+  "webSearch": {
+    "title": "Buscar en la web",
+    "placeholder": "Buscar en Google…",
+    "hint": "Pulsa Intro para buscar en una nueva pestaña",
+    "action": "Buscar"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "title": "Welcome to Narn",
+  "intro": "Take a look through the guides below before you get started — or jump straight to setting up your credential vault when you're ready.",
+  "guidesHeading": "Guides",
+  "browseGuides": "Browse guides",
+  "setupVaultHeading": "Ready to translate?",
+  "setupVaultBody": "Set up your credential vault to add the AI provider keys your translations will use.",
+  "setupVaultButton": "Set up vault"
+}

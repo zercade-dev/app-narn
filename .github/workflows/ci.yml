@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Restrict the GITHUB_TOKEN to the minimum required scopes.
+permissions:
+  contents: read
+
+# Cancel any in-progress run for the same branch/PR to free up runner capacity.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# narn is the self-contained open-core app workspace (pnpm; @zercade-dev/narn-* packages
+# + frontend/server/shared + modules). This is narn's OWN source quality gate — build,
+# lint, format and catalog pinning — so a bad commit is caught at the source. Automated
+# tests are not part of this repo, so they are NOT run here; the companion
+# docker-build.yml boot-smokes the image.
+jobs:
+  quality-gate:
+    # Fork PRs run on a GitHub-hosted EPHEMERAL runner — untrusted PR code never
+    # touches the self-hosted box; push / same-repo PRs keep the self-hosted runner.
+    # The CI label is dedicated to this runner group so only one CI job runs at a time.
+    # Pair with the repo Actions setting "Require approval for all outside
+    # collaborators" so a fork run is gated on manual maintainer approval first.
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || fromJSON('["self-hosted", "zdev", "CI"]') }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true # self-hosted runner: wipe prior-run untracked/ignored files
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Catalog pinning (lint:deps)
+        run: pnpm lint:deps

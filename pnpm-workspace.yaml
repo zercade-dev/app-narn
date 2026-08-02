@@ -1,0 +1,156 @@
+packages:
+  - 'packages/*'
+  - 'modules/*'
+
+onlyBuiltDependencies:
+  - esbuild
+
+allowBuilds:
+  esbuild: true
+  koffi: false
+
+overrides:
+  # GHSA-xcpc-8h2w-3j85 (high): adm-zip <0.6.0 allocates an attacker-declared
+  # uncompressed-size buffer (up to 4GB) before validating it. Pulled in
+  # transitively via modules/deepl -> deepl-node, which still pins ^0.5.16
+  # upstream (deepl-node 1.27.0, latest as of 2026-07-18) — force the patched
+  # range here until deepl-node bumps its own pin.
+  adm-zip: '>=0.6.0'
+  # GHSA-3jxr-9vmj-r5cp (high, published 2026-07-20): brace-expansion <5.0.7 has an
+  # exponential-time regex DoS on consecutive non-expanding {} groups.
+  # GHSA-mh99-v99m-4gvg (high, published 2026-07-24, supersedes the above): a second
+  # DoS via unbounded expansion length was found in 5.0.7 itself — patched in 5.0.8.
+  # Pulled in transitively via eslint/@typescript-eslint's minimatch dependency
+  # (dev-only chain, 30 paths) — force the patched range until upstream bumps minimatch.
+  brace-expansion: '>=5.0.8'
+  # GHSA-4c8g-83qw-93j6 (high, published 2026-07-21): fast-uri <3.1.3 has a host
+  # confusion vulnerability via failed IDN canonicalization. Pulled in transitively
+  # via shadcn -> @modelcontextprotocol/sdk -> ajv(-formats) -> fast-uri (dev-only
+  # chain) — force the patched range until upstream bumps ajv.
+  fast-uri: '>=3.1.3'
+  # GHSA-52cp-r559-cp3m (high, published 2026-07-20): js-yaml <4.3.0 YAML merge-key
+  # chains force quadratic CPU consumption.
+  # GHSA-pm4m-ph32-ghv5 (high, published 2026-07-24, supersedes the above): a second,
+  # unrelated DoS (exponential parsing time in flow collections) was found in versions
+  # up to and including 5.2.1 — patched in 5.2.2. Pulled in transitively via
+  # shadcn -> cosmiconfig (dev-only chain) — force the patched range until shadcn
+  # bumps its own cosmiconfig pin.
+  js-yaml: '>=5.2.2'
+
+catalog:
+  # Shared tooling
+  typescript: 7.0.2
+  prettier: 3.9.6
+  eslint: 10.8.0
+  # Maintenance scripts (e.g. scripts/update-provider-pricing.ts) — the browser
+  # automation used to scrape provider pricing and capability pages.
+  playwright: 1.62.0
+  '@eslint/js': 10.0.1
+  globals: 17.8.0
+  eslint-config-prettier: 10.1.8
+  eslint-plugin-react-hooks: 7.1.1
+  '@typescript-eslint/eslint-plugin': 8.65.0
+  '@typescript-eslint/parser': 8.65.0
+
+  # Module dependencies
+  '@github/copilot-sdk': 1.0.8
+  deepl-node: 1.27.0
+
+  # AI SDK dependencies
+  ai: 7.0.42
+  '@ai-sdk/google': 4.0.28
+  '@ai-sdk/deepseek': 3.0.16
+  '@ai-sdk/openai': 4.0.24
+  '@ai-sdk/anthropic': 4.0.24
+  '@ai-sdk/openai-compatible': 3.0.17
+
+  # Server runtime
+  cors: 2.8.6
+  dotenv: 17.4.2
+  express: 5.2.1
+  helmet: 8.3.0
+  multer: 2.2.0
+  papaparse: 5.5.4
+  zod: 4.4.3
+  yauzl: 3.4.0
+  yazl: 3.3.1
+  pg: 8.22.0
+  # Server dev / types
+  '@types/cors': 2.8.19
+  '@types/express': 5.0.6
+  '@types/multer': 2.2.0
+  '@types/node': 26.1.2
+  '@types/papaparse': 5.5.2
+  '@types/yauzl': 3.4.0
+  '@types/yazl': 3.3.1
+  '@types/pg': 8.20.0
+  tsx: 4.23.1
+
+  # Frontend runtime
+  '@base-ui/react': 1.6.0
+  '@tanstack/react-virtual': 3.14.9
+  class-variance-authority: 0.7.1
+  clsx: 2.1.1
+  lucide-react: 1.27.0
+  react: 19.2.8
+  react-dom: 19.2.8
+  i18next: 26.3.6
+  react-i18next: 17.0.11
+  react-markdown: 10.1.0
+  shadcn: 4.16.0
+  sonner: 2.0.7
+  tailwind-merge: 3.6.0
+  zustand: 5.0.14
+
+  # Frontend dev
+  '@axe-core/react': 4.12.1
+  '@fontsource-variable/geist': 5.3.0
+  '@fontsource-variable/geist-mono': 5.3.0
+  '@fontsource/chakra-petch': 5.3.0
+  '@fontsource/orbitron': 5.3.0
+  '@fontsource/press-start-2p': 5.3.0
+  '@fontsource/silkscreen': 5.3.0
+  '@tailwindcss/vite': 4.3.3
+  '@types/react': 19.2.17
+  '@types/react-dom': 19.2.3
+  '@vitejs/plugin-react': 6.0.4
+  esbuild: 0.28.1
+  tailwindcss: 4.3.3
+  vite: 8.1.5
+
+  # Frontend build tooling — parsers for the strip-comments Vite plugin (guarantee
+  # no shipped comments). Real parsers, never regex (// and /* appear in string and
+  # regex literals, so a regex stripper would corrupt code).
+  parse5: 8.0.1
+  acorn: 8.18.0
+  postcss: 8.5.25
+
+# Supply-chain cooldown: refuse dependency versions published fewer than this many
+# minutes ago (1440 = 1 day), which blunts compromised "just-published" package attacks
+# by giving the ecosystem time to detect and unpublish them. 1 day matches the release-age
+# window the install-time supply-chain guard already enforces, so the auto-maintained
+# exclude list below stays sufficient. Raising this (e.g. 4320 = 3 days) is a stronger
+# posture but then requires manually excluding any 1–3-day-old transitive the guard
+# doesn't, since it auto-maintains exclusions only at the 1-day boundary.
+minimumReleaseAge: 1440
+
+# Cooldown exceptions — kept empty by policy: the fast-moving deps above (ai,
+# @typescript-eslint/*, @tanstack/react-virtual, multer) are pinned to the newest version
+# already older than `minimumReleaseAge`, not the absolute latest, so no exception is
+# needed and the whole tree clears the cooldown. The install-time guard auto-populates
+# this only if a still-young version is ever pulled in; prune entries once they age past
+# the cooldown (and, if desired, bump the catalog pin to the now-aged latest).
+minimumReleaseAgeExclude: []
+
+# trustPolicy is deliberately NOT enabled. `trustPolicy: no-downgrade` rejects the
+# legacy transitive `semver@6.3.1` (ERR_PNPM_TRUST_DOWNGRADE — it predates npm
+# provenance, so its trust "downgraded" vs newer versions) with no per-package
+# exclude available, which hard-fails the clean `pnpm install --frozen-lockfile` that
+# the container image build runs (see `Dockerfile`). That's a false positive on a
+# ubiquitous old dep, and pnpm itself keeps trustPolicy OFF by default for exactly
+# this reason. minimumReleaseAge + blockExoticSubdeps below cover the cooldown +
+# exotic-source hardening without the false positive.
+# blockExoticSubdeps — a TRANSITIVE dependency may not resolve exotic sources
+# (git+ssh:, direct https: tarballs); only DIRECT deps may. Defaults to true in pnpm 11 —
+# pinned explicitly so a future pnpm-major default change can't silently relax it.
+blockExoticSubdeps: true

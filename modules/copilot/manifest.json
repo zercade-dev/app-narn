@@ -1,0 +1,32 @@
+{
+  "id": "copilot",
+  "name": "GitHub Copilot",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "capabilities": ["translate", "batch"],
+  "costTier": "medium",
+  "configSchema": {
+    "model": {
+      "type": "string",
+      "description": "Model identifier — populated at runtime from the Copilot models API; defaults to the cheapest discovered model."
+    },
+    "verbose": {
+      "type": "boolean",
+      "default": false,
+      "description": "Log the full system prompt and user message for each translation job"
+    },
+    "batchMode": {
+      "type": "string",
+      "enum": ["language", "entry"],
+      "default": "entry",
+      "description": "Controls translation batching strategy: by target language or by entry"
+    },
+    "reasoningEffort": {
+      "type": "string",
+      "default": "disabled",
+      "description": "Reasoning effort level for Copilot models that support it. Warning: setting this bills additional reasoning tokens on every request."
+    }
+  },
+  "requiredEnvVars": ["GITHUB_TOKEN"],
+  "cloudDisabled": true
+}

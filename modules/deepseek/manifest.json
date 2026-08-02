@@ -1,0 +1,36 @@
+{
+  "id": "deepseek",
+  "name": "DeepSeek",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "capabilities": ["translate", "batch"],
+  "costTier": "high",
+  "configSchema": {
+    "model": {
+      "type": "string",
+      "description": "DeepSeek model id. deepseek-chat and deepseek-reasoner are legacy aliases (deprecating 2026-07-24). Free text accepted for new/custom models. Left blank until live discovery selects the cheapest available model."
+    },
+    "reasoningEffort": {
+      "type": "string",
+      "default": "disabled",
+      "description": "Reasoning effort level. Only applies to models that support thinking (e.g. deepseek-v4-pro). 'disabled' turns off thinking mode."
+    },
+    "verbose": {
+      "type": "boolean",
+      "default": false,
+      "description": "Log full prompts and responses"
+    },
+    "batchMode": {
+      "type": "string",
+      "enum": ["language", "entry"],
+      "default": "entry",
+      "description": "Batch by target language or by entry"
+    },
+    "useStructuredOutput": {
+      "type": "boolean",
+      "default": false,
+      "description": "Experimental — enabling this is experimental and may change. Request a JSON response via DeepSeek's native JSON mode (response_format json_object). Constrains the reply to valid JSON so malformed output is far less likely (DeepSeek does not enforce a strict schema). Off by default — enable only if you see 'malformed JSON from provider' errors."
+    }
+  },
+  "requiredEnvVars": ["DEEPSEEK_API_KEY"]
+}

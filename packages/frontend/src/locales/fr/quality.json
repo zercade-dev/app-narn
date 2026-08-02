@@ -1,0 +1,74 @@
+{
+  "title": "Tableau de bord qualité",
+  "loading": "Chargement du résumé qualité…",
+  "error": "Impossible de charger le résumé qualité : {{message}}",
+  "empty": "Aucun résultat LQA pour le moment. Lancez une traduction pour alimenter ce tableau de bord.",
+  "overview": "{{results}} résultat(s) LQA sur {{entries}} entrée(s) — taux de réussite global {{passRate}}.",
+  "overallStat": {
+    "passRateLabel": "Taux de réussite global",
+    "results": "{{count}} résultats LQA",
+    "entries": "{{count}} entrées",
+    "legendPassed": "Réussies {{count}}",
+    "legendFailed": "Échouées {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "Problèmes les plus fréquents",
+    "description": "Nombre de problèmes par type, toutes langues confondues."
+  },
+  "other": "Autres",
+  "drillDownHint": "Cliquez pour afficher les entrées correspondantes",
+  "columns": {
+    "language": "Langue",
+    "source": "Source",
+    "module": "Module",
+    "passRate": "Taux de réussite"
+  },
+  "legend": {
+    "tierHigh": "Taux de réussite élevé (≥ 90 %)",
+    "tierMid": "Taux de réussite moyen (70–89 %)",
+    "tierLow": "Taux de réussite faible (< 70 %)",
+    "passed": "Réussies",
+    "failed": "Échouées"
+  },
+  "checkLabels": {
+    "tag-equality": "Égalité des balises",
+    "overflow": "Dépassement de longueur",
+    "length-limit": "Limite de longueur",
+    "glossary-adherence": "Respect du glossaire",
+    "forbidden-terms": "Termes interdits",
+    "regex-assertions": "Assertions regex",
+    "number-parity": "Parité des nombres",
+    "whitespace-parity": "Parité des espaces",
+    "line-break-parity": "Parité des sauts de ligne",
+    "end-punctuation": "Ponctuation finale",
+    "double-spacing": "Espaces doubles",
+    "double-words": "Mots doublés",
+    "untranslated": "Non traduit",
+    "mask-integrity": "Intégrité du masquage",
+    "tag-mismatch": "Discordance de balises",
+    "too-long": "Trop long",
+    "glossary-term-missing": "Terme de glossaire manquant",
+    "forbidden-term": "Terme interdit",
+    "regex-assertion-failed": "Assertion regex échouée",
+    "regex-config-error": "Erreur de configuration regex",
+    "number-missing": "Nombre manquant",
+    "number-added": "Nombre ajouté",
+    "whitespace-leading": "Espace en début",
+    "whitespace-trailing": "Espace en fin",
+    "line-break-mismatch": "Discordance de sauts de ligne",
+    "end-punctuation-mismatch": "Discordance de ponctuation finale",
+    "mask-mismatch": "Discordance de masque"
+  },
+  "byLanguage": {
+    "title": "Taux de réussite par langue",
+    "description": "Du pire au meilleur. Cliquez sur une langue pour inspecter ses entrées en échec."
+  },
+  "bySource": {
+    "title": "Problèmes par source",
+    "description": "Du pire au meilleur. Cliquez sur une source pour inspecter ses entrées en échec."
+  },
+  "byModule": {
+    "title": "Qualité par module",
+    "description": "Taux de réussite et problèmes regroupés par module de traduction ayant produit chaque traduction."
+  }
+}

@@ -1,0 +1,558 @@
+/* Pixel theme. Square corners, chunky 2px borders, hard offset shadows,
+   Silkscreen headings + Press Start 2P display. Loaded lazily by
+   theme-registry.ts; token contract mirrors index.css (:root/.dark). */
+:root[data-theme='pixel'] {
+  --background: oklch(0.96 0.02 95);
+  --foreground: oklch(0.22 0.03 60);
+  --card: oklch(0.99 0.01 95);
+  --card-foreground: oklch(0.22 0.03 60);
+  --popover: oklch(0.99 0.01 95);
+  --popover-foreground: oklch(0.22 0.03 60);
+  --primary: oklch(0.5 0.19 250);
+  --primary-foreground: oklch(0.98 0.01 95);
+  --secondary: oklch(0.9 0.04 95);
+  --secondary-foreground: oklch(0.3 0.04 60);
+  --muted: oklch(0.9 0.03 95);
+  --muted-foreground: oklch(0.45 0.03 60);
+  --accent: oklch(0.85 0.14 95);
+  --accent-foreground: oklch(0.3 0.06 60);
+  --destructive: oklch(0.55 0.22 27);
+  --border: oklch(0.35 0.03 60);
+  --input: oklch(0.35 0.03 60);
+  --ring: oklch(0.5 0.19 250);
+  --type-ui: oklch(0.5 0.19 250);
+  --type-dialogue: oklch(0.55 0.2 320);
+  --type-lore: oklch(0.5 0.18 155);
+  --type-default: oklch(0.45 0.04 60);
+  --type-achievement: oklch(0.6 0.18 80);
+  --type-other: oklch(0.5 0.18 155);
+  --status-pass: oklch(0.55 0.17 145);
+  --status-warn: oklch(0.47 0.15 75);
+  --status-fail: oklch(0.55 0.22 27);
+  --status-info: oklch(0.55 0.15 235);
+  --chart-1: oklch(0.5 0.19 250);
+  --chart-2: oklch(0.6 0.2 25);
+  --chart-3: oklch(0.55 0.17 145);
+  --chart-4: oklch(0.65 0.17 80);
+  --chart-5: oklch(0.55 0.2 320);
+  --radius: 0rem;
+  --sidebar: oklch(0.93 0.03 95);
+  --sidebar-foreground: oklch(0.25 0.03 60);
+  --sidebar-primary: oklch(0.5 0.19 250);
+  --sidebar-primary-foreground: oklch(0.98 0.01 95);
+  --sidebar-accent: oklch(0.86 0.06 95);
+  --sidebar-accent-foreground: oklch(0.3 0.06 60);
+  --sidebar-border: oklch(0.35 0.03 60);
+  --sidebar-ring: oklch(0.5 0.19 250);
+  --shadow-card: 3px 3px 0 0 oklch(0.22 0.03 60);
+  --theme-font-heading: 'Silkscreen', 'Geist Variable', sans-serif;
+  --theme-font-display: 'Press Start 2P', 'Silkscreen', sans-serif;
+}
+
+:root[data-theme='pixel'].dark {
+  --background: oklch(0.17 0.02 280);
+  --foreground: oklch(0.95 0.02 95);
+  --card: oklch(0.22 0.025 280);
+  --card-foreground: oklch(0.95 0.02 95);
+  --popover: oklch(0.22 0.025 280);
+  --popover-foreground: oklch(0.95 0.02 95);
+  --primary: oklch(0.75 0.19 145);
+  --primary-foreground: oklch(0.15 0.03 280);
+  --secondary: oklch(0.28 0.03 280);
+  --secondary-foreground: oklch(0.95 0.02 95);
+  --muted: oklch(0.28 0.03 280);
+  --muted-foreground: oklch(0.72 0.03 95);
+  --accent: oklch(0.32 0.06 320);
+  --accent-foreground: oklch(0.92 0.05 320);
+  --destructive: oklch(0.68 0.2 25);
+  --border: oklch(0.55 0.04 280);
+  --input: oklch(0.55 0.04 280);
+  --ring: oklch(0.75 0.19 145);
+  --type-ui: oklch(0.72 0.17 250);
+  --type-dialogue: oklch(0.75 0.18 320);
+  --type-lore: oklch(0.75 0.16 155);
+  --type-default: oklch(0.8 0.03 95);
+  --type-achievement: oklch(0.8 0.16 80);
+  --type-other: oklch(0.75 0.16 155);
+  --status-pass: oklch(0.75 0.17 145);
+  --status-warn: oklch(0.8 0.15 80);
+  --status-fail: oklch(0.7 0.19 25);
+  --status-info: oklch(0.75 0.13 235);
+  --chart-1: oklch(0.75 0.19 145);
+  --chart-2: oklch(0.72 0.17 250);
+  --chart-3: oklch(0.8 0.16 80);
+  --chart-4: oklch(0.75 0.18 320);
+  --chart-5: oklch(0.7 0.19 25);
+  --sidebar: oklch(0.14 0.02 280);
+  --sidebar-foreground: oklch(0.93 0.02 95);
+  --sidebar-primary: oklch(0.75 0.19 145);
+  --sidebar-primary-foreground: oklch(0.15 0.03 280);
+  --sidebar-accent: oklch(0.3 0.05 320);
+  --sidebar-accent-foreground: oklch(0.92 0.05 320);
+  --sidebar-border: oklch(0.45 0.04 280);
+  --sidebar-ring: oklch(0.75 0.19 145);
+  --shadow-card: 3px 3px 0 0 oklch(0 0 0 / 0.6);
+}
+
+/* Identity extras: chunky borders and pixelated images. */
+[data-theme='pixel'] [data-slot='card'] {
+  border-width: 2px;
+}
+[data-theme='pixel'] img {
+  image-rendering: pixelated;
+}
+
+/* Chunky square checkbox with a hard offset shadow, matching the card treatment.
+   [data-slot='checkbox'] also carries Tailwind's `border` (border-width:1px, specificity
+   0,1,0) and `rounded-sm` (border-radius:calc(var(--radius) * .6), 0,1,0) utilities from
+   checkbox.tsx's cn(); this two-attribute-selector rule (0,2,0) outranks both
+   unconditionally, verified against a `pnpm build` of packages/frontend
+   (dist/assets/index-*.css compiles them to exactly those single-class selectors).
+   Checked and indeterminate both render bg-primary/border-primary in checkbox.tsx (same
+   data-[checked]/data-[indeterminate] treatment), so both get the heavier "popped" shadow
+   here; the doubled data-checked/data-indeterminate attribute reaches 0,3,0.
+
+   box-shadow is a single-value property — competing box-shadow rules replace, they don't
+   merge. The REAL competitor for box-shadow on this element is checkbox.tsx's keyboard
+   focus ring, `.focus-visible\:ring-2:focus-visible` (0,2,0; verified in dist/assets/
+   index-*.css), NOT the `.data-\[checked\]\:bg-primary[data-checked]` utility (0,2,0) —
+   that one sets background-color and never competed here; an earlier version of this
+   comment compared against it in error. Both rules below previously outranked or tied the
+   ring rule and replaced it outright (the base rule at 0,2,0 ties and wins on source order;
+   the checked/indeterminate rule at 0,3,0 wins unconditionally), which silently suppressed
+   the keyboard focus indicator on pixel checkboxes in every state. Fixed by composing
+   instead of replacing: each box-shadow below appends `var(--tw-ring-offset-shadow, 0 0
+   #0000), var(--tw-ring-shadow, 0 0 #0000)` — the same two custom properties Tailwind's
+   compiled ring rule sets (and whose defaults, `0 0 #0000`, are Tailwind's own preflight
+   reset, confirmed in dist/assets/index-*.css) — as extra shadow layers. Custom properties
+   cascade independently per property, so Tailwind's rule keeps setting `--tw-ring-shadow`
+   on the same element regardless of which rule wins the box-shadow property itself; when
+   unfocused the vars hold the transparent default (identity unaffected), and when
+   `:focus-visible` triggers, the appended layers pick up the real ring value. The
+   focus ring surviving the theme box-shadow override is covered by a parity test
+   (jsdom can't resolve var() inside box-shadow or recompute :focus-visible
+   dynamically, so that test checks cascade-winner selection and literal
+   composition rather than final resolved pixel/color values). */
+/* A parity test locates these two rules by matching this exact single-line
+   box-shadow text — keep both on one line; prettier-ignored below. */
+/* prettier-ignore */
+[data-theme='pixel'] [data-slot='checkbox'] {
+  border-width: 2px;
+  border-radius: 0;
+  box-shadow: 2px 2px 0 0 var(--border), var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000);
+}
+/* prettier-ignore */
+[data-theme='pixel'] [data-slot='checkbox'][data-checked],
+[data-theme='pixel'] [data-slot='checkbox'][data-indeterminate] {
+  box-shadow: 2px 2px 0 0 var(--foreground), var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000);
+}
+
+/* Silkscreen is a fixed-grid bitmap face: below ~11px it stops hinting cleanly
+   and letterforms drop pixels. Raise sub-11px CHROME to the floor so glyphs
+   render on-grid. Content (data-content) is exempt — it isn't rendered in
+   Silkscreen, so it needs no floor.
+   Coverage: grepping packages/frontend/src (2026-07-18) for Tailwind
+   arbitrary text sizes turns up only `text-[9px]` and `text-[10px]` below
+   the floor; `text-[11px]`/`text-[12px]` and the named scale (`text-xs` =
+   12px) are already clear and untouched. There is no `text-2xs` or other
+   custom sub-11px scale defined in `@theme` (index.css) to account for.
+   Matching is by attribute substring (`[class*=…]`), verified against real
+   output — Tailwind 4 keeps arbitrary-value utilities as a literal DOM class
+   token (e.g. class="text-[10px]"), confirmed against ExampleEntryPicker's
+   badge and others. An exact-class form (`.text-\[10px\]`) is redundant with
+   the substring match (dropping it changes nothing, checked in jsdom) and
+   would additionally miss any variant-prefixed usage (e.g.
+   `dark:text-[10px]`, none exist today but the substring form would still
+   catch it), so only the substring form is kept.
+   The `:not([data-content]):not([data-content] *)` pair is a *structural*
+   negation on this one selector, not a second rule competing for the same
+   property — unlike the font-family gate's content opt-out in index.css
+   (which needs doubled specificity, `[data-content][data-content]`, to
+   out-rank the gate selectors it competes with), an element carrying
+   [data-content] — or a descendant of one — simply fails to match this
+   selector at all, so there is no cascade contest to win; verified with
+   lightningcss (this project's real CSS parser, via @tailwindcss/vite) and a
+   jsdom DOM-cascade check (including a same-element data-content case and a
+   nested-inside-a-data-content-container case) before shipping. */
+:root[data-theme='pixel'] {
+  --pixel-text-floor: 11px;
+}
+[data-theme='pixel']
+  :is([class*='text-[10px]'], [class*='text-[9px]']):not([data-content]):not([data-content] *) {
+  font-size: var(--pixel-text-floor);
+  line-height: 1.45;
+}
+
+/* Square, chunky, hard-shadowed overlays — no rounded corners, no soft blur. Covers the
+   reported "tooltips don't look pixel-art" / "same with dropdown options", plus the Compare
+   keyboard-shortcuts panel (a Popover, hence popover-content matters here too, not just
+   tooltip-content).
+
+   tooltip-content/popover-content/select-content are all rendered through a Base UI Portal —
+   in practice appended under document.body, itself a descendant of <html data-theme='pixel'>
+   (theme-registry.ts sets data-theme on document.documentElement) — so the plain descendant
+   selector below still matches; no portal-specific selector is needed.
+
+   Compiled Tailwind utilities these three elements carry via cn(), verified against a real
+   `pnpm build` of packages/frontend (dist/assets/index-*.css), not guessed — quoted here as
+   class-name / property pairs rather than literal rule syntax, so this comment can't be
+   mistaken for a CSS rule by the (deliberately naive) brace-matching rule parser the theming
+   tests use to pull real selectors out of this file:
+     .border sets border-style and border-width:1px, specificity 0,1,0 — popover-content
+       (border-color isn't set by .border itself; it comes from the global universal-selector
+       reset that already sets border-color to var(--border), specificity 0,0,0 — so this
+       rule's border-color is not a behavior change, only width/style/radius/shadow are)
+     .rounded-md sets border-radius (calc(var(--radius) * .8)), specificity 0,1,0 —
+       tooltip-content
+     .rounded-lg sets border-radius (var(--radius)), specificity 0,1,0 — select-content
+     .shadow-md sets box-shadow via the shared --tw-inset-shadow/--tw-inset-ring-shadow/
+       --tw-ring-offset-shadow/--tw-ring-shadow/--tw-shadow composition chain, specificity
+       0,1,0 — popover-content, select-content
+     .ring-1 (from ring-foreground/10) sets box-shadow via that SAME shared composition
+       chain, specificity 0,1,0 — select-content only. It's a permanently-on decorative ring,
+       NOT a :focus-visible ring: read against tooltip.tsx/popover.tsx/select.tsx, none of
+       TooltipContent/PopoverContent/SelectContent's own className carries any
+       focus-visible: variant (unlike checkbox.tsx, see the checkbox comment above). There is
+       therefore no keyboard focus indicator living on box-shadow for these three elements to
+       preserve, so replacing box-shadow outright here is safe — unlike the checkbox fix, no
+       var(--tw-ring-shadow)/var(--tw-ring-offset-shadow) composition is needed.
+
+   Open/close animations (data-open:animate-in/fade-in-0/zoom-in-95,
+   data-closed:animate-out/fade-out-0/zoom-out-95, data-[side=*]:slide-in-from-*) drive
+   transform/opacity through the --tw-enter-* and --tw-exit-* custom properties and the
+   `animate-in` keyframe utility, entirely independent of border/border-radius/box-shadow —
+   undisturbed here.
+
+   The selector below, `[data-theme='pixel'] :is([data-slot='tooltip-content'], …)`, has two
+   selector-level components (the leading attribute selector plus the :is() argument, each
+   0,1,0) for a total of (0,2,0) — unconditionally beating every 0,1,0 utility listed above.
+   No tie, no doubling needed; this rule outranking every listed utility is
+   covered by a parity test against the real compiled utility text.
+
+   border-width/border-style/border-color are written as three longhands here rather than the
+   equivalent `border: 2px solid var(--border)` shorthand — same rendered result in a real
+   browser, but jsdom's CSS engine (this project's test environment) invalidates an entire
+   shorthand declaration when any one of its components is a var() reference, which would make
+   border-width/border-style unverifiable too, not just border-color (verified empirically: a
+   var()-bearing `border:` shorthand left border-top-width computed as the initial `medium` in
+   jsdom even with `--border` defined and reachable, while the same values split into
+   longhands resolved border-width/border-style correctly, leaving only the var()-bearing
+   border-color longhand itself unresolved — consistent with this file's other documented
+   var()-in-declaration limitation). Longhands sidestep that without changing behavior. */
+[data-theme='pixel']
+  :is([data-slot='tooltip-content'], [data-slot='popover-content'], [data-slot='select-content']) {
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--border);
+  border-radius: 0;
+  box-shadow: 3px 3px 0 0 var(--border);
+}
+
+/* select-item carries no border/box-shadow utility of its own in select.tsx (only
+   `rounded-md`), so there is no focus-ring collision possible here — this only squares the
+   corners and adds a pixel-art "selection cursor" as the item is arrowed through.
+
+   The cursor is a border-left color swap, NOT generated ::before content: an earlier
+   proposal (a data-highlighted::before rule inserting a '\25B8' glyph via `content`
+   plus a margin-right) has two real problems. (1) CSS-generated `content` text is exposed to
+   assistive tech by some screen readers (pseudo-elements can't carry aria-hidden, since they
+   aren't DOM nodes), so a decorative glyph could get announced as content. (2) Only the
+   highlighted item would have gained the extra inline glyph + margin, so each item's rendered
+   width would change the instant it becomes/stops being highlighted — arrowing through the
+   list would visibly jitter.
+
+   border-left avoids both: it is never read as text content, and its WIDTH (3px) is set
+   unconditionally on every item, highlighted or not — only border-left-COLOR changes on
+   [data-highlighted], so the box never resizes. This cursor never reflowing is covered
+   by a parity test (equal border-left widths, differing colors, across two
+   independently-highlighted/unhighlighted nodes). */
+[data-theme='pixel'] [data-slot='select-item'] {
+  border-radius: 0;
+  border-left: 3px solid transparent;
+}
+[data-theme='pixel'] [data-slot='select-item'][data-highlighted] {
+  border-left-color: var(--foreground);
+}
+
+/* Tooltip arrow follow-up: the overlay block above squares off tooltip-content's box, but
+   TooltipPrimitive.Arrow (tooltip.tsx) was left untouched — a smooth rounded diamond
+   (`rotate-45 rounded-[2px]`) protruding from a hard-bordered square popup. This block gives
+   the arrow the same chunky-bordered treatment.
+
+   Base UI's TooltipArrow carries `data-open`/`data-closed`/`data-side`/`data-align` (see
+   TooltipArrowDataAttributes) — but TooltipPopup (tooltip-content) carries the SAME
+   `data-open`/`data-closed`/`data-side` attribute names (CommonPopupDataAttributes), so
+   `[data-side='top']` alone would ALSO match the popup box, not just the arrow. There is
+   therefore no existing attribute unique to the arrow — tooltip.tsx adds
+   `data-slot='tooltip-arrow'`, this file's established theming hook, to disambiguate.
+
+   The arrow is a single `rotate-45` div (not an SVG triangle or a clipped-wrapper trick).
+   Compiled Tailwind utilities it carries, verified against a real `pnpm build` of
+   packages/frontend (dist/assets/index-*.css) — quoted as class-name / property pairs, not
+   literal rule syntax, so this comment can't be mistaken for a real rule by the (deliberately
+   naive) brace-matching rule parser the theming tests use to pull selectors out of this file:
+     .rotate-45 sets the CSS `rotate` property to 45deg, specificity 0,1,0
+     .size-2\.5 sets width/height to 0.625rem (10px), specificity 0,1,0
+     .rounded-\[2px\] sets border-radius to 2px, specificity 0,1,0
+   Rotating a square's TL/TR/BR/BL corners by
+   `rotate: 45deg` (clockwise in screen coordinates — same matrix as `transform: rotate(45deg)`)
+   sends them to North/East/South/West respectively, so the PRE-rotation top/right/bottom/left
+   edges become the POST-rotation NE/SE/SW/NW diagonal edges. Only the half of the diamond that
+   pokes OUT past the popup's own edge (pointing at the trigger) is visible; the other half is
+   translated back underneath/inside the popup's box (see the unconditional
+   `translate-y-[calc(-50%-2px)]` plus the per-`data-side` position classes in tooltip.tsx) and
+   is invisible. Bordering all four edges would draw a border line across that hidden half too
+   — it would show through as a stray diagonal crossing the popup near the seam, exactly the
+   artifact this comment is warning future edits away from. So only the two edges that make up
+   the VISIBLE point get a border, chosen per `data-side` (derived from the corner mapping
+   above, cross-checked against tooltip.tsx's own per-side position classes):
+     data-side=top              (arrow points down/South, sits below the popup)  -> right + bottom
+     data-side=bottom           (arrow points up/North, sits above the popup)    -> top + left
+     data-side=left/inline-start (arrow points right/East, sits right of popup)  -> top + right
+     data-side=right/inline-end  (arrow points left/West, sits left of popup)    -> left + bottom
+   background/fill are left untouched (`bg-foreground`/`fill-foreground` already match the
+   popup's own `bg-foreground` fill, so the hidden half still blends seamlessly with no visible
+   seam) and so is every position/animation class — this block only adds border-radius and
+   border longhands.
+
+   border-*-width/style/color are longhands rather than the equivalent border shorthand, for
+   the same jsdom var()-in-shorthand-invalidation reason documented in the overlay comment
+   above (border-color here is `var(--border)`, not a literal).
+
+   Selector for each rule is `[data-theme='pixel'] [data-slot='tooltip-arrow'][data-side=...]`
+   — three selector-level components (0,3,0), which unconditionally outranks
+   `.rounded-\[2px\]` (0,1,0) with no tie. */
+[data-theme='pixel'] [data-slot='tooltip-arrow'] {
+  border-radius: 0;
+}
+[data-theme='pixel'] [data-slot='tooltip-arrow'][data-side='top'] {
+  border-right-width: 2px;
+  border-right-style: solid;
+  border-right-color: var(--border);
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: var(--border);
+}
+[data-theme='pixel'] [data-slot='tooltip-arrow'][data-side='bottom'] {
+  border-top-width: 2px;
+  border-top-style: solid;
+  border-top-color: var(--border);
+  border-left-width: 2px;
+  border-left-style: solid;
+  border-left-color: var(--border);
+}
+[data-theme='pixel'] [data-slot='tooltip-arrow'][data-side='left'],
+[data-theme='pixel'] [data-slot='tooltip-arrow'][data-side='inline-start'] {
+  border-top-width: 2px;
+  border-top-style: solid;
+  border-top-color: var(--border);
+  border-right-width: 2px;
+  border-right-style: solid;
+  border-right-color: var(--border);
+}
+[data-theme='pixel'] [data-slot='tooltip-arrow'][data-side='right'],
+[data-theme='pixel'] [data-slot='tooltip-arrow'][data-side='inline-end'] {
+  border-left-width: 2px;
+  border-left-style: solid;
+  border-left-color: var(--border);
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+  border-bottom-color: var(--border);
+}
+
+/* Row actions (Compare/Translations table): 30px square sprite tiles — chunky 2px
+   border, hard offset shadow, press-down on active. ComparisonCell.tsx's CellActions renders
+   these as bare `<button type="button" className="p-1.5 rounded text-muted-foreground/70
+   hover:… disabled:opacity-40">` elements directly — NOT the cva-based Button component in
+   components/ui/button.tsx (confirmed by reading ComparisonCell.tsx: no Button/cn import used
+   for these five action buttons) — so unlike checkbox.tsx above, there is no Tailwind
+   `focus-visible:ring-*` box-shadow already living on this element to compose with. Its only
+   existing focus mechanism is the browser's native `:focus-visible` outline, coloured via the
+   global `*` outline-color reset (index.css) but otherwise unstyled here (no
+   `outline-none`/`outline-hidden` class on the button, verified against ComparisonCell.tsx and
+   dist/assets/index-*.css). Rather than lean on that implicit, UA-default-dependent ring (not
+   something jsdom can exercise for a cascade proof, and thin against the chunky pixel
+   aesthetic), this block adds its own explicit `:focus-visible` outline rule below.
+
+   `[data-theme='pixel'] [data-row-action]` is a two-attribute-selector rule (0,2,0),
+   unconditionally beating the button's own `.rounded` (border-radius, 0,1,0) and `.p-1\.5`
+   (padding, 0,1,0) utilities — verified against a real `pnpm build` of packages/frontend
+   (dist/assets/index-*.css), same margin as the checkbox/overlay rules above. This base rule
+   sets no background/color, so — unlike techno's version of this rule below — there is no tie
+   against the button's own `hover:text-*`/`hover:bg-*` utilities (0,2,0 each — one
+   status-info/status-warn/status-pass/status-fail/foreground+muted pair per action, all
+   verified in dist/assets/index-*.css): box-shadow/border/dimensions don't compete with
+   color/background-color, so no doubling is needed here (contrast techno's doubled base rule).
+
+   `:active` (0,3,0) unconditionally outranks the base rule (0,2,0) for box-shadow, so the
+   press-down state's `box-shadow: none` always wins regardless of source order. It doesn't
+   fight the intent rules below either (those only set background/color, never box-shadow or
+   transform) — pressing a filled primary/destructive tile still shows its fill, just offset
+   and flat. Disabled buttons never match `:active` in a real browser (no pointer interaction
+   on `disabled` elements), so this never races the `disabled:opacity-40` utility. */
+[data-theme='pixel'] [data-row-action] {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 2px solid var(--border);
+  border-radius: 0;
+  box-shadow: 2px 2px 0 0 var(--border);
+}
+[data-theme='pixel'] [data-row-action]:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+[data-theme='pixel'] [data-row-action][data-row-action-intent='primary'] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+[data-theme='pixel'] [data-row-action][data-row-action-intent='destructive'] {
+  background: var(--destructive);
+  color: var(--primary-foreground);
+}
+/* Explicit, testable focus-visible outline (see the comment above). `outline` is a distinct
+   property from the `box-shadow`/`transform` used by the rules above, so neither the
+   decorative shadow nor the press-down state can silently clobber it — and unlike box-shadow,
+   outline is unaffected by `clip-path` (not used by pixel's tiles, but kept as the same
+   mechanism as techno's version of this rule below, for consistency).
+
+   outline-width/outline-style/outline-offset are written as separate longhands rather than the
+   equivalent `outline: 2px solid var(--ring)` shorthand, same jsdom var()-in-shorthand
+   reasoning documented in the tooltip-content overlay comment above: empirically, jsdom
+   invalidates the ENTIRE `outline` shorthand when any component is a var() reference (verified
+   directly — `outlineWidth`/`outlineStyle` came back as the initial `medium`/`none` even while
+   genuinely `:focus-visible`, with only the raw `outline` getter returning the literal
+   specified text), whereas splitting into longhands lets `outlineWidth`/`outlineStyle` resolve
+   correctly per real focus state, leaving only the var()-bearing `outline-color` longhand
+   itself unresolved (asserted as literal text, like `border-color` elsewhere in this file). */
+[data-theme='pixel'] [data-row-action]:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: var(--ring);
+  outline-offset: 2px;
+}
+
+/* Badges had no pixel rule at all, so `variant="secondary"` fell through to the
+   near-white --secondary and rendered as a white box behind the label. Give the
+   badge the same square, hard-edged treatment as row-action tiles. */
+[data-theme='pixel'] [data-slot='badge'] {
+  border-radius: 0;
+  border-width: 2px;
+  border-color: currentColor;
+  background-color: transparent;
+  box-shadow: 2px 2px 0 0 var(--border);
+  padding-inline: 0.375rem;
+}
+
+/* ...but the DEFAULT badge variant is a SOLID chip: `bg-primary text-primary-foreground`
+   (badge.tsx), where --primary-foreground is the label color chosen to sit ON the --primary
+   fill. Stripping the fill to transparent (correct for secondary/outline/destructive, whose
+   foreground tokens read against the page) left the default badge showing --primary-foreground
+   text on the page background — white-on-white in light mode, black-on-black in dark — which is
+   exactly the review-queue language pill (ReviewTab.tsx's default <Badge>) and the settings
+   theme gallery's default badge. Restore the solid --primary fill for the default variant ONLY,
+   so the label/background pair keeps its intended contrast; the square border + pixel drop
+   shadow from the rule above still apply. Badge's useRender state maps to data attributes via
+   base-ui's getStateAttributesProps (state.slot -> data-slot='badge', state.variant ->
+   data-variant='default'), so this [data-variant='default'] selector (0,3,0) outranks the
+   generic badge rule (0,2,0) with no reliance on source order. */
+[data-theme='pixel'] [data-slot='badge'][data-variant='default'] {
+  background-color: var(--primary);
+}
+
+/* LQA three-state indicator. LQAResult (packages/shared/src/types/lqa.ts) carries no
+   0-100 score — just passed/issues/overflow/overflowRatio — so the per-cell badge
+   (`data-testid='lqa-issue-badge'` in StringTableRow.tsx's Cell) is a three-state
+   intact/cracked/broken "shield" bound to the real `data-lqa-variant` ('check'/'overflow'/
+   'error') attribute, not a fabricated meter. Pixel gets a sprite-tile identity: a chunky
+   square border, consistent with the checkbox/row-action tiles above.
+
+   Cell renders the badge as a Base UI TooltipTrigger (rendered as a plain span via its `render`
+   prop) carrying the compiled
+   Tailwind utilities `absolute top-0.5 right-0.5 w-4 h-4 rounded-full cursor-help bg-background`
+   — verified by reading StringTableRow.tsx directly, not guessed. Only `.rounded-full`
+   (border-radius:3.40282e38px, specificity 0,1,0 — confirmed against a real `pnpm build` of
+   packages/frontend, dist/assets/index-*.css) competes with this rule; `bg-background` sets
+   background-color, a property this rule never touches, so there is no tie there. The selector
+   below, `[data-theme='pixel'] [data-testid='lqa-issue-badge']`, is two selector-level
+   components (0,2,0) — unconditionally beats `.rounded-full`'s (0,1,0) with no tie, same margin
+   as the tooltip-content overlay rule above; no doubling needed. This themed LQA
+   badge cascade is covered by a parity test.
+
+   Focus/hover: this span is a Base UI TooltipTrigger, not a `<button>`/`[role='tab']`/`<a>`, so
+   pixel has no generic focus-visible rule that targets it (pixel.css, unlike techno.css, has no
+   such generic rule at all) and Cell's own className carries no `focus-visible:`/`hover:`
+   box-shadow or ring utility on this element (verified by reading StringTableRow.tsx — only the
+   four listed classes are present). There is therefore no existing box-shadow-based interactive
+   effect for this rule to disturb, and no clip-path is used here anyway (pixel's square border
+   never clips a shadow), so no outline-rerouting fix (see the row-action block above) is needed. */
+[data-theme='pixel'] [data-testid='lqa-issue-badge'] {
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--border);
+  border-radius: 0;
+}
+
+/* Judge-score meter. Unlike the LQA badge above, JudgeVerdict really does carry a
+   0-100 `score` (packages/shared/src/types/judge.ts) — so this IS a legitimate meter, not a
+   fabricated one. It renders alongside the existing numeric `Badge` in
+   TranslationAiReviewTab.tsx's JudgeVerdictCard (never replacing it) and reuses `scoreTint()`'s
+   existing 85/70 tiers verbatim — no new thresholds invented here. 5 units at 20 points each is
+   coarser than the raw score (a 42 and a 44 both light 2 units); the exact number lives in the
+   container's `aria-label` (the interpolated `runs.judgeScoreLabel` i18n key), not implied by
+   unit count.
+   Pixel gets a heart identity — the sprite set (`pixel-sprites.ts`) is closed and has no heart
+   glyph, so this is a plain `clip-path`-drawn heart on the per-unit `<span className="size-3">`,
+   not a new sprite.
+
+   Container: `data-testid='judge-score-meter'` carries only Tailwind's `inline-flex items-center
+   gap-0.5` plus `scoreTint()`'s status tint (a `bg-status-` family class at 10 percent opacity,
+   paired with a `text-status-` color — JudgeVerdictCard.tsx) — no border-radius/box-shadow of
+   its own for this rule to compete with. Per-unit spans carry only
+   `size-3` (width/height only — compiled Tailwind, verified via `pnpm build`, sets exactly
+   `width: calc(var(--spacing) * 3)` and `height: calc(var(--spacing) * 3)` and nothing else),
+   which sets neither background nor clip-path nor opacity, so there is no specificity tie to resolve
+   and no self-doubling-attribute fix is needed — same margin as the LQA badge rule above. A real
+   `pnpm build` of packages/frontend also confirms no bare `span` reset rule exists anywhere in
+   the compiled output (checked dist/assets/index-*.css and the pixel chunk itself) to tie
+   against either.
+
+   Specificity (per this repo's `specificity()` test helper, which counts a `>` child combinator's
+   right-hand type selector): `[data-theme='pixel'] [data-testid='judge-score-meter'] > span` is
+   (0,2,1) — two attribute selectors plus the `span` type selector. The filled variant
+   (`data-filled='true'`) adds one more attribute selector, (0,3,1), which unconditionally beats
+   (0,2,1) with no tie (also correct in source order, filled after base).
+
+   No hover/focus mechanism is added: this is a `role='img'` decorative `<span>`, not a `<button>`/
+   `[role='tab']`/`<a>`, so pixel's row-action `:focus-visible` rule (above) never matches it, and
+   neither this rule nor JudgeVerdictCard.tsx's className sets any interactive box-shadow/ring on
+   it — so the clip-path/box-shadow trap documented on the row-action rules above (clip-path clips
+   box-shadow but not outline) does not apply here; this rule uses only `opacity`, a property
+   clip-path never touches. */
+[data-theme='pixel'] [data-testid='judge-score-meter'] > span {
+  background: currentColor;
+  clip-path: polygon(50% 100%, 0 35%, 15% 0, 50% 20%, 85% 0, 100% 35%);
+  opacity: 0.25;
+}
+[data-theme='pixel'] [data-testid='judge-score-meter'] > span[data-filled='true'] {
+  opacity: 1;
+}
+
+[data-theme='pixel'] * {
+  scrollbar-color: var(--primary) var(--muted);
+}
+[data-theme='pixel'] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+[data-theme='pixel'] ::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-left: 2px solid var(--border);
+}
+[data-theme='pixel'] ::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  background-clip: border-box;
+  border: 2px solid var(--border);
+  border-radius: 0;
+  box-shadow: inset -2px -2px 0 0 oklch(0 0 0 / 0.25);
+}

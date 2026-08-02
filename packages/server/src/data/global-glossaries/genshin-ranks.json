@@ -1,0 +1,149 @@
+{
+  "id": "genshin-ranks",
+  "name": "Genshin Ranks",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1700000000000,
+  "terms": [
+    {
+      "id": "genshin-ranks-ace",
+      "source": "Ace",
+      "translations": {
+        "zh-hans": "菁英",
+        "zh-hant": "菁英",
+        "ko": "장인",
+        "ja": "玄人",
+        "es": "Élite",
+        "fr": "Élite",
+        "ru": "Герой",
+        "th": "ยอดฝีมือ",
+        "vi": "Tinh Anh",
+        "de": "Elite",
+        "id": "Ace",
+        "pt-br": "Elite",
+        "tr": "Usta",
+        "it": "Asso"
+      }
+    },
+    {
+      "id": "genshin-ranks-artificier",
+      "source": "Artificier",
+      "translations": {
+        "zh-hans": "巨匠",
+        "zh-hant": "巨匠",
+        "ko": "거장",
+        "ja": "巨匠",
+        "es": "Gran artífice",
+        "fr": "Grand maître",
+        "ru": "Мастер",
+        "th": "มือฉมัง",
+        "vi": "Kỳ Cựu",
+        "de": "Altmeister",
+        "id": "Artificier",
+        "pt-br": "Mestre Artesão",
+        "tr": "Tasarımcı",
+        "it": "Artefice"
+      }
+    },
+    {
+      "id": "genshin-ranks-grandmaster",
+      "source": "Grandmaster",
+      "translations": {
+        "zh-hans": "宗师",
+        "zh-hant": "宗師",
+        "ko": "대가",
+        "ja": "名人",
+        "es": "Maestro",
+        "fr": "Spécialiste",
+        "ru": "Наставник",
+        "th": "ปรมาจารย์",
+        "vi": "Tông Sư",
+        "de": "Meister",
+        "id": "Grandmaster",
+        "pt-br": "Mestre",
+        "tr": "Büyük Üstat",
+        "it": "Granmaestro"
+      }
+    },
+    {
+      "id": "genshin-ranks-legend",
+      "source": "Legend",
+      "translations": {
+        "zh-hans": "传奇",
+        "zh-hant": "傳奇",
+        "ko": "전설",
+        "ja": "伝説",
+        "es": "Leyenda",
+        "fr": "Légende",
+        "ru": "Легенда",
+        "th": "ตำนาน",
+        "vi": "Huyền Thoại",
+        "de": "Legende",
+        "id": "Legend",
+        "pt-br": "Lendário",
+        "tr": "Efsane",
+        "it": "Leggenda"
+      }
+    },
+    {
+      "id": "genshin-ranks-linchpin",
+      "source": "Linchpin",
+      "translations": {
+        "zh-hans": "中坚",
+        "zh-hant": "中堅",
+        "ko": "정예",
+        "ja": "中堅",
+        "es": "Pilar",
+        "fr": "Noyau dur",
+        "ru": "Ключевой игрок",
+        "th": "ผู้ชำนาญ",
+        "vi": "Chủ Lực",
+        "de": "Rückgrat",
+        "id": "Linchpin",
+        "pt-br": "Pivô",
+        "tr": "Belkemiği",
+        "it": "Cardine"
+      }
+    },
+    {
+      "id": "genshin-ranks-novice",
+      "source": "Novice",
+      "translations": {
+        "zh-hans": "初程",
+        "zh-hant": "初程",
+        "ko": "입문",
+        "ja": "新人",
+        "es": "Principiante",
+        "fr": "Première excursion",
+        "ru": "Новичок",
+        "th": "ฝึกหัด",
+        "vi": "Khởi Đầu",
+        "de": "Novize",
+        "id": "Novice",
+        "pt-br": "Primeira Excursão",
+        "tr": "Çaylak",
+        "it": "Novizio"
+      }
+    },
+    {
+      "id": "genshin-ranks-rising-star",
+      "source": "Rising Star",
+      "translations": {
+        "zh-hans": "新星",
+        "zh-hant": "新星",
+        "ko": "견습",
+        "ja": "新星",
+        "es": "Estrella emergente",
+        "fr": "Nouvelle étoile",
+        "ru": "Восходящая звезда",
+        "th": "ดาวรุ่ง",
+        "vi": "Tân Tinh",
+        "de": "Neuer Stern",
+        "id": "Rising Star",
+        "pt-br": "Nova Estrela",
+        "tr": "Yükselen Yıldız",
+        "it": "Astro nascente"
+      }
+    }
+  ]
+}

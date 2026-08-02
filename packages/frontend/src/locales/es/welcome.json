@@ -1,0 +1,9 @@
+{
+  "title": "Bienvenido a Narn",
+  "intro": "Echa un vistazo a las guías a continuación antes de empezar, o ve directamente a configurar tu bóveda de credenciales cuando estés listo.",
+  "guidesHeading": "Guías",
+  "browseGuides": "Ver guías",
+  "setupVaultHeading": "¿Listo para traducir?",
+  "setupVaultBody": "Configura tu bóveda de credenciales para añadir las claves de los proveedores de IA que usarán tus traducciones.",
+  "setupVaultButton": "Configurar bóveda"
+}

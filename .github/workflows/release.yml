@@ -1,0 +1,167 @@
+name: Release
+# `develop` -> `main` IS the release, for narn's own open-core image. One merge
+# produces the whole release: it promotes the digest develop already built, cuts the
+# `vX.Y.Z` tag, and publishes a GitHub Release whose body is that version's changelog
+# entry.
+#
+# The changelog lives here (packages/frontend/src/guides/en/changelog/), so this repo
+# is its natural home.
+#
+# WHY THIS WORKFLOW DOES ALL THREE ITSELF, rather than tagging and letting
+# release-image.yml react: a tag pushed with GITHUB_TOKEN does NOT trigger workflows
+# (GitHub suppresses that to prevent recursion), so a tag-triggered build would never
+# fire. Promote first, THEN tag — a failed promotion must not leave a tag pointing at
+# an unpublished release.
+#
+# WHY PROMOTE INSTEAD OF REBUILD: docker builds are not reproducible. Retagging the
+# digest CI already validated guarantees the released bytes are the tested bytes.
+#
+# This also keeps `:main` alive. It is the open-core self-host default
+# (docker-compose.yml pulls ghcr.io/zercade-dev/narn:main) and, since publish-image.yml
+# moved to the develop channel, this workflow is now its ONLY writer — so `:main` now
+# means "latest release" rather than "latest integration build", which is what a
+# self-host default should point at.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write # create the tag + the GitHub Release
+  packages: write # retag the image in GHCR
+
+concurrency:
+  # Serialize releases; never cancel one in flight — a half-promoted release is exactly
+  # the state this design avoids.
+  group: release-main
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: [self-hosted, zdev, general]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true
+          fetch-depth: 0
+
+      - name: Resolve the version and its changelog entry
+        id: ver
+        run: |
+          set -euo pipefail
+          # sed, not `node -p`: this self-hosted runner has no global node (that is why
+          # every other workflow adds actions/setup-node first), and publish-image.yml
+          # already reads the version exactly this way. Adding a whole setup-node step
+          # just to read one string would be the heavier fix.
+          VER="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' package.json | head -n 1)"
+          if [[ ! "$VER" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::package.json version '${VER}' is not a bare X.Y.Z"
+            exit 1
+          fi
+          NOTES="packages/frontend/src/guides/en/changelog/v${VER}.md"
+          if [[ ! -f "$NOTES" ]]; then
+            echo "::error::${NOTES} is missing — run \`make release-prep VERSION=${VER}\` on develop before merging to main."
+            exit 1
+          fi
+          shopt -s nullglob
+          for f in packages/frontend/src/guides/en/changelog/unreleased/*.md; do
+            [[ "$(basename "$f")" == "README.md" ]] && continue
+            echo "::error::Unconsolidated changelog fragment: ${f}. Run \`make release-prep\` on develop."
+            exit 1
+          done
+          {
+            echo "ver=${VER}"
+            echo "notes=${NOTES}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Releasing ${VER} with notes from ${NOTES}"
+
+      - name: Skip if this version is already released
+        id: guard
+        env:
+          VER: ${{ steps.ver.outputs.ver }}
+        run: |
+          set -euo pipefail
+          # Idempotence: a re-run, or a push to main that is not a release (a hotfix that
+          # did not bump), must be a clean no-op rather than a failed release.
+          if git rev-parse -q --verify "refs/tags/v${VER}" >/dev/null; then
+            echo "Tag v${VER} already exists — nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Log in to GHCR
+        if: steps.guard.outputs.release == 'true'
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Resolve the digest to promote
+        id: src
+        if: steps.guard.outputs.release == 'true'
+        env:
+          VER: ${{ steps.ver.outputs.ver }}
+        run: |
+          set -euo pipefail
+          IMG=ghcr.io/zercade-dev/narn
+          if docker buildx imagetools inspect "${IMG}:${VER}" >/dev/null 2>&1; then
+            echo "::error::${IMG}:${VER} already exists and released versions are immutable. Bump the version on develop and merge again."
+            exit 1
+          fi
+          # Promote the RELEASED COMMIT's own sha-<short>, never the moving `:develop`
+          # tag: if develop advanced between release-prep and this merge, `:develop`
+          # already points at a newer build and would ship code this release never
+          # contained. HEAD^2 is the merged develop head; on a fast-forward main IS it.
+          SRC_SHA="$(git rev-parse HEAD^2 2>/dev/null || git rev-parse HEAD)"
+          SHORT="${SRC_SHA:0:7}"
+          if ! err="$(docker buildx imagetools inspect "${IMG}:sha-${SHORT}" 2>&1 1>/dev/null)"; then
+            echo "::error::Could not resolve ${IMG}:sha-${SHORT} (commit ${SRC_SHA}): ${err}"
+            echo "::error::A release promotes the image develop already built for THIS commit. If the tag is unknown, let publish-image.yml finish on develop before merging. If it looks like an auth/network failure, re-run this job."
+            exit 1
+          fi
+          {
+            echo "src=${IMG}:sha-${SHORT}"
+            echo "img=${IMG}"
+          } >> "$GITHUB_OUTPUT"
+          echo "Promoting ${IMG}:sha-${SHORT} (commit ${SRC_SHA})"
+
+      - name: Promote to the released tags
+        if: steps.guard.outputs.release == 'true'
+        env:
+          VER: ${{ steps.ver.outputs.ver }}
+          IMG: ${{ steps.src.outputs.img }}
+          SRC_REF: ${{ steps.src.outputs.src }}
+        run: |
+          set -euo pipefail
+          MAJOR="${VER%%.*}"; REST="${VER#*.}"; MINOR="${REST%%.*}"
+          # --dry-run FIRST: assert the promotion is a carbon copy before anything moves.
+          docker buildx imagetools create --dry-run --tag "${IMG}:${VER}" "${SRC_REF}" >/dev/null
+          docker buildx imagetools create \
+            --tag "${IMG}:${VER}" \
+            --tag "${IMG}:${MAJOR}.${MINOR}" \
+            --tag "${IMG}:v${VER}" \
+            --tag "${IMG}:main" \
+            --tag "${IMG}:latest" \
+            "${SRC_REF}"
+          SRC="$(docker buildx imagetools inspect "${SRC_REF}" --format '{{.Manifest.Digest}}')"
+          DST="$(docker buildx imagetools inspect "${IMG}:${VER}" --format '{{.Manifest.Digest}}')"
+          if [[ "$SRC" != "$DST" ]]; then
+            echo "::error::Promotion was not a carbon copy: ${SRC_REF}=${SRC} ${VER}=${DST}"
+            exit 1
+          fi
+          echo "Promoted ${SRC} -> ${VER}, ${MAJOR}.${MINOR}, v${VER}, main, latest"
+
+      - name: Tag and publish the GitHub Release
+        if: steps.guard.outputs.release == 'true'
+        env:
+          # The notes file is repo content, passed by PATH and read by gh from disk —
+          # never interpolated into a shell command.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VER: ${{ steps.ver.outputs.ver }}
+          NOTES: ${{ steps.ver.outputs.notes }}
+        run: |
+          set -euo pipefail
+          git tag "v${VER}"
+          git push origin "v${VER}"
+          gh release create "v${VER}" --title "v${VER}" --notes-file "$NOTES"
+          echo "### Released v${VER}" >> "$GITHUB_STEP_SUMMARY"
+          cat "$NOTES" >> "$GITHUB_STEP_SUMMARY"

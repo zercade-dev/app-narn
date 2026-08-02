@@ -1,0 +1,209 @@
+{
+  "id": "genshin-nations",
+  "name": "Genshin Nations",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1700000000000,
+  "terms": [
+    {
+      "id": "genshin-nations-fontaine",
+      "source": "Fontaine",
+      "translations": {
+        "zh-hans": "枫丹",
+        "zh-hant": "楓丹",
+        "ko": "폰타인",
+        "ja": "フォンテーヌ",
+        "es": "Fontaine",
+        "fr": "Fontaine",
+        "ru": "Фонтейн",
+        "th": "Fontaine",
+        "vi": "Fontaine",
+        "de": "Fontaine",
+        "id": "Fontaine",
+        "pt-br": "Fontaine",
+        "tr": "Fontaine",
+        "it": "Fontaine"
+      }
+    },
+    {
+      "id": "genshin-nations-inazuma",
+      "source": "Inazuma",
+      "translations": {
+        "zh-hans": "稻妻",
+        "zh-hant": "稻妻",
+        "ko": "이나즈마",
+        "ja": "稲妻",
+        "es": "Inazuma",
+        "fr": "Inazuma",
+        "ru": "Инадзума",
+        "th": "Inazuma",
+        "vi": "Inazuma",
+        "de": "Inazuma",
+        "id": "Inazuma",
+        "pt-br": "Inazuma",
+        "tr": "Inazuma",
+        "it": "Inazuma"
+      }
+    },
+    {
+      "id": "genshin-nations-khaenriah",
+      "source": "Khaenri'ah",
+      "translations": {
+        "zh-hans": "坎瑞亚",
+        "zh-hant": "坎瑞亞",
+        "ko": "켄리아",
+        "ja": "カーンルイア",
+        "es": "Khaenri'ah",
+        "fr": "Khaenri'ah",
+        "ru": "Каэнри'ах",
+        "th": "Khaenri'ah",
+        "vi": "Khaenri'ah",
+        "de": "Khaenri'ah",
+        "id": "Khaenri'ah",
+        "pt-br": "Khaenri'ah",
+        "tr": "Khaenri'ah",
+        "it": "Khaenri'ah"
+      }
+    },
+    {
+      "id": "genshin-nations-liyue",
+      "source": "Liyue",
+      "translations": {
+        "zh-hans": "璃月",
+        "zh-hant": "璃月",
+        "ko": "‍리월",
+        "ja": "璃月",
+        "es": "Liyue",
+        "fr": "Liyue",
+        "ru": "Ли Юэ",
+        "th": "Liyue",
+        "vi": "Liyue",
+        "de": "Liyue",
+        "id": "Liyue",
+        "pt-br": "Liyue",
+        "tr": "Liyue",
+        "it": "Liyue"
+      }
+    },
+    {
+      "id": "genshin-nations-mondstadt",
+      "source": "Mondstadt",
+      "translations": {
+        "zh-hans": "蒙德",
+        "zh-hant": "蒙德",
+        "ko": "몬드",
+        "ja": "モンド",
+        "es": "Mondstadt",
+        "fr": "Mondstadt",
+        "ru": "Мондштадт",
+        "th": "Mondstadt",
+        "vi": "Mondstadt",
+        "de": "Mondstadt",
+        "id": "Mondstadt",
+        "pt-br": "Mondstadt",
+        "tr": "Mondstadt",
+        "it": "Mondstadt"
+      }
+    },
+    {
+      "id": "genshin-nations-natlan",
+      "source": "Natlan",
+      "translations": {
+        "zh-hans": "纳塔",
+        "zh-hant": "納塔",
+        "ko": "나타",
+        "ja": "ナタ",
+        "es": "Natlan",
+        "fr": "Natlan",
+        "ru": "Натлан",
+        "th": "Natlan",
+        "vi": "Natlan",
+        "de": "Natlan",
+        "id": "Natlan",
+        "pt-br": "Natlan",
+        "tr": "Natlan",
+        "it": "Natlan"
+      }
+    },
+    {
+      "id": "genshin-nations-nod-krai",
+      "source": "Nod-Krai",
+      "translations": {
+        "zh-hans": "挪德卡莱",
+        "zh-hant": "挪德卡萊",
+        "ko": "노드크라이",
+        "ja": "ナド・クライ",
+        "es": "Nod-Krai",
+        "fr": "Nod-Krai",
+        "ru": "Нод-Край",
+        "th": "Nod-Krai",
+        "vi": "Nod-Krai",
+        "de": "Nod-Krai",
+        "id": "Nod-Krai",
+        "pt-br": "Nod-Krai",
+        "tr": "Nod-Krai",
+        "it": "Nod-Krai"
+      }
+    },
+    {
+      "id": "genshin-nations-snezhnaya",
+      "source": "Snezhnaya",
+      "translations": {
+        "zh-hans": "至冬",
+        "zh-hant": "至冬",
+        "ko": "스네즈나야",
+        "ja": "スネージナヤ",
+        "es": "Snezhnaya",
+        "fr": "Snezhnaya",
+        "ru": "Снежная",
+        "th": "Snezhnaya",
+        "vi": "Snezhnaya",
+        "de": "Snezhnaya",
+        "id": "Snezhnaya",
+        "pt-br": "Snezhnaya",
+        "tr": "Snezhnaya",
+        "it": "Snezhnaya"
+      }
+    },
+    {
+      "id": "genshin-nations-sumeru",
+      "source": "Sumeru",
+      "translations": {
+        "zh-hans": "须弥",
+        "zh-hant": "須彌",
+        "ko": "수메르",
+        "ja": "スメール",
+        "es": "Sumeru",
+        "fr": "Sumeru",
+        "ru": "Сумеру",
+        "th": "Sumeru",
+        "vi": "Sumeru",
+        "de": "Sumeru",
+        "id": "Sumeru",
+        "pt-br": "Sumeru",
+        "tr": "Sumeru",
+        "it": "Sumeru"
+      }
+    },
+    {
+      "id": "genshin-nations-teyvat",
+      "source": "Teyvat",
+      "translations": {
+        "zh-hans": "提瓦特",
+        "zh-hant": "提瓦特",
+        "ko": "티바트",
+        "ja": "テイワット",
+        "es": "Teyvat",
+        "fr": "Teyvat",
+        "ru": "Тейват",
+        "th": "Teyvat",
+        "vi": "Teyvat",
+        "de": "Teyvat",
+        "id": "Teyvat",
+        "pt-br": "Teyvat",
+        "tr": "Teyvat",
+        "it": "Teyvat"
+      }
+    }
+  ]
+}

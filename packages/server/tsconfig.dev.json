@@ -1,0 +1,25 @@
+{
+  // Dev-only config for `tsx watch` (see the `dev` script). It maps the
+  // workspace packages the server depends on to their TypeScript *source*
+  // instead of their built `dist/`, so editing `@zercade-dev/narn-shared` or any
+  // `@zercade-dev/narn-module-*` hot-reloads the running server — no manual rebuild.
+  //
+  // This file is NOT used by `tsc` (the production build still uses
+  // tsconfig.json → dist), so it has no effect on shipped output.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@zercade-dev/narn-shared": ["../shared/src/index.ts"],
+      "@zercade-dev/narn-module-anthropic": ["../../modules/anthropic/src/index.ts"],
+      "@zercade-dev/narn-module-copilot": ["../../modules/copilot/src/index.ts"],
+      "@zercade-dev/narn-module-deepl": ["../../modules/deepl/src/index.ts"],
+      "@zercade-dev/narn-module-deepseek": ["../../modules/deepseek/src/index.ts"],
+      "@zercade-dev/narn-module-generic-ai": ["../../modules/generic-ai/src/index.ts"],
+      "@zercade-dev/narn-module-google": ["../../modules/google/src/index.ts"],
+      "@zercade-dev/narn-module-openai": ["../../modules/openai/src/index.ts"],
+      "@zercade-dev/narn-module-openrouter": ["../../modules/openrouter/src/index.ts"],
+      "@zercade-dev/narn-module-pseudo": ["../../modules/pseudo/src/index.ts"]
+    }
+  }
+}

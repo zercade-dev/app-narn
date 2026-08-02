@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NARN</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-__CSP_NONCE__' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self' http://localhost:3001; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; media-src 'self'; worker-src 'self' blob:; frame-src 'none'; manifest-src 'self'; child-src 'self' blob:; report-uri /csp-violation; report-to csp-endpoint" />
+    <script nonce="__CSP_NONCE__">
+      const s = localStorage.getItem('translator-dark-mode');
+      if (s === 'true' || (s === null && matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+      const themeIds = ['pixel', 'techno', 'minimal'];
+      const storedTheme = localStorage.getItem('translator-ui-theme');
+      if (themeIds.includes(storedTheme)) {
+        document.documentElement.setAttribute('data-theme', storedTheme);
+      }
+    </script>
+    <style>
+      #app-loading {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background-color: #ffffff;
+        font-family: system-ui, sans-serif;
+        color: #71717a;
+      }
+      html.dark #app-loading {
+        background-color: #09090b;
+        color: #a1a1aa;
+      }
+      #app-loading-spinner {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 3px solid currentColor;
+        border-top-color: transparent;
+        animation: app-spin 0.65s linear infinite;
+      }
+      @keyframes app-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      #app-loading-text {
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="app-loading">
+        <div id="app-loading-spinner"></div>
+        <span id="app-loading-text">Loading&hellip;</span>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx" nonce="__CSP_NONCE__"></script>
+  </body>
+</html>

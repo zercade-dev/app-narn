@@ -1,0 +1,13 @@
+# actionlint config — declare the custom self-hosted runner labels used by this
+# repo's `runs-on: [self-hosted, …]` lists so they do not trip actionlint's
+# [runner-label] check. The first label below names the project's self-hosted
+# box; `CI` and `general` split it into two runner pools so long image builds
+# never occupy the runner reserved for the source quality gate (CI):
+#   - CI      → ci.yml
+#   - general → security.yml, docker-build.yml, publish-image.yml, release-image.yml,
+#               release.yml
+self-hosted-runner:
+  labels:
+    - zdev
+    - CI
+    - general

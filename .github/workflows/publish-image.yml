@@ -1,0 +1,134 @@
+name: publish-image
+
+# Publish narn's OWN open-core app image to GHCR after CI passes on develop, via
+# scripts/docker-publish.sh. narn is the app's source of record and the SOLE
+# publisher of its GHCR package (ghcr.io/zercade-dev/narn). It publishes:
+#   - develop         a single moving tag, overwritten each push (latest develop build)
+#   - sha-<short>     an immutable per-commit tag for pinned deploys / rollbacks
+# Real releases now exist (`develop` -> `main` promotes + tags), so the old
+# `main-v<x.y.z>` stand-in tag is retired; released semver tags come from
+# release.yml. This workflow publishes the DEVELOP channel only.
+#
+# CI-gated: this used to trigger on `push` to main (path-gated) in PARALLEL to
+# ci.yml + docker-build.yml, with no dependency between them — a commit whose tests
+# FAILED but which still built could publish/overwrite the floating tag that
+# deployments pull by default. Fix: trigger on `workflow_run` for the "CI" workflow's
+# completion, restricted to `branches: [develop]` (so PR-triggered CI runs never fire this),
+# and gate the build job on the watched run's `conclusion == 'success'`. A red (or
+# cancelled) CI run reaches `completed` but fails that check, so the publish never starts —
+# CI success is now a hard prerequisite. The companion docker-build.yml boot-smoke remains
+# an ADDITIONAL gate (it is part of CI's required-checks surface), not instead of it.
+#
+# NOTE: workflow_run has no native `paths:` filter (unlike the `push` + `paths-ignore`
+# trigger this replaces), so the publish now runs after every successful CI completion on
+# develop rather than being skipped for docs-only pushes. That's a resource-cost regression,
+# not a correctness one, and intentionally out of scope (YAGNI) — re-adding path filtering
+# (e.g. diffing workflow_run.head_sha against its parent) is a follow-up if the extra
+# republishes become a problem.
+on:
+  workflow_run:
+    workflows: ['CI']
+    types: [completed]
+    branches: [develop]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  packages: write
+
+# Supersede an in-progress build when newer commits land on develop. Key on the CI run's
+# head_sha (the commit actually being published), falling back to github.sha for a
+# manual workflow_dispatch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  build-push:
+    # workflow_dispatch is an explicit manual override — always runs. A workflow_run
+    # trigger fires on EVERY conclusion (success/failure/cancelled), so the conclusion
+    # check is the actual gate.
+    #
+    # FORK GUARD: for `workflow_run`, the `branches:` filter matches the TRIGGERING run's
+    # HEAD branch — for a fork PR that is the fork's source-branch name. An outside
+    # contributor who names their fork branch `develop` and whose CI reaches success would
+    # otherwise satisfy the gate and reach the publish step (attacker's head_sha checked
+    # out on the self-hosted runner, with packages:write, pushing the floating `develop` tag).
+    # Require the completed CI run to be same-repo (not a fork) AND a push (not a
+    # `pull_request` event) — a publish must only ever follow a real push to develop.
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.event != 'pull_request') }}
+    runs-on: [self-hosted, zdev, general] # self-hosted runner (Docker + buildx provisioned on the box)
+    timeout-minutes: 30
+    steps:
+      # Self-contained repo (own Dockerfile + pnpm-lock.yaml) — a plain checkout is
+      # all the build needs.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true # self-hosted runner: wipe prior-run untracked/ignored files
+          # For workflow_run, github.sha/github.ref point at the DEFAULT-branch tip, not
+          # the commit CI ran against — check out the exact CI-tested commit. A manual
+          # workflow_dispatch has no workflow_run, so this falls back to github.sha.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Build and push image
+        # GitHub-supplied values go through env, never interpolated into run:.
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # narn's own GHCR package (now also docker-publish.sh's default; set
+          # explicitly so the CI publish target is unambiguous).
+          IMAGE: ghcr.io/zercade-dev/narn
+          PLATFORMS: linux/amd64
+          # Same workflow_run fallback as the checkout step: the exact CI-tested commit.
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          SHORT="${SHA:0:7}"
+          # Dependency-free version read (self-hosted runner: no jq/node guaranteed).
+          VERSION="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' package.json | head -n 1)"
+          if [ -z "$VERSION" ]; then
+            echo "::error::could not read version from package.json" >&2
+            exit 1
+          fi
+          echo "Publishing tags: develop sha-${SHORT} (version ${VERSION})"
+          TAGS="develop sha-${SHORT}" bash scripts/docker-publish.sh
+
+      - name: Summarize
+        if: success()
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          SHORT="${SHA:0:7}"
+          VERSION="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' package.json | head -n 1)"
+          {
+            echo "### Image published to GHCR"
+            echo '```'
+            echo "docker pull ghcr.io/zercade-dev/narn:develop   # version ${VERSION}"
+            echo "docker pull ghcr.io/zercade-dev/narn:sha-${SHORT}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prune aged Docker artifacts
+        # The buildx build leaves dangling images + a persistent docker-container
+        # build cache that grows unbounded; keep the shared self-hosted box bounded.
+        # `until=2h` reaps only artifacts older than 2h, so a CONCURRENT sibling job
+        # (e.g. docker-build.yml on the same push) is never touched. `docker volume
+        # prune` removes only UNREFERENCED volumes (the builder's own cache volume is
+        # referenced, so left alone). NEVER use an unfiltered `docker system prune`
+        # on this shared runner — it would destroy a concurrent job's artifacts.
+        if: always()
+        run: |
+          docker image prune -af --filter "until=2h" || true
+          # Stopped containers + orphaned networks left by a job that was cancelled/
+          # killed before its cleanup trap ran (cancel-in-progress can SIGKILL a step
+          # mid-sleep). Networks especially: leaked ones exhaust Docker's finite bridge
+          # address pool and wedge every future `docker network create`. until=2h keeps
+          # concurrent siblings safe; an in-use network/container is skipped regardless.
+          docker container prune -f --filter "until=2h" || true
+          docker network prune -f --filter "until=2h" || true
+          # The build cache lives INSIDE the persistent docker-container builder, not
+          # the daemon's default cache — prune that builder BY NAME (a bare
+          # `buildx prune` only hits the currently-selected builder, which is shared
+          # and raced across concurrent jobs on this runner).
+          docker buildx prune --builder translator-builder -af --filter "until=2h" || true
+          docker volume prune -f || true

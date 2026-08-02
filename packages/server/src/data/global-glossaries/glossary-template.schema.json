@@ -1,0 +1,78 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "glossary-template.schema.json",
+  "title": "GlobalGlossaryTemplate",
+  "description": "Schema for global read-only glossary JSON files loaded by the server.",
+  "type": "object",
+  "required": ["id", "name", "readOnly", "createdAt", "updatedAt", "terms"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this glossary (kebab-case).",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable display name for this glossary.",
+      "minLength": 1
+    },
+    "readOnly": {
+      "type": "boolean",
+      "const": true,
+      "description": "Global glossaries are always read-only."
+    },
+    "createdAt": {
+      "type": "number",
+      "description": "Unix timestamp (ms) when this glossary was created."
+    },
+    "updatedAt": {
+      "type": "number",
+      "description": "Unix timestamp (ms) when this glossary was last updated."
+    },
+    "terms": {
+      "type": "array",
+      "description": "Glossary terms with per-language translations.",
+      "items": {
+        "$ref": "#/$defs/GlossaryTerm"
+      }
+    }
+  },
+  "$defs": {
+    "GlossaryTerm": {
+      "type": "object",
+      "required": ["id", "source", "translations"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique term identifier (kebab-case, prefixed with glossary id).",
+          "pattern": "^[a-z0-9]+(-[a-z0-9:]+)*$"
+        },
+        "source": {
+          "type": "string",
+          "description": "Source text (English) for this term.",
+          "minLength": 1
+        },
+        "constant": {
+          "type": "boolean",
+          "description": "When true, matches are masked during translation and restored afterwards."
+        },
+        "translations": {
+          "type": "object",
+          "description": "Map of BCP-47 language tag to translated string.",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes about this term."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "id": "miliastra-terms",
+  "name": "Miliastra Terms",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1700000000000,
+  "terms": [
+    {
+      "id": "miliastra-terms-craftsperson",
+      "source": "Craftsperson",
+      "translations": {
+        "zh-hans": "奇匠",
+        "zh-hant": "奇匠",
+        "ko": "별바다 창작자",
+        "ja": "クリエイター",
+        "es": "Artífice",
+        "fr": "Artisan",
+        "ru": "Создатель",
+        "th": "นักรังสรรค์",
+        "vi": "Kỳ Tài",
+        "de": "Handwerker",
+        "id": "Pengrajin",
+        "pt-br": "Artesão",
+        "tr": "Zanaatkar",
+        "it": "Artefice"
+      }
+    },
+    {
+      "id": "miliastra-terms-genshin-impact",
+      "source": "Genshin Impact",
+      "translations": {
+        "zh-hans": "原神",
+        "zh-hant": "原神",
+        "ko": "원신",
+        "ja": "原神",
+        "es": "Genshin Impact",
+        "fr": "Genshin Impact",
+        "ru": "Genshin Impact",
+        "th": "Genshin Impact",
+        "vi": "Genshin Impact",
+        "de": "Genshin Impact",
+        "id": "Genshin Impact",
+        "pt-br": "Genshin Impact",
+        "tr": "Genshin Impact",
+        "it": "Genshin Impact"
+      }
+    },
+    {
+      "id": "miliastra-terms-manekin",
+      "source": "Manekin",
+      "translations": {
+        "zh-hans": "奇偶·男",
+        "zh-hant": "奇偶·男",
+        "ko": "별인형·남성",
+        "ja": "ドール（男）",
+        "es": "Manekín masculino",
+        "fr": "Manekin",
+        "ru": "Манекен (м)",
+        "th": "หุ่นแดนอัศจรรย์ - ชาย",
+        "vi": "Người Mẫu Nam",
+        "de": "Mannekin",
+        "id": "Manekin (L)",
+        "pt-br": "Manequim",
+        "tr": "Manekin",
+        "it": "Manekino"
+      }
+    },
+    {
+      "id": "miliastra-terms-manekina",
+      "source": "Manekina",
+      "translations": {
+        "zh-hans": "奇偶·女",
+        "zh-hant": "奇偶·女",
+        "ko": "별인형·여성",
+        "ja": "ドール（女）",
+        "es": "Manekín femenino",
+        "fr": "Manekina",
+        "ru": "Манекен (ж)",
+        "th": "หุ่นแดนอัศจรรย์ - หญิง",
+        "vi": "Người Mẫu Nữ",
+        "de": "Mannekina",
+        "id": "Manekin (P)",
+        "pt-br": "Manequina",
+        "tr": "Manekina",
+        "it": "Manekina"
+      }
+    },
+    {
+      "id": "miliastra-terms-miliastra-sandbox",
+      "source": "Miliastra Sandbox",
+      "translations": {
+        "zh-hans": "千星沙箱",
+        "zh-hant": "千星沙箱",
+        "ko": "별바다 정원",
+        "ja": "星々の箱庭",
+        "es": "Miliastra Sandbox",
+        "fr": "Bac à sable milliastral",
+        "ru": "Miliastra Sandbox",
+        "th": "แซนด์บ็อกซ์พันดารา",
+        "vi": "Sandbox Thiên Tinh",
+        "de": "Miliastra Sandbox",
+        "id": "Miliastra Sandbox",
+        "pt-br": "Caixa Miliastra",
+        "tr": "Miliastra Sandbox",
+        "it": "Miliastra Sandbox"
+      }
+    },
+    {
+      "id": "miliastra-terms-miliastra-wonderland",
+      "source": "Miliastra Wonderland",
+      "translations": {
+        "zh-hans": "千星奇域",
+        "zh-hant": "千星奇域",
+        "ko": "별바다 세계",
+        "ja": "星々の幻境",
+        "es": "Edén Miliastra",
+        "fr": "Paradisia milliastral",
+        "ru": "Астральный предел",
+        "th": "แดนอัศจรรย์พันดารา",
+        "vi": "Thiên Tinh Kỳ Vực",
+        "de": "Miliastra Wonderland",
+        "id": "Miliastra Wonderland",
+        "pt-br": "Miliastra Arcanum",
+        "tr": "Bin Yıldız Diyarı",
+        "it": "Miliastra Mirabilia"
+      }
+    },
+    {
+      "id": "miliastra-terms-stage",
+      "source": "Stage",
+      "translations": {
+        "zh-hans": "关卡",
+        "zh-hant": "關卡",
+        "ko": "스테이지",
+        "ja": "ステージ",
+        "es": "Nivel",
+        "fr": "Niveau",
+        "ru": "Уровень",
+        "th": "ด่าน",
+        "vi": "Ải",
+        "de": "Level",
+        "id": "Stage",
+        "pt-br": "Fase",
+        "tr": "Aşama",
+        "it": "Livello"
+      }
+    },
+    {
+      "id": "miliastra-terms-wonderland",
+      "source": "Wonderland",
+      "translations": {
+        "zh-hans": "奇域",
+        "zh-hant": "奇域",
+        "ko": "별세계",
+        "ja": "幻境",
+        "es": "Edén",
+        "fr": "Paradisia",
+        "ru": "Предел",
+        "th": "อัศจรรย์",
+        "vi": "Kỳ Vực",
+        "de": "Wonderland",
+        "id": "Wonderland",
+        "pt-br": "Arcanum",
+        "tr": "Diyar",
+        "it": "Mirabilia"
+      }
+    },
+    {
+      "id": "miliastra-terms-wonderland-manekin",
+      "source": "Wonderland Manekin",
+      "translations": {
+        "zh-hans": "奇域人偶",
+        "zh-hant": "奇域人偶",
+        "ko": "별인형",
+        "ja": "幻境ドール",
+        "es": "Manekín",
+        "fr": "Mannequin du Paradisia milliastral",
+        "ru": "Манекен",
+        "th": "หุ่นแดนอัศจรรย์",
+        "vi": "Người Mẫu Kỳ Vực",
+        "de": "Wonderland-Mannekin",
+        "id": "Manekin Wonderland",
+        "pt-br": "Manequim de Arcanum",
+        "tr": "Diyar Manekinleri",
+        "it": "Manekino di Mirabilia"
+      }
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+name: Release image
+
+# Build and publish narn's open-core app image to its OWN GHCR package
+# (ghcr.io/zercade-dev/narn) on a vX.Y.Z tag push — the released semver tags:
+# the full version, a rolling major.minor, the raw tag, `latest` (stable only),
+# plus an immutable sha-<short>. Uses only the Docker CLI (buildx) via
+# scripts/docker-publish.sh — no docker/* marketplace actions.
+#
+# Division of labour: the companion publish-image.yml publishes the moving `develop`
+# + `sha-<short>` tags after CI passes on develop; release.yml writes the released
+# semver tags plus `main` and `latest` when develop merges to main. This file is
+# neither — see the retirement note directly below. It needs no fork-trust guard:
+# `workflow_dispatch` can only be started by someone with write access to this repo,
+# so an outside contributor cannot reach the publish step.
+# ⚠ RETIRED as an automatic publisher (develop-branch migration, 2026-07-30).
+# `release.yml` now owns releases: the develop -> main merge promotes the digest
+# develop already built, cuts the tag, and publishes the notes. Two reasons the old
+# tag trigger cannot stay:
+#   1. The tag is created by release.yml with GITHUB_TOKEN, and a GITHUB_TOKEN-pushed
+#      tag does NOT trigger workflows — so this would never fire anyway.
+#   2. If it did fire, it would REBUILD the image. Docker builds are not reproducible,
+#      so the released digest would differ from the one release.yml just promoted.
+# Kept, manual-only, as an escape hatch for rebuilding a release from source.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    runs-on: [self-hosted, zdev, general] # self-hosted runner (Docker + buildx provisioned on the box)
+    timeout-minutes: 30
+    steps:
+      # Self-contained repo (own Dockerfile + pnpm-lock.yaml) — a plain checkout is
+      # all the build needs.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true # self-hosted runner: wipe prior-run untracked/ignored files
+
+      - name: Build and push release image
+        # GitHub-supplied values go through env, never interpolated into run:.
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }} # narn's token writes narn's own package
+          IMAGE: ghcr.io/zercade-dev/narn
+          PLATFORMS: linux/amd64
+          GIT_REF: ${{ github.ref }} # refs/tags/vX.Y.Z on a tag push
+          HEAD_SHA: ${{ github.sha }}
+          IS_PUSH: ${{ github.event_name == 'push' }} # publish only on the tag push
+        run: |
+          SHORT_SHA="${HEAD_SHA:0:7}"
+          # Immutable sha-<short> always; on a vX.Y.Z tag also the full version,
+          # rolling major.minor, the raw tag, and (stable releases only) latest.
+          tags="sha-${SHORT_SHA}"
+          if [[ "$GIT_REF" == refs/tags/v* ]]; then
+            raw="${GIT_REF#refs/tags/}" # vX.Y.Z
+            ver="${raw#v}"              # X.Y.Z
+            if [[ "$ver" == *-* ]]; then
+              # prerelease (e.g. v1.2.3-rc.1): pin the exact version only — never
+              # move the rolling major.minor or latest onto a prerelease.
+              tags="${ver} ${raw} ${tags}"
+            else
+              major="${ver%%.*}"
+              rest="${ver#*.}"
+              minor="${rest%%.*}"
+              tags="${ver} ${major}.${minor} ${raw} latest ${tags}"
+            fi
+          fi
+          # Publish only on the tag push; a manual run builds (validates) without pushing.
+          [[ "$IS_PUSH" == "true" ]] && PUSH=true || PUSH=false
+          echo "Derived tags: ${tags} (push=${PUSH})"
+          TAGS="$tags" PUSH="$PUSH" bash scripts/docker-publish.sh
+
+      - name: Summarize image
+        if: success() && github.event_name == 'push'
+        env:
+          GIT_REF: ${{ github.ref }}
+        run: |
+          ver="${GIT_REF#refs/tags/v}"
+          {
+            echo "### Release image published"
+            echo '```'
+            echo "docker pull ghcr.io/zercade-dev/narn:${ver}"
+            echo "docker pull ghcr.io/zercade-dev/narn:latest"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prune aged Docker artifacts
+        # The buildx build leaves dangling images + a persistent docker-container
+        # build cache that grows unbounded; keep the shared self-hosted box bounded.
+        # `until=2h` reaps only artifacts older than 2h, so a CONCURRENT sibling job
+        # is never touched. `docker volume prune` removes only UNREFERENCED volumes
+        # (the builder's own cache volume is referenced, so left alone). NEVER use an
+        # unfiltered `docker system prune` on this shared runner — it would destroy a
+        # concurrent job's artifacts.
+        if: always()
+        run: |
+          docker image prune -af --filter "until=2h" || true
+          # Stopped containers + orphaned networks left by a job that was cancelled/
+          # killed before its cleanup trap ran (cancel-in-progress can SIGKILL a step
+          # mid-sleep). Networks especially: leaked ones exhaust Docker's finite bridge
+          # address pool and wedge every future `docker network create`. until=2h keeps
+          # concurrent siblings safe; an in-use network/container is skipped regardless.
+          docker container prune -f --filter "until=2h" || true
+          docker network prune -f --filter "until=2h" || true
+          # The build cache lives INSIDE the persistent docker-container builder, not
+          # the daemon's default cache — prune that builder BY NAME (a bare
+          # `buildx prune` only hits the currently-selected builder, which is shared
+          # and raced across concurrent jobs on this runner).
+          docker buildx prune --builder translator-builder -af --filter "until=2h" || true
+          docker volume prune -f || true

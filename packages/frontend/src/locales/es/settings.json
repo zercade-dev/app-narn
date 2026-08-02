@@ -1,0 +1,42 @@
+{
+  "title": "Ajustes",
+  "appearance": "Apariencia",
+  "appearanceDescription": "Elige el aspecto de narn en este dispositivo.",
+  "theme": "Tema",
+  "mode": "Modo",
+  "switchToLight": "Cambiar a modo claro",
+  "switchToDark": "Cambiar a modo oscuro",
+  "languageTitle": "Idioma",
+  "languageDescription": "Idioma de la interfaz.",
+  "preview": "Vista previa",
+  "previewHint": "Controles de ejemplo con el tema seleccionado.",
+  "previewSamples": {
+    "heading": "Encabezado",
+    "body": "El texto muestra la fuente y los colores base.",
+    "muted": "El texto atenuado se ve así.",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "pass": "Correcto",
+    "warn": "Aviso",
+    "fail": "Fallido",
+    "info": "Información",
+    "inputPlaceholder": "Campo de texto",
+    "selectOptionA": "Primera opción",
+    "selectOptionB": "Segunda opción",
+    "checkbox": "Casilla",
+    "badgeDefault": "Predeterminado",
+    "badgeSecondary": "Secundario",
+    "badgeOutline": "Contorno",
+    "badgeDestructive": "Destructivo",
+    "scrollHint": "Desplázate para ver la barra de desplazamiento del tema",
+    "iconsLabel": "Iconos"
+  },
+  "themes": {
+    "default": { "name": "Predeterminado", "description": "El aspecto clásico de narn." },
+    "pixel": { "name": "Pixel", "description": "Aire retro de consola de 8 bits." },
+    "techno": { "name": "Tecno", "description": "Terminal ciberpunk de neón." },
+    "minimal": { "name": "Minimal", "description": "Plano, sobrio y monocromo." }
+  }
+}

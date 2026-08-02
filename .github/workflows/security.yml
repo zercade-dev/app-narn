@@ -1,0 +1,71 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [main, develop]
+    # `pnpm audit` output is a pure function of the dependency tree — a push that changes no
+    # manifest or lockfile produces byte-identical results, so gate on those. The weekly
+    # schedule below stays unfiltered and catches newly-published advisories against unchanged
+    # deps; workflow_dispatch / schedule are never affected by path filters.
+    paths:
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+      - 'packages/*/package.json'
+      - 'modules/*/package.json'
+      - '.github/workflows/security.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+      - 'packages/*/package.json'
+      - 'modules/*/package.json'
+      - '.github/workflows/security.yml'
+  schedule:
+    - cron: '0 0 * * 0'
+
+# Restrict the GITHUB_TOKEN to the minimum required scopes.
+permissions:
+  contents: read
+
+# Cancel any in-progress run for the same branch/PR to free up runner capacity.
+# Scheduled runs are never cancelled (unique group per run-id).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'schedule' && github.run_id || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' }}
+
+jobs:
+  security-audit:
+    # Fork PRs run on a GitHub-hosted EPHEMERAL runner — untrusted PR code never
+    # touches the self-hosted box; push / same-repo PRs keep the self-hosted runner.
+    # Pair with the repo Actions setting "Require approval for all outside
+    # collaborators" so a fork run is gated on manual maintainer approval first.
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || fromJSON('["self-hosted", "zdev", "general"]') }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true # self-hosted runner: wipe prior-run untracked/ignored files
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Audits the shipping app only.
+      - name: Run security audit
+        run: pnpm audit --audit-level=high
+
+      # Visibility only: dev-chain advisories (build tooling) are reported but
+      # never fail the workflow — the gating audit above covers what ships.
+      - name: Report dev-dependency advisories (non-gating)
+        if: always()
+        run: pnpm audit --dev --audit-level=moderate || true

@@ -1,0 +1,18 @@
+{
+  "countdown": {
+    "message": "⚠️ Le service va redémarrer sous peu pour appliquer une mise à jour — enregistrez votre travail maintenant. Les traductions en cours seront interrompues ; les entrées déjà terminées sont conservées, relancez ensuite ce qui reste inachevé.",
+    "collapse": "Réduire",
+    "expand": "Développer"
+  },
+  "restarted": {
+    "message": "Le service a redémarré récemment pour appliquer une mise à jour ; une partie de l'activité a pu être interrompue — relancez tout ce qui semble incomplet.",
+    "dismiss": "Ignorer"
+  },
+  "cancelled": {
+    "message": "Le redémarrage planifié du service a été annulé — vous pouvez continuer à travailler normalement.",
+    "dismiss": "Ignorer"
+  },
+  "slot": {
+    "aria": "Vous utilisez l'environnement {{label}}"
+  }
+}

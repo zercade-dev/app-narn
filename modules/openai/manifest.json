@@ -1,0 +1,36 @@
+{
+  "id": "openai",
+  "name": "OpenAI (GPT)",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "capabilities": ["translate", "batch"],
+  "costTier": "medium",
+  "configSchema": {
+    "model": {
+      "type": "string",
+      "description": "OpenAI model id (e.g. gpt-4o, gpt-4o-mini, o1). Left blank until live discovery selects the cheapest available model."
+    },
+    "reasoningEffort": {
+      "type": "string",
+      "default": "disabled",
+      "description": "Reasoning effort level (model-specific). Common values: disabled, low, medium, high, xhigh"
+    },
+    "verbose": {
+      "type": "boolean",
+      "default": false,
+      "description": "Log full prompts and responses"
+    },
+    "batchMode": {
+      "type": "string",
+      "enum": ["language", "entry"],
+      "default": "entry",
+      "description": "Batch by target language or by entry"
+    },
+    "useStructuredOutput": {
+      "type": "boolean",
+      "default": false,
+      "description": "Experimental — enabling this is experimental and may change. Request a valid-JSON response via OpenAI's native JSON mode (response_format json_object). Forces syntactically valid JSON so malformed output is far less likely. Off by default — enable only if you see 'malformed JSON from provider' errors."
+    }
+  },
+  "requiredEnvVars": ["OPENAI_API_KEY"]
+}

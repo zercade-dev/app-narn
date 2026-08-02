@@ -1,0 +1,357 @@
+{
+  "id": "genshin-phrases",
+  "name": "Common Phrases",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1700000000000,
+  "terms": [
+    {
+      "id": "genshin-phrases-close",
+      "source": "Close",
+      "translations": {
+        "zh-hans": "关闭",
+        "zh-hant": "關閉",
+        "ko": "끄기",
+        "ja": "閉じる",
+        "es": "Apagar",
+        "fr": "Fermer",
+        "ru": "Закрыть",
+        "th": "ปิด",
+        "vi": "Đóng",
+        "de": "Ausschalten",
+        "id": "Tutup",
+        "pt-br": "Fechar",
+        "tr": "Kapat",
+        "it": "Chiudi"
+      }
+    },
+    {
+      "id": "genshin-phrases-exit",
+      "source": "Exit",
+      "translations": {
+        "zh-hans": "离开",
+        "zh-hant": "離開",
+        "ko": "나가기",
+        "ja": "離れる",
+        "es": "Salir",
+        "fr": "Quitter",
+        "ru": "Выйти",
+        "th": "ออก",
+        "vi": "Rời Khỏi",
+        "de": "Verlassen",
+        "id": "Keluar",
+        "pt-br": "Sair",
+        "tr": "Çık",
+        "it": "Esci"
+      }
+    },
+    {
+      "id": "genshin-phrases-get-ready",
+      "source": "Get Ready",
+      "translations": {
+        "zh-hans": "准备",
+        "es": "Prepararse",
+        "ru": "Готов",
+        "th": "เตรียมพร้อม",
+        "vi": "Sẵn Sàng",
+        "id": "Bersiap"
+      }
+    },
+    {
+      "id": "genshin-phrases-hit-v",
+      "source": "Hit (v)",
+      "translations": {
+        "ru": "Ударить",
+        "id": "Hit (v)"
+      }
+    },
+    {
+      "id": "genshin-phrases-open",
+      "source": "Open",
+      "translations": {
+        "zh-hans": "打开",
+        "zh-hant": "打開",
+        "ko": "열기",
+        "ja": "開ける",
+        "es": "Abrir",
+        "fr": "Ouvrir",
+        "ru": "Открыть",
+        "th": "เปิด",
+        "vi": "Mở",
+        "de": "Öffnen",
+        "id": "Buka",
+        "pt-br": "Abrir",
+        "tr": "Aç",
+        "it": "Apri"
+      }
+    },
+    {
+      "id": "genshin-phrases-pause",
+      "source": "Pause",
+      "translations": {
+        "zh-hans": "暂停",
+        "zh-hant": "暫停",
+        "ko": "일시정지",
+        "ja": "一時停止",
+        "es": "Pausa",
+        "fr": "Pause",
+        "ru": "Пауза",
+        "th": "หยุดชั่วคราว",
+        "vi": "Tạm Dừng",
+        "de": "Anhalten",
+        "id": "Jeda",
+        "pt-br": "Pausar",
+        "tr": "Duraklat",
+        "it": "Pausa"
+      }
+    },
+    {
+      "id": "genshin-phrases-player",
+      "source": "Player",
+      "translations": {
+        "zh-hans": "玩家",
+        "zh-hant": "玩家",
+        "ko": "플레이어",
+        "ja": "プレイヤー",
+        "es": "Jugador",
+        "fr": "Joueur",
+        "ru": "Игрок",
+        "th": "ผู้เล่น",
+        "vi": "Người Chơi",
+        "de": "Spieler",
+        "id": "Pemain",
+        "pt-br": "Jogador",
+        "tr": "Oyuncu",
+        "it": "Giocatore"
+      }
+    },
+    {
+      "id": "genshin-phrases-players-ready",
+      "source": "Players Ready:",
+      "translations": {
+        "zh-hans": "已准备玩家：",
+        "es": "Jugadores Listos:",
+        "ru": "Игроков готово:",
+        "vi": "Người chơi sẵn sàng:",
+        "id": "Pemain Bersiap:"
+      }
+    },
+    {
+      "id": "genshin-phrases-press",
+      "source": "Press",
+      "translations": {
+        "zh-hans": "按",
+        "es": "Presionar",
+        "ru": "Нажать",
+        "vi": "Nhấn",
+        "id": "Tekan"
+      }
+    },
+    {
+      "id": "genshin-phrases-pull",
+      "source": "Pull",
+      "translations": {
+        "zh-hans": "拉动",
+        "zh-hant": "拉動",
+        "ko": "당기기",
+        "ja": "引く",
+        "es": "Activar",
+        "fr": "Tirer",
+        "ru": "Потянуть",
+        "th": "ดึง",
+        "vi": "Kéo",
+        "de": "Ziehen",
+        "id": "Tarik",
+        "pt-br": "Puxar",
+        "tr": "Çek",
+        "it": "Tira"
+      }
+    },
+    {
+      "id": "genshin-phrases-pull-the-lever",
+      "source": "Pull the lever",
+      "translations": {
+        "zh-hans": "拉动拉杆",
+        "zh-hant": "拉動拉桿",
+        "ko": "당겨 보자",
+        "ja": "レバーを引く",
+        "es": "Mover la palanca",
+        "fr": "Tirer le levier",
+        "ru": "Потянуть за рычаг",
+        "th": "ดึงคันโยก",
+        "vi": "Kéo cần gạt",
+        "de": "Hebel ziehen",
+        "id": "Tarik tuas",
+        "pt-br": "Puxar a alavanca",
+        "tr": "Kolu çek",
+        "it": "Tira la leva"
+      }
+    },
+    {
+      "id": "genshin-phrases-push",
+      "source": "Push",
+      "translations": {
+        "zh-hans": "推动",
+        "zh-hant": "推動",
+        "ko": "밀기",
+        "ja": "押す",
+        "es": "Empujar",
+        "fr": "Pousser",
+        "ru": "Толкнуть",
+        "th": "ผลัก",
+        "vi": "Đẩy",
+        "de": "Bewegen",
+        "id": "Dorong",
+        "pt-br": "Empurrar",
+        "tr": "İttir",
+        "it": "Spingi"
+      }
+    },
+    {
+      "id": "genshin-phrases-push-the-button",
+      "source": "Push the button",
+      "translations": {
+        "zh-hans": "按下按钮",
+        "es": "Presionar el botón",
+        "ru": "Нажать на кнопку",
+        "th": "กดปุ่ม",
+        "vi": "Nhấn nút",
+        "id": "Tekan tombol"
+      }
+    },
+    {
+      "id": "genshin-phrases-rules",
+      "source": "Rules",
+      "translations": {
+        "zh-hans": "规则",
+        "zh-hant": "規則",
+        "ja": "ルール",
+        "es": "Reglas:",
+        "ru": "Правила",
+        "th": "กติกา",
+        "vi": "Quy tắc",
+        "id": "Aturan"
+      }
+    },
+    {
+      "id": "genshin-phrases-score",
+      "source": "Score",
+      "translations": {
+        "zh-hans": "分数",
+        "zh-hant": "分數",
+        "ko": "점수",
+        "ja": "スコア",
+        "es": "Puntuación",
+        "fr": "Score",
+        "ru": "Счёт",
+        "th": "คะแนน",
+        "vi": "Điểm",
+        "de": "Punktzahl",
+        "id": "Skor",
+        "pt-br": "Pontuação",
+        "tr": "Puan",
+        "it": "Punteggio"
+      }
+    },
+    {
+      "id": "genshin-phrases-score-2",
+      "source": "Score:",
+      "translations": {
+        "zh-hans": "分数：",
+        "zh-hant": "分數：",
+        "ko": "점수:",
+        "ja": "スコア：",
+        "es": "Puntuación:",
+        "fr": "Score:",
+        "ru": "Счёт:",
+        "th": "คะแนน:",
+        "vi": "Điểm:",
+        "de": "Punktzahl:",
+        "id": "Skor:",
+        "pt-br": "Pontuação:",
+        "tr": "Puan:",
+        "it": "Punteggio:"
+      }
+    },
+    {
+      "id": "genshin-phrases-start-game",
+      "source": "Start Game",
+      "translations": {
+        "zh-hans": "开始游戏",
+        "zh-hant": "開始遊戲",
+        "ko": "게임 시작",
+        "ja": "ゲームスタート",
+        "es": "Empezar juego",
+        "fr": "Démarrer",
+        "ru": "Играть",
+        "th": "เริ่มเกม",
+        "vi": "Bắt Đầu",
+        "de": "Spiel starten",
+        "id": "Mulai Bermain",
+        "pt-br": "Iniciar Jogo",
+        "tr": "Oyunu Başlat",
+        "it": "Inizia partita"
+      }
+    },
+    {
+      "id": "genshin-phrases-turn-off",
+      "source": "Turn off",
+      "translations": {
+        "zh-hans": "关闭",
+        "zh-hant": "關閉",
+        "ko": "끄기",
+        "ja": "オフにする",
+        "es": "Apagar",
+        "fr": "Fermer",
+        "ru": "Выключить",
+        "th": "ปิด",
+        "vi": "Tắt",
+        "de": "Ausschalten",
+        "id": "Matikan",
+        "pt-br": "Desativar",
+        "tr": "Kapat",
+        "it": "Spegni"
+      }
+    },
+    {
+      "id": "genshin-phrases-turn-on",
+      "source": "Turn on",
+      "translations": {
+        "zh-hans": "开启",
+        "zh-hant": "開啟",
+        "ko": "오픈",
+        "ja": "オンにする",
+        "es": "Activar",
+        "fr": "Ouvrir",
+        "ru": "Включить",
+        "th": "เปิด",
+        "vi": "Bật",
+        "de": "Anschalten",
+        "id": "Aktifkan",
+        "pt-br": "Ativar",
+        "tr": "Aç",
+        "it": "Accendi"
+      }
+    },
+    {
+      "id": "genshin-phrases-use",
+      "source": "Use",
+      "translations": {
+        "zh-hans": "使用",
+        "zh-hant": "使用",
+        "ko": "사용",
+        "ja": "使用する",
+        "es": "Usar",
+        "fr": "Utiliser",
+        "ru": "Использовать",
+        "th": "ใช้",
+        "vi": "Dùng",
+        "de": "Anwenden",
+        "id": "Gunakan",
+        "pt-br": "Usar",
+        "tr": "Kullan",
+        "it": "Usa"
+      }
+    }
+  ]
+}

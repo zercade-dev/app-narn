@@ -1,0 +1,73 @@
+{
+  "id": "generic-ai",
+  "name": "Generic AI",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "capabilities": ["translate", "batch"],
+  "costTier": "medium",
+  "configSchema": {
+    "format": {
+      "type": "string",
+      "enum": ["openai", "anthropic"],
+      "default": "openai",
+      "description": "Format of the API backend. Use 'openai' for OpenAI-compatible endpoints (Ollama, vLLM, etc.). Use 'anthropic' for Anthropic-compatible endpoints."
+    },
+    "baseURL": {
+      "type": "string",
+      "description": "Base URL for the OpenAI-compatible API (e.g. 'http://localhost:11434/v1' for Ollama, 'http://localhost:1234/v1' for LM Studio)."
+    },
+    "endpointType": {
+      "type": "string",
+      "enum": ["ollama", "lm-studio", "unknown"],
+      "default": "unknown",
+      "description": "Local-LLM server type (replaces the old baseURL autodetect). 'ollama' = model discovery + VRAM-footprint probe + unload-between-models. 'lm-studio' = enriched discovery (context length, quantization) + unload-between-models — but no VRAM-footprint probe, which LM Studio's REST API doesn't support. 'unknown' = a generic OpenAI-compatible endpoint (e.g. vLLM). OpenRouter is detected by URL regardless of this setting."
+    },
+    "allowInsecureHttp": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allow http:// base URLs for non-localhost hosts (e.g. Ollama or LM Studio on your LAN). Use only on trusted private networks."
+    },
+    "free": {
+      "type": "boolean",
+      "default": true,
+      "description": "This endpoint is a free, local LLM (e.g. Ollama/LM Studio). When on, the model picker hides pricing and shows model size/VRAM footprint instead (VRAM probing is Ollama-only), and the module is treated as free (cost tier \"free\"). Turn off for a paid generic OpenAI-compatible endpoint."
+    },
+    "model": {
+      "type": "string",
+      "description": "Model ID to use. Left blank until live discovery selects the cheapest model."
+    },
+    "reasoningEffort": {
+      "type": "string",
+      "default": "disabled",
+      "description": "Reasoning effort level (if supported by provider)"
+    },
+    "verbose": {
+      "type": "boolean",
+      "default": false,
+      "description": "Log full prompts and responses"
+    },
+    "batchMode": {
+      "type": "string",
+      "enum": ["language", "entry"],
+      "default": "entry",
+      "description": "Batch by target language or by entry"
+    },
+    "useStructuredOutput": {
+      "type": "boolean",
+      "default": false,
+      "description": "openai format only (ignored when format is 'anthropic'). Force JSON-array output via a response_format schema. For grammar-constrained backends (Ollama/llama.cpp) this makes malformed replies (objects, code fences, wrong types) impossible — the main cause of 'malformed JSON from provider' on small local models. Only enable if your endpoint honors response_format; leave off for endpoints that reject it."
+    },
+    "rateLimitEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Apply the global requests-per-second limit to this endpoint. Off by default — local Ollama/LM Studio endpoints do not need throttling."
+    },
+    "maxParallel": {
+      "type": "number",
+      "default": 1,
+      "description": "Maximum provider requests run at once for this endpoint (1 = serial). Keep at 1 for a single local LLM; raise for a fast paid API. Applies to all of this endpoint's work — translation, AI review, and glossary suggestions."
+    }
+  },
+  "requiredEnvVars": ["GENERIC_API_KEY"],
+  "cloudDisabled": true
+}

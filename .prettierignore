@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.pnpm-store/
+pnpm-lock.yaml
+projects/
+*.tsbuildinfo
+audit-report.json
+global-config.json
+.translator-vault.json

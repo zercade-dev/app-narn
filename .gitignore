@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+packages/*/dist/
+packages/frontend/dist/
+modules/*/dist/
+*.tsbuildinfo
+
+# Caches
+.turbo/
+.vite/
+.cache/
+.nyc_output/
+
+# Test / coverage outputs
+coverage/
+test_output.txt
+
+# Logs (audit-log rotation also produces non-*.log suffixes)
+*.log
+logs/
+
+# Editor / OS cruft
+.DS_Store
+
+# Security audit artifact (regenerated on every security-check run)
+audit-report.json
+
+# Environment files — ignore real env, keep the committed example
+.env
+.env.local
+.env.*.local
+*.tmp
+
+# ----------------------------------------------------------------------------
+# Server runtime data — NEVER commit (names from .env.example + server source)
+# ----------------------------------------------------------------------------
+# Encrypted credential vault (VAULT_FILE, AES-256-GCM module API keys)
+.translator-vault.json
+# Workspace-wide module config (GLOBAL_CONFIG_FILE)
+global-config.json
+# Project data dir (PROJECTS_ROOT) and the auto-snapshot backups inside it
+projects/
+.backups/
+
+# ----------------------------------------------------------------------------
+# Agent / editor tooling scratch — must never appear in the public repo
+# ----------------------------------------------------------------------------
+.claude/
+.codegraph/
+.superpowers/
+.playwright-mcp/
+.copilot-tracking/
+.v8-coverage/
+static_analysis_semgrep_*/
+.sec
+tmp
+tmp.md
+
+# Runtime artifact: the Copilot model-discovery cache
+packages/server/copilot-models-cache.json

@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "lib": ["ES2022"],
+    "composite": true
+  },
+  "include": ["src", "src/**/*.json", "src/**/*.mjs"],
+  "references": [{ "path": "../shared" }],
+  "exclude": ["node_modules", "dist"]
+}

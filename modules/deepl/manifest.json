@@ -1,0 +1,33 @@
+{
+  "id": "deepl",
+  "name": "DeepL",
+  "version": "1.0.0",
+  "entry": "./src/index.ts",
+  "capabilities": ["translate", "glossary-push", "batch"],
+  "costTier": "low",
+  "configSchema": {
+    "apiKey": {
+      "type": "string",
+      "format": "password"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["free", "pro"],
+      "default": "free"
+    },
+    "model": {
+      "type": "string",
+      "enum": ["latency_optimized", "quality_optimized", "prefer_quality_optimized"],
+      "default": "quality_optimized"
+    },
+    "englishVariant": {
+      "type": "string",
+      "enum": ["en-US", "en-GB"],
+      "default": "en-US",
+      "description": "English variant sent as the target language when the project language is English.",
+      "projectOnly": true
+    }
+  },
+  "requiredEnvVars": ["DEEPL_API_KEY"],
+  "instanceable": false
+}

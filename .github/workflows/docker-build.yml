@@ -1,0 +1,110 @@
+name: docker-build
+
+# Verify the production image assembles AND boots: the storage seam runs a FATAL
+# startup migration, so the server cannot start without Postgres. We build the
+# image, then boot it against a throwaway Postgres on a private docker network and
+# probe /api/readyz — closing the boot+health smoke this workflow once deferred.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Restrict the GITHUB_TOKEN to the minimum required scopes. This workflow only
+# checks out the repo and builds + boot-smokes the image locally — it never
+# pushes to a registry — so read-only contents access is all it needs.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    # Fork PRs build on a GitHub-hosted EPHEMERAL runner — a forked PR's untrusted
+    # build code never reaches the self-hosted box; push / same-repo PRs keep the
+    # self-hosted runner (Docker provisioned on the box). Pair with the repo Actions
+    # setting "Require approval for all outside collaborators" for manual approval.
+    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || fromJSON('["self-hosted", "zdev", "general"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          clean: true # self-hosted runner: wipe prior-run untracked/ignored files
+
+      # Self-contained repo (own Dockerfile + pnpm-lock.yaml) — context is the repo root.
+      - name: Build image
+        run: docker build -t narn:ci .
+
+      - name: Boot the image against Postgres and probe readiness
+        # Runner-agnostic boot smoke: run Postgres + the app on a throwaway private
+        # docker network and probe /api/readyz from INSIDE the app container via
+        # `docker exec` (its own loopback). No GitHub `services:`, no `--network host`,
+        # no host ports — none of those work when the self-hosted runner isolates job
+        # steps from the docker network namespace. Names are run-scoped so concurrent
+        # jobs on the shared runner never collide; a trap tears everything down.
+        run: |
+          set -euo pipefail
+          id="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          net="narn-ci-net-$id"; pg="narn-ci-pg-$id"; app="narn-ci-$id"
+          cleanup() {
+            # -v also drops each container's anonymous volume (postgres declares a
+            # VOLUME) so smoke runs don't orphan one volume apiece on the runner.
+            docker rm -f -v "$app" "$pg" >/dev/null 2>&1 || true
+            docker network rm "$net" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          docker network create "$net" >/dev/null
+          docker run -d --name "$pg" --network "$net" \
+            -e POSTGRES_USER=translator -e POSTGRES_PASSWORD=translator -e POSTGRES_DB=translator \
+            postgres:17-bookworm@sha256:517f51201e18a12503a42945ef0b434d65a5297d72a4180f11905d905fcc5612 >/dev/null
+          for _ in $(seq 1 30); do
+            if docker exec "$pg" pg_isready -U translator -d translator >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+
+          # The app reaches Postgres by container name on the private network.
+          docker run -d --name "$app" --network "$net" \
+            -e HOST=127.0.0.1 -e PORT=3001 \
+            -e DATABASE_URL="postgres://translator:translator@$pg:5432/translator" \
+            narn:ci >/dev/null
+
+          ok=0
+          for _ in $(seq 1 30); do
+            if docker exec "$app" node -e 'fetch("http://127.0.0.1:3001/api/readyz").then(r=>r.text()).then(t=>process.exit(t.includes(`"ready"`)?0:1)).catch(()=>process.exit(1))' 2>/dev/null; then
+              echo "readyz OK"; ok=1; break
+            fi
+            sleep 2
+          done
+          if [ "$ok" != 1 ]; then
+            echo "readyz did not become ready; container logs:" >&2
+            docker logs "$app" >&2 || true
+            exit 1
+          fi
+
+      - name: Prune aged Docker artifacts
+        # `docker build` + a throwaway Postgres stack up dangling images, build
+        # cache, and orphaned anon volumes; keep the shared self-hosted box from
+        # growing unbounded. `until=2h` reaps only artifacts older than 2h, so a
+        # CONCURRENT sibling job's in-flight image/cache is never touched. `docker
+        # volume prune` removes only UNREFERENCED volumes — a running sibling's
+        # postgres data volume is left alone. NEVER use an unfiltered `docker system
+        # prune` on this shared runner; it would destroy a concurrent job's work.
+        if: always()
+        run: |
+          docker image prune -af --filter "until=2h" || true
+          # Stopped containers + orphaned networks left by a job that was cancelled/
+          # killed before its cleanup trap ran (cancel-in-progress can SIGKILL a step
+          # mid-sleep). Networks especially: leaked ones exhaust Docker's finite bridge
+          # address pool and wedge every future `docker network create`. until=2h keeps
+          # concurrent siblings safe; an in-use network/container is skipped regardless.
+          docker container prune -f --filter "until=2h" || true
+          docker network prune -f --filter "until=2h" || true
+          # Plain `docker build` here always fills the DEFAULT (docker-driver) builder's
+          # cache, regardless of which builder is currently "selected" — but a BARE
+          # `buildx prune` only hits whatever IS currently selected, and that selection
+          # (~/.docker/buildx/current) is shared across every job on this runner's user.
+          # Any --push workflow that ran more recently on this box already called
+          # `docker buildx use <name>`, leaving `default` unselected — so a bare prune
+          # here silently re-prunes someone else's already-covered builder while
+          # `default`'s own cache (the one this job just filled) is never touched.
+          # Target it by name, like every other workflow targets its own builder.
+          docker buildx prune --builder default -af --filter "until=2h" || true
+          docker volume prune -f || true

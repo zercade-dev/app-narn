@@ -1,0 +1,56 @@
+{
+  "title": "Orphelins",
+  "subtitle": "Entr\u00e9es qui ne sont plus dans le dernier CSV import\u00e9. Supprimez-les ou r\u00e9affectez leurs traductions \u00e0 une autre entr\u00e9e.",
+  "emptyTitle": "Tout est reli\u00e9",
+  "empty": "Aucun enregistrement orphelin\u00a0: les CSV import\u00e9s correspondent au projet actuel.",
+  "noProject": "S\u00e9lectionnez un projet pour voir les orphelins.",
+  "columns": {
+    "select": "S\u00e9lectionner",
+    "source": "Source",
+    "translations": "Traductions",
+    "actions": "Actions"
+  },
+  "actions": {
+    "delete": "Supprimer",
+    "relink": "R\u00e9affecter",
+    "bulkDelete": "Supprimer la s\u00e9lection ({{count}})",
+    "refresh": "Actualiser",
+    "cancel": "Annuler",
+    "back": "Retour"
+  },
+  "confirmDelete": {
+    "title": "Supprimer l\u2019orphelin\u00a0?",
+    "body": "Cette action supprime d\u00e9finitivement l\u2019enregistrement orphelin et ses traductions. Elle est irr\u00e9versible."
+  },
+  "relink": {
+    "title": "R\u00e9affecter l\u2019orphelin",
+    "description": "D\u00e9place les traductions de cette entr\u00e9e orpheline vers une autre, class\u00e9es selon la similarit\u00e9 du texte source de chaque candidate avec celui de cet orphelin.",
+    "searchPlaceholder": "Rechercher des entr\u00e9es par texte source\u2026",
+    "noCandidates": "Aucune entr\u00e9e correspondante",
+    "submit": "Continuer",
+    "confirmTitle": "Confirmer la r\u00e9affectation",
+    "confirmDescription": "Choisissez comment les traductions de l\u2019orphelin sont appliqu\u00e9es \u00e0 l\u2019entr\u00e9e cible avant de r\u00e9affecter.",
+    "overrideModeLabel": "Mode de remplacement",
+    "overrideEmptyOnly": "Ne remplir que les traductions vides (conserver celles existantes de la cible)",
+    "overrideAll": "Remplacer toutes les traductions par celles de l\u2019orphelin",
+    "aiRetranslateLabel": "Utiliser l\u2019IA pour retraduire",
+    "aiRetranslateHint": "Apr\u00e8s la r\u00e9affectation, une passe IA compare l\u2019ancien texte source de l\u2019orphelin au nouveau texte source de la cible et met \u00e0 jour chaque traduction existante pour refl\u00e9ter le m\u00eame changement.",
+    "aiModuleLabel": "Module d\u2019IA",
+    "aiModelLabel": "Mod\u00e8le",
+    "aiReasoningEffortLabel": "Effort de raisonnement",
+    "aiModulePlaceholder": "S\u00e9lectionnez un module\u2026",
+    "aiNoModules": "Aucun module compatible IA n\u2019est activ\u00e9 \u2014 activez-en un dans les param\u00e8tres globaux pour utiliser la retraduction par IA.",
+    "confirmSubmit": "R\u00e9affecter"
+  },
+  "toast": {
+    "loadError": "Impossible de charger les orphelins",
+    "deleted": "Orphelin supprim\u00e9",
+    "deleteError": "Impossible de supprimer l\u2019orphelin",
+    "bulkDeleted": "{{count}} orphelins supprim\u00e9s",
+    "relinked": "Traductions d\u00e9plac\u00e9es",
+    "relinkError": "Impossible de r\u00e9affecter l\u2019orphelin",
+    "candidatesError": "Impossible de charger les entr\u00e9es candidates",
+    "aiRetranslateStarted": "Retraduction IA d\u00e9marr\u00e9e \u2014 voir l\u2019onglet Activit\u00e9",
+    "aiRetranslateUnavailable": "R\u00e9affect\u00e9, mais la retraduction IA n\u2019a pas pu d\u00e9marrer (aucun module compatible IA disponible)"
+  }
+}

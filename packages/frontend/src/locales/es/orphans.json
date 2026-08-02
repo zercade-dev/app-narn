@@ -1,0 +1,56 @@
+{
+  "title": "Huérfanas",
+  "subtitle": "Entradas que ya no están en el último CSV importado. Elimínalas o reasigna sus traducciones a otra entrada.",
+  "emptyTitle": "Todo está vinculado",
+  "empty": "No hay registros huérfanos: los CSV importados coinciden con el proyecto actual.",
+  "noProject": "Selecciona un proyecto para ver las huérfanas.",
+  "columns": {
+    "select": "Seleccionar",
+    "source": "Origen",
+    "translations": "Traducciones",
+    "actions": "Acciones"
+  },
+  "actions": {
+    "delete": "Eliminar",
+    "relink": "Reasignar",
+    "bulkDelete": "Eliminar seleccionadas ({{count}})",
+    "refresh": "Actualizar",
+    "cancel": "Cancelar",
+    "back": "Atrás"
+  },
+  "confirmDelete": {
+    "title": "¿Eliminar huérfana?",
+    "body": "Esto elimina de forma permanente el registro huérfano y sus traducciones. No se puede deshacer."
+  },
+  "relink": {
+    "title": "Reasignar huérfana",
+    "description": "Mueve las traducciones de esta entrada huérfana a otra, ordenadas por lo similar que es el texto de origen de cada candidata al de esta huérfana.",
+    "searchPlaceholder": "Buscar entradas por texto de origen…",
+    "noCandidates": "No hay entradas coincidentes",
+    "submit": "Continuar",
+    "confirmTitle": "Confirmar reasignación",
+    "confirmDescription": "Elige cómo se aplican las traducciones de la huérfana a la entrada destino antes de reasignar.",
+    "overrideModeLabel": "Modo de sobrescritura",
+    "overrideEmptyOnly": "Rellenar solo las traducciones vacías (conservar las existentes del destino)",
+    "overrideAll": "Sobrescribir todas las traducciones con las de la huérfana",
+    "aiRetranslateLabel": "Usar IA para retraducir",
+    "aiRetranslateHint": "Tras reasignar, un paso de IA compara el texto de origen antiguo de la huérfana con el nuevo del destino y actualiza cada traducción existente para reflejar el mismo cambio.",
+    "aiModuleLabel": "Módulo de IA",
+    "aiModelLabel": "Modelo",
+    "aiReasoningEffortLabel": "Esfuerzo de razonamiento",
+    "aiModulePlaceholder": "Selecciona un módulo…",
+    "aiNoModules": "No hay ningún módulo con IA habilitado; habilita uno en la configuración global para usar la retraducción con IA.",
+    "confirmSubmit": "Reasignar"
+  },
+  "toast": {
+    "loadError": "No se pudieron cargar las huérfanas",
+    "deleted": "Huérfana eliminada",
+    "deleteError": "No se pudo eliminar la huérfana",
+    "bulkDeleted": "Se eliminaron {{count}} huérfanas",
+    "relinked": "Traducciones movidas",
+    "relinkError": "No se pudo reasignar la huérfana",
+    "candidatesError": "No se pudieron cargar las entradas candidatas",
+    "aiRetranslateStarted": "Retraducción IA iniciada — consulta la pestaña Actividad",
+    "aiRetranslateUnavailable": "Reasignado, pero la retraducción IA no pudo iniciarse (no hay ningún módulo con IA disponible)"
+  }
+}

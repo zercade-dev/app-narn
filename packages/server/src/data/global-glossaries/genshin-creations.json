@@ -1,0 +1,1089 @@
+{
+  "id": "genshin-creations",
+  "name": "Creations",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1783191865082,
+  "terms": [
+    {
+      "id": "genshin-creations-abyss-herald-frost-fall",
+      "source": "Abyss Herald: Frost Fall",
+      "translations": {
+        "zh-hans": "深渊使徒·霜落",
+        "zh-hant": "深淵使徒·霜落",
+        "ko": "심연 사도·서리 내림",
+        "ja": "アビスの使徒·落霜",
+        "es": "Emisario del Abismo - Helada sombría",
+        "fr": "Apôtre de l'Abîme - Frimas",
+        "ru": "Вестник Бездны: Наступление хлада",
+        "th": "Abyss Herald: Frost Fall",
+        "vi": "Sứ Đồ Vực Sâu - Sương Lạc",
+        "de": "Abgrundbote – Frostfall",
+        "id": "Abyss Herald: Frost Fall",
+        "pt-br": "Apóstolo do Abismo - Geada Imponente",
+        "tr": "Hiçliğin Habercisi: Buzul Kıyamet",
+        "it": "Apostolo dell'Abisso: Cascata algida"
+      }
+    },
+    {
+      "id": "genshin-creations-abyss-lector-violet-lightning",
+      "source": "Abyss Lector: Violet Lightning",
+      "translations": {
+        "zh-hans": "深渊咏者·紫电",
+        "zh-hant": "深淵詠者·紫電",
+        "ko": "심연 봉독자·자색 뇌전",
+        "ja": "アビスの詠唱者・紫電",
+        "es": "Bardo del Abismo - Trueno púrpura",
+        "fr": "Chantre de l'Abîme - Foudre pourpre",
+        "ru": "Чтец Бездны: Пурпурная молния",
+        "th": "Abyss Lector: Violet Lightning",
+        "vi": "Học Sĩ Vực Sâu - Tử Điện",
+        "de": "Abgrundsänger – Lila Blitze",
+        "id": "Abyss Lector: Violet Lightning",
+        "pt-br": "Bardo do Abismo - Trovão Violeta",
+        "tr": "Hiçlik Vaizi: Mor Şimşek",
+        "it": "Cantore dell'Abisso: Fulmine viola"
+      }
+    },
+    {
+      "id": "genshin-creations-anemo-slime",
+      "source": "Anemo Slime",
+      "translations": {
+        "zh-hans": "风史莱姆",
+        "zh-hant": "風史萊姆",
+        "ko": "바람 슬라임",
+        "ja": "風スライム",
+        "es": "Slime Anemo",
+        "fr": "Anémoblob",
+        "ru": "Анемо слайм",
+        "th": "Anemo Slime",
+        "de": "Anemo-Schleim",
+        "vi": "Slime Phong",
+        "id": "Anemo Slime",
+        "pt-br": "Slime Anemo",
+        "tr": "Rüzgar Bodurlopu",
+        "it": "Melmoso di Anemo"
+      }
+    },
+    {
+      "id": "genshin-creations-blazing-axe-mitachurl",
+      "source": "Blazing Axe Mitachurl",
+      "translations": {
+        "zh-hans": "火斧丘丘暴徒",
+        "zh-hant": "火斧丘丘暴徒",
+        "ko": "불도끼 츄츄 폭도",
+        "ja": "ヒルチャール暴徒·炎斧",
+        "es": "Mitachurl con Hacha de Fuego",
+        "fr": "Brutoviandu avec hache Pyro",
+        "ru": "Митачурл с огненным топором",
+        "th": "Blazing Axe Mitachurl",
+        "de": "Mitachurl mit Feueraxt",
+        "vi": "Bạo Đồ Hilichurl Búa Lửa",
+        "id": "Blazing Axe Mitachurl",
+        "pt-br": "Mitachurl do Machado Ardente",
+        "tr": "Alev Baltalı Dağ Azmanı",
+        "it": "Mitachurl con ascia di fuoco"
+      }
+    },
+    {
+      "id": "genshin-creations-cryo-abyss-mage",
+      "source": "Cryo Abyss Mage",
+      "translations": {
+        "zh-hans": "冰深渊法师",
+        "zh-hant": "冰深淵法師",
+        "ko": "얼음의 심연 메이지",
+        "ja": "アビスの魔術師·氷",
+        "es": "Mago del Abismo Cryo",
+        "fr": "Cryomage de l'Abîme",
+        "ru": "Крио маг Бездны",
+        "th": "Cryo Abyss Mage",
+        "de": "Kryo-Abgrundmagier",
+        "vi": "Pháp Sư Vực Sâu Băng",
+        "id": "Cryo Abyss Mage",
+        "pt-br": "Feiticeiro do Abismo Cryo",
+        "tr": "Hiçlik Buz Büyücüsü",
+        "it": "Mago dell'Abisso di Cryo"
+      }
+    },
+    {
+      "id": "genshin-creations-cryo-slime",
+      "source": "Cryo Slime",
+      "translations": {
+        "zh-hans": "冰史莱姆",
+        "zh-hant": "冰史萊姆",
+        "ko": "얼음 슬라임",
+        "ja": "氷スライム",
+        "es": "Slime Cryo",
+        "fr": "Cryoblob",
+        "ru": "Крио слайм",
+        "th": "Cryo Slime",
+        "de": "Kryo-Schleim",
+        "vi": "Slime Băng",
+        "id": "Cryo Slime",
+        "pt-br": "Slime Cryo",
+        "tr": "Buz Bodurlopu",
+        "it": "Melmoso di Cryo"
+      }
+    },
+    {
+      "id": "genshin-creations-cryo-whopperflower",
+      "source": "Cryo Whopperflower",
+      "translations": {
+        "zh-hans": "冰霜骗骗花",
+        "zh-hant": "冰霜騙騙花",
+        "ko": "얼어붙은 구라구라꽃",
+        "ja": "トリックフラワー·氷",
+        "es": "Megaflora Cryo",
+        "fr": "Fleur mensongère Cryo",
+        "ru": "Крио попрыгунья",
+        "th": "Cryo Whopperflower",
+        "de": "Gigantische Kryo-Vaniloqua",
+        "vi": "Hoa Lừa Dối Băng Giá",
+        "id": "Cryo Whopperflower",
+        "pt-br": "Flor Gigante Cryo",
+        "tr": "Yalancı Buz Çiçeği",
+        "it": "Malefiore di Cryo"
+      }
+    },
+    {
+      "id": "genshin-creations-dendro-slime",
+      "source": "Dendro Slime",
+      "translations": {
+        "zh-hans": "草史莱姆",
+        "zh-hant": "草史萊姆",
+        "ko": "풀 슬라임",
+        "ja": "草スライム",
+        "es": "Slime Dendro",
+        "fr": "Dendroblob",
+        "ru": "Дендро слайм",
+        "th": "Dendro Slime",
+        "de": "Dendro-Schleim",
+        "vi": "Slime Thảo",
+        "id": "Dendro Slime",
+        "pt-br": "Slime Dendro",
+        "tr": "Doğa Bodurlopu",
+        "it": "Melmoso di Dendro"
+      }
+    },
+    {
+      "id": "genshin-creations-electro-abyss-mage",
+      "source": "Electro Abyss Mage",
+      "translations": {
+        "zh-hans": "雷深渊法师",
+        "zh-hant": "雷深淵法師",
+        "ko": "번개의 심연 메이지",
+        "ja": "アビスの魔術師・雷",
+        "es": "Mago del Abismo Electro",
+        "fr": "Électromage de l'Abîme",
+        "ru": "Электро маг Бездны",
+        "th": "Electro Abyss Mage",
+        "de": "Elektro-Abgrundmagier",
+        "vi": "Pháp Sư Vực Sâu Lôi",
+        "id": "Electro Abyss Mage",
+        "pt-br": "Feiticeiro do Abismo Electro",
+        "tr": "Hiçlik Elektrik Büyücüsü",
+        "it": "Mago dell'Abisso di Electro"
+      }
+    },
+    {
+      "id": "genshin-creations-electro-slime",
+      "source": "Electro Slime",
+      "translations": {
+        "zh-hans": "雷史莱姆",
+        "zh-hant": "雷史萊姆",
+        "ko": "번개 슬라임",
+        "ja": "雷スライム",
+        "es": "Slime Electro",
+        "fr": "Électroblobs",
+        "ru": "Электро слайм",
+        "th": "Electro Slime",
+        "de": "Elektro-Schleim",
+        "vi": "Slime Lôi",
+        "id": "Electro Slime",
+        "pt-br": "Slime Electro",
+        "tr": "Elektrik Bodurlopu",
+        "it": "Melmoso di Electro"
+      }
+    },
+    {
+      "id": "genshin-creations-electro-whopperflower",
+      "source": "Electro Whopperflower",
+      "translations": {
+        "zh-hans": "电气骗骗花",
+        "zh-hant": "電氣騙騙花",
+        "ko": "전기 구라구라꽃",
+        "ja": "トリックフラワー・雷",
+        "es": "Megaflora Electro",
+        "fr": "Fleur mensongère Électro",
+        "ru": "Электро попрыгунья",
+        "th": "Electro Whopperflower",
+        "de": "Elektro-Vaniloqua",
+        "vi": "Hoa Lừa Dối - Lôi",
+        "id": "Electro Whopperflower",
+        "pt-br": "Flor Gigante Electro",
+        "tr": "Yalancı Elektrik Çiçeği",
+        "it": "Malefiore di Electro"
+      }
+    },
+    {
+      "id": "genshin-creations-eremite-axe-vanguard",
+      "source": "Eremite Axe Vanguard",
+      "translations": {
+        "zh-hans": "镀金旅团·阵前斧手",
+        "zh-hant": "鍍金旅團·陣前斧手",
+        "ko": "도금 여단·선봉 부월수",
+        "ja": "エルマイト旅団·アックス",
+        "es": "Eremita Hachera",
+        "fr": "Lanceuse de hache des Érémites",
+        "ru": "Топорник Пустынников",
+        "th": "Eremite Axe Vanguard",
+        "vi": "Eremite - Rìu Chiến",
+        "de": "Goldbrigade – Axtstürmerin",
+        "id": "Eremite Axe Vanguard",
+        "pt-br": "Eremita - Vanguarda do Machado",
+        "tr": "Münzevi Öncü Baltacı",
+        "it": "Eremita d'assalto con scure"
+      }
+    },
+    {
+      "id": "genshin-creations-eremite-desert-clearwater",
+      "source": "Eremite Desert Clearwater",
+      "translations": {
+        "zh-hans": "镀金旅团·沙中净水",
+        "zh-hant": "鍍金旅團·沙中淨水",
+        "ko": "도금 여단·사막의 물",
+        "ja": "エルマイト旅団·サンドウォーター",
+        "es": "Eremita Ablucionadora",
+        "fr": "Ablutionneuse des Érémites",
+        "ru": "Пустынник: Родник в песках",
+        "th": "Eremite Desert Clearwater",
+        "vi": "Eremite - Nước Giữa Sa Mạc",
+        "de": "Goldbrigade – Wüstenwasser",
+        "id": "Eremite Desert Clearwater",
+        "pt-br": "Eremita - Águas Cristalinas",
+        "tr": "Münzevi Berrak Su",
+        "it": "Eremita Acquachiara del deserto"
+      }
+    },
+    {
+      "id": "genshin-creations-fatui-skirmisher-cryogunner-legionnaire",
+      "source": "Fatui Skirmisher - Cryogunner Legionnaire",
+      "translations": {
+        "zh-hans": "愚人众先遣队·冰铳重卫士",
+        "zh-hant": "愚人眾先遣隊·冰銃重衛士",
+        "ko": "우인단 선발대·얼음총 중보병",
+        "ja": "ファデュイ先遣隊・重衛士・氷銃",
+        "es": "Soldado Fatui - Guardia con Cañón Cryo",
+        "fr": "Tirailleur Fatui - Mitrailleur Cryo",
+        "ru": "Застрельщик Фатуи: Крио бомбардир",
+        "th": "Fatui Skirmisher - Cryogunner Legionnaire",
+        "de": "Fatui-Plänkler – Kryo-Kanonen-Gardist",
+        "vi": "Đội Tiên Phong Fatui - Vệ Binh Băng Hạng Nặng",
+        "id": "Fatui Skirmisher - Cryogunner Legionnaire",
+        "pt-br": "Soldado dos Fatui - Guarda de Canhão Cryo",
+        "tr": "Fatui Avcı Eri - Lejyoner Buz Topçusu",
+        "it": "Schermagliatore dei Fatui Cryoartigliere corazzato"
+      }
+    },
+    {
+      "id": "genshin-creations-fatui-skirmisher-electrohammer-vanguard",
+      "source": "Fatui Skirmisher - Electrohammer Vanguard",
+      "translations": {
+        "zh-hans": "愚人众先遣队·雷锤前锋军",
+        "zh-hant": "愚人眾先遣隊·雷錘前鋒軍",
+        "ko": "우인단 선발대·번개 해머 돌격대",
+        "ja": "ファデュイ先遣隊·前鋒軍·雷ハンマー",
+        "es": "Soldado Fatui - Electromartillador de Vanguardia",
+        "fr": "Tirailleur Fatui - Frappeur Électro",
+        "ru": "Застрельщик Фатуи: Электро молотобоец",
+        "th": "Fatui Skirmisher - Electrohammer Vanguard",
+        "de": "Fatui-Plänkler – Elektro-Hammer-Stürmer",
+        "vi": "Đội Tiên Phong Fatui - Quân Tiên Phong Chùy Lôi",
+        "id": "Fatui Skirmisher - Electrohammer Vanguard",
+        "pt-br": "Soldado dos Fatui - Vanguarda de Martelo Electro",
+        "tr": "Fatui Avcı Eri - Öncü Elektrik Balyoz",
+        "it": "Schermagliatore dei Fatui Electromartello d'assalto"
+      }
+    },
+    {
+      "id": "genshin-creations-fatui-skirmisher-pyroslinger-bracer",
+      "source": "Fatui Skirmisher - Pyroslinger Bracer",
+      "translations": {
+        "zh-hans": "愚人众先遣队·火铳游击兵",
+        "zh-hant": "愚人眾先遣隊·火銃游擊兵",
+        "ko": "우인단 선발대·화승총 유격대",
+        "ja": "ファデュイ先遣隊·遊撃兵·炎銃",
+        "es": "Soldado Fatui - Guerrillero con Cañón Pyro",
+        "fr": "Tirailleur Fatui - Mercenaire Pyro",
+        "ru": "Застрельщик Фатуи: Пиро мушкетёр",
+        "th": "Fatui Skirmisher - Pyroslinger Bracer",
+        "de": "Fatui-Plänkler – Pyro-Kanonen-Freischärler",
+        "vi": "Đội Tiên Phong Fatui - Quân Du Kích Hỏa",
+        "id": "Fatui Skirmisher - Pyroslinger Bracer",
+        "pt-br": "Soldado dos Fatui - Guerrilheiro de Canhão Pyro",
+        "tr": "Fatui Avcı Eri - Destek Ateş Nişancısı",
+        "it": "Schermagliatore dei Fatui Fante Pyrocacciatore"
+      }
+    },
+    {
+      "id": "genshin-creations-floating-hydro-fungus",
+      "source": "Floating Hydro Fungus",
+      "translations": {
+        "zh-hans": "浮游水蕈兽",
+        "zh-hant": "浮游水蕈獸",
+        "ko": "둥실 물 버섯몬",
+        "ja": "プカプカ水キノコン",
+        "es": "Flotihongo Hydro",
+        "fr": "Fongus Hydro flottant",
+        "ru": "Парящий Гидро плесенник",
+        "th": "Floating Hydro Fungus",
+        "de": "Schwebende Hydro-Pilzbestie",
+        "vi": "Nấm Quỷ Phù Du - Thủy",
+        "id": "Floating Hydro Fungus",
+        "pt-br": "Cogumelo Flutuante Hydro",
+        "tr": "Uçan Su Mantarı",
+        "it": "Miconoide fluttuante di Hydro"
+      }
+    },
+    {
+      "id": "genshin-creations-flow-inverted-wayob-manifestation",
+      "source": "Flow-Inverted Wayob Manifestation",
+      "translations": {
+        "zh-hans": "溯流·大灵显化身",
+        "zh-hant": "溯流·大靈顯化身",
+        "ko": "역류·대영혼의 화신",
+        "ja": "噴流·大霊の化身",
+        "es": "Manifestación Wayob Contrafluyente",
+        "fr": "Manifestation coulante de Wayob",
+        "ru": "Воплощение Вайоб обращённого течения",
+        "th": "Flow-Inverted Wayob Manifestation",
+        "vi": "Hóa Thân Wayob - Nghịch Lưu",
+        "de": "Strömungsschwimmer – Wayob-Verkörperung",
+        "id": "Flow-Inverted Wayob Manifestation",
+        "pt-br": "Manifestação Wayob do Fluxo Invertido",
+        "tr": "Ters Akıntı Wayob Tezahürü",
+        "it": "Manifestazione effluente della Wayob"
+      }
+    },
+    {
+      "id": "genshin-creations-flowcurrent-bird",
+      "source": "Flowcurrent Bird",
+      "translations": {
+        "zh-hans": "浮流鸟",
+        "zh-hant": "浮流鳥",
+        "ko": "둥둥 펭귄",
+        "ja": "浮流ペンギン",
+        "es": "Ave fluyecorriente",
+        "fr": "Oiseau fluxeau",
+        "ru": "Птица течений",
+        "th": "Flowcurrent Bird",
+        "de": "Wassertreibling",
+        "vi": "Chim Nước Xanh",
+        "id": "Flowcurrent Bird",
+        "pt-br": "Pássaro do Fluxo Aéreo",
+        "tr": "Akarsu Kuşu",
+        "it": "Pinguino Solcacorrenti"
+      }
+    },
+    {
+      "id": "genshin-creations-forest-boar",
+      "source": "Forest Boar",
+      "translations": {
+        "zh-hans": "野林猪",
+        "zh-hant": "野林豬",
+        "ko": "숲멧돼지",
+        "ja": "イノシシ",
+        "es": "Jabalí del bosque",
+        "fr": "Sanglier des forêts",
+        "ru": "Лесной кабан",
+        "th": "Forest Boar",
+        "de": "Waldschwein",
+        "vi": "Heo Rừng Hoang Dã",
+        "id": "Forest Boar",
+        "pt-br": "Javali do Bosque",
+        "tr": "Orman Domuzu",
+        "it": "Cinghiale della foresta"
+      }
+    },
+    {
+      "id": "genshin-creations-frostarm-lawachurl",
+      "source": "Frostarm Lawachurl",
+      "translations": {
+        "zh-hans": "丘丘霜铠王",
+        "zh-hant": "丘丘霜鎧王",
+        "ko": "츄츄 서리왕",
+        "ja": "ヒルチャール・霜鎧の王",
+        "es": "Lawachurl Brazo Helado",
+        "fr": "Chef Brutogivré",
+        "ru": "Лавачурл с инеевым панцирем",
+        "th": "Frostarm Lawachurl",
+        "de": "Frostarm-Lawachurl",
+        "vi": "Vua Giáp Băng Hilichurl",
+        "id": "Frostarm Lawachurl",
+        "pt-br": "Lawachurl dos Braços Congelantes",
+        "tr": "Buz Kollu Dağ Reisi",
+        "it": "Lawachurl Bracciogelato"
+      }
+    },
+    {
+      "id": "genshin-creations-geo-slime",
+      "source": "Geo Slime",
+      "translations": {
+        "zh-hans": "岩史莱姆",
+        "zh-hant": "岩史萊姆",
+        "ko": "바위 슬라임",
+        "ja": "岩スライム",
+        "es": "Slime Geo",
+        "fr": "Géoblob",
+        "ru": "Гео слайм",
+        "th": "Geo Slime",
+        "de": "Geo-Schleim",
+        "vi": "Slime Nham",
+        "id": "Geo Slime",
+        "pt-br": "Slime Geo",
+        "tr": "Toprak Bodurlopu",
+        "it": "Melmoso di Geo"
+      }
+    },
+    {
+      "id": "genshin-creations-goldflame-qucusaur-tyrant",
+      "source": "Goldflame Qucusaur Tyrant",
+      "translations": {
+        "zh-hans": "金焰绒翼龙暴君",
+        "zh-hant": "金焰絨翼龍暴君",
+        "ko": "황금불꽃의 깃룡 폭군",
+        "ja": "暴君·金焔のクク竜",
+        "es": "Tirano Qucusaurio Aureoardiente",
+        "fr": "Tyran qucusaure de flamme dorée",
+        "ru": "Кукузавр-тиран золотого пламени",
+        "th": "ทรราช Qucusaurus เพลิงทอง",
+        "de": "Goldflammen-Qucusauriertyrann",
+        "vi": "Bạo Chúa Qucusaur Lửa Vàng",
+        "id": "Goldflame Qucusaurus Tyrant",
+        "pt-br": "Tirano Qucussauro da Chama Dourada",
+        "tr": "Altın Alevli Gukuzor Tiran",
+        "it": "Tiranno Qucusauro Fiammadoro"
+      }
+    },
+    {
+      "id": "genshin-creations-hilichurl",
+      "source": "Hilichurl",
+      "translations": {
+        "zh-hans": "丘丘人",
+        "zh-hant": "丘丘人",
+        "ko": "츄츄족",
+        "ja": "ヒルチャール",
+        "es": "Hilichurl",
+        "fr": "Brutocollinus",
+        "ru": "Хиличурл",
+        "th": "Hilichurl",
+        "de": "Hilichurl",
+        "vi": "Hilichurl",
+        "id": "Hilichurl",
+        "pt-br": "Hilichurl",
+        "tr": "Dağ Yabanisi",
+        "it": "Hilichurl"
+      }
+    },
+    {
+      "id": "genshin-creations-hilichurl-fighter",
+      "source": "Hilichurl Fighter",
+      "translations": {
+        "zh-hans": "打手丘丘人",
+        "zh-hant": "打手丘丘人",
+        "ko": "츄츄 싸움꾼",
+        "ja": "ヒルチャール・戦士",
+        "es": "Hilichurl Guerrero",
+        "fr": "Guerrier Brutocollinus",
+        "ru": "Хиличурл-боец",
+        "th": "Hilichurl Fighter",
+        "de": "Hilichurl-Kämpfer",
+        "vi": "Hilichurl Chiến Sĩ",
+        "id": "Hilichurl Fighter",
+        "pt-br": "Hilichurl Lutador",
+        "tr": "Savaşçı Dağ Yabanisi",
+        "it": "Hilichurl combattente"
+      }
+    },
+    {
+      "id": "genshin-creations-hydro-abyss-mage",
+      "source": "Hydro Abyss Mage",
+      "translations": {
+        "zh-hans": "水深渊法师",
+        "zh-hant": "水深淵法師",
+        "ko": "물의 심연 메이지",
+        "ja": "アビスの魔術師·水",
+        "es": "Mago del Abismo Hydro",
+        "fr": "Hydromage de l'Abîme",
+        "ru": "Гидро маг Бездны",
+        "th": "Hydro Abyss Mage",
+        "de": "Hydro-Abgrundmagier",
+        "vi": "Pháp Sư Vực Sâu Thủy",
+        "id": "Hydro Abyss Mage",
+        "pt-br": "Feiticeiro do Abismo Hydro",
+        "tr": "Hiçlik Su Büyücüsü",
+        "it": "Mago dell'Abisso di Hydro"
+      }
+    },
+    {
+      "id": "genshin-creations-hydro-samachurl",
+      "source": "Hydro Samachurl",
+      "translations": {
+        "zh-hans": "水丘丘萨满",
+        "zh-hant": "水丘丘薩滿",
+        "ko": "물 츄츄 샤먼",
+        "ja": "ヒルチャールシャーマン·水",
+        "es": "Samachurl Hydro",
+        "fr": "Brutoshaman Hydro",
+        "ru": "Гидро шамачурл",
+        "th": "Hydro Samachurl",
+        "de": "Hydro-Samachurl",
+        "vi": "Phù Thủy Hilichurl Thủy",
+        "id": "Hydro Samachurl",
+        "pt-br": "Samachurl Hydro",
+        "tr": "Su Dağ Şamanı",
+        "it": "Sciamachurl di Hydro"
+      }
+    },
+    {
+      "id": "genshin-creations-hydro-slime",
+      "source": "Hydro Slime",
+      "translations": {
+        "zh-hans": "水史莱姆",
+        "zh-hant": "水史萊姆",
+        "ko": "물 슬라임",
+        "ja": "水スライム",
+        "es": "Slime Hydro",
+        "fr": "Hydroblob",
+        "ru": "Гидро слайм",
+        "th": "Hydro Slime",
+        "de": "Hydro-Schleim",
+        "vi": "Slime Thủy",
+        "id": "Hydro Slime",
+        "pt-br": "Slime Hydro",
+        "tr": "Su Bodurlopu",
+        "it": "Melmoso di Hydro"
+      }
+    },
+    {
+      "id": "genshin-creations-kairagi-dancing-thunder",
+      "source": "Kairagi: Dancing Thunder",
+      "translations": {
+        "zh-hans": "海乱鬼·雷腾",
+        "zh-hant": "海亂鬼·雷騰",
+        "ko": "해란귀·뇌무",
+        "ja": "海乱鬼·雷騰",
+        "es": "Samurái Kairagi - Rayo danzarín",
+        "fr": "Oni des mers - Danse d'éclairs",
+        "ru": "Кайраги: Громовое вознесение",
+        "th": "Kairagi: Dancing Thunder",
+        "vi": "Kairagi - Lôi Đằng",
+        "de": "Kairagi – Galoppierender Blitz",
+        "id": "Kairagi: Dancing Thunder",
+        "pt-br": "Kairagi: Trovão Dançante",
+        "tr": "Kairagi: Dans Eden Yıldırım",
+        "it": "Kairagi: Tuono danzante"
+      }
+    },
+    {
+      "id": "genshin-creations-kairagi-fiery-might",
+      "source": "Kairagi: Fiery Might",
+      "translations": {
+        "zh-hans": "海乱鬼·炎威",
+        "zh-hant": "海亂鬼·炎威",
+        "ko": "해란귀·염위",
+        "ja": "海乱鬼·炎威",
+        "es": "Samurái Kairagi - Amenaza ígnea",
+        "fr": "Oni des mers - Menace de feu",
+        "ru": "Кайраги: Огненная мощь",
+        "th": "Kairagi: Fiery Might",
+        "vi": "Kairagi - Viêm Uy",
+        "de": "Kairagi – Sengende Macht",
+        "id": "Kairagi: Fiery Might",
+        "pt-br": "Kairagi: Força Poderosa",
+        "tr": "Kairagi: Yakıcı Güç",
+        "it": "Kairagi: Forza infuocata"
+      }
+    },
+    {
+      "id": "genshin-creations-large-anemo-slime",
+      "source": "Large Anemo Slime",
+      "translations": {
+        "zh-hans": "大型风史莱姆",
+        "zh-hant": "大型風史萊姆",
+        "ko": "거대 바람 슬라임",
+        "ja": "大型風スライム",
+        "es": "Slime Gigante Anemo",
+        "fr": "Anémoblob géant",
+        "ru": "Большой Анемо слайм",
+        "th": "Large Anemo Slime",
+        "de": "Großer Anemo-Schleim",
+        "vi": "Slime Phong Lớn",
+        "id": "Large Anemo Slime",
+        "pt-br": "Grande Slime Anemo",
+        "tr": "Büyük Rüzgar Bodurlopu",
+        "it": "Melmoso di Anemo gigante"
+      }
+    },
+    {
+      "id": "genshin-creations-large-cryo-slime",
+      "source": "Large Cryo Slime",
+      "translations": {
+        "zh-hans": "大型冰史莱姆",
+        "zh-hant": "大型冰史萊姆",
+        "ko": "거대 얼음 슬라임",
+        "ja": "大型氷スライム",
+        "es": "Slime Gigante Cryo",
+        "fr": "Cryoblob géant",
+        "ru": "Большой Крио слайм",
+        "th": "Large Cryo Slime",
+        "de": "Großer Kryo-Schleim",
+        "vi": "Slime Băng Lớn",
+        "id": "Large Cryo Slime",
+        "pt-br": "Grande Slime Cryo",
+        "tr": "Büyük Buz Bodurlopu",
+        "it": "Melmoso di Cryo gigante"
+      }
+    },
+    {
+      "id": "genshin-creations-large-dendro-slime",
+      "source": "Large Dendro Slime",
+      "translations": {
+        "zh-hans": "大型草史莱姆",
+        "zh-hant": "大型草史萊姆",
+        "ko": "거대 풀 슬라임",
+        "ja": "大型草スライム",
+        "es": "Slime Gigante Dendro",
+        "fr": "Dendroblob géant",
+        "ru": "Большой Дендро слайм",
+        "th": "Large Dendro Slime",
+        "de": "Großer Dendro-Schleim",
+        "vi": "Slime Thảo Lớn",
+        "id": "Large Dendro Slime",
+        "pt-br": "Grande Slime Dendro",
+        "tr": "Büyük Doğa Bodurlopu",
+        "it": "Melmoso di Dendro gigante"
+      }
+    },
+    {
+      "id": "genshin-creations-large-electro-slime",
+      "source": "Large Electro Slime",
+      "translations": {
+        "zh-hans": "大型雷史莱姆",
+        "zh-hant": "大型雷史萊姆",
+        "ko": "거대 번개 슬라임",
+        "ja": "大型雷スライム",
+        "es": "Slime Gigante Electro",
+        "fr": "Électroblob géant",
+        "ru": "Большой Электро слайм",
+        "th": "Large Electro Slime",
+        "de": "Großer Elektro-Schleim",
+        "vi": "Slime Lôi Lớn",
+        "id": "Large Electro Slime",
+        "pt-br": "Grande Slime Electro",
+        "tr": "Büyük Elektrik Bodurlopu",
+        "it": "Melmoso di Electro gigante"
+      }
+    },
+    {
+      "id": "genshin-creations-large-geo-slime",
+      "source": "Large Geo Slime",
+      "translations": {
+        "zh-hans": "大型岩史莱姆",
+        "zh-hant": "大型岩史萊姆",
+        "ko": "거대 바위 슬라임",
+        "ja": "大型岩スライム",
+        "es": "Slime Gigante Geo",
+        "fr": "Géoblob géant",
+        "ru": "Большой Гео слайм",
+        "th": "Large Geo Slime",
+        "de": "Großer Geo-Schleim",
+        "vi": "Slime Nham Lớn",
+        "id": "Large Geo Slime",
+        "pt-br": "Grande Slime Geo",
+        "tr": "Büyük Toprak Bodurlopu",
+        "it": "Melmoso di Geo gigante"
+      }
+    },
+    {
+      "id": "genshin-creations-large-hydro-slime",
+      "source": "Large Hydro Slime",
+      "translations": {
+        "zh-hans": "大型水史莱姆",
+        "zh-hant": "大型水史萊姆",
+        "ko": "거대 물 슬라임",
+        "ja": "大型水スライム",
+        "es": "Slime Gigante Hydro",
+        "fr": "Hydroblobs géants",
+        "ru": "Большой Гидро слайм",
+        "th": "Large Hydro Slime",
+        "de": "Großer Hydro-Schleim",
+        "vi": "Slime Thủy Lớn",
+        "id": "Large Hydro Slime",
+        "pt-br": "Grande Slime Hydro",
+        "tr": "Büyük Su Bodurlopu",
+        "it": "Melmoso di Hydro gigante"
+      }
+    },
+    {
+      "id": "genshin-creations-large-pyro-slime",
+      "source": "Large Pyro Slime",
+      "translations": {
+        "zh-hans": "大型火史莱姆",
+        "zh-hant": "大型火史萊姆",
+        "ko": "거대 화염 슬라임",
+        "ja": "大型炎スライム",
+        "es": "Slime Gigante Pyro",
+        "fr": "Pyroblobs géants",
+        "ru": "Большой Пиро слайм",
+        "th": "Large Pyro Slime",
+        "de": "Großer Pyro-Schleim",
+        "vi": "Slime Hỏa Lớn",
+        "id": "Large Pyro Slime",
+        "pt-br": "Grande Slime Pyro",
+        "tr": "Büyük Ateş Bodurlopu",
+        "it": "Melmoso di Pyro gigante"
+      }
+    },
+    {
+      "id": "genshin-creations-maguu-kenki",
+      "source": "Maguu Kenki",
+      "translations": {
+        "zh-hans": "魔偶剑鬼",
+        "zh-hant": "魔偶劍鬼",
+        "ko": "꼭두각시 검귀",
+        "ja": "魔偶剣鬼",
+        "es": "Oni Espadachín",
+        "fr": "Lame oni",
+        "ru": "Магу кэнки",
+        "th": "Maguu Kenki",
+        "de": "Maguu Kenki",
+        "vi": "Maguu Kenki",
+        "id": "Maguu Kenki",
+        "pt-br": "Maguu Kenki",
+        "tr": "Maguu Kenki",
+        "it": "Maguu Kenki"
+      }
+    },
+    {
+      "id": "genshin-creations-nobushi-jintouban",
+      "source": "Nobushi: Jintouban",
+      "translations": {
+        "zh-hans": "野伏·阵刀番",
+        "zh-hant": "野伏·陣刀番",
+        "ko": "「노부시·칼잡이」",
+        "ja": "野伏·陣刀番",
+        "es": "Nobushi - Filodemonio",
+        "fr": "Nobushi - Jintouban",
+        "ru": "Нобуси: Дзинтобан",
+        "th": "Nobushi: Jintouban",
+        "vi": "Nobushi - Jintouban",
+        "de": "Nobushi – Jintouban",
+        "id": "Nobushi: Jintouban",
+        "pt-br": "Nobushi: Jintou-Ban",
+        "tr": "Nobushi: Jintouban",
+        "it": "Nobushi: Jintouban"
+      }
+    },
+    {
+      "id": "genshin-creations-pyro-abyss-mage",
+      "source": "Pyro Abyss Mage",
+      "translations": {
+        "zh-hans": "火深渊法师",
+        "zh-hant": "火深淵法師",
+        "ko": "화염의 심연 메이지",
+        "ja": "アビスの魔術師·炎",
+        "es": "Mago del Abismo Pyro",
+        "fr": "Pyromage de l'Abîme",
+        "ru": "Пиро маг Бездны",
+        "th": "Pyro Abyss Mage",
+        "de": "Pyro-Abgrundmagier",
+        "vi": "Pháp Sư Vực Sâu Hỏa",
+        "id": "Pyro Abyss Mage",
+        "pt-br": "Feiticeiro do Abismo Pyro",
+        "tr": "Hiçlik Ateş Büyücüsü",
+        "it": "Mago dell'Abisso di Pyro"
+      }
+    },
+    {
+      "id": "genshin-creations-pyro-hilichurl-shooter",
+      "source": "Pyro Hilichurl Shooter",
+      "translations": {
+        "zh-hans": "火箭丘丘射手",
+        "zh-hant": "火箭丘丘射手",
+        "ko": "불 화살 츄츄 궁수",
+        "ja": "ヒルチャール・炎矢",
+        "es": "Hilichurl Ballestero Pyro",
+        "fr": "Tireurs Brutocollinus Pyro",
+        "ru": "Пиро хиличурл-стрелок",
+        "th": "Pyro Hilichurl Shooter",
+        "de": "Pyro-Hilichurl-Schütze",
+        "vi": "Xạ Thủ Hilichurl Hỏa Tiễn",
+        "id": "Pyro Hilichurl Shooter",
+        "pt-br": "Hilichurl Arqueiro Pyro",
+        "tr": "Nişancı Ateş Dağ Yabanisi",
+        "it": "Hilichurl balestriere di Pyro"
+      }
+    },
+    {
+      "id": "genshin-creations-pyro-slime",
+      "source": "Pyro Slime",
+      "translations": {
+        "zh-hans": "火史莱姆",
+        "zh-hant": "火史萊姆",
+        "ko": "화염 슬라임",
+        "ja": "炎スライム",
+        "es": "Slime Pyro",
+        "fr": "Pyroblob",
+        "ru": "Пиро слайм",
+        "th": "Pyro Slime",
+        "de": "Pyro-Schleim",
+        "vi": "Slime Hỏa",
+        "id": "Pyro Slime",
+        "pt-br": "Slime Pyro",
+        "tr": "Ateş Bodurlopu",
+        "it": "Melmoso di Pyro"
+      }
+    },
+    {
+      "id": "genshin-creations-pyro-whopperflower",
+      "source": "Pyro Whopperflower",
+      "translations": {
+        "zh-hans": "炽热骗骗花",
+        "zh-hant": "熾熱騙騙花",
+        "ko": "뜨거운 구라구라꽃",
+        "ja": "トリックフラワー・炎",
+        "es": "Megaflora Pyro",
+        "fr": "Fleur mensongère Pyro",
+        "ru": "Пиро попрыгунья",
+        "th": "Pyro Whopperflower",
+        "de": "Pyro-Vaniloqua",
+        "vi": "Hoa Lừa Dối Rực Lửa",
+        "id": "Pyro Whopperflower",
+        "pt-br": "Flor Gigante Pyro",
+        "tr": "Yalancı Ateş Çiçeği",
+        "it": "Malefiore di Pyro"
+      }
+    },
+    {
+      "id": "genshin-creations-rock-cavernous-wayob-manifestation",
+      "source": "Rock-Cavernous Wayob Manifestation",
+      "translations": {
+        "zh-hans": "窟岩·大灵显化身",
+        "zh-hant": "窟岩·大靈顯化身",
+        "ko": "암굴·대영혼의 화신",
+        "ja": "岩窟·大霊の化身",
+        "es": "Manifestación Wayob Cavernaria",
+        "fr": "Manifestation caverneuse de Wayob",
+        "ru": "Воплощение Вайоб пещер и скал",
+        "th": "Rock-Cavernous Wayob Manifestation",
+        "vi": "Hóa Thân Wayob - Hang Đá",
+        "de": "Höhlenbewohner – Wayob-Verkörperung",
+        "id": "Rock-Cavernous Wayob Manifestation",
+        "pt-br": "Manifestação Wayob da Caverna Rochosa",
+        "tr": "Kaya Mağarası Wayob Tezahürü",
+        "it": "Manifestazione cavernosa della Wayob"
+      }
+    },
+    {
+      "id": "genshin-creations-ruin-drake-skywatch",
+      "source": "Ruin Drake: Skywatch",
+      "translations": {
+        "zh-hans": "遗迹龙兽·空巡",
+        "zh-hant": "遺蹟龍獸·空巡",
+        "ko": "유적 드레이크·천공의 수호자",
+        "ja": "遺跡ドレイク·飛空",
+        "es": "Dragón de las Ruinas - Vigía aéreo",
+        "fr": "Dragon des ruines aérien",
+        "ru": "Дракон руин: Страж небес",
+        "th": "Ruin Drake: Skywatch",
+        "de": "Ruinendrache – Himmelswächter",
+        "vi": "Rồng Di Tích - Thiên Vệ",
+        "id": "Ruin Drake: Skywatch",
+        "pt-br": "Dragão das Ruínas - Vigia Aérea",
+        "tr": "Harabe Ejderi: Gökyüzü Gözcüsü",
+        "it": "Drago delle rovine: Guardiano dei cieli"
+      }
+    },
+    {
+      "id": "genshin-creations-ruin-grader",
+      "source": "Ruin Grader",
+      "translations": {
+        "zh-hans": "遗迹重机",
+        "zh-hant": "遺蹟重機",
+        "ko": "파멸의 유적 가디언",
+        "ja": "遺跡重機",
+        "es": "Demoledor de las Ruinas",
+        "fr": "Colosse des ruines",
+        "ru": "Руинный молотильщик",
+        "th": "Ruin Grader",
+        "de": "Ruinenkoloss",
+        "vi": "Cần Cẩu Di Tích",
+        "id": "Ruin Grader",
+        "pt-br": "Colosso das Ruínas",
+        "tr": "Harabe Ezicisi",
+        "it": "Colosso delle rovine"
+      }
+    },
+    {
+      "id": "genshin-creations-ruin-guard",
+      "source": "Ruin Guard",
+      "translations": {
+        "zh-hans": "遗迹守卫",
+        "zh-hant": "遺蹟守衛",
+        "ko": "유적 가디언",
+        "ja": "遺跡守衛",
+        "es": "Guardián de las Ruinas",
+        "fr": "Gardien des ruines",
+        "ru": "Страж руин",
+        "th": "Ruin Guard",
+        "de": "Ruinenwächter",
+        "vi": "Thủ Vệ Di Tích",
+        "id": "Ruin Guard",
+        "pt-br": "Guarda das Ruínas",
+        "tr": "Harabe Muhafızı",
+        "it": "Guardia delle rovine"
+      }
+    },
+    {
+      "id": "genshin-creations-stonehide-lawachurl",
+      "source": "Stonehide Lawachurl",
+      "translations": {
+        "zh-hans": "丘丘岩盔王",
+        "zh-hant": "丘丘岩盔王",
+        "ko": "츄츄 바위왕",
+        "ja": "ヒルチャール・岩兜の王",
+        "es": "Lawachurl Acorazado",
+        "fr": "Chef Brutorocheux",
+        "ru": "Лавачурл с каменным панцирем",
+        "th": "Stonehide Lawachurl",
+        "de": "Steinhaut-Lawachurl",
+        "vi": "Vua Mũ Đá Hilichurl",
+        "id": "Stonehide Lawachurl",
+        "pt-br": "Lawachurl da Pedra Oculta",
+        "tr": "Taş Sırtlı Dağ Reisi",
+        "it": "Lawachurl Mantodipietra"
+      }
+    },
+    {
+      "id": "genshin-creations-swiftstep-seeker",
+      "source": "Swiftstep Seeker",
+      "translations": {
+        "zh-hans": "疾迅勇士·引索客",
+        "zh-hant": "疾迅勇士·引索客",
+        "ko": "날쌘 용사·밧줄꾼",
+        "ja": "迅疾の勇士·シーカー",
+        "es": "Guerrera Rauda - Buscapistas",
+        "fr": "Guideuse à pas rapide",
+        "ru": "Стремительный воин: Ищущая",
+        "th": "Swiftstep Seeker",
+        "vi": "Dũng Sĩ Nhanh Nhẹn - Tìm Kiếm",
+        "de": "Recke des schnellen Schritts – Sucher",
+        "id": "Swiftstep Seeker",
+        "pt-br": "Exploradora de Passo Ágil",
+        "tr": "Çevik Adım: Arayıcı",
+        "it": "Cercatrice piè veloce"
+      }
+    },
+    {
+      "id": "genshin-creations-thunderhelm-lawachurl",
+      "source": "Thunderhelm Lawachurl",
+      "translations": {
+        "zh-hans": "丘丘雷兜王",
+        "zh-hant": "丘丘雷兜王",
+        "ko": "츄츄 번개왕",
+        "ja": "ヒルチャール·雷兜の王",
+        "es": "Lawachurl Electroyelmo",
+        "fr": "Chef Brutoélectrique",
+        "ru": "Лавачурл с громовым шлемом",
+        "th": "Thunderhelm Lawachurl",
+        "de": "Blitzhelm-Lawachurl",
+        "vi": "Vua Giáp Lôi Hilichurl",
+        "id": "Thunderhelm Lawachurl",
+        "pt-br": "Lawachurl da Trovoada",
+        "tr": "Yıldırım Başlı Dağ Reisi",
+        "it": "Lawachurl Elmodituono"
+      }
+    },
+    {
+      "id": "genshin-creations-treasure-hoarder-scout",
+      "source": "Treasure Hoarder Scout",
+      "translations": {
+        "zh-hans": "盗宝团·斥候",
+        "zh-hant": "盜寶團·斥候",
+        "ko": "보물 사냥단·척후병",
+        "ja": "宝盗団·斥候",
+        "es": "Ladrón de Tesoros - Centinela",
+        "fr": "Guetteur des Pilleurs de trésors",
+        "ru": "Похититель сокровищ: Разведчик",
+        "th": "กองโจรล่าสมบัติ - Scout",
+        "de": "Schatzräuber – Späher",
+        "vi": "Đạo Bảo Đoàn - Trinh Sát",
+        "id": "Treasure Hoarder - Scout",
+        "pt-br": "Ladrões de Tesouro - Escolta",
+        "tr": "Hazine Avcısı Gözcü",
+        "it": "Cacciatore di tesori ricognitore"
+      }
+    },
+    {
+      "id": "genshin-creations-treasure-hoarder-seaman",
+      "source": "Treasure Hoarder Seaman",
+      "translations": {
+        "zh-hans": "盗宝团·海上男儿",
+        "zh-hant": "盜寶團·海上男兒",
+        "ko": "보물 사냥단·바다의 남아",
+        "ja": "宝盗団・海の男児",
+        "es": "Ladrón de Tesoros - Grumete",
+        "fr": "Marin des Pilleurs de trésors",
+        "ru": "Похититель сокровищ: Морячок",
+        "th": "กองโจรล่าสมบัติ - Seaman",
+        "de": "Schatzräuber – Seemann",
+        "vi": "Đạo Bảo Đoàn - Thanh Niên Trên Biển",
+        "id": "Treasure Hoarder - Seaman",
+        "pt-br": "Ladrões de Tesouro - Homem do Mar",
+        "tr": "Hazine Avcısı Denizci",
+        "it": "Cacciatore di tesori marinaio"
+      }
+    },
+    {
+      "id": "genshin-creations-winged-cryoshroom",
+      "source": "Winged Cryoshroom",
+      "translations": {
+        "zh-hans": "有翼冰本真蕈",
+        "zh-hant": "有翼冰本真蕈",
+        "ko": "포롱 얼음 버섯몬",
+        "ja": "パタパタ氷マッシュロン",
+        "es": "Cryohongo Alado",
+        "fr": "Champicryo ailé",
+        "ru": "Крылатый Крио моровик",
+        "th": "Winged Cryoshroom",
+        "de": "Geflügelter Kryo-Pilz",
+        "vi": "Nấm Quỷ Có Cánh - Băng",
+        "id": "Winged Cryoshroom",
+        "pt-br": "Cogumelo Alado Cryo",
+        "tr": "Kanatlı Buz Mantarı",
+        "it": "Cryofungo alato"
+      }
+    },
+    {
+      "id": "genshin-creations-wooden-shieldwall-mitachurl",
+      "source": "Wooden Shieldwall Mitachurl",
+      "translations": {
+        "zh-hans": "木盾丘丘暴徒",
+        "zh-hant": "木盾丘丘暴徒",
+        "ko": "나무방패 츄츄 폭도",
+        "ja": "ヒルチャール暴徒·木盾",
+        "es": "Mitachurl con Escudo de Madera",
+        "fr": "Brutoviandu avec bouclier de bois",
+        "ru": "Митачурл с деревянным щитом",
+        "th": "Wooden Shieldwall Mitachurl",
+        "de": "Mitachurl mit Holzschild",
+        "vi": "Bạo Đồ Hilichurl Khiên Gỗ",
+        "id": "Wooden Shieldwall Mitachurl",
+        "pt-br": "Mitachurl de Escudo de Madeira",
+        "tr": "Ahşap Kalkanlı Dağ Azmanı",
+        "it": "Mitachurl con scudo di legno"
+      }
+    }
+  ]
+}

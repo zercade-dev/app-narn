@@ -1,0 +1,109 @@
+{
+  "id": "genshin-skills",
+  "name": "Genshin Skills",
+  "readOnly": true,
+  "createdAt": 1700000000000,
+  "updatedAt": 1700000000000,
+  "terms": [
+    {
+      "id": "genshin-skills-elemental-application",
+      "source": "Elemental Application",
+      "translations": {
+        "zh-hans": "元素附着",
+        "zh-hant": "元素附著",
+        "ko": "원소 부착",
+        "ja": "元素付着",
+        "es": "Aplicación elemental",
+        "fr": "Applications élémentaires",
+        "ru": "Эффект элемента",
+        "th": "การติดสถานะธาตุ",
+        "vi": "Gán Ấn Nguyên Tố",
+        "de": "Elementarattribut",
+        "id": "Efek Elemental",
+        "pt-br": "Afinidade Elemental",
+        "tr": "Element Etkileri",
+        "it": "Applicazione elementale"
+      }
+    },
+    {
+      "id": "genshin-skills-elemental-burst",
+      "source": "Elemental Burst",
+      "translations": {
+        "zh-hans": "元素爆发",
+        "zh-hant": "元素爆發",
+        "ko": "원소폭발",
+        "ja": "元素爆発",
+        "es": "Habilidad Definitiva",
+        "fr": "Déchaînement élémentaire",
+        "ru": "Взрыв стихии",
+        "th": "ท่าไม้ตาย",
+        "vi": "Kỹ Năng Nộ",
+        "de": "Spezialfähigkeit",
+        "id": "Elemental Burst",
+        "pt-br": "Supremo",
+        "tr": "Element Patlaması",
+        "it": "Tripudio elementale"
+      }
+    },
+    {
+      "id": "genshin-skills-elemental-skill",
+      "source": "Elemental Skill",
+      "translations": {
+        "zh-hans": "元素战技",
+        "zh-hant": "元素戰技",
+        "ko": "원소전투 스킬",
+        "ja": "元素スキル",
+        "es": "Habilidad Elemental",
+        "fr": "Compétence élémentaire",
+        "ru": "Элементальный навык",
+        "th": "สกิลธาตุ",
+        "vi": "Kỹ Năng Nguyên Tố",
+        "de": "Elementarfähigkeit",
+        "id": "Elemental Skill",
+        "pt-br": "Habilidade Elemental",
+        "tr": "Element Becerisi",
+        "it": "Abilità elementale"
+      }
+    },
+    {
+      "id": "genshin-skills-normal-attack",
+      "source": "Normal Attack",
+      "translations": {
+        "zh-hans": "普通攻击",
+        "zh-hant": "普通攻擊",
+        "ko": "일반 공격",
+        "ja": "通常攻撃",
+        "es": "Ataque Normal",
+        "fr": "Attaque normale",
+        "ru": "Обычная атака",
+        "th": "โจมตีปกติ",
+        "vi": "Tấn Công Thường",
+        "de": "Standardangriff",
+        "id": "Normal Attack",
+        "pt-br": "Ataque Normal",
+        "tr": "Normal Saldırı",
+        "it": "Attacco normale"
+      }
+    },
+    {
+      "id": "genshin-skills-skill",
+      "source": "Skill",
+      "translations": {
+        "zh-hans": "技能",
+        "zh-hant": "技能",
+        "ko": "스킬",
+        "ja": "スキル",
+        "es": "Habilidad",
+        "fr": "Compétence",
+        "ru": "Навык",
+        "th": "สกิล",
+        "vi": "Kỹ Năng",
+        "de": "Fähigkeit",
+        "id": "Skill",
+        "pt-br": "Habilidades",
+        "tr": "Beceri",
+        "it": "Abilità"
+      }
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import i18n, { loadLocale } from '../i18n/index.js';
+import {
+  activateTheme,
+  readStoredTheme,
+  THEME_STORAGE_KEY,
+  type UiTheme,
+} from '../themes/theme-registry.js';
+
+export type UiLanguage = 'en' | 'es' | 'fr';
+export type ConsoleFilter = 'all' | 'info' | 'warn' | 'error' | 'debug' | 'notifications';
+
+interface UiSettingsState {
+  language: UiLanguage;
+  setLanguage: (lang: UiLanguage) => void;
+  darkMode: boolean;
+  setDarkMode: (dark: boolean) => void;
+  projectIcons: Record<string, string>;
+  setProjectIcon: (id: string, icon: string) => void;
+  consoleFilter: ConsoleFilter;
+  setConsoleFilter: (filter: ConsoleFilter) => void;
+  theme: UiTheme;
+  setTheme: (theme: UiTheme) => void;
+}
+
+const initialDarkMode =
+  globalThis.window !== undefined &&
+  (localStorage.getItem('translator-dark-mode') === 'true' ||
+    (localStorage.getItem('translator-dark-mode') === null &&
+      matchMedia('(prefers-color-scheme: dark)').matches));
+
+export const useUiSettings = create<UiSettingsState>()(
+  persist(
+    (set) => ({
+      language: 'en',
+      setLanguage: (language) => {
+        void (async () => {
+          await loadLocale(language);
+          await i18n.changeLanguage(language);
+        })();
+        set({ language });
+      },
+      darkMode: initialDarkMode,
+      setDarkMode: (dark) => {
+        if (typeof document !== 'undefined') {
+          document.documentElement.classList.toggle('dark', dark);
+        }
+        if (typeof globalThis.window !== 'undefined') {
+          localStorage.setItem('translator-dark-mode', String(dark));
+        }
+        set({ darkMode: dark });
+      },
+      projectIcons: {},
+      setProjectIcon: (id, icon) =>
+        set((s) => ({ projectIcons: { ...s.projectIcons, [id]: icon } })),
+      consoleFilter: 'all',
+      setConsoleFilter: (consoleFilter) => set({ consoleFilter }),
+      theme: readStoredTheme(),
+      setTheme: (theme) => {
+        if (globalThis.window !== undefined) {
+          localStorage.setItem(THEME_STORAGE_KEY, theme);
+        }
+        void activateTheme(theme);
+        set({ theme });
+      },
+    }),
+    {
+      name: 'translator-ui-settings',
+      partialize: (state) => ({
+        language: state.language,
+        projectIcons: state.projectIcons,
+        consoleFilter: state.consoleFilter,
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.language && state.language !== 'en') {
+          void (async () => {
+            await loadLocale(state.language);
+            await i18n.changeLanguage(state.language);
+          })();
+        }
+      },
+    },
+  ),
+);
