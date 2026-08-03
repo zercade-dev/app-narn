@@ -23,6 +23,13 @@ overrides:
   # Pulled in transitively via eslint/@typescript-eslint's minimatch dependency
   # (dev-only chain, 30 paths) — force the patched range until upstream bumps minimatch.
   brace-expansion: '>=5.0.8'
+  # GHSA-4cwx-7wf7-3272 (high, published 2026-08-03): undici <7.29.0 has a
+  # cross-user information-disclosure and parse-time crash via degenerate
+  # private cache directives. Pulled in transitively via every AI-SDK module's
+  # @ai-sdk/provider-utils dependency (anthropic, deepseek, generic-ai,
+  # google, openai, openrouter, packages/shared) — force the patched range
+  # here until @ai-sdk/provider-utils bumps its own pin.
+  undici: '>=7.29.0'
 
 catalog:
   # Shared tooling
