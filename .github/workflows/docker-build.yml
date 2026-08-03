@@ -17,11 +17,14 @@ permissions:
 
 jobs:
   build:
-    # Fork PRs build on a GitHub-hosted EPHEMERAL runner — a forked PR's untrusted
-    # build code never reaches the self-hosted box; push / same-repo PRs keep the
-    # self-hosted runner (Docker provisioned on the box). Pair with the repo Actions
-    # setting "Require approval for all outside collaborators" for manual approval.
-    runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || fromJSON('["self-hosted", "zdev", "general"]') }}
+    # TEMPORARY (2026-08-03): forced to ubuntu-latest unconditionally. Since this repo
+    # went public, the org's `zdev` self-hosted runner group doesn't pick up its jobs at
+    # all — GitHub disables org self-hosted runners for public repos by default unless
+    # "Allow public repositories to use organization runners" is enabled in org Actions
+    # settings. Revert to the conditional self-hosted expression below once that's
+    # confirmed fixed:
+    #   runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || fromJSON('["self-hosted", "zdev", "general"]') }}
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
