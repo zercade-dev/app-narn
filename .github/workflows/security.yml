@@ -38,7 +38,6 @@ concurrency:
 
 jobs:
   security-audit:
-    # ubuntu-latest: free/unlimited on public repos, no need to spend zdev capacity here.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

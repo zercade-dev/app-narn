@@ -22,7 +22,6 @@ concurrency:
 # docker-build.yml boot-smokes the image.
 jobs:
   quality-gate:
-    # ubuntu-latest: free/unlimited on public repos, no need to spend zdev capacity here.
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

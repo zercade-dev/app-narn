@@ -17,7 +17,6 @@ permissions:
 
 jobs:
   build:
-    # ubuntu-latest: free/unlimited on public repos, no need to spend zdev capacity here.
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
