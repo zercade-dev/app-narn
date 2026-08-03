@@ -20,9 +20,11 @@ overrides:
   # exponential-time regex DoS on consecutive non-expanding {} groups.
   # GHSA-mh99-v99m-4gvg (high, published 2026-07-24, supersedes the above): a second
   # DoS via unbounded expansion length was found in 5.0.7 itself — patched in 5.0.8.
+  # GHSA-rgw5-rvv9-x895 (high, published 2026-08-03, bypasses the above): a third DoS
+  # via unbounded intermediate arrays was found, unpatched by 5.0.8 — patched in 5.0.9.
   # Pulled in transitively via eslint/@typescript-eslint's minimatch dependency
   # (dev-only chain, 30 paths) — force the patched range until upstream bumps minimatch.
-  brace-expansion: '>=5.0.8'
+  brace-expansion: '>=5.0.9'
   # GHSA-4cwx-7wf7-3272 (high, published 2026-08-03): undici <7.29.0 has a
   # cross-user information-disclosure and parse-time crash via degenerate
   # private cache directives. Pulled in transitively via every AI-SDK module's
