@@ -1,0 +1,1 @@
+Fixed a bug where a collaborator on a shared project couldn't switch into it — clicking the project in the sidebar failed with a "Failed to switch project" error, even with full write access to their assigned languages. Switching your active project now works correctly for collaborators, not just project owners.
