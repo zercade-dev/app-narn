@@ -17,13 +17,7 @@ permissions:
 
 jobs:
   build:
-    # TEMPORARY (2026-08-03): forced to ubuntu-latest unconditionally. Since this repo
-    # went public, the org's `zdev` self-hosted runner group doesn't pick up its jobs at
-    # all — GitHub disables org self-hosted runners for public repos by default unless
-    # "Allow public repositories to use organization runners" is enabled in org Actions
-    # settings. Revert to the conditional self-hosted expression below once that's
-    # confirmed fixed:
-    #   runs-on: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository) && 'ubuntu-latest' || fromJSON('["self-hosted", "zdev", "general"]') }}
+    # ubuntu-latest: free/unlimited on public repos, no need to spend zdev capacity here.
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

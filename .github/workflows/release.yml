@@ -38,13 +38,7 @@ concurrency:
 
 jobs:
   release:
-    # TEMPORARY (2026-08-03): forced to ubuntu-latest. Since this repo went public, the
-    # org's `zdev` self-hosted runner group doesn't pick up its jobs at all — GitHub
-    # disables org self-hosted runners for public repos by default unless "Allow public
-    # repositories to use organization runners" is enabled in org Actions settings. This
-    # job only retags an existing digest via `docker buildx imagetools` (no local build),
-    # so ubuntu-latest's stock Docker/buildx is sufficient. Revert to
-    # `runs-on: [self-hosted, zdev, general]` once that org setting is confirmed fixed.
+    # ubuntu-latest: free/unlimited on public repos, no need to spend zdev capacity here.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
