@@ -14,9 +14,11 @@ credit you in the release notes unless you'd rather stay anonymous.
 
 ## Scope
 
-NARN is designed to run locally, single-user, with no network-facing
-authentication of its own — see the [README](README.md) for that model. Reports
-most relevant to that design include:
+This repository is the open-core NARN app, designed to run locally,
+single-user, with no network-facing authentication of its own — see the
+[README](README.md) for that model. It's also the codebase a separate
+hosted multi-tenant cloud service is built on top of, so reports about
+either side are welcome:
 
 - Anything that could expose or exfiltrate credentials from the vault
   (`packages/server/src/modules/M18-vault.ts` and
@@ -27,6 +29,10 @@ most relevant to that design include:
 - Remote code execution, path traversal, or injection anywhere in the
   server or a translation module.
 - Cross-site scripting in the frontend.
+- Anything in this codebase that a multi-tenant deployment built on top of
+  it would inherit — e.g. a gap in the injection seams the hosting layer
+  uses to add its own auth/tenancy, or a request path that assumes
+  single-user isolation that doesn't actually hold.
 
 Reports that only apply to running the server on a network you don't
 control, or with `HOST` deliberately set to expose it beyond loopback, are
