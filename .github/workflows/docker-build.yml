@@ -17,12 +17,13 @@ permissions:
 
 jobs:
   build:
+    # GitHub-hosted: this repo went public and the self-hosted zdev runner pool
+    # isn't provisioned for it. Public repos get free, unlimited GitHub-hosted
+    # Actions minutes, and ubuntu-latest ships Docker + buildx already.
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          clean: true # self-hosted runner: wipe prior-run untracked/ignored files
 
       # Self-contained repo (own Dockerfile + pnpm-lock.yaml) — context is the repo root.
       - name: Build image
