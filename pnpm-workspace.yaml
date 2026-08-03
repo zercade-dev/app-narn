@@ -23,19 +23,6 @@ overrides:
   # Pulled in transitively via eslint/@typescript-eslint's minimatch dependency
   # (dev-only chain, 30 paths) — force the patched range until upstream bumps minimatch.
   brace-expansion: '>=5.0.8'
-  # GHSA-4c8g-83qw-93j6 (high, published 2026-07-21): fast-uri <3.1.3 has a host
-  # confusion vulnerability via failed IDN canonicalization. Pulled in transitively
-  # via shadcn -> @modelcontextprotocol/sdk -> ajv(-formats) -> fast-uri (dev-only
-  # chain) — force the patched range until upstream bumps ajv.
-  fast-uri: '>=3.1.3'
-  # GHSA-52cp-r559-cp3m (high, published 2026-07-20): js-yaml <4.3.0 YAML merge-key
-  # chains force quadratic CPU consumption.
-  # GHSA-pm4m-ph32-ghv5 (high, published 2026-07-24, supersedes the above): a second,
-  # unrelated DoS (exponential parsing time in flow collections) was found in versions
-  # up to and including 5.2.1 — patched in 5.2.2. Pulled in transitively via
-  # shadcn -> cosmiconfig (dev-only chain) — force the patched range until shadcn
-  # bumps its own cosmiconfig pin.
-  js-yaml: '>=5.2.2'
 
 catalog:
   # Shared tooling
@@ -97,7 +84,6 @@ catalog:
   i18next: 26.3.6
   react-i18next: 17.0.11
   react-markdown: 10.1.0
-  shadcn: 4.16.1
   sonner: 2.0.7
   tailwind-merge: 3.6.0
   zustand: 5.0.14
