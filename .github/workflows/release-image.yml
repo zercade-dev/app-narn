@@ -30,15 +30,16 @@ permissions:
 
 jobs:
   build-push:
-    runs-on: [self-hosted, zdev, general] # self-hosted runner (Docker + buildx provisioned on the box)
+    # GitHub-hosted: this repo went public and the self-hosted zdev runner pool
+    # isn't provisioned for it. Public repos get free, unlimited GitHub-hosted
+    # Actions minutes, and ubuntu-latest ships Docker + buildx already.
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       # Self-contained repo (own Dockerfile + pnpm-lock.yaml) — a plain checkout is
       # all the build needs.
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          clean: true # self-hosted runner: wipe prior-run untracked/ignored files
 
       - name: Build and push release image
         # GitHub-supplied values go through env, never interpolated into run:.
