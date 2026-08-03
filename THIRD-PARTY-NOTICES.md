@@ -52,9 +52,17 @@ registry's `use-mobile` hook, carried here as
 below. That pair was found by inspection, not by diffing this tree against the upstream
 registry, so treat it as the known cases rather than a guaranteed-complete list.
 
-Separately, the `shadcn` npm package is a development dependency, used for its command
-line tool; `packages/frontend/src/index.css` also imports the stylesheet it ships
-(`shadcn/tailwind.css`), which is bundled into the built frontend.
+The `shadcn` npm package (its CLI, used to scaffold and add these components) was itself a
+development dependency until 2026-08-03, when it was removed: the package bundles
+`@modelcontextprotocol/sdk` for an unused `shadcn mcp` feature, which pulled in vulnerable
+transitive dependencies (`hono`, `@hono/node-server`) unrelated to anything this repo uses
+it for. `packages/frontend/src/index.css` used to import that package's stylesheet
+(`shadcn/tailwind.css`); its CSS was ejected — inlined verbatim via the package's own
+`shadcn eject` command — into `index.css` directly as part of that removal, so it still
+ships in the built frontend but is no longer resolvable as an installed package. The MIT
+notice below now covers vendored source only, not a live dependency; it can no longer be
+verified against an installed copy and is current as of `shadcn@4.16.1`, the version in use
+at removal.
 
 shadcn/ui is MIT-licensed. Its notice is reproduced in full:
 
@@ -294,12 +302,12 @@ The package list is derived from the build output itself — the modules the bun
 in the emitted chunks, the module graph behind them, and the source paths of every emitted
 asset — rather than from a `package.json`. That is deliberate: a manifest-derived list
 answers a different question, and `pnpm licenses list --prod` excluding development
-dependencies is exactly how six font families went unattributed (see _Fonts_). Two entries
-are the exception and are marked `[stylesheet]` in the file: `tailwindcss` and `shadcn` are
-pulled in by `src/index.css` and resolved inside Tailwind's own plugin, so their CSS ships
-without either package ever becoming a module the bundler reports. They are named
-explicitly in `build/licenses.mjs`, and their licence texts are read from the installed
-packages like every other; a name there that no longer resolves fails the build. That
+dependencies is exactly how six font families went unattributed (see _Fonts_). One entry
+is the exception and is marked `[stylesheet]` in the file: `tailwindcss` is
+pulled in by `src/index.css` and resolved inside Tailwind's own plugin, so its CSS ships
+without the package ever becoming a module the bundler reports. It is named
+explicitly in `build/licenses.mjs`, and its licence text is read from the installed
+package like every other; a name there that no longer resolves fails the build. That
 guard runs in one direction only: a package **removed** from the stylesheet is caught, but
 a **newly added** bare-specifier `@import` would go unattributed silently until someone
 adds it to that list.
@@ -470,20 +478,22 @@ the `Unknown` entries.
 picture of what NARN redistributes. Two things fall outside it, and both are handled
 elsewhere in this file:
 
-- **CSS from two MIT development dependencies** bundled into the built stylesheet:
-  `shadcn` (`shadcn/tailwind.css`) and `tailwindcss`. Both ship their own licence files
-  in the installed tree; shadcn's notice is reproduced above because its registry source is
-  also vendored into this repository.
+- **CSS from an MIT development dependency** bundled into the built stylesheet:
+  `tailwindcss`. It ships its own licence file in the installed tree.
+- **Vendored shadcn/ui CSS** (`shadcn/tailwind.css`, ejected into `src/index.css` — see
+  _Vendored source: shadcn/ui_). It is no longer an installed dependency at all, so it is
+  covered only by the notice reproduced above, not by `dist/LICENSES.txt`.
 - **Vite's own `modulepreload` polyfill**, injected into the bundle by the build (6
   occurrences across 2 chunks). `vite` is an MIT development dependency, and this is its
   code shipping in the output — the same category as the CSS above.
 
-Both are generated or injected output rather than a redistributed file, which is what
-distinguishes them from the fonts. The six font families were on this list too, for the
-same reason, until they were moved to production dependencies precisely so that `--prod`
-would report them; they are in the census above, as `OFL-1.1`. The first bullet is covered
-by the licence file the build emits — `shadcn` and `tailwindcss` are both in
-`dist/LICENSES.txt`, marked `[stylesheet]`; the polyfill in the second is not, because it
+All three are generated, injected or vendored-inline rather than a redistributed installed
+file, which is what distinguishes them from the fonts. The six font families were on this
+list too, for the same reason, until they were moved to production dependencies precisely
+so that `--prod` would report them; they are in the census above, as `OFL-1.1`. The first
+bullet is covered by the licence file the build emits — `tailwindcss` is in
+`dist/LICENSES.txt`, marked `[stylesheet]`; the second is covered by the reproduced notice
+in this file instead; the polyfill in the third is not covered by either, because it
 belongs to no bundled package directory. See _Notices and the built frontend_.
 
 One development dependency does carry a copyleft licence — `@axe-core/react` (MPL-2.0),
