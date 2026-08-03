@@ -53,10 +53,13 @@ jobs:
     # HEAD branch — for a fork PR that is the fork's source-branch name. An outside
     # contributor who names their fork branch `develop` and whose CI reaches success would
     # otherwise satisfy the gate and reach the publish step (attacker's head_sha checked
-    # out on the self-hosted runner, with packages:write, pushing the floating `develop` tag).
+    # out with packages:write, pushing the floating `develop` tag).
     # Require the completed CI run to be same-repo (not a fork) AND a push (not a
     # `pull_request` event) — a publish must only ever follow a real push to develop.
     if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.event != 'pull_request') }}
+    # GitHub-hosted: this repo went public and the self-hosted zdev runner pool
+    # isn't provisioned for it. Public repos get free, unlimited GitHub-hosted
+    # Actions minutes, and ubuntu-latest ships Docker + buildx already.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -65,7 +68,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          clean: true # self-hosted runner: wipe prior-run untracked/ignored files
           # For workflow_run, github.sha/github.ref point at the DEFAULT-branch tip, not
           # the commit CI ran against — check out the exact CI-tested commit. A manual
           # workflow_dispatch has no workflow_run, so this falls back to github.sha.
