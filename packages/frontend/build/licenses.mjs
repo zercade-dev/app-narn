@@ -40,20 +40,12 @@ export const LICENSES_FILE_NAME = 'LICENSES.txt';
  * Packages whose code ships in the built stylesheet but which the module graph
  * cannot see, named here because there is no way to discover them.
  *
- * `src/index.css` opens with `@import 'tailwindcss'`. Tailwind resolves it
- * inside its own vite plugin and hands back finished CSS — so the package
- * never becomes a module in the bundler's graph, and never appears among the
- * emitted assets' source paths. Its CSS is nonetheless in the stylesheet that
- * ships.
- *
- * `shadcn/tailwind.css` used to be a second entry here, imported the same
- * way. It was ejected (inlined verbatim into `src/index.css` by `shadcn
- * eject`, then `shadcn` dropped as a dependency) to remove a vulnerable
- * transitive chain — `shadcn` bundled `@modelcontextprotocol/sdk` for its
- * unused `shadcn mcp` feature, pulling in `hono`/`@hono/node-server`. The CSS
- * itself still ships; it is just no longer resolvable as an installed
- * package, so it can no longer be attributed here. It remains covered by the
- * MIT notice reproduced in THIRD-PARTY-NOTICES.md's vendored-source section.
+ * `src/index.css` opens with `@import 'tailwindcss'` and
+ * `@import 'shadcn/tailwind.css'`. Tailwind resolves both itself, inside its
+ * own vite plugin, and hands back finished CSS — so neither package ever
+ * becomes a module in the bundler's graph, and neither appears among the
+ * emitted assets' source paths. Their CSS is nonetheless in the stylesheet
+ * that ships.
  *
  * This is a named list rather than a derived one, which is exactly the shape
  * that went wrong before, so it is bounded to make the failure loud: each name
@@ -62,7 +54,7 @@ export const LICENSES_FILE_NAME = 'LICENSES.txt';
  * resolves fails the build instead of quietly dropping out. What it cannot
  * catch is a NEW stylesheet import — add one, and add it here.
  */
-export const CSS_PIPELINE_PACKAGES = ['tailwindcss'];
+export const CSS_PIPELINE_PACKAGES = ['tailwindcss', 'shadcn'];
 
 /**
  * Licence-bearing file names, in preference order. Matched case-insensitively

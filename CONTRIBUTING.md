@@ -70,7 +70,6 @@ its own.
 pnpm install   # install workspace deps
 pnpm dev       # server (:3001) + frontend (:5173) in parallel
 pnpm build     # clean + tsc build of all packages
-pnpm lint      # eslint over packages/*/src
 ```
 
 ## The local gate

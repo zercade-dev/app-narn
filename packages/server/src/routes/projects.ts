@@ -299,12 +299,7 @@ projectsRouter.post(
   requireUnlockedVault,
   asyncHandler(async (req, res) => {
     const projectId = req.params.id as string;
-    // `switchProject` only writes the caller's own `active_project` pointer
-    // (per-tenant, i.e. per-user) — it touches no shared project data, so a
-    // collaborator switching to a project they're a member of needs plain
-    // membership, not the owner-only `manage` capability the other mutating
-    // routes on this router require.
-    await assertProjectAccess(projectId, { type: 'read' });
+    await assertProjectAccess(projectId, { type: 'manage' });
     await getProjectStore().switchProject(projectId);
     res.json({ activeId: req.params.id });
   }),

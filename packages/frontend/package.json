@@ -40,6 +40,7 @@
     "acorn": "catalog:",
     "parse5": "catalog:",
     "postcss": "catalog:",
+    "shadcn": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:"
