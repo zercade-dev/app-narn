@@ -39,6 +39,12 @@ control, or with `HOST` deliberately set to expose it beyond loopback, are
 still welcome — that's an explicitly documented risk, but real bugs in how
 it's mitigated are still worth reporting.
 
+The hosting layer's own source isn't in this repository and isn't public
+yet, so a cloud-specific report will usually be based on the hosted
+service's observed behavior rather than its code — that's fine, email it
+here the same way. It'll get its own security policy if and when it's
+published separately.
+
 ## Supported versions
 
 Only the latest released version is supported. Please upgrade before
