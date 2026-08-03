@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest an improvement or a new capability for NARN.
+labels: [enhancement, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For open-ended ideas or "what do you think about..." conversations,
+        [Discussions](../../discussions) is often a better fit than an issue —
+        feel free to start there instead if you're not yet sure this should be
+        a concrete feature request.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What are you trying to do that NARN doesn't currently support well?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What you'd like to see. Sketches, mockups, or example config/output are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches or workarounds you've tried or thought about.
