@@ -175,8 +175,8 @@ catalogs:
       specifier: 10.1.0
       version: 10.1.0
     shadcn:
-      specifier: 4.16.0
-      version: 4.16.0
+      specifier: 4.16.1
+      version: 4.16.1
     sonner:
       specifier: 2.0.7
       version: 2.0.7
@@ -497,7 +497,7 @@ importers:
         version: 8.5.25
       shadcn:
         specifier: 'catalog:'
-        version: 4.16.0(typescript@7.0.2)
+        version: 4.16.1(typescript@7.0.2)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.3
@@ -3384,8 +3384,8 @@ packages:
   setprototypeof@1.2.0:
     resolution: {integrity: sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==}
 
-  shadcn@4.16.0:
-    resolution: {integrity: sha512-kPr4RrQmbbZeAjwBYeBSpFvAHV8rkTlNPUluIxkRriq5TpevfFelVO5xvcF6oguHPVn0R6wPuVer4HudfcLy/A==}
+  shadcn@4.16.1:
+    resolution: {integrity: sha512-XLFzfNNIUPlUlyheFEzj0H4Vnhi9nI0nl3Nfgg8HYXW1FkUVhVT1X+mgmOUW8aWL5SeG0A+yJIV5fm3Hr9MVkQ==}
     engines: {node: '>=20.18.1'}
     hasBin: true
 
@@ -6475,7 +6475,7 @@ snapshots:
 
   setprototypeof@1.2.0: {}
 
-  shadcn@4.16.0(typescript@7.0.2):
+  shadcn@4.16.1(typescript@7.0.2):
     dependencies:
       '@babel/core': 7.29.7
       '@babel/parser': 7.29.7
@@ -6497,7 +6497,7 @@ snapshots:
       kleur: 4.1.5
       open: 11.0.0
       ora: 8.2.0
-      postcss: 8.5.24
+      postcss: 8.5.25
       postcss-selector-parser: 7.1.4
       prompts: 2.4.2
       recast: 0.23.11
