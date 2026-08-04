@@ -2,15 +2,24 @@
 
 ## Reporting a vulnerability
 
-**Please don't open a public issue for a security report.** Email
-**security@zercade.dev** instead, with:
+**Please don't open a public issue for a security report.** Use GitHub's
+private vulnerability reporting instead — the **Report a vulnerability**
+button on this repository's
+[Security tab](https://github.com/zercade-dev/app-narn/security/advisories/new).
+It opens a draft advisory only you and the maintainers can see, and it's
+where the fix gets worked on and disclosed from.
+
+If you'd rather not go through GitHub, email **security@zercade.dev**.
+
+Either way, please include:
 
 - A description of the vulnerability and its impact.
 - Steps to reproduce, or a proof of concept if you have one.
 - The version (or commit/image tag) you tested against.
 
 You'll get an acknowledgement within a few days. Once a fix is out, we'll
-credit you in the release notes unless you'd rather stay anonymous.
+credit you in the release notes unless you'd rather stay anonymous. There's
+no bug-bounty program — reports are triaged and credited, not paid.
 
 ## Scope
 
@@ -41,7 +50,7 @@ it's mitigated are still worth reporting.
 
 The hosting layer's own source isn't in this repository and isn't public
 yet, so a cloud-specific report will usually be based on the hosted
-service's observed behavior rather than its code — that's fine, email it
+service's observed behavior rather than its code — that's fine, report it
 here the same way. It'll get its own security policy if and when it's
 published separately.
 

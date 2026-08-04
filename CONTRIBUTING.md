@@ -125,10 +125,12 @@ not once per change.
 ## Reporting a security issue
 
 Please report a suspected vulnerability privately, by email to security@zercade.dev
-rather than opening a public issue. That address is for security reports only; the
-commercial-licensing contact in [`LICENSE`](LICENSE) is a different one. There is no
-separate security policy document; this section is the policy. Include enough detail
-to reproduce the problem, and please give the maintainer a chance to ship a fix
+rather than opening a public issue. GitHub's **Report a vulnerability** button on the
+[Security tab](https://github.com/zercade-dev/app-narn/security/advisories/new) is the
+same private channel and the easier route. That address is for security reports only;
+the commercial-licensing contact in [`LICENSE`](LICENSE) is a different one. The full
+policy, including what's in scope, is [`SECURITY.md`](SECURITY.md). Include enough
+detail to reproduce the problem, and please give the maintainer a chance to ship a fix
 before disclosing it publicly.
 
 ## Trademarks
