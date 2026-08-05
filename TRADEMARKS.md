@@ -42,8 +42,12 @@ NARN ships optional, **read-only** terminology glossaries to help keep
 translations consistent. Some reference third-party video-game franchises and
 their in-game names — most notably:
 
-- **Genshin Impact** and its in-game names (characters, regions, elements,
-  reactions, etc.) — trademarks of **HoYoverse / COGNOSPHERE PTE. LTD.** (miHoYo).
+- **Genshin Impact**, **Miliastra Wonderland**, and their in-game names
+  (characters, regions, elements, reactions, Craftsperson, Manekin, Stage,
+  Wonderland, etc.) — trademarks of **HoYoverse / COGNOSPHERE PTE. LTD.**
+  (miHoYo). NARN is built to help Miliastra Wonderland Craftspeople translate
+  **their own** creations; it ships no game assets and no game text beyond the
+  terminology glossaries described here.
 - **Horizon** and the character **"Aloy"** — trademarks of **Sony Interactive
   Entertainment / Guerrilla**.
 

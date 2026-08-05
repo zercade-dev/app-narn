@@ -5,5 +5,18 @@
   "browseGuides": "Browse guides",
   "setupVaultHeading": "Ready to translate?",
   "setupVaultBody": "Set up your credential vault to add the AI provider keys your translations will use.",
-  "setupVaultButton": "Set up vault"
+  "setupVaultButton": "Set up vault",
+  "themeChooser": {
+    "title": "Choose your look",
+    "intro": "Pick a theme for NARN — you can change it any time in Settings.",
+    "confirm": "Use this theme",
+    "keepDefault": "Keep Techno",
+    "names": { "default": "Classic", "pixel": "Pixel", "techno": "Techno", "minimal": "Minimal" },
+    "taglines": {
+      "default": "The original NARN look.",
+      "pixel": "Chunky retro pixels.",
+      "techno": "Neon console. The new default.",
+      "minimal": "Just the content."
+    }
+  }
 }
