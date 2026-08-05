@@ -5,5 +5,23 @@
   "browseGuides": "Ver guías",
   "setupVaultHeading": "¿Listo para traducir?",
   "setupVaultBody": "Configura tu bóveda de credenciales para añadir las claves de los proveedores de IA que usarán tus traducciones.",
-  "setupVaultButton": "Configurar bóveda"
+  "setupVaultButton": "Configurar bóveda",
+  "themeChooser": {
+    "title": "Elige tu estilo",
+    "intro": "Elige un tema para NARN — puedes cambiarlo cuando quieras en Ajustes.",
+    "confirm": "Usar este tema",
+    "keepDefault": "Mantener Techno",
+    "names": {
+      "default": "Clásico",
+      "pixel": "Pixel",
+      "techno": "Techno",
+      "minimal": "Minimalista"
+    },
+    "taglines": {
+      "default": "El aspecto original de NARN.",
+      "pixel": "Píxeles retro contundentes.",
+      "techno": "Consola neón. El nuevo predeterminado.",
+      "minimal": "Solo el contenido."
+    }
+  }
 }

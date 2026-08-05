@@ -42,7 +42,7 @@ catalog:
   # automation used to scrape provider pricing and capability pages.
   playwright: 1.62.1
   '@eslint/js': 10.0.1
-  globals: 17.8.0
+  globals: 17.9.0
   eslint-config-prettier: 10.1.8
   eslint-plugin-react-hooks: 7.1.1
   '@typescript-eslint/eslint-plugin': 8.65.0
@@ -80,7 +80,7 @@ catalog:
   '@types/yauzl': 3.4.0
   '@types/yazl': 3.3.1
   '@types/pg': 8.20.3
-  tsx: 4.23.1
+  tsx: 4.23.5
 
   # Frontend runtime
   '@base-ui/react': 1.6.0

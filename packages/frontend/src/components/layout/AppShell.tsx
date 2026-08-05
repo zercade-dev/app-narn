@@ -12,6 +12,10 @@ import { GlobalConfigView } from '../global-config/GlobalConfigView.js';
 import { TranslationMemoryPanel } from '../tm/TranslationMemoryPanel.js';
 import { GuideView } from '../guide/GuideView.js';
 import { WelcomeView } from '../welcome/WelcomeView.js';
+import {
+  shouldShowThemeChooser,
+  ThemeChooserOverlay,
+} from '../theme-chooser/ThemeChooserOverlay.js';
 import { ColorTextView } from '../color-text/ColorTextView.js';
 import { AccountView } from '../account/AccountView.js';
 import { LegalView } from '../legal/LegalView.js';
@@ -293,6 +297,11 @@ export function RoutingTabContent({
 export function AppShell() {
   const { t } = useTranslation('strings');
   const { t: tv } = useTranslation('vault');
+  // First-login theme chooser: lazy initializer (not an effect) so this reads
+  // localStorage once, before anything else can write it — see
+  // shouldShowThemeChooser's doc comment for why the check must be a
+  // one-time, storage-only signal.
+  const [showThemeChooser, setShowThemeChooser] = useState(() => shouldShowThemeChooser());
   const [consolePanelOpen, setConsolePanelOpen] = useState(false);
   const [vaultDialogOpen, setVaultDialogOpen] = useState(false);
   const [vaultEditorOpen, setVaultEditorOpen] = useState(false);
@@ -414,6 +423,7 @@ export function AppShell() {
   return (
     <TooltipProvider>
       <div className="flex h-svh w-full flex-col">
+        {showThemeChooser && <ThemeChooserOverlay onDone={() => setShowThemeChooser(false)} />}
         <SlotRibbon />
         <SidebarProvider className="min-h-0 flex-1">
           {/* Sidebar */}

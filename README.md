@@ -5,13 +5,27 @@
 [![Security Audit](https://github.com/zercade-dev/app-narn/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/zercade-dev/app-narn/actions/workflows/security.yml)
 [![docker-build](https://github.com/zercade-dev/app-narn/actions/workflows/docker-build.yml/badge.svg?branch=main)](https://github.com/zercade-dev/app-narn/actions/workflows/docker-build.yml)
 
-**Translate games, apps, and anything else with text — into as many languages as you need.**
+**Translate your Miliastra Wonderland Stage into every language the game speaks.**
 
-NARN connects to AI models (Claude, GPT, Gemini, DeepSeek, GitHub Copilot, and more —
-Google AI Studio and OpenRouter both have free tiers) and classical machine translation
-(DeepL), keeps your terminology consistent with glossaries, never re-translates the same
-line twice with translation memory, and catches mistakes with AI-powered review — all from
-one workbench.
+NARN is a translation workbench built for Miliastra Wonderland Craftspeople. It reads the
+CSV the game exports — a quirky, non-standard dialect that breaks ordinary spreadsheet
+importers — ships **12 read-only glossaries (332 terms, 14 languages)** covering the game's
+characters, elements, reactions, stats, nations, ranks and Miliastra's own vocabulary, and
+writes back a file the game can import.
+
+It connects to AI models (Claude, GPT, Gemini, DeepSeek, GitHub Copilot, and more — Google
+AI Studio and OpenRouter both have free tiers) and classical machine translation (DeepL),
+keeps your terminology consistent with glossaries, never re-translates the same line twice
+with translation memory, and catches mistakes with AI-powered review — all from one
+workbench.
+
+Nothing about it is Miliastra-only: if you have a CSV of text in any language, NARN will
+translate it. That is simply the workflow it was built around.
+
+> NARN is an independent, fan-made tool. It is not affiliated with, endorsed by, or sponsored
+> by HoYoverse / COGNOSPHERE PTE. LTD. Genshin Impact and Miliastra Wonderland are their
+> trademarks. The bundled glossaries are unofficial fan-made terminology aids — see
+> [TRADEMARKS.md](TRADEMARKS.md).
 
 ![NARN — comparing a translation against its source and reference](docs/images/cover-compare.png)
 
