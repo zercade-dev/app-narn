@@ -28,6 +28,30 @@ import { useUiSettings } from '../../stores/ui-settings-store.js';
 const MODE_IDS = ['light', 'dark'] as const;
 type ColorChoice = (typeof MODE_IDS)[number];
 
+/**
+ * Shared roving-radiogroup arrow-key contract, used by both the theme cards
+ * and the mode options so the wrap-around navigation math can't drift apart
+ * between them: ArrowRight/Down advances, ArrowLeft/Up retreats, both wrap in
+ * `ids` order; any other key is a no-op (returns null, caller does nothing).
+ *
+ * Deliberately ref-free — it returns the next id rather than performing the
+ * focus-follow itself, so no ref is ever passed into a plain function during
+ * render (that trips react-hooks/refs regardless of whether the callee would
+ * actually read it synchronously). Each caller applies the result via its own
+ * local closure, which accesses its ref directly rather than receiving it as
+ * an argument.
+ */
+function nextRovingId<T extends string>(key: string, ids: readonly T[], current: T): T | null {
+  const delta =
+    key === 'ArrowRight' || key === 'ArrowDown'
+      ? 1
+      : key === 'ArrowLeft' || key === 'ArrowUp'
+        ? -1
+        : 0;
+  if (!delta) return null;
+  return ids[(ids.indexOf(current) + delta + ids.length) % ids.length]!;
+}
+
 export function shouldShowThemeChooser(): boolean {
   return globalThis.window !== undefined && localStorage.getItem(THEME_STORAGE_KEY) === null;
 }
@@ -47,42 +71,23 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
   const cardRefs = useRef<Partial<Record<UiTheme, HTMLButtonElement | null>>>({});
   const modeRefs = useRef<Partial<Record<ColorChoice, HTMLButtonElement | null>>>({});
 
-  // Radiogroup arrow-key contract: arrows move the selection (wrapping in
-  // THEME_IDS order) and focus follows, live-previewing via the selection
-  // effect. Roving tabindex below keeps exactly one card in the tab order.
-  const moveSelection = (delta: number) => {
-    const idx = THEME_IDS.indexOf(selected);
-    const next = THEME_IDS[(idx + delta + THEME_IDS.length) % THEME_IDS.length]!;
+  // Both radiogroups share the nextRovingId navigation math; each keeps its
+  // own thin wiring (which state to set, which ref map to focus into) local,
+  // accessing its ref via closure rather than passing it as an argument.
+  const onRadiogroupKeyDown = (e: React.KeyboardEvent) => {
+    const next = nextRovingId(e.key, THEME_IDS, selected);
+    if (!next) return;
+    e.preventDefault();
     setSelected(next);
     cardRefs.current[next]?.focus();
   };
 
-  const onRadiogroupKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      moveSelection(1);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      moveSelection(-1);
-    }
-  };
-
-  // Same radiogroup contract as the theme cards, over the two mode options.
-  const moveMode = (delta: number) => {
-    const idx = MODE_IDS.indexOf(mode);
-    const next = MODE_IDS[(idx + delta + MODE_IDS.length) % MODE_IDS.length]!;
+  const onModeKeyDown = (e: React.KeyboardEvent) => {
+    const next = nextRovingId(e.key, MODE_IDS, mode);
+    if (!next) return;
+    e.preventDefault();
     setMode(next);
     modeRefs.current[next]?.focus();
-  };
-
-  const onModeKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      moveMode(1);
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      moveMode(-1);
-    }
   };
 
   // aria-modal promises a focus trap: Tab/Shift+Tab cycle inside the dialog
