@@ -5,12 +5,12 @@
  * dismissal (Esc / backdrop / "keep" link) persists techno. Either path writes
  * THEME_STORAGE_KEY, which is the never-show-again signal — no extra flag.
  *
- * The chooser also owns the light/dark axis (spec 2026-08-05 first-login
- * color mode). Mode is local state until Confirm: selecting it only toggles
- * the `.dark` class, so a preview is never persisted, and dismissal restores
- * whatever mode was active on mount. Confirm persists via the store's
- * setDarkMode, which writes 'true'/'false' to translator-dark-mode — the same
- * key and encoding both pre-paint scripts already decode.
+ * The chooser also owns the light/dark axis. Mode is local state until
+ * Confirm: selecting it only toggles the `.dark` class, so a preview is
+ * never persisted, and dismissal restores whatever mode was active on mount.
+ * Confirm persists via the store's setDarkMode, which writes 'true'/'false'
+ * to translator-dark-mode — the same key and encoding both pre-paint scripts
+ * already decode.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
