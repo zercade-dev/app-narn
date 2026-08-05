@@ -8,7 +8,9 @@
   "setupVaultButton": "Configurer le coffre",
   "themeChooser": {
     "title": "Choisissez votre style",
-    "intro": "Choisissez un thème pour NARN — vous pourrez le changer à tout moment dans les Paramètres.",
+    "intro": "Choisissez un thème et le mode clair ou sombre — vous pourrez les modifier à tout moment dans les Paramètres.",
+    "modeLabel": "Clair ou sombre",
+    "modes": { "light": "Clair", "dark": "Sombre" },
     "confirm": "Utiliser ce thème",
     "keepDefault": "Garder Techno",
     "names": { "default": "Classique", "pixel": "Pixel", "techno": "Techno", "minimal": "Minimal" },

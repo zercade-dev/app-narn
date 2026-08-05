@@ -4,6 +4,13 @@
  * is pre-selected and live-previewed; Confirm persists the selection, any
  * dismissal (Esc / backdrop / "keep" link) persists techno. Either path writes
  * THEME_STORAGE_KEY, which is the never-show-again signal — no extra flag.
+ *
+ * The chooser also owns the light/dark axis (spec 2026-08-05 first-login
+ * color mode). Mode is local state until Confirm: selecting it only toggles
+ * the `.dark` class, so a preview is never persisted, and dismissal restores
+ * whatever mode was active on mount. Confirm persists via the store's
+ * setDarkMode, which writes 'true'/'false' to translator-dark-mode — the same
+ * key and encoding both pre-paint scripts already decode.
  */
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +25,9 @@ import {
 } from '../../themes/theme-registry.js';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
 
+const MODE_IDS = ['light', 'dark'] as const;
+type ColorChoice = (typeof MODE_IDS)[number];
+
 export function shouldShowThemeChooser(): boolean {
   return globalThis.window !== undefined && localStorage.getItem(THEME_STORAGE_KEY) === null;
 }
@@ -25,11 +35,17 @@ export function shouldShowThemeChooser(): boolean {
 export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
   const { t } = useTranslation('welcome');
   const setTheme = useUiSettings((s) => s.setTheme);
+  const setDarkMode = useUiSettings((s) => s.setDarkMode);
   const darkMode = useUiSettings((s) => s.darkMode);
   const [selected, setSelected] = useState<UiTheme>('techno');
+  const [mode, setMode] = useState<ColorChoice>(() => (darkMode ? 'dark' : 'light'));
+  // The mode to restore if the user previews one and then dismisses. Captured
+  // on first render, so later store updates can't move the restore target.
+  const initialDarkRef = useRef(darkMode);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Partial<Record<UiTheme, HTMLButtonElement | null>>>({});
+  const modeRefs = useRef<Partial<Record<ColorChoice, HTMLButtonElement | null>>>({});
 
   // Radiogroup arrow-key contract: arrows move the selection (wrapping in
   // THEME_IDS order) and focus follows, live-previewing via the selection
@@ -48,6 +64,24 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
       e.preventDefault();
       moveSelection(-1);
+    }
+  };
+
+  // Same radiogroup contract as the theme cards, over the two mode options.
+  const moveMode = (delta: number) => {
+    const idx = MODE_IDS.indexOf(mode);
+    const next = MODE_IDS[(idx + delta + MODE_IDS.length) % MODE_IDS.length]!;
+    setMode(next);
+    modeRefs.current[next]?.focus();
+  };
+
+  const onModeKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      moveMode(1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      moveMode(-1);
     }
   };
 
@@ -75,22 +109,37 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
     void activateTheme(selected);
   }, [selected]);
 
+  // Live-preview the mode by moving only the class — never setDarkMode, which
+  // would persist a choice the user hasn't confirmed.
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', mode === 'dark');
+  }, [mode]);
+
   useEffect(() => {
     confirmRef.current?.focus();
   }, []);
 
-  const commit = (theme: UiTheme) => {
-    setTheme(theme); // persists THEME_STORAGE_KEY via the store
+  const confirmChoice = () => {
+    setDarkMode(mode === 'dark'); // persists translator-dark-mode
+    setTheme(selected); // persists THEME_STORAGE_KEY via the store
+    onDone();
+  };
+
+  const dismiss = () => {
+    // A previewed mode was never committed, so put the class back.
+    document.documentElement.classList.toggle('dark', initialDarkRef.current);
+    setTheme('techno');
     onDone();
   };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') commit('techno');
+      if (e.key === 'Escape') dismiss();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-    // commit is stable enough for this listener's purpose (always dismisses to 'techno').
+    // dismiss is stable enough for this listener's purpose (always techno +
+    // the mount-time mode, both captured in refs or module-stable setters).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -102,7 +151,7 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
       data-testid="theme-chooser-overlay"
       ref={dialogRef}
       className="fixed inset-0 z-50 grid place-items-center bg-background/95 p-6"
-      onClick={() => commit('techno')}
+      onClick={() => dismiss()}
       onKeyDown={onDialogKeyDown}
     >
       <div className="w-full max-w-3xl space-y-6" onClick={(e) => e.stopPropagation()}>
@@ -112,7 +161,37 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
         </div>
         <div
           role="radiogroup"
+          aria-label={t('themeChooser.modeLabel')}
+          data-testid="theme-chooser-mode-group"
+          className="flex gap-2"
+          onKeyDown={onModeKeyDown}
+        >
+          {MODE_IDS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="radio"
+              aria-checked={mode === id}
+              tabIndex={mode === id ? 0 : -1}
+              ref={(el) => {
+                modeRefs.current[id] = el;
+              }}
+              data-mode-id={id}
+              data-testid={`theme-chooser-mode-${id}`}
+              onClick={() => setMode(id)}
+              className={cn(
+                'rounded-lg border px-4 py-2 text-sm transition-colors hover:bg-accent hover:text-accent-foreground',
+                mode === id ? 'border-primary ring-2 ring-ring' : '',
+              )}
+            >
+              {t(`themeChooser.modes.${id}`)}
+            </button>
+          ))}
+        </div>
+        <div
+          role="radiogroup"
           aria-label={t('themeChooser.title')}
+          data-testid="theme-chooser-theme-group"
           className="grid gap-3 sm:grid-cols-2"
           onKeyDown={onRadiogroupKeyDown}
         >
@@ -135,7 +214,7 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
               )}
             >
               <span className="mb-2 flex gap-1">
-                {(darkMode ? preview.dark : preview.light).map((c, i) => (
+                {(mode === 'dark' ? preview.dark : preview.light).map((c, i) => (
                   <span
                     key={i}
                     aria-hidden
@@ -157,7 +236,7 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
             type="button"
             data-testid="theme-chooser-confirm"
             className={cn(buttonVariants({ size: 'sm' }))}
-            onClick={() => commit(selected)}
+            onClick={confirmChoice}
           >
             {t('themeChooser.confirm')}
           </button>
@@ -166,7 +245,7 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
             variant="link"
             size="sm"
             data-testid="theme-chooser-keep-default"
-            onClick={() => commit('techno')}
+            onClick={dismiss}
           >
             {t('themeChooser.keepDefault')}
           </Button>

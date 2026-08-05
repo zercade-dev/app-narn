@@ -8,7 +8,9 @@
   "setupVaultButton": "Configurar bóveda",
   "themeChooser": {
     "title": "Elige tu estilo",
-    "intro": "Elige un tema para NARN — puedes cambiarlo cuando quieras en Ajustes.",
+    "intro": "Elige un tema y el modo claro u oscuro — puedes cambiar ambos cuando quieras en Ajustes.",
+    "modeLabel": "Claro u oscuro",
+    "modes": { "light": "Claro", "dark": "Oscuro" },
     "confirm": "Usar este tema",
     "keepDefault": "Mantener Techno",
     "names": {
