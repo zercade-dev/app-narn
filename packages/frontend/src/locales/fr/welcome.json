@@ -5,5 +5,18 @@
   "browseGuides": "Parcourir les guides",
   "setupVaultHeading": "Prêt à traduire ?",
   "setupVaultBody": "Configurez votre coffre de credentials pour ajouter les clés des fournisseurs d'IA que vos traductions utiliseront.",
-  "setupVaultButton": "Configurer le coffre"
+  "setupVaultButton": "Configurer le coffre",
+  "themeChooser": {
+    "title": "Choisissez votre style",
+    "intro": "Choisissez un thème pour NARN — vous pourrez le changer à tout moment dans les Paramètres.",
+    "confirm": "Utiliser ce thème",
+    "keepDefault": "Garder Techno",
+    "names": { "default": "Classique", "pixel": "Pixel", "techno": "Techno", "minimal": "Minimal" },
+    "taglines": {
+      "default": "L'apparence originale de NARN.",
+      "pixel": "Pixels rétro imposants.",
+      "techno": "Console néon. Le nouveau réglage par défaut.",
+      "minimal": "Juste le contenu."
+    }
+  }
 }
