@@ -9,9 +9,10 @@
   "themeChooser": {
     "title": "Choisissez votre style",
     "intro": "Choisissez un thème et le mode clair ou sombre — vous pourrez les modifier à tout moment dans les Paramètres.",
+    "themeLabel": "Thème",
     "modeLabel": "Clair ou sombre",
     "modes": { "light": "Clair", "dark": "Sombre" },
-    "confirm": "Utiliser ce thème",
+    "confirm": "Utiliser ces paramètres",
     "keepDefault": "Garder Techno",
     "names": { "default": "Classique", "pixel": "Pixel", "techno": "Techno", "minimal": "Minimal" },
     "taglines": {

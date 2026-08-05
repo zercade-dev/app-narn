@@ -66,6 +66,10 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
   // The mode to restore if the user previews one and then dismisses. Captured
   // on first render, so later store updates can't move the restore target.
   const initialDarkRef = useRef(darkMode);
+  // Set true by confirmChoice/dismiss right before they call onDone(). Guards
+  // the preview effect's unmount cleanup (below) from re-restoring the
+  // pre-preview mode over whichever state those two already settled on.
+  const settledRef = useRef(false);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Partial<Record<UiTheme, HTMLButtonElement | null>>>({});
@@ -115,9 +119,27 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
   }, [selected]);
 
   // Live-preview the mode by moving only the class — never setDarkMode, which
-  // would persist a choice the user hasn't confirmed.
+  // would persist a choice the user hasn't confirmed. The cleanup exists only
+  // for an unmount that bypasses confirmChoice/dismiss (not reachable today,
+  // since onDone is only ever called from those two): it restores the
+  // pre-preview mode so a previewed choice can never outlive the overlay
+  // unpersisted. It also runs between mode changes, but harmlessly — the
+  // next run of this same effect immediately re-applies the newly selected
+  // mode, so the settled end state after a mode change is unaffected. Once
+  // confirmChoice/dismiss have settled the mode themselves, settledRef stops
+  // this cleanup from clobbering what they just applied.
   useEffect(() => {
     document.documentElement.classList.toggle('dark', mode === 'dark');
+    // Copied out of the ref so the cleanup below reads a snapshot rather than
+    // whatever initialDarkRef.current happens to hold by the time it runs
+    // (it never actually changes post-mount, but react-hooks/exhaustive-deps
+    // can't know that).
+    const restoreDark = initialDarkRef.current;
+    return () => {
+      if (!settledRef.current) {
+        document.documentElement.classList.toggle('dark', restoreDark);
+      }
+    };
   }, [mode]);
 
   useEffect(() => {
@@ -125,12 +147,14 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
   }, []);
 
   const confirmChoice = () => {
+    settledRef.current = true;
     setDarkMode(mode === 'dark'); // persists translator-dark-mode
     setTheme(selected); // persists THEME_STORAGE_KEY via the store
     onDone();
   };
 
   const dismiss = () => {
+    settledRef.current = true;
     // A previewed mode was never committed, so put the class back.
     document.documentElement.classList.toggle('dark', initialDarkRef.current);
     setTheme('techno');
@@ -195,7 +219,7 @@ export function ThemeChooserOverlay({ onDone }: { onDone: () => void }) {
         </div>
         <div
           role="radiogroup"
-          aria-label={t('themeChooser.title')}
+          aria-label={t('themeChooser.themeLabel')}
           data-testid="theme-chooser-theme-group"
           className="grid gap-3 sm:grid-cols-2"
           onKeyDown={onRadiogroupKeyDown}
