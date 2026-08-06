@@ -26,6 +26,10 @@ import {
   useStageDetailsStore,
   type StageDetailsPatchBody,
 } from '../../stores/stage-details-store.js';
+import {
+  useStageDetailsDraftStore,
+  type StageDetailsDraftConfig,
+} from '../../stores/stage-details-draft-store.js';
 import { useRunStore } from '../../stores/run-store.js';
 import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
@@ -66,17 +70,36 @@ export function StageDetailsTab(): React.JSX.Element | null {
   const modules = useModules();
   const configuredModels = useConfiguredModels();
 
-  // Translate popover state.
+  // Translate popover state. moduleId/model/reasoningEffort/currentOnly/
+  // staleOnly/checkedFields are a per-project draft persisted in
+  // stage-details-draft-store so an in-progress edit survives navigating
+  // away and back (see stage-details-draft-store.ts). Until the user
+  // touches any field for this project, `project.stageDetailsConfig` (the
+  // last SAVED translate run's config) seeds moduleId/model/reasoningEffort
+  // — same local-wins-else-server-config precedence use-stage-details-chat.ts
+  // uses for its own override.
   const cfg = project?.stageDetailsConfig;
+  const draftProjectId = activeProjectId ?? '';
+  const draft = useStageDetailsDraftStore((s) => s.drafts[draftProjectId]);
+  const setDraftConfig = useStageDetailsDraftStore((s) => s.setDraft);
   const [popoverOpen, setPopoverOpen] = useState(false);
-  const [moduleId, setModuleId] = useState(cfg?.moduleId ?? '');
-  const [model, setModel] = useState(cfg?.model ?? '');
-  const [reasoningEffort, setReasoningEffort] = useState(cfg?.reasoningEffort ?? '');
-  const [currentOnly, setCurrentOnly] = useState(false);
-  const [staleOnly, setStaleOnly] = useState(false);
-  const [checkedFields, setCheckedFields] = useState<Set<StageDetailFieldId>>(
-    () => new Set(STAGE_DETAIL_FIELD_IDS),
-  );
+  const moduleId = draft?.moduleId ?? cfg?.moduleId ?? '';
+  const model = draft?.model ?? cfg?.model ?? '';
+  const reasoningEffort = draft?.reasoningEffort ?? cfg?.reasoningEffort ?? '';
+  const currentOnly = draft?.currentOnly ?? false;
+  const staleOnly = draft?.staleOnly ?? false;
+  const checkedFields = new Set<StageDetailFieldId>(draft?.checkedFields ?? STAGE_DETAIL_FIELD_IDS);
+  const updateDraft = (patch: Partial<StageDetailsDraftConfig>) => {
+    setDraftConfig(draftProjectId, {
+      moduleId,
+      model,
+      reasoningEffort,
+      currentOnly,
+      staleOnly,
+      checkedFields: Array.from(checkedFields),
+      ...patch,
+    });
+  };
   const [translating, setTranslating] = useState(false);
 
   const translateModules = useMemo(() => {
@@ -235,12 +258,10 @@ export function StageDetailsTab(): React.JSX.Element | null {
   };
 
   const toggleField = (fieldId: StageDetailFieldId, checked: boolean) => {
-    setCheckedFields((prev) => {
-      const next = new Set(prev);
-      if (checked) next.add(fieldId);
-      else next.delete(fieldId);
-      return next;
-    });
+    const next = new Set(checkedFields);
+    if (checked) next.add(fieldId);
+    else next.delete(fieldId);
+    updateDraft({ checkedFields: Array.from(next) });
   };
 
   const handleTranslate = async () => {
@@ -350,7 +371,7 @@ export function StageDetailsTab(): React.JSX.Element | null {
                     <label className="flex items-center gap-2 text-sm">
                       <Checkbox
                         checked={currentOnly}
-                        onCheckedChange={(c) => setCurrentOnly(c === true)}
+                        onCheckedChange={(c) => updateDraft({ currentOnly: c === true })}
                         data-testid="stage-details-scope-current"
                       />
                       {t('scopeCurrentOnly', { lang: effectiveLang ?? '' })}
@@ -358,7 +379,7 @@ export function StageDetailsTab(): React.JSX.Element | null {
                     <label className="flex items-center gap-2 text-sm">
                       <Checkbox
                         checked={staleOnly}
-                        onCheckedChange={(c) => setStaleOnly(c === true)}
+                        onCheckedChange={(c) => updateDraft({ staleOnly: c === true })}
                         data-testid="stage-details-scope-stale"
                       />
                       {t('scopeStaleOnly')}
@@ -388,13 +409,11 @@ export function StageDetailsTab(): React.JSX.Element | null {
                       moduleId={moduleId}
                       model={model}
                       reasoningEffort={reasoningEffort}
-                      onModuleChange={(id) => {
-                        setModuleId(id);
-                        setModel('');
-                        setReasoningEffort('');
-                      }}
-                      onModelChange={setModel}
-                      onReasoningEffortChange={setReasoningEffort}
+                      onModuleChange={(id) =>
+                        updateDraft({ moduleId: id, model: '', reasoningEffort: '' })
+                      }
+                      onModelChange={(m) => updateDraft({ model: m })}
+                      onReasoningEffortChange={(effort) => updateDraft({ reasoningEffort: effort })}
                       configuredModels={configuredModels}
                       moduleLabel={t('module')}
                       modelLabel={t('model')}
