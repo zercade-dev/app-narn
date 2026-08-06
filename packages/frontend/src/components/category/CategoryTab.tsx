@@ -14,7 +14,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronRight, Loader2, Save, Sparkles, Tags, Trash2, X } from 'lucide-react';
+import { ChevronRight, Loader2, Save, Sparkles, Tags, Trash2, X, XCircle } from 'lucide-react';
 import {
   RunStatusCode,
   CATEGORY_CHUNK_SIZE,
@@ -217,6 +217,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
   const fetchJudgeLogs = useRunStore((s) => s.fetchJudgeLogs);
   const fetchRuns = useRunStore((s) => s.fetchRuns);
   const startPolling = useRunStore((s) => s.startPolling);
+  const cancelRun = useRunStore((s) => s.cancelRun);
 
   // Deep-link from the Activity tab's "review suggestions" action: a completed
   // category-gen run whose suggestions should be reopened here, even after the
@@ -872,15 +873,34 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
       {/* Background category-generation progress. The run keeps going if the
           user navigates away; on return this card reappears until completion. */}
       {runActive && activeRun && (
-        <RunProgressCard
-          run={activeRun}
-          runningLabel={t('genRunning')}
-          startingLabel={t('genStarting')}
-          countLabel={(done, total) => t('genProgressCount', { done, total })}
-          hint={t('genBackgroundHint')}
-          bordered
-          data-testid="category-gen-progress"
-        />
+        <div className="flex items-start gap-3">
+          <div className="flex-1">
+            <RunProgressCard
+              run={activeRun}
+              runningLabel={t('genRunning')}
+              startingLabel={t('genStarting')}
+              countLabel={(done, total) => t('genProgressCount', { done, total })}
+              hint={t('genBackgroundHint')}
+              bordered
+              data-testid="category-gen-progress"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-status-fail hover:text-status-fail hover:bg-status-fail/10"
+            onClick={() =>
+              cancelRun(projectId, activeRun.runId).catch((err: unknown) =>
+                toast.error((err as Error).message),
+              )
+            }
+            data-testid="category-gen-cancel-run"
+          >
+            <XCircle className="size-4" />
+            {t('cancel')}
+          </Button>
+        </div>
       )}
 
       {/* Categories as tabs; selecting one shows its entries + description. */}
