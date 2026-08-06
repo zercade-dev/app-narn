@@ -14,6 +14,7 @@ import {
   EyeOff,
   ListChecks,
   Copy,
+  XCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -155,6 +156,7 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   const fetchSourceReview = useRunStore((s) => s.fetchSourceReview);
   const approveEntry = useRunStore((s) => s.approveSourceReviewEntry);
   const ignoreEntry = useRunStore((s) => s.ignoreSourceReviewEntry);
+  const cancelRun = useRunStore((s) => s.cancelRun);
 
   const entries = useStringStore((s) => s.entries);
   const fetchEntries = useStringStore((s) => s.fetchEntries);
@@ -662,12 +664,31 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
 
       {/* Live progress for an active run (full cost/progress lives in Activity). */}
       {activeRun && (
-        <RunProgressCard
-          run={activeRun}
-          runningLabel={t('sourceAi.progressLabel')}
-          hint={t('sourceAi.progressActivityNote')}
-          data-testid="source-ai-progress"
-        />
+        <div className="flex items-start gap-3">
+          <div className="flex-1">
+            <RunProgressCard
+              run={activeRun}
+              runningLabel={t('sourceAi.progressLabel')}
+              hint={t('sourceAi.progressActivityNote')}
+              data-testid="source-ai-progress"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-status-fail hover:text-status-fail hover:bg-status-fail/10"
+            onClick={() =>
+              cancelRun(projectId, activeRun.runId).catch((err: unknown) =>
+                toast.error((err as Error).message),
+              )
+            }
+            data-testid="source-ai-cancel-run"
+          >
+            <XCircle className="size-4" />
+            {t('cancel')}
+          </Button>
+        </div>
       )}
 
       {/* Findings detail */}
