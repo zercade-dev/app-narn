@@ -28,6 +28,7 @@ import { useCallback, useRef, useState } from 'react';
 import { useColorTextStore } from '../stores/color-text-store.js';
 import { useProjectStore } from '../stores/project-store.js';
 import { vaultLockedEvent } from '../lib/vault-events.js';
+import { toast } from '../lib/toast.js';
 
 /** One conversation turn — mirrors the server's `ChatTurn` shape. */
 export interface ChatTurn {
@@ -134,6 +135,7 @@ export function useColorTextChat(): UseColorTextChat {
           // to the inline error) so the browser console shows the real cause.
           console.error('[color-text chat] request failed', { status: res.status, message });
           setError(message);
+          toast.error(message);
           return;
         }
 
@@ -160,7 +162,9 @@ export function useColorTextChat(): UseColorTextChat {
           // De-silence: log the transport/stream failure to the console too, not
           // just the inline error (see the non-423 branch above).
           console.error('[color-text chat] stream error', err);
-          setError(err instanceof Error ? err.message : String(err));
+          const message = err instanceof Error ? err.message : String(err);
+          setError(message);
+          toast.error(message);
         }
       } finally {
         setStreaming(false);
