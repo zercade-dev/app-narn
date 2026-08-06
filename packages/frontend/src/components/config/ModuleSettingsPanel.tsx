@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { ChevronDown, Info, Plus, Trash2, PowerOff } from 'lucide-react';
+import { ChevronDown, Info, Plus, Trash2, PowerOff, AlertTriangle } from 'lucide-react';
 
 interface ModuleMetadata {
   id: string;
@@ -1102,6 +1102,21 @@ export function ModuleSettingsPanel({
                             // the field regardless of the toggle's current state.
                             const showStructuredWarning =
                               key === 'useStructuredOutput' && mod.id !== 'generic-ai';
+                            // gpt-5.6-luna has a known, unfixed limitation under OpenAI's
+                            // schema-less JSON mode (the only structured-output path this
+                            // app sends for openai — see model-factory.ts's
+                            // nativeStructuredOutputSettings): it can return a
+                            // syntactically-valid-but-content-empty JSON stub instead of the
+                            // real translation/review. Surfaced as a known-model-limitation
+                            // notice (no behavioral/request-path change) whenever the
+                            // selected model matches and structured output is on for this
+                            // instance. See docs/superpowers/investigations/gpt-5.6-luna-structured-output.md.
+                            const currentModelId = resolveFieldValue('model');
+                            const showLunaStructuredOutputWarning =
+                              key === 'useStructuredOutput' &&
+                              enabled &&
+                              typeof currentModelId === 'string' &&
+                              /gpt-5\.6-luna/i.test(currentModelId);
                             return (
                               <div key={key} className="space-y-1">
                                 <div className="flex items-center gap-2">
@@ -1133,6 +1148,25 @@ export function ModuleSettingsPanel({
                                       />
                                       <TooltipContent>
                                         {t('structuredOutputExperimentalWarning')}
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                  {showLunaStructuredOutputWarning && (
+                                    <Tooltip>
+                                      <TooltipTrigger
+                                        render={
+                                          <button
+                                            type="button"
+                                            className="text-destructive inline-flex cursor-help items-center"
+                                            aria-label={t('structuredOutputLunaWarning')}
+                                            data-testid={`module-${mod.id}-structured-output-luna-warning`}
+                                          >
+                                            <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
+                                          </button>
+                                        }
+                                      />
+                                      <TooltipContent>
+                                        {t('structuredOutputLunaWarning')}
                                       </TooltipContent>
                                     </Tooltip>
                                   )}
