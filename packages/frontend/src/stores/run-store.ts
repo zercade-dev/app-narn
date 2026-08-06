@@ -301,7 +301,7 @@ const notifiedFailedRunIds = new Set<string>();
  * `kind: 'chat'` runs (`chat-usage.ts`'s `startChatTurn`/`finishChatTurn` —
  * verified: a failed chat turn writes `RunStatusCode.Failed` via
  * `OUTCOME_STATUS`) are explicitly excluded via the existing `isChatRun`
- * helper: Tasks 1.3/1.4 already toast a chat failure precisely, at the
+ * helper: the chat call sites already toast a chat failure precisely, at the
  * point of failure, with the real error message — this would otherwise
  * ALSO fire a second, generic, mislabeled toast for the same failure
  * (`runTypeLabel`'s switch has no `'chat'` case, so it would read

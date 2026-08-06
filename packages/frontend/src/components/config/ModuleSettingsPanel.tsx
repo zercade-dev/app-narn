@@ -1110,8 +1110,7 @@ export function ModuleSettingsPanel({
                             // place of the real translation/review. Surfaced as a
                             // known-model-limitation notice (no behavioral/request-path
                             // change) whenever the selected model matches and structured
-                            // output is on for this instance. See
-                            // docs/superpowers/investigations/gpt-5.6-luna-structured-output.md.
+                            // output is on for this instance.
                             const currentModelId = resolveFieldValue('model');
                             const showLunaStructuredOutputWarning =
                               key === 'useStructuredOutput' &&
