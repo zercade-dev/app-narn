@@ -8,8 +8,11 @@
   "setupVaultButton": "Set up vault",
   "themeChooser": {
     "title": "Choose your look",
-    "intro": "Pick a theme for NARN — you can change it any time in Settings.",
-    "confirm": "Use this theme",
+    "intro": "Pick a theme and choose light or dark — you can change both any time in Settings.",
+    "themeLabel": "Theme",
+    "modeLabel": "Light or dark",
+    "modes": { "light": "Light", "dark": "Dark" },
+    "confirm": "Use these settings",
     "keepDefault": "Keep Techno",
     "names": { "default": "Classic", "pixel": "Pixel", "techno": "Techno", "minimal": "Minimal" },
     "taglines": {

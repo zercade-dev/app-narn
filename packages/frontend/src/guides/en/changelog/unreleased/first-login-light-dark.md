@@ -1,0 +1,1 @@
+The first-run appearance screen now lets you choose light or dark alongside your theme. Previously it followed your system setting and you had to visit Settings afterwards to change it. Picking an option previews it straight away, so you can see both the mode and the theme before committing. As before, you can change either one at any time in Settings.
