@@ -19,6 +19,7 @@ import {
   ChevronUp,
   ChevronDown,
   X,
+  XCircle,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -744,6 +745,7 @@ export function TranslationAiReviewTab({ projectId }: { projectId: string }) {
   const fetchVerdicts = useRunStore((s) => s.fetchVerdicts);
   const fetchJudgeLogs = useRunStore((s) => s.fetchJudgeLogs);
   const judgeRun = useRunStore((s) => s.judgeRun);
+  const cancelRun = useRunStore((s) => s.cancelRun);
 
   const entries = useStringStore((s) => s.entries);
   const fetchEntries = useStringStore((s) => s.fetchEntries);
@@ -1081,12 +1083,31 @@ export function TranslationAiReviewTab({ projectId }: { projectId: string }) {
 
       {/* Live progress for an active review (full cost/progress lives in Activity). */}
       {activeJudgeRun && (
-        <RunProgressCard
-          run={activeJudgeRun}
-          runningLabel={tr('translationAi.progressLabel')}
-          hint={tr('translationAi.progressActivityNote')}
-          data-testid="translation-ai-progress"
-        />
+        <div className="flex items-start gap-3">
+          <div className="flex-1">
+            <RunProgressCard
+              run={activeJudgeRun}
+              runningLabel={tr('translationAi.progressLabel')}
+              hint={tr('translationAi.progressActivityNote')}
+              data-testid="translation-ai-progress"
+            />
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-status-fail hover:text-status-fail hover:bg-status-fail/10"
+            onClick={() =>
+              cancelRun(projectId, activeJudgeRun.runId).catch((err: unknown) =>
+                toast.error((err as Error).message),
+              )
+            }
+            data-testid="translation-ai-cancel-run"
+          >
+            <XCircle className="size-4" />
+            {tr('cancel')}
+          </Button>
+        </div>
       )}
 
       {judgeRuns.length === 0 && (
