@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import {
   RunStatus,
+  RunStatusCode,
+  runTypeLabel,
   type BatchGroupingDimension,
   type JudgeChecks,
   type JudgeVerdictRecord,
@@ -14,6 +16,9 @@ import { apiRequest } from '../hooks/use-api.js';
 import { isRunActive } from '../lib/run-kind.js';
 import { getErrorMessage } from '../lib/utils.js';
 import { mutateThenRefresh, runAction } from './store-helpers.js';
+import { RUN_TYPE_KEY, isChatRun } from '../components/tabs/run-status-ui.js';
+import { toast } from '../lib/toast.js';
+import i18n from '../i18n/index.js';
 
 /**
  * One per-entry source-review record. Mirrors the server's `SourceReviewRecord`
@@ -269,6 +274,45 @@ let pollInFlight = false;
 /** Count of consecutive failed polls, driving the backoff / give-up logic. */
 let pollConsecutiveErrors = 0;
 
+/**
+ * Fires one `toast.error` per run whose status just transitioned into
+ * `RunStatusCode.Failed` between the previous and current `fetchRuns`
+ * snapshot — the single choke point every run kind's polling flows through
+ * (translate, stage-details, source-review, judge, glossary-gen,
+ * category-gen), so this covers all of them without six per-tab toasts.
+ *
+ * `previousRuns` is `get().runs` captured immediately before the new `set()`
+ * call in `fetchRuns` — i.e. the prior fetch's snapshot (or `[]` on the very
+ * first fetch of a poll session, since `startPolling` resets `runs` to `[]`
+ * before polling a new project). A run absent from `previousRuns` (first
+ * observation of that runId) is skipped: there is no previous status to diff
+ * against, so a page load that lands on an already-`Failed` run must not
+ * toast on that first sighting. A run whose previous status was already
+ * `Failed` is also skipped, so re-observing the same failed run on a later
+ * poll tick never re-toasts.
+ *
+ * `kind: 'chat'` runs (`chat-usage.ts`'s `startChatTurn`/`finishChatTurn` —
+ * verified: a failed chat turn writes `RunStatusCode.Failed` via
+ * `OUTCOME_STATUS`) are explicitly excluded via the existing `isChatRun`
+ * helper: Tasks 1.3/1.4 already toast a chat failure precisely, at the
+ * point of failure, with the real error message — this diff would otherwise
+ * ALSO fire a second, generic, mislabeled toast for the same failure on the
+ * next poll tick (`runTypeLabel`'s switch has no `'chat'` case, so it would
+ * read "Translation run failed" regardless of which chat actually failed).
+ */
+function notifyFailedRunTransitions(previousRuns: RunStatus[], nextRuns: RunStatus[]): void {
+  for (const run of nextRuns) {
+    if (run.status !== RunStatusCode.Failed) continue;
+    if (isChatRun(run)) continue;
+    const prev = previousRuns.find((r) => r.runId === run.runId);
+    if (!prev || prev.status === RunStatusCode.Failed) continue;
+    const typeLabel = i18n.t(RUN_TYPE_KEY[runTypeLabel(run.kind)], { ns: 'strings' });
+    const base = i18n.t('runs.runFailedToast', { ns: 'strings', type: typeLabel });
+    const message = run.errors[0]?.message;
+    toast.error(message ? `${base}: ${message}` : base);
+  }
+}
+
 export const useRunStore = create<RunStore>((set, get) => {
   /**
    * Arm the next poll tick `delay` ms out and record it as the live poller.
@@ -338,7 +382,12 @@ export const useRunStore = create<RunStore>((set, get) => {
         // stops a previous project's in-flight poll from clobbering the current
         // project's runs and re-targeting/killing its poller.
         if (token !== runFetchToken) return;
+        // Captured BEFORE the set() below overwrites it — this IS the previous
+        // fetch's snapshot (or `[]` on the very first fetch of a poll session),
+        // exactly what the Failed-transition toast diffs against.
+        const previousRuns = get().runs;
         set({ runs, loading: false, error: null });
+        notifyFailedRunTransitions(previousRuns, runs);
 
         // Poll while any run is in pending or running state.
         // Queued runs count as active: they will transition to running without
