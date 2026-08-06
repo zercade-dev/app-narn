@@ -73,8 +73,8 @@ catalogs:
       specifier: 5.5.2
       version: 5.5.2
     '@types/pg':
-      specifier: 8.20.3
-      version: 8.20.3
+      specifier: 8.20.4
+      version: 8.20.4
     '@types/react':
       specifier: 19.2.18
       version: 19.2.18
@@ -581,7 +581,7 @@ importers:
         version: 5.5.2
       '@types/pg':
         specifier: 'catalog:'
-        version: 8.20.3
+        version: 8.20.4
       '@types/yauzl':
         specifier: 'catalog:'
         version: 3.4.0
@@ -1450,8 +1450,8 @@ packages:
   '@types/papaparse@5.5.2':
     resolution: {integrity: sha512-gFnFp/JMzLHCwRf7tQHrNnfhN4eYBVYYI897CGX4MY1tzY9l2aLkVyx2IlKZ/SAqDbB3I1AOZW5gTMGGsqWliA==}
 
-  '@types/pg@8.20.3':
-    resolution: {integrity: sha512-4Tvg+HO6+oQaAkpT8GTYoSExzpGGZz532GXgbbCElWJQeQdMozBWxEKNBhJJpHFjWXsMxqPbyypvj/89FWNoSQ==}
+  '@types/pg@8.20.4':
+    resolution: {integrity: sha512-Jz7UDOlIiFJuacC0TlBoLyNtmwlA/wpIyPDd3tvUqlRM+HzkWy2xUgpFpaXtbfTAFF6sIGq5lsCDBdJnhky1Xg==}
 
   '@types/qs@6.15.1':
     resolution: {integrity: sha512-GZHUBZR9hckSUhrxmp1nG6NwdpM9fCunJwyThLW1X3AyHgd9IlHb6VANpQQqDr2o/qQp6McZ3y/IA2rVzKzSbw==}
@@ -3784,7 +3784,7 @@ snapshots:
     dependencies:
       '@types/node': 26.1.1
 
-  '@types/pg@8.20.3':
+  '@types/pg@8.20.4':
     dependencies:
       '@types/node': 26.1.2
       pg-protocol: 1.15.0
