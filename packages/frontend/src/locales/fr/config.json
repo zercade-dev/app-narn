@@ -85,7 +85,7 @@
   "credentialsMissingChip": "Identifiants manquants",
   "credentialsVaultLockedChip": "Coffre verrouillé",
   "structuredOutputExperimentalWarning": "Activer la sortie structurée devrait améliorer la cohérence du format et réduire les nouvelles tentatives, mais cette fonctionnalité reste expérimentale. Essayez-la activée et désactivée avec le modèle que vous utilisez, et conservez l’option qui donne les meilleurs résultats.",
-  "structuredOutputLunaWarning": "gpt-5.6-luna peut renvoyer une réponse vide (sans contenu réel) lorsque la sortie structurée est activée. Si vous obtenez des résultats vides avec ce modèle, essayez de désactiver la sortie structurée ou d'utiliser un autre modèle.",
+  "structuredOutputLunaWarning": "gpt-5.6-luna refuse fréquemment de traduire (renvoie une erreur ou une réponse mal formée au lieu d'une traduction) lorsque la sortie structurée est activée. En cas d'échec avec ce modèle, essayez de désactiver la sortie structurée ou d'utiliser un autre modèle.",
   "disableModule": "Désactiver",
   "modulesEnabledSection": "Activés ({{count}})",
   "modulesDisabledSection": "Désactivés ({{count}})",

@@ -1105,12 +1105,13 @@ export function ModuleSettingsPanel({
                             // gpt-5.6-luna has a known, unfixed limitation under OpenAI's
                             // schema-less JSON mode (the only structured-output path this
                             // app sends for openai — see model-factory.ts's
-                            // nativeStructuredOutputSettings): it can return a
-                            // syntactically-valid-but-content-empty JSON stub instead of the
-                            // real translation/review. Surfaced as a known-model-limitation
-                            // notice (no behavioral/request-path change) whenever the
-                            // selected model matches and structured output is on for this
-                            // instance. See docs/superpowers/investigations/gpt-5.6-luna-structured-output.md.
+                            // nativeStructuredOutputSettings): it frequently refuses to
+                            // translate — an error/refusal string or a malformed reply in
+                            // place of the real translation/review. Surfaced as a
+                            // known-model-limitation notice (no behavioral/request-path
+                            // change) whenever the selected model matches and structured
+                            // output is on for this instance. See
+                            // docs/superpowers/investigations/gpt-5.6-luna-structured-output.md.
                             const currentModelId = resolveFieldValue('model');
                             const showLunaStructuredOutputWarning =
                               key === 'useStructuredOutput' &&
@@ -1161,7 +1162,10 @@ export function ModuleSettingsPanel({
                                             aria-label={t('structuredOutputLunaWarning')}
                                             data-testid={`module-${mod.id}-structured-output-luna-warning`}
                                           >
-                                            <AlertTriangle className="size-3.5 shrink-0" aria-hidden />
+                                            <AlertTriangle
+                                              className="size-3.5 shrink-0"
+                                              aria-hidden
+                                            />
                                           </button>
                                         }
                                       />
