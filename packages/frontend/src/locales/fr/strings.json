@@ -460,6 +460,7 @@
     "stringsProgress": "{{completed}} / {{total}} entrées",
     "progressFailedSuffix": "({{count}} en échec)",
     "cancel": "Annuler",
+    "runFailedToast": "L'exécution de {{type}} a échoué",
     "emptyState": "Aucun historique d'activité trouvé.",
     "mobileEmpty": "Aucune exécution pour l'instant. Les exécutions lancées sur le bureau affichent leur progression ici.",
     "viewSwitchLabel": "Vue de l'activité",
