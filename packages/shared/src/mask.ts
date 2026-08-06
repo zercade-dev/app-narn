@@ -43,11 +43,24 @@ export function maskSecret(secret: string | null | undefined, visible = 4): stri
  * (NBSP, vertical tab, form feed) is left intact. See
  * {@link redactSecretsFromError}.
  */
-const HTTP_WHITESPACE_EDGES = /^[\t\n\r ]+|[\t\n\r ]+$/g;
+function isHttpWhitespace(ch: string): boolean {
+  return ch === '\t' || ch === '\n' || ch === '\r' || ch === ' ';
+}
 
-/** Strip leading/trailing HTTP whitespace bytes (see {@link HTTP_WHITESPACE_EDGES}). */
+/**
+ * Strip leading/trailing HTTP whitespace bytes (see {@link isHttpWhitespace}).
+ * A manual index scan rather than a `^...+|...+$`-style regex: this function
+ * runs on a caught secret value (untrusted, length-unbounded), and a regex
+ * sink there is exactly the shape CodeQL's polynomial-regex check flags,
+ * even though the specific pattern here isn't actually vulnerable — this
+ * form is provably linear and closes the finding outright.
+ */
 function trimHttpWhitespace(s: string): string {
-  return s.replace(HTTP_WHITESPACE_EDGES, '');
+  let start = 0;
+  let end = s.length;
+  while (start < end && isHttpWhitespace(s[start])) start++;
+  while (end > start && isHttpWhitespace(s[end - 1])) end--;
+  return s.slice(start, end);
 }
 
 /**
