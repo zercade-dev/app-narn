@@ -46,6 +46,7 @@
   "modulePlaceholder": "Auto-select cheapest",
   "saveFailed": "Could not save: {{message}}",
   "runProgress": "Translating {{completed}}/{{total}}",
+  "cancel": "Cancel",
   "chatEmpty": "Ask about wording, tone, or translations for the stage details fields.",
   "chatConfigMissing": "Pick a provider and model in the assistant settings, or run a stage-details translation first.",
   "chatAssistant": "Assistant",
