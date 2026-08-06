@@ -46,6 +46,7 @@
   "modulePlaceholder": "Sélectionner automatiquement le moins cher",
   "saveFailed": "Impossible d'enregistrer : {{message}}",
   "runProgress": "Traduction en cours {{completed}}/{{total}}",
+  "cancel": "Annuler",
   "chatEmpty": "Posez des questions sur la formulation, le ton ou les traductions des champs de détails du niveau.",
   "chatConfigMissing": "Choisissez un fournisseur et un modèle dans les réglages de l'assistant, ou lancez d'abord une traduction des détails du niveau.",
   "chatAssistant": "Assistant",

@@ -19,7 +19,7 @@ import {
   emptyStageDetails,
   type StageDetailFieldId,
 } from '@zercade-dev/narn-shared';
-import { Languages, MessageSquare } from 'lucide-react';
+import { Languages, MessageSquare, XCircle } from 'lucide-react';
 import { useProjectStore, accessFor } from '../../stores/project-store.js';
 import { writableSubset } from '@/lib/collab-locks';
 import {
@@ -297,6 +297,24 @@ export function StageDetailsTab(): React.JSX.Element | null {
                   })}
                 />
               </div>
+            )}
+            {activeRun && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-status-fail hover:text-status-fail hover:bg-status-fail/10"
+                onClick={() =>
+                  useRunStore
+                    .getState()
+                    .cancelRun(activeProjectId, activeRun.runId)
+                    .catch((err: unknown) => toast.error((err as Error).message))
+                }
+                data-testid="stage-details-cancel-run"
+              >
+                <XCircle className="size-4" />
+                {t('cancel')}
+              </Button>
             )}
             <Button
               type="button"
