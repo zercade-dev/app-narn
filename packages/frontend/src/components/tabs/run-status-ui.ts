@@ -12,17 +12,7 @@ import {
   type RunUsageEntry,
 } from '@zercade-dev/narn-shared';
 import { RunStatusCode } from '@zercade-dev/narn-shared';
-
-/** User-facing run "type" key, derived from the run's kind. */
-export const RUN_TYPE_KEY = {
-  translation: 'runs.typeTranslation',
-  'translation-ai-review': 'runs.typeTranslationAiReview',
-  'source-ai-review': 'runs.typeSourceAiReview',
-  'glossary-generation': 'runs.typeGlossaryGeneration',
-  'category-generation': 'runs.typeCategoryGeneration',
-  'relink-retranslate': 'runs.typeRelinkRetranslate',
-  'stage-details-translation': 'runs.typeStageDetailsTranslation',
-} as const;
+import { isChatRun } from '@/lib/run-kind';
 
 // Soft status tints: one hue family per meaning, tints over solid fills. Names
 // are kept from the original literal-color constants for
@@ -37,11 +27,6 @@ export const TINT_EMERALD = 'bg-status-pass/10 text-status-pass';
 export const TINT_RED = 'bg-status-fail/10 text-status-fail';
 export const TINT_VIOLET = 'bg-type-dialogue/10 text-type-dialogue';
 export const TINT_FUCHSIA = 'bg-type-dialogue/10 text-type-dialogue';
-
-/** Whether a run is a chat-session usage record (`kind === 'chat'`). */
-export function isChatRun(run: Pick<RunStatus, 'kind'>): boolean {
-  return run.kind === 'chat';
-}
 
 /**
  * The chat-session summary of a `kind: 'chat'` run. Token counts and cost are

@@ -6,7 +6,8 @@ import { useRunStore } from '../../stores/run-store.js';
 import { Card } from '../ui/card';
 import { RunProgressBar } from '../ui/run-progress-bar';
 import { RunStatusBadge } from './RunStatusBadge.js';
-import { RUN_TYPE_KEY, chatRunData, chatTypeKey, isChatRun } from './run-status-ui.js';
+import { chatRunData, chatTypeKey } from './run-status-ui.js';
+import { RUN_TYPE_KEY, isChatRun } from '@/lib/run-kind';
 import { relativeTime } from '@/lib/utils';
 import { useRelativeTimeTick } from '../config/ModelRefreshControl.js';
 
@@ -20,7 +21,6 @@ export function MobileRunsList({ projectId }: Readonly<{ projectId: string }>) {
   const { t } = useTranslation('strings');
   const runs = useRunStore((s) => s.runs);
   const startPolling = useRunStore((s) => s.startPolling);
-  const stopPolling = useRunStore((s) => s.stopPolling);
   // Stable sentinel Date for useRelativeTimeTick — identity never changes
   // across renders, only whether it's passed (vs. null) does. `useState`
   // (not `useRef`) because reading `.current` during render is disallowed.
@@ -28,8 +28,15 @@ export function MobileRunsList({ projectId }: Readonly<{ projectId: string }>) {
 
   useEffect(() => {
     if (projectId) startPolling(projectId);
-    return () => stopPolling();
-  }, [projectId, startPolling, stopPolling]);
+    // No unmount cleanup here on purpose: a run started from any tab kicks
+    // off the store's self-rescheduling poll loop, which is not tied to any
+    // component's lifecycle — `fetchRuns` already self-terminates the loop
+    // once no run is active (run-store.ts). Calling stopPolling() here would
+    // kill that loop out from under a still-running run just because the user
+    // navigated away from the mobile Activity list, silently defeating both the
+    // run-failure toast and every surface's live run status for the rest of
+    // that run.
+  }, [projectId, startPolling]);
 
   const list = runs ?? [];
   // Keeps each card's relative-time label ("5m ago") fresh; ticks only

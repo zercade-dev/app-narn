@@ -66,6 +66,7 @@ export function StageDetailsTab(): React.JSX.Element | null {
   const startTranslate = useStageDetailsStore((s) => s.startTranslate);
 
   const runs = useRunStore((s) => s.runs);
+  const cancelRun = useRunStore((s) => s.cancelRun);
 
   const modules = useModules();
   const configuredModels = useConfiguredModels();
@@ -89,16 +90,22 @@ export function StageDetailsTab(): React.JSX.Element | null {
   const currentOnly = draft?.currentOnly ?? false;
   const staleOnly = draft?.staleOnly ?? false;
   const checkedFields = new Set<StageDetailFieldId>(draft?.checkedFields ?? STAGE_DETAIL_FIELD_IDS);
+  // Seed used ONLY when this project has no stored draft yet — it materializes
+  // the render-time precedence above (draft ?? saved run config ?? default) as
+  // a full config. Once a draft exists, every patch merges onto the STORED
+  // draft, not onto these closure values, so two updates landing in the same
+  // React commit compose instead of the second silently dropping the first's
+  // field.
+  const draftSeed: StageDetailsDraftConfig = {
+    moduleId,
+    model,
+    reasoningEffort,
+    currentOnly,
+    staleOnly,
+    checkedFields: Array.from(checkedFields),
+  };
   const updateDraft = (patch: Partial<StageDetailsDraftConfig>) => {
-    setDraftConfig(draftProjectId, {
-      moduleId,
-      model,
-      reasoningEffort,
-      currentOnly,
-      staleOnly,
-      checkedFields: Array.from(checkedFields),
-      ...patch,
-    });
+    setDraftConfig(draftProjectId, (prev) => ({ ...(prev ?? draftSeed), ...patch }));
   };
   const [translating, setTranslating] = useState(false);
 
@@ -258,10 +265,16 @@ export function StageDetailsTab(): React.JSX.Element | null {
   };
 
   const toggleField = (fieldId: StageDetailFieldId, checked: boolean) => {
-    const next = new Set(checkedFields);
-    if (checked) next.add(fieldId);
-    else next.delete(fieldId);
-    updateDraft({ checkedFields: Array.from(next) });
+    // Derived from the STORED draft (not the render-time `checkedFields`) for
+    // the same reason `updateDraft` merges onto `prev`: two toggles in one
+    // React commit must both stick.
+    setDraftConfig(draftProjectId, (prev) => {
+      const base = prev ?? draftSeed;
+      const next = new Set(base.checkedFields);
+      if (checked) next.add(fieldId);
+      else next.delete(fieldId);
+      return { ...base, checkedFields: Array.from(next) };
+    });
   };
 
   const handleTranslate = async () => {
@@ -306,36 +319,35 @@ export function StageDetailsTab(): React.JSX.Element | null {
           <h2 className="text-lg font-semibold">{t('title')}</h2>
           <div className="flex items-center gap-2">
             {activeRun && (
-              <div data-testid="stage-details-run-progress" className="w-32">
-                <RunProgressBar
-                  completed={activeRun.completed}
-                  failed={activeRun.failed}
-                  total={activeRun.total}
-                  status={activeRun.status}
-                  aria-label={t('runProgress', {
-                    completed: activeRun.completed,
-                    total: activeRun.total,
-                  })}
-                />
-              </div>
-            )}
-            {activeRun && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-status-fail hover:text-status-fail hover:bg-status-fail/10"
-                onClick={() =>
-                  useRunStore
-                    .getState()
-                    .cancelRun(activeProjectId, activeRun.runId)
-                    .catch((err: unknown) => toast.error((err as Error).message))
-                }
-                data-testid="stage-details-cancel-run"
-              >
-                <XCircle className="size-4" />
-                {t('cancel')}
-              </Button>
+              <>
+                <div data-testid="stage-details-run-progress" className="w-32">
+                  <RunProgressBar
+                    completed={activeRun.completed}
+                    failed={activeRun.failed}
+                    total={activeRun.total}
+                    status={activeRun.status}
+                    aria-label={t('runProgress', {
+                      completed: activeRun.completed,
+                      total: activeRun.total,
+                    })}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-status-fail hover:text-status-fail hover:bg-status-fail/10"
+                  onClick={() =>
+                    cancelRun(activeProjectId, activeRun.runId).catch((err: unknown) =>
+                      toast.error(getErrorMessage(err)),
+                    )
+                  }
+                  data-testid="stage-details-cancel-run"
+                >
+                  <XCircle className="size-4" />
+                  {t('cancel')}
+                </Button>
+              </>
             )}
             <Button
               type="button"

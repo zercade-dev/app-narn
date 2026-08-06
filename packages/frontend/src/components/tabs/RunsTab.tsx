@@ -23,8 +23,6 @@ import {
   usageEntryKey,
   usageEntryLabel,
   sumUsage,
-  RUN_TYPE_KEY,
-  isChatRun,
   chatRunData,
   chatTypeKey,
 } from './run-status-ui.js';
@@ -53,7 +51,7 @@ import {
   Info,
   MessageSquare,
 } from 'lucide-react';
-import { isTranslationRun, hasRunDetails } from '@/lib/run-kind';
+import { isTranslationRun, hasRunDetails, RUN_TYPE_KEY, isChatRun } from '@/lib/run-kind';
 import { cn, relativeTime } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 import { AiReviewDialog, type AiReviewOverride } from './AiReviewDialog.js';

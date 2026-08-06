@@ -32,11 +32,26 @@ export interface StageDetailsDraftConfig {
   checkedFields: StageDetailFieldId[];
 }
 
+/**
+ * Functional form of {@link StageDetailsDraftStore.setDraft}: receives the
+ * project's CURRENT stored draft (`undefined` when none exists yet) and returns
+ * its replacement. Callers that merge a patch should prefer this over building
+ * the replacement from render-time values, so two updates landing in the same
+ * React commit compose instead of the second clobbering the first.
+ */
+export type StageDetailsDraftUpdater = (
+  prev: StageDetailsDraftConfig | undefined,
+) => StageDetailsDraftConfig;
+
 interface StageDetailsDraftStore {
   /** Per-project draft config, keyed by project id. Absent = no local draft yet. */
   drafts: Record<string, StageDetailsDraftConfig>;
-  /** Replaces `projectId`'s whole draft entry — callers merge patches themselves. */
-  setDraft: (projectId: string, config: StageDetailsDraftConfig) => void;
+  /**
+   * Replaces `projectId`'s whole draft entry — callers merge patches
+   * themselves, either by passing the complete replacement config or (safer)
+   * an updater that derives it from the current stored draft.
+   */
+  setDraft: (projectId: string, config: StageDetailsDraftConfig | StageDetailsDraftUpdater) => void;
 }
 
 export const useStageDetailsDraftStore = create<StageDetailsDraftStore>()(
@@ -44,7 +59,12 @@ export const useStageDetailsDraftStore = create<StageDetailsDraftStore>()(
     (set) => ({
       drafts: {},
       setDraft: (projectId, config) =>
-        set((s) => ({ drafts: { ...s.drafts, [projectId]: config } })),
+        set((s) => ({
+          drafts: {
+            ...s.drafts,
+            [projectId]: typeof config === 'function' ? config(s.drafts[projectId]) : config,
+          },
+        })),
     }),
     { name: 'narn-stage-details-draft' },
   ),
