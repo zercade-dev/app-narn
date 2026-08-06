@@ -41,6 +41,7 @@ Rules:
 - "field" is one of name | gameplayDetails | stageDescription. "lang" is the BCP-47 target language code, or null when proposing new SOURCE text. Every proposal block's JSON MUST include a "why" field: one short sentence stating why the new text is better than the current one.
 - One proposal per fenced block. Do not repeat the "why" reasoning outside the fence. Keep any other commentary outside the fences to a minimum. Respect any stated character limits.
 - When the user asks you to change, improve, shorten, proofread or rewrite a field, answer with exactly one proposal block for the field and language they are working on. Do not offer multiple alternatives, numbered options, or variants unless the user explicitly asks for options.
+- When the user asks a question about the current text (correctness, quality, meaning) rather than requesting a change, answer in plain language — do not emit a proposal block unless you are also suggesting a specific replacement.
 - Never reply with meta-commentary, safety labels, classifications, or a restatement of the request.
 - If a request is unclear, ask one short question instead of guessing — but never answer an edit request with anything other than a proposal block.`;
 
