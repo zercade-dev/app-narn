@@ -1,6 +1,6 @@
 import type { ModelInfo, ReasoningEffort } from '../types/models.js';
 import type { EndpointType, ProviderType } from './types.js';
-import { maskSecret } from '../mask.js';
+import { maskSecret, redactSecretsFromError } from '../mask.js';
 import { toErrorMessage } from '../error-utils.js';
 import { AuthError, RateLimitError } from '../types/errors.js';
 import {
@@ -313,7 +313,10 @@ export async function resolveAnthropicModels({
     // A typed auth/rate-limit error is intentional — propagate it so the caller
     // surfaces a bad key / quota wall instead of an empty list.
     if (err instanceof AuthError || err instanceof RateLimitError) throw err;
-    console.error(`[anthropic] fetch error key=${maskSecret(apiKey)}`, err);
+    console.error(
+      `[anthropic] fetch error key=${maskSecret(apiKey)}`,
+      redactSecretsFromError(err, [apiKey]),
+    );
     return [];
   }
 
@@ -387,7 +390,10 @@ export async function resolveOpenAIModels({
       });
   } catch (err) {
     if (err instanceof AuthError || err instanceof RateLimitError) throw err;
-    console.error(`[openai] fetch error key=${maskSecret(apiKey)}`, err);
+    console.error(
+      `[openai] fetch error key=${maskSecret(apiKey)}`,
+      redactSecretsFromError(err, [apiKey]),
+    );
     return [];
   }
 }
@@ -537,7 +543,10 @@ export async function resolveGoogleModels({
     }
   } catch (err) {
     if (err instanceof AuthError || err instanceof RateLimitError) throw err;
-    console.error(`[google] fetch error key=${maskSecret(apiKey)}`, err);
+    console.error(
+      `[google] fetch error key=${maskSecret(apiKey)}`,
+      redactSecretsFromError(err, [apiKey]),
+    );
     return [];
   }
 
@@ -649,7 +658,10 @@ export async function resolveDeepSeekModels({
       });
   } catch (err) {
     if (err instanceof AuthError || err instanceof RateLimitError) throw err;
-    console.error(`[deepseek] fetch error key=${maskSecret(apiKey)}`, err);
+    console.error(
+      `[deepseek] fetch error key=${maskSecret(apiKey)}`,
+      redactSecretsFromError(err, [apiKey]),
+    );
     return [];
   }
 }
@@ -961,7 +973,10 @@ export async function resolveOpenRouterModels({
     return models;
   } catch (err) {
     if (err instanceof AuthError || err instanceof RateLimitError) throw err;
-    console.error(`[openrouter] fetch error key=${maskSecret(apiKey)}`, err);
+    console.error(
+      `[openrouter] fetch error key=${maskSecret(apiKey)}`,
+      redactSecretsFromError(err, [apiKey]),
+    );
     return [];
   }
 }
@@ -1062,9 +1077,17 @@ export async function resolveGenericModels({
         return results;
       } catch (err) {
         if (err instanceof TypeError) {
+          // A native Headers.append TypeError embeds the raw apiKey verbatim
+          // in its own .message — attaching the caught `err` itself as
+          // `cause` (the usual preserve-caught-error-compliant shape) would
+          // propagate that unmasked value to anyone who later logs this
+          // error's cause chain. Deliberately substitute a redacted stand-in
+          // instead; reassigning `err` isn't an option either (no-ex-assign).
+          const safeErr = redactSecretsFromError(err, [apiKey]) as Error;
           throw new Error(
-            `Could not connect to Ollama at ${baseURL}: ${err.message}. Is Ollama running?`,
-            { cause: err },
+            `Could not connect to Ollama at ${baseURL}: ${safeErr.message}. Is Ollama running?`,
+            // eslint-disable-next-line preserve-caught-error -- cause is intentionally the redacted stand-in, not the raw caught error (which could carry an unmasked apiKey)
+            { cause: safeErr },
           );
         }
         throw err;
@@ -1130,9 +1153,13 @@ export async function resolveGenericModels({
         if (err instanceof AuthError || err instanceof RateLimitError) throw err;
         if (err instanceof Error && err.message.startsWith('LM Studio server returned')) throw err;
         if (err instanceof TypeError) {
+          // See the matching Ollama-branch comment above: cause is
+          // deliberately the redacted stand-in, not the raw caught error.
+          const safeErr = redactSecretsFromError(err, [apiKey]) as Error;
           throw new Error(
-            `Could not connect to LM Studio at ${baseURL}: ${err.message}. Is the local server running?`,
-            { cause: err },
+            `Could not connect to LM Studio at ${baseURL}: ${safeErr.message}. Is the local server running?`,
+            // eslint-disable-next-line preserve-caught-error -- see the Ollama-branch comment above
+            { cause: safeErr },
           );
         }
         throw err;
@@ -1177,13 +1204,18 @@ export async function resolveGenericModels({
       if (err instanceof Error && err.message.includes('Failed to fetch models from')) {
         throw err; // Re-throw user-facing errors
       }
+      // See the Ollama-branch comment above: cause is deliberately the
+      // redacted stand-in (also reused for the console.warn below), not the
+      // raw caught error, which could carry an unmasked apiKey.
+      const safeErr = redactSecretsFromError(err, [apiKey]);
       console.warn(
         `[generic] fetch error url=${redactUrlUserinfo(modelsUrl)} key=${maskSecret(apiKey)}`,
-        err,
+        safeErr,
       );
       throw new Error(
-        `Could not connect to ${modelsUrl}: ${err instanceof Error ? err.message : 'Unknown error'}`,
-        { cause: err },
+        `Could not connect to ${modelsUrl}: ${safeErr instanceof Error ? safeErr.message : 'Unknown error'}`,
+        // eslint-disable-next-line preserve-caught-error -- see the Ollama-branch comment above
+        { cause: safeErr },
       );
     }
   } catch (err) {
