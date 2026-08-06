@@ -414,7 +414,6 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
     resumeRun,
     reorderQueue,
     startPolling,
-    stopPolling,
   } = useRunStore();
   const openReview = useViewStore((s) => s.openReview);
   const openSuggestions = useViewStore((s) => s.openSuggestions);
@@ -514,8 +513,14 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
     if (projectId) {
       startPolling(projectId);
     }
-    return () => stopPolling();
-  }, [projectId, startPolling, stopPolling]);
+    // No unmount cleanup here on purpose: a run started from any tab kicks
+    // off the store's self-rescheduling poll loop, which is not tied to any
+    // component's lifecycle — `fetchRuns` already self-terminates the loop
+    // once no run is active (run-store.ts). Calling stopPolling() here would
+    // kill that loop out from under a still-running run just because the user
+    // glanced at Activity and navigated away, silently defeating both the
+    // run-failure toast and Activity's own live status for the rest of that run.
+  }, [projectId, startPolling]);
 
   const activeRuns = runs.filter(
     (r) => r.status === RunStatusCode.Pending || r.status === RunStatusCode.Running,
