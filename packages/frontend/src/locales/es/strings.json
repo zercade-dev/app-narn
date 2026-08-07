@@ -460,6 +460,7 @@
     "stringsProgress": "{{completed}} / {{total}} entradas",
     "progressFailedSuffix": "({{count}} con error)",
     "cancel": "Cancelar",
+    "runFailedToast": "La ejecución de {{type}} falló",
     "emptyState": "No se encontró historial de actividad.",
     "mobileEmpty": "Aún no hay ejecuciones. Las ejecuciones iniciadas en el escritorio muestran aquí su progreso.",
     "viewSwitchLabel": "Vista de actividad",

@@ -35,6 +35,7 @@ import { useProjectStore } from '../stores/project-store.js';
 import { useStageDetailsStore } from '../stores/stage-details-store.js';
 import { useStageAssistantStore } from '../stores/stage-assistant-store.js';
 import { vaultLockedEvent } from '../lib/vault-events.js';
+import { toast } from '../lib/toast.js';
 
 /** One conversation turn — mirrors the server's `ChatTurn` shape. */
 export interface ChatTurn {
@@ -136,6 +137,7 @@ export function useStageDetailsChat(): UseStageDetailsChat {
             // Non-JSON error body — keep the HTTP-status fallback.
           }
           setError(message);
+          toast.error(message);
           return;
         }
 
@@ -159,7 +161,9 @@ export function useStageDetailsChat(): UseStageDetailsChat {
         // A `stop()`/unmount abort finalizes gracefully — the partial assistant
         // message is kept. Any other failure surfaces as an error.
         if ((err as { name?: string })?.name !== 'AbortError') {
-          setError(err instanceof Error ? err.message : String(err));
+          const message = err instanceof Error ? err.message : String(err);
+          setError(message);
+          toast.error(message);
         }
       } finally {
         setStreaming(false);

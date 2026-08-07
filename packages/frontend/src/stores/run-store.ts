@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import {
   RunStatus,
+  RunStatusCode,
+  runTypeLabel,
   type BatchGroupingDimension,
   type JudgeChecks,
   type JudgeVerdictRecord,
@@ -11,9 +13,11 @@ import {
   type CategorySuggestion,
 } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../hooks/use-api.js';
-import { isRunActive } from '../lib/run-kind.js';
+import { RUN_TYPE_KEY, isChatRun, isRunActive } from '../lib/run-kind.js';
 import { getErrorMessage } from '../lib/utils.js';
 import { mutateThenRefresh, runAction } from './store-helpers.js';
+import { toast } from '../lib/toast.js';
+import i18n from '../i18n/index.js';
 
 /**
  * One per-entry source-review record. Mirrors the server's `SourceReviewRecord`
@@ -269,6 +273,83 @@ let pollInFlight = false;
 /** Count of consecutive failed polls, driving the backoff / give-up logic. */
 let pollConsecutiveErrors = 0;
 
+/**
+ * Runs whose Failed transition has already been toasted in this poll session.
+ *
+ * There are TWO independent write paths into `runs` — the ~2s poll
+ * (`fetchRuns`) and the server-pushed SSE `run-progress` event
+ * (`applyProgressEvent`) — and either can be the first to observe a run turn
+ * `Failed`. In normal desktop use the SSE path wins: `ConsolePanel` is mounted
+ * unconditionally by `AppShell` (its `open` prop only controls visual
+ * expansion), so the log stream is always connected, and the server flushes
+ * TERMINAL statuses immediately, bypassing its own 150ms coalescing window
+ * (`http/run-events.ts`). Notifying from both paths is therefore required for
+ * the toast to fire at all; this set is what stops them from BOTH firing for
+ * the same run (and stops a later poll tick re-toasting a still-`Failed` run).
+ *
+ * Cleared by `stopPolling` — which runs when the last active run settles, on a
+ * project switch, and when the poller gives up — so the set never grows
+ * unbounded over a long session and a fresh poll session starts clean.
+ */
+const notifiedFailedRunIds = new Set<string>();
+
+/**
+ * Fires the one-per-run `toast.error` for a run observed in
+ * `RunStatusCode.Failed`, whichever write path observed it first. Idempotent
+ * per runId via {@link notifiedFailedRunIds}.
+ *
+ * `kind: 'chat'` runs (`chat-usage.ts`'s `startChatTurn`/`finishChatTurn` —
+ * verified: a failed chat turn writes `RunStatusCode.Failed` via
+ * `OUTCOME_STATUS`) are explicitly excluded via the existing `isChatRun`
+ * helper: the chat call sites already toast a chat failure precisely, at the
+ * point of failure, with the real error message — this would otherwise
+ * ALSO fire a second, generic, mislabeled toast for the same failure
+ * (`runTypeLabel`'s switch has no `'chat'` case, so it would read
+ * "Translation run failed" regardless of which chat actually failed).
+ *
+ * `errors` is optional in the caller's view because the SSE payload carries no
+ * error list (`RunProgressEvent` is six scalar fields); an absent/empty list
+ * just falls back to the bare "{{type}} run failed" label.
+ */
+function notifyFailedRun(
+  run: Pick<RunStatus, 'runId' | 'kind'> & { errors?: RunStatus['errors'] },
+): void {
+  if (isChatRun(run)) return;
+  if (notifiedFailedRunIds.has(run.runId)) return;
+  notifiedFailedRunIds.add(run.runId);
+  const typeLabel = i18n.t(RUN_TYPE_KEY[runTypeLabel(run.kind)], { ns: 'strings' });
+  const base = i18n.t('runs.runFailedToast', { ns: 'strings', type: typeLabel });
+  const message = run.errors?.[0]?.message;
+  toast.error(message ? `${base}: ${message}` : base);
+}
+
+/**
+ * Diffs a `fetchRuns` poll snapshot and notifies each run that just
+ * transitioned into `RunStatusCode.Failed` — the single choke point every run
+ * kind's polling flows through (translate, stage-details, source-review,
+ * judge, glossary-gen, category-gen), so this covers all of them without six
+ * per-tab toasts.
+ *
+ * `previousRuns` is `get().runs` captured immediately before the new `set()`
+ * call in `fetchRuns` — i.e. the prior fetch's snapshot (or `[]` on the very
+ * first fetch of a poll session, since `startPolling` resets `runs` to `[]`
+ * before polling a new project). A run absent from `previousRuns` (first
+ * observation of that runId) is skipped: there is no previous status to diff
+ * against, so a page load that lands on an already-`Failed` run must not
+ * toast on that first sighting. A run whose previous status was already
+ * `Failed` is also skipped, so re-observing the same failed run on a later
+ * poll tick never re-toasts. The actual toast (and its cross-path dedup) is
+ * delegated to {@link notifyFailedRun}, which the SSE path also calls.
+ */
+function notifyFailedRunTransitions(previousRuns: RunStatus[], nextRuns: RunStatus[]): void {
+  for (const run of nextRuns) {
+    if (run.status !== RunStatusCode.Failed) continue;
+    const prev = previousRuns.find((r) => r.runId === run.runId);
+    if (!prev || prev.status === RunStatusCode.Failed) continue;
+    notifyFailedRun(run);
+  }
+}
+
 export const useRunStore = create<RunStore>((set, get) => {
   /**
    * Arm the next poll tick `delay` ms out and record it as the live poller.
@@ -338,7 +419,12 @@ export const useRunStore = create<RunStore>((set, get) => {
         // stops a previous project's in-flight poll from clobbering the current
         // project's runs and re-targeting/killing its poller.
         if (token !== runFetchToken) return;
+        // Captured BEFORE the set() below overwrites it — this IS the previous
+        // fetch's snapshot (or `[]` on the very first fetch of a poll session),
+        // exactly what the Failed-transition toast diffs against.
+        const previousRuns = get().runs;
         set({ runs, loading: false, error: null });
+        notifyFailedRunTransitions(previousRuns, runs);
 
         // Poll while any run is in pending or running state.
         // Queued runs count as active: they will transition to running without
@@ -655,9 +741,13 @@ export const useRunStore = create<RunStore>((set, get) => {
         globalThis.clearTimeout(intervalId);
       }
       // Reset the loop's private state so a fresh startPolling begins clean even
-      // if a tick was mid-flight when polling stopped.
+      // if a tick was mid-flight when polling stopped. The already-toasted set
+      // is part of that state: a poll session ends when its runs have settled,
+      // so nothing in it can still need dedup, and clearing keeps it from
+      // growing for the lifetime of a long-lived tab.
       pollInFlight = false;
       pollConsecutiveErrors = 0;
+      notifiedFailedRunIds.clear();
       if (intervalId !== null) {
         set({ pollingIntervalId: null, pollingProjectId: null });
       }
@@ -676,14 +766,27 @@ export const useRunStore = create<RunStore>((set, get) => {
       // result) — ignore rather than clobber the more current stored state.
       if (!progressIncreased && !statusChanged) return;
       const nextRuns = [...runs];
-      nextRuns[idx] = {
+      const merged: RunStatus = {
         ...existing,
         status: e.status as RunStatus['status'],
         completed: e.completed,
         failed: e.failed,
         total: e.total,
       };
+      nextRuns[idx] = merged;
       set({ runs: nextRuns });
+      // The SSE fast path is usually the FIRST observer of a failure: the
+      // server flushes terminal statuses immediately (bypassing its 150ms
+      // coalescing window), well before the next ~2s poll tick. Without this
+      // the poll-side diff would later see `prev.status === Failed` — written
+      // here — and skip it, so the failure toast would never fire in normal
+      // desktop use. `notifyFailedRun` dedups per runId, so the poll tick that
+      // follows can't double-toast. Gated on a real transition (the stored run
+      // was not already Failed) to match the poll path's semantics: a run first
+      // observed already-Failed is never toasted.
+      if (merged.status === RunStatusCode.Failed && existing.status !== RunStatusCode.Failed) {
+        notifyFailedRun(merged);
+      }
     },
   };
 });
