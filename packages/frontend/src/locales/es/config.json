@@ -85,6 +85,7 @@
   "credentialsMissingChip": "Faltan credenciales",
   "credentialsVaultLockedChip": "Bóveda bloqueada",
   "structuredOutputExperimentalWarning": "Activar la salida estructurada debería mejorar la coherencia del formato y reducir los reintentos, aunque la función aún es experimental. Pruébala activada y desactivada con el modelo que utilices y conserva la opción que dé mejores resultados.",
+  "structuredOutputLunaWarning": "gpt-5.6-luna se niega con frecuencia a traducir (devuelve un error o una respuesta con formato incorrecto en lugar de una traducción) cuando la salida estructurada está activada. Si ves fallos con este modelo, prueba a desactivar la salida estructurada o a usar otro modelo.",
   "disableModule": "Desactivar",
   "modulesEnabledSection": "Habilitados ({{count}})",
   "modulesDisabledSection": "Deshabilitados ({{count}})",

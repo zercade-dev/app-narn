@@ -460,6 +460,7 @@
     "stringsProgress": "{{completed}} / {{total}} entries",
     "progressFailedSuffix": "({{count}} failed)",
     "cancel": "Cancel",
+    "runFailedToast": "{{type}} run failed",
     "emptyState": "No activity history found.",
     "mobileEmpty": "No runs yet. Runs started on desktop show their progress here.",
     "viewSwitchLabel": "Activity view",

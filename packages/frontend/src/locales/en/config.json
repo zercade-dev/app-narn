@@ -85,6 +85,7 @@
   "credentialsMissingChip": "Credentials missing",
   "credentialsVaultLockedChip": "Vault locked",
   "structuredOutputExperimentalWarning": "Enabling structured output should improve format consistency and reduce retries, though the feature is still experimental. Try it both on and off with the model you use, and keep whichever gives better results.",
+  "structuredOutputLunaWarning": "gpt-5.6-luna frequently refuses to translate (returning an error or malformed reply instead of a translation) when structured output is enabled. If you see failures with this model, try disabling structured output or switching to a different model.",
   "disableModule": "Disable",
   "modulesEnabledSection": "Enabled ({{count}})",
   "modulesDisabledSection": "Disabled ({{count}})",

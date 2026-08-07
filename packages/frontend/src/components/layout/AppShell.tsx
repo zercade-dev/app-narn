@@ -147,7 +147,6 @@ export function RoutingTabContent({
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const runs = useRunStore((s) => s.runs);
   const startPolling = useRunStore((s) => s.startPolling);
-  const stopPolling = useRunStore((s) => s.stopPolling);
   const isCollaborator = role === 'collaborator';
 
   const translationsInProgress = runs.some(
@@ -227,8 +226,14 @@ export function RoutingTabContent({
     if (projectId) {
       startPolling(projectId);
     }
-    return () => stopPolling();
-  }, [projectId, startPolling, stopPolling]);
+    // No unmount cleanup here on purpose: a run started from any tab kicks
+    // off the store's self-rescheduling poll loop, which is not tied to any
+    // component's lifecycle — `fetchRuns` already self-terminates the loop
+    // once no run is active (run-store.ts). Calling stopPolling() here would
+    // kill that loop out from under a still-running run just because the user
+    // left the Routing tab, silently defeating both the run-failure toast and
+    // every tab's live run status for the rest of that run.
+  }, [projectId, startPolling]);
 
   // The routing module selector sorts active-in-project modules first and mutes
   // the inactive ones, so it needs the project's real per-module `active` flags.

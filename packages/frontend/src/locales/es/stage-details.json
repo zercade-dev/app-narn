@@ -46,6 +46,7 @@
   "modulePlaceholder": "Seleccionar el más económico automáticamente",
   "saveFailed": "No se pudo guardar: {{message}}",
   "runProgress": "Traduciendo {{completed}}/{{total}}",
+  "cancel": "Cancelar",
   "chatEmpty": "Pregunta sobre la redacción, el tono o las traducciones de los campos de detalles del escenario.",
   "chatConfigMissing": "Elige un proveedor y un modelo en los ajustes del asistente, o ejecuta primero una traducción de detalles de fase.",
   "chatAssistant": "Asistente",
