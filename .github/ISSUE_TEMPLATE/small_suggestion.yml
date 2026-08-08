@@ -1,0 +1,31 @@
+name: Small suggestion
+description: A small tweak or polish idea — clearer wording, a better default, a minor UI adjustment.
+labels: [polish, needs-triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For small quality-of-life ideas that don't need a full feature request —
+        clearer wording or tips, a more sensible default value, a minor UI
+        adjustment. If your idea adds a new capability or changes how a feature
+        works, please use the Feature request template instead.
+  - type: input
+    id: where
+    attributes:
+      label: Where in the app?
+      description: The screen, form, or element your suggestion is about.
+      placeholder: Create instance form — the tip under the name field
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: What would you change?
+      description: What it says or does today, and what you'd change it to. Concrete wording or example values are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is this better?
+      description: Optional — e.g. the current text is easy to misread, or a default would save a step.
