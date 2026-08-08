@@ -121,17 +121,29 @@ export function StageDetailsTab(): React.JSX.Element | null {
 
   // Refresh-on-run-completion: the M31 engine writes translations server-side,
   // so nothing client-side updates `project.stageDetails` when a run finishes.
-  // Watch this project's stage-details runs and, on an observed active→terminal
-  // transition, refetch the project once so the new translations appear without
-  // a reload (a genuine remote change — the local-merge pattern doesn't
-  // apply). Render-time transition capture mirrors ReviewTab's retranslate-run
-  // pattern: per-run statuses are snapshotted, and a transition only fires when
-  // a run's PREVIOUS status is both known and non-terminal — the
-  // `prevStatus !== undefined` lookup is what guards runs first observed
-  // already-terminal (mount-time historical runs, runs from before a project
-  // switch); the mount-time seeding merely primes that lookup. The transition
-  // bumps a tick, and an effect performs the single fetch.
+  // Watch this project's stage-details runs and, once one is seen finished,
+  // refetch the project once so the new translations appear without a reload (a
+  // genuine remote change — the local-merge pattern doesn't apply). Render-time
+  // transition capture mirrors ReviewTab's retranslate-run pattern: per-run
+  // statuses are snapshotted and compared against the next render's.
+  //
+  // A run counts as finished in two cases:
+  //  1. An observed active→terminal transition (previous status known and
+  //     non-terminal). The `prevStatus !== undefined` half is what suppresses
+  //     runs first observed ALREADY terminal — mount-time historical runs and
+  //     runs left over from before a project switch, neither of which should
+  //     trigger a fetch here (mount is handled by the re-activation effect
+  //     below); the mount-time seeding merely primes that lookup.
+  //  2. A first sighting of a run THIS tab started (`ownRunId`). An instant run
+  //     (pseudo finishes in tens of ms) can complete before the run store's
+  //     first poll returns it, so its only ever observed status is terminal and
+  //     case 1 can never fire — yet its results are exactly what the user is
+  //     waiting for. First sighting counts ONLY for the tab's own run, so the
+  //     historical-run suppression above is untouched.
+  //
+  // Either way the tick is bumped and an effect performs the single fetch.
   const [refetchTick, setRefetchTick] = useState(0);
+  const [ownRunId, setOwnRunId] = useState<string | null>(null);
   const sdRuns = runs.filter((r) => r.projectId === activeProjectId && r.kind === 'stage-details');
   const sdRunsSignature = `${activeProjectId ?? ''}|${sdRuns
     .map((r) => `${r.runId}=${r.status}`)
@@ -147,14 +159,20 @@ export function StageDetailsTab(): React.JSX.Element | null {
     const isTerminal = (s: RunStatusCode) =>
       s === RunStatusCode.Completed || s === RunStatusCode.Failed || s === RunStatusCode.Cancelled;
     const finished = sdRuns.some((r) => {
+      if (!isTerminal(r.status)) return false;
       const prevStatus = prevSdRuns.statuses.get(r.runId);
-      return prevStatus !== undefined && !isTerminal(prevStatus) && isTerminal(r.status);
+      if (prevStatus === undefined) return r.runId === ownRunId;
+      return !isTerminal(prevStatus);
     });
     setPrevSdRuns({
       signature: sdRunsSignature,
       statuses: new Map(sdRuns.map((r) => [r.runId, r.status])),
     });
-    if (finished) setRefetchTick((n) => n + 1);
+    if (finished) {
+      // Consume the marker so the fetch fires exactly once for this run.
+      setOwnRunId(null);
+      setRefetchTick((n) => n + 1);
+    }
   }
   // Project-switch staleness: a stage-details run can finish while ANOTHER
   // project is viewed — the transition watcher above only observes the current
@@ -290,7 +308,7 @@ export function StageDetailsTab(): React.JSX.Element | null {
         currentOnly && effectiveLang && translatableLanguages.includes(effectiveLang)
           ? [effectiveLang]
           : translatableLanguages;
-      await startTranslate(activeProjectId, {
+      const { runId } = await startTranslate(activeProjectId, {
         languages: requestLanguages,
         fields: STAGE_DETAIL_FIELD_IDS.filter((f) => checkedFields.has(f)),
         staleOnly,
@@ -298,6 +316,10 @@ export function StageDetailsTab(): React.JSX.Element | null {
         ...(model ? { model } : {}),
         ...(reasoningEffort ? { reasoningEffort } : {}),
       });
+      // Remember the run we just started: if it finishes before the first poll
+      // returns it, the watcher above has no active→terminal transition to see
+      // and would otherwise leave the results stale (see case 2 there).
+      setOwnRunId(runId);
       // Observe the new run's progress in the run store (and Activity tab).
       useRunStore.getState().startPolling(activeProjectId);
       setPopoverOpen(false);

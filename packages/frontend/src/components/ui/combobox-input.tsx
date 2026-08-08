@@ -68,6 +68,29 @@ export function ComboboxInput({
     ? '[&:not(:focus-within)>input]:text-transparent'
     : undefined;
 
+  // Free-text preservation. Base UI's AriaCombobox syncs the input back to the
+  // SELECTED item's label once the popup's exit animation finishes
+  // (`handleUnmount`, wired up by `useOpenChangeComplete`). Here selection is
+  // single-mode with the input OUTSIDE the popup, so when the user typed a value
+  // that matches no suggestion there is no selection and that label is '' —
+  // base-ui then emits `onInputValueChange('', { reason: 'input-clear' })` and
+  // silently wipes the typed text ~100ms after the popup closes.
+  //
+  // Dropping `input-clear` is safe in this wrapper because nothing else here
+  // produces it: ordinary typing (including deleting back to empty) reports
+  // `input-change`, picking an item reports `item-press`/`none`, and the base-ui
+  // Clear button — which would report `clear-press`, a different reason anyway —
+  // is not rendered (`showClear` defaults to false and this wrapper never sets
+  // it). The revert after an actual selection carries reason `none`, so
+  // selecting a suggestion still syncs the input normally.
+  const handleInputValueChange = React.useCallback(
+    (next: string, details: { reason: string }) => {
+      if (details.reason === 'input-clear') return;
+      onValueChange(next);
+    },
+    [onValueChange],
+  );
+
   // When the user selects an item from the dropdown, `itemToStringLabel`
   // determines what text goes into the input. We want the ID (value) there,
   // not the human-readable label. The combobox items render their own label
@@ -87,7 +110,7 @@ export function ComboboxInput({
       itemToStringLabel={(item) => (item as NormalizedSuggestion).value}
       itemToStringValue={(item) => (item as NormalizedSuggestion).value}
       inputValue={value}
-      onInputValueChange={onValueChange}
+      onInputValueChange={handleInputValueChange}
       onValueChange={handleItemSelect}
     >
       <ShadcnComboboxInput
