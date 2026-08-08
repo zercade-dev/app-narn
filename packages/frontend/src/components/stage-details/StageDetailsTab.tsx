@@ -45,6 +45,10 @@ import { RunProgressBar } from '@/components/ui/run-progress-bar';
 import { toast } from '@/lib/toast';
 import { getErrorMessage } from '../../lib/utils.js';
 
+/** A run that will not change status again — the trigger for a results refetch. */
+const isTerminalRunStatus = (s: RunStatusCode): boolean =>
+  s === RunStatusCode.Completed || s === RunStatusCode.Failed || s === RunStatusCode.Cancelled;
+
 export function StageDetailsTab(): React.JSX.Element | null {
   const { t } = useTranslation('stage-details');
   const isMobile = useIsMobile();
@@ -139,7 +143,9 @@ export function StageDetailsTab(): React.JSX.Element | null {
   //     first poll returns it, so its only ever observed status is terminal and
   //     case 1 can never fire — yet its results are exactly what the user is
   //     waiting for. First sighting counts ONLY for the tab's own run, so the
-  //     historical-run suppression above is untouched.
+  //     historical-run suppression above is untouched. Case 2 has a blind spot
+  //     of its own — the marker is only set once `startTranslate` RESOLVES — so
+  //     it is backstopped by the marker watcher below.
   //
   // Either way the tick is bumped and an effect performs the single fetch.
   const [refetchTick, setRefetchTick] = useState(0);
@@ -156,13 +162,11 @@ export function StageDetailsTab(): React.JSX.Element | null {
     statuses: new Map(sdRuns.map((r) => [r.runId, r.status])),
   }));
   if (prevSdRuns.signature !== sdRunsSignature) {
-    const isTerminal = (s: RunStatusCode) =>
-      s === RunStatusCode.Completed || s === RunStatusCode.Failed || s === RunStatusCode.Cancelled;
     const finished = sdRuns.some((r) => {
-      if (!isTerminal(r.status)) return false;
+      if (!isTerminalRunStatus(r.status)) return false;
       const prevStatus = prevSdRuns.statuses.get(r.runId);
       if (prevStatus === undefined) return r.runId === ownRunId;
-      return !isTerminal(prevStatus);
+      return !isTerminalRunStatus(prevStatus);
     });
     setPrevSdRuns({
       signature: sdRunsSignature,
@@ -185,7 +189,34 @@ export function StageDetailsTab(): React.JSX.Element | null {
   const [prevProjectId, setPrevProjectId] = useState(activeProjectId);
   if (prevProjectId !== activeProjectId) {
     setPrevProjectId(activeProjectId);
+    // Drop any pending own-run marker: it belongs to the project being left, and
+    // this switch already bumps the tick. Keeping it would let the same run bump
+    // a second time (here, then again when it is first sighted after a switch
+    // back), and its results arrive with this refetch anyway.
+    setOwnRunId(null);
     if (activeProjectId) setRefetchTick((n) => n + 1);
+  }
+  // Backstop for case 2's own blind spot: `setOwnRunId` only lands once the POST
+  // RESOLVES, so a poll arriving DURING that await can deliver the run already
+  // terminal. The watcher above then runs with `ownRunId` still null — it
+  // declines to fire AND snapshots the run into `prevSdRuns`, spending the first
+  // sighting, after which no later render can recover it (reachable whenever the
+  // run store already has a live polling chain, i.e. any other run in flight).
+  // So watch the MARKER as well as the runs: when it turns non-null, the run may
+  // already be sitting in `sdRuns` finished, and that counts. Deliberately not an
+  // effect — a setState in an effect body is a cascading render (and banned by
+  // react-hooks/set-state-in-effect); this is the same render-phase capture the
+  // two blocks above use. Skipped mid-project-switch, which clears the marker and
+  // refetches on its own.
+  const [prevOwnRunId, setPrevOwnRunId] = useState<string | null>(null);
+  if (prevOwnRunId !== ownRunId && prevProjectId === activeProjectId) {
+    setPrevOwnRunId(ownRunId);
+    const own = ownRunId ? sdRuns.find((r) => r.runId === ownRunId) : undefined;
+    if (own && isTerminalRunStatus(own.status)) {
+      setOwnRunId(null);
+      setPrevOwnRunId(null);
+      setRefetchTick((n) => n + 1);
+    }
   }
   useEffect(() => {
     if (refetchTick === 0) return;
@@ -216,13 +247,13 @@ export function StageDetailsTab(): React.JSX.Element | null {
   // string rows to reload.
   useEffect(() => {
     if (!activeProjectId) return;
-    const isTerminal = (s: RunStatusCode) =>
-      s === RunStatusCode.Completed || s === RunStatusCode.Failed || s === RunStatusCode.Cancelled;
     const hasFinishedStageRun = useRunStore
       .getState()
       .runs.some(
         (r) =>
-          r.projectId === activeProjectId && r.kind === 'stage-details' && isTerminal(r.status),
+          r.projectId === activeProjectId &&
+          r.kind === 'stage-details' &&
+          isTerminalRunStatus(r.status),
       );
     if (!hasFinishedStageRun) return;
     void useProjectStore
