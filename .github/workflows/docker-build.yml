@@ -11,10 +11,19 @@ on:
 
 # Restrict the GITHUB_TOKEN to the minimum required scopes. This workflow only
 # checks out the repo and builds + boot-smokes the image locally — it never
-# pushes to a registry — so read-only contents access is all it needs.
+# pushes to a registry — so read-only contents access (plus checks:read for the
+# ignorable-paths gate below) is all it needs.
 permissions:
   contents: read
+  checks: read # ignorable-paths-gate reads the base commit's check-run verdict
 
+# `build` is ruleset-required on develop and main, so the workflow must always run
+# and report — a trigger-level paths filter would leave PRs stuck on an unreported
+# "Expected" check. The ignorable-paths gate early-exits the job as an explicit
+# SUCCESS when the diff cannot affect image assembly or boot (issue templates,
+# docs/ — see the action for the list). It verifies the base against quality-gate,
+# not `build`: develop merge commits only carry check-runs from push CI, which
+# doesn't include this workflow — the action's input docs have the full rationale.
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,8 +31,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Check whether this diff can affect the image
+        id: gate
+        uses: ./.github/actions/ignorable-paths-gate
+        with:
+          required-check: quality-gate
+
       # Self-contained repo (own Dockerfile + pnpm-lock.yaml) — context is the repo root.
       - name: Build image
+        if: steps.gate.outputs.skip != 'true'
         run: docker build -t narn:ci .
 
       - name: Boot the image against Postgres and probe readiness
@@ -33,6 +49,7 @@ jobs:
         # no host ports — none of those work when the self-hosted runner isolates job
         # steps from the docker network namespace. Names are run-scoped so concurrent
         # jobs on the shared runner never collide; a trap tears everything down.
+        if: steps.gate.outputs.skip != 'true'
         run: |
           set -euo pipefail
           id="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
