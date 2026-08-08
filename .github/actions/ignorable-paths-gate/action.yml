@@ -1,0 +1,100 @@
+name: ignorable-paths-gate
+description: >-
+  Decides whether a required-check job can early-exit as SUCCESS because the
+  event's diff touches only paths its checks never read. quality-gate and build
+  are ruleset-required on develop/main, so a trigger-level `paths-ignore` would
+  leave the PR stuck on a never-reported "Expected" context — the workflow must
+  run and report. This gate lets it report success in seconds instead.
+
+  Two conditions, both required, evaluated against the compare API's diff from
+  the merge base (PRs) or the previous tip (pushes):
+  1. every changed path — including BOTH sides of renames — matches the
+     ignore-list regex below. It is an IGNORE-list on purpose: anything
+     unanticipated (source, lockfiles, Dockerfile, workflows, root markdown —
+     which root prettier format-checks) defaults to a full run;
+  2. the base commit's `required-check` check-run concluded success, so the
+     verdict being inherited actually exists. Skipped-but-green runs also
+     produce a success check-run, so stacked docs-only changes chain soundly.
+
+  Every failure path ends in skip=false (fail open) — the gate may only ever
+  SAVE work, never fail a job or mask a broken baseline.
+inputs:
+  required-check:
+    description: >-
+      Check-run name that must have concluded success on the base commit for
+      its verdict to be inherited. Callers pass quality-gate — including
+      docker-build: develop merge commits carry a quality-gate check-run from
+      push CI, but `build` check-runs exist only on PR heads and main pushes,
+      so gating on `build` would fail open on every PR. quality-gate witnesses
+      "the base is an integrated, CI-green state"; each PR's own image
+      integrity is still enforced by the required `build` check on its head.
+    required: true
+outputs:
+  skip:
+    description: "'true' only when the heavy steps can safely early-exit"
+    value: ${{ steps.decide.outputs.skip }}
+runs:
+  using: composite
+  steps:
+    - id: decide
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        EVENT: ${{ github.event_name }}
+        FORCED: ${{ github.event.forced }}
+        BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        CHECK: ${{ inputs.required-check }}
+        # Directory alternatives end in /, exact files in $. NOT here, on
+        # purpose: root *.md/*.yml (prettier-gated), .github/workflows/**
+        # (edits must exercise the workflow), .github/actionlint.yaml.
+        IGNORE_RE: '^(docs/|\.github/(ISSUE_TEMPLATE/|CODEOWNERS$|pull_request_template\.md$|dependabot\.yml$)|LICENSE$)'
+      run: |
+        # No set -e: every failure below must fall through to skip=false, never
+        # redden the step. finish() is the single exit point.
+        set -uo pipefail
+        finish() {
+          echo "skip=$1" >>"$GITHUB_OUTPUT"
+          if [ "$1" = "true" ]; then
+            echo "::notice::ignorable-paths gate: skipping heavy steps — $2"
+          else
+            echo "ignorable-paths gate: running the full job — $2"
+          fi
+          exit 0
+        }
+
+        case "$EVENT" in
+          pull_request|push) ;;
+          *) finish false "event=$EVENT is never gated" ;;
+        esac
+        if [ "$EVENT" = "push" ] && [ "$FORCED" = "true" ]; then
+          finish false "forced push"
+        fi
+        if [ -z "$BASE_SHA" ] || [ -z "${BASE_SHA//0/}" ]; then
+          finish false "no usable base sha"
+        fi
+
+        cmp="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${BASE_SHA}...${HEAD_SHA}")" \
+          || finish false "compare API failed"
+
+        # The compare API caps files at 300 per response — at the cap the list
+        # may be truncated, so the delta cannot be trusted as complete. An
+        # empty list means an identical tree; nothing to save, keep it simple.
+        verdict="$(jq -r --arg re "$IGNORE_RE" '
+          if (.files | type) != "array" or (.files | length) == 0 or (.files | length) >= 300 then "no"
+          elif ([.files[] | .filename, (.previous_filename // empty)] | all(test($re))) then "yes"
+          else "no" end' <<<"$cmp")" || finish false "jq parse failed"
+        if [ "$verdict" != "yes" ]; then
+          finish false "delta touches non-ignorable paths"
+        fi
+
+        base="$(jq -r '.merge_base_commit.sha // empty' <<<"$cmp")"
+        if [ -z "$base" ]; then
+          finish false "compare returned no merge base"
+        fi
+        concl="$(gh api "repos/${GITHUB_REPOSITORY}/commits/${base}/check-runs?check_name=${CHECK}&filter=latest" \
+          --jq '.check_runs[0].conclusion // empty')" || finish false "check-runs API failed"
+        if [ "$concl" != "success" ]; then
+          finish false "base ${base:0:7} ${CHECK}=${concl:-none}, not success"
+        fi
+        finish true "only ignorable paths changed vs base ${base:0:7} (${CHECK}=success there)"
