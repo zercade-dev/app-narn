@@ -17,6 +17,26 @@ export interface AddInstanceBaseModule {
   requiredEnvVars: string[];
 }
 
+/** Fallback slug stem used when the base module id is not itself slug-shaped. */
+const FALLBACK_SLUG_STEM = 'instance';
+
+/**
+ * First free slug in the sequence `<base>`, `<base>-2`, `<base>-3`, … — the value
+ * the creation form opens with, so the user never has to invent an id. Gaps are
+ * filled rather than skipped, and the result always satisfies
+ * {@link isValidInstanceSlug} (a base module id that isn't slug-shaped falls back
+ * to the `instance…` stem; no registered module id does today).
+ */
+export function suggestInstanceSlug(baseModuleId: string, takenSlugs?: Iterable<string>): string {
+  const taken = new Set(takenSlugs ?? []);
+  const stem = isValidInstanceSlug(baseModuleId) ? baseModuleId : FALLBACK_SLUG_STEM;
+  if (!taken.has(stem)) return stem;
+  for (let n = 2; ; n++) {
+    const candidate = `${stem}-${n}`;
+    if (!taken.has(candidate)) return candidate;
+  }
+}
+
 /**
  * Inline form for creating a named instance of a base module
  * (slug is immutable; display name is editable afterwards).
@@ -26,6 +46,7 @@ export function AddInstanceForm({
   unlocked,
   existingKeys,
   reservedSlugs,
+  takenSlugs,
   onCreated,
   onCancel,
   onEditVaultKey,
@@ -41,6 +62,8 @@ export function AddInstanceForm({
    * base module's own id when the caller doesn't pass the full set.
    */
   reservedSlugs?: readonly string[];
+  /** Slugs already used by instances of this base module — the suggestion skips them. */
+  takenSlugs?: readonly string[];
   onCreated: () => void;
   onCancel: () => void;
   /**
@@ -50,12 +73,18 @@ export function AddInstanceForm({
   onEditVaultKey?: (key: string) => void;
 }>): React.JSX.Element {
   const { t } = useTranslation('config');
-  // Start blank rather than seeding the base module id: a base-named instance
-  // (e.g. "anthropic" → anthropic:anthropic) is now allowed, so pre-filling the
-  // base id would create one on a blind Create. Forcing a deliberate slug choice
-  // avoids that; the placeholder shows the expected shape instead.
-  const [slug, setSlug] = useState('');
-  const [displayName, setDisplayName] = useState('');
+  // Both inputs open pre-filled so a plain "Create" works with no typing: the
+  // slug is the first free `<base>`/`<base>-2`/… value, and the display name
+  // mirrors the server's own default for an omitted name. A base-named instance
+  // (e.g. anthropic:anthropic) is deliberately allowed, so suggesting the bare
+  // base id first is safe.
+  const suggestedSlug = suggestInstanceSlug(baseModule.id, takenSlugs);
+  const defaultDisplayName = (forSlug: string) =>
+    forSlug ? `${baseModule.name} (${forSlug})` : '';
+  const [slug, setSlug] = useState(suggestedSlug);
+  const [displayName, setDisplayName] = useState(() => defaultDisplayName(suggestedSlug));
+  // Once the user edits the name it stops tracking the slug.
+  const [nameTouched, setNameTouched] = useState(false);
   const [creating, setCreating] = useState(false);
   // Reserve OTHER modules' ids so a colliding slug is blocked in the form (not
   // just rejected by the server), but allow the instance's OWN base id so a
@@ -131,8 +160,11 @@ export function AddInstanceForm({
         <Input
           id={`instance-slug-${baseModule.id}`}
           value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          placeholder="my-ollama"
+          onChange={(e) => {
+            setSlug(e.target.value);
+            if (!nameTouched) setDisplayName(defaultDisplayName(e.target.value));
+          }}
+          placeholder={suggestedSlug}
           className="w-64"
           data-testid="instance-slug-input"
         />
@@ -151,7 +183,10 @@ export function AddInstanceForm({
         <Input
           id={`instance-name-${baseModule.id}`}
           value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          onChange={(e) => {
+            setNameTouched(true);
+            setDisplayName(e.target.value);
+          }}
           placeholder={`${baseModule.name} (${slug || 'slug'})`}
           className="w-64"
           data-testid="instance-name-input"
