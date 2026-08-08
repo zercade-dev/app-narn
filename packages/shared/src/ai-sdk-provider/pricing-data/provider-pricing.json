@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-07T15:48:37.489Z",
+  "generatedAt": "2026-08-08T18:21:19.154Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
@@ -339,20 +339,6 @@
           "outputCostPerMillion": 15,
           "cacheWriteCostPerMillion": 3.75,
           "cachedInputCostPerMillion": 0.3
-        },
-        {
-          "id": "claude-opus-4-5",
-          "inputCostPerMillion": 5,
-          "outputCostPerMillion": 25,
-          "cacheWriteCostPerMillion": 6.25,
-          "cachedInputCostPerMillion": 0.5
-        },
-        {
-          "id": "claude-opus-4-1",
-          "inputCostPerMillion": 15,
-          "outputCostPerMillion": 75,
-          "cacheWriteCostPerMillion": 18.75,
-          "cachedInputCostPerMillion": 1.5
         }
       ]
     }

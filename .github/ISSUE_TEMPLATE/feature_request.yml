@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest an improvement or a new capability for NARN.
+description: Suggest a new capability or a larger improvement for NARN.
 labels: [enhancement, needs-triage]
 body:
   - type: markdown

@@ -5,10 +5,16 @@
  *
  * Each suggestion may be a plain string or a `{ label, value }` object.
  * The dropdown shows the human-readable label while selecting fills the
- * input with the value (ID). Free text is fully preserved — any string
- * typed by the user is accepted even if it isn't in the suggestion list.
+ * input with the value (ID). Free text is accepted — any string typed by the
+ * user is a valid value even if it isn't in the suggestion list — and it
+ * survives closing the dropdown as long as no suggestion is currently
+ * selected. KNOWN LIMITATION: if a suggestion WAS previously selected and the
+ * user then types over it without picking another, base-ui restores the old
+ * selection's label when the dropdown closes. That is pre-existing base-ui
+ * behaviour and is not handled here (see `handleInputValueChange`).
  */
 import * as React from 'react';
+import type { ComboboxRootChangeEventDetails } from '@base-ui/react';
 import { cn } from '@/lib/utils';
 import {
   Combobox,
@@ -68,6 +74,36 @@ export function ComboboxInput({
     ? '[&:not(:focus-within)>input]:text-transparent'
     : undefined;
 
+  // Free-text preservation. Base UI's AriaCombobox syncs the input back to the
+  // SELECTED item's label once the popup's exit animation finishes
+  // (`handleUnmount`, wired up by `useOpenChangeComplete`). Here selection is
+  // single-mode with the input OUTSIDE the popup, so with NO selection that
+  // label is '' — base-ui emits `onInputValueChange('', { reason: 'input-clear' })`
+  // and silently wipes the typed text ~100ms after the popup closes. That is
+  // the case dropped below, and nothing else in this wrapper produces
+  // `input-clear`: ordinary typing (including deleting back to empty) reports
+  // `input-change`, picking an item reports `item-press`, and the base-ui Clear
+  // button — which reports `clear-press` anyway — is never rendered
+  // (`showClear` defaults to false and this wrapper never sets it).
+  //
+  // NOT fixed here: the sibling revert, where a suggestion IS selected and the
+  // user types over it without picking another. base-ui restores the previous
+  // selection's label with reason `none`, overwriting the typed text just the
+  // same. That is long-standing base-ui behaviour, it is what makes a normal
+  // suggestion pick sync the input, and separating the two would need selection
+  // state this wrapper doesn't track — so it is left alone.
+  //
+  // Suppression is an early return rather than `details.cancel()` because the
+  // input is fully controlled by the caller's `value`: not calling back leaves
+  // the rendered value untouched, which is exactly the wanted outcome.
+  const handleInputValueChange = React.useCallback(
+    (next: string, details: ComboboxRootChangeEventDetails) => {
+      if (details.reason === 'input-clear') return;
+      onValueChange(next);
+    },
+    [onValueChange],
+  );
+
   // When the user selects an item from the dropdown, `itemToStringLabel`
   // determines what text goes into the input. We want the ID (value) there,
   // not the human-readable label. The combobox items render their own label
@@ -87,7 +123,7 @@ export function ComboboxInput({
       itemToStringLabel={(item) => (item as NormalizedSuggestion).value}
       itemToStringValue={(item) => (item as NormalizedSuggestion).value}
       inputValue={value}
-      onInputValueChange={onValueChange}
+      onInputValueChange={handleInputValueChange}
       onValueChange={handleItemSelect}
     >
       <ShadcnComboboxInput

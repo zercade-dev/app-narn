@@ -9,6 +9,7 @@ on:
 # Restrict the GITHUB_TOKEN to the minimum required scopes.
 permissions:
   contents: read
+  checks: read # ignorable-paths-gate reads the base commit's check-run verdict
 
 # Cancel any in-progress run for the same branch/PR to free up runner capacity.
 concurrency:
@@ -20,6 +21,12 @@ concurrency:
 # lint, format and catalog pinning — so a bad commit is caught at the source. Automated
 # tests are not part of this repo, so they are NOT run here; the companion
 # docker-build.yml boot-smokes the image.
+#
+# quality-gate is ruleset-required on develop and main, so it must always run and
+# report — a trigger-level paths filter would leave PRs stuck on an unreported
+# "Expected" check. Instead, the ignorable-paths gate below early-exits the job as
+# an explicit SUCCESS when the diff touches only paths none of these checks read
+# (issue templates, docs/, LICENSE — see the action for the list and its limits).
 jobs:
   quality-gate:
     runs-on: ubuntu-latest
@@ -27,25 +34,38 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Check whether this diff can affect the quality gate
+        id: gate
+        uses: ./.github/actions/ignorable-paths-gate
+        with:
+          required-check: quality-gate
+
       - name: Setup pnpm
+        if: steps.gate.outputs.skip != 'true'
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Setup Node.js
+        if: steps.gate.outputs.skip != 'true'
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
 
       - name: Install dependencies
+        if: steps.gate.outputs.skip != 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Build
+        if: steps.gate.outputs.skip != 'true'
         run: pnpm build
 
       - name: Lint
+        if: steps.gate.outputs.skip != 'true'
         run: pnpm lint
 
       - name: Format check
+        if: steps.gate.outputs.skip != 'true'
         run: pnpm format:check
 
       - name: Catalog pinning (lint:deps)
+        if: steps.gate.outputs.skip != 'true'
         run: pnpm lint:deps
