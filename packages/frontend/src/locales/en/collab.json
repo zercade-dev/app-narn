@@ -23,7 +23,7 @@
     "columnLanguages": "Writable languages",
     "columnActions": "Actions",
     "selectAllLanguages": "Select all",
-    "unselectAllLanguages": "Unselect all",
+    "unselectAllLanguages": "Deselect all",
     "save": "Save",
     "saving": "Saving…",
     "remove": "Remove",

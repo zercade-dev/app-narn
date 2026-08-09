@@ -65,8 +65,8 @@
     "linkFailed": "Impossible de lier : {{message}}"
   },
   "pagination": {
-    "rowsFiltered": "{{formattedCount}} sur {{totalCount}} entrées",
     "rows": "{{formattedCount}} entrées",
+    "rowsFiltered": "{{formattedCount}} sur {{totalCount}} entrées",
     "rowsPerPage": "Lignes par page :",
     "prev": "Préc.",
     "next": "Suiv.",
@@ -250,9 +250,9 @@
     "placeholder": "Sélectionnez une cellule pour voir et modifier son texte.",
     "sourceReadOnly": "Texte source (lecture seule)",
     "translationLabel": "Traduction — {{lang}}",
-    "save": "Enregistrer",
     "ignoreOverflow": "Ignorer le débordement",
     "overflowIgnored": "Débordement ignoré",
+    "save": "Enregistrer",
     "discard": "Ignorer",
     "saved": "Traduction enregistrée",
     "undo": "Annuler",

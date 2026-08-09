@@ -2,7 +2,7 @@
   "title": "Backup and Restore",
   "createSection": "Create backup",
   "createDescription": "Pack the active project (config, entries, glossary) into a verifiable .zip archive.",
-  "createButton": "Create Backup",
+  "createButton": "Create backup",
   "creating": "Creating backup…",
   "download": "Download",
   "downloadAria": "Download {{filename}}",
@@ -30,7 +30,7 @@
   "confirmConfirm": "Yes, restore",
   "confirmCancel": "Cancel",
   "deleteButton": "Delete",
-  "deleteConfirmTitle": "Delete Backup",
+  "deleteConfirmTitle": "Delete backup",
   "deleteConfirmBody": "This will permanently delete this backup file from the server. This cannot be undone.",
   "deleteConfirm": "Delete",
   "deleting": "Deleting…",
@@ -38,6 +38,6 @@
   "toastDeleteFailed": "Delete failed: {{message}}",
   "toastBackupCreated": "Backup created.",
   "toastBackupFailed": "Backup failed: {{message}}",
-  "toastRestoreSuccess": "Backup restored correctly",
+  "toastRestoreSuccess": "Backup restored.",
   "toastRestoreFailed": "Restore failed: {{message}}"
 }

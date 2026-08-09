@@ -33,13 +33,13 @@
     "overrideModeLabel": "Override mode",
     "overrideEmptyOnly": "Only fill empty translations (keep the target's existing ones)",
     "overrideAll": "Override all translations with the orphan's",
-    "aiRetranslateLabel": "Use AI to retranslate",
+    "aiRetranslateLabel": "Use AI to re-translate",
     "aiRetranslateHint": "After relinking, an AI pass compares the orphan's old source text with the target's new source text and updates each existing translation to reflect the same edit.",
     "aiModuleLabel": "AI module",
     "aiModelLabel": "Model",
     "aiReasoningEffortLabel": "Reasoning effort",
     "aiModulePlaceholder": "Select a module…",
-    "aiNoModules": "No AI-capable module is enabled — enable one in the global settings to use AI retranslation.",
+    "aiNoModules": "No AI-capable module is enabled — enable one in the global settings to use AI re-translation.",
     "confirmSubmit": "Relink"
   },
   "toast": {
@@ -50,7 +50,7 @@
     "relinked": "Translations moved",
     "relinkError": "Failed to relink orphan",
     "candidatesError": "Failed to load relink candidates",
-    "aiRetranslateStarted": "AI retranslate started — see the Activity tab",
-    "aiRetranslateUnavailable": "Relinked, but AI retranslate could not start (no AI-capable module available)"
+    "aiRetranslateStarted": "AI re-translate started — see the Activity tab",
+    "aiRetranslateUnavailable": "Relinked, but AI re-translate could not start (no AI-capable module available)"
   }
 }

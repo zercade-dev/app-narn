@@ -6,5 +6,5 @@
   "runCancelled": "Exécution annulée :",
   "runCompleted": "Traduction terminée — {{completed}} sur {{total}} réussies.",
   "runCompletedWithErrors": "Traduction terminée — {{completed}} réussies, {{failed}} échouées.",
-  "savedRulesNotice": "Runs use saved routing rules — unsaved edits in the rule editor have no effect."
+  "savedRulesNotice": "Les exécutions utilisent les règles de routage enregistrées — les modifications non enregistrées dans l'éditeur de règles n'ont aucun effet."
 }

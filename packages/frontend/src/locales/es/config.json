@@ -160,7 +160,7 @@
     "ruleCount_one": "{{count}} regla",
     "ruleCount_other": "{{count}} reglas",
     "sectionFiltering": "Filtrado",
-    "categoriesConfiguredHint": "Las categorías se configuran en la pestaña Texto multilingüe.",
+    "categoriesConfiguredHint": "Las categorías se configuran en la pestaña Traducciones.",
     "allCategories": "Todas las categorías",
     "nSelected": "{{count}} seleccionadas",
     "sectionAgentSettings": "Ajustes del agente",
