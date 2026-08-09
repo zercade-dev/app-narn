@@ -104,7 +104,7 @@
     "translateScopeSelected": "Se traducirán {{count}} entradas seleccionadas.",
     "translateScopeAll": "Se traducirán las {{count}} entradas de la vista actual.",
     "translateModeUntranslated": "Solo completar entradas sin traducir",
-    "translateModeRetranslate": "Re-traducir traducciones existentes",
+    "translateModeRetranslate": "Retraducir traducciones existentes",
     "translateUseReference": "Usar referencia ({{language}}) como contexto",
     "translateUseReferenceNone": "Usar idioma de referencia como contexto",
     "translateNoReferenceHint": "Selecciona un idioma de referencia en la barra de herramientas para habilitar esta opción.",

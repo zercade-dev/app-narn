@@ -415,7 +415,7 @@
     "typeSourceAiReview": "AI review (source)",
     "typeGlossaryGeneration": "Glossary generation",
     "typeCategoryGeneration": "Category generation",
-    "typeRelinkRetranslate": "Relink AI retranslate",
+    "typeRelinkRetranslate": "Relink AI re-translate",
     "typeStageDetailsTranslation": "Stage details translation",
     "typeChatTextStyler": "Assistant chat (Text Styler)",
     "typeChatStageDetails": "Assistant chat (Stage details)",

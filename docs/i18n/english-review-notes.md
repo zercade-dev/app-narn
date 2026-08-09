@@ -9,19 +9,26 @@ wrong register for the control, inconsistent casing, typo/grammar, mistranslatio
 risk). Nothing was rewritten for style preference, no key was renamed, added or
 removed, and the `pseudo-test` language and the NARN brand name were left untouched.
 
-**Criteria hit counts (English strings changed): 31**
+**Criteria hit counts (English strings changed): 41**
 
 | Criterion                            | Changed                     |
 | ------------------------------------ | --------------------------- |
-| 1 — terminology drift                | 7                           |
+| 1 — terminology drift                | 13                          |
 | 2 — wrong register for the control   | 0                           |
-| 3 — inconsistent casing / typography | 21                          |
+| 3 — inconsistent casing / typography | 25                          |
 | 4 — typos and grammatical errors     | 3                           |
 | 5 — ambiguity that will mistranslate | 0 (flagged only, by design) |
 
-Spanish and French were updated for the 6 semantic changes only (13 values); the
-casing-only changes were **not** mirrored, because es and fr already use sentence
-case for controls and the English casing carries no meaning into them.
+The counts cover two waves: the 31 strings this review changed itself, and the 10
+strings of the four families it had to hold back, applied later once the tests that
+assert them verbatim could be updated in the same change — see "Applied later — the
+test-blocked families" at the end of this file.
+
+Spanish and French were updated for the 6 semantic changes of the first wave (13
+values); the casing-only changes were **not** mirrored, because es and fr already use
+sentence case for controls and the English casing carries no meaning into them. The
+second wave needed one es value; for the other nine strings the reason no mirror was
+required is recorded with the family.
 
 ## Changes applied
 
@@ -78,12 +85,22 @@ Deliberately **not** mirrored:
   convention for controls, so the English casing carries no information into them.
 - `category:deleteConfirmBody_*` — `« »` is correct typography in Spanish and
   French; only the English copy was moved to `“ ”`.
+- `config:routing.labelMaxLength` — the English fix was the misspelling "lenght"
+  → "length". Both translations were written from the intended meaning rather than
+  from the typo (es "Límite de longitud de entrada", fr "Limite de longueur
+  d'entrée"), so neither ever carried the error. Verified by reading both values,
+  not assumed.
+- `config:models.confidenceReason.batch-exceeds-reliable` — the English fix was
+  subject-verb agreement ("{{entryCount}} entries **exceeds**" → "exceed").
+  Spanish already writes the plural verb ("{{entryCount}} entradas **superan**")
+  and French likewise ("{{entryCount}} entrées **dépassent**"), so the error was
+  English-only. Verified by reading both values.
 
 ## Ambiguities flagged for translators (no English change)
 
 | Key                                                                                                                                                                                                                                                                            | Ambiguity                                             | Intended reading                                                                                                                                                                                                                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `config:importBtn`, `glossary:importBtn`, `config:routing.importBtn`                                                                                                                                                                                                           | noun or verb                                          | **verb** — each labels a button that starts an import.                                                                                                                                                                                                                                             |
+| `config:importCsv`, `glossary:importBtn`, `config:routing.importBtn`                                                                                                                                                                                                           | noun or verb                                          | **verb** — each labels a button that starts an import. An earlier draft of this row cited `config:importBtn`, which does not exist: the config-namespace key is `config:importCsv` ("Import CSV"), and `config:routing.importBtn` ("Import") is the routing-rules one.                                                                                                                                                                                                                                             |
 | `config:routing.exportBtn`, `config:templateExport`, `glossary:exportCsv`, `glossary:exportTbx`                                                                                                                                                                                | noun or verb                                          | **verb** — button labels.                                                                                                                                                                                                                                                                          |
 | `strings:compare.run` (`Run`)                                                                                                                                                                                                                                                  | verb ("run this") or noun ("a translation run")       | **noun** — it labels the run-picker filter in the Compare toolbar (`Run: [select]`), i.e. _which translation run_.                                                                                                                                                                                 |
 | `strings:runs.judgeViewRaw` / `judgeViewDiff` (`Raw`, `Diff`)                                                                                                                                                                                                                  | adjective or noun                                     | **noun** — the two view modes of the suggestion panel.                                                                                                                                                                                                                                             |
@@ -137,6 +154,18 @@ queue`, `Stage details`, `Categories`). Left alone on purpose: within the Global
    (`“{{slug}}”`, `“{{text}}”`) and — before this review — guillemets. Only the
    guillemets were fixed, because they are wrong for English; straight-vs-curly is
    a style call affecting ~10 strings.
+7. **`strings:pagination.prev` stays `Prev` while `review:sourceAi.findingPrev`
+   became `Previous`.** That looks like a half-finished fix and is not one, so the
+   reasoning is written down here to stop the next translator "correcting" it. The
+   two are different control classes: `review:sourceAi.findingPrev` is a findings
+   navigator with room for a word — and the abbreviation was also its `aria-label`,
+   where it read badly — whereas `strings:pagination.prev` sits in the string-table
+   pager beside `next`, `first` and `last` in a fixed, narrow strip, where the
+   abbreviation is load-bearing. **Translators: this key is space-constrained.** Use
+   your locale's usual pager abbreviation if it has one and spell it out only if it
+   does not; fr already abbreviates (`Préc.`) while es does not (`Anterior`), and
+   both are correct for their language. Do not align it with
+   `review:sourceAi.findingPrev`.
 
 ## Bugs found while reviewing (not fixed here — they need key changes)
 
@@ -153,22 +182,28 @@ queue`, `Stage details`, `Categories`). Left alone on purpose: within the Global
    the `orphans` namespace's. Probably dead; deleting keys is out of scope here, so
    it will be translated into fourteen locales unless it is removed first.
 
-## Identified but not applied — blocked by exact-match test assertions
+## Applied later — the test-blocked families
 
-Each of the following is a legitimate criterion 1/3 fix, but the English string is
-asserted verbatim by a test outside this repository, which is versioned separately.
-Applying the copy change without the matching test edit would turn that suite red.
-They are listed here so the change can be made as one coordinated cross-repo commit
-later. Note that each is a _pair or family_ — applying only the unblocked half would
-create a new inconsistency, so the whole family was held back. The exact blocking
-assertions (file and line) are tracked outside this repository, not reproduced here.
+Four families were identified by this review as legitimate criterion 1/3 fixes but
+**not applied at the time**: each English string is asserted verbatim by a test that
+lives outside this repository, which is versioned separately, so changing the copy
+alone would have turned that suite red. Each is also a _pair or family_ — applying
+only the unblocked half would have created a new inconsistency — so each was held
+back whole. The exact blocking assertions are tracked outside this repository, not
+reproduced here.
 
-| Key(s)                                                                                                                                                                                  | Proposed change                                                                                                                                                                                                                                              | Blocker                                                                                                                                  |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `glossary:assignGlossary`, `glossary:unassignGlossary`                                                                                                                                  | `Assign Glossary` / `Unassign Glossary` → sentence case                                                                                                                                                                                                      | Held back — an outside test asserts the current wording verbatim; needs a coordinated commit that lands with the matching test update.   |
-| `glossary:confirmDeleteGlossaryTitle`, `glossary:confirmDeleteTitle`                                                                                                                    | `Delete Glossary` / `Delete Term` → sentence case                                                                                                                                                                                                            | Held back — an outside test asserts the current wording verbatim; needs a coordinated commit that lands with the matching test update.   |
-| `collab:sharing.unselectAllLanguages`                                                                                                                                                   | `Unselect all` → `Deselect all` (the app-wide wording)                                                                                                                                                                                                       | Held back — an outside test asserts the current wording verbatim; needs a coordinated commit that lands with the matching test update.   |
-| `orphans:relink.aiRetranslateLabel`, `orphans:relink.aiNoModules`, `orphans:toast.aiRetranslateStarted`, `orphans:toast.aiRetranslateUnavailable`, `strings:runs.typeRelinkRetranslate` | unify on the hyphenated form used everywhere else (`review:retranslate` "Re-translate", `backup:triggerPreRetranslate` "before re-translation", `strings:compare.translateModeRetranslate`): `retranslate`/`retranslation` → `re-translate`/`re-translation` | Held back — two outside tests assert the current wording verbatim; needs a coordinated commit that lands with the matching test updates. |
+**They have since been applied**, together with the matching test updates, as one
+coordinated cross-repo change; nothing in this section is outstanding. The rows are
+kept because they explain wording a reader might otherwise expect to find in the
+first-wave table above, and because the es/fr reasoning is the record a future
+translator needs.
+
+| Key(s)                                                                                                                                                                                  | Change applied                                                                                                                                                                                                                                               | es / fr                                                                                                                                                                                                                            |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `glossary:assignGlossary`, `glossary:unassignGlossary`                                                                                                                                  | `Assign Glossary` / `Unassign Glossary` → `Assign glossary` / `Unassign glossary` (3 — sentence case, like every other control)                                                                                                                              | No mirror — casing-only. Both locales write these sentence case already: es "Asignar glosario" / "Quitar glosario", fr "Attribuer le glossaire" / "Retirer le glossaire".                                                           |
+| `glossary:confirmDeleteGlossaryTitle`, `glossary:confirmDeleteTitle`                                                                                                                    | `Delete Glossary` / `Delete Term` → `Delete glossary` / `Delete term` (3 — sibling confirm titles are sentence case)                                                                                                                                         | No mirror — casing-only. es "Eliminar glosario" / "Eliminar término" and fr "Supprimer le glossaire" / "Supprimer le terme" were already correct.                                                                                   |
+| `collab:sharing.unselectAllLanguages`                                                                                                                                                   | `Unselect all` → `Deselect all` (1 — the app-wide wording for this control)                                                                                                                                                                                  | No mirror — es "Deseleccionar todo" and fr "Tout désélectionner" are already the renderings used for `Deselect all` elsewhere, so the English drift never reached them.                                                             |
+| `orphans:relink.aiRetranslateLabel`, `orphans:relink.aiNoModules`, `orphans:toast.aiRetranslateStarted`, `orphans:toast.aiRetranslateUnavailable`, `strings:runs.typeRelinkRetranslate` | unify on the hyphenated form used everywhere else (`review:retranslate` "Re-translate", `backup:triggerPreRetranslate` "before re-translation", `strings:compare.translateModeRetranslate`): `retranslate`/`retranslation` → `re-translate`/`re-translation` | The hyphen is English-only — Spanish and French join the prefix ("retraducir", "retraduire"). The one es outlier was aligned with its own family: `strings:compare.translateModeRetranslate` "Re-traducir…" → "Retraducir…".        |
 
 Playwright role/text selectors elsewhere (`getByRole('menuitem', { name: 'Edit Categories' })`,
 `'Enabled Glossaries'`) are case-insensitive by default, so the casing changes that

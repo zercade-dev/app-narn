@@ -1109,8 +1109,8 @@ or search the file for the word.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
-| es | | |
-| fr | | |
+| es | glosario | Masculine. Already used throughout the shipped `glossary` namespace; "diccionario" is wrong here. |
+| fr | glossaire | Masculine. Already used throughout the shipped `glossary` namespace. |
 | de | | |
 | it | | |
 | pt-br | | |
@@ -1136,8 +1136,8 @@ or search the file for the word.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
-| es | | |
-| fr | | |
+| es | término | Masculine. Shortened to "término" alone inside the Glossary tab, exactly as English shortens "glossary term" to "term". Never "entrada", which is reserved for _entry_. |
+| fr | terme | Masculine. Shortened to "terme" alone inside the Glossary tab. Never "entrée", which is reserved for _entry_. |
 | de | | |
 | it | | |
 | pt-br | | |
