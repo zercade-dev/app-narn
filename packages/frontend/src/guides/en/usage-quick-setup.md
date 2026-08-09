@@ -24,7 +24,7 @@ In the **Glossary** tab, enable the glossaries that apply to your project. Auto-
 
 ## 5. Set up routing
 
-Add **routing rules** in the **Routing** tab to map entries to a module, then **Save** — runs use the saved rules only. For a single-provider setup, just use the matching entry in **Templates**. This step is required: an entry with no matching rule fails translation with a *"no route"* error.
+Open the **Routing** tab and pick your provider from the selector it opens on — that sends every entry in the project to it, which is all a single-provider setup needs. Want different providers per language, category, or entry length? Switch to **Advanced** and add **routing rules** there instead. Your choice is saved for you either way. This step is required: an entry with no matching rule fails translation with a *"no route"* error.
 
 ## 6. *(Optional)* Build glossaries from your own content
 

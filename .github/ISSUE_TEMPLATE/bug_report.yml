@@ -1,5 +1,6 @@
 name: Bug report
 description: Something in NARN isn't working the way it should.
+title: "🐛 Bug: <short summary — e.g. CSV export drops the last row>"
 labels: [bug, needs-triage]
 body:
   - type: markdown
