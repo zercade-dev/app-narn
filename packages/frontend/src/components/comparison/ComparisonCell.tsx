@@ -543,7 +543,7 @@ export function ComparisonCell({
                 className="text-[10px] px-1 rounded bg-status-info/15 text-status-info"
                 data-testid={`comparison-cell-translated-${language}`}
               >
-                translated
+                {t('compare.cellTranslatedBadge')}
               </span>
             )}
             {status === 'reviewed' && (
@@ -551,7 +551,7 @@ export function ComparisonCell({
                 className="text-[10px] px-1 rounded bg-status-pass/15 text-status-pass"
                 data-testid={`comparison-cell-reviewed-${language}`}
               >
-                reviewed
+                {t('compare.cellReviewedBadge')}
               </span>
             )}
             {record?.needsReview === true && (
@@ -559,7 +559,7 @@ export function ComparisonCell({
                 className="text-[10px] px-1 rounded bg-status-warn/15 text-status-warn font-medium"
                 data-testid={`comparison-cell-needs-review-${language}`}
               >
-                needs review
+                {t('compare.cellNeedsReviewBadge')}
               </span>
             )}
           </div>

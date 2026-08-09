@@ -142,7 +142,10 @@
     "cellClearAria": "Effacer la traduction pour {{language}}",
     "cellEditAria": "Modifier la traduction pour {{language}}",
     "cellEditTooltip": "Modifier · Enter · Esc pour annuler",
-    "cellEditReviewedTooltip": "Révisé — appuyez sur Enter pour modifier"
+    "cellEditReviewedTooltip": "Révisé — appuyez sur Enter pour modifier",
+    "cellTranslatedBadge": "traduit",
+    "cellReviewedBadge": "révisé",
+    "cellNeedsReviewBadge": "à réviser"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",

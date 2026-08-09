@@ -725,10 +725,21 @@ or search the file for the word.
 
 **Not:** to review, pending, unverified, unchecked, requires revision, for approval. Whatever you choose has to work identically in the filter, the badge and "Flag all as needs review".
 
+**The three surfaces, and the casing trap.** The filter label (`strings:filters.needsReview`, `strings:compare.needsReviewFilter`) is sentence case; the row badge (`strings:compare.cellNeedsReviewBadge`) is deliberately **lowercase**, because all three cell chips are lowercase 10px chips by design. That is the mirror of the "preserve uppercase where English uses it for layout" rule in the style guides: preserve the lowercase too. Same wording, different casing — do not "fix" the badge to sentence case, and do not let the casing difference tempt you into two different renderings.
+
+**Gender, for languages that inflect adjectives (the "reviewed" family).** The implied noun is always *translation*, but the same word appears in three grammatical roles and they do not all agree the same way. The rule settled for es/fr, which every inflecting locale should follow:
+
+- **Status token — invariant (masculine in es/fr).** The two adjectival cell badges `strings:compare.cellTranslatedBadge` / `cellReviewedBadge` render the stored status value itself, and `strings:contextMenu.clearReviewed` quotes that same token («revisado» / « révisé »). A quoted token is *mentioned*, not used, so it does not agree with anything: es "traducido"/"revisado", fr "traduit"/"révisé".
+- **Explicit antecedent — agrees.** Where the string names the noun, agreement is forced: `strings:compare.cellMarkReviewedAria` is "Marcar la traducción de {{language}} como revisad**a**" / "Marquer la traduction {{language}} comme révisé**e**".
+- **Elliptical action label — follows the token.** `strings:shortcuts.markReviewed` ("Mark as reviewed") has no visible noun and sets the status, so it takes the token form: "Marcar como revisado" / "Marquer comme révisé". Note that `strings:compare.markAllReviewed` ("Marcar todo como revisado") is *not* evidence for this — it agrees with masculine "todo", so dropping "todo" removes the antecedent rather than preserving it. The basis is the quoted status token above.
+- **Counter-precedent to know about:** `vault:statusLocked` ships as "Bloqueada", agreeing with an invisible "bóveda". That is a standalone status word that *does* agree, so the rule is not "status words never inflect" — it is that a value quoted as a token elsewhere in the UI stays in its citation form. If your language has no such citation form, agree with *translation* everywhere and say so in your Notes cell.
+
+"Needs review" itself sidesteps all of this in es/fr: it is a verb phrase, not an adjective, so it carries no gender.
+
 | Locale | Rendering | Notes |
 | --- | --- | --- |
-| es | | |
-| fr | | |
+| es | necesita revisión | Verb phrase, so no gender to agree. Sentence-cased in the filter ("Necesita revisión" — `filters.needsReview`, `compare.needsReviewFilter`), lowercase in the row badge ("necesita revisión" — `compare.cellNeedsReviewBadge`), same wording in both. "Marcar todo como necesita revisión" is the bulk form. For the related *reviewed* adjective see the gender rule above: token form "revisado", agreeing form "revisada". |
+| fr | à réviser | No gender to agree. Sentence-cased in the filter ("À réviser"), lowercase in the row badge ("à réviser"), same wording in both. Note the capital À keeps its accent in the filter form. For the related *révisé* adjective see the gender rule above: token form "révisé", agreeing form "révisée". |
 | de | | |
 | it | | |
 | pt-br | | |

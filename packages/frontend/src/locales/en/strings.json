@@ -142,7 +142,10 @@
     "cellClearAria": "Clear translation for {{language}}",
     "cellEditAria": "Edit translation for {{language}}",
     "cellEditTooltip": "Edit · Enter · Esc to cancel",
-    "cellEditReviewedTooltip": "Reviewed — press Enter to edit"
+    "cellEditReviewedTooltip": "Reviewed — press Enter to edit",
+    "cellTranslatedBadge": "translated",
+    "cellReviewedBadge": "reviewed",
+    "cellNeedsReviewBadge": "needs review"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",

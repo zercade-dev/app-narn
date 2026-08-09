@@ -142,7 +142,10 @@
     "cellClearAria": "Borrar la traducción de {{language}}",
     "cellEditAria": "Editar la traducción de {{language}}",
     "cellEditTooltip": "Editar · Enter · Esc para cancelar",
-    "cellEditReviewedTooltip": "Revisado — pulsa Enter para editar"
+    "cellEditReviewedTooltip": "Revisado — pulsa Enter para editar",
+    "cellTranslatedBadge": "traducido",
+    "cellReviewedBadge": "revisado",
+    "cellNeedsReviewBadge": "necesita revisión"
   },
   "shortcuts": {
     "title": "Atajos de teclado",
