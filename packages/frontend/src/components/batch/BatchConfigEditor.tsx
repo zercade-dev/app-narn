@@ -27,6 +27,7 @@ import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover.js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs.js';
 import { isOfferableModule, basesWithInstances } from '@/lib/module-options';
+import { RoutingModeToggle } from './SimpleRoutingConfig.js';
 
 /** Module shape the routing UI needs to decide selectability and render labels. */
 export interface RoutingModuleOption {
@@ -276,6 +277,15 @@ export interface BatchConfigEditorProps {
   autoSaveError: string | null;
   onFlush: () => void;
   translationsInProgress?: boolean;
+  /** Current routing editor mode; drives the header Simple/Advanced toggle. */
+  advanced: boolean;
+  onToggleAdvanced: (advanced: boolean) => void;
+  /**
+   * True when the user prefers simple mode but this project's rules are too
+   * rich to represent that way, so the full editor is shown instead. Renders a
+   * one-line explanation of why the simple view did not appear.
+   */
+  simpleFallbackNotice: boolean;
   // Config
   modules: RoutingModuleOption[];
   availableLanguages: string[];
@@ -314,6 +324,9 @@ export function BatchConfigEditor({
   autoSaveError,
   onFlush,
   translationsInProgress,
+  advanced,
+  onToggleAdvanced,
+  simpleFallbackNotice,
   modules,
   availableLanguages,
   availableCategories,
@@ -356,9 +369,19 @@ export function BatchConfigEditor({
     <Card data-testid="routing-rules-config">
       <CardHeader>
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2">
             <CardTitle>{t('routing.title')}</CardTitle>
+            <RoutingModeToggle advanced={advanced} onChange={onToggleAdvanced} />
           </div>
+
+          {simpleFallbackNotice && (
+            <p
+              className="text-xs text-muted-foreground"
+              data-testid="routing-simple-fallback-notice"
+            >
+              {t('routing.simpleAdvancedNotice', { count: draft.length })}
+            </p>
+          )}
 
           <div className="grid gap-2 md:grid-cols-[220px_1fr_auto_auto] md:items-end">
             <div>
@@ -465,7 +488,7 @@ export function BatchConfigEditor({
             <TabsTrigger value="templates">
               {t('routing.tabTemplates', { count: defaultRules.length })}
             </TabsTrigger>
-            <TabsTrigger value="advanced">{t('routing.tabAdvanced')}</TabsTrigger>
+            <TabsTrigger value="advanced">{t('routing.tabImportExport')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="rules" className="space-y-3 pt-3">

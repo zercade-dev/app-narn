@@ -12,6 +12,9 @@ import {
 } from './BatchConfigEditor.js';
 import { basesWithInstances } from '@/lib/module-options';
 import { useStringStore } from '../../stores/string-store.js';
+import { useUiSettings } from '../../stores/ui-settings-store.js';
+import { isSimpleRouting, makeSimpleRule, simpleRuleModuleId } from '@/lib/routing-mode';
+import { SimpleRoutingConfig } from './SimpleRoutingConfig.js';
 
 /** The whole-document payload `save()` PUTs — same shape for both the
  * project-scoped and per-user collab-routing endpoints. */
@@ -203,6 +206,15 @@ export function RoutingRulesConfig({
     [groups, activeGroupId],
   );
 
+  const routingAdvanced = useUiSettings((s) => s.routingAdvanced);
+  const setRoutingAdvanced = useUiSettings((s) => s.setRoutingAdvanced);
+  // The preference only *asks* for the simple view. A project whose rules are
+  // richer than one catch-all cannot be represented by a single selector, so it
+  // renders the full editor regardless — a preference set once and forgotten
+  // must never hide a configuration the user built by hand.
+  const simpleEligible = useMemo(() => isSimpleRouting(mergedGroups), [mergedGroups]);
+  const showSimple = !routingAdvanced && simpleEligible;
+
   // Auto-save: every mutator below computes its own fresh next-state values and
   // calls `schedule()` with the resulting payload directly (rather than a
   // `useEffect` watching `mergedGroups`) — the props-sync block just below
@@ -379,6 +391,12 @@ export function RoutingRulesConfig({
     schedule(buildPayload(groups, activeGroupId, nextDraft));
   }
 
+  function selectSimpleModule(moduleId: string): void {
+    const nextDraft = [makeSimpleRule(moduleId, draft[0]?.id)];
+    setDraft(nextDraft);
+    schedule(buildPayload(groups, activeGroupId, nextDraft));
+  }
+
   function switchGroup(nextGroupId: string | null): void {
     if (!nextGroupId) return;
     if (nextGroupId === activeGroupId) return;
@@ -448,6 +466,22 @@ export function RoutingRulesConfig({
     schedule(buildPayload(nextGroups, activeGroupId, draft));
   }
 
+  if (showSimple) {
+    return (
+      <SimpleRoutingConfig
+        modules={modules}
+        selectedModuleId={simpleRuleModuleId(mergedGroups)}
+        disabledModuleIds={disabledModuleIds}
+        translationsInProgress={translationsInProgress}
+        autoSaveStatus={autoSaveStatus}
+        autoSaveError={autoSaveError}
+        advanced={routingAdvanced}
+        onToggleAdvanced={setRoutingAdvanced}
+        onSelectModule={selectSimpleModule}
+      />
+    );
+  }
+
   return (
     <BatchConfigEditor
       mergedGroups={mergedGroups}
@@ -461,6 +495,9 @@ export function RoutingRulesConfig({
       autoSaveError={autoSaveError}
       onFlush={flush}
       translationsInProgress={translationsInProgress}
+      advanced={routingAdvanced}
+      onToggleAdvanced={setRoutingAdvanced}
+      simpleFallbackNotice={!routingAdvanced && !simpleEligible}
       modules={modules}
       availableLanguages={availableLanguages}
       availableCategories={availableCategories}
