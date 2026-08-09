@@ -194,7 +194,7 @@ export function AddInstanceForm({
           </p>
         ) : (
           <p className="text-xs text-muted-foreground">
-            {t('instances.slugHelp', { base: baseModule.id })}
+            {t('instances.slugHelp', { base: baseModule.name })}
           </p>
         )}
       </div>

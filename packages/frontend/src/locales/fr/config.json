@@ -265,9 +265,9 @@
   "instances": {
     "addButton": "Ajouter une instance",
     "formTitle": "Nouvelle instance de {{base}}",
-    "slugLabel": "Slug (id immuable)",
+    "slugLabel": "Id d'instance",
     "slugReserved": "« {{slug}} » est un id de module réservé — choisissez un autre slug.",
-    "slugHelp": "Lettres minuscules, chiffres et tirets. Utilisé dans l'id « {{base}}:<slug> » et dans les noms de clés dérivées du coffre.",
+    "slugHelp": "N'importe quelle valeur convient — ce n'est qu'une étiquette pour distinguer cette instance de vos autres instances {{base}}. Elle ne peut plus être modifiée une fois l'instance créée.",
     "nameLabel": "Nom d'affichage",
     "createButton": "Créer l'instance",
     "creating": "Création…",

@@ -265,8 +265,8 @@
   "instances": {
     "addButton": "Add instance",
     "formTitle": "New instance of {{base}}",
-    "slugLabel": "Slug (immutable id)",
-    "slugHelp": "Lowercase letters, digits and dashes. Used in the id “{{base}}:<slug>” and in the derived vault key names.",
+    "slugLabel": "Instance id",
+    "slugHelp": "Any value works — it's just a label so you can tell this instance apart from your other {{base}} ones. It can't be changed after the instance is created.",
     "slugReserved": "“{{slug}}” is a reserved module id — choose a different slug.",
     "nameLabel": "Display name",
     "createButton": "Create instance",
