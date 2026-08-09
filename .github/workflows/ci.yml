@@ -18,9 +18,17 @@ concurrency:
 
 # narn is the self-contained open-core app workspace (pnpm; @zercade-dev/narn-* packages
 # + frontend/server/shared + modules). This is narn's OWN source quality gate — build,
-# lint, format and catalog pinning — so a bad commit is caught at the source. Automated
-# tests are not part of this repo, so they are NOT run here; the companion
-# docker-build.yml boot-smokes the image.
+# lint, format, catalog pinning and locale parity/integrity — so a bad commit is caught
+# at the source. The automated suites are not part of this repo, so they are NOT run
+# here; the companion docker-build.yml boot-smokes the image.
+#
+# The locale check is the deliberate exception to that. It is a plain-Node script
+# (scripts/check-locales.mjs, rules in scripts/locale-rules.mjs) rather than a
+# runner-bound suite precisely so it can run HERE: locale JSON changes are raised in
+# THIS repo, so a check that only ran downstream would let an English key with no
+# translations merge and ship, and would only go red later, somewhere else, on a diff
+# that does not contain the key. The same rules module is imported by the downstream
+# guards, so the two cannot disagree.
 #
 # quality-gate is ruleset-required on develop and main, so it must always run and
 # report — a trigger-level paths filter would leave PRs stuck on an unreported
@@ -69,3 +77,7 @@ jobs:
       - name: Catalog pinning (lint:deps)
         if: steps.gate.outputs.skip != 'true'
         run: pnpm lint:deps
+
+      - name: Locale parity and integrity
+        if: steps.gate.outputs.skip != 'true'
+        run: pnpm check:locales
