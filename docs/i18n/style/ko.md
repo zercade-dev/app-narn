@@ -68,6 +68,11 @@ review-translation-ai), table column headers (`strings:columns.config`), filter 
 (`strings:filters.needsReview`) and bulk-bar buttons (`strings:bulk.approveSelected`).
 Treat the English character count as the ceiling there rather than a target.
 
+The renderings used as examples above are illustrations of the length problem, not
+decisions about wording. `terminology.md` owns the rendering of every domain term,
+including the surface names and _translation memory_ — decide it there on first use,
+record it, and then follow it here.
+
 ## Placeholders
 
 `{{token}}` contents are identifiers, never translated. Word order around a token may
@@ -80,8 +85,9 @@ time, so a bare particle after `{{token}}` is a coin flip.
 Two acceptable fixes, in order of preference:
 
 1. **Put a real noun after the token** and attach the particle to that:
-   `logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes
-   "{{module}} 모듈이 꺼져 있어요" — "모듈" takes 이, the token stays bare.
+   the closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module
+   is turned off"; the full string carries three tokens) becomes "{{module}} 모듈이 꺼져 있어요" —
+   "모듈" takes 이, the token stays bare.
 2. Where no noun fits, use the doublet form — "{{name}}이(가)". It is ugly but correct, and
    Korean readers are used to it in software.
 

@@ -37,9 +37,14 @@ uppercases in code.
 
 ## Punctuation and spacing
 
-- **A no-break space (U+00A0) before `:` `;` `!` `?`**, and inside `« »`. Use U+00A0, not
-  a plain space and not U+202F: it is the one choice that never wraps and renders
-  everywhere.
+- **A no-break space (U+00A0) before `:` `;` `!` `?`**, and inside `« »`. This is a
+  deliberate house simplification, so know what it costs: the French typographic norm is
+  U+00A0 before `:` and inside the guillemets, but the **narrow** no-break space U+202F
+  before `;` `!` `?`. U+00A0 is used throughout here because it is what the shipped French
+  already uses where it uses anything, it never wraps, and it renders in every font and
+  browser — U+202F still falls back to a visible box or a full space in some environments.
+  The trade-off is a slightly wide gap before `; ! ?`. Never use a plain space, which can
+  wrap and orphan the punctuation onto the next line.
 - Quoting a value: `« valeur »` with a no-break space inside each guillemet.
   `english-review-notes.md` records that guillemets were kept in French on purpose when
   the English copy moved to `“ ”`.
@@ -69,6 +74,11 @@ For those classes, **never exceed ~1.6× the English character count**. French p
 chains are the usual cause of overflow — prefer "Mémoire de traduction" to "Mémoire des
 traductions enregistrées", and drop the article in chrome where French tolerates it.
 
+The renderings used as examples above are illustrations of the length problem, not
+decisions about wording. `terminology.md` owns the rendering of every domain term,
+including the surface names and _translation memory_ — decide it there on first use,
+record it, and then follow it here.
+
 ## Placeholders
 
 `{{token}}` contents are identifiers, never translated. Word order around a token may
@@ -77,8 +87,9 @@ change freely; every token in the English string must appear exactly once.
 Two French-specific hazards:
 
 - **Never elide before a token.** "l'{{module}}" is unsafe because the value's initial
-  letter is unknown. Put a real noun in front: `logs:translation.failedModuleDisabled`
-  ("the {{module}} module is turned off") becomes "le module {{module}} est désactivé".
+  letter is unknown. Put a real noun in front: the closing clause of
+  `logs:translation.failedModuleDisabled` ("…the {{module}} module is turned off"; the
+  full string carries three tokens) becomes "le module {{module}} est désactivé".
 - **Never let an article agree with a token.** The value's gender is unknown for the same
   reason; the noun you insert carries the gender.
 

@@ -81,8 +81,8 @@ space.
 change freely; every token in the English string must appear exactly once.
 
 Chinese is comfortable here: nouns do not inflect, there are no articles and no gender.
-`logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes
-"{{module}} 模組已停用。"
+The closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module is
+turned off"; the full string carries three tokens) becomes "{{module}} 模組已停用。"
 
 **Counted nouns take a measure word and no plural marking.**
 `category:countLabel_other` ("{{count}} entries") is "{{count}} 個項目" — the 個 is not
@@ -92,7 +92,10 @@ it. `_one` and `_other` will be identical, which is correct, not a copy-paste er
 
 ## Locale-specific traps
 
-- **Taiwan vocabulary, not mainland.** Use 專案 (not 項目), 軟體 (not 軟件), 程式 (not 程序),
+- **Taiwan vocabulary, not mainland.** For the domain term _project_, use 專案, not 項目 —
+  which is the mainland rendering of it. (項目 in its ordinary sense of "item" is perfectly
+  good Traditional Chinese and is used in the measure-word example above; what is banned is
+  項目 standing for _project_.) The rest of the list: 軟體 (not 軟件), 程式 (not 程序),
   預設 (not 默認/缺省), 記憶體 (not 內存), 品質 (not 質量), 使用者 (not 用戶), 網路 (not
   網絡), 資料 (not 數據), 檔案 (not 文件), 影片 (not 視頻), 匯入/匯出 (not 導入/導出), 儲存
   (not 保存), 執行 (not 運行). Every one of these survives a character conversion unchanged,

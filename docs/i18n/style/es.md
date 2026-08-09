@@ -50,11 +50,17 @@ uppercases in code, so Spanish writes "ESTADO", not "Estado".
 
 ## Numbers and dates
 
-Decimal comma, thousands point: `1.234,56`. Percentages take no space before `%`.
+**Numbers are formatted by the app from the browser locale, not written by translators** —
+which matters here more than in any other locale in this set, because Spanish itself is
+split: Spain and the Southern Cone write `1.234,56`, while Mexico, Colombia and Peru write
+`1,234.56`. The neutral-Spanish register this file prescribes cannot settle that, and it
+does not have to; the formatter follows the reader's own locale.
 
-Dates and times are formatted by the app from the browser locale, not typed by
-translators — if you meet something that looks like a date format string, it is not a
-translatable string.
+Where a separator is unavoidable in literal copy (an example inside a hint string, say),
+use the decimal comma and the thousands point. Percentages take no space before `%`.
+
+Dates and times are likewise formatted by the app — if you meet something that looks like
+a date format string, it is not a translatable string.
 
 ## Length discipline
 
@@ -68,6 +74,11 @@ For those classes, **never exceed ~1.6× the English character count**, and pref
 shorter synonym: "Actividad" over "Historial de actividad", "Calidad" over "Control de
 calidad". Body text, descriptions and toasts are not constrained — expand there instead.
 
+The renderings used as examples above are illustrations of the length problem, not
+decisions about wording. `terminology.md` owns the rendering of every domain term,
+including the surface names and _translation memory_ — decide it there on first use,
+record it, and then follow it here.
+
 ## Placeholders
 
 `{{token}}` contents are identifiers, never translated. Word order around a token may
@@ -77,8 +88,9 @@ translation.
 The specific Spanish hazard is the **article before a token**. You cannot write
 "el {{module}}" safely, because the value's gender is unknown. Put a real noun in front of
 the token and let the article agree with the noun:
-`logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes
-"el módulo {{module}} está desactivado".
+the closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module is
+turned off"; the full string carries three tokens) becomes "el módulo {{module}} está
+desactivado".
 
 Plurals: Spanish uses the same `_one` / `_other` shape as English, so
 `strings:bulk.rowsSelected_one` / `_other` map one to one.

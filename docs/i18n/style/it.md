@@ -65,6 +65,11 @@ For those classes, **never exceed ~1.5× the English character count**, and drop
 article where Italian chrome tolerates it: "Memoria di traduzione", not "La memoria delle
 traduzioni". Body text and descriptions are unconstrained.
 
+The renderings used as examples above are illustrations of the length problem, not
+decisions about wording. `terminology.md` owns the rendering of every domain term,
+including the surface names and _translation memory_ — decide it there on first use,
+record it, and then follow it here.
+
 ## Placeholders
 
 `{{token}}` contents are identifiers, never translated. Word order around a token may
@@ -74,8 +79,9 @@ Two Italian-specific hazards:
 
 - **Never elide before a token.** "l'{{module}}" is unsafe because the value's initial
   letter is unknown, and neither is its gender. Put a real noun in front:
-  `logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes
-  "il modulo {{module}} è disattivato".
+  the closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module
+  is turned off"; the full string carries three tokens) becomes "il modulo {{module}} è
+  disattivato".
 - **Never let an article or a past participle agree with a token** — the inserted noun
   carries the agreement.
 

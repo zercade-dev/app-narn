@@ -71,6 +71,11 @@ For those classes, **never exceed ~1.5× the English character count**, and pref
 shorter of two correct options — «Активность» over «История выполнения», «Качество» over
 «Контроль качества».
 
+The renderings used as examples above are illustrations of the length problem, not
+decisions about wording. `terminology.md` owns the rendering of every domain term,
+including the surface names and _translation memory_ — decide it there on first use,
+record it, and then follow it here.
+
 ## Placeholders
 
 `{{token}}` contents are identifiers, never translated. Word order around a token may
@@ -78,9 +83,9 @@ change freely; every token in the English string must appear exactly once.
 
 The Russian hazard is **case government**: a token cannot be declined, so it must always
 land in a position where the nominative is correct. Put a real noun beside it and let the
-noun take the case: `logs:translation.failedModuleDisabled` ("the {{module}} module is
-turned off") becomes «Модуль {{module}} отключён» — the noun «модуль» inflects, the token
-never does.
+noun take the case: the closing clause of `logs:translation.failedModuleDisabled` ("…the
+{{module}} module is turned off"; the full string carries three tokens) becomes «Модуль
+{{module}} отключён» — the noun «модуль» inflects, the token never does.
 
 The same rule covers counted nouns: never build «{{count}} записи» by guessing — use the
 plural keys below.

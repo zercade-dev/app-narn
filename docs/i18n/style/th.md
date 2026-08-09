@@ -81,10 +81,11 @@ than the European locales get, precisely because there is no wrap point to fall 
 change freely; every token in the English string must appear exactly once.
 
 Thai does not inflect, so a token can sit almost anywhere:
-`logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes
-"โมดูล {{module}} ถูกปิดใช้งาน". Note the spaces around the Latin-script token — those are
-correct and necessary; Latin runs inside Thai text are separated by spaces even though Thai
-words are not.
+the closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module is
+turned off"; the full string carries three tokens) becomes "โมดูล {{module}}
+ถูกปิดใช้งาน". Note the spaces around the Latin-script token — those are correct and
+necessary; Latin runs inside Thai text are separated by spaces even though Thai words are
+not.
 
 **Counted nouns need a classifier and no plural marking.**
 `category:countLabel_other` ("{{count}} entries") is "{{count}} รายการ". `_one` and

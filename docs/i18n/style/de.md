@@ -50,7 +50,7 @@ is a noun and capitalized ("Deutsch").
 - Use **ß**, not "ss", where the rule calls for it ("Größe", "außer"). This locale is
   standard German; the Swiss variant that drops ß is a different locale.
 - Hyphenate mixed compounds rather than running them together: "Routing-Regel",
-  "API-Schlüssel", "KI-Prüfung".
+  "API-Schlüssel", "Token-Limit".
 - Em dashes in the source stay em dashes with spaces around them.
 
 ## Numbers and dates
@@ -75,10 +75,15 @@ Two rules for those classes:
 
 1. **Never exceed ~1.5× the English character count.**
 2. **No single unbroken token longer than about 20 characters.** If the natural compound
-   is longer, split it with a hyphen ("KI-Prüfung") or use a two-word form — do not insert
+   is longer, split it with a hyphen ("Backup-Datei") or use a two-word form — do not insert
    soft hyphens or any other markup, which would trip the inline-tag checks.
 
 Descriptions, toasts and guide prose are not constrained; put the precision there.
+
+The renderings used as examples in this file — here and in the casing section — are
+illustrations of German word formation, not decisions about wording. `terminology.md`
+owns the rendering of every domain term, including the surface names and
+_translation memory_ — decide it there on first use, record it, and then follow it here.
 
 ## Placeholders
 
@@ -88,8 +93,9 @@ change freely; every token in the English string must appear exactly once.
 The German hazard is **article and case before a token**. You cannot write "das {{module}}"
 safely, because the value's gender is unknown, and you cannot decline the token. Put a real
 noun in front and let it carry the gender and the case:
-`logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes
-"Das Modul {{module}} ist deaktiviert."
+the closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module is
+turned off"; the full string carries three tokens) becomes "Das Modul {{module}} ist
+deaktiviert."
 
 Plurals map one to one onto English `_one` / `_other`.
 

@@ -11,10 +11,18 @@ placeholder handling.
 
 ## Register
 
-**你, and usually no pronoun at all.** Mainland Simplified software has settled on 你
-(or dropping the subject entirely) for professional tools; 您 reads as deferential
-customer-service copy and is out of keeping with an informal-but-professional English
-source. This is the opposite of the `zh-hant` decision — see that file.
+**你, and usually no pronoun at all — a house decision, not a settled norm.** Mainland
+Simplified localization is genuinely split here: much of the major platform localization
+(Apple and Microsoft in zh-CN among them) uses 您, while developer-facing and
+younger-audience products lean on 你 or on dropping the subject altogether. I chose 你
+because 您 reads as deferential customer-service copy against an
+informal-but-professional English source. It is the same kind of call `de.md` makes
+between _Sie_ and _du_: defensible either way, and if it is reversed it must be reversed
+across every string at once, not per string. Note that `zh-hant` deliberately decides the
+other way — see that file for why the same character carries different weight in Taiwan.
+
+The practical risk is low, because the primary rule below is to drop the pronoun entirely,
+which sidesteps the question in most strings.
 
 Chinese drops the subject freely, so prefer that: `sidebar:selectProject` ("Select a
 project") is "选择项目", with no pronoun. Use 你 only where possession genuinely has to be
@@ -82,8 +90,8 @@ compound; prefer the compound.
 change freely; every token in the English string must appear exactly once.
 
 Chinese is comfortable here: nouns do not inflect, there are no articles and no gender.
-`logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes
-"{{module}} 模块已关闭。"
+The closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module is
+turned off"; the full string carries three tokens) becomes "{{module}} 模块已关闭。"
 
 **Counted nouns take a measure word and no plural marking.**
 `category:countLabel_other` ("{{count}} entries") is "{{count}} 个条目" — the 个 is not

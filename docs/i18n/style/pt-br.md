@@ -69,6 +69,11 @@ For those classes, **never exceed ~1.6× the English character count**. Drop the
 ("Memória de tradução", not "A memória de traduções") and prefer the shorter verb
 ("Excluir" over "Remover permanentemente").
 
+The renderings used as examples above are illustrations of the length problem, not
+decisions about wording. `terminology.md` owns the rendering of every domain term,
+including the surface names and _translation memory_ — decide it there on first use,
+record it, and then follow it here.
+
 ## Placeholders
 
 `{{token}}` contents are identifiers, never translated. Word order around a token may
@@ -77,8 +82,9 @@ change freely; every token in the English string must appear exactly once.
 The Brazilian hazard is **article and contraction before a token**. "o {{module}}" is
 unsafe (unknown gender) and "do {{module}}" doubly so (the contraction bakes the article
 in). Put a real noun in front and let it carry both:
-`logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes "o
-módulo {{module}} está desativado".
+the closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module is
+turned off"; the full string carries three tokens) becomes "o módulo {{module}} está
+desativado".
 
 Plurals map one to one onto English `_one` / `_other`.
 
@@ -93,11 +99,11 @@ Plurals map one to one onto English `_one` / `_other`.
   away from the process reading of "stage" — but Brazilian gaming genuinely calls a
   playable level a _fase_. Use it for `stage-details:title` and its siblings, and do not
   let that leak into any other string where "stage" would mean a step.
-- **"Modelo" is a live collision.** It is the natural Portuguese word for _template_
-  (`config:templatesTitle`) and also the obvious word for the AI _model_
-  (`config:routing.labelModelOverride`). `terminology.md` forbids sharing one word between
-  them — pick a distinct rendering for one of the two and record it before translating
-  either namespace.
+- **"Modelo" is taken by the AI model** (`config:routing.labelModelOverride`). It is also
+  the natural Portuguese word for _template_ (`config:templatesTitle`), and `terminology.md`
+  fixes the direction of that collision: the rendering of _model_ stays where it is, and it
+  is the rendering of _template_ that has to move. Choose a different word for template,
+  record it in `terminology.md`, and never let "modelo" drift onto templates.
 - **"Judge"** takes the evaluative sense ("avaliar"), never "julgar"/"juiz".
 - **Standalone status words carry gender.** `vault:statusLocked` ("Locked") has no visible
   noun and must agree with whatever `terminology.md` fixes for _credential vault_.

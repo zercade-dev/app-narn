@@ -70,14 +70,20 @@ For those classes, **never exceed ~1.6× the English character count**, and pref
 shorter derivation: "Terjemahan" over "Penerjemahan", "Kualitas" over "Penjaminan
 kualitas". Body text is unconstrained — put the precision there.
 
+The renderings used as examples above are illustrations of the length problem, not
+decisions about wording. `terminology.md` owns the rendering of every domain term,
+including the surface names and _translation memory_ — decide it there on first use,
+record it, and then follow it here.
+
 ## Placeholders
 
 `{{token}}` contents are identifiers, never translated. Word order around a token may
 change freely; every token in the English string must appear exactly once.
 
 Indonesian is comfortable here: nouns do not inflect, there are no articles and no gender,
-so a token can sit almost anywhere. `logs:translation.failedModuleDisabled` ("the
-{{module}} module is turned off") becomes "Modul {{module}} dinonaktifkan".
+so a token can sit almost anywhere. The closing clause of
+`logs:translation.failedModuleDisabled` ("…the {{module}} module is turned off"; the full
+string carries three tokens) becomes "Modul {{module}} dinonaktifkan".
 
 **No plural marking after a numeral.** `category:countLabel_other` ("{{count}} entries") is
 "{{count}} entri" — never "entri-entri". The `_one` and `_other` strings will usually be

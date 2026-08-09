@@ -80,9 +80,9 @@ change freely; every token in the English string must appear exactly once.
 **Never attach a suffix directly to a token.** Turkish suffixes obey vowel harmony and take
 a buffer consonant depending on the value's final sound — and the value is unknown at
 translation time, so "{{module}}'ü" is a coin flip. Put a real noun after the token and
-suffix that instead: `logs:translation.failedModuleDisabled` ("the {{module}} module is
-turned off") becomes "{{module}} modülü kapalı" — "modül" takes the suffix, the token stays
-bare.
+suffix that instead: the closing clause of `logs:translation.failedModuleDisabled` ("…the
+{{module}} module is turned off"; the full string carries three tokens) becomes
+"{{module}} modülü kapalı" — "modül" takes the suffix, the token stays bare.
 
 **Counted nouns stay singular.** After a numeral, Turkish does not mark the plural:
 `category:countLabel_other` ("{{count}} entries") is "{{count}} girdi", with no `-ler`.

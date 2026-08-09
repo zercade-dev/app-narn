@@ -74,14 +74,20 @@ the English character count as the ceiling rather than a target.
 
 Japanese wraps at almost any character, so long body text is not a layout hazard.
 
+The renderings used as examples above are illustrations of the length problem, not
+decisions about wording. `terminology.md` owns the rendering of every domain term,
+including the surface names and _translation memory_ — decide it there on first use,
+record it, and then follow it here.
+
 ## Placeholders
 
 `{{token}}` contents are identifiers, never translated. Word order around a token may
 change freely; every token in the English string must appear exactly once.
 
 Japanese is comfortable here: nouns do not inflect, and a particle can follow a token
-safely because it does not agree with anything. `logs:translation.failedModuleDisabled`
-("the {{module}} module is turned off") becomes 「{{module}}モジュールが無効になっています。」
+safely because it does not agree with anything. The closing clause of
+`logs:translation.failedModuleDisabled` ("…the {{module}} module is turned off"; the full
+string carries three tokens) becomes 「{{module}}モジュールが無効になっています。」
 
 **Counted nouns take a counter and no plural marking.** `category:countLabel_other`
 ("{{count}} entries") is 「{{count}}件」 — pick the counter that fits the object (件 for

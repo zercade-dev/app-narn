@@ -24,8 +24,8 @@ first word and proper nouns only, so `config:routing.title` ("Routing Rules") be
 tắc định tuyến". `english-review-notes.md` records that English Title Case on page titles is
 a per-surface design convention with no meaning outside English.
 
-Language names and months are lowercase in running text ("tiếng Việt", "tháng Một" keeps
-the capital only on the month name proper).
+Months are never capitalized: "tháng một" or "tháng 1", never "tháng Một". In a language
+name only the proper noun takes a capital — "tiếng Việt", "tiếng Anh".
 
 Preserve uppercase only where English uses it for layout: `strings:columns.config`
 ("STATUS") becomes "TRẠNG THÁI". Diacritics survive uppercasing and **must be kept** —
@@ -42,8 +42,10 @@ Preserve uppercase only where English uses it for layout: `strings:columns.confi
 - Use **precomposed (NFC) characters**. Decomposed sequences look identical on screen but
   compare unequal, which will make the whitespace and tag checks and any string search
   behave unpredictably.
-- Tone-mark placement follows the modern convention: "hòa", "thủy", "quý" — not the older
-  "hoà"/"thuỷ" placement.
+- Tone-mark placement follows the **traditional style (kiểu cũ)**: "hòa", "thủy", "quý" —
+  not the newer style (kiểu mới), which writes "hoà"/"thuỷ". Despite the names, the
+  traditional placement is what Vietnamese software, dictionaries and publishing use, and
+  it is what the input methods produce by default.
 - Em dashes in the source stay em dashes with spaces around them.
 
 ## Numbers and dates
@@ -69,14 +71,19 @@ two or three syllables where you can: "Hoạt động" over "Lịch sử hoạt 
 over "Kiểm soát chất lượng". A long label does not clip — it wraps at a syllable boundary,
 which reads as a typo.
 
+The renderings used as examples above are illustrations of the length problem, not
+decisions about wording. `terminology.md` owns the rendering of every domain term,
+including the surface names and _translation memory_ — decide it there on first use,
+record it, and then follow it here.
+
 ## Placeholders
 
 `{{token}}` contents are identifiers, never translated. Word order around a token may
 change freely; every token in the English string must appear exactly once.
 
 Vietnamese is comfortable here: nouns do not inflect and there are no articles.
-`logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes
-"Mô-đun {{module}} đã bị tắt".
+The closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module is
+turned off"; the full string carries three tokens) becomes "Mô-đun {{module}} đã bị tắt".
 
 **Do not put a classifier in front of a token** ("cái {{module}}") — the correct classifier
 depends on the value, which is unknown. Put the real noun first and classify that instead.
