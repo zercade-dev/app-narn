@@ -43,9 +43,13 @@ const FALLBACK_SLUG_STEM = 'instance';
 /**
  * First free slug in the sequence `<base>`, `<base>-2`, `<base>-3`, … — the value
  * the creation form opens with, so the user never has to invent an id. Gaps are
- * filled rather than skipped, and the result always satisfies
- * {@link isValidInstanceSlug} (a base module id that isn't slug-shaped falls back
- * to the `instance…` stem; no registered module id does today).
+ * filled rather than skipped, and a base module id that isn't slug-shaped falls
+ * back to the `instance…` stem (no registered module id needs that today).
+ *
+ * The result is only a starting value for an editable field, so it is not
+ * re-validated: every registered module id is a short, slug-shaped constant, far
+ * from the pattern's 32-character cap. The form's own `isValidInstanceSlug` gate
+ * and the server both still judge whatever is finally submitted.
  */
 export function suggestInstanceSlug(baseModuleId: string, takenSlugs?: Iterable<string>): string {
   const taken = new Set(takenSlugs ?? []);
