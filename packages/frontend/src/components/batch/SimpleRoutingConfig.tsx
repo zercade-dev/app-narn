@@ -21,6 +21,17 @@ import { basesWithInstances } from '@/lib/module-options';
 import { isSelectableRoutingModule, type RoutingModuleOption } from './BatchConfigEditor.js';
 
 /**
+ * Portion of a `<base>:<slug>` module id after the colon; the whole id if
+ * there is none. Mirrors `moduleLabel()` in BatchConfigEditor.tsx so the
+ * shared `routing.deletedInstance` i18n key interpolates identically in both
+ * the simple and advanced views.
+ */
+function instanceSlug(moduleId: string): string {
+  const sep = moduleId.indexOf(':');
+  return sep > 0 ? moduleId.slice(sep + 1) : moduleId;
+}
+
+/**
  * Segmented Simple/Advanced control. Rendered in BOTH views' headers so the
  * mode is never unreachable from whichever one is on screen.
  */
@@ -87,7 +98,14 @@ export function SimpleRoutingConfig({
   const { t } = useTranslation('config');
   const baseInstanceSet = basesWithInstances(modules);
   const selectable = modules.filter((m) => isSelectableRoutingModule(m, baseInstanceSet));
-  const selected = selectable.find((m) => m.id === selectedModuleId);
+  // Resolve the selected module's name/deleted-state against the RAW module
+  // list, not `selectable`. `selectable` is filtered to what the dropdown may
+  // currently offer; a module id that still exists but is no longer *offered*
+  // (e.g. a bare instanceable base that has since gained a named instance, so
+  // isSelectableRoutingModule now excludes it) must still resolve to its real
+  // name here, not read as deleted. Mirrors moduleLabel() in
+  // BatchConfigEditor.tsx, which searches the unfiltered `modules` list.
+  const selected = modules.find((m) => m.id === selectedModuleId);
   // Only claim an instance was deleted once the module list has actually
   // loaded — an empty list is "not loaded yet", not "everything is gone".
   const deleted = selectedModuleId !== null && !selected && modules.length > 0;
@@ -118,9 +136,7 @@ export function SimpleRoutingConfig({
             >
               <SelectValue placeholder={t('routing.simplePlaceholder')}>
                 {(v: string | null) =>
-                  v
-                    ? (selectable.find((m) => m.id === v)?.name ?? v)
-                    : t('routing.simplePlaceholder')
+                  v ? (modules.find((m) => m.id === v)?.name ?? v) : t('routing.simplePlaceholder')
                 }
               </SelectValue>
             </SelectTrigger>
@@ -168,7 +184,7 @@ export function SimpleRoutingConfig({
             data-testid="routing-simple-deleted-warning"
           >
             <AlertTriangle className="size-3" />
-            {t('routing.deletedInstance', { slug: selectedModuleId })}
+            {t('routing.deletedInstance', { slug: instanceSlug(selectedModuleId ?? '') })}
           </p>
         )}
 
