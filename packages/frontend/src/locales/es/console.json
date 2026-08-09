@@ -20,8 +20,6 @@
   "clear": "Borrar registros",
   "expand": "Expandir",
   "collapse": "Contraer",
-  "expandStack": "Expandir traza",
-  "collapseStack": "Contraer traza",
   "vaultLocked": "Bóveda bloqueada",
   "vaultLockedUnlockHint": "Bóveda bloqueada: haz clic para desbloquear",
   "repeatCount": "Repetido {{count}} veces",

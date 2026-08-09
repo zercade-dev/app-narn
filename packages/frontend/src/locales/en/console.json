@@ -20,8 +20,6 @@
   "clear": "Clear logs",
   "expand": "Expand",
   "collapse": "Collapse",
-  "expandStack": "Expand stack",
-  "collapseStack": "Collapse stack",
   "vaultLocked": "Vault locked",
   "vaultLockedUnlockHint": "Vault locked — click to unlock",
   "repeatCount": "Repeated {{count}} times",

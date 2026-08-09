@@ -20,8 +20,6 @@
   "clear": "Effacer les journaux",
   "expand": "Développer",
   "collapse": "Réduire",
-  "expandStack": "Développer la trace",
-  "collapseStack": "Réduire la trace",
   "vaultLocked": "Coffre verrouillé",
   "vaultLockedUnlockHint": "Coffre verrouillé — cliquez pour déverrouiller",
   "repeatCount": "Répété {{count}} fois",
