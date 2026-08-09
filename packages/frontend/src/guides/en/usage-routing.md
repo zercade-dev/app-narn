@@ -10,7 +10,7 @@ Either way, this tab only decides *how* entries are dispatched. Translations are
 
 ## Routing rules
 
-These are the **Advanced** view. Rules are evaluated in priority order; the first one that matches an entry wins. Each rule can match on:
+Rules live in the **Advanced** view. They are evaluated in priority order; the first one that matches an entry wins. Each rule can match on:
 
 * **Sources** — the source/origin labels of imported entries.
 * **Entry length limit** — apply only to entries at or under a character count.
