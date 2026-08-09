@@ -43,7 +43,6 @@
     "loading": "Cargando entradas…"
   },
   "columns": {
-    "source": "ORIGEN",
     "config": "ESTADO",
     "tooltipSource": "Archivo de origen",
     "tooltipAchievementSource": "Origen de logro",

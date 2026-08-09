@@ -43,7 +43,6 @@
     "loading": "Chargement des entrées…"
   },
   "columns": {
-    "source": "SOURCE",
     "config": "STATUT",
     "tooltipSource": "Fichier source",
     "tooltipAchievementSource": "Source de succès",

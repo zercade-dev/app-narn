@@ -43,7 +43,6 @@
     "loading": "Loading entries…"
   },
   "columns": {
-    "source": "SOURCE",
     "config": "STATUS",
     "tooltipSource": "Source file",
     "tooltipAchievementSource": "Achievement source",

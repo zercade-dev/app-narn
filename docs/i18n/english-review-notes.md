@@ -169,6 +169,12 @@ queue`, `Stage details`, `Categories`). Left alone on purpose: within the Global
 
 ## Bugs found while reviewing (not fixed here — they need key changes)
 
+**Both have since been fixed**, ahead of the locale backfill so neither would be
+translated into twelve more languages: the three `_plural` families were converted to
+`_one`/`_other` in all three locales, and `strings:columns.source` was deleted after its
+only literal lookup was confirmed to be the `orphans` namespace's own key and no dynamic
+`columns.*` construction was found.
+
 1. **Three plural forms never render.** `config:glossariesSkipped_plural`,
    `config:malformedRows_plural` and `config:exportRoundtripWarning_plural` use the
    legacy i18next v3 `_plural` suffix. The app runs i18next 26 with JSON v4 and no

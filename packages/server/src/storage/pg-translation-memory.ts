@@ -106,10 +106,13 @@ export class PgTranslationMemory implements TranslationMemory {
     let autoApply: TmVariant | null = null;
     const hints: TmHint[] = [];
     for (const variant of rankVariants(variants)) {
-      // Defensive: the engine only records LQA-passed results, but hand-seeded
-      // or legacy variants may carry `lqaPassed: false`. Never auto-apply or
-      // hint them — a known-bad translation in the prompt risks anchoring
-      // weaker models on it.
+      // Defensive: no code path writes a variant this branch can drop. `record()`
+      // has exactly one caller — `approveTranslations` in M9 — and it stamps
+      // `lqaPassed: true` unconditionally, because a human approving the text is
+      // the authority regardless of the original automated LQA verdict. So the
+      // branch exists for rows this app did not write: hand-seeded or legacy
+      // variants that carry `lqaPassed: false`. Never auto-apply or hint those —
+      // a known-bad translation in the prompt risks anchoring weaker models on it.
       if (!variant.lqaPassed) continue;
       if (fingerprintMatches(variant.fingerprint, query.fingerprint, query.policy)) {
         // `rankVariants` orders best-first, so the first match is the winner.
