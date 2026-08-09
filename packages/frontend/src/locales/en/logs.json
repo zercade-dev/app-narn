@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "Set up routing rules",
+    "openModuleSettings": "Open module settings",
+    "openQuality": "Open quality settings",
+    "openGlossary": "Open glossary",
+    "unlockVault": "Unlock vault"
+  },
+  "translation": {
+    "start": "Translating a string into {{language}}…",
+    "done": "Translated a string into {{language}}.",
+    "doneFromMemory": "Reused a saved translation for {{language}}.",
+    "queued": "Queued {{total}} string for translation.",
+    "queued_other": "Queued {{total}} strings for translation.",
+    "runQueued": "Translation run queued — position {{position}}.",
+    "retryQueued": "Retry queued — position {{position}}.",
+    "retry": "Retrying a failed translation.",
+    "failedNoRoute": "Couldn't translate {{count}} string into {{language}} — no routing rule matches.",
+    "failedNoRoute_other": "Couldn't translate {{count}} strings into {{language}} — no routing rule matches.",
+    "failedModuleDisabled": "Couldn't translate {{count}} string into {{language}} — the {{module}} module is turned off.",
+    "failedModuleDisabled_other": "Couldn't translate {{count}} strings into {{language}} — the {{module}} module is turned off.",
+    "failedModuleNotFound": "Couldn't translate {{count}} string into {{language}} — the {{module}} module isn't installed.",
+    "failedModuleNotFound_other": "Couldn't translate {{count}} strings into {{language}} — the {{module}} module isn't installed.",
+    "failedGeneric": "Couldn't translate a string into {{language}}.",
+    "batchFailed": "A batch of {{count}} translations into {{languages}} failed.",
+    "queueStartFailed": "Couldn't start the translation run.",
+    "maskMismatch": "Formatting tags didn't survive translation into {{language}}.",
+    "tmRejected": "A saved translation for {{language}} didn't pass the quality check.",
+    "lqaRetry": "Quality check failed — asking the model to try again.",
+    "authCancel": "Sign-in was cancelled, so translation stopped."
+  },
+  "lqa": {
+    "passed": "Quality check passed.",
+    "failed": "Quality check failed.",
+    "overflow": "Translation is too long for the space available.",
+    "checkError": "A quality check couldn't run."
+  },
+  "judge": {
+    "done": "Review scored {{score}} — {{verdict}}.",
+    "suggestDone": "Review finished with suggestions.",
+    "suggestNoChange": "Review found nothing to change.",
+    "suggestionDiscarded": "Suggestion discarded."
+  },
+  "sourceReview": {
+    "done": "Source review found {{findings}} issue.",
+    "done_other": "Source review found {{findings}} issues."
+  },
+  "glossaryGen": {
+    "done": "Glossary run finished — {{suggested}} terms suggested from {{analyzed}} strings.",
+    "failed": "Glossary generation failed.",
+    "saveSuggestionsFailed": "Couldn't save the glossary suggestions."
+  },
+  "categoryGen": {
+    "queued": "Category generation queued.",
+    "done": "Category generation finished — {{suggestions}} suggestions.",
+    "failed": "Category generation failed."
+  },
+  "stageDetails": {
+    "queued": "Stage details queued.",
+    "done": "Stage details finished — {{completed}} done, {{failed}} failed.",
+    "failed": "Stage details failed."
+  },
+  "module": {
+    "loaded": "Loaded the {{module}} module.",
+    "instanceRegistered": "Added the {{instance}} configuration.",
+    "instanceRegisterFailed": "Couldn't add the {{instance}} configuration."
+  },
+  "vault": {
+    "unlocked": "Vault unlocked.",
+    "passwordChanged": "Vault password changed.",
+    "credentialsEvicted": "Your saved credentials were cleared from memory."
+  },
+  "orphan": {
+    "detected": "Found {{count}} string that's no longer in the source file.",
+    "detected_other": "Found {{count}} strings that are no longer in the source file.",
+    "linked": "Linked an orphaned string.",
+    "deleted": "Deleted an orphaned string."
+  },
+  "tm": {
+    "cleared": "Translation memory cleared.",
+    "variantDeleted": "Removed a translation-memory entry."
+  },
+  "backup": {
+    "restored": "Backup restored.",
+    "pruneFailed": "Couldn't clean up old backups."
+  }
+}

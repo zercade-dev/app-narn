@@ -10,11 +10,12 @@
  * Call `refetch()` to force a server-side cache bypass (passes ?refresh=true).
  */
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ModelInfo } from '@zercade-dev/narn-shared';
 import { apiRequest, ApiError } from './use-api';
 import { useVaultStore } from '../stores/vault-store.js';
 import { readJson, writeJson } from '../lib/local-storage.js';
-import { errorMessage, randomId } from '../lib/utils.js';
+import { errorMessage, randomId, technicalDetail } from '../lib/utils.js';
 import { vaultLockedEvent } from '../lib/vault-events.js';
 
 /** Must match the server-side TTL in routes/modules.ts. */
@@ -74,6 +75,12 @@ export interface UseModuleModelsResult {
   models: ModelInfo[];
   loading: boolean;
   error: string | null;
+  /**
+   * Raw provider/network reason behind `error` (e.g. "invalid API key", a 503
+   * body), when one is available — secondary, de-emphasised detail. `error`
+   * itself is always the localized headline; this is never a substitute for it.
+   */
+  errorDetail: string | null;
   /** Timestamp of the most recent successful fetch, or null if never loaded. */
   cachedAt: Date | null;
   refetch: () => void;
@@ -95,6 +102,12 @@ export const retryCounters: Record<string, number> = {};
  * of a misleading "no models available" state.
  */
 export const lastErrors: Record<string, string | null> = {};
+
+/**
+ * Raw provider/network reason behind the corresponding `lastErrors` entry,
+ * kept alongside it for the same late-mount-selector reason.
+ */
+export const lastErrorDetails: Record<string, string | null> = {};
 
 /** Shared record tracking in-flight model list fetch requests to deduplicate parallel mounts. */
 export const activeFetches: Record<string, Promise<ModelInfo[]>> = {};
@@ -137,6 +150,7 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
   const [models, setModels] = useState<ModelInfo[]>(initial.models);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
   const [cachedAt, setCachedAt] = useState<Date | null>(initial.updatedAt);
   const [tick, setTick] = useState(0);
   const forceRefreshRef = useRef(false);
@@ -144,6 +158,11 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
   const [manualRefreshPending, setManualRefreshPending] = useState(false);
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const hasVault = useVaultStore((s) => s.hasVault);
+  // Unprefixed binding: errorMessage() resolves its HTTP-status keys with an
+  // explicit `errors:` namespace prefix (e.g. `t('errors:http.vaultLocked')`),
+  // so this doesn't need — and must not have — a namespace bound here (see
+  // the same reasoning in hooks/use-async-action.ts).
+  const { t } = useTranslation();
 
   const hasExceededRetries = !manualRefreshPending && isRetryLatched(moduleId);
   const effectiveLoading = hasExceededRetries ? false : loading;
@@ -164,6 +183,7 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       setError(null);
+      setErrorDetail(null);
       setModels([]);
       return;
     }
@@ -174,6 +194,7 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
     // elapses instead of staying wedged until a manual refresh / vault toggle.
     if (!isManualRefresh && isRetryLatched(moduleId)) {
       setError(lastErrors[moduleId] ?? null);
+      setErrorDetail(lastErrorDetails[moduleId] ?? null);
       return;
     }
 
@@ -194,12 +215,14 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
         if (cancelled) return;
         retryCounters[moduleId] = 0; // Reset retry count on success
         lastErrors[moduleId] = null;
+        lastErrorDetails[moduleId] = null;
         delete lastErrorAt[moduleId];
         const list = Array.isArray(data) ? data : [];
         const now = new Date();
         setModels(list);
         setCachedAt(now);
         setError(null);
+        setErrorDetail(null);
         const payload: ModelsLocalCache = { models: list, updatedAt: now.toISOString() };
         if (writeJson(MODELS_CACHE_KEY, payload)) {
           // Notify other hook instances that fresh model data is now cached.
@@ -217,24 +240,34 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
             const retry = async () => {
               forceRefreshRef.current = true;
               setManualRefreshPending(true);
-              setTick((t) => t + 1);
+              setTick((prev) => prev + 1);
             };
             globalThis.dispatchEvent(vaultLockedEvent({ retry, retryId }));
           }
           // No token / vault locked — treat as empty, not an error.
           lastErrors[moduleId] = null;
+          lastErrorDetails[moduleId] = null;
           delete lastErrorAt[moduleId];
           setModels([]);
           setError(null);
+          setErrorDetail(null);
           return;
         }
         // Increment retry counter on each network or connection error and stamp
         // the failure time so the latch can expire after RETRY_LATCH_TTL_MS.
         retryCounters[moduleId] = (retryCounters[moduleId] ?? 0) + 1;
         lastErrorAt[moduleId] = Date.now();
-        const message = errorMessage(err, 'Failed to load models');
+        // `t` maps a recognised ApiError status (401/403/423/429/5xx) or an
+        // offline TypeError to specific wording; `technicalDetail` keeps the
+        // raw provider/network reason available as secondary detail, since a
+        // bad API key, a 503, and a dropped connection would otherwise all
+        // collapse into the same generic headline.
+        const message = errorMessage(err, 'Failed to load models', t);
+        const detail = technicalDetail(err) ?? null;
         lastErrors[moduleId] = message;
+        lastErrorDetails[moduleId] = detail;
         setError(message);
+        setErrorDetail(detail);
       })
       .finally(() => {
         if (!cancelled) {
@@ -249,7 +282,7 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
     return () => {
       cancelled = true;
     };
-  }, [tick, enabled, vaultUnlocked, hasVault, moduleId, MODELS_CACHE_KEY, MODELS_UPDATED_EVENT]);
+  }, [tick, enabled, vaultUnlocked, hasVault, moduleId, MODELS_CACHE_KEY, MODELS_UPDATED_EVENT, t]);
 
   // When auto-fetch is latched off by a prior failure, schedule a single tick
   // for the moment the latch window expires so the list auto-recovers without
@@ -262,7 +295,7 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
     if ((retryCounters[moduleId] ?? 0) < 1 || at === undefined) return;
     const remainingMs = RETRY_LATCH_TTL_MS - (Date.now() - at);
     if (remainingMs <= 0) return; // already expired — the mount fetch covers it
-    const id = setTimeout(() => setTick((t) => t + 1), remainingMs);
+    const id = setTimeout(() => setTick((prev) => prev + 1), remainingMs);
     return () => clearTimeout(id);
   }, [tick, moduleId, error]);
 
@@ -285,7 +318,7 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
     if (!cachedAt) return;
     const expiresInMs = MODELS_CACHE_TTL_MS - (Date.now() - cachedAt.getTime());
     if (expiresInMs <= 0) return; // already stale — the mount fetch covers it
-    const id = setTimeout(() => setTick((t) => t + 1), expiresInMs);
+    const id = setTimeout(() => setTick((prev) => prev + 1), expiresInMs);
     return () => clearTimeout(id);
   }, [cachedAt]);
 
@@ -294,7 +327,7 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
     setManualRefreshPending(true);
     retryCounters[moduleId] = 0; // Reset retry count on manual refresh
     delete lastErrorAt[moduleId];
-    setTick((t) => t + 1);
+    setTick((prev) => prev + 1);
   }, [moduleId]);
 
   // After the vault transitions from locked to unlocked, force-refresh the model
@@ -316,10 +349,11 @@ export function useModuleModels(moduleId: string, enabled = true): UseModuleMode
       // `lastErrors`/`retryCounters` entry that would short-circuit the refetch.
       retryCounters[moduleId] = 0;
       lastErrors[moduleId] = null;
+      lastErrorDetails[moduleId] = null;
       delete lastErrorAt[moduleId];
       delete activeFetches[moduleId];
     }
   }, [vaultUnlocked, refetch, moduleId]);
 
-  return { models, loading: effectiveLoading, error, cachedAt, refetch };
+  return { models, loading: effectiveLoading, error, errorDetail, cachedAt, refetch };
 }

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { RunStatusCode } from '@zercade-dev/narn-shared';
 import { useLoggerStore } from '../../stores/logger-store.js';
+import { presentEntry } from '../../lib/log-presentation/present.js';
+import type { Translate } from '../../lib/log-presentation/types.js';
 
 type FinishedStatus =
   typeof RunStatusCode.Completed | typeof RunStatusCode.Failed | typeof RunStatusCode.Cancelled;
@@ -81,14 +83,13 @@ export function useRunCompletionNotice(
 }
 
 /**
- * Collect distinct failure reasons logged for a finished run, so a partially- or
- * fully-failed run surfaces *why* (e.g. "module-disabled", "no-route") instead
- * of a bare count. Controlled pre-dispatch failures carry a how-to-fix `hint`
- * (from the engine's aggregated `translation:failed` trace); when present it is
- * appended so the notice tells the user what to do, not just what broke. Reads
- * the logger store directly to keep call sites terse.
+ * Collect the distinct failure reasons logged for a finished run, rendered as
+ * user-facing prose through the shared log presenter — so the notice says what
+ * went wrong and what to do, in the user's language. The engine's English
+ * `hint` metadata is deliberately ignored for display; it stays on the wire for
+ * log export.
  */
-export function collectRunFailureReasons(runId: string): string[] {
+export function collectRunFailureReasons(runId: string, t: Translate): string[] {
   const logEntries = useLoggerStore.getState().entries;
   const reasons = logEntries
     .filter(
@@ -97,12 +98,7 @@ export function collectRunFailureReasons(runId: string): string[] {
         e.message === 'translation:failed' &&
         e.metadata?.runId === runId,
     )
-    .map((e) => {
-      const reason = (e.metadata?.error as string) ?? '';
-      if (!reason) return '';
-      const hint = e.metadata?.hint;
-      return typeof hint === 'string' && hint ? `${reason} — ${hint}` : reason;
-    })
+    .map((e) => presentEntry(e, t).text)
     .filter(Boolean);
   return [...new Set(reasons)];
 }

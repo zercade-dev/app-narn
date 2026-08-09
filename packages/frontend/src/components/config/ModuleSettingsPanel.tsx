@@ -183,6 +183,7 @@ const EMPTY_COPILOT_MODELS: UseCopilotModelsResult = {
   models: [],
   loading: false,
   error: null,
+  errorDetail: null,
   cachedAt: null,
   refetch: () => {},
 };
