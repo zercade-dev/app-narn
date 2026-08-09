@@ -1,0 +1,106 @@
+# Style guide — Brazilian Portuguese (pt-br)
+
+This locale is **Brazilian** Portuguese, not European Portuguese. Where the two diverge,
+Brazilian wins every time — see the traps section for the specific word list.
+
+Terminology — _which word_ — is settled in `terminology.md`, including the list of things
+that are never translated. This file settles register, casing, punctuation, length and
+placeholder handling.
+
+## Register
+
+**Você**, always. Never _tu_, never _o senhor / a senhora_, and never mesoclisis
+("far-se-á") — all three read as either regional or bureaucratic, and the English source
+is informal-but-professional.
+
+Two verb forms split by control type, which is the Brazilian software convention:
+
+- **Button labels take the infinitive**: `sidebar:create` is "Criar", `sidebar:cancel` is
+  "Cancelar", `config:deleteProject` is "Excluir projeto".
+- **Instructions and sentences take the third-person imperative**: `sidebar:selectProject`
+  ("Select a project") is "Selecione um projeto"; `vault:unlockDescription` is "Digite sua
+  senha…".
+
+Progress states use the gerund: `backup:creating` ("Creating backup…") is "Criando
+backup…".
+
+## Casing
+
+Sentence case for every control, label, tab and page title. Portuguese capitalizes only
+the first word and proper nouns, so `config:templatesTitle` ("Project Templates") becomes
+"Modelos de projeto" — one capital. `english-review-notes.md` records that the English
+Title Case on page titles is a per-surface design convention with no meaning outside
+English, so do not mirror it.
+
+Language names, months and weekdays are lowercase ("português", "janeiro").
+
+Preserve uppercase only where English uses it for layout: `strings:columns.config`
+("STATUS") becomes "STATUS", which happens to be identical.
+
+## Punctuation and spacing
+
+- No space before `:` `;` `!` `?`.
+- Quoting a value: `“…”`, matching the English source after its review. Guillemets are a
+  European Portuguese habit — do not use them here.
+- Ellipsis is the single character `…` (U+2026), matching `sidebar:searchProjects`
+  ("Search projects…") — "Pesquisar projetos…".
+- Follow the current orthographic agreement: no trema ("linguiça"), "ideia" not "idéia",
+  and no accent on "voo" or "leem".
+- Em dashes in the source stay em dashes with spaces around them.
+
+## Numbers and dates
+
+Decimal comma, thousands point: `1.234,56`. No space before `%`.
+
+Dates and times are formatted by the app from the browser locale — a date format string is
+not a translatable string.
+
+## Length discipline
+
+Brazilian Portuguese runs roughly **15–30% longer** than English, the widest expansion of
+the Romance set, because of prepositional chains and longer verb forms.
+
+The space-constrained surfaces are sidebar items (`sidebar:translationMemory`,
+`sidebar:globalConfig`), tab labels (`strings:tabs.strings`, `strings:tabs` for
+review-translation-ai), table column headers (`strings:columns.config`), filter labels
+(`strings:filters.needsReview`) and bulk-bar buttons (`strings:bulk.approveSelected`).
+
+For those classes, **never exceed ~1.6× the English character count**. Drop the article
+("Memória de tradução", not "A memória de traduções") and prefer the shorter verb
+("Excluir" over "Remover permanentemente").
+
+## Placeholders
+
+`{{token}}` contents are identifiers, never translated. Word order around a token may
+change freely; every token in the English string must appear exactly once.
+
+The Brazilian hazard is **article and contraction before a token**. "o {{module}}" is
+unsafe (unknown gender) and "do {{module}}" doubly so (the contraction bakes the article
+in). Put a real noun in front and let it carry both:
+`logs:translation.failedModuleDisabled` ("the {{module}} module is turned off") becomes "o
+módulo {{module}} está desativado".
+
+Plurals map one to one onto English `_one` / `_other`.
+
+## Locale-specific traps
+
+- **Brazilian vocabulary, not European.** Use "arquivo" (not _ficheiro_), "tela" (not
+  _ecrã_), "usuário" (not _utilizador_), "senha" (not _palavra-passe_), "excluir" (not
+  _eliminar_), "salvar" (not _guardar_), "compartilhar" (not _partilhar_), "time" or
+  "equipe" (not _equipa_), "cadastrar" for sign-up flows. A translation that mixes the two
+  varieties is more jarring than one that is merely awkward.
+- **"Fase" is the _right_ word here, unusually.** `terminology.md` warns every language
+  away from the process reading of "stage" — but Brazilian gaming genuinely calls a
+  playable level a _fase_. Use it for `stage-details:title` and its siblings, and do not
+  let that leak into any other string where "stage" would mean a step.
+- **"Modelo" is a live collision.** It is the natural Portuguese word for _template_
+  (`config:templatesTitle`) and also the obvious word for the AI _model_
+  (`config:routing.labelModelOverride`). `terminology.md` forbids sharing one word between
+  them — pick a distinct rendering for one of the two and record it before translating
+  either namespace.
+- **"Judge"** takes the evaluative sense ("avaliar"), never "julgar"/"juiz".
+- **Standalone status words carry gender.** `vault:statusLocked` ("Locked") has no visible
+  noun and must agree with whatever `terminology.md` fixes for _credential vault_.
+- **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms
+  where English writes "entr(ies)". Do not imitate the parentheses; rephrase so one string
+  covers every count.
