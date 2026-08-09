@@ -28,10 +28,13 @@ rule harder to hold, not easier: it hands you a real imperative — "Speichere",
 string labels a control, it is an infinitive.
 
 Where a full sentence really does instruct the user, the du-imperative is right, and it is
-irregular in a way the _Sie_ form never was: strong verbs drop the final -e and shift the
-stem — _gib_, not "gebe"; _lies_, not "lese"; _nimm_, not "nehme".
-`account:mfaDisableHint` ("Enter a current code from your authenticator app…") is "Gib
-einen aktuellen Code aus deiner Authenticator-App ein…".
+irregular in a way the _Sie_ form never was: strong verbs **with an e→i/ie stem change**
+take that changed stem and drop the final -e — _gib_, not "gebe"; _lies_, not "lese";
+_nimm_, not "nehme". `account:mfaDisableHint` ("Enter a current code from your
+authenticator app…") is "Gib einen aktuellen Code aus deiner Authenticator-App ein…".
+
+That is the only class that shifts. Verbs that umlaut in the present tense do **not** umlaut
+here (_fahr_, not "fähr"; _lauf_, not "läuf"), and every other verb simply drops the -e.
 
 _du_, _dich_, _dir_ and _dein_ are lowercase — see the casing section. And whatever you do,
 never mix _du_ and _Sie_, in any string class: labels, errors, toasts and prose share one
@@ -43,10 +46,11 @@ German capitalizes **all nouns**. That is orthography, not Title Case, and it ap
 regardless of what English does: "Projekt löschen", "Routing-Regeln", "Übersetzungsspeicher".
 
 The address pronouns are the counter-example: _du_, _dich_, _dir_, _dein_ and their
-inflections are **lowercase** in current orthography — capitalized only in personal
-correspondence, never in a UI. A capitalized "Du" or "Dein" in a string is usually a
-_Sie_-form reflex (_Sie_ and _Ihr_ are always capitalized) and reads as a register slip
-rather than as politeness.
+inflections are **lowercase** in current orthography — never capitalized as an honorific in
+a UI, though sentence-initial capitalization applies as normal ("Du benötigst dieses
+Passwort…" in the register section is right for that reason). A **mid-sentence** "Du" or
+"Dein" is the tell: it is usually a _Sie_-form reflex, since _Sie_ and _Ihr_ are capitalized
+in any position, and it reads as a register slip rather than as politeness.
 
 Do **not** mirror English Title Case, and do **not** lowercase German nouns to imitate
 English sentence case — both produce wrong German. `english-review-notes.md` records that

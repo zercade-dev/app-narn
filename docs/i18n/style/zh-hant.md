@@ -51,7 +51,8 @@ full-width digits.
 - **Ellipsis:** in prose sentences use the full-width `……`. In short UI affordance labels —
   search placeholders and progress states such as `common:loading` ("Loading…") — keep the
   single `…`, because `……` doubles the width of a deliberately unobtrusive label. This split
-  is a judgement call; apply it consistently, and identically to `zh-hans`.
+  is a judgement call; apply it consistently, and treat it as coupled to `zh-hans` — if it
+  is ever revisited, revisit both files together rather than letting them drift.
 - No space between Chinese characters themselves.
 
 ## Numbers and dates

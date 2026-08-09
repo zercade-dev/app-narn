@@ -53,7 +53,8 @@ full-width digits.
 - **Insert a half-width space between Chinese characters and adjacent Latin text or
   numerals**: "使用 {{module}} 模块", "共 {{count}} 个条目". This is the mainstream
   Simplified Chinese web convention and it materially improves legibility. Note that
-  `zh-hant` follows the same rule, but `ja` deliberately does not.
+  `zh-hant` follows the same rule and `ja` does not — in Japanese the absence of the space
+  is itself the convention.
 - **Ellipsis:** in prose sentences use the full-width Chinese ellipsis `……`. In short UI
   affordance labels — search placeholders and progress states such as `common:loading`
   ("Loading…") — keep the single `…`, because `……` doubles the width of a label whose whole
