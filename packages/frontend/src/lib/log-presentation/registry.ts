@@ -1,4 +1,5 @@
 import type { LogMeta, LogPresenter } from './types.js';
+import { openTab, openGlobalConfig, unlockVault } from './actions.js';
 
 /**
  * Expand a language code to a display name ("fr" -> "French"). Falls back to
@@ -78,6 +79,14 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     // Aggregate by reason + language: "no routing rule" failures to French fold
     // together, while a provider error to German stays its own row.
     groupKey: (m) => `${str(m.error, '')} ${str(m.targetLanguage, '')}`,
+    action: (m) => {
+      const reason = str(m.error, '');
+      if (reason === 'no-route') return openTab('routing', 'action.openRouting');
+      if (reason === 'module-disabled' || reason === 'module-not-found') {
+        return openGlobalConfig('action.openModuleSettings');
+      }
+      return undefined;
+    },
   },
   'translation:batch-failed': {
     key: 'translation.batchFailed',
@@ -103,7 +112,7 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
 
   'lqa:passed': { key: 'lqa.passed' },
   'lqa:failed': { key: 'lqa.failed' },
-  'lqa:overflow': { key: 'lqa.overflow' },
+  'lqa:overflow': { key: 'lqa.overflow', action: () => openTab('quality', 'action.openQuality') },
   'lqa:check-error': { key: 'lqa.checkError' },
 
   'judge:done': {
@@ -122,8 +131,14 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     key: 'glossaryGen.done',
     vars: (m) => ({ suggested: num(m.suggested, 0), analyzed: num(m.analyzed, 0) }),
   },
-  'glossary-gen:failed': { key: 'glossaryGen.failed' },
-  'glossary-gen:save-suggestions-failed': { key: 'glossaryGen.saveSuggestionsFailed' },
+  'glossary-gen:failed': {
+    key: 'glossaryGen.failed',
+    action: () => openTab('glossary', 'action.openGlossary'),
+  },
+  'glossary-gen:save-suggestions-failed': {
+    key: 'glossaryGen.saveSuggestionsFailed',
+    action: () => openTab('glossary', 'action.openGlossary'),
+  },
 
   'category-gen:queued': { key: 'categoryGen.queued' },
   'category-gen:done': {
@@ -151,7 +166,10 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
 
   'vault:unlocked': { key: 'vault.unlocked' },
   'vault:password-changed': { key: 'vault.passwordChanged' },
-  'credentials:evicted': { key: 'vault.credentialsEvicted' },
+  'credentials:evicted': {
+    key: 'vault.credentialsEvicted',
+    action: () => unlockVault('action.unlockVault'),
+  },
 
   'orphan:detected': {
     key: 'orphan.detected',
