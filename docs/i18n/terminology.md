@@ -210,8 +210,8 @@ or search the file for the word.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
-| es | | |
-| fr | | |
+| es | traducción | Feminine — every standalone status word agreeing with it is feminine too. Already used throughout the shipped `strings` and `review` namespaces; the tab label is the plural "Traducciones". The verb is "traducir", and "re-translate" is "retraducir" (`review:retranslate`). |
+| fr | traduction | Feminine. Already used throughout the shipped `strings` and `review` namespaces; the tab label is the plural "Traductions". The verb is "traduire", and "re-translate" is "retraduire" (`review:retranslate`). |
 | de | | |
 | it | | |
 | pt-br | | |

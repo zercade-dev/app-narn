@@ -137,6 +137,15 @@
     "selectRow": "Seleccionar fila",
     "run": "Ejecución"
   },
+  "shortcuts": {
+    "title": "Atajos de teclado",
+    "retranslate": "Retraducir",
+    "markReviewed": "Marcar como revisado",
+    "clearTranslation": "Borrar traducción",
+    "enterEditMode": "Entrar en modo de edición",
+    "navigateRows": "Navegar entre filas",
+    "cancelEditing": "Cancelar la edición"
+  },
   "filters": {
     "searchPlaceholder": "Buscar texto…",
     "status": "Estado:",
