@@ -29,10 +29,10 @@ interface GlossarySidebarProps {
   readonly loadGlossaries: () => Promise<void>;
   readonly reportError: (err: unknown, fallbackKey: string) => void;
   /**
-   * AI glossary generation is 'manage'-only server-side, and the dialog it
-   * opens is already hidden outright for collaborators (GlossaryTab.tsx) —
-   * so the trigger itself is hidden too rather than left as a dead click
-   * that opens nothing.
+   * Both creation paths are 'manage'-only server-side — `POST /glossaries`
+   * asserts manage access, and AI generation does too (its dialog is already
+   * hidden outright for collaborators in GlossaryTab.tsx) — so both triggers
+   * are hidden rather than left as dead clicks that 403 or open nothing.
    */
   readonly isCollaborator: boolean;
 }
@@ -89,38 +89,46 @@ export function GlossarySidebar({
 
   return (
     <div className="w-52 shrink-0 flex flex-col gap-2">
-      <div className="flex items-center justify-between mb-1">
+      <div className="mb-1">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
           {t('glossaries')}
         </span>
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-6 w-6"
-          onClick={() => setCreatingGlossary(true)}
-          data-testid="glossary-new-btn"
-          title={t('newGlossary')}
-          aria-label={t('newGlossary')}
-          data-row-action
-        >
-          <Plus className="w-3.5 h-3.5" />
-        </Button>
       </div>
 
-      {/* Generate glossaries is a project-wide action — available regardless of
-          which (if any) glossary is selected, so it lives at the top of the
-          sidebar. 'manage'-only server-side, hidden for collaborators. */}
+      {/* Creating a glossary by hand and generating them with AI are both
+          project-wide actions — available regardless of which (if any) glossary
+          is selected, so both live at the top of the sidebar. Both are
+          'manage'-only server-side (POST /glossaries and the generate run alike),
+          so both are hidden for collaborators rather than left as dead clicks.
+
+          Manual creation is the PRIMARY button and comes first: it is the plain,
+          always-available path, while generation depends on a configured AI
+          module. The manual affordance used to be an unlabelled 24px icon button
+          tucked in the header row above, which read as no button at all next to
+          the labelled generate button. */}
       {!isCollaborator && (
-        <Button
-          variant="outline"
-          className="w-full justify-start"
-          onClick={onGenerate}
-          data-testid="glossary-generate-btn"
-          title={t('generateGlossariesBtn')}
-        >
-          <Sparkles className="w-3.5 h-3.5 mr-1 shrink-0" />
-          <span className="min-w-0 truncate">{t('generateGlossariesBtn')}</span>
-        </Button>
+        <>
+          <Button
+            className="w-full justify-start"
+            onClick={() => setCreatingGlossary(true)}
+            data-testid="glossary-new-btn"
+            title={t('newGlossary')}
+          >
+            <Plus className="w-3.5 h-3.5 mr-1 shrink-0" />
+            <span className="min-w-0 truncate">{t('newGlossary')}</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            className="w-full justify-start"
+            onClick={onGenerate}
+            data-testid="glossary-generate-btn"
+            title={t('generateGlossariesBtn')}
+          >
+            <Sparkles className="w-3.5 h-3.5 mr-1 shrink-0" />
+            <span className="min-w-0 truncate">{t('generateGlossariesBtn')}</span>
+          </Button>
+        </>
       )}
 
       {creatingGlossary && (
