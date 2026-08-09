@@ -38,6 +38,6 @@
   "toastDeleteFailed": "Error al eliminar: {{message}}",
   "toastBackupCreated": "Copia de seguridad creada.",
   "toastBackupFailed": "Error al crear la copia: {{message}}",
-  "toastRestoreSuccess": "Copia de seguridad restaurada correctamente",
+  "toastRestoreSuccess": "Copia de seguridad restaurada.",
   "toastRestoreFailed": "Error al restaurar: {{message}}"
 }

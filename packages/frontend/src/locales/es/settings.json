@@ -34,7 +34,7 @@
     "iconsLabel": "Iconos"
   },
   "themes": {
-    "default": { "name": "Predeterminado", "description": "El aspecto clásico de narn." },
+    "default": { "name": "Clásico", "description": "El aspecto clásico de narn." },
     "pixel": { "name": "Pixel", "description": "Aire retro de consola de 8 bits." },
     "techno": { "name": "Tecno", "description": "Terminal ciberpunk de neón." },
     "minimal": { "name": "Minimal", "description": "Plano, sobrio y monocromo." }

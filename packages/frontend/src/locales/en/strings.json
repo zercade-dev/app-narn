@@ -191,7 +191,7 @@
     "offPage": "({{count}} on other pages)",
     "selectAllFiltered": "Select all {{count}} filtered rows",
     "allFilteredSelected": "All {{count}} filtered rows selected.",
-    "bulkOperation": "Bulk Operation",
+    "bulkOperation": "Bulk operation",
     "addCategory": "Add category",
     "back": "Back",
     "apply": "Apply",
@@ -214,9 +214,9 @@
     "removeCategoryApply_zero": "Remove categories",
     "removeCategoryApply_one": "Remove {{count}} category",
     "removeCategoryApply_other": "Remove {{count}} categories",
-    "aiGeneration": "AI Generation",
-    "generateGlossaryFromSelection": "Generate Glossary from Selection",
-    "generateCategoriesFromSelection": "Generate Categories from Selection"
+    "aiGeneration": "AI generation",
+    "generateGlossaryFromSelection": "Generate glossary from selection",
+    "generateCategoriesFromSelection": "Generate categories from selection"
   },
   "order": {
     "label": "Order:",
@@ -230,14 +230,14 @@
     "presortFailed": "Could not sort entries"
   },
   "contextMenu": {
-    "editCategories": "Edit Categories",
+    "editCategories": "Edit categories",
     "editCategoriesDescription": "Add or remove categories for this entry.",
     "noCategories": "No categories yet.",
     "addCategoryPlaceholder": "Add category…",
     "categoryName": "Category name",
     "removeCategory": "Remove category {{category}}",
     "add": "Add",
-    "enabledGlossaries": "Enabled Glossaries",
+    "enabledGlossaries": "Enabled glossaries",
     "enabledGlossariesDescription": "Select which glossaries are enabled during translation.",
     "noGlossaries": "No glossaries found for this project.",
     "readOnly": "(read-only)",

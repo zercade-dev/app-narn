@@ -1,8 +1,8 @@
 {
-  "translateSelected": "Translate Selected",
+  "translateSelected": "Translate selected",
   "toTranslateCount": "{{count}} to translate",
   "progressAriaLabel": "{{completed}} of {{total}} translated",
-  "cancelRun": "Cancel Run",
+  "cancelRun": "Cancel run",
   "runCancelled": "Run cancelled:",
   "runCompleted": "Translation done — {{completed}} of {{total}} succeeded.",
   "runCompletedWithErrors": "Translation done — {{completed}} succeeded, {{failed}} failed.",

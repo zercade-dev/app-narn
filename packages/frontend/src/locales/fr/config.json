@@ -160,7 +160,7 @@
     "ruleCount_one": "{{count}} règle",
     "ruleCount_other": "{{count}} règles",
     "sectionFiltering": "Filtrage",
-    "categoriesConfiguredHint": "Les catégories se configurent dans l'onglet Texte multilingue.",
+    "categoriesConfiguredHint": "Les catégories se configurent dans l'onglet Traductions.",
     "allCategories": "Toutes les catégories",
     "nSelected": "{{count}} sélectionnées",
     "sectionAgentSettings": "Paramètres de l'agent",

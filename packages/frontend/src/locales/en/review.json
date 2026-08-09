@@ -53,7 +53,7 @@
     "noModules": "No review-capable module is available. Enable an AI module in Global Config.",
     "cancel": "Cancel",
     "findingPosition": "{{current}} of {{total}}",
-    "findingPrev": "Prev",
+    "findingPrev": "Previous",
     "findingNext": "Next",
     "copySuggestion": "Copy",
     "copied": "Suggestion copied",

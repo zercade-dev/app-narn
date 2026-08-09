@@ -38,6 +38,6 @@
   "toastDeleteFailed": "Échec de la suppression : {{message}}",
   "toastBackupCreated": "Sauvegarde créée.",
   "toastBackupFailed": "Erreur lors de la création de la sauvegarde : {{message}}",
-  "toastRestoreSuccess": "Sauvegarde restaurée correctement",
+  "toastRestoreSuccess": "Sauvegarde restaurée.",
   "toastRestoreFailed": "Erreur lors de la restauration : {{message}}"
 }
