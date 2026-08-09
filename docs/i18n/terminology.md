@@ -21,27 +21,11 @@ left in English, an acronym you expanded.
 `NARN` · provider and module names (`DeepL`, `Copilot`, `OpenRouter`, `Anthropic`,
 `Gemini`, `OpenAI`, `DeepSeek`, `GitHub Copilot`) · module ids and module-instance ids
 (`generic-ai`, `openai:default`) · model ids · vault key names (`OPENAI_API_KEY`) ·
-the language code `pseudo-test` · CSV header tokens · version numbers · **keyboard key
-names** · anything inside `{{…}}`.
+the language code `pseudo-test` · CSV header tokens · version numbers ·
+anything inside `{{…}}`.
 
-**Keyboard key names are the trap on this list**, because they are ordinary English words
-that the app also uses as ordinary English words. `Enter`, `Esc`, `Shift`, `Tab`, `Ctrl`
-and `Alt` name physical keys, and the key is engraved in English on the keyboards these
-users have; translating one produces an instruction to press a key that does not exist.
-Keep them verbatim, and translate only the sentence around them:
-`strings:compare.cellEditTooltip` ("Edit · Enter · Esc to cancel") is "Editar · Enter ·
-Esc para cancelar" in es and "Modifier · Enter · Esc pour annuler" in fr;
-`strings:compare.cellEditReviewedTooltip` ("Reviewed — press Enter to edit") keeps `Enter`
-the same way, as do `common:webSearch.hint`, `strings:compare.contextPlaceholder` and
-`strings:compare.tonePlaceholder` ("…Enter to save, Shift+Enter for a new line, Esc to
-cancel…").
-
-The same words appear in the same files as **verbs and nouns, and there they translate
-normally** — "Enter your password", "Enter a valid hex color", "Enter edit mode", the
-_Tab_ that means a tab in the UI. Eight of the fifteen `Enter`s in `en` are the verb. Read
-the string, not the word: the key-name reading is the one that names a keystroke. This is
-also why key names are not in the guard's do-not-translate list, which is a per-term count
-check and would demand every one of those verbs survive untranslated.
+**Keyboard key names are not on that list — they are per-locale.** See the next section;
+they are the one term class where "copy the English" is the wrong default.
 
 The product name appears in English as `narn`, `Narn` and `NARN`. That inconsistency is
 known and unresolved; copy whatever spelling the source string contains, and never
@@ -49,6 +33,52 @@ translate or re-case it.
 
 `LQA` is an industry acronym; keep it as `LQA` unless the target language has an
 established localized form, and record that decision in its row below.
+
+## Keyboard key names
+
+`Enter`, `Esc`, `Shift`, `Tab`, `Ctrl` and `Alt` name physical keys. The reader has to
+find that key on the keyboard in front of them, so the only thing that matters is what
+**their** keycap says.
+
+> **The rule:** write the key name **as it is engraved on that locale's keyboard**. Keep
+> the English word only where that locale's keycap is in fact English.
+
+For the locales in this repo and the ones arriving next, the English word is often *not*
+what is engraved: French AZERTY shows **Entrée**, **Échap** and **Maj**; Spanish shows
+**Intro** and **Mayús**; German shows **Strg** for Ctrl and **Umschalt** (or the bare ⇧
+glyph) for Shift. `Tab`, `Ctrl` and `Alt` happen to be engraved in English on most
+European layouts, so those usually stay — but that is an observation about the keycap,
+not a rule about the word. If you are unsure what a layout engraves, say so in the Notes
+column rather than guessing; a wrong key name is an instruction to press a key that does
+not exist.
+
+**These strings are currently inconsistent, and that is a known defect for the backfill
+to settle — not a rule.** Measured against the shipped files on 2026-08-09:
+
+| Key | es | fr |
+| --- | --- | --- |
+| `strings:compare.cellEditTooltip` | `Enter` / `Esc` kept in English | `Enter` / `Esc` kept in English |
+| `strings:compare.cellEditReviewedTooltip` | "pulsa **Enter**" — kept in English | "appuyez sur **Enter**" — kept in English |
+| `common:webSearch.hint` | "Pulsa **Intro**" — localized | "Appuyez sur **Entrée**" — localized |
+| `strings:compare.contextPlaceholder` | `Enter` / `Esc` kept, **Mayús** localized — mixed | **Entrée** / **Maj+Entrée** / **Échap** — localized |
+| `strings:compare.tonePlaceholder` | `Enter` / `Esc` kept, **Mayús** localized — mixed | **Entrée** / **Maj+Entrée** / **Échap** — localized |
+
+So both locales already localize some key names and not others, and es even mixes the two
+inside a single string. Under the rule above the **localized** cells are the correct ones:
+`common:webSearch.hint`, and the fr placeholders, are right and must not be "fixed" back
+to English. The rows still in English are the ones that need changing — as one deliberate
+sweep, so a tooltip and the placeholder next to it stop naming the same key two ways.
+Until that sweep lands, match the locale's engraved name in anything you newly write; do
+not propagate the English leftovers.
+
+The same words appear in the same files as **verbs and nouns, and there they translate
+normally** — "Enter your password", "Enter a valid hex color", "Enter edit mode", the
+_Tab_ that means a tab in the UI. Eight of the fifteen `Enter`s in `en` are the verb. Read
+the string, not the word: the key-name reading is the one that names a keystroke. This is
+one reason key names are not in the guard's do-not-translate list, which is a per-term
+count check and would demand every one of those verbs survive untranslated; the other is
+the rule above — a locale that correctly writes **Entrée** would fail a check that
+insisted on `Enter`.
 
 ## Surface names
 
