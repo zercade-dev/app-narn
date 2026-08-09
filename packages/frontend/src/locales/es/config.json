@@ -275,8 +275,8 @@
   "instances": {
     "addButton": "Añadir instancia",
     "formTitle": "Nueva instancia de {{base}}",
-    "slugLabel": "Slug (id inmutable)",
-    "slugHelp": "Letras minúsculas, dígitos y guiones. Se usa en el id “{{base}}:<slug>” y en los nombres de claves derivadas del baúl.",
+    "slugLabel": "Id de instancia",
+    "slugHelp": "Cualquier valor sirve: solo es una etiqueta para distinguir esta instancia de tus otras de {{base}}. No se puede cambiar una vez creada la instancia.",
     "slugReserved": "«{{slug}}» es un id de módulo reservado: elige otro slug.",
     "nameLabel": "Nombre visible",
     "createButton": "Crear instancia",

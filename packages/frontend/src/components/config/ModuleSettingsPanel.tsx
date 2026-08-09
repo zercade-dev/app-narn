@@ -29,7 +29,7 @@ import {
 import { useModuleModels } from '../../hooks/use-module-models.js';
 import { useModuleHealth } from '../../hooks/use-module-health.js';
 import { ModuleHealthStrip } from './ModuleHealthStrip.js';
-import { AddInstanceForm } from './AddInstanceForm.js';
+import { AddInstanceForm, instanceSlugsOf } from './AddInstanceForm.js';
 import { ReasoningEffortSelect } from './ReasoningEffortSelect.js';
 import { ModuleReasoningEffortSelect } from './ModuleReasoningEffortSelect.js';
 import {
@@ -801,6 +801,11 @@ export function ModuleSettingsPanel({
         const baseName = isInstance
           ? (modules.find((m) => m.id === mod.baseModuleId)?.name ?? mod.baseModuleId)
           : undefined;
+        // Instances are always created FROM a base module, so an instance card's
+        // "add another instance" form targets that base, not the instance itself.
+        const instanceFormBase = isInstance
+          ? (modules.find((m) => m.id === mod.baseModuleId) ?? mod)
+          : mod;
         // Only fetch this module's live model list when it is globally enabled.
         // Cards are already filtered to globally-enabled modules, but keeping the
         // gate explicit means a not-enabled module never issues a `/models`
@@ -987,10 +992,9 @@ export function ModuleSettingsPanel({
                 </div>
                 {mode === 'global' && instanceFormFor === mod.id && (
                   <AddInstanceForm
-                    baseModule={
-                      isInstance ? (modules.find((m) => m.id === mod.baseModuleId) ?? mod) : mod
-                    }
+                    baseModule={instanceFormBase}
                     reservedSlugs={modules.filter((m) => !m.baseModuleId).map((m) => m.id)}
+                    takenSlugs={instanceSlugsOf(modules, instanceFormBase.id)}
                     unlocked={vaultUnlocked}
                     existingKeys={vaultKeys}
                     onEditVaultKey={onEditVaultKey}
