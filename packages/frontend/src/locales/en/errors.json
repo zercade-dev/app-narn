@@ -1,3 +1,11 @@
 {
-  "generic": "Something went wrong."
+  "generic": "Something went wrong.",
+  "http": {
+    "unauthorized": "You need to sign in again.",
+    "forbidden": "You don't have permission to do that.",
+    "vaultLocked": "Your vault is locked. Unlock it and try again.",
+    "rateLimited": "Too many requests — wait a moment and try again.",
+    "server": "The server ran into a problem. Try again in a moment.",
+    "offline": "Can't reach the server. Check your connection."
+  }
 }

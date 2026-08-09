@@ -65,7 +65,10 @@ export function ModuleModelSelector(props: Readonly<ModuleModelSelectorProps>): 
     enabled = true,
     confidenceContext,
   } = props;
-  const { models, loading, error, cachedAt, refetch } = useModuleModels(moduleId, enabled);
+  const { models, loading, error, errorDetail, cachedAt, refetch } = useModuleModels(
+    moduleId,
+    enabled,
+  );
   const { footprints, inspecting, progress, inspect } = useModelFootprints(moduleId);
   const { t } = useTranslation('config');
 
@@ -143,6 +146,8 @@ export function ModuleModelSelector(props: Readonly<ModuleModelSelectorProps>): 
         cachedAt={cachedAt}
         error={error}
         errorTestId="module-models-error"
+        errorDetail={errorDetail}
+        errorDetailTestId="module-models-error-detail"
       />
     </div>
   );

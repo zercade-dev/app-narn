@@ -20,8 +20,10 @@
   "clear": "Effacer les journaux",
   "expand": "Développer",
   "collapse": "Réduire",
-  "expandStack": "Développer la trace",
-  "collapseStack": "Réduire la trace",
   "vaultLocked": "Coffre verrouillé",
-  "vaultLockedUnlockHint": "Coffre verrouillé — cliquez pour déverrouiller"
+  "vaultLockedUnlockHint": "Coffre verrouillé — cliquez pour déverrouiller",
+  "repeatCount": "Répété {{count}} fois",
+  "showDetails": "Afficher les détails techniques",
+  "membersNotShown": "{{count}} entrée supplémentaire non affichée",
+  "membersNotShown_other": "{{count}} entrées supplémentaires non affichées"
 }

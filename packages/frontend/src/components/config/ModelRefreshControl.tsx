@@ -88,6 +88,13 @@ export interface ModelsStatusFooterProps {
   cachedAt: Date | null;
   error: string | null;
   errorTestId?: string;
+  /**
+   * Raw provider/network reason behind `error` (see {@link technicalDetail}),
+   * shown as a small, muted second line beneath the localized headline so a
+   * bad API key, a 503, and a dropped connection don't all read identically.
+   */
+  errorDetail?: string | null;
+  errorDetailTestId?: string;
 }
 
 /** "Updated Xm ago" line plus the fetch error line, hidden while loading. */
@@ -96,6 +103,8 @@ export function ModelsStatusFooter({
   cachedAt,
   error,
   errorTestId,
+  errorDetail,
+  errorDetailTestId,
 }: Readonly<ModelsStatusFooterProps>): React.JSX.Element | null {
   const { t } = useTranslation('config');
   if (loading) return null;
@@ -109,6 +118,11 @@ export function ModelsStatusFooter({
       {error && (
         <p className="text-xs text-destructive" role="alert" data-testid={errorTestId}>
           {error}
+        </p>
+      )}
+      {error && errorDetail && (
+        <p className="text-[11px] text-muted-foreground/70" data-testid={errorDetailTestId}>
+          {errorDetail}
         </p>
       )}
     </>

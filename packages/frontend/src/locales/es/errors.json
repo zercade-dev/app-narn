@@ -1,3 +1,11 @@
 {
-  "generic": "Algo salió mal."
+  "generic": "Algo salió mal.",
+  "http": {
+    "unauthorized": "Debes iniciar sesión de nuevo.",
+    "forbidden": "No tienes permiso para hacer eso.",
+    "vaultLocked": "Tu bóveda está bloqueada. Desbloquéala e inténtalo de nuevo.",
+    "rateLimited": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
+    "server": "El servidor tuvo un problema. Inténtalo de nuevo en un momento.",
+    "offline": "No se puede conectar con el servidor. Comprueba tu conexión."
+  }
 }
