@@ -93,8 +93,13 @@ Two acceptable fixes, in order of preference:
 
 **Counted nouns take a counter and no plural marking.** `category:countLabel_other`
 ("{{count}} entries") is "{{count}}개" or "{{count}}건" — pick one counter per object type
-and keep it. Do not add 들. `_one` and `_other` will be identical, which is correct, not a
-copy-paste error.
+and keep it. Do not add 들.
+
+**Korean has exactly one plural category: `other`.** A plural family therefore supplies
+`_other` and nothing else — never a `_one` copied across from English. A `_one` key can
+never resolve here, and the key-parity guard rejects any suffix that is not a plural
+category of the language, so copying English's pair is a red build, not a harmless
+duplicate.
 
 ## Locale-specific traps
 

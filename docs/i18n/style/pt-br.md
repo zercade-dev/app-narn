@@ -86,7 +86,12 @@ the closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}
 turned off"; the full string carries three tokens) becomes "o módulo {{module}} está
 desativado".
 
-Plurals map one to one onto English `_one` / `_other`.
+Plurals map one to one onto English `_one` / `_other`, with one exception: CLDR gives
+Portuguese a third category, `many`, which fires only on whole millions (1 000 000,
+2 000 000, …). The shipped files omit it and the parity guard only *reports* the gap rather
+than failing on it, but a count that can plausibly reach a million should carry `_many` as
+well; `LOCALE_PARITY_STRICT=pt-br` turns the omission into a failure for anyone completing
+the locale.
 
 ## Locale-specific traps
 

@@ -86,8 +86,13 @@ so a token can sit almost anywhere. The closing clause of
 string carries three tokens) becomes "Modul {{module}} dinonaktifkan".
 
 **No plural marking after a numeral.** `category:countLabel_other` ("{{count}} entries") is
-"{{count}} entri" — never "entri-entri". The `_one` and `_other` strings will usually be
-identical, which is correct, not a copy-paste error.
+"{{count}} entri" — never "entri-entri".
+
+**Indonesian has exactly one plural category: `other`.** A plural family therefore supplies
+`_other` and nothing else — never a `_one` copied across from English. A `_one` key can
+never resolve here, and the key-parity guard rejects any suffix that is not a plural
+category of the language, so copying English's pair is a red build, not a harmless
+duplicate.
 
 ## Locale-specific traps
 

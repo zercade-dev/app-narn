@@ -92,8 +92,13 @@ string carries three tokens) becomes 「{{module}}モジュールが無効にな
 **Counted nouns take a counter and no plural marking.** `category:countLabel_other`
 ("{{count}} entries") is 「{{count}}件」 — pick the counter that fits the object (件 for
 records and entries, 個 for generic items, 言語 for languages) and use the same counter for
-the same object everywhere. `_one` and `_other` will be identical, which is correct, not a
-copy-paste error.
+the same object everywhere.
+
+**Japanese has exactly one plural category: `other`.** A plural family therefore supplies
+`_other` and nothing else — never a `_one` copied across from English. A `_one` key can
+never resolve here, and the key-parity guard rejects any suffix that is not a plural
+category of the language, so copying English's pair is a red build, not a harmless
+duplicate.
 
 ## Locale-specific traps
 

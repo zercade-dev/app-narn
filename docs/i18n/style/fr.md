@@ -96,6 +96,12 @@ Two French-specific hazards:
 Plurals map one to one onto English `_one` / `_other`, but note that French treats 0 as
 singular ("0 ligne sélectionnée"), which the `_one` form must cover.
 
+One exception to that mapping: CLDR gives French a third category, `many`, which fires only
+on whole millions (1 000 000, 2 000 000, …). The shipped files omit it and the parity guard
+only *reports* the gap rather than failing on it, but a count that can plausibly reach a
+million should carry `_many` as well; `LOCALE_PARITY_STRICT=fr` turns the omission into a
+failure for anyone completing the locale.
+
 ## Locale-specific traps
 
 - **"Modèle" is a live collision, and the shipped file is on the wrong side of it.**

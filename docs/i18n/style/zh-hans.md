@@ -96,8 +96,13 @@ turned off"; the full string carries three tokens) becomes "{{module}} 模块已
 **Counted nouns take a measure word and no plural marking.**
 `category:countLabel_other` ("{{count}} entries") is "{{count}} 个条目" — the 个 is not
 optional. Pick one measure word per object type (个 for entries, 条 for records, 项 for
-items) and keep it. `_one` and `_other` will be identical, which is correct, not a
-copy-paste error. Do not add 们.
+items) and keep it. Do not add 们.
+
+**Chinese has exactly one plural category: `other`.** A plural family therefore supplies
+`_other` and nothing else — never a `_one` copied across from English. A `_one` key can
+never resolve here, and the key-parity guard rejects any suffix that is not a plural
+category of the language, so copying English's pair is a red build, not a harmless
+duplicate.
 
 ## Locale-specific traps
 

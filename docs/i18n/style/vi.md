@@ -89,8 +89,13 @@ turned off"; the full string carries three tokens) becomes "Mô-đun {{module}} 
 depends on the value, which is unknown. Put the real noun first and classify that instead.
 
 **No plural marking after a numeral.** `category:countLabel_other` ("{{count}} entries") is
-"{{count}} mục" — never "các mục" or "những mục" after a number. `_one` and `_other` will
-usually be identical, which is correct, not a copy-paste error.
+"{{count}} mục" — never "các mục" or "những mục" after a number.
+
+**Vietnamese has exactly one plural category: `other`.** A plural family therefore supplies
+`_other` and nothing else — never a `_one` copied across from English. A `_one` key can
+never resolve here, and the key-parity guard rejects any suffix that is not a plural
+category of the language, so copying English's pair is a red build, not a harmless
+duplicate.
 
 ## Locale-specific traps
 

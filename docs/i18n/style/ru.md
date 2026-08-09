@@ -93,9 +93,13 @@ plural keys below.
 **Plural forms need attention before the backfill.** Russian selects between _one_, _few_,
 _many_ and _other_, but the English source ships only `_one` and `_other`. A grammatically
 correct Russian file therefore needs `_few` and `_many` variants that have no English
-counterpart. Confirm with the maintainers that adding those keys is acceptable to the
-key-parity check before you start — do not silently ship the `_other` form for 2–4, and do
-not silently drop the extra forms.
+counterpart. **Those keys are expected, not merely tolerated.** The key-parity guard
+compares plural families by their base key, not by their exact suffixes, so the extra
+Russian forms are the correct shape and need no permission; conversely a suffix that is not
+one of Russian's four categories is a hard failure. Supply all four — do not ship the
+`_other` form for 2–4, and do not drop the extra forms. `LOCALE_PARITY_STRICT=ru` promotes
+a missing category from a report to a failure, and is the setting to run the backfill
+under.
 
 ## Locale-specific traps
 

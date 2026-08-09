@@ -113,6 +113,23 @@ Two things it does **not** do, both deliberate:
 Match the surrounding code rather than introducing a new style, and keep a pull
 request to one subject.
 
+## Translations
+
+The interface strings live in `packages/frontend/src/locales/<locale>/`, with `en` as the
+source. Two documents exist so that separate people, and separate pull requests, arrive at
+the same wording:
+
+- [`docs/i18n/terminology.md`](docs/i18n/terminology.md) fixes the domain vocabulary —
+  what each term means in this app, what it must not be confused with, and the rendering
+  already agreed for each locale. If your locale's cell for a term is still empty, you are
+  the first to reach it: decide it and fill it in, in the same pull request.
+- [`docs/i18n/style/`](docs/i18n/style) holds one style guide per target locale — register,
+  casing, punctuation, numbers, length discipline, placeholder handling and the traps
+  specific to that language.
+
+Read both before translating. A change to an English string should update the other locales
+in the same pull request; `{{token}}` placeholders are identifiers and are never translated.
+
 ## Opening an issue, and what the labels mean
 
 Please use one of the [issue templates](https://github.com/zercade-dev/app-narn/issues/new/choose)

@@ -93,7 +93,12 @@ turned off"; the full string carries three tokens) becomes "el módulo {{module}
 desactivado".
 
 Plurals: Spanish uses the same `_one` / `_other` shape as English, so
-`strings:bulk.rowsSelected_one` / `_other` map one to one.
+`strings:bulk.rowsSelected_one` / `_other` map one to one — with one exception. CLDR gives
+Spanish a third category, `many`, which fires only on whole millions (1 000 000, 2 000 000,
+…). The shipped files omit it and the parity guard only *reports* the gap rather than
+failing on it, but a count that can plausibly reach a million should carry `_many` as well;
+`LOCALE_PARITY_STRICT=es` turns the omission into a failure for anyone completing the
+locale.
 
 ## Locale-specific traps
 

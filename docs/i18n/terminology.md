@@ -75,7 +75,9 @@ Three English details to know about:
   a stale English name, not a second tab. Use your rendering of **Orphans**.
 - The tab now labelled "Translations" was once "Multi-language Text". Several strings
   still said so until an English source review retired the name; if you meet that
-  phrasing anywhere, it is stale — use **Translations**.
+  phrasing in a UI string, it is stale — use **Translations**. Published changelog
+  entries are the exception: they are frozen release history and keep the name they
+  shipped with.
 - The Activity **page** title is deliberately longer than its tab label:
   `strings:runs.title` is "Translation Activity" where `strings:tabs.runs` is just
   "Activity". Keep that relationship — expand the page title, do not shorten it to
@@ -204,7 +206,7 @@ or search the file for the word.
 
 **Example:** `strings:tabs.strings` — "Translations"
 
-**Not:** target, target text, localization, version, output, result. The tab was formerly labelled "Multi-language Text"; that name is dead in English and must not be revived in any locale.
+**Not:** target, target text, localization, version, output, result. The tab was formerly labelled "Multi-language Text"; that name is dead in the live UI and must not be revived in any locale. The one place it legitimately survives is the shipped changelog entries that announced those releases (`guides/en/changelog/v1.9.17.md` and four others) — release history is frozen, so leave it exactly as it stands there and do not "correct" it.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
@@ -1138,6 +1140,33 @@ or search the file for the word.
 | --- | --- | --- |
 | es | término | Masculine. Shortened to "término" alone inside the Glossary tab, exactly as English shortens "glossary term" to "term". Never "entrada", which is reserved for _entry_. |
 | fr | terme | Masculine. Shortened to "terme" alone inside the Glossary tab. Never "entrée", which is reserved for _entry_. |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | | |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### match
+
+**Means here:** one place where a glossary term was found in an entry's source text. The Glossary tab's Matches panel lists them, counts them, filters them by term, and compares entries with and without a glossary assigned. The same word is also the verb behind search results and routing conditions ("No models match your search", "Must match"); keep the noun and the verb on the same root wherever the language allows it.
+
+**Part of speech in UI:** noun, usually plural ("{{count}} matches", "No matches found."), and a verb in the routing and search strings.
+
+**Example:** `glossary:matchesPanel` — "Matches"
+
+**Not:** hit, result, occurrence, finding, suggestion — and never the word you chose for **glossary term**: a term is what is searched for, a match is where it turned up.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | coincidencia | Feminine. Plural "coincidencias" throughout the Matches panel ("{{count}} coincidencias", "No se encontraron coincidencias.", "Aplicar coincidencias"). The verb is "coincidir" (`config:noMatches` — "Ningún modelo coincide con tu búsqueda"). |
+| fr | correspondance | Feminine. Plural "correspondances" throughout the Matches panel ("{{count}} correspondances", "Aucune correspondance trouvée.", "Appliquer les correspondances"). The verb is "correspondre" (`config:noMatches` — "Aucun modèle ne correspond à votre recherche"). |
 | de | | |
 | it | | |
 | pt-br | | |
