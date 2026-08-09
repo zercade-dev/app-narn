@@ -33,21 +33,53 @@ established localized form, and record that decision in its row below.
 
 ## Surface names
 
-Tab and page labels are cross-referenced by name in other namespaces — "…from the
-Translations tab", "Track it in the Activity tab", "restore it from the Backup tab". These
-need no table of their own, because each has exactly one key that defines it. The rule is:
+A surface — a tab, a page, a tool — does **not** have one key. Its name is written out
+two or three times, in different namespaces: the tab label, the page or section title
+the tab opens, and sometimes a sidebar item or a guide topic. Twelve of the seventeen
+tab labels are duplicated verbatim at another key today. On top of that, other strings
+name the surface inside a sentence — "…from the Translations tab", "Track it in the
+Activity tab", "restore it from the Backup tab".
 
-> Translate the label at its own key, then reuse **that exact wording** every time prose
-> mentions the surface. Never paraphrase a tab name inside a sentence.
+> **The rule:** every key that names the same surface gets the **same rendering**, and
+> prose that mentions the surface repeats that rendering verbatim. Translating the tab
+> label and its page title differently is the single highest-frequency drift risk in
+> this app, because the two are never on screen at the same moment.
 
-The defining keys are `strings:tabs.*` for the per-project tabs and `sidebar:*` for the
-workspace-level destinations. Two English quirks to know about:
+The names to keep in step (tab label first, then its other homes):
+
+| Surface | Keys that must agree |
+| --- | --- |
+| Orphans | `strings:tabs.orphans` · `orphans:title` |
+| Glossary | `strings:tabs.glossary` · `glossary:title` |
+| Sharing | `strings:tabs.sharing` · `collab:sharing.pageTitle` |
+| Stage details | `strings:tabs` (stage-details) · `stage-details:title` |
+| Text Styler | `strings:tabs` (color-text) · `colorText:title` · `sidebar:colorText` |
+| Translation AI review | `strings:tabs` (review-translation-ai) · `review:translationAi.title` |
+| Source AI review | `strings:tabs` (review-source-ai) · `review:sourceAi.configTitle` |
+| Activity | `strings:tabs.runs` · `strings:guide.topicActivity` |
+| Quality | `strings:tabs.quality` · `strings:guide.topicQuality` |
+
+(Where a key path contains a hyphen it is given as namespace plus the sub-key in
+brackets, so the citation checker does not read it as a truncated key.)
+
+The guide topics under `strings:guide` are a third home for most of these names, and
+nearly all of them append the word "Tab" — `strings:guide.topicGlossary` is "Glossary
+Tab", `strings:guide.topicMultiLanguage` is "Translations Tab". Translate the surface
+name identically there and add your locale's word for "tab"; do not take the chance to
+rename the surface. (`topicActivity` and `topicQuality` have no "Tab" suffix — they are
+the exceptions, listed in the table above.)
+
+Three English details to know about:
 
 - The Orphans tab is called the "Relink tab" by `config:fullReplaceOrphanNotice`. That is
   a stale English name, not a second tab. Use your rendering of **Orphans**.
 - The tab now labelled "Translations" was once "Multi-language Text". Several strings
   still said so until an English source review retired the name; if you meet that
   phrasing anywhere, it is stale — use **Translations**.
+- The Activity **page** title is deliberately longer than its tab label:
+  `strings:runs.title` is "Translation Activity" where `strings:tabs.runs` is just
+  "Activity". Keep that relationship — expand the page title, do not shorten it to
+  match, and do not invent a third wording.
 
 ## Terms
 
@@ -554,7 +586,7 @@ or search the file for the word.
 
 **Example:** `strings:runs.judgeBadge` — "AI review"
 
-**Not:** AI check, AI control, AI verification, proofreading, correction, revision, audit. Reserve your "check" word for LQA checks, which are deterministic and unrelated.
+**Not:** AI check, AI control, AI verification, proofreading, correction, revision, audit. Reserve your "check" word for LQA checks: those are deterministic rules, this is a model's opinion. The two systems do meet — a judge's issues are filed alongside the LQA results for the same entry — but they are never the same thing to a reader, so they must not share a word.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
@@ -602,7 +634,7 @@ or search the file for the word.
 
 #### source review
 
-**Means here:** the AI pass that inspects the **source text** for typos, grammar, terminology and clarity problems. Report-only: it never writes a translation, and applying a finding edits the source.
+**Means here:** the AI pass that inspects the **source text** for problems in five independently toggleable categories: typo, grammar, terminology, clarity and unsafe wording. Report-only: it never writes a translation, and applying its suggestion edits the source.
 
 **Part of speech in UI:** noun phrase (also the tab "Source AI review").
 
@@ -629,9 +661,9 @@ or search the file for the word.
 
 #### finding
 
-**Means here:** one issue the source review reports against one entry, carrying a type (typo, grammar, terminology, clarity) and a suggested source rewrite.
+**Means here:** one issue the source review reports against one entry, carrying a type — typo, grammar, terminology, clarity or unsafe — and a description of what is wrong. An entry can carry several findings; the corrected source text is **not** attached to each one. There is at most ONE suggestion per entry, a single unified rewrite of the whole source that addresses all of its findings together.
 
-**Part of speech in UI:** noun, usually plural.
+**Part of speech in UI:** noun, usually plural. The five type labels live at `review:sourceAi.findingTypo`, `findingGrammar`, `findingTerminology`, `findingClarity` and `review:sourceAi.findingUnsafe` — translate all five, and keep them distinct from the LQA check names.
 
 **Example:** `review:sourceAi.findingsTitle` — "Findings"
 
@@ -656,7 +688,7 @@ or search the file for the word.
 
 #### suggestion
 
-**Means here:** a proposed change the user reviews and then applies or discards: a judge's rewritten translation, a generated glossary term, a proposed category assignment.
+**Means here:** a proposed change the user reviews and then applies or discards: a judge's rewritten translation, a source review's corrected source text, a generated glossary term, a proposed category assignment.
 
 **Part of speech in UI:** noun. The action on it is "apply" (or "discard"), not "accept" or "save".
 
@@ -712,7 +744,7 @@ or search the file for the word.
 
 #### module
 
-**Means here:** one translation backend the app can call — `openai`, `deepl`, `pseudo` and the rest. It is what a routing rule points at and what every "choose what to translate with" picker selects.
+**Means here:** one translation backend the app can call — `openai`, `deepl`, `pseudo` and the rest. It is what every "choose what to translate with" picker selects and what a routing rule points at. In practice a rule stores a *named instance* of a module (see below) for the modules that support instances, and the bare module id only for `deepl` and `pseudo`, which cannot have instances. The user-facing word for all of it is still **module**.
 
 **Part of speech in UI:** noun. **Canonical term** for the thing you pick before an AI call.
 
@@ -739,13 +771,13 @@ or search the file for the word.
 
 #### module instance
 
-**Means here:** a named configuration of a base module, identified as `<base>:<slug>` (for example `openai:default`), with its own credentials, model and settings. One base module can have several instances, and pickers offer instances rather than bare base modules.
+**Means here:** a named configuration of a base module, identified as `<base>:<slug>` (for example `openai:default`), with its own credentials, model and settings. One base module can have several. A picker offers named instances, plus modules that cannot have instances at all (`deepl`, `pseudo`), plus a base module that is still instance-less; what it does not offer is a base module that already has instances, because its configuration has moved into them.
 
 **Part of speech in UI:** noun phrase; often shortened to "instance" once "module" is established in the sentence.
 
 **Example:** `config:instances.formTitle` — "New instance of {{base}}"
 
-**Not:** copy, clone, profile, account, connection, occurrence, configuration. The instance id itself (`generic-ai:my-ollama`) and the word "slug" in `config:instances.slugLabel` refer to literal identifiers and are never translated.
+**Not:** copy, clone, profile, account, connection, occurrence, configuration. The instance id itself (`generic-ai:my-ollama`) is a literal identifier and is never translated. English shows the user the word "slug" in exactly one string, `config:instances.slugReserved` — there it names the second half of that identifier, not a UI concept, so translate it as the identifier fragment it is (the field itself is labelled "Instance id").
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
@@ -930,7 +962,7 @@ or search the file for the word.
 
 #### LQA
 
-**Means here:** Linguistic Quality Assurance: the deterministic check suite that runs on every translation. Nothing to do with the AI review.
+**Means here:** Linguistic Quality Assurance: the deterministic check suite that runs on every translation. It is a separate system from the AI review — rules, not a model judgement — though the judge does file its issues into the same per-entry LQA results, always at warning severity, so an AI opinion can never fail the gate.
 
 **Part of speech in UI:** acronym, used attributively — "LQA checks", "LQA gate", "LQA results", "LQA retries".
 
@@ -1121,7 +1153,7 @@ or search the file for the word.
 
 #### translation memory
 
-**Means here:** the store of previously approved translations, reused automatically for identical source text across every project. An industry concept (TM), with its own workspace page and reuse policy.
+**Means here:** the store of approved translations, reused automatically for identical source text across every project. Approving is the only way a translation gets in — nothing a run produces is stored here until a person approves it (`config:tm.browserEmpty` states this to the user). Whether a stored translation is then reused, and how exact the match must be, is the project's memory policy. An industry concept (TM), with its own workspace page.
 
 **Part of speech in UI:** noun phrase.
 
@@ -1148,7 +1180,7 @@ or search the file for the word.
 
 #### approve
 
-**Means here:** to store a translation into translation memory so it can be reused later. It is a promotion, not an edit.
+**Means here:** to store a translation into translation memory so it can be reused later, and mark it reviewed at the same time. It is a promotion, not an edit — the text does not change. This is the only route into translation memory, which is why the word matters: if your rendering reads as "confirm" or "save", the user has no way to tell this action from the three around it.
 
 **Part of speech in UI:** verb ("Approve to memory", "Approved {{count}} translations to memory").
 
@@ -1231,7 +1263,7 @@ or search the file for the word.
 
 #### orphan
 
-**Means here:** an entry that is no longer present in the latest imported CSV. It keeps its translations, is excluded from AI runs, and waits in the Orphans tab to be relinked or deleted.
+**Means here:** an entry that a **full-replace** CSV import found missing from the imported file. It keeps its translations, is excluded from every AI run, is hidden from the strings list, and waits in the Orphans tab to be relinked or deleted. Only a full-replace import orphans anything — a merge import never does — and an entry stops being an orphan automatically if a later import (in either mode) carries it again.
 
 **Part of speech in UI:** noun; also "orphaned" as an adjective ("{{count}} orphaned", "an orphaned string").
 
