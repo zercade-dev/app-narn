@@ -135,7 +135,14 @@
     "selectPage": "Sélectionner toutes les lignes de cette page",
     "selectAll": "Tout sélectionner ({{count}})",
     "selectRow": "Sélectionner la ligne",
-    "run": "Exécution"
+    "run": "Exécution",
+    "cellRetranslateAria": "Retraduire {{language}}",
+    "cellUndoAria": "Versions précédentes pour {{language}}",
+    "cellMarkReviewedAria": "Marquer la traduction {{language}} comme révisée",
+    "cellClearAria": "Effacer la traduction pour {{language}}",
+    "cellEditAria": "Modifier la traduction pour {{language}}",
+    "cellEditTooltip": "Modifier · Enter · Esc pour annuler",
+    "cellEditReviewedTooltip": "Révisé — appuyez sur Enter pour modifier"
   },
   "shortcuts": {
     "title": "Raccourcis clavier",

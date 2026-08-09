@@ -135,7 +135,14 @@
     "selectPage": "Select all rows on this page",
     "selectAll": "Select all {{count}}",
     "selectRow": "Select row",
-    "run": "Run"
+    "run": "Run",
+    "cellRetranslateAria": "Re-translate {{language}}",
+    "cellUndoAria": "Previous versions for {{language}}",
+    "cellMarkReviewedAria": "Mark {{language}} translation as reviewed",
+    "cellClearAria": "Clear translation for {{language}}",
+    "cellEditAria": "Edit translation for {{language}}",
+    "cellEditTooltip": "Edit · Enter · Esc to cancel",
+    "cellEditReviewedTooltip": "Reviewed — press Enter to edit"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
