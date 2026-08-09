@@ -1,6 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { deriveInstanceCredentialKey, isValidInstanceSlug } from '@zercade-dev/narn-shared';
+import {
+  deriveInstanceCredentialKey,
+  isValidInstanceSlug,
+  parseModuleInstanceId,
+} from '@zercade-dev/narn-shared';
 import { promptFirstMissingCredential } from './credential-prompt.js';
 import { apiRequest } from '../../hooks/use-api.js';
 import { resolveDefaultReasoningEffort } from '../../lib/default-reasoning-effort.js';
@@ -15,6 +19,22 @@ export interface AddInstanceBaseModule {
   name: string;
   /** The base module's declared credential vault keys (derived per instance). */
   requiredEnvVars: string[];
+}
+
+/**
+ * Slugs already used by instances of `baseModuleId`, read off a `GET /api/modules`
+ * listing — which includes every registered instance regardless of whether it is
+ * enabled, so it is a complete picture. Feeds {@link AddInstanceForm}'s
+ * `takenSlugs`.
+ */
+export function instanceSlugsOf(
+  modules: readonly { id: string; baseModuleId?: string }[],
+  baseModuleId: string,
+): string[] {
+  return modules
+    .filter((m) => m.baseModuleId === baseModuleId)
+    .map((m) => parseModuleInstanceId(m.id)?.slug)
+    .filter((s): s is string => s !== undefined);
 }
 
 /** Fallback slug stem used when the base module id is not itself slug-shaped. */
