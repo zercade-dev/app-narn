@@ -10,13 +10,17 @@
  * somewhere downstream.
  *
  * Severity split, matching the rules module:
- *   FAIL   key parity, value integrity, and the self-checks that prove the run
- *          actually compared something.
- *   REPORT plural-category coverage gaps and legacy i18next v3 `_plural` keys —
- *          i18next falls back to `_other` or the bare key for both, and today's
- *          shipped files carry them. `LOCALE_PARITY_STRICT` promotes the
- *          coverage gaps to failures for a chosen locale, so a backfill can hold
- *          ITS locale to the full category set without reddening the rest.
+ *   FAIL   key parity, value integrity, the self-checks that prove the run
+ *          actually compared something, and a plural category the locale does
+ *          not supply with no bare `key` sibling to catch it — that renders
+ *          ENGLISH mid-sentence, measured, not a grammar nicety. See
+ *          missingPluralCategories() in the rules module.
+ *   REPORT a coverage gap a bare `key` sibling rescues, a gap in a locale
+ *          grandfathered for that category (es/fr `many` — exact millions
+ *          only), and the legacy i18next v3 `_plural` inventory.
+ *          `LOCALE_PARITY_STRICT` promotes ALL of a locale's gaps, including
+ *          the forgiven ones, so a backfill can hold ITS locale to the full
+ *          category set without reddening the rest.
  *
  * A summary line is printed even on success, including how many values were
  * compared: a green run that compared nothing is the failure mode this whole
@@ -30,6 +34,7 @@ import {
   collectCoverageGaps,
   collectLegacyPluralKeys,
   doNotTranslateOffenders,
+  enforcedCoverageGapFamilies,
   formatCoverageGap,
   identicalValueOffenders,
   invalidLeafValues,
@@ -148,16 +153,17 @@ fail(
 );
 fail('IDENTICAL_ALLOWLIST entries needing a real reason, not a word', thinAllowlistReasons());
 
-// --- Reported-only findings ------------------------------------------------
+// --- Plural-category coverage ----------------------------------------------
 const coverageGaps = collectCoverageGaps(locales);
 const legacyPlurals = collectLegacyPluralKeys(locales);
 
 // Headlines only: the family lists run to hundreds of lines on today's files
-// and would bury the verdict. `LOCALE_PARITY_STRICT` prints them in full,
-// because there they are a failure someone has to act on.
+// and would bury the verdict. The enforced subset is printed in full below,
+// because those are a failure someone has to act on.
 if (coverageGaps.length > 0) {
   console.log(
-    `check-locales: NOTE — plural-category coverage gaps (non-fatal, i18next falls back to "_other"):`,
+    `check-locales: NOTE — plural-category coverage (a gap with no bare "key" sibling ` +
+      `renders English for those counts):`,
   );
   console.log(coverageGaps.map(summarizeCoverageGap).join('\n'));
 }
@@ -181,20 +187,28 @@ fail(
     .map((gap) => `${gap.locale}: "_${gap.category}"`),
 );
 
-// A dead `_plural` key is tolerable only because something else still renders:
-// the bare key, or `_other`. With neither, the UI shows a raw i18next key.
+// A dead `_plural` key is tolerable only if a bare `key` sibling still renders.
+// Without one the UI shows English, or a raw key with no fallback language.
 fail(
-  'legacy "_plural" families with no bare "key" and no "_other" fallback (they render a raw key)',
+  'legacy "_plural" families with no bare "key" sibling (nothing of their own renders)',
   legacyPlurals.withoutFallback,
 );
 
-// Opt-in only, so the check stays green on today's shipped files while a
-// backfill can hold ITS locale to the language's full category set.
-const enforcedGaps = coverageGaps.filter((gap) => isStrictFor(gap.locale));
-fail(
-  `plural-category gaps, promoted to failures by LOCALE_PARITY_STRICT="${STRICT_ENV}"`,
-  enforcedGaps.map(formatCoverageGap),
-);
+// A missing plural category is a FAILURE by default. Only three things forgive
+// one, all in enforcedCoverageGapFamilies(): a bare `key` sibling that catches
+// it, a grandfathered locale+category, and LOCALE_PARITY_STRICT going the other
+// way and forgiving nothing.
+for (const gap of coverageGaps) {
+  const enforced = enforcedCoverageGapFamilies(gap);
+  if (enforced.length === 0) continue;
+  fail(
+    `${gap.locale}: ${enforced.length} plural ${enforced.length === 1 ? 'family' : 'families'} ` +
+      `do not supply "_${gap.category}", and have no bare "key" sibling — those counts render ` +
+      `English` +
+      (isStrictFor(gap.locale) ? ` [LOCALE_PARITY_STRICT="${STRICT_ENV}"]` : ''),
+    formatCoverageGap(gap, enforced).split('\n'),
+  );
+}
 
 // --- Verdict ---------------------------------------------------------------
 const namespaceCount = reference.size;

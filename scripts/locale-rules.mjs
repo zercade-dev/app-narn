@@ -141,9 +141,12 @@ export function splitPluralKey(key) {
 // ---------------------------------------------------------------------------
 
 /**
- * `LOCALE_PARITY_STRICT` promotes the reported-only plural-coverage gaps to
- * hard failures. Unset (the default) keeps the check green on today's shipped
- * files, which omit `_many` on 38 of 41 fr/es families. Set it to `1`, `true`
+ * `LOCALE_PARITY_STRICT` promotes EVERY plural-coverage gap in a locale to a
+ * hard failure, including the ones the default severity forgives — families a
+ * bare `key` sibling rescues, and the grandfathered es/fr `many`. It is the
+ * tool for a backfill holding its own locale to the language's complete
+ * category set; it is not what makes a genuinely missing category fail, which
+ * is now the default (see enforcedCoverageGapFamilies). Set it to `1`, `true`
  * or `all` for every locale, or to a comma-separated locale list
  * (`LOCALE_PARITY_STRICT=ru,pt-br`) to hold just the locale being backfilled
  * to its language's full category set.
@@ -225,7 +228,7 @@ export function classifyKeys(keys) {
  * resolve the bare key only. The reverse is not allowed: a base the reference
  * pluralises must stay a plural family everywhere.
  *
- * That reverse case is worth spelling out, because 26 of the 41 English plural
+ * That reverse case is worth spelling out, because 29 of the 41 English plural
  * families have no bare sibling and a translator will hit it: adding a bare
  * `b` where the reference has only `b_one`/`b_other` is reported as `extra`.
  * i18next would resolve such a key (the bare form is its last fallback), so
@@ -310,10 +313,17 @@ export function pluralCategoriesFor(locale) {
  *    Japanese (categories ["other"]), where the key is dead weight that can
  *    never resolve. `zero` is exempt (see ALWAYS_LEGAL_SUFFIX) and the legacy
  *    `plural` is reported rather than failed (see LEGACY_PLURAL_SUFFIX).
- *  - Every family must supply `other` — the one category every language has,
- *    and i18next's last-resort plural form. Families carrying ONLY the legacy
- *    `_plural` suffix are exempt: they are the three pre-existing v3 keys, and
- *    failing them here would go red on already-shipped content.
+ *  - Every family must supply `other`. It is the one category every language
+ *    has, so a family without it is guaranteed to have counts it cannot render
+ *    in this language.
+ *
+ * The legacy `_plural`-only carve-out that used to sit on the second rule is
+ * GONE. It exempted exactly three pre-existing v3 keys from the mandatory
+ * `_other`; all three have since been converted, so the carve-out had no
+ * subjects left and its only remaining effect would have been to let a NEW
+ * `_plural`-only family through with a report instead of a failure. `_plural`
+ * is never looked up under the v4 JSON format, so such a family renders
+ * nothing of its own for any count — exactly what this rule exists to stop.
  */
 export function pluralFamilyErrors(base, suffixes, categories) {
   const errors = [];
@@ -329,11 +339,10 @@ export function pluralFamilyErrors(base, suffixes, categories) {
     }
   }
 
-  const onlyLegacy = supplied.every((suffix) => suffix === LEGACY_PLURAL_SUFFIX);
-  if (!suffixes.has('other') && !onlyLegacy) {
+  if (!suffixes.has('other')) {
     errors.push(
-      `${base}: no "_other" form — every language has the "other" category and i18next ` +
-        `falls back to it`,
+      `${base}: no "_other" form — every language has the "other" category, so some ` +
+        `counts have nothing to resolve to in this language`,
     );
   }
 
@@ -341,13 +350,83 @@ export function pluralFamilyErrors(base, suffixes, categories) {
 }
 
 /**
- * The REPORTED-ONLY rule: categories the language has that this family does
- * not supply. Deliberately not a failure — i18next falls back to `other`, and
- * the shipped fr/es files already omit `_many` on every family, so failing
- * here would go red before any translation work begins.
+ * Categories the language has that this family does not supply.
+ *
+ * THIS USED TO BE DOCUMENTED AS HARMLESS, ON A FALSE PREMISE. The old comment
+ * — here and on every caller — said "not a failure, i18next falls back to
+ * `other`". It does not. There is no intra-language fallback between plural
+ * categories: for a count, i18next resolves the category, then looks for
+ * `key_<category>` and the bare `key` IN THIS LANGUAGE, and if it finds
+ * neither it moves to the next language in the fallback chain — English.
+ *
+ * Measured against the installed i18next 26, `ru` supplying only `_one`/`_other`
+ * with `fallbackLng: 'en'`:
+ *
+ *     count=1  -> "1 строка"   (ru, category one)
+ *     count=2  -> "2 rows"     <- ENGLISH (category few, not supplied)
+ *     count=5  -> "5 rows"     <- ENGLISH (category many, not supplied)
+ *     count=21 -> "21 строка"  (ru, category one)
+ *
+ * Russian `few` covers 2-4 and `many` covers 5-20, so that is most of the
+ * counts a UI ever shows, rendered in English mid-sentence. With no fallback
+ * language configured it is worse still — the raw key.
+ *
+ * The ONE thing that does rescue it is a bare `key` sibling in the same locale,
+ * because the bare key IS tried before the language moves on. Verified the same
+ * way: with a ru bare sibling present, count=2 renders the ru bare string, not
+ * English. That is why gaps are split by `coveredByBareKey` below, and why the
+ * split decides severity rather than decorating the message.
  */
 export function missingPluralCategories(suffixes, categories) {
   return [...categories].filter((category) => !suffixes.has(category)).sort();
+}
+
+/**
+ * Locales excused from the missing-category rule, per category, with the reason
+ * it is tolerable for THEM and would not be in general.
+ *
+ * This list is deliberately tiny and deliberately category-scoped. The reason
+ * below is a fact about `many` in these two languages and nothing else — it
+ * would be false for the same locales' `one`, and false for `many` in half the
+ * languages queued behind them — so a locale-wide excuse would be justified by
+ * an argument that does not cover it.
+ *
+ * Any locale NOT listed here fails on an uncovered gap. That is the point: the
+ * languages arriving next include ru/pl/cs/ar, where the missing categories are
+ * everyday counts, and they must fail loudly rather than ship English
+ * mid-sentence the way es/fr's `many` never will.
+ */
+export const COVERAGE_GAP_GRANDFATHER = {
+  es: {
+    many:
+      'In es, "many" selects ONLY exact millions (1000000, 2000000, 3000000 — verified ' +
+      'via Intl.PluralRules; 1500000 is "other"). A count no UI here reaches, so the ' +
+      'gap on all 41 families is real but unreachable. This is NOT the situation in ' +
+      'ru/pl/cs/ar, where "many" covers ordinary counts.',
+  },
+  fr: {
+    many: 'Same as es: "many" in fr is exact millions only, so the gap is unreachable.',
+  },
+};
+
+/**
+ * The families in a coverage gap that are a FAILURE, as opposed to a note.
+ *
+ * Three rules, in order:
+ *  1. `LOCALE_PARITY_STRICT` for this locale — every family in the gap counts,
+ *     including bare-covered ones. The override is for a backfill holding its
+ *     own locale to the full category set, so it deliberately ignores both
+ *     mitigations below.
+ *  2. Grandfathered locale+category — nothing counts. See the list above.
+ *  3. Otherwise: the families with NO bare `key` sibling. Those are the ones
+ *     that render English (or a raw key); a family with a bare sibling renders
+ *     this locale's own text, which is a grammar imperfection rather than an
+ *     untranslated string, and is not worth failing a build over.
+ */
+export function enforcedCoverageGapFamilies(gap, strictEnv = STRICT_ENV) {
+  if (isStrictFor(gap.locale, strictEnv)) return gap.families;
+  if (COVERAGE_GAP_GRANDFATHER[gap.locale]?.[gap.category]) return [];
+  return gap.uncovered;
 }
 
 /**
@@ -413,22 +492,27 @@ export function localePluralErrors(locales, locale) {
 }
 
 // ---------------------------------------------------------------------------
-// Reported-only parity findings
+// Plural-category coverage
 // ---------------------------------------------------------------------------
 
 /**
- * Plural categories each locale's language has that its families do not
- * supply. Not a failure — i18next falls back to `other` — so this is the
- * report described on missingPluralCategories(). Each entry is
- * `{ locale, category, families, coveredByBareKey }`, where `families` are
- * `namespace:base` ids and `coveredByBareKey` counts how many of them have a
- * bare `key` sibling to fall back on.
+ * Plural categories each locale's language has that its families do not supply.
+ *
+ * Each entry is `{ locale, category, families, uncovered, coveredByBareKey }`:
+ * `families` are `namespace:base` ids, `uncovered` is the subset with NO bare
+ * `key` sibling — the ones that actually render English — and
+ * `coveredByBareKey` is how many of the rest do have one.
+ *
+ * The split is the whole point. See missingPluralCategories() for the measured
+ * behaviour: a missing category falls through to the next LANGUAGE, not to this
+ * language's `_other`, unless a bare sibling catches it first.
+ * enforcedCoverageGapFamilies() turns the split into a severity.
  */
 export function collectCoverageGaps(locales) {
   const gaps = [];
   for (const locale of [...locales.keys()].sort()) {
     const categories = pluralCategoriesFor(locale);
-    /** missing category -> [family id, has bare sibling] */
+    /** missing category -> { families, uncovered } */
     const byCategory = new Map();
     for (const [namespace, data] of locales.get(locale) ?? []) {
       const { plain, plurals } = classifyKeys(flattenKeys(data));
@@ -440,13 +524,15 @@ export function collectCoverageGaps(locales) {
         for (const category of missingPluralCategories(suffixes, categories)) {
           let bucket = byCategory.get(category);
           if (!bucket) {
-            bucket = { families: [], bare: 0 };
+            bucket = { families: [], uncovered: [] };
             byCategory.set(category, bucket);
           }
-          bucket.families.push(`${namespace}:${base}`);
-          // i18next tries the bare `key` before giving up, so a family with a
-          // bare sibling still renders text for the missing category.
-          if (plain.has(base)) bucket.bare += 1;
+          const id = `${namespace}:${base}`;
+          bucket.families.push(id);
+          // i18next tries the bare `key` in THIS language before moving to the
+          // next one, so a family with a bare sibling still renders this
+          // locale's text. Without one, the missing category renders English.
+          if (!plain.has(base)) bucket.uncovered.push(id);
         }
       }
     }
@@ -455,7 +541,8 @@ export function collectCoverageGaps(locales) {
         locale,
         category,
         families: bucket.families.sort(),
-        coveredByBareKey: bucket.bare,
+        uncovered: bucket.uncovered.sort(),
+        coveredByBareKey: bucket.families.length - bucket.uncovered.length,
       });
     }
   }
@@ -472,10 +559,13 @@ export function collectLegacyPluralKeys(locales) {
       for (const [base, suffixes] of plurals) {
         if (!suffixes.has(LEGACY_PLURAL_SUFFIX)) continue;
         keys.push(`${locale}/${namespace}:${base}_plural`);
-        // `_other` is just as good a fallback as the bare key — a family of
-        // `key_plural` + `key_other` resolves fine, it merely wastes the dead
-        // `_plural` entry. Only a family with NEITHER would render a raw key.
-        if (!plain.has(base) && !suffixes.has('other')) {
+        // Only the BARE key rescues a dead `_plural` entry. This used to also
+        // credit `_other`, on the same false premise corrected above: `_other`
+        // is consulted for the counts whose category IS `other` and for no
+        // others, so a `key_plural` + `key_other` family still renders nothing
+        // of its own at count 1 in a language with a `one` category. The bare
+        // key is the only sibling i18next tries for every category.
+        if (!plain.has(base)) {
           withoutFallback.push(`${locale}/${namespace}:${base}`);
         }
       }
@@ -486,25 +576,37 @@ export function collectLegacyPluralKeys(locales) {
 
 /** One gap as a single headline line, without the family list. */
 export function summarizeCoverageGap(gap) {
-  const { locale, category, families, coveredByBareKey } = gap;
+  const { locale, category, families, uncovered, coveredByBareKey } = gap;
   const verb = families.length === 1 ? 'family does' : 'families do';
-  const covered = coveredByBareKey > 0 ? ` (${coveredByBareKey} via a bare "key" sibling)` : '';
+  const rescued = coveredByBareKey > 0 ? `, ${coveredByBareKey} rescued by a bare "key"` : '';
   return (
     `  ${locale}: ${families.length} plural ${verb} not supply "_${category}" ` +
-    `(CLDR categories for ${locale}: ${[...pluralCategoriesFor(locale)].join(', ')})${covered}`
+    `(CLDR categories for ${locale}: ${[...pluralCategoriesFor(locale)].join(', ')}) — ` +
+    `${uncovered.length} would render English${rescued}`
   );
 }
 
-/** The headline plus every family under it — the form the written report uses. */
-export function formatCoverageGap(gap) {
-  return `${summarizeCoverageGap(gap)}\n    ${gap.families.join('\n    ')}`;
+/**
+ * The headline plus a family list. Defaults to every family in the gap; the
+ * failure path passes the ENFORCED subset, so the message lists what has to be
+ * fixed rather than everything that was noticed.
+ */
+export function formatCoverageGap(gap, families) {
+  // NOT a defaulted parameter. `gaps.map(formatCoverageGap)` would pass the
+  // array index in as `families`, and the default would never apply — caught by
+  // the guard suite with "families.join is not a function", which is the polite
+  // version of this bug. Anything that is not an array means "all of them".
+  const list = Array.isArray(families) ? families : gap.families;
+  return `${summarizeCoverageGap(gap)}\n    ${list.join('\n    ')}`;
 }
 
 /**
- * The full reported-only findings, as text.
+ * The full coverage/legacy findings, as text — everything noticed, whether or
+ * not it is enforced.
  *
- * WHERE THE WARNINGS GO. Some findings are reported rather than failed
- * (plural-category coverage, legacy `_plural` keys). A console warning alone
+ * WHERE THE WARNINGS GO. Some findings are reported rather than failed (a
+ * coverage gap that a bare `key` sibling rescues, a grandfathered locale's
+ * `many`, and the legacy `_plural` inventory). A console warning alone
  * was not enough of a channel on the guard side: its reporter prints nothing
  * for a green run and the agent entry points run silent, so the warnings
  * reached nobody. They are therefore also written to a file on every run. A
@@ -517,7 +619,9 @@ export function buildReport(locales, { coverageGaps, legacyPlurals }) {
     `# locale-parity report — ${new Date().toISOString()}`,
     `# Locales: ${[...locales.keys()].sort().join(', ')}`,
     '',
-    '## Plural-category coverage gaps (non-fatal — i18next falls back to "_other")',
+    '## Plural-category coverage gaps',
+    '## (a gap with no bare "key" sibling renders ENGLISH for those counts — see',
+    '##  missingPluralCategories(); es/fr "many" is grandfathered as exact-millions-only)',
     '',
   ];
   out.push(
@@ -590,8 +694,8 @@ export function charCount(value) {
  *     both languages — a false failure, observed on all three of es/fr's
  *     `_zero`/`_one` forms before this rule was added.
  *  2. English's `_other`, for a plural form English does not have. `other` is
- *     the one category every language has and i18next's last-resort plural
- *     form, so it is the only reference guaranteed to exist for `ru:foo_few`.
+ *     the one category every language has — not a runtime fallback for the
+ *     others, but the only reference guaranteed to exist for `ru:foo_few`.
  *  3. English's bare `base`, for a plural family the locale ADDED where English
  *     writes one plain string. keySetDiff explicitly allows this ("{{count}}
  *     rows processed" is one English string and four Russian ones), so without
