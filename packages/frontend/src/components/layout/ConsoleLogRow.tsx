@@ -32,6 +32,14 @@ function formatMetaEntry([k, v]: [string, unknown]): string {
   return `${k}=${typeof v === 'object' ? JSON.stringify(v) : String(v)}`;
 }
 
+/** One retained group member's timestamp + metadata (minus `stack`), compact. */
+function memberDetailLine(member: LogEntry): string {
+  const time = new Date(member.timestamp).toLocaleTimeString();
+  if (!member.metadata) return time;
+  const pairs = Object.entries(member.metadata).filter(([k]) => k !== 'stack');
+  return pairs.length > 0 ? `${time} ${pairs.map(formatMetaEntry).join(' ')}` : time;
+}
+
 interface ConsoleLogRowProps {
   group: LogGroup;
   expanded: boolean;
@@ -42,7 +50,7 @@ export function ConsoleLogRow({ group, expanded, onToggle }: Readonly<ConsoleLog
   const { t } = useTranslation('logs');
   const { t: tConsole } = useTranslation('console');
   const entry = group.head;
-  const presented = presentEntry(entry, t as (k: string, v?: Record<string, unknown>) => string);
+  const presented = presentEntry(entry, t);
   const isLqaFailed = entry.message.startsWith('lqa:failed');
   const isLqaOverflow = entry.message.startsWith('lqa:overflow');
   const stack = typeof entry.metadata?.stack === 'string' ? entry.metadata.stack : null;
@@ -137,6 +145,19 @@ export function ConsoleLogRow({ group, expanded, onToggle }: Readonly<ConsoleLog
             : ''}
           {stack ? `\n\n${stack}` : ''}
         </pre>
+      )}
+      {expanded && group.count > 1 && (
+        <div
+          data-testid="console-group-members"
+          className="mt-0.5 ml-24 text-[10px] whitespace-pre-wrap break-words leading-4 text-muted-foreground/70"
+        >
+          {group.members.map((member) => (
+            <div key={member.id}>{memberDetailLine(member)}</div>
+          ))}
+          {group.count > group.members.length && (
+            <div>{tConsole('membersNotShown', { count: group.count - group.members.length })}</div>
+          )}
+        </div>
       )}
     </>
   );

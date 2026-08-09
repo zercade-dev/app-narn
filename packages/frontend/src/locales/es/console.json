@@ -23,5 +23,7 @@
   "vaultLocked": "Bóveda bloqueada",
   "vaultLockedUnlockHint": "Bóveda bloqueada: haz clic para desbloquear",
   "repeatCount": "Repetido {{count}} veces",
-  "showDetails": "Mostrar detalles técnicos"
+  "showDetails": "Mostrar detalles técnicos",
+  "membersNotShown": "{{count}} entrada más no mostrada",
+  "membersNotShown_other": "{{count}} entradas más no mostradas"
 }

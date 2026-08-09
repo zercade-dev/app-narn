@@ -1,5 +1,6 @@
 import type { LogEntry } from './types.js';
 import { LOG_PRESENTERS } from './registry.js';
+import { visibleMeta } from './fallback.js';
 
 /**
  * A run of adjacent, equivalent entries shown as one row. `count` keeps
@@ -17,12 +18,28 @@ export const MAX_GROUP_MEMBERS = 50;
 /**
  * Identity for folding. Entries carrying a stack get a unique signature: each
  * stack differs, so collapsing them would hide the only detail that matters.
+ *
+ * Otherwise the signature is the identity of the RENDERED line, not just the
+ * event key: many presenters interpolate metadata into their text (or even
+ * pick their message key by metadata, like `translation:done`'s `tmHit`
+ * split), so two adjacent entries that render different sentences must not
+ * fold just because they share a level and event key. A presenter's own
+ * `groupKey` still wins when defined (e.g. `translation:failed` aggregates by
+ * reason + language rather than by every distinct module/count value); absent
+ * that, the presenter's own interpolated `vars` stand in for it.
  */
 export function groupSignature(entry: LogEntry): string {
   if (entry.metadata?.stack) return `unique ${entry.id}`;
+  const meta = entry.metadata ?? {};
   const presenter = LOG_PRESENTERS[entry.message];
-  const extra = presenter?.groupKey?.(entry.metadata ?? {}) ?? '';
-  return `${entry.level} ${entry.message} ${extra}`;
+  if (!presenter) {
+    return `${entry.level} ${entry.message} ${JSON.stringify(visibleMeta(meta))}`;
+  }
+  const key = typeof presenter.key === 'function' ? presenter.key(meta) : presenter.key;
+  const extra = presenter.groupKey
+    ? presenter.groupKey(meta)
+    : JSON.stringify(presenter.vars?.(meta) ?? {});
+  return `${entry.level} ${key} ${extra}`;
 }
 
 /**

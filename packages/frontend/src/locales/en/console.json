@@ -23,5 +23,7 @@
   "vaultLocked": "Vault locked",
   "vaultLockedUnlockHint": "Vault locked — click to unlock",
   "repeatCount": "Repeated {{count}} times",
-  "showDetails": "Show technical details"
+  "showDetails": "Show technical details",
+  "membersNotShown": "{{count}} more entry not shown",
+  "membersNotShown_other": "{{count}} more entries not shown"
 }

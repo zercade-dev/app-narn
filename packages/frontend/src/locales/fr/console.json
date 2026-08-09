@@ -23,5 +23,7 @@
   "vaultLocked": "Coffre verrouillé",
   "vaultLockedUnlockHint": "Coffre verrouillé — cliquez pour déverrouiller",
   "repeatCount": "Répété {{count}} fois",
-  "showDetails": "Afficher les détails techniques"
+  "showDetails": "Afficher les détails techniques",
+  "membersNotShown": "{{count}} entrée supplémentaire non affichée",
+  "membersNotShown_other": "{{count}} entrées supplémentaires non affichées"
 }

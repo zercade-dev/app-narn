@@ -139,14 +139,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
             ? e.level === 'notification'
             : e.level === consoleFilter;
       if (!levelOk) return false;
-      return (
-        query === '' ||
-        entryMatchesQuery(
-          e,
-          query,
-          presentEntry(e, tLogs as (k: string, v?: Record<string, unknown>) => string).text,
-        )
-      );
+      return query === '' || entryMatchesQuery(e, query, presentEntry(e, tLogs).text);
     });
   }
   const filteredEntries = getFilteredEntries();
