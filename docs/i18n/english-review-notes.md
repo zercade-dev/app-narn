@@ -1,6 +1,6 @@
 # English source review — 2026-08-09
 
-Applied before any translation work, per spec D9. Every change here is a change
+Applied before any translation work. Every change here is a change
 translators do not have to redo later.
 
 Scope: all 1,915 English strings across the 24 namespaces were read. A string was
@@ -121,15 +121,15 @@ queue`, `Stage details`, `Categories`). Left alone on purpose: within the Global
    "entries" everywhere. `logs` is internally consistent and deliberately written
    in a plain narrative register, so aligning it means rewriting ~12 sentences —
    more churn than this review's conservative bar allows. **Recommended canonical
-   term for Task 2: "entry".** Worth a follow-up pass on `logs:*`.
+   term for the terminology lexicon: "entry".** Worth a follow-up pass on `logs:*`.
 4. **"Module" vs "Provider" for the thing you pick before an AI call.** The two
    assistant panels (`colorText:assistant.instanceLabel`, `stage-details:chatInstanceLabel`)
    and simple routing (`config:routing.simplePlaceholder`) say _Provider_; every
    other picker says _Module_ (`category:module`, `glossary:generateModule`,
    `review:sourceAi.module`, `strings:runs.aiReviewModule`, `orphans:relink.aiModuleLabel`).
    They may genuinely be different objects (a module vs a configured instance of
-   one), so picking one is a product call, not a copy fix. Task 2 should decide and
-   record it as terminology.
+   one), so picking one is a product call, not a copy fix. The terminology lexicon
+   work should decide and record it.
 5. **`strings:tabs.category` is `Category` (singular) while the page it opens is
    titled `Categories`.** Left alone — tab labels are deliberately short.
 6. **Quotation style is split three ways in English**: escaped straight quotes
@@ -156,19 +156,19 @@ queue`, `Stage details`, `Categories`). Left alone on purpose: within the Global
 ## Identified but not applied — blocked by exact-match test assertions
 
 Each of the following is a legitimate criterion 1/3 fix, but the English string is
-asserted verbatim by a test that lives in the **parent** repo (`tests/`), outside
-this task's commit scope (`app/`). Applying the copy change without the matching
-test edit would turn the suite red. They are listed here so the change can be made
-as one coordinated commit later. Note that each is a _pair or family_ — applying
-only the unblocked half would create a new inconsistency, so the whole family was
-held back.
+asserted verbatim by a test outside this repository, which is versioned separately.
+Applying the copy change without the matching test edit would turn that suite red.
+They are listed here so the change can be made as one coordinated cross-repo commit
+later. Note that each is a _pair or family_ — applying only the unblocked half would
+create a new inconsistency, so the whole family was held back. The exact blocking
+assertions (file and line) are tracked outside this repository, not reproduced here.
 
-| Key(s)                                                                                                                                                                                  | Proposed change                                                                                                                                                                                                                                              | Blocking assertion                                                                                                                                                                                               |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `glossary:assignGlossary`, `glossary:unassignGlossary`                                                                                                                                  | `Assign Glossary` / `Unassign Glossary` → sentence case                                                                                                                                                                                                      | `tests/unit/frontend/src/components/glossary/__tests__/GlossaryTab.test.tsx:528` — `expect(actionBtn.textContent).toBe('Unassign Glossary')`                                                                     |
-| `glossary:confirmDeleteGlossaryTitle`, `glossary:confirmDeleteTitle`                                                                                                                    | `Delete Glossary` / `Delete Term` → sentence case                                                                                                                                                                                                            | `tests/unit/frontend/src/components/glossary/__tests__/GlossaryTab-locks.test.tsx:218` — `screen.findByText('Delete Glossary')`                                                                                  |
-| `collab:sharing.unselectAllLanguages`                                                                                                                                                   | `Unselect all` → `Deselect all` (the app-wide wording)                                                                                                                                                                                                       | `tests/unit/frontend/src/components/sharing/__tests__/SharingTab.test.tsx:182` — `toBe('Unselect all')`                                                                                                          |
-| `orphans:relink.aiRetranslateLabel`, `orphans:relink.aiNoModules`, `orphans:toast.aiRetranslateStarted`, `orphans:toast.aiRetranslateUnavailable`, `strings:runs.typeRelinkRetranslate` | unify on the hyphenated form used everywhere else (`review:retranslate` "Re-translate", `backup:triggerPreRetranslate` "before re-translation", `strings:compare.translateModeRetranslate`): `retranslate`/`retranslation` → `re-translate`/`re-translation` | `tests/playwright/specs/orphans.spec.ts:307` — `toHaveText('Relink AI retranslate')`; `tests/unit/frontend/src/components/orphans/__tests__/OrphansTab.test.tsx:236` — exact string with "use AI retranslation." |
+| Key(s)                                                                                                                                                                                  | Proposed change                                                                                                                                                                                                                                              | Blocker                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `glossary:assignGlossary`, `glossary:unassignGlossary`                                                                                                                                  | `Assign Glossary` / `Unassign Glossary` → sentence case                                                                                                                                                                                                      | Held back — an outside test asserts the current wording verbatim; needs a coordinated commit that lands with the matching test update.   |
+| `glossary:confirmDeleteGlossaryTitle`, `glossary:confirmDeleteTitle`                                                                                                                    | `Delete Glossary` / `Delete Term` → sentence case                                                                                                                                                                                                            | Held back — an outside test asserts the current wording verbatim; needs a coordinated commit that lands with the matching test update.   |
+| `collab:sharing.unselectAllLanguages`                                                                                                                                                   | `Unselect all` → `Deselect all` (the app-wide wording)                                                                                                                                                                                                       | Held back — an outside test asserts the current wording verbatim; needs a coordinated commit that lands with the matching test update.   |
+| `orphans:relink.aiRetranslateLabel`, `orphans:relink.aiNoModules`, `orphans:toast.aiRetranslateStarted`, `orphans:toast.aiRetranslateUnavailable`, `strings:runs.typeRelinkRetranslate` | unify on the hyphenated form used everywhere else (`review:retranslate` "Re-translate", `backup:triggerPreRetranslate` "before re-translation", `strings:compare.translateModeRetranslate`): `retranslate`/`retranslation` → `re-translate`/`re-translation` | Held back — two outside tests assert the current wording verbatim; needs a coordinated commit that lands with the matching test updates. |
 
 Playwright role/text selectors elsewhere (`getByRole('menuitem', { name: 'Edit Categories' })`,
 `'Enabled Glossaries'`) are case-insensitive by default, so the casing changes that
