@@ -213,7 +213,16 @@ export function RoutingRulesConfig({
   // renders the full editor regardless — a preference set once and forgotten
   // must never hide a configuration the user built by hand.
   const simpleEligible = useMemo(() => isSimpleRouting(mergedGroups), [mergedGroups]);
-  const showSimple = !routingAdvanced && simpleEligible;
+  // Latch: set once the full editor has been shown *because* the document was
+  // not simple, and held for the rest of this mount so an edit that happens to
+  // make the document simple (clearing a rule's max length, deleting the second
+  // rule) cannot unmount the editor under the user's cursor. It is cleared by an
+  // explicit mode click and by a props change (a different project), both below.
+  // It can only ever SUPPRESS the simple view — `showSimple` still requires the
+  // live `isSimpleRouting` check, so a document that turns rich under us (a save
+  // from another tab or a collaborator) never gets the single selector rendered
+  // over rules it would then overwrite.
+  const [editorLatched, setEditorLatched] = useState(false);
 
   // Auto-save: every mutator below computes its own fresh next-state values and
   // calls `schedule()` with the resulting payload directly (rather than a
@@ -243,17 +252,46 @@ export function RoutingRulesConfig({
   // Re-derive local editing state during render when the server-provided props
   // change (the initializers above cover the mount case).
   const [prevSync, setPrevSync] = useState({ routingRuleGroups, activeRoutingRuleGroupId, rules });
-  if (
+  const syncingProps =
     prevSync.routingRuleGroups !== routingRuleGroups ||
     prevSync.activeRoutingRuleGroupId !== activeRoutingRuleGroupId ||
-    prevSync.rules !== rules
-  ) {
+    prevSync.rules !== rules;
+  if (syncingProps) {
     setPrevSync({ routingRuleGroups, activeRoutingRuleGroupId, rules });
     setGroups(savedGroups);
     setActiveGroupId(savedActiveGroupId);
     setDraft(
       normalizeRules(savedGroups.find((group) => group.id === savedActiveGroupId)?.rules ?? []),
     );
+  }
+
+  // A different project is a fresh decision, so its own document decides the
+  // mode. Keyed on `projectId` and NOT on the props sync above: that sync also
+  // fires for the SAME project when our own auto-save echoes back through the
+  // parent's refetch, and clearing the latch there would swap the view out from
+  // under the very edit the latch exists to protect, just a second later.
+  const [prevProjectId, setPrevProjectId] = useState(projectId);
+  const projectChanged = prevProjectId !== projectId;
+  if (projectChanged) {
+    setPrevProjectId(projectId);
+    setEditorLatched(false);
+  }
+
+  // Arm the latch only on a render whose `mergedGroups` really describes the
+  // current props: during a props sync (or a project change) the local state
+  // above is still the PREVIOUS document, and latching from it would arm on a
+  // document that is already gone. (Those renders' output is discarded — React
+  // re-renders after a render-phase setState — so nothing stale is shown.)
+  if (!syncingProps && !projectChanged && !editorLatched && !routingAdvanced && !simpleEligible) {
+    setEditorLatched(true);
+  }
+  // Safety is evaluated live on every render: not-simple ⇒ never the simple view.
+  const showSimple = !routingAdvanced && simpleEligible && !editorLatched;
+
+  /** Mode clicks are an explicit decision, so they re-evaluate from scratch. */
+  function toggleAdvanced(advanced: boolean): void {
+    setEditorLatched(false);
+    setRoutingAdvanced(advanced);
   }
 
   const handleExport = () => {
@@ -476,7 +514,7 @@ export function RoutingRulesConfig({
         autoSaveStatus={autoSaveStatus}
         autoSaveError={autoSaveError}
         advanced={routingAdvanced}
-        onToggleAdvanced={setRoutingAdvanced}
+        onToggleAdvanced={toggleAdvanced}
         onSelectModule={selectSimpleModule}
       />
     );
@@ -496,7 +534,7 @@ export function RoutingRulesConfig({
       onFlush={flush}
       translationsInProgress={translationsInProgress}
       advanced={routingAdvanced}
-      onToggleAdvanced={setRoutingAdvanced}
+      onToggleAdvanced={toggleAdvanced}
       simpleFallbackNotice={!routingAdvanced && !simpleEligible}
       modules={modules}
       availableLanguages={availableLanguages}
