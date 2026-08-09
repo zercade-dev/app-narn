@@ -13,6 +13,7 @@ import {
 import { useProjectStore } from '../../stores/project-store.js';
 import { apiRequest, apiDownload } from '../../hooks/use-api.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
+import { PseudoTestHelp } from './PseudoTestHelp.js';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -425,22 +426,24 @@ export function DataTab() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-4 gap-y-2">
                 {availableTargetLanguages.map((lang) => (
-                  <label
-                    key={lang.code}
-                    className="flex items-center gap-2 text-sm"
-                    data-pseudo={lang.code === PSEUDO_LANGUAGE_CODE ? 'true' : undefined}
-                  >
-                    <Checkbox
-                      id={`target-lang-${lang.code}`}
-                      data-testid={`target-lang-${lang.code}`}
-                      checked={currentLanguages.includes(lang.code)}
-                      onCheckedChange={(checked) =>
-                        handleLanguageToggle(lang.code, checked === true)
-                      }
-                    />
-                    <span className="min-w-0 flex-1 truncate">{lang.name}</span>
-                    <LangCodeChip code={lang.code} />
-                  </label>
+                  <div key={lang.code} className="flex items-center gap-2 text-sm">
+                    <label
+                      className="flex min-w-0 flex-1 items-center gap-2"
+                      data-pseudo={lang.code === PSEUDO_LANGUAGE_CODE ? 'true' : undefined}
+                    >
+                      <Checkbox
+                        id={`target-lang-${lang.code}`}
+                        data-testid={`target-lang-${lang.code}`}
+                        checked={currentLanguages.includes(lang.code)}
+                        onCheckedChange={(checked) =>
+                          handleLanguageToggle(lang.code, checked === true)
+                        }
+                      />
+                      <span className="min-w-0 flex-1 truncate">{lang.name}</span>
+                      <LangCodeChip code={lang.code} />
+                    </label>
+                    {lang.code === PSEUDO_LANGUAGE_CODE && <PseudoTestHelp />}
+                  </div>
                 ))}
               </div>
               {isDirty && (
