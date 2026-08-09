@@ -30,15 +30,14 @@ import { fileURLToPath } from 'node:url';
 import {
   CLDR_CATEGORIES,
   REFERENCE_LOCALE,
-  STRICT_ENV,
   collectCoverageGaps,
   collectLegacyPluralKeys,
+  describeEnforcedGap,
   doNotTranslateOffenders,
   enforcedCoverageGapFamilies,
   formatCoverageGap,
   identicalValueOffenders,
   invalidLeafValues,
-  isStrictFor,
   keyOrderOffenders,
   lengthOffenders,
   loadLocales,
@@ -201,13 +200,7 @@ fail(
 for (const gap of coverageGaps) {
   const enforced = enforcedCoverageGapFamilies(gap);
   if (enforced.length === 0) continue;
-  fail(
-    `${gap.locale}: ${enforced.length} plural ${enforced.length === 1 ? 'family' : 'families'} ` +
-      `do not supply "_${gap.category}", and have no bare "key" sibling — those counts render ` +
-      `English` +
-      (isStrictFor(gap.locale) ? ` [LOCALE_PARITY_STRICT="${STRICT_ENV}"]` : ''),
-    formatCoverageGap(gap, enforced).split('\n'),
-  );
+  fail(describeEnforcedGap(gap, enforced), formatCoverageGap(gap, enforced).split('\n'));
 }
 
 // --- Verdict ---------------------------------------------------------------

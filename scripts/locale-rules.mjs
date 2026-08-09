@@ -107,12 +107,17 @@ export const CLDR_CATEGORIES = ['zero', 'one', 'two', 'few', 'many', 'other'];
  * The legacy i18next v3 plural suffix. The app runs the v4 JSON format (no
  * `compatibilityJSON` is set in src/i18n/index.ts), under which `key_plural`
  * is never looked up at all: for a `count`, i18next tries `key_<category>`
- * and then the bare `key`. Three keys still use it — config:glossariesSkipped,
- * config:malformedRows, config:exportRoundtripWarning — so their bare
- * (singular) form renders for every count. That is a pre-existing content
- * defect and out of scope for these rules; the suffix is recognised here so
- * the plural rules neither crash on it nor silently bless it, and the
- * legacy `_plural` report names it.
+ * and then the bare `key`, in that order, in this language before moving to
+ * the next.
+ *
+ * NO KEY USES IT ANY MORE — verified, zero `_plural` keys across every shipped
+ * locale. (This comment used to name three, config:glossariesSkipped /
+ * malformedRows / exportRoundtripWarning, which have since been converted.)
+ * The suffix stays recognised here so that a reintroduced one is classified as
+ * a plural form rather than mistaken for a plain key called `foo_plural`, and
+ * so the rules neither crash on it nor silently bless it: it is now a hard
+ * failure via pluralFamilyErrors()'s mandatory `_other`, whose carve-out for
+ * this suffix was removed once it had no subjects.
  */
 export const LEGACY_PLURAL_SUFFIX = 'plural';
 
@@ -399,10 +404,14 @@ export function missingPluralCategories(suffixes, categories) {
 export const COVERAGE_GAP_GRANDFATHER = {
   es: {
     many:
-      'In es, "many" selects ONLY exact millions (1000000, 2000000, 3000000 — verified ' +
-      'via Intl.PluralRules; 1500000 is "other"). A count no UI here reaches, so the ' +
-      'gap on all 41 families is real but unreachable. This is NOT the situation in ' +
-      'ru/pl/cs/ar, where "many" covers ordinary counts.',
+      'In es, "many" selects ONLY exact millions (1000000, 2000000, 3000000 — verified via ' +
+      'Intl.PluralRules; 1500000 is "other", and NO integer in 0..200 selects it). A count ' +
+      'no UI here reaches, so the gap on all 41 families is real but unreachable. This is ' +
+      'emphatically NOT the situation in ru/pl/uk/ar, where "many" is an everyday integer ' +
+      'category — measured over 0..200: ru 129, pl 146, uk 129, ar 178 of 201 counts. ' +
+      '(cs/sk/lt look like a third case again: they have a "many" category that selects no ' +
+      'integer at all, only fractions such as 1.5. It is not grandfathered, so it fails ' +
+      'closed, which is the right default for a category nobody has measured.)',
   },
   fr: {
     many: 'Same as es: "many" in fr is exact millions only, so the gap is unreachable.',
@@ -427,6 +436,41 @@ export function enforcedCoverageGapFamilies(gap, strictEnv = STRICT_ENV) {
   if (isStrictFor(gap.locale, strictEnv)) return gap.families;
   if (COVERAGE_GAP_GRANDFATHER[gap.locale]?.[gap.category]) return [];
   return gap.uncovered;
+}
+
+/**
+ * Why these families are a failure, worded for the path that produced them.
+ *
+ * THE TWO PATHS SAY DIFFERENT THINGS AND MUST NOT SHARE A SENTENCE. The
+ * default path enforces exactly the families with no bare `key` sibling, so
+ * "those counts render English" is true of every one of them. The strict path
+ * enforces `gap.families`, which INCLUDES the bare-covered ones — for those the
+ * locale's own text still renders, and claiming otherwise would put this
+ * round's own defect back into user-facing output. It happened: a single
+ * hardcoded clause told `LOCALE_PARITY_STRICT=es` that 12 bare-covered
+ * families "render English" when none of them do.
+ *
+ * Both callers use this, so neither can drift from the other or from the truth.
+ */
+export function describeEnforcedGap(gap, families, strictEnv = STRICT_ENV) {
+  const count = `${families.length} plural ${families.length === 1 ? 'family' : 'families'}`;
+  const missing = `do not supply "_${gap.category}"`;
+
+  if (isStrictFor(gap.locale, strictEnv)) {
+    const rescued =
+      gap.coveredByBareKey > 0
+        ? `, including ${gap.coveredByBareKey} a bare "key" sibling would otherwise rescue`
+        : '';
+    return (
+      `${gap.locale}: ${count} ${missing} — LOCALE_PARITY_STRICT="${strictEnv}" holds this ` +
+      `locale to its language's complete category set${rescued}`
+    );
+  }
+
+  return (
+    `${gap.locale}: ${count} ${missing}, and have no bare "key" sibling — ` +
+    `those counts render English`
+  );
 }
 
 /**
