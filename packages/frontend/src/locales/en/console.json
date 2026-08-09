@@ -23,5 +23,7 @@
   "expandStack": "Expand stack",
   "collapseStack": "Collapse stack",
   "vaultLocked": "Vault locked",
-  "vaultLockedUnlockHint": "Vault locked — click to unlock"
+  "vaultLockedUnlockHint": "Vault locked — click to unlock",
+  "repeatCount": "Repeated {{count}} times",
+  "showDetails": "Show technical details"
 }

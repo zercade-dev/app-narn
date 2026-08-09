@@ -23,5 +23,7 @@
   "expandStack": "Expandir traza",
   "collapseStack": "Contraer traza",
   "vaultLocked": "Bóveda bloqueada",
-  "vaultLockedUnlockHint": "Bóveda bloqueada: haz clic para desbloquear"
+  "vaultLockedUnlockHint": "Bóveda bloqueada: haz clic para desbloquear",
+  "repeatCount": "Repetido {{count}} veces",
+  "showDetails": "Mostrar detalles técnicos"
 }
