@@ -24,8 +24,6 @@ Placeholders and markup tags in your text pass through untouched, so if one of t
 
 ## Getting it into your game
 
-Most games only load the languages they ship with, so a `pseudo-test` column would simply be ignored. The CSV export works around this with a substitution.
-
 In the export card, set **Export pseudo text as** to a language you are not currently shipping — German, say — then download the file and load it in the game with that language selected. The chosen language's column is filled with the Pseudo Test text for that one download only; nothing stored changes, and the real translations are still there next time you export.
 
 When you are done testing, export again with the substitution set back to **No substitution**.
