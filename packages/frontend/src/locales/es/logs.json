@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "Configurar reglas de enrutamiento",
+    "openModuleSettings": "Abrir la configuración de módulos",
+    "openQuality": "Abrir los ajustes de calidad",
+    "openGlossary": "Abrir el glosario",
+    "unlockVault": "Desbloquear bóveda"
+  },
+  "translation": {
+    "start": "Traduciendo un texto a {{language}}…",
+    "done": "Se tradujo un texto a {{language}}.",
+    "doneFromMemory": "Se reutilizó una traducción guardada para {{language}}.",
+    "queued": "{{total}} texto en cola para traducir.",
+    "queued_other": "{{total}} textos en cola para traducir.",
+    "runQueued": "Ejecución de traducción en cola — posición {{position}}.",
+    "retryQueued": "Reintento en cola — posición {{position}}.",
+    "retry": "Reintentando una traducción fallida.",
+    "failedNoRoute": "No se pudo traducir {{count}} texto a {{language}} — ninguna regla de enrutamiento coincide.",
+    "failedNoRoute_other": "No se pudieron traducir {{count}} textos a {{language}} — ninguna regla de enrutamiento coincide.",
+    "failedModuleDisabled": "No se pudo traducir {{count}} texto a {{language}} — el módulo {{module}} está desactivado.",
+    "failedModuleDisabled_other": "No se pudieron traducir {{count}} textos a {{language}} — el módulo {{module}} está desactivado.",
+    "failedModuleNotFound": "No se pudo traducir {{count}} texto a {{language}} — el módulo {{module}} no está instalado.",
+    "failedModuleNotFound_other": "No se pudieron traducir {{count}} textos a {{language}} — el módulo {{module}} no está instalado.",
+    "failedGeneric": "No se pudo traducir un texto a {{language}}.",
+    "batchFailed": "Falló un lote de {{count}} traducciones a {{languages}}.",
+    "queueStartFailed": "No se pudo iniciar la ejecución de traducción.",
+    "maskMismatch": "Las etiquetas de formato no sobrevivieron a la traducción a {{language}}.",
+    "tmRejected": "Una traducción guardada para {{language}} no superó el control de calidad.",
+    "lqaRetry": "Control de calidad fallido — se pidió al modelo un nuevo intento.",
+    "authCancel": "Se canceló el inicio de sesión, así que la traducción se detuvo."
+  },
+  "lqa": {
+    "passed": "Control de calidad superado.",
+    "failed": "Control de calidad fallido.",
+    "overflow": "La traducción es demasiado larga para el espacio disponible.",
+    "checkError": "No se pudo ejecutar un control de calidad."
+  },
+  "judge": {
+    "done": "La revisión puntuó {{score}} — {{verdict}}.",
+    "suggestDone": "La revisión terminó con sugerencias.",
+    "suggestNoChange": "La revisión no encontró nada que cambiar.",
+    "suggestionDiscarded": "Sugerencia descartada."
+  },
+  "sourceReview": {
+    "done": "La revisión del original encontró {{findings}} problema.",
+    "done_other": "La revisión del original encontró {{findings}} problemas."
+  },
+  "glossaryGen": {
+    "done": "La generación de glosario terminó — {{suggested}} términos sugeridos a partir de {{analyzed}} textos.",
+    "failed": "La generación de glosarios falló.",
+    "saveSuggestionsFailed": "No se pudieron guardar las sugerencias del glosario."
+  },
+  "categoryGen": {
+    "queued": "Generación de categorías en cola.",
+    "done": "La generación de categorías terminó — {{suggestions}} sugerencias.",
+    "failed": "La generación de categorías falló."
+  },
+  "stageDetails": {
+    "queued": "Detalles del escenario en cola.",
+    "done": "Detalles del escenario terminados — {{completed}} hechos, {{failed}} fallidos.",
+    "failed": "Los detalles del escenario fallaron."
+  },
+  "module": {
+    "loaded": "Se cargó el módulo {{module}}.",
+    "instanceRegistered": "Se añadió la configuración {{instance}}.",
+    "instanceRegisterFailed": "No se pudo añadir la configuración {{instance}}."
+  },
+  "vault": {
+    "unlocked": "Bóveda desbloqueada.",
+    "passwordChanged": "Se cambió la contraseña de la bóveda.",
+    "credentialsEvicted": "Tus credenciales guardadas se borraron de la memoria."
+  },
+  "orphan": {
+    "detected": "Se encontró {{count}} texto que ya no está en el archivo de origen.",
+    "detected_other": "Se encontraron {{count}} textos que ya no están en el archivo de origen.",
+    "linked": "Texto huérfano vinculado.",
+    "deleted": "Texto huérfano eliminado."
+  },
+  "tm": {
+    "cleared": "Memoria de traducción borrada.",
+    "variantDeleted": "Se eliminó una variante de la memoria de traducción."
+  },
+  "backup": {
+    "restored": "Copia de seguridad restaurada.",
+    "pruneFailed": "No se pudieron limpiar las copias de seguridad antiguas."
+  }
+}
