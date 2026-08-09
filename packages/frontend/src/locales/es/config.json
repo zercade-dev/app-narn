@@ -177,7 +177,7 @@
     "simpleLabel": "Traducir todo con",
     "simplePlaceholder": "Elige un proveedor",
     "simpleHint": "Todas las cadenas de este proyecto se traducen con el proveedor que elijas aquí.",
-    "simpleAdvancedNotice": "Este proyecto usa enrutamiento avanzado ({{count}} reglas), por eso se muestra el editor completo.",
+    "simpleAdvancedNotice": "Este proyecto usa enrutamiento avanzado, por eso se muestra el editor completo.",
     "refreshModels": "Actualizar modelos",
     "selectPlaceholder": "— seleccionar —",
     "exportFailed": "No se pudieron exportar las reglas de enrutamiento.",

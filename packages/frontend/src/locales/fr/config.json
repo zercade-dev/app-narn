@@ -177,7 +177,7 @@
     "simpleLabel": "Tout traduire avec",
     "simplePlaceholder": "Choisissez un fournisseur",
     "simpleHint": "Toutes les chaînes de ce projet sont traduites par le fournisseur choisi ici.",
-    "simpleAdvancedNotice": "Ce projet utilise un routage avancé ({{count}} règles), l'éditeur complet est donc affiché.",
+    "simpleAdvancedNotice": "Ce projet utilise un routage avancé, l'éditeur complet est donc affiché.",
     "refreshModels": "Actualiser les modèles",
     "selectPlaceholder": "— sélectionner —",
     "exportFailed": "Échec de l'exportation des règles de routage.",

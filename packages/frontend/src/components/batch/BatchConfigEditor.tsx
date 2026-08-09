@@ -379,7 +379,7 @@ export function BatchConfigEditor({
               className="text-xs text-muted-foreground"
               data-testid="routing-simple-fallback-notice"
             >
-              {t('routing.simpleAdvancedNotice', { count: draft.length })}
+              {t('routing.simpleAdvancedNotice')}
             </p>
           )}
 
