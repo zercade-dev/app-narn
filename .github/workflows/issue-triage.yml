@@ -1,0 +1,99 @@
+name: issue-triage
+
+# Keep the `needs-triage` label honest.
+#
+# The three issue templates stamp `needs-triage` on every new issue, and nothing
+# used to take it off again — so it accumulated on issues that had long since been
+# decided, and stopped meaning anything. This workflow removes it at the moment a
+# triage decision is made, and sweeps up whatever the event path missed.
+#
+# The rule, in full: an issue is triaged once it is **closed** (a close is itself a
+# decision — fixed, duplicate, wontfix, all of them) or **assigned** (someone has
+# taken it on). Reopening an issue nobody is assigned to undoes that, so the label
+# comes back. CONTRIBUTING.md documents the same rule for humans.
+#
+# The daily sweep is the part that makes this trustworthy. Label edits made through
+# the API, bulk closes, and any window where this workflow was broken or not yet on
+# the default branch all bypass the event path; the sweep reconciles them. It only
+# ever performs the removals the rule already implies, and stays silent — it opens
+# no issues and writes no comments.
+on:
+  issues:
+    types: [closed, assigned, reopened]
+  schedule:
+    # Daily, at an off-peak minute. Nothing depends on the exact time.
+    - cron: '17 6 * * *'
+  workflow_dispatch: # manual reconcile, and the only way to smoke-test a change here
+
+# `issues: write` is the whole scope: this workflow adds and removes one label and
+# touches nothing else. It never reads or writes repository contents.
+permissions:
+  issues: write
+
+# Serialize: a scheduled sweep racing an event-driven run against the same issue
+# would have them both editing one label set. Queue instead of cancelling, so a run
+# triggered by a real triage decision is never dropped.
+concurrency:
+  group: issue-triage
+  cancel-in-progress: false
+
+jobs:
+  # Fast path — reacts to a single issue, within seconds of the decision.
+  decision:
+    if: github.event_name == 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      # Guarded by `contains(...)` on the event payload rather than an API read, so
+      # the common case (an issue that no longer carries the label) costs nothing.
+      - name: Drop needs-triage on a closed or assigned issue
+        if: >-
+          (github.event.action == 'closed' || github.event.action == 'assigned')
+          && contains(github.event.issue.labels.*.name, 'needs-triage')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number }}
+        run: gh issue edit "$NUMBER" --repo "$GITHUB_REPOSITORY" --remove-label needs-triage
+
+      # A reopened issue is undecided again — unless somebody is on it. `assignee`
+      # is null precisely when the assignee list is empty, so it reads the whole list.
+      - name: Restore needs-triage on a reopened, unassigned issue
+        if: >-
+          github.event.action == 'reopened'
+          && github.event.issue.assignee == null
+          && !contains(github.event.issue.labels.*.name, 'needs-triage')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.issue.number }}
+        run: gh issue edit "$NUMBER" --repo "$GITHUB_REPOSITORY" --add-label needs-triage
+
+  # Slow path — reconciles the whole repository against the same rule.
+  sweep:
+    if: github.event_name != 'issues'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove needs-triage wherever the rule says it should be gone
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          # `gh issue list` excludes pull requests, so this is issues only. The limit
+          # is far above any plausible backlog of *mislabelled* issues; if it were
+          # ever hit, the next daily run picks up the remainder.
+          closed=$(gh issue list --repo "$GITHUB_REPOSITORY" --state closed \
+            --label needs-triage --limit 500 --json number --jq '.[].number')
+
+          assigned=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --label needs-triage --limit 500 --json number,assignees \
+            --jq '.[] | select(.assignees | length > 0) | .number')
+
+          stale=$(printf '%s\n%s\n' "$closed" "$assigned" | grep -v '^$' || true)
+          if [ -z "$stale" ]; then
+            echo "Nothing to reconcile."
+            exit 0
+          fi
+
+          for number in $stale; do
+            echo "Removing needs-triage from #$number"
+            gh issue edit "$number" --repo "$GITHUB_REPOSITORY" --remove-label needs-triage
+          done
