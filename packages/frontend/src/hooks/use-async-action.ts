@@ -4,8 +4,15 @@
  * suggestions, kick off a run, …).
  *
  * It owns a `busy` flag (raised before the work, lowered in `finally`), reports
- * failures with `toast.error(errorMessage(err, opts.errorFallback))`, and — when
- * `opts.successMessage` is set — shows `toast.success` after the work resolves.
+ * failures with `toast.error(errorMessage(err, opts.errorFallback, t))`, and —
+ * when `opts.successMessage` is set — shows `toast.success` after the work
+ * resolves. Passing `t` through to `errorMessage` is what makes a recognised
+ * `ApiError` status (401/403/423/429/5xx) or an offline `TypeError` produce
+ * specific wording instead of always falling back to `opts.errorFallback` —
+ * this is the one call site wired that way, covering every `useAsyncAction`
+ * consumer (the vault-gated LLM operations across ConfigTab, DataTab,
+ * ModuleSettingsPanel, CategoryTab, the review tabs, GenerateGlossaryDialog,
+ * and {@link useVaultRetryAction}) at once.
  *
  * Composability with the vault-retry flow: a handler that issues a vault-gated
  * `apiRequest` should pass `opts.onError`. It runs FIRST, before the default
@@ -32,11 +39,16 @@
  * on a real delivered result, exactly once.
  */
 import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { errorMessage } from '../lib/utils.js';
 import { toast } from '../lib/toast.js';
 
 export interface UseAsyncActionOptions {
-  /** Localized fallback message when the thrown value is not an `Error`. */
+  /**
+   * Localized fallback shown for every failure that isn't a recognised
+   * `ApiError` status or offline `TypeError` (see {@link errorMessage}) —
+   * i.e. it's the default toast text, not just a non-`Error`-throw special case.
+   */
   errorFallback: string;
   /** Shown via `toast.success` after the action resolves. Omit for no toast. */
   successMessage?: string;
@@ -64,21 +76,27 @@ export function useAsyncAction(
   opts: UseAsyncActionOptions,
 ): UseAsyncAction {
   const [busy, setBusy] = useState(false);
+  // Default (unprefixed) binding: errorMessage() resolves its HTTP-status keys
+  // with an explicit `errors:` namespace prefix (e.g. `t('errors:http.vaultLocked')`),
+  // so this doesn't need — and must not have — a namespace bound here.
+  const { t } = useTranslation();
   // Re-entrancy guard read synchronously: `busy` state lags a tick, so a double
   // click within the same frame would otherwise launch the work twice.
   const runningRef = useRef(false);
 
-  // Keep the latest fn/opts without re-creating `run` (and re-triggering callers'
+  // Keep the latest fn/opts/t without re-creating `run` (and re-triggering callers'
   // memo deps) every render — handlers are typically inline closures. The refs are
   // synced in a layout effect: not during render (react-hooks/refs forbids that),
   // but synchronously after commit and BEFORE the browser paints / any user event
-  // can fire `run`, so `run` always sees the latest fn/opts (no passive-flush
+  // can fire `run`, so `run` always sees the latest fn/opts/t (no passive-flush
   // staleness window). Client-only SPA, so no SSR layout-effect concern.
   const fnRef = useRef(fn);
   const optsRef = useRef(opts);
+  const tRef = useRef(t);
   useLayoutEffect(() => {
     fnRef.current = fn;
     optsRef.current = opts;
+    tRef.current = t;
   });
 
   const run = useCallback(() => {
@@ -95,7 +113,7 @@ export function useAsyncAction(
         // onError runs first and may suppress the default toast (e.g. a 423 the
         // global unlock dialog already handles) by returning a truthy value.
         const handled = onError?.(err);
-        if (!handled) toast.error(errorMessage(err, errorFallback));
+        if (!handled) toast.error(errorMessage(err, errorFallback, tRef.current));
       } finally {
         runningRef.current = false;
         setBusy(false);

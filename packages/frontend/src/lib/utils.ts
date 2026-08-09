@@ -69,6 +69,19 @@ function httpStatus(error: unknown): number | undefined {
 }
 
 /**
+ * True for the shape `fetch` throws when the network is unreachable — a
+ * `TypeError` (no `status`, so {@link httpStatus} can't classify it) — while
+ * the browser confirms there's genuinely no connection via
+ * `navigator.onLine`. Guards against misclassifying an unrelated `TypeError`
+ * (e.g. a programming bug) as "offline".
+ */
+function isOfflineTypeError(error: unknown): boolean {
+  return (
+    error instanceof TypeError && typeof navigator !== 'undefined' && navigator.onLine === false
+  );
+}
+
+/**
  * User-facing text for a caught error, given a caller-supplied localized
  * fallback. Use when a thrown value isn't handled specially and a generic
  * JSON dump would be unhelpful in the UI — e.g.
@@ -77,17 +90,23 @@ function httpStatus(error: unknown): number | undefined {
  * The raw `error.message` is deliberately never the headline: it is server or
  * runtime text ("ECONNREFUSED", a zod dump) that means nothing to a user. When
  * `t` is supplied, a recognised `ApiError`-shaped status produces specific
- * wording; otherwise the caller's fallback stands. Raw detail belongs in a
- * description slot via {@link technicalDetail}, or in the console, which
- * keeps everything.
+ * wording, and a `fetch`-thrown `TypeError` while `navigator.onLine` is false
+ * maps to the offline wording; otherwise the caller's fallback stands. Raw
+ * detail belongs in a description slot via {@link technicalDetail}, or in
+ * the console, which keeps everything.
  */
-export function errorMessage(error: unknown, fallback: string, t?: (key: string) => string): string {
+export function errorMessage(
+  error: unknown,
+  fallback: string,
+  t?: (key: string) => string,
+): string {
   if (t) {
     const status = httpStatus(error);
     if (status !== undefined) {
       const key = HTTP_ERROR_KEYS[status] ?? (status >= 500 ? 'errors:http.server' : undefined);
       if (key) return t(key);
     }
+    if (isOfflineTypeError(error)) return t('errors:http.offline');
   }
   return fallback;
 }
