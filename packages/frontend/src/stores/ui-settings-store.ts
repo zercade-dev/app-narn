@@ -20,6 +20,15 @@ interface UiSettingsState {
   setProjectIcon: (id: string, icon: string) => void;
   consoleFilter: ConsoleFilter;
   setConsoleFilter: (filter: ConsoleFilter) => void;
+  /**
+   * Routing tab mode preference (issue #60). False (the default) shows the
+   * single-provider selector; true shows the full rule editor. Persisted per
+   * browser so enabling advanced mode is a one-time choice. Only a preference —
+   * a project whose rules are not simple renders the full editor regardless
+   * (see lib/routing-mode.ts).
+   */
+  routingAdvanced: boolean;
+  setRoutingAdvanced: (advanced: boolean) => void;
   theme: UiTheme;
   setTheme: (theme: UiTheme) => void;
 }
@@ -56,6 +65,8 @@ export const useUiSettings = create<UiSettingsState>()(
         set((s) => ({ projectIcons: { ...s.projectIcons, [id]: icon } })),
       consoleFilter: 'all',
       setConsoleFilter: (consoleFilter) => set({ consoleFilter }),
+      routingAdvanced: false,
+      setRoutingAdvanced: (routingAdvanced) => set({ routingAdvanced }),
       theme: readStoredTheme(),
       setTheme: (theme) => {
         if (globalThis.window !== undefined) {
@@ -71,6 +82,7 @@ export const useUiSettings = create<UiSettingsState>()(
         language: state.language,
         projectIcons: state.projectIcons,
         consoleFilter: state.consoleFilter,
+        routingAdvanced: state.routingAdvanced,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.language && state.language !== 'en') {
