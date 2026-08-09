@@ -28,12 +28,20 @@ import { join } from 'node:path';
 export const REFERENCE_LOCALE = 'en';
 
 /**
- * NOTHING HERE RESOLVES ITS OWN LOCATION. `localesDir` is a required argument
- * and `import.meta.url` is deliberately unused: one caller runs this file
- * through a bundler's module runner, which rewrites `import.meta.url` to a
- * non-`file:` URL, so `fileURLToPath()` throws on it (observed, not theoretical).
- * Each caller resolves the directory in whatever way is correct for it and
+ * NOTHING HERE RESOLVES ITS OWN LOCATION. `localesDir` is a required argument;
+ * each caller resolves the directory in whatever way is correct for it and
  * passes it in.
+ *
+ * One trap is worth writing down before someone adds a self-locating default.
+ * `import.meta.url` itself is FINE — it is a real `file:` URL under every
+ * caller, including the one that loads this module through a bundler's module
+ * runner, and `fileURLToPath(import.meta.url)` works. What is not fine is
+ * `new URL(relative, import.meta.url)`: one caller runs in a jsdom environment,
+ * whose `URL` global is jsdom's class rather than node:url's, and
+ * `fileURLToPath()` rejects a jsdom URL instance with ERR_INVALID_URL_SCHEME
+ * ("The URL must be of scheme file") even though the string it was built from
+ * is a perfectly good file: URL. Probed directly, not inferred. Taking the
+ * directory as an argument sidesteps the question entirely.
  */
 
 /**
@@ -231,7 +239,7 @@ export function classifyKeys(keys) {
  * entries naming keys that had long since been translated, so it hid nothing
  * useful and quietly widened. Every locale is now diffed in full, and a gap is
  * a failure — if a translation is genuinely pending, the fix is to translate the
- * key, not to re-add a suppression seam.
+ * key (see the translating-ui-strings skill), not to re-add a suppression seam.
  */
 export function keySetDiff(reference, actual) {
   const missing = [
@@ -342,11 +350,27 @@ export function missingPluralCategories(suffixes, categories) {
   return [...categories].filter((category) => !suffixes.has(category)).sort();
 }
 
-/** Namespace files the reference has, and the ones this locale has. */
+/**
+ * Namespace files the reference has, the ones this locale has, and the
+ * difference in BOTH directions.
+ *
+ * `extra` matters as much as `missing`, and is the easier one to overlook: a
+ * namespace the locale has and the reference does not is never key-diffed and
+ * never value-checked — every rule below iterates the reference's namespaces —
+ * so its contents are invisible unless the file itself is reported. The
+ * realistic path is a rename or deletion in the reference that a locale did not
+ * follow: the stale file keeps shipping, its keys resolve for nobody, and
+ * nothing else here would say so.
+ */
 export function namespaceDiff(locales, locale, referenceLocale = REFERENCE_LOCALE) {
   const expected = [...(locales.get(referenceLocale)?.keys() ?? [])].sort();
   const actual = [...(locales.get(locale)?.keys() ?? [])].sort();
-  return { expected, actual, missing: expected.filter((ns) => !actual.includes(ns)) };
+  return {
+    expected,
+    actual,
+    missing: expected.filter((ns) => !actual.includes(ns)),
+    extra: actual.filter((ns) => !expected.includes(ns)),
+  };
 }
 
 /**

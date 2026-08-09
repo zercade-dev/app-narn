@@ -24,6 +24,7 @@
  */
 import { fileURLToPath } from 'node:url';
 import {
+  CLDR_CATEGORIES,
   REFERENCE_LOCALE,
   STRICT_ENV,
   collectCoverageGaps,
@@ -91,10 +92,22 @@ for (const locale of allLocales) {
 
   if (locale === REFERENCE_LOCALE) continue;
 
-  const { missing } = namespaceDiff(locales, locale);
+  // BOTH directions. The key-diff loop below walks the REFERENCE's namespaces,
+  // so a namespace this locale has and the reference does not is never opened
+  // by any rule — reporting the file here is the only thing that sees it.
+  const { missing, extra } = namespaceDiff(locales, locale);
   fail(
     `${locale}: missing namespace files`,
     missing.map((namespace) => `${namespace}.json is present in ${REFERENCE_LOCALE} only`),
+  );
+  fail(
+    `${locale}: unexpected namespace files`,
+    extra.map(
+      (namespace) =>
+        `${namespace}.json has no ${REFERENCE_LOCALE} counterpart — nothing compares its ` +
+        `contents, so it is either a stale file left behind by a rename or a namespace ` +
+        `${REFERENCE_LOCALE} is missing`,
+    ),
   );
 
   const keyDiffs = [];
@@ -157,6 +170,16 @@ if (legacyPlurals.keys.length > 0) {
   );
   console.log(`  ${legacyPlurals.keys.join('\n  ')}`);
 }
+
+// The reported-only findings are not asserted — they are what they are — but the
+// report itself must be well-formed: every category it names is a real CLDR
+// category. A bogus one means the rules, not the content, are wrong.
+fail(
+  'coverage report names something that is not a CLDR plural category',
+  coverageGaps
+    .filter((gap) => !CLDR_CATEGORIES.includes(gap.category))
+    .map((gap) => `${gap.locale}: "_${gap.category}"`),
+);
 
 // A dead `_plural` key is tolerable only because something else still renders:
 // the bare key, or `_other`. With neither, the UI shows a raw i18next key.
