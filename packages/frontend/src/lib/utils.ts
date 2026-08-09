@@ -45,12 +45,58 @@ export function getErrorMessage(error: unknown): string {
 }
 
 /**
- * Error message with a caller-supplied (typically localized) fallback. Use when
- * a thrown value isn't an `Error` and a generic JSON dump would be unhelpful in
- * the UI — e.g. `toast.error(errorMessage(err, t('runs.startFailed')))`.
+ * i18n keys in the `errors` namespace for the HTTP statuses worth naming.
+ *
+ * `httpStatus()` below duck-types the status instead of `instanceof ApiError`
+ * — `hooks/use-api.ts` imports from this module (`downloadBlob`, `randomId`),
+ * so importing `ApiError` from `use-api.js` here would create an import cycle.
  */
-export function errorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
+const HTTP_ERROR_KEYS: Record<number, string> = {
+  401: 'errors:http.unauthorized',
+  403: 'errors:http.forbidden',
+  423: 'errors:http.vaultLocked',
+  429: 'errors:http.rateLimited',
+};
+
+/** Duck-types an `ApiError`-shaped value's `status` without importing the class. */
+function httpStatus(error: unknown): number | undefined {
+  return typeof error === 'object' &&
+    error !== null &&
+    'status' in error &&
+    typeof (error as { status: unknown }).status === 'number'
+    ? (error as { status: number }).status
+    : undefined;
+}
+
+/**
+ * User-facing text for a caught error, given a caller-supplied localized
+ * fallback. Use when a thrown value isn't handled specially and a generic
+ * JSON dump would be unhelpful in the UI — e.g.
+ * `toast.error(errorMessage(err, t('runs.startFailed')))`.
+ *
+ * The raw `error.message` is deliberately never the headline: it is server or
+ * runtime text ("ECONNREFUSED", a zod dump) that means nothing to a user. When
+ * `t` is supplied, a recognised `ApiError`-shaped status produces specific
+ * wording; otherwise the caller's fallback stands. Raw detail belongs in a
+ * description slot via {@link technicalDetail}, or in the console, which
+ * keeps everything.
+ */
+export function errorMessage(error: unknown, fallback: string, t?: (key: string) => string): string {
+  if (t) {
+    const status = httpStatus(error);
+    if (status !== undefined) {
+      const key = HTTP_ERROR_KEYS[status] ?? (status >= 500 ? 'errors:http.server' : undefined);
+      if (key) return t(key);
+    }
+  }
+  return fallback;
+}
+
+/** Raw error text for a description slot or a details disclosure. */
+export function technicalDetail(error: unknown): string | undefined {
+  if (error instanceof Error && error.message) return error.message;
+  if (typeof error === 'string' && error) return error;
+  return undefined;
 }
 
 /**
