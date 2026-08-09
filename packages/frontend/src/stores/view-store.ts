@@ -92,6 +92,21 @@ interface ViewStore {
    * clears it once consumed.
    */
   pendingCategoryGenScope: { entryIds: string[] } | null;
+  /**
+   * Guide topic to open on the next render of the Guide view, set by
+   * `openGuide`. Deliberately in-memory only (unlike the `/join` deep link in
+   * `lib/url-state.ts`): it exists so an in-app "what is this?" affordance can
+   * hand the reader straight to the relevant topic, not to make guide topics
+   * addressable.
+   *
+   * `GuideView` only READS it — plain `setView` clears it, so opening the Guide
+   * from the sidebar afterwards lands on the default topic instead of the last
+   * deep-linked one. Clearing lives here rather than in GuideView because the
+   * consumer would have to write to this store from an effect, which
+   * `react-hooks/set-state-in-effect` (rightly) rejects.
+   */
+  pendingGuideSlug: string | null;
+  /** Selects a top-level view. Clears any pending guide topic (see above). */
   setView: (v: ShellView) => void;
   /** Selects a project section and switches the shell back to the project view. */
   setActiveTab: (tab: Tab) => void;
@@ -119,6 +134,12 @@ interface ViewStore {
   openCategoryGenScope: (entryIds: string[]) => void;
   /** Clears the pending category-gen scope (call after consuming it). */
   clearPendingCategoryGenScope: () => void;
+  /**
+   * Opens the Guide view scrolled to a specific topic. Used by in-context help
+   * affordances (e.g. the Pseudo Test tooltip on the Data tab) so "read more"
+   * lands on the right page instead of the Guide's first topic.
+   */
+  openGuide: (slug: string) => void;
 }
 
 export const useViewStore = create<ViewStore>()((set) => ({
@@ -127,7 +148,8 @@ export const useViewStore = create<ViewStore>()((set) => ({
   reviewRunId: null,
   suggestionRunId: null,
   pendingCategoryGenScope: null,
-  setView: (view) => set({ view }),
+  pendingGuideSlug: null,
+  setView: (view) => set({ view, pendingGuideSlug: null }),
   setActiveTab: (activeTab) => set({ activeTab, view: 'project' }),
   openReview: (sub, runId) =>
     set({ activeTab: REVIEW_TAB[sub], view: 'project', reviewRunId: runId ?? null }),
@@ -137,4 +159,5 @@ export const useViewStore = create<ViewStore>()((set) => ({
   openCategoryGenScope: (entryIds) =>
     set({ activeTab: 'category', view: 'project', pendingCategoryGenScope: { entryIds } }),
   clearPendingCategoryGenScope: () => set({ pendingCategoryGenScope: null }),
+  openGuide: (slug) => set({ view: 'guide', pendingGuideSlug: slug }),
 }));
