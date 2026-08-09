@@ -113,6 +113,28 @@ Two things it does **not** do, both deliberate:
 Match the surrounding code rather than introducing a new style, and keep a pull
 request to one subject.
 
+## Opening an issue, and what the labels mean
+
+Please use one of the [issue templates](https://github.com/zercade-dev/app-narn/issues/new/choose)
+— a bug report, a feature request, or a small suggestion. Each one applies the label
+that says what kind of issue it is, so you do not need to label anything yourself:
+`bug`, `enhancement` or `polish`. `documentation` and `question` exist for the same
+purpose and are applied by hand. An issue carries exactly one of these.
+
+Every new issue also arrives with `needs-triage`, which means only that the
+maintainer has not yet decided what happens to it. That label is managed
+automatically, by [`.github/workflows/issue-triage.yml`](.github/workflows/issue-triage.yml),
+and the rule it enforces is this: an issue stops needing triage once it is **closed**
+or **assigned**. Closing is itself a decision — fixed, duplicate, `wontfix`, all of
+them count — and assigning means someone has taken it on. Reopening an issue that
+nobody is assigned to puts the label back, because the decision has been undone. A
+daily sweep reconciles anything the live path missed, so `needs-triage` on an open,
+unassigned issue always means what it says.
+
+Please do not report a vulnerability as a public issue, whatever the labels suggest —
+the `security` label is for issues that arrive that way by mistake. See _Reporting a
+security issue_ below for the private channel.
+
 ## Pull requests
 
 Open pull requests against `develop`; `main` carries releases. Continuous
