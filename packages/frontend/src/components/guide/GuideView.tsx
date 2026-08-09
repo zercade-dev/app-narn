@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
+import { useViewStore } from '../../stores/view-store.js';
 import { GUIDE_GROUPS, getGuideContent } from './guides-registry.js';
 import { renderMarkdown } from './markdown.js';
 import { stripLocalOnly } from './strip-local-only.js';
@@ -28,7 +29,26 @@ export function GuideView() {
     [visibleGroups],
   );
   const firstVisibleSlug = visibleGroups[0]?.topics[0]?.slug;
-  const [activeSlug, setActiveSlug] = useState(firstVisibleSlug ?? '');
+
+  // `openGuide(slug)` deep-links here from an in-context help affordance (e.g.
+  // the Pseudo Test tooltip on the Data tab). AppShell unmounts this view when
+  // `view !== 'guide'`, so the lazy initialiser is the live path — it opens ON
+  // the requested topic instead of rendering topic #1 for a frame first.
+  const pendingGuideSlug = useViewStore((s) => s.pendingGuideSlug);
+  const [activeSlug, setActiveSlug] = useState(() => pendingGuideSlug ?? firstVisibleSlug ?? '');
+
+  // Same render-phase "adjust state when a prop changes" pattern as the
+  // cloudManaged reconcile below, covering the case where a deep-link arrives
+  // while this view is already mounted. Tracking the last-honoured request (not
+  // just comparing against activeSlug) is what lets the reader click away to
+  // another topic afterwards without being yanked back. The store value itself
+  // is cleared by the next `setView`, not from here — writing to it during
+  // render would be a side effect, and from an effect a lint error.
+  const [honouredSlug, setHonouredSlug] = useState(pendingGuideSlug);
+  if (pendingGuideSlug && pendingGuideSlug !== honouredSlug) {
+    setHonouredSlug(pendingGuideSlug);
+    setActiveSlug(pendingGuideSlug);
+  }
 
   // Render-phase reconcile (React's "adjusting state when a prop changes"
   // pattern): if cloudManaged flips true mid-session (after /vault/status

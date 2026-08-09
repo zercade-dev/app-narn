@@ -68,6 +68,7 @@ export const GUIDE_GROUPS: GuideGroup[] = [
       { slug: 'usage-compare', labelKey: 'guide.topicCompare' },
       { slug: 'usage-routing', labelKey: 'guide.topicRouting' },
       { slug: 'usage-activity', labelKey: 'guide.topicActivity' },
+      { slug: 'usage-pseudo-test', labelKey: 'guide.topicPseudoTest' },
     ],
   },
   {
