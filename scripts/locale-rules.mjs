@@ -699,8 +699,8 @@ export function buildReport(locales, { coverageGaps, legacyPlurals }) {
 // NOTHING HERE IS ADVISORY. A finding is either a failure or it is not a
 // finding. The one thing that could rot silently — an IDENTICAL_ALLOWLIST entry
 // whose value has since been translated — is asserted as stale by the callers
-// rather than ignored, and pairCounts() below exists so a check that silently
-// stops comparing anything goes red instead of green.
+// rather than ignored, and uncomparedNamespaces() below exists so a check that
+// silently stops comparing anything goes red instead of green.
 
 /**
  * Leaf entries whose value is a string, as [key, value] pairs. Non-string and

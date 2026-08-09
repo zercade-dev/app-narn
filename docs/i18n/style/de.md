@@ -34,7 +34,23 @@ _nimm_, not "nehme". `account:mfaDisableHint` ("Enter a current code from your
 authenticator app…") is "Gib einen aktuellen Code aus deiner Authenticator-App ein…".
 
 That is the only class that shifts. Verbs that umlaut in the present tense do **not** umlaut
-here (_fahr_, not "fähr"; _lauf_, not "läuf"), and every other verb simply drops the -e.
+here (_fahr_, not "fähr"; _lauf_, not "läuf").
+
+The final **-e is a separate question, and it is not simply dropped.** Four stem shapes
+_require_ it, and several of their verbs are everyday words in this UI:
+
+- Stems ending in **-d** or **-t**: _Warte_, _Sende_, _Beende_, _Finde_, _Lade_ — never
+  "Wart", "Send", "Beend".
+- Stems ending in a **consonant + m or n**, where that consonant is not l, m, n, r or h:
+  _Öffne_, _Atme_, _Rechne_, _Zeichne_. The excluded letters are what make _lern_, _komm_
+  and _film_ fine without it.
+- Stems ending in **-ig**: _Bestätige_, _Benachrichtige_, _Entschuldige_.
+- Verbs in **-eln / -ern**, which keep the ending and contract the stem instead: _Sammle_
+  (sammeln), _Wechsle_ (wechseln), _Ändere_ (ändern) — not "sammel", "wechsel", "änder".
+
+For every other verb the -e is genuinely optional (_mach_ or _mache_, _sag_ or _sage_,
+_geh_ or _gehe_). Drop it there — the short form is the current UI register — and keep it
+only where one of the four shapes above forces it.
 
 _du_, _dich_, _dir_ and _dein_ are lowercase — see the casing section. And whatever you do,
 never mix _du_ and _Sie_, in any string class: labels, errors, toasts and prose share one

@@ -21,8 +21,27 @@ left in English, an acronym you expanded.
 `NARN` · provider and module names (`DeepL`, `Copilot`, `OpenRouter`, `Anthropic`,
 `Gemini`, `OpenAI`, `DeepSeek`, `GitHub Copilot`) · module ids and module-instance ids
 (`generic-ai`, `openai:default`) · model ids · vault key names (`OPENAI_API_KEY`) ·
-the language code `pseudo-test` · CSV header tokens · version numbers · anything inside
-`{{…}}`.
+the language code `pseudo-test` · CSV header tokens · version numbers · **keyboard key
+names** · anything inside `{{…}}`.
+
+**Keyboard key names are the trap on this list**, because they are ordinary English words
+that the app also uses as ordinary English words. `Enter`, `Esc`, `Shift`, `Tab`, `Ctrl`
+and `Alt` name physical keys, and the key is engraved in English on the keyboards these
+users have; translating one produces an instruction to press a key that does not exist.
+Keep them verbatim, and translate only the sentence around them:
+`strings:compare.cellEditTooltip` ("Edit · Enter · Esc to cancel") is "Editar · Enter ·
+Esc para cancelar" in es and "Modifier · Enter · Esc pour annuler" in fr;
+`strings:compare.cellEditReviewedTooltip` ("Reviewed — press Enter to edit") keeps `Enter`
+the same way, as do `common:webSearch.hint`, `strings:compare.contextPlaceholder` and
+`strings:compare.tonePlaceholder` ("…Enter to save, Shift+Enter for a new line, Esc to
+cancel…").
+
+The same words appear in the same files as **verbs and nouns, and there they translate
+normally** — "Enter your password", "Enter a valid hex color", "Enter edit mode", the
+_Tab_ that means a tab in the UI. Eight of the fifteen `Enter`s in `en` are the verb. Read
+the string, not the word: the key-name reading is the one that names a keystroke. This is
+also why key names are not in the guard's do-not-translate list, which is a per-term count
+check and would demand every one of those verbs survive untranslated.
 
 The product name appears in English as `narn`, `Narn` and `NARN`. That inconsistency is
 known and unresolved; copy whatever spelling the source string contains, and never
@@ -1176,8 +1195,8 @@ or search the file for the word.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
-| es | coincidencia | Feminine. Plural "coincidencias" throughout the Matches panel ("{{count}} coincidencias", "No se encontraron coincidencias.", "Aplicar coincidencias"). The verb is "coincidir" (`config:noMatches` — "Ningún modelo coincide con tu búsqueda"). |
-| fr | correspondance | Feminine. Plural "correspondances" throughout the Matches panel ("{{count}} correspondances", "Aucune correspondance trouvée.", "Appliquer les correspondances"). The verb is "correspondre" (`config:noMatches` — "Aucun modèle ne correspond à votre recherche"). |
+| es | coincidencia | Feminine. Plural "coincidencias" throughout the Matches panel ("{{count}} coincidencias", "No se encontraron coincidencias.", "Aplicar coincidencias"). The verb is "coincidir" (`config:models.noMatches` — "Ningún modelo coincide con tu búsqueda"). |
+| fr | correspondance | Feminine. Plural "correspondances" throughout the Matches panel ("{{count}} correspondances", "Aucune correspondance trouvée.", "Appliquer les correspondances"). The verb is "correspondre" (`config:models.noMatches` — "Aucun modèle ne correspond à votre recherche"). |
 | de | | |
 | it | | |
 | pt-br | | |
