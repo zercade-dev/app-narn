@@ -83,6 +83,7 @@
     "immutableHint": "Un pseudo ne peut plus être modifié une fois réservé.",
     "placeholder": "p. ex. jamie-writes",
     "formatHint": "Lettres minuscules, chiffres et traits d'union, de 3 à 30 caractères.",
+    "claimOnDesktop": "Ouvrez narn sur un écran plus grand pour réserver votre pseudo.",
     "claimButton": "Réserver le pseudo",
     "claiming": "Réservation…",
     "claimSuccess": "Pseudo réservé."

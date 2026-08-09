@@ -33,6 +33,10 @@ interface NicknameSectionProps {
    * nickname — lets a parent (e.g. `JoinProjectView`) react without a second
    * `getNickname()` round trip. */
   readonly onClaimed?: (nickname: string) => void;
+  /** Suppresses the claim form, leaving only the read-only states. Set on
+   * mobile viewports (issue #70), where claiming — a one-shot, permanent
+   * write — has no place; an already-claimed nickname still displays. */
+  readonly readOnly?: boolean;
 }
 
 type Status = 'loading' | 'claimed' | 'unclaimed';
@@ -50,7 +54,7 @@ type Status = 'loading' | 'claimed' | 'unclaimed';
  * trip the server rejects with `nickname_already_claimed`, which the form
  * surfaces like any other claim error.
  */
-export function NicknameSection({ onClaimed }: Readonly<NicknameSectionProps>) {
+export function NicknameSection({ onClaimed, readOnly = false }: Readonly<NicknameSectionProps>) {
   const { t } = useTranslation('collab');
   const [status, setStatus] = useState<Status>('loading');
   const [nickname, setNickname] = useState<string | null>(null);
@@ -114,6 +118,10 @@ export function NicknameSection({ onClaimed }: Readonly<NicknameSectionProps>) {
           </p>
           <p className="text-sm text-muted-foreground">{t('nickname.immutableHint')}</p>
         </div>
+      ) : readOnly ? (
+        <p className="text-sm text-muted-foreground" data-testid="nickname-claim-on-desktop">
+          {t('nickname.claimOnDesktop')}
+        </p>
       ) : (
         <div className="space-y-2" data-testid="nickname-form">
           <Label htmlFor="nickname-input">{t('nickname.title')}</Label>
