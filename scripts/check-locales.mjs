@@ -65,8 +65,6 @@ if (!reference) {
   console.error(`check-locales: reference locale "${REFERENCE_LOCALE}" not found`);
   process.exit(1);
 }
-const targetLocales = allLocales.filter((locale) => locale !== REFERENCE_LOCALE);
-
 /** Hard failures, as `[heading, lines]` blocks in discovery order. */
 const failures = [];
 const usedAllowlistKeys = new Set();
