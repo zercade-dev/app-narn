@@ -236,6 +236,21 @@ export class ModuleRegistry {
   }
 
   /**
+   * Every id this registry can resolve: the loaded base modules plus the
+   * current tenant's instances — exactly the two maps {@link resolve} consults,
+   * so `listModuleIds().includes(id)` iff `getModule(id)` is defined.
+   *
+   * Distinct from {@link listModules}, which builds full metadata (credential
+   * state and all) for each entry. Callers that only need to know whether an id
+   * is real — notably anything about to put one in a file path — should use
+   * this and take the string from the returned list rather than reusing their
+   * own untrusted input.
+   */
+  listModuleIds(): string[] {
+    return [...this.modules.keys(), ...this.tenantInstances().keys()];
+  }
+
+  /**
    * Resolve a module or instance id to its loaded base module. For instance
    * ids the returned `instance` field carries the registry entry.
    */

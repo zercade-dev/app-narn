@@ -52,32 +52,33 @@ function getTenantModelsCacheDir(): string {
   return resolveProjectPath(MODELS_CACHE_DIR, tenantId);
 }
 
-/**
- * Module ids that may be turned into a models-cache filename: a base module id,
- * optionally followed by `:<instance-slug>`. Both halves carry the same
- * lowercase `[a-z0-9-]` shape that `MODULE_INSTANCE_SLUG_PATTERN` enforces when
- * an instance is created, and every base module id is spelled that way too — so
- * this admits every id a registered module can actually have.
- */
-const CACHEABLE_MODULE_ID =
-  /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?(?::[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?)?$/;
-
-function getModuleModelsCachePath(id: string): string {
-  // `id` reaches here from `req.params.id`. Every caller has already rejected
-  // ids the registry doesn't know, which is the real guard — but a registry
-  // lookup is a dynamic property read, so neither a reader nor a static
-  // analyser can see that it constrains the string. Restate it as an explicit
-  // allowlist on the way into a path: nothing that fails this could have named
-  // a registered module, so no reachable request changes behaviour.
-  if (!CACHEABLE_MODULE_ID.test(id)) {
-    throw new PathTraversalError(`Invalid module id: ${id}`);
-  }
+/** The cache file for an id already known to be a real module id. */
+function modelsCachePathFor(id: string): string {
   return resolveProjectPath(getTenantModelsCacheDir(), `${id}-models-cache.json`);
+}
+
+/**
+ * Resolves a caller-supplied module id to the registry's own spelling of it,
+ * so what ends up in a filename is the registry's string rather than the
+ * request's.
+ *
+ * `listModuleIds()` enumerates exactly the ids `getModule()` resolves — both
+ * read the same two maps — and every route here already 404s an id
+ * `getModule()` doesn't know, so this rejects nothing that reaches it today.
+ * It only makes the constraint explicit instead of leaving it implied by a
+ * dynamic map read further down the file.
+ */
+function requireRegisteredModuleId(id: string): string {
+  const registeredId = moduleRegistry.listModuleIds().find((known) => known === id);
+  if (registeredId === undefined) {
+    throw new PathTraversalError(`Unknown module id: ${id}`);
+  }
+  return registeredId;
 }
 
 async function writeModuleModelsCache(id: string, cache: ModelsCache): Promise<void> {
   await fsp.mkdir(getTenantModelsCacheDir(), { recursive: true });
-  await atomicWrite(getModuleModelsCachePath(id), cache);
+  await atomicWrite(modelsCachePathFor(requireRegisteredModuleId(id)), cache);
 }
 
 interface ModelsCache {
@@ -85,17 +86,33 @@ interface ModelsCache {
   models: unknown[];
 }
 
-async function readModelsCache(): Promise<ModelsCache | null> {
-  return readModuleModelsCache(COPILOT_MODULE_ID);
-}
-
-async function readModuleModelsCache(id: string): Promise<ModelsCache | null> {
+async function readCacheAt(cachePath: string): Promise<ModelsCache | null> {
   try {
-    const raw = await fsp.readFile(getModuleModelsCachePath(id), 'utf-8');
+    const raw = await fsp.readFile(cachePath, 'utf-8');
     return JSON.parse(raw) as ModelsCache;
   } catch {
     return null;
   }
+}
+
+/**
+ * The shared Copilot cache. Keyed by a module-id CONSTANT, not by anything a
+ * request carries, so it deliberately skips the registry check above — whether
+ * Copilot happens to be registered has never determined whether its cache file
+ * can be read.
+ */
+async function readModelsCache(): Promise<ModelsCache | null> {
+  return readCacheAt(modelsCachePathFor(COPILOT_MODULE_ID));
+}
+
+async function readModuleModelsCache(id: string): Promise<ModelsCache | null> {
+  let cachePath: string;
+  try {
+    cachePath = modelsCachePathFor(requireRegisteredModuleId(id));
+  } catch {
+    return null;
+  }
+  return readCacheAt(cachePath);
 }
 
 // Age of a model cache vs. the TTL — the single "fresh?" predicate shared by the
