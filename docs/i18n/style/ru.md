@@ -195,7 +195,7 @@ them:
 published pages**, so they are not a translator's decision. Whatever the published Russian
 page calls itself, the label must say — a link whose text differs from the title of the page
 it opens is a defect no locale review can catch, because the page is not in this repo. The
-three ship as «Условия использования», «Политика использования cookie» and «Субобработчики»
+three ship as «Условия использования», «Политика о файлах cookie» and «Субобработчики»
 respectively, each of which is defensible on its own:
 
 - **terms** — «Условия использования» over «Пользовательское соглашение»; both are standard,
@@ -309,7 +309,10 @@ followed by a Cyrillic word:
 1. **Skip by token name first.** A placeholder that cannot hold a number cannot force
    agreement, whatever follows it. In this app that is `module`, `instance`, `language`,
    `languages`, `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`, `keys`,
-   `slug`, `type` — module ids, language display names, error text, dates. Skip `count` too:
+   `slug`, `type`, `focus`, `field`, `why`, `label`, `filename`, `id`, `time` and `passRate` —
+   module ids, language display names, field labels, error text, dates. This is the full list
+   measured over all 24 namespaces: with exactly these, the detector has **zero** surviving
+   false positives across 187 token-plus-Cyrillic-word occurrences. Skip `count` too:
    it is the one token that *does* get CLDR selection, so its family already handles it.
 2. **Then skip by word.** What is left fires on the next Cyrillic word, which is often not a
    noun at all. Safe: prepositions and particles — «не» above all, which is invariant and can
@@ -343,7 +346,7 @@ Russian's four categories instead.
 **Settled convention: do not add a plural family over an English plain key.** The guard
 permits it — a locale may turn one English `{{count}}` string into four, provided the plain
 key survives — and the temptation is real, because Russian would often be richer for it. No
-shipped locale does it: across all 34 families in the four locales, **zero** were added this
+shipped locale does it: across all **41** families in each of the four locales, **zero** were added this
 way, and every count English writes as one string is handled with the count-neutral device
 above («Осиротевших записей: {{count}}», «Ключей в хранилище: {{count}}»). Follow that. If the
 project ever wants added families, it is a decision to take **once, for every locale**, not
@@ -380,8 +383,8 @@ locale meets all twelve:
 `logs:translation.failedModuleNotFound` · `logs:sourceReview.done` · `logs:orphan.detected` ·
 `vault:keysCount` · `vault:remainingAttemptsHint` · `vault:retrySuccess` · `vault:retryFailed`
 
-Ten of the twelve carry the same tokens in the bare key and in `_other`, so the constraint
-binds without ever being visible. **`vault:retrySuccess` is the only token-asymmetric one** —
+Eleven of the twelve carry identical token sets in the bare key and in `_other`, so the
+constraint binds without ever being visible. **`vault:retrySuccess` is the only token-asymmetric one** —
 the bare key has no token and `_other` has `{{count}}` — and `vault:retryFailed` is the case
 where neither has one, so no Russian form may add a number at all. Check English's `_other`,
 not English's bare key, before writing your singular.
