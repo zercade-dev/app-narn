@@ -219,7 +219,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | запись | Feminine, 3rd declension: gen. записи, instr. записью, gen. pl. записей — counts run «1 запись / 2–4 записи / 5+ записей», so every counted family needs all four plural keys. «Запись» is the ordinary Russian for an _entry_ (in a dictionary, a journal, a log); the English ban on _record_ targets a database flavour «запись» does not carry here. Never «строка», which is both _string_ and _row_. Where `logs` narrates about "strings" it takes «запись» too. |
+| ru | запись | Feminine, 3rd declension: gen. записи, instr. записью, gen. pl. записей — counts run «1 запись / 2–4 записи / 5+ записей», so every counted family needs all four plural keys. «Запись» is the ordinary Russian for an _entry_ (in a dictionary, a journal, a log); the English ban on _record_ targets a database flavour «запись» does not carry here. Never «строка», which is both _string_ and _row_. Where `logs` narrates about "strings" it takes «запись» too. **«Запись» is claimed exclusively, and one other term had to move because of it:** _recording_ (the manual-edit audit) would naturally be «запись» as well, and takes «фиксация» instead — see that row before writing anything about the audit. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -355,6 +355,33 @@ or search the file for the word.
 | it | | |
 | pt-br | | |
 | ru | встроенный тег | Head noun «тег» (masculine, gen. тега, pl. теги, gen. pl. тегов). In running text it usually appears as «теги форматирования» — `logs:translation.maskMismatch` is «Теги форматирования не сохранились при переводе на {{language}}.» — but the head noun stays «тег» everywhere. Never «метка», which is taken by _source label_, and never «ярлык». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### placeholder
+
+**Means here:** specifically a `{{…}}`-style token inside the game text, which the translation must carry over unchanged. A **subset of _inline tag_** above, not a rival to it: "inline tag" is the umbrella over placeholders, formatting tags and `\n` escapes, and "placeholder" names only the token kind. The LQA check that compares them is filterable by name.
+
+**Part of speech in UI:** noun, usually plural.
+
+**Example:** `strings:filters.placeholderMismatch` — "Placeholder mismatch"
+
+**Not:** variable, parameter, argument, field, wildcard — and **not** the input-hint sense of the same English word. A `placeholder` attribute on a text box is unrelated UI vocabulary; if your language would use one word for both, use two.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | подстановка | Feminine; gen. подстановки, gen. pl. подстановок. `strings:filters.placeholderMismatch` is «Несовпадение подстановок». Sits under «тег» (_inline tag_) rather than beside it, so a string about tags in general still says «теги». The **input-hint** sense is a different word entirely and never «подстановка» — a field hint is rendered as the hint text itself («Поиск по тексту…»), which is how the shipped `strings` namespace handles every one of them. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -547,7 +574,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | прогон | Masculine; gen. прогона, pl. прогоны, gen. pl. прогонов — «стоимость прогона», «статус прогона», «Прогоны» in Activity. «Запуск» was rejected: it shares a root with «запустить», which the UI needs as the separate action _start_, and «стоимость запуска» reads as the cost of starting rather than the cost of the run. Never «задача», «сеанс», «операция» or «партия». `logs:translation.runQueued` is «Прогон перевода поставлен в очередь — позиция {{position}}.» One thing to know and accept: «прогон» has an unrelated colloquial sense (a tall tale, a wind-up). It is suppressed by the technical collocations this app always supplies — «прогон перевода», «стоимость прогона», «Прогоны» in a table of statuses — and no candidate without a drawback exists, so this is a known cost rather than an oversight. |
+| ru | прогон | Masculine; gen. прогона, pl. прогоны, gen. pl. прогонов — «стоимость прогона», «статус прогона», «Прогоны» in Activity. «Запуск» was rejected: it shares a root with «запустить», which the UI needs as the separate action _start_, and «стоимость запуска» reads as the cost of starting rather than the cost of the run. Never «задача», «сеанс», «операция» or «партия». `logs:translation.runQueued` is «Прогон перевода поставлен в очередь — позиция {{position}}.» **The six status values, fixed** (`strings:runs.statusPending` onward): «Ожидание», «В очереди», «Выполняется», «Приостановлено», «Завершено», «Отменено», with «Ошибка» for _Failed_. Four are neuter short forms — the invariant status shape recorded on _needs review_ — and the two that are not («В очереди», «Ошибка») are noun phrases, which are equally invariant; none of them agrees with «прогон», and none should be made to. The column header `strings:runs.statusColumn` is «Статус». One thing to know and accept: «прогон» has an unrelated colloquial sense (a tall tale, a wind-up). It is suppressed by the technical collocations this app always supplies — «прогон перевода», «стоимость прогона», «Прогоны» in a table of statuses — and no candidate without a drawback exists, so this is a known cost rather than an oversight. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -755,6 +782,8 @@ or search the file for the word.
 **Example:** `category:reviewTitle` — "Review suggestions"
 
 **Not:** proposal, recommendation, advice, hint, tip, idea. Keep one word across the judge panel, the glossary generator and the category generator — they are the same interaction.
+
+**A known English copy bug, and the one place it must not be mirrored.** The action on a suggestion is *apply* — `strings:runs.judgeApply` is "Apply suggestion" — but `strings:runs.judgeApproveAll` says "**Approve** all suggestions" for the very same action on all of them. That is stale English copy awaiting a fix, not a second action. Render **both** with your *apply* word, and do not reach for your *approve* word: this file reserves that for storing a translation into translation memory, which is a different operation that appears in the same UI. Following the English here would invent a distinction the app does not have.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
@@ -1166,6 +1195,33 @@ or search the file for the word.
 | zh-hans | | |
 | zh-hant | | |
 
+#### issue
+
+**Means here:** one verdict an LQA check files against one translation, at blocking or warning severity. The judge's opinions are filed into the same per-entry list, always as warnings, so an issue is what the *results* contain regardless of who put it there.
+
+**Part of speech in UI:** noun, usually counted ("{{count}} LQA issues").
+
+**Example:** `strings:row.lqaIssues_other` — "{{count}} LQA issues"
+
+**Not:** error, problem in the sense of a crash, defect, bug, violation — and **not** the word you chose for a source review's **finding**, which is an AI opinion about the source rather than a machine verdict about a translation. The two are listed on the same entry.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | проблема | Feminine; gen. проблемы, gen. pl. проблем — counted, so the family needs all four plural categories, where English (`strings:row.lqaIssues_one`, `strings:row.lqaIssues_other`) has two: «{{count}} проблема / проблемы / проблем LQA». The acronym follows the noun and does not decline. This is the counterpart the _finding_ row names: «проблема» is the machine verdict, «замечание» is the AI's remark on the source. Not «ошибка», which _check_ reserves so that a failing check is never confused with a runtime error. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
 #### severity
 
 **Means here:** how hard an LQA check fails — blocking or warning. Set per check; the value decides whether the gate fails and an automatic retry is triggered.
@@ -1428,7 +1484,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | утвердить | Perfective «утвердить» on buttons, imperfective «утверждать» in prose — the promotion sense, not «подтвердить» (_confirm_), «принять» (_accept_) or «сохранить» (_save_), all three of which live in the same bulk bar, and not «проверить», which is reserved. `strings:bulk.approveSelected` is «Утвердить в память». Count-neutral phrasing keeps the participle out of agreement trouble: «Утверждено переводов: {{count}}». **Use the verb and the participle, never the verbal noun «утверждение»** — that word is taken by _assertion_ below, and «утверждение перевода» would read as a regex assertion in a file that has both. |
+| ru | утвердить | Perfective «утвердить» on buttons, imperfective «утверждать» in prose — the promotion sense, not «подтвердить» (_confirm_), «принять» (_accept_) or «сохранить» (_save_), all three of which live in the same bulk bar, and not «проверить», which is reserved. `strings:bulk.approveSelected` is «Утвердить в память». Count-neutral phrasing keeps the participle out of agreement trouble: «Утверждено переводов: {{count}}». **Use the verb and the participle, never the verbal noun «утверждение»** — that word is taken by _assertion_ below, and «утверждение перевода» would read as a regex assertion in a file that has both. Second restriction, from the English copy bug recorded on _suggestion_: `strings:runs.judgeApproveAll` says "Approve all suggestions" for what is really *apply*, and it ships as «Применить все предложения». «Утвердить» belongs to this row alone — putting it on a judge button would claim a translation had been stored in memory when it has not. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1676,6 +1732,33 @@ or search the file for the word.
 | it | | |
 | pt-br | | |
 | ru | участник | Masculine animate; gen. участника, gen. pl. участников. `collab:sharing.membersTitle` is «Участники». The generic masculine covers everyone, as is standard in Russian UI — do not switch to «участница» for a named person. Wider than «соредактор» (_collaborator_): the owner is a «участник» but not a «соредактор». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### recording
+
+**Means here:** the manual-edit audit capturing who changed which translation by hand, kept for seven days and switched off when a project has no active collaborators. "Recording" names the capture being on or off; it is a process, not the captured rows.
+
+**Part of speech in UI:** noun (a status), and the participle "recorded" for what it produced.
+
+**Example:** `strings:runs.manualRecordingPaused` — "Recording paused — no active collaborators"
+
+**Not:** log, history, tracking, audio or video recording, and above all **not the word you chose for _entry_**. Several languages' first word for "a record" is the same one they use for a content entry, and this app counts entries constantly — if the two collide, "Recording paused" reads as "Entry paused".
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | фиксация | Feminine; gen. фиксации. **This row exists because «запись» is double-booked:** it is the natural Russian for _recording_ and it is already _entry_, the unit this whole app counts. «Фиксация» takes the process sense and leaves «запись» alone — `strings:runs.manualRecordingPaused` is «Фиксация приостановлена — нет активных соредакторов», and the participle for a captured change is «зафиксировано». Not «журналирование», which is the server-log panel's territory, and not «отслеживание». |
 | tr | | |
 | id | | |
 | vi | | |

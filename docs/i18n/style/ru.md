@@ -103,6 +103,15 @@ For those classes, **never exceed ~1.5× the English character count**, and pref
 shorter of two correct options — «Активность» over «История выполнения», «Качество» over
 «Контроль качества».
 
+**One recorded exception, so it does not read as a defect.** `strings:tabs.review-source-ai`
+ships at **1.75×** — «ИИ-рецензия исходного текста» against "Source AI review" — and that is
+correct. `terminology.md` builds _source review_ out of _AI review_ and _source text_ on
+purpose, so the two review tabs read as siblings, and the neighbouring
+`strings:tabs.review-translation-ai` («ИИ-рецензия переводов») has to match it word for word.
+Shortening either one buys a few pixels and breaks a naming rule that costs more. Any future
+exception needs the same shape: a named term rule that outranks the budget, written down
+here — not a translator's judgement that the label "felt too long to shorten".
+
 The renderings used as examples above are illustrations of the length problem, not
 decisions about wording. `terminology.md` owns the rendering of every domain term,
 including the surface names and _translation memory_ — decide it there on first use,
@@ -114,12 +123,21 @@ A surface is named in one namespace and owned by another, so these four are writ
 different translators at different times. They are settled; copy them, do not re-render
 them:
 
-| Surface | Russian | Owning key | Already named from |
+| Surface | Russian | Owning key | Repeated at |
 | --- | --- | --- | --- |
 | Compare | «Сравнение» | `strings:tabs.compare` | `config:routing.tonesHint` |
 | Translations | «Переводы» | `strings:tabs.strings` | `config:routing.categoriesConfiguredHint` |
 | Backup | «Резервные копии» | `strings:tabs.backup` | `config:importSnapshotNote` |
 | Orphans | «Сироты» | `orphans:title` | `config:fullReplaceOrphanNotice` |
+| Sharing | «Доступ» | `strings:tabs.sharing` | `collab:sharing.pageTitle` |
+
+**Sharing is the one to read twice.** «Доступ» is short for a reason the wording does not
+show: «Совместный доступ» is the fuller and more obvious rendering, and at seventeen
+characters against "Sharing"'s seven it does not fit the tab budget above. The tab is the
+authority, so the `collab` page title and everything else naming that surface takes «Доступ»
+too — a page title that expands to «Совместный доступ» while the tab says «Доступ» is exactly
+the drift `terminology.md`'s surface-name rule exists to stop, and the two are never on
+screen together to make it visible.
 
 The punctuation pattern is the same in all four: «ёлочки» around the tab name at the top
 level of the string, and the sentence's full stop **outside** the closing guillemet — «…на
