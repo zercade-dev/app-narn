@@ -1,7 +1,8 @@
 # Style guide — Vietnamese (vi)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/vi.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register
@@ -72,9 +73,9 @@ over "Kiểm soát chất lượng". A long label does not clip — it wraps at 
 which reads as a typo.
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/vi.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ## Placeholders
 
@@ -102,7 +103,7 @@ duplicate.
 - **CAT-tool vocabulary is not settled in Vietnamese.** "Bộ nhớ dịch" for _translation
   memory_ and "bảng thuật ngữ" for _glossary_ are the common renderings, but they are not
   universal the way the Spanish or German equivalents are. Whatever you choose, record it in
-  `terminology.md` on first use — the next translator will otherwise pick differently in
+  `terminology/vi.md` on first use — the next translator will otherwise pick differently in
   good faith.
 - **Sino-Vietnamese vs native register.** "Xóa" and "loại bỏ", "lưu" and "lưu trữ", "cài
   đặt" and "thiết lập" differ in formality, not meaning. Pick one per term; mixing them

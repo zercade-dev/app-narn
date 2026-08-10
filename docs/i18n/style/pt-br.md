@@ -3,8 +3,9 @@
 This locale is **Brazilian** Portuguese, not European Portuguese. Where the two diverge,
 Brazilian wins every time — see the traps section for the specific word list.
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/pt-br.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register
@@ -70,9 +71,9 @@ For those classes, **never exceed ~1.6× the English character count**. Drop the
 ("Excluir" over "Remover permanentemente").
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/pt-br.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ## Placeholders
 
@@ -108,10 +109,10 @@ the locale.
   the natural Portuguese word for _template_ (`config:templatesTitle`), and `terminology.md`
   fixes the direction of that collision: the rendering of _model_ stays where it is, and it
   is the rendering of _template_ that has to move. Choose a different word for template,
-  record it in `terminology.md`, and never let "modelo" drift onto templates.
+  record it in `terminology/pt-br.md`, and never let "modelo" drift onto templates.
 - **"Judge"** takes the evaluative sense ("avaliar"), never "julgar"/"juiz".
 - **Standalone status words carry gender.** `vault:statusLocked` ("Locked") has no visible
-  noun and must agree with whatever `terminology.md` fixes for _credential vault_.
+  noun and must agree with whatever `terminology/pt-br.md` records for _credential vault_.
 - **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms
   where English writes "entr(ies)". Do not imitate the parentheses; rephrase so one string
   covers every count.
