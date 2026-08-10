@@ -840,6 +840,60 @@ or search the file for the word.
 | zh-hans | | |
 | zh-hant | | |
 
+#### flag
+
+**Means here:** to set a translation aside in the review queue to come back to later. It is a **disposition, not an alarm** — the handler sets the record's status to flagged *and clears its needs-review flag*, so it is the opposite move to marking something for review.
+
+**Part of speech in UI:** verb on the row button ("Flag"), and "flagged" as the filter chip and the toast.
+
+**Example:** `review:flag` — "Flag"
+
+**Not:** mark, report, denounce, bookmark, star — and above all **not the verb you chose for "mark as needs review"**, because this action *clears* that flag. Using one word for both would make the same verb set and unset the same state.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | отложить | Perfective «отложить» / imperfective «откладывать»; the participle «отложенные» serves the filter chip unchanged. `review:flag` is «Отложить», `review:filterFlagged` is «Отложенные», `review:flaggedToast` is «Перевод отложен». The ordinary Russian for setting something aside to return to, which is what the English hint describes. **Deliberately not «отметить»** — that verb belongs to `strings:compare.flagAllNeedsReview` («Отметить всё на вычитку»), and this action clears exactly that flag; and not «на вычитку», which would be factually backwards. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### review queue
+
+**Means here:** the Manual review surface: the list of translations awaiting a person, with its filters, its per-language scoping and its empty states.
+
+**Part of speech in UI:** noun phrase (a page title, an empty-state title, a filter label).
+
+**Example:** `review:title` — "Review queue"
+
+**Not:** a second name for **needs review**, which is the *state* an item is in. The queue is where those items are listed. Build the two from one root if your language allows it, so a reader sees one feature rather than two.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | очередь вычитки | Feminine head noun «очередь» (3rd declension, gen. очереди). `review:title` is «Очередь вычитки» and `review:emptyTitle` is «Очередь вычитки пуста». Built from the same «вычитка» as _needs review_, so the tab (`strings:tabs.review-manual` — «Ручная вычитка»), the filter («На вычитку») and the queue share one root. Note the standing ban from that row: the noun and «для вычитки» only — never the verb «вычитать», which is a stress-only homograph of _subtract_. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
 ### Modules, providers, credentials
 
 #### module
@@ -1413,6 +1467,33 @@ or search the file for the word.
 | zh-hans | | |
 | zh-hant | | |
 
+#### constant
+
+**Means here:** a flag on a glossary term meaning the term is masked before the model sees it and restored verbatim in the translation — the model never translates it at all. A column in the Glossary table, a bulk action, and a badge in the review panels.
+
+**Part of speech in UI:** noun used as a column header and a state badge; the badge is lowercase where the surrounding chips are.
+
+**Example:** `glossary:colConstant` — "Constant"
+
+**Not:** permanent, unchangeable, read-only, fixed, do-not-translate. **"Read-only" is the near-miss to avoid**: it is a different flag two columns away in the same table, and it means the row cannot be edited, not that the text is never translated.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | константа | Feminine; gen. константы, gen. pl. констант. `glossary:colConstant` is «Константа» (9 characters against 8, so the narrow column still fits) and `review:glossaryConstant` is the lowercase «константа», matching the chips beside it. «Константа» is the established Russian for a value substituted verbatim rather than computed, which is exactly the mechanism. Rejected: «постоянный» (an adjective needing an antecedent, and it reads as *permanent*), «неизменяемый» (its UI reading is *cannot be edited*, which is what «Только для чтения» already means in the same table) and «Не переводить» (a command, wrong for a header and wrong for a badge). |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
 #### match
 
 **Means here:** one place where a glossary term was found in an entry's source text. The Glossary tab's Matches panel lists them, counts them, filters them by term, and compares entries with and without a glossary assigned. The same word is also the verb behind search results and routing conditions ("No models match your search", "Must match"); keep the noun and the verb on the same root wherever the language allows it.
@@ -1484,7 +1565,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | утвердить | Perfective «утвердить» on buttons, imperfective «утверждать» in prose — the promotion sense, not «подтвердить» (_confirm_), «принять» (_accept_) or «сохранить» (_save_), all three of which live in the same bulk bar, and not «проверить», which is reserved. `strings:bulk.approveSelected` is «Утвердить в память». Count-neutral phrasing keeps the participle out of agreement trouble: «Утверждено переводов: {{count}}». **Use the verb and the participle, never the verbal noun «утверждение»** — that word is taken by _assertion_ below, and «утверждение перевода» would read as a regex assertion in a file that has both. Second restriction, from the English copy bug recorded on _suggestion_: `strings:runs.judgeApproveAll` says "Approve all suggestions" for what is really *apply*, and it ships as «Применить все предложения». «Утвердить» belongs to this row alone — putting it on a judge button would claim a translation had been stored in memory when it has not. |
+| ru | утвердить | Perfective «утвердить» on buttons, imperfective «утверждать» in prose — the promotion sense, not «подтвердить» (_confirm_), «принять» (_accept_) or «сохранить» (_save_), all three of which live in the same bulk bar, and not «проверить», which is reserved. `strings:bulk.approveSelected` is «Утвердить в память». Count-neutral phrasing keeps the participle out of agreement trouble: «Утверждено переводов: {{count}}». **Use the verb and the participle, never the verbal noun «утверждение»** — that word is taken by _assertion_ below, and «утверждение перевода» would read as a regex assertion in a file that has both. Second restriction, from the English copy bug recorded on _suggestion_: `strings:runs.judgeApproveAll` says "Approve all suggestions" for what is really *apply*, and it ships as «Применить все предложения». «Утвердить» belongs to this row alone — putting it on a judge button would claim a translation had been stored in memory when it has not. **One deliberate divergence, recorded so it is not "corrected" later.** English writes "Approve" at two unrelated call sites and Russian splits them, because only one of them approves anything: `review:approve` posts to the project's approve endpoint and writes into translation memory, so it is «Утвердить»; `review:sourceAi.approve` only dispositions a source-review record and stores nothing, so it is **«Принять»**. Two English words identical, two Russian words different — the same use/mention discipline as the judge buttons above, resolved by the call site rather than by the string. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1732,6 +1813,87 @@ or search the file for the word.
 | it | | |
 | pt-br | | |
 | ru | участник | Masculine animate; gen. участника, gen. pl. участников. `collab:sharing.membersTitle` is «Участники». The generic masculine covers everyone, as is standard in Russian UI — do not switch to «участница» for a named person. Wider than «соредактор» (_collaborator_): the owner is a «участник» but not a «соредактор». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### nickname
+
+**Means here:** the public handle a person picks once, by which collaborators recognize them across shared projects. Set-once and never editable afterwards. Its format is Latin lowercase letters, digits and hyphens, 3–30 characters.
+
+**Part of speech in UI:** noun.
+
+**Example:** `collab:nickname.title` — "Nickname"
+
+**Not:** username, alias, pen name, display name, account name. **"Username" is the one to avoid**: the app already has an account identity, and giving both the same name recreates exactly the confusion the *collaborator* / *member* pair exists to prevent.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | никнейм | Masculine loanword; gen. никнейма, pl. никнеймы. The settled Russian for a public handle in a product. Rejected: «имя пользователя», which is *username* and would collide with the account identity, and «псевдоним», which reads as a pen name adopted to conceal. **The format hint must say «латинские»** — `collab:nickname.formatHint` is «Строчные латинские буквы, цифры и дефисы, от 3 до 30 символов», because the pattern is Latin-only and a Russian reader would otherwise try Cyrillic and be rejected without knowing why. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### claim
+
+**Means here:** to take a nickname for yourself, permanently. One action, but the UI needs the whole family: a button, a progressive status while it runs, a success toast, and an immutability hint about what has already been claimed.
+
+**Part of speech in UI:** verb, with a verbal noun and a participle.
+
+**Example:** `collab:nickname.claimButton` — "Claim nickname"
+
+**Not:** reserve, register, take, occupy, request. Whatever you pick must yield all four forms **and** stay distinguishable from "that name is **reserved**", which is a different, adjacent message.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | закрепить | Perfective «закрепить»; verbal noun «закрепление», participle «закреплен». One root covers all four surfaces — `collab:nickname.claimButton` «Закрепить никнейм», `claiming` «Закрепление…», `claimSuccess` «Никнейм закреплен.», `immutableHint` «После закрепления никнейм изменить нельзя.» Rejected: «занять», which reads well on the button but has no usable verbal noun, and «зарезервировать», because `collab:errors.nickname_reserved` («Это имя зарезервировано») would then contradict the button on screen. Those two words stay free for exactly those errors — «занят» for a taken nickname, «зарезервировано» for a blocked one. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### invite
+
+**Means here:** a one-time code the project owner generates so someone can join the project as a collaborator. It carries a status — pending, redeemed, revoked or expired — and an expiry date, and the code itself is shown exactly once.
+
+**Part of speech in UI:** noun; the four statuses are a value set on one field.
+
+**Example:** `collab:invites.title` — "Invites"
+
+**Not:** invitation link, request, token, membership, access code used interchangeably. **Translate the four statuses as a set, in one part of speech** — they sit in one column and a reader compares them down the page.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | приглашение | Neuter; gen. приглашения, gen. pl. приглашений. `collab:invites.title` is «Приглашения». **The four statuses, decided as a set:** `collab:invites.status.pending` «Ожидает», `status.redeemed` «Использовано», `status.revoked` «Отозвано», `status.expired` «Истекло» — all four predicates of the implied «приглашение», which is neuter, so three are neuter past forms and «Ожидает» is a present-tense 3sg because Russian has no participle for _pending_ that reads as a status. «В ожидании» would have matched in shape only by making one value a prepositional phrase, which is the part-of-speech mismatch the _severity_ row warns about; «Активно» would have been a uniform set but changes the meaning, since a revoked invite is also inactive. |
 | tr | | |
 | id | | |
 | vi | | |

@@ -30,7 +30,15 @@ before you translate the string.** The convention below is already shipped acros
 
 - **Titles, tab labels and section headings are noun phrases.** `config:importCsv` is
   «Импорт CSV», `config:routing.tabImportExport` is «Импорт / Экспорт»,
-  `config:saveAsTemplateTitle` is «Шаблон проекта».
+  `config:saveAsTemplateTitle` is «Шаблон проекта». A dialog title takes the deverbal noun
+  for the same reason: `config:models.pickTitle` is «Выбор модели».
+- **A confirm dialog is the exception, and takes the infinitive** — it names the action you
+  are about to authorize, not a section you are looking at. `config:confirmDeleteTitle` is
+  «Удалить проект», `glossary:confirmDeleteTitle` is «Удалить термин»,
+  `category:deleteConfirmTitle` is «Удалить категорию?» and `collab:leaveConfirmTitle` is
+  «Покинуть проект?». Keep English's question mark where it has one and leave it off where it
+  does not — the source is inconsistent about it, and matching per key is what keeps a
+  reviewer from "fixing" one of them.
 - **Buttons are infinitives** — the rule above, restated here because this is where it
   contrasts: `config:routing.importBtn` and `config:routing.exportBtn` are «Импортировать»
   and «Экспортировать». English's "Import" is one word in both rows of this list; Russian's
@@ -180,6 +188,36 @@ value it can take**. The devices, in order of preference:
 
 Never «{{total}} записи» or «осталось {{n}} дня». If you cannot find a frame, say so rather
 than shipping a string that is right one time in three.
+
+**One recorded case where the count-neutral frame costs something.**
+`logs:translation.queued` and `logs:sourceReview.done` each display `{{total}}` /
+`{{findings}}` while their plural family selects on `count`, and the log-presentation
+registry sets both members of each pair from the same value — so inflecting after the token
+*would* have been correct in those two strings. They are count-neutral anyway, deliberately:
+the guarantee lives in a different file from the string, so a later change there would break
+the grammar silently and nothing would fail. The cost is real and is the point of writing it
+down — those two log lines lose a singular/plural distinction English has. Do not "restore"
+it without re-reading the registry and deciding to depend on it.
+
+### Checking your own work for numeral agreement
+
+Two passes, because they catch different mistakes. Scan every string containing a `{{token}}`
+followed by a Cyrillic word:
+
+1. **Skip by token name first.** A placeholder that cannot hold a number cannot force
+   agreement, whatever follows it. In this app that is `module`, `instance`, `language`,
+   `languages`, `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`, `keys`,
+   `slug`, `type` — module ids, language display names, error text, dates. Skip `count` too:
+   it is the one token that *does* get CLDR selection, so its family already handles it.
+2. **Then skip by word.** What is left fires on the next Cyrillic word, which is often not a
+   noun at all. Safe: prepositions and particles — «не» above all, which is invariant and can
+   never agree with anything; invariant abbreviations («симв.», «байт»); and impersonal
+   participles and short participles used as statuses («вычитано», «отключен»), which are
+   never counted nouns and which the placeholder rule above deliberately puts beside a token.
+
+Whatever survives both passes is a genuine numeric token with a Russian word after it —
+check it by hand at 1, 2 and 5. Run the token pass first: it is precise, where the word list
+exempts a word after *every* token and blunts the check if it grows.
 
 **Russian supplies all four plural categories — that is settled, not a question to raise.**
 Russian selects between _one_, _few_, _many_ and _other_, while the English source ships
