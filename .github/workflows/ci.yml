@@ -81,3 +81,7 @@ jobs:
       - name: Locale parity and integrity
         if: steps.gate.outputs.skip != 'true'
         run: pnpm check:locales
+
+      - name: Lexicon citations
+        if: steps.gate.outputs.skip != 'true'
+        run: pnpm check:lexicon
