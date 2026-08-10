@@ -40,6 +40,17 @@ overrides:
   # and its tarball was diff-audited against 3.3.16 (owner-approved during the
   # dependency freeze). Relax to a range once the freeze lifts.
   nanoid: 3.3.17
+  # GHSA-v422-hmwv-36x6 (low, published 2026-08-02): body-parser <2.3.0 silently
+  # skips the request-size check when `limit` is unparseable — bytes.parse()
+  # returns null and enforcement is dropped instead of erroring. Not reachable
+  # here (both call sites in packages/server/src/index.ts pass string literals,
+  # '10mb' and '64kb'), so this is hardening, not a live hole. Pulled in
+  # transitively via express, whose own '^2.2.1' range already admits 2.3.0.
+  # EXACT pin for the same reason as nanoid above: 2.3.0 was published
+  # 2026-06-15, seven weeks BEFORE the 2026-08-04 ChainDrop worm outbreak, and
+  # its tarball was diff-audited against 2.2.2 (owner-approved during the
+  # dependency freeze). Relax to '>=2.3.0' once the freeze lifts.
+  body-parser: 2.3.0
 
 catalog:
   # Shared tooling
