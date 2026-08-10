@@ -743,3 +743,12 @@ with one language that was survivable, and with several it is not. A translator 
 their own locale's file never conflicts with another, but a rule rewrite mid-flight
 invalidates work already done. A term the lexicon lacks goes into an additive queue and is
 resolved between waves, not during one.
+
+**Who resolves the queue, and what happens to work already shipped under a different
+reading.** The person coordinating the wave resolves it, once, after the wave's last batch
+lands and before the next wave starts — the same moment the measurements are written up.
+Until then the rendering you chose stands: keep using it consistently for the rest of your
+own language rather than pausing on it. If the resolution differs from what you shipped, it
+arrives as an ordinary fix round against your locale, with a scoped re-review like any
+other. Nothing you translate is ever stranded by a queue decision, which is the whole reason
+the queue is additive rather than a place to wait.

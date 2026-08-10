@@ -33,7 +33,11 @@ so eleven languages can run at once without ever touching the same line.
 `terminology/README.md`: add the proposed term, the key that made you need it, and the
 rendering you used, then carry on with that rendering. Do not add a heading here. The queue
 is resolved **between waves, never mid-wave** — a term promoted into this file mid-wave would
-change what the other ten translators are reading while they read it.
+change what the other ten translators are reading while they read it. **You are never blocked
+by a queued term:** the rendering you used stands for the rest of your wave, and if the
+between-waves resolution settles on a different word it reaches your locale as an ordinary
+fix round. Who runs that resolution, and the fix-round procedure, are the runbook's —
+`backfill-runbook.md`.
 
 **Why it works this way.** The Russian pilot ran this file as a fifth, parallel workstream
 and it cost more than any single translation batch: ten rounds, growing from 55 terms to 76,

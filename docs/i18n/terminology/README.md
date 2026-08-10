@@ -73,6 +73,11 @@ prevent.
 Give the key that motivated it, so whoever resolves the queue can read the string rather
 than guess at the concept.
 
+A queued term never blocks you: the rendering you used stands for the rest of your wave, and
+a resolution that settles on a different word reaches your locale as an ordinary fix round.
+Who runs the resolution, and the fix-round procedure, belong to
+[`../backfill-runbook.md`](../backfill-runbook.md).
+
 | Proposed term | Key that motivated it | Locale | Rendering used | Raised by |
 | --- | --- | --- | --- | --- |
 | _(empty)_ | | | | |
