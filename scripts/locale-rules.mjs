@@ -22,7 +22,7 @@
  * changing a threshold.
  */
 import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 
 /** English is the reference locale (statically loaded in src/i18n/index.ts). */
 export const REFERENCE_LOCALE = 'en';
@@ -1142,10 +1142,24 @@ export function thinAllowlistReasons() {
 // namespace, which is the only direction that catches a delete or a rename.
 //
 // Scope (deliberately conservative, to stay false-positive free):
-// - Only bindings of the form `const { t } = useTranslation('ns')` or
-//   `const { t: tName } = useTranslation('ns')` with a single string-literal
-//   namespace are tracked. Array namespaces, `keyPrefix` options, and
-//   dynamically chosen namespaces are skipped.
+// - Only `const` destructurings of a `useTranslation('ns')` call with a single
+//   single-quoted namespace literal are tracked, and only when `t` is among the
+//   destructured properties — as `t` or renamed, `t: tName`. Array namespaces,
+//   `keyPrefix` options, dynamically chosen namespaces, `let`/`var` bindings and
+//   double-quoted namespaces are all skipped.
+// - A SIBLING DESTRUCTURED PROPERTY DOES NOT DEFEAT THE MATCH. It used to:
+//   the rule was written as a single regex requiring `{ t }` or `{ t: name }`
+//   and nothing else between the braces, so `const { t, i18n } =
+//   useTranslation('ns')` — a form seven components use, between them holding
+//   160 call sites, including StringTableRow and ComparisonGrid — was invisible
+//   to the guard entirely. A key deleted from every locale while those files
+//   still referenced it shipped. Properties are now split on commas and matched
+//   individually, so order does not matter (`{ i18n, t }` is the same binding)
+//   and the count of siblings does not either.
+//   Siblings must still each be a plain identifier, optionally renamed. That
+//   keeps out the forms whose meaning is not obvious from a regex — a rest
+//   element, a default value, a nested pattern — where `t` might not be the
+//   translate function at all; those skip the whole binding rather than guess.
 // - Within one file, a binding name mapped to two different namespaces is
 //   ambiguous and skipped entirely.
 // - Only single-quoted literal keys are checked; template literals and
@@ -1156,7 +1170,9 @@ export function thinAllowlistReasons() {
 // Every one of those restrictions is load-bearing. This rule fails CI in the
 // repository where frontend PRs are raised, so a false positive reddens correct
 // code and gets the rule deleted rather than debugged. Widen it only with a
-// reason as concrete as the ones above.
+// reason as concrete as the ones above — the sibling-property widening was
+// justified by seven measured files and re-verified at zero offenders over the
+// whole tree before it landed.
 
 /** File extensions the source sweep reads. */
 export const SOURCE_EXTENSIONS = ['.ts', '.tsx'];
@@ -1221,14 +1237,46 @@ export function namespaceHasKey(nsKeySet, key) {
   return BARE_KEY_SUFFIXES.some((suffix) => nsKeySet.has(`${key}${suffix}`));
 }
 
-const BINDING_RE = /const\s*\{\s*t(?:\s*:\s*(\w+))?\s*\}\s*=\s*useTranslation\(\s*'([\w-]+)'\s*\)/g;
+/**
+ * A `const { … } = useTranslation('ns')` statement, capturing the destructured
+ * property list and the namespace.
+ *
+ * The property list is `[^{}]*`, which cannot cross a brace in either
+ * direction — so the match can never span from one statement's `const {` to a
+ * later statement's `}`, and a nested destructuring pattern fails to match at
+ * all rather than matching half of itself. What it CAN cross is a newline,
+ * which is deliberate: a multi-line destructuring is the same binding.
+ */
+const BINDING_RE = /const\s*\{\s*([^{}]*?)\s*\}\s*=\s*useTranslation\(\s*'([\w-]+)'\s*\)/g;
+
+/** The destructured translate function: `t`, or renamed as `t: tName`. */
+const T_PROPERTY_RE = /^t(?:\s*:\s*(\w+))?$/;
+
+/**
+ * A destructured property this rule understands: a plain identifier, optionally
+ * renamed to another identifier. One property that does not fit — a rest
+ * element, a default value, a computed key — skips the whole binding, because
+ * those are the forms where `t` may not be what it looks like.
+ */
+const SIMPLE_PROPERTY_RE = /^\w+(?:\s*:\s*\w+)?$/;
 
 /** Extracts binding-name -> namespace for one file; drops ambiguous names. */
 export function extractBindings(source) {
   const bindings = new Map();
   const ambiguous = new Set();
   for (const match of source.matchAll(BINDING_RE)) {
-    const name = match[1] ?? 't';
+    const properties = match[1]
+      .split(',')
+      .map((property) => property.trim())
+      .filter((property) => property !== ''); // a trailing comma is legal
+    if (!properties.every((property) => SIMPLE_PROPERTY_RE.test(property))) continue;
+
+    // `{ i18n: t }` binds the i18n INSTANCE to the name `t`, so the property has
+    // to be matched on its key, not on the name it introduces.
+    const tProperty = properties.find((property) => T_PROPERTY_RE.test(property));
+    if (!tProperty) continue;
+
+    const name = T_PROPERTY_RE.exec(tProperty)[1] ?? 't';
     const namespace = match[2];
     if (bindings.has(name) && bindings.get(name) !== namespace) ambiguous.add(name);
     bindings.set(name, namespace);
@@ -1261,8 +1309,24 @@ export function usedKeysInSource(source) {
 }
 
 /**
+ * The smallest source-file count that means the sweep actually ran.
+ *
+ * Exported so the CLI and the vitest guard share ONE number: two hardcoded
+ * floors are two things to keep in step, and the one that drifts low is the one
+ * that stops protecting anything. The frontend has ~250 files, so this is a
+ * "did the walk find the tree at all" floor, not a growth assertion — it should
+ * not be raised as the app grows.
+ */
+export const MIN_SOURCE_FILES = 100;
+
+/**
  * Keys referenced in source but absent from the reference locale, as
  * `path: "ns:key"` ids, plus how many files were read.
+ *
+ * Paths are reported RELATIVE to `srcDir`. The absolute path is noise everywhere
+ * and actively unhelpful in CI, where it names the runner's checkout directory
+ * (`/home/runner/work/app-narn/app-narn/…`) rather than anything the reader can
+ * paste.
  *
  * `filesScanned` is returned rather than logged because a sweep that reads
  * nothing produces an empty offender list, which is indistinguishable from a
@@ -1281,7 +1345,8 @@ export function missingUsedKeys(locales, srcDir, referenceLocale = REFERENCE_LOC
 
   const sources = readSourceFiles(srcDir);
   const offenders = [];
-  for (const [path, source] of sources) {
+  for (const [absolutePath, source] of sources) {
+    const path = relative(srcDir, absolutePath);
     // Reported per BINDING, not per call site, so a file that names a namespace
     // with no locale file is caught even when every key it passes is dynamic.
     for (const [, namespace] of extractBindings(source)) {

@@ -36,6 +36,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   CLDR_CATEGORIES,
+  MIN_SOURCE_FILES,
   REFERENCE_LOCALE,
   collectCoverageGaps,
   collectLegacyPluralKeys,
@@ -173,10 +174,11 @@ fail(
 
 // A sweep that read nothing reports no offenders, which looks exactly like a
 // clean run. The count is asserted here and printed in the summary below.
-if (usedKeys.filesScanned < 100) {
+if (usedKeys.filesScanned < MIN_SOURCE_FILES) {
   fail('source sweep', [
-    `only ${usedKeys.filesScanned} source file(s) found under ${FRONTEND_SRC_DIR} — ` +
-      `the used-key rule compared almost nothing, so its green result means nothing`,
+    `only ${usedKeys.filesScanned} source file(s) found under ${FRONTEND_SRC_DIR}, ` +
+      `expected at least ${MIN_SOURCE_FILES} — the used-key rule compared almost nothing, ` +
+      `so its green result means nothing`,
   ]);
 }
 
