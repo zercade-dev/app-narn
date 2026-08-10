@@ -309,8 +309,7 @@ rediscovered.
 
 ### Checking your own work for numeral agreement
 
-Two passes, because they catch different mistakes. Scan every string containing a `{{token}}`
-followed by a Cyrillic word:
+Two passes. Scan every string containing a `{{token}}` followed by a Cyrillic word:
 
 1. **Skip by token name first.** A placeholder that cannot hold a number cannot force
    agreement, whatever follows it. In this app that is `module`, `instance`, `language`,
@@ -320,15 +319,21 @@ followed by a Cyrillic word:
    measured over all 24 namespaces: with exactly these, the detector has **zero** surviving
    false positives across 187 token-plus-Cyrillic-word occurrences. Skip `count` too:
    it is the one token that *does* get CLDR selection, so its family already handles it.
-2. **Then skip by word.** What is left fires on the next Cyrillic word, which is often not a
-   noun at all. Safe: prepositions and particles — «не» above all, which is invariant and can
-   never agree with anything; invariant abbreviations («симв.», «байт»); and impersonal
-   participles and short participles used as statuses («вычитано», «отключен»), which are
-   never counted nouns and which the placeholder rule above deliberately puts beside a token.
+2. **Then skip by word — but only words that actually cleared pass 1.** Of the 187, just
+   **19** survive the token skip, and six words cover every one of them: the prepositions
+   «из», «с» and «на», invariant and unable to agree with anything; the invariant
+   abbreviations «симв.» and «байт»; and the impersonal participle «вычитано», used as a
+   status rather than a counted noun. Build your word list from what pass 1 actually leaves
+   behind — never from the full 187. A word picked up from the raw scan is contaminated by
+   legitimate `{{count}}` agreement (a real counted noun such as «записи» recurs constantly
+   and correctly after `{{count}}`, whose own family already inflects it) and, once
+   exempted, would silently wave through a defect such as `{{orphanCount}} записи`.
 
-Whatever survives both passes is a genuine numeric token with a Russian word after it —
-check it by hand at 1, 2 and 5. Run the token pass first: it is precise, where the word list
-exempts a word after *every* token and blunts the check if it grows.
+Whatever survives both passes is a genuine numeric token with a Russian word after it — check
+it by hand at 1, 2 and 5. The token pass has to run first, but not because check *order*
+changes any single verdict — it does not, the two filters are independent. It runs first
+because pass 2's word list is only ever safe to build from pass 1's 19 survivors, never from
+the 187 words you started with.
 
 **Russian supplies all four plural categories — that is settled, not a question to raise.**
 Russian selects between _one_, _few_, _many_ and _other_, while the English source ships
