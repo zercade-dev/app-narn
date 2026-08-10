@@ -21,6 +21,25 @@ candidate you rejected and why.
 Terms are in the order they appear in `../terminology.md`. Do not add, remove or reorder
 rows: a term the lexicon lacks goes in the additive queue in [`README.md`](README.md).
 
+## Keyboard key names
+
+`../terminology.md`'s "Keyboard key names" section is not one of the 76 frozen term rows —
+it is a per-locale rule (write the key name as engraved on that locale's keyboard), and this
+is where Russian's application of it is recorded, per that section's settled table.
+
+**Russian keeps `Enter`, `Shift` and `Esc` in Latin script, unchanged from English.** This is
+not an untranslated leftover — it is what the rule demands: a Russian keyboard's keycaps are
+printed with the Latin words `Enter`, `Shift` and `Esc`, not a Cyrillic rendering, so copying
+the English word is the correct application of "write it as engraved," the same as it would
+be for an English-language keycap. Do not "fix" these to a Cyrillic translation and do not
+flag them as missed strings in a locale-parity or untranslated-string sweep.
+
+Shipped examples: `common:webSearch.hint` — «Нажмите **Enter**, чтобы искать в новой
+вкладке»; `strings:compare.contextPlaceholder` and `strings:compare.tonePlaceholder` — «...
+(**Enter** — сохранить, **Shift+Enter** — новая строка, **Esc** — отмена)...»;
+`strings:compare.cellEditTooltip` — «Изменить · **Enter** · **Esc** — отмена»;
+`strings:compare.cellEditReviewedTooltip` — «Вычитано — нажмите **Enter**, чтобы изменить».
+
 | Term | Rendering | Notes |
 | --- | --- | --- |
 | project | проект | Masculine; gen. проекта, dat. проекту, instr. проектом, pl. проекты, gen. pl. проектов. The verb is «создать» — `sidebar:createProjectTitle` is «Создать проект», never «открыть новый проект». Deliberately not the word chosen for _workspace_, which several strings contrast with it in one sentence. |

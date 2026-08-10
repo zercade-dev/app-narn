@@ -21,6 +21,20 @@ candidate you rejected and why.
 Terms are in the order they appear in `../terminology.md`. Do not add, remove or reorder
 rows: a term the lexicon lacks goes in the additive queue in [`README.md`](README.md).
 
+## Keyboard key names
+
+`../terminology.md`'s "Keyboard key names" section is not one of the 76 frozen term rows —
+it is a per-locale rule (write the key name as engraved on that locale's keyboard). French
+(AZERTY) renderings, settled 2026-08-10: `Enter` → **Entrée**, `Esc` → **Échap**,
+`Shift` → **Maj**. `Tab`, `Ctrl` and `Alt` do not currently occur as key names in any
+shipped `fr` string.
+
+Shipped examples: `common:webSearch.hint` — "Appuyez sur **Entrée** pour rechercher dans un
+nouvel onglet"; `strings:compare.contextPlaceholder` / `tonePlaceholder` — "(**Entrée** pour
+enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)…";
+`strings:compare.cellEditTooltip` — "Modifier · **Entrée** · **Échap** pour annuler";
+`strings:compare.cellEditReviewedTooltip` — "Révisé — appuyez sur **Entrée** pour modifier".
+
 | Term | Rendering | Notes |
 | --- | --- | --- |
 | project |  |  |

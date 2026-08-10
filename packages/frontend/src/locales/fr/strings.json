@@ -137,8 +137,8 @@
     "cellMarkReviewedAria": "Marquer la traduction {{language}} comme révisée",
     "cellClearAria": "Effacer la traduction pour {{language}}",
     "cellEditAria": "Modifier la traduction pour {{language}}",
-    "cellEditTooltip": "Modifier · Enter · Esc pour annuler",
-    "cellEditReviewedTooltip": "Révisé — appuyez sur Enter pour modifier",
+    "cellEditTooltip": "Modifier · Entrée · Échap pour annuler",
+    "cellEditReviewedTooltip": "Révisé — appuyez sur Entrée pour modifier",
     "cellTranslatedBadge": "traduit",
     "cellReviewedBadge": "révisé",
     "cellNeedsReviewBadge": "à réviser"

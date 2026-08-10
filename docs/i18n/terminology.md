@@ -86,24 +86,31 @@ not a rule about the word. If you are unsure what a layout engraves, say so in t
 column rather than guessing; a wrong key name is an instruction to press a key that does
 not exist.
 
-**These strings are currently inconsistent, and that is a known defect for the backfill
-to settle — not a rule.** Measured against the shipped files on 2026-08-09:
+**Settled per-locale renderings.** These are the only key names that occur in the shipped
+`en`, `es`, `fr` and `ru` strings today; a translator meeting one of them writes exactly
+this rendering, everywhere, and does not make a local decision:
 
-| Key | es | fr |
-| --- | --- | --- |
-| `strings:compare.cellEditTooltip` | `Enter` / `Esc` kept in English | `Enter` / `Esc` kept in English |
-| `strings:compare.cellEditReviewedTooltip` | "pulsa **Enter**" — kept in English | "appuyez sur **Enter**" — kept in English |
-| `common:webSearch.hint` | "Pulsa **Intro**" — localized | "Appuyez sur **Entrée**" — localized |
-| `strings:compare.contextPlaceholder` | `Enter` / `Esc` kept, **Mayús** localized — mixed | **Entrée** / **Maj+Entrée** / **Échap** — localized |
-| `strings:compare.tonePlaceholder` | `Enter` / `Esc` kept, **Mayús** localized — mixed | **Entrée** / **Maj+Entrée** / **Échap** — localized |
+| Key name | es | fr | ru |
+| --- | --- | --- | --- |
+| `Enter` (key) | **Intro** | **Entrée** | `Enter` (Latin, as engraved) |
+| `Esc` | `Esc` (already English on the keycap) | **Échap** | `Esc` (Latin, as engraved) |
+| `Shift` | **Mayús** | **Maj** | `Shift` (Latin, as engraved) |
+| `Tab` / `Ctrl` / `Alt` | not currently used as a key name in any shipped string | — | — |
 
-So both locales already localize some key names and not others, and es even mixes the two
-inside a single string. Under the rule above the **localized** cells are the correct ones:
-`common:webSearch.hint`, and the fr placeholders, are right and must not be "fixed" back
-to English. The rows still in English are the ones that need changing — as one deliberate
-sweep, so a tooltip and the placeholder next to it stop naming the same key two ways.
-Until that sweep lands, match the locale's engraved name in anything you newly write; do
-not propagate the English leftovers.
+Russian keeps the Latin key names **on purpose, not as an untranslated leftover**: a
+Russian keycap is printed with the Latin `Enter`/`Shift`/`Esc`, not a Cyrillic word, so
+copying the English word is what the rule above ("write it as engraved") actually
+requires for this locale. See `terminology/ru.md` for the same note recorded against the
+term, so a reviewer scanning for untranslated strings does not re-open it as a defect.
+
+This settles what used to be a known inconsistency: as measured against the shipped files
+on 2026-08-09, `es` and `fr` each kept `Enter`/`Esc` in English in the compare-tab tooltips
+(`strings:compare.cellEditTooltip`, `strings:compare.cellEditReviewedTooltip`) while
+already localizing the same key names in `common:webSearch.hint` and the compare-tab
+placeholders (`strings:compare.contextPlaceholder`, `strings:compare.tonePlaceholder`) —
+`es` even mixed both readings inside one string (`Enter`/`Esc` kept, `Mayús` localized).
+All five keys across `es` and `fr` now use the table above consistently; `ru` needed no
+string changes because it was already consistent with its own (Latin-keycap) rendering.
 
 The same words appear in the same files as **verbs and nouns, and there they translate
 normally** — "Enter your password", "Enter a valid hex color", "Enter edit mode", the

@@ -21,6 +21,21 @@ candidate you rejected and why.
 Terms are in the order they appear in `../terminology.md`. Do not add, remove or reorder
 rows: a term the lexicon lacks goes in the additive queue in [`README.md`](README.md).
 
+## Keyboard key names
+
+`../terminology.md`'s "Keyboard key names" section is not one of the 76 frozen term rows —
+it is a per-locale rule (write the key name as engraved on that locale's keyboard). Spanish
+renderings, settled 2026-08-10: `Enter` → **Intro**, `Shift` → **Mayús**. `Esc` stays `Esc`
+— unlike `Enter`/`Shift`, the escape key is already labelled `Esc` on a Spanish keyboard, so
+copying it is the correct application of the rule, not an English leftover. `Tab`, `Ctrl`
+and `Alt` do not currently occur as key names in any shipped `es` string.
+
+Shipped examples: `common:webSearch.hint` — "Pulsa **Intro** para buscar en una nueva
+pestaña"; `strings:compare.contextPlaceholder` / `tonePlaceholder` — "(**Intro** para
+guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
+`strings:compare.cellEditTooltip` — "Editar · **Intro** · **Esc** para cancelar";
+`strings:compare.cellEditReviewedTooltip` — "Revisado — pulsa **Intro** para editar".
+
 | Term | Rendering | Notes |
 | --- | --- | --- |
 | project |  |  |
