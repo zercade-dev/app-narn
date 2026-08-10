@@ -156,7 +156,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | проект | Masculine; gen. проекта, dat. проекту, instr. проектом, pl. проекты, gen. pl. проектов. The verb is «создать» — `sidebar:createProjectTitle` is «Создать проект», never «открыть новый проект». Deliberately not the word chosen for _workspace_, which several strings contrast with it in one sentence. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -183,7 +183,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | рабочая область | Feminine phrase whose adjective agrees: «рабочей области» in the genitive, which is the form the attributive uses take — `config:workspaceSettingsTitle` is «Настройки рабочей области». The settled Russian for a scope above the project, and never «проект». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -210,7 +210,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | запись | Feminine, 3rd declension: gen. записи, instr. записью, gen. pl. записей — counts run «1 запись / 2–4 записи / 5+ записей», so every counted family needs all four plural keys. «Запись» is the ordinary Russian for an _entry_ (in a dictionary, a journal, a log); the English ban on _record_ targets a database flavour «запись» does not carry here. Never «строка», which is both _string_ and _row_. Where `logs` narrates about "strings" it takes «запись» too. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -237,7 +237,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | исходный текст | Masculine; gen. «исходного текста». «Исходный» is shared with «исходный язык» (_source language_) and reads naturally in both. _Source label_ deliberately switches to the noun «источник», so «исходный» always means the original-language material and «источник» always means where an entry came from. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -264,7 +264,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | перевод | Masculine — which matters for the _reviewed_ family above: unlike es/fr the implied noun is masculine, so the citation form and the agreeing form coincide. Gen. перевода, pl. переводы, gen. pl. переводов; the tab label is the plural «Переводы». The verb is «перевести» / «переводить», and _re-translate_ is «перевести заново» (`review:retranslate`). Never bare «память» for _translation memory_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -291,7 +291,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | метка источника | Feminine head noun «метка» (gen. метки, gen. pl. меток); plural «метки источников», and the shortened routing column heading _Sources_ is «Источники». Never «ярлык», which is a shortcut, and never «тег», which is reserved for _inline tag_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -318,7 +318,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | достижение | Neuter; gen. достижения, gen. pl. достижений. «Достижения» is what Steam and Xbox call these in Russian; PlayStation's «трофеи» is platform-specific and would not match the rest of the app. Attributive forms are genitive: «название достижения», «описание достижения». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -345,7 +345,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | встроенный тег | Head noun «тег» (masculine, gen. тега, pl. теги, gen. pl. тегов). In running text it usually appears as «теги форматирования» — `logs:translation.maskMismatch` is «Теги форматирования не сохранились при переводе на {{language}}.» — but the head noun stays «тег» everywhere. Never «метка», which is taken by _source label_, and never «ярлык». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -372,7 +372,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | контекст для переводчика | Head noun «контекст» (masculine, gen. контекста); the prepositional phrase does not inflect, so the term survives every case unchanged. The model capability is «контекстное окно» and the entry metadata bundle is «контекст записи» — three phrases sharing one head noun, exactly as English shares the word _context_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -401,7 +401,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | исходный язык | Masculine; gen. «исходного языка». Pairs with «целевой язык» (_target language_), and that pair is the settled wording in Russian CAT and MT interfaces — `config:sourceLanguage` is «Исходный язык». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -428,7 +428,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | целевой язык | Masculine; plural «целевые языки», gen. pl. «целевых языков» — `config:targetLanguages` is «Целевые языки». Never «локаль»: the app tracks languages, not regional formats. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -455,7 +455,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | справочный язык | Masculine. «Справочный» is the reading-aid sense, as in «справочник»; «опорный» and «промежуточный» were rejected because both imply the app translates *through* the language. Checked against _guide_, which is «Руководство» and not «Справка», so nothing else in the UI carries the справ- root. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -482,7 +482,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | редактируемый язык | Participial adjective, agrees with its noun: «Редактируемые языки» in the column heading (`collab:sharing.columnLanguages`), «редактируемых языков» in the genitive. Use this one adjective in the table column, the lock messages and the invite dialog; the read-only counterpart is «только для чтения», not a second adjective. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -509,7 +509,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | Псевдотест | Proper noun, written solid, capital on the first letter only. The language list around it is fully Cyrillic and lowercase («русский», «испанский»), so an English name would read as a stray token — `strings:guide.topicPseudoTest` is «Псевдотест». The concept is «псевдолокализация»; the language code `pseudo-test` is never translated. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -538,7 +538,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | прогон | Masculine; gen. прогона, pl. прогоны, gen. pl. прогонов — «стоимость прогона», «статус прогона», «Прогоны» in Activity. «Запуск» was rejected: it shares a root with «запустить», which the UI needs as the separate action _start_, and «стоимость запуска» reads as the cost of starting rather than the cost of the run. Never «задача», «сеанс», «операция» or «партия». `logs:translation.runQueued` is «Прогон перевода поставлен в очередь — позиция {{position}}.» |
 | tr | | |
 | id | | |
 | vi | | |
@@ -565,7 +565,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | Активность | Feminine, 3rd declension (gen. активности). Ten characters against the English eight, so it fits the tab; «История выполнения» does not. The page title stays longer than the tab exactly as in English: `strings:runs.title` is «Активность переводов», `strings:tabs.runs` is «Активность». Never «Журнал», which belongs to the live server-log panel. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -592,7 +592,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | пакет | Masculine; gen. пакета, pl. пакеты, gen. pl. пакетов. Attributive takes the adjective — `config:module.batchMode` is «Пакетный режим», and batch size is «размер пакета». Bulk operations are «массовые операции», a different word, as in English. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -619,7 +619,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | группировка пакетов | Feminine head noun «группировка», deliberately a different lexeme from the «группа» of _rule group_: gen. pl. «группировок» against «групп», so the two never coincide in any case. `config:batchGroupingLabel` is «Группировка пакетов», which shares no word with «Пакетный режим» (_batch mode_). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -646,7 +646,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | ИИ-рецензия | Feminine; gen. «ИИ-рецензии». The prefix «ИИ-» does not inflect and follows the ordinary «ИИ-помощник» pattern. The two tabs are «ИИ-рецензия переводов» and «ИИ-рецензия исходного текста»; the run badge `strings:runs.judgeBadge` is the bare «ИИ-рецензия». «Рецензия» is an expert opinion, which is the distinction this file asks for: «проверка» is reserved for LQA checks and «вычитка» for a person reading a translation, so three concepts keep three words. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -673,7 +673,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | оценивать | Verb: imperfective «оценивать», perfective «оценить» — the evaluative sense only, never «судить» or «судья». `review:translationAi.description` becomes «Пусть ИИ оценит завершенные переводы по точности, беглости, терминологии и тональности». The noun «оценка» is the score it produces, not a name for the feature, which is «ИИ-рецензия»; do not introduce «судья» as a noun. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -700,7 +700,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | рецензия исходного текста | Built from _AI review_ and _source text_ on purpose, so the two passes read as siblings: `review:sourceAi.configTitle` is «ИИ-рецензия исходного текста». Report-only, so the verbs around it are «предложить» and «применить», never «исправить», and it must not be confusable with the translation pass on the neighbouring tab. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -727,7 +727,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | замечание | Neuter; gen. замечания, gen. pl. замечаний. `review:sourceAi.findingsTitle` is «Замечания». The five type labels are «Опечатка», «Грамматика», «Терминология», «Ясность» and «Небезопасная формулировка». Keep «замечание» for the AI's opinion and «проблема» for an LQA verdict — that is the English _finding_ / _issue_ split, and both words are needed on the same entry. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -754,7 +754,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | предложение | Neuter; gen. предложения, gen. pl. предложений. «Предложение» also means _sentence_ in grammar; that was weighed and accepted, because nothing in this app counts sentences (it counts «записи») and the actions beside it — «Применить», «Отклонить» — settle the reading. `category:reviewTitle` is «Просмотр предложений». One word across the judge panel, the glossary generator and the category generator. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -792,7 +792,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | на вычитку | A prepositional phrase, so there is no gender and no agreement anywhere — the same shape as fr «à réviser». Sentence-cased in the filter («На вычитку» — `strings:filters.needsReview`, `strings:compare.needsReviewFilter`), lowercase in the row badge («на вычитку» — `strings:compare.cellNeedsReviewBadge`), same wording in both; the bulk form is «Отметить всё на вычитку». «Вычитка» is a person reading a text and keeps «проверка» free for LQA checks — use the noun, not the verb «вычитать», which is a stress-only homograph of _subtract_. For the related _reviewed_ family: the implied noun «перевод» is masculine, so the token form and the agreeing form do not diverge the way es/fr's do — badge «переведено» / «вычитано» (neuter short forms, the citation shape Russian status values take), explicit antecedent «Отметить перевод на {{language}} как вычитанный» (`strings:compare.cellMarkReviewedAria`), elliptical label «Отметить как вычитанное» (`strings:shortcuts.markReviewed`). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -821,7 +821,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | модуль | Masculine inanimate, so the accusative equals the nominative («выбрать модуль»); gen. модуля, pl. модули, gen. pl. модулей. `config:routing.labelModule` is «Модуль». Read the hazard recorded on _model_ below before writing either word: the two are minimal pairs in every case and sit in adjacent controls. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -848,7 +848,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | экземпляр модуля | Masculine head noun «экземпляр» (gen. экземпляра, pl. экземпляры), shortened to «экземпляр» once «модуль» is established, exactly as English shortens to _instance_. `config:instances.formTitle` is «Новый экземпляр {{base}}». The field labelled _Instance id_ is «Идентификатор экземпляра», and the _slug_ named in `config:instances.slugReserved` is «часть идентификатора», not a UI concept. Never «копия», «профиль» or «конфигурация». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -875,7 +875,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | поставщик | Masculine animate, so the accusative equals the genitive («выбрать поставщика»); gen. pl. поставщиков. The native word rather than «провайдер», which in Russian reads as an internet or hosting company. `config:enableModuleHelp` is «Добавьте поставщика ИИ или сервиса перевода для использования во всех проектах.» The three English strings that mislabel a module-instance picker _Provider_ keep «Поставщик» as written and must not drag _module_ toward this word. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -902,7 +902,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | модель | Feminine, 3rd declension: gen./dat./prep. модели, instr. моделью, pl. модели, gen. pl. моделей. **The one-letter hazard:** «модель» and «модуль» stay minimal pairs through the whole paradigm (модуля/модели, модулю/модели, модули/модели, модулей/моделей) and appear in adjacent labels, so proofread this pair rather than trusting the eye. _Template_ is «шаблон» precisely so it can never be «модель». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -929,7 +929,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | правило маршрутизации | Neuter head noun «правило» (gen. правила, gen. pl. правил); `config:routing.title` is «Правила маршрутизации», which the style guide already fixes. «Маршрутизация» is the only available Russian word and does carry a network flavour — the surrounding strings are about entries and languages, which settles the reading. Note that «правила маршрутизации» is also the genitive singular, so prefer «в этом правиле» to a bare genitive where a plural could be read. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -956,7 +956,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | группа правил | Feminine head noun «группа» (gen. группы, gen. pl. групп); `config:routing.groupSelectLabel` is «Группа правил». Distinct from «группировка пакетов» (_batch grouping_) by lexeme rather than by modifier, and never «набор», «профиль» or the word chosen for _category_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -983,7 +983,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | хранилище учетных данных | Neuter — which is what the standalone status word agrees with: `vault:statusLabel` is «Хранилище учетных данных» and the locked status is «Заблокировано», the Russian counterpart of the es «Bloqueada» precedent recorded above. Shortened to «хранилище» where the context is clear, and all four surfaces read: «Хранилище заблокировано», «Разблокировать хранилище», «Пароль хранилища». The English ban on _storage_ targets a vague English word; «хранилище» is the established Russian for a security vault and nothing else in this app competes for it. «Сейф» and «кошелек» were rejected. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1010,7 +1010,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | учетные данные | Plural-only in Russian: there is no natural singular, so a single credential is still «учетные данные», or «ключ» where a count is genuinely needed. `config:credentialsMissingChip` is «Отсутствуют учетные данные». Never «пароль» — the vault password is one thing, the credentials it holds are another. Written without ё, per the style guide. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1039,7 +1039,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | LQA | Kept in Latin script and never declined: the Russian localization industry uses the English acronym and no established Cyrillic form exists, so this row is a deliberate do-not-translate. Attributive in every string — `config:lqa.title` is «Проверки LQA», and «Результаты LQA», «Повторы LQA» and the filter chip use the same three letters. Never «КЛК», and never «контроль качества», which is the _quality gate_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1066,7 +1066,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | контроль качества | Masculine head noun «контроль» (gen. контроля). _Fails the gate_ is «не проходит контроль качества», and bare _the gate_ is the bare «контроль» — `config:lqa.description` is «Проверки качества выполняются для каждого перевода. Блокирующие проблемы не проходят контроль качества и могут вызвать автоматический повтор; предупреждения только сообщаются.» The process-control sense only: the style guide rules out «ворота» and «шлюз». It shares «качества» with «проверки качества» exactly as English shares _quality_, but the head nouns stay different, and the tab itself is just «Качество». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1093,7 +1093,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | проверка | Feminine; gen. проверки, pl. проверки, gen. pl. проверок. One word across «проверка качества», «Проверки LQA» and every individual check name — `quality:checkLabels.overflow` is «Переполнение по длине». Reserved: _AI review_ is «рецензия» and _needs review_ is «вычитка», so «проверка» always means a deterministic rule. Severities are «блокирующая» and «предупреждение», both kept apart from «ошибка». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1120,7 +1120,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | переполнение | Neuter; gen. переполнения. Deliberately shares no lexeme with «ограничение длины» (_length limit_), which is the collision this pair is warned about — `config:lqa.checks.overflow.name` is «Переполнение по длине», the ratio is «коэффициент переполнения», _overflow only_ is «только переполнение» and _ignore overflow_ is «игнорировать переполнение». «Переполнение» is the neutral technical word here; this app has no buffer for it to be confused with. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1147,7 +1147,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | ограничение длины | Neuter head noun «ограничение» (gen. ограничения, pl. ограничения). `config:routing.labelMaxLength` is «Ограничение длины записи». A hard cap set by the game, against the relative «переполнение» — the two share no word. Provider rate limits are «ограничение частоты запросов», so the modifier always says which limit is meant. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1176,7 +1176,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | глоссарий | Masculine; gen. глоссария, pl. глоссарии, gen. pl. глоссариев. The settled Russian CAT-tool word — «словарь» is a dictionary and is wrong here, and it must not be reused for «память переводов» either. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1203,7 +1203,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | термин | Masculine; gen. термина, gen. pl. терминов — `glossary:totalTerms` is «Всего терминов:». Shortened to «термин» alone inside the Glossary tab, exactly as English shortens _glossary term_ to _term_. Never «запись», which is reserved for _entry_, so «Добавить термин» and «{{count}} записей» can never collide. It shares a root with the check name «Терминология», as English does. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1230,7 +1230,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | совпадение | Neuter; gen. совпадения, gen. pl. совпадений, so the Matches panel reads «Совпадения», «Совпадений: {{count}}», «Совпадения не найдены.» The verb is the same root — «совпадать» (`config:models.noMatches` — «Ни одна модель не совпадает с запросом»). Never the word chosen for _glossary term_: a «термин» is what is searched for, a «совпадение» is where it turned up. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1257,7 +1257,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | память переводов | Feminine head noun «память» (3rd declension, gen. памяти), the established Russian CAT term. `sidebar:translationMemory` is «Память переводов» — sixteen characters, which fits the sidebar beside its neighbours. Never the bare «память», which reads as RAM and is what `logs:vault.credentialsEvicted` genuinely means. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1284,7 +1284,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | утвердить | Perfective «утвердить» on buttons, imperfective «утверждать» in prose — the promotion sense, not «подтвердить» (_confirm_), «принять» (_accept_) or «сохранить» (_save_), all three of which live in the same bulk bar, and not «проверить», which is reserved. `strings:bulk.approveSelected` is «Утвердить в память». Count-neutral phrasing keeps the participle out of agreement trouble: «Утверждено переводов: {{count}}». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1311,7 +1311,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | категория | Feminine; gen. категории, pl. категории, gen. pl. категорий — counts run «1 категория / 2–4 категории / 5+ категорий», so `category:countLabel_other` and its siblings need all four plural keys. `strings:tabs.category` is the singular «Категория» and the page title is the plural «Категории», as in English. Not «группа» (taken by _rule group_) and not «метка» (taken by _source label_). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1338,7 +1338,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | тональность | Feminine, 3rd declension (gen. тональности, pl. тональности) — `config:routing.labelTones` is «Тональности». **The English ban on _tonality_ does not carry over to Russian:** «тональность» is precisely the writing-register sense («тональность текста»), while «тон» is the acoustic and colour word this file warns about, so the two words swap roles relative to the Romance languages the ban was written for. Not «стиль» or «голос», which read as the model's writing rather than an authoring instruction. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1367,7 +1367,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | сирота | Common gender, 1st declension, animate: acc. «сироту» («Перепривязать сироту»), gen. сироты, pl. сироты, gen. pl. сирот — «сироты» is both the genitive singular and the nominative plural, so counted strings need all four plural keys rather than a guessed ending. The literal metaphor is kept because English's is equally jarring and «Сироты» is short enough for the tab title (`orphans:title`); the adjective «осиротевший» carries _orphaned_ («осиротевшая запись», «Осиротевших: {{count}}»). One noun for the tab title, the count chip, the confirm dialog and the log lines alike. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1394,7 +1394,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | перепривязать | Perfective «перепривязать», imperfective «перепривязывать»; the noun is «перепривязка». `orphans:relink.title` is «Перепривязать сироту». One verb serves the row button, the dialog title, the confirm step and the import warning — never «переподключить», «восстановить» or «объединить». The stale English _Relink tab_ is this app's Orphans tab, so render it «Сироты». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1421,7 +1421,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | резервная копия | Feminine phrase whose adjective agrees: «резервной копии» in the genitive, «Резервные копии» as the tab title. The native register rather than the loanword «бэкап», per the style guide's pick-one rule, and the app stays in that register throughout — `backup:createSection` is «Создать резервную копию» and the verb is never «забэкапить». Distinct from _export_ («экспорт») and from _snapshot_ («снимок»). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1448,7 +1448,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | снимок | Masculine, fleeting vowel: gen. снимка, pl. снимки, gen. pl. снимков. «Снимок» is the standard Russian for a state snapshot; expand to «снимок состояния» wherever the bare word could be read as a photograph. `config:importSnapshotNote` is «Перед этим импортом был создан страховочный снимок ({{date}}). Его можно восстановить на вкладке „Резервные копии“.» English's _restore points_ are «точки восстановления». Shares nothing with «резервная копия», which several strings put in the same sentence. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1475,7 +1475,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | шаблон | Masculine; gen. шаблона, pl. шаблоны, gen. pl. шаблонов. Explicitly **not** «модель», which is the word Russian would otherwise reach for and which is taken by _model_. `config:templatesTitle` is «Шаблоны проектов». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1504,7 +1504,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | соредактор | Masculine animate (acc. = gen., «пригласить соредактора»); gen. pl. соредакторов. A second word was required because «участник» is taken by _member_ and the two appear in adjacent strings on the Sharing page. «Соавтор» was rejected — a collaborator translates rather than writes the source — and «соредактор» is not the bare «редактор» the English list warns about. `collab:join.description` is «Введите код приглашения, чтобы присоединиться к чужому проекту в качестве соредактора.» |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1531,7 +1531,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | участник | Masculine animate; gen. участника, gen. pl. участников. `collab:sharing.membersTitle` is «Участники». The generic masculine covers everyone, as is standard in Russian UI — do not switch to «участница» for a named person. Wider than «соредактор» (_collaborator_): the owner is a «участник» but not a «соредактор». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1560,7 +1560,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | уровень | Masculine with a fleeting vowel: gen. уровня, pl. уровни, gen. pl. уровней. The game-level sense only — «этап» and «стадия» are exactly the process readings this file and the style guide both rule out. `stage-details:title` is «Сведения об уровне». One ambiguity to know about: log severity is also «уровень», but the two never share a surface and the game sense always stands beside stage content. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1587,7 +1587,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | Стилизатор текста | Proper noun, sentence-cased. Seventeen characters against the English eleven, which is the ceiling for a sidebar item; the shorter «Стили текста» was rejected because it names a settings page rather than a tool. Use exactly this wording in the sidebar item, the tab label and the tool's own title (`sidebar:colorText`, `colorText:title`). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1614,7 +1614,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | Руководство | Neuter; gen. руководства. Not «Справка», which is _Help_ and would also collide with «справочный язык» (_reference language_); not «Документация» or «Инструкция». `sidebar:guide` is «Руководство», and every _read the guide_ link repeats that one word. Topic titles ending in _Tab_ take «вкладка» plus the surface name in nested quotes: `strings:guide.topicGlossary` is «Вкладка „Глоссарий“». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1641,7 +1641,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | История изменений | Feminine head noun «история» (gen. истории). Seventeen characters against the English nine, which is over the style guide's 1.5× guidance for a sidebar item — accepted because it is the established Russian term and is no longer than «Память переводов», which the same sidebar already fits. `sidebar:changelog` is «История изменений»; version numbers are never translated. |
 | tr | | |
 | id | | |
 | vi | | |

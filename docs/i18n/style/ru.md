@@ -59,7 +59,7 @@ not a translatable string.
 ## Length discipline
 
 Russian runs roughly **10–20% longer** than English in characters, and individual words
-are markedly longer («маршрутизация», «предупреждение», «учётные данные»), so tight chrome
+are markedly longer («маршрутизация», «предупреждение», «учетные данные»), so tight chrome
 overflows before the sentence count suggests it will.
 
 The space-constrained surfaces are sidebar items (`sidebar:translationMemory`,
@@ -85,21 +85,30 @@ The Russian hazard is **case government**: a token cannot be declined, so it mus
 land in a position where the nominative is correct. Put a real noun beside it and let the
 noun take the case: the closing clause of `logs:translation.failedModuleDisabled` ("…the
 {{module}} module is turned off"; the full string carries three tokens) becomes «Модуль
-{{module}} отключён» — the noun «модуль» inflects, the token never does.
+{{module}} отключен» — the noun «модуль» inflects, the token never does.
 
 The same rule covers counted nouns: never build «{{count}} записи» by guessing — use the
 plural keys below.
 
-**Plural forms need attention before the backfill.** Russian selects between _one_, _few_,
-_many_ and _other_, but the English source ships only `_one` and `_other`. A grammatically
-correct Russian file therefore needs `_few` and `_many` variants that have no English
-counterpart. **Those keys are expected, not merely tolerated.** The key-parity guard
-compares plural families by their base key, not by their exact suffixes, so the extra
-Russian forms are the correct shape and need no permission; conversely a suffix that is not
-one of Russian's four categories is a hard failure. Supply all four — do not ship the
-`_other` form for 2–4, and do not drop the extra forms. `LOCALE_PARITY_STRICT=ru` promotes
-a missing category from a report to a failure, and is the setting to run the backfill
-under.
+**Russian supplies all four plural categories — that is settled, not a question to raise.**
+Russian selects between _one_, _few_, _many_ and _other_, while the English source ships
+only `_one` and `_other`, so a grammatically correct Russian file carries `_few` and `_many`
+variants that have no English counterpart. **Those keys are required, not merely
+tolerated.** The key-parity guard compares plural families by their base key, not by their
+exact suffixes, so the extra Russian forms are the correct shape and need no permission;
+conversely a suffix that is not one of Russian's four categories is a hard failure.
+
+**A category you leave out does not fall back to `_other`.** i18next picks the suffix for
+the count first and then walks the *language* chain, so a file carrying only `_one` and
+`_other` renders the **English** string at the counts Russian would have sent to `_few` and
+`_many` — measured with `fallbackLng: 'en'`, counts 3 and 7 come back as "3 entries" and "7
+entries" while 21 correctly takes the Russian `_one`. The one thing that rescues a gap is a
+bare `key` sibling in the same locale, which i18next does try, so the locale's own text
+still renders — ungrammatically, but in Russian. The guard therefore already fails, without
+being asked, on exactly the families that have no bare sibling: `LOCALE_PARITY_STRICT=ru` is
+not what makes a missing `_few` or `_many` an error. What it adds is the bare-sibling cases,
+holding the locale to its language's complete category set, which is why it is the setting
+to run the backfill under.
 
 ## Locale-specific traps
 
