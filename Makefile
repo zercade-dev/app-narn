@@ -19,12 +19,16 @@ security-check:
 ## Release gate for the public app: build + lint + format + locale checks +
 ## prod security audit. check:locales is here because CI's quality-gate job
 ## runs it and .githooks/pre-push runs this target — without it a push passes
-## locally and fails in CI. (lint:deps stays out; CI runs it separately.)
+## locally and fails in CI. check:lexicon is the same story for the
+## terminology lexicon: it proves every rendering quoted in
+## docs/i18n/terminology/<locale>.md actually occurs in the shipped locale
+## files. (lint:deps stays out; CI runs it separately.)
 verify:
 	pnpm build
 	pnpm lint
 	pnpm format:check
 	pnpm check:locales
+	pnpm check:lexicon
 	$(MAKE) security-check
 
 ## Refresh the bundled global glossaries from the public community
