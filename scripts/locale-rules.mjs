@@ -416,6 +416,15 @@ export const COVERAGE_GAP_GRANDFATHER = {
   fr: {
     many: 'Same as es: "many" in fr is exact millions only, so the gap is unreachable.',
   },
+  it: {
+    many:
+      'Same shape as es/fr: "many" in it selects only exact millions (1000000, 2000000 — ' +
+      'verified via Intl.PluralRules; 1500000 is "other", and NO integer in 0..200 selects ' +
+      'it), so the gap on all 41 families is real but unreachable by any count this UI shows.',
+  },
+  'pt-br': {
+    many: 'Same as it: exact millions only, so the gap is unreachable.',
+  },
 };
 
 /**
@@ -1034,10 +1043,38 @@ export function identicalValueOffenders(pairs, locale, usedAllowlistKeys = new S
 export const MAX_LENGTH_RATIO = 2.5;
 export const MIN_REFERENCE_CHARS = 12;
 
-/** 4. Length sanity. */
-export function lengthOffenders(pairs, locale) {
+/**
+ * locale -> namespace -> key -> why this pair is excused from the length-ratio
+ * check, e.g. a legal formula with no shorter defensible rendering in that
+ * language. Empty until a locale needs one — `legal:cookies` in Russian has
+ * passed on its own so far, but German and Italian legal text is not
+ * guaranteed the same luck.
+ *
+ * The reason is not decoration: an entry whose reason is empty or blank
+ * throws at module load, because an unexplained exemption is indistinguishable
+ * from a mistake, which is the entire reason this mechanism is allowed to
+ * exist. See the validation loop below.
+ */
+export const LENGTH_EXEMPTIONS = {};
+
+for (const [locale, namespaces] of Object.entries(LENGTH_EXEMPTIONS)) {
+  for (const [namespace, keys] of Object.entries(namespaces)) {
+    for (const [key, reason] of Object.entries(keys)) {
+      if (!reason || !reason.trim()) {
+        throw new Error(
+          `LENGTH_EXEMPTIONS.${locale}.${namespace}.${key} has no reason — an unexplained ` +
+            `length exemption is indistinguishable from a mistake.`,
+        );
+      }
+    }
+  }
+}
+
+/** 4. Length sanity. An exempt pair (see LENGTH_EXEMPTIONS) is skipped. */
+export function lengthOffenders(pairs, locale, exemptions = LENGTH_EXEMPTIONS[locale] ?? {}) {
   const offenders = [];
   for (const pair of pairs) {
+    if (exemptions[pair.namespace]?.[pair.key]) continue;
     const refLength = charCount(pair.referenceValue);
     if (refLength < MIN_REFERENCE_CHARS) continue;
     const ratio = charCount(pair.value) / refLength;
