@@ -18,6 +18,12 @@ import { openTab, openGlobalConfig, unlockVault } from './actions.js';
 export function languageName(code: unknown): string {
   if (typeof code !== 'string' || code === '') return '?';
   try {
+    // `Intl.DisplayNames` resolves this locale LIST to a single best-fit locale
+    // up front (standard locale negotiation) — it does not retry per lookup.
+    // The trailing 'en' is only reached if `resolvedLanguage` itself isn't a
+    // locale ICU supports; once a locale is picked, every `.of()` call below
+    // (including the fallback `.of(code)` a few lines down) is answered from
+    // that same one locale — there is no per-code English fallback.
     const displayNames = new Intl.DisplayNames([i18n.resolvedLanguage ?? 'en', 'en'], {
       type: 'language',
     });
