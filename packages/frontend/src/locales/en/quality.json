@@ -3,7 +3,6 @@
   "loading": "Loading quality summary…",
   "error": "Failed to load quality summary: {{message}}",
   "empty": "No LQA results yet. Run a translation to populate this dashboard.",
-  "overview": "{{results}} LQA result(s) across {{entries}} entry/entries — overall pass rate {{passRate}}.",
   "overallStat": {
     "passRateLabel": "Overall pass rate",
     "results": "{{count}} LQA results",
@@ -16,11 +15,7 @@
     "description": "Issue-type counts across all languages."
   },
   "other": "Other",
-  "drillDownHint": "Click to view the matching entries",
   "columns": {
-    "language": "Language",
-    "source": "Source",
-    "module": "Module",
     "passRate": "Pass rate"
   },
   "legend": {

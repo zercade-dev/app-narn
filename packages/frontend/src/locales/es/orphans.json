@@ -3,7 +3,6 @@
   "subtitle": "Entradas que ya no están en el último CSV importado. Elimínalas o reasigna sus traducciones a otra entrada.",
   "emptyTitle": "Todo está vinculado",
   "empty": "No hay registros huérfanos: los CSV importados coinciden con el proyecto actual.",
-  "noProject": "Selecciona un proyecto para ver las huérfanas.",
   "columns": {
     "select": "Seleccionar",
     "source": "Origen",

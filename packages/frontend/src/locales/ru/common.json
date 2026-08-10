@@ -1,13 +1,10 @@
 {
   "save": "Сохранить",
   "cancel": "Отмена",
-  "close": "Закрыть",
-  "discard": "Сбросить",
   "loading": "Загрузка…",
   "changelogEntryError": "Не удалось загрузить описание этого выпуска.",
   "changelogShowOlder": "Показать прежние выпуски ({{count}})",
   "saving": "Сохранение…",
-  "rows": "записей",
   "thinking": "Думает… {{seconds}} с",
   "webSearch": {
     "title": "Поиск в интернете",
