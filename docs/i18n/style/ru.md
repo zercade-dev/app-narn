@@ -199,6 +199,14 @@ the grammar silently and nothing would fail. The cost is real and is the point o
 down — those two log lines lose a singular/plural distinction English has. Do not "restore"
 it without re-reading the registry and deciding to depend on it.
 
+**And do not reach for the obvious alternative — it is blocked by the guard.** Interpolating
+`{{count}}` instead, so the displayed number and the selected number are one variable, fails
+placeholder integrity: the guard compares the **multiset** of tokens against English, and
+English writes `{{total}}` / `{{findings}}`. Dropping the English token and adding a new one
+is two violations, not a clever fix. The count-neutral wording was therefore forced, not
+preferred — which is the whole reason it is recorded here rather than left to be
+rediscovered.
+
 ### Checking your own work for numeral agreement
 
 Two passes, because they catch different mistakes. Scan every string containing a `{{token}}`
