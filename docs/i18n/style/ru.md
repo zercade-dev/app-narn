@@ -96,7 +96,18 @@ only `_one` and `_other`, so a grammatically correct Russian file carries `_few`
 variants that have no English counterpart. **Those keys are required, not merely
 tolerated.** The key-parity guard compares plural families by their base key, not by their
 exact suffixes, so the extra Russian forms are the correct shape and need no permission;
-conversely a suffix that is not one of Russian's four categories is a hard failure.
+conversely a suffix that is neither one of Russian's four categories nor one of the two
+exceptions below is a hard failure — it can never resolve.
+
+**The two exceptions, so you do not delete a legal key.** `_zero` is legal in *every*
+locale, Russian included, whatever its CLDR categories: i18next appends an explicit
+`key_zero` lookup whenever the count is 0, independent of the plural rules, and the guard
+exempts the suffix for exactly that reason. English already ships one —
+`strings:bulk.removeCategoryApply_zero` — so you will meet it, and Russian may keep or add
+a `_zero` form where "0 of them" wants its own wording. The legacy i18next-v3 `_plural`
+suffix is the other: the guard reports it rather than failing it, but it never resolves
+under the v4 JSON format, so treat it as dead weight — never add one, and give the family
+Russian's four categories instead.
 
 **A category you leave out does not fall back to `_other`.** i18next picks the suffix for
 the count first and then walks the *language* chain, so a file carrying only `_one` and
@@ -104,7 +115,12 @@ the count first and then walks the *language* chain, so a file carrying only `_o
 `_many` — measured with `fallbackLng: 'en'`, counts 3 and 7 come back as "3 entries" and "7
 entries" while 21 correctly takes the Russian `_one`. The one thing that rescues a gap is a
 bare `key` sibling in the same locale, which i18next does try, so the locale's own text
-still renders — ungrammatically, but in Russian. The guard therefore already fails, without
+still renders — ungrammatically, but in Russian. **That is not an escape hatch you may
+reach for:** where English carries only `key_one`/`key_other`, adding a bare `key` to the
+Russian family is reported as an `extra` key and fails the diff. The fix for a category you
+find hard to word is the category, never a bare key that bypasses plural selection
+everywhere. (The reverse — adding a *family* where English has a plain `{{count}}` key — is
+allowed, provided you keep the plain key too.) The guard therefore already fails, without
 being asked, on exactly the families that have no bare sibling: `LOCALE_PARITY_STRICT=ru` is
 not what makes a missing `_few` or `_many` an error. What it adds is the bare-sibling cases,
 holding the locale to its language's complete category set, which is why it is the setting
@@ -122,9 +138,12 @@ to run the backfill under.
   wrong.
 - **"Stage" is a game level**, not a phase: «этап» and «стадия» are exactly the process
   readings `terminology.md` warns about.
-- **Loanword or native word — pick once.** «бэкап» vs «резервная копия», «раннер» vs
-  «запуск», «промпт» vs «запрос». Both registers exist in Russian dev speech; alternating
-  between them inside one namespace is the defect.
+- **Loanword or native word — pick once.** «бэкап» vs «резервная копия», «промпт» vs
+  «запрос», «дифф» vs «различия». Both registers exist in Russian dev speech; alternating
+  between them inside one namespace is the defect. (This is a register choice, not a licence
+  to re-open a settled term: _run_ is «прогон» and _backup_ is «резервная копия» in
+  `terminology.md`, and «запуск» in particular is **not** available for _run_ — it is needed
+  for the separate verb _start_.)
 - **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms at
   all where English writes "entr(ies)". Those cannot be fixed with plural keys — rephrase
   so one Russian string covers every count, typically by putting the number in front of an

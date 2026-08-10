@@ -538,7 +538,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | прогон | Masculine; gen. прогона, pl. прогоны, gen. pl. прогонов — «стоимость прогона», «статус прогона», «Прогоны» in Activity. «Запуск» was rejected: it shares a root with «запустить», which the UI needs as the separate action _start_, and «стоимость запуска» reads as the cost of starting rather than the cost of the run. Never «задача», «сеанс», «операция» or «партия». `logs:translation.runQueued` is «Прогон перевода поставлен в очередь — позиция {{position}}.» |
+| ru | прогон | Masculine; gen. прогона, pl. прогоны, gen. pl. прогонов — «стоимость прогона», «статус прогона», «Прогоны» in Activity. «Запуск» was rejected: it shares a root with «запустить», which the UI needs as the separate action _start_, and «стоимость запуска» reads as the cost of starting rather than the cost of the run. Never «задача», «сеанс», «операция» or «партия». `logs:translation.runQueued` is «Прогон перевода поставлен в очередь — позиция {{position}}.» One thing to know and accept: «прогон» has an unrelated colloquial sense (a tall tale, a wind-up). It is suppressed by the technical collocations this app always supplies — «прогон перевода», «стоимость прогона», «Прогоны» in a table of statuses — and no candidate without a drawback exists, so this is a known cost rather than an oversight. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -792,7 +792,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | на вычитку | A prepositional phrase, so there is no gender and no agreement anywhere — the same shape as fr «à réviser». Sentence-cased in the filter («На вычитку» — `strings:filters.needsReview`, `strings:compare.needsReviewFilter`), lowercase in the row badge («на вычитку» — `strings:compare.cellNeedsReviewBadge`), same wording in both; the bulk form is «Отметить всё на вычитку». «Вычитка» is a person reading a text and keeps «проверка» free for LQA checks — use the noun, not the verb «вычитать», which is a stress-only homograph of _subtract_. For the related _reviewed_ family: the implied noun «перевод» is masculine, so the token form and the agreeing form do not diverge the way es/fr's do — badge «переведено» / «вычитано» (neuter short forms, the citation shape Russian status values take), explicit antecedent «Отметить перевод на {{language}} как вычитанный» (`strings:compare.cellMarkReviewedAria`), elliptical label «Отметить как вычитанное» (`strings:shortcuts.markReviewed`). |
+| ru | на вычитку | A prepositional phrase, so there is no gender and no agreement anywhere — the same shape as fr «à réviser». Sentence-cased in the filter («На вычитку» — `strings:filters.needsReview`, `strings:compare.needsReviewFilter`), lowercase in the row badge («на вычитку» — `strings:compare.cellNeedsReviewBadge`), same wording in both; the bulk form is «Отметить всё на вычитку». «Вычитка» is a person reading a text and keeps «проверка» free for LQA checks — use the noun, not the verb «вычитать», which is a stress-only homograph of _subtract_. Be aware that «вычитка» is **narrower** than English _review_: it is proofreading, not accuracy checking against the source. That narrowing is accepted deliberately, and it is not a reason to reach for «на проверку» in some later namespace — one rendering, everywhere. For the related _reviewed_ family: the implied noun «перевод» is masculine, so the token form and the agreeing form do not diverge the way es/fr's do — badge «переведено» / «вычитано» (neuter short forms, the citation shape Russian status values take), explicit antecedent «Отметить перевод на {{language}} как вычитанный» (`strings:compare.cellMarkReviewedAria`), elliptical label «Отметить как вычитанное» (`strings:shortcuts.markReviewed`). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1066,7 +1066,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | контроль качества | Masculine head noun «контроль» (gen. контроля). _Fails the gate_ is «не проходит контроль качества», and bare _the gate_ is the bare «контроль» — `config:lqa.description` is «Проверки качества выполняются для каждого перевода. Блокирующие проблемы не проходят контроль качества и могут вызвать автоматический повтор; предупреждения только сообщаются.» The process-control sense only: the style guide rules out «ворота» and «шлюз». It shares «качества» with «проверки качества» exactly as English shares _quality_, but the head nouns stay different, and the tab itself is just «Качество». |
+| ru | контроль качества | Masculine head noun «контроль» (gen. контроля). **Watch the transitivity:** «не проходит контроль качества» is correct only when the *translation* is the subject («перевод не проходит контроль качества»); when the subject is the issue, it has to be «не дают пройти контроль качества», because the issues are what stops the translation, not what is being checked. So `config:lqa.description` ships as: Проверки качества выполняются для каждого перевода. Блокирующие проблемы не дают пройти контроль качества и могут вызвать автоматический повтор; предупреждения только фиксируются. Bare _the gate_ is the bare «контроль». The process-control sense only: the style guide rules out «ворота» and «шлюз». It shares «качества» with «проверки качества» exactly as English shares _quality_, but the head nouns stay different, and the tab itself is just «Качество». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1093,7 +1093,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | проверка | Feminine; gen. проверки, pl. проверки, gen. pl. проверок. One word across «проверка качества», «Проверки LQA» and every individual check name — `quality:checkLabels.overflow` is «Переполнение по длине». Reserved: _AI review_ is «рецензия» and _needs review_ is «вычитка», so «проверка» always means a deterministic rule. Severities are «блокирующая» and «предупреждение», both kept apart from «ошибка». |
+| ru | проверка | Feminine; gen. проверки, pl. проверки, gen. pl. проверок — «проверки» is the genitive singular *and* the nominative/accusative plural, so «результат проверки» and «Проверки LQA» are spelled alike and the number has to come from the surrounding words. One word across «проверка качества», «Проверки LQA» and every individual check name — `quality:checkLabels.overflow` is «Переполнение по длине». Reserved: _AI review_ is «рецензия» and _needs review_ is «вычитка», so «проверка» always means a deterministic rule. Severities are «блокирующая» and «предупреждение», both kept apart from «ошибка». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1120,7 +1120,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | переполнение | Neuter; gen. переполнения. Deliberately shares no lexeme with «ограничение длины» (_length limit_), which is the collision this pair is warned about — `config:lqa.checks.overflow.name` is «Переполнение по длине», the ratio is «коэффициент переполнения», _overflow only_ is «только переполнение» and _ignore overflow_ is «игнорировать переполнение». «Переполнение» is the neutral technical word here; this app has no buffer for it to be confused with. |
+| ru | переполнение | Neuter; gen. переполнения. «Превышение длины» was the obvious alternative and was rejected on this term's own `Not:` line, which bans _excess_ and _overrun_ — «превышение» is precisely «excess». (It is not rejected for sharing «длины» with _length limit_: the check name is «Переполнение по длине» and shares it too, exactly as English shares _length_ between "Length overflow" and "Entry length limit".) `config:lqa.checks.overflow.name` is «Переполнение по длине», the ratio is «коэффициент переполнения», _overflow only_ is «только переполнение» and _ignore overflow_ is «игнорировать переполнение». «Переполнение» is the neutral technical word here; this app has no buffer for it to be confused with. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1176,7 +1176,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | глоссарий | Masculine; gen. глоссария, pl. глоссарии, gen. pl. глоссариев. The settled Russian CAT-tool word — «словарь» is a dictionary and is wrong here, and it must not be reused for «память переводов» either. |
+| ru | глоссарий | Masculine; gen. глоссария, pl. глоссарии, gen. pl. глоссариев. Syncretism to know about: «глоссарии» is the prepositional singular *and* the nominative/accusative plural, so «в глоссарии» (in the glossary) and «глоссарии» (glossaries) are spelled alike — let the preposition and the verb carry the number. The settled Russian CAT-tool word — «словарь» is a dictionary and is wrong here, and it must not be reused for «память переводов» either. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1338,7 +1338,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | тональность | Feminine, 3rd declension (gen. тональности, pl. тональности) — `config:routing.labelTones` is «Тональности». **The English ban on _tonality_ does not carry over to Russian:** «тональность» is precisely the writing-register sense («тональность текста»), while «тон» is the acoustic and colour word this file warns about, so the two words swap roles relative to the Romance languages the ban was written for. Not «стиль» or «голос», which read as the model's writing rather than an authoring instruction. |
+| ru | тональность | Feminine, 3rd declension: gen. sg. тональности and nom./acc. pl. тональности are spelled alike, so the surrounding words have to carry the number. **Why «тональность» and not «тон» — it is not a false-friend argument.** «Тон» is fully idiomatic for the tone of a text («вежливый тон», «тон статьи», «задать тон»), and «тональность» is equally the musical key and colour tonality, so neither word is disqualified on its own. The plural decides it: the field is plural (`config:routing.labelTones` is «Тональности»), and «тона» is the colour-sense plural — exactly what this term's `Not:` line bans — while «тональности» cannot be read that way. Second, «тональность бренда» / «тональность коммуникации» is the settled Russian rendering of _tone of voice_ in content writing, which is what these values are. **The cost, which is real:** «анализ тональности» is the entrenched Russian term for _sentiment analysis_, so in an app that also has an AI reviewer a reader can plausibly take «тональность» for sentiment — keep the label beside authoring words («Тональности записи»), never beside review words. Not «стиль» or «голос», which read as the model's writing rather than an authoring instruction. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1367,7 +1367,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | сирота | Common gender, 1st declension, animate: acc. «сироту» («Перепривязать сироту»), gen. сироты, pl. сироты, gen. pl. сирот — «сироты» is both the genitive singular and the nominative plural, so counted strings need all four plural keys rather than a guessed ending. The literal metaphor is kept because English's is equally jarring and «Сироты» is short enough for the tab title (`orphans:title`); the adjective «осиротевший» carries _orphaned_ («осиротевшая запись», «Осиротевших: {{count}}»). One noun for the tab title, the count chip, the confirm dialog and the log lines alike. |
+| ru | сирота | Common gender, 1st declension, gen. сироты, pl. сироты, gen. pl. сирот — «сироты» is both the genitive singular and the nominative plural, so counted strings need all four plural keys rather than a guessed ending. **«Сирота» is strictly animate and human, which limits where it may stand.** The tab title and the count chip take it, because it is short and English's own metaphor is equally jarring: `orphans:title` is «Сироты», and «Сирот: {{count}}» is the chip. Action labels and prose must **not**, because the animate accusative makes them read literally — `orphans:relink.title` is «Перепривязать осиротевшую запись», never «Перепривязать сироту». Everything outside the tab therefore uses the adjective this row already establishes: «осиротевшая запись», «осиротевшие записи». That is one term with two registers, not two terms — do not introduce a third word. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1394,7 +1394,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | перепривязать | Perfective «перепривязать», imperfective «перепривязывать»; the noun is «перепривязка». `orphans:relink.title` is «Перепривязать сироту». One verb serves the row button, the dialog title, the confirm step and the import warning — never «переподключить», «восстановить» or «объединить». The stale English _Relink tab_ is this app's Orphans tab, so render it «Сироты». |
+| ru | перепривязать | Perfective «перепривязать», imperfective «перепривязывать»; the noun is «перепривязка». `orphans:relink.title` is «Перепривязать осиротевшую запись» — the adjective, not «сироту», for the reason recorded on _orphan_ above. One verb serves the row button, the dialog title, the confirm step and the import warning — never «переподключить», «восстановить» or «объединить». The stale English _Relink tab_ is this app's Orphans tab, so render it «Сироты». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1448,7 +1448,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | снимок | Masculine, fleeting vowel: gen. снимка, pl. снимки, gen. pl. снимков. «Снимок» is the standard Russian for a state snapshot; expand to «снимок состояния» wherever the bare word could be read as a photograph. `config:importSnapshotNote` is «Перед этим импортом был создан страховочный снимок ({{date}}). Его можно восстановить на вкладке „Резервные копии“.» English's _restore points_ are «точки восстановления». Shares nothing with «резервная копия», which several strings put in the same sentence. |
+| ru | снимок | Masculine, fleeting vowel: gen. снимка, pl. снимки, gen. pl. снимков. «Снимок» is the standard Russian for a state snapshot; expand to «снимок состояния» wherever the bare word could be read as a photograph. `config:importSnapshotNote` ships as: Перед этим импортом был создан страховочный снимок ({{date}}). Его можно восстановить на вкладке «Резервные копии». — the tab name is at the top level of the string, so it takes «ёлочки»; the guillemets elsewhere in this cell are citation marks. English's _restore points_ are «точки восстановления». Shares nothing with «резервная копия», which several strings put in the same sentence. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1504,7 +1504,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | соредактор | Masculine animate (acc. = gen., «пригласить соредактора»); gen. pl. соредакторов. A second word was required because «участник» is taken by _member_ and the two appear in adjacent strings on the Sharing page. «Соавтор» was rejected — a collaborator translates rather than writes the source — and «соредактор» is not the bare «редактор» the English list warns about. `collab:join.description` is «Введите код приглашения, чтобы присоединиться к чужому проекту в качестве соредактора.» |
+| ru | соредактор | Masculine animate (acc. = gen., «пригласить соредактора»); gen. pl. соредакторов. A second word was required because «участник» is taken by _member_ and the two appear in adjacent strings on the Sharing page. «Соавтор» was rejected — a collaborator translates rather than writes the source — and «соредактор» is not the bare «редактор» the English list warns about. It is a considered stretch rather than a settled term: its default reading is a co-editor of a publication, and Russian has no established word for this role. Kept because the constraint is binding (two adjacent words are required) and because it is transparent on first reading. `collab:join.description` is «Введите код приглашения, чтобы присоединиться к чужому проекту в качестве соредактора.» |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1614,7 +1614,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | Руководство | Neuter; gen. руководства. Not «Справка», which is _Help_ and would also collide with «справочный язык» (_reference language_); not «Документация» or «Инструкция». `sidebar:guide` is «Руководство», and every _read the guide_ link repeats that one word. Topic titles ending in _Tab_ take «вкладка» plus the surface name in nested quotes: `strings:guide.topicGlossary` is «Вкладка „Глоссарий“». |
+| ru | Руководство | Neuter; gen. руководства. Eleven characters against the English five — the worst ratio in this file at 2.2×, on `sidebar:guide`, which is one of the space-constrained surfaces. Accepted because the only shorter option is «Справка», and that is _Help_ (see below); measured against the sidebar's real width, eleven characters is well inside it. Not «Справка», which is _Help_ and would also collide with «справочный язык» (_reference language_); not «Документация» or «Инструкция». `sidebar:guide` is «Руководство», and every _read the guide_ link repeats that one word. **A notation warning for the whole `strings:guide.topic*` family:** the guillemets elsewhere in this cell are citation marks around a rendering, not part of it. Topic titles ending in _Tab_ take «вкладка» plus the surface name, and that name is at the **top** level of the shipped string, so it takes «ёлочки», never „лапки“ — `strings:guide.topicGlossary` ships as: Вкладка «Глоссарий». „Лапки“ are correct only inside another pair of «ёлочки». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1641,7 +1641,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | История изменений | Feminine head noun «история» (gen. истории). Seventeen characters against the English nine, which is over the style guide's 1.5× guidance for a sidebar item — accepted because it is the established Russian term and is no longer than «Память переводов», which the same sidebar already fits. `sidebar:changelog` is «История изменений»; version numbers are never translated. |
+| ru | История изменений | Feminine head noun «история» (gen. истории). Seventeen characters against the English nine, which is over the style guide's 1.5× guidance for a sidebar item — accepted because it is the established Russian term and is one character longer than «Память переводов» (sixteen), which the same sidebar already fits. `sidebar:changelog` is «История изменений»; version numbers are never translated. |
 | tr | | |
 | id | | |
 | vi | | |
