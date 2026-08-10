@@ -53,6 +53,14 @@ before you translate the string.** The convention below is already shipped acros
 A verbal noun («Создание…», «Импортирование…») is a **status**, not a command — use it for
 progress text and never for a button.
 
+**A term row that names a key beats this convention.** Two shipped titles take the infinitive
+where the shape rule would give a deverbal noun, because `terminology.md` cites those exact
+keys with those exact wordings: `sidebar:createProjectTitle` is «Создать проект» (the _project_
+row: "the verb is «создать»… never «открыть новый проект»") and `backup:createSection` is
+«Создать резервную копию» (the _backup_ row). Those are not drift. When a row cites a key,
+the row wins — and if you think it is wrong, change the row rather than the string, so the
+next namespace does not diverge from this one.
+
 **A word English reuses across controls does not have one Russian rendering, and forcing one
 is the error.** "Custom" is the standing example: as an adjective before a noun it is
 «пользовательский», agreeing — `config:models.useCustom` ships as `Использовать «{{model}}»
@@ -120,6 +128,14 @@ Shortening either one buys a few pixels and breaks a naming rule that costs more
 exception needs the same shape: a named term rule that outranks the budget, written down
 here — not a translator's judgement that the label "felt too long to shorten".
 
+**Second recorded exception: `sidebar:globalConfig` at 1.77×** — «Глобальная конфигурация»
+against "Global Config", on a sidebar item, which is the tightest class in the list above.
+Forced by the same kind of rule: `terminology.md` pairs it with `config:globalConfigTitle` as
+one surface whose two keys are word-for-word identical, and the name is repeated in prose at
+`stage-details:chatOpenConfig` and `colorText:assistant.openConfig`. Shortening the sidebar
+item alone would break all three. These two are the **only** exceptions; anything else over
+1.5× on a constrained surface is a defect until it is written here.
+
 The renderings used as examples above are illustrations of the length problem, not
 decisions about wording. `terminology.md` owns the rendering of every domain term,
 including the surface names and _translation memory_ — decide it there on first use,
@@ -138,6 +154,27 @@ them:
 | Backup | «Резервные копии» | `strings:tabs.backup` | `config:importSnapshotNote` |
 | Orphans | «Сироты» | `orphans:title` | `config:fullReplaceOrphanNotice` |
 | Sharing | «Доступ» | `strings:tabs.sharing` | `collab:sharing.pageTitle` |
+| Global Config | «Глобальная конфигурация» | `sidebar:globalConfig` | `config:globalConfigTitle`, and in prose at `stage-details:chatOpenConfig`, `colorText:assistant.openConfig` |
+| Legal | «Правовая информация» | `sidebar:legal` | `legal:title`, which expands to «Правовая информация и политики» |
+
+### Open, not settled: the three `legal` link labels
+
+`legal:terms`, `legal:cookies` and `legal:subprocessors` are **link labels pointing at
+published pages**, so they are not a translator's decision. Whatever the published Russian
+page calls itself, the label must say — a link whose text differs from the title of the page
+it opens is a defect no locale review can catch, because the page is not in this repo. The
+three ship as «Условия использования», «Политика использования cookie» and «Субобработчики»
+respectively, each of which is defensible on its own:
+
+- **terms** — «Условия использования» over «Пользовательское соглашение»; both are standard,
+  and they are not synonyms in Russian legal practice.
+- **cookies** — «Политика использования cookie», shortened from the fuller «Политика
+  использования файлов cookie» purely for width.
+- **subprocessors** — «Субобработчики», the GDPR term of art, over the calque
+  «субпроцессоры», which reads as CPUs.
+
+**Reconcile all three against the published pages before treating them as settled**, and if a
+page's own title differs, change the label, not the page.
 
 **Sharing is the one to read twice.** «Доступ» is short for a reason the wording does not
 show: «Совместный доступ» is the fuller and more obvious rendering, and at seventeen
@@ -245,6 +282,42 @@ a `_zero` form where "0 of them" wants its own wording. The legacy i18next-v3 `_
 suffix is the other: the guard reports it rather than failing it, but it never resolves
 under the v4 JSON format, so treat it as dead weight — never add one, and give the family
 Russian's four categories instead.
+
+**Settled convention: do not add a plural family over an English plain key.** The guard
+permits it — a locale may turn one English `{{count}}` string into four, provided the plain
+key survives — and the temptation is real, because Russian would often be richer for it. No
+shipped locale does it: across all 34 families in the four locales, **zero** were added this
+way, and every count English writes as one string is handled with the count-neutral device
+above («Осиротевших записей: {{count}}», «Ключей в хранилище: {{count}}»). Follow that. If the
+project ever wants added families, it is a decision to take **once, for every locale**, not
+per namespace — half a language done each way is worse than either. (This convention is
+project-wide rather than Russian; it lives here because Russian is the first locale with the
+categories to make it tempting.)
+
+**When English's family is `bare + _other`, its `_other` dictates the tokens of every Russian
+form — including the singular.** This is the rule most likely to make a correct Russian file
+look wrong, and nothing about it is visible from the locale files. The mechanism: your
+`foo_one` has no English counterpart, so `resolveReference` falls back to `en:foo_other` and
+then to `en:foo`, and the placeholder check compares your string's tokens against **whichever
+it landed on**. English's *singular* here is the bare key, and the guard never reaches it once
+`_other` exists.
+
+The worked example, `vault:retrySuccess`. English's bare key is "Unlocked — your action went
+through." with **no token**; its `_other` is "Unlocked — all **{{count}}** actions went
+through." So Russian's `_one` is checked against the `_other`, and a true singular —
+«Разблокировано — ваше действие выполнено.» — **fails**, for a missing `{{count}}` that
+English's own singular does not have either. The way out is to make all four count-neutral and
+carry the token: «Разблокировано — выполнено действий: {{count}}.»
+
+`vault:retryFailed` is the exact mirror: English's `_other` carries **no** token, so no Russian
+form may add one, and all four are worded without a number. Same shape at `vault:keysCount`,
+`vault:remainingAttemptsHint`, `console:unreadErrors` and `console:membersNotShown` — there the
+bare key and `_other` happen to carry the same token, so the constraint binds without being
+visible. Check English's `_other`, not English's bare key, before writing your singular.
+
+**Write the bare key count-neutral too.** Once all four categories exist it is unreachable, so
+its only remaining job is to be grammatical if something ever does reach it —
+`vault:keysCount` ships «Ключей в хранилище: {{count}}» beside its four inflected siblings.
 
 **A category you leave out does not fall back to `_other`.** i18next picks the suffix for
 the count first and then walks the *language* chain, so a file carrying only `_one` and
