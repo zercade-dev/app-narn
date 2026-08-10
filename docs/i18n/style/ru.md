@@ -53,13 +53,22 @@ before you translate the string.** The convention below is already shipped acros
 A verbal noun («Создание…», «Импортирование…») is a **status**, not a command — use it for
 progress text and never for a button.
 
-**A term row that names a key beats this convention.** Two shipped titles take the infinitive
-where the shape rule would give a deverbal noun, because `terminology.md` cites those exact
-keys with those exact wordings: `sidebar:createProjectTitle` is «Создать проект» (the _project_
-row: "the verb is «создать»… never «открыть новый проект»") and `backup:createSection` is
-«Создать резервную копию» (the _backup_ row). Those are not drift. When a row cites a key,
-the row wins — and if you think it is wrong, change the row rather than the string, so the
-next namespace does not diverge from this one.
+**A term row fixes the lexeme. It does not fix the shape — and this guide said the opposite
+for one round.** A row's `Example:` line exists to show the term *in use*; it is not a
+prescription that the cited key must keep that grammatical form. Both authorities apply and
+they apply to different things: the row decides **which word**, this section decides **which
+shape that word takes in that control**.
+
+The cost of getting it backwards is on screen now. `sidebar:createProjectTitle` and
+`backup:createSection` are section titles, so the shape rule gives «Создание проекта» and
+«Создание резервной копии» — but both took the infinitive because the _project_ and _backup_
+rows quote those keys, and `backup:createSection` («Создать резервную копию») now sits
+directly above «Восстановление из резервной копии», one title in each shape. The rows were
+fixing «создать» against «открыть новый проект» and «резервная копия» against «бэкап».
+Neither was ruling on titles.
+
+So: take the **word** from the row, the **form** from the control. If a row genuinely means to
+pin a form, it has to say so in words — a quoted example is not that.
 
 **A word English reuses across controls does not have one Russian rendering, and forcing one
 is the error.** "Custom" is the standing example: as an adjective before a noun it is
@@ -110,31 +119,54 @@ Russian runs roughly **10–20% longer** than English in characters, and individ
 are markedly longer («маршрутизация», «предупреждение», «учетные данные»), so tight chrome
 overflows before the sentence count suggests it will.
 
-The space-constrained surfaces are sidebar items (`sidebar:translationMemory`,
-`sidebar:globalConfig`), tab labels (`strings:tabs.strings`, `strings:tabs` for
-review-translation-ai), table column headers (`strings:columns.config`), filter labels
-(`strings:filters.needsReview`) and bulk-bar buttons (`strings:bulk.approveSelected`).
+### The budget is in characters, not in multiples of English
 
-For those classes, **never exceed ~1.5× the English character count**, and prefer the
-shorter of two correct options — «Активность» over «История выполнения», «Качество» over
-«Контроль качества».
+**This guide used to say "never exceed ~1.5× the English character count", with a list of two
+recorded exceptions. That rule was false the day it was written** — an audit of every
+constrained-surface key across all 24 namespaces found **27** over 1.5×, in every batch,
+including tab labels at 2.50× and a sidebar item at 3.80×. Nothing was wrong with those
+strings. The rule was wrong, in two ways, and both are worth understanding before you use the
+one below.
 
-**One recorded exception, so it does not read as a defect.** `strings:tabs.review-source-ai`
-ships at **1.75×** — «ИИ-рецензия исходного текста» against "Source AI review" — and that is
-correct. `terminology.md` builds _source review_ out of _AI review_ and _source text_ on
-purpose, so the two review tabs read as siblings, and the neighbouring
-`strings:tabs.review-translation-ai` («ИИ-рецензия переводов») has to match it word for word.
-Shortening either one buys a few pixels and breaks a naming rule that costs more. Any future
-exception needs the same shape: a named term rule that outranks the budget, written down
-here — not a translator's judgement that the label "felt too long to shorten".
+**A ratio is the wrong unit when the English is short.** Every one of those 27 was flagged for
+having a *short source*, not a long rendering: "Legal" is five characters, so 1.5× is seven
+and a half — no correct Russian rendering of it can exist. Meanwhile
+`strings:bulk.approveSelected` at 44 English characters passes the ratio test with room to
+spare while being one of the genuinely tight labels. The ratio measures the wrong thing.
 
-**Second recorded exception: `sidebar:globalConfig` at 1.77×** — «Глобальная конфигурация»
-against "Global Config", on a sidebar item, which is the tightest class in the list above.
-Forced by the same kind of rule: `terminology.md` pairs it with `config:globalConfigTitle` as
-one surface whose two keys are word-for-word identical, and the name is repeated in prose at
-`stage-details:chatOpenConfig` and `colorText:assistant.openConfig`. Shortening the sidebar
-item alone would break all three. These two are the **only** exceptions; anything else over
-1.5× on a constrained surface is a defect until it is written here.
+**And the five classes are not equally constrained.** Only one of them has a hard, fixed
+width: the sidebar is `16rem` (`SIDEBAR_WIDTH` in `components/ui/sidebar.tsx`) and every item
+label is wrapped in `truncate`, so overflow ellipsizes. Tab bars, table columns and filter
+rows scroll, auto-size or wrap — going long there costs elegance, not correctness.
+
+So: **budgets are absolute character counts, per class.**
+
+| Class | Budget | Kind | Longest shipped |
+| --- | --- | --- | --- |
+| Sidebar item (`sidebar:globalConfig`, `sidebar:legal`) | **26** | **hard** — fixed 16rem, truncates | 23 |
+| Tab label (`strings:tabs.backup`) | 32 | soft | 28 |
+| Table column header (`strings:columns.config`) | 22 | soft | 19 |
+| Filter label (`strings:filters.needsReview`) | 38 | soft | 34 |
+| Bulk-bar control (`strings:bulk.approveSelected`) | 52 | soft | 48 |
+
+**Hard** means fix it: a sidebar item over 26 characters is cut off with an ellipsis in a
+container that cannot grow. **Soft** means prefer the shorter of two correct options —
+«Активность» over «История выполнения» — but do not distort a term to hit a number, and do
+not treat the figure as a failure threshold.
+
+Two honesty notes about those numbers, so you can judge them rather than obey them. They are
+anchored on the container where the container is fixed (the sidebar) and on the longest
+shipped value plus headroom everywhere else; nobody has measured rendered pixel widths. And
+if you need to go past a hard budget, **look at the running app before you decide** — a
+measurement beats this table.
+
+**There is deliberately no exception ledger.** The previous one recorded two of twenty-seven
+and nobody noticed for four rounds, because a hand-maintained list of per-key exemptions goes
+stale silently and invisibly. If a term rule forces a long label — `strings:tabs.review-source-ai`
+is «ИИ-рецензия исходного текста» because `terminology.md` builds _source review_ from _AI
+review_ + _source text_ and its sibling tab must match word for word — that is the term rule
+doing its job, and the budget above already accommodates it. Terms outrank the budget; the
+budget exists to stop *avoidable* length.
 
 The renderings used as examples above are illustrations of the length problem, not
 decisions about wording. `terminology.md` owns the rendering of every domain term,
@@ -168,8 +200,15 @@ respectively, each of which is defensible on its own:
 
 - **terms** — «Условия использования» over «Пользовательское соглашение»; both are standard,
   and they are not synonyms in Russian legal practice.
-- **cookies** — «Политика использования cookie», shortened from the fuller «Политика
-  использования файлов cookie» purely for width.
+- **cookies** — «Политика о файлах cookie» (24 characters, 1.85×). Note that *cookie*
+  qualifies «файлы» in Russian and never stands alone, so the shorter «…использования cookie»
+  is not an option. **The length here is a guard failure, not a preference:**
+  `lengthOffenders` fails anything over `MAX_LENGTH_RATIO = 2.5` and has **no per-key
+  allowlist**, and all three fuller standard forms breach it — «Политика использования файлов
+  cookie» 2.8×, «Политика в отношении файлов cookie» 2.6×, «Политика использования
+  cookie-файлов» 2.8×. So if the published page's own title is one of those, this label cannot
+  simply follow it: that needs a **granted length exception in the guard**, not a translator's
+  choice. Escalate rather than shorten.
 - **subprocessors** — «Субобработчики», the GDPR term of art, over the calque
   «субпроцессоры», which reads as CPUs.
 
@@ -188,6 +227,24 @@ The punctuation pattern is the same in all four: «ёлочки» around the tab
 level of the string, and the sentence's full stop **outside** the closing guillemet — «…на
 вкладке «Сравнение».» The guillemets in the table above are citation marks; the ones in the
 shipped string are part of it.
+
+## Matching a sibling namespace — match the English, not the other locale file
+
+Two namespaces often name the same thing, and the surface-name rule tells you to keep them in
+step. When you do that, **read the sibling's English, not its Russian.** Copying the other
+locale file's rendering imports whatever the English there says — including words your own
+key's English does not have.
+
+The worked example, caught in review: `config:lqa.checks.tag-equality.name` is "**Inline** tag
+equality" while `quality:checkLabels.tag-equality` is the bare "Tag equality". Matching the
+sibling by rendering put «встроенных» into a string whose own source has no such word. The
+correct pair is «Идентичность встроенных тегов» in `config` and «Идентичность тегов» in
+`quality` — same term, each faithful to its own key.
+
+This is a distinct error class from ordinary drift, and it hides behind a *virtue*: the file
+looks more consistent, not less. When two sibling keys disagree in English, that disagreement
+is either deliberate or an English defect — carry it across, and if you think it is a defect,
+raise it as one rather than silently harmonizing in one language only.
 
 ## Placeholders
 
@@ -306,14 +363,28 @@ The worked example, `vault:retrySuccess`. English's bare key is "Unlocked — yo
 through." with **no token**; its `_other` is "Unlocked — all **{{count}}** actions went
 through." So Russian's `_one` is checked against the `_other`, and a true singular —
 «Разблокировано — ваше действие выполнено.» — **fails**, for a missing `{{count}}` that
-English's own singular does not have either. The way out is to make all four count-neutral and
-carry the token: «Разблокировано — выполнено действий: {{count}}.»
+English's own singular does not have either. **What the constraint forces is the token, not sameness.** Put `{{count}}` in every category
+and then inflect them normally, exactly as you would any other family:
+«Разблокировано — выполнено {{count}} действие / действия / действий.» Four identical
+count-neutral strings would also pass the guard, and that is the wrong lesson — it throws away
+the CLDR machinery for no guard reason and reads worst at `count: 1`, which is the commonest
+case. Make the categories differ.
 
 `vault:retryFailed` is the exact mirror: English's `_other` carries **no** token, so no Russian
-form may add one, and all four are worded without a number. Same shape at `vault:keysCount`,
-`vault:remainingAttemptsHint`, `console:unreadErrors` and `console:membersNotShown` — there the
-bare key and `_other` happen to carry the same token, so the constraint binds without being
-visible. Check English's `_other`, not English's bare key, before writing your singular.
+form may add one, and all four are worded without a number. **The full list, so nobody rediscovers it.** This is a mechanical property of the English
+source, not a translation finding — twelve families are shaped `bare + _other`, and every
+locale meets all twelve:
+
+`console:unreadErrors` · `console:membersNotShown` · `logs:translation.queued` ·
+`logs:translation.failedNoRoute` · `logs:translation.failedModuleDisabled` ·
+`logs:translation.failedModuleNotFound` · `logs:sourceReview.done` · `logs:orphan.detected` ·
+`vault:keysCount` · `vault:remainingAttemptsHint` · `vault:retrySuccess` · `vault:retryFailed`
+
+Ten of the twelve carry the same tokens in the bare key and in `_other`, so the constraint
+binds without ever being visible. **`vault:retrySuccess` is the only token-asymmetric one** —
+the bare key has no token and `_other` has `{{count}}` — and `vault:retryFailed` is the case
+where neither has one, so no Russian form may add a number at all. Check English's `_other`,
+not English's bare key, before writing your singular.
 
 **Write the bare key count-neutral too.** Once all four categories exist it is unreachable, so
 its only remaining job is to be grammatical if something ever does reach it —

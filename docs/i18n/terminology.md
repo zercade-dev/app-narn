@@ -807,6 +807,31 @@ or search the file for the word.
 | zh-hans | | |
 | zh-hant | | |
 
+#### discard
+
+**Means here:** two different actions that English spells with one word. **Discarding unsaved edits** — the ghost button beside Save that puts a field back the way it was (`strings:editor.discard`, `config:discard`, `vault:discard`, `common:discard`) — and **discarding a proposal or a produced result**: rejecting a judge's suggestion or a generated glossary (`strings:runs.judgeDiscard`, `glossary:generateDiscard`, `colorText:assistant.discard`).
+
+**Part of speech in UI:** verb, on buttons.
+
+**Not:** cancel, delete, undo, clear. **The two senses need two words in most languages**, because the first destroys nothing the user made and the second refuses something offered. Check the call site: if a Save button is beside it, it is the first sense.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | Сбросить / Отклонить | The split is by **what is being discarded**, not by control shape, so it is a rule rather than a per-key judgement. Unsaved edits revert: «Сбросить» (`strings:editor.discard`, `config:discard`, `vault:discard`, `common:discard`) — a reset, and deliberately not «Отмена», which is the Cancel button that may sit beside it. A proposal or result is refused: «Отклонить» (`strings:runs.judgeDiscard`, `glossary:generateDiscard`, `colorText:assistant.discard`), matching «Применить» as its opposite in the same pair of buttons and matching the passive in `logs:judge.suggestionDiscarded` («Предложение отклонено.»). |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
 #### needs review
 
 **Means here:** a flag set on a single translation meaning a person should look at it. Its counterpart action is "Mark as reviewed". It is a state, not an instruction to the app.
@@ -863,6 +888,33 @@ or search the file for the word.
 | it | | |
 | pt-br | | |
 | ru | отложить | Perfective «отложить» / imperfective «откладывать»; the participle «отложенные» serves the filter chip unchanged. `review:flag` is «Отложить», `review:filterFlagged` is «Отложенные», `review:flaggedToast` is «Перевод отложен». The ordinary Russian for setting something aside to return to, which is what the English hint describes. **Deliberately not «отметить»** — that verb belongs to `strings:compare.flagAllNeedsReview` («Отметить всё на вычитку»), and this action clears exactly that flag; and not «на вычитку», which would be factually backwards. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### Review (the sidebar group)
+
+**Means here:** the sidebar section grouping four tabs — Source AI review, Translation AI review, **Manual review** and **Quality**. It is an umbrella over three different systems: a model's opinion, a person reading, and deterministic rules.
+
+**Part of speech in UI:** a navigational group heading, not a feature name.
+
+**Example:** `sidebar:groups.review` — "Review"
+
+**Not:** a word derived from whichever member you translated first. English gets away with "Review" because it is vague in English too; most languages have **separate** words for AI review, human review and machine checking, so the umbrella has to be chosen deliberately or it will silently claim the group for one of its four members.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | Проверка и вычитка | Eighteen characters, inside the sidebar budget. **The elimination is the point of this row.** Russian has no single superordinate over «рецензия» (AI), «вычитка» (a person) and «проверка» (LQA), so the label enumerates the two poles and lets the middle sit under them. «Рецензирование» is the trap and was rejected: it derives the umbrella from the **narrowest** member — the group is half AI review, a quarter manual review and a quarter LQA — so it would make «Ручная вычитка» and «Качество» read as subordinate to the AI feature. «Контроль качества» is taken by the _quality gate_; «Качество» is the name of a tab **inside** this group, which is the surface-name collision this file exists to prevent; «Вычитка» alone covers one tab of four. Both words here are used in their own settled senses, so nothing is stolen. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1570,7 +1622,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | совпадение | Neuter; gen. совпадения, gen. pl. совпадений, so the Matches panel reads «Совпадения», «Совпадений: {{count}}», «Совпадения не найдены.» The verb is the same root — «совпадать» (`config:models.noMatches` — «Ни одна модель не совпадает с запросом»). Note what that costs: «запрос» is *also* the HTTP request in the module settings panel, so it now carries two senses. Two is the ceiling — it is why _prompt_ takes the loanword «промпт» rather than becoming a third. Never the word chosen for _glossary term_: a «термин» is what is searched for, a «совпадение» is where it turned up. |
+| ru | совпадение | Neuter; gen. совпадения, gen. pl. совпадений, so the Matches panel reads «Совпадения», «Совпадений: {{count}}», «Совпадения не найдены.» The verb is the same root — «совпадать» (`config:models.noMatches` — «Ни одна модель не совпадает с запросом»). Note what that costs: «запрос» is *also* the HTTP request in the module settings panel, so it now carries two senses. Two is the ceiling — it is why _prompt_ takes the loanword «промпт» rather than becoming a third. Never the word chosen for _glossary term_: a «термин» is what is searched for, a «совпадение» is where it turned up. **"No matching X" is the one place that root is deliberately dropped:** «Совпадающих X нет» is stilted, so the settled phrasing is **«Подходящих X нет»** — `sidebar:noMatches` «Подходящих проектов нет», `orphans:relink.noCandidates` «Подходящих записей нет», `strings:bulk.categoryEmpty` «Подходящих категорий нет.» Consistent across every namespace that has one, and not a drift from this row: an empty-state message is not naming the _match_ concept, it is saying nothing fits. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1597,7 +1649,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | память переводов | Feminine head noun «память» (3rd declension, gen. памяти), the established Russian CAT term. `sidebar:translationMemory` is «Память переводов» — sixteen characters, which fits the sidebar beside its neighbours. Never the bare «память», which reads as RAM and is what `logs:vault.credentialsEvicted` genuinely means. |
+| ru | память переводов | Feminine head noun «память» (3rd declension, gen. памяти), the established Russian CAT term. `sidebar:translationMemory` is «Память переводов» — sixteen characters, inside the sidebar item's 26-character budget. Never the bare «память», which reads as RAM and is what `logs:vault.credentialsEvicted` genuinely means. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -2035,7 +2087,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | Стилизатор текста | Proper noun, sentence-cased. Seventeen characters against the English eleven, which is the ceiling for a sidebar item; the shorter «Стили текста» was rejected because it names a settings page rather than a tool. Use exactly this wording in the sidebar item, the tab label and the tool's own title (`sidebar:colorText`, `colorText:title`). |
+| ru | Стилизатор текста | Proper noun, sentence-cased. Seventeen characters, inside the sidebar item's 26-character budget; the shorter «Стили текста» was rejected because it names a settings page rather than a tool. Use exactly this wording in the sidebar item, the tab label and the tool's own title (`sidebar:colorText`, `colorText:title`). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -2116,7 +2168,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | Руководство | Neuter; gen. руководства. Eleven characters against the English five — at 2.2×, the worst ratio in this file on a space-constrained surface, `sidebar:guide` being chrome where `config:routing.labelTones` (a worse ratio) is not. Accepted because the only shorter option is «Справка», and that is _Help_ (see below); measured against the sidebar's real width, eleven characters is well inside it. Not «Справка», which is _Help_ and would also collide with «справочный язык» (_reference language_); not «Документация» or «Инструкция». `sidebar:guide` is «Руководство», and every _read the guide_ link repeats that one word. **A notation warning for the whole `strings:guide.topic*` family:** the guillemets elsewhere in this cell are citation marks around a rendering, not part of it. Topic titles ending in _Tab_ take «вкладка» plus the surface name, and that name is at the **top** level of the shipped string, so it takes «ёлочки», never „лапки“ — `strings:guide.topicGlossary` ships as: Вкладка «Глоссарий». „Лапки“ are correct only inside another pair of «ёлочки». |
+| ru | Руководство | Neuter; gen. руководства. Eleven characters, comfortably inside the sidebar item's 26-character budget — the ratio against English's five-letter "Guide" is not the measure, and the style guide explains why. The only shorter option is «Справка», which is _Help_ (see below). Not «Справка», which is _Help_ and would also collide with «справочный язык» (_reference language_); not «Документация» or «Инструкция». `sidebar:guide` is «Руководство», and every _read the guide_ link repeats that one word. **A notation warning for the whole `strings:guide.topic*` family:** the guillemets elsewhere in this cell are citation marks around a rendering, not part of it. Topic titles ending in _Tab_ take «вкладка» plus the surface name, and that name is at the **top** level of the shipped string, so it takes «ёлочки», never „лапки“ — `strings:guide.topicGlossary` ships as: Вкладка «Глоссарий». „Лапки“ are correct only inside another pair of «ёлочки». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -2170,7 +2222,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | История изменений | Feminine head noun «история» (gen. истории). Seventeen characters against the English nine, which is over the style guide's 1.5× guidance for a sidebar item — accepted because it is the established Russian term and is one character longer than «Память переводов» (sixteen), which the same sidebar already fits. `sidebar:changelog` is «История изменений»; version numbers are never translated. |
+| ru | История изменений | Feminine head noun «история» (gen. истории). Seventeen characters, inside the sidebar item's 26-character budget and one longer than «Память переводов», which the same sidebar already fits. `sidebar:changelog` is «История изменений»; version numbers are never translated. |
 | tr | | |
 | id | | |
 | vi | | |
