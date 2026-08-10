@@ -17,11 +17,20 @@
  * bucket, some genuine neighbours may be missed — acceptable for a pre-sort.
  */
 
-/** Placeholder / markup patterns stripped before tokenizing so they don't dominate similarity. */
+/**
+ * Placeholder / markup patterns stripped before tokenizing so they don't dominate similarity.
+ *
+ * Each bracketed body excludes its OWN opening delimiter as well as the closing
+ * one (`[^{}]` rather than `[^}]`). That keeps the scan linear: on input with
+ * many unterminated openers — `{{{{{…` — a body that allowed the opener would
+ * rescan the whole tail from every one of them. Excluding it makes each attempt
+ * stop at the next opener instead. Well-formed placeholders don't nest, so
+ * nothing that matched before stops matching.
+ */
 const PLACEHOLDER_PATTERNS: RegExp[] = [
-  /\{[^}]*\}/g, // {0}, {name}, {0:N2}
-  /<[^>]*>/g, // <color=...>, </color>, <b>
-  /\[[^\]]*\]/g, // [HP], [sprite index=3]
+  /\{[^{}]*\}/g, // {0}, {name}, {0:N2}
+  /<[^<>]*>/g, // <color=...>, </color>, <b>
+  /\[[^[\]]*\]/g, // [HP], [sprite index=3]
   /%[0-9]*\$?[sd]/g, // printf-style %s, %1$d
   /\\[nrt]/g, // escaped newlines/tabs in raw source
 ];

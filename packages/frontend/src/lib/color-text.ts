@@ -230,8 +230,16 @@ export function mergeConsecutiveColorTags(input: string): string {
     // The separator alternation matches a literal `\n` escape as one unit
     // (so its letter 'n' doesn't trip the no-letter rule) or any other
     // non-letter, non-'<' character.
+    //
+    // The three separator branches are kept mutually exclusive — a backslash is
+    // handled by the `\\n` branch or the `\\(?!n)` branch, never by the general
+    // one. An overlapping alternation lets a run of backslashes be divided
+    // between branches in exponentially many ways, and the engine tries every
+    // division before failing. The set of separators accepted is unchanged: a
+    // backslash matched singly before an `n` could never complete the match
+    // anyway, because the following `n` is a letter.
     input = input.replace(
-      /<color=([^>]+)>((?:[^<]|<(?!\/color>))*)<\/color>((?:\\n|[^\p{L}<])*)<color=\1>((?:[^<]|<(?!\/color>))*)<\/color>/giu,
+      /<color=([^>]+)>((?:[^<]|<(?!\/color>))*)<\/color>((?:\\n|\\(?!n)|[^\p{L}<\\])*)<color=\1>((?:[^<]|<(?!\/color>))*)<\/color>/giu,
       '<color=$1>$2$3$4</color>',
     );
   } while (input !== prev);

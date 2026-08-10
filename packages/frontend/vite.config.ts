@@ -129,11 +129,16 @@ export default defineConfig({
         // every <script> tag Vite emits (the module entry + preload polyfill).
         // Without this, 'strict-dynamic' in the meta CSP blocks the static
         // <script type="module"> tags that carry no nonce attribute.
+        // Tag and attribute matching is case-insensitive, and the original tag
+        // spelling is carried through the replacement. Vite emits lowercase
+        // `<script>`, so this changes nothing today — it just stops the pattern
+        // from being one HTML-casing change away from silently skipping a tag
+        // and emitting a script the CSP would then block.
         return html
           .replace(/__CSP_NONCE__/g, BUILD_NONCE)
-          .replace(/<script\b([^>]*?)>/g, (match, attrs: string) => {
-            if (/\bnonce=/.test(attrs)) return match; // already has a nonce
-            return `<script${attrs} nonce="${BUILD_NONCE}">`;
+          .replace(/<(script)\b([^>]*?)>/gi, (match, tag: string, attrs: string) => {
+            if (/\bnonce=/i.test(attrs)) return match; // already has a nonce
+            return `<${tag}${attrs} nonce="${BUILD_NONCE}">`;
           });
       },
     },
