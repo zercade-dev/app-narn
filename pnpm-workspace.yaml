@@ -83,7 +83,7 @@ catalog:
   '@types/cors': 2.8.19
   '@types/express': 5.0.6
   '@types/multer': 2.2.0
-  '@types/node': 26.1.2
+  '@types/node': 26.2.0
   '@types/papaparse': 5.5.2
   '@types/yauzl': 3.4.0
   '@types/yazl': 3.3.1
