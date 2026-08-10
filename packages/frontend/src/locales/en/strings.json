@@ -259,7 +259,6 @@
     "clearReviewed": "Clear \"reviewed\" status"
   },
   "editor": {
-    "placeholder": "Select a cell to view and edit its text.",
     "sourceReadOnly": "Source text (read-only)",
     "translationLabel": "Translation — {{lang}}",
     "ignoreOverflow": "Ignore overflow",

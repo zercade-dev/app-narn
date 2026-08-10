@@ -259,7 +259,6 @@
     "clearReviewed": "Quitar el estado «revisado»"
   },
   "editor": {
-    "placeholder": "Selecciona una celda para ver y editar su texto.",
     "sourceReadOnly": "Texto de origen (solo lectura)",
     "translationLabel": "Traducción — {{lang}}",
     "ignoreOverflow": "Ignorar desbordamiento",

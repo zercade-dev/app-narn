@@ -133,7 +133,6 @@ The names to keep in step (tab label first, then its other homes):
 | Surface | Keys that must agree |
 | --- | --- |
 | Orphans | `strings:tabs.orphans` · `orphans:title` |
-| Glossary | `strings:tabs.glossary` · `glossary:title` |
 | Sharing | `strings:tabs.sharing` · `collab:sharing.pageTitle` |
 | Stage details | `strings:tabs` (stage-details) · `stage-details:title` |
 | Text Styler | `strings:tabs` (color-text) · `colorText:title` · `sidebar:colorText` |
@@ -435,7 +434,7 @@ or search the file for the word.
 
 #### discard
 
-**Means here:** two different actions that English spells with one word. **Discarding unsaved edits** — the ghost button beside Save that puts a field back the way it was (`strings:editor.discard`, `config:discard`, `vault:discard`, `common:discard`) — and **discarding a proposal or a produced result**: rejecting a judge's suggestion or a generated glossary (`strings:runs.judgeDiscard`, `glossary:generateDiscard`, `colorText:assistant.discard`).
+**Means here:** two different actions that English spells with one word. **Discarding unsaved edits** — the ghost button beside Save that puts a field back the way it was (`strings:editor.discard`, `config:discard`, `vault:discard`) — and **discarding a proposal or a produced result**: rejecting a judge's suggestion or a generated glossary (`strings:runs.judgeDiscard`, `glossary:generateDiscard`, `colorText:assistant.discard`).
 
 **Part of speech in UI:** verb, on buttons.
 

@@ -65,6 +65,10 @@
  *        components/config/LqaChecksPanel.tsx:378,404
  *      - config:models.confidenceTier.*, confidenceReason.* —
  *        components/config/ModelPicker.tsx:357,364
+ *      - strings:tabs.* — components/layout/Sidebar.tsx:785,788
+ *        (`tStrings(\`tabs.${id}\`)` — a RENAMED `t` binding,
+ *        `const { t: tStrings } = useTranslation('strings')` at line 198;
+ *        still a plain backtick template once the rename is followed)
  *
  * 2. Explicit `t('ns:key')` namespace-prefixed literal — a real literal call,
  *    but the scanner skips any key containing `:` on purpose (out of scope,
@@ -104,6 +108,18 @@
  *        components/vault/VaultEditorDialog.tsx:224
  *      - backup:trigger* — components/backup/BackupTab.tsx (`TRIGGER_LABEL_KEYS`,
  *        rendered at line 284)
+ *      - strings:runs.aiReviewCheck* — components/tabs/AiReviewDialog.tsx
+ *        (`CHECK_LABEL_KEY`, consumed at line 434)
+ *      - strings:runs.judgeIssue* — components/review/TranslationAiReviewTab.tsx
+ *        (`ISSUE_TYPE_KEY`, consumed at line 359)
+ *      - strings:runs.type{Translation,TranslationAiReview,SourceAiReview,
+ *        GlossaryGeneration,CategoryGeneration,RelinkRetranslate,
+ *        StageDetailsTranslation} — lib/run-kind.ts (`RUN_TYPE_KEY`),
+ *        consumed at components/tabs/RunsTab.tsx:930,
+ *        components/tabs/MobileRunsList.tsx:67, and (via the i18n singleton,
+ *        see mechanism 7) stores/run-store.ts:320
+ *      - review:sourceAi.finding* — components/review/SourceAiReviewTab.tsx
+ *        (`FINDING_TYPE_KEY`, consumed at lines 520, 1088, 1217)
  *
  * 4. The entire `logs:*` namespace (translation.*, lqa.*, judge.*,
  *    sourceReview.*, glossaryGen.*, categoryGen.*, stageDetails.*, module.*,
@@ -128,6 +144,40 @@
  *      - config:modulesEnabledSection / modulesDisabledSection —
  *        components/config/ModuleSettingsPanel.tsx:715,767-778
  *        (`headingKey` field on a section-heading row, `t(item.headingKey, …)`)
+ *      - strings:runs.typeChat{StageDetails,TextStyler,Generic} —
+ *        components/tabs/run-status-ui.ts:41-50 (`chatTypeKey()`'s switch
+ *        returns one of the three key literals; consumed via `t(chatTypeKey(…))`
+ *        at components/tabs/RunsTab.tsx:929, MobileRunsList.tsx:66)
+ *
+ * 6. `t` (or a translation key) received as a PLAIN FUNCTION PARAMETER,
+ *    outside any `useTranslation()` destructuring the scanner can track —
+ *    the binding-extraction rule only recognises `const { t } =
+ *    useTranslation('ns')`, so a helper that takes `t` in from its caller,
+ *    or that closes over a component's own `t` and takes the KEY in from its
+ *    caller instead, is invisible to it either way:
+ *      - strings:runs.usage{Tokens,Reasoning,Cached,CacheWrite,Characters} —
+ *        components/tabs/run-status-ui.ts:133-163, `usageEntryFigures(entry,
+ *        t: TFn)` — `t` is a function parameter, not a `useTranslation()`
+ *        binding; called from components/review/TranslationAiReviewTab.tsx
+ *        and the Activity-row Cost cell
+ *      - glossary:toast{LoadError,AddError,DeleteError,UpdateError,
+ *        PushError,GlossaryCreateError,GlossaryRenameError,
+ *        GlossaryDeleteError,ImportError,ExportError} —
+ *        components/glossary/GlossaryTab.tsx:146-148, a local `reportError(err,
+ *        fallbackKey)` closes over the component's own `t` and calls
+ *        `t(fallbackKey)`; every call site passes a literal string as
+ *        `fallbackKey` (e.g. `reportError(err, 'toastLoadError')`,
+ *        components/glossary/GlossarySidebar.tsx:70,86 for the two
+ *        `toastGlossary*` variants), but the literal sits next to
+ *        `reportError(`, never next to `t(`
+ *
+ * 7. The i18n singleton called directly — `i18n.t(key, { ns: '…' })` via
+ *    `import i18n from '../i18n/index.js'` — instead of a component's
+ *    `useTranslation()`-bound `t`. Used outside React components, where no
+ *    hook is available: `stores/run-store.ts:320-321` (`notifyFailedRun()`,
+ *    a Zustand store's plain function), reaching `strings:runs.runFailedToast`
+ *    directly and `strings:runs.type*` (mechanism 3's `RUN_TYPE_KEY`) through
+ *    this same call.
  *
  * Add to this list, with the call site, whenever a hit is investigated and
  * found to be a computed-lookup false positive rather than dead. That is
@@ -139,7 +189,9 @@ import { fileURLToPath } from 'node:url';
 import {
   BARE_KEY_SUFFIXES,
   MIN_SOURCE_FILES,
+  MIN_TRACKED_BINDINGS,
   REFERENCE_LOCALE,
+  extractBindings,
   flattenEntries,
   loadLocales,
   readSourceFiles,
@@ -165,8 +217,25 @@ const sources = readSourceFiles(FRONTEND_SRC_DIR);
 // call anywhere in the frontend source. Built once, over every file, rather
 // than per-namespace, because a call site's namespace comes from its own
 // useTranslation() binding and may not match the namespace being checked.
+//
+// bindingsTracked mirrors missingUsedKeys()'s own count (locale-rules.mjs) —
+// summed here rather than reused from that function because this reporter
+// walks usedKeysInSource() directly rather than calling missingUsedKeys(),
+// but it's the same self-check for the same reason. MIN_SOURCE_FILES catches
+// a walk that read nothing; MIN_TRACKED_BINDINGS catches the OTHER silent
+// failure, where every file is read but the binding matcher stops recognising
+// any of them. For check-locales.mjs's used-key rule that failure hides a
+// real gap; for THIS reporter it runs the other way and is louder in effect,
+// not quieter — with usedByNamespace empty, almost every key in the app
+// would report as an unreached hit, which reads as a mass regression rather
+// than a clean run and would be obvious on its own. The assertion is kept
+// anyway: a report a human is about to act on should say WHY its numbers
+// moved, not make the reader rediscover "the matcher broke" from a suddenly
+// enormous hit list.
 const usedByNamespace = new Map();
+let bindingsTracked = 0;
 for (const source of sources.values()) {
+  bindingsTracked += extractBindings(source).size;
   for (const { namespace, key } of usedKeysInSource(source)) {
     let used = usedByNamespace.get(namespace);
     if (!used) {
@@ -217,6 +286,16 @@ if (sources.size < MIN_SOURCE_FILES) {
   );
   process.exit(1);
 }
+if (bindingsTracked < MIN_TRACKED_BINDINGS) {
+  console.error(
+    `i18n-unused-keys: FAILED — only ${bindingsTracked} t() binding(s) tracked across ` +
+      `${sources.size} file(s), expected at least ${MIN_TRACKED_BINDINGS}. The files were read ` +
+      `but the binding matcher recognised almost nothing in them, which would report almost ` +
+      `every key in the app as an unreached hit — not a clean run misread as one, but a hit ` +
+      `list large enough that its cause needs stating rather than rediscovering.`,
+  );
+  process.exit(1);
+}
 
 if (hits.length > 0) {
   console.log('i18n-unused-keys: keys with no reachable static call site (verify before removing):');
@@ -227,5 +306,5 @@ if (hits.length > 0) {
 
 console.log(
   `i18n-unused-keys: ${hits.length} hit(s) across ${reference.size} namespaces, ` +
-    `${sources.size} source files scanned`,
+    `${sources.size} source files scanned, ${bindingsTracked} t() bindings tracked`,
 );
