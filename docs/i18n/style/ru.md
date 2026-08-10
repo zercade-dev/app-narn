@@ -22,6 +22,29 @@ Avoid addressing the user at all where the sentence works impersonally — «Т�
 пароль» rather than «Вам потребуется пароль» — but do not mix impersonal and «вы» inside
 one dialog.
 
+### Titles, buttons, column headers and placeholders — four shapes
+
+English writes the same words for all four; Russian does not, so **resolve the control
+before you translate the string.** The convention below is already shipped across the whole
+`config` namespace and every later namespace follows it:
+
+- **Titles, tab labels and section headings are noun phrases.** `config:importCsv` is
+  «Импорт CSV», `config:routing.tabImportExport` is «Импорт / Экспорт»,
+  `config:saveAsTemplateTitle` is «Шаблон проекта».
+- **Buttons are infinitives** — the rule above, restated here because this is where it
+  contrasts: `config:routing.importBtn` and `config:routing.exportBtn` are «Импортировать»
+  and «Экспортировать». English's "Import" is one word in both rows of this list; Russian's
+  is two different ones.
+- **Table column headers are bare nouns, and they keep English's abbreviation** where it has
+  one: `config:models.colParameters` ("Params") is «Парам.», `config:models.colQuantization`
+  ("Quant") is «Квант.». A header is chrome — the length rule below bites hardest here.
+- **Placeholders inside a control are imperative**, not titles. `config:models.select` and
+  `config:models.pickTitle` are byte-identical in English ("Select a model") and different
+  controls: «Выберите модель» for the placeholder, «Выбор модели» for the dialog title.
+
+A verbal noun («Создание…», «Импортирование…») is a **status**, not a command — use it for
+progress text and never for a button.
+
 ## Casing
 
 Sentence case only. Russian capitalizes the first word and proper nouns; nothing else.
@@ -75,6 +98,24 @@ The renderings used as examples above are illustrations of the length problem, n
 decisions about wording. `terminology.md` owns the rendering of every domain term,
 including the surface names and _translation memory_ — decide it there on first use,
 record it, and then follow it here.
+
+### Surface names already shipped — repeat these verbatim
+
+A surface is named in one namespace and owned by another, so these four are written by
+different translators at different times. They are settled; copy them, do not re-render
+them:
+
+| Surface | Russian | Owning key | Already named from |
+| --- | --- | --- | --- |
+| Compare | «Сравнение» | `strings:tabs.compare` | `config:routing.tonesHint` |
+| Translations | «Переводы» | `strings:tabs.strings` | `config:routing.categoriesConfiguredHint` |
+| Backup | «Резервные копии» | `strings:tabs.backup` | `config:importSnapshotNote` |
+| Orphans | «Сироты» | `orphans:title` | `config:fullReplaceOrphanNotice` |
+
+The punctuation pattern is the same in all four: «ёлочки» around the tab name at the top
+level of the string, and the sentence's full stop **outside** the closing guillemet — «…на
+вкладке «Сравнение».» The guillemets in the table above are citation marks; the ones in the
+shipped string are part of it.
 
 ## Placeholders
 
@@ -138,12 +179,13 @@ to run the backfill under.
   wrong.
 - **"Stage" is a game level**, not a phase: «этап» and «стадия» are exactly the process
   readings `terminology.md` warns about.
-- **Loanword or native word — pick once.** «бэкап» vs «резервная копия», «промпт» vs
-  «запрос», «дифф» vs «различия». Both registers exist in Russian dev speech; alternating
-  between them inside one namespace is the defect. (This is a register choice, not a licence
-  to re-open a settled term: _run_ is «прогон» and _backup_ is «резервная копия» in
-  `terminology.md`, and «запуск» in particular is **not** available for _run_ — it is needed
-  for the separate verb _start_.)
+- **Loanword or native word — pick once.** «дифф» vs «различия», «кеш» vs «кэш», «токен» vs
+  «маркер». Both registers exist in Russian dev speech; alternating between them inside one
+  namespace is the defect. (This is a register choice for words `terminology.md` does not
+  cover, **not** a licence to re-open a settled term. Three are settled and closed: _run_ is
+  «прогон» — «запуск» is unavailable, it is needed for the verb _start_; _backup_ is
+  «резервная копия», not «бэкап»; _prompt_ is «промпт» — «запрос» is unavailable, it is
+  already the HTTP request and the search query.)
 - **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms at
   all where English writes "entr(ies)". Those cannot be fixed with plural keys — rephrase
   so one Russian string covers every count, typically by putting the number in front of an

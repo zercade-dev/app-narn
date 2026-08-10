@@ -111,6 +111,15 @@ The names to keep in step (tab label first, then its other homes):
 (Where a key path contains a hyphen it is given as namespace plus the sub-key in
 brackets, so the citation checker does not read it as a truncated key.)
 
+Three more surfaces need the same discipline without appearing in that table, because they
+have no second *title* key — they are named from **other namespaces in prose**, which is the
+same drift risk by another route. **Compare** (`strings:tabs.compare`) is named by
+`config:routing.tonesHint`; **Translations** (`strings:tabs.strings`) by
+`config:routing.categoriesConfiguredHint`; **Backup** (`strings:tabs.backup`) by
+`config:importSnapshotNote`. In each case the tab label is the authority and the prose
+repeats it verbatim — which means the namespace naming the surface and the namespace owning
+it are usually translated by different people, at different times.
+
 The guide topics under `strings:guide` are a third home for most of these names, and
 nearly all of them append the word "Tab" — `strings:guide.topicGlossary` is "Glossary
 Tab", `strings:guide.topicMultiLanguage` is "Translations Tab". Translate the surface
@@ -912,6 +921,60 @@ or search the file for the word.
 | zh-hans | | |
 | zh-hant | | |
 
+#### prompt
+
+**Means here:** the instruction text the app composes and sends to a model with a job. A routing rule exposes prompt options and carries a badge when it overrides them. It is the app's own composed instruction, never something the user types into a chat.
+
+**Part of speech in UI:** noun, frequently attributive ("prompt options", "prompt override").
+
+**Example:** `config:routing.labelPromptOptions` — "Prompt Options"
+
+**Not:** request, query, question, command, instruction on its own. Keep it distinct from an HTTP **request** — the same settings panel carries requests-per-second and request-timeout labels — and from the **search query** behind "No models match your search".
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | промпт | Masculine loanword; gen. промпта, pl. промпты. **Chosen by elimination, and the elimination is the part worth keeping.** The native candidate «запрос» is unavailable: it is already the HTTP _request_ in the same panel (`config:requestsPerSecondLabel` is «Запросов к поставщику в секунду», `config:requestTimeoutLabel` is «Таймаут запроса (секунды)») and it is additionally the _search query_ fixed by the _match_ row. Three senses of one word was one too many, so the loanword takes this one. The same elimination holds in every namespace that mentions rate limits — do not re-open it there. `config:routing.labelPromptOptions` is «Параметры промпта»; the rule badge `config:routing.promptBadge` is the lowercase «промпт». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### reasoning effort
+
+**Means here:** a provider parameter on a model — low, medium or high — controlling how much the model deliberates before answering. Set on a module instance and overridable per routing rule.
+
+**Part of speech in UI:** noun phrase.
+
+**Example:** `config:module.reasoningEffort` — "Reasoning effort"
+
+**Not:** a NARN concept at all — it is the provider's own parameter, so prefer whatever your locale's AI tooling already calls it. Not "effort" in the sense of work done, and never confusable with a run's cost.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | уровень рассуждений | Masculine head noun «уровень» (gen. уровня). The parameter is a scale with visible low/medium/high values, so «уровень» is right where the calque «усилие рассуждения» is not. **«Уровень» is safe here only because the genitive complement binds it:** a bare «Уровень» is both the game-level _stage_ and a log severity, which is precisely why _severity_ below takes «важность» instead. `config:routing.labelReasoningEffort` is «Переопределение уровня рассуждений». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
 #### routing rule
 
 **Means here:** one ordered condition-to-module mapping. The first rule that matches (in ascending priority order) decides which module translates a given entry into a given language; if none matches, the job fails.
@@ -1020,6 +1083,33 @@ or search the file for the word.
 | zh-hans | | |
 | zh-hant | | |
 
+#### custom
+
+**Means here:** the user-supplied alternative to the app's preset choices — a batch size typed in rather than picked, a model id entered by hand.
+
+**Part of speech in UI:** adjective, and in one place a bare select option.
+
+**Example:** `config:models.useCustom` — "Use "{{model}}" as a custom model"
+
+**Not:** personal, own, manual, advanced, other. English reuses one word across several controls; what matters is that each control reads naturally in your language, not that a single word covers all of them.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | пользовательский | Adjective, agrees with its noun: `config:models.useCustom` ships as Использовать «{{model}}» как пользовательскую модель. **A bare «Свой» or «Пользовательский» does not stand alone in a Russian option list**, so a select option names what it configures instead — `config:batchGroupingCustom` ("Custom") is «Свой размер», because choosing it reveals an entries-per-batch input. One term with two surface forms, not two terms; the adjective is the citation form. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
 ### Quality
 
 #### LQA
@@ -1066,7 +1156,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | контроль качества | Masculine head noun «контроль» (gen. контроля). **Watch the transitivity:** «не проходит контроль качества» is correct only when the *translation* is the subject («перевод не проходит контроль качества»); when the subject is the issue, it has to be «не дают пройти контроль качества», because the issues are what stops the translation, not what is being checked. So `config:lqa.description` ships as: Проверки качества выполняются для каждого перевода. Блокирующие проблемы не дают пройти контроль качества и могут вызвать автоматический повтор; предупреждения только фиксируются. Bare _the gate_ is the bare «контроль». The process-control sense only: the style guide rules out «ворота» and «шлюз». It shares «качества» with «проверки качества» exactly as English shares _quality_, but the head nouns stay different, and the tab itself is just «Качество». |
+| ru | контроль качества | Masculine head noun «контроль» (gen. контроля). **Watch the transitivity:** «не проходит контроль качества» is correct only when the *translation* is the subject («перевод не проходит контроль качества»); when the subject is the issue, it has to be «не дают пройти контроль качества», because the issues are what stops the translation, not what is being checked. So `config:lqa.description` ships as: Проверки качества выполняются для каждого перевода. Блокирующие проблемы не дают пройти контроль качества и могут вызвать автоматический повтор; предупреждения только фиксируются. Bare _the gate_ is the bare «контроль». **Never «этап»** to render _at the gate_: it is one of the two process readings of _stage_ that the style guide bans outright, and it is easy to reach for. Where English writes "Used at LQA gate", drop the noun instead of finding a synonym — `config:overflowRatioDescription` ships «Используется при контроле качества LQA…». The process-control sense only: the style guide rules out «ворота» and «шлюз». It shares «качества» with «проверки качества» exactly as English shares _quality_, but the head nouns stay different, and the tab itself is just «Качество». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1094,6 +1184,87 @@ or search the file for the word.
 | it | | |
 | pt-br | | |
 | ru | проверка | Feminine; gen. проверки, pl. проверки, gen. pl. проверок — «проверки» is the genitive singular *and* the nominative/accusative plural, so «результат проверки» and «Проверки LQA» are spelled alike and the number has to come from the surrounding words. One word across «проверка качества», «Проверки LQA» and every individual check name — `quality:checkLabels.overflow` is «Переполнение по длине». Reserved: _AI review_ is «рецензия» and _needs review_ is «вычитка», so «проверка» always means a deterministic rule. Severities are «блокирующая» and «предупреждение», both kept apart from «ошибка». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### severity
+
+**Means here:** how hard an LQA check fails — blocking or warning. Set per check; the value decides whether the gate fails and an automatic retry is triggered.
+
+**Part of speech in UI:** noun.
+
+**Example:** `config:lqa.checks.glossary-adherence.description` — "At warning severity the issue is informational only; set severity to blocking to trigger the automatic retry."
+
+**Not:** level, priority, urgency, criticality, error. The two **values** are not this term — "blocking" and "warning" are fixed by *check* above and must not drift here.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | важность | Feminine; gen. важности. **Not «уровень»**, which is the game-level _stage_ and a log severity both, and which this file is trying to contain; not «серьезность», which reads as the gravity of an injury. The two values stay exactly as _check_ fixes them and appear as **quoted tokens**, so they do not agree with «важность» and are not meant to — `config:lqa.checks.glossary-adherence.description` ships as: При важности «предупреждение» проблема носит только информационный характер; задайте важность «блокирующая», чтобы включить автоматический повтор. That is the style guide's quoted-token rule, not a gender error. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### assertion
+
+**Means here:** one user-written regular expression the regex LQA check applies to a translation — which must match it, or must not. A check can carry several.
+
+**Part of speech in UI:** noun.
+
+**Example:** `config:lqa.regexAddAssertion` — "Add assertion"
+
+**Not:** condition, check, rule, test, claim, statement. The first three are all taken — "condition" by routing conditions, "check" by the LQA checks themselves, "rule" by routing rules — so a fourth word is genuinely required rather than merely nice.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | утверждение | Neuter; gen. утверждения, gen. pl. утверждений. The logical sense, as in a test assertion. `config:lqa.regexAddAssertion` is «Добавить утверждение» and `config:lqa.checks.regex-assertions.name` is «Утверждения регулярных выражений». **Known overlap, and the reason _approve_ is now restricted:** «утверждение» is also the verbal noun of «утвердить» (_approve_), so that row bans the noun form outright — approval uses the verb «утвердить» and the participle «Утверждено», which leaves this word free for the regex strings. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### pattern
+
+**Means here:** the regular expression itself, in the field beside an assertion.
+
+**Part of speech in UI:** noun.
+
+**Example:** `config:lqa.regexPattern` — "Pattern"
+
+**Not:** template, model, mask, sample, form. Whatever you choose must not be the word you gave **template** — several languages would otherwise use one word for both, and template is already carrying a reservation of its own.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | выражение | Neuter; gen. выражения, gen. pl. выражений. `config:lqa.regexPattern` is «Выражение», and the check description names them in full as «регулярные выражения». «Шаблон» is the word Russian reaches for first and is **unavailable**: it belongs to _template_, which holds it specifically so that _template_ never becomes «модель». Taking it here would push that whole chain over. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1230,7 +1401,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | совпадение | Neuter; gen. совпадения, gen. pl. совпадений, so the Matches panel reads «Совпадения», «Совпадений: {{count}}», «Совпадения не найдены.» The verb is the same root — «совпадать» (`config:models.noMatches` — «Ни одна модель не совпадает с запросом»). Never the word chosen for _glossary term_: a «термин» is what is searched for, a «совпадение» is where it turned up. |
+| ru | совпадение | Neuter; gen. совпадения, gen. pl. совпадений, so the Matches panel reads «Совпадения», «Совпадений: {{count}}», «Совпадения не найдены.» The verb is the same root — «совпадать» (`config:models.noMatches` — «Ни одна модель не совпадает с запросом»). Note what that costs: «запрос» is *also* the HTTP request in the module settings panel, so it now carries two senses. Two is the ceiling — it is why _prompt_ takes the loanword «промпт» rather than becoming a third. Never the word chosen for _glossary term_: a «термин» is what is searched for, a «совпадение» is where it turned up. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1284,7 +1455,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | утвердить | Perfective «утвердить» on buttons, imperfective «утверждать» in prose — the promotion sense, not «подтвердить» (_confirm_), «принять» (_accept_) or «сохранить» (_save_), all three of which live in the same bulk bar, and not «проверить», which is reserved. `strings:bulk.approveSelected` is «Утвердить в память». Count-neutral phrasing keeps the participle out of agreement trouble: «Утверждено переводов: {{count}}». |
+| ru | утвердить | Perfective «утвердить» on buttons, imperfective «утверждать» in prose — the promotion sense, not «подтвердить» (_confirm_), «принять» (_accept_) or «сохранить» (_save_), all three of which live in the same bulk bar, and not «проверить», which is reserved. `strings:bulk.approveSelected` is «Утвердить в память». Count-neutral phrasing keeps the participle out of agreement trouble: «Утверждено переводов: {{count}}». **Use the verb and the participle, never the verbal noun «утверждение»** — that word is taken by _assertion_ below, and «утверждение перевода» would read as a regex assertion in a file that has both. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1367,7 +1538,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | сирота | Common gender, 1st declension, gen. сироты, pl. сироты, gen. pl. сирот — «сироты» is both the genitive singular and the nominative plural, so counted strings need all four plural keys rather than a guessed ending. **«Сирота» is strictly animate and human, which limits where it may stand.** The tab title takes it, because it is short and English's own metaphor is equally jarring: `orphans:title` is «Сироты». Everywhere else — action labels, prose and counts — uses the adjective, both because the animate accusative otherwise makes the string read literally (`orphans:relink.title` is «Перепривязать осиротевшую запись», never «Перепривязать сироту») and because English itself switches part of speech there: `config:orphanedCount` is the adjective "{{count}} orphaned", so Russian gives it «{{count}} осиротевшая запись / осиротевшие записи / осиротевших записей» — a plural family, with the adjective agreeing in all four categories, not a noun count. That is one term with two registers, not two terms — do not introduce a third word. |
+| ru | сирота | Common gender, 1st declension, gen. сироты, pl. сироты, gen. pl. сирот — «сироты» is both the genitive singular and the nominative plural, so counted strings need all four plural keys rather than a guessed ending. **«Сирота» is strictly animate and human, which limits where it may stand.** The tab title takes it, because it is short and English's own metaphor is equally jarring: `orphans:title` is «Сироты». Everywhere else — action labels, prose and counts — uses the adjective, both because the animate accusative otherwise makes the string read literally (`orphans:relink.title` is «Перепривязать осиротевшую запись», never «Перепривязать сироту») and because English itself switches part of speech there: `config:orphanedCount` is the adjective "{{count}} orphaned", and it ships as «Осиротевших: {{count}}». **That key is a single plain key — it has no `_one`/`_other` siblings**, so it takes count-neutral phrasing and must not be given a Russian plural family; added categories English does not have are reported as `extra` and fail the diff. The `orphans` namespace's own counts are the place for plural families. That is one term with two registers, not two terms — do not introduce a third word. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1448,7 +1619,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | снимок | Masculine, fleeting vowel: gen. снимка, pl. снимки, gen. pl. снимков. «Снимок» is the standard Russian for a state snapshot; expand to «снимок состояния» wherever the bare word could be read as a photograph. `config:importSnapshotNote` ships as: Перед этим импортом был создан страховочный снимок ({{date}}). Его можно восстановить на вкладке «Резервные копии». — the tab name is at the top level of the string, so it takes «ёлочки»; the guillemets elsewhere in this cell are citation marks. English's _restore points_ are «точки восстановления». Shares nothing with «резервная копия», which several strings put in the same sentence. |
+| ru | снимок | Masculine, fleeting vowel: gen. снимка, pl. снимки, gen. pl. снимков. «Снимок» is the standard Russian for a state snapshot; expand to «снимок состояния» wherever the bare word could be read as a photograph. `config:importSnapshotNote` ships as: Перед этим импортом был создан страховочный снимок ({{date}}). Его можно восстановить на вкладке «Резервные копии». — the tab name is at the top level of the string, so it takes «ёлочки»; the guillemets elsewhere in this cell are citation marks. English's _restore points_ are «точки восстановления». Shares nothing with «резервная копия», which several strings put in the same sentence. The loose English use flagged in the block above — a saved *configuration*, not a restore point — keeps the same Russian word, exactly as English keeps the same English one: `config:templatesDescription` ships «Многократно используемые снимки конфигурации проекта.» |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1475,7 +1646,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | шаблон | Masculine; gen. шаблона, pl. шаблоны, gen. pl. шаблонов. Explicitly **not** «модель», which is the word Russian would otherwise reach for and which is taken by _model_. `config:templatesTitle` is «Шаблоны проектов». |
+| ru | шаблон | Masculine; gen. шаблона, pl. шаблоны, gen. pl. шаблонов. Explicitly **not** «модель», which is the word Russian would otherwise reach for and which is taken by _model_. `config:templatesTitle` is «Шаблоны проектов». The reservation runs the other way too: because «шаблон» belongs to _template_, it must stay out of the regex strings, where English's _pattern_ takes «выражение» — see _pattern_ below. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1560,7 +1731,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | уровень | Masculine with a fleeting vowel: gen. уровня, pl. уровни, gen. pl. уровней. The game-level sense only — «этап» and «стадия» are exactly the process readings this file and the style guide both rule out. `stage-details:title` is «Сведения об уровне». One ambiguity to know about: log severity is also «уровень», but the two never share a surface and the game sense always stands beside stage content. |
+| ru | уровень | Masculine with a fleeting vowel: gen. уровня, pl. уровни, gen. pl. уровней. The game-level sense only — «этап» and «стадия» are exactly the process readings this file and the style guide both rule out. `stage-details:title` is «Сведения об уровне». One ambiguity to know about: log severity is also «уровень», but the two never share a surface and the game sense always stands beside stage content. For the LQA sense of _severity_ the word is **«важность»**, chosen partly to keep «уровень» from spreading — see _severity_ below. |
 | tr | | |
 | id | | |
 | vi | | |
