@@ -14,7 +14,7 @@ is the instruction derived from it — say so rather than silently following one
 | File | What it settles | Who writes it |
 | --- | --- | --- |
 | `terminology.md` | which word a domain term takes, and what it must not be confused with | frozen for the duration of the backfill |
-| `terminology/<lang>.md` | your locale's rendering of each term, with its notes | you, for your language only |
+| `terminology/<lang>.md` | your locale's rendering of each term, with its notes | you, for your language only (created by the pre-flight — see below) |
 | `style/<lang>.md` | register, casing, punctuation, numbers, length budgets, placeholders | you, for your language only |
 | `english-review-notes.md` | English defects, ambiguities and their intended reading | frozen; read it before batch 1 |
 | `backfill-notes.md` | what the pilot cost and what it found | frozen; the evidence behind this file |
@@ -36,13 +36,38 @@ shared state and no merge conflict between them.
 - **Terms outrank the length budget.** The budget exists to stop *avoidable* length. If a
   term rule forces a long label, that is the term rule doing its job.
 
+## The file you edit, and where you run things
+
+**Your locale's strings live in `packages/frontend/src/locales/<lang>/<namespace>.json`** —
+one file per namespace, the same 24 namespace filenames English has. If your language's
+directory does not exist yet, **create each file by copying English's and translating in
+place**:
+
+```bash
+mkdir -p packages/frontend/src/locales/<lang>
+cp packages/frontend/src/locales/en/config.json packages/frontend/src/locales/<lang>/config.json
+```
+
+Copy-then-translate rather than writing a file from scratch: it makes key order match by
+construction, which is a checked property, and it guarantees you never silently omit a key.
+The one thing you do **not** carry over unchanged is the set of plural suffixes — see 2.7.
+
+**Working directory: every command in this file runs from the workspace root** — the
+directory that contains `packages/frontend`, `Makefile`, `package.json` and `scripts/`.
+More than one directory named `scripts/` exists in this checkout, so running a bare
+`node scripts/…` from the wrong place fails with a "cannot find module" error that looks
+exactly like a script that was never written. If a command cannot find its script, check
+your working directory before concluding the tool is missing.
+
 ## Tooling this procedure assumes
 
-These land with the pre-flight work, before the first batch is dispatched. If one is
-missing, say so rather than skipping the step it belongs to.
+The first two exist today. **The last two, and the per-language lexicon file
+`terminology/<lang>.md`, are pre-flight deliverables** — they are created before the first
+batch is dispatched, and they may not exist while you are reading this. If one is missing,
+say so rather than silently skipping the step it belongs to.
 
-- `pnpm check:locales` — the parity, placeholder, plural-coverage and length gate. Part of
-  the release gate, so it must be green at every commit.
+- `pnpm check:locales` — the parity, placeholder, plural-coverage, key-order and length
+  gate. Part of the release gate, so it must be green at every commit.
 - `LOCALE_PARITY_STRICT=<lang> pnpm check:locales` — the same gate, holding your locale to
   its language's complete plural-category set with no bare-key rescue. The variable takes a
   comma-separated list, so you can hold just the language you are backfilling.
@@ -348,18 +373,38 @@ two sibling keys disagree in English, that disagreement is either deliberate or 
 defect — carry it across, and if you think it is a defect, raise it as one rather than
 silently harmonizing in one language only.
 
-### 2.7 Do not add a plural family over a plain English key
+### 2.7 Your plural categories are your language's, not English's
 
-The guard permits it: a locale may turn one English `{{count}}` string into a full plural
-family, provided the plain key survives. The temptation is real, because a language with
-more categories than English would often be richer for it.
+**This is the rule that decides which keys your files contain, so settle it before you copy
+the first namespace.** English ships `_one` and `_other`. That is *English's* category set,
+not a template. Every plural family in your file gets **exactly your language's categories —
+no more and no fewer** — because a suffix that is not one of them can never resolve. The
+parity guard compares plural families by their **base key**, not by their exact suffixes,
+precisely so that each language can supply its own set.
 
-**No shipped locale does it.** Across all **41** plural families, in each of the four
-locales shipped so far, **zero** were added this way; every count English writes as one
-string is handled with the count-neutral device from 2.2. Follow that.
+There are 41 plural families in English, and English spells them with **29** `_one` keys and
+**41** `_other` keys (the other twelve families are the `bare + _other` shape from 2.3, which
+have no `_one` at all) plus one `_zero`.
 
-If the project ever wants added families, it is a decision to take **once, for every
-locale**, not per namespace — half a language done each way is worse than either.
+**If your language has more categories than English**, the extra forms are **required, not
+merely tolerated**. Russian selects between _one_, _few_, _many_ and _other_, so it carries
+`_few` and `_many` variants with no English counterpart — 94 keys more than English, which is
+exactly the twelve missing `_one` forms plus 41 `_few` plus 41 `_many`.
+
+**If your language has one category, you supply `_other` and nothing else.** Copying
+English's `_one` across is a **hard guard failure by design**: the suffix is not in your
+language's set, so it can never be selected, and the guard fails it rather than letting a
+dead key sit in the file forever. A single-category language therefore ends with **29 keys
+fewer than English**, not more. Do not "complete" a family to match English's shape.
+
+**Do not add a plural family over a plain English key.** The guard permits it — a locale may
+turn one English `{{count}}` string into a full family, provided the plain key survives — and
+the temptation is real for a language with more categories than English. **No shipped locale
+does it:** across all 41 families, in each of the four locales shipped so far, **zero** were
+added this way; every count English writes as one string is handled with the count-neutral
+device from 2.2. Follow that. If the project ever wants added families, it is a decision to
+take **once, for every locale**, not per namespace — half a language done each way is worse
+than either.
 
 The mirror of this rule is not a matter of taste. **A category you leave out does not fall
 back to `_other`.** The framework picks the suffix for the count first and then walks the
@@ -368,7 +413,8 @@ that category would have taken. The one thing that rescues a gap is a bare `key`
 the same locale — and where English carries only `key_one`/`key_other`, adding a bare `key`
 to your family is reported as an extra key and fails the diff. **The fix for a category you
 find hard to word is the category, never a bare key that bypasses plural selection
-everywhere.**
+everywhere.** This is about categories your language *has* and you omitted; it is not an
+argument for adding one your language does not have.
 
 Two suffixes are legal that you might otherwise delete. `_zero` resolves in *every* locale
 whatever its categories, because an explicit `key_zero` lookup is made whenever the count is
@@ -435,19 +481,25 @@ Character expansion over the 1,931 shared keys, measured against the English sou
 | es | 1.22 | 1.21 | 1.60 |
 | fr | 1.26 | 1.24 | 1.67 |
 
-(All three rows recomputed by one method — nearest rank for the percentile. The pilot
-recorded Russian's 90th percentile as 1.71; the hundredth is a percentile-interpolation
-difference and not a disagreement.)
+**Read the population before you compare these to anything.** Every row above is over the
+**1,931 keys the locale shares with English**, one ratio per shared key. `backfill-notes.md`
+records Russian's 90th percentile as **1.71**, and that is over a different population: all
+**2,025** Russian keys, with each extra plural form measured against the English form it
+resolves to. Both figures are correct and both reproduce exactly — 1.7222 over the shared
+set, 1.7143 over the full Russian set. The gap is the denominator, not rounding and not an
+interpolation choice. **When you report your own language's expansion, state which of the
+two populations you measured**, because a language with many extra plural forms will move
+these apart much further than Russian did.
 
 Russian is *shorter* overall than both locales shipped before it, which is not what anyone
 predicts. **The aggregate is not the number that matters — the tail is.** At the 90th
 percentile every one of the three runs 1.6x to 1.7x, and that is what breaks chrome. A
 language whose aggregate looks comfortable can still overflow every tab label it has.
 
-Budget your key count by your language's **plural-category count**, not by its expansion:
-Russian needed 94 keys English has no counterpart for, because it fills four categories
-where English fills two. A language with two categories needs none; a language with one
-category ends with **fewer** keys than English, not more.
+Budget your key count by your language's **plural-category count**, not by its expansion, per
+the rule in 2.7: Russian needed 94 keys English has no counterpart for, because it fills four
+categories where English fills two. A language with `one`/`other` needs none. A
+single-category language ends with 29 keys **fewer** than English, not more.
 
 ---
 
@@ -456,12 +508,15 @@ category ends with **fewer** keys than English, not more.
 1. **Read the three authorities and the previous batches' shipped files.** Not their
    reports. Precedent verification against a report is how three stale citations reached a
    commit in the pilot.
-2. **Translate the batch**, resolving each string's control shape before writing it, and
-   filling `terminology/<lang>.md` for every term you meet **in the same change as the
-   wording** — not afterwards.
-3. **Run the mechanical checks below** and clear every survivor.
-4. **Report**: wall clock, terms added, conventions settled, and every judgement call.
-5. **Review, fix, re-review** — see the rubric and the state machine.
+2. **Create this batch's files by copying English's**, one namespace at a time, into
+   `packages/frontend/src/locales/<lang>/`. Then **translate in place**, resolving each
+   string's control shape before writing it, and adjusting each plural family to your
+   language's categories per 2.7.
+3. **Fill in `terminology/<lang>.md`** for every term the batch met, **in the same change as
+   the wording** — not afterwards, and not in the batch report.
+4. **Run the mechanical checks below** and clear every survivor.
+5. **Report**: wall clock, terms added, conventions settled, and every judgement call.
+6. **Review, fix, re-review** — see the rubric and the state machine.
 
 ### The mechanical checks, run before review and not after
 
@@ -478,10 +533,20 @@ made the reviewer's verdicts checkable. Hand the reviewer the output.
    - **Word axis second.** On what survives, clear the next words that cannot inflect —
      prepositions and particles, invariant abbreviations, short and impersonal participles.
    - **Run the token axis first.** The word list exempts a word after *every* token and
-     blunts the check as it grows, so it must run second and stay short. Over the finished
-     24 Russian namespaces: 187 occurrences, 0 survivors.
-   - Whatever survives both passes is a genuine numeric token with a real word after it.
-     Check it by hand at several counts, including one that ends in 1.
+     blunts the check as it grows, so it must run second and stay short.
+   - **The pilot's figure, with the method that produces it**, because the count moves a lot
+     with the matching rule: counting every place where `}}` is followed by whitespace and
+     then a word in the target script, over all 2,025 shipped Russian values, gives **187
+     occurrences and 0 survivors**. A looser rule that also matches across intervening
+     punctuation gives 257 on the same files. Neither is wrong; **state which one you used**
+     when you report your own number, or it cannot be compared to anything.
+   - **What survives both passes is a candidate, not a verdict.** The token axis only skips
+     the 23 placeholders someone has confirmed cannot hold a number, and this app has **73**
+     distinct placeholders — so 50 of them survive the first pass whether or not they are
+     numeric, including plainly textual ones like `{{category}}`, `{{text}}` and `{{rules}}`.
+     A survivor means "nobody has cleared this yet". Look at each one, decide whether the
+     value can be a number at all, and only then check the agreement by hand at several
+     counts, including one ending in 1.
 2. **Strict-mode parity, from the first batch and not at the end.**
    `LOCALE_PARITY_STRICT=<lang> pnpm check:locales`. Russian was clean in every batch, and
    that is exactly why no plural work ever had to be redone.
@@ -507,9 +572,22 @@ made the reviewer's verdicts checkable. Hand the reviewer the output.
    | three-dot ellipses instead of the single character | `...` for `…` |
    | hyphens used as dashes | `-` for `—` |
 
-**Five defect classes never fired in four batches: quoting and punctuation, do-not-translate
-token counts, placeholder multisets, key order, and plural coverage.** All five are
-mechanically guarded, which is why. Do not spend review attention on them.
+   **Punctuation in the source is yours to change; the token inside `{{…}}` is not.**
+   Quotation marks, dashes, ellipses and spacing all follow **your** language's convention,
+   not English's, and that includes the marks wrapped around a placeholder. English writes
+   `category:deleteConfirmBody_one` with curly quotes — `“{{category}}”` — and Russian ships
+   the same key with guillemets, `«{{category}}»`. The placeholder is untouched; the two
+   characters around it are set by `style/<lang>.md`. Decide your quote characters there
+   before batch 1, because they appear in every namespace.
+
+**Four defect classes never fired in four batches because they are mechanically guarded:
+do-not-translate token counts, placeholder multisets, key order, and plural coverage.** Do
+not spend review attention on those four.
+
+**Quoting and punctuation also never fired — but nothing guards it.** There is no quote,
+dash or ellipsis check anywhere in the locale rules; the class stayed clean because the
+style guide settled it before batch 1 and sweep 6 above caught what slipped. Treat it as a
+translator instruction plus a grep, never as something a gate will catch for you.
 
 ---
 
@@ -642,8 +720,8 @@ language.
    with measured ones** — that is a deliverable, not a note.
 3. **The six register and typography greps**, and the sibling-English check across the whole
    language.
-4. **The citation check** — every rendering quoted in `terminology/<lang>.md` exists in the
-   shipped files.
+4. **The citation check** — every rendering quoted in `terminology/<lang>.md` (the per-language
+   lexicon file the pre-flight creates) exists in the shipped files.
 
 Fixes from the sweep go in as a normal fix round with a scoped re-review. The language is
 not done until that re-review passes.

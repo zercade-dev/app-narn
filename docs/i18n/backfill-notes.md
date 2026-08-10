@@ -123,8 +123,12 @@ The classes, in the order they mattered:
    it was written against, and the same key also renders over a different collection.
 
 Classes that never fired, in four batches: quoting and punctuation, do-not-translate token
-counts, placeholder multisets, key order, plural coverage. All five are mechanically
-guarded, which is why.
+counts, placeholder multisets, key order, plural coverage. Four of the five are
+mechanically guarded, which is why. **Quoting and punctuation is the exception and was
+miscounted here for a round:** nothing in `scripts/locale-rules.mjs` checks quotes, dashes,
+ellipses or spacing. That class stayed clean because `style/ru.md` settled it before the
+first batch and the typography greps swept for what slipped — a translator instruction plus
+a grep, not a gate. Do not tell a later language it is guarded.
 
 ---
 
@@ -181,8 +185,14 @@ first string is written.
 4. **Length budgets as absolute character counts per class**, not as a multiple of
    English. A ratio is meaningless when the English is five characters long, and only one
    of the five constrained classes has a fixed width.
-5. **The full surface-name set with the key pairs that must agree.** Seven surfaces, 16
-   key pairs, several of them written by different translators in different batches.
+5. **The full surface-name set with the keys that must agree.** `terminology.md` names
+   **ten** surfaces across **twenty-one** keys in its table, plus **three more** — Compare,
+   Translations and Backup — which have no second title key and are named only in prose
+   from another namespace. The seven surfaces across **16 keys** recorded in `style/ru.md`
+   are the subset this pilot settled and shipped, **not** the whole set: a brief that
+   quotes the seven understates the work by about a third. (They are 16 keys, not 16
+   *pairs* — Global Config alone accounts for four of them.) Several are written by
+   different translators in different batches.
 6. **"Match the sibling's English, not its other-locale rendering."** The error class
    hides behind a virtue: the file looks *more* consistent, not less.
 7. **The settled convention not to add a plural family over a plain English key**, and the
@@ -191,8 +201,12 @@ first string is written.
 8. **The English defects that must not be mirrored**, each with the reason: a bulk action
    labelled "Approve" that really applies (`strings:runs.judgeApproveAll` against
    `strings:runs.judgeApply` — one action, two verbs); three controls labelled "Provider"
-   that select a module instance; a stale tab name in one notice; two theme names that
-   already diverge between two locales in one shipped language. A defect named without its
+   that select a module instance; a stale tab name in one notice; and two theme names that
+   already diverge **between two namespaces inside one locale** — `es` renders
+   `settings:themes.techno.name` as "Tecno" but `welcome:themeChooser.names.techno` as
+   "Techno", and `settings:themes.minimal.name` as "Minimal" but
+   `welcome:themeChooser.names.minimal` as "Minimalista", while `fr` and `ru` agree with
+   themselves across both namespaces. A defect named without its
    keys cannot be acted on, so each one belongs in `english-review-notes.md` with the keys
    and the intended reading — that is the file language 2 will read, not this one.
 9. **The reservation-scoping rule.** Every reservation must state which part of speech and
@@ -201,7 +215,9 @@ first string is written.
    only compared two terms.
 10. **The measured expansion figure.** Russian is 1.19× English in characters over the
     shared keys, median 1.18 — *shorter* than both previously shipped locales (1.22 and
-    1.26). The tail is what breaks chrome: the 90th percentile is 1.71.
+    1.26). The tail is what breaks chrome: the 90th percentile is 1.71 over all 2,025
+    Russian keys, and 1.72 over the 1,931 shared with English. Quote the population with
+    the figure — see section 9.
 
 ---
 
@@ -335,3 +351,10 @@ Recorded plainly, because each one cost something measurable.
 - Expansion in characters over the shared keys: 1.19 for Russian, 1.22 and 1.26 for the
   two locales shipped before it. Chrome budgets are absolute character counts, not
   multiples of English.
+- **State the population with every percentile — the two in this file are not the same
+  one.** Russian's 90th percentile is **1.71** over all **2,025** Russian keys (each extra
+  plural form measured against the English form it resolves to) and **1.72** over the
+  **1,931** keys shared with English. Both reproduce exactly; the difference is the
+  denominator, not rounding. A language with many extra plural forms will separate the two
+  further than Russian does, so a percentile quoted without its population cannot be
+  compared to anything.

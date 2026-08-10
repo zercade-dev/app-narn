@@ -130,9 +130,12 @@ one below.
 
 **A ratio is the wrong unit when the English is short.** Every one of those 27 was flagged for
 having a *short source*, not a long rendering: "Legal" is five characters, so 1.5× is seven
-and a half — no correct Russian rendering of it can exist. Meanwhile
-`strings:bulk.approveSelected` at 44 English characters passes the ratio test with room to
-spare while being one of the genuinely tight labels. The ratio measures the wrong thing.
+and a half — no correct Russian rendering of it can exist. The ratio measures the wrong thing
+at the other end too: `strings:bulk.approveNone` ("No translations to approve in the
+selection.") is 44 English characters, so the old 1.5× rule let it run to 66, while
+`strings:bulk.approveSelected` ("Approve to memory") is 17 and is one of the genuinely tight
+labels in the same bulk bar. Length is a property of the container, and the ratio does not
+know what the container is.
 
 **And the five classes are not equally constrained.** Only one of them has a hard, fixed
 width: the sidebar is `16rem` (`SIDEBAR_WIDTH` in `components/ui/sidebar.tsx`) and every item
@@ -202,13 +205,16 @@ respectively, each of which is defensible on its own:
   and they are not synonyms in Russian legal practice.
 - **cookies** — «Политика о файлах cookie» (24 characters, 1.85×). Note that *cookie*
   qualifies «файлы» in Russian and never stands alone, so the shorter «…использования cookie»
-  is not an option. **The length here is a guard failure, not a preference:**
-  `lengthOffenders` fails anything over `MAX_LENGTH_RATIO = 2.5` and has **no per-key
-  allowlist**, and all three fuller standard forms breach it — «Политика использования файлов
-  cookie» 2.8×, «Политика в отношении файлов cookie» 2.6×, «Политика использования
-  cookie-файлов» 2.8×. So if the published page's own title is one of those, this label cannot
-  simply follow it: that needs a **granted length exception in the guard**, not a translator's
-  choice. Escalate rather than shorten.
+  is not an option. **The length here is a guard question, not a preference:**
+  `lengthOffenders` fails anything over `MAX_LENGTH_RATIO = 2.5`, and all three fuller
+  standard forms breach it — «Политика использования файлов cookie» 2.8×, «Политика в
+  отношении файлов cookie» 2.6×, «Политика использования cookie-файлов» 2.8×. So if the
+  published page's own title is one of those, this label cannot simply follow it on a
+  translator's say-so. **A per-key exemption mechanism now exists** — `LENGTH_EXEMPTIONS` in
+  `scripts/locale-rules.mjs`, keyed locale → namespace → key → the reason, which
+  `lengthOffenders` consults and which throws at module load if a reason is blank. It is
+  empty today, deliberately: an exemption is *granted*, not helped oneself to. Escalate for
+  one rather than shortening the rendering.
 - **subprocessors** — «Субобработчики», the GDPR term of art, over the calque
   «субпроцессоры», which reads as CPUs.
 
