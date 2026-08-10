@@ -1,0 +1,42 @@
+{
+  "title": "Настройки",
+  "appearance": "Внешний вид",
+  "appearanceDescription": "Выберите, как narn выглядит на этом устройстве.",
+  "theme": "Тема",
+  "mode": "Режим",
+  "switchToLight": "Переключить на светлый режим",
+  "switchToDark": "Переключить на темный режим",
+  "languageTitle": "Язык",
+  "languageDescription": "Язык интерфейса.",
+  "preview": "Предпросмотр",
+  "previewHint": "Примеры элементов управления в выбранной теме.",
+  "previewSamples": {
+    "heading": "Заголовок",
+    "body": "Основной текст показывает базовый шрифт и цвета.",
+    "muted": "Приглушенный текст выглядит так.",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "edit": "Изменить",
+    "delete": "Удалить",
+    "pass": "Пройдено",
+    "warn": "Предупреждение",
+    "fail": "Не пройдено",
+    "info": "Информация",
+    "inputPlaceholder": "Текстовое поле",
+    "selectOptionA": "Первый вариант",
+    "selectOptionB": "Второй вариант",
+    "checkbox": "Флажок",
+    "badgeDefault": "Обычный",
+    "badgeSecondary": "Вторичный",
+    "badgeOutline": "Контурный",
+    "badgeDestructive": "Опасный",
+    "scrollHint": "Прокрутите, чтобы увидеть полосу прокрутки в стиле темы",
+    "iconsLabel": "Значки"
+  },
+  "themes": {
+    "default": { "name": "Классика", "description": "Классический вид narn." },
+    "pixel": { "name": "Пиксель", "description": "Крупные пиксели 8-битной консоли." },
+    "techno": { "name": "Техно", "description": "Неоновый киберпанк-терминал." },
+    "minimal": { "name": "Минимализм", "description": "Плоский, спокойный, монохромный." }
+  }
+}

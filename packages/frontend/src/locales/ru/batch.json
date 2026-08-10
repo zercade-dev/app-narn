@@ -1,0 +1,10 @@
+{
+  "translateSelected": "Перевести выбранное",
+  "toTranslateCount": "К переводу: {{count}}",
+  "progressAriaLabel": "Переведено: {{completed}} из {{total}}",
+  "cancelRun": "Отменить прогон",
+  "runCancelled": "Прогон отменен:",
+  "runCompleted": "Перевод завершен — успешно: {{completed}} из {{total}}.",
+  "runCompletedWithErrors": "Перевод завершен — успешно: {{completed}}, с ошибкой: {{failed}}.",
+  "savedRulesNotice": "Прогоны используют сохраненные правила маршрутизации — несохраненные правки в редакторе правил не действуют."
+}
