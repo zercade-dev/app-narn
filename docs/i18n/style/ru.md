@@ -45,6 +45,15 @@ before you translate the string.** The convention below is already shipped acros
 A verbal noun («Создание…», «Импортирование…») is a **status**, not a command — use it for
 progress text and never for a button.
 
+**A word English reuses across controls does not have one Russian rendering, and forcing one
+is the error.** "Custom" is the standing example: as an adjective before a noun it is
+«пользовательский», agreeing — `config:models.useCustom` ships as `Использовать «{{model}}»
+как пользовательскую модель`. As a bare select option it cannot stand alone at all, because
+a lone «Свой» or «Пользовательский» is not idiomatic in a Russian option list, so the option
+names what it configures: `config:batchGroupingCustom` ("Custom") is «Свой размер», the
+option that reveals an entries-per-batch input. Resolve the control, then choose; do not
+chase consistency across two controls that are not the same control.
+
 ## Casing
 
 Sentence case only. Russian capitalizes the first word and proper nouns; nothing else.
@@ -130,6 +139,29 @@ noun take the case: the closing clause of `logs:translation.failedModuleDisabled
 
 The same rule covers counted nouns: never build «{{count}} записи» by guessing — use the
 plural keys below.
+
+**Only `{{count}}` triggers plural selection. Every other numeric token is a plural trigger
+i18next cannot see.** This is the one placeholder rule that bites in any language with
+numeral agreement, and its failure mode is silent: the string is grammatical for some values
+of the token and wrong for others, so it passes every guard and every spot-check that
+happens to use a number ending in 1. `{{total}}`, `{{maxLength}}`, `{{tokens}}`,
+`{{entryCount}}` and their kind get **no** CLDR category — there is no plural key to write,
+because i18next never looks for one.
+
+So a numeric token that is not `count` must sit in a frame that is **grammatical for every
+value it can take**. The devices, in order of preference:
+
+- **Number after an invariant noun phrase, behind a colon or in brackets** — the same
+  count-neutral device as above. `config:models` (confidenceReason.prompt-near-context) ships
+  «Промпт (токенов: ~{{tokens}}) приближается…»; `config:models`
+  (confidenceReason.batch-exceeds-reliable) ships «Число записей ({{entryCount}}) превышает…».
+- **An abbreviation that does not decline** — `config:routing.templateMeta` ships «не более
+  {{maxLength}} симв.», where the full «символов» would be right only for some values.
+- **A bare ratio or fraction with no noun at all** — `config:models.footprintInspecting` is
+  «Измерение {{done}}/{{total}}: {{model}}…».
+
+Never «{{total}} записи» or «осталось {{n}} дня». If you cannot find a frame, say so rather
+than shipping a string that is right one time in three.
 
 **Russian supplies all four plural categories — that is settled, not a question to raise.**
 Russian selects between _one_, _few_, _many_ and _other_, while the English source ships

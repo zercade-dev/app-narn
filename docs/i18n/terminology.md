@@ -965,7 +965,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | уровень рассуждений | Masculine head noun «уровень» (gen. уровня). The parameter is a scale with visible low/medium/high values, so «уровень» is right where the calque «усилие рассуждения» is not. **«Уровень» is safe here only because the genitive complement binds it:** a bare «Уровень» is both the game-level _stage_ and a log severity, which is precisely why _severity_ below takes «важность» instead. `config:routing.labelReasoningEffort` is «Переопределение уровня рассуждений». |
+| ru | уровень рассуждений | Masculine head noun «уровень» (gen. уровня). The parameter is a scale with visible low/medium/high values, so «уровень» is right where the calque «усилие рассуждения» is not. **«Уровень» carries three loads in this app and is safe here only because the genitive complement binds it.** The three: the game-level _stage_, a log severity, and this parameter. A bare «Уровень» is ambiguous between all three; «уровень рассуждений» is not, and the three surfaces never meet — a model setting, a game-content tab and a log filter. That is a documented overload, not an unnoticed collision, and it is why the LQA sense of _severity_ drops the noun instead of becoming a fourth. `config:routing.labelReasoningEffort` is «Переопределение уровня рассуждений». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1083,33 +1083,6 @@ or search the file for the word.
 | zh-hans | | |
 | zh-hant | | |
 
-#### custom
-
-**Means here:** the user-supplied alternative to the app's preset choices — a batch size typed in rather than picked, a model id entered by hand.
-
-**Part of speech in UI:** adjective, and in one place a bare select option.
-
-**Example:** `config:models.useCustom` — "Use "{{model}}" as a custom model"
-
-**Not:** personal, own, manual, advanced, other. English reuses one word across several controls; what matters is that each control reads naturally in your language, not that a single word covers all of them.
-
-| Locale | Rendering | Notes |
-| --- | --- | --- |
-| es | | |
-| fr | | |
-| de | | |
-| it | | |
-| pt-br | | |
-| ru | пользовательский | Adjective, agrees with its noun: `config:models.useCustom` ships as Использовать «{{model}}» как пользовательскую модель. **A bare «Свой» or «Пользовательский» does not stand alone in a Russian option list**, so a select option names what it configures instead — `config:batchGroupingCustom` ("Custom") is «Свой размер», because choosing it reveals an entries-per-batch input. One term with two surface forms, not two terms; the adjective is the citation form. |
-| tr | | |
-| id | | |
-| vi | | |
-| th | | |
-| ja | | |
-| ko | | |
-| zh-hans | | |
-| zh-hant | | |
-
 ### Quality
 
 #### LQA
@@ -1183,7 +1156,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | проверка | Feminine; gen. проверки, pl. проверки, gen. pl. проверок — «проверки» is the genitive singular *and* the nominative/accusative plural, so «результат проверки» and «Проверки LQA» are spelled alike and the number has to come from the surrounding words. One word across «проверка качества», «Проверки LQA» and every individual check name — `quality:checkLabels.overflow` is «Переполнение по длине». Reserved: _AI review_ is «рецензия» and _needs review_ is «вычитка», so «проверка» always means a deterministic rule. Severities are «блокирующая» and «предупреждение», both kept apart from «ошибка». |
+| ru | проверка | Feminine; gen. проверки, pl. проверки, gen. pl. проверок — «проверки» is the genitive singular *and* the nominative/accusative plural, so «результат проверки» and «Проверки LQA» are spelled alike and the number has to come from the surrounding words. One word across «проверка качества», «Проверки LQA» and every individual check name — `quality:checkLabels.overflow` is «Переполнение по длине». Reserved: _AI review_ is «рецензия» and _needs review_ is «вычитка», so «проверка» always means a deterministic rule. **The two severity values are a matched pair of nouns: «Блокировка» and «Предупреждение»** (`config:lqa.severityBlocking`, `config:lqa.severityWarning`). The adjective pair «блокирующая»/«предупреждающая» was rejected because it needs an implied feminine antecedent the reader fills as «проверка», and «предупреждающая проверка» is not idiomatic — only one member of the pair would read well, and a select whose two options are different parts of speech is worse than either. Nouns are symmetrical, need no antecedent, and match the English register. **The adjective stays correct wherever a real noun is present** — `config:lqa.description` says «Блокирующие проблемы…», and the glossary-adherence description says «сделайте проверку блокирующей». That is the same use/mention split the _needs review_ row records: a value shown as an option is a token, a modifier attached to a visible noun agrees with it. Both stay apart from «ошибка». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1210,7 +1183,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | важность | Feminine; gen. важности. **Not «уровень»**, which is the game-level _stage_ and a log severity both, and which this file is trying to contain; not «серьезность», which reads as the gravity of an injury. The two values stay exactly as _check_ fixes them and appear as **quoted tokens**, so they do not agree with «важность» and are not meant to — `config:lqa.checks.glossary-adherence.description` ships as: При важности «предупреждение» проблема носит только информационный характер; задайте важность «блокирующая», чтобы включить автоматический повтор. That is the style guide's quoted-token rule, not a gender error. |
+| ru | серьезность | **Prefer no head noun at all — that is what the app's strings do.** Russian expresses this adjectivally, and dropping the noun also gives «блокирующая» a feminine noun to agree with: `config:lqa.checks.glossary-adherence.description` ships as: В режиме предупреждения проблема носит только информационный характер; сделайте проверку блокирующей, чтобы включить автоматический повтор. Use «серьезность» (f., gen. серьезности) — or «критичность», which Russian issue trackers use interchangeably — only where a head noun is genuinely unavoidable, such as a column header over the two values. **«Важность» is wrong and was shipped once before being caught:** it means *importance*, a ranking of what matters most, not how hard something fails. The error is worth studying — it was argued from what the other candidates were not («уровень» is taken by _stage_, «проверка» by _check_) without anyone checking that the surviving word meant severity. Not «уровень» in any case: see _reasoning effort_ for the loads that word already carries. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1249,7 +1222,7 @@ or search the file for the word.
 
 #### pattern
 
-**Means here:** the regular expression itself, in the field beside an assertion.
+**Means here:** the regular expression itself, in the field beside an assertion. **This term is the regex sense only** — if English uses "pattern" elsewhere for a shape, a habit or a layout, that is a different word and this row does not cover it.
 
 **Part of speech in UI:** noun.
 
@@ -1264,7 +1237,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | выражение | Neuter; gen. выражения, gen. pl. выражений. `config:lqa.regexPattern` is «Выражение», and the check description names them in full as «регулярные выражения». «Шаблон» is the word Russian reaches for first and is **unavailable**: it belongs to _template_, which holds it specifically so that _template_ never becomes «модель». Taking it here would push that whole chain over. |
+| ru | выражение | Neuter; gen. выражения, gen. pl. выражений. `config:lqa.regexPattern` is «Выражение», and the check description names them in full as «регулярные выражения» — the rendering is valid **for the regex sense only**, and does not generalize to any other English "pattern". «Шаблон» is the word Russian reaches for first and is **unavailable**: it belongs to _template_, which holds it specifically so that _template_ never becomes «модель». Taking it here would push that whole chain over. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1538,7 +1511,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | сирота | Common gender, 1st declension, gen. сироты, pl. сироты, gen. pl. сирот — «сироты» is both the genitive singular and the nominative plural, so counted strings need all four plural keys rather than a guessed ending. **«Сирота» is strictly animate and human, which limits where it may stand.** The tab title takes it, because it is short and English's own metaphor is equally jarring: `orphans:title` is «Сироты». Everywhere else — action labels, prose and counts — uses the adjective, both because the animate accusative otherwise makes the string read literally (`orphans:relink.title` is «Перепривязать осиротевшую запись», never «Перепривязать сироту») and because English itself switches part of speech there: `config:orphanedCount` is the adjective "{{count}} orphaned", and it ships as «Осиротевших: {{count}}». **That key is a single plain key — it has no `_one`/`_other` siblings**, so it takes count-neutral phrasing and must not be given a Russian plural family; added categories English does not have are reported as `extra` and fail the diff. The `orphans` namespace's own counts are the place for plural families. That is one term with two registers, not two terms — do not introduce a third word. |
+| ru | сирота | Common gender, 1st declension, gen. сироты, pl. сироты, gen. pl. сирот — «сироты» is both the genitive singular and the nominative plural, so counted strings need all four plural keys rather than a guessed ending. **«Сирота» is strictly animate and human, which limits where it may stand.** The tab title takes it, because it is short and English's own metaphor is equally jarring: `orphans:title` is «Сироты». Everywhere else — action labels, prose and counts — uses the adjective, both because the animate accusative otherwise makes the string read literally (`orphans:relink.title` is «Перепривязать осиротевшую запись», never «Перепривязать сироту») and because English itself switches part of speech there: `config:orphanedCount` is the adjective "{{count}} orphaned", and it ships as **«Осиротевших записей: {{count}}»** — count-neutral, **with the head noun kept**. Two things to take from that. A bare «Осиротевших: 5» is a substantivized adjective left hanging, so count-neutral phrasing in Russian means putting the number after an invariant noun *phrase*, not after an adjective alone. And the key is a single plain key with no `_one`/`_other` siblings: adding a Russian family over it would in fact be legal (the guard allows an added family provided the plain key survives), but this key does not need one — the count-neutral form is grammatical at every count and is what shipped, so do not add one here. The `orphans` namespace's own counts are where families belong. That is one term with two registers, not two terms — do not introduce a third word. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1731,7 +1704,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | уровень | Masculine with a fleeting vowel: gen. уровня, pl. уровни, gen. pl. уровней. The game-level sense only — «этап» and «стадия» are exactly the process readings this file and the style guide both rule out. `stage-details:title` is «Сведения об уровне». One ambiguity to know about: log severity is also «уровень», but the two never share a surface and the game sense always stands beside stage content. For the LQA sense of _severity_ the word is **«важность»**, chosen partly to keep «уровень» from spreading — see _severity_ below. |
+| ru | уровень | Masculine with a fleeting vowel: gen. уровня, pl. уровни, gen. pl. уровней. The game-level sense only — «этап» and «стадия» are exactly the process readings this file and the style guide both rule out. `stage-details:title` is «Сведения об уровне». One ambiguity to know about: log severity is also «уровень», but the two never share a surface and the game sense always stands beside stage content. For the LQA sense of _severity_ Russian drops the head noun rather than reaching for «уровень» — see _severity_ below. |
 | tr | | |
 | id | | |
 | vi | | |
