@@ -21,8 +21,11 @@ left in English, an acronym you expanded.
 `NARN` · provider and module names (`DeepL`, `Copilot`, `OpenRouter`, `Anthropic`,
 `Gemini`, `OpenAI`, `DeepSeek`, `GitHub Copilot`) · module ids and module-instance ids
 (`generic-ai`, `openai:default`) · model ids · vault key names (`OPENAI_API_KEY`) ·
-the language code `pseudo-test` · CSV header tokens · version numbers · anything inside
-`{{…}}`.
+the language code `pseudo-test` · CSV header tokens · version numbers ·
+anything inside `{{…}}`.
+
+**Keyboard key names are not on that list — they are per-locale.** See the next section;
+they are the one term class where "copy the English" is the wrong default.
 
 The product name appears in English as `narn`, `Narn` and `NARN`. That inconsistency is
 known and unresolved; copy whatever spelling the source string contains, and never
@@ -30,6 +33,52 @@ translate or re-case it.
 
 `LQA` is an industry acronym; keep it as `LQA` unless the target language has an
 established localized form, and record that decision in its row below.
+
+## Keyboard key names
+
+`Enter`, `Esc`, `Shift`, `Tab`, `Ctrl` and `Alt` name physical keys. The reader has to
+find that key on the keyboard in front of them, so the only thing that matters is what
+**their** keycap says.
+
+> **The rule:** write the key name **as it is engraved on that locale's keyboard**. Keep
+> the English word only where that locale's keycap is in fact English.
+
+For the locales in this repo and the ones arriving next, the English word is often *not*
+what is engraved: French AZERTY shows **Entrée**, **Échap** and **Maj**; Spanish shows
+**Intro** and **Mayús**; German shows **Strg** for Ctrl and **Umschalt** (or the bare ⇧
+glyph) for Shift. `Tab`, `Ctrl` and `Alt` happen to be engraved in English on most
+European layouts, so those usually stay — but that is an observation about the keycap,
+not a rule about the word. If you are unsure what a layout engraves, say so in the Notes
+column rather than guessing; a wrong key name is an instruction to press a key that does
+not exist.
+
+**These strings are currently inconsistent, and that is a known defect for the backfill
+to settle — not a rule.** Measured against the shipped files on 2026-08-09:
+
+| Key | es | fr |
+| --- | --- | --- |
+| `strings:compare.cellEditTooltip` | `Enter` / `Esc` kept in English | `Enter` / `Esc` kept in English |
+| `strings:compare.cellEditReviewedTooltip` | "pulsa **Enter**" — kept in English | "appuyez sur **Enter**" — kept in English |
+| `common:webSearch.hint` | "Pulsa **Intro**" — localized | "Appuyez sur **Entrée**" — localized |
+| `strings:compare.contextPlaceholder` | `Enter` / `Esc` kept, **Mayús** localized — mixed | **Entrée** / **Maj+Entrée** / **Échap** — localized |
+| `strings:compare.tonePlaceholder` | `Enter` / `Esc` kept, **Mayús** localized — mixed | **Entrée** / **Maj+Entrée** / **Échap** — localized |
+
+So both locales already localize some key names and not others, and es even mixes the two
+inside a single string. Under the rule above the **localized** cells are the correct ones:
+`common:webSearch.hint`, and the fr placeholders, are right and must not be "fixed" back
+to English. The rows still in English are the ones that need changing — as one deliberate
+sweep, so a tooltip and the placeholder next to it stop naming the same key two ways.
+Until that sweep lands, match the locale's engraved name in anything you newly write; do
+not propagate the English leftovers.
+
+The same words appear in the same files as **verbs and nouns, and there they translate
+normally** — "Enter your password", "Enter a valid hex color", "Enter edit mode", the
+_Tab_ that means a tab in the UI. Eight of the fifteen `Enter`s in `en` are the verb. Read
+the string, not the word: the key-name reading is the one that names a keystroke. This is
+one reason key names are not in the guard's do-not-translate list, which is a per-term
+count check and would demand every one of those verbs survive untranslated; the other is
+the rule above — a locale that correctly writes **Entrée** would fail a check that
+insisted on `Enter`.
 
 ## Surface names
 
@@ -210,8 +259,8 @@ or search the file for the word.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
-| es | | |
-| fr | | |
+| es | traducción | Feminine — every standalone status word agreeing with it is feminine too. Already used throughout the shipped `strings` and `review` namespaces; the tab label is the plural "Traducciones". The verb is "traducir", and "re-translate" is "retraducir" (`review:retranslate`). |
+| fr | traduction | Feminine. Already used throughout the shipped `strings` and `review` namespaces; the tab label is the plural "Traductions". The verb is "traduire", and "re-translate" is "retraduire" (`review:retranslate`). |
 | de | | |
 | it | | |
 | pt-br | | |
@@ -725,10 +774,21 @@ or search the file for the word.
 
 **Not:** to review, pending, unverified, unchecked, requires revision, for approval. Whatever you choose has to work identically in the filter, the badge and "Flag all as needs review".
 
+**The three surfaces, and the casing trap.** The filter label (`strings:filters.needsReview`, `strings:compare.needsReviewFilter`) is sentence case; the row badge (`strings:compare.cellNeedsReviewBadge`) is deliberately **lowercase**, because all three cell chips are lowercase 10px chips by design. That is the mirror of the "preserve uppercase where English uses it for layout" rule in the style guides: preserve the lowercase too. Same wording, different casing — do not "fix" the badge to sentence case, and do not let the casing difference tempt you into two different renderings.
+
+**Gender, for languages that inflect adjectives (the "reviewed" family).** The implied noun is always *translation*, but the same word appears in three grammatical roles and they do not all agree the same way. The rule settled for es/fr, which every inflecting locale should follow:
+
+- **Status token — invariant (masculine in es/fr).** The two adjectival cell badges `strings:compare.cellTranslatedBadge` / `cellReviewedBadge` render the stored status value itself, and `strings:contextMenu.clearReviewed` quotes that same token («revisado» / « révisé »). A quoted token is *mentioned*, not used, so it does not agree with anything: es "traducido"/"revisado", fr "traduit"/"révisé".
+- **Explicit antecedent — agrees.** Where the string names the noun, agreement is forced: `strings:compare.cellMarkReviewedAria` is "Marcar la traducción de {{language}} como revisad**a**" / "Marquer la traduction {{language}} comme révisé**e**".
+- **Elliptical action label — follows the token.** `strings:shortcuts.markReviewed` ("Mark as reviewed") has no visible noun and sets the status, so it takes the token form: "Marcar como revisado" / "Marquer comme révisé". Note that `strings:compare.markAllReviewed` ("Marcar todo como revisado") is *not* evidence for this — it agrees with masculine "todo", so dropping "todo" removes the antecedent rather than preserving it. The basis is the quoted status token above.
+- **Counter-precedent to know about:** `vault:statusLocked` ships as "Bloqueada", agreeing with an invisible "bóveda". That is a standalone status word that *does* agree, so the rule is not "status words never inflect" — it is that a value quoted as a token elsewhere in the UI stays in its citation form. If your language has no such citation form, agree with *translation* everywhere and say so in your Notes cell.
+
+"Needs review" itself sidesteps all of this in es/fr: it is a verb phrase, not an adjective, so it carries no gender.
+
 | Locale | Rendering | Notes |
 | --- | --- | --- |
-| es | | |
-| fr | | |
+| es | necesita revisión | Verb phrase, so no gender to agree. Sentence-cased in the filter ("Necesita revisión" — `filters.needsReview`, `compare.needsReviewFilter`), lowercase in the row badge ("necesita revisión" — `compare.cellNeedsReviewBadge`), same wording in both. "Marcar todo como necesita revisión" is the bulk form. For the related *reviewed* adjective see the gender rule above: token form "revisado", agreeing form "revisada". |
+| fr | à réviser | No gender to agree. Sentence-cased in the filter ("À réviser"), lowercase in the row badge ("à réviser"), same wording in both. Note the capital À keeps its accent in the filter form. For the related *révisé* adjective see the gender rule above: token form "révisé", agreeing form "révisée". |
 | de | | |
 | it | | |
 | pt-br | | |
@@ -1165,8 +1225,8 @@ or search the file for the word.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
-| es | coincidencia | Feminine. Plural "coincidencias" throughout the Matches panel ("{{count}} coincidencias", "No se encontraron coincidencias.", "Aplicar coincidencias"). The verb is "coincidir" (`config:noMatches` — "Ningún modelo coincide con tu búsqueda"). |
-| fr | correspondance | Feminine. Plural "correspondances" throughout the Matches panel ("{{count}} correspondances", "Aucune correspondance trouvée.", "Appliquer les correspondances"). The verb is "correspondre" (`config:noMatches` — "Aucun modèle ne correspond à votre recherche"). |
+| es | coincidencia | Feminine. Plural "coincidencias" throughout the Matches panel ("{{count}} coincidencias", "No se encontraron coincidencias.", "Aplicar coincidencias"). The verb is "coincidir" (`config:models.noMatches` — "Ningún modelo coincide con tu búsqueda"). |
+| fr | correspondance | Feminine. Plural "correspondances" throughout the Matches panel ("{{count}} correspondances", "Aucune correspondance trouvée.", "Appliquer les correspondances"). The verb is "correspondre" (`config:models.noMatches` — "Aucun modèle ne correspond à votre recherche"). |
 | de | | |
 | it | | |
 | pt-br | | |

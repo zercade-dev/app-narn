@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback, type KeyboardEvent } from 'react';
 import type React from 'react';
+import { useTranslation } from 'react-i18next';
 import { AlertTriangle, CheckCircle2, Pencil, RefreshCw, Trash2, Undo2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { isBlockingIssue } from '@/lib/lqa';
@@ -97,6 +98,12 @@ function CellActions({
   onOpenUndo,
   onEnterEdit,
 }: Readonly<CellActionsProps>): React.JSX.Element {
+  // The three action tooltips compose their wording from `shortcuts.*` — the same
+  // keys the keyboard-shortcuts panel renders — plus a literal ` · <key>` suffix.
+  // Composing rather than storing "Re-translate · T" whole keeps ONE source of
+  // wording for both surfaces, which sit one keypress apart and drifted before.
+  // The separator and the key glyphs (T, R, Enter, Esc) are never translated.
+  const { t } = useTranslation('strings');
   const [markingReviewed, setMarkingReviewed] = useState(false);
   const [reviewFading, setReviewFading] = useState(false);
   const [clearing, setClearing] = useState(false);
@@ -132,7 +139,7 @@ function CellActions({
                 disabled={retranslating}
                 onClick={() => void onRetranslate()}
                 className="inline-flex items-center justify-center p-1 rounded-md text-muted-foreground/70 hover:text-status-info hover:bg-status-info/10 transition-colors disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                aria-label={`Re-translate ${language}`}
+                aria-label={t('compare.cellRetranslateAria', { language })}
                 data-testid={`comparison-cell-retranslate-${language}`}
               />
             }
@@ -144,7 +151,7 @@ function CellActions({
               <RefreshCw className="size-3.5" aria-hidden="true" />
             </span>
           </TooltipTrigger>
-          <TooltipContent side="top">Retranslate · T</TooltipContent>
+          <TooltipContent side="top">{`${t('shortcuts.retranslate')} · T`}</TooltipContent>
         </Tooltip>
       )}
       {onOpenUndo && (
@@ -155,14 +162,14 @@ function CellActions({
                 type="button"
                 onClick={onOpenUndo}
                 className="inline-flex items-center justify-center p-1 rounded-md text-muted-foreground/70 hover:text-status-warn hover:bg-status-warn/10 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                aria-label={`Previous versions for ${language}`}
+                aria-label={t('compare.cellUndoAria', { language })}
                 data-testid={`comparison-cell-undo-${language}`}
               />
             }
           >
             <Undo2 className="size-3.5" aria-hidden="true" />
           </TooltipTrigger>
-          <TooltipContent side="top">Previous versions</TooltipContent>
+          <TooltipContent side="top">{t('compare.undoTooltip')}</TooltipContent>
         </Tooltip>
       )}
       {onMarkReviewed && text && (status !== 'reviewed' || reviewFading) && (
@@ -181,14 +188,14 @@ function CellActions({
                   disabled={markingReviewed}
                   onClick={() => void handleMarkReviewedClick(onMarkReviewed)}
                   className="inline-flex items-center justify-center p-1 rounded-md text-muted-foreground/70 hover:text-status-pass hover:bg-status-pass/10 transition-colors disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                  aria-label={`Mark ${language} translation as reviewed`}
+                  aria-label={t('compare.cellMarkReviewedAria', { language })}
                   data-testid={`comparison-cell-mark-reviewed-${language}`}
                 />
               }
             >
               <CheckCircle2 className="size-3.5" aria-hidden="true" />
             </TooltipTrigger>
-            <TooltipContent side="top">Mark as reviewed · R</TooltipContent>
+            <TooltipContent side="top">{`${t('shortcuts.markReviewed')} · R`}</TooltipContent>
           </Tooltip>
         </span>
       )}
@@ -208,14 +215,14 @@ function CellActions({
                   }
                 }}
                 className="inline-flex items-center justify-center p-1 rounded-md text-muted-foreground/70 hover:text-status-fail hover:bg-status-fail/10 transition-colors disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-destructive focus-visible:outline-none"
-                aria-label={`Clear translation for ${language}`}
+                aria-label={t('compare.cellClearAria', { language })}
                 data-testid={`comparison-cell-clear-${language}`}
               />
             }
           >
             <Trash2 className="size-3.5" aria-hidden="true" />
           </TooltipTrigger>
-          <TooltipContent side="top">Clear translation · C</TooltipContent>
+          <TooltipContent side="top">{`${t('shortcuts.clearTranslation')} · C`}</TooltipContent>
         </Tooltip>
       )}
       <Tooltip>
@@ -226,7 +233,7 @@ function CellActions({
               disabled={status === 'reviewed'}
               onClick={onEnterEdit}
               className="inline-flex items-center justify-center p-1 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              aria-label={`Edit translation for ${language}`}
+              aria-label={t('compare.cellEditAria', { language })}
               data-testid={`comparison-cell-edit-${language}`}
             />
           }
@@ -235,8 +242,8 @@ function CellActions({
         </TooltipTrigger>
         <TooltipContent side="top">
           {status === 'reviewed'
-            ? 'Reviewed — press Enter to edit'
-            : 'Edit · Enter · Esc to cancel'}
+            ? t('compare.cellEditReviewedTooltip')
+            : t('compare.cellEditTooltip')}
         </TooltipContent>
       </Tooltip>
     </div>
@@ -256,6 +263,7 @@ export function ComparisonCell({
   onClear,
   onOpenUndo,
 }: Readonly<ComparisonCellProps>): React.JSX.Element {
+  const { t } = useTranslation('strings');
   const record = entry.translations[language];
   const text = record?.text ?? '';
   const moduleId = record?.moduleId ?? '';
@@ -511,7 +519,7 @@ export function ComparisonCell({
             className="w-full resize-y bg-background border border-input rounded p-1 text-sm focus:outline-none focus:ring-1 focus:ring-ring min-h-[80px]"
             data-content
             data-testid={`comparison-cell-editor-${language}`}
-            aria-label={`Edit translation for ${language}`}
+            aria-label={t('compare.cellEditAria', { language })}
           />
         ) : (
           <div className="whitespace-pre-wrap break-words leading-relaxed" data-content>
@@ -535,7 +543,7 @@ export function ComparisonCell({
                 className="text-[10px] px-1 rounded bg-status-info/15 text-status-info"
                 data-testid={`comparison-cell-translated-${language}`}
               >
-                translated
+                {t('compare.cellTranslatedBadge')}
               </span>
             )}
             {status === 'reviewed' && (
@@ -543,7 +551,7 @@ export function ComparisonCell({
                 className="text-[10px] px-1 rounded bg-status-pass/15 text-status-pass"
                 data-testid={`comparison-cell-reviewed-${language}`}
               >
-                reviewed
+                {t('compare.cellReviewedBadge')}
               </span>
             )}
             {record?.needsReview === true && (
@@ -551,7 +559,7 @@ export function ComparisonCell({
                 className="text-[10px] px-1 rounded bg-status-warn/15 text-status-warn font-medium"
                 data-testid={`comparison-cell-needs-review-${language}`}
               >
-                needs review
+                {t('compare.cellNeedsReviewBadge')}
               </span>
             )}
           </div>

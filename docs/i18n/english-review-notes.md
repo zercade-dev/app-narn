@@ -167,20 +167,33 @@ queue`, `Stage details`, `Categories`). Left alone on purpose: within the Global
    both are correct for their language. Do not align it with
    `review:sourceAi.findingPrev`.
 
-## Bugs found while reviewing (not fixed here — they need key changes)
+## Bugs found while reviewing (both since fixed)
 
-1. **Three plural forms never render.** `config:glossariesSkipped_plural`,
-   `config:malformedRows_plural` and `config:exportRoundtripWarning_plural` use the
-   legacy i18next v3 `_plural` suffix. The app runs i18next 26 with JSON v4 and no
-   `compatibilityJSON` override, so only `_one`/`_other` are resolved: the three
-   `_plural` keys are dead and the singular string renders for every count
-   ("2 glossary disabled"). Fixing this renames keys, which this task must not do —
-   it belongs with the backfill work that touches key shape.
-2. **`strings:columns.source` (`SOURCE`) has no call site.** The string table
-   renders the source _language name_ in that header instead
-   (`StringTableGrid.tsx`), and the only `columns.source` lookup in the frontend is
-   the `orphans` namespace's. Probably dead; deleting keys is out of scope here, so
-   it will be translated into fourteen locales unless it is removed first.
+Both were out of scope for the review itself, because both needed key changes. **Both have
+since been fixed**, ahead of the locale backfill so neither would be translated into twelve
+more languages. They are kept here as findings, with what was done to each.
+
+(The four key names quoted below — the three `_plural` keys and `strings:columns.source` —
+no longer exist, deliberately: they are the record of what was removed. A citation sweep
+will surface them, as it surfaces the `config:importBtn` named in the ambiguities table
+above; all five are correct as history and must not be "repaired" to a live key.)
+
+1. **Three plural forms never rendered — fixed by converting them.**
+   `config:glossariesSkipped_plural`, `config:malformedRows_plural` and
+   `config:exportRoundtripWarning_plural` used the legacy i18next v3 `_plural` suffix. The
+   app runs i18next 26 with JSON v4 and no `compatibilityJSON` override, so only the CLDR
+   category suffixes are resolved: the three `_plural` keys were dead and the bare key
+   rendered for every count. That bare key was grammatically singular, so the UI really did
+   render "5 glossary disabled" — a user-visible bug, not merely dead weight. All three
+   families were **converted** to `_one`/`_other` in en, es and fr rather than deleted.
+   (`exportRoundtripWarning_one` also lost its plural-shaped tail: "Fix those cells" became
+   "Fix that cell".)
+2. **`strings:columns.source` (`SOURCE`) had no call site — deleted.** The string table
+   renders the source _language name_ in that header instead (`StringTableGrid.tsx`), and
+   the only `columns.source` lookup in the frontend belongs to the `orphans` namespace,
+   which has its own key of that name. No dynamic `columns.*` key construction exists
+   either, so the key was removed from all three locales before the backfill could
+   translate it twelve more times.
 
 ## Applied later — the test-blocked families
 

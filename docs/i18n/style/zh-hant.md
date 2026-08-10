@@ -1,8 +1,8 @@
 # Style guide — Traditional Chinese (zh-hant)
 
 This locale targets **Taiwan** Traditional Chinese. Its Simplified counterpart, `zh-hans`,
-is a separate translation with different vocabulary, different quotation marks and a
-different register decision — **never produce this file by character-converting that one.**
+is a separate translation with different vocabulary and different quotation marks —
+**never produce this file by character-converting that one.**
 A converter changes the characters and leaves mainland vocabulary in place, which produces
 text that is technically Traditional and reads as foreign to every Taiwanese user.
 
@@ -13,9 +13,10 @@ placeholder handling.
 ## Register
 
 **您, though usually the subject is dropped entirely.** Taiwanese software localization
-uses 您 as its neutral second person — it does not carry the deferential, customer-service
-weight that makes it the wrong choice in `zh-hans`. This is a genuine divergence between the
-two Chinese files, not an oversight: `zh-hans` decides on 你 and this file decides on 您.
+uses 您 as its neutral second person: it is the Taiwan norm for professional software, not
+a formality upgrade over the English source. What separates this file from `zh-hans` is
+above all vocabulary and quotation marks — see the traps section — and neither of those
+survives a character conversion.
 
 Chinese drops the subject freely, so prefer that: `sidebar:selectProject` ("Select a
 project") is "選擇專案", with no pronoun. Use 您 only where possession has to be marked:
@@ -50,7 +51,8 @@ full-width digits.
 - **Ellipsis:** in prose sentences use the full-width `……`. In short UI affordance labels —
   search placeholders and progress states such as `common:loading` ("Loading…") — keep the
   single `…`, because `……` doubles the width of a deliberately unobtrusive label. This split
-  is a judgement call; apply it consistently, and identically to `zh-hans`.
+  is a judgement call; apply it consistently, and treat it as coupled to `zh-hans` — if it
+  is ever revisited, revisit both files together rather than letting them drift.
 - No space between Chinese characters themselves.
 
 ## Numbers and dates

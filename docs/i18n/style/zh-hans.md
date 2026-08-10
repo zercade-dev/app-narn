@@ -1,9 +1,9 @@
 # Style guide — Simplified Chinese (zh-hans)
 
 This locale is **mainland Simplified Chinese**. Its Traditional counterpart, `zh-hant`, is
-a separate translation with different vocabulary, different quotation marks and a different
-register decision — **never produce one file by character-converting the other.** The
-differences are listed in the traps section below.
+a separate translation with different vocabulary and different quotation marks — **never
+produce one file by character-converting the other.** The differences are listed in the
+traps section below.
 
 Terminology — _which word_ — is settled in `terminology.md`, including the list of things
 that are never translated. This file settles register, casing, punctuation, length and
@@ -11,22 +11,22 @@ placeholder handling.
 
 ## Register
 
-**你, and usually no pronoun at all — a house decision, not a settled norm.** Mainland
-Simplified localization is genuinely split here: much of the major platform localization
-(Apple and Microsoft in zh-CN among them) uses 您, while developer-facing and
-younger-audience products lean on 你 or on dropping the subject altogether. I chose 你
-because 您 reads as deferential customer-service copy against an
-informal-but-professional English source. It is the same kind of call `de.md` makes
-between _Sie_ and _du_: defensible either way, and if it is reversed it must be reversed
-across every string at once, not per string. Note that `zh-hant` deliberately decides the
-other way — see that file for why the same character carries different weight in Taiwan.
+**您, and usually no pronoun at all — a house decision, not a settled norm.** Mainland
+Simplified localization is genuinely split here: developer-facing and younger-audience
+products lean on 你 or on dropping the subject altogether, while much of the major
+platform localization — Apple and Microsoft in zh-CN among them — uses 您. We chose 您
+because that platform localization is the company this UI keeps, which makes 您 the
+neutral second person here rather than a deferential one; 你 is defensible, and was the
+earlier call. It is the same kind of decision `de.md` makes between _Sie_ and _du_:
+defensible either way, and if it is reversed it must be reversed across every string at
+once, not per string.
 
 The practical risk is low, because the primary rule below is to drop the pronoun entirely,
 which sidesteps the question in most strings.
 
 Chinese drops the subject freely, so prefer that: `sidebar:selectProject` ("Select a
-project") is "选择项目", with no pronoun. Use 你 only where possession genuinely has to be
-marked: `vault:unlockDescription` ("Enter your password…") is "输入你的密码…".
+project") is "选择项目", with no pronoun. Use 您 only where possession genuinely has to be
+marked: `vault:unlockDescription` ("Enter your password…") is "输入您的密码…".
 
 Instructions and button labels both take the **bare verb**: "选择", "保存", "删除", "取消".
 Do not use 请 on controls; reserve it for genuine requests such as a retry prompt.
@@ -53,7 +53,8 @@ full-width digits.
 - **Insert a half-width space between Chinese characters and adjacent Latin text or
   numerals**: "使用 {{module}} 模块", "共 {{count}} 个条目". This is the mainstream
   Simplified Chinese web convention and it materially improves legibility. Note that
-  `zh-hant` follows the same rule, but `ja` deliberately does not.
+  `zh-hant` follows the same rule and `ja` does not — in Japanese the absence of the space
+  is itself the convention.
 - **Ellipsis:** in prose sentences use the full-width Chinese ellipsis `……`. In short UI
   affordance labels — search placeholders and progress states such as `common:loading`
   ("Loading…") — keep the single `…`, because `……` doubles the width of a label whose whole

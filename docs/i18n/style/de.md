@@ -6,27 +6,67 @@ placeholder handling.
 
 ## Register
 
-**Sie, not du.** This is a professional tool that holds paid API credentials and spends
-the user's own provider budget; German business software addresses that user with _Sie_,
-and a _du_ localization would read as a consumer app. The English source is
-informal-but-professional, and _Sie_ is the German neutral for exactly that band — it is
-not a formality upgrade.
+**du, not Sie — a house decision, not the German default.** German business software still
+mostly addresses the user with _Sie_, and _Sie_ would be defensible for a tool that holds
+paid API credentials and spends the user's own provider budget. We chose _du_ anyway,
+because modern developer-tool German has largely settled on it — GitHub, Vercel and Linear
+all use _du_ in their German UI — and because _du_ matches the English source's
+informal-but-professional register instead of lifting it a notch into business formality.
+Like every register call it is all-or-nothing: if it is ever reversed, it is reversed
+across every string at once, never per string.
 
-**Prefer constructions with no direct address at all.** German UI convention is the
-impersonal infinitive for controls and instructions: `sidebar:selectProject` ("Select a
-project") is "Projekt auswählen", not "Wählen Sie ein Projekt aus". Reserve _Sie_ for
-sentences that genuinely address the user, such as `vault:createDescription` ("You will
-need this password to unlock the vault each session") — "Sie benötigen dieses Passwort…".
+**Prefer constructions with no direct address at all.** The _du_ decision does not change
+this: German UI convention is the impersonal infinitive for controls and instructions, so
+`sidebar:selectProject` ("Select a project") is "Projekt auswählen" — neither "Wähle ein
+Projekt aus" nor "Wählen Sie ein Projekt aus". Reserve _du_ for sentences that genuinely
+address the user, such as `vault:createDescription` ("…You will need this password to
+unlock the vault each session") — "Du benötigst dieses Passwort…".
 
-Button labels are always infinitives: "Speichern", "Löschen", "Abbrechen". Never the
-imperative "Speichere".
+Button labels are always infinitives: "Speichern", "Löschen", "Abbrechen". _du_ makes this
+rule harder to hold, not easier: it hands you a real imperative — "Speichere", "Lösche",
+"Wähle" — that _Sie_ never offered, and that form is wrong on anything clickable. If the
+string labels a control, it is an infinitive.
 
-Whatever you do, never mix _du_ and _Sie_. One slip is visible immediately.
+Where a full sentence really does instruct the user, the du-imperative is right, and it is
+irregular in a way the _Sie_ form never was: strong verbs **with an e→i/ie stem change**
+take that changed stem and drop the final -e — _gib_, not "gebe"; _lies_, not "lese";
+_nimm_, not "nehme". `account:mfaDisableHint` ("Enter a current code from your
+authenticator app…") is "Gib einen aktuellen Code aus deiner Authenticator-App ein…".
+
+That is the only class that shifts. Verbs that umlaut in the present tense do **not** umlaut
+here (_fahr_, not "fähr"; _lauf_, not "läuf").
+
+The final **-e is a separate question, and it is not simply dropped.** Four stem shapes
+_require_ it, and several of their verbs are everyday words in this UI:
+
+- Stems ending in **-d** or **-t**: _Warte_, _Sende_, _Beende_, _Finde_, _Lade_ — never
+  "Wart", "Send", "Beend".
+- Stems ending in a **consonant + m or n**, where that consonant is not l, m, n, r or h:
+  _Öffne_, _Atme_, _Rechne_, _Zeichne_. The excluded letters are what make _lern_, _komm_
+  and _film_ fine without it.
+- Stems ending in **-ig**: _Bestätige_, _Benachrichtige_, _Entschuldige_.
+- Verbs in **-eln / -ern**, which keep the ending and contract the stem instead: _Sammle_
+  (sammeln), _Wechsle_ (wechseln), _Ändere_ (ändern) — not "sammel", "wechsel", "änder".
+
+For every other verb the -e is genuinely optional (_mach_ or _mache_, _sag_ or _sage_,
+_geh_ or _gehe_). Drop it there — the short form is the current UI register — and keep it
+only where one of the four shapes above forces it.
+
+_du_, _dich_, _dir_ and _dein_ are lowercase — see the casing section. And whatever you do,
+never mix _du_ and _Sie_, in any string class: labels, errors, toasts and prose share one
+voice, and one slip is visible immediately.
 
 ## Casing
 
 German capitalizes **all nouns**. That is orthography, not Title Case, and it applies
 regardless of what English does: "Projekt löschen", "Routing-Regeln", "Übersetzungsspeicher".
+
+The address pronouns are the counter-example: _du_, _dich_, _dir_, _dein_ and their
+inflections are **lowercase** in current orthography — never capitalized as an honorific in
+a UI, though sentence-initial capitalization applies as normal ("Du benötigst dieses
+Passwort…" in the register section is right for that reason). A **mid-sentence** "Du" or
+"Dein" is the tell: it is usually a _Sie_-form reflex, since _Sie_ and _Ihr_ are capitalized
+in any position, and it reads as a register slip rather than as politeness.
 
 Do **not** mirror English Title Case, and do **not** lowercase German nouns to imitate
 English sentence case — both produce wrong German. `english-review-notes.md` records that
@@ -110,6 +150,12 @@ Plurals map one to one onto English `_one` / `_other`.
 - **"Stage" is a game level**, not a phase. German "Phase", "Etappe" and "Stufe" are the
   process readings `terminology.md` warns about; use the gaming term.
 - **"Judge"** takes the evaluative sense ("bewerten"), never "richten"/"Richter".
+- **Drop the possessive rather than translating it.** English marks possession far more
+  often than German does, and dropping it is idiom, not a register choice.
+  `vault:unlockDescription` ("Enter your password to decrypt module credentials for this
+  session") reads best as "Passwort eingeben, um…" — "dein Passwort" is not wrong, just
+  noise. Keep _dein_ where the possession is the point of the sentence, as in the
+  `account:mfaDisableHint` example in the register section.
 - **Genitive chains get long fast.** "Die Einstellungen der Instanz des Moduls" is correct
   and unreadable; prefer a compound or a hyphenated form.
 - **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms

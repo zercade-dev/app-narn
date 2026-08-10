@@ -17,7 +17,8 @@
     "format": "prettier --write \"packages/*/src/**/*.{ts,tsx,css,json}\" \"*.{json,md,yaml,yml}\"",
     "format:check": "prettier --check \"packages/*/src/**/*.{ts,tsx,css,json}\" \"*.{json,md,yaml,yml}\"",
     "reset": "bash scripts/reset.sh",
-    "lint:deps": "tsx scripts/check-catalog.ts"
+    "lint:deps": "tsx scripts/check-catalog.ts",
+    "check:locales": "node scripts/check-locales.mjs"
   },
   "devDependencies": {
     "@eslint/js": "catalog:",

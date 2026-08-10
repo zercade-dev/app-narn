@@ -43,7 +43,6 @@
     "loading": "Cargando entradas…"
   },
   "columns": {
-    "source": "ORIGEN",
     "config": "ESTADO",
     "tooltipSource": "Archivo de origen",
     "tooltipAchievementSource": "Origen de logro",
@@ -135,7 +134,26 @@
     "selectPage": "Seleccionar todas las filas de esta página",
     "selectAll": "Seleccionar todas ({{count}})",
     "selectRow": "Seleccionar fila",
-    "run": "Ejecución"
+    "run": "Ejecución",
+    "cellRetranslateAria": "Retraducir {{language}}",
+    "cellUndoAria": "Versiones anteriores de {{language}}",
+    "cellMarkReviewedAria": "Marcar la traducción de {{language}} como revisada",
+    "cellClearAria": "Borrar la traducción de {{language}}",
+    "cellEditAria": "Editar la traducción de {{language}}",
+    "cellEditTooltip": "Editar · Enter · Esc para cancelar",
+    "cellEditReviewedTooltip": "Revisado — pulsa Enter para editar",
+    "cellTranslatedBadge": "traducido",
+    "cellReviewedBadge": "revisado",
+    "cellNeedsReviewBadge": "necesita revisión"
+  },
+  "shortcuts": {
+    "title": "Atajos de teclado",
+    "retranslate": "Retraducir",
+    "markReviewed": "Marcar como revisado",
+    "clearTranslation": "Borrar traducción",
+    "enterEditMode": "Entrar en modo de edición",
+    "navigateRows": "Navegar entre filas",
+    "cancelEditing": "Cancelar la edición"
   },
   "filters": {
     "searchPlaceholder": "Buscar texto…",

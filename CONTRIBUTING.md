@@ -79,9 +79,14 @@ pnpm lint      # eslint over packages/*/src
 make verify
 ```
 
-`make verify` runs `pnpm build`, `pnpm lint`, `pnpm format:check` and a dependency
-security audit that fails on high or critical advisories in production
-dependencies. Run it before you open a pull request.
+`make verify` runs `pnpm build`, `pnpm lint`, `pnpm format:check`, `pnpm check:locales`
+and a dependency security audit that fails on high or critical advisories in
+production dependencies. Run it before you open a pull request.
+
+`pnpm check:locales` is the interface-string gate — see [Translations](#translations)
+below. It is a standalone script rather than a test suite, it needs no browser or
+server, and continuous integration runs the same command, so a failure here is the
+failure you would otherwise meet on the pull request.
 
 Two things it does **not** do, both deliberate:
 
@@ -129,6 +134,12 @@ the same wording:
 
 Read both before translating. A change to an English string should update the other locales
 in the same pull request; `{{token}}` placeholders are identifiers and are never translated.
+
+Check your work with `pnpm check:locales` (also run by `make verify` and by continuous
+integration). It compares every locale against `en` for missing and extra keys, plural
+categories, placeholder preservation, product and provider names left translated, values
+left untranslated, gross length outliers and key order, and it names the file, the key and
+the reason for each failure.
 
 ## Opening an issue, and what the labels mean
 
