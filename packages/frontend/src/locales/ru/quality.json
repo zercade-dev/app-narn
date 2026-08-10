@@ -31,7 +31,7 @@
     "failed": "Не пройдено"
   },
   "checkLabels": {
-    "tag-equality": "Идентичность встроенных тегов",
+    "tag-equality": "Идентичность тегов",
     "overflow": "Переполнение по длине",
     "length-limit": "Ограничение длины",
     "glossary-adherence": "Соблюдение глоссария",

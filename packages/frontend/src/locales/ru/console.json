@@ -29,7 +29,7 @@
   "showDetails": "Показать технические сведения",
   "membersNotShown": "Не показано записей: {{count}}",
   "membersNotShown_one": "Еще {{count}} запись не показана",
-  "membersNotShown_few": "Еще {{count}} записи не показаны",
+  "membersNotShown_few": "Еще {{count}} записи не показано",
   "membersNotShown_many": "Еще {{count}} записей не показано",
   "membersNotShown_other": "Еще {{count}} записи не показано"
 }
