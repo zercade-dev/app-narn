@@ -119,7 +119,7 @@ catalog:
   '@vitejs/plugin-react': 6.0.5
   esbuild: 0.28.1
   tailwindcss: 4.3.3
-  vite: 8.2.0
+  vite: 8.2.1
 
   # Frontend build tooling — parsers for the strip-comments Vite plugin (guarantee
   # no shipped comments). Real parsers, never regex (// and /* appear in string and
