@@ -77,8 +77,8 @@
   },
   "module": {
     "loaded": "Загружен модуль {{module}}.",
-    "instanceRegistered": "Добавлена конфигурация {{instance}}.",
-    "instanceRegisterFailed": "Не удалось добавить конфигурацию {{instance}}."
+    "instanceRegistered": "Добавлен экземпляр {{instance}}.",
+    "instanceRegisterFailed": "Не удалось добавить экземпляр {{instance}}."
   },
   "vault": {
     "unlocked": "Хранилище разблокировано.",
