@@ -78,8 +78,14 @@ alphabet.
 
 ## 3. What review caught, and how the rate moved
 
-Findings per 100 English keys, in batch order: **5.6 → 3.0 → 2.0 → 1.3**. Criticals:
+Findings per 100 English keys, in batch order: **5.6 → 3.0 → 2.0 → 1.5**. Criticals:
 **3 → 1 → 0 → 0**. The last batch was the largest and had zero critical findings.
+
+That rate counts **every finding of any severity**: it is each row of the cost-per-batch
+table above, totalled and divided by that row's English key count — so the last batch is
+9 findings over 602 keys.
+Both of its Importants were process findings rather than string defects; on string defects
+alone the last batch is 1.2.
 
 That trend is the pilot's main result, and it is not a story about translators getting
 better — each batch had a different one. It is the artifacts filling up. Every finding in
@@ -100,9 +106,11 @@ The classes, in the order they mattered:
    the roles and the sentence said the entries catch the matchers. Every guard passed it.
    The fix was structural — put the agent in the instrumental — not a reordering.
 3. **A pronoun or trailing modifier binding to the nearest noun rather than the intended
-   one** (1 critical, 2 important). Grammatical, idiomatic, and false. This class did not
-   stop occurring; it recurred in the last batch as modifier attachment rather than as
-   pronouns.
+   one** (1 critical, 2 important). Grammatical, idiomatic, and false. The class did not
+   stay in one shape: it recurred in the **second** batch as modifier attachment rather
+   than as pronouns, and that is the calibration finding that widened rubric item 2.
+   It did not recur after that — the last batch came back approved, with both of its
+   Importants process findings rather than string defects.
 4. **A term row that contradicts its own cited key's English** (repeated). Twice the
    *document* was wrong and the shipped string was right. The reviewer found it by
    diffing the file against every row that names a key.
@@ -181,9 +189,12 @@ first string is written.
    fact that the guard would permit it. Verified across all four locales: 41 families
    each, zero added.
 8. **The English defects that must not be mirrored**, each with the reason: a bulk action
-   labelled "Approve" that really applies; three controls labelled "Provider" that select a
-   module instance; a stale tab name in one notice; two theme names that already diverge
-   between two locales in one shipped language.
+   labelled "Approve" that really applies (`strings:runs.judgeApproveAll` against
+   `strings:runs.judgeApply` — one action, two verbs); three controls labelled "Provider"
+   that select a module instance; a stale tab name in one notice; two theme names that
+   already diverge between two locales in one shipped language. A defect named without its
+   keys cannot be acted on, so each one belongs in `english-review-notes.md` with the keys
+   and the intended reading — that is the file language 2 will read, not this one.
 9. **The reservation-scoping rule.** Every reservation must state which part of speech and
    which sense it binds. Four reservations written in this pilot had to be narrowed later,
    always the same way: a claim over a root or a bare word, backed by evidence that had
@@ -302,11 +313,7 @@ Recorded plainly, because each one cost something measurable.
    language — for Russian it means keeping the Latin words, which looks exactly like the
    unfixed leftovers the rule is about. Settle it as one sweep across all locales, or each
    new translator will make a local decision.
-6. **The pass-rate column header changed in this pass**, so the terminology row describing
-   it as abbreviated is now stale; and one section of the Russian style guide still quotes
-   an earlier rendering of a legal link label alongside the corrected one. Both are noted
-   in the review report; neither blocks translation.
-7. **The two authority documents were rewritten while batches were reading them.** For
+6. **The two authority documents were rewritten while batches were reading them.** For
    eleven parallel languages that is untenable. **Freeze both, cut the language-2 brief
    from the frozen text, and route new terms through an additive queue** — a translator
    filling their own locale column never conflicts with another, but a rule rewrite in
