@@ -228,17 +228,49 @@ defects the reviewer would otherwise spend attention on, or produces the evidenc
 makes the reviewer's verdicts checkable. Run them as a pre-flight; hand the reviewer the
 output.
 
-1. **The numeral-agreement detector, both axes, in this order.**
-   - *Token axis first:* skip every placeholder that cannot hold a number. In this app
+1. **The numeral-agreement detector, both axes.**
+   - *Token axis:* skip every placeholder that cannot hold a number. In this app
      that is `count` (its family handles it) plus `module`, `instance`, `language`,
      `languages`, `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`,
      `keys`, `slug`, `type`, `focus`, `field`, `why`, `label`, `filename`, `id`, `time`,
      `passRate`. The last eight are missing from the list in `style/ru.md` and each one
      costs a false positive.
-   - *Word axis second:* on what survives, clear invariant next words — prepositions and
-     particles, invariant abbreviations, short and impersonal participles.
-   - Run it token-axis-first: the word list exempts a word after *every* token and blunts
-     the check as it grows. Over the finished 24 namespaces: 187 occurrences, 0 survivors.
+   - *Word axis:* on what survives the token axis, clear invariant next words —
+     prepositions and particles, invariant abbreviations, short and impersonal
+     participles.
+   - **What has to happen in a fixed order is not evaluation, it is derivation.**
+     Checking the token or the word first, per occurrence, gives the same verdict — for
+     one fixed pair of lists the two checks are a plain logical OR, and OR is
+     commutative. What is load-bearing is where the word-exemption list is BUILT FROM:
+     only from occurrences that already survived the token axis, never from the raw,
+     unfiltered set. A list derived from the raw set is contaminated by legitimate
+     `{{count}}`-driven agreement — a real counted noun such as «записи» recurs
+     constantly and correctly after `{{count}}`, because that family already carries its
+     own plural forms — and once a word is exempted, it is exempted everywhere,
+     including after a non-`count` token it has no business covering. An injected
+     `{{orphanCount}} записи` defect passes silently under a raw-derived word list and is
+     caught under one derived from the post-token-axis survivors. This was verified by
+     building the exemption list the wrong way and getting 32 words instead of 6, one of
+     which absorbed exactly that class of injected defect.
+   - **The narrow figure, stated precisely.** Counting every place where `}}` is
+     followed by one or more whitespace characters and then a word in the target script:
+     **187 raw occurrences, 19 after the token axis, 0 after the word axis** — verified
+     against both the 2,025-key Russian corpus this file originally measured (commit
+     `e7fe56d`) and the current 2,002-key corpus. The reachability sweep in section 8
+     item 4 later removed 23 dead keys from every locale; none of them had a narrow-rule
+     match, so this figure is unchanged by it.
+   - **The looser figure, stated precisely — this one needed a correction.** A rule that
+     also matches across intervening punctuation *and* symbol characters (Unicode
+     categories P and S together; punctuation alone, category P only, gives 256 — one
+     short) gives **257** raw occurrences over the same 2,025-key corpus.
+     `review:overflowIssue`'s "×" (a math symbol, not punctuation under Unicode's own
+     split) sitting immediately before a preposition is the one occurrence that
+     punctuation-only matching misses. Over the current 2,002-key corpus the same rule
+     gives 255 — a delta of **2** from the reachability sweep, not 3: an earlier telling
+     of this number reported 254 and blamed the whole 3-occurrence gap on the sweep,
+     conflating that pre-existing category-boundary question with the sweep's real,
+     smaller effect. Quote the exact rule and the exact population together; neither
+     figure means anything on its own.
 2. **Strict-mode parity.** `LOCALE_PARITY_STRICT=ru pnpm check:locales` (substituting your
    locale) holds the locale to its language's complete plural-category set with no
    bare-key rescue. Run it from the first batch, not at the end — Russian was clean in

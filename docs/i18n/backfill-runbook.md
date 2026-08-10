@@ -524,22 +524,46 @@ Everything here is cheap and scriptable, and over four batches each one either f
 defects the reviewer would otherwise have spent attention on, or produced the evidence that
 made the reviewer's verdicts checkable. Hand the reviewer the output.
 
-1. **The numeral-agreement detector, both axes, in this order.**
-   - **Token axis first.** Skip every placeholder that cannot hold a number. In this app
+1. **The numeral-agreement detector, both axes.**
+   - **Token axis.** Skip every placeholder that cannot hold a number. In this app
      that is `count` (its own family handles it) plus `module`, `instance`, `language`,
      `languages`, `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`, `keys`,
      `slug`, `type`, `focus`, `field`, `why`, `label`, `filename`, `id`, `time` and
      `passRate`.
-   - **Word axis second.** On what survives, clear the next words that cannot inflect —
-     prepositions and particles, invariant abbreviations, short and impersonal participles.
-   - **Run the token axis first.** The word list exempts a word after *every* token and
-     blunts the check as it grows, so it must run second and stay short.
-   - **The pilot's figure, with the method that produces it**, because the count moves a lot
-     with the matching rule: counting every place where `}}` is followed by whitespace and
-     then a word in the target script, over all 2,025 shipped Russian values, gives **187
-     occurrences and 0 survivors**. A looser rule that also matches across intervening
-     punctuation gives 257 on the same files. Neither is wrong; **state which one you used**
-     when you report your own number, or it cannot be compared to anything.
+   - **Word axis.** On what survives the token axis, clear the next words that cannot
+     inflect — prepositions and particles, invariant abbreviations, short and impersonal
+     participles.
+   - **The fixed order that matters is not which check runs first — it is where the word
+     list comes from.** Checking the token or the word first, per occurrence, gives the
+     same verdict: for one fixed pair of lists the two checks are a plain logical OR, and
+     OR is commutative. The load-bearing rule is that the word-exemption list must be
+     **derived only from occurrences that already survived the token axis**, never from
+     the raw, unfiltered set. Build it from the raw set instead and it gets contaminated
+     by legitimate `{{count}}`-driven agreement — a real counted noun such as «записи»
+     recurs constantly and correctly after `{{count}}`, whose own family already carries
+     plural forms for it — and once that word is exempted, it is exempted after every
+     token, including a non-`count` one it has no business covering. An injected
+     `{{orphanCount}} записи` defect passes silently under a raw-derived word list;
+     deriving the list from the 19 post-token-axis survivors instead (not the 187 raw
+     occurrences) is what catches it, and is the actual reason to keep the word list
+     "second" — not check ordering.
+   - **The narrow figure, stated precisely.** Counting every place where `}}` is followed
+     by one or more whitespace characters and then a word in the target script gives
+     **187 raw occurrences, 19 after the token axis, 0 after the word axis**, over the
+     2,025 shipped Russian values this document was originally measured against (commit
+     `e7fe56d`). Reproduces identically over the current 2,002-key corpus — the
+     reachability sweep that later removed 23 dead keys from every locale (see the
+     open-items list) removed none that this rule matched.
+   - **The looser figure, stated precisely.** A rule that also matches across intervening
+     punctuation *and* symbol characters (Unicode categories P and S together — matching
+     punctuation alone, category P only, gives 256, one short) gives **257** occurrences
+     over the same 2,025-key corpus. The one occurrence punctuation-only matching misses
+     is `review:overflowIssue`'s "×" (a math symbol, not punctuation under Unicode's own
+     category split) immediately before a preposition. Over the current 2,002-key corpus
+     the same rule gives 255 — a delta of **2** from the reachability sweep, not 3: state
+     the exact rule and the exact population together whenever you quote either figure,
+     because a number without both is not reproducible and a plausible-looking
+     explanation for how it moved can still be wrong even when its total is right.
    - **What survives both passes is a candidate, not a verdict.** The token axis only skips
      the 23 placeholders someone has confirmed cannot hold a number, and this app has **73**
      distinct placeholders — so 50 of them survive the first pass whether or not they are

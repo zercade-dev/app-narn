@@ -18,7 +18,9 @@
  *
  * Three checks, run in this file in this order:
  *
- *   1. Numeral agreement — token axis first, word axis second (see below).
+ *   1. Numeral agreement — token axis, then a word axis derived ONLY from
+ *      what survives the token axis (see below — the per-occurrence checks
+ *      are commutative, the derivation is not).
  *   2. Both collision directions over the whole flattened locale. Report
  *      only: both directions have legitimate hits (a deliberately reused
  *      rendering; a genuine English defect), and it is the translator's job
@@ -43,42 +45,68 @@
  * Over the 24 shipped namespaces, counting every place where a `{{token}}`
  * is followed by whitespace and then a word in the locale's own script (the
  * "narrow" rule — see numeralAgreementRegex): **187 raw occurrences, 19
- * survive the token-axis skip below, 0 survive the word axis too.** That is
- * the number this file's skip list and ru's word-axis exemptions are
- * calibrated against (docs/i18n/style/ru.md "Checking your own work for
- * numeral agreement", docs/i18n/backfill-notes.md's "Mechanical checks"
- * section item 1, docs/i18n/backfill-runbook.md's "the mechanical checks"
- * list item 1 — all three state the same 187/0 figure and the same
- * 23-token skip list verbatim).
+ * survive the token-axis skip below, 0 survive the word axis too.** Verified
+ * against BOTH the 2,025-key Russian corpus docs/i18n/backfill-notes.md and
+ * docs/i18n/backfill-runbook.md were originally measured against (commit
+ * `e7fe56d`) and the current 2,002-key corpus — a later reachability sweep
+ * (commits `2202e64` / `b4bf722`) removed 23 dead keys from every locale
+ * after those documents were written, and none of the removed keys had a
+ * narrow-rule match, so this figure is identical in both states. All three
+ * source documents (docs/i18n/style/ru.md "Checking your own work for
+ * numeral agreement", and the two above) state the same 187/0 figure and the
+ * same 23-token skip list verbatim.
  *
- * A LOOSER rule that also matches across intervening punctuation (quotes,
- * dashes, colons, parentheses — not just whitespace) is documented at 257
- * raw occurrences for the same corpus. Reproducing it today against the
- * currently shipped files gives 254, not 257 — three short of the published
- * figure. That is NOT a script disagreement: `docs/i18n/backfill-notes.md`
- * and this repo's own git history both predate a since-landed reachability
- * sweep ("remove 22 unreachable UI keys" / "remove one more dead key",
- * commits 2202e64 and b4bf722) that deleted 23 keys from every locale after
- * backfill-notes.md's population was measured — English dropped from the
- * documented 1,931 keys to 1,908 today, Russian from 2,025 to 2,002, exactly
- * 23 in both cases. Three of those twenty-three evidently carried a
- * loose-rule-only numeral-agreement match; the narrow rule's 187/0 result is
- * untouched because none of the twenty-three removed keys had a narrow-rule
- * match. The loose rule is informational only (printed, not gated) for
- * exactly this reason: it is the more fragile of the two figures to keep in
- * sync with a corpus that keeps shrinking as dead keys are found.
+ * WHY THE TOKEN AXIS RUNS BEFORE THE WORD AXIS — and why that is NOT about
+ * evaluation order. Per occurrence, checking the token or the word first
+ * gives the same verdict: for one fixed pair of lists, "skip if token in
+ * skiplist, else skip if word in exemptlist" is a plain logical OR, and OR
+ * is commutative — a reviewer proved this directly. What actually depends
+ * on the order is how NUMERAL_WORD_AXIS_EXEMPTIONS gets BUILT: it must be
+ * derived only from occurrences that already survived the token axis (the
+ * 19 for ru), never from the raw 187. A list built from the raw set is
+ * contaminated by legitimate `{{count}}`-driven agreement — a real counted
+ * noun like «записи» recurs constantly and correctly after `{{count}}`,
+ * whose own family already carries plural forms for it — and once such a
+ * word is exempted, it is exempted after every token, including a
+ * non-`count` one it has no business covering. Building ru's list from the
+ * raw 187 instead of the 19 produces 32 exempted words instead of 6, and
+ * that list absorbs `записи` outright, so an injected `{{orphanCount}}
+ * записи` defect (exactly the class this detector exists to catch) passes
+ * silently. `numeralAgreementCheck()` checks `tokenSkip` before
+ * `wordExempt` in its loop below for this reason: not because the check
+ * order changes any single verdict, but because NUMERAL_WORD_AXIS_EXEMPTIONS
+ * must only ever be calibrated against post-token-axis survivors.
+ *
+ * THE LOOSE RULE, PRECISELY — this figure needed a correction, not just a
+ * caveat. `looseNumeralAgreementRegex()` matches across intervening
+ * whitespace, punctuation AND symbol characters (Unicode categories P and S
+ * together — punctuation alone, category P only, gives 256 on the
+ * historical corpus, one short). With P+S it reproduces exactly the
+ * documented **257** over the 2,025-key corpus at commit `e7fe56d`. The one
+ * occurrence punctuation-only matching misses is `review:overflowIssue`'s
+ * "×" (a math symbol, not punctuation under Unicode's own category split)
+ * sitting immediately before a preposition. Over the current 2,002-key
+ * corpus the same P+S rule gives 255 — a delta of **2** from the
+ * reachability sweep, not 3. (An earlier version of this comment used
+ * punctuation-only matching, got 254, and blamed the entire 3-occurrence
+ * gap on the sweep — conflating a pre-existing category-boundary question
+ * with the sweep's smaller, real effect. Right total, wrong reason; caught
+ * by checking out the historical commit and re-deriving the rule against it
+ * directly instead of trusting the arithmetic.) The loose rule stays
+ * informational only (printed, never gates the exit code): it is the more
+ * fragile of the two figures to keep exactly reproducible.
  *
  * WORD-AXIS EXEMPTIONS ARE PER LOCALE AND START EMPTY. Only `ru`'s are
- * populated below, reverse-engineered from the 19 token-axis survivors
- * above: three invariant prepositions (из, с, на), two invariant
- * abbreviations (симв, байт) and one impersonal participle used as a status
- * (вычитано) — precisely the three device classes docs/i18n/backfill-
- * runbook.md's "Only count triggers plural selection" section and
- * docs/i18n/style/ru.md describe. A locale with no entry here simply gets
- * every token-axis survivor printed as a candidate — see "What survives is
- * a candidate, not a verdict" in backfill-runbook.md's "the mechanical
- * checks" list, item 1. That is correct, not a bug: nobody has cleared that
- * language's word axis yet.
+ * populated below, derived from the 19 token-axis survivors (never from the
+ * raw 187 — see above): three invariant prepositions (из, с, на), two
+ * invariant abbreviations (симв, байт) and one impersonal participle used
+ * as a status (вычитано) — precisely the three device classes
+ * docs/i18n/backfill-runbook.md's "Only count triggers plural selection"
+ * section and docs/i18n/style/ru.md describe. A locale with no entry here
+ * simply gets every token-axis survivor printed as a candidate — see "What
+ * survives is a candidate, not a verdict" in backfill-runbook.md's "the
+ * mechanical checks" list, item 1. That is correct, not a bug: nobody has
+ * cleared that language's word axis yet.
  * ---------------------------------------------------------------------------
  */
 import { join } from 'node:path';
@@ -183,16 +211,23 @@ function numeralAgreementRegex(locale) {
 }
 
 /**
- * The "loose" variant that also matches across intervening punctuation —
- * quotes, dashes, colons, parentheses, guillemets — not only whitespace. See
- * the module header for why this is printed rather than gated: it is the
- * more fragile of the two figures to keep exactly in sync with a shrinking
- * corpus.
+ * The "loose" variant that also matches across intervening punctuation and
+ * symbol characters — quotes, dashes, colons, parentheses, guillemets, and
+ * Unicode Symbol-category characters such as "×" — not only whitespace.
+ * BOTH Unicode categories P (punctuation) and S (symbol) are required to
+ * reproduce the documented 257-occurrence figure exactly: punctuation alone
+ * lands one short (256) on the historical corpus, because
+ * `review:overflowIssue`'s "×" is a math symbol, not punctuation, under
+ * Unicode's own category split — see the module header's "THE LOOSE RULE,
+ * PRECISELY" section for how this was verified against the exact historical
+ * commit. See the module header for why this figure is printed rather than
+ * gated: it is the more fragile of the two to keep exactly in sync with a
+ * shrinking corpus.
  */
 function looseNumeralAgreementRegex(locale) {
   const script = scriptFor(locale);
   return new RegExp(
-    `\\{\\{\\w+\\}\\}[\\s\\p{P}]*(\\p{Script=${script}}[\\p{Script=${script}}\\p{M}]*)`,
+    `\\{\\{\\w+\\}\\}[\\s\\p{P}\\p{S}]*(\\p{Script=${script}}[\\p{Script=${script}}\\p{M}]*)`,
     'gu',
   );
 }
@@ -228,11 +263,16 @@ export function looseNumeralAgreementCount(namespaces, locale) {
  *  - `survivors`: what is left after ALSO skipping this locale's word-axis
  *    exemptions — offender strings, ready to print. Empty means clean.
  *
- * Order is load-bearing: token axis runs first and is checked before word
- * axis on every match, exactly as docs/i18n/backfill-notes.md's "Mechanical
- * checks" section item 1 insists — "the word list exempts a word after
- * every token and blunts the check as it grows, so it must run second and
- * stay short."
+ * This function checks tokenSkip before wordExempt on every match, but that
+ * per-match check order is NOT what makes the two-pass design correct — for
+ * one fixed pair of lists, "skip if token in skiplist, else skip if word in
+ * exemptlist" is a commutative logical OR, so evaluating either check first
+ * yields the same verdict. What is load-bearing is that
+ * NUMERAL_WORD_AXIS_EXEMPTIONS is calibrated from `afterTokenAxis` survivors
+ * only, never from `raw` — see the module header's "WHY THE TOKEN AXIS RUNS
+ * BEFORE THE WORD AXIS" section for why a raw-derived word list gets
+ * contaminated by legitimate `{{count}}` agreement and silently exempts real
+ * defects.
  */
 export function numeralAgreementCheck(namespaces, locale) {
   const re = numeralAgreementRegex(locale);
@@ -412,17 +452,27 @@ function runCli() {
   console.log('');
 
   // --- Check 1 ---------------------------------------------------------
-  console.log('## 1. Numeral agreement (token axis first, word axis second)');
+  console.log('## 1. Numeral agreement (token axis, then a word axis derived from its survivors)');
   const { raw, afterTokenAxis, survivors } = numeralAgreementCheck(namespaces, locale);
   const looseCount = looseNumeralAgreementCount(namespaces, locale);
+  const hasWordAxis = (NUMERAL_WORD_AXIS_EXEMPTIONS[locale] ?? []).length > 0;
   console.log(
     `   narrow rule ("}}" + whitespace + word): ${raw} raw, ${afterTokenAxis} after the token-axis ` +
       `skip (${NUMERAL_TOKEN_SKIPLIST.length} tokens), ${survivors.length} after the word axis too.`,
   );
   console.log(
-    `   loose rule ("}}" + whitespace/punctuation + word, informational only): ${looseCount} raw.`,
+    `   loose rule ("}}" + whitespace/punctuation/symbol + word, informational only): ${looseCount} raw.`,
   );
-  if (survivors.length > 0) {
+  if (survivors.length > 0 && !hasWordAxis) {
+    console.log(
+      `   "${locale}" has no calibrated word-axis exemption list yet — every one of these is an ` +
+        `UNCLEARED CANDIDATE, not a known defect. This does not mean the batch is broken; it means ` +
+        `nobody has looked at these words for "${locale}" yet (see NUMERAL_WORD_AXIS_EXEMPTIONS in ` +
+        `this script). Go through them by hand: fix real defects, and add invariant words (prepositions, ` +
+        `invariant abbreviations, impersonal participles) to this locale's exemption list with a reason.`,
+    );
+    for (const survivor of survivors) console.log(`     ${survivor}`);
+  } else if (survivors.length > 0) {
     console.log('   Survivors — candidates, not verdicts. Clear each by hand before committing:');
     for (const survivor of survivors) console.log(`     ${survivor}`);
   } else {
@@ -459,9 +509,12 @@ function runCli() {
   // Only check 1 gates the exit code — see the module header for why 2 and 3
   // are report-only.
   if (survivors.length > 0) {
+    const reason = hasWordAxis
+      ? `Clear each one (fix the string, or add a word-axis exemption with a reason) before review.`
+      : `This means nobody has cleared "${locale}"'s word axis yet, NOT that this batch is broken — ` +
+        `see the survivor list above and NUMERAL_WORD_AXIS_EXEMPTIONS in this script.`;
     console.error(
-      `i18n-preflight: FAILED — ${survivors.length} numeral-agreement survivor(s) for "${locale}". ` +
-        `Clear each one (fix the string, or add a word-axis exemption with a reason) before review.`,
+      `i18n-preflight: FAILED — ${survivors.length} numeral-agreement survivor(s) for "${locale}". ${reason}`,
     );
     process.exit(1);
   }
