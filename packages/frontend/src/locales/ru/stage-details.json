@@ -36,7 +36,7 @@
   "translateConfirm": "Запустить перевод",
   "translateQueued": "Перевод сведений об уровне поставлен в очередь",
   "translateFailed": "Не удалось запустить перевод: {{message}}",
-  "scope": "Область",
+  "scope": "Охват",
   "scopeCurrentOnly": "Только текущий язык ({{lang}})",
   "scopeStaleOnly": "Только устаревшие переводы",
   "fieldsHeading": "Поля",
