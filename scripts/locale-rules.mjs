@@ -1320,6 +1320,36 @@ export function usedKeysInSource(source) {
 export const MIN_SOURCE_FILES = 100;
 
 /**
+ * The smallest number of tracked `t` bindings that means the MATCHER still
+ * works, as opposed to the walk.
+ *
+ * MIN_SOURCE_FILES catches a sweep that read nothing. It cannot catch the
+ * other silent failure, where the files are all read and the binding matcher
+ * stops recognising them: offenders go empty, `filesScanned` is unchanged, and
+ * both callers report success while covering nothing. Every way that can happen
+ * is realistic — an idiom shift in how components call `useTranslation`, an edit
+ * to the property rules that narrows them too far, and the one this rule's own
+ * shape creates: a file pairing `{ t }` for one namespace with `{ t, i18n }` for
+ * a DIFFERENT one makes the name `t` ambiguous, and the binding is dropped
+ * rather than reported.
+ *
+ * 100 against 124 tracked today. What this floor is and is not:
+ *
+ *  - It catches a COLLAPSE — a matcher that stops matching, or a repo-wide
+ *    change of idiom. That is the failure that would otherwise never be noticed.
+ *  - It does NOT catch a drip: one new ambiguous file costs one binding, and no
+ *    floor can see that without tripping on ordinary refactoring. The semantics
+ *    of that case are pinned by a unit test instead, and this constant is not a
+ *    substitute for it.
+ *
+ * Do not raise it to today's exact count to catch smaller drops — a floor that
+ * reddens a normal refactor gets deleted, and then nothing is watching at all.
+ * If a deliberate change genuinely lowers the real count, lower this WITH the
+ * reason, rather than removing the assertion as redundant.
+ */
+export const MIN_TRACKED_BINDINGS = 100;
+
+/**
  * Keys referenced in source but absent from the reference locale, as
  * `path: "ns:key"` ids, plus how many files were read.
  *
@@ -1328,10 +1358,12 @@ export const MIN_SOURCE_FILES = 100;
  * (`/home/runner/work/app-narn/app-narn/…`) rather than anything the reader can
  * paste.
  *
- * `filesScanned` is returned rather than logged because a sweep that reads
- * nothing produces an empty offender list, which is indistinguishable from a
- * clean run. Both callers surface the number — one in its summary line, one as
- * an assertion — so a path that stops matching goes red instead of green.
+ * `filesScanned` and `bindingsTracked` are returned rather than logged because
+ * an empty offender list means either "nothing is wrong" or "nothing was
+ * looked at", and the two are indistinguishable from the outside. Both callers
+ * assert both counts against MIN_SOURCE_FILES and MIN_TRACKED_BINDINGS, so a
+ * walk that finds no files and a matcher that recognises no bindings each go
+ * red instead of green.
  */
 export function missingUsedKeys(locales, srcDir, referenceLocale = REFERENCE_LOCALE) {
   const reference = locales.get(referenceLocale);
@@ -1345,11 +1377,14 @@ export function missingUsedKeys(locales, srcDir, referenceLocale = REFERENCE_LOC
 
   const sources = readSourceFiles(srcDir);
   const offenders = [];
+  let bindingsTracked = 0;
   for (const [absolutePath, source] of sources) {
     const path = relative(srcDir, absolutePath);
+    const bindings = extractBindings(source);
+    bindingsTracked += bindings.size;
     // Reported per BINDING, not per call site, so a file that names a namespace
     // with no locale file is caught even when every key it passes is dynamic.
-    for (const [, namespace] of extractBindings(source)) {
+    for (const [, namespace] of bindings) {
       if (referenceKeys.has(namespace)) continue;
       offenders.push(`${path}: namespace "${namespace}" has no ${referenceLocale} locale file`);
     }
@@ -1359,5 +1394,5 @@ export function missingUsedKeys(locales, srcDir, referenceLocale = REFERENCE_LOC
       if (!namespaceHasKey(nsKeySet, key)) offenders.push(`${path}: "${namespace}:${key}"`);
     }
   }
-  return { offenders, filesScanned: sources.size };
+  return { offenders, filesScanned: sources.size, bindingsTracked };
 }

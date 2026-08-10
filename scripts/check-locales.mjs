@@ -37,6 +37,7 @@ import { fileURLToPath } from 'node:url';
 import {
   CLDR_CATEGORIES,
   MIN_SOURCE_FILES,
+  MIN_TRACKED_BINDINGS,
   REFERENCE_LOCALE,
   collectCoverageGaps,
   collectLegacyPluralKeys,
@@ -173,12 +174,22 @@ fail(
 );
 
 // A sweep that read nothing reports no offenders, which looks exactly like a
-// clean run. The count is asserted here and printed in the summary below.
+// clean run. So does a sweep that read everything and recognised no t()
+// bindings in it. Both counts are asserted here and printed in the summary
+// below; see MIN_SOURCE_FILES / MIN_TRACKED_BINDINGS for what each defends.
 if (usedKeys.filesScanned < MIN_SOURCE_FILES) {
   fail('source sweep', [
     `only ${usedKeys.filesScanned} source file(s) found under ${FRONTEND_SRC_DIR}, ` +
       `expected at least ${MIN_SOURCE_FILES} — the used-key rule compared almost nothing, ` +
       `so its green result means nothing`,
+  ]);
+}
+if (usedKeys.bindingsTracked < MIN_TRACKED_BINDINGS) {
+  fail('used-key binding coverage', [
+    `only ${usedKeys.bindingsTracked} t() binding(s) tracked across ${usedKeys.filesScanned} ` +
+      `file(s), expected at least ${MIN_TRACKED_BINDINGS} — the files were read but the ` +
+      `binding matcher recognised almost nothing in them, so the empty offender list above ` +
+      `means "nothing was checked", not "nothing is wrong"`,
   ]);
 }
 
@@ -253,5 +264,6 @@ if (failures.length > 0) {
 
 console.log(
   `check-locales: OK — ${allLocales.length} locales, ${namespaceCount} namespaces, ` +
-    `${valuesCompared} values compared, ${usedKeys.filesScanned} source files scanned`,
+    `${valuesCompared} values compared, ${usedKeys.filesScanned} source files scanned, ` +
+    `${usedKeys.bindingsTracked} t() bindings tracked`,
 );
