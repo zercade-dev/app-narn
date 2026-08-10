@@ -19,8 +19,13 @@ export function isRecord(v: unknown): v is Record<string, unknown> {
  * `{`/`}` for object payloads.
  */
 export function extractJsonBetween(text: string, open: string, close: string): string {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
-  const candidate = fenced?.[1] ?? text;
+  // The fence body is captured raw and trimmed after the match rather than
+  // having the pattern absorb the surrounding whitespace itself. A lazy body
+  // flanked by `\s*` on both sides is ambiguous — every whitespace run can be
+  // divided between the body and its neighbour — which makes the scan quadratic
+  // on long model output. Trimming afterwards yields the identical string.
+  const fenced = text.match(/```(?:json)?([\s\S]*?)```/i);
+  const candidate = fenced?.[1].trim() ?? text;
 
   const first = candidate.indexOf(open);
   const last = candidate.lastIndexOf(close);

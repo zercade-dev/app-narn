@@ -25,6 +25,11 @@ import { extensionFileFilter, validateUploadedFile } from '../utils/file-validat
 
 export const backupRouter: Router = Router();
 
+// Where multer stages an accepted upload. Named rather than inlined below so
+// the restore handler can re-assert that the file it was handed really does
+// live here, instead of trusting the path multer reports.
+const BACKUP_UPLOAD_DIR = path.join(os.tmpdir(), 'translator-backup-uploads');
+
 // Anti-malware hardening: extension allowlist (.zip only — the client-supplied
 // `mimetype` is never trusted for this) plus, once the file lands on disk,
 // magic-byte content verification (the ZIP signature check inside
@@ -33,9 +38,29 @@ export const backupRouter: Router = Router();
 // M13-backup-manager.ts (entry-count + uncompressed-size + path checks).
 const upload = singleFileUpload({
   maxBytes: 200 * 1024 * 1024, // 200 MB
-  dest: path.join(os.tmpdir(), 'translator-backup-uploads'),
+  dest: BACKUP_UPLOAD_DIR,
   fileFilter: extensionFileFilter(['.zip']),
 });
+
+/**
+ * Resolves the temp path of an accepted upload and confirms it stays inside
+ * {@link BACKUP_UPLOAD_DIR}.
+ *
+ * The name here is multer's, not the client's — multer generates it and keeps
+ * the client-supplied `originalname` separate (that one is validated by
+ * `validateUploadedFile`). So this cannot fail for an upload that came through
+ * the middleware above; it is a containment assertion, held close to the two
+ * filesystem calls that consume the path so the property stays visible if the
+ * storage configuration is ever changed.
+ */
+function resolveUploadTempPath(uploadPath: string): string {
+  const root = path.resolve(BACKUP_UPLOAD_DIR);
+  const resolved = path.resolve(root, path.basename(uploadPath));
+  if (!resolved.startsWith(root + path.sep)) {
+    throw new Error('Upload temp path escaped the upload directory');
+  }
+  return resolved;
+}
 
 // Guard for routes with a :backupId param. Backup ids are opaque store tokens
 // (`bk_<uuid>`) used ONLY as an exact-match SQL bind — never a path segment — so
@@ -230,7 +255,7 @@ backupRouter.post(
   asyncHandler(async (req, res) => {
     let tempPath: string | null = null;
     try {
-      tempPath = req.file!.path;
+      tempPath = resolveUploadTempPath(req.file!.path);
       // Magic-byte content verification: the extension/mimetype checked at
       // upload time (fileFilter) is client-supplied and never trusted alone —
       // read the first few bytes actually written to disk and reject anything

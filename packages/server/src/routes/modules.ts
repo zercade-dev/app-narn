@@ -25,6 +25,7 @@ import { COPILOT_MODULE_ID, normalizeCopilotConfig } from '../utils/copilot-conf
 import { requireUnlockedVault } from '../middleware/require-vault.js';
 import { requireTenant } from '../storage/pg/tenant-context.js';
 import { resolveProjectPath } from '../utils/project-path.js';
+import { PathTraversalError } from '../errors/PathTraversalError.js';
 import { getModelsCacheBase } from '../config/env.js';
 import { assertProjectAccess } from '../middleware/authz.js';
 
@@ -51,7 +52,26 @@ function getTenantModelsCacheDir(): string {
   return resolveProjectPath(MODELS_CACHE_DIR, tenantId);
 }
 
+/**
+ * Module ids that may be turned into a models-cache filename: a base module id,
+ * optionally followed by `:<instance-slug>`. Both halves carry the same
+ * lowercase `[a-z0-9-]` shape that `MODULE_INSTANCE_SLUG_PATTERN` enforces when
+ * an instance is created, and every base module id is spelled that way too — so
+ * this admits every id a registered module can actually have.
+ */
+const CACHEABLE_MODULE_ID =
+  /^[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?(?::[a-z0-9](?:[a-z0-9-]{0,30}[a-z0-9])?)?$/;
+
 function getModuleModelsCachePath(id: string): string {
+  // `id` reaches here from `req.params.id`. Every caller has already rejected
+  // ids the registry doesn't know, which is the real guard — but a registry
+  // lookup is a dynamic property read, so neither a reader nor a static
+  // analyser can see that it constrains the string. Restate it as an explicit
+  // allowlist on the way into a path: nothing that fails this could have named
+  // a registered module, so no reachable request changes behaviour.
+  if (!CACHEABLE_MODULE_ID.test(id)) {
+    throw new PathTraversalError(`Invalid module id: ${id}`);
+  }
   return resolveProjectPath(getTenantModelsCacheDir(), `${id}-models-cache.json`);
 }
 

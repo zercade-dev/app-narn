@@ -18,6 +18,7 @@ import {
 import { getSessionId } from '../middleware/session.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 import { requireUnlockedVault } from '../middleware/require-vault.js';
+import { rateLimiter } from '../middleware/rate-limiter.js';
 import { isCloudMode } from '../identity/registry.js';
 import { getCurrentTenant } from '../storage/pg/tenant-context.js';
 import { promises as fs } from 'node:fs';
@@ -35,6 +36,15 @@ const LOG_DIR = getAuditLogDir();
  * slice/serialize.
  */
 const MAX_AUDIT_LIMIT = 10_000;
+
+/**
+ * Shared limiter for the three audit routes that touch the log directory —
+ * writing an export, listing the directory, and streaming a file back. Each is
+ * driven by a human clicking a button, so 30/min per bucket (tenant in cloud
+ * mode, else client IP) is far above any real use while keeping a scripted
+ * caller from turning the export route into an unbounded disk writer.
+ */
+const auditFileRateLimiter = rateLimiter({ maxRequests: 30, windowMs: 60_000 });
 
 /** A time-window bound: any string `new Date(...)` can parse (ISO is the norm). */
 const auditTimeString = z
@@ -255,6 +265,7 @@ logsRouter.get(
 logsRouter.post(
   '/audit/export',
   requireUnlockedVault,
+  auditFileRateLimiter,
   blockAuditFilesInCloud,
   validateBody(auditFilterSchema),
   asyncHandler(async (req: Request, res: Response) => {
@@ -305,6 +316,7 @@ logsRouter.post(
 logsRouter.get(
   '/audit/files',
   requireUnlockedVault,
+  auditFileRateLimiter,
   blockAuditFilesInCloud,
   asyncHandler(async (_req: Request, res: Response) => {
     await fs.mkdir(LOG_DIR, { recursive: true });
@@ -334,6 +346,7 @@ logsRouter.get(
 logsRouter.get(
   '/audit/file/:filename',
   requireUnlockedVault,
+  auditFileRateLimiter,
   blockAuditFilesInCloud,
   asyncHandler(async (req: Request, res: Response) => {
     const filename = Array.isArray(req.params.filename)
@@ -346,34 +359,37 @@ logsRouter.get(
       return;
     }
 
-    const filepath = path.join(LOG_DIR, filename);
-
-    // Check if file exists
-    try {
-      await fs.access(filepath);
-    } catch {
+    // Resolve the request against the directory's own listing, and serve the
+    // NAME THAT CAME BACK rather than the one the client sent. The two strings
+    // are equal whenever this succeeds, so no response changes — but the value
+    // handed to the filesystem now originates from the filesystem, which makes
+    // the route safe by construction instead of safe by the guard above alone.
+    // A name with no matching entry takes the same 404 the old existence check
+    // produced.
+    const entries = await fs.readdir(LOG_DIR).catch(() => [] as string[]);
+    const storedName = entries.find((entry) => entry === filename);
+    if (storedName === undefined) {
       res.status(404).json({ error: 'File not found' });
       return;
     }
 
     // Log file access for audit purposes
     auditLogger.log('security.audit-file-access', {
-      filename,
+      filename: storedName,
       sessionId: getSessionId(res),
     });
 
     // Set headers for download. Strip characters that could break out of the
     // quoted header value (defense-in-depth — validateLogFilename already
     // rejects `..`/`/`/absolute, but not a literal `"` or CR/LF).
-    const safeFilename = filename.replace(/["\r\n]/g, '');
+    const safeFilename = storedName.replace(/["\r\n]/g, '');
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', `attachment; filename="${safeFilename}"`);
     // `res.sendFile` requires an ABSOLUTE path (it throws "path must be
     // absolute" otherwise) — LOG_DIR is relative by default (`./logs`), so pass
     // it as the sendFile `root` (absolute-resolved, same as validateLogFilename
-    // above) with the already-validated `filename` rather than the possibly
-    // relative `filepath`.
-    res.sendFile(filename, { root: path.resolve(LOG_DIR) });
+    // above) rather than a possibly relative joined path.
+    res.sendFile(storedName, { root: path.resolve(LOG_DIR) });
   }),
 );
 
