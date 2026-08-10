@@ -22,7 +22,7 @@
  * changing a threshold.
  */
 import { readFileSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 
 /** English is the reference locale (statically loaded in src/i18n/index.ts). */
 export const REFERENCE_LOCALE = 'en';
@@ -1127,4 +1127,272 @@ export function thinAllowlistReasons() {
   return Object.entries(IDENTICAL_ALLOWLIST)
     .filter(([, reason]) => reason.trim().split(/\s+/).length < 5)
     .map(([id]) => id);
+}
+
+// ---------------------------------------------------------------------------
+// Used keys in source
+// ---------------------------------------------------------------------------
+//
+// Everything above compares locale files against EACH OTHER, so none of it can
+// see a key that is deleted from every locale at once while components still
+// reference it — parity stays perfect and i18next renders the raw key name at
+// runtime (e.g. the bulk bar showing "toTranslateCount" instead of "12 to
+// translate"). The rules below scan the frontend source for statically
+// analysable `t('…')` calls and check each referenced key against the reference
+// namespace, which is the only direction that catches a delete or a rename.
+//
+// Scope (deliberately conservative, to stay false-positive free):
+// - Only `const` destructurings of a `useTranslation('ns')` call with a single
+//   single-quoted namespace literal are tracked, and only when `t` is among the
+//   destructured properties — as `t` or renamed, `t: tName`. Array namespaces,
+//   `keyPrefix` options, dynamically chosen namespaces, `let`/`var` bindings and
+//   double-quoted namespaces are all skipped.
+// - A SIBLING DESTRUCTURED PROPERTY DOES NOT DEFEAT THE MATCH. It used to:
+//   the rule was written as a single regex requiring `{ t }` or `{ t: name }`
+//   and nothing else between the braces, so `const { t, i18n } =
+//   useTranslation('ns')` — a form seven components use, between them holding
+//   160 call sites, including StringTableRow and ComparisonGrid — was invisible
+//   to the guard entirely. A key deleted from every locale while those files
+//   still referenced it shipped. Properties are now split on commas and matched
+//   individually, so order does not matter (`{ i18n, t }` is the same binding)
+//   and the count of siblings does not either.
+//   Siblings must still each be a plain identifier, optionally renamed. That
+//   keeps out the forms whose meaning is not obvious from a regex — a rest
+//   element, a default value, a nested pattern — where `t` might not be the
+//   translate function at all; those skip the whole binding rather than guess.
+// - Within one file, a binding name mapped to two different namespaces is
+//   ambiguous and skipped entirely.
+// - Only single-quoted literal keys are checked; template literals and
+//   variables are skipped. Keys with an explicit `ns:` prefix are skipped.
+// - A key counts as present if the exact key exists or any plural/ordinal
+//   suffix variant of it exists (i18next resolves `key` → `key_one` etc.).
+//
+// Every one of those restrictions is load-bearing. This rule fails CI in the
+// repository where frontend PRs are raised, so a false positive reddens correct
+// code and gets the rule deleted rather than debugged. Widen it only with a
+// reason as concrete as the ones above — the sibling-property widening was
+// justified by seven measured files and re-verified at zero offenders over the
+// whole tree before it landed.
+
+/** File extensions the source sweep reads. */
+export const SOURCE_EXTENSIONS = ['.ts', '.tsx'];
+
+/**
+ * Directories the walk never descends into.
+ *
+ * This sweep used to be a Vite `import.meta.glob` rooted at the frontend's
+ * `src/`, a base directory that already excluded the first two by containing
+ * neither. A filesystem walk has no such base, and pointing it one
+ * directory higher by accident would make it read a package's `node_modules` —
+ * so the exclusions are written down rather than assumed. `__tests__` is
+ * excluded on purpose too: a fixture calling `t('deliberately.missing')` is not
+ * a shipping defect.
+ */
+export const SOURCE_SKIP_DIRS = new Set(['node_modules', 'dist', '__tests__']);
+
+/**
+ * Every source file under `srcDir`, as `path -> text`.
+ *
+ * Entries are inserted in sorted order so two runs report findings in the same
+ * sequence; readdirSync's own order is filesystem-dependent.
+ */
+export function readSourceFiles(srcDir) {
+  const files = new Map();
+  const walk = (dir) => {
+    const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+      a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+    );
+    for (const entry of entries) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (!SOURCE_SKIP_DIRS.has(entry.name)) walk(full);
+      } else if (entry.isFile() && SOURCE_EXTENSIONS.some((ext) => entry.name.endsWith(ext))) {
+        files.set(full, readFileSync(full, 'utf8'));
+      }
+    }
+  };
+  walk(srcDir);
+  return files;
+}
+
+/**
+ * Suffixes that satisfy a lookup of the BARE key, because i18next appends them
+ * itself when a `count` is passed.
+ *
+ * Deliberately NOT expressed through splitPluralKey(): that function answers
+ * the opposite question (given a key on disk, what family is it in?) and knows
+ * nothing of the `_ordinal_` infix, so `key_ordinal_one` would reduce to the
+ * base `key_ordinal` and a source reference to `key` would go unmatched. The
+ * legacy `_plural` suffix is left out for the same reason it is a failure
+ * elsewhere: under the v4 JSON format it is never looked up, so it cannot make
+ * a bare key resolve.
+ */
+export const BARE_KEY_SUFFIXES = CLDR_CATEGORIES.flatMap((category) => [
+  `_${category}`,
+  `_ordinal_${category}`,
+]);
+
+export function namespaceHasKey(nsKeySet, key) {
+  if (nsKeySet.has(key)) return true;
+  return BARE_KEY_SUFFIXES.some((suffix) => nsKeySet.has(`${key}${suffix}`));
+}
+
+/**
+ * A `const { … } = useTranslation('ns')` statement, capturing the destructured
+ * property list and the namespace.
+ *
+ * The property list is `[^{}]*`, which cannot cross a brace in either
+ * direction — so the match can never span from one statement's `const {` to a
+ * later statement's `}`, and a nested destructuring pattern fails to match at
+ * all rather than matching half of itself. What it CAN cross is a newline,
+ * which is deliberate: a multi-line destructuring is the same binding.
+ */
+const BINDING_RE = /const\s*\{\s*([^{}]*?)\s*\}\s*=\s*useTranslation\(\s*'([\w-]+)'\s*\)/g;
+
+/** The destructured translate function: `t`, or renamed as `t: tName`. */
+const T_PROPERTY_RE = /^t(?:\s*:\s*(\w+))?$/;
+
+/**
+ * A destructured property this rule understands: a plain identifier, optionally
+ * renamed to another identifier. One property that does not fit — a rest
+ * element, a default value, a computed key — skips the whole binding, because
+ * those are the forms where `t` may not be what it looks like.
+ */
+const SIMPLE_PROPERTY_RE = /^\w+(?:\s*:\s*\w+)?$/;
+
+/** Extracts binding-name -> namespace for one file; drops ambiguous names. */
+export function extractBindings(source) {
+  const bindings = new Map();
+  const ambiguous = new Set();
+  for (const match of source.matchAll(BINDING_RE)) {
+    const properties = match[1]
+      .split(',')
+      .map((property) => property.trim())
+      .filter((property) => property !== ''); // a trailing comma is legal
+    if (!properties.every((property) => SIMPLE_PROPERTY_RE.test(property))) continue;
+
+    // `{ i18n: t }` binds the i18n INSTANCE to the name `t`, so the property has
+    // to be matched on its key, not on the name it introduces.
+    const tProperty = properties.find((property) => T_PROPERTY_RE.test(property));
+    if (!tProperty) continue;
+
+    const name = T_PROPERTY_RE.exec(tProperty)[1] ?? 't';
+    const namespace = match[2];
+    if (bindings.has(name) && bindings.get(name) !== namespace) ambiguous.add(name);
+    bindings.set(name, namespace);
+  }
+  for (const name of ambiguous) bindings.delete(name);
+  return bindings;
+}
+
+/**
+ * The statically analysable `t()` call sites in one file's text, as
+ * `{ namespace, key }` — pure, so the scoping rules above can be pinned by a
+ * test without a filesystem.
+ *
+ * Duplicates are kept: two call sites for the same missing key are two things
+ * to fix, and collapsing them here would hide the second one from the report.
+ */
+export function usedKeysInSource(source) {
+  const used = [];
+  for (const [name, namespace] of extractBindings(source)) {
+    // `name('key'` not preceded by an identifier char or `.` (avoids matching
+    // e.g. `format('x')` when the binding is named `t`).
+    const callRe = new RegExp(`(?<![\\w.$])${name}\\(\\s*'([^']+)'`, 'g');
+    for (const call of source.matchAll(callRe)) {
+      const key = call[1];
+      if (key.includes(':')) continue; // explicit ns override — out of scope
+      used.push({ namespace, key });
+    }
+  }
+  return used;
+}
+
+/**
+ * The smallest source-file count that means the sweep actually ran.
+ *
+ * Exported so the CLI and the vitest guard share ONE number: two hardcoded
+ * floors are two things to keep in step, and the one that drifts low is the one
+ * that stops protecting anything. The frontend has ~250 files, so this is a
+ * "did the walk find the tree at all" floor, not a growth assertion — it should
+ * not be raised as the app grows.
+ */
+export const MIN_SOURCE_FILES = 100;
+
+/**
+ * The smallest number of tracked `t` bindings that means the MATCHER still
+ * works, as opposed to the walk.
+ *
+ * MIN_SOURCE_FILES catches a sweep that read nothing. It cannot catch the
+ * other silent failure, where the files are all read and the binding matcher
+ * stops recognising them: offenders go empty, `filesScanned` is unchanged, and
+ * both callers report success while covering nothing. Every way that can happen
+ * is realistic — an idiom shift in how components call `useTranslation`, an edit
+ * to the property rules that narrows them too far, and the one this rule's own
+ * shape creates: a file pairing `{ t }` for one namespace with `{ t, i18n }` for
+ * a DIFFERENT one makes the name `t` ambiguous, and the binding is dropped
+ * rather than reported.
+ *
+ * 100 against 124 tracked today. What this floor is and is not:
+ *
+ *  - It catches a COLLAPSE — a matcher that stops matching, or a repo-wide
+ *    change of idiom. That is the failure that would otherwise never be noticed.
+ *  - It does NOT catch a drip: one new ambiguous file costs one binding, and no
+ *    floor can see that without tripping on ordinary refactoring. The semantics
+ *    of that case are pinned by a unit test instead, and this constant is not a
+ *    substitute for it.
+ *
+ * Do not raise it to today's exact count to catch smaller drops — a floor that
+ * reddens a normal refactor gets deleted, and then nothing is watching at all.
+ * If a deliberate change genuinely lowers the real count, lower this WITH the
+ * reason, rather than removing the assertion as redundant.
+ */
+export const MIN_TRACKED_BINDINGS = 100;
+
+/**
+ * Keys referenced in source but absent from the reference locale, as
+ * `path: "ns:key"` ids, plus how many files were read.
+ *
+ * Paths are reported RELATIVE to `srcDir`. The absolute path is noise everywhere
+ * and actively unhelpful in CI, where it names the runner's checkout directory
+ * (`/home/runner/work/app-narn/app-narn/…`) rather than anything the reader can
+ * paste.
+ *
+ * `filesScanned` and `bindingsTracked` are returned rather than logged because
+ * an empty offender list means either "nothing is wrong" or "nothing was
+ * looked at", and the two are indistinguishable from the outside. Both callers
+ * assert both counts against MIN_SOURCE_FILES and MIN_TRACKED_BINDINGS, so a
+ * walk that finds no files and a matcher that recognises no bindings each go
+ * red instead of green.
+ */
+export function missingUsedKeys(locales, srcDir, referenceLocale = REFERENCE_LOCALE) {
+  const reference = locales.get(referenceLocale);
+  if (!reference) throw new Error(`Reference locale "${referenceLocale}" not found`);
+
+  /** namespace -> set of flattened reference keys */
+  const referenceKeys = new Map();
+  for (const [namespace, data] of reference) {
+    referenceKeys.set(namespace, new Set(flattenKeys(data)));
+  }
+
+  const sources = readSourceFiles(srcDir);
+  const offenders = [];
+  let bindingsTracked = 0;
+  for (const [absolutePath, source] of sources) {
+    const path = relative(srcDir, absolutePath);
+    const bindings = extractBindings(source);
+    bindingsTracked += bindings.size;
+    // Reported per BINDING, not per call site, so a file that names a namespace
+    // with no locale file is caught even when every key it passes is dynamic.
+    for (const [, namespace] of bindings) {
+      if (referenceKeys.has(namespace)) continue;
+      offenders.push(`${path}: namespace "${namespace}" has no ${referenceLocale} locale file`);
+    }
+    for (const { namespace, key } of usedKeysInSource(source)) {
+      const nsKeySet = referenceKeys.get(namespace);
+      if (!nsKeySet) continue; // already reported above; one defect, one finding
+      if (!namespaceHasKey(nsKeySet, key)) offenders.push(`${path}: "${namespace}:${key}"`);
+    }
+  }
+  return { offenders, filesScanned: sources.size, bindingsTracked };
 }

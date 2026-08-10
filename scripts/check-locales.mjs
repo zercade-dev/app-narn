@@ -9,8 +9,14 @@
  * with no translations is caught where the change is raised rather than
  * somewhere downstream.
  *
+ * It also scans the frontend source for statically analysable `t('…')` calls, so
+ * a key deleted or renamed in every locale at once — which every locale-to-locale
+ * rule here is blind to, parity being perfect — fails where the deletion is made
+ * rather than on a later gitlink bump.
+ *
  * Severity split, matching the rules module:
- *   FAIL   key parity, value integrity, the self-checks that prove the run
+ *   FAIL   key parity, value integrity, a key referenced in source but absent
+ *          from the reference locale, the self-checks that prove the run
  *          actually compared something, and a plural category the locale does
  *          not supply with no bare `key` sibling to catch it — that renders
  *          ENGLISH mid-sentence, measured, not a grammar nicety. See
@@ -26,9 +32,12 @@
  * compared: a green run that compared nothing is the failure mode this whole
  * check exists to prevent, so the number has to be visible in the log.
  */
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   CLDR_CATEGORIES,
+  MIN_SOURCE_FILES,
+  MIN_TRACKED_BINDINGS,
   REFERENCE_LOCALE,
   collectCoverageGaps,
   collectLegacyPluralKeys,
@@ -42,6 +51,7 @@ import {
   lengthOffenders,
   loadLocales,
   localePluralErrors,
+  missingUsedKeys,
   namespaceDiff,
   namespaceKeyDiff,
   pairsFor,
@@ -56,7 +66,8 @@ import {
 // `pnpm check:locales` from anywhere in the workspace read the same tree. Plain
 // Node runs this file directly, so `import.meta.url` is a real `file:` URL here
 // (which is exactly why the rules module refuses to depend on that).
-const LOCALES_DIR = fileURLToPath(new URL('../packages/frontend/src/locales', import.meta.url));
+const FRONTEND_SRC_DIR = fileURLToPath(new URL('../packages/frontend/src', import.meta.url));
+const LOCALES_DIR = join(FRONTEND_SRC_DIR, 'locales');
 
 const locales = loadLocales(LOCALES_DIR);
 const allLocales = [...locales.keys()].sort();
@@ -150,6 +161,38 @@ fail(
 );
 fail('IDENTICAL_ALLOWLIST entries needing a real reason, not a word', thinAllowlistReasons());
 
+// --- Keys referenced in source ---------------------------------------------
+// The one rule here that does NOT compare locales against each other, and so
+// the only one that can see a key deleted or renamed in every locale at once
+// while a component still calls t('key'). Parity is perfect in that case and
+// i18next renders the raw key path on screen.
+const usedKeys = missingUsedKeys(locales, FRONTEND_SRC_DIR);
+fail(
+  `keys referenced in source but missing from ${REFERENCE_LOCALE}` +
+    ` (i18next would render the raw key)`,
+  usedKeys.offenders,
+);
+
+// A sweep that read nothing reports no offenders, which looks exactly like a
+// clean run. So does a sweep that read everything and recognised no t()
+// bindings in it. Both counts are asserted here and printed in the summary
+// below; see MIN_SOURCE_FILES / MIN_TRACKED_BINDINGS for what each defends.
+if (usedKeys.filesScanned < MIN_SOURCE_FILES) {
+  fail('source sweep', [
+    `only ${usedKeys.filesScanned} source file(s) found under ${FRONTEND_SRC_DIR}, ` +
+      `expected at least ${MIN_SOURCE_FILES} — the used-key rule compared almost nothing, ` +
+      `so its green result means nothing`,
+  ]);
+}
+if (usedKeys.bindingsTracked < MIN_TRACKED_BINDINGS) {
+  fail('used-key binding coverage', [
+    `only ${usedKeys.bindingsTracked} t() binding(s) tracked across ${usedKeys.filesScanned} ` +
+      `file(s), expected at least ${MIN_TRACKED_BINDINGS} — the files were read but the ` +
+      `binding matcher recognised almost nothing in them, so the empty offender list above ` +
+      `means "nothing was checked", not "nothing is wrong"`,
+  ]);
+}
+
 // --- Plural-category coverage ----------------------------------------------
 const coverageGaps = collectCoverageGaps(locales);
 const legacyPlurals = collectLegacyPluralKeys(locales);
@@ -221,5 +264,6 @@ if (failures.length > 0) {
 
 console.log(
   `check-locales: OK — ${allLocales.length} locales, ${namespaceCount} namespaces, ` +
-    `${valuesCompared} values compared`,
+    `${valuesCompared} values compared, ${usedKeys.filesScanned} source files scanned, ` +
+    `${usedKeys.bindingsTracked} t() bindings tracked`,
 );

@@ -107,9 +107,19 @@ The names to keep in step (tab label first, then its other homes):
 | Source AI review | `strings:tabs` (review-source-ai) · `review:sourceAi.configTitle` |
 | Activity | `strings:tabs.runs` · `strings:guide.topicActivity` |
 | Quality | `strings:tabs.quality` · `strings:guide.topicQuality` |
+| Global Config | `sidebar:globalConfig` · `config:globalConfigTitle` |
 
 (Where a key path contains a hyphen it is given as namespace plus the sub-key in
 brackets, so the citation checker does not read it as a truncated key.)
+
+Three more surfaces need the same discipline without appearing in that table, because they
+have no second *title* key — they are named from **other namespaces in prose**, which is the
+same drift risk by another route. **Compare** (`strings:tabs.compare`) is named by
+`config:routing.tonesHint`; **Translations** (`strings:tabs.strings`) by
+`config:routing.categoriesConfiguredHint`; **Backup** (`strings:tabs.backup`) by
+`config:importSnapshotNote`. In each case the tab label is the authority and the prose
+repeats it verbatim — which means the namespace naming the surface and the namespace owning
+it are usually translated by different people, at different times.
 
 The guide topics under `strings:guide` are a third home for most of these names, and
 nearly all of them append the word "Tab" — `strings:guide.topicGlossary` is "Glossary
@@ -131,6 +141,10 @@ Three English details to know about:
   `strings:runs.title` is "Translation Activity" where `strings:tabs.runs` is just
   "Activity". Keep that relationship — expand the page title, do not shorten it to
   match, and do not invent a third wording.
+- **Legal** works the same way: `sidebar:legal` is "Legal" and `legal:title` is "Legal &
+  policies". Expand the page title, keep the sidebar item short, and do not invent a third
+  name. Note that `sidebar:globalConfig` in the table above is the *opposite* case — there
+  the tab and the page title are word-for-word identical, and must stay so.
 
 ## Terms
 
@@ -156,7 +170,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | проект | Masculine; gen. проекта, dat. проекту, instr. проектом, pl. проекты, gen. pl. проектов. The verb is «создать» — `sidebar:createProjectTitle` is «Создать проект», never «открыть новый проект». Deliberately not the word chosen for _workspace_, which several strings contrast with it in one sentence. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -183,7 +197,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | рабочая область | Feminine phrase whose adjective agrees: «рабочей области» in the genitive, which is the form the attributive uses take — `config:workspaceSettingsTitle` is «Настройки рабочей области». The settled Russian for a scope above the project, and never «проект». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -210,7 +224,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | запись | Feminine, 3rd declension: gen. записи, instr. записью, gen. pl. записей — counts run «1 запись / 2–4 записи / 5+ записей», so every counted family needs all four plural keys. «Запись» is the ordinary Russian for an _entry_ (in a dictionary, a journal, a log); the English ban on _record_ targets a database flavour «запись» does not carry here. Never «строка», which is both _string_ and _row_. Where `logs` narrates about "strings" it takes «запись» too. **«Запись» is claimed exclusively, and two other terms had to move because of it:** _recording_ (the manual-edit audit) takes «фиксация», and _release_ (a changelog entry) takes «выпуск». **The claim is on the noun naming a content unit, and only that** — «запись» is fine for a **log** entry where «журнал» is present in the same string to disambiguate (`console:empty` is «Записей в журнале пока нет.»), and the verb «записывать» is free for writing to a log or a cache (`strings:runs.detailsTokCacheWrite` — «Токены записи в кэш»). Over-reading the reservation costs more than under-reading it. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -237,7 +251,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | исходный текст | Masculine; gen. «исходного текста». «Исходный» is shared with «исходный язык» (_source language_) and reads naturally in both. _Source label_ deliberately switches to the noun «источник», so «исходный» always means the original-language material and «источник» always means where an entry came from. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -264,7 +278,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | перевод | Masculine — which matters for the _reviewed_ family above: unlike es/fr the implied noun is masculine, so the citation form and the agreeing form coincide. Gen. перевода, pl. переводы, gen. pl. переводов; the tab label is the plural «Переводы». The verb is «перевести» / «переводить», and _re-translate_ is «перевести заново» (`review:retranslate`). Never bare «память» for _translation memory_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -291,7 +305,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | метка источника | Feminine head noun «метка» (gen. метки, gen. pl. меток); plural «метки источников», and the shortened routing column heading _Sources_ is «Источники». Never «ярлык», which is a shortcut, and never «тег», which is reserved for _inline tag_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -318,7 +332,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | достижение | Neuter; gen. достижения, gen. pl. достижений. «Достижения» is what Steam and Xbox call these in Russian; PlayStation's «трофеи» is platform-specific and would not match the rest of the app. Attributive forms are genitive: «название достижения», «описание достижения». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -345,7 +359,34 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | встроенный тег | Head noun «тег» (masculine, gen. тега, pl. теги, gen. pl. тегов). In running text it usually appears as «теги форматирования» — `logs:translation.maskMismatch` is «Теги форматирования не сохранились при переводе на {{language}}.» — but the head noun stays «тег» everywhere. Never «метка», which is taken by _source label_, and never «ярлык». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### placeholder
+
+**Means here:** specifically a `{{…}}`-style token inside the game text, which the translation must carry over unchanged. A **subset of _inline tag_** above, not a rival to it: "inline tag" is the umbrella over placeholders, formatting tags and `\n` escapes, and "placeholder" names only the token kind. The LQA check that compares them is filterable by name.
+
+**Part of speech in UI:** noun, usually plural.
+
+**Example:** `strings:filters.placeholderMismatch` — "Placeholder mismatch"
+
+**Not:** variable, parameter, argument, field, wildcard — and **not** the input-hint sense of the same English word. A `placeholder` attribute on a text box is unrelated UI vocabulary; if your language would use one word for both, use two.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | подстановка | Feminine; gen. подстановки, gen. pl. подстановок. `strings:filters.placeholderMismatch` is «Несовпадение подстановок». Sits under «тег» (_inline tag_) rather than beside it, so a string about tags in general still says «теги». The **input-hint** sense is a different word entirely and never «подстановка» — a field hint is rendered as the hint text itself («Поиск по тексту…»), which is how the shipped `strings` namespace handles every one of them. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -372,7 +413,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | контекст для переводчика | Head noun «контекст» (masculine, gen. контекста); the prepositional phrase does not inflect, so the term survives every case unchanged. The model capability is «контекстное окно» and the entry metadata bundle is «контекст записи» — three phrases sharing one head noun, exactly as English shares the word _context_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -401,7 +442,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | исходный язык | Masculine; gen. «исходного языка». Pairs with «целевой язык» (_target language_), and that pair is the settled wording in Russian CAT and MT interfaces — `config:sourceLanguage` is «Исходный язык». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -428,7 +469,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | целевой язык | Masculine; plural «целевые языки», gen. pl. «целевых языков» — `config:targetLanguages` is «Целевые языки». Never «локаль»: the app tracks languages, not regional formats. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -455,7 +496,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | справочный язык | Masculine. «Справочный» is the reading-aid sense, as in «справочник»; «опорный» and «промежуточный» were rejected because both imply the app translates *through* the language. Checked against _guide_, which is «Руководство» and not «Справка» — that is the collision worth avoiding, because a sidebar item and a language label sharing one word would read as one feature. The справ- **root** is not exclusive to this term and does not need to be: `glossary:flaggedHint` ends «…и справки при переводе», and `review:backTranslationTitle` is «Обратный перевод (только для справки)». English says "reference" in all three places, so all three are correct — shared root, different heads. «Справочный язык» is the term; «для справки» is the ordinary adverbial and is not a second rendering of it. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -482,7 +523,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | редактируемый язык | Participial adjective, agrees with its noun: «Редактируемые языки» in the column heading (`collab:sharing.columnLanguages`), «редактируемых языков» in the genitive. Use this one adjective in the table column, the lock messages and the invite dialog; the read-only counterpart is «только для чтения», not a second adjective. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -509,7 +550,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | Псевдотест | Proper noun, written solid, capital on the first letter only. The language list around it is fully Cyrillic and lowercase («русский», «испанский»), so an English name would read as a stray token — `strings:guide.topicPseudoTest` is «Псевдотест». The concept is «псевдолокализация»; the language code `pseudo-test` is never translated. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -538,7 +579,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | прогон | Masculine; gen. прогона, pl. прогоны, gen. pl. прогонов — «стоимость прогона», «статус прогона», «Прогоны» in Activity. «Запуск» was rejected: it shares a root with «запустить», which the UI needs as the separate action _start_, and «стоимость запуска» reads as the cost of starting rather than the cost of the run. **That ban is on rendering _run_ as «запуск» — it does not reach the root.** «Перезапуск» is the right and only word for a service restart (`system:restarted.message` — «Сервис был недавно перезапущен…»), and «запустить» remains the verb _start_. Never «задача», «сеанс», «операция» or «партия». `logs:translation.runQueued` is «Прогон перевода поставлен в очередь — позиция {{position}}.» **The seven status values, fixed**: `strings:runs.statusPending` «Ожидание», `statusQueued` «В очереди», `statusRunning` «Выполняется», `statusPaused` «Приостановлено», `statusCompleted` «Завершено», `statusCancelled` «Отменено», `statusFailed` «Ошибка». **They are four different shapes, and that is not a defect to tidy:** three neuter short participles («Приостановлено», «Завершено», «Отменено»), one verbal noun («Ожидание»), one finite present-tense verb («Выполняется») and one noun («Ошибка»). What they have in common is the only thing that matters — every one is **invariant**, none agrees with «прогон», and none should be made to. Do not go looking for a missing fourth participle: «Ожидание» in particular is pinned across two namespaces by the _invite_ row. The column header `strings:runs.statusColumn` is «Статус». **This set is the precedent for every other status column**: `collab:invites.status.pending` renders «Ожидание» to match `strings:runs.statusPending`, even though a different word fitted its own set more tidily. A status value is matched across columns by its English word first, and only then chosen for shape — see _invite_. One thing to know and accept: «прогон» has an unrelated colloquial sense (a tall tale, a wind-up). It is suppressed by the technical collocations this app always supplies — «прогон перевода», «стоимость прогона», «Прогоны» in a table of statuses — and no candidate without a drawback exists, so this is a known cost rather than an oversight. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -565,7 +606,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | Активность | Feminine, 3rd declension (gen. активности). Ten characters against the English eight, so it fits the tab; «История выполнения» does not. The page title stays longer than the tab exactly as in English: `strings:runs.title` is «Активность переводов», `strings:tabs.runs` is «Активность». Never «Журнал», which belongs to the live server-log panel. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -592,7 +633,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | пакет | Masculine; gen. пакета, pl. пакеты, gen. pl. пакетов. Attributive takes the adjective — `config:module.batchMode` is «Пакетный режим», and batch size is «размер пакета». Bulk operations are «массовые операции», a different word, as in English. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -619,7 +660,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | группировка пакетов | Feminine head noun «группировка», deliberately a different lexeme from the «группа» of _rule group_: gen. pl. «группировок» against «групп», so the two never coincide in any case. `config:batchGroupingLabel` is «Группировка пакетов», which shares no word with «Пакетный режим» (_batch mode_). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -637,7 +678,7 @@ or search the file for the word.
 
 **Example:** `strings:runs.judgeBadge` — "AI review"
 
-**Not:** AI check, AI control, AI verification, proofreading, correction, revision, audit. Reserve your "check" word for LQA checks: those are deterministic rules, this is a model's opinion. The two systems do meet — a judge's issues are filed alongside the LQA results for the same entry — but they are never the same thing to a reader, so they must not share a word.
+**Not:** AI check, AI control, AI verification, proofreading, correction, revision, audit. Do not render *AI review* with your "check" word: those are deterministic rules, this is a model's opinion. (That is a rule about this **term** — it does not stop you translating a literal English "Checks" as a check, which is what `review:sourceAi.checksLabel` and `strings:runs.aiReviewChecksLabel` are.) The two systems do meet — a judge's issues are filed alongside the LQA results for the same entry — but they are never the same thing to a reader, so they must not share a word.
 
 | Locale | Rendering | Notes |
 | --- | --- | --- |
@@ -646,7 +687,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | ИИ-рецензия | Feminine; gen. «ИИ-рецензии». The prefix «ИИ-» does not inflect and follows the ordinary «ИИ-помощник» pattern. The two tabs are «ИИ-рецензия переводов» and «ИИ-рецензия исходного текста»; the run badge `strings:runs.judgeBadge` is the bare «ИИ-рецензия». «Рецензия» is an expert opinion, which is the distinction this file asks for: «проверка» is reserved for LQA checks and «вычитка» for a person reading a translation, so three concepts keep three words. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -673,7 +714,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | оценивать | Verb: imperfective «оценивать», perfective «оценить» — the evaluative sense only, never «судить» or «судья». `review:translationAi.description` becomes «Пусть ИИ оценит завершенные переводы по точности, беглости, терминологии и тональности». The noun «оценка» is the score it produces, not a name for the feature, which is «ИИ-рецензия»; do not introduce «судья» as a noun. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -700,7 +741,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | рецензия исходного текста | Built from _AI review_ and _source text_ on purpose, so the two passes read as siblings: `review:sourceAi.configTitle` is «ИИ-рецензия исходного текста». Report-only, so the verbs around it are «предложить» and «применить», never «исправить», and it must not be confusable with the translation pass on the neighbouring tab. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -727,7 +768,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | замечание | Neuter; gen. замечания, gen. pl. замечаний. `review:sourceAi.findingsTitle` is «Замечания». The five type labels are «Опечатка», «Грамматика», «Терминология», «Ясность» and «Небезопасная формулировка». Keep «замечание» for the AI's opinion and «проблема» for an LQA verdict — that is the English _finding_ / _issue_ split, and both words are needed on the same entry. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -747,6 +788,8 @@ or search the file for the word.
 
 **Not:** proposal, recommendation, advice, hint, tip, idea. Keep one word across the judge panel, the glossary generator and the category generator — they are the same interaction.
 
+**A known English copy bug, and the one place it must not be mirrored.** The action on a suggestion is *apply* — `strings:runs.judgeApply` is "Apply suggestion" — but `strings:runs.judgeApproveAll` says "**Approve** all suggestions" for the very same action on all of them. That is stale English copy awaiting a fix, not a second action. Render **both** with your *apply* word, and do not reach for your *approve* word: this file reserves that for storing a translation into translation memory, which is a different operation that appears in the same UI. Following the English here would invent a distinction the app does not have.
+
 | Locale | Rendering | Notes |
 | --- | --- | --- |
 | es | | |
@@ -754,7 +797,32 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | предложение | Neuter; gen. предложения, gen. pl. предложений. «Предложение» also means _sentence_ in grammar; that was weighed and accepted, because nothing in this app counts sentences (it counts «записи») and the actions beside it — «Применить», «Отклонить» — settle the reading. `category:reviewTitle` is «Просмотр предложений». One word across the judge panel, the glossary generator and the category generator. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### discard
+
+**Means here:** two different actions that English spells with one word. **Discarding unsaved edits** — the ghost button beside Save that puts a field back the way it was (`strings:editor.discard`, `config:discard`, `vault:discard`, `common:discard`) — and **discarding a proposal or a produced result**: rejecting a judge's suggestion or a generated glossary (`strings:runs.judgeDiscard`, `glossary:generateDiscard`, `colorText:assistant.discard`).
+
+**Part of speech in UI:** verb, on buttons.
+
+**Not:** cancel, delete, undo, clear. **The two senses need two words in most languages**, because the first destroys nothing the user made and the second refuses something offered. Check the call site: if a Save button is beside it, it is the first sense.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | Сбросить / Отклонить | The split is by **what is being discarded**, not by control shape, so it is a rule rather than a per-key judgement. Unsaved edits revert: «Сбросить» (`strings:editor.discard`, `config:discard`, `vault:discard`, `common:discard`) — a reset, and deliberately not «Отмена», which is the Cancel button that may sit beside it. A proposal or result is refused: «Отклонить» (`strings:runs.judgeDiscard`, `glossary:generateDiscard`, `colorText:assistant.discard`), matching «Применить» as its opposite in the same pair of buttons and matching the passive in `logs:judge.suggestionDiscarded` («Предложение отклонено.»). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -792,7 +860,88 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | на вычитку | A prepositional phrase, so there is no gender and no agreement anywhere — the same shape as fr «à réviser». Sentence-cased in the filter («На вычитку» — `strings:filters.needsReview`, `strings:compare.needsReviewFilter`), lowercase in the row badge («на вычитку» — `strings:compare.cellNeedsReviewBadge`), same wording in both; the bulk form is «Отметить всё на вычитку». «Вычитка» is a person reading a text and keeps «проверка» free for LQA checks — use the noun, not the verb «вычитать», which is a stress-only homograph of _subtract_. Be aware that «вычитка» is **narrower** than English _review_: it is proofreading, not accuracy checking against the source. That narrowing is accepted deliberately, and it is not a reason to reach for «на проверку» in some later namespace — one rendering, everywhere. For the related _reviewed_ family: the implied noun «перевод» is masculine, so the token form and the agreeing form do not diverge the way es/fr's do — badge «переведено» / «вычитано» (neuter short forms, the citation shape Russian status values take), explicit antecedent «Отметить перевод на {{language}} как вычитанный» (`strings:compare.cellMarkReviewedAria`), elliptical label «Отметить как вычитанное» (`strings:shortcuts.markReviewed`). |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### flag
+
+**Means here:** to set a translation aside in the review queue to come back to later. It is a **disposition, not an alarm** — the handler sets the record's status to flagged *and clears its needs-review flag*, so it is the opposite move to marking something for review.
+
+**Part of speech in UI:** verb on the row button ("Flag"), and "flagged" as the filter chip and the toast.
+
+**Example:** `review:flag` — "Flag"
+
+**Not:** mark, report, denounce, bookmark, star — and above all **not the verb you chose for "mark as needs review"**, because this action *clears* that flag. Using one word for both would make the same verb set and unset the same state.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | отложить | Perfective «отложить» / imperfective «откладывать»; the participle «отложенные» serves the filter chip unchanged. `review:flag` is «Отложить», `review:filterFlagged` is «Отложенные», `review:flaggedToast` is «Перевод отложен». The ordinary Russian for setting something aside to return to, which is what the English hint describes. **Deliberately not «отметить»** — that verb belongs to `strings:compare.flagAllNeedsReview` («Отметить всё на вычитку»), and this action clears exactly that flag; and not «на вычитку», which would be factually backwards. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### Review (the sidebar group)
+
+**Means here:** the sidebar section grouping four tabs — Source AI review, Translation AI review, **Manual review** and **Quality**. It is an umbrella over three different systems: a model's opinion, a person reading, and deterministic rules.
+
+**Part of speech in UI:** a navigational group heading, not a feature name.
+
+**Example:** `sidebar:groups.review` — "Review" (and `strings:guide.groupReview`, the same word for the same grouping in the guide)
+
+**Not:** a word derived from whichever member you translated first. English gets away with "Review" because it is vague in English too; most languages have **separate** words for AI review, human review and machine checking, so the umbrella has to be chosen deliberately or it will silently claim the group for one of its four members.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | Проверка и вычитка | Eighteen characters, inside the sidebar budget. **The elimination is the point of this row.** Russian has no single superordinate over «рецензия» (AI), «вычитка» (a person) and «проверка» (LQA), so the label enumerates the two poles and lets the middle sit under them. «Рецензирование» is the trap and was rejected: it derives the umbrella from the **narrowest** member — the group is half AI review, a quarter manual review and a quarter LQA — so it would make «Ручная вычитка» and «Качество» read as subordinate to the AI feature. «Контроль качества» is taken by the _quality gate_; «Качество» is the name of a tab **inside** this group, which is the surface-name collision this file exists to prevent; «Вычитка» alone covers one tab of four. Both words here are used in their own settled senses, so nothing is stolen. **This row binds `strings:guide.groupReview` as well**, and the two must not diverge: that group was briefly kept as «Рецензирование» on the stated grounds that the guide's Review group is AI-review topics only. It is not — `components/guide/guides-registry.ts` puts `usage-ai-review` **and** `usage-quality` in it, so half of it is LQA and the elimination above applies verbatim. Residual imperfection, recorded rather than hidden: the guide group has no manual-review topic, so «вычитка» names something not in it — accepted because English uses one word for both groupings, the registry mirrors the sidebar's grouping, and the alternative additionally trips a reservation. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### review queue
+
+**Means here:** the Manual review surface: the list of translations awaiting a person, with its filters, its per-language scoping and its empty states.
+
+**Part of speech in UI:** noun phrase (a page title, an empty-state title, a filter label).
+
+**Example:** `review:title` — "Review queue"
+
+**Not:** a second name for **needs review**, which is the *state* an item is in. The queue is where those items are listed. Build the two from one root if your language allows it, so a reader sees one feature rather than two.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | очередь вычитки | Feminine head noun «очередь» (3rd declension, gen. очереди). `review:title` is «Очередь вычитки» and `review:emptyTitle` is «Очередь вычитки пуста». Built from the same «вычитка» as _needs review_, so the tab (`strings:tabs.review-manual` — «Ручная вычитка»), the filter («На вычитку») and the queue share one root. Note the standing ban from that row: the noun and «для вычитки» only — never the verb «вычитать», which is a stress-only homograph of _subtract_. **Where a button needs _proofread_ as an infinitive, the periphrasis is «Сделать вычитку»** (`stage-details:chatQuickActions.proofread`): it keeps the approved noun and needs no verb at all. Use that shape rather than reaching for the banned verb. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -821,7 +970,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | модуль | Masculine inanimate, so the accusative equals the nominative («выбрать модуль»); gen. модуля, pl. модули, gen. pl. модулей. `config:routing.labelModule` is «Модуль». Read the hazard recorded on _model_ below before writing either word: the two are minimal pairs in every case and sit in adjacent controls. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -848,7 +997,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | экземпляр модуля | Masculine head noun «экземпляр» (gen. экземпляра, pl. экземпляры), shortened to «экземпляр» once «модуль» is established, exactly as English shortens to _instance_. `config:instances.formTitle` is «Новый экземпляр {{base}}». The field labelled _Instance id_ is «Идентификатор экземпляра», and the _slug_ named in `config:instances.slugReserved` is «часть идентификатора», not a UI concept. Never «копия», «профиль» or «конфигурация». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -875,7 +1024,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | поставщик | Masculine animate, so the accusative equals the genitive («выбрать поставщика»); gen. pl. поставщиков. The native word rather than «провайдер», which in Russian reads as an internet or hosting company. `config:enableModuleHelp` is «Добавьте поставщика ИИ или сервиса перевода для использования во всех проектах.» The three English strings that mislabel a module-instance picker _Provider_ keep «Поставщик» as written and must not drag _module_ toward this word. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -902,7 +1051,61 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | модель | Feminine, 3rd declension: gen./dat./prep. модели, instr. моделью, pl. модели, gen. pl. моделей. **The one-letter hazard:** «модель» and «модуль» stay minimal pairs through the whole paradigm (модуля/модели, модулю/модели, модули/модели, модулей/моделей) and appear in adjacent labels, so proofread this pair rather than trusting the eye. _Template_ is «шаблон» precisely so it can never be «модель». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### prompt
+
+**Means here:** the instruction text the app composes and sends to a model with a job. A routing rule exposes prompt options and carries a badge when it overrides them. It is the app's own composed instruction, never something the user types into a chat.
+
+**Part of speech in UI:** noun, frequently attributive ("prompt options", "prompt override").
+
+**Example:** `config:routing.labelPromptOptions` — "Prompt Options"
+
+**Not:** request, query, question, command, instruction on its own. Keep it distinct from an HTTP **request** — the same settings panel carries requests-per-second and request-timeout labels — and from the **search query** behind "No models match your search".
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | промпт | Masculine loanword; gen. промпта, pl. промпты. **Chosen by elimination, and the elimination is the part worth keeping.** The native candidate «запрос» is unavailable: it is already the HTTP _request_ in the same panel (`config:requestsPerSecondLabel` is «Запросов к поставщику в секунду», `config:requestTimeoutLabel` is «Таймаут запроса (секунды)») and it is additionally the _search query_ fixed by the _match_ row. Three senses of one word was one too many, so the loanword takes this one. The same elimination holds in every namespace that mentions rate limits — do not re-open it there. `config:routing.labelPromptOptions` is «Параметры промпта»; the rule badge `config:routing.promptBadge` is the lowercase «промпт». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### reasoning effort
+
+**Means here:** a provider parameter on a model — low, medium or high — controlling how much the model deliberates before answering. Set on a module instance and overridable per routing rule.
+
+**Part of speech in UI:** noun phrase.
+
+**Example:** `config:module.reasoningEffort` — "Reasoning effort"
+
+**Not:** a NARN concept at all — it is the provider's own parameter, so prefer whatever your locale's AI tooling already calls it. Not "effort" in the sense of work done, and never confusable with a run's cost.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | уровень рассуждений | Masculine head noun «уровень» (gen. уровня). The parameter is a scale with visible low/medium/high values, so «уровень» is right where the calque «усилие рассуждения» is not. **«Уровень» carries three loads in this app and is safe here only because the genitive complement binds it.** The three: the game-level _stage_, a log severity, and this parameter. A bare «Уровень» is ambiguous between all three; «уровень рассуждений» is not, and the three surfaces never meet — a model setting, a game-content tab and a log filter. That is a documented overload, not an unnoticed collision, and it is why the LQA sense of _severity_ drops the noun instead of becoming a fourth. `config:routing.labelReasoningEffort` is «Переопределение уровня рассуждений». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -929,7 +1132,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | правило маршрутизации | Neuter head noun «правило» (gen. правила, gen. pl. правил); `config:routing.title` is «Правила маршрутизации», which the style guide already fixes. «Маршрутизация» is the only available Russian word and does carry a network flavour — the surrounding strings are about entries and languages, which settles the reading. Note that «правила маршрутизации» is also the genitive singular, so prefer «в этом правиле» to a bare genitive where a plural could be read. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -956,7 +1159,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | группа правил | Feminine head noun «группа» (gen. группы, gen. pl. групп); `config:routing.groupSelectLabel` is «Группа правил». Distinct from «группировка пакетов» (_batch grouping_) by lexeme rather than by modifier, and never «набор», «профиль» or the word chosen for _category_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -983,7 +1186,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | хранилище учетных данных | Neuter — which is what the standalone status word agrees with: `vault:statusLabel` is «Хранилище учетных данных» and the locked status is «Заблокировано», the Russian counterpart of the es «Bloqueada» precedent recorded above. Shortened to «хранилище» where the context is clear, and all four surfaces read: «Хранилище заблокировано», «Разблокировать хранилище», «Пароль хранилища». The English ban on _storage_ targets a vague English word; «хранилище» is the established Russian for a security vault and nothing else in this app competes for it. «Сейф» and «кошелек» were rejected. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1010,7 +1213,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | учетные данные | Plural-only in Russian: there is no natural singular, so a single credential is still «учетные данные», or «ключ» where a count is genuinely needed. `config:credentialsMissingChip` is «Отсутствуют учетные данные». Never «пароль» — the vault password is one thing, the credentials it holds are another. Written without ё, per the style guide. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1039,7 +1242,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | LQA | Kept in Latin script and never declined: the Russian localization industry uses the English acronym and no established Cyrillic form exists, so this row is a deliberate do-not-translate. Attributive in every string — `config:lqa.title` is «Проверки LQA», and «Результаты LQA», «Повторы LQA» and the filter chip use the same three letters. Never «КЛК», and never «контроль качества», which is the _quality gate_. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1066,7 +1269,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | контроль качества | Masculine head noun «контроль» (gen. контроля). **Watch the transitivity:** «не проходит контроль качества» is correct only when the *translation* is the subject («перевод не проходит контроль качества»); when the subject is the issue, it has to be «не дают пройти контроль качества», because the issues are what stops the translation, not what is being checked. So `config:lqa.description` ships as: Проверки качества выполняются для каждого перевода. Блокирующие проблемы не дают пройти контроль качества и могут вызвать автоматический повтор; предупреждения только фиксируются. Bare _the gate_ is the bare «контроль». **Never «этап»** to render _at the gate_: it is one of the two process readings of _stage_ that the style guide bans outright, and it is easy to reach for. Where English writes "Used at LQA gate", drop the noun instead of finding a synonym — `config:overflowRatioDescription` ships «Используется при контроле качества LQA…». The process-control sense only: the style guide rules out «ворота» and «шлюз». It shares «качества» with «проверки качества» exactly as English shares _quality_, but the head nouns stay different, and the tab itself is just «Качество». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1093,7 +1296,142 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | проверка | Feminine; gen. проверки, pl. проверки, gen. pl. проверок — «проверки» is the genitive singular *and* the nominative/accusative plural, so «результат проверки» and «Проверки LQA» are spelled alike and the number has to come from the surrounding words. One word across «проверка качества», «Проверки LQA» and every individual check name — `quality:checkLabels.overflow` is «Переполнение по длине». Reserved **against the other two _terms_**: _AI review_ is «рецензия» and _needs review_ is «вычитка», so neither of those is ever rendered «проверка». **That is not a claim that «проверка» always means an LQA check** — where English itself writes "check(s)", follow the English, whatever system it belongs to. Shipped and correct: `review:sourceAi.checksLabel` and `strings:runs.aiReviewChecksLabel` are both «Проверки» for the toggles of the **AI** passes, because their English says "Checks"; `config:pseudoTestHelpBody` renders "QA pass" as «офлайн-проверка качества». Same rule as the style guide's "match the English, not the other locale file", one level up: a reservation binds the *term*, never the word. **The reservation is on «проверка» naming a *thing*, not on the word's ordinary verbal use** — as a progress verbal noun ("Checking…") it is correct and already ships: `config:fullReplacePreviewLoading` is «Проверка, сколько записей осиротеет…» and `account:mfaLoading` is «Проверка настроек безопасности…». Neither names an LQA check, and neither is a violation. **The two severity values are a matched pair of nouns: «Блокировка» and «Предупреждение»** (`config:lqa.severityBlocking`, `config:lqa.severityWarning`). The adjective pair «блокирующая»/«предупреждающая» was rejected because it needs an implied feminine antecedent the reader fills as «проверка», and «предупреждающая проверка» is not idiomatic — only one member of the pair would read well, and a select whose two options are different parts of speech is worse than either. **That rule is scoped to a select** — options compared side by side at the moment of choosing. It does **not** bind a read-only status column, where the stronger constraint is rendering the same English word the same way in every column it appears in, even at the cost of a mixed set: see _invite_ and _run_. Nouns are symmetrical, need no antecedent, and match the English register. **The adjective stays correct wherever a real noun is present** — `config:lqa.description` says «Блокирующие проблемы…», and the glossary-adherence description says «сделайте проверку блокирующей». That is the same use/mention split the _needs review_ row records: a value shown as an option is a token, a modifier attached to a visible noun agrees with it. Both stay apart from «ошибка». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### issue
+
+**Means here:** one verdict an LQA check files against one translation, at blocking or warning severity. The judge's opinions are filed into the same per-entry list, always as warnings, so an issue is what the *results* contain regardless of who put it there.
+
+**Part of speech in UI:** noun, usually counted ("{{count}} LQA issues").
+
+**Example:** `strings:row.lqaIssues_other` — "{{count}} LQA issues"
+
+**Not:** error, problem in the sense of a crash, defect, bug, violation — and **not** the word you chose for a source review's **finding**, which is an AI opinion about the source rather than a machine verdict about a translation. The two are listed on the same entry.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | проблема | Feminine; gen. проблемы, gen. pl. проблем — counted, so the family needs all four plural categories, where English (`strings:row.lqaIssues_one`, `strings:row.lqaIssues_other`) has two: «{{count}} проблема / проблемы / проблем LQA». The acronym follows the noun and does not decline. This is the counterpart the _finding_ row names: «проблема» is the machine verdict, «замечание» is the AI's remark on the source. Not «ошибка», which _check_ reserves so that a failing check is never confused with a runtime error. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### severity
+
+**Means here:** how hard an LQA check fails — blocking or warning. Set per check; the value decides whether the gate fails and an automatic retry is triggered.
+
+**Part of speech in UI:** noun.
+
+**Example:** `config:lqa.checks.glossary-adherence.description` — "At warning severity the issue is informational only; set severity to blocking to trigger the automatic retry."
+
+**Not:** level, priority, urgency, criticality, error. The two **values** are not this term — "blocking" and "warning" are fixed by *check* above and must not drift here.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | серьезность | **Prefer no head noun at all — that is what the app's strings do.** Russian expresses this adjectivally, and dropping the noun also gives «блокирующая» a feminine noun to agree with: `config:lqa.checks.glossary-adherence.description` ships as: В режиме предупреждения проблема носит только информационный характер; сделайте проверку блокирующей, чтобы включить автоматический повтор. Use «серьезность» (f., gen. серьезности) — or «критичность», which Russian issue trackers use interchangeably — only where a head noun is genuinely unavoidable, such as a column header over the two values. **«Важность» is wrong and was shipped once before being caught:** it means *importance*, a ranking of what matters most, not how hard something fails. The error is worth studying — it was argued from what the other candidates were not («уровень» is taken by _stage_, «проверка» by _check_) without anyone checking that the surviving word meant severity. Not «уровень» in any case: see _reasoning effort_ for the loads that word already carries. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### notification severity
+
+**Means here:** the three levels an account notification carries — info, warning, critical. A separate value set from the LQA *severity* above: these grade a message to the user, not how hard a check fails.
+
+**Part of speech in UI:** a set of three value labels.
+
+**Example:** `account:notificationsSeverity.critical` — "Critical"
+
+**Not:** alarm, danger, error, priority. **"Warning" is not free to re-decide** — it is fixed by *check* above and must render identically here, or one product ships two words for one severity word.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | Информация / Предупреждение / Критично | The set is the rendering: Russian supplies **no head noun** for the concept, exactly as the LQA _severity_ row prescribes. «Предупреждение» is taken verbatim from _check_ and must not drift. «Критично» is a short-form predicate standing among two nouns — a **deliberate one-member deviation**, taken on the _invite_ status precedent that meaning outranks paradigm: «Критическая ошибка» asserts an error has occurred, which a critical notification need not report, and «Тревога» is an alarm. A uniform set was available and would have said something false. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### assertion
+
+**Means here:** one user-written regular expression the regex LQA check applies to a translation — which must match it, or must not. A check can carry several.
+
+**Part of speech in UI:** noun.
+
+**Example:** `config:lqa.regexAddAssertion` — "Add assertion"
+
+**Not:** condition, check, rule, test, claim, statement. The first three are all taken — "condition" by routing conditions, "check" by the LQA checks themselves, "rule" by routing rules — so a fourth word is genuinely required rather than merely nice.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | утверждение | Neuter; gen. утверждения, gen. pl. утверждений. The logical sense, as in a test assertion. `config:lqa.regexAddAssertion` is «Добавить утверждение» and `config:lqa.checks.regex-assertions.name` is «Утверждения регулярных выражений». **Known overlap, and the reason _approve_ is now restricted:** «утверждение» is also the verbal noun of «утвердить» (_approve_), so that row bans the noun form outright — approval uses the verb «утвердить» and the participle «Утверждено», which leaves this word free for the regex strings. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### pattern
+
+**Means here:** the regular expression itself, in the field beside an assertion. **This term is the regex sense only** — if English uses "pattern" elsewhere for a shape, a habit or a layout, that is a different word and this row does not cover it.
+
+**Part of speech in UI:** noun.
+
+**Example:** `config:lqa.regexPattern` — "Pattern"
+
+**Not:** template, model, mask, sample, form. Whatever you choose must not be the word you gave **template** — several languages would otherwise use one word for both, and template is already carrying a reservation of its own.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | выражение | Neuter; gen. выражения, gen. pl. выражений. `config:lqa.regexPattern` is «Выражение», and the check description names them in full as «регулярные выражения» — the rendering is valid **for the regex sense only**, and does not generalize to any other English "pattern". «Шаблон» is the word Russian reaches for first and is **unavailable**: it belongs to _template_, which holds it specifically so that _template_ never becomes «модель». Taking it here would push that whole chain over. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1120,7 +1458,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | переполнение | Neuter; gen. переполнения. «Превышение длины» was the obvious alternative and was rejected on this term's own `Not:` line, which bans _excess_ and _overrun_ — «превышение» is precisely «excess». (It is not rejected for sharing «длины» with _length limit_: the check name is «Переполнение по длине» and shares it too, exactly as English shares _length_ between "Length overflow" and "Entry length limit".) `config:lqa.checks.overflow.name` is «Переполнение по длине», the ratio is «коэффициент переполнения», _overflow only_ is «только переполнение» and _ignore overflow_ is «игнорировать переполнение». «Переполнение» is the neutral technical word here; this app has no buffer for it to be confused with. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1147,7 +1485,34 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | ограничение длины | Neuter head noun «ограничение» (gen. ограничения, pl. ограничения). `config:routing.labelMaxLength` is «Ограничение длины записи». A hard cap set by the game, against the relative «переполнение» — the two share no word. Provider rate limits are «ограничение частоты запросов», so the modifier always says which limit is meant. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### pass rate
+
+**Means here:** the share of LQA results that passed, shown as a percentage on the Quality dashboard — as an overall figure, as a per-language and per-module column, and as three banded tiers in the legend.
+
+**Part of speech in UI:** noun phrase; the table column header abbreviates it.
+
+**Example:** `quality:columns.passRate` — "Pass rate"
+
+**Not:** success rate, score, quality score, health. **"Success rate" is the trap**: `config:health.successRate` is a *different* metric in the same product (provider request success), so the two must not share a word.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | доля прохождения | Feminine head noun «доля» (gen. доли). `quality:overallStat.passRateLabel` is «Общая доля прохождения» and the three tiers are «Высокая / Средняя / Низкая доля прохождения». `quality:columns.passRate` ships the **full** «Доля прохождения» (16 characters, inside the 22-character column budget). It was «Прохождение» while the length rule was a ratio; the abbreviation was withdrawn when the rule became a character budget, because the abbreviation licence is scoped to headers where **English** abbreviates — «Парам.» for "Params" — and "Pass rate" does not. Built on the same root as the legend, «Пройдено» / «Не пройдено» (`quality:overallStat.legendPassed`, `legendFailed`), which is the point of choosing it. «Успешность» was rejected: `config:health.successRate` is a different metric and would then share the word. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1176,7 +1541,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | глоссарий | Masculine; gen. глоссария, pl. глоссарии, gen. pl. глоссариев. Syncretism to know about: «глоссарии» is the prepositional singular *and* the nominative/accusative plural, so «в глоссарии» (in the glossary) and «глоссарии» (glossaries) are spelled alike — let the preposition and the verb carry the number. The settled Russian CAT-tool word — «словарь» is a dictionary and is wrong here, and it must not be reused for «память переводов» either. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1203,7 +1568,34 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | термин | Masculine; gen. термина, gen. pl. терминов — `glossary:totalTerms` is «Всего терминов:». Shortened to «термин» alone inside the Glossary tab, exactly as English shortens _glossary term_ to _term_. Never «запись», which is reserved for _entry_, so «Добавить термин» and «{{count}} записей» can never collide. It shares a root with the check name «Терминология», as English does. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### constant
+
+**Means here:** a flag on a glossary term meaning the term is masked before the model sees it and restored verbatim in the translation — the model never translates it at all. A column in the Glossary table, a bulk action, and a badge in the review panels.
+
+**Part of speech in UI:** noun used as a column header and a state badge; the badge is lowercase where the surrounding chips are.
+
+**Example:** `glossary:colConstant` — "Constant"
+
+**Not:** permanent, unchangeable, read-only, fixed, do-not-translate. **"Read-only" is the near-miss to avoid**: it is a different flag two columns away in the same table, and it means the row cannot be edited, not that the text is never translated.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | константа | Feminine; gen. константы, gen. pl. констант. `glossary:colConstant` is «Константа» (9 characters against 8, so the narrow column still fits) and `review:glossaryConstant` is the lowercase «константа», matching the chips beside it. «Константа» is the established Russian for a value substituted verbatim rather than computed, which is exactly the mechanism. Rejected: «постоянный» (an adjective needing an antecedent, and it reads as *permanent*), «неизменяемый» (its UI reading is *cannot be edited*, which is what «Только для чтения» already means in the same table) and «Не переводить» (a command, wrong for a header and wrong for a badge). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1230,7 +1622,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | совпадение | Neuter; gen. совпадения, gen. pl. совпадений, so the Matches panel reads «Совпадения», «Совпадений: {{count}}», «Совпадения не найдены.» The verb is the same root — «совпадать» (`config:models.noMatches` — «Ни одна модель не совпадает с запросом»). Note what that costs: «запрос» is *also* the HTTP request in the module settings panel, so it now carries two senses. Two is the ceiling — it is why _prompt_ takes the loanword «промпт» rather than becoming a third. Never the word chosen for _glossary term_: a «термин» is what is searched for, a «совпадение» is where it turned up. **"No matching X" is the one place that root is deliberately dropped:** «Совпадающих X нет» is stilted, so the settled phrasing is **«Подходящих X нет»** — `sidebar:noMatches` «Подходящих проектов нет», `orphans:relink.noCandidates` «Подходящих записей нет», `strings:bulk.categoryEmpty` «Подходящих категорий нет.» Consistent across every namespace that has one, and not a drift from this row: an empty-state message is not naming the _match_ concept, it is saying nothing fits. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1257,7 +1649,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | память переводов | Feminine head noun «память» (3rd declension, gen. памяти), the established Russian CAT term. `sidebar:translationMemory` is «Память переводов» — sixteen characters, inside the sidebar item's 26-character budget. Never the bare «память», which reads as RAM and is what `logs:vault.credentialsEvicted` genuinely means. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1284,7 +1676,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | утвердить | Perfective «утвердить» on buttons, imperfective «утверждать» in prose — the promotion sense, not «подтвердить» (_confirm_), «принять» (_accept_) or «сохранить» (_save_), all three of which live in the same bulk bar, and not «проверить», which is reserved. `strings:bulk.approveSelected` is «Утвердить в память». Count-neutral phrasing keeps the participle out of agreement trouble: «Утверждено переводов: {{count}}». **Use the verb and the participle, never the verbal noun «утверждение»** — that word is taken by _assertion_ below, and «утверждение перевода» would read as a regex assertion in a file that has both. Second restriction, from the English copy bug recorded on _suggestion_: `strings:runs.judgeApproveAll` says "Approve all suggestions" for what is really *apply*, and it ships as «Применить все предложения». «Утвердить» belongs to this row alone — putting it on a judge button would claim a translation had been stored in memory when it has not. **One deliberate divergence, recorded so it is not "corrected" later.** English writes "Approve" at two unrelated call sites and Russian splits them, because only one of them approves anything: `review:approve` posts to the project's approve endpoint and writes into translation memory, so it is «Утвердить»; `review:sourceAi.approve` only dispositions a source-review record and stores nothing, so it is **«Принять»**. Two English words identical, two Russian words different — the same use/mention discipline as the judge buttons above, resolved by the call site rather than by the string. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1311,7 +1703,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | категория | Feminine; gen. категории, pl. категории, gen. pl. категорий, so a family counting categories runs «1 категория / 2–4 категории / 5+ категорий». **Do not reach for `category:countLabel_other` as that example — it counts _entries_, not categories.** It lives in the `category` namespace and is the per-category entry tally under each chip, so it belongs to _entry_ and ships as «{{count}} записи»; the _entry_ row cites the same key for exactly that reason. A namespace name is not evidence about what a key counts, and this row asserted otherwise for six rounds. `strings:tabs.category` is the singular «Категория» and the page title is the plural «Категории», as in English. Not «группа» (taken by _rule group_) and not «метка» (taken by _source label_). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1338,7 +1730,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | тональность | Feminine, 3rd declension: gen. sg. тональности and nom./acc. pl. тональности are spelled alike, so the surrounding words have to carry the number. **Why «тональность» and not «тон» — it is not a false-friend argument.** «Тон» is fully idiomatic for the tone of a text («вежливый тон», «тон статьи», «задать тон»), and «тональность» is equally the musical key and colour tonality, so neither word is disqualified on its own. The plural decides it: the field is plural (`config:routing.labelTones` is «Тональности»), and «тона» is the colour-sense plural — exactly what this term's `Not:` line bans — while «тональности» cannot be read that way. Second, «тональность бренда» / «тональность коммуникации» is the settled Russian rendering of _tone of voice_ in content writing, which is what these values are. **The cost, which is real:** «анализ тональности» is the entrenched Russian term for _sentiment analysis_, so in an app that also has an AI reviewer a reader can plausibly take «тональность» for sentiment — the hazard is a **bare standalone «Тональность» on an analysis surface**, where the sentiment reading is available with nothing to block it — keep a governing noun beside it there («Тональности записи»). It is *not* a ban on review surfaces, which would be unfollowable: tone is one of the four judge criteria, so `review:translationAi.description` («…по точности, беглости, терминологии и тональности») and `strings:runs.judgeIssueTone` are correct and unavoidable. Not «стиль» or «голос», which read as the model's writing rather than an authoring instruction. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1367,7 +1759,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | сирота | Common gender, 1st declension, gen. сироты, pl. сироты, gen. pl. сирот — «сироты» is both the genitive singular and the nominative plural, so counted strings need all four plural keys rather than a guessed ending. **«Сирота» is strictly animate and human, which limits where it may stand.** The tab title takes it, because it is short and English's own metaphor is equally jarring: `orphans:title` is «Сироты». Everywhere else — action labels, prose and counts — uses the adjective, both because the animate accusative otherwise makes the string read literally (`orphans:relink.title` is «Перепривязать осиротевшую запись», never «Перепривязать сироту») and because English itself switches part of speech there: `config:orphanedCount` is the adjective "{{count}} orphaned", and it ships as **«Осиротевших записей: {{count}}»** — count-neutral, **with the head noun kept**. Two things to take from that. A bare «Осиротевших: 5» is a substantivized adjective left hanging, so count-neutral phrasing in Russian means putting the number after an invariant noun *phrase*, not after an adjective alone. And the key is a single plain key with no `_one`/`_other` siblings: adding a Russian family over it would in fact be legal (the guard allows an added family provided the plain key survives), but **no shipped locale adds one anywhere** — that is a settled project-wide convention, recorded in the style guide, not a judgement about this key. Count-neutral is the answer here and everywhere English writes one string. The `orphans` namespace's own counts are where families belong. That is one term with two registers, not two terms — do not introduce a third word. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1394,7 +1786,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | перепривязать | Perfective «перепривязать», imperfective «перепривязывать»; the noun is «перепривязка». `orphans:relink.title` is «Перепривязать осиротевшую запись» — the adjective, not «сироту», for the reason recorded on _orphan_ above. One verb serves the row button, the dialog title, the confirm step and the import warning — never «переподключить», «восстановить» or «объединить». The stale English _Relink tab_ is this app's Orphans tab, so render it «Сироты». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1421,7 +1813,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | резервная копия | Feminine phrase whose adjective agrees: «резервной копии» in the genitive, «Резервные копии» as the tab title. The native register rather than the loanword «бэкап», per the style guide's pick-one rule, and the app stays in that register throughout — `backup:createSection` is «Создать резервную копию» and the verb is never «забэкапить». Distinct from _export_ («экспорт») and from _snapshot_ («снимок»). |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1448,7 +1840,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | снимок | Masculine, fleeting vowel: gen. снимка, pl. снимки, gen. pl. снимков. «Снимок» is the standard Russian for a state snapshot; expand to «снимок состояния» wherever the bare word could be read as a photograph. `config:importSnapshotNote` ships as: Перед этим импортом был создан страховочный снимок ({{date}}). Его можно восстановить на вкладке «Резервные копии». — the tab name is at the top level of the string, so it takes «ёлочки»; the guillemets elsewhere in this cell are citation marks. English's _restore points_ are «точки восстановления». Shares nothing with «резервная копия», which several strings put in the same sentence. The loose English use flagged in the block above — a saved *configuration*, not a restore point — keeps the same Russian word, exactly as English keeps the same English one: `config:templatesDescription` ships «Многократно используемые снимки конфигурации проекта.» |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1475,7 +1867,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | шаблон | Masculine; gen. шаблона, pl. шаблоны, gen. pl. шаблонов. Explicitly **not** «модель», which is the word Russian would otherwise reach for and which is taken by _model_. `config:templatesTitle` is «Шаблоны проектов». The reservation runs the other way too: because «шаблон» belongs to _template_, it must stay out of the regex strings, where English's _pattern_ takes «выражение» — see _pattern_ below. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1504,7 +1896,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | соредактор | Masculine animate (acc. = gen., «пригласить соредактора»); gen. pl. соредакторов. A second word was required because «участник» is taken by _member_ and the two appear in adjacent strings on the Sharing page. «Соавтор» was rejected — a collaborator translates rather than writes the source — and «соредактор» is not the bare «редактор» the English list warns about. It is a considered stretch rather than a settled term: its default reading is a co-editor of a publication, and Russian has no established word for this role. Kept because the constraint is binding (two adjacent words are required) and because it is transparent on first reading. `collab:join.description` is «Введите код приглашения, чтобы присоединиться к чужому проекту в качестве соредактора.» |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1531,7 +1923,115 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | участник | Masculine animate; gen. участника, gen. pl. участников. `collab:sharing.membersTitle` is «Участники». The generic masculine covers everyone, as is standard in Russian UI — do not switch to «участница» for a named person. Wider than «соредактор» (_collaborator_): the owner is a «участник» but not a «соредактор». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### nickname
+
+**Means here:** the public handle a person picks once, by which collaborators recognize them across shared projects. Set-once and never editable afterwards. Its format is Latin lowercase letters, digits and hyphens, 3–30 characters.
+
+**Part of speech in UI:** noun.
+
+**Example:** `collab:nickname.title` — "Nickname"
+
+**Not:** username, alias, pen name, display name, account name. **"Username" is the one to avoid**: the app already has an account identity, and giving both the same name recreates exactly the confusion the *collaborator* / *member* pair exists to prevent.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | никнейм | Masculine loanword; gen. никнейма, pl. никнеймы. The settled Russian for a public handle in a product. Rejected: «имя пользователя», which is *username* and would collide with the account identity, and «псевдоним», which reads as a pen name adopted to conceal. **The format hint must say «латинские»** — `collab:nickname.formatHint` is «Строчные латинские буквы, цифры и дефисы, от 3 до 30 символов», because the pattern is Latin-only and a Russian reader would otherwise try Cyrillic and be rejected without knowing why. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### claim
+
+**Means here:** to take a nickname for yourself, permanently. One action, but the UI needs the whole family: a button, a progressive status while it runs, a success toast, and an immutability hint about what has already been claimed.
+
+**Part of speech in UI:** verb, with a verbal noun and a participle.
+
+**Example:** `collab:nickname.claimButton` — "Claim nickname"
+
+**Not:** reserve, register, take, occupy, request. Whatever you pick must yield all four forms **and** stay distinguishable from "that name is **reserved**", which is a different, adjacent message.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | закрепить | Perfective «закрепить»; verbal noun «закрепление», participle «закреплен». One root covers all four surfaces — `collab:nickname.claimButton` «Закрепить никнейм», `claiming` «Закрепление…», `claimSuccess` «Никнейм закреплен.», `immutableHint` «После закрепления никнейм изменить нельзя.» Rejected: «занять», which reads well on the button but has no usable verbal noun, and «зарезервировать», because `collab:errors.nickname_reserved` («Это имя зарезервировано») would then contradict the button on screen. Those two words stay free for exactly those errors — «занят» for a taken nickname, «зарезервировано» for a blocked one. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### invite
+
+**Means here:** a one-time code the project owner generates so someone can join the project as a collaborator. It carries a status — pending, redeemed, revoked or expired — and an expiry date, and the code itself is shown exactly once.
+
+**Part of speech in UI:** noun; the four statuses are a value set on one field.
+
+**Example:** `collab:invites.title` — "Invites"
+
+**Not:** invitation link, request, token, membership, access code used interchangeably. **Translate the four statuses as a set, in one part of speech** — they sit in one column and a reader compares them down the page.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | приглашение | Neuter; gen. приглашения, gen. pl. приглашений. `collab:invites.title` is «Приглашения». **The four statuses:** `collab:invites.status.pending` «Ожидание», `status.redeemed` «Использовано», `status.revoked` «Отозвано», `status.expired` «Истекло». Three are neuter past forms agreeing with the implied «приглашение»; «Ожидание» is a verbal noun, and that break in shape is **deliberate and outranks internal uniformity**. The rule it follows: *a status value is matched across columns by its English word first, and only then chosen for shape.* "Pending" is also a run status, and `strings:runs.statusPending` ships «Ожидание» — the same English word in two status columns must render the same way, or a reader meets two words for one state. «Ожидает» was the internally-tidier answer and was dropped for that reason. «Активно» was rejected outright: it changes the meaning, since a revoked invite is also inactive. |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### recording
+
+**Means here:** the manual-edit audit capturing who changed which translation by hand, kept for seven days and switched off when a project has no active collaborators. "Recording" names the capture being on or off; it is a process, not the captured rows.
+
+**Part of speech in UI:** noun (a status), and the participle "recorded" for what it produced.
+
+**Example:** `strings:runs.manualRecordingPaused` — "Recording paused — no active collaborators"
+
+**Not:** log, history, tracking, audio or video recording, and above all **not the word you chose for _entry_**. Several languages' first word for "a record" is the same one they use for a content entry, and this app counts entries constantly — if the two collide, "Recording paused" reads as "Entry paused".
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | фиксация | Feminine; gen. фиксации. **This row exists because «запись» is double-booked:** it is the natural Russian for _recording_ and it is already _entry_, the unit this whole app counts. «Фиксация» takes the process sense and leaves «запись» alone — `strings:runs.manualRecordingPaused` is «Фиксация приостановлена — нет активных соредакторов», and the participle for a captured change is «зафиксировано». Not «журналирование», which is the server-log panel's territory, and not «отслеживание». |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1560,7 +2060,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | уровень | Masculine with a fleeting vowel: gen. уровня, pl. уровни, gen. pl. уровней. The game-level sense only — «этап» and «стадия» are exactly the process readings this file and the style guide both rule out. `stage-details:title` is «Сведения об уровне». One ambiguity to know about: log severity is also «уровень», but the two never share a surface and the game sense always stands beside stage content. For the LQA sense of _severity_ Russian drops the head noun rather than reaching for «уровень» — see _severity_ below. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1587,7 +2087,61 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | Стилизатор текста | Proper noun, sentence-cased. Seventeen characters, inside the sidebar item's 26-character budget; the shorter «Стили текста» was rejected because it names a settings page rather than a tool. Use exactly this wording in the sidebar item, the tab label and the tool's own title (`sidebar:colorText`, `colorText:title`). |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### element
+
+**Means here:** one of the seven elemental colours in the Text Styler palette — Hydro, Pyro, Anemo, Electro, Dendro, Cryo, Geo — grouped under the "Elements" heading beside the plain-colour and quality swatch groups.
+
+**Part of speech in UI:** proper nouns (swatch labels) plus a group heading.
+
+**Example:** `colorText:groupElements` — "Elements"
+
+**Not:** invented or literal translations of the Greek roots. These are **game content**: use the names the game itself ships in your language, and if it ships them untranslated, leave them.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | стихия | The group heading `colorText:groupElements` is «Стихии», and the seven swatches are «Гидро», «Пиро», «Анемо», «Электро», «Дендро», «Крио», «Гео» — the official Russian names, transliterated as the game ships them. Latin names were rejected on the same argument as _Pseudo Test_: a palette otherwise fully Cyrillic would read them as stray tokens. **«Элементы» was rejected for the heading** because `settings:previewHint` uses «элементы управления» for UI controls, and one product should not call two unrelated things «элементы». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### theme
+
+**Means here:** one of the four visual styles the app ships — Classic, Pixel, Techno, Minimal — chosen in Settings and again in the first-run welcome flow.
+
+**Part of speech in UI:** proper nouns (the four names) plus the noun "theme".
+
+**Example:** `settings:themes.techno.name` — "Techno"
+
+**Not:** skin, style, appearance, mode — and **each name must be byte-identical in both places it appears**: `settings:themes.*.name` and `welcome:themeChooser.names.*`. This is the highest-risk duplication in the app for a locale to get wrong, because the two are never on screen together; es currently ships "Tecno" in one and "Techno" in the other.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | тема | Feminine; gen. темы. The four names, **identical at both keys**: «Классика», «Пиксель», «Техно», «Минимализм». Nouns rather than adjectives, because they stand alone as card titles rather than modifying «тема». Copy them; do not re-transliterate «Техно», which is where the es divergence happened. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1614,7 +2168,34 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | Руководство | Neuter; gen. руководства. Eleven characters, comfortably inside the sidebar item's 26-character budget — the ratio against English's five-letter "Guide" is not the measure, and the style guide explains why. The only shorter option is «Справка», which is _Help_ — a concept this file has no row for, because it appears in zero shipped strings. Not «Справка» — _Help_, which is not a surface this app has — and it would also collide with «справочный язык» (_reference language_); not «Документация» or «Инструкция». `sidebar:guide` is «Руководство», and every _read the guide_ link repeats that one word. **A notation warning for the whole `strings:guide.topic*` family:** the guillemets elsewhere in this cell are citation marks around a rendering, not part of it. Topic titles ending in _Tab_ take «вкладка» plus the surface name, and that name is at the **top** level of the shipped string, so it takes «ёлочки», never „лапки“ — `strings:guide.topicGlossary` ships as: Вкладка «Глоссарий». „Лапки“ are correct only inside another pair of «ёлочки». |
+| tr | | |
+| id | | |
+| vi | | |
+| th | | |
+| ja | | |
+| ko | | |
+| zh-hans | | |
+| zh-hant | | |
+
+#### release
+
+**Means here:** one published version of the app, and by extension its changelog entry — the thing the Changelog page lists and the "Show older releases" control counts.
+
+**Part of speech in UI:** noun.
+
+**Example:** `common:changelogShowOlder` — "Show older releases ({{count}})"
+
+**Not:** version (that is the number, `v1.56.0`), update, build, entry. **Not "entry"**: that word is reserved for a content entry, and this app counts those constantly.
+
+| Locale | Rendering | Notes |
+| --- | --- | --- |
+| es | | |
+| fr | | |
+| de | | |
+| it | | |
+| pt-br | | |
+| ru | выпуск | Masculine; gen. выпуска, gen. pl. выпусков. `common:changelogShowOlder` is «Показать прежние выпуски ({{count}})» and `common:changelogEntryError` is «Не удалось загрузить описание этого выпуска.» **«Запись» is unavailable** — it is _entry_, and a changelog "entry" sitting beside the app's entry counts would be the same double-booking that pushed _recording_ onto «фиксация». Version numbers themselves are never translated. |
 | tr | | |
 | id | | |
 | vi | | |
@@ -1641,7 +2222,7 @@ or search the file for the word.
 | de | | |
 | it | | |
 | pt-br | | |
-| ru | | |
+| ru | История изменений | Feminine head noun «история» (gen. истории). Seventeen characters, inside the sidebar item's 26-character budget and one longer than «Память переводов», which the same sidebar already fits. `sidebar:changelog` is «История изменений»; version numbers are never translated. |
 | tr | | |
 | id | | |
 | vi | | |

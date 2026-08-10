@@ -61,9 +61,46 @@ The space-constrained surfaces are sidebar items (`sidebar:translationMemory`,
 review-translation-ai), table column headers (`strings:columns.config`), filter labels
 (`strings:filters.needsReview`) and bulk-bar buttons (`strings:bulk.approveSelected`).
 
-For those classes, **never exceed ~1.5× the English character count**, and drop the
-article where Italian chrome tolerates it: "Memoria di traduzione", not "La memoria delle
-traduzioni". Body text and descriptions are unconstrained.
+For those classes, **budget in absolute characters per class — never as a multiple of
+English** (see the table below), and drop the article where Italian chrome tolerates it:
+"Memoria di traduzione", not "La memoria delle traduzioni". Body text and descriptions are
+unconstrained.
+
+### Why the budget is in characters, and not in multiples of English
+
+**A ratio is the wrong unit, because it scales with the English source rather than with the
+container.** It punishes exactly the strings that need the most room: `sidebar:legal` is
+"Legal", five characters, so a 1.5× rule grants seven and a half — no correct Italian
+rendering of it can exist. Meanwhile a 44-character English label like
+`strings:bulk.approveSelected` clears the same rule with room to spare while sitting on one
+of the tightest surfaces in the app. This guide used to carry a "never exceed ~1.5× the
+English character count" rule; the Russian pilot audited every constrained-surface key in
+all 24 namespaces against it and found **27** breaches, in every batch, **none of which was
+a wrong string**. The rule was, so it is gone.
+
+**The five classes are also not equally constrained.** Only the sidebar has a hard, fixed
+width: `16rem` (`SIDEBAR_WIDTH` in `components/ui/sidebar.tsx`), with every item label
+wrapped in `truncate`, so overflow silently ellipsizes. Tab bars, table columns, filter rows
+and the bulk bar scroll, auto-size or wrap — going long there costs elegance, not
+correctness.
+
+| Class                                                    | Budget              | Kind                                      |
+| -------------------------------------------------------- | ------------------- | ----------------------------------------- |
+| Sidebar item (`sidebar:globalConfig`, `sidebar:legal`)   | **26**              | **hard** — fixed 16rem, truncates         |
+| Tab label (`strings:tabs.backup`)                        | _to be measured_    | soft — the tab bar scrolls                |
+| Table column header (`strings:columns.config`)           | _to be measured_    | soft — columns auto-size                  |
+| Filter label (`strings:filters.needsReview`)             | _to be measured_    | soft — the filter row wraps               |
+| Bulk-bar control (`strings:bulk.approveSelected`)        | _to be measured_    | soft                                      |
+
+The sidebar figure is derived from that fixed container, so it is a property of the UI and
+carries over to every language unchanged — treat it as binding from the first string.
+
+The four soft budgets are deliberately **not** filled in, and must not be copied from
+another language's guide: the numbers in `style/ru.md` were measured from Russian's own
+shipped strings and mean nothing here. Measure them the same way once Italian ships — the
+longest rendering each class actually needed, rounded up — and write them into this table
+then. Until they exist, the instruction for a soft class is "as short as the term allows,
+and never at the cost of the agreed rendering in `terminology.md`".
 
 The renderings used as examples above are illustrations of the length problem, not
 decisions about wording. `terminology.md` owns the rendering of every domain term,
