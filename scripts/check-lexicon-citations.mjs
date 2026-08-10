@@ -92,16 +92,55 @@
  * package script) while rejecting a fabricated word and a real-but-unrelated
  * one in the stress cases pinned alongside this module's other tests.
  *
- * ONE KNOWN LIMIT, stated rather than hidden: prefix-sharing cannot tell a
- * case-inflected form of the SAME word from a DIFFERENT word derived from the
- * same root. Russian "ожидает" (waits, a verb) and "ожидание" (waiting, a
- * noun) share a five-character stem on seven- and eight-letter words — the
- * same shape as a legitimate adjective declension such as "рабочая" ->
- * "рабочей" — so no prefix-only rule can fail one without also failing the
- * other. That is a fact about the two pairs having identical string shape,
- * not a bug in the threshold; catching it needs a lemma/part-of-speech
- * comparison this script does not attempt. Recorded rather than silently
- * accepted as a false negative nobody knew about.
+ * THREE KNOWN LIMITS OF THIS TOLERANCE, stated rather than hidden. This is
+ * the most valuable part of this comment: each one says exactly what gets
+ * through and why, so the next person reading a clean run knows precisely
+ * which defects it did NOT rule out. None of the three is fixed by moving
+ * PREFIX_RATIO or PREFIX_FLOOR — the "required prefix" section above already
+ * measured what a looser, flatter floor costs, and tightening either
+ * constant to close one of these gaps reopens that exact calibration
+ * problem for a different word. Three stated limits are worth more than a
+ * fourth one nobody wrote down.
+ *
+ *   1. A case-inflected form of the SAME word cannot be told apart from a
+ *      DIFFERENT word derived from the same root, because both share a long
+ *      leading stem. Russian "ожидает" (waits, a verb) and "ожидание"
+ *      (waiting, a noun) share a five-character stem on seven- and
+ *      eight-letter words — the same shape as a legitimate adjective
+ *      declension such as "рабочая" -> "рабочей" — so no prefix-only rule
+ *      can fail one without also failing the other. A citation that quoted
+ *      "ожидает" for a key that actually ships "ожидание" would NOT be
+ *      caught. That is a fact about the two pairs having identical string
+ *      shape, not a bug in the threshold; catching it needs a lemma/
+ *      part-of-speech comparison this script does not attempt.
+ *
+ *   2. A SHORT-WORD TYPO can coincidentally collide with a genuinely
+ *      shipped but entirely unrelated word, and pass for the wrong reason —
+ *      a collision, not a shared root. Confirmed against the real shipped
+ *      ru corpus: "тег" (tag) mistyped as "тек" is a 3-letter candidate, so
+ *      its required prefix is the floor, 3 — and the corpus ships "текст"
+ *      (text), which happens to start with exactly those same three
+ *      characters. `wordIsAttested('тек', corpus)` returns `true`, even
+ *      though "тек" is nobody's citation of "текст" and "тег" was never
+ *      shipped as "тек" anywhere. The shorter a wrong candidate is, the
+ *      more likely a coincidental collision like this becomes, because
+ *      short prefixes are drawn from a small alphabet that many unrelated
+ *      words share.
+ *
+ *   3. TRUNCATION TOWARD THE FLOOR is structurally never caught, for the
+ *      same underlying reason (2) is possible at all: the required prefix
+ *      scales with the CANDIDATE's own length, not with whatever length the
+ *      citation was supposed to have. A citation garbled or truncated down
+ *      to a 3-letter fragment — "пер" instead of "переполнение" — needs
+ *      only a 3-character match, which the real word (and a dozen other
+ *      unrelated ones: "перевод", "период", "переведено"…) all satisfy
+ *      trivially; confirmed the same way — `wordIsAttested('пер', corpus)`
+ *      is `true` against the real shipped ru corpus. The shorter a wrong
+ *      citation gets, the EASIER this check finds it to wave through, which
+ *      is the opposite of what "tolerance" is meant to buy, and is an
+ *      unavoidable consequence of scaling the requirement to the
+ *      candidate's own — possibly already wrong — length rather than to
+ *      some ground truth this script has no way to know.
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
