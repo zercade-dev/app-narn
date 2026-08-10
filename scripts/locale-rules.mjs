@@ -1128,3 +1128,171 @@ export function thinAllowlistReasons() {
     .filter(([, reason]) => reason.trim().split(/\s+/).length < 5)
     .map(([id]) => id);
 }
+
+// ---------------------------------------------------------------------------
+// Used keys in source
+// ---------------------------------------------------------------------------
+//
+// Everything above compares locale files against EACH OTHER, so none of it can
+// see a key that is deleted from every locale at once while components still
+// reference it — parity stays perfect and i18next renders the raw key name at
+// runtime (e.g. the bulk bar showing "toTranslateCount" instead of "12 to
+// translate"). The rules below scan the frontend source for statically
+// analysable `t('…')` calls and check each referenced key against the reference
+// namespace, which is the only direction that catches a delete or a rename.
+//
+// Scope (deliberately conservative, to stay false-positive free):
+// - Only bindings of the form `const { t } = useTranslation('ns')` or
+//   `const { t: tName } = useTranslation('ns')` with a single string-literal
+//   namespace are tracked. Array namespaces, `keyPrefix` options, and
+//   dynamically chosen namespaces are skipped.
+// - Within one file, a binding name mapped to two different namespaces is
+//   ambiguous and skipped entirely.
+// - Only single-quoted literal keys are checked; template literals and
+//   variables are skipped. Keys with an explicit `ns:` prefix are skipped.
+// - A key counts as present if the exact key exists or any plural/ordinal
+//   suffix variant of it exists (i18next resolves `key` → `key_one` etc.).
+//
+// Every one of those restrictions is load-bearing. This rule fails CI in the
+// repository where frontend PRs are raised, so a false positive reddens correct
+// code and gets the rule deleted rather than debugged. Widen it only with a
+// reason as concrete as the ones above.
+
+/** File extensions the source sweep reads. */
+export const SOURCE_EXTENSIONS = ['.ts', '.tsx'];
+
+/**
+ * Directories the walk never descends into.
+ *
+ * This sweep used to be a Vite `import.meta.glob` rooted at the frontend's
+ * `src/`, a base directory that already excluded the first two by containing
+ * neither. A filesystem walk has no such base, and pointing it one
+ * directory higher by accident would make it read a package's `node_modules` —
+ * so the exclusions are written down rather than assumed. `__tests__` is
+ * excluded on purpose too: a fixture calling `t('deliberately.missing')` is not
+ * a shipping defect.
+ */
+export const SOURCE_SKIP_DIRS = new Set(['node_modules', 'dist', '__tests__']);
+
+/**
+ * Every source file under `srcDir`, as `path -> text`.
+ *
+ * Entries are inserted in sorted order so two runs report findings in the same
+ * sequence; readdirSync's own order is filesystem-dependent.
+ */
+export function readSourceFiles(srcDir) {
+  const files = new Map();
+  const walk = (dir) => {
+    const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+      a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+    );
+    for (const entry of entries) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (!SOURCE_SKIP_DIRS.has(entry.name)) walk(full);
+      } else if (entry.isFile() && SOURCE_EXTENSIONS.some((ext) => entry.name.endsWith(ext))) {
+        files.set(full, readFileSync(full, 'utf8'));
+      }
+    }
+  };
+  walk(srcDir);
+  return files;
+}
+
+/**
+ * Suffixes that satisfy a lookup of the BARE key, because i18next appends them
+ * itself when a `count` is passed.
+ *
+ * Deliberately NOT expressed through splitPluralKey(): that function answers
+ * the opposite question (given a key on disk, what family is it in?) and knows
+ * nothing of the `_ordinal_` infix, so `key_ordinal_one` would reduce to the
+ * base `key_ordinal` and a source reference to `key` would go unmatched. The
+ * legacy `_plural` suffix is left out for the same reason it is a failure
+ * elsewhere: under the v4 JSON format it is never looked up, so it cannot make
+ * a bare key resolve.
+ */
+export const BARE_KEY_SUFFIXES = CLDR_CATEGORIES.flatMap((category) => [
+  `_${category}`,
+  `_ordinal_${category}`,
+]);
+
+export function namespaceHasKey(nsKeySet, key) {
+  if (nsKeySet.has(key)) return true;
+  return BARE_KEY_SUFFIXES.some((suffix) => nsKeySet.has(`${key}${suffix}`));
+}
+
+const BINDING_RE = /const\s*\{\s*t(?:\s*:\s*(\w+))?\s*\}\s*=\s*useTranslation\(\s*'([\w-]+)'\s*\)/g;
+
+/** Extracts binding-name -> namespace for one file; drops ambiguous names. */
+export function extractBindings(source) {
+  const bindings = new Map();
+  const ambiguous = new Set();
+  for (const match of source.matchAll(BINDING_RE)) {
+    const name = match[1] ?? 't';
+    const namespace = match[2];
+    if (bindings.has(name) && bindings.get(name) !== namespace) ambiguous.add(name);
+    bindings.set(name, namespace);
+  }
+  for (const name of ambiguous) bindings.delete(name);
+  return bindings;
+}
+
+/**
+ * The statically analysable `t()` call sites in one file's text, as
+ * `{ namespace, key }` — pure, so the scoping rules above can be pinned by a
+ * test without a filesystem.
+ *
+ * Duplicates are kept: two call sites for the same missing key are two things
+ * to fix, and collapsing them here would hide the second one from the report.
+ */
+export function usedKeysInSource(source) {
+  const used = [];
+  for (const [name, namespace] of extractBindings(source)) {
+    // `name('key'` not preceded by an identifier char or `.` (avoids matching
+    // e.g. `format('x')` when the binding is named `t`).
+    const callRe = new RegExp(`(?<![\\w.$])${name}\\(\\s*'([^']+)'`, 'g');
+    for (const call of source.matchAll(callRe)) {
+      const key = call[1];
+      if (key.includes(':')) continue; // explicit ns override — out of scope
+      used.push({ namespace, key });
+    }
+  }
+  return used;
+}
+
+/**
+ * Keys referenced in source but absent from the reference locale, as
+ * `path: "ns:key"` ids, plus how many files were read.
+ *
+ * `filesScanned` is returned rather than logged because a sweep that reads
+ * nothing produces an empty offender list, which is indistinguishable from a
+ * clean run. Both callers surface the number — one in its summary line, one as
+ * an assertion — so a path that stops matching goes red instead of green.
+ */
+export function missingUsedKeys(locales, srcDir, referenceLocale = REFERENCE_LOCALE) {
+  const reference = locales.get(referenceLocale);
+  if (!reference) throw new Error(`Reference locale "${referenceLocale}" not found`);
+
+  /** namespace -> set of flattened reference keys */
+  const referenceKeys = new Map();
+  for (const [namespace, data] of reference) {
+    referenceKeys.set(namespace, new Set(flattenKeys(data)));
+  }
+
+  const sources = readSourceFiles(srcDir);
+  const offenders = [];
+  for (const [path, source] of sources) {
+    // Reported per BINDING, not per call site, so a file that names a namespace
+    // with no locale file is caught even when every key it passes is dynamic.
+    for (const [, namespace] of extractBindings(source)) {
+      if (referenceKeys.has(namespace)) continue;
+      offenders.push(`${path}: namespace "${namespace}" has no ${referenceLocale} locale file`);
+    }
+    for (const { namespace, key } of usedKeysInSource(source)) {
+      const nsKeySet = referenceKeys.get(namespace);
+      if (!nsKeySet) continue; // already reported above; one defect, one finding
+      if (!namespaceHasKey(nsKeySet, key)) offenders.push(`${path}: "${namespace}:${key}"`);
+    }
+  }
+  return { offenders, filesScanned: sources.size };
+}
