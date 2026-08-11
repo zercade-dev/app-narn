@@ -1,7 +1,8 @@
 # Style guide — Korean (ko)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/ko.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register
@@ -69,9 +70,9 @@ review-translation-ai), table column headers (`strings:columns.config`), filter 
 Treat the English character count as the ceiling there rather than a target.
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/ko.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ## Placeholders
 

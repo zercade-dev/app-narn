@@ -121,18 +121,23 @@ request to one subject.
 ## Translations
 
 The interface strings live in `packages/frontend/src/locales/<locale>/`, with `en` as the
-source. Two documents exist so that separate people, and separate pull requests, arrive at
+source. Three documents exist so that separate people, and separate pull requests, arrive at
 the same wording:
 
 - [`docs/i18n/terminology.md`](docs/i18n/terminology.md) fixes the domain vocabulary —
-  what each term means in this app, what it must not be confused with, and the rendering
-  already agreed for each locale. If your locale's cell for a term is still empty, you are
-  the first to reach it: decide it and fill it in, in the same pull request.
+  what each term means in this app and what it must not be confused with. It is **frozen**
+  while the locale backfill runs: read it, do not edit it.
+- [`docs/i18n/terminology/`](docs/i18n/terminology) holds one file per locale, giving the
+  rendering agreed for each term. If a term's row for your locale is still empty, you are
+  the first to reach it: decide it and write the row, in the same pull request. A term the
+  vocabulary does not cover goes in the additive queue at the bottom of
+  [`docs/i18n/terminology/README.md`](docs/i18n/terminology/README.md), never into
+  `terminology.md`.
 - [`docs/i18n/style/`](docs/i18n/style) holds one style guide per target locale — register,
   casing, punctuation, numbers, length discipline, placeholder handling and the traps
   specific to that language.
 
-Read both before translating. A change to an English string should update the other locales
+Read all three before translating. A change to an English string should update the other locales
 in the same pull request; `{{token}}` placeholders are identifiers and are never translated.
 
 Check your work with `pnpm check:locales` (also run by `make verify` and by continuous

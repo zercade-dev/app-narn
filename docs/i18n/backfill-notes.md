@@ -8,9 +8,13 @@ what the translator's brief has to carry on day one that this one did not.
 Read it with `terminology.md` and `style/ru.md`: those two say *what to write*, this says
 *how to run the job*.
 
-Scope of the pilot: 24 namespaces, 1931 English keys, 2025 Russian keys (the extra 94 are
-`_few` / `_many` forms English has no counterpart for), 53,147 English characters in,
-67,736 Russian characters out.
+Scope of the pilot: 24 namespaces, 1,908 English keys, 2,002 Russian keys (the extra 94 are
+`_few` / `_many` forms English has no counterpart for), 52,591 English characters in,
+67,026 Russian characters out — the current, post-reachability-sweep corpus. The pilot was
+originally measured at 1,931/2,025 keys and 53,147/67,736 characters (commit `e7fe56d`);
+section 8 item 4's reachability sweep later removed 23 dead keys from every locale, none of
+them touched by the numeral-agreement figures below, which is why those alone were
+re-derived at the time and these were not.
 
 ---
 
@@ -123,8 +127,12 @@ The classes, in the order they mattered:
    it was written against, and the same key also renders over a different collection.
 
 Classes that never fired, in four batches: quoting and punctuation, do-not-translate token
-counts, placeholder multisets, key order, plural coverage. All five are mechanically
-guarded, which is why.
+counts, placeholder multisets, key order, plural coverage. Four of the five are
+mechanically guarded, which is why. **Quoting and punctuation is the exception and was
+miscounted here for a round:** nothing in `scripts/locale-rules.mjs` checks quotes, dashes,
+ellipses or spacing. That class stayed clean because `style/ru.md` settled it before the
+first batch and the typography greps swept for what slipped — a translator instruction plus
+a grep, not a gate. Do not tell a later language it is guarded.
 
 ---
 
@@ -181,8 +189,14 @@ first string is written.
 4. **Length budgets as absolute character counts per class**, not as a multiple of
    English. A ratio is meaningless when the English is five characters long, and only one
    of the five constrained classes has a fixed width.
-5. **The full surface-name set with the key pairs that must agree.** Seven surfaces, 16
-   key pairs, several of them written by different translators in different batches.
+5. **The full surface-name set with the keys that must agree.** `terminology.md` names
+   **ten** surfaces across **twenty-one** keys in its table, plus **three more** — Compare,
+   Translations and Backup — which have no second title key and are named only in prose
+   from another namespace. The seven surfaces across **16 keys** recorded in `style/ru.md`
+   are the subset this pilot settled and shipped, **not** the whole set: a brief that
+   quotes the seven understates the work by about a third. (They are 16 keys, not 16
+   *pairs* — Global Config alone accounts for four of them.) Several are written by
+   different translators in different batches.
 6. **"Match the sibling's English, not its other-locale rendering."** The error class
    hides behind a virtue: the file looks *more* consistent, not less.
 7. **The settled convention not to add a plural family over a plain English key**, and the
@@ -191,8 +205,12 @@ first string is written.
 8. **The English defects that must not be mirrored**, each with the reason: a bulk action
    labelled "Approve" that really applies (`strings:runs.judgeApproveAll` against
    `strings:runs.judgeApply` — one action, two verbs); three controls labelled "Provider"
-   that select a module instance; a stale tab name in one notice; two theme names that
-   already diverge between two locales in one shipped language. A defect named without its
+   that select a module instance; a stale tab name in one notice; and two theme names that
+   already diverge **between two namespaces inside one locale** — `es` renders
+   `settings:themes.techno.name` as "Tecno" but `welcome:themeChooser.names.techno` as
+   "Techno", and `settings:themes.minimal.name` as "Minimal" but
+   `welcome:themeChooser.names.minimal` as "Minimalista", while `fr` and `ru` agree with
+   themselves across both namespaces. A defect named without its
    keys cannot be acted on, so each one belongs in `english-review-notes.md` with the keys
    and the intended reading — that is the file language 2 will read, not this one.
 9. **The reservation-scoping rule.** Every reservation must state which part of speech and
@@ -201,7 +219,9 @@ first string is written.
    only compared two terms.
 10. **The measured expansion figure.** Russian is 1.19× English in characters over the
     shared keys, median 1.18 — *shorter* than both previously shipped locales (1.22 and
-    1.26). The tail is what breaks chrome: the 90th percentile is 1.71.
+    1.26). The tail is what breaks chrome: the 90th percentile is 1.71 over all 2,002
+    Russian keys, and 1.7273 over the 1,908 shared with English. Quote the population with
+    the figure — see section 9.
 
 ---
 
@@ -212,17 +232,49 @@ defects the reviewer would otherwise spend attention on, or produces the evidenc
 makes the reviewer's verdicts checkable. Run them as a pre-flight; hand the reviewer the
 output.
 
-1. **The numeral-agreement detector, both axes, in this order.**
-   - *Token axis first:* skip every placeholder that cannot hold a number. In this app
+1. **The numeral-agreement detector, both axes.**
+   - *Token axis:* skip every placeholder that cannot hold a number. In this app
      that is `count` (its family handles it) plus `module`, `instance`, `language`,
      `languages`, `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`,
      `keys`, `slug`, `type`, `focus`, `field`, `why`, `label`, `filename`, `id`, `time`,
      `passRate`. The last eight are missing from the list in `style/ru.md` and each one
      costs a false positive.
-   - *Word axis second:* on what survives, clear invariant next words — prepositions and
-     particles, invariant abbreviations, short and impersonal participles.
-   - Run it token-axis-first: the word list exempts a word after *every* token and blunts
-     the check as it grows. Over the finished 24 namespaces: 187 occurrences, 0 survivors.
+   - *Word axis:* on what survives the token axis, clear invariant next words —
+     prepositions and particles, invariant abbreviations, short and impersonal
+     participles.
+   - **What has to happen in a fixed order is not evaluation, it is derivation.**
+     Checking the token or the word first, per occurrence, gives the same verdict — for
+     one fixed pair of lists the two checks are a plain logical OR, and OR is
+     commutative. What is load-bearing is where the word-exemption list is BUILT FROM:
+     only from occurrences that already survived the token axis, never from the raw,
+     unfiltered set. A list derived from the raw set is contaminated by legitimate
+     `{{count}}`-driven agreement — a real counted noun such as «записи» recurs
+     constantly and correctly after `{{count}}`, because that family already carries its
+     own plural forms — and once a word is exempted, it is exempted everywhere,
+     including after a non-`count` token it has no business covering. An injected
+     `{{orphanCount}} записи` defect passes silently under a raw-derived word list and is
+     caught under one derived from the post-token-axis survivors. This was verified by
+     building the exemption list the wrong way and getting 32 words instead of 6, one of
+     which absorbed exactly that class of injected defect.
+   - **The narrow figure, stated precisely.** Counting every place where `}}` is
+     followed by one or more whitespace characters and then a word in the target script:
+     **187 raw occurrences, 19 after the token axis, 0 after the word axis** — verified
+     against both the 2,025-key Russian corpus this file originally measured (commit
+     `e7fe56d`) and the current 2,002-key corpus. The reachability sweep in section 8
+     item 4 later removed 23 dead keys from every locale; none of them had a narrow-rule
+     match, so this figure is unchanged by it.
+   - **The looser figure, stated precisely — this one needed a correction.** A rule that
+     also matches across intervening punctuation *and* symbol characters (Unicode
+     categories P and S together; punctuation alone, category P only, gives 256 — one
+     short) gives **257** raw occurrences over the same 2,025-key corpus.
+     `review:overflowIssue`'s "×" (a math symbol, not punctuation under Unicode's own
+     split) sitting immediately before a preposition is the one occurrence that
+     punctuation-only matching misses. Over the current 2,002-key corpus the same rule
+     gives 255 — a delta of **2** from the reachability sweep, not 3: an earlier telling
+     of this number reported 254 and blamed the whole 3-occurrence gap on the sweep,
+     conflating that pre-existing category-boundary question with the sweep's real,
+     smaller effect. Quote the exact rule and the exact population together; neither
+     figure means anything on its own.
 2. **Strict-mode parity.** `LOCALE_PARITY_STRICT=ru pnpm check:locales` (substituting your
    locale) holds the locale to its language's complete plural-category set with no
    bare-key rescue. Run it from the first batch, not at the end — Russian was clean in
@@ -323,10 +375,14 @@ Recorded plainly, because each one cost something measurable.
 
 ## 9. Numbers to reuse
 
-- 1931 English keys, 24 namespaces, 53,147 English characters — the whole surface, per
-  language.
+- 1,908 English keys, 24 namespaces, 52,591 English characters — the whole surface, per
+  language, over the current post-reachability-sweep corpus (section 1).
 - Russian needed 94 extra keys (`_few` / `_many`); a language with two categories needs
-  none, one with six needs more. Budget by the target's plural-category count.
+  none, one with six needs more. Budget by the target's plural-category count — **except**
+  `it`/`pt-br`, whose third category (`many`) is grandfathered as unreachable
+  (`COVERAGE_GAP_GRANDFATHER` in `scripts/locale-rules.mjs`) and should not be written at
+  all; see backfill-runbook.md 2.7 for the reasoning and the one expected strict-mode
+  failure that follows from it.
 - ~4h15m of translator wall clock for the whole language, plus four reviews, plus five fix
   rounds, plus ten rounds on the shared terminology file.
 - The terminology file is the expensive shared artifact and it is now 76 terms deep. For
@@ -335,3 +391,10 @@ Recorded plainly, because each one cost something measurable.
 - Expansion in characters over the shared keys: 1.19 for Russian, 1.22 and 1.26 for the
   two locales shipped before it. Chrome budgets are absolute character counts, not
   multiples of English.
+- **State the population with every percentile — the two in this file are not the same
+  one.** Russian's 90th percentile is **1.71** over all **2,002** Russian keys (each extra
+  plural form measured against the English form it resolves to) and **1.7273** over the
+  **1,908** keys shared with English. Both reproduce exactly; the difference is the
+  denominator, not rounding. A language with many extra plural forms will separate the two
+  further than Russian does, so a percentile quoted without its population cannot be
+  compared to anything.

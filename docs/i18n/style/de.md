@@ -1,7 +1,8 @@
 # Style guide — German (de)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/de.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register
@@ -153,14 +154,15 @@ another language's guide: the numbers in `style/ru.md` were measured from Russia
 shipped strings and mean nothing here. Measure them the same way once German ships — the
 longest rendering each class actually needed, rounded up — and write them into this table
 then. Until they exist, the instruction for a soft class is "as short as the term allows,
-and never at the cost of the agreed rendering in `terminology.md`".
+and never at the cost of the agreed rendering in `terminology/de.md`".
 
 Descriptions, toasts and guide prose are not constrained; put the precision there.
 
 The renderings used as examples in this file — here and in the casing section — are
 illustrations of German word formation, not decisions about wording. `terminology.md`
-owns the rendering of every domain term, including the surface names and
-_translation memory_ — decide it there on first use, record it, and then follow it here.
+defines every domain term, including the surface names and _translation memory_;
+`terminology/de.md` holds the rendering. Decide the rendering on first use, write its
+row there, and then follow it here.
 
 ## Placeholders
 
@@ -180,7 +182,7 @@ Plurals map one to one onto English `_one` / `_other`.
 
 - **Do not over-Germanize.** German technical registers use English loans naturally —
   "Backup", "Update", "Token", "Prompt". Coining "Sicherungskopie" where practitioners say
-  "Backup" makes the UI harder to read, not more German. `terminology.md` records the
+  "Backup" makes the UI harder to read, not more German. `terminology/de.md` records the
   choice per term; make it once and keep it.
 - **"Gate" must not become "Tor".** The quality gate is a process-control checkpoint;
   "Tor", "Pforte" and "Schranke" all read physically.

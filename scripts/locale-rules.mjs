@@ -165,6 +165,199 @@ export function isStrictFor(locale, strictEnv = STRICT_ENV) {
   return value.split(',').some((entry) => entry.trim() === locale);
 }
 
+// ---------------------------------------------------------------------------
+// Work-in-progress locales
+// ---------------------------------------------------------------------------
+
+/**
+ * Locale directory -> why this language is mid-backfill. Exactly ONE rule stops
+ * applying to a declared locale: namespace files the reference has that it has
+ * not created yet.
+ *
+ * WHY THIS EXISTS. A language is translated over six batches (see
+ * docs/i18n/backfill-runbook.md), each batch creating its own namespaces, so
+ * between batch 1 and batch 6 the locale directory is INCOMPLETE BY
+ * CONSTRUCTION. Measured against these rules with a synthetic German locale
+ * holding only batch 1's `config.json`: 23 hard failures, one per namespace
+ * nobody has reached. Every translator meets that on day one, for five of six
+ * batches, and the documented instruction is to run the gate at every commit. A
+ * gate that is red for reasons everyone is told to ignore is a gate that gets
+ * ignored, and then deleted.
+ *
+ * WHAT IT DOES NOT BUY — anything at all. Every other rule applies in full from
+ * batch 1: key parity within a namespace, placeholder integrity,
+ * do-not-translate terms, key order, length sanity, plural-suffix legality,
+ * plural-category coverage, and values byte-identical to English. Those catch
+ * defects a translator can fix today, and a batch that trips one of them is
+ * wrong, not unfinished. namespaceDiff's `extra` is not deferred either: a
+ * namespace with no reference counterpart is a stale or misnamed file, which is
+ * a defect at every point in a backfill rather than a batch that has not
+ * happened.
+ *
+ * THE IDENTICAL-VALUE RULE WAS ONCE ON THIS LIST, AND TAKING IT OFF IS WORTH
+ * RECORDING. The reasoning was that pre-copying all 24 English files is the
+ * other way to hold a partial locale, and in that shape the rule fires on ~735
+ * untranslated values. But pairsFor() only yields pairs for namespaces the
+ * locale ACTUALLY HAS, so under the shape the runbook mandates — create this
+ * batch's namespaces and no others — that rule has no false positives to
+ * suppress in the first place. Deferring it bought a correct batch nothing and
+ * cost two things: it blessed the pre-copy shape the runbook forbids, and it
+ * hid a value copied through from English INSIDE an already-translated
+ * namespace until the declaration was lifted, which is months later and five
+ * batches after the commit that introduced it. One rule, not two.
+ *
+ * The declaration is explicit and carries a reason, like LENGTH_EXEMPTIONS and
+ * for the same reason: a locale that became work-in-progress by inference — "it
+ * has fewer files than en, so someone must be working on it" — is exactly how a
+ * half-translated language ships. An entry with no reason throws at module
+ * load.
+ *
+ * It cannot be forgotten in either direction. Every CLI run prints a line per
+ * declared locale naming what is deferred, so the state is in the log of every
+ * check run while the language is in flight; and the moment the last namespace
+ * lands, the entry defers nothing and staleWipLocales() turns it into a hard
+ * failure saying to delete it. The gate lifts the exemption, not a memory.
+ */
+export const WIP_LOCALES = {};
+
+for (const [locale, reason] of Object.entries(WIP_LOCALES)) {
+  if (!reason || !reason.trim()) {
+    throw new Error(
+      `WIP_LOCALES.${locale} has no reason — an unexplained work-in-progress locale is ` +
+        `indistinguishable from a half-translated one nobody remembers.`,
+    );
+  }
+  if (locale === REFERENCE_LOCALE) {
+    throw new Error(
+      `WIP_LOCALES."${REFERENCE_LOCALE}" is the reference locale — every rule here is defined ` +
+        `against it, so it is what "complete" means and cannot itself be work-in-progress.`,
+    );
+  }
+}
+
+/**
+ * Is this locale declared work-in-progress?
+ *
+ * DELIBERATELY UNRELATED TO LOCALE_PARITY_STRICT, which is the interaction that
+ * matters most here: the runbook tells a translator to run
+ * `LOCALE_PARITY_STRICT=<lang> pnpm check:locales` from the FIRST batch, so a
+ * strict mode that also cancelled the work-in-progress exemption would leave
+ * the one command the procedure mandates red for five of six batches, which is
+ * the whole defect this mechanism exists to remove.
+ *
+ * They are orthogonal because they govern different rules, not because one
+ * outranks the other. STRICT_ENV is consulted in exactly two places —
+ * enforcedCoverageGapFamilies() and describeEnforcedGap() — and both are about
+ * plural-category coverage: it is a severity knob for plurals, not a general
+ * "forgive nothing" switch, and it has never had an opinion about which
+ * namespace files exist. So the combination a translator actually runs, strict
+ * AND work-in-progress, is the strictest available reading of a partial locale:
+ * every plural family already written is held to the language's complete
+ * category set with no bare-key rescue and no grandfathering, while the
+ * namespaces batch 4 has not reached are not reported as missing.
+ */
+export function isWorkInProgress(locale, wipLocales = WIP_LOCALES) {
+  return Object.hasOwn(wipLocales, locale);
+}
+
+/**
+ * The findings of a WIP-deferrable rule that this locale is still held to.
+ *
+ * Shaped like enforcedCoverageGapFamilies(): the rule itself keeps reporting
+ * everything it sees, and severity is decided in one shared place that both
+ * callers go through. Passing a rule's findings through this is what makes a
+ * rule deferrable, so the set of deferrable rules is the set of call sites —
+ * ONE of them, the missing-namespace rule named in WIP_LOCALES above. Do not
+ * add a second without an argument as concrete as the one there, and read the
+ * identical-value paragraph first: the test is not "does this rule fire on a
+ * partial locale", it is "can a correct batch do anything about it". A rule a
+ * batch could have satisfied is not unsatisfiable, it is unsatisfied.
+ */
+export function enforcedForWipLocale(locale, findings, wipLocales = WIP_LOCALES) {
+  return isWorkInProgress(locale, wipLocales) ? [] : findings;
+}
+
+/**
+ * What each declared work-in-progress locale is actually deferring, as
+ * `locale -> { missingNamespaces }`.
+ *
+ * ONE implementation for both callers, because the two consumers ask different
+ * questions of the same answer — the CLI prints it, the vitest guard asserts a
+ * declaration still earns its place — and a locale that looked finished to one
+ * and unfinished to the other would put the two repos back into exactly the
+ * drift this module exists to prevent.
+ *
+ * It stays an object rather than a bare list because the thing it answers is
+ * "what is this declaration buying", and that question survives the rule set
+ * changing shape; it has already narrowed from two rules to one.
+ *
+ * namespaceDiff() is declared further down the file. That is a hoisted function
+ * declaration, not a temporal-dead-zone `const`, and nothing here runs at module
+ * load — the whole work-in-progress mechanism sits in one place deliberately, so
+ * that the rule it defers, the switch that defers it and the check that expires
+ * it are read together.
+ *
+ * Locales with no directory on disk are skipped here and reported by
+ * staleWipLocales(), which is the function that can say why.
+ */
+export function collectWipDeferrals(
+  locales,
+  referenceLocale = REFERENCE_LOCALE,
+  wipLocales = WIP_LOCALES,
+) {
+  const deferrals = new Map();
+  for (const locale of Object.keys(wipLocales).sort()) {
+    if (!locales.has(locale)) continue;
+    deferrals.set(locale, {
+      missingNamespaces: namespaceDiff(locales, locale, referenceLocale).missing,
+    });
+  }
+  return deferrals;
+}
+
+/** One declared locale as a single line, naming what it is deferring and why. */
+export function describeWipLocale(locale, deferred, wipLocales = WIP_LOCALES) {
+  const namespaces = deferred?.missingNamespaces ?? [];
+  return (
+    `  ${locale}: ${namespaces.length} namespace file(s) not created yet — deferred and NOT ` +
+    `checked. Every other rule applies. Reason: ${wipLocales[locale]}`
+  );
+}
+
+/**
+ * Work-in-progress declarations that no longer defer anything, as failure
+ * messages. The mirror of staleAllowlistKeys(), and the reason nobody can
+ * forget to lift the exemption: the run in which the last namespace file lands
+ * is the run that goes red and says to delete the entry. There is no window in
+ * which a complete language sits under a weakened gate.
+ *
+ * A declaration naming a locale with no directory at all is the same finding
+ * wearing a different hat — it defers nothing, and it also means nothing is
+ * checking the language it names, so it is worth its own sentence. It is also
+ * why a language cannot be declared BEFORE its first batch lands: the entry and
+ * the first namespace file have to arrive in the same commit.
+ */
+export function staleWipLocales(locales, deferrals, wipLocales = WIP_LOCALES) {
+  const stale = [];
+  for (const locale of Object.keys(wipLocales).sort()) {
+    if (!locales.has(locale)) {
+      stale.push(
+        `${locale}: declared work-in-progress, but there is no ${locale}/ locale directory — ` +
+          `nothing is deferred and nothing is being checked under that name`,
+      );
+      continue;
+    }
+    if ((deferrals.get(locale)?.missingNamespaces.length ?? 0) === 0) {
+      stale.push(
+        `${locale}: every ${REFERENCE_LOCALE} namespace is present, so this language is no ` +
+          `longer incomplete by construction — delete the WIP_LOCALES entry and let the full ` +
+          `gate apply to it`,
+      );
+    }
+  }
+  return stale;
+}
+
 /**
  * `zero` is legal in EVERY locale regardless of its CLDR categories. i18next
  * appends an explicit `key_zero` lookup whenever count === 0, independent of
@@ -415,6 +608,15 @@ export const COVERAGE_GAP_GRANDFATHER = {
   },
   fr: {
     many: 'Same as es: "many" in fr is exact millions only, so the gap is unreachable.',
+  },
+  it: {
+    many:
+      'Same shape as es/fr: "many" in it selects only exact millions (1000000, 2000000 — ' +
+      'verified via Intl.PluralRules; 1500000 is "other", and NO integer in 0..200 selects ' +
+      'it), so the gap on all 41 families is real but unreachable by any count this UI shows.',
+  },
+  'pt-br': {
+    many: 'Same as it: exact millions only, so the gap is unreachable.',
   },
 };
 
@@ -1034,10 +1236,38 @@ export function identicalValueOffenders(pairs, locale, usedAllowlistKeys = new S
 export const MAX_LENGTH_RATIO = 2.5;
 export const MIN_REFERENCE_CHARS = 12;
 
-/** 4. Length sanity. */
-export function lengthOffenders(pairs, locale) {
+/**
+ * locale -> namespace -> key -> why this pair is excused from the length-ratio
+ * check, e.g. a legal formula with no shorter defensible rendering in that
+ * language. Empty until a locale needs one — `legal:cookies` in Russian has
+ * passed on its own so far, but German and Italian legal text is not
+ * guaranteed the same luck.
+ *
+ * The reason is not decoration: an entry whose reason is empty or blank
+ * throws at module load, because an unexplained exemption is indistinguishable
+ * from a mistake, which is the entire reason this mechanism is allowed to
+ * exist. See the validation loop below.
+ */
+export const LENGTH_EXEMPTIONS = {};
+
+for (const [locale, namespaces] of Object.entries(LENGTH_EXEMPTIONS)) {
+  for (const [namespace, keys] of Object.entries(namespaces)) {
+    for (const [key, reason] of Object.entries(keys)) {
+      if (!reason || !reason.trim()) {
+        throw new Error(
+          `LENGTH_EXEMPTIONS.${locale}.${namespace}.${key} has no reason — an unexplained ` +
+            `length exemption is indistinguishable from a mistake.`,
+        );
+      }
+    }
+  }
+}
+
+/** 4. Length sanity. An exempt pair (see LENGTH_EXEMPTIONS) is skipped. */
+export function lengthOffenders(pairs, locale, exemptions = LENGTH_EXEMPTIONS[locale] ?? {}) {
   const offenders = [];
   for (const pair of pairs) {
+    if (exemptions[pair.namespace]?.[pair.key]) continue;
     const refLength = charCount(pair.referenceValue);
     if (refLength < MIN_REFERENCE_CHARS) continue;
     const ratio = charCount(pair.value) / refLength;

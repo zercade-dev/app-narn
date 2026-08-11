@@ -1,13 +1,10 @@
 {
   "save": "Enregistrer",
   "cancel": "Annuler",
-  "close": "Fermer",
-  "discard": "Ignorer",
   "loading": "Chargement\u2026",
   "changelogEntryError": "Impossible de charger cette entr\u00e9e du journal des modifications.",
   "changelogShowOlder": "Voir les versions ant\u00e9rieures ({{count}})",
   "saving": "Enregistrement\u2026",
-  "rows": "lignes",
   "thinking": "R\u00e9flexion\u2026 {{seconds}}s",
   "webSearch": {
     "title": "Rechercher sur le web",

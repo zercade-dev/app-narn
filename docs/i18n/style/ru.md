@@ -1,8 +1,9 @@
 # Style guide — Russian (ru)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
-placeholder handling.
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/ru.md`. This file settles register, casing, punctuation, length
+and placeholder handling.
 
 ## Register
 
@@ -130,9 +131,12 @@ one below.
 
 **A ratio is the wrong unit when the English is short.** Every one of those 27 was flagged for
 having a *short source*, not a long rendering: "Legal" is five characters, so 1.5× is seven
-and a half — no correct Russian rendering of it can exist. Meanwhile
-`strings:bulk.approveSelected` at 44 English characters passes the ratio test with room to
-spare while being one of the genuinely tight labels. The ratio measures the wrong thing.
+and a half — no correct Russian rendering of it can exist. The ratio measures the wrong thing
+at the other end too: `strings:bulk.approveNone` ("No translations to approve in the
+selection.") is 44 English characters, so the old 1.5× rule let it run to 66, while
+`strings:bulk.approveSelected` ("Approve to memory") is 17 and is one of the genuinely tight
+labels in the same bulk bar. Length is a property of the container, and the ratio does not
+know what the container is.
 
 **And the five classes are not equally constrained.** Only one of them has a hard, fixed
 width: the sidebar is `16rem` (`SIDEBAR_WIDTH` in `components/ui/sidebar.tsx`) and every item
@@ -163,15 +167,15 @@ measurement beats this table.
 **There is deliberately no exception ledger.** The previous one recorded two of twenty-seven
 and nobody noticed for four rounds, because a hand-maintained list of per-key exemptions goes
 stale silently and invisibly. If a term rule forces a long label — `strings:tabs.review-source-ai`
-is «ИИ-рецензия исходного текста» because `terminology.md` builds _source review_ from _AI
-review_ + _source text_ and its sibling tab must match word for word — that is the term rule
+is «ИИ-рецензия исходного текста» because `terminology/ru.md` builds it from _AI review_ +
+_source text_ on purpose, so its sibling tab must match word for word — that is the term rule
 doing its job, and the budget above already accommodates it. Terms outrank the budget; the
 budget exists to stop *avoidable* length.
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/ru.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ### Surface names already shipped — repeat these verbatim
 
@@ -202,13 +206,16 @@ respectively, each of which is defensible on its own:
   and they are not synonyms in Russian legal practice.
 - **cookies** — «Политика о файлах cookie» (24 characters, 1.85×). Note that *cookie*
   qualifies «файлы» in Russian and never stands alone, so the shorter «…использования cookie»
-  is not an option. **The length here is a guard failure, not a preference:**
-  `lengthOffenders` fails anything over `MAX_LENGTH_RATIO = 2.5` and has **no per-key
-  allowlist**, and all three fuller standard forms breach it — «Политика использования файлов
-  cookie» 2.8×, «Политика в отношении файлов cookie» 2.6×, «Политика использования
-  cookie-файлов» 2.8×. So if the published page's own title is one of those, this label cannot
-  simply follow it: that needs a **granted length exception in the guard**, not a translator's
-  choice. Escalate rather than shorten.
+  is not an option. **The length here is a guard question, not a preference:**
+  `lengthOffenders` fails anything over `MAX_LENGTH_RATIO = 2.5`, and all three fuller
+  standard forms breach it — «Политика использования файлов cookie» 2.8×, «Политика в
+  отношении файлов cookie» 2.6×, «Политика использования cookie-файлов» 2.8×. So if the
+  published page's own title is one of those, this label cannot simply follow it on a
+  translator's say-so. **A per-key exemption mechanism now exists** — `LENGTH_EXEMPTIONS` in
+  `scripts/locale-rules.mjs`, keyed locale → namespace → key → the reason, which
+  `lengthOffenders` consults and which throws at module load if a reason is blank. It is
+  empty today, deliberately: an exemption is *granted*, not helped oneself to. Escalate for
+  one rather than shortening the rendering.
 - **subprocessors** — «Субобработчики», the GDPR term of art, over the calque
   «субпроцессоры», which reads as CPUs.
 
@@ -303,8 +310,7 @@ rediscovered.
 
 ### Checking your own work for numeral agreement
 
-Two passes, because they catch different mistakes. Scan every string containing a `{{token}}`
-followed by a Cyrillic word:
+Two passes. Scan every string containing a `{{token}}` followed by a Cyrillic word:
 
 1. **Skip by token name first.** A placeholder that cannot hold a number cannot force
    agreement, whatever follows it. In this app that is `module`, `instance`, `language`,
@@ -314,15 +320,21 @@ followed by a Cyrillic word:
    measured over all 24 namespaces: with exactly these, the detector has **zero** surviving
    false positives across 187 token-plus-Cyrillic-word occurrences. Skip `count` too:
    it is the one token that *does* get CLDR selection, so its family already handles it.
-2. **Then skip by word.** What is left fires on the next Cyrillic word, which is often not a
-   noun at all. Safe: prepositions and particles — «не» above all, which is invariant and can
-   never agree with anything; invariant abbreviations («симв.», «байт»); and impersonal
-   participles and short participles used as statuses («вычитано», «отключен»), which are
-   never counted nouns and which the placeholder rule above deliberately puts beside a token.
+2. **Then skip by word — but only words that actually cleared pass 1.** Of the 187, just
+   **19** survive the token skip, and six words cover every one of them: the prepositions
+   «из», «с» and «на», invariant and unable to agree with anything; the invariant
+   abbreviations «симв.» and «байт»; and the impersonal participle «вычитано», used as a
+   status rather than a counted noun. Build your word list from what pass 1 actually leaves
+   behind — never from the full 187. A word picked up from the raw scan is contaminated by
+   legitimate `{{count}}` agreement (a real counted noun such as «записи» recurs constantly
+   and correctly after `{{count}}`, whose own family already inflects it) and, once
+   exempted, would silently wave through a defect such as `{{orphanCount}} записи`.
 
-Whatever survives both passes is a genuine numeric token with a Russian word after it —
-check it by hand at 1, 2 and 5. Run the token pass first: it is precise, where the word list
-exempts a word after *every* token and blunts the check if it grows.
+Whatever survives both passes is a genuine numeric token with a Russian word after it — check
+it by hand at 1, 2 and 5. The token pass has to run first, but not because check *order*
+changes any single verdict — it does not, the two filters are independent. It runs first
+because pass 2's word list is only ever safe to build from pass 1's 19 survivors, never from
+the 187 words you started with.
 
 **Russian supplies all four plural categories — that is settled, not a question to raise.**
 Russian selects between _one_, _few_, _many_ and _other_, while the English source ships
@@ -413,7 +425,7 @@ to run the backfill under.
 ## Locale-specific traps
 
 - **Case endings mean a domain term appears inflected everywhere.** «проект» will show up
-  as «проекта», «проекту», «проектом». That is expected and correct; `terminology.md`
+  as «проекта», «проекту», «проектом». That is expected and correct; `terminology/ru.md`
   records the nominative citation form, and consistency means the same _lexeme_, not the
   same letters.
 - **"Judge"** must take the evaluative sense («оценить», «оценка»), never «судья»/«судить»,
