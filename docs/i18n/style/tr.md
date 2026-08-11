@@ -9,25 +9,31 @@ placeholder handling.
 > you.** `scripts/check-lexicon-citations.mjs` reads **both** `terminology/tr.md` **and this
 > file**, and fails on a quoted span whose significant words are not attested in the shipped
 > `tr` corpus. It also implements the three-way split below rather than merely describing it:
-> a prescription for a namespace that has not shipped yet is **skipped**, not failed (today's
-> run reports `6 style guide(s) checked … 345 citation(s) checked (16 prescription(s) for an
-> unshipped namespace skipped)`).
+> a prescription for a namespace that has **not shipped yet is skipped, not failed**, and
+> starts being checked the moment that namespace ships. `tr`'s prescriptions today are the
+> `sidebar:`, `vault:`, `orphans:` and `colorText:` quotations, waiting on batches 4 and 6.
+> Run the script for its own counts; do not copy them into this file.
 >
-> **What it does not check is attachment.** It proves a rendering exists *somewhere* in the
-> shipped locale; it cannot prove the rendering belongs to the key it is quoted against. A
-> span that is attested elsewhere but describes the cited key **wrongly** passes green — and
-> that is not hypothetical: the runbook records exactly one such row surviving six rounds of
-> human review in the pilot. Hold every quotation below to that second standard by hand;
-> the guard has the first one covered.
+> **What it does not check is attachment.** It proves that **each significant word** of a
+> quoted rendering is attested somewhere in the shipped locale — word by word, prefix-
+> tolerant, never the span as a unit — so it cannot prove the rendering belongs to the key it
+> is quoted against, and a span whose words each occur in *different* strings still passes. A
+> quotation that is attested but describes the cited key **wrongly** goes green; the runbook
+> records exactly one such row surviving six rounds of human review in the pilot. Hold every
+> quotation below to that second standard by hand; the guard has the first one covered.
 >
 > **This block previously asserted the opposite** — that the script "does not read style
 > guides", and therefore that nothing but a manual grep could catch a stale quotation here.
-> That has been false since round 1, when the guard was extended to read style guides
-> (`STYLE_DIR`, and the script's own header says so). It survived round 3 even though that
-> batch had the falsifying output in hand: the guard rejected a `tr (style guide)` citation
-> in this very file, which it could not have done if it did not read this file. Corrected
-> rather than deleted, because the distinction the paragraph was reaching for — attested
-> versus correctly attached — is real and is the part that survives.
+> **That claim was true when it was written and false thirty minutes later**, and the gap is
+> the whole lesson: it was written at `bc1ab50` (19:39, round 1's fix commit), when the guard
+> genuinely read only the lexicon; `59d4f7c` (20:09) extended it to read style guides, and
+> nobody went back to the sentence. Round 2 inherited it as false, and round 3 edited the
+> bullet directly beneath it while holding the falsifying output — the guard had just
+> rejected a `tr (style guide)` citation in this very file, which it could not have done
+> without reading this file. **A claim about tooling does not decay; it flips, in one commit,
+> usually somebody else's.** Corrected rather than deleted, because the distinction the
+> paragraph was reaching for — attested versus correctly attached — is real and is the part
+> that survives.
 >
 > - A quotation attached to a **`config:` or `strings:` key is a citation**: that string is
 >   shipped, and it is checkable today. The `config:` ones were verified against
@@ -226,12 +232,23 @@ geçidi" and never "kalite kapısı".
      only thing added.
 
   Batch 3 shipped both bare for one round; they parsed as broken Turkish, and it was the
-  reviewer, not a gate, that caught it — no guard can see a missing subject. **Batches 4–6
-  will meet this shape again** in the `vault:`, `orphans:` and `backup:` empty states.
-  Note that this is the same device as the three strings that name a control *without*
-  English prompting it — `translationAi.emptyHintNoRun` “Tüm çevirileri incele” düğmesine,
-  `sourceAi.scopeNoneHint` “Tüm girdiler” seçeneğine, `glossary:generateRunningHint` “Üret”
-  düğmesini — so this locale now has one convention for naming a control in prose, not two.
+  reviewer, not a gate, that caught it — no guard can see a missing subject.
+
+  **Only one other string is a precedent for this licence.** `glossary:generateRunningHint`
+  (“Üret” düğmesini) quotes a control where English writes the label bare — the same device
+  as item 2. Two nearby strings also quote a control, `review:translationAi.emptyHintNoRun`
+  (“Tüm çevirileri incele”) and `review:sourceAi.scopeNoneHint` (“Tüm girdiler”), but there
+  **English quotes it too** (`"Review all translations"`, `"All entries"`), so those are the
+  ordinary mirroring rule two bullets up, not this licence. Do not read them as evidence that
+  this locale adds quotes to control names freely; it does not.
+
+  **Scope, stated as a conditional rather than a prediction.** The control-label-as-subject
+  shape occurs in exactly **two** keys in the whole product — the two above. A scan of all 24
+  English namespaces finds none in `vault:`, `orphans:` or `backup:`, whose nearest strings
+  take a gerund subject (“Restoring will overwrite …”), which is unambiguous in Turkish and
+  is not this shape. So: *if* the shape recurs in a later batch, this is the device. An
+  earlier version of this note predicted batches 4–6 would meet it again; that prediction was
+  never checked, and it is false.
 - Ellipsis is the single character `…` (U+2026), matching `common:saving` ("Saving…") —
   "Kaydediliyor…".
 - Turkish attaches case suffixes to proper nouns with an apostrophe ("NARN'ı", "API'sini",
