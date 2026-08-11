@@ -49,10 +49,15 @@
  *      part of it. Known gap, not a silent one.
  *   3. A backtick span that is NOT shaped like a key or file reference (it
  *      contains whitespace, or a character outside `[\w./:*-]`) is treated
- *      as a citation too, by the same adjacency-free rule as a quoted span.
- *      None exist in any populated locale file today — every backtick span
- *      currently in scope is a key, a namespace, or a file link — so this
- *      path is unexercised, future-proofing rather than load-bearing.
+ *      as a citation too, by the same adjacency-free rule as a quoted span —
+ *      UNLESS the span is itself a reference to an interpolation token
+ *      (`` `{{message}}` ``, `` `{{count}}件` ``): isPlaceholderReferenceSpan()
+ *      excludes it, because a placeholder is substituted at render time and
+ *      can never appear in the shipped corpus literally — a backtick'd
+ *      mention of one in prose ("collides with the `{{message}}` strings")
+ *      is commentary about a token name, not a claim about shipped text, and
+ *      two translators (ja, de) independently wrapped one in backticks and
+ *      hit this rule by accident before the exclusion existed.
  *
  *   The delimiter used for "a quoted span" is decided PER CELL, not per
  *   locale: if a cell contains a guillemet anywhere, guillemets are that
@@ -92,15 +97,48 @@
  * package script) while rejecting a fabricated word and a real-but-unrelated
  * one in the stress cases pinned alongside this module's other tests.
  *
- * THREE KNOWN LIMITS OF THIS TOLERANCE, stated rather than hidden. This is
+ * UNSPACED-SCRIPT ATTESTATION. Everything above assumes the target script
+ * marks word boundaries with whitespace, so tokenizeWords() can split a
+ * sentence into the individual words a citation is checked against.
+ * Japanese, Korean, Chinese and Thai do not — UNSPACED_SCRIPT_LOCALES in
+ * locale-rules.mjs is the exact same list the identical-value rule
+ * (MIN_UNSPACED_CHARS) and the numeral-agreement detector's `gapFor()`
+ * already special-case, for the identical underlying reason; this script
+ * predates all three languages having a shipped locale directory and never
+ * got the same treatment until Japanese was the first to exercise it.
+ * Because tokenizeWords() splits only on non-letter characters, an entire
+ * Japanese CLAUSE with no intervening punctuation is ONE token:
+ * `config:sourcesHint` ships "エントリをインポートすると、ここにソースラベルが
+ * 表示されます。", which tokenizes as a single run up to the "、" — so the
+ * lexicon's "source label" -> "ソースラベル" citation sits in the MIDDLE of
+ * that one corpus token, never at its start. requiredPrefixLength anchors to
+ * position 0 of both strings — that is what "prefix" means — so it can only
+ * ever match a citation that happens to open a clause, which was true of
+ * none of nine real, correctly-cited Japanese terms (verified: each of the
+ * nine occurs mid-sentence in the shipped file, never clause-initial). No
+ * value of PREFIX_RATIO or PREFIX_FLOOR fixes this; a prefix rule cannot
+ * match a substring that does not start at position 0, however short the
+ * required prefix is allowed to get.
+ *
+ * For a locale in UNSPACED_SCRIPT_LOCALES, checkLocaleLexicon() therefore
+ * switches wordIsAttested() to CONTAINMENT instead of leading-prefix: a
+ * candidate is attested if some corpus token contains it anywhere, not only
+ * as a leading run (options.unspacedScript; see wordIsAttested()'s own
+ * comment). This is not "the same rule but looser" — it is the rule that
+ * makes sense once "prefix of a word" stops being a meaningful position at
+ * all, which is exactly the situation a script with no word boundaries is
+ * in. See limit 4 below for what the swap gives up.
+ *
+ * FOUR KNOWN LIMITS OF THIS TOLERANCE, stated rather than hidden. This is
  * the most valuable part of this comment: each one says exactly what gets
  * through and why, so the next person reading a clean run knows precisely
- * which defects it did NOT rule out. None of the three is fixed by moving
- * PREFIX_RATIO or PREFIX_FLOOR — the "required prefix" section above already
- * measured what a looser, flatter floor costs, and tightening either
- * constant to close one of these gaps reopens that exact calibration
- * problem for a different word. Three stated limits are worth more than a
- * fourth one nobody wrote down.
+ * which defects it did NOT rule out. None of the first three is fixed by
+ * moving PREFIX_RATIO or PREFIX_FLOOR — the "required prefix" section above
+ * already measured what a looser, flatter floor costs, and tightening
+ * either constant to close one of these gaps reopens that exact calibration
+ * problem for a different word. The fourth is specific to the containment
+ * swap just above and has no PREFIX_RATIO/PREFIX_FLOOR to tune at all. Four
+ * stated limits are worth more than a fifth one nobody wrote down.
  *
  *   1. A case-inflected form of the SAME word cannot be told apart from a
  *      DIFFERENT word derived from the same root, because both share a long
@@ -141,11 +179,35 @@
  *      unavoidable consequence of scaling the requirement to the
  *      candidate's own — possibly already wrong — length rather than to
  *      some ground truth this script has no way to know.
+ *
+ *   4. SCOPED TO UNSPACED-SCRIPT LOCALES (see UNSPACED_SCRIPT_LOCALES
+ *      above): containment gives up the prefix rule's tolerance for
+ *      inflection at the END of a word, because containment demands every
+ *      character of the candidate match, contiguously, wherever it occurs —
+ *      there is no ratio or floor to relax. A spaced-locale citation in
+ *      dictionary form is accepted when the shipped word differs in its
+ *      last ~30% of characters (that is the whole point of PREFIX_RATIO —
+ *      "метка" cited for shipped "метки"). The equivalent situation in an
+ *      unspaced-script locale — a citation whose dictionary/citation form
+ *      differs from the shipped form only in trailing characters, the way a
+ *      Japanese い-adjective or する-verb conjugation can alter a word's own
+ *      tail — is NOT caught: containment requires the candidate's exact
+ *      characters to appear unbroken, so any difference anywhere in the
+ *      candidate, including at the very end, fails the match. This is the
+ *      opposite trade from limits 1-3, which are all about the prefix rule
+ *      being too LOOSE at the end of a word; containment is looser about
+ *      WHERE a match sits (anywhere in a corpus token, not only its start)
+ *      but has zero tolerance for HOW EXACTLY it matches once found. No
+ *      shipped Japanese citation has been observed to fall in this gap —
+ *      Japanese nouns mostly do not inflect at all, which is why containment
+ *      is the right default here — but a future term whose citation form is
+ *      a verb or adjective stem rather than its shipped conjugated form
+ *      could.
  */
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { flattenEntries, loadLocales } from './locale-rules.mjs';
+import { UNSPACED_SCRIPT_LOCALES, flattenEntries, loadLocales } from './locale-rules.mjs';
 
 // `join(dirname(fileURLToPath(import.meta.url)), '..')`, NOT
 // `fileURLToPath(new URL('..', import.meta.url))`. This module is imported
@@ -208,8 +270,20 @@ export function requiredPrefixLength(
 }
 
 /** Is `word` attested — itself or a long-enough-shared-prefix relative —
- * anywhere in `corpusWords`? */
+ * anywhere in `corpusWords`? For an UNSPACED-SCRIPT locale
+ * (`options.unspacedScript`, set by checkLocaleLexicon from
+ * UNSPACED_SCRIPT_LOCALES in locale-rules.mjs) this is CONTAINMENT instead:
+ * does some corpus token literally contain `word` as a substring, anywhere
+ * within it, not only as its own leading run. See "UNSPACED-SCRIPT
+ * ATTESTATION" in the module header for why leading-prefix cannot be applied
+ * to a script with no word boundaries at all. */
 export function wordIsAttested(word, corpusWords, options) {
+  if (options?.unspacedScript) {
+    for (const corpusWord of corpusWords) {
+      if (corpusWord.includes(word)) return true;
+    }
+    return false;
+  }
   const required = requiredPrefixLength(word.length, options);
   for (const corpusWord of corpusWords) {
     if (longestCommonPrefixLength(word, corpusWord) >= required) return true;
@@ -275,6 +349,22 @@ export function isKeyLikeSpan(span) {
   return /^[\w./:*-]+$/.test(span);
 }
 
+/**
+ * A backtick span that names an interpolation TOKEN, such as `` `{{message}}` ``
+ * or `` `{{count}}件` ``, rather than citing shipped text. A placeholder is
+ * substituted with a value at render time, so it can never appear in the
+ * shipped corpus literally — a backtick'd mention of one is a reference to a
+ * token name in prose ("collides with the `{{message}}` strings"), not a
+ * falsifiable claim, and treating it as one produces a false failure with no
+ * way for a translator to satisfy it short of removing correct commentary.
+ * Two translators (ja, de) independently wrapped a placeholder in backticks
+ * inside a Notes cell and hit exactly this before this exclusion existed —
+ * see the module header, "WHAT COUNTS AS A CITATION" item 3.
+ */
+export function isPlaceholderReferenceSpan(span) {
+  return /\{\{[^{}]*\}\}/.test(span);
+}
+
 const KEY_SPAN = String.raw`[\w./:*-]+`;
 /** Up to three connector words (always English prose in this file, even in
  * ru.md) plus optional punctuation between a key and its quoted rendering —
@@ -322,11 +412,12 @@ export function extractQuotedCitations(cellText) {
   return citations;
 }
 
-/** Backtick spans in `cellText` that are not key-like — see isKeyLikeSpan. */
+/** Backtick spans in `cellText` that are not key-like and not a placeholder
+ * reference — see isKeyLikeSpan and isPlaceholderReferenceSpan. */
 export function extractNonKeyBacktickSpans(cellText) {
   const spans = [];
   for (const match of cellText.matchAll(/`([^`]+)`/g)) {
-    if (!isKeyLikeSpan(match[1])) spans.push(match[1]);
+    if (!isKeyLikeSpan(match[1]) && !isPlaceholderReferenceSpan(match[1])) spans.push(match[1]);
   }
   return spans;
 }
@@ -412,6 +503,12 @@ export function corpusWordsFor(namespaces) {
  * detect a stale entry.
  */
 export function checkLocaleLexicon(locale, fileText, corpusWords, options) {
+  // Every candidate for THIS locale is checked under one matching rule,
+  // decided once here rather than by each caller — see UNSPACED_SCRIPT_LOCALES
+  // in locale-rules.mjs and "UNSPACED-SCRIPT ATTESTATION" in the module
+  // header. `options` may still set the prefix-mode ratio/floor explicitly
+  // (tests do); this only adds the mode switch on top.
+  const matchOptions = { ...options, unspacedScript: UNSPACED_SCRIPT_LOCALES.has(locale) };
   const offenders = [];
   const allowlisted = new Set();
   const rows = parseLexiconRows(fileText);
@@ -421,7 +518,7 @@ export function checkLocaleLexicon(locale, fileText, corpusWords, options) {
     if (candidates.length === 0) continue;
     rowsChecked += 1;
     for (const candidate of candidates) {
-      if (renderingIsCovered(candidate.text, corpusWords, options)) continue;
+      if (renderingIsCovered(candidate.text, corpusWords, matchOptions)) continue;
       const key = allowlistKey(locale, row.term);
       if (candidate.source === 'Rendering' && key in RENDERING_ALLOWLIST) {
         allowlisted.add(key);
