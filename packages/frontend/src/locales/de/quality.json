@@ -2,7 +2,7 @@
   "title": "Qualitäts-Dashboard",
   "loading": "Qualitätsübersicht wird geladen…",
   "error": "Qualitätsübersicht konnte nicht geladen werden: {{message}}",
-  "empty": "Noch keine LQA-Ergebnisse. Eine Übersetzung ausführen, um dieses Dashboard zu füllen.",
+  "empty": "Noch keine LQA-Ergebnisse. Einen Übersetzungsdurchlauf starten, um dieses Dashboard zu füllen.",
   "overallStat": {
     "passRateLabel": "Bestehensquote gesamt",
     "results": "LQA-Ergebnisse: {{count}}",

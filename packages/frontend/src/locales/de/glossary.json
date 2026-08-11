@@ -5,7 +5,7 @@
   "pushToDeepL": "An DeepL übertragen",
   "pushToDeepLReplace": "Übertragen & Veraltetes löschen",
   "confirmPushReplaceTitle": "Veraltete DeepL-Einträge löschen?",
-  "confirmPushReplaceDescription": "Dadurch werden zuerst alle von dieser App verwalteten DeepL-Glossare gelöscht — auf diesem Server projektübergreifend, nicht nur in diesem Projekt — und anschließend wird dieses Glossar neu übertragen. Begriffe und Sprachpaare, die du lokal entfernt hast, verschwinden damit auch aus DeepL, und die übertragenen Begriffe jedes anderen Projekts sind gelöscht, bis dieses Projekt erneut übertragen wird.",
+  "confirmPushReplaceDescription": "Dadurch werden zuerst alle von dieser App verwalteten DeepL-Glossare gelöscht — auf diesem Server projektübergreifend, nicht nur in diesem Projekt — und anschließend wird dieses Glossar neu übertragen. Begriffe und Sprachpaare, die du lokal entfernt hast, verschwinden damit auch aus DeepL, und die übertragenen Begriffe jedes anderen Projekts bleiben gelöscht, bis das jeweilige Projekt erneut übertragen wird.",
   "confirmPushReplaceConfirm": "Löschen & übertragen",
   "colSource": "Quellbegriff",
   "colNotes": "Notizen",
@@ -94,7 +94,7 @@
   "toastGlossaryDeleted": "Glossar gelöscht",
   "toastGlossaryDeleteError": "Glossar konnte nicht gelöscht werden",
   "bulkMarkConstant": "Als konstant markieren ({{count}})",
-  "bulkClearConstant": "„Konstant“ entfernen ({{count}})",
+  "bulkClearConstant": "Konstant-Markierung entfernen ({{count}})",
   "selectAll": "Alle Zeilen auswählen",
   "selectRow": "Zeile auswählen",
   "matchesPanel": "Treffer",
@@ -134,6 +134,6 @@
   "repushRequired": "Erneute Übertragung nötig",
   "toastRepushRequired": "Das Glossar hat sich seit der letzten Übertragung an DeepL geändert — erneut übertragen, um DeepL zu aktualisieren",
   "flaggedTitle": "{{count}} markiert (unvollständig)",
-  "flaggedHint": "Diesen Begriffen fehlt die Übersetzung für eine oder mehrere deiner aktiven Sprachen; deshalb sind sie von Treffern, Zuweisung und Übersetzungsreferenz ausgeschlossen, bis jede Sprache gefüllt ist.",
+  "flaggedHint": "Diesen Begriffen fehlt die Übersetzung für eine oder mehrere deiner aktiven Sprachen; deshalb sind sie von Treffern, Zuweisung und Übersetzungsreferenz ausgeschlossen, bis für jede Sprache eine Übersetzung eingetragen ist.",
   "flaggedMissingLanguages": "Fehlt: {{languages}}"
 }

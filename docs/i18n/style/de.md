@@ -94,6 +94,15 @@ kept where the sentence really is about the reader's own choice
 (`config:structuredOutputExperimentalWarning` "Probier sie … aus und behalte, …") — which is
 also where the short imperative form reads naturally rather than clipped.
 
+**A passive statement is not the infinitive instruction, and swapping one in changes what the
+string does.** Round 3 shipped English's "Assign categories to entries from the Translations
+tab" as "Kategorien werden im Tab Übersetzungen zugewiesen" in two keys and as an infinitive in
+a third; the passive turns an instruction into a description, and in `category:subtitle` it flips
+mood halfway through a string whose first sentence is three impersonal infinitives. All three
+now read "Kategorien im Tab Übersetzungen … zuweisen" (`category:subtitle`, `category:empty`,
+`category:noEntriesInCategory`). The passive stays right where the *antecedent* is the patient
+and nobody is being instructed — that is the word-order rule below, a different situation.
+
 ## Surface names — one rendering, repeated verbatim
 
 A surface is named in several namespaces at once, and the namespaces are translated in
@@ -161,23 +170,44 @@ re-deciding it.
 | **verdict** — the judge's per-entry ruling | *Urteil* | `strings:runs.judgeAllFindingsDescription` | batch 5's `logs:judge.done`, whose `{{verdict}}` token this names |
 | **assistant** — the chat persona | *Assistent*, weak masculine; linking form *Assistenten-* in a compound | `strings:runs.typeChatGeneric` | batch 6 owes "KI-Assistent" at `colorText:assistant.title` and the same noun at `stage-details:chatAssistant` |
 | **review, as a verb with an object** — the Translation-AI controls | *bewerten* | `review:translationAi.runReview`, `reviewAll`, `reReview`, and the two empty-state hints that quote those labels | any later key that tells a user to review *translations* with an AI |
-| **review, as a verb** — what the source review does to an entry | *untersuchen* | `review:sourceAi.configHint`, `emptyHint`, `scopeNeverReviewed`, `scopeNoneHint` | batch 5's `logs:sourceReview.*` |
+| **review / check, as a verb** — what the **source review** does to an entry | *untersuchen* | `review:sourceAi.scopeNeverReviewed`, `scopeNoneHint` and `configHint`'s second sentence (all three render English *review*); `emptyHint` (renders English *checks*) | batch 5's `logs:sourceReview.*` |
 | **issues**, where English means "problems in the text" rather than the LQA verdict | *Auffälligkeiten* | `review:sourceAi.configHint`, `review:sourceAi.noFindings` | any later prose about what a review looks for |
-| **approve**, on a source-review finding (records the review; writes nothing) | *Bestätigen* / *Bestätigt* | `review:sourceAi.approve`, `approvedToast`, `approvedBadge`, `approveFailed`, `keyboardHint` | — |
+| **approve**, on a source-review finding (persists `approved: true` on the run's own record; never reaches Translation Memory and never edits the source) | *Bestätigen* / *Bestätigt* | `review:sourceAi.approve`, `approvedToast`, `approvedBadge`, `approveFailed`, `keyboardHint` | — |
+| **previous**, of a stored translation version | *vorherig* — never *früher* | `review:diffTitle`, `previousVersionMeta`, `noPreviousVersion`, and the pager `review:prev` | any later batch naming an earlier version of a translation |
 | **push**, to DeepL | *übertragen* / *Übertragung* | `glossary:pushToDeepL`, `confirmPushReplace*`, `toastPushError`, `repushRequired`, `toastRepushRequired` | — |
 
-**Why *bewerten* and not a word built on *Review*, and what it does not license.** Three
-Translation-AI controls need a **verb with an object** — "Review last run", "Review all
-translations", "Re-review" — and German has none for *review*: the noun is the loan (*Review*,
-fixed by the lexicon's *AI review* row), *reviewen* is not a form this UI should introduce, and
-`../terminology/de.md` reserves *prüfen* for the human/LQA root and *Prüfung* for the
-deterministic check. What those three buttons actually start is the judge, whose term already
-is *bewerten*, and English says so itself: `review:translationAi.emptyHintRun` reads "**will
-judge** the latest completed translation run". So the verb is the judge's. **This does not
-touch the noun**: the feature is still "Übersetzungs-KI-Review" at `review:translationAi.title`,
-and `strings:runs.aiReviewStart` "Review starten" — English "Start review", a noun — stays as
-it is. Where English gives a noun, German uses *Review*; where English gives a verb, German
-uses *bewerten* for the judge and *untersuchen* for the source review.
+**Why *bewerten* on the three Translation-AI controls — the argument is the engine, not a
+shortage of German verbs.** "Review last run", "Review all translations" and "Re-review" need a
+**verb with an object**, and the verb they take is the judge's because **that is literally what
+they start**: `TranslationAiReviewTab.tsx` sets `reviewTargetRun`/`reviewingAll`, which reach
+`stores/run-store.ts`, whose call is `POST /projects/:id/runs/:runId/judge` (and the
+project-wide `/judge`) — M25 JudgeEngine. The lexicon's *judge* row already fixes that verb as
+*bewerten*, so these three keys inherit it. **This does not touch the noun**: the feature is
+still "Übersetzungs-KI-Review" at `review:translationAi.title`, and `strings:runs.aiReviewStart`
+"Review starten" — English "Start review", a noun — stays as it is.
+
+> **Corrected 2026-08-11 (round-3 review, I1), left visible rather than rewritten away.** The
+> first version of this paragraph argued instead that German "has none" for *review*. That is
+> **false**: it eliminated only *reviewen*, *prüfen* and *Prüfung* and never considered
+> *begutachten*, *überprüfen*, *durchsehen*, *sichten* or *beurteilen*. The conclusion survived
+> the correction — the buttons really do call `/judge`, re-verified in the store — but a false
+> absolute is exactly the kind of reason that outlives whoever wrote it, so the argument now
+> rests on the call site alone. No shipped string changed.
+
+**The verb rule is three-way, not two-way**, and the third case is the commonest:
+
+> English noun → ***Review***. English verb → ***prüfen*** where a **person** reviews (the
+> default), ***bewerten*** where the **judge** does (`/judge`, `review:translationAi.*`),
+> ***untersuchen*** where the **source review** does (`review:sourceAi.*`).
+
+The default branch is not hypothetical: batch 3 ships it seven times, all correctly —
+`category:reviewTitle` (byte-identical to `strings:runs.reviewSuggestions`), `category:aiHint`,
+`category:genBackgroundHint`, `glossary:generateRunningHint`, `glossary:importPreviewDescription`,
+`review:languageLabel` and `review:allItemsTitle`. An earlier draft of this rule stated only the
+*bewerten* and *untersuchen* branches; a later batch applying it literally to `logs:*` or
+`stage-details:*` would have written a machine's word for a person's action. The reservation on
+*Prüfung* binds the **noun** naming the deterministic LQA check; the **verb** *prüfen* is the
+ordinary German for a person checking something and is free.
 
 **`review:sourceAi.ignore` inherits *ignorieren*, and its two toasts do not.** The row at the
 top of this table binds the button: `ignore` is "Ignorieren". `ignoredToast` and `ignoreFailed`
@@ -233,6 +263,13 @@ English.
 
 Preserve uppercase only where English uses it for layout: `strings:columns.config`
 ("STATUS") becomes "STATUS", which happens to be identical.
+
+**A noun keeps its capital as the first element of a hyphenated compound adjective**, where the
+lowercase form is easy to slip into because the whole word is doing an adjective's job:
+"KI-fähiges Modul" (`glossary:generateNoModules`, `category:noModules`) and "Review-fähiges
+Modul" (`review:sourceAi.noModules`) — the last of which shipped as "review-fähiges" in round 3
+and was corrected; it was the only lowercase `-fähig` compound in the whole locale, against two
+capitalized siblings in the same batch.
 
 Adjectives derived from language names are lowercase ("deutsch"), the language name itself
 is a noun and capitalized ("Deutsch").
@@ -447,7 +484,7 @@ Measured expansion against the English source, one ratio per key:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 — `config` | 374 | 13,015 | — | 1.23 | 1.22 | 1.50 | 2.83 |
 | 2 — `strings` | 452 | 9,900 | 12,643 | 1.28 | 1.23 | 1.80 | 3.75 |
-| 3 — `glossary` `review` `category` `quality` | 377 | 10,744 | 13,445 | 1.25 | 1.24 | 1.71 | 3.33 |
+| 3 — `glossary` `review` `category` `quality` | 377 | 10,744 | 13,502 | 1.26 | 1.25 | 1.71 | 3.33 |
 
 Batch 1's max is `config:batchGroupingCustom` ("Custom" → "Benutzerdefiniert") and batch 2's
 is `strings:runs.judgeVerdictFail` ("Fail" → "Nicht bestanden"); both ratios are measuring
@@ -476,7 +513,8 @@ touches, and both figures are re-measured rather than assumed:
   "Zurückgestellt" (14), both far inside **36**.
 - **Bulk-bar control** — the longest is `review:approveUnchangedPassing` "Unveränderte &
   bestandene freigeben" (35), one character inside **36**, and the two glossary bulk actions
-  render at 26 and 22. The budget is not raised: 35 fits.
+  render at 27 and 34 with a two-digit count ("Als konstant markieren (12)",
+  "Konstant-Markierung entfernen (12)"). The budget is not raised: 35 fits.
 
 Batch 3's max ratio, `review:flag` "Flag" → "Zurückstellen" (3.25), and `glossary:add` (3.33)
 are both measuring a four-character English source; the length gate ignores any English shorter
@@ -485,9 +523,10 @@ back to 1.71** from `strings`' 1.80 — this batch is panel prose and dialogs ra
 which is the same thing the `config`/`strings` gap said from the other side.
 
 **Two unbreakable tokens over 20 characters shipped in batch 3**, both on unconstrained
-surfaces and both terms this locale already ships: "Übersetzungsdurchlauf" (21, in four
-`review:translationAi.*` sentences) and "Schlusszeichensetzung" (21,
-`quality:checkLabels.end-punctuation`, an item in the issue-type list, which wraps). The second
+surfaces and both terms this locale already ships: "Übersetzungsdurchlauf" (21, in the four
+`review:translationAi.*` sentences and in `quality:empty` — five sites after the fix round) and
+"Schlusszeichensetzung" (21, `quality:checkLabels.end-punctuation`, an item in the issue-type
+list, which wraps). The second
 is the batch-1 term repeated verbatim, per the rule that a settled term is split at the point of
 use rather than re-coined.
 
@@ -587,6 +626,27 @@ antecedent. `config:lqa.checks.achievement-length-limit.description` first read 
 *achievements* that exceed their limits rather than *translations*, because
 "Errungenschaften" sat closest to the "die". Restructure so the intended antecedent is
 adjacent, rather than trusting the reader to recover it.
+
+**And it covers a third shape, which round 3 shipped and the review caught: deixis.** A
+demonstrative is an attachment device too, and German's *dieser* is proximal in exactly the way
+English's *this* is — so re-using it for a **different** referent late in a string that has
+already spent it on the current one silently redirects the reader.
+`glossary:confirmPushReplaceDescription` is the worked example and it is worth keeping, because
+the string is the confirm dialog for an irreversible cross-project deletion. English closes with
+the **distal** "until **that** project is pushed again", pointing at each *other* project; the
+first German shipped the **proximal** "bis **dieses** Projekt erneut übertragen wird" after the
+same sentence had already written "nicht nur in **diesem** Projekt" and "wird **dieses** Glossar
+neu übertragen" for the project the user is standing in. The reader was told the other projects
+recover when *they* re-push. It now reads "…bleiben gelöscht, bis **das jeweilige** Projekt
+erneut übertragen wird" — *das jeweilige* / *das betreffende* distributes over the other
+projects, which is what the English distal does. **Two rules fall out:**
+
+- **Count your demonstratives per string, not per clause.** If *dieser* is already spent on one
+  referent, a second referent needs a distributive (*das jeweilige*, *das betreffende*) or a
+  repeated noun — never a second *dieser*.
+- **"until" needs a state verb.** German `sein` + participle is a completed state and does not
+  carry "until"; a state that persists until an event takes *bleiben* ("bleiben gelöscht, bis
+  …"), not "sind gelöscht, bis …".
 
 ### The citation guard cannot see German strong verbs — fix the row, never the string
 
