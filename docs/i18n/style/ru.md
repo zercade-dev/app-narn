@@ -1,8 +1,9 @@
 # Style guide — Russian (ru)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
-placeholder handling.
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/ru.md`. This file settles register, casing, punctuation, length
+and placeholder handling.
 
 ## Register
 
@@ -166,15 +167,15 @@ measurement beats this table.
 **There is deliberately no exception ledger.** The previous one recorded two of twenty-seven
 and nobody noticed for four rounds, because a hand-maintained list of per-key exemptions goes
 stale silently and invisibly. If a term rule forces a long label — `strings:tabs.review-source-ai`
-is «ИИ-рецензия исходного текста» because `terminology.md` builds _source review_ from _AI
-review_ + _source text_ and its sibling tab must match word for word — that is the term rule
+is «ИИ-рецензия исходного текста» because `terminology/ru.md` builds it from _AI review_ +
+_source text_ on purpose, so its sibling tab must match word for word — that is the term rule
 doing its job, and the budget above already accommodates it. Terms outrank the budget; the
 budget exists to stop *avoidable* length.
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/ru.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ### Surface names already shipped — repeat these verbatim
 
@@ -424,7 +425,7 @@ to run the backfill under.
 ## Locale-specific traps
 
 - **Case endings mean a domain term appears inflected everywhere.** «проект» will show up
-  as «проекта», «проекту», «проектом». That is expected and correct; `terminology.md`
+  as «проекта», «проекту», «проектом». That is expected and correct; `terminology/ru.md`
   records the nominative citation form, and consistency means the same _lexeme_, not the
   same letters.
 - **"Judge"** must take the evaluative sense («оценить», «оценка»), never «судья»/«судить»,

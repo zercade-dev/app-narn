@@ -8,9 +8,13 @@ what the translator's brief has to carry on day one that this one did not.
 Read it with `terminology.md` and `style/ru.md`: those two say *what to write*, this says
 *how to run the job*.
 
-Scope of the pilot: 24 namespaces, 1931 English keys, 2025 Russian keys (the extra 94 are
-`_few` / `_many` forms English has no counterpart for), 53,147 English characters in,
-67,736 Russian characters out.
+Scope of the pilot: 24 namespaces, 1,908 English keys, 2,002 Russian keys (the extra 94 are
+`_few` / `_many` forms English has no counterpart for), 52,591 English characters in,
+67,026 Russian characters out — the current, post-reachability-sweep corpus. The pilot was
+originally measured at 1,931/2,025 keys and 53,147/67,736 characters (commit `e7fe56d`);
+section 8 item 4's reachability sweep later removed 23 dead keys from every locale, none of
+them touched by the numeral-agreement figures below, which is why those alone were
+re-derived at the time and these were not.
 
 ---
 
@@ -215,8 +219,8 @@ first string is written.
    only compared two terms.
 10. **The measured expansion figure.** Russian is 1.19× English in characters over the
     shared keys, median 1.18 — *shorter* than both previously shipped locales (1.22 and
-    1.26). The tail is what breaks chrome: the 90th percentile is 1.71 over all 2,025
-    Russian keys, and 1.72 over the 1,931 shared with English. Quote the population with
+    1.26). The tail is what breaks chrome: the 90th percentile is 1.71 over all 2,002
+    Russian keys, and 1.7273 over the 1,908 shared with English. Quote the population with
     the figure — see section 9.
 
 ---
@@ -371,10 +375,14 @@ Recorded plainly, because each one cost something measurable.
 
 ## 9. Numbers to reuse
 
-- 1931 English keys, 24 namespaces, 53,147 English characters — the whole surface, per
-  language.
+- 1,908 English keys, 24 namespaces, 52,591 English characters — the whole surface, per
+  language, over the current post-reachability-sweep corpus (section 1).
 - Russian needed 94 extra keys (`_few` / `_many`); a language with two categories needs
-  none, one with six needs more. Budget by the target's plural-category count.
+  none, one with six needs more. Budget by the target's plural-category count — **except**
+  `it`/`pt-br`, whose third category (`many`) is grandfathered as unreachable
+  (`COVERAGE_GAP_GRANDFATHER` in `scripts/locale-rules.mjs`) and should not be written at
+  all; see backfill-runbook.md 2.7 for the reasoning and the one expected strict-mode
+  failure that follows from it.
 - ~4h15m of translator wall clock for the whole language, plus four reviews, plus five fix
   rounds, plus ten rounds on the shared terminology file.
 - The terminology file is the expensive shared artifact and it is now 76 terms deep. For
@@ -384,9 +392,9 @@ Recorded plainly, because each one cost something measurable.
   two locales shipped before it. Chrome budgets are absolute character counts, not
   multiples of English.
 - **State the population with every percentile — the two in this file are not the same
-  one.** Russian's 90th percentile is **1.71** over all **2,025** Russian keys (each extra
-  plural form measured against the English form it resolves to) and **1.72** over the
-  **1,931** keys shared with English. Both reproduce exactly; the difference is the
+  one.** Russian's 90th percentile is **1.71** over all **2,002** Russian keys (each extra
+  plural form measured against the English form it resolves to) and **1.7273** over the
+  **1,908** keys shared with English. Both reproduce exactly; the difference is the
   denominator, not rounding. A language with many extra plural forms will separate the two
   further than Russian does, so a percentile quoted without its population cannot be
   compared to anything.

@@ -65,10 +65,9 @@ your working directory before concluding the tool is missing.
 
 ## Tooling this procedure assumes
 
-The first two exist today. **The last two, and the per-language lexicon file
-`terminology/<lang>.md`, are pre-flight deliverables** — they are created before the first
-batch is dispatched, and they may not exist while you are reading this. If one is missing,
-say so rather than silently skipping the step it belongs to.
+All four ship on this branch, and all fourteen backfill languages already have their
+`terminology/<lang>.md` lexicon file (empty until their first batch fills it in, but
+present). Nothing here is a pre-flight deliverable still to be built.
 
 - `pnpm check:locales` — the parity, placeholder, plural-coverage, key-order and length
   gate. Part of the release gate, so it must be green at every commit — **including yours,
@@ -78,10 +77,13 @@ say so rather than silently skipping the step it belongs to.
 - `LOCALE_PARITY_STRICT=<lang> pnpm check:locales` — the same gate, holding your locale to
   its language's complete plural-category set with no bare-key rescue. The variable takes a
   comma-separated list, so you can hold just the language you are backfilling.
-- `node scripts/i18n-preflight.mjs <lang>` — the numeral-agreement detector, both collision
-  directions, and the `bare + _other` family list.
-- `node scripts/check-lexicon-citations.mjs` — every rendering quoted in a lexicon file
-  exists in the shipped locale files.
+- `pnpm i18n:preflight <lang>` (`node scripts/i18n-preflight.mjs <lang>`) — the
+  numeral-agreement detector, both collision directions, and the `bare + _other` family
+  list.
+- `pnpm check:lexicon` (`node scripts/check-lexicon-citations.mjs`) — every rendering quoted
+  in a lexicon file exists in the shipped locale files. `make verify` and app CI's
+  `quality-gate` run the `pnpm` form of both `check:locales` and `check:lexicon` directly —
+  use it locally too so you are running what the gate runs, not an equivalent of it.
 
 ## The work-in-progress declaration — the controller adds it at batch 1
 
@@ -195,14 +197,17 @@ which surface name does it repeat".
 | Batch | Namespaces | en keys | en chars |
 | --- | --- | --- | --- |
 | 1 | `config` | 374 | 13,015 |
-| 2 | `strings` | 459 | 10,066 |
-| 3 | `glossary` `review` `category` `quality` | 387 | 11,086 |
-| 4 | `collab` `account` `vault` `settings` `sidebar` | 301 | 7,854 |
-| 5 | `logs` `console` `system` `errors` `generation` `batch` | 124 | 4,588 |
-| 6 | `stage-details` `colorText` `orphans` `backup` `welcome` `common` `legal` | 286 | 6,538 |
+| 2 | `strings` | 452 | 9,900 |
+| 3 | `glossary` `review` `category` `quality` | 377 | 10,744 |
+| 4 | `collab` `account` `vault` `settings` `sidebar` | 300 | 7,851 |
+| 5 | `logs` `console` `system` `errors` `generation` `batch` | 123 | 4,567 |
+| 6 | `stage-details` `colorText` `orphans` `backup` `welcome` `common` `legal` | 282 | 6,514 |
 
-**Totals: 1,931 keys and 53,147 characters across 24 namespaces** — the whole surface, per
-language.
+**Totals: 1,908 keys and 52,591 characters across 24 namespaces** — the whole surface, per
+language, measured over the current (post-reachability-sweep) corpus. The reachability
+sweep in `backfill-notes.md` section 8 removed 23 dead keys from every locale after this
+table was first measured; re-measure with the same `loadLocales`/`flattenEntries` pass
+over `packages/frontend/src/locales` if the corpus moves again.
 
 **The order and the grouping, and why each is what it is.**
 
@@ -495,6 +500,35 @@ merely tolerated**. Russian selects between _one_, _few_, _many_ and _other_, so
 `_few` and `_many` variants with no English counterpart — 94 keys more than English, which is
 exactly the twelve missing `_one` forms plus 41 `_few` plus 41 `_many`.
 
+**Italian and Brazilian Portuguese are the one documented exception to the rule above, and
+it is a code decision, not a translator's — read it before you copy Russian's shape onto
+them.** `Intl.PluralRules` gives `it` and `pt-BR` three categories too — `one`, `many`,
+`other` — the same count as Russian's four minus one, so the paragraph above reads as if
+they owe the same treatment: write `_many` for all 41 families. They don't. `it`/`pt-br`'s
+`many` selects ONLY exact millions (1000000, 2000000, 3000000, …; verified via
+`Intl.PluralRules` — no integer 0..200 selects it), and no count this app ever renders
+reaches a million, so the category is real per the language's grammar but **unreachable by
+anything the UI can show**. `COVERAGE_GAP_GRANDFATHER` in `scripts/locale-rules.mjs` records
+exactly this finding, and the precedent already shipped agrees with it: `es` and `fr` have
+the identical `one`/`many`/`other` shape and carry **zero** `_many` keys between them —
+1,908 keys each, the same count as English, because nothing else in their category set
+differs from English's `_one`/`_other` split. **Do not write `_many` for `it` or `pt-br`.**
+Ship `_one`/`_other` only, matching `es`/`fr`, and expect to land at English's own key count
+for this dimension — neither the 29-fewer of a single-category language nor Russian's 94
+more. The default gate (`pnpm check:locales`, what CI runs) does not ask for the missing
+category either, for the same reason: it is forgiving a gap the tool has already proven is
+unreachable, not skipping a check.
+
+**`LOCALE_PARITY_STRICT=<lang>` will still flag it — that is the one expected strict-mode
+failure for these two languages, and the fix is not to add the category.** Strict mode
+exists to hold your locale to its language's *complete* category set with no rescue, so by
+design it ignores both the bare-key mitigation and this grandfathering (`isStrictFor` short-
+circuits `enforcedCoverageGapFamilies` before either mitigation is consulted) — running
+`LOCALE_PARITY_STRICT=it pnpm check:locales` reports every `it` family missing `_many` as a
+hard failure regardless of reachability. Read that specific failure as the documented
+exception settled above, not as a signal to add `_many` after all; every other strict-mode
+failure on `it`/`pt-br` is real and must be fixed like any other language's.
+
 **If your language has one category, you supply `_other` and nothing else.** Copying
 English's `_one` across is a **hard guard failure by design**: the suffix is not in your
 language's set, so it can never be selected, and the guard fails it rather than letting a
@@ -577,19 +611,20 @@ never see.
 
 ### 2.10 The measured expansion — and where the tail bites
 
-Character expansion over the 1,931 shared keys, measured against the English source:
+Character expansion over the 1,908 shared keys, measured against the English source:
 
 | Locale | Aggregate | Median | 90th percentile |
 | --- | --- | --- | --- |
-| ru | 1.19 | 1.18 | 1.72 |
+| ru | 1.19 | 1.18 | 1.73 |
 | es | 1.22 | 1.21 | 1.60 |
 | fr | 1.26 | 1.24 | 1.67 |
 
 **Read the population before you compare these to anything.** Every row above is over the
-**1,931 keys the locale shares with English**, one ratio per shared key. `backfill-notes.md`
-records Russian's 90th percentile as **1.71**, and that is over a different population: all
-**2,025** Russian keys, with each extra plural form measured against the English form it
-resolves to. Both figures are correct and both reproduce exactly — 1.7222 over the shared
+**1,908 keys the locale shares with English**, one ratio per shared key — the
+post-reachability-sweep count; see section 1's totals. `backfill-notes.md` records
+Russian's 90th percentile as **1.71**, and that is over a different population: all
+**2,002** Russian keys, with each extra plural form measured against the English form it
+resolves to. Both figures are correct and both reproduce exactly — 1.7273 over the shared
 set, 1.7143 over the full Russian set. The gap is the denominator, not rounding and not an
 interpolation choice. **When you report your own language's expansion, state which of the
 two populations you measured**, because a language with many extra plural forms will move
@@ -866,7 +901,8 @@ language — preceded by one step that has to come first.
 3. **The six register and typography greps**, and the sibling-English check across the whole
    language.
 4. **The citation check** — every rendering quoted in `terminology/<lang>.md` (the per-language
-   lexicon file the pre-flight creates) exists in the shipped files.
+   lexicon file the pre-flight created, already present and empty for every backfill
+   language) exists in the shipped files.
 
 Fixes from the sweep go in as a normal fix round with a scoped re-review. The language is
 not done until that re-review passes.
