@@ -170,10 +170,11 @@ re-deciding it.
 | **verdict** — the judge's per-entry ruling | *Urteil* | `strings:runs.judgeAllFindingsDescription` | batch 5's `logs:judge.done`, whose `{{verdict}}` token this names |
 | **assistant** — the chat persona | *Assistent*, weak masculine; linking form *Assistenten-* in a compound | `strings:runs.typeChatGeneric` | batch 6 owes "KI-Assistent" at `colorText:assistant.title` and the same noun at `stage-details:chatAssistant` |
 | **review, as a verb with an object** — the Translation-AI controls | *bewerten* | `review:translationAi.runReview`, `reviewAll`, `reReview`, and the two empty-state hints that quote those labels | any later key that tells a user to review *translations* with an AI |
-| **review / check, as a verb** — what the **source review** does to an entry | *untersuchen* | `review:sourceAi.scopeNeverReviewed`, `scopeNoneHint` and `configHint`'s second sentence (all three render English *review*); `emptyHint` (renders English *checks*) | batch 5's `logs:sourceReview.*` |
+| **review, as a verb** — what the **source review** does to an entry | *untersuchen* | `review:sourceAi.scopeNeverReviewed`, `scopeNoneHint` and `configHint`'s **second** sentence (all three render English *review*). `emptyHint` renders English *checks* with the same verb, because *prüfen* is withheld from the AI source review — that is this row extending to one *check*, not a claim that every *check* takes it | batch 5's `logs:sourceReview.*` |
+| **browse / look something over** — reading rather than analysing | *durchsehen* | `category:subtitle` and `strings:mobile.desktopOnlyBody` (English *browse*), `review:sourceAi.configHint`'s **first** sentence (English *Check the source text itself*) | any later batch rendering English *browse* |
 | **issues**, where English means "problems in the text" rather than the LQA verdict | *Auffälligkeiten* | `review:sourceAi.configHint`, `review:sourceAi.noFindings` | any later prose about what a review looks for |
-| **approve**, on a source-review finding (persists `approved: true` on the run's own record; never reaches Translation Memory and never edits the source) | *Bestätigen* / *Bestätigt* | `review:sourceAi.approve`, `approvedToast`, `approvedBadge`, `approveFailed`, `keyboardHint` | — |
-| **previous**, of a stored translation version | *vorherig* — never *früher* | `review:diffTitle`, `previousVersionMeta`, `noPreviousVersion`, and the pager `review:prev` | any later batch naming an earlier version of a translation |
+| **approve**, on a source-review finding (persists the approval **twice** — on the run's finding record and mirrored onto the entry's own `sourceReview`, when that stored review came from the same run; never reaches Translation Memory and never edits the source text) | *Bestätigen* / *Bestätigt* | `review:sourceAi.approve`, `approvedToast`, `approvedBadge`, `approveFailed`, `keyboardHint` | — |
+| **previous**, of a stored translation version — **on the review surfaces only** | *vorherig* | `review:diffTitle`, `previousVersionMeta`, `noPreviousVersion`, and the pager `review:prev` | later batches naming an earlier version **inside `review:`** |
 | **push**, to DeepL | *übertragen* / *Übertragung* | `glossary:pushToDeepL`, `confirmPushReplace*`, `toastPushError`, `repushRequired`, `toastRepushRequired` | — |
 
 **Why *bewerten* on the three Translation-AI controls — the argument is the engine, not a
@@ -196,9 +197,11 @@ still "Übersetzungs-KI-Review" at `review:translationAi.title`, and `strings:ru
 
 **The verb rule is three-way, not two-way**, and the third case is the commonest:
 
-> English noun → ***Review***. English verb → ***prüfen*** where a **person** reviews (the
-> default), ***bewerten*** where the **judge** does (`/judge`, `review:translationAi.*`),
-> ***untersuchen*** where the **source review** does (`review:sourceAi.*`).
+> English noun → ***Review***, **unless a lexicon row fixes the term** — *review queue* is
+> Prüfwarteschlange and *needs review* is zu prüfen, and a term row always wins.
+> English verb → ***prüfen*** where a **person** reviews (the default), ***bewerten*** where the
+> **judge** does (the judge routes, `review:translationAi.*`), ***untersuchen*** where the **source
+> review** does (`review:sourceAi.*`).
 
 The default branch is not hypothetical: batch 3 ships it seven times, all correctly —
 `category:reviewTitle` (byte-identical to `strings:runs.reviewSuggestions`), `category:aiHint`,
@@ -208,6 +211,35 @@ The default branch is not hypothetical: batch 3 ships it seven times, all correc
 `stage-details:*` would have written a machine's word for a person's action. The reservation on
 *Prüfung* binds the **noun** naming the deterministic LQA check; the **verb** *prüfen* is the
 ordinary German for a person checking something and is free.
+
+**What the source-review *Bestätigen* decision actually rests on.** Two negatives, both
+verified in `packages/server/src/routes/runs.ts`: the action **never reaches Translation Memory**
+(that is a different route, the one the review queue posts to) and **never edits the source
+text**. It is not a write-free action — the route writes the run's finding record *and* mirrors
+the approval onto the entry's own `sourceReview` — but neither write is the one that would make
+*freigeben* the right word.
+
+> **Corrected 2026-08-11 (round-3 review M1, then re-review M1), left visible.** The row above
+> first justified *Bestätigen* by saying the action "writes nothing"; that was false. The repair
+> named one write and missed the second. Two wrong reasons in a row under a conclusion that was
+> never in doubt — which is the argument for stating the negatives, which are what the split
+> depends on, rather than an inventory of what it writes.
+
+**Two words for "previous version", and both are right — do not harmonize them.**
+*vorherig* is fixed above for the **review surfaces**, where `review:diffTitle` renders as the
+heading directly over `review:previousVersionMeta`'s caption and a split would be visible in one
+glance. The Compare tab's version-history panel is a different surface and settled the other way
+in batch 2: `strings:compare.undoVersionsTitle`, `undoRestored`, `undoTooltip` and `cellUndoAria`
+all render English "Previous version(s)" as **"Frühere Version(en)"**, and they ship, reviewed.
+(`undoVersionsHint` renders English's own "an **earlier** version" and is *eine frühere Version*
+— not a counterexample.) The two surfaces never co-render, so there is no defect and **no string
+change is owed** in either direction.
+
+> **Corrected 2026-08-11 (round-3 re-review, I4), left visible.** The row above first read
+> "*vorherig* — **never** *früher*", an unbounded ban derived from four `review:` keys, which
+> told batches 4-6 that those four shipped batch-2 strings were wrong. Scoping the row, rather
+> than widening the ban, is the same repair the *flag* row already carries for *markiert*: a rule
+> derived from one surface is stated for that surface.
 
 **`review:sourceAi.ignore` inherits *ignorieren*, and its two toasts do not.** The row at the
 top of this table binds the button: `ignore` is "Ignorieren". `ignoredToast` and `ignoreFailed`
