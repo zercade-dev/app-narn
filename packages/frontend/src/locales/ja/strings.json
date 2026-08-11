@@ -1,7 +1,7 @@
 {
   "loading": "読み込み中…",
   "viewNotFound": "このページは見つかりませんでした。",
-  "viewNotFoundContact": "アプリ内のリンクからこのページに来た場合は、次の宛先まで報告してください。",
+  "viewNotFoundContact": "アプリ内のリンクからこのページに来た場合は、次の宛先まで報告してください：",
   "selectProjectCta": "プロジェクトを選択",
   "tabs": {
     "config": "設定",
@@ -103,8 +103,8 @@
     "translateScopeAll": "現在の表示にあるエントリ{{count}}件すべてを翻訳します。",
     "translateModeUntranslated": "未翻訳のエントリのみ埋める",
     "translateModeRetranslate": "既存の翻訳を再翻訳する",
-    "translateUseReference": "参照（{{language}}）をコンテキストとして使用",
-    "translateUseReferenceNone": "参照言語をコンテキストとして使用",
+    "translateUseReference": "参照（{{language}}）をコンテキストとして使用する",
+    "translateUseReferenceNone": "参照言語をコンテキストとして使用する",
     "translateNoReferenceHint": "このオプションを有効にするには、ツールバーで参照言語を選択してください。",
     "translateCustomBatchSizeCaveat": "（モジュール・言語）の組み合わせごとに送信されます。言語や振り分け先のモジュールが異なる場合は、1つのリクエストにまとめられません。",
     "translateStart": "開始",
@@ -270,7 +270,7 @@
   },
   "guide": {
     "groupSetup": "セットアップ",
-    "groupTranslate": "翻訳",
+    "groupTranslate": "翻訳作業",
     "groupReview": "レビュー",
     "groupContent": "用語",
     "groupMaintenance": "メンテナンス",

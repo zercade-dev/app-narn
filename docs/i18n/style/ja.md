@@ -56,7 +56,8 @@ Japanese does not. Resolve the control **before** writing the string.
 | Confirm-dialog title | **same as the button it confirms** | `config:deleteProject` and `config:confirmDeleteTitle` are both 「プロジェクトを削除」, because their English is identical too. Where English differs, follow English. |
 | Table column header | bare noun, shortest defensible form | `config:models.colConfidence` 「信頼度」, `config:models.colContext` 「コンテキスト」 |
 | Select option / value label | bare noun or 〈noun〉ごと, never a sentence | `config:module.batchByLanguage` 「言語ごと」, `config:lqa.severityBlocking` 「ブロッキング」 |
-| Checkbox / radio label — a **behaviour** the user switches on | dictionary-form verb phrase (～する／～しない), **not** 体言止め: the user is choosing what the app will do, not naming a thing | `strings:compare.translateModeRetranslate` 「既存の翻訳を再翻訳する」, `strings:compare.translateDisableMemory` 「この実行では翻訳メモリを使用しない」 |
+| Checkbox / radio label **whose English is a verb phrase** | dictionary-form verb phrase (～する／～しない), **not** 体言止め: the user is choosing what the app will do, not naming a thing | `strings:compare.translateModeRetranslate` 「既存の翻訳を再翻訳する」, `strings:compare.translateDisableMemory` 「この実行では翻訳メモリを使用しない」, `strings:compare.translateUseReferenceNone` 「参照言語をコンテキストとして使用する」 |
+| Checkbox label whose English is a **noun phrase** naming a mode | follow English — 体言止め | `strings:runs.aiReviewVerbose` 「詳細ログ（プロンプト・パラメーター・生の応答）」 |
 | Placeholder inside a control | ～を選択／～を入力 + 「…」, no noun for the control itself | `config:enableModulePlaceholder` 「有効にするモジュールを選択…」 |
 | Progress / status text | ～中 or ～しました — a state, never a command. The **ellipsis is English's to give**, not the shape's: add 「…」 only where the source has one | `config:duplicating` 「複製中…」 and `config:autoSaveSaved` 「保存しました」 (English has the ellipsis); `strings:row.translating` 「翻訳中」 and `strings:runs.statusQueued` 「待機中」 (English has none) |
 | Description / help / toast | full ですます sentence ending in 。 | `config:maxBackupsDescription` |
@@ -84,7 +85,7 @@ is 「状態」** — the ordinary word, with nothing standing in for the shouti
 rendering of *Status* everywhere it occurs, control shape notwithstanding: the shouted table
 header, the ordinary column header `strings:runs.statusColumn` 「状態」, and the filter label
 `strings:filters.status` 「状態：」. ステータス was rejected as the katakana loan where a two-character
-kanji word is equally idiomatic and this is a column header — the tightest of the six classes.
+kanji word is equally idiomatic and this is a column header — the tightest of the five classes.
 
 Latin-script material inside a Japanese string (`API`, `CSV`, `AI`, provider and model ids)
 keeps its English casing and stays **half-width**. Never use full-width Latin letters or
@@ -126,8 +127,10 @@ full-width digits.
   **(a) symbol layout copied from English**, **(b) a Latin name that contains a space**, and
   **(c) an example of literal user input**. Batch 1: four keys (1, 2, 3, 4 below).
   Batch 2: ten keys — `strings:runs.estimatedCost` 「≈ ${{amount}}」 plus the three
-  `strings:runs.projectTotal*` that embed it (class a), and the six `strings:guide.topic*`
-  product names plus 「Gemini 2.5」 inside `strings:runs.detailsCharNote` (class b).
+  `strings:runs.projectTotal*` that embed it (class a), and the **five** `strings:guide.topic*`
+  product names that contain a space plus 「Gemini 2.5」 inside `strings:runs.detailsCharNote`
+  (class b). 1 + 3 + 5 + 1 = 10. "DeepSeek" and "OpenRouter" are allowlisted product names but
+  have no space, so they are not exceptions to this rule.
   1. `config:pseudoTestHelpLink` 「クリックしてガイドを読む →」 — the space before the arrow is
      symbol layout copied from English, not word spacing.
   2. `config:routing.selectPlaceholder` 「— 選択 —」 — same, around an em-dash pair.
@@ -424,7 +427,7 @@ locale file.
   are all 「無効」) carry no information into Japanese. Record such a group as licensed rather
   than inventing a second word to keep them apart. **Batch 2's licensed collapses, every one
   of them reported by `i18n-preflight.mjs` check 2 and every one deliberate:** 翻訳 over
-  *Translations* / *Translate* / *Translation*; 状態 over *STATUS* / *Status* (the shouted
+  *Translations* / *Translation*; 状態 over *STATUS* / *Status* (the shouted
   header carries no case into Japanese — `english-review-notes.md` says so explicitly);
   要レビュー over the sentence-case filter and the deliberately lowercase badge; カテゴリを削除
   over *Remove category* / *Remove categories*; AIレビュー over *AI Review* / *AI review*;
@@ -438,6 +441,13 @@ locale file.
   timestamp column, and the more accurate rendering is also the one that separates it from
   `strings:compare.translateStart`. Reading the collision list as "all licensed" would have
   shipped that.
+  **The licence has one hard boundary, and batch 2 crossed it once.** A collapse is licensed
+  only where the two keys **cannot co-render**. *Translate* was in the list above until review
+  found that `strings:guide.groupTranslate` and `strings:tabs.strings` render nested, one inside
+  the other, in the sidebar — see the group-heading section below. Before licensing a collapse,
+  check the call sites for containment, not just for "different screens": number and
+  part-of-speech carry no information into Japanese, but a group/member distinction does, and it
+  is visible at exactly the moment the two are stacked.
 
 ## Surface names settled so far — repeat these verbatim
 
@@ -462,7 +472,7 @@ budget row above — so every one of them is also subject to the 13-glyph trunca
 | Source AI review | 「原文AIレビュー」 | `strings:tabs` (review-source-ai) | `review:sourceAi.configTitle`. Built on batch 1's 原文レビュー (*source review*) plus AI |
 | Translation AI review | 「翻訳AIレビュー」 | `strings:tabs` (review-translation-ai) | `review:translationAi.title` |
 | Manual review | 「手動レビュー」 | `strings:tabs` (review-manual) | `review:title` is a **different English string** ("Review queue") and takes its own rendering — do not copy this one onto it |
-| Quality | 「品質」 | `strings:tabs.quality` | `strings:guide.topicQuality` 「品質」 (shipped batch 2), `quality:*` page title |
+| Quality | 「品質」 | `strings:tabs.quality` | `strings:guide.topicQuality` 「品質」 (shipped batch 2). **`quality:title` is a different English string** — "Quality Dashboard", not "Quality" — and takes **「品質ダッシュボード」**, matching `strings:tabPlaceholder.quality` in this same batch. Keep 品質 as the root so the tab and the page title read as one surface; do **not** copy the bare 「品質」 onto it |
 | Glossary (tab) | 「用語集」 | `strings:tabs.glossary` | `strings:guide.topicGlossary` 「用語集タブ」 (shipped batch 2), `glossary:*` |
 | Category (tab) | 「カテゴリ」 | `strings:tabs.category` | `strings:guide.topicCategory` 「カテゴリタブ」 (shipped batch 2), `category:*`. English's singular tab / plural page title carries no information into Japanese |
 | Activity | 「アクティビティ」 | `strings:tabs.runs` | `strings:guide.topicActivity` 「アクティビティ」 (shipped batch 2). The **page title expands deliberately**: `strings:runs.title` is 「翻訳アクティビティ」. Do not shorten it to match and do not invent a third wording |
@@ -477,10 +487,43 @@ The word for *tab* is 「タブ」, appended with no particle and no space: 「�
 `strings:guide.topic*` key whose English ends in "Tab" follows that shape; `topicQuality` and
 `topicActivity` have no "Tab" suffix in English and take none in Japanese either.
 
-**The guide group headings are a separate small set**, settled batch 2 at
-`strings:guide.group*` and owed verbatim by `sidebar:groups.*`: 「セットアップ」「翻訳」
-「レビュー」「用語」「メンテナンス」「翻訳メモリ」. See the *Review (the sidebar group)* row in
-`terminology/ja.md` for why the umbrella is レビュー and not one of its four members' words.
+### The guide / sidebar group headings
+
+`strings:guide.group*` and `sidebar:groups.*` name the same groupings, so they must agree — but
+**the two sets are not the same size, and an earlier version of this section said they were.**
+Five headings are shared; each side has one the other lacks.
+
+| Heading | en | ja | Owed by |
+| --- | --- | --- | --- |
+| Setup | Setup | 「セットアップ」 | `sidebar:groups.project` |
+| Translate | Translate | **「翻訳作業」** | `sidebar:groups.translate` — **not** 「翻訳」, see below |
+| Review | Review | 「レビュー」 | `sidebar:groups.review` |
+| Terminology | Terminology | 「用語」 | `sidebar:groups.content` |
+| Maintenance | Maintenance | 「メンテナンス」 | `sidebar:groups.maintenance` |
+| Translation Memory | Translation Memory | 「翻訳メモリ」 | **nothing** — there is no such sidebar group; Translation Memory is the sidebar *item* `sidebar:translationMemory`, covered by its own surface row above |
+| Page | Page | — | `sidebar:groups.page` has **no** `strings:guide` counterpart; batch 4 decides it alone |
+
+See the *Review (the sidebar group)* row in `terminology/ja.md` for why the umbrella is レビュー
+and not one of its four members' words.
+
+**A group heading and the tabs nested under it DO co-render, so the collapse licence does not
+reach them.** `components/layout/Sidebar.tsx:132-175` nests each group's tabs directly under its
+heading, so the two keys are on screen simultaneously — one inside the other — which is exactly
+the condition the surface-name rule ("the two keys are never on screen at the same moment")
+assumes away. Batch 2 shipped `strings:guide.groupTranslate` as 「翻訳」 and that put the heading
+「翻訳」 directly above its first child `strings:tabs.strings` 「翻訳」. **The tab is not the thing to
+change** — batch 1 anchored it in prose at `config:routing.categoriesConfiguredHint`
+「カテゴリは翻訳タブで設定します。」 — so the *group* took the distinct word, 「翻訳作業」. Every other
+locale keeps the pair apart too (en Translate/Translations, ru Перевод/Переводы,
+de Übersetzen/Übersetzungen, tr Çeviri/Çeviriler).
+
+**All six groups were then checked against their own children, not just the one that failed.**
+Only `groups.translate` was an equality collision. Two are prefix relationships and both are
+**licensed**: 「レビュー」 over 原文AIレビュー／翻訳AIレビュー／手動レビュー, and 「用語」 over 用語集 —
+in each case the heading is the general word and the child specialises it, which is the same
+group/member relationship English has (Review > Source AI review; Terminology > Glossary) and is
+how Japanese ordinarily expresses it. 「セットアップ」 and 「メンテナンス」 share nothing with their
+children. Do not re-open these two when batch 4 writes `sidebar:groups.*`.
 
 **`config:fullReplaceOrphanNotice` says *Relink tab* in English. There is no such tab** —
 it is the known stale English name for Orphans, and Japanese ships the Orphans rendering.
