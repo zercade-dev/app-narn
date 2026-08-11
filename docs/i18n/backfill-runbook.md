@@ -24,7 +24,7 @@ Nobody writes another language's files. That is the property that lets several l
 run at the same time: a locale never reads another locale's rendering, so there is no
 shared state and no merge conflict between them.
 
-**Two precedence rules, both learned the expensive way.**
+**Three precedence rules, all learned the expensive way.**
 
 - **A term row fixes the lexeme. It does not fix the shape.** A row's `Example:` line
   shows the term in use; it is not a ruling that the cited key keeps that grammatical
@@ -35,6 +35,22 @@ shared state and no merge conflict between them.
   above a sibling title written in the other shape.
 - **Terms outrank the length budget.** The budget exists to stop *avoidable* length. If a
   term rule forces a long label, that is the term rule doing its job.
+- **A guard that rejects copy you believe is correct is a finding against the guard, not
+  license to rewrite what you believe is right.** This is the general rule the length one
+  above is a single instance of, stated once so it applies to every mechanical check, not
+  only that one: don't absorb the workaround into the string — a rendering distorted to
+  satisfy a guard ships a defect just as surely as one that fails the guard outright, and
+  it is harder to find afterwards because nothing is red. Escalate to the controller
+  instead, who has two entry points for exactly this, both keyed by `locale:namespace:key`
+  and both requiring a reason (an unexplained entry throws at module load):
+  `IDENTICAL_ALLOWLIST` (`scripts/locale-rules.mjs`) when a value is legitimately
+  byte-identical to English, and `LENGTH_EXEMPTIONS` (same file) when a correct rendering
+  legitimately breaches the length-ratio cap. The shipped example: German's tab label for
+  Import/Export is spelled exactly as English spells it — the correct German nouns for
+  both operations — and the alternative that reads differently, the infinitive pair
+  "Importieren / Exportieren", is the wrong control shape for a tab label. That is now an
+  `IDENTICAL_ALLOWLIST` entry, not a tab relabelled to dodge the check. Ask for the entry;
+  do not write around the check.
 
 ## The file you edit, and where you run things
 
@@ -673,9 +689,14 @@ made the reviewer's verdicts checkable. Hand the reviewer the output.
 1. **The numeral-agreement detector, both axes.**
    - **Token axis.** Skip every placeholder that cannot hold a number. In this app
      that is `count` (its own family handles it) plus `module`, `instance`, `language`,
-     `languages`, `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`, `keys`,
+     `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`, `keys`,
      `slug`, `type`, `focus`, `field`, `why`, `label`, `filename`, `id`, `time` and
-     `passRate`.
+     `passRate` — 22, not 23: `languages` was removed 2026-08-11 (a wave-1 defect
+     report), because `config:templateMeta` interpolates it with a plain count
+     (`template.config.activeLanguages.length`), not a name list, and skipping it made
+     that key's numeral-agreement hazard invisible to every language whose nouns
+     inflect. Checked by opening the `t()` call site, the same standard the other 22
+     were re-checked against, not by re-reading the name.
    - **Word axis.** On what survives the token axis, clear the next words that cannot
      inflect — prepositions and particles, invariant abbreviations, short and impersonal
      participles.
@@ -711,8 +732,8 @@ made the reviewer's verdicts checkable. Hand the reviewer the output.
      because a number without both is not reproducible and a plausible-looking
      explanation for how it moved can still be wrong even when its total is right.
    - **What survives both passes is a candidate, not a verdict.** The token axis only skips
-     the 23 placeholders someone has confirmed cannot hold a number, and this app has **73**
-     distinct placeholders — so 50 of them survive the first pass whether or not they are
+     the 22 placeholders someone has confirmed cannot hold a number, and this app has **73**
+     distinct placeholders — so 51 of them survive the first pass whether or not they are
      numeric, including plainly textual ones like `{{category}}`, `{{text}}` and `{{rules}}`.
      A survivor means "nobody has cleared this yet". Look at each one, decide whether the
      value can be a number at all, and only then check the agreement by hand at several

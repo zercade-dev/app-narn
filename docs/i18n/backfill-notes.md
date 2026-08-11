@@ -235,10 +235,14 @@ output.
 1. **The numeral-agreement detector, both axes.**
    - *Token axis:* skip every placeholder that cannot hold a number. In this app
      that is `count` (its family handles it) plus `module`, `instance`, `language`,
-     `languages`, `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`,
+     `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`,
      `keys`, `slug`, `type`, `focus`, `field`, `why`, `label`, `filename`, `id`, `time`,
-     `passRate`. The last eight are missing from the list in `style/ru.md` and each one
-     costs a false positive.
+     `passRate`. 22, not 23, as of 2026-08-11: `languages` was removed as a wave-1 defect
+     — `config:templateMeta` interpolates it with a plain count, not a name list, which
+     made that key's hazard invisible to every inflecting language. This figure moved;
+     the 187/19/0 figures below did not (ru's own `{{languages}}` occurrences were never
+     among them — see `scripts/i18n-preflight.mjs`'s NUMERAL_TOKEN_SKIPLIST comment for
+     how that was verified).
    - *Word axis:* on what survives the token axis, clear invariant next words —
      prepositions and particles, invariant abbreviations, short and impersonal
      participles.
