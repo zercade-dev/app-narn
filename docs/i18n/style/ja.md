@@ -443,11 +443,17 @@ locale file.
   shipped that.
   **The licence has one hard boundary, and batch 2 crossed it once.** A collapse is licensed
   only where the two keys **cannot co-render**. *Translate* was in the list above until review
-  found that `strings:guide.groupTranslate` and `strings:tabs.strings` render nested, one inside
-  the other, in the sidebar — see the group-heading section below. Before licensing a collapse,
-  check the call sites for containment, not just for "different screens": number and
-  part-of-speech carry no information into Japanese, but a group/member distinction does, and it
-  is visible at exactly the moment the two are stacked.
+  found that its rendering would reach the sidebar and land on top of `strings:tabs.strings` —
+  see the group-heading section below for the mechanism, which is **not** direct co-rendering
+  and is the more useful thing to know.
+  **Co-rendering is a property of the whole rail, not of a parent-child pair.** A first draft of
+  this rule said "check the call sites for containment", which is too narrow: `Sidebar.tsx`
+  renders every group and every tab into one scrolling column, so any two labels in it are on
+  screen together whether or not one contains the other. That is why the Config/Settings hazard
+  in the surface table needs its own hand-written warning — 「設定」 and a batch-4 *Settings*
+  rendering would never be parent and child, and would still sit six rows apart in one rail.
+  Number and part-of-speech carry no information into Japanese; a group/member distinction, or
+  two different surfaces, do.
 
 ## Surface names settled so far — repeat these verbatim
 
@@ -500,30 +506,73 @@ Five headings are shared; each side has one the other lacks.
 | Review | Review | 「レビュー」 | `sidebar:groups.review` |
 | Terminology | Terminology | 「用語」 | `sidebar:groups.content` |
 | Maintenance | Maintenance | 「メンテナンス」 | `sidebar:groups.maintenance` |
-| Translation Memory | Translation Memory | 「翻訳メモリ」 | **nothing** — there is no such sidebar group; Translation Memory is the sidebar *item* `sidebar:translationMemory`, covered by its own surface row above |
+| Translation Memory | Translation Memory | 「翻訳メモリ」 | **no sidebar group** — Translation Memory is the sidebar *item* `sidebar:translationMemory`, covered by its own surface row above. It is not unswept, though: in the **guide** rail it sits directly above its only child `guide.topicTranslationMemory` 「翻訳メモリ」, an exact equality collision that is **licensed** because English writes the identical pair. See sweep 1 below |
 | Page | Page | — | `sidebar:groups.page` has **no** `strings:guide` counterpart; batch 4 decides it alone |
 
 See the *Review (the sidebar group)* row in `terminology/ja.md` for why the umbrella is レビュー
 and not one of its four members' words.
 
-**A group heading and the tabs nested under it DO co-render, so the collapse licence does not
-reach them.** `components/layout/Sidebar.tsx:132-175` nests each group's tabs directly under its
-heading, so the two keys are on screen simultaneously — one inside the other — which is exactly
-the condition the surface-name rule ("the two keys are never on screen at the same moment")
-assumes away. Batch 2 shipped `strings:guide.groupTranslate` as 「翻訳」 and that put the heading
-「翻訳」 directly above its first child `strings:tabs.strings` 「翻訳」. **The tab is not the thing to
-change** — batch 1 anchored it in prose at `config:routing.categoriesConfiguredHint`
-「カテゴリは翻訳タブで設定します。」 — so the *group* took the distinct word, 「翻訳作業」. Every other
-locale keeps the pair apart too (en Translate/Translations, ru Перевод/Переводы,
-de Übersetzen/Übersetzungen, tr Çeviri/Çeviriler).
+### Why `groupTranslate` is 「翻訳作業」 — a latent collision, not a live one
 
-**All six groups were then checked against their own children, not just the one that failed.**
-Only `groups.translate` was an equality collision. Two are prefix relationships and both are
-**licensed**: 「レビュー」 over 原文AIレビュー／翻訳AIレビュー／手動レビュー, and 「用語」 over 用語集 —
-in each case the heading is the general word and the child specialises it, which is the same
-group/member relationship English has (Review > Source AI review; Terminology > Glossary) and is
-how Japanese ordinarily expresses it. 「セットアップ」 and 「メンテナンス」 share nothing with their
-children. Do not re-open these two when batch 4 writes `sidebar:groups.*`.
+**`strings:guide.group*` does not render in the sidebar at all.** Its six call sites are all in
+`components/guide/guides-registry.ts` (`GUIDE_GROUPS[].titleKey`), painted by `GuideView.tsx:73`
+into the **guide page's own left rail**. The sidebar's group heading is `sidebar:groups.*`, under
+`useTranslation('sidebar')` at `Sidebar.tsx:197`/`:773` — a namespace batch 4 owns.
+`Sidebar.tsx:132-175` is the `NAV_GROUPS` data literal and contains no strings whatsoever. An
+earlier version of this section cited that range and claimed the two keys "render nested in the
+sidebar"; **they never do.**
+
+**The fix was still right, and the real mechanism is the one worth writing down.** The two
+headings are **byte-identical in English** ("Translate"), and the surface-name rule binds
+`sidebar:groups.translate` to copy whatever `strings:guide.groupTranslate` says. So a batch-2
+value of 「翻訳」 would have been copied into the sidebar by batch 4, and **there** it would sit
+directly above `strings:tabs.strings` 「翻訳」. The collision is **latent until batch 4**, mediated
+by the verbatim-copy rule rather than by any call site batch 2 owns.
+
+> **The generalisable lesson: a batch-2 key can seed a collision that only appears two batches
+> later, on a surface it does not itself render on.** Checking your own key's call sites is not
+> enough. Check the call sites of every key the copy rule binds to yours.
+
+The tab was not the thing to change — batch 1 anchored it in prose at
+`config:routing.categoriesConfiguredHint` 「カテゴリは翻訳タブで設定します。」 — so the *group* took
+the distinct word. Every other locale keeps the pair apart too (en Translate/Translations,
+ru Перевод/Переводы, de Übersetzen/Übersetzungen, tr Çeviri/Çeviriler).
+
+### The two sweeps, run separately because they are two different rails
+
+An earlier version ran one sweep, against the wrong surface, and concluded "only
+`groups.translate` was an equality collision". **That was false twice over**: it measured
+`guide.group*` against sidebar tabs, which never meet; and on the rail where `guide.group*`
+actually renders there **is** an equality collision, which the sweep missed.
+
+**Sweep 1 — the guide rail** (`guide.group*` over its own `guide.topic*` children):
+
+| Heading | Children | Verdict |
+| --- | --- | --- |
+| 「セットアップ」 | 「クイックセットアップ」 + 11 others | **prefix, licensed — English does the same** (Setup > Quick Setup) |
+| 「翻訳作業」 | 翻訳タブ・比較タブ・振り分けタブ・アクティビティ・疑似テスト | clear |
+| 「レビュー」 | AIレビュー・品質 | prefix, licensed — English does the same (Review > AI Review) |
+| 「用語」 | 用語集タブ・カテゴリタブ | prefix, licensed — **but not because English mirrors it**, see below |
+| 「メンテナンス」 | 孤立エントリタブ・バックアップタブ | clear |
+| 「翻訳メモリ」 | 「翻訳メモリ」 — its **only** child | **exact equality, live today — licensed** |
+
+**`guide.groupTranslationMemory` over `guide.topicTranslationMemory` is an equality collision and
+stays.** English writes the identical pair ("Translation Memory" over "Translation Memory"), a
+one-topic group named after its topic, and es/fr/ru/de/tr all render the two identically. Copying
+that is faithfulness, not drift — the earlier table's "Owed by: nothing" cell is what hid it from
+the sweep. Do not "fix" it.
+
+**「用語」 over 用語集 stands, but the grounds are not "English mirrors it".** English's
+*Terminology* and *Glossary* share no substring, so that premise fails precisely here. The real
+ground is in `terminology/ja.md`'s *glossary term* row: 用語 and 用語集 are **one word family**,
+with the head 集 ("collection") carrying the distinction — a 用語集 is literally a collection of
+用語. That is how Japanese expresses this relationship, and it is why no second word is needed.
+
+**Sweep 2 — the sidebar rail** (`sidebar:groups.*`, batch 4, over `strings:tabs.*`, batch 2).
+This is the sweep the table above was really describing. With `groups.translate` at 「翻訳作業」
+there is no equality collision; 「レビュー」 over the three ～レビュー tabs and 「用語」 over 用語集 are
+the same two licensed prefixes, on the same grounds. `groups.page` has no `guide` counterpart and
+is batch 4's alone. Do not re-open any of these when batch 4 writes `sidebar:groups.*`.
 
 **`config:fullReplaceOrphanNotice` says *Relink tab* in English. There is no such tab** —
 it is the known stale English name for Orphans, and Japanese ships the Orphans rendering.
