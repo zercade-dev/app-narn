@@ -1004,13 +1004,25 @@ reviews and in this runbook, and they sharpened rule 3 into three corollaries. E
 because it cost a round.
 
 - **A standing claim is re-derived when you touch the paragraph it lives in, not only when
-  you write a new one.** One guide asserted that a guard does not read style guides. The
-  guard had read them since round 1; the script says so in its own header. The sentence
-  survived three passes — the batch that wrote it, a later batch that edited the bullet
-  directly beneath it, and a reviewer who read the block — and the translator who finally
-  fixed it had been holding the falsifying evidence in its own report all along, in the form
-  of that same guard rejecting one of its style-guide citations. **Evidence you have already
-  written down is not evidence you have read.**
+  you write a new one.** One guide asserted that a guard does not read style guides. **That
+  sentence was true when it was written, and false thirty minutes later** — the guard was
+  extended in the same session, and nobody went back. It then survived three passes: the
+  batch that wrote it, a later batch that edited the bullet directly beneath it, and a
+  reviewer who read the whole block. The translator who finally fixed it had been holding the
+  falsifying evidence in its own report all along, in the form of that same guard rejecting
+  one of its style-guide citations. **Evidence you have already written down is not evidence
+  you have read.**
+
+  The direction that actually costs least is the reverse one: **when you change a tool, grep
+  the docs for claims about it, in the same commit.** A sentence about tooling does not rot
+  gradually — it flips the moment the tool ships, and everything written before that moment
+  is now a claim nobody has re-checked.
+
+  **Never quote a run's counters as evidence in a document.** "345 citations checked today"
+  is stale on the next commit, and worse, it is a *global* count across every locale, so a
+  batch in another language invalidates a number sitting in yours. The one instance of this
+  in the programme was wrong on arrival — no run at that tree ever printed the figure it
+  quoted. State what the tool *does*; let the tool state its own counts.
 - **A right answer with an unfounded reason is the failure mode that leaves no trace.** It
   appeared in all three wave-1 languages and is the commonest defect this process finds:
   nothing downstream breaks, so nothing signals, and the reason goes on to mislead the batch
