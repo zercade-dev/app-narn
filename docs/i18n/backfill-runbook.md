@@ -976,6 +976,32 @@ act on it.** An assertion about a file travelled through three agents in the pil
 anyone opened the file. Three separate defects had exactly that shape, and each one was a
 single command away from being falsified.
 
+The first three-language backfill produced **seven** more of them, in style guides, in
+reviews and in this runbook, and they sharpened rule 3 into three corollaries. Each is here
+because it cost a round.
+
+- **A standing claim is re-derived when you touch the paragraph it lives in, not only when
+  you write a new one.** One guide asserted that a guard does not read style guides. The
+  guard had read them since round 1; the script says so in its own header. The sentence
+  survived three passes — the batch that wrote it, a later batch that edited the bullet
+  directly beneath it, and a reviewer who read the block — and the translator who finally
+  fixed it had been holding the falsifying evidence in its own report all along, in the form
+  of that same guard rejecting one of its style-guide citations. **Evidence you have already
+  written down is not evidence you have read.**
+- **A right answer with an unfounded reason is the failure mode that leaves no trace.** It
+  appeared in all three wave-1 languages and is the commonest defect this process finds:
+  nothing downstream breaks, so nothing signals, and the reason goes on to mislead the batch
+  that inherits it. One guide justified a correct verb choice with "German has no verb for
+  *review*" — a false absolute that also omitted the verb the same batch shipped seven
+  times, so a later batch following it literally would have written the wrong one. **When a
+  reason is corrected, leave the correction visible in the file** rather than rewriting it
+  away; a quietly repaired proof is indistinguishable from one that was always sound.
+- **Faithfulness to a defect in the English is not a licence to ship one the English does
+  not have.** A batch kept a clause bare because the English is bare, reasoning from a
+  documented English defect — but English's imperative and bare noun phrase are homographic
+  and the target language's are not, so the "faithful" rendering produced a different and
+  worse sentence. Reproduce the *effect* the English has on its reader, not its surface.
+
 ---
 
 ## 7. After the last batch: the whole-language sweep
