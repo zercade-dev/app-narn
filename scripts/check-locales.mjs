@@ -27,6 +27,12 @@
  *          `LOCALE_PARITY_STRICT` promotes ALL of a locale's gaps, including
  *          the forgiven ones, so a backfill can hold ITS locale to the full
  *          category set without reddening the rest.
+ *   DEFER a locale declared in WIP_LOCALES is mid-backfill and incomplete by
+ *          construction, so its uncreated namespace files and its values still
+ *          identical to English are counted and printed rather than failed.
+ *          Nothing else is deferred, LOCALE_PARITY_STRICT is unaffected either
+ *          way, and a declaration that has stopped deferring anything is itself
+ *          a failure. See WIP_LOCALES in the rules module.
  *
  * A summary line is printed even on success, including how many values were
  * compared: a green run that compared nothing is the failure mode this whole
@@ -41,11 +47,15 @@ import {
   REFERENCE_LOCALE,
   collectCoverageGaps,
   collectLegacyPluralKeys,
+  collectWipDeferrals,
   describeEnforcedGap,
+  describeWipLocale,
   doNotTranslateOffenders,
   enforcedCoverageGapFamilies,
+  enforcedForWipLocale,
   formatCoverageGap,
   identicalValueOffenders,
+  isWorkInProgress,
   invalidLeafValues,
   keyOrderOffenders,
   lengthOffenders,
@@ -57,6 +67,7 @@ import {
   pairsFor,
   placeholderOffenders,
   staleAllowlistKeys,
+  staleWipLocales,
   summarizeCoverageGap,
   thinAllowlistReasons,
   uncomparedNamespaces,
@@ -111,7 +122,13 @@ for (const locale of allLocales) {
   const { missing, extra } = namespaceDiff(locales, locale);
   fail(
     `${locale}: missing namespace files`,
-    missing.map((namespace) => `${namespace}.json is present in ${REFERENCE_LOCALE} only`),
+    // Deferred for a work-in-progress locale — those are the batches it has not
+    // reached yet. `extra` below is NOT deferred: a namespace with no English
+    // counterpart is a stale or misnamed file at every point in a backfill.
+    enforcedForWipLocale(
+      locale,
+      missing.map((namespace) => `${namespace}.json is present in ${REFERENCE_LOCALE} only`),
+    ),
   );
   fail(
     `${locale}: unexpected namespace files`,
@@ -140,9 +157,19 @@ for (const locale of allLocales) {
 
   fail(`${locale}: placeholder integrity`, placeholderOffenders(pairs, locale));
   fail(`${locale}: do-not-translate terms`, doNotTranslateOffenders(pairs, locale));
-  fail(`${locale}: values identical to ${REFERENCE_LOCALE}`, [
-    ...identicalValueOffenders(pairs, locale, usedAllowlistKeys),
-  ]);
+  // A WIP locale's identical values are deferred wholesale, so the allowlist
+  // suppresses nothing for it: tally into a throwaway set rather than let a
+  // mid-backfill language keep a dead entry alive for the finished locales.
+  fail(
+    `${locale}: values identical to ${REFERENCE_LOCALE}`,
+    enforcedForWipLocale(locale, [
+      ...identicalValueOffenders(
+        pairs,
+        locale,
+        isWorkInProgress(locale) ? new Set() : usedAllowlistKeys,
+      ),
+    ]),
+  );
   fail(`${locale}: length sanity`, lengthOffenders(pairs, locale));
   fail(`${locale}: key order`, keyOrderOffenders(locales, locale));
   fail(
@@ -160,6 +187,30 @@ fail(
   staleAllowlistKeys(usedAllowlistKeys),
 );
 fail('IDENTICAL_ALLOWLIST entries needing a real reason, not a word', thinAllowlistReasons());
+
+// --- Work-in-progress locales ----------------------------------------------
+// Printed on every run, green or red, because a deferral nobody can see is a
+// weakened gate nobody can see. The stale check below is the other half: a
+// declaration that has stopped deferring anything names a finished language, so
+// the run that finishes it is the run that demands the entry be deleted.
+const wipDeferrals = collectWipDeferrals(locales);
+const wipLocales = [...wipDeferrals.keys()];
+
+if (wipLocales.length > 0) {
+  console.log(
+    `check-locales: NOTE — ${wipLocales.length} locale(s) declared work-in-progress. Missing ` +
+      `namespace files and values identical to ${REFERENCE_LOCALE} are NOT checked for them; ` +
+      `every other rule is:`,
+  );
+  console.log(
+    wipLocales.map((locale) => describeWipLocale(locale, wipDeferrals.get(locale))).join('\n'),
+  );
+}
+
+fail(
+  'WIP_LOCALES entries that defer nothing (the language is finished — delete them)',
+  staleWipLocales(locales, wipDeferrals),
+);
 
 // --- Keys referenced in source ---------------------------------------------
 // The one rule here that does NOT compare locales against each other, and so
@@ -262,8 +313,15 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
+// The work-in-progress clause is appended only when there is one, so the line a
+// repository with no backfill in flight prints is exactly the line it printed
+// before this mechanism existed.
 console.log(
   `check-locales: OK — ${allLocales.length} locales, ${namespaceCount} namespaces, ` +
     `${valuesCompared} values compared, ${usedKeys.filesScanned} source files scanned, ` +
-    `${usedKeys.bindingsTracked} t() bindings tracked`,
+    `${usedKeys.bindingsTracked} t() bindings tracked` +
+    (wipLocales.length > 0
+      ? `, ${wipLocales.length} work-in-progress (${wipLocales.join(', ')}) — incomplete on ` +
+        `purpose, see the NOTE above`
+      : ''),
 );

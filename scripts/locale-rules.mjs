@@ -165,6 +165,111 @@ export function isStrictFor(locale, strictEnv = STRICT_ENV) {
   return value.split(',').some((entry) => entry.trim() === locale);
 }
 
+// ---------------------------------------------------------------------------
+// Work-in-progress locales
+// ---------------------------------------------------------------------------
+
+/**
+ * Locale directory -> why this language is mid-backfill. Two rules, and only
+ * those two, stop applying to a declared locale.
+ *
+ * WHY THIS EXISTS. A language is translated over six batches (see
+ * docs/i18n/backfill-runbook.md), so between batch 1 and batch 6 it is
+ * INCOMPLETE BY CONSTRUCTION and there is no state in which the whole gate can
+ * pass. Measured against these rules with a synthetic German locale: create
+ * only batch 1's namespace and the run fails with 23 missing namespace files;
+ * pre-copy all 24 English files instead, so that nothing is missing, and it
+ * fails with 735 values byte-identical to English. Every translator meets that
+ * on day one, for five of six batches, and the documented instruction is to run
+ * the gate every time. A gate that is red for reasons everyone is told to
+ * ignore is a gate that gets ignored, and then deleted.
+ *
+ * WHAT A DECLARATION BUYS, exhaustively:
+ *
+ *   - namespace files the reference has and this locale does not — the batches
+ *     it has not started yet. namespaceDiff's `extra` still fails: a namespace
+ *     with no reference counterpart is a stale or misnamed file, which is a
+ *     defect at every point in a backfill rather than a batch that has not
+ *     happened.
+ *   - values still byte-identical to English (identicalValueOffenders).
+ *
+ * WHAT IT DOES NOT BUY — anything. Every other rule applies in full from batch
+ * 1, because every other rule is scoped to the namespaces the locale DOES have:
+ * key parity within a namespace, placeholder integrity, do-not-translate terms,
+ * key order, length sanity, plural-suffix legality and plural-category
+ * coverage. Those are the rules that catch a defect a translator can fix today,
+ * and a batch that trips one of them is wrong, not unfinished.
+ *
+ * The declaration is explicit and carries a reason, like LENGTH_EXEMPTIONS and
+ * for the same reason: a locale that became work-in-progress by inference — "it
+ * has fewer files than en, so someone must be working on it" — is exactly how a
+ * half-translated language ships. An entry with no reason throws at module
+ * load.
+ *
+ * It cannot be forgotten in either direction. Every CLI run prints a line per
+ * declared locale naming what is deferred, so the state is in the log of every
+ * check run while the language is in flight; and the moment the language is
+ * finished — every namespace present, no value left identical to English — the
+ * entry suppresses nothing and staleWipLocales() turns it into a hard failure
+ * saying to delete it. The gate lifts the exemption, not a memory.
+ */
+export const WIP_LOCALES = {};
+
+for (const [locale, reason] of Object.entries(WIP_LOCALES)) {
+  if (!reason || !reason.trim()) {
+    throw new Error(
+      `WIP_LOCALES.${locale} has no reason — an unexplained work-in-progress locale is ` +
+        `indistinguishable from a half-translated one nobody remembers.`,
+    );
+  }
+  if (locale === REFERENCE_LOCALE) {
+    throw new Error(
+      `WIP_LOCALES."${REFERENCE_LOCALE}" is the reference locale — every rule here is defined ` +
+        `against it, so it is what "complete" means and cannot itself be work-in-progress.`,
+    );
+  }
+}
+
+/**
+ * Is this locale declared work-in-progress?
+ *
+ * DELIBERATELY UNRELATED TO LOCALE_PARITY_STRICT, which is the interaction that
+ * matters most here: the runbook tells a translator to run
+ * `LOCALE_PARITY_STRICT=<lang> pnpm check:locales` from the FIRST batch, so a
+ * strict mode that also cancelled the work-in-progress exemption would leave
+ * the one command the procedure mandates red for five of six batches, which is
+ * the whole defect this mechanism exists to remove.
+ *
+ * They are orthogonal because they govern different rules, not because one
+ * outranks the other. STRICT_ENV is consulted in exactly two places —
+ * enforcedCoverageGapFamilies() and describeEnforcedGap() — and both are about
+ * plural-category coverage: it is a severity knob for plurals, not a general
+ * "forgive nothing" switch, and it has never had an opinion about namespace
+ * completeness or identical values. So the combination a translator actually
+ * runs, strict AND work-in-progress, is the strictest available reading of a
+ * partial locale: every plural family already written is held to the language's
+ * complete category set with no bare-key rescue and no grandfathering, while
+ * the namespaces batch 4 has not reached are not reported as missing.
+ */
+export function isWorkInProgress(locale, wipLocales = WIP_LOCALES) {
+  return Object.hasOwn(wipLocales, locale);
+}
+
+/**
+ * The findings of a WIP-deferrable rule that this locale is still held to.
+ *
+ * Shaped like enforcedCoverageGapFamilies(): the rule itself keeps reporting
+ * everything it sees, and severity is decided in one shared place that both
+ * callers go through. Passing a rule's findings through this is what makes a
+ * rule deferrable, so the set of deferrable rules is the set of call sites —
+ * two of them, listed in WIP_LOCALES above. Do not add a third without an
+ * argument as concrete as the one there: a rule that a batch could have
+ * satisfied is not unsatisfiable, it is unsatisfied.
+ */
+export function enforcedForWipLocale(locale, findings, wipLocales = WIP_LOCALES) {
+  return isWorkInProgress(locale, wipLocales) ? [] : findings;
+}
+
 /**
  * `zero` is legal in EVERY locale regardless of its CLDR categories. i18next
  * appends an explicit `key_zero` lookup whenever count === 0, independent of
@@ -1164,6 +1269,102 @@ export function thinAllowlistReasons() {
   return Object.entries(IDENTICAL_ALLOWLIST)
     .filter(([, reason]) => reason.trim().split(/\s+/).length < 5)
     .map(([id]) => id);
+}
+
+// ---------------------------------------------------------------------------
+// Work-in-progress accounting
+// ---------------------------------------------------------------------------
+//
+// The declaration and the severity switch are up with LOCALE_PARITY_STRICT, the
+// other severity switch; what follows needs identicalValueOffenders() and so
+// cannot live there. It sits here rather than anywhere else because it is the
+// same shape as the two functions above: a suppression that suppresses nothing
+// is a hard failure, not a shrug.
+
+/**
+ * What each declared work-in-progress locale is actually deferring, as
+ * `locale -> { missingNamespaces, identicalValues }`.
+ *
+ * ONE implementation for both callers, because the two consumers of this ask
+ * different questions of the same answer — the CLI prints it, the vitest guard
+ * asserts a declaration still earns its place — and a locale that looked
+ * finished to one and unfinished to the other would put the two repos back into
+ * exactly the drift this module exists to prevent.
+ *
+ * The allowlist tally is a THROWAWAY set, deliberately. A WIP locale's
+ * identical values are deferred wholesale, so IDENTICAL_ALLOWLIST is not
+ * suppressing anything for it; letting it mark entries used would let a
+ * mid-backfill language keep a dead suppression alive for the finished ones,
+ * which is the staleAllowlistKeys() check quietly losing its teeth.
+ *
+ * Locales with no directory on disk are skipped here and reported by
+ * staleWipLocales(), which is the function that can say why.
+ */
+export function collectWipDeferrals(
+  locales,
+  referenceLocale = REFERENCE_LOCALE,
+  wipLocales = WIP_LOCALES,
+) {
+  const deferrals = new Map();
+  for (const locale of Object.keys(wipLocales).sort()) {
+    if (!locales.has(locale)) continue;
+    deferrals.set(locale, {
+      missingNamespaces: namespaceDiff(locales, locale, referenceLocale).missing,
+      identicalValues: identicalValueOffenders(
+        pairsFor(locales, locale, referenceLocale),
+        locale,
+        new Set(),
+      ),
+    });
+  }
+  return deferrals;
+}
+
+/** One declared locale as a single line, naming what it is deferring and why. */
+export function describeWipLocale(locale, deferred, wipLocales = WIP_LOCALES) {
+  const namespaces = deferred?.missingNamespaces ?? [];
+  const identical = deferred?.identicalValues ?? [];
+  return (
+    `  ${locale}: ${namespaces.length} namespace file(s) not created yet and ` +
+    `${identical.length} value(s) still identical to ${REFERENCE_LOCALE} — both deferred and ` +
+    `NOT checked. Reason: ${wipLocales[locale]}`
+  );
+}
+
+/**
+ * Work-in-progress declarations that no longer suppress anything, as failure
+ * messages. The mirror of staleAllowlistKeys(), and the reason a translator
+ * cannot forget to lift the exemption: the run that first has every namespace
+ * present and nothing left identical to English is the run that goes red and
+ * says to delete the entry. There is no window in which a finished language
+ * sits under a weakened gate.
+ *
+ * A declaration naming a locale with no directory at all is the same finding
+ * wearing a different hat — it suppresses nothing, and it also means nothing is
+ * checking the language it names, so it is worth its own sentence.
+ */
+export function staleWipLocales(locales, deferrals, wipLocales = WIP_LOCALES) {
+  const stale = [];
+  for (const locale of Object.keys(wipLocales).sort()) {
+    if (!locales.has(locale)) {
+      stale.push(
+        `${locale}: declared work-in-progress, but there is no ${locale}/ locale directory — ` +
+          `nothing is deferred and nothing is being checked under that name`,
+      );
+      continue;
+    }
+    const deferred = deferrals.get(locale);
+    const total =
+      (deferred?.missingNamespaces.length ?? 0) + (deferred?.identicalValues.length ?? 0);
+    if (total === 0) {
+      stale.push(
+        `${locale}: every namespace is present and no value is still identical to ` +
+          `${REFERENCE_LOCALE}, so this language is finished — delete the WIP_LOCALES entry and ` +
+          `let the full gate apply to it`,
+      );
+    }
+  }
+  return stale;
 }
 
 // ---------------------------------------------------------------------------
