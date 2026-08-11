@@ -72,7 +72,14 @@ English ("Select a model") and are two different controls; they ship as "Modell 
 | Select / combobox placeholder | **infinitive phrase**, not a title | `config:enableModulePlaceholder`, `config:routing.simplePlaceholder` |
 | Table column header | **bare noun**, and it keeps English's abbreviation where English has one | `config:models.colParameters` "Param.", `config:models.colQuantization` "Quant." |
 | Progress / status text | **`wird` + participle**, or a deverbal noun — never an infinitive, which would read as a command | `config:autoSaveSaving` "Wird gespeichert…", `config:duplicating` "Wird dupliziert…", `config:importing` "Import läuft…" |
-| Inline fragment inside a summary row | lowercase-initial adjective + noun, no sentence punctuation | `config:routing.anySource` "beliebige Herkunft", `config:routing.noModule` "kein Modul" |
+| Inline fragment inside a summary row | **determiner + noun**, lowercase-initial, no sentence punctuation | `config:routing.anySource` "jede Herkunft", `config:routing.anyLang` "jede Sprache", `config:routing.noModule` "kein Modul" |
+
+**The summary-row shape is a determiner, not an adjective**, and that is the part worth
+copying rather than the word. English's *any* invites a German adjective (*beliebig*), which
+costs five characters in the densest row in the app for no gain; the determiner *jede* says
+the same thing and is what German writes here. It also stays distinct from *alle*, which is
+spent on the "All …" select options (`config:routing.allTones`, `config:routing.allCategories`)
+— English separates *any* from *all* in exactly the same two places.
 
 **German collapses the title/button distinction that other languages keep.** A dialog title
 naming an action and the button that performs it are both "Projekt löschen", because the
@@ -115,7 +122,9 @@ later batch grep for the rendering and repeat it: `config:importSnapshotNote` "i
 ## Casing
 
 German capitalizes **all nouns**. That is orthography, not Title Case, and it applies
-regardless of what English does: "Projekt löschen", "Routing-Regeln", "Übersetzungsspeicher".
+regardless of what English does: "Projekt löschen", "Routing-Regeln", "Zeilenumbruchparität"
+(all three shipped, at `config:deleteProject`, `config:routing.title` and
+`config:lqa.checks.line-break-parity.name`).
 
 The address pronouns are the counter-example: _du_, _dich_, _dir_, _dein_ and their
 inflections are **lowercase** in current orthography — never capitalized as an honorific in
@@ -152,7 +161,10 @@ is a noun and capitalized ("Deutsch").
 ## Numbers and dates
 
 Decimal comma, thousands point: `1.234,56`. A no-break space before `%` — `config:health.successRate`
-is "Erfolg {{rate}} %" and `config:models.gpuPlacement` is "{{pct}} % GPU", both with U+00A0.
+is "Erfolg {{rate}} %" and `config:models.gpuPlacement` is "{{pct}} % GPU". **Both spaces
+in that sentence are literal U+00A0**, copied from the shipped values — an earlier draft of
+this line wrote them as ordinary spaces while claiming otherwise, which is a citation that
+teaches the exact mistake it is warning about. Copy the character, do not retype it.
 
 **One exception, and it is not a style call: a number the reader types back into a field
 keeps the format that field parses.** `config:overflowRatioDescription` documents the default
@@ -196,8 +208,16 @@ the token axis** — so `de` has no word-axis exemption list and needs none yet.
 ## Length discipline
 
 German runs **10–35% longer** than English, and the worst case is not the sentence but the
-**single unbreakable compound**: "Anmeldeinformationen", "Übersetzungsspeicher",
-"Qualitätssicherungsprüfungen". A compound that overflows cannot wrap, so it clips.
+**single unbreakable compound**: "Schlusszeichensetzung" (21) and "Kontextübereinstimmung"
+(22) both shipped in batch 1, at `config:lqa.checks.end-punctuation.name` and inside
+`config:tm.policyStrict`. A compound that overflows cannot wrap, so it clips.
+
+This rule has already **decided two terms**, which is the clearest evidence that it is worth
+holding: *Anmeldeinformationen* (21) was rejected for **credential** in favour of
+"Zugangsdaten", and *Übersetzungsspeicher* (20) was rejected for **translation memory** in
+favour of "Translation Memory" — see `terminology/de.md`. Both are correct German and
+neither is what this locale ships; do not reintroduce either from an older draft of this
+file, which used both as examples.
 
 The space-constrained surfaces are sidebar items (`sidebar:translationMemory`,
 `sidebar:globalConfig`), tab labels (`strings:tabs.strings`, `strings:tabs` for
@@ -241,11 +261,14 @@ correctness.
 The sidebar figure is derived from that fixed container, so it is a property of the UI and
 carries over to every language unchanged — treat it as binding from the first string.
 
-The four soft budgets are deliberately **not** filled in, and must not be copied from
+**Three of the four soft budgets are still empty**, and none of the four may be copied from
 another language's guide: the numbers in `style/ru.md` were measured from Russian's own
-shipped strings and mean nothing here. Measure them the same way once German ships — the
-longest rendering each class actually needed, rounded up — and write them into this table
-then. Until they exist, the instruction for a soft class is "as short as the term allows,
+shipped strings and mean nothing here. The tab-label row is the one exception — batch 1
+filled it with a provisional figure from the three tab labels `config` turned out to hold,
+and the paragraph below says why that number is a floor rather than a ceiling. Measure the
+other three the same way as their namespaces ship — the longest rendering each class
+actually needed, rounded up — and write them into this table then. Until they exist, the
+instruction for a soft class is "as short as the term allows,
 and never at the cost of the agreed rendering in `terminology/de.md`".
 
 **What batch 1 (`config`) contributes to that measurement.** `config` holds no sidebar item,
@@ -257,9 +280,12 @@ carries a **provisional 20**. The longest rendered value across the three is **1
 ("Import / Export"; the other two interpolate a count and render at ~11 and ~13), and 20 is
 that plus headroom. **Treat it as a floor, not a ceiling.** It was measured over a
 sub-tab bar of three short labels, not over the class anchor `strings:tabs.backup`; the main
-tab bar is batch 2's and holds far longer names — "KI-Review der Übersetzungen" alone is 27.
-Batch 2 raises this figure to whatever it actually needs and does **not** shorten a settled
-surface name to fit 20.
+tab bar is batch 2's and holds far longer names — a plausible rendering of *Translation AI
+review* runs to about 27 characters. **That last figure is a forecast, not a citation:**
+nothing in this locale ships a rendering of that tab yet, and the surface name belongs to
+batch 3 (see the *judge* row in `terminology/de.md`, which explicitly keeps the surface name
+out of the term). Batch 2 raises this figure to whatever it actually needs and does **not**
+shorten a settled surface name to fit 20.
 
 It also holds one table-column-header class — the model picker's `config:models.col*` —
 whose longest German rendering is **11** characters ("Fähigkeiten"); "Param." and "Quant."
@@ -355,9 +381,12 @@ Two habits that make this cheap:
   `config:tm.browserDescription`, `config:routing.simpleHint` and
   `config:importModeFullReplaceHint` are all passive for this reason.
 - **A number mismatch or a marked article is a proof, and it is worth arranging for one.**
-  `config:routing.defaultToneHelp` ("Einträge, die diese Regel übersetzt") is safe because
-  the verb is singular and the antecedent plural; `config:lqa.lengthLimitNote` ("Limits, die
-  der Spiel-Editor vorgibt") is safe because *der* is unambiguously nominative.
+  `config:routing.defaultToneHelp` ("Einträge verwendet, die diese Regel übersetzt") is safe
+  because the verb is singular and the antecedent plural; `config:lqa.lengthLimitNote`
+  ("Limits, die der Spiel-Editor vorgibt") is safe because *der* is unambiguously nominative.
+  Both spans are quoted **verbatim and unelided** — an earlier draft dropped the intervening
+  "verwendet," from the first one without marking the cut, which made a citation of a string
+  that does not exist.
 
 The same sweep also covers **attachment**: a relative pronoun binds the nearest matching
 antecedent. `config:lqa.checks.achievement-length-limit.description` first read as
@@ -370,8 +399,12 @@ adjacent, rather than trusting the reader to recover it.
 `scripts/check-lexicon-citations.mjs` attests a lexicon Rendering by longest-common-prefix,
 at 70% of the word's length (floor 3). That works for weak verbs and for noun plurals, and it
 **fails for exactly the verb class the register section tells you to use**: an e→i/ie stem
-change or an umlaut destroys the prefix. *freigeben* against a shipped *freigibst* shares 5
-of a required 7; *nehmen* against *nimm* shares 2; *lesen* against *lies* shares 2.
+change or an umlaut destroys the prefix. The required prefix is `max(3, ceil(0.7 × len))` of
+the *candidate*, so — counted, not estimated — *freigeben* against a shipped *freigibst*
+shares **5** where 7 is required; *nehmen* against *nimm* shares **1** where 5 is required;
+*lesen* against *lies* shares **1** where 4 is required; *geben* against *gib* shares **1**
+where 4 is required. The stem change lands on the second or third character, which is inside
+every one of those thresholds.
 
 **A failing citation is a defect in the row, not in the copy.** Put the form the string
 actually ships in the Rendering cell and the dictionary form in Notes — a quoted span in
