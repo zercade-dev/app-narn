@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Lexicon citation guard: does a rendering quoted in a per-locale terminology
- * file actually occur, in some form, in that locale's shipped strings?
+ * file, OR a shipped-key-adjacent rendering quoted in a per-locale STYLE
+ * GUIDE, actually occur, in some form, in that locale's shipped strings?
  *
  *   node scripts/check-lexicon-citations.mjs   (usually via `pnpm check:lexicon`)
  *
@@ -15,6 +16,14 @@
  * and nothing before this script said so. That gap is exactly what the pilot
  * needed most — a row quoting a stale rendering survived six rounds of human
  * review before the shipped file was checked directly.
+ *
+ * SINCE THEN, this script also reads `docs/i18n/style/<locale>.md` — the
+ * style guide a translator copies control shapes from, and which quotes
+ * shipped renderings constantly, in running prose rather than a lexicon
+ * table. That extension has its own header, "STYLE GUIDE CITATIONS", further
+ * down this file, right above checkStyleGuide() — read it before touching
+ * anything under that heading; the rules below this point are the ORIGINAL
+ * lexicon-table design and do not describe the style-guide path.
  *
  * SCOPE. Only the per-locale files this script targets,
  * docs/i18n/terminology/<locale>.md — not the shared docs/i18n/terminology.md,
@@ -221,6 +230,7 @@ import { UNSPACED_SCRIPT_LOCALES, flattenEntries, loadLocales } from './locale-r
 const APP_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const LOCALES_DIR = join(APP_ROOT, 'packages/frontend/src/locales');
 const TERMINOLOGY_DIR = join(APP_ROOT, 'docs/i18n/terminology');
+const STYLE_DIR = join(APP_ROOT, 'docs/i18n/style');
 
 // ---------------------------------------------------------------------------
 // Matching primitives
@@ -531,6 +541,502 @@ export function checkLocaleLexicon(locale, fileText, corpusWords, options) {
 }
 
 // ---------------------------------------------------------------------------
+// STYLE GUIDE CITATIONS — docs/i18n/style/<locale>.md
+// ---------------------------------------------------------------------------
+//
+// A style guide is running prose, not a Term/Rendering/Notes table, and it
+// quotes a shipped rendering constantly — "resolve the control, then here is
+// what it ships as". Nothing above this point ever opened these files: a
+// German sweep of `style/de.md` this round found five stale or malformed
+// citations among 106 quoted spans by hand, `style/ru.md` was found stale
+// three separate times in pre-flight, and a whole-branch review independently
+// flagged the gap as higher-value than a typography guard also on the table.
+// This section is the fix, reusing every primitive above it (KEY_SPAN,
+// isKeyLikeSpan, isPlaceholderReferenceSpan, renderingIsCovered,
+// UNSPACED_SCRIPT_LOCALES) rather than re-deriving them.
+//
+// WHAT COUNTS AS A CITATION HERE, and what does not.
+//
+// A style guide mixes three things that all look the same at a glance — a
+// quoted span of the target language — and only one of them is checkable:
+//
+//   1. A CITATION: a quoted span bound to a key whose NAMESPACE has already
+//      shipped for this locale. Checkable today, exactly like a lexicon
+//      Rendering cell.
+//   2. A PRESCRIPTION: a quoted span bound to a key whose namespace has NOT
+//      shipped yet (batch 1 today is `config`-only for de/tr/ja; ru shipped
+//      every namespace, so ru has no prescriptions left). It describes what
+//      that key MUST ship, not what it DOES ship, and checking it against
+//      today's corpus would either pass by pure accident (the words happen
+//      to occur elsewhere already) or fail for a reason that has nothing to
+//      do with the citation being wrong. `style/tr.md`'s own header block
+//      states this exact three-way split independently, in its own words,
+//      before this script read a single style guide — which is strong
+//      independent confirmation this is the right cut, not a rule invented
+//      to fit the four files it happened to be checked against.
+//   3. An ILLUSTRATION: a quoted span with NO key adjacent to it at all — a
+//      rejected candidate ("neither "Wähle ein Projekt aus" nor "Wählen Sie
+//      ein Projekt aus""), a wrong form shown as wrong, a declension
+//      paradigm, an English gloss under discussion. Never copied as a
+//      rendering, and — exactly as in a lexicon Notes cell (see WHAT COUNTS
+//      AS A CITATION above) — never extracted, because nothing marks it as a
+//      claim about shipped text. This is the SAME adjacency principle the
+//      lexicon rules already rely on, just applied to prose instead of a
+//      table cell.
+//
+// So there are two decisions, and they are independent: EXTRACTION decides
+// whether a quoted span is a citation-shaped candidate at all (adjacency);
+// NAMESPACE GATING decides whether a citation-shaped candidate is checkable
+// today (has its namespace shipped). A span can be citation-shaped and still
+// not be checked (a prescription); a span can never be citation-shaped no
+// matter how "future" it sounds (an illustration is never checked, and never
+// needs to be — it never claimed anything about the shipped corpus).
+//
+// EXTRACTION. Three shapes, tried in this order, over the file's PARAGRAPHS
+// (flattenStyleParagraphs joins a soft-wrapped paragraph into one line so a
+// citation split across a markdown line wrap — `style/de.md`'s
+// `config:health.successRate` example is exactly this — is still found; a
+// blank line remains a hard break, so one paragraph's trailing key can never
+// absorb the next paragraph's leading quote):
+//
+//   a. FORWARD, quote-delimited: `` `key` [("English gloss")] [connector]
+//      "span" ``. The optional parenthetical gloss is new relative to the
+//      lexicon Notes-cell forward pattern (STYLE_GLOSS below) — a style
+//      guide routinely restates the English source in parens before giving
+//      the rendering ("`sidebar:selectProject` ("Select a project") is
+//      "Projekt auswählen""), which the lexicon table never does because a
+//      lexicon row has no English-source column to restate. The connector
+//      itself is unchanged from the lexicon rule: up to three words plus
+//      optional `:`/`—`/`-` punctuation. A connector containing a NEGATION
+//      (`not`, `never`, `no longer`, `isn't`) is dropped rather than
+//      extracted — `` `key` is not "X"`` names X to reject it, the mirror
+//      image of "no key at all" for the illustration case above; no shipped
+//      style guide currently has this shape, but a citation guard that could
+//      be fooled by "is not" is worse than one with an explicit rule against
+//      it, at negligible cost.
+//   b. BACKWARD, quote-delimited: `` "span" (`key`) `` — unchanged from the
+//      lexicon rule.
+//   c. BARE PARENTHETICAL: `` `key` ("span") `` with NO connector or
+//      trailing quote at all — `style/de.md`'s own worked example for why
+//      this script exists: `` `config:routing.defaultToneHelp` ("Einträge
+//      verwendet, die diese Regel übersetzt") ``, a direct German citation in
+//      parens, no "is"/"ships" in sight. This shape is genuinely ambiguous
+//      with (a)'s gloss-only prefix — both are "`key` (something in
+//      parens)" — so it is accepted ONLY when (a)/(b) did not already
+//      consume that exact key+paren span (tracked by match range, not by
+//      re-parsing) AND the parenthetical contains a non-ASCII LETTER
+//      (hasNonAsciiLetter): an English gloss is, in every observed instance,
+//      pure ASCII text (aside from a stray "…" or em dash, neither of which
+//      is a letter), while a German/Turkish citation typically carries an
+//      umlaut/cedilla/dotless-i and a Russian or Japanese one is non-ASCII by
+//      definition. This is a heuristic, not a certainty, and it is
+//      documented as one rather than assumed: a German or Turkish citation
+//      written entirely in plain ASCII letters (`style/de.md`'s neighboring
+//      "Limits, die der Spiel-Editor vorgibt" is exactly this) is
+//      INDISTINGUISHABLE from an English gloss by this rule and is silently
+//      not checked — a known false negative, not a false positive, which is
+//      the direction this script has to fail in.
+//
+// THREE THINGS DELIBERATELY NOT DONE, each because the real content in
+// `style/de.md`, `style/ru.md`, `style/tr.md` and `style/ja.md` was read
+// first and shows why:
+//
+//   - NO adjacency-free "any non-key backtick span is a citation" rule (the
+//     lexicon Notes-cell rule 3), applied file-wide. Tried this in analysis
+//     and it fires on every symbol/regex/code illustration a style guide
+//     uses to teach its own sweeps: `` `;` ``, `` `„…“` ``, `` `1.234,56` ``,
+//     `` `\b(Sie|Ihr|Ihre|Ihnen)\b` ``, `` `toLowerCase()` ``,
+//     `` `Intl.PluralRules('tr')` `` — every one of these is a real backtick
+//     span in one of the four files today, none is a citation, and a bare
+//     "non-key, non-placeholder" filter (the lexicon rule) accepts most of
+//     them because they contain letters and are not key-shaped. Restricting
+//     extraction to KEY-ADJACENT quoted/parenthetical spans, as (a)-(c) do,
+//     structurally excludes every one of these without needing to enumerate
+//     them: none sits directly after a backtick key.
+//   - NO backtick-delimited citation body (`` `key` ships as `Word` ``,
+//     rather than in quotes). `style/ru.md` has exactly one instance,
+//     `` `config:models.useCustom` ships as `Использовать «{{model}}» как
+//     пользовательскую модель` `` — a real citation, missed by this design.
+//     Supporting it safely means telling it apart from every command/path
+//     backtick span two paragraphs later (`` `node
+//     scripts/i18n-preflight.mjs de` `` in `style/de.md` is the concrete
+//     instance — a backtick span containing WHITESPACE that is not a key and
+//     not a placeholder reference, exactly the trap this module's header
+//     already names for the lexicon Notes-cell rule and calls unexercised
+//     there; it is exercised here, by this exact string, and the fix is the
+//     same one item 3 already states: this design does not extract a bare
+//     backtick span as a citation AT ALL outside the quote/paren shapes
+//     above, so a command or path backtick span is simply inert — never a
+//     match target — rather than caught-and-excluded case by case). One
+//     missed citation, cleanly documented, beats a body of code trying to
+//     out-guess every future command example.
+//   - NO coverage of a "Surface | Rendering | Owning key" table row where the
+//     rendering and the key sit in DIFFERENT cells (`style/ru.md`'s Sharing
+//     row, `` | Sharing | «Доступ» | `strings:tabs.sharing` | ... | ``). The
+//     key-adjacency this whole design relies on does not hold across a `|`
+//     cell boundary, and `style/de.md` and `style/tr.md`'s own surface
+//     tables do not even quote the rendering (they bold or leave it plain),
+//     so this is a `style/ru.md`-only gap, worth naming rather than reaching
+//     for a second, table-aware parser to close it.
+//
+// NAMESPACE GATING implementation: `namespaceOfKey` reads the part of a key
+// before its first `:`; a key with no colon at all (almost always a file or
+// script reference the KEY_SPAN character class also happens to match, e.g.
+// `` `terminology/de.md` `` or `` `english-review-notes.md` ``) is not a
+// citation of anything and is dropped outright, not even counted as a
+// prescription. A key WITH a colon is checked against `namespaces.has(...)`
+// — the same shipped-namespace map corpusWordsFor already flattens — so a
+// bogus "namespace" that is not really one (nothing in these four files
+// produces one, but nothing prevents it either) is harmless: it is simply
+// never present in `namespaces`, so it is treated as a prescription and
+// skipped, the safe direction.
+export const STYLE_QUOTE_DELIMITERS = [
+  { open: '"', close: '"' },
+  { open: '«', close: '»' },
+  { open: '「', close: '」' },
+];
+
+/** Up to a three-word connector plus optional punctuation, CAPTURED this
+ * time (unlike the lexicon CONNECTOR) so extractStyleCitations can veto a
+ * negated one — see "WHAT COUNTS AS A CITATION", item (a). */
+const STYLE_CONNECTOR_WORDS = String.raw`((?:\w+(?:\s+\w+){0,2})?)`;
+
+/** An optional English-gloss parenthetical directly after the key — see
+ * "EXTRACTION", item (a), shape 1: `` `key` (gloss) ``, the paren opens right
+ * after the key. de.md's convention throughout: `` `sidebar:selectProject`
+ * ("Select a project") is "Projekt auswählen" ``. A SINGLE, non-nested paren:
+ * no observed gloss nests parentheses, and nesting support would risk the
+ * gloss swallowing real content past its own close-paren.
+ *
+ * Shape 2 — `` (`key` "gloss") connector "citation" ``, where the paren opens
+ * BEFORE the key instead — is deliberately NOT folded into this same
+ * alternation; see STYLE_SHAPE2_PATTERNS for why it has to be its own,
+ * separately-anchored pattern. */
+const STYLE_GLOSS = String.raw`(?:\s*\([^)]*\))?`;
+
+function styleCitationPatterns(open, close) {
+  return {
+    forward: new RegExp(
+      '`(' +
+        KEY_SPAN +
+        ')`' +
+        STYLE_GLOSS +
+        String.raw`\s*` +
+        STYLE_CONNECTOR_WORDS +
+        String.raw`\s*[:—-]?\s*` +
+        open +
+        '([^' +
+        close +
+        ']+)' +
+        close,
+      'g',
+    ),
+    backward: new RegExp(
+      open + '([^' + close + ']+)' + close + String.raw`\s*\(\s*` + '`(' + KEY_SPAN + ')`' + String.raw`\s*\)`,
+      'g',
+    ),
+  };
+}
+
+/**
+ * Shape 2 — `` (`key` "gloss") connector "citation" `` — see "EXTRACTION",
+ * item (a). Anchored at the OPENING paren, which sits BEFORE the key, rather
+ * than folded as an alternative into STYLE_GLOSS (which is anchored AFTER
+ * the key and can only look forward). That difference is not cosmetic: an
+ * earlier version tried "after the key, either a paren-wrapped gloss OR a
+ * bare-quote-then-close-paren gloss" as one alternation, and it was a real,
+ * caught bug, not a hypothetical one. Once that bare-quote alternative
+ * exists at the key's own position, the SAME straight-quote-adjacent-to-key
+ * shape is now ambiguous with the ordinary "`key` "citation"" zero-connector
+ * case (see styleCitationPatterns' forward pattern) — and when the intended
+ * parse (gloss, then a DIFFERENT-delimiter citation later) fails to complete
+ * because that later citation is guillemet- or corner-bracket-delimited, not
+ * straight-quoted, standard regex backtracking falls back to the other legal
+ * parse: the bare gloss quote treated as if IT were the citation. Anchoring
+ * shape 2 at the leading "(" instead removes the ambiguity structurally —
+ * this pattern and the plain forward pattern can never both claim the same
+ * key position, because only one of them requires a "(" immediately before
+ * the backtick. The gloss itself is always straight-quoted in every observed
+ * instance (es.md/fr.md/it.md/ru.md's shared `english-review-notes.md`
+ * Title-Case sentence — `` (`config:routing.title` "Routing Rules") becomes
+ * «Правила маршрутизации» ``), so only that one gloss delimiter is supported
+ * here; the citation itself is tried against all of STYLE_QUOTE_DELIMITERS.
+ */
+function styleShape2Pattern(open, close) {
+  return new RegExp(
+    String.raw`\(\s*` +
+      '`(' +
+      KEY_SPAN +
+      ')`' +
+      String.raw`\s*"[^"]*"\s*\)\s*` +
+      STYLE_CONNECTOR_WORDS +
+      String.raw`\s*[:—-]?\s*` +
+      open +
+      '([^' +
+      close +
+      ']+)' +
+      close,
+    'g',
+  );
+}
+
+/** `` `key` (span) `` with no connector or trailing quote — see "EXTRACTION",
+ * item (c). Matched separately from styleCitationPatterns() because it is a
+ * strict subset of shape (a)'s shape-1 prefix, before its optional
+ * connector+quote tail: every shape-1 match's key+gloss prefix ALSO matches
+ * this pattern, which is exactly why extractStyleCitations() has to track
+ * and exclude ranges already consumed by shape 1/2/backward rather than
+ * simply unioning every pattern's results. */
+const STYLE_BARE_PAREN = new RegExp('`(' + KEY_SPAN + ')`\\s*\\(([^)]*)\\)', 'g');
+
+/**
+ * A key-adjacent connector that means the following quote is NOT a claim
+ * about shipped text, even though it is quote-delimited and key-adjacent —
+ * every word here was found causing a real false positive in one of the four
+ * populated style guides, not added speculatively:
+ *
+ *   - `not` / `never` / `no longer` / `isn't`: `` `key` is not "X"`` names X
+ *     to reject it — see "EXTRACTION", item (a). No shipped style guide uses
+ *     this shape today; kept as a cheap guard against one that will.
+ *   - `shipped` (bare past tense, distinct from `ships`): de.md's own worked
+ *     example for a FIXED defect, kept on purpose as a worked example —
+ *     `` `config:lqa.checks.untranslated.description` shipped "Einträge, die
+ *     triviale Matcher abfangen würden" `` quotes the WRONG, since-corrected
+ *     string, deliberately, to show what the bug looked like. "shipped"
+ *     (what a string used to render) and "ships" (what it renders now) are
+ *     one word apart and opposite in meaning for this guard's purposes.
+ *   - `bare` (as in "is the bare"): ru.md and tr.md's parallel worked example
+ *     for the sibling-namespace trap — `` `quality:checkLabels.tag-equality`
+ *     is the bare "Tag equality"`` — names the UNADORNED ENGLISH form of the
+ *     key for contrast with a fuller sibling, not a rendering.
+ */
+const NON_CLAIM_CONNECTOR = /\b(?:not|never|no longer|isn't|isnt|shipped|bare)\b/i;
+
+/**
+ * A citation immediately followed by this (within a short trailing window)
+ * is explicitly marked as the ENGLISH source, not a rendering — tr.md's
+ * `` `config:fullReplaceOrphanNotice` calls it the "Relink tab" in English``
+ * is the one instance found; without this check "Relink tab" itself was
+ * extracted and checked against the Turkish corpus.
+ */
+const TRAILING_ENGLISH_GLOSS = /^\s*in English\b/i;
+
+/** Does `text` contain at least one Unicode LETTER outside the ASCII range?
+ * The disambiguator for STYLE_BARE_PAREN — see "EXTRACTION", item (c), for
+ * what this does and does not catch. */
+export function hasNonAsciiLetter(text) {
+  for (const ch of text) {
+    if (ch.codePointAt(0) > 127 && /\p{L}/u.test(ch)) return true;
+  }
+  return false;
+}
+
+/**
+ * Strips one layer of wrapping quote/backtick characters from a
+ * STYLE_BARE_PAREN capture, so an offender message reads `key: "text"`
+ * rather than `key: "«text»"` or `` key: "`text`" `` when the parenthetical
+ * itself already carried its own quote marks — ru.md's
+ * `` `backup:createSection` («Создать резервную копию») `` and tr.md's
+ * `` `config:instances.*` (`"{{base}}" örneği`) `` both do this. Cosmetic
+ * only: tokenizeWords already drops these characters on both the citation
+ * and the corpus side, so the match verdict is unaffected either way — this
+ * exists so a reader of an offender line is never left wondering whether the
+ * extra punctuation is part of the claimed rendering.
+ */
+export function stripWrappingQuote(text) {
+  const trimmed = text.trim();
+  const pairs = [
+    ['"', '"'],
+    ['«', '»'],
+    ['「', '」'],
+    ['`', '`'],
+  ];
+  for (const [open, close] of pairs) {
+    if (
+      trimmed.startsWith(open) &&
+      trimmed.endsWith(close) &&
+      trimmed.length >= open.length + close.length
+    ) {
+      return trimmed.slice(open.length, trimmed.length - close.length).trim();
+    }
+  }
+  return trimmed;
+}
+
+/**
+ * Locales whose real shipped UI text is never pure ASCII — Cyrillic (ru) and
+ * every UNSPACED_SCRIPT_LOCALES member (CJK/Thai). Used only to catch an
+ * ENGLISH GLOSS extracted where no gloss-marking punctuation (parens) was
+ * present to swallow it — see checkStyleGuide. NOT extended to de/tr: both
+ * are Latin-script locales with genuinely, correctly ASCII-only shipped
+ * citations today (tr's `config:delete` is "Sil"), so "pure ASCII" carries no
+ * signal there at all.
+ */
+const NON_LATIN_SCRIPT_LOCALES = new Set(['ru', ...UNSPACED_SCRIPT_LOCALES]);
+
+/** The namespace prefix of a `namespace:key.path` reference — the part
+ * before the first `:` — or `null` if the span has no colon at all (a file
+ * or script reference KEY_SPAN's character class also matches; see
+ * "NAMESPACE GATING" above). Never validated against a real namespace list:
+ * an invalid namespace is simply never present in a locale's shipped
+ * `namespaces` map, so checkStyleGuide's own gating already treats it as
+ * unshippable — the safe outcome — without this function needing to know
+ * what a real namespace looks like. */
+export function namespaceOfKey(key) {
+  const idx = key.indexOf(':');
+  return idx === -1 ? null : key.slice(0, idx);
+}
+
+/**
+ * A style guide is markdown PROSE, not a table: a citation can be split
+ * across a soft line wrap that a lexicon table cell never has. Blank lines
+ * are markdown's own hard paragraph break, so joining only WITHIN a
+ * `\n{2,}`-delimited block (never across one) cannot let one paragraph's
+ * trailing key absorb the next paragraph's leading quote. A markdown TABLE
+ * block (no blank lines between its rows) flattens into one block same as
+ * prose; this is safe rather than a hazard, because every citation pattern
+ * above requires a literal quote/paren character immediately after the key
+ * (plus its bounded gloss+connector) — the `|` cell separators that remain
+ * in the flattened text cannot satisfy that requirement, so a row boundary
+ * simply cannot be crossed by a match (verified against every surface-name
+ * and control-shape table in the four populated style guides).
+ */
+export function flattenStyleParagraphs(fileText) {
+  return fileText.split(/\n{2,}/).map((block) => block.replace(/\n/g, ' '));
+}
+
+/**
+ * Every key-adjacent citation candidate in one flattened block of style-guide
+ * text, as `{ key, text }` — `key` exactly as written (raw backtick span,
+ * unresolved; see namespaceOfKey), `text` the candidate rendering. See the
+ * STYLE GUIDE CITATIONS header above for the three extraction shapes and why
+ * a fourth (adjacency-free backtick citation) is deliberately not attempted.
+ */
+export function extractStyleCitations(text) {
+  const citations = [];
+  const consumedRanges = [];
+
+  // Shape 2 FIRST, and its consumed ranges recorded before shape 1/backward
+  // ever run — see styleShape2Pattern's own comment for why running it
+  // first (rather than folding it into styleCitationPatterns) is what makes
+  // the ambiguity with the plain "`key` "citation"" zero-connector case
+  // structurally impossible rather than merely untriggered by today's
+  // content.
+  for (const { open, close } of STYLE_QUOTE_DELIMITERS) {
+    for (const match of text.matchAll(styleShape2Pattern(open, close))) {
+      const matchEnd = match.index + match[0].length;
+      consumedRanges.push([match.index, matchEnd]);
+      const [, key, connector, span] = match;
+      if (NON_CLAIM_CONNECTOR.test(connector)) continue;
+      if (span.includes('**')) continue;
+      if (TRAILING_ENGLISH_GLOSS.test(text.slice(matchEnd, matchEnd + 20))) continue;
+      citations.push({ key, text: span });
+    }
+  }
+
+  for (const { open, close } of STYLE_QUOTE_DELIMITERS) {
+    const { forward, backward } = styleCitationPatterns(open, close);
+    for (const match of text.matchAll(forward)) {
+      // A match whose key position sits inside an already-consumed shape-2
+      // range is shape 2's own gloss, re-discovered here as the spurious
+      // "zero-connector" alternate parse — see styleShape2Pattern's comment.
+      const withinShape2 = consumedRanges.some(
+        ([start, end]) => match.index >= start && match.index < end,
+      );
+      if (withinShape2) continue;
+      const matchEnd = match.index + match[0].length;
+      consumedRanges.push([match.index, matchEnd]);
+      const [, key, connector, span] = match;
+      if (NON_CLAIM_CONNECTOR.test(connector)) continue;
+      if (span.includes('**')) continue; // markdown emphasis — commentary about the English source, never a literal rendering
+      if (TRAILING_ENGLISH_GLOSS.test(text.slice(matchEnd, matchEnd + 20))) continue;
+      citations.push({ key, text: span });
+    }
+    for (const match of text.matchAll(backward)) {
+      consumedRanges.push([match.index, match.index + match[0].length]);
+      const [, span, key] = match;
+      if (span.includes('**')) continue;
+      citations.push({ key, text: span });
+    }
+  }
+  for (const match of text.matchAll(STYLE_BARE_PAREN)) {
+    const alreadyConsumed = consumedRanges.some(
+      ([start, end]) => match.index >= start && match.index < end,
+    );
+    if (alreadyConsumed) continue;
+    const [, key, rawSpan] = match;
+    const span = stripWrappingQuote(rawSpan);
+    if (!hasNonAsciiLetter(span)) continue;
+    citations.push({ key, text: span });
+  }
+  return citations;
+}
+
+/**
+ * Checks one locale's style guide against its shipped corpus. Returns
+ * `{ offenders, citationsChecked, prescriptionsSkipped }` — `offenders` as
+ * `key: "text"` strings, ready to print; `prescriptionsSkipped` the count of
+ * citation-shaped candidates whose namespace has not shipped yet (see
+ * "NAMESPACE GATING" above) — reported for visibility, never a failure.
+ *
+ * Two adjustments relative to checkLocaleLexicon, both scoped to THIS
+ * function only — checkLocaleLexicon and its lexicon-file callers are
+ * untouched, so this cannot change what `pnpm check:lexicon` reports for a
+ * terminology file:
+ *
+ *   - A candidate whose text is pure ASCII is dropped for a
+ *     NON_LATIN_SCRIPT_LOCALES member before it is even namespace-gated. An
+ *     ENGLISH GLOSS with no parens around it to mark it as one (ja.md:
+ *     `` `config:targetLanguages` "Target Languages" and
+ *     `config:routing.labelTargetLanguage` "Target language" are both
+ *     「ターゲット言語」 ``, two keys sharing one trailing citation) is
+ *     otherwise indistinguishable from a real citation by this module's
+ *     adjacency rules alone. Restricted to ru/ja/ko/zh/th because a Latin
+ *     script locale can have a genuinely, correctly ASCII-only citation
+ *     (tr's `config:delete` is "Sil") — see NON_LATIN_SCRIPT_LOCALES.
+ *   - `minWordLength: 2` for an UNSPACED_SCRIPT_LOCALES member, down from the
+ *     lexicon default of 3 (MIN_WORD_LENGTH). ja.md deliberately quotes a
+ *     short, VERBATIM, ellipsis-elided tail of a longer shipped string —
+ *     `` `config:pseudoTestHelpLink` 「…読む →」`` for the shipped
+ *     "クリックしてガイドを読む →" — and the elided, checkable word "読む" is
+ *     two characters. At the default floor of 3 it never becomes a
+ *     "significant word" at all, so renderingIsCovered() falls back to
+ *     matching the WHOLE candidate string as one unit — arrow and ellipsis
+ *     included — against a corpus of pure-letter tokens, which can never
+ *     succeed. Two-character CJK words are not the "stray letter" case
+ *     MIN_WORD_LENGTH exists to filter (see that constant's own comment) —
+ *     a two-character kanji/kana compound routinely carries a word's worth
+ *     of meaning, unlike two Latin letters.
+ */
+export function checkStyleGuide(locale, fileText, namespaces, corpusWords, options) {
+  const unspacedScript = UNSPACED_SCRIPT_LOCALES.has(locale);
+  const matchOptions = {
+    ...options,
+    unspacedScript,
+    minWordLength: options?.minWordLength ?? (unspacedScript ? 2 : MIN_WORD_LENGTH),
+  };
+  const nonLatinScript = NON_LATIN_SCRIPT_LOCALES.has(locale);
+  const offenders = [];
+  let citationsChecked = 0;
+  let prescriptionsSkipped = 0;
+  for (const block of flattenStyleParagraphs(fileText)) {
+    for (const { key, text } of extractStyleCitations(block)) {
+      if (nonLatinScript && !hasNonAsciiLetter(text)) continue; // an English gloss with no paren to mark it as one
+      const namespace = namespaceOfKey(key);
+      if (namespace === null) continue; // a file/script reference, not a translation key
+      if (!namespaces.has(namespace)) {
+        prescriptionsSkipped += 1;
+        continue; // prescription: this namespace has not shipped for this locale yet
+      }
+      citationsChecked += 1;
+      if (renderingIsCovered(text, corpusWords, matchOptions)) continue;
+      offenders.push(`${key}: "${text}"`);
+    }
+  }
+  return { offenders, citationsChecked, prescriptionsSkipped };
+}
+
+// ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
 
@@ -581,6 +1087,39 @@ function runCli() {
     ]);
   }
 
+  // Style guides — docs/i18n/style/<locale>.md. Same `locales` map, same
+  // corpus-per-locale computation; see the "STYLE GUIDE CITATIONS" header
+  // above checkStyleGuide() for what counts as a citation here and why a
+  // locale with no shipped directory (or a citation in a namespace that
+  // has not shipped for one that does) is skipped rather than failed.
+  const styleFiles = readdirSync(STYLE_DIR)
+    .filter((name) => name.endsWith('.md') && name !== 'README.md')
+    .sort();
+  let styleLocalesChecked = 0;
+  let styleLocalesSkipped = 0;
+  let styleCitationsChecked = 0;
+  let stylePrescriptionsSkipped = 0;
+
+  for (const file of styleFiles) {
+    const locale = basename(file, '.md');
+    const namespaces = locales.get(locale);
+    if (!namespaces) {
+      styleLocalesSkipped += 1;
+      continue;
+    }
+    const fileText = readFileSync(join(STYLE_DIR, file), 'utf8');
+    const corpusWords = corpusWordsFor(namespaces);
+    const {
+      offenders,
+      citationsChecked,
+      prescriptionsSkipped,
+    } = checkStyleGuide(locale, fileText, namespaces, corpusWords);
+    styleCitationsChecked += citationsChecked;
+    stylePrescriptionsSkipped += prescriptionsSkipped;
+    if (citationsChecked > 0 || prescriptionsSkipped > 0) styleLocalesChecked += 1;
+    if (offenders.length > 0) failures.push([`${locale} (style guide)`, offenders]);
+  }
+
   if (failures.length > 0) {
     console.error('');
     for (const [locale, offenders] of failures) {
@@ -598,7 +1137,9 @@ function runCli() {
   console.log(
     `check-lexicon-citations: OK — ${localesChecked} locale(s) with shipped renderings checked ` +
       `(${localesSkipped} scaffold(s) with no shipped locale skipped), ${rowsChecked} row(s) with ` +
-      `at least one candidate citation.`,
+      `at least one candidate citation; ${styleLocalesChecked} style guide(s) checked ` +
+      `(${styleLocalesSkipped} with no shipped locale skipped), ${styleCitationsChecked} citation(s) ` +
+      `checked (${stylePrescriptionsSkipped} prescription(s) for an unshipped namespace skipped).`,
   );
 }
 
