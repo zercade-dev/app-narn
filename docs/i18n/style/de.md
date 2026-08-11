@@ -114,10 +114,10 @@ mentions it repeats that rendering verbatim. Settled so far:
 | Project Templates | **Projektvorlagen** | `config:templatesTitle` (shipped); the singular section title is `config:saveAsTemplateTitle` "Projektvorlage", matching English's own singular/plural split. |
 | Config | **Konfiguration** | `strings:tabs.config` (shipped); `strings:guide.topicConfig` repeats it. Distinct from **Globale Konfiguration**, which is the workspace-level page above it. |
 | Data | **Daten** | `strings:tabs.data` (shipped). |
-| Source AI review | **Quelltext-KI-Review** | `strings:tabs` (review-source-ai) and `strings:tabPlaceholder` (review-source-ai), shipped; batch 3's `review:sourceAi.configTitle` owes the same. The bare **Quelltext-Review** is the *term* in prose and is a different string — see `../terminology/de.md`. |
-| Translation AI review | **Übersetzungs-KI-Review** | `strings:tabs` (review-translation-ai), shipped; batch 3's `review:translationAi.title` owes the same. |
-| Manual review | **Manuelles Review** | `strings:tabs` (review-manual), shipped. |
-| Quality | **Qualität** | `strings:tabs.quality`, `strings:guide.topicQuality` (shipped). |
+| Source AI review | **Quelltext-KI-Review** | `strings:tabs` (review-source-ai), `strings:tabPlaceholder` (review-source-ai) and `review:sourceAi.configTitle` (all shipped). The bare **Quelltext-Review** is the *term* in prose and is a different string — see `../terminology/de.md`. |
+| Translation AI review | **Übersetzungs-KI-Review** | `strings:tabs` (review-translation-ai) and `review:translationAi.title` (both shipped). |
+| Manual review | **Manuelles Review** | `strings:tabs` (review-manual), shipped. Its **page title is a different string**, `review:title` "Prüfwarteschlange" — English splits the same way ("Manual review" / "Review queue"), like Activity and Legal. Do not harmonize them. |
+| Quality | **Qualität** | `strings:tabs.quality`, `strings:guide.topicQuality` (shipped). The **page title expands**, exactly as Activity's does: `quality:title` is "Qualitäts-Dashboard" for English's "Quality Dashboard" — the rendering `strings:tabPlaceholder.quality` already shipped in prose. Do not copy the tab label into it. |
 | Glossary | **Glossar** | `strings:tabs.glossary`, `strings:guide.topicGlossary` (shipped). |
 | Category | **Kategorie** | `strings:tabs.category`, `strings:guide.topicCategory` (shipped). Singular on purpose, as in English, even though the page it opens is plural. |
 | Routing | **Routing** | `strings:tabs.routing`, `strings:guide.topicRouting` (shipped). |
@@ -160,6 +160,33 @@ re-deciding it.
 | **undo** — one edit | *Rückgängig* | `strings:compare.undo`, `strings:editor.undo` | — |
 | **verdict** — the judge's per-entry ruling | *Urteil* | `strings:runs.judgeAllFindingsDescription` | batch 5's `logs:judge.done`, whose `{{verdict}}` token this names |
 | **assistant** — the chat persona | *Assistent*, weak masculine; linking form *Assistenten-* in a compound | `strings:runs.typeChatGeneric` | batch 6 owes "KI-Assistent" at `colorText:assistant.title` and the same noun at `stage-details:chatAssistant` |
+| **review, as a verb with an object** — the Translation-AI controls | *bewerten* | `review:translationAi.runReview`, `reviewAll`, `reReview`, and the two empty-state hints that quote those labels | any later key that tells a user to review *translations* with an AI |
+| **review, as a verb** — what the source review does to an entry | *untersuchen* | `review:sourceAi.configHint`, `emptyHint`, `scopeNeverReviewed`, `scopeNoneHint` | batch 5's `logs:sourceReview.*` |
+| **issues**, where English means "problems in the text" rather than the LQA verdict | *Auffälligkeiten* | `review:sourceAi.configHint`, `review:sourceAi.noFindings` | any later prose about what a review looks for |
+| **approve**, on a source-review finding (records the review; writes nothing) | *Bestätigen* / *Bestätigt* | `review:sourceAi.approve`, `approvedToast`, `approvedBadge`, `approveFailed`, `keyboardHint` | — |
+| **push**, to DeepL | *übertragen* / *Übertragung* | `glossary:pushToDeepL`, `confirmPushReplace*`, `toastPushError`, `repushRequired`, `toastRepushRequired` | — |
+
+**Why *bewerten* and not a word built on *Review*, and what it does not license.** Three
+Translation-AI controls need a **verb with an object** — "Review last run", "Review all
+translations", "Re-review" — and German has none for *review*: the noun is the loan (*Review*,
+fixed by the lexicon's *AI review* row), *reviewen* is not a form this UI should introduce, and
+`../terminology/de.md` reserves *prüfen* for the human/LQA root and *Prüfung* for the
+deterministic check. What those three buttons actually start is the judge, whose term already
+is *bewerten*, and English says so itself: `review:translationAi.emptyHintRun` reads "**will
+judge** the latest completed translation run". So the verb is the judge's. **This does not
+touch the noun**: the feature is still "Übersetzungs-KI-Review" at `review:translationAi.title`,
+and `strings:runs.aiReviewStart` "Review starten" — English "Start review", a noun — stays as
+it is. Where English gives a noun, German uses *Review*; where English gives a verb, German
+uses *bewerten* for the judge and *untersuchen* for the source review.
+
+**`review:sourceAi.ignore` inherits *ignorieren*, and its two toasts do not.** The row at the
+top of this table binds the button: `ignore` is "Ignorieren". `ignoredToast` and `ignoreFailed`
+are named there too, but their **own English does not say "ignored"** — it is "Review entry
+removed" and "Could not remove the review entry" — so they ship as "Review-Eintrag entfernt"
+and "Der Review-Eintrag konnte nicht entfernt werden". Matching a sibling means matching its
+English, not another key's rendering; writing "Ignoriert" there would invent wording English
+does not have. The inheritance is real and it lands on the control, which is the string that
+names the action.
 
 **`revert` and `undo` must not collapse into one word.** English keeps them apart and so does
 this locale: *Rückgängig* is the single-edit undo in the compare cell and the editor, while
@@ -271,9 +298,12 @@ tokens against English; swapping a token is two violations, not a clever fix.
 non-skiplisted `{{token}}` followed by a German word. Batch 1 landed at **14 raw, 0 after
 the token axis**, so `de` had no word-axis exemption list. Batch 2 hit **8 token-axis
 survivors before its `usageTokens` fix and 6 after** (4 distinct words); re-running the
-detector over the shipped tree today gives **48 raw / 6 / 0**. Quote whichever figure you
-mean *with the state it reproduces in* — "landed at 50/8" reads as the shipped state and is
-not. Building the word list is what separated the survivors:
+detector over the tree as `strings` shipped gave **48 raw / 6 / 0**. Over the tree with
+batch 3 landed it gives **80 raw / 13 after the token axis / 0 after the word axis** — every
+one of the 13 is cleared by the same four-word list below, so batch 3 added **no** new
+exemption and did not touch that file. Quote whichever figure you mean *with the state it reproduces in* —
+"landed at 50/8" reads as the shipped state and is not. Building the word list is what
+separated the survivors:
 
 - **One was a real defect and was fixed in the string, not exempted.**
   `strings:runs.usageTokens` first read "{{input}} Eingabe / {{output}} Ausgabe", where both
@@ -417,6 +447,7 @@ Measured expansion against the English source, one ratio per key:
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 — `config` | 374 | 13,015 | — | 1.23 | 1.22 | 1.50 | 2.83 |
 | 2 — `strings` | 452 | 9,900 | 12,643 | 1.28 | 1.23 | 1.80 | 3.75 |
+| 3 — `glossary` `review` `category` `quality` | 377 | 10,744 | 13,445 | 1.25 | 1.24 | 1.71 | 3.33 |
 
 Batch 1's max is `config:batchGroupingCustom` ("Custom" → "Benutzerdefiniert") and batch 2's
 is `strings:runs.judgeVerdictFail` ("Fail" → "Nicht bestanden"); both ratios are measuring
@@ -433,6 +464,32 @@ unconstrained surfaces where the rule does not bite: "Schlusszeichensetzung" (21
 "Kontextübereinstimmung" (22, inside `config:tm.policyStrict`, a select option that wraps).
 Every other long compound is hyphenated and therefore breakable. If either term is ever
 needed on one of the five constrained surfaces, split it there rather than re-coining it.
+
+**What batch 3 (`glossary`, `review`, `category`, `quality`) contributes.** It holds no sidebar
+item and no tab label, so both hard rows are unchanged. It moves neither of the two soft rows it
+touches, and both figures are re-measured rather than assumed:
+
+- **Table column header** — the five it adds are `glossary:colSource` "Quellbegriff" (12),
+  `colNotes` (7), `colConstant` (8), `colActions` (8) and `quality:columns.passRate`
+  "Bestehensquote" (14). The longest ties `strings`' own 14, so **18** still holds.
+- **Filter label** — `review:filterNeedsReview` "Zu prüfen" (9) and `review:filterFlagged`
+  "Zurückgestellt" (14), both far inside **36**.
+- **Bulk-bar control** — the longest is `review:approveUnchangedPassing` "Unveränderte &
+  bestandene freigeben" (35), one character inside **36**, and the two glossary bulk actions
+  render at 26 and 22. The budget is not raised: 35 fits.
+
+Batch 3's max ratio, `review:flag` "Flag" → "Zurückstellen" (3.25), and `glossary:add` (3.33)
+are both measuring a four-character English source; the length gate ignores any English shorter
+than 12 characters, and neither string is on a constrained surface. Its **90th percentile fell
+back to 1.71** from `strings`' 1.80 — this batch is panel prose and dialogs rather than chrome,
+which is the same thing the `config`/`strings` gap said from the other side.
+
+**Two unbreakable tokens over 20 characters shipped in batch 3**, both on unconstrained
+surfaces and both terms this locale already ships: "Übersetzungsdurchlauf" (21, in four
+`review:translationAi.*` sentences) and "Schlusszeichensetzung" (21,
+`quality:checkLabels.end-punctuation`, an item in the issue-type list, which wraps). The second
+is the batch-1 term repeated verbatim, per the rule that a settled term is split at the point of
+use rather than re-coined.
 
 **Batch 2 shipped two more of the same kind, on the same terms**: "Übersetzungsaktivität" (21,
 `strings:runs.title`, a page title) and "Übersetzungsdurchlauf" (21, inside
