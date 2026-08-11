@@ -136,9 +136,13 @@ Two things to carry forward from it:
   wrong, so it passed the parity gate, the pre-flight and all seven typography sweeps. The
   only way to catch a casing defect of this kind is to know which containers uppercase and
   check `lang` is set — which is now a product invariant rather than a translator's job.
-- **If you ever add a hand-uppercased value** — `strings:columns.config` "DURUM" is the
-  one in this namespace, preserved because English uses uppercase for layout — the
-  by-hand mapping rule above still applies to it, because no CSS is involved there.
+- **If you ever add a hand-uppercased value** — there are **three** in this namespace,
+  each preserved because English uses uppercase for layout: `strings:columns.config`
+  "DURUM" (en "STATUS"), `strings:filters.matchAll` "VE" (en "AND") and
+  `strings:filters.matchAny` "VEYA" (en "OR") — the by-hand mapping rule above still
+  applies to them, because no CSS is involved there. None of the three happens to contain
+  an `i` or `ı`, so none was ever affected by the casing defect; they are listed so the
+  count in this guide is true rather than merely harmless.
 
 **And it is a hazard in the other direction too, in tooling rather than in the UI.**
 JavaScript's `toLowerCase()` is locale-invariant: `"İstem".toLowerCase()` is `i` plus a
@@ -217,8 +221,11 @@ Intl.NumberFormat('tr-TR', {style:'currency', currency:'USD'}).format(1234.5)  �
                                      (de-DE, USD, for contrast)                →  "1.234,50 $"
 ```
 
-**The percent sign goes before too** ("%50"), so Turkish is *not* the mirror-image case here
-— German is. An earlier version of this section claimed the currency symbol follows the
+**The percent sign goes before too** ("%50"), so Turkish puts *both* signs before the number
+and is internally consistent — it is not a locale where the two signs sit on opposite sides.
+Nor is German the mirror of it: `de-DE` gives "50 %" and "1.234,50 $", i.e. both signs after.
+The two locales are consistent opposites, not mirrors. An earlier version of this section
+claimed the currency symbol follows the
 number and had four strings inverted on that basis; the claim was false and the strings were
 reverted. **Verify a typographic rule against `Intl` before writing it down** — it takes one
 line, and the app formats every other number from the browser locale anyway, so a hard-coded

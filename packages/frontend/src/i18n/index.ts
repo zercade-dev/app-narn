@@ -51,10 +51,19 @@ void i18n.use(initReactI18next).init({
 // `languageChanged` fires on `changeLanguage()`, including the initial call, and
 // `resolvedLanguage` is used rather than the requested code so a fallback is
 // reflected honestly.
-i18n.on('languageChanged', () => {
+function syncDocumentLanguage() {
   if (typeof document === 'undefined') return;
   document.documentElement.lang = i18n.resolvedLanguage ?? 'en';
-});
+}
+
+i18n.on('languageChanged', syncDocumentLanguage);
+
+// `init()` above emits `languageChanged` synchronously, before this listener
+// exists, so the initial value is set here rather than relied on from the event.
+// The markup already says `en` and the initial language is `en`, so this is
+// currently a no-op — it is written so the invariant holds by construction
+// instead of by that coincidence.
+syncDocumentLanguage();
 
 const loadedLocales = new Set<string>(['en']);
 
