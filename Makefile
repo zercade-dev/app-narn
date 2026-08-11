@@ -16,11 +16,20 @@ security-check:
 	@echo "Checking for high/critical vulnerabilities in production dependencies..."
 	@node -e "const fs = require('fs'); const r = JSON.parse(fs.readFileSync('./audit-report.json', 'utf-8')); const prodHigh = Object.values(r.advisories).filter(a => a.severity === 'high' && !a.findings.every(f => f.dev)).length; const prodCritical = Object.values(r.advisories).filter(a => a.severity === 'critical' && !a.findings.every(f => f.dev)).length; if (prodHigh > 0 || prodCritical > 0) { console.error('High or critical severity vulnerabilities found in production dependencies!'); process.exit(1); }"
 
-## Release gate for the public app: build + lint + format + prod security audit.
+## Release gate for the public app: build + lint + format + locale checks +
+## prod security audit. check:locales and check:lexicon are both here because
+## CI's quality-gate job runs each of them directly too (see
+## .github/workflows/ci.yml) and .githooks/pre-push runs this target —
+## without them here, a push passes locally and fails in CI. check:lexicon
+## proves every rendering quoted in docs/i18n/terminology/<locale>.md
+## actually occurs in the shipped locale files. (lint:deps stays out; CI
+## runs it separately.)
 verify:
 	pnpm build
 	pnpm lint
 	pnpm format:check
+	pnpm check:locales
+	pnpm check:lexicon
 	$(MAKE) security-check
 
 ## Refresh the bundled global glossaries from the public community

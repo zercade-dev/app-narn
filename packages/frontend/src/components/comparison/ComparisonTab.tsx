@@ -52,6 +52,7 @@ export function ComparisonTab({
 }: Readonly<ComparisonTabProps>): React.JSX.Element {
   const { t } = useTranslation('strings');
   const { t: tBatch } = useTranslation('batch');
+  const { t: tLogs } = useTranslation('logs');
   // Which languages the current access (owner/collaborator + writableLanguages)
   // may WRITE — mirrors the StringTableEditor/RunsTab wiring in collab-locks.ts.
   // Reference columns stay choosable across every active language (read-any);
@@ -127,7 +128,7 @@ export function ComparisonTab({
       retranslateResolversRef.current.delete(key);
 
       if (run.failed > 0) {
-        const reasons = collectRunFailureReasons(run.runId);
+        const reasons = collectRunFailureReasons(run.runId, tLogs);
         toast.warning(
           tBatch('runCompletedWithErrors', { completed: run.completed, failed: run.failed }),
           { description: reasons.length > 0 ? reasons.join(' · ') : undefined },
@@ -147,7 +148,7 @@ export function ComparisonTab({
         return next;
       });
     }
-  }, [allRuns, retranslateRuns, projectId, fetchEntry, bulkUpdate, tBatch]);
+  }, [allRuns, retranslateRuns, projectId, fetchEntry, bulkUpdate, tBatch, tLogs]);
 
   // Poll while any per-cell retranslate is in flight. Polling itself is
   // self-managed by the run store: `fetchRuns` (called via `applyQueuedRun`
@@ -401,7 +402,7 @@ export function ComparisonTab({
       // Surface why jobs failed (e.g. "module-disabled", "no-route") instead of
       // a bare failure count — otherwise a fully-failed run (e.g. pseudo target
       // with the pseudo module disabled) looks like it failed for no reason.
-      const reasons = collectRunFailureReasons(c.runId);
+      const reasons = collectRunFailureReasons(c.runId, tLogs);
       toast.warning(
         tBatch('runCompletedWithErrors', { completed: c.completed, failed: c.failed }),
         {

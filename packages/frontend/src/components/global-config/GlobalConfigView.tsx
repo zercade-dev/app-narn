@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Lock, LockOpen } from 'lucide-react';
 import type { BatchGroupingDimension, ProjectTemplate } from '@zercade-dev/narn-shared';
 import { ModuleSettingsPanel } from '../config/ModuleSettingsPanel.js';
-import { AddInstanceForm } from '../config/AddInstanceForm.js';
+import { AddInstanceForm, instanceSlugsOf } from '../config/AddInstanceForm.js';
 import { promptFirstMissingCredential } from '../config/credential-prompt.js';
 import { useVaultStatus } from '../../hooks/useVaultStatus.js';
 import { apiRequest, apiDownload } from '../../hooks/use-api.js';
@@ -425,6 +425,7 @@ export function GlobalConfigView({
             key={addInstanceBase.id}
             baseModule={addInstanceBase}
             reservedSlugs={availableModules.filter((m) => !m.baseModuleId).map((m) => m.id)}
+            takenSlugs={instanceSlugsOf(availableModules, addInstanceBase.id)}
             unlocked={unlocked}
             existingKeys={keys}
             onEditVaultKey={onEditVaultKey}

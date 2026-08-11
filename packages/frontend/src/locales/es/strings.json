@@ -32,7 +32,6 @@
     "category": "Selecciona un proyecto para gestionar categorías.",
     "routing": "Selecciona un proyecto para configurar las reglas de enrutamiento.",
     "runs": "Selecciona un proyecto para ver el historial de actividad.",
-    "stage-details": "Selecciona un proyecto para editar los detalles de su escenario.",
     "orphans": "Selecciona un proyecto para ver las huérfanas.",
     "backup": "Selecciona un proyecto para usar las copias de seguridad.",
     "sharing": "Selecciona un proyecto para gestionar el acceso compartido."
@@ -43,7 +42,6 @@
     "loading": "Cargando entradas…"
   },
   "columns": {
-    "source": "ORIGEN",
     "config": "ESTADO",
     "tooltipSource": "Archivo de origen",
     "tooltipAchievementSource": "Origen de logro",
@@ -65,8 +63,8 @@
     "linkFailed": "No se pudo vincular: {{message}}"
   },
   "pagination": {
-    "rowsFiltered": "{{formattedCount}} de {{totalCount}} entradas",
     "rows": "{{formattedCount}} entradas",
+    "rowsFiltered": "{{formattedCount}} de {{totalCount}} entradas",
     "rowsPerPage": "Filas por página:",
     "prev": "Anterior",
     "next": "Siguiente",
@@ -88,10 +86,10 @@
     "clearFilters": "Borrar filtros",
     "addContext": "+ Contexto",
     "editContext": "Editar contexto del traductor",
-    "contextPlaceholder": "Añadir contexto para el traductor (Enter para guardar, Mayús+Enter para nueva línea, Esc para cancelar)…",
+    "contextPlaceholder": "Añadir contexto para el traductor (Intro para guardar, Mayús+Intro para nueva línea, Esc para cancelar)…",
     "addTone": "+ Tono",
     "editTone": "Editar tono",
-    "tonePlaceholder": "Añadir tono (Enter para guardar, Mayús+Enter para nueva línea, Esc para cancelar)…",
+    "tonePlaceholder": "Añadir tono (Intro para guardar, Mayús+Intro para nueva línea, Esc para cancelar)…",
     "loading": "Cargando entradas…",
     "flagAllNeedsReview": "Marcar todo como necesita revisión",
     "flagAllNeedsReviewDone": "{{count}} traducción/traducciones marcada(s) para revisión",
@@ -104,12 +102,10 @@
     "translateScopeSelected": "Se traducirán {{count}} entradas seleccionadas.",
     "translateScopeAll": "Se traducirán las {{count}} entradas de la vista actual.",
     "translateModeUntranslated": "Solo completar entradas sin traducir",
-    "translateModeRetranslate": "Re-traducir traducciones existentes",
+    "translateModeRetranslate": "Retraducir traducciones existentes",
     "translateUseReference": "Usar referencia ({{language}}) como contexto",
     "translateUseReferenceNone": "Usar idioma de referencia como contexto",
     "translateNoReferenceHint": "Selecciona un idioma de referencia en la barra de herramientas para habilitar esta opción.",
-    "translateGroupingLabel": "Agrupación de lotes (esta ejecución)",
-    "translateGroupingDefault": "Usar la configuración del espacio de trabajo",
     "translateCustomBatchSizeCaveat": "Se envía por par (módulo, idioma); idiomas o módulos distintos no pueden compartir una sola solicitud.",
     "translateStart": "Iniciar",
     "translateCancel": "Cancelar",
@@ -135,7 +131,26 @@
     "selectPage": "Seleccionar todas las filas de esta página",
     "selectAll": "Seleccionar todas ({{count}})",
     "selectRow": "Seleccionar fila",
-    "run": "Ejecución"
+    "run": "Ejecución",
+    "cellRetranslateAria": "Retraducir {{language}}",
+    "cellUndoAria": "Versiones anteriores de {{language}}",
+    "cellMarkReviewedAria": "Marcar la traducción de {{language}} como revisada",
+    "cellClearAria": "Borrar la traducción de {{language}}",
+    "cellEditAria": "Editar la traducción de {{language}}",
+    "cellEditTooltip": "Editar · Intro · Esc para cancelar",
+    "cellEditReviewedTooltip": "Revisado — pulsa Intro para editar",
+    "cellTranslatedBadge": "traducido",
+    "cellReviewedBadge": "revisado",
+    "cellNeedsReviewBadge": "necesita revisión"
+  },
+  "shortcuts": {
+    "title": "Atajos de teclado",
+    "retranslate": "Retraducir",
+    "markReviewed": "Marcar como revisado",
+    "clearTranslation": "Borrar traducción",
+    "enterEditMode": "Entrar en modo de edición",
+    "navigateRows": "Navegar entre filas",
+    "cancelEditing": "Cancelar la edición"
   },
   "filters": {
     "searchPlaceholder": "Buscar texto…",
@@ -150,9 +165,6 @@
     "placeholderMismatch": "Discrepancia en marcadores",
     "newOnly": "Nuevo (de la última importación)",
     "clearNewFlags": "Borrar marcas de nuevo ({{count}})",
-    "untranslatedFor": "Sin traducir para:",
-    "allLanguages": "Todos los idiomas",
-    "source": "Origen:",
     "allSources": "Todos los orígenes",
     "showColumns": "Mostrar columnas:",
     "clearFilters": "Limpiar filtros",
@@ -247,12 +259,11 @@
     "clearReviewed": "Quitar el estado «revisado»"
   },
   "editor": {
-    "placeholder": "Selecciona una celda para ver y editar su texto.",
     "sourceReadOnly": "Texto de origen (solo lectura)",
     "translationLabel": "Traducción — {{lang}}",
-    "save": "Guardar",
     "ignoreOverflow": "Ignorar desbordamiento",
     "overflowIgnored": "Desbordamiento ignorado",
+    "save": "Guardar",
     "discard": "Descartar",
     "saved": "Traducción guardada",
     "undo": "Deshacer",
@@ -289,6 +300,7 @@
     "topicQuality": "Calidad",
     "topicAiReview": "Revisión con IA",
     "topicActivity": "Actividad",
+    "topicPseudoTest": "Pseudo Test",
     "topicCategory": "Pestaña Categoría",
     "topicTranslationMemory": "Memoria de traducción"
   },

@@ -5,9 +5,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { logout } from '../../lib/auth-redirect.js';
+import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
 import { useNotificationStore } from '../../stores/notification-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import { useSystemStatusStore } from '@/stores/system-status-store';
+import { DesktopOnlyNotice } from '../common/DesktopOnlyNotice.js';
 import { NicknameSection } from '../collab/NicknameSection.js';
 import { SecurityTab } from './SecurityTab.js';
 import { DataTab } from './DataTab.js';
@@ -31,58 +33,73 @@ import { NotificationsTab } from './NotificationsTab.js';
  * a read/act view with no in-progress state to lose (it reads a Zustand store
  * that already survives unmount on its own), so re-fetching fresh data on
  * each visit is desirable, not a regression.
+ *
+ * MOBILE (issue #70): the view itself is gated 'mobile' so signing out is
+ * reachable from a phone, but only the session/identity strip survives — the
+ * three tabs are REPLACED by <DesktopOnlyNotice>, not merely hidden, so their
+ * panels never mount and their MFA/device/export/notification fetches never
+ * fire on mobile. The nickname stays visible read-only (`readOnly`), which
+ * suppresses the one-shot claim form.
  */
 type AccountTab = 'security' | 'data' | 'notifications';
 
 export function AccountView() {
   const { t } = useTranslation('account');
   const [tab, setTab] = useState<AccountTab>('security');
+  const isMobile = useIsMobile();
   const unreadCount = useNotificationStore((s) => s.unreadCount);
   const supportEmail = useSystemStatusStore((s) => s.status?.supportEmail ?? null);
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8" data-testid="account-view">
       <section data-testid="account-nickname">
-        <NicknameSection onClaimed={(n) => useProjectStore.setState({ selfNickname: n })} />
+        <NicknameSection
+          readOnly={isMobile}
+          onClaimed={(n) => useProjectStore.setState({ selfNickname: n })}
+        />
       </section>
 
-      <Tabs
-        value={tab}
-        onValueChange={(v) => {
-          if (v !== null) setTab(v as AccountTab);
-        }}
-      >
-        <TabsList>
-          <TabsTrigger value="security" data-testid="account-tab-security">
-            {t('tabSecurity')}
-          </TabsTrigger>
-          <TabsTrigger value="data" data-testid="account-tab-data">
-            {t('tabData')}
-          </TabsTrigger>
-          <TabsTrigger value="notifications" data-testid="account-tab-notifications">
-            {t('tabNotifications')}
-            {unreadCount > 0 && (
-              <Badge
-                variant="secondary"
-                className="ml-1 h-4 min-w-4 px-1 text-[10px]"
-                data-testid="account-tab-notifications-unread-badge"
-              >
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </Badge>
-            )}
-          </TabsTrigger>
-        </TabsList>
+      {isMobile ? (
+        <DesktopOnlyNotice />
+      ) : (
+        <Tabs
+          value={tab}
+          onValueChange={(v) => {
+            if (v !== null) setTab(v as AccountTab);
+          }}
+        >
+          <TabsList>
+            <TabsTrigger value="security" data-testid="account-tab-security">
+              {t('tabSecurity')}
+            </TabsTrigger>
+            <TabsTrigger value="data" data-testid="account-tab-data">
+              {t('tabData')}
+            </TabsTrigger>
+            <TabsTrigger value="notifications" data-testid="account-tab-notifications">
+              {t('tabNotifications')}
+              {unreadCount > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="ml-1 h-4 min-w-4 px-1 text-[10px]"
+                  data-testid="account-tab-notifications-unread-badge"
+                >
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="security" keepMounted>
-          <SecurityTab />
-        </TabsContent>
-        <TabsContent value="data" keepMounted>
-          <DataTab />
-        </TabsContent>
-        <TabsContent value="notifications">
-          <NotificationsTab />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="security" keepMounted>
+            <SecurityTab />
+          </TabsContent>
+          <TabsContent value="data" keepMounted>
+            <DataTab />
+          </TabsContent>
+          <TabsContent value="notifications">
+            <NotificationsTab />
+          </TabsContent>
+        </Tabs>
+      )}
 
       <section>
         <Button

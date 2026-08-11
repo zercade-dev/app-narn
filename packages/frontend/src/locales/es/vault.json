@@ -42,7 +42,6 @@
   "delete": "Eliminar",
   "discard": "Descartar",
   "undoRemove": "Deshacer",
-  "new": "Nuevo",
   "passwordHelp": "Introduce tu contrase\u00f1a para volver a cifrar el archivo.",
   "passwordRequired": "Se requiere la contrase\u00f1a para guardar.",
   "cancel": "Cancelar",

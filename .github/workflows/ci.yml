@@ -18,21 +18,54 @@ concurrency:
 
 # narn is the self-contained open-core app workspace (pnpm; @zercade-dev/narn-* packages
 # + frontend/server/shared + modules). This is narn's OWN source quality gate — build,
-# lint, format and catalog pinning — so a bad commit is caught at the source. Automated
-# tests are not part of this repo, so they are NOT run here; the companion
-# docker-build.yml boot-smokes the image.
+# lint, format, catalog pinning and locale parity/integrity — so a bad commit is caught
+# at the source. The automated suites are not part of this repo, so they are NOT run
+# here; the companion docker-build.yml boot-smokes the image.
+#
+# The locale and lexicon checks are the deliberate exception to "gate everything behind
+# the heavy build". Both are plain-Node scripts (scripts/check-locales.mjs and
+# scripts/check-lexicon-citations.mjs, rules shared via scripts/locale-rules.mjs) with no
+# workspace dependency — they read locale JSON and docs/i18n/terminology/*.md directly —
+# so they run as their own always-on steps below, BEFORE the ignorable-paths gate and
+# unconditioned by its `skip` output, invoked with plain `node` rather than through pnpm.
+# Two reasons this pair is carved out rather than sharing the gate with build/lint/tests:
+#   1. locale JSON changes are raised in THIS repo, so a check that only ran downstream
+#      would let an English key with no translations merge and ship, and would only go
+#      red later, somewhere else, on a diff that does not contain the key;
+#   2. the ignorable-paths gate's IGNORE_RE treats `docs/` as skippable, and the lexicon
+#      lives at docs/i18n/terminology/<locale>.md — a lexicon-only fix round is exactly a
+#      docs-only diff, so a gated `check:lexicon` step would early-exit on precisely the
+#      change class it was built to catch. Running it unconditionally, at near-zero cost
+#      (no install, no build — just Node and the checked-out tree), closes that gap
+#      without touching IGNORE_RE, so genuinely ignorable docs-only diffs (a typo in
+#      backfill-runbook.md, say) still skip the expensive build/lint/format/test steps
+#      below exactly as before.
 #
 # quality-gate is ruleset-required on develop and main, so it must always run and
 # report — a trigger-level paths filter would leave PRs stuck on an unreported
-# "Expected" check. Instead, the ignorable-paths gate below early-exits the job as
-# an explicit SUCCESS when the diff touches only paths none of these checks read
-# (issue templates, docs/, LICENSE — see the action for the list and its limits).
+# "Expected" check. Instead, the ignorable-paths gate below early-exits the *heavy*
+# steps (build/lint/format/catalog pinning) as an explicit SUCCESS when the diff
+# touches only paths none of them read (issue templates, docs/, LICENSE — see the
+# action for the list and its limits). It does not gate the locale/lexicon steps above
+# — see the paragraph above for why — so it no longer needs to cover every path those
+# two checks read; only the heavy steps' own paths.
 jobs:
   quality-gate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+
+      - name: Locale parity and integrity
+        run: node scripts/check-locales.mjs
+
+      - name: Lexicon citations
+        run: node scripts/check-lexicon-citations.mjs
 
       - name: Check whether this diff can affect the quality gate
         id: gate
@@ -43,12 +76,6 @@ jobs:
       - name: Setup pnpm
         if: steps.gate.outputs.skip != 'true'
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-
-      - name: Setup Node.js
-        if: steps.gate.outputs.skip != 'true'
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '24'
 
       - name: Install dependencies
         if: steps.gate.outputs.skip != 'true'

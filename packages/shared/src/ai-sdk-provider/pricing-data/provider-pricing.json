@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T18:21:19.154Z",
+  "generatedAt": "2026-08-11T20:17:15.431Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
@@ -233,44 +233,12 @@
           "contextLength": 1050000
         },
         {
-          "id": "gpt-5.5",
-          "inputCostPerMillion": 5,
-          "cachedInputCostPerMillion": 0.5,
-          "capabilityTags": ["tools", "vision"],
-          "contextLength": 1050000
-        },
-        {
-          "id": "gpt-5.5-pro",
-          "inputCostPerMillion": 30,
-          "capabilityTags": ["tools", "vision"],
-          "contextLength": 1050000
-        },
-        {
-          "id": "gpt-5.4",
-          "inputCostPerMillion": 2.5,
-          "cachedInputCostPerMillion": 0.25,
-          "capabilityTags": ["tools", "vision"],
-          "contextLength": 1050000
-        },
-        {
-          "id": "gpt-5.4-mini",
-          "inputCostPerMillion": 0.75,
-          "cachedInputCostPerMillion": 0.075,
+          "id": "gpt-5.6-cyber",
+          "inputCostPerMillion": 12.5,
+          "cachedInputCostPerMillion": 1.25,
+          "outputCostPerMillion": 15.625,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 400000
-        },
-        {
-          "id": "gpt-5.4-nano",
-          "inputCostPerMillion": 0.2,
-          "cachedInputCostPerMillion": 0.02,
-          "capabilityTags": ["tools", "vision"],
-          "contextLength": 400000
-        },
-        {
-          "id": "gpt-5.4-pro",
-          "inputCostPerMillion": 30,
-          "capabilityTags": ["tools", "vision"],
-          "contextLength": 1050000
         }
       ]
     },
@@ -339,6 +307,20 @@
           "outputCostPerMillion": 15,
           "cacheWriteCostPerMillion": 3.75,
           "cachedInputCostPerMillion": 0.3
+        },
+        {
+          "id": "claude-opus-4-5",
+          "inputCostPerMillion": 5,
+          "outputCostPerMillion": 25,
+          "cacheWriteCostPerMillion": 6.25,
+          "cachedInputCostPerMillion": 0.5
+        },
+        {
+          "id": "claude-opus-4-1",
+          "inputCostPerMillion": 15,
+          "outputCostPerMillion": 75,
+          "cacheWriteCostPerMillion": 18.75,
+          "cachedInputCostPerMillion": 1.5
         }
       ]
     }

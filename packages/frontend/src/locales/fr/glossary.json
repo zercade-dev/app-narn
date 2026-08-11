@@ -1,5 +1,4 @@
 {
-  "title": "Glossaire",
   "generate": "Générer",
   "generateGlossariesBtn": "Générer des glossaires",
   "translateTerms": "Générer les traductions",
@@ -106,6 +105,9 @@
   "matchAssignmentWith": "Avec glossaire",
   "unassignGlossary": "Retirer le glossaire",
   "matchResultsCount": "{{count}} correspondances",
+  "deselectAll": "Tout désélectionner",
+  "assignGlossary": "Attribuer le glossaire",
+  "toastAssigned": "Glossaire attribué avec succès",
   "matchNoResults": "Aucune correspondance trouvée.",
   "disabled": "Désactivé",
   "enable": "Activer",

@@ -79,9 +79,14 @@ pnpm lint      # eslint over packages/*/src
 make verify
 ```
 
-`make verify` runs `pnpm build`, `pnpm lint`, `pnpm format:check` and a dependency
-security audit that fails on high or critical advisories in production
-dependencies. Run it before you open a pull request.
+`make verify` runs `pnpm build`, `pnpm lint`, `pnpm format:check`, `pnpm check:locales`
+and a dependency security audit that fails on high or critical advisories in
+production dependencies. Run it before you open a pull request.
+
+`pnpm check:locales` is the interface-string gate — see [Translations](#translations)
+below. It is a standalone script rather than a test suite, it needs no browser or
+server, and continuous integration runs the same command, so a failure here is the
+failure you would otherwise meet on the pull request.
 
 Two things it does **not** do, both deliberate:
 
@@ -112,6 +117,56 @@ Two things it does **not** do, both deliberate:
 
 Match the surrounding code rather than introducing a new style, and keep a pull
 request to one subject.
+
+## Translations
+
+The interface strings live in `packages/frontend/src/locales/<locale>/`, with `en` as the
+source. Three documents exist so that separate people, and separate pull requests, arrive at
+the same wording:
+
+- [`docs/i18n/terminology.md`](docs/i18n/terminology.md) fixes the domain vocabulary —
+  what each term means in this app and what it must not be confused with. It is **frozen**
+  while the locale backfill runs: read it, do not edit it.
+- [`docs/i18n/terminology/`](docs/i18n/terminology) holds one file per locale, giving the
+  rendering agreed for each term. If a term's row for your locale is still empty, you are
+  the first to reach it: decide it and write the row, in the same pull request. A term the
+  vocabulary does not cover goes in the additive queue at the bottom of
+  [`docs/i18n/terminology/README.md`](docs/i18n/terminology/README.md), never into
+  `terminology.md`.
+- [`docs/i18n/style/`](docs/i18n/style) holds one style guide per target locale — register,
+  casing, punctuation, numbers, length discipline, placeholder handling and the traps
+  specific to that language.
+
+Read all three before translating. A change to an English string should update the other locales
+in the same pull request; `{{token}}` placeholders are identifiers and are never translated.
+
+Check your work with `pnpm check:locales` (also run by `make verify` and by continuous
+integration). It compares every locale against `en` for missing and extra keys, plural
+categories, placeholder preservation, product and provider names left translated, values
+left untranslated, gross length outliers and key order, and it names the file, the key and
+the reason for each failure.
+
+## Opening an issue, and what the labels mean
+
+Please use one of the [issue templates](https://github.com/zercade-dev/app-narn/issues/new/choose)
+— a bug report, a feature request, or a small suggestion. Each one applies the label
+that says what kind of issue it is, so you do not need to label anything yourself:
+`bug`, `enhancement` or `polish`. `documentation` and `question` exist for the same
+purpose and are applied by hand. An issue carries exactly one of these.
+
+Every new issue also arrives with `needs-triage`, which means only that the
+maintainer has not yet decided what happens to it. That label is managed
+automatically, by [`.github/workflows/issue-triage.yml`](.github/workflows/issue-triage.yml),
+and the rule it enforces is this: an issue stops needing triage once it is **closed**
+or **assigned**. Closing is itself a decision — fixed, duplicate, `wontfix`, all of
+them count — and assigning means someone has taken it on. Reopening an issue that
+nobody is assigned to puts the label back, because the decision has been undone. A
+daily sweep reconciles anything the live path missed, so `needs-triage` on an open,
+unassigned issue always means what it says.
+
+Please do not report a vulnerability as a public issue, whatever the labels suggest —
+the `security` label is for issues that arrive that way by mistake. See _Reporting a
+security issue_ below for the private channel.
 
 ## Pull requests
 

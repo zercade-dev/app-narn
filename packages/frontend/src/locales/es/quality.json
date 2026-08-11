@@ -3,7 +3,6 @@
   "loading": "Cargando resumen de calidad…",
   "error": "No se pudo cargar el resumen de calidad: {{message}}",
   "empty": "Aún no hay resultados de LQA. Ejecuta una traducción para llenar este panel.",
-  "overview": "{{results}} resultado(s) de LQA en {{entries}} entrada(s) — tasa de aprobación general {{passRate}}.",
   "overallStat": {
     "passRateLabel": "Tasa de aprobación general",
     "results": "{{count}} resultados de LQA",
@@ -16,11 +15,7 @@
     "description": "Recuento de tipos de problemas en todos los idiomas."
   },
   "other": "Otros",
-  "drillDownHint": "Haz clic para ver las entradas correspondientes",
   "columns": {
-    "language": "Idioma",
-    "source": "Origen",
-    "module": "Módulo",
     "passRate": "Tasa de aprobación"
   },
   "legend": {

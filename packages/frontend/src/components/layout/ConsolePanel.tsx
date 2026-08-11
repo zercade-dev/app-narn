@@ -4,7 +4,6 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   ChevronDown,
   ChevronUp,
-  ChevronRight,
   Circle,
   Trash2,
   Download,
@@ -16,7 +15,6 @@ import type { LogEntry } from '../../stores/logger-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { vaultLockedEvent } from '../../lib/vault-events.js';
 import { useUiSettings, type ConsoleFilter } from '../../stores/ui-settings-store.js';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -29,12 +27,19 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PixelIcon } from '@/components/ui/pixel-icon';
 import { cn, downloadBlob } from '@/lib/utils';
+import { ConsoleLogRow } from './ConsoleLogRow.js';
+import { groupEntries } from '@/lib/log-presentation/group.js';
+import { presentEntry } from '@/lib/log-presentation/present.js';
 
 /** Distance (px) from the bottom within which the viewport counts as "pinned". */
 const PIN_THRESHOLD_PX = 32;
 
-/** Lower-cased, searchable text for an entry: message plus stringified metadata. */
-function entryMatchesQuery(entry: LogEntry, query: string): boolean {
+/**
+ * Lower-cased, searchable text for an entry: the friendly text a reader sees,
+ * plus the raw message and metadata a developer would search for.
+ */
+function entryMatchesQuery(entry: LogEntry, query: string, friendly: string): boolean {
+  if (friendly.toLowerCase().includes(query)) return true;
   if (entry.message.toLowerCase().includes(query)) return true;
   if (entry.metadata) {
     try {
@@ -45,25 +50,6 @@ function entryMatchesQuery(entry: LogEntry, query: string): boolean {
   }
   return false;
 }
-
-const LEVEL_BADGE_VARIANT: Record<
-  LogEntry['level'],
-  'destructive' | 'outline' | 'secondary' | 'ghost'
-> = {
-  error: 'destructive',
-  warn: 'secondary',
-  info: 'outline',
-  debug: 'ghost',
-  notification: 'outline',
-};
-
-const LEVEL_BADGE_LABEL: Record<LogEntry['level'], string> = {
-  error: 'error',
-  warn: 'warn',
-  info: 'info',
-  debug: 'debug',
-  notification: 'notif',
-};
 
 const FILTER_LEVELS: ConsoleFilter[] = ['all', 'error', 'warn', 'info', 'debug', 'notifications'];
 
@@ -98,6 +84,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   'use no memo'; // TanStack Virtual's useVirtualizer() returns functions the
   // React Compiler cannot memoize safely, so opt this component out.
   const { t } = useTranslation('console');
+  const { t: tLogs } = useTranslation('logs');
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const vaultExists = useVaultStore((s) => s.hasVault);
   const { entries, connected, clearEntries } = useLogger();
@@ -152,14 +139,15 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
             ? e.level === 'notification'
             : e.level === consoleFilter;
       if (!levelOk) return false;
-      return query === '' || entryMatchesQuery(e, query);
+      return query === '' || entryMatchesQuery(e, query, presentEntry(e, tLogs).text);
     });
   }
   const filteredEntries = getFilteredEntries();
+  const groups = groupEntries(filteredEntries);
 
   // eslint-disable-next-line react-hooks/incompatible-library -- the 'use no memo' directive above opts this component out of the React Compiler, which is the documented TanStack Virtual integration.
   const virtualizer = useVirtualizer({
-    count: filteredEntries.length,
+    count: groups.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 28,
     overscan: 10,
@@ -441,27 +429,17 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
 
           <div className="relative flex-1 min-h-0 flex flex-col">
             <div ref={parentRef} className="flex-1 overflow-auto font-mono text-[11px]">
-              {filteredEntries.length === 0 && (
+              {groups.length === 0 && (
                 <div data-testid="console-empty" className="px-3 py-2 text-muted-foreground/60">
                   {t('empty')}
                 </div>
               )}
               <div style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}>
                 {virtualizer.getVirtualItems().map((vRow) => {
-                  const entry = filteredEntries[vRow.index];
+                  const group = groups[vRow.index];
+                  const entry = group.head;
                   const isLqaFailed = entry.message.startsWith('lqa:failed');
                   const isLqaOverflow = entry.message.startsWith('lqa:overflow');
-                  const badgeVariant = isLqaFailed
-                    ? 'destructive'
-                    : isLqaOverflow
-                      ? 'secondary'
-                      : LEVEL_BADGE_VARIANT[entry.level];
-                  const metaEntries = entry.metadata
-                    ? Object.entries(entry.metadata).filter(([k]) => k !== 'stack')
-                    : [];
-                  const stack =
-                    typeof entry.metadata?.stack === 'string' ? entry.metadata.stack : null;
-                  const isExpanded = expandedIds.has(entry.id);
                   return (
                     <div
                       key={vRow.key}
@@ -475,65 +453,11 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                       )}
                       style={{ transform: `translateY(${vRow.start}px)` }}
                     >
-                      <div className="flex gap-2 items-start">
-                        <span className="text-muted-foreground/60 shrink-0 text-[10px]">
-                          {new Date(entry.timestamp).toLocaleTimeString()}
-                        </span>
-                        <Badge
-                          variant={badgeVariant}
-                          className={cn(
-                            'shrink-0 w-10 justify-center uppercase text-[10px] px-1',
-                            isLqaOverflow && 'bg-status-warn text-white',
-                            entry.level === 'notification' &&
-                              'bg-type-dialogue/15 text-type-dialogue',
-                          )}
-                        >
-                          {LEVEL_BADGE_LABEL[entry.level]}
-                        </Badge>
-                        {/* Log payload: literal program output (message + metadata), not UI
-                            chrome. data-content opts it out of the theme's display/pixel font
-                            (unreadable at this length) and the pixel small-text floor. */}
-                        <span className="break-words flex-1" data-content>
-                          {entry.message}
-                          {metaEntries.length > 0 && (
-                            <span className="text-muted-foreground/50 ml-1">
-                              {metaEntries.map(formatMetaEntry).join(' ')}
-                            </span>
-                          )}
-                        </span>
-                        {stack && (
-                          <button
-                            type="button"
-                            onClick={() => toggleExpand(entry.id)}
-                            aria-label={isExpanded ? t('collapseStack') : t('expandStack')}
-                            data-testid="console-stack-toggle"
-                            className="shrink-0 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
-                          >
-                            <PixelIcon
-                              name="chevron-right"
-                              fallback={ChevronRight}
-                              className={cn(
-                                'size-4 transition-transform',
-                                isExpanded && 'rotate-90',
-                              )}
-                            />
-                          </button>
-                        )}
-                      </div>
-                      {stack && isExpanded && (
-                        <pre
-                          data-testid="console-stack"
-                          data-content
-                          className={cn(
-                            'mt-0.5 ml-24 text-[10px] whitespace-pre-wrap break-words leading-4',
-                            entry.level === 'error' || isLqaFailed
-                              ? 'text-status-fail'
-                              : 'text-muted-foreground/70',
-                          )}
-                        >
-                          {stack}
-                        </pre>
-                      )}
+                      <ConsoleLogRow
+                        group={group}
+                        expanded={expandedIds.has(entry.id)}
+                        onToggle={() => toggleExpand(entry.id)}
+                      />
                     </div>
                   );
                 })}

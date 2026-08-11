@@ -32,7 +32,6 @@
     "category": "Sélectionnez un projet pour gérer les catégories.",
     "routing": "Sélectionnez un projet pour configurer les règles de routage.",
     "runs": "Sélectionnez un projet pour voir l'historique d'activité.",
-    "stage-details": "Sélectionnez un projet pour modifier les détails de son niveau.",
     "orphans": "Sélectionnez un projet pour voir les orphelins.",
     "backup": "Sélectionnez un projet pour utiliser les sauvegardes.",
     "sharing": "Sélectionnez un projet pour gérer le partage."
@@ -43,7 +42,6 @@
     "loading": "Chargement des entrées…"
   },
   "columns": {
-    "source": "SOURCE",
     "config": "STATUT",
     "tooltipSource": "Fichier source",
     "tooltipAchievementSource": "Source de succès",
@@ -65,8 +63,8 @@
     "linkFailed": "Impossible de lier : {{message}}"
   },
   "pagination": {
-    "rowsFiltered": "{{formattedCount}} sur {{totalCount}} entrées",
     "rows": "{{formattedCount}} entrées",
+    "rowsFiltered": "{{formattedCount}} sur {{totalCount}} entrées",
     "rowsPerPage": "Lignes par page :",
     "prev": "Préc.",
     "next": "Suiv.",
@@ -108,8 +106,6 @@
     "translateUseReference": "Utiliser la référence ({{language}}) comme contexte",
     "translateUseReferenceNone": "Utiliser la langue de référence comme contexte",
     "translateNoReferenceHint": "Sélectionnez une langue de référence dans la barre d'outils pour activer cette option.",
-    "translateGroupingLabel": "Regroupement des lots (cette exécution)",
-    "translateGroupingDefault": "Utiliser le réglage de l'espace de travail",
     "translateCustomBatchSizeCaveat": "Envoyé par paire (module, langue) ; des langues ou modules différents ne peuvent pas partager une seule requête.",
     "translateStart": "Démarrer",
     "translateCancel": "Annuler",
@@ -135,7 +131,26 @@
     "selectPage": "Sélectionner toutes les lignes de cette page",
     "selectAll": "Tout sélectionner ({{count}})",
     "selectRow": "Sélectionner la ligne",
-    "run": "Exécution"
+    "run": "Exécution",
+    "cellRetranslateAria": "Retraduire {{language}}",
+    "cellUndoAria": "Versions précédentes pour {{language}}",
+    "cellMarkReviewedAria": "Marquer la traduction {{language}} comme révisée",
+    "cellClearAria": "Effacer la traduction pour {{language}}",
+    "cellEditAria": "Modifier la traduction pour {{language}}",
+    "cellEditTooltip": "Modifier · Entrée · Échap pour annuler",
+    "cellEditReviewedTooltip": "Révisé — appuyez sur Entrée pour modifier",
+    "cellTranslatedBadge": "traduit",
+    "cellReviewedBadge": "révisé",
+    "cellNeedsReviewBadge": "à réviser"
+  },
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "retranslate": "Retraduire",
+    "markReviewed": "Marquer comme révisé",
+    "clearTranslation": "Effacer la traduction",
+    "enterEditMode": "Passer en mode édition",
+    "navigateRows": "Naviguer entre les lignes",
+    "cancelEditing": "Annuler l’édition"
   },
   "filters": {
     "searchPlaceholder": "Rechercher du texte…",
@@ -150,9 +165,6 @@
     "placeholderMismatch": "Incompatibilité de variables",
     "newOnly": "Nouveau (dernier import)",
     "clearNewFlags": "Effacer les marques « nouveau » ({{count}})",
-    "untranslatedFor": "Non traduit pour :",
-    "allLanguages": "Toutes les langues",
-    "source": "Source :",
     "allSources": "Toutes les sources",
     "showColumns": "Afficher les colonnes :",
     "clearFilters": "Effacer les filtres",
@@ -247,12 +259,11 @@
     "clearReviewed": "Effacer le statut « révisé »"
   },
   "editor": {
-    "placeholder": "Sélectionnez une cellule pour voir et modifier son texte.",
     "sourceReadOnly": "Texte source (lecture seule)",
     "translationLabel": "Traduction — {{lang}}",
-    "save": "Enregistrer",
     "ignoreOverflow": "Ignorer le débordement",
     "overflowIgnored": "Débordement ignoré",
+    "save": "Enregistrer",
     "discard": "Ignorer",
     "saved": "Traduction enregistrée",
     "undo": "Annuler",
@@ -289,6 +300,7 @@
     "topicQuality": "Qualité",
     "topicAiReview": "Révision par IA",
     "topicActivity": "Activité",
+    "topicPseudoTest": "Pseudo Test",
     "topicCategory": "Onglet Catégorie",
     "topicTranslationMemory": "Mémoire de traduction"
   },

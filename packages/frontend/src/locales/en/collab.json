@@ -23,7 +23,7 @@
     "columnLanguages": "Writable languages",
     "columnActions": "Actions",
     "selectAllLanguages": "Select all",
-    "unselectAllLanguages": "Unselect all",
+    "unselectAllLanguages": "Deselect all",
     "save": "Save",
     "saving": "Saving…",
     "remove": "Remove",
@@ -83,6 +83,7 @@
     "immutableHint": "Nicknames can't be changed once claimed.",
     "placeholder": "e.g. jamie-writes",
     "formatHint": "Lowercase letters, numbers, and hyphens, 3–30 characters.",
+    "claimOnDesktop": "Open narn on a larger screen to claim your nickname.",
     "claimButton": "Claim nickname",
     "claiming": "Claiming…",
     "claimSuccess": "Nickname claimed."

@@ -3,7 +3,6 @@
   "loading": "Chargement du résumé qualité…",
   "error": "Impossible de charger le résumé qualité : {{message}}",
   "empty": "Aucun résultat LQA pour le moment. Lancez une traduction pour alimenter ce tableau de bord.",
-  "overview": "{{results}} résultat(s) LQA sur {{entries}} entrée(s) — taux de réussite global {{passRate}}.",
   "overallStat": {
     "passRateLabel": "Taux de réussite global",
     "results": "{{count}} résultats LQA",
@@ -16,11 +15,7 @@
     "description": "Nombre de problèmes par type, toutes langues confondues."
   },
   "other": "Autres",
-  "drillDownHint": "Cliquez pour afficher les entrées correspondantes",
   "columns": {
-    "language": "Langue",
-    "source": "Source",
-    "module": "Module",
     "passRate": "Taux de réussite"
   },
   "legend": {

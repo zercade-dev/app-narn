@@ -1,5 +1,6 @@
 name: Small suggestion
 description: A small tweak or polish idea — clearer wording, a better default, a minor UI adjustment.
+title: "💡 Polish: <short summary — e.g. clearer tip under the instance name field>"
 labels: [polish, needs-triage]
 body:
   - type: markdown

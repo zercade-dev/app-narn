@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "Configurer les règles de routage",
+    "openModuleSettings": "Ouvrir les paramètres des modules",
+    "openQuality": "Ouvrir les paramètres de qualité",
+    "openGlossary": "Ouvrir le glossaire",
+    "unlockVault": "Déverrouiller le coffre"
+  },
+  "translation": {
+    "start": "Traduction d'un texte vers {{language}}…",
+    "done": "Texte traduit vers {{language}}.",
+    "doneFromMemory": "Traduction enregistrée réutilisée pour {{language}}.",
+    "queued": "{{total}} texte mis en file d'attente pour traduction.",
+    "queued_other": "{{total}} textes mis en file d'attente pour traduction.",
+    "runQueued": "Exécution de traduction en file d'attente — position {{position}}.",
+    "retryQueued": "Nouvelle tentative en file d'attente — position {{position}}.",
+    "retry": "Nouvelle tentative de traduction après un échec.",
+    "failedNoRoute": "Impossible de traduire {{count}} texte vers {{language}} — aucune règle de routage ne correspond.",
+    "failedNoRoute_other": "Impossible de traduire {{count}} textes vers {{language}} — aucune règle de routage ne correspond.",
+    "failedModuleDisabled": "Impossible de traduire {{count}} texte vers {{language}} — le module {{module}} est désactivé.",
+    "failedModuleDisabled_other": "Impossible de traduire {{count}} textes vers {{language}} — le module {{module}} est désactivé.",
+    "failedModuleNotFound": "Impossible de traduire {{count}} texte vers {{language}} — le module {{module}} n'est pas installé.",
+    "failedModuleNotFound_other": "Impossible de traduire {{count}} textes vers {{language}} — le module {{module}} n'est pas installé.",
+    "failedGeneric": "Impossible de traduire un texte vers {{language}}.",
+    "batchFailed": "Un lot de {{count}} traductions vers {{languages}} a échoué.",
+    "queueStartFailed": "Impossible de lancer l'exécution de traduction.",
+    "maskMismatch": "Les balises de mise en forme n'ont pas survécu à la traduction vers {{language}}.",
+    "tmRejected": "Une traduction enregistrée pour {{language}} n'a pas passé le contrôle qualité.",
+    "lqaRetry": "Contrôle qualité échoué — nouvelle tentative demandée au modèle.",
+    "authCancel": "La connexion a été annulée, la traduction s'est donc arrêtée."
+  },
+  "lqa": {
+    "passed": "Contrôle qualité réussi.",
+    "failed": "Contrôle qualité échoué.",
+    "overflow": "La traduction est trop longue pour l'espace disponible.",
+    "checkError": "Impossible d'exécuter un contrôle qualité."
+  },
+  "judge": {
+    "done": "La révision a obtenu {{score}} — {{verdict}}.",
+    "suggestDone": "La révision s'est terminée avec des suggestions.",
+    "suggestNoChange": "La révision n'a rien trouvé à changer.",
+    "suggestionDiscarded": "Suggestion abandonnée."
+  },
+  "sourceReview": {
+    "done": "La révision de la source a trouvé {{findings}} problème.",
+    "done_other": "La révision de la source a trouvé {{findings}} problèmes."
+  },
+  "glossaryGen": {
+    "done": "La génération du glossaire est terminée — {{suggested}} termes suggérés à partir de {{analyzed}} textes.",
+    "failed": "La génération des glossaires a échoué.",
+    "saveSuggestionsFailed": "Impossible d'enregistrer les suggestions du glossaire."
+  },
+  "categoryGen": {
+    "queued": "Génération de catégories mise en file d'attente.",
+    "done": "La génération de catégories est terminée — {{suggestions}} suggestions.",
+    "failed": "La génération de catégories a échoué."
+  },
+  "stageDetails": {
+    "queued": "Détails du niveau mis en file d'attente.",
+    "done": "Détails du niveau terminés — {{completed}} réussis, {{failed}} échoués.",
+    "failed": "Les détails du niveau ont échoué."
+  },
+  "module": {
+    "loaded": "Module {{module}} chargé.",
+    "instanceRegistered": "Configuration {{instance}} ajoutée.",
+    "instanceRegisterFailed": "Impossible d'ajouter la configuration {{instance}}."
+  },
+  "vault": {
+    "unlocked": "Coffre déverrouillé.",
+    "passwordChanged": "Mot de passe du coffre modifié.",
+    "credentialsEvicted": "Vos identifiants enregistrés ont été effacés de la mémoire."
+  },
+  "orphan": {
+    "detected": "{{count}} texte n'est plus dans le fichier source.",
+    "detected_other": "{{count}} textes ne sont plus dans le fichier source.",
+    "linked": "Texte orphelin relié.",
+    "deleted": "Texte orphelin supprimé."
+  },
+  "tm": {
+    "cleared": "Mémoire de traduction effacée.",
+    "variantDeleted": "Variante de mémoire de traduction supprimée."
+  },
+  "backup": {
+    "restored": "Sauvegarde restaurée.",
+    "pruneFailed": "Impossible de nettoyer les anciennes sauvegardes."
+  }
+}

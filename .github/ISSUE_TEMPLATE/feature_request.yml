@@ -1,5 +1,6 @@
 name: Feature request
 description: Suggest a new capability or a larger improvement for NARN.
+title: "🚀 Feature: <short summary — e.g. bulk re-run of failed strings>"
 labels: [enhancement, needs-triage]
 body:
   - type: markdown

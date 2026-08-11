@@ -20,8 +20,10 @@
   "clear": "Clear logs",
   "expand": "Expand",
   "collapse": "Collapse",
-  "expandStack": "Expand stack",
-  "collapseStack": "Collapse stack",
   "vaultLocked": "Vault locked",
-  "vaultLockedUnlockHint": "Vault locked — click to unlock"
+  "vaultLockedUnlockHint": "Vault locked — click to unlock",
+  "repeatCount": "Repeated {{count}} times",
+  "showDetails": "Show technical details",
+  "membersNotShown": "{{count}} more entry not shown",
+  "membersNotShown_other": "{{count}} more entries not shown"
 }

@@ -23,7 +23,11 @@ export const SHELL_VIEW_GATES: Record<ShellView, MobileGate> = {
   settings: 'mobile',
   'global-config': 'desktop',
   'translation-memory': 'desktop',
-  account: 'desktop',
+  // Renders on mobile so signing out is reachable from a phone (issue #70).
+  // Only the session/identity strip survives: the Security/Data/Notifications
+  // tabs are replaced by <DesktopOnlyNotice> inside the view, and the nickname
+  // claim form is suppressed, so no write affordance reaches mobile.
+  account: 'mobile',
   'join-project': 'desktop',
 };
 

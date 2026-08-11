@@ -43,11 +43,18 @@ export const JUDGE_SYSTEM_PROMPT = [
   'Return ONLY JSON. Do not include markdown, code fences, analysis, or extra explanation.',
 ].join('\n');
 
-/** Formatting tokens a suggestion must carry over from the reviewed translation. */
+/**
+ * Formatting tokens a suggestion must carry over from the reviewed translation.
+ *
+ * The bracketed bodies exclude their own opening delimiter (`[^<>]`, `[^{}]`)
+ * so scanning stays linear on model output full of unterminated `<`/`{` — see
+ * the same note in shared/src/similarity. Tags and placeholders never nest, so
+ * the token set matched is unchanged.
+ */
 const FORMATTING_TOKEN_PATTERNS: readonly RegExp[] = [
   /\\[ntr]/g, // literal escape sequences (\n, \t, \r)
-  /<[^>]+>/g, // markup tags, e.g. <color=yellow>, </color>
-  /\{[^}]*\}/g, // placeholders, e.g. {0}, {1:lv.TurnSystem.Current Player.Name}
+  /<[^<>]+>/g, // markup tags, e.g. <color=yellow>, </color>
+  /\{[^{}]*\}/g, // placeholders, e.g. {0}, {1:lv.TurnSystem.Current Player.Name}
 ];
 
 function countTokens(text: string, pattern: RegExp): Map<string, number> {

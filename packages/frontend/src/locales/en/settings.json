@@ -34,7 +34,7 @@
     "iconsLabel": "Icons"
   },
   "themes": {
-    "default": { "name": "Default", "description": "The classic narn look." },
+    "default": { "name": "Classic", "description": "The classic narn look." },
     "pixel": { "name": "Pixel", "description": "Chunky 8-bit console vibes." },
     "techno": { "name": "Techno", "description": "Neon cyberpunk terminal." },
     "minimal": { "name": "Minimal", "description": "Flat, quiet, monochrome." }
