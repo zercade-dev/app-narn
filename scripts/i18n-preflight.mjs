@@ -316,8 +316,29 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
  * `{{total}} girdi` ("{{total}} entries", singular "girdi" at every count)
  * reports as an uncleared survivor and fails the gate on a rendering that
  * is not a defect.
+ *
+ * `ja`: the same fact, held even more strongly — Japanese nouns have no
+ * number at all, so there is no plural form for a numeral to agree with, in
+ * any construction. The batch-3 translator asked instead for a single-word
+ * exemption (倍, the multiplier in `review:overflowIssue`), by analogy with
+ * ru's симв/байт. Granting that would have been wrong twice over: it would
+ * treat a grammar fact as an unfinished calibration, and it would guarantee
+ * the same escalation every round with a different word — 件, 個, 回 and
+ * every other counter sit in exactly the same position and are equally
+ * invariant. Rounds 1 and 2 produced zero word-axis survivors for `ja`, so
+ * the axis has never caught a real Japanese defect, and cannot.
+ *
+ * As with `tr`, this is NOT a claim that Japanese has no numeral-adjacent
+ * hazard. It has one, and it is the choice of COUNTER (助数詞): 件 for
+ * records, 行 for rows, 語 for glossary terms. That is a lexical decision per
+ * counted object rather than an agreement rule, so no regex can check it; it
+ * is handled by the counter-by-object table in docs/i18n/style/ja.md, which
+ * the batch-1 review required and every later batch extends. The euphonic
+ * changes Japanese counters do have (一本 ippon, 三本 sanbon, 六本 roppon)
+ * are changes in READING only — the written form after any numeral is the
+ * same characters, and this product renders text, not speech.
  */
-export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr']);
+export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja']);
 
 /**
  * The script list for a locale, or `undefined` if this detector has no

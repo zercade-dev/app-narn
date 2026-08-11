@@ -5,8 +5,9 @@ term and the list of things that are never translated; this locale's rendering o
 term goes in `terminology/ja.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
-**Every key cited below is a key this locale has actually translated** — `config` (batch 1)
-and `strings` (batch 2), and nothing else. That constraint is deliberate and binds later
+**Every key cited below is a key this locale has actually translated** — `config` (batch 1),
+`strings` (batch 2) and `glossary` / `review` / `category` / `quality` (batch 3), and nothing
+else. That constraint is deliberate and binds later
 batches too: **do not prescribe a rendering for a key in a
 namespace you have not translated.** The original scaffold of this file illustrated nine
 rules with `vault:*`, `sidebar:*`, `strings:*`, `common:*`, `logs:*` and `category:*`
@@ -62,6 +63,8 @@ Japanese does not. Resolve the control **before** writing the string.
 | Progress / status text | ～中 or ～しました — a state, never a command. The **ellipsis is English's to give**, not the shape's: add 「…」 only where the source has one | `config:duplicating` 「複製中…」 and `config:autoSaveSaved` 「保存しました」 (English has the ellipsis); `strings:row.translating` 「翻訳中」 and `strings:runs.statusQueued` 「待機中」 (English has none) |
 | Description / help / toast | full ですます sentence ending in 。 | `config:maxBackupsDescription` |
 | Inline fragment in a summary row | noun + なし / 指定なし, no verb, no 。 | `config:routing.anySource` 「ソース指定なし」, `config:routing.noModule` 「モジュールなし」 |
+| Empty-state title | bare clause, and it takes 。 **only where English does** | `glossary:emptyTermsTitle` 「この用語集にはまだ用語がありません」 and `review:emptyTitle` 「レビューキューは空です」 (no period in en, none here); `category:noSuggestions` 「モデルからカテゴリの提案はありませんでした。」 (en has one) |
+| Field label whose English *reads* as a verb phrase | noun phrase anyway — resolve the control, not the wording | `glossary:generateFocusSourceTextsLabel` ("Focus on source texts") is a `<Label>` over a textarea at `GenerateGlossaryDialog.tsx:699` and ships 「絞り込む原文」, not a ～する form |
 
 **Why the ～にする row exists.** The button shape above ends on a サ変 noun (複製, 作成), which
 needs a verb-forming noun to end on. *Mark as reviewed* and *Flag as needs review* have none —
@@ -146,7 +149,21 @@ full-width digits.
   English writes "+ Context" with a space; the space goes, the `+` stays. Same for the `$` in
   `strings:runs.estimatedCost` and the `+` in `Shift+Enter`.
 - Ellipsis is the single character `…` (U+2026) wherever the English source has it, as a UI
-  affordance: `config:importing` ("Importing…") is 「インポート中…」.
+  affordance: `config:importing` ("Importing…") is 「インポート中…」. **The rule bites in both
+  directions and batch 3 is where it shows**: `review:sourceAi.modulePlaceholder` ("Select a
+  module") is 「モジュールを選択」 with no ellipsis, while `glossary:generateModulePlaceholder`
+  ("Select a module…") is 「モジュールを選択…」 with one. Same control class, different English,
+  two different Japanese values — and that is correct, not drift.
+- **A sentence that begins with an unquoted button label takes 「…」 around that label.**
+  English writes `review:sourceAi.emptyHint` and `review:translationAi.emptyHintRun` starting
+  with the bare labels *Run review* and *Review last run* (`english-review-notes.md` flags both
+  and tells you to render the label identically to its own key). In Japanese an unbracketed
+  label at the head of a sentence is unparseable — 「レビューを実行」では… reads as a verb phrase
+  unless the brackets are there — so the two shipped values quote it:
+  「「レビューを実行」では、すべての原文エントリを…」 and 「「前回の実行をレビュー」では、…」.
+  Punctuation is ours to set; the label inside is copied verbatim from `sourceAi.runReview` /
+  `translationAi.runReview`. `review:emptyFlaggedHint` and `review:sourceAi.scopeNoneHint`
+  follow the same shape, and the latter's English already carries quotes.
 - 中黒 「・」 has **two** jobs here, and batch 1 only wrote down the first.
   1. Joining a loanword compound where it would otherwise be ambiguous; otherwise run them
      together. Batch 1 needed it nowhere and neither did batch 2.
@@ -267,6 +284,13 @@ still the worked example of why a budget must name its container — `config:rou
 friends really do sit in a scrolling in-panel row, and they are the only tab-shaped control in
 this app that does.
 
+Batch 3 measures the same, over the four namespaces' 366 shared keys: 5,578 Japanese characters
+against 10,744 English, aggregate **0.54**, median **0.53**, 90th percentile **0.80**, single
+maximum **1.00** — and that maximum is now a *ceiling* rather than an outlier, reached by five
+keys and exceeded by none (`category:entryCheckboxLabel`, `review:undo`, `review:provenance`
+the allowlisted format string, `glossary:exportTbx`, `review:sourceAi.findingUnsafe`). Three
+batches in, the distribution has not moved.
+
 Japanese runs ~0.55x English over batches 1 and 2 alike (`strings`: 5,480 Japanese characters
 against 9,900 English, aggregate **0.55**, median **0.56**, 90th percentile **0.83**, single
 maximum **1.50** at `strings:filters.matchAny` 「または」 — a two-character English source, which
@@ -300,7 +324,7 @@ the counter is a property of the object, not of the string.
 | language | **言語** | `config:routing.langsMore_other` 「+{{count}}言語」 |
 | spreadsheet cell | **個** | `config:exportRoundtripWarning_other` 「{{count}}個のセル」 |
 | glossary | **件** | `config:glossariesSkipped_other` 「無効化した用語集{{count}}件」 |
-| glossary term | **語** | not yet shipped — batch 3. Terms and words take 語, never 件. |
+| glossary term | **語** | shipped batch 3: `glossary:toastPushed` 「用語{{count}}語をDeepLに送信しました」, `glossary:generateSuggestionCount` 「用語{{count}}語」, `glossary:bulkMarkConstant`, `glossary:flaggedTitle`. Terms and words take 語, never 件. |
 | routing rule | **件** | `config:routing.ruleCount_other` 「ルール{{count}}件」 |
 | run, retry, attempt, request | **回** | an occurrence of an action, never 件 |
 | person (member, collaborator) | **人** | not yet shipped — batch 4 |
@@ -310,7 +334,11 @@ the counter is a property of the object, not of the string.
 | table row — where English itself says *row* | **行** | added batch 2: `strings:bulk.rowsSelected_other` 「{{count}}行を選択中」, `strings:bulk.selectAllFiltered`. Same counter as a CSV row and for the same reason: the object is a row, not a content unit. Where the same selection is described without the word *row*, it is entries — `strings:compare.selectedCount` 「{{count}}件を選択中」 |
 | chat turn | **ターン** | added batch 2: `strings:runs.chatTurns_other` 「{{count}}ターン」 — the unit *is* the counter, like 文字／バイト／トークン |
 | LQA issue, finding | **件** | added batch 2: `strings:row.lqaIssues_other` 「LQAの問題{{count}}件」 — a verdict is a record |
-| a genuinely mixed or unknown selection | **件** | `config:routing.nSelected` 「{{count}}件を選択中」 — one key rendering over both categories and tones. Batch 2 **narrows this row**: the category half is no longer a fallback at all, because *category* has its own row above and it is 件. The licence now rests on the tone half alone, which batch 3 settles; if tones also take 件, this row stops being a fallback and becomes an ordinary coincidence. A key that counts one known class must still take that class's counter. |
+| glossary match (a place in an entry where a term was found) | **件** | added batch 3: `glossary:matchResultsCount` 「一致箇所{{count}}件」. The object is a located occurrence, i.e. a record — not a word, so not 語 |
+| source text (as a scoping input) | **件** | added batch 3: `glossary:generateFocusSourceTextsCount_other` 「原文{{count}}件に絞り込みました。」. Each pasted line names one entry, so this is the *entry* counter under another name |
+| LQA result, review item | **件** | added batch 3: `quality:overallStat.results` 「LQAの結果{{count}}件」, `review:allItemsCount` 「翻訳{{count}}件」, `review:sourceAi.lqaHint`. Consistent with batch 2's *LQA issue* row — a verdict is a record |
+| batch (a packed request) | **バッチ** | added batch 3: `category:genBatchCount_other` 「{{count}}バッチで実行します（…）」, `glossary:generateBatchCount_other` 「約{{count}}バッチで…」. The unit *is* the counter, like 文字／バイト／トークン／ターン. Never 回 — that counts an *action*, and a batch is a thing sent |
+| a genuinely mixed or unknown selection | **件** | `config:routing.nSelected` 「{{count}}件を選択中」 — one key rendering over both categories and tones. Batch 2 **narrows this row**: the category half is no longer a fallback at all, because *category* has its own row above and it is 件. The licence now rests on the tone half alone. **Batch 3 does NOT settle it, contrary to what this cell used to promise**: `category` counts categories and entries, and no `glossary`/`review`/`category`/`quality` key counts tones — the tone vocabulary lives in Compare (batch 2) and Config (batch 1), neither of which counts them either. The tone half is still open; whichever later batch counts a tone decides it. A key that counts one known class must still take that class's counter. |
 
 **A bare number behind 「：」 or inside brackets takes no counter at all.** That is the
 label:value shape from the punctuation section, and it is why
@@ -381,6 +409,39 @@ Batch 2 met eleven more and used the same three devices, plus one new one:
   「実行IDをコピー（{{runId}}）」. The draft 「実行ID{{runId}}をコピー」 put を straight against the
   token and would have been reported on every pre-flight run.
 
+Batch 3 met eleven more and used the same devices — `glossary:generateProgressLabel`
+「解析した原文エントリ：{{completed}}/{{total}}」, `glossary:toastGenerated`
+「作成した用語集：{{glossaries}}・割り当てたエントリ：{{entries}}」,
+`category:genProgressCount` 「バッチ：{{done}}/{{total}}」,
+`quality:overallStat.legendPassed` 「合格：{{count}}」, `review:sourceAi.runSummary` — and
+`review:sourceAi.scopeAll` 「すべてのエントリ（{{count}}）」 for the brackets device.
+
+### The one deliberate exception, and why it is not a workaround
+
+**`review:overflowIssue` ships 「オーバーフロー：翻訳の長さは原文の{{ratio}}倍です。」 — a
+counter written directly against a non-`count` token, the only one in batches 1–3.** It is
+reported by `i18n-preflight.mjs` on every run (`1 after the token-axis skip`, `1 after the
+word axis too`), and it is **not** a defect:
+
+- Japanese has no numeral agreement, and 倍 is invariant. The string is grammatical at every
+  value the token can take, including the decimals it actually shows (1.75倍, 2.4倍).
+- English writes "{{ratio}}× the source length". 倍 is the exact Japanese equivalent of that
+  ×, so removing it is *less* faithful, not more.
+- Every count-neutral rewrite that clears the detector destroys the sentence: the narrow rule
+  for `ja` fires on a token followed immediately by **any** Han/Hiragana/Katakana character, so
+  the only shapes that pass are a token at the end of a clause, a token before punctuation,
+  or a skiplisted token — and a Japanese sentence cannot end on the number and still carry
+  「です。」. The alternatives all convert a sentence into a label:value row that English does
+  not have.
+
+So the string stands and the **guard** is the finding: `NUMERAL_WORD_AXIS_EXEMPTIONS` in
+`scripts/i18n-preflight.mjs` wants a `ja` entry for 倍 — an invariant multiplier counter, the
+exact analogue of the invariant abbreviations симв／байт that `ru`'s list carries. It is
+correctly calibrated: it is derived from the single **post**-token-axis survivor, never from
+the 81 raw matches. Batch 3 escalated it rather than editing the script, because that script
+is shared by all three languages running in this one worktree. **Do not "fix" this string in
+a later batch.**
+
 `{{count}}` itself is exempt from all of this — its own family handles it — so
 「{{count}}件」 is the normal, preferred shape and appears throughout the file.
 
@@ -399,6 +460,31 @@ locale file.
   backwards makes "Clear translation" read as un-setting a flag.
 - **_Discard_ is 破棄 or 却下** — see the *discard* row in `terminology/ja.md`. 破棄 throws away
   the user's own unsaved edit; 却下 refuses something the app offered.
+
+**Batch 3 adds a third English verb with the same problem: _delete_ / _remove_ / _erase_.**
+English uses three and Japanese needs three, because the three operations really differ.
+
+- **削除 destroys the thing.** `glossary:confirmDeleteTitle` 「用語を削除」,
+  `glossary:confirmDeleteGlossaryTitle` 「用語集を削除」, `category:deleteCategory`
+  「カテゴリを削除」.
+- **外す un-assigns it and destroys nothing.** `category:removeFromCategory` 「カテゴリから外す」,
+  `category:deleteConfirmBody_other` 「「{{category}}」をエントリ{{count}}件から外し…」. Reach for
+  解除 instead where what is released is a *marker or setting* (`glossary:bulkClearConstant`
+  「{{count}}語の定数を解除」, `glossary:unassignGlossary` 「用語集の割り当てを解除」) — 外す takes a
+  member out of a collection, 解除 turns a flag off.
+- **消去 wipes a remote store.** `glossary:confirmPushReplaceTitle`
+  「DeepLの古いエントリを消去しますか？」, `glossary:pushToDeepLReplace` 「送信して古い分を消去」,
+  `glossary:confirmPushReplaceConfirm` 「消去して送信」. This is the same 消去 batch 1 shipped for
+  `config:tm.clearAll` 「すべて消去」 — content the user can see, gone.
+
+**One live divergence this batch could not fix, recorded so nobody "harmonises" it wrongly.**
+`strings:bulk.removeCategory` ("Remove category") shipped in batch 2 as 「カテゴリを削除」, but
+`StringTableBulkBar.tsx:302` only un-assigns the checked categories from the selected rows —
+it is the 外す operation wearing the 削除 word, and it is now byte-identical to
+`category:deleteCategory`, which really does destroy the category. The two never co-render
+(bulk bar in Translations, button in the Category tab), so nothing is broken on screen. It is
+flagged to the controller as a batch-2 finding; do **not** weaken `category:deleteCategory` to
+match it.
 
 ## Locale-specific traps
 
@@ -441,6 +527,32 @@ locale file.
   timestamp column, and the more accurate rendering is also the one that separates it from
   `strings:compare.translateStart`. Reading the collision list as "all licensed" would have
   shipped that.
+  **Batch 3's licensed collapses**, every one reported by `i18n-preflight.mjs` check 2 and
+  every one checked against the whole-rail test rather than waved through: 用語集 over
+  *Glossaries* / *Glossary*; カテゴリ over *Categories* / *Category*; 原文 over *Source* /
+  *Source text*; 定数 over *Constant* / *constant*; 操作 over *Actions* / *Action*; 追加 over
+  *Add* / *added* and 削除 over *Delete* / *removed* (the diff legend — the participle carries
+  no information into Japanese); 合格 over *Passed* / *Pass* and 不合格 over *Failed* / *Fail*;
+  保留 over *Flag* / *Flagged*; レビューする言語 over *Language to review* / *Languages to
+  review*; 有効な用語集 over *Active glossaries* / *Enabled glossaries*; モジュールを選択 over
+  *Choose a module* / *Select a module*; すべて表示 over *View all* / *Show all*; 再試行 over
+  *Try again* / *Retries*; 禁止用語 over *Forbidden terms* / *Forbidden term* — **that last one
+  was checked in code, not reasoned**: `quality:checkLabels` is only ever read as
+  `checkLabel(entry.key)` over an emitted LQA *issue* type (`QualityTab.tsx:100`, `:210`), and
+  `forbidden-terms` is a check id that `modules/M10/` never emits as an issue, so the two
+  cannot appear in one chart.
+  **Two same-English pairs batch 3 deliberately kept apart**, which the same check reports from
+  the other direction: 不合格 (`quality:legend.failed`, a verdict) against 失敗
+  (`strings:runs.statusFailed`, a run that errored); and 「メモ」 (`glossary:colNotes`, the column
+  header, matching the shipped `config:routing.promptNotes`) against 「メモを入力」
+  (`glossary:notesPlaceholder`, the placeholder inside the field) — the same trigger/placeholder
+  split as `config:models.select` / `pickTitle`.
+  **One same-English pair Japanese cannot keep apart**: 前へ covers both *Previous*
+  (`review:prev` and its two siblings) and *Prev* (`strings:pagination.prev`).
+  `english-review-notes.md` item 7 tells translators not to align those two — but that
+  instruction is about locales that *abbreviate* pagers (fr "Préc."), and Japanese has no
+  abbreviation of 前へ. The collapse is a property of the language, not a failure to follow the
+  note.
   **The licence has one hard boundary, and batch 2 crossed it once.** A collapse is licensed
   only where the two keys **cannot co-render**. *Translate* was in the list above until review
   found that its rendering would reach the sidebar and land on top of `strings:tabs.strings` —
@@ -475,12 +587,12 @@ budget row above — so every one of them is also subject to the 13-glyph trunca
 | Config (tab) | 「設定」 | `strings:tabs.config` | `strings:guide.topicConfig` 「設定タブ」 (shipped batch 2). **Batch 4 must not reuse the bare 「設定」 for the app-wide *Settings* surface** — グローバル設定 already contains it and this tab now holds it; pick a distinguishing word there |
 | Data (tab) | 「データ」 | `strings:tabs.data` | — |
 | Routing (tab) | 「振り分け」 | `strings:tabs.routing` | `strings:guide.topicRouting` 「振り分けタブ」 (shipped batch 2). The *routing rule* term is 振り分けルール (`config:routing.title`); the tab is the bare root |
-| Source AI review | 「原文AIレビュー」 | `strings:tabs` (review-source-ai) | `review:sourceAi.configTitle`. Built on batch 1's 原文レビュー (*source review*) plus AI |
-| Translation AI review | 「翻訳AIレビュー」 | `strings:tabs` (review-translation-ai) | `review:translationAi.title` |
-| Manual review | 「手動レビュー」 | `strings:tabs` (review-manual) | `review:title` is a **different English string** ("Review queue") and takes its own rendering — do not copy this one onto it |
-| Quality | 「品質」 | `strings:tabs.quality` | `strings:guide.topicQuality` 「品質」 (shipped batch 2). **`quality:title` is a different English string** — "Quality Dashboard", not "Quality" — and takes **「品質ダッシュボード」**, matching `strings:tabPlaceholder.quality` in this same batch. Keep 品質 as the root so the tab and the page title read as one surface; do **not** copy the bare 「品質」 onto it |
-| Glossary (tab) | 「用語集」 | `strings:tabs.glossary` | `strings:guide.topicGlossary` 「用語集タブ」 (shipped batch 2), `glossary:*` |
-| Category (tab) | 「カテゴリ」 | `strings:tabs.category` | `strings:guide.topicCategory` 「カテゴリタブ」 (shipped batch 2), `category:*`. English's singular tab / plural page title carries no information into Japanese |
+| Source AI review | 「原文AIレビュー」 | `strings:tabs` (review-source-ai) | `review:sourceAi.configTitle` 「原文AIレビュー」 (shipped batch 3). Built on batch 1's 原文レビュー (*source review*) plus AI |
+| Translation AI review | 「翻訳AIレビュー」 | `strings:tabs` (review-translation-ai) | `review:translationAi.title` 「翻訳AIレビュー」 (shipped batch 3) |
+| Manual review | 「手動レビュー」 | `strings:tabs` (review-manual) | `review:title` is a **different English string** ("Review queue") and takes its own rendering — batch 3 shipped 「レビューキュー」. Do not copy 手動レビュー onto it |
+| Quality | 「品質」 | `strings:tabs.quality` | `strings:guide.topicQuality` 「品質」 (shipped batch 2). **`quality:title` is a different English string** — "Quality Dashboard", not "Quality" — and shipped in batch 3 as **「品質ダッシュボード」**, matching the 品質ダッシュボード inside `strings:tabPlaceholder.quality`. Keep 品質 as the root so the tab and the page title read as one surface; do **not** copy the bare 「品質」 onto it |
+| Glossary (tab) | 「用語集」 | `strings:tabs.glossary` | `strings:guide.topicGlossary` 「用語集タブ」 (shipped batch 2), `glossary:glossaries` 「用語集」 (shipped batch 3 — the panel heading English pluralises and Japanese does not; identical and licensed) |
+| Category (tab) | 「カテゴリ」 | `strings:tabs.category` | `strings:guide.topicCategory` 「カテゴリタブ」 (shipped batch 2), `category:title` 「カテゴリ」 (shipped batch 3). English's singular tab / plural page title carries no information into Japanese |
 | Activity | 「アクティビティ」 | `strings:tabs.runs` | `strings:guide.topicActivity` 「アクティビティ」 (shipped batch 2). The **page title expands deliberately**: `strings:runs.title` is 「翻訳アクティビティ」. Do not shorten it to match and do not invent a third wording |
 | Sharing | 「共有」 | `strings:tabs.sharing` | `collab:sharing.pageTitle` |
 | Stage details | 「ステージ詳細」 | `strings:tabs` (stage-details) | `stage-details:title` |
@@ -568,6 +680,18 @@ ground is in `terminology/ja.md`'s *glossary term* row: 用語 and 用語集 are
 with the head 集 ("collection") carrying the distinction — a 用語集 is literally a collection of
 用語. That is how Japanese expresses this relationship, and it is why no second word is needed.
 
+**Sweep 3 — the sidebar rail against the page title it opens** (batch 3). Batch 3 writes no
+rail label at all, but every one of its page titles is on screen *beside* the whole sidebar
+rail, which is the co-render test as the whole-rail rule states it. All five checked:
+
+| Sidebar rail label (batch 2) | Page title batch 3 wrote | Verdict |
+| --- | --- | --- |
+| 「用語集」 `strings:tabs.glossary` | 「用語集」 `glossary:glossaries` | **exact equality — licensed**: English writes Glossary over Glossaries for the same surface, the Translation Memory case exactly |
+| 「カテゴリ」 `strings:tabs.category` | 「カテゴリ」 `category:title` | **exact equality — licensed**: English's Category / Categories, number only |
+| 「品質」 `strings:tabs.quality` | 「品質ダッシュボード」 `quality:title` | prefix, licensed — English does the same (Quality > Quality Dashboard), and this is why the tab label must **not** be copied onto the title |
+| 「手動レビュー」 `strings:tabs` (review-manual) | 「レビューキュー」 `review:title` | clear — the one pair English deliberately keeps apart, and Japanese follows |
+| 「原文AIレビュー」／「翻訳AIレビュー」 | the same two, `review:sourceAi.configTitle` / `review:translationAi.title` | exact equality — licensed, English is byte-identical in both homes |
+
 **Sweep 2 — the sidebar rail** (`sidebar:groups.*`, batch 4, over `strings:tabs.*`, batch 2).
 This is the sweep the table above was really describing. With `groups.translate` at 「翻訳作業」
 there is no equality collision; 「レビュー」 over the three ～レビュー tabs and 「用語」 over 用語集 are
@@ -579,10 +703,16 @@ it is the known stale English name for Orphans, and Japanese ships the Orphans r
 
 ## The six register and typography sweeps
 
-Run all six over every batch before handing it to review. All six were clean on batch 1 and on
-batch 2, as was the seventh below — batch 2's only spaces are the ten recorded exceptions in the
-punctuation section, and its only half-width symbols against Japanese are `+`, `$` and the ratio
-`/`, all licensed above.
+Run all six over every batch before handing it to review. All six were clean on batches 1, 2
+and 3, as was the seventh below. **Batch 3 has exactly two spaces in 366 values**, both class
+(b) — `glossary:sourceLink` "GI: MW Glossary / Common Translation Sheet" and
+`review:provenance` "{{module}} · {{date}}", the two values already carried by
+`IDENTICAL_ALLOWLIST` and kept byte-identical to English on purpose. Its only half-width symbols
+against Japanese are the ratio `/` (six keys) and the `+` in `glossary:importMoreItems`
+「+{{count}}件は表示していません」, both licensed above. Sweep 6 reports three hits
+(`category:descriptionSaved`, `category:descriptionSaveFailed`, `glossary:matchNoResults`) and
+all three are false positives: they are short *sentences* whose English carries the period, not
+control labels.
 
 | Sweep | Japanese instance | Why |
 | --- | --- | --- |
