@@ -996,6 +996,18 @@ because it cost a round.
   times, so a later batch following it literally would have written the wrong one. **When a
   reason is corrected, leave the correction visible in the file** rather than rewriting it
   away; a quietly repaired proof is indistinguishable from one that was always sound.
+
+  Correcting one takes three passes if you do it by feel, because **a reason feels finished
+  once the string is right** — so the repair lands in whichever file you happened to be in.
+  Two habits collapse that to one pass, and both were arrived at the expensive way:
+
+  - **Grep the claim, not the file.** The same false sentence lived in a style guide and in
+    a lexicon row; deleting it from one left the other pointing at a retraction of itself.
+    The lexicon is the file a later translator opens *first*.
+  - **Re-open the code after rewriting a reason that cites it.** A repaired reason is a new
+    claim and inherits nothing from the old one's checking. "Writes nothing" was corrected
+    to "writes one thing" against a route that writes two — and the replacement for a false
+    absolute was itself an unbounded absolute the same batch broke five times.
 - **Faithfulness to a defect in the English is not a licence to ship one the English does
   not have.** A batch kept a clause bare because the English is bare, reasoning from a
   documented English defect — but English's imperative and bare noun phrase are homographic
