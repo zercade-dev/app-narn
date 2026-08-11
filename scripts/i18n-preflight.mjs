@@ -333,10 +333,28 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
  * records, 行 for rows, 語 for glossary terms. That is a lexical decision per
  * counted object rather than an agreement rule, so no regex can check it; it
  * is handled by the counter-by-object table in docs/i18n/style/ja.md, which
- * the batch-1 review required and every later batch extends. The euphonic
- * changes Japanese counters do have (一本 ippon, 三本 sanbon, 六本 roppon)
- * are changes in READING only — the written form after any numeral is the
- * same characters, and this product renders text, not speech.
+ * the batch-1 review required and every later batch extends.
+ *
+ * An earlier version of this comment justified the flag with "the written form
+ * after any numeral is the same characters". That is FALSE, and the reviewer
+ * asked to falsify it duly did. Japanese has at least two numeral-conditioned
+ * orthographic changes: a counter spelled in KANA changes characters and not
+ * merely reading (1ぴき / 2ひき / 3びき, 1ぷん / 4ふん), and the native ～つ
+ * series has no form above nine, so `{{count}}つ` is ungrammatical from ten up.
+ * The correction is left visible rather than rewritten because a repaired proof
+ * should not be indistinguishable from one that was always sound.
+ *
+ * The flag survives on narrower and checkable grounds. Neither hazard is
+ * reachable in this product: style/ja.md's counter table admits only kanji
+ * counters and katakana units, and katakana takes neither rendaku nor
+ * gemination; a grep of all 24 shipped `ja` namespaces for a placeholder
+ * followed by hiragana returns seven hits, every one a particle — no kana
+ * counter, no `{{count}}つ`. And the word axis could not catch either case in
+ * any event, because `{{count}}` is skipped on the token axis before the word
+ * axis runs. So the flag costs no coverage, and the single-word 倍 grant it
+ * replaced would have cost the same while implying the axis still had work to
+ * do here. If a kana counter is ever introduced, it is the counter table that
+ * must catch it, not this axis.
  */
 export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja']);
 
