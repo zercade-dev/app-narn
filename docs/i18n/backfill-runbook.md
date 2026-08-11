@@ -524,6 +524,15 @@ same round.**
    heading and its own first child would read the same word. Every other shipped locale
    keeps them distinct (ru Перевод/Переводы, de Übersetzen/Übersetzungen, tr Çeviri/Çeviriler).
 
+   **The test is: name the container.** Not "are these nested", and not "are they on
+   different screens" — a rail, a toolbar, a card, a table row, a popover are all containers,
+   and two labels a few rows apart in one of them collide as surely as a heading over its own
+   child. A locale licensed a collapse against the *sidebar* test and shipped a toolbar where
+   a filter tab and the button beside it read identically, because the filter tab renders
+   always and the button renders exactly when that tab is visible and inactive. The boundary
+   it applied was the right one; it was applied to the wrong surface. If you cannot name the
+   container the two keys share, they do not share one.
+
    **So: check the nesting before you collapse two surface names — including nesting on a
    surface your own batch never renders.** The keys you are writing may only reach the screen
    through a later batch that is required to copy you. `strings:guide.group*` itself renders
