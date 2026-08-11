@@ -285,8 +285,9 @@ export const NUMERAL_LOCALE_SCRIPTS = {
  */
 export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
   ru: ['из', 'с', 'на', 'вычитано', 'симв', 'байт'],
-  // de, derived from the four post-token-axis survivors that batch 2 (`strings`)
-  // produced — never from the raw match set, per the calibration rule above.
+  // de, derived from batch 2 (`strings`)'s post-token-axis survivors — 8 before
+  // the usageTokens fix below, 6 after, carrying these 4 distinct words. Never
+  // from the raw match set, per the calibration rule above.
   // `von` is a preposition; `entfernen` and `kopieren` are infinitives on control
   // labels; `markiert` is an invariant predicative participle. None of the four
   // can inflect for number, so a numeral in front of them is always grammatical.
