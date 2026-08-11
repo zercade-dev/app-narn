@@ -511,15 +511,30 @@ same round.**
    translator who settles these names without writing them into the surface table leaves
    batch 4 to invent them again. German shipped four of the six unrecorded and the review
    caught it.
-2. **A collapse your language licenses everywhere else can still be wrong here.** The tab
-   labels sit *inside* these group headings — `Sidebar.tsx` renders each tab as an item
-   under its group — so a group heading and the first tab under it are visible together, one
-   nested in the other. Japanese renders *Translate* and *Translations* identically as 翻訳,
-   which is correct everywhere else in the product and carries no information loss; at this
-   one pair it produced a heading and its own first child reading the same word. Every other
-   shipped locale keeps them distinct (ru Перевод/Переводы, de Übersetzen/Übersetzungen,
-   tr Çeviri/Çeviriler). **Check the nesting before you collapse two surface names**, and if
-   they nest, keep them apart even when your language would otherwise merge them.
+2. **A collapse your language licenses everywhere else can still be wrong here, and the
+   damage can be two batches away from the key that causes it.** `Sidebar.tsx:773` renders
+   `sidebar:groups.*` as a heading with the `strings:tabs.*` items nested underneath, so a
+   group heading and the first tab under it are on screen together, one inside the other.
+
+   Now follow the chain. Batch 2 writes `strings:guide.groupTranslate`. Because that key is
+   byte-identical in English to `sidebar:groups.translate`, the verbatim-copy rule means it
+   *dictates* what batch 4 must write there. Japanese renders both *Translate* and
+   *Translations* as 翻訳 — correct everywhere else in the product, and a collapse the
+   language genuinely licenses — so batch 2 was silently deciding that batch 4's sidebar
+   heading and its own first child would read the same word. Every other shipped locale
+   keeps them distinct (ru Перевод/Переводы, de Übersetzen/Übersetzungen, tr Çeviri/Çeviriler).
+
+   **So: check the nesting before you collapse two surface names — including nesting on a
+   surface your own batch never renders.** The keys you are writing may only reach the screen
+   through a later batch that is required to copy you. `strings:guide.group*` itself renders
+   in the guide's own left rail (`GuideView.tsx:73`, over the `guide.topic*` buttons), not in
+   the sidebar; it is the copy rule, not a shared call site, that carries the defect across.
+
+   Two nestings in that guide rail are *licensed*, and both are recorded so nobody reopens
+   them: a heading that is the general word over a child that specialises it (Review over
+   the three review topics), and `guide.groupTranslationMemory` over its single identically
+   named child — English writes "Translation Memory" over "Translation Memory" deliberately,
+   and every shipped locale renders that pair identically.
 
 `terminology.md` is the authority for the full set. As it stands it names **ten surfaces
 across twenty-one keys** in its table, plus **three more that have no second title key** and
