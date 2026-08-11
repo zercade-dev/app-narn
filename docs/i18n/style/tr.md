@@ -10,13 +10,14 @@ placeholder handling.
 > `terminology/tr.md` and **does not read style guides**, so every quotation below is
 > maintained by hand and can go stale silently.
 >
-> - A quotation attached to a **`config:` key is a citation**: that string is shipped, and
->   it is checkable today. All of them were verified against
->   `packages/frontend/src/locales/tr/config.json` at the end of batch 1.
+> - A quotation attached to a **`config:` or `strings:` key is a citation**: that string is
+>   shipped, and it is checkable today. The `config:` ones were verified against
+>   `packages/frontend/src/locales/tr/config.json` at the end of batch 1; the `strings:`
+>   ones against `.../tr/strings.json` at the end of batch 2.
 > - A quotation attached to a key in **any other namespace is a prescription**, binding on
 >   the batch that owns that namespace — `sidebar:*` and `vault:*` in batch 4,
->   `strings:*` in batch 2, `quality:*` in batch 3. It describes what that key **must**
->   ship, not what it does ship.
+>   `quality:*` in batch 3, `orphans:*` and `colorText:*` in batch 6. It describes what
+>   that key **must** ship, not what it does ship.
 > - A quotation attached to **no key at all** is an illustration: a rejected candidate, a
 >   wrong form shown as wrong, or a convention example. Never copy one as a rendering.
 >
@@ -49,7 +50,10 @@ every later namespace follows it.
 - **Titles, tab labels and section headings are noun phrases.** `config:importCsv` is
   "CSV içe aktarma", `config:routing.tabImportExport` is "İçe / dışa aktarma",
   `config:saveAsTemplateTitle` is "Proje şablonu". A dialog title takes the deverbal noun
-  for the same reason: `config:models.pickTitle` is "Model seçimi".
+  for the same reason: `config:models.pickTitle` is "Model seçimi", and
+  `strings:achievement.dialogTitle` ("Link achievement") is "Başarım bağlama" while its own
+  button `strings:achievement.linkButton` ("Link…") is the bare stem "Bağla…" — the same
+  English verb, two shapes, one dialog apart.
 - **A confirm-dialog title is the exception and takes the imperative** — it names the
   action you are about to authorize, not a section you are looking at.
   `config:confirmDeleteTitle` is "Projeyi sil". Keep English's question mark where it has
@@ -144,6 +148,28 @@ geçidi" and never "kalite kapısı".
   token.
 - Em dashes in the source stay em dashes with spaces around them. Never a hyphen.
 
+### Keyboard key names — Latin, as engraved
+
+**`Enter`, `Esc`, `Shift`, `Tab`, `Ctrl` and `Alt` stay in English for this locale**, and
+that is a decision about the hardware, not an untranslated leftover: a Turkish Q or F keycap
+is printed with the Latin words. `terminology.md`'s rule is "write the key name as it is
+engraved on that locale's keyboard", and here the engraving is English — unlike French
+(**Entrée**, **Échap**, **Maj**) or Spanish (**Intro**, **Mayús**).
+
+Shipped in batch 2 at `strings:compare.contextPlaceholder` and `tonePlaceholder`
+("kaydetmek için Enter, yeni satır için Shift+Enter, iptal için Esc"),
+`strings:compare.cellEditTooltip` ("Düzenle · Enter · iptal için Esc") and
+`cellEditReviewedTooltip` ("İncelendi — düzenlemek için Enter'a basın").
+
+Two consequences worth knowing:
+
+- **A case suffix on a key name takes the apostrophe** — "Enter'a basın" — because it is a
+  literal proper noun you can read in the string. That is the licensed use of the
+  apostrophe form; it is still **never** available on a `{{token}}` (see the placeholder
+  section).
+- **The same words translate normally as verbs and nouns.** "Enter your password" is not
+  this rule; read the string, not the word.
+
 ## Numbers and dates
 
 Decimal comma, thousands point: `1.234,56`. `config:overflowRatioDescription` ships
@@ -153,6 +179,13 @@ No space before `%`, and Turkish writes the sign **before** the number ("%50") �
 that where the number is literal, including where the English writes it after:
 `config:health.successRate` ("Success {{rate}}%") ships "Başarı %{{rate}}", and
 `config:models.gpuPlacement` ("{{pct}}% GPU") ships "GPU %{{pct}}".
+
+**A currency symbol follows the number, with a space.** Turkish writes "10,50 $", not
+"$10,50", so the four cost strings invert English's order: `strings:runs.estimatedCost`
+("≈ ${{amount}}") ships "≈ {{amount}} $", and `projectTotal` / `projectTotalYou` /
+`projectTotalCollaborators` follow it. This is the mirror of the `%` rule above — Turkish
+puts the percent sign *before* and the currency symbol *after* — and the two are easy to
+conflate, so they are written down together. The token is untouched; only the symbol moves.
 
 Dates and times are formatted by the app from the browser locale — a date format string is
 not a translatable string. `{{time}}` is an `Intl.RelativeTimeFormat` output ("3 dk. önce"),
@@ -310,6 +343,33 @@ inversion that exists only to keep a detector quiet is a guard authoring copy, w
 runbook forbids — when a shape looks unnatural, check whether a tool is the only thing
 asking for it before you write it down as a convention.**
 
+#### Non-numeric tokens, as shipped in batch 2 — the cell aria-labels
+
+Five sibling `aria-label`s in the Compare grid all interpolate `{{language}}`, and they are
+the clearest worked set of device 1 vs device 3 in the language. A screen reader speaks an
+ungrammatical form verbatim, so this family is worth copying rather than re-deriving.
+
+| Key | English | Turkish | Device |
+| --- | --- | --- | --- |
+| `strings:compare.cellMarkReviewedAria` | `Mark {{language}} translation as reviewed` | `{{language}} çevirisini incelendi olarak işaretle` | 1 — "çeviri" carries the suffix |
+| `strings:compare.cellClearAria` | `Clear translation for {{language}}` | `{{language}} çevirisini temizle` | 1 |
+| `strings:compare.cellEditAria` | `Edit translation for {{language}}` | `{{language}} çevirisini düzenle` | 1 |
+| `strings:compare.cellRetranslateAria` | `Re-translate {{language}}` | `{{language}} için yeniden çevir` | 3 — invariant "için" |
+| `strings:compare.cellUndoAria` | `Previous versions for {{language}}` | `{{language}} için önceki sürümler` | 3 |
+
+**Why two devices inside one family, deliberately.** Device 1 needs a head noun to carry the
+suffix, and for the first three that noun is "çeviri", which their English names too. The
+last two have no such noun available: device 1 on `cellRetranslateAria` forces
+"{{language}} çevirisini yeniden **çevir**" — the same root twice in four words — and
+`cellUndoAria`'s head is already "sürümler", which cannot take the language. The invariant
+postposition is the better sentence in both, and it is just as safe. **Choose on the
+sentence, not on the family**: the rule that binds is that no suffix ever touches the token.
+
+`strings:runs.copyRunId` ("{{runId}} çalıştırma kimliğini kopyala") and
+`strings:runs.runFailedToast` ("{{type}} çalıştırması başarısız oldu") are the same device 1
+shape on other tokens, and `strings:achievement.dialogSubtitle` ("“{{text}}” için karşılığını
+seçin.") is device 3 with the identifier quoted exactly as English quotes it.
+
 ### Counted nouns stay singular
 
 After a numeral, Turkish does not mark the plural: `config:routing.ruleCount_other`
@@ -343,8 +403,12 @@ against `_other`'s "o hücreleri düzeltin".
 Turkish is **about the same length as English or slightly longer**, because agglutination
 packs prepositions and possessives into suffixes. Measured over the 374 shipped `config`
 keys: aggregate **1.10**, median **1.07**, 90th percentile **1.43**, longest single ratio
-1.92 (`config:deselectAll`). Re-measure over the whole language at the final sweep, and
-state the population with the figure. The catch is distribution, not the aggregate: fewer,
+1.92 (`config:deselectAll`). Over the 452 shipped `strings` keys: aggregate **1.16**, median
+**1.13**, 90th percentile **1.70**, longest single ratio 3.33 (`strings:compare.run`, three
+English characters against “Çalıştırma”). Re-measure over the whole language at the final
+sweep, and state the population with the figure. **The two namespaces differ because
+`strings` is chrome:** it is full of one- and two-word labels, and a short English source is
+what produces a large ratio — the tail here is not long renderings, it is short sources. The catch is distribution, not the aggregate: fewer,
 much longer single tokens ("değerlendirilemedi", "yapılandırmalarınızı"), which clip rather
 than wrap, and a tail that is what breaks chrome.
 
@@ -356,28 +420,31 @@ constrained — only the sidebar has a fixed width.
 | Class | Anchor key | Budget | Kind | Basis |
 | --- | --- | --- | --- | --- |
 | Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **26** | **hard** — fixed `16rem` (`SIDEBAR_WIDTH`), `truncate` | the container |
-| Tab label | `strings:tabs.backup` | 26 | soft | measured — longest `tr` tab label in `config` is 18: `routing.tabImportExport` "İçe / dışa aktarma" |
-| Table column header | `strings:columns.config` | 16 | soft | measured — longest of `config`'s twelve headers is 10: `models.colCapabilities` "Yetenekler" |
-| Filter label | `strings:filters.needsReview` | 38 (provisional) | soft | none shipped yet |
-| Bulk-bar control | `strings:bulk.approveSelected` | 52 (provisional) | soft | none shipped yet |
+| Tab label | `strings:tabs.backup` | 32 | soft | measured over the **main** tab bar — longest shipped is 28: `tabs.review-source-ai` "Kaynak yapay zekâ incelemesi" (and `tabs.review-translation-ai`, also 28) |
+| Table column header | `strings:columns.config` | 20 | soft | measured — longest shipped is 18: `runs.runIdColumn` "Çalıştırma kimliği" |
+| Filter label | `strings:filters.needsReview` | 40 | soft | measured — longest shipped is 38: `filters.lqaFailed` "Yalnızca LQA başarısızlıklarını göster" |
+| Bulk-bar control | `strings:bulk.approveSelected` | 40 | soft | measured — longest shipped control is 39 as a template / ~35 rendered: `bulk.selectAllFiltered` "Filtrelenen {{count}} satırın tümünü seç"; longest static one is 23, the anchor itself, "Çeviri belleğine onayla" |
 
 The sidebar number is derived from the container, which is the same container for every
-locale.
+locale, and is the only figure not re-derivable from shipped strings.
 
-**Two of the four soft classes have a first measured figure, taken from `config`'s own
-members of them.** The model table carries twelve column headers (`config:models.col*`) and
-the routing editor carries a secondary tab bar (`config:routing.tabRules`, `tabTemplates`,
-`tabImportExport` — the first two measured as rendered text, since their count is
-interpolated). They are the same *class* as the anchor keys even though the anchors
-themselves live in `strings`; the earlier claim that neither class appears in `config` was
-wrong, and this guide cited `models.colParameters` as a column header two sections above
-while making it.
+**All four soft figures are now measured, and batch 2 raised three of them.** Batch 1 could
+only see `config`'s own members of two classes — the twelve model-table headers
+(`config:models.col*`) and the routing editor's *in-panel secondary* tab bar
+(`config:routing.tabRules`, `tabTemplates`, `tabImportExport`) — and had no filter row or
+bulk bar to measure at all. `strings` owns the widest member of every one of the four, so
+these are the figures the classes are actually held to.
 
-**The other two are genuinely absent** — `config` has no filter row and no bulk bar — and
-stay provisional. **Batch 2 owns all four anchors** and must re-derive each figure from the
-longest value Turkish actually ships in `strings`, which is where the widest members of
-every one of these classes live; the whole-language sweep replaces them with measured
-figures either way.
+**The tab-label figure moved 26 → 32, and the reason is the container, not drift.**
+`config`'s tabs sit inside one panel; `strings:tabs.*` is the main, wider, scrolling bar.
+The two AI-review tabs are 28 characters because *AI review* is “yapay zekâ incelemesi” and
+the AI is never abbreviated to “YZ” (see the term row) — a term forcing a long label is the
+term rule doing its job, and the budget exists to stop *avoidable* length, not this. **Do
+not shorten a settled surface name to fit an earlier batch's number:** every later batch
+repeats these names verbatim, so a shortened tab label would propagate into four namespaces.
+
+Each figure is the longest shipped value plus a little headroom, and the whole-language
+sweep re-measures all four over the finished locale.
 
 **Hard** means fix it — a sidebar item over budget is cut off in a container that cannot
 grow. **Soft** means prefer the shorter of two correct options, but do not distort a term to
@@ -389,22 +456,60 @@ more. Nothing in `config` comes close — the longest Turkish/English ratio in t
 is well under 2×. If a correct rendering ever breaches it, escalate for a per-key
 `LENGTH_EXEMPTIONS` entry rather than distorting the wording.
 
-## Surface names settled in batch 1 — repeat these verbatim
+## Surface names — repeat these verbatim
 
 A surface is named in one namespace and owned by another, so these are written by different
-translators at different times. `config` names five surfaces it does not own. They are
-settled; copy them, do not re-render them.
+translators at different times. **Batch 2 owns the main tab bar, which is where most of them
+are settled**; `config` named five of them before the labels existed, and those five are
+consistent with the table below by construction. They are settled; copy them, do not
+re-render them.
 
-| Surface | Turkish | Owning key | Repeated at |
+### The main tab bar — `strings:tabs.*`, all seventeen
+
+| Surface | Turkish | Owning key | Also named at |
 | --- | --- | --- | --- |
-| Global Config | Genel yapılandırma | `sidebar:globalConfig` | `config:globalConfigTitle` — **word-for-word identical in English, and must stay so** |
-| Compare | Karşılaştırma | `strings:tabs.compare` | `config:routing.tonesHint` |
-| Translations | Çeviriler | `strings:tabs.strings` | `config:routing.categoriesConfiguredHint` |
-| Backup | Yedekleme | `strings:tabs.backup` | `config:importSnapshotNote` |
-| Orphans | Yetimler | `orphans:title` | `config:fullReplaceOrphanNotice` |
+| Config | Yapılandırma | `strings:tabs.config` | `strings:guide.topicConfig` "Yapılandırma sekmesi" |
+| Data | Veri | `strings:tabs.data` | — |
+| Translations | Çeviriler | `strings:tabs.strings` | `config:routing.categoriesConfiguredHint`, `strings:guide.topicMultiLanguage` |
+| Compare | Karşılaştırma | `strings:tabs.compare` | `config:routing.tonesHint`, `strings:guide.topicCompare`, `strings:order.presortHint` |
+| Source AI review | Kaynak yapay zekâ incelemesi | `strings:tabs.review-source-ai` | `review:sourceAi.configTitle` (batch 3) |
+| Translation AI review | Çeviri yapay zekâ incelemesi | `strings:tabs.review-translation-ai` | `review:translationAi.title` (batch 3) |
+| Manual review | Elle inceleme | `strings:tabs.review-manual` | — |
+| Quality | Kalite | `strings:tabs.quality` | `strings:guide.topicQuality` — **no "Tab" suffix in English; do not add "sekmesi"** |
+| Glossary | Sözlükçe | `strings:tabs.glossary` | `strings:guide.topicGlossary` "Sözlükçe sekmesi" |
+| Category | Kategori | `strings:tabs.category` | `strings:guide.topicCategory` "Kategori sekmesi" — singular on purpose, though the page it opens is plural |
+| Routing | Yönlendirme | `strings:tabs.routing` | `strings:guide.topicRouting` "Yönlendirme sekmesi" |
+| Activity | Etkinlik | `strings:tabs.runs` | `strings:guide.topicActivity`; page title expands to "Çeviri etkinliği" (`strings:runs.title`) |
+| Stage details | Bölüm ayrıntıları | `strings:tabs` (stage-details) | `stage-details:title` (batch 6), `strings:runs.typeStageDetailsTranslation` |
+| Orphans | Yetimler | `strings:tabs.orphans` | `orphans:title` (batch 6), `config:fullReplaceOrphanNotice`, `strings:guide.topicOrphans` |
+| Backup | Yedekleme | `strings:tabs.backup` | `config:importSnapshotNote`, `strings:guide.topicBackup` |
+| Sharing | Paylaşım | `strings:tabs.sharing` | `collab:sharing.pageTitle` (batch 4) |
+| Text Styler | Metin biçimlendirici | `strings:tabs` (color-text) | `colorText:title` and `sidebar:colorText` (batches 4/6), `strings:runs.typeChatTextStyler` |
 
-Two notes on that table:
+### Surfaces named outside that bar
 
+| Surface | Turkish | Owning key | Also named at |
+| --- | --- | --- | --- |
+| Global Config | Genel yapılandırma | `sidebar:globalConfig` | `config:globalConfigTitle` — **word-for-word identical in English, and must stay so**; also `strings:runs.aiReviewNoModules` |
+| Credential Vault | Kimlik bilgisi kasası | `strings:guide.topicVault` | `vault:statusLabel` (batch 4) — the full form, never the bare clip "kasa" |
+| AI Review | Yapay zekâ incelemesi | `strings:guide.topicAiReview` | `strings:runs.aiReview` / `aiReviewConfigTitle` / `judgeBadge` |
+| Translation Memory | Çeviri belleği | `sidebar:translationMemory` | `config:tm.*`, `strings:guide.groupTranslationMemory`, `strings:guide.topicTranslationMemory` |
+| Review (sidebar group) | İnceleme | `sidebar:groups.review` | `strings:guide.groupReview` — an umbrella, not any one member; see the term row |
+| Pseudo Test | Pseudo Test | `strings:guide.topicPseudoTest` | `config:pseudoTestHelpAria` — a proper noun, untranslated |
+
+**Guide topics append "sekmesi", and only where English appends "Tab".** `topicQuality`,
+`topicActivity`, `topicAiReview`, `topicPseudoTest`, `topicVault`, `topicQuickSetup` and
+`topicTranslationMemory` have no "Tab" in English and take no "sekmesi" — mirror English
+per key rather than regularising the set.
+
+Four notes on these tables:
+
+- **Two tab labels are 28 characters** — the two AI-review tabs — because the term is
+  "yapay zekâ incelemesi" and the AI is never abbreviated. That is what set the tab-label
+  budget to 32; see "Length discipline".
+- **`strings:runs.viewEngines` ("AI engines") is not a surface name.** It labels a view
+  toggle inside Activity and ships as "Yapay zekâ motorları". "motor" is banned as a
+  rendering of *module*, not as a word — here English itself says engines.
 - **Backup: the tab is "Yedekleme", a countable backup is "yedek".** `config:maxBackupsLabel`
   is "Proje başına en fazla yedek" — the object — while the surface that lists and restores
   them is the process noun. Do not swap them.
@@ -467,9 +572,9 @@ point of failure.
 
 | # | Debt | Trigger — who discharges it, and when | What to do |
 | --- | --- | --- | --- |
-| 1 | `terminology/tr.md` records *credential vault* as the clip **"kasa"**, not the term **"kimlik bilgisi kasası"** — the citation guard cannot accept a rendering no shipped string contains. | **Batch 2**, at `strings:guide.topicVault` ("Credential Vault") — the first **cold, standalone** naming of the vault. Batch 4's `vault:statusLabel` is the second. | Ship the full form there, then promote the Rendering column in `terminology/tr.md` from "kasa" to "kimlik bilgisi kasası". Bare "kasa" in a cold naming is the safe/strongbox reading the frozen lexicon bans. |
+| 1 | ~~`terminology/tr.md` records *credential vault* as the clip **"kasa"**, not the term.~~ **CLOSED in batch 2.** | — | `strings:guide.topicVault` ships **"Kimlik bilgisi kasası"**, and the Rendering column in `terminology/tr.md` is promoted to the full form. The clip "kasa" remains licensed only where the string already establishes credentials. **Batch 4's `vault:statusLabel` is the second cold naming and takes the full form too** — that part of the debt transfers, it does not vanish. |
 | 2 | ~~Six strings invert the unit noun behind a colon where Russian ships natural order.~~ **CLOSED in fix round 3 — and it was never a real debt.** It was recorded as a word-axis calibration debt on the assumption that `tr`'s axis was merely uncalibrated; Turkish counted nouns do not inflect after a numeral at all, so the axis is structurally moot and no list was ever owed. | — | Natural order restored in all six, plus `models.confidenceReason.batch-exceeds-reliable` in the same class. **Batch 2 writes numeric strings in natural Turkish order, unit noun attached** — there is one convention, not two. See "Numeric tokens, as shipped" above. |
-| 3 | Two of the five length budgets (filter label, bulk-bar control) are still provisional — `config` contains no filter row and no bulk bar to measure. | **Batch 2**, which owns all four soft anchors in `strings`. | Re-derive every soft figure from the longest value Turkish actually ships in `strings`, including the two batch 1 could measure; the whole-language sweep replaces them with measured figures either way. |
+| 3 | ~~Two of the five length budgets (filter label, bulk-bar control) are still provisional.~~ **CLOSED in batch 2.** | — | All four soft figures are re-derived from the longest value `strings` actually ships: tab label 26 → **32**, column header 16 → **20**, filter label 38 → **40** (the provisional guess landed on the exact measured longest, 38), bulk-bar control 52 → **40**. The whole-language sweep re-measures them over the finished locale, as it does for every language. |
 
 ## Locale-specific traps
 
