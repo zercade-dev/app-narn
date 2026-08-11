@@ -88,7 +88,7 @@ combining dot (U+0307), not `i`. The lexicon citation guard
 rendering you cite in `terminology/tr.md` is only attested against corpus occurrences that
 are **already lowercase** if the word starts with `İ`. When you cite such a word, make sure
 some shipped string carries it lowercase — batch 1's "istem" is attested through
-`config:routing.promptBadge`, not through `config:labelPromptOptions`.
+`config:routing.promptBadge`, not through `config:routing.labelPromptOptions`.
 
 **One do-not-translate collision to know about.** The guard's term check counts `API`, and
 Turkish "KAPI" contains it. The check now matches on token boundaries so "KAPI" no longer
@@ -101,6 +101,11 @@ geçidi" and never "kalite kapısı".
 - Quoting a value: `“…”`, matching the English source after its review —
   `config:duplicateSuccess` ships `“{{name}}” projesi çoğaltıldı.` The **placeholder is
   untouched; the two characters around it are ours.**
+- **Adding quotes English does not have is licensed for an identifier**, and only for one:
+  `config:instances.formTitle` / `instanceOf` / `slugHelp` quote `{{base}}` so the module id
+  reads as a name rather than as part of the sentence, exactly as English itself quotes
+  `{{slug}}` and `{{model}}` in the same namespace. It is not licensed for prose values, and
+  never for a number.
 - Ellipsis is the single character `…` (U+2026), matching `common:saving` ("Saving…") —
   "Kaydediliyor…".
 - Turkish attaches case suffixes to proper nouns with an apostrophe ("NARN'ı", "API'sini",
@@ -146,15 +151,11 @@ Three devices, in order of preference:
    Shipped: `config:enableModuleAddInstance` is "Başka bir {{name}} örneği ekle…" and
    `config:models.useCustom` is "“{{model}}” modelini özel model olarak kullan" — "örneği"
    and "modelini" harmonize with "örnek" and "model", never with the interpolated value.
-   **This device is only available for tokens the pre-flight detector skips — see the token
-   table below.**
 2. **Restructure so the token lands at the end of a clause, behind a colon, or inside
    brackets.** This is the count-neutral device the runbook prefers for numeric tokens, and
    in this locale it is also the fallback whenever device 1 is unavailable.
 3. **Invariant postposition.** Turkish postpositions — "için", "ile", "gibi", "kadar" —
-   do not harmonize, so "{{name}} için" is safe where a case suffix would not be. Use it
-   sparingly: the detector still flags it, because it cannot tell a postposition from a
-   counted noun until someone clears the word axis for `tr`.
+   do not harmonize, so "{{name}} için" is safe where a case suffix would not be.
 
 **The apostrophe form is not device 4.** Turkish writes a case suffix on a proper noun with
 an apostrophe — "NARN'ı", "API'sini" — and it is tempting to reach for `{{model}}'i`. It
@@ -162,55 +163,89 @@ does not help: the apostrophe separates the suffix, it does not choose it. You w
 be picking one of `-i / -ı / -u / -ü` for a value you cannot see. The apostrophe is for
 literal names **you can read in the string**, never for a token.
 
+### Which device a string takes — open the call site, do not consult a list
+
+**The rule turns on what the token's value can be, not on what the token is called.** One
+question decides it, and you answer it at the call site:
+
+> **Can this token's value ever be a number the reader counts?**
+>
+> - **No** — it is an id, a name, a language, a message, a timestamp, a model, a slug.
+>   **Device 1.** Write the natural Turkish appositive; the following head noun carries the
+>   suffix and nothing about the value can make it wrong.
+> - **Yes** — it is a total, a size, a limit, a rate, a token count, a position.
+>   **Device 2 is mandatory**, and not because of any tool: runbook §2.2 requires a frame
+>   that is grammatical for *every* value a non-`count` numeric token can take, and the
+>   guard forbids the obvious alternative of interpolating `{{count}}` instead. This one is
+>   settled project-wide; do not relitigate it per key.
+
+An earlier version of this section said the device was chosen by whether the token appeared
+on the pre-flight's 23-name `NUMERAL_TOKEN_SKIPLIST`. **That was wrong, and it is worth
+saying why**: that list is a Russian-calibrated description of which tokens in this app
+cannot hold a number — a fact about the app, useful as a *hint* for the question above —
+not a grammar policy for 1,500 Turkish keys. Reading it as policy also made the guide
+disagree with its own batch: `config:models.confidenceReason.effort-reduces-quality` ships
+device 1 on `effort`, which is not on that list, and it is perfectly correct Turkish.
+
+#### The tooling constraint, stated separately because it is not grammar
+
+`tr` has no calibrated `NUMERAL_WORD_AXIS_EXEMPTIONS` entry, so **every** `{{token}}` +
+space + Turkish word occurrence outside the 23-name skiplist is reported as an uncleared
+candidate and `node scripts/i18n-preflight.mjs tr` exits non-zero. That is a fact about the
+detector's calibration state, and it has two consequences worth keeping apart:
+
+- Where device 2 was already required (numeric tokens), nothing is lost. The detector and
+  §2.2 agree.
+- Where device 1 was correct (non-numeric tokens), the detector still blocks the *bare*
+  form. **Two escapes, both legitimate:** put punctuation between the token and the head
+  noun, or raise it. Quoting the value — `“{{base}}” örneği` — is the one used in `config`,
+  because the values involved are identifiers the user chose and English already quotes
+  identifiers in the same namespace (`config:instances.slugReserved`, `config:models.useCustom`);
+  punctuation around a placeholder is ours to set, per the runbook. **Do not reach for it
+  where quoting the value would be odd** — raise it instead, so a `tr` word-axis list can be
+  calibrated from real survivors. That file belongs to whoever runs the wave, not to a
+  translator.
+
 #### Worked example — `config:instances.formTitle` ("New instance of {{base}}")
 
 - **Wrong:** "{{base}}'in yeni örneği". The genitive is `-in / -ın / -un / -ün` plus a
   buffer `n` after a vowel. `openai` wants "openai'nin", `deepl` wants "deepl'in", `gpt-4`
   wants "gpt-4'ün". One string cannot be right for all three, and two of the three are
   wrong however you write it.
-- **Device 1 would give** "Yeni {{base}} örneği" — correct Turkish, suffix-safe, and the
-  form a Turkish reader expects.
-- **Shipped: "Yeni örnek ({{base}})"** — device 2, because `base` is **not** on the
-  pre-flight's token skiplist and `tr` has no calibrated word-axis exemption list, so
-  device 1 would leave an uncleared survivor in `node scripts/i18n-preflight.mjs tr`. Its
-  sibling `config:instances.instanceOf` ("instance of {{base}}") ships the same shape,
-  "örnek ({{base}})", so the two badges agree.
+- **The question:** can `{{base}}` be a number? No — it is a base module id. **Device 1.**
+- **Shipped: "Yeni “{{base}}” örneği"** — the appositive, in natural Turkish word order,
+  with the identifier quoted. The suffix rides on "örnek". Its sibling
+  `config:instances.instanceOf` ships the same shape, "“{{base}}” örneği", so the badge and
+  the dialog title agree.
 
-That interaction is the whole reason this section exists: **the grammatically best Turkish
-device and the detector's clean run do not always coincide, and which one you may use is
-decided by the token's name, not by the sentence.**
+#### Worked shapes for device 2, all shipped in `config`
 
-### Which tokens each device is available for
-
-The pre-flight's token axis skips 23 placeholders that cannot hold a number
-(`NUMERAL_TOKEN_SKIPLIST` in `scripts/i18n-preflight.mjs`):
-
-> `count` · `module` · `instance` · `language` · `languages` · `lang` · `name` · `message` ·
-> `date` · `verdict` · `headers` · `model` · `keys` · `slug` · `type` · `focus` · `field` ·
-> `why` · `label` · `filename` · `id` · `time` · `passRate`
-
-- **Token on that list → device 1 is available.** Write the natural Turkish appositive.
-- **Any other token → use device 2.** `tr` has no `NUMERAL_WORD_AXIS_EXEMPTIONS` entry, so
-  *every* surviving occurrence is reported as an uncleared candidate and the pre-flight
-  exits non-zero. In `config` that meant restructuring nine strings; the tokens involved
-  were `base`, `columns`, `reviewed`, `total`, `maxLength`, `rules`, `chars`, `bytes`,
-  `entryCount`, `reliable`, `tokens`, `context`, `pct` and `done`.
-
-Worked shapes for device 2, all shipped in `config`:
+Every one of these carries a token whose value **is** a number, so the count-neutral frame
+is the runbook's requirement rather than a detector workaround:
 
 | Key | English | Turkish |
 | --- | --- | --- |
 | `config:reviewProgressCount` | `{{reviewed}} / {{total}} reviewed` | `İncelenen: {{reviewed}} / {{total}}` |
 | `config:lqa.lengthLimitValue` | `{{chars}} chars / {{bytes}} bytes` | `karakter: {{chars}} / bayt: {{bytes}}` |
 | `config:templateMeta` | `{{languages}} languages · {{rules}} routing rules` | `dil: {{languages}} · yönlendirme kuralı: {{rules}}` |
-| `config:routing.templateMeta` | `max {{maxLength}} chars` | `uzunluk sınırı: {{maxLength}}` |
+| `config:routing.templateMeta` | `max {{maxLength}} chars` | `en fazla karakter sayısı: {{maxLength}}` |
 | `config:models.confidenceReason.prompt-near-context` | `(~{{tokens}} tokens)` | `(token: ~{{tokens}})` |
 | `config:models.confidenceReason.batch-exceeds-reliable` | `{{entryCount}} entries exceed the ~{{reliable}}` | `Girdi sayısı ({{entryCount}}), … sınırı (~{{reliable}}) aşıyor` |
 
-**If a later batch needs device 1 for a non-skiplisted token, do not just write it and
-leave the pre-flight red.** Raise it: the fix is a calibrated `tr` entry in
-`NUMERAL_WORD_AXIS_EXEMPTIONS`, derived only from post-token-axis survivors, and that file
-belongs to whoever runs the wave — not to a translator.
+**Never drop the unit noun to get the token to the end.** Moving the number behind a colon
+is the licensed device; deleting "karakter", "bayt" or "token" on the way is not — a bare
+number in a metadata strip says nothing, and rubric item 4 is about exactly this. Put the
+unit in the label instead: "en fazla karakter sayısı: {{maxLength}}", never "uzunluk
+sınırı: {{maxLength}}".
+
+**The recorded cost, so nobody "restores" it blindly.** Russian ships these six in natural
+order — «не более {{maxLength}} симв.» — because its word axis exempts the invariant unit
+nouns «симв.» and «байт». Turkish's exact analogues (karakter, bayt, token) would be
+exempted on the same reasoning, and `tr` simply has no list yet. So the inversion here is a
+calibration debt, not a Turkish preference: if a `tr` word-axis list is ever calibrated, the
+words to derive it from are **karakter, bayt, token** plus whatever the later batches'
+survivors add. Until then these six stay inverted, and they are still correct — Turkish
+tolerates the colon frame; it is just not the first thing a Turkish writer would type.
 
 ### Counted nouns stay singular
 
@@ -255,20 +290,31 @@ is the wrong unit when the English source is short: "Legal" is five characters, 
 correct Turkish rendering of it can fit 1.5×. The five classes are also not equally
 constrained — only the sidebar has a fixed width.
 
-| Class | Anchor key | Budget | Kind |
-| --- | --- | --- | --- |
-| Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **26** | **hard** — fixed `16rem` (`SIDEBAR_WIDTH`), `truncate` |
-| Tab label | `strings:tabs.backup` | 32 (provisional) | soft |
-| Table column header | `strings:columns.config` | 22 (provisional) | soft |
-| Filter label | `strings:filters.needsReview` | 38 (provisional) | soft |
-| Bulk-bar control | `strings:bulk.approveSelected` | 52 (provisional) | soft |
+| Class | Anchor key | Budget | Kind | Basis |
+| --- | --- | --- | --- | --- |
+| Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **26** | **hard** — fixed `16rem` (`SIDEBAR_WIDTH`), `truncate` | the container |
+| Tab label | `strings:tabs.backup` | 26 | soft | measured — longest `tr` tab label in `config` is 18: `routing.tabImportExport` "İçe / dışa aktarma" |
+| Table column header | `strings:columns.config` | 16 | soft | measured — longest of `config`'s twelve headers is 10: `models.colCapabilities` "Yetenekler" |
+| Filter label | `strings:filters.needsReview` | 38 (provisional) | soft | none shipped yet |
+| Bulk-bar control | `strings:bulk.approveSelected` | 52 (provisional) | soft | none shipped yet |
 
 The sidebar number is derived from the container, which is the same container for every
-locale. **The four soft ones are provisional and marked so on purpose:** none of those
-classes lives in `config`, so batch 1 had nothing to measure. **Batch 2 owns all four**
-(`strings` holds the tabs, columns, filters and bulk bar) — set them there from the longest
-value Turkish actually ships plus headroom, and the whole-language sweep replaces them with
-measured figures either way.
+locale.
+
+**Two of the four soft classes have a first measured figure, taken from `config`'s own
+members of them.** The model table carries twelve column headers (`config:models.col*`) and
+the routing editor carries a secondary tab bar (`config:routing.tabRules`, `tabTemplates`,
+`tabImportExport` — the first two measured as rendered text, since their count is
+interpolated). They are the same *class* as the anchor keys even though the anchors
+themselves live in `strings`; the earlier claim that neither class appears in `config` was
+wrong, and this guide cited `models.colParameters` as a column header two sections above
+while making it.
+
+**The other two are genuinely absent** — `config` has no filter row and no bulk bar — and
+stay provisional. **Batch 2 owns all four anchors** and must re-derive each figure from the
+longest value Turkish actually ships in `strings`, which is where the widest members of
+every one of these classes live; the whole-language sweep replaces them with measured
+figures either way.
 
 **Hard** means fix it — a sidebar item over budget is cut off in a container that cannot
 grow. **Soft** means prefer the shorter of two correct options, but do not distort a term to
