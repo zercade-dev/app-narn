@@ -524,14 +524,28 @@ same round.**
    heading and its own first child would read the same word. Every other shipped locale
    keeps them distinct (ru Перевод/Переводы, de Übersetzen/Übersetzungen, tr Çeviri/Çeviriler).
 
-   **The test is: name the container.** Not "are these nested", and not "are they on
-   different screens" — a rail, a toolbar, a card, a table row, a popover are all containers,
-   and two labels a few rows apart in one of them collide as surely as a heading over its own
-   child. A locale licensed a collapse against the *sidebar* test and shipped a toolbar where
-   a filter tab and the button beside it read identically, because the filter tab renders
-   always and the button renders exactly when that tab is visible and inactive. The boundary
-   it applied was the right one; it was applied to the wrong surface. If you cannot name the
-   container the two keys share, they do not share one.
+   **The test is: name the smallest container that holds both, then keep going outward.**
+   Not "are these nested", not "are they on different screens", and *not* "do they share a
+   toolbar" — because the answer is often no, and the collision is real anyway. **The page is
+   a container.** Keep widening until you reach one that holds both keys, and then ask
+   whether both can be painted at once.
+
+   The worked example is the pair that produced this rule, and it also breaks the shorter
+   version of it: a review queue's filter tab and its per-card Flag button both read
+   identically in one locale. They are **siblings** — the tab sits in a header, the button in
+   an action row inside a card component, and they share nothing below the tab pane. A
+   translator asking "do they share a container?" finds no, clears the collapse, and re-ships
+   the defect. Asking for the smallest *common* container finds the pane, and the pane paints
+   both at once.
+
+   **What decides it is the render condition, not the geometry.** Those two are visible
+   together precisely because the filter tab renders always while the button renders whenever
+   that filter is not active — so the inactive tab and the button are on screen in the same
+   paint. Work out when each key renders; do not argue from how far apart they sit.
+
+   **And check the screen-reader pass too.** Two labels that never look alike can still be
+   read out identically, and an `aria-label` is where this programme's worst instance of it
+   was found — a destroy verb announced for an operation that only un-assigns.
 
    **So: check the nesting before you collapse two surface names — including nesting on a
    surface your own batch never renders.** The keys you are writing may only reach the screen

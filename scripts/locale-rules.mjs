@@ -1218,8 +1218,14 @@ export const IDENTICAL_ALLOWLIST = {
     'Proper name of an external spreadsheet ("GI: MW Glossary / Common Translation Sheet") — ' +
     'it is a link target users must be able to find, not prose',
   '*:review:provenance':
-    'Format string "{{module}} · {{date}}" — nothing but two placeholders and a separator, ' +
-    'so there is no word to translate',
+    'Format string "{{module}} · {{date}}" — two placeholders and a separator, so there is ' +
+    'no WORD to translate. Corrected 2026-08-11: the original reason said there was nothing ' +
+    'to translate at all, which the shipped tree falsifies — the SEPARATOR is locale-' +
+    'variable, and `ja` now ships the ideographic 中黒 ("{{module}}・{{date}}") to match the ' +
+    'rest of its punctuation. That locale is therefore no longer byte-identical and no ' +
+    'longer reaches this entry; the entry covers the locales that legitimately keep the ' +
+    'ASCII middle dot. A CJK locale reading the old reason would have kept "·" against its ' +
+    'own typography rules, which is the opposite of what this entry is for.',
   '*:strings:guide.topicGoogle':
     'Product name "Google AI (Gemini)" — both parts are on the do-not-translate list',
 
