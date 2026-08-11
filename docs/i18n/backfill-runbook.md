@@ -490,6 +490,37 @@ This is the single highest-frequency drift risk in this app, because the two key
 on screen at the same moment — and because the namespace naming a surface and the namespace
 owning it are usually translated by different people, in different batches.
 
+**Except for one family, where they ARE on screen at the same moment, nested.** The five
+sidebar group headings and their guide twins are byte-identical in English and render one
+inside the other:
+
+| Sidebar group (batch 4) | Guide twin (batch 2) | English |
+| --- | --- | --- |
+| `sidebar:groups.project` | `strings:guide.groupSetup` | Setup |
+| `sidebar:groups.translate` | `strings:guide.groupTranslate` | Translate |
+| `sidebar:groups.review` | `strings:guide.groupReview` | Review |
+| `sidebar:groups.content` | `strings:guide.groupContent` | Terminology |
+| `sidebar:groups.maintenance` | `strings:guide.groupMaintenance` | Maintenance |
+
+(`strings:guide.groupTranslationMemory` is a sixth guide topic with no sidebar twin.)
+
+**Two things follow, and both were found the hard way, by two different languages in the
+same round.**
+
+1. `strings` names all six first, in batch 2, and batch 4 inherits five of them. A batch-2
+   translator who settles these names without writing them into the surface table leaves
+   batch 4 to invent them again. German shipped four of the six unrecorded and the review
+   caught it.
+2. **A collapse your language licenses everywhere else can still be wrong here.** The tab
+   labels sit *inside* these group headings — `Sidebar.tsx` renders each tab as an item
+   under its group — so a group heading and the first tab under it are visible together, one
+   nested in the other. Japanese renders *Translate* and *Translations* identically as 翻訳,
+   which is correct everywhere else in the product and carries no information loss; at this
+   one pair it produced a heading and its own first child reading the same word. Every other
+   shipped locale keeps them distinct (ru Перевод/Переводы, de Übersetzen/Übersetzungen,
+   tr Çeviri/Çeviriler). **Check the nesting before you collapse two surface names**, and if
+   they nest, keep them apart even when your language would otherwise merge them.
+
 `terminology.md` is the authority for the full set. As it stands it names **ten surfaces
 across twenty-one keys** in its table, plus **three more that have no second title key** and
 are named only in prose from another namespace — Compare (`strings:tabs.compare`, named by
