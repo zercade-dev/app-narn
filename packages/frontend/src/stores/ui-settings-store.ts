@@ -8,7 +8,15 @@ import {
   type UiTheme,
 } from '../themes/theme-registry.js';
 
-export type UiLanguage = 'en' | 'es' | 'fr';
+/**
+ * Languages the interface can be switched to. A locale's files can land under
+ * `locales/<code>/` well before it appears here — translation ships dark, and
+ * adding the code to this union is the switch that makes it selectable. Keep it
+ * in lockstep with `UI_LANGS` (lib/url-state.ts) and `UI_LANGUAGE_LABELS`
+ * (components/settings/SettingsView.tsx); `satisfies` and the exhaustive
+ * `Record` make tsc enforce both.
+ */
+export type UiLanguage = 'en' | 'es' | 'fr' | 'ru';
 export type ConsoleFilter = 'all' | 'info' | 'warn' | 'error' | 'debug' | 'notifications';
 
 interface UiSettingsState {
