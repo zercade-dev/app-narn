@@ -81,9 +81,11 @@ present). Nothing here is a pre-flight deliverable still to be built.
   numeral-agreement detector, both collision directions, and the `bare + _other` family
   list.
 - `pnpm check:lexicon` (`node scripts/check-lexicon-citations.mjs`) — every rendering quoted
-  in a lexicon file exists in the shipped locale files. `make verify` and app CI's
-  `quality-gate` run the `pnpm` form of both `check:locales` and `check:lexicon` directly —
-  use it locally too so you are running what the gate runs, not an equivalent of it.
+  in a lexicon file exists in the shipped locale files. `make verify` runs the `pnpm` form of
+  both; CI runs the same two scripts through bare `node`, deliberately, so they still fire on
+  a documentation-only change that skips the rest of the gate. Either form runs the same
+  file, so use whichever you like — what matters is that you are running the checks
+  themselves rather than an equivalent of your own.
 
 ## The work-in-progress declaration — the controller adds it at batch 1
 
