@@ -1176,6 +1176,17 @@ export const MIN_UNSPACED_CHARS = 8;
  * words-only threshold would exempt essentially every value in ja/ko/zh/th and
  * quietly disable this check for the locales where a copied-through English
  * string is most obvious to a reader and most embarrassing to ship.
+ *
+ * CONSEQUENCE FOR IDENTICAL_ALLOWLIST, learned the hard way: the two thresholds
+ * do not select the same set of keys, so the allowlist's completeness is
+ * script-dependent. A 1-2 word English value under 8 characters is invisible to
+ * every spaced locale and visible to every unspaced one. Six do-not-translate
+ * product names sat unallowlisted for the whole programme for exactly this
+ * reason — only their three-word sibling had ever fired — and the first
+ * Japanese batch surfaced all six at once. So an allowlist that looks complete
+ * after de/es/fr/tr is not evidence of anything for ja/ko/zh/th, and the gap
+ * appears as a batch of failures on one locale rather than as a trickle. Grant
+ * the entries; do not raise a threshold to make them disappear.
  */
 export function isSubstantial(value, locale) {
   const trimmed = value.trim();
@@ -1211,6 +1222,32 @@ export const IDENTICAL_ALLOWLIST = {
     'so there is no word to translate',
   '*:strings:guide.topicGoogle':
     'Product name "Google AI (Gemini)" — both parts are on the do-not-translate list',
+
+  // The six siblings of topicGoogle. They belong to the same class and have the
+  // same justification, but only topicGoogle was here until an unspaced locale
+  // arrived: it is three words, so it trips MIN_WORDS, while these six are one
+  // or two words and no spaced locale can ever see them. All six clear
+  // MIN_UNSPACED_CHARS, so `ja` is the first locale in the programme able to
+  // surface them — see the note on isSubstantial(). `*:` because "this is a
+  // product name" is language-independent, exactly as for topicGoogle.
+  '*:strings:guide.topicCopilot':
+    'Product name "GitHub Copilot" — both parts are on the do-not-translate list',
+  '*:strings:guide.topicDeepseek':
+    'Product name "DeepSeek" — on the do-not-translate list',
+  '*:strings:guide.topicClaude':
+    'Product names "Anthropic (Claude)" — vendor and model, both on the do-not-translate list',
+  '*:strings:guide.topicGpt':
+    'Product names "OpenAI (GPT)" — vendor and model, both on the do-not-translate list',
+  '*:strings:guide.topicOpenrouter':
+    'Product name "OpenRouter" — on the do-not-translate list',
+  '*:strings:guide.topicGenericAi':
+    'Module name "Generic AI" — the product\'s own name for the bring-your-own-endpoint ' +
+    'module, shown in the module picker, so it must match the picker verbatim',
+
+  '*:strings:runs.estimatedCost':
+    'Format string "≈ ${{amount}}" — an approximation sign, a currency symbol and a ' +
+    'placeholder, so there is no word to translate. A locale that writes its currency ' +
+    'differently should be a per-locale entry, not a change to this one.',
 };
 
 export function allowlistKeysFor(locale, namespace, key) {
