@@ -1196,6 +1196,13 @@ export function isSubstantial(value, locale) {
  * silently accumulate dead suppressions.
  */
 export const IDENTICAL_ALLOWLIST = {
+  'de:config:routing.tabImportExport':
+    'German spells both nouns exactly as English does — Import and Export are the ordinary ' +
+    'German nouns for the two operations — and the key is a tab label, which style/de.md ' +
+    'binds to a noun phrase. The alternative that differs from en is the infinitive pair ' +
+    '"Importieren / Exportieren", which is the wrong control shape. Requested by the ' +
+    'translator and granted rather than absorbed into the string: a guard rejecting copy ' +
+    'the translator believes is correct is a finding against the guard.',
   '*:glossary:sourceLink':
     'Proper name of an external spreadsheet ("GI: MW Glossary / Common Translation Sheet") — ' +
     'it is a link target users must be able to find, not prose',

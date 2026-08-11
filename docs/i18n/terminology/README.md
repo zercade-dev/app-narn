@@ -80,4 +80,4 @@ Who runs the resolution, and the fix-round procedure, belong to
 
 | Proposed term | Key that motivated it | Locale | Rendering used | Raised by |
 | --- | --- | --- | --- | --- |
-| _(empty)_ | | | | |
+| **discard (third sense): omit from an export** — `discard` in the lexicon covers two senses, unsaved edits and rejecting a proposal. This is neither: the checkbox drops rows from a CSV export and destroys nothing the user made and refuses nothing offered. Most languages need a third verb for it, and every locale meets it in **batch 1**. | `config:discardUntranslatable` — "Discard entries that don't need translation" | `de` | "weglassen" (`config:discardUntranslatable` — "Einträge ohne Übersetzungsbedarf weglassen"); *verwerfen* is held for sense 1 | `de` batch 1 |

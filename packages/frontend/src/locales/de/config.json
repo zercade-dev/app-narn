@@ -140,8 +140,8 @@
     "moduleDisabledWarning": "Modul ist deaktiviert",
     "modelDefault": "Standard",
     "doneEdit": "Fertig",
-    "anySource": "beliebige Herkunft",
-    "anyLang": "beliebige Sprache",
+    "anySource": "jede Herkunft",
+    "anyLang": "jede Sprache",
     "moduleDisabledSuffix": " (deaktiviert)",
     "noModule": "kein Modul",
     "removeConfirm": "Bestätigen",
@@ -173,7 +173,7 @@
     "exportBtn": "Exportieren",
     "tabRules": "Regeln ({{count}})",
     "tabTemplates": "Vorlagen ({{count}})",
-    "tabImportExport": "Importieren / Exportieren",
+    "tabImportExport": "Import / Export",
     "modeSimple": "Einfach",
     "modeAdvanced": "Erweitert",
     "modeAriaLabel": "Modus des Routing-Editors",
@@ -209,7 +209,7 @@
   "batchGroupingLabel": "Batch-Gruppierung",
   "batchGroupingUpdateFailed": "Batch-Gruppierung konnte nicht aktualisiert werden: {{message}}",
   "batchGroupingDefaultOption": "Workspace-Einstellung verwenden",
-  "batchGroupingDescription": "Hält verwandte Einträge über Übersetzungsläufe, KI-Reviews der Übersetzungen und Quelltext-Reviews hinweg im selben Batch, damit das Modell sie zusammen sieht. Glossarbegriff- und Kategoriegenerierung sind davon nicht betroffen.",
+  "batchGroupingDescription": "Hält verwandte Einträge über Übersetzungs-, Bewertungs- und Quelltext-Review-Durchläufe hinweg im selben Batch, damit das Modell sie zusammen sieht. Glossarbegriff- und Kategoriegenerierung sind davon nicht betroffen.",
   "batchGroupingNone": "Keine (nicht erzwingen)",
   "batchGroupingCategory": "Nach Kategorie",
   "batchGroupingGlossary": "Nach Glossar",
@@ -368,11 +368,11 @@
       },
       "untranslated": {
         "name": "Nicht übersetzt",
-        "description": "Markiert Übersetzungen, die mit dem Quelltext identisch sind (Einträge, die triviale Matcher abfangen würden, werden übersprungen)."
+        "description": "Markiert Übersetzungen, die mit dem Quelltext identisch sind (Einträge, die von trivialen Matchern abgefangen würden, werden übersprungen)."
       },
       "achievement-length-limit": {
         "name": "Längenlimit für Errungenschaften",
-        "description": "Markiert Übersetzungen von Namen und Beschreibungen von Errungenschaften, die ihre UTF-8-Byte-Limits überschreiten. Gilt für Einträge, die als Name oder Beschreibung einer Errungenschaft gekennzeichnet sind; standardmäßig nur Warnung."
+        "description": "Markiert Übersetzungen, die das UTF-8-Byte-Limit für Namen oder Beschreibungen von Errungenschaften überschreiten. Gilt für Einträge, die als Name oder Beschreibung einer Errungenschaft gekennzeichnet sind; standardmäßig nur Warnung."
       }
     }
   },

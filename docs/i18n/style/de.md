@@ -233,7 +233,7 @@ correctness.
 | Class                                                    | Budget              | Kind                                      |
 | -------------------------------------------------------- | ------------------- | ----------------------------------------- |
 | Sidebar item (`sidebar:globalConfig`, `sidebar:legal`)   | **26**              | **hard** — fixed 16rem, truncates         |
-| Tab label (`strings:tabs.backup`)                        | _to be measured_    | soft — the tab bar scrolls                |
+| Tab label (`strings:tabs.backup`)                        | **20** (provisional) | soft — the tab bar scrolls                |
 | Table column header (`strings:columns.config`)           | _to be measured_    | soft — columns auto-size                  |
 | Filter label (`strings:filters.needsReview`)             | _to be measured_    | soft — the filter row wraps               |
 | Bulk-bar control (`strings:bulk.approveSelected`)        | _to be measured_    | soft                                      |
@@ -249,11 +249,22 @@ then. Until they exist, the instruction for a soft class is "as short as the ter
 and never at the cost of the agreed rendering in `terminology/de.md`".
 
 **What batch 1 (`config`) contributes to that measurement.** `config` holds no sidebar item,
-no tab label, no filter label and no bulk-bar control, so it moves none of those four rows.
-It does hold one table-column-header class — the model picker's `config:models.col*` — whose
-longest German rendering is **11** characters ("Fähigkeiten"); "Param." and "Quant." keep
-English's abbreviation, and `config:models.colConfidence` is "Konfidenz" (9) rather than the
-23-character *Zuverlässigkeit* for that reason. `config:globalConfigTitle` is
+no filter label and no bulk-bar control, so it moves none of those three rows.
+
+It does hold **three tab labels** — the routing editor's own tab bar,
+`config:routing.tabRules`, `tabTemplates` and `tabImportExport` — which is why that row now
+carries a **provisional 20**. The longest rendered value across the three is **15**
+("Import / Export"; the other two interpolate a count and render at ~11 and ~13), and 20 is
+that plus headroom. **Treat it as a floor, not a ceiling.** It was measured over a
+sub-tab bar of three short labels, not over the class anchor `strings:tabs.backup`; the main
+tab bar is batch 2's and holds far longer names — "KI-Review der Übersetzungen" alone is 27.
+Batch 2 raises this figure to whatever it actually needs and does **not** shorten a settled
+surface name to fit 20.
+
+It also holds one table-column-header class — the model picker's `config:models.col*` —
+whose longest German rendering is **11** characters ("Fähigkeiten"); "Param." and "Quant."
+keep English's abbreviation, and `config:models.colConfidence` is "Konfidenz" (9) rather
+than the 23-character *Zuverlässigkeit* for that reason. `config:globalConfigTitle` is
 "Globale Konfiguration" (21) and is **binding on the sidebar**, since `sidebar:globalConfig`
 must be identical: it fits the hard 26 with five characters to spare.
 
@@ -323,6 +334,54 @@ Plurals map one to one onto English `_one` / `_other`.
   keycaps read *Strg* and *Umschalt* (or a bare ⇧) where English reads Ctrl and Shift, while
   *Tab*, *Enter*, *Esc* and *Alt* are engraved in English on a German layout and stay. Nothing
   in `config` names a key, so no key name has shipped yet.
+
+### Word order is a correctness check, not a style call
+
+German marks case on articles and determiners, not on most plural nouns, so a clause with
+**two plural noun phrases and a transitive verb carries its roles in word order alone**. The
+default reading is subject-first. Whenever the English means the *other* way round, the
+German must be a **passive** or must otherwise mark the agent — there is no guard anywhere
+that can catch this, and the sentence is perfectly grammatical while meaning the reverse.
+
+The batch-1 defect, kept as the worked example: `config:lqa.checks.untranslated.description`
+shipped "Einträge, die triviale Matcher abfangen würden" for English's "entries trivial
+matchers would catch". Every noun phrase in it is nominative/accusative syncretic and the
+verb is plural, so it read *entries that would catch trivial matchers* — agent and patient
+swapped. The fix is the passive: "die **von** trivialen Matchern abgefangen würden".
+
+Two habits that make this cheap:
+
+- **Write the relative clause as a passive by default** where the antecedent is the patient.
+  `config:tm.browserDescription`, `config:routing.simpleHint` and
+  `config:importModeFullReplaceHint` are all passive for this reason.
+- **A number mismatch or a marked article is a proof, and it is worth arranging for one.**
+  `config:routing.defaultToneHelp` ("Einträge, die diese Regel übersetzt") is safe because
+  the verb is singular and the antecedent plural; `config:lqa.lengthLimitNote` ("Limits, die
+  der Spiel-Editor vorgibt") is safe because *der* is unambiguously nominative.
+
+The same sweep also covers **attachment**: a relative pronoun binds the nearest matching
+antecedent. `config:lqa.checks.achievement-length-limit.description` first read as
+*achievements* that exceed their limits rather than *translations*, because
+"Errungenschaften" sat closest to the "die". Restructure so the intended antecedent is
+adjacent, rather than trusting the reader to recover it.
+
+### The citation guard cannot see German strong verbs — fix the row, never the string
+
+`scripts/check-lexicon-citations.mjs` attests a lexicon Rendering by longest-common-prefix,
+at 70% of the word's length (floor 3). That works for weak verbs and for noun plurals, and it
+**fails for exactly the verb class the register section tells you to use**: an e→i/ie stem
+change or an umlaut destroys the prefix. *freigeben* against a shipped *freigibst* shares 5
+of a required 7; *nehmen* against *nimm* shares 2; *lesen* against *lies* shares 2.
+
+**A failing citation is a defect in the row, not in the copy.** Put the form the string
+actually ships in the Rendering cell and the dictionary form in Notes — a quoted span in
+Notes is only checked when it sits next to a backtick key, so an un-adjacent dictionary form
+costs nothing. Rewording a correct German sentence to satisfy a prefix heuristic is how a
+tool ends up authoring the copy, and it degrades every string it touches.
+
+(An earlier draft of this guide recorded the opposite rule — "the cheap fix is usually the
+string, not the row". It was wrong, and it scaled badly in the one direction that matters:
+the more idiomatic the German, the more likely the guard is to reject it.)
 
 ### The six sweeps, instantiated for German
 
