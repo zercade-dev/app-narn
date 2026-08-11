@@ -51,10 +51,10 @@ cp packages/frontend/src/locales/en/config.json packages/frontend/src/locales/<l
 Copy-then-translate rather than writing a file from scratch: it makes key order match by
 construction, which is a checked property, and it guarantees you never silently omit a key.
 The one thing you do **not** carry over unchanged is the set of plural suffixes — see 2.7.
-**Copy one batch's namespaces at a time, not all 24 up front.** An untranslated English
-copy sitting in your locale directory looks exactly like a translated file, and the gate is
-deliberately quiet about it while your language is declared work-in-progress — see the
-declaration section below.
+**Copy one batch's namespaces at a time, not all 24 up front.** Pre-copying is not merely
+untidy: the work-in-progress declaration defers *missing namespace files*, so a locale that
+already has all 24 defers nothing, and the gate will both report the declaration as stale
+and red on every untranslated value at once. Create what you are about to translate.
 
 **Working directory: every command in this file runs from the workspace root** — the
 directory that contains `packages/frontend`, `Makefile`, `package.json` and `scripts/`.
@@ -72,7 +72,9 @@ say so rather than silently skipping the step it belongs to.
 
 - `pnpm check:locales` — the parity, placeholder, plural-coverage, key-order and length
   gate. Part of the release gate, so it must be green at every commit — **including yours,
-  from batch 1, which is what the work-in-progress declaration below is for.**
+  from batch 1, which is what the work-in-progress declaration below is for.** It defers one
+  rule for a mid-backfill language and nothing else; read that section before you read a
+  failure as expected, because almost none of them are.
 - `LOCALE_PARITY_STRICT=<lang> pnpm check:locales` — the same gate, holding your locale to
   its language's complete plural-category set with no bare-key rescue. The variable takes a
   comma-separated list, so you can hold just the language you are backfilling.
@@ -81,10 +83,11 @@ say so rather than silently skipping the step it belongs to.
 - `node scripts/check-lexicon-citations.mjs` — every rendering quoted in a lexicon file
   exists in the shipped locale files.
 
-## Declare your locale work-in-progress — before batch 1
+## The work-in-progress declaration — the controller adds it at batch 1
 
-**Do this first, in the same commit as batch 1.** Add one entry to `WIP_LOCALES` in
-`scripts/locale-rules.mjs`, with a real reason:
+**You do not add this yourself.** The wave controller adds one entry to `WIP_LOCALES` in
+`scripts/locale-rules.mjs`, with a real reason, **in the commit that lands your batch 1**,
+and deletes it at the whole-language sweep (section 7):
 
 ```js
 export const WIP_LOCALES = {
@@ -92,63 +95,90 @@ export const WIP_LOCALES = {
 };
 ```
 
-**Why it is needed.** Your language arrives over six batches, so between batch 1 and batch
-6 it is incomplete *by construction*, and there is no arrangement of files that satisfies
-the whole gate. Measured on a synthetic German locale against the real rules:
+**Two reasons it is the controller's and not yours.** It cannot be added in advance: a
+declaration naming a locale with no directory is itself a hard failure, by design, so the
+entry and your first namespace file have to arrive together. And it is the one file in this
+procedure that several languages touch at once — everything else you write is yours alone —
+so a wave running three languages in parallel would otherwise be three agents editing one
+file. In this wave only the controller commits, which makes that a non-issue rather than a
+merge to resolve. If you find yourself wanting to edit `WIP_LOCALES`, say so and let the
+controller do it.
 
-| What you have after batch 1 | What `pnpm check:locales` says without the declaration |
-| --- | --- |
-| only `config.json`, translated | **23 findings** — every namespace you have not started is "present in en only" |
-| all 24 English files pre-copied, `config.json` translated | **735 findings** — every value you have not reached yet is byte-identical to English |
-
-Neither is a defect and neither is fixable before the last batch. The declaration is what
+**Why it exists.** Each batch creates its own namespaces, so between batch 1 and batch 6
+your locale *directory* is incomplete by construction. Measured on a synthetic German
+locale against the real rules: after batch 1, holding a translated `config.json` and
+nothing else, `pnpm check:locales` reports **23 hard failures**, one per namespace nobody
+has reached. Not a defect, and not fixable before the last batch. The declaration is what
 makes "green at every commit" a true statement rather than one everybody learns to ignore.
 
-**What it turns off — exactly two rules, and nothing else:**
+**What it turns off — one rule, and only this one:**
 
-- namespace files English has that you have not created yet;
-- values still byte-identical to English.
+- namespace files English has that you have not created yet.
 
 **What stays on, from batch 1, with no softening whatsoever:** key parity *within* every
 namespace you have created, placeholder integrity, do-not-translate terms, key order,
-length sanity, legal plural suffixes, and plural-category coverage. Those are the checks
-that catch a defect you can fix today, and one of them going red means the batch is
-**wrong**, not unfinished. A namespace file with no English counterpart also still fails —
-that is a stale or misnamed file, which is a defect at any point in a backfill.
+length sanity, legal plural suffixes, plural-category coverage, **and values byte-identical
+to English**. Those are the checks that catch a defect you can fix today, and one of them
+going red means the batch is **wrong**, not unfinished. A namespace file with no English
+counterpart also still fails — that is a stale or misnamed file, a defect at any point in a
+backfill.
+
+**The identical-value rule is deliberately not deferred, and it was, briefly.** The
+argument for deferring it was that pre-copying all 24 English files is the other way to
+hold a partial locale, and in that shape the rule fires on hundreds of values. But the
+checks only ever compare namespaces your locale *has*, so under the procedure below — copy
+this batch's namespaces, no others — the rule has nothing to false-positive on. Deferring
+it bought a correct batch nothing and cost two things: it blessed the pre-copy shape, and
+it hid a value you pasted from English and never came back to, inside a namespace you did
+translate, until the declaration was lifted five batches later. It now reds in the batch
+that wrote it, which is where it is cheapest to fix.
+
+**Two identical-value figures circulate; they count different things.** **735** is the
+whole-language number — every substantial value across all 24 pre-copied namespaces of a
+synthetic German locale. **191** is `config` alone, one namespace. Neither contradicts the
+other, and both were measured on the same corpus; quote the population with the number.
 
 **`LOCALE_PARITY_STRICT` is unaffected in both directions.** It is a plural-coverage
-setting and has no opinion about missing namespaces or identical values, so the two never
-collide. `LOCALE_PARITY_STRICT=<lang> pnpm check:locales` on a declared locale is the
-strictest reading available of a partial language: every plural family you have already
-written is held to your language's complete category set, with no bare-key rescue and no
+setting and has no opinion about which namespace files exist, so the two never collide.
+`LOCALE_PARITY_STRICT=<lang> pnpm check:locales` on a declared locale is the strictest
+reading available of a partial language: every plural family you have already written is
+held to your language's complete category set, with no bare-key rescue and no
 grandfathering, while the batches you have not reached are not called missing. **That is
 the command to run from batch 1** — mechanical check 2 below — and it is green on a correct
 partial batch.
 
-**Every run prints your declaration**, with the reason and the two counts, so the state is
-visible in the log of every check anyone runs while you are mid-flight:
+**Every run prints the declaration**, with its reason and its count, so the state is visible
+in the log of every check anyone runs while you are mid-flight:
 
 ```
-check-locales: NOTE — 1 locale(s) declared work-in-progress. Missing namespace files and
-values identical to en are NOT checked for them; every other rule is:
-  de: 23 namespace file(s) not created yet and 0 value(s) still identical to en — both
-  deferred and NOT checked. Reason: Backfill in flight — batches 1-6, …
+check-locales: NOTE — 1 locale(s) declared work-in-progress. The namespace files they have
+not created yet are NOT checked; every other rule is, including values identical to en:
+  de: 23 namespace file(s) not created yet — deferred and NOT checked. Every other rule
+  applies. Reason: Backfill in flight — batches 1-6, …
 ```
 
-**Lifting it is not something you can forget.** The moment your language is finished —
-every namespace present, no value left identical to English — the entry defers nothing, and
-`pnpm check:locales` goes **red** asking you to delete it:
+**Nobody can forget to lift it.** The moment the last namespace file lands, the entry defers
+nothing and `pnpm check:locales` goes **red** asking for its deletion:
 
 ```
-check-locales: FAIL — WIP_LOCALES entries that defer nothing (the language is finished —
+check-locales: FAIL — WIP_LOCALES entries that defer nothing (every namespace has landed —
 delete them)
-  de: every namespace is present and no value is still identical to en, so this language is
-  finished — delete the WIP_LOCALES entry and let the full gate apply to it
+  de: every en namespace is present, so this language is no longer incomplete by
+  construction — delete the WIP_LOCALES entry and let the full gate apply to it
 ```
 
-Delete the entry in the whole-language-sweep commit (section 7). Removing it applies the full gate
-to your language with nothing weakened; if it goes red after removal, that is a real
-finding, and it is the only moment in the backfill where the two deferred rules can speak.
+The controller deletes it in the whole-language-sweep commit (section 7). Removing it
+applies the full gate with nothing weakened; if it goes red after removal, that is a real
+finding, and it is the only moment in the backfill where the deferred rule can speak.
+
+**A declared locale must not reach `develop`.** While the entry exists, one rule is off for
+that language, and a merged declaration means it is off for everyone on the branch — for
+however long the language takes. The whole backfill of a language lands as **one PR**, with
+the declaration added in its first commit and deleted in its last, so `develop` never
+carries one. This wave happens to be structurally safe (one worktree, one PR per language),
+but the next eight languages are not automatically so: if a wave ever needs to land a
+partial language on `develop`, that is a decision to take deliberately and write down, not
+a side effect of a long-running branch.
 
 ---
 
@@ -586,10 +616,11 @@ single-category language ends with 29 keys **fewer** than English, not more.
    `packages/frontend/src/locales/<lang>/`. Then **translate in place**, resolving each
    string's control shape before writing it, and adjusting each plural family to your
    language's categories per 2.7. **Create only this batch's namespaces** — do not pre-copy
-   the later ones. Both shapes are equally green under the work-in-progress declaration, but
-   an English file sitting in your locale directory is indistinguishable at a glance from a
-   translated one, and it is the shape that ships 1,900 identical values if the declaration
-   is ever lifted a batch early. On batch 1, add the declaration in this same commit.
+   the later ones; the declaration defers missing files, not untranslated ones, so a
+   pre-copied locale goes red on every value it has not reached and its declaration is
+   reported stale on top. You do not add or remove that declaration yourself: the controller
+   adds it in the commit that lands this batch when it is batch 1, and deletes it at the
+   whole-language sweep.
 3. **Fill in `terminology/<lang>.md`** for every term the batch met, **in the same change as
    the wording** — not afterwards, and not in the batch report.
 4. **Run the mechanical checks below** and clear every survivor.
@@ -652,12 +683,12 @@ made the reviewer's verdicts checkable. Hand the reviewer the output.
 2. **Strict-mode parity, from the first batch and not at the end.**
    `LOCALE_PARITY_STRICT=<lang> pnpm check:locales`. Russian was clean in every batch, and
    that is exactly why no plural work ever had to be redone.
-   **Green here means green** — with your locale declared work-in-progress (see "Declare
-   your locale work-in-progress" above) this command passes on a correct partial batch, so
+   **Green here means green** — with your locale declared work-in-progress (see "The
+   work-in-progress declaration" above) this command passes on a correct partial batch, so
    there is no expected failure to read past, and any finding it reports is yours to fix
-   now. The two rules a partial language cannot satisfy are deferred and printed as a NOTE
-   rather than failed; strict mode does not re-enable them, and it forgives nothing it ever
-   forgave.
+   now. The one rule a partial language cannot satisfy — which of English's namespace files
+   exist yet — is deferred and printed as a NOTE rather than failed; strict mode does not
+   re-enable it, and it forgives nothing it ever forgave.
 3. **The `bare + _other` family list**, checked against the English source rather than
    rediscovered — the twelve in 2.3.
 4. **Both collision directions**, over the whole language once it exists:
@@ -821,13 +852,12 @@ single command away from being falsified.
 Four checks that no per-batch review can see, run by someone who did not translate the
 language — preceded by one step that has to come first.
 
-0. **Delete your `WIP_LOCALES` entry, and run `pnpm check:locales`.** This is the step that
-   turns the two deferred rules back on — every namespace present, no value left identical
-   to English — and it is the first and only time they speak about your language. Do it
-   *before* the four below, because a missing namespace or a copied-through English value
-   is exactly the kind of finding that changes what those sweeps are looking at. The gate
-   asks for the deletion on its own once the language is finished, so if you have not got
-   to this step yet, it will find you.
+0. **The controller deletes this language's `WIP_LOCALES` entry**, then runs
+   `pnpm check:locales`. That turns the one deferred rule back on — is every English
+   namespace actually present — and it is the first and only time it speaks about this
+   language. Do it *before* the four below, because a namespace nobody noticed was never
+   created changes what those sweeps are looking at. The gate demands the deletion on its
+   own once the last namespace lands, so this step cannot be skipped silently.
 1. **Both collision directions** over the finished locale — same-English/different-rendering
    and same-rendering/different-English. Every hit is explained or fixed.
 2. **The length distribution per class**, against the absolute budgets in `style/<lang>.md`.
