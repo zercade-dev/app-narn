@@ -5,10 +5,29 @@ term and the list of things that are never translated; this locale's rendering o
 term goes in `terminology/tr.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
-> **How to read a quoted rendering in this file — it is one of two things, and nothing
-> guards the difference.** `scripts/check-lexicon-citations.mjs` checks
-> `terminology/tr.md` and **does not read style guides**, so every quotation below is
-> maintained by hand and can go stale silently.
+> **How to read a quoted rendering in this file — and exactly how far the guard protects
+> you.** `scripts/check-lexicon-citations.mjs` reads **both** `terminology/tr.md` **and this
+> file**, and fails on a quoted span whose significant words are not attested in the shipped
+> `tr` corpus. It also implements the three-way split below rather than merely describing it:
+> a prescription for a namespace that has not shipped yet is **skipped**, not failed (today's
+> run reports `6 style guide(s) checked … 345 citation(s) checked (16 prescription(s) for an
+> unshipped namespace skipped)`).
+>
+> **What it does not check is attachment.** It proves a rendering exists *somewhere* in the
+> shipped locale; it cannot prove the rendering belongs to the key it is quoted against. A
+> span that is attested elsewhere but describes the cited key **wrongly** passes green — and
+> that is not hypothetical: the runbook records exactly one such row surviving six rounds of
+> human review in the pilot. Hold every quotation below to that second standard by hand;
+> the guard has the first one covered.
+>
+> **This block previously asserted the opposite** — that the script "does not read style
+> guides", and therefore that nothing but a manual grep could catch a stale quotation here.
+> That has been false since round 1, when the guard was extended to read style guides
+> (`STYLE_DIR`, and the script's own header says so). It survived round 3 even though that
+> batch had the falsifying output in hand: the guard rejected a `tr (style guide)` citation
+> in this very file, which it could not have done if it did not read this file. Corrected
+> rather than deleted, because the distinction the paragraph was reaching for — attested
+> versus correctly attached — is real and is the part that survives.
 >
 > - A quotation attached to a **`config:` or `strings:` key is a citation**: that string is
 >   shipped, and it is checkable today. The `config:` ones were verified against
@@ -25,8 +44,9 @@ placeholder handling.
 >   wrong form shown as wrong, or a convention example. Never copy one as a rendering.
 >
 > When you ship a prescription, come back and leave it as a citation. When you change a
-> `config` string, re-run the audit — grep this file's quoted spans against the shipped
-> JSON — because nothing else will.
+> string this file quotes, re-read the quotation next to its key — the guard catches a
+> rendering that no longer exists anywhere, but it does not catch one attached to the wrong
+> key.
 
 ## Register
 
@@ -189,11 +209,29 @@ geçidi" and never "kalite kapısı".
 - Quoting a value: `“…”`, matching the English source after its review —
   `config:duplicateSuccess` ships `“{{name}}” projesi çoğaltıldı.` The **placeholder is
   untouched; the two characters around it are ours.**
-- **Adding quotes English does not have is licensed for an identifier**, and only for one:
-  `config:instances.formTitle` / `instanceOf` / `slugHelp` quote `{{base}}` so the module id
-  reads as a name rather than as part of the sentence, exactly as English itself quotes
-  `{{slug}}` and `{{model}}` in the same namespace. It is not licensed for prose values, and
-  never for a number.
+- **Adding quotes English does not have is licensed in exactly two places.** It is not
+  licensed for prose values, and never for a number.
+  1. **An identifier.** `config:instances.formTitle` / `instanceOf` / `slugHelp` quote
+     `{{base}}` so the module id reads as a name rather than as part of the sentence,
+     exactly as English itself quotes `{{slug}}` and `{{model}}` in the same namespace.
+  2. **A control label used as a sentence constituent.** English can drop a button name
+     into a sentence bare, because its imperative and its bare noun phrase are homographic:
+     *Review last run will judge…* reads as a subject. **Turkish has no such homography** —
+     "Son çalıştırmayı incele" is an unambiguous 2nd-person imperative, so leaving it bare
+     produces a command followed by a finite clause whose subject cannot be recovered. Put
+     the label in “ ”. Shipped: `review:translationAi.emptyHintRun`
+     (“Son çalıştırmayı incele”, …) and `review:sourceAi.emptyHint`
+     (“İncelemeyi çalıştır”, …). The label inside the quotes is copied **verbatim** from the
+     control it names (`translationAi.runReview`, `sourceAi.runReview`) — the quotes are the
+     only thing added.
+
+  Batch 3 shipped both bare for one round; they parsed as broken Turkish, and it was the
+  reviewer, not a gate, that caught it — no guard can see a missing subject. **Batches 4–6
+  will meet this shape again** in the `vault:`, `orphans:` and `backup:` empty states.
+  Note that this is the same device as the three strings that name a control *without*
+  English prompting it — `translationAi.emptyHintNoRun` “Tüm çevirileri incele” düğmesine,
+  `sourceAi.scopeNoneHint` “Tüm girdiler” seçeneğine, `glossary:generateRunningHint` “Üret”
+  düğmesini — so this locale now has one convention for naming a control in prose, not two.
 - Ellipsis is the single character `…` (U+2026), matching `common:saving` ("Saving…") —
   "Kaydediliyor…".
 - Turkish attaches case suffixes to proper nouns with an apostrophe ("NARN'ı", "API'sini",
@@ -635,6 +673,28 @@ Four notes on these tables:
 Turkish declines the surface name in prose, which is expected: "Yedekleme sekmesinden",
 "Çeviriler sekmesinde". The **stem** is what must match, not the letters. Keep the surface
 name unquoted, as English does.
+
+**Whether that declension takes an apostrophe is decided by ambiguity, not by the name being
+a surface name.** Every surface name in this product is an ordinary Turkish common noun
+pressed into service as a name, so the proper-noun apostrophe rule (`NARN'ı`, `API'sini`,
+`DeepL'e`) does **not** transfer to them automatically:
+
+- **No apostrophe where the sentence already disambiguates** — because it appends "sekmesi"
+  ("Yedekleme sekmesinden", "Çeviriler sekmesinden", "Etkinlik sekmesinden"), or because the
+  name is two words and cannot be read as the bare common noun ("Genel yapılandırmada", at
+  `review:sourceAi.noModules` and `strings:runs.aiReviewNoModules`). This is the normal case
+  and covers every in-prose surface name shipped through batch 3 but one.
+- **Apostrophe only where the bare stem would otherwise read as the common noun.**
+  `category:noModules` ("…Configure one in Config.") ships "Yapılandırma'da birini
+  yapılandırın." — without the apostrophe, "yapılandırmada" is simply *in the configuration*,
+  and the sentence would lose the fact that it is naming a tab. English gets this free from
+  capitalisation, which Turkish sentence case does not provide here.
+
+That single occurrence is currently the locale's **only** apostrophized surface name, and it
+is deliberate rather than an inconsistency. **It is not the proper-noun rule.** The
+apostrophe sweep in the table below groups the two, so read a hit before licensing it: a
+`DeepL'e` hit is a proper noun, a `Yapılandırma'da` hit is this rule, and both are correct
+for different reasons.
 
 ## Matching a sibling namespace — match the English, not another locale's file
 
