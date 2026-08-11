@@ -26,7 +26,7 @@ Placeholders and markup tags in your text pass through untouched, so if one of t
 
 In the export card, set **Export pseudo text as** to a language you are not currently shipping — German, say — then download the file and load it in the game with that language selected. The chosen language's column is filled with the Pseudo Test text for that one download only; nothing stored changes, and the real translations are still there next time you export.
 
-When you are done testing, export again with the substitution set back to **No substitution**.
+When you are done testing, export again with the substitution set back to **No substitution**. A normal export never contains a Pseudo Test column — the pseudo text only ever reaches your game through the substitution above — so leaving Pseudo Test switched on does not affect the files you ship.
 
 ## When to use it
 
