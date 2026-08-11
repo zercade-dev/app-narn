@@ -1,7 +1,8 @@
 # Style guide — Thai (th)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/th.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register

@@ -42,7 +42,6 @@
   "delete": "Supprimer",
   "discard": "Annuler",
   "undoRemove": "Annuler",
-  "new": "Nouveau",
   "passwordHelp": "Saisissez votre mot de passe pour rechiffrer le fichier.",
   "passwordRequired": "Le mot de passe est requis pour enregistrer.",
   "cancel": "Annuler",

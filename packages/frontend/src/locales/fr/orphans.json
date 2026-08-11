@@ -3,7 +3,6 @@
   "subtitle": "Entr\u00e9es qui ne sont plus dans le dernier CSV import\u00e9. Supprimez-les ou r\u00e9affectez leurs traductions \u00e0 une autre entr\u00e9e.",
   "emptyTitle": "Tout est reli\u00e9",
   "empty": "Aucun enregistrement orphelin\u00a0: les CSV import\u00e9s correspondent au projet actuel.",
-  "noProject": "S\u00e9lectionnez un projet pour voir les orphelins.",
   "columns": {
     "select": "S\u00e9lectionner",
     "source": "Source",

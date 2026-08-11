@@ -1,10 +1,11 @@
+import i18n from '../../i18n/index.js';
 import type { LogMeta, LogPresenter } from './types.js';
 import { openTab, openGlobalConfig, unlockVault } from './actions.js';
 
 /**
- * Expand a language code to a display name ("fr" -> "French"). Falls back to
- * the raw code, which is what the synthetic `pseudo-test` language and any
- * non-standard tag resolve to.
+ * Expand a language code to a display name ("fr" -> "French" in an English UI,
+ * "francés" in a Spanish one). Falls back to the raw code, which is what the
+ * synthetic `pseudo-test` language and any non-standard tag resolve to.
  *
  * `Intl.DisplayNames` parses any syntactically valid BCP-47 tag, even one
  * whose primary subtag it doesn't recognise — `"pseudo-test"` gets read as
@@ -17,7 +18,15 @@ import { openTab, openGlobalConfig, unlockVault } from './actions.js';
 export function languageName(code: unknown): string {
   if (typeof code !== 'string' || code === '') return '?';
   try {
-    const displayNames = new Intl.DisplayNames(['en'], { type: 'language' });
+    // `Intl.DisplayNames` resolves this locale LIST to a single best-fit locale
+    // up front (standard locale negotiation) — it does not retry per lookup.
+    // The trailing 'en' is only reached if `resolvedLanguage` itself isn't a
+    // locale ICU supports; once a locale is picked, every `.of()` call below
+    // (including the fallback `.of(code)` a few lines down) is answered from
+    // that same one locale — there is no per-code English fallback.
+    const displayNames = new Intl.DisplayNames([i18n.resolvedLanguage ?? 'en', 'en'], {
+      type: 'language',
+    });
     const primarySubtag = code.split('-')[0];
     if (displayNames.of(primarySubtag) === primarySubtag) return code;
     const display = displayNames.of(code);

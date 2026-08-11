@@ -1,7 +1,8 @@
 # Style guide — Spanish (es)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles the rest: register, casing, punctuation,
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/es.md`. This file settles the rest: register, casing, punctuation,
 length and placeholder handling. Spanish is already partly shipped, so most of what
 follows records decisions the existing translation has already made rather than inventing
 new ones.
@@ -75,9 +76,9 @@ shorter synonym: "Actividad" over "Historial de actividad", "Calidad" over "Cont
 calidad". Body text, descriptions and toasts are not constrained — expand there instead.
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/es.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ## Placeholders
 
@@ -107,10 +108,10 @@ locale.
   plantilla"); keep it that way and never let "modelo" drift onto templates.
 - **Standalone status words carry gender.** `vault:statusLocked` ships as "Bloqueada",
   agreeing with "bóveda". If the rendering chosen for _credential vault_ in
-  `terminology.md` ever changes gender, every status word in that namespace changes with
+  `terminology/es.md` ever changes gender, every status word in that namespace changes with
   it — they are adjectives with no visible noun.
 - **"Stage" is a game level**, not a phase. Spanish "fase" and "etapa" both read as
-  process steps; use the gaming term recorded in `terminology.md`.
+  process steps; use the gaming term recorded in `terminology/es.md`.
 - **"Judge"** must take the evaluative sense, not the legal one — "evaluar", never
   "juzgar" in the courtroom reading.
 - **Gerund for progress labels.** English "Saving…", "Generating…" are progress states;

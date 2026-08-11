@@ -6,8 +6,9 @@ is a separate translation with different vocabulary and different quotation mark
 A converter changes the characters and leaves mainland vocabulary in place, which produces
 text that is technically Traditional and reads as foreign to every Taiwanese user.
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/zh-hant.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register
@@ -110,7 +111,7 @@ duplicate.
   which is why converting from `zh-hans` fails silently.
 - **Hong Kong Traditional is a third variety.** It shares the characters but not all the
   vocabulary (網絡 rather than 網路, 硬碟 differences, different loanword transliterations).
-  This file is Taiwan-targeted; record that in `terminology.md` if a Hong Kong variant is
+  This file is Taiwan-targeted; record that in `terminology/zh-hant.md` if a Hong Kong variant is
   ever added.
 - **模型 vs 模板 / 範本.** 模型 is the AI model (`config:routing.labelModelOverride`).
   Taiwanese usage prefers 範本 over 模板 for _template_ (`config:templatesTitle`); pick one,

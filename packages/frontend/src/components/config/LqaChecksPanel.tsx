@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LQACheckConfig, LQASeverity, Project } from '@zercade-dev/narn-shared';
 import {
-  LANGUAGE_REGISTRY,
   getLengthLimit,
   DEFAULT_ACHIEVEMENT_NAME_MAX_BYTES,
   DEFAULT_ACHIEVEMENT_DESCRIPTION_MAX_BYTES,
@@ -12,6 +11,7 @@ import { apiRequest } from '../../hooks/use-api.js';
 import { useAutoSave } from '../../hooks/use-auto-save.js';
 import { useAsyncData } from '../../hooks/use-async-data.js';
 import { useProjectStore } from '../../stores/project-store.js';
+import { languageName } from '../../lib/log-presentation/registry.js';
 import { AutoSaveStatus } from './AutoSaveStatus.js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,10 +44,6 @@ interface RegexAssertionDraft {
 }
 
 type ChecksDraft = Record<string, LQACheckConfig>;
-
-function languageName(code: string): string {
-  return LANGUAGE_REGISTRY.find((l) => l.code === code)?.name ?? code;
-}
 
 function parseTermList(value: string): string[] {
   return value

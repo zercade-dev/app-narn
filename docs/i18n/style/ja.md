@@ -1,7 +1,8 @@
 # Style guide — Japanese (ja)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/ja.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register
@@ -75,9 +76,9 @@ the English character count as the ceiling rather than a target.
 Japanese wraps at almost any character, so long body text is not a layout hazard.
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/ja.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ## Placeholders
 
@@ -104,7 +105,7 @@ duplicate.
 
 - **Katakana or kanji — decide per term and record it.** 「モジュール」 is right (there is
   no natural kanji compound), 「翻訳メモリ」 beats 「トランスレーションメモリ」, and
-  「実行」 beats 「ラン」 for _run_. What matters is deciding once, in `terminology.md`,
+  「実行」 beats 「ラン」 for _run_. What matters is deciding once, in `terminology/ja.md`,
   rather than per string.
 - **「ステージ」 is correct for _stage_** — it is the gaming word for a playable level.
   「段階」 and 「工程」 are exactly the process readings `terminology.md` warns about.

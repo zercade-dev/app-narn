@@ -1,7 +1,8 @@
 # Style guide — French (fr)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/fr.md`. This file settles register, casing, punctuation, length and
 placeholder handling. French is already partly shipped, so most of what follows records
 decisions the existing translation has made; the two places where the shipped file is
 inconsistent are called out in the traps section and need fixing, not copying.
@@ -75,9 +76,9 @@ chains are the usual cause of overflow — prefer "Mémoire de traduction" to "M
 traductions enregistrées", and drop the article in chrome where French tolerates it.
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/fr.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ## Placeholders
 
@@ -108,11 +109,11 @@ failure for anyone completing the locale.
   `sidebar:templateNone` ships as "Aucun modèle" — but "modèle" is also the obvious French
   word for the AI _model_ (`config:routing.labelModelOverride`), and `terminology.md`
   forbids sharing a word between the two. Decide a distinct rendering for _template_,
-  record it in `terminology.md`, and fix the shipped strings; do not add more uses of
+  record it in `terminology/fr.md`, and fix the shipped strings; do not add more uses of
   "modèle" for templates in the meantime.
 - **"Credentials" is left in English in the shipped vault strings** (`vault:statusLabel` —
   "Coffre de credentials"). That is an unresolved decision, not a house style. Settle on a
-  French rendering, record it in `terminology.md`, and apply it to all four vault strings
+  French rendering, record it in `terminology/fr.md`, and apply it to all four vault strings
   at once.
 - **"Stage" is a false friend.** In French, _un stage_ is an internship. The English
   "Stage details" tab is a game level — never leave "stage" untranslated and never reach
@@ -120,7 +121,8 @@ failure for anyone completing the locale.
 - **"Judge"** must take the evaluative sense; the legal reading ("juger", "arbitre") is
   wrong for the AI review.
 - **Avoid anglicisms that have settled French equivalents** in this domain — "run" is not
-  "un run", "check" is not "checker". `terminology.md` fixes the rendering for both.
+  "un run", "check" is not "checker". `terminology.md` defines both terms; record the
+  rendering in `terminology/fr.md`.
 - **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms
   where English writes "entr(ies)". Do not imitate the parentheses; rephrase so one string
   covers every count.

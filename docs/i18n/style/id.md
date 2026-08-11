@@ -4,8 +4,9 @@ This locale is **Indonesian**, not Malaysian Malay. The two are close enough tha
 Malaysian word slips through unnoticed by a non-native reviewer and jars every native one —
 the traps section lists the ones that actually occur in software.
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/id.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register
@@ -71,9 +72,9 @@ shorter derivation: "Terjemahan" over "Penerjemahan", "Kualitas" over "Penjamina
 kualitas". Body text is unconstrained — put the precision there.
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/id.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ## Placeholders
 

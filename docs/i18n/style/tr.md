@@ -1,7 +1,8 @@
 # Style guide — Turkish (tr)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/tr.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register
@@ -92,7 +93,7 @@ copy-paste error.
 ## Locale-specific traps
 
 - **Agglutination means the domain term appears inflected everywhere.** "proje" shows up as
-  "projeyi", "projeden", "projenin". That is expected and correct; `terminology.md` records
+  "projeyi", "projeden", "projenin". That is expected and correct; `terminology/tr.md` records
   the bare citation form, and consistency means the same stem, not the same letters.
 - **Vowel harmony applies to your own coinages too** — a suffix chosen for its written look
   rather than by harmony is immediately wrong to a reader.

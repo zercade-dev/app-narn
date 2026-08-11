@@ -5,8 +5,9 @@ a separate translation with different vocabulary and different quotation marks �
 produce one file by character-converting the other.** The differences are listed in the
 traps section below.
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/zh-hans.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register

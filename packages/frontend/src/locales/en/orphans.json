@@ -3,7 +3,6 @@
   "subtitle": "Entries no longer present in the latest imported CSV. Delete them or relink translations onto a different entry.",
   "emptyTitle": "Everything's linked",
   "empty": "No orphaned records — imported CSVs match the current project.",
-  "noProject": "Select a project to view orphans.",
   "columns": {
     "select": "Select",
     "source": "Source",

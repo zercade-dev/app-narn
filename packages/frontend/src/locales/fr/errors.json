@@ -1,5 +1,4 @@
 {
-  "generic": "Une erreur s\u2019est produite.",
   "http": {
     "unauthorized": "Vous devez vous reconnecter.",
     "forbidden": "Vous n\u2019avez pas la permission de faire cela.",

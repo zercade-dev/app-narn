@@ -1,13 +1,10 @@
 {
   "save": "Save",
   "cancel": "Cancel",
-  "close": "Close",
-  "discard": "Discard",
   "loading": "Loading…",
   "changelogEntryError": "Couldn't load this changelog entry.",
   "changelogShowOlder": "Show older releases ({{count}})",
   "saving": "Saving…",
-  "rows": "rows",
   "thinking": "Thinking… {{seconds}}s",
   "webSearch": {
     "title": "Search the web",

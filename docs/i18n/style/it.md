@@ -1,7 +1,8 @@
 # Style guide — Italian (it)
 
-Terminology — _which word_ — is settled in `terminology.md`, including the list of things
-that are never translated. This file settles register, casing, punctuation, length and
+Terminology — _which word_ — is settled in `terminology.md`, which defines every domain
+term and the list of things that are never translated; this locale's rendering of each
+term goes in `terminology/it.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
 ## Register
@@ -100,12 +101,12 @@ another language's guide: the numbers in `style/ru.md` were measured from Russia
 shipped strings and mean nothing here. Measure them the same way once Italian ships — the
 longest rendering each class actually needed, rounded up — and write them into this table
 then. Until they exist, the instruction for a soft class is "as short as the term allows,
-and never at the cost of the agreed rendering in `terminology.md`".
+and never at the cost of the agreed rendering in `terminology/it.md`".
 
 The renderings used as examples above are illustrations of the length problem, not
-decisions about wording. `terminology.md` owns the rendering of every domain term,
-including the surface names and _translation memory_ — decide it there on first use,
-record it, and then follow it here.
+decisions about wording. `terminology.md` defines every domain term, including the surface
+names and _translation memory_; `terminology/it.md` holds the rendering. Decide the
+rendering on first use, write its row there, and then follow it here.
 
 ## Placeholders
 
@@ -137,13 +138,13 @@ locale.
   about.
 - **"Modello" is taken by the AI model** (`config:routing.labelModelOverride`). It is also
   the obvious Italian word for _template_ (`config:templatesTitle`). Reserve "modello" for
-  the model, choose something else for template, and record it in `terminology.md`.
+  the model, choose something else for template, and record it in `terminology/it.md`.
 - **"Libreria" / "supporto" / "eventualmente"** are the classic calque traps if English
   prose creeps in; none of them mean what the English cognate means.
 - **"Judge"** takes the evaluative sense ("valutare"), never "giudicare" in the courtroom
   reading or "giudice".
 - **Standalone status words carry gender.** `vault:statusLocked` ("Locked") has no visible
-  noun; it must agree with whatever `terminology.md` fixes for _credential vault_. Change
+  noun; it must agree with whatever `terminology/it.md` records for _credential vault_. Change
   that noun's gender and every status word in the namespace changes with it.
 - **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms
   where English writes "entr(ies)". Do not imitate the parentheses; rephrase so one string

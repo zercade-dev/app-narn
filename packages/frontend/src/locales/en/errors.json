@@ -1,5 +1,4 @@
 {
-  "generic": "Something went wrong.",
   "http": {
     "unauthorized": "You need to sign in again.",
     "forbidden": "You don't have permission to do that.",

@@ -42,7 +42,6 @@
   "delete": "Delete",
   "discard": "Discard",
   "undoRemove": "Undo",
-  "new": "New",
   "passwordHelp": "Enter your vault password to re-encrypt the file.",
   "passwordRequired": "Password is required to save.",
   "cancel": "Cancel",
