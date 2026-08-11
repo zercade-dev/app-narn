@@ -126,6 +126,10 @@ mentions it repeats that rendering verbatim. Settled so far:
 | Sharing | **Zusammenarbeit** | `strings:tabs.sharing`, `strings:tabPlaceholder.sharing` (shipped); batch 4's `collab:sharing.pageTitle` owes the same. *Freigabe* was rejected — *freigeben* is the **approve** term (into Translation Memory) and the two would read as one feature. |
 | Text Styler | **Text-Styler** | `strings:tabs` (color-text) (shipped); `sidebar:colorText` and `colorText:title` owe the same. |
 | Review (sidebar group) | **Review** | `strings:guide.groupReview` (shipped); batch 4's `sidebar:groups.review` owes the same. |
+| Setup (sidebar group) | **Einrichtung** | `strings:guide.groupSetup` (shipped); batch 4's `sidebar:groups.project` owes the same — note the key is `project` while its English is "Setup". |
+| Translate (sidebar group) | **Übersetzen** | `strings:guide.groupTranslate` (shipped); batch 4's `sidebar:groups.translate` owes the same. |
+| Terminology (sidebar group) | **Terminologie** | `strings:guide.groupContent` (shipped); batch 4's `sidebar:groups.content` owes the same — again the key name and the English differ. |
+| Maintenance (sidebar group) | **Wartung** | `strings:guide.groupMaintenance` (shipped); batch 4's `sidebar:groups.maintenance` owes the same. |
 | Translation Memory (guide topic) | **Translation Memory** | `strings:guide.topicTranslationMemory` and `strings:guide.groupTranslationMemory` (shipped), matching the term. |
 
 **How a tab is named inside a sentence: `im Tab <Name>`.** Not "im Backup-Tab" and not
@@ -141,6 +145,45 @@ surface name after it — `strings:guide.topicConfig` is "Tab Konfiguration",
 "Konfigurations-Tab": the compound buries the surface name inside a word, which is what a
 later batch greps for, and it disagrees with the `im Tab <Name>` sentence form for no gain.
 `topicActivity` and `topicQuality` have no "Tab" in English and get none in German.
+
+## Decisions this locale has settled that are NOT lexicon terms
+
+`terminology.md` is frozen at 76 terms and `terminology/de.md` may not grow rows, so a
+rendering that binds a later batch and has no term row lives **here**. Each row names the keys
+that fixed it and the keys that inherit it; a later batch reuses the rendering rather than
+re-deciding it.
+
+| Concept | German | Fixed by | Inherited by |
+| --- | --- | --- | --- |
+| **ignore / ignored** — exclude from AI dispatch | verb *ignorieren*, participle *Ignoriert*, negation *nicht mehr ignorieren* | `strings:row.ignored`, `strings:row.ignoreAction`, `strings:row.unignoreAction`, `strings:bulk.ignoreEntry`, `strings:editor.ignoreOverflow` | `review:sourceAi.ignore` and its toasts (batch 3), `generation:ignoreGlossariesLabel` (batch 5) |
+| **revert** — undo a whole run's writes | *Zurücksetzen* / *Zurückgesetzt* | `strings:runs.revert`, `strings:runs.revertedBadge`, `strings:runs.revertSuccess_other` | — |
+| **undo** — one edit | *Rückgängig* | `strings:compare.undo`, `strings:editor.undo` | — |
+| **verdict** — the judge's per-entry ruling | *Urteil* | `strings:runs.judgeAllFindingsDescription` | batch 5's `logs:judge.done`, whose `{{verdict}}` token this names |
+| **assistant** — the chat persona | *Assistent*, weak masculine; linking form *Assistenten-* in a compound | `strings:runs.typeChatGeneric` | batch 6 owes "KI-Assistent" at `colorText:assistant.title` and the same noun at `stage-details:chatAssistant` |
+
+**`revert` and `undo` must not collapse into one word.** English keeps them apart and so does
+this locale: *Rückgängig* is the single-edit undo in the compare cell and the editor, while
+*Zurücksetzen* reverses everything one run wrote. A fix round that "harmonizes" them destroys a
+distinction the UI relies on — both controls can be on screen at once.
+
+**Why *Urteil*, deliberately, and why it does not reach *Befund*.** The two words look
+adjacent and are not. A *Befund* is the source review's observation — reported, never
+adjudicated, which is why that term row rejected the evaluative candidates. A **verdict** is
+the judge's per-entry ruling, and the judge genuinely does adjudicate: it scores, and it
+returns pass or fail (`strings:runs.judgeVerdictPass` / `judgeVerdictFail`). *Urteil* is the
+ordinary German word for exactly that, English chose "verdict" rather than a softer word, and
+the alternatives are all spent — *Bewertung* is the **judge** term itself, *Ergebnis* is an LQA
+result, *Befund* is a finding. The lexicon's ban of *richten* / *Richter* for **judge** binds
+those two lexemes — the person, and the act of sitting in judgement — and does not reach the
+noun *Urteil*, per the rule that a reservation states the part of speech and sense it binds.
+**Scope of this reservation:** *Urteil* is the judge's ruling and nothing else. A source-review
+output is a *Befund*, an LQA output is a *Beanstandung*.
+
+**Assistent is a weak masculine noun (n-Deklination).** It takes *-en* in every case but the
+nominative singular, and its compound linking form is *Assistenten-*, not the bare stem —
+"Assistenten-Chat", the way German writes *Studentenausweis* or *Assistentenstelle*. Batch 2
+first shipped *Assistenz-*, which is **assistance**, an abstract quality, not the persona the
+app means; the review caught it. Do not re-shorten the compound to "Assistent-Chat".
 
 ## Casing
 
@@ -226,8 +269,11 @@ tokens against English; swapping a token is two violations, not a clever fix.
 
 `node scripts/i18n-preflight.mjs de` is what proves this held: it reports every
 non-skiplisted `{{token}}` followed by a German word. Batch 1 landed at **14 raw, 0 after
-the token axis**, so `de` had no word-axis exemption list. Batch 2 landed at **50 raw, 8
-after the token axis**, and building the list is what separated the survivors:
+the token axis**, so `de` had no word-axis exemption list. Batch 2 hit **8 token-axis
+survivors before its `usageTokens` fix and 6 after** (4 distinct words); re-running the
+detector over the shipped tree today gives **48 raw / 6 / 0**. Quote whichever figure you
+mean *with the state it reproduces in* — "landed at 50/8" reads as the shipped state and is
+not. Building the word list is what separated the survivors:
 
 - **One was a real defect and was fixed in the string, not exempted.**
   `strings:runs.usageTokens` first read "{{input}} Eingabe / {{output}} Ausgabe", where both
@@ -370,14 +416,16 @@ Measured expansion against the English source, one ratio per key:
 | Batch | Keys | en chars | de chars | Aggregate | Median | 90th pct | Max |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 — `config` | 374 | 13,015 | — | 1.23 | 1.22 | 1.50 | 2.83 |
-| 2 — `strings` | 452 | 9,900 | 12,615 | 1.27 | 1.23 | 1.75 | 3.75 |
+| 2 — `strings` | 452 | 9,900 | 12,643 | 1.28 | 1.23 | 1.80 | 3.75 |
 
 Batch 1's max is `config:batchGroupingCustom` ("Custom" → "Benutzerdefiniert") and batch 2's
 is `strings:runs.judgeVerdictFail` ("Fail" → "Nicht bestanden"); both ratios are measuring
 English's brevity on a four-to-six-character source, which is exactly why the budgets above
 are absolute rather than multiples. The aggregate barely moved between the two batches, but
-the **90th percentile went 1.50 → 1.75** — `strings` is chrome-heavy, and chrome is where a
+the **90th percentile went 1.50 → 1.80** — `strings` is chrome-heavy, and chrome is where a
 short English label meets a German compound. The tail is the number that threatens layout.
+(Both `strings` rows are measured on the post-fix-round file; the pre-fix-round figures were
+12,615 chars, aggregate 1.27, p90 1.75.)
 
 **Two unbreakable tokens over the 20-character rule shipped in batch 1**, both on
 unconstrained surfaces where the rule does not bite: "Schlusszeichensetzung" (21,
