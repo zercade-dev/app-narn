@@ -105,19 +105,42 @@ mentions it repeats that rendering verbatim. Settled so far:
 | Global Config | **Globale Konfiguration** | `config:globalConfigTitle` (shipped). `sidebar:globalConfig` must be word-for-word identical — 21 chars, inside the 26-char sidebar budget. |
 | Workspace Settings | **Workspace-Einstellungen** | `config:workspaceSettingsTitle` (shipped). |
 | Translation Memory | **Translation Memory** | `config:tm.policyTitle`, `config:tm.browserTitle` (shipped); `sidebar:translationMemory` owes the same. |
-| Backup | **Backup** | Named in prose by `config:importSnapshotNote` (shipped); `strings:tabs.backup` owes the same. |
-| Translations | **Übersetzungen** | Named in prose by `config:routing.categoriesConfiguredHint` (shipped); `strings:tabs.strings` owes the same. |
-| Compare | **Vergleich** | Named in prose by `config:routing.tonesHint` (shipped); `strings:tabs.compare` owes the same. |
-| Orphans | **Waisen** | Named in prose by `config:fullReplaceOrphanNotice` (shipped); `orphans:title` and `strings:tabs.orphans` owe the same. English calls it the "Relink tab" there — a stale name, not a second tab. |
+| Backup | **Backup** | `config:importSnapshotNote`, `strings:tabs.backup`, `strings:guide.topicBackup` (all shipped). |
+| Translations | **Übersetzungen** | `config:routing.categoriesConfiguredHint`, `strings:tabs.strings`, `strings:guide.topicMultiLanguage` (all shipped). |
+| Compare | **Vergleich** | `config:routing.tonesHint`, `strings:tabs.compare`, `strings:guide.topicCompare`, `strings:order.presortHint` (all shipped). |
+| Orphans | **Waisen** | `config:fullReplaceOrphanNotice`, `strings:tabs.orphans`, `strings:guide.topicOrphans` (shipped); `orphans:title` owes the same. English calls it the "Relink tab" in the config string — a stale name, not a second tab. |
 | Guide | **Guide** | Named in prose by `config:pseudoTestHelpLink` (shipped); `sidebar:guide` owes the same. |
 | LQA Checks | **LQA-Prüfungen** | `config:lqa.title` (shipped). |
 | Project Templates | **Projektvorlagen** | `config:templatesTitle` (shipped); the singular section title is `config:saveAsTemplateTitle` "Projektvorlage", matching English's own singular/plural split. |
+| Config | **Konfiguration** | `strings:tabs.config` (shipped); `strings:guide.topicConfig` repeats it. Distinct from **Globale Konfiguration**, which is the workspace-level page above it. |
+| Data | **Daten** | `strings:tabs.data` (shipped). |
+| Source AI review | **Quelltext-KI-Review** | `strings:tabs` (review-source-ai) and `strings:tabPlaceholder` (review-source-ai), shipped; batch 3's `review:sourceAi.configTitle` owes the same. The bare **Quelltext-Review** is the *term* in prose and is a different string — see `../terminology/de.md`. |
+| Translation AI review | **Übersetzungs-KI-Review** | `strings:tabs` (review-translation-ai), shipped; batch 3's `review:translationAi.title` owes the same. |
+| Manual review | **Manuelles Review** | `strings:tabs` (review-manual), shipped. |
+| Quality | **Qualität** | `strings:tabs.quality`, `strings:guide.topicQuality` (shipped). |
+| Glossary | **Glossar** | `strings:tabs.glossary`, `strings:guide.topicGlossary` (shipped). |
+| Category | **Kategorie** | `strings:tabs.category`, `strings:guide.topicCategory` (shipped). Singular on purpose, as in English, even though the page it opens is plural. |
+| Routing | **Routing** | `strings:tabs.routing`, `strings:guide.topicRouting` (shipped). |
+| Activity | **Aktivität** | `strings:tabs` (runs), `strings:guide.topicActivity` (shipped). The page title `strings:runs.title` deliberately expands to "Übersetzungsaktivität" — expand it, never shorten the page title to match. |
+| Stage details | **Level-Details** | `strings:tabs` (stage-details), `strings:runs.typeStageDetailsTranslation` (shipped); batch 6's `stage-details:title` owes the same. |
+| Sharing | **Zusammenarbeit** | `strings:tabs.sharing`, `strings:tabPlaceholder.sharing` (shipped); batch 4's `collab:sharing.pageTitle` owes the same. *Freigabe* was rejected — *freigeben* is the **approve** term (into Translation Memory) and the two would read as one feature. |
+| Text Styler | **Text-Styler** | `strings:tabs` (color-text) (shipped); `sidebar:colorText` and `colorText:title` owe the same. |
+| Review (sidebar group) | **Review** | `strings:guide.groupReview` (shipped); batch 4's `sidebar:groups.review` owes the same. |
+| Translation Memory (guide topic) | **Translation Memory** | `strings:guide.topicTranslationMemory` and `strings:guide.groupTranslationMemory` (shipped), matching the term. |
 
 **How a tab is named inside a sentence: `im Tab <Name>`.** Not "im Backup-Tab" and not
 "im Tab „Backup“". The bare, unhyphenated, unquoted name after the word *Tab* is what lets a
 later batch grep for the rendering and repeat it: `config:importSnapshotNote` "im Tab Backup",
 `config:routing.tonesHint` "im Tab Vergleich", `config:routing.categoriesConfiguredHint`
 "im Tab Übersetzungen", `config:fullReplaceOrphanNotice` "im Tab Waisen".
+
+**A guide topic that appends "Tab" takes the same shape, without the preposition.**
+English writes "Config Tab", "Translations Tab"; German writes the word first and the bare
+surface name after it — `strings:guide.topicConfig` is "Tab Konfiguration",
+`strings:guide.topicMultiLanguage` is "Tab Übersetzungen", and the other six follow. Not
+"Konfigurations-Tab": the compound buries the surface name inside a word, which is what a
+later batch greps for, and it disagrees with the `im Tab <Name>` sentence form for no gain.
+`topicActivity` and `topicQuality` have no "Tab" in English and get none in German.
 
 ## Casing
 
@@ -203,7 +226,22 @@ tokens against English; swapping a token is two violations, not a clever fix.
 
 `node scripts/i18n-preflight.mjs de` is what proves this held: it reports every
 non-skiplisted `{{token}}` followed by a German word. Batch 1 landed at **14 raw, 0 after
-the token axis** — so `de` has no word-axis exemption list and needs none yet.
+the token axis**, so `de` had no word-axis exemption list. Batch 2 landed at **50 raw, 8
+after the token axis**, and building the list is what separated the survivors:
+
+- **One was a real defect and was fixed in the string, not exempted.**
+  `strings:runs.usageTokens` first read "{{input}} Eingabe / {{output}} Ausgabe", where both
+  nouns sit after a non-`count` number and would have to pluralise. It ships as
+  "Tokens — Eingabe: {{input}} / Ausgabe: {{output}}" — the label before the colon, the
+  number after it, which is the device this section already prescribes.
+- **Four words were exempted**, and `NUMERAL_WORD_AXIS_EXEMPTIONS.de` in
+  `scripts/i18n-preflight.mjs` now holds them: *von* (preposition), *entfernen* and
+  *kopieren* (infinitives on control labels), *markiert* (invariant predicative participle).
+  None can inflect for number.
+
+The list was derived **only** from the eight post-token-axis survivors, never from the 50 raw
+matches — deriving it from the raw set would have exempted ordinary counted nouns that are
+correct after `{{count}}` and wrong after anything else. Add to it the same way.
 
 ## Length discipline
 
@@ -253,39 +291,63 @@ correctness.
 | Class                                                    | Budget              | Kind                                      |
 | -------------------------------------------------------- | ------------------- | ----------------------------------------- |
 | Sidebar item (`sidebar:globalConfig`, `sidebar:legal`)   | **26**              | **hard** — fixed 16rem, truncates         |
-| Tab label (`strings:tabs.backup`)                        | **20** (provisional) | soft — the tab bar scrolls                |
-| Table column header (`strings:columns.config`)           | _to be measured_    | soft — columns auto-size                  |
-| Filter label (`strings:filters.needsReview`)             | _to be measured_    | soft — the filter row wraps               |
-| Bulk-bar control (`strings:bulk.approveSelected`)        | _to be measured_    | soft                                      |
+| Tab label (`strings:tabs.backup`)                        | **26**              | **hard** — the same container; see below  |
+| Table column header (`strings:columns.config`)           | **18**              | soft — columns auto-size                  |
+| Filter label (`strings:filters.needsReview`)             | **36**              | soft — the filter row wraps               |
+| Bulk-bar control (`strings:bulk.approveSelected`)        | **36**              | soft                                      |
 
 The sidebar figure is derived from that fixed container, so it is a property of the UI and
 carries over to every language unchanged — treat it as binding from the first string.
 
-**Three of the four soft budgets are still empty**, and none of the four may be copied from
-another language's guide: the numbers in `style/ru.md` were measured from Russian's own
-shipped strings and mean nothing here. The tab-label row is the one exception — batch 1
-filled it with a provisional figure from the three tab labels `config` turned out to hold,
-and the paragraph below says why that number is a floor rather than a ceiling. Measure the
-other three the same way as their namespaces ship — the longest rendering each class
-actually needed, rounded up — and write them into this table then. Until they exist, the
-instruction for a soft class is "as short as the term allows,
-and never at the cost of the agreed rendering in `terminology/de.md`".
+**All five are now measured.** None was copied from another language's guide: the numbers in
+`style/ru.md` were measured from Russian's own shipped strings and mean nothing here. The
+three soft figures are the longest rendering the class actually needed in `config` and
+`strings`, rounded up; re-measure and raise them if a later batch needs more, exactly as
+batch 2 did for the tab label. A soft budget means "prefer the shorter of two correct
+options", never "shorten the agreed rendering in `terminology/de.md` to hit a number".
+
+### The tab label is not a tab bar — it is the sidebar, and it is hard
+
+Batch 1 recorded a **provisional 20** for this class and warned that the main tab bar would
+raise it. Batch 2 owns `strings:tabs.*` and measured the container instead of forecasting
+it, and the forecast's premise turned out to be wrong in a way that matters more than the
+number:
+
+**`strings:tabs.*` has exactly one call site, and it is not a tab bar.** It is
+`components/layout/Sidebar.tsx`, which renders every tab label as
+`<span className="truncate">` inside a `SidebarMenuButton` — the same 16rem sidebar the
+"sidebar item" row above describes. There is no horizontal tab strip in this app; the
+runbook's "the main tab bar is a wider, scrolling container" does not describe this UI.
+So the class is **hard, not soft**: a label over budget is silently ellipsized, exactly like
+a sidebar item.
+
+The arithmetic, from `components/ui/sidebar.tsx`: `SIDEBAR_WIDTH` is `16rem` = 256px, less
+the 1px right border, less `SidebarGroup`'s `p-2` (16px), less `SidebarMenuButton`'s `p-2`
+(16px), less the leading `size-4` icon (16px) and its `gap-2` (8px) — **199px** for the
+truncating label at `text-sm`. That is the same 199px a plain sidebar item gets, since those
+carry an icon too, which is why the two rows now share one figure. At ~7.6px average advance
+for mixed-case German at 14px, 199px is ~26 characters — independently reproducing the 26
+this guide already carried for the sidebar. Nobody has measured rendered pixel widths; if a
+future rendering needs to go past 26, look at the running app before deciding.
+
+The longest tab label this batch actually needed is **"Übersetzungs-KI-Review" (22)**, four
+characters inside the budget. Batch 1's forecast of a ~27-character rendering
+("KI-Review der Übersetzungen") was for a different shape and did not ship: the settled
+surface name is the hyphenated compound, which is the ordinary German way to build it and
+happens to fit. **This is not a surface name shortened to meet a budget** — the compound was
+chosen for parallelism with "Quelltext-KI-Review" and with the *KI-Review* term, and the
+budget was measured afterwards.
 
 **What batch 1 (`config`) contributes to that measurement.** `config` holds no sidebar item,
 no filter label and no bulk-bar control, so it moves none of those three rows.
 
 It does hold **three tab labels** — the routing editor's own tab bar,
-`config:routing.tabRules`, `tabTemplates` and `tabImportExport` — which is why that row now
-carries a **provisional 20**. The longest rendered value across the three is **15**
-("Import / Export"; the other two interpolate a count and render at ~11 and ~13), and 20 is
-that plus headroom. **Treat it as a floor, not a ceiling.** It was measured over a
-sub-tab bar of three short labels, not over the class anchor `strings:tabs.backup`; the main
-tab bar is batch 2's and holds far longer names — a plausible rendering of *Translation AI
-review* runs to about 27 characters. **That last figure is a forecast, not a citation:**
-nothing in this locale ships a rendering of that tab yet, and the surface name belongs to
-batch 3 (see the *judge* row in `terminology/de.md`, which explicitly keeps the surface name
-out of the term). Batch 2 raises this figure to whatever it actually needs and does **not**
-shorten a settled surface name to fit 20.
+`config:routing.tabRules`, `tabTemplates` and `tabImportExport`, whose longest rendered value
+is **15** ("Import / Export"; the other two interpolate a count and render at ~11 and ~13).
+That is a genuinely different container from `strings:tabs.*`: an in-panel secondary strip
+inside one panel, which does not truncate. It contributed the provisional 20 this row used
+to carry; the measured 26 above replaces it, and the two containers are noted here only so
+nobody re-derives the smaller figure from `config` again.
 
 It also holds one table-column-header class — the model picker's `config:models.col*` —
 whose longest German rendering is **11** characters ("Fähigkeiten"); "Param." and "Quant."
@@ -294,11 +356,28 @@ than the 23-character *Zuverlässigkeit* for that reason. `config:globalConfigTi
 "Globale Konfiguration" (21) and is **binding on the sidebar**, since `sidebar:globalConfig`
 must be identical: it fits the hard 26 with five characters to spare.
 
-Measured expansion over `config`'s 374 keys against the English source: **aggregate 1.23,
-median 1.22, 90th percentile 1.50, max 2.83**. The max is `config:batchGroupingCustom`
-("Custom" → "Benutzerdefiniert"), a six-character English source — the ratio is measuring
-English's brevity, which is exactly why the budgets above are absolute rather than
-multiples.
+**What batch 2 (`strings`) contributes.** It is the namespace that anchors four of the five
+classes, so it moved all four. Tab label: see the section above. Table column header: the
+longest of the sixteen `strings` headers is "Bearbeiten von" / "Wiederholungen" (both 14),
+against `config`'s longest of 11 — hence **18**. Filter label: the longest of the twenty-five
+`strings:filters.*` values is "Nur unübersetzte Einträge anzeigen" (34) — hence **36**.
+Bulk-bar control: the longest control label is "Kategorien aus Auswahl generieren" (33), with
+"Ins Translation Memory freigeben" (32) just behind it — hence **36** as well. `strings` holds
+no sidebar item, so the hard 26 there is unchanged.
+
+Measured expansion against the English source, one ratio per key:
+
+| Batch | Keys | en chars | de chars | Aggregate | Median | 90th pct | Max |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 — `config` | 374 | 13,015 | — | 1.23 | 1.22 | 1.50 | 2.83 |
+| 2 — `strings` | 452 | 9,900 | 12,615 | 1.27 | 1.23 | 1.75 | 3.75 |
+
+Batch 1's max is `config:batchGroupingCustom` ("Custom" → "Benutzerdefiniert") and batch 2's
+is `strings:runs.judgeVerdictFail` ("Fail" → "Nicht bestanden"); both ratios are measuring
+English's brevity on a four-to-six-character source, which is exactly why the budgets above
+are absolute rather than multiples. The aggregate barely moved between the two batches, but
+the **90th percentile went 1.50 → 1.75** — `strings` is chrome-heavy, and chrome is where a
+short English label meets a German compound. The tail is the number that threatens layout.
 
 **Two unbreakable tokens over the 20-character rule shipped in batch 1**, both on
 unconstrained surfaces where the rule does not bite: "Schlusszeichensetzung" (21,
@@ -306,6 +385,12 @@ unconstrained surfaces where the rule does not bite: "Schlusszeichensetzung" (21
 "Kontextübereinstimmung" (22, inside `config:tm.policyStrict`, a select option that wraps).
 Every other long compound is hyphenated and therefore breakable. If either term is ever
 needed on one of the five constrained surfaces, split it there rather than re-coining it.
+
+**Batch 2 shipped two more of the same kind, on the same terms**: "Übersetzungsaktivität" (21,
+`strings:runs.title`, a page title) and "Übersetzungsdurchlauf" (21, inside
+`strings:bulk.cancelFailed`, a toast). Neither surface is constrained. Across `config` and
+`strings` together that is four unbreakable tokens over 20 characters and **zero** of them on
+any of the five constrained classes — the rule is holding where it bites.
 
 Descriptions, toasts and guide prose are not constrained; put the precision there.
 
@@ -358,8 +443,12 @@ Plurals map one to one onto English `_one` / `_other`.
   rate** must be built on something else. Both are recorded in `terminology/de.md`.
 - **`Tab` in `terminology.md`'s keyboard-key section is the key, not the UI tab.** German
   keycaps read *Strg* and *Umschalt* (or a bare ⇧) where English reads Ctrl and Shift, while
-  *Tab*, *Enter*, *Esc* and *Alt* are engraved in English on a German layout and stay. Nothing
-  in `config` names a key, so no key name has shipped yet.
+  *Tab*, *Enter*, *Esc* and *Alt* are engraved in English on a German layout and stay. Batch 2
+  shipped the first four: `strings:compare.contextPlaceholder` and
+  `strings:compare.tonePlaceholder` write "Umschalt+Enter" and keep the bare *Enter* and *Esc*,
+  and `strings:compare.cellEditTooltip` and `strings:compare.cellEditReviewedTooltip` keep
+  *Enter* and *Esc*. The **verb** *enter* translates normally in the same batch —
+  `strings:shortcuts.enterEditMode` is "In den Bearbeitungsmodus wechseln", not a keystroke.
 
 ### Word order is a correctness check, not a style call
 
