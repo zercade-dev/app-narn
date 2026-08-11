@@ -218,7 +218,9 @@ export function isStrictFor(locale, strictEnv = STRICT_ENV) {
  * lands, the entry defers nothing and staleWipLocales() turns it into a hard
  * failure saying to delete it. The gate lifts the exemption, not a memory.
  */
-export const WIP_LOCALES = {};
+export const WIP_LOCALES = {
+  de: 'Backfill in flight — German is arriving one batch at a time, so the namespaces later batches own do not exist yet. Delete this entry when the last batch lands.',
+};
 
 for (const [locale, reason] of Object.entries(WIP_LOCALES)) {
   if (!reason || !reason.trim()) {
