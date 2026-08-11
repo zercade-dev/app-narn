@@ -432,7 +432,15 @@ The five classes, with the key each is anchored on:
 **The numbers are per language, and yours are not Russian's.** Derive them the way the
 pilot did: for the sidebar, from the container; for the other four, from the longest value
 that language ships, plus headroom. Write the resulting five numbers into
-`style/<lang>.md`. **Hard** means fix it — a sidebar item over budget is cut off in a
+`style/<lang>.md`.
+
+**"Tab label" is two different containers, and batch 1 can only see the smaller one.**
+`config`'s tabs are an *in-panel secondary* bar inside one panel; the main tab bar is
+`strings:tabs.*`, which batch 2 owns — a wider, scrolling container. So a tab-label budget
+written in batch 1 is derived from the narrower surface and is a **floor, never a ceiling**:
+batch 2 raises it from its own measurement. Do not shorten a settled surface name to fit a
+figure an earlier batch derived from a different container — surface names are repeated
+verbatim, so every later batch would inherit the short form. **Hard** means fix it — a sidebar item over budget is cut off in a
 container that cannot grow. **Soft** means prefer the shorter of two correct options, but
 do not distort a term to hit a number and do not treat the figure as a failure threshold.
 Nobody has measured rendered pixel widths; if you need to go past a hard budget, look at
@@ -929,6 +937,21 @@ language — preceded by one step that has to come first.
 
 Fixes from the sweep go in as a normal fix round with a scoped re-review. The language is
 not done until that re-review passes.
+
+**Then, and only then, the language may be announced — and the announcement is a separate
+event from the files landing.** A locale ships **dark**: its files exist and are complete
+long before the language picker offers it, because the picker is a short hand-maintained
+list widened once, for all of them, in a later step. So:
+
+> **A language's changelog fragment ships in the release that makes it *selectable*, never
+> the release that lands its files.**
+
+This is not a stylistic preference. Russian's files and Russian's changelog fragment landed
+together, the fragment was consolidated into a release, and that release announced an
+interface language that Settings did not offer — a user reads the entry, opens the picker
+and finds it absent. Eleven languages have the identical shape, so the rule is written here
+rather than remembered. A batch that lands only locale files adds **no** fragment; the batch
+that widens the picker adds one naming every language it turns on.
 
 ---
 
