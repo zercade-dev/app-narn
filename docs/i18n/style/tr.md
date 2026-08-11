@@ -16,8 +16,11 @@ placeholder handling.
 >   ones against `.../tr/strings.json` at the end of batch 2.
 > - A quotation attached to a key in **any other namespace is a prescription**, binding on
 >   the batch that owns that namespace — `sidebar:*` and `vault:*` in batch 4,
->   `quality:*` in batch 3, `orphans:*` and `colorText:*` in batch 6. It describes what
->   that key **must** ship, not what it does ship.
+>   `orphans:*` and `colorText:*` in batch 6. It describes what that key **must** ship, not
+>   what it does ship. **`glossary:`, `review:`, `category:` and `quality:` quotations are
+>   citations as of batch 3**, verified against `.../tr/{glossary,review,category,quality}.json`
+>   at the end of that batch; the two prescriptions batch 2 left for `quality:*` and
+>   `review:*` were discharged there and are marked as shipped below.
 > - A quotation attached to **no key at all** is an illustration: a rejected candidate, a
 >   wrong form shown as wrong, or a convention example. Never copy one as a rendering.
 >
@@ -88,6 +91,28 @@ word order around a placeholder is free, the shape of a sibling pair is not.
 **A title that is a sentence in English stays a sentence.** The noun-phrase rule covers
 titles that *name* something. `config:importWarningsTitle` ("Review before importing") is
 an instruction, and ships as one: "İçe aktarmadan önce gözden geçirin".
+`category:reviewTitle` ("Review suggestions") is the batch-3 instance — an `<h4>` over the
+suggestion checkboxes with `reviewHint` under it, so it ships as the instruction
+"Önerileri inceleyin", not as a noun phrase.
+
+**Generic English "review" takes two Turkish verbs, and the split is by construction, not
+by taste.** "inceleme" is the *review* term, so the plain verb is the same stem wherever
+English attaches it to an object: `strings:runs.reviewSuggestions` ("Review suggestions",
+a button) is "Önerileri incele" and `category:reviewTitle`, byte-identical in English,
+takes the same lexeme in the instruction shape. "gözden geçir" is kept for the
+**"Review before &lt;doing X&gt;"** construction alone, which batch 1 settled at
+`config:importWarningsTitle` and batch 3 repeats at `category:aiHint`
+("Uygulamadan önce gözden geçirin."). Do not extend "gözden geçir" past that frame: an
+earlier batch-3 draft used it for "Review suggestions" too, which put two words for one
+English verb inside one namespace, and the pre-flight's same-English/different-rendering
+direction is what caught it.
+
+**"Current" is "mevcut", not "geçerli", wherever the sentence could also be read as
+*valid*.** `review:currentTranslation` is "Mevcut çeviri" and `category:currentTitle` is
+"Mevcut kategoriler" — "Geçerli çeviri" would read as *a valid translation*, which is a
+claim about quality the English does not make. Batch 2's "geçerli görünüm"
+(`strings:compare.translateScopeAll`) stands: a *view* cannot be valid or invalid, so the
+ambiguity does not arise there. Choose on the noun, not on the adjective.
 
 **A term row fixes the lexeme, not the shape.** Take the *word* from `terminology/tr.md`
 and the *form* from the control. An `Example:` line in a term row is an illustration, not
@@ -208,7 +233,15 @@ Decimal comma, thousands point: `1.234,56`. `config:overflowRatioDescription` sh
 No space before `%`, and Turkish writes the sign **before** the number ("%50") — follow
 that where the number is literal, including where the English writes it after:
 `config:health.successRate` ("Success {{rate}}%") ships "Başarı %{{rate}}", and
-`config:models.gpuPlacement` ("{{pct}}% GPU") ships "GPU %{{pct}}".
+`config:models.gpuPlacement` ("{{pct}}% GPU") ships "GPU %{{pct}}". Verified rather than
+assumed: `new Intl.NumberFormat('tr-TR',{style:'percent'}).format(0.9)` is `%90`.
+
+**A percent range takes one sign, at the front of the range** — not one per bound and not
+one at the end. Batch 3's three quality tiers are the worked set:
+`quality:legend.tierHigh` is "Yüksek geçme oranı (≥ %90)", `tierMid` is
+"Orta geçme oranı (%70–89)" and `tierLow` is "Düşük geçme oranı (< %70)". English writes
+"(70–89%)", with the sign after the upper bound; moving it to the front is the same rule
+as the single-number case, and the en dash between the bounds is kept as English has it.
 
 **A currency symbol PRECEDES the number in Turkish, so the four cost strings keep English's
 order.** `strings:runs.estimatedCost` ships "≈ ${{amount}}", and `projectTotal` /
@@ -452,8 +485,11 @@ packs prepositions and possessives into suffixes. Measured over the 374 shipped 
 keys: aggregate **1.10**, median **1.07**, 90th percentile **1.43**, longest single ratio
 1.92 (`config:deselectAll`). Over the 452 shipped `strings` keys: aggregate **1.16**, median
 **1.13**, 90th percentile **1.70**, longest single ratio 3.33 (`strings:compare.run`, three
-English characters against “Çalıştırma”). Re-measure over the whole language at the final
-sweep, and state the population with the figure. **The two namespaces differ because
+English characters against “Çalıştırma”). Over the 377 batch-3 keys
+(`glossary` + `review` + `category` + `quality`): aggregate **1.08**, median **1.06**, 90th
+percentile **1.50**, longest single ratio 3.00 (`review:sourceAi.findingTypo`, four English
+characters — "Typo" — against “Yazım hatası”). Re-measure over the whole language at the
+final sweep, and state the population with the figure. **The two namespaces differ because
 `strings` is chrome:** it is full of one- and two-word labels, and a short English source is
 what produces a large ratio — the tail here is not long renderings, it is short sources. The catch is distribution, not the aggregate: fewer,
 much longer single tokens ("değerlendirilemedi", "yapılandırmalarınızı"), which clip rather
@@ -507,6 +543,15 @@ grow ~1.5–3% with weight, which puts `tabs.review-source-ai` at roughly 201–
 selected — it may clip a character or two, only on the tab whose label you least need. Not
 a reason to shorten it.
 
+**Batch 3 tested the three soft figures against a second namespace group and none moved.**
+Over `glossary` + `review` + `category` + `quality` the longest column header is **11**
+(`quality:columns.passRate` "Geçme oranı", budget 20), the longest filter label is **16**
+(`review:filterNeedsReview` "İnceleme gerekli", budget 40) and the longest bulk-bar control
+is **38** as a template / ~34 rendered (`glossary:bulkMarkConstant`
+"{{count}} terimi sabit olarak işaretle", budget 40). The batch adds **no** value to the
+hard sidebar class — it names surfaces but never labels one. So the four figures stand as
+batch 2 left them; the whole-language sweep still re-measures.
+
 **The three soft figures were all re-derived by batch 2** from the longest value `strings`
 actually ships; batch 1 could measure only the column-header class (from
 `config:models.col*`) and had no filter row or bulk bar at all. Each is the longest shipped
@@ -539,10 +584,10 @@ re-render them.
 | Data | Veri | `strings:tabs.data` | — |
 | Translations | Çeviriler | `strings:tabs.strings` | `config:routing.categoriesConfiguredHint`, `strings:guide.topicMultiLanguage` |
 | Compare | Karşılaştırma | `strings:tabs.compare` | `config:routing.tonesHint`, `strings:guide.topicCompare`, `strings:order.presortHint` |
-| Source AI review | Kaynak yapay zekâ incelemesi | `strings:tabs.review-source-ai` | `review:sourceAi.configTitle` (batch 3) |
-| Translation AI review | Çeviri yapay zekâ incelemesi | `strings:tabs.review-translation-ai` | `review:translationAi.title` (batch 3) |
-| Manual review | Elle inceleme | `strings:tabs.review-manual` | — |
-| Quality | Kalite | `strings:tabs.quality` | `strings:guide.topicQuality` — **no "Tab" suffix in English; do not add "sekmesi"** |
+| Source AI review | Kaynak yapay zekâ incelemesi | `strings:tabs.review-source-ai` | `review:sourceAi.configTitle` — **shipped in batch 3**, byte-identical |
+| Translation AI review | Çeviri yapay zekâ incelemesi | `strings:tabs.review-translation-ai` | `review:translationAi.title` — **shipped in batch 3**, byte-identical |
+| Manual review | Elle inceleme | `strings:tabs.review-manual` | the page it opens is titled *Review queue* → “İnceleme kuyruğu” (`review:title`); deliberately **not** the tab label, exactly as Activity's page title expands |
+| Quality | Kalite | `strings:tabs.quality` | `strings:guide.topicQuality` — **no "Tab" suffix in English; do not add "sekmesi"**. The page it opens is *Quality Dashboard*, a **different** string: `quality:title` ships as "Kalite panosu", the wording batch 2 already committed to in `strings:tabPlaceholder.quality` ("Kalite panosunu görüntülemek için…"). Do not copy the tab label into it, and do not invent a third wording. |
 | Glossary | Sözlükçe | `strings:tabs.glossary` | `strings:guide.topicGlossary` "Sözlükçe sekmesi" |
 | Category | Kategori | `strings:tabs.category` | `strings:guide.topicCategory` "Kategori sekmesi" — singular on purpose, though the page it opens is plural |
 | Routing | Yönlendirme | `strings:tabs.routing` | `strings:guide.topicRouting` "Yönlendirme sekmesi" |
@@ -598,7 +643,24 @@ Copying another locale's rendering imports whatever *that* key's English says, i
 words your own key's English does not have. The standing example:
 `config:lqa.checks.tag-equality.name` is "**Inline** tag equality" and ships as "Satır içi
 etiket eşitliği", while `quality:checkLabels.tag-equality` is the bare "Tag equality" and
-must ship as "Etiket eşitliği" — same term, each faithful to its own key.
+ships as "Etiket eşitliği" — same term, each faithful to its own key. **Both halves are now
+shipped**; the second was a prescription until batch 3.
+
+Batch 3 met the same class three more times, and all three resolved the same way:
+
+- **`quality:legend.passed` / `failed` are "Geçen" / "Geçmeyen", not "Başarılı" /
+  "Başarısız".** Their English is the bare "Passed" / "Failed"; the LQA row badge's English
+  is the qualified "LQA passed" (`strings:row.lqaPassed` → "LQA başarılı"), and
+  `strings:runs.statusFailed` ("Failed") is a *run status*. Matching either by rendering
+  would collapse three different verdict families into one word. The dashboard instead
+  reads as one family with its own `columns.passRate` "Geçme oranı".
+- **`review:approve` is the bare "Onayla".** Batch 2's `strings:bulk.approveSelected` names
+  the destination — "Çeviri belleğine onayla" — because *its* English says "Approve to
+  memory". This key's English does not, so this key does not.
+- **`category:modulePlaceholder` is "Bir modül seçin"** even though its English is "Choose
+  a module" where every sibling picker says "Select a module". Same control, same
+  rendering; English's verb drift here carries no meaning, and mirroring it would invent a
+  second Turkish wording for one picker.
 
 ## Register and typography sweeps
 
@@ -675,7 +737,27 @@ point of failure.
   disposition verb is therefore still free for the batch that meets it.
 - **"Success rate" is not "pass rate".** `config:health.successRate` (provider request
   success) ships as "Başarı"; the Quality dashboard's *pass rate* is a different metric and
-  needs a different word.
+  ships as "Geçme oranı" (`quality:columns.passRate`), on the same "geç-" root as
+  "kalite geçidi". Settled in batch 3; the reservation batch 1 wrote held.
+- **"Inspect" may not be "incele".** `quality:byLanguage.description` and
+  `bySource.description` say "Click a language to inspect its failed entries", and they ship
+  as "… görmek için bir dile tıklayın". "inceleme" is the *review* term, and the Quality
+  dashboard is the one member of the Review group that is explicitly **not** a review — using
+  the review verb for its drill-down would say the opposite of what the lexicon settled.
+- **"Etkin" renders both *active* and *enabled*, and that is settled, not drift.** Batch 1's
+  `config:modulesEnabledSection` is "Etkin ({{count}})" for English *Enabled*, and batch 2's
+  `strings:runs.activeRuns` is "{{count}} etkin çalıştırma" for *active runs*. Batch 3's
+  `review:glossaryActiveTitle` renders *Active glossaries* and is therefore
+  "Etkin sözlükçeler", byte-identical to `strings:contextMenu.enabledGlossaries`, which
+  renders *Enabled glossaries* — the pre-flight reports that as a same-rendering collision,
+  licensed because the two name **the same set of glossaries** on two surfaces. Do not coin
+  a second word to make the tool quiet.
+- **"Action failed" is "İşlem başarısız oldu", and the "işlem" ban does not reach it.**
+  `terminology/tr.md` sends the Activity table's **Action** column to "Eylem"
+  (`strings:runs.actionColumn`) so that one word is not doing two jobs one column apart.
+  That is a column-local reservation: `review:actionFailed` is a generic error toast on a
+  different surface, and "İşlem başarısız oldu" is the natural Turkish. `glossary:colActions`
+  — a column header, the same class as the reserved one — takes "Eylemler".
 - **"İstem" (prompt) and "istek" (request) differ by one letter** and appear in the same
   settings panel. Read the English before you type either.
 - **"Context" is three different things in English.** The model's context window is "bağlam
