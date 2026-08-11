@@ -1036,9 +1036,14 @@ because it cost a round.
   once the string is right** — so the repair lands in whichever file you happened to be in.
   Two habits collapse that to one pass, and both were arrived at the expensive way:
 
-  - **Grep the claim, not the file.** The same false sentence lived in a style guide and in
-    a lexicon row; deleting it from one left the other pointing at a retraction of itself.
-    The lexicon is the file a later translator opens *first*.
+  - **Grep the claim, not the file — and grep it across everything you wrote that round, not
+    just the file the finding named.** The same false sentence lived in a style guide and in
+    a lexicon row; deleting it from one left the other pointing at a retraction of itself,
+    and the lexicon is the file a later translator opens *first*. A second locale fixed a
+    claim in its style guide and left three copies of it alive in its own report, including
+    a figure transcribed from a run it had not executed. **A finding names a location because
+    that is where the reviewer happened to look, not because that is where the claim lives.**
+    Scope the sweep to the claim's blast radius.
   - **Re-open the code after rewriting a reason that cites it.** A repaired reason is a new
     claim and inherits nothing from the old one's checking. "Writes nothing" was corrected
     to "writes one thing" against a route that writes two — and the replacement for a false
