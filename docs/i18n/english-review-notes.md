@@ -161,13 +161,21 @@ queue`, `Stage details`, `Categories`). Left alone on purpose: within the Global
    reasoning is written down here to stop the next translator "correcting" it. The
    two are different control classes: `review:sourceAi.findingPrev` is a findings
    navigator with room for a word — and the abbreviation was also its `aria-label`,
-   where it read badly — whereas `strings:pagination.prev` sits in the string-table
-   pager beside `next`, `first` and `last` in a fixed, narrow strip, where the
-   abbreviation is load-bearing. **Translators: this key is space-constrained.** Use
-   your locale's usual pager abbreviation if it has one and spell it out only if it
-   does not; fr already abbreviates (`Préc.`) while es does not (`Anterior`), and
-   both are correct for their language. Do not align it with
-   `review:sourceAi.findingPrev`.
+   where it read badly — whereas `strings:pagination.prev` is a page pager, where
+   many languages abbreviate by convention. Use your locale's usual pager wording:
+   fr abbreviates (`Préc.`) while es does not (`Anterior`), and both are correct for
+   their language. Do not align it with `review:sourceAi.findingPrev`.
+   **Corrected 2026-08-11:** this entry previously said the key "sits in the
+   string-table pager beside `next`, `first` and `last` in a fixed, narrow strip"
+   and told translators it was **space-constrained**. Both claims were false, and
+   the second was pushing translators to abbreviate for no reason. The string-table
+   pager (`components/string-table/StringTablePagination.tsx:170-201`) renders
+   `«  ‹  ›  »` as literal glyphs and never calls this key. Its **only** call site is
+   the Compare toolbar's two-button pager (`ComparisonToolbar.tsx:407` and `:419`),
+   an auto-sized `size="sm"` button in a `gap-1` flex row with the page indicator
+   between the two — no `first`/`last` siblings and no fixed width. `de` ships
+   "Vorherige" and `es` "Anterior" at full length without trouble. Found by the
+   German round-2 translator, who checked the call site instead of relaying the note.
 8. **`config:templateMeta` reads "1 languages · 1 routing rules" — and this review
    missed it.** Added 2026-08-11, after wave 1's pre-flight fix removed `languages`
    from the numeral detector's token skiplist and made it visible for the first

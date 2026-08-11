@@ -414,33 +414,52 @@ It was wrong in two ways, and both matter to you:
   characters, so 1.5x is seven and a half, and no correct rendering of it can exist in most
   languages. The ratio measures the wrong thing: a long English source buys slack a tight
   control does not actually have, and a short one denies slack a loose control could afford.
-- **The five constrained classes are not equally constrained.** Only one has a hard, fixed
-  width: the sidebar is `16rem` (`SIDEBAR_WIDTH` in `components/ui/sidebar.tsx`) and every
-  item label is wrapped in `truncate`, so overflow ellipsizes. Tab bars, table columns and
-  filter rows scroll, auto-size or wrap — going long there costs elegance, not correctness.
+- **The constrained classes are not equally constrained.** Two of the six share one hard,
+  fixed width: the sidebar is `16rem` (`SIDEBAR_WIDTH` in `components/ui/sidebar.tsx`) and
+  every label in it — sidebar items **and the product's tab labels, which are sidebar menu
+  items** — is wrapped in `truncate`, so overflow ellipsizes. Table columns, filter rows and
+  the in-panel sub-tab bars scroll, auto-size or wrap; going long there costs elegance, not
+  correctness.
 
-The five classes, with the key each is anchored on:
+The six classes, with the key each is anchored on:
 
 | Class | Anchor key | Kind |
 | --- | --- | --- |
 | Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **hard** — fixed `16rem`, truncates |
-| Tab label | `strings:tabs.backup` | soft |
+| Tab label | `strings:tabs.backup` | **hard** — the same `16rem` sidebar, truncates (see below) |
+| In-panel sub-tab | `config:routing.tabImportExport` | soft |
 | Table column header | `strings:columns.config` | soft |
 | Filter label | `strings:filters.needsReview` | soft |
 | Bulk-bar control | `strings:bulk.approveSelected` | soft |
 
 **The numbers are per language, and yours are not Russian's.** Derive them the way the
-pilot did: for the sidebar, from the container; for the other four, from the longest value
-that language ships, plus headroom. Write the resulting five numbers into
+pilot did: for the two hard classes, from the container; for the other four, from the
+longest value that language ships, plus headroom. Write the resulting six numbers into
 `style/<lang>.md`.
 
-**"Tab label" is two different containers, and batch 1 can only see the smaller one.**
-`config`'s tabs are an *in-panel secondary* bar inside one panel; the main tab bar is
-`strings:tabs.*`, which batch 2 owns — a wider, scrolling container. So a tab-label budget
-written in batch 1 is derived from the narrower surface and is a **floor, never a ceiling**:
-batch 2 raises it from its own measurement. Do not shorten a settled surface name to fit a
-figure an earlier batch derived from a different container — surface names are repeated
-verbatim, so every later batch would inherit the short form. **Hard** means fix it — a sidebar item over budget is cut off in a
+**"Tab label" is two different containers, and only one of them is hard.**
+
+- `config`'s tabs are an *in-panel secondary* bar inside one panel — soft, and this is what a
+  batch-1 budget measures.
+- **`strings:tabs.*` is not a tab bar at all.** Its only call site is
+  `components/layout/Sidebar.tsx:785` and `:788`, a `<span className="truncate">` inside a
+  `SidebarMenuButton`. There is no horizontal main tab bar anywhere in this frontend: the
+  product's tabs *are* sidebar menu items, in the fixed `16rem` container, and an over-long
+  label **ellipsizes**.
+
+So the tab-label class is **hard**, and it is the same physical constraint as the
+sidebar-item class — one container, one budget. A batch-1 figure derived from the in-panel
+bar is not a floor to be raised; it is a measurement of a *different, softer* surface, and
+batch 2 must re-derive against the sidebar. The usable label width is about 199px of the
+256px sidebar (1 border + 16 group padding + 16 button padding + 16 icon + 8 gap come off
+it), which is roughly **26 characters of Latin script** — and roughly **half that in a
+full-width CJK script**, whose glyphs carry about twice the advance width. Derive your own
+number from the container and record how.
+
+Do not shorten a settled surface name merely to hit a figure — surface names are repeated
+verbatim and every later batch inherits the short form. But if a correct rendering genuinely
+cannot fit, **escalate**: an ellipsized sidebar label is a product problem worth naming, and
+this is the one container in the app that cannot grow. **Hard** means fix it — a sidebar item over budget is cut off in a
 container that cannot grow. **Soft** means prefer the shorter of two correct options, but
 do not distort a term to hit a number and do not treat the figure as a failure threshold.
 Nobody has measured rendered pixel widths; if you need to go past a hard budget, look at
