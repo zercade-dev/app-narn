@@ -36,9 +36,9 @@
  *
  *   1. The Rendering column's own value, whenever it is non-empty. This is
  *      the row's primary claim and is always checked.
- *   2. A guillemet- or straight-double-quote-delimited span in the Notes
- *      column, but ONLY when it sits immediately next to a backtick
- *      `ns:key`-shaped reference — either "`key` is «span»" (and its
+ *   2. A guillemet-, corner-bracket- or straight-double-quote-delimited span
+ *      in the Notes column, but ONLY when it sits immediately next to a
+ *      backtick `ns:key`-shaped reference — either "`key` is «span»" (and its
  *      "ships"/"ships as"/"says"/"becomes"/"renders" variants) or
  *      "«span» (`key`)". That adjacency is what turns a quoted word into a
  *      falsifiable CITATION rather than linguistic commentary. Most of
@@ -69,16 +69,34 @@
  *      hit this rule by accident before the exclusion existed.
  *
  *   The delimiter used for "a quoted span" is decided PER CELL, not per
- *   locale: if a cell contains a guillemet anywhere, guillemets are that
- *   cell's citation marks and straight double quotes are ignored: ru.md uses
- *   straight quotes exclusively to quote ENGLISH words under discussion
- *   ("the word "string"", ""Approve all suggestions""), never a Russian
- *   citation, so treating both delimiters as equivalent in a guillemet cell
- *   would check English prose against a Russian corpus and fail every time.
- *   A cell with no guillemet falls back to straight double quotes, which is
- *   es.md/fr.md's only citation delimiter — neither file uses guillemets at
- *   all. Both conventions were confirmed by reading every quoted span in the
- *   three currently-populated files, not assumed.
+ *   locale, and — since the wave that added the style-guide extension below —
+ *   over THREE delimiter pairs, not two: a cell containing a guillemet uses
+ *   guillemets; failing that, a cell containing a Japanese corner bracket
+ *   (「」) uses corner brackets; failing that, straight double quotes are the
+ *   fallback. Priority order matters for the same reason it did with two
+ *   delimiters: ru.md uses straight quotes exclusively to quote ENGLISH words
+ *   under discussion ("the word "string"", ""Approve all suggestions""),
+ *   never a Russian citation, so treating both delimiters as equivalent in a
+ *   guillemet cell would check English prose against a Russian corpus and
+ *   fail every time. es.md/fr.md have no guillemets at all, so straight
+ *   quotes are their only citation delimiter — confirmed by reading every
+ *   quoted span in those files, not assumed.
+ *
+ *   THE CORNER-BRACKET CASE WAS A REAL, SHIPPED BUG, not a hypothetical
+ *   extension made for symmetry with the style-guide path. Before it was
+ *   added here, quoteDelimiterFor() had exactly two branches — guillemet or
+ *   straight-quote fallback — so a ja.md Notes cell whose only quote
+ *   punctuation was 「…」 (Japanese's own convention, stated in that file's own
+ *   header) matched NEITHER branch: it fell to the straight-quote fallback,
+ *   found no straight quotes in the cell, and extracted ZERO citations from a
+ *   cell that plainly named one. Every Notes citation in terminology/ja.md
+ *   was silently unchecked as a result — which is exactly how a stale
+ *   `pass rate` rendering survived batch 1's own review; see
+ *   checkLocaleLexicon's real-corpus regression test for the corner-bracket
+ *   citation used to prove the fix catches a genuine defect. Korean and both
+ *   Chinese locales (also in UNSPACED_SCRIPT_LOCALES) use the same 「」/『』ish
+ *   convention family and would have hit this identically the moment their
+ *   terminology files gained content — this was not a Japanese-only fix.
  *
  * INFLECTION TOLERANCE, and why this shape. Russian (and, later, Turkish)
  * inflects nouns and adjectives, so a citation written in dictionary form —
@@ -398,14 +416,18 @@ function citationPatterns(open, close) {
 }
 
 /**
- * The quote delimiter this cell's citations use. Decided PER CELL: a
- * guillemet anywhere in the cell means guillemets are the citation marks and
- * straight double quotes are commentary (see the module header); no
- * guillemet means straight double quotes are the citation marks, which is
- * es.md/fr.md's only convention.
+ * The quote delimiter this cell's citations use. Decided PER CELL, over
+ * THREE candidates in priority order — guillemet, then Japanese corner
+ * bracket, then straight-quote fallback — see the module header ("WHAT
+ * COUNTS AS A CITATION", item 2) for why priority order matters and for the
+ * real, shipped bug the corner-bracket branch fixes: before it existed, a
+ * ja.md Notes cell quoted only in 「…」 fell straight through to the
+ * straight-quote fallback and yielded zero citations, silently.
  */
 export function quoteDelimiterFor(cellText) {
-  return cellText.includes('«') ? { open: '«', close: '»' } : { open: '"', close: '"' };
+  if (cellText.includes('«')) return { open: '«', close: '»' };
+  if (cellText.includes('「')) return { open: '「', close: '」' };
+  return { open: '"', close: '"' };
 }
 
 /**
@@ -592,7 +614,7 @@ export function checkLocaleLexicon(locale, fileText, corpusWords, options) {
 // matter how "future" it sounds (an illustration is never checked, and never
 // needs to be — it never claimed anything about the shipped corpus).
 //
-// EXTRACTION. Three shapes, tried in this order, over the file's PARAGRAPHS
+// EXTRACTION. Four shapes, tried in this order, over the file's PARAGRAPHS
 // (flattenStyleParagraphs joins a soft-wrapped paragraph into one line so a
 // citation split across a markdown line wrap — `style/de.md`'s
 // `config:health.successRate` example is exactly this — is still found; a
@@ -636,8 +658,25 @@ export function checkLocaleLexicon(locale, fileText, corpusWords, options) {
 //      INDISTINGUISHABLE from an English gloss by this rule and is silently
 //      not checked — a known false negative, not a false positive, which is
 //      the direction this script has to fail in.
+//   d. PIPE-ADJACENT BACKWARD, table-row shape: `` "span" | `key` `` — a
+//      citation and its key in ADJACENT `|`-separated table cells rather
+//      than adjacent in the same clause. `style/ru.md`'s "Surface names
+//      already shipped" table and `style/ja.md`'s "Surface names settled in
+//      batch 1" table both have this exact shape in their second and third
+//      columns (`| Compare | «Сравнение» | `strings:tabs.compare` | ... |`,
+//      `| Global Config | 「グローバル設定」 | `config:globalConfigTitle` |
+//      ... |`) — a rendering quoted in one cell, its key in the very next
+//      one, no clause-level adjacency at all. Bounded to exactly ONE `|`
+//      between quote and key (not "the next key anywhere in the row"): a
+//      corpus-wide scan for `["»」]\s*\|\s*` immediately-followed-by-a-key
+//      found this shape in exactly these two tables and nowhere else, so a
+//      single-pipe bound is not an arbitrary guess, it is what the real data
+//      contains. A row's THIRD+ cell (`style/ru.md`'s "Repeated at",
+//      `style/ja.md`'s "Also owed by") — a key that merely OWES the same
+//      rendering, not one already checked to carry it — is correctly out of
+//      this pattern's one-pipe reach and is never claimed as a citation.
 //
-// THREE THINGS DELIBERATELY NOT DONE, each because the real content in
+// TWO THINGS DELIBERATELY NOT DONE, each because the real content in
 // `style/de.md`, `style/ru.md`, `style/tr.md` and `style/ja.md` was read
 // first and shows why:
 //
@@ -670,14 +709,38 @@ export function checkLocaleLexicon(locale, fileText, corpusWords, options) {
 //     match target — rather than caught-and-excluded case by case). One
 //     missed citation, cleanly documented, beats a body of code trying to
 //     out-guess every future command example.
-//   - NO coverage of a "Surface | Rendering | Owning key" table row where the
-//     rendering and the key sit in DIFFERENT cells (`style/ru.md`'s Sharing
-//     row, `` | Sharing | «Доступ» | `strings:tabs.sharing` | ... | ``). The
-//     key-adjacency this whole design relies on does not hold across a `|`
-//     cell boundary, and `style/de.md` and `style/tr.md`'s own surface
-//     tables do not even quote the rendering (they bold or leave it plain),
-//     so this is a `style/ru.md`-only gap, worth naming rather than reaching
-//     for a second, table-aware parser to close it.
+//     THE DECISION, and why it is "rewrite the row", not "add a fourth
+//     delimiter": adding a bare backtick as a citation delimiter here is not
+//     merely more work, it is actively unsafe, because a backtick is ALSO
+//     this design's own KEY delimiter. `` `config:models.select` and
+//     `config:models.pickTitle` are ... `` — two adjacent backtick-key
+//     mentions joined by a short connector — is one of the single most
+//     common shapes in every one of these four files. Treat a bare backtick
+//     as a citation delimiter and that exact shape becomes indistinguishable
+//     from `` `key1` CONNECTOR `key2` ``: the second key gets captured as if
+//     it were key1's citation, tokenizes to English/code fragments
+//     ("config", "models", "pickTitle"), and fails against the corpus — a
+//     brand-new false-positive class across the entire corpus, not a
+//     narrowly-scoped fix for one row. The row itself has a cheap, safe fix
+//     that needs no guard change at all: rewrap it in straight quotes
+//     instead of backticks (confirmed by hand: the citation's own inner
+//     «{{model}}» guillemets do not collide with an outer straight-quote
+//     pair the way they would with outer guillemets, and the style path
+//     already tries straight quotes as one of STYLE_QUOTE_DELIMITERS). This
+//     was reported upward rather than edited directly — `style/ru.md` is a
+//     shipped, translator-owned authority document.
+//
+// A FOURTH shape exists for exactly one reason: the first version of this
+// analysis claimed the "Surface | Rendering | Owning key" table shape below
+// (rendering and key in DIFFERENT `|` cells) was safe to leave uncovered
+// because every rendering in it was "already checked elsewhere in prose".
+// That claim was never run — and it was false: re-running the real-corpus
+// regression with each table-row rendering corrupted in turn found NO other
+// citation anywhere in the file that would have caught the corruption. The
+// "Repeated at"/"Also owed by" column NAMES a sibling key that must carry
+// the same rendering; it does not itself CITE the rendering a second time in
+// checkable prose. Retracted, and replaced with STYLE_PIPE_KEY below, which
+// closes the gap instead of documenting it.
 //
 // NAMESPACE GATING implementation: `namespaceOfKey` reads the part of a key
 // before its first `:`; a key with no colon at all (almost always a file or
@@ -788,6 +851,30 @@ function styleShape2Pattern(open, close) {
  * and exclude ranges already consumed by shape 1/2/backward rather than
  * simply unioning every pattern's results. */
 const STYLE_BARE_PAREN = new RegExp('`(' + KEY_SPAN + ')`\\s*\\(([^)]*)\\)', 'g');
+
+/** `` "span" | `key` `` — see "EXTRACTION", item (d): a table-row shape
+ * where the rendering and its key sit in adjacent `|`-separated cells rather
+ * than adjacent in prose. Exactly one pipe between quote and key, matching
+ * what the real corpus contains (see item (d)'s own comment for the scan
+ * that confirmed this bound, not merely assumed it). */
+function stylePipeKeyPattern(open, close) {
+  // `|` required on BOTH sides, not just before the key — the quote must be
+  // its OWN cell's entire content, not merely something that happens to
+  // precede a `|`. Without the leading `|`, this pattern over-matched a real
+  // row: `style/ja.md`'s "Translations (tab)" row nests its OWN "named in
+  // prose by `key` 「quote」" citation inside a LATER cell, and the naive
+  // (quote)(pipe)(key) version grabbed THAT quote and misattributed it to
+  // the row's fourth-cell key — silently harmless only because that key's
+  // namespace has not shipped for ja yet, and a guaranteed false positive
+  // the day it does (the two strings are unrelated sentences). Requiring a
+  // `|` immediately before the quote too confines a match to a cell whose
+  // ENTIRE content is the quote, which is what every genuine instance in
+  // both real tables looks like and what the nested-citation row does not.
+  return new RegExp(
+    '\\|\\s*' + open + '([^' + close + ']+)' + close + '\\s*\\|\\s*`(' + KEY_SPAN + ')`',
+    'g',
+  );
+}
 
 /**
  * A key-adjacent connector that means the following quote is NOT a claim
@@ -968,6 +1055,20 @@ export function extractStyleCitations(text) {
     const span = stripWrappingQuote(rawSpan);
     if (!hasNonAsciiLetter(span)) continue;
     citations.push({ key, text: span });
+  }
+
+  // Shape (d) — table-row "span" | `key`. Independent of every shape above
+  // (the quote comes BEFORE the key here, separated by a `|` cell boundary,
+  // never a `(`), so no overlap tracking against the earlier ranges is
+  // needed for correctness; still recorded for consistency and in case a
+  // future shape is added that could otherwise double-claim the same span.
+  for (const { open, close } of STYLE_QUOTE_DELIMITERS) {
+    for (const match of text.matchAll(stylePipeKeyPattern(open, close))) {
+      consumedRanges.push([match.index, match.index + match[0].length]);
+      const [, span, key] = match;
+      if (span.includes('**')) continue;
+      citations.push({ key, text: span });
+    }
   }
   return citations;
 }
