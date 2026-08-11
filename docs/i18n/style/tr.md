@@ -5,6 +5,25 @@ term and the list of things that are never translated; this locale's rendering o
 term goes in `terminology/tr.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
+> **How to read a quoted rendering in this file — it is one of two things, and nothing
+> guards the difference.** `scripts/check-lexicon-citations.mjs` checks
+> `terminology/tr.md` and **does not read style guides**, so every quotation below is
+> maintained by hand and can go stale silently.
+>
+> - A quotation attached to a **`config:` key is a citation**: that string is shipped, and
+>   it is checkable today. All of them were verified against
+>   `packages/frontend/src/locales/tr/config.json` at the end of batch 1.
+> - A quotation attached to a key in **any other namespace is a prescription**, binding on
+>   the batch that owns that namespace — `sidebar:*` and `vault:*` in batch 4,
+>   `strings:*` in batch 2, `quality:*` in batch 3. It describes what that key **must**
+>   ship, not what it does ship.
+> - A quotation attached to **no key at all** is an illustration: a rejected candidate, a
+>   wrong form shown as wrong, or a convention example. Never copy one as a rendering.
+>
+> When you ship a prescription, come back and leave it as a citation. When you change a
+> `config` string, re-run the audit — grep this file's quoted spans against the shipped
+> JSON — because nothing else will.
+
 ## Register
 
 **Siz — the `-in` / `-ın` / `-un` / `-ün` imperative.** `sidebar:selectProject` ("Select a
@@ -50,7 +69,17 @@ every later namespace follows it.
   same-English/different-rendering collision in `config`.
 
 A `-yor` progressive ("İçe aktarılıyor…", "Ölçülüyor…") is a **status**, not a command:
-use it for progress text and never for a button.
+use it for progress text and never for a button. It is the settled shape for every progress
+string in `config` — `importing`, `duplicating`, `autoSaveSaving`, `instances.creating`,
+`models.loading` — so a progress label in a later namespace that reaches for a verbal noun
+instead is the outlier, not the innovation.
+
+**A pair of keys that renders the same English word takes the same Turkish shape in both.**
+`config:models.footprintInspecting` and `footprintInspectingShort` are both English
+"Inspecting", and both ship the progressive: "{{model}} ölçülüyor ({{done}}/{{total}})…"
+and "Ölçülüyor…". Where the long member's natural Turkish word order would put a finite
+verb in front of the numbers, **reorder around the tokens rather than changing the shape** —
+word order around a placeholder is free, the shape of a sibling pair is not.
 
 **A title that is a sentence in English stays a sentence.** The noun-phrase rule covers
 titles that *name* something. `config:importWarningsTitle` ("Review before importing") is
@@ -168,16 +197,38 @@ literal names **you can read in the string**, never for a token.
 **The rule turns on what the token's value can be, not on what the token is called.** One
 question decides it, and you answer it at the call site:
 
-> **Can this token's value ever be a number the reader counts?**
+> **Is the token `{{count}}`?**
+>
+> - **Yes — stop here. Write the plain, natural Turkish: `{{count}}` + the singular
+>   noun.** "{{count}} satır işlendi", "{{count}} kural", "{{count}} yetim". `{{count}}` is
+>   the one token i18next selects a plural category for, so its own family handles
+>   agreement — and Turkish does not mark the plural after a numeral anyway, so there is
+>   nothing to make grammatical and **nothing to restructure**. Roughly eighteen strings in
+>   `config` are this shape. The rest of this section does not apply to them.
+>
+> **Otherwise — can this token's value ever be a number the reader counts?**
 >
 > - **No** — it is an id, a name, a language, a message, a timestamp, a model, a slug.
->   **Device 1.** Write the natural Turkish appositive; the following head noun carries the
->   suffix and nothing about the value can make it wrong.
-> - **Yes** — it is a total, a size, a limit, a rate, a token count, a position.
->   **Device 2 is mandatory**, and not because of any tool: runbook §2.2 requires a frame
->   that is grammatical for *every* value a non-`count` numeric token can take, and the
->   guard forbids the obvious alternative of interpolating `{{count}}` instead. This one is
->   settled project-wide; do not relitigate it per key.
+>   **Device 1 is available**, and is usually the best Turkish: write the natural
+>   appositive, and the following head noun carries the suffix. It is *available*, not
+>   compulsory — device 2 is often the better sentence anyway, and three `config` strings
+>   correctly take it on non-numeric tokens (`credentialsMissing`, `activatedLanguages`,
+>   `rawNewlineLanguagesNotice`, all of which end on a list the reader scans). Choose on the
+>   sentence; either is safe here.
+> - **Yes, and it is not `{{count}}`** — a total, a size, a limit, a rate, a token count, a
+>   position. **Write the natural Turkish here too, unit noun and all: "en fazla
+>   {{maxLength}} karakter", "{{chars}} karakter / {{bytes}} bayt".** The runbook's
+>   *"Only `count` triggers plural selection"* rule demands a count-neutral frame for these
+>   tokens because in most languages the noun after them inflects and the framework cannot
+>   select the form. **Turkish has no numeral agreement at all** — a noun after any numeral
+>   stays in the bare singular — so there is no form to get wrong and the frame buys this
+>   locale nothing. Device 2 stays available as a *stylistic* choice where the sentence
+>   reads better with the number last; it is not a requirement.
+>
+> **Two rules survive all three branches, and they are the ones that actually bind:** never
+> weld a suffix onto a token (the section above), and never swap the token English wrote for
+> a different one — interpolating `{{count}}` in place of `{{total}}` fails the placeholder
+> multiset check, whatever it does for the grammar.
 
 An earlier version of this section said the device was chosen by whether the token appeared
 on the pre-flight's 23-name `NUMERAL_TOKEN_SKIPLIST`. **That was wrong, and it is worth
@@ -187,24 +238,32 @@ not a grammar policy for 1,500 Turkish keys. Reading it as policy also made the 
 disagree with its own batch: `config:models.confidenceReason.effort-reduces-quality` ships
 device 1 on `effort`, which is not on that list, and it is perfectly correct Turkish.
 
-#### The tooling constraint, stated separately because it is not grammar
+#### The tooling constraint that used to bind here — and no longer does
 
-`tr` has no calibrated `NUMERAL_WORD_AXIS_EXEMPTIONS` entry, so **every** `{{token}}` +
-space + Turkish word occurrence outside the 23-name skiplist is reported as an uncleared
-candidate and `node scripts/i18n-preflight.mjs tr` exits non-zero. That is a fact about the
-detector's calibration state, and it has two consequences worth keeping apart:
+**Read this before copying batch 1's shapes: the blocker is gone.** While batch 1 was
+written, `tr` had no `NUMERAL_WORD_AXIS_EXEMPTIONS` entry, so *every* `{{token}}` + space +
+Turkish word occurrence outside the token skiplist was reported as an uncleared candidate
+and the pre-flight exited non-zero — which blocked the bare device-1 form even where it was
+the correct Turkish. `scripts/i18n-preflight.mjs` now carries
+`NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES`, and `tr` is in it: because Turkish counted nouns
+never inflect for number, there is no numeral-word agreement to check, so every token-axis
+survivor is cleared **unconditionally** — "there is nothing to look for", not "nobody has
+looked yet". The script's own comment names `{{total}} girdi` as the correct string the old
+behaviour would have failed.
 
-- Where device 2 was already required (numeric tokens), nothing is lost. The detector and
-  §2.2 agree.
-- Where device 1 was correct (non-numeric tokens), the detector still blocks the *bare*
-  form. **Two escapes, both legitimate:** put punctuation between the token and the head
-  noun, or raise it. Quoting the value — `“{{base}}” örneği` — is the one used in `config`,
-  because the values involved are identifiers the user chose and English already quotes
-  identifiers in the same namespace (`config:instances.slugReserved`, `config:models.useCustom`);
-  punctuation around a placeholder is ours to set, per the runbook. **Do not reach for it
-  where quoting the value would be odd** — raise it instead, so a `tr` word-axis list can be
-  calibrated from real survivors. That file belongs to whoever runs the wave, not to a
-  translator.
+Two consequences:
+
+- **Device 1 is now available for every non-numeric token**, bare, in natural word order.
+  No punctuation trick is needed to satisfy the gate.
+- **The identifier quoting in `config:instances.*` (`“{{base}}” örneği`) stands on its own
+  merits, not on the gate.** Keep it: English quotes identifiers in the same namespace
+  (`config:instances.slugReserved`, `config:models.useCustom`), and punctuation around a
+  placeholder is ours to set. But do not reach for it as a workaround — there is nothing
+  left to work around.
+
+Turkish's real numeral-adjacent hazard is a different check now: **1b, "Welded suffix"**,
+which gates a case or particle suffix written directly against a token. That is the one to
+keep clean.
 
 #### Worked example — `config:instances.formTitle` ("New instance of {{base}}")
 
@@ -218,34 +277,38 @@ detector's calibration state, and it has two consequences worth keeping apart:
   `config:instances.instanceOf` ships the same shape, "“{{base}}” örneği", so the badge and
   the dialog title agree.
 
-#### Worked shapes for device 2, all shipped in `config`
+#### Numeric tokens, as shipped — natural order, unit noun attached
 
-Every one of these carries a token whose value **is** a number, so the count-neutral frame
-is the runbook's requirement rather than a detector workaround:
+Every one of these carries a token whose value **is** a number. They ship in ordinary
+Turkish word order, with the unit noun where a Turkish writer would put it:
 
 | Key | English | Turkish |
 | --- | --- | --- |
-| `config:reviewProgressCount` | `{{reviewed}} / {{total}} reviewed` | `İncelenen: {{reviewed}} / {{total}}` |
-| `config:lqa.lengthLimitValue` | `{{chars}} chars / {{bytes}} bytes` | `karakter: {{chars}} / bayt: {{bytes}}` |
-| `config:templateMeta` | `{{languages}} languages · {{rules}} routing rules` | `dil: {{languages}} · yönlendirme kuralı: {{rules}}` |
-| `config:routing.templateMeta` | `max {{maxLength}} chars` | `en fazla karakter sayısı: {{maxLength}}` |
-| `config:models.confidenceReason.prompt-near-context` | `(~{{tokens}} tokens)` | `(token: ~{{tokens}})` |
-| `config:models.confidenceReason.batch-exceeds-reliable` | `{{entryCount}} entries exceed the ~{{reliable}}` | `Girdi sayısı ({{entryCount}}), … sınırı (~{{reliable}}) aşıyor` |
+| `config:reviewProgressCount` | `{{reviewed}} / {{total}} reviewed` | `{{reviewed}} / {{total}} incelendi` |
+| `config:lqa.lengthLimitValue` | `{{chars}} chars / {{bytes}} bytes` | `{{chars}} karakter / {{bytes}} bayt` |
+| `config:templateMeta` | `{{languages}} languages · {{rules}} routing rules` | `{{languages}} dil · {{rules}} yönlendirme kuralı` |
+| `config:routing.templateMeta` | `max {{maxLength}} chars` | `en fazla {{maxLength}} karakter` |
+| `config:models.confidenceReason.prompt-near-context` | `(~{{tokens}} tokens)` | `(~{{tokens}} token)` |
+| `config:models.confidenceReason.batch-exceeds-reliable` | `{{entryCount}} entries exceed the ~{{reliable}}` | `{{entryCount}} girdi, … ~{{reliable}} sınırını aşıyor` |
 
-**Never drop the unit noun to get the token to the end.** Moving the number behind a colon
-is the licensed device; deleting "karakter", "bayt" or "token" on the way is not — a bare
-number in a metadata strip says nothing, and rubric item 4 is about exactly this. Put the
-unit in the label instead: "en fazla karakter sayısı: {{maxLength}}", never "uzunluk
-sınırı: {{maxLength}}".
+**Never drop the unit noun.** Whether the number comes first or last, "karakter", "bayt",
+"token" and their kind stay: a bare number in a metadata strip says nothing, and rubric
+item 4 is about exactly this. `config:routing.templateMeta` is the standing example: it
+ships "en fazla {{maxLength}} karakter". A round-1 draft of it read *uzunluk sınırı*
+followed by the bare number, with no unit at all — that is the shape to avoid, and it is
+quoted here as a wrong form, not as a rendering.
 
-**The recorded cost, so nobody "restores" it blindly.** Russian ships these six in natural
-order — «не более {{maxLength}} симв.» — because its word axis exempts the invariant unit
-nouns «симв.» and «байт». Turkish's exact analogues (karakter, bayt, token) would be
-exempted on the same reasoning, and `tr` simply has no list yet. So the inversion here is a
-calibration debt, not a Turkish preference: if a `tr` word-axis list is ever calibrated, the
-words to derive it from are **karakter, bayt, token** plus whatever the later batches'
-survivors add. Until then these six stay inverted, and they are still correct — Turkish
-tolerates the colon frame; it is just not the first thing a Turkish writer would type.
+**These six shipped inverted for one round, and the story is worth keeping.** Turkish's
+natural order was blocked while batch 1 was written: the pre-flight then treated `tr` as an
+uncalibrated word axis, so "{{maxLength}} karakter" reported as an uncleared survivor and
+failed the gate. It was recorded as calibration debt — a word axis waiting to be derived
+from whole-language survivors. **The debt turned out not to be real.** Turkish nouns never
+inflect after a numeral, so there is nothing for a word axis to catch and none was ever
+needed; `tr` is now in `NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES` and the natural order passes.
+The six were restored in fix round 3. **The lesson generalises past this locale: an
+inversion that exists only to keep a detector quiet is a guard authoring copy, which the
+runbook forbids — when a shape looks unnatural, check whether a tool is the only thing
+asking for it before you write it down as a convention.**
 
 ### Counted nouns stay singular
 
@@ -377,19 +440,36 @@ seventh is Turkish-specific and is the one that catches this locale's signature 
 | Hyphen used as a dash | ` - ` for ` — ` | `grep -nE ' - '` |
 | **Suffix attached to a placeholder** | `{{model}}'i`, `{{count}}ı` | `grep -nE "\}\}['’]?[a-zçğıöşüA-ZÇĞİÖŞÜ]"` |
 
-**The seventh sweep is not redundant with the pre-flight, and this is the part to
-understand.** The pre-flight's narrow rule requires **whitespace** between `}}` and the
-following word, so it cannot see `{{model}}'i` at all — the exact construction this
-locale's placeholder rule forbids. The loose rule does match it, but the loose rule is
-printed for information and never gates the exit code. So a Turkish suffix-on-token defect
-passes `node scripts/i18n-preflight.mjs tr` cleanly. **Nothing but this grep catches it.**
+**The seventh sweep now has a gate behind it — keep running it anyway.** When batch 1 was
+written, the pre-flight's narrow rule required **whitespace** between `}}` and the following
+word, so it could not see `{{model}}'i` at all — this locale's signature defect passed the
+gate cleanly, and the grep was the only thing that caught it. `scripts/i18n-preflight.mjs`
+now carries **check 1b, "Welded suffix"**, which matches a case or particle suffix written
+directly against a token and gates the exit code. The grep stays in this table as the
+cheaper inner-loop check and as cover for shapes the gate may not match; a clean grep is no
+longer the only evidence, but a dirty one is still a defect.
 
-Conversely, most of what the narrow rule *does* flag for Turkish is not a numeral-agreement
-defect in the first place: a Turkish noun after a numeral never inflects for number, so
-"{{total}} girdi" would be correct at every count. Batch 1 restructured those strings
-anyway, because the detector gates the batch and the count-neutral device is the runbook's
-own first preference — but a reviewer should know the two checks are aimed at different
-things in this language.
+Conversely, what the narrow numeral rule flags for Turkish is **not** a numeral-agreement
+defect at all: a Turkish noun after a numeral never inflects for number, so "{{total}} girdi"
+is correct at every count. The pre-flight now says so itself — it reports the word axis as
+**not applicable** for `tr` and clears token-axis survivors unconditionally rather than
+treating this locale as merely uncalibrated. Twelve `config` occurrences are cleared that
+way today, and every one of them is ordinary Turkish. The runbook's *"Only `count` triggers
+plural selection"* rule is written for languages whose counted nouns inflect; it constrains
+this locale only through the shared placeholder rules, never through word order.
+
+## Open debts — each with the event that discharges it
+
+Three decisions were deliberately deferred rather than guessed. Each is a **debt with a
+trigger**, not a remark: when the trigger happens, the person it happens to owns the fix.
+They are also recorded in the wave ledger, so neither this file nor the ledger is the single
+point of failure.
+
+| # | Debt | Trigger — who discharges it, and when | What to do |
+| --- | --- | --- | --- |
+| 1 | `terminology/tr.md` records *credential vault* as the clip **"kasa"**, not the term **"kimlik bilgisi kasası"** — the citation guard cannot accept a rendering no shipped string contains. | **Batch 2**, at `strings:guide.topicVault` ("Credential Vault") — the first **cold, standalone** naming of the vault. Batch 4's `vault:statusLabel` is the second. | Ship the full form there, then promote the Rendering column in `terminology/tr.md` from "kasa" to "kimlik bilgisi kasası". Bare "kasa" in a cold naming is the safe/strongbox reading the frozen lexicon bans. |
+| 2 | ~~Six strings invert the unit noun behind a colon where Russian ships natural order.~~ **CLOSED in fix round 3 — and it was never a real debt.** It was recorded as a word-axis calibration debt on the assumption that `tr`'s axis was merely uncalibrated; Turkish counted nouns do not inflect after a numeral at all, so the axis is structurally moot and no list was ever owed. | — | Natural order restored in all six, plus `models.confidenceReason.batch-exceeds-reliable` in the same class. **Batch 2 writes numeric strings in natural Turkish order, unit noun attached** — there is one convention, not two. See "Numeric tokens, as shipped" above. |
+| 3 | Two of the five length budgets (filter label, bulk-bar control) are still provisional — `config` contains no filter row and no bulk bar to measure. | **Batch 2**, which owns all four soft anchors in `strings`. | Re-derive every soft figure from the longest value Turkish actually ships in `strings`, including the two batch 1 could measure; the whole-language sweep replaces them with measured figures either way. |
 
 ## Locale-specific traps
 
