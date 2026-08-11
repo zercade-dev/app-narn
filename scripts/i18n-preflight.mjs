@@ -107,12 +107,37 @@
  * survives is a candidate, not a verdict" in backfill-runbook.md's "the
  * mechanical checks" list, item 1. That is correct, not a bug: nobody has
  * cleared that language's word axis yet.
+ *
+ * SCRIPT COVERAGE IS NOW EXPLICIT FOR EVERY LOCALE, NOT DEFAULTED. Earlier
+ * versions of this file defaulted an unlisted locale's script to Latin, on
+ * the reasoning that "es, fr and any future Latin-script locale need no
+ * entry". That reasoning did not hold once the eleven remaining backfill
+ * languages included five non-Latin scripts (ja, ko, th, zh-hans, zh-hant):
+ * a locale nobody had added to NUMERAL_LOCALE_SCRIPTS silently matched
+ * against Latin, found nothing (correctly — there is no Latin text to find),
+ * and printed "No survivors" — identical output to a locale genuinely
+ * checked and found clean. `NUMERAL_LOCALE_SCRIPTS` now lists every locale
+ * this script may be invoked on (an array of scripts each, since Japanese
+ * running text mixes Han/Hiragana/Katakana in one sentence), and a locale
+ * missing from that map makes `runCli()` REFUSE — a distinct non-zero exit,
+ * printed instead of a survivor count — rather than silently pass. The ru
+ * figures above are unaffected: `ru` keeps its original single-script entry
+ * and its whitespace-required gap, so 187/19/0 (and loose 255 on the current
+ * corpus) are unchanged by this. What changed for scripts that do NOT put
+ * spaces between words (`UNSPACED_SCRIPT_LOCALES` in locale-rules.mjs — ja,
+ * ko, th, zh-hans, zh-hant) is `gapFor()`: the narrow rule's gap is
+ * zero-or-more whitespace instead of one-or-more there, because real
+ * Japanese/Chinese/Thai text puts the counted noun directly against the
+ * placeholder's rendered value with no separator — a whitespace-required
+ * gap would have kept the check a no-op for exactly those five languages
+ * even after adding their scripts.
  * ---------------------------------------------------------------------------
  */
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   REFERENCE_LOCALE,
+  UNSPACED_SCRIPT_LOCALES,
   classifyKeys,
   flattenEntries,
   flattenKeys,
@@ -171,14 +196,42 @@ export const NUMERAL_TOKEN_SKIPLIST = [
 ];
 
 /**
- * The Unicode script a locale's own words are written in, for the word-half
- * of the numeral-agreement match — matching a word in the WRONG script would
- * catch an embedded do-not-translate term (NARN, DeepL, API…) rather than a
- * genuine agreement hazard. Defaults to Latin (es, fr and any future
- * Latin-script locale need no entry).
+ * The Unicode script(s) a locale's own words are written in, for the
+ * word-half of the numeral-agreement match — matching a word in the WRONG
+ * script would catch an embedded do-not-translate term (NARN, DeepL, API…)
+ * rather than a genuine agreement hazard. An array because one locale can
+ * mix scripts in ordinary running text — Japanese interleaves Han (kanji),
+ * Hiragana and Katakana within a single sentence, so a check that only
+ * looked at one of the three would silently miss the other two.
+ *
+ * EVERY locale this script can be invoked on MUST have an entry here.
+ * There is deliberately no "defaults to Latin" fallback any more: that
+ * default is what made this check a silent no-op for ja/ko/th/zh-hans/
+ * zh-hant (raw: 0, survivors: 0 — indistinguishable from a locale that was
+ * genuinely checked and found clean) while it happily gated the exit code
+ * for languages it never looked at. `scriptsFor()` below throws for any
+ * locale not listed here, and `runCli()` turns that into a refusal — a
+ * non-zero exit that says the detector does not cover this locale — rather
+ * than printing "No survivors." An untested language must never look like a
+ * clean one. Adding a locale here is a claim that its script coverage is
+ * correct, not a formality.
  */
 export const NUMERAL_LOCALE_SCRIPTS = {
-  ru: 'Cyrillic',
+  en: ['Latin'],
+  es: ['Latin'],
+  fr: ['Latin'],
+  ru: ['Cyrillic'],
+  de: ['Latin'],
+  id: ['Latin'],
+  it: ['Latin'],
+  'pt-br': ['Latin'],
+  tr: ['Latin'],
+  vi: ['Latin'],
+  ja: ['Han', 'Hiragana', 'Katakana'],
+  ko: ['Hangul'],
+  th: ['Thai'],
+  'zh-hans': ['Han'],
+  'zh-hant': ['Han'],
 };
 
 /**
@@ -192,22 +245,65 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
   ru: ['из', 'с', 'на', 'вычитано', 'симв', 'байт'],
 };
 
-function scriptFor(locale) {
-  return NUMERAL_LOCALE_SCRIPTS[locale] ?? 'Latin';
+/**
+ * The script list for a locale, or `undefined` if this detector has no
+ * entry for it — callers must treat `undefined` as "cannot check", never as
+ * "assume Latin". See NUMERAL_LOCALE_SCRIPTS for why there is no fallback.
+ */
+function scriptsFor(locale) {
+  return NUMERAL_LOCALE_SCRIPTS[locale];
+}
+
+/** True only for a locale this detector can genuinely examine. */
+export function isNumeralCheckSupported(locale) {
+  return Object.prototype.hasOwnProperty.call(NUMERAL_LOCALE_SCRIPTS, locale);
+}
+
+function requireScripts(locale) {
+  const scripts = scriptsFor(locale);
+  if (!scripts) {
+    throw new Error(
+      `i18n-preflight: no NUMERAL_LOCALE_SCRIPTS entry for "${locale}" — the numeral-agreement ` +
+        `detector cannot examine this locale's script and must not report a result for it. Add an ` +
+        `entry (see the comment above NUMERAL_LOCALE_SCRIPTS) before running this check for "${locale}".`,
+    );
+  }
+  return scripts;
+}
+
+/** One `[\p{Script=X}\p{Script=Y}…]`-shaped class covering every script in the list. */
+function scriptClass(scripts) {
+  return scripts.map((script) => `\\p{Script=${script}}`).join('');
 }
 
 /**
- * `{{token}}` + one-or-more whitespace + a word in the locale's script — the
- * "narrow" rule the skip list and the 187/0 calibration figure are measured
- * against. The capture groups are token name (1) and the word (3); group 2
- * (the gap) exists only so the two are separated, it is not used.
+ * The gap between `{{token}}` and the following word. Most scripts in
+ * NUMERAL_LOCALE_SCRIPTS separate words with whitespace, so the narrow rule
+ * requires at least one whitespace character there (unchanged from the
+ * original ru-only calibration — this is why ru's 187/19/0 figures do not
+ * move). `UNSPACED_SCRIPT_LOCALES` (locale-rules.mjs — the same set the
+ * identical-value check already uses, for the same underlying reason) names
+ * the scripts that do NOT put spaces between words: Japanese, Chinese and
+ * Thai write a counted noun directly against the placeholder's rendered
+ * value with no separator at all, and this codebase already treats Korean
+ * the same way for the analogous reason. Requiring whitespace for those
+ * locales would make the "matching rule not depend on whitespace" gap the
+ * same silent no-op I2 found, just moved one line down — so for those
+ * locales the gap is zero-or-more, not one-or-more.
+ */
+function gapFor(locale) {
+  return UNSPACED_SCRIPT_LOCALES.has(locale) ? '\\s*' : '\\s+';
+}
+
+/**
+ * `{{token}}` + a script-appropriate gap + a word in the locale's script(s)
+ * — the "narrow" rule the skip list and the 187/0 calibration figure are
+ * measured against. The capture groups are token name (1) and the word (3);
+ * group 2 (the gap) exists only so the two are separated, it is not used.
  */
 function numeralAgreementRegex(locale) {
-  const script = scriptFor(locale);
-  return new RegExp(
-    `\\{\\{(\\w+)\\}\\}(\\s+)(\\p{Script=${script}}[\\p{Script=${script}}\\p{M}]*)`,
-    'gu',
-  );
+  const cls = scriptClass(requireScripts(locale));
+  return new RegExp(`\\{\\{(\\w+)\\}\\}(${gapFor(locale)})([${cls}][${cls}\\p{M}]*)`, 'gu');
 }
 
 /**
@@ -222,14 +318,13 @@ function numeralAgreementRegex(locale) {
  * PRECISELY" section for how this was verified against the exact historical
  * commit. See the module header for why this figure is printed rather than
  * gated: it is the more fragile of the two to keep exactly in sync with a
- * shrinking corpus.
+ * shrinking corpus. (This variant already matched across zero-width gaps via
+ * `[\s\p{P}\p{S}]*`, so unspaced scripts needed no separate change here —
+ * only the narrow rule's `gapFor()` was ru-shaped.)
  */
 function looseNumeralAgreementRegex(locale) {
-  const script = scriptFor(locale);
-  return new RegExp(
-    `\\{\\{\\w+\\}\\}[\\s\\p{P}\\p{S}]*(\\p{Script=${script}}[\\p{Script=${script}}\\p{M}]*)`,
-    'gu',
-  );
+  const cls = scriptClass(requireScripts(locale));
+  return new RegExp(`\\{\\{\\w+\\}\\}[\\s\\p{P}\\p{S}]*([${cls}][${cls}\\p{M}]*)`, 'gu');
 }
 
 /** Every string value of one locale, as `[namespace, key, value]` triples. */
@@ -453,30 +548,50 @@ function runCli() {
 
   // --- Check 1 ---------------------------------------------------------
   console.log('## 1. Numeral agreement (token axis, then a word axis derived from its survivors)');
-  const { raw, afterTokenAxis, survivors } = numeralAgreementCheck(namespaces, locale);
-  const looseCount = looseNumeralAgreementCount(namespaces, locale);
-  const hasWordAxis = (NUMERAL_WORD_AXIS_EXEMPTIONS[locale] ?? []).length > 0;
-  console.log(
-    `   narrow rule ("}}" + whitespace + word): ${raw} raw, ${afterTokenAxis} after the token-axis ` +
-      `skip (${NUMERAL_TOKEN_SKIPLIST.length} tokens), ${survivors.length} after the word axis too.`,
-  );
-  console.log(
-    `   loose rule ("}}" + whitespace/punctuation/symbol + word, informational only): ${looseCount} raw.`,
-  );
-  if (survivors.length > 0 && !hasWordAxis) {
+  const numeralCheckSupported = isNumeralCheckSupported(locale);
+  let survivors = [];
+  let hasWordAxis = false;
+  if (!numeralCheckSupported) {
+    // Refuse rather than guess. Printing "0 raw, 0 survivors" here would be
+    // indistinguishable from a locale this detector actually examined and
+    // found clean — that silent no-op is exactly what I2 found for
+    // ja/ko/th/zh-hans/zh-hant before NUMERAL_LOCALE_SCRIPTS covered them.
+    // See the comment above NUMERAL_LOCALE_SCRIPTS.
     console.log(
-      `   "${locale}" has no calibrated word-axis exemption list yet — every one of these is an ` +
-        `UNCLEARED CANDIDATE, not a known defect. This does not mean the batch is broken; it means ` +
-        `nobody has looked at these words for "${locale}" yet (see NUMERAL_WORD_AXIS_EXEMPTIONS in ` +
-        `this script). Go through them by hand: fix real defects, and add invariant words (prepositions, ` +
-        `invariant abbreviations, impersonal participles) to this locale's exemption list with a reason.`,
+      `   REFUSED — "${locale}" has no NUMERAL_LOCALE_SCRIPTS entry, so this detector does not know ` +
+        `what script "${locale}" is written in and cannot tell a real word from an untranslated ` +
+        `do-not-translate term. This is NOT the same as "0 survivors" — it means nobody has told the ` +
+        `detector how to read "${locale}" yet. Add an entry to NUMERAL_LOCALE_SCRIPTS in ` +
+        `scripts/i18n-preflight.mjs before trusting this check for "${locale}".`,
     );
-    for (const survivor of survivors) console.log(`     ${survivor}`);
-  } else if (survivors.length > 0) {
-    console.log('   Survivors — candidates, not verdicts. Clear each by hand before committing:');
-    for (const survivor of survivors) console.log(`     ${survivor}`);
   } else {
-    console.log('   No survivors.');
+    const result = numeralAgreementCheck(namespaces, locale);
+    survivors = result.survivors;
+    const { raw, afterTokenAxis } = result;
+    const looseCount = looseNumeralAgreementCount(namespaces, locale);
+    hasWordAxis = (NUMERAL_WORD_AXIS_EXEMPTIONS[locale] ?? []).length > 0;
+    console.log(
+      `   narrow rule ("}}" + gap + word): ${raw} raw, ${afterTokenAxis} after the token-axis ` +
+        `skip (${NUMERAL_TOKEN_SKIPLIST.length} tokens), ${survivors.length} after the word axis too.`,
+    );
+    console.log(
+      `   loose rule ("}}" + whitespace/punctuation/symbol + word, informational only): ${looseCount} raw.`,
+    );
+    if (survivors.length > 0 && !hasWordAxis) {
+      console.log(
+        `   "${locale}" has no calibrated word-axis exemption list yet — every one of these is an ` +
+          `UNCLEARED CANDIDATE, not a known defect. This does not mean the batch is broken; it means ` +
+          `nobody has looked at these words for "${locale}" yet (see NUMERAL_WORD_AXIS_EXEMPTIONS in ` +
+          `this script). Go through them by hand: fix real defects, and add invariant words (prepositions, ` +
+          `invariant abbreviations, impersonal participles) to this locale's exemption list with a reason.`,
+      );
+      for (const survivor of survivors) console.log(`     ${survivor}`);
+    } else if (survivors.length > 0) {
+      console.log('   Survivors — candidates, not verdicts. Clear each by hand before committing:');
+      for (const survivor of survivors) console.log(`     ${survivor}`);
+    } else {
+      console.log('   No survivors.');
+    }
   }
   console.log('');
 
@@ -507,7 +622,16 @@ function runCli() {
 
   // --- Verdict -------------------------------------------------------------
   // Only check 1 gates the exit code — see the module header for why 2 and 3
-  // are report-only.
+  // are report-only. A locale this detector cannot examine gates the exit
+  // code too, just not with a survivor count: see NUMERAL_LOCALE_SCRIPTS.
+  if (!numeralCheckSupported) {
+    console.error(
+      `i18n-preflight: REFUSED — "${locale}" has no NUMERAL_LOCALE_SCRIPTS entry, so check 1 did not ` +
+        `run. Add an entry before treating this locale's pre-flight as meaningful.`,
+    );
+    process.exit(2);
+  }
+
   if (survivors.length > 0) {
     const reason = hasWordAxis
       ? `Clear each one (fix the string, or add a word-axis exemption with a reason) before review.`
