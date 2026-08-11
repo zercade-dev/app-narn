@@ -114,6 +114,32 @@ is `İ` (not `I`), and uppercase of `ı` is `I`. Any label you write in uppercas
 the Turkish mapping by hand — "İçerik", not "Icerik"; "İŞLEM", not "ISLEM". Do not rely on
 a generic uppercase transformation.
 
+**And there is a third case the two rules above do not cover: uppercase applied by CSS,
+which you cannot see in the JSON at all.** Many labels ship in sentence case and are
+uppercased at render time by `text-transform: uppercase` — the guide group headings
+(`GuideView.tsx`), the run-detail stat cards and headings (`RunsTab.tsx`), the AI-review
+section headers (`TranslationAiReviewTab.tsx`), and everything matching `[data-row-action]`
+under the **default** techno theme. CSS uppercasing is language-sensitive **only** through
+the document's `lang` attribute.
+
+> **Status: fixed in the app, and correct as of this batch's fix round.** `index.html`
+> shipped a static `lang="en"` that nothing ever updated, so the browser applied default
+> Unicode casing and Turkish "Çeviri" rendered **"ÇEVIRI"** — the wrong letter, not a
+> spelling variant. Twelve batch-2 labels were affected. `i18n/index.ts` now sets
+> `document.documentElement.lang` from `resolvedLanguage` on every `languageChanged`, so
+> `İ` is produced correctly. **Batches 3–6 need change nothing and must not hand-uppercase
+> anything to compensate** — write ordinary sentence case and let CSS do it.
+
+Two things to carry forward from it:
+
+- **No guard can see this class.** The JSON was correct throughout; only the rendering was
+  wrong, so it passed the parity gate, the pre-flight and all seven typography sweeps. The
+  only way to catch a casing defect of this kind is to know which containers uppercase and
+  check `lang` is set — which is now a product invariant rather than a translator's job.
+- **If you ever add a hand-uppercased value** — `strings:columns.config` "DURUM" is the
+  one in this namespace, preserved because English uses uppercase for layout — the
+  by-hand mapping rule above still applies to it, because no CSS is involved there.
+
 **And it is a hazard in the other direction too, in tooling rather than in the UI.**
 JavaScript's `toLowerCase()` is locale-invariant: `"İstem".toLowerCase()` is `i` plus a
 combining dot (U+0307), not `i`. The lexicon citation guard
@@ -180,12 +206,26 @@ that where the number is literal, including where the English writes it after:
 `config:health.successRate` ("Success {{rate}}%") ships "Başarı %{{rate}}", and
 `config:models.gpuPlacement` ("{{pct}}% GPU") ships "GPU %{{pct}}".
 
-**A currency symbol follows the number, with a space.** Turkish writes "10,50 $", not
-"$10,50", so the four cost strings invert English's order: `strings:runs.estimatedCost`
-("≈ ${{amount}}") ships "≈ {{amount}} $", and `projectTotal` / `projectTotalYou` /
-`projectTotalCollaborators` follow it. This is the mirror of the `%` rule above — Turkish
-puts the percent sign *before* and the currency symbol *after* — and the two are easy to
-conflate, so they are written down together. The token is untouched; only the symbol moves.
+**A currency symbol PRECEDES the number in Turkish, so the four cost strings keep English's
+order.** `strings:runs.estimatedCost` ships "≈ ${{amount}}", and `projectTotal` /
+`projectTotalYou` / `projectTotalCollaborators` follow it. CLDR is unambiguous, and it is
+the same for every currency including the lira:
+
+```
+Intl.NumberFormat('tr-TR', {style:'currency', currency:'USD'}).format(1234.5)  →  "$1.234,50"
+                                                              TRY              →  "₺1.234,50"
+                                     (de-DE, USD, for contrast)                →  "1.234,50 $"
+```
+
+**The percent sign goes before too** ("%50"), so Turkish is *not* the mirror-image case here
+— German is. An earlier version of this section claimed the currency symbol follows the
+number and had four strings inverted on that basis; the claim was false and the strings were
+reverted. **Verify a typographic rule against `Intl` before writing it down** — it takes one
+line, and the app formats every other number from the browser locale anyway, so a hard-coded
+placement that disagrees with `Intl` is inconsistent with the rest of the UI by
+construction. There is a real mixed usage for the lira in Turkish price displays, which is
+probably where the wrong rule came from; it does not survive CLDR and it does not transfer
+to the dollar sign at all.
 
 Dates and times are formatted by the app from the browser locale — a date format string is
 not a translatable string. `{{time}}` is an `Intl.RelativeTimeFormat` output ("3 dk. önce"),
@@ -414,37 +454,57 @@ than wrap, and a tail that is what breaks chrome.
 
 **Budgets are absolute character counts, per class — never a multiple of English.** A ratio
 is the wrong unit when the English source is short: "Legal" is five characters, and no
-correct Turkish rendering of it can fit 1.5×. The five classes are also not equally
-constrained — only the sidebar has a fixed width.
+correct Turkish rendering of it can fit 1.5×. The four classes are not equally constrained:
+**one of them is hard** — the sidebar container, which holds both the sidebar items and the
+tab labels — and the other three scroll, auto-size or wrap, where going long costs elegance
+rather than correctness.
 
 | Class | Anchor key | Budget | Kind | Basis |
 | --- | --- | --- | --- | --- |
-| Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **26** | **hard** — fixed `16rem` (`SIDEBAR_WIDTH`), `truncate` | the container |
-| Tab label | `strings:tabs.backup` | 32 | soft | measured over the **main** tab bar — longest shipped is 28: `tabs.review-source-ai` "Kaynak yapay zekâ incelemesi" (and `tabs.review-translation-ai`, also 28) |
+| **Sidebar item _and_ tab label — one class, one container** | `sidebar:globalConfig`, `sidebar:legal`, `strings:tabs.backup` | **199px ≈ 28 tr chars** | **hard** — fixed `16rem` (`SIDEBAR_WIDTH`), `truncate` | the container, measured: 256px − 1 border − 16 `SidebarGroup p-2` − 16 `SidebarMenuButton p-2` − 16 icon − 8 `gap-2` = 199px, ÷ 7.09px mean Turkish advance at `text-sm` |
 | Table column header | `strings:columns.config` | 20 | soft | measured — longest shipped is 18: `runs.runIdColumn` "Çalıştırma kimliği" |
 | Filter label | `strings:filters.needsReview` | 40 | soft | measured — longest shipped is 38: `filters.lqaFailed` "Yalnızca LQA başarısızlıklarını göster" |
 | Bulk-bar control | `strings:bulk.approveSelected` | 40 | soft | measured — longest shipped control is 39 as a template / ~35 rendered: `bulk.selectAllFiltered` "Filtrelenen {{count}} satırın tümünü seç"; longest static one is 23, the anchor itself, "Çeviri belleğine onayla" |
 
-The sidebar number is derived from the container, which is the same container for every
-locale, and is the only figure not re-derivable from shipped strings.
+**There is no main tab bar in this product, and the tab labels are sidebar items.**
+`strings:tabs.*` has exactly two call sites, both in `components/layout/Sidebar.tsx` (785,
+788) — a `SidebarMenuButton` tooltip and a `<span className="truncate">` inside it — so a
+tab label lives in the **same physical container** as a sidebar item and is held to the same
+hard budget. An earlier version of this table split them into two classes and called the tab
+one *soft*, on the strength of two sentences that described a wider scrolling bar and said
+"only the sidebar has a fixed width". **Both sentences were false and both are deleted.**
+This is not a raise of `config`'s in-panel figure of 26 either: `config:routing.tab*` is a
+genuinely different, softer container, and its number was never a floor for this one.
 
-**All four soft figures are now measured, and batch 2 raised three of them.** Batch 1 could
-only see `config`'s own members of two classes — the twelve model-table headers
-(`config:models.col*`) and the routing editor's *in-panel secondary* tab bar
-(`config:routing.tabRules`, `tabTemplates`, `tabImportExport`) — and had no filter row or
-bulk bar to measure at all. `strings` owns the widest member of every one of the four, so
-these are the figures the classes are actually held to.
+**The pixel figure is what binds; the character count is a per-language proxy.** Turkish
+averages 7.09px per character in this class (Geist Variable, `text-sm` = 14px), against
+English's 6.49px, which is why the same 199px is ~28 characters here and ~30 there.
+Re-derive the character figure per language; do not port this one.
 
-**The tab-label figure moved 26 → 32, and the reason is the container, not drift.**
-`config`'s tabs sit inside one panel; `strings:tabs.*` is the main, wider, scrolling bar.
-The two AI-review tabs are 28 characters because *AI review* is “yapay zekâ incelemesi” and
-the AI is never abbreviated to “YZ” (see the term row) — a term forcing a long label is the
-term rule doing its job, and the budget exists to stop *avoidable* length, not this. **Do
-not shorten a settled surface name to fit an earlier batch's number:** every later batch
-repeats these names verbatim, so a shortened tab label would propagate into four namespaces.
+**The two 28-character tab labels are inside the budget and stay exactly as they are.**
+Measured with real glyph advances: `tabs.review-source-ai` "Kaynak yapay zekâ incelemesi" is
+198.4px and `tabs.review-translation-ai` "Çeviri yapay zekâ incelemesi" is 187.4px, both
+under 199px. For scale, shipped Russian's 28-character label in this same class is 215.7px,
+overflows by 17px, and ships anyway. They are also forced by a term rule — *AI review* is
+"yapay zekâ incelemesi" and the AI is never abbreviated to "YZ" — which the runbook says
+outranks the budget.
 
-Each figure is the longest shipped value plus a little headroom, and the whole-language
-sweep re-measures all four over the finished locale.
+**Do not shorten a settled surface name to fit a number**, and note that the reason is not
+the budget: every later batch repeats these names verbatim, so a shortened tab label
+propagates into four namespaces at once. Measure first, and if a name genuinely does not
+fit, escalate rather than trimming it.
+
+**One caveat to record rather than act on.** `SidebarMenuButton` carries
+`data-active:font-medium`, so the tab you are *on* renders at weight 500. Geist's advances
+grow ~1.5–3% with weight, which puts `tabs.review-source-ai` at roughly 201–203px while
+selected — it may clip a character or two, only on the tab whose label you least need. Not
+a reason to shorten it.
+
+**The three soft figures were all re-derived by batch 2** from the longest value `strings`
+actually ships; batch 1 could measure only the column-header class (from
+`config:models.col*`) and had no filter row or bulk bar at all. Each is the longest shipped
+value plus a little headroom. The whole-language sweep re-measures every class over the
+finished locale — including the hard one, in pixels.
 
 **Hard** means fix it — a sidebar item over budget is cut off in a container that cannot
 grow. **Soft** means prefer the shorter of two correct options, but do not distort a term to
@@ -504,12 +564,15 @@ per key rather than regularising the set.
 
 Four notes on these tables:
 
-- **Two tab labels are 28 characters** — the two AI-review tabs — because the term is
-  "yapay zekâ incelemesi" and the AI is never abbreviated. That is what set the tab-label
-  budget to 32; see "Length discipline".
+- **A tab label is a sidebar item.** `strings:tabs.*` renders in the sidebar menu, not in a
+  tab bar, so these names are held to the **hard** 199px container — see "Length
+  discipline". The two AI-review tabs are 28 characters, because the term is "yapay zekâ
+  incelemesi" and the AI is never abbreviated; both measure inside 199px and stay.
 - **`strings:runs.viewEngines` ("AI engines") is not a surface name.** It labels a view
   toggle inside Activity and ships as "Yapay zekâ motorları". "motor" is banned as a
-  rendering of *module*, not as a word — here English itself says engines.
+  rendering of *module*, not as a word — here English itself says engines. Its sibling
+  `runs.viewManual` must be a **noun phrase of the same shape**, "Elle düzenlemeler", not a
+  bare adverb.
 - **Backup: the tab is "Yedekleme", a countable backup is "yedek".** `config:maxBackupsLabel`
   is "Proje başına en fazla yedek" — the object — while the surface that lists and restores
   them is the process noun. Do not swap them.
@@ -574,10 +637,17 @@ point of failure.
 | --- | --- | --- | --- |
 | 1 | ~~`terminology/tr.md` records *credential vault* as the clip **"kasa"**, not the term.~~ **CLOSED in batch 2.** | — | `strings:guide.topicVault` ships **"Kimlik bilgisi kasası"**, and the Rendering column in `terminology/tr.md` is promoted to the full form. The clip "kasa" remains licensed only where the string already establishes credentials. **Batch 4's `vault:statusLabel` is the second cold naming and takes the full form too** — that part of the debt transfers, it does not vanish. |
 | 2 | ~~Six strings invert the unit noun behind a colon where Russian ships natural order.~~ **CLOSED in fix round 3 — and it was never a real debt.** It was recorded as a word-axis calibration debt on the assumption that `tr`'s axis was merely uncalibrated; Turkish counted nouns do not inflect after a numeral at all, so the axis is structurally moot and no list was ever owed. | — | Natural order restored in all six, plus `models.confidenceReason.batch-exceeds-reliable` in the same class. **Batch 2 writes numeric strings in natural Turkish order, unit noun attached** — there is one convention, not two. See "Numeric tokens, as shipped" above. |
-| 3 | ~~Two of the five length budgets (filter label, bulk-bar control) are still provisional.~~ **CLOSED in batch 2.** | — | All four soft figures are re-derived from the longest value `strings` actually ships: tab label 26 → **32**, column header 16 → **20**, filter label 38 → **40** (the provisional guess landed on the exact measured longest, 38), bulk-bar control 52 → **40**. The whole-language sweep re-measures them over the finished locale, as it does for every language. |
+| 3 | ~~Two of the five length budgets (filter label, bulk-bar control) are still provisional.~~ **CLOSED in batch 2**, then corrected in its fix round. | — | There are **four** classes, not five: the tab-label class turned out to be the *same hard container* as the sidebar item, so the two merged at **199px ≈ 28 tr chars**. **Three** classes are soft, and batch 2 re-derived all three from the longest value `strings` actually ships: column header 16 → **20**, filter label 38 → **40** (the provisional guess landed on the exact measured longest, 38), bulk-bar control 52 → **40**. The tab-label figure batch 2 first published (32, soft) was wrong — derived from a container that does not exist — and no string was written to fit it. The whole-language sweep re-measures every class over the finished locale, the hard one in pixels. |
 
 ## Locale-specific traps
 
+- **CSS-applied uppercase is the trap no guard can see — and it is now fixed in the app.**
+  Labels in the guide group headings, the run-detail cards and the AI-review section headers
+  are uppercased by CSS, which only honours Turkish's `İ` when the document carries
+  `lang="tr"`. It did not until batch 2's review found "Çeviri" rendering as "ÇEVIRI" in
+  twelve labels; `i18n/index.ts` now keeps `documentElement.lang` in step with the UI
+  language. **Write ordinary sentence case and do not compensate by hand.** Full account,
+  including the one key that is still hand-uppercased on purpose, in "Casing" above.
 - **Agglutination means the domain term appears inflected everywhere.** "proje" shows up as
   "projeyi", "projeden", "projenin". That is expected and correct; `terminology/tr.md` records
   the bare citation form, and consistency means the same stem, not the same letters.
