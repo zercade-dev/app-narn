@@ -250,20 +250,118 @@ does not have it. `ja`, `ko` and `zh-hans` are at 1,879 for the same reason.
 
 ## Surface names shipped so far
 
-Repeat these verbatim; every later batch inherits them.
+Repeat these verbatim; every later batch inherits them. `strings:tabs.*` is the authority for
+a surface, because it names all seventeen of them first.
 
 | Surface | Rendering | Key | Also owed by |
 | --- | --- | --- | --- |
+| Config | "Cấu hình" | `strings:tabs.config` | `strings:guide.topicConfig` prefixes it with "Tab" |
+| Data | "Dữ liệu" | `strings:tabs.data` | — |
+| Translations | "Bản dịch" | `strings:tabs.strings` | `strings:guide.topicMultiLanguage`, and the prose at `config:routing.categoriesConfiguredHint` |
+| Compare | "So sánh" | `strings:tabs.compare` | `strings:guide.topicCompare`, and the prose at `config:routing.tonesHint` and `strings:order.presortHint` |
+| Source AI review | "Rà soát nguồn bằng AI" | `strings:tabs` (review-source-ai) | `review:sourceAi.configTitle` (batch 3) |
+| Translation AI review | "Rà soát bản dịch bằng AI" | `strings:tabs` (review-translation-ai) | `review:translationAi.title` (batch 3) |
+| Manual review | "Duyệt thủ công" | `strings:tabs` (review-manual) | — |
+| Quality | "Chất lượng" | `strings:tabs.quality` | `strings:guide.topicQuality` — no "Tab" suffix, per the lexicon |
+| Glossary | "Bảng thuật ngữ" | `strings:tabs.glossary` | `strings:guide.topicGlossary` prefixes "Tab" |
+| Category | "Danh mục" | `strings:tabs.category` | `strings:guide.topicCategory` prefixes "Tab" |
+| Routing | "Điều phối" | `strings:tabs.routing` | `strings:guide.topicRouting` prefixes "Tab" |
+| Activity | "Hoạt động" | `strings:tabs.runs` | `strings:guide.topicActivity` — and the page title expands, see below |
+| Stage details | "Chi tiết màn chơi" | `strings:tabs` (stage-details) | `stage-details:title` (batch 6) |
+| Orphans | "Mục mồ côi" | `strings:tabs.orphans` | `orphans:title` (batch 6), `strings:guide.topicOrphans`, and the prose at `config:fullReplaceOrphanNotice` |
+| Backup | "Sao lưu" | `strings:tabs.backup` | `strings:guide.topicBackup`, and the prose at `config:importSnapshotNote` |
+| Sharing | "Chia sẻ" | `strings:tabs.sharing` | `collab:sharing.pageTitle` (batch 4) |
+| Text Styler | "Tạo kiểu văn bản" | `strings:tabs` (color-text) | `colorText:title` (batch 6), `sidebar:colorText` (batch 4) |
 | Global Config | "Cấu hình chung" | `config:globalConfigTitle` | `sidebar:globalConfig` (batch 4) — identical in English, so identical here |
 | Workspace Settings | "Cài đặt không gian làm việc" | `config:workspaceSettingsTitle` | — |
-| Translation Memory | "Bộ nhớ dịch" | `config:tm.policyTitle`, `config:tm.browserTitle` | `sidebar:translationMemory` (batch 4) |
-| LQA Checks | "Kiểm tra LQA" | `config:lqa.title` | `strings:tabs` (quality) names a different surface — do not reuse |
+| Translation Memory | "Bộ nhớ dịch" | `config:tm.policyTitle`, `strings:guide.groupTranslationMemory` | `sidebar:translationMemory` (batch 4) |
+| Credential Vault | "Kho bảo mật" | `strings:guide.topicVault` | `vault:statusLabel` (batch 4) |
+| LQA Checks | "Kiểm tra LQA" | `config:lqa.title` | — |
 | Routing Rules | "Quy tắc điều phối" | `config:routing.title` | — |
-| Project Templates | "Mẫu dự án" | `config:templatesTitle` | `config:saveAsTemplateTitle` is the singular English of the same surface and takes the same rendering |
-| Compare (named in prose) | "tab So sánh" | `config:routing.tonesHint` | `strings:tabs.compare` (batch 2) is the authority — this prose must match it |
-| Translations (named in prose) | "tab Bản dịch" | `config:routing.categoriesConfiguredHint` | `strings:tabs.strings` (batch 2) is the authority |
-| Backup (named in prose) | "tab Sao lưu" | `config:importSnapshotNote` | `strings:tabs.backup` (batch 2) is the authority |
-| Orphans (named in prose) | "tab Mục mồ côi" | `config:fullReplaceOrphanNotice` | `strings:tabs.orphans` / `orphans:title` (batches 2, 6) |
+| Project Templates | "Mẫu dự án" | `config:templatesTitle` | `config:saveAsTemplateTitle` is the same surface in English's singular and takes the same rendering |
+
+**Two expansions that look like drift and are not.** `strings:runs.title` is "Hoạt động dịch"
+where the tab is "Hoạt động" — expand the page title, never shorten it to match. `legal:title`
+does the same against `sidebar:legal` and is settled in batch 6.
 
 `config:fullReplaceOrphanNotice` says "Relink tab" in English; there is no such tab and
 `english-review-notes.md` records it as a stale name, so the Vietnamese names **Orphans**.
+
+### The five sidebar group headings, and what nests under them
+
+`strings:guide.group*` (batch 2) and `sidebar:groups.*` (batch 4) are byte-identical in
+English, so batch 2 decides both. `Sidebar.tsx:773` renders the group heading with its tab
+labels nested directly underneath, so heading and child are painted together and the pair has
+to be read as a pair.
+
+| Group | Rendering | Nested tab labels | Verdict |
+| --- | --- | --- | --- |
+| Setup | "Thiết lập" | Cấu hình · Dữ liệu · Điều phối | no overlap |
+| Translate | "Dịch" | Bản dịch · So sánh | **proper substring, licensed** |
+| Review | "Xem xét" | Rà soát nguồn bằng AI · Rà soát bản dịch bằng AI · Duyệt thủ công · Chất lượng | no overlap |
+| Terminology | "Thuật ngữ" | Bảng thuật ngữ · Danh mục | **proper substring, licensed** |
+| Maintenance | "Bảo trì" | Mục mồ côi · Sao lưu · Chia sẻ | no overlap |
+
+Both licensed pairs are licensed **on structure** — a heading standing over its own compound,
+never an equality — and both are proper substrings, which is the rider that makes that rule
+safe rather than dangerous. English corroborates the first (Translate over Translations, as
+`ru` Перевод/Переводы and `de` Übersetzen/Übersetzungen do) and does **not** corroborate the
+second, which is expected: Vietnamese compounds by juxtaposition and will always show more
+substring relations than English, so English is a second opinion here and not the test.
+
+Two more overlaps were checked and cleared:
+
+- `strings:guide.groupTranslate` "Dịch" against `strings:guide.groupTranslationMemory` "Bộ nhớ
+  dịch". These are **siblings** in the guide's left rail (`GuideView.tsx:73`), not a
+  heading over a child, so the structural licence does not carry them — but they are a bare
+  verb against a three-syllable compound noun, which no Vietnamese reader confuses, and
+  English has the identical relation.
+- `strings:guide.groupTranslationMemory` over its single child `topicTranslationMemory`, which
+  is an **equality**. That one is licensed explicitly by the runbook: English writes
+  "Translation Memory" over "Translation Memory" deliberately and every shipped locale renders
+  the pair identically.
+
+### Collisions found in batch 2 and what was done
+
+The same-rendering / same-English sweep is in `pnpm i18n:preflight vi`. Three hits were real
+defects and were fixed in the strings rather than explained away:
+
+- `strings:runs.startedColumn` (_Started_, a timestamp column) had collapsed onto
+  `strings:compare.translateStart` (_Start_, a button). It now reads "Bắt đầu lúc", which is
+  also the better column header.
+- `strings:bulk.removeCategoryApply_zero` (_Remove categories_) had collapsed onto
+  `strings:bulk.removeCategory` (_Remove category_), and those two **co-render**: the menu item
+  and the apply button are in one popover. The zero form now marks the plural with *các*, which
+  is available because no numeral is present.
+- `strings:compare.clearSelection` and `strings:bulk.clearSelection` (_Clear selection_) had
+  collapsed onto _Deselect all_. English keeps two wordings; runbook 2.6 says to carry a
+  sibling disagreement across rather than harmonize it in one language, so they now read
+  "Bỏ chọn" against "Bỏ chọn tất cả".
+
+The rest are licensed, and all but one for the same reason — **English marks number and
+Vietnamese does not**, so an English singular/plural pair is one Vietnamese word: Sources /
+Source, Languages / Language, Categories / Category, Tones / Tone, Project Template(s), Target
+Language(s), Remove category / categories. This includes `strings:tabs.strings`
+(_Translations_) against `strings:runs.judgeTargetLabel` (_Translation_), which is the one
+pair in that group whose members can be painted at once — the sidebar is always visible — and
+it is licensed on the same grounds rather than on nesting: they are the same lexeme naming the
+same object, differing in English only by a suffix this language has no equivalent of.
+
+The one that is not about number: _Discard_ is deliberately two words, per the lexicon's
+two-sense rule — "Bỏ thay đổi" where a Save button sits beside it (`config:discard`,
+`strings:editor.discard`) and "Từ chối" where the app is offering something
+(`strings:runs.judgeDiscard`).
+
+## Keyboard key names
+
+Vietnamese keyboards are US QWERTY with **English keycaps** — `Enter`, `Shift`, `Esc`, `Tab`,
+`Ctrl` and `Alt` are engraved in English on every layout sold in Vietnam, and no Vietnamese
+word is printed on any of them. So the lexicon's rule ("write the key name as it is engraved
+on that locale's keyboard") requires keeping the English word here, exactly as it does for
+`ru`. This is a decision, not an untranslated leftover: a reviewer scanning
+`strings:compare.contextPlaceholder` or `strings:compare.cellEditTooltip` for English words
+should not reopen it.
+
+The same words translate normally where they are **verbs or nouns** — `strings:shortcuts.enterEditMode`
+(_Enter edit mode_) is "Vào chế độ sửa", and the *tab* that means a tab in the UI is "tab".
+Read the string, not the word.

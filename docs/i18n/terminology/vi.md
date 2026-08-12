@@ -39,21 +39,21 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | writable language |  |  |
 | Pseudo Test | Pseudo Test | Kept in English as the proper name of a synthetic language, alongside the never-translated code *pseudo-test*. Vietnamese has no term for pseudo-localization, and a coined one would read as the name of a real language. |
 | run | lần chạy | Noun only — Vietnamese has no bare-verb reading to confuse it with. Not *tác vụ* (task), *tiến trình* (process), *phiên* (session) or *lô* (**batch**, which a run contains). |
-| revert |  |  |
-| Activity |  |  |
+| revert | hoàn nguyên | The technical Vietnamese verb for returning something to its original state, chosen precisely so *hoàn tác* stays free for **undo** at `strings:compare.undo` — the reservation this row calls load-bearing, and both controls can be on screen at once. *khôi phục* is the restore verb and is spoken for by backups and by `strings:compare.undoRestore`. |
+| Activity | Hoạt động | The tab, and the guide topic, byte-identical. The page title `strings:runs.title` deliberately expands to "Hoạt động dịch" and is not shortened to match, exactly as English expands *Activity* to *Translation Activity*. Not *lịch sử* (history) and not *nhật ký*, which is reserved for the live server **log**. |
 | log |  |  |
 | batch | lô | One syllable, and the only member of its family that is: **cách nhóm lô** and *chế độ lô* are both built on it. Kept clear of *hàng loạt*, which is the bulk-operation word. |
 | batch grouping | cách nhóm lô | Against *chế độ lô* for batch mode — different heads (*cách* against *chế độ*), so the two settings never read as one, which this row asks for explicitly. |
-| AI review |  |  |
+| AI review | Rà soát AI | *rà soát* — to go over something carefully — is the AI-opinion root, and it is held apart from *kiểm tra*, the deterministic **check** word, which is the separation this row exists to enforce. The two tabs expand it: `strings:tabs.review-source-ai` and `strings:tabs.review-translation-ai`. English's literal "Checks" at `strings:runs.aiReviewChecksLabel` still takes the check word, per this row's own carve-out. |
 | judge | đánh giá | The evaluative sense. *thẩm phán* and *xét xử* are the legal readings and are wrong here. Used as a verb in prose; never introduced as a noun. |
 | source review | rà soát nguồn | *rà soát* is the AI-inspection root and is kept away from *kiểm tra*, which is spent on the deterministic LQA **check**. |
-| finding |  |  |
-| suggestion |  |  |
+| finding | phát hiện | What a source review reports. Kept clear of *vấn đề*, the LQA **issue**: a machine verdict and an AI opinion appear on the same entry, so they must not share a word. |
+| suggestion | đề xuất | One word across the judge panel, the glossary generator and the category generator. The action on it is *áp dụng* (apply), never *chấp thuận* — see **approve**, and see this row's own note on English's `judgeApproveAll` copy bug, which this locale does not mirror: `strings:runs.judgeApproveAll` renders with the apply word. |
 | discard | Bỏ thay đổi / Từ chối | Two senses, two words, as this row predicts. Sense 1 — unsaved edits, with a Save button beside it (`config:discard`) — is *bỏ thay đổi*, never bare *hủy*, which is Cancel. Sense 2 — refusing something the app offered — is *từ chối*. The third sense split out as **omit** takes a third word again. |
-| needs review |  |  |
-| flag |  | Settled in batch 2, where the term is actually met (`strings:compare.flagAllNeedsReview`). Batch 1 deliberately does **not** claim it: the LQA check descriptions in `config:lqa.checks.*` open with the English verb *Flags*, and that is the ordinary reporting verb, not this term — a check files an **issue**, it does not set a review disposition. Rendering those with the flag word would have imported the review-queue meaning into a machine verdict, so they use the issue term instead. |
-| ignore / ignored |  |  |
-| Review (the sidebar group) |  |  |
+| needs review | cần duyệt | Verb phrase, so it carries no gender or number and reads identically in the filter, the badge and the bulk confirmation. The row badge `strings:compare.cellNeedsReviewBadge` keeps English's deliberate **lowercase**; the filter label is sentence case. Same wording, different casing — the difference is not a licence for two renderings. |
+| flag | gắn cờ | Deliberately not *đánh dấu*, which is the verb for marking something reviewed — this row notes that flagging *clears* the needs-review flag, so one verb for both would set and unset one state. Settled here rather than in batch 1: English's LQA check descriptions in `config:lqa.checks` open with the verb *Flags*, which is ordinary reporting and not this term, so those use the **issue** word instead. |
+| ignore / ignored | bỏ qua | State *đã bỏ qua*, action *bỏ qua mục*, negation *ngừng bỏ qua mục* — built out of the affirmative, because Vietnamese has no verb for *unignore* either. The per-run routing outcome this row bans sharing a word with (*skip*) is rendered *không được xử lý* instead, at `config:skipped`; that keeps a person's persistent decision apart from the engine's. |
+| Review (the sidebar group) | Xem xét | Chosen so it claims none of its four members: *rà soát* is spent on **AI review**, *duyệt* on manual review, *kiểm tra* on the LQA **check**, and *chất lượng* is the Quality tab. *xem xét* is the general Vietnamese word for examining something and is free. `strings:guide.groupReview` and `sidebar:groups.review` are byte-identical in English and take this rendering in both. |
 | review queue |  |  |
 | back-translation |  |  |
 | module | mô-đun | Hyphenated transliteration, settled once for the whole locale. The bare English form and the unhyphenated *môđun* are both attested in Vietnamese software; this locale takes the hyphenated form and does not alternate. |
@@ -91,17 +91,17 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | snapshot | điểm khôi phục | English calls these restore points too, and Vietnamese has no separate word: *ảnh chụp* is a photograph and every other candidate this row bans outright. The *khôi phục* shared with the restore verb is fine — the heads differ, and the requirement is only that it stay distinguishable from **bản sao lưu**, which it plainly is. |
 | template | mẫu | And **model** is *mô hình*, not *mẫu* — this is the pair this row calls dangerous, and Vietnamese has it too. |
 | omit (from an export) | loại trừ | The third sense of English *discard*, and a third Vietnamese verb, matching the four locales that converged on an omit or exclude verb independently. `config:discardUntranslatable` destroys nothing and refuses nothing. |
-| collaborator |  |  |
+| collaborator | cộng tác viên | Distinct from **thành viên** (member) by more than a modifier, which matters because the two appear in adjacent strings on the Sharing page. |
 | member |  |  |
 | nickname |  |  |
 | claim |  |  |
 | invite |  |  |
 | revoke |  |  |
-| recording |  |  |
-| stage |  |  |
-| Text Styler |  |  |
+| recording | ghi nhận | The capture process. Not *ghi chép* or *bản ghi*, either of which would collide with a content **entry** — the collision this row warns about, where "Recording paused" would read as "Entry paused". Not *nhật ký*, which is the live server **log**. The three `collab:sharing.audit*` strings take this word too, per this row and `english-review-notes.md`. |
+| stage | màn chơi | A playable level, as Vietnamese gaming uses it. *giai đoạn* is the process reading and is the single most likely mistranslation in this app; it appears nowhere in this locale. |
+| Text Styler | Tạo kiểu văn bản | Translated rather than kept in English: unlike **Pseudo Test** it names an ordinary tool rather than a synthetic language, and Vietnamese has a settled phrase for text styling. The same rendering is owed by `strings:tabs`, `colorText:title` and `sidebar:colorText`. |
 | element |  |  |
-| assistant |  |  |
+| assistant | trợ lý | A role, not an act of assistance — *trợ giúp* is the near-miss this row names and is not used. Decided at the first meeting, in the three `strings:runs.typeChat*` run-type labels, so the chat surfaces in batch 6 inherit it rather than coining a second word. Vietnamese compounds by juxtaposition, so there is no linking form to record: the compound is simply *trợ lý AI*. |
 | theme |  |  |
 | guide |  |  |
 | release |  |  |
