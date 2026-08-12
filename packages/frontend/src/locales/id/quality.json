@@ -1,0 +1,69 @@
+{
+  "title": "Dasbor Kualitas",
+  "loading": "Memuat ringkasan kualitas…",
+  "error": "Gagal memuat ringkasan kualitas: {{message}}",
+  "empty": "Belum ada hasil LQA. Jalankan penerjemahan untuk mengisi dasbor ini.",
+  "overallStat": {
+    "passRateLabel": "Tingkat lulus keseluruhan",
+    "results": "{{count}} hasil LQA",
+    "entries": "{{count}} entri",
+    "legendPassed": "Lulus {{count}}",
+    "legendFailed": "Gagal {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "Isu paling umum",
+    "description": "Jumlah per jenis isu di seluruh bahasa."
+  },
+  "other": "Lainnya",
+  "columns": {
+    "passRate": "Tingkat lulus"
+  },
+  "legend": {
+    "tierHigh": "Tingkat lulus tinggi (≥ 90%)",
+    "tierMid": "Tingkat lulus sedang (70–89%)",
+    "tierLow": "Tingkat lulus rendah (< 70%)",
+    "passed": "Lulus",
+    "failed": "Gagal"
+  },
+  "checkLabels": {
+    "tag-equality": "Kesetaraan tag",
+    "overflow": "Luapan panjang",
+    "length-limit": "Batas panjang",
+    "glossary-adherence": "Kepatuhan glosarium",
+    "forbidden-terms": "Istilah terlarang",
+    "regex-assertions": "Asersi regex",
+    "number-parity": "Paritas angka",
+    "whitespace-parity": "Paritas spasi",
+    "line-break-parity": "Paritas pemisah baris",
+    "end-punctuation": "Tanda baca akhir",
+    "double-spacing": "Spasi ganda",
+    "double-words": "Kata ganda",
+    "untranslated": "Belum diterjemahkan",
+    "mask-integrity": "Integritas penyamaran",
+    "tag-mismatch": "Tag tidak cocok",
+    "too-long": "Terlalu panjang",
+    "glossary-term-missing": "Istilah glosarium hilang",
+    "forbidden-term": "Istilah terlarang",
+    "regex-assertion-failed": "Asersi regex gagal",
+    "regex-config-error": "Galat konfigurasi regex",
+    "number-missing": "Angka hilang",
+    "number-added": "Angka bertambah",
+    "whitespace-leading": "Spasi di awal",
+    "whitespace-trailing": "Spasi di akhir",
+    "line-break-mismatch": "Pemisah baris tidak cocok",
+    "end-punctuation-mismatch": "Tanda baca akhir tidak cocok",
+    "mask-mismatch": "Penyamaran tidak cocok"
+  },
+  "byLanguage": {
+    "title": "Tingkat lulus per bahasa",
+    "description": "Terburuk lebih dulu. Klik sebuah bahasa untuk memeriksa entri yang gagal."
+  },
+  "bySource": {
+    "title": "Isu per sumber",
+    "description": "Terburuk lebih dulu. Klik sebuah sumber untuk memeriksa entri yang gagal."
+  },
+  "byModule": {
+    "title": "Kualitas per modul",
+    "description": "Tingkat lulus dan isu dikelompokkan menurut modul penerjemahan yang menghasilkan tiap terjemahan."
+  }
+}

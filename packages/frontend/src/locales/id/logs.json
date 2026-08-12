@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "Siapkan aturan penyaluran",
+    "openModuleSettings": "Buka pengaturan modul",
+    "openQuality": "Buka Dasbor Kualitas",
+    "openGlossary": "Buka glosarium",
+    "unlockVault": "Buka kunci brankas"
+  },
+  "translation": {
+    "start": "Menerjemahkan sebuah entri ke {{language}}…",
+    "done": "Sebuah entri diterjemahkan ke {{language}}.",
+    "doneFromMemory": "Terjemahan tersimpan dipakai ulang untuk {{language}}.",
+    "queued": "Diantrekan untuk diterjemahkan: {{total}}.",
+    "queued_other": "Diantrekan untuk diterjemahkan: {{total}}.",
+    "runQueued": "Putaran penerjemahan diantrekan — posisi {{position}}.",
+    "retryQueued": "Percobaan ulang diantrekan — posisi {{position}}.",
+    "retry": "Mencoba ulang sebuah terjemahan yang gagal.",
+    "failedNoRoute": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — tidak ada aturan penyaluran yang cocok.",
+    "failedNoRoute_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — tidak ada aturan penyaluran yang cocok.",
+    "failedModuleDisabled": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — modul {{module}} sedang nonaktif.",
+    "failedModuleDisabled_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — modul {{module}} sedang nonaktif.",
+    "failedModuleNotFound": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — modul {{module}} tidak terpasang.",
+    "failedModuleNotFound_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — modul {{module}} tidak terpasang.",
+    "failedGeneric": "Tidak bisa menerjemahkan sebuah entri ke {{language}}.",
+    "batchFailed": "Satu batch berisi {{count}} terjemahan ke {{languages}} gagal.",
+    "queueStartFailed": "Tidak bisa memulai putaran penerjemahan.",
+    "maskMismatch": "Tag pemformatan tidak selamat saat diterjemahkan ke {{language}}.",
+    "tmRejected": "Terjemahan tersimpan untuk {{language}} tidak lolos pemeriksaan kualitas.",
+    "lqaRetry": "Pemeriksaan kualitas gagal — model diminta mencoba lagi.",
+    "authCancel": "Proses masuk dibatalkan, jadi penerjemahan berhenti."
+  },
+  "lqa": {
+    "passed": "Pemeriksaan kualitas lulus.",
+    "failed": "Pemeriksaan kualitas gagal.",
+    "overflow": "Terjemahan terlalu panjang untuk ruang yang tersedia.",
+    "checkError": "Sebuah pemeriksaan kualitas tidak bisa dijalankan."
+  },
+  "judge": {
+    "done": "Tinjauan mendapat skor {{score}} — putusan: {{verdict}}.",
+    "suggestDone": "Tinjauan selesai dengan saran.",
+    "suggestNoChange": "Tinjauan tidak menemukan yang perlu diubah.",
+    "suggestionDiscarded": "Saran ditolak."
+  },
+  "sourceReview": {
+    "done": "Tinjauan sumber menemukan {{findings}} masalah.",
+    "done_other": "Tinjauan sumber menemukan {{findings}} masalah."
+  },
+  "glossaryGen": {
+    "done": "Putaran glosarium selesai — {{suggested}} istilah disarankan dari {{analyzed}} entri.",
+    "failed": "Pembuatan glosarium gagal.",
+    "saveSuggestionsFailed": "Tidak bisa menyimpan saran glosarium."
+  },
+  "categoryGen": {
+    "queued": "Pembuatan kategori diantrekan.",
+    "done": "Pembuatan kategori selesai — {{suggestions}} saran.",
+    "failed": "Pembuatan kategori gagal."
+  },
+  "stageDetails": {
+    "queued": "Detail Stage diantrekan.",
+    "done": "Detail Stage selesai — {{completed}} beres, {{failed}} gagal.",
+    "failed": "Detail Stage gagal."
+  },
+  "module": {
+    "loaded": "Modul {{module}} dimuat.",
+    "instanceRegistered": "Konfigurasi {{instance}} ditambahkan.",
+    "instanceRegisterFailed": "Tidak bisa menambahkan konfigurasi {{instance}}."
+  },
+  "vault": {
+    "unlocked": "Kunci brankas dibuka.",
+    "passwordChanged": "Kata sandi brankas diubah.",
+    "credentialsEvicted": "Kredensial tersimpan Anda dibersihkan dari memori server."
+  },
+  "orphan": {
+    "detected": "Ditemukan {{count}} entri yang sudah tidak ada di berkas sumber.",
+    "detected_other": "Ditemukan {{count}} entri yang sudah tidak ada di berkas sumber.",
+    "linked": "Sebuah entri yatim dihubungkan.",
+    "deleted": "Sebuah entri yatim dihapus."
+  },
+  "tm": {
+    "cleared": "Memori terjemahan dikosongkan.",
+    "variantDeleted": "Sebuah entri memori terjemahan dihapus."
+  },
+  "backup": {
+    "restored": "Cadangan dipulihkan.",
+    "pruneFailed": "Tidak bisa membersihkan cadangan lama."
+  }
+}
