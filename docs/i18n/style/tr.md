@@ -144,12 +144,33 @@ placeholder handling.
 >    the lexicon's, not this file's — the style extractor ignores non-key backtick spans
 >    altogether (see the table below). Keeping the habit in both files costs nothing and is
 >    still the right habit; believing it is what the *style* guard checks is what cost a round.
-> 2. **Never put ENGLISH in the delimiter this file's cell is using.** Which delimiter that is
->    is decided per cell, in order: guillemets, then corner brackets, then **curly doubles**,
->    then straight doubles as the fallback. This locale writes curly everywhere, so **curly is
->    always the live delimiter here and straight-quoted English is inert** — the opposite of
->    what an earlier version of this rule said. Write an English gloss in *italics* and you are
->    safe under every delimiter.
+> 2. **Never put ENGLISH in quotes of ANY kind. Straight quotes are live here — the claim that
+>    they are inert was wrong.** This bullet asserted that because the locale writes curly
+>    everywhere, curly is "always the live delimiter here and straight-quoted English is inert".
+>    **The style path does not pick one delimiter and drop the rest: it loops over all of them**,
+>    straight doubles included, and the great majority of this file's own style citations are
+>    straight-delimited. So a straight-quoted English gloss beside a key is a candidate exactly
+>    like a curly-quoted one.
+>
+>    **What actually kept this file's two English glosses from failing is something else
+>    entirely, and it is a hole rather than a licence:** the style path resolves a citation's
+>    namespace from the key beside it, and a key written in an abbreviated or non-namespaced
+>    form resolves to nothing — so the citation is **skipped, not checked**. The whole-language
+>    sweep measured that this silently dropped a substantial minority of this file's style
+>    citations. The tooling side is with the wave controller, but **the abbreviated keys in this
+>    file were mine and are now fully qualified** — every key quoted here carries its namespace,
+>    so nothing in it is dropped for that reason any more.
+>
+>    **Qualifying them immediately failed one citation, which is the whole argument for doing it:**
+>    the *"Inspect" may not be "incele"* bullet quoted its English source in straight quotes, and
+>    that had been invisible **because of this very gap** — an English gloss, in live delimiters,
+>    beside a key the extractor could not resolve. It is italics now. So the gap was not
+>    harmlessly suppressing noise; it was hiding exactly the class of defect the rule above
+>    exists to prevent. **Never read a skip as a licence**, and write keys in full so the guard
+>    can speak. Write an English gloss in *italics*, which is
+>    safe under every delimiter and under every extractor, and **do not reason about which
+>    delimiter is live** — this is the second time a claim in this bullet about how the guard
+>    treats delimiters has turned out to be false.
 >
 > **And know why this locale is exposed where `ru` and `ja` are not.** The guard skips a
 > citation whose text has no non-ASCII letter *only for non-Latin-script locales* — `ru`, `ja`
@@ -387,7 +408,7 @@ takes the deferential form.** `stage-details:chatQuickPrompts.improve` / `shorte
 current text in both of those payloads. `StageChatPanel.tsx` builds each one with `t(…)` and
 passes the result to `send()` — the four quick prompts and the header at `:159`, the retry prompt
 and the header again at `:425` — and **none of the six is ever painted**. So
-`chatQuickPrompts.shorten` is “{{focus}} alanını anlamını koruyarak kısalt.” — a bare imperative,
+`stage-details:chatQuickPrompts.shorten` is “{{focus}} alanını anlamını koruyarak kısalt.” — a bare imperative,
 matching English's own bare imperative, where the deferential form would be addressing nobody.
 
 **The sixth is a header, not an imperative, and it is here because of its classification rather
@@ -411,7 +432,7 @@ key cannot be classified from its neighbours. A bare noun survives both roles, w
 not a choice.
 
 **The buttons that trigger them are ordinary controls and follow the ordinary rule**, which is
-why the pair reads as two shapes for one action: `chatQuickActions.shorten` is “Kısalt” (a
+why the pair reads as two shapes for one action: `stage-details:chatQuickActions.shorten` is “Kısalt” (a
 short isolated button, bare stem) over a prompt that is also a bare stem, while
 `chatNoProposalRetryButton` is “Doğrudan düzenleme olarak yeniden dene”. **Check the call site
 before applying this** — every claim in this section came from opening `StageChatPanel.tsx`, and
@@ -953,10 +974,10 @@ rather than correctness.
 
 | Class | Anchor key | Budget | Kind | Basis |
 | --- | --- | --- | --- | --- |
-| **Sidebar item _and_ tab label — one class, one container** | `sidebar:globalConfig`, `sidebar:legal`, `strings:tabs.backup` | **199px ≈ 28 tr chars** | **hard** — fixed `16rem` (`SIDEBAR_WIDTH`), `truncate` | the container, measured: 256px − 1 border − 16 `SidebarGroup p-2` − 16 `SidebarMenuButton p-2` − 16 icon − 8 `gap-2` = 199px, ÷ 7.09px mean Turkish advance at `text-sm` |
-| Table column header | `strings:columns.config` | 20 | soft | measured — longest shipped is 18: `runs.runIdColumn` "Çalıştırma kimliği" |
-| Filter label | `strings:filters.needsReview` | 40 | soft | measured — longest shipped is 38: `filters.lqaFailed` "Yalnızca LQA başarısızlıklarını göster" |
-| Bulk-bar control | `strings:bulk.approveSelected` | 40 | soft | measured — longest shipped control is 39 as a template / ~35 rendered: `bulk.selectAllFiltered` "Filtrelenen {{count}} satırın tümünü seç"; longest static one is 23, the anchor itself, "Çeviri belleğine onayla" |
+| **Sidebar item _and_ tab label — one class, one container** | `sidebar:globalConfig`, `sidebar:legal`, `strings:tabs.backup` | **199px ≈ 27–29 tr chars** | **hard** — fixed `16rem` (`SIDEBAR_WIDTH`), `truncate` | the container, measured: 256px − 1 border − 16 `SidebarGroup p-2` − 16 `SidebarMenuButton p-2` − 16 icon − 8 `gap-2` = 199px. **199px is what binds**; the character figure is a density-dependent proxy — see below |
+| Table column header | `strings:columns.config` | 20 | soft | measured — longest shipped is 18: `strings:runs.runIdColumn` "Çalıştırma kimliği" |
+| Filter label | `strings:filters.needsReview` | 40 | soft | measured — longest shipped is 38: `strings:filters.lqaFailed` "Yalnızca LQA başarısızlıklarını göster" |
+| Bulk-bar control | `strings:bulk.approveSelected` | 40 | soft | measured — longest shipped control is **40** as a template / ~35 rendered: `strings:bulk.selectAllFiltered` "Filtrelenen {{count}} satırın tümünü seç", which **equals the budget rather than sitting under it**; longest static one is 23, the anchor itself, "Çeviri belleğine onayla" |
 
 **There is no main tab bar in this product, and the tab labels are sidebar items.**
 `strings:tabs.*` has exactly two call sites, both in `components/layout/Sidebar.tsx` (785,
@@ -968,14 +989,26 @@ one *soft*, on the strength of two sentences that described a wider scrolling ba
 This is not a raise of `config`'s in-panel figure of 26 either: `config:routing.tab*` is a
 genuinely different, softer container, and its number was never a floor for this one.
 
-**The pixel figure is what binds; the character count is a per-language proxy.** Turkish
-averages 7.09px per character in this class (Geist Variable, `text-sm` = 14px), against
-English's 6.49px, which is why the same 199px is ~28 characters here and ~30 there.
-Re-derive the character figure per language; do not port this one.
+**The pixel figure is what binds; the character count is a per-language proxy — and it is a
+RANGE, not a number.** This paragraph used to read "Turkish averages 7.09px per character in this
+class", giving a single figure of ~28 characters. **7.09 was never a class average: it is one
+label's own density.** `strings:tabs.review-source-ai` is recorded two paragraphs down at 198.4px over 28
+characters — 198.4 ÷ 28 = 7.086 — and its sibling `strings:tabs.review-translation-ai` is 187.4px over the
+same 28 characters, i.e. 6.693. **Two labels in one class differ by 6%**, so no single density can
+describe the class, and the arithmetic that produced "28 chars" was one label generalised.
+
+Measured across the whole 25-label class by the whole-language sweep: the mean is **6.741 px/char**
+(199 ÷ 6.741 = **29.5** characters) and the densest label is **7.308 px/char**
+(199 ÷ 7.308 = **27.2**). So the honest proxy is **27–29 characters depending on the label's own
+density**, and a label near the top of the range must be checked in pixels rather than counted.
+(The two class-wide figures are the sweep's measurement; the density arithmetic above is
+re-derived here from this file's own recorded pixel widths. Measuring glyph advances needs the
+font, so re-derive them with a real text measurement, not by counting characters.)
+Re-derive the range per language; do not port this one.
 
 **The two 28-character tab labels are inside the budget and stay exactly as they are.**
-Measured with real glyph advances: `tabs.review-source-ai` "Kaynak yapay zekâ incelemesi" is
-198.4px and `tabs.review-translation-ai` "Çeviri yapay zekâ incelemesi" is 187.4px, both
+Measured with real glyph advances: `strings:tabs.review-source-ai` "Kaynak yapay zekâ incelemesi" is
+198.4px and `strings:tabs.review-translation-ai` "Çeviri yapay zekâ incelemesi" is 187.4px, both
 under 199px. For scale, shipped Russian's 28-character label in this same class is 215.7px,
 overflows by 17px, and ships anyway. They are also forced by a term rule — *AI review* is
 "yapay zekâ incelemesi" and the AI is never abbreviated to "YZ" — which the runbook says
@@ -988,7 +1021,7 @@ fit, escalate rather than trimming it.
 
 **One caveat to record rather than act on.** `SidebarMenuButton` carries
 `data-active:font-medium`, so the tab you are *on* renders at weight 500. Geist's advances
-grow ~1.5–3% with weight, which puts `tabs.review-source-ai` at roughly 201–203px while
+grow ~1.5–3% with weight, which puts `strings:tabs.review-source-ai` at roughly 201–203px while
 selected — it may clip a character or two, only on the tab whose label you least need. Not
 a reason to shorten it.
 
@@ -998,7 +1031,7 @@ spare.** The sidebar items it owns run: `colorText` "Metin biçimlendirici" **20
 `legal` "Yasal bilgiler" 14, `translationMemory` "Çeviri belleği" 14, `aboutNarn`
 "Narn hakkında" 13, down to `guide` "Kılavuz" 7 and `account` "Hesap" 5; the six group
 headings run 5–11 ("Terminoloji" is the longest). The budget is 28 characters / 199px, so
-the longest is 20 characters ≈ 142px at this class's 7.09px mean advance — a margin so wide
+the longest is 20 characters ≈ 135–146px across this class's density range — a margin so wide
 that the mean-advance proxy cannot be wrong enough to matter, which is why this batch did not
 need per-glyph measurement the way batch 2's two 28-character tab labels did. **Nothing was
 shortened to fit and nothing needed escalating.** Two notes for whoever measures next: the
@@ -1008,8 +1041,8 @@ longest `sidebar` values overall are toasts and aria-labels (`templateWarningUnk
 at 51), which are not in this class and must not be counted into it.
 
 Batch 4 moved no soft figure either. Its longest column header is **18**
-(`collab:sharing.columnLanguages` "Yazılabilir diller" and `invites.columnCreated`
-"Oluşturulma tarihi", budget 20 — tying batch 2's longest, `runs.runIdColumn`), and it ships
+(`collab:sharing.columnLanguages` "Yazılabilir diller" and `collab:invites.columnCreated`
+"Oluşturulma tarihi", budget 20 — tying batch 2's longest, `strings:runs.runIdColumn`), and it ships
 no filter label and no bulk-bar control.
 
 **Batch 6 touches one soft class, moves nothing, and adds nothing to the hard one.** It ships
@@ -1215,7 +1248,7 @@ Batch 3 met the same class three more times, and all three resolved the same way
   is the qualified "LQA passed" (`strings:row.lqaPassed` → "LQA başarılı"), and
   `strings:runs.statusFailed` ("Failed") is a *run status*. Matching either by rendering
   would collapse three different verdict families into one word. The dashboard instead
-  reads as one family with its own `columns.passRate` "Geçme oranı".
+  reads as one family with its own `quality:columns.passRate` "Geçme oranı".
 - **`review:approve` is the bare "Onayla".** Batch 2's `strings:bulk.approveSelected` names
   the destination — "Çeviri belleğine onayla" — because *its* English says "Approve to
   memory". This key's English does not, so this key does not.
@@ -1229,35 +1262,62 @@ Batch 3 met the same class three more times, and all three resolved the same way
 Run all seven before handing a batch to review. The first six are the standard set; the
 seventh is Turkish-specific and is the one that catches this locale's signature defect.
 
-| Sweep | Turkish instance | Command shape |
-| --- | --- | --- |
-| Over-formal imperative the guide bans | `-iniz` / `-ınız` endings | `grep -nE '(iniz\|ınız\|unuz\|ünüz)\b'` — **eyeball every hit**: the same ending spells the ordinary 2nd-person possessive and ability forms ("oyununuzdaki", "edebilirsiniz", "seçtiğiniz"), which are correct. Only a bare verb stem plus the ending ("seçiniz", "giriniz") is the defect; `config` has 10 hits and 0 defects |
-| Bare-stem singular where a sentence needs `-in` | "seç", "gir" mid-sentence | read the imperatives |
-| Straight quotes where the guide sets typographic ones | `"` and `'` around a value | **values only** — see the note under this table |
-| Doubled spaces | — | **values only** — see the note under this table |
-| Three-dot ellipsis instead of the single character | `...` for `…` | `grep -n '\.\.\.'` |
-| Hyphen used as a dash | ` - ` for ` — ` | `grep -nE ' - '` |
-| **Suffix attached to a placeholder** | `{{model}}'i`, `{{count}}ı` | `grep -nE "\}\}['’]?[a-zçğıöşüA-ZÇĞİÖŞÜ]"` |
+| # | Sweep | Turkish instance | How to run it |
+| --- | --- | --- | --- |
+| 1 | Over-formal imperative the guide bans | `-iniz` / `-ınız` endings | the runner below, rule `over-formal` — then **eyeball every hit** |
+| 2 | Bare-stem singular where a sentence needs `-in` | "seç", "gir" mid-sentence | **the only one that is not mechanisable** — read the imperatives |
+| 3 | Straight quotes where the guide sets typographic ones | `"` and `'` around a value | the runner below, rule `straight quote` |
+| 4 | Doubled spaces | — | the runner below, rule `doubled space` |
+| 5 | Three-dot ellipsis instead of the single character | `...` for `…` | the runner below, rule `three-dot` |
+| 6 | Hyphen used as a dash | ` - ` for ` — ` | the runner below, rule `hyphen-dash` |
+| 7 | **Suffix attached to a placeholder** | `{{model}}'i`, `{{count}}ı` | the runner below, rule `welded suffix` |
 
-**Two of those sweeps CANNOT be run as a `grep` over the JSON files, and the forms this table
-carried for five rounds were both broken.** `grep -nE '  '` matches the JSON's own two-space
-indentation and `grep -n '\\"'` matches every line's own key/value delimiters, so each returns
-essentially the whole file: **they can neither pass nor fail.** Nobody noticed because a sweep that
-always "hits" reads as noise to be eyeballed away, and the batch that found it wrote the fix into
-its report — which, per the runbook, is not a file anyone opens. Run them over **parsed values**:
+**Sweep 1 needs the eyeballing, and it is the reason the runner prints the matched form.** The
+same endings spell the ordinary 2nd-person possessive, ability, participle and question forms —
+“hesabınız”, “edebilirsiniz”, “seçtiğiniz”, “mısınız” — which are all correct. **Only a bare verb
+stem plus the ending is the defect** (“seçiniz”, “giriniz”, “tıklayınız”). Across the finished
+locale every hit is one of the correct classes and none is a bare stem. This cell used to quote a
+per-namespace hit count; that figure was not reproducible from the command beside it, and the
+runbook forbids counters in a document for exactly that reason — **the durable claim is the
+classification, and the runner reports its own counts.**
+
+**THREE of these sweeps shipped as commands that could neither pass nor fail, and they were found
+one at a time over three rounds. Run the negative control on every one of them, not on the one a
+finding names.**
+
+- `grep -nE '  '` (doubled spaces) matched the JSON's own two-space **indentation**, and
+  `grep -n '\"'` (straight quotes) matched every line's own key/value **delimiters** — each
+  returned essentially the whole file.
+- `grep -nE '(iniz\|ınız\|unuz\|ünüz)\b'` (over-formal imperative) carried the **markdown
+  pipe-escaping** into the shell. In ERE `\|` is a *literal* pipe, so the command searched for the
+  one-piece string `iniz|ınız|unuz|ünüz`, which occurs nowhere. It returned 0 on the shipped
+  corpus **and 0 on a corpus with “Bir model seçiniz” planted in it.**
+
+The third is the instructive one: it sat two rows from the two that were fixed, in the same edit,
+by the same person, who wrote the paragraph explaining why a replacement must be proved able to
+fail — and did not re-run the row that was not named. **A finding names a location because that is
+where somebody happened to look.** The fix is therefore not three fixed commands but **one runner
+with one negative control**, so a new rule cannot be added without inheriting both:
 
 ```bash
-# from the workspace root — doubled spaces, three-dot ellipses, hyphen-dashes,
-# straight quotes and welded suffixes, over values only
+# from the workspace root. Prints: <rule> <file> <key> <value> for every hit.
 node -e 'const fs=require("fs"),p="packages/frontend/src/locales/tr";
 const f=(o,k="",a=[])=>{for(const[q,v]of Object.entries(o))v&&typeof v==="object"?f(v,k+q+".",a):a.push([k+q,v]);return a};
-const R={"doubled space":/ {2}/,"three-dot":/\.\.\./,"hyphen-dash":/ - /,"straight quote":/"/,"welded suffix":/\}\}[\x27\u2019]?[a-zA-ZçğıöşüÇĞİÖŞÜ]/};
+const R={"over-formal":/[a-zçğıöşüA-ZÇĞİÖŞÜ]*(iniz|ınız|unuz|ünüz)\b/,"doubled space":/ {2}/,"three-dot":/\.\.\./,"hyphen-dash":/ - /,"straight quote":/"/,"welded suffix":/\}\}[\x27\u2019]?[a-zA-ZçğıöşüÇĞİÖŞÜ]/};
 for(const n of fs.readdirSync(p))for(const[k,v]of f(JSON.parse(fs.readFileSync(p+"/"+n,"utf8"))))
-for(const[name,re]of Object.entries(R))if(re.test(v))console.log(name,n,k,JSON.stringify(v));'
+for(const[name,re]of Object.entries(R)){const m=v.match(re);if(m)console.log(name,n,k,JSON.stringify(m[0]),JSON.stringify(v));}'
 ```
 
-Clean across all 1,920 values as of the last batch. The other five sweeps are fine as greps,
-because none of them can match JSON syntax.
+**It reads parsed values, never file bytes, which is what retires the whole indentation/delimiter
+class.** On the finished locale it prints only `over-formal` hits, all of them correct forms
+(see above), and nothing for the other five rules.
+
+**Prove it can still fail before you trust a clean run.** Point `p` at a throwaway directory
+holding one file with a planted defect per rule — `"iki  boşluk"`, `"üç nokta..."`,
+`"tire - kısa çizgi"`, `"düz \"tırnak\""`, `"{{model}}'i sil"`, `"{{count}}ı sil"`,
+`"Bir model seçiniz"` — and confirm each rule fires and a clean value stays silent. A sweep that
+has never been shown to go red is not evidence of anything, which is the lesson all three broken
+commands taught separately.
 
 **The seventh sweep now has a gate behind it — keep running it anyway.** When batch 1 was
 written, the pre-flight's narrow rule required **whitespace** between `}}` and the following
@@ -1322,7 +1382,7 @@ point of failure.
   ships as "Geçme oranı" (`quality:columns.passRate`), on the same "geç-" root as
   "kalite geçidi". Settled in batch 3; the reservation batch 1 wrote held.
 - **"Inspect" may not be "incele".** `quality:byLanguage.description` and
-  `bySource.description` say "Click a language to inspect its failed entries", and they ship
+  `quality:bySource.description` say *Click a language to inspect its failed entries*, and they ship
   as "… görmek için bir dile tıklayın". "inceleme" is the *review* term, and the Quality
   dashboard is the one member of the Review group that is explicitly **not** a review — using
   the review verb for its drill-down would say the opposite of what the lexicon settled.
@@ -1382,7 +1442,7 @@ point of failure.
   where that reading is spent: `settings:previewHint` ("Sample controls rendered with the
   selected theme.") ships as "Seçili temayla görüntülenen örnek **kontroller**". The generic
   verb *check* takes the same root — `account:mfaLoading` is "Güvenlik ayarlarınız kontrol
-  ediliyor…", `nickname.loading` is "Takma adınız kontrol ediliyor…" — and neither is the
+  ediliyor…", `collab:nickname.loading` is "Takma adınız kontrol ediliyor…" — and neither is the
   term. Reserve "denetim" for a named LQA rule; nothing in this batch is one.
 - **"oturum" is barred as a rendering of *run*, and that is the whole of the ban.**
   `account:signOut` is "Oturumu kapat" and `vault:unlockDescription` / `createDescription`
@@ -1484,7 +1544,7 @@ point of failure.
   signal it. Check the reason at the call site, not at the key name.
 - **English's *Override* is two different actions and takes two Turkish verbs.**
   `config:routing.labelModelOverride` is “Model geçersiz kılma” — a rule replacing a setting —
-  while `orphans:relink.overrideModeLabel` is “Üzerine yazma modu” and `relink.overrideAll` is
+  while `orphans:relink.overrideModeLabel` is “Üzerine yazma modu” and `orphans:relink.overrideAll` is
   “Tüm çevirilerin üzerine yetimin çevirilerini yaz”, because there the action writes over
   stored translation text. Rendering the orphans pair with the routing verb would say the
   translations are being *invalidated*, which is not what relinking does. Resolve the action,
@@ -1495,7 +1555,10 @@ point of failure.
   `strings:filters.searchPlaceholder`, `strings:mobile.searchPlaceholder`,
   `strings:achievement.dialogSearch`,
   `strings:compare.translateExamplesSearchPlaceholder`, `config:models.searchOrType` and
-  `config:tm.searchPlaceholder`. `sidebar:searchProjects` ships the bare stem “Projelerde
-  ara…” instead, which is the button shape in a placeholder's position. Not fixed here —
-  it belongs to another batch's file — but it is a one-word fix and it is written down so
-  the whole-language sweep can take it.
+  `config:tm.searchPlaceholder`. `sidebar:searchProjects` shipped the bare stem “Projelerde
+  ara…” for four rounds, which is the button shape in a placeholder's position. **The
+  whole-language sweep took it, as this note asked: it is “Projelerde arayın…” now**, and the
+  class is uniform — all twelve `Search …` placeholders in the locale take the `-in` form. The
+  note is kept as the worked example of the mechanism: a defect in a *shipped* namespace found by
+  a *later* batch has no batch of its own to fix it, so it has to be written down against the
+  sweep or it never gets fixed at all.
