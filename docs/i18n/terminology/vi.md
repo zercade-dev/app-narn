@@ -36,7 +36,7 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | source language | ngôn ngữ nguồn | Pairs with **ngôn ngữ đích**; the two sit side by side in `config`. |
 | target language | ngôn ngữ đích | Not *bản địa* or *ngôn ngữ khu vực* — the app tracks languages, not locales, which is the confusion this row bans. |
 | reference language |  |  |
-| writable language |  |  |
+| writable language | ngôn ngữ được phép sửa | One adjective phrase, used identically in the table column, the lock messages and the invite dialog — the alternation this row calls the bug. *có thể sửa* (editable) and *được gán* (assigned) were both rejected for that reason: they describe the language rather than the permission. |
 | Pseudo Test | Pseudo Test | Kept in English as the proper name of a synthetic language, alongside the never-translated code *pseudo-test*. Vietnamese has no term for pseudo-localization, and a coined one would read as the name of a real language. |
 | run | lần chạy | Noun only — Vietnamese has no bare-verb reading to confuse it with. Not *tác vụ* (task), *tiến trình* (process), *phiên* (session) or *lô* (**batch**, which a run contains). |
 | revert | hoàn nguyên | The technical Vietnamese verb for returning something to its original state, chosen precisely so *hoàn tác* stays free for **undo** at `strings:compare.undo` — the reservation this row calls load-bearing, and both controls can be on screen at once. *khôi phục* is the restore verb and is spoken for by backups and by `strings:compare.undoRestore`. |
@@ -71,7 +71,7 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | check | kiểm tra | The deterministic LQA rule. Held apart from *rà soát* (**AI review** and **source review**) — that separation is the point of both rows. Where a countable noun is needed, *phép kiểm tra*. |
 | issue | vấn đề | Not *lỗi* (error), which this row bans and which the app uses for real failures. Distinct from *phát hiện*, the **finding** a source review reports. |
 | severity | mức nghiêm trọng | The two values are fixed by **check** and do not drift here: blocking is *chặn*, warning is *cảnh báo*. |
-| notification severity |  |  |
+| notification severity | mức nghiêm trọng | The same phrase as the LQA **severity**, because it is the same kind of scale and no string puts the two on one screen. The value *cảnh báo* is fixed by **check** and is repeated here unchanged, which is what this row requires; *thông tin* and *nghiêm trọng* are the other two. |
 | assertion | khẳng định | A fourth word was genuinely required — *điều kiện*, *kiểm tra* and *quy tắc* are already spent on routing conditions, LQA checks and routing rules. |
 | pattern | biểu thức | The regex sense only. *mẫu* is spent on **template**, which is exactly the collision this row flags. |
 | overflow | tràn | The relative measure. Kept visibly different from **giới hạn độ dài**, the absolute cap — both appear in the same checks list. |
@@ -92,18 +92,18 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | template | mẫu | And **model** is *mô hình*, not *mẫu* — this is the pair this row calls dangerous, and Vietnamese has it too. |
 | omit (from an export) | loại trừ | The third sense of English *discard*, and a third Vietnamese verb, matching the four locales that converged on an omit or exclude verb independently. `config:discardUntranslatable` destroys nothing and refuses nothing. |
 | collaborator | cộng tác viên | Distinct from **thành viên** (member) by more than a modifier, which matters because the two appear in adjacent strings on the Sharing page. |
-| member |  |  |
-| nickname |  |  |
-| claim |  |  |
-| invite |  |  |
-| revoke |  |  |
+| member | thành viên | Everyone with access, the owner included. Two clearly separate words were needed because *Members* and *collaborators* appear in adjacent strings on the Sharing page, and **cộng tác viên** shares no morpheme with this. |
+| nickname | biệt danh | Deliberately not *tên đăng nhập* (username), which the app already has as an account identity — the confusion this row names. |
+| claim | nhận | Yields all four forms the UI needs without inflection: button *nhận biệt danh*, progressive *đang nhận*, toast *đã nhận biệt danh*, hint *đã nhận rồi thì không đổi được*. *đăng ký* (register) is the more obvious Vietnamese verb for taking a unique handle and is banned by this row; *giữ chỗ* is spent on **reserved**, which is the adjacent message this row says must stay distinguishable — `collab:errors.nickname_reserved` uses it. |
+| invite | lời mời | Noun. The four statuses are translated as one set in one part of speech, per this row: *đang chờ*, *đã dùng*, *đã thu hồi*, *đã hết hạn* — the first marks an ongoing state and the other three a completed one, which is the natural Vietnamese aspect pairing and reads down a column as one paradigm. |
+| revoke | thu hồi | Button *thu hồi*, status *đã thu hồi*. Vietnamese marks the participle with a preverbal *đã* rather than by inflection, so the infinitive and the participle cannot coincide — the collapse this row warns about, in the adjacent columns of one table, cannot happen here. |
 | recording | ghi nhận | The capture process. Not *ghi chép* or *bản ghi*, either of which would collide with a content **entry** — the collision this row warns about, where "Recording paused" would read as "Entry paused". Not *nhật ký*, which is the live server **log**. The three `collab:sharing.audit*` strings take this word too, per this row and `english-review-notes.md`. |
 | stage | màn chơi | A playable level, as Vietnamese gaming uses it. *giai đoạn* is the process reading and is the single most likely mistranslation in this app; it appears nowhere in this locale. |
 | Text Styler | Tạo kiểu văn bản | Translated rather than kept in English: unlike **Pseudo Test** it names an ordinary tool rather than a synthetic language, and Vietnamese has a settled phrase for text styling. The same rendering is owed by `strings:tabs`, `colorText:title` and `sidebar:colorText`. |
 | element |  |  |
 | assistant | trợ lý | A role, not an act of assistance — *trợ giúp* is the near-miss this row names and is not used. Decided at the first meeting, in the three `strings:runs.typeChat*` run-type labels, so the chat surfaces in batch 6 inherit it rather than coining a second word. Vietnamese compounds by juxtaposition, so there is no linking form to record: the compound is simply *trợ lý AI*. |
-| theme |  |  |
-| guide |  |  |
+| theme | chủ đề | The four names are byte-identical in `settings:themes` and in `welcome:themeChooser.names` (batch 6), which this row calls the highest-risk duplication in the app: *Cổ điển*, *Pixel*, *Techno*, *Tối giản*. Two are kept in English because they are coined names rather than words — *Pixel* is the ordinary Vietnamese loan and *Techno* names a genre. |
+| guide | hướng dẫn | One word for the sidebar item and every "read the guide" link. Not *trợ giúp* (help) or *tài liệu* (documentation) — using two of them is the bug this row names. |
 | release |  |  |
 | changelog |  |  |
-| dismiss |  |  |
+| dismiss | Xóa / Đóng | Two words, because English's one covers two consequences and one of them destroys data. `account:notificationsDismiss` issues a DELETE, so it says *xóa* — the honest verb, and the opposite of the *đóng*/*ẩn* reading this row bans for that sense. `system:restarted.dismiss` (batch 5) only closes a banner and says *đóng*. Checked at each key rather than decided once, as this row requires. |
