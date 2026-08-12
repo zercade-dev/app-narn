@@ -1,0 +1,25 @@
+{
+  "title": "Selamat datang di Narn",
+  "intro": "Lihat-lihat dulu panduan di bawah sebelum Anda mulai — atau langsung siapkan brankas kredensial Anda bila sudah siap.",
+  "guidesHeading": "Panduan",
+  "browseGuides": "Telusuri panduan",
+  "setupVaultHeading": "Siap menerjemahkan?",
+  "setupVaultBody": "Siapkan brankas kredensial Anda untuk menambahkan kunci penyedia AI yang akan dipakai penerjemahan Anda.",
+  "setupVaultButton": "Siapkan brankas",
+  "themeChooser": {
+    "title": "Pilih tampilan Anda",
+    "intro": "Pilih sebuah tema dan pilih terang atau gelap — keduanya bisa Anda ubah kapan saja di Pengaturan.",
+    "themeLabel": "Tema",
+    "modeLabel": "Terang atau gelap",
+    "modes": { "light": "Terang", "dark": "Gelap" },
+    "confirm": "Pakai pengaturan ini",
+    "keepDefault": "Tetap pakai Tekno",
+    "names": { "default": "Klasik", "pixel": "Piksel", "techno": "Tekno", "minimal": "Minimal" },
+    "taglines": {
+      "default": "Tampilan NARN yang asli.",
+      "pixel": "Piksel retro yang kokoh.",
+      "techno": "Konsol neon. Bawaan yang baru.",
+      "minimal": "Hanya isinya saja."
+    }
+  }
+}

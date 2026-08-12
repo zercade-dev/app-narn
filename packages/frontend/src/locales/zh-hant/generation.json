@@ -1,0 +1,17 @@
+{
+  "contextLabel": "包含條目情境",
+  "contextHint": "在提示詞中加入額外的條目細節，以改善建議品質。",
+  "fieldContext": "情境備註",
+  "fieldSources": "來源標籤",
+  "fieldCategories": "已指派的類別",
+  "languagesLabel": "把既有譯文一併作為情境送出",
+  "languagesHint": "把每個條目在所選語言中已完成的譯文，一併作為額外情境送出。",
+  "selectAllLanguages": "全選",
+  "deselectAllLanguages": "取消全選",
+  "skipCategoriesLabel": "略過的類別",
+  "skipCategoriesHint": "帶有其中任一類別的條目，都會完全排除在這次請求之外。",
+  "skipCategoriesPlaceholder": "未選取任何項目",
+  "ignoreGlossariesLabel": "忽略既有術語表",
+  "ignoreGlossariesHint": "所選術語表中的術語會被視為已知術語：術語表生成時會把它們當成已知，讓模型不再重複建議；類別生成時，符合這些術語的條目會完全排除在請求之外。",
+  "ignoreGlossariesPlaceholder": "未選取任何項目"
+}

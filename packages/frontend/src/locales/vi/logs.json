@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "Thiết lập quy tắc điều phối",
+    "openModuleSettings": "Mở cài đặt mô-đun",
+    "openQuality": "Mở bảng chất lượng",
+    "openGlossary": "Mở bảng thuật ngữ",
+    "unlockVault": "Mở khóa kho bảo mật"
+  },
+  "translation": {
+    "start": "Đang dịch một mục sang {{language}}…",
+    "done": "Đã dịch một mục sang {{language}}.",
+    "doneFromMemory": "Đã dùng lại một bản dịch đã lưu cho {{language}}.",
+    "queued": "Đã xếp hàng {{total}} lượt dịch.",
+    "queued_other": "Đã xếp hàng {{total}} lượt dịch.",
+    "runQueued": "Đã xếp hàng một lần chạy dịch — vị trí {{position}}.",
+    "retryQueued": "Đã xếp hàng lượt thử lại — vị trí {{position}}.",
+    "retry": "Đang thử lại một bản dịch thất bại.",
+    "failedNoRoute": "Không dịch được {{count}} mục sang {{language}} — không có quy tắc điều phối nào khớp.",
+    "failedNoRoute_other": "Không dịch được {{count}} mục sang {{language}} — không có quy tắc điều phối nào khớp.",
+    "failedModuleDisabled": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} đang tắt.",
+    "failedModuleDisabled_other": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} đang tắt.",
+    "failedModuleNotFound": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} chưa được cài.",
+    "failedModuleNotFound_other": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} chưa được cài.",
+    "failedGeneric": "Không dịch được một mục sang {{language}}.",
+    "batchFailed": "Một lô {{count}} bản dịch sang {{languages}} đã thất bại.",
+    "queueStartFailed": "Không bắt đầu được lần chạy dịch.",
+    "maskMismatch": "Thẻ định dạng không còn nguyên sau khi dịch sang {{language}}.",
+    "tmRejected": "Một bản dịch đã lưu cho {{language}} không qua được kiểm tra chất lượng.",
+    "lqaRetry": "Kiểm tra chất lượng không đạt — đang yêu cầu mô hình thử lại.",
+    "authCancel": "Việc đăng nhập đã bị hủy, nên quá trình dịch dừng lại."
+  },
+  "lqa": {
+    "passed": "Kiểm tra chất lượng đạt.",
+    "failed": "Kiểm tra chất lượng không đạt.",
+    "overflow": "Bản dịch quá dài so với chỗ trống có được.",
+    "checkError": "Một phép kiểm tra chất lượng không chạy được."
+  },
+  "judge": {
+    "done": "Lượt rà soát chấm {{score}} điểm — kết luận: {{verdict}}.",
+    "suggestDone": "Lượt rà soát đã xong và có đề xuất.",
+    "suggestNoChange": "Lượt rà soát không tìm thấy gì cần đổi.",
+    "suggestionDiscarded": "Đã từ chối đề xuất."
+  },
+  "sourceReview": {
+    "done": "Rà soát nguồn: {{findings}} phát hiện.",
+    "done_other": "Rà soát nguồn: {{findings}} phát hiện."
+  },
+  "glossaryGen": {
+    "done": "Lượt sinh bảng thuật ngữ đã xong — đề xuất {{suggested}} thuật ngữ từ {{analyzed}} mục.",
+    "failed": "Sinh bảng thuật ngữ thất bại.",
+    "saveSuggestionsFailed": "Không lưu được các đề xuất thuật ngữ."
+  },
+  "categoryGen": {
+    "queued": "Đã xếp hàng lượt sinh danh mục.",
+    "done": "Sinh danh mục đã xong — {{suggestions}} đề xuất.",
+    "failed": "Sinh danh mục thất bại."
+  },
+  "stageDetails": {
+    "queued": "Đã xếp hàng lượt dịch chi tiết màn chơi.",
+    "done": "Chi tiết màn chơi đã xong — {{completed}} thành công, {{failed}} thất bại.",
+    "failed": "Dịch chi tiết màn chơi thất bại."
+  },
+  "module": {
+    "loaded": "Đã nạp mô-đun {{module}}.",
+    "instanceRegistered": "Đã thêm cấu hình {{instance}}.",
+    "instanceRegisterFailed": "Không thêm được cấu hình {{instance}}."
+  },
+  "vault": {
+    "unlocked": "Đã mở khóa kho bảo mật.",
+    "passwordChanged": "Đã đổi mật khẩu kho bảo mật.",
+    "credentialsEvicted": "Thông tin xác thực đã lưu của bạn đã bị xóa khỏi bộ nhớ."
+  },
+  "orphan": {
+    "detected": "Tìm thấy {{count}} mục không còn trong tệp nguồn.",
+    "detected_other": "Tìm thấy {{count}} mục không còn trong tệp nguồn.",
+    "linked": "Đã liên kết một mục mồ côi.",
+    "deleted": "Đã xóa một mục mồ côi."
+  },
+  "tm": {
+    "cleared": "Đã xóa sạch bộ nhớ dịch.",
+    "variantDeleted": "Đã gỡ một mục trong bộ nhớ dịch."
+  },
+  "backup": {
+    "restored": "Đã khôi phục bản sao lưu.",
+    "pruneFailed": "Không dọn được các bản sao lưu cũ."
+  }
+}

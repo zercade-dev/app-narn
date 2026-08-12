@@ -1,0 +1,10 @@
+{
+  "translateSelected": "Dịch mục đã chọn",
+  "toTranslateCount": "{{count}} lượt dịch cần chạy",
+  "progressAriaLabel": "Đã dịch {{completed}} trên {{total}} lượt",
+  "cancelRun": "Hủy lần chạy",
+  "runCancelled": "Đã hủy lần chạy:",
+  "runCompleted": "Dịch xong — {{completed}} trên {{total}} lượt thành công.",
+  "runCompletedWithErrors": "Dịch xong — {{completed}} lượt thành công, {{failed}} lượt thất bại.",
+  "savedRulesNotice": "Các lần chạy dùng quy tắc điều phối đã lưu — những chỉnh sửa chưa lưu trong trình soạn quy tắc không có tác dụng."
+}

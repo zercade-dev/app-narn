@@ -333,6 +333,44 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
   // `strings:runs.stringsProgress` read "{{completed}} / {{total}} voci"; both
   // now put the word in front of the ratio, where it labels rather than agrees.
   it: ['di', 'in', 'su', 'che', 'token', 'batch', 'byte', 'car', 's'],
+  // vi, derived from the whole-language post-token-axis survivor set — 60 of the
+  // 166 raw narrow matches, carrying these 24 distinct forms. Never from the raw
+  // set, per the calibration rule above.
+  //
+  // WHY THIS IS A LIST AND NOT A NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES ENTRY,
+  // which is the obvious move and is wrong. Vietnamese nouns have no number, so
+  // like `tr` and `ja` it has no numeral agreement for this axis to catch — but
+  // unlike either it DOES have one numeral-adjacent hazard the axis can catch:
+  // the pluralizers `các` and `những`, which are correct before a bare noun and
+  // UNGRAMMATICAL after a numeral ("{{total}} các mục" is wrong at every count).
+  // Flagging the locale inapplicable would clear that silently. So the axis stays
+  // on, and `các`/`những` must never be added to this list — that exclusion is
+  // the entry's whole point, not an oversight. `{{count}}` is skipped on the token
+  // axis, so the hazard is only ever reachable after a non-`count` token, which is
+  // exactly what this axis looks at.
+  //
+  // A SECOND FACT ABOUT THIS LOCALE: Vietnamese writes every syllable as its own
+  // space-delimited token, so a "word" axis is a SYLLABLE axis here. Half the
+  // entries below (`ngôn`, `quy`, `thuật`, `phát`, `đề`, `thành`, `thất`, `ký`,
+  // `ví`, `thao`) are the first syllable of a compound — `ngôn ngữ`, `quy tắc`,
+  // `thuật ngữ` — not free words. That is not a defect in the list; it is what the
+  // whitespace tokenizer sees, and every one of them is invariant for the same
+  // reason the whole words are. Expect this list to be longer and finer-grained
+  // than a European locale's, and expect a later batch to extend it rather than
+  // to find it complete.
+  //
+  // The 24 by class: prepositions and particles (`trên`, `vào`, `ra`, `mà`, `đã`);
+  // invariant loanwords (`token`, `byte`); adjectives (`mới`, `khác`); classifiers
+  // and count nouns (`lượt`, `lô`, `mục`, `bảng`, `điểm`); and the compound-initial
+  // syllables listed above. None inflects for number, in any construction, so a
+  // numeral in front of any of them is always grammatical.
+  vi: [
+    'trên', 'vào', 'ra', 'mà', 'đã',
+    'token', 'byte',
+    'mới', 'khác',
+    'lượt', 'lô', 'mục', 'bảng', 'điểm',
+    'ngôn', 'quy', 'thuật', 'phát', 'đề', 'thành', 'thất', 'ký', 'ví', 'thao',
+  ],
 };
 
 /**
@@ -393,8 +431,84 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
  * replaced would have cost the same while implying the axis still had work to
  * do here. If a kana counter is ever introduced, it is the counter table that
  * must catch it, not this axis.
+ *
+ * `id`: the same grammar fact as `tr`, resting on two properties rather than
+ * one. Indonesian nouns are not marked for number at all, and the ONE plural
+ * device the language has — full reduplication ("kata-kata") — is
+ * ungrammatical after a numeral, so "tiga buku" is the only well-formed shape
+ * and "tiga buku-buku" is an error rather than an alternative
+ * (docs/i18n/style/id.md, "No plural marking after a numeral"). Indonesian
+ * verbs, participles and adjectives carry no number agreement either, which
+ * matters here because the second-commonest survivor shape after a bare noun
+ * is a predicative participle ("{{completed}} berhasil", "{{failed}} gagal").
+ * So there is no wrong form for the word axis to find in either position.
+ * Measured over the finished locale: 172 raw narrow matches, 61 after the
+ * token axis, carrying 25 distinct words — bare counted nouns (entri, token,
+ * karakter, bita, bahasa, aturan, glosarium, istilah, saran, temuan, masalah,
+ * batch, contoh, tindakan, baris), invariant participles (berhasil, gagal,
+ * ditambah, diperbarui, ditimpa, ditandai, beres, masuk, keluar), the
+ * preposition `dari`, the relative pronoun `yang` and the invariant
+ * abbreviation `dtk`. A NUMERAL_WORD_AXIS_EXEMPTIONS list was the other
+ * option and would have been wrong for the reason the `ja` note gives: it
+ * treats a grammar fact as an unfinished calibration, and with 25 words
+ * already it would need extending on every future string that puts any new
+ * noun after any token.
+ *
+ * As with `tr` and `ja`, this is NOT a claim that Indonesian has no
+ * numeral-adjacent hazard. It has one, and it is the CLASSIFIER (kata
+ * penggolong): buah for objects, orang for people, lembar for sheets. That is
+ * the same shape as ja's counter problem — a lexical choice per counted
+ * object, not an agreement rule, so no regex can check it — and it is handled
+ * by the classifier rule in docs/i18n/style/id.md, which settles the question
+ * by omitting classifiers throughout. Indonesian has no case system, so the
+ * welded-suffix hazard WELDED_SUFFIX_LOCALES exists for cannot arise here
+ * either.
+ * `th`: the same fact as `ja`, and reachable by the same evidence. Thai nouns
+ * have no number morphology at all — there is no plural form for a numeral to
+ * agree with, in any construction — and plurality is carried by a numeral plus
+ * a CLASSIFIER (ลักษณนาม), which is itself invariant: "1 รายการ" and "5 รายการ"
+ * are the same characters. `Intl.PluralRules('th')` reports `["other"]` alone
+ * for both cardinals and ordinals, which is the same fact from the other side,
+ * and is why `locales/th` ships `_other` and no `_one`. Thai also blocks the
+ * optional plurality words (ทั้งหลาย, บรรดา) after a numeral rather than
+ * requiring them, so there is no form that is right at one count and wrong at
+ * another for this axis to find. Batch 1 produced 11 token-axis survivors and
+ * every one was an invariant noun, unit or clause opener (อักขระ, ไบต์, โทเค็น,
+ * and three relative clauses); a word list would therefore have to grow by
+ * every noun the language uses next to a number, which is the escalation-per-
+ * round outcome the `ja` paragraph above rejects.
+ *
+ * As with `tr` and `ja`, this is NOT a claim that Thai has no numeral-adjacent
+ * hazard. It has one, and it is the same shape as Japanese's: the choice of
+ * CLASSIFIER per counted object — รายการ for entries, แถว for CSV rows, ชุด for
+ * a glossary, ครั้ง for occurrences. That is a lexical decision per object, not
+ * an agreement rule, so no regex can check it; it is handled by the
+ * classifier-by-object table in docs/i18n/style/th.md. Unlike Japanese, Thai
+ * has no numeral-conditioned ORTHOGRAPHIC change to fall back on either: there
+ * is no rendaku/gemination analogue and no bounded native counting series, so
+ * the narrower ground the `ja` flag survives on is not even needed here.
+ * `zh-hant`: the same grammar fact as `ja`, and for Chinese it holds even
+ * more simply — a Chinese noun has no number at all, so there is no plural
+ * form for a numeral to agree with in any construction, and unlike Japanese
+ * there is no numeral-conditioned orthography either: Chinese measure words
+ * are invariant Han characters with no rendaku or gemination and no series
+ * that runs out above nine. Measured over the finished 1,879-value locale:
+ * 180 raw narrow matches, 63 after the token axis, and every one of the 63
+ * is a measure word or a plain noun sitting directly after a numeral — 個,
+ * 項, 則, 筆, 次, 頁, 倍, 秒, 字元, 位元組 and their like — each grammatical
+ * at every value its token can take. Granting them individually would be
+ * the same escalation every round with a different counter, which is the
+ * argument this file already accepted for `ja`.
+ *
+ * As with `tr` and `ja`, this is NOT a claim that Chinese has no
+ * numeral-adjacent hazard. It has the same one Japanese has: the choice of
+ * MEASURE WORD (量詞) per counted object — 個 for entries, 列 for CSV rows,
+ * 條 for rules, 筆 for records, 種 for languages, 次 for attempts. That is a
+ * lexical decision per object rather than an agreement rule, so no regex can
+ * check it; it is handled by the measure-word table in
+ * docs/i18n/style/zh-hant.md, which the whole-language sweep required.
  */
-export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja']);
+export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja', 'id', 'th', 'zh-hant']);
 
 /**
  * The script list for a locale, or `undefined` if this detector has no
@@ -831,10 +945,25 @@ function runCli() {
       // matters and isn't the same silent-clean ambiguity NUMERAL_LOCALE_SCRIPTS
       // exists to prevent: it is stated explicitly here rather than inferred
       // from an empty survivor list.
+      // The closing sentence is CONDITIONAL, and was not until 2026-08-12. It
+      // was written for `tr`, the first member of this set, and printed
+      // unconditionally — so `ja` (added in wave 1) and `th` were both told
+      // their hazard "is the welded-suffix check below" while section 1b, two
+      // lines further down the same report, printed "Not applicable — not in
+      // WELDED_SUFFIX_LOCALES" for exactly those locales. A report that
+      // contradicts itself within one screen is worse than one that says less,
+      // so the claim is now made only for a locale the welded check actually
+      // covers. See NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES: `ja` and `th` name
+      // their real hazard (counter / classifier choice) in their own style
+      // guides, because no check in this script can see it.
+      const elsewhere = isWeldedSuffixCheckSupported(locale)
+        ? ` This locale's numeral-adjacent hazard is the welded-suffix check below, not this one.`
+        : ` This locale's numeral-adjacent hazard is a lexical one no check here can see — see ` +
+          `NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES and docs/i18n/style/${locale}.md.`;
       console.log(
         `   "${locale}" counted nouns do not inflect for number, so the word axis is not applicable — ` +
-          `every token-axis survivor above is cleared unconditionally, not calibrated blank. This ` +
-          `locale's numeral-adjacent hazard is the welded-suffix check below, not this one.`,
+          `every token-axis survivor above is cleared unconditionally, not calibrated blank.` +
+          elsewhere,
       );
     } else if (survivors.length > 0 && !hasWordAxis) {
       console.log(

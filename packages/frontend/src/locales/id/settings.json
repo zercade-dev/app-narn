@@ -1,0 +1,42 @@
+{
+  "title": "Pengaturan",
+  "appearance": "Tampilan",
+  "appearanceDescription": "Pilih tampilan narn di perangkat ini.",
+  "theme": "Tema",
+  "mode": "Mode",
+  "switchToLight": "Beralih ke mode terang",
+  "switchToDark": "Beralih ke mode gelap",
+  "languageTitle": "Bahasa",
+  "languageDescription": "Bahasa antarmuka pengguna.",
+  "preview": "Pratinjau",
+  "previewHint": "Contoh kontrol yang digambar dengan tema terpilih.",
+  "previewSamples": {
+    "heading": "Judul",
+    "body": "Teks isi memperlihatkan fon dan warna dasarnya.",
+    "muted": "Teks redup tampak seperti ini.",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "edit": "Sunting",
+    "delete": "Hapus",
+    "pass": "Lulus",
+    "warn": "Peringatan",
+    "fail": "Gagal",
+    "info": "Info",
+    "inputPlaceholder": "Kolom teks",
+    "selectOptionA": "Opsi pertama",
+    "selectOptionB": "Opsi kedua",
+    "checkbox": "Kotak centang",
+    "badgeDefault": "Bawaan",
+    "badgeSecondary": "Sekunder",
+    "badgeOutline": "Bergaris",
+    "badgeDestructive": "Tegas",
+    "scrollHint": "Gulir untuk melihat bilah gulir bertema",
+    "iconsLabel": "Ikon"
+  },
+  "themes": {
+    "default": { "name": "Klasik", "description": "Tampilan klasik narn." },
+    "pixel": { "name": "Piksel", "description": "Nuansa konsol 8-bit yang kokoh." },
+    "techno": { "name": "Tekno", "description": "Terminal cyberpunk neon." },
+    "minimal": { "name": "Minimal", "description": "Datar, tenang, monokrom." }
+  }
+}

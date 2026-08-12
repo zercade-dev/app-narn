@@ -1,0 +1,69 @@
+{
+  "title": "Bảng chất lượng",
+  "loading": "Đang tải tóm tắt chất lượng…",
+  "error": "Không tải được tóm tắt chất lượng: {{message}}",
+  "empty": "Chưa có kết quả LQA nào. Hãy chạy một lượt dịch để có dữ liệu cho bảng này.",
+  "overallStat": {
+    "passRateLabel": "Tỷ lệ đạt tổng thể",
+    "results": "{{count}} kết quả LQA",
+    "entries": "{{count}} mục",
+    "legendPassed": "Đạt {{count}}",
+    "legendFailed": "Trượt {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "Vấn đề thường gặp nhất",
+    "description": "Số lượng theo từng loại vấn đề, tính trên mọi ngôn ngữ."
+  },
+  "other": "Khác",
+  "columns": {
+    "passRate": "Tỷ lệ đạt"
+  },
+  "legend": {
+    "tierHigh": "Tỷ lệ đạt cao (≥ 90%)",
+    "tierMid": "Tỷ lệ đạt trung bình (70–89%)",
+    "tierLow": "Tỷ lệ đạt thấp (< 70%)",
+    "passed": "Đạt",
+    "failed": "Trượt"
+  },
+  "checkLabels": {
+    "tag-equality": "Trùng khớp thẻ",
+    "overflow": "Tràn độ dài",
+    "length-limit": "Giới hạn độ dài",
+    "glossary-adherence": "Tuân thủ bảng thuật ngữ",
+    "forbidden-terms": "Thuật ngữ bị cấm",
+    "regex-assertions": "Khẳng định regex",
+    "number-parity": "Trùng khớp chữ số",
+    "whitespace-parity": "Trùng khớp khoảng trắng",
+    "line-break-parity": "Trùng khớp ngắt dòng",
+    "end-punctuation": "Dấu câu kết thúc",
+    "double-spacing": "Khoảng trắng lặp",
+    "double-words": "Từ lặp",
+    "untranslated": "Chưa dịch",
+    "mask-integrity": "Toàn vẹn phần che",
+    "tag-mismatch": "Lệch thẻ",
+    "too-long": "Quá dài",
+    "glossary-term-missing": "Thiếu thuật ngữ",
+    "forbidden-term": "Có thuật ngữ bị cấm",
+    "regex-assertion-failed": "Khẳng định regex không đạt",
+    "regex-config-error": "Lỗi cấu hình regex",
+    "number-missing": "Thiếu chữ số",
+    "number-added": "Thừa chữ số",
+    "whitespace-leading": "Khoảng trắng đầu",
+    "whitespace-trailing": "Khoảng trắng cuối",
+    "line-break-mismatch": "Lệch ngắt dòng",
+    "end-punctuation-mismatch": "Lệch dấu câu kết thúc",
+    "mask-mismatch": "Lệch phần che"
+  },
+  "byLanguage": {
+    "title": "Tỷ lệ đạt theo ngôn ngữ",
+    "description": "Kém nhất lên trước. Bấm vào một ngôn ngữ để xem các mục không đạt của nó."
+  },
+  "bySource": {
+    "title": "Vấn đề theo nguồn",
+    "description": "Kém nhất lên trước. Bấm vào một nguồn để xem các mục không đạt của nó."
+  },
+  "byModule": {
+    "title": "Chất lượng theo mô-đun",
+    "description": "Tỷ lệ đạt và các vấn đề, gom theo mô-đun dịch đã tạo ra từng bản dịch."
+  }
+}

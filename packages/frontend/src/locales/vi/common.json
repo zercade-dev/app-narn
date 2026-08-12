@@ -1,0 +1,15 @@
+{
+  "save": "Lưu",
+  "cancel": "Hủy",
+  "loading": "Đang tải…",
+  "changelogEntryError": "Không tải được mục nhật ký thay đổi này.",
+  "changelogShowOlder": "Xem các bản phát hành cũ hơn ({{count}})",
+  "saving": "Đang lưu…",
+  "thinking": "Đang nghĩ… {{seconds}}s",
+  "webSearch": {
+    "title": "Tìm trên web",
+    "placeholder": "Tìm trên Google…",
+    "hint": "Nhấn Enter để tìm trong tab mới",
+    "action": "Tìm"
+  }
+}
