@@ -41,9 +41,12 @@ import { THEMES } from '../../themes/theme-registry.js';
  */
 export const UI_LANGUAGE_LABELS: Record<UiLanguage, string> = {
   en: 'English',
+  de: 'Deutsch',
   es: 'Español',
   fr: 'Français',
+  ja: '日本語',
   ru: 'Русский',
+  tr: 'Türkçe',
 };
 
 export function SettingsView() {

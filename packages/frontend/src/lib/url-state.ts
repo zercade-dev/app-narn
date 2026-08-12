@@ -1,8 +1,23 @@
 import type { ShellView, Tab } from '../stores/view-store.js';
 import type { UiLanguage } from '../stores/ui-settings-store.js';
 
-/** UI locales accepted in `?lang`. `satisfies` keeps this in lockstep with UiLanguage. */
-export const UI_LANGS = ['en', 'es', 'fr', 'ru'] as const satisfies readonly UiLanguage[];
+/**
+ * UI locales accepted in `?lang`, and the order the picker renders them in.
+ * `satisfies` keeps this in lockstep with UiLanguage.
+ *
+ * English first because it is the source language and the default; the rest
+ * alphabetical by code. A mechanical rule beats taste here — the list grows
+ * with every wave, and "where does the new one go" should never be a decision.
+ */
+export const UI_LANGS = [
+  'en',
+  'de',
+  'es',
+  'fr',
+  'ja',
+  'ru',
+  'tr',
+] as const satisfies readonly UiLanguage[];
 
 export function isUiLang(value: string | null | undefined): value is UiLanguage {
   return value != null && (UI_LANGS as readonly string[]).includes(value);
