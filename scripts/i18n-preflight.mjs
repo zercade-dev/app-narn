@@ -463,7 +463,6 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
  * by omitting classifiers throughout. Indonesian has no case system, so the
  * welded-suffix hazard WELDED_SUFFIX_LOCALES exists for cannot arise here
  * either.
- */
  * `th`: the same fact as `ja`, and reachable by the same evidence. Thai nouns
  * have no number morphology at all — there is no plural form for a numeral to
  * agree with, in any construction — and plurality is carried by a numeral plus
