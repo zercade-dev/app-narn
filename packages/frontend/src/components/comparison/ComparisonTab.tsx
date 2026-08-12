@@ -873,11 +873,18 @@ export function ComparisonTab({
       // ignore cancel errors
     }
     setBulkTranslateRunId(null);
-    // The string is shared with a context that appends a reason after a colon;
-    // this toast has no reason to append, so the colon comes off. Strip either
-    // width: a CJK locale writes the full-width "：" and stripping only the
-    // ASCII one would leave it dangling at the end of the toast. The Japanese
-    // batch found this by writing the value without a colon at all to avoid it.
+    // `batch:runCancelled` ends in a colon that nothing appends to — this is
+    // its only call site, and always has been — so the colon comes off here.
+    //
+    // Strip either width. A CJK locale writes the full-width "：" its
+    // typography calls for, and stripping only the ASCII one would leave it
+    // dangling at the end of the toast. No shipped locale trips that today
+    // because the Japanese batch found it and wrote its value with no colon at
+    // all; the widened strip is so the next CJK locale does not have to.
+    //
+    // (An earlier version of this comment said the string was shared with a
+    // context that appends a reason. That was inferred from the colon and was
+    // never true.)
     toast.info(
       tBatch('runCancelled')
         .replace(/[:：]\s*$/u, '')
