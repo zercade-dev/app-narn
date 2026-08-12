@@ -1073,6 +1073,24 @@ act on it.** An assertion about a file travelled through three agents in the pil
 anyone opened the file. Three separate defects had exactly that shape, and each one was a
 single command away from being falsified.
 
+**Where the defects actually end up, once the strings are clean.** Every finding in the last
+two rounds of the first wave — all ten of them, across three languages — was in a *document*,
+not a string, and every one had the same shape: **a claim that was true or unfalsifiable when
+it was written, and became checkable later.** A prescription for a namespace that had not
+shipped. A budget measured on one batch's members. A count derived from a list. A quoted
+rendering nobody could resolve to a key.
+
+Two halves, and only one is guarded. The **citation** half now has a mechanism: the guard
+checks every quoted rendering attached to a resolvable key, and prints a NOTE naming the ones
+whose key it cannot resolve, so an unchecked citation is visible rather than silent. The
+**prose** half has nothing — a sentence asserting how many headers exist, which controls a
+component renders, or where a string is displayed is checked by a person or not at all.
+
+So when you write a sentence of that kind, **write it so a later reader can falsify it**: name
+the file and the symbol, give the command, and prefer a claim that a script can re-run to a
+number you counted once. A count in a document is a fact about the moment it was written; a
+method is a fact about the code.
+
 The first three-language backfill produced **seven** more of them, in style guides, in
 reviews and in this runbook, and they sharpened rule 3 into three corollaries. Each is here
 because it cost a round.
