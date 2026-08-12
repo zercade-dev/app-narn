@@ -992,6 +992,19 @@ const NON_LATIN_SCRIPT_LOCALES = new Set(['ru', ...UNSPACED_SCRIPT_LOCALES]);
  * `namespaces` map, so checkStyleGuide's own gating already treats it as
  * unshippable — the safe outcome — without this function needing to know
  * what a real namespace looks like. */
+/**
+ * Does an unqualified key-span look like an abbreviated translation key rather
+ * than the file or script reference such spans usually are? A dotted
+ * identifier with no slash and no source-file extension — `toast.deleted`,
+ * `status.revoked` — is almost certainly a key someone wrote without its
+ * namespace. Used only to COUNT them; nothing is resolved or checked from it.
+ */
+export function looksLikeAbbreviatedKey(key) {
+  if (key.includes('/')) return false;
+  if (/\.(md|mjs|js|ts|tsx|json|css|html)$/i.test(key)) return false;
+  return /^[A-Za-z][\w-]*(?:\.[\w-]+)+$/.test(key);
+}
+
 export function namespaceOfKey(key) {
   const idx = key.indexOf(':');
   return idx === -1 ? null : key.slice(0, idx);
@@ -1157,11 +1170,28 @@ export function checkStyleGuide(locale, fileText, namespaces, corpusWords, optio
   const offenders = [];
   let citationsChecked = 0;
   let prescriptionsSkipped = 0;
+  const abbreviatedKeysDropped = [];
   for (const block of flattenStyleParagraphs(fileText)) {
     for (const { key, text } of extractStyleCitations(block)) {
       if (nonLatinScript && !hasNonAsciiLetter(text)) continue; // an English gloss with no paren to mark it as one
       const namespace = namespaceOfKey(key);
-      if (namespace === null) continue; // a file/script reference, not a translation key
+      if (namespace === null) {
+        // Usually a file or script reference the key-span character class also
+        // matches (`terminology/de.md`, `check-locales.mjs`) — genuinely not a
+        // citation of anything. But it is ALSO how an abbreviated key looks: a
+        // guide writing `` `toast.deleted` `` rather than
+        // `` `orphans:toast.deleted` `` lands here and is dropped in silence.
+        //
+        // A whole-language sweep found 23 of these across the three guides,
+        // i.e. real citations nobody was checking, and the locale that found it
+        // had a rule in its own file resting on the mistaken belief that
+        // something else was suppressing them. Guessing the namespace would
+        // mean resolving a bare suffix against 24 candidates, so this counts
+        // them and says so instead: a number the reader can act on beats a
+        // silent skip, and qualifying the key is a one-word fix in the guide.
+        if (looksLikeAbbreviatedKey(key)) abbreviatedKeysDropped.push(key);
+        continue;
+      }
       if (!namespaces.has(namespace)) {
         prescriptionsSkipped += 1;
         continue; // prescription: this namespace has not shipped for this locale yet
@@ -1171,7 +1201,7 @@ export function checkStyleGuide(locale, fileText, namespaces, corpusWords, optio
       offenders.push(`${key}: "${text}"`);
     }
   }
-  return { offenders, citationsChecked, prescriptionsSkipped };
+  return { offenders, citationsChecked, prescriptionsSkipped, abbreviatedKeysDropped };
 }
 
 // ---------------------------------------------------------------------------
@@ -1237,6 +1267,7 @@ function runCli() {
   let styleLocalesSkipped = 0;
   let styleCitationsChecked = 0;
   let stylePrescriptionsSkipped = 0;
+  const styleAbbreviatedKeys = [];
 
   for (const file of styleFiles) {
     const locale = basename(file, '.md');
@@ -1251,9 +1282,11 @@ function runCli() {
       offenders,
       citationsChecked,
       prescriptionsSkipped,
+      abbreviatedKeysDropped,
     } = checkStyleGuide(locale, fileText, namespaces, corpusWords);
     styleCitationsChecked += citationsChecked;
     stylePrescriptionsSkipped += prescriptionsSkipped;
+    for (const key of abbreviatedKeysDropped) styleAbbreviatedKeys.push(`${locale}: \`${key}\``);
     if (citationsChecked > 0 || prescriptionsSkipped > 0) styleLocalesChecked += 1;
     if (offenders.length > 0) failures.push([`${locale} (style guide)`, offenders]);
   }
@@ -1279,6 +1312,19 @@ function runCli() {
       `(${styleLocalesSkipped} with no shipped locale skipped), ${styleCitationsChecked} citation(s) ` +
       `checked (${stylePrescriptionsSkipped} prescription(s) for an unshipped namespace skipped).`,
   );
+
+  // Reported rather than silently dropped: a key written without its namespace
+  // cannot be resolved to one, so it is not checked — but it is a citation
+  // somebody meant, and until this line existed nobody could tell how many
+  // there were. Qualifying the key in the guide is what makes it checkable.
+  if (styleAbbreviatedKeys.length > 0) {
+    console.log(
+      `  NOTE — ${styleAbbreviatedKeys.length} style-guide citation(s) name a key with no ` +
+        `namespace, so they cannot be checked. Qualify the key (\`orphans:toast.deleted\`, ` +
+        `not \`toast.deleted\`) to bring each one under the guard:`,
+    );
+    for (const entry of styleAbbreviatedKeys) console.log(`    ${entry}`);
+  }
 }
 
 // Only run as a CLI (the test suite imports the pure functions above).
