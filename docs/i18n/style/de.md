@@ -63,9 +63,9 @@ now reads "Erst eine bestehende zurückziehen, dann eine neue erstellen."
 
 The du-imperative is kept for the narrower case: a **direct invitation to act**, which is
 usually an instruction carried out on the screen in front of the reader and occasionally one
-carried out elsewhere. **Eight** instances exist across the whole shipped locale, derived by
-matching every `de/*.json` value against a list of German imperative forms rather than from
-memory — read the method note below before you quote the number:
+carried out elsewhere. **Nine** instances exist across the shipped locale as of round 5, derived
+**without a verb list** — read the method note below before you quote the number, because every
+previous move of this count was the method rather than a new string:
 
 - **In a field, on this screen** — `account:deleteTokenSent`, `account:mfaDisableHint`.
 - **On another device** — `collab:nickname.claimOnDesktop`, which reuses batch 2's
@@ -75,11 +75,14 @@ memory — read the method note below before you quote the number:
   each ask the reader to send an email and are each concatenated with a mailto link. They are
   du-imperatives and they are **not** field-or-device instructions, so they are named here rather
   than left to contradict the sentence above.
-- **About the reader's own choice** — `config:structuredOutputExperimentalWarning` and
-  `config:structuredOutputLunaWarning`, licensed by the register section's own clause. They are
-  siblings, one paragraph apart in the same panel, and they carry the same verb.
+- **About the reader's own choice** — `config:structuredOutputExperimentalWarning` (which carries
+  **two**, *Probier* and *behalte*), `config:structuredOutputLunaWarning` and
+  `config:ignoreBatchSizeLimitDescription` ("… — lass die Option aus, sofern du nicht weißt …").
+  All three are advice about a setting the reader is choosing, licensed by the register section's
+  own clause; none is a corrective error. The first two are siblings one paragraph apart in the
+  same panel and carry the same verb.
 
-None of the eight is a corrective error, so the rule above holds without exception. **Batch 5
+None of the nine is a corrective error, so the rule above holds without exception. **Batch 5
 owns `errors`**, so it inherits the split rather than re-deciding it.
 
 **Batch 5 applied it, and the count of du-imperatives across the whole locale is unchanged by
@@ -95,29 +98,52 @@ six use *du* and neither is an imperative: English writes them as **statements a
 follows it. The rule splits **imperative against infinitive**; a du-statement is neither, and
 turning one into an infinitive would drop the direct address English chose.
 
-**State the method with the count, and match anywhere in the value — not sentence-initially.**
-That is the whole lesson of this enumeration, which has now moved three times (three → six →
-eight) and whose last two moves were caused by the *method*, not by a new string. A du-imperative
-in German is verb-first **in its clause**, not in its sentence, so a value that opens with a
-subordinate clause hides one in the middle: `config:structuredOutputLunaWarning` puts *probier*
-after a *Wenn …* condition and `strings:viewNotFoundContact` puts *melde* after one. A
-sentence-split scan cannot see either by construction — and both verbs are ordinary words any
-list would carry, so "a verb outside the list would be missed", which is what this paragraph used
-to warn about, pointed at the wrong risk entirely.
+**Do not use a verb list. Enumerate and read.** This count has moved four times — three → six →
+eight → nine — and **every** move was the method, never a new string. Two failure modes produced
+them, and a method has to defeat both:
 
-The method that returns the eight above: match the imperative forms **at any clause boundary**
-(after sentence punctuation *or* a comma) across every `de/*.json` value, then read the hits.
-Re-run over the whole corpus, not over your own batch. A second pass matching the same forms
-**anywhere at all** in a value returns only four more occurrences, all of them the noun
-*Versuch(e)* in `logs:translation.lqaRetry` and `vault:remainingAttemptsHint*` — so the
-clause-boundary rule is tight enough to be worth running and loose enough to catch the two the
-sentence rule missed.
+- **Where the verb sits.** A German du-imperative is verb-first **in its clause**, not in its
+  sentence, and a clause can open after far more than a full stop. `strings:viewNotFoundContact`
+  puts *melde* after a *Wenn …* comma, `config:structuredOutputExperimentalWarning` puts *behalte*
+  after a bare *und*, and `config:ignoreBatchSizeLimitDescription` puts *lass* after an **em
+  dash**. A sentence-split scan misses all three; a comma-only clause split still misses the last
+  two.
+- **Which verbs you thought of.** A list can only ever confirm that nothing hides *among the forms
+  already in it*. The `lass` miss is exactly this: the list that produced the eight contained
+  *versuch* and not *lass*, so its own clean second pass — four occurrences, every one the noun
+  *Versuch(e)* — proved nothing about `lassen` at all. **A negative result from a list is not
+  evidence of absence.**
 
-> **Corrected 2026-08-12 (round-5 review, I2), left visible.** The paragraph above previously
-> claimed six, "derived by scanning every `de/*.json` value for a sentence-initial imperative".
-> The count was wrong and the stated method is *why* it was wrong — the third round running that
-> this list has moved. Both new entries were already licensed by rules this section states, so
-> **no string changed** and the rule was never in doubt; the enumeration and its method did.
+**The method that produced the nine, which needs no verb list and can therefore find a form
+nobody thought of:**
+
+1. Split every `de/*.json` value at **every** clause boundary — start of value, sentence
+   punctuation, comma, semicolon, colon, em/en dash, bracket, bullet, slash, **and** the
+   coordinating conjunctions *und / oder / aber / sondern / denn*. Placeholders are blanked first.
+2. Collect the **distinct clause-initial tokens** and read the whole set. It is a few hundred
+   (~800 at the round-5 tree, and it grows with every batch — re-enumerate, never reuse a
+   number). Reading it is minutes, and it surfaces a form you have never seen because you are
+   reading the corpus rather than querying your own assumptions.
+3. Close the one shape step 2 cannot see — a **fronted adverbial before the verb** — by collecting
+   the distinct clause-**second** tokens and reading those too (~500 at the round-5 tree). Every
+   verb form in that set today is an infinitive, a participle, or a 2sg with an explicit *du*
+   subject, so the hole is empty and the 46-odd values opening *Zuerst / Jetzt / Bitte / Erst* are
+   all infinitives.
+
+Re-run both passes over the **whole corpus**, not over your own batch, and re-run them after your
+last string edit. If a later round ever does fall back to a verb list, say so in this paragraph
+and name what closes it — an unstated list is what has cost this enumeration four rounds.
+
+> **Corrected twice on 2026-08-12, both left visible.** At the round-5 **review** this paragraph
+> claimed six, "derived by scanning every `de/*.json` value for a sentence-initial imperative";
+> the count was wrong and the stated method was why. The repair diagnosed that correctly — *verb-
+> first in its clause, not its sentence* — and then **wrote a method that did not implement its
+> own diagnosis**, narrowing "anywhere in the value" back to "after sentence punctuation or a
+> comma" three lines later, and deleting the list caveat as "the wrong risk" when the next
+> survivor, `config:ignoreBatchSizeLimitDescription`, was precisely that risk. The round-5
+> **re-review** found it: nine. **A repaired reason is a new claim and inherits none of the old
+> one's checking** — the runbook says so, and this paragraph is the worked example. No string has
+> ever moved for this finding across all four rounds; the rule was never in doubt.
 
 > **Corrected 2026-08-12 (round-4 re-review, R2), left visible.** This paragraph first said
 > "three shipped instances, all of that kind" and omitted `account:reportBugsPrefix` — a
@@ -449,10 +475,12 @@ the narrow scope the lexicon's *entry* reservation allows.
 > the stronger ground that it would be a second word for the *Logging* this locale already
 > ships. Only the evidence was wrong, and both rows now say so.
 
-**How a log line narrates: four shapes, and they are chosen by the subject, not by the event.**
-`logs` is the only namespace in the product whose text is narration of things that already
-happened, and batch 5 settled a convention over all 59 of its lines. Batch 6's `backup`,
-`orphans` and `stage-details` narrate the same events, so this binds them.
+**How a log line narrates: seven shapes, chosen by the subject and by what kind of thing is being
+reported — not by the event.** `logs` is the only namespace in the product whose text is narration
+of things that already happened. Batch 5 settled the system below over the whole namespace; batch
+6's `backup`, `orphans` and `stage-details` narrate the same events, so it binds them. **Count
+shapes, not lines** — the plural siblings and the unreachable bare keys make any line count
+misleading, which is exactly the error the first version of this section made.
 
 | Shape | When | Example |
 | --- | --- | --- |
@@ -460,22 +488,33 @@ happened, and batch 5 settled a convention over all 59 of its lines. Batch 6's `
 | **`wurde` / `wurden` + participle** | a completed event whose subject **does** take an article, so the bare headline would read as a fragment | `logs:module.loaded` "Das Modul {{module}} wurde geladen.", `logs:orphan.deleted`, `logs:tm.variantDeleted` |
 | **`wird` / `werden` + participle** | in flight, not finished — the control-shape table's progress row, applied to narration | `logs:translation.start`, `logs:translation.retry` "Eine fehlgeschlagene Übersetzung wird wiederholt." |
 | **`konnte(n) nicht` + passive infinitive** | a failure the app attempted and could not complete | `logs:translation.queueStartFailed`, `logs:backup.pruneFailed`, all six `failed*` plural forms |
+| **`ergab` + object** (Präteritum, bare subject) | a completed **evaluation** reporting what it produced, where a participle would have to invent a verb English does not have | `logs:judge.done` "Review ergab Punktzahl {{score}} — Urteil: {{verdict}}.", `logs:judge.suggestNoChange` |
+| **Nominal `… in der Warteschlange`** | queued — a *state* the item is now in, not an event that happened to it; German has no idiomatic participle for it, and `strings:runs.statusQueued` "In Warteschlange" already ships the nominal | `logs:translation.runQueued`, `logs:translation.retryQueued`, `logs:categoryGen.queued`, `logs:stageDetails.queued` |
+| **Label-colon-value tail** | any line reporting a **number** that is not `count` — forced by the counting section rather than chosen, and it attaches to whichever shape above the line already has | `logs:sourceReview.done` "Quelltext-Review — Befunde: {{findings}}.", `logs:stageDetails.done`, `logs:translation.queued`, `logs:orphan.detected` |
 
-**Two licensed departures, named so a later batch does not "harmonize" them.** A *state* is not
+**Three licensed departures, named so a later batch does not "harmonize" them.** A *state* is not
 an event and stays copular — `logs:lqa.overflow` is "Die Übersetzung ist zu lang für den
-verfügbaren Platz.", following its own English. And an **unaccusative** verb takes `sein` +
-participle rather than a passive, because there is no agent to demote:
-`logs:translation.batchFailed` "Ein Batch ist fehlgeschlagen" and `logs:translation.maskMismatch`.
-The one **active** Perfekt in the namespace, `logs:translation.tmRejected`, is licensed by its own
-English, which is active with a full subject and object, and by the idiom *die Prüfung bestehen*,
-which has no natural passive here.
+verfügbaren Platz.", following its own English. An **unaccusative** verb takes `sein` + participle
+rather than a passive, because there is no agent to demote: `logs:translation.batchFailed` "Ein
+Batch ist fehlgeschlagen" and `logs:translation.maskMismatch`. And the one **active Perfekt** in
+the namespace, `logs:translation.tmRejected`, is licensed by its own English — active with a full
+subject and object — and by the idiom *die Prüfung bestehen*, which has no natural passive here.
 
-> **Added 2026-08-12 (round-5 review, I3).** The convention held 58 of 59 lines and was written
-> down nowhere, which is the runbook's non-negotiable rule that anything binding a later batch goes into the lexicon or the style file in the same change: a decision that binds a later batch belongs in
+> **Added 2026-08-12 (round-5 review, I3).** The convention was in the file and written down
+> nowhere, which is the runbook's non-negotiable rule that anything binding a later batch goes into the lexicon or the style file in the same change: a decision that binds a later batch belongs in
 > this file, not in a batch report. The one line that broke it was `logs:judge.suggestNoChange`,
 > shipped as an article-plus-Perfekt active clause — the only one in the namespace — directly
 > against its own sibling `logs:judge.done`, which the same engine emits into the same stream with
 > a bare subject and a Präteritum. It now reads "Review ergab keinen Änderungsbedarf."
+>
+> **Corrected at the round-5 re-review, left visible.** The first version of this section claimed
+> **four** shapes covering "all 59 lines", and that overstated it: three further shapes were in the
+> file unrecorded — the Präteritum headline the finding itself was about, licensed only inside this
+> blockquote and not in the table that binds; the queue-state nominal; and the label-colon-value
+> tail, which the same fix round rewrote `logs:orphan.detected` *into*. A table that binds a later
+> batch has to carry every shape that batch will meet, and a note inside a correction does not
+> bind. Re-derived by classifying all 65 shipped values mechanically rather than by re-reading the
+> table.
 
 **Three English verbs collapse onto *Entfernen*; a fourth English word deliberately does not.**
 `system:restarted.dismiss` and `system:cancelled.dismiss` are English *Dismiss*, the same word
