@@ -343,7 +343,7 @@ it was false, and is restated here rather than quietly swapped.**
 the batch report — called it "the placeholder of the input the user types a vault key name into",
 citing `VaultEditorDialog.tsx:281` and `:301`. Nothing is typed at either. `:281` is a
 `ComboboxInput` on the `row.existing` branch that is **`disabled` with `value={row.key}`**, and
-`row.key` is never empty for an existing row (`:97` builds the rows from the fetched key list), so the
+`row.key` is never empty for an existing row (`:99` builds the rows from the fetched key list), so the
 placeholder cannot render there at all; `:301` is `<SelectValue placeholder={t('keyPlaceholder')} />`
 on a `<Select>` whose options come from the modules' `requiredEnvVars`.
 
@@ -365,13 +365,6 @@ documents.
 independently described the control the same way and neither had opened the file — agreement between
 two guesses is not evidence. The runbook's rule 3 says a claim about a key is checked by whoever is
 about to act on it; a claim about a *control* is no different.
-
-**Why `ja` is the first locale to see it, which decides the entry's scope.** "KEY_NAME" is 8
-characters and one whitespace-delimited word, so it clears `MIN_UNSPACED_CHARS` (8) and fails
-`MIN_WORDS` (3): no spaced locale can ever surface it. That is the exact situation
-`isSubstantial()`'s own comment describes for the six product names batch 2 surfaced. The reason is
-language-independent, so the proposed entry is **`*:vault:keyPlaceholder`**, not a `ja:` one.
-Requested from the controller; `scripts/` is not this batch's to edit.
 
 **There was never a "main tab bar", and that mistake is the most valuable thing this batch
 found.** Batch 1's table carried a separate soft *Main tab label* row, and the runbook's own
@@ -653,24 +646,32 @@ English uses three words and Japanese needs four, because the operations really 
   「{{count}}語の定数を解除」, `glossary:unassignGlossary` 「用語集の割り当てを解除」) — 外す takes a
   member out of a collection, 解除 turns a flag off.
 
-**Batch 4's two licensed collisions, stated so the next collision sweep does not re-open them:**
+- **消去 wipes a remote store.** `glossary:confirmPushReplaceTitle`
+  「DeepLの古いエントリを消去しますか？」, `glossary:pushToDeepLReplace` 「送信して古い分を消去」,
+  `glossary:confirmPushReplaceConfirm` 「消去して送信」. This is the same 消去 batch 1 shipped for
+  `config:tm.clearAll` 「すべて消去」 — content the user can see, gone.
+
+**Batch 4's two licensed collisions, stated so the next collision sweep does not re-open them.**
+(This block sits *after* the four verbs on purpose: the fix round first inserted it between 外す and
+消去, which left the promise two paragraphs up — "Japanese needs four" — showing only three.)
 
 - 「取り消し済み」 covers `collab:invites.status.revoked` (*Revoked*) and the shipped
   `strings:runs.revertedBadge` (*Reverted*) — two different operations, a cancelled invite and an
   undone translation edit, and both are status badges in tables, which is what makes it worth
   naming. Licensed: Sharing and Activity are different tabs and cannot co-render. 失効 was rejected
   because it means *lapsed* and would collide with 「期限切れ」 one row above it in the same status set.
-- 「無効」 gains a fifth member, `account:mfaStatusNotEnabled` (*Not enabled*), joining
-  `config:reviewProgressInactive`, `config:inactiveLabel`, `config:module.reasoningEffortDisabled`
-  and `glossary:disabled`. The licensed-collapse list further down names *inactive* / *Inactive* /
-  *Disabled* / *Off* but not *Not enabled*; it is the same off-state concept, and Account and Global
-  Config are mutually exclusive `view` values. It also cannot co-render with
-  `account:mfaDisableButton` 「無効化」 in its own section — `MfaSection.tsx` paints status+Disable
-  only when MFA is enrolled and status+Enable only in the else branch.
-- **消去 wipes a remote store.** `glossary:confirmPushReplaceTitle`
-  「DeepLの古いエントリを消去しますか？」, `glossary:pushToDeepLReplace` 「送信して古い分を消去」,
-  `glossary:confirmPushReplaceConfirm` 「消去して送信」. This is the same 消去 batch 1 shipped for
-  `config:tm.clearAll` 「すべて消去」 — content the user can see, gone.
+- 「無効」 gains a fifth member, `account:mfaStatusNotEnabled` (*Not enabled*). The five English
+  values it now covers are *inactive* (`config:reviewProgressInactive`), *Inactive*
+  (`config:inactiveLabel`), *Disabled* (`config:module.reasoningEffortDisabled`), *Off*
+  (`glossary:disabled`) and *Not enabled*. **The licensed-collapse list further down names only the
+  first three** — its parenthesis reads exactly `("inactive" / "Inactive" / "Disabled" are all
+  「無効」)`; *Off* was never added to it in batch 3, and *Not enabled* joins them now. (The first
+  version of this bullet asserted that list contained *Off* as well. It does not — a claim about
+  another part of this same file, made without re-reading it, which is the tracked failure class in
+  miniature and is left visible here rather than silently corrected.) All five are the same
+  off-state concept; Account and Global Config are mutually exclusive `view` values. It also cannot
+  co-render with `account:mfaDisableButton` 「無効化」 in its own section — `MfaSection.tsx` paints
+  status+Disable only when MFA is enrolled and status+Enable only in the else branch.
 
 **A batch-2 divergence, fixed in batch 3's fix round — four `strings` keys, one of them an
 `aria-label`.** `strings:bulk.removeCategory` ("Remove category") shipped in batch 2 as
@@ -819,7 +820,17 @@ actually does.
   It is rejected here because 前へ reads better in both controls, not because nothing shorter
   exists.
   **The licence has one hard boundary, and batch 2 crossed it once.** A collapse is licensed
-  only where the two keys **cannot co-render**. *Translate* was in the list above until review
+  only where the two keys **cannot co-render** — *unless the difference English is marking is
+  number, part of speech, or an article*, which carry nothing into Japanese and therefore cannot
+  be preserved by any rendering. That exception is not new and is not a softening: it is the same
+  principle stated four bullets down ("Number and part-of-speech carry no information into
+  Japanese"), and it is what already licenses 用語集 over 用語集 in the guide rail, 共有 over 共有 and
+  カテゴリ over カテゴリ across a rail label and a page title, and — batch 4 — メンバー over メンバー
+  in one card, 環境設定 over 環境設定, and プロジェクトへの参加 over itself. Every one of those pairs
+  plainly **does** co-render, so stating the boundary absolutely made the file contradict its own
+  shipped decisions in six places. **What the boundary still forbids absolutely is a collapse over
+  two English strings that differ in *meaning*** — that is the case batch 2 crossed.
+  *Translate* was in the list above until review
   found that its rendering would reach the sidebar and land on top of `strings:tabs.strings` —
   see the group-heading section below for the mechanism, which is **not** direct co-rendering
   and is the more useful thing to know.
@@ -1031,19 +1042,56 @@ quotes the rule. The table is now derived mechanically, not by hand:
 | レビュー ⊂ 手動レビュー | Review ⊂ Manual review | **yes** |
 | 用語 ⊂ 用語集 | Terminology ⊄ Glossary | no |
 
-**The correct premise is not "English mirrors it" — it is that each pair is a licensed
-heading-over-specialising-child or root-over-compound relation.** The four mirrored pairs need no
-further argument. The five unmirrored ones each rest on grounds recorded elsewhere in this file or in
-`terminology/ja.md`: 設定/環境設定 on the three-way 設定 hazard below (one 設定 family, distinguished
-by heads, exactly as English distinguishes Config / Global Config / Settings); 用語/用語集 on the
-*glossary term* row's one-word-family argument, where the head 集 carries the distinction;
-翻訳/翻訳作業 on the round-2 rename that created the prefix **deliberately**, to replace an equality;
-and 翻訳/翻訳メモリ and 翻訳/翻訳AIレビュー on the same footing as 翻訳作業 — 翻訳 is the app's root
-morpheme for the whole domain, so every compound built on it shares it, which is what Japanese
-compounding does and not evidence of drift. **English is a useful corroboration when it happens to
-agree; it is not the test.** A locale whose morphology compounds more than English's will always show
-more substring relations than English does, and reading that as a defect would force it to invent
-synonyms.
+**The English column is case-folded, and the number changes if it is not.** Four rows read "yes"
+under case-insensitive comparison; a **strict** byte-for-byte substring test returns **one** — only
+Config ⊂ Global Config — because English writes "Source AI **r**eview" / "Translation AI **r**eview" /
+"Manual **r**eview" against a heading capitalised "Review". The normalisation is stated because this
+whole section exists to correct figures that were wrong, and a figure whose value depends on an
+unstated fold is the same defect wearing a smaller hat. It moves the conclusion **further** in its own
+direction — English mirrors even less than the table shows — so nothing below depends on which number
+you take.
+
+**The test this replaces the old premise with, and its scope, which is the load-bearing part.**
+
+> **Applies to a *proper substring* relation only.** For two labels that render **identically**, the
+> test is the co-render one further down, unchanged — not this.
+
+Within that scope: **each pair is a licensed heading-over-specialising-child or root-over-compound
+relation.** The four mirrored pairs need no further argument. The five unmirrored ones each rest on
+grounds recorded elsewhere in this file or in `terminology/ja.md`: 設定/環境設定 on the three-way 設定
+hazard below (one 設定 family, distinguished by heads, exactly as English distinguishes Config /
+Global Config / Settings); 用語/用語集 on the *glossary term* row's one-word-family argument, where
+the head 集 carries the distinction; 翻訳/翻訳作業 on the round-2 rename that created the prefix
+**deliberately**, to replace an equality; and 翻訳/翻訳メモリ and 翻訳/翻訳AIレビュー on the same
+footing — 翻訳 is the app's root morpheme for the whole domain, so every compound built on it shares
+it.
+
+**Why the scope line is not pedantry.** This file uses *collapse* for two strings rendering the
+**same**, and "a heading over its own child" read at equality would license `guide.groupTranslate`
+「翻訳」 sitting on top of `strings:tabs.strings` 「翻訳」 — the exact equality round 2 spent a rename
+removing. A structural licence must never reach equality; equality keeps the co-render test.
+
+**Two riders on the disjunction, both learned from this locale's own nine pairs.**
+
+1. **"Root over compound" is morphology, not hierarchy, so it makes a pair *defensible*, not
+   *settled*.** Only four of the nine are genuinely a heading over its own child (レビュー over its
+   three, 用語 over 用語集). The other five are peers in different rail blocks — or inverted, with
+   翻訳 the *child* and 翻訳作業 its heading — so the containment implies a hierarchy the rail does
+   not have. That is precisely the Config/Settings hazard below. **When neither label is the other's
+   group heading, the licence holds only if the distinguishing element is written down somewhere.**
+   Japanese survives here because the 設定 hazard has its own section; a locale without one would
+   ship the hazard silently.
+2. **Compounding is not the only asymmetry — English's inflection accounts for three of the five.**
+   The mechanism fits 用語/用語集 (Terminology/Glossary) and 設定/環境設定 (Config/Settings), where
+   English reaches for a separate lexeme. It does **not** fit the three 翻訳 pairs: English compounds
+   there perfectly well ("Translation Memory", "Translation AI review") and the mirror breaks because
+   English marks **number and part of speech** — *Translations* vs *Translation…*, *Translations* vs
+   *Translate* — where Japanese marks neither. State both causes, because a language told to look for
+   compounding and finding inflection will conclude the rule does not apply to it.
+
+**English is corroboration where it agrees; it is not the test.** A locale that compounds, or whose
+source inflects, will always show more substring relations than English does, and reading that as
+drift would force it to invent synonyms.
 
 ### The three-way 設定 hazard, and why *Settings* is 「環境設定」
 
