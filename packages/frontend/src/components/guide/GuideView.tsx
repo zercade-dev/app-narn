@@ -148,7 +148,15 @@ export function GuideView() {
                 variant="outline"
                 size="sm"
                 data-testid="guide-content-retry"
-                onClick={() => setRetryToken((n) => n + 1)}
+                onClick={() => {
+                  // Clear the error immediately (in the click handler, not an
+                  // effect) so the UI drops back to the loading state while
+                  // the retried load is in flight — otherwise the error
+                  // panel (Retry button included) stays on screen for the
+                  // whole retry with no feedback that anything happened.
+                  setLoadedGuide(null);
+                  setRetryToken((n) => n + 1);
+                }}
               >
                 {t('collab:routing.retry')}
               </Button>
