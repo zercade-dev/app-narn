@@ -294,7 +294,14 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
   // The two survivors NOT on this list were a real defect and were fixed in the
   // string instead: `strings:runs.usageTokens` read "{{input}} Eingabe /
   // {{output}} Ausgabe", where both nouns would have had to pluralise.
-  de: ['von', 'entfernen', 'kopieren', 'markiert'],
+  // `s` is the SI symbol for second, not a word: invariant for number by
+  // definition, and German typography puts a space between the numeral and the
+  // unit symbol (Duden, and SI itself). The batch that met it could have
+  // cleared this detector for free by writing `{{seconds}}s` closed up, the way
+  // English does, and escalated instead — which is the right call twice over,
+  // since the welded form is wrong in German and "the guard went quiet" is not
+  // a reason to write anything.
+  de: ['von', 'entfernen', 'kopieren', 'markiert', 's'],
 };
 
 /**
