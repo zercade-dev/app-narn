@@ -21,6 +21,36 @@ Instructions and button labels both take the bare verb: "เลือก", "บ�
 Do not use กรุณา ("please") on controls; reserve it for genuine requests such as a retry
 prompt.
 
+## Control shapes — resolve the control before you translate the string
+
+English writes the same words for a title, a button, a column header and a placeholder.
+Thai does not, and the difference is nominalization: `การ` + verb turns an action into the
+name of a thing, and it is the single lever this locale uses to tell the four apart. The
+worked pair is `config:models.select` and `config:models.pickTitle`, byte-identical in
+English ("Select a model") and two different controls — a picker trigger and a dialog
+title. Thai ships the bare verb for the first and the nominalized form for the second.
+
+| Control | Thai shape | Example |
+| --- | --- | --- |
+| Page / section / dialog title, tab label | noun phrase — nominalize with `การ` where the English is a verb | `config:models.pickTitle`, `config:importCsv` |
+| Button, menu item | **bare verb**, no `การ`, no subject, no particle | `config:chooseCsv`, `config:templateImport` |
+| Confirm-dialog title | bare verb phrase where English has no question mark; interrogative particle where it does — see Punctuation | `config:confirmDeleteTitle` |
+| Table column header | bare noun, keeping any abbreviation English keeps | `config:models.colContext` |
+| Filter label, option value, state badge | bare noun or stative phrase, never an imperative | `config:module.reasoningEffortDisabled` |
+| Placeholder inside a control | imperative — the same bare verb a button takes | `config:enableModulePlaceholder` |
+| Progress / status text | `กำลัง` + verb, or verb + `แล้ว` when finished | `config:importing`, `config:autoSaveSaved` |
+
+**An action and its resulting state must not collapse onto one string when both can be on
+screen.** `config:disableModule` is a button ("Disable") and `config:modulesDisabledSection`
+is the heading over the modules it produced ("Disabled ({{count}})"); both render on the
+Global Config page at once. The button takes the bare verb and the heading takes the
+stative `อยู่` form. The same split settles `config:module.reasoningEffortDisabled`, which
+is an option value rather than an action.
+
+**Score the paradigm, not the option.** Every value set — the four confidence tiers, the
+five batch-grouping options, the four TM policies — is translated as a group and read down
+the page, so all members take one part of speech.
+
 ## Casing
 
 Thai has no letter case. The English distinction between sentence case, Title Case and the
@@ -34,6 +64,11 @@ emphasis.
 Latin-script material inside a Thai string (`API`, `CSV`, `AI`, provider names) keeps its
 English casing.
 
+Because Thai has no case **and** no number marking, two English strings differing only in
+case or only in number collapse to one Thai string. That is licensed, not drift: batch 1
+ships one rendering for both "inactive" and "Inactive", and one for both "Target Languages"
+and "Target language".
+
 ## Punctuation and spacing
 
 - **Thai has no spaces between words.** A space in Thai is a phrase or clause separator,
@@ -44,13 +79,22 @@ English casing.
 - Questions take an interrogative particle — ไหม, หรือไม่ — and **no question mark**.
   `backup:confirmTitle` ("Replace current project data?") becomes
   "แทนที่ข้อมูลโปรเจกต์ปัจจุบันหรือไม่".
+- **Quotation marks follow the English source, per key.** Thai has no quotation marks of
+  its own — both the straight pair and the curly pair are in ordinary Thai use — so there
+  is no Thai convention to prefer, and matching the source is what keeps the pair around a
+  `{{token}}` stable. Where English writes the straight pair (`config:duplicateSuccess`)
+  Thai writes the straight pair; where English writes the curly pair
+  (`config:instances.slugReserved`) Thai writes the curly pair. This is the one punctuation
+  rule that does **not** follow the "your language's convention wins" instruction in the
+  runbook, and the reason is that Thai has no competing convention rather than that the
+  source outranks it.
 - Ellipsis: keep the single character `…` (U+2026) exactly where the English source has it,
   since it is a UI affordance (a loading state, a search placeholder) rather than Thai
   punctuation.
 - Do not use ๆ unless the repetition it marks is genuinely there.
 - Em dashes in the source stay em dashes with spaces around them.
 
-## Numbers and dates
+## Numbers, counting and dates
 
 Use **Arabic numerals** (`0`–`9`), not Thai numerals (๐–๙). Thai numerals are used in
 ceremonial and legal contexts, not in software.
@@ -61,34 +105,99 @@ Dates and times are formatted by the app from the browser locale — a date form
 not a translatable string. In particular, do not attempt to convert to the Buddhist era by
 hand inside a string.
 
+**Thai nouns have no number, so no word in this locale ever agrees with a count.** The
+numeral-agreement detector's word axis is therefore switched off for `th`
+(`NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES` in `scripts/i18n-preflight.mjs`), on the same
+grammar-fact grounds as `ja` and `tr`. That is not licence to stop thinking about numbers:
+it moves the whole hazard onto the **classifier** (ลักษณนาม), which no script can check.
+
+**Classifier by counted object.** Pick from this table rather than reaching for the nearest
+noun; the wrong classifier is the one numeral defect this locale can actually ship.
+
+| Counted object | Classifier | Where it was settled |
+| --- | --- | --- |
+| entry (the content unit) | รายการ | `config:new`, `config:orphanedCount` |
+| CSV row | แถว | `config:rowsProcessed` |
+| glossary | ชุด | `config:glossariesSkipped_other` |
+| occurrence of an event (retries, attempts) | ครั้ง | `config:health.rateLimitRetries` |
+| module instance | ตัว | `config:enableModuleAddInstance` |
+
+**Where a non-`count` token carries a number, keep the head noun in front of the ratio.**
+`config:reviewProgressCount` is "{{reviewed}} / {{total}} reviewed" in English and ships
+here as the label first, then the bare ratio — the count-neutral device the runbook
+prescribes, and the same fix `it` applied to the same key. `config:templateMeta` takes the
+same shape, per `english-review-notes.md`, which records that both of its tokens are plain
+array lengths.
+
 ## Length discipline
 
-Thai character counts land close to English, but **Thai has no spaces to wrap on**, so a
-long label becomes one unbreakable run that clips rather than wrapping. Thai also renders
-taller than Latin script, because vowels and tone marks stack above and below the
-consonant line — a tight table row that fits English may cut the marks off.
+Thai character counts land close to English — measured over the whole language, the
+aggregate ratio is **below 1.0** — but two facts make a raw character budget the wrong
+instrument, and both are why this class needs measuring rather than estimating.
 
-The space-constrained surfaces are sidebar items (`sidebar:translationMemory`,
-`sidebar:globalConfig`), tab labels (`strings:tabs.strings`, `strings:tabs` for
-review-translation-ai), table column headers (`strings:columns.config`), filter labels
-(`strings:filters.needsReview`) and bulk-bar buttons (`strings:bulk.approveSelected`).
+**1. Thai has no wrap point.** A Thai run has no spaces inside it, so an over-long label in
+a fixed container does not wrap onto a second line; it clips or ellipsizes at whatever
+character the container ends on. The overflow is silent and it can cut a word in half.
 
-**Corrected before wave 3 — this paragraph used to state a ratio rule, and the runbook
-forbids it.** It read: "For those classes, never exceed ~1.3× the English character count —
-a stricter ceiling than the European locales get". Section 2.4 of the runbook is titled
-"Length budgets are absolute character counts, per class" and opens "Never a multiple of
-English": an audit found **27** correct strings over the pilot's 1.5× ceiling, including a
-sidebar item at 3.80×, because a ratio measures how long the *English* is rather than how
-wide the *control* is. Making the ratio stricter does not fix that — it multiplies the same
-wrong unit by a smaller number.
+**2. A code-point count over-states Thai width by about a fifth.** Thai vowels and tone
+marks are **nonspacing** — Unicode general category `Mn` — so they consume no advance
+width at all. Measured over the shipped `th` files, `Mn` marks are **21.4%** of all Thai
+code points. A budget written in code points is therefore not a budget in width. Count
+**advance-bearing characters** instead, which is reproducible:
 
-**Derive your budgets instead**, as absolute character counts per class, from each class's
-anchor key in the runbook's table. The two observations this paragraph rested on stay true
-and are exactly why you must measure rather than estimate: Thai has **no wrap point**, so an
-over-long label becomes one unbreakable run that clips instead of wrapping; and Thai renders
-**taller** than Latin, because vowels and tone marks stack above and below the consonant
-line, so a row height that fits English can cut the marks off. Height is a constraint no
-character count of any kind expresses — record it separately.
+```js
+[...value].filter((c) => !/\p{Mn}/u.test(c)).length
+```
+
+### The budgets
+
+| Class | Anchor key | Kind | Budget (advance-bearing chars) |
+| --- | --- | --- | --- |
+| Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **hard** | 24 |
+| Tab label | `strings:tabs.backup` | **hard** — same container | 24 |
+| In-panel sub-tab | `config:routing.tabImportExport` | soft | 20 |
+| Table column header | `strings:columns.config` | soft | 14 |
+| Filter label | `strings:filters.needsReview` | soft | 18 |
+| Bulk-bar control | `strings:bulk.approveSelected` | soft | 22 |
+
+**How the two hard numbers were derived**, so the next person can redo it rather than trust
+it. `SIDEBAR_WIDTH` is `16rem` = 256px (`components/ui/sidebar.tsx:34`). Off that come 1px
+of right border, 16px of `SidebarGroup` `p-2`, 16px of `SidebarMenuButton` `p-2`, a 16px
+`size-4` icon and an 8px `gap-2` — leaving **199px** of label. The label renders at
+`text-sm`, 14px. A Thai consonant or spacing vowel in a UI sans face has an advance of
+roughly 0.55em, so ~7.7px at 14px; rounding to 8px for headroom gives 199 / 8 ≈ **24**.
+The 0.55em figure is the one estimate in this derivation and it is **not** measured here —
+see the font note below for why it cannot be, in this repo, today. Everything else is read
+off the component.
+
+The four soft budgets are the longest value this locale ships in each class plus headroom,
+measured after the last batch. Soft means prefer the shorter of two correct options; it is
+not a failure threshold, and a term rule outranks it.
+
+### Height is a separate constraint, and it is the one a character count cannot express
+
+Thai stacks. A syllable can carry an upper vowel, a tone mark **above that**, and a lower
+vowel below the consonant line — three levels where Latin has one. A line box tuned to
+Latin clips the top and bottom of Thai rather than making it look cramped.
+
+Two concrete findings, both read off the code:
+
+- **`components/ui/label.tsx:12` sets `leading-none`** — line-height 1 — on every `<Label>`
+  in the app, at `text-sm` (14px text in a 14px line box). A single-line label is safe:
+  nothing on that element sets `overflow: hidden`, so the marks simply overflow the line
+  box and still paint. A label that **wraps to two lines** is not: line 1's lower vowels
+  and line 2's upper marks occupy the same pixels. **Keep Label strings short enough to sit
+  on one line**, which for a form label in this app is the practical rule this constraint
+  reduces to.
+- **The bundled font has no Thai at all.** `--font-sans` is `'Geist Variable', sans-serif`
+  (`packages/frontend/src/index.css:633`), and `@fontsource-variable/geist` ships only the
+  `latin`, `latin-ext`, `cyrillic`, `cyrillic-ext` and `vietnamese` subsets — check
+  `metadata.json` in that package. Every Thai glyph therefore comes from the reader's own
+  fallback face, so Thai line height, mark placement and advance width are all set by a
+  font this app does not ship, does not pin and cannot measure. That is also why the 0.55em
+  advance above is an estimate: there is no Thai font in this container to measure
+  (`fc-list :lang=th` returns nothing), so a real pixel measurement needs the running app
+  on a machine that has one. **A measurement beats this table**; if you can take one, do.
 
 ## Placeholders
 
@@ -109,7 +218,10 @@ not.
 `_other` and nothing else — never a `_one` copied across from English. A `_one` key can
 never resolve here, and the key-parity guard rejects any suffix that is not a plural
 category of the language, so copying English's pair is a red build, not a harmless
-duplicate.
+duplicate. Verified rather than assumed: `Intl.PluralRules('th').resolvedOptions()
+.pluralCategories` is `["other"]`, for ordinals as well as cardinals. This locale therefore
+lands at **29 keys fewer than English** — one per English `_one` — and the twelve
+`bare + _other` families keep their bare key and add nothing.
 
 ## Locale-specific traps
 
@@ -129,3 +241,34 @@ duplicate.
 - **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms
   where English writes "entr(ies)". Thai needs no parenthetical at all — number plus
   classifier already covers every count.
+- **`ตรวจ` is a shared root, not a shared word.** The sidebar Review group, the LQA check
+  and human proofreading are three different terms built on it, told apart by their second
+  element. Never shorten one of them to the bare root in running text.
+
+## Surface names — repeat these verbatim
+
+Every key naming one of these surfaces takes exactly the rendering below, and prose that
+mentions the surface repeats it. Rows are added by the batch that first ships the name.
+
+| Surface | Rendering | First shipped |
+| --- | --- | --- |
+| Global Config | การตั้งค่าส่วนกลาง | `config:globalConfigTitle` |
+| Translations (tab) | คำแปล | named in prose by `config:routing.categoriesConfiguredHint` |
+| Compare (tab) | เปรียบเทียบ | named in prose by `config:routing.tonesHint` |
+| Backup (tab) | ข้อมูลสำรอง | named in prose by `config:importSnapshotNote` |
+| Orphans (tab) | รายการกำพร้า | named in prose by `config:fullReplaceOrphanNotice` |
+| Translation Memory | หน่วยความจำการแปล | `config:tm.policyTitle` |
+
+## The six register and typography sweeps
+
+Run these over every namespace before handing a batch to review. All six are greps and all
+six must return nothing.
+
+| Sweep | Thai instance |
+| --- | --- |
+| gendered politeness particles the register bans | `ครับ`, `ค่ะ`, `นะคะ` |
+| "please" on a control label | `กรุณา` |
+| the invisible character that breaks whitespace parity | U+200B |
+| Thai digits where Arabic numerals are required | `[๐-๙]` |
+| doubled spaces | `  ` |
+| three-dot ellipses instead of the single character | `...` for `…` |

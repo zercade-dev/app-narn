@@ -23,74 +23,74 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 
 | Term | Rendering | Notes |
 | --- | --- | --- |
-| project |  |  |
-| workspace |  |  |
-| entry |  |  |
-| source text |  |  |
-| translation |  |  |
-| source label |  |  |
-| achievement |  |  |
-| inline tag |  |  |
-| placeholder |  |  |
+| project | โปรเจกต์ | Transliteration, the spelling Thai software tooling uses. Rejected โครงการ: that is *project* in the civil-engineering and business-initiative sense and would read as a funded undertaking rather than a container of text. |
+| workspace | เวิร์กสเปซ | Transliteration, deliberately unlike the project word so the two never converge. Rejected พื้นที่ทำงาน (*work area*), which is used for a window layout in Thai desktop UIs and would read as a screen region rather than a scope above the project. |
+| entry | รายการ | The canonical term. It is also the natural Thai classifier for a listed item, so a count reads naturally as number then classifier with no plural marking. Reserved for the content unit only; it is NOT free for a glossary term, a log line or a release. Batch 1 already needed a different classifier twice: แถว for a CSV row and ชุด for a glossary. |
+| source text | ข้อความต้นฉบับ | ต้นฉบับ is the settled Thai localization word for the source/original. Bare ต้นฉบับ is used where the sentence already says *text*. |
+| translation | คำแปล | The produced text. The act of translating is การแปล and the verb is แปล. |
+| source label | ป้ายกำกับแหล่งที่มา | Shortened to แหล่งที่มา for the routing column heading, which English also shortens to *Sources*. **Thai uses three different words for English *source*** and that is deliberate: ต้นทาง for source language, ต้นฉบับ for source text, แหล่งที่มา for the origin an entry was imported from. One word for all three would make the three terms indistinguishable, which is what the shared lexicon's *Not* list warns about. |
+| achievement | ความสำเร็จ | The word Thai game platforms ship for a player achievement. Used attributively without a linker: ชื่อความสำเร็จ, คำอธิบายความสำเร็จ. |
+| inline tag | แท็กในข้อความ | Literally *tag inside the text*, which is the whole point of the term — it names markup living in the content, not metadata about it. |
+| placeholder | ตัวแทนค่า | Literally *value stand-in*. Deliberately NOT used for the input-hint sense of the English word: an empty-state hint on a control is ข้อความตัวอย่าง. Thai would otherwise happily use one word for both, which the shared lexicon forbids. |
 | translator context |  |  |
-| source language |  |  |
-| target language |  |  |
+| source language | ภาษาต้นทาง | Pairs with the target-language row below; ต้นทาง and ปลายทาง are a fixed Thai pair and read correctly side by side. |
+| target language | ภาษาปลายทาง | Thai does not mark number, so the plural label and the singular label are the same phrase. That is a licensed same-rendering collision, not drift. |
 | reference language |  |  |
 | writable language |  |  |
-| Pseudo Test |  |  |
-| run |  |  |
+| Pseudo Test | ทดสอบเทียม | เทียม is *artificial* in the productive Thai sense (ดาวเทียม, ฟันเทียม), so pseudo text is ข้อความเทียม from the same root. Rejected จำลอง (*simulated*) and any transliteration: จำลอง is the mock/dummy reading the shared lexicon rules out. The language code itself is never translated. |
+| run | รอบการทำงาน | Always a noun, never a verb — Thai verbs for what starts one are แปล, เริ่ม, สร้าง. Shortened to รอบ inside a phrase where the sentence has already established what is running (รอบการแปล). Rejected งาน, which is the *job* reading the shared lexicon reserves against. |
 | revert |  |  |
 | Activity |  |  |
 | log |  |  |
-| batch |  |  |
-| batch grouping |  |  |
+| batch | แบตช์ | Transliteration, chosen because both natural Thai candidates are already spoken for: ชุด is the classifier this locale uses for a glossary and other bundles, and กลุ่ม is the head of the rule-group term. A loanword keeps *batch* unmistakable in ขนาดแบตช์, โหมดแบตช์ and การจัดกลุ่มแบตช์. |
+| batch grouping | การจัดกลุ่มแบตช์ | Shares the morpheme กลุ่ม with the rule-group term, which is a shared root and not a collision: the heads differ (a *grouping* against a *group*) and nothing in the UI contrasts the two. |
 | AI review |  |  |
-| judge |  |  |
-| source review |  |  |
+| judge | ประเมิน | The evaluative sense only, as a verb in explanatory copy. Never ตัดสิน or ผู้พิพากษา, which are the legal readings. No noun *the judge* is introduced, matching English. |
+| source review | รีวิวต้นฉบับ | รีวิว (loanword) is reserved for a model's opinion and is kept apart from การตรวจสอบ, which is the deterministic LQA check, and from ตรวจทาน, which is a person reading. Thai has three separate words here where English has one, so the split is forced rather than chosen. |
 | finding |  |  |
 | suggestion |  |  |
-| discard |  |  |
+| discard | ยกเลิกการแก้ไข | This row records the FIRST sense only — the ghost button beside Save that puts a field back. Thai cannot carry both senses on one verb: this one cancels an edit the user made, and the *refuse a proposal* sense destroys nothing of the user's. The second sense is settled in a later batch. |
 | needs review |  |  |
 | flag |  |  |
-| ignore / ignored |  |  |
+| ignore / ignored | ละเว้น | The action and the state share the verb; Thai marks the state by context, not by a participle. Kept apart from ข้าม (*skip*), which is the per-run routing outcome. Note that where an LQA check *flags* something, this locale writes รายงาน (*reports*) rather than the review-queue flag verb — see that row. |
 | Review (the sidebar group) |  |  |
 | review queue |  |  |
 | back-translation |  |  |
-| module |  |  |
-| module instance |  |  |
-| provider |  |  |
-| model |  |  |
-| prompt |  |  |
-| reasoning effort |  |  |
-| routing rule |  |  |
-| rule group |  |  |
-| credential vault |  |  |
-| credential |  |  |
-| LQA |  |  |
-| quality gate |  |  |
-| check |  |  |
-| issue |  |  |
-| severity |  |  |
+| module | โมดูล | Transliteration. The canonical term for the thing every picker selects. |
+| module instance | อินสแตนซ์โมดูล | Shortened to อินสแตนซ์ once โมดูล is established in the sentence, exactly as English shortens it. The instance id itself is never translated. |
+| provider | ผู้ให้บริการ | The outside company behind a module. The three English strings that label a module picker *Provider* are translated as written with this word, per the shared lexicon, and that does not drag the module row toward it. |
+| model | โมเดล | Transliteration. This is the reason the template row below cannot use the obvious Thai word for a pattern or a model. |
+| prompt | พรอมต์ | Transliteration. Kept apart from คำขอ, which is an HTTP request, and from การค้นหา, which is a search query. |
+| reasoning effort | ระดับการให้เหตุผล | The provider's own parameter, phrased as a *level of reasoning* rather than as effort expended, so it cannot be read as work done or as a run's cost. |
+| routing rule | กฎการจ่ายงาน | จ่ายงาน is *to hand work out*, which is content routing. Rejected every candidate built on เส้นทาง (*route*, *path*): all of them read as network routing, which the shared lexicon rules out. |
+| rule group | กลุ่มกฎ | Kept apart from หมวดหมู่ (*category*) and from เทมเพลต. See the batch-grouping row for why sharing กลุ่ม is not a collision. |
+| credential vault | ตู้นิรภัย | The head noun, which is what every batch-1 string needs; where English writes the full noun phrase *credential vault* the head takes the credential word from the row below as its modifier, and that form ships with the vault namespace in a later batch. All four required phrasings were checked before deciding — the full noun phrase, ตู้นิรภัยถูกล็อก, ปลดล็อกตู้นิรภัย and รหัสผ่านตู้นิรภัย all read naturally. Rejected every keychain/wallet word; ตู้นิรภัย is the ordinary Thai word for a physical vault and carries the right weight. |
+| credential | ข้อมูลรับรอง | Usually plural in English, unmarked in Thai. The vault key names themselves are literal identifiers and stay in Latin. |
+| LQA | LQA | Kept as the industry acronym. Thai localization practice uses the English acronym; no established Thai form exists, and inventing one would leave the filter chip and the check list disagreeing with every other Thai CAT tool. |
+| quality gate | เกณฑ์คุณภาพ | เกณฑ์ is a *criterion / threshold*, which is the process-control sense. Every physical-door word (ประตู, ด่านตรวจ) was rejected — and ด่าน in particular is already the *stage* term. |
+| check | การตรวจสอบ | One word across *quality check*, *LQA checks* and each individual check name. It is a compound on ตรวจ, which is also the root of the sidebar Review group and of ตรวจทาน; the three are distinguished by their second element, which is what makes the umbrella work rather than a collision. |
+| issue | ปัญหา | The machine verdict an LQA check files. Kept apart from ข้อผิดพลาด (*error*) and from whatever a source-review finding takes, since both are listed on the same entry. |
+| severity | ระดับ | *Level*, which is the only form batch 1 needed — every occurrence there sits in a sentence that has already named the check, so the fuller phrasing would be padding. Where a bare column or label has to carry the term alone it extends with the Thai word for severity, and that form ships with the quality namespace in a later batch. The two values are fixed by the check row: ปิดกั้น and คำเตือน. |
 | notification severity |  |  |
-| assertion |  |  |
-| pattern |  |  |
-| overflow |  |  |
-| length limit |  |  |
+| assertion | ข้อยืนยัน | A genuinely fourth word, as the shared lexicon requires: เงื่อนไข is taken by routing conditions, การตรวจสอบ by the LQA checks and กฎ by routing rules. |
+| pattern | รูปแบบ | The regex sense only. Free to take this word precisely because the template row went to a transliteration; in Thai รูปแบบ would otherwise be the obvious word for a template too. |
+| overflow | การล้น | Attributive in อัตราส่วนการล้น; the check itself is named ความยาวล้น. Kept clearly apart from the length-limit row — one is a ratio against the source, the other an absolute cap from the game. |
+| length limit | ขีดจำกัดความยาว | Absolute, set by the game editor. Never reuses the overflow word. |
 | pass rate |  |  |
-| glossary |  |  |
-| glossary term |  |  |
+| glossary | อภิธานศัพท์ | The established Thai term. Long (11 characters) but correct, and it is not reused for translation memory. |
+| glossary term | คำศัพท์ | Never รายการ, which is reserved for a content entry — the two are counted in adjacent strings. |
 | constant |  |  |
-| match |  |  |
-| translation memory |  |  |
-| approve |  |  |
-| category |  |  |
-| tone |  |  |
-| orphan |  |  |
-| relink |  |  |
-| backup |  |  |
-| snapshot |  |  |
-| template |  |  |
-| omit (from an export) |  |  |
+| match | ตรงกัน / จับคู่ | Batch 1 met only the verb: ตรงกัน for *matches* in a condition or a search, จับคู่ for the act of matching a glossary term against source text. Both are built on the same idea deliberately, so the noun settled in a later batch can stay on this root. |
+| translation memory | หน่วยความจำการแปล | Always the full phrase. Bare หน่วยความจำ is RAM in Thai, which is exactly the confusion the shared lexicon warns about, and this app has a log line that genuinely means RAM. |
+| approve | อนุมัติ | Promotion into translation memory. Kept apart from นำไปใช้ (*apply* a suggestion), บันทึก (*save*) and the mark-as-reviewed phrasing — all four appear in one bulk bar. |
+| category | หมวดหมู่ | Not reused for the rule-group or source-label rows. |
+| tone | น้ำเสียง | The register a piece of text is written in. Rejected โทน: this product also ships a colour tool, and a bare โทน beside colour swatches reads as a colour tone. Rejected โทนเสียง, which is acoustic. |
+| orphan | รายการกำพร้า | Built on the entry word plus *orphaned*, because an orphan is literally an entry in that state. The same phrase serves the tab title, the count chip, the confirm dialog and the log lines. |
+| relink | เชื่อมใหม่ | One verb for the row button, the dialog title, the confirm step and the import warning. |
+| backup | ข้อมูลสำรอง | A noun; the verb is สร้างข้อมูลสำรอง. Kept apart from ส่งออก (*export*) and from the snapshot row. Restoring one is กู้คืน. |
+| snapshot | สแนปช็อต | Transliteration, so it can never be mistaken for the backup term in the sentences that use both. |
+| template | เทมเพลต | Transliteration. The obvious Thai words — แบบ, รูปแบบ, ต้นแบบ — are either already taken by the pattern row or read as a physical mould. |
+| omit (from an export) | ไม่รวม | A third verb, distinct from both discard senses: nothing is destroyed and nothing is refused, only left out of a generated file. Met in batch 1, in the export checkbox, exactly as the shared lexicon predicts. |
 | collaborator |  |  |
 | member |  |  |
 | nickname |  |  |
@@ -103,7 +103,7 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | element |  |  |
 | assistant |  |  |
 | theme |  |  |
-| guide |  |  |
+| guide | คู่มือ | One word for every *read the guide* link, the sidebar item and the guide topics. Never ช่วยเหลือ, which is the help sense. |
 | release |  |  |
 | changelog |  |  |
 | dismiss |  |  |

@@ -393,8 +393,33 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
  * replaced would have cost the same while implying the axis still had work to
  * do here. If a kana counter is ever introduced, it is the counter table that
  * must catch it, not this axis.
+ *
+ * `th`: the same fact as `ja`, and reachable by the same evidence. Thai nouns
+ * have no number morphology at all — there is no plural form for a numeral to
+ * agree with, in any construction — and plurality is carried by a numeral plus
+ * a CLASSIFIER (ลักษณนาม), which is itself invariant: "1 รายการ" and "5 รายการ"
+ * are the same characters. `Intl.PluralRules('th')` reports `["other"]` alone
+ * for both cardinals and ordinals, which is the same fact from the other side,
+ * and is why `locales/th` ships `_other` and no `_one`. Thai also blocks the
+ * optional plurality words (ทั้งหลาย, บรรดา) after a numeral rather than
+ * requiring them, so there is no form that is right at one count and wrong at
+ * another for this axis to find. Batch 1 produced 11 token-axis survivors and
+ * every one was an invariant noun, unit or clause opener (อักขระ, ไบต์, โทเค็น,
+ * and three relative clauses); a word list would therefore have to grow by
+ * every noun the language uses next to a number, which is the escalation-per-
+ * round outcome the `ja` paragraph above rejects.
+ *
+ * As with `tr` and `ja`, this is NOT a claim that Thai has no numeral-adjacent
+ * hazard. It has one, and it is the same shape as Japanese's: the choice of
+ * CLASSIFIER per counted object — รายการ for entries, แถว for CSV rows, ชุด for
+ * a glossary, ครั้ง for occurrences. That is a lexical decision per object, not
+ * an agreement rule, so no regex can check it; it is handled by the
+ * classifier-by-object table in docs/i18n/style/th.md. Unlike Japanese, Thai
+ * has no numeral-conditioned ORTHOGRAPHIC change to fall back on either: there
+ * is no rendaku/gemination analogue and no bounded native counting series, so
+ * the narrower ground the `ja` flag survives on is not even needed here.
  */
-export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja']);
+export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja', 'th']);
 
 /**
  * The script list for a locale, or `undefined` if this detector has no
@@ -831,10 +856,25 @@ function runCli() {
       // matters and isn't the same silent-clean ambiguity NUMERAL_LOCALE_SCRIPTS
       // exists to prevent: it is stated explicitly here rather than inferred
       // from an empty survivor list.
+      // The closing sentence is CONDITIONAL, and was not until 2026-08-12. It
+      // was written for `tr`, the first member of this set, and printed
+      // unconditionally — so `ja` (added in wave 1) and `th` were both told
+      // their hazard "is the welded-suffix check below" while section 1b, two
+      // lines further down the same report, printed "Not applicable — not in
+      // WELDED_SUFFIX_LOCALES" for exactly those locales. A report that
+      // contradicts itself within one screen is worse than one that says less,
+      // so the claim is now made only for a locale the welded check actually
+      // covers. See NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES: `ja` and `th` name
+      // their real hazard (counter / classifier choice) in their own style
+      // guides, because no check in this script can see it.
+      const elsewhere = isWeldedSuffixCheckSupported(locale)
+        ? ` This locale's numeral-adjacent hazard is the welded-suffix check below, not this one.`
+        : ` This locale's numeral-adjacent hazard is a lexical one no check here can see — see ` +
+          `NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES and docs/i18n/style/${locale}.md.`;
       console.log(
         `   "${locale}" counted nouns do not inflect for number, so the word axis is not applicable — ` +
-          `every token-axis survivor above is cleared unconditionally, not calibrated blank. This ` +
-          `locale's numeral-adjacent hazard is the welded-suffix check below, not this one.`,
+          `every token-axis survivor above is cleared unconditionally, not calibrated blank.` +
+          elsewhere,
       );
     } else if (survivors.length > 0 && !hasWordAxis) {
       console.log(
