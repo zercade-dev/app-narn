@@ -42,7 +42,7 @@
   "judge": {
     "done": "Review ergab Punktzahl {{score}} — Urteil: {{verdict}}.",
     "suggestDone": "Review mit Vorschlägen abgeschlossen.",
-    "suggestNoChange": "Das Review hat keinen Änderungsbedarf gefunden.",
+    "suggestNoChange": "Review ergab keinen Änderungsbedarf.",
     "suggestionDiscarded": "Vorschlag abgelehnt."
   },
   "sourceReview": {
@@ -76,7 +76,7 @@
     "credentialsEvicted": "Die gespeicherten Zugangsdaten wurden aus dem Arbeitsspeicher entfernt."
   },
   "orphan": {
-    "detected": "Einträge gefunden, die nicht mehr in der Quelldatei enthalten sind: {{count}}.",
+    "detected": "Nicht mehr in der Quelldatei enthaltene Einträge: {{count}}.",
     "detected_one": "{{count}} Eintrag gefunden, der nicht mehr in der Quelldatei enthalten ist.",
     "detected_other": "{{count}} Einträge gefunden, die nicht mehr in der Quelldatei enthalten sind.",
     "linked": "Ein verwaister Eintrag wurde neu verknüpft.",

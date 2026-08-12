@@ -25,7 +25,7 @@
   "vaultLockedUnlockHint": "Tresor gesperrt — zum Entsperren klicken",
   "repeatCount": "{{count}}-mal wiederholt",
   "showDetails": "Technische Details anzeigen",
-  "membersNotShown": "Nicht angezeigte weitere Einträge: {{count}}",
+  "membersNotShown": "Weitere nicht angezeigte Einträge: {{count}}",
   "membersNotShown_one": "{{count}} weiterer Eintrag wird nicht angezeigt",
   "membersNotShown_other": "{{count}} weitere Einträge werden nicht angezeigt"
 }

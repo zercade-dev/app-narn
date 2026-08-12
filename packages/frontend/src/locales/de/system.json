@@ -9,7 +9,7 @@
     "dismiss": "Schließen"
   },
   "cancelled": {
-    "message": "Der geplante Neustart des Dienstes wurde abgebrochen — du kannst normal weiterarbeiten.",
+    "message": "Der geplante Neustart des Dienstes wurde abgesagt — du kannst normal weiterarbeiten.",
     "dismiss": "Schließen"
   },
   "slot": {

@@ -63,23 +63,27 @@ now reads "Erst eine bestehende zurückziehen, dann eine neue erstellen."
 
 The du-imperative is kept for the narrower case: a **direct invitation to act**, which is
 usually an instruction carried out on the screen in front of the reader and occasionally one
-carried out elsewhere. Six instances exist across the whole shipped locale, derived by scanning
-every `de/*.json` value for a sentence-initial imperative rather than from memory — four of them
-in batch 4:
+carried out elsewhere. **Eight** instances exist across the whole shipped locale, derived by
+matching every `de/*.json` value against a list of German imperative forms rather than from
+memory — read the method note below before you quote the number:
 
 - **In a field, on this screen** — `account:deleteTokenSent`, `account:mfaDisableHint`.
 - **On another device** — `collab:nickname.claimOnDesktop`, which reuses batch 2's
-  `strings:mobile.desktopOnlyBody` frame verbatim.
-- **Off-screen entirely** — `account:reportBugsPrefix`, which asks the reader to send an email.
-  It is a du-imperative and it is **not** a field-or-device instruction, so it is named here
-  rather than left to contradict the sentence above.
-- Batch 1's `config:structuredOutputExperimentalWarning` is the sixth, licensed by the register
-  section's own clause about a sentence that really is about the reader's own choice.
+  `strings:mobile.desktopOnlyBody` frame verbatim. Both are instances in their own right; the
+  second is not merely a frame the first copies.
+- **Off-screen entirely** — `account:reportBugsPrefix` and `strings:viewNotFoundContact`, which
+  each ask the reader to send an email and are each concatenated with a mailto link. They are
+  du-imperatives and they are **not** field-or-device instructions, so they are named here rather
+  than left to contradict the sentence above.
+- **About the reader's own choice** — `config:structuredOutputExperimentalWarning` and
+  `config:structuredOutputLunaWarning`, licensed by the register section's own clause. They are
+  siblings, one paragraph apart in the same panel, and they carry the same verb.
 
-None of the six is a corrective error, so the rule above holds without exception. **Batch 5 owns
-`errors`**, so it inherits the split rather than re-deciding it.
+None of the eight is a corrective error, so the rule above holds without exception. **Batch 5
+owns `errors`**, so it inherits the split rather than re-deciding it.
 
-**Batch 5 applied it, and the count of du-imperatives across the whole locale is still six.**
+**Batch 5 applied it, and the count of du-imperatives across the whole locale is unchanged by
+it — batch 5 adds none.**
 All six `errors:http.*` keys ship with **no** imperative: the corrective half of each is an
 impersonal infinitive — `errors:http.vaultLocked` "Der Tresor ist gesperrt. Entsperren und erneut
 versuchen." (the shape `config:credentialsVaultLocked` already ships), `errors:http.offline`
@@ -91,14 +95,29 @@ six use *du* and neither is an imperative: English writes them as **statements a
 follows it. The rule splits **imperative against infinitive**; a du-statement is neither, and
 turning one into an infinitive would drop the direct address English chose.
 
-The enumeration above was re-derived rather than carried over from round 4 — which is how round
-4's own list was found to be one short. **State the method with the count, because the method is
-a heuristic:** every `de/*.json` value was split into sentences and matched against a list of
-~60 sentence-initial German imperative forms, over the corpus with batch 5's six namespaces
-landed, and the six new namespaces were then read by hand. That returns the same six keys the
-bullets above name, `strings:mobile.desktopOnlyBody` included — it is an instance in its own
-right and not merely the frame `collab:nickname.claimOnDesktop` copies. A verb outside the
-matched list would be missed, so a later batch adding one must add it to the bullets itself.
+**State the method with the count, and match anywhere in the value — not sentence-initially.**
+That is the whole lesson of this enumeration, which has now moved three times (three → six →
+eight) and whose last two moves were caused by the *method*, not by a new string. A du-imperative
+in German is verb-first **in its clause**, not in its sentence, so a value that opens with a
+subordinate clause hides one in the middle: `config:structuredOutputLunaWarning` puts *probier*
+after a *Wenn …* condition and `strings:viewNotFoundContact` puts *melde* after one. A
+sentence-split scan cannot see either by construction — and both verbs are ordinary words any
+list would carry, so "a verb outside the list would be missed", which is what this paragraph used
+to warn about, pointed at the wrong risk entirely.
+
+The method that returns the eight above: match the imperative forms **at any clause boundary**
+(after sentence punctuation *or* a comma) across every `de/*.json` value, then read the hits.
+Re-run over the whole corpus, not over your own batch. A second pass matching the same forms
+**anywhere at all** in a value returns only four more occurrences, all of them the noun
+*Versuch(e)* in `logs:translation.lqaRetry` and `vault:remainingAttemptsHint*` — so the
+clause-boundary rule is tight enough to be worth running and loose enough to catch the two the
+sentence rule missed.
+
+> **Corrected 2026-08-12 (round-5 review, I2), left visible.** The paragraph above previously
+> claimed six, "derived by scanning every `de/*.json` value for a sentence-initial imperative".
+> The count was wrong and the stated method is *why* it was wrong — the third round running that
+> this list has moved. Both new entries were already licensed by rules this section states, so
+> **no string changed** and the rule was never in doubt; the enumeration and its method did.
 
 > **Corrected 2026-08-12 (round-4 re-review, R2), left visible.** This paragraph first said
 > "three shipped instances, all of that kind" and omitted `account:reportBugsPrefix` — a
@@ -231,7 +250,7 @@ mentions it repeats that rendering verbatim. Settled so far:
 | Page (sidebar group) | **Seiten** | `sidebar:groups.page` (shipped). The one group heading with no guide twin, and the one that is **not** singular in German where English is: it stands over four sibling page links (Einstellungen, Changelog, Rechtliches, Über Narn), and a bare singular heading over a list reads as an error in German where English's type-label "Page" does not. The five activity-named groups above are unaffected — they name a task, not a countable item. |
 | Settings | **Einstellungen** | `sidebar:settings` and `settings:title` (both shipped). Byte-identical in English, so identical in German — the same relationship `sidebar:globalConfig` has, and the opposite of Legal's. |
 | Legal | **Rechtliches** | `sidebar:legal` (shipped); batch 6's `legal:title` ("Legal & policies") **expands**, exactly as Activity's page title does. Do not shorten the page title to match and do not invent a third name. |
-| Changelog | **Changelog** | `sidebar:changelog` (shipped); batch 6's `common:changelogShowOlder` names the same page. See the lexicon row for why *Änderungsprotokoll* was rejected. |
+| Changelog | **Changelog** | `sidebar:changelog` (shipped); batch 6's `common:changelogShowOlder` names the same page. *Änderungsprotokoll* was rejected because *Protokoll* reads as a transcript or a network protocol, so the compound names a running record of changes rather than release notes — the lexicon row carries the full argument, **re-grounded in round 5** after its original one cited a reservation the Activity row had retracted. |
 | About Narn | **Über Narn** | `sidebar:aboutNarn` (shipped). The brand keeps the source string's own casing — `Narn` here, `narn` in `settings:appearanceDescription` — and is never translated or re-cased. |
 | Account | **Konto** | `sidebar:account` (shipped). Not *Benutzerkonto* (longer, and the possessor is obvious) and never *Zugang*, which would drag toward *Zugangsdaten*. |
 | Credential vault | **Zugangsdaten-Tresor** | `vault:statusLabel` (shipped), with the short *Tresor* wherever English shortens — see the lexicon row, which owns the split. |
@@ -430,6 +449,34 @@ the narrow scope the lexicon's *entry* reservation allows.
 > the stronger ground that it would be a second word for the *Logging* this locale already
 > ships. Only the evidence was wrong, and both rows now say so.
 
+**How a log line narrates: four shapes, and they are chosen by the subject, not by the event.**
+`logs` is the only namespace in the product whose text is narration of things that already
+happened, and batch 5 settled a convention over all 59 of its lines. Batch 6's `backup`,
+`orphans` and `stage-details` narrate the same events, so this binds them.
+
+| Shape | When | Example |
+| --- | --- | --- |
+| **Bare headline participle**, no auxiliary and no article | a completed event whose subject needs no article — a proper noun, a mass term, a bare deverbal noun | `logs:vault.unlocked` "Tresor entsperrt.", `logs:tm.cleared` "Translation Memory geleert.", `logs:lqa.passed` "Qualitätsprüfung bestanden.", `logs:categoryGen.failed` |
+| **`wurde` / `wurden` + participle** | a completed event whose subject **does** take an article, so the bare headline would read as a fragment | `logs:module.loaded` "Das Modul {{module}} wurde geladen.", `logs:orphan.deleted`, `logs:tm.variantDeleted` |
+| **`wird` / `werden` + participle** | in flight, not finished — the control-shape table's progress row, applied to narration | `logs:translation.start`, `logs:translation.retry` "Eine fehlgeschlagene Übersetzung wird wiederholt." |
+| **`konnte(n) nicht` + passive infinitive** | a failure the app attempted and could not complete | `logs:translation.queueStartFailed`, `logs:backup.pruneFailed`, all six `failed*` plural forms |
+
+**Two licensed departures, named so a later batch does not "harmonize" them.** A *state* is not
+an event and stays copular — `logs:lqa.overflow` is "Die Übersetzung ist zu lang für den
+verfügbaren Platz.", following its own English. And an **unaccusative** verb takes `sein` +
+participle rather than a passive, because there is no agent to demote:
+`logs:translation.batchFailed` "Ein Batch ist fehlgeschlagen" and `logs:translation.maskMismatch`.
+The one **active** Perfekt in the namespace, `logs:translation.tmRejected`, is licensed by its own
+English, which is active with a full subject and object, and by the idiom *die Prüfung bestehen*,
+which has no natural passive here.
+
+> **Added 2026-08-12 (round-5 review, I3).** The convention held 58 of 59 lines and was written
+> down nowhere, which is runbook §6 rule 2 exactly: a decision that binds a later batch belongs in
+> this file, not in a batch report. The one line that broke it was `logs:judge.suggestNoChange`,
+> shipped as an article-plus-Perfekt active clause — the only one in the namespace — directly
+> against its own sibling `logs:judge.done`, which the same engine emits into the same stream with
+> a bare subject and a Präteritum. It now reads "Review ergab keinen Änderungsbedarf."
+
 **Three English verbs collapse onto *Entfernen*; a fourth English word deliberately does not.**
 `system:restarted.dismiss` and `system:cancelled.dismiss` are English *Dismiss*, the same word
 `account:notificationsDismiss` renders as "Entfernen" — and they ship as "Schließen" instead.
@@ -442,7 +489,8 @@ both would put a delete verb on a button that hides a notice.
 
 **An English label that names a surface the app does not have takes the real surface name.**
 `logs:action.openQuality` is *Open quality settings*, and the button's handler is
-`openTab('quality', …)` in `lib/log-presentation/actions.ts` — the Quality tab, which is a
+`openTab('quality', …)` at `lib/log-presentation/registry.ts:124`, under `'lqa:overflow'` —
+`actions.ts` only defines the `openTab` factory and binds no label. The Quality tab is a
 read-only dashboard with no settings on it at all. That is the shape the runbook already records
 for `config:fullReplaceOrphanNotice`'s stale *Relink tab*, so the German names the page it opens:
 "Qualitäts-Dashboard öffnen", repeating the page title `quality:title` already ships. Its four
@@ -747,14 +795,16 @@ Measured expansion against the English source, one ratio per key:
 | 2 — `strings` | 452 | 9,900 | 12,643 | 1.28 | 1.23 | 1.80 | 3.75 |
 | 3 — `glossary` `review` `category` `quality` | 377 | 10,744 | 13,502 | 1.26 | 1.25 | 1.71 | 3.33 |
 | 4 — `collab` `account` `vault` `settings` `sidebar` | 300 | 7,851 | 10,003 | 1.27 | 1.26 | 1.71 | 3.20 |
-| 5 — `logs` `console` `system` `errors` `generation` `batch` | 123 | 4,567 | 5,812 | 1.27 | 1.26 | 1.57 | 2.07 |
+| 5 — `logs` `console` `system` `errors` `generation` `batch` | 123 | 4,567 | 5,780 | 1.27 | 1.25 | 1.57 | 2.07 |
 
 **Every row is over the keys the batch SHARES with English.** It is the same population for
 batches 1-3, which added no keys of their own. Batch 4 is the first that differs: it ships
 **304** keys against English's 300, because `vault` gains four German `_one` forms (see the
 counting section), and those four are excluded from the row above rather than measured
 against an English string they have no counterpart in. Batch 5 ships **131** against English's
-123 — the remaining eight `_one` forms, likewise excluded.
+123 — the remaining eight `_one` forms, likewise excluded. (Batch 5's row is re-derived after its
+fix round, which moved four values and removed 32 German characters; the aggregate and the tail
+are unchanged to two decimals, the median fell 1.26 → 1.25.)
 
 (Re-derived after the round-4 fix round, which moved four values and added 31 German
 characters. The aggregate, median, tail and max are unchanged to two decimals.)
