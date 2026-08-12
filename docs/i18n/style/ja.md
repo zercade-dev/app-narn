@@ -179,11 +179,16 @@ the first is the one that makes the other two mechanical.
      about it.** Its shape comes from the table like any other control: `console:statusConnected`
      「サーバーのログストリームに接続済み」 and `console:vaultLocked` 「保管庫はロック中」 are status
      chips, so 体言止め, while `console:repeatCount` 「{{count}}回繰り返されました」,
-     `console:membersNotShown` 「他{{count}}件は表示していません」 and `system:slot.aria`
-     「{{label}}環境を使用しています」 are a tooltip, an inline note and an `aria-label` — sentences
-     that a screen reader or a hover has to read as sentences, so they take a ですます verb clause
-     and still no 。. Three of the batch's own NONE-class values are therefore **not** 体言止め,
-     and all three are correct. **Do not read "no full stop" as "noun phrase".**
+     `console:membersNotShown` 「他{{count}}件は表示していません」, `system:slot.aria`
+     「{{label}}環境を使用しています」 and `batch:runCancelled` 「実行をキャンセルしました」 are a tooltip,
+     an inline note, an `aria-label` and a toast — things a screen reader or a hover has to read as
+     sentences, so they take a ですます verb clause and still no 。. **Four** of the batch's own
+     NONE-class values are therefore **not** 体言止め — five keys, since `membersNotShown` carries
+     the same string in its bare and `_other` members — and all of them are correct. (An earlier
+     count here said three and omitted `runCancelled`, whose English ends in the colon its call site
+     strips — see the punctuation section — so it reads as NONE-class on both sides. Derived by
+     script over the 123 values, not by eye.)
+     **Do not read "no full stop" as "noun phrase".**
 
    The one thing this rule does **not** license is a completed event written as a bare noun
    phrase. English's *Vault unlocked.* / *Backup restored.* / *Translation memory cleared.* are
@@ -205,6 +210,21 @@ the first is the one that makes the other two mechanical.
    name; `english-review-notes.md` item 3 records the same English inconsistency and leaves the
    **English** deliberately unchanged. Do not "restore" the English word, and do not raise it
    again — it is a decided, recorded English defect with a recorded reason.
+
+   **The rule has exactly one exception and `terminology.md` now names it: `logs:translation.queued`.**
+   Its `{{total}}` counts **jobs** — one entry for one target language — so エントリ there makes the
+   number wrong by the language count on every multi-language run. It ships
+   「翻訳キューに追加しました（翻訳数：{{total}}）。」; see the **job** row of the counter table. The three
+   `failed*` families keep エントリ and are **correct**, because their aggregate is keyed on language
+   as well as reason, so the language is fixed inside a group.
+
+   **This exception was shipped wrong twice in one round, and the second time is the useful one.**
+   The round-5 batch wrote a bare bracketed number; the round-5 review recommended 「エントリ数」; the
+   fix round applied it — and the row in `english-review-notes.md` saying *do not render it with a
+   word that promises entries* had been at HEAD for seven minutes by then. **A reviewer's
+   recommendation is a claim like any other, and a fix round re-reads the frozen authorities at HEAD
+   before applying one.** In a wave running three languages at once, another locale's escalation lands
+   binding rows mid-round; the sibling locale that committed 51 seconds later had already applied it.
 4. **A run-engine's name is a thing; 〜に失敗する and 〜が完了する want an action. Restore 実行.**
    English narrates a run as *"Stage details failed."*, naming the feature. Japanese cannot:
    〜に失敗する takes an action noun (実行に失敗, 生成に失敗, 接続に失敗), so 「ステージ詳細に失敗しました」
@@ -572,18 +592,29 @@ Nothing here approaches the guard's ratio cap in either direction.
 
 **Batch 5 breaks that flat run, and the cause is the register rather than the corpus.** Over its
 **123 shared keys** — the same 123 in both languages, because this batch contains no `_one` key at
-all, so nothing comes out of either total — **2,814 Japanese characters against 4,567 English**:
+all, so nothing comes out of either total — **2,810 Japanese characters against 4,567 English**:
 aggregate **0.62**, median **0.62**, 90th percentile **0.81** (`logs:stageDetails.failed`), minimum
 **0.15** (`console:filter_notifications` 「通知」 against "Notifications"), maximum **1.11**
 (`logs:judge.done`). Five keys reach or pass 1.00: 「JSON」 and 「テキスト」 and 「すべて」 all at exactly
 1.00, `logs:vault.unlocked` 「保管庫のロックを解除しました。」 at 1.00 against *Vault unlocked.*, and
-`logs:judge.done` alone above it — pushed there by the 判定 label the fix round added, on a key
-whose English is already terse.
-**These are the fix round's figures, re-derived after its five string edits** (`action.openQuality`,
-`judge.done`, `stageDetails.done`, `stageDetails.failed`, `translation.queued`/`_other`), which moved
-the Japanese total by +16 and the aggregate by +0.005. The pre-fix figures were 2,798 characters and
-0.61; both are quoted here rather than one replacing the other, because a distribution written before
-the last string edit is stale by construction and this is the second round in which that has bitten.
+`logs:judge.done` alone above it — pushed there by the 判定 label a fix round added, on a key whose
+English is already terse.
+
+**Three measurement points, all recorded, because this figure has been written three times and was
+stale twice.** The Japanese character total moved with each round of edits, and each figure was
+correct when written:
+
+| Measured after | ja chars | aggregate |
+| --- | --- | --- |
+| the batch (5 namespaces of edits before it) | 2,798 | 0.6127 |
+| fix round 1 (`action.openQuality`, `judge.done`, `stageDetails.done`/`failed`, `translation.queued`/`_other`) | 2,814 | 0.6162 |
+| **fix round 2** (`translation.queued`/`_other`, エントリ数 → 翻訳数) | **2,810** | **0.6153** |
+
+Fix round 1 moved the total by +16 and the aggregate by **+0.0035** — not +0.005, which is what you
+get by subtracting the *rounded* figures instead of rounding the difference. **Every row above was
+re-derived after that round's last string edit**, and the table exists instead of a sentence because
+a single "re-derived after the last edit" claim is true only until the next edit, and this file
+carried two such sentences at once, naming two different edit lists.
 **The aggregate rose from 0.57 to 0.62 because `logs` is narration**, and that is a structural
 effect worth stating rather than a drift: English narrates a completed event with a bare past
 participle — *Vault unlocked.*, *Backup restored.*, *Translation memory cleared.* — where Japanese
@@ -605,15 +636,15 @@ once: 「選択範囲を翻訳」 **7**, 「実行をキャンセル」 **8**, �
 three-digit count, and `progressAriaLabel` is an `aria-label` with no rendered width at all —
 against a **soft budget of 17**. **The conclusion survives and the reason did not**, which is the
 tracked failure class: the batch is comfortable, but it is comfortable because it was measured, not
-because the class was absent. Everything else in the six namespaces really is unconstrained — the
-console panel wraps freely, and the longest values are two multi-sentence banners
-(`system:countdown.message`, `generation:ignoreGlossariesHint`) that wrap by design. **Do not read
+because the class was absent. **A second class is present too, and the first correction missed it:**
+the five `console:filter_*` labels 「すべて」「エラー」「警告」「情報」「デバッグ」 are tab-shaped, rendered
+in a scrolling row at `ConsolePanel.tsx:414` — the **in-panel sub-tab** class, budget **12**. They
+measure **2-4** characters, so there is no risk, but "everything else is unconstrained" was still
+false and is corrected rather than left standing. Everything **outside those two classes** really is
+unconstrained: the console log rows wrap freely, and the longest values are two multi-sentence
+banners (`system:countdown.message`, `generation:ignoreGlossariesHint`) that wrap by design. **Do not read
 "batch 5 had no constrained keys" as a precedent about which namespaces carry chrome**; `batch` and
 `console` both do.
-**Re-derived after the last string edit of the round** — the two that moved were
-`logs:sourceReview.done`/`done_other` (問題 → 指摘) and `logs:orphan.linked` (リンク → 再リンク), and
-every figure above was measured after them, not before.
-
 Japanese runs ~0.55x English over batches 1 and 2 alike (`strings`: 5,480 Japanese characters
 against 9,900 English, aggregate **0.55**, median **0.56**, 90th percentile **0.83**, single
 maximum **1.50** at `strings:filters.matchAny` 「または」 — a two-character English source, which
@@ -653,6 +684,7 @@ the counter is a property of the object, not of the string.
 | person (member, collaborator) | **人** | **Still not shipped after batch 4, and the reason is worth recording so nobody hunts for it: `collab` counts nothing at all.** It has no plural family and no numeric placeholder in any of its 106 keys — checked over `locales/en/collab.json`, not assumed. `collab:errors.project_full` names a collaborator limit in words and shows no number. Whichever later batch first counts people decides this row |
 | notification | **件** | added batch 4: `account:notificationsUnreadCount_other` 「未読の通知{{count}}件」. A notification is a stored record the user works through, like an LQA result or a review item — the same class as the 件 rows above it, not an occurrence of an action |
 | **log entry** | **件** | added batch 5, and it is the one object this batch forced. `console:unreadErrors_other` 「未読のエラー{{count}}件」 counts unread **error rows in the console** (`ConsolePanel.tsx:317`, `unreadErrorCount`), and `console:membersNotShown_other` 「他{{count}}件は表示していません」 counts the **log entries folded into one aggregated row** (`ConsoleLogRow.tsx:158`, `group.count - group.members.length`) — the key name says *members* and the object is not a person. Both are records of an event, which is the 件 class the *notification*, *LQA result* and *routing rule* rows above already sit in. Not 行: a log line wraps and is not a table row. Not 個: nothing here is a discrete physical object. The noun itself is 「ログエントリはまだありません。」 (`console:empty`) — see the *entry* row in `terminology/ja.md` for why ログ disambiguates the reservation rather than breaking it |
+| **job** (one entry × one target language) | **翻訳 + 件**, or the 翻訳数 label | **added in the round-5 re-review, and it is the counter table's first entry that is NOT what the English word says.** `logs:translation.queued` says *strings* and `batch:toTranslateCount` says *to translate*, but both numbers are **jobs**: the engine's nested loop over entries × target languages (`M9-translation-engine.ts:1161`, emitted at `:1248`) and, on the bulk-bar side, `StringTable.tsx:270-286`'s identical `for (id) for (lang)`. A 10-entry run into 3 languages reports **30**, so an *entry* word over-states it by the language count. The head noun that is true of a job is **翻訳** — a job is one translation to produce — which is also the unit `logs:translation.batchFailed` 「翻訳{{count}}件のバッチ」 already counts (`m.batchSize`). `logs:translation.queued` writes it as the label 「翻訳数：{{total}}」 because `{{total}}` is not skiplisted; `batch:toTranslateCount` 「翻訳対象{{count}}件」 keeps 対象 because it names the thing being translated rather than a content unit, and `{{count}}` is skiplisted so the counter can sit inline. **Never エントリ and never 行 here** |
 | vault key slot | **項目** | added batch 4: `vault:keysCount` 「保管庫に{{count}}項目」. The **unit is the counter**, like 文字／バイト／トークン／ターン／バッチ. 項目 is batch 1's own word for these slots (`config:credentialsMissing` 「保管庫に次の項目を設定してください：{{keys}}」), so the count line and the prose name one object. Not 個 — a credential is a slot in a record, not a discrete physical object; not 件 — nothing here is a record of an event |
 | discrete object (model, module, instance, backup, template, glossary file) | **個** | the generic object counter, for a thing that is a countable object rather than a record |
 | character / byte / token | **文字 / バイト / トークン** | `config:routing.templateMeta` 「最大文字数：{{maxLength}}」 — the unit *is* the counter |
@@ -802,10 +834,9 @@ So the count-neutral device and the faithful rendering are the *same* rendering 
 `logs:stageDetails.done` 「（完了：{{completed}}・失敗：{{failed}}）」,
 `batch:progressAriaLabel` 「翻訳済み：{{completed}}/{{total}}」 (the ratio device, byte-parallel to
 batch 1's `config:reviewProgressCount`), `logs:translation.queued_other`
-「翻訳キューに追加しました（エントリ数：{{total}}）。」 (the label-and-colon device, matching
-`strings:pagination.rows` 「エントリ数：{{formattedCount}}」 — the fix round labelled what had been a bare
-bracketed number, because two sibling log lines label theirs 「（順番：{{position}}）」 and an unlabelled
-number after a queue verb invites a position reading), and `logs:translation.batchFailed`
+「翻訳キューに追加しました（翻訳数：{{total}}）。」 (the label-and-colon device — the label was added
+because two sibling log lines label theirs 「（順番：{{position}}）」 and an unlabelled number after a
+queue verb invites a position reading), and `logs:translation.batchFailed`
 「翻訳{{count}}件のバッチが失敗しました（対象言語：{{languages}}）。」, where the counter sits against
 the **skiplisted** `{{count}}` and the name list is bracketed.
 **Batch 5 therefore added zero token-axis survivors**: the run over seventeen namespaces still
@@ -1080,11 +1111,22 @@ row above is the shape for a verb with neither a サ変 noun nor a state to set.
   **The first three all co-render, and none of the three differences is number, part of speech or
   an article** — so the boundary as batch 4 stated it did not decide them. The extension, on the
   **form-versus-sense** axis, with a **control-class veto**:
-  > A collapse over two co-rendering keys is licensed when **(1)** the English difference is one
-  > of *form* only — number, part of speech, article, abbreviation, or two phrasings of one
-  > event — **and (2)** the two keys are not two control classes that the shape table renders
-  > differently. A difference in **meaning** is never licensed. Establish which it is by opening
-  > the code; the label is evidence about wording, not about behaviour.
+  > A collapse over two co-rendering keys is licensed when **(0)** the two keys name the same
+  > operation on the same object — established by **opening the code**, never by reading the
+  > labels — **and (1)** the English difference is one of *form* only — number, part of speech,
+  > article, abbreviation, or two phrasings of one event — **and (2)** the two keys are not two
+  > control classes that the shape table renders differently. All three clauses must hold. A
+  > difference in **meaning** fails clause (0) and is never licensed.
+
+  **Clause (0) is stated as a clause because it used to be a trailing sentence, and that was luck
+  rather than structure.** The round-5 re-review found the gap: where two keys carry
+  **byte-identical** English and sit in the **same** shape row but differ in **behaviour**,
+  clause (1) is vacuously satisfied and clause (2) does not fire, so nothing in the rule refused
+  them — only a separate paragraph did. The live instance is in this very batch:
+  `account:notificationsDismiss` and `system:restarted.dismiss` are both *Dismiss*, both buttons,
+  and one issues a `DELETE` while the other writes a `localStorage` flag. Promoted to clause (0) so
+  the refusal is structural. **It is also the clause you check first**, because it is the only one
+  that requires reading code, and the other two are cheap once it passes.
 
   **Both clauses were paid for, and the first wording of this extension failed on both.** Batch 5
   first wrote it as *"licensed when the English distinction names no difference in what the two
@@ -1106,31 +1148,35 @@ row above is the shape for a verb with neither a サ変 noun nor a state to set.
     number, part of speech and article, and therefore one no Japanese rendering can carry. Right
     answer, unfounded reason, committed inside the paragraph that introduced the rule.
 
-  The prohibition is untouched, and `account:notificationsDismiss` is the proof: it keeps 削除
-  against the banners' 閉じる because the operations really differ (a `DELETE` against a
-  `localStorage` flag), so identical English is the thing that had to be **split**.
-
   **The rule applied to batch 5's own three, so it is checkable rather than asserted:**
 
-  | Collapse | Clause (1) — form | Clause (2) — control class |
-  | --- | --- | --- |
-  | 警告 over *Warning* / *Warn* | **abbreviation** of one value name | filter tab and status badge are both the bare-noun row — same class |
-  | 閉じる over *Close* / *Dismiss* | **two words for one action**, verified in code to be one action | `glossary:close` and the two banner ✕ `aria-label`s are all the plain-dictionary-form button row — same class |
-  | 「カテゴリの生成に失敗しました。」 over two English sentences | **two phrasings of one event** | a toast and its own log line, both narration sentences — same class |
+  | Collapse | Clause (0) — same operation | Clause (1) — form | Clause (2) — control class |
+  | --- | --- | --- | --- |
+  | 警告 over *Warning* / *Warn* | both name the same severity **value**; neither is an operation | **abbreviation** of one value name | filter tab and status badge are both the bare-noun row — same class |
+  | 閉じる over *Close* / *Dismiss* | both hide the thing and destroy nothing — checked at `RestartBanners.tsx:142`/`:161` | **two words for one action** | `glossary:close` and the two banner ✕ `aria-label`s are all the plain-dictionary-form button row — same class |
+  | 「カテゴリの生成に失敗しました。」 over two English sentences | literally the same event, one toast and one log line for it | **two phrasings of one event** | both narration sentences — same class |
 
-  **"Two words for one action" is the loosest member of the form list, and clause (2) is the only
-  thing keeping it safe.** Without the veto it reads as "same action ⇒ same string", which is
-  precisely how a trigger and its dialog title, or a filter tab and the button that sets it, get
-  collapsed — three defects this file has already paid for. Batch 6 meets the temptation directly
-  in `common`'s *Close* / *Cancel* / *Back*: check the shape table row **before** the behaviour.
+  And the refusal, which is the same table's fourth row and the reason clause (0) exists:
+
+  | Refused split | Clause (0) | Verdict |
+  | --- | --- | --- |
+  | `account:notificationsDismiss` 削除 vs `system:*.dismiss` 閉じる — byte-identical *Dismiss*, both buttons | **fails** — `notification-store.ts:137` issues `DELETE /notifications/:id`; the banners write a `localStorage` flag | not licensed; the identical English is the thing that had to be **split** |
+
+  **"Two words for one action" is the loosest member of the form list, and clauses (0) and (2) are
+  what keep it safe.** Without them it reads as "same action ⇒ same string", which is precisely how
+  a trigger and its dialog title, or a filter tab and the button that sets it, get collapsed — three
+  defects this file has already paid for. Batch 6 meets the temptation directly in `common`'s
+  *Close* / *Cancel* / *Back*: open the handler, then check the shape-table row, and only then look
+  at the words.
 
   **The category pair has harder evidence than batch 5 cited, and the round-5 review found it.**
   The parallel glossary pair — `glossary:generateFailed` and `logs:glossaryGen.failed` — is
   **byte-identical in English** ("Glossary generation failed."), and Japanese ships one string for
   it with no collapse required at all. Two sibling generators, one written two ways in English and
   one written one way, for the same kind of event: that asymmetry is the evidence that the category
-  pair's two phrasings are an **English accident**, not a distinction. It is filed as an English
-  defect rather than only harmonised in one language (see the round-5 report's queue).
+  pair's two phrasings are an **English accident**, not a distinction. **It is now a row in
+  `english-review-notes.md`** — filed from this locale's round-5 fix round — which tells every locale
+  to render the category pair as one event, so the collapse is no longer a per-language judgement.
   **The console's five filter tabs are a paradigm, scored together rather than key by key** —
   「すべて」「エラー」「警告」「情報」「デバッグ」 — which is why 警告 was not nudged to a rarer synonym
   to dodge the collision report: it is the standard Japanese log-level word, and breaking the set
