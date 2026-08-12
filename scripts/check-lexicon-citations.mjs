@@ -509,6 +509,36 @@ export function candidatesForRow(row) {
  * hiding the next real regression on that row.
  */
 export const RENDERING_ALLOWLIST = {
+  // NOT the case this constant was built for, and saying so is the point: «dự án»
+  // IS in the shipped corpus — `config:noProjectTitle` is "Chưa chọn dự án" — and
+  // the guard cannot see it. This is a defect in renderingIsCovered() for a
+  // syllable-isolating script, granted as an entry rather than absorbed into the
+  // row, per the runbook's rule that a guard rejecting copy the translator
+  // believes is correct is a finding against the guard.
+  //
+  // THE MECHANISM, reproducible in one command (`node --input-type=module -e` over
+  // this module's own exports): Vietnamese writes every syllable as its own
+  // space-delimited token, so «dự án» tokenizes to ["dự","án"], each 2 characters.
+  // Both fall under MIN_WORD_LENGTH (3), significantWords() returns EMPTY, and
+  // renderingIsCovered() falls back to matching the whole trimmed phrase "dự án"
+  // (5 chars, required prefix 4) against SINGLE corpus tokens — which can never
+  // succeed for a multi-token phrase, however well attested its parts are. Both
+  // tokens are individually present in the corpus; a per-token fallback would pass.
+  //
+  // THE REAL FIX, deliberately not applied here because it changes shared guard
+  // behaviour for all fourteen locales and belongs to whoever owns this script:
+  // when significantWords() is empty AND the candidate has more than one token,
+  // check every token against the corpus instead of the joined phrase. That keeps
+  // the docstring's promise (an all-short-particle candidate is still checked, not
+  // silently passed) and is strictly more correct than comparing a phrase to a
+  // token. Delete this entry when that lands — staleAllowlistEntries() will demand
+  // it the moment the guard can see the word.
+  'vi:project':
+    'Guard limitation, not an absent rendering — see the block comment above. «dự án» ships ' +
+    'at config:noProjectTitle and a dozen other keys; renderingIsCovered() cannot attest a ' +
+    'two-token phrase whose every token is shorter than MIN_WORD_LENGTH, because its ' +
+    'no-significant-words fallback compares the joined phrase against single corpus tokens. ' +
+    'The rendering was not padded or changed to clear the check.',
   'ru:severity':
     'Every shipped LQA-severity string drops the head noun (see the row\'s own Notes: ' +
     '"Prefer no head noun at all — that is what the app\'s strings do"). «Серьезность» / ' +
