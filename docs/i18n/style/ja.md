@@ -91,6 +91,36 @@ when English is byte-identical.** `config:models.select` (the closed combobox's 
 is 「モデルを選択」 and `config:models.pickTitle` (the dialog it opens) is 「モデルの選択」.
 This is the one same-English/different-rendering group in batch 1 and it is deliberate.
 
+**Batch 4 adds the third such split, on the same grounds, and it must be recorded here rather than
+only in a batch report** — `i18n-preflight` check 2 reports every one of these on every future run,
+and an unexplained hit is one a later translator will "fix". English's **"Join project"** takes two
+renderings:
+
+- `sidebar:joinProject` 「プロジェクトへの参加」 — the `TabsTrigger` of the New Project sheet
+  (`Sidebar.tsx:846`), a section label, so the **noun phrase**.
+- `collab:join.joinButton` 「プロジェクトに参加」 — the submit button of the form inside that very
+  `TabsContent`, so the **action phrase**.
+
+The two **co-render nested**, which is why the split is not optional: rendering them alike would put
+an identical label directly above its own panel's button — the `groups.translate` shape in miniature.
+`collab:join.title` ("Join a project", the `<h1>` of the standalone `/join` view at
+`AppShell.tsx:502-504`) takes the noun phrase too, so it is **byte-identical to `sidebar:joinProject`**
+— an equality that is licensed and reachable rather than merely theoretical: the `/join` view is
+routed by URL (`lib/url-state.ts:37`), not from the rail, so ordinary navigation never paints both,
+but opening the New Project sheet over that view does. Licensed because the two English strings name
+one activity and differ only by an article, which carries nothing into Japanese.
+
+**And the second split, which binds nobody but is recorded so nobody hunts for a rule.** English's
+**"Default"** is 「既定」 in `config` (three keys: `module.reasoningEffortDefault`,
+`routing.modelDefault`, `routing.defaultGroupName`) and 「デフォルト」 at
+`settings:previewSamples.badgeDefault`. Two senses, not one: config's is *the default value to
+inherit*, while the settings one names a **shadcn badge variant** in a four-member set whose other
+three (「セカンダリ」「アウトライン」「デストラクティブ」) have no idiomatic kanji form — forcing 既定
+into that set would break the paradigm, which is the error runbook 2.1 names. They cannot co-render
+(`SettingsView` and `GlobalConfigView` are mutually exclusive `view` values). **`badgeDefault` is the
+only *Default* outside `config`**, so no later batch inherits a choice here; this note exists to stop
+the collision report being read as a defect.
+
 ## Casing
 
 Japanese has no letter case, so the English sentence-case / Title Case / uppercase
@@ -290,28 +320,51 @@ hit the number. A term rule outranks the budget: `config:models.colProcessor` is
 from the component's own CSS, and one (the in-panel sub-tab) was measured in batch 1. The
 whole-language sweep confirms all five.
 
-**Batch 4 confirms the hard row against the namespace that owns it, and it is not close.** The 28
+**Batch 4 confirms the hard row against the namespace that owns it, and it is not close.** The **31**
 labels the rail can paint at once (listed in the Sweep 4 table below) run from 2 to 7 rendered
-characters. The longest are 「グローバル設定」, 「原文AIレビュー」 and 「翻訳AIレビュー」 at 7 full-width
-equivalents — the AI ones counting the half-width `AI` as ~1 — against a budget of 13 and a container
-of ~199px, so the widest label in the app's tightest control uses **about half** the space it has.
+characters. **Four** sit at the maximum of 7 full-width equivalents — 「グローバル設定」,
+「原文AIレビュー」, 「翻訳AIレビュー」 and 「アクティビティ」, the AI ones counting the half-width `AI`
+as ~1 — against a budget of 13 and a container of ~199px, so the widest label in the app's tightest
+control uses **about half** the space it has. (An earlier version of this paragraph named only three
+and omitted アクティビティ, contradicting the batch-2 paragraph in this same file, which lists it among
+the 7s. The measurement was never in doubt; the transcription of it was.)
 `sidebar` itself never came near it: its longest rail value is 「グローバル設定」 at 7, and its longest
 value of any kind, 「ワークスペースのナビゲーション」 at 15, is an `aria-label` on `<SidebarContent>`
 with no width at all. **Nothing in this batch was shortened to fit anything**, and the brief's
 escalation path for an unfittable label was not needed.
 
-### One guard escalation: `vault:keyPlaceholder` needs an `IDENTICAL_ALLOWLIST` entry
+### One guard escalation: `vault:keyPlaceholder` — granted, and its reason corrected
 
-`LOCALE_PARITY_STRICT=ja pnpm check:locales` reports exactly one finding for `ja`, and it is a
-finding against the guard, not against the string: `vault:keyPlaceholder` ships English's
-**"KEY_NAME"** byte-identical, deliberately. It is the placeholder of the input the user types a
-vault key name into (`VaultEditorDialog.tsx:281`, and the same key as the picker's placeholder at
-`:301`), and `terminology.md`'s never-translated list covers vault key names outright. The value is a
-**format template for an ASCII uppercase identifier** — the same class as
-`config:lqa.forbiddenPlaceholder`, an example of literal user input — so a Japanese rendering such as
-「キー名」 would demonstrate an input shape the field does not accept, and 「例：KEY_NAME」 would pad
-the string purely to clear a check. Both are the "absorb the workaround into the string" failure the
-runbook names.
+`vault:keyPlaceholder` ships English's **"KEY_NAME"** byte-identical, deliberately, and now carries an
+`IDENTICAL_ALLOWLIST` entry. The conclusion was right from the start; **the reason this file gave for
+it was false, and is restated here rather than quietly swapped.**
+
+**What it is not:** a free-text field. The first version of this section — and the granted entry, and
+the batch report — called it "the placeholder of the input the user types a vault key name into",
+citing `VaultEditorDialog.tsx:281` and `:301`. Nothing is typed at either. `:281` is a
+`ComboboxInput` on the `row.existing` branch that is **`disabled` with `value={row.key}`**, and
+`row.key` is never empty for an existing row (`:97` builds the rows from the fetched key list), so the
+placeholder cannot render there at all; `:301` is `<SelectValue placeholder={t('keyPlaceholder')} />`
+on a `<Select>` whose options come from the modules' `requiredEnvVars`.
+
+**What it is:** the empty-state placeholder of the vault-key **picker**, and its value **samples the
+format of the options** — literal ASCII identifiers such as `OPENAI_API_KEY` and
+`GENERIC_API_KEY__MY-OLLAMA`, which `terminology.md` puts on the never-translate list outright. A
+rendered 「キー名」 would name the *field* where the string is sampling the *values*, and
+「例：KEY_NAME」 would pad the value purely to clear a check — the "absorb the workaround into the
+string" failure the runbook names. Byte-identical is right for the same reason
+`config:lqa.forbiddenPlaceholder` keeps its half-width comma: the value demonstrates a literal form.
+
+**The scope argument was and remains sound**, and is the part worth keeping: the reason is
+language-independent, so the entry is `*:vault:keyPlaceholder`. `ja` is merely the first locale able
+to *see* the value — at 8 characters and one whitespace-delimited word it clears
+`MIN_UNSPACED_CHARS` (8) and fails `MIN_WORDS` (3), the exact gap `isSubstantial()`'s own comment
+documents.
+
+**How the false reason got written, because it is the more useful lesson:** two translators
+independently described the control the same way and neither had opened the file — agreement between
+two guesses is not evidence. The runbook's rule 3 says a claim about a key is checked by whoever is
+about to act on it; a claim about a *control* is no different.
 
 **Why `ja` is the first locale to see it, which decides the entry's scope.** "KEY_NAME" is 8
 characters and one whitespace-delimited word, so it clears `MIN_UNSPACED_CHARS` (8) and fails
@@ -375,7 +428,9 @@ stale by construction. **Re-run the measurement as the last step of the round, n
 Batch 4 measures over its **299 shared keys, with the English measured over the same 299** — the
 denominator batch 3 got wrong. English's own five files hold 300 keys and 7,851 characters; the 29
 characters of `account:notificationsUnreadCount_one` come out of the English total because Japanese
-supplies no `_one`, leaving **4,447 Japanese characters against 7,822 English**: aggregate **0.57**,
+supplies no `_one`, leaving **4,448 Japanese characters against 7,822 English** — re-derived after
+the fix round's five string edits, which moved the Japanese total by a net **+1** (four `policy*`
+keys at +1 each, `retrySuccess_other` at −3) and left every rounded figure here unchanged: aggregate **0.57**,
 median **0.57**, 90th percentile **0.81**, minimum **0.15** (`account:tabNotifications`
 「通知」 against "Notifications"), maximum **1.20**. Ten keys reach or pass 1.00 — six sit exactly on
 it (`collab:leaveConfirmTitle`, `vault:unlock`, `vault:keyPlaceholder`, `vault:undoRemove`,
@@ -427,7 +482,7 @@ the counter is a property of the object, not of the string.
 | glossary | **件** | `config:glossariesSkipped_other` 「無効化した用語集{{count}}件」 |
 | glossary term | **語** | shipped batch 3: `glossary:toastPushed` 「用語{{count}}語をDeepLに送信しました」, `glossary:generateSuggestionCount` 「用語{{count}}語」, `glossary:bulkMarkConstant`, `glossary:flaggedTitle`, `glossary:importMoreItems`. Terms and words take 語, never 件. |
 | routing rule | **件** | `config:routing.ruleCount_other` 「ルール{{count}}件」 |
-| run, retry, attempt, request | **回** | an occurrence of an action, never 件. **Shipped batch 4, twice**: `vault:remainingAttemptsHint_other` 「残り{{count}}回です。」 (login attempts) and `vault:retrySuccess_other` 「…{{count}}回の操作がすべて完了しました。」 — the call site (`AppShell.tsx:770`, `count: retries.length`) counts the **queued HTTP requests** held while the vault was locked, i.e. occurrences of an action, which is what this row's *request* entry covers. 件 was rejected there for that reason and not by feel |
+| run, retry, attempt, request | **回** | an occurrence of an action, never 件. **Shipped batch 4, twice**: `vault:remainingAttemptsHint_other` 「残り{{count}}回です。」 (login attempts) and `vault:retrySuccess_other` 「{{count}}回の操作が完了しました。」 — the call site (`AppShell.tsx:770`, `count: retries.length`) counts the **queued HTTP requests** held while the vault was locked, i.e. occurrences of an action, which is what this row's *request* entry covers. 件 was rejected there for that reason and not by feel. The fix round dropped すべて from that value (it quantified a single item at count 1, which is the count Japanese's sole `_other` category has to serve), and **the citation guard caught this row still quoting the old text** — a two-word string edit whose blast radius reached a different file |
 | person (member, collaborator) | **人** | **Still not shipped after batch 4, and the reason is worth recording so nobody hunts for it: `collab` counts nothing at all.** It has no plural family and no numeric placeholder in any of its 106 keys — checked over `locales/en/collab.json`, not assumed. `collab:errors.project_full` names a collaborator limit in words and shows no number. Whichever later batch first counts people decides this row |
 | notification | **件** | added batch 4: `account:notificationsUnreadCount_other` 「未読の通知{{count}}件」. A notification is a stored record the user works through, like an LQA result or a review item — the same class as the 件 rows above it, not an occurrence of an action |
 | vault key slot | **項目** | added batch 4: `vault:keysCount` 「保管庫に{{count}}項目」. The **unit is the counter**, like 文字／バイト／トークン／ターン／バッチ. 項目 is batch 1's own word for these slots (`config:credentialsMissing` 「保管庫に次の項目を設定してください：{{keys}}」), so the count line and the prose name one object. Not 個 — a credential is a slot in a record, not a discrete physical object; not 件 — nothing here is a record of an event |
@@ -597,6 +652,21 @@ English uses three words and Japanese needs four, because the operations really 
   解除 instead where what is released is a *marker or setting* (`glossary:bulkClearConstant`
   「{{count}}語の定数を解除」, `glossary:unassignGlossary` 「用語集の割り当てを解除」) — 外す takes a
   member out of a collection, 解除 turns a flag off.
+
+**Batch 4's two licensed collisions, stated so the next collision sweep does not re-open them:**
+
+- 「取り消し済み」 covers `collab:invites.status.revoked` (*Revoked*) and the shipped
+  `strings:runs.revertedBadge` (*Reverted*) — two different operations, a cancelled invite and an
+  undone translation edit, and both are status badges in tables, which is what makes it worth
+  naming. Licensed: Sharing and Activity are different tabs and cannot co-render. 失効 was rejected
+  because it means *lapsed* and would collide with 「期限切れ」 one row above it in the same status set.
+- 「無効」 gains a fifth member, `account:mfaStatusNotEnabled` (*Not enabled*), joining
+  `config:reviewProgressInactive`, `config:inactiveLabel`, `config:module.reasoningEffortDisabled`
+  and `glossary:disabled`. The licensed-collapse list further down names *inactive* / *Inactive* /
+  *Disabled* / *Off* but not *Not enabled*; it is the same off-state concept, and Account and Global
+  Config are mutually exclusive `view` values. It also cannot co-render with
+  `account:mfaDisableButton` 「無効化」 in its own section — `MfaSection.tsx` paints status+Disable
+  only when MFA is enrolled and status+Enable only in the else branch.
 - **消去 wipes a remote store.** `glossary:confirmPushReplaceTitle`
   「DeepLの古いエントリを消去しますか？」, `glossary:pushToDeepLReplace` 「送信して古い分を消去」,
   `glossary:confirmPushReplaceConfirm` 「消去して送信」. This is the same 消去 batch 1 shipped for
@@ -637,11 +707,18 @@ actually does.
   `MembersSection.tsx` deletes the member's grant; the person, their account and their past edits
   all survive. **削除 was rejected as an overstatement** — 「メンバーを削除」 reads as deleting the
   person — and that is the same defect class as the batch-3 `aria-label` finding, reached from the
-  other direction. English's own bare *Remove* is given an object in Japanese because the button is
-  a screen-reader target in a table row where "外す" alone names nothing.
+  other direction. English's own bare *Remove* is given an object in Japanese **because 外す is
+  semantically empty without one** — the bare verb means "take off / detach" and names no object at
+  all — not merely because the button sits in a table row. That distinction matters, because the
+  *same* row of the *same* page carries `collab:invites.revoke` 「取り消す」 with **no** object
+  (`SharingTab.tsx:93`/`:98` paint MembersSection and InvitesSection into one page, so both Actions
+  columns are on screen together). 取り消す names a complete action on its own, English is bare in
+  both, and adding an object there purely for visual symmetry between two adjacent tables would
+  invent content neither English string has. **Add an object when the Japanese verb needs one, never
+  to make two columns look alike.**
 - **抜ける for leaving a project yourself.** `collab:leaveProject` 「プロジェクトから抜ける」 is an
   **`aria-label`** (`Sidebar.tsx:465`) on a button that `DELETE`s the caller's *own* membership
-  (`Sidebar.tsx:380`). A screen reader must not announce 「プロジェクトを削除」 there — the project is
+  (`Sidebar.tsx:379`). A screen reader must not announce 「プロジェクトを削除」 there — the project is
   untouched — so the verb names the departure, not a deletion.
 - **削除 stays for a real delete even when English softens the verb.** `account:notificationsDismiss`
   says *Dismiss*, but `notification-store.ts:137` issues `DELETE /notifications/:id`: the row is
@@ -915,7 +992,7 @@ equality collision; 「レビュー」 over the three ～レビュー tabs and �
 two licensed prefixes, on the same grounds. `groups.page` had no `guide` counterpart and was batch
 4's alone. Do not re-open any of these.
 
-**Sweep 4 — the whole rail as one container, all 28 labels at once** (batch 4). Sweep 2 compares a
+**Sweep 4 — the whole rail as one container, all 31 labels at once** (batch 4). Sweep 2 compares a
 heading with its own children, which is the narrow question. `Sidebar.tsx` paints **every** group and
 **every** item into one scrolling column, and `SidebarGroup` is not a render condition — the project
 groups render whenever `allowedTabs` is non-empty, whatever `view` is, so the Page group's items and
@@ -931,9 +1008,42 @@ the project tabs are on screen together even while a workspace page is open. The
 | 「メンテナンス」 | 「孤立エントリ」「バックアップ」 |
 | 「ページ」 | 「環境設定」「変更履歴」「法的情報」「Narnについて」 |
 
-**No two are equal.** Four substring relations exist and each is licensed: 設定 ⊂ グローバル設定 and
-設定 ⊂ 環境設定 (see the hazard below), レビュー ⊂ the three ～レビュー tabs, 用語 ⊂ 用語集, 翻訳 ⊂
-翻訳作業 and ⊂ 翻訳AIレビュー. In every case English has the same relation between the same pair.
+**No two are equal** — 31 labels, 31 distinct values, verified by set comparison over the shipped
+files rather than by eye.
+
+**Nine substring relations exist, and only four of them are mirrored in English.** The first version
+of this paragraph said there were four and that "in every case English has the same relation between
+the same pair". Both were wrong, and the second was **already refuted forty lines above in this same
+file**, where the 用語/用語集 sweep records that English's *Terminology* and *Glossary* share no
+substring "so that premise fails precisely here". A discarded reason was rebuilt as a new section's
+closing premise — the standing-claim-not-re-derived failure, committed inside the very batch that
+quotes the rule. The table is now derived mechanically, not by hand:
+
+| ja relation | English pair | Mirrored? |
+| --- | --- | --- |
+| 設定 ⊂ グローバル設定 | Config ⊂ Global Config | **yes** |
+| 設定 ⊂ 環境設定 | Config ⊄ Settings | no |
+| 翻訳 ⊂ 翻訳メモリ | Translations ⊄ Translation Memory | no |
+| 翻訳 ⊂ 翻訳作業 | Translations ⊄ Translate | no |
+| 翻訳 ⊂ 翻訳AIレビュー | Translations ⊄ Translation AI review | no |
+| レビュー ⊂ 原文AIレビュー | Review ⊂ Source AI review | **yes** |
+| レビュー ⊂ 翻訳AIレビュー | Review ⊂ Translation AI review | **yes** |
+| レビュー ⊂ 手動レビュー | Review ⊂ Manual review | **yes** |
+| 用語 ⊂ 用語集 | Terminology ⊄ Glossary | no |
+
+**The correct premise is not "English mirrors it" — it is that each pair is a licensed
+heading-over-specialising-child or root-over-compound relation.** The four mirrored pairs need no
+further argument. The five unmirrored ones each rest on grounds recorded elsewhere in this file or in
+`terminology/ja.md`: 設定/環境設定 on the three-way 設定 hazard below (one 設定 family, distinguished
+by heads, exactly as English distinguishes Config / Global Config / Settings); 用語/用語集 on the
+*glossary term* row's one-word-family argument, where the head 集 carries the distinction;
+翻訳/翻訳作業 on the round-2 rename that created the prefix **deliberately**, to replace an equality;
+and 翻訳/翻訳メモリ and 翻訳/翻訳AIレビュー on the same footing as 翻訳作業 — 翻訳 is the app's root
+morpheme for the whole domain, so every compound built on it shares it, which is what Japanese
+compounding does and not evidence of drift. **English is a useful corroboration when it happens to
+agree; it is not the test.** A locale whose morphology compounds more than English's will always show
+more substring relations than English does, and reading that as a defect would force it to invent
+synonyms.
 
 ### The three-way 設定 hazard, and why *Settings* is 「環境設定」
 
