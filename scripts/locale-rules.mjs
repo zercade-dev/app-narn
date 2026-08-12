@@ -1251,14 +1251,21 @@ export const IDENTICAL_ALLOWLIST = {
     'module, shown in the module picker, so it must match the picker verbatim',
 
   '*:vault:keyPlaceholder':
-    'The placeholder of the input a user types a VAULT KEY NAME into, and its value is a ' +
-    'format template for one — "KEY_NAME", ASCII uppercase with an underscore. Vault key ' +
-    'names are on the shared never-translate list, so every correct locale renders this ' +
-    'identically; the scope is `*:` for that reason rather than per-locale. Requested ' +
+    'A sample VAULT KEY NAME — "KEY_NAME", ASCII uppercase with an underscore — shown as the ' +
+    'empty-state hint of the key control. Vault key names are on the shared never-translate ' +
+    'list and are drawn from a fixed set of identifiers, so every correct locale renders ' +
+    'this identically; the scope is `*:` for that reason rather than per-locale. Requested ' +
     'independently by the Japanese and German batch-4 translators, and `ja` is merely the ' +
     'first locale able to SEE it: at 8 characters and one word it clears ' +
     'MIN_UNSPACED_CHARS and fails MIN_WORDS, which is exactly the asymmetry isSubstantial() ' +
-    'documents. Neither translator localized or padded the value to clear the check.',
+    'documents. Neither translator localized or padded the value to clear the check. ' +
+    'CORRECTED 2026-08-12: this entry first said it was "the placeholder of the input a user ' +
+    'TYPES a vault key name into". That is false at both call sites and I wrote it from two ' +
+    'agents agreeing rather than from the file. VaultEditorDialog.tsx:281 is a ComboboxInput ' +
+    'that is `disabled` with `value={row.key}` always set, so its placeholder can never ' +
+    'render at all; :301 is a <SelectValue> inside a <Select>, where the user PICKS from a ' +
+    'list. Nothing is typed anywhere. The conclusion was right and only the reason was ' +
+    'wrong, which is this programme\'s commonest defect and leaves no trace downstream.',
 
   '*:strings:runs.estimatedCost':
     'Format string "≈ ${{amount}}" — an approximation sign, a currency symbol and a ' +
