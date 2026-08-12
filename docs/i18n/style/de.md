@@ -471,7 +471,7 @@ English, which is active with a full subject and object, and by the idiom *die P
 which has no natural passive here.
 
 > **Added 2026-08-12 (round-5 review, I3).** The convention held 58 of 59 lines and was written
-> down nowhere, which is the runbook's third non-negotiable rule exactly: a decision that binds a later batch belongs in
+> down nowhere, which is the runbook's non-negotiable rule that anything binding a later batch goes into the lexicon or the style file in the same change: a decision that binds a later batch belongs in
 > this file, not in a batch report. The one line that broke it was `logs:judge.suggestNoChange`,
 > shipped as an article-plus-Perfekt active clause — the only one in the namespace — directly
 > against its own sibling `logs:judge.done`, which the same engine emits into the same stream with
