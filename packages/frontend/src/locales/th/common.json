@@ -1,0 +1,15 @@
+{
+  "save": "บันทึก",
+  "cancel": "ยกเลิก",
+  "loading": "กำลังโหลด…",
+  "changelogEntryError": "โหลดบันทึกการเปลี่ยนแปลงรายการนี้ไม่ได้",
+  "changelogShowOlder": "แสดงรุ่นก่อนหน้า ({{count}})",
+  "saving": "กำลังบันทึก…",
+  "thinking": "กำลังคิด… {{seconds}} วินาที",
+  "webSearch": {
+    "title": "ค้นหาบนเว็บ",
+    "placeholder": "ค้นหาใน Google…",
+    "hint": "กด Enter เพื่อค้นหาในแท็บใหม่",
+    "action": "ค้นหา"
+  }
+}

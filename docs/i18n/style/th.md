@@ -135,9 +135,15 @@ array lengths.
 
 ## Length discipline
 
-Thai character counts land close to English — measured over the whole language, the
-aggregate ratio is **below 1.0** — but two facts make a raw character budget the wrong
-instrument, and both are why this class needs measuring rather than estimating.
+Thai is **shorter than English** here. Measured over the **1,879 keys this locale shares
+with English** — one ratio per key, code points on both sides — the aggregate is **0.97**,
+the median exactly **1.00**, the 90th percentile **1.46** and the 95th **1.67**. (State the
+population when quoting these: the 29 English `_one` keys have no Thai counterpart, so
+1,879 is the whole of this locale rather than a subset of it.) The tail is what matters and
+it sits where the other locales' does.
+
+But two facts make a raw character budget the wrong instrument even so, and both are why
+this class needs measuring rather than estimating.
 
 **1. Thai has no wrap point.** A Thai run has no spaces inside it, so an over-long label in
 a fixed container does not wrap onto a second line; it clips or ellipsizes at whatever
@@ -145,9 +151,9 @@ character the container ends on. The overflow is silent and it can cut a word in
 
 **2. A code-point count over-states Thai width by about a fifth.** Thai vowels and tone
 marks are **nonspacing** — Unicode general category `Mn` — so they consume no advance
-width at all. Measured over the shipped `th` files, `Mn` marks are **21.4%** of all Thai
-code points. A budget written in code points is therefore not a budget in width. Count
-**advance-bearing characters** instead, which is reproducible:
+width at all. Measured over the finished `th` locale, `Mn` marks are **21.8%** of all Thai
+code points (9,634 of 44,122). A budget written in code points is therefore not a budget in
+width. Count **advance-bearing characters** instead, which is reproducible:
 
 ```js
 [...value].filter((c) => !/\p{Mn}/u.test(c)).length
@@ -155,14 +161,27 @@ code points. A budget written in code points is therefore not a budget in width.
 
 ### The budgets
 
-| Class | Anchor key | Kind | Budget (advance-bearing chars) |
-| --- | --- | --- | --- |
-| Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **hard** | 24 |
-| Tab label | `strings:tabs.backup` | **hard** — same container | 24 |
-| In-panel sub-tab | `config:routing.tabImportExport` | soft | 20 |
-| Table column header | `strings:columns.config` | soft | 14 |
-| Filter label | `strings:filters.needsReview` | soft | 18 |
-| Bulk-bar control | `strings:bulk.approveSelected` | soft | 22 |
+| Class | Anchor key | Kind | Budget | Measured max |
+| --- | --- | --- | --- | --- |
+| Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **hard** | 24 | 16 |
+| Tab label | `strings:tabs.backup` | **hard** — same container | 24 | 14 |
+| Sidebar group heading | `sidebar:groups.maintenance` | **hard** — same container | 24 | 11 |
+| In-panel sub-tab | `config:routing.tabImportExport` | soft | 16 | 13 |
+| Table column header | `strings:columns.config` | soft | 18 | 15 |
+| Filter label | `strings:filters.needsReview` | soft | 28 | 24 |
+| Bulk-bar control | `strings:bulk.approveSelected` | soft | 30 | 26 |
+
+All figures are **advance-bearing characters**, counting each `{{token}}` as 3 — the width
+of a rendered three-digit value, since the literal token text is never on screen. Reproduce
+the whole table by running that count over `locales/th`; the "measured max" column is a fact
+about the shipped tree at the time it was written, and the method is what to trust.
+
+**The two hard classes came in at two-thirds of budget and nothing breaches.** The widest
+sidebar item is `sidebar:translationMemory` at 16 and the widest tab label
+`strings:tabs.review-source-ai` at 14, against 24 — so no correct Thai rendering had to be
+shortened, and no `LENGTH_EXEMPTIONS` entry was needed anywhere in the language. The four
+soft budgets are the longest value this locale actually ships in each class plus headroom,
+measured after the last batch and replacing the provisional figures batch 1 guessed.
 
 **How the two hard numbers were derived**, so the next person can redo it rather than trust
 it. `SIDEBAR_WIDTH` is `16rem` = 256px (`components/ui/sidebar.tsx:34`). Off that come 1px
@@ -323,3 +342,10 @@ six must return nothing.
 | Thai digits where Arabic numerals are required | `[๐-๙]` |
 | doubled spaces | `  ` |
 | three-dot ellipses instead of the single character | `...` for `…` |
+
+All six ran clean over the finished locale. A seventh grep is worth running and is **not**
+expected to be empty: the repetition mark `ๆ`. The style rule above bans it where the
+repetition is not genuinely there, which no grep can decide, so read every hit. The finished
+locale has exactly two and both are lexicalized rather than repetitive — `quality:other` and
+the closing phrase of `backup:restoreDescription`, where the mark is part of a fixed
+expression meaning *any at all* rather than a doubling of the preceding word.
