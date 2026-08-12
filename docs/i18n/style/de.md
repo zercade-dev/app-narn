@@ -61,11 +61,29 @@ infinitive way — `vault:errorInvalidPassword`, `account:errorInvalidConfirmati
 one outlier at `collab:invites.errorTooManyPendingInvites`, which the review caught and which
 now reads "Erst eine bestehende zurückziehen, dann eine neue erstellen."
 
-The du-imperative is kept for the narrower case: an instruction the reader carries out **on the
-screen in front of them**, in a field or on a device. Three shipped instances, all of that kind
-— `account:deleteTokenSent`, `account:mfaDisableHint` and `collab:nickname.claimOnDesktop`
-(which reuses batch 2's `strings:mobile.desktopOnlyBody` frame verbatim). **Batch 5 owns
+The du-imperative is kept for the narrower case: a **direct invitation to act**, which is
+usually an instruction carried out on the screen in front of the reader and occasionally one
+carried out elsewhere. Six instances exist across the whole shipped locale, derived by scanning
+every `de/*.json` value for a sentence-initial imperative rather than from memory — four of them
+in batch 4:
+
+- **In a field, on this screen** — `account:deleteTokenSent`, `account:mfaDisableHint`.
+- **On another device** — `collab:nickname.claimOnDesktop`, which reuses batch 2's
+  `strings:mobile.desktopOnlyBody` frame verbatim.
+- **Off-screen entirely** — `account:reportBugsPrefix`, which asks the reader to send an email.
+  It is a du-imperative and it is **not** a field-or-device instruction, so it is named here
+  rather than left to contradict the sentence above.
+- Batch 1's `config:structuredOutputExperimentalWarning` is the sixth, licensed by the register
+  section's own clause about a sentence that really is about the reader's own choice.
+
+None of the six is a corrective error, so the rule above holds without exception. **Batch 5 owns
 `errors`**, so it inherits the split rather than re-deciding it.
+
+> **Corrected 2026-08-12 (round-4 re-review, R2), left visible.** This paragraph first said
+> "three shipped instances, all of that kind" and omitted `account:reportBugsPrefix` — a
+> du-imperative **this batch shipped and the same fix round edited two paragraphs below**. The
+> count came from the review that requested the paragraph and was copied rather than re-derived.
+> The rule never depended on it; the list did, and batch 5 is the batch that would have read it.
 
 _du_, _dich_, _dir_ and _dein_ are lowercase — see the casing section. And whatever you do,
 never mix _du_ and _Sie_, in any string class: labels, errors, toasts and prose share one
@@ -82,7 +100,7 @@ English ("Select a model") and are two different controls; they ship as "Modell 
 | --- | --- | --- |
 | Page title, section heading, tab label | **noun phrase** (a compound where German has one) | `config:importCsv` "CSV-Import", `config:models.pickTitle` "Modellauswahl", `config:reviewProgress` "Prüffortschritt" |
 | Button | **bare infinitive**, object first | `config:delete` "Löschen", `config:deleteProject` "Projekt löschen", `config:saveAsTemplate` "Als Vorlage speichern" |
-| Navigation button (goes to another page) | **bare infinitive too** — never the bare directional phrase | `vault:goToVault` "Zur Tresor-Seite wechseln", `vault:setupRedirect` "Dieses Gerät einrichten" |
+| Navigation button **whose English is a verb phrase** (*Go to …*, *Set up …*, *Open …*) | **bare infinitive too** — never the bare directional phrase. An item named after its *destination* is a surface name (see Surface names), not this row | `vault:goToVault` "Zur Tresor-Seite wechseln", `vault:setupRedirect` "Dieses Gerät einrichten" |
 | Confirm-dialog title | **infinitive**, which in German is the same string as the button | `config:confirmDeleteTitle` "Projekt löschen" |
 | Select / combobox placeholder | **infinitive phrase**, not a title | `config:enableModulePlaceholder`, `config:routing.simplePlaceholder` |
 | Table column header | **bare noun**, and it keeps English's abbreviation where English has one | `config:models.colParameters` "Param.", `config:models.colQuantization` "Quant." |
@@ -110,10 +128,30 @@ infinitive — so a single control changed shape with the vault's state. It now 
 "Zur Tresor-Seite wechseln", which keeps English's directional sense and matches its own
 other state.
 
+**The same handler backs a third label, and that is what the rule is really protecting.**
+`welcome:setupVaultButton` — English *Set up vault* — calls `goToVaultSetup` too
+(`WelcomeView.tsx`), the identical function and the identical destination as both states of the
+button above. Batch 6 therefore ships a third label pointing at this one navigation target, and
+the rule is what keeps all three the same shape.
+
 The rule is stated as *never the bare PP* rather than as *unless it is navigational* on
 purpose: the second form would make every later batch classify each button as navigational or
-not, and that judgement drifts. Rounds 5 and 6 meet more "Go to …"-shaped labels in `common`,
-`legal` and `welcome` — all of them take the verb.
+not, and that judgement drifts. Stating it absolutely costs nothing, because **nothing shipped
+violates it**: every `Zur…`/`Zum…`/`Ins…`-initial value in the German corpus is either prose or
+already a prepositional phrase **plus** a verb — `settings:switchToLight` is
+"Zum hellen Modus wechseln" and `settings:switchToDark` its twin. The absolute form describes
+what four rounds already do.
+
+> **Corrected 2026-08-12 (round-4 re-review, R1), left visible.** This paragraph first argued
+> that rounds 5 and 6 "meet more Go to …-shaped labels in `common`, `legal` and `welcome`".
+> That is **false**, and re-checking it takes one command: `grep -in "go to"` over all 24
+> English namespaces returns exactly one line, `vault:goToVault` itself. `common` has no
+> navigational label at all; `legal` is eight noun-phrase document titles, which the narrowed
+> row above deliberately does not govern; `welcome`'s two are already verb phrases (*Browse
+> guides*, *Set up vault*). The claim arrived in the fix round's dispatch and was copied into
+> this file without being checked — the relay this programme keeps paying for. The **rule** was
+> never in doubt; only its forward-looking evidence was, and the shared-handler fact above is
+> both true and stronger.
 
 **Instructions inside a sentence: prefer the impersonal infinitive over the du-imperative.**
 The register section already says this; batch 1 applied it to every instruction that is not
@@ -691,7 +729,10 @@ it moves the table-column row by four characters.
   `sidebar:selectProject` 17 (the project-selector trigger in the header), `sidebar:settings`
   13, `sidebar:legal` 11, `sidebar:aboutNarn` 9, `sidebar:changelog` 9, `sidebar:guide` 5 and
   `sidebar:account` 5 — plus the six group headings, of which the longest is
-  `sidebar:groups.content` at 12. `sidebar:newProject` 14 truncates in the project-selector
+  `sidebar:groups.content` at 12. **The headings are the one part of that list the `truncate`
+  sweep does not find**: `SidebarGroupLabel` (`components/ui/sidebar.tsx`) carries no `truncate`
+  class, so a heading overflows rather than ellipsizing. They render in the same 16rem rail and
+  are held to the same budget; at 12 characters maximum it constrains nothing either way. `sidebar:newProject` 14 truncates in the project-selector
   popover, a `w-64` container of the same width. **Nothing in this batch needed to be shortened
   to fit, and nothing was**: the binding item, "Globale Konfiguration", was fixed in batch 1 by
   the Global Config surface name and simply fits.
