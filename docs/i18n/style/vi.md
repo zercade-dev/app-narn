@@ -67,10 +67,21 @@ The space-constrained surfaces are sidebar items (`sidebar:translationMemory`,
 review-translation-ai), table column headers (`strings:columns.config`), filter labels
 (`strings:filters.needsReview`) and bulk-bar buttons (`strings:bulk.approveSelected`).
 
-For those classes, **never exceed ~1.7× the English character count**, and keep chrome to
-two or three syllables where you can: "Hoạt động" over "Lịch sử hoạt động", "Chất lượng"
-over "Kiểm soát chất lượng". A long label does not clip — it wraps at a syllable boundary,
-which reads as a typo.
+**Corrected before wave 3 — this paragraph used to state a ratio rule, and the runbook
+forbids it.** It read: "For those classes, never exceed ~1.7× the English character count".
+Section 2.4 of the runbook is titled "Length budgets are absolute character counts, per
+class" and opens "Never a multiple of English": an audit found **27** correct strings over
+the pilot's 1.5× ceiling, including a sidebar item at 3.80×, because a ratio measures how
+long the *English* is rather than how wide the *control* is. A short source such as
+`sidebar:legal` ("Legal") denies slack the control actually has — and Vietnamese, the widest
+expander of the fourteen, is where that bites hardest.
+
+**Derive your budgets instead.** Take each class's anchor key from the runbook's table and
+record an absolute character count per class. Two of the six are **hard** (the sidebar and
+the tab labels share one fixed 16rem width and truncate); the rest scroll, wrap or
+auto-size. Keeping chrome to two or three syllables — "Hoạt động" over "Lịch sử hoạt động",
+"Chất lượng" over "Kiểm soát chất lượng" — remains good style, and the wrap-at-a-syllable
+-boundary problem is real, but neither is a ratio.
 
 The renderings used as examples above are illustrations of the length problem, not
 decisions about wording. `terminology.md` defines every domain term, including the surface

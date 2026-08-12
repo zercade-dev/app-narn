@@ -66,11 +66,27 @@ not a translatable string, and no Minguo-era conversion should be attempted by h
 
 ## Length discipline
 
-Traditional Chinese runs **much shorter** than English — roughly 0.4–0.6× the character
-count — so no chrome surface is length-constrained. The constraint here is **legibility, not
-width**: Traditional characters carry more strokes than their Simplified equivalents, so at
-the small type sizes used in table headers and filter chips a dense four-character compound
-can turn to mush. Prefer the two- or three-character form where one exists.
+**Corrected before wave 3 — this paragraph was wrong twice, and Simplified Chinese measured
+the proof.** It read: "Traditional Chinese runs **much shorter** than English — roughly
+0.4–0.6× the character count — so no chrome surface is length-constrained."
+
+- **Wrong unit.** The constraint is *width*, not character count, and a full-width CJK glyph
+  carries about **twice** the advance of a Latin character (measured, in
+  `backfill-notes.md`). So half the characters is roughly the *same width*.
+- **Wrong even in its own unit, and the conclusion does not follow.** `zh-hans` measured its
+  whole shipped locale: **0.39 aggregate / 0.35 median** in characters — below the guessed
+  range — but **0.69 aggregate / 0.67 median / 1.00 p90 / 2.00 max** in rendered width, with
+  **96 of 1,879 keys wider than their English source**. "No chrome surface is
+  length-constrained" was false: the p90 sits exactly at parity.
+
+Traditional runs close to Simplified in character economy, so treat those figures as your
+prior — and then **measure your own**, as absolute character counts per class, from each
+class's anchor key in the runbook's table (section 2.4, "Never a multiple of English").
+
+The legibility point stands and is separate from width: Traditional characters carry more
+strokes than their Simplified equivalents, so at the small type sizes used in table headers
+and filter chips a dense four-character compound can turn to mush. Prefer the two- or
+three-character form where one exists.
 
 The surfaces to keep short — sidebar items (`sidebar:translationMemory`), tab labels
 (`strings:tabs.strings`), table column headers (`strings:columns.config`), filter labels

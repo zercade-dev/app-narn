@@ -302,6 +302,37 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
   // since the welded form is wrong in German and "the guard went quiet" is not
   // a reason to write anything.
   de: ['von', 'entfernen', 'kopieren', 'markiert', 's'],
+  // pt-br, derived from the whole-language sweep's post-token-axis survivors —
+  // 109 raw narrow matches, 12 after the token axis, and all twelve are the same
+  // word. Never from the raw match set, per the calibration rule above.
+  // `de` is the preposition "of": invariant for number, gender and case in
+  // Portuguese, and it is what every "X de Y" ratio frame puts after its first
+  // token ("Página {{page}} de {{total}}", "{{current}} de {{total}}",
+  // "Pontuação: {{score}} de 100"). A numeral in front of it is always
+  // grammatical, so the twelve are cleared rather than rewritten. Nothing else
+  // survived the token axis: the count-neutral device this locale uses
+  // everywhere else (an invariant noun phrase, then a colon, then the number)
+  // puts no word after a token at all, so `de` is the only entry pt-br needs and
+  // the list is deliberately not padded with words nothing matched.
+  'pt-br': ['de'],
+  // it, derived from the whole-language post-token-axis survivor set — 25 before
+  // the two fixes below, 23 after, carrying these 9 distinct words. Never from
+  // the raw 130 matches, per the calibration rule above.
+  // `di`, `in` and `su` are prepositions and `che` is a relative pronoun: none
+  // inflects for number. `token`, `batch` and `byte` are English loanwords, and
+  // Italian borrows them INVARIABLE — an unadapted foreign noun takes no plural
+  // ending, so "1 token" and "5 token" are both correct (the plural is carried
+  // by the article, which these strings do not use). `car` is the standard
+  // Italian abbreviation of "caratteri", written "car." and invariant. `s` is
+  // the SI symbol for second, invariant by definition, and Italian typography
+  // puts a space between the numeral and the unit symbol.
+  // The two survivors NOT on this list were real defects and were fixed in the
+  // strings instead, both the same shape — a plural participle or noun sitting
+  // after a bare ratio, which is wrong at a denominator of 1:
+  // `config:reviewProgressCount` read "{{reviewed}} / {{total}} revisionate" and
+  // `strings:runs.stringsProgress` read "{{completed}} / {{total}} voci"; both
+  // now put the word in front of the ratio, where it labels rather than agrees.
+  it: ['di', 'in', 'su', 'che', 'token', 'batch', 'byte', 'car', 's'],
 };
 
 /**

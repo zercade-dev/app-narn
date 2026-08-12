@@ -1,0 +1,10 @@
+{
+  "translateSelected": "Traduci la selezione",
+  "toTranslateCount": "Da tradurre: {{count}}",
+  "progressAriaLabel": "Tradotte: {{completed}} di {{total}}",
+  "cancelRun": "Annulla l'esecuzione",
+  "runCancelled": "Esecuzione annullata:",
+  "runCompleted": "Traduzione completata — riuscite: {{completed}} di {{total}}.",
+  "runCompletedWithErrors": "Traduzione completata — riuscite: {{completed}}; non riuscite: {{failed}}.",
+  "savedRulesNotice": "Le esecuzioni usano le regole di routing salvate: le modifiche non salvate nell'editor delle regole non hanno effetto."
+}

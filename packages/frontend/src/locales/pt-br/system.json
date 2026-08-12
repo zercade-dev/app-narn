@@ -1,0 +1,18 @@
+{
+  "countdown": {
+    "message": "⚠️ O serviço vai reiniciar em breve para aplicar uma atualização — salve o seu trabalho agora. As traduções em andamento serão interrompidas; as entradas concluídas são mantidas, então execute de novo depois o que ficou pela metade.",
+    "collapse": "Recolher",
+    "expand": "Expandir"
+  },
+  "restarted": {
+    "message": "O serviço foi reiniciado há pouco para aplicar uma atualização; parte da atividade pode ter sido interrompida — execute de novo o que parecer incompleto.",
+    "dismiss": "Dispensar"
+  },
+  "cancelled": {
+    "message": "O reinício programado do serviço foi cancelado — você pode continuar trabalhando normalmente.",
+    "dismiss": "Dispensar"
+  },
+  "slot": {
+    "aria": "Você está usando o ambiente {{label}}"
+  }
+}

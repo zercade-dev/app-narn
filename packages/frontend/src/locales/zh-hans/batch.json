@@ -1,0 +1,10 @@
+{
+  "translateSelected": "翻译所选",
+  "toTranslateCount": "待翻译 {{count}} 项",
+  "progressAriaLabel": "已翻译 {{completed}} / {{total}} 项",
+  "cancelRun": "取消运行",
+  "runCancelled": "运行已取消：",
+  "runCompleted": "翻译完成——{{total}} 项中有 {{completed}} 项成功。",
+  "runCompletedWithErrors": "翻译完成——{{completed}} 项成功，{{failed}} 项失败。",
+  "savedRulesNotice": "运行使用已保存的分发规则——规则编辑器中未保存的修改不会生效。"
+}

@@ -90,7 +90,13 @@ an argument already made.
 
 | Proposed term | Key that motivated it | Locale | Rendering used | Raised by |
 | --- | --- | --- | --- | --- |
-| _(empty)_ | | | | |
+| **undo** — the frozen `revert` row reserves a word *against* it ("undo is the distinction to protect") but never defines it. Two wave-1 locales coined it independently to hold the reservation; a term reserved against but undefined is the shape that produced the `log` row last resolution. | `strings:compare.undo` | `ko` | 되돌리기 | `ko` batch 2 |
+| **cancel** — named in the **Not:** list of `revert`, `discard` *and* `revoke`. Three frozen rows reserve against a word with no row of its own. | `batch:cancelRun`, `config:cancelImport` | `ko` | 취소 / 실행 취소 | `ko` |
+| **apply** — the `suggestion` row states "the action on it is *apply*" and `approve` reserves against it, but it has no row; it also labels three controls that are not suggestions, so the one-word/one-action reading is already false. | `strings:runs.judgeApply`, `glossary:importApply` | `ko` | 적용 | `ko` |
+| **history** — a fourth concept colliding with three frozen terms (`log`, `recording`, `changelog`) and settled by none of them. | `strings:runs.emptyState` | `ko` | 내역 | `ko` |
+| **skip** — named in `ignore`'s **Not:** list as "a per-run routing outcome", which defines it by exclusion only. | `config:skipped`, `generation:skipCategoriesLabel` | `ko` | 건너뛰기 | `ko` |
+| **disable / disabled** — named in `ignore`'s **Not:** list. Four call sites, two parts of speech, and one is a bare "Off" badge, so a locale needs all three forms settled together. | `config:disableModule`, `glossary:disabled` | `ko` | 비활성화 / 사용 안 함 / 꺼짐 | `ko` |
+| **verdict** — the `judge` row defines the engine but not its output, which is simultaneously a log token and two UI labels. | `strings:runs.judgeVerdictPass`, `logs:judge.done` | `ko` | 판정 | `ko` |
 
 ### Resolution — wave 1 to wave 2 (2026-08-12)
 

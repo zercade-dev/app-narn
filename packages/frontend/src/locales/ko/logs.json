@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "배정 규칙 설정",
+    "openModuleSettings": "모듈 설정 열기",
+    "openQuality": "품질 대시보드 열기",
+    "openGlossary": "용어집 열기",
+    "unlockVault": "보관함 잠금 해제"
+  },
+  "translation": {
+    "start": "항목을 {{language}} 언어로 번역하는 중…",
+    "done": "항목을 {{language}} 언어로 번역했어요.",
+    "doneFromMemory": "{{language}} 언어의 저장된 번역을 다시 사용했어요.",
+    "queued": "번역 {{total}}건을 대기열에 넣었어요.",
+    "queued_other": "번역 {{total}}건을 대기열에 넣었어요.",
+    "runQueued": "번역 실행을 대기열에 넣었어요 — {{position}}번째예요.",
+    "retryQueued": "재시도를 대기열에 넣었어요 — {{position}}번째예요.",
+    "retry": "실패한 번역을 다시 시도하는 중이에요.",
+    "failedNoRoute": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — 맞는 배정 규칙이 없어요.",
+    "failedNoRoute_other": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — 맞는 배정 규칙이 없어요.",
+    "failedModuleDisabled": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — {{module}} 모듈이 꺼져 있어요.",
+    "failedModuleDisabled_other": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — {{module}} 모듈이 꺼져 있어요.",
+    "failedModuleNotFound": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — {{module}} 모듈이 설치되어 있지 않아요.",
+    "failedModuleNotFound_other": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — {{module}} 모듈이 설치되어 있지 않아요.",
+    "failedGeneric": "항목을 {{language}} 언어로 번역하지 못했어요.",
+    "batchFailed": "{{languages}} 언어로 보낸 번역 {{count}}건짜리 배치가 실패했어요.",
+    "queueStartFailed": "번역 실행을 시작하지 못했어요.",
+    "maskMismatch": "{{language}} 언어로 번역하는 동안 서식 태그가 그대로 남지 않았어요.",
+    "tmRejected": "{{language}} 언어의 저장된 번역이 품질 검사를 통과하지 못했어요.",
+    "lqaRetry": "품질 검사에 실패해서 모델에 다시 요청하고 있어요.",
+    "authCancel": "로그인이 취소되어 번역을 멈췄어요."
+  },
+  "lqa": {
+    "passed": "품질 검사를 통과했어요.",
+    "failed": "품질 검사에 실패했어요.",
+    "overflow": "번역이 쓸 수 있는 공간에 비해 너무 길어요.",
+    "checkError": "품질 검사를 실행하지 못했어요."
+  },
+  "judge": {
+    "done": "검토 점수는 {{score}}점이에요 — 판정: {{verdict}}.",
+    "suggestDone": "검토를 마쳤고 제안이 있어요.",
+    "suggestNoChange": "검토 결과 바꿀 부분이 없었어요.",
+    "suggestionDiscarded": "제안을 폐기했어요."
+  },
+  "sourceReview": {
+    "done": "원문 검토에서 문제 {{findings}}건을 찾았어요.",
+    "done_other": "원문 검토에서 문제 {{findings}}건을 찾았어요."
+  },
+  "glossaryGen": {
+    "done": "용어집 실행을 마쳤어요 — 항목 {{analyzed}}개에서 용어 {{suggested}}개를 제안했어요.",
+    "failed": "용어집 생성에 실패했어요.",
+    "saveSuggestionsFailed": "용어집 제안을 저장하지 못했어요."
+  },
+  "categoryGen": {
+    "queued": "카테고리 생성을 대기열에 넣었어요.",
+    "done": "카테고리 생성을 마쳤어요 — 제안 {{suggestions}}건이에요.",
+    "failed": "카테고리 생성에 실패했어요."
+  },
+  "stageDetails": {
+    "queued": "스테이지 상세를 대기열에 넣었어요.",
+    "done": "스테이지 상세를 마쳤어요 — {{completed}}건 완료, {{failed}}건 실패예요.",
+    "failed": "스테이지 상세에 실패했어요."
+  },
+  "module": {
+    "loaded": "{{module}} 모듈을 불러왔어요.",
+    "instanceRegistered": "{{instance}} 설정을 추가했어요.",
+    "instanceRegisterFailed": "{{instance}} 설정을 추가하지 못했어요."
+  },
+  "vault": {
+    "unlocked": "보관함 잠금을 해제했어요.",
+    "passwordChanged": "보관함 비밀번호를 변경했어요.",
+    "credentialsEvicted": "저장된 자격 증명을 메모리에서 지웠어요."
+  },
+  "orphan": {
+    "detected": "원본 파일에 더 이상 없는 항목 {{count}}개를 찾았어요.",
+    "detected_other": "원본 파일에 더 이상 없는 항목 {{count}}개를 찾았어요.",
+    "linked": "미연결 항목을 연결했어요.",
+    "deleted": "미연결 항목을 삭제했어요."
+  },
+  "tm": {
+    "cleared": "번역 메모리를 비웠어요.",
+    "variantDeleted": "번역 메모리에서 번역 하나를 삭제했어요."
+  },
+  "backup": {
+    "restored": "백업을 복원했어요.",
+    "pruneFailed": "오래된 백업을 정리하지 못했어요."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "translateSelected": "선택 항목 번역",
+  "toTranslateCount": "번역 대상 {{count}}건",
+  "progressAriaLabel": "{{total}}건 중 {{completed}}건 번역됨",
+  "cancelRun": "실행 취소",
+  "runCancelled": "실행을 취소했어요:",
+  "runCompleted": "번역을 마쳤어요 — {{total}}건 중 {{completed}}건 성공했어요.",
+  "runCompletedWithErrors": "번역을 마쳤어요 — {{completed}}건 성공, {{failed}}건 실패했어요.",
+  "savedRulesNotice": "실행은 저장된 배정 규칙을 사용해요. 규칙 편집기에서 저장하지 않은 변경은 반영되지 않아요."
+}

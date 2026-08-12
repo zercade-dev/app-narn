@@ -73,8 +73,22 @@ The space-constrained surfaces are sidebar items (`sidebar:translationMemory`,
 review-translation-ai), table column headers (`strings:columns.config`), filter labels
 (`strings:filters.needsReview`) and bulk-bar buttons (`strings:bulk.approveSelected`).
 
-For those classes, **never exceed ~1.3× the English character count** — a stricter ceiling
-than the European locales get, precisely because there is no wrap point to fall back on.
+**Corrected before wave 3 — this paragraph used to state a ratio rule, and the runbook
+forbids it.** It read: "For those classes, never exceed ~1.3× the English character count —
+a stricter ceiling than the European locales get". Section 2.4 of the runbook is titled
+"Length budgets are absolute character counts, per class" and opens "Never a multiple of
+English": an audit found **27** correct strings over the pilot's 1.5× ceiling, including a
+sidebar item at 3.80×, because a ratio measures how long the *English* is rather than how
+wide the *control* is. Making the ratio stricter does not fix that — it multiplies the same
+wrong unit by a smaller number.
+
+**Derive your budgets instead**, as absolute character counts per class, from each class's
+anchor key in the runbook's table. The two observations this paragraph rested on stay true
+and are exactly why you must measure rather than estimate: Thai has **no wrap point**, so an
+over-long label becomes one unbreakable run that clips instead of wrapping; and Thai renders
+**taller** than Latin, because vowels and tone marks stack above and below the consonant
+line, so a row height that fits English can cut the marks off. Height is a constraint no
+character count of any kind expresses — record it separately.
 
 ## Placeholders
 
