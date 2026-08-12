@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "設定分派規則",
+    "openModuleSettings": "開啟模組設定",
+    "openQuality": "開啟品質儀表板",
+    "openGlossary": "開啟術語表",
+    "unlockVault": "解鎖保險庫"
+  },
+  "translation": {
+    "start": "正在把一個條目翻譯成 {{language}}…",
+    "done": "已把一個條目翻譯成 {{language}}。",
+    "doneFromMemory": "已重用 {{language}} 的已儲存譯文。",
+    "queued": "已將 {{total}} 項翻譯工作排入佇列。",
+    "queued_other": "已將 {{total}} 項翻譯工作排入佇列。",
+    "runQueued": "翻譯執行已排入佇列——位置 {{position}}。",
+    "retryQueued": "重試已排入佇列——位置 {{position}}。",
+    "retry": "正在重試一則失敗的翻譯。",
+    "failedNoRoute": "無法把 {{count}} 個條目翻譯成 {{language}}——沒有符合的分派規則。",
+    "failedNoRoute_other": "無法把 {{count}} 個條目翻譯成 {{language}}——沒有符合的分派規則。",
+    "failedModuleDisabled": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 模組已關閉。",
+    "failedModuleDisabled_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 模組已關閉。",
+    "failedModuleNotFound": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 模組未安裝。",
+    "failedModuleNotFound_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 模組未安裝。",
+    "failedGeneric": "無法把一個條目翻譯成 {{language}}。",
+    "batchFailed": "一個含 {{count}} 則譯文、目標為 {{languages}} 的批次失敗了。",
+    "queueStartFailed": "無法開始這次翻譯執行。",
+    "maskMismatch": "格式標記在翻譯成 {{language}} 後未能保留。",
+    "tmRejected": "{{language}} 的一則已儲存譯文沒有通過品質檢查。",
+    "lqaRetry": "品質檢查未通過——正在請模型再試一次。",
+    "authCancel": "登入已取消，因此翻譯已停止。"
+  },
+  "lqa": {
+    "passed": "品質檢查通過。",
+    "failed": "品質檢查未通過。",
+    "overflow": "譯文對可用空間來說太長了。",
+    "checkError": "有一項品質檢查無法執行。"
+  },
+  "judge": {
+    "done": "審閱得分 {{score}}——判定：{{verdict}}。",
+    "suggestDone": "審閱已完成，並提出建議。",
+    "suggestNoChange": "審閱認為沒有需要修改的地方。",
+    "suggestionDiscarded": "已拒絕建議。"
+  },
+  "sourceReview": {
+    "done": "原文審閱找到 {{findings}} 項缺失。",
+    "done_other": "原文審閱找到 {{findings}} 項缺失。"
+  },
+  "glossaryGen": {
+    "done": "術語表執行已完成——從 {{analyzed}} 個條目中建議了 {{suggested}} 個術語。",
+    "failed": "術語表生成失敗。",
+    "saveSuggestionsFailed": "無法儲存術語表建議。"
+  },
+  "categoryGen": {
+    "queued": "類別生成已排入佇列。",
+    "done": "類別生成已完成——共 {{suggestions}} 則建議。",
+    "failed": "類別生成失敗。"
+  },
+  "stageDetails": {
+    "queued": "關卡詳情已排入佇列。",
+    "done": "關卡詳情已完成——{{completed}} 項完成，{{failed}} 項失敗。",
+    "failed": "關卡詳情失敗。"
+  },
+  "module": {
+    "loaded": "已載入 {{module}} 模組。",
+    "instanceRegistered": "已新增 {{instance}} 設定。",
+    "instanceRegisterFailed": "無法新增 {{instance}} 設定。"
+  },
+  "vault": {
+    "unlocked": "保險庫已解鎖。",
+    "passwordChanged": "保險庫密碼已變更。",
+    "credentialsEvicted": "您已儲存的憑證已從記憶體中清除。"
+  },
+  "orphan": {
+    "detected": "找到 {{count}} 個已不在原始檔案中的條目。",
+    "detected_other": "找到 {{count}} 個已不在原始檔案中的條目。",
+    "linked": "已連結一個孤立條目。",
+    "deleted": "已刪除一個孤立條目。"
+  },
+  "tm": {
+    "cleared": "翻譯記憶庫已清除。",
+    "variantDeleted": "已移除一筆翻譯記憶庫項目。"
+  },
+  "backup": {
+    "restored": "已還原備份。",
+    "pruneFailed": "無法清理舊備份。"
+  }
+}

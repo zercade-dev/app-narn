@@ -487,8 +487,28 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
  * has no numeral-conditioned ORTHOGRAPHIC change to fall back on either: there
  * is no rendaku/gemination analogue and no bounded native counting series, so
  * the narrower ground the `ja` flag survives on is not even needed here.
+ * `zh-hant`: the same grammar fact as `ja`, and for Chinese it holds even
+ * more simply — a Chinese noun has no number at all, so there is no plural
+ * form for a numeral to agree with in any construction, and unlike Japanese
+ * there is no numeral-conditioned orthography either: Chinese measure words
+ * are invariant Han characters with no rendaku or gemination and no series
+ * that runs out above nine. Measured over the finished 1,879-value locale:
+ * 180 raw narrow matches, 63 after the token axis, and every one of the 63
+ * is a measure word or a plain noun sitting directly after a numeral — 個,
+ * 項, 則, 筆, 次, 頁, 倍, 秒, 字元, 位元組 and their like — each grammatical
+ * at every value its token can take. Granting them individually would be
+ * the same escalation every round with a different counter, which is the
+ * argument this file already accepted for `ja`.
+ *
+ * As with `tr` and `ja`, this is NOT a claim that Chinese has no
+ * numeral-adjacent hazard. It has the same one Japanese has: the choice of
+ * MEASURE WORD (量詞) per counted object — 個 for entries, 列 for CSV rows,
+ * 條 for rules, 筆 for records, 種 for languages, 次 for attempts. That is a
+ * lexical decision per object rather than an agreement rule, so no regex can
+ * check it; it is handled by the measure-word table in
+ * docs/i18n/style/zh-hant.md, which the whole-language sweep required.
  */
-export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja', 'id', 'th']);
+export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja', 'id', 'th', 'zh-hant']);
 
 /**
  * The script list for a locale, or `undefined` if this detector has no
