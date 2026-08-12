@@ -352,6 +352,46 @@ two-sense rule — "Bỏ thay đổi" where a Save button sits beside it (`confi
 `strings:editor.discard`) and "Từ chối" where the app is offering something
 (`strings:runs.judgeDiscard`).
 
+### Collisions found in batch 3 and what was done
+
+Two more real defects, fixed in the strings:
+
+- `quality:checkLabels.forbidden-term` (the issue code) had collapsed onto
+  `quality:checkLabels.forbidden-terms` (the check name) — English separates them by number
+  alone, and both live in one map that the Quality dashboard can paint at once. The issue code
+  now reads "Có thuật ngữ bị cấm", stating that one was found. Every other check/issue pair in
+  that map was already distinct (`tag-equality` against `tag-mismatch`, `overflow` against
+  `too-long`, and so on); this was the only one English left to number.
+- `strings:pagination.showAll` (_Show all_) had collapsed onto `review:viewAll` (_View all_).
+  They are different actions — one sets the page size, the other opens the findings dialog — so
+  the English disagreement is carried across rather than harmonized: "Hiện tất cả" against
+  "Xem tất cả".
+
+Three deliberate splits of one English word, all recorded in `terminology/vi.md`:
+
+- _Approve_ is **two** actions. `review:approve` stores a translation into translation memory
+  and takes the lexicon's **approve** term; `review:sourceAi.approve` only records that you
+  read a finding and takes *đồng ý* instead. Rendering the second with the memory word would
+  promise a write that does not happen.
+- _Failed_ is two things: an LQA result that did not pass ("Trượt", matching
+  `strings:runs.judgeVerdictFail`) and a run that errored ("Thất bại").
+- _Discard_ stays the two words settled in batch 1.
+
+And one collapse that looks like drift and is licensed by
+`english-review-notes.md` item 7 rather than in spite of it: `strings:pagination.prev` (_Prev_)
+and the three _Previous_ keys all read "Trước". That note says to use the locale's usual pager
+wording and **not** to align the two. Nothing was aligned — Vietnamese simply has no shorter
+form of a word that is already one syllable, so the pager wording and the full word are the
+same string.
+
+The remaining same-rendering hits are the number-marking class from batch 2, plus one new
+shape: English derives a **noun phrase** from a verb phrase where Vietnamese cannot.
+`strings:bulk.aiGeneration` (_AI generation_) reads the same as `category:aiButton`
+(_Generate with AI_), and `strings:runs.typeGlossaryGeneration` (_Glossary generation_) the
+same as `glossary:generateGlossariesBtn` (_Generate glossaries_). Neither pair co-renders, and
+Vietnamese marks the difference with syntax rather than morphology, so there is no form to
+preserve.
+
 ## Keyboard key names
 
 Vietnamese keyboards are US QWERTY with **English keycaps** — `Enter`, `Shift`, `Esc`, `Tab`,

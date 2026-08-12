@@ -69,7 +69,7 @@
     "prev": "Trước",
     "next": "Sau",
     "pageOfTotal": "Trang {{page}} trên {{total}}",
-    "showAll": "Xem tất cả"
+    "showAll": "Hiện tất cả"
   },
   "compare": {
     "searchPlaceholder": "Tìm văn bản…",
