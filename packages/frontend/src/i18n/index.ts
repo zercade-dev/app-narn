@@ -23,6 +23,20 @@ void i18n.use(initReactI18next).init({
   },
   lng: 'en',
   fallbackLng: 'en',
+  // The app's locale codes are all lowercase, including the three compound
+  // ones (`pt-br`, `zh-hans`, `zh-hant`) — that is what the locale folders on
+  // disk are named and what `UiLanguage`/`UI_LANGS` persist. Without this
+  // option, i18next canonicalizes a requested code before looking up its
+  // resource bundle (`zh-hans` -> `zh-Hans`, `pt-br` -> `pt-BR`), which does
+  // not match any bundle registered by `loadLocale()` below (bundles are
+  // stored under the raw lowercase code). The lookup misses and
+  // `resolvedLanguage` falls back to `en` — silently, with no error, so the
+  // picker still shows the compound locale selected while the whole UI
+  // renders in English. Two-letter codes are unaffected by canonicalization,
+  // which is why this only ever broke the three compound ones.
+  // `lowerCaseLng: true` makes i18next format requested codes to lowercase
+  // instead, matching the casing every bundle is actually stored under.
+  lowerCaseLng: true,
   // `escapeValue: false` disables i18next's own HTML-escaping of interpolated
   // values. This is SAFE here only because React already escapes every JSX text
   // child (translated strings render as `{t('key')}`), and no translated string
