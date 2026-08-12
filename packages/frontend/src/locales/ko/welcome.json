@@ -1,0 +1,25 @@
+{
+  "title": "Narn에 오신 것을 환영해요",
+  "intro": "시작하기 전에 아래 가이드를 한번 둘러보세요. 준비가 됐다면 바로 자격 증명 보관함 설정으로 넘어가도 돼요.",
+  "guidesHeading": "가이드",
+  "browseGuides": "가이드 둘러보기",
+  "setupVaultHeading": "번역할 준비가 됐나요?",
+  "setupVaultBody": "번역에 사용할 AI 제공업체 키를 넣으려면 자격 증명 보관함을 설정하세요.",
+  "setupVaultButton": "보관함 설정",
+  "themeChooser": {
+    "title": "화면 모양 고르기",
+    "intro": "테마를 고르고 라이트와 다크 중에서 선택하세요. 둘 다 환경 설정에서 언제든 바꿀 수 있어요.",
+    "themeLabel": "테마",
+    "modeLabel": "라이트 또는 다크",
+    "modes": { "light": "라이트", "dark": "다크" },
+    "confirm": "이 설정 사용",
+    "keepDefault": "테크노 유지",
+    "names": { "default": "클래식", "pixel": "픽셀", "techno": "테크노", "minimal": "미니멀" },
+    "taglines": {
+      "default": "NARN의 원래 모습이에요.",
+      "pixel": "투박한 레트로 픽셀이에요.",
+      "techno": "네온이 빛나는 콘솔이에요. 새로운 기본 테마예요.",
+      "minimal": "내용에만 집중해요."
+    }
+  }
+}

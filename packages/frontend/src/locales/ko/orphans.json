@@ -1,0 +1,55 @@
+{
+  "title": "미연결 항목",
+  "subtitle": "가장 최근에 가져온 CSV에 더 이상 없는 항목이에요. 삭제하거나 번역을 다른 항목으로 재연결하세요.",
+  "emptyTitle": "모두 연결되어 있어요",
+  "empty": "미연결 항목이 없어요. 가져온 CSV가 현재 프로젝트와 일치해요.",
+  "columns": {
+    "select": "선택",
+    "source": "원문",
+    "translations": "번역",
+    "actions": "작업"
+  },
+  "actions": {
+    "delete": "삭제",
+    "relink": "재연결",
+    "bulkDelete": "선택 항목 삭제 ({{count}})",
+    "refresh": "새로 고침",
+    "cancel": "취소",
+    "back": "뒤로"
+  },
+  "confirmDelete": {
+    "title": "미연결 항목을 삭제할까요?",
+    "body": "미연결 항목과 그 번역을 영구적으로 삭제해요. 되돌릴 수 없어요."
+  },
+  "relink": {
+    "title": "미연결 항목 재연결",
+    "description": "이 미연결 항목의 번역을 다른 항목으로 옮겨요. 후보는 원문이 이 미연결 항목과 얼마나 비슷한지에 따라 정렬돼요.",
+    "searchPlaceholder": "원문으로 항목 검색…",
+    "noCandidates": "일치하는 항목이 없어요",
+    "submit": "계속",
+    "confirmTitle": "재연결 확인",
+    "confirmDescription": "재연결하기 전에 미연결 항목의 번역을 대상 항목에 어떻게 적용할지 선택하세요.",
+    "overrideModeLabel": "덮어쓰기 방식",
+    "overrideEmptyOnly": "비어 있는 번역만 채우기 (대상의 기존 번역은 유지)",
+    "overrideAll": "모든 번역을 미연결 항목의 번역으로 덮어쓰기",
+    "aiRetranslateLabel": "AI로 다시 번역하기",
+    "aiRetranslateHint": "재연결한 뒤 AI가 미연결 항목의 옛 원문과 대상의 새 원문을 비교해, 기존 번역에 같은 수정을 반영해요.",
+    "aiModuleLabel": "AI 모듈",
+    "aiModelLabel": "모델",
+    "aiReasoningEffortLabel": "추론 강도",
+    "aiModulePlaceholder": "모듈을 선택하세요…",
+    "aiNoModules": "사용할 수 있는 AI 모듈이 없어요. AI 재번역을 쓰려면 글로벌 설정에서 하나를 활성화하세요.",
+    "confirmSubmit": "재연결"
+  },
+  "toast": {
+    "loadError": "미연결 항목을 불러오지 못했어요",
+    "deleted": "미연결 항목을 삭제했어요",
+    "deleteError": "삭제하지 못했어요",
+    "bulkDeleted": "미연결 항목 {{count}}개를 삭제했어요",
+    "relinked": "번역을 옮겼어요",
+    "relinkError": "미연결 항목을 재연결하지 못했어요",
+    "candidatesError": "재연결 후보를 불러오지 못했어요",
+    "aiRetranslateStarted": "AI 재번역을 시작했어요 — 활동 탭에서 확인하세요",
+    "aiRetranslateUnavailable": "재연결했지만 AI 재번역을 시작하지 못했어요(사용할 수 있는 AI 모듈이 없어요)"
+  }
+}
