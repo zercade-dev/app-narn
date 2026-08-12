@@ -14,7 +14,12 @@
     "modes": { "light": "ライト", "dark": "ダーク" },
     "confirm": "この設定を使う",
     "keepDefault": "テクノのままにする",
-    "names": { "default": "クラシック", "pixel": "ピクセル", "techno": "テクノ", "minimal": "ミニマル" },
+    "names": {
+      "default": "クラシック",
+      "pixel": "ピクセル",
+      "techno": "テクノ",
+      "minimal": "ミニマル"
+    },
     "taglines": {
       "default": "NARN本来の見た目です。",
       "pixel": "ごつごつしたレトロなドット絵です。",
