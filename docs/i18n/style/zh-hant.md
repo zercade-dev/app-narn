@@ -424,9 +424,11 @@ where a space would read as part of the value rather than as typography.
 
 ## Collisions — the licensed ones, so nobody re-opens them
 
-Run `node scripts/i18n-preflight.mjs zh-hant` for the live list. Over the finished locale it
-reports **12 same-English/different-rendering** groups and **48
-same-rendering/different-English** groups. The licences that are not obvious:
+**Run `node scripts/i18n-preflight.mjs zh-hant` for the live list — that command is the
+figure, not the numbers below.** At the sweep it reported **11** same-English/different-rendering
+groups and **47** same-rendering/different-English groups; both move whenever any string in
+this locale changes, and both moved by one while the sweep's own fixes were being applied.
+The licences that are not obvious:
 
 - **Five same-English splits are required by a frozen term**: *Discard* splits 捨棄 / 拒絕
   (the two senses the `discard` row defines), *Dismiss* splits 清除 / 關閉 (one deletes, one
