@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "设置分发规则",
+    "openModuleSettings": "打开模块设置",
+    "openQuality": "打开质量看板",
+    "openGlossary": "打开术语表",
+    "unlockVault": "解锁保险库"
+  },
+  "translation": {
+    "start": "正在把一个条目翻译为 {{language}}…",
+    "done": "已把一个条目翻译为 {{language}}。",
+    "doneFromMemory": "已复用 {{language}} 的一条已保存译文。",
+    "queued": "已加入翻译队列，共 {{total}} 项。",
+    "queued_other": "已加入翻译队列，共 {{total}} 项。",
+    "runQueued": "翻译运行已加入队列——位置 {{position}}。",
+    "retryQueued": "重试已加入队列——位置 {{position}}。",
+    "retry": "正在重试一次失败的翻译。",
+    "failedNoRoute": "无法把 {{count}} 个条目翻译为 {{language}}——没有匹配的分发规则。",
+    "failedNoRoute_other": "无法把 {{count}} 个条目翻译为 {{language}}——没有匹配的分发规则。",
+    "failedModuleDisabled": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 模块已停用。",
+    "failedModuleDisabled_other": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 模块已停用。",
+    "failedModuleNotFound": "无法把 {{count}} 个条目翻译为 {{language}}——未安装 {{module}} 模块。",
+    "failedModuleNotFound_other": "无法把 {{count}} 个条目翻译为 {{language}}——未安装 {{module}} 模块。",
+    "failedGeneric": "无法把一个条目翻译为 {{language}}。",
+    "batchFailed": "一个包含 {{count}} 条译文、目标语言为 {{languages}} 的批次失败了。",
+    "queueStartFailed": "无法启动翻译运行。",
+    "maskMismatch": "格式标记未能在翻译为 {{language}} 的过程中保留下来。",
+    "tmRejected": "{{language}} 的一条已保存译文未通过质量检查。",
+    "lqaRetry": "质量检查未通过——正在请求模型重试。",
+    "authCancel": "登录已取消，因此翻译已停止。"
+  },
+  "lqa": {
+    "passed": "质量检查通过。",
+    "failed": "质量检查未通过。",
+    "overflow": "译文对可用空间来说太长了。",
+    "checkError": "某项质量检查无法运行。"
+  },
+  "judge": {
+    "done": "审校评分 {{score}}——判定：{{verdict}}。",
+    "suggestDone": "审校完成，并给出了建议。",
+    "suggestNoChange": "审校认为无需修改。",
+    "suggestionDiscarded": "建议已拒绝。"
+  },
+  "sourceReview": {
+    "done": "原文审校得到 {{findings}} 个发现项。",
+    "done_other": "原文审校得到 {{findings}} 个发现项。"
+  },
+  "glossaryGen": {
+    "done": "术语表运行完成——从 {{analyzed}} 个条目中建议了 {{suggested}} 个术语。",
+    "failed": "术语表生成失败。",
+    "saveSuggestionsFailed": "无法保存术语表建议。"
+  },
+  "categoryGen": {
+    "queued": "类别生成已加入队列。",
+    "done": "类别生成完成——{{suggestions}} 条建议。",
+    "failed": "类别生成失败。"
+  },
+  "stageDetails": {
+    "queued": "关卡详情已加入队列。",
+    "done": "关卡详情完成——{{completed}} 项完成，{{failed}} 项失败。",
+    "failed": "关卡详情失败。"
+  },
+  "module": {
+    "loaded": "已加载 {{module}} 模块。",
+    "instanceRegistered": "已添加 {{instance}} 配置。",
+    "instanceRegisterFailed": "无法添加 {{instance}} 配置。"
+  },
+  "vault": {
+    "unlocked": "保险库已解锁。",
+    "passwordChanged": "保险库密码已更改。",
+    "credentialsEvicted": "您保存的凭据已从内存中清除。"
+  },
+  "orphan": {
+    "detected": "发现 {{count}} 个条目已不在源文件中。",
+    "detected_other": "发现 {{count}} 个条目已不在源文件中。",
+    "linked": "已关联一个孤立条目。",
+    "deleted": "已删除一个孤立条目。"
+  },
+  "tm": {
+    "cleared": "翻译记忆库已清空。",
+    "variantDeleted": "已移除一条翻译记忆库条目。"
+  },
+  "backup": {
+    "restored": "备份已恢复。",
+    "pruneFailed": "无法清理旧备份。"
+  }
+}
