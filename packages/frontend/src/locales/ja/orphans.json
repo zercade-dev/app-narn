@@ -1,0 +1,55 @@
+{
+  "title": "孤立エントリ",
+  "subtitle": "最後にインポートしたCSVに存在しなくなったエントリです。削除するか、翻訳を別のエントリに再リンクしてください。",
+  "emptyTitle": "すべてリンク済みです",
+  "empty": "孤立エントリはありません。インポートしたCSVは現在のプロジェクトと一致しています。",
+  "columns": {
+    "select": "選択",
+    "source": "原文",
+    "translations": "翻訳",
+    "actions": "操作"
+  },
+  "actions": {
+    "delete": "削除",
+    "relink": "再リンク",
+    "bulkDelete": "選択範囲を削除（{{count}}）",
+    "refresh": "更新",
+    "cancel": "キャンセル",
+    "back": "戻る"
+  },
+  "confirmDelete": {
+    "title": "孤立エントリを削除しますか？",
+    "body": "孤立エントリとその翻訳が完全に削除されます。この操作は取り消せません。"
+  },
+  "relink": {
+    "title": "孤立エントリの再リンク",
+    "description": "この孤立エントリの翻訳を別のエントリに移します。候補は、原文がこの孤立エントリとどれだけ似ているかの順に並びます。",
+    "searchPlaceholder": "原文でエントリを検索…",
+    "noCandidates": "一致するエントリがありません",
+    "submit": "続ける",
+    "confirmTitle": "再リンクの確認",
+    "confirmDescription": "再リンクの前に、孤立エントリの翻訳を対象のエントリにどう適用するかを選んでください。",
+    "overrideModeLabel": "上書きモード",
+    "overrideEmptyOnly": "空の翻訳だけを埋める（対象の既存の翻訳は残す）",
+    "overrideAll": "すべての翻訳を孤立エントリの翻訳で上書きする",
+    "aiRetranslateLabel": "AIで再翻訳する",
+    "aiRetranslateHint": "再リンクの後、孤立エントリの古い原文と対象の新しい原文をAIが比較し、既存の翻訳を同じ変更が反映されるように更新します。",
+    "aiModuleLabel": "AIモジュール",
+    "aiModelLabel": "モデル",
+    "aiReasoningEffortLabel": "推論の強度",
+    "aiModulePlaceholder": "モジュールを選択…",
+    "aiNoModules": "AIに対応したモジュールが有効になっていません。AIによる再翻訳を使うには、グローバル設定で有効にしてください。",
+    "confirmSubmit": "再リンク"
+  },
+  "toast": {
+    "loadError": "孤立エントリを読み込めませんでした",
+    "deleted": "孤立エントリを削除しました",
+    "deleteError": "孤立エントリを削除できませんでした",
+    "bulkDeleted": "孤立エントリ{{count}}件を削除しました",
+    "relinked": "翻訳を移しました",
+    "relinkError": "孤立エントリを再リンクできませんでした",
+    "candidatesError": "再リンクの候補を読み込めませんでした",
+    "aiRetranslateStarted": "AIによる再翻訳を開始しました。アクティビティタブで確認できます",
+    "aiRetranslateUnavailable": "再リンクしましたが、AIによる再翻訳を開始できませんでした（AIに対応したモジュールがありません）"
+  }
+}

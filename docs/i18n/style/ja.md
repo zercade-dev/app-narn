@@ -5,13 +5,13 @@ term and the list of things that are never translated; this locale's rendering o
 term goes in `terminology/ja.md`. This file settles register, casing, punctuation, length and
 placeholder handling.
 
-**Every key cited below is a key this locale has actually translated** — after batch 5 that is
-**seventeen** namespaces: `config` (batch 1), `strings` (batch 2), `glossary` / `review` /
+**Every key cited below is a key this locale has actually translated** — after batch 6 that is
+**all twenty-four** namespaces: `config` (batch 1), `strings` (batch 2), `glossary` / `review` /
 `category` / `quality` (batch 3), `collab` / `account` / `vault` / `settings` / `sidebar`
-(batch 4) and `logs` / `console` / `system` / `errors` / `generation` / `batch` (batch 5).
-The seven `stage-details` / `colorText` / `orphans` / `backup` / `welcome` / `common` / `legal`
-keys are batch 6's and are named below only as pointers. That constraint is deliberate and binds
-later batches too: **do not prescribe a rendering for a key in a namespace you have not
+(batch 4), `logs` / `console` / `system` / `errors` / `generation` / `batch` (batch 5) and
+`stage-details` / `colorText` / `orphans` / `backup` / `welcome` / `common` / `legal` (batch 6).
+The constraint that produced this list is deliberate and still binds anything written here
+later: **do not prescribe a rendering for a key in a namespace you have not
 translated.** The original scaffold of this file illustrated nine rules with `vault:*`,
 `sidebar:*`, `strings:*`, `common:*`, `logs:*` and `category:*` examples; each of those was a
 guess that the batch owning the key would have inherited as a settled decision. They have been
@@ -23,7 +23,19 @@ as the second home of a surface name, is fine — that is a pointer, not a rende
 `settings:*` and `account:*` throughout this file and did not come back to the sentence that
 said it had not. The *rule* was never broken; the list of namespaces it named went stale the
 moment the next batch shipped. A list of what exists is a standing claim, and it is re-derived
-whenever anything is added to the file.)
+whenever anything is added to the file. **Batch 6 re-derived it again**, which is the last time
+it can move: the language is complete, so the pointer-only clause has nothing left to point at.)
+
+**Two pointers this file wrote about batch 6 were wrong about what batch 6 contains, and both
+are corrected below rather than deleted** — the line at the ～にする row and the one closing the
+collapse-boundary section each named *Close* as a `common` key. **`common` has eleven keys and
+none of them is *Close***: `save`, `cancel`, `loading`, `changelogEntryError`,
+`changelogShowOlder`, `saving`, `thinking` and four `webSearch.*`. *Close* occurs nowhere in
+this batch's 282 keys, and *Back* is `orphans:actions.back`, not a `common` key. Both sentences
+were written from an expectation of what a "common" namespace holds, never from
+`locales/en/common.json` — the same failure the runbook's rule 3 names, committed about a file
+one command away. The prediction they were making (that the collapse boundary would be tested
+by repeated bare controls) was **right**; the keys it named were not.
 
 **Quoting convention, so every claim here is checkable.** 「…」 marks a span quoted
 **verbatim from a shipped value** — never truncated with an internal `…`, so it can be
@@ -94,13 +106,14 @@ Japanese does not. Resolve the control **before** writing the string.
 | Select option / value label | bare noun or 〈noun〉ごと, never a sentence | `config:module.batchByLanguage` 「言語ごと」, `config:lqa.severityBlocking` 「ブロッキング」 |
 | Checkbox / radio label **whose English is a verb phrase** | dictionary-form verb phrase (～する／～しない), **not** 体言止め: the user is choosing what the app will do, not naming a thing | `strings:compare.translateModeRetranslate` 「既存の翻訳を再翻訳する」, `strings:compare.translateDisableMemory` 「この実行では翻訳メモリを使用しない」, `strings:compare.translateUseReferenceNone` 「参照言語をコンテキストとして使用する」 |
 | Checkbox label whose English is a **noun phrase** naming a mode | follow English — 体言止め | `strings:runs.aiReviewVerbose` 「詳細ログ（プロンプト・パラメーター・生の応答）」 |
-| Placeholder inside a control | ～を選択／～を入力 + 「…」, no noun for the control itself | `config:enableModulePlaceholder` 「有効にするモジュールを選択…」 |
+| Placeholder inside a control **whose English is an instruction** | ～を選択／～を入力 + 「…」, no noun for the control itself | `config:enableModulePlaceholder` 「有効にするモジュールを選択…」 |
+| Placeholder **whose English is a descriptive noun phrase** | noun phrase — follow English, do not convert it into an instruction | `stage-details:fields.name.placeholder` 「ステージの名前」 over "The stage's name", `gameplayDetails.placeholder` 「ステージの遊び方」 over "How the stage plays". Added in batch 6, which met the first placeholders in this app that describe the content rather than command the user. Keep the placeholder distinct from its own label: the label above the first is 「名前」, above the second 「ゲームプレイ詳細」 |
 | Progress / status text | ～中 or ～しました — a state, never a command. The **ellipsis is English's to give**, not the shape's: add 「…」 only where the source has one | `config:duplicating` 「複製中…」 and `config:autoSaveSaved` 「保存しました」 (English has the ellipsis); `strings:row.translating` 「翻訳中」 and `strings:runs.statusQueued` 「待機中」 (English has none) |
 | Description / help / toast | full ですます sentence ending in 。 | `config:maxBackupsDescription` |
 | Inline fragment in a summary row | noun + なし / 指定なし, no verb, no 。 | `config:routing.anySource` 「ソース指定なし」, `config:routing.noModule` 「モジュールなし」 |
 | Empty-state title | bare clause, and it takes 。 **only where English does** | `glossary:emptyTermsTitle` 「この用語集にはまだ用語がありません」 and `review:emptyTitle` 「レビューキューは空です」 (no period in en, none here); `category:noSuggestions` 「モデルからカテゴリの提案はありませんでした。」 (en has one) |
 | Field label whose English *reads* as a verb phrase | noun phrase anyway — resolve the control, not the wording | `glossary:generateFocusSourceTextsLabel` ("Focus on source texts") is a `<Label>` over a textarea at `GenerateGlossaryDialog.tsx:699` and ships 「絞り込む原文」, not a ～する form |
-| Button whose action has **neither** a サ変 noun **nor** a state to set | plain dictionary form (閉じる, 開く, 戻す, 折りたたむ) — not 体言止め, and not ～にする | `glossary:close` 「閉じる」, `review:openDetails` 「詳細を開く」, `review:undo` 「元に戻す」. Added in the batch-3 fix round: these three shipped correctly but had no row, and *Close* recurs in batch 6's `common` while batch 4 is almost entirely buttons |
+| Button whose action has **neither** a サ変 noun **nor** a state to set | plain dictionary form (閉じる, 開く, 戻す, 折りたたむ) — not 体言止め, and not ～にする | `glossary:close` 「閉じる」, `review:openDetails` 「詳細を開く」, `review:undo` 「元に戻す」. Added in the batch-3 fix round: these three shipped correctly but had no row, and batch 4 is almost entirely buttons. **The clause that used to end this cell — "and *Close* recurs in batch 6's `common`" — is false and is left visible: `common` has no *Close* key** (see the correction at the head of this file). The row still earned batch 6: `orphans:actions.back` 「戻る」 and `welcome:themeChooser.confirm` 「この設定を使う」 are both verbs with neither a サ変 noun nor a state to set |
 
 **A pair of opposite controls may legitimately take two different shapes, and batch 5 shipped one.**
 `console:expand` / `console:collapse` and `system:countdown.expand` / `countdown.collapse` are
@@ -150,9 +163,18 @@ one activity and differ only by an article, which carries nothing into Japanese.
 inherit*, while the settings one names a **shadcn badge variant** in a four-member set whose other
 three (「セカンダリ」「アウトライン」「デストラクティブ」) have no idiomatic kanji form — forcing 既定
 into that set would break the paradigm, which is the error runbook 2.1 names. They cannot co-render
-(`SettingsView` and `GlobalConfigView` are mutually exclusive `view` values). **`badgeDefault` is the
-only *Default* outside `config`**, so no later batch inherits a choice here; this note exists to stop
+(`SettingsView` and `GlobalConfigView` are mutually exclusive `view` values). This note exists to stop
 the collision report being read as a defect.
+
+**Batch 6 falsified the sentence that used to close this paragraph and it is corrected here rather
+than dropped.** It read "**`badgeDefault` is the only *Default* outside `config`**, so no later batch
+inherits a choice here" — a standing claim about the corpus, written in batch 4 without scanning the
+namespaces batch 6 owned. `welcome:themeChooser.taglines.techno` ends "The new default." and is a
+third home. It ships **「既定」** — 「ネオンが光るコンソール。新しい既定のテーマです。」 — because it is
+config's sense, *the default value to inherit* (techno is the theme a user gets without choosing),
+not a badge-variant name. So the split survives with one more member on the config side, and the
+sentence that said the question could not recur is gone. **A claim of the form "X is the only Y" is a
+scan of the whole corpus, and it goes stale the moment a namespace nobody had read lands.**
 
 ## Narration — the `logs` and `console` register, settled in batch 5
 
@@ -284,6 +306,24 @@ full-width digits.
 
 - Use full-width Japanese punctuation: 、 。 （ ） 「 」 ： ？ ！ — never their half-width
   ASCII equivalents inside Japanese text.
+- **English's own final punctuation decides whether the value ends in 。 — everywhere, not only in
+  `logs`. Batch 6 promoted this from a narration rule to a whole-language one, by measuring it
+  rather than by asserting it.** Over the **1,597** keys shipped before this batch, comparing
+  "English ends in `.` or `。`" against "Japanese ends in 。", there is exactly **one** mismatch:
+  `strings:runs.estimateSuffix` ("est." → 「概算」), where the English full stop is an abbreviation
+  mark and not a sentence end. Five batches had followed the rule without it being written down.
+  It settles the cases the shape table leaves open: a `<DialogDescription>` whose English carries no
+  period takes none (`common:webSearch.hint`
+  「新しいタブで検索するには、Enterを押してください」 — and note the citation guard caught this row
+  still quoting the value's earlier wording after a self-review reshaped it, the second time in two
+  rounds that a two-value string edit's blast radius reached a different file), and a toast whose English carries one takes one
+  (`backup:toastBackupCreated` 「バックアップを作成しました。」 against
+  `orphans:toast.deleted` 「孤立エントリを削除しました」, whose English has no period).
+  **The one shape it produces that looks wrong and is not:** an em-dash split into two sentences
+  inside a value whose English has no final period ends with an internal 。 and no closing one —
+  `orphans:toast.aiRetranslateStarted`
+  「AIによる再翻訳を開始しました。アクティビティタブで確認できます」. The internal stop is the
+  em-dash's (narration rule 2); the missing final one is English's.
 - Quoting a value uses 「…」, whatever mark English used. `config:instances.slugReserved`
   turns English's curly quotes into 「{{slug}}」; `config:duplicateSuccess` turns English's
   escaped straight quotes into 「{{name}}」. The placeholder is untouched; the two characters
@@ -459,6 +499,8 @@ as its source length. That is what the container has to fit.
 | In-panel sub-tab label | `config:routing.tabRules` | soft | **12** | **measured** on batch 1's three routing sub-tabs: `config:routing.tabRules` 「ルール（{{count}}）」 renders at 7, `config:routing.tabTemplates` 「テンプレート（{{count}}）」 at 9, `config:routing.tabImportExport` 「インポート／エクスポート」 at 12. They sit in a scrolling row inside the routing panel — the app's **only** tab-shaped control that is not a sidebar item, and the reason this row exists separately from the hard sidebar row above |
 | Table column header | `strings:columns.config` | soft | **8** | **re-measured** across both batches: batch 1's longest `config:models.col*` header was 6, but batch 2's `strings:runs.detailsLanguagesColumn` 「ターゲット言語」 is 7 — a term rule (*target language*) fixes it and outranks the budget — so the figure rises to 8. The class anchor `strings:columns.config` itself is 「状態」 at 2 |
 | Filter label | `strings:filters.needsReview` | soft | **14** | **measured** on batch 2's twenty-four `strings:filters.*` plus the Compare filter row: the longest are 「新規（前回のインポート分）」 at 13 and 「新規フラグを解除（{{count}}）」 at 13 with a three-digit count, then 「プレースホルダーの不一致」 at 12. The anchor 「要レビュー」 is 4. The provisional 8 was badly wrong — it was reasoned from the anchor rather than from the class |
+| **Swatch chip label** | `colorText:swatches.hydro` | **hard** — `max-w-24` + `truncate` | **8** | **derived from the component**, batch 6: `PaletteSection.tsx:39` renders the label in a *span* carrying *max-w-24* and *truncate*, inside a `text-xs` chip. 96px ÷ 12px = 8 full-width glyphs. Measured across the whole class at once (18 swatches): 1-5, the longest being 「タイトル」「セカンダリ」「パープル」「オレンジ」 at 4-5. The class is **hard** and nothing in it is close |
+| **Palette group caption** | `colorText:groupElements` | soft | **9** | **derived from the component**, batch 6: `PaletteSection.tsx:78` and `:93` put each caption in a *w-28 shrink-0* `text-xs` span — 112px ÷ 12px = 9 glyphs. `shrink-0` with **no** `truncate`, so an over-long caption pushes the swatch row rather than clipping, which is why this row is soft where the swatch row is hard. All five measure 2-5 (「暗い背景」「明るい背景」「元素」「品質別」「自分の色」) |
 | Bulk-bar control | `strings:bulk.approveSelected` | soft | **17** | **measured** on batch 2's `strings:bulk.*`: the longest is 「絞り込まれた{{count}}行すべてを選択」 at 16 with a three-digit count, then 「選択範囲からカテゴリを生成」 at 13. The anchor 「承認して翻訳メモリに追加」 is 12 |
 
 **Hard** means fix it — a sidebar item over budget is cut off in a container that cannot
@@ -466,9 +508,17 @@ grow. **Soft** means prefer the shorter of two correct options, and never distor
 hit the number. A term rule outranks the budget: `config:models.colProcessor` is
 「プロセッサー」 and not the shorter 「プロセッサ」 because the long-vowel rule above says so.
 
-**No provisional row is left.** Three rows are measured from shipped Japanese, one is derived
-from the component's own CSS, and one (the in-panel sub-tab) was measured in batch 1. The
-whole-language sweep confirms all five.
+**No provisional row is left.** Three rows are measured from shipped Japanese, three are derived
+from the component's own CSS, and one (the in-panel sub-tab) was measured in batch 1.
+
+**The table grew in batch 6 and that is a finding about the earlier batches, not only about this
+one.** Two classes existed all along in `colorText` and no batch had a reason to look at them,
+because the five classes were inherited from the runbook's list rather than re-derived per
+namespace. **Rubric item 7 asks for the distribution of a whole class; nothing asks whether a
+namespace introduces a class the table does not have** — so the check that finds one is reading
+the component, and it has to be done once per namespace with chrome. Batch 5 learned the same
+lesson from the other end (it claimed no constrained class was present and two were). Both new
+rows are comfortable, and both are comfortable **because they were measured**.
 
 **Batch 4 confirms the hard row against the namespace that owns it, and it is not close.** The **31**
 labels the rail can paint at once (listed in the Sweep 4 table below) run from 2 to 7 rendered
@@ -645,6 +695,43 @@ unconstrained: the console log rows wrap freely, and the longest values are two 
 banners (`system:countdown.message`, `generation:ignoreGlossariesHint`) that wrap by design. **Do not read
 "batch 5 had no constrained keys" as a precedent about which namespaces carry chrome**; `batch` and
 `console` both do.
+**Batch 6 measures over its 282 shared keys — the same 282 in both languages, because this batch
+contains no plural key of any kind** (no `_one`, no `_other`, no `_zero`; checked over
+`locales/en`, which is also why the count closes exactly). **3,639 Japanese characters against
+6,514 English**: aggregate **0.56**, median **0.55**, 90th percentile **0.81**, minimum **0.14**
+(`colorText:swatches.electro` 「雷」 against "Electro"), maximum **1.33** (`colorText:modeRaw`
+「タグ表示」 against the three-character "Raw"). Five keys reach or pass 1.00 — three sit exactly on
+it (`stage-details:chat`, `stage-details:translate`, `orphans:confirmDelete.title`) and two exceed
+it, both `colorText` mode labels against three- and four-character English sources. **Re-derived
+after the last string edit of the round**, per the rule two paragraphs up that this file has broken
+twice — and it earned its keep again here: the first derivation of these figures was written before
+a self-review moved four values onto ～てください (English gives the user a bare imperative at
+`welcome:setupVaultBody`, `orphans:relink.confirmDescription`, `backup:backupsListDescription` and
+`common:webSearch.hint`, and a ～ます statement describes where English instructs). That edit moved
+the Japanese total by +14 and the aggregate from 0.5565 to 0.5586. Both figures were correct when
+written; only the second is correct now.
+
+**Six batches: aggregate 0.55 / 0.55 / 0.54 / 0.57 / 0.62 / 0.56, 90th percentile
+0.83 / 0.83 / 0.80 / 0.81 / 0.81 / 0.81.** Batch 5's 0.62 stands out and its cause was named at the
+time — `logs` is narration, where English's bare past participles meet Japanese's 〜しました。 tail.
+Batch 6 drops straight back to the body's own level, which is the confirmation that batch 5's
+figure was a register effect and not a drift: this batch is half chrome and half short sentences,
+the ordinary mix. **The 90th percentile has not moved across six batches.** The tail is the number
+that breaks layouts, and in this language it never has.
+
+### The whole language, measured once at the end
+
+**1,879 shared keys: 29,087 Japanese characters against 51,568 English — aggregate 0.5641,
+median 0.56, 90th percentile 0.82, minimum 0.14, maximum 1.50.** State the population with the
+number: the English denominator is measured over **the same 1,879 keys**, not over English's own
+1,908 — the 29 `_one` keys Japanese does not supply come out of both totals, exactly as batch 4
+established. Fifty-seven keys reach or pass 1.00 and **every one of them has a short English
+source**; the single 1.50 is `strings:filters.matchAny` 「または」 against "OR", which is the ratio
+measuring the wrong thing in its purest form. Japanese is the first locale in this programme to
+run *shorter* than English by a wide margin — `ru` 1.19, `es` 1.22, `fr` 1.26 against this
+language's 0.56 — so **the guard's 2.5x ratio cap was never a live risk in either direction, and
+not one string in six batches was shortened or lengthened to satisfy a length figure.**
+
 Japanese runs ~0.55x English over batches 1 and 2 alike (`strings`: 5,480 Japanese characters
 against 9,900 English, aggregate **0.55**, median **0.56**, 90th percentile **0.83**, single
 maximum **1.50** at `strings:filters.matchAny` 「または」 — a two-character English source, which
@@ -696,6 +783,9 @@ the counter is a property of the object, not of the string.
 | source text (as a scoping input) | **件** | added batch 3: `glossary:generateFocusSourceTextsCount_other` 「原文{{count}}件に絞り込みました。」. Each pasted line names one entry, so this is the *entry* counter under another name |
 | LQA result, review item | **件** | added batch 3: `quality:overallStat.results` 「LQAの結果{{count}}件」, `review:allItemsCount` 「翻訳{{count}}件」, `review:sourceAi.lqaHint`. Consistent with batch 2's *LQA issue* row — a verdict is a record |
 | batch (a packed request) | **バッチ** | added batch 3: `category:genBatchCount_other` 「{{count}}バッチで実行します（…）」, `glossary:generateBatchCount_other` 「約{{count}}バッチで…」. The unit *is* the counter, like 文字／バイト／トークン／ターン. Never 回 — that counts an *action*, and a batch is a thing sent |
+| **orphan** | **件** | added batch 6, and it is a rename of a row rather than a new class: `orphans:toast.bulkDeleted` 「孤立エントリ{{count}}件を削除しました」 counts orphans, and an orphan **is** an entry (`terminology.md`: "an entry that a full-replace CSV import found missing"), so it takes the *entry* counter. Batch 1 already shipped the state-only form 「孤立{{count}}件」 at `config:orphanedCount`; the two agree. Not 行 — the Orphans table is a table, but the object counted is a content unit, which is the distinction the *table row* row below draws |
+| **release** (one published version) | **no counter — brackets** | added batch 6, and it is the row that shows a counter is not always owed. `common:changelogShowOlder` 「過去のリリースを表示（{{count}}）」 puts the number in brackets after a completed noun phrase, which the bare-number rule below already licenses — the same device as `config:modulesEnabledSection` 「有効（{{count}}）」 and `strings:runs.judgeApproveAllSuccess`. 件 would have been defensible (a release is a record) and was still rejected: the control is a *Show more* affordance whose number is a remainder, not a quantity the sentence is about. **Whichever later batch counts releases inside running text decides that counter; this row does not** |
+| **second (elapsed time)** | **秒** | added batch 6: `common:thinking` 「思考中…{{seconds}}秒」. The **unit is the counter**, like 文字／バイト／トークン／ターン／バッチ. It is also this locale's second deliberate non-`count` detector survivor — see the exception section below |
 | a genuinely mixed or unknown selection | **件** | `config:routing.nSelected` 「{{count}}件を選択中」 — one key rendering over both categories and tones. Batch 2 **narrows this row**: the category half is no longer a fallback at all, because *category* has its own row above and it is 件. The licence now rests on the tone half alone. **Batch 3 does NOT settle it, contrary to what this cell used to promise**: `category` counts categories and entries, and no `glossary`/`review`/`category`/`quality` key counts tones — the tone vocabulary lives in Compare (batch 2) and Config (batch 1), neither of which counts them either. The tone half is still open; whichever later batch counts a tone decides it. A key that counts one known class must still take that class's counter. |
 
 **Open the call site and ask what is being counted — the counter is a property of the object,
@@ -750,6 +840,15 @@ Counted over the seventeen shipped namespaces: **1,597 ja keys against English's
 exactly the 29 `_one` keys English writes. **All 29 are now behind us — batch 6's seven namespaces
 contain none** (checked over `locales/en`), so batch 6 lands at English's own 282 and the finished
 language at **1,879**. If batch 6's count differs from English's, something is wrong.
+
+**Batch 6 landed on both numbers: 282 and 1,879.** The prediction is now a measurement, and it is
+worth saying what made it safe rather than lucky — the arithmetic never depended on the batch at
+all. English's plural shape is a property of `locales/en`, readable before a single string is
+written, and Japanese's single `other` category is a property of the language. The gap is therefore
+fixed at 29 from the first batch onwards, and any batch can check its own contribution before it
+starts. **The whole language is 1,879 keys across all 24 namespaces, 29 fewer than English's
+1,908, and every one of those 29 is an English `_one`.** No key was ever added, dropped or renamed
+anywhere else in six batches.
 
 **`_zero` is the one non-category suffix you keep.** `strings:bulk.removeCategoryApply_zero`
 is Japanese's only `_zero` key, and it stays: i18next makes an explicit `key_zero` lookup at
@@ -877,6 +976,27 @@ word axis too`), and it is **not** a defect:
 So the string stands and the **guard** was the finding. Batch 3 escalated it rather than editing
 the script, because that script is shared by all three languages running in this one worktree.
 **Do not "fix" this string in a later batch.**
+
+**Batch 6 adds the second — and, since the language is now complete, the last — one:
+`common:thinking` 「思考中…{{seconds}}秒」.** The pre-flight now reports **two** token-axis
+survivors for `ja`, and both are named here. It clears the same three tests:
+
+- 秒 is invariant, so the string is grammatical at every value the token can take, including 0 and
+  the fractional values a live timer shows.
+- English's own string is *Thinking… {{seconds}}s* — it spends a unit symbol there, so writing the
+  Japanese unit is the faithful rendering rather than an addition.
+- Every frame that clears the detector damages the string. The label-and-colon device gives
+  「思考中…（経過秒数：{{seconds}}）」, which turns a live indicator two characters wide into a
+  data row; dropping the unit loses it; keeping English's half-width `s` would clear the detector
+  **for free**, which is precisely why it was considered and rejected — clearing a lint is not a
+  reason to write 「12s」 where Japanese writes 「12秒」. That is the "absorb the workaround into the
+  string" failure the runbook names, and the fact that the cheap option was also the passing one is
+  what made it tempting.
+
+The call site is `components/ui/thinking-indicator.tsx`, a small inline chip beside a streaming
+reply. **Two exceptions in 1,879 keys is not a licence to stop looking for a frame** — batch 5 met
+ten non-`count` tokens in narrative sentences and found frames for all ten. Both exceptions are
+counters welded to a unit that has no alternative; that is the whole class.
 
 **Correction, batch 4 — the escalation was resolved a different way, and the sentence that used to
 stand here is now false about the tool.** It said `NUMERAL_WORD_AXIS_EXEMPTIONS` "wants a `ja` entry
@@ -1165,9 +1285,31 @@ row above is the shape for a verb with neither a サ変 noun nor a state to set.
   **"Two words for one action" is the loosest member of the form list, and clauses (0) and (2) are
   what keep it safe.** Without them it reads as "same action ⇒ same string", which is precisely how
   a trigger and its dialog title, or a filter tab and the button that sets it, get collapsed — three
-  defects this file has already paid for. Batch 6 meets the temptation directly in `common`'s
-  *Close* / *Cancel* / *Back*: open the handler, then check the shape-table row, and only then look
-  at the words.
+  defects this file has already paid for.
+
+  **Batch 6 met the temptation and the prediction written here was right about the shape and wrong
+  about the keys** — it said the test would come in "`common`'s *Close* / *Cancel* / *Back*", and
+  `common` has no *Close* and no *Back* (see the head of this file). What it actually has is
+  *Cancel*, one of **three** bare `Cancel`s this batch ships, and the pair that tested the rule
+  hardest was not a control at all. The three clauses applied, in the order the rule now demands —
+  clause (0) first, because it is the only one that needs the code:
+
+  | Pair | (0) same operation, from the code | (1) form only | (2) control class | Verdict |
+  | --- | --- | --- | --- | --- |
+  | `stage-details:cancel` / `orphans:actions.cancel` / `backup:confirmCancel` — all bare *Cancel*, all 「キャンセル」 | **fails**: `StageDetailsTab.tsx:394` calls `cancelRun` on a **server-side run**; `OrphansTab.tsx:430` calls `closeRelink`, a sheet dismissal; `backup:confirmCancel` dismisses a `ConfirmSheet` | byte-identical | all buttons | **collapsed anyway — and NOT by these clauses.** The three sit in three different project tabs and **cannot co-render**, so the older boundary licenses them outright; the clause table is the *co-render* licence and never had to be reached. Stating which licence a collapse runs on is the point of the exercise |
+  | `colorText:swatches.warn` / `console:filter_warn` — both *Warn*, both 「警告」 | fails on referents: a colour role against a log level | vacuous — byte-identical | swatch chip and filter tab are both the bare-noun row | **collapsed, on the paradigm rather than on the clauses.** `ConsolePanel.tsx:398` gates the filter tabs on `open`, so the panel really can be open over the Text Styler view. The console's five levels are scored as a set (「すべて」「エラー」「警告」「情報」「デバッグ」) and so are the swatch group's five roles (「タイトル」「通常」「キー1」「キー2」「警告」); nudging either to a synonym to dodge a report is the error runbook 2.1 names. Recorded as a documented exception, not a silent one |
+  | `colorText:groupQuality` / `strings:tabs.quality` — both *Quality* | **fails**: a palette group of five colours against the Quality dashboard | vacuous — byte-identical | both bare-noun labels, so no veto | **REFUSED.** `colorText:groupQuality` ships 「品質別」 |
+
+  **The refusal is the row worth reading.** The rail is painted beside every view, so a palette
+  group heading reading exactly 「品質」 sits on screen with the tab that opens the Quality
+  dashboard — and `strings:tabs.quality` is a **surface name**, which makes every occurrence of that
+  string a claim about that surface. That is what separates it from the 警告 row above (neither key
+  is a surface name) and from 「翻訳」 over `orphans:columns.translations` /
+  `stage-details:translationsHeading` / `strings:tabs.strings`, where the column heading labels the
+  translations themselves and batch 2 already shipped the same relation at
+  `strings:runs.judgeTargetLabel`. 「品質別」 keeps the 品質 root with a head that says *grouped by*,
+  the construction this locale already ships at `quality:bySource.title` 「ソース別の問題」 — the
+  `設定`/`環境設定` move, one section down, applied to a second three-way root.
 
   **The category pair has harder evidence than batch 5 cited, and the round-5 review found it.**
   The parallel glossary pair — `glossary:generateFailed` and `logs:glossaryGen.failed` — is
@@ -1183,6 +1325,37 @@ row above is the shape for a verb with neither a サ変 noun nor a state to set.
   to separate it from a severity badge in a different view would be the error runbook 2.1 names.
   情報 repeats `account:notificationsSeverity.info` and `settings:previewSamples.info` outright,
   and that is not even a collapse — all three English strings are the identical *Info*.
+
+  **Batch 6's licensed collapses, and its four deliberate splits.** Licensed, each checked against
+  the container both keys paint into: 原文 over *Source* at `orphans:columns.source`,
+  `stage-details:sourceHeading` and `chatFocusSource` (one word, three homes, English identical);
+  翻訳 over *Translations* at `orphans:columns.translations` and `stage-details:translationsHeading`
+  (see the refusal table above); 項目 over *Fields* / *Field* (`stage-details:fieldsHeading`,
+  `chatFocusField` — number only, and both name a stage-details form field); ガイド over *Guide* /
+  *Guides* (`sidebar:guide`, `welcome:guidesHeading` — number only, and they **do** co-render, the
+  rail beside the welcome view); 古い over *stale* / *Stale* (`config:module.cacheStale`,
+  `stage-details:stale` — case only); 長さ制限 over *Length limit* / *Max length*; 翻訳はまだありません
+  over *No translations yet* / *No translation yet*; 警告 over *Warn* in its fifth home; and
+  クリップボードにコピーしました over the identical English toast in two namespaces
+  (`stage-details:copied`, `colorText:copied` — one operation, checked at both call sites).
+  The four **splits**, all reported by check 2 and all deliberate:
+
+  - ***Create backup* takes two renderings.** `backup:createSection` is a `<CardTitle>`
+    (`BackupTab.tsx:224`) and takes the title shape 「バックアップの作成」; `backup:createButton` is
+    the `<Button>` inside that same card (`:233`) and takes the action shape 「バックアップを作成」.
+    They co-render, one directly above the other, so clause (2) vetoes the collapse — the
+    `config:models.select` / `pickTitle` split, in a second namespace. This is also the exact pair
+    the runbook holds up as a Russian defect (a section title that took the button's shape because
+    a term row quoted it); the term fixes the lexeme, the control fixes the form.
+  - ***Raw* takes two renderings, because it is two senses.** `colorText:modeRaw` 「タグ表示」 is the
+    editor mode that shows the markup tags themselves (`ColorTextView.tsx` — raw mode edits the
+    tagged string in a textarea, rich mode is a contenteditable), paired with `modeRich`
+    「リッチ表示」. `strings:runs.judgeViewRaw` 「全文」 is the suggestion panel's full-text view
+    against 「差分」. A bare transliteration of *Raw* names nothing in Japanese in either place.
+  - ***Translate* takes two renderings** — `sidebar:groups.translate` / `strings:guide.groupTranslate`
+    「翻訳作業」 and `stage-details:translate` 「ステージ詳細を翻訳」. Both exist for the same reason:
+    a bare 翻訳 would land on a heading or a column that reads 翻訳 on the same screen.
+  - ***Quality* takes two renderings** — the refusal recorded above.
 
   **Two same-English pairs batch 3 deliberately kept apart**, which the same check reports from
   the other direction: 不合格 (`quality:legend.failed`, a verdict) against 失敗
@@ -1250,15 +1423,15 @@ budget row above — so every one of them is also subject to the 13-glyph trunca
 | Global Config | 「グローバル設定」 | `config:globalConfigTitle` | `sidebar:globalConfig` 「グローバル設定」 (shipped batch 4) — English is word-for-word identical in both, so Japanese must be too |
 | Translation Memory | 「翻訳メモリ」 | `config:tm.policyTitle`, `config:tm.browserTitle` | `sidebar:translationMemory` 「翻訳メモリ」 (shipped batch 4), `strings:guide.groupTranslationMemory`, `strings:guide.topicTranslationMemory` (both shipped batch 2) |
 | **Settings** (the app-wide page) | **「環境設定」** | `sidebar:settings` and `settings:title`, both shipped batch 4 | English is byte-identical in both, so Japanese is too — the `sidebar:globalConfig` case exactly. **Not 「設定」** — see the three-way 設定 hazard below |
-| **Changelog** | 「変更履歴」 | `sidebar:changelog` (shipped batch 4) | batch 6's `common:changelog*` page strings |
-| **Legal** | 「法的情報」 | `sidebar:legal` (shipped batch 4) | `legal:title` is a **different English string** ("Legal & policies") and expands deliberately, like Activity's page title — batch 6 writes its own value on this root and must not copy the bare 「法的情報」 onto it |
+| **Changelog** | 「変更履歴」 | `sidebar:changelog` (shipped batch 4) | `common:changelogEntryError` 「このリリースの変更履歴を読み込めませんでした。」 (shipped batch 6). `common:changelogShowOlder` names the *release*, not the page: 「過去のリリースを表示（{{count}}）」 |
+| **Legal** | 「法的情報」 | `sidebar:legal` (shipped batch 4) | `legal:title` is a **different English string** ("Legal & policies") and expands deliberately, like Activity's page title. **Batch 6 shipped 「法的情報とポリシー」** — the root kept, the bare rail value not copied onto it, and English's `&` rendered と rather than ・ (中黒 separates list items; this is a two-member conjunction in a title). The seven document names under it are surface names of external pages and take the established Japanese legal-document titles: 「利用規約」「プライバシーポリシー」「クッキーポリシー」「適正利用ポリシー」「サブプロセッサー」「セキュリティと責任ある開示」. 再委託先 was rejected for *Subprocessors* — it is the contract-law term for the relationship, not the name of a page a reader is looking for |
 | **About Narn** | 「Narnについて」 | `sidebar:aboutNarn` (shipped batch 4) | the brand is copied **verbatim, in the spelling that key uses** (`Narn`, not `narn` or `NARN`), half-width, with no space before について |
 | **Account** | 「アカウント」 | `sidebar:account` (shipped batch 4) | the Account page has **no** title key — `AccountView.tsx` renders no `<h1>`, so the rail item is the surface's only name |
 | **Guide** | 「ガイド」 | `sidebar:guide` (shipped batch 4) | the *guide* term itself |
 | Translations (tab) | 「翻訳」 | `strings:tabs.strings`; named in prose by `config:routing.categoriesConfiguredHint` 「カテゴリは翻訳タブで設定します。」 | `strings:guide.topicMultiLanguage` 「翻訳タブ」 (shipped batch 2) |
 | Compare (tab) | 「比較」 | `strings:tabs.compare`; named in prose by `config:routing.tonesHint` 「トーンは比較タブでエントリごとに設定します。」 | `strings:guide.topicCompare` 「比較タブ」 (shipped batch 2) |
-| Backup (tab) | 「バックアップ」 | `strings:tabs.backup`; named in prose by `config:importSnapshotNote` 「バックアップタブから復元できます。」 | `strings:guide.topicBackup` 「バックアップタブ」 (shipped batch 2), `backup:*` titles. **Batch 5 also binds one `backup` value that is not a surface name:** `logs:backup.restored` 「バックアップを復元しました。」 and `backup:toastRestoreSuccess` are **byte-identical in English** (*Backup restored.*), so batch 6 copies that sentence rather than writing a second one |
-| Orphans (tab) | 「孤立エントリ」 | `strings:tabs.orphans`; named in prose by `config:fullReplaceOrphanNotice` 「孤立エントリタブで解決してください。」 | `strings:guide.topicOrphans` 「孤立エントリタブ」 (shipped batch 2), `orphans:title` |
+| Backup (tab) | 「バックアップ」 | `strings:tabs.backup`; named in prose by `config:importSnapshotNote` 「バックアップタブから復元できます。」 | `strings:guide.topicBackup` 「バックアップタブ」 (shipped batch 2). **Batch 6 shipped the page title on the same root and it expands, like Activity's:** `backup:title` ("Backup and Restore") is 「バックアップと復元」 — do not shorten it to match the tab. The `logs:backup.restored` binding was paid: `backup:toastRestoreSuccess` ships 「バックアップを復元しました。」, copied because the English is byte-identical |
+| Orphans (tab) | 「孤立エントリ」 | `strings:tabs.orphans`; named in prose by `config:fullReplaceOrphanNotice` 「孤立エントリタブで解決してください。」 | `strings:guide.topicOrphans` 「孤立エントリタブ」 (shipped batch 2), `orphans:title` 「孤立エントリ」 (shipped batch 6, copied verbatim) |
 | Config (tab) | 「設定」 | `strings:tabs.config` | `strings:guide.topicConfig` 「設定タブ」 (shipped batch 2). **Batch 4 did not reuse the bare 「設定」 for the app-wide *Settings* surface** — it took 「環境設定」; see the 設定 hazard below |
 | Data (tab) | 「データ」 | `strings:tabs.data` | — |
 | Routing (tab) | 「振り分け」 | `strings:tabs.routing` | `strings:guide.topicRouting` 「振り分けタブ」 (shipped batch 2). The *routing rule* term is 振り分けルール (`config:routing.title`); the tab is the bare root |
@@ -1270,12 +1443,12 @@ budget row above — so every one of them is also subject to the 13-glyph trunca
 | Category (tab) | 「カテゴリ」 | `strings:tabs.category` | `strings:guide.topicCategory` 「カテゴリタブ」 (shipped batch 2), `category:title` 「カテゴリ」 (shipped batch 3). English's singular tab / plural page title carries no information into Japanese |
 | Activity | 「アクティビティ」 | `strings:tabs.runs` | `strings:guide.topicActivity` 「アクティビティ」 (shipped batch 2). The **page title expands deliberately**: `strings:runs.title` is 「翻訳アクティビティ」. Do not shorten it to match and do not invent a third wording |
 | Sharing | 「共有」 | `strings:tabs.sharing` | `collab:sharing.pageTitle` 「共有」 (shipped batch 4). Exact equality with the rail item, and they **do** co-render — `SharingTab.tsx:59` paints the `<h2>` beside the whole sidebar. Licensed: English is byte-identical in both homes |
-| Stage details | 「ステージ詳細」 | `strings:tabs` (stage-details) | `stage-details:title` |
-| Text Styler | 「テキスト装飾」 | `strings:tabs` (color-text) | `colorText:title`, `sidebar:colorText` |
+| Stage details | 「ステージ詳細」 | `strings:tabs` (stage-details) | `stage-details:title` 「ステージ詳細」 (shipped batch 6, copied verbatim) |
+| Text Styler | 「テキスト装飾」 | `strings:tabs` (color-text) | `sidebar:colorText` (shipped batch 4), `colorText:title` 「テキスト装飾」 (shipped batch 6). All three homes now agree in the shipped files |
 | AI Review (guide topic) | 「AIレビュー」 | `strings:guide.topicAiReview` | the *AI review* term itself — `strings:runs.judgeBadge` |
 | Pseudo Test | 「疑似テスト」 | `config:pseudoTestHelpAria` | `strings:guide.topicPseudoTest` 「疑似テスト」 (shipped batch 2) |
 | Credential Vault | 「認証情報の保管庫」 | `strings:guide.topicVault` | `vault:statusLabel` 「認証情報の保管庫」 (shipped batch 4). The short form is 「保管庫」 — see the *credential vault* row in `terminology/ja.md`, which checked all four frames |
-| **Theme names** (four proper nouns) | 「クラシック」／「ピクセル」／「テクノ」／「ミニマル」 | `settings:themes.default.name`, `.pixel.name`, `.techno.name`, `.minimal.name` (all shipped batch 4) | **`welcome:themeChooser.names.*`, batch 6 — byte-identical, all four.** `terminology.md` calls this the highest-risk duplication in the app because the two homes are never on screen together and `es` already ships two different spellings. Do not re-decide, do not "improve", do not localise 「テクノ」 into a technology word |
+| **Theme names** (four proper nouns) | 「クラシック」／「ピクセル」／「テクノ」／「ミニマル」 | `settings:themes.default.name`, `.pixel.name`, `.techno.name`, `.minimal.name` (all shipped batch 4) | **`welcome:themeChooser.names.*` — shipped batch 6, byte-identical, all four, copied out of `locales/ja/settings.json` rather than out of this row.** That distinction is the point: `terminology.md` calls this the app's highest-risk duplication precisely because the two homes are never on screen together, so **nothing mechanical catches a divergence** — the citation guard checks that a quoted rendering exists *somewhere* in the locale, which both spellings would satisfy. `es` ships "Tecno"/"Techno" and "Minimal"/"Minimalista" to this day. The fifth key in that family reuses one of them: `welcome:themeChooser.keepDefault` ("Keep Techno") is 「テクノのままにする」 |
 
 The word for *tab* is 「タブ」, appended with no particle and no space: 「翻訳タブ」. Every
 `strings:guide.topic*` key whose English ends in "Tab" follows that shape; `topicQuality` and
@@ -1536,6 +1709,22 @@ no full-width Latin or digits, and no three-dot ellipsis — the batch has exact
 **Sweep 6 has now cried wolf in two batches out of two in which `logs`-shaped copy exists**; it is
 kept because it is the only thing standing between this locale and a full stop on a button, but
 read its hits against the narration rule before treating one as a defect.
+
+**Batch 6 runs all seven with one hit, and it is sweep 3's first false positive in six batches.**
+Sweeps 1, 2, 4, 5, 6 and 7 are empty over the 282 values: no あなた, no honorific escalation, no
+full-width Latin or digits, no three-dot ellipsis, no full stop on a short label, and **no space at
+all** — the second batch after batch 4 with an empty exception list. Sweep 3 (ASCII punctuation
+between two Japanese characters) reports `backup:createDescription` and `backup:restoreDescription`,
+and both are the **literal file extension `.zip`** sitting inside a Japanese sentence
+(「検証可能な.zipアーカイブ」, 「バックアップの.zipをアップロード」). A file extension is a literal
+token, not sentence punctuation; 「ドットzip」 and a full-width 「．zip」 are both wrong, and
+`restoreSelectFile` 「.zipファイルの選択」 carries the same token at the head of a value where the
+sweep cannot see it. **Add it to the sweep's known-false-positive list rather than to the string.**
+The batch's fifteen ellipses are all U+2026 and all mirror an ellipsis the English source has —
+checked by comparing the two files key by key, not by eye, and the parity is exact in both
+directions. Its two half-width symbols against Japanese are the ratio `/` in
+`stage-details:runProgress` 「翻訳中：{{completed}}/{{total}}」 (the ratio-operator role batch 1
+settled) and the `#` of the literal hex formats in `colorText:invalidHex`.
 
 | Sweep | Japanese instance | Why |
 | --- | --- | --- |
