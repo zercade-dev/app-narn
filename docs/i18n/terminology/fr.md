@@ -23,7 +23,7 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 
 ## Keyboard key names
 
-`../terminology.md`'s "Keyboard key names" section is not one of the 76 frozen term rows —
+`../terminology.md`'s "Keyboard key names" section is not one of the 84 frozen term rows —
 it is a per-locale rule (write the key name as engraved on that locale's keyboard). French
 (AZERTY) renderings, settled 2026-08-10: `Enter` → **Entrée**, `Esc` → **Échap**,
 `Shift` → **Maj**. `Tab`, `Ctrl` and `Alt` do not currently occur as key names in any
@@ -53,7 +53,9 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | writable language |  |  |
 | Pseudo Test |  |  |
 | run |  |  |
+| revert |  |  |
 | Activity |  |  |
+| log |  |  |
 | batch |  |  |
 | batch grouping |  |  |
 | AI review |  |  |
@@ -64,8 +66,10 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | discard |  |  |
 | needs review | à réviser | No gender to agree. Sentence-cased in the filter ("À réviser"), lowercase in the row badge ("à réviser"), same wording in both. Note the capital À keeps its accent in the filter form. For the related *révisé* adjective see the gender rule above: token form "révisé", agreeing form "révisée". |
 | flag |  |  |
+| ignore / ignored |  |  |
 | Review (the sidebar group) |  |  |
 | review queue |  |  |
+| back-translation |  |  |
 | module |  |  |
 | module instance |  |  |
 | provider |  |  |
@@ -100,16 +104,20 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | backup |  |  |
 | snapshot |  |  |
 | template |  |  |
+| omit (from an export) |  |  |
 | collaborator |  |  |
 | member |  |  |
 | nickname |  |  |
 | claim |  |  |
 | invite |  |  |
+| revoke |  |  |
 | recording |  |  |
 | stage |  |  |
 | Text Styler |  |  |
 | element |  |  |
+| assistant |  |  |
 | theme |  |  |
 | guide |  |  |
 | release |  |  |
 | changelog |  |  |
+| dismiss |  |  |

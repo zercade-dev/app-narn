@@ -341,7 +341,8 @@ later batch greps for, and it disagrees with the `im Tab <Name>` sentence form f
 
 ## Decisions this locale has settled that are NOT lexicon terms
 
-`terminology.md` is frozen at 76 terms and `terminology/de.md` may not grow rows, so a
+`terminology.md` is frozen at 84 terms (76 until the between-waves resolution promoted eight
+more) and `terminology/de.md` may not grow rows of its own, so a
 rendering that binds a later batch and has no term row lives **here**. Each row names the keys
 that fixed it and the keys that inherit it; a later batch reuses the rendering rather than
 re-deciding it.

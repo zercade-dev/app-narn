@@ -29,9 +29,9 @@ Locales already shipped in `packages/frontend/src/locales`:
 
 | Locale | File | State |
 | --- | --- | --- |
-| `es` | [`es.md`](es.md) | shipped; 5 of 76 rows recorded |
-| `fr` | [`fr.md`](fr.md) | shipped; 5 of 76 rows recorded |
-| `ru` | [`ru.md`](ru.md) | shipped; all 76 rows recorded by the pilot |
+| `es` | [`es.md`](es.md) | shipped; 5 of 84 rows recorded |
+| `fr` | [`fr.md`](fr.md) | shipped; 5 of 84 rows recorded |
+| `ru` | [`ru.md`](ru.md) | shipped; 76 of 84 rows recorded — the pilot filled every row the lexicon then had |
 
 The eleven languages of the backfill:
 
@@ -39,7 +39,11 @@ The eleven languages of the backfill:
 [`id.md`](id.md) · [`vi.md`](vi.md) · [`th.md`](th.md) · [`ja.md`](ja.md) ·
 [`ko.md`](ko.md) · [`zh-hans.md`](zh-hans.md) · [`zh-hant.md`](zh-hant.md)
 
-All eleven start empty — 76 rows, no renderings.
+Each of the eleven has 84 rows, and all eleven started with no renderings. `de`, `ja` and
+`tr` are no longer empty — wave 1 filled the 76 rows the lexicon had then. **The eight rows
+added by the resolution below are empty in every one of the fourteen files, `ru`, `de`, `ja`
+and `tr` included**: a locale records a rendering in the change that decides it, and none of
+them has decided these yet.
 
 `es` and `fr` shipped before the lexicon reached its present size, which is why most of
 their rows are still empty. Those two are records to be completed from the shipped strings,
@@ -78,12 +82,53 @@ a resolution that settles on a different word reaches your locale as an ordinary
 Who runs the resolution, and the fix-round procedure, belong to
 [`../backfill-runbook.md`](../backfill-runbook.md).
 
+### Open queue
+
+Rows raised since the last resolution. **Check the resolution below before adding one** — a
+term settled there is settled, and re-raising it costs the next resolution a re-reading of
+an argument already made.
+
+| Proposed term | Key that motivated it | Locale | Rendering used | Raised by |
+| --- | --- | --- | --- | --- |
+| _(empty)_ | | | | |
+
 ### Resolution — wave 1 to wave 2 (2026-08-12)
 
-The eleven rows below were raised during wave 1 (`de`, `ja`, `tr`) and are resolved here,
-which is what "between waves" means. **Twelve rows now carry a resolution: eight promote and
-four stay out**, taking the lexicon from 76 terms to 84 when it is unfrozen for exactly that
-edit, before wave 2 dispatches.
+**Applied 2026-08-12. Every term below is decided — do not re-raise any of them.** The rows
+were raised during wave 1 (`de`, `ja`, `tr`) and resolved between waves, which is what
+"between waves" means: **eight promoted and four stayed out**, taking the lexicon from 76
+terms to 84 in the single edit the freeze was lifted for, before wave 2 dispatched. Eleven of
+the twelve are also fully *applied*; the twelfth, `erase`, is decided (it stays out) but the
+file its fact was to be written into does not exist, so where that fact lands is still
+open — read its bullet below before acting on its resolution cell. The table is kept
+whole because it is the record of *why* — a wave-2 translator who disagrees with a resolution
+reads the row before arguing with it. Where each one landed:
+
+- **Promoted into [`../terminology.md`](../terminology.md)** — `omit (from an export)` under
+  Maintenance; `ignore / ignored`, `revert`, `back-translation` and `log` under Runs and
+  engines; `revoke` under Collaboration; `assistant` and `dismiss` under Product surfaces.
+  Every locale file gained the eight rows, empty.
+- **`audit`** — no new term: the ruling is that the frozen `recording` row already covers the
+  feature, and that row now says so, names the three `collab:sharing.audit*` keys and repeats
+  the ban on the LQA *check* word.
+- **`badge variant names`** and **`forget (a device)`** — rulings filed in
+  [`../english-review-notes.md`](../english-review-notes.md), where a per-key English defect
+  belongs; neither is a term any locale must fill.
+- **`erase`** — **resolved, but not as written.** Its resolution folds the distinction into
+  "the frozen `delete` row", and there is no `delete` row in this lexicon — there never has
+  been. Nothing was improvised to make the instruction fit: no `delete` term was invented,
+  because that is the exact imposition the row's own reasoning refuses. The fact it records
+  is real, and it went to [`../english-review-notes.md`](../english-review-notes.md) —
+  the same file the other three held-out rows used, and the one whose "intended reading"
+  column exists for precisely this. Reading the strings to file it turned up more than the
+  queue row knew: the destruction is not only remote but **cross-project** — the description
+  says it "first deletes every DeepL glossary this app manages — across every project on this
+  server, not just this one". Three keys, no lexicon row.
+  **Lesson for the next resolution:** this row named its target from memory and the target
+  did not exist. A resolution that directs a fact into another row must name a row that is
+  actually in the file — check before writing the cell, not when applying it.
+- **`console`, `log level`, `service restart`, `environment` / `slot`** — held out by the
+  `log` row's own resolution; no file needed a change for them.
 
 Three things are worth knowing about how the resolutions came out, because they shape how the
 next wave should use this queue:
@@ -108,7 +153,7 @@ next wave should use this queue:
 | **revert** — distinct from *undo*, which the lexicon does cover. *Revert* rolls a run's translations back; *undo* restores one earlier cell version. If a locale renders both with one word it loses a real distinction the UI makes. | `strings:runs.revert` ("Revert"), `strings:runs.revertedBadge`, `strings:runs.revertSuccess_*` — against `strings:compare.undo` ("Undo") | `ja`, `de` | `ja` 取り消し for *revert* (badge 取り消し済み), with 元に戻す deliberately held for *undo* at `compare.undo`. `de` *Zurücksetzen* / *Zurückgesetzt*, with *Rückgängig* held for *undo*. Both locales reserved a separate word for *undo* without seeing each other's file. The reservation matters because both controls can be on screen at once: *undo* reverses one edit, *revert* reverses everything one run wrote. | `ja` and `de` batch 2, independently, from the identical keys | **PROMOTE.** *Means here:* roll back every translation one run wrote, restoring the previous values. Distinct from *undo*, which restores one earlier version of one cell. *Not:* undo, cancel, restore (which is the backup verb). The reservation is load-bearing because both controls can be on screen at once; two locales reserved a separate word for *undo* independently. |
 | **assistant** — the frozen lexicon has no row for it, and it names a *persona* rather than an act of assistance. Every locale meets it in **batch 2** (`strings` run-type labels) and again in **batch 6** (`colorText`, `stage-details`), so a locale that decides it late will have shipped a different word first. | `strings:runs.typeChatGeneric` / `typeChatTextStyler` / `typeChatStageDetails`; then `colorText:assistant.title` ("AI assistant"), `stage-details:chatAssistant` | `de` | **Assistent** — masculine, weak (n-Deklination): *der Assistent*, *des/dem/den Assistenten*, plural *die Assistenten*, so the **compound linking form is `Assistenten-`**, not the bare stem. Ships as "Assistenten-Chat (Text-Styler)" / "(Level-Details)" / bare, and prescribes **"KI-Assistent"** for `colorText:assistant.title` in batch 6. Must not drift to *Assistenz* (abstract assistance — the batch shipped that first and the review caught it), *Helfer* or *Bot*. | `de` batch 2 | **PROMOTE.** *Means here:* the product AI chat persona, in the Text Styler, Stage Details and generic chats. A role name, not an act of assistance. *Part of speech:* noun, and a compound element. *Not:* assistance (abstract), helper, bot, agent. The row needs the batch note: it is met in batch 2 and again in batch 6, so a locale that decides it late ships two words for one persona. |
 | **back-translation** — the frozen lexicon has no row for it, and it is a term of art rather than a compound of *back* and *translation*: the machine re-translation of a target string into the source language, shown as a reading aid and never edited. A locale that renders it literally will name an action the product does not offer. Met in **batch 3** (`review`). | `review:backTranslationTitle` — "Back-translation (reference only)" | `ja` | 逆翻訳 — the established Japanese term of art, shipped as 「逆翻訳（参考のみ）」. | `ja` batch 3, raised for the controller to add because three locales share this file in one worktree | **PROMOTE.** *Means here:* the machine re-translation of a target string back into the source language, displayed read-only as a reading aid. Never edited and never sent anywhere. *Not:* reverse translation as an action, round-trip, source text. Raised by one locale, but the argument is language-independent and every language meets it in batch 3, so it does not wait for a second nomination. |
-| **erase** — distinct from *delete*, which the lexicon covers, and from *remove*. Used only where the product destroys rows at a remote destination it does not own (the DeepL glossary), so a locale that collapses it into its *delete* word loses the warning that the destruction is not local. Met in **batch 3** (`glossary`). | `glossary:confirmPushReplaceTitle` — "Erase stale DeepL entries?" | `ja` | 消去 — shipped as 「DeepLの古いエントリを消去しますか？」, kept apart from 削除 (*delete*). | `ja` batch 3, raised for the controller to add because three locales share this file in one worktree | **HOLD as a row; promote the distinction into the frozen `delete` row instead.** One key does not justify a 77th row that eleven locales must each fill. The fact is real and belongs in `delete`’s **Not:** list: this key destroys rows at a remote destination the product does not own (the DeepL glossary), so a locale that renders it with its ordinary delete word loses the warning that the destruction is not local. |
+| **erase** — distinct from *delete*, which the lexicon covers, and from *remove*. Used only where the product destroys rows at a remote destination it does not own (the DeepL glossary), so a locale that collapses it into its *delete* word loses the warning that the destruction is not local. Met in **batch 3** (`glossary`). | `glossary:confirmPushReplaceTitle` — "Erase stale DeepL entries?" | `ja` | 消去 — shipped as 「DeepLの古いエントリを消去しますか？」, kept apart from 削除 (*delete*). | `ja` batch 3, raised for the controller to add because three locales share this file in one worktree | **HOLD as a row; promote the distinction into the frozen `delete` row instead.** One key does not justify a 77th row that eleven locales must each fill. The fact is real and belongs in `delete`’s **Not:** list: this key destroys rows at a remote destination the product does not own (the DeepL glossary), so a locale that renders it with its ordinary delete word loses the warning that the destruction is not local. **APPLIED DIFFERENTLY (2026-08-12): this lexicon has no `delete` row and never has had one, so the destination this resolution names does not exist. The hold stands and no `delete` term was invented; the fact went to `english-review-notes.md` instead, where reading the strings showed the destruction is also cross-project. See the bullet list above.** |
 | **audit** — `audit` is not in the lexicon, and every language will reach for its *check* word, which is spent on the LQA checks. **A ruling is wanted rather than a rendering:** is this the recording feature the product already names elsewhere, under a second English name, or a term of its own? Met in **batch 4** (`collab`). | `collab:sharing.auditToggleLabel` — "Manual-edit audit" | `tr` | Raised for a ruling; the batch shipped its own rendering and recorded it in `style/tr.md` pending the resolution. | `tr` batch 4 | **HOLD — and the ruling it asked for is that the lexicon already covers it.** The frozen `recording` row is defined as “the manual-edit audit capturing who changed which translation by hand, kept for seven days”. That is this feature, under a second English name. Render `collab:sharing.audit*` with your **recording** term; do not coin an audit term and do not reach for the word spent on the LQA checks. One english-review-notes row is owed separately: the same card calls it *audit* (title), *record* (checkbox) and *track* (help) — three English words for one feature in three adjacent strings. |
 | **revoke** — collides with *cancel*, *undo* and *remove* in more than one language, and the four invite statuses must resolve as **one set** rather than four independent choices. German found the sharper constraint: the status cell and the revoke button are **adjacent columns of one table**, and a mixed table paints a revoked status beside a live revoke button, so a locale whose infinitive and participle coincide collapses the pair exactly where a reader compares them. Met in **batch 4** (`collab`). | `collab:invites.revoke` ("Revoke") against `collab:invites.status.revoked` ("Revoked") | `tr`, `de` | `de` chose *zurückziehen* over *widerrufen* for the co-render reason above. `tr` raised the set-consistency requirement. | `tr` and `de` batch 4, independently | **PROMOTE.** *Means here:* cancel an invitation that has been sent and not accepted; the row remains and its status becomes *Revoked*. *Not:* delete, remove, cancel, undo. Two constraints go in the row: the four invite statuses resolve as **one set in one part of speech**, and the status cell and the revoke button are **adjacent columns of one table**, so a locale whose infinitive and participle coincide collapses the pair exactly where a reader compares them. |
 | **dismiss** — **it deletes.** `notification-store.ts` issues a DELETE; a locale that reads *dismiss* as *close* or *hide* ships a false statement about a destructive action. This is the class of defect that has produced a finding in every language of this wave. Met in **batch 4** (`account`). | `account:notificationsDismiss` — "Dismiss" | `tr` | Raised so the destructive sense is settled once rather than guessed eleven times. | `tr` batch 4 | **PROMOTE, with both senses in one row, because English writes one word for two consequences.** `account:notificationsDismiss` **deletes** (the notification store issues a DELETE and the item does not return); `system:restarted.dismiss` closes a banner against a stored flag and destroys nothing. *Not:* close, hide — for the first sense. A locale may use one word for both only after checking which consequence each key has; the pair was found co-rendering-adjacent in the Japanese sweep and neither collapse clause catches it. |

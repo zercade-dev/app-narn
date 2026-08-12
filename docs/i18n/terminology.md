@@ -19,13 +19,13 @@ different word, a term you deliberately left in English, an acronym you expanded
 
 ## Frozen for the backfill
 
-**The term rows in this file are frozen for the duration of the backfill.** The 76 terms
+**The term rows in this file are frozen for the duration of the backfill.** The 84 terms
 below, their definitions, their part-of-speech notes and their "Not:" lists do not change
 while languages are being translated. Nobody edits this file during a wave — not to reword
 a definition, not to add a term, not to fix one that looks wrong.
 
 **What you write instead:** exactly one file, `terminology/<locale>.md` for the language you
-are translating. It holds your rendering and notes for each of the 76 terms, in the order
+are translating. It holds your rendering and notes for each of the 84 terms, in the order
 they appear here. Nobody else writes rows in your file, and you write rows in nobody else's,
 so eleven languages can run at once without ever touching the same line.
 
@@ -357,6 +357,16 @@ or search the file for the word.
 
 **Not:** job, task, execution, process, session, operation, batch. "Batch" especially: a run contains many batches.
 
+#### revert
+
+**Means here:** to roll back every translation one run wrote, restoring the values that were there before it. Offered on a finished run in Activity; the run then carries a "Reverted" badge.
+
+**Part of speech in UI:** verb on the control, participle on the badge and in the toast.
+
+**Example:** `strings:runs.revert` — "Revert"
+
+**Not:** undo, cancel, restore. **Undo is the distinction to protect:** `strings:compare.undo` restores one earlier version of one cell, this reverses everything one run wrote, and both controls can be on screen at once — a locale that renders the two with one word loses a distinction the UI makes. Two languages reserved a separate word for *undo* independently, without seeing each other's files. "Restore" is the **backup** verb and is already spoken for.
+
 #### Activity
 
 **Means here:** the per-project tab listing every run with its status, progress, cost and per-entry detail. It is a history of runs, not a feed of user actions.
@@ -365,7 +375,17 @@ or search the file for the word.
 
 **Example:** `strings:tabs.runs` — "Activity"
 
-**Not:** history, log, logs, feed, events, timeline, jobs. "Log" is taken by the live server-log panel, which is a different surface.
+**Not:** history, log, logs, feed, events, timeline, jobs. "Log" is taken by the live server-log panel, which is a different surface — and that surface is now a term of its own, the next row.
+
+#### log
+
+**Means here:** the live server-log panel and the lines it streams — the running narration of what the server is doing, filterable by level, searchable and exportable. It is what the app is saying while it works, not a record the user keeps: nothing in it is stored on an entry, and it is not the history of runs.
+
+**Part of speech in UI:** noun, very often attributive ("log entry", "log stream", "Export logs").
+
+**Example:** `console:statusConnected` — "Connected to server log stream"
+
+**Not:** history, activity, journal, audit, changelog. **Activity is the reservation that makes this row necessary** — that term forbids "log" for the run list while never naming the panel it was reserved against, so a translator arrived at the log strings with a word reserved for a concept the lexicon had not defined. The two must stay apart from this side too. **"Log entry" and "log stream" fold into this term** unless your language needs a separate word for a single line, in which case build it from the same root and say so in your Notes.
 
 #### batch
 
@@ -478,6 +498,16 @@ or search the file for the word.
 
 **Not:** mark, report, denounce, bookmark, star — and above all **not the verb you chose for "mark as needs review"**, because this action *clears* that flag. Using one word for both would make the same verb set and unset the same state.
 
+#### ignore / ignored
+
+**Means here:** to mark an entry so that every AI dispatch skips it, while it stays in the project, stays visible in the table and keeps the translations it already has. It is both an action and a state, on the same object, and it is reversible from the same row.
+
+**Part of speech in UI:** verb for the action ("Ignore entry"), participle for the state badge ("Ignored").
+
+**Example:** `strings:row.ignored` — "Ignored"
+
+**Not:** skip (a per-run routing outcome, decided by the engine rather than by a person), discard, disable (which is what happens to a module or a feature), hide, exclude. **Nobody has an idiomatic verb for "unignore":** two languages met the negation independently and both built it out of the affirmative rather than coining a word for it (`strings:row.unignoreAction` is "Unignore entry" in English). Build it; do not invent a verb, and do not let the built form drift into a second term.
+
 #### Review (the sidebar group)
 
 **Means here:** the sidebar section grouping four tabs — Source AI review, Translation AI review, **Manual review** and **Quality**. It is an umbrella over three different systems: a model's opinion, a person reading, and deterministic rules.
@@ -497,6 +527,16 @@ or search the file for the word.
 **Example:** `review:title` — "Review queue"
 
 **Not:** a second name for **needs review**, which is the *state* an item is in. The queue is where those items are listed. Build the two from one root if your language allows it, so a reader sees one feature rather than two.
+
+#### back-translation
+
+**Means here:** the machine re-translation of a target-language string back into the source language, shown read-only beside the translation as a reading aid for someone who does not speak the target language. It is never edited, never stored on the entry and never sent anywhere.
+
+**Part of speech in UI:** noun phrase (a panel heading).
+
+**Example:** `review:backTranslationTitle` — "Back-translation (reference only)"
+
+**Not:** reverse translation as an action, round trip, retranslation, source text, reference language. It is a **term of art** in this industry: use your locale's established one if it has it. A literal compound of "back" and "translation" tends to name an action — translating something back — which is not what this is; the product offers no such action.
 
 ### Modules, providers, credentials
 
@@ -846,6 +886,16 @@ or search the file for the word.
 
 **Not:** model, pattern, blueprint, preset, sample, form, boilerplate. **"Model" is the dangerous one**: in several Romance and Slavic languages it is the obvious word for template, and it is already taken by the AI model. Pick something else.
 
+#### omit (from an export)
+
+**Means here:** to leave rows out of an artifact the app generates — the export checkbox that drops entries not needing translation from the CSV the app writes. Nothing is deleted, nothing is refused: the entries stay exactly as they are, and only the generated file is smaller.
+
+**Part of speech in UI:** verb, on a checkbox label.
+
+**Example:** `config:discardUntranslatable` — "Discard entries that don't need translation"
+
+**Not:** discard, delete, remove, skip, ignore. **English writes "discard" here and it is a third sense of that word**, distinct from both senses the *discard* term covers: it destroys nothing the user made and it refuses nothing the app offered. Most languages need a third verb for it, and every locale meets it early, in the config namespace. Four locales reached an omit/exclude verb for it independently, none having seen the others' files — the strongest evidence any term in this file carries.
+
 ### Collaboration
 
 #### collaborator
@@ -898,6 +948,16 @@ or search the file for the word.
 
 **Not:** invitation link, request, token, membership, access code used interchangeably. **Translate the four statuses as a set, in one part of speech** — they sit in one column and a reader compares them down the page.
 
+#### revoke
+
+**Means here:** to cancel an invitation that has been sent and not yet accepted. The row stays in the table and its status becomes *Revoked*; nothing is deleted, and nobody who already joined loses anything.
+
+**Part of speech in UI:** verb on the button, participle as one of the four invite statuses.
+
+**Example:** `collab:invites.revoke` — "Revoke"
+
+**Not:** delete, remove, cancel, undo — each of which collides with something else in this product. Two constraints bind this row, and both were found at the call site rather than argued from the word. **The four invite statuses resolve as one set, in one part of speech** — see *invite*. And **the status cell and the revoke button are adjacent columns of one table**, so English's *Revoked* / *Revoke* pair is on screen at once: a language whose participle and infinitive coincide collapses the distinction in exactly the place a reader compares them, and needs a different verb rather than a different sentence.
+
 #### recording
 
 **Means here:** the manual-edit audit capturing who changed which translation by hand, kept for seven days and switched off when a project has no active collaborators. "Recording" names the capture being on or off; it is a process, not the captured rows.
@@ -906,7 +966,9 @@ or search the file for the word.
 
 **Example:** `strings:runs.manualRecordingPaused` — "Recording paused — no active collaborators"
 
-**Not:** log, history, tracking, audio or video recording, and above all **not the word you chose for _entry_**. Several languages' first word for "a record" is the same one they use for a content entry, and this app counts entries constantly — if the two collide, "Recording paused" reads as "Entry paused".
+**Not:** log, history, tracking, audio or video recording, and above all **not the word you chose for _entry_**. Several languages' first word for "a record" is the same one they use for a content entry, and this app counts entries constantly — if the two collide, "Recording paused" reads as "Entry paused". Not the live server **log** either — that is a term of its own, and this is not it.
+
+**English calls this same feature "audit", and there is no second term for it.** The Sharing tab's toggle is `collab:sharing.auditToggleLabel` — "Manual-edit audit" — and it switches on exactly the capture defined above; `collab:sharing.auditToggleCheckboxLabel` says "Record manual edits" and `auditToggleHelp` says "Track manual text edits…", so one feature is named three ways in three adjacent strings. **Render all of them with your _recording_ term.** Do not coin an audit word, and above all do not reach for the word you spent on the LQA **checks** — a translator meeting "audit" first will reach for it, which is why this paragraph is here rather than in a row of its own. The English inconsistency is filed in `english-review-notes.md`; the vocabulary is settled here.
 
 ### Product surfaces
 
@@ -939,6 +1001,16 @@ or search the file for the word.
 **Example:** `colorText:groupElements` — "Elements"
 
 **Not:** invented or literal translations of the Greek roots. These are **game content**: use the names the game itself ships in your language, and if it ships them untranslated, leave them.
+
+#### assistant
+
+**Means here:** the product's AI chat persona. The Text Styler's assistant, the Stage details chat and the generic chat are all the same one, and the run list labels their conversations. It names a **role**, not an act of assistance.
+
+**Part of speech in UI:** noun, and a compound element ("Assistant chat (Text Styler)", "AI assistant").
+
+**Example:** `colorText:assistant.title` — "AI assistant"
+
+**Not:** assistance (the abstract noun — the near-miss a locale ships first and a review catches), helper, bot, agent, support. **Decide it the first time you meet it, not the second.** It appears first as a run-type label (`strings:runs.typeChatGeneric` and its two siblings) and only later on the chat surfaces themselves, so a locale that waits until it reaches the surfaces has already shipped a different word for the same persona. Where your language inflects a noun in compounds, record the linking form in your Notes — the compound is where the drift starts.
 
 #### theme
 
@@ -979,3 +1051,13 @@ or search the file for the word.
 **Example:** `sidebar:changelog` — "Changelog"
 
 **Not:** history, news, updates, release notes, versions, log, journal. Version numbers (`v1.56.0`) are never translated.
+
+#### dismiss
+
+**Means here:** two different consequences English spells with one word, and the difference is destructive. `account:notificationsDismiss` **deletes**: the notification store issues a DELETE and the item does not come back. `system:restarted.dismiss` closes a banner against a stored flag and destroys nothing.
+
+**Part of speech in UI:** verb, on a button.
+
+**Example:** `account:notificationsDismiss` — "Dismiss"
+
+**Not:** close, hide — for the first of those two, where reading *dismiss* as "put it away" ships a false statement about an action that destroys data. You may use one word for both **only after checking which consequence the key in front of you has**; the two keys are far apart in the UI, which is exactly why the check has to be deliberate.

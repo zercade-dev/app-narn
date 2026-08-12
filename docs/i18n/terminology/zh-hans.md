@@ -39,7 +39,9 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | writable language |  |  |
 | Pseudo Test |  |  |
 | run |  |  |
+| revert |  |  |
 | Activity |  |  |
+| log |  |  |
 | batch |  |  |
 | batch grouping |  |  |
 | AI review |  |  |
@@ -50,8 +52,10 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | discard |  |  |
 | needs review |  |  |
 | flag |  |  |
+| ignore / ignored |  |  |
 | Review (the sidebar group) |  |  |
 | review queue |  |  |
+| back-translation |  |  |
 | module |  |  |
 | module instance |  |  |
 | provider |  |  |
@@ -86,16 +90,20 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | backup |  |  |
 | snapshot |  |  |
 | template |  |  |
+| omit (from an export) |  |  |
 | collaborator |  |  |
 | member |  |  |
 | nickname |  |  |
 | claim |  |  |
 | invite |  |  |
+| revoke |  |  |
 | recording |  |  |
 | stage |  |  |
 | Text Styler |  |  |
 | element |  |  |
+| assistant |  |  |
 | theme |  |  |
 | guide |  |  |
 | release |  |  |
 | changelog |  |  |
+| dismiss |  |  |
