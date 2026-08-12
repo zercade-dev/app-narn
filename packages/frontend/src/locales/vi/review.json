@@ -39,7 +39,7 @@
     "emptyTitle": "Chưa có lượt rà soát nguồn nào",
     "emptyHint": "Chạy rà soát sẽ kiểm tra mọi mục nguồn để tìm lỗi chính tả, lỗi ngữ pháp, vấn đề thuật ngữ, chỗ thiếu rõ ràng và nội dung không an toàn. Kết quả chỉ mang tính báo cáo.",
     "loadingFindings": "Đang tải các phát hiện…",
-    "noFindings": "Không tìm thấy vấn đề nào trong lần chạy này.",
+    "noFindings": "Lần chạy này không có phát hiện nào.",
     "findingsTitle": "Phát hiện",
     "suggestion": "Văn bản nguồn đề xuất",
     "findingUnsafe": "Nội dung không an toàn",

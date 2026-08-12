@@ -392,6 +392,32 @@ same as `glossary:generateGlossariesBtn` (_Generate glossaries_). Neither pair c
 Vietnamese marks the difference with syntax rather than morphology, so there is no form to
 preserve.
 
+## The counted thing is a job, not an entry (batch 5)
+
+`english-review-notes.md` records that `logs:translation.queued` and the four `batch:*`
+counters count **jobs** — one entry for one target language — so a 10-entry run into three
+languages reports 30. English says "strings" and over-states on every multi-language run.
+
+Vietnamese does not need the count-neutral device for grammar here, because no noun after a
+numeral inflects. It needs it for **truth**, which is a different reason and produces a
+different answer: the head noun has to be one that is true of a job. This locale uses
+**lượt dịch** — a translation pass — at `logs:translation.queued`, `batch:toTranslateCount`,
+`batch:progressAriaLabel`, `batch:runCompleted` and `batch:runCompletedWithErrors`. The
+**entry** word appears in none of the five.
+
+The narrowing in that row is honoured rather than generalised: `logs:translation.failedNoRoute`
+and its two module siblings **are** counting entries — `partitionControlledFailures` keys its
+aggregate on target language and reason, so the language is fixed within a group — and those
+three keep *mục*. A batch that read the row loosely had three of the four backwards; this one
+did not.
+
+`strings:runs.stringsProgress` is the same class one key wider and drops the counted noun
+altogether.
+
+And `logs:judge.done`'s `{{verdict}}` is a raw English enum that never passes through
+i18next, so the Vietnamese labels it as data ("kết luận: {{verdict}}") rather than embedding
+it as a word, where an English *pass* would read as a translation error.
+
 ## Keyboard key names
 
 Vietnamese keyboards are US QWERTY with **English keycaps** — `Enter`, `Shift`, `Esc`, `Tab`,
