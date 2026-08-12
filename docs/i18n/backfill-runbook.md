@@ -103,6 +103,24 @@ present). Nothing here is a pre-flight deliverable still to be built.
   file, so use whichever you like — what matters is that you are running the checks
   themselves rather than an equivalent of your own.
 
+  **Two things about this guard that are not obvious and have each cost a round.**
+
+  - **Every quoted span in a lexicon row is a candidate rendering.** There is no adjacency
+    requirement and no exemption for an illustration, so an English gloss in quotes beside a
+    key is read as a claim that your locale ships that English — and it fails, correctly.
+    **Put glosses in *italics*, never in quotes.** Three locales have now hit this, one of
+    them three rounds running with a backticked function name.
+  - **A Latin-script locale is structurally more exposed to it.** The guard skips a span
+    containing no non-ASCII letter, but only for the non-Latin-script locales, so a Russian
+    or Japanese gloss is dropped automatically while a German or Turkish one cannot be. Four
+    of the languages still to come are Latin-script and inherit that exposure; if yours is,
+    expect this guard to find glosses that a Cyrillic or CJK locale never had to think about.
+
+  **And check which quote characters your own documents use.** The delimiter list is
+  finite — straight, guillemets, corner brackets, curly. One locale wrote its lexicon
+  entirely in curly quotes before the guard knew them, and every citation in that file
+  extracted to nothing for four rounds while the run stayed green.
+
 ## The work-in-progress declaration — the controller adds it at batch 1
 
 **You do not add this yourself.** The wave controller adds one entry to `WIP_LOCALES` in
