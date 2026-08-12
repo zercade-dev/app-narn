@@ -1,0 +1,25 @@
+{
+  "title": "欢迎使用 Narn",
+  "intro": "开始之前，不妨先浏览下面的指南——如果您已经准备好了，也可以直接去设置凭据保险库。",
+  "guidesHeading": "指南",
+  "browseGuides": "浏览指南",
+  "setupVaultHeading": "准备好开始翻译了吗？",
+  "setupVaultBody": "设置您的凭据保险库，添加翻译时要用到的 AI 服务商密钥。",
+  "setupVaultButton": "设置保险库",
+  "themeChooser": {
+    "title": "选择您的外观",
+    "intro": "挑一个主题，再选浅色或深色——两者随时都可以在设置中更改。",
+    "themeLabel": "主题",
+    "modeLabel": "浅色或深色",
+    "modes": { "light": "浅色", "dark": "深色" },
+    "confirm": "使用这些设置",
+    "keepDefault": "保持科技主题",
+    "names": { "default": "经典", "pixel": "像素", "techno": "科技", "minimal": "极简" },
+    "taglines": {
+      "default": "最初的 NARN 外观。",
+      "pixel": "厚重的复古像素风。",
+      "techno": "霓虹主机风格。新的默认主题。",
+      "minimal": "只留下内容本身。"
+    }
+  }
+}

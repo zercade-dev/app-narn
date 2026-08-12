@@ -1,0 +1,15 @@
+{
+  "save": "保存",
+  "cancel": "取消",
+  "loading": "加载中…",
+  "changelogEntryError": "无法加载这条更新日志。",
+  "changelogShowOlder": "显示更早的发布（{{count}}）",
+  "saving": "保存中…",
+  "thinking": "思考中… {{seconds}} 秒",
+  "webSearch": {
+    "title": "搜索网络",
+    "placeholder": "在 Google 中搜索…",
+    "hint": "按 Enter 在新标签页中搜索",
+    "action": "搜索"
+  }
+}

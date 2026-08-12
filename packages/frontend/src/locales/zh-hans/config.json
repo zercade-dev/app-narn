@@ -182,7 +182,7 @@
     "importFailed": "导入失败：分发规则文件无效。",
     "groupSwitchInProgress": "翻译进行期间无法切换规则组。",
     "untitledGroup": "未命名规则组",
-    "via": "通过",
+    "via": "经由",
     "routesTo": "分发至"
   },
   "health": {
@@ -243,7 +243,7 @@
       "very-low": "极低"
     },
     "confidenceReason": {
-      "batch-exceeds-reliable": "{{entryCount}} 个条目超过了该模型单次运行可可靠处理的约 {{reliable}} 个",
+      "batch-exceeds-reliable": "{{entryCount}} 个条目超过了该模型单次运行能可靠处理的约 {{reliable}} 个",
       "prompt-near-context": "提示词（约 {{tokens}} token）已接近可用的上下文窗口（约 {{context}} token）",
       "prompt-exceeds-context": "提示词（约 {{tokens}} token）超过了可用的上下文窗口（约 {{context}} token）",
       "weak-task-fit": "与此任务的适配性较弱",

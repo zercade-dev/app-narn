@@ -1,0 +1,55 @@
+{
+  "title": "孤立条目",
+  "subtitle": "最近一次导入的 CSV 中已不存在的条目。您可以删除它们，或把译文重新关联到另一个条目上。",
+  "emptyTitle": "全部都有关联",
+  "empty": "没有孤立条目——导入的 CSV 与当前项目一致。",
+  "columns": {
+    "select": "选择",
+    "source": "原文",
+    "translations": "译文",
+    "actions": "操作"
+  },
+  "actions": {
+    "delete": "删除",
+    "relink": "重新关联",
+    "bulkDelete": "删除所选（{{count}}）",
+    "refresh": "刷新",
+    "cancel": "取消",
+    "back": "返回"
+  },
+  "confirmDelete": {
+    "title": "删除孤立条目？",
+    "body": "此操作会永久删除该孤立条目及其译文，且无法撤销。"
+  },
+  "relink": {
+    "title": "重新关联孤立条目",
+    "description": "把此孤立条目的译文移到另一个条目上，候选项按其原文与此孤立条目原文的相似度排序。",
+    "searchPlaceholder": "按原文搜索条目…",
+    "noCandidates": "没有匹配的条目",
+    "submit": "继续",
+    "confirmTitle": "确认重新关联",
+    "confirmDescription": "在重新关联之前，请选择孤立条目的译文如何应用到目标条目上。",
+    "overrideModeLabel": "覆盖方式",
+    "overrideEmptyOnly": "仅填充空白译文（保留目标条目已有的译文）",
+    "overrideAll": "用孤立条目的译文覆盖全部译文",
+    "aiRetranslateLabel": "使用 AI 重新翻译",
+    "aiRetranslateHint": "重新关联后，AI 会比较孤立条目的旧原文与目标条目的新原文，并更新每条现有译文以反映同样的改动。",
+    "aiModuleLabel": "AI 模块",
+    "aiModelLabel": "模型",
+    "aiReasoningEffortLabel": "推理强度",
+    "aiModulePlaceholder": "选择模块…",
+    "aiNoModules": "没有启用任何具备 AI 能力的模块——请在全局配置中启用一个，才能使用 AI 重新翻译。",
+    "confirmSubmit": "重新关联"
+  },
+  "toast": {
+    "loadError": "加载孤立条目失败",
+    "deleted": "孤立条目已删除",
+    "deleteError": "删除孤立条目失败",
+    "bulkDeleted": "已删除 {{count}} 个孤立条目",
+    "relinked": "译文已移动",
+    "relinkError": "重新关联孤立条目失败",
+    "candidatesError": "加载重新关联候选项失败",
+    "aiRetranslateStarted": "AI 重新翻译已开始——请查看活动标签页",
+    "aiRetranslateUnavailable": "已重新关联，但 AI 重新翻译无法启动（没有可用的 AI 模块）"
+  }
+}
