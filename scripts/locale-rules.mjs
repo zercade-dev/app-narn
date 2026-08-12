@@ -219,6 +219,9 @@ export function isStrictFor(locale, strictEnv = STRICT_ENV) {
  * failure saying to delete it. The gate lifts the exemption, not a memory.
  */
 export const WIP_LOCALES = {
+  'zh-hant':
+    'Traditional Chinese backfill in flight — batches 1-6 land on one branch, and this ' +
+    'entry is deleted in the whole-language sweep commit that lands the last namespace.',
 };
 
 for (const [locale, reason] of Object.entries(WIP_LOCALES)) {
