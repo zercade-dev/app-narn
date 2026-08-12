@@ -427,6 +427,19 @@ function citationPatterns(open, close) {
 export function quoteDelimiterFor(cellText) {
   if (cellText.includes('«')) return { open: '«', close: '»' };
   if (cellText.includes('「')) return { open: '「', close: '」' };
+  // Curly doubles are checked BEFORE the straight fallback, and the ordering is
+  // the whole point. A locale whose lexicon uses curly quotes exclusively — 974
+  // of them and not one straight quote — extracted ZERO citations for four
+  // rounds, because straight quotes were the unconditional fallback and a curly
+  // span never matched them. Every one of its key-adjacent citations was
+  // silently unchecked while the run stayed green.
+  //
+  // The mixed cell is the reason this sits above the fallback rather than
+  // below it: with straight first, a cell carrying an English gloss in straight
+  // quotes and the locale's rendering in curly ones extracts the ENGLISH and
+  // checks it against the target-language corpus — a guaranteed false finding
+  // that also hides the real citation.
+  if (cellText.includes('“')) return { open: '“', close: '”' };
   return { open: '"', close: '"' };
 }
 
@@ -757,6 +770,16 @@ export const STYLE_QUOTE_DELIMITERS = [
   { open: '"', close: '"' },
   { open: '«', close: '»' },
   { open: '「', close: '」' },
+  // Curly doubles. Added after a locale whose authority documents use them
+  // EXCLUSIVELY — 974 curly quotes and not one straight quote — turned out to
+  // have every one of its key-adjacent citations silently unextracted, and so
+  // unchecked, for four rounds. That is the same shape as the corner-bracket
+  // gap this file's header already records for an unspaced script: a delimiter
+  // list written from the locales that existed at the time, meeting a locale
+  // that punctuates differently. The lesson is in the list rather than the
+  // comment — when a new locale arrives, check which quote characters its
+  // documents actually use before trusting a green run.
+  { open: '“', close: '”' },
 ];
 
 /** Up to a three-word connector plus optional punctuation, CAPTURED this
