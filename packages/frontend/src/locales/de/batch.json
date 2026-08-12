@@ -1,0 +1,10 @@
+{
+  "translateSelected": "Auswahl übersetzen",
+  "toTranslateCount": "{{count}} zu übersetzen",
+  "progressAriaLabel": "Übersetzt: {{completed}} von {{total}}",
+  "cancelRun": "Durchlauf abbrechen",
+  "runCancelled": "Durchlauf abgebrochen:",
+  "runCompleted": "Übersetzung abgeschlossen — erfolgreich: {{completed}} von {{total}}.",
+  "runCompletedWithErrors": "Übersetzung abgeschlossen — erfolgreich: {{completed}}, fehlgeschlagen: {{failed}}.",
+  "savedRulesNotice": "Durchläufe verwenden die gespeicherten Routing-Regeln — nicht gespeicherte Änderungen im Regel-Editor haben keine Wirkung."
+}

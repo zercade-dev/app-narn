@@ -1,0 +1,42 @@
+{
+  "title": "Ayarlar",
+  "appearance": "Görünüm",
+  "appearanceDescription": "narn'ın bu cihazda nasıl görüneceğini seçin.",
+  "theme": "Tema",
+  "mode": "Mod",
+  "switchToLight": "Açık moda geç",
+  "switchToDark": "Koyu moda geç",
+  "languageTitle": "Dil",
+  "languageDescription": "Kullanıcı arayüzünün dili.",
+  "preview": "Önizleme",
+  "previewHint": "Seçili temayla görüntülenen örnek kontroller.",
+  "previewSamples": {
+    "heading": "Başlık",
+    "body": "Gövde metni, temel yazı tipini ve renkleri gösterir.",
+    "muted": "Soluk metin böyle görünür.",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "edit": "Düzenle",
+    "delete": "Sil",
+    "pass": "Başarılı",
+    "warn": "Uyarı",
+    "fail": "Başarısız",
+    "info": "Bilgi",
+    "inputPlaceholder": "Metin alanı",
+    "selectOptionA": "Birinci seçenek",
+    "selectOptionB": "İkinci seçenek",
+    "checkbox": "Onay kutusu",
+    "badgeDefault": "Varsayılan",
+    "badgeSecondary": "İkincil",
+    "badgeOutline": "Çerçeveli",
+    "badgeDestructive": "Yıkıcı",
+    "scrollHint": "Temalı kaydırma çubuğunu görmek için kaydırın",
+    "iconsLabel": "Simgeler"
+  },
+  "themes": {
+    "default": { "name": "Klasik", "description": "Klasik narn görünümü." },
+    "pixel": { "name": "Piksel", "description": "Kalın hatlı 8 bit konsol havası." },
+    "techno": { "name": "Tekno", "description": "Neon siberpunk terminal." },
+    "minimal": { "name": "Minimal", "description": "Düz, sakin, tek renkli." }
+  }
+}

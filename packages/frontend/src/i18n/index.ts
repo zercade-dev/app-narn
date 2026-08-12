@@ -32,6 +32,39 @@ void i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 });
 
+// Keep the document's language in step with the UI language.
+//
+// `index.html` ships a static `lang="en"`, and until this hook existed nothing
+// ever updated it — so every non-English UI claimed to be English. That is not
+// cosmetic: CSS `text-transform: uppercase` is language-sensitive *only* via
+// `lang`, and the app uppercases labels in several places (run detail headings,
+// guide group headings, AI-review column headings). With `lang="en"` the
+// browser applies default Unicode casing, so Turkish dotted "i" uppercases to
+// "I" instead of "İ" — "Çeviri" renders as "ÇEVIRI", which is misspelt in
+// Turkish. Twelve shipped Turkish labels were affected, and no guard can see it
+// because the JSON is correct; only the rendering is wrong.
+//
+// Screen-reader pronunciation, hyphenation, spell-check and font fallback all
+// key off the same attribute, so this is a correctness fix for every locale,
+// not only for the ones with locale-specific casing rules.
+//
+// `languageChanged` fires on `changeLanguage()`, including the initial call, and
+// `resolvedLanguage` is used rather than the requested code so a fallback is
+// reflected honestly.
+function syncDocumentLanguage() {
+  if (typeof document === 'undefined') return;
+  document.documentElement.lang = i18n.resolvedLanguage ?? 'en';
+}
+
+i18n.on('languageChanged', syncDocumentLanguage);
+
+// `init()` above emits `languageChanged` synchronously, before this listener
+// exists, so the initial value is set here rather than relied on from the event.
+// The markup already says `en` and the initial language is `en`, so this is
+// currently a no-op — it is written so the invariant holds by construction
+// instead of by that coincidence.
+syncDocumentLanguage();
+
 const loadedLocales = new Set<string>(['en']);
 
 // In-flight loads, keyed by locale, so concurrent callers share one fetch

@@ -1,0 +1,55 @@
+{
+  "title": "Waisen",
+  "subtitle": "Einträge, die in der zuletzt importierten CSV nicht mehr vorhanden sind. Diese Einträge löschen oder ihre Übersetzungen mit einem anderen Eintrag neu verknüpfen.",
+  "emptyTitle": "Alles ist verknüpft",
+  "empty": "Keine verwaisten Einträge — die importierten CSVs stimmen mit dem aktuellen Projekt überein.",
+  "columns": {
+    "select": "Auswählen",
+    "source": "Quelltext",
+    "translations": "Übersetzungen",
+    "actions": "Aktionen"
+  },
+  "actions": {
+    "delete": "Löschen",
+    "relink": "Neu verknüpfen",
+    "bulkDelete": "Auswahl löschen ({{count}})",
+    "refresh": "Aktualisieren",
+    "cancel": "Abbrechen",
+    "back": "Zurück"
+  },
+  "confirmDelete": {
+    "title": "Waise löschen?",
+    "body": "Dadurch werden der verwaiste Eintrag und seine Übersetzungen dauerhaft gelöscht. Das lässt sich nicht rückgängig machen."
+  },
+  "relink": {
+    "title": "Waise neu verknüpfen",
+    "description": "Übersetzungen von dieser Waise auf einen anderen Eintrag verschieben; die Kandidaten sind danach sortiert, wie ähnlich ihr Quelltext dem Quelltext dieser Waise ist.",
+    "searchPlaceholder": "Einträge nach Quelltext durchsuchen…",
+    "noCandidates": "Keine passenden Einträge",
+    "submit": "Weiter",
+    "confirmTitle": "Neuverknüpfung bestätigen",
+    "confirmDescription": "Festlegen, wie die Übersetzungen der Waise vor der Neuverknüpfung auf den Zieleintrag angewendet werden.",
+    "overrideModeLabel": "Überschreibmodus",
+    "overrideEmptyOnly": "Nur leere Übersetzungen füllen (die vorhandenen des Zieleintrags behalten)",
+    "overrideAll": "Alle Übersetzungen mit denen der Waise überschreiben",
+    "aiRetranslateLabel": "Mit KI neu übersetzen",
+    "aiRetranslateHint": "Nach der Neuverknüpfung vergleicht ein KI-Durchlauf den alten Quelltext der Waise mit dem neuen Quelltext des Zieleintrags und passt jede vorhandene Übersetzung an dieselbe Änderung an.",
+    "aiModuleLabel": "KI-Modul",
+    "aiModelLabel": "Modell",
+    "aiReasoningEffortLabel": "Reasoning-Aufwand",
+    "aiModulePlaceholder": "Modul auswählen…",
+    "aiNoModules": "Es ist kein KI-fähiges Modul aktiviert — eines in der Globalen Konfiguration aktivieren, um die KI-Neuübersetzung zu nutzen.",
+    "confirmSubmit": "Neu verknüpfen"
+  },
+  "toast": {
+    "loadError": "Waisen konnten nicht geladen werden",
+    "deleted": "Waise gelöscht",
+    "deleteError": "Löschen fehlgeschlagen",
+    "bulkDeleted": "Gelöschte Waisen: {{count}}",
+    "relinked": "Übersetzungen verschoben",
+    "relinkError": "Waise konnte nicht neu verknüpft werden",
+    "candidatesError": "Kandidaten für die Neuverknüpfung konnten nicht geladen werden",
+    "aiRetranslateStarted": "KI-Neuübersetzung gestartet — siehe Tab Aktivität",
+    "aiRetranslateUnavailable": "Neu verknüpft, aber die KI-Neuübersetzung konnte nicht gestartet werden (kein KI-fähiges Modul verfügbar)"
+  }
+}

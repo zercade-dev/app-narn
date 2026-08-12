@@ -1,0 +1,93 @@
+{
+  "action": {
+    "openRouting": "Yönlendirme kurallarını ayarla",
+    "openModuleSettings": "Modül ayarlarını aç",
+    "openQuality": "Kalite panosunu aç",
+    "openGlossary": "Sözlükçeyi aç",
+    "unlockVault": "Kasanın kilidini aç"
+  },
+  "translation": {
+    "start": "Bir girdi {{language}} diline çevriliyor…",
+    "done": "Bir girdi {{language}} diline çevrildi.",
+    "doneFromMemory": "{{language}} için kayıtlı bir çeviri yeniden kullanıldı.",
+    "queued": "{{total}} çeviri sıraya alındı.",
+    "queued_one": "{{total}} çeviri sıraya alındı.",
+    "queued_other": "{{total}} çeviri sıraya alındı.",
+    "runQueued": "Çeviri çalıştırması sıraya alındı — sıradaki yeri: {{position}}.",
+    "retryQueued": "Yeniden deneme sıraya alındı — sıradaki yeri: {{position}}.",
+    "retry": "Başarısız bir çeviri yeniden deneniyor.",
+    "failedNoRoute": "{{count}} girdi {{language}} diline çevrilemedi — eşleşen yönlendirme kuralı yok.",
+    "failedNoRoute_one": "{{count}} girdi {{language}} diline çevrilemedi — eşleşen yönlendirme kuralı yok.",
+    "failedNoRoute_other": "{{count}} girdi {{language}} diline çevrilemedi — eşleşen yönlendirme kuralı yok.",
+    "failedModuleDisabled": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} modülü kapalı.",
+    "failedModuleDisabled_one": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} modülü kapalı.",
+    "failedModuleDisabled_other": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} modülü kapalı.",
+    "failedModuleNotFound": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} modülü kurulu değil.",
+    "failedModuleNotFound_one": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} modülü kurulu değil.",
+    "failedModuleNotFound_other": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} modülü kurulu değil.",
+    "failedGeneric": "Bir girdi {{language}} diline çevrilemedi.",
+    "batchFailed": "{{languages}} için {{count}} çeviriden oluşan bir yığın başarısız oldu.",
+    "queueStartFailed": "Çeviri çalıştırması başlatılamadı.",
+    "maskMismatch": "{{language}} diline çeviri sırasında biçimlendirme etiketleri korunamadı.",
+    "tmRejected": "{{language}} için kayıtlı bir çeviri kalite denetimini geçemedi.",
+    "lqaRetry": "Kalite denetimi başarısız oldu — modelden yeniden denemesi isteniyor.",
+    "authCancel": "Oturum açma iptal edildiği için çeviri durduruldu."
+  },
+  "lqa": {
+    "passed": "Kalite denetimi başarılı oldu.",
+    "failed": "Kalite denetimi başarısız oldu.",
+    "overflow": "Çeviri, mevcut alan için çok uzun.",
+    "checkError": "Bir kalite denetimi çalıştırılamadı."
+  },
+  "judge": {
+    "done": "İnceleme {{score}} puan verdi — karar: {{verdict}}.",
+    "suggestDone": "İnceleme önerilerle tamamlandı.",
+    "suggestNoChange": "İnceleme, değiştirilecek bir şey bulmadı.",
+    "suggestionDiscarded": "Öneri reddedildi."
+  },
+  "sourceReview": {
+    "done": "Kaynak incelemesi {{findings}} sorun buldu.",
+    "done_one": "Kaynak incelemesi {{findings}} sorun buldu.",
+    "done_other": "Kaynak incelemesi {{findings}} sorun buldu."
+  },
+  "glossaryGen": {
+    "done": "Sözlükçe çalıştırması tamamlandı — {{analyzed}} girdiden {{suggested}} terim önerildi.",
+    "failed": "Sözlükçe üretimi başarısız oldu.",
+    "saveSuggestionsFailed": "Sözlükçe önerileri kaydedilemedi."
+  },
+  "categoryGen": {
+    "queued": "Kategori üretimi sıraya alındı.",
+    "done": "Kategori üretimi tamamlandı — {{suggestions}} öneri.",
+    "failed": "Kategori üretimi başarısız oldu."
+  },
+  "stageDetails": {
+    "queued": "Bölüm ayrıntıları sıraya alındı.",
+    "done": "Bölüm ayrıntıları tamamlandı — {{completed}} başarılı, {{failed}} başarısız.",
+    "failed": "Bölüm ayrıntıları başarısız oldu."
+  },
+  "module": {
+    "loaded": "{{module}} modülü yüklendi.",
+    "instanceRegistered": "{{instance}} yapılandırması eklendi.",
+    "instanceRegisterFailed": "{{instance}} yapılandırması eklenemedi."
+  },
+  "vault": {
+    "unlocked": "Kasanın kilidi açıldı.",
+    "passwordChanged": "Kasa parolası değiştirildi.",
+    "credentialsEvicted": "Kayıtlı kimlik bilgileriniz bellekten temizlendi."
+  },
+  "orphan": {
+    "detected": "Kaynak dosyada artık yer almayan {{count}} girdi bulundu.",
+    "detected_one": "Kaynak dosyada artık yer almayan {{count}} girdi bulundu.",
+    "detected_other": "Kaynak dosyada artık yer almayan {{count}} girdi bulundu.",
+    "linked": "Yetim bir girdi bağlandı.",
+    "deleted": "Yetim bir girdi silindi."
+  },
+  "tm": {
+    "cleared": "Çeviri belleği temizlendi.",
+    "variantDeleted": "Bir çeviri belleği girdisi kaldırıldı."
+  },
+  "backup": {
+    "restored": "Yedek geri yüklendi.",
+    "pruneFailed": "Eski yedekler temizlenemedi."
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "title": "品質ダッシュボード",
+  "loading": "品質の概要を読み込み中…",
+  "error": "品質の概要の読み込みに失敗しました：{{message}}",
+  "empty": "LQAの結果はまだありません。翻訳を実行すると、このダッシュボードに表示されます。",
+  "overallStat": {
+    "passRateLabel": "全体の合格率",
+    "results": "LQAの結果{{count}}件",
+    "entries": "エントリ{{count}}件",
+    "legendPassed": "合格：{{count}}",
+    "legendFailed": "不合格：{{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "最も多い問題",
+    "description": "すべての言語における問題の種類別の件数です。"
+  },
+  "other": "その他",
+  "columns": {
+    "passRate": "合格率"
+  },
+  "legend": {
+    "tierHigh": "合格率が高い（90%以上）",
+    "tierMid": "合格率が中程度（70〜89%）",
+    "tierLow": "合格率が低い（70%未満）",
+    "passed": "合格",
+    "failed": "不合格"
+  },
+  "checkLabels": {
+    "tag-equality": "タグの一致",
+    "overflow": "長さのオーバーフロー",
+    "length-limit": "長さ制限",
+    "glossary-adherence": "用語集の遵守",
+    "forbidden-terms": "禁止用語",
+    "regex-assertions": "正規表現アサーション",
+    "number-parity": "数字の一致",
+    "whitespace-parity": "空白の一致",
+    "line-break-parity": "改行の一致",
+    "end-punctuation": "文末の句読点",
+    "double-spacing": "連続する空白",
+    "double-words": "単語の重複",
+    "untranslated": "未翻訳",
+    "mask-integrity": "マスクの整合性",
+    "tag-mismatch": "タグの不一致",
+    "too-long": "長すぎる",
+    "glossary-term-missing": "用語集の用語が欠落",
+    "forbidden-term": "禁止用語",
+    "regex-assertion-failed": "正規表現アサーションの失敗",
+    "regex-config-error": "正規表現の設定エラー",
+    "number-missing": "数字の欠落",
+    "number-added": "数字の追加",
+    "whitespace-leading": "先頭の空白",
+    "whitespace-trailing": "末尾の空白",
+    "line-break-mismatch": "改行の不一致",
+    "end-punctuation-mismatch": "文末の句読点の不一致",
+    "mask-mismatch": "マスクの不一致"
+  },
+  "byLanguage": {
+    "title": "言語別の合格率",
+    "description": "悪い順に表示します。言語をクリックすると、不合格のエントリを確認できます。"
+  },
+  "bySource": {
+    "title": "ソース別の問題",
+    "description": "悪い順に表示します。ソースをクリックすると、不合格のエントリを確認できます。"
+  },
+  "byModule": {
+    "title": "モジュール別の品質",
+    "description": "各翻訳を生成した翻訳モジュール別の合格率と問題です。"
+  }
+}

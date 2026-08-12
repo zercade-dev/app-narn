@@ -1,0 +1,55 @@
+{
+  "title": "Yetimler",
+  "subtitle": "En son içe aktarılan CSV dosyasında artık bulunmayan girdiler. Bunları silin ya da çevirileri farklı bir girdiye yeniden bağlayın.",
+  "emptyTitle": "Her şey bağlı",
+  "empty": "Yetim girdi yok — içe aktarılan CSV dosyaları mevcut projeyle eşleşiyor.",
+  "columns": {
+    "select": "Seç",
+    "source": "Kaynak",
+    "translations": "Çeviriler",
+    "actions": "Eylemler"
+  },
+  "actions": {
+    "delete": "Sil",
+    "relink": "Yeniden bağla",
+    "bulkDelete": "Seçilenleri sil ({{count}})",
+    "refresh": "Yenile",
+    "cancel": "İptal",
+    "back": "Geri"
+  },
+  "confirmDelete": {
+    "title": "Yetim silinsin mi?",
+    "body": "Bu işlem, yetim girdiyi ve çevirilerini kalıcı olarak siler. Bu geri alınamaz."
+  },
+  "relink": {
+    "title": "Yetimi yeniden bağlama",
+    "description": "Bu yetimin çevirilerini başka bir girdiye taşıyın; adaylar, kaynak metinlerinin bu yetiminkine ne kadar benzediğine göre sıralanır.",
+    "searchPlaceholder": "Girdileri kaynak metne göre arayın…",
+    "noCandidates": "Eşleşen girdi yok",
+    "submit": "Devam et",
+    "confirmTitle": "Yeniden bağlama onayı",
+    "confirmDescription": "Yeniden bağlamadan önce, yetimin çevirilerinin hedef girdiye nasıl uygulanacağını seçin.",
+    "overrideModeLabel": "Üzerine yazma modu",
+    "overrideEmptyOnly": "Yalnızca boş çevirileri doldur (hedefin mevcut çevirilerini koru)",
+    "overrideAll": "Tüm çevirilerin üzerine yetimin çevirilerini yaz",
+    "aiRetranslateLabel": "Yeniden çevirmek için yapay zekâ kullan",
+    "aiRetranslateHint": "Yeniden bağlamadan sonra bir yapay zekâ geçişi, yetimin eski kaynak metniyle hedefin yeni kaynak metnini karşılaştırır ve mevcut her çeviriyi aynı değişikliği yansıtacak biçimde günceller.",
+    "aiModuleLabel": "Yapay zekâ modülü",
+    "aiModelLabel": "Model",
+    "aiReasoningEffortLabel": "Akıl yürütme çabası",
+    "aiModulePlaceholder": "Bir modül seçin…",
+    "aiNoModules": "Yapay zekâ yeteneği olan hiçbir modül etkin değil — yapay zekâ ile yeniden çeviriyi kullanmak için Genel yapılandırmada bir modül etkinleştirin.",
+    "confirmSubmit": "Yeniden bağla"
+  },
+  "toast": {
+    "loadError": "Yetimler yüklenemedi",
+    "deleted": "Yetim silindi",
+    "deleteError": "Yetim silinemedi",
+    "bulkDeleted": "{{count}} yetim silindi",
+    "relinked": "Çeviriler taşındı",
+    "relinkError": "Yetim yeniden bağlanamadı",
+    "candidatesError": "Yeniden bağlama adayları yüklenemedi",
+    "aiRetranslateStarted": "Yapay zekâ ile yeniden çeviri başlatıldı — Etkinlik sekmesine bakın",
+    "aiRetranslateUnavailable": "Yeniden bağlandı, ancak yapay zekâ ile yeniden çeviri başlatılamadı (yapay zekâ yeteneği olan modül yok)"
+  }
+}

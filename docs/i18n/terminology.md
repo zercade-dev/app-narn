@@ -217,7 +217,7 @@ or search the file for the word.
 
 **Means here:** one row of imported source content: a key, its source text, its metadata (categories, tone, translator context, source labels) and its translation in each target language. This is the unit the whole app counts.
 
-**Part of speech in UI:** noun. **Canonical term.** The `logs` namespace narrates about the same object using the word "string" ("Queued {{total}} strings for translation"); translate that occurrence with your *entry* rendering too, so the UI counts one thing, not two.
+**Part of speech in UI:** noun. **Canonical term.** The `logs` namespace narrates about the same object using the word "string" (`logs:orphan.detected` — "Found {{count}} strings that are no longer in the source file."); translate that occurrence with your *entry* rendering too, so the UI counts one thing, not two. **One exception, and it is the only one:** `logs:translation.queued` counts *jobs* — one entry for one target language — not entries, so an *entry* rendering there makes the number wrong on any multi-language run. See its row in `english-review-notes.md`. (This row previously used that very key as its illustration, which pointed translators at the single case the rule does not fit; corrected 2026-08-12, without changing the rule itself.)
 
 **Example:** `category:countLabel_other` — "{{count}} entries"
 

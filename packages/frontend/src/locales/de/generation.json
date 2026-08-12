@@ -1,0 +1,17 @@
+{
+  "contextLabel": "Eintragskontext einbeziehen",
+  "contextHint": "Zusätzliche Eintragsdetails in den Prompt aufnehmen, um die Vorschläge zu verbessern.",
+  "fieldContext": "Kontextnotizen",
+  "fieldSources": "Herkunftslabels",
+  "fieldCategories": "Zugewiesene Kategorien",
+  "languagesLabel": "Vorhandene Übersetzungen als Kontext senden",
+  "languagesHint": "Die fertigen Übersetzungen jedes Eintrags in den ausgewählten Sprachen als zusätzlichen Kontext senden.",
+  "selectAllLanguages": "Alle auswählen",
+  "deselectAllLanguages": "Alle abwählen",
+  "skipCategoriesLabel": "Kategorien überspringen",
+  "skipCategoriesHint": "Einträge mit einer dieser Kategorien werden vollständig aus der Anfrage ausgeschlossen.",
+  "skipCategoriesPlaceholder": "Nichts ausgewählt",
+  "ignoreGlossariesLabel": "Vorhandene Glossare ignorieren",
+  "ignoreGlossariesHint": "Die Begriffe der ausgewählten Glossare gelten als bereits bekannte Terminologie: Bei der Glossargenerierung werden sie als bekannt mitgesendet, damit das Modell sie nicht erneut vorschlägt; bei der Kategoriegenerierung werden Einträge, die auf diese Begriffe passen, vollständig aus der Anfrage ausgeschlossen.",
+  "ignoreGlossariesPlaceholder": "Nichts ausgewählt"
+}

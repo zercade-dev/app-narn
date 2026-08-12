@@ -1,0 +1,10 @@
+{
+  "http": {
+    "unauthorized": "Du musst dich erneut anmelden.",
+    "forbidden": "Du hast keine Berechtigung dafür.",
+    "vaultLocked": "Der Tresor ist gesperrt. Entsperren und erneut versuchen.",
+    "rateLimited": "Zu viele Anfragen — einen Moment warten und erneut versuchen.",
+    "server": "Auf dem Server ist ein Problem aufgetreten. In einem Moment erneut versuchen.",
+    "offline": "Der Server ist nicht erreichbar. Verbindung prüfen."
+  }
+}

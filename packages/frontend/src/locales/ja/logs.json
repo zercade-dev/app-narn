@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "振り分けルールを設定",
+    "openModuleSettings": "モジュール設定を開く",
+    "openQuality": "品質ダッシュボードを開く",
+    "openGlossary": "用語集を開く",
+    "unlockVault": "保管庫のロックを解除"
+  },
+  "translation": {
+    "start": "エントリを{{language}}に翻訳中…",
+    "done": "エントリを{{language}}に翻訳しました。",
+    "doneFromMemory": "{{language}}の保存済みの翻訳を再利用しました。",
+    "queued": "翻訳キューに追加しました（翻訳数：{{total}}）。",
+    "queued_other": "翻訳キューに追加しました（翻訳数：{{total}}）。",
+    "runQueued": "翻訳の実行をキューに追加しました（順番：{{position}}）。",
+    "retryQueued": "再試行をキューに追加しました（順番：{{position}}）。",
+    "retry": "失敗した翻訳を再試行しています。",
+    "failedNoRoute": "エントリ{{count}}件を{{language}}に翻訳できませんでした。一致する振り分けルールがありません。",
+    "failedNoRoute_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。一致する振り分けルールがありません。",
+    "failedModuleDisabled": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}モジュールが無効になっています。",
+    "failedModuleDisabled_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}モジュールが無効になっています。",
+    "failedModuleNotFound": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}モジュールがインストールされていません。",
+    "failedModuleNotFound_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}モジュールがインストールされていません。",
+    "failedGeneric": "エントリを{{language}}に翻訳できませんでした。",
+    "batchFailed": "翻訳{{count}}件のバッチが失敗しました（対象言語：{{languages}}）。",
+    "queueStartFailed": "翻訳の実行を開始できませんでした。",
+    "maskMismatch": "{{language}}への翻訳でインラインタグが保持されませんでした。",
+    "tmRejected": "{{language}}の保存済みの翻訳は品質チェックに合格しませんでした。",
+    "lqaRetry": "品質チェックに不合格でした。モデルに再試行を依頼しています。",
+    "authCancel": "サインインがキャンセルされたため、翻訳を停止しました。"
+  },
+  "lqa": {
+    "passed": "品質チェックに合格しました。",
+    "failed": "品質チェックに不合格でした。",
+    "overflow": "翻訳が長すぎて、利用できるスペースに収まりません。",
+    "checkError": "品質チェックを実行できませんでした。"
+  },
+  "judge": {
+    "done": "レビューを採点しました（スコア：{{score}}・判定：{{verdict}}）。",
+    "suggestDone": "レビューが完了し、提案があります。",
+    "suggestNoChange": "レビューの結果、変更点はありませんでした。",
+    "suggestionDiscarded": "提案を却下しました。"
+  },
+  "sourceReview": {
+    "done": "原文レビューが完了しました（指摘：{{findings}}）。",
+    "done_other": "原文レビューが完了しました（指摘：{{findings}}）。"
+  },
+  "glossaryGen": {
+    "done": "用語集生成の実行が完了しました（提案した用語：{{suggested}}・解析したエントリ：{{analyzed}}）。",
+    "failed": "用語集の生成に失敗しました。",
+    "saveSuggestionsFailed": "用語集の提案を保存できませんでした。"
+  },
+  "categoryGen": {
+    "queued": "カテゴリの生成をキューに追加しました。",
+    "done": "カテゴリの生成が完了しました（提案：{{suggestions}}）。",
+    "failed": "カテゴリの生成に失敗しました。"
+  },
+  "stageDetails": {
+    "queued": "ステージ詳細をキューに追加しました。",
+    "done": "ステージ詳細の実行が完了しました（完了：{{completed}}・失敗：{{failed}}）。",
+    "failed": "ステージ詳細の実行に失敗しました。"
+  },
+  "module": {
+    "loaded": "{{module}}モジュールを読み込みました。",
+    "instanceRegistered": "{{instance}}の設定を追加しました。",
+    "instanceRegisterFailed": "{{instance}}の設定を追加できませんでした。"
+  },
+  "vault": {
+    "unlocked": "保管庫のロックを解除しました。",
+    "passwordChanged": "保管庫のパスワードを変更しました。",
+    "credentialsEvicted": "保存されていた認証情報がメモリから消去されました。"
+  },
+  "orphan": {
+    "detected": "ソースファイルに存在しなくなったエントリが{{count}}件見つかりました。",
+    "detected_other": "ソースファイルに存在しなくなったエントリが{{count}}件見つかりました。",
+    "linked": "孤立エントリを再リンクしました。",
+    "deleted": "孤立エントリを削除しました。"
+  },
+  "tm": {
+    "cleared": "翻訳メモリを消去しました。",
+    "variantDeleted": "翻訳メモリのエントリを削除しました。"
+  },
+  "backup": {
+    "restored": "バックアップを復元しました。",
+    "pruneFailed": "古いバックアップを整理できませんでした。"
+  }
+}

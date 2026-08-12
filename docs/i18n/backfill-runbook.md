@@ -24,7 +24,7 @@ Nobody writes another language's files. That is the property that lets several l
 run at the same time: a locale never reads another locale's rendering, so there is no
 shared state and no merge conflict between them.
 
-**Two precedence rules, both learned the expensive way.**
+**Three precedence rules, all learned the expensive way.**
 
 - **A term row fixes the lexeme. It does not fix the shape.** A row's `Example:` line
   shows the term in use; it is not a ruling that the cited key keeps that grammatical
@@ -35,6 +35,22 @@ shared state and no merge conflict between them.
   above a sibling title written in the other shape.
 - **Terms outrank the length budget.** The budget exists to stop *avoidable* length. If a
   term rule forces a long label, that is the term rule doing its job.
+- **A guard that rejects copy you believe is correct is a finding against the guard, not
+  license to rewrite what you believe is right.** This is the general rule the length one
+  above is a single instance of, stated once so it applies to every mechanical check, not
+  only that one: don't absorb the workaround into the string — a rendering distorted to
+  satisfy a guard ships a defect just as surely as one that fails the guard outright, and
+  it is harder to find afterwards because nothing is red. Escalate to the controller
+  instead, who has two entry points for exactly this, both keyed by `locale:namespace:key`
+  and both requiring a reason (an unexplained entry throws at module load):
+  `IDENTICAL_ALLOWLIST` (`scripts/locale-rules.mjs`) when a value is legitimately
+  byte-identical to English, and `LENGTH_EXEMPTIONS` (same file) when a correct rendering
+  legitimately breaches the length-ratio cap. The shipped example: German's tab label for
+  Import/Export is spelled exactly as English spells it — the correct German nouns for
+  both operations — and the alternative that reads differently, the infinitive pair
+  "Importieren / Exportieren", is the wrong control shape for a tab label. That is now an
+  `IDENTICAL_ALLOWLIST` entry, not a tab relabelled to dodge the check. Ask for the entry;
+  do not write around the check.
 
 ## The file you edit, and where you run things
 
@@ -86,6 +102,31 @@ present). Nothing here is a pre-flight deliverable still to be built.
   a documentation-only change that skips the rest of the gate. Either form runs the same
   file, so use whichever you like — what matters is that you are running the checks
   themselves rather than an equivalent of your own.
+
+  **Two things about this guard that are not obvious and have each cost a round.**
+
+  - **A quoted span sitting next to a key in a lexicon row is read as a claim that your
+    locale ships that text** — so an English gloss written there fails, correctly. **Put
+    glosses in *italics*, never in quotes.** Three locales have hit this, one of them three
+    rounds running with a backticked function name, which is the same trap: a **non-key
+    backtick span** is a candidate too, and that one needs no key beside it at all.
+
+    An earlier version of this bullet said there is no adjacency requirement and no exemption
+    for an illustration. That is false, and it was written from a batch's report rather than
+    from the parser: quoted spans **do** require key-adjacency, a parenthesised gloss escapes,
+    and the adjacency-free rule covers only non-key backtick spans in the lexicon. The advice
+    was right and the reason was not — which is this programme's commonest defect, committed
+    here in the file that warns about it.
+  - **A Latin-script locale is structurally more exposed to it.** The guard skips a span
+    containing no non-ASCII letter, but only for the non-Latin-script locales, so a Russian
+    or Japanese gloss is dropped automatically while a German or Turkish one cannot be. Four
+    of the languages still to come are Latin-script and inherit that exposure; if yours is,
+    expect this guard to find glosses that a Cyrillic or CJK locale never had to think about.
+
+  **And check which quote characters your own documents use.** The delimiter list is
+  finite — straight, guillemets, corner brackets, curly. One locale wrote its lexicon
+  entirely in curly quotes before the guard knew them, and every citation in that file
+  extracted to nothing for four rounds while the run stayed green.
 
 ## The work-in-progress declaration — the controller adds it at batch 1
 
@@ -265,7 +306,23 @@ Importants were process findings rather than defects in a string. That is not tr
 getting better — each batch had a different one. It is the artifacts filling up. Every
 finding in the first two batches that generalised was written into the lexicon or the style
 file before the third batch started, and the third and fourth batches then did not make
-those mistakes. If your rate is *not* falling, the artifacts are not being updated.
+those mistakes.
+
+**That last inference was wrong, and the first parallel wave falsified it.** The runbook used
+to end this paragraph with *"if your rate is not falling, the artifacts are not being
+updated"*. Across three languages and six batches each, the rate **did not fall** — and the
+artifacts were being updated the whole time. What the pilot measured was a *starting* rate
+being paid down: inheriting finished artifacts moves batch 1 from **5.6 to 2.1–3.5**, which is
+the real transfer effect and it is large. What remains after that is a **per-round fixed
+cost** of roughly nine findings, and it is not translation error — it is the claims each batch
+writes into its own style guide and lexicon, which cannot be inherited because they do not
+exist until that batch writes them.
+
+So: **expect a low flat rate, not a falling one.** A flat rate is the artifacts working. If
+you are hunting a process failure because the line is not sloping down, you are hunting
+something that is not there — and the thing actually worth watching is *where* the findings
+are. By the last two rounds of that wave every finding in all three languages was in a
+document rather than a string.
 
 ---
 
@@ -398,25 +455,52 @@ It was wrong in two ways, and both matter to you:
   characters, so 1.5x is seven and a half, and no correct rendering of it can exist in most
   languages. The ratio measures the wrong thing: a long English source buys slack a tight
   control does not actually have, and a short one denies slack a loose control could afford.
-- **The five constrained classes are not equally constrained.** Only one has a hard, fixed
-  width: the sidebar is `16rem` (`SIDEBAR_WIDTH` in `components/ui/sidebar.tsx`) and every
-  item label is wrapped in `truncate`, so overflow ellipsizes. Tab bars, table columns and
-  filter rows scroll, auto-size or wrap — going long there costs elegance, not correctness.
+- **The constrained classes are not equally constrained.** Two of the six share one hard,
+  fixed width: the sidebar is `16rem` (`SIDEBAR_WIDTH` in `components/ui/sidebar.tsx`) and
+  every label in it — sidebar items **and the product's tab labels, which are sidebar menu
+  items** — is wrapped in `truncate`, so overflow ellipsizes. Table columns, filter rows and
+  the in-panel sub-tab bars scroll, auto-size or wrap; going long there costs elegance, not
+  correctness.
 
-The five classes, with the key each is anchored on:
+The six classes, with the key each is anchored on:
 
 | Class | Anchor key | Kind |
 | --- | --- | --- |
 | Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **hard** — fixed `16rem`, truncates |
-| Tab label | `strings:tabs.backup` | soft |
+| Tab label | `strings:tabs.backup` | **hard** — the same `16rem` sidebar, truncates (see below) |
+| In-panel sub-tab | `config:routing.tabImportExport` | soft |
 | Table column header | `strings:columns.config` | soft |
 | Filter label | `strings:filters.needsReview` | soft |
 | Bulk-bar control | `strings:bulk.approveSelected` | soft |
 
 **The numbers are per language, and yours are not Russian's.** Derive them the way the
-pilot did: for the sidebar, from the container; for the other four, from the longest value
-that language ships, plus headroom. Write the resulting five numbers into
-`style/<lang>.md`. **Hard** means fix it — a sidebar item over budget is cut off in a
+pilot did: for the two hard classes, from the container; for the other four, from the
+longest value that language ships, plus headroom. Write the resulting six numbers into
+`style/<lang>.md`.
+
+**"Tab label" is two different containers, and only one of them is hard.**
+
+- `config`'s tabs are an *in-panel secondary* bar inside one panel — soft, and this is what a
+  batch-1 budget measures.
+- **`strings:tabs.*` is not a tab bar at all.** Its only call site is
+  `components/layout/Sidebar.tsx:785` and `:788`, a `<span className="truncate">` inside a
+  `SidebarMenuButton`. There is no horizontal main tab bar anywhere in this frontend: the
+  product's tabs *are* sidebar menu items, in the fixed `16rem` container, and an over-long
+  label **ellipsizes**.
+
+So the tab-label class is **hard**, and it is the same physical constraint as the
+sidebar-item class — one container, one budget. A batch-1 figure derived from the in-panel
+bar is not a floor to be raised; it is a measurement of a *different, softer* surface, and
+batch 2 must re-derive against the sidebar. The usable label width is about 199px of the
+256px sidebar (1 border + 16 group padding + 16 button padding + 16 icon + 8 gap come off
+it), which is roughly **26 characters of Latin script** — and roughly **half that in a
+full-width CJK script**, whose glyphs carry about twice the advance width. Derive your own
+number from the container and record how.
+
+Do not shorten a settled surface name merely to hit a figure — surface names are repeated
+verbatim and every later batch inherits the short form. But if a correct rendering genuinely
+cannot fit, **escalate**: an ellipsized sidebar label is a product problem worth naming, and
+this is the one container in the app that cannot grow. **Hard** means fix it — a sidebar item over budget is cut off in a
 container that cannot grow. **Soft** means prefer the shorter of two correct options, but
 do not distort a term to hit a number and do not treat the figure as a failure threshold.
 Nobody has measured rendered pixel widths; if you need to go past a hard budget, look at
@@ -446,6 +530,102 @@ namespace ("…from the Translations tab").
 This is the single highest-frequency drift risk in this app, because the two keys are never
 on screen at the same moment — and because the namespace naming a surface and the namespace
 owning it are usually translated by different people, in different batches.
+
+**Except for one family, where they ARE on screen at the same moment, nested.** The five
+sidebar group headings and their guide twins are byte-identical in English and render one
+inside the other:
+
+| Sidebar group (batch 4) | Guide twin (batch 2) | English |
+| --- | --- | --- |
+| `sidebar:groups.project` | `strings:guide.groupSetup` | Setup |
+| `sidebar:groups.translate` | `strings:guide.groupTranslate` | Translate |
+| `sidebar:groups.review` | `strings:guide.groupReview` | Review |
+| `sidebar:groups.content` | `strings:guide.groupContent` | Terminology |
+| `sidebar:groups.maintenance` | `strings:guide.groupMaintenance` | Maintenance |
+
+(`strings:guide.groupTranslationMemory` is a sixth guide topic with no sidebar twin.)
+
+**Two things follow, and both were found the hard way, by two different languages in the
+same round.**
+
+1. `strings` names all six first, in batch 2, and batch 4 inherits five of them. A batch-2
+   translator who settles these names without writing them into the surface table leaves
+   batch 4 to invent them again. German shipped four of the six unrecorded and the review
+   caught it.
+2. **A collapse your language licenses everywhere else can still be wrong here, and the
+   damage can be two batches away from the key that causes it.** `Sidebar.tsx:773` renders
+   `sidebar:groups.*` as a heading with the `strings:tabs.*` items nested underneath, so a
+   group heading and the first tab under it are on screen together, one inside the other.
+
+   Now follow the chain. Batch 2 writes `strings:guide.groupTranslate`. Because that key is
+   byte-identical in English to `sidebar:groups.translate`, the verbatim-copy rule means it
+   *dictates* what batch 4 must write there. Japanese renders both *Translate* and
+   *Translations* as 翻訳 — correct everywhere else in the product, and a collapse the
+   language genuinely licenses — so batch 2 was silently deciding that batch 4's sidebar
+   heading and its own first child would read the same word. Every other shipped locale
+   keeps them distinct (ru Перевод/Переводы, de Übersetzen/Übersetzungen, tr Çeviri/Çeviriler).
+
+   **The test is: name the smallest container that holds both, then keep going outward.**
+   Not "are these nested", not "are they on different screens", and *not* "do they share a
+   toolbar" — because the answer is often no, and the collision is real anyway. **The page is
+   a container.** Keep widening until you reach one that holds both keys, and then ask
+   whether both can be painted at once.
+
+   The worked example is the pair that produced this rule, and it also breaks the shorter
+   version of it: a review queue's filter tab and its per-card Flag button both read
+   identically in one locale. They are **siblings** — the tab sits in a header, the button in
+   an action row inside a card component, and they share nothing below the tab pane. A
+   translator asking "do they share a container?" finds no, clears the collapse, and re-ships
+   the defect. Asking for the smallest *common* container finds the pane, and the pane paints
+   both at once.
+
+   **What decides it is the render condition, not the geometry.** Those two are visible
+   together precisely because the filter tab renders always while the button renders whenever
+   that filter is not active — so the inactive tab and the button are on screen in the same
+   paint. Work out when each key renders; do not argue from how far apart they sit.
+
+   **And check the screen-reader pass too.** Two labels that never look alike can still be
+   read out identically, and an `aria-label` is where this programme's worst instance of it
+   was found — a destroy verb announced for an operation that only un-assigns.
+
+   **When you license a collapse, English is corroboration and not the test.** The tempting
+   rule is "English has the same relation between the same pair, so the collapse is
+   faithful". It does not hold: a language that compounds more than English will always show
+   more substring relations than English does, so measuring your collapses against English's
+   marks the extra ones as defects and licenses nothing you actually needed licensing for.
+   One locale wrote that premise, had it fail in five of its nine pairs, and had already
+   recorded forty lines earlier in the same file that one of those pairs is licensed on
+   different grounds entirely. **License on structure instead** — a heading over its own
+   child, or a root over its own compound — and cite English only as a second opinion.
+
+   **Three riders, and the first is the one that makes this rule safe rather than dangerous:**
+
+   - **It licenses PROPER SUBSTRINGS ONLY. Equality is never licensed by it.** "A heading
+     over its own child" read loosely permits a heading whose rendering *equals* its child's,
+     which is the exact defect this whole section exists to prevent and which one locale had
+     to rename a surface to escape. If the two renderings are the same string, the structural
+     argument does not apply at all — go back to the co-render test.
+   - **"Root over its own compound" is morphology, not semantics**, so it will happily
+     license a pair that is genuinely confusable in the UI. It carried five of one locale's
+     nine pairs, including a three-way hazard that same file says needs a hand-written
+     warning. Treat it as a reason the collapse is *defensible*, not as a reason to stop
+     looking.
+   - **Compounding is not the only asymmetry.** It explained two of that locale's five
+     unmirrored pairs; the other three diverge because English *inflects* — "Translations"
+     against "Translation…" — which the languages that inflect more than English will meet
+     harder than the ones that compound more.
+
+   **So: check the nesting before you collapse two surface names — including nesting on a
+   surface your own batch never renders.** The keys you are writing may only reach the screen
+   through a later batch that is required to copy you. `strings:guide.group*` itself renders
+   in the guide's own left rail (`GuideView.tsx:73`, over the `guide.topic*` buttons), not in
+   the sidebar; it is the copy rule, not a shared call site, that carries the defect across.
+
+   Two nestings in that guide rail are *licensed*, and both are recorded so nobody reopens
+   them: a heading that is the general word over a child that specialises it (Review over
+   the three review topics), and `guide.groupTranslationMemory` over its single identically
+   named child — English writes "Translation Memory" over "Translation Memory" deliberately,
+   and every shipped locale renders that pair identically.
 
 `terminology.md` is the authority for the full set. As it stands it names **ten surfaces
 across twenty-one keys** in its table, plus **three more that have no second title key** and
@@ -516,8 +696,14 @@ the identical `one`/`many`/`other` shape and carry **zero** `_many` keys between
 1,908 keys each, the same count as English, because nothing else in their category set
 differs from English's `_one`/`_other` split. **Do not write `_many` for `it` or `pt-br`.**
 Ship `_one`/`_other` only, matching `es`/`fr`, and expect to land at English's own key count
-for this dimension — neither the 29-fewer of a single-category language nor Russian's 94
-more. The default gate (`pnpm check:locales`, what CI runs) does not ask for the missing
+**for this dimension** — neither the 29-fewer of a single-category language nor Russian's 94
+more.
+
+**But not at English's total.** `es` and `fr` sit at 1,908 only because they predate the
+strict gate and the default run accepts the bare-key rescue for the twelve bare-plus-`_other`
+families; the gate's own coverage note lists them as not supplying `_one` to this day. A
+locale backfilled under `LOCALE_PARITY_STRICT` must supply those twelve, so `it` and `pt-br`
+land at **1,920**. See 2.10. The default gate (`pnpm check:locales`, what CI runs) does not ask for the missing
 category either, for the same reason: it is forgiving a gap the tool has already proven is
 unreachable, not skipping a check.
 
@@ -639,8 +825,24 @@ language whose aggregate looks comfortable can still overflow every tab label it
 
 Budget your key count by your language's **plural-category count**, not by its expansion, per
 the rule in 2.7: Russian needed 94 keys English has no counterpart for, because it fills four
-categories where English fills two. A language with `one`/`other` needs none. A
-single-category language ends with 29 keys **fewer** than English, not more.
+categories where English fills two. A single-category language ends with 29 keys **fewer**
+than English, not more.
+
+**A language with `one`/`other` needs twelve — not none, which is what this line used to
+say.** English writes twelve families as a bare key plus `_other`, with no `_one` at all, and
+the strict gate you run **refuses the bare-key rescue**: `LOCALE_PARITY_STRICT` enforces
+every family in the coverage gap, including the bare-covered ones, where the default gate
+enforces only families with no bare sibling. So supply `_one` for all twelve and expect to
+land at **1,920**, not English's 1,908. They arrive in two batches — four in `vault`, eight
+across `console` and `logs`. Two languages hit this independently in the same round, and one
+proved it by deleting a key and re-running rather than by argument.
+
+The corollary, which cost a batch some thought: **the `_one` may be byte-identical to the
+`_other`.** The gate demands the *category*, not a different wording, and in a language whose
+counted noun stays bare-singular after a numeral the two forms genuinely coincide. Supply the
+key anyway. But **check the bare key's own call sites before you rely on that**: adding `_one`
+stops i18next falling back to the bare form at count 1, so if the bare key is reachable
+without a count anywhere, its rendering still has to stand on its own.
 
 ---
 
@@ -673,9 +875,14 @@ made the reviewer's verdicts checkable. Hand the reviewer the output.
 1. **The numeral-agreement detector, both axes.**
    - **Token axis.** Skip every placeholder that cannot hold a number. In this app
      that is `count` (its own family handles it) plus `module`, `instance`, `language`,
-     `languages`, `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`, `keys`,
+     `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`, `keys`,
      `slug`, `type`, `focus`, `field`, `why`, `label`, `filename`, `id`, `time` and
-     `passRate`.
+     `passRate` — 22, not 23: `languages` was removed 2026-08-11 (a wave-1 defect
+     report), because `config:templateMeta` interpolates it with a plain count
+     (`template.config.activeLanguages.length`), not a name list, and skipping it made
+     that key's numeral-agreement hazard invisible to every language whose nouns
+     inflect. Checked by opening the `t()` call site, the same standard the other 22
+     were re-checked against, not by re-reading the name.
    - **Word axis.** On what survives the token axis, clear the next words that cannot
      inflect — prepositions and particles, invariant abbreviations, short and impersonal
      participles.
@@ -711,8 +918,8 @@ made the reviewer's verdicts checkable. Hand the reviewer the output.
      because a number without both is not reproducible and a plausible-looking
      explanation for how it moved can still be wrong even when its total is right.
    - **What survives both passes is a candidate, not a verdict.** The token axis only skips
-     the 23 placeholders someone has confirmed cannot hold a number, and this app has **73**
-     distinct placeholders — so 50 of them survive the first pass whether or not they are
+     the 22 placeholders someone has confirmed cannot hold a number, and this app has **73**
+     distinct placeholders — so 51 of them survive the first pass whether or not they are
      numeric, including plainly textual ones like `{{category}}`, `{{text}}` and `{{rules}}`.
      A survivor means "nobody has cleared this yet". Look at each one, decide whether the
      value can be a number at all, and only then check the agreement by hand at several
@@ -882,6 +1089,79 @@ act on it.** An assertion about a file travelled through three agents in the pil
 anyone opened the file. Three separate defects had exactly that shape, and each one was a
 single command away from being falsified.
 
+**Where the defects actually end up, once the strings are clean.** Every finding in the last
+two rounds of the first wave — all ten of them, across three languages — was in a *document*,
+not a string, and every one had the same shape: **a claim that was true or unfalsifiable when
+it was written, and became checkable later.** A prescription for a namespace that had not
+shipped. A budget measured on one batch's members. A count derived from a list. A quoted
+rendering nobody could resolve to a key.
+
+Two halves, and only one is guarded. The **citation** half now has a mechanism: the guard
+checks every quoted rendering attached to a resolvable key, and prints a NOTE naming the ones
+whose key it cannot resolve, so an unchecked citation is visible rather than silent. The
+**prose** half has nothing — a sentence asserting how many headers exist, which controls a
+component renders, or where a string is displayed is checked by a person or not at all.
+
+So when you write a sentence of that kind, **write it so a later reader can falsify it**: name
+the file and the symbol, give the command, and prefer a claim that a script can re-run to a
+number you counted once. A count in a document is a fact about the moment it was written; a
+method is a fact about the code.
+
+The first three-language backfill produced **seven** more of them, in style guides, in
+reviews and in this runbook, and they sharpened rule 3 into three corollaries. Each is here
+because it cost a round.
+
+- **A standing claim is re-derived when you touch the paragraph it lives in, not only when
+  you write a new one.** One guide asserted that a guard does not read style guides. **That
+  sentence was true when it was written, and false thirty minutes later** — the guard was
+  extended in the same session, and nobody went back. It then survived three passes: the
+  batch that wrote it, a later batch that edited the bullet directly beneath it, and a
+  reviewer who read the whole block. The translator who finally fixed it had been holding the
+  falsifying evidence in its own report all along, in the form of that same guard rejecting
+  one of its style-guide citations. **Evidence you have already written down is not evidence
+  you have read.**
+
+  The direction that actually costs least is the reverse one: **when you change a tool, grep
+  the docs for claims about it, in the same commit.** A sentence about tooling does not rot
+  gradually — it flips the moment the tool ships, and everything written before that moment
+  is now a claim nobody has re-checked.
+
+  **Never quote a run's counters as evidence in a document.** "345 citations checked today"
+  is stale on the next commit, and worse, it is a *global* count across every locale, so a
+  batch in another language invalidates a number sitting in yours. The one instance of this
+  in the programme was wrong on arrival — no run at that tree ever printed the figure it
+  quoted. State what the tool *does*; let the tool state its own counts.
+- **A right answer with an unfounded reason is the failure mode that leaves no trace.** It
+  appeared in all three wave-1 languages and is the commonest defect this process finds:
+  nothing downstream breaks, so nothing signals, and the reason goes on to mislead the batch
+  that inherits it. One guide justified a correct verb choice with "German has no verb for
+  *review*" — a false absolute that also omitted the verb the same batch shipped seven
+  times, so a later batch following it literally would have written the wrong one. **When a
+  reason is corrected, leave the correction visible in the file** rather than rewriting it
+  away; a quietly repaired proof is indistinguishable from one that was always sound.
+
+  Correcting one takes three passes if you do it by feel, because **a reason feels finished
+  once the string is right** — so the repair lands in whichever file you happened to be in.
+  Two habits collapse that to one pass, and both were arrived at the expensive way:
+
+  - **Grep the claim, not the file — and grep it across everything you wrote that round, not
+    just the file the finding named.** The same false sentence lived in a style guide and in
+    a lexicon row; deleting it from one left the other pointing at a retraction of itself,
+    and the lexicon is the file a later translator opens *first*. A second locale fixed a
+    claim in its style guide and left three copies of it alive in its own report, including
+    a figure transcribed from a run it had not executed. **A finding names a location because
+    that is where the reviewer happened to look, not because that is where the claim lives.**
+    Scope the sweep to the claim's blast radius.
+  - **Re-open the code after rewriting a reason that cites it.** A repaired reason is a new
+    claim and inherits nothing from the old one's checking. "Writes nothing" was corrected
+    to "writes one thing" against a route that writes two — and the replacement for a false
+    absolute was itself an unbounded absolute the same batch broke five times.
+- **Faithfulness to a defect in the English is not a licence to ship one the English does
+  not have.** A batch kept a clause bare because the English is bare, reasoning from a
+  documented English defect — but English's imperative and bare noun phrase are homographic
+  and the target language's are not, so the "faithful" rendering produced a different and
+  worse sentence. Reproduce the *effect* the English has on its reader, not its surface.
+
 ---
 
 ## 7. After the last batch: the whole-language sweep
@@ -909,6 +1189,21 @@ language — preceded by one step that has to come first.
 Fixes from the sweep go in as a normal fix round with a scoped re-review. The language is
 not done until that re-review passes.
 
+**Then, and only then, the language may be announced — and the announcement is a separate
+event from the files landing.** A locale ships **dark**: its files exist and are complete
+long before the language picker offers it, because the picker is a short hand-maintained
+list widened once, for all of them, in a later step. So:
+
+> **A language's changelog fragment ships in the release that makes it *selectable*, never
+> the release that lands its files.**
+
+This is not a stylistic preference. Russian's files and Russian's changelog fragment landed
+together, the fragment was consolidated into a release, and that release announced an
+interface language that Settings did not offer — a user reads the entry, opens the picker
+and finds it absent. Eleven languages have the identical shape, so the rule is written here
+rather than remembered. A batch that lands only locale files adds **no** fragment; the batch
+that widens the picker adds one naming every language it turns on.
+
 ---
 
 ## 8. Two structural constraints on how the work is scheduled
@@ -926,6 +1221,22 @@ with one language that was survivable, and with several it is not. A translator 
 their own locale's file never conflicts with another, but a rule rewrite mid-flight
 invalidates work already done. A term the lexicon lacks goes into an additive queue and is
 resolved between waves, not during one.
+
+**But the freeze protects you from a rule rewrite, not from another language's escalation.**
+`english-review-notes.md` grows *additively* during a wave: when any locale finds a defect in
+the English — a label naming a surface that does not exist, a singular string on a bulk path,
+a token that is a raw enum — the controller files a row, and that row **binds every language
+immediately**, including the ones already mid-batch. Three landed in that file during a single
+round of the first wave, and two of them arrived between one language finishing its work and
+its work being committed.
+
+So: **re-read the frozen authorities, and diff them, immediately before your final gate run** —
+not at the start of the batch, which is when everybody reads them and when they were still
+true. `git diff <the commit you started from> -- docs/i18n/english-review-notes.md` is the
+whole check. Two separate languages shipped a defect in the last round of the first wave
+because a row landed after they had read the file: one had it in its immediate parent commit
+and one had it two minutes after finishing. **The row you never saw still binds the string you
+shipped.**
 
 **Who resolves the queue, and what happens to work already shipped under a different
 reading.** The person coordinating the wave resolves it, once, after the wave's last batch

@@ -1,0 +1,33 @@
+{
+  "title": "Willkommen bei Narn",
+  "intro": "Die Guides unten durchsehen, bevor du loslegst — oder direkt den Zugangsdaten-Tresor einrichten, sobald du bereit bist.",
+  "guidesHeading": "Guides",
+  "browseGuides": "Guides durchsehen",
+  "setupVaultHeading": "Bereit zum Übersetzen?",
+  "setupVaultBody": "Den Zugangsdaten-Tresor einrichten, um die Schlüssel der KI-Anbieter für deine Übersetzungen zu hinterlegen.",
+  "setupVaultButton": "Tresor einrichten",
+  "themeChooser": {
+    "title": "Dein Look",
+    "intro": "Ein Theme und dazu Hell oder Dunkel auswählen — beides lässt sich jederzeit in den Einstellungen ändern.",
+    "themeLabel": "Theme",
+    "modeLabel": "Hell oder Dunkel",
+    "modes": {
+      "light": "Hell",
+      "dark": "Dunkel"
+    },
+    "confirm": "Diese Einstellungen übernehmen",
+    "keepDefault": "Techno behalten",
+    "names": {
+      "default": "Klassisch",
+      "pixel": "Pixel",
+      "techno": "Techno",
+      "minimal": "Minimal"
+    },
+    "taglines": {
+      "default": "Der ursprüngliche NARN-Look.",
+      "pixel": "Klobige Retro-Pixel.",
+      "techno": "Neon-Konsole. Der neue Standard.",
+      "minimal": "Nur der Inhalt."
+    }
+  }
+}
