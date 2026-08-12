@@ -1,0 +1,25 @@
+{
+  "title": "Narn'a hoş geldiniz",
+  "intro": "Başlamadan önce aşağıdaki kılavuzlara göz atın — ya da hazır olduğunuzda doğrudan kimlik bilgisi kasanızı kurmaya geçin.",
+  "guidesHeading": "Kılavuzlar",
+  "browseGuides": "Kılavuzlara göz at",
+  "setupVaultHeading": "Çevirmeye hazır mısınız?",
+  "setupVaultBody": "Çevirilerinizin kullanacağı yapay zekâ sağlayıcı anahtarlarını eklemek için kimlik bilgisi kasanızı kurun.",
+  "setupVaultButton": "Kasayı kur",
+  "themeChooser": {
+    "title": "Görünümünüzü seçin",
+    "intro": "Bir tema seçin ve açık ya da koyu modu belirleyin — ikisini de istediğiniz zaman Ayarlar'dan değiştirebilirsiniz.",
+    "themeLabel": "Tema",
+    "modeLabel": "Açık ya da koyu",
+    "modes": { "light": "Açık", "dark": "Koyu" },
+    "confirm": "Bu ayarları kullan",
+    "keepDefault": "Tekno'da kal",
+    "names": { "default": "Klasik", "pixel": "Piksel", "techno": "Tekno", "minimal": "Minimal" },
+    "taglines": {
+      "default": "Özgün NARN görünümü.",
+      "pixel": "Kalın hatlı retro pikseller.",
+      "techno": "Neon konsol. Yeni varsayılan.",
+      "minimal": "Yalnızca içerik."
+    }
+  }
+}

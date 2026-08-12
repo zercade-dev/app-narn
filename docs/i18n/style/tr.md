@@ -14,12 +14,15 @@ placeholder handling.
 > prescriptions were discharged in batch 4 and are citations now, checked on every run.
 > Run the script for its own counts; do not copy them into this file.
 >
-> **`tr` has exactly ONE style-guide prescription left, and it is `common:saving`
-> (“Kaydediliyor…”), in batch 6 — not the `orphans:`/`colorText:` pair this block named for
-> three rounds.** Both of those keys appear here in **prose only**, with no quoted rendering
-> beside them, so neither was ever a prescription; the sentence was carried from batch 1 and
-> re-worded in batch 4 without being re-derived, which is the exact failure mode the block
-> below it describes. **Derive it, do not read it** — reuse the guard's own three functions
+> **`tr` has NO style-guide prescriptions left. Batch 6 was the last batch, every namespace
+> has shipped, and the guard now checks every quotation in this file on every run.** The
+> `common:saving` prescription this block named for a round shipped as “Kaydediliyor…”; the
+> three batch-5 prescriptions listed further down shipped as written and are marked there.
+> A locale with all 24 namespaces present cannot hold a prescription at all — the skip is
+> keyed on the namespace being absent — so **the derivation below now prints nothing for this
+> locale, and that empty list is the finished state rather than a broken snippet.** Keep the
+> snippet: it is what a *reviewer* runs to check the claim, and it is the only way to tell an
+> empty list from an extractor that stopped extracting. **Derive it, do not read it** — reuse the guard's own three functions
 > *and its own skips*, so the answer is the guard's rather than an approximation of it:
 >
 > ```js
@@ -44,9 +47,10 @@ placeholder handling.
 > question that path can answer. Running the *style* extractor over the lexicon file produces a
 > number that means nothing; batch 4's fix round did exactly that and reported it.
 >
-> That `common:saving` prescription is now **doubly** binding, and batch 6 has no freedom in
-> it: batch 4 shipped `collab:sharing.saving` — same English, “Saving…” — as “Kaydediliyor…”,
-> so the verbatim rule fixes `common:saving` before the guard ever looks at it.
+> That `common:saving` prescription was **doubly** binding and batch 6 had no freedom in
+> it: batch 4 shipped `collab:sharing.saving` — same English, *Saving…* — as “Kaydediliyor…”,
+> so the verbatim rule fixed `common:saving` before the guard ever looked at it. **Shipped;
+> this is a citation now.**
 >
 > **What it does not check is attachment.** It proves that **each significant word** of a
 > quoted rendering is attested somewhere in the shipped locale — word by word, prefix-
@@ -69,17 +73,29 @@ placeholder handling.
 > paragraph was reaching for — attested versus correctly attached — is real and is the part
 > that survives.
 >
+> **Batch 6 landed the last seven namespaces, so EVERY quotation in this file is now a
+> citation.** `stage-details:`, `colorText:`, `orphans:`, `backup:`, `welcome:`, `common:` and
+> `legal:` quotations joined the checked set the moment that batch landed, and the three
+> prescriptions batch 5 wrote further down discharged as written: `colorText:assistant.unlockVault`
+> and `stage-details:chatUnlockVault` both ship “Kasanın kilidini aç”, and
+> `backup:toastRestoreSuccess` ships “Yedek geri yüklendi.” Each was checked **against its own
+> key**, not merely against the corpus, because attestation is all the guard can prove — the
+> pair above is attested from `logs:action.unlockVault` whatever `colorText` had shipped.
+>
 > - A quotation attached to a **`config:` or `strings:` key is a citation**: that string is
 >   shipped, and it is checkable today. The `config:` ones were verified against
 >   `packages/frontend/src/locales/tr/config.json` at the end of batch 1; the `strings:`
 >   ones against `.../tr/strings.json` at the end of batch 2.
-> - A quotation attached to a key in **any other namespace is a prescription**, binding on
->   the batch that owns that namespace — today exactly one, `common:saving` (see above).
->   It describes what that key **must** ship, not what it does ship. The `orphans:` and
->   `colorText:` rows in the surface-name table are **prose guidance**, not quotations: they
->   name a key and tell batch 6 to repeat a rendering quoted elsewhere, which binds batch 6
->   just as hard but is invisible to the extractor. Do not count them as prescriptions and do
->   not expect the guard to speak about them. **`glossary:`, `review:`,
+> - A quotation attached to a key in **any other namespace was a prescription**, binding on
+>   the batch that owned that namespace — **there are none left, because there are no
+>   unshipped namespaces left.** It described what that key **must** ship, not what it did
+>   ship. The `orphans:` and `colorText:` rows in the surface-name table were **prose
+>   guidance**, not quotations: they named a key and told batch 6 to repeat a rendering quoted
+>   elsewhere, which bound batch 6 just as hard but was invisible to the extractor — and batch
+>   6 did repeat them, `orphans:title` as “Yetimler” and `colorText:title` as
+>   “Metin biçimlendirici”. That asymmetry is the lasting lesson of the pair: **a binding
+>   instruction written as prose is still binding and still unguarded**, so the next locale
+>   should quote what it means to bind. **`glossary:`, `review:`,
 >   `category:` and `quality:` quotations are citations as of batch 3**, verified against
 >   `.../tr/{glossary,review,category,quality}.json` at the end of that batch; the two
 >   prescriptions batch 2 left for `quality:*` and `review:*` were discharged there and are
@@ -90,23 +106,27 @@ placeholder handling.
 >   shipped string is “Bu oturumda modül kimlik bilgilerinin şifresini çözmek için
 >   **parolanızı girin**.” **`logs:`, `console:`, `system:`, `errors:`, `generation:` and
 >   `batch:` quotations are citations as of batch 5**, checked on every run from the moment
->   that batch landed; the batch left no prescription of its own behind in this file, and
->   re-running the derivation above at the end of it prints `common:saving` and the two
->   batch-5 prescriptions written as citations directly below. **Batch 5 leaves batch 6 three
->   strings it has no freedom in**, found by diffing the six English files against batch 6's
->   seven for byte-identical values:
+>   that batch landed. **`stage-details:`, `colorText:`, `orphans:`, `backup:`,
+>   `welcome:`, `common:` and `legal:` quotations are citations as of batch 6**, verified
+>   against those seven `tr` files at the end of that batch. **Batch 5 left batch 6 three
+>   strings it had no freedom in — all three shipped as written**, found by diffing the six
+>   English files against batch 6's seven for byte-identical values:
 >   `colorText:assistant.unlockVault` is “Kasanın kilidini aç”,
 >   `stage-details:chatUnlockVault` is “Kasanın kilidini aç”,
 >   both byte-identical in English to `logs:action.unlockVault`; and
 >   `backup:toastRestoreSuccess` must repeat `logs:backup.restored`, “Yedek geri yüklendi.”
->   The first two are quoted here on purpose, so the guard starts checking them the moment
->   `colorText` and `stage-details` land; the third is recorded in the *backup* row of
->   `terminology/tr.md` as prose and nothing mechanical will say so.
->   **One same-English pair in that diff is a coincidence and must NOT be copied:**
+>   The first two were quoted here on purpose, so the guard started checking them the moment
+>   `colorText` and `stage-details` landed; the third was recorded in the *backup* row of
+>   `terminology/tr.md` as prose, and nothing mechanical said so — it shipped because the
+>   translator opened the row, not because a tool asked.
+>   **One same-English pair in that diff was a coincidence and was NOT copied:**
 >   `colorText:swatches.warn` is English *Warn* like `console:filter_warn`, but it names a
->   game text colour in a list of colour names, not a log level. Batch 6 decides it on its
->   own; if it lands on the same word that is fine — the two never co-render — but it is not
->   the verbatim rule.
+>   game text colour in a list of colour names, not a log level. Batch 6 decided it on its
+>   own and landed on the same word — `colorText:swatches.warn` is “Uyarı” — which is fine,
+>   because Turkish has one noun for the warning sense and the two never co-render as the
+>   same kind of object. **It arrived there by the elimination, not by the verbatim rule**,
+>   and the distinction matters for the next locale: had the swatch needed a different word,
+>   nothing in the identity of the English would have argued against it.
 > - A quotation attached to **no key at all** is an illustration: a rejected candidate, a
 >   wrong form shown as wrong, or a convention example. Never copy one as a rendering.
 >
@@ -355,6 +375,33 @@ engine, not in the string; the runbook records the same reasoning for the two lo
 displayed token and selecting token happen to agree today. Where the unit is safe, name it;
 where it is a fact about another file, mirror English's bare tally instead of inventing a
 claim that can silently go false.
+
+### Text addressed to the MODEL, not to the user — settled in batch 6
+
+**The `-in` register is a rule about addressing the reader. Five strings in this locale are not
+addressed to the reader at all: they are prompt text the app sends to a model, and they take
+the bare stem.** `stage-details:chatQuickPrompts.improve` / `shorten` / `proofread` /
+`punchier` are composed into the request when the user clicks a quick action, and
+`stage-details:chatNoProposalRetry` is composed when they click *Retry as a direct edit*
+(`StageChatPanel.tsx` builds each one with `t(...)` and sends the result). None of them is ever
+painted as a label. So `chatQuickPrompts.shorten` is “{{focus}} alanını anlamını koruyarak
+kısalt.” — a bare imperative, matching English's own bare imperative, where the deferential
+form would be addressing nobody.
+
+**The buttons that trigger them are ordinary controls and follow the ordinary rule**, which is
+why the pair reads as two shapes for one action: `chatQuickActions.shorten` is “Kısalt” (a
+short isolated button, bare stem) over a prompt that is also a bare stem, while
+`chatNoProposalRetryButton` is “Doğrudan düzenleme olarak yeniden dene”. **Check the call site
+before applying this**: a string in a chat namespace is not automatically prompt text, and
+`stage-details:chatInputPlaceholder` (“Asistana sorun…”) is a placeholder the user reads and
+therefore takes `-in` like every other placeholder in the locale.
+
+**The vowel-harmony rule binds prompt text exactly as hard**, and this is where it bit: every
+one of the five interpolates a name. `{{focus}}` is built at `StageChatPanel.tsx` as a field
+label plus a parenthesised language, so it is unpredictable text — device 1, with “alan”
+carrying every suffix: “{{focus}} alanının …”, “{{focus}} alanını …”, “{{focus}} alanına …”.
+The same head noun carries `{{field}}` in `chatNoProposalRetry`, whose second token sits inside
+brackets (device 2). Nothing in the batch attaches a suffix to a token.
 
 ## Casing
 
@@ -783,6 +830,11 @@ against `_other`'s "o hücreleri düzeltin".
   registry, whose presenter for each of them sets `count` explicitly, and the two `console`
   families through the unread-error badge and the grouped-row overflow line, both of which
   interpolate a count. They are written count-neutral anyway, per the runbook.
+  **Batch 6 adds none of either, and the language closes at 1,920 exactly.** Its seven
+  namespaces contain **no plural family at all** — no `_one`, no `_other`, no `_zero` in any of
+  the seven English files — so the batch ships 282 keys against English's 282, and the
+  whole-language total is English's 1,908 plus the twelve `_one` forms batches 4 and 5
+  supplied. Verified by counting both trees rather than by adding up the batch reports.
 - **Keep the bare key.** English has it, so key parity requires it, and it is the sibling
   that rescues the family in the default gate. Write it count-neutral: once `_one` and
   `_other` both exist it is unreachable. **Checked rather than assumed, because supplying
@@ -842,8 +894,27 @@ is the 123 keys this batch shares with English; the batch ships **131** `tr` key
 eight being the `_one` forms the eight `bare + _other` families in `console` and `logs` owe.
 The batch is the lowest-tail one so far and the reason is the register: 59 of its keys are
 whole narrated sentences, where Turkish and English cost about the same, and the tail is again
-the handful of one-word labels. Re-measure over the whole language at the
-final sweep, and state the population with the figure. **The two namespaces differ because
+the handful of one-word labels. Over the 282 batch-6 keys
+(`stage-details` + `colorText` + `orphans` + `backup` + `welcome` + `common` + `legal`):
+aggregate **1.14**, median **1.12**, 90th percentile **1.55**, longest single ratio 2.40
+(`stage-details:stale`, five English characters — *Stale* — against “Güncel değil”). **State
+the population**: that is all 282 keys, and for this batch it is also the whole of it — the
+namespaces carry no plural family at all, so `tr` ships exactly 282 keys here and there is no
+second population to distinguish. It is the highest-tail batch since `strings`, for the same
+reason `strings` was: seven small namespaces are mostly one- and two-word chrome, and a short
+English source is what makes a large ratio.
+
+**The whole-language figures, re-derived after the last string edit of the last batch.** Over
+the **1,908 keys `tr` shares with English**: aggregate **1.11**, median **1.08**, 90th
+percentile **1.56**, longest single ratio 3.33 (`strings:compare.run`). Over the **full 1,920
+`tr` keys**, each extra `_one` measured against the English form it resolves to: aggregate
+**1.11**, median **1.08**, 90th percentile **1.55**. **The two populations barely differ here,
+and that is a fact about this language rather than a rounding accident** — Turkish carries only
+twelve keys English has no counterpart for, against Russian's ninety-four, so the denominator
+the runbook warns about cannot move these apart. A language with a larger category set must
+still state which population it measured. Turkish is **slightly shorter in aggregate than every
+locale shipped before it** (ru 1.19, es 1.22, fr 1.26) and yet sits in the same place at the
+tail, which is the runbook's point restated: the aggregate is not what breaks chrome. **The two namespaces differ because
 `strings` is chrome:** it is full of one- and two-word labels, and a short English source is
 what produces a large ratio — the tail here is not long renderings, it is short sources. The catch is distribution, not the aggregate: fewer,
 much longer single tokens ("değerlendirilemedi", "yapılandırmalarınızı"), which clip rather
@@ -917,6 +988,19 @@ Batch 4 moved no soft figure either. Its longest column header is **18**
 "Oluşturulma tarihi", budget 20 — tying batch 2's longest, `runs.runIdColumn`), and it ships
 no filter label and no bulk-bar control.
 
+**Batch 6 touches one soft class, moves nothing, and adds nothing to the hard one.** It ships
+no sidebar item and no `strings:tabs.*` key, so the 199px container is untouched by the last
+batch of the language. Its only column headers are `orphans:columns.*`, the longest of which is
+**9** (`orphans:columns.translations` “Çeviriler”, budget 20). `orphans:columns.select` is
+**not** in that class and must not be measured into it: despite its key name it is the
+`aria-label` on the select-all checkbox and on every row checkbox — two call sites, which is
+why it ships as the deliberately generic “Seç” rather than being specialised to either. The
+batch ships no filter label; the one control that could be read into the bulk-bar class,
+`orphans:actions.bulkDelete` (“Seçilenleri sil ({{count}})”), is 26 characters as a template
+against a budget of 40, and it sits in the Orphans toolbar rather than in the bulk bar the
+anchor was measured from. So all four figures stand exactly as batch 2 left them, across the
+whole language.
+
 **Batch 5 touches one soft class and does not move it either.** The console's six level
 filters are filter labels; the longest is 13 (`console:filter_debug` “Hata ayıklama”, budget
 40), well inside it even though it is the batch's largest ratio — a five-character English
@@ -972,11 +1056,11 @@ re-render them.
 | Category | Kategori | `strings:tabs.category` | `strings:guide.topicCategory` "Kategori sekmesi" — singular on purpose, though the page it opens is plural |
 | Routing | Yönlendirme | `strings:tabs.routing` | `strings:guide.topicRouting` "Yönlendirme sekmesi" |
 | Activity | Etkinlik | `strings:tabs.runs` | `strings:guide.topicActivity`; page title expands to "Çeviri etkinliği" (`strings:runs.title`) |
-| Stage details | Bölüm ayrıntıları | `strings:tabs` (stage-details) | `stage-details:title` (batch 6), `strings:runs.typeStageDetailsTranslation` |
-| Orphans | Yetimler | `strings:tabs.orphans` | `orphans:title` (batch 6), `config:fullReplaceOrphanNotice`, `strings:guide.topicOrphans` |
-| Backup | Yedekleme | `strings:tabs.backup` | `config:importSnapshotNote`, `strings:guide.topicBackup` |
+| Stage details | Bölüm ayrıntıları | `strings:tabs` (stage-details) | `stage-details:title` — **shipped in batch 6**, byte-identical; `strings:runs.typeStageDetailsTranslation` |
+| Orphans | Yetimler | `strings:tabs.orphans` | `orphans:title` — **shipped in batch 6**, byte-identical; `config:fullReplaceOrphanNotice`, `strings:guide.topicOrphans` |
+| Backup | Yedekleme | `strings:tabs.backup` | `config:importSnapshotNote`, `strings:guide.topicBackup`; the page title expands to “Yedekleme ve geri yükleme” (`backup:title`, batch 6) exactly as Activity's does — a countable backup stays “yedek” |
 | Sharing | Paylaşım | `strings:tabs.sharing` | `collab:sharing.pageTitle` — **shipped in batch 4**, byte-identical |
-| Text Styler | Metin biçimlendirici | `strings:tabs` (color-text) | `sidebar:colorText` — **shipped in batch 4**, byte-identical; `colorText:title` (batch 6) still owes it; `strings:runs.typeChatTextStyler` |
+| Text Styler | Metin biçimlendirici | `strings:tabs` (color-text) | `sidebar:colorText` — **shipped in batch 4**, byte-identical; `colorText:title` — **shipped in batch 6**, byte-identical, the third and last site; `strings:runs.typeChatTextStyler` |
 
 ### Surfaces named outside that bar
 
@@ -990,7 +1074,7 @@ re-render them.
 | Guide | Kılavuz | `sidebar:guide` — **shipped in batch 4** | `config:pseudoTestHelpLink` and every link that sends the reader to the guide |
 | Settings | Ayarlar | `sidebar:settings` — **shipped in batch 4** | `settings:title` — **word-for-word identical in English, and must stay so**, the same relationship Global Config has |
 | Account | Hesap | `sidebar:account` — **shipped in batch 4** | the page's own sections name parts of it, never the page |
-| Legal | Yasal bilgiler | `sidebar:legal` — **shipped in batch 4** | `legal:title` is English's *longer* "Legal & policies" and expands, exactly as Activity's page title does — **prescription for batch 6: expand it, do not repeat this label and do not shorten the page title to match** |
+| Legal | Yasal bilgiler | `sidebar:legal` — **shipped in batch 4** | `legal:title` is English's *longer* *Legal & policies* and expands, exactly as Activity's page title does — **discharged in batch 6: “Yasal bilgiler ve politikalar”**, which keeps this label as its head and adds English's second noun rather than inventing a third name |
 | Changelog | Değişiklik günlüğü | `sidebar:changelog` — **shipped in batch 4** | named in prose by `common:changelogEntryError` ("Couldn't load this **changelog** entry.", batch 6), which repeats the stem; `common:changelogShowOlder` counts *releases*, a different word |
 | Pseudo Test | Pseudo Test | `strings:guide.topicPseudoTest` | `config:pseudoTestHelpAria` — a proper noun, untranslated |
 
@@ -1301,6 +1385,37 @@ point of failure.
   temizlendi.” The *translation memory* row bans the bare word because it reads as RAM —
   and here the string genuinely means RAM. `logs:tm.cleared` two rows away is the term,
   written out in full: “Çeviri belleği temizlendi.”
+- **Batch 6's licensed collisions, all six, with the deciding question for each.** The
+  pre-flight prints them and none is a defect. *Create backup* takes two renderings because
+  `backup:createSection` is a section heading (“Yedek oluşturma”) and `backup:createButton` is
+  the button directly beneath it (“Yedek oluştur”) — the runbook names this exact key as the
+  place Russian took the wrong shape, and the two being siblings on screen is why the shapes
+  must differ, not a reason to unify them. *Discard* splits by sense, settled by the frozen
+  lexicon, which names `colorText:assistant.discard` in its sense-2 group: “Reddet” there,
+  “Vazgeç” at the three sense-1 sites. *Translate* splits by control: `stage-details:translate`
+  is a button (“Çevir”) against the sidebar group heading “Çeviri”. In the other direction,
+  “Uyarı” now serves *Warn* at `colorText:swatches.warn` as well as the console level and the
+  severity value; “Başlık” serves `colorText:swatches.title` (*Title*) and
+  `settings:previewSamples.heading` (*Heading*), which are in different namespaces and never
+  co-render; and “Kaydedilemedi: {{message}}” serves `stage-details:saveFailed` (*Could not
+  save*) beside `config:autoSaveError` (*Failed to save*) — one event, two English wordings,
+  one impersonal negative potential, exactly as *Retry* / *Try again* already resolved.
+- **“Current” in a bare label goes to “mevcut” even where a full sentence took “geçerli”.**
+  `stage-details:chatQuickCurrent` is the standalone label “Mevcut metin:”, while batch 2's
+  `strings:compare.undoVersionsHint` ships “Geçerli metin geçmişte tutulur” inside a sentence
+  about undo history. That is the *Current* rule doing what it says — decide on the ambiguity,
+  not on the adjective — and the two are not drift: a bare label with a colon can be read as
+  *valid text*, and a clause about version history cannot. The same reading sends
+  `stage-details:scopeCurrentOnly` to “Yalnızca mevcut dil ({{lang}})”. The rule's other half
+  is corroborated in the same batch by `colorText:invalidHex` (“Geçerli bir hex renk değeri
+  girin…”), where English really does mean *valid* and “geçerli” is the right word.
+- **English's *Override* is two different actions and takes two Turkish verbs.**
+  `config:routing.labelModelOverride` is “Model geçersiz kılma” — a rule replacing a setting —
+  while `orphans:relink.overrideModeLabel` is “Üzerine yazma modu” and `relink.overrideAll` is
+  “Tüm çevirilerin üzerine yetimin çevirilerini yaz”, because there the action writes over
+  stored translation text. Rendering the orphans pair with the routing verb would say the
+  translations are being *invalidated*, which is not what relinking does. Resolve the action,
+  not the word.
 - **A search placeholder takes the `-in` imperative — one shipped string disagrees and it is
   the outlier.** `console:searchPlaceholder` is “Günlüklerde arayın…”, matching every earlier
   search field in the locale — `strings:compare.searchPlaceholder`,
