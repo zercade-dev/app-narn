@@ -88,21 +88,42 @@ placeholder handling.
 >   the three this file had been carrying since batch 1: `sidebar:selectProject`
 >   (“Bir proje seçin”), `sidebar:create` (“Oluştur”) and `vault:unlockDescription`, whose
 >   shipped string is “Bu oturumda modül kimlik bilgilerinin şifresini çözmek için
->   **parolanızı girin**.”
+>   **parolanızı girin**.” **`logs:`, `console:`, `system:`, `errors:`, `generation:` and
+>   `batch:` quotations are citations as of batch 5**, checked on every run from the moment
+>   that batch landed; the batch left no prescription of its own behind in this file, and
+>   re-running the derivation above at the end of it prints `common:saving` and the two
+>   batch-5 prescriptions written as citations directly below. **Batch 5 leaves batch 6 three
+>   strings it has no freedom in**, found by diffing the six English files against batch 6's
+>   seven for byte-identical values:
+>   `colorText:assistant.unlockVault` is “Kasanın kilidini aç”,
+>   `stage-details:chatUnlockVault` is “Kasanın kilidini aç”,
+>   both byte-identical in English to `logs:action.unlockVault`; and
+>   `backup:toastRestoreSuccess` must repeat `logs:backup.restored`, “Yedek geri yüklendi.”
+>   The first two are quoted here on purpose, so the guard starts checking them the moment
+>   `colorText` and `stage-details` land; the third is recorded in the *backup* row of
+>   `terminology/tr.md` as prose and nothing mechanical will say so.
+>   **One same-English pair in that diff is a coincidence and must NOT be copied:**
+>   `colorText:swatches.warn` is English *Warn* like `console:filter_warn`, but it names a
+>   game text colour in a list of colour names, not a log level. Batch 6 decides it on its
+>   own; if it lands on the same word that is fine — the two never co-render — but it is not
+>   the verbatim rule.
 > - A quotation attached to **no key at all** is an illustration: a rejected candidate, a
 >   wrong form shown as wrong, or a convention example. Never copy one as a rendering.
 >
 > **Two ways to write a sentence here that the guard reads as a Turkish rendering. Both cost
 > this locale findings; the second cost it four rounds of silence.**
 >
-> 1. **Do not backtick a code fragment.** A backtick span that is not key-shaped — anything
->    with whitespace or a bracket in it — is a citation with no adjacency needed, so a
->    function name with parentheses, or a snippet like a variable assignment, fails as an
->    unattested rendering. **Name the function in prose.** A fenced block does **not** protect
->    you: paragraph flattening only joins the lines of a block, it strips nothing, so a
->    citation inside a fence extracts exactly as it would outside one. (An earlier version of
->    this rule said fences were stripped. They are not — re-derived from the flattening
->    function itself.)
+> 1. **Do not backtick a code fragment — in `terminology/tr.md`.** A backtick span that is not
+>    key-shaped — anything with whitespace or a bracket in it — is a citation with no adjacency
+>    needed there, so a function name with parentheses, or a snippet like a variable
+>    assignment, fails as an unattested rendering. **Name the function in prose.** A fenced
+>    block does **not** protect you: paragraph flattening only joins the lines of a block, it
+>    strips nothing, so a citation inside a fence extracts exactly as it would outside one. (An
+>    earlier version of this rule said fences were stripped. They are not — re-derived from the
+>    flattening function itself.) **Scope corrected in batch 5, by measurement:** this rule is
+>    the lexicon's, not this file's — the style extractor ignores non-key backtick spans
+>    altogether (see the table below). Keeping the habit in both files costs nothing and is
+>    still the right habit; believing it is what the *style* guard checks is what cost a round.
 > 2. **Never put ENGLISH in the delimiter this file's cell is using.** Which delimiter that is
 >    is decided per cell, in order: guillemets, then corner brackets, then **curly doubles**,
 >    then straight doubles as the fallback. This locale writes curly everywhere, so **curly is
@@ -114,10 +135,43 @@ placeholder handling.
 > citation whose text has no non-ASCII letter *only for non-Latin-script locales* — `ru`, `ja`
 > and the other unspaced scripts — so their English glosses are discarded automatically.
 > Turkish is Latin-script, so an English gloss and a Turkish rendering are indistinguishable to
-> it. **In a lexicon row this bites hardest: `candidatesForRow` collects EVERY quoted span in
-> the row — Rendering cell and Notes cell alike, with no key adjacency and no exemption for an
-> illustration.** Four rows of this file failed the moment the guard learned to read curly
-> quotes, and all four were English glosses, not one a wrong rendering.
+> it. Four rows of this file failed the moment the guard learned to read curly quotes, and all
+> four were English glosses, not one a wrong rendering.
+>
+> **What exactly makes a quoted span a candidate — measured in batch 5, because the version of
+> this paragraph that stood for four rounds was wrong about it.** It said the lexicon's
+> candidate builder collects EVERY quoted span in a row, *with no key adjacency*. It does not.
+> Running that builder over synthetic rows gives, in the **lexicon** file:
+>
+> | Shape in a Notes cell | Extracted? |
+> | --- | --- |
+> | a quoted span with no key anywhere near it | **no** |
+> | a key, then the span in parentheses | **no** — an opening parenthesis is not one of the connector characters |
+> | a key, then the span directly, or after up to three connector words | **yes** |
+> | the span, then the key in parentheses | **yes** |
+> | a backtick span that is not key-shaped | **yes**, and this one really has no adjacency requirement |
+>
+> The style-guide extractor behaves the same on the first four rows and **differs on the last**:
+> it ignores non-key backtick spans entirely. So the backtick-a-function-name trap is a
+> *lexicon* trap, not a trap in this file — which is the opposite of what the old paragraph
+> implied by treating one rule as covering both.
+>
+> **A third shape, and this one loses a citation silently — measured in batch 5 while writing
+> the prescriptions two bullets up.** Inside a blockquote (this whole block is one), paragraph
+> flattening joins the lines but keeps each line's leading angle bracket, so a citation whose
+> key ends one line and whose quoted rendering begins the next has that bracket sitting
+> between them — and it is not one of the connector characters, so nothing extracts. The same
+> two lines outside a blockquote extract normally, and so does the same citation rewrapped
+> onto one line. It cost a prescription here: the first of the two *Unlock vault* lines above
+> was written across a line break, extracted nothing, and only reappeared after the pair was
+> rewrapped. **Keep a key and its quoted rendering on one physical line**, and re-run the
+> derivation snippet after writing a prescription rather than trusting that you wrote one.
+>
+> **The instruction does not change: put an English gloss in *italics*.** Only the reason
+> changes, and the correction is left visible rather than rewritten away. Two of the shapes
+> above extract an adjacent gloss, the parenthesized shape survives only by an accident of the
+> connector pattern, and a rule that depends on remembering which is which will be got wrong.
+> Italics are safe under every shape and under both extractors.
 >
 > When you ship a prescription, come back and leave it as a citation. When you change a
 > string this file quotes, re-read the quotation next to its key — the guard catches a
@@ -250,6 +304,39 @@ ambiguity does not arise there. Choose on the noun, not on the adjective.
 and the *form* from the control. An `Example:` line in a term row is an illustration, not
 a ruling that the cited key keeps that grammatical form.
 
+### Narration — the shape of a log line, settled in batch 5
+
+`logs` and `console` are the only namespaces that narrate events instead of labelling
+controls, and 59 of the 123 keys in that batch are one register. Three rules, and they are
+the same three the control section already implies — written out here because a batch that
+gets one of them wrong gets it wrong sixty times.
+
+- **A completed event is the passive perfective, with no agent.** `logs:translation.done` is
+  “Bir girdi {{language}} diline çevrildi.”, `logs:vault.passwordChanged` is “Kasa parolası
+  değiştirildi.”, `logs:orphan.deleted` is “Yetim bir girdi silindi.” The app is the agent in
+  every one of them and Turkish does not name it, exactly as English does not.
+- **An in-flight event is the `-yor` progressive**, which is the same form the progress
+  labels in `config` take: `logs:translation.start` is “Bir girdi {{language}} diline
+  çevriliyor…” and `logs:translation.retry` is “Başarısız bir çeviri yeniden deneniyor.”
+  English marks the difference with its own participles; do not flatten the two into one
+  tense.
+- **A failure the user could not have caused is the impersonal negative potential**
+  (`-Amadı`), never a blaming imperative: `logs:translation.queueStartFailed` is “Çeviri
+  çalıştırması başlatılamadı.” and `logs:backup.pruneFailed` is “Eski yedekler
+  temizlenemedi.” This matches the toasts batch 2 and batch 3 already shipped
+  (`strings:bulk.cancelFailed`, `review:sourceAi.startFailed`), which is why no new wording
+  had to be invented for any of them.
+
+**A tally after an em dash keeps a head noun, and the head is chosen for what the number
+actually counts.** `logs:glossaryGen.done` says “{{analyzed}} girdiden {{suggested}} terim
+önerildi” because those two count entries and glossary terms respectively.
+`logs:stageDetails.done` deliberately has **no** head noun — “{{completed}} bitti, {{failed}}
+başarısız” — because the engine counts *languages* there and the guarantee lives in the
+engine, not in the string; the runbook records the same reasoning for the two log lines whose
+displayed token and selecting token happen to agree today. Where the unit is safe, name it;
+where it is a fact about another file, mirror English's bare tally instead of inventing a
+claim that can silently go false.
+
 ## Casing
 
 Sentence case for every control, label, tab and page title. Turkish does not capitalize
@@ -293,13 +380,26 @@ Two things to carry forward from it:
   wrong, so it passed the parity gate, the pre-flight and all seven typography sweeps. The
   only way to catch a casing defect of this kind is to know which containers uppercase and
   check `lang` is set — which is now a product invariant rather than a translator's job.
-- **If you ever add a hand-uppercased value** — there are **three** in this namespace,
+- **If you ever add a hand-uppercased value** — there are **three** in `strings`,
   each preserved because English uses uppercase for layout: `strings:columns.config`
   "DURUM" (en "STATUS"), `strings:filters.matchAll` "VE" (en "AND") and
   `strings:filters.matchAny` "VEYA" (en "OR") — the by-hand mapping rule above still
   applies to them, because no CSS is involved there. None of the three happens to contain
   an `i` or `ı`, so none was ever affected by the casing defect; they are listed so the
-  count in this guide is true rather than merely harmless.
+  count in this guide is true rather than merely harmless. **Batch 5 adds the fourth and it
+  is in `console`:** `console:title` (English *CONSOLE*) is “KONSOL”, rendered inside an
+  ordinary bold span with no `text-transform`, so the uppercase has to be in the value. It
+  too has no `i`/`ı`, so the by-hand mapping is a formality here — but write it by hand
+  anyway, because the next such value may not be so lucky.
+
+**Two more CSS-uppercasing containers, both found in batch 5 and both in the console.** The
+level-filter tabs and the export-format select trigger carry `uppercase` in their class
+lists, so six filter labels and two format labels are uppercased at render time. Two of them
+contain the letter that matters — “Bilgi” and “Bildirimler” — so they are the first strings
+in this locale outside batch 2's twelve whose correctness depends on the `lang` attribute
+fix. Nothing to do: write sentence case and let CSS do it. The list in this section is a
+list of containers someone has checked, not a closed set — check the class list of any
+container you write a short label into.
 
 **And it is a hazard in the other direction too, in tooling rather than in the UI.**
 JavaScript's `toLowerCase()` is locale-invariant: `"İstem".toLowerCase()` is `i` plus a
@@ -650,6 +750,17 @@ against `_other`'s "o hücreleri düzeltin".
   Note also that `logs:translation.queued` and `logs:sourceReview.done` are the two the
   runbook flags for a *different* reason on top of this one: each displays a non-`count`
   token while selecting on `count`.
+  **Batch 5 shipped the other eight and the twelve are now complete.** All eight come out
+  byte-identical across bare / `_one` / `_other`, which is the third of the three shapes batch
+  4 met and the commonest one: a Turkish noun after a numeral never inflects, and none of the
+  eight has a possessive or a demonstrative that could carry a number the way
+  `vault:retrySuccess` does. `logs:sourceReview.done` is “Kaynak incelemesi {{findings}} sorun
+  buldu.” in all three, and the other seven behave the same way. **The bare keys are
+  unreachable and were checked, not assumed:** every one of the eight is reached through a
+  call site that always passes a count — the six `logs` families through the log-presentation
+  registry, whose presenter for each of them sets `count` explicitly, and the two `console`
+  families through the unread-error badge and the grouped-row overflow line, both of which
+  interpolate a count. They are written count-neutral anyway, per the runbook.
 - **Keep the bare key.** English has it, so key parity requires it, and it is the sibling
   that rescues the family in the default gate. Write it count-neutral: once `_one` and
   `_other` both exist it is unreachable. **Checked rather than assumed, because supplying
@@ -701,7 +812,15 @@ characters — "Typo" — against “Yazım hatası”). Over the 300 batch-4 ke
 characters — "Legal" — against “Yasal bilgiler”). **State the population**: that is the 300
 keys this batch shares with English; the batch ships **304** `tr` keys, the extra four being
 the `_one` forms the four `vault` `bare + _other` families owe (see "Plural categories"),
-which have no English counterpart to be a ratio of. Re-measure over the whole language at the
+which have no English counterpart to be a ratio of. Over the 123 batch-5 keys
+(`logs` + `console` + `system` + `errors` + `generation` + `batch`): aggregate **1.09**,
+median **1.09**, 90th percentile **1.52**, longest single ratio 2.60 (`console:filter_debug`,
+five English characters — *Debug* — against “Hata ayıklama”). **State the population**: that
+is the 123 keys this batch shares with English; the batch ships **131** `tr` keys, the extra
+eight being the `_one` forms the eight `bare + _other` families in `console` and `logs` owe.
+The batch is the lowest-tail one so far and the reason is the register: 59 of its keys are
+whole narrated sentences, where Turkish and English cost about the same, and the tail is again
+the handful of one-word labels. Re-measure over the whole language at the
 final sweep, and state the population with the figure. **The two namespaces differ because
 `strings` is chrome:** it is full of one- and two-word labels, and a short English source is
 what produces a large ratio — the tail here is not long renderings, it is short sources. The catch is distribution, not the aggregate: fewer,
@@ -775,6 +894,12 @@ Batch 4 moved no soft figure either. Its longest column header is **18**
 (`collab:sharing.columnLanguages` "Yazılabilir diller" and `invites.columnCreated`
 "Oluşturulma tarihi", budget 20 — tying batch 2's longest, `runs.runIdColumn`), and it ships
 no filter label and no bulk-bar control.
+
+**Batch 5 touches one soft class and does not move it either.** The console's six level
+filters are filter labels; the longest is 13 (`console:filter_debug` “Hata ayıklama”, budget
+40), well inside it even though it is the batch's largest ratio — a five-character English
+source is what produces that number, not a long rendering. The batch ships no sidebar item,
+no column header and no bulk-bar control, so the hard class is untouched.
 
 **Batch 3 tested the three soft figures against a second namespace group and none moved.**
 Over `glossary` + `review` + `category` + `quality` the longest column header is **11**
@@ -1113,3 +1238,38 @@ point of failure.
 - **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms
   where English writes "entr(ies)". Turkish needs no parenthetical at all — the singular
   noun after the number already covers every count.
+- **A number in a run control counts JOBS, not entries — open the call site before you
+  name the unit.** `batch:toTranslateCount` (English *{{count}} to translate*) ships
+  “yapılacak {{count}} çeviri” and **not** “{{count}} girdi”, because the value is computed
+  by walking the selected rows *and* the selected target languages: ten entries into three
+  languages is 30, not 10. `batch:progressAriaLabel`, `runCompleted` and
+  `runCompletedWithErrors` count the same thing and take the same head noun. English elides
+  the noun in all four and so hides the question; Turkish has to supply a head, and the
+  wrong head is a false statement in an `aria-label` a screen reader reads out verbatim.
+- **“Dismiss” is “Kapat” on a banner and “Kaldır” on a notification, and the split is the
+  control.** `system:restarted.dismiss` / `cancelled.dismiss` are the ✕ on a transient
+  restart banner, so they take the closing verb — the same word `glossary:close` already
+  ships for English *Close*. `account:notificationsDismiss` removes a row from a list that
+  persists, so batch 4's “Kaldır” stands. The pre-flight reports both directions of this and
+  both are licensed; the two surfaces cannot co-render.
+- **English's log levels *Warn* and *Warning* are one Turkish word.** `console:filter_warn`
+  is “Uyarı”, byte-identical to `config:lqa.severityWarning` and
+  `settings:previewSamples.warn`. English clips the level name to fit a tiny tab; Turkish
+  has no established clipping of this word, and inventing one to make the tool quiet is the
+  error the *Etkin* bullet warns about. The tab is uppercased by CSS, which costs nothing
+  here.
+- **Bare “bellek” is licensed exactly once, and it is the RAM reading on purpose.**
+  `logs:vault.credentialsEvicted` (English *…were cleared from memory*) ships “…bellekten
+  temizlendi.” The *translation memory* row bans the bare word because it reads as RAM —
+  and here the string genuinely means RAM. `logs:tm.cleared` two rows away is the term,
+  written out in full: “Çeviri belleği temizlendi.”
+- **A search placeholder takes the `-in` imperative — one shipped string disagrees and it is
+  the outlier.** `console:searchPlaceholder` is “Günlüklerde arayın…”, matching every earlier
+  search field in the locale — `strings:compare.searchPlaceholder`,
+  `strings:filters.searchPlaceholder`, `strings:mobile.searchPlaceholder`,
+  `strings:achievement.dialogSearch`,
+  `strings:compare.translateExamplesSearchPlaceholder`, `config:models.searchOrType` and
+  `config:tm.searchPlaceholder`. `sidebar:searchProjects` ships the bare stem “Projelerde
+  ara…” instead, which is the button shape in a placeholder's position. Not fixed here —
+  it belongs to another batch's file — but it is a one-word fix and it is written down so
+  the whole-language sweep can take it.

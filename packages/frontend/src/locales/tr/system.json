@@ -1,0 +1,18 @@
+{
+  "countdown": {
+    "message": "⚠️ Hizmet, bir güncellemeyi uygulamak için kısa süre içinde yeniden başlatılacak — lütfen çalışmanızı şimdi kaydedin. Devam eden çeviriler kesintiye uğrayacak; tamamlanan girdiler korunur, bu yüzden yarım kalanları sonrasında yeniden çalıştırın.",
+    "collapse": "Daralt",
+    "expand": "Genişlet"
+  },
+  "restarted": {
+    "message": "Hizmet, bir güncellemeyi uygulamak için kısa süre önce yeniden başlatıldı; bazı işlemler kesintiye uğramış olabilir — eksik görünen her şeyi yeniden çalıştırın.",
+    "dismiss": "Kapat"
+  },
+  "cancelled": {
+    "message": "Planlanan hizmet yeniden başlatması iptal edildi — normal şekilde çalışmaya devam edebilirsiniz.",
+    "dismiss": "Kapat"
+  },
+  "slot": {
+    "aria": "{{label}} ortamını kullanıyorsunuz"
+  }
+}
