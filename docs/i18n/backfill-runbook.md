@@ -306,7 +306,23 @@ Importants were process findings rather than defects in a string. That is not tr
 getting better — each batch had a different one. It is the artifacts filling up. Every
 finding in the first two batches that generalised was written into the lexicon or the style
 file before the third batch started, and the third and fourth batches then did not make
-those mistakes. If your rate is *not* falling, the artifacts are not being updated.
+those mistakes.
+
+**That last inference was wrong, and the first parallel wave falsified it.** The runbook used
+to end this paragraph with *"if your rate is not falling, the artifacts are not being
+updated"*. Across three languages and six batches each, the rate **did not fall** — and the
+artifacts were being updated the whole time. What the pilot measured was a *starting* rate
+being paid down: inheriting finished artifacts moves batch 1 from **5.6 to 2.1–3.5**, which is
+the real transfer effect and it is large. What remains after that is a **per-round fixed
+cost** of roughly nine findings, and it is not translation error — it is the claims each batch
+writes into its own style guide and lexicon, which cannot be inherited because they do not
+exist until that batch writes them.
+
+So: **expect a low flat rate, not a falling one.** A flat rate is the artifacts working. If
+you are hunting a process failure because the line is not sloping down, you are hunting
+something that is not there — and the thing actually worth watching is *where* the findings
+are. By the last two rounds of that wave every finding in all three languages was in a
+document rather than a string.
 
 ---
 
