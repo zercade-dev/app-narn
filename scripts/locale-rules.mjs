@@ -219,6 +219,7 @@ export function isStrictFor(locale, strictEnv = STRICT_ENV) {
  * failure saying to delete it. The gate lifts the exemption, not a memory.
  */
 export const WIP_LOCALES = {
+  vi: 'Backfill in flight — wave 3, batches 1-6, one PR; deleted in the whole-language sweep.',
 };
 
 for (const [locale, reason] of Object.entries(WIP_LOCALES)) {
