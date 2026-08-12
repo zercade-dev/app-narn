@@ -1,0 +1,69 @@
+{
+  "title": "Painel de qualidade",
+  "loading": "Carregando o resumo de qualidade…",
+  "error": "Falha ao carregar o resumo de qualidade: {{message}}",
+  "empty": "Ainda não há resultados de LQA. Execute uma tradução para preencher este painel.",
+  "overallStat": {
+    "passRateLabel": "Taxa de aprovação geral",
+    "results": "Resultados de LQA: {{count}}",
+    "entries": "Entradas: {{count}}",
+    "legendPassed": "Aprovadas: {{count}}",
+    "legendFailed": "Reprovadas: {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "Problemas mais comuns",
+    "description": "Contagem por tipo de problema em todos os idiomas."
+  },
+  "other": "Outros",
+  "columns": {
+    "passRate": "Taxa de aprovação"
+  },
+  "legend": {
+    "tierHigh": "Taxa de aprovação alta (≥ 90%)",
+    "tierMid": "Taxa de aprovação média (70–89%)",
+    "tierLow": "Taxa de aprovação baixa (< 70%)",
+    "passed": "Aprovadas",
+    "failed": "Reprovadas"
+  },
+  "checkLabels": {
+    "tag-equality": "Igualdade de tags",
+    "overflow": "Estouro de comprimento",
+    "length-limit": "Limite de comprimento",
+    "glossary-adherence": "Aderência ao glossário",
+    "forbidden-terms": "Termos proibidos",
+    "regex-assertions": "Asserções de regex",
+    "number-parity": "Paridade de números",
+    "whitespace-parity": "Paridade de espaços em branco",
+    "line-break-parity": "Paridade de quebras de linha",
+    "end-punctuation": "Pontuação final",
+    "double-spacing": "Espaços duplicados",
+    "double-words": "Palavras duplicadas",
+    "untranslated": "Não traduzido",
+    "mask-integrity": "Integridade das máscaras",
+    "tag-mismatch": "Tags divergentes",
+    "too-long": "Longa demais",
+    "glossary-term-missing": "Termo de glossário ausente",
+    "forbidden-term": "Termo proibido",
+    "regex-assertion-failed": "Asserção de regex reprovada",
+    "regex-config-error": "Erro de configuração da regex",
+    "number-missing": "Número ausente",
+    "number-added": "Número adicionado",
+    "whitespace-leading": "Espaço em branco no início",
+    "whitespace-trailing": "Espaço em branco no fim",
+    "line-break-mismatch": "Quebras de linha divergentes",
+    "end-punctuation-mismatch": "Pontuação final divergente",
+    "mask-mismatch": "Máscaras divergentes"
+  },
+  "byLanguage": {
+    "title": "Taxa de aprovação por idioma",
+    "description": "Piores primeiro. Clique em um idioma para inspecionar as entradas reprovadas dele."
+  },
+  "bySource": {
+    "title": "Problemas por origem",
+    "description": "Piores primeiro. Clique em uma origem para inspecionar as entradas reprovadas dela."
+  },
+  "byModule": {
+    "title": "Qualidade por módulo",
+    "description": "Taxa de aprovação e problemas agrupados pelo módulo de tradução que produziu cada tradução."
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "title": "Preferências",
+  "appearance": "Aparência",
+  "appearanceDescription": "Escolha como o narn aparece neste dispositivo.",
+  "theme": "Tema",
+  "mode": "Modo",
+  "switchToLight": "Mudar para o modo claro",
+  "switchToDark": "Mudar para o modo escuro",
+  "languageTitle": "Idioma",
+  "languageDescription": "Idioma da interface.",
+  "preview": "Prévia",
+  "previewHint": "Controles de exemplo exibidos com o tema selecionado.",
+  "previewSamples": {
+    "heading": "Título",
+    "body": "O texto do corpo mostra a fonte e as cores básicas.",
+    "muted": "O texto atenuado fica assim.",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "pass": "Aprovado",
+    "warn": "Aviso",
+    "fail": "Reprovado",
+    "info": "Informação",
+    "inputPlaceholder": "Campo de texto",
+    "selectOptionA": "Primeira opção",
+    "selectOptionB": "Segunda opção",
+    "checkbox": "Caixa de seleção",
+    "badgeDefault": "Padrão",
+    "badgeSecondary": "Secundário",
+    "badgeOutline": "Contornado",
+    "badgeDestructive": "Alerta",
+    "scrollHint": "Role para ver a barra de rolagem do tema",
+    "iconsLabel": "Ícones"
+  },
+  "themes": {
+    "default": { "name": "Clássico", "description": "O visual clássico do narn." },
+    "pixel": { "name": "Pixel", "description": "Clima de console 8-bit encorpado." },
+    "techno": { "name": "Techno", "description": "Terminal cyberpunk neon." },
+    "minimal": { "name": "Minimalista", "description": "Plano, discreto, monocromático." }
+  }
+}
