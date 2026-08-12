@@ -30,12 +30,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useUiSettings, type UiLanguage } from '../../stores/ui-settings-store.js';
+import { UI_LANGS } from '../../lib/url-state.js';
 import { THEMES } from '../../themes/theme-registry.js';
 
+/**
+ * Each language named in its own language, never translated — a reader looking
+ * for their language scans for the word they know, which is the same word in
+ * every UI language. The exhaustive `Record` means adding a code to
+ * `UiLanguage` fails the build until its label exists.
+ */
 export const UI_LANGUAGE_LABELS: Record<UiLanguage, string> = {
   en: 'English',
   es: 'Español',
   fr: 'Français',
+  ru: 'Русский',
 };
 
 export function SettingsView() {
@@ -69,9 +77,17 @@ export function SettingsView() {
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="en">English</SelectItem>
-              <SelectItem value="es">Español</SelectItem>
-              <SelectItem value="fr">Français</SelectItem>
+              {/*
+                Rendered from UI_LANGS rather than hand-listed: a hardcoded list
+                here is a second source of truth that can silently disagree with
+                the union, which is how a shipped locale can exist everywhere
+                except the one control that switches to it.
+              */}
+              {UI_LANGS.map((code) => (
+                <SelectItem key={code} value={code}>
+                  {UI_LANGUAGE_LABELS[code]}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </CardContent>

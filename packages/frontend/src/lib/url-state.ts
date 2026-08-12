@@ -2,7 +2,7 @@ import type { ShellView, Tab } from '../stores/view-store.js';
 import type { UiLanguage } from '../stores/ui-settings-store.js';
 
 /** UI locales accepted in `?lang`. `satisfies` keeps this in lockstep with UiLanguage. */
-export const UI_LANGS = ['en', 'es', 'fr'] as const satisfies readonly UiLanguage[];
+export const UI_LANGS = ['en', 'es', 'fr', 'ru'] as const satisfies readonly UiLanguage[];
 
 export function isUiLang(value: string | null | undefined): value is UiLanguage {
   return value != null && (UI_LANGS as readonly string[]).includes(value);

@@ -351,10 +351,10 @@ export class CSVImporter {
    *
    * `options.languages` restricts the exported translation columns to the given
    * language codes (still ordered by registry). The source language column is
-   * always emitted regardless of the filter. The synthetic `pseudo-test` column
-   * is the one exception to "omitted means unrestricted": it is emitted ONLY
-   * when explicitly listed here, because it is not a shippable language and a
-   * default export carrying it cannot be loaded by the game.
+   * always emitted regardless of the filter. The synthetic `pseudo-test`
+   * column is NEVER emitted, whether or not it is listed here: it is not a
+   * shippable language and an export carrying it cannot be loaded by the game.
+   * Use `options.pseudoAs` to get pseudo text into a file.
    *
    * `options.pseudoAs` substitutes the synthetic pseudo-test column into a
    * real language's column: the chosen language's cells are filled from the
@@ -426,16 +426,12 @@ export class CSVImporter {
     const filteredLangs = project.activeLanguages
       .filter((code) => code !== project.sourceLanguage)
       .filter((code) => (languageFilter ? languageFilter.has(code) : true))
-      // The synthetic pseudo-test language is never a shippable column — the
-      // game only loads the languages it ships with, so emitting it breaks the
-      // exported file. It is therefore opt-in: it appears only when explicitly
-      // named in `options.languages`, and never when `pseudoAs` has already
-      // substituted its text into a real language's column.
-      .filter((code) =>
-        code === PSEUDO_LANGUAGE_CODE
-          ? pseudoAs === undefined && languageFilter?.has(code) === true
-          : true,
-      );
+      // The synthetic pseudo-test language is never a column in an exported
+      // file — the game only loads the languages it ships with, so emitting it
+      // breaks the export. There is deliberately no opt-in: naming it in
+      // `options.languages` does not bring it back. Pseudo text reaches a CSV
+      // only via `pseudoAs`, which writes it into a real language's column.
+      .filter((code) => code !== PSEUDO_LANGUAGE_CODE);
     if (pseudoAs !== undefined && !filteredLangs.includes(pseudoAs)) filteredLangs.push(pseudoAs);
     const translationLangs = filteredLangs.sort(
       (a, b) =>
