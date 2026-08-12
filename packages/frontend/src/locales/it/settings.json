@@ -1,0 +1,42 @@
+{
+  "title": "Impostazioni",
+  "appearance": "Aspetto",
+  "appearanceDescription": "Scegli l'aspetto di narn su questo dispositivo.",
+  "theme": "Tema",
+  "mode": "Modalità",
+  "switchToLight": "Passa alla modalità chiara",
+  "switchToDark": "Passa alla modalità scura",
+  "languageTitle": "Lingua",
+  "languageDescription": "Lingua dell'interfaccia utente.",
+  "preview": "Anteprima",
+  "previewHint": "Elementi di esempio resi con il tema selezionato.",
+  "previewSamples": {
+    "heading": "Titolo",
+    "body": "Il testo del corpo mostra il carattere e i colori di base.",
+    "muted": "Il testo attenuato ha questo aspetto.",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "pass": "Superato",
+    "warn": "Avviso",
+    "fail": "Non superato",
+    "info": "Info",
+    "inputPlaceholder": "Campo di testo",
+    "selectOptionA": "Prima opzione",
+    "selectOptionB": "Seconda opzione",
+    "checkbox": "Casella di selezione",
+    "badgeDefault": "Predefinito",
+    "badgeSecondary": "Secondario",
+    "badgeOutline": "Contornato",
+    "badgeDestructive": "Di allerta",
+    "scrollHint": "Scorri per vedere la barra di scorrimento del tema",
+    "iconsLabel": "Icone"
+  },
+  "themes": {
+    "default": { "name": "Classico", "description": "L'aspetto classico di narn." },
+    "pixel": { "name": "Pixel", "description": "Atmosfere spigolose da console a 8 bit." },
+    "techno": { "name": "Techno", "description": "Terminale cyberpunk al neon." },
+    "minimal": { "name": "Minimal", "description": "Piatto, sobrio, monocromatico." }
+  }
+}

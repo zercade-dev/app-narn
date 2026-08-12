@@ -1,0 +1,93 @@
+{
+  "action": {
+    "openRouting": "Configura le regole di routing",
+    "openModuleSettings": "Apri le impostazioni del modulo",
+    "openQuality": "Apri il pannello della qualità",
+    "openGlossary": "Apri il glossario",
+    "unlockVault": "Sblocca la cassaforte"
+  },
+  "translation": {
+    "start": "Traduzione di una voce in {{language}} in corso…",
+    "done": "Voce tradotta in {{language}}.",
+    "doneFromMemory": "Riutilizzata una traduzione salvata per {{language}}.",
+    "queued": "Traduzioni in coda: {{total}}.",
+    "queued_one": "Traduzioni in coda: {{total}}.",
+    "queued_other": "Traduzioni in coda: {{total}}.",
+    "runQueued": "Esecuzione di traduzione in coda — posizione {{position}}.",
+    "retryQueued": "Nuovo tentativo in coda — posizione {{position}}.",
+    "retry": "Nuovo tentativo su una traduzione non riuscita.",
+    "failedNoRoute": "Traduzione in {{language}} non riuscita (voci: {{count}}): nessuna regola di routing corrisponde.",
+    "failedNoRoute_one": "Impossibile tradurre {{count}} voce in {{language}}: nessuna regola di routing corrisponde.",
+    "failedNoRoute_other": "Impossibile tradurre {{count}} voci in {{language}}: nessuna regola di routing corrisponde.",
+    "failedModuleDisabled": "Traduzione in {{language}} non riuscita (voci: {{count}}): il modulo {{module}} è disattivato.",
+    "failedModuleDisabled_one": "Impossibile tradurre {{count}} voce in {{language}}: il modulo {{module}} è disattivato.",
+    "failedModuleDisabled_other": "Impossibile tradurre {{count}} voci in {{language}}: il modulo {{module}} è disattivato.",
+    "failedModuleNotFound": "Traduzione in {{language}} non riuscita (voci: {{count}}): il modulo {{module}} non è installato.",
+    "failedModuleNotFound_one": "Impossibile tradurre {{count}} voce in {{language}}: il modulo {{module}} non è installato.",
+    "failedModuleNotFound_other": "Impossibile tradurre {{count}} voci in {{language}}: il modulo {{module}} non è installato.",
+    "failedGeneric": "Impossibile tradurre una voce in {{language}}.",
+    "batchFailed": "Batch non riuscito — traduzioni: {{count}}; lingue: {{languages}}.",
+    "queueStartFailed": "Impossibile avviare l'esecuzione di traduzione.",
+    "maskMismatch": "I tag di formattazione non sono sopravvissuti alla traduzione in {{language}}.",
+    "tmRejected": "Una traduzione salvata per {{language}} non ha superato il controllo di qualità.",
+    "lqaRetry": "Controllo di qualità non superato: si chiede al modello di riprovare.",
+    "authCancel": "L'accesso è stato annullato, quindi la traduzione si è interrotta."
+  },
+  "lqa": {
+    "passed": "Controllo di qualità superato.",
+    "failed": "Controllo di qualità non superato.",
+    "overflow": "La traduzione è troppo lunga per lo spazio disponibile.",
+    "checkError": "Non è stato possibile eseguire un controllo di qualità."
+  },
+  "judge": {
+    "done": "Revisione: punteggio {{score}} — verdetto: {{verdict}}.",
+    "suggestDone": "Revisione terminata con suggerimenti.",
+    "suggestNoChange": "La revisione non ha trovato nulla da modificare.",
+    "suggestionDiscarded": "Suggerimento rifiutato."
+  },
+  "sourceReview": {
+    "done": "Revisione dell'origine terminata — rilievi: {{findings}}.",
+    "done_one": "Revisione dell'origine terminata — rilievi: {{findings}}.",
+    "done_other": "Revisione dell'origine terminata — rilievi: {{findings}}."
+  },
+  "glossaryGen": {
+    "done": "Esecuzione del glossario terminata — termini proposti: {{suggested}}; voci analizzate: {{analyzed}}.",
+    "failed": "Generazione del glossario non riuscita.",
+    "saveSuggestionsFailed": "Impossibile salvare i suggerimenti del glossario."
+  },
+  "categoryGen": {
+    "queued": "Generazione delle categorie in coda.",
+    "done": "Generazione delle categorie terminata — suggerimenti: {{suggestions}}.",
+    "failed": "Generazione delle categorie non riuscita."
+  },
+  "stageDetails": {
+    "queued": "Dettagli livello in coda.",
+    "done": "Dettagli livello terminati — completati: {{completed}}; non riusciti: {{failed}}.",
+    "failed": "Dettagli livello non riusciti."
+  },
+  "module": {
+    "loaded": "Modulo {{module}} caricato.",
+    "instanceRegistered": "Aggiunta la configurazione {{instance}}.",
+    "instanceRegisterFailed": "Impossibile aggiungere la configurazione {{instance}}."
+  },
+  "vault": {
+    "unlocked": "Cassaforte sbloccata.",
+    "passwordChanged": "Password della cassaforte cambiata.",
+    "credentialsEvicted": "Le tue credenziali salvate sono state rimosse dalla memoria RAM."
+  },
+  "orphan": {
+    "detected": "Voci non più presenti nel file di origine: {{count}}.",
+    "detected_one": "Trovata {{count}} voce che non è più presente nel file di origine.",
+    "detected_other": "Trovate {{count}} voci che non sono più presenti nel file di origine.",
+    "linked": "Ricollegata una voce orfana.",
+    "deleted": "Eliminata una voce orfana."
+  },
+  "tm": {
+    "cleared": "Memoria di traduzione svuotata.",
+    "variantDeleted": "Rimossa una voce dalla memoria di traduzione."
+  },
+  "backup": {
+    "restored": "Backup ripristinato.",
+    "pruneFailed": "Impossibile eliminare i vecchi backup."
+  }
+}

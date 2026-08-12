@@ -315,6 +315,24 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
   // puts no word after a token at all, so `de` is the only entry pt-br needs and
   // the list is deliberately not padded with words nothing matched.
   'pt-br': ['de'],
+  // it, derived from the whole-language post-token-axis survivor set — 25 before
+  // the two fixes below, 23 after, carrying these 9 distinct words. Never from
+  // the raw 130 matches, per the calibration rule above.
+  // `di`, `in` and `su` are prepositions and `che` is a relative pronoun: none
+  // inflects for number. `token`, `batch` and `byte` are English loanwords, and
+  // Italian borrows them INVARIABLE — an unadapted foreign noun takes no plural
+  // ending, so "1 token" and "5 token" are both correct (the plural is carried
+  // by the article, which these strings do not use). `car` is the standard
+  // Italian abbreviation of "caratteri", written "car." and invariant. `s` is
+  // the SI symbol for second, invariant by definition, and Italian typography
+  // puts a space between the numeral and the unit symbol.
+  // The two survivors NOT on this list were real defects and were fixed in the
+  // strings instead, both the same shape — a plural participle or noun sitting
+  // after a bare ratio, which is wrong at a denominator of 1:
+  // `config:reviewProgressCount` read "{{reviewed}} / {{total}} revisionate" and
+  // `strings:runs.stringsProgress` read "{{completed}} / {{total}} voci"; both
+  // now put the word in front of the ratio, where it labels rather than agrees.
+  it: ['di', 'in', 'su', 'che', 'token', 'batch', 'byte', 'car', 's'],
 };
 
 /**
