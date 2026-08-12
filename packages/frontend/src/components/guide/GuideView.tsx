@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Loader2 } from 'lucide-react';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { useViewStore } from '../../stores/view-store.js';
@@ -60,9 +61,35 @@ export function GuideView() {
     setActiveSlug(firstVisibleSlug);
   }
 
-  const rawContent = getGuideContent(activeSlug, language);
-  const content = cloudManaged ? stripLocalOnly(rawContent) : rawContent;
-  const rendered = renderMarkdown(content);
+  // getGuideContent is async (guide markdown is code-split, one chunk per
+  // slug/locale — see guides-registry.ts). The loaded content is tagged with
+  // the request key it answers; render-time "loading" is derived by
+  // comparing that key against the current one, rather than resetting state
+  // to null synchronously in the effect body (which the react-hooks
+  // set-state-in-effect rule flags as a cascading-render hazard). This also
+  // guards the async race the reader can trigger by switching topic or UI
+  // language while a load is in flight: the effect's cleanup flips `ignore`,
+  // so a load that resolves after a newer selection was made writes nothing
+  // — the stale `.then` is a no-op, and the key comparison would have hidden
+  // it even if it weren't. An AbortController isn't a fit here — dynamic
+  // `import()` has no abort signal to pass it.
+  const [loadedGuide, setLoadedGuide] = useState<{ key: string; content: string } | null>(null);
+  useEffect(() => {
+    let ignore = false;
+    const key = `${language}::${activeSlug}`;
+    getGuideContent(activeSlug, language).then((md) => {
+      if (!ignore) setLoadedGuide({ key, content: md });
+    });
+    return () => {
+      ignore = true;
+    };
+  }, [activeSlug, language]);
+
+  const rawContent =
+    loadedGuide && loadedGuide.key === `${language}::${activeSlug}` ? loadedGuide.content : null;
+  const content =
+    rawContent === null ? null : cloudManaged ? stripLocalOnly(rawContent) : rawContent;
+  const rendered = content === null ? null : renderMarkdown(content);
 
   return (
     <div className="flex h-full" data-testid="guide-view">
@@ -94,7 +121,19 @@ export function GuideView() {
 
       {/* Content area — capped to a comfortable reading measure (~70ch). */}
       <main className="flex-1 overflow-auto px-6 py-8">
-        <div className="mx-auto max-w-[72ch]">{rendered}</div>
+        <div className="mx-auto max-w-[72ch]">
+          {rendered === null ? (
+            <div
+              className="flex items-center gap-2 py-3 text-sm text-muted-foreground"
+              data-testid="guide-content-loading"
+            >
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              {t('loading')}
+            </div>
+          ) : (
+            rendered
+          )}
+        </div>
       </main>
     </div>
   );
