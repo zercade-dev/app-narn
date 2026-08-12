@@ -378,23 +378,47 @@ claim that can silently go false.
 
 ### Text addressed to the MODEL, not to the user — settled in batch 6
 
-**The `-in` register is a rule about addressing the reader. Five strings in this locale are not
-addressed to the reader at all: they are prompt text the app sends to a model, and they take
-the bare stem.** `stage-details:chatQuickPrompts.improve` / `shorten` / `proofread` /
-`punchier` are composed into the request when the user clicks a quick action, and
-`stage-details:chatNoProposalRetry` is composed when they click *Retry as a direct edit*
-(`StageChatPanel.tsx` builds each one with `t(...)` and sends the result). None of them is ever
-painted as a label. So `chatQuickPrompts.shorten` is “{{focus}} alanını anlamını koruyarak
-kısalt.” — a bare imperative, matching English's own bare imperative, where the deferential
-form would be addressing nobody.
+**The `-in` register is a rule about addressing the reader. Six strings in this locale are not
+addressed to the reader at all: they are prompt text the app sends to a model, and none of them
+takes the deferential form.** `stage-details:chatQuickPrompts.improve` / `shorten` / `proofread` /
+`punchier` are composed into the request when the user clicks a quick action;
+`stage-details:chatNoProposalRetry` is composed when they click *Retry as a direct edit*; and
+`stage-details:chatQuickCurrent` (“Mevcut metin:”) is the **header line** appended above the
+current text in both of those payloads. `StageChatPanel.tsx` builds each one with `t(…)` and
+passes the result to `send()` — the four quick prompts and the header at `:159`, the retry prompt
+and the header again at `:425` — and **none of the six is ever painted**. So
+`chatQuickPrompts.shorten` is “{{focus}} alanını anlamını koruyarak kısalt.” — a bare imperative,
+matching English's own bare imperative, where the deferential form would be addressing nobody.
+
+**The sixth is a header, not an imperative, and it is here because of its classification rather
+than its shape.** `chatQuickCurrent` is a bare noun phrase with a colon, so the bare-stem rule has
+nothing to bite on and the string would read the same either way. That is exactly why it went
+unnoticed for a round: it was first recorded in the *Locale-specific traps* section as “the
+standalone label”, with its wording licensed on a UI ambiguity — *a bare label with a colon can be
+read as valid text* — **for a control that does not exist.** The rendering was right and the reason
+was about a surface that is never rendered, which is this wave's signature defect. The *Current*
+rule still holds on its own UI evidence; `stage-details:scopeCurrentOnly`
+(“Yalnızca mevcut dil ({{lang}})”) is the painted half that carries it.
+
+**One key in this namespace is genuinely dual-use, and it is the worked example the
+check-the-call-site sentence below exists for.** `stage-details:chatFocusSource` (“Kaynak”) is
+**painted twice** — the `<option value="">` of the focus-language select at `:339`, and the
+language slot of a proposal card at `:377` — **and composed into prompt text twice**: at `:125` it
+becomes part of `focusLabel`, which is interpolated as `{{focus}}`, and at `:419` it is passed as
+`{{lang}}` to `chatNoProposalRetry`. So the prompt set is not a partition of the namespace, and a
+key cannot be classified from its neighbours. A bare noun survives both roles, which is what makes
+“Kaynak” right at all four sites; a key whose two roles wanted different shapes would be a finding,
+not a choice.
 
 **The buttons that trigger them are ordinary controls and follow the ordinary rule**, which is
 why the pair reads as two shapes for one action: `chatQuickActions.shorten` is “Kısalt” (a
 short isolated button, bare stem) over a prompt that is also a bare stem, while
 `chatNoProposalRetryButton` is “Doğrudan düzenleme olarak yeniden dene”. **Check the call site
-before applying this**: a string in a chat namespace is not automatically prompt text, and
-`stage-details:chatInputPlaceholder` (“Asistana sorun…”) is a placeholder the user reads and
-therefore takes `-in` like every other placeholder in the locale.
+before applying this** — every claim in this section came from opening `StageChatPanel.tsx`, and
+the one claim in it that was ever wrong was the one made from the key name instead. A string in a
+chat namespace is not automatically prompt text: `stage-details:chatInputPlaceholder`
+(“Asistana sorun…”) is a placeholder the user reads and therefore takes `-in` like every other
+placeholder in the locale, and `chatFocusSource` above is both at once.
 
 **The vowel-harmony rule binds prompt text exactly as hard**, and this is where it bit: every
 one of the five interpolates a name. `{{focus}}` is built at `StageChatPanel.tsx` as a field
@@ -1055,7 +1079,7 @@ re-render them.
 | Glossary | Sözlükçe | `strings:tabs.glossary` | `strings:guide.topicGlossary` "Sözlükçe sekmesi" |
 | Category | Kategori | `strings:tabs.category` | `strings:guide.topicCategory` "Kategori sekmesi" — singular on purpose, though the page it opens is plural |
 | Routing | Yönlendirme | `strings:tabs.routing` | `strings:guide.topicRouting` "Yönlendirme sekmesi" |
-| Activity | Etkinlik | `strings:tabs.runs` | `strings:guide.topicActivity`; page title expands to "Çeviri etkinliği" (`strings:runs.title`) |
+| Activity | Etkinlik | `strings:tabs.runs` | `strings:guide.topicActivity`; page title expands to "Çeviri etkinliği" (`strings:runs.title`); named in prose by `review:*.progressActivityNote`, `glossary:generateRunningHint` and, in batch 6, `orphans:toast.aiRetranslateStarted` (“…Etkinlik sekmesine bakın”) |
 | Stage details | Bölüm ayrıntıları | `strings:tabs` (stage-details) | `stage-details:title` — **shipped in batch 6**, byte-identical; `strings:runs.typeStageDetailsTranslation` |
 | Orphans | Yetimler | `strings:tabs.orphans` | `orphans:title` — **shipped in batch 6**, byte-identical; `config:fullReplaceOrphanNotice`, `strings:guide.topicOrphans` |
 | Backup | Yedekleme | `strings:tabs.backup` | `config:importSnapshotNote`, `strings:guide.topicBackup`; the page title expands to “Yedekleme ve geri yükleme” (`backup:title`, batch 6) exactly as Activity's does — a countable backup stays “yedek” |
@@ -1066,13 +1090,13 @@ re-render them.
 
 | Surface | Turkish | Owning key | Also named at |
 | --- | --- | --- | --- |
-| Global Config | Genel yapılandırma | `sidebar:globalConfig` — **the owning key shipped in batch 4** | `config:globalConfigTitle` — **word-for-word identical in English, and must stay so**; also `strings:runs.aiReviewNoModules` |
+| Global Config | Genel yapılandırma | `sidebar:globalConfig` — **the owning key shipped in batch 4** | `config:globalConfigTitle` — **word-for-word identical in English, and must stay so**; also `strings:runs.aiReviewNoModules`, `review:sourceAi.noModules`, and in batch 6 `orphans:relink.aiNoModules` (whose English says *the global settings* — a surface that does not exist; see `english-review-notes.md`) plus `stage-details:chatOpenConfig` / `colorText:assistant.openConfig`, both “Genel yapılandırmayı aç” |
 | Credential Vault | Kimlik bilgisi kasası | `strings:guide.topicVault` | `vault:statusLabel` — **shipped in batch 4**, the full form, cold; also `vault:unlockTitle` / `createTitle` / `editorTitle` and `account:devicesDescription` / `devicesEmpty`, all of whose English writes it out in full. The bare clip "kasa" is licensed only where English clips it too |
 | AI Review | Yapay zekâ incelemesi | `strings:guide.topicAiReview` | `strings:runs.aiReview` / `aiReviewConfigTitle` / `judgeBadge` |
 | Translation Memory | Çeviri belleği | `sidebar:translationMemory` — **the owning key shipped in batch 4** | `config:tm.*`, `strings:guide.groupTranslationMemory`, `strings:guide.topicTranslationMemory` |
 | Review (sidebar group) | İnceleme | `sidebar:groups.review` — **shipped in batch 4**, copied verbatim from its guide twin | `strings:guide.groupReview` — an umbrella, not any one member; see the term row |
 | Guide | Kılavuz | `sidebar:guide` — **shipped in batch 4** | `config:pseudoTestHelpLink` and every link that sends the reader to the guide |
-| Settings | Ayarlar | `sidebar:settings` — **shipped in batch 4** | `settings:title` — **word-for-word identical in English, and must stay so**, the same relationship Global Config has |
+| Settings | Ayarlar | `sidebar:settings` — **shipped in batch 4** | `settings:title` — **word-for-word identical in English, and must stay so**, the same relationship Global Config has; named in prose by `welcome:themeChooser.intro`, which is one of the locale's **two** apostrophized surface names (“Ayarlar'dan”) — see "Surface names" |
 | Account | Hesap | `sidebar:account` — **shipped in batch 4** | the page's own sections name parts of it, never the page |
 | Legal | Yasal bilgiler | `sidebar:legal` — **shipped in batch 4** | `legal:title` is English's *longer* *Legal & policies* and expands, exactly as Activity's page title does — **discharged in batch 6: “Yasal bilgiler ve politikalar”**, which keeps this label as its head and adds English's second noun rather than inventing a third name |
 | Changelog | Değişiklik günlüğü | `sidebar:changelog` — **shipped in batch 4** | named in prose by `common:changelogEntryError` ("Couldn't load this **changelog** entry.", batch 6), which repeats the stem; `common:changelogShowOlder` counts *releases*, a different word |
@@ -1155,9 +1179,22 @@ pressed into service as a name, so the proper-noun apostrophe rule (`NARN'ı`, `
   and the sentence would lose the fact that it is naming a tab. English gets this free from
   capitalisation, which Turkish sentence case does not provide here.
 
-That single occurrence is currently the locale's **only** apostrophized surface name, and it
-is deliberate rather than an inconsistency. **It is not the proper-noun rule.** The
-apostrophe sweep in the table below groups the two, so read a hit before licensing it: a
+**The finished locale has exactly TWO apostrophized surface names**, and both are deliberate
+rather than inconsistencies: `category:noModules` above, and — added by batch 6 —
+`welcome:themeChooser.intro`, “…ikisini de istediğiniz zaman **Ayarlar'dan**
+değiştirebilirsiniz.” Both meet the condition stated one bullet up and nothing else does: bare
+“ayarlardan” reads as *from the settings* and loses that the sentence names the **Settings**
+page, exactly as bare “yapılandırmada” loses **Config**. Every other in-prose surface name in the
+locale is disambiguated by an appended “sekmesi” or by being two words, and correctly takes none.
+
+**This paragraph said “the only” for two rounds, and batch 6 falsified it in the same commit that
+wrote the string** — the same shape as the hand-uppercased inventory in *Casing*, which was also
+one short until somebody swept instead of trusting the list. So **derive it, do not read it**:
+flatten every value under `packages/frontend/src/locales/tr` and print those containing an ASCII
+apostrophe. Everything that comes back is either a **proper noun or key name** — `narn'ı`,
+`DeepL'e`, `API'sini`, `VRAM'i`, `Google'da`, `Enter'a`, `Tekno'da`; note a theme name is a proper
+noun, not a surface name — or one of the two above. **It is not the proper-noun rule.** The
+apostrophe sweep in the table below groups both classes, so read a hit before licensing it: a
 `DeepL'e` hit is a proper noun, a `Yapılandırma'da` hit is this rule, and both are correct
 for different reasons.
 
@@ -1196,11 +1233,31 @@ seventh is Turkish-specific and is the one that catches this locale's signature 
 | --- | --- | --- |
 | Over-formal imperative the guide bans | `-iniz` / `-ınız` endings | `grep -nE '(iniz\|ınız\|unuz\|ünüz)\b'` — **eyeball every hit**: the same ending spells the ordinary 2nd-person possessive and ability forms ("oyununuzdaki", "edebilirsiniz", "seçtiğiniz"), which are correct. Only a bare verb stem plus the ending ("seçiniz", "giriniz") is the defect; `config` has 10 hits and 0 defects |
 | Bare-stem singular where a sentence needs `-in` | "seç", "gir" mid-sentence | read the imperatives |
-| Straight quotes where the guide sets typographic ones | `"` and `'` around a value | `grep -n '\\"'` |
-| Doubled spaces | — | `grep -nE '  '` |
+| Straight quotes where the guide sets typographic ones | `"` and `'` around a value | **values only** — see the note under this table |
+| Doubled spaces | — | **values only** — see the note under this table |
 | Three-dot ellipsis instead of the single character | `...` for `…` | `grep -n '\.\.\.'` |
 | Hyphen used as a dash | ` - ` for ` — ` | `grep -nE ' - '` |
 | **Suffix attached to a placeholder** | `{{model}}'i`, `{{count}}ı` | `grep -nE "\}\}['’]?[a-zçğıöşüA-ZÇĞİÖŞÜ]"` |
+
+**Two of those sweeps CANNOT be run as a `grep` over the JSON files, and the forms this table
+carried for five rounds were both broken.** `grep -nE '  '` matches the JSON's own two-space
+indentation and `grep -n '\\"'` matches every line's own key/value delimiters, so each returns
+essentially the whole file: **they can neither pass nor fail.** Nobody noticed because a sweep that
+always "hits" reads as noise to be eyeballed away, and the batch that found it wrote the fix into
+its report — which, per the runbook, is not a file anyone opens. Run them over **parsed values**:
+
+```bash
+# from the workspace root — doubled spaces, three-dot ellipses, hyphen-dashes,
+# straight quotes and welded suffixes, over values only
+node -e 'const fs=require("fs"),p="packages/frontend/src/locales/tr";
+const f=(o,k="",a=[])=>{for(const[q,v]of Object.entries(o))v&&typeof v==="object"?f(v,k+q+".",a):a.push([k+q,v]);return a};
+const R={"doubled space":/ {2}/,"three-dot":/\.\.\./,"hyphen-dash":/ - /,"straight quote":/"/,"welded suffix":/\}\}[\x27\u2019]?[a-zA-ZçğıöşüÇĞİÖŞÜ]/};
+for(const n of fs.readdirSync(p))for(const[k,v]of f(JSON.parse(fs.readFileSync(p+"/"+n,"utf8"))))
+for(const[name,re]of Object.entries(R))if(re.test(v))console.log(name,n,k,JSON.stringify(v));'
+```
+
+Clean across all 1,920 values as of the last batch. The other five sweeps are fine as greps,
+because none of them can match JSON syntax.
 
 **The seventh sweep now has a gate behind it — keep running it anyway.** When batch 1 was
 written, the pre-flight's narrow rule required **whitespace** between `}}` and the following
@@ -1399,16 +1456,32 @@ point of failure.
   `settings:previewSamples.heading` (*Heading*), which are in different namespaces and never
   co-render; and “Kaydedilemedi: {{message}}” serves `stage-details:saveFailed` (*Could not
   save*) beside `config:autoSaveError` (*Failed to save*) — one event, two English wordings,
-  one impersonal negative potential, exactly as *Retry* / *Try again* already resolved.
-- **“Current” in a bare label goes to “mevcut” even where a full sentence took “geçerli”.**
-  `stage-details:chatQuickCurrent` is the standalone label “Mevcut metin:”, while batch 2's
-  `strings:compare.undoVersionsHint` ships “Geçerli metin geçmişte tutulur” inside a sentence
-  about undo history. That is the *Current* rule doing what it says — decide on the ambiguity,
-  not on the adjective — and the two are not drift: a bare label with a colon can be read as
-  *valid text*, and a clause about version history cannot. The same reading sends
-  `stage-details:scopeCurrentOnly` to “Yalnızca mevcut dil ({{lang}})”. The rule's other half
-  is corroborated in the same batch by `colorText:invalidHex` (“Geçerli bir hex renk değeri
+  one impersonal negative potential, exactly as *Retry* / *Try again* already resolved. Two more
+  same-rendering groups belong to this batch and were **missed by the first enumeration, which
+  closed itself at “all six” over a set of eight**: “Henüz çeviri yok” serves
+  `config:reviewProgressNone` (*No translations yet*) and `stage-details:noTranslation` (*No
+  translation yet*) — genuinely new, and licensed because a bare Turkish noun is unmarked for
+  number so one rendering is true of both; and “Hedef diller” serves `config:targetLanguages`
+  (*Target Languages*) and `stage-details:languagesLabel` (*Target languages*) — a pre-existing
+  group this batch joined, where the English difference is Title Case and carries no meaning into
+  Turkish. **Re-derive both directions mechanically rather than listing them:** an enumeration
+  that says “all” and is short by two is the class of claim this programme has paid for
+  repeatedly, and the fix is to close it with a script, not with more care.
+- **“Current” goes to “mevcut” wherever the phrase could also be read as *valid*, and batch 6's
+  painted instance is the scope filter.** `stage-details:scopeCurrentOnly` is
+  “Yalnızca mevcut dil ({{lang}})”: “geçerli dil” would read as *a valid language*, a claim about
+  the language that the English does not make. Batch 2's `strings:compare.undoVersionsHint`
+  (“Geçerli metin geçmişte tutulur”) stands, because a clause about undo history cannot be read
+  that way — decide on the ambiguity, not on the adjective. The rule's other half is corroborated
+  in the same batch by `colorText:invalidHex` (“Geçerli bir hex renk değeri
   girin…”), where English really does mean *valid* and “geçerli” is the right word.
+
+  **`stage-details:chatQuickCurrent` (“Mevcut metin:”) was cited here as the bare-label instance,
+  and that was wrong — it is never painted at all.** Both of its call sites compose it into a model
+  request, so it belongs to the prompt-text section above, and its wording never depended on a UI
+  ambiguity. The correction is left visible because **the string did not change**: a right
+  rendering resting on a reason about a surface that does not exist leaves nothing broken to
+  signal it. Check the reason at the call site, not at the key name.
 - **English's *Override* is two different actions and takes two Turkish verbs.**
   `config:routing.labelModelOverride` is “Model geçersiz kılma” — a rule replacing a setting —
   while `orphans:relink.overrideModeLabel` is “Üzerine yazma modu” and `relink.overrideAll` is
