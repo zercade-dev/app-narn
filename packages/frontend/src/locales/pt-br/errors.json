@@ -1,0 +1,10 @@
+{
+  "http": {
+    "unauthorized": "Você precisa entrar de novo.",
+    "forbidden": "Você não tem permissão para fazer isso.",
+    "vaultLocked": "O seu cofre está bloqueado. Desbloqueie-o e tente de novo.",
+    "rateLimited": "Requisições demais — espere um momento e tente de novo.",
+    "server": "O servidor teve um problema. Tente de novo em instantes.",
+    "offline": "Não é possível acessar o servidor. Verifique a sua conexão."
+  }
+}

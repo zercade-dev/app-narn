@@ -1,0 +1,93 @@
+{
+  "action": {
+    "openRouting": "Configurar as regras de roteamento",
+    "openModuleSettings": "Abrir as configurações do módulo",
+    "openQuality": "Abrir o painel de qualidade",
+    "openGlossary": "Abrir o glossário",
+    "unlockVault": "Desbloquear cofre"
+  },
+  "translation": {
+    "start": "Traduzindo uma entrada para {{language}}…",
+    "done": "Entrada traduzida para {{language}}.",
+    "doneFromMemory": "Tradução salva reutilizada para {{language}}.",
+    "queued": "Trabalhos na fila para tradução: {{total}}.",
+    "queued_one": "Trabalhos na fila para tradução: {{total}}.",
+    "queued_other": "Trabalhos na fila para tradução: {{total}}.",
+    "runQueued": "Execução de tradução na fila — posição {{position}}.",
+    "retryQueued": "Nova tentativa na fila — posição {{position}}.",
+    "retry": "Repetindo uma tradução que falhou.",
+    "failedNoRoute": "Não foi possível traduzir para {{language}} (entradas: {{count}}) — nenhuma regra de roteamento corresponde.",
+    "failedNoRoute_one": "Não foi possível traduzir {{count}} entrada para {{language}} — nenhuma regra de roteamento corresponde.",
+    "failedNoRoute_other": "Não foi possível traduzir {{count}} entradas para {{language}} — nenhuma regra de roteamento corresponde.",
+    "failedModuleDisabled": "Não foi possível traduzir para {{language}} (entradas: {{count}}) — o módulo {{module}} está desativado.",
+    "failedModuleDisabled_one": "Não foi possível traduzir {{count}} entrada para {{language}} — o módulo {{module}} está desativado.",
+    "failedModuleDisabled_other": "Não foi possível traduzir {{count}} entradas para {{language}} — o módulo {{module}} está desativado.",
+    "failedModuleNotFound": "Não foi possível traduzir para {{language}} (entradas: {{count}}) — o módulo {{module}} não está instalado.",
+    "failedModuleNotFound_one": "Não foi possível traduzir {{count}} entrada para {{language}} — o módulo {{module}} não está instalado.",
+    "failedModuleNotFound_other": "Não foi possível traduzir {{count}} entradas para {{language}} — o módulo {{module}} não está instalado.",
+    "failedGeneric": "Não foi possível traduzir uma entrada para {{language}}.",
+    "batchFailed": "Falhou um lote de traduções para {{languages}} — traduções: {{count}}.",
+    "queueStartFailed": "Não foi possível iniciar a execução de tradução.",
+    "maskMismatch": "As tags de formatação não sobreviveram à tradução para {{language}}.",
+    "tmRejected": "Uma tradução salva para {{language}} não passou na verificação de qualidade.",
+    "lqaRetry": "A verificação de qualidade falhou — pedindo ao modelo para tentar de novo.",
+    "authCancel": "O login foi cancelado, então a tradução parou."
+  },
+  "lqa": {
+    "passed": "A verificação de qualidade passou.",
+    "failed": "A verificação de qualidade falhou.",
+    "overflow": "A tradução é longa demais para o espaço disponível.",
+    "checkError": "Não foi possível executar uma verificação de qualidade."
+  },
+  "judge": {
+    "done": "A revisão pontuou {{score}} — veredito: {{verdict}}.",
+    "suggestDone": "A revisão terminou com sugestões.",
+    "suggestNoChange": "A revisão não encontrou nada a mudar.",
+    "suggestionDiscarded": "Sugestão recusada."
+  },
+  "sourceReview": {
+    "done": "Problemas encontrados pela revisão da origem: {{findings}}.",
+    "done_one": "Problemas encontrados pela revisão da origem: {{findings}}.",
+    "done_other": "Problemas encontrados pela revisão da origem: {{findings}}."
+  },
+  "glossaryGen": {
+    "done": "A execução de glossário terminou — termos sugeridos: {{suggested}}; entradas analisadas: {{analyzed}}.",
+    "failed": "Falha na geração de glossário.",
+    "saveSuggestionsFailed": "Não foi possível salvar as sugestões de glossário."
+  },
+  "categoryGen": {
+    "queued": "Geração de categorias na fila.",
+    "done": "A geração de categorias terminou — sugestões: {{suggestions}}.",
+    "failed": "Falha na geração de categorias."
+  },
+  "stageDetails": {
+    "queued": "Detalhes da fase na fila.",
+    "done": "Os detalhes da fase terminaram — concluídos: {{completed}}, com falha: {{failed}}.",
+    "failed": "Os detalhes da fase falharam."
+  },
+  "module": {
+    "loaded": "Módulo {{module}} carregado.",
+    "instanceRegistered": "Configuração {{instance}} adicionada.",
+    "instanceRegisterFailed": "Não foi possível adicionar a configuração {{instance}}."
+  },
+  "vault": {
+    "unlocked": "Cofre desbloqueado.",
+    "passwordChanged": "Senha do cofre alterada.",
+    "credentialsEvicted": "As suas credenciais salvas foram removidas da memória RAM."
+  },
+  "orphan": {
+    "detected": "Entradas encontradas que não estão mais no arquivo de origem: {{count}}.",
+    "detected_one": "{{count}} entrada encontrada que não está mais no arquivo de origem.",
+    "detected_other": "{{count}} entradas encontradas que não estão mais no arquivo de origem.",
+    "linked": "Uma entrada órfã foi revinculada.",
+    "deleted": "Uma entrada órfã foi excluída."
+  },
+  "tm": {
+    "cleared": "Memória de tradução limpa.",
+    "variantDeleted": "Uma entrada da memória de tradução foi removida."
+  },
+  "backup": {
+    "restored": "Backup restaurado.",
+    "pruneFailed": "Não foi possível limpar os backups antigos."
+  }
+}

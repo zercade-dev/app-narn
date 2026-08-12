@@ -302,6 +302,19 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
   // since the welded form is wrong in German and "the guard went quiet" is not
   // a reason to write anything.
   de: ['von', 'entfernen', 'kopieren', 'markiert', 's'],
+  // pt-br, derived from the whole-language sweep's post-token-axis survivors —
+  // 109 raw narrow matches, 12 after the token axis, and all twelve are the same
+  // word. Never from the raw match set, per the calibration rule above.
+  // `de` is the preposition "of": invariant for number, gender and case in
+  // Portuguese, and it is what every "X de Y" ratio frame puts after its first
+  // token ("Página {{page}} de {{total}}", "{{current}} de {{total}}",
+  // "Pontuação: {{score}} de 100"). A numeral in front of it is always
+  // grammatical, so the twelve are cleared rather than rewritten. Nothing else
+  // survived the token axis: the count-neutral device this locale uses
+  // everywhere else (an invariant noun phrase, then a colon, then the number)
+  // puts no word after a token at all, so `de` is the only entry pt-br needs and
+  // the list is deliberately not padded with words nothing matched.
+  'pt-br': ['de'],
 };
 
 /**

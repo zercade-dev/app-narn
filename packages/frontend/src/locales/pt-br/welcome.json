@@ -1,0 +1,30 @@
+{
+  "title": "Boas-vindas ao Narn",
+  "intro": "Dê uma olhada nos guias abaixo antes de começar — ou vá direto para a configuração do seu cofre de credenciais quando estiver pronto.",
+  "guidesHeading": "Guias",
+  "browseGuides": "Explorar os guias",
+  "setupVaultHeading": "Pronto para traduzir?",
+  "setupVaultBody": "Configure o seu cofre de credenciais para adicionar as chaves dos provedores de IA que as suas traduções vão usar.",
+  "setupVaultButton": "Configurar o cofre",
+  "themeChooser": {
+    "title": "Escolha o seu visual",
+    "intro": "Escolha um tema e opte por claro ou escuro — você pode mudar os dois a qualquer momento em Preferências.",
+    "themeLabel": "Tema",
+    "modeLabel": "Claro ou escuro",
+    "modes": { "light": "Claro", "dark": "Escuro" },
+    "confirm": "Usar estas configurações",
+    "keepDefault": "Manter o Techno",
+    "names": {
+      "default": "Clássico",
+      "pixel": "Pixel",
+      "techno": "Techno",
+      "minimal": "Minimalista"
+    },
+    "taglines": {
+      "default": "O visual original do NARN.",
+      "pixel": "Pixels retrô encorpados.",
+      "techno": "Console neon. O novo padrão.",
+      "minimal": "Só o conteúdo."
+    }
+  }
+}
