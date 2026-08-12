@@ -1250,6 +1250,16 @@ export const IDENTICAL_ALLOWLIST = {
     'Module name "Generic AI" — the product\'s own name for the bring-your-own-endpoint ' +
     'module, shown in the module picker, so it must match the picker verbatim',
 
+  '*:vault:keyPlaceholder':
+    'The placeholder of the input a user types a VAULT KEY NAME into, and its value is a ' +
+    'format template for one — "KEY_NAME", ASCII uppercase with an underscore. Vault key ' +
+    'names are on the shared never-translate list, so every correct locale renders this ' +
+    'identically; the scope is `*:` for that reason rather than per-locale. Requested ' +
+    'independently by the Japanese and German batch-4 translators, and `ja` is merely the ' +
+    'first locale able to SEE it: at 8 characters and one word it clears ' +
+    'MIN_UNSPACED_CHARS and fails MIN_WORDS, which is exactly the asymmetry isSubstantial() ' +
+    'documents. Neither translator localized or padded the value to clear the check.',
+
   '*:strings:runs.estimatedCost':
     'Format string "≈ ${{amount}}" — an approximation sign, a currency symbol and a ' +
     'placeholder, so there is no word to translate. A locale that writes its currency ' +
