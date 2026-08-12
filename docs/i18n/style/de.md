@@ -63,9 +63,12 @@ now reads "Erst eine bestehende zurückziehen, dann eine neue erstellen."
 
 The du-imperative is kept for the narrower case: a **direct invitation to act**, which is
 usually an instruction carried out on the screen in front of the reader and occasionally one
-carried out elsewhere. **Nine** instances exist across the shipped locale as of round 5, derived
-**without a verb list** — read the method note below before you quote the number, because every
-previous move of this count was the method rather than a new string:
+carried out elsewhere. **Ten keys carrying eleven forms** exist across the finished locale,
+derived **without a verb list** — read the method note below before you quote either number,
+because every previous move of this count was the method rather than a new string. **Say which of
+the two you mean:** one key (`config:structuredOutputExperimentalWarning`) carries two forms, so
+the key count and the form count are permanently one apart, and rounds 1-5 printed "nine"
+without ever saying it was keys.
 
 - **In a field, on this screen** — `account:deleteTokenSent`, `account:mfaDisableHint`.
 - **On another device** — `collab:nickname.claimOnDesktop`, which reuses batch 2's
@@ -81,8 +84,17 @@ previous move of this count was the method rather than a new string:
   All three are advice about a setting the reader is choosing, licensed by the register section's
   own clause; none is a corrective error. The first two are siblings one paragraph apart in the
   same panel and carry the same verb.
+- **Pointing the reader at another surface** — `orphans:toast.aiRetranslateStarted`, "KI-Neu­
+  übersetzung gestartet — **siehe** Tab Aktivität", added by the whole-language sweep. It sits
+  **after an em dash**, which is the exact position the method note below flags as the one a
+  comma-based scan misses, and it is the tenth key. **It is also the one form here that is not a
+  register choice:** *siehe* is morphologically a 2sg imperative of *sehen* (with the e→ie stem
+  change and the archaic retained -e, against the productive *sieh*), but it is lexicalised as the
+  German cross-reference formula and is written identically in *Sie*-register documents. So it
+  neither supports nor threatens the du decision — do not cite it as evidence for the register,
+  and do not "correct" it to *sieh*.
 
-None of the nine is a corrective error, so the rule above holds without exception. **Batch 5
+None of the ten is a corrective error, so the rule above holds without exception. **Batch 5
 owns `errors`**, so it inherits the split rather than re-deciding it.
 
 **Batch 5 applied it, and the count of du-imperatives across the whole locale is unchanged by
@@ -98,9 +110,9 @@ six use *du* and neither is an imperative: English writes them as **statements a
 follows it. The rule splits **imperative against infinitive**; a du-statement is neither, and
 turning one into an infinitive would drop the direct address English chose.
 
-**Do not use a verb list. Enumerate and read.** This count has moved four times — three → six →
-eight → nine — and **every** move was the method, never a new string. Two failure modes produced
-them, and a method has to defeat both:
+**Do not use a verb list. Enumerate and read.** This count has moved five times — three → six →
+eight → nine → ten keys — and **every** move was the method, never a new string. Two failure modes
+produced them, and a method has to defeat both:
 
 - **Where the verb sits.** A German du-imperative is verb-first **in its clause**, not in its
   sentence, and a clause can open after far more than a full stop. `strings:viewNotFoundContact`
@@ -132,7 +144,23 @@ nobody thought of:**
 
 Re-run both passes over the **whole corpus**, not over your own batch, and re-run them after your
 last string edit. If a later round ever does fall back to a verb list, say so in this paragraph
-and name what closes it — an unstated list is what has cost this enumeration four rounds.
+and name what closes it — an unstated list is what has cost this enumeration five rounds.
+
+**What closes the set, stated so it is falsifiable.** A German 2sg imperative is a bare stem or
+stem + *-e*, so it can never end in *-en* or *-end* and is never a *ge-* participle. Dropping
+those three shapes from the 898 distinct clause-initial tokens of the finished corpus leaves
+**723 to read**, and reading all 723 yields exactly eight imperative lexemes — *behalte, gib,
+lass, melde, öffne, probier, schick, siehe* — over ten keys. That filter is a **morphological**
+one, not a verb list: it can only ever admit too much, never too little, which is the property a
+verb list does not have.
+
+> **The fifth move, and it happened during the check that found it.** The sweep's tenth key
+> (*siehe*) was surfaced by the list-free pass. Re-deriving it, this locale's own translator first
+> printed the survivors through a hand-written display list of imperative-looking tokens — and
+> that list omitted *schick*, dropping `account:reportBugsPrefix`, a key this very paragraph had
+> named for two rounds. The enumeration was right and the convenience filter laid over it was not.
+> **A list you write to look at the answer is still a list.** The reading is the method; anything
+> that shortens the reading has to be a shape rule you can prove admits too much.
 
 > **Corrected twice on 2026-08-12, both left visible.** At the round-5 **review** this paragraph
 > claimed six, "derived by scanning every `de/*.json` value for a sentence-initial imperative";
@@ -259,7 +287,7 @@ mentions it repeats that rendering verbatim. Settled so far:
 
 | Surface | German | Where it is already shipped / where it is owed |
 | --- | --- | --- |
-| Global Config | **Globale Konfiguration** | `config:globalConfigTitle` and `sidebar:globalConfig` (both shipped, word-for-word identical as English requires) — 21 chars, inside the 26-char sidebar budget. |
+| Global Config | **Globale Konfiguration** | `config:globalConfigTitle` and `sidebar:globalConfig` (both shipped, word-for-word identical as English requires) — 21 chars, inside the 199 px sidebar slot (~25-char proxy). |
 | Workspace Settings | **Workspace-Einstellungen** | `config:workspaceSettingsTitle` (shipped). |
 | Translation Memory | **Translation Memory** | `config:tm.policyTitle`, `config:tm.browserTitle`, `sidebar:translationMemory` (all shipped). |
 | Backup | **Backup** | `config:importSnapshotNote`, `strings:tabs.backup`, `strings:guide.topicBackup` (all shipped). |
@@ -279,7 +307,7 @@ mentions it repeats that rendering verbatim. Settled so far:
 | Category | **Kategorie** | `strings:tabs.category`, `strings:guide.topicCategory` (shipped). Singular on purpose, as in English, even though the page it opens is plural. |
 | Routing | **Routing** | `strings:tabs.routing`, `strings:guide.topicRouting` (shipped). |
 | Activity | **Aktivität** | `strings:tabs` (runs), `strings:guide.topicActivity` (shipped). The page title `strings:runs.title` deliberately expands to "Übersetzungsaktivität" — expand it, never shorten the page title to match. |
-| Stage details | **Level-Details** | `strings:tabs` (stage-details), `strings:runs.typeStageDetailsTranslation` and batch 6's `stage-details:title` (all shipped). Batch 6 also compounds on it — `stage-details:chatToggle` "Level-Details-Chat umschalten" and `fields.stageDescription.label` "Level-Beschreibung" — which is the term split at the point of use, not a second name. |
+| Stage details | **Level-Details** | `strings:tabs` (stage-details), `strings:runs.typeStageDetailsTranslation` and batch 6's `stage-details:title` (all shipped). Batch 6 also compounds on it — `stage-details:chatToggle` "Level-Details-Chat umschalten" and `stage-details:fields.stageDescription.label` "Level-Beschreibung" — which is the term split at the point of use, not a second name. |
 | Sharing | **Zusammenarbeit** | `strings:tabs.sharing`, `strings:tabPlaceholder.sharing`, `collab:sharing.pageTitle` (all shipped). *Freigabe* was rejected — *freigeben* is the **approve** term (into Translation Memory) and the two would read as one feature. |
 | Text Styler | **Text-Styler** | `strings:tabs` (color-text), `sidebar:colorText` and batch 6's `colorText:title` (all shipped). |
 | Review (sidebar group) | **Review** | `strings:guide.groupReview` and `sidebar:groups.review` (both shipped). |
@@ -324,7 +352,7 @@ re-deciding it.
 | **revert** — undo a whole run's writes | *Zurücksetzen* / *Zurückgesetzt* | `strings:runs.revert`, `strings:runs.revertedBadge`, `strings:runs.revertSuccess_other` | — |
 | **undo** — one edit | *Rückgängig* | `strings:compare.undo`, `strings:editor.undo` | — |
 | **verdict** — the judge's per-entry ruling | *Urteil* | `strings:runs.judgeAllFindingsDescription` | shipped in batch 5 at `logs:judge.done`, which labels the token: "Review ergab Punktzahl {{score}} — Urteil: {{verdict}}." |
-| **assistant** — the chat persona | *Assistent*, weak masculine; linking form *Assistenten-* in a compound | `strings:runs.typeChatGeneric` | shipped in batch 6: `colorText:assistant.title` "KI-Assistent" (English *AI assistant*) and `stage-details:chatAssistant` "Assistent" (English *Assistant*) — each faithful to its own key's English. The linking form carries the batch's four compounds: `colorText:assistant.settings` / `stage-details:chatSettings` "Assistenten-Einstellungen", `assistant.noCredentials` and `assistant.vaultLocked` "Der Assistenten-Anbieter …" |
+| **assistant** — the chat persona | *Assistent*, weak masculine; linking form *Assistenten-* in a compound | `strings:runs.typeChatGeneric` | shipped in batch 6: `colorText:assistant.title` "KI-Assistent" (English *AI assistant*) and `stage-details:chatAssistant` "Assistent" (English *Assistant*) — each faithful to its own key's English. The linking form carries the batch's four compounds: `colorText:assistant.settings` / `stage-details:chatSettings` "Assistenten-Einstellungen", `colorText:assistant.noCredentials` and `colorText:assistant.vaultLocked` "Der Assistenten-Anbieter …" |
 | **review, as a verb with an object** — the Translation-AI controls | *bewerten* | `review:translationAi.runReview`, `reviewAll`, `reReview`, and the two empty-state hints that quote those labels | any later key that tells a user to review *translations* with an AI |
 | **review, as a verb** — what the **source review** does to an entry | *untersuchen* | `review:sourceAi.scopeNeverReviewed`, `scopeNoneHint` and `configHint`'s **second** sentence (all three render English *review*). `emptyHint` renders English *checks* with the same verb, because *prüfen* is withheld from the AI source review — that is this row extending to one *check*, not a claim that every *check* takes it | batch 5's `logs:sourceReview.*` |
 | **browse / look something over** — reading rather than analysing | *durchsehen* | `category:subtitle` and `strings:mobile.desktopOnlyBody` (English *browse*), `review:sourceAi.configHint`'s **first** sentence (English *Check the source text itself*) | any later batch rendering English *browse* |
@@ -613,7 +641,7 @@ because the English is loose and a plausible German could have overstated or und
 - `orphans:relink.aiRetranslateHint` — the route captures the orphan's OLD source text and both
   entries' pre-merge translations, then enqueues a background run
   (`relinkRetranslateEngine.enqueue`). It really is a **run**, so the German is "ein
-  KI-Durchlauf" per the **run** row's compound head, and `toast.aiRetranslateStarted` really can
+  KI-Durchlauf" per the **run** row's compound head, and `orphans:toast.aiRetranslateStarted` really can
   say "siehe Tab Aktivität".
 - `backup:confirmBody` and `restoreDescription` — restore verifies **all** checksums before
   anything is applied (`restoreBackup`: "Validate ALL checksums before any write") and then
@@ -629,7 +657,7 @@ because the English is loose and a plausible German could have overstated or und
 neither is a collision.** *Prüfsumme* (`backup:restoreDescription`) is the only German word for
 a checksum; the reservation binds the noun *Prüfung* naming the deterministic LQA check, not the
 *prüf-* stem, exactly as `config:reviewProgress` "Prüffortschritt" already ships it. And
-`chatQuickPrompts.proofread` writes "Grammatik- und Rechtschreibfehler" where the **issue** row
+`stage-details:chatQuickPrompts.proofread` writes "Grammatik- und Rechtschreibfehler" where the **issue** row
 reserves *Fehler* for **error**: a `-fehler` compound naming a spelling mistake is not the LQA
 verdict noun, and batch 2 already shipped the same shape at `strings:runs.aiReviewCheckTypo`
 "Tippfehler" and `strings:runs.judgeIssueMistranslation` "Fehlübersetzung". Where the *bare*
@@ -766,9 +794,9 @@ count-neutral and true on both paths, reusing the lexeme `backup:toastDeleteFail
 ships. The plural is not the fix — it is the opposite half-truth, false on the single-row path.
 
 **The sibling asymmetry that follows is correct and must not be "harmonized".** Three toasts in
-that namespace disagree about number on purpose, because their call sites do: `toast.deleted`
+that namespace disagree about number on purpose, because their call sites do: `orphans:toast.deleted`
 "Waise gelöscht" is singular (only `handleDelete` fires it — the bulk success is the separate
-`toast.bulkDeleted`), `toast.loadError` "Waisen konnten nicht geladen werden" is plural (it
+`orphans:toast.bulkDeleted`), `orphans:toast.loadError` "Waisen konnten nicht geladen werden" is plural (it
 reports the whole list failing to load), and `toast.deleteError` is neither. **The question is
 rubric item 6's — how many call sites, not what does this control do** — and it has to be asked
 of a key that carries no token, which is the case that looks like it needs no counting thought
@@ -851,14 +879,16 @@ The list was derived **only** from the eight post-token-axis survivors, never fr
 matches — deriving it from the raw set would have exempted ordinary counted nouns that are
 correct after `{{count}}` and wrong after anything else. Add to it the same way.
 
-**Batch 6 produced this locale's first survivor that is neither a defect nor covered by the four
-words, and it is escalated rather than absorbed.** Over the complete 24-namespace tree the
-detector gives **137 raw / 16 after the token axis / 1 after the word axis**, and the one is
+**Batch 6 produced this locale's first survivor that was neither a defect nor covered by the four
+words, and it was escalated rather than absorbed.** Over the complete 24-namespace tree the
+detector now gives **137 raw / 16 after the token axis / 0 after the word axis**. The survivor was
 `common:thinking` — "Denkt nach… {{seconds}} s", an elapsed-seconds counter in the chat bubble.
 `s` is the SI symbol for *second*, which is invariant for number by definition (never "5 ss"), so
-it is the same class as the four words above and belongs in
-`NUMERAL_WORD_AXIS_EXEMPTIONS.de` as a fifth entry. **This batch may not edit `scripts/`, so the
-entry is the controller's to add**, with that reason. What is deliberately **not** done is the
+it is the same class as the four words above, and it is now the **fifth** entry in
+`NUMERAL_WORD_AXIS_EXEMPTIONS.de` — added by the controller, since a batch may not edit
+`scripts/`. It is exact-word rather than prefix matching and locale-keyed, so it cannot silently
+clear `Sprachen` or reach another language, and it accounts for exactly one occurrence in the
+whole corpus. What was deliberately **not** done is the
 cheap alternative: writing the token closed-up as `{{seconds}}s` the way English does would clear
 the narrow rule (which requires whitespace after `}}`) while shipping a number welded to its unit,
 which Duden and the SI both forbid. That is writing around the check, and the runbook's rule about
@@ -914,8 +944,8 @@ correctness.
 
 | Class                                                    | Budget              | Kind                                      |
 | -------------------------------------------------------- | ------------------- | ----------------------------------------- |
-| Sidebar item (`sidebar:globalConfig`, `sidebar:legal`)   | **26**              | **hard** — fixed 16rem, truncates         |
-| Tab label (`strings:tabs.backup`)                        | **26**              | **hard** — the same container; see below  |
+| Sidebar item (`sidebar:globalConfig`, `sidebar:legal`)   | **199 px** (~25 chars) | **hard** — fixed 16rem, truncates       |
+| Tab label (`strings:tabs.backup`)                        | **199 px** (~25 chars) | **hard** — the same container; see below |
 | Table column header (`strings:columns.config`)           | **22**              | soft — columns auto-size                  |
 | Filter label (`strings:filters.needsReview`)             | **36**              | soft — the filter row wraps               |
 | Bulk-bar control (`strings:bulk.approveSelected`)        | **36**              | soft                                      |
@@ -949,13 +979,23 @@ The arithmetic, from `components/ui/sidebar.tsx`: `SIDEBAR_WIDTH` is `16rem` = 2
 the 1px right border, less `SidebarGroup`'s `p-2` (16px), less `SidebarMenuButton`'s `p-2`
 (16px), less the leading `size-4` icon (16px) and its `gap-2` (8px) — **199px** for the
 truncating label at `text-sm`. That is the same 199px a plain sidebar item gets, since those
-carry an icon too, which is why the two rows now share one figure. At ~7.6px average advance
-for mixed-case German at 14px, 199px is ~26 characters — independently reproducing the 26
-this guide already carried for the sidebar. Nobody has measured rendered pixel widths; if a
-future rendering needs to go past 26, look at the running app before deciding.
+carry an icon too, which is why the two rows now share one figure.
 
-The longest tab label this batch actually needed is **"Übersetzungs-KI-Review" (22)**, four
-characters inside the budget. Batch 1's forecast of a ~27-character rendering
+**The budget is 199 px. The character count is a proxy, it is 25, and it used to be 26.**
+Rounds 1-6 carried 26, derived from an *estimated* ~7.6 px average advance, with this paragraph
+admitting in the same breath that nobody had measured rendered widths — a provisional figure that
+survived six rounds because nothing shipped ever came close to it. The whole-language sweep
+measured it instead: it read the advance widths out of the shipped variable font and laid out all
+**27** rail labels, giving a measured mean of **7.151 px/char** and putting the widest shipped
+label at 82% of the slot with 36 px to spare. The mean is not the number that matters, though —
+at the corpus's **wide** end 26 characters render at about **214 px**, which overflows a 199 px
+slot and clips. So the proxy is **25**, and the pixel figure is the budget: a label of 25 wide
+characters still fits, and anything you are unsure about is measured against 199 px rather than
+against a character count. **Nothing shipped is affected** — the longest German rail label is
+`strings:tabs` (review-translation-ai) "Übersetzungs-KI-Review" at **22**.
+
+The longest tab label batch 2 actually needed is that same **"Übersetzungs-KI-Review" (22)**,
+three characters inside the proxy and well inside the slot. Batch 1's forecast of a ~27-character rendering
 ("KI-Review der Übersetzungen") was for a different shape and did not ship: the settled
 surface name is the hyphenated compound, which is the ordinary German way to build it and
 happens to fit. **This is not a surface name shortened to meet a budget** — the compound was
@@ -978,16 +1018,30 @@ whose longest German rendering is **11** characters ("Fähigkeiten"); "Param." a
 keep English's abbreviation, and `config:models.colConfidence` is "Konfidenz" (9) rather
 than the 23-character *Zuverlässigkeit* for that reason. `config:globalConfigTitle` is
 "Globale Konfiguration" (21) and is **binding on the sidebar**, since `sidebar:globalConfig`
-must be identical: it fits the hard 26 with five characters to spare.
+must be identical: at 21 characters it fits the hard 199 px slot with four inside the ~25-char proxy.
 
 **What batch 2 (`strings`) contributes.** It is the namespace that anchors four of the five
 classes, so it moved all four. Tab label: see the section above. Table column header: the
-longest of the sixteen `strings` headers is "Bearbeiten von" / "Wiederholungen" (both 14),
-against `config`'s longest of 11 — hence **18**. Filter label: the longest of the twenty-five
+longest `strings` headers are `strings:runs.manualEditedByColumn` "Bearbeitet von" and
+`strings:runs.detailsRetryCount` "Wiederholungen" (both 14), against `config`'s longest of 11 —
+hence **18**.
+
+> **Corrected 2026-08-12 (whole-language sweep), left visible.** This sentence quoted
+> **"Bearbeiten von"**, a string this locale has never shipped: the value is "Bearbeitet von", a
+> participle rendering English's *Edited by*, where the quoted form is a nominalized infinitive
+> meaning *editing of* — the wrong control shape for a column header as well as the wrong string.
+> The measurement was unaffected (both are 14 characters), which is exactly why it survived. It
+> survived the citation guard too, because neither span named a key the guard could resolve; both
+> are qualified now, so both are checked. The sentence also said "the sixteen `strings` headers",
+> a count nothing here can reproduce — enumerating `strings`' `columns.*` plus every `*Column` key
+> gives **19**, and one of those, `columns.tooltipAchievementSource` "Herkunft der Errungenschaft"
+> (27), is a **tooltip** rather than a rendered header, so it neither belongs to this class nor
+> breaches the budget. The count is dropped rather than replaced: the figure this row rests on is
+> the longest *header*, and it is named by key above. Filter label: the longest of the twenty-five
 `strings:filters.*` values is "Nur unübersetzte Einträge anzeigen" (34) — hence **36**.
 Bulk-bar control: the longest control label is "Kategorien aus Auswahl generieren" (33), with
 "Ins Translation Memory freigeben" (32) just behind it — hence **36** as well. `strings` holds
-no sidebar item, so the hard 26 there is unchanged.
+no sidebar item, so the hard sidebar figure is unchanged.
 
 Measured expansion against the English source, one ratio per key:
 
@@ -1067,7 +1121,7 @@ any of the five constrained classes — the rule is holding where it bites.
 batch that finally fills the **sidebar-item** row — `sidebar` owns every item in the rail — and
 it moves the table-column row by four characters.
 
-- **Sidebar item — the hard 26 holds, with five characters to spare.** Enumerated from the
+- **Sidebar item — the hard budget holds, with room to spare.** Enumerated from the
   `truncate` spans in `Sidebar.tsx`, not from the namespace: **nine** `sidebar:*` labels render
   in the 16rem rail — `sidebar:globalConfig` 21, `sidebar:translationMemory` 18,
   `sidebar:selectProject` 17 (the project-selector trigger in the header), `sidebar:settings`
