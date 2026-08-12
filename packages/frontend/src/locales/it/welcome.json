@@ -1,0 +1,25 @@
+{
+  "title": "Benvenuto in Narn",
+  "intro": "Dai un'occhiata alle guide qui sotto prima di iniziare, oppure passa direttamente alla configurazione della tua cassaforte delle credenziali quando sei pronto.",
+  "guidesHeading": "Guide",
+  "browseGuides": "Sfoglia le guide",
+  "setupVaultHeading": "Tutto pronto per tradurre?",
+  "setupVaultBody": "Configura la tua cassaforte delle credenziali per aggiungere le chiavi dei provider di IA che le tue traduzioni useranno.",
+  "setupVaultButton": "Configura la cassaforte",
+  "themeChooser": {
+    "title": "Scegli il tuo aspetto",
+    "intro": "Scegli un tema e opta per chiaro o scuro: puoi cambiarli entrambi in qualsiasi momento in Impostazioni.",
+    "themeLabel": "Tema",
+    "modeLabel": "Chiaro o scuro",
+    "modes": { "light": "Chiaro", "dark": "Scuro" },
+    "confirm": "Usa queste impostazioni",
+    "keepDefault": "Mantieni Techno",
+    "names": { "default": "Classico", "pixel": "Pixel", "techno": "Techno", "minimal": "Minimal" },
+    "taglines": {
+      "default": "L'aspetto originale di NARN.",
+      "pixel": "Pixel retrò e spigolosi.",
+      "techno": "Console al neon. Il nuovo tema predefinito.",
+      "minimal": "Solo il contenuto."
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "http": {
+    "unauthorized": "Devi accedere di nuovo.",
+    "forbidden": "Non hai il permesso di farlo.",
+    "vaultLocked": "La tua cassaforte è bloccata. Sbloccala e riprova.",
+    "rateLimited": "Troppe richieste: attendi un momento e riprova.",
+    "server": "Il server ha riscontrato un problema. Riprova tra poco.",
+    "offline": "Impossibile raggiungere il server. Controlla la connessione."
+  }
+}

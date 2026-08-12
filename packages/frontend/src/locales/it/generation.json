@@ -1,0 +1,17 @@
+{
+  "contextLabel": "Includi il contesto della voce",
+  "contextHint": "Aggiungi al prompt ulteriori dettagli della voce per migliorare i suggerimenti.",
+  "fieldContext": "Note di contesto",
+  "fieldSources": "Etichette di origine",
+  "fieldCategories": "Categorie assegnate",
+  "languagesLabel": "Invia le traduzioni esistenti come contesto",
+  "languagesHint": "Invia come contesto aggiuntivo le traduzioni completate di ogni voce nelle lingue selezionate.",
+  "selectAllLanguages": "Seleziona tutto",
+  "deselectAllLanguages": "Deseleziona tutto",
+  "skipCategoriesLabel": "Salta le categorie",
+  "skipCategoriesHint": "Le voci che hanno una di queste categorie vengono escluse del tutto dalla richiesta.",
+  "skipCategoriesPlaceholder": "Nessuna selezionata",
+  "ignoreGlossariesLabel": "Ignora i glossari esistenti",
+  "ignoreGlossariesHint": "I termini dei glossari selezionati vengono trattati come terminologia già nota: per la generazione del glossario vengono inviati come già noti, così il modello non li ripropone; per la generazione delle categorie, le voci che corrispondono a quei termini vengono escluse del tutto dalla richiesta.",
+  "ignoreGlossariesPlaceholder": "Nessuna selezionata"
+}
