@@ -1188,6 +1188,22 @@ their own locale's file never conflicts with another, but a rule rewrite mid-fli
 invalidates work already done. A term the lexicon lacks goes into an additive queue and is
 resolved between waves, not during one.
 
+**But the freeze protects you from a rule rewrite, not from another language's escalation.**
+`english-review-notes.md` grows *additively* during a wave: when any locale finds a defect in
+the English — a label naming a surface that does not exist, a singular string on a bulk path,
+a token that is a raw enum — the controller files a row, and that row **binds every language
+immediately**, including the ones already mid-batch. Three landed in that file during a single
+round of the first wave, and two of them arrived between one language finishing its work and
+its work being committed.
+
+So: **re-read the frozen authorities, and diff them, immediately before your final gate run** —
+not at the start of the batch, which is when everybody reads them and when they were still
+true. `git diff <the commit you started from> -- docs/i18n/english-review-notes.md` is the
+whole check. Two separate languages shipped a defect in the last round of the first wave
+because a row landed after they had read the file: one had it in its immediate parent commit
+and one had it two minutes after finishing. **The row you never saw still binds the string you
+shipped.**
+
 **Who resolves the queue, and what happens to work already shipped under a different
 reading.** The person coordinating the wave resolves it, once, after the wave's last batch
 lands and before the next wave starts — the same moment the measurements are written up.
