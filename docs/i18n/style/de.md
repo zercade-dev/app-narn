@@ -79,6 +79,27 @@ in batch 4:
 None of the six is a corrective error, so the rule above holds without exception. **Batch 5 owns
 `errors`**, so it inherits the split rather than re-deciding it.
 
+**Batch 5 applied it, and the count of du-imperatives across the whole locale is still six.**
+All six `errors:http.*` keys ship with **no** imperative: the corrective half of each is an
+impersonal infinitive — `errors:http.vaultLocked` "Der Tresor ist gesperrt. Entsperren und erneut
+versuchen." (the shape `config:credentialsVaultLocked` already ships), `errors:http.offline`
+"Der Server ist nicht erreichbar. Verbindung prüfen." and `errors:http.rateLimited`. Two of the
+six use *du* and neither is an imperative: English writes them as **statements about the reader**
+(*You need to sign in again*, *You don't have permission to do that*), which is the shape
+`collab:errors.already_member` and `collab:errors.cannot_join_own_project` already ship, so
+`errors:http.unauthorized` is "Du musst dich erneut anmelden." and `errors:http.forbidden`
+follows it. The rule splits **imperative against infinitive**; a du-statement is neither, and
+turning one into an infinitive would drop the direct address English chose.
+
+The enumeration above was re-derived rather than carried over from round 4 — which is how round
+4's own list was found to be one short. **State the method with the count, because the method is
+a heuristic:** every `de/*.json` value was split into sentences and matched against a list of
+~60 sentence-initial German imperative forms, over the corpus with batch 5's six namespaces
+landed, and the six new namespaces were then read by hand. That returns the same six keys the
+bullets above name, `strings:mobile.desktopOnlyBody` included — it is an instance in its own
+right and not merely the frame `collab:nickname.claimOnDesktop` copies. A verb outside the
+matched list would be missed, so a later batch adding one must add it to the bullets itself.
+
 > **Corrected 2026-08-12 (round-4 re-review, R2), left visible.** This paragraph first said
 > "three shipped instances, all of that kind" and omitted `account:reportBugsPrefix` — a
 > du-imperative **this batch shipped and the same fix round edited two paragraphs below**. The
@@ -193,7 +214,7 @@ mentions it repeats that rendering verbatim. Settled so far:
 | Source AI review | **Quelltext-KI-Review** | `strings:tabs` (review-source-ai), `strings:tabPlaceholder` (review-source-ai) and `review:sourceAi.configTitle` (all shipped). The bare **Quelltext-Review** is the *term* in prose and is a different string — see `../terminology/de.md`. |
 | Translation AI review | **Übersetzungs-KI-Review** | `strings:tabs` (review-translation-ai) and `review:translationAi.title` (both shipped). |
 | Manual review | **Manuelles Review** | `strings:tabs` (review-manual), shipped. Its **page title is a different string**, `review:title` "Prüfwarteschlange" — English splits the same way ("Manual review" / "Review queue"), like Activity and Legal. Do not harmonize them. |
-| Quality | **Qualität** | `strings:tabs.quality`, `strings:guide.topicQuality` (shipped). The **page title expands**, exactly as Activity's does: `quality:title` is "Qualitäts-Dashboard" for English's "Quality Dashboard" — the rendering `strings:tabPlaceholder.quality` already shipped in prose. Do not copy the tab label into it. |
+| Quality | **Qualität** | `strings:tabs.quality`, `strings:guide.topicQuality` (shipped). The **page title expands**, exactly as Activity's does: `quality:title` is "Qualitäts-Dashboard" for English's "Quality Dashboard" — the rendering `strings:tabPlaceholder.quality` already shipped in prose. Do not copy the tab label into it. Batch 5's `logs:action.openQuality` repeats the **page title**, not the tab label, because it opens the page — see the note below the table. |
 | Glossary | **Glossar** | `strings:tabs.glossary`, `strings:guide.topicGlossary` (shipped). |
 | Category | **Kategorie** | `strings:tabs.category`, `strings:guide.topicCategory` (shipped). Singular on purpose, as in English, even though the page it opens is plural. |
 | Routing | **Routing** | `strings:tabs.routing`, `strings:guide.topicRouting` (shipped). |
@@ -242,7 +263,7 @@ re-deciding it.
 | **ignore / ignored** — exclude from AI dispatch | verb *ignorieren*, participle *Ignoriert*, negation *nicht mehr ignorieren* | `strings:row.ignored`, `strings:row.ignoreAction`, `strings:row.unignoreAction`, `strings:bulk.ignoreEntry`, `strings:editor.ignoreOverflow` | `review:sourceAi.ignore` and its toasts (batch 3), `generation:ignoreGlossariesLabel` (batch 5) |
 | **revert** — undo a whole run's writes | *Zurücksetzen* / *Zurückgesetzt* | `strings:runs.revert`, `strings:runs.revertedBadge`, `strings:runs.revertSuccess_other` | — |
 | **undo** — one edit | *Rückgängig* | `strings:compare.undo`, `strings:editor.undo` | — |
-| **verdict** — the judge's per-entry ruling | *Urteil* | `strings:runs.judgeAllFindingsDescription` | batch 5's `logs:judge.done`, whose `{{verdict}}` token this names |
+| **verdict** — the judge's per-entry ruling | *Urteil* | `strings:runs.judgeAllFindingsDescription` | shipped in batch 5 at `logs:judge.done`, which labels the token: "Review ergab Punktzahl {{score}} — Urteil: {{verdict}}." |
 | **assistant** — the chat persona | *Assistent*, weak masculine; linking form *Assistenten-* in a compound | `strings:runs.typeChatGeneric` | batch 6 owes "KI-Assistent" at `colorText:assistant.title` and the same noun at `stage-details:chatAssistant` |
 | **review, as a verb with an object** — the Translation-AI controls | *bewerten* | `review:translationAi.runReview`, `reviewAll`, `reReview`, and the two empty-state hints that quote those labels | any later key that tells a user to review *translations* with an AI |
 | **review, as a verb** — what the **source review** does to an entry | *untersuchen* | `review:sourceAi.scopeNeverReviewed`, `scopeNoneHint` and `configHint`'s **second** sentence (all three render English *review*). `emptyHint` renders English *checks* with the same verb, because *prüfen* is withheld from the AI source review — that is this row extending to one *check*, not a claim that every *check* takes it | batch 5's `logs:sourceReview.*` |
@@ -254,6 +275,10 @@ re-deciding it.
 | **remove / forget / dismiss** — take a row out of a list for good | *Entfernen* | `collab:sharing.remove`, `collab:sharing.removeConfirm`, `vault:remove`, `account:deviceForgetButton`, `account:notificationsDismiss` | any later batch removing a row from a list |
 | **share**, a project with a person | *teilen* | `collab:sharedWithYou`, `collab:sharing.auditToggleUnsharedHint`, `collab:routing.scopeNote` | — |
 | **owner**, of a project | *Projektinhaber* | `collab:join.nicknameFirst`, `collab:locks.glossaryEditScoped` | any later batch naming the person a project belongs to |
+| **log / logs** — the live server-log surface and its own chrome | loan *Log*, pl. *Logs*; the unit is a hyphenated *Log-Eintrag* | `console:searchPlaceholder`, `console:exportLogs`, `console:clear`, `console:empty`, `console:statusConnected` | any later batch naming the log panel or a log line |
+| **close**, a one-off banner | *Schließen* | `system:restarted.dismiss`, `system:cancelled.dismiss` | any later batch closing a banner or dialog rather than removing a list row |
+| **score**, the judge's number | *Punktzahl* | `strings:runs.judgeScoreLabel`, `strings:runs.aiReviewed`; batch 5's `logs:judge.done` repeats it | any later batch naming what the judge returns alongside its verdict |
+| **quality check**, the LQA gate seen from a log line | *Qualitätsprüfung* | `logs:lqa.passed`, `logs:lqa.failed`, `logs:translation.tmRejected`, `logs:translation.lqaRetry` | — |
 
 **Why *bewerten* on the three Translation-AI controls — the argument is the engine, not a
 shortage of German verbs.** "Review last run", "Review all translations" and "Re-review" need a
@@ -333,6 +358,8 @@ this locale: *Rückgängig* is the single-edit undo in the compare cell and the 
 *Zurücksetzen* reverses everything one run wrote. A fix round that "harmonizes" them destroys a
 distinction the UI relies on — both controls can be on screen at once.
 
+**The label on `logs:judge.done`'s verdict token is deliberate, and it is there because of what the token holds.** English writes *Review scored {{score}} — {{verdict}}* with the value bare, and `{{verdict}}` interpolates the raw enum `M25-judge-engine.ts` logs: the literal ASCII *pass* or *fail*, never a translated string (`strings:runs.judgeVerdictPass` and `judgeVerdictFail` exist and are not used here). A bare untranslated token after a dash reads as a broken sentence in German; naming it — Urteil: — makes it parse as data, and it is the one place this locale adds a word English does not have. **That is a defect in the product, not in the English copy**, and it is escalated rather than absorbed: if the log line is ever fixed to interpolate the translated verdict, drop the label with it.
+
 **Why *Urteil*, deliberately, and why it does not reach *Befund*.** The two words look
 adjacent and are not. A *Befund* is the source review's observation — reported, never
 adjudicated, which is why that term row rejected the evaluative candidates. A **verdict** is
@@ -382,6 +409,46 @@ English's own *Alerts* (a word the source deliberately varies from *Notification
 heading above it) and ships as "Hinweise zu deinem Konto und zu Aktivitäten auf der
 Plattform." That is the rule the lexicon already states for *entry* and for *flag*, applied
 once more; a banned-lexeme grep will hit it, and this paragraph is the licence.
+
+**The live server log is *Log*, not *Protokoll*, and batch 2 decided that before batch 5 met
+it.** `strings:runs.judgeLogsTitle` renders English *Verbose logs* as "Ausführliche Logs
+({{count}})" and `strings:runs.aiReviewVerbose` renders *Verbose logging* as
+"Ausführliches Logging (Prompt, Parameter & Rohantwort)", both shipped and reviewed. `console`
+and `logs` follow that precedent rather than opening it again: the loan sits in the family this
+locale already keeps (*Backup*, *Prompt*, *Routing*, *Workspace*, *Review*, *Guide*,
+*Changelog*, *Theme*), and *Protokoll* is ambiguous in German between a transcript and a network
+protocol. The counted unit takes the hyphenated mixed compound — `console:empty` is
+"Noch keine Log-Einträge." — which is *entry* with a disambiguating head in front of it, exactly
+the narrow scope the lexicon's *entry* reservation allows.
+
+> **Corrected 2026-08-12 (round 5), left visible.** `terminology/de.md`'s **Activity** row said
+> *Protokoll* is the live server log, and its **recording** row rejected *Protokollierung* on the
+> same premise. Neither was true of anything this locale ships — *Protokoll* has never appeared
+> in a German value, in any batch — and batch 5 is the batch that would have inherited it. Both
+> conclusions survive: *Protokoll* is still wrong for **Activity** (it reads as a record of what
+> happened, not a list of runs) and *Protokollierung* is still wrong for **recording**, now on
+> the stronger ground that it would be a second word for the *Logging* this locale already
+> ships. Only the evidence was wrong, and both rows now say so.
+
+**Three English verbs collapse onto *Entfernen*; a fourth English word deliberately does not.**
+`system:restarted.dismiss` and `system:cancelled.dismiss` are English *Dismiss*, the same word
+`account:notificationsDismiss` renders as "Entfernen" — and they ship as "Schließen" instead.
+The *Entfernen* row is scoped to taking a **row out of a list**, and dismissing a notification is
+a `DELETE` (`stores/notification-store.ts`). These two are the ✕ on a one-off restart banner, and
+`RestartBanners.tsx` handles them by writing a `localStorage` flag — nothing leaves a list and
+nothing is deleted. The two also **co-render**: the banners mount in the app shell, above
+whatever view is open, including the Account view that owns `notificationsDismiss`. One word for
+both would put a delete verb on a button that hides a notice.
+
+**An English label that names a surface the app does not have takes the real surface name.**
+`logs:action.openQuality` is *Open quality settings*, and the button's handler is
+`openTab('quality', …)` in `lib/log-presentation/actions.ts` — the Quality tab, which is a
+read-only dashboard with no settings on it at all. That is the shape the runbook already records
+for `config:fullReplaceOrphanNotice`'s stale *Relink tab*, so the German names the page it opens:
+"Qualitäts-Dashboard öffnen", repeating the page title `quality:title` already ships. Its four
+siblings need no such judgement — `logs:action.openGlossary` is "Glossar öffnen" and
+`logs:action.unlockVault` is "Tresor entsperren", byte-identical to
+`config:credentialsUnlockButton`, whose English is identical too.
 
 ## Casing
 
@@ -499,9 +566,30 @@ count-neutral shortcut the runbook warns about: *Schlüssel* is invariant for nu
 so singular and plural are the same word and there is nothing to inflect. The other three
 families do differ per category.
 
-**Batch 5 owes the remaining eight** — two in `console` and six in `logs`. They are listed in
-the pre-flight's own section 3, so run `node scripts/i18n-preflight.mjs de` and read that list
-rather than rediscovering it.
+**Batch 5 shipped the remaining eight** — two in `console` and six in `logs`, so this locale now
+supplies `_one` for all twelve and the plural-coverage NOTE printed by `pnpm check:locales` no
+longer names `de` at all. They are listed in the pre-flight's own section 3, so run
+`node scripts/i18n-preflight.mjs de` and read that list rather than rediscovering it.
+
+**Six of the eight inflect normally; two cannot, and the reason is not laziness.**
+`console:unreadErrors`, `console:membersNotShown`, `logs:translation.failedNoRoute`,
+`failedModuleDisabled`, `failedModuleNotFound` and `logs:orphan.detected` all select on
+`{{count}}`, so their `_one` and `_other` differ as ordinary German singular and plural.
+`logs:translation.queued` and `logs:sourceReview.done` ship **the same string in all three
+forms**, because the number they *display* is `{{total}}` / `{{findings}}` while the number they
+*select* on is `count` — two different tokens. `lib/log-presentation/registry.ts` happens to set
+both members of each pair from one value, so inflecting after the displayed token would be
+correct today; the runbook forbids depending on it, because that guarantee lives in a file no
+guard ties to the string. Both are therefore count-neutral — "Zur Übersetzung eingereihte
+Einträge: {{total}}." and "Quelltext-Review — Befunde: {{findings}}." — and they lose a
+singular/plural distinction English has. **Do not "restore" it** without re-reading that
+registry and deciding to depend on it.
+
+**The bare key of each family carries English's own token set and is written count-neutral.**
+The three `logs:translation.failed*` bare keys therefore look unlike their own `_one`/`_other`:
+they put `{{count}}` behind a label — the closing "Einträge: {{count}}." — instead of in front
+of a counted noun. They are unreachable once both categories exist; their only job is to be grammatical if
+something ever reaches them.
 
 `node scripts/i18n-preflight.mjs de` is what proves this held: it reports every
 non-skiplisted `{{token}}` followed by a German word. Batch 1 landed at **14 raw, 0 after
@@ -659,12 +747,14 @@ Measured expansion against the English source, one ratio per key:
 | 2 — `strings` | 452 | 9,900 | 12,643 | 1.28 | 1.23 | 1.80 | 3.75 |
 | 3 — `glossary` `review` `category` `quality` | 377 | 10,744 | 13,502 | 1.26 | 1.25 | 1.71 | 3.33 |
 | 4 — `collab` `account` `vault` `settings` `sidebar` | 300 | 7,851 | 10,003 | 1.27 | 1.26 | 1.71 | 3.20 |
+| 5 — `logs` `console` `system` `errors` `generation` `batch` | 123 | 4,567 | 5,812 | 1.27 | 1.26 | 1.57 | 2.07 |
 
 **Every row is over the keys the batch SHARES with English.** It is the same population for
 batches 1-3, which added no keys of their own. Batch 4 is the first that differs: it ships
 **304** keys against English's 300, because `vault` gains four German `_one` forms (see the
 counting section), and those four are excluded from the row above rather than measured
-against an English string they have no counterpart in.
+against an English string they have no counterpart in. Batch 5 ships **131** against English's
+123 — the remaining eight `_one` forms, likewise excluded.
 
 (Re-derived after the round-4 fix round, which moved four values and added 31 German
 characters. The aggregate, median, tail and max are unchanged to two decimals.)
@@ -770,6 +860,36 @@ constrained surface. The **90th percentile is 1.71**, identical to batch 3's —
 half chrome and half dialog prose, and the two halves average out to the same tail the
 panel-prose batch had.
 
+**What batch 5 (`logs`, `console`, `system`, `errors`, `generation`, `batch`) contributes: it
+moves nothing, and the interesting part is which surface it does *not* belong to.** It holds no
+sidebar item, no `strings:tabs.*` label, no table column header, no filter label and no bulk-bar
+control, so all five rows stand at their batch-4 values.
+
+**The console's level-filter strip looks like the tab-label class and is not it.** `filter_all`
+… `filter_notifications` are `TabsTrigger`s inside `ConsolePanel.tsx`'s own header — a
+full-width bottom panel, `text-[10px] font-mono` with a CSS `uppercase`, each trigger `flex-none`
+and auto-sized — not the 16rem rail. Two things follow. The labels render **uppercase**, so
+`console:filter_notifications` "Benachrichtigungen" is 18 characters of capitals against
+English's 13, and nothing truncates. And `console:title` "KONSOLE" is uppercase in the **source**
+rather than by CSS, exactly like `strings:columns.config`: preserve it, per the casing section.
+
+The one thing worth measuring here is the floating jump button. `console:jumpToLatest` is
+"Zum neuesten Eintrag springen" (29) against a 14-character English source — the batch's
+**maximum ratio at 2.07**, well inside the guard's 2.5 cap, on an auto-sized `absolute` button
+that overlays the log list and constrains nothing. The bare directional "Zum neuesten Eintrag"
+is banned by the navigation-button row above, which is why the verb is there.
+
+**One unbreakable token over 20 characters shipped in batch 5**, on an unconstrained surface and
+on a term this locale already ships: "Übersetzungsdurchlauf" (21, `logs:translation.runQueued`
+and `logs:translation.queueStartFailed`, two lines in a scrolling log). "Kategoriegenerierung"
+(20) and "Glossargenerierung" (18) sit under the rule. This is the batch-1 term repeated
+verbatim, per the rule that a settled term is split at the point of use rather than re-coined.
+
+Batch 5's tail is the **lowest of the five at 1.57**, and the reason is structural rather than
+lucky: this batch is 123 keys of narration and prose with almost no chrome, and chrome is where a
+short English label meets a German compound. The aggregate is unchanged at 1.27, which is the
+same thing the `config`/`strings` gap said from the other side.
+
 Descriptions, toasts and guide prose are not constrained; put the precision there.
 
 The renderings used as examples in this file — here and in the casing section — are
@@ -785,10 +905,26 @@ change freely; every token in the English string must appear exactly once.
 
 The German hazard is **article and case before a token**. You cannot write "das {{module}}"
 safely, because the value's gender is unknown, and you cannot decline the token. Put a real
-noun in front and let it carry the gender and the case:
-the closing clause of `logs:translation.failedModuleDisabled` ("…the {{module}} module is
-turned off"; the full string carries three tokens) becomes "Das Modul {{module}} ist
-deaktiviert."
+noun in front and let it carry the gender and the case. Batch 5 shipped the worked example at
+`logs:translation.failedModuleDisabled_other` — English's closing clause is *— the {{module}}
+module is turned off* and the German reads "das Modul {{module}} ist deaktiviert".
+
+> **Corrected 2026-08-12 (round 5), left visible.** This paragraph previously quoted that clause
+> capitalized, as a standalone sentence. The key writes it mid-sentence after an em dash, so the
+> shipped span is lowercase, and the quotation named a string that does not exist. The citation
+> was written in round 1, when `logs` had no German file at all and nothing could check it; it
+> became checkable the moment batch 5 created the namespace. The **device** — a real noun in
+> front of the token — was never in doubt, only the form quoted for it.
+
+**The same device covers `{{language}}`, and batch 5 is where it decided the preposition.**
+The `logs` namespace names a target language nine times, and English varies between *into
+{{language}}* and *for {{language}}* for one relation. German cannot mirror *into*: "ins
+{{language}}" needs the adjectival form of the language name and "in {{language}}" needs an
+article, and the token supplies a bare noun (*Deutsch*, *Französisch*). Batch 2 had already
+settled the frame — `strings:compare.cellClearAria` is "Übersetzung für {{language}} löschen" —
+so every `logs` line uses *für {{language}}*, e.g. `logs:translation.done`
+"Ein Eintrag wurde für {{language}} übersetzt." That is one German preposition for one English
+relation, not a collapse of two: check the English of any *new* key before reusing it.
 
 Plurals map one to one onto English `_one` / `_other`.
 

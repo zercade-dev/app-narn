@@ -1,0 +1,93 @@
+{
+  "action": {
+    "openRouting": "Routing-Regeln einrichten",
+    "openModuleSettings": "Moduleinstellungen öffnen",
+    "openQuality": "Qualitäts-Dashboard öffnen",
+    "openGlossary": "Glossar öffnen",
+    "unlockVault": "Tresor entsperren"
+  },
+  "translation": {
+    "start": "Ein Eintrag wird für {{language}} übersetzt…",
+    "done": "Ein Eintrag wurde für {{language}} übersetzt.",
+    "doneFromMemory": "Gespeicherte Übersetzung für {{language}} wiederverwendet.",
+    "queued": "Zur Übersetzung eingereihte Einträge: {{total}}.",
+    "queued_one": "Zur Übersetzung eingereihte Einträge: {{total}}.",
+    "queued_other": "Zur Übersetzung eingereihte Einträge: {{total}}.",
+    "runQueued": "Übersetzungsdurchlauf in der Warteschlange — Position {{position}}.",
+    "retryQueued": "Wiederholung in der Warteschlange — Position {{position}}.",
+    "retry": "Eine fehlgeschlagene Übersetzung wird wiederholt.",
+    "failedNoRoute": "Übersetzung für {{language}} fehlgeschlagen — keine Routing-Regel passt; Einträge: {{count}}.",
+    "failedNoRoute_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — keine Routing-Regel passt.",
+    "failedNoRoute_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — keine Routing-Regel passt.",
+    "failedModuleDisabled": "Übersetzung für {{language}} fehlgeschlagen — das Modul {{module}} ist deaktiviert; Einträge: {{count}}.",
+    "failedModuleDisabled_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — das Modul {{module}} ist deaktiviert.",
+    "failedModuleDisabled_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — das Modul {{module}} ist deaktiviert.",
+    "failedModuleNotFound": "Übersetzung für {{language}} fehlgeschlagen — das Modul {{module}} ist nicht installiert; Einträge: {{count}}.",
+    "failedModuleNotFound_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — das Modul {{module}} ist nicht installiert.",
+    "failedModuleNotFound_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — das Modul {{module}} ist nicht installiert.",
+    "failedGeneric": "Ein Eintrag konnte nicht für {{language}} übersetzt werden.",
+    "batchFailed": "Ein Batch ist fehlgeschlagen — Übersetzungen: {{count}}, Sprachen: {{languages}}.",
+    "queueStartFailed": "Der Übersetzungsdurchlauf konnte nicht gestartet werden.",
+    "maskMismatch": "Formatierungs-Tags sind bei der Übersetzung für {{language}} verloren gegangen.",
+    "tmRejected": "Eine gespeicherte Übersetzung für {{language}} hat die Qualitätsprüfung nicht bestanden.",
+    "lqaRetry": "Qualitätsprüfung nicht bestanden — das Modell wird um einen erneuten Versuch gebeten.",
+    "authCancel": "Die Anmeldung wurde abgebrochen, daher wurde die Übersetzung gestoppt."
+  },
+  "lqa": {
+    "passed": "Qualitätsprüfung bestanden.",
+    "failed": "Qualitätsprüfung nicht bestanden.",
+    "overflow": "Die Übersetzung ist zu lang für den verfügbaren Platz.",
+    "checkError": "Eine Qualitätsprüfung konnte nicht ausgeführt werden."
+  },
+  "judge": {
+    "done": "Review ergab Punktzahl {{score}} — Urteil: {{verdict}}.",
+    "suggestDone": "Review mit Vorschlägen abgeschlossen.",
+    "suggestNoChange": "Das Review hat keinen Änderungsbedarf gefunden.",
+    "suggestionDiscarded": "Vorschlag abgelehnt."
+  },
+  "sourceReview": {
+    "done": "Quelltext-Review — Befunde: {{findings}}.",
+    "done_one": "Quelltext-Review — Befunde: {{findings}}.",
+    "done_other": "Quelltext-Review — Befunde: {{findings}}."
+  },
+  "glossaryGen": {
+    "done": "Glossardurchlauf abgeschlossen — vorgeschlagene Begriffe: {{suggested}}, analysierte Einträge: {{analyzed}}.",
+    "failed": "Glossargenerierung fehlgeschlagen.",
+    "saveSuggestionsFailed": "Die Glossarvorschläge konnten nicht gespeichert werden."
+  },
+  "categoryGen": {
+    "queued": "Kategoriegenerierung in der Warteschlange.",
+    "done": "Kategoriegenerierung abgeschlossen — Vorschläge: {{suggestions}}.",
+    "failed": "Kategoriegenerierung fehlgeschlagen."
+  },
+  "stageDetails": {
+    "queued": "Level-Details in der Warteschlange.",
+    "done": "Level-Details abgeschlossen — fertig: {{completed}}, fehlgeschlagen: {{failed}}.",
+    "failed": "Level-Details fehlgeschlagen."
+  },
+  "module": {
+    "loaded": "Das Modul {{module}} wurde geladen.",
+    "instanceRegistered": "Die Konfiguration {{instance}} wurde hinzugefügt.",
+    "instanceRegisterFailed": "Die Konfiguration {{instance}} konnte nicht hinzugefügt werden."
+  },
+  "vault": {
+    "unlocked": "Tresor entsperrt.",
+    "passwordChanged": "Tresor-Passwort geändert.",
+    "credentialsEvicted": "Die gespeicherten Zugangsdaten wurden aus dem Arbeitsspeicher entfernt."
+  },
+  "orphan": {
+    "detected": "Einträge gefunden, die nicht mehr in der Quelldatei enthalten sind: {{count}}.",
+    "detected_one": "{{count}} Eintrag gefunden, der nicht mehr in der Quelldatei enthalten ist.",
+    "detected_other": "{{count}} Einträge gefunden, die nicht mehr in der Quelldatei enthalten sind.",
+    "linked": "Ein verwaister Eintrag wurde neu verknüpft.",
+    "deleted": "Ein verwaister Eintrag wurde gelöscht."
+  },
+  "tm": {
+    "cleared": "Translation Memory geleert.",
+    "variantDeleted": "Ein Eintrag im Translation Memory wurde entfernt."
+  },
+  "backup": {
+    "restored": "Backup wiederhergestellt.",
+    "pruneFailed": "Alte Backups konnten nicht aufgeräumt werden."
+  }
+}

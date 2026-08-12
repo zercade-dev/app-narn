@@ -1,0 +1,18 @@
+{
+  "countdown": {
+    "message": "⚠️ Der Dienst wird in Kürze neu gestartet, um ein Update einzuspielen — bitte jetzt deine Arbeit speichern. Laufende Übersetzungen werden unterbrochen; abgeschlossene Einträge bleiben erhalten, also alles Unfertige danach erneut starten.",
+    "collapse": "Einklappen",
+    "expand": "Ausklappen"
+  },
+  "restarted": {
+    "message": "Der Dienst wurde kürzlich neu gestartet, um ein Update einzuspielen; einige Vorgänge wurden dabei möglicherweise unterbrochen — alles, was unvollständig aussieht, erneut starten.",
+    "dismiss": "Schließen"
+  },
+  "cancelled": {
+    "message": "Der geplante Neustart des Dienstes wurde abgebrochen — du kannst normal weiterarbeiten.",
+    "dismiss": "Schließen"
+  },
+  "slot": {
+    "aria": "Du verwendest die Umgebung {{label}}"
+  }
+}
