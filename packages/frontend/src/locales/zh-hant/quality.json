@@ -1,0 +1,69 @@
+{
+  "title": "品質儀表板",
+  "loading": "載入品質摘要中…",
+  "error": "無法載入品質摘要：{{message}}",
+  "empty": "尚無 LQA 結果。執行一次翻譯即可填入這個儀表板。",
+  "overallStat": {
+    "passRateLabel": "整體通過率",
+    "results": "{{count}} 筆 LQA 結果",
+    "entries": "{{count}} 個條目",
+    "legendPassed": "通過 {{count}}",
+    "legendFailed": "未通過 {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "最常見的問題",
+    "description": "所有語言的問題類型計數。"
+  },
+  "other": "其他",
+  "columns": {
+    "passRate": "通過率"
+  },
+  "legend": {
+    "tierHigh": "高通過率（≥ 90%）",
+    "tierMid": "中通過率（70–89%）",
+    "tierLow": "低通過率（< 70%）",
+    "passed": "已通過",
+    "failed": "未通過"
+  },
+  "checkLabels": {
+    "tag-equality": "標記一致性",
+    "overflow": "長度溢出",
+    "length-limit": "長度上限",
+    "glossary-adherence": "術語表遵循",
+    "forbidden-terms": "禁用術語",
+    "regex-assertions": "正規式斷言",
+    "number-parity": "數字一致性",
+    "whitespace-parity": "空白一致性",
+    "line-break-parity": "換行一致性",
+    "end-punctuation": "結尾標點",
+    "double-spacing": "重複空白",
+    "double-words": "重複字詞",
+    "untranslated": "未翻譯",
+    "mask-integrity": "遮罩完整性",
+    "tag-mismatch": "標記不符",
+    "too-long": "過長",
+    "glossary-term-missing": "缺少術語表術語",
+    "forbidden-term": "禁用術語",
+    "regex-assertion-failed": "正規式斷言未通過",
+    "regex-config-error": "正規式設定錯誤",
+    "number-missing": "缺少數字",
+    "number-added": "多出數字",
+    "whitespace-leading": "開頭空白",
+    "whitespace-trailing": "結尾空白",
+    "line-break-mismatch": "換行不符",
+    "end-punctuation-mismatch": "結尾標點不符",
+    "mask-mismatch": "遮罩不符"
+  },
+  "byLanguage": {
+    "title": "各語言通過率",
+    "description": "最差的排在前面。點選語言可檢視其未通過的條目。"
+  },
+  "bySource": {
+    "title": "各來源的問題",
+    "description": "最差的排在前面。點選來源可檢視其未通過的條目。"
+  },
+  "byModule": {
+    "title": "各模組品質",
+    "description": "依產生譯文的翻譯模組分組的通過率與問題。"
+  }
+}

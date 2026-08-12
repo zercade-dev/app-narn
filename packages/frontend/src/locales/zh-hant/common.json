@@ -1,0 +1,15 @@
+{
+  "save": "儲存",
+  "cancel": "取消",
+  "loading": "載入中…",
+  "changelogEntryError": "無法載入這則更新內容。",
+  "changelogShowOlder": "顯示較舊的發行版（{{count}}）",
+  "saving": "儲存中…",
+  "thinking": "思考中… {{seconds}} 秒",
+  "webSearch": {
+    "title": "搜尋網路",
+    "placeholder": "用 Google 搜尋…",
+    "hint": "按 Enter 即可在新分頁中搜尋",
+    "action": "搜尋"
+  }
+}

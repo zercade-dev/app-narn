@@ -1,0 +1,42 @@
+{
+  "title": "偏好設定",
+  "appearance": "外觀",
+  "appearanceDescription": "選擇 narn 在這台裝置上的外觀。",
+  "theme": "主題",
+  "mode": "模式",
+  "switchToLight": "切換至淺色模式",
+  "switchToDark": "切換至深色模式",
+  "languageTitle": "語言",
+  "languageDescription": "使用者介面的語言。",
+  "preview": "預覽",
+  "previewHint": "以所選主題呈現的範例控制項。",
+  "previewSamples": {
+    "heading": "標題",
+    "body": "內文會顯示基本的字體與顏色。",
+    "muted": "次要文字看起來像這樣。",
+    "save": "儲存",
+    "cancel": "取消",
+    "edit": "編輯",
+    "delete": "刪除",
+    "pass": "已通過",
+    "warn": "警告",
+    "fail": "未通過",
+    "info": "資訊",
+    "inputPlaceholder": "文字欄位",
+    "selectOptionA": "第一個選項",
+    "selectOptionB": "第二個選項",
+    "checkbox": "核取方塊",
+    "badgeDefault": "預設",
+    "badgeSecondary": "次要",
+    "badgeOutline": "外框",
+    "badgeDestructive": "危險",
+    "scrollHint": "捲動即可看到主題化的捲軸",
+    "iconsLabel": "圖示"
+  },
+  "themes": {
+    "default": { "name": "經典", "description": "narn 的經典外觀。" },
+    "pixel": { "name": "像素", "description": "厚實的 8 位元主機風格。" },
+    "techno": { "name": "科技", "description": "霓虹賽博龐克終端機。" },
+    "minimal": { "name": "簡約", "description": "扁平、安靜、單色。" }
+  }
+}

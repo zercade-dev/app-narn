@@ -98,7 +98,7 @@
     "inheritGlobal": "繼承自全域設定",
     "reasoningEffort": "推理強度",
     "reasoningEffortDefault": "預設",
-    "reasoningEffortDisabled": "停用",
+    "reasoningEffortDisabled": "已停用",
     "batchMode": "批次模式",
     "batchByLanguage": "依語言",
     "batchByEntry": "依條目",

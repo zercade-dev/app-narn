@@ -1,0 +1,10 @@
+{
+  "translateSelected": "翻譯所選",
+  "toTranslateCount": "{{count}} 項待翻譯",
+  "progressAriaLabel": "已翻譯 {{completed}} / {{total}}",
+  "cancelRun": "取消執行",
+  "runCancelled": "執行已取消：",
+  "runCompleted": "翻譯完成——{{total}} 項中有 {{completed}} 項成功。",
+  "runCompletedWithErrors": "翻譯完成——{{completed}} 項成功，{{failed}} 項失敗。",
+  "savedRulesNotice": "執行時使用的是已儲存的分派規則——規則編輯器中未儲存的變更不會生效。"
+}
