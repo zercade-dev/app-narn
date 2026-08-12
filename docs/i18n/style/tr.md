@@ -1276,7 +1276,7 @@ point of failure.
   distinct entries for the one language the same sentence names — “girdi” is right there. The
   non-aggregated path passes no count and defaults to 1. In `logs` exactly **one** key has the
   mismatch, `translation.queued`, whose token is the routing-decision count; it ships
-  “{{total}} çeviri sıraya alındı.” for that reason. Do not re-broaden this to the `failed*`
+  “{{total}} çeviri sıraya alındı.” for that reason. **Do not re-broaden this to the `failed*`
   siblings — that is the correction being recorded, not a warning about them.** `batch:toTranslateCount` (English *{{count}} to translate*) ships
   “yapılacak {{count}} çeviri” and **not** “{{count}} girdi”, because the value is computed
   by walking the selected rows *and* the selected target languages: ten entries into three
