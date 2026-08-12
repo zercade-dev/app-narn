@@ -9,7 +9,7 @@
   "tokenPlaceholder": "Bestätigungscode",
   "confirmPlaceholder": "Zur Bestätigung deine E-Mail-Adresse eingeben",
   "deleteMfaCodePlaceholder": "Authenticator-Code",
-  "reportBugsPrefix": "Fehler gefunden? Melde ihn an",
+  "reportBugsPrefix": "Fehler gefunden? Schick ihn an",
   "deleteConfirmButton": "Endgültig löschen",
   "errorGeneric": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
   "errorInvalidConfirmation": "Code oder E-Mail-Adresse stimmen nicht überein. Bitte beides prüfen und erneut versuchen.",

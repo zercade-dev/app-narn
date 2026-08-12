@@ -68,7 +68,7 @@
     "nicknameRequiredBody": "Vor dem Einladen von Mitwirkenden einen Nickname beanspruchen — daran erkennen sie dieses Projekt.",
     "nicknameRequiredLink": "Nickname einrichten",
     "errorNicknameRequired": "Vor dem Einladen von Mitwirkenden einen Nickname beanspruchen.",
-    "errorTooManyPendingInvites": "Für dieses Projekt gibt es zu viele ausstehende Einladungen von dir. Zieh eine zurück, bevor du eine neue erstellst.",
+    "errorTooManyPendingInvites": "Für dieses Projekt gibt es zu viele ausstehende Einladungen von dir. Erst eine bestehende zurückziehen, dann eine neue erstellen.",
     "status": {
       "pending": "Ausstehend",
       "redeemed": "Eingelöst",

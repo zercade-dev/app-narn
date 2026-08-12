@@ -53,6 +53,20 @@ For every other verb the -e is genuinely optional (_mach_ or _mache_, _sag_ or _
 _geh_ or _gehe_). Drop it there — the short form is the current UI register — and keep it
 only where one of the four shapes above forces it.
 
+**A corrective error message takes the impersonal infinitive, not the du-imperative.** The
+rule above ("where a full sentence really does instruct the user") licenses both, which is
+exactly why the split has to be written down: rounds 1-4 shipped every corrective the
+infinitive way — `vault:errorInvalidPassword`, `account:errorInvalidConfirmation`,
+`collab:errors.nickname_reserved`, `collab:invites.errorNicknameRequired` — and round 4 shipped
+one outlier at `collab:invites.errorTooManyPendingInvites`, which the review caught and which
+now reads "Erst eine bestehende zurückziehen, dann eine neue erstellen."
+
+The du-imperative is kept for the narrower case: an instruction the reader carries out **on the
+screen in front of them**, in a field or on a device. Three shipped instances, all of that kind
+— `account:deleteTokenSent`, `account:mfaDisableHint` and `collab:nickname.claimOnDesktop`
+(which reuses batch 2's `strings:mobile.desktopOnlyBody` frame verbatim). **Batch 5 owns
+`errors`**, so it inherits the split rather than re-deciding it.
+
 _du_, _dich_, _dir_ and _dein_ are lowercase — see the casing section. And whatever you do,
 never mix _du_ and _Sie_, in any string class: labels, errors, toasts and prose share one
 voice, and one slip is visible immediately.
@@ -68,6 +82,7 @@ English ("Select a model") and are two different controls; they ship as "Modell 
 | --- | --- | --- |
 | Page title, section heading, tab label | **noun phrase** (a compound where German has one) | `config:importCsv` "CSV-Import", `config:models.pickTitle` "Modellauswahl", `config:reviewProgress` "Prüffortschritt" |
 | Button | **bare infinitive**, object first | `config:delete` "Löschen", `config:deleteProject` "Projekt löschen", `config:saveAsTemplate` "Als Vorlage speichern" |
+| Navigation button (goes to another page) | **bare infinitive too** — never the bare directional phrase | `vault:goToVault` "Zur Tresor-Seite wechseln", `vault:setupRedirect` "Dieses Gerät einrichten" |
 | Confirm-dialog title | **infinitive**, which in German is the same string as the button | `config:confirmDeleteTitle` "Projekt löschen" |
 | Select / combobox placeholder | **infinitive phrase**, not a title | `config:enableModulePlaceholder`, `config:routing.simplePlaceholder` |
 | Table column header | **bare noun**, and it keeps English's abbreviation where English has one | `config:models.colParameters` "Param.", `config:models.colQuantization` "Quant." |
@@ -85,6 +100,20 @@ spent on the "All …" select options (`config:routing.allTones`, `config:routin
 naming an action and the button that performs it are both "Projekt löschen", because the
 German infinitive *is* the deverbal form. That is not drift and must not be "fixed" by
 inventing a nominalization for one of them.
+
+**A navigation button is still a button, and the bare directional phrase is banned even
+though it is good German.** German UIs write *Zur Startseite* on a link constantly, and round
+4 first shipped `vault:goToVault` in that shape. The round-4 review found the defect that
+makes it the wrong call here: `VaultUnlockDialog.tsx:213-215` is **one** `<Button>` whose
+label is `hasVault ? t('goToVault') : t('setupRedirect')`, and `setupRedirect` is an
+infinitive — so a single control changed shape with the vault's state. It now reads
+"Zur Tresor-Seite wechseln", which keeps English's directional sense and matches its own
+other state.
+
+The rule is stated as *never the bare PP* rather than as *unless it is navigational* on
+purpose: the second form would make every later batch classify each button as navigational or
+not, and that judgement drifts. Rounds 5 and 6 meet more "Go to …"-shaped labels in `common`,
+`legal` and `welcome` — all of them take the verb.
 
 **Instructions inside a sentence: prefer the impersonal infinitive over the du-imperative.**
 The register section already says this; batch 1 applied it to every instruction that is not
@@ -591,13 +620,16 @@ Measured expansion against the English source, one ratio per key:
 | 1 — `config` | 374 | 13,015 | — | 1.23 | 1.22 | 1.50 | 2.83 |
 | 2 — `strings` | 452 | 9,900 | 12,643 | 1.28 | 1.23 | 1.80 | 3.75 |
 | 3 — `glossary` `review` `category` `quality` | 377 | 10,744 | 13,502 | 1.26 | 1.25 | 1.71 | 3.33 |
-| 4 — `collab` `account` `vault` `settings` `sidebar` | 300 | 7,851 | 9,972 | 1.27 | 1.26 | 1.71 | 3.20 |
+| 4 — `collab` `account` `vault` `settings` `sidebar` | 300 | 7,851 | 10,003 | 1.27 | 1.26 | 1.71 | 3.20 |
 
 **Every row is over the keys the batch SHARES with English.** It is the same population for
 batches 1-3, which added no keys of their own. Batch 4 is the first that differs: it ships
 **304** keys against English's 300, because `vault` gains four German `_one` forms (see the
 counting section), and those four are excluded from the row above rather than measured
 against an English string they have no counterpart in.
+
+(Re-derived after the round-4 fix round, which moved four values and added 31 German
+characters. The aggregate, median, tail and max are unchanged to two decimals.)
 
 Batch 1's max is `config:batchGroupingCustom` ("Custom" → "Benutzerdefiniert") and batch 2's
 is `strings:runs.judgeVerdictFail` ("Fail" → "Nicht bestanden"); both ratios are measuring
@@ -653,13 +685,24 @@ any of the five constrained classes — the rule is holding where it bites.
 batch that finally fills the **sidebar-item** row — `sidebar` owns every item in the rail — and
 it moves the table-column row by four characters.
 
-- **Sidebar item — the hard 26 holds, with five characters to spare.** The nine items measure
-  `sidebar:globalConfig` 21, `sidebar:translationMemory` 18, `sidebar:settings` 13,
-  `sidebar:colorText` 11, `sidebar:legal` 11, `sidebar:aboutNarn` 9, `sidebar:changelog` 9,
-  `sidebar:guide` 5 and `sidebar:account` 5. The six group headings render in the same 16rem
-  rail and are shorter still: the longest is `sidebar:groups.content` at 12. **Nothing in this
-  batch needed to be shortened to fit, and nothing was**: the binding item, "Globale
-  Konfiguration", was fixed in batch 1 by the Global Config surface name and simply fits.
+- **Sidebar item — the hard 26 holds, with five characters to spare.** Enumerated from the
+  `truncate` spans in `Sidebar.tsx`, not from the namespace: **nine** `sidebar:*` labels render
+  in the 16rem rail — `sidebar:globalConfig` 21, `sidebar:translationMemory` 18,
+  `sidebar:selectProject` 17 (the project-selector trigger in the header), `sidebar:settings`
+  13, `sidebar:legal` 11, `sidebar:aboutNarn` 9, `sidebar:changelog` 9, `sidebar:guide` 5 and
+  `sidebar:account` 5 — plus the six group headings, of which the longest is
+  `sidebar:groups.content` at 12. `sidebar:newProject` 14 truncates in the project-selector
+  popover, a `w-64` container of the same width. **Nothing in this batch needed to be shortened
+  to fit, and nothing was**: the binding item, "Globale Konfiguration", was fixed in batch 1 by
+  the Global Config surface name and simply fits.
+
+  **`sidebar:colorText` is not in that list, and the first version of this paragraph wrongly
+  put it there.** The key has **no call site**: `useTranslation('sidebar')` appears once
+  (`Sidebar.tsx`), and the Text Styler entry in the rail is `strings:tabs` (color-text), a
+  `NAV_GROUPS` tab. The rendering stays "Text-Styler" — byte-identical to its tab twin, as the
+  surface-name rule requires — and the budget verdict is unchanged, but the reason was false.
+  `vault:remove` is the same shape: correct rendering, no call site. Both are dead-key
+  candidates for the between-waves sweep, not defects in this batch.
 - **Table column header — raised from 18 to 22**, on the measurement rather than on a
   preference. `collab:sharing.columnLanguages` is "Bearbeitbare Sprachen" (21), the longest
   header this locale ships; the previous 18 was `strings`' own longest plus rounding. The term
