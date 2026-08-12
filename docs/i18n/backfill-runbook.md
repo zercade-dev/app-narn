@@ -547,6 +547,16 @@ same round.**
    read out identically, and an `aria-label` is where this programme's worst instance of it
    was found — a destroy verb announced for an operation that only un-assigns.
 
+   **When you license a collapse, English is corroboration and not the test.** The tempting
+   rule is "English has the same relation between the same pair, so the collapse is
+   faithful". It does not hold: a language that compounds more than English will always show
+   more substring relations than English does, so measuring your collapses against English's
+   marks the extra ones as defects and licenses nothing you actually needed licensing for.
+   One locale wrote that premise, had it fail in five of its nine pairs, and had already
+   recorded forty lines earlier in the same file that one of those pairs is licensed on
+   different grounds entirely. **License on structure instead** — a heading over its own
+   child, or a root over its own compound — and cite English only as a second opinion.
+
    **So: check the nesting before you collapse two surface names — including nesting on a
    surface your own batch never renders.** The keys you are writing may only reach the screen
    through a later batch that is required to copy you. `strings:guide.group*` itself renders
