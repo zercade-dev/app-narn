@@ -628,8 +628,14 @@ the identical `one`/`many`/`other` shape and carry **zero** `_many` keys between
 1,908 keys each, the same count as English, because nothing else in their category set
 differs from English's `_one`/`_other` split. **Do not write `_many` for `it` or `pt-br`.**
 Ship `_one`/`_other` only, matching `es`/`fr`, and expect to land at English's own key count
-for this dimension — neither the 29-fewer of a single-category language nor Russian's 94
-more. The default gate (`pnpm check:locales`, what CI runs) does not ask for the missing
+**for this dimension** — neither the 29-fewer of a single-category language nor Russian's 94
+more.
+
+**But not at English's total.** `es` and `fr` sit at 1,908 only because they predate the
+strict gate and the default run accepts the bare-key rescue for the twelve bare-plus-`_other`
+families; the gate's own coverage note lists them as not supplying `_one` to this day. A
+locale backfilled under `LOCALE_PARITY_STRICT` must supply those twelve, so `it` and `pt-br`
+land at **1,920**. See 2.10. The default gate (`pnpm check:locales`, what CI runs) does not ask for the missing
 category either, for the same reason: it is forgiving a gap the tool has already proven is
 unreachable, not skipping a check.
 
@@ -751,8 +757,24 @@ language whose aggregate looks comfortable can still overflow every tab label it
 
 Budget your key count by your language's **plural-category count**, not by its expansion, per
 the rule in 2.7: Russian needed 94 keys English has no counterpart for, because it fills four
-categories where English fills two. A language with `one`/`other` needs none. A
-single-category language ends with 29 keys **fewer** than English, not more.
+categories where English fills two. A single-category language ends with 29 keys **fewer**
+than English, not more.
+
+**A language with `one`/`other` needs twelve — not none, which is what this line used to
+say.** English writes twelve families as a bare key plus `_other`, with no `_one` at all, and
+the strict gate you run **refuses the bare-key rescue**: `LOCALE_PARITY_STRICT` enforces
+every family in the coverage gap, including the bare-covered ones, where the default gate
+enforces only families with no bare sibling. So supply `_one` for all twelve and expect to
+land at **1,920**, not English's 1,908. They arrive in two batches — four in `vault`, eight
+across `console` and `logs`. Two languages hit this independently in the same round, and one
+proved it by deleting a key and re-running rather than by argument.
+
+The corollary, which cost a batch some thought: **the `_one` may be byte-identical to the
+`_other`.** The gate demands the *category*, not a different wording, and in a language whose
+counted noun stays bare-singular after a numeral the two forms genuinely coincide. Supply the
+key anyway. But **check the bare key's own call sites before you rely on that**: adding `_one`
+stops i18next falling back to the bare form at count 1, so if the bare key is reachable
+without a count anywhere, its rendering still has to stand on its own.
 
 ---
 
