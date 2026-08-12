@@ -557,6 +557,23 @@ same round.**
    different grounds entirely. **License on structure instead** — a heading over its own
    child, or a root over its own compound — and cite English only as a second opinion.
 
+   **Three riders, and the first is the one that makes this rule safe rather than dangerous:**
+
+   - **It licenses PROPER SUBSTRINGS ONLY. Equality is never licensed by it.** "A heading
+     over its own child" read loosely permits a heading whose rendering *equals* its child's,
+     which is the exact defect this whole section exists to prevent and which one locale had
+     to rename a surface to escape. If the two renderings are the same string, the structural
+     argument does not apply at all — go back to the co-render test.
+   - **"Root over its own compound" is morphology, not semantics**, so it will happily
+     license a pair that is genuinely confusable in the UI. It carried five of one locale's
+     nine pairs, including a three-way hazard that same file says needs a hand-written
+     warning. Treat it as a reason the collapse is *defensible*, not as a reason to stop
+     looking.
+   - **Compounding is not the only asymmetry.** It explained two of that locale's five
+     unmirrored pairs; the other three diverge because English *inflects* — "Translations"
+     against "Translation…" — which the languages that inflect more than English will meet
+     harder than the ones that compound more.
+
    **So: check the nesting before you collapse two surface names — including nesting on a
    surface your own batch never renders.** The keys you are writing may only reach the screen
    through a later batch that is required to copy you. `strings:guide.group*` itself renders
