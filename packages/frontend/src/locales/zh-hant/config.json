@@ -172,7 +172,7 @@
     "modeSimple": "簡易",
     "modeAdvanced": "進階",
     "modeAriaLabel": "分派規則編輯器模式",
-    "simpleLabel": "全部內容皆以此翻譯",
+    "simpleLabel": "用來翻譯全部內容的供應商",
     "simplePlaceholder": "選擇供應商",
     "simpleHint": "這個專案中的每個條目，都會由您在這裡選擇的供應商翻譯。",
     "simpleAdvancedNotice": "這個專案使用進階分派，因此顯示完整編輯器。",
