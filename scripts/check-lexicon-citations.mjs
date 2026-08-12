@@ -553,7 +553,22 @@ export function checkLocaleLexicon(locale, fileText, corpusWords, options) {
   // in locale-rules.mjs and "UNSPACED-SCRIPT ATTESTATION" in the module
   // header. `options` may still set the prefix-mode ratio/floor explicitly
   // (tests do); this only adds the mode switch on top.
-  const matchOptions = { ...options, unspacedScript: UNSPACED_SCRIPT_LOCALES.has(locale) };
+  const unspacedScript = UNSPACED_SCRIPT_LOCALES.has(locale);
+  const matchOptions = {
+    ...options,
+    unspacedScript,
+    // Same `minWordLength: 2` adjustment checkStyleGuide() applies, and for the
+    // same reason its comment gives: a two-character CJK/Korean compound is a
+    // word, not the "stray letter" MIN_WORD_LENGTH exists to filter. Without it
+    // a citation whose every token is two characters yields no significant word
+    // at all, renderingIsCovered() falls back to matching the whole candidate —
+    // spaces included — against a corpus of pure-letter tokens, and that can
+    // never succeed. It was scoped to style guides only; lexicon files hit it
+    // just as hard. Two locales reproduced it independently: ko's shipped
+    // `generation:fieldSources` ("출처 라벨") and zh-hans's `colorText:assistant.title`
+    // ("AI 助手") each failed here while verifying fine in the style guide.
+    minWordLength: options?.minWordLength ?? (unspacedScript ? 2 : MIN_WORD_LENGTH),
+  };
   const offenders = [];
   const allowlisted = new Set();
   const rows = parseLexiconRows(fileText);
