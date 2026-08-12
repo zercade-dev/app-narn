@@ -1,0 +1,55 @@
+{
+  "title": "Mục mồ côi",
+  "subtitle": "Những mục không còn trong tệp CSV nhập gần nhất. Hãy xóa chúng đi, hoặc liên kết lại bản dịch của chúng sang một mục khác.",
+  "emptyTitle": "Mọi thứ đều đã được liên kết",
+  "empty": "Không có mục mồ côi nào — các tệp CSV đã nhập khớp với dự án hiện tại.",
+  "columns": {
+    "select": "Chọn",
+    "source": "Nguồn",
+    "translations": "Bản dịch",
+    "actions": "Thao tác"
+  },
+  "actions": {
+    "delete": "Xóa",
+    "relink": "Liên kết lại",
+    "bulkDelete": "Xóa mục đã chọn ({{count}})",
+    "refresh": "Làm mới",
+    "cancel": "Hủy",
+    "back": "Quay lại"
+  },
+  "confirmDelete": {
+    "title": "Xóa mục mồ côi?",
+    "body": "Thao tác này xóa vĩnh viễn mục mồ côi cùng các bản dịch của nó. Không thể hoàn tác."
+  },
+  "relink": {
+    "title": "Liên kết lại mục mồ côi",
+    "description": "Chuyển bản dịch từ mục mồ côi này sang một mục khác, xếp hạng theo mức giống nhau giữa văn bản nguồn của từng ứng viên và của mục mồ côi này.",
+    "searchPlaceholder": "Tìm mục theo văn bản nguồn…",
+    "noCandidates": "Không có mục nào khớp",
+    "submit": "Tiếp tục",
+    "confirmTitle": "Xác nhận liên kết lại",
+    "confirmDescription": "Chọn cách áp dụng bản dịch của mục mồ côi vào mục đích trước khi liên kết lại.",
+    "overrideModeLabel": "Chế độ ghi đè",
+    "overrideEmptyOnly": "Chỉ điền vào những bản dịch còn trống (giữ nguyên bản dịch sẵn có của mục đích)",
+    "overrideAll": "Ghi đè mọi bản dịch bằng bản dịch của mục mồ côi",
+    "aiRetranslateLabel": "Dùng AI để dịch lại",
+    "aiRetranslateHint": "Sau khi liên kết lại, một lượt AI sẽ so văn bản nguồn cũ của mục mồ côi với văn bản nguồn mới của mục đích, rồi cập nhật từng bản dịch sẵn có để phản ánh đúng thay đổi đó.",
+    "aiModuleLabel": "Mô-đun AI",
+    "aiModelLabel": "Mô hình",
+    "aiReasoningEffortLabel": "Mức độ suy luận",
+    "aiModulePlaceholder": "Chọn một mô-đun…",
+    "aiNoModules": "Chưa bật mô-đun nào dùng được AI — hãy bật một mô-đun ở Cấu hình chung để dùng tính năng AI dịch lại.",
+    "confirmSubmit": "Liên kết lại"
+  },
+  "toast": {
+    "loadError": "Không tải được các mục mồ côi",
+    "deleted": "Đã xóa mục mồ côi",
+    "deleteError": "Không xóa được mục mồ côi",
+    "bulkDeleted": "Đã xóa {{count}} mục mồ côi",
+    "relinked": "Đã chuyển các bản dịch",
+    "relinkError": "Không liên kết lại được mục mồ côi",
+    "candidatesError": "Không tải được danh sách ứng viên để liên kết lại",
+    "aiRetranslateStarted": "Đã bắt đầu lượt AI dịch lại — xem ở tab Hoạt động",
+    "aiRetranslateUnavailable": "Đã liên kết lại, nhưng lượt AI dịch lại không bắt đầu được (không có mô-đun nào dùng được AI)"
+  }
+}

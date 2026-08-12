@@ -333,6 +333,44 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
   // `strings:runs.stringsProgress` read "{{completed}} / {{total}} voci"; both
   // now put the word in front of the ratio, where it labels rather than agrees.
   it: ['di', 'in', 'su', 'che', 'token', 'batch', 'byte', 'car', 's'],
+  // vi, derived from the whole-language post-token-axis survivor set — 60 of the
+  // 166 raw narrow matches, carrying these 24 distinct forms. Never from the raw
+  // set, per the calibration rule above.
+  //
+  // WHY THIS IS A LIST AND NOT A NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES ENTRY,
+  // which is the obvious move and is wrong. Vietnamese nouns have no number, so
+  // like `tr` and `ja` it has no numeral agreement for this axis to catch — but
+  // unlike either it DOES have one numeral-adjacent hazard the axis can catch:
+  // the pluralizers `các` and `những`, which are correct before a bare noun and
+  // UNGRAMMATICAL after a numeral ("{{total}} các mục" is wrong at every count).
+  // Flagging the locale inapplicable would clear that silently. So the axis stays
+  // on, and `các`/`những` must never be added to this list — that exclusion is
+  // the entry's whole point, not an oversight. `{{count}}` is skipped on the token
+  // axis, so the hazard is only ever reachable after a non-`count` token, which is
+  // exactly what this axis looks at.
+  //
+  // A SECOND FACT ABOUT THIS LOCALE: Vietnamese writes every syllable as its own
+  // space-delimited token, so a "word" axis is a SYLLABLE axis here. Half the
+  // entries below (`ngôn`, `quy`, `thuật`, `phát`, `đề`, `thành`, `thất`, `ký`,
+  // `ví`, `thao`) are the first syllable of a compound — `ngôn ngữ`, `quy tắc`,
+  // `thuật ngữ` — not free words. That is not a defect in the list; it is what the
+  // whitespace tokenizer sees, and every one of them is invariant for the same
+  // reason the whole words are. Expect this list to be longer and finer-grained
+  // than a European locale's, and expect a later batch to extend it rather than
+  // to find it complete.
+  //
+  // The 24 by class: prepositions and particles (`trên`, `vào`, `ra`, `mà`, `đã`);
+  // invariant loanwords (`token`, `byte`); adjectives (`mới`, `khác`); classifiers
+  // and count nouns (`lượt`, `lô`, `mục`, `bảng`, `điểm`); and the compound-initial
+  // syllables listed above. None inflects for number, in any construction, so a
+  // numeral in front of any of them is always grammatical.
+  vi: [
+    'trên', 'vào', 'ra', 'mà', 'đã',
+    'token', 'byte',
+    'mới', 'khác',
+    'lượt', 'lô', 'mục', 'bảng', 'điểm',
+    'ngôn', 'quy', 'thuật', 'phát', 'đề', 'thành', 'thất', 'ký', 'ví', 'thao',
+  ],
 };
 
 /**

@@ -1,0 +1,25 @@
+{
+  "title": "Chào mừng đến với Narn",
+  "intro": "Hãy xem qua các bài hướng dẫn bên dưới trước khi bắt đầu — hoặc đi thẳng tới việc thiết lập kho bảo mật khi bạn đã sẵn sàng.",
+  "guidesHeading": "Hướng dẫn",
+  "browseGuides": "Xem các bài hướng dẫn",
+  "setupVaultHeading": "Sẵn sàng dịch chưa?",
+  "setupVaultBody": "Hãy thiết lập kho bảo mật để thêm những khóa nhà cung cấp AI mà các bản dịch của bạn sẽ dùng.",
+  "setupVaultButton": "Thiết lập kho bảo mật",
+  "themeChooser": {
+    "title": "Chọn vẻ ngoài của bạn",
+    "intro": "Chọn một chủ đề và chọn nền sáng hay tối — bạn có thể đổi cả hai bất cứ lúc nào ở Cài đặt.",
+    "themeLabel": "Chủ đề",
+    "modeLabel": "Sáng hay tối",
+    "modes": { "light": "Sáng", "dark": "Tối" },
+    "confirm": "Dùng những cài đặt này",
+    "keepDefault": "Giữ Techno",
+    "names": { "default": "Cổ điển", "pixel": "Pixel", "techno": "Techno", "minimal": "Tối giản" },
+    "taglines": {
+      "default": "Vẻ ngoài nguyên bản của NARN.",
+      "pixel": "Điểm ảnh retro thô mộc.",
+      "techno": "Cửa sổ dòng lệnh đèn neon. Mặc định mới.",
+      "minimal": "Chỉ nội dung, không hơn."
+    }
+  }
+}

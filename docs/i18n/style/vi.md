@@ -15,8 +15,8 @@ Do not use "quý khách" (commercial, reads like a bank), "anh/chị" (assumes t
 gender and age) or "mày/tao" in any circumstance.
 
 Vietnamese drops the pronoun freely — prefer that in short strings. Keep _bạn_ where the
-English says **your** and the possessor is load-bearing (`config:enableModuleHelp` ends
-"…cho mọi dự án của bạn"), and drop it where English merely has an implied subject.
+English says **your** and the possessor is load-bearing — `config:enableModuleHelp` closes on
+it — and drop it where English merely has an implied subject.
 
 **Corrected before batch 1:** the seed cited `vault:unlockDescription` as _Enter your
 password…_ rendered "Nhập mật khẩu của bạn…". Both halves were truncations — the English is
@@ -115,11 +115,15 @@ the pilot's 1.5× ceiling, including a sidebar item at 3.80×, because a ratio m
 long the *English* is rather than how wide the *control* is. A short source such as
 `sidebar:legal` ("Legal") denies slack the control actually has.
 
-**The seed's "widest expander of the fourteen" claim is an unverified estimate.** It is
-carried here unresolved on purpose: it cannot be measured until every namespace has shipped,
-and the measurement is a deliverable of the whole-language sweep (runbook 7.2), not of
-batch 1. See "Measured expansion" below, which holds the method now and the numbers after
-the sweep. **The tail, not the aggregate, is what breaks chrome** (runbook 2.10).
+**The seed's "widest expander of the fourteen" claim was an estimate, and the measurement
+falsifies it.** Over the 1,879 keys `vi` shares with English, the aggregate expansion is
+**1.056**, the median **1.043** and the 90th percentile **1.438** — the *narrowest* of the
+seven Latin-script locales in the tree on all three, below `tr` (1.109 / 1.086 / 1.556),
+`pt-br`, `ru`, `es`, `it` and `de` (1.258 / 1.241 / 1.667). The intuition behind the seed is
+real — one syllable per space-delimited unit — but it is more than offset by what Vietnamese
+does not spend characters on: no articles, no plural marking, no case endings, no
+agreement, and syllables that are three or four letters. **The tail, not the aggregate, is
+what breaks chrome** (runbook 2.10), and 1.438 is the number to budget against.
 
 ### The six budgets
 
@@ -131,17 +135,36 @@ headroom.
 | --- | --- | --- | --- | --- |
 | Sidebar item | `sidebar:globalConfig`, `sidebar:legal` | **hard** | **26 chars** | container |
 | Tab label | `strings:tabs.backup` | **hard** | **26 chars** | same container |
-| In-panel sub-tab | `config:routing.tabImportExport` | soft | _pending sweep_ | longest shipped + headroom |
-| Table column header | `strings:columns.config` | soft | _pending sweep_ | longest shipped + headroom |
-| Filter label | `strings:filters.needsReview` | soft | _pending sweep_ | longest shipped + headroom |
-| Bulk-bar control | `strings:bulk.approveSelected` | soft | _pending sweep_ | longest shipped + headroom |
+| In-panel sub-tab | `config:routing.tabImportExport` | soft | **22 chars** | longest shipped 19 + headroom |
+| Table column header | `strings:columns.config` | soft | **18 chars** | longest shipped 15 + headroom |
+| Filter label | `strings:filters.needsReview` | soft | **30 chars** | longest shipped 26 + headroom |
+| Bulk-bar control | `strings:bulk.approveSelected` | soft | **38 chars** | longest shipped 35 + headroom |
 
-The four soft budgets are derived from the longest value **this locale ships** in each class,
-so they cannot be written before the class has shipped: three of the four anchors live in
-`strings` (batch 2) and the classes they name run across batches 2 and 6. They are filled in
-at the whole-language sweep, where runbook 7.2 makes replacing a provisional budget with a
-measured one a deliverable rather than a note. The two hard numbers do not wait, because they
-come from the container rather than from the copy.
+**Measured at the whole-language sweep, over the finished locale, per runbook 7.2** — these
+replace the provisional figures batch 1 could not derive. The distribution behind each, so a
+later reader can re-run it rather than trust it:
+
+| Class | Keys | Longest shipped | Longest en counterpart |
+| --- | --- | --- | --- |
+| Sidebar item | 11 | **16** — `sidebar:colorText`, `sidebar:changelog` | 11 |
+| Sidebar group heading | 6 | **9** — `sidebar:groups.project`, `sidebar:groups.content` | 5 |
+| Tab label | 17 | **24** — `strings:tabs` (review-translation-ai) | 21 |
+| In-panel sub-tab | 6 | **19** — `config:routing.tabRules` | 17 |
+| Table column header | 40 | **15** — `strings:columns.tooltipAchievementSource` | 18 |
+| Filter label | 26 | **26** — `strings:filters.newOnly` | 22 |
+| Bulk-bar control | 17 | **35** — `strings:bulk.generateGlossaryFromSelection` | 32 |
+
+**Both hard classes clear their container with room to spare, and one is close.** The longest
+sidebar item is 16 against a 26-character budget. The longest tab label is 24 — inside the
+budget, but the two AI-review tabs are the only strings in this locale that come near a hard
+limit, and they are long because the surface name is long in English too. Do not shorten
+either to buy margin; if a future tab needs more, measure the running app rather than the
+table.
+
+**The two soft classes worth watching are the filter labels and the bulk bar**, which are the
+only two where this locale runs longer than English at the top of the distribution. Neither
+overflows — both scroll or wrap — but a new filter label above 30 characters should be
+looked at.
 
 **How the two hard numbers were derived, so a later reader can re-derive them.** Both
 classes live in one container: `SIDEBAR_WIDTH` is `16rem` = 256px
@@ -170,7 +193,16 @@ every shorter candidate is a different term.
 
 Method, so it can be re-run rather than trusted: one ratio per key over the **1,879 keys
 `vi` shares with English** (the population runbook 2.10 asks you to name — `vi` has exactly
-these, no extra plural forms, see below), character counts by code point.
+these and no others, because it supplies no plural form English lacks), character counts by
+code point. Aggregate **1.056**, median **1.043**, 90th percentile **1.438**; 51,568 English
+characters against 54,451 Vietnamese. Only one of the two populations runbook 2.10 warns
+about exists here: a locale with no extra plural forms has one key set, so the shared-key
+figure and the whole-locale figure are the same number.
+
+The longest single ratio is 3.67, at `strings:runs.judgeIssueUnsafe` — English's *Unsafe*
+against a phrase naming what is unsafe. That is the shape of every high ratio in this locale:
+a one-word English source, not a long Vietnamese rendering, which is exactly why runbook 2.4
+forbids budgeting by ratio.
 
 ```bash
 node -e 'const fs=require("fs");const f=(o,p,out)=>{for(const[k,v]of Object.entries(o))v&&typeof v==="object"?f(v,p+k+".",out):out.set(p+k,String(v))};
@@ -231,8 +263,8 @@ does not have it. `ja`, `ko` and `zh-hans` are at 1,879 for the same reason.
 - **"Routing" is not "định tuyến".** The obvious Vietnamese word for _routing_ is the
   networking one, and `terminology.md`'s *routing rule* row says in as many words: "Avoid any
   word that suggests *network* routing — this is content routing." "điều phối" (to dispatch /
-  allocate) carries no network reading and is not claimed by another term, so `config:routing.*`
-  ships "điều phối" throughout. **The seed cited "Quy tắc định tuyến" here and it was
+  allocate) carries no network reading and is not claimed by another term, so every key under
+  the routing subtree ships it. **The seed cited "Quy tắc định tuyến" here and it was
   wrong** — it was written before the lexicon row was read, and the citation guard did not
   catch it (see the note in `terminology/vi.md` on `routing rule`).
 - **"Stage" is a game level.** Vietnamese gaming uses "màn chơi"; "giai đoạn" is exactly the
@@ -311,8 +343,8 @@ substring relations than English, so English is a second opinion here and not th
 
 Two more overlaps were checked and cleared:
 
-- `strings:guide.groupTranslate` "Dịch" against `strings:guide.groupTranslationMemory` "Bộ nhớ
-  dịch". These are **siblings** in the guide's left rail (`GuideView.tsx:73`), not a
+- `strings:guide.groupTranslate` "Dịch" against `strings:guide.groupTranslationMemory`, which is
+  the three-syllable compound noun for translation memory. These are **siblings** in the guide's left rail (`GuideView.tsx:73`), not a
   heading over a child, so the structural licence does not carry them — but they are a bare
   verb against a three-syllable compound noun, which no Vietnamese reader confuses, and
   English has the identical relation.
