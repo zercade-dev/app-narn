@@ -1,6 +1,6 @@
 {
   "title": "Waisen",
-  "subtitle": "Einträge, die in der zuletzt importierten CSV nicht mehr vorhanden sind. Diese Einträge löschen oder ihre Übersetzungen auf einen anderen Eintrag neu verknüpfen.",
+  "subtitle": "Einträge, die in der zuletzt importierten CSV nicht mehr vorhanden sind. Diese Einträge löschen oder ihre Übersetzungen mit einem anderen Eintrag neu verknüpfen.",
   "emptyTitle": "Alles ist verknüpft",
   "empty": "Keine verwaisten Einträge — die importierten CSVs stimmen mit dem aktuellen Projekt überein.",
   "columns": {
@@ -44,7 +44,7 @@
   "toast": {
     "loadError": "Waisen konnten nicht geladen werden",
     "deleted": "Waise gelöscht",
-    "deleteError": "Waise konnte nicht gelöscht werden",
+    "deleteError": "Löschen fehlgeschlagen",
     "bulkDeleted": "Gelöschte Waisen: {{count}}",
     "relinked": "Übersetzungen verschoben",
     "relinkError": "Waise konnte nicht neu verknüpft werden",

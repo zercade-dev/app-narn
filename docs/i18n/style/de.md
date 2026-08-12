@@ -341,6 +341,7 @@ re-deciding it.
 | **quality check**, the LQA gate seen from a log line | *Qualitätsprüfung* | `logs:lqa.passed`, `logs:lqa.failed`, `logs:translation.tmRejected`, `logs:translation.lqaRetry` | — |
 | **restore**, a backup | verb *wiederherstellen*, deverbal *Wiederherstellung* | `backup:restoreButton`, `restoring`, `restoreSection`, `toastRestoreSuccess`, `toastRestoreFailed`, `confirmConfirm`; the batch-2 precedent is `strings:compare.undoRestore` | — |
 | **clipboard**, the copy confirmation and its failure | "In die Zwischenablage kopiert" / "Kopieren in die Zwischenablage fehlgeschlagen" | `colorText:copied`, `stage-details:copied`, `stage-details:copyFailed` — the third repeats batch 3's `review:sourceAi.copyFailed`, whose English is identical | — |
+| **save failure** — two English wordings, one German string, **licensed** | "Speichern fehlgeschlagen: {{message}}" | `config:autoSaveError` (*Failed to save: {{message}}*, batch 1) and `stage-details:saveFailed` (*Could not save: {{message}}*, batch 6) ship the identical German. This is the same-rendering/different-English direction and it is deliberate: German has no meaning distinction to carry between *failed to* and *could not*, both keys report one event — a save that did not happen — and this locale already renders both English shapes with *fehlgeschlagen* elsewhere (`review:sourceAi.copyFailed` is a *Could not*, `config:autoSaveError` a *Failed to*). `ru` collapses the identical pair; `es` and `fr` keep it apart, and either is defensible. **Recorded so the collision sweep does not reopen it** — the danger of this class is that the file looks *more* consistent, not less | — |
 | **why**, the model's stated reason for a proposal | *Begründung:* | `colorText:assistant.proposalWhy`, `stage-details:chatProposalWhy`. English's terse *Why:* is idiomatic English labelling; a German "Warum:" in front of a free-text sentence reads as a question nobody asked, so the label names the thing instead | — |
 | **stop**, a streaming AI response mid-flight | *Stoppen* | `colorText:assistant.stop`, `stage-details:chatStop` (both `aria-label`s). Distinct from *Abbrechen*, which cancels a **run** (`stage-details:cancel`, `batch:cancelRun`) — one ends a stream, the other kills queued work | — |
 | **ask**, of the assistant | *bitten* where English asks it **to do** something, *fragen* where English asks it **about** something | `colorText:assistant.placeholder` (*Ask the assistant to style your text…*) is "Den Assistenten bitten, …"; `stage-details:chatInputPlaceholder` (*Ask the assistant…*) and `chatEmpty` (*Ask about wording…*) are *fragen*. Two English senses of one verb, two German verbs — do not collapse them | — |
@@ -752,6 +753,27 @@ and `config:routing.nSelected` "{{count}} ausgewählt" need no rephrasing at all
 **Do not "fix" this by interpolating `{{count}}` instead.** The gate compares the multiset of
 tokens against English; swapping a token is two violations, not a clever fix.
 
+**A key with NO number at all still has to be count-neutral if one of its call sites is a bulk
+path — and German exposes that where English hides it.** `orphans:toast.deleteError` is the
+worked example and it shipped wrong in round 6. Its English is *Failed to delete orphan*, and it
+fires from **two** handlers in `OrphansTab.tsx`: the single-row delete (`handleDelete`) and the
+bulk-delete route's catch (`handleBulkDelete`), which runs after a whole selection was rolled
+back. English's bare noun is at least ambiguous between one and many; a German noun is not, so
+"Waise konnte nicht gelöscht werden" says *one* orphan on a path where N failed — a **worse**
+sentence than the source, which is the runbook's rider that faithfulness to an English defect is
+not a licence to ship one the English does not have. It now reads **"Löschen fehlgeschlagen"**,
+count-neutral and true on both paths, reusing the lexeme `backup:toastDeleteFailed` already
+ships. The plural is not the fix — it is the opposite half-truth, false on the single-row path.
+
+**The sibling asymmetry that follows is correct and must not be "harmonized".** Three toasts in
+that namespace disagree about number on purpose, because their call sites do: `toast.deleted`
+"Waise gelöscht" is singular (only `handleDelete` fires it — the bulk success is the separate
+`toast.bulkDeleted`), `toast.loadError` "Waisen konnten nicht geladen werden" is plural (it
+reports the whole list failing to load), and `toast.deleteError` is neither. **The question is
+rubric item 6's — how many call sites, not what does this control do** — and it has to be asked
+of a key that carries no token, which is the case that looks like it needs no counting thought
+at all.
+
 **The twelve `bare + _other` families need a German `_one`, and batch 4 is the first batch to
 meet any of them.** English spells those twelve with no `_one` at all; German has a `one`
 category, so leaving it out would render the **English** string at count 1 unless the bare
@@ -976,8 +998,8 @@ Measured expansion against the English source, one ratio per key:
 | 3 — `glossary` `review` `category` `quality` | 377 | 10,744 | 13,502 | 1.26 | 1.25 | 1.71 | 3.33 |
 | 4 — `collab` `account` `vault` `settings` `sidebar` | 300 | 7,851 | 10,003 | 1.27 | 1.26 | 1.71 | 3.20 |
 | 5 — `logs` `console` `system` `errors` `generation` `batch` | 123 | 4,567 | 5,780 | 1.27 | 1.25 | 1.57 | 2.07 |
-| 6 — `stage-details` `colorText` `orphans` `backup` `welcome` `common` `legal` | 282 | 6,514 | 8,179 | 1.26 | 1.21 | 1.67 | 3.33 |
-| **whole language** | **1,908** | **52,591** | **66,158** | **1.26** | **1.24** | **1.67** | **3.75** |
+| 6 — `stage-details` `colorText` `orphans` `backup` `welcome` `common` `legal` | 282 | 6,514 | 8,167 | 1.25 | 1.20 | 1.67 | 3.33 |
+| **whole language** | **1,908** | **52,591** | **66,146** | **1.26** | **1.24** | **1.67** | **3.75** |
 
 **Every row is over the keys the batch SHARES with English.** It is the same population for
 batches 1-3, which added no keys of their own. Batch 4 is the first that differs: it ships
@@ -1128,8 +1150,12 @@ sidebar item, no `strings:tabs.*` label, no filter label and no bulk-bar control
 five rows stand at their batch-4 values. It does hold **one** table-column-header set — the four
 `orphans:columns.*` — whose longest is "Übersetzungen" (13) against the measured **22**, so that
 row is unmoved too. `orphans:actions.bulkDelete` looks like a bulk-bar control and is not: it is
-one of two buttons in the Orphans card's own toolbar row, which wraps, and it renders at 20
-characters with a two-digit count.
+one of two buttons in the Orphans card's own toolbar row, not in `strings:bulk.*`'s bar, and it
+renders at 20 characters with a two-digit count. (**Corrected 2026-08-12, round-6 review M2:**
+this sentence also said the row "wraps". `OrphansTab.tsx:304` is a bare
+`flex items-center gap-2` with no `flex-wrap`, so it would shrink or overflow instead. The two
+checkable numbers and the conclusion were right and the invented fact was load-bearing for
+nothing — which is exactly why it survived being written.)
 
 **One unbreakable token over 20 characters shipped in batch 6**, on an unconstrained surface:
 "Unterauftragsverarbeiter" (24, `legal:subprocessors`, a link row in a full-width list). It is
@@ -1143,18 +1169,36 @@ Batch 6's max ratio is 3.33, at `colorText:addColorConfirm` — English *Add*, G
 (it skips any English shorter than 12 characters). Its **90th percentile is 1.67** — between batch 5's 1.57 and batches 3/4's 1.71,
 which is what a batch that is half chrome and half toast prose should look like.
 
+**Batch 6's row was re-derived after its fix round and it moved, which is why that rule exists.**
+The round-6 review's Critical replaced `orphans:toast.deleteError` with a count-neutral frame —
+11 German characters shorter — and its M1 swapped a preposition at equal length. Eleven
+characters in 8,179 moved the **batch** aggregate 1.2556 → 1.2538 and the median 1.2093 →
+1.2047, i.e. **1.26 → 1.25 and 1.21 → 1.20 at the two decimals this table prints**, while the
+tail and the max did not move at all. The whole-language row absorbed the same eleven characters
+and still prints the same two decimals (1.2580 → 1.2577; 1.2417 → 1.2414). A fix round of **two
+strings** was therefore enough to falsify two published digits — which is what the runbook means
+by re-deriving after the *last* string edit rather than after the translation.
+
 **The whole-language row, and which population it is over.** The bold row above is over the
 **1,908 keys `de` shares with English**, one ratio per shared key — the population the runbook's
 own comparison table uses (ru 1.19, es 1.22, fr 1.26), so `de` at **1.26** sits with French. Over
 the **full 1,920-key German set** instead, measuring each of the twelve extra `_one` forms against
-the English form it resolves to, the figures are aggregate **1.2569**, median **1.2409**, 90th
+the English form it resolves to, the figures are aggregate **1.2567**, median **1.2405**, 90th
 percentile **1.6667** — a difference of one unit in the third decimal, because twelve extra keys
 in nineteen hundred cannot move an aggregate. That gap is much smaller than Russian's, and the
 reason is the same one that fixes the key count: German adds twelve keys where Russian adds 94.
 The tail is identical to two decimals on both populations. The whole-language **max** is
 `strings:runs.judgeVerdictFail` ("Fail" → "Nicht bestanden", 3.75), unchanged from batch 2.
 
-All figures on this line and in the table above are re-derived after batch 6's last string edit.
+**"Sits with French" is doing real work and was re-derived over the identical population rather
+than taken from the runbook's rounded table:** ru **1.1862**, es **1.2187**, fr **1.2576**, de
+**1.2577**, each over the same 1,908 shared keys. German is the longest of the four, by one ten-
+thousandth over French — so the honest statement is that de and fr are indistinguishable and both
+run about 6% longer than Spanish, not that German is "comfortably mid-range". The fix round moved
+de from 1.2580 to 1.2577 and did not change that ordering.
+
+All figures on this line and in the table above are re-derived after the **fix round's** last
+string edit, not the batch's.
 
 Descriptions, toasts and guide prose are not constrained; put the precision there.
 
