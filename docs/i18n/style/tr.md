@@ -10,8 +10,9 @@ placeholder handling.
 > file**, and fails on a quoted span whose significant words are not attested in the shipped
 > `tr` corpus. It also implements the three-way split below rather than merely describing it:
 > a prescription for a namespace that has **not shipped yet is skipped, not failed**, and
-> starts being checked the moment that namespace ships. `tr`'s prescriptions today are the
-> `sidebar:`, `vault:`, `orphans:` and `colorText:` quotations, waiting on batches 4 and 6.
+> starts being checked the moment that namespace ships. **`tr`'s remaining prescriptions are
+> the `orphans:` and `colorText:` quotations, waiting on batch 6** — the `sidebar:` and
+> `vault:` ones were discharged in batch 4 and are citations now, checked on every run.
 > Run the script for its own counts; do not copy them into this file.
 >
 > **What it does not check is attachment.** It proves that **each significant word** of a
@@ -40,12 +41,17 @@ placeholder handling.
 >   `packages/frontend/src/locales/tr/config.json` at the end of batch 1; the `strings:`
 >   ones against `.../tr/strings.json` at the end of batch 2.
 > - A quotation attached to a key in **any other namespace is a prescription**, binding on
->   the batch that owns that namespace — `sidebar:*` and `vault:*` in batch 4,
->   `orphans:*` and `colorText:*` in batch 6. It describes what that key **must** ship, not
->   what it does ship. **`glossary:`, `review:`, `category:` and `quality:` quotations are
->   citations as of batch 3**, verified against `.../tr/{glossary,review,category,quality}.json`
->   at the end of that batch; the two prescriptions batch 2 left for `quality:*` and
->   `review:*` were discharged there and are marked as shipped below.
+>   the batch that owns that namespace — today only `orphans:*` and `colorText:*`, in batch 6.
+>   It describes what that key **must** ship, not what it does ship. **`glossary:`, `review:`,
+>   `category:` and `quality:` quotations are citations as of batch 3**, verified against
+>   `.../tr/{glossary,review,category,quality}.json` at the end of that batch; the two
+>   prescriptions batch 2 left for `quality:*` and `review:*` were discharged there and are
+>   marked as shipped below. **`sidebar:` and `vault:` quotations are citations as of batch
+>   4**, verified against `.../tr/{sidebar,vault}.json` at the end of that batch — including
+>   the three this file had been carrying since batch 1: `sidebar:selectProject`
+>   (“Bir proje seçin”), `sidebar:create` (“Oluştur”) and `vault:unlockDescription`, whose
+>   shipped string is “Bu oturumda modül kimlik bilgilerinin şifresini çözmek için
+>   **parolanızı girin**.”
 > - A quotation attached to **no key at all** is an illustration: a rejected candidate, a
 >   wrong form shown as wrong, or a convention example. Never copy one as a rendering.
 >
@@ -57,7 +63,10 @@ placeholder handling.
 ## Register
 
 **Siz — the `-in` / `-ın` / `-un` / `-ün` imperative.** `sidebar:selectProject` ("Select a
-project") is "Bir proje seçin"; `vault:unlockDescription` is "Parolanızı girin…".
+project") is “Bir proje seçin”; `vault:unlockDescription` ends on “parolanızı girin”.
+(Both shipped in batch 4; this bullet was written as a prescription in batch 1 and the
+shipped strings are what it now cites — the second one is a sentence, not the two-word
+fragment an earlier version of this line quoted.)
 
 Two forms to avoid at both ends:
 
@@ -100,6 +109,39 @@ every later namespace follows it.
   ("Select a model") and are two different controls: "Bir model seçin" for the
   placeholder, "Model seçimi" for the dialog title. That pair is the one licensed
   same-English/different-rendering collision in `config`.
+
+**A tab label that names an *action* keeps English's verb phrase; only a tab that names a
+*surface* is a noun phrase.** Settled in batch 4 on the one place in the product where the
+two shapes sit in the same `TabsList`: the New Project sheet's tabs are
+`sidebar:createTab` ("Create new") and `sidebar:joinProject` ("Join project"), and they
+ship as "Yeni oluştur" and "Projeye katıl". The noun-phrase rule above was derived from the
+main tab bar, where every English label is itself a noun ("Config", "Data", "Compare"); these
+two are verb phrases in English because they name what the tab *does*, and a Turkish deverbal
+noun ("Yeni oluşturma") would read as a section heading over a form the user is standing in.
+The sheet's own title stays a noun phrase — `sidebar:createProjectTitle` is "Proje
+oluşturma" — so the title/tab distinction is visible in the shape, exactly as it is in
+`config`. **`collab:join.joinButton` is byte-identical in English to the tab and ships
+byte-identical here, "Projeye katıl", because the two are genuinely on screen together** (the
+form is rendered inside that tab's own `TabsContent`) and English repeats itself there
+deliberately.
+
+**A confirm button still never takes "Onayla", and batch 4 adds the third member of the
+"Evet, …" family.** `account:deviceForgetConfirm` is English's bare "Confirm" on the
+destructive half of a two-button row, and ships as **"Evet, unut"** — the same shape as
+`config:instances.deleteConfirm` ("Evet, sil") and `config:tm.clearAllConfirm`
+("Evet, tümünü temizle"). The reason is unchanged: *approve* owns "onayla"
+(`review:approve`). The **noun** "onay" is not caught by that bar and is free where English
+means a confirmation rather than the approve action — `account:tokenPlaceholder` is
+"Onay kodu" and `confirmPlaceholder` is "Onaylamak için e-postanızı yazın". Where English
+means *verify a code*, the verb is "doğrula": `account:mfaConfirmButton` ("Confirm and
+enable") is "Doğrula ve etkinleştir", which is also what the route does to that code.
+
+**One key, two call sites, takes the `-in` form.** `vault:manageOnVaultPage` is rendered both
+as a hint paragraph and as the button beneath it (`VaultEditorDialog.tsx`, the cloud-managed
+branch), so the bare-stem button exception cannot apply — it would read as a curt command in
+the paragraph. It ships as "Kimlik bilgilerini kasa sayfasında yönetin". The bare stem stays
+the rule for a **short, isolated** button, which is what `vault:unlock` ("Kilidi aç"),
+`setupRedirect` ("Bu cihazı kur") and `goToVault` ("Kasa sayfasına git") are.
 
 A `-yor` progressive ("İçe aktarılıyor…", "Ölçülüyor…") is a **status**, not a command:
 use it for progress text and never for a button. It is the settled shape for every progress
@@ -521,17 +563,63 @@ against `_other`'s "o hücreleri düzeltin".
 
 `Intl.PluralRules('tr')` gives **`one` and `other`** — exactly English's set. So:
 
-- Turkish ships **the same key count as English**, 1,908. No `_few`, no `_many`, no extra
-  and no missing category.
-- Copy English's plural shape as-is, then apply the singular-after-numeral rule to the
-  wording.
+- Turkish ships **1,920 keys, twelve more than English's 1,908** — no `_few`, no `_many`, and
+  no missing category, but one `_one` that English does not have for each of the twelve
+  `bare + _other` families. **This corrects an earlier version of this bullet, which said
+  "the same key count as English, 1,908".** That sentence was wrong and it was wrong in a way
+  worth keeping visible, because the reasoning behind it is right and only its conclusion was
+  not: Turkish's category set *is* English's, so a family English spells `_one` + `_other`
+  costs Turkish exactly two keys. The twelve exceptions are the families English spells
+  **bare + `_other` with no `_one` at all** (runbook 2.3 — verified against
+  `locales/en` rather than quoted: 41 families, 29 with `_one`, 12 without, 0 other shapes).
+  English's *singular* there is the bare key, and a bare key is a plain key, not a category —
+  so a Turkish family that copies that shape has **no `one` form**, and `pnpm check:locales`
+  in strict mode fails it. Measured, not reasoned: deleting `vault:keysCount_one` and
+  re-running `LOCALE_PARITY_STRICT=tr pnpm check:locales` produces
+  `FAIL — tr: 1 plural family do not supply "_one" … including 1 a bare "key" sibling would
+  otherwise rescue`. Restoring it is green. **Batch 4 shipped four of the twelve — all in
+  `vault`. Batch 5 owes the other eight: two in `console` (`unreadErrors`,
+  `membersNotShown`) and six in `logs` (`translation.queued`, `translation.failedNoRoute`,
+  `translation.failedModuleDisabled`, `translation.failedModuleNotFound`,
+  `sourceReview.done`, `orphan.detected`).** Do not rediscover this — the `_one` will not be
+  in the English file you copy, and the gate will not mention it until you run strict mode.
+  Note also that `logs:translation.queued` and `logs:sourceReview.done` are the two the
+  runbook flags for a *different* reason on top of this one: each displays a non-`count`
+  token while selecting on `count`.
+- **Keep the bare key.** English has it, so key parity requires it, and it is the sibling
+  that rescues the family in the default gate. Write it count-neutral: once `_one` and
+  `_other` both exist it is unreachable. **Checked rather than assumed, because supplying
+  `_one` is what makes it unreachable:** all four `vault` families are called with a `count`
+  at every one of their call sites — `keysCount` at `GlobalConfigView.tsx:312`,
+  `remainingAttemptsHint` at `VaultUnlockDialog.tsx:82`, `retrySuccess` and `retryFailed` at
+  `AppShell.tsx:770` and `:773` — so no site reaches the bare key at all, and nothing
+  regressed by adding the singular. (`strings:runs.retryFailed` is a different key in a
+  different namespace; do not confuse the two when grepping.)
+- **The counter-argument, stated so nobody re-opens it as if it were new.** Turkish counted
+  nouns stay in the bare singular after a numeral, so the singular and the plural of
+  `keysCount` are byte-identical and the `_one` form buys the *reader* nothing. It is
+  supplied anyway, for two reasons that outrank that: `LOCALE_PARITY_STRICT=tr` fails without
+  it (measured above), and two of the four families — `retrySuccess` and `retryFailed` — do
+  have a real singular/plural distinction in Turkish that lives in the possessive noun
+  ("işleminiz" / "işlemleriniz"), not in numeral agreement. A shape that is right for two of
+  the four and merely harmless for the other two beats one that is wrong for two.
+- Copy English's plural shape as-is, add the missing `_one` where English has none, then
+  apply the singular-after-numeral rule to the wording.
 - `_zero` remains legal in every locale and English already ships one
   (`strings:bulk.removeCategoryApply_zero`); keep it. Never add a `_plural` suffix — it
   never resolves.
 - The twelve `bare + _other` families (listed in the runbook) all live in `console`, `logs`
   and `vault`, none in `config`. Read the runbook's section 2.3 before writing them: your
   `_one` is checked against English's `_other`, so it must carry `{{count}}` even where
-  English's own singular does not.
+  English's own singular does not. **The four in `vault`, as shipped in batch 4, are the
+  worked set** — and they come out three different ways, which is the point:
+  `keysCount` and `remainingAttemptsHint` are byte-identical across bare/`_one`/`_other`,
+  because a Turkish noun after a numeral never inflects and the frame is already
+  count-neutral; `retrySuccess` differs in all three (bare has no token, `_one` carries
+  `{{count}}` because it is checked against English's `_other`, `_other` adds "tümü" for
+  English's "all"); `retryFailed` carries **no** token in any form — neither English form has
+  one — and differs only in the number of the noun ("işleminiz" / "işlemleriniz"), with bare
+  and `_one` identical because they say the same thing.
 
 ## Length discipline
 
@@ -543,7 +631,13 @@ keys: aggregate **1.10**, median **1.07**, 90th percentile **1.43**, longest sin
 English characters against “Çalıştırma”). Over the 377 batch-3 keys
 (`glossary` + `review` + `category` + `quality`): aggregate **1.08**, median **1.06**, 90th
 percentile **1.50**, longest single ratio 3.00 (`review:sourceAi.findingTypo`, four English
-characters — "Typo" — against “Yazım hatası”). Re-measure over the whole language at the
+characters — "Typo" — against “Yazım hatası”). Over the 300 batch-4 keys
+(`collab` + `account` + `vault` + `settings` + `sidebar`): aggregate **1.09**, median
+**1.08**, 90th percentile **1.50**, longest single ratio 2.80 (`sidebar:legal`, five English
+characters — "Legal" — against “Yasal bilgiler”). **State the population**: that is the 300
+keys this batch shares with English; the batch ships **304** `tr` keys, the extra four being
+the `_one` forms the four `vault` `bare + _other` families owe (see "Plural categories"),
+which have no English counterpart to be a ratio of. Re-measure over the whole language at the
 final sweep, and state the population with the figure. **The two namespaces differ because
 `strings` is chrome:** it is full of one- and two-word labels, and a short English source is
 what produces a large ratio — the tail here is not long renderings, it is short sources. The catch is distribution, not the aggregate: fewer,
@@ -598,6 +692,26 @@ grow ~1.5–3% with weight, which puts `tabs.review-source-ai` at roughly 201–
 selected — it may clip a character or two, only on the tab whose label you least need. Not
 a reason to shorten it.
 
+**Batch 4 is the first batch to write into the hard class, and everything fits with room to
+spare.** The sidebar items it owns run: `colorText` "Metin biçimlendirici" **20**,
+`globalConfig` "Genel yapılandırma" **18**, `changelog` "Değişiklik günlüğü" **18**,
+`legal` "Yasal bilgiler" 14, `translationMemory` "Çeviri belleği" 14, `aboutNarn`
+"Narn hakkında" 13, down to `guide` "Kılavuz" 7 and `account` "Hesap" 5; the six group
+headings run 5–11 ("Terminoloji" is the longest). The budget is 28 characters / 199px, so
+the longest is 20 characters ≈ 142px at this class's 7.09px mean advance — a margin so wide
+that the mean-advance proxy cannot be wrong enough to matter, which is why this batch did not
+need per-glyph measurement the way batch 2's two 28-character tab labels did. **Nothing was
+shortened to fit and nothing needed escalating.** Two notes for whoever measures next: the
+longest of them, `sidebar:colorText`, has no live call site at all (`PAGE_ITEMS` in
+`Sidebar.tsx` does not list it), so the real longest *rendered* item is 18; and the four
+longest `sidebar` values overall are toasts and aria-labels (`templateWarningUnknownGlossary`
+at 51), which are not in this class and must not be counted into it.
+
+Batch 4 moved no soft figure either. Its longest column header is **18**
+(`collab:sharing.columnLanguages` "Yazılabilir diller" and `invites.columnCreated`
+"Oluşturulma tarihi", budget 20 — tying batch 2's longest, `runs.runIdColumn`), and it ships
+no filter label and no bulk-bar control.
+
 **Batch 3 tested the three soft figures against a second namespace group and none moved.**
 Over `glossary` + `review` + `category` + `quality` the longest column header is **11**
 (`quality:columns.passRate` "Geçme oranı", budget 20), the longest filter label is **16**
@@ -650,19 +764,58 @@ re-render them.
 | Stage details | Bölüm ayrıntıları | `strings:tabs` (stage-details) | `stage-details:title` (batch 6), `strings:runs.typeStageDetailsTranslation` |
 | Orphans | Yetimler | `strings:tabs.orphans` | `orphans:title` (batch 6), `config:fullReplaceOrphanNotice`, `strings:guide.topicOrphans` |
 | Backup | Yedekleme | `strings:tabs.backup` | `config:importSnapshotNote`, `strings:guide.topicBackup` |
-| Sharing | Paylaşım | `strings:tabs.sharing` | `collab:sharing.pageTitle` (batch 4) |
-| Text Styler | Metin biçimlendirici | `strings:tabs` (color-text) | `colorText:title` and `sidebar:colorText` (batches 4/6), `strings:runs.typeChatTextStyler` |
+| Sharing | Paylaşım | `strings:tabs.sharing` | `collab:sharing.pageTitle` — **shipped in batch 4**, byte-identical |
+| Text Styler | Metin biçimlendirici | `strings:tabs` (color-text) | `sidebar:colorText` — **shipped in batch 4**, byte-identical; `colorText:title` (batch 6) still owes it; `strings:runs.typeChatTextStyler` |
 
 ### Surfaces named outside that bar
 
 | Surface | Turkish | Owning key | Also named at |
 | --- | --- | --- | --- |
-| Global Config | Genel yapılandırma | `sidebar:globalConfig` | `config:globalConfigTitle` — **word-for-word identical in English, and must stay so**; also `strings:runs.aiReviewNoModules` |
-| Credential Vault | Kimlik bilgisi kasası | `strings:guide.topicVault` | `vault:statusLabel` (batch 4) — the full form, never the bare clip "kasa" |
+| Global Config | Genel yapılandırma | `sidebar:globalConfig` — **the owning key shipped in batch 4** | `config:globalConfigTitle` — **word-for-word identical in English, and must stay so**; also `strings:runs.aiReviewNoModules` |
+| Credential Vault | Kimlik bilgisi kasası | `strings:guide.topicVault` | `vault:statusLabel` — **shipped in batch 4**, the full form, cold; also `vault:unlockTitle` / `createTitle` / `editorTitle` and `account:devicesDescription` / `devicesEmpty`, all of whose English writes it out in full. The bare clip "kasa" is licensed only where English clips it too |
 | AI Review | Yapay zekâ incelemesi | `strings:guide.topicAiReview` | `strings:runs.aiReview` / `aiReviewConfigTitle` / `judgeBadge` |
-| Translation Memory | Çeviri belleği | `sidebar:translationMemory` | `config:tm.*`, `strings:guide.groupTranslationMemory`, `strings:guide.topicTranslationMemory` |
-| Review (sidebar group) | İnceleme | `sidebar:groups.review` | `strings:guide.groupReview` — an umbrella, not any one member; see the term row |
+| Translation Memory | Çeviri belleği | `sidebar:translationMemory` — **the owning key shipped in batch 4** | `config:tm.*`, `strings:guide.groupTranslationMemory`, `strings:guide.topicTranslationMemory` |
+| Review (sidebar group) | İnceleme | `sidebar:groups.review` — **shipped in batch 4**, copied verbatim from its guide twin | `strings:guide.groupReview` — an umbrella, not any one member; see the term row |
+| Guide | Kılavuz | `sidebar:guide` — **shipped in batch 4** | `config:pseudoTestHelpLink` and every link that sends the reader to the guide |
+| Settings | Ayarlar | `sidebar:settings` — **shipped in batch 4** | `settings:title` — **word-for-word identical in English, and must stay so**, the same relationship Global Config has |
+| Account | Hesap | `sidebar:account` — **shipped in batch 4** | the page's own sections name parts of it, never the page |
+| Legal | Yasal bilgiler | `sidebar:legal` — **shipped in batch 4** | `legal:title` is English's *longer* "Legal & policies" and expands, exactly as Activity's page title does — **prescription for batch 6: expand it, do not repeat this label and do not shorten the page title to match** |
+| Changelog | Değişiklik günlüğü | `sidebar:changelog` — **shipped in batch 4** | named in prose by `common:changelogEntryError` ("Couldn't load this **changelog** entry.", batch 6), which repeats the stem; `common:changelogShowOlder` counts *releases*, a different word |
 | Pseudo Test | Pseudo Test | `strings:guide.topicPseudoTest` | `config:pseudoTestHelpAria` — a proper noun, untranslated |
+
+### The sidebar group headings — `sidebar:groups.*`, all six
+
+Five of the six are byte-identical in English to a `strings:guide.group*` key batch 2 already
+shipped, so the verbatim-copy rule **dictated** them and batch 4 copied them rather than
+deciding them. They are listed here because the next reader needs to see that they were
+copied, not invented.
+
+| Heading | Turkish | Source of the decision |
+| --- | --- | --- |
+| `groups.project` (Setup) | Kurulum | copied from `strings:guide.groupSetup` |
+| `groups.translate` (Translate) | Çeviri | copied from `strings:guide.groupTranslate` |
+| `groups.review` (Review) | İnceleme | copied from `strings:guide.groupReview` |
+| `groups.content` (Terminology) | Terminoloji | copied from `strings:guide.groupContent` |
+| `groups.maintenance` (Maintenance) | Bakım | copied from `strings:guide.groupMaintenance` |
+| `groups.page` (Page) | Sayfa | **batch 4's own** — no guide twin; the workspace pages group (Ayarlar, Değişiklik günlüğü, Yasal bilgiler, Narn hakkında) |
+
+**The nesting the runbook warns about is clean in this locale, and it is worth stating why
+rather than only that.** `Sidebar.tsx:773` paints each heading directly over its own tab
+labels, so heading and first child are on screen together, one inside the other. Here that
+gives "Çeviri" over "Çeviriler" — the general word over the one that specialises it, which is
+the licensed shape — and "İnceleme" over three children that all carry "inceleme" as their
+head ("Kaynak yapay zekâ incelemesi", "Çeviri yapay zekâ incelemesi", "Elle inceleme") plus
+"Kalite", which sits outside the umbrella in both languages. Neither pair is the Japanese
+failure, where one word served both the heading and its child.
+
+**One same-rendering pair this creates is licensed and must not be "fixed":**
+`sidebar:groups.translate` "Çeviri" (English *Translate*) renders the same word as
+`strings:runs.typeTranslation` and `strings:runs.judgeTargetLabel` (English *Translation*).
+Those are run-type and panel labels inside the Activity/AI-review surfaces, and the sidebar is
+always painted, so the two genuinely co-render — but there is no nesting between them and no
+ambiguity: one is a nav group over five tabs, the other is a value in a table column headed
+"Tür". The pair also predates batch 4 (batch 2 shipped both `guide.groupTranslate` and
+`runs.typeTranslation`), and the verbatim rule leaves batch 4 no choice about it.
 
 **Guide topics append "sekmesi", and only where English appends "Tab".** `topicQuality`,
 `topicActivity`, `topicAiReview`, `topicPseudoTest`, `topicVault`, `topicQuickSetup` and
@@ -781,7 +934,7 @@ point of failure.
 
 | # | Debt | Trigger — who discharges it, and when | What to do |
 | --- | --- | --- | --- |
-| 1 | ~~`terminology/tr.md` records *credential vault* as the clip **"kasa"**, not the term.~~ **CLOSED in batch 2.** | — | `strings:guide.topicVault` ships **"Kimlik bilgisi kasası"**, and the Rendering column in `terminology/tr.md` is promoted to the full form. The clip "kasa" remains licensed only where the string already establishes credentials. **Batch 4's `vault:statusLabel` is the second cold naming and takes the full form too** — that part of the debt transfers, it does not vanish. |
+| 1 | ~~`terminology/tr.md` records *credential vault* as the clip **"kasa"**, not the term.~~ **CLOSED in batch 2.** | — | `strings:guide.topicVault` ships **"Kimlik bilgisi kasası"**, and the Rendering column in `terminology/tr.md` is promoted to the full form. The clip "kasa" remains licensed only where the string already establishes credentials. **The transferred half is now discharged too: batch 4 shipped `vault:statusLabel` as "Kimlik bilgisi kasası"**, the full form, cold — along with `unlockTitle`, `createTitle` and `editorTitle`, whose English also writes the term out. Nothing of this debt remains open. |
 | 2 | ~~Six strings invert the unit noun behind a colon where Russian ships natural order.~~ **CLOSED in fix round 3 — and it was never a real debt.** It was recorded as a word-axis calibration debt on the assumption that `tr`'s axis was merely uncalibrated; Turkish counted nouns do not inflect after a numeral at all, so the axis is structurally moot and no list was ever owed. | — | Natural order restored in all six, plus `models.confidenceReason.batch-exceeds-reliable` in the same class. **Batch 2 writes numeric strings in natural Turkish order, unit noun attached** — there is one convention, not two. See "Numeric tokens, as shipped" above. |
 | 3 | ~~Two of the five length budgets (filter label, bulk-bar control) are still provisional.~~ **CLOSED in batch 2**, then corrected in its fix round. | — | There are **four** classes, not five: the tab-label class turned out to be the *same hard container* as the sidebar item, so the two merged at **199px ≈ 28 tr chars**. **Three** classes are soft, and batch 2 re-derived all three from the longest value `strings` actually ships: column header 16 → **20**, filter label 38 → **40** (the provisional guess landed on the exact measured longest, 38), bulk-bar control 52 → **40**. The tab-label figure batch 2 first published (32, soft) was wrong — derived from a container that does not exist — and no string was written to fit it. The whole-language sweep re-measures every class over the finished locale, the hard one in pixels. |
 
@@ -847,6 +1000,35 @@ point of failure.
   "önbellek" vs "cache". All are attested; alternating inside one namespace is the defect.
   Settled and closed by batch 1: module is "modül", template is "şablon", cache is
   "önbellek", token is "token", prompt is "istem", batch is "yığın".
+- **A UI control is "kontrol"; "denetim" is the LQA check and nothing else.** The *check*
+  term row rejected "kontrol" precisely because it reads as a UI control — and batch 4 is
+  where that reading is spent: `settings:previewHint` ("Sample controls rendered with the
+  selected theme.") ships as "Seçili temayla görüntülenen örnek **kontroller**". The generic
+  verb *check* takes the same root — `account:mfaLoading` is "Güvenlik ayarlarınız kontrol
+  ediliyor…", `nickname.loading` is "Takma adınız kontrol ediliyor…" — and neither is the
+  term. Reserve "denetim" for a named LQA rule; nothing in this batch is one.
+- **"oturum" is barred as a rendering of *run*, and that is the whole of the ban.**
+  `account:signOut` is "Oturumu kapat" and `vault:unlockDescription` / `createDescription`
+  say "bu oturumda" / "her oturumda" for English's own "session" — the ordinary word, doing
+  its own job. The reservation in `terminology/tr.md` is against calling a *run* an "oturum",
+  and it does not reach the noun (runbook 2.9).
+- **Turkish word order can strand an email address or a link, and a colon is the fix.**
+  `account:reportBugsPrefix` is an English fragment ending on a preposition, with the support
+  address appended by the component. A literal Turkish rendering ends on the verb, leaving the
+  address dangling with no connector, so it ships as “Bir hata mı buldunuz? Şu adrese
+  bildirin:” — the demonstrative announces the address and the colon carries it. English
+  gets this free from its preposition; Turkish has no preposition to end on. Punctuation is
+  ours to set (see "Punctuation and spacing"), and this is the one place in the batch where
+  the fix is punctuation rather than word order.
+- **A status badge is not an LQA verdict, even when the English word is the same.**
+  `settings:previewSamples.pass` / `fail` are theme-preview samples of the four semantic
+  colours, and they ship as "Başarılı" / "Uyarı" / "Başarısız" / "Bilgi" — matching
+  `strings:runs.statusFailed` ("Başarısız"), the generic run status, **not**
+  `quality:legend.passed` / `failed` ("Geçen" / "Geçmeyen"), which are LQA verdicts on the
+  Quality dashboard and are fixed by the *pass rate* row. The pre-flight reports both
+  "Passed" and "Failed" as same-English/different-rendering pairs for this reason; they are
+  licensed, and the deciding question is which family the key belongs to, not which word
+  English used.
 - **Count-neutral phrasing.** `english-review-notes.md` lists keys with no plural forms
   where English writes "entr(ies)". Turkish needs no parenthetical at all — the singular
   noun after the number already covers every count.
