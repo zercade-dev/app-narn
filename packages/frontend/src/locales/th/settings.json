@@ -1,0 +1,42 @@
+{
+  "title": "การตั้งค่า",
+  "appearance": "รูปลักษณ์",
+  "appearanceDescription": "เลือกว่า narn จะมีหน้าตาอย่างไรบนอุปกรณ์นี้",
+  "theme": "ธีม",
+  "mode": "โหมด",
+  "switchToLight": "สลับไปโหมดสว่าง",
+  "switchToDark": "สลับไปโหมดมืด",
+  "languageTitle": "ภาษา",
+  "languageDescription": "ภาษาของส่วนติดต่อผู้ใช้",
+  "preview": "ตัวอย่าง",
+  "previewHint": "ตัวควบคุมตัวอย่างที่แสดงผลด้วยธีมที่เลือก",
+  "previewSamples": {
+    "heading": "หัวเรื่อง",
+    "body": "ข้อความเนื้อหาแสดงฟอนต์และสีพื้นฐาน",
+    "muted": "ข้อความจางจะมีลักษณะแบบนี้",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "pass": "ผ่าน",
+    "warn": "คำเตือน",
+    "fail": "ไม่ผ่าน",
+    "info": "แจ้งให้ทราบ",
+    "inputPlaceholder": "ช่องข้อความ",
+    "selectOptionA": "ตัวเลือกแรก",
+    "selectOptionB": "ตัวเลือกที่สอง",
+    "checkbox": "ช่องทำเครื่องหมาย",
+    "badgeDefault": "แบบมาตรฐาน",
+    "badgeSecondary": "แบบรอง",
+    "badgeOutline": "แบบเส้นขอบ",
+    "badgeDestructive": "แบบเน้นเตือน",
+    "scrollHint": "เลื่อนเพื่อดูแถบเลื่อนตามธีม",
+    "iconsLabel": "ไอคอน"
+  },
+  "themes": {
+    "default": { "name": "คลาสสิก", "description": "หน้าตาคลาสสิกของ narn" },
+    "pixel": { "name": "พิกเซล", "description": "อารมณ์เครื่องเกม 8 บิตแบบหนา" },
+    "techno": { "name": "เทคโน", "description": "เทอร์มินัลไซเบอร์พังก์นีออน" },
+    "minimal": { "name": "มินิมอล", "description": "แบน เรียบ ขาวดำ" }
+  }
+}

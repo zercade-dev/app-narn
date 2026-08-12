@@ -121,6 +121,10 @@ noun; the wrong classifier is the one numeral defect this locale can actually sh
 | glossary | ชุด | `config:glossariesSkipped_other` |
 | occurrence of an event (retries, attempts) | ครั้ง | `config:health.rateLimitRetries` |
 | module instance | ตัว | `config:enableModuleAddInstance` |
+| glossary term | คำ | `glossary:toastPushed` |
+| category | หมวด | `strings:bulk.removeCategoryApply_other` |
+| LQA issue, source-review finding | ข้อ | `strings:row.lqaIssues_other` |
+| glossary match | จุด | `glossary:matchResultsCount` |
 
 **Where a non-`count` token carries a number, keep the head noun in front of the ratio.**
 `config:reviewProgressCount` is "{{reviewed}} / {{total}} reviewed" in English and ships
@@ -253,7 +257,8 @@ mentions the surface repeats it. Rows are added by the batch that first ships th
 | Surface | Rendering | First shipped |
 | --- | --- | --- |
 | Global Config | การตั้งค่าส่วนกลาง | `config:globalConfigTitle` |
-| Config (tab) | การตั้งค่า | `strings:tabs.config` |
+| Config (tab) | ตั้งค่าโปรเจกต์ | `strings:tabs.config` |
+| Settings (page) | การตั้งค่า | `sidebar:settings`, `settings:title` |
 | Data (tab) | ข้อมูล | `strings:tabs.data` |
 | Translations (tab) | คำแปล | `strings:tabs.strings` |
 | Compare (tab) | เปรียบเทียบ | `strings:tabs.compare` |
@@ -270,7 +275,18 @@ mentions the surface repeats it. Rows are added by the batch that first ships th
 | Backup (tab) | ข้อมูลสำรอง | `strings:tabs.backup` |
 | Sharing (tab) | การแบ่งปัน | `strings:tabs.sharing` |
 | Text Styler | ตัวแต่งข้อความ | `strings:tabs` (color-text) |
-| Translation Memory | หน่วยความจำการแปล | `config:tm.policyTitle` |
+| Translation Memory | หน่วยความจำการแปล | `config:tm.policyTitle`, `sidebar:translationMemory` |
+| Guide | คู่มือ | `sidebar:guide` |
+| Account | บัญชี | `sidebar:account` |
+| Changelog | บันทึกการเปลี่ยนแปลง | `sidebar:changelog` |
+
+**The Config tab and the Settings page had to be pulled apart, and the reason is
+structural.** Both are sidebar items and the sidebar is always painted, so English's
+*Config* / *Settings* pair would otherwise have collapsed onto one Thai string sitting twice
+in one list. The tab therefore names what it configures. That in turn leaves the Settings
+page free to take the plain word, which is a **proper substring** of the Global Config
+rendering — a general term beside its own specialisation, which is what those two pages
+actually are.
 
 The five sidebar group headings are settled here too, because `strings:guide.group*` ships
 first and `sidebar:groups.*` must copy it byte for byte in a later batch:

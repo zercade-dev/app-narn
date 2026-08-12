@@ -4,7 +4,7 @@
   "viewNotFoundContact": "หากคุณมาที่นี่จากลิงก์ในแอป โปรดรายงานไปที่",
   "selectProjectCta": "เลือกโปรเจกต์",
   "tabs": {
-    "config": "การตั้งค่า",
+    "config": "ตั้งค่าโปรเจกต์",
     "data": "ข้อมูล",
     "strings": "คำแปล",
     "compare": "เปรียบเทียบ",
@@ -283,7 +283,7 @@
     "topicOpenrouter": "OpenRouter",
     "topicGenericAi": "Generic AI",
     "topicDeepl": "DeepL",
-    "topicConfig": "แท็บการตั้งค่า",
+    "topicConfig": "แท็บตั้งค่าโปรเจกต์",
     "topicQuickSetup": "ตั้งค่าอย่างรวดเร็ว",
     "topicVault": "ตู้นิรภัยข้อมูลรับรอง",
     "topicDocker": "Docker",

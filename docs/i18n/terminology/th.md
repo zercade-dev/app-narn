@@ -36,7 +36,7 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | source language | ภาษาต้นทาง | Pairs with the target-language row below; ต้นทาง and ปลายทาง are a fixed Thai pair and read correctly side by side. |
 | target language | ภาษาปลายทาง | Thai does not mark number, so the plural label and the singular label are the same phrase. That is a licensed same-rendering collision, not drift. |
 | reference language | ภาษาอ้างอิง | A reading aid only. Never built on ต้นทาง, which would imply the app translates through it. |
-| writable language |  |  |
+| writable language | ภาษาที่แก้ไขได้ | One adjective, used identically in the Members table column, in every lock message and in the invite flow. The bug the shared lexicon warns about is alternating between *editable*, *granted* and *permitted*; Thai has the same choice and this row closes it. |
 | Pseudo Test | ทดสอบเทียม | เทียม is *artificial* in the productive Thai sense (ดาวเทียม, ฟันเทียม), so pseudo text is ข้อความเทียม from the same root. Rejected จำลอง (*simulated*) and any transliteration: จำลอง is the mock/dummy reading the shared lexicon rules out. The language code itself is never translated. |
 | run | รอบการทำงาน | Always a noun, never a verb — Thai verbs for what starts one are แปล, เริ่ม, สร้าง. Shortened to รอบ inside a phrase where the sentence has already established what is running (รอบการแปล). Rejected งาน, which is the *job* reading the shared lexicon reserves against. |
 | revert | ย้อนกลับ | Rolls back everything one run wrote. Three separate verbs are kept apart here and all three can be on screen at once: this one, เลิกทำ for *undo* (one earlier version of one cell) and กู้คืน for *restore* (a backup, and restoring an earlier version from the undo dialog). The badge takes the same verb plus แล้ว. Batch 2 had to move the bulk-bar back button off this word for the same reason. |
@@ -91,19 +91,19 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | snapshot | สแนปช็อต | Transliteration, so it can never be mistaken for the backup term in the sentences that use both. |
 | template | เทมเพลต | Transliteration. The obvious Thai words — แบบ, รูปแบบ, ต้นแบบ — are either already taken by the pattern row or read as a physical mould. |
 | omit (from an export) | ไม่รวม | A third verb, distinct from both discard senses: nothing is destroyed and nothing is refused, only left out of a generated file. Met in batch 1, in the export checkbox, exactly as the shared lexicon predicts. |
-| collaborator |  |  |
-| member |  |  |
-| nickname |  |  |
-| claim |  |  |
-| invite |  |  |
-| revoke |  |  |
+| collaborator | ผู้ร่วมงาน | Someone invited into another person's project. Two distinct words are required because *Members* and *collaborators* sit in adjacent strings on one page; see the member row. |
+| member | สมาชิก | Anyone with access, the owner included — the row type of the Members table. Thai does not mark number, so the table title and the column header are one string. |
+| nickname | ชื่อเล่น | The ordinary Thai word for a handle a person goes by. Never ชื่อผู้ใช้ (*username*), which the app already spends on account identity — exactly the confusion the collaborator/member pair exists to prevent. |
+| claim | ขอใช้ | *To request the use of*. It yields all four forms the UI needs — a button, a progressive กำลังขอใช้…, a completed ขอใช้…แล้ว and the immutability hint — and it stays clearly apart from สงวนไว้, the *that name is reserved* message that appears next to it. Rejected จอง (*to book*), which is the reserve word the shared lexicon rules out. |
+| invite | คำเชิญ | A noun. The four statuses are translated as one set in one part of speech, all stative: รอดำเนินการ, ใช้แล้ว, เพิกถอนแล้ว, หมดอายุแล้ว — a reader compares them down one column. |
+| revoke | เพิกถอน | The verb on the button; the status cell takes the same verb plus แล้ว. Thai marks the completed state with a separate particle rather than by inflection, so the two are visibly different strings in adjacent columns of one table — the constraint the shared lexicon records for this row, met without needing a second verb. |
 | recording | การบันทึกการแก้ไข | Names the capture, not the captured rows. It has to be the full nominal phrase rather than the bare verb, because that verb alone is this locale's word for *save* — the bare form would make a paused audit read as a paused save. Never รายการ (an entry) and never ล็อก. The three English words for this one feature — audit, record, track — all take this term. |
 | stage | ด่าน | A playable level, the word Thai gaming uses. Never ขั้นตอน or ระยะ, which are exactly the process readings the shared lexicon calls the most likely mistranslation in the app. ด่าน is also why the quality-gate term avoids every checkpoint word. |
 | Text Styler | ตัวแต่งข้อความ | A product surface name, translated once and repeated in the sidebar item, the tab label and the tool's own title. แต่ง is *to style or adorn*, not *to edit*, so it does not read as a text editor. |
 | element |  |  |
 | assistant | ผู้ช่วย | A role — literally *the one who helps* — and not the abstract noun for assistance, which is the near-miss the shared lexicon warns a locale ships first. Decided at the run-type labels, where the word appears before any chat surface does. Thai compounds with no linking form, so the chat compound needs no adjustment. |
-| theme |  |  |
+| theme | ธีม | Transliteration. The four names are transliterated too — คลาสสิก, พิกเซล, เทคโน, มินิมอล — and each is byte-identical at `settings:themes` and `welcome:themeChooser`, which the shared lexicon calls the highest-risk duplication in the app. |
 | guide | คู่มือ | One word for every *read the guide* link, the sidebar item and the guide topics. Never ช่วยเหลือ, which is the help sense. |
 | release |  |  |
 | changelog |  |  |
-| dismiss |  |  |
+| dismiss | ลบ / ปิด | Two words, because the two consequences differ and one of them destroys data. `account:notificationsDismiss` issues a DELETE and the notification does not come back, so it takes the delete verb — reading it as *put it away* would ship a false statement about the action. `system:restarted.dismiss` only closes a banner against a stored flag and takes the close verb. Checked at each key, not decided once. |
