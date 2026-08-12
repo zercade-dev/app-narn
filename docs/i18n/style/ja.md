@@ -107,7 +107,7 @@ Japanese does not. Resolve the control **before** writing the string.
 | Checkbox / radio label **whose English is a verb phrase** | dictionary-form verb phrase (～する／～しない), **not** 体言止め: the user is choosing what the app will do, not naming a thing | `strings:compare.translateModeRetranslate` 「既存の翻訳を再翻訳する」, `strings:compare.translateDisableMemory` 「この実行では翻訳メモリを使用しない」, `strings:compare.translateUseReferenceNone` 「参照言語をコンテキストとして使用する」 |
 | Checkbox label whose English is a **noun phrase** naming a mode | follow English — 体言止め | `strings:runs.aiReviewVerbose` 「詳細ログ（プロンプト・パラメーター・生の応答）」 |
 | Placeholder inside a control **whose English is an instruction** | ～を選択／～を入力 + 「…」, no noun for the control itself | `config:enableModulePlaceholder` 「有効にするモジュールを選択…」 |
-| Placeholder **whose English is a descriptive noun phrase** | noun phrase — follow English, do not convert it into an instruction | `stage-details:fields.name.placeholder` 「ステージの名前」 over "The stage's name", `gameplayDetails.placeholder` 「ステージの遊び方」 over "How the stage plays". Added in batch 6, which met the first placeholders in this app that describe the content rather than command the user. Keep the placeholder distinct from its own label: the label above the first is 「名前」, above the second 「ゲームプレイ詳細」 |
+| Placeholder **whose English is a descriptive noun phrase** | noun phrase — follow English, do not convert it into an instruction | `stage-details:fields.name.placeholder` 「ステージの名前」 over "The stage's name", `gameplayDetails.placeholder` 「ステージの遊び方」 over "How the stage plays". Added in batch 6, which met the first placeholders in this app that describe the content rather than command the user. **Follow English on how far the placeholder sits from its own label** — do not manufacture a distinction English does not make. Two of the three pairs separate naturally (label 「名前」 over 「ステージの名前」, label 「ゲームプレイ詳細」 over 「ステージの遊び方」); the third is label 「ステージ説明」 over placeholder 「ステージの説明」, a one-particle difference, and English's own pair is just as close ("Stage description" / "A description of the stage"). That is faithful, not a defect. **(The first version of this cell said "keep the placeholder distinct from its own label", which promised a distinctness the third pair does not deliver and English does not ask for.)** |
 | Progress / status text | ～中 or ～しました — a state, never a command. The **ellipsis is English's to give**, not the shape's: add 「…」 only where the source has one | `config:duplicating` 「複製中…」 and `config:autoSaveSaved` 「保存しました」 (English has the ellipsis); `strings:row.translating` 「翻訳中」 and `strings:runs.statusQueued` 「待機中」 (English has none) |
 | Description / help / toast | full ですます sentence ending in 。 | `config:maxBackupsDescription` |
 | Inline fragment in a summary row | noun + なし / 指定なし, no verb, no 。 | `config:routing.anySource` 「ソース指定なし」, `config:routing.noModule` 「モジュールなし」 |
@@ -500,7 +500,7 @@ as its source length. That is what the container has to fit.
 | Table column header | `strings:columns.config` | soft | **8** | **re-measured** across both batches: batch 1's longest `config:models.col*` header was 6, but batch 2's `strings:runs.detailsLanguagesColumn` 「ターゲット言語」 is 7 — a term rule (*target language*) fixes it and outranks the budget — so the figure rises to 8. The class anchor `strings:columns.config` itself is 「状態」 at 2 |
 | Filter label | `strings:filters.needsReview` | soft | **14** | **measured** on batch 2's twenty-four `strings:filters.*` plus the Compare filter row: the longest are 「新規（前回のインポート分）」 at 13 and 「新規フラグを解除（{{count}}）」 at 13 with a three-digit count, then 「プレースホルダーの不一致」 at 12. The anchor 「要レビュー」 is 4. The provisional 8 was badly wrong — it was reasoned from the anchor rather than from the class |
 | **Swatch chip label** | `colorText:swatches.hydro` | **hard** — `max-w-24` + `truncate` | **8** | **derived from the component**, batch 6: `PaletteSection.tsx:39` renders the label in a *span* carrying *max-w-24* and *truncate*, inside a `text-xs` chip. 96px ÷ 12px = 8 full-width glyphs. Measured across the whole class at once (18 swatches): 1-5, the longest being 「タイトル」「セカンダリ」「パープル」「オレンジ」 at 4-5. The class is **hard** and nothing in it is close |
-| **Palette group caption** | `colorText:groupElements` | soft | **9** | **derived from the component**, batch 6: `PaletteSection.tsx:78` and `:93` put each caption in a *w-28 shrink-0* `text-xs` span — 112px ÷ 12px = 9 glyphs. `shrink-0` with **no** `truncate`, so an over-long caption pushes the swatch row rather than clipping, which is why this row is soft where the swatch row is hard. All five measure 2-5 (「暗い背景」「明るい背景」「元素」「品質別」「自分の色」) |
+| **Palette group caption** | `colorText:groupElements` | soft | **9** | **derived from the component**, batch 6: `PaletteSection.tsx:78` and `:93` put each caption in a *w-28 shrink-0* `text-xs` span — 112px ÷ 12px = 9.33, taken down to 9 glyphs. Soft because an over-long caption **wraps to a second line inside the fixed box**, making the palette row taller — it costs elegance, not correctness. **(The first version of this cell said the caption "pushes the swatch row rather than clipping". That is wrong about the CSS and is corrected rather than dropped: *w-28* is a fixed `width`, not a max-width, and `flex-grow` defaults to 0, so the item's used width stays 112px and it cannot push anything; with `white-space: normal` and Japanese breaking between characters it wraps instead. The verdict — soft — was right and the mechanism behind it was not, which is the class this very file corrects three times elsewhere in the same round.)** All five measure 2-5 (「暗い背景」「明るい背景」「元素」「品質別の色」「自分の色」) |
 | Bulk-bar control | `strings:bulk.approveSelected` | soft | **17** | **measured** on batch 2's `strings:bulk.*`: the longest is 「絞り込まれた{{count}}行すべてを選択」 at 16 with a three-digit count, then 「選択範囲からカテゴリを生成」 at 13. The anchor 「承認して翻訳メモリに追加」 is 12 |
 
 **Hard** means fix it — a sidebar item over budget is cut off in a container that cannot
@@ -637,7 +637,10 @@ budget is 46% of its container while its *ratio* is the batch's worst.
 The batch runs slightly **longer** than batch 3's 0.54, and the reason is the corpus rather than a
 drift in register: batch 4 is chrome — 300 keys over 7,851 English characters, 26 per key, against
 batch 3's 29 — and short English sources are where Japanese's advantage is smallest. Four batches in,
-the aggregate has moved 0.55 / 0.55 / 0.54 / 0.57 and the 90th percentile 0.83 / 0.83 / 0.80 / 0.81.
+the aggregate had moved 0.55 / 0.55 / 0.54 / 0.57 and the 90th percentile 0.83 / 0.83 / 0.80 / 0.81
+**as this paragraph computed them at the time — see the restated six-batch table below, which puts
+every batch on one population and one percentile convention and moves this row's last two figures
+to 0.57 and 0.82.**
 Nothing here approaches the guard's ratio cap in either direction.
 
 **Batch 5 breaks that flat run, and the cause is the register rather than the corpus.** Over its
@@ -671,9 +674,10 @@ participle — *Vault unlocked.*, *Backup restored.*, *Translation memory cleare
 must write out a verb in ですます, so the 〜しました。 tail costs four to six characters that English
 never spends. Every locale that marks politeness on the verb will meet the same effect in this
 namespace. It is not a reason to drop the register: the narration section above settles that the
-sentences are sentences. Five batches: aggregate **0.55 / 0.55 / 0.54 / 0.57 / 0.62**, 90th
-percentile **0.83 / 0.83 / 0.80 / 0.81 / 0.81**. The tail has not moved at all across five batches;
-only the body has.
+sentences are sentences. Five batches, as computed here at the time: aggregate **0.55 / 0.55 / 0.54 / 0.57 / 0.62**,
+90th percentile **0.83 / 0.83 / 0.80 / 0.81 / 0.81**. **Both series are superseded by the restated
+table below** — same conclusion, one population, one percentile convention. The tail has not moved
+at all; only the body has.
 
 **One constrained class IS present, and the first version of this paragraph said none was.** It
 claimed "nothing in these six namespaces sits in one of the five constrained classes" and "no
@@ -698,7 +702,8 @@ banners (`system:countdown.message`, `generation:ignoreGlossariesHint`) that wra
 **Batch 6 measures over its 282 shared keys — the same 282 in both languages, because this batch
 contains no plural key of any kind** (no `_one`, no `_other`, no `_zero`; checked over
 `locales/en`, which is also why the count closes exactly). **3,639 Japanese characters against
-6,514 English**: aggregate **0.56**, median **0.55**, 90th percentile **0.81**, minimum **0.14**
+6,514 English**: aggregate **0.56**, median **0.56**, 90th percentile **0.82** (nearest-rank —
+see the method note below), minimum **0.14**
 (`colorText:swatches.electro` 「雷」 against "Electro"), maximum **1.33** (`colorText:modeRaw`
 「タグ表示」 against the three-character "Raw"). Five keys reach or pass 1.00 — three sit exactly on
 it (`stage-details:chat`, `stage-details:translate`, `orphans:confirmDelete.title`) and two exceed
@@ -711,13 +716,46 @@ a self-review moved four values onto ～てください (English gives the user 
 the Japanese total by +14 and the aggregate from 0.5565 to 0.5586. Both figures were correct when
 written; only the second is correct now.
 
-**Six batches: aggregate 0.55 / 0.55 / 0.54 / 0.57 / 0.62 / 0.56, 90th percentile
-0.83 / 0.83 / 0.80 / 0.81 / 0.81 / 0.81.** Batch 5's 0.62 stands out and its cause was named at the
+### The six-batch series, restated on one population with the method pinned
+
+**The series this file published for five rounds spliced two populations together.** It read
+aggregate *0.55 / 0.55 / 0.54 / 0.57 / 0.62 / 0.56*, and the round-6 review re-derived it: batches
+1 and 2 were computed against **all** of English's keys, batches 3-6 against the **shared** keys.
+Runbook 2.10 says to state which population you measured, and a trend line is exactly where mixing
+them does damage. Corrected here rather than dropped, because the conclusion drawn from it survives
+untouched.
+
+**Population: the keys this locale shares with English, with English measured over the same keys**
+— the population batch 6 declares for its own figures. **Percentile: nearest-rank**
+(`ceil(p·N)`), stated because two of these figures move with the convention.
+
+| Batch | keys | ja | en (shared) | aggregate | median | 90th pct |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 `config` | 368 | 7,121 | 12,745 | **0.56** | 0.57 | 0.83 |
+| 2 `strings` | 441 | 5,492 | 9,639 | **0.57** | 0.56 | 0.83 |
+| 3 | 366 | 5,577 | 10,281 | **0.54** | 0.53 | 0.80 |
+| 4 | 299 | 4,448 | 7,822 | **0.57** | 0.57 | 0.82 |
+| 5 | 123 | 2,810 | 4,567 | **0.62** | 0.62 | 0.81 |
+| 6 | 282 | 3,639 | 6,514 | **0.56** | 0.56 | 0.82 |
+
+**Aggregate 0.56 / 0.57 / 0.54 / 0.57 / 0.62 / 0.56; 90th percentile 0.83 / 0.83 / 0.80 / 0.82 /
+0.81 / 0.82.** Batch 5's 0.62 stands out and its cause was named at the
 time — `logs` is narration, where English's bare past participles meet Japanese's 〜しました。 tail.
 Batch 6 drops straight back to the body's own level, which is the confirmation that batch 5's
 figure was a register effect and not a drift: this batch is half chrome and half short sentences,
-the ordinary mix. **The 90th percentile has not moved across six batches.** The tail is the number
-that breaks layouts, and in this language it never has.
+the ordinary mix. **The 90th percentile has not moved across six batches** — 0.80 to 0.83 throughout, on one
+population and one convention. The tail is the number that breaks layouts, and in this language it
+never has.
+
+**Two figures moved with the correction and one of them is the percentile method, not the data.**
+Batches 4 and 6 read 0.81 before and are 0.82 under nearest-rank; batch 5's published **0.81** is
+not reproducible under either convention I can name — the floor-index method this file had been
+using gives **0.8043** (→ 0.80) and nearest-rank gives **0.8095** (→ 0.81), because four values sit
+within 0.018 of each other there (0.8000, 0.8043, 0.8095, 0.8182). The review reports nearest-rank
+as giving 0.80, which is the opposite labelling from my re-derivation; the substance is the same
+either way and is the reason the method is now printed beside the number. **A percentile without
+its convention is not a reproducible figure**, which is the same defect as a ratio without its
+population, one row down.
 
 ### The whole language, measured once at the end
 
@@ -725,17 +763,25 @@ that breaks layouts, and in this language it never has.
 median 0.56, 90th percentile 0.82, minimum 0.14, maximum 1.50.** State the population with the
 number: the English denominator is measured over **the same 1,879 keys**, not over English's own
 1,908 — the 29 `_one` keys Japanese does not supply come out of both totals, exactly as batch 4
-established. Fifty-seven keys reach or pass 1.00 and **every one of them has a short English
-source**; the single 1.50 is `strings:filters.matchAny` 「または」 against "OR", which is the ratio
-measuring the wrong thing in its purest form. Japanese is the first locale in this programme to
+established. Fifty-seven keys reach or pass 1.00. **Most of them have a short English source — not
+all, and the first version of this sentence said "every one".** The median English source among the
+57 is **6** characters, but **seven** are 15 characters or longer and **three** are 20 or longer:
+`glossary:sourceLink` at 42 (a do-not-translate sheet name carried by `IDENTICAL_ALLOWLIST`),
+`logs:judge.done` at 38 and ratio 1.11, and `vault:lockoutCountdown` at 22. "Every one" is not true
+of a 38-character sentence. The substance — no length risk anywhere — is unaffected, which is
+exactly why the overreach survived being written. The single 1.50 is `strings:filters.matchAny`
+「または」 against "OR", which is the ratio measuring the wrong thing in its purest form. Japanese is the first locale in this programme to
 run *shorter* than English by a wide margin — `ru` 1.19, `es` 1.22, `fr` 1.26 against this
 language's 0.56 — so **the guard's 2.5x ratio cap was never a live risk in either direction, and
 not one string in six batches was shortened or lengthened to satisfy a length figure.**
 
-Japanese runs ~0.55x English over batches 1 and 2 alike (`strings`: 5,480 Japanese characters
-against 9,900 English, aggregate **0.55**, median **0.56**, 90th percentile **0.83**, single
-maximum **1.50** at `strings:filters.matchAny` 「または」 — a two-character English source, which
-is the ratio measuring the wrong thing exactly as the runbook says it does). Length pressure in
+Japanese runs a little over half the length of English in batches 1 and 2 alike — and **both
+figures in this sentence were restated in round 6**, because it was one of the two rows that had
+been measured against all of English's keys rather than the shared ones, and because later fix
+rounds moved `strings` after it was written. On the shared population `strings` is **5,492**
+Japanese characters against **9,639** English: aggregate **0.57**, median **0.56**, 90th percentile
+**0.83**, single maximum **1.50** at `strings:filters.matchAny` 「または」 — a two-character English
+source, which is the ratio measuring the wrong thing exactly as the runbook says it does. Length pressure in
 this language runs the opposite way from every locale shipped before it, and the guard's own
 2.5x ratio cap is not a live risk in either direction. **That is not the same as "nothing came
 near a budget"** — an earlier version of this file said so and was wrong, by the sub-tab row
@@ -1298,18 +1344,60 @@ row above is the shape for a verb with neither a サ変 noun nor a state to set.
   | --- | --- | --- | --- | --- |
   | `stage-details:cancel` / `orphans:actions.cancel` / `backup:confirmCancel` — all bare *Cancel*, all 「キャンセル」 | **fails**: `StageDetailsTab.tsx:394` calls `cancelRun` on a **server-side run**; `OrphansTab.tsx:430` calls `closeRelink`, a sheet dismissal; `backup:confirmCancel` dismisses a `ConfirmSheet` | byte-identical | all buttons | **collapsed anyway — and NOT by these clauses.** The three sit in three different project tabs and **cannot co-render**, so the older boundary licenses them outright; the clause table is the *co-render* licence and never had to be reached. Stating which licence a collapse runs on is the point of the exercise |
   | `colorText:swatches.warn` / `console:filter_warn` — both *Warn*, both 「警告」 | fails on referents: a colour role against a log level | vacuous — byte-identical | swatch chip and filter tab are both the bare-noun row | **collapsed, on the paradigm rather than on the clauses.** `ConsolePanel.tsx:398` gates the filter tabs on `open`, so the panel really can be open over the Text Styler view. The console's five levels are scored as a set (「すべて」「エラー」「警告」「情報」「デバッグ」) and so are the swatch group's five roles (「タイトル」「通常」「キー1」「キー2」「警告」); nudging either to a synonym to dodge a report is the error runbook 2.1 names. Recorded as a documented exception, not a silent one |
-  | `colorText:groupQuality` / `strings:tabs.quality` — both *Quality* | **fails**: a palette group of five colours against the Quality dashboard | vacuous — byte-identical | both bare-noun labels, so no veto | **REFUSED.** `colorText:groupQuality` ships 「品質別」 |
+  | `colorText:groupQuality` / `strings:tabs.quality` — both *Quality* | **fails**: a palette group of five rarity-tier colours (`palettes.ts:57-64` — gray/green/blue/purple/orange) against the LQA Quality dashboard | vacuous — byte-identical | both bare-noun labels, so no veto | **REFUSED.** `colorText:groupQuality` ships 「品質別の色」 |
 
-  **The refusal is the row worth reading.** The rail is painted beside every view, so a palette
-  group heading reading exactly 「品質」 sits on screen with the tab that opens the Quality
-  dashboard — and `strings:tabs.quality` is a **surface name**, which makes every occurrence of that
-  string a claim about that surface. That is what separates it from the 警告 row above (neither key
-  is a surface name) and from 「翻訳」 over `orphans:columns.translations` /
-  `stage-details:translationsHeading` / `strings:tabs.strings`, where the column heading labels the
-  translations themselves and batch 2 already shipped the same relation at
-  `strings:runs.judgeTargetLabel`. 「品質別」 keeps the 品質 root with a head that says *grouped by*,
-  the construction this locale already ships at `quality:bySource.title` 「ソース別の問題」 — the
-  `設定`/`環境設定` move, one section down, applied to a second three-way root.
+  **The refusal is right and the ground first given for it was wrong.** The round-6 review
+  falsified it and the retraction is left visible, because a quietly repaired rule is
+  indistinguishable from one that was always sound. The discarded sentence read:
+
+  > `strings:tabs.quality` is a **surface name**, which makes every occurrence of that string a
+  > claim about that surface.
+
+  **It fails in both directions.** It over-refuses: `strings:tabs.strings` 「翻訳」 is a surface
+  name by exactly the same test, and `orphans:columns.translations` and
+  `stage-details:translationsHeading` both render 「翻訳」 byte-identically while
+  `AppShell.tsx:433-435` mounts the rail beside every view — the identical co-render fact the
+  refusal rests on. Under the discarded rule both would have to be refused, and this file
+  licenses them. **And it under-refuses**: applied consistently it condemns a pair nobody had
+  looked at, `strings:tabs.data` 「データ」 against `account:tabData` 「データ」, which co-render
+  for the same reason. The corroboration offered was wrong too —
+  `strings:runs.judgeTargetLabel`'s English is **"Translation"**, singular, so it is an
+  inflection collapse and not an equality with a surface name at all.
+
+  > **The test is REFERENT IDENTITY.** Two keys may render identically when they name the same
+  > referent — the same object, or the same concept. A collapse is refused when the identical
+  > string would assert a referent the key does not have. Surface-name-ness is a property of one
+  > key; a collapse is a relation between two, so only a relation can decide it.
+
+  It reproduces every equality in this locale without exception. 「翻訳」 names *the translations*
+  at all three keys, so an identical rendering asserts nothing false. 「カテゴリ」, 「用語集」,
+  「アクティビティ」, 「品質」 over its guide topic, 「原文AIレビュー」, 「翻訳AIレビュー」,
+  「ステージ詳細」, 「孤立エントリ」, 「共有」, 「テキスト装飾」 and 「メンバー」 are each one
+  referent named twice. `colorText:groupQuality` is the one pair with **no referent in common** —
+  a colour ramp against a quality dashboard — so an identical rendering would assert one, and it
+  is refused. The 警告 row above survives on the same test rather than on the paradigm alone:
+  both keys name the **warning** concept, one as a colour role and one as a log level, so no
+  false identity is asserted; the paradigm argument is why 警告 rather than a synonym, not why a
+  collapse is allowed at all.
+
+  **The pair the new test surfaces, examined rather than left open.** `strings:tabs.data` is the
+  project's Data tab (CSV import/export of entries, `config/DataTab.tsx`) and `account:tabData`
+  is the account's Data tab (export and deletion of the **user's own** account data,
+  `account/DataTab.tsx`, whose own file comment calls it "Data (export + deletion)"). The
+  referents differ in scope, they co-render, and both ship 「データ」. **Licensed, narrowly:**
+  *Data* is a generic noun in both English strings and neither is a domain term, so English
+  ships the identical genericity and no Japanese rendering can mark a distinction English does
+  not make — the opposite of 品質, where the rail's word names a specific product surface. If a
+  later sweep disagrees, the fix is a batch-2/batch-4 string and belongs to a round that owns
+  those namespaces, not to this one.
+
+  **M8, accepted:** 「品質別」 shipped first and was a bare 別-modifier with nothing to modify —
+  the substantivized-modifier shape this locale's own *match* row rejects ("a bare 一致 as a
+  panel title is the substantivized-adjective shape reviewer-rubric item 4 rejects"), and not
+  the shape of the precedent cited for it: every 別 construction here carries a head noun
+  (「ソース別の問題」, 「言語別の合格率」). It ships **「品質別の色」** — 5 glyphs against a soft
+  budget of 9, the collision refusal intact, the head noun restored, and its four sibling
+  captions all plain noun phrases beside it (「暗い背景」「明るい背景」「元素」「自分の色」).
 
   **The category pair has harder evidence than batch 5 cited, and the round-5 review found it.**
   The parallel glossary pair — `glossary:generateFailed` and `logs:glossaryGen.failed` — is
