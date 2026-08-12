@@ -30,8 +30,10 @@
  * This MUST stay in step with the frontend's `UI_LANGS` / `UiLanguage`: a UI
  * language missing here silently renders source labels in English (that was the
  * de/ja/ru/tr defect). `shared` must NOT import from `frontend` — that is the
- * wrong dependency direction — so the link is enforced by a test instead; see
- * `tests/unit/frontend/src/lib/__tests__/source-label-locale-parity.test.ts`.
+ * wrong dependency direction — so the two lists cannot be linked at the type
+ * level, and a parity test in the test suite enforces it instead. Adding a UI
+ * language means adding it here and giving every `SOURCE_LABELS` entry a display
+ * form for it; that test fails with both edits named if you add only one.
  */
 export const SOURCE_DISPLAY_LOCALES = ['en', 'de', 'es', 'fr', 'ja', 'ru', 'tr'] as const;
 
