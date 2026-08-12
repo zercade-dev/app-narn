@@ -393,8 +393,40 @@ export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
  * replaced would have cost the same while implying the axis still had work to
  * do here. If a kana counter is ever introduced, it is the counter table that
  * must catch it, not this axis.
+ *
+ * `id`: the same grammar fact as `tr`, resting on two properties rather than
+ * one. Indonesian nouns are not marked for number at all, and the ONE plural
+ * device the language has — full reduplication ("kata-kata") — is
+ * ungrammatical after a numeral, so "tiga buku" is the only well-formed shape
+ * and "tiga buku-buku" is an error rather than an alternative
+ * (docs/i18n/style/id.md, "No plural marking after a numeral"). Indonesian
+ * verbs, participles and adjectives carry no number agreement either, which
+ * matters here because the second-commonest survivor shape after a bare noun
+ * is a predicative participle ("{{completed}} berhasil", "{{failed}} gagal").
+ * So there is no wrong form for the word axis to find in either position.
+ * Measured over the finished locale: 172 raw narrow matches, 61 after the
+ * token axis, carrying 25 distinct words — bare counted nouns (entri, token,
+ * karakter, bita, bahasa, aturan, glosarium, istilah, saran, temuan, masalah,
+ * batch, contoh, tindakan, baris), invariant participles (berhasil, gagal,
+ * ditambah, diperbarui, ditimpa, ditandai, beres, masuk, keluar), the
+ * preposition `dari`, the relative pronoun `yang` and the invariant
+ * abbreviation `dtk`. A NUMERAL_WORD_AXIS_EXEMPTIONS list was the other
+ * option and would have been wrong for the reason the `ja` note gives: it
+ * treats a grammar fact as an unfinished calibration, and with 25 words
+ * already it would need extending on every future string that puts any new
+ * noun after any token.
+ *
+ * As with `tr` and `ja`, this is NOT a claim that Indonesian has no
+ * numeral-adjacent hazard. It has one, and it is the CLASSIFIER (kata
+ * penggolong): buah for objects, orang for people, lembar for sheets. That is
+ * the same shape as ja's counter problem — a lexical choice per counted
+ * object, not an agreement rule, so no regex can check it — and it is handled
+ * by the classifier rule in docs/i18n/style/id.md, which settles the question
+ * by omitting classifiers throughout. Indonesian has no case system, so the
+ * welded-suffix hazard WELDED_SUFFIX_LOCALES exists for cannot arise here
+ * either.
  */
-export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja']);
+export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja', 'id']);
 
 /**
  * The script list for a locale, or `undefined` if this detector has no
@@ -834,7 +866,8 @@ function runCli() {
       console.log(
         `   "${locale}" counted nouns do not inflect for number, so the word axis is not applicable — ` +
           `every token-axis survivor above is cleared unconditionally, not calibrated blank. This ` +
-          `locale's numeral-adjacent hazard is the welded-suffix check below, not this one.`,
+          `locale still has a numeral-adjacent hazard; which one it is differs per language and is ` +
+          `named in its entry in NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES and in docs/i18n/style/${locale}.md.`,
       );
     } else if (survivors.length > 0 && !hasWordAxis) {
       console.log(
