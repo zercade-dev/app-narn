@@ -395,9 +395,9 @@ Recorded plainly, because each one cost something measurable.
   failure that follows from it.
 - ~4h15m of translator wall clock for the whole language, plus four reviews, plus five fix
   rounds, plus ten rounds on the shared terminology file.
-- The terminology file is the expensive shared artifact and it is now 76 terms deep. For
-  language 2 it should cost only the per-locale column, not the rows — **if** the rows are
-  frozen first.
+- The terminology file is the expensive shared artifact and the pilot left it 76 terms deep
+  (84 since the wave-1 → wave-2 resolution promoted eight more). For language 2 it should
+  cost only the per-locale column, not the rows — **if** the rows are frozen first.
 - Expansion in characters over the shared keys: 1.19 for Russian, 1.22 and 1.26 for the
   two locales shipped before it. Chrome budgets are absolute character counts, not
   multiples of English.
