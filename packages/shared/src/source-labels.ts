@@ -10,8 +10,9 @@
  * This catalog maps each canonical (English) source label to its localized form
  * in every reference language. It powers:
  *  - display translation: showing an imported source label in the app's UI
- *    language (en/es/fr) regardless of the language it was imported in, while
- *    the stored value and CSV import/export keep the EXACT imported text;
+ *    language (every locale in {@link SOURCE_DISPLAY_LOCALES}) regardless of the
+ *    language it was imported in, while the stored value and CSV import/export
+ *    keep the EXACT imported text;
  *  - recognition: detecting that a label (in any language) is a known origin.
  *
  * Labels not present here are unknown/custom sources and are displayed
@@ -21,30 +22,55 @@
  * a single label looked up here individually.
  */
 
-/** A canonical source label with its en/es/fr display forms and all recognized variants. */
+/**
+ * App UI languages that have a localized display form — the single source of
+ * truth for both the {@link SourceDisplayLocale} type and the runtime fallback
+ * in `resolveDisplayLocale`.
+ *
+ * This MUST stay in step with the frontend's `UI_LANGS` / `UiLanguage`: a UI
+ * language missing here silently renders source labels in English (that was the
+ * de/ja/ru/tr defect). `shared` must NOT import from `frontend` — that is the
+ * wrong dependency direction — so the link is enforced by a test instead; see
+ * `tests/unit/frontend/src/lib/__tests__/source-label-locale-parity.test.ts`.
+ */
+export const SOURCE_DISPLAY_LOCALES = ['en', 'de', 'es', 'fr', 'ja', 'ru', 'tr'] as const;
+
+/** App UI languages that have a localized display form. */
+export type SourceDisplayLocale = (typeof SOURCE_DISPLAY_LOCALES)[number];
+
+/** A canonical source label with a display form per UI locale and all recognized variants. */
 export interface SourceLabelDef {
   /** Canonical English label (also the i18n-neutral key). */
   en: string;
+  /** German display form. (For `Tab` this is legitimately identical to English.) */
+  de: string;
   /** Spanish display form. */
   es: string;
   /** French display form. */
   fr: string;
+  /** Japanese display form. */
+  ja: string;
+  /** Russian display form. */
+  ru: string;
+  /** Turkish display form. */
+  tr: string;
   /**
    * Every recognized localized form across all 15 reference languages (plus a
    * few singular/plural inflections), used to map an imported label back to
-   * this entry regardless of the import language. Includes the en/es/fr forms.
+   * this entry regardless of the import language. Includes every display form.
    */
   variants: readonly string[];
 }
 
-/** App UI languages that have a localized display form. */
-export type SourceDisplayLocale = 'en' | 'es' | 'fr';
-
 export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   {
     en: 'Tab',
+    de: 'Tab',
     es: 'Pestaña',
     fr: 'Option',
+    ja: 'オプションタブ',
+    ru: 'Вкладка',
+    tr: 'Sekme',
     variants: [
       'Tab',
       'Pestaña',
@@ -63,8 +89,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Custom Variable',
+    de: 'Benutzerdefinierte Variable',
     es: 'Variable personalizada',
     fr: 'Variable personnalisée',
+    ja: 'カスタム変数',
+    ru: 'Настраиваемые переменные',
+    tr: 'Özel Değişken',
     variants: [
       'Custom Variable',
       'Variable personalizada',
@@ -85,8 +115,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Item',
+    de: 'Objekt',
     es: 'Objeto',
     fr: 'Objets',
+    ja: 'アイテム',
+    ru: 'Предмет',
+    tr: 'Eşya',
     variants: [
       'Item',
       'Objeto',
@@ -105,8 +139,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Node Graph',
+    de: 'Knotendiagramm',
     es: 'Diagrama de nodos',
     fr: 'Graphique de nœuds',
+    ja: 'ノードグラフ',
+    ru: 'Схема узлов',
+    tr: 'Düğüm Grafiği',
     variants: [
       'Node Graph',
       'Diagrama de nodos',
@@ -127,8 +165,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'UI Control Group',
+    de: 'Menüsteuerungsgruppen',
     es: 'Grupo de control de interfaz',
     fr: "Groupe de contrôle d'interface",
+    ja: 'UIコントロールグループ',
+    ru: 'Группа элементов меню',
+    tr: 'Kullanıcı Arayüzü Kontrol Grubu',
     variants: [
       'UI Control Group',
       'Grupo de control de interfaz',
@@ -149,8 +191,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Nameplate',
+    de: 'Namensschild',
     es: 'Placa de nombre',
     fr: 'Plaque',
+    ja: 'ネームプレート',
+    ru: 'Табличка',
+    tr: 'İsim Levhası',
     variants: [
       'Nameplate',
       'Placa de nombre',
@@ -171,8 +217,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Text Bubble',
+    de: 'Textblase',
     es: 'Globo de texto',
     fr: 'Bulle de texte',
+    ja: 'テキストバブル',
+    ru: 'Текстовый пузырь',
+    tr: 'Metin Balonu',
     variants: [
       'Text Bubble',
       'Globo de texto',
@@ -193,8 +243,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Achievement',
+    de: 'Errungenschaften',
     es: 'Logros',
     fr: 'Succès',
+    ja: 'アチーブメント',
+    ru: 'Достижение',
+    tr: 'Başarım',
     variants: [
       'Achievement',
       'Logros',
@@ -219,8 +273,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Leaderboard',
+    de: 'Rangliste',
     es: 'Clasificación',
     fr: 'Classement',
+    ja: 'ランキング',
+    ru: 'Рейтинг',
+    tr: 'Sıralama',
     variants: [
       'Leaderboard',
       'Clasificación',
@@ -240,8 +298,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Loading Screen',
+    de: 'Ladebildschirm',
     es: 'Interfaz de carga',
     fr: 'Interface de chargement',
+    ja: 'ロード画面',
+    ru: 'Загрузочный экран',
+    tr: 'Yükleme Ekranı',
     variants: [
       'Loading Screen',
       'Interfaz de carga',
@@ -262,8 +324,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Manage Voice & Text Chat',
+    de: 'Audio- und Textchat-Verwaltung',
     es: 'Gestión de chat de voz y texto',
     fr: 'Gestion du tchat par texte et audio',
+    ja: 'ボイスとテキストチャット管理',
+    ru: 'Управление голосовым и текстовым чатом',
+    tr: 'Sesli Sohbet ve Metin Sohbeti Yönetimi',
     variants: [
       'Manage Voice & Text Chat',
       'Gestión de chat de voz y texto',
@@ -284,8 +350,12 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Faction',
+    de: 'Fraktion',
     es: 'Facción',
     fr: 'Faction',
+    ja: '陣営',
+    ru: 'Фракция',
+    tr: 'Bağlılık',
     variants: [
       'Faction',
       'Facción',
@@ -314,7 +384,10 @@ function normalizeLabel(value: string): string {
 const VARIANT_TO_DEF: ReadonlyMap<string, SourceLabelDef> = (() => {
   const map = new Map<string, SourceLabelDef>();
   for (const def of SOURCE_LABELS) {
-    for (const variant of [def.en, def.es, def.fr, ...def.variants]) {
+    for (const variant of [
+      ...SOURCE_DISPLAY_LOCALES.map((locale) => def[locale]),
+      ...def.variants,
+    ]) {
       const key = normalizeLabel(variant);
       if (!map.has(key)) map.set(key, def);
     }
@@ -322,9 +395,17 @@ const VARIANT_TO_DEF: ReadonlyMap<string, SourceLabelDef> = (() => {
   return map;
 })();
 
+/**
+ * Maps a UI locale (possibly region-tagged, e.g. `es-MX`) to the display locale
+ * whose form should be rendered, falling back to `en` for anything the catalog
+ * does not carry. Driven off {@link SOURCE_DISPLAY_LOCALES} so adding a locale
+ * is a single edit.
+ */
 function resolveDisplayLocale(locale: string): SourceDisplayLocale {
   const base = locale.toLowerCase().split('-')[0];
-  return base === 'es' || base === 'fr' ? base : 'en';
+  return (SOURCE_DISPLAY_LOCALES as readonly string[]).includes(base)
+    ? (base as SourceDisplayLocale)
+    : 'en';
 }
 
 /**
@@ -337,9 +418,10 @@ export function getSourceLabelDef(raw: string): SourceLabelDef | undefined {
 }
 
 /**
- * Returns the display form of a source origin label in the app UI language
- * (en/es/fr). A label imported in any of the 15 reference languages is mapped
- * to the requested locale's form; an unknown/custom label is returned verbatim.
+ * Returns the display form of a source origin label in the app UI language (any
+ * of {@link SOURCE_DISPLAY_LOCALES}; anything else falls back to English). A
+ * label imported in any of the 15 reference languages is mapped to the requested
+ * locale's form; an unknown/custom label is returned verbatim.
  *
  * Display-only: the stored `StringEntry.sources` value and CSV import/export
  * always keep the exact imported text.
