@@ -14,9 +14,17 @@ export const UI_LANGS = [
   'de',
   'es',
   'fr',
+  'id',
+  'it',
   'ja',
+  'ko',
+  'pt-br',
   'ru',
+  'th',
   'tr',
+  'vi',
+  'zh-hans',
+  'zh-hant',
 ] as const satisfies readonly UiLanguage[];
 
 export function isUiLang(value: string | null | undefined): value is UiLanguage {

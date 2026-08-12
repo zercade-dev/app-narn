@@ -44,9 +44,17 @@ export const UI_LANGUAGE_LABELS: Record<UiLanguage, string> = {
   de: 'Deutsch',
   es: 'Español',
   fr: 'Français',
+  id: 'Bahasa Indonesia',
+  it: 'Italiano',
   ja: '日本語',
+  ko: '한국어',
+  'pt-br': 'Português (Brasil)',
   ru: 'Русский',
+  th: 'ไทย',
   tr: 'Türkçe',
+  vi: 'Tiếng Việt',
+  'zh-hans': '简体中文',
+  'zh-hant': '繁體中文',
 };
 
 export function SettingsView() {

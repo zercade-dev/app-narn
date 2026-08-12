@@ -526,16 +526,23 @@ const VARIANT_TO_DEF: ReadonlyMap<string, SourceLabelDef> = (() => {
 })();
 
 /**
- * Maps a UI locale (possibly region-tagged, e.g. `es-MX`) to the display locale
- * whose form should be rendered, falling back to `en` for anything the catalog
- * does not carry. Driven off {@link SOURCE_DISPLAY_LOCALES} so adding a locale
- * is a single edit.
+ * Maps a UI locale (possibly region- or script-tagged, e.g. `es-MX`, `pt-BR`,
+ * `zh-Hans-CN`) to the display locale whose form should be rendered, falling
+ * back to `en` for anything the catalog does not carry. Some display locales
+ * are themselves compound (`pt-br`, `zh-hans`, `zh-hant`), so this matches the
+ * most specific tag first, then drops trailing subtags one at a time until a
+ * match is found — it does not just take the leading base subtag. Driven off
+ * {@link SOURCE_DISPLAY_LOCALES} so adding a locale is a single edit.
  */
 function resolveDisplayLocale(locale: string): SourceDisplayLocale {
-  const base = locale.toLowerCase().split('-')[0];
-  return (SOURCE_DISPLAY_LOCALES as readonly string[]).includes(base)
-    ? (base as SourceDisplayLocale)
-    : 'en';
+  const subtags = locale.toLowerCase().split('-');
+  for (let count = subtags.length; count > 0; count--) {
+    const candidate = subtags.slice(0, count).join('-');
+    if ((SOURCE_DISPLAY_LOCALES as readonly string[]).includes(candidate)) {
+      return candidate as SourceDisplayLocale;
+    }
+  }
+  return 'en';
 }
 
 /**
