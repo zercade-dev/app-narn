@@ -873,7 +873,16 @@ export function ComparisonTab({
       // ignore cancel errors
     }
     setBulkTranslateRunId(null);
-    toast.info(tBatch('runCancelled').replace(':', '').trim());
+    // The string is shared with a context that appends a reason after a colon;
+    // this toast has no reason to append, so the colon comes off. Strip either
+    // width: a CJK locale writes the full-width "：" and stripping only the
+    // ASCII one would leave it dangling at the end of the toast. The Japanese
+    // batch found this by writing the value without a colon at all to avoid it.
+    toast.info(
+      tBatch('runCancelled')
+        .replace(/[:：]\s*$/u, '')
+        .trim(),
+    );
   }, [projectId, bulkTranslateRunId, tBatch]);
 
   const colTemplate = (() => {
