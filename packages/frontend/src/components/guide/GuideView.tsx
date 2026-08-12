@@ -62,31 +62,49 @@ export function GuideView() {
   }
 
   // getGuideContent is async (guide markdown is code-split, one chunk per
-  // slug/locale — see guides-registry.ts). The loaded content is tagged with
+  // slug/locale — see guides-registry.ts). The loaded result is tagged with
   // the request key it answers; render-time "loading" is derived by
   // comparing that key against the current one, rather than resetting state
   // to null synchronously in the effect body (which the react-hooks
   // set-state-in-effect rule flags as a cascading-render hazard). This also
   // guards the async race the reader can trigger by switching topic or UI
   // language while a load is in flight: the effect's cleanup flips `ignore`,
-  // so a load that resolves after a newer selection was made writes nothing
-  // — the stale `.then` is a no-op, and the key comparison would have hidden
-  // it even if it weren't. An AbortController isn't a fit here — dynamic
-  // `import()` has no abort signal to pass it.
-  const [loadedGuide, setLoadedGuide] = useState<{ key: string; content: string } | null>(null);
+  // so a load that resolves (or rejects) after a newer selection was made
+  // writes nothing — the stale `.then` is a no-op, and the key comparison
+  // would have hidden it even if it weren't. An AbortController isn't a fit
+  // here — dynamic `import()` has no abort signal to pass it.
+  //
+  // A rejection (e.g. a stale hashed chunk 404ing after a deploy, or a
+  // network blip) lands in the 'error' status rather than being left
+  // unhandled — an unhandled rejection would leave the spinner spinning
+  // forever with no way out. `retryToken` gives the reader a way out: the
+  // Retry button bumps it, which re-runs this effect against the same
+  // slug/language.
+  const [loadedGuide, setLoadedGuide] = useState<
+    { key: string; status: 'ready'; content: string } | { key: string; status: 'error' } | null
+  >(null);
+  const [retryToken, setRetryToken] = useState(0);
   useEffect(() => {
     let ignore = false;
     const key = `${language}::${activeSlug}`;
-    getGuideContent(activeSlug, language).then((md) => {
-      if (!ignore) setLoadedGuide({ key, content: md });
-    });
+    getGuideContent(activeSlug, language).then(
+      (md) => {
+        if (!ignore) setLoadedGuide({ key, status: 'ready', content: md });
+      },
+      (err) => {
+        console.error('[guide] failed to load guide content', err);
+        if (!ignore) setLoadedGuide({ key, status: 'error' });
+      },
+    );
     return () => {
       ignore = true;
     };
-  }, [activeSlug, language]);
+  }, [activeSlug, language, retryToken]);
 
-  const rawContent =
-    loadedGuide && loadedGuide.key === `${language}::${activeSlug}` ? loadedGuide.content : null;
+  const currentGuideKey = `${language}::${activeSlug}`;
+  const loadedForCurrent = loadedGuide && loadedGuide.key === currentGuideKey ? loadedGuide : null;
+  const hasLoadError = loadedForCurrent?.status === 'error';
+  const rawContent = loadedForCurrent?.status === 'ready' ? loadedForCurrent.content : null;
   const content =
     rawContent === null ? null : cloudManaged ? stripLocalOnly(rawContent) : rawContent;
   const rendered = content === null ? null : renderMarkdown(content);
@@ -122,7 +140,20 @@ export function GuideView() {
       {/* Content area — capped to a comfortable reading measure (~70ch). */}
       <main className="flex-1 overflow-auto px-6 py-8">
         <div className="mx-auto max-w-[72ch]">
-          {rendered === null ? (
+          {hasLoadError ? (
+            <div className="space-y-3 py-3" data-testid="guide-content-error">
+              <p className="text-sm text-destructive">{t('account:errorGeneric')}</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                data-testid="guide-content-retry"
+                onClick={() => setRetryToken((n) => n + 1)}
+              >
+                {t('collab:routing.retry')}
+              </Button>
+            </div>
+          ) : rendered === null ? (
             <div
               className="flex items-center gap-2 py-3 text-sm text-muted-foreground"
               data-testid="guide-content-loading"
