@@ -2,7 +2,7 @@
   "action": {
     "openRouting": "Yönlendirme kurallarını ayarla",
     "openModuleSettings": "Modül ayarlarını aç",
-    "openQuality": "Kalite ayarlarını aç",
+    "openQuality": "Kalite panosunu aç",
     "openGlossary": "Sözlükçeyi aç",
     "unlockVault": "Kasanın kilidini aç"
   },
@@ -10,9 +10,9 @@
     "start": "Bir girdi {{language}} diline çevriliyor…",
     "done": "Bir girdi {{language}} diline çevrildi.",
     "doneFromMemory": "{{language}} için kayıtlı bir çeviri yeniden kullanıldı.",
-    "queued": "{{total}} girdi çeviri için sıraya alındı.",
-    "queued_one": "{{total}} girdi çeviri için sıraya alındı.",
-    "queued_other": "{{total}} girdi çeviri için sıraya alındı.",
+    "queued": "{{total}} çeviri sıraya alındı.",
+    "queued_one": "{{total}} çeviri sıraya alındı.",
+    "queued_other": "{{total}} çeviri sıraya alındı.",
     "runQueued": "Çeviri çalıştırması sıraya alındı — sıradaki yeri: {{position}}.",
     "retryQueued": "Yeniden deneme sıraya alındı — sıradaki yeri: {{position}}.",
     "retry": "Başarısız bir çeviri yeniden deneniyor.",
@@ -30,17 +30,17 @@
     "queueStartFailed": "Çeviri çalıştırması başlatılamadı.",
     "maskMismatch": "{{language}} diline çeviri sırasında biçimlendirme etiketleri korunamadı.",
     "tmRejected": "{{language}} için kayıtlı bir çeviri kalite denetimini geçemedi.",
-    "lqaRetry": "Kalite denetimi başarısız — modelden yeniden denemesi isteniyor.",
+    "lqaRetry": "Kalite denetimi başarısız oldu — modelden yeniden denemesi isteniyor.",
     "authCancel": "Oturum açma iptal edildiği için çeviri durduruldu."
   },
   "lqa": {
-    "passed": "Kalite denetimi başarılı.",
-    "failed": "Kalite denetimi başarısız.",
+    "passed": "Kalite denetimi başarılı oldu.",
+    "failed": "Kalite denetimi başarısız oldu.",
     "overflow": "Çeviri, mevcut alan için çok uzun.",
     "checkError": "Bir kalite denetimi çalıştırılamadı."
   },
   "judge": {
-    "done": "İnceleme {{score}} puan verdi — {{verdict}}.",
+    "done": "İnceleme {{score}} puan verdi — karar: {{verdict}}.",
     "suggestDone": "İnceleme önerilerle tamamlandı.",
     "suggestNoChange": "İnceleme, değiştirilecek bir şey bulmadı.",
     "suggestionDiscarded": "Öneri reddedildi."
@@ -62,7 +62,7 @@
   },
   "stageDetails": {
     "queued": "Bölüm ayrıntıları sıraya alındı.",
-    "done": "Bölüm ayrıntıları tamamlandı — {{completed}} bitti, {{failed}} başarısız.",
+    "done": "Bölüm ayrıntıları tamamlandı — {{completed}} başarılı, {{failed}} başarısız.",
     "failed": "Bölüm ayrıntıları başarısız oldu."
   },
   "module": {
@@ -76,9 +76,9 @@
     "credentialsEvicted": "Kayıtlı kimlik bilgileriniz bellekten temizlendi."
   },
   "orphan": {
-    "detected": "Kaynak dosyada artık bulunmayan {{count}} girdi bulundu.",
-    "detected_one": "Kaynak dosyada artık bulunmayan {{count}} girdi bulundu.",
-    "detected_other": "Kaynak dosyada artık bulunmayan {{count}} girdi bulundu.",
+    "detected": "Kaynak dosyada artık yer almayan {{count}} girdi bulundu.",
+    "detected_one": "Kaynak dosyada artık yer almayan {{count}} girdi bulundu.",
+    "detected_other": "Kaynak dosyada artık yer almayan {{count}} girdi bulundu.",
     "linked": "Yetim bir girdi bağlandı.",
     "deleted": "Yetim bir girdi silindi."
   },

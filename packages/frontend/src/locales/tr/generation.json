@@ -1,6 +1,6 @@
 {
   "contextLabel": "Girdi bağlamını dahil et",
-  "contextHint": "Önerileri iyileştirmek için isteme fazladan girdi ayrıntıları ekleyin.",
+  "contextHint": "Önerileri iyileştirmek için istem metnine fazladan girdi ayrıntıları ekleyin.",
   "fieldContext": "Çevirmen bağlamı notları",
   "fieldSources": "Kaynak etiketleri",
   "fieldCategories": "Atanan kategoriler",

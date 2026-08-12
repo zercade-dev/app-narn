@@ -320,6 +320,25 @@ gets one of them wrong gets it wrong sixty times.
   çevriliyor…” and `logs:translation.retry` is “Başarısız bir çeviri yeniden deneniyor.”
   English marks the difference with its own participles; do not flatten the two into one
   tense.
+- **A state predicate is not one of these shapes. Narrate the event, copula and all.**
+  `logs:lqa.passed` / `lqa.failed` (English *Quality check passed. / failed.*) shipped for one
+  round as “Kalite denetimi başarılı.” / “başarısız.” — a nominal sentence with a zero copula,
+  which in a stream of narrated events reads as a **badge** rather than as something that just
+  happened, and this locale ships an actual badge with that adjective (`strings:row.lqaPassed`
+  “LQA başarılı”) that can be painted in the string table while the console panel is open.
+  Three sibling keys with the identical English construction — `glossaryGen.failed`,
+  `categoryGen.failed`, `stageDetails.failed` — had already taken the perfective “başarısız
+  **oldu**”, so one English shape was shipping two Turkish shapes inside one namespace. Fixed
+  to “Kalite denetimi başarılı oldu.” / “Kalite denetimi başarısız oldu.”, with
+  `translation.lqaRetry` following. **Whenever English writes `<subject> failed.` in this
+  namespace, the rendering ends in the copula** — the *check* lexicon row settles the word
+  (“başarısız” against the “geç-” root), never the shape, and the two questions have to be
+  answered separately. **The converse, so the rule is not over-applied:** where the *English*
+  is itself a state rather than an event, the Turkish zero copula is the faithful rendering and
+  the copula must not be added. `logs:lqa.overflow` (*Translation is too long for the space
+  available.*) ships “Çeviri, mevcut alan için çok uzun.” and stays exactly as it is — it is the
+  only such key in the namespace, and it is a description of the translation, not a report of
+  something that happened to it.
 - **A failure the user could not have caused is the impersonal negative potential**
   (`-Amadı`), never a blaming imperative: `logs:translation.queueStartFailed` is “Çeviri
   çalıştırması başlatılamadı.” and `logs:backup.pruneFailed` is “Eski yedekler
@@ -330,7 +349,7 @@ gets one of them wrong gets it wrong sixty times.
 **A tally after an em dash keeps a head noun, and the head is chosen for what the number
 actually counts.** `logs:glossaryGen.done` says “{{analyzed}} girdiden {{suggested}} terim
 önerildi” because those two count entries and glossary terms respectively.
-`logs:stageDetails.done` deliberately has **no** head noun — “{{completed}} bitti, {{failed}}
+`logs:stageDetails.done` deliberately has **no** head noun — “{{completed}} başarılı, {{failed}}
 başarısız” — because the engine counts *languages* there and the guarantee lives in the
 engine, not in the string; the runbook records the same reasoning for the two log lines whose
 displayed token and selecting token happen to agree today. Where the unit is safe, name it;
@@ -386,8 +405,11 @@ Two things to carry forward from it:
   `strings:filters.matchAny` "VEYA" (en "OR") — the by-hand mapping rule above still
   applies to them, because no CSS is involved there. None of the three happens to contain
   an `i` or `ı`, so none was ever affected by the casing defect; they are listed so the
-  count in this guide is true rather than merely harmless. **Batch 5 adds the fourth and it
-  is in `console`:** `console:title` (English *CONSOLE*) is “KONSOL”, rendered inside an
+  count in this guide is true rather than merely harmless. **The list was itself one short, and
+  the missing member is the one where the mapping bites**: `vault:keyPlaceholder`
+  “ANAHTAR_ADI” (en *KEY_NAME*), shipped by batch 4 as a translated field shape rather than a
+  literal — *adı* → *ADI* is exactly the by-hand mapping this section is about. So the class is
+  four before this batch, and **batch 5 adds the fifth, in `console`:** `console:title` (English *CONSOLE*) is “KONSOL”, rendered inside an
   ordinary bold span with no `text-transform`, so the uppercase has to be in the value. It
   too has no `i`/`ı`, so the by-hand mapping is a formality here — but write it by hand
   anyway, because the next such value may not be so lucky.
@@ -813,7 +835,7 @@ characters — "Legal" — against “Yasal bilgiler”). **State the population
 keys this batch shares with English; the batch ships **304** `tr` keys, the extra four being
 the `_one` forms the four `vault` `bare + _other` families owe (see "Plural categories"),
 which have no English counterpart to be a ratio of. Over the 123 batch-5 keys
-(`logs` + `console` + `system` + `errors` + `generation` + `batch`): aggregate **1.09**,
+(`logs` + `console` + `system` + `errors` + `generation` + `batch`): aggregate **1.10**,
 median **1.09**, 90th percentile **1.52**, longest single ratio 2.60 (`console:filter_debug`,
 five English characters — *Debug* — against “Hata ayıklama”). **State the population**: that
 is the 123 keys this batch shares with English; the batch ships **131** `tr` keys, the extra
@@ -1178,7 +1200,15 @@ point of failure.
   different surface, and "İşlem başarısız oldu" is the natural Turkish. `glossary:colActions`
   — a column header, the same class as the reserved one — takes "Eylemler".
 - **"İstem" (prompt) and "istek" (request) differ by one letter** and appear in the same
-  settings panel. Read the English before you type either.
+  settings panel. Read the English before you type either. **Batch 5 is where the two first render inside
+  one component**, and the split is faithful because English writes both: `generation:contextHint`
+  names the *prompt* while `generation:skipCategoriesHint` and `ignoreGlossariesHint` both end
+  “istekten tamamen çıkarılır” for English's *request*, all three inside the generation-context
+  controls. **A second trap sits on top of it: the dative of “istem” is homographic with the
+  negative imperative of *istemek*.** “…için isteme … ekleyin” garden-paths as *do not want*, so
+  the hint ships the compound instead — “…için **istem metnine** fazladan girdi ayrıntıları
+  ekleyin.” Inflect this noun through a compound, not bare, wherever the case ending would
+  produce that form.
 - **"Context" is three different things in English.** The model's context window is "bağlam
   penceresi" (`config:models.confidenceReason.prompt-near-context`); the CSV column is the
   translator's own note (`config:includeContext`, "Bağlam sütununu dahil et"); the entry
@@ -1239,7 +1269,15 @@ point of failure.
   where English writes "entr(ies)". Turkish needs no parenthetical at all — the singular
   noun after the number already covers every count.
 - **A number in a run control counts JOBS, not entries — open the call site before you
-  name the unit.** `batch:toTranslateCount` (English *{{count}} to translate*) ships
+  name the unit, and open it for each key rather than for the family.** The batch's first
+  version of this bullet claimed three `logs` failure counters were jobs too. **They are not**,
+  and the review caught it: the three `translation.failed*` siblings aggregate on target
+  language **and** reason together, so the language is fixed inside a group and their `count` is
+  distinct entries for the one language the same sentence names — “girdi” is right there. The
+  non-aggregated path passes no count and defaults to 1. In `logs` exactly **one** key has the
+  mismatch, `translation.queued`, whose token is the routing-decision count; it ships
+  “{{total}} çeviri sıraya alındı.” for that reason. Do not re-broaden this to the `failed*`
+  siblings — that is the correction being recorded, not a warning about them.** `batch:toTranslateCount` (English *{{count}} to translate*) ships
   “yapılacak {{count}} çeviri” and **not** “{{count}} girdi”, because the value is computed
   by walking the selected rows *and* the selected target languages: ten entries into three
   languages is 30, not 10. `batch:progressAriaLabel`, `runCompleted` and
