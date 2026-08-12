@@ -103,8 +103,8 @@
     "batchByLanguage": "ตามภาษา",
     "batchByEntry": "ตามรายการ",
     "serverCache": "แคชของเซิร์ฟเวอร์:",
-    "cacheFresh": "ใหม่",
-    "cacheStale": "เก่า",
+    "cacheFresh": "ล่าสุด",
+    "cacheStale": "ล้าสมัย",
     "modelInfoUpdated": "อัปเดตข้อมูลโมเดลเมื่อ {{time}}"
   },
   "routing": {
@@ -136,7 +136,7 @@
     "promptBadge": "พรอมต์",
     "moduleDisabledWarning": "โมดูลถูกปิดใช้งาน",
     "modelDefault": "ค่าเริ่มต้น",
-    "doneEdit": "เสร็จสิ้น",
+    "doneEdit": "เสร็จ",
     "anySource": "ทุกแหล่งที่มา",
     "anyLang": "ทุกภาษา",
     "moduleDisabledSuffix": " (ปิดอยู่)",

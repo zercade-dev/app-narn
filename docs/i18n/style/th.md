@@ -253,11 +253,46 @@ mentions the surface repeats it. Rows are added by the batch that first ships th
 | Surface | Rendering | First shipped |
 | --- | --- | --- |
 | Global Config | การตั้งค่าส่วนกลาง | `config:globalConfigTitle` |
-| Translations (tab) | คำแปล | named in prose by `config:routing.categoriesConfiguredHint` |
-| Compare (tab) | เปรียบเทียบ | named in prose by `config:routing.tonesHint` |
-| Backup (tab) | ข้อมูลสำรอง | named in prose by `config:importSnapshotNote` |
-| Orphans (tab) | รายการกำพร้า | named in prose by `config:fullReplaceOrphanNotice` |
+| Config (tab) | การตั้งค่า | `strings:tabs.config` |
+| Data (tab) | ข้อมูล | `strings:tabs.data` |
+| Translations (tab) | คำแปล | `strings:tabs.strings` |
+| Compare (tab) | เปรียบเทียบ | `strings:tabs.compare` |
+| Source AI review (tab) | รีวิวต้นฉบับด้วย AI | `strings:tabs` (review-source-ai) |
+| Translation AI review (tab) | รีวิวคำแปลด้วย AI | `strings:tabs` (review-translation-ai) |
+| Manual review (tab) | ตรวจทานเอง | `strings:tabs` (review-manual) |
+| Quality | คุณภาพ | `strings:tabs.quality`, `strings:guide.topicQuality` |
+| Glossary (tab) | อภิธานศัพท์ | `strings:tabs.glossary` |
+| Category (tab) | หมวดหมู่ | `strings:tabs.category` |
+| Routing (tab) | การจ่ายงาน | `strings:tabs.routing` |
+| Activity | กิจกรรม | `strings:tabs.runs`, `strings:guide.topicActivity` |
+| Stage details (tab) | รายละเอียดด่าน | `strings:tabs` (stage-details) |
+| Orphans (tab) | รายการกำพร้า | `strings:tabs.orphans` |
+| Backup (tab) | ข้อมูลสำรอง | `strings:tabs.backup` |
+| Sharing (tab) | การแบ่งปัน | `strings:tabs.sharing` |
+| Text Styler | ตัวแต่งข้อความ | `strings:tabs` (color-text) |
 | Translation Memory | หน่วยความจำการแปล | `config:tm.policyTitle` |
+
+The five sidebar group headings are settled here too, because `strings:guide.group*` ships
+first and `sidebar:groups.*` must copy it byte for byte in a later batch:
+`strings:guide.groupSetup`, `groupTranslate`, `groupReview`, `groupContent` and
+`groupMaintenance`. Two of the five are deliberately a heading over its own child and both
+are **proper substrings**, never equal to it: the Translate group is the bare verb over the
+Translations tab's noun, and the Setup group avoids the Config tab's own word entirely.
+`groupTranslationMemory` is identical to its single child, which English does on purpose and
+every shipped locale reproduces.
+
+## Keyboard key names
+
+**Keep `Enter`, `Shift`, `Esc`, `Tab`, `Ctrl` and `Alt` in Latin.** A Thai keyboard is a
+Latin QWERTY layout with Thai letters added to the same keycaps; the modifier and control
+keys are engraved with the English words, not with Thai. Copying the English word is
+therefore what `terminology.md`'s "write it as it is engraved" rule actually requires here,
+exactly as it does for Russian — this is a positive decision, not an untranslated leftover,
+and a reviewer scanning for stray English should not reopen it.
+
+The same words translate normally when they are **not** key names: `enter your password`,
+`enter edit mode` and the UI sense of *tab* are ordinary words. Read the string, not the
+word.
 
 ## The six register and typography sweeps
 
