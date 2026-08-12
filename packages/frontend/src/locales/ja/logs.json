@@ -2,7 +2,7 @@
   "action": {
     "openRouting": "振り分けルールを設定",
     "openModuleSettings": "モジュール設定を開く",
-    "openQuality": "品質設定を開く",
+    "openQuality": "品質ダッシュボードを開く",
     "openGlossary": "用語集を開く",
     "unlockVault": "保管庫のロックを解除"
   },
@@ -10,8 +10,8 @@
     "start": "エントリを{{language}}に翻訳中…",
     "done": "エントリを{{language}}に翻訳しました。",
     "doneFromMemory": "{{language}}の保存済みの翻訳を再利用しました。",
-    "queued": "エントリを翻訳キューに追加しました（{{total}}）。",
-    "queued_other": "エントリを翻訳キューに追加しました（{{total}}）。",
+    "queued": "翻訳キューに追加しました（エントリ数：{{total}}）。",
+    "queued_other": "翻訳キューに追加しました（エントリ数：{{total}}）。",
     "runQueued": "翻訳の実行をキューに追加しました（順番：{{position}}）。",
     "retryQueued": "再試行をキューに追加しました（順番：{{position}}）。",
     "retry": "失敗した翻訳を再試行しています。",
@@ -36,7 +36,7 @@
     "checkError": "品質チェックを実行できませんでした。"
   },
   "judge": {
-    "done": "レビューを採点しました（スコア：{{score}}・{{verdict}}）。",
+    "done": "レビューを採点しました（スコア：{{score}}・判定：{{verdict}}）。",
     "suggestDone": "レビューが完了し、提案があります。",
     "suggestNoChange": "レビューの結果、変更点はありませんでした。",
     "suggestionDiscarded": "提案を却下しました。"
@@ -57,8 +57,8 @@
   },
   "stageDetails": {
     "queued": "ステージ詳細をキューに追加しました。",
-    "done": "ステージ詳細が完了しました（完了：{{completed}}・失敗：{{failed}}）。",
-    "failed": "ステージ詳細に失敗しました。"
+    "done": "ステージ詳細の実行が完了しました（完了：{{completed}}・失敗：{{failed}}）。",
+    "failed": "ステージ詳細の実行に失敗しました。"
   },
   "module": {
     "loaded": "{{module}}モジュールを読み込みました。",

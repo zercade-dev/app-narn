@@ -162,16 +162,28 @@ table above still governs `console`'s chrome — its filter tabs, its buttons, i
 `logs` is 59 sentences, and a wrong aspect rule there is wrong sixty times over. Three rules, and
 the first is the one that makes the other two mechanical.
 
-1. **English's own final punctuation decides the shape. Do not decide it per string.**
-   - A value ending in an **ellipsis** is in-flight progress and takes ～中…: `logs:translation.start`
-     is 「エントリを{{language}}に翻訳中…」 — the one such value in the namespace.
-   - A value ending in a **full stop** is a completed event and takes a ですます sentence ending in
-     。: 「エントリを{{language}}に翻訳しました。」, 「保管庫のロックを解除しました。」,
-     「バックアップを復元しました。」 This is the same 〜しました the progress row of the table above
-     already prescribes for a completed action; `logs` simply applies it 55 times.
-   - A value ending in **neither** is a state chip or a tooltip and takes 体言止め with no 。:
-     `console:statusConnected` 「サーバーのログストリームに接続済み」, `console:vaultLocked`
-     「保管庫はロック中」, `console:repeatCount` 「{{count}}回繰り返されました」.
+1. **English's own final punctuation decides the PUNCTUATION. The control-shape table still
+   decides the SHAPE.** These are two axes, and the round-5 review caught this rule conflating
+   them — its first wording said punctuation "decides the shape" and then illustrated the third
+   case with three values that are not the shape it claimed. Corrected here rather than rewritten
+   away, because the *punctuation* half is the useful part and it is verified over all 123 values
+   with zero mismatches.
+   - A value ending in an **ellipsis** carries 「…」 and is in-flight progress, so the table's
+     progress row gives ～中…: `logs:translation.start` is 「エントリを{{language}}に翻訳中…」 — the
+     one such value in the namespace.
+   - A value ending in a **full stop** carries 。, and a narrated completed event takes the table's
+     ですます sentence: 「エントリを{{language}}に翻訳しました。」,
+     「保管庫のロックを解除しました。」, 「バックアップを復元しました。」 This is the same 〜しました the
+     progress row already prescribes for a completed action; `logs` applies it 55 times.
+   - A value ending in **neither** takes no final punctuation — and **that is all this rule says
+     about it.** Its shape comes from the table like any other control: `console:statusConnected`
+     「サーバーのログストリームに接続済み」 and `console:vaultLocked` 「保管庫はロック中」 are status
+     chips, so 体言止め, while `console:repeatCount` 「{{count}}回繰り返されました」,
+     `console:membersNotShown` 「他{{count}}件は表示していません」 and `system:slot.aria`
+     「{{label}}環境を使用しています」 are a tooltip, an inline note and an `aria-label` — sentences
+     that a screen reader or a hover has to read as sentences, so they take a ですます verb clause
+     and still no 。. Three of the batch's own NONE-class values are therefore **not** 体言止め,
+     and all three are correct. **Do not read "no full stop" as "noun phrase".**
 
    The one thing this rule does **not** license is a completed event written as a bare noun
    phrase. English's *Vault unlocked.* / *Backup restored.* / *Translation memory cleared.* are
@@ -193,6 +205,22 @@ the first is the one that makes the other two mechanical.
    name; `english-review-notes.md` item 3 records the same English inconsistency and leaves the
    **English** deliberately unchanged. Do not "restore" the English word, and do not raise it
    again — it is a decided, recorded English defect with a recorded reason.
+4. **A run-engine's name is a thing; 〜に失敗する and 〜が完了する want an action. Restore 実行.**
+   English narrates a run as *"Stage details failed."*, naming the feature. Japanese cannot:
+   〜に失敗する takes an action noun (実行に失敗, 生成に失敗, 接続に失敗), so 「ステージ詳細に失敗しました」
+   reads as *failed at stage details*. The fix round shipped
+   `logs:stageDetails.failed` 「ステージ詳細の実行に失敗しました。」 and
+   `logs:stageDetails.done` 「ステージ詳細の実行が完了しました（完了：{{completed}}・失敗：{{failed}}）。」
+   The surface name survives intact as a prefix, so the verbatim-copy rule is untouched, and 実行 is
+   the lexicon's own word for *run*.
+   **The rule is per verb, not per key**, which is why `logs:stageDetails.queued`
+   「ステージ詳細をキューに追加しました。」 needs nothing: queueing takes a **thing**, so no head noun is
+   owed. The three `categoryGen`/`glossaryGen` siblings already satisfy it because English gives
+   them one (*generation* → 生成).
+   **This is the same rule as judgement call 7** — 用語集の実行 reads as *executing the glossary*, so
+   `logs:glossaryGen.done` restored 用語集生成の実行 — and round 5 applied it there and missed it one
+   namespace away, which the review caught. When English names a feature where Japanese needs an
+   action, the head noun is not optional decoration.
 
 **One call-site finding that changed a string, and it is the reason this section exists.**
 `batch:runCancelled`'s English is *"Run cancelled:"* — with a trailing colon — and its **only**
@@ -544,22 +572,44 @@ Nothing here approaches the guard's ratio cap in either direction.
 
 **Batch 5 breaks that flat run, and the cause is the register rather than the corpus.** Over its
 **123 shared keys** — the same 123 in both languages, because this batch contains no `_one` key at
-all, so nothing comes out of either total — **2,798 Japanese characters against 4,567 English**:
-aggregate **0.61**, median **0.62**, 90th percentile **0.80** (`errors:http.vaultLocked`), minimum
-**0.15** (`console:filter_notifications` 「通知」 against "Notifications"), maximum **1.03**
+all, so nothing comes out of either total — **2,814 Japanese characters against 4,567 English**:
+aggregate **0.62**, median **0.62**, 90th percentile **0.81** (`logs:stageDetails.failed`), minimum
+**0.15** (`console:filter_notifications` 「通知」 against "Notifications"), maximum **1.11**
 (`logs:judge.done`). Five keys reach or pass 1.00: 「JSON」 and 「テキスト」 and 「すべて」 all at exactly
 1.00, `logs:vault.unlocked` 「保管庫のロックを解除しました。」 at 1.00 against *Vault unlocked.*, and
-`logs:judge.done` alone above it.
-**The aggregate rose from 0.57 to 0.61 because `logs` is narration**, and that is a structural
+`logs:judge.done` alone above it — pushed there by the 判定 label the fix round added, on a key
+whose English is already terse.
+**These are the fix round's figures, re-derived after its five string edits** (`action.openQuality`,
+`judge.done`, `stageDetails.done`, `stageDetails.failed`, `translation.queued`/`_other`), which moved
+the Japanese total by +16 and the aggregate by +0.005. The pre-fix figures were 2,798 characters and
+0.61; both are quoted here rather than one replacing the other, because a distribution written before
+the last string edit is stale by construction and this is the second round in which that has bitten.
+**The aggregate rose from 0.57 to 0.62 because `logs` is narration**, and that is a structural
 effect worth stating rather than a drift: English narrates a completed event with a bare past
 participle — *Vault unlocked.*, *Backup restored.*, *Translation memory cleared.* — where Japanese
 must write out a verb in ですます, so the 〜しました。 tail costs four to six characters that English
 never spends. Every locale that marks politeness on the verb will meet the same effect in this
 namespace. It is not a reason to drop the register: the narration section above settles that the
-sentences are sentences. And it is not a layout risk anywhere — nothing in `logs`, `console`,
-`system`, `errors`, `generation` or `batch` sits in one of the five constrained classes, the
-console panel wraps freely, and the batch's longest values are two multi-sentence banners
-(`system:countdown.message`, `generation:ignoreGlossariesHint`) that wrap by design.
+sentences are sentences. Five batches: aggregate **0.55 / 0.55 / 0.54 / 0.57 / 0.62**, 90th
+percentile **0.83 / 0.83 / 0.80 / 0.81 / 0.81**. The tail has not moved at all across five batches;
+only the body has.
+
+**One constrained class IS present, and the first version of this paragraph said none was.** It
+claimed "nothing in these six namespaces sits in one of the five constrained classes" and "no
+layout risk anywhere". Four `batch:*` keys render inside `StringTableBulkBar.tsx` —
+`translateSelected` (`:375`, `:397`), `cancelRun` (`:384`), `toTranslateCount` (`:401`) and
+`progressAriaLabel` (`:368`) — which is the **bulk-bar** class, whose own anchor
+`strings:bulk.approveSelected` lives in that same component. **Rubric item 7 was owed and skipped**:
+the class was present and its distribution was never measured. Measured now, over the whole class at
+once: 「選択範囲を翻訳」 **7**, 「実行をキャンセル」 **8**, 「翻訳対象{{count}}件」 **7** with a
+three-digit count, and `progressAriaLabel` is an `aria-label` with no rendered width at all —
+against a **soft budget of 17**. **The conclusion survives and the reason did not**, which is the
+tracked failure class: the batch is comfortable, but it is comfortable because it was measured, not
+because the class was absent. Everything else in the six namespaces really is unconstrained — the
+console panel wraps freely, and the longest values are two multi-sentence banners
+(`system:countdown.message`, `generation:ignoreGlossariesHint`) that wrap by design. **Do not read
+"batch 5 had no constrained keys" as a precedent about which namespaces carry chrome**; `batch` and
+`console` both do.
 **Re-derived after the last string edit of the round** — the two that moved were
 `logs:sourceReview.done`/`done_other` (問題 → 指摘) and `logs:orphan.linked` (リンク → 再リンク), and
 every figure above was measured after them, not before.
@@ -746,14 +796,16 @@ generalise that exception across a 59-key namespace.
 lines are already summary-shaped: every one of the ten sits behind an em-dash that appends a
 datum, and rule 2 of the narration section maps that construction onto 「（ラベル：値）」 anyway.
 So the count-neutral device and the faithful rendering are the *same* rendering here:
-`logs:judge.done` 「レビューを採点しました（スコア：{{score}}・{{verdict}}）。」,
+`logs:judge.done` 「レビューを採点しました（スコア：{{score}}・判定：{{verdict}}）。」,
 `logs:sourceReview.done_other` 「原文レビューが完了しました（指摘：{{findings}}）。」,
 `logs:glossaryGen.done` 「提案した用語：{{suggested}}・解析したエントリ：{{analyzed}}」,
 `logs:stageDetails.done` 「（完了：{{completed}}・失敗：{{failed}}）」,
 `batch:progressAriaLabel` 「翻訳済み：{{completed}}/{{total}}」 (the ratio device, byte-parallel to
 batch 1's `config:reviewProgressCount`), `logs:translation.queued_other`
-「エントリを翻訳キューに追加しました（{{total}}）。」 (batch 2's brackets-after-a-completed-sentence
-device), and `logs:translation.batchFailed`
+「翻訳キューに追加しました（エントリ数：{{total}}）。」 (the label-and-colon device, matching
+`strings:pagination.rows` 「エントリ数：{{formattedCount}}」 — the fix round labelled what had been a bare
+bracketed number, because two sibling log lines label theirs 「（順番：{{position}}）」 and an unlabelled
+number after a queue verb invites a position reading), and `logs:translation.batchFailed`
 「翻訳{{count}}件のバッチが失敗しました（対象言語：{{languages}}）。」, where the counter sits against
 the **skiplisted** `{{count}}` and the name list is bracketed.
 **Batch 5 therefore added zero token-axis survivors**: the run over seventeen namespaces still
@@ -1026,20 +1078,59 @@ row above is the shape for a verb with neither a サ変 noun nor a state to set.
   this batch owns, where English's singular and plural land on one Japanese string exactly as
   batch 4's `vault:keysCount` did.
   **The first three all co-render, and none of the three differences is number, part of speech or
-  an article** — so the boundary as batch 4 stated it did not decide them, and pretending it did
-  would have been the quiet kind of wrong. The extension, stated openly:
-  > A collapse over two co-rendering keys is licensed when the English distinction **names no
-  > difference in what the two controls do**. Number, part of speech and article are the cases
-  > where that is true by construction; an abbreviation (*Warn* / *Warning*), a synonym for one
-  > action (*Dismiss* / *Close*), and two phrasings of one event (a toast and its own log line)
-  > are true for the same reason, and are established by opening the code rather than by reading
-  > the labels.
-  This widens the exception and does **not** touch the absolute prohibition: two English strings
-  that differ in *meaning* still may not collapse, which is precisely why
-  `account:notificationsDismiss` keeps 削除 against the banners' 閉じる — there the operations
-  really differ (a `DELETE` against a `localStorage` flag), so the identical English is the thing
-  that had to be split. **Establish the operation first; the label is evidence about wording, not
-  about behaviour.**
+  an article** — so the boundary as batch 4 stated it did not decide them. The extension, on the
+  **form-versus-sense** axis, with a **control-class veto**:
+  > A collapse over two co-rendering keys is licensed when **(1)** the English difference is one
+  > of *form* only — number, part of speech, article, abbreviation, or two phrasings of one
+  > event — **and (2)** the two keys are not two control classes that the shape table renders
+  > differently. A difference in **meaning** is never licensed. Establish which it is by opening
+  > the code; the label is evidence about wording, not about behaviour.
+
+  **Both clauses were paid for, and the first wording of this extension failed on both.** Batch 5
+  first wrote it as *"licensed when the English distinction names no difference in what the two
+  controls do"*, and the round-5 review falsified it twice; the retraction is left visible because
+  a quietly repaired rule is indistinguishable from one that was always sound.
+
+  - **It was not sufficient — it was vacuously satisfied by byte-identical English**, where there
+    is no distinction at all to name. That licenses the three splits this same file calls
+    mandatory: `config:models.select` / `models.pickTitle` (the batch-1 deliberate group),
+    `sidebar:joinProject` / `collab:join.joinButton` (which this file says in so many words is
+    "not optional", because they co-render nested), and `review:filterFlagged` / `review:flag`
+    (split in batch 3's fix round after the review found they co-render). **What keeps those three
+    apart is control class, not behaviour** — a trigger, a title and a button are three rows of
+    the shape table — which is why clause (2) is a veto and not a footnote.
+  - **Its own first instance failed its own test.** A console log-level **filter tab** and a
+    notification-severity **badge** do not do the same thing: one filters a stream, the other
+    labels a record. What actually licenses 警告 is that both English strings name the same
+    *value* and differ only by an **abbreviation** — a difference of form, in the same class as
+    number, part of speech and article, and therefore one no Japanese rendering can carry. Right
+    answer, unfounded reason, committed inside the paragraph that introduced the rule.
+
+  The prohibition is untouched, and `account:notificationsDismiss` is the proof: it keeps 削除
+  against the banners' 閉じる because the operations really differ (a `DELETE` against a
+  `localStorage` flag), so identical English is the thing that had to be **split**.
+
+  **The rule applied to batch 5's own three, so it is checkable rather than asserted:**
+
+  | Collapse | Clause (1) — form | Clause (2) — control class |
+  | --- | --- | --- |
+  | 警告 over *Warning* / *Warn* | **abbreviation** of one value name | filter tab and status badge are both the bare-noun row — same class |
+  | 閉じる over *Close* / *Dismiss* | **two words for one action**, verified in code to be one action | `glossary:close` and the two banner ✕ `aria-label`s are all the plain-dictionary-form button row — same class |
+  | 「カテゴリの生成に失敗しました。」 over two English sentences | **two phrasings of one event** | a toast and its own log line, both narration sentences — same class |
+
+  **"Two words for one action" is the loosest member of the form list, and clause (2) is the only
+  thing keeping it safe.** Without the veto it reads as "same action ⇒ same string", which is
+  precisely how a trigger and its dialog title, or a filter tab and the button that sets it, get
+  collapsed — three defects this file has already paid for. Batch 6 meets the temptation directly
+  in `common`'s *Close* / *Cancel* / *Back*: check the shape table row **before** the behaviour.
+
+  **The category pair has harder evidence than batch 5 cited, and the round-5 review found it.**
+  The parallel glossary pair — `glossary:generateFailed` and `logs:glossaryGen.failed` — is
+  **byte-identical in English** ("Glossary generation failed."), and Japanese ships one string for
+  it with no collapse required at all. Two sibling generators, one written two ways in English and
+  one written one way, for the same kind of event: that asymmetry is the evidence that the category
+  pair's two phrasings are an **English accident**, not a distinction. It is filed as an English
+  defect rather than only harmonised in one language (see the round-5 report's queue).
   **The console's five filter tabs are a paradigm, scored together rather than key by key** —
   「すべて」「エラー」「警告」「情報」「デバッグ」 — which is why 警告 was not nudged to a rarer synonym
   to dodge the collision report: it is the standard Japanese log-level word, and breaking the set
@@ -1357,6 +1448,17 @@ required, not a collision: English is byte-identical in both, and `SettingsView.
 
 **`config:fullReplaceOrphanNotice` says *Relink tab* in English. There is no such tab** —
 it is the known stale English name for Orphans, and Japanese ships the Orphans rendering.
+
+**`logs:action.openQuality` says *Open quality settings*. There are no quality settings** — the
+second instance of the identical class, and the one round 5 got wrong. The handler is
+`registry.ts:124` → `actions.ts:10` `setActiveTab('quality')`, i.e. the read-only Quality
+dashboard, so the key ships **「品質ダッシュボードを開く」**, copying the surface's existing name
+`quality:title` 「品質ダッシュボード」. Round 5 shipped the faithful-to-the-defect 「品質設定を開く」 and
+filed the finding a second time; `english-review-notes.md:113` had already answered it — *"render
+what the control actually opens"* — three minutes before the batch ended, so the timing was
+excusable and the string was not. **Re-read `english-review-notes.md` at HEAD before a fix round,
+not only at the start of a batch**: in a wave running three languages at once, another locale's
+escalation can land a binding row mid-batch.
 
 ## The six register and typography sweeps
 
