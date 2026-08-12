@@ -10,10 +10,27 @@ placeholder handling.
 > file**, and fails on a quoted span whose significant words are not attested in the shipped
 > `tr` corpus. It also implements the three-way split below rather than merely describing it:
 > a prescription for a namespace that has **not shipped yet is skipped, not failed**, and
-> starts being checked the moment that namespace ships. **`tr`'s remaining prescriptions are
-> the `orphans:` and `colorText:` quotations, waiting on batch 6** — the `sidebar:` and
-> `vault:` ones were discharged in batch 4 and are citations now, checked on every run.
+> starts being checked the moment that namespace ships. The `sidebar:` and `vault:`
+> prescriptions were discharged in batch 4 and are citations now, checked on every run.
 > Run the script for its own counts; do not copy them into this file.
+>
+> **`tr` has exactly ONE style-guide prescription left, and it is `common:saving`
+> (“Kaydediliyor…”), in batch 6 — not the `orphans:`/`colorText:` pair this block named for
+> three rounds.** Both of those keys appear here in **prose only**, with no quoted rendering
+> beside them, so neither was ever a prescription; the sentence was carried from batch 1 and
+> re-worded in batch 4 without being re-derived, which is the exact failure mode the block
+> below it describes. **Derive it, do not read it** — the guard's own extractor answers in one
+> command, and it is the only answer that cannot be stale:
+>
+> ```js
+> // node --input-type=module, run from the workspace root
+> import { flattenStyleParagraphs, extractStyleCitations, namespaceOfKey } from './scripts/check-lexicon-citations.mjs';
+> // …citations whose namespaceOfKey() is not a file in locales/tr/ are your prescriptions
+> ```
+>
+> That `common:saving` prescription is now **doubly** binding, and batch 6 has no freedom in
+> it: batch 4 shipped `collab:sharing.saving` — same English, “Saving…” — as “Kaydediliyor…”,
+> so the verbatim rule fixes `common:saving` before the guard ever looks at it.
 >
 > **What it does not check is attachment.** It proves that **each significant word** of a
 > quoted rendering is attested somewhere in the shipped locale — word by word, prefix-
@@ -41,8 +58,12 @@ placeholder handling.
 >   `packages/frontend/src/locales/tr/config.json` at the end of batch 1; the `strings:`
 >   ones against `.../tr/strings.json` at the end of batch 2.
 > - A quotation attached to a key in **any other namespace is a prescription**, binding on
->   the batch that owns that namespace — today only `orphans:*` and `colorText:*`, in batch 6.
->   It describes what that key **must** ship, not what it does ship. **`glossary:`, `review:`,
+>   the batch that owns that namespace — today exactly one, `common:saving` (see above).
+>   It describes what that key **must** ship, not what it does ship. The `orphans:` and
+>   `colorText:` rows in the surface-name table are **prose guidance**, not quotations: they
+>   name a key and tell batch 6 to repeat a rendering quoted elsewhere, which binds batch 6
+>   just as hard but is invisible to the extractor. Do not count them as prescriptions and do
+>   not expect the guard to speak about them. **`glossary:`, `review:`,
 >   `category:` and `quality:` quotations are citations as of batch 3**, verified against
 >   `.../tr/{glossary,review,category,quality}.json` at the end of that batch; the two
 >   prescriptions batch 2 left for `quality:*` and `review:*` were discharged there and are
@@ -54,6 +75,16 @@ placeholder handling.
 >   **parolanızı girin**.”
 > - A quotation attached to **no key at all** is an illustration: a rejected candidate, a
 >   wrong form shown as wrong, or a convention example. Never copy one as a rendering.
+>
+> **Writing about code in these two files: do not backtick a code fragment.** A backtick span
+> that is not key-shaped — anything containing whitespace or a bracket — is treated as a
+> citation with no adjacency needed, so a function name with parentheses or a snippet like a
+> variable assignment fails the guard as an unattested Turkish rendering. This cost batch 4
+> two findings, in two different rounds, on the same mistake. Name the function in prose, or
+> put the snippet in a fenced block (fences are flattened out before extraction). The same
+> applies to straight-quoted **English** next to a key: on a line that carries no curly-quoted
+> Turkish span, straight quotes become the citation delimiter and the English is read as your
+> rendering.
 >
 > When you ship a prescription, come back and leave it as a citation. When you change a
 > string this file quotes, re-read the quotation next to its key — the guard catches a
@@ -1000,6 +1031,23 @@ point of failure.
   "önbellek" vs "cache". All are attested; alternating inside one namespace is the defect.
   Settled and closed by batch 1: module is "modül", template is "şablon", cache is
   "önbellek", token is "token", prompt is "istem", batch is "yığın".
+- **Two batch-4 same-rendering collisions the pre-flight prints, both licensed — the licence
+  belongs here, not in a batch report.** (a) English *Done* takes two renderings:
+  `collab:invites.done` is “Tamam” and `config:routing.doneEdit` is “Bitti”. Resolve the
+  control, then choose — “Tamam” is what a Turkish user expects on the button that dismisses
+  a dialog they have finished reading (the one-time invite code), while “Bitti” ends an
+  inline edit and reports that the editing is over. They never co-render. (b) Turkish
+  “Yeniden dene” now serves two English phrasings, `collab:routing.retry` (*Retry*) and
+  `glossary:generateTryAgain` (*Try again*): one action, two English wordings, one Turkish
+  verb. Coining a second verb to keep the tool quiet is the error the *Etkin* bullet below
+  warns about.
+- **Two keys in this locale are translated but render nowhere, and both are English's own
+  dead keys rather than this locale's defect.** `sidebar:colorText` — `PAGE_ITEMS` in
+  `components/layout/Sidebar.tsx` does not list it, and the Text Styler is reached through
+  `strings:tabs.color-text`, which ships the same “Metin biçimlendirici” — and `vault:remove`
+  (“Kaldır”), which no component calls: `VaultEditorDialog` uses `delete`, `undoRemove` and
+  `discard` for the three row states. Both are translated for parity and are correct; **do
+  not measure either against a length budget and do not spend review attention on them.**
 - **A UI control is "kontrol"; "denetim" is the LQA check and nothing else.** The *check*
   term row rejected "kontrol" precisely because it reads as a UI control — and batch 4 is
   where that reading is spent: `settings:previewHint` ("Sample controls rendered with the
