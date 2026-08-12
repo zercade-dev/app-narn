@@ -1,0 +1,10 @@
+{
+  "translateSelected": "แปลรายการที่เลือก",
+  "toTranslateCount": "ต้องแปล {{count}} งาน",
+  "progressAriaLabel": "แปลแล้ว {{completed}} จาก {{total}}",
+  "cancelRun": "ยกเลิกรอบการทำงาน",
+  "runCancelled": "ยกเลิกรอบการทำงานแล้ว:",
+  "runCompleted": "แปลเสร็จแล้ว — สำเร็จ {{completed}} จาก {{total}}",
+  "runCompletedWithErrors": "แปลเสร็จแล้ว — สำเร็จ {{completed}} ล้มเหลว {{failed}}",
+  "savedRulesNotice": "รอบการทำงานใช้กฎการจ่ายงานที่บันทึกไว้ — การแก้ไขที่ยังไม่บันทึกในตัวแก้ไขกฎจะไม่มีผล"
+}
