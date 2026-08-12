@@ -19,14 +19,30 @@ placeholder handling.
 > three rounds.** Both of those keys appear here in **prose only**, with no quoted rendering
 > beside them, so neither was ever a prescription; the sentence was carried from batch 1 and
 > re-worded in batch 4 without being re-derived, which is the exact failure mode the block
-> below it describes. **Derive it, do not read it** — the guard's own extractor answers in one
-> command, and it is the only answer that cannot be stale:
+> below it describes. **Derive it, do not read it** — reuse the guard's own three functions
+> *and its own skips*, so the answer is the guard's rather than an approximation of it:
 >
 > ```js
 > // node --input-type=module, run from the workspace root
 > import { flattenStyleParagraphs, extractStyleCitations, namespaceOfKey } from './scripts/check-lexicon-citations.mjs';
-> // …citations whose namespaceOfKey() is not a file in locales/tr/ are your prescriptions
+> import fs from 'node:fs';
+> const shipped = new Set(fs.readdirSync('packages/frontend/src/locales/tr').map((f) => f.replace(/\.json$/, '')));
+> for (const block of flattenStyleParagraphs(fs.readFileSync('docs/i18n/style/tr.md', 'utf8')))
+>   for (const { key, text } of extractStyleCitations(block)) {
+>     const ns = namespaceOfKey(key); // null = a file or script reference, which the guard skips
+>     if (ns && !shipped.has(ns)) console.log('PRESCRIPTION:', key, '=>', text);
+>   }
 > ```
+>
+> **Print the list; never print a count.** A count from a hand-rolled loop is not the guard's
+> count unless it reproduces every skip — namespace-less spans, unshipped namespaces, and (for
+> non-Latin locales only) glosses with no non-ASCII letter — and a count in this file is stale
+> on the next commit anyway, which the runbook forbids for exactly that reason. The list is
+> what binds you; let the guard report its own totals. **And note the lexicon file is a
+> different code path entirely** — `parseLexiconRows` + `candidatesForRow`, which has **no
+> namespace gating at all**, so "how many prescriptions does `terminology/tr.md` have" is not a
+> question that path can answer. Running the *style* extractor over the lexicon file produces a
+> number that means nothing; batch 4's fix round did exactly that and reported it.
 >
 > That `common:saving` prescription is now **doubly** binding, and batch 6 has no freedom in
 > it: batch 4 shipped `collab:sharing.saving` — same English, “Saving…” — as “Kaydediliyor…”,
@@ -76,15 +92,32 @@ placeholder handling.
 > - A quotation attached to **no key at all** is an illustration: a rejected candidate, a
 >   wrong form shown as wrong, or a convention example. Never copy one as a rendering.
 >
-> **Writing about code in these two files: do not backtick a code fragment.** A backtick span
-> that is not key-shaped — anything containing whitespace or a bracket — is treated as a
-> citation with no adjacency needed, so a function name with parentheses or a snippet like a
-> variable assignment fails the guard as an unattested Turkish rendering. This cost batch 4
-> two findings, in two different rounds, on the same mistake. Name the function in prose, or
-> put the snippet in a fenced block (fences are flattened out before extraction). The same
-> applies to straight-quoted **English** next to a key: on a line that carries no curly-quoted
-> Turkish span, straight quotes become the citation delimiter and the English is read as your
-> rendering.
+> **Two ways to write a sentence here that the guard reads as a Turkish rendering. Both cost
+> this locale findings; the second cost it four rounds of silence.**
+>
+> 1. **Do not backtick a code fragment.** A backtick span that is not key-shaped — anything
+>    with whitespace or a bracket in it — is a citation with no adjacency needed, so a
+>    function name with parentheses, or a snippet like a variable assignment, fails as an
+>    unattested rendering. **Name the function in prose.** A fenced block does **not** protect
+>    you: paragraph flattening only joins the lines of a block, it strips nothing, so a
+>    citation inside a fence extracts exactly as it would outside one. (An earlier version of
+>    this rule said fences were stripped. They are not — re-derived from the flattening
+>    function itself.)
+> 2. **Never put ENGLISH in the delimiter this file's cell is using.** Which delimiter that is
+>    is decided per cell, in order: guillemets, then corner brackets, then **curly doubles**,
+>    then straight doubles as the fallback. This locale writes curly everywhere, so **curly is
+>    always the live delimiter here and straight-quoted English is inert** — the opposite of
+>    what an earlier version of this rule said. Write an English gloss in *italics* and you are
+>    safe under every delimiter.
+>
+> **And know why this locale is exposed where `ru` and `ja` are not.** The guard skips a
+> citation whose text has no non-ASCII letter *only for non-Latin-script locales* — `ru`, `ja`
+> and the other unspaced scripts — so their English glosses are discarded automatically.
+> Turkish is Latin-script, so an English gloss and a Turkish rendering are indistinguishable to
+> it. **In a lexicon row this bites hardest: `candidatesForRow` collects EVERY quoted span in
+> the row — Rendering cell and Notes cell alike, with no key adjacency and no exemption for an
+> illustration.** Four rows of this file failed the moment the guard learned to read curly
+> quotes, and all four were English glosses, not one a wrong rendering.
 >
 > When you ship a prescription, come back and leave it as a citation. When you change a
 > string this file quotes, re-read the quotation next to its key — the guard catches a
