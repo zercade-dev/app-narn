@@ -105,11 +105,18 @@ present). Nothing here is a pre-flight deliverable still to be built.
 
   **Two things about this guard that are not obvious and have each cost a round.**
 
-  - **Every quoted span in a lexicon row is a candidate rendering.** There is no adjacency
-    requirement and no exemption for an illustration, so an English gloss in quotes beside a
-    key is read as a claim that your locale ships that English — and it fails, correctly.
-    **Put glosses in *italics*, never in quotes.** Three locales have now hit this, one of
-    them three rounds running with a backticked function name.
+  - **A quoted span sitting next to a key in a lexicon row is read as a claim that your
+    locale ships that text** — so an English gloss written there fails, correctly. **Put
+    glosses in *italics*, never in quotes.** Three locales have hit this, one of them three
+    rounds running with a backticked function name, which is the same trap: a **non-key
+    backtick span** is a candidate too, and that one needs no key beside it at all.
+
+    An earlier version of this bullet said there is no adjacency requirement and no exemption
+    for an illustration. That is false, and it was written from a batch's report rather than
+    from the parser: quoted spans **do** require key-adjacency, a parenthesised gloss escapes,
+    and the adjacency-free rule covers only non-key backtick spans in the lexicon. The advice
+    was right and the reason was not — which is this programme's commonest defect, committed
+    here in the file that warns about it.
   - **A Latin-script locale is structurally more exposed to it.** The guard skips a span
     containing no non-ASCII letter, but only for the non-Latin-script locales, so a Russian
     or Japanese gloss is dropped automatically while a German or Turkish one cannot be. Four

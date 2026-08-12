@@ -1012,7 +1012,21 @@ export function namespaceOfKey(key) {
  * and control-shape table in the four populated style guides).
  */
 export function flattenStyleParagraphs(fileText) {
-  return fileText.split(/\n{2,}/).map((block) => block.replace(/\n/g, ' '));
+  return fileText.split(/\n{2,}/).map((block) =>
+    block
+      // Drop the blockquote marker each line carries BEFORE joining. Without
+      // this the join leaves a stray "> " sitting between a key and the
+      // rendering quoted after it, which no citation pattern tolerates — so a
+      // citation split across a line break inside a blockquote extracted
+      // NOTHING, silently, and a guide that states its rules in blockquotes
+      // had them go unchecked. Found by measurement in a batch that lost a
+      // real prescription to it.
+      //
+      // The marker is only stripped at the start of a line, so a ">" inside
+      // prose or inside a quoted rendering is untouched.
+      .replace(/^[ \t]*>[ \t]?/gm, '')
+      .replace(/\n/g, ' '),
+  );
 }
 
 /**
