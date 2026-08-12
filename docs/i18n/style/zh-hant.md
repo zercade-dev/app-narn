@@ -132,8 +132,8 @@ not a translatable string, and no Minguo-era conversion should be attempted by h
 
 > **CORRECTED TWICE, and both corrections are left visible on purpose.** The pre-flight seed
 > of this file said: *"Traditional Chinese runs **much shorter** than English — roughly
-> 0.4–0.6× the character count — so no chrome surface is length-constrained."* Wave 3 then
-> inherited a partial repair. The full correction:
+> 0.4–0.6× the character count — so no chrome surface is length-constrained."* This locale
+> then inherited a partial repair. The full correction:
 >
 > - **Wrong unit.** The constraint is *width*, not character count, and a full-width CJK
 >   glyph carries about **twice** the advance of a Latin character (`backfill-notes.md`
