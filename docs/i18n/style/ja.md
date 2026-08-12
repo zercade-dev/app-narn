@@ -76,10 +76,10 @@ caught in review — the fix matters beyond the one string, because batch 4 is a
 confirm buttons and would have inherited the precedent.
 
 **"Please try again." is 「もう一度やり直してください。」 — settled in batch 4, which met it seven
-times.** The tempting 「もう一度お試しください」 is the お～ください pattern, and **no shipped `ja` value
+times.** The tempting *もう一度お試しください* is the お～ください pattern, and **no shipped `ja` value
 in batches 1-3 uses one** (checked by grep over all six namespaces, zero hits): the established shape
-is 「もう一度〈verb〉てください」, as in `config:exportRoundtripWarning_other`
-「もう一度インポートする前に…」. やり直す is the generic member of that family, so the same sentence
+is *もう一度〈verb〉てください*, as in `config:exportRoundtripWarning_other`
+「もう一度インポートする前に」. やり直す is the generic member of that family, so the same sentence
 covers `account:errorGeneric`, `mfaErrorEnroll`, `mfaErrorVerify`, `devicesError`,
 `deviceForgetError`, `vault:errorInvalidPassword`, `vault:retryFailed` and
 `collab:errors.join_failed`/`unknown_error` without alternating. Where the English names the action
@@ -107,7 +107,7 @@ Japanese does not. Resolve the control **before** writing the string.
 | Checkbox / radio label **whose English is a verb phrase** | dictionary-form verb phrase (～する／～しない), **not** 体言止め: the user is choosing what the app will do, not naming a thing | `strings:compare.translateModeRetranslate` 「既存の翻訳を再翻訳する」, `strings:compare.translateDisableMemory` 「この実行では翻訳メモリを使用しない」, `strings:compare.translateUseReferenceNone` 「参照言語をコンテキストとして使用する」 |
 | Checkbox label whose English is a **noun phrase** naming a mode | follow English — 体言止め | `strings:runs.aiReviewVerbose` 「詳細ログ（プロンプト・パラメーター・生の応答）」 |
 | Placeholder inside a control **whose English is an instruction** | ～を選択／～を入力 + 「…」, no noun for the control itself | `config:enableModulePlaceholder` 「有効にするモジュールを選択…」 |
-| Placeholder **whose English is a descriptive noun phrase** | noun phrase — follow English, do not convert it into an instruction | `stage-details:fields.name.placeholder` 「ステージの名前」 over "The stage's name", `gameplayDetails.placeholder` 「ステージの遊び方」 over "How the stage plays". Added in batch 6, which met the first placeholders in this app that describe the content rather than command the user. **Follow English on how far the placeholder sits from its own label** — do not manufacture a distinction English does not make. Two of the three pairs separate naturally (label 「名前」 over 「ステージの名前」, label 「ゲームプレイ詳細」 over 「ステージの遊び方」); the third is label 「ステージ説明」 over placeholder 「ステージの説明」, a one-particle difference, and English's own pair is just as close ("Stage description" / "A description of the stage"). That is faithful, not a defect. **(The first version of this cell said "keep the placeholder distinct from its own label", which promised a distinctness the third pair does not deliver and English does not ask for.)** |
+| Placeholder **whose English is a descriptive noun phrase** | noun phrase — follow English, do not convert it into an instruction | `stage-details:fields.name.placeholder` 「ステージの名前」 over "The stage's name", `stage-details:fields.gameplayDetails.placeholder` 「ステージの遊び方」 over "How the stage plays". Added in batch 6, which met the first placeholders in this app that describe the content rather than command the user. **Follow English on how far the placeholder sits from its own label** — do not manufacture a distinction English does not make. Two of the three pairs separate naturally (label 「名前」 over 「ステージの名前」, label 「ゲームプレイ詳細」 over 「ステージの遊び方」); the third is label 「ステージ説明」 over placeholder 「ステージの説明」, a one-particle difference, and English's own pair is just as close ("Stage description" / "A description of the stage"). That is faithful, not a defect. **(The first version of this cell said "keep the placeholder distinct from its own label", which promised a distinctness the third pair does not deliver and English does not ask for.)** |
 | Progress / status text | ～中 or ～しました — a state, never a command. The **ellipsis is English's to give**, not the shape's: add 「…」 only where the source has one | `config:duplicating` 「複製中…」 and `config:autoSaveSaved` 「保存しました」 (English has the ellipsis); `strings:row.translating` 「翻訳中」 and `strings:runs.statusQueued` 「待機中」 (English has none) |
 | Description / help / toast | full ですます sentence ending in 。 | `config:maxBackupsDescription` |
 | Inline fragment in a summary row | noun + なし / 指定なし, no verb, no 。 | `config:routing.anySource` 「ソース指定なし」, `config:routing.noModule` 「モジュールなし」 |
@@ -121,7 +121,7 @@ Japanese does not. Resolve the control **before** writing the string.
 「展開」 and 「折りたたむ」 — 体言止め on one side, plain dictionary form on the other. That is not drift:
 展開 **is** a サ変 noun and therefore takes the 体言止め row, while *collapse* has no サ変 noun at all
 (折りたたみ names the fold, not the act) and falls to the plain-dictionary row above. Forcing symmetry
-would mean either 「展開する」, which breaks 体言止め, or 「折りたたみ」, which is not a Japanese button
+would mean either *展開する*, which breaks 体言止め, or *折りたたみ*, which is not a Japanese button
 label. The English pair is symmetric and the Japanese one is not, because the two verbs are not the
 same kind of word — resolve the shape from the verb, not from the sibling.
 
@@ -148,7 +148,7 @@ renderings:
   `TabsContent`, so the **action phrase**.
 
 The two **co-render nested**, which is why the split is not optional: rendering them alike would put
-an identical label directly above its own panel's button — the `groups.translate` shape in miniature.
+an identical label directly above its own panel's button — the `sidebar:groups.translate` shape in miniature.
 `collab:join.title` ("Join a project", the `<h1>` of the standalone `/join` view at
 `AppShell.tsx:502-504`) takes the noun phrase too, so it is **byte-identical to `sidebar:joinProject`**
 — an equality that is licensed and reachable rather than merely theoretical: the `/join` view is
@@ -221,7 +221,7 @@ the first is the one that makes the other two mechanical.
    - **Introducing a clause** → a full stop and a second sentence. `logs:translation.failedNoRoute`
      is 「エントリ{{count}}件を{{language}}に翻訳できませんでした。一致する振り分けルールがありません。」;
      `errors:http.rateLimited` is 「リクエストが多すぎます。少し待ってから、もう一度やり直してください。」
-   - **Appending a datum** → 「（ラベル：値）」 before the full stop, or a bracketed 中黒 list where
+   - **Appending a datum** → *（ラベル：値）* before the full stop, or a bracketed 中黒 list where
      there are two. `logs:translation.runQueued` is 「翻訳の実行をキューに追加しました（順番：{{position}}）。」,
      `batch:runCompletedWithErrors` is 「翻訳が完了しました（成功：{{completed}}・失敗：{{failed}}）。」
    Never a spaced ASCII dash: the space rule in the punctuation section forbids it, and the em-dash
@@ -249,7 +249,7 @@ the first is the one that makes the other two mechanical.
    binding rows mid-round; the sibling locale that committed 51 seconds later had already applied it.
 4. **A run-engine's name is a thing; 〜に失敗する and 〜が完了する want an action. Restore 実行.**
    English narrates a run as *"Stage details failed."*, naming the feature. Japanese cannot:
-   〜に失敗する takes an action noun (実行に失敗, 生成に失敗, 接続に失敗), so 「ステージ詳細に失敗しました」
+   〜に失敗する takes an action noun (実行に失敗, 生成に失敗, 接続に失敗), so *ステージ詳細に失敗しました*
    reads as *failed at stage details*. The fix round shipped
    `logs:stageDetails.failed` 「ステージ詳細の実行に失敗しました。」 and
    `logs:stageDetails.done` 「ステージ詳細の実行が完了しました（完了：{{completed}}・失敗：{{failed}}）。」
@@ -418,7 +418,7 @@ full-width digits.
      `strings:compare.translateCustomBatchSizeCaveat` 「（モジュール・言語）の組み合わせごとに送信されます。」.
      Never a half-width comma between Japanese items — that shape is reserved for
      `config:lqa.forbiddenPlaceholder`, which is an example of user input.
-  Where English's own separator is 「·」, 中黒 is also the faithful mapping of it:
+  Where English's own separator is `·`, 中黒 is also the faithful mapping of it:
   `strings:runs.judgeAllFindingsCount` 「指摘：{{total}}・未処理の提案：{{withSuggestions}}」.
   **That mapping is not optional, and batch 3 broke it once.** `review:provenance`
   ("{{module}} · {{date}}") shipped with English's spaced ASCII `·` intact — defensible in
@@ -426,7 +426,7 @@ full-width digits.
   carries it — while its sibling `review:previousVersionMeta` ("Previous version · {{module}} ·
   {{date}}") took 中黒. `ReviewTab.tsx:840` and `:941` paint both into the same review card, in
   the same `font-mono text-[11px]`, whenever a previous version exists, so the user saw
-  `openai · …` above 「…・openai・…」. Fixed to 「{{module}}・{{date}}」. **The allowlist permits an
+  `openai · …` above a 中黒-separated sibling in the same card. Fixed to 「{{module}}・{{date}}」. **The allowlist permits an
   identical value; it never requires one** — the entry stays live because es/fr/ru/de/tr all
   still ship it byte-identical, and `identicalValueOffenders()` marks it used per locale.
 - Long-vowel marks follow the modern convention **for -er / -or / -ar loans**:
@@ -436,8 +436,35 @@ full-width digits.
   where a shorter form is tempting. **Loans ending in -y / -ry take no mark**: 「エントリ」
   「カテゴリ」「メモリ」「ポリシー」 (a -cy loan, which lands on シー rather than a bare リ).
   The rejected long forms — *entorī*, *toransurēshon memori* — are named in romaji
-  deliberately: a rejected candidate never goes in 「…」, so every 「…」 span in this file
-  stays verifiable against the shipped file.
+  deliberately: a rejected candidate never goes in 「…」. **That last clause used to end "so every
+  「…」 span in this file stays verifiable against the shipped file", and the whole-language sweep
+  found it false 28 times in this file and 11 in the lexicon** — rejected candidates, retracted
+  values and ellipsis-truncated fragments, all wearing the notation that means *this is what we
+  ship*. All 39 are repaired and the claim is now true, but it is restated as a **procedure rather
+  than a promise**, because the promise is what went unchecked for six rounds:
+
+  ```bash
+  # every 「…」 span in both artifacts must occur in some locales/ja value
+  python3 - <<'EOF'
+  import io,re,json,glob
+  def flat(o,p=''):
+      out={}
+      for k,v in o.items(): out.update(flat(v,p+k+'.')) if isinstance(v,dict) else out.update({p+k:str(v)})
+      return out
+  blob='\n'.join(v for f in glob.glob('packages/frontend/src/locales/ja/*.json')
+                    for v in flat(json.load(io.open(f,encoding='utf-8'))).values())
+  for p in ['docs/i18n/terminology/ja.md','docs/i18n/style/ja.md']:
+      for n,l in enumerate(io.open(p,encoding='utf-8'),1):
+          for m in re.finditer(r'\u300c([^\u300c\u300d\n]*)\u300d',l):
+              if m.group(1) not in blob: print(p,n,m.group(1))
+  EOF
+  ```
+
+  **Run it whenever you add a 「…」 span. The citation guard will not do it for you** — proven by
+  the sweep rather than argued: `extractStyleCitations()` returns its citations only for
+  **key-adjacent** spans, and not one of the 39 was key-adjacent, so none was ever extracted; and
+  for three of them `renderingIsCovered()` returns **true** anyway, because containment attestation
+  finds the pieces scattered elsewhere in the corpus. **Attestation is not attachment.**
   Settled in batch 1 because *entry* and *category* are the two most repeated nouns in the
   app, and alternating between 「エントリ」 and its long form across six batches would be
   visible on almost every screen.
@@ -489,19 +516,20 @@ rendering. Decide the rendering on first use, write its row there, and then foll
 
 ### The five per-class budgets — absolute character counts, never a multiple of English
 
-Counted in **rendered Japanese characters** — a full-width character is one, and a
-`{{count}}`-shaped placeholder counts as the digits it will actually show (assume 1–3), not
-as its source length. That is what the container has to fit.
+Counted in **rendered Japanese characters**, with the convention stated because two of these
+figures move with it: a full-width character is **1**, a half-width Latin character or digit is
+**0.5** (a full-width glyph carries about twice the advance), and a `{{token}}` counts as the
+three digits it can show, i.e. **1.5**. That is what the container has to fit.
 
 | Class | Anchor key | Kind | Budget | Basis |
 | --- | --- | --- | --- | --- |
 | Sidebar item — **including every `strings:tabs.*` label** | `sidebar:globalConfig`, `sidebar:legal`, `strings:tabs.backup` | **hard** — fixed `16rem`, `truncate` | **13** | **derived from the component**, batch 2: `SIDEBAR_WIDTH` 16rem = 256px, less 1px `border-r`, less `SidebarGroup`'s `p-2` (16px), less `SidebarMenuButton`'s `p-2` (16px), less the `size-4` icon (16px), less `gap-2` (8px) = **199px**. At `text-sm` (14px) a full-width CJK glyph advances 1em = 14px, so 199 ÷ 14 = 14.2 glyphs fit and 13 leaves one glyph of headroom. Half-width Latin inside a label counts ~0.5 |
-| In-panel sub-tab label | `config:routing.tabRules` | soft | **12** | **measured** on batch 1's three routing sub-tabs: `config:routing.tabRules` 「ルール（{{count}}）」 renders at 7, `config:routing.tabTemplates` 「テンプレート（{{count}}）」 at 9, `config:routing.tabImportExport` 「インポート／エクスポート」 at 12. They sit in a scrolling row inside the routing panel — the app's **only** tab-shaped control that is not a sidebar item, and the reason this row exists separately from the hard sidebar row above |
-| Table column header | `strings:columns.config` | soft | **8** | **re-measured** across both batches: batch 1's longest `config:models.col*` header was 6, but batch 2's `strings:runs.detailsLanguagesColumn` 「ターゲット言語」 is 7 — a term rule (*target language*) fixes it and outranks the budget — so the figure rises to 8. The class anchor `strings:columns.config` itself is 「状態」 at 2 |
-| Filter label | `strings:filters.needsReview` | soft | **14** | **measured** on batch 2's twenty-four `strings:filters.*` plus the Compare filter row: the longest are 「新規（前回のインポート分）」 at 13 and 「新規フラグを解除（{{count}}）」 at 13 with a three-digit count, then 「プレースホルダーの不一致」 at 12. The anchor 「要レビュー」 is 4. The provisional 8 was badly wrong — it was reasoned from the anchor rather than from the class |
-| **Swatch chip label** | `colorText:swatches.hydro` | **hard** — `max-w-24` + `truncate` | **8** | **derived from the component**, batch 6: `PaletteSection.tsx:39` renders the label in a *span* carrying *max-w-24* and *truncate*, inside a `text-xs` chip. 96px ÷ 12px = 8 full-width glyphs. Measured across the whole class at once (18 swatches): 1-5, the longest being 「タイトル」「セカンダリ」「パープル」「オレンジ」 at 4-5. The class is **hard** and nothing in it is close |
+| In-panel sub-tab label | `config:routing.tabRules` | soft | 12 → **13** | **BUDGET REPLACED at the whole-language sweep, and it is the one row that had to move.** The 12 was measured in batch 1 over the *three* routing sub-tabs and never re-derived when batch 5 added the console's filter tabs. Measured over the whole class — **9** members across two namespaces (`config:routing.tab{Rules,Templates,ImportExport}` plus **six** `console:filter_*`, `FILTER_LEVELS` at `ConsolePanel.tsx:54` being `all/error/warn/info/debug/notifications`) — the maximum is **12** at `config:routing.tabImportExport` 「インポート／エクスポート」, next 9.5 at `tabTemplates`. That is the budget **exactly, i.e. zero headroom**, which no other soft row here has (8 vs 7, 14 vs 13, 9 vs 5, 17 vs 14.5), so a correct 13-glyph label would read as over budget. Runbook 2.4 derives a soft budget from the longest value the language ships **plus headroom**; **13** restores one glyph, the same method the hard sidebar row states |
+| Table column header | `strings:columns.config` | soft | **8** | **basis replaced at the sweep — the number holds, its population was one batch's.** Measured over the whole class: **48** headers across eight namespaces (`config:models.col*`, `glossary:col*`, `strings:columns.*`, `strings:runs.*Column`, `orphans:columns.*`, `collab:{sharing,invites}.column*`, `quality:columns.*`), **max 7**, median 2. Two keys tie at the maximum — `collab:sharing.columnLanguages` 「編集可能な言語」 and `strings:runs.detailsLanguagesColumn` 「ターゲット言語」 — and both are fixed by a term rule, which outranks the budget. The class anchor `strings:columns.config` itself is 「状態」 at 2 |
+| Filter label | `strings:filters.needsReview` | soft | **14** | **basis replaced at the sweep — number unchanged.** Whole class: **29** members (`strings:filters.*` plus the Compare filter row), **max 13** at `strings:filters.newOnly` 「新規（前回のインポート分）」, next 12, median 6. The anchor 「要レビュー」 is 4. The provisional 8 this row started from was badly wrong — reasoned from the anchor rather than from the class, which is what rubric item 7 exists to catch |
+| **Swatch chip label** | `colorText:swatches.hydro` | **hard** — `max-w-24` + `truncate` | **8** | **derived from the component**, batch 6: `PaletteSection.tsx:39` renders the label in a *span* carrying *max-w-24* and *truncate*, inside a `text-xs` chip. 96px ÷ 12px = 8 full-width glyphs. Measured across the whole class at once (18 swatches): 1-5, the longest being 「タイトル」「セカンダリ」「パープル」「オレンジ」 and 「グリーン」 at 4-5. (**「グリーン」 was omitted from that list until the sweep** — the same transcription-of-a-measurement slip as the アクティビティ omission corrected one section earlier, and with the same shape: the measurement was never in doubt, the list beside it was.) The class is **hard** and nothing in it is close |
 | **Palette group caption** | `colorText:groupElements` | soft | **9** | **derived from the component**, batch 6: `PaletteSection.tsx:78` and `:93` put each caption in a *w-28 shrink-0* `text-xs` span — 112px ÷ 12px = 9.33, taken down to 9 glyphs. Soft because an over-long caption **wraps to a second line inside the fixed box**, making the palette row taller — it costs elegance, not correctness. **(The first version of this cell said the caption "pushes the swatch row rather than clipping". That is wrong about the CSS and is corrected rather than dropped: *w-28* is a fixed `width`, not a max-width, and `flex-grow` defaults to 0, so the item's used width stays 112px and it cannot push anything; with `white-space: normal` and Japanese breaking between characters it wraps instead. The verdict — soft — was right and the mechanism behind it was not, which is the class this very file corrects three times elsewhere in the same round.)** All five measure 2-5 (「暗い背景」「明るい背景」「元素」「品質別の色」「自分の色」) |
-| Bulk-bar control | `strings:bulk.approveSelected` | soft | **17** | **measured** on batch 2's `strings:bulk.*`: the longest is 「絞り込まれた{{count}}行すべてを選択」 at 16 with a three-digit count, then 「選択範囲からカテゴリを生成」 at 13. The anchor 「承認して翻訳メモリに追加」 is 12 |
+| Bulk-bar control | `strings:bulk.approveSelected` | soft | **17** | **basis replaced at the sweep — number unchanged.** Measured over the keys `StringTableBulkBar.tsx` actually renders: **25** (21 `strings:bulk.*` + 4 `batch:*`), of which **18 are controls**; **max 14.5** at `strings:bulk.selectAllFiltered` 「絞り込まれた{{count}}行すべてを選択」 with a three-digit count, next 13, median 7. The anchor 「承認して翻訳メモリに追加」 is 12. **The seven non-controls in that bar are longer and are not a breach** — `strings:bulk.allFilteredSelected` 19.5 and `removeCategoryEmpty` 17 are status and empty-state *sentences*, and this class is scoped to controls. Stated so the next sweep does not read them as one |
 
 **Hard** means fix it — a sidebar item over budget is cut off in a container that cannot
 grow. **Soft** means prefer the shorter of two correct options, and never distort a term to
@@ -550,8 +578,8 @@ on a `<Select>` whose options come from the modules' `requiredEnvVars`.
 **What it is:** the empty-state placeholder of the vault-key **picker**, and its value **samples the
 format of the options** — literal ASCII identifiers such as `OPENAI_API_KEY` and
 `GENERIC_API_KEY__MY-OLLAMA`, which `terminology.md` puts on the never-translate list outright. A
-rendered 「キー名」 would name the *field* where the string is sampling the *values*, and
-「例：KEY_NAME」 would pad the value purely to clear a check — the "absorb the workaround into the
+rendered *キー名* would name the *field* where the string is sampling the *values*, and
+*例：KEY_NAME* would pad the value purely to clear a check — the "absorb the workaround into the
 string" failure the runbook names. Byte-identical is right for the same reason
 `config:lqa.forbiddenPlaceholder` keeps its half-width comma: the value demonstrates a literal form.
 
@@ -828,7 +856,7 @@ the counter is a property of the object, not of the string.
 | glossary match (a place in an entry where a term was found) | **件** | added batch 3: `glossary:matchResultsCount` 「一致箇所{{count}}件」. The object is a located occurrence, i.e. a record — not a word, so not 語 |
 | source text (as a scoping input) | **件** | added batch 3: `glossary:generateFocusSourceTextsCount_other` 「原文{{count}}件に絞り込みました。」. Each pasted line names one entry, so this is the *entry* counter under another name |
 | LQA result, review item | **件** | added batch 3: `quality:overallStat.results` 「LQAの結果{{count}}件」, `review:allItemsCount` 「翻訳{{count}}件」, `review:sourceAi.lqaHint`. Consistent with batch 2's *LQA issue* row — a verdict is a record |
-| batch (a packed request) | **バッチ** | added batch 3: `category:genBatchCount_other` 「{{count}}バッチで実行します（…）」, `glossary:generateBatchCount_other` 「約{{count}}バッチで…」. The unit *is* the counter, like 文字／バイト／トークン／ターン. Never 回 — that counts an *action*, and a batch is a thing sent |
+| batch (a packed request) | **バッチ** | added batch 3: `category:genBatchCount_other` 「{{count}}バッチで実行します」, `glossary:generateBatchCount_other` 「約{{count}}バッチで実行します」. The unit *is* the counter, like 文字／バイト／トークン／ターン. Never 回 — that counts an *action*, and a batch is a thing sent |
 | **orphan** | **件** | added batch 6, and it is a rename of a row rather than a new class: `orphans:toast.bulkDeleted` 「孤立エントリ{{count}}件を削除しました」 counts orphans, and an orphan **is** an entry (`terminology.md`: "an entry that a full-replace CSV import found missing"), so it takes the *entry* counter. Batch 1 already shipped the state-only form 「孤立{{count}}件」 at `config:orphanedCount`; the two agree. Not 行 — the Orphans table is a table, but the object counted is a content unit, which is the distinction the *table row* row below draws |
 | **release** (one published version) | **no counter — brackets** | added batch 6, and it is the row that shows a counter is not always owed. `common:changelogShowOlder` 「過去のリリースを表示（{{count}}）」 puts the number in brackets after a completed noun phrase, which the bare-number rule below already licenses — the same device as `config:modulesEnabledSection` 「有効（{{count}}）」 and `strings:runs.judgeApproveAllSuccess`. 件 would have been defensible (a release is a record) and was still rejected: the control is a *Show more* affordance whose number is a remainder, not a quantity the sentence is about. **Whichever later batch counts releases inside running text decides that counter; this row does not** |
 | **second (elapsed time)** | **秒** | added batch 6: `common:thinking` 「思考中…{{seconds}}秒」. The **unit is the counter**, like 文字／バイト／トークン／ターン／バッチ. It is also this locale's second deliberate non-`count` detector survivor — see the exception section below |
@@ -837,7 +865,7 @@ the counter is a property of the object, not of the string.
 **Open the call site and ask what is being counted — the counter is a property of the object,
 never of the string or its namespace, and nothing mechanical will ever catch this.** Batch 3
 proved it in the same commit that wrote the sentence: `glossary:importMoreItems` shipped
-「+{{count}}件…」 while five other `glossary` keys in the same file correctly used 語, because the
+*+{{count}}件…* while five other `glossary` keys in the same file correctly used 語, because the
 key *reads* like a generic overflow label. `GlossaryImportPreviewSheet.tsx:109-113` sums the
 overflow of `diff.conflicts`, `diff.updated` and `diff.added`, and every row of all three renders
 a term's `source` — glossary terms, so 語. The mirror check passed on the same day and by the
@@ -899,7 +927,7 @@ anywhere else in six batches.
 **`_zero` is the one non-category suffix you keep.** `strings:bulk.removeCategoryApply_zero`
 is Japanese's only `_zero` key, and it stays: i18next makes an explicit `key_zero` lookup at
 count 0 in every locale whatever its categories, so dropping it would render
-「カテゴリ0件を外す」 where English renders the countless "Remove categories".
+*カテゴリ0件を外す* where English renders the countless "Remove categories".
 
 ### Non-`count` numeric tokens — the one place Japanese still has to be careful
 
@@ -947,7 +975,7 @@ Batch 2 met eleven more and used the same three devices, plus one new one:
   `config:modulesEnabledSection` 「有効（{{count}}）」, and it is what lets a *success message*
   carry a count without either a counter or a label-colon opening.
 - **A token in brackets rather than in front of a particle** — `strings:runs.copyRunId`
-  「実行IDをコピー（{{runId}}）」. The draft 「実行ID{{runId}}をコピー」 put を straight against the
+  「実行IDをコピー（{{runId}}）」. The draft *実行ID{{runId}}をコピー* put を straight against the
   token and would have been reported on every pre-flight run.
 
 Batch 3 met eleven more and used the same devices — `glossary:generateProgressLabel`
@@ -971,7 +999,7 @@ generalise that exception across a 59-key namespace.
 
 **It was not generalised, and nothing was distorted to avoid it**, because English's own log
 lines are already summary-shaped: every one of the ten sits behind an em-dash that appends a
-datum, and rule 2 of the narration section maps that construction onto 「（ラベル：値）」 anyway.
+datum, and rule 2 of the narration section maps that construction onto *（ラベル：値）* anyway.
 So the count-neutral device and the faithful rendering are the *same* rendering here:
 `logs:judge.done` 「レビューを採点しました（スコア：{{score}}・判定：{{verdict}}）。」,
 `logs:sourceReview.done_other` 「原文レビューが完了しました（指摘：{{findings}}）。」,
@@ -996,7 +1024,7 @@ match total is deliberately not quoted here — it is a run counter and moves wi
 **Two of those bracketed frames are also the only 0-safe wording, which is a separate and
 stronger reason to prefer them.** `logs:sourceReview.done` and `logs:categoryGen.done` fire
 whatever the count, including zero (`registry.ts:136` and `:155` default the value to 0), so a
-Japanese 「…が見つかりました」 or 「…を提案しました」 would assert a discovery at count 0. The
+Japanese *…が見つかりました* or *…を提案しました* would assert a discovery at count 0. The
 completed-event-plus-bracketed-datum frame states the number without claiming anything about it.
 The cost is a small shift of verb — English's *found* / *finished* both become 完了しました — and
 that shift is deliberate, not an oversight.
@@ -1032,10 +1060,10 @@ survivors for `ja`, and both are named here. It clears the same three tests:
 - English's own string is *Thinking… {{seconds}}s* — it spends a unit symbol there, so writing the
   Japanese unit is the faithful rendering rather than an addition.
 - Every frame that clears the detector damages the string. The label-and-colon device gives
-  「思考中…（経過秒数：{{seconds}}）」, which turns a live indicator two characters wide into a
+  *思考中…（経過秒数：{{seconds}}）*, which turns a live indicator two characters wide into a
   data row; dropping the unit loses it; keeping English's half-width `s` would clear the detector
   **for free**, which is precisely why it was considered and rejected — clearing a lint is not a
-  reason to write 「12s」 where Japanese writes 「12秒」. That is the "absorb the workaround into the
+  reason to write *12s* where Japanese writes *12秒*. That is the "absorb the workaround into the
   string" failure the runbook names, and the fact that the cheap option was also the passing one is
   what made it tempting.
 
@@ -1149,7 +1177,7 @@ actually does.
   `collab:sharing.remove` / `removeConfirm` 「メンバーを外す」, `removeConfirmTitle`
   「メンバーを外しますか？」, `removing` 「外しています…」, `memberRemoved` 「メンバーを外しました。」.
   `MembersSection.tsx` deletes the member's grant; the person, their account and their past edits
-  all survive. **削除 was rejected as an overstatement** — 「メンバーを削除」 reads as deleting the
+  all survive. **削除 was rejected as an overstatement** — *メンバーを削除* reads as deleting the
   person — and that is the same defect class as the batch-3 `aria-label` finding, reached from the
   other direction. English's own bare *Remove* is given an object in Japanese **because 外す is
   semantically empty without one** — the bare verb means "take off / detach" and names no object at
@@ -1179,7 +1207,7 @@ actually does.
   exact operation. The consequence is not hidden behind the verb either —
   `account:devicesDescription` spells out that the saved vault key is deleted.
 - **取り消す cancels an invite, and it is deliberately not a delete.**
-  `collab:invites.revoke` 「取り消す」, `revoking` 「取り消し中…」, `status.revoked` 「取り消し済み」.
+  `collab:invites.revoke` 「取り消す」, `collab:invites.revoking` 「取り消し中…」, `collab:invites.status.revoked` 「取り消し済み」.
   The route sets `revokedAt`; `InvitesSection.tsx:224-254` keeps listing the row, greyed. A delete
   verb would promise the row disappears.
 - **The one confirmation, stated because a reviewer will look for it:** `vault:delete` 「削除」 and
@@ -1278,11 +1306,19 @@ row above is the shape for a verb with neither a サ変 noun nor a state to set.
   an article** — so the boundary as batch 4 stated it did not decide them. The extension, on the
   **form-versus-sense** axis, with a **control-class veto**:
   > A collapse over two co-rendering keys is licensed when **(0)** the two keys name the same
-  > operation on the same object — established by **opening the code**, never by reading the
-  > labels — **and (1)** the English difference is one of *form* only — number, part of speech,
-  > article, abbreviation, or two phrasings of one event — **and (2)** the two keys are not two
-  > control classes that the shape table renders differently. All three clauses must hold. A
-  > difference in **meaning** fails clause (0) and is never licensed.
+  > operation **with the same consequence** — established by **opening the code**, never by
+  > reading the labels — **and (1)** the English difference is one of *form* only — number, part
+  > of speech, article, abbreviation, or two phrasings of one event — **and (2)** the two keys are
+  > not two control classes that the shape table renders differently. All three clauses must hold.
+  > A difference in **meaning** fails clause (0) and is never licensed.
+
+  **Clause (0) said "on the same object" until the whole-language sweep, and the file's own table
+  contradicted it.** The licensed 閉じる row covers `glossary:close` (a dialog button) and
+  `system:restarted.dismiss` (the ✕ on a restart banner) — two plainly different *objects*, which
+  do co-render (`AppShell.tsx:442` paints `RestartBanners` above every view) — so the clause as
+  worded refused a row sitting directly beneath it. The discriminator in the refusal the clause was
+  actually written for was never object identity: it is **consequence**, `DELETE /notifications/:id`
+  against a `localStorage` flag. Reworded to match what it has always been doing.
 
   **Clause (0) is stated as a clause because it used to be a trailing sentence, and that was luck
   rather than structure.** The round-5 re-review found the gap: where two keys carry
@@ -1369,7 +1405,20 @@ row above is the shape for a verb with neither a サ変 noun nor a state to set.
   > string would assert a referent the key does not have. Surface-name-ness is a property of one
   > key; a collapse is a relation between two, so only a relation can decide it.
 
-  It reproduces every equality in this locale without exception. 「翻訳」 names *the translations*
+  It reproduces every equality in this locale — **and the enumeration below is the claim that had
+  to be corrected, not the test.** The whole-language sweep ran the collision check this file never
+  ran, every rail label against the whole corpus, and found **four** co-rendering equalities the
+  list omitted: `sidebar:groups.content` 「用語」 against the three terminology labels
+  (`review:sourceAi.findingTerminology`, `strings:runs.aiReviewCheckTerminology`,
+  `strings:runs.judgeIssueTerminology`); `strings:tabs.glossary` against
+  `strings:columns.tooltipGlossary`; `strings:tabs.category` against
+  `config:routing.labelCategories` and `strings:columns.tooltipCategory`; and
+  `sidebar:translationMemory` against `config:tm.policyTitle` and `config:tm.browserTitle` — two
+  identical section headings inside one panel, which English writes identically too. **All four are
+  correctly licensed** by referent identity, so the test survived the widening intact; the sentence
+  claiming the list was complete did not. *"Every X"* is a scan of the whole corpus — the same
+  lesson this file already records about *"X is the only Y"*, one section up, and now committed
+  twice. 「翻訳」 names *the translations*
   at all three keys, so an identical rendering asserts nothing false. 「カテゴリ」, 「用語集」,
   「アクティビティ」, 「品質」 over its guide topic, 「原文AIレビュー」, 「翻訳AIレビュー」,
   「ステージ詳細」, 「孤立エントリ」, 「共有」, 「テキスト装飾」 and 「メンバー」 are each one
@@ -1555,7 +1604,7 @@ Five headings are shared; each side has one the other lacks.
 | Review | Review | 「レビュー」 | `sidebar:groups.review` |
 | Terminology | Terminology | 「用語」 | `sidebar:groups.content` |
 | Maintenance | Maintenance | 「メンテナンス」 | `sidebar:groups.maintenance` |
-| Translation Memory | Translation Memory | 「翻訳メモリ」 | **no sidebar group** — Translation Memory is the sidebar *item* `sidebar:translationMemory`, covered by its own surface row above. It is not unswept, though: in the **guide** rail it sits directly above its only child `guide.topicTranslationMemory` 「翻訳メモリ」, an exact equality collision that is **licensed** because English writes the identical pair. See sweep 1 below |
+| Translation Memory | Translation Memory | 「翻訳メモリ」 | **no sidebar group** — Translation Memory is the sidebar *item* `sidebar:translationMemory`, covered by its own surface row above. It is not unswept, though: in the **guide** rail it sits directly above its only child `strings:guide.topicTranslationMemory` 「翻訳メモリ」, an exact equality collision that is **licensed** because English writes the identical pair. See sweep 1 below |
 | Page | Page | 「ページ」 | `sidebar:groups.page` had **no** `strings:guide` counterpart, so batch 4 decided it alone. Faithful to a heading English itself makes little of; its four children (環境設定・変更履歴・法的情報・Narnについて) are the workspace's static content pages. It does not collide with `strings:pagination.pageOfTotal` 「ページ：{{page}}/{{total}}」, which is a label:value row in the string table and differs as a string even though the two are painted at once |
 
 See the *Review (the sidebar group)* row in `terminology/ja.md` for why the umbrella is レビュー
@@ -1590,7 +1639,7 @@ ru Перевод/Переводы, de Übersetzen/Übersetzungen, tr Çeviri/Ç
 ### The two sweeps, run separately because they are two different rails
 
 An earlier version ran one sweep, against the wrong surface, and concluded "only
-`groups.translate` was an equality collision". **That was false twice over**: it measured
+`sidebar:groups.translate` was an equality collision". **That was false twice over**: it measured
 `guide.group*` against sidebar tabs, which never meet; and on the rail where `guide.group*`
 actually renders there **is** an equality collision, which the sweep missed.
 
@@ -1640,7 +1689,7 @@ The review card below it adds `provenance` and `previousVersionMeta`, both now �
 
 **Sweep 2 — the sidebar rail** (`sidebar:groups.*`, batch 4, over `strings:tabs.*`, batch 2).
 This is the sweep the table above was really describing, and **batch 4 has now run it against the
-shipped file rather than against a prediction.** With `groups.translate` at 「翻訳作業」 there is no
+shipped file rather than against a prediction.** With `sidebar:groups.translate` at 「翻訳作業」 there is no
 equality collision; 「レビュー」 over the three ～レビュー tabs and 「用語」 over 用語集 are the same
 two licensed prefixes, on the same grounds. `groups.page` had no `guide` counterpart and was batch
 4's alone. Do not re-open any of these.
@@ -1709,7 +1758,7 @@ footing — 翻訳 is the app's root morpheme for the whole domain, so every com
 it.
 
 **Why the scope line is not pedantry.** This file uses *collapse* for two strings rendering the
-**same**, and "a heading over its own child" read at equality would license `guide.groupTranslate`
+**same**, and "a heading over its own child" read at equality would license `strings:guide.groupTranslate`
 「翻訳」 sitting on top of `strings:tabs.strings` 「翻訳」 — the exact equality round 2 spent a rename
 removing. A structural licence must never reach equality; equality keeps the co-render test.
 
@@ -1744,7 +1793,7 @@ in Japanese and all three are painted simultaneously**: `strings:tabs.config` *C
 `sidebar:settings` / `settings:title` *Settings*. A fourth is one click away in the same rail's
 target page — `config:workspaceSettingsTitle` *Workspace Settings* 「ワークスペース設定」.
 
-The bare 「設定」 was therefore unavailable for *Settings*, and 「アプリ設定」/「表示設定」 were both
+The bare 「設定」 was therefore unavailable for *Settings*, and *アプリ設定*／*表示設定* were both
 rejected as narrower than the page: `SettingsView.tsx` holds the UI **language** picker as well as
 appearance, so a display-only word understates it. **「環境設定」 is the established Japanese for
 exactly this class** — device-local user preferences — and it keeps the 設定 root, so the four read
@@ -1756,11 +1805,33 @@ required, not a collision: English is byte-identical in both, and `SettingsView.
 **`config:fullReplaceOrphanNotice` says *Relink tab* in English. There is no such tab** —
 it is the known stale English name for Orphans, and Japanese ships the Orphans rendering.
 
+**Three observations the whole-language sweep recorded here so a later sweep does not re-open
+them.** Each was re-checked at the code rather than relayed.
+
+- **「設定を開く」 uses the bare 設定 the hazard above reserves, and it stays.**
+  `colorText:assistant.openSettings` and `stage-details:chatOpenSettings` ship 「設定を開く」 while
+  the rail's `strings:tabs.config` 「設定」 is painted beside them, so the link *could* read as
+  "open the Config tab". The handler is `AssistantPanel.tsx:353` — `setSettingsOpen(true)`, the
+  assistant's own settings popover, whose sibling `colorText:assistant.settings` is
+  「アシスタントの設定」. **Left as is:** English is the bare *Open settings*, and expanding it to
+  アシスタントの設定を開く would import a word the key's own English lacks — the rubric-8 defect,
+  which outranks a hazard that resolves itself the moment the popover opens.
+- **`vault:remove` has no call site.** `VaultEditorDialog.tsx` renders `delete`, `undoRemove` and
+  `discard`; no `t('remove')` bound to the `vault` namespace exists anywhere in
+  `packages/frontend/src`. So the *Remove* leg of the same-English/different-rendering group the
+  pre-flight reports (`vault:remove` 「削除」 against `collab:sharing.remove` 「メンバーを外す」) is
+  **unreachable**, and the split is unfalsifiable rather than wrong. This is an English-corpus
+  observation affecting all seven locales, not a `ja` defect.
+- **`config:tm.policyTitle` and `config:tm.browserTitle` are both 「翻訳メモリ」 in one panel** —
+  and English writes "Translation Memory" for both, so this is faithfulness, licensed by referent
+  identity (one referent, named twice). Recorded because it is an equality inside a **single
+  container**, which is the shape every other rule here treats as the dangerous one.
+
 **`logs:action.openQuality` says *Open quality settings*. There are no quality settings** — the
 second instance of the identical class, and the one round 5 got wrong. The handler is
 `registry.ts:124` → `actions.ts:10` `setActiveTab('quality')`, i.e. the read-only Quality
 dashboard, so the key ships **「品質ダッシュボードを開く」**, copying the surface's existing name
-`quality:title` 「品質ダッシュボード」. Round 5 shipped the faithful-to-the-defect 「品質設定を開く」 and
+`quality:title` 「品質ダッシュボード」. Round 5 shipped the faithful-to-the-defect *品質設定を開く* and
 filed the finding a second time; `english-review-notes.md:113` had already answered it — *"render
 what the control actually opens"* — three minutes before the batch ended, so the timing was
 excusable and the string was not. **Re-read `english-review-notes.md` at HEAD before a fix round,
@@ -1805,7 +1876,7 @@ all** — the second batch after batch 4 with an empty exception list. Sweep 3 (
 between two Japanese characters) reports `backup:createDescription` and `backup:restoreDescription`,
 and both are the **literal file extension `.zip`** sitting inside a Japanese sentence
 (「検証可能な.zipアーカイブ」, 「バックアップの.zipをアップロード」). A file extension is a literal
-token, not sentence punctuation; 「ドットzip」 and a full-width 「．zip」 are both wrong, and
+token, not sentence punctuation; *ドットzip* and a full-width *．zip* are both wrong, and
 `restoreSelectFile` 「.zipファイルの選択」 carries the same token at the head of a value where the
 sweep cannot see it. **Add it to the sweep's known-false-positive list rather than to the string.**
 The batch's fifteen ellipses are all U+2026 and all mirror an ellipsis the English source has —
