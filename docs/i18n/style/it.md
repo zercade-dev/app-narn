@@ -179,7 +179,7 @@ those two distinct, which is the pair the co-render rule actually protects.
 
 ## Length discipline
 
-Measured over the 1,908 keys Italian shares with English (see `backfill-runbook.md` §2.10
+Measured over the 1,908 keys Italian shares with English (see `backfill-runbook.md` section 2.10
 on stating the population): **aggregate 1.25, median 1.25, 90th percentile 1.70.** Italian
 sits between French and German, and the tail is what matters — at the 90th percentile a
 string runs 1.7× its English source, which is what breaks chrome.

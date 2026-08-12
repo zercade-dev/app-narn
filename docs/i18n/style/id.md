@@ -67,9 +67,22 @@ The space-constrained surfaces are sidebar items (`sidebar:translationMemory`,
 review-translation-ai), table column headers (`strings:columns.config`), filter labels
 (`strings:filters.needsReview`) and bulk-bar buttons (`strings:bulk.approveSelected`).
 
-For those classes, **never exceed ~1.6× the English character count**, and prefer the
-shorter derivation: "Terjemahan" over "Penerjemahan", "Kualitas" over "Penjaminan
-kualitas". Body text is unconstrained — put the precision there.
+**Corrected before wave 3 — this paragraph used to state a ratio rule, and the runbook
+forbids it.** It read: "For those classes, never exceed ~1.6× the English character count".
+Section 2.4 of the runbook is titled "Length budgets are absolute character counts, per
+class" and opens "Never a multiple of English": an audit of every constrained-surface key
+found **27** correct strings over the pilot's 1.5× ceiling, including a tab label at 2.50×
+and a sidebar item at 3.80×, because a ratio measures how long the *English* is rather than
+how wide the *control* is. `sidebar:legal` is "Legal" — five characters, so 1.6× is eight,
+and no correct Indonesian rendering of it fits that.
+
+**Derive your budgets instead.** Take each class's anchor key from the runbook's table, and
+record an absolute character count per class. Two of the six classes are **hard** (the
+sidebar and the tab labels share one fixed 16rem width and truncate); the rest scroll, wrap
+or auto-size, so overrunning them costs elegance rather than correctness. Prefer the shorter
+derivation where both are correct — "Terjemahan" over "Penerjemahan", "Kualitas" over
+"Penjaminan kualitas" — but as a style preference, not as a ceiling. Body text is
+unconstrained; put the precision there.
 
 The renderings used as examples above are illustrations of the length problem, not
 decisions about wording. `terminology.md` defines every domain term, including the surface
