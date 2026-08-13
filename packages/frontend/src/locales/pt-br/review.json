@@ -35,7 +35,7 @@
     "progressLabel": "Revisão em andamento",
     "progressActivityNote": "O custo e o progresso completos estão na aba Atividade.",
     "runLabel": "Execução da revisão",
-    "runSummary": "Sinalizadas: {{flagged}} de {{reviewed}} · constatações: {{findings}}",
+    "runSummary": "Marcadas: {{flagged}} de {{reviewed}} · constatações: {{findings}}",
     "emptyTitle": "Ainda não há revisão da origem",
     "emptyHint": "Executar revisão verifica cada entrada de origem em busca de erros de digitação, gramática, terminologia, clareza e conteúdo impróprio. Os resultados são apenas informativos.",
     "loadingFindings": "Carregando constatações…",

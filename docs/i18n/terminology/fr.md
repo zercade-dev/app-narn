@@ -65,7 +65,7 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | suggestion |  |  |
 | discard |  |  |
 | needs review | à réviser | No gender to agree. Sentence-cased in the filter ("À réviser"), lowercase in the row badge ("à réviser"), same wording in both. Note the capital À keeps its accent in the filter form. For the related *révisé* adjective see the gender rule above: token form "révisé", agreeing form "révisée". |
-| flag |  |  |
+| flag | signaler | Verb on `review:flag`, participle on `review:filterFlagged`/`review:flaggedToast` — the review disposition, and only that. `review:sourceAi.runSummary`'s loose "flagged" (entries the source review marked as carrying findings, not the disposition) is not this term and takes *marquées*, matching how French already renders other loose flag uses (`strings:flagAllNeedsReviewDone` "marquée(s)"). `glossary:flaggedTitle` still renders its own loose "flagged" as *signalé(s)*, sharing the disposition root — a pre-existing collision this pass left untouched. |
 | ignore / ignored |  |  |
 | Review (the sidebar group) |  |  |
 | review queue |  |  |
