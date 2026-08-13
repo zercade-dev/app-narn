@@ -27,6 +27,7 @@ import { installTestTenantProviderIfEnabled } from './identity/test-tenant-ident
 import { healthRouter } from './routes/health.js';
 import { systemRouter } from './routes/system.js';
 import { globalConfigRouter } from './routes/global-config.js';
+import { freewayRouter } from './routes/freeway.js';
 import { lqaRouter } from './routes/lqa.js';
 import { tmRouter } from './routes/tm.js';
 import { notificationsRouter } from './routes/notifications.js';
@@ -173,6 +174,10 @@ app.use('/api/templates', templatesRouter);
 app.use('/api/collab-routing', collabRoutingRouter);
 app.use('/api/modules', modulesRouter);
 app.use('/api/global-config', globalConfigRouter);
+// Ungated like the module-instances routes it mirrors: status is read-only
+// and preset creation writes only a module-instance record + non-secret
+// config (baseURL/model from the bundled snapshot), never a vault secret.
+app.use('/api/freeway', freewayRouter);
 app.use('/api/lqa', lqaRouter);
 app.use('/api/tm', tmRouter);
 // Mounted ungated at the app level: the router applies requireUnlockedVault

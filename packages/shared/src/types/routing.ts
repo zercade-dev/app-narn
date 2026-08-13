@@ -70,7 +70,8 @@ export interface RoutingDecision {
  * aggregates them in the log (one trace per (targetLanguage, reason)) and
  * attaches a fix hint instead of repeating the same line per entry.
  */
-export type ControlledFailureReason = 'no-route' | 'module-disabled' | 'module-not-found';
+export type ControlledFailureReason =
+  'no-route' | 'module-disabled' | 'module-not-found' | 'freeway-no-buckets';
 
 /**
  * Maps a {@link ControlledFailureReason} to a short, user-actionable hint
@@ -82,6 +83,8 @@ export const CONTROLLED_FAILURE_HINTS: Record<ControlledFailureReason, string> =
   'no-route': 'No routing rule matches target {{lang}}. Add a rule in Batch → Routing.',
   'module-disabled': 'Enable the module in Global Config.',
   'module-not-found': 'Module is not installed/registered.',
+  'freeway-no-buckets':
+    'Add a free-plan API key in Freeway settings, or pin a rule to a specific provider.',
 };
 
 /**
