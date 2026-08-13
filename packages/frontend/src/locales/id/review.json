@@ -48,7 +48,7 @@
     "module": "Modul",
     "modulePlaceholder": "Pilih modul",
     "model": "Model",
-    "freewayModelHint": "NARN Freeway automatically picks the best free model for each batch — no model or reasoning-effort choice needed.",
+    "freewayModelHint": "NARN Freeway otomatis memilih model gratis terbaik untuk setiap batch — tidak perlu memilih model atau upaya penalaran.",
     "noModules": "Tidak ada modul berkemampuan tinjauan yang tersedia. Aktifkan modul AI di Konfigurasi Global.",
     "cancel": "Batal",
     "findingPosition": "{{current}} dari {{total}}",

@@ -48,7 +48,7 @@
     "module": "Mô-đun",
     "modulePlaceholder": "Chọn một mô-đun",
     "model": "Mô hình",
-    "freewayModelHint": "NARN Freeway automatically picks the best free model for each batch — no model or reasoning-effort choice needed.",
+    "freewayModelHint": "NARN Freeway tự động chọn mô hình miễn phí tốt nhất cho mỗi lô — không cần chọn mô hình hay mức độ suy luận.",
     "noModules": "Không có mô-đun nào rà soát được. Hãy bật một mô-đun AI ở Cấu hình chung.",
     "cancel": "Hủy",
     "findingPosition": "{{current}} trên {{total}}",
