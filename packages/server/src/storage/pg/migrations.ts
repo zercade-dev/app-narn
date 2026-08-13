@@ -963,4 +963,59 @@ export const MIGRATIONS: ReadonlyArray<{ name: string; statements: readonly stri
       `grant execute on function narn_sweep_expired_manual_edits() to app_user`,
     ],
   },
+  {
+    // NARN Freeway: per-tenant quota ledger. `freeway_usage`
+    // holds additive counters per (bucket, window); `freeway_buckets` holds
+    // slow-moving bucket state (cooldowns, disable reasons, quality EMAs).
+    // bucket_key = '<moduleOrInstanceId>::<modelId>'. Tenant-global tables
+    // exactly like templates/collab_routing (0009/0025 idiom): tenant_id-scoped
+    // RLS, not the project_members-membership form. app_user is granted
+    // directly (no existence guard) because app_user is unconditionally
+    // created by 0009's guarded `create role` earlier in the same migration
+    // run — mirrors 0010/0011/0012/0013/0017/0025.
+    name: '0027_freeway',
+    statements: [
+      `create table if not exists freeway_usage (
+         tenant_id text not null default 'local',
+         bucket_key text not null,
+         window_kind text not null,
+         window_start bigint not null,
+         requests bigint not null default 0,
+         input_tokens bigint not null default 0,
+         output_tokens bigint not null default 0,
+         chars bigint not null default 0,
+         primary key (tenant_id, bucket_key, window_kind, window_start)
+       )`,
+      `create table if not exists freeway_buckets (
+         tenant_id text not null default 'local',
+         bucket_key text not null,
+         cooldown_until bigint,
+         disabled_reason text,
+         flap_count integer not null default 0,
+         stats jsonb not null default '{}'::jsonb,
+         updated_at bigint not null default 0,
+         primary key (tenant_id, bucket_key)
+       )`,
+      `alter table freeway_usage enable row level security`,
+      `alter table freeway_usage force row level security`,
+      `alter table freeway_buckets enable row level security`,
+      `alter table freeway_buckets force row level security`,
+      `create policy tenant_isolation on freeway_usage using (
+         tenant_id = current_setting('app.user_id', true) and current_setting('app.user_id', true) <> ''
+       ) with check (
+         tenant_id = current_setting('app.user_id', true) and current_setting('app.user_id', true) <> ''
+       )`,
+      `create policy tenant_isolation on freeway_buckets using (
+         tenant_id = current_setting('app.user_id', true) and current_setting('app.user_id', true) <> ''
+       ) with check (
+         tenant_id = current_setting('app.user_id', true) and current_setting('app.user_id', true) <> ''
+       )`,
+      // A table created after 0009's blanket grant needs its own explicit grant
+      // (mirrors 0010 device_vaults / 0011 project_backups / 0012
+      // policy_acceptances / 0013 account_deletion_tokens / 0017 notifications /
+      // 0025 collab_routing).
+      `grant select, insert, update, delete on freeway_usage to app_user`,
+      `grant select, insert, update, delete on freeway_buckets to app_user`,
+    ],
+  },
 ];

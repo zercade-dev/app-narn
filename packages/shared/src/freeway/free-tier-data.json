@@ -1,0 +1,150 @@
+{
+  "generatedAt": "2026-08-13",
+  "providers": {
+    "google": {
+      "moduleId": "google",
+      "resetTimeZone": "America/Los_Angeles",
+      "models": [
+        {
+          "id": "gemini-pro-latest",
+          "qualityTier": 4,
+          "maxBatch": 40,
+          "contextLength": 1048576,
+          "limits": [
+            { "window": "rpm", "limit": 5 },
+            { "window": "rpd", "limit": 100 }
+          ]
+        },
+        {
+          "id": "gemini-flash-latest",
+          "qualityTier": 3,
+          "maxBatch": 30,
+          "contextLength": 1048576,
+          "limits": [
+            { "window": "rpm", "limit": 10 },
+            { "window": "rpd", "limit": 250 }
+          ]
+        },
+        {
+          "id": "gemini-flash-lite-latest",
+          "qualityTier": 2,
+          "maxBatch": 20,
+          "contextLength": 1048576,
+          "limits": [
+            { "window": "rpm", "limit": 15 },
+            { "window": "rpd", "limit": 1000 }
+          ]
+        }
+      ]
+    },
+    "openrouter": {
+      "moduleId": "openrouter",
+      "resetTimeZone": "UTC",
+      "probe": "openrouter-key",
+      "models": [
+        {
+          "id": "nvidia/nemotron-3-ultra-550b-a55b:free",
+          "qualityTier": 3,
+          "maxBatch": 25,
+          "limits": [
+            { "window": "rpm", "limit": 20 },
+            { "window": "rpd", "limit": 50 }
+          ]
+        },
+        {
+          "id": "google/gemma-4-31b-it:free",
+          "qualityTier": 2,
+          "maxBatch": 20,
+          "limits": [
+            { "window": "rpm", "limit": 20 },
+            { "window": "rpd", "limit": 50 }
+          ]
+        }
+      ]
+    },
+    "deepl": {
+      "moduleId": "deepl",
+      "resetTimeZone": "UTC",
+      "probe": "deepl-usage",
+      "models": [
+        {
+          "id": "deepl",
+          "qualityTier": 1,
+          "maxBatch": 50,
+          "limits": [{ "window": "monthly_chars", "limit": 500000 }]
+        }
+      ]
+    },
+    "copilot": {
+      "moduleId": "copilot",
+      "resetTimeZone": "UTC",
+      "models": [
+        {
+          "id": "gpt-4o-mini",
+          "qualityTier": 2,
+          "maxBatch": 20,
+          "limits": [
+            { "window": "rpm", "limit": 10 },
+            { "window": "rpd", "limit": 80 }
+          ]
+        }
+      ]
+    },
+    "groq": {
+      "moduleId": "generic-ai:groq",
+      "resetTimeZone": "UTC",
+      "presetBaseUrl": "https://api.groq.com/openai/v1",
+      "presetDefaultModel": "llama-3.3-70b-versatile",
+      "models": [
+        {
+          "id": "llama-3.3-70b-versatile",
+          "qualityTier": 3,
+          "maxBatch": 25,
+          "contextLength": 131072,
+          "limits": [
+            { "window": "rpm", "limit": 30 },
+            { "window": "rpd", "limit": 1000 },
+            { "window": "tpm", "limit": 12000 }
+          ]
+        }
+      ]
+    },
+    "mistral": {
+      "moduleId": "generic-ai:mistral",
+      "resetTimeZone": "UTC",
+      "presetBaseUrl": "https://api.mistral.ai/v1",
+      "presetDefaultModel": "mistral-small-latest",
+      "models": [
+        {
+          "id": "mistral-small-latest",
+          "qualityTier": 2,
+          "maxBatch": 20,
+          "contextLength": 131072,
+          "limits": [
+            { "window": "rpm", "limit": 60 },
+            { "window": "rpd", "limit": 500 }
+          ]
+        }
+      ]
+    },
+    "cerebras": {
+      "moduleId": "generic-ai:cerebras",
+      "resetTimeZone": "UTC",
+      "presetBaseUrl": "https://api.cerebras.ai/v1",
+      "presetDefaultModel": "llama-3.3-70b",
+      "models": [
+        {
+          "id": "llama-3.3-70b",
+          "qualityTier": 2,
+          "maxBatch": 20,
+          "contextLength": 65536,
+          "limits": [
+            { "window": "rpm", "limit": 30 },
+            { "window": "rpd", "limit": 14400 },
+            { "window": "tpm", "limit": 60000 }
+          ]
+        }
+      ]
+    }
+  }
+}
