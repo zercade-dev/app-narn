@@ -48,7 +48,7 @@
     "module": "模組",
     "modulePlaceholder": "選擇模組",
     "model": "模型",
-    "freewayModelHint": "NARN Freeway automatically picks the best free model for each batch — no model or reasoning-effort choice needed.",
+    "freewayModelHint": "NARN Freeway 會自動為每個批次選擇最佳免費模型——不需要選擇模型或推理強度。",
     "noModules": "沒有可用的審閱模組。請在全域設定中啟用一個 AI 模組。",
     "cancel": "取消",
     "findingPosition": "第 {{current}} 則，共 {{total}} 則",

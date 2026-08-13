@@ -1268,65 +1268,24 @@ export const IDENTICAL_ALLOWLIST = {
     'placeholder, so there is no word to translate. A locale that writes its currency ' +
     'differently should be a per-locale entry, not a change to this one.',
 
-  // NARN Freeway feature keys (app-narn PR #114, merged into develop after the 11-locale
-  // localization program had already completed its batch), see below.
-  ...(() => {
-    const FREEWAY_PLACEHOLDER_REASON =
-      "NARN Freeway feature key added after the parallel localization program's batch for " +
-      'de/id/it/ja/ko/pt-br/th/tr/vi/zh-hans/zh-hant, so those 11 locales have no translation ' +
-      'for it yet. Per owner directive the English text ships as a placeholder until the ' +
-      'localization program backfills it — none of the eleven is user-selectable yet (see ' +
-      'MEMORY note "Changelog must wait for selectable"), so nothing renders untranslated in ' +
-      'front of a real user in the meantime. es/fr/ru already carry real translations for ' +
-      'this key from when the feature shipped, so this wildcard entry has no effect on them: ' +
-      'identicalValueOffenders() only consults an allowlist entry once a value is already ' +
-      'byte-identical to English, and theirs are not.';
-    const FREEWAY_KEYS = [
-      'config:freeway.addFailed',
-      'config:freeway.colNextReset',
-      'config:freeway.colPassRate',
-      'config:freeway.colRemaining',
-      'config:freeway.description',
-      'config:freeway.disabledReasonChip',
-      'config:freeway.empty',
-      'config:freeway.enableModuleButton',
-      'config:freeway.enableModuleHint',
-      'config:freeway.generatedAtLabel',
-      'config:freeway.keyMissing',
-      'config:freeway.keyPresent',
-      'config:freeway.loadFailed',
-      'config:freeway.loading',
-      'config:freeway.passRateEntry',
-      'config:freeway.presetsUnavailable',
-      'config:freeway.remainingChars',
-      'config:freeway.remainingRequests_other',
-      'config:freeway.sourcesTitle',
-      'config:freeway.state.cooling',
-      'config:freeway.state.disabled',
-      'config:freeway.state.exhausted',
-      'config:freeway.title',
-      'config:routing.freewayLabel',
-      'config:routing.freewayOnboardButton',
-      'config:routing.freewayOnboardDisabledHint',
-      'review:sourceAi.freewayModelHint',
-      'strings:runs.aiReviewFreewayModelHint',
-      'strings:runs.detailsFreewayHeading',
-      'strings:runs.resumeRetryFreePool',
-      'strings:runs.resumeWithButton',
-      'strings:runs.resumeWithDescription',
-      'strings:runs.resumeWithModulePlaceholder',
-      'strings:runs.resumeWithNoModules',
-      'strings:runs.resumeWithStarted',
-      'strings:runs.resumeWithTitle',
-      'strings:runs.statusWaitingForQuota',
-      'strings:runs.waitingPairsCount_many',
-      'strings:runs.waitingPairsCount_one',
-      'strings:runs.waitingPairsCount_other',
-      'strings:runs.waitingResumesAt',
-      'strings:runs.waitingSkipReasonWarning',
-    ];
-    return Object.fromEntries(FREEWAY_KEYS.map((key) => [`*:${key}`, FREEWAY_PLACEHOLDER_REASON]));
-  })(),
+  // NARN Freeway: the feature shipped after the parallel localization program had
+  // finished its batch, so eleven locales carried its strings as English placeholders
+  // under a generated allowlist. Those are translated now and the allowlist is gone.
+  // Only the product name itself stays here: it is a name, so a locale that "translates"
+  // it invents a product that does not exist.
+  '*:config:freeway.title':
+    'The literal product name "NARN Freeway", as a panel heading. Identical to English in ' +
+    'every locale by design, like any other proper noun.',
+
+  '*:config:freeway.passRateEntry':
+    'Format string "{{language}}: {{rate}}%" -- two placeholders, a colon and a percent ' +
+    'sign, so there is no word to translate. A locale that punctuates differently should ' +
+    'be a per-locale entry, not a change to this one.',
+
+  '*:config:routing.freewayLabel':
+    'The literal product name "NARN Freeway". Identical to English in every locale by ' +
+    'design, like any other proper noun -- see the freeway strings in each locale, which ' +
+    'keep the name verbatim inside otherwise-translated sentences.',
 };
 
 export function allowlistKeysFor(locale, namespace, key) {

@@ -107,3 +107,15 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 | release | รุ่น | A published version of the app, and by extension its changelog entry. Kept apart from เวอร์ชัน, which is the version NUMBER, and never รายการ — this app counts entries constantly. |
 | changelog | บันทึกการเปลี่ยนแปลง | *Record of changes*. It shares the บันทึก root with the recording term and with the save verb, which is not a collision — the three differ in their heads and none is ever a bare บันทึก standing for this page. Never ล็อก, which is the live server log and a term of its own. |
 | dismiss | ลบ / ปิด | Two words, because the two consequences differ and one of them destroys data. `account:notificationsDismiss` issues a DELETE and the notification does not come back, so it takes the delete verb — reading it as *put it away* would ship a false statement about the action. `system:restarted.dismiss` only closes a banner against a stored flag and takes the close verb. Checked at each key, not decided once. |
+
+## Additive queue (not yet in the frozen lexicon)
+
+Terms this locale met that are not among the 87 frozen rows above. Recorded here, in the
+same shape, so the next translator to meet the term does not re-decide it differently —
+per `../terminology.md`'s own additive-queue instruction, but filed locally rather than in
+the cross-locale `README.md` queue, since that file is shared across every locale working
+in parallel and this row only needed to bind `th`.
+
+| Term | Rendering | Notes |
+| --- | --- | --- |
+| request (a countable AI-provider call, e.g. NARN Freeway's remaining-quota count) | คำขอ | Self-classifying noun, counted with no separate classifier — `{{count}} คำขอ`, the same pattern already used for รายการ, แถว and ชุด elsewhere in this locale. Met first at `config:freeway.remainingRequests_other`. Rejected adding ครั้ง (the classifier for an *occurrence of an event*, e.g. retries): คำขอ names the concrete thing counted, not the event of counting it, so it takes the self-classifying form rather than the event-classifier form. |
