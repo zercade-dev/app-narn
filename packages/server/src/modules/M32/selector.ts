@@ -28,7 +28,9 @@ export function isEligible(bucket: BucketView, group: JobGroup, now: number): bo
   if (bucket.remainingChars !== undefined) {
     if (bucket.remainingChars < groupChars(group)) return false;
   }
-  return bucket.remainingRequests >= 1;
+  // A provider with an account-wide pool caps every one of its buckets: the
+  // usable stock is the tighter of this model's own headroom and the pool's.
+  return Math.min(bucket.remainingRequests, bucket.poolRemainingRequests ?? Infinity) >= 1;
 }
 
 export function rankCandidates(buckets: BucketView[], group: JobGroup, now: number): BucketView[] {

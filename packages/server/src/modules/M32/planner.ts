@@ -59,6 +59,19 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
         estimatedRequests,
       });
       bucket.remainingRequests = Math.max(0, bucket.remainingRequests - estimatedRequests);
+      // An account-wide pool is spent by whichever of its models is used, so
+      // the same requests come off every sibling's working headroom too —
+      // otherwise the plan promises each model the whole shared allowance.
+      if (bucket.poolKey !== undefined) {
+        for (const sibling of working) {
+          if (sibling.poolKey !== bucket.poolKey) continue;
+          if (sibling.poolRemainingRequests === undefined) continue;
+          sibling.poolRemainingRequests = Math.max(
+            0,
+            sibling.poolRemainingRequests - estimatedRequests,
+          );
+        }
+      }
       if (bucket.remainingChars !== undefined) {
         let chars = 0;
         for (const job of group.jobs) chars += job.sourceText.length;

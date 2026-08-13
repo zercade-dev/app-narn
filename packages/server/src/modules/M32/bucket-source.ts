@@ -88,6 +88,29 @@ function resolveSnapshotBucket(bucketKey: string): ResolvedSnapshotBucket | unde
   return { provider, model, dayWindow };
 }
 
+/**
+ * Day headroom of a provider's account-wide pool — its `sharedLimits` rpd minus
+ * the requests EVERY one of its models spent in the same day window (OpenRouter
+ * counts all `:free` models against one allowance). Undefined for providers
+ * without such a pool, whose models are limited individually only.
+ */
+async function sharedPoolRemaining(
+  provider: FreeTierProvider,
+  now: number,
+  ledger: FreewayLedgerStore,
+): Promise<number | undefined> {
+  const sharedRpd = provider.sharedLimits?.find((l) => l.window === 'rpd')?.limit;
+  if (sharedRpd === undefined) return undefined;
+  const start = windowStart('rpd', now, provider.resetTimeZone);
+  let spent = 0;
+  for (const model of provider.models) {
+    const key = freewayBucketKey(provider.moduleId, model.id);
+    const [usage] = await ledger.usage(key, [{ kind: 'rpd', start }]);
+    spent += usage.requests;
+  }
+  return Math.max(0, sharedRpd - spent);
+}
+
 /** Assemble live BucketViews for every snapshot bucket usable RIGHT NOW-ish. */
 export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Promise<BucketView[]> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
@@ -102,6 +125,8 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
     const status = moduleStatus(provider.moduleId);
     if (!status || !status.credentialed || !status.enabled) continue;
+
+    const poolRemainingRequests = await sharedPoolRemaining(provider, now, ledger);
 
     for (const model of provider.models) {
       const dayWindow = resolveDayWindow(model);
@@ -126,6 +151,8 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         weakLanguages: model.weakLanguages,
         remainingRequests,
         remainingChars,
+        poolKey: poolRemainingRequests === undefined ? undefined : providerKey,
+        poolRemainingRequests,
         nextResetAt: nextReset(dayWindow.kind, now, provider.resetTimeZone),
         cooldownUntil: state?.cooldownUntil,
         disabledReason: state?.disabledReason,
@@ -157,12 +184,23 @@ export async function recordDispatch(
   });
 }
 
-/** 429/quota error: cooldown until retryAfterMs (when given) else the bucket's next day-scale reset; flap-bumps when already recently cooled. */
+/**
+ * 429/quota error: cooldown until retryAfterMs (when given) else the bucket's
+ * next day-scale reset; flap-bumps when already recently cooled.
+ *
+ * `scope: 'pool'` widens the cooldown to every bucket of a provider whose quota
+ * is account-wide (`sharedLimits`): a 429 there is a statement about the shared
+ * allowance, so rerouting to a sibling model would only spend another request
+ * against the same exhausted pool. Flap detection stays a property of the bucket
+ * that was actually struck. On a provider WITHOUT a shared pool the scope is
+ * inert — a model-specific 429 must never sideline unrelated siblings.
+ */
 export async function coolBucket(
   bucketKey: string,
   now: number,
   retryAfterMs: number | undefined,
   deps?: BucketSourceDeps,
+  scope: 'bucket' | 'pool' = 'bucket',
 ): Promise<void> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const states = await ledger.listBuckets();
@@ -171,16 +209,22 @@ export async function coolBucket(
     existing?.cooldownUntil !== undefined &&
     existing.cooldownUntil <= now &&
     now - existing.cooldownUntil < FLAP_WINDOW_MS;
+  const resolved = resolveSnapshotBucket(bucketKey);
   let until: number;
   if (retryAfterMs !== undefined) {
     until = now + retryAfterMs;
   } else {
-    const resolved = resolveSnapshotBucket(bucketKey);
     until = resolved
       ? nextReset(resolved.dayWindow.kind, now, resolved.provider.resetTimeZone)
       : now;
   }
   await ledger.setCooldown(bucketKey, until, flap ? { flap: true } : undefined);
+  if (scope !== 'pool' || !resolved?.provider.sharedLimits) return;
+  for (const model of resolved.provider.models) {
+    const siblingKey = freewayBucketKey(resolved.provider.moduleId, model.id);
+    if (siblingKey === bucketKey) continue;
+    await ledger.setCooldown(siblingKey, until);
+  }
 }
 
 /** Fold one run's gate outcomes into stats: ONE read + ONE mergeStats per bucket. */

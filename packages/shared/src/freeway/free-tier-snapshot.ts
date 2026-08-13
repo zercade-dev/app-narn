@@ -36,6 +36,12 @@ export interface FreeTierProvider {
   probe?: 'deepl-usage' | 'openrouter-key';
   models: FreeTierModel[];
   /**
+   * Account-wide limits shared across ALL of this provider's models (e.g. the
+   * OpenRouter `:free` pool). Per-model `limits` still apply individually; the
+   * effective headroom of any bucket is the tighter of the two.
+   */
+  sharedLimits?: FreeTierLimit[];
+  /**
    * generic-ai preset providers only (groq, mistral, cerebras): the
    * OpenAI-compatible base URL a one-click Freeway preset instance is
    * pre-shaped with.

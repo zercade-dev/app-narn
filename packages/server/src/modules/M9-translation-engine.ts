@@ -307,6 +307,25 @@ function retryAfterMsOf(err: unknown): number | undefined {
 }
 
 /**
+ * Floor for a rate limit the provider named as per-MINUTE but sent without a
+ * `Retry-After`. Just over a minute, so the window has certainly rolled over.
+ */
+const PER_MINUTE_RATE_LIMIT_COOLDOWN_MS = 70_000;
+
+/**
+ * Retry-After when the provider sent one; a short floor for per-minute pool
+ * limits (OpenRouter names them "...-per-min") that arrive without one —
+ * otherwise a minute-scale limit would cool a bucket until the daily reset.
+ * Undefined for any other rate limit, which still falls back to that reset.
+ */
+function rateLimitCooldownMs(err: unknown): number | undefined {
+  const retryAfter = retryAfterMsOf(err);
+  if (retryAfter !== undefined) return retryAfter;
+  const message = err instanceof Error ? err.message : String(err);
+  return /per.?min/i.test(message) ? PER_MINUTE_RATE_LIMIT_COOLDOWN_MS : undefined;
+}
+
+/**
  * Human-readable headroom for a Freeway "why routed" detail line: chars for a
  * `monthly_chars`-governed bucket (DeepL), else requests. Falls back to
  * "quota unknown" when the bucket isn't in the loaded view (shouldn't
@@ -2872,15 +2891,17 @@ export class TranslationEngine {
 
   /** Cool a bucket after a 429. Never fails the batch (a ledger write that
    * threw here would escape into the dispatch catch-all and FAIL pairs that
-   * should only have been parked). */
+   * should only have been parked). `scope: 'pool'` cools the whole
+   * account-wide pool a rate limit speaks for (see {@link coolBucket}). */
   private async coolFreewayBucket(
     bucketKey: string,
     now: number,
     retryAfterMs: number | undefined,
     deps: BucketSourceDeps,
+    scope: 'bucket' | 'pool' = 'bucket',
   ): Promise<void> {
     try {
-      await coolBucket(bucketKey, now, retryAfterMs, deps);
+      await coolBucket(bucketKey, now, retryAfterMs, deps, scope);
     } catch (err) {
       this.logger.warn('translation:freeway-ledger-write-failed', {
         bucketKey,
@@ -2992,7 +3013,13 @@ export class TranslationEngine {
             await this.disableFreewayBucket(state.bucketKey, deps);
             return { kind: 'error', error: err, authCancel: false };
           }
-          await this.coolFreewayBucket(state.bucketKey, strikeAt, retryAfterMsOf(err), deps);
+          await this.coolFreewayBucket(
+            state.bucketKey,
+            strikeAt,
+            rateLimitCooldownMs(err),
+            deps,
+            'pool',
+          );
           const buckets = await loadBucketViews(strikeAt, deps);
           const parked = revalidateGroup(
             { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
@@ -3013,7 +3040,13 @@ export class TranslationEngine {
         }
         const now = Date.now();
         if (rateLimited) {
-          await this.coolFreewayBucket(state.bucketKey, now, retryAfterMsOf(err), deps);
+          await this.coolFreewayBucket(
+            state.bucketKey,
+            now,
+            rateLimitCooldownMs(err),
+            deps,
+            'pool',
+          );
         } else if (providerFailure) {
           await this.coolFreewayBucket(
             state.bucketKey,

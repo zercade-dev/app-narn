@@ -28,6 +28,10 @@ export interface BucketView {
   remainingRequests: number;
   /** DeepL-style char headroom; undefined for request-limited providers. */
   remainingChars?: number;
+  /** Set when the provider has a shared day-scale pool; equals providerKey. */
+  poolKey?: string;
+  /** Shared-pool day headroom: sharedLimits rpd minus the provider-wide spend. */
+  poolRemainingRequests?: number;
   /** Epoch ms when the day-scale window above (rpd, or the monthly char window) resets. */
   nextResetAt: number;
   cooldownUntil?: number;
