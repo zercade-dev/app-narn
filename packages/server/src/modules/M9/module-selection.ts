@@ -19,7 +19,11 @@ import { sanitizeLogObject } from '../M16-credential-store.js';
 import type { ModuleRegistry } from '../M6-module-registry.js';
 import { resolveEffectiveModuleConfig } from '../M19-global-config-store.js';
 import { selectBackgroundBucket } from '../M32/background-select.js';
-import { loadBucketViews, type BucketSourceDeps } from '../M32/bucket-source.js';
+import {
+  freewayModuleOverrides,
+  loadBucketViews,
+  type BucketSourceDeps,
+} from '../M32/bucket-source.js';
 import type { DifficultyBand } from '../M32/types.js';
 
 /** Cheapest-first ordering used to rank enabled modules when none is requested. */
@@ -56,6 +60,14 @@ export interface SelectCapableModuleOptions {
   requestedFailLabel?: string;
   /** Message used when no module is requested and none is capable. */
   noneAvailableMessage: string;
+  /**
+   * Config values applied LAST, after the effective global/project config and
+   * every per-run override — so they win over user configuration in both
+   * directions. Freeway uses this for the dispatch settings it manages itself
+   * from snapshot facts about the chosen model; ordinary selection leaves it
+   * unset.
+   */
+  configOverrides?: Record<string, unknown>;
 }
 
 /**
@@ -75,6 +87,7 @@ export function selectCapableModule(
     ProjectModuleConfigEntry | undefined
   >;
   const { requestedId, requestedModel, requestedEffort, verbose, logSink, capability } = options;
+  const configOverrides = options.configOverrides ?? {};
   const candidates = requestedId
     ? registry.listModules(sessionId).filter((m) => m.id === requestedId)
     : registry
@@ -106,6 +119,7 @@ export function selectCapableModule(
         ...effective.config,
         ...(typeof rps === 'number' && rps > 0 ? { requestsPerSecond: rps } : {}),
         ...overrides,
+        ...configOverrides,
       },
       sessionId,
     );
@@ -210,6 +224,12 @@ export async function selectFreewayBackgroundModule(
         // The bucket's model is the quota being spent, so it wins over any
         // per-run model override (which named a different provider's model).
         requestedModel: bucket.modelId,
+        // Same Freeway-managed dispatch settings the translate path applies:
+        // a per-model upstream fact outranks the workspace's own config.
+        configOverrides: {
+          ...options.configOverrides,
+          ...freewayModuleOverrides(bucket.moduleId, bucket.modelId),
+        },
       });
       return { ...built, bucketKey: bucket.bucketKey };
     } catch (err) {

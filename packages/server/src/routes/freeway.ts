@@ -26,6 +26,7 @@ import { rateLimiter } from '../middleware/rate-limiter.js';
 import { validateBody } from '../middleware/validate.js';
 import { getSessionId } from '../middleware/session.js';
 import { loadBucketViews } from '../modules/M32/bucket-source.js';
+import { effectiveRemainingRequests } from '../modules/M32/selector.js';
 import type { BucketView } from '../modules/M32/types.js';
 import { moduleRegistry } from '../modules/M6-module-registry.js';
 import { resolveEffectiveModuleConfig } from '../modules/M19-global-config-store.js';
@@ -79,20 +80,27 @@ interface FreewayStatusBucket {
  * governs: char-scale (DeepL-style) buckets carry a real `remainingChars`
  * (their `remainingRequests` is the MAX_SAFE_INTEGER sentinel — see
  * bucket-source.ts's loadBucketViews — so it never signals exhaustion),
- * request-scale buckets have no `remainingChars` and are judged on
- * `remainingRequests` instead.
+ * request-scale buckets have no `remainingChars` and are judged on the
+ * pool-clamped request stock instead — the same figure the selector spends
+ * against, so a drained account-wide pool doesn't render every sibling ready.
  */
 function deriveBucketState(
   view: Pick<
     BucketView,
-    'disabledReason' | 'cooldownUntil' | 'remainingRequests' | 'remainingChars'
+    | 'disabledReason'
+    | 'cooldownUntil'
+    | 'remainingRequests'
+    | 'remainingChars'
+    | 'poolRemainingRequests'
   >,
   now: number,
 ): BucketStatusState {
   if (view.disabledReason) return 'disabled';
   if (view.cooldownUntil !== undefined && view.cooldownUntil > now) return 'cooling';
   const exhausted =
-    view.remainingChars !== undefined ? view.remainingChars === 0 : view.remainingRequests === 0;
+    view.remainingChars !== undefined
+      ? view.remainingChars === 0
+      : effectiveRemainingRequests(view) === 0;
   if (exhausted) return 'exhausted';
   return 'ready';
 }
@@ -126,7 +134,7 @@ function toStatusBucket(view: BucketView, now: number): FreewayStatusBucket {
     moduleId: view.moduleId,
     modelId: view.modelId,
     qualityTier: view.qualityTier,
-    remainingRequests: view.remainingRequests,
+    remainingRequests: effectiveRemainingRequests(view),
     remainingChars: view.remainingChars,
     nextResetAt: view.nextResetAt,
     state: deriveBucketState(view, now),
@@ -211,7 +219,7 @@ freewayRouter.get(
           moduleId: v.moduleId,
           modelId: v.modelId,
           qualityTier: v.qualityTier,
-          remainingRequests: v.remainingRequests,
+          remainingRequests: effectiveRemainingRequests(v),
           remainingChars: v.remainingChars,
           nextResetAt: v.nextResetAt,
           state,

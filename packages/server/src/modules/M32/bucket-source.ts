@@ -7,12 +7,18 @@
  */
 import type { FreeTierModel, FreeTierProvider, FreewayWindowKind } from '@zercade-dev/narn-shared';
 import {
+  freeTierModel,
   freeTierProvider,
   getFreeTierSnapshot,
+  hasSharedPool,
   nextReset,
   windowStart,
 } from '@zercade-dev/narn-shared';
-import type { FreewayLedgerStore, FreewayWindowRef } from '../../storage/types.js';
+import type {
+  FreewayLedgerStore,
+  FreewayWindowRef,
+  FreewayWindowUsage,
+} from '../../storage/types.js';
 import { getFreewayLedgerStore } from '../../storage/registry.js';
 import { isCloudMode } from '../../identity/registry.js';
 import { moduleRegistry } from '../M6-module-registry.js';
@@ -22,8 +28,39 @@ import { updateGatePassEma } from './stats.js';
 
 const FLAP_WINDOW_MS = 5 * 60_000;
 
+/**
+ * Upper bound on how long a shared-pool cooldown may sideline the buckets that
+ * were NOT struck. Their exhaustion is inferred from a sibling's 429, never
+ * observed, so the blast radius stays bounded: if the pool really is drained
+ * for the day, each sibling re-cools itself on its own next 429, at a cost of
+ * at most one request; if the limit was minute-scale or model-specific, the
+ * siblings are back within the minute instead of parked until the daily reset.
+ */
+export const POOL_SIBLING_COOLDOWN_CAP_MS = 70_000;
+
 export function freewayBucketKey(moduleId: string, modelId: string): string {
   return `${moduleId}::${modelId}`;
+}
+
+/**
+ * Module-config values Freeway imposes on the instance serving a bucket, over
+ * and above the model id — dispatch-time facts about the model, not user
+ * preferences, so they are applied LAST and win over the effective
+ * global/project config in BOTH directions (forcing a setting on and forcing
+ * it off). Keys absent from the snapshot are absent here too, leaving the
+ * user's config (and the module's own default) untouched.
+ *
+ * Freeway-routed jobs only: direct routing to the same module stays governed
+ * by the user's configuration, which is why this is applied at the Freeway
+ * dispatch sites rather than inside the shared config resolution.
+ */
+export function freewayModuleOverrides(moduleId: string, modelId: string): Record<string, unknown> {
+  const model = freeTierModel(moduleId, modelId);
+  if (model?.useStructuredOutput === undefined) return {};
+  // Structured-output support is upstream-dependent and measured per model: a
+  // model that mis-parses under a schema constraint (or pays a quality tax for
+  // it) must run without it however the workspace has the module configured.
+  return { useStructuredOutput: model.useStructuredOutput };
 }
 
 export interface BucketSourceDeps {
@@ -88,6 +125,39 @@ function resolveSnapshotBucket(bucketKey: string): ResolvedSnapshotBucket | unde
   return { provider, model, dayWindow };
 }
 
+/** One model's day-scale window and the usage already read for it. */
+interface ModelUsage {
+  model: FreeTierModel;
+  dayWindow: DayWindow;
+  bucketKey: string;
+  usage: FreewayWindowUsage;
+}
+
+/**
+ * Day headroom of a provider's account-wide pool — its shared `rpd` limit minus
+ * the requests every RPD-GOVERNED model spent in that window (OpenRouter counts
+ * all `:free` models against one allowance). Pure: it folds the per-model usage
+ * the caller has already read, so a pooled provider's cells are queried once,
+ * not once for the pool sum and again for each model's own headroom. Undefined
+ * for providers without a shared day budget, whose models are limited
+ * individually only.
+ */
+function sharedPoolRemaining(
+  provider: FreeTierProvider,
+  models: readonly ModelUsage[],
+): number | undefined {
+  if (!hasSharedPool(provider)) return undefined;
+  const sharedRpd = provider.sharedLimits?.find((l) => l.window === 'rpd')?.limit;
+  if (sharedRpd === undefined) return undefined;
+  let spent = 0;
+  for (const entry of models) {
+    // A char-governed model in a pooled provider has no rpd cell to fold in.
+    if (entry.dayWindow.kind !== 'rpd') continue;
+    spent += entry.usage.requests;
+  }
+  return Math.max(0, sharedRpd - spent);
+}
+
 /** Assemble live BucketViews for every snapshot bucket usable RIGHT NOW-ish. */
 export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Promise<BucketView[]> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
@@ -103,12 +173,20 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
     const status = moduleStatus(provider.moduleId);
     if (!status || !status.credentialed || !status.enabled) continue;
 
+    // ONE usage read per model, shared by that model's own headroom and by the
+    // provider's pool sum.
+    const models: ModelUsage[] = [];
     for (const model of provider.models) {
       const dayWindow = resolveDayWindow(model);
       if (!dayWindow) continue;
       const bucketKey = freewayBucketKey(provider.moduleId, model.id);
       const start = windowStart(dayWindow.kind, now, provider.resetTimeZone);
       const [usage] = await ledger.usage(bucketKey, [{ kind: dayWindow.kind, start }]);
+      models.push({ model, dayWindow, bucketKey, usage });
+    }
+    const poolRemainingRequests = sharedPoolRemaining(provider, models);
+
+    for (const { model, dayWindow, bucketKey, usage } of models) {
       const remainingRequests =
         dayWindow.kind === 'monthly_chars'
           ? Number.MAX_SAFE_INTEGER
@@ -126,6 +204,8 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         weakLanguages: model.weakLanguages,
         remainingRequests,
         remainingChars,
+        poolKey: poolRemainingRequests === undefined ? undefined : providerKey,
+        poolRemainingRequests,
         nextResetAt: nextReset(dayWindow.kind, now, provider.resetTimeZone),
         cooldownUntil: state?.cooldownUntil,
         disabledReason: state?.disabledReason,
@@ -157,12 +237,25 @@ export async function recordDispatch(
   });
 }
 
-/** 429/quota error: cooldown until retryAfterMs (when given) else the bucket's next day-scale reset; flap-bumps when already recently cooled. */
+/**
+ * 429/quota error: cooldown until retryAfterMs (when given) else the bucket's
+ * next day-scale reset; flap-bumps when already recently cooled.
+ *
+ * `scope: 'pool'` widens the cooldown to every bucket of a provider whose quota
+ * is account-wide (`sharedLimits`): a 429 there is a statement about the shared
+ * allowance, so rerouting to a sibling model would only spend another request
+ * against the same exhausted pool. The struck bucket keeps the full `until`;
+ * siblings get a capped, never-shortening cool (see
+ * {@link POOL_SIBLING_COOLDOWN_CAP_MS}). Flap detection stays a property of the
+ * bucket that was actually struck. On a provider WITHOUT a shared pool the scope
+ * is inert — a model-specific 429 must never sideline unrelated siblings.
+ */
 export async function coolBucket(
   bucketKey: string,
   now: number,
   retryAfterMs: number | undefined,
   deps?: BucketSourceDeps,
+  scope: 'bucket' | 'pool' = 'bucket',
 ): Promise<void> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const states = await ledger.listBuckets();
@@ -171,16 +264,26 @@ export async function coolBucket(
     existing?.cooldownUntil !== undefined &&
     existing.cooldownUntil <= now &&
     now - existing.cooldownUntil < FLAP_WINDOW_MS;
+  const resolved = resolveSnapshotBucket(bucketKey);
   let until: number;
   if (retryAfterMs !== undefined) {
     until = now + retryAfterMs;
   } else {
-    const resolved = resolveSnapshotBucket(bucketKey);
     until = resolved
       ? nextReset(resolved.dayWindow.kind, now, resolved.provider.resetTimeZone)
       : now;
   }
   await ledger.setCooldown(bucketKey, until, flap ? { flap: true } : undefined);
+  if (scope !== 'pool' || !resolved || !hasSharedPool(resolved.provider)) return;
+  const siblingUntil = Math.min(until, now + POOL_SIBLING_COOLDOWN_CAP_MS);
+  for (const model of resolved.provider.models) {
+    const siblingKey = freewayBucketKey(resolved.provider.moduleId, model.id);
+    if (siblingKey === bucketKey) continue;
+    const prior = states.find((s) => s.bucketKey === siblingKey)?.cooldownUntil ?? 0;
+    // Never shorten: a sibling already sidelined for longer (its own 429, or a
+    // provider-error cool on a retired model) must stay sidelined.
+    await ledger.setCooldown(siblingKey, Math.max(prior, siblingUntil));
+  }
 }
 
 /** Fold one run's gate outcomes into stats: ONE read + ONE mergeStats per bucket. */

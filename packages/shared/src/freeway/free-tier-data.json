@@ -6,18 +6,9 @@
       "resetTimeZone": "America/Los_Angeles",
       "models": [
         {
-          "id": "gemini-pro-latest",
-          "qualityTier": 4,
-          "maxBatch": 40,
-          "contextLength": 1048576,
-          "limits": [
-            { "window": "rpm", "limit": 5 },
-            { "window": "rpd", "limit": 100 }
-          ]
-        },
-        {
           "id": "gemini-flash-latest",
-          "qualityTier": 3,
+          "qualityTier": 4,
+          "useStructuredOutput": true,
           "maxBatch": 30,
           "contextLength": 1048576,
           "limits": [
@@ -28,6 +19,7 @@
         {
           "id": "gemini-flash-lite-latest",
           "qualityTier": 2,
+          "useStructuredOutput": true,
           "maxBatch": 20,
           "contextLength": 1048576,
           "limits": [
@@ -41,20 +33,39 @@
       "moduleId": "openrouter",
       "resetTimeZone": "UTC",
       "probe": "openrouter-key",
+      "sharedLimits": [
+        { "window": "rpm", "limit": 20 },
+        { "window": "rpd", "limit": 50 }
+      ],
       "models": [
         {
           "id": "nvidia/nemotron-3-ultra-550b-a55b:free",
           "qualityTier": 3,
+          "useStructuredOutput": false,
           "maxBatch": 25,
+          "contextLength": 1000000,
           "limits": [
             { "window": "rpm", "limit": 20 },
             { "window": "rpd", "limit": 50 }
           ]
         },
         {
-          "id": "google/gemma-4-31b-it:free",
-          "qualityTier": 2,
+          "id": "nvidia/nemotron-3-super-120b-a12b:free",
+          "qualityTier": 3,
+          "useStructuredOutput": false,
+          "maxBatch": 25,
+          "contextLength": 262144,
+          "limits": [
+            { "window": "rpm", "limit": 20 },
+            { "window": "rpd", "limit": 50 }
+          ]
+        },
+        {
+          "id": "google/gemma-4-26b-a4b-it:free",
+          "qualityTier": 3,
+          "useStructuredOutput": true,
           "maxBatch": 20,
+          "contextLength": 262144,
           "limits": [
             { "window": "rpm", "limit": 20 },
             { "window": "rpd", "limit": 50 }
@@ -69,7 +80,7 @@
       "models": [
         {
           "id": "deepl",
-          "qualityTier": 1,
+          "qualityTier": 3,
           "maxBatch": 50,
           "limits": [{ "window": "monthly_chars", "limit": 500000 }]
         }

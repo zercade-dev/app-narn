@@ -106,18 +106,21 @@ import {
   isAbortError,
   isRateLimitError,
   isRunCancellingAuthError,
+  rateLimitCooldownMs,
+  retryAfterMsOf,
   withRateLimitRetry,
 } from './M9/errors.js';
 import { groupDecisions } from './M9/packing.js';
 import {
   type BucketSourceDeps,
   coolBucket,
+  freewayModuleOverrides,
   loadBucketViews,
   recordDispatch,
   recordGateOutcomes,
 } from './M32/bucket-source.js';
 import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
-import { selectEscalation } from './M32/selector.js';
+import { effectiveRemainingRequests, selectEscalation } from './M32/selector.js';
 import { difficultyBand } from './M32/difficulty.js';
 import type { BucketView, JobGroup } from './M32/types.js';
 import { syncAuthoritativeUsage } from './M32/probes.js';
@@ -294,31 +297,20 @@ type ControlledFailureGroup = {
 };
 
 /**
- * Provider-supplied `Retry-After` carried on a rate-limit error, in ms.
- * Undefined when the provider gave none — the Freeway cooldown then falls back
- * to the bucket's next day-scale reset. Clamped like the dispatch back-off so a
- * hostile endpoint cannot sideline a bucket beyond a minute on its own say-so.
- */
-function retryAfterMsOf(err: unknown): number | undefined {
-  if (typeof err !== 'object' || err === null || !('retryAfterMs' in err)) return undefined;
-  const value = (err as { retryAfterMs?: unknown }).retryAfterMs;
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return undefined;
-  return Math.min(Math.round(value), 60_000);
-}
-
-/**
  * Human-readable headroom for a Freeway "why routed" detail line: chars for a
- * `monthly_chars`-governed bucket (DeepL), else requests. Falls back to
- * "quota unknown" when the bucket isn't in the loaded view (shouldn't
- * happen for a bucket the resolver just assigned, but the detail log must
- * never throw).
+ * `monthly_chars`-governed bucket (DeepL), else requests — clamped by the
+ * provider's shared-pool headroom, which is what the selector actually spends
+ * against (reporting a per-model 50 while the account-wide pool is drained
+ * would be a lie). Falls back to "quota unknown" when the bucket isn't in the
+ * loaded view (shouldn't happen for a bucket the resolver just assigned, but
+ * the detail log must never throw).
  */
 function formatBucketHeadroom(view: BucketView | undefined): string {
   if (!view) return 'quota unknown';
   if (view.remainingChars !== undefined) {
     return `${view.remainingChars} chars left this month`;
   }
-  return `${view.remainingRequests} requests left today`;
+  return `${effectiveRemainingRequests(view)} requests left today`;
 }
 
 /** `HH:MM` in the server's local time, for the "resumes ~HH:MM" detail line. */
@@ -2872,15 +2864,17 @@ export class TranslationEngine {
 
   /** Cool a bucket after a 429. Never fails the batch (a ledger write that
    * threw here would escape into the dispatch catch-all and FAIL pairs that
-   * should only have been parked). */
+   * should only have been parked). `scope: 'pool'` cools the whole
+   * account-wide pool a rate limit speaks for (see {@link coolBucket}). */
   private async coolFreewayBucket(
     bucketKey: string,
     now: number,
     retryAfterMs: number | undefined,
     deps: BucketSourceDeps,
+    scope: 'bucket' | 'pool' = 'bucket',
   ): Promise<void> {
     try {
-      await coolBucket(bucketKey, now, retryAfterMs, deps);
+      await coolBucket(bucketKey, now, retryAfterMs, deps, scope);
     } catch (err) {
       this.logger.warn('translation:freeway-ledger-write-failed', {
         bucketKey,
@@ -2992,7 +2986,13 @@ export class TranslationEngine {
             await this.disableFreewayBucket(state.bucketKey, deps);
             return { kind: 'error', error: err, authCancel: false };
           }
-          await this.coolFreewayBucket(state.bucketKey, strikeAt, retryAfterMsOf(err), deps);
+          await this.coolFreewayBucket(
+            state.bucketKey,
+            strikeAt,
+            rateLimitCooldownMs(err),
+            deps,
+            'pool',
+          );
           const buckets = await loadBucketViews(strikeAt, deps);
           const parked = revalidateGroup(
             { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
@@ -3013,7 +3013,13 @@ export class TranslationEngine {
         }
         const now = Date.now();
         if (rateLimited) {
-          await this.coolFreewayBucket(state.bucketKey, now, retryAfterMsOf(err), deps);
+          await this.coolFreewayBucket(
+            state.bucketKey,
+            now,
+            rateLimitCooldownMs(err),
+            deps,
+            'pool',
+          );
         } else if (providerFailure) {
           await this.coolFreewayBucket(
             state.bucketKey,
@@ -3273,18 +3279,28 @@ export class TranslationEngine {
       if (first.reasoningEffortOverride)
         batchOverrides.reasoningEffort = first.reasoningEffortOverride;
 
+      // Freeway manages a handful of dispatch settings itself, from snapshot
+      // facts about the chosen model — applied after the batch overrides so
+      // they win over the user's config. Empty (and therefore inert) for a
+      // batch this run routed directly rather than through Freeway.
+      const freewayOverrides =
+        bucketKey === undefined ? {} : freewayModuleOverrides(moduleId, first.modelOverride ?? '');
+
       const routedModule = this.moduleRegistry.createWithConfig(
         moduleId,
         {
           ...effective.config,
           ...this.rateLimitConfig(global),
           ...batchOverrides,
+          ...freewayOverrides,
           log: moduleLog,
         },
         sessionId,
       );
       // Builds the module instance a Freeway failover/escalation target needs:
-      // that bucket's own module config plus its model as the override.
+      // that bucket's own module config plus its model as the override, and
+      // the new bucket's own Freeway-managed dispatch settings (the hop may
+      // cross from a model that wants structured output to one that must not).
       const createFreewayModule = (
         nextModuleId: string,
         modelId: string,
@@ -3300,6 +3316,7 @@ export class TranslationEngine {
             ...nextEffective.config,
             ...this.rateLimitConfig(global),
             model: modelId,
+            ...freewayModuleOverrides(nextModuleId, modelId),
             log: moduleLog,
           },
           sessionId,

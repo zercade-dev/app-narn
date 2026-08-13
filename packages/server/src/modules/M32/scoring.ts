@@ -9,12 +9,14 @@ import type { BucketView, DifficultyBand, JobGroup } from './types.js';
 import { languageHardness } from './difficulty.js';
 
 /**
- * Curated first-attempt gate-pass priors by quality tier (row) and difficulty
- * band (column, band-1..4). Corrected at runtime by live per-language EMAs.
+ * First-attempt gate-pass priors by quality tier (row) and difficulty band
+ * (column, band-1..4). Corrected at runtime by live per-language EMAs. The
+ * TIER-3 row is seeded from judged benchmark runs over the bundled free
+ * models; every other row remains a curated estimate.
  */
 const PASS_PRIORS: Record<1 | 2 | 3 | 4, [number, number, number, number]> = {
   4: [0.99, 0.985, 0.97, 0.95],
-  3: [0.985, 0.97, 0.94, 0.9],
+  3: [0.99, 0.98, 0.955, 0.925],
   2: [0.96, 0.93, 0.87, 0.78],
   1: [0.96, 0.94, 0.85, 0.75],
 };

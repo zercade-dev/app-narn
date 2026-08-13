@@ -53,6 +53,50 @@ export function abortableSleep(ms: number, signal?: AbortSignal): Promise<void> 
 export const MAX_RETRY_AFTER_MS = 60_000;
 
 /**
+ * A provider-supplied `retryAfterMs`, clamped to {@link MAX_RETRY_AFTER_MS} so a
+ * hostile or broken endpoint cannot sideline a free-tier bucket beyond a minute
+ * on its own say-so. Absent ⇒ the caller's own fallback (for a Freeway cooldown,
+ * the bucket's next day-scale reset).
+ */
+export function retryAfterMsOf(err: unknown): number | undefined {
+  if (typeof err !== 'object' || err === null || !('retryAfterMs' in err)) return undefined;
+  const value = (err as { retryAfterMs?: unknown }).retryAfterMs;
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return undefined;
+  return Math.min(Math.round(value), MAX_RETRY_AFTER_MS);
+}
+
+/**
+ * Floor for a rate limit the provider named as per-MINUTE but sent without a
+ * `Retry-After`. Just over a minute, so the window has certainly rolled over.
+ */
+export const PER_MINUTE_RATE_LIMIT_COOLDOWN_MS = 70_000;
+
+/**
+ * A rate limit the provider named as per-MINUTE ("...-per-min",
+ * "requests per minute"). Word-bounded on BOTH sides so a camelCase quota name
+ * that merely contains the letters — `RequestsPerMinutePerProject` — is not
+ * read as a minute-scale limit.
+ */
+const PER_MINUTE_LIMIT_RE = /\bper[-_\s]?min(ute)?s?\b/i;
+
+/**
+ * How long a rate-limited Freeway bucket cools. A limit the provider named as
+ * per-minute gets AT LEAST the 70s floor: `Retry-After` is clamped to 60s
+ * (below the floor), so honoring a short one would put the bucket back before
+ * the minute window has certainly rolled over. Any other rate limit uses the
+ * provider's own `Retry-After`, or undefined — which falls back to the
+ * bucket's next day-scale reset.
+ */
+export function rateLimitCooldownMs(err: unknown): number | undefined {
+  const retryAfter = retryAfterMsOf(err);
+  const message = err instanceof Error ? err.message : String(err);
+  if (PER_MINUTE_LIMIT_RE.test(message)) {
+    return Math.max(retryAfter ?? 0, PER_MINUTE_RATE_LIMIT_COOLDOWN_MS);
+  }
+  return retryAfter;
+}
+
+/**
  * Whether an error (or a module's per-result `error` string) signals a 429.
  * Detects the shared typed RateLimitError by name first, then falls back to
  * the canonical shared message vocabulary (which covers Google's quota

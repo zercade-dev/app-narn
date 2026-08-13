@@ -9,7 +9,7 @@
  * hook) so a slow/unreachable provider never stalls run start.
  */
 import type { FreeTierProvider, FreewayWindowKind } from '@zercade-dev/narn-shared';
-import { getFreeTierSnapshot, windowStart } from '@zercade-dev/narn-shared';
+import { getFreeTierSnapshot, hasSharedPool, windowStart } from '@zercade-dev/narn-shared';
 import type { FreewayLedgerStore } from '../../storage/types.js';
 import { getFreewayLedgerStore } from '../../storage/registry.js';
 import { freewayBucketKey } from './bucket-source.js';
@@ -127,9 +127,24 @@ async function probeDeepL(
 /**
  * OpenRouter: `GET https://openrouter.ai/api/v1/key` with
  * `Authorization: Bearer <key>` → account-level `data.usage`/`data.limit`.
- * Free `:free` models share ONE account-wide daily request pool, so a usable
- * count is written identically to every `rpd`-governed model this provider
- * lists — there is no per-model breakdown to read.
+ * Free `:free` models share ONE account-wide daily request pool and the
+ * endpoint has no per-model breakdown, so the count is attributed to a single
+ * canonical bucket (the provider's first `rpd`-governed model) rather than
+ * written to each sibling: pool headroom is derived by SUMMING the provider's
+ * buckets, so fanning the same total out would count it once per model and
+ * drain the pool N times over.
+ *
+ * The siblings' own cells are RESET to zero in the same pass, because the
+ * account total already includes every request NARN spent on them — left
+ * standing they would be counted twice by that sum. The invariant this
+ * establishes: after a probe the canonical cell carries the authoritative
+ * account total, every sibling cell is zero, and later per-sibling dispatches
+ * accumulate on top of that total, so the pool sum stays exact. (It also
+ * clears a stale total from a bucket that used to be canonical, should the
+ * snapshot's model order ever change.)
+ *
+ * A provider without a shared pool has genuinely independent per-model
+ * counters, so it keeps the fan-out.
  *
  * The endpoint's documented shape carries `usage`/`limit` as dollar-credit
  * figures, not a request count, and it has changed shape before — so this
@@ -157,13 +172,16 @@ async function probeOpenRouter(
   if (requests === undefined) return;
   const kind: FreewayWindowKind = 'rpd';
   const start = windowStart(kind, now, provider.resetTimeZone);
+  const pooled = hasSharedPool(provider);
+  // Pooled: the total lands on the canonical bucket and every other sibling is
+  // zeroed. Unpooled: each model's own counter is independent, so all get it.
+  const writes = rpdModels.map((model, index) => ({
+    bucketKey: freewayBucketKey(provider.moduleId, model.id),
+    requests: !pooled || index === 0 ? requests : 0,
+  }));
   await Promise.all(
-    rpdModels.map((model) =>
-      ledger.syncAuthoritativeUsage(
-        freewayBucketKey(provider.moduleId, model.id),
-        { kind, start },
-        { requests },
-      ),
+    writes.map((write) =>
+      ledger.syncAuthoritativeUsage(write.bucketKey, { kind, start }, { requests: write.requests }),
     ),
   );
 }
