@@ -48,7 +48,7 @@
     "module": "모듈",
     "modulePlaceholder": "모듈을 선택하세요",
     "model": "모델",
-    "freewayModelHint": "NARN Freeway automatically picks the best free model for each batch — no model or reasoning-effort choice needed.",
+    "freewayModelHint": "NARN Freeway가 배치마다 가장 좋은 무료 모델을 자동으로 선택해서, 모델이나 추론 강도를 선택할 필요가 없어요.",
     "noModules": "검토를 실행할 수 있는 모듈이 없어요. 글로벌 설정에서 AI 모듈을 활성화하세요.",
     "cancel": "취소",
     "findingPosition": "{{current}}/{{total}}",
