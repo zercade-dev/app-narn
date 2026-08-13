@@ -7,7 +7,11 @@
  * and the caller (M9) must treat that as a failure.
  */
 import type { RoutingDecision, RoutingRule, StringEntry } from '@zercade-dev/narn-shared';
-import { PSEUDO_LANGUAGE_CODE, PSEUDO_MODULE_ID } from '@zercade-dev/narn-shared';
+import {
+  FREEWAY_MODULE_ID,
+  PSEUDO_LANGUAGE_CODE,
+  PSEUDO_MODULE_ID,
+} from '@zercade-dev/narn-shared';
 
 export interface RouterAvailableModule {
   id: string;
@@ -72,7 +76,7 @@ export class Router {
     for (const rule of sorted) {
       if (rule.moduleId === PSEUDO_MODULE_ID) continue;
       if (!Router.matches(rule, entry, targetLanguage)) continue;
-      if (!availableIds.has(rule.moduleId)) continue;
+      if (rule.moduleId !== FREEWAY_MODULE_ID && !availableIds.has(rule.moduleId)) continue;
       return {
         entry,
         targetLanguage,

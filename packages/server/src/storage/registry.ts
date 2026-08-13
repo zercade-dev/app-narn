@@ -2,6 +2,7 @@ import { getPool, TenantDb } from './pg/pool.js';
 import { PgBackupStore } from './pg-backup-store.js';
 import { PgCollabRoutingStore } from './pg-collab-routing-store.js';
 import { PgDeviceVaultStore } from './pg-device-vault-store.js';
+import { PgFreewayLedgerStore } from './pg-freeway-ledger-store.js';
 import { PgGlobalConfigStore } from './pg-global-config-store.js';
 import { PgGlossaryStore } from './pg-glossary-store.js';
 import { PgMemberStore } from './pg-member-store.js';
@@ -21,6 +22,7 @@ import type {
   CollabRoutingStore,
   DeviceVaultRecord,
   DeviceVaultStore,
+  FreewayLedgerStore,
   GlobalConfigStore,
   GlossaryStore,
   MemberStore,
@@ -46,6 +48,7 @@ let backupStore: BackupStore | undefined;
 let notificationStore: NotificationStore | undefined;
 let deviceVaultStore: DeviceVaultStore | undefined;
 let collabRoutingStore: CollabRoutingStore | undefined;
+let freewayLedgerStore: FreewayLedgerStore | undefined;
 
 export function getProjectStore(): ProjectStore {
   if (!projectStore) projectStore = new PgProjectStore(new TenantDb(getPool()));
@@ -158,6 +161,14 @@ export function setCollabRoutingStore(store: CollabRoutingStore): void {
   collabRoutingStore = store;
 }
 
+export function getFreewayLedgerStore(): FreewayLedgerStore {
+  if (!freewayLedgerStore) freewayLedgerStore = new PgFreewayLedgerStore(new TenantDb(getPool()));
+  return freewayLedgerStore;
+}
+export function setFreewayLedgerStore(store: FreewayLedgerStore): void {
+  freewayLedgerStore = store;
+}
+
 /**
  * Ambient-tenant convenience wrappers — the cloud composition root's
  * `/auth/devices` routes import surface (via the `storage/index.ts` barrel).
@@ -193,4 +204,5 @@ export function __resetStorageForTests(): void {
   notificationStore = undefined;
   deviceVaultStore = undefined;
   collabRoutingStore = undefined;
+  freewayLedgerStore = undefined;
 }

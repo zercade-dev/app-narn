@@ -1,10 +1,12 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Route as RouteIcon } from 'lucide-react';
 import type { RoutingRule, RoutingRuleGroup } from '@zercade-dev/narn-shared';
-import { LANGUAGE_REGISTRY } from '@zercade-dev/narn-shared';
+import { LANGUAGE_REGISTRY, FREEWAY_MODULE_ID } from '@zercade-dev/narn-shared';
 import { downloadBlob } from '@/lib/utils';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useAutoSave } from '../../hooks/use-auto-save.js';
+import { Button } from '../ui/button.js';
 import {
   BatchConfigEditor,
   isSelectableRoutingModule,
@@ -504,59 +506,96 @@ export function RoutingRulesConfig({
     schedule(buildPayload(nextGroups, activeGroupId, draft));
   }
 
+  // One-click onboarding: a project with no routing rules yet (the fresh-project
+  // state, in either editor mode) can hand everything to the free pool in one
+  // click instead of hand-building a catch-all rule. Reuses `selectSimpleModule`
+  // — the exact save path the simple selector already uses — so the created
+  // rule is byte-identical to one the user picked by hand (priority 1, no
+  // constraints). Disabled (with an inline hint, mirroring how the rest of this
+  // component surfaces `translationsInProgress`) while a run is active, same as
+  // every other rule-mutating control here.
+  const hasNoRules = draft.length === 0;
+  const freewayOnboarding = hasNoRules && (
+    <div
+      className="rounded-lg border border-dashed p-3 space-y-1"
+      data-testid="routing-freeway-onboard-wrapper"
+    >
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        onClick={() => selectSimpleModule(FREEWAY_MODULE_ID)}
+        disabled={translationsInProgress}
+        data-testid="routing-freeway-onboard"
+      >
+        <RouteIcon className="size-4 mr-1.5" aria-hidden="true" />
+        {t('routing.freewayOnboardButton')}
+      </Button>
+      {translationsInProgress && (
+        <p className="text-xs text-status-warn">{t('routing.freewayOnboardDisabledHint')}</p>
+      )}
+    </div>
+  );
+
   if (showSimple) {
     return (
-      <SimpleRoutingConfig
-        modules={modules}
-        selectedModuleId={simpleRuleModuleId(mergedGroups)}
-        disabledModuleIds={disabledModuleIds}
-        translationsInProgress={translationsInProgress}
-        autoSaveStatus={autoSaveStatus}
-        autoSaveError={autoSaveError}
-        advanced={routingAdvanced}
-        onToggleAdvanced={toggleAdvanced}
-        onSelectModule={selectSimpleModule}
-      />
+      <div className="space-y-3">
+        {freewayOnboarding}
+        <SimpleRoutingConfig
+          modules={modules}
+          selectedModuleId={simpleRuleModuleId(mergedGroups)}
+          disabledModuleIds={disabledModuleIds}
+          translationsInProgress={translationsInProgress}
+          autoSaveStatus={autoSaveStatus}
+          autoSaveError={autoSaveError}
+          advanced={routingAdvanced}
+          onToggleAdvanced={toggleAdvanced}
+          onSelectModule={selectSimpleModule}
+        />
+      </div>
     );
   }
 
   return (
-    <BatchConfigEditor
-      mergedGroups={mergedGroups}
-      activeGroupId={activeGroupId}
-      activeGroup={activeGroup}
-      draft={draft}
-      editingIds={editingIds}
-      pendingDeleteId={pendingDeleteId}
-      error={error}
-      autoSaveStatus={autoSaveStatus}
-      autoSaveError={autoSaveError}
-      onFlush={flush}
-      translationsInProgress={translationsInProgress}
-      advanced={routingAdvanced}
-      onToggleAdvanced={toggleAdvanced}
-      simpleFallbackNotice={!routingAdvanced && !simpleEligible}
-      modules={modules}
-      availableLanguages={availableLanguages}
-      availableCategories={availableCategories}
-      availableSources={availableSources}
-      availableTones={availableTones}
-      disabledModuleIds={disabledModuleIds}
-      defaultRules={defaultRules}
-      onAdd={add}
-      onImportChange={handleImport}
-      onExport={handleExport}
-      onUpdate={update}
-      onMove={move}
-      onRemove={remove}
-      onStartEdit={startEdit}
-      onDoneEdit={doneEdit}
-      onSetPendingDeleteId={setPendingDeleteId}
-      onSwitchGroup={switchGroup}
-      onAddGroup={addGroup}
-      onRemoveActiveGroup={removeActiveGroup}
-      onRenameActiveGroup={renameActiveGroup}
-      onAddFromTemplate={addFromTemplate}
-    />
+    <div className="space-y-3">
+      {freewayOnboarding}
+      <BatchConfigEditor
+        mergedGroups={mergedGroups}
+        activeGroupId={activeGroupId}
+        activeGroup={activeGroup}
+        draft={draft}
+        editingIds={editingIds}
+        pendingDeleteId={pendingDeleteId}
+        error={error}
+        autoSaveStatus={autoSaveStatus}
+        autoSaveError={autoSaveError}
+        onFlush={flush}
+        translationsInProgress={translationsInProgress}
+        advanced={routingAdvanced}
+        onToggleAdvanced={toggleAdvanced}
+        simpleFallbackNotice={!routingAdvanced && !simpleEligible}
+        modules={modules}
+        availableLanguages={availableLanguages}
+        availableCategories={availableCategories}
+        availableSources={availableSources}
+        availableTones={availableTones}
+        disabledModuleIds={disabledModuleIds}
+        defaultRules={defaultRules}
+        onAdd={add}
+        onImportChange={handleImport}
+        onExport={handleExport}
+        onUpdate={update}
+        onMove={move}
+        onRemove={remove}
+        onStartEdit={startEdit}
+        onDoneEdit={doneEdit}
+        onSetPendingDeleteId={setPendingDeleteId}
+        onSwitchGroup={switchGroup}
+        onAddGroup={addGroup}
+        onRemoveActiveGroup={removeActiveGroup}
+        onRenameActiveGroup={renameActiveGroup}
+        onAddFromTemplate={addFromTemplate}
+      />
+    </div>
   );
 }

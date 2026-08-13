@@ -218,8 +218,7 @@ export function isStrictFor(locale, strictEnv = STRICT_ENV) {
  * lands, the entry defers nothing and staleWipLocales() turns it into a hard
  * failure saying to delete it. The gate lifts the exemption, not a memory.
  */
-export const WIP_LOCALES = {
-};
+export const WIP_LOCALES = {};
 
 for (const [locale, reason] of Object.entries(WIP_LOCALES)) {
   if (!reason || !reason.trim()) {
@@ -732,7 +731,9 @@ export function localePluralErrors(locales, locale) {
   const errors = [];
   for (const [namespace, data] of locales.get(locale) ?? []) {
     for (const [base, suffixes] of classifyKeys(flattenKeys(data)).plurals) {
-      errors.push(...pluralFamilyErrors(base, suffixes, categories).map((e) => `${namespace}:${e}`));
+      errors.push(
+        ...pluralFamilyErrors(base, suffixes, categories).map((e) => `${namespace}:${e}`),
+      );
     }
   }
   return errors;
@@ -1235,14 +1236,12 @@ export const IDENTICAL_ALLOWLIST = {
   // product name" is language-independent, exactly as for topicGoogle.
   '*:strings:guide.topicCopilot':
     'Product name "GitHub Copilot" — both parts are on the do-not-translate list',
-  '*:strings:guide.topicDeepseek':
-    'Product name "DeepSeek" — on the do-not-translate list',
+  '*:strings:guide.topicDeepseek': 'Product name "DeepSeek" — on the do-not-translate list',
   '*:strings:guide.topicClaude':
     'Product names "Anthropic (Claude)" — vendor and model, both on the do-not-translate list',
   '*:strings:guide.topicGpt':
     'Product names "OpenAI (GPT)" — vendor and model, both on the do-not-translate list',
-  '*:strings:guide.topicOpenrouter':
-    'Product name "OpenRouter" — on the do-not-translate list',
+  '*:strings:guide.topicOpenrouter': 'Product name "OpenRouter" — on the do-not-translate list',
   '*:strings:guide.topicGenericAi':
     'Module name "Generic AI" — the product\'s own name for the bring-your-own-endpoint ' +
     'module, shown in the module picker, so it must match the picker verbatim',
@@ -1262,12 +1261,72 @@ export const IDENTICAL_ALLOWLIST = {
     'that is `disabled` with `value={row.key}` always set, so its placeholder can never ' +
     'render at all; :301 is a <SelectValue> inside a <Select>, where the user PICKS from a ' +
     'list. Nothing is typed anywhere. The conclusion was right and only the reason was ' +
-    'wrong, which is this programme\'s commonest defect and leaves no trace downstream.',
+    "wrong, which is this programme's commonest defect and leaves no trace downstream.",
 
   '*:strings:runs.estimatedCost':
     'Format string "≈ ${{amount}}" — an approximation sign, a currency symbol and a ' +
     'placeholder, so there is no word to translate. A locale that writes its currency ' +
     'differently should be a per-locale entry, not a change to this one.',
+
+  // NARN Freeway feature keys (app-narn PR #114, merged into develop after the 11-locale
+  // localization program had already completed its batch), see below.
+  ...(() => {
+    const FREEWAY_PLACEHOLDER_REASON =
+      "NARN Freeway feature key added after the parallel localization program's batch for " +
+      'de/id/it/ja/ko/pt-br/th/tr/vi/zh-hans/zh-hant, so those 11 locales have no translation ' +
+      'for it yet. Per owner directive the English text ships as a placeholder until the ' +
+      'localization program backfills it — none of the eleven is user-selectable yet (see ' +
+      'MEMORY note "Changelog must wait for selectable"), so nothing renders untranslated in ' +
+      'front of a real user in the meantime. es/fr/ru already carry real translations for ' +
+      'this key from when the feature shipped, so this wildcard entry has no effect on them: ' +
+      'identicalValueOffenders() only consults an allowlist entry once a value is already ' +
+      'byte-identical to English, and theirs are not.';
+    const FREEWAY_KEYS = [
+      'config:freeway.addFailed',
+      'config:freeway.colNextReset',
+      'config:freeway.colPassRate',
+      'config:freeway.colRemaining',
+      'config:freeway.description',
+      'config:freeway.disabledReasonChip',
+      'config:freeway.empty',
+      'config:freeway.enableModuleButton',
+      'config:freeway.enableModuleHint',
+      'config:freeway.generatedAtLabel',
+      'config:freeway.keyMissing',
+      'config:freeway.keyPresent',
+      'config:freeway.loadFailed',
+      'config:freeway.loading',
+      'config:freeway.passRateEntry',
+      'config:freeway.presetsUnavailable',
+      'config:freeway.remainingChars',
+      'config:freeway.remainingRequests_other',
+      'config:freeway.sourcesTitle',
+      'config:freeway.state.cooling',
+      'config:freeway.state.disabled',
+      'config:freeway.state.exhausted',
+      'config:freeway.title',
+      'config:routing.freewayLabel',
+      'config:routing.freewayOnboardButton',
+      'config:routing.freewayOnboardDisabledHint',
+      'review:sourceAi.freewayModelHint',
+      'strings:runs.aiReviewFreewayModelHint',
+      'strings:runs.detailsFreewayHeading',
+      'strings:runs.resumeRetryFreePool',
+      'strings:runs.resumeWithButton',
+      'strings:runs.resumeWithDescription',
+      'strings:runs.resumeWithModulePlaceholder',
+      'strings:runs.resumeWithNoModules',
+      'strings:runs.resumeWithStarted',
+      'strings:runs.resumeWithTitle',
+      'strings:runs.statusWaitingForQuota',
+      'strings:runs.waitingPairsCount_many',
+      'strings:runs.waitingPairsCount_one',
+      'strings:runs.waitingPairsCount_other',
+      'strings:runs.waitingResumesAt',
+      'strings:runs.waitingSkipReasonWarning',
+    ];
+    return Object.fromEntries(FREEWAY_KEYS.map((key) => [`*:${key}`, FREEWAY_PLACEHOLDER_REASON]));
+  })(),
 };
 
 export function allowlistKeysFor(locale, namespace, key) {

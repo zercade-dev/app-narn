@@ -4,7 +4,10 @@ import { RunStatusCode, hasRunDetailsKind } from '@zercade-dev/narn-shared';
 import { getProjectStore, getRunStore, getStringStore } from '../storage/registry.js';
 import type { SourceReviewRecord } from '../storage/types.js';
 import { logger } from '../modules/M15-console-logger.js';
-import { translationEngine } from '../modules/M9-translation-engine.js';
+import {
+  translationEngine,
+  type ResumeWithModuleResult,
+} from '../modules/M9-translation-engine.js';
 import { judgeEngine } from '../modules/M25-judge-engine.js';
 import { sourceReviewEngine } from '../modules/M26-source-review-engine.js';
 import { backgroundRunEngines } from '../modules/run-engines.js';
@@ -641,9 +644,87 @@ runsRouter.post(
     // membership — confirm the run is visible under `:projectId` (404 otherwise)
     // before resuming, so a tenant can't resume another tenant's run by its UUID.
     await assertRunVisible(projectId, runId);
-    const status = await translationEngine.resume(projectId, runId);
+    // The caller's session is what the resumed pass reads credentials under
+    // (a quota-parked run can resume days after its original session died).
+    const status = await translationEngine.resume(projectId, runId, getSessionId(res));
     if (!status) {
       res.status(409).json({ error: 'Run cannot be resumed' });
+      return;
+    }
+    res.json({ success: true });
+  }),
+);
+
+/** Body for resuming a quota-parked run on one explicitly chosen module. */
+const resumeWithSchema = z.object({ moduleId: z.string().min(1) });
+
+/**
+ * Why a resume-with-module was refused: the status to answer with plus a
+ * message the UI can show as-is. Run-STATE refusals are 409 (a conflict with
+ * what the run is doing, matching the pause/resume siblings); MODULE-choice
+ * refusals are 400 (the body named something unusable). `not-found` is
+ * unreachable behind `assertRunVisible` — kept as a defensive 404 rather than
+ * mislabelling a vanished run as a bad request.
+ */
+const RESUME_WITH_ERRORS: Record<
+  Extract<ResumeWithModuleResult, { ok: false }>['reason'],
+  { status: number; error: string }
+> = {
+  'not-found': { status: 404, error: 'Run not found' },
+  'not-parked': {
+    status: 409,
+    error: 'Only a run paused waiting for free quota can be resumed with a chosen module',
+  },
+  'not-drained': {
+    status: 409,
+    error: 'This run still has work in flight — wait for it to settle, then choose a module',
+  },
+  'project-busy': {
+    status: 409,
+    error: 'Another run is already in progress for this project — wait for it to finish',
+  },
+  'unknown-module': { status: 400, error: 'Unknown module' },
+  'module-unavailable': {
+    status: 400,
+    error: 'That module is disabled or has no credentials in this session',
+  },
+  'module-not-eligible': {
+    status: 400,
+    error: 'That module cannot be used to translate a run',
+  },
+};
+
+/**
+ * POST /api/projects/:projectId/runs/:runId/resume-with
+ * Resumes a run parked on free quota (`Paused` + `waitingForQuota`) by
+ * re-dispatching exactly its parked (entry, language) pairs onto the module in
+ * the body, bypassing Freeway — the "don't wait for the free pool, spend my own
+ * quota" escape hatch. Vault-gated like the sibling resume/retry routes (the
+ * re-dispatch reads per-session credentials, so a locked vault yields 423);
+ * 409 when the run's state rules it out (not parked, still draining, project
+ * busy) and 400 when the chosen module is unknown, unusable, or not a legal
+ * translation target — see {@link RESUME_WITH_ERRORS}.
+ */
+runsRouter.post(
+  '/:projectId/runs/:runId/resume-with',
+  requireUnlockedVault,
+  validateBody(resumeWithSchema),
+  asyncHandler(async (req, res) => {
+    const { projectId, runId } = req.params;
+    // Cross-tenant gate: the engine keys its in-memory runs by `runId` alone and
+    // vault-unlock is not membership — confirm the run is visible under
+    // `:projectId` (404 otherwise) before re-dispatching it.
+    await assertRunVisible(projectId, runId);
+    const { moduleId } = req.body as z.infer<typeof resumeWithSchema>;
+    const result = await translationEngine.resumeWithModule(
+      projectId,
+      runId,
+      moduleId,
+      getSessionId(res),
+    );
+    if (!result.ok) {
+      const refusal = RESUME_WITH_ERRORS[result.reason];
+      res.status(refusal.status).json({ error: refusal.error });
       return;
     }
     res.json({ success: true });

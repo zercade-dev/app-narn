@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Lock, LockOpen } from 'lucide-react';
 import type { BatchGroupingDimension, ProjectTemplate } from '@zercade-dev/narn-shared';
 import { ModuleSettingsPanel } from '../config/ModuleSettingsPanel.js';
+import { FreewayPanel } from '../config/FreewayPanel.js';
 import { AddInstanceForm, instanceSlugsOf } from '../config/AddInstanceForm.js';
 import { promptFirstMissingCredential } from '../config/credential-prompt.js';
 import { useVaultStatus } from '../../hooks/useVaultStatus.js';
@@ -452,6 +453,8 @@ export function GlobalConfigView({
         onUnlockVault={onUnlockVault}
         onEditVaultKey={onEditVaultKey}
       />
+
+      <FreewayPanel onEditVaultKey={onEditVaultKey} />
 
       <Card>
         <CardHeader>

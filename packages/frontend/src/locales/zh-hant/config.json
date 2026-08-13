@@ -183,7 +183,10 @@
     "groupSwitchInProgress": "翻譯進行中，無法切換規則群組。",
     "untitledGroup": "未命名群組",
     "via": "經由",
-    "routesTo": "分派至"
+    "routesTo": "分派至",
+    "freewayLabel": "NARN Freeway",
+    "freewayOnboardButton": "Let NARN Freeway handle everything",
+    "freewayOnboardDisabledHint": "Available once the current run finishes."
   },
   "health": {
     "noData": "尚無健康狀態資料",
@@ -192,6 +195,41 @@
     "rateLimitRetries": "429 重試：{{count}} 次",
     "lqaRetries": "LQA 重試：{{count}} 次",
     "sparklineTitle": "過去 10 分鐘內的 429 回應"
+  },
+  "freeway": {
+    "title": "NARN Freeway",
+    "description": "A shared pool of free-tier AI models NARN can route work to automatically — no credit card required. Add a free key below, then point a routing rule or a background engine at NARN Freeway to use it.",
+    "refresh": "Refresh",
+    "loading": "Loading NARN Freeway status…",
+    "loadFailed": "Failed to load NARN Freeway status: {{message}}",
+    "generatedAtLabel": "Updated {{time}}",
+    "sourcesTitle": "Free sources",
+    "keyPresent": "Key added",
+    "keyMissing": "No key yet",
+    "addButton": "Add",
+    "adding": "Adding…",
+    "addFailed": "Failed to add {{provider}}: {{message}}",
+    "presetsUnavailable": "One-click setup for free providers isn't available on this deployment.",
+    "enableModuleHint": "Key is set, but the module is turned off.",
+    "enableModuleButton": "Enable it",
+    "disabledReasonChip": "Disabled: {{reason}}",
+    "statusTitle": "Status",
+    "empty": "No free-tier sources configured yet.",
+    "colModel": "Model",
+    "colState": "State",
+    "colRemaining": "Remaining",
+    "colNextReset": "Next reset",
+    "colPassRate": "Pass rate",
+    "remainingRequests_other": "{{count}} requests",
+    "remainingChars": "{{count}} chars",
+    "passRateEntry": "{{language}}: {{rate}}%",
+    "state": {
+      "ready": "Ready",
+      "cooling": "Cooling down",
+      "exhausted": "Exhausted for today",
+      "disabled": "Module disabled",
+      "uncredentialed": "No key"
+    }
   },
   "overflowRatioLabel": "溢出比例",
   "overflowRatioDescription": "套用至新匯入條目的預設溢出比例。用於品質把關時偵測文字溢出。預設值：1.75。",

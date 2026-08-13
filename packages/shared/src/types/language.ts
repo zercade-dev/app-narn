@@ -16,6 +16,14 @@ export const PSEUDO_LANGUAGE_CODE = 'pseudo-test';
 /** Module id of the pseudo-localization module (modules/pseudo). */
 export const PSEUDO_MODULE_ID = 'pseudo';
 
+/**
+ * Reserved routing target id for the "freeway" virtual module: a routing
+ * rule may target it like any real module id, but it never appears in
+ * `availableModules` — the router carves it out of the availability check
+ * so a matching rule always resolves to it regardless of registration.
+ */
+export const FREEWAY_MODULE_ID = 'freeway';
+
 export const LANGUAGE_REGISTRY: Language[] = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'zh-hans', name: 'Simplified Chinese', nativeName: '中文（简体）' },

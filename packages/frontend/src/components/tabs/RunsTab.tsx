@@ -10,6 +10,8 @@ import { ManualEditsView } from './ManualEditsView.js';
 import {
   RunStatusCode,
   runTypeLabel,
+  PSEUDO_MODULE_ID,
+  FREEWAY_MODULE_ID,
   type RunStatus,
   type RunUsageEntry,
   type RunDetails,
@@ -32,8 +34,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Card } from '../ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '../ui/dialog';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { ModuleSelect } from '../ui/module-select';
+import { useModules } from '../../hooks/use-modules.js';
+import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
 import {
   Loader2,
   XCircle,
@@ -236,7 +248,11 @@ function RunDetailsContent({
   }
 
   const hasUsage = (usage?.length ?? 0) > 0 && tokenStats.length > 0;
-  const hasSidecar = !!details && (groupedEntries.length > 0 || (details.retries?.length ?? 0) > 0);
+  const hasSidecar =
+    !!details &&
+    (groupedEntries.length > 0 ||
+      (details.retries?.length ?? 0) > 0 ||
+      (details.freeway?.length ?? 0) > 0);
 
   if (loading) {
     return (
@@ -352,6 +368,19 @@ function RunDetailsContent({
         </div>
       )}
 
+      {details && details.freeway && details.freeway.length > 0 && (
+        <div className="space-y-1.5" data-testid="run-details-freeway">
+          <h4 className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            {t('runs.detailsFreewayHeading')}
+          </h4>
+          <ul className="space-y-0.5 rounded-md border border-border/60 bg-muted/30 px-2.5 py-2 font-mono text-[10px] text-muted-foreground">
+            {details.freeway.map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {details && details.retries && details.retries.length > 0 && (
         <div className="space-y-1.5" data-testid="run-details-retries">
           <h4 className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -410,6 +439,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
     fetchRunDetails,
     pauseRun,
     resumeRun,
+    resumeRunWith,
     reorderQueue,
     startPolling,
   } = useRunStore();
@@ -473,6 +503,40 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
 
   // The run whose AI-review (module/model) config dialog is open, if any.
   const [reviewRunId, setReviewRunId] = useState<string | null>(null);
+
+  // The parked run whose "Resume now with…" module-picker dialog is open, if
+  // any, plus the module chosen in it. Modules are fetched only while the
+  // dialog is open (the `enabled` gate on useModules), like other dialogs in
+  // this file. Freeway must never be offered here — it's the thing the user
+  // is escaping — and pseudo is never a real translate destination.
+  const [resumeWithRunId, setResumeWithRunId] = useState<string | null>(null);
+  const [resumeWithModuleId, setResumeWithModuleId] = useState('');
+  const resumeWithModules = useModules({ enabled: resumeWithRunId !== null });
+  const resumeWithBaseInstances = basesWithInstances(resumeWithModules);
+  const resumeWithOptions = resumeWithModules.filter(
+    (m) =>
+      m.capabilities?.includes('translate') &&
+      m.id !== PSEUDO_MODULE_ID &&
+      m.id !== FREEWAY_MODULE_ID &&
+      isOfferableModule(m, resumeWithBaseInstances) &&
+      isEnabledModule(m),
+  );
+
+  const closeResumeWithDialog = useCallback(() => {
+    setResumeWithRunId(null);
+    setResumeWithModuleId('');
+  }, []);
+
+  const submitResumeWith = useCallback(() => {
+    if (!resumeWithRunId || !resumeWithModuleId) return;
+    resumeRunWith(projectId, resumeWithRunId, resumeWithModuleId).then(
+      () => {
+        toast.success(t('runs.resumeWithStarted'));
+        closeResumeWithDialog();
+      },
+      (err: unknown) => toast.error((err as Error).message),
+    );
+  }, [closeResumeWithDialog, projectId, resumeRunWith, resumeWithModuleId, resumeWithRunId, t]);
 
   // Per-run detail (translated entries, retries, character totals): lazily
   // fetched on first open of the run's details dialog, then cached.
@@ -761,6 +825,12 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                     const isRunning =
                       run.status === RunStatusCode.Running || run.status === RunStatusCode.Pending;
                     const isPaused = run.status === RunStatusCode.Paused;
+                    // Status is checked FIRST: a Cancelled run with a leftover
+                    // waitingForQuota field (set before it was cancelled) must
+                    // never render the waiting chip — only a currently-Paused,
+                    // still-parked run does.
+                    const isWaitingForQuota =
+                      isPaused && (run.waitingForQuota?.pairs?.length ?? 0) > 0;
                     const isQueued = run.status === RunStatusCode.Queued;
                     const queueIndex = isQueued ? queuedIds.indexOf(run.runId) : -1;
 
@@ -816,6 +886,16 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                             <div className="flex items-center gap-2">
                               {getStatusIcon(run.status)}
                               {getStatusBadge(run.status)}
+                              {isWaitingForQuota && (
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-status-warn/10 text-status-warn"
+                                  data-testid={`run-waiting-badge-${run.runId}`}
+                                >
+                                  <Hourglass data-icon="inline-start" className="size-3" />
+                                  {t('runs.statusWaitingForQuota')}
+                                </Badge>
+                              )}
                               {isJudge && (
                                 <Badge
                                   variant="outline"
@@ -837,6 +917,39 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                 </Badge>
                               )}
                             </div>
+                            {isWaitingForQuota && run.waitingForQuota && (
+                              <div
+                                className="mt-1 space-y-0.5"
+                                data-testid={`run-waiting-detail-${run.runId}`}
+                              >
+                                <div
+                                  className="text-[10px] text-muted-foreground"
+                                  title={new Date(run.waitingForQuota.resumeAt).toLocaleString()}
+                                  data-testid={`run-waiting-resume-at-${run.runId}`}
+                                >
+                                  {t('runs.waitingResumesAt', {
+                                    time: relativeTime(new Date(run.waitingForQuota.resumeAt)),
+                                  })}
+                                </div>
+                                <div
+                                  className="text-[10px] text-muted-foreground"
+                                  data-testid={`run-waiting-pairs-${run.runId}`}
+                                >
+                                  {t('runs.waitingPairsCount', {
+                                    count: run.waitingForQuota.pairs.length,
+                                  })}
+                                </div>
+                                {run.waitingForQuota.skipReason && (
+                                  <div
+                                    className="flex items-center gap-1 text-[10px] text-status-warn"
+                                    data-testid={`run-waiting-skip-reason-${run.runId}`}
+                                  >
+                                    <AlertCircle className="size-3 shrink-0" />
+                                    {t('runs.waitingSkipReasonWarning')}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                             {isJudge && run.judgeSummary && run.judgeSummary.judged > 0 && (
                               <>
                                 <div
@@ -1041,7 +1154,24 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                   data-testid={`run-resume-${run.runId}`}
                                 >
                                   <Play className="size-4 mr-1" />
-                                  {t('runs.resume')}
+                                  {/* A parked run's plain Resume re-plans against the free
+                                  pool again, so it's labeled distinctly from a normal
+                                  paused run's Resume — "Resume now with…" below is the
+                                  escape hatch to a different module. */}
+                                  {isWaitingForQuota
+                                    ? t('runs.resumeRetryFreePool')
+                                    : t('runs.resume')}
+                                </Button>
+                              )}
+                              {isWaitingForQuota && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setResumeWithRunId(run.runId)}
+                                  data-testid={`run-resume-with-${run.runId}`}
+                                >
+                                  <Play className="size-4 mr-1" />
+                                  {t('runs.resumeWithButton')}
                                 </Button>
                               )}
                               {canRetry && (
@@ -1177,6 +1307,46 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
             onOpenChange={(open) => !open && setReviewRunId(null)}
             onStart={startReview}
           />
+
+          <Dialog
+            open={resumeWithRunId !== null}
+            onOpenChange={(open) => !open && closeResumeWithDialog()}
+          >
+            <DialogContent data-testid="run-resume-with-dialog">
+              <DialogHeader>
+                <DialogTitle>{t('runs.resumeWithTitle')}</DialogTitle>
+                <DialogDescription>{t('runs.resumeWithDescription')}</DialogDescription>
+              </DialogHeader>
+              {resumeWithOptions.length > 0 ? (
+                <ModuleSelect
+                  value={resumeWithModuleId}
+                  onValueChange={setResumeWithModuleId}
+                  modules={resumeWithOptions}
+                  placeholder={t('runs.resumeWithModulePlaceholder')}
+                  triggerTestId="run-resume-with-module-select"
+                />
+              ) : (
+                <p
+                  className="text-xs text-muted-foreground"
+                  data-testid="run-resume-with-no-modules"
+                >
+                  {t('runs.resumeWithNoModules')}
+                </p>
+              )}
+              <DialogFooter>
+                <Button variant="outline" onClick={closeResumeWithDialog}>
+                  {t('runs.resumeWithCancel')}
+                </Button>
+                <Button
+                  disabled={!resumeWithModuleId}
+                  onClick={submitResumeWith}
+                  data-testid="run-resume-with-confirm"
+                >
+                  {t('runs.resumeWithConfirm')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </div>
