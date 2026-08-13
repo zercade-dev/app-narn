@@ -23,6 +23,13 @@ export interface FreeTierLimit {
 export interface FreeTierModel {
   id: string;
   qualityTier: 1 | 2 | 3 | 4;
+  /**
+   * Freeway-managed structured-output setting, applied at dispatch time to
+   * the module instance serving this bucket. Overrides any global/project
+   * module config for Freeway-routed jobs — support is a per-model upstream
+   * fact, not a user preference. Undefined: the module's own default governs.
+   */
+  useStructuredOutput?: boolean;
   limits: FreeTierLimit[];
   /** Recommended max strings per request for a reliable model of this tier. */
   maxBatch: number;

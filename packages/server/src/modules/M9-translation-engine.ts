@@ -114,6 +114,7 @@ import { groupDecisions } from './M9/packing.js';
 import {
   type BucketSourceDeps,
   coolBucket,
+  freewayModuleOverrides,
   loadBucketViews,
   recordDispatch,
   recordGateOutcomes,
@@ -3278,18 +3279,28 @@ export class TranslationEngine {
       if (first.reasoningEffortOverride)
         batchOverrides.reasoningEffort = first.reasoningEffortOverride;
 
+      // Freeway manages a handful of dispatch settings itself, from snapshot
+      // facts about the chosen model — applied after the batch overrides so
+      // they win over the user's config. Empty (and therefore inert) for a
+      // batch this run routed directly rather than through Freeway.
+      const freewayOverrides =
+        bucketKey === undefined ? {} : freewayModuleOverrides(moduleId, first.modelOverride ?? '');
+
       const routedModule = this.moduleRegistry.createWithConfig(
         moduleId,
         {
           ...effective.config,
           ...this.rateLimitConfig(global),
           ...batchOverrides,
+          ...freewayOverrides,
           log: moduleLog,
         },
         sessionId,
       );
       // Builds the module instance a Freeway failover/escalation target needs:
-      // that bucket's own module config plus its model as the override.
+      // that bucket's own module config plus its model as the override, and
+      // the new bucket's own Freeway-managed dispatch settings (the hop may
+      // cross from a model that wants structured output to one that must not).
       const createFreewayModule = (
         nextModuleId: string,
         modelId: string,
@@ -3305,6 +3316,7 @@ export class TranslationEngine {
             ...nextEffective.config,
             ...this.rateLimitConfig(global),
             model: modelId,
+            ...freewayModuleOverrides(nextModuleId, modelId),
             log: moduleLog,
           },
           sessionId,

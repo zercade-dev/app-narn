@@ -7,6 +7,7 @@
  */
 import type { FreeTierModel, FreeTierProvider, FreewayWindowKind } from '@zercade-dev/narn-shared';
 import {
+  freeTierModel,
   freeTierProvider,
   getFreeTierSnapshot,
   hasSharedPool,
@@ -39,6 +40,27 @@ export const POOL_SIBLING_COOLDOWN_CAP_MS = 70_000;
 
 export function freewayBucketKey(moduleId: string, modelId: string): string {
   return `${moduleId}::${modelId}`;
+}
+
+/**
+ * Module-config values Freeway imposes on the instance serving a bucket, over
+ * and above the model id — dispatch-time facts about the model, not user
+ * preferences, so they are applied LAST and win over the effective
+ * global/project config in BOTH directions (forcing a setting on and forcing
+ * it off). Keys absent from the snapshot are absent here too, leaving the
+ * user's config (and the module's own default) untouched.
+ *
+ * Freeway-routed jobs only: direct routing to the same module stays governed
+ * by the user's configuration, which is why this is applied at the Freeway
+ * dispatch sites rather than inside the shared config resolution.
+ */
+export function freewayModuleOverrides(moduleId: string, modelId: string): Record<string, unknown> {
+  const model = freeTierModel(moduleId, modelId);
+  if (model?.useStructuredOutput === undefined) return {};
+  // Structured-output support is upstream-dependent and measured per model: a
+  // model that mis-parses under a schema constraint (or pays a quality tax for
+  // it) must run without it however the workspace has the module configured.
+  return { useStructuredOutput: model.useStructuredOutput };
 }
 
 export interface BucketSourceDeps {
