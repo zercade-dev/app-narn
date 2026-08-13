@@ -30,7 +30,7 @@ const FLAP_WINDOW_MS = 5 * 60_000;
  * at most one request; if the limit was minute-scale or model-specific, the
  * siblings are back within the minute instead of parked until the daily reset.
  */
-const POOL_SIBLING_COOLDOWN_CAP_MS = 70_000;
+export const POOL_SIBLING_COOLDOWN_CAP_MS = 70_000;
 
 export function freewayBucketKey(moduleId: string, modelId: string): string {
   return `${moduleId}::${modelId}`;

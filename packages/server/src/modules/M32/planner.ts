@@ -31,12 +31,20 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
   const totalJobs = groups.reduce((sum, g) => sum + g.jobs.length, 0);
   const reserve = opts.reserveRequests ?? defaultReserve(totalJobs);
   const background = opts.priorityClass === 'background';
-  // Working copies: the planner spends headroom as it assigns.
+  // Working copies: the planner spends headroom as it assigns. A background
+  // run leaves the reserve untouched for interactive work — including on an
+  // account-wide pool, where the reserve comes off the ONE shared budget (each
+  // sibling's view carries the same pool figure, so subtracting from every view
+  // takes it off the pool once, not once per model).
   const working = buckets.map((b) => ({
     ...b,
     remainingRequests: background
       ? Math.max(0, b.remainingRequests - reserve)
       : b.remainingRequests,
+    poolRemainingRequests:
+      background && b.poolRemainingRequests !== undefined
+        ? Math.max(0, b.poolRemainingRequests - reserve)
+        : b.poolRemainingRequests,
   }));
   const ordered = [...groups].sort((a, b) => {
     if (a.band !== b.band) return b.band - a.band;

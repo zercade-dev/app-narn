@@ -44,10 +44,24 @@ export function isEligible(bucket: BucketView, group: JobGroup, now: number): bo
   return effectiveRemainingRequests(bucket) >= 1;
 }
 
+/** A monthly character budget is a reservoir (1), a daily request window is not (0). */
+function isReservoir(bucket: BucketView): number {
+  return bucket.remainingChars !== undefined ? 1 : 0;
+}
+
+/**
+ * Ranks the eligible buckets cheapest-first. Daily request quotas perish
+ * daily while a monthly character budget does not, so reservoir buckets sort
+ * BEHIND every request-window bucket regardless of cost: use-it-or-lose-it
+ * headroom is spent first, and the reservoir covers what's left once the daily
+ * buckets are exhausted or cooling. Within each class the order is expected
+ * requests per job, then soonest reset, then tier, then key.
+ */
 export function rankCandidates(buckets: BucketView[], group: JobGroup, now: number): BucketView[] {
   const eligible = buckets.filter((b) => isEligible(b, group, now));
   const costs = new Map(eligible.map((b) => [b.bucketKey, requestCost(b, group)]));
   return [...eligible].sort((a, b) => {
+    if (isReservoir(a) !== isReservoir(b)) return isReservoir(a) - isReservoir(b);
     const ca = costs.get(a.bucketKey)!;
     const cb = costs.get(b.bucketKey)!;
     if (ca.requestsPerJob !== cb.requestsPerJob) return ca.requestsPerJob - cb.requestsPerJob;
@@ -74,7 +88,7 @@ export function selectBucket(
   const winner = ranked[0];
   if (reserve > 0 && winner.qualityTier === 4 && group.band < 4) {
     const cost = requestCost(winner, group);
-    if (winner.remainingRequests - cost.estimatedRequests < reserve) {
+    if (effectiveRemainingRequests(winner) - cost.estimatedRequests < reserve) {
       const fallback = ranked.find((b) => b.qualityTier !== 4);
       if (fallback) return toSelection(fallback, group);
     }
