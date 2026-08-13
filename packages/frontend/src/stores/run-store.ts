@@ -232,6 +232,14 @@ interface RunStore {
   fetchRunDetails: (projectId: string, runId: string) => Promise<RunDetails | null>;
   pauseRun: (projectId: string, runId: string) => Promise<void>;
   resumeRun: (projectId: string, runId: string) => Promise<void>;
+  /**
+   * Resumes a run parked on `waitingForQuota` (or any paused run) with an
+   * explicitly chosen module instead of waiting on the free pool. Mirrors
+   * `pauseRun`/`resumeRun`'s envelope; re-throws so the server's 409/400
+   * taxonomy message (not-parked, not-drained, project-busy, unknown-module,
+   * module-unavailable, module-not-eligible) surfaces to the caller.
+   */
+  resumeRunWith: (projectId: string, runId: string, moduleId: string) => Promise<void>;
   reorderQueue: (projectId: string, runIds: string[]) => Promise<void>;
   startPolling: (projectId: string) => void;
   stopPolling: () => void;
@@ -684,6 +692,22 @@ export const useRunStore = create<RunStore>((set, get) => {
         get,
         projectId,
         () => apiRequest(`/projects/${projectId}/runs/${runId}/resume`, { method: 'POST' }),
+        { poll: true, rethrow: true },
+      );
+    },
+
+    resumeRunWith: async (projectId: string, runId: string, moduleId: string) => {
+      // Same envelope as resumeRun — the run is active again, so poll for
+      // it; re-throw so the server's 409/400 message surfaces to the caller.
+      await mutateThenRefresh(
+        set,
+        get,
+        projectId,
+        () =>
+          apiRequest(`/projects/${projectId}/runs/${runId}/resume-with`, {
+            method: 'POST',
+            body: JSON.stringify({ moduleId }),
+          }),
         { poll: true, rethrow: true },
       );
     },

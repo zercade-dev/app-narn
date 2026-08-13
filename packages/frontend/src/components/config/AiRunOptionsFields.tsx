@@ -32,6 +32,16 @@ export interface AiRunOptionsFieldsProps {
   modulePlaceholder?: string;
   /** Forwarded to the model picker: enables the Confidence column for this run context. */
   confidenceContext?: ModelConfidenceContext;
+  /**
+   * Suppress the model + reasoning-effort fields even though a module is
+   * selected — for a module that picks its own model (e.g. NARN Freeway),
+   * rendering them would mount `ModuleModelSelector` for a module with no
+   * `/api/modules/:id/models` route, producing a spurious 404 error state.
+   * The caller decides when this applies (a dialog-local gate, not something
+   * this shared component infers) and is responsible for any explanatory
+   * text shown in the fields' place.
+   */
+  hideModelFields?: boolean;
 }
 
 export function AiRunOptionsFields({
@@ -49,6 +59,7 @@ export function AiRunOptionsFields({
   reasoningEffortLabel,
   modulePlaceholder,
   confidenceContext,
+  hideModelFields,
 }: Readonly<AiRunOptionsFieldsProps>): React.JSX.Element {
   return (
     <>
@@ -64,7 +75,7 @@ export function AiRunOptionsFields({
         />
       </div>
 
-      {moduleId && (
+      {moduleId && !hideModelFields && (
         <div className="space-y-1.5">
           <Label htmlFor={`${idPrefix}-model`}>{modelLabel}</Label>
           <ModuleModelSelector
@@ -79,7 +90,7 @@ export function AiRunOptionsFields({
         </div>
       )}
 
-      {moduleId && (
+      {moduleId && !hideModelFields && (
         <ModuleReasoningEffortSelect
           id={`${idPrefix}-reasoning-effort`}
           moduleId={moduleId}
