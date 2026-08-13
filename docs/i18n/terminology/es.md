@@ -66,7 +66,7 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | suggestion |  |  |
 | discard |  |  |
 | needs review | necesita revisión | Verb phrase, so no gender to agree. Sentence-cased in the filter ("Necesita revisión" — `filters.needsReview`, `compare.needsReviewFilter`), lowercase in the row badge ("necesita revisión" — `compare.cellNeedsReviewBadge`), same wording in both. "Marcar todo como necesita revisión" is the bulk form. For the related *reviewed* adjective see the gender rule above: token form "revisado", agreeing form "revisada". |
-| flag |  |  |
+| flag | marcar | Verb on `review:flag`, participle on `review:filterFlagged`/`review:flaggedToast` — the review disposition, and only that. `review:sourceAi.runSummary`'s loose "flagged" (entries the source review marked as carrying findings, not the disposition) is not this term and takes *identificadas*, never *marcada(s)*. `glossary:flaggedTitle` still renders its own loose "flagged" as *marcados*, sharing the disposition root — a pre-existing collision this pass left untouched. |
 | ignore / ignored |  |  |
 | Review (the sidebar group) |  |  |
 | review queue |  |  |

@@ -35,7 +35,7 @@
     "progressLabel": "Revisione in corso",
     "progressActivityNote": "Il costo completo e l'avanzamento sono nella scheda Attività.",
     "runLabel": "Esecuzione di revisione",
-    "runSummary": "Contrassegnate: {{flagged}} di {{reviewed}} · rilievi: {{findings}}",
+    "runSummary": "Segnalate: {{flagged}} di {{reviewed}} · rilievi: {{findings}}",
     "emptyTitle": "Ancora nessuna revisione dell'origine",
     "emptyHint": "“Esegui la revisione” controlla ogni voce di origine alla ricerca di refusi, errori di grammatica, terminologia, chiarezza e contenuti a rischio. I risultati sono solo informativi.",
     "loadingFindings": "Caricamento dei rilievi…",

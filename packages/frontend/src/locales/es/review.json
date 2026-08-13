@@ -35,7 +35,7 @@
     "progressLabel": "Revisión en curso",
     "progressActivityNote": "El coste y el progreso completos están en la pestaña Actividad.",
     "runLabel": "Ejecución de revisión",
-    "runSummary": "{{flagged}} marcadas de {{reviewed}} · {{findings}} hallazgos",
+    "runSummary": "{{flagged}} identificadas de {{reviewed}} · {{findings}} hallazgos",
     "emptyTitle": "Aún no hay revisión del original",
     "emptyHint": "«Ejecutar revisión» comprueba cada entrada de origen en busca de erratas, gramática, terminología, claridad y contenido inseguro. Los resultados son solo informativos.",
     "loadingFindings": "Cargando hallazgos…",

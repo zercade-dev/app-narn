@@ -35,7 +35,7 @@
     "progressLabel": "Đang rà soát",
     "progressActivityNote": "Chi phí và tiến độ đầy đủ nằm ở tab Hoạt động.",
     "runLabel": "Lần chạy rà soát",
-    "runSummary": "Gắn cờ {{flagged}} trên {{reviewed}} · {{findings}} phát hiện",
+    "runSummary": "{{flagged}} trên {{reviewed}} có phát hiện · {{findings}} phát hiện",
     "emptyTitle": "Chưa có lượt rà soát nguồn nào",
     "emptyHint": "Chạy rà soát sẽ kiểm tra mọi mục nguồn để tìm lỗi chính tả, lỗi ngữ pháp, vấn đề thuật ngữ, chỗ thiếu rõ ràng và nội dung không an toàn. Kết quả chỉ mang tính báo cáo.",
     "loadingFindings": "Đang tải các phát hiện…",
