@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Quality** tab is a dashboard that aggregates the LQA (Language Quality Assurance) results produced whenever entries are translated. It shows your overall pass rate and where issues cluster, so you can find problem areas quickly. It fills in as you translate — if it is empty, run a translation first.
+The **Quality** tab is a dashboard that aggregates the LQA (Linguistic Quality Assurance) results produced whenever entries are translated. It shows your overall pass rate and where issues cluster, so you can find problem areas quickly. It fills in as you translate — if it is empty, run a translation first.
 
 ## What it shows
 
