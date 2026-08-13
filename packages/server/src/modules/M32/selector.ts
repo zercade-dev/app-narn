@@ -20,6 +20,19 @@ function groupChars(group: JobGroup): number {
   return total;
 }
 
+/**
+ * The request stock a bucket can actually spend: a provider with an
+ * account-wide pool caps every one of its buckets, so the usable figure is the
+ * tighter of this model's own headroom and the pool's. Every surface that
+ * reports or reasons about remaining requests must use this, or a drained pool
+ * reads as full on each sibling.
+ */
+export function effectiveRemainingRequests(
+  bucket: Pick<BucketView, 'remainingRequests' | 'poolRemainingRequests'>,
+): number {
+  return Math.min(bucket.remainingRequests, bucket.poolRemainingRequests ?? Infinity);
+}
+
 export function isEligible(bucket: BucketView, group: JobGroup, now: number): boolean {
   if (bucket.disabledReason !== undefined) return false;
   if (bucket.cooldownUntil !== undefined && bucket.cooldownUntil > now) return false;
@@ -28,9 +41,7 @@ export function isEligible(bucket: BucketView, group: JobGroup, now: number): bo
   if (bucket.remainingChars !== undefined) {
     if (bucket.remainingChars < groupChars(group)) return false;
   }
-  // A provider with an account-wide pool caps every one of its buckets: the
-  // usable stock is the tighter of this model's own headroom and the pool's.
-  return Math.min(bucket.remainingRequests, bucket.poolRemainingRequests ?? Infinity) >= 1;
+  return effectiveRemainingRequests(bucket) >= 1;
 }
 
 export function rankCandidates(buckets: BucketView[], group: JobGroup, now: number): BucketView[] {

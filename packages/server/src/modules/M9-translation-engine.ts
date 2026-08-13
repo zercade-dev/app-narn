@@ -106,6 +106,8 @@ import {
   isAbortError,
   isRateLimitError,
   isRunCancellingAuthError,
+  rateLimitCooldownMs,
+  retryAfterMsOf,
   withRateLimitRetry,
 } from './M9/errors.js';
 import { groupDecisions } from './M9/packing.js';
@@ -117,7 +119,7 @@ import {
   recordGateOutcomes,
 } from './M32/bucket-source.js';
 import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
-import { selectEscalation } from './M32/selector.js';
+import { effectiveRemainingRequests, selectEscalation } from './M32/selector.js';
 import { difficultyBand } from './M32/difficulty.js';
 import type { BucketView, JobGroup } from './M32/types.js';
 import { syncAuthoritativeUsage } from './M32/probes.js';
@@ -294,50 +296,20 @@ type ControlledFailureGroup = {
 };
 
 /**
- * Provider-supplied `Retry-After` carried on a rate-limit error, in ms.
- * Undefined when the provider gave none — the Freeway cooldown then falls back
- * to the bucket's next day-scale reset. Clamped like the dispatch back-off so a
- * hostile endpoint cannot sideline a bucket beyond a minute on its own say-so.
- */
-function retryAfterMsOf(err: unknown): number | undefined {
-  if (typeof err !== 'object' || err === null || !('retryAfterMs' in err)) return undefined;
-  const value = (err as { retryAfterMs?: unknown }).retryAfterMs;
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return undefined;
-  return Math.min(Math.round(value), 60_000);
-}
-
-/**
- * Floor for a rate limit the provider named as per-MINUTE but sent without a
- * `Retry-After`. Just over a minute, so the window has certainly rolled over.
- */
-const PER_MINUTE_RATE_LIMIT_COOLDOWN_MS = 70_000;
-
-/**
- * Retry-After when the provider sent one; a short floor for per-minute pool
- * limits (OpenRouter names them "...-per-min") that arrive without one —
- * otherwise a minute-scale limit would cool a bucket until the daily reset.
- * Undefined for any other rate limit, which still falls back to that reset.
- */
-function rateLimitCooldownMs(err: unknown): number | undefined {
-  const retryAfter = retryAfterMsOf(err);
-  if (retryAfter !== undefined) return retryAfter;
-  const message = err instanceof Error ? err.message : String(err);
-  return /\bper[-_\s]?min/i.test(message) ? PER_MINUTE_RATE_LIMIT_COOLDOWN_MS : undefined;
-}
-
-/**
  * Human-readable headroom for a Freeway "why routed" detail line: chars for a
- * `monthly_chars`-governed bucket (DeepL), else requests. Falls back to
- * "quota unknown" when the bucket isn't in the loaded view (shouldn't
- * happen for a bucket the resolver just assigned, but the detail log must
- * never throw).
+ * `monthly_chars`-governed bucket (DeepL), else requests — clamped by the
+ * provider's shared-pool headroom, which is what the selector actually spends
+ * against (reporting a per-model 50 while the account-wide pool is drained
+ * would be a lie). Falls back to "quota unknown" when the bucket isn't in the
+ * loaded view (shouldn't happen for a bucket the resolver just assigned, but
+ * the detail log must never throw).
  */
 function formatBucketHeadroom(view: BucketView | undefined): string {
   if (!view) return 'quota unknown';
   if (view.remainingChars !== undefined) {
     return `${view.remainingChars} chars left this month`;
   }
-  return `${view.remainingRequests} requests left today`;
+  return `${effectiveRemainingRequests(view)} requests left today`;
 }
 
 /** `HH:MM` in the server's local time, for the "resumes ~HH:MM" detail line. */

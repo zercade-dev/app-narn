@@ -46,7 +46,12 @@ import { getRunStore } from '../../storage/registry.js';
 import { getCurrentTenant } from '../../storage/pg/tenant-context.js';
 import { sanitizeLogObject } from '../M16-credential-store.js';
 import { coolBucket, recordDispatch, type BucketSourceDeps } from '../M32/bucket-source.js';
-import { isAbortError, isRateLimitError, withRateLimitRetry } from './errors.js';
+import {
+  isAbortError,
+  isRateLimitError,
+  rateLimitCooldownMs,
+  withRateLimitRetry,
+} from './errors.js';
 import type { ModuleLogFn } from './module-selection.js';
 import { JobQueue } from './queue.js';
 import { awaitAllWithTimeout, SettledTracker } from './run-settled.js';
@@ -139,18 +144,6 @@ export interface EnqueueBatchedOptions<TItem extends { entryId: string }, TRecor
   customBatchSizeOverride?: number;
   /** Wires each packed batch onto the queue (owns any per-run side-channel). */
   dispatch: (ctx: BatchDispatchContext<TItem, TRecord>) => void;
-}
-
-/**
- * A provider-supplied `retryAfterMs`, clamped so a hostile endpoint cannot
- * sideline a free bucket beyond a minute on its own say-so. Absent ⇒ the
- * cooldown runs to the bucket's next day-scale reset.
- */
-function retryAfterMsOf(err: unknown): number | undefined {
-  if (typeof err !== 'object' || err === null || !('retryAfterMs' in err)) return undefined;
-  const value = (err as { retryAfterMs?: unknown }).retryAfterMs;
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return undefined;
-  return Math.min(Math.round(value), 60_000);
 }
 
 /** The free-tier bucket a background run spends against, plus its test seams. */
@@ -809,9 +802,13 @@ export abstract class BackgroundRunEngine<TRecord> {
 
   /**
    * Cool the run's free-tier bucket after a rate limit outlived its retries, so
-   * the pool stops offering it until it recovers. No-op for a run that isn't
-   * bound to a bucket; never fails the batch (the items are already failing on
-   * the provider error — a ledger write must not change that outcome).
+   * the pool stops offering it until it recovers. Same semantics as the
+   * translate path's dispatch failover: a per-minute limit sent without a
+   * `Retry-After` cools for just over a minute rather than until the daily
+   * reset, and the cool is pool-scoped, since a provider with an account-wide
+   * allowance rate-limits every one of its models at once. No-op for a run that
+   * isn't bound to a bucket; never fails the batch (the items are already
+   * failing on the provider error — a ledger write must not change that).
    */
   private async coolFreewayBucket(
     binding: FreewayBatchBinding | undefined,
@@ -819,7 +816,13 @@ export abstract class BackgroundRunEngine<TRecord> {
   ): Promise<void> {
     if (!binding) return;
     try {
-      await coolBucket(binding.bucketKey, Date.now(), retryAfterMsOf(err), binding.deps);
+      await coolBucket(
+        binding.bucketKey,
+        Date.now(),
+        rateLimitCooldownMs(err),
+        binding.deps,
+        'pool',
+      );
     } catch (writeErr) {
       this.logger.warn(`${this.logPrefix}:freeway-ledger-write-failed`, {
         bucketKey: binding.bucketKey,

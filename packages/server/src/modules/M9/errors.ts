@@ -53,6 +53,38 @@ export function abortableSleep(ms: number, signal?: AbortSignal): Promise<void> 
 export const MAX_RETRY_AFTER_MS = 60_000;
 
 /**
+ * A provider-supplied `retryAfterMs`, clamped to {@link MAX_RETRY_AFTER_MS} so a
+ * hostile or broken endpoint cannot sideline a free-tier bucket beyond a minute
+ * on its own say-so. Absent ⇒ the caller's own fallback (for a Freeway cooldown,
+ * the bucket's next day-scale reset).
+ */
+export function retryAfterMsOf(err: unknown): number | undefined {
+  if (typeof err !== 'object' || err === null || !('retryAfterMs' in err)) return undefined;
+  const value = (err as { retryAfterMs?: unknown }).retryAfterMs;
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return undefined;
+  return Math.min(Math.round(value), MAX_RETRY_AFTER_MS);
+}
+
+/**
+ * Floor for a rate limit the provider named as per-MINUTE but sent without a
+ * `Retry-After`. Just over a minute, so the window has certainly rolled over.
+ */
+export const PER_MINUTE_RATE_LIMIT_COOLDOWN_MS = 70_000;
+
+/**
+ * Retry-After when the provider sent one; a short floor for per-minute pool
+ * limits (OpenRouter names them "...-per-min") that arrive without one —
+ * otherwise a minute-scale limit would cool a bucket until the daily reset.
+ * Undefined for any other rate limit, which still falls back to that reset.
+ */
+export function rateLimitCooldownMs(err: unknown): number | undefined {
+  const retryAfter = retryAfterMsOf(err);
+  if (retryAfter !== undefined) return retryAfter;
+  const message = err instanceof Error ? err.message : String(err);
+  return /\bper[-_\s]?min/i.test(message) ? PER_MINUTE_RATE_LIMIT_COOLDOWN_MS : undefined;
+}
+
+/**
  * Whether an error (or a module's per-result `error` string) signals a 429.
  * Detects the shared typed RateLimitError by name first, then falls back to
  * the canonical shared message vocabulary (which covers Google's quota
