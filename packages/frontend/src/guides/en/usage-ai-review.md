@@ -10,7 +10,7 @@ The **Translation AI review** tab has an AI judge score completed translations f
 
 * Click **Review last run** to judge the latest completed translation run (or start a review from a specific run in the **Activity** tab).
 * Step through the flagged results; each verdict shows the source, the translation, a **score**, and often a **suggestion**.
-* **Apply** a suggestion to replace the translation, or **Approve all suggestions** to apply them in one pass. A warning appears if a suggestion would drop tags, placeholders, or line breaks.
+* **Apply** a suggestion to replace the translation, or **Apply all suggestions** to apply them in one pass. A warning appears if a suggestion would drop tags, placeholders, or line breaks.
 
 ## Source AI review
 
