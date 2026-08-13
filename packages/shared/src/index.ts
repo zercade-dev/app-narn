@@ -47,6 +47,7 @@ export {
 export { isExcludedFromAi } from './entry-exclusion.js';
 export {
   SOURCE_LABELS,
+  SOURCE_DISPLAY_LOCALES,
   getSourceLabel,
   getSourceLabelDef,
   isKnownSourceLabel,

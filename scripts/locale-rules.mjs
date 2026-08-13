@@ -218,7 +218,8 @@ export function isStrictFor(locale, strictEnv = STRICT_ENV) {
  * lands, the entry defers nothing and staleWipLocales() turns it into a hard
  * failure saying to delete it. The gate lifts the exemption, not a memory.
  */
-export const WIP_LOCALES = {};
+export const WIP_LOCALES = {
+};
 
 for (const [locale, reason] of Object.entries(WIP_LOCALES)) {
   if (!reason || !reason.trim()) {
@@ -1172,6 +1173,17 @@ export const MIN_UNSPACED_CHARS = 8;
  * words-only threshold would exempt essentially every value in ja/ko/zh/th and
  * quietly disable this check for the locales where a copied-through English
  * string is most obvious to a reader and most embarrassing to ship.
+ *
+ * CONSEQUENCE FOR IDENTICAL_ALLOWLIST, learned the hard way: the two thresholds
+ * do not select the same set of keys, so the allowlist's completeness is
+ * script-dependent. A 1-2 word English value under 8 characters is invisible to
+ * every spaced locale and visible to every unspaced one. Six do-not-translate
+ * product names sat unallowlisted for the whole programme for exactly this
+ * reason — only their three-word sibling had ever fired — and the first
+ * Japanese batch surfaced all six at once. So an allowlist that looks complete
+ * after de/es/fr/tr is not evidence of anything for ja/ko/zh/th, and the gap
+ * appears as a batch of failures on one locale rather than as a trickle. Grant
+ * the entries; do not raise a threshold to make them disappear.
  */
 export function isSubstantial(value, locale) {
   const trimmed = value.trim();
@@ -1192,14 +1204,70 @@ export function isSubstantial(value, locale) {
  * silently accumulate dead suppressions.
  */
 export const IDENTICAL_ALLOWLIST = {
+  'de:config:routing.tabImportExport':
+    'German spells both nouns exactly as English does — Import and Export are the ordinary ' +
+    'German nouns for the two operations — and the key is a tab label, which style/de.md ' +
+    'binds to a noun phrase. The alternative that differs from en is the infinitive pair ' +
+    '"Importieren / Exportieren", which is the wrong control shape. Requested by the ' +
+    'translator and granted rather than absorbed into the string: a guard rejecting copy ' +
+    'the translator believes is correct is a finding against the guard.',
   '*:glossary:sourceLink':
     'Proper name of an external spreadsheet ("GI: MW Glossary / Common Translation Sheet") — ' +
     'it is a link target users must be able to find, not prose',
   '*:review:provenance':
-    'Format string "{{module}} · {{date}}" — nothing but two placeholders and a separator, ' +
-    'so there is no word to translate',
+    'Format string "{{module}} · {{date}}" — two placeholders and a separator, so there is ' +
+    'no WORD to translate. Corrected 2026-08-11: the original reason said there was nothing ' +
+    'to translate at all, which the shipped tree falsifies — the SEPARATOR is locale-' +
+    'variable, and `ja` now ships the ideographic 中黒 ("{{module}}・{{date}}") to match the ' +
+    'rest of its punctuation. That locale is therefore no longer byte-identical and no ' +
+    'longer reaches this entry; the entry covers the locales that legitimately keep the ' +
+    'ASCII middle dot. A CJK locale reading the old reason would have kept "·" against its ' +
+    'own typography rules, which is the opposite of what this entry is for.',
   '*:strings:guide.topicGoogle':
     'Product name "Google AI (Gemini)" — both parts are on the do-not-translate list',
+
+  // The six siblings of topicGoogle. They belong to the same class and have the
+  // same justification, but only topicGoogle was here until an unspaced locale
+  // arrived: it is three words, so it trips MIN_WORDS, while these six are one
+  // or two words and no spaced locale can ever see them. All six clear
+  // MIN_UNSPACED_CHARS, so `ja` is the first locale in the programme able to
+  // surface them — see the note on isSubstantial(). `*:` because "this is a
+  // product name" is language-independent, exactly as for topicGoogle.
+  '*:strings:guide.topicCopilot':
+    'Product name "GitHub Copilot" — both parts are on the do-not-translate list',
+  '*:strings:guide.topicDeepseek':
+    'Product name "DeepSeek" — on the do-not-translate list',
+  '*:strings:guide.topicClaude':
+    'Product names "Anthropic (Claude)" — vendor and model, both on the do-not-translate list',
+  '*:strings:guide.topicGpt':
+    'Product names "OpenAI (GPT)" — vendor and model, both on the do-not-translate list',
+  '*:strings:guide.topicOpenrouter':
+    'Product name "OpenRouter" — on the do-not-translate list',
+  '*:strings:guide.topicGenericAi':
+    'Module name "Generic AI" — the product\'s own name for the bring-your-own-endpoint ' +
+    'module, shown in the module picker, so it must match the picker verbatim',
+
+  '*:vault:keyPlaceholder':
+    'A sample VAULT KEY NAME — "KEY_NAME", ASCII uppercase with an underscore — shown as the ' +
+    'empty-state hint of the key control. Vault key names are on the shared never-translate ' +
+    'list and are drawn from a fixed set of identifiers, so every correct locale renders ' +
+    'this identically; the scope is `*:` for that reason rather than per-locale. Requested ' +
+    'independently by the Japanese and German batch-4 translators, and `ja` is merely the ' +
+    'first locale able to SEE it: at 8 characters and one word it clears ' +
+    'MIN_UNSPACED_CHARS and fails MIN_WORDS, which is exactly the asymmetry isSubstantial() ' +
+    'documents. Neither translator localized or padded the value to clear the check. ' +
+    'CORRECTED 2026-08-12: this entry first said it was "the placeholder of the input a user ' +
+    'TYPES a vault key name into". That is false at both call sites and I wrote it from two ' +
+    'agents agreeing rather than from the file. VaultEditorDialog.tsx:281 is a ComboboxInput ' +
+    'that is `disabled` with `value={row.key}` always set, so its placeholder can never ' +
+    'render at all; :301 is a <SelectValue> inside a <Select>, where the user PICKS from a ' +
+    'list. Nothing is typed anywhere. The conclusion was right and only the reason was ' +
+    'wrong, which is this programme\'s commonest defect and leaves no trace downstream.',
+
+  '*:strings:runs.estimatedCost':
+    'Format string "≈ ${{amount}}" — an approximation sign, a currency symbol and a ' +
+    'placeholder, so there is no word to translate. A locale that writes its currency ' +
+    'differently should be a per-locale entry, not a change to this one.',
 };
 
 export function allowlistKeysFor(locale, namespace, key) {

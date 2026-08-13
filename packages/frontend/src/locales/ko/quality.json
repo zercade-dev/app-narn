@@ -1,0 +1,69 @@
+{
+  "title": "품질 대시보드",
+  "loading": "품질 요약을 불러오는 중…",
+  "error": "품질 요약을 불러오지 못했어요: {{message}}",
+  "empty": "아직 LQA 결과가 없어요. 번역을 실행하면 이 대시보드가 채워져요.",
+  "overallStat": {
+    "passRateLabel": "전체 통과율",
+    "results": "LQA 결과 {{count}}건",
+    "entries": "항목 {{count}}개",
+    "legendPassed": "통과 {{count}}",
+    "legendFailed": "실패 {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "가장 흔한 이슈",
+    "description": "모든 언어를 합친 이슈 유형별 건수예요."
+  },
+  "other": "기타",
+  "columns": {
+    "passRate": "통과율"
+  },
+  "legend": {
+    "tierHigh": "높은 통과율 (90% 이상)",
+    "tierMid": "중간 통과율 (70–89%)",
+    "tierLow": "낮은 통과율 (70% 미만)",
+    "passed": "통과",
+    "failed": "실패"
+  },
+  "checkLabels": {
+    "tag-equality": "태그 일치",
+    "overflow": "길이 초과",
+    "length-limit": "길이 제한",
+    "glossary-adherence": "용어집 준수",
+    "forbidden-terms": "금지 용어",
+    "regex-assertions": "정규식 어서션",
+    "number-parity": "숫자 일치",
+    "whitespace-parity": "공백 일치",
+    "line-break-parity": "줄바꿈 일치",
+    "end-punctuation": "끝 문장 부호",
+    "double-spacing": "중복 공백",
+    "double-words": "중복 단어",
+    "untranslated": "미번역",
+    "mask-integrity": "마스크 무결성",
+    "tag-mismatch": "태그 불일치",
+    "too-long": "너무 김",
+    "glossary-term-missing": "용어집 용어 누락",
+    "forbidden-term": "금지 용어 사용",
+    "regex-assertion-failed": "정규식 어서션 실패",
+    "regex-config-error": "정규식 설정 오류",
+    "number-missing": "숫자 누락",
+    "number-added": "숫자 추가",
+    "whitespace-leading": "앞 공백",
+    "whitespace-trailing": "뒤 공백",
+    "line-break-mismatch": "줄바꿈 불일치",
+    "end-punctuation-mismatch": "끝 문장 부호 불일치",
+    "mask-mismatch": "마스크 불일치"
+  },
+  "byLanguage": {
+    "title": "언어별 통과율",
+    "description": "낮은 순으로 보여 줘요. 언어를 클릭하면 실패한 항목을 확인할 수 있어요."
+  },
+  "bySource": {
+    "title": "출처별 이슈",
+    "description": "많은 순으로 보여 줘요. 출처를 클릭하면 실패한 항목을 확인할 수 있어요."
+  },
+  "byModule": {
+    "title": "모듈별 품질",
+    "description": "각 번역을 만든 번역 모듈을 기준으로 통과율과 이슈를 묶어 보여 줘요."
+  }
+}

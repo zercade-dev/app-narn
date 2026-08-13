@@ -33,8 +33,8 @@ Language names, months and weekdays are lowercase in Spanish ("español", "enero
 where English capitalizes them.
 
 Preserve uppercase only where the English string is uppercase for a layout reason:
-`strings:columns.config` is "STATUS" because it sits beside language names the table
-uppercases in code, so Spanish writes "ESTADO", not "Estado".
+`strings:columns.config` ("STATUS") becomes "ESTADO", not "Estado", because that header
+sits beside language names the table uppercases in code.
 
 ## Punctuation and spacing
 

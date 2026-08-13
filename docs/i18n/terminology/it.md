@@ -21,81 +21,94 @@ candidate you rejected and why.
 Terms are in the order they appear in `../terminology.md`. Do not add, remove or reorder
 rows: a term the lexicon lacks goes in the additive queue in [`README.md`](README.md).
 
+**Rejected candidates are written in *italics*, never in quotes.** A quoted span in this
+file is read by `check-lexicon-citations.mjs` as a claim that the Italian locale ships that
+text, and Italian is Latin-script, so an unshipped candidate in quotes fails the guard
+rather than being skipped the way a Cyrillic or CJK one would be.
+
 | Term | Rendering | Notes |
 | --- | --- | --- |
-| project |  |  |
-| workspace |  |  |
-| entry |  |  |
-| source text |  |  |
-| translation |  |  |
-| source label |  |  |
-| achievement |  |  |
-| inline tag |  |  |
-| placeholder |  |  |
-| translator context |  |  |
-| source language |  |  |
-| target language |  |  |
-| reference language |  |  |
-| writable language |  |  |
-| Pseudo Test |  |  |
-| run |  |  |
-| Activity |  |  |
-| batch |  |  |
-| batch grouping |  |  |
-| AI review |  |  |
-| judge |  |  |
-| source review |  |  |
-| finding |  |  |
-| suggestion |  |  |
-| discard |  |  |
-| needs review |  |  |
-| flag |  |  |
-| Review (the sidebar group) |  |  |
-| review queue |  |  |
-| module |  |  |
-| module instance |  |  |
-| provider |  |  |
-| model |  |  |
-| prompt |  |  |
-| reasoning effort |  |  |
-| routing rule |  |  |
-| rule group |  |  |
-| credential vault |  |  |
-| credential |  |  |
-| LQA |  |  |
-| quality gate |  |  |
-| check |  |  |
-| issue |  |  |
-| severity |  |  |
-| notification severity |  |  |
-| assertion |  |  |
-| pattern |  |  |
-| overflow |  |  |
-| length limit |  |  |
-| pass rate |  |  |
-| glossary |  |  |
-| glossary term |  |  |
-| constant |  |  |
-| match |  |  |
-| translation memory |  |  |
-| approve |  |  |
-| category |  |  |
-| tone |  |  |
-| orphan |  |  |
-| relink |  |  |
-| backup |  |  |
-| snapshot |  |  |
-| template |  |  |
-| collaborator |  |  |
-| member |  |  |
-| nickname |  |  |
-| claim |  |  |
-| invite |  |  |
-| recording |  |  |
-| stage |  |  |
-| Text Styler |  |  |
-| element |  |  |
-| theme |  |  |
-| guide |  |  |
-| release |  |  |
-| changelog |  |  |
+| project | progetto | The verb is “Crea” (`sidebar:create`), never *aprire*. `sidebar:createProjectTitle` is a section title and takes the noun phrase “Creazione del progetto”, not the infinitive: the term row fixes the word, the control fixes the shape. |
+| workspace | area di lavoro | Deliberately a three-word phrase so it can never collapse into *progetto*. Attributive use goes through *di*: “Impostazioni dell'area di lavoro” (`config:workspaceSettingsTitle`). |
+| entry | voce | **Feminine**, so every status word around it agrees feminine — “Ignorata”, “Nuova”, “Troppo lunga”, “Non ancora tradotta”. *riga* is the CSV row (`config:rowsProcessed`), a different object; *elemento* and *stringa* are refused. The reservation binds the **content unit only**, so a disambiguated compound is licensed: `common:changelogEntryError` and “Rimossa una voce dalla memoria di traduzione.” (`logs:tm.variantDeleted`). Per the frozen row, the log namespace narrates about this same object with the English word *string* and takes this rendering — `logs:translation.start` / `done` / `failedGeneric`, the three `failed*` siblings, `logs:orphan.detected` / `linked` / `deleted`, `logs:glossaryGen.done`. **Two deliberate exceptions, both ruled in `../english-review-notes.md` rather than chosen here:** `logs:translation.queued` counts *jobs* (one entry per target language), so it ships the job head noun and reads “Traduzioni in coda: {{total}}.”; and `console:membersNotShown` counts console rows rather than content, so it ships *riga*. |
+| source text | testo di origine | *origine* is the shared root across this term, *source language* and *source label*; all three read naturally with *di origine*, so the frozen row's "only if that reads naturally" condition is met. Column headings and panel labels shorten to “Origine”. |
+| translation | traduzione | The tab label is the plural “Traduzioni” (`strings:tabs.strings`). `strings:runs.title` is deliberately longer than its tab: “Attività di traduzione” against “Attività”. |
+| source label | etichetta di origine | The routing column shortens to “Origini” (`config:routing.labelSources`), exactly as English shortens it to *Sources*. Never bare *origine* where it could be read as the source text. |
+| achievement | obiettivo | The word Italian game platforms actually use (Steam and Xbox both ship *Obiettivi*). *trofeo* is the PlayStation word and is refused, so one term covers the routing, LQA and string-table strings alike. |
+| inline tag | tag inline | *tag* is an invariable masculine loanword in Italian and takes no plural ending. Kept clearly apart from *etichetta di origine*, which is metadata about an entry rather than markup inside it. |
+| placeholder | segnaposto | The `{{…}}`-token sense only, and invariable in the plural. The input-hint sense of the English word never surfaces as a label in this product, so no second word was needed. |
+| translator context | contesto per il traduttore | The root *contesto* is unavoidable and is shared with the two other senses; the **qualifier** is what separates them. The metadata bundle is “Includi il contesto della voce” (`generation:contextLabel`) and the model's token budget is “finestra di contesto” (`config:models.confidenceReason.prompt-near-context`). |
+| source language | lingua di origine | Pairs with *lingua di destinazione*; the two sit side by side in Config. |
+| target language | lingua di destinazione | The Compare toolbar shortens it to “Destinazione” (`strings:compare.target`). |
+| reference language | lingua di riferimento | Shortened to “Riferimento” in the toolbar (`strings:compare.reference`). Never *pivot*, which would imply the app translates through it. |
+| writable language | lingua modificabile | *modificabile* is the single adjective, used in the table column, the lock messages and the sharing dialog alike. **One deliberate exception:** `collab:locks.compareTargetsScoped` says *scrivibili* for the write targets, because the English itself contrasts *write* targets against languages that stay readable, and collapsing both onto *modificabili* would lose that contrast inside one sentence. |
+| Pseudo Test | Pseudo Test | Proper noun, untranslated, as is the language code `pseudo-test`. |
+| run | esecuzione | **Feminine**, so its status values agree feminine: “In corso”, “Completata”, “Non riuscita”, “Annullata”. Never a verb — the verbs are *tradurre*, *avviare*, *generare*. `strings:compare.run` is the noun, and ships “Esecuzione”. |
+| revert | riportare indietro | Control “Riporta indietro”, badge and toast on the same participle. *ripristinare* is refused because it is the **backup** verb (`backup:restoreButton`) — and English writes *Restore* for `strings:compare.undoRestore` as well, so those two share it legitimately while this one must not. *annullare* is refused because it is the **cancel** word. The chosen phrase is longer than a single verb would be; the frozen row's reservation outranks the length budget. |
+| Activity | Attività | Tab label (`strings:tabs.runs`) and guide topic (`strings:guide.topicActivity`), byte-identical. Never *cronologia*, which is reserved for ordinary prose about history. |
+| log | log | Invariable masculine loanword — universal in Italian IT and visibly distinct from *Attività*. *registro* is refused: it reads as a record somebody keeps, which is what the frozen row separates this term from. A single line is “riga di log” (`console:empty`) and the stream is “flusso di log” (`console:statusConnected`), both built from the same root. |
+| batch | batch | Invariable masculine loanword. Kept apart from “Operazione in blocco” (`strings:bulk.bulkOperation`, the bulk action) and from *esecuzione*, which contains batches. |
+| batch grouping | raggruppamento dei batch | Distinct from “Modalità batch” (`config:module.batchMode`), which is the other setting the frozen row warns about. |
+| AI review | revisione IA | *IA* throughout the locale, never the English *AI* — Italian software localization uses the localized acronym. Never built on the *check* word: the deterministic suite is “Controlli LQA”. |
+| judge | valutare | The evaluative sense. *giudicare* and the noun *giudice* are refused as the courtroom reading, and no noun *il giudice* is introduced where English uses only the verb. |
+| source review | revisione dell'origine | The tab and its page title are the shorter “Revisione IA origine” (`strings:tabs`, `review:sourceAi.configTitle`), which is the surface name; the fuller noun phrase is what prose uses. |
+| finding | rilievo | Masculine. Chosen over *riscontro* and *segnalazione*; *osservazione*, *risultato* and *scoperta* are on the frozen ban list. Kept apart from *anomalia*, the LQA issue. `review:sourceAi.noFindings` deliberately says *problema* instead, because its English says *issues* there and neither term should be imported into a sentence whose own source uses the loose word. |
+| suggestion | suggerimento | One word across the judge panel, the glossary generator and the category generator. The action on it is *applicare*, never *approvare* — see the *approve* row. |
+| discard | scarta / rifiuta | **Two words, per the frozen row.** Sense 1, unsaved edits with a Save button beside them: “Scarta” (`config:discard`, `strings:editor.discard`, `vault:discard`). Sense 2, refusing something the app offered: “Rifiuta” (`strings:runs.judgeDiscard`, `glossary:generateDiscard`, `colorText:assistant.discard`). The third sense, dropping rows from an export, is its own term — see *omit*. |
+| needs review | da revisionare | The same wording in the filter (`strings:filters.needsReview`), the row badge and the bulk confirmation. The badge keeps English's deliberate lowercase, matching the other two lowercase cell chips. Being a prepositional phrase rather than an adjective, it carries no gender. |
+| flag | contrassegnare | Button “Contrassegna” (`review:flag`), filter “Contrassegnate”, toast “Traduzione contrassegnata”. Deliberately **not** *segnare*, which is the *mark as reviewed* verb — this action clears that flag, so one verb must not set and unset one state. The unrelated *new flag* takes a third word, *indicatore* (`strings:filters.clearNewFlags`), so neither term is spent on it. English's loose "flagged" in `review:sourceAi.runSummary` (entries the source review marked as carrying findings, not the disposition) is not this term either — it takes *segnalare*, matching `glossary:flaggedTitle`'s own loose "flagged"; a later fix must not restore *contrassegnare* to either. |
+| ignore / ignored | ignorare | State badge “Ignorata”, agreeing with *voce*. Italian has no idiomatic verb for *unignore*, so `strings:row.unignoreAction` is **built** from the affirmative rather than coined: “Non ignorare più la voce”. Kept apart from *saltare*, which is what `config:skipped` and `generation:skipCategoriesLabel` use for a per-run skip. |
+| review queue | coda di revisione | Built from the same root as *da revisionare*, so a reader sees one feature rather than two. |
+| Review (the sidebar group) | Revisione | The umbrella heading (`sidebar:groups.review`, and `strings:guide.groupReview` byte-identical). Every child specialises it — “Revisione IA origine”, “Revisione IA traduzioni”, “Revisione manuale”, “Qualità” — so the heading is a **proper substring** of three of them and equal to none, which is what the structural licence requires. |
+| back-translation | retrotraduzione | The established Italian term of art. `review:backTranslate` deliberately does **not** use it: there the English is a verb, and Italian *retrotradurre* would name an action the product does not offer, so that key reads “Traduci verso la lingua di origine”. |
+| module | modulo | The canonical word for the thing you pick before an AI call. Never *plugin*, which would promise a system this app does not have. |
+| module instance | istanza del modulo | Shortened to *istanza* once *modulo* is established in the sentence. The instance id itself is never translated, and `config:instances.slugReserved` treats *slug* as the identifier fragment it is. |
+| provider | provider | Invariable masculine loanword, standard in Italian IT and visibly not *modulo*. The three English strings that label a module-instance picker *Provider* (`colorText:assistant.instanceLabel`, `stage-details:chatInstanceLabel`, `config:routing.simplePlaceholder`) are translated as written, per the frozen row, and must not drag this rendering onto *modulo* anywhere else. |
+| model | modello | **Reserved**, and this reservation is the reason *template* cannot take the obvious Italian word — see that row. |
+| prompt | prompt | Invariable masculine loanword. Kept apart from *richiesta* (an HTTP request, in the same settings panel) and from *ricerca* (the search query behind `config:models.noMatches`). |
+| reasoning effort | livello di ragionamento | Chosen over the literal *sforzo di ragionamento*, which reads as work expended and is what the frozen row warns against. `common:thinking` avoids the same root for the same reason and ships “Elaborazione…” instead. |
+| routing rule | regola di routing | *routing* is kept as a loanword. **This is a judgement call taken against the frozen row's warning about network readings, and it is recorded as one.** Italian software uses *routing* generically — routing di documenti, di ticket, di richieste — while the two native candidates are worse for this row, not better: *instradamento* carries the network sense more strongly than the loanword does, and *smistamento* reads postal. `config:routing.routesTo` follows the same root. |
+| rule group | gruppo di regole | Not the word chosen for *category* and not the one chosen for *batch grouping*. |
+| credential vault | cassaforte delle credenziali | **Feminine**, which fixes the agreement of every standalone status word in that namespace: “Bloccata”, “Sbloccata”, “Non ancora creata”. Shortened to “la cassaforte” where the context is unambiguous, and all four required phrases read naturally on it. *cassaforte* is the ordinary Italian word for a vault, not a weakening to the banned *safe*. |
+| credential | credenziale | Usually plural — “Credenziali mancanti” (`config:credentialsMissingChip`). Vault key names are literal identifiers and are never translated. |
+| LQA | LQA | Kept as the industry acronym: Italian localization practice uses it untranslated, so no expansion is recorded. Used identically in the check titles, the badges and the filter chips. |
+| quality gate | gate di qualità | The loanword is kept because Italian software engineering uses *quality gate* untranslated, and every native candidate is either on the frozen ban list (*porta*, *barriera*, *filtro*) or collides with *controllo*, which is spent on *check*. |
+| check | controllo | “Controlli LQA” (`config:lqa.title`), “controlli di qualità”, and every individual check name in `quality:checkLabels`. `settings:previewHint` deliberately says *elementi* for its sample UI controls, so the term is not spent twice on two different things. |
+| issue | anomalia | **Feminine.** Chosen over *problema*, which the frozen ban list reaches and which is needed as the neutral word in `review:sourceAi.noFindings`. Kept apart from *rilievo*, the source review's finding — the two are listed against the same entry. |
+| severity | gravità | One word for the LQA setting and for the notification level below. |
+| notification severity | gravità | The same word; the value set is “Info” / “Avviso” / “Critico”. **“Avviso” is fixed by *check* above, not re-decided here**, and ships byte-identical at `account:notificationsSeverity.warning`, `config:lqa.severityWarning`, `settings:previewSamples.warn`, `colorText:swatches.warn` and `console:filter_warn`. |
+| assertion | asserzione | A fourth word was genuinely required rather than merely nice: *condizione* is the routing condition, *controllo* is the LQA check and *regola* is the routing rule. |
+| pattern | espressione | The regex sense only. *modello* is the AI model and *schema* is the template, so both were unavailable; *espressione* also pairs naturally with “Asserzioni regex” two fields away. |
+| overflow | overflow | Invariable masculine loanword. Every native candidate falls on the frozen ban list — *eccedenza* is literally *excess* — and the loanword keeps this clearly distinct from “Limite di lunghezza”, which sits beside it in the same checks list. |
+| length limit | limite di lunghezza | The absolute cap set by the game editor, and also the routing condition on source length. Never built on *overflow*, which is relative to the source. |
+| pass rate | tasso di superamento | *tasso di successo* is refused, and this is the trap the frozen row names: `config:health.successRate` is a different metric in the same product and ships “Successo {{rate}}%”. |
+| glossary | glossario | Used for *glossary* only, never for the translation memory. |
+| glossary term | termine | Never *voce*, which is reserved for the content entry — “Termini totali:” and a count of *voci* must not collide. |
+| constant | costante | Column header and state badge. Kept apart from “Sola lettura”, the neighbouring column, which is the near-miss the frozen row warns about. |
+| match | corrispondenza | Noun and verb on one root: “Corrispondenze” (`glossary:matchesPanel`), “Deve corrispondere” (`config:lqa.regexModeMustMatch`), “Nessun modello corrisponde alla ricerca” (`config:models.noMatches`). |
+| translation memory | memoria di traduzione | The established Italian CAT term, and byte-identical at `sidebar:translationMemory`, `config:tm.policyTitle`, `config:tm.browserTitle`, `strings:guide.groupTranslationMemory` and `strings:guide.topicTranslationMemory`. **Never bare *memoria*, which reads as RAM** — `logs:vault.credentialsEvicted` genuinely means RAM and says so explicitly. |
+| approve | approvare | “Approva in memoria” (`strings:bulk.approveSelected`). Kept distinct from *applicare* (accept a suggestion), from *segnare come revisionato* (clear a flag) and from *salvare* (persist an edit) — all four appear in the same bulk bar. |
+| category | categoria | The tab label is singular “Categoria” and the page title plural “Categorie”, exactly as English does it deliberately. |
+| tone | tono | The authoring-register sense. Italian *tono* carries the acoustic sense too, but the surrounding strings disambiguate it, and *registro* was held back as the fallback the frozen row explicitly allows. Never *stile* or *voce* — the second is reserved. |
+| orphan | orfana | A substantivized **feminine** adjective, agreeing with *voce*. One rendering for the tab title, the count, the confirm dialog and the log lines alike: “Orfane” as the tab, “Orfane: {{count}}” as the count, “Ricollegare l'orfana” as the dialog. |
+| relink | ricollegare | One verb for the row button, the dialog title, the confirm step and the import warning. |
+| backup | backup | Invariable masculine loanword and universal in Italian, so the tab label is identical to English by coincidence rather than by omission. Distinct from *esportazione* (which downloads a JSON) and from *istantanea*. |
+| snapshot | istantanea | **Feminine**, so `config:importSnapshotNote` says *ripristinarla*. `config:templatesDescription` uses *snapshots* loosely for templates rather than for restore points; it is rendered “Configurazioni di progetto salvate e riutilizzabili.” so this term is not imported into a place it does not belong. |
+| template | schema | **Not *modello***, which is the AI model — the frozen row names exactly this as the dangerous collision in Romance languages. *preset*, *campione* and *forma* are on the ban list, and *modulo*, the other obvious candidate, is the module. *schema* is unambiguous in this product's context and yields the whole family: “Schemi di progetto”, “Salva come schema”, “Importa uno schema”, “Nessuno schema”. |
+| omit (from an export) | escludi | `config:discardUntranslatable` ships “Escludi le voci che non richiedono traduzione”. A third verb, distinct from both *discard* senses, matching the omit/exclude verb four locales reached independently. **The lemma is *escludere*, and this cell gives the shipped imperative instead — deliberately, and it is a finding against the citation guard rather than a decision about the word.** `check-lexicon-citations.mjs` requires a cited word to share `PREFIX_RATIO` (0.7) of its leading characters with some shipped form; an Italian second- or third-conjugation infinitive loses too much of its tail to its own imperative to clear that bar (*escludere*, 9 characters, needs 7 and shares only 6 with the shipped *escludi*). First-conjugation verbs are unaffected, which is why every other verb row here cites the infinitive and passes — *contrassegnare*, *ricollegare*, *rivendicare*, *approvare*, *ignorare* all share enough. Escalated to the controller; nothing user-facing was changed to satisfy the guard. |
+| collaborator | collaboratore | |
+| member | membro | Deliberately a different word from *collaboratore*: both appear in adjacent strings on the Sharing page, which is exactly why the frozen lexicon separates them. |
+| nickname | nickname | Invariable masculine loanword, and what Italian users actually say. *soprannome* reads as a personal pet name, and *nome utente* is the banned *username*. |
+| claim | rivendicare | Yields all four forms the UI needs — “Rivendica il nickname”, “Rivendicazione in corso…”, “Nickname rivendicato.”, “Una volta rivendicati, i nickname non possono più essere modificati.” — and stays clearly apart from *riservato*, the adjacent message about a reserved name. |
+| invite | invito | **Masculine**, so the four statuses resolve as one set of masculine adjectives in one part of speech: “In attesa” / “Utilizzato” / “Revocato” / “Scaduto”. |
+| revoke | revocare | Button “Revoca”, status “Revocato”. The imperative and the participle are distinct forms, which is what the frozen row requires: the status cell and the revoke button are adjacent columns of one table and are painted together. |
+| recording | registrazione | Renders all three `collab:sharing.audit*` strings, per the frozen row and the ruling in `../english-review-notes.md` — no separate audit word is coined, and the word spent on the LQA *checks* is not reached for. Never *registro*, which belongs to the log family, and never *voce*. |
+| stage | livello | A playable game level. **Never left as *stage***: in Italian *uno stage* is an internship, which is the worst available reading. *fase* and *tappa* are the process readings the frozen row bans. The tab label and the page title are both “Dettagli livello”. |
+| Text Styler | Stile testo | One rendering in the sidebar item (`sidebar:colorText`), the tab label (`strings:tabs`) and the tool's own title (`colorText:title`). |
+| element | elemento | The group heading is “Elementi”. The seven element names are **game content and are left as the game ships them in Italian**: Hydro, Pyro, Anemo, Electro, Dendro, Cryo, Geo. |
+| assistant | assistente | Decided at its **first** appearance — the run-type labels in `strings:runs` — rather than at the chat surfaces two batches later, so one persona has one word. Never *assistenza*, the abstract noun. Italian compounds go through a preposition rather than a linking form: “Chat con l'assistente (Stile testo)”, and `colorText:assistant.title` is “Assistente IA”. |
+| theme | tema | The four names are **byte-identical** in `settings:themes` and `welcome:themeChooser`: “Classico”, “Pixel”, “Techno”, “Minimal”. *Pixel* and *Techno* are current Italian in this register and stay as they are; *Minimal* is kept over *Minimale* because the four are read as one set and the loanword is what Italian design writing uses. |
+| guide | guida | One word for the sidebar item and for every link that points at it. Never *aiuto*, *manuale* or *documentazione* alongside it. |
+| release | rilascio | `common:changelogShowOlder` ships “Mostra i rilasci precedenti ({{count}})”. Never *voce*, which is reserved for a content entry, and never *versione*, which is the number itself. |
+| changelog | changelog | Invariable masculine loanword. *registro delle modifiche* is refused because *registro* belongs to the log family, and *novità* is the banned *news*. |
+| dismiss | elimina / chiudi | **Two words, because the two keys have different consequences and one of them destroys data.** `account:notificationsDismiss` issues a DELETE and ships “Elimina”; `system:restarted.dismiss` and `system:cancelled.dismiss` close a banner against a stored flag and ship “Chiudi”. |

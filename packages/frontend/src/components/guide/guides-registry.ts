@@ -1,26 +1,35 @@
 /**
- * Loads all guide Markdown files eagerly via Vite's import.meta.glob.
- * Keys are relative paths like '../../guides/en/configure-deepl.md'.
- * Values are raw Markdown strings.
+ * Lazy index of guide Markdown files, same pattern as changelog-registry.ts
+ * in this directory: the glob is deliberately NOT eager, so each guide file
+ * becomes its own code-split chunk, fetched only when its slug/locale is
+ * actually requested — instead of every locale's guides shipping in the
+ * main bundle. Keys are relative paths like '../../guides/en/configure-deepl.md'.
  */
 // One level deep only (guides/<locale>/<slug>.md). Deliberately excludes
 // subdirectories like guides/en/changelog/, which changelog-registry.ts
-// lazy-loads — statically globbing them here would pull them into the main
-// bundle and make those dynamic imports ineffective.
-const raw = import.meta.glob('../../guides/*/*.md', {
+// lazy-loads separately — globbing them here too would just duplicate that
+// registration.
+type Loader = () => Promise<string>;
+
+const files = import.meta.glob('../../guides/*/*.md', {
   query: '?raw',
   import: 'default',
-  eager: true,
-}) as Record<string, string>;
+}) as Record<string, Loader>;
 
 /**
  * Returns the raw Markdown content for the given guide slug and locale.
- * Falls back to 'en' when the locale-specific file is missing.
+ * Falls back to 'en' when the locale-specific file is missing — including
+ * when the locale's guide directory doesn't exist at all yet (today, only
+ * `guides/en/` ships; import.meta.glob simply has no keys for the other
+ * fourteen locales, so this resolves to the English chunk for all of them
+ * until per-locale guides land).
  */
-export function getGuideContent(slug: string, locale: string): string {
+export async function getGuideContent(slug: string, locale: string): Promise<string> {
   const key = `../../guides/${locale}/${slug}.md`;
   const fallbackKey = `../../guides/en/${slug}.md`;
-  return raw[key] ?? raw[fallbackKey] ?? `# ${slug}\n\nContent coming soon.`;
+  const load = files[key] ?? files[fallbackKey];
+  if (!load) return `# ${slug}\n\nContent coming soon.`;
+  return load();
 }
 
 export type GuideTopic = {

@@ -1,0 +1,42 @@
+{
+  "title": "Einstellungen",
+  "appearance": "Darstellung",
+  "appearanceDescription": "Festlegen, wie narn auf diesem Gerät aussieht.",
+  "theme": "Theme",
+  "mode": "Modus",
+  "switchToLight": "Zum hellen Modus wechseln",
+  "switchToDark": "Zum dunklen Modus wechseln",
+  "languageTitle": "Sprache",
+  "languageDescription": "Sprache der Benutzeroberfläche.",
+  "preview": "Vorschau",
+  "previewHint": "Beispiel-Steuerelemente im ausgewählten Theme.",
+  "previewSamples": {
+    "heading": "Überschrift",
+    "body": "Der Fließtext zeigt die Grundschrift und die Grundfarben.",
+    "muted": "Gedämpfter Text sieht so aus.",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "pass": "Bestanden",
+    "warn": "Warnung",
+    "fail": "Nicht bestanden",
+    "info": "Info",
+    "inputPlaceholder": "Textfeld",
+    "selectOptionA": "Erste Option",
+    "selectOptionB": "Zweite Option",
+    "checkbox": "Kontrollkästchen",
+    "badgeDefault": "Standard",
+    "badgeSecondary": "Sekundär",
+    "badgeOutline": "Umriss",
+    "badgeDestructive": "Destruktiv",
+    "scrollHint": "Scrollen, um die Scrollleiste im Theme zu sehen",
+    "iconsLabel": "Symbole"
+  },
+  "themes": {
+    "default": { "name": "Klassisch", "description": "Der klassische narn-Look." },
+    "pixel": { "name": "Pixel", "description": "Klobige 8-Bit-Konsolen-Vibes." },
+    "techno": { "name": "Techno", "description": "Neon-Cyberpunk-Terminal." },
+    "minimal": { "name": "Minimal", "description": "Flach, ruhig, monochrom." }
+  }
+}

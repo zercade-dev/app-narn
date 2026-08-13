@@ -38,7 +38,6 @@
   "instanceKeyFallbackHint": "Opcional: déjalo vacío para usar la clave del módulo base en lugar de esta específica de la instancia.",
   "noKeys": "Aún no hay credenciales almacenadas.",
   "addKey": "Añadir credencial",
-  "remove": "Eliminar",
   "delete": "Eliminar",
   "discard": "Descartar",
   "undoRemove": "Deshacer",

@@ -1,0 +1,69 @@
+{
+  "title": "Qualitäts-Dashboard",
+  "loading": "Qualitätsübersicht wird geladen…",
+  "error": "Qualitätsübersicht konnte nicht geladen werden: {{message}}",
+  "empty": "Noch keine LQA-Ergebnisse. Einen Übersetzungsdurchlauf starten, um dieses Dashboard zu füllen.",
+  "overallStat": {
+    "passRateLabel": "Bestehensquote gesamt",
+    "results": "LQA-Ergebnisse: {{count}}",
+    "entries": "Einträge: {{count}}",
+    "legendPassed": "Bestanden: {{count}}",
+    "legendFailed": "Nicht bestanden: {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "Häufigste Beanstandungen",
+    "description": "Anzahl je Beanstandungstyp über alle Sprachen hinweg."
+  },
+  "other": "Sonstige",
+  "columns": {
+    "passRate": "Bestehensquote"
+  },
+  "legend": {
+    "tierHigh": "Hohe Bestehensquote (≥ 90 %)",
+    "tierMid": "Mittlere Bestehensquote (70–89 %)",
+    "tierLow": "Niedrige Bestehensquote (< 70 %)",
+    "passed": "Bestanden",
+    "failed": "Nicht bestanden"
+  },
+  "checkLabels": {
+    "tag-equality": "Tag-Gleichheit",
+    "overflow": "Längenüberlauf",
+    "length-limit": "Längenlimit",
+    "glossary-adherence": "Glossartreue",
+    "forbidden-terms": "Verbotene Begriffe",
+    "regex-assertions": "Regex-Zusicherungen",
+    "number-parity": "Zahlenparität",
+    "whitespace-parity": "Leerraumparität",
+    "line-break-parity": "Zeilenumbruchparität",
+    "end-punctuation": "Schlusszeichensetzung",
+    "double-spacing": "Doppelte Leerzeichen",
+    "double-words": "Doppelte Wörter",
+    "untranslated": "Nicht übersetzt",
+    "mask-integrity": "Maskenintegrität",
+    "tag-mismatch": "Tag-Abweichung",
+    "too-long": "Zu lang",
+    "glossary-term-missing": "Glossarbegriff fehlt",
+    "forbidden-term": "Verbotener Begriff",
+    "regex-assertion-failed": "Regex-Zusicherung fehlgeschlagen",
+    "regex-config-error": "Fehler in der Regex-Konfiguration",
+    "number-missing": "Zahl fehlt",
+    "number-added": "Zahl hinzugefügt",
+    "whitespace-leading": "Führender Leerraum",
+    "whitespace-trailing": "Nachgestellter Leerraum",
+    "line-break-mismatch": "Zeilenumbruch-Abweichung",
+    "end-punctuation-mismatch": "Schlusszeichen-Abweichung",
+    "mask-mismatch": "Masken-Abweichung"
+  },
+  "byLanguage": {
+    "title": "Bestehensquote nach Sprache",
+    "description": "Schlechteste zuerst. Auf eine Sprache klicken, um ihre nicht bestandenen Einträge anzusehen."
+  },
+  "bySource": {
+    "title": "Beanstandungen nach Herkunft",
+    "description": "Schlechteste zuerst. Auf eine Herkunft klicken, um ihre nicht bestandenen Einträge anzusehen."
+  },
+  "byModule": {
+    "title": "Qualität nach Modul",
+    "description": "Bestehensquote und Beanstandungen, gruppiert nach dem Übersetzungsmodul, von dem die jeweilige Übersetzung stammt."
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "countdown": {
+    "message": "⚠️ Layanan akan segera dimulai ulang untuk menerapkan pembaruan — simpan pekerjaan Anda sekarang. Penerjemahan yang sedang berjalan akan terputus; entri yang sudah selesai tetap tersimpan, jadi jalankan ulang yang belum tuntas setelahnya.",
+    "collapse": "Ciutkan",
+    "expand": "Bentangkan"
+  },
+  "restarted": {
+    "message": "Layanan baru saja dimulai ulang untuk menerapkan pembaruan; sebagian aktivitas mungkin terputus — jalankan ulang apa pun yang tampak belum tuntas.",
+    "dismiss": "Tutup"
+  },
+  "cancelled": {
+    "message": "Jadwal mulai ulang layanan dibatalkan — Anda bisa terus bekerja seperti biasa.",
+    "dismiss": "Tutup"
+  },
+  "slot": {
+    "aria": "Anda sedang memakai lingkungan {{label}}"
+  }
+}

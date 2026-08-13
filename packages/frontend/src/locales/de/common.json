@@ -1,0 +1,15 @@
+{
+  "save": "Speichern",
+  "cancel": "Abbrechen",
+  "loading": "Wird geladen…",
+  "changelogEntryError": "Dieser Changelog-Eintrag konnte nicht geladen werden.",
+  "changelogShowOlder": "Ältere Releases anzeigen ({{count}})",
+  "saving": "Wird gespeichert…",
+  "thinking": "Denkt nach… {{seconds}} s",
+  "webSearch": {
+    "title": "Websuche",
+    "placeholder": "Google durchsuchen…",
+    "hint": "Enter drücken, um in einem neuen Tab zu suchen",
+    "action": "Suchen"
+  }
+}

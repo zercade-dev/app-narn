@@ -1,0 +1,30 @@
+{
+  "title": "Narnへようこそ",
+  "intro": "始める前に、下のガイドに目を通してみてください。準備ができていれば、認証情報の保管庫の設定に直接進むこともできます。",
+  "guidesHeading": "ガイド",
+  "browseGuides": "ガイドを見る",
+  "setupVaultHeading": "翻訳を始めますか？",
+  "setupVaultBody": "翻訳で使うAIプロバイダーのキーを追加するため、認証情報の保管庫を設定してください。",
+  "setupVaultButton": "保管庫を設定",
+  "themeChooser": {
+    "title": "見た目の選択",
+    "intro": "テーマを選び、ライトかダークかを選んでください。どちらも環境設定でいつでも変更できます。",
+    "themeLabel": "テーマ",
+    "modeLabel": "ライトかダーク",
+    "modes": { "light": "ライト", "dark": "ダーク" },
+    "confirm": "この設定を使う",
+    "keepDefault": "テクノのままにする",
+    "names": {
+      "default": "クラシック",
+      "pixel": "ピクセル",
+      "techno": "テクノ",
+      "minimal": "ミニマル"
+    },
+    "taglines": {
+      "default": "NARN本来の見た目です。",
+      "pixel": "ごつごつしたレトロなドット絵です。",
+      "techno": "ネオンが光るコンソール。新しい既定のテーマです。",
+      "minimal": "内容だけを見せます。"
+    }
+  }
+}

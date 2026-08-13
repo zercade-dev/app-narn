@@ -21,81 +21,96 @@ candidate you rejected and why.
 Terms are in the order they appear in `../terminology.md`. Do not add, remove or reorder
 rows: a term the lexicon lacks goes in the additive queue in [`README.md`](README.md).
 
+**Reading the Notes column.** An English word under discussion is written in *italics*,
+never in quotes and never in backticks — a quoted or backticked span is read by
+`check-lexicon-citations.mjs` as a claim that this locale ships that exact text, and an
+English gloss written that way fails, correctly. Corner brackets 「…」 therefore always
+wrap a real shipped rendering here, matching the quote convention this locale's strings
+use.
+
 | Term | Rendering | Notes |
 | --- | --- | --- |
-| project |  |  |
-| workspace |  |  |
-| entry |  |  |
-| source text |  |  |
-| translation |  |  |
-| source label |  |  |
-| achievement |  |  |
-| inline tag |  |  |
-| placeholder |  |  |
-| translator context |  |  |
-| source language |  |  |
-| target language |  |  |
-| reference language |  |  |
-| writable language |  |  |
-| Pseudo Test |  |  |
-| run |  |  |
-| Activity |  |  |
-| batch |  |  |
-| batch grouping |  |  |
-| AI review |  |  |
-| judge |  |  |
-| source review |  |  |
-| finding |  |  |
-| suggestion |  |  |
-| discard |  |  |
-| needs review |  |  |
-| flag |  |  |
-| Review (the sidebar group) |  |  |
-| review queue |  |  |
-| module |  |  |
-| module instance |  |  |
-| provider |  |  |
-| model |  |  |
-| prompt |  |  |
-| reasoning effort |  |  |
-| routing rule |  |  |
-| rule group |  |  |
-| credential vault |  |  |
-| credential |  |  |
-| LQA |  |  |
-| quality gate |  |  |
-| check |  |  |
-| issue |  |  |
-| severity |  |  |
-| notification severity |  |  |
-| assertion |  |  |
-| pattern |  |  |
-| overflow |  |  |
-| length limit |  |  |
-| pass rate |  |  |
-| glossary |  |  |
-| glossary term |  |  |
-| constant |  |  |
-| match |  |  |
-| translation memory |  |  |
-| approve |  |  |
-| category |  |  |
-| tone |  |  |
-| orphan |  |  |
-| relink |  |  |
-| backup |  |  |
-| snapshot |  |  |
-| template |  |  |
-| collaborator |  |  |
-| member |  |  |
-| nickname |  |  |
-| claim |  |  |
-| invite |  |  |
-| recording |  |  |
-| stage |  |  |
-| Text Styler |  |  |
-| element |  |  |
-| theme |  |  |
-| guide |  |  |
-| release |  |  |
-| changelog |  |  |
+| project | 專案 | The Taiwan rendering, and the single most load-bearing divergence from `zh-hans`, which ships 项目 — whose Traditional form 項目 is used *here* for an ordinary item and is barred for this sense. A character conversion of the Simplified file would therefore have produced a locale that calls a project an item throughout. `config:duplicateProject` is 「複製專案」 |
+| workspace | 工作區 | Shares no morpheme with 專案, which is what the term's *never the same word* rule asks. `config:workspaceSettingsTitle` is 「工作區設定」 and `config:batchGroupingDefaultOption` is 「使用工作區設定」, so the contrast against a project value reads at a glance |
+| entry | 條目 | **Canonical, counter 個.** 項目 was rejected even though it is idiomatic Taiwanese for an item: the frozen term lists *item* among the readings this word must not take, and the same two characters are the mainland word for *project*, so admitting it in one sense while banning it in the other would leave a trap in every later batch. 記錄 is spent on *recording*, 列 on a CSV row. `config:batchGroupingCustomSizeLabel` is 「每批次條目數」 |
+| source text | 原文 | The settled Taiwanese localization-industry word, and it pairs with 譯文 exactly as *source text* pairs with *translation*. `config:lqa.checks.tag-equality.description` is 「原文與譯文之間的內嵌標記必須一致。」 Kept for *source language* too — see that row |
+| translation | 譯文 | The noun. The verb is 翻譯, a different word, which is what keeps the *Translations* tab and the *Translate* sidebar group apart without effort — the collapse Japanese had to be warned about. `config:routing.categoriesConfiguredHint` is 「類別是在譯文分頁中設定的。」 Never 目標文字 or 輸出 |
+| source label | 來源標籤 | `config:routing.sourcesHint` is 「匯入條目後，來源標籤會顯示在這裡。」 The routing column heading shortens to 來源 exactly as English shortens it to *Sources* (`config:routing.labelSources`). 來源 and 原文 use different morphemes on purpose, so the *source label* / *source text* / *source language* trio can never blur |
+| achievement | 成就 | What every Taiwanese game platform ships for this. `config:lqa.achievementNameBytesLabel` is 「成就名稱（位元組）」 |
+| inline tag | 內嵌標記 | 標記 is the head; 內嵌 is the settled Taiwanese computing prefix for *inline* (mainland copy prefers 内联, which is one of the divergences a converter leaves untouched). Distinct from 來源標籤, which takes 標籤, and the umbrella over 佔位符 below |
+| placeholder | 佔位符 | The `{{…}}`-token sense **only**, and note the character: Taiwan writes 佔 with the person radical where the mainland writes 占. `config:lqa.checks.mask-integrity.description` is 「被遮罩的佔位符必須在往返翻譯後端的過程中保持不變。」 The input-hint sense of the same English word takes a different word entirely and had no occurrence in `config` |
+| translator context | 譯者情境 | Three things English calls *context*, and this locale keeps them apart by head rather than by modifier: this one is 情境, a model's context window is 上下文 (`config:models.confidenceReason.prompt-near-context` and `config:models.colContext`). `config:includeContext` is 「包含譯者情境欄」 — English says only *context column* there, and the qualifier is not padding: the exported column is the translator note (`M2-csv-importer.ts:518` seeds it as an optional translator note), and bare 情境 beside a table of AI settings would have read as the model's. 備註 is spent on the routing Notes field |
+| source language | 原文語言 | Built on 原文 rather than on 來源, so the pair 原文語言 / 目標語言 reads as one axis and 來源 stays the *source label* word |
+| target language | 目標語言 | Pairs with 原文語言; both are the settled Taiwanese compounds |
+| reference language | 參考語言 | `strings:compare.translateUseReferenceNone` is 「使用參考語言作為情境」. The toolbar label shortens to 參考 (`strings:compare.reference`), the same shortening English makes. Never a wording implying the app translates *through* it, which the term rules out |
+| writable language | 可編輯語言 | One adjective everywhere, which is what the term asks: the table column (`collab:sharing.columnLanguages`), the lock messages (`collab:locks.reviewLanguagesScoped` is 「審校佇列僅限於您的可編輯語言。」) and the compare-toolbar note. 可寫入 was rejected — it reads as a filesystem permission, and it is the word `collab:locks.compareTargetsScoped` needs for the *write target* it contrasts against |
+| Pseudo Test | 偽翻譯測試 | `config:pseudoTestHelpAria` is 「什麼是偽翻譯測試？」 偽在地化 is the industry term for pseudo-localization and was rejected deliberately: the English name is *Pseudo Test*, not *Pseudo-localization*, and the app's own description calls it a QA pass rather than a localization mode. The language code itself is never translated |
+| run | 執行 | The noun — one execution of a background engine. **The frozen term lists *execution* among the readings to avoid, and this row takes it anyway, knowingly.** Taiwanese Chinese has no other nominal for this: 運行 is the mainland verb, 任務 and 作業 are the *job* / *task* readings the same list bars, 程序 would name an OS process. What the reservation actually protects is that *run* must not be 批次, 活動 or 日誌, and 執行 collides with none of them. Its counter is 次. `config:importModeFullReplaceHint` is 「…不會納入 AI 執行」 |
+| revert | 回溯 | Rolls back everything one run wrote, and it is the third of three words this product must keep apart: 復原 is *undo* (`strings:compare.undo`, one earlier version of one cell) and 還原 is the backup *restore* verb (`backup:restoreButton`). 回復 was the obvious fourth candidate and was **rejected on legibility**: it is the two characters of 復原 in the other order, and the two controls appear in the same table. 回溯 is the Taiwanese technical word for rolling a transaction back. The badge is 「已回溯」 (`strings:runs.revertedBadge`) |
+| Activity | 活動 | The tab and the guide topic. 歷史 and 日誌 are both barred by the term — 日誌 belongs to the live server-log panel, one row down. The page title expands as English does: `strings:runs.title` is 「翻譯活動」 against the tab's 活動, and prose repeats the tab form, e.g. `review:translationAi.progressActivityNote` |
+| log | 日誌 | The live server-log panel and its lines. **記錄 was rejected here even though Taiwanese platform localization prefers it**, because *recording* needs that word (see its row) and a product cannot spend one word on both. 日誌 is standard Taiwanese usage for a server log (系統日誌、錯誤日誌) and carries the whole family: 日誌串流 (`console:statusConnected`), 匯出日誌 (`console:exportLogs`), 詳細日誌 (`strings:runs.aiReviewVerbose`). **Log entry folds into this term**, so `console:empty` is simply 「尚無日誌。」 and `console:membersNotShown` counts 筆日誌 rather than spending the reserved *entry* word on a log line |
+| batch | 批次 | Not 批量, which is the mainland form and is wanted here for nothing. `config:module.batchMode` is 「批次模式」 |
+| batch grouping | 批次分組 | `config:batchGroupingLabel` is 「批次分組」, built on 批次 so a reader sees one feature. It cannot collide with 批次模式 — 分組 and 模式 are different heads |
+| AI review | 審閱 | The AI's opinion. **Three review words, sharing 審 and differing in the head**: 審閱 for an AI pass, 審校 for a person proofreading (*needs review*, *review queue*), 審核 for the sidebar umbrella. None is a substring of another and none is equal to another, so the runbook's equality ban is satisfied structurally rather than by luck. Never 檢查, which is the deterministic LQA word |
+| judge | 評分 | The evaluative sense the term demands, never 法官 or 審判. Used verbally: `config:batchGroupingDescription` is 「在翻譯、評分與原文審閱執行中，把相關條目保留在同一個批次，讓模型能一起看到它們。術語與類別生成不受影響。」 No noun *the judge* is introduced, because English introduces none either |
+| source review | 原文審閱 | 原文 plus the 審閱 root, so the AI passes over source and over translation read as one pair. Not 校對, which names human proofreading specifically and belongs to the 審校 family |
+| finding | 缺失 | One issue the source review reports, counted with 項. The elimination: 問題 is held by *issue* (a machine verdict, listed against the same entry), 錯誤 and 瑕疵 read as a code defect, and 發現 is not a count noun in Chinese at all — it cannot take a measure word. 缺失 is the standard Taiwanese word for an item raised in a review, and it survives the test the rubric asks for: it means *a shortcoming that was found*, which is what a finding is. `review:sourceAi.findingsTitle` is 「缺失」. The five types ship as 錯字、文法、術語、清晰度 and 不當內容 |
+| suggestion | 建議 | One word across the judge panel, the glossary generator and the category generator. The action on it is 套用 (`strings:runs.judgeApply`), never 核准 — `strings:runs.judgeApproveAll` says *Approve all suggestions* in English for the same action and ships here as 「套用所有建議」, per the copy bug the term records. `strings:runs.judgeAllFindingsDescription` quotes that button and repeats it verbatim |
+| discard | 捨棄 | Sense one — the ghost button beside Save. `config:discard` is 「捨棄」. The second sense (refusing something the app produced) and the export checkbox each take a different verb; see the *omit* row. Three verbs, exactly as the term predicts |
+| needs review | 待審校 | Works unchanged in all three surfaces the term names: the filter (`strings:filters.needsReview`), the row badge (`strings:compare.cellNeedsReviewBadge`) and 「全部標記為待審校」 (`strings:compare.flagAllNeedsReview`). **The casing trap costs this locale nothing** — Chinese has no case, so the deliberately lowercase badge and the sentence-case filter are the same string, which is exactly what the term asks for |
+| flag | 擱置 | A disposition, not an alarm — literally *to set aside*, which is what the term's own definition says the action does. **It had to differ from 標記**, the ordinary marking verb, because this action *clears* the needs-review flag that 標記為待審校 sets: one word for both would make the same verb set and unset one state. `review:flag` is 「擱置」 and the filter chip is 「已擱置」 (`review:filterFlagged`). Note the judge's own *flagged* counts (`strings:runs.judgeSummary`, `glossary:flaggedTitle`) are a different sense — a machine singling something out — and take 標出 |
+| ignore / ignored | 忽略 | `strings:row.ignored` is 「已忽略」. The negation is **built, not coined**: `strings:row.unignoreAction` is 「取消忽略條目」, using the standard 取消 + verb pattern that this locale also uses for *deselect* and *unassign*. Distinct from 略過 (a per-run routing outcome) and from 停用 (what happens to a module) |
+| Review (the sidebar group) | 審核 | The navigational umbrella over the four review tabs, byte-identical to `strings:guide.groupReview` as English requires. **Three review words share 審 and differ in the head** — 審核 the umbrella, 審閱 an AI pass, 審校 a person proofreading — so the family reads as one system while no two are equal and none is a substring of another. Choosing the umbrella deliberately is what the term asks: 審閱 or 審校 as the heading would have silently claimed the group for one of its four members |
+| review queue | 審校佇列 | `review:title` is 「審校佇列」, built on the same 審校 root as the state 待審校 so a reader sees one feature rather than two. 佇列 rather than the mainland 队列 |
+| back-translation | 回譯 | The established Chinese term of art in this industry — **not** a literal compound of *back* and *translate*, which in Chinese would name an action the product does not offer. `review:backTranslationTitle` is 「回譯（僅供參考）」. The one place the product does offer the action, `review:backTranslate`, spells it out as a verb phrase instead |
+| module | 模組 | **Canonical**, and the Taiwan form — mainland copy writes 模块. `config:routing.labelModule` is 「模組」. Never 外掛, which would promise a plugin system the app does not have |
+| module instance | 模組實例 | Shortened to 實例 once 模組 is established in the sentence, which is what the whole `config:instances.*` subtree does: `config:instances.addButton` is 「新增實例」. The instance id itself is never translated |
+| provider | 供應商 | The outside company. `config:enableModuleHelp` is 「新增可在您所有專案中使用的 AI 或翻譯供應商。」 Shares nothing with 模組, so the three English strings that mislabel a module picker *Provider* — rendered as written, per the term — cannot drag 模組 anywhere. `config:routing.simplePlaceholder` is 「選擇供應商」 |
+| model | 模型 | Never 範本, which is *template*; the collision the terminology file warns about costs this locale nothing, because Taiwanese usage prefers 範本 over 模板 and the two words then share no character with 模型 |
+| prompt | 提示詞 | The settled Chinese AI term. 提示 alone would collide with an ordinary UI hint, so the 詞 is not optional. Distinct from 請求 (an HTTP request, `config:requestTimeoutLabel`) and from 搜尋 (the search query behind `config:models.noMatches`) |
+| reasoning effort | 推理強度 | What Taiwanese AI tooling calls the provider parameter. Not 努力, which is effort in the sense of work expended |
+| routing rule | 分派規則 | **路由 was rejected, and it is the one rejection that changes a whole subtree.** In Chinese 路由 is unambiguously *network* routing — a router is 路由器 — which is the reading the frozen term forbids outright. 分派 (assign, dispatch) carries the content sense with no network reading. `config:routing.title` is 「分派規則」 and `config:routing.routesTo` is 「分派至」 |
+| rule group | 規則群組 | Built on 規則 so the two read as one feature, and 群組 rather than the mainland 组. Not reused for 類別 or for 批次分組 |
+| credential vault | 保險庫 | The short form carries the load, as English's does: `config:credentialsVaultLockedChip` is 「保險庫已鎖定」 and `config:credentialsUnlockButton` is 「解鎖保險庫」. The full compound 憑證保險庫 is held for `vault:statusLabel` and has not shipped yet. Not 金鑰庫 (a keystore) and not 鑰匙圈 (a keychain) |
+| credential | 憑證 | `config:credentialsMissingChip` is 「缺少憑證」. Taiwanese usage also gives 憑證 the TLS-certificate sense, which the app never renders, so no disambiguation is needed. The vault key names themselves are never translated |
+| LQA | LQA | Kept as the acronym. Taiwanese localization vendors use LQA untranslated in exactly this sense, and no established Chinese expansion competes with it. `config:lqa.title` is 「LQA 檢查」, with the half-width space the style guide requires between Latin and Han |
+| quality gate | 品質把關 | 關卡 is the natural word for a gate and is spent on *stage*, so the gate had to be built elsewhere. 把關 is the process-control reading — to vet at a checkpoint — with none of the physical-door readings the term warns about. `config:lqa.description` says a blocking issue causes 品質把關失敗. Note 品質, not the mainland 质量 |
+| check | 檢查 | One word across 品質檢查, 「LQA 檢查」 and every individual check name in `config:lqa.checks.*`. Kept clear of 審閱 (the AI's opinion) and of 稽核, which the *recording* row warns every locale reaches for first |
+| issue | 問題 | One LQA verdict. `config:lqa.checks.glossary-adherence.description` says 這個問題僅供參考 at warning severity. Held apart from the source review's *finding*, which takes a different word entirely, because both are listed against the same entry |
+| severity | 嚴重程度 | `config:lqa.checks.glossary-adherence.description` is where the head noun actually appears — 將嚴重程度設為阻斷. The two values are 阻斷 and 警告, and they belong to the *check* term, not to this one |
+| notification severity | 嚴重程度 | **The head noun is settled but never shipped**, which is why this cell holds the bare word rather than the compound 通知嚴重程度: the product renders only the three value labels, so the qualified form has nowhere to appear and a Rendering cell claiming it would be a citation nothing could check. The values are 資訊、警告、嚴重 (`account:notificationsSeverity.info`, `account:notificationsSeverity.warning`, `account:notificationsSeverity.critical`). **警告 is not free to re-decide** — it is fixed by *check* above (`config:lqa.severityWarning`) and ships identically here, so the product does not carry two words for one severity word. 嚴重 for *critical* rather than 危急, which reads as a medical emergency. If a column header ever needs the qualified form, it is 通知嚴重程度 |
+| assertion | 斷言 | The regex LQA check's user-written rule. A fourth word was genuinely required, as the term says: 條件 is the routing condition, 檢查 the LQA check, 規則 the routing rule. `config:lqa.regexAddAssertion` is 「新增斷言」 |
+| pattern | 正規式 | The regular expression in the field beside an assertion, and nothing else. 模式 is spent on *mode* (`config:module.batchMode`), 樣式 on the Text Styler's visual sense, 範本 on *template* — so the standard Taiwanese short form of 正規表示式 is what is left, and it is exactly what the field holds. `config:lqa.regexPattern` is 「正規式」 |
+| overflow | 溢出 | Relative to the source, and configured as 溢出比例 (`config:overflowRatioLabel`). Kept clearly apart from 長度上限, which is absolute — both appear in the same checks list, as `config:lqa.checks.overflow.name` (「長度溢出」) and `config:lqa.checks.length-limit.name` |
+| length limit | 長度上限 | The hard per-language cap, and also the routing condition on source length (`config:routing.labelMaxLength` is 「條目長度上限」). 上限 rather than 限制 because the same head then serves every other cap in the product — batch size, output tokens, backups — and a reader meets one word for one idea |
+| pass rate | 通過率 | `quality:columns.passRate` is 「通過率」 and the overall figure is 「整體通過率」. **成功率 is the trap and it is already spent**: `config:health.successRate` is a different metric in the same product (provider request success) and ships as 成功率, so the two may never share a word. Built on 通過, the same root as the `quality:legend.passed` verdict |
+| glossary | 術語表 | A named list attached to a project. 術語庫 was rejected because 庫 is spent on the single workspace-wide 翻譯記憶庫, and a project-scoped list sharing that head would imply one global store. `config:batchGroupingGlossary` is 「依術語表」 |
+| glossary term | 術語 | One row of a glossary; the head of 術語表, which is the *root over its own compound* licence rather than a collapse. Never 條目, which is reserved for content entries — `config:lqa.checks.forbidden-terms.name` is 「禁用術語」 |
+| constant | 常數 | The masked-and-restored flag on a glossary term. Every descriptive alternative the term lists is barred: 固定 is *fixed*, 永久 is *permanent*, and 唯讀 is the genuine *read-only* flag two columns away in the same table (`glossary:readOnly`). The literal reading is what is left, and it is no more opaque in Chinese than *Constant* is in English. `glossary:colConstant` is 「常數」; the lowercase badge (`review:glossaryConstant`) is the same string, because Chinese has no case |
+| match | 符合項 | The noun — one place a glossary term was found. `glossary:matchesPanel` is 「符合項」 and `glossary:matchResultsCount` is 「{{count}} 個符合項」. The verb stays on the same root, as the term asks: `config:lqa.regexModeMustMatch` is 「必須符合」 and `config:models.noMatches` is 「沒有符合搜尋的模型」. 命中 was rejected as a *hit*, which the term bars; 結果 is barred as *result*; and it is deliberately not 術語, which is what is searched *for* |
+| translation memory | 翻譯記憶庫 | The industry term, used unchanged in Taiwanese CAT tooling. `config:tm.policyTitle` is 「翻譯記憶庫」. Never bare 記憶體, which is RAM |
+| approve | 核准 | To store a translation into memory. `config:tm.browserEmpty` is 「尚無翻譯記憶庫項目。當您核准譯文時，項目就會被存入。」 Kept apart from 套用 (*apply* a suggestion), 標記為已審校 (*mark as reviewed*) and 儲存 (*save*) — all four share the bulk bar |
+| category | 類別 | `config:routing.labelCategories` is 「類別」. Not reused for 規則群組 or for 來源標籤 |
+| tone | 語氣 | The authoring instruction, per entry. The acoustic readings (音調, 聲調) and the model's writing style (文風) are exactly the traps the term names. `config:routing.labelTones` is 「語氣」 |
+| orphan | 孤立條目 | The figurative noun, built on 條目 so the count chip, the tab and the log lines all count the same object. `config:importModeFullReplaceHint` says such entries 會標示為孤立, and `config:fullReplaceOrphanNotice` names the tab 孤立條目分頁 — English calls it the *Relink tab* there, which does not exist, and that defect is not mirrored |
+| relink | 重新連結 | One verb for the row button, the dialog title, the confirm step and the import warning. `config:importModeFullReplaceHint` is 「…在重新連結或刪除前不會納入 AI 執行」 |
+| backup | 備份 | `config:maxBackupsLabel` is 「每個專案的備份數量上限」. Kept apart from 匯出 (*export*) and from 快照 below, which share sentences with it |
+| snapshot | 快照 | The automatic pre-operation backup. `config:importSnapshotNote` is 「本次匯入前已建立安全快照（{{date}}）。您可以在備份分頁中還原它。」 — one sentence carrying both this term and *backup*, which is why they cannot share a word |
+| template | 範本 | **Taiwanese usage prefers 範本 over the mainland 模板**, and that preference resolves the terminology file's warning for free: 範本 shares no character with 模型, so *template* and *model* can never be confused here. `config:templatesTitle` is 「專案範本」 |
+| omit (from an export) | 排除 | The third *discard* sense — leaving rows out of a generated file, destroying nothing. `config:discardUntranslatable` is 「排除不需翻譯的條目」. 捨棄 is sense one and 拒絕 sense two; this is a fourth verb by count and a third by sense, which is what the term predicts every locale needs |
+| collaborator | 協作者 | `collab:join.description` is 「輸入邀請碼，以協作者身分加入他人的專案。」 Two distinct words are required against *member* below, and 協作 (to collaborate) versus 成員 (a member of) gives them different heads rather than a shared one |
+| member | 成員 | Anyone with access, the owner included. `collab:sharing.membersTitle` is 「成員」 and the table column is the same word, which is the English singular/plural pair Chinese cannot and need not express. Never 使用者, which is the account identity, and never the *collaborator* word — the two appear in adjacent strings on the Sharing page |
+| nickname | 暱稱 | `collab:nickname.title` is 「暱稱」. **使用者名稱 is the one to avoid**, exactly as the term says: the app already has an account identity, and giving both that name recreates the confusion the collaborator/member pair exists to prevent |
+| claim | 認領 | The Taiwanese verb for taking something as your own, and it yields the whole family the term requires: the button (`collab:nickname.claimButton` 「認領暱稱」), the progressive status (「認領中…」), the toast (「已認領暱稱。」) and the immutability hint (「暱稱一旦認領便無法變更。」). 登記 and 註冊 are the *register* readings the term bars, 取得 the *take* reading. It also stays clear of the adjacent 保留名稱 message (`collab:errors.nickname_reserved`) |
+| invite | 邀請 | The noun; the code itself is 邀請碼. **The four statuses translate as one set, in one part of speech** — 待接受、已兌換、已撤銷、已過期 — all four aspectual, so a reader comparing them down the column sees one paradigm |
+| revoke | 撤銷 | `collab:invites.revoke` is 「撤銷」 and the status is 「已撤銷」. **The adjacency constraint the term records is satisfied for free**: Chinese marks the participle with 已 rather than by inflection, so the button and the status cell in the next column can never coincide the way an infinitive and a participle do in some languages. Kept apart from 刪除, 移除 and 取消, each of which is spent elsewhere |
+| recording | 記錄 | The manual-edit audit, as both the noun (the capture) and the verb. **It is why *log* had to take 日誌**: 記錄 is the word Taiwanese platform localization normally gives a log, and this product cannot spend it on both. It is also deliberately not 條目, the *entry* word — `strings:runs.manualRecordingPaused` is 「記錄已暫停——沒有活躍的協作者」, which under an entry-shaped word would have read as *entry paused*. **English's three names for one feature all collapse onto it**, per the term and `english-review-notes.md`: `collab:sharing.auditToggleLabel` is 「手動編輯記錄」, `auditToggleCheckboxLabel` 「記錄手動編輯」 and `auditToggleHelp` 「記錄協作者對這個專案所做的手動文字編輯。」 No 稽核 word was coined, and 檢查 — where every locale reaches first for *audit* — was not touched |
+| stage | 關卡 | The gaming word for a playable level, and the single most likely mistranslation in the app: 階段 is exactly the process reading the term warns about, and it is the first word a Chinese speaker reaches for. `stage-details:title` is 「關卡詳情」, matching `strings:tabs` (stage-details). Spending 關卡 here is what forced *quality gate* onto 把關 rather than any 關 compound |
+| Text Styler | 文字樣式工具 | The product surface name, identical in `sidebar:colorText`, `strings:tabs` (color-text) and `colorText:title`. 樣式 is free for it because *pattern* took 正規式 and *template* took 範本. The 工具 tail is not padding: bare 文字樣式 reads as a style *attribute* rather than a tool, and this is a workspace tool with its own page |
+| element | 元素 | The group heading (`colorText:groupElements`). The seven swatch names are **game content, not translation**: `colorText:swatches.hydro` and its six siblings ship as 水元素、火元素、風元素、雷元素、草元素、冰元素、岩元素 — the names the games themselves ship in Traditional Chinese — rather than any rendering of the Greek roots |
+| assistant | 助理 | The product's AI chat persona, and **decided at its first appearance rather than its second**, as the term insists: it is met first as a run-type label (`strings:runs.typeChatGeneric` is 「助理對話」) and only later on the chat surfaces (`colorText:assistant.title` is 「AI 助理」, `stage-details:chatAssistant` 「助理」). 助手 is the mainland preference and 協助 would be the abstract *assistance* near-miss the term names. Chinese compounds without a linking form, so nothing had to be recorded there |
+| theme | 主題 | The four names are 經典、像素、科技、簡約, and each is **byte-identical in `settings:themes.*.name` and `welcome:themeChooser.names.*`**, which is what the term calls the app's highest-risk duplication. 科技 for *Techno* takes the technology reading, not the music genre, which is what the Techno theme's own tagline (a neon console) describes |
+| guide | 指南 | `config:pseudoTestHelpLink` is 「點選此處閱讀指南 →」. One word for the built-in documentation section everywhere; 說明 is spent on the ordinary *description* label and 教學 would promise a tutorial |
+| release | 發行版 | One published version of the app. `common:changelogShowOlder` is 「顯示較舊的發行版（{{count}}）」. 版本 alone is barred — that is the *version number* — and 條目 is barred by the term because this app counts content entries constantly. 發行版 keeps 版 as its head while naming the published thing rather than its number |
+| changelog | 更新內容 | The page listing what changed per release (`sidebar:changelog`). **日誌 was unavailable**: it belongs to the live server-log panel, and the term bars *log* for this row anyway, so the compound 更新日誌 that most Chinese products use is closed off here. 更新內容 is the standard Taiwanese app-store heading for the same thing. Version numbers are never translated |
+| dismiss | 清除 / 關閉 | **Two words, because the two keys have different consequences and one of them destroys data.** `account:notificationsDismiss` issues a DELETE, so it ships as 「清除」; `system:restarted.dismiss` and `system:cancelled.dismiss` close a banner against a stored flag and destroy nothing, so they ship as 「關閉」. Checked at the call sites before deciding, which is what the term requires. 關閉 doubles as *Close* (`glossary:close`), which is the same non-destructive act |

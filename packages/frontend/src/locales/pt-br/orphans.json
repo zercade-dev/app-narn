@@ -1,0 +1,55 @@
+{
+  "title": "Órfãos",
+  "subtitle": "Entradas que não estão mais no CSV importado mais recente. Exclua-as ou revincule as traduções a outra entrada.",
+  "emptyTitle": "Está tudo vinculado",
+  "empty": "Nenhuma entrada órfã — os CSVs importados batem com o projeto atual.",
+  "columns": {
+    "select": "Selecionar",
+    "source": "Origem",
+    "translations": "Traduções",
+    "actions": "Ações"
+  },
+  "actions": {
+    "delete": "Excluir",
+    "relink": "Revincular",
+    "bulkDelete": "Excluir selecionadas ({{count}})",
+    "refresh": "Atualizar",
+    "cancel": "Cancelar",
+    "back": "Voltar"
+  },
+  "confirmDelete": {
+    "title": "Excluir o órfão?",
+    "body": "Isso exclui permanentemente a entrada órfã e as traduções dela. Não é possível desfazer."
+  },
+  "relink": {
+    "title": "Revincular órfão",
+    "description": "Mova as traduções deste órfão para outra entrada, ordenadas pela semelhança entre o texto de origem de cada candidata e o deste órfão.",
+    "searchPlaceholder": "Pesquisar entradas pelo texto de origem…",
+    "noCandidates": "Nenhuma entrada corresponde",
+    "submit": "Continuar",
+    "confirmTitle": "Confirmar a revinculação",
+    "confirmDescription": "Escolha como as traduções do órfão são aplicadas à entrada de destino antes de revincular.",
+    "overrideModeLabel": "Modo de substituição",
+    "overrideEmptyOnly": "Preencher apenas as traduções vazias (mantendo as existentes no destino)",
+    "overrideAll": "Substituir todas as traduções pelas do órfão",
+    "aiRetranslateLabel": "Usar IA para retraduzir",
+    "aiRetranslateHint": "Depois de revincular, uma passagem de IA compara o texto de origem antigo do órfão com o novo texto de origem do destino e atualiza cada tradução existente para refletir a mesma edição.",
+    "aiModuleLabel": "Módulo de IA",
+    "aiModelLabel": "Modelo",
+    "aiReasoningEffortLabel": "Esforço de raciocínio",
+    "aiModulePlaceholder": "Selecione um módulo…",
+    "aiNoModules": "Nenhum módulo com IA está ativado — ative um na Configuração global para usar a retradução por IA.",
+    "confirmSubmit": "Revincular"
+  },
+  "toast": {
+    "loadError": "Falha ao carregar os órfãos",
+    "deleted": "Órfão excluído",
+    "deleteError": "Não foi possível excluir",
+    "bulkDeleted": "Órfãos excluídos: {{count}}",
+    "relinked": "Traduções movidas",
+    "relinkError": "Falha ao revincular o órfão",
+    "candidatesError": "Falha ao carregar as candidatas à revinculação",
+    "aiRetranslateStarted": "Retradução por IA iniciada — veja a aba Atividade",
+    "aiRetranslateUnavailable": "Revinculado, mas não foi possível iniciar a retradução por IA (nenhum módulo com IA disponível)"
+  }
+}

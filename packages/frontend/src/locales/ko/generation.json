@@ -1,0 +1,17 @@
+{
+  "contextLabel": "항목 컨텍스트 포함",
+  "contextHint": "제안 품질을 높이도록 항목의 추가 정보를 프롬프트에 넣어요.",
+  "fieldContext": "참고 정보",
+  "fieldSources": "출처 라벨",
+  "fieldCategories": "지정된 카테고리",
+  "languagesLabel": "기존 번역을 컨텍스트로 보내기",
+  "languagesHint": "선택한 언어에서 각 항목의 완성된 번역을 추가 컨텍스트로 보내요.",
+  "selectAllLanguages": "전체 선택",
+  "deselectAllLanguages": "전체 선택 해제",
+  "skipCategoriesLabel": "건너뛸 카테고리",
+  "skipCategoriesHint": "이 카테고리 중 하나라도 가진 항목은 요청에서 아예 빠져요.",
+  "skipCategoriesPlaceholder": "선택 없음",
+  "ignoreGlossariesLabel": "기존 용어집 무시",
+  "ignoreGlossariesHint": "선택한 용어집의 용어는 이미 아는 용어로 처리해요. 용어집 생성에서는 이미 아는 용어로 보내 모델이 다시 제안하지 않게 하고, 카테고리 생성에서는 그 용어와 일치하는 항목을 요청에서 아예 빼요.",
+  "ignoreGlossariesPlaceholder": "선택 없음"
+}

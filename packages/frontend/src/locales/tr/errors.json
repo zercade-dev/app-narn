@@ -1,0 +1,10 @@
+{
+  "http": {
+    "unauthorized": "Yeniden oturum açmanız gerekiyor.",
+    "forbidden": "Bunu yapma izniniz yok.",
+    "vaultLocked": "Kasanız kilitli. Kilidini açıp yeniden deneyin.",
+    "rateLimited": "Çok fazla istek — biraz bekleyip yeniden deneyin.",
+    "server": "Sunucuda bir sorun oluştu. Birazdan yeniden deneyin.",
+    "offline": "Sunucuya ulaşılamıyor. Bağlantınızı kontrol edin."
+  }
+}

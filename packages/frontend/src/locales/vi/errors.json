@@ -1,0 +1,10 @@
+{
+  "http": {
+    "unauthorized": "Bạn cần đăng nhập lại.",
+    "forbidden": "Bạn không có quyền làm việc đó.",
+    "vaultLocked": "Kho bảo mật của bạn đang khóa. Hãy mở khóa rồi thử lại.",
+    "rateLimited": "Quá nhiều yêu cầu — hãy chờ một lát rồi thử lại.",
+    "server": "Máy chủ gặp sự cố. Hãy thử lại sau ít phút.",
+    "offline": "Không kết nối được tới máy chủ. Hãy kiểm tra đường truyền của bạn."
+  }
+}

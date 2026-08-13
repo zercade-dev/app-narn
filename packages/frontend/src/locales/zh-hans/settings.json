@@ -1,0 +1,42 @@
+{
+  "title": "设置",
+  "appearance": "外观",
+  "appearanceDescription": "选择 narn 在此设备上的外观。",
+  "theme": "主题",
+  "mode": "模式",
+  "switchToLight": "切换到浅色模式",
+  "switchToDark": "切换到深色模式",
+  "languageTitle": "语言",
+  "languageDescription": "用户界面的语言。",
+  "preview": "预览",
+  "previewHint": "使用所选主题渲染的示例控件。",
+  "previewSamples": {
+    "heading": "标题",
+    "body": "正文展示的是基础字体和颜色。",
+    "muted": "弱化文本看起来是这样。",
+    "save": "保存",
+    "cancel": "取消",
+    "edit": "编辑",
+    "delete": "删除",
+    "pass": "通过",
+    "warn": "警告",
+    "fail": "未通过",
+    "info": "信息",
+    "inputPlaceholder": "文本框",
+    "selectOptionA": "第一个选项",
+    "selectOptionB": "第二个选项",
+    "checkbox": "复选框",
+    "badgeDefault": "默认",
+    "badgeSecondary": "次要",
+    "badgeOutline": "描边",
+    "badgeDestructive": "危险",
+    "scrollHint": "滚动即可看到主题化的滚动条",
+    "iconsLabel": "图标"
+  },
+  "themes": {
+    "default": { "name": "经典", "description": "经典的 narn 外观。" },
+    "pixel": { "name": "像素", "description": "厚重的 8 位游戏机风格。" },
+    "techno": { "name": "科技", "description": "霓虹赛博朋克终端。" },
+    "minimal": { "name": "极简", "description": "扁平、安静、单色。" }
+  }
+}

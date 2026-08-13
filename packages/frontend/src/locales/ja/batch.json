@@ -1,0 +1,10 @@
+{
+  "translateSelected": "選択範囲を翻訳",
+  "toTranslateCount": "翻訳対象{{count}}件",
+  "progressAriaLabel": "翻訳済み：{{completed}}/{{total}}",
+  "cancelRun": "実行をキャンセル",
+  "runCancelled": "実行をキャンセルしました",
+  "runCompleted": "翻訳が完了しました（成功：{{completed}}/{{total}}）。",
+  "runCompletedWithErrors": "翻訳が完了しました（成功：{{completed}}・失敗：{{failed}}）。",
+  "savedRulesNotice": "実行では保存済みの振り分けルールが使われます。ルールエディターの未保存の編集は反映されません。"
+}

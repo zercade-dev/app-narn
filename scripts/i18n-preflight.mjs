@@ -16,11 +16,20 @@
  * backfill-runbook.md's "The reviewer rubric" section for the demotion and
  * its evidence.
  *
- * Three checks, run in this file in this order:
+ * Four checks, run in this file in this order:
  *
  *   1. Numeral agreement — token axis, then a word axis derived ONLY from
  *      what survives the token axis (see below — the per-occurrence checks
  *      are commutative, the derivation is not).
+ *   1b. Welded suffix — a grammatical suffix written directly against a
+ *      token, with no whitespace, in a locale whose orthography chooses
+ *      that suffix by the (unknown-until-runtime) interpolated value's
+ *      final sound. Scoped to WELDED_SUFFIX_LOCALES (`tr` only, so far) —
+ *      see that constant's comment for why this is a separate check from
+ *      1 rather than a widened gap on it, and why it does not run
+ *      everywhere. Added 2026-08-11: check 1's whitespace-only gap could
+ *      not see this construction at all (`{{model}}'i` produced 0 raw
+ *      matches), which is the defect that motivated it.
  *   2. Both collision directions over the whole flattened locale. Report
  *      only: both directions have legitimate hits (a deliberately reused
  *      rendering; a genuine English defect), and it is the translator's job
@@ -29,13 +38,13 @@
  *      it is a property of English, not a per-language discovery, so every
  *      locale brief carries the same twelve.
  *
- * Only check 1 gates the exit code. Checks 2 and 3 are report-only by design
- * (backfill-notes.md's "Mechanical checks to run before review" section,
- * items 3-4, and backfill-runbook.md's "the mechanical checks" list, items
- * 3-4): a collision needs a human explanation, not a fixed threshold, and
- * the family list is the same twelve regardless of which locale is named on
- * the command line — failing a build over it would be failing on a fact
- * about English, which no locale batch can fix.
+ * Checks 1 and 1b gate the exit code. Checks 2 and 3 are report-only by
+ * design (backfill-notes.md's "Mechanical checks to run before review"
+ * section, items 3-4, and backfill-runbook.md's "the mechanical checks"
+ * list, items 3-4): a collision needs a human explanation, not a fixed
+ * threshold, and the family list is the same twelve regardless of which
+ * locale is named on the command line — failing a build over it would be
+ * failing on a fact about English, which no locale batch can fix.
  *
  * ---------------------------------------------------------------------------
  * CALIBRATION — read before touching NUMERAL_TOKEN_SKIPLIST or
@@ -54,7 +63,11 @@
  * narrow-rule match, so this figure is identical in both states. All three
  * source documents (docs/i18n/style/ru.md "Checking your own work for
  * numeral agreement", and the two above) state the same 187/0 figure and the
- * same 23-token skip list verbatim.
+ * same 22-token skip list verbatim (23 before `languages` was removed — see
+ * NUMERAL_TOKEN_SKIPLIST's own comment. That removal does not move this
+ * figure: none of ru's `{{languages}}` occurrences ever sat directly against
+ * a script-class word in the shipped strings, so they were never part of
+ * the 187 to begin with).
  *
  * WHY THE TOKEN AXIS RUNS BEFORE THE WORD AXIS — and why that is NOT about
  * evaluation order. Per occurrence, checking the token or the word first
@@ -160,7 +173,7 @@ const LOCALES_DIR = join(APP_ROOT, 'packages/frontend/src/locales');
  * Placeholders that cannot hold a number, so nothing that follows one can be
  * a numeral-agreement defect. Verbatim from docs/i18n/backfill-runbook.md's
  * "the mechanical checks" list item 1 and docs/i18n/backfill-notes.md's
- * "Mechanical checks" section item 1 — both name the same 23 tokens in the
+ * "Mechanical checks" section item 1 — both name the same 22 tokens in the
  * same order; do not retype this list from memory, copy it from one of
  * those two files if it ever needs to change, and update whichever of the
  * two did not already move.
@@ -168,13 +181,42 @@ const LOCALES_DIR = join(APP_ROOT, 'packages/frontend/src/locales');
  * `count` is included: it is the one token that DOES get CLDR plural
  * selection, so its own family already handles agreement and it would only
  * ever generate a false positive here.
+ *
+ * WHAT THIS LIST IS, AND WHAT IT IS NOT. Every entry is here because nobody
+ * has found a call site anywhere in the app that binds it to a number —
+ * that is an app-wide, per-token fact about this codebase's `t()` call
+ * sites, checked by opening them, not a linguistic rule about what a
+ * translator may write. It says nothing about which Turkish (or any other
+ * language's) construction is grammatically correct next to a given token;
+ * `docs/i18n/style/<lang>.md` owns that question for its own locale. Treat
+ * a locale's style guide leaning on this list as "which count-neutral
+ * rendering keeps the pre-flight green" as a documentation bug in *that*
+ * file, not evidence this list should grow a grammar opinion.
+ *
+ * `languages` WAS ON THIS LIST AND IS NOT ANY MORE — 2026-08-11, a wave-1
+ * defect report. It was calibrated against Russian's `count`/`countLabel`-
+ * shaped corpus, where every `{{languages}}` interpolation is a
+ * comma-joined list of language names. That is not true app-wide:
+ * `config:templateMeta` ("{{languages}} languages · {{rules}} routing
+ * rules") interpolates `template.config.activeLanguages.length` — a plain
+ * count — from `GlobalConfigView.tsx`. Skipping `languages` here made that
+ * key's numeral-agreement hazard invisible to every inflecting language,
+ * which is most of them; Japanese survived it by accident (nothing
+ * inflects there), and it was live for ru/de/tr along with the ten
+ * languages still to come. Removing it does not change ru's calibration
+ * (its own `{{languages}}` occurrences never sit directly against a
+ * script-class word in the shipped strings — see the CALIBRATION section
+ * below), and de/ja/tr were re-verified the same way when this was fixed.
+ * The other 22 were checked the same way — by opening every `t()` call
+ * site that passes each token, not by re-reading the names — and none of
+ * them was wrong the same way: each is consistently a name, id, label,
+ * timestamp or free-text field at every call site found.
  */
 export const NUMERAL_TOKEN_SKIPLIST = [
   'count',
   'module',
   'instance',
   'language',
-  'languages',
   'lang',
   'name',
   'message',
@@ -243,7 +285,230 @@ export const NUMERAL_LOCALE_SCRIPTS = {
  */
 export const NUMERAL_WORD_AXIS_EXEMPTIONS = {
   ru: ['из', 'с', 'на', 'вычитано', 'симв', 'байт'],
+  // de, derived from batch 2 (`strings`)'s post-token-axis survivors — 8 before
+  // the usageTokens fix below, 6 after, carrying these 4 distinct words. Never
+  // from the raw match set, per the calibration rule above.
+  // `von` is a preposition; `entfernen` and `kopieren` are infinitives on control
+  // labels; `markiert` is an invariant predicative participle. None of the four
+  // can inflect for number, so a numeral in front of them is always grammatical.
+  // The two survivors NOT on this list were a real defect and were fixed in the
+  // string instead: `strings:runs.usageTokens` read "{{input}} Eingabe /
+  // {{output}} Ausgabe", where both nouns would have had to pluralise.
+  // `s` is the SI symbol for second, not a word: invariant for number by
+  // definition, and German typography puts a space between the numeral and the
+  // unit symbol (Duden, and SI itself). The batch that met it could have
+  // cleared this detector for free by writing `{{seconds}}s` closed up, the way
+  // English does, and escalated instead — which is the right call twice over,
+  // since the welded form is wrong in German and "the guard went quiet" is not
+  // a reason to write anything.
+  de: ['von', 'entfernen', 'kopieren', 'markiert', 's'],
+  // pt-br, derived from the whole-language sweep's post-token-axis survivors —
+  // 109 raw narrow matches, 12 after the token axis, and all twelve are the same
+  // word. Never from the raw match set, per the calibration rule above.
+  // `de` is the preposition "of": invariant for number, gender and case in
+  // Portuguese, and it is what every "X de Y" ratio frame puts after its first
+  // token ("Página {{page}} de {{total}}", "{{current}} de {{total}}",
+  // "Pontuação: {{score}} de 100"). A numeral in front of it is always
+  // grammatical, so the twelve are cleared rather than rewritten. Nothing else
+  // survived the token axis: the count-neutral device this locale uses
+  // everywhere else (an invariant noun phrase, then a colon, then the number)
+  // puts no word after a token at all, so `de` is the only entry pt-br needs and
+  // the list is deliberately not padded with words nothing matched.
+  'pt-br': ['de'],
+  // it, derived from the whole-language post-token-axis survivor set — 25 before
+  // the two fixes below, 23 after, carrying these 9 distinct words. Never from
+  // the raw 130 matches, per the calibration rule above.
+  // `di`, `in` and `su` are prepositions and `che` is a relative pronoun: none
+  // inflects for number. `token`, `batch` and `byte` are English loanwords, and
+  // Italian borrows them INVARIABLE — an unadapted foreign noun takes no plural
+  // ending, so "1 token" and "5 token" are both correct (the plural is carried
+  // by the article, which these strings do not use). `car` is the standard
+  // Italian abbreviation of "caratteri", written "car." and invariant. `s` is
+  // the SI symbol for second, invariant by definition, and Italian typography
+  // puts a space between the numeral and the unit symbol.
+  // The two survivors NOT on this list were real defects and were fixed in the
+  // strings instead, both the same shape — a plural participle or noun sitting
+  // after a bare ratio, which is wrong at a denominator of 1:
+  // `config:reviewProgressCount` read "{{reviewed}} / {{total}} revisionate" and
+  // `strings:runs.stringsProgress` read "{{completed}} / {{total}} voci"; both
+  // now put the word in front of the ratio, where it labels rather than agrees.
+  it: ['di', 'in', 'su', 'che', 'token', 'batch', 'byte', 'car', 's'],
+  // vi, derived from the whole-language post-token-axis survivor set — 60 of the
+  // 166 raw narrow matches, carrying these 24 distinct forms. Never from the raw
+  // set, per the calibration rule above.
+  //
+  // WHY THIS IS A LIST AND NOT A NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES ENTRY,
+  // which is the obvious move and is wrong. Vietnamese nouns have no number, so
+  // like `tr` and `ja` it has no numeral agreement for this axis to catch — but
+  // unlike either it DOES have one numeral-adjacent hazard the axis can catch:
+  // the pluralizers `các` and `những`, which are correct before a bare noun and
+  // UNGRAMMATICAL after a numeral ("{{total}} các mục" is wrong at every count).
+  // Flagging the locale inapplicable would clear that silently. So the axis stays
+  // on, and `các`/`những` must never be added to this list — that exclusion is
+  // the entry's whole point, not an oversight. `{{count}}` is skipped on the token
+  // axis, so the hazard is only ever reachable after a non-`count` token, which is
+  // exactly what this axis looks at.
+  //
+  // A SECOND FACT ABOUT THIS LOCALE: Vietnamese writes every syllable as its own
+  // space-delimited token, so a "word" axis is a SYLLABLE axis here. Half the
+  // entries below (`ngôn`, `quy`, `thuật`, `phát`, `đề`, `thành`, `thất`, `ký`,
+  // `ví`, `thao`) are the first syllable of a compound — `ngôn ngữ`, `quy tắc`,
+  // `thuật ngữ` — not free words. That is not a defect in the list; it is what the
+  // whitespace tokenizer sees, and every one of them is invariant for the same
+  // reason the whole words are. Expect this list to be longer and finer-grained
+  // than a European locale's, and expect a later batch to extend it rather than
+  // to find it complete.
+  //
+  // The 24 by class: prepositions and particles (`trên`, `vào`, `ra`, `mà`, `đã`);
+  // invariant loanwords (`token`, `byte`); adjectives (`mới`, `khác`); classifiers
+  // and count nouns (`lượt`, `lô`, `mục`, `bảng`, `điểm`); and the compound-initial
+  // syllables listed above. None inflects for number, in any construction, so a
+  // numeral in front of any of them is always grammatical.
+  vi: [
+    'trên', 'vào', 'ra', 'mà', 'đã',
+    'token', 'byte',
+    'mới', 'khác',
+    'lượt', 'lô', 'mục', 'bảng', 'điểm',
+    'ngôn', 'quy', 'thuật', 'phát', 'đề', 'thành', 'thất', 'ký', 'ví', 'thao',
+  ],
 };
+
+/**
+ * Locales where the word axis cannot ever find a numeral-agreement defect,
+ * because the language's counted nouns do not inflect for number at all —
+ * a grammar fact, not an unfinished calibration.
+ *
+ * `tr`: after any numeral Turkish nouns stay in the bare singular ("üç
+ * kitap", never "üç kitaplar" — docs/i18n/style/tr.md "Counted nouns stay
+ * singular"), so there is no wrong plural form for the word axis to catch
+ * here: every token-axis survivor is cleared unconditionally rather than
+ * printed as an uncleared candidate. This is NOT the same situation as a
+ * locale simply missing from NUMERAL_WORD_AXIS_EXEMPTIONS (that means
+ * "nobody has looked yet"; this means "there is nothing to look for"), and
+ * it is NOT a claim that Turkish has no numeral-adjacent hazard at all — it
+ * has a different one, a case suffix welded onto the unpredictable token
+ * value, which WELDED_SUFFIX_LOCALES / weldedSuffixCheck() below exists to
+ * catch instead. Without this entry, a correct Turkish string like
+ * `{{total}} girdi` ("{{total}} entries", singular "girdi" at every count)
+ * reports as an uncleared survivor and fails the gate on a rendering that
+ * is not a defect.
+ *
+ * `ja`: the same fact, held even more strongly — Japanese nouns have no
+ * number at all, so there is no plural form for a numeral to agree with, in
+ * any construction. The batch-3 translator asked instead for a single-word
+ * exemption (倍, the multiplier in `review:overflowIssue`), by analogy with
+ * ru's симв/байт. Granting that would have been wrong twice over: it would
+ * treat a grammar fact as an unfinished calibration, and it would guarantee
+ * the same escalation every round with a different word — 件, 個, 回 and
+ * every other counter sit in exactly the same position and are equally
+ * invariant. Rounds 1 and 2 produced zero word-axis survivors for `ja`, so
+ * the axis has never caught a real Japanese defect, and cannot.
+ *
+ * As with `tr`, this is NOT a claim that Japanese has no numeral-adjacent
+ * hazard. It has one, and it is the choice of COUNTER (助数詞): 件 for
+ * records, 行 for rows, 語 for glossary terms. That is a lexical decision per
+ * counted object rather than an agreement rule, so no regex can check it; it
+ * is handled by the counter-by-object table in docs/i18n/style/ja.md, which
+ * the batch-1 review required and every later batch extends.
+ *
+ * An earlier version of this comment justified the flag with "the written form
+ * after any numeral is the same characters". That is FALSE, and the reviewer
+ * asked to falsify it duly did. Japanese has at least two numeral-conditioned
+ * orthographic changes: a counter spelled in KANA changes characters and not
+ * merely reading (1ぴき / 2ひき / 3びき, 1ぷん / 4ふん), and the native ～つ
+ * series has no form above nine, so `{{count}}つ` is ungrammatical from ten up.
+ * The correction is left visible rather than rewritten because a repaired proof
+ * should not be indistinguishable from one that was always sound.
+ *
+ * The flag survives on narrower and checkable grounds. Neither hazard is
+ * reachable in this product: style/ja.md's counter table admits only kanji
+ * counters and katakana units, and katakana takes neither rendaku nor
+ * gemination; a grep of all 24 shipped `ja` namespaces for a placeholder
+ * followed by hiragana returns seven hits, every one a particle — no kana
+ * counter, no `{{count}}つ`. And the word axis could not catch either case in
+ * any event, because `{{count}}` is skipped on the token axis before the word
+ * axis runs. So the flag costs no coverage, and the single-word 倍 grant it
+ * replaced would have cost the same while implying the axis still had work to
+ * do here. If a kana counter is ever introduced, it is the counter table that
+ * must catch it, not this axis.
+ *
+ * `id`: the same grammar fact as `tr`, resting on two properties rather than
+ * one. Indonesian nouns are not marked for number at all, and the ONE plural
+ * device the language has — full reduplication ("kata-kata") — is
+ * ungrammatical after a numeral, so "tiga buku" is the only well-formed shape
+ * and "tiga buku-buku" is an error rather than an alternative
+ * (docs/i18n/style/id.md, "No plural marking after a numeral"). Indonesian
+ * verbs, participles and adjectives carry no number agreement either, which
+ * matters here because the second-commonest survivor shape after a bare noun
+ * is a predicative participle ("{{completed}} berhasil", "{{failed}} gagal").
+ * So there is no wrong form for the word axis to find in either position.
+ * Measured over the finished locale: 172 raw narrow matches, 61 after the
+ * token axis, carrying 25 distinct words — bare counted nouns (entri, token,
+ * karakter, bita, bahasa, aturan, glosarium, istilah, saran, temuan, masalah,
+ * batch, contoh, tindakan, baris), invariant participles (berhasil, gagal,
+ * ditambah, diperbarui, ditimpa, ditandai, beres, masuk, keluar), the
+ * preposition `dari`, the relative pronoun `yang` and the invariant
+ * abbreviation `dtk`. A NUMERAL_WORD_AXIS_EXEMPTIONS list was the other
+ * option and would have been wrong for the reason the `ja` note gives: it
+ * treats a grammar fact as an unfinished calibration, and with 25 words
+ * already it would need extending on every future string that puts any new
+ * noun after any token.
+ *
+ * As with `tr` and `ja`, this is NOT a claim that Indonesian has no
+ * numeral-adjacent hazard. It has one, and it is the CLASSIFIER (kata
+ * penggolong): buah for objects, orang for people, lembar for sheets. That is
+ * the same shape as ja's counter problem — a lexical choice per counted
+ * object, not an agreement rule, so no regex can check it — and it is handled
+ * by the classifier rule in docs/i18n/style/id.md, which settles the question
+ * by omitting classifiers throughout. Indonesian has no case system, so the
+ * welded-suffix hazard WELDED_SUFFIX_LOCALES exists for cannot arise here
+ * either.
+ * `th`: the same fact as `ja`, and reachable by the same evidence. Thai nouns
+ * have no number morphology at all — there is no plural form for a numeral to
+ * agree with, in any construction — and plurality is carried by a numeral plus
+ * a CLASSIFIER (ลักษณนาม), which is itself invariant: "1 รายการ" and "5 รายการ"
+ * are the same characters. `Intl.PluralRules('th')` reports `["other"]` alone
+ * for both cardinals and ordinals, which is the same fact from the other side,
+ * and is why `locales/th` ships `_other` and no `_one`. Thai also blocks the
+ * optional plurality words (ทั้งหลาย, บรรดา) after a numeral rather than
+ * requiring them, so there is no form that is right at one count and wrong at
+ * another for this axis to find. Batch 1 produced 11 token-axis survivors and
+ * every one was an invariant noun, unit or clause opener (อักขระ, ไบต์, โทเค็น,
+ * and three relative clauses); a word list would therefore have to grow by
+ * every noun the language uses next to a number, which is the escalation-per-
+ * round outcome the `ja` paragraph above rejects.
+ *
+ * As with `tr` and `ja`, this is NOT a claim that Thai has no numeral-adjacent
+ * hazard. It has one, and it is the same shape as Japanese's: the choice of
+ * CLASSIFIER per counted object — รายการ for entries, แถว for CSV rows, ชุด for
+ * a glossary, ครั้ง for occurrences. That is a lexical decision per object, not
+ * an agreement rule, so no regex can check it; it is handled by the
+ * classifier-by-object table in docs/i18n/style/th.md. Unlike Japanese, Thai
+ * has no numeral-conditioned ORTHOGRAPHIC change to fall back on either: there
+ * is no rendaku/gemination analogue and no bounded native counting series, so
+ * the narrower ground the `ja` flag survives on is not even needed here.
+ * `zh-hant`: the same grammar fact as `ja`, and for Chinese it holds even
+ * more simply — a Chinese noun has no number at all, so there is no plural
+ * form for a numeral to agree with in any construction, and unlike Japanese
+ * there is no numeral-conditioned orthography either: Chinese measure words
+ * are invariant Han characters with no rendaku or gemination and no series
+ * that runs out above nine. Measured over the finished 1,879-value locale:
+ * 180 raw narrow matches, 63 after the token axis, and every one of the 63
+ * is a measure word or a plain noun sitting directly after a numeral — 個,
+ * 項, 則, 筆, 次, 頁, 倍, 秒, 字元, 位元組 and their like — each grammatical
+ * at every value its token can take. Granting them individually would be
+ * the same escalation every round with a different counter, which is the
+ * argument this file already accepted for `ja`.
+ *
+ * As with `tr` and `ja`, this is NOT a claim that Chinese has no
+ * numeral-adjacent hazard. It has the same one Japanese has: the choice of
+ * MEASURE WORD (量詞) per counted object — 個 for entries, 列 for CSV rows,
+ * 條 for rules, 筆 for records, 種 for languages, 次 for attempts. That is a
+ * lexical decision per object rather than an agreement rule, so no regex can
+ * check it; it is handled by the measure-word table in
+ * docs/i18n/style/zh-hant.md, which the whole-language sweep required.
+ */
+export const NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES = new Set(['tr', 'ja', 'id', 'th', 'zh-hant']);
 
 /**
  * The script list for a locale, or `undefined` if this detector has no
@@ -368,10 +633,17 @@ export function looseNumeralAgreementCount(namespaces, locale) {
  * BEFORE THE WORD AXIS" section for why a raw-derived word list gets
  * contaminated by legitimate `{{count}}` agreement and silently exempts real
  * defects.
+ *
+ * For a locale in NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES, the word axis is
+ * skipped unconditionally — every token-axis survivor is cleared, never
+ * printed as a candidate — because that locale's grammar has no numeral-word
+ * agreement for the word axis to check in the first place. See that
+ * constant's own comment.
  */
 export function numeralAgreementCheck(namespaces, locale) {
   const re = numeralAgreementRegex(locale);
   const tokenSkip = new Set(NUMERAL_TOKEN_SKIPLIST);
+  const wordAxisInapplicable = NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES.has(locale);
   const wordExempt = new Set((NUMERAL_WORD_AXIS_EXEMPTIONS[locale] ?? []).map((w) => w.toLowerCase()));
 
   let raw = 0;
@@ -385,12 +657,100 @@ export function numeralAgreementCheck(namespaces, locale) {
       const word = match[3];
       if (tokenSkip.has(token)) continue; // token axis first
       afterTokenAxis += 1;
+      if (wordAxisInapplicable) continue; // this locale's nouns never inflect — nothing to check
       if (wordExempt.has(word.toLowerCase())) continue; // word axis second
       survivors.push(`${namespace}:${key} — {{${token}}} … "${word}"`);
     }
   }
 
   return { raw, afterTokenAxis, survivors };
+}
+
+// ---------------------------------------------------------------------------
+// Check 1b: welded suffix (a placeholder-adjacency defect, not a numeral one)
+// ---------------------------------------------------------------------------
+
+/**
+ * Locales whose orthography attaches a grammatical suffix directly onto the
+ * preceding word, chosen by that word's final sound — Turkish case suffixes
+ * on proper nouns ("NARN'ı", "API'sini") are the shipped example; see
+ * docs/i18n/style/tr.md's "Vowel harmony over an interpolated value" section.
+ * A `{{token}}` renders a value unknown until runtime, so a suffix written
+ * directly against it (`{{model}}'i`, or with no apostrophe at all,
+ * `{{base}}ı`) is right only for the values that happen to end in the
+ * assumed sound and wrong for the rest — a defect the numeral-agreement
+ * check above cannot see, welded or not: that check's gap is whitespace
+ * (`gapFor()`), and a welded suffix has none.
+ *
+ * SCOPED TO `tr` ONLY, DELIBERATELY — this was evaluated, not copied
+ * verbatim from the smallest-fix proposal that motivated it. Two things
+ * ruled out "widen the numeral-agreement gap instead" and "apply to every
+ * locale":
+ *
+ *  - **Not a widened gap.** `gapFor()` controls how much whitespace sits
+ *    between `}}` and a WORD in numeralAgreementRegex's word-axis check —
+ *    widening it to zero-or-more would still require the character right
+ *    after `}}` to be a script letter, so it could catch `{{base}}ı` but
+ *    never `{{model}}'i` (the apostrophe is neither whitespace nor a
+ *    script letter). It would also feed welded matches into the numeral
+ *    word axis, conflating two defects docs/i18n/style/tr.md is explicit
+ *    are "aimed at different things in this language": whether a count
+ *    forces plural agreement (it never does, in Turkish) versus whether a
+ *    case suffix was chosen for a value the guard cannot see. A separate
+ *    check keeps that distinction instead of erasing it.
+ *  - **Not every locale.** Applying this pattern locale-wide would treat
+ *    any letter immediately after `}}` as suspect, and the shipped corpus
+ *    already has a legitimate, unrelated shape that collides with it: `en`,
+ *    `es` and `fr` all ship `common:thinking` as "…{{seconds}}s" — a plain
+ *    unit suffix, not a value-dependent grammatical choice. Every
+ *    UNSPACED_SCRIPT_LOCALES entry (ja, ko, th, zh-hans, zh-hant) would
+ *    fare far worse: those languages never put whitespace before ANY word,
+ *    so this pattern would fire on ordinary, correct running text, not on
+ *    a defect — the same silent-no-op-shaped mistake NUMERAL_LOCALE_SCRIPTS'
+ *    own history already warns about, just inverted into a false-positive
+ *    flood instead of a false-negative no-op. Widen this set only for a
+ *    locale whose own style guide documents the same value-dependent
+ *    welded-suffix hazard Turkish has — not by assuming every agglutinative
+ *    or non-Latin language works the same way.
+ */
+export const WELDED_SUFFIX_LOCALES = new Set(['tr']);
+
+/** True only for a locale the welded-suffix check is calibrated to examine. */
+export function isWeldedSuffixCheckSupported(locale) {
+  return WELDED_SUFFIX_LOCALES.has(locale);
+}
+
+/**
+ * `{{token}}` + an optional apostrophe (ASCII `'` or the typographic `’`
+ * this locale's style guide prescribes) + a word in the locale's own
+ * script, with NO gap — the whitespace-free adjacency the numeral-agreement
+ * regex above cannot express. Reuses `requireScripts()`/`scriptClass()` so
+ * a do-not-translate Latin term glued to the token in some other way is
+ * still bounded to the locale's own script, same rationale as
+ * numeralAgreementRegex.
+ */
+function weldedSuffixRegex(locale) {
+  const cls = scriptClass(requireScripts(locale));
+  return new RegExp(`\\{\\{(\\w+)\\}\\}(['’]?)([${cls}][${cls}\\p{M}]*)`, 'gu');
+}
+
+/**
+ * Every welded-suffix offender for one locale, as ready-to-print strings.
+ * Unlike the numeral-agreement check, this has no token skiplist and no
+ * word-axis exemption list: welding is a hazard for ANY token, not only the
+ * ones that can hold a number (`{{model}}'i` is a defect even though
+ * `model` is on NUMERAL_TOKEN_SKIPLIST), so every match is an offender.
+ */
+export function weldedSuffixCheck(namespaces, locale) {
+  const re = weldedSuffixRegex(locale);
+  const offenders = [];
+  for (const [namespace, key, value] of localeStringEntries(namespaces)) {
+    for (const match of value.matchAll(re)) {
+      const [, token, apostrophe, suffix] = match;
+      offenders.push(`${namespace}:${key} — {{${token}}}${apostrophe}${suffix}…`);
+    }
+  }
+  return offenders;
 }
 
 // ---------------------------------------------------------------------------
@@ -569,6 +929,7 @@ function runCli() {
     survivors = result.survivors;
     const { raw, afterTokenAxis } = result;
     const looseCount = looseNumeralAgreementCount(namespaces, locale);
+    const wordAxisInapplicable = NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES.has(locale);
     hasWordAxis = (NUMERAL_WORD_AXIS_EXEMPTIONS[locale] ?? []).length > 0;
     console.log(
       `   narrow rule ("}}" + gap + word): ${raw} raw, ${afterTokenAxis} after the token-axis ` +
@@ -577,7 +938,34 @@ function runCli() {
     console.log(
       `   loose rule ("}}" + whitespace/punctuation/symbol + word, informational only): ${looseCount} raw.`,
     );
-    if (survivors.length > 0 && !hasWordAxis) {
+    if (wordAxisInapplicable) {
+      // Not "no survivors because nobody found any" — "no survivors because
+      // this language's grammar has nothing here to survive". See
+      // NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES for why that distinction
+      // matters and isn't the same silent-clean ambiguity NUMERAL_LOCALE_SCRIPTS
+      // exists to prevent: it is stated explicitly here rather than inferred
+      // from an empty survivor list.
+      // The closing sentence is CONDITIONAL, and was not until 2026-08-12. It
+      // was written for `tr`, the first member of this set, and printed
+      // unconditionally — so `ja` (added in wave 1) and `th` were both told
+      // their hazard "is the welded-suffix check below" while section 1b, two
+      // lines further down the same report, printed "Not applicable — not in
+      // WELDED_SUFFIX_LOCALES" for exactly those locales. A report that
+      // contradicts itself within one screen is worse than one that says less,
+      // so the claim is now made only for a locale the welded check actually
+      // covers. See NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES: `ja` and `th` name
+      // their real hazard (counter / classifier choice) in their own style
+      // guides, because no check in this script can see it.
+      const elsewhere = isWeldedSuffixCheckSupported(locale)
+        ? ` This locale's numeral-adjacent hazard is the welded-suffix check below, not this one.`
+        : ` This locale's numeral-adjacent hazard is a lexical one no check here can see — see ` +
+          `NUMERAL_WORD_AXIS_INAPPLICABLE_LOCALES and docs/i18n/style/${locale}.md.`;
+      console.log(
+        `   "${locale}" counted nouns do not inflect for number, so the word axis is not applicable — ` +
+          `every token-axis survivor above is cleared unconditionally, not calibrated blank.` +
+          elsewhere,
+      );
+    } else if (survivors.length > 0 && !hasWordAxis) {
       console.log(
         `   "${locale}" has no calibrated word-axis exemption list yet — every one of these is an ` +
           `UNCLEARED CANDIDATE, not a known defect. This does not mean the batch is broken; it means ` +
@@ -589,6 +977,31 @@ function runCli() {
     } else if (survivors.length > 0) {
       console.log('   Survivors — candidates, not verdicts. Clear each by hand before committing:');
       for (const survivor of survivors) console.log(`     ${survivor}`);
+    } else {
+      console.log('   No survivors.');
+    }
+  }
+  console.log('');
+
+  // --- Check 1b ------------------------------------------------------------
+  console.log('## 1b. Welded suffix (a case/particle suffix written directly against a token)');
+  const weldedSupported = isWeldedSuffixCheckSupported(locale);
+  let weldedOffenders = [];
+  if (!weldedSupported) {
+    console.log(
+      `   Not applicable — "${locale}" is not in WELDED_SUFFIX_LOCALES. See that constant's comment ` +
+        `for why this check is scoped narrowly rather than run everywhere.`,
+    );
+  } else {
+    weldedOffenders = weldedSuffixCheck(namespaces, locale);
+    if (weldedOffenders.length > 0) {
+      console.log(
+        `   FAILED — ${weldedOffenders.length} placeholder(s) with a suffix written directly against ` +
+          `them, no whitespace. The correct suffix depends on the interpolated value's final sound, ` +
+          `which is unknown until runtime — restructure so the token stays bare (see ` +
+          `docs/i18n/style/${locale}.md's placeholder section):`,
+      );
+      for (const offender of weldedOffenders) console.log(`     ${offender}`);
     } else {
       console.log('   No survivors.');
     }
@@ -621,15 +1034,23 @@ function runCli() {
   console.log('');
 
   // --- Verdict -------------------------------------------------------------
-  // Only check 1 gates the exit code — see the module header for why 2 and 3
-  // are report-only. A locale this detector cannot examine gates the exit
-  // code too, just not with a survivor count: see NUMERAL_LOCALE_SCRIPTS.
+  // Checks 1 and 1b gate the exit code — see the module header for why 2 and
+  // 3 are report-only. A locale check 1 cannot examine gates the exit code
+  // too, just not with a survivor count: see NUMERAL_LOCALE_SCRIPTS.
   if (!numeralCheckSupported) {
     console.error(
       `i18n-preflight: REFUSED — "${locale}" has no NUMERAL_LOCALE_SCRIPTS entry, so check 1 did not ` +
         `run. Add an entry before treating this locale's pre-flight as meaningful.`,
     );
     process.exit(2);
+  }
+
+  if (weldedOffenders.length > 0) {
+    console.error(
+      `i18n-preflight: FAILED — ${weldedOffenders.length} welded-suffix offender(s) for "${locale}". ` +
+        `Restructure each so the token stays bare — see the list above and check 1b's own comment.`,
+    );
+    process.exit(1);
   }
 
   if (survivors.length > 0) {

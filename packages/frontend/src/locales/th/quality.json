@@ -1,0 +1,69 @@
+{
+  "title": "แดชบอร์ดคุณภาพ",
+  "loading": "กำลังโหลดสรุปคุณภาพ…",
+  "error": "โหลดสรุปคุณภาพไม่สำเร็จ: {{message}}",
+  "empty": "ยังไม่มีผลการตรวจ LQA รันการแปลเพื่อให้แดชบอร์ดนี้มีข้อมูล",
+  "overallStat": {
+    "passRateLabel": "อัตราผ่านโดยรวม",
+    "results": "ผลการตรวจ LQA {{count}} ข้อ",
+    "entries": "{{count}} รายการ",
+    "legendPassed": "ผ่าน {{count}}",
+    "legendFailed": "ไม่ผ่าน {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "ปัญหาที่พบบ่อยที่สุด",
+    "description": "จำนวนตามชนิดของปัญหาในทุกภาษา"
+  },
+  "other": "อื่น ๆ",
+  "columns": {
+    "passRate": "อัตราผ่าน"
+  },
+  "legend": {
+    "tierHigh": "อัตราผ่านสูง (≥ 90%)",
+    "tierMid": "อัตราผ่านปานกลาง (70–89%)",
+    "tierLow": "อัตราผ่านต่ำ (< 70%)",
+    "passed": "ผ่าน",
+    "failed": "ไม่ผ่าน"
+  },
+  "checkLabels": {
+    "tag-equality": "ความเท่ากันของแท็ก",
+    "overflow": "ความยาวล้น",
+    "length-limit": "ขีดจำกัดความยาว",
+    "glossary-adherence": "การยึดตามอภิธานศัพท์",
+    "forbidden-terms": "คำต้องห้าม",
+    "regex-assertions": "ข้อยืนยันด้วย Regex",
+    "number-parity": "ความตรงกันของตัวเลข",
+    "whitespace-parity": "ความตรงกันของช่องว่าง",
+    "line-break-parity": "ความตรงกันของการขึ้นบรรทัดใหม่",
+    "end-punctuation": "เครื่องหมายวรรคตอนท้ายข้อความ",
+    "double-spacing": "ช่องว่างซ้ำ",
+    "double-words": "คำซ้ำ",
+    "untranslated": "ยังไม่ได้แปล",
+    "mask-integrity": "ความสมบูรณ์ของมาสก์",
+    "tag-mismatch": "แท็กไม่ตรงกัน",
+    "too-long": "ยาวเกินไป",
+    "glossary-term-missing": "ไม่มีคำศัพท์จากอภิธานศัพท์",
+    "forbidden-term": "พบคำต้องห้าม",
+    "regex-assertion-failed": "ข้อยืนยัน Regex ไม่ผ่าน",
+    "regex-config-error": "ตั้งค่า Regex ผิดพลาด",
+    "number-missing": "ตัวเลขหายไป",
+    "number-added": "มีตัวเลขเพิ่มมา",
+    "whitespace-leading": "ช่องว่างนำหน้า",
+    "whitespace-trailing": "ช่องว่างต่อท้าย",
+    "line-break-mismatch": "การขึ้นบรรทัดใหม่ไม่ตรงกัน",
+    "end-punctuation-mismatch": "เครื่องหมายวรรคตอนท้ายไม่ตรงกัน",
+    "mask-mismatch": "มาสก์ไม่ตรงกัน"
+  },
+  "byLanguage": {
+    "title": "อัตราผ่านตามภาษา",
+    "description": "แย่ที่สุดก่อน คลิกที่ภาษาเพื่อดูรายการที่ไม่ผ่าน"
+  },
+  "bySource": {
+    "title": "ปัญหาตามแหล่งที่มา",
+    "description": "แย่ที่สุดก่อน คลิกที่แหล่งที่มาเพื่อดูรายการที่ไม่ผ่าน"
+  },
+  "byModule": {
+    "title": "คุณภาพตามโมดูล",
+    "description": "อัตราผ่านและปัญหา จัดกลุ่มตามโมดูลการแปลที่ผลิตคำแปลแต่ละรายการ"
+  }
+}

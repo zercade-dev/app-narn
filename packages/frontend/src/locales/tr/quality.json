@@ -1,0 +1,69 @@
+{
+  "title": "Kalite panosu",
+  "loading": "Kalite özeti yükleniyor…",
+  "error": "Kalite özeti yüklenemedi: {{message}}",
+  "empty": "Henüz LQA sonucu yok. Bu panoyu doldurmak için bir çeviri çalıştırın.",
+  "overallStat": {
+    "passRateLabel": "Genel geçme oranı",
+    "results": "{{count}} LQA sonucu",
+    "entries": "{{count}} girdi",
+    "legendPassed": "Geçen: {{count}}",
+    "legendFailed": "Geçmeyen: {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "En sık görülen sorunlar",
+    "description": "Tüm dillerdeki sorun türü sayıları."
+  },
+  "other": "Diğer",
+  "columns": {
+    "passRate": "Geçme oranı"
+  },
+  "legend": {
+    "tierHigh": "Yüksek geçme oranı (≥ %90)",
+    "tierMid": "Orta geçme oranı (%70–89)",
+    "tierLow": "Düşük geçme oranı (< %70)",
+    "passed": "Geçen",
+    "failed": "Geçmeyen"
+  },
+  "checkLabels": {
+    "tag-equality": "Etiket eşitliği",
+    "overflow": "Uzunluk taşması",
+    "length-limit": "Uzunluk sınırı",
+    "glossary-adherence": "Sözlükçeye uyum",
+    "forbidden-terms": "Yasaklı terimler",
+    "regex-assertions": "Regex doğrulamaları",
+    "number-parity": "Sayı eşliği",
+    "whitespace-parity": "Boşluk eşliği",
+    "line-break-parity": "Satır sonu eşliği",
+    "end-punctuation": "Bitiş noktalaması",
+    "double-spacing": "Çift boşluk",
+    "double-words": "Çift sözcük",
+    "untranslated": "Çevrilmemiş",
+    "mask-integrity": "Maske bütünlüğü",
+    "tag-mismatch": "Etiket uyuşmazlığı",
+    "too-long": "Çok uzun",
+    "glossary-term-missing": "Sözlükçe terimi eksik",
+    "forbidden-term": "Yasaklı terim",
+    "regex-assertion-failed": "Regex doğrulaması başarısız",
+    "regex-config-error": "Regex yapılandırma hatası",
+    "number-missing": "Sayı eksik",
+    "number-added": "Sayı eklenmiş",
+    "whitespace-leading": "Baştaki boşluk",
+    "whitespace-trailing": "Sondaki boşluk",
+    "line-break-mismatch": "Satır sonu uyuşmazlığı",
+    "end-punctuation-mismatch": "Bitiş noktalaması uyuşmazlığı",
+    "mask-mismatch": "Maske uyuşmazlığı"
+  },
+  "byLanguage": {
+    "title": "Dile göre geçme oranı",
+    "description": "En kötüden başlayarak. Geçmeyen girdilerini görmek için bir dile tıklayın."
+  },
+  "bySource": {
+    "title": "Kaynağa göre sorunlar",
+    "description": "En kötüden başlayarak. Geçmeyen girdilerini görmek için bir kaynağa tıklayın."
+  },
+  "byModule": {
+    "title": "Modüle göre kalite",
+    "description": "Her çeviriyi üreten çeviri modülüne göre gruplanmış geçme oranı ve sorunlar."
+  }
+}

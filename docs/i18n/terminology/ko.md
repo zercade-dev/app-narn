@@ -21,81 +21,103 @@ candidate you rejected and why.
 Terms are in the order they appear in `../terminology.md`. Do not add, remove or reorder
 rows: a term the lexicon lacks goes in the additive queue in [`README.md`](README.md).
 
+**Quoting convention, so every claim here is checkable.** “…” marks a span quoted
+**verbatim from a shipped `ko` value**, never truncated, so it can be verified by substring
+search. A rejected candidate, an English source word, or a bare lexeme under discussion is
+written in plain text or *italics*, never in “…”.
+
+**One reservation binds nearly every row: 항목 is *entry* and nothing else.** Korean reaches
+for 항목 for any list row, form field or menu item, so the reservation had to be enforced by
+hand in six places — vault keys (`vault:changePasswordFieldsRequired` “비밀번호 입력란”),
+form fields (`config:routing.promptOptionsOptional` “모든 필드는 선택 사항이에요.”), a
+changelog release (`common:changelogEntryError` “이 릴리스의 변경 이력”), a translation-memory
+row (`config:tm.browserEmpty`), a source-review finding (`review:sourceAi.ignoredToast`
+“검토 목록에서 제외했어요”) and a console overflow line (`console:membersNotShown`). Each is
+recorded in its own row below.
+
 | Term | Rendering | Notes |
 | --- | --- | --- |
-| project |  |  |
-| workspace |  |  |
-| entry |  |  |
-| source text |  |  |
-| translation |  |  |
-| source label |  |  |
-| achievement |  |  |
-| inline tag |  |  |
-| placeholder |  |  |
-| translator context |  |  |
-| source language |  |  |
-| target language |  |  |
-| reference language |  |  |
-| writable language |  |  |
-| Pseudo Test |  |  |
-| run |  |  |
-| Activity |  |  |
-| batch |  |  |
-| batch grouping |  |  |
-| AI review |  |  |
-| judge |  |  |
-| source review |  |  |
-| finding |  |  |
-| suggestion |  |  |
-| discard |  |  |
-| needs review |  |  |
-| flag |  |  |
-| Review (the sidebar group) |  |  |
-| review queue |  |  |
-| module |  |  |
-| module instance |  |  |
-| provider |  |  |
-| model |  |  |
-| prompt |  |  |
-| reasoning effort |  |  |
-| routing rule |  |  |
-| rule group |  |  |
-| credential vault |  |  |
-| credential |  |  |
-| LQA |  |  |
-| quality gate |  |  |
-| check |  |  |
-| issue |  |  |
-| severity |  |  |
-| notification severity |  |  |
-| assertion |  |  |
-| pattern |  |  |
-| overflow |  |  |
-| length limit |  |  |
-| pass rate |  |  |
-| glossary |  |  |
-| glossary term |  |  |
-| constant |  |  |
-| match |  |  |
-| translation memory |  |  |
-| approve |  |  |
-| category |  |  |
-| tone |  |  |
-| orphan |  |  |
-| relink |  |  |
-| backup |  |  |
-| snapshot |  |  |
-| template |  |  |
-| collaborator |  |  |
-| member |  |  |
-| nickname |  |  |
-| claim |  |  |
-| invite |  |  |
-| recording |  |  |
-| stage |  |  |
-| Text Styler |  |  |
-| element |  |  |
-| theme |  |  |
-| guide |  |  |
-| release |  |  |
-| changelog |  |  |
+| project | 프로젝트 | Batch 1 (`config`). Verb is 만들기/복제 — `config:duplicateProject` is “프로젝트 복제”. |
+| workspace | 워크스페이스 | Batch 1. Never the word chosen for *project*; the two are contrasted directly at `config:batchGroupingDefaultOption` “워크스페이스 설정 사용”. Rejected 작업 공간: two words, and 작업 is already carrying *Actions* columns. |
+| entry | 항목 | Batch 1. **Counter is 개** (`config:orphanedCount` “미연결 {{count}}개”), except where the thing counted is a *job* rather than an entry — see *run* and the batch-5 note below. Rejected 엔트리 (a bare loan nobody says in Korean UI) and 건, which is kept as the neutral counter for jobs, matches and issues. **The reservation is the expensive part:** Korean uses 항목 for form fields, list rows and menu items too, so every non-entry sense had to be given a different word (see the paragraph above this table). `config:routing.simpleHint` says *string* in English and means an entry — it ships 항목. **Batch 5 applies the canonical-term rule to `logs`:** `logs:translation.start`/`done`/`failedGeneric`, the three `failed*` bare/`_other` pairs, `logs:orphan.detected` “원본 파일에 더 이상 없는 항목 {{count}}개를 찾았어요.” and `logs:glossaryGen.done` all ship 항목 over an English *string*. **`logs:translation.queued` is the documented exception** — its token counts jobs (one entry × one target language), so it ships “번역 {{total}}건을 대기열에 넣었어요.”, a head noun true of a job. The `batch:*` counters take the same 건 for the same reason. |
+| source text | 원문 | Batch 1. Deliberately **not** the 원본 of *source language* nor the 출처 of *source label* — three English *source*es, three Korean words, because 원문 (the original text) is the only one that reads naturally in the LQA descriptions. All the bare *Source* column headers land here too (`glossary:colSource`, `orphans:columns.source`, `strings:runs.judgeSourceLabel`, `stage-details:sourceHeading`), because that column holds source text. **A fourth English *Source* is provenance:** `glossary:sourceLabel` (“출처:”) introduces the link to the external sheet, so it takes the *source label* word instead. Read the call site, not the word. |
+| translation | 번역 | Batch 1–2. Noun and verb stem (번역하다). Korean marks neither number nor the noun/verb split, so *Translations*, *Translation* and the tab label all land on 번역 (`strings:tabs.strings`, `strings:runs.judgeTargetLabel`, `orphans:columns.translations`) — licensed. **English's *Translate* does not:** `strings:guide.groupTranslate` and `sidebar:groups.translate` ship “번역 작업”, never 번역, because that heading sits directly above `strings:tabs.strings` on the rail and an equality there is the one thing the co-render rule forbids. **`stage-details:translate` (“Translate”, a button) was split off for the same reason** — it ships “번역하기” because a bare 번역 would sit in the same view as the “번역” panel heading (`stage-details:translationsHeading`). Where the translated *text* needs a head noun of its own, 번역문 is available on the same root; nothing has needed it yet. |
+| source label | 출처 라벨 | Batch 1. Short form 출처 for the column heading English shortens to *Sources* (`config:routing.labelSources`, `strings:filters.allSources`, `quality:bySource.title`). 출처 = where it came from, which is exactly the term's sense and keeps it apart from 원문 (*source text*) and 원본 언어 (*source language*). Rejected 소스: it collapses all three back into one loan. |
+| achievement | 업적 | Batch 1. The settled Korean game word; used attributively with no particle (“업적 이름”, “업적 설명”, `config:lqa.achievementNameBytesLabel`). |
+| inline tag | 인라인 태그 | Batch 1 (`config:lqa.checks.tag-equality.name` “인라인 태그 일치”). The umbrella; *placeholder* is the subset. In `logs:translation.maskMismatch` English says *formatting tags* and Korean follows with 서식 태그 — the English is narrower there, so the rendering is too. |
+| placeholder | 자리 표시자 | Batch 1. The standard Korean IT rendering for a `{{…}}` token (`strings:filters.placeholderMismatch` “자리 표시자 불일치”). **Not used for the input-hint sense** — an empty-field hint is never named in Korean UI, and where English does name one the string describes the control instead. |
+| translator context | 번역 참고 정보 | Batch 2 (`strings:compare.editContext` “번역 참고 정보 편집”). Short form 참고 정보 inside the Compare toolbar and the CSV column (`config:includeContext`, `generation:fieldContext`). Rejected 메모 (reserved for English *Notes* — `config:routing.promptNotes`, `glossary:colNotes`) and 설명 (reserved for *Description*). The **entry-metadata** sense is 항목 컨텍스트 (`generation:contextLabel`) and the **model** sense is 컨텍스트 창 (`config:models.confidenceReason.prompt-near-context`), so all three English *context*es stay apart. |
+| source language | 원본 언어 | Batch 1 (`config:sourceLanguage`). Pairs with 대상 언어; the two appear side by side. Rejected 출발어/도착어, the translation-industry pair — precise, but opaque to a game team. |
+| target language | 대상 언어 | Batch 1 (`config:targetLanguages`). Korean does not mark number, so *Target Languages* and *Target language* are one rendering. |
+| reference language | 참조 언어 | Batch 2 (`strings:compare.translateUseReferenceNone` “참조 언어를 컨텍스트로 사용하기”). Short form 참조 in the toolbar (`strings:compare.reference`). Never 기준 언어, which would read as a second source. |
+| writable language | 편집 가능 언어 | Batch 4 (`collab:sharing.columnLanguages`). One adjective, used identically in the table column, the lock messages (`collab:locks.reviewLanguagesScoped`) and the invite dialog. Rejected 쓰기 가능, which reads as file permissions. |
+| Pseudo Test | 슈도 테스트 | Batch 1 (`config:pseudoTestHelpAria` “슈도 테스트란?”), repeated at `strings:guide.topicPseudoTest`. **Rejected 의사(擬似) 테스트**, the technically correct rendering of *pseudo*: 의사 is a homograph of the everyday word for *doctor*, and this string is read in isolation as a language-picker label. The code `pseudo-test` is never translated. |
+| run | 실행 | Batch 2. Noun only, never a verb ending. `strings:compare.run` (the run picker) is “실행”. Rejected 작업 (reserved for *Actions* columns and English *task*) and 회차. **This is what frees 실행 취소 for *Cancel run*** (`batch:cancelRun`) — the idiom Korean would otherwise spend on *Undo*; see *revert*. |
+| revert | 롤백 | Batch 2 (`strings:runs.revert` “롤백”, badge `revertedBadge` “롤백됨”). **Elimination proof:** 되돌리기 is spent on *undo* (`strings:compare.undo`), 복원 on *restore* (`backup:restoreButton`), 취소 on *Cancel*, and 실행 취소 is `batch:cancelRun`. 롤백 is the surviving word, it is current in Korean technical software, and it means what the term means — reversing everything one run wrote. |
+| Activity | 활동 | Batch 2 (`strings:tabs.runs`, `strings:guide.topicActivity`). The page title expands deliberately: `strings:runs.title` is “번역 활동”. **English's *activity history* is 활동 내역, not 기록** (`strings:runs.emptyState` “활동 내역이 없어요.”) — 기록 is spent on *recording*, and 로그 on *log*. |
+| log | 로그 | Batch 5 (`console:statusConnected` “서버 로그 스트림에 연결됨”). *Log entry* and *log stream* fold into the same root — `console:empty` is “아직 로그가 없어요.” and needs no separate word for one line. Kept clear of 활동 (*Activity*), 내역 (activity history) and 기록 (*recording*). |
+| batch | 배치 | Batch 1 (`config:module.batchMode` “배치 모드”). The loan, not 묶음: it has to carry *batch size*, *batch grouping* and *batch mode* without either colliding with *bulk operation* (일괄 작업) or reading as an ordinary bundle. |
+| batch grouping | 배치 그룹화 | Batch 1 (`config:batchGroupingLabel`). Distinct from 배치 모드 by the head noun, as the term requires. |
+| AI review | AI 검토 | Batch 2 (`strings:runs.judgeBadge`). Built on 검토 (a person or a model reading), never 검사 — that is the deterministic *check*. The two tab names extend it: 원문 AI 검토, 번역 AI 검토. `strings:guide.topicAiReview` (“AI Review”) is the same rendering. |
+| judge | 평가 | Batch 2 (`review:translationAi.description` “AI가 완료된 번역을 정확성, 유창성, 용어, 톤 기준으로 평가하게 해요.”). The evaluative sense only — never 판사/재판, the legal reading Korean reaches for first. Used as a verb in prose; the *feature* is always AI 검토, so no noun *the judge* is introduced. |
+| source review | 원문 검토 | Batch 2–3 (`review:sourceAi.configTitle` “원문 AI 검토”, `strings:runs.sourceReviewDetailsShow` “원문 검토 보기”). Built from *source text* + 검토, so it reads as a sibling of 번역 AI 검토 rather than a different system. |
+| finding | 지적 사항 | Batch 3 (`review:sourceAi.findingsTitle` “지적 사항”). Distinct from 이슈 (*issue*, the LQA verdict), which is listed on the same entry. Rejected 발견 사항 (vague) and 오류 (*error*, and untrue of the clarity findings). |
+| suggestion | 제안 | Batch 2 (`category:reviewTitle` “제안 검토”). The action on it is 적용 (*apply*), never 승인 — see the *approve* row and the English copy bug it records. |
+| discard | 변경 취소 / 폐기 | Batch 1 and 2. **Two senses, two words, as the term requires.** Discarding unsaved edits, beside a Save button, is “변경 취소” (`config:discard`, `strings:editor.discard`, `vault:discard`). Discarding something the app offered is “폐기” (`strings:runs.judgeDiscard`, `glossary:generateDiscard` “결과 폐기”, `colorText:assistant.discard`). Neither is 취소, which is *Cancel* on its own. **A third English *discard* is not this term at all:** `config:discardUntranslatable` is the export checkbox — see *omit*. |
+| needs review | 검토 필요 | Batch 2. One rendering across the filter (`strings:filters.needsReview`), the badge (`strings:compare.cellNeedsReviewBadge`) and the bulk action (`strings:compare.flagAllNeedsReview` “모두 검토 필요로 표시”). English's lowercase badge carries no case into Korean, so filter and badge are byte-identical — that is the casing rule working, not drift. The counterpart action is 검토 완료로 표시. **Korean adjectival forms do not agree with anything**, so the whole gender question the es/fr note settles does not arise here: 번역됨 / 검토됨 / 검토 필요 are invariant in every one of the three roles. |
+| flag | 보류 | Batch 3 (`review:flag` “보류”, filter `review:filterFlagged` “보류됨”, toast `review:flaggedToast` “번역을 보류했어요”). **Deliberately not 표시**, which is the verb for *mark as needs review* — this action clears that flag, so one verb for both would set and unset the same state. 보류 is a disposition (set aside to come back to), which is exactly the term's definition, and it does not read as an alarm. The filter tab and the row button co-render; 보류됨 / 보류 is a proper substring pair, the same relation English's *Flagged* / *Flag* has. **`glossary:flaggedTitle` is a different English *flagged*** (a term missing a translation) and takes 표시됨, not 보류. |
+| ignore / ignored | 무시 | Batch 2 (`strings:row.ignored` “무시됨”, `strings:row.ignoreAction` “항목 무시”). The negation is built, not coined: `unignoreAction` is “항목 무시 해제”. Kept apart from 건너뛰기 (*skip*, the per-run routing outcome), 제외 (*omit*), 비활성화 (*disable*) and 폐기 (*discard*). |
+| Review (the sidebar group) | 검토 | Batch 2 and 4 (`strings:guide.groupReview`, `sidebar:groups.review`). The umbrella, chosen before any of its four members so it could not be captured by one of them. It sits over 원문 AI 검토 / 번역 AI 검토 / 수동 검토 / 품질 — a proper prefix of three of the four and equal to none, which is what the co-render rule requires of a heading. |
+| review queue | 검토 대기열 | Batch 3 (`review:title` “검토 대기열”). Built on the same 검토 root as *needs review*, so a reader sees one feature; 대기열 is the same word used for the run queue (`strings:runs.moveUp` “대기열에서 위로”), which is correct — both are queues. |
+| back-translation | 역번역 | Batch 3 (`review:backTranslationTitle` “역번역 (참고용)”). The established Korean term of art. `review:backTranslate` (“Translate back to source”) is the action and expands: “원본 언어로 역번역”. |
+| module | 모듈 | Batch 1 (`config:routing.labelModule` “모듈”). Canonical for the thing you pick before an AI call; never 플러그인, which would promise a plugin system that does not exist. |
+| module instance | 모듈 인스턴스 | Batch 1; shortened to 인스턴스 once 모듈 is established (`config:instances.formTitle` “{{base}} 새 인스턴스”). The id itself is never translated; `config:instances.slugReserved` renders *slug* as 슬러그, the identifier fragment it names. |
+| provider | 제공업체 | Batch 1 (`config:enableModuleHelp`). The outside company. **The three English strings that label a module-instance picker *Provider* are translated as written** — `colorText:assistant.instanceLabel`, `stage-details:chatInstanceLabel` and `config:routing.simplePlaceholder` (“제공업체를 선택하세요”) — and they do not drag 모듈 anywhere else. Rejected 공급자, which reads as a supply chain. |
+| model | 모델 | Batch 1. Free to take the obvious word because *template* is 템플릿, not 모델 — the collision the term warns about does not arise in Korean. |
+| prompt | 프롬프트 | Batch 1 (`config:routing.labelPromptOptions` “프롬프트 옵션”). Kept apart from 요청 (an HTTP *request*, `config:requestTimeoutLabel`) and 검색 (a search *query*). |
+| reasoning effort | 추론 강도 | Batch 1 (`config:module.reasoningEffort`). The provider's own parameter; 강도 (intensity) rather than 노력, which would read as work done and could be confused with a run's cost. |
+| routing rule | 배정 규칙 | Batch 1 (`config:routing.title` “배정 규칙”). **Rejected 라우팅**, which in Korean is unambiguously *network* routing — exactly what the term forbids. 배정 (assignment/allocation) says what the rule does: it assigns an entry to a module. The tab is the bare root, “배정” (`strings:tabs.routing`), and the guide topic is “배정 탭”. |
+| rule group | 규칙 그룹 | Batch 1 (`config:routing.groupSelectLabel`). Not reused for *category* (카테고리) or *batch grouping* (배치 그룹화). |
+| credential vault | 자격 증명 보관함 | Batch 1 and 4 (`vault:statusLabel`). Short form 보관함 wherever the context is unambiguous, and all four frames the term asks about were checked before deciding: “보관함 잠김” (`config:credentialsVaultLockedChip`), “보관함 잠금 해제” (`config:credentialsUnlockButton`), “보관함 비밀번호” (`vault:changePasswordTitle`) and the full form as the status label. Rejected 금고, which is a physical safe. |
+| credential | 자격 증명 | Batch 1 (`config:credentialsMissingChip` “자격 증명 없음”). The vault key names themselves are never translated. |
+| LQA | LQA | Batch 1. **Kept as the industry acronym**, uppercase and half-width, in every string including the filter chip — Korean localization vendors use *LQA* untranslated and no localized form is established. `config:lqa.title` is “LQA 검사”. |
+| quality gate | 품질 게이트 | Batch 1 (`config:lqa.description`). The process-control sense; 게이트 as a loan avoids the physical-door reading Korean 문 would give. Once 품질 검사 has been said, English's bare *the gate* is 게이트. |
+| check | 검사 | Batch 1. One word across 품질 검사, LQA 검사 and every individual check name (`quality:checkLabels.*`). **Never 검토**, which is *review* — the whole point of the two terms. The severity words are 차단 (*blocking*) and 경고 (*warning*), and neither is 오류 (*error*). |
+| issue | 이슈 | Batch 2 (`strings:row.lqaIssues_other` “LQA 이슈 {{count}}건”). A machine verdict; distinct from 지적 사항 (*finding*, an AI opinion about the source), which is listed on the same entry. Rejected 문제, which the LQA descriptions need for ordinary English *problems*. |
+| severity | 심각도 | Batch 1 (`config:lqa.checks.glossary-adherence.description` uses 심각도 twice). The two **values** are fixed by *check* and do not drift here. |
+| notification severity | 심각도 | Batch 4 (`account:notificationsSeverity.*`). Same word, different value set: 정보 / 경고 / 심각. **경고 is not re-decided here** — it is the same 경고 as the LQA warning severity, as the term requires. |
+| assertion | 어서션 | Batch 1 (`config:lqa.regexAddAssertion` “어서션 추가”). A genuine fourth word was required: 조건 is spent on routing conditions, 검사 on the LQA checks, 규칙 on routing rules. Rejected 단언, the literal translation — correct in a logic textbook, unreadable on a button. |
+| pattern | 패턴 | Batch 1 (`config:lqa.regexPattern`). The regex sense only, and safely distinct from 템플릿 (*template*). |
+| overflow | 길이 초과 | Batch 1 (`config:lqa.checks.overflow.name`); the ratio setting is 초과 비율 (`config:overflowRatioLabel`) and the LQA verdict label is the same 길이 초과 (`quality:checkLabels.overflow`). **Distinct from *length limit* by the head:** 초과 is relative to the source, 제한 is an absolute cap. Rejected the loan 오버플로, which in Korean reads as a buffer overflow. |
+| length limit | 길이 제한 | Batch 1 (`config:routing.labelMaxLength` “항목 길이 제한”, `config:lqa.checks.length-limit.name`). |
+| pass rate | 통과율 | Batch 3 (`quality:columns.passRate` “통과율”). **성공률 is reserved for `config:health.successRate`** (“성공 {{rate}}%”), a different metric in the same product, exactly as the term warns. |
+| glossary | 용어집 | Batch 1–3 (`strings:tabs.glossary` “용어집”). The settled Korean CAT-tool word, and used for *glossary* only — *translation memory* is 번역 메모리. Korean does not mark number, so `glossary:glossaries` (*Glossaries*, the panel heading) is the identical “용어집”; licensed. |
+| glossary term | 용어 | Batch 3 (`glossary:totalTerms` “전체 용어 수:”). Never 항목, which is reserved for entries — “용어 추가” and “항목 {{count}}개” must not collide, and in Korean they do not. |
+| constant | 불변 | Batch 3 (`glossary:colConstant` “불변”, badge `review:glossaryConstant`). **Rejected 고정**, the literal *fixed*: on a table row it reads as *pinned*, and the adjacent column is *read-only* (읽기 전용) — the near-miss the term names. 불변 says the text does not change, which is what the flag does. |
+| match | 일치 | Batch 3 (`glossary:matchesPanel` “일치”). Noun and verb share the root, as the term asks: `config:lqa.regexModeMustMatch` is “일치해야 함” and `config:models.noMatches` is “검색과 일치하는 모델이 없어요”. **Counted with 건, not 개** (`glossary:matchResultsCount` “{{count}}건 일치”), deliberately — 일치 항목 would have re-used the *entry* noun for a place in the text. |
+| translation memory | 번역 메모리 | Batch 1 (`config:tm.policyTitle`, `sidebar:translationMemory`). **Never bare 메모리**, which is RAM — and this app has a string that genuinely means RAM (`logs:vault.credentialsEvicted` “저장된 자격 증명을 메모리에서 지웠어요.”), so the two readings really do both occur. `config:tm.browserEmpty` avoids 항목 for a stored translation: “번역 메모리에 저장된 번역이 아직 없어요.” |
+| approve | 승인 | Batch 2 (`strings:bulk.approveSelected` “번역 메모리에 승인”). Kept distinct from 적용 (*apply* a suggestion), 표시 (*mark as reviewed*) and 저장 (*save*) — all four are in the same bulk bar. **The English copy bug is not mirrored:** `strings:runs.judgeApproveAll` (“Approve all suggestions”) ships “모든 제안 적용”, the *apply* word, and so does the sentence in `judgeAllFindingsDescription` that quotes it. `review:sourceAi.approve` is also 승인 — English uses one word for recording a source-review verdict, and Korean follows it. |
+| category | 카테고리 | Batch 1. Korean does not mark number, so English's singular tab label and plural page title are one rendering (`strings:tabs.category`, `category:title`). Not reused for 규칙 그룹 or 출처. |
+| tone | 톤 | Batch 1 (`config:routing.labelTones` “톤”). The authoring-instruction sense; rejected 어조 only because 톤 is what Korean game teams already say, and rejected 문체/스타일 because they read as the model's writing style. |
+| orphan | 미연결 항목 | Batch 6 (`orphans:title`), named in batch 1 by `config:fullReplaceOrphanNotice` and in batch 2 by `strings:tabs.orphans`. Short form 미연결 for the count chip (`config:orphanedCount` “미연결 {{count}}개”) and the state (`config:importModeFullReplaceHint` “미연결로 표시돼요”). **Rejected 고아**, the literal word: in Korean it names a parentless child and nothing else, and it is jarring on a game-text screen. 미연결 pairs with 재연결 (*relink*), which is what the tab is for. |
+| relink | 재연결 | Batch 6 (`orphans:relink.title` “미연결 항목 재연결”). One verb across the row button, the dialog title, the confirm step and the import warning. |
+| backup | 백업 | Batch 6 (`backup:createSection` “백업 만들기”). The page title expands like Activity's: `backup:title` is “백업과 복원”. Kept separate from 내보내기 (*export*) and 스냅샷 (*snapshot*). |
+| snapshot | 스냅샷 | Batch 1 (`config:importSnapshotNote` “안전 스냅샷”). Distinguishable from 백업 in the one sentence that uses both. |
+| template | 템플릿 | Batch 1 (`config:templatesTitle` “프로젝트 템플릿”). Korean's word for *template* is the loan, so the 모델 collision the term warns about never arises. |
+| omit (from an export) | 제외 | Batch 1 (`config:discardUntranslatable` “번역이 필요 없는 항목 제외”). **A third verb, as the term predicts:** neither 변경 취소 nor 폐기 (the two *discard* senses) fits — nothing is destroyed and nothing is refused, the generated file is simply smaller. 제외 is also used where English says *left out of the request entirely* (`generation:skipCategoriesHint`), which is the same relation. |
+| collaborator | 공동 작업자 | Batch 4 (`collab:join.description`). Three syllables longer than 협업자 and chosen anyway: 협업자 is not current in Korean product UI. Never interchangeable with 구성원. |
+| member | 구성원 | Batch 4 (`collab:sharing.membersTitle` “구성원”). The row type of the Members table; *Members* and *Member* are one rendering (Korean marks no number). Two distinct words were required because “구성원” and “공동 작업자” appear in adjacent strings on the same page, and they are visibly different. |
+| nickname | 닉네임 | Batch 4 (`collab:nickname.title`). **Never 사용자 이름**, which is the account identity — the confusion the term exists to prevent. |
+| claim | 확보 | Batch 4 (`collab:nickname.claimButton` “닉네임 확보”). **Elimination proof, and the survivor does mean the thing:** 등록/예약/차지 are all on the term's *Not* list, and 예약 is additionally spoken for by the adjacent message `collab:errors.nickname_reserved` (“예약된 이름이에요.”). 확보 means *to secure for oneself, permanently*, which is the action. All four forms exist: button “닉네임 확보”, progressive “확보하는 중…”, toast “닉네임을 확보했어요.”, and the immutability hint “한 번 확보한 닉네임은 바꿀 수 없어요.” |
+| invite | 초대 | Batch 4 (`collab:invites.title`). **The four statuses are one set in one part of speech** — 대기 중 / 사용됨 / 철회됨 / 만료됨 (`collab:invites.status.*`), all state forms, read down one column. |
+| revoke | 철회 | Batch 4 (`collab:invites.revoke` “철회”, status “철회됨”). **Chosen at the call site, not from the word:** the status cell and the button are adjacent columns of one table, so the pair has to stay visibly distinct — 철회 / 철회됨 does, and Korean's ~됨 marks the state unambiguously. Rejected 취소 (*Cancel*), 삭제 (nothing is deleted) and 해제 (already spent on 잠금 해제 and 할당 해제). |
+| recording | 기록 | Batch 2 and 4 (`strings:runs.manualRecordingPaused` “기록 일시 중지됨 — 활성 공동 작업자가 없어요”). **Not 항목** — Korean's first word for *a record* is dangerously close to the entry noun, and “항목 일시 중지됨” would be exactly the misreading the term warns about. Not 로그 either. **English's three names for this one feature all take it:** `collab:sharing.auditToggleLabel` (*Manual-edit audit*) is “수동 편집 기록”, `auditToggleCheckboxLabel` (*Record manual edits*) is “수동 편집 기록하기”, and `auditToggleHelp` (*Track…*) uses the same verb — no separate *audit* word was coined, and 검사 (the LQA *check* word every locale reaches for here) was not touched. |
+| stage | 스테이지 | Batch 2 and 6 (`stage-details:title` “스테이지 상세”). **단계 is the process reading `terminology.md` warns about and is rejected outright**; 스테이지 is the Korean game word for a playable level. |
+| Text Styler | 텍스트 스타일러 | Batch 2, 4 and 6 — `strings:tabs` (color-text), `sidebar:colorText` and `colorText:title` all ship the identical rendering. A proper noun, so it is transliterated rather than described; 텍스트 꾸미기 was rejected as a description of the action rather than a name. |
+| element | 원소 | Batch 6 (`colorText:groupElements` “원소”). The seven swatches take the **Korean names the games in this family ship** — 물 / 불 / 바람 / 번개 / 풀 / 얼음 / 바위 — rather than transliterations of the Greek roots, which is what the term asks for. If the game this project localizes ships them untranslated, that decision moves to the swatch rows and this heading stays. |
+| assistant | 어시스턴트 | Batch 2, decided at its **first** appearance (the run-type labels `strings:runs.typeChatGeneric` “어시스턴트 대화”, and its two siblings) rather than at the chat surfaces, exactly as the term instructs. Batch 6 copied it into `colorText:assistant.title` (“AI 어시스턴트”) and `stage-details:chatAssistant`. It names the role; 도움말/지원 (*assistance*) is the near-miss and was never used. Korean compounds take no linking form — the noun is juxtaposed unchanged. |
+| theme | 테마 | Batch 4 and 6. **The four names are byte-identical in both homes**, copied out of `locales/ko/settings.json` rather than from this row: 클래식 / 픽셀 / 테크노 / 미니멀 (`settings:themes.*.name` and `welcome:themeChooser.names.*`). `welcome:themeChooser.keepDefault` reuses one of them: “테크노 유지”. |
+| guide | 가이드 | Batch 2 and 4 (`sidebar:guide` “가이드”, `welcome:guidesHeading`). One word; never 도움말, 설명서 or 매뉴얼. |
+| release | 릴리스 | Batch 6 (`common:changelogShowOlder` “과거 릴리스 보기 ({{count}})”). **Not 항목** — the term forbids the entry word here, which is why `common:changelogEntryError` was rewritten as “이 릴리스의 변경 이력을 불러오지 못했어요.” rather than naming a changelog *entry*. Version numbers are never translated. |
+| changelog | 변경 이력 | Batch 4 (`sidebar:changelog` “변경 이력”). A fourth word for a fourth concept: 로그 is *log*, 내역 is the Activity history, 기록 is *recording*, 이력 is the changelog. None of the four co-render as labels. |
+| dismiss | 삭제 / 닫기 | Batch 4 and 5. **Two consequences, two words, and the call site decides which** — `account:notificationsDismiss` issues a DELETE and ships “삭제”; `system:restarted.dismiss` and `system:cancelled.dismiss` close a banner and ship “닫기”. Rendering the first as 닫기 would have shipped a false statement about an action that destroys data. The resulting 삭제 / *Delete* collision is licensed: both really do delete. |

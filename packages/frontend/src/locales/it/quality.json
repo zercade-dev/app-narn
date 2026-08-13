@@ -1,0 +1,69 @@
+{
+  "title": "Pannello della qualità",
+  "loading": "Caricamento del riepilogo della qualità…",
+  "error": "Impossibile caricare il riepilogo della qualità: {{message}}",
+  "empty": "Ancora nessun risultato LQA. Esegui una traduzione per popolare questo pannello.",
+  "overallStat": {
+    "passRateLabel": "Tasso di superamento complessivo",
+    "results": "Risultati LQA: {{count}}",
+    "entries": "Voci: {{count}}",
+    "legendPassed": "Superati: {{count}}",
+    "legendFailed": "Non superati: {{count}}"
+  },
+  "mostCommonIssues": {
+    "title": "Anomalie più comuni",
+    "description": "Conteggi per tipo di anomalia in tutte le lingue."
+  },
+  "other": "Altro",
+  "columns": {
+    "passRate": "Tasso di superamento"
+  },
+  "legend": {
+    "tierHigh": "Tasso di superamento alto (≥ 90%)",
+    "tierMid": "Tasso di superamento medio (70–89%)",
+    "tierLow": "Tasso di superamento basso (< 70%)",
+    "passed": "Superati",
+    "failed": "Non superati"
+  },
+  "checkLabels": {
+    "tag-equality": "Uguaglianza dei tag",
+    "overflow": "Overflow di lunghezza",
+    "length-limit": "Limite di lunghezza",
+    "glossary-adherence": "Aderenza al glossario",
+    "forbidden-terms": "Termini vietati",
+    "regex-assertions": "Asserzioni regex",
+    "number-parity": "Parità dei numeri",
+    "whitespace-parity": "Parità degli spazi",
+    "line-break-parity": "Parità delle interruzioni di riga",
+    "end-punctuation": "Punteggiatura finale",
+    "double-spacing": "Spazi doppi",
+    "double-words": "Parole ripetute",
+    "untranslated": "Non tradotto",
+    "mask-integrity": "Integrità delle maschere",
+    "tag-mismatch": "Tag non corrispondenti",
+    "too-long": "Troppo lunga",
+    "glossary-term-missing": "Termine del glossario mancante",
+    "forbidden-term": "Termine vietato",
+    "regex-assertion-failed": "Asserzione regex non soddisfatta",
+    "regex-config-error": "Errore di configurazione della regex",
+    "number-missing": "Numero mancante",
+    "number-added": "Numero aggiunto",
+    "whitespace-leading": "Spazi iniziali",
+    "whitespace-trailing": "Spazi finali",
+    "line-break-mismatch": "Interruzioni di riga non corrispondenti",
+    "end-punctuation-mismatch": "Punteggiatura finale non corrispondente",
+    "mask-mismatch": "Maschere non corrispondenti"
+  },
+  "byLanguage": {
+    "title": "Tasso di superamento per lingua",
+    "description": "Dal peggiore. Fai clic su una lingua per esaminare le sue voci non superate."
+  },
+  "bySource": {
+    "title": "Anomalie per origine",
+    "description": "Dal peggiore. Fai clic su un'origine per esaminare le sue voci non superate."
+  },
+  "byModule": {
+    "title": "Qualità per modulo",
+    "description": "Tasso di superamento e anomalie raggruppati per il modulo di traduzione che ha prodotto ciascuna traduzione."
+  }
+}

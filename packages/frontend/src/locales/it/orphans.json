@@ -1,0 +1,55 @@
+{
+  "title": "Orfane",
+  "subtitle": "Voci non più presenti nell'ultimo CSV importato. Eliminale oppure ricollega le loro traduzioni a un'altra voce.",
+  "emptyTitle": "È tutto collegato",
+  "empty": "Nessun record orfano: i CSV importati corrispondono al progetto attuale.",
+  "columns": {
+    "select": "Seleziona",
+    "source": "Origine",
+    "translations": "Traduzioni",
+    "actions": "Azioni"
+  },
+  "actions": {
+    "delete": "Elimina",
+    "relink": "Ricollega",
+    "bulkDelete": "Elimina la selezione ({{count}})",
+    "refresh": "Aggiorna",
+    "cancel": "Annulla",
+    "back": "Indietro"
+  },
+  "confirmDelete": {
+    "title": "Eliminare l'orfana?",
+    "body": "Questa operazione elimina definitivamente il record orfano e le sue traduzioni. Non è possibile annullarla."
+  },
+  "relink": {
+    "title": "Ricollegare l'orfana",
+    "description": "Sposta le traduzioni da questa orfana a un'altra voce, in ordine di somiglianza fra il testo di origine di ciascun candidato e quello dell'orfana.",
+    "searchPlaceholder": "Cerca le voci per testo di origine…",
+    "noCandidates": "Nessuna voce corrisponde",
+    "submit": "Continua",
+    "confirmTitle": "Conferma del ricollegamento",
+    "confirmDescription": "Scegli come applicare le traduzioni dell'orfana alla voce di destinazione prima di ricollegarla.",
+    "overrideModeLabel": "Modalità di sovrascrittura",
+    "overrideEmptyOnly": "Compila solo le traduzioni vuote (mantieni quelle esistenti della destinazione)",
+    "overrideAll": "Sovrascrivi tutte le traduzioni con quelle dell'orfana",
+    "aiRetranslateLabel": "Usa l'IA per ritradurre",
+    "aiRetranslateHint": "Dopo il ricollegamento, un passaggio con l'IA confronta il vecchio testo di origine dell'orfana con il nuovo testo di origine della destinazione e aggiorna ogni traduzione esistente perché rifletta la stessa modifica.",
+    "aiModuleLabel": "Modulo di IA",
+    "aiModelLabel": "Modello",
+    "aiReasoningEffortLabel": "Livello di ragionamento",
+    "aiModulePlaceholder": "Seleziona un modulo…",
+    "aiNoModules": "Nessun modulo con IA è attivo: attivane uno in Configurazione globale per usare la ritraduzione con l'IA.",
+    "confirmSubmit": "Ricollega"
+  },
+  "toast": {
+    "loadError": "Impossibile caricare le orfane",
+    "deleted": "Orfana eliminata",
+    "deleteError": "Impossibile completare l'eliminazione",
+    "bulkDeleted": "Orfane eliminate: {{count}}",
+    "relinked": "Traduzioni spostate",
+    "relinkError": "Impossibile ricollegare l'orfana",
+    "candidatesError": "Impossibile caricare i candidati per il ricollegamento",
+    "aiRetranslateStarted": "Ritraduzione con l'IA avviata — vedi la scheda Attività",
+    "aiRetranslateUnavailable": "Ricollegata, ma non è stato possibile avviare la ritraduzione con l'IA (nessun modulo con IA disponibile)"
+  }
+}

@@ -19,13 +19,13 @@ different word, a term you deliberately left in English, an acronym you expanded
 
 ## Frozen for the backfill
 
-**The term rows in this file are frozen for the duration of the backfill.** The 76 terms
+**The term rows in this file are frozen for the duration of the backfill.** The 87 terms
 below, their definitions, their part-of-speech notes and their "Not:" lists do not change
 while languages are being translated. Nobody edits this file during a wave — not to reword
 a definition, not to add a term, not to fix one that looks wrong.
 
 **What you write instead:** exactly one file, `terminology/<locale>.md` for the language you
-are translating. It holds your rendering and notes for each of the 76 terms, in the order
+are translating. It holds your rendering and notes for each of the 87 terms, in the order
 they appear here. Nobody else writes rows in your file, and you write rows in nobody else's,
 so eleven languages can run at once without ever touching the same line.
 
@@ -148,9 +148,22 @@ The names to keep in step (tab label first, then its other homes):
 | Activity | `strings:tabs.runs` · `strings:guide.topicActivity` |
 | Quality | `strings:tabs.quality` · `strings:guide.topicQuality` |
 | Global Config | `sidebar:globalConfig` · `config:globalConfigTitle` |
+| Live log panel | `console:title` · named in prose by `colorText:assistant.verboseHint` and `stage-details:chatVerboseHint` |
 
 (Where a key path contains a hyphen it is given as namespace plus the sub-key in
 brackets, so the citation checker does not read it as a truncated key.)
+
+**About that last row.** The live log panel is the surface the frozen **log** term streams
+its lines into, and it is named twice: its own title is `console:title` — "CONSOLE",
+uppercase for layout in the same way as `strings:columns.config`, so keep the uppercase
+where your script has case — while `colorText:assistant.verboseHint` and
+`stage-details:chatVerboseHint` both call it "the live log panel". Thirteen locales
+rendered the title with a console loanword and one, `vi`, named it with its own log word
+instead ("BẢNG NHẬT KÝ"); either reading is defensible, but one locale uses one of them in
+all three keys. The lines are the **log** term, the panel is this surface, and neither is
+**Activity**. This is where the previous resolution said the `console` ruling belonged —
+"a surface name, belongs in the surface table rather than the term list" — and it is
+written here now, one resolution late.
 
 Three more surfaces need the same discipline without appearing in that table, because they
 have no second *title* key — they are named from **other namespaces in prose**, which is the
@@ -217,7 +230,7 @@ or search the file for the word.
 
 **Means here:** one row of imported source content: a key, its source text, its metadata (categories, tone, translator context, source labels) and its translation in each target language. This is the unit the whole app counts.
 
-**Part of speech in UI:** noun. **Canonical term.** The `logs` namespace narrates about the same object using the word "string" ("Queued {{total}} strings for translation"); translate that occurrence with your *entry* rendering too, so the UI counts one thing, not two.
+**Part of speech in UI:** noun. **Canonical term.** The `logs` namespace narrates about the same object using the word "string" (`logs:orphan.detected` — "Found {{count}} strings that are no longer in the source file."); translate that occurrence with your *entry* rendering too, so the UI counts one thing, not two. **One exception, and it is the only one:** `logs:translation.queued` counts *jobs* — one entry for one target language — not entries, so an *entry* rendering there makes the number wrong on any multi-language run. See its row in `english-review-notes.md`. (This row previously used that very key as its illustration, which pointed translators at the single case the rule does not fit; corrected 2026-08-12, without changing the rule itself.)
 
 **Example:** `category:countLabel_other` — "{{count}} entries"
 
@@ -285,13 +298,23 @@ or search the file for the word.
 
 #### translator context
 
-**Means here:** a free-text note a person attaches to an entry explaining how the string is used, sent to the model with the job. Three different things are called "context" in English: this, the entry metadata bundle ("Include entry context"), and a model's token budget ("context window").
+**Means here:** a free-text note a person attaches to an entry explaining how the string is used, sent to the model with the job.
+
+**Five different things are called "context" in English**, and this row is one of them. (It said "three" until the guide-wave resolution counted them against the shipped strings.)
+
+1. **This term** — `strings:compare.addContext`, `editContext`, `contextPlaceholder`, `emptyContextFilter`, and the export column at `config:includeContext`.
+2. **The entry metadata bundle** sent with a generation job — `generation:contextLabel` ("Include entry context"), `generation:contextHint`, `generation:fieldContext` ("Context notes").
+3. **A model's token budget** — `config:models.colContext`, a bare "Context" column of token counts, and `config:models.confidenceReason.prompt-near-context` / `prompt-exceeds-context`, which spell out "context window".
+4. **An already-translated language sent along with the job** — `strings:compare.translateUseReference` / `translateUseReferenceNone`, `generation:languagesLabel`, all phrased "… as context".
+5. **The match conditions of a memory policy** — `config:tm.policyStrict`, "Strict (full context match)".
 
 **Part of speech in UI:** noun phrase.
 
 **Example:** `strings:compare.editContext` — "Edit translator context"
 
-**Not:** comment, note, description, background, remark — and above all not the same word you use for "context window", which is a model capability, not authoring input.
+**Not:** comment, note, description, background, remark.
+
+**On sharing one root across those five — measured rather than asserted.** Eleven of the fourteen shipped locales use a single word for this term *and* for the model's context window, letting the qualified phrase carry the difference ("translator context", "entry context", "context window", "as context"); `ko`, `vi` and `th` chose separate words. Both are defensible and this row no longer forbids either. The key that is **not** safe by default is `config:models.colContext` — a bare "Context" heading over a column of token counts, which means the window and nothing else: if your single word would read there as an authoring note, that one key needs the qualified form.
 
 ### Languages
 
@@ -357,6 +380,47 @@ or search the file for the word.
 
 **Not:** job, task, execution, process, session, operation, batch. "Batch" especially: a run contains many batches.
 
+#### revert
+
+**Means here:** to roll back every translation one run wrote, restoring the values that were there before it. Offered on a finished run in Activity; the run then carries a "Reverted" badge.
+
+**Part of speech in UI:** verb on the control, participle on the badge and in the toast.
+
+**Example:** `strings:runs.revert` — "Revert"
+
+**Not:** undo, cancel, restore. **Undo is the distinction to protect:** `strings:compare.undo` restores one earlier version of one cell, this reverses everything one run wrote, and both controls can be on screen at once — a locale that renders the two with one word loses a distinction the UI makes. Two languages reserved a separate word for *undo* independently, without seeing each other's files. "Restore" is the **backup** verb and is already spoken for. Both *undo* and *cancel* are now terms of their own — the next two rows.
+
+#### undo
+
+**Means here:** to reverse the last thing *this person* just did, and only that: `strings:compare.undo` opens the previous versions of one translation and puts one back, `strings:editor.undo` and `review:undo` reverse the edit just saved, and `vault:undoRemove` puts back a credential just removed. One person's one action, not a run and not a dialog.
+
+**Part of speech in UI:** verb on a button. English also uses it passively in nine confirm dialogs ("This cannot be undone", `backup:confirmBody`, `config:confirmDeleteDescription` and seven more) — that is the same verb and takes the same root.
+
+**Example:** `strings:compare.undo` — "Undo"
+
+**Not:** revert, cancel, discard, revoke, clear. **This word and *cancel* are the two most reserved-against in the lexicon, and until now the least defined:** three frozen rows name it in their **Not:** lists — *revert* ("undo is the distinction to protect"), *discard* and *revoke* — and none of them defined it. The distinction they were all protecting is **scope**: undo reverses one edit of yours, *revert* reverses everything one run wrote, and both controls can be on screen at once.
+
+**Two facts measured against the shipped locales, so nobody re-derives them.**
+
+- **Undo and cancel collapse into one word in Romance and Slavic languages, and three shipped locales collapsed them.** `fr` renders both `common:cancel` and `strings:compare.undo` as "Annuler"; `ru` renders `strings:runs.cancel` and `strings:compare.undo` both as «Отменить»; `it` escaped it only by adding a noun ("Annulla" against "Annulla modifica"). If your language's first word for *undo* is also its first word for *cancel*, one of the two has to move — decide the pair together, and see the next row.
+- **`strings:compare.undoRestore` is not this term, and it is not a defect.** The button inside the previous-versions panel says "Restore", and **all fourteen shipped locales render it with the same word as `backup:restoreButton`**. Do not "fix" that: the reservation of *restore* for backups warns against using it on the *undo* and *revert* controls, not against the word appearing in the panel. Note that the interaction has three English wordings — the control "Undo", the panel "Previous versions" (`strings:compare.undoVersionsTitle`, `undoTooltip`, `cellUndoAria`) and the action "Restore" — so keep all three in step with each other rather than merging them.
+
+#### cancel
+
+**Means here:** two things English spells with one word, and the difference is whether work has already started. **Backing out of a dialog before anything happens** — the ghost button beside Save, Confirm or Delete, in seventeen namespaces — and **stopping something already in flight**: a queued or running run (`batch:cancelRun`, `strings:runs.cancel`), an import (`config:cancelImport`), a generation (`glossary:generateCancelled`). Only the second leaves state behind: whatever finished before the stop is kept, and *Cancelled* is one of the seven run statuses.
+
+**Part of speech in UI:** verb on a button; participle as a run status (`strings:runs.statusCancelled`) and in toasts (`batch:runCancelled`).
+
+**Example:** `common:cancel` — "Cancel"
+
+**Not:** undo, revert, discard, revoke, delete, close, stop-and-lose-everything. Three frozen rows already reserve against this word — *revert*, *discard* and *revoke* — and this row is the thing they were reserving against.
+
+**Three constraints go with it.**
+
+- **The seven run statuses resolve as one set, in one part of speech** — `strings:runs.statusQueued`, `statusPending`, `statusRunning`, `statusPaused`, `statusCompleted`, `statusFailed`, `statusCancelled`, under the `statusColumn` header. Same rule as the four invite statuses under *invite*: a reader compares them down one column.
+- **Check your word against *undo* before you settle it**, per the row above. `ko` shows the other shape of the same trap: `batch:cancelRun` composes to 실행 취소, which is also the conventional Korean for *undo*, so the run control reads as the undo control even though `strings:compare.undo` is a different word there. If your word for *cancel* plus your word for *run* composes into your language's undo term, phrase the run control differently rather than accepting it.
+- The dialog sense and the in-flight sense **may** share one word — most locales do — but record in your Notes that you checked, because one of the two stops work that is running and the other does nothing at all.
+
 #### Activity
 
 **Means here:** the per-project tab listing every run with its status, progress, cost and per-entry detail. It is a history of runs, not a feed of user actions.
@@ -365,7 +429,17 @@ or search the file for the word.
 
 **Example:** `strings:tabs.runs` — "Activity"
 
-**Not:** history, log, logs, feed, events, timeline, jobs. "Log" is taken by the live server-log panel, which is a different surface.
+**Not:** history, log, logs, feed, events, timeline, jobs. "Log" is taken by the live server-log panel, which is a different surface — and that surface is now a term of its own, the next row.
+
+#### log
+
+**Means here:** the live server-log panel and the lines it streams — the running narration of what the server is doing, filterable by level, searchable and exportable. It is what the app is saying while it works, not a record the user keeps: nothing in it is stored on an entry, and it is not the history of runs.
+
+**Part of speech in UI:** noun, very often attributive ("log entry", "log stream", "Export logs").
+
+**Example:** `console:statusConnected` — "Connected to server log stream"
+
+**Not:** history, activity, journal, audit, changelog. **Activity is the reservation that makes this row necessary** — that term forbids "log" for the run list while never naming the panel it was reserved against, so a translator arrived at the log strings with a word reserved for a concept the lexicon had not defined. The two must stay apart from this side too. **"Log entry" and "log stream" fold into this term** unless your language needs a separate word for a single line, in which case build it from the same root and say so in your Notes.
 
 #### batch
 
@@ -478,6 +552,26 @@ or search the file for the word.
 
 **Not:** mark, report, denounce, bookmark, star — and above all **not the verb you chose for "mark as needs review"**, because this action *clears* that flag. Using one word for both would make the same verb set and unset the same state.
 
+**English uses "flag" for five different things and this row is only the first of them.** Five locales collapsed two of the five before the list existed, so it is written out here rather than left to each locale to work out again:
+
+1. **This term** — the review disposition: `review:flag`, `review:filterFlagged`, `review:flaggedToast`, `review:emptyFlaggedTitle` / `emptyFlaggedHint`.
+2. **What an LQA check does to a translation.** Eleven check descriptions begin "Flags …" (`config:lqa.checks.*.description`), and `config:lqa.lengthLimitNote` says translations "are flagged". That is a machine filing an **issue**, not a person setting work aside — ordinary prose, not this term.
+3. **A glossary term missing a language** — `glossary:flaggedTitle` ("{{count}} flagged (incomplete)"), and the wording inside the *glossary term* row above. Ordinary prose again.
+4. **A count of entries an AI review scored badly** — `review:sourceAi.runSummary`, `strings:runs.judgeSummary`, `strings:runs.judgeAllFindingsDescription`. Nothing was set aside for a person here; the review scored and moved on.
+5. **A stored boolean marker, as a noun** — "Clear new flags" (`strings:filters.clearNewFlags`, `strings:bulk.clearNewFlag`, `strings:row.newTooltip`) and 'Clear "needs review" flag' (`strings:contextMenu.clearNeedsReview`). And `config:lqa.regexFlags` ("Flags") is not this English word at all: it is the regular-expression flag letters, and belongs beside *pattern*.
+
+**Measured against the shipped files:** nine locales keep sense 1 apart from sense 4, while `es`, `fr`, `it`, `pt-br` and `vi` render `review:sourceAi.runSummary` with their disposition word — which tells the reader the source review *set aside* entries it merely scored. `de` worked the same split out unaided and recorded it in its own locale file; a decision recorded in one locale file binds nobody else, which is why it is here now.
+
+#### ignore / ignored
+
+**Means here:** to mark an entry so that every AI dispatch skips it, while it stays in the project, stays visible in the table and keeps the translations it already has. It is both an action and a state, on the same object, and it is reversible from the same row.
+
+**Part of speech in UI:** verb for the action ("Ignore entry"), participle for the state badge ("Ignored").
+
+**Example:** `strings:row.ignored` — "Ignored"
+
+**Not:** skip, discard, disable (which is what happens to a module or a feature, and is now a term of its own), hide, exclude. **The gloss on *skip* here was wrong and is corrected:** this row used to define it as "a per-run routing outcome, decided by the engine rather than by a person", and no shipped string means that. In the live UI *skip* is an import outcome count (`config:skipped`, `glossary:importSkipped`) and a generation setting a person configures (`generation:skipCategoriesLabel`, whose hint says the entries are "left out of the request entirely"). It stayed out of the lexicon in the guide-wave resolution; render each occurrence as ordinary prose and do not reach for this term for any of them. **Nobody has an idiomatic verb for "unignore":** two languages met the negation independently and both built it out of the affirmative rather than coining a word for it (`strings:row.unignoreAction` is "Unignore entry" in English). Build it; do not invent a verb, and do not let the built form drift into a second term.
+
 #### Review (the sidebar group)
 
 **Means here:** the sidebar section grouping four tabs — Source AI review, Translation AI review, **Manual review** and **Quality**. It is an umbrella over three different systems: a model's opinion, a person reading, and deterministic rules.
@@ -497,6 +591,16 @@ or search the file for the word.
 **Example:** `review:title` — "Review queue"
 
 **Not:** a second name for **needs review**, which is the *state* an item is in. The queue is where those items are listed. Build the two from one root if your language allows it, so a reader sees one feature rather than two.
+
+#### back-translation
+
+**Means here:** the machine re-translation of a target-language string back into the source language, shown read-only beside the translation as a reading aid for someone who does not speak the target language. It is never edited, never stored on the entry and never sent anywhere.
+
+**Part of speech in UI:** noun phrase (a panel heading).
+
+**Example:** `review:backTranslationTitle` — "Back-translation (reference only)"
+
+**Not:** reverse translation as an action, round trip, retranslation, source text, reference language. It is a **term of art** in this industry: use your locale's established one if it has it. A literal compound of "back" and "translation" tends to name an action — translating something back — which is not what this is; the product offers no such action.
 
 ### Modules, providers, credentials
 
@@ -599,6 +703,20 @@ or search the file for the word.
 **Example:** `config:credentialsMissingChip` — "Credentials missing"
 
 **Not:** password, login, account, access data, identity, authorization. The vault *key names* themselves (`OPENAI_API_KEY`, `GENERIC_API_KEY__MY-OLLAMA`) are literal identifiers and are never translated.
+
+#### disable / disabled
+
+**Means here:** to turn a module, a glossary, a check or a setting off so the app stops using it, while it stays configured and can be turned back on. A module moves between the "Enabled ({{count}})" and "Disabled ({{count}})" sections of the same page; a disabled glossary keeps every term it has and shows an "Off" badge.
+
+**Part of speech in UI:** verb on the control (`config:disableModule`, `glossary:disable`), participle for the state and the section heading (`config:modulesDisabledSection`, `glossary:disabledBanner`, `config:routing.moduleDisabledWarning`), and a bare badge (`glossary:disabled` — "Off"). **The enable/disable pair is one lexeme:** `config:enableModuleSelectLabel`, `glossary:enable` and `config:modulesEnabledSection` take the affirmative of whatever you choose here.
+
+**Example:** `config:disableModule` — "Disable"
+
+**Not:** ignore, skip, remove, delete, hide, cancel, omit. *Ignore* is the near one and the `ignore` row reserves against this term from its side: ignoring is done to an **entry**, by a person, and is undone from the same row; disabling is done to a **module or a feature** and changes what the app is able to do at all.
+
+**English writes this one state three ways, and they are one state.** "Disabled" (`config:modulesDisabledSection`, `config:tm.policyDisabled`, `config:module.reasoningEffortDisabled`), "Off" (`glossary:disabled`) and "turned off" (`logs:translation.failedModuleDisabled`). Render them with **one** state word, the way *recording* handles English's audit/record/track — unless your locale's platform convention has a settled on/off pair for switch badges, in which case the badge may take that pair and everything else takes the participle. Either way `config:tm.policyDisabled` is the same state as `config:modulesDisabledSection` and must not become a third word.
+
+**Two shipped locales drifted here before this row existed, which is the reason it is one.** `es` alternates two roots for one action — *Deshabilitar* at `glossary:disable` against *Desactivar* at `config:disableModule`, and *Desactivada* against *Deshabilitados* for the state. `ko` ships three forms of the state: 비활성화됨 for the section heading, 꺼짐 for the badge and 사용 안 함 for the memory policy. Nothing in the UI distinguishes those cases; the drift is invisible from inside any one namespace, which is why the row names all of them.
 
 ### Quality
 
@@ -846,6 +964,16 @@ or search the file for the word.
 
 **Not:** model, pattern, blueprint, preset, sample, form, boilerplate. **"Model" is the dangerous one**: in several Romance and Slavic languages it is the obvious word for template, and it is already taken by the AI model. Pick something else.
 
+#### omit (from an export)
+
+**Means here:** to leave rows out of an artifact the app generates — the export checkbox that drops entries not needing translation from the CSV the app writes. Nothing is deleted, nothing is refused: the entries stay exactly as they are, and only the generated file is smaller.
+
+**Part of speech in UI:** verb, on a checkbox label.
+
+**Example:** `config:discardUntranslatable` — "Discard entries that don't need translation"
+
+**Not:** discard, delete, remove, skip, ignore. **English writes "discard" here and it is a third sense of that word**, distinct from both senses the *discard* term covers: it destroys nothing the user made and it refuses nothing the app offered. Most languages need a third verb for it, and every locale meets it early, in the config namespace. Four locales reached an omit/exclude verb for it independently, none having seen the others' files — the strongest evidence any term in this file carries.
+
 ### Collaboration
 
 #### collaborator
@@ -898,6 +1026,16 @@ or search the file for the word.
 
 **Not:** invitation link, request, token, membership, access code used interchangeably. **Translate the four statuses as a set, in one part of speech** — they sit in one column and a reader compares them down the page.
 
+#### revoke
+
+**Means here:** to cancel an invitation that has been sent and not yet accepted. The row stays in the table and its status becomes *Revoked*; nothing is deleted, and nobody who already joined loses anything.
+
+**Part of speech in UI:** verb on the button, participle as one of the four invite statuses.
+
+**Example:** `collab:invites.revoke` — "Revoke"
+
+**Not:** delete, remove, cancel, undo — each of which collides with something else in this product. Two constraints bind this row, and both were found at the call site rather than argued from the word. **The four invite statuses resolve as one set, in one part of speech** — see *invite*. And **the status cell and the revoke button are adjacent columns of one table**, so English's *Revoked* / *Revoke* pair is on screen at once: a language whose participle and infinitive coincide collapses the distinction in exactly the place a reader compares them, and needs a different verb rather than a different sentence.
+
 #### recording
 
 **Means here:** the manual-edit audit capturing who changed which translation by hand, kept for seven days and switched off when a project has no active collaborators. "Recording" names the capture being on or off; it is a process, not the captured rows.
@@ -906,7 +1044,9 @@ or search the file for the word.
 
 **Example:** `strings:runs.manualRecordingPaused` — "Recording paused — no active collaborators"
 
-**Not:** log, history, tracking, audio or video recording, and above all **not the word you chose for _entry_**. Several languages' first word for "a record" is the same one they use for a content entry, and this app counts entries constantly — if the two collide, "Recording paused" reads as "Entry paused".
+**Not:** log, history, tracking, audio or video recording, and above all **not the word you chose for _entry_**. Several languages' first word for "a record" is the same one they use for a content entry, and this app counts entries constantly — if the two collide, "Recording paused" reads as "Entry paused". Not the live server **log** either — that is a term of its own, and this is not it.
+
+**English calls this same feature "audit", and there is no second term for it.** The Sharing tab's toggle is `collab:sharing.auditToggleLabel` — "Manual-edit audit" — and it switches on exactly the capture defined above; `collab:sharing.auditToggleCheckboxLabel` says "Record manual edits" and `auditToggleHelp` says "Track manual text edits…", so one feature is named three ways in three adjacent strings. **Render all of them with your _recording_ term.** Do not coin an audit word, and above all do not reach for the word you spent on the LQA **checks** — a translator meeting "audit" first will reach for it, which is why this paragraph is here rather than in a row of its own. The English inconsistency is filed in `english-review-notes.md`; the vocabulary is settled here.
 
 ### Product surfaces
 
@@ -939,6 +1079,16 @@ or search the file for the word.
 **Example:** `colorText:groupElements` — "Elements"
 
 **Not:** invented or literal translations of the Greek roots. These are **game content**: use the names the game itself ships in your language, and if it ships them untranslated, leave them.
+
+#### assistant
+
+**Means here:** the product's AI chat persona. The Text Styler's assistant, the Stage details chat and the generic chat are all the same one, and the run list labels their conversations. It names a **role**, not an act of assistance.
+
+**Part of speech in UI:** noun, and a compound element ("Assistant chat (Text Styler)", "AI assistant").
+
+**Example:** `colorText:assistant.title` — "AI assistant"
+
+**Not:** assistance (the abstract noun — the near-miss a locale ships first and a review catches), helper, bot, agent, support. **Decide it the first time you meet it, not the second.** It appears first as a run-type label (`strings:runs.typeChatGeneric` and its two siblings) and only later on the chat surfaces themselves, so a locale that waits until it reaches the surfaces has already shipped a different word for the same persona. Where your language inflects a noun in compounds, record the linking form in your Notes — the compound is where the drift starts.
 
 #### theme
 
@@ -979,3 +1129,13 @@ or search the file for the word.
 **Example:** `sidebar:changelog` — "Changelog"
 
 **Not:** history, news, updates, release notes, versions, log, journal. Version numbers (`v1.56.0`) are never translated.
+
+#### dismiss
+
+**Means here:** two different consequences English spells with one word, and the difference is destructive. `account:notificationsDismiss` **deletes**: the notification store issues a DELETE and the item does not come back. `system:restarted.dismiss` closes a banner against a stored flag and destroys nothing.
+
+**Part of speech in UI:** verb, on a button.
+
+**Example:** `account:notificationsDismiss` — "Dismiss"
+
+**Not:** close, hide — for the first of those two, where reading *dismiss* as "put it away" ships a false statement about an action that destroys data. You may use one word for both **only after checking which consequence the key in front of you has**; the two keys are far apart in the UI, which is exactly why the check has to be deliberate.

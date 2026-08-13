@@ -35,7 +35,7 @@
     "progressLabel": "Révision en cours",
     "progressActivityNote": "Le coût et la progression complets se trouvent dans l'onglet Activité.",
     "runLabel": "Exécution de révision",
-    "runSummary": "{{flagged}} signalées sur {{reviewed}} · {{findings}} constats",
+    "runSummary": "{{flagged}} marquées sur {{reviewed}} · {{findings}} constats",
     "emptyTitle": "Aucune révision de la source pour le moment",
     "emptyHint": "« Lancer la révision » vérifie chaque entrée source pour les fautes de frappe, la grammaire, la terminologie, la clarté et le contenu à risque. Les résultats sont indicatifs uniquement.",
     "loadingFindings": "Chargement des constats…",

@@ -1,0 +1,17 @@
+{
+  "contextLabel": "含めるエントリのコンテキスト",
+  "contextHint": "エントリの詳細をプロンプトに追加して、提案の質を高めます。",
+  "fieldContext": "コンテキストのメモ",
+  "fieldSources": "ソースラベル",
+  "fieldCategories": "割り当て済みのカテゴリ",
+  "languagesLabel": "コンテキストとして送信する既存の翻訳",
+  "languagesHint": "選択した言語について、各エントリの完了した翻訳を追加のコンテキストとして送信します。",
+  "selectAllLanguages": "すべて選択",
+  "deselectAllLanguages": "すべて選択解除",
+  "skipCategoriesLabel": "スキップするカテゴリ",
+  "skipCategoriesHint": "これらのカテゴリのいずれかが付いたエントリは、リクエストから完全に除外されます。",
+  "skipCategoriesPlaceholder": "選択なし",
+  "ignoreGlossariesLabel": "無視する既存の用語集",
+  "ignoreGlossariesHint": "選択した用語集の用語は、既知の用語として扱われます。用語集の生成では、モデルが同じ用語を再度提案しないよう、既知のものとして送信されます。カテゴリの生成では、それらの用語に一致するエントリがリクエストから完全に除外されます。",
+  "ignoreGlossariesPlaceholder": "選択なし"
+}

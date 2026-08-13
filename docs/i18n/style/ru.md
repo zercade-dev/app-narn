@@ -314,12 +314,16 @@ Two passes. Scan every string containing a `{{token}}` followed by a Cyrillic wo
 
 1. **Skip by token name first.** A placeholder that cannot hold a number cannot force
    agreement, whatever follows it. In this app that is `module`, `instance`, `language`,
-   `languages`, `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`, `keys`,
+   `lang`, `name`, `message`, `date`, `verdict`, `headers`, `model`, `keys`,
    `slug`, `type`, `focus`, `field`, `why`, `label`, `filename`, `id`, `time` and `passRate` —
    module ids, language display names, field labels, error text, dates. This is the full list
    measured over all 24 namespaces: with exactly these, the detector has **zero** surviving
    false positives across 187 token-plus-Cyrillic-word occurrences. Skip `count` too:
    it is the one token that *does* get CLDR selection, so its family already handles it.
+   (`languages` was on this list through 2026-08-10 and is not any more — it holds a plain
+   count at `config:templateMeta` in at least one other locale, even though every ru
+   occurrence of it is a name list. Its removal does not change the 187/19/0 figures here:
+   none of ru's own `{{languages}}` values ever sat directly against a Cyrillic word.)
 2. **Then skip by word — but only words that actually cleared pass 1.** Of the 187, just
    **19** survive the token skip, and six words cover every one of them: the prepositions
    «из», «с» and «на», invariant and unable to agree with anything; the invariant

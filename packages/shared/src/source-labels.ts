@@ -10,8 +10,9 @@
  * This catalog maps each canonical (English) source label to its localized form
  * in every reference language. It powers:
  *  - display translation: showing an imported source label in the app's UI
- *    language (en/es/fr) regardless of the language it was imported in, while
- *    the stored value and CSV import/export keep the EXACT imported text;
+ *    language (every locale in {@link SOURCE_DISPLAY_LOCALES}) regardless of the
+ *    language it was imported in, while the stored value and CSV import/export
+ *    keep the EXACT imported text;
  *  - recognition: detecting that a label (in any language) is a known origin.
  *
  * Labels not present here are unknown/custom sources and are displayed
@@ -21,30 +22,97 @@
  * a single label looked up here individually.
  */
 
-/** A canonical source label with its en/es/fr display forms and all recognized variants. */
+/**
+ * App UI languages that have a localized display form — the single source of
+ * truth for both the {@link SourceDisplayLocale} type and the runtime fallback
+ * in `resolveDisplayLocale`.
+ *
+ * This MUST stay in step with the frontend's `UI_LANGS` / `UiLanguage`: a UI
+ * language missing here silently renders source labels in English (that was the
+ * de/ja/ru/tr defect). `shared` must NOT import from `frontend` — that is the
+ * wrong dependency direction — so the two lists cannot be linked at the type
+ * level, and a parity test in the test suite enforces it instead. Adding a UI
+ * language means adding it here and giving every `SOURCE_LABELS` entry a display
+ * form for it; that test fails with both edits named if you add only one.
+ */
+export const SOURCE_DISPLAY_LOCALES = [
+  'en',
+  'de',
+  'es',
+  'fr',
+  'id',
+  'it',
+  'ja',
+  'ko',
+  'pt-br',
+  'ru',
+  'th',
+  'tr',
+  'vi',
+  'zh-hans',
+  'zh-hant',
+] as const;
+
+/** App UI languages that have a localized display form. */
+export type SourceDisplayLocale = (typeof SOURCE_DISPLAY_LOCALES)[number];
+
+/** A canonical source label with a display form per UI locale and all recognized variants. */
 export interface SourceLabelDef {
   /** Canonical English label (also the i18n-neutral key). */
   en: string;
+  /** German display form. (For `Tab` this is legitimately identical to English.) */
+  de: string;
   /** Spanish display form. */
   es: string;
   /** French display form. */
   fr: string;
+  /** Indonesian display form. */
+  id: string;
+  /** Italian display form. */
+  it: string;
+  /** Japanese display form. */
+  ja: string;
+  /** Korean display form. */
+  ko: string;
+  /** Brazilian Portuguese display form. */
+  'pt-br': string;
+  /** Russian display form. */
+  ru: string;
+  /** Thai display form. */
+  th: string;
+  /** Turkish display form. */
+  tr: string;
+  /** Vietnamese display form. */
+  vi: string;
+  /** Simplified Chinese display form. */
+  'zh-hans': string;
+  /** Traditional Chinese display form. */
+  'zh-hant': string;
   /**
    * Every recognized localized form across all 15 reference languages (plus a
    * few singular/plural inflections), used to map an imported label back to
-   * this entry regardless of the import language. Includes the en/es/fr forms.
+   * this entry regardless of the import language. Includes every display form.
    */
   variants: readonly string[];
 }
 
-/** App UI languages that have a localized display form. */
-export type SourceDisplayLocale = 'en' | 'es' | 'fr';
-
 export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   {
     en: 'Tab',
+    de: 'Tab',
     es: 'Pestaña',
     fr: 'Option',
+    id: 'Tab',
+    it: 'Scheda',
+    ja: 'オプションタブ',
+    ko: '탭',
+    'pt-br': 'Aba',
+    ru: 'Вкладка',
+    th: 'แท็บ',
+    tr: 'Sekme',
+    vi: 'Thẻ Chọn',
+    'zh-hans': '选项卡',
+    'zh-hant': '選項卡',
     variants: [
       'Tab',
       'Pestaña',
@@ -63,8 +131,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Custom Variable',
+    de: 'Benutzerdefinierte Variable',
     es: 'Variable personalizada',
     fr: 'Variable personnalisée',
+    id: 'Variabel Kustom',
+    it: 'Variabile personalizzata',
+    ja: 'カスタム変数',
+    ko: '커스텀 변수',
+    'pt-br': 'Variável Personalizada',
+    ru: 'Настраиваемые переменные',
+    th: 'ตัวแปรกำหนดเอง',
+    tr: 'Özel Değişken',
+    vi: 'Biến Số Tùy Chỉnh',
+    'zh-hans': '自定义变量',
+    'zh-hant': '自訂變量',
     variants: [
       'Custom Variable',
       'Variable personalizada',
@@ -85,8 +165,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Item',
+    de: 'Objekt',
     es: 'Objeto',
     fr: 'Objets',
+    id: 'Item',
+    it: 'Oggetto',
+    ja: 'アイテム',
+    ko: '아이템',
+    'pt-br': 'Itens',
+    ru: 'Предмет',
+    th: 'ไอเทม',
+    tr: 'Eşya',
+    vi: 'Đạo Cụ',
+    'zh-hans': '道具',
+    'zh-hant': '道具',
     variants: [
       'Item',
       'Objeto',
@@ -105,8 +197,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Node Graph',
+    de: 'Knotendiagramm',
     es: 'Diagrama de nodos',
     fr: 'Graphique de nœuds',
+    id: 'Grafik Node',
+    it: 'Grafico dei nodi',
+    ja: 'ノードグラフ',
+    ko: '노드 그래프',
+    'pt-br': 'Gráfico de Nódulos',
+    ru: 'Схема узлов',
+    th: 'โหนดกราฟ',
+    tr: 'Düğüm Grafiği',
+    vi: 'Đồ Thị',
+    'zh-hans': '节点图',
+    'zh-hant': '節點圖',
     variants: [
       'Node Graph',
       'Diagrama de nodos',
@@ -127,8 +231,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'UI Control Group',
+    de: 'Menüsteuerungsgruppen',
     es: 'Grupo de control de interfaz',
     fr: "Groupe de contrôle d'interface",
+    id: 'Grup Kontrol Halaman',
+    it: 'Gruppo comandi IU',
+    ja: 'UIコントロールグループ',
+    ko: '인터페이스 컨트롤 그룹',
+    'pt-br': 'Grupo de Controle de Interface',
+    ru: 'Группа элементов меню',
+    th: 'กลุ่มควบคุม UI',
+    tr: 'Kullanıcı Arayüzü Kontrol Grubu',
+    vi: 'Nhóm Điều Khiển Giao Diện',
+    'zh-hans': '界面控件组',
+    'zh-hant': '介面控制元件組',
     variants: [
       'UI Control Group',
       'Grupo de control de interfaz',
@@ -149,8 +265,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Nameplate',
+    de: 'Namensschild',
     es: 'Placa de nombre',
     fr: 'Plaque',
+    id: 'Papan Nama',
+    it: 'Targa',
+    ja: 'ネームプレート',
+    ko: '네임플레이트',
+    'pt-br': 'Placa de Nome',
+    ru: 'Табличка',
+    th: 'ป้ายชื่อ',
+    tr: 'İsim Levhası',
+    vi: 'Bảng Hiệu',
+    'zh-hans': '铭牌',
+    'zh-hant': '銘牌',
     variants: [
       'Nameplate',
       'Placa de nombre',
@@ -171,8 +299,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Text Bubble',
+    de: 'Textblase',
     es: 'Globo de texto',
     fr: 'Bulle de texte',
+    id: 'Gelembung Teks',
+    it: 'Fumetto',
+    ja: 'テキストバブル',
+    ko: '말풍선',
+    'pt-br': 'Bolha de Texto',
+    ru: 'Текстовый пузырь',
+    th: 'บับเบิ้ลข้อความ',
+    tr: 'Metin Balonu',
+    vi: 'Khung Bong Bóng Văn Bản',
+    'zh-hans': '文本气泡',
+    'zh-hant': '文字氣泡',
     variants: [
       'Text Bubble',
       'Globo de texto',
@@ -193,8 +333,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Achievement',
+    de: 'Errungenschaften',
     es: 'Logros',
     fr: 'Succès',
+    id: 'Achievement',
+    it: 'Obiettivi',
+    ja: 'アチーブメント',
+    ko: '업적',
+    'pt-br': 'Conquista',
+    ru: 'Достижение',
+    th: 'ความสำเร็จ',
+    tr: 'Başarım',
+    vi: 'Thành Tựu',
+    'zh-hans': '成就',
+    'zh-hant': '成就',
     variants: [
       'Achievement',
       'Logros',
@@ -219,8 +371,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Leaderboard',
+    de: 'Rangliste',
     es: 'Clasificación',
     fr: 'Classement',
+    id: 'Papan Peringkat',
+    it: 'Classifica',
+    ja: 'ランキング',
+    ko: '랭킹',
+    'pt-br': 'Placar',
+    ru: 'Рейтинг',
+    th: 'กระดานจัดอันดับ',
+    tr: 'Sıralama',
+    vi: 'Bảng Xếp Hạng',
+    'zh-hans': '排行榜',
+    'zh-hant': '排行榜',
     variants: [
       'Leaderboard',
       'Clasificación',
@@ -240,8 +404,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Loading Screen',
+    de: 'Ladebildschirm',
     es: 'Interfaz de carga',
     fr: 'Interface de chargement',
+    id: 'Halaman Loading',
+    it: 'Schermata di caricamento',
+    ja: 'ロード画面',
+    ko: '로딩 화면',
+    'pt-br': 'Tela de Carregamento',
+    ru: 'Загрузочный экран',
+    th: 'อินเทอร์เฟซการโหลด',
+    tr: 'Yükleme Ekranı',
+    vi: 'Giao Diện Tải',
+    'zh-hans': '加载界面',
+    'zh-hant': '載入介面',
     variants: [
       'Loading Screen',
       'Interfaz de carga',
@@ -262,8 +438,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Manage Voice & Text Chat',
+    de: 'Audio- und Textchat-Verwaltung',
     es: 'Gestión de chat de voz y texto',
     fr: 'Gestion du tchat par texte et audio',
+    id: 'Manajemen Obrolan Suara dan Teks',
+    it: 'Gestione chat vocale e di testo',
+    ja: 'ボイスとテキストチャット管理',
+    ko: '음성 및 채팅 관리',
+    'pt-br': 'Gerenciar voz e bate-papo de texto',
+    ru: 'Управление голосовым и текстовым чатом',
+    th: 'การจัดการแชทเสียงและข้อความ',
+    tr: 'Sesli Sohbet ve Metin Sohbeti Yönetimi',
+    vi: 'Quản Lý Văn Bản & Giọng Nói',
+    'zh-hans': '语音和文字聊天管理',
+    'zh-hant': '語音和文字聊天管理',
     variants: [
       'Manage Voice & Text Chat',
       'Gestión de chat de voz y texto',
@@ -284,8 +472,20 @@ export const SOURCE_LABELS: readonly SourceLabelDef[] = [
   },
   {
     en: 'Faction',
+    de: 'Fraktion',
     es: 'Facción',
     fr: 'Faction',
+    id: 'Faksi',
+    it: 'Fazione',
+    ja: '陣営',
+    ko: '진영',
+    'pt-br': 'Facção',
+    ru: 'Фракция',
+    th: 'ฝ่าย',
+    tr: 'Bağlılık',
+    vi: 'Phe',
+    'zh-hans': '阵营',
+    'zh-hant': '陣營',
     variants: [
       'Faction',
       'Facción',
@@ -314,7 +514,10 @@ function normalizeLabel(value: string): string {
 const VARIANT_TO_DEF: ReadonlyMap<string, SourceLabelDef> = (() => {
   const map = new Map<string, SourceLabelDef>();
   for (const def of SOURCE_LABELS) {
-    for (const variant of [def.en, def.es, def.fr, ...def.variants]) {
+    for (const variant of [
+      ...SOURCE_DISPLAY_LOCALES.map((locale) => def[locale]),
+      ...def.variants,
+    ]) {
       const key = normalizeLabel(variant);
       if (!map.has(key)) map.set(key, def);
     }
@@ -322,9 +525,24 @@ const VARIANT_TO_DEF: ReadonlyMap<string, SourceLabelDef> = (() => {
   return map;
 })();
 
+/**
+ * Maps a UI locale (possibly region- or script-tagged, e.g. `es-MX`, `pt-BR`,
+ * `zh-Hans-CN`) to the display locale whose form should be rendered, falling
+ * back to `en` for anything the catalog does not carry. Some display locales
+ * are themselves compound (`pt-br`, `zh-hans`, `zh-hant`), so this matches the
+ * most specific tag first, then drops trailing subtags one at a time until a
+ * match is found — it does not just take the leading base subtag. Driven off
+ * {@link SOURCE_DISPLAY_LOCALES} so adding a locale is a single edit.
+ */
 function resolveDisplayLocale(locale: string): SourceDisplayLocale {
-  const base = locale.toLowerCase().split('-')[0];
-  return base === 'es' || base === 'fr' ? base : 'en';
+  const subtags = locale.toLowerCase().split('-');
+  for (let count = subtags.length; count > 0; count--) {
+    const candidate = subtags.slice(0, count).join('-');
+    if ((SOURCE_DISPLAY_LOCALES as readonly string[]).includes(candidate)) {
+      return candidate as SourceDisplayLocale;
+    }
+  }
+  return 'en';
 }
 
 /**
@@ -337,9 +555,10 @@ export function getSourceLabelDef(raw: string): SourceLabelDef | undefined {
 }
 
 /**
- * Returns the display form of a source origin label in the app UI language
- * (en/es/fr). A label imported in any of the 15 reference languages is mapped
- * to the requested locale's form; an unknown/custom label is returned verbatim.
+ * Returns the display form of a source origin label in the app UI language (any
+ * of {@link SOURCE_DISPLAY_LOCALES}; anything else falls back to English). A
+ * label imported in any of the 15 reference languages is mapped to the requested
+ * locale's form; an unknown/custom label is returned verbatim.
  *
  * Display-only: the stored `StringEntry.sources` value and CSV import/export
  * always keep the exact imported text.
