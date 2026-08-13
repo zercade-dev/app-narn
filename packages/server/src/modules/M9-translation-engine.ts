@@ -322,7 +322,7 @@ function rateLimitCooldownMs(err: unknown): number | undefined {
   const retryAfter = retryAfterMsOf(err);
   if (retryAfter !== undefined) return retryAfter;
   const message = err instanceof Error ? err.message : String(err);
-  return /per.?min/i.test(message) ? PER_MINUTE_RATE_LIMIT_COOLDOWN_MS : undefined;
+  return /\bper[-_\s]?min/i.test(message) ? PER_MINUTE_RATE_LIMIT_COOLDOWN_MS : undefined;
 }
 
 /**

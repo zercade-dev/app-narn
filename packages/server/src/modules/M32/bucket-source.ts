@@ -22,6 +22,16 @@ import { updateGatePassEma } from './stats.js';
 
 const FLAP_WINDOW_MS = 5 * 60_000;
 
+/**
+ * Upper bound on how long a shared-pool cooldown may sideline the buckets that
+ * were NOT struck. Their exhaustion is inferred from a sibling's 429, never
+ * observed, so the blast radius stays bounded: if the pool really is drained
+ * for the day, each sibling re-cools itself on its own next 429, at a cost of
+ * at most one request; if the limit was minute-scale or model-specific, the
+ * siblings are back within the minute instead of parked until the daily reset.
+ */
+const POOL_SIBLING_COOLDOWN_CAP_MS = 70_000;
+
 export function freewayBucketKey(moduleId: string, modelId: string): string {
   return `${moduleId}::${modelId}`;
 }
@@ -191,9 +201,11 @@ export async function recordDispatch(
  * `scope: 'pool'` widens the cooldown to every bucket of a provider whose quota
  * is account-wide (`sharedLimits`): a 429 there is a statement about the shared
  * allowance, so rerouting to a sibling model would only spend another request
- * against the same exhausted pool. Flap detection stays a property of the bucket
- * that was actually struck. On a provider WITHOUT a shared pool the scope is
- * inert — a model-specific 429 must never sideline unrelated siblings.
+ * against the same exhausted pool. The struck bucket keeps the full `until`;
+ * siblings get a capped, never-shortening cool (see
+ * {@link POOL_SIBLING_COOLDOWN_CAP_MS}). Flap detection stays a property of the
+ * bucket that was actually struck. On a provider WITHOUT a shared pool the scope
+ * is inert — a model-specific 429 must never sideline unrelated siblings.
  */
 export async function coolBucket(
   bucketKey: string,
@@ -220,10 +232,14 @@ export async function coolBucket(
   }
   await ledger.setCooldown(bucketKey, until, flap ? { flap: true } : undefined);
   if (scope !== 'pool' || !resolved?.provider.sharedLimits) return;
+  const siblingUntil = Math.min(until, now + POOL_SIBLING_COOLDOWN_CAP_MS);
   for (const model of resolved.provider.models) {
     const siblingKey = freewayBucketKey(resolved.provider.moduleId, model.id);
     if (siblingKey === bucketKey) continue;
-    await ledger.setCooldown(siblingKey, until);
+    const prior = states.find((s) => s.bucketKey === siblingKey)?.cooldownUntil ?? 0;
+    // Never shorten: a sibling already sidelined for longer (its own 429, or a
+    // provider-error cool on a retired model) must stay sidelined.
+    await ledger.setCooldown(siblingKey, Math.max(prior, siblingUntil));
   }
 }
 
