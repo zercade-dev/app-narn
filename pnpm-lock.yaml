@@ -112,8 +112,8 @@ catalogs:
       specifier: 2.8.6
       version: 2.8.6
     deepl-node:
-      specifier: 1.27.0
-      version: 1.27.0
+      specifier: 1.28.0
+      version: 1.28.0
     dotenv:
       specifier: 17.4.2
       version: 17.4.2
@@ -295,7 +295,7 @@ importers:
         version: link:../../packages/shared
       deepl-node:
         specifier: 'catalog:'
-        version: 1.27.0
+        version: 1.28.0
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1725,8 +1725,8 @@ packages:
     resolution: {integrity: sha512-s7iGf5GaVMxEG0ENN9x+xTr7GFZCb1ZP/1uATUpCEK2X78nDB3RwbtFCo9pGAf9ru+VwoQ464DkaLEeRM08wJA==}
     engines: {node: '>=4'}
 
-  axios@1.18.0:
-    resolution: {integrity: sha512-E32NzpYKp++W7XRe52rHiXV2ehxmh3wbdgO7MHeFM+vqxLBYHzt0ElkiImtOBxtOmyp0yoC8C6uESVV84Y2/hw==}
+  axios@1.19.0:
+    resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==}
 
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
@@ -1861,8 +1861,8 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
-  deepl-node@1.27.0:
-    resolution: {integrity: sha512-OEiprFdxqr7aS0+gmv8vsZLBLoDarBppG1zkTWUlrAvPoYdwSWKFWjcZgr9XSV3FWlPy8g10WdJjWkxDn9P56w==}
+  deepl-node@1.28.0:
+    resolution: {integrity: sha512-Kb4K1OVYuqFrHMHBSQq25HAhrcLjlFrkxYsWRfhbuPpEVfODOWiIdggZA+8JQ43egP/vLAReAj9h2mrR+15Ezw==}
     engines: {node: '>=14.17'}
 
   delayed-stream@1.0.0:
@@ -3721,7 +3721,7 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
 
   '@types/connect@3.4.38':
     dependencies:
@@ -3745,7 +3745,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.1':
     dependencies:
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
       '@types/qs': 6.15.1
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -3811,7 +3811,7 @@ snapshots:
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
 
   '@types/unist@2.0.11': {}
 
@@ -4028,7 +4028,7 @@ snapshots:
 
   axe-core@4.12.1: {}
 
-  axios@1.18.0:
+  axios@1.19.0:
     dependencies:
       follow-redirects: 1.16.0
       form-data: 4.0.6
@@ -4156,11 +4156,11 @@ snapshots:
 
   deep-is@0.1.4: {}
 
-  deepl-node@1.27.0:
+  deepl-node@1.28.0:
     dependencies:
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
       adm-zip: 0.6.0
-      axios: 1.18.0
+      axios: 1.19.0
       form-data: 3.0.5
       loglevel: 1.9.2
     transitivePeerDependencies:
