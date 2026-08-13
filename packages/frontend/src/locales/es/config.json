@@ -227,6 +227,7 @@
     "colPassRate": "Tasa de aprobación",
     "remainingRequests_one": "{{count}} solicitud",
     "remainingRequests_other": "{{count}} solicitudes",
+    "remainingRequests_many": "{{count}} solicitudes",
     "remainingChars": "{{count}} caracteres",
     "passRateEntry": "{{language}}: {{rate}}%",
     "state": {

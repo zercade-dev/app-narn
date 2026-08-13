@@ -332,6 +332,7 @@
     "waitingResumesAt": "Se reanuda {{time}}",
     "waitingPairsCount_one": "{{count}} par pendiente",
     "waitingPairsCount_other": "{{count}} pares pendientes",
+    "waitingPairsCount_many": "{{count}} pares pendientes",
     "waitingSkipReasonWarning": "La reanudación automática no encontró una clave gratuita utilizable — usa «Reanudar ahora con…» abajo para elegir un módulo.",
     "pause": "Pausar",
     "resume": "Reanudar",

@@ -48,6 +48,7 @@
     "module": "モジュール",
     "modulePlaceholder": "モジュールを選択",
     "model": "モデル",
+    "freewayModelHint": "NARN Freeway automatically picks the best free model for each batch — no model or reasoning-effort choice needed.",
     "noModules": "レビューを実行できるモジュールがありません。グローバル設定でAIモジュールを有効にしてください。",
     "cancel": "キャンセル",
     "findingPosition": "{{current}}/{{total}}",

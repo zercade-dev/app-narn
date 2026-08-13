@@ -227,6 +227,7 @@
     "colPassRate": "Taux de réussite",
     "remainingRequests_one": "{{count}} requête",
     "remainingRequests_other": "{{count}} requêtes",
+    "remainingRequests_many": "{{count}} de requêtes",
     "remainingChars": "{{count}} caractères",
     "passRateEntry": "{{language}} : {{rate}}%",
     "state": {

@@ -48,6 +48,7 @@
     "module": "Modul",
     "modulePlaceholder": "Modul auswählen",
     "model": "Modell",
+    "freewayModelHint": "NARN Freeway automatically picks the best free model for each batch — no model or reasoning-effort choice needed.",
     "noModules": "Kein Review-fähiges Modul verfügbar. In der Globalen Konfiguration ein KI-Modul aktivieren.",
     "cancel": "Abbrechen",
     "findingPosition": "{{current}} von {{total}}",

@@ -48,6 +48,7 @@
     "module": "โมดูล",
     "modulePlaceholder": "เลือกโมดูล",
     "model": "โมเดล",
+    "freewayModelHint": "NARN Freeway automatically picks the best free model for each batch — no model or reasoning-effort choice needed.",
     "noModules": "ไม่มีโมดูลที่รีวิวได้ เปิดใช้งานโมดูล AI ในการตั้งค่าส่วนกลาง",
     "cancel": "ยกเลิก",
     "findingPosition": "{{current}} จาก {{total}}",
