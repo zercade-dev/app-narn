@@ -38,7 +38,6 @@
   "instanceKeyFallbackHint": "任意です。空欄のままにすると、このインスタンス専用のキーではなく、ベースモジュールのキーを使用します。",
   "noKeys": "保存されている認証情報はまだありません。",
   "addKey": "認証情報を追加",
-  "remove": "削除",
   "delete": "削除",
   "discard": "破棄",
   "undoRemove": "元に戻す",

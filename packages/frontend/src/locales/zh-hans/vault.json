@@ -38,7 +38,6 @@
   "instanceKeyFallbackHint": "可选——留空则使用基础模块的密钥，而不是此实例专用的密钥。",
   "noKeys": "尚未存储任何凭据。",
   "addKey": "添加凭据",
-  "remove": "移除",
   "delete": "删除",
   "discard": "放弃",
   "undoRemove": "撤销",

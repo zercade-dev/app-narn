@@ -40,7 +40,6 @@
   "instanceKeyFallbackHint": "Facoltativo: lascia vuoto per usare la chiave del modulo di base invece di quella specifica di questa istanza.",
   "noKeys": "Ancora nessuna credenziale salvata.",
   "addKey": "Aggiungi una credenziale",
-  "remove": "Rimuovi",
   "delete": "Elimina",
   "discard": "Scarta",
   "undoRemove": "Annulla modifica",

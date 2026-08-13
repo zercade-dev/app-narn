@@ -38,7 +38,6 @@
   "instanceKeyFallbackHint": "Facultatif — laissez vide pour utiliser la clé du module de base au lieu de celle propre à cette instance.",
   "noKeys": "Aucune credential stockée pour l'instant.",
   "addKey": "Ajouter une credential",
-  "remove": "Supprimer",
   "delete": "Supprimer",
   "discard": "Annuler",
   "undoRemove": "Annuler",

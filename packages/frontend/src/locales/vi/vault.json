@@ -38,7 +38,6 @@
   "instanceKeyFallbackHint": "Không bắt buộc — để trống để dùng khóa của mô-đun gốc thay cho khóa riêng của thực thể này.",
   "noKeys": "Chưa lưu thông tin xác thực nào.",
   "addKey": "Thêm thông tin xác thực",
-  "remove": "Gỡ",
   "delete": "Xóa",
   "discard": "Bỏ thay đổi",
   "undoRemove": "Hoàn tác",

@@ -40,7 +40,6 @@
   "instanceKeyFallbackHint": "İsteğe bağlı — bu örneğe özel anahtar yerine temel modülün anahtarını kullanmak için boş bırakın.",
   "noKeys": "Henüz kayıtlı kimlik bilgisi yok.",
   "addKey": "Kimlik bilgisi ekle",
-  "remove": "Kaldır",
   "delete": "Sil",
   "discard": "Vazgeç",
   "undoRemove": "Geri al",

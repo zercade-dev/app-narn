@@ -38,7 +38,6 @@
   "instanceKeyFallbackHint": "Opsional — kosongkan untuk memakai kunci modul dasarnya alih-alih kunci khusus instans ini.",
   "noKeys": "Belum ada kredensial yang tersimpan.",
   "addKey": "Tambah kredensial",
-  "remove": "Hapus",
   "delete": "Hapus",
   "discard": "Buang",
   "undoRemove": "Urungkan",
