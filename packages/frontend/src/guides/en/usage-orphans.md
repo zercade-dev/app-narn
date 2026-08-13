@@ -12,7 +12,7 @@ The **Orphans** tab lists entries that are no longer present in the most recentl
 
 ## Workflow
 
-1. Re-import your source CSV from the **Config** tab.
+1. Re-import your source CSV from the **Data** tab.
 2. Open **Orphans** and review what dropped out.
 3. **Relink** any entry whose id or source text changed but whose translations are still valid.
 4. **Delete** entries that are genuinely gone.

@@ -12,7 +12,7 @@ Der Tab **Waisen** listet Einträge auf, die in der zuletzt importierten CSV nic
 
 ## Ablauf
 
-1. Die eigene Quell-CSV im Tab **Konfiguration** erneut importieren.
+1. Die eigene Quell-CSV im Tab **Daten** erneut importieren.
 2. **Waisen** öffnen und durchsehen, was weggefallen ist.
 3. Jeden Eintrag, dessen ID oder Quelltext sich geändert hat, dessen Übersetzungen aber noch gültig sind, **neu verknüpfen**.
 4. Einträge, die wirklich verschwunden sind, **löschen**.
