@@ -12,6 +12,7 @@
  * subclass keeps only the source-review scope, batch body, and persistence.
  */
 import {
+  FREEWAY_MODULE_ID,
   type GlobalConfig,
   type Project,
   RunStatusCode,
@@ -41,8 +42,18 @@ import { getGlobalConfigStore, getProjectStore, getStringStore } from '../storag
 import { getCurrentTenant, runWithTenant } from '../storage/pg/tenant-context.js';
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { defaultPricingProvider, type PricingProvider } from './M9/usage-pricing.js';
-import { selectCapableModule, type ModuleLogFn } from './M9/module-selection.js';
-import { BackgroundRunEngine, sanitizeLLMText, type LoggerLike } from './M9/run-engine.js';
+import {
+  selectCapableModule,
+  selectFreewayBackgroundModule,
+  type ModuleLogFn,
+} from './M9/module-selection.js';
+import type { BucketSourceDeps } from './M32/bucket-source.js';
+import {
+  BackgroundRunEngine,
+  sanitizeLLMText,
+  type FreewayBatchBinding,
+  type LoggerLike,
+} from './M9/run-engine.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
 
 /** Items reviewed per provider call (engine-level batching). */
@@ -103,6 +114,8 @@ export interface SourceReviewEngineDeps {
   globalConfigStore?: Pick<GlobalConfigStore, 'load'>;
   logger?: LoggerLike;
   pricing?: PricingProvider;
+  /** Bucket-source overrides used when a run selects the free-tier target. */
+  freeway?: BucketSourceDeps;
 }
 
 // LLM-produced finding/suggestion text is sanitized via the shared
@@ -141,6 +154,8 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
   private get globalConfigStore(): Pick<GlobalConfigStore, 'load'> {
     return this._globalConfigStore ?? getGlobalConfigStore();
   }
+  /** Injected Freeway bucket-source overrides (ledger / status / cloud mode). */
+  private readonly freewayOverrides: BucketSourceDeps;
 
   constructor(deps: SourceReviewEngineDeps = {}) {
     super({
@@ -152,6 +167,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       pricing: deps.pricing ?? defaultPricingProvider,
     });
     this.moduleRegistry = deps.moduleRegistry ?? defaultModuleRegistry;
+    this.freewayOverrides = deps.freeway ?? {};
     this._stringStore = deps.stringStore;
     this._projectStore = deps.projectStore;
     this._globalConfigStore = deps.globalConfigStore;
@@ -172,30 +188,45 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
    * Picks the review module/model. Precedence: an explicit request override,
    * then the project's saved {@link Project.sourceReviewConfig}, then the
    * cheapest enabled module that implements `reviewSource`. Reasoning-effort
-   * falls back the same way. Throws SourceReviewNotPossibleError when nothing
-   * can review.
+   * falls back the same way. The free-tier target resolves to a concrete bucket
+   * instead (see below). Throws SourceReviewNotPossibleError when nothing can
+   * review.
    */
-  private selectModule(
+  private async selectModule(
     project: Project,
     global: GlobalConfig,
     sessionId: string | undefined,
     request: SourceReviewRequest,
     logSink?: ModuleLogFn,
-  ): { module: TranslationModule; moduleId: string } {
+  ): Promise<{ module: TranslationModule; moduleId: string; bucketKey?: string }> {
     const saved = project.sourceReviewConfig;
     const requestedId = request.moduleId ?? saved?.moduleId;
     const requestedModel = request.model ?? saved?.model;
     const requestedEffort = request.reasoningEffort ?? saved?.reasoningEffort;
-    return selectCapableModule(this.moduleRegistry, project, global, sessionId, {
-      ...(requestedId !== undefined ? { requestedId } : {}),
-      ...(requestedModel ? { requestedModel } : {}),
+    const options = {
       ...(requestedEffort ? { requestedEffort } : {}),
       ...(request.verbose ? { verbose: true } : {}),
       ...(logSink ? { logSink } : {}),
-      capability: (m) => typeof m.reviewSource === 'function',
-      notPossible: (msg) => new SourceReviewNotPossibleError(msg),
-      requestedFailLabel: `module "${requestedId}" cannot review source text`,
+      capability: (m: TranslationModule) => typeof m.reviewSource === 'function',
+      notPossible: (msg: string) => new SourceReviewNotPossibleError(msg),
       noneAvailableMessage: 'no enabled source-review-capable module available',
+    };
+    if (requestedId === FREEWAY_MODULE_ID) {
+      // Resolved ONCE, here at run start: the whole run stays bound to this
+      // bucket. A rate limit mid-run therefore fails the run exactly as a paid
+      // module's would — a background run never re-routes to another free
+      // bucket while it is in flight.
+      return selectFreewayBackgroundModule(this.moduleRegistry, project, global, sessionId, {
+        ...options,
+        deps: this.freewayOverrides,
+        noneAvailableMessage: 'no free-tier model is currently available to review source text',
+      });
+    }
+    return selectCapableModule(this.moduleRegistry, project, global, sessionId, {
+      ...options,
+      requestedFailLabel: `module "${requestedId}" cannot review source text`,
+      ...(requestedId !== undefined ? { requestedId } : {}),
+      ...(requestedModel ? { requestedModel } : {}),
     });
   }
 
@@ -225,6 +256,10 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     // `sourceLanguage` without a second `loadProject` call per batch —
     // `enqueueBatched` resolves `buildItems` strictly before invoking `dispatch`.
     let loadedProject!: Project;
+    // Set by `selectModule` below, which `enqueueBatched` resolves strictly
+    // before it invokes `dispatch`: the free-tier bucket the run spends
+    // against, or undefined for an ordinary module.
+    let freeway: FreewayBatchBinding | undefined;
 
     return this.enqueueBatched<SourceReviewItem>({
       projectId,
@@ -232,8 +267,13 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         project: await this.projectStore.loadProject(projectId),
         global: await this.globalConfigStore.load(),
       }),
-      selectModule: (project, global, logSink) =>
-        this.selectModule(project, global, sessionId, request, logSink),
+      selectModule: async (project, global, logSink) => {
+        const selected = await this.selectModule(project, global, sessionId, request, logSink);
+        if (selected.bucketKey !== undefined) {
+          freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+        }
+        return selected;
+      },
       buildItems: async (project) => {
         loadedProject = project;
         const allEntries = await this.stringStore.load(projectId);
@@ -293,6 +333,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
               entriesById,
               records,
               dispatchOptions,
+              freeway,
             );
           this.queue.add(runId, tenant ? () => runWithTenant(tenant, body) : body);
         }
@@ -310,6 +351,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     entriesById: Map<string, StringEntry>,
     reviewRecords: SourceReviewRecord[],
     dispatchOptions?: BatchDispatchOptions,
+    freeway?: FreewayBatchBinding,
   ): Promise<void> {
     await this.runBatchWithUsage<SourceReviewItem, SourceReviewItemResult>({
       runId,
@@ -319,6 +361,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       call: (signal) => module.reviewSource!(batch, opts, signal, dispatchOptions),
       failureKey: (item) => ({ entryId: item.entryId }),
       usageOf: (result) => result.usage,
+      ...(freeway ? { freeway } : {}),
       onResult: async (result, status) => {
         if (result.error) {
           this.recordFailure(status, { entryId: result.entryId }, result.error);

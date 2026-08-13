@@ -37,6 +37,13 @@ const TERMINAL_STATUSES: ReadonlySet<RunStatusCode> = new Set([
  * started by the CURRENT process (`startedAt >= PROCESS_START_MS`) are never
  * touched, so an active run is never dropped.
  *
+ * Runs parked on free quota (`Paused` + `waitingForQuota`) are ALSO left alone,
+ * regardless of age: they hold no in-flight work to reconcile, they are meant
+ * to outlive the process (a park can last until tomorrow's quota reset), and
+ * they stay re-adoptable — the resume paths pick a persisted parked run back
+ * up and re-plan exactly its parked pairs. Failing them here would destroy
+ * work the engine deliberately deferred.
+ *
  * @returns the number of runs flipped to `Failed`.
  */
 export async function sweepOrphanedRuns(
@@ -49,6 +56,7 @@ export async function sweepOrphanedRuns(
   for (const run of runs) {
     if (TERMINAL_STATUSES.has(run.status)) continue;
     if (run.status === RunStatusCode.Queued) continue;
+    if (run.status === RunStatusCode.Paused && run.waitingForQuota) continue;
     if (typeof run.startedAt !== 'number' || run.startedAt >= cutoffMs) continue;
     const failed: RunStatus = { ...run, status: RunStatusCode.Failed, finishedAt: Date.now() };
     delete failed.queuePosition;

@@ -183,7 +183,10 @@
     "groupSwitchInProgress": "Không thể đổi nhóm quy tắc trong lúc các bản dịch đang chạy.",
     "untitledGroup": "Nhóm chưa đặt tên",
     "via": "qua",
-    "routesTo": "chuyển tới"
+    "routesTo": "chuyển tới",
+    "freewayLabel": "NARN Freeway",
+    "freewayOnboardButton": "Let NARN Freeway handle everything",
+    "freewayOnboardDisabledHint": "Available once the current run finishes."
   },
   "health": {
     "noData": "Chưa có dữ liệu tình trạng",
@@ -192,6 +195,41 @@
     "rateLimitRetries": "Số lần thử lại 429: {{count}}",
     "lqaRetries": "Số lần thử lại LQA: {{count}}",
     "sparklineTitle": "Số phản hồi 429 trong 10 phút gần nhất"
+  },
+  "freeway": {
+    "title": "NARN Freeway",
+    "description": "A shared pool of free-tier AI models NARN can route work to automatically — no credit card required. Add a free key below, then point a routing rule or a background engine at NARN Freeway to use it.",
+    "refresh": "Refresh",
+    "loading": "Loading NARN Freeway status…",
+    "loadFailed": "Failed to load NARN Freeway status: {{message}}",
+    "generatedAtLabel": "Updated {{time}}",
+    "sourcesTitle": "Free sources",
+    "keyPresent": "Key added",
+    "keyMissing": "No key yet",
+    "addButton": "Add",
+    "adding": "Adding…",
+    "addFailed": "Failed to add {{provider}}: {{message}}",
+    "presetsUnavailable": "One-click setup for free providers isn't available on this deployment.",
+    "enableModuleHint": "Key is set, but the module is turned off.",
+    "enableModuleButton": "Enable it",
+    "disabledReasonChip": "Disabled: {{reason}}",
+    "statusTitle": "Status",
+    "empty": "No free-tier sources configured yet.",
+    "colModel": "Model",
+    "colState": "State",
+    "colRemaining": "Remaining",
+    "colNextReset": "Next reset",
+    "colPassRate": "Pass rate",
+    "remainingRequests_other": "{{count}} requests",
+    "remainingChars": "{{count}} chars",
+    "passRateEntry": "{{language}}: {{rate}}%",
+    "state": {
+      "ready": "Ready",
+      "cooling": "Cooling down",
+      "exhausted": "Exhausted for today",
+      "disabled": "Module disabled",
+      "uncredentialed": "No key"
+    }
   },
   "overflowRatioLabel": "Tỷ lệ tràn",
   "overflowRatioDescription": "Tỷ lệ tràn mặc định áp dụng cho các mục mới nhập vào. Dùng ở cổng chất lượng để phát hiện văn bản bị tràn. Mặc định: 1,75.",

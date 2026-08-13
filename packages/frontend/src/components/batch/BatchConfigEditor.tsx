@@ -1,6 +1,15 @@
 import { useState, useRef, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowDown, ArrowUp, X, AlertTriangle, Pencil, RotateCcw, ChevronDown } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  X,
+  AlertTriangle,
+  Pencil,
+  RotateCcw,
+  ChevronDown,
+  Route as RouteIcon,
+} from 'lucide-react';
 import type {
   RoutingRule,
   RoutingRuleGroup,
@@ -8,7 +17,7 @@ import type {
   PromptOptions,
   ModelInfo,
 } from '@zercade-dev/narn-shared';
-import { PSEUDO_MODULE_ID, getSourceLabel } from '@zercade-dev/narn-shared';
+import { PSEUDO_MODULE_ID, FREEWAY_MODULE_ID, getSourceLabel } from '@zercade-dev/narn-shared';
 import { CopilotModelsContext } from '../../hooks/use-copilot-models.js';
 import { useModuleModels } from '../../hooks/use-module-models.js';
 import { ModelPicker } from '../config/ModelPicker.js';
@@ -602,6 +611,12 @@ export function BatchConfigEditor({
                                       value={m.id}
                                       className={inactive ? 'text-muted-foreground' : undefined}
                                     >
+                                      {m.id === FREEWAY_MODULE_ID && (
+                                        <RouteIcon
+                                          className="inline size-3 mr-1 align-[-1px]"
+                                          aria-hidden="true"
+                                        />
+                                      )}
                                       {m.name}
                                       {inactive ? t('routing.moduleDisabledSuffix') : ''}
                                     </SelectItem>

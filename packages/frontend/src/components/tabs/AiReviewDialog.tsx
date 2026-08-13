@@ -9,12 +9,14 @@
  * from the run each render, with `user*` state overriding once the user picks.
  * The parent remounts this dialog per run (via `key`) so those overrides reset.
  */
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { JudgeChecks, RunStatus, RunUsageEntry } from '@zercade-dev/narn-shared';
+import { FREEWAY_MODULE_ID } from '@zercade-dev/narn-shared';
 import { Sparkles } from 'lucide-react';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
+import type { ModuleSelectOption } from '../ui/module-select';
 import {
   Dialog,
   DialogContent,
@@ -133,6 +135,9 @@ export function AiReviewDialog({
   onStart,
 }: Readonly<AiReviewDialogProps>): React.JSX.Element {
   const { t } = useTranslation('strings');
+  // Only for the synthetic Freeway option's label below (`config:routing.freewayLabel`,
+  // reused from the routing picker rather than duplicating the string here).
+  const { t: tConfig } = useTranslation('config');
   const { read: readSettings, save: saveSettings } = useDialogSettings(
     'ai-review',
     AI_REVIEW_SETTINGS_DEFAULTS,
@@ -190,10 +195,38 @@ export function AiReviewDialog({
   // Named instances, non-instanceable modules, and instanceable bases without
   // instances are offered — a base is excluded only once it has instances (then
   // it's managed through them), mirroring the global config module list.
-  const baseInstanceSet = basesWithInstances(modules);
-  const judgeModules = modules.filter(
-    (m) => m.supportsJudge && isOfferableModule(m, baseInstanceSet) && isEnabledModule(m),
-  );
+  const realJudgeModules = useMemo(() => {
+    const withInstances = basesWithInstances(modules);
+    return modules.filter(
+      (m) => m.supportsJudge && isOfferableModule(m, withInstances) && isEnabledModule(m),
+    );
+  }, [modules]);
+  // The judge picker also offers a synthetic NARN Freeway target (M25
+  // JudgeEngine already accepts moduleId 'freeway', resolving via the free pool
+  // at background priority) — appended here at THIS composition site only,
+  // mirroring AppShell's RoutingTabContent `routingModules` pattern, and run
+  // through the SAME isOfferableModule/isEnabledModule predicates real modules
+  // use (both accept it: `instanceable: false`, `enabled: true`), rather than
+  // being force-included. Only added once `realJudgeModules` is non-empty —
+  // that both keeps Freeway from ever being the *sole* offered option (the
+  // "no judge modules" empty state below stays exactly as it was: real API
+  // modules only) and avoids a mount-time race where the synthetic entry
+  // would otherwise appear on the very first render, before the async
+  // `/modules` fetch has resolved.
+  const judgeModules = useMemo<ModuleSelectOption[]>(() => {
+    if (realJudgeModules.length === 0) return realJudgeModules;
+    const withInstances = basesWithInstances(modules);
+    return [
+      ...modules,
+      {
+        id: FREEWAY_MODULE_ID,
+        name: tConfig('routing.freewayLabel'),
+        instanceable: false,
+        supportsJudge: true,
+        enabled: true,
+      },
+    ].filter((m) => m.supportsJudge && isOfferableModule(m, withInstances) && isEnabledModule(m));
+  }, [modules, realJudgeModules, tConfig]);
 
   // Apply last-used settings when the dialog opens for a run. Stored module/
   // model/effort are applied only while that module is still an offerable
@@ -201,8 +234,8 @@ export function AiReviewDialog({
   // stays in charge. (Render-time "prev prop" pattern, as in TranslateRunDialog.)
   const [prevRunId, setPrevRunId] = useState<string | undefined>(undefined);
   // Stashes a stored module/model/effort triple from the open transition below
-  // until `judgeModules` (async, [] on mount) has actually loaded — see the
-  // adjustment block right after this one.
+  // until `realJudgeModules` (async, [] on mount) has actually loaded — see
+  // the adjustment block right after this one.
   const [pendingStored, setPendingStored] = useState<{
     moduleId: string;
     model: string;
@@ -231,11 +264,14 @@ export function AiReviewDialog({
   }
 
   // Apply the stashed stored module choice once the async module list has
-  // loaded (judgeModules is [] on the mount-time open transition above — the
-  // dialog remounts per run, so that block always runs before modules arrive).
-  // Applied at most once per open; an unknown/no-longer-eligible stored module
-  // is dropped so the default chain below stays in charge.
-  if (pendingStored && judgeModules.length > 0) {
+  // loaded (realJudgeModules is [] on the mount-time open transition above —
+  // the dialog remounts per run, so that block always runs before modules
+  // arrive; gated on realJudgeModules rather than judgeModules since the
+  // latter always contains at least the synthetic Freeway entry, which would
+  // never let this wait for the real fetch). Applied at most once per open; an
+  // unknown/no-longer-eligible stored module is dropped so the default chain
+  // below stays in charge.
+  if (pendingStored && realJudgeModules.length > 0) {
     setPendingStored(null);
     if (judgeModules.some((m) => m.id === pendingStored.moduleId)) {
       setUserModuleId(pendingStored.moduleId);
@@ -328,7 +364,7 @@ export function AiReviewDialog({
     onOpenChange(false);
   };
 
-  const noJudgeModules = modules.length > 0 && judgeModules.length === 0;
+  const noJudgeModules = modules.length > 0 && realJudgeModules.length === 0;
 
   return (
     <Dialog open={open ?? run !== undefined} onOpenChange={onOpenChange}>
@@ -362,7 +398,20 @@ export function AiReviewDialog({
               reasoningEffortLabel={t('runs.aiReviewReasoningEffort')}
               modulePlaceholder={t('runs.aiReviewModulePlaceholder')}
               confidenceContext={confidenceContext}
+              hideModelFields={moduleId === FREEWAY_MODULE_ID}
             />
+
+            {/* Freeway picks its own model per batch — no model/effort route
+                (`/api/modules/freeway/models`) exists for the suppressed
+                selectors to call, so a one-line explanation replaces them. */}
+            {moduleId === FREEWAY_MODULE_ID && (
+              <p
+                className="text-xs text-muted-foreground"
+                data-testid="ai-review-freeway-model-hint"
+              >
+                {t('runs.aiReviewFreewayModelHint')}
+              </p>
+            )}
 
             <div className="space-y-1.5">
               <Label htmlFor="ai-review-response-language">

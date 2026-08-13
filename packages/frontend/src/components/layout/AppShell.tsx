@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { RestartBanners } from './RestartBanners.js';
 import { SlotRibbon } from './SlotRibbon.js';
@@ -47,8 +47,9 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { Toaster } from 'sonner';
 import { CopilotModelsProvider } from '../../hooks/use-copilot-models.js';
 import type { RoutingRule, RoutingRuleGroup } from '@zercade-dev/narn-shared';
-import { RunStatusCode } from '@zercade-dev/narn-shared';
+import { RunStatusCode, FREEWAY_MODULE_ID } from '@zercade-dev/narn-shared';
 import { RoutingRulesConfig, type RoutingBackend } from '../batch/RoutingRulesConfig.js';
+import type { RoutingModuleOption } from '../batch/BatchConfigEditor.js';
 import { isModuleActive } from '../batch/ModulesPanel.js';
 import { RunsTab } from '../tabs/RunsTab.js';
 import { MobileRunsList } from '../tabs/MobileRunsList.js';
@@ -143,7 +144,22 @@ export function RoutingTabContent({
   onSaved,
 }: Readonly<RoutingTabContentProps>) {
   const { t } = useTranslation('strings');
+  const { t: tConfig } = useTranslation('config');
   const availableModules = useModules();
+  // The routing rule/module picker offers a synthetic NARN Freeway target
+  // (M7-router special-cases FREEWAY_MODULE_ID so a matching rule always
+  // resolves regardless of registration — see M7-router.ts) IN ADDITION TO
+  // the real modules API list, appended here at THIS composition site only.
+  // `useModules()` itself stays untouched, so every other consumer of that
+  // hook (judge/glossary/category/orphans/source-review pickers, none of
+  // which are freeway-wired) keeps seeing exactly the real module list.
+  const routingModules: RoutingModuleOption[] = useMemo(
+    () => [
+      ...availableModules,
+      { id: FREEWAY_MODULE_ID, name: tConfig('routing.freewayLabel'), instanceable: false },
+    ],
+    [availableModules, tConfig],
+  );
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const runs = useRunStore((s) => s.runs);
   const startPolling = useRunStore((s) => s.startPolling);
@@ -286,7 +302,7 @@ export function RoutingTabContent({
           rules={effectiveRules}
           routingRuleGroups={effectiveGroups}
           activeRoutingRuleGroupId={effectiveActiveGroupId}
-          modules={availableModules}
+          modules={routingModules}
           availableLanguages={activeLanguages}
           availableCategories={availableCategories}
           translationsInProgress={translationsInProgress}

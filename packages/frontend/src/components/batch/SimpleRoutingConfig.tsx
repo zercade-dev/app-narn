@@ -10,7 +10,8 @@
  * asserts "the routing editor is on screen" is mode-agnostic.
  */
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Route as RouteIcon } from 'lucide-react';
+import { FREEWAY_MODULE_ID } from '@zercade-dev/narn-shared';
 import type { AutoSaveStatus as AutoSaveStatusValue } from '../../hooks/use-auto-save.js';
 import { AutoSaveStatus } from '../config/AutoSaveStatus.js';
 import { Button } from '../ui/button.js';
@@ -158,6 +159,9 @@ export function SimpleRoutingConfig({
                       value={m.id}
                       className={inactive ? 'text-muted-foreground' : undefined}
                     >
+                      {m.id === FREEWAY_MODULE_ID && (
+                        <RouteIcon className="inline size-3 mr-1 align-[-1px]" aria-hidden="true" />
+                      )}
                       {m.name}
                       {inactive ? t('routing.moduleDisabledSuffix') : ''}
                     </SelectItem>

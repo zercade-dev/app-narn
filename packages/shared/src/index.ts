@@ -57,7 +57,12 @@ export type { OrphanEntry } from './types/orphan.js';
 export type { ProjectRole, ProjectAccess, Capability } from './types/access.js';
 export { can } from './types/access.js';
 export type { Language } from './types/language.js';
-export { LANGUAGE_REGISTRY, PSEUDO_LANGUAGE_CODE, PSEUDO_MODULE_ID } from './types/language.js';
+export {
+  LANGUAGE_REGISTRY,
+  PSEUDO_LANGUAGE_CODE,
+  PSEUDO_MODULE_ID,
+  FREEWAY_MODULE_ID,
+} from './types/language.js';
 export type {
   TranslationModule,
   TranslationJob,
@@ -358,3 +363,17 @@ export {
   recommendedModelsFor,
 } from './recommended-models.js';
 export type { RecommendedProvider } from './recommended-models.js';
+
+export type {
+  FreewayWindowKind,
+  FreeTierLimit,
+  FreeTierModel,
+  FreeTierProvider,
+  FreeTierSnapshot,
+} from './freeway/free-tier-snapshot.js';
+export {
+  getFreeTierSnapshot,
+  freeTierProvider,
+  freeTierModel,
+} from './freeway/free-tier-snapshot.js';
+export { windowStart, nextReset } from './freeway/windows.js';

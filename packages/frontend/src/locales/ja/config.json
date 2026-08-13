@@ -183,7 +183,10 @@
     "groupSwitchInProgress": "翻訳の実行中は、ルールグループを切り替えられません。",
     "untitledGroup": "名称未設定のグループ",
     "via": "使用：",
-    "routesTo": "振り分け先"
+    "routesTo": "振り分け先",
+    "freewayLabel": "NARN Freeway",
+    "freewayOnboardButton": "Let NARN Freeway handle everything",
+    "freewayOnboardDisabledHint": "Available once the current run finishes."
   },
   "health": {
     "noData": "ヘルスデータはまだありません",
@@ -192,6 +195,41 @@
     "rateLimitRetries": "429の再試行：{{count}}",
     "lqaRetries": "LQAの再試行：{{count}}",
     "sparklineTitle": "過去10分間の429応答"
+  },
+  "freeway": {
+    "title": "NARN Freeway",
+    "description": "A shared pool of free-tier AI models NARN can route work to automatically — no credit card required. Add a free key below, then point a routing rule or a background engine at NARN Freeway to use it.",
+    "refresh": "Refresh",
+    "loading": "Loading NARN Freeway status…",
+    "loadFailed": "Failed to load NARN Freeway status: {{message}}",
+    "generatedAtLabel": "Updated {{time}}",
+    "sourcesTitle": "Free sources",
+    "keyPresent": "Key added",
+    "keyMissing": "No key yet",
+    "addButton": "Add",
+    "adding": "Adding…",
+    "addFailed": "Failed to add {{provider}}: {{message}}",
+    "presetsUnavailable": "One-click setup for free providers isn't available on this deployment.",
+    "enableModuleHint": "Key is set, but the module is turned off.",
+    "enableModuleButton": "Enable it",
+    "disabledReasonChip": "Disabled: {{reason}}",
+    "statusTitle": "Status",
+    "empty": "No free-tier sources configured yet.",
+    "colModel": "Model",
+    "colState": "State",
+    "colRemaining": "Remaining",
+    "colNextReset": "Next reset",
+    "colPassRate": "Pass rate",
+    "remainingRequests_other": "{{count}} requests",
+    "remainingChars": "{{count}} chars",
+    "passRateEntry": "{{language}}: {{rate}}%",
+    "state": {
+      "ready": "Ready",
+      "cooling": "Cooling down",
+      "exhausted": "Exhausted for today",
+      "disabled": "Module disabled",
+      "uncredentialed": "No key"
+    }
   },
   "overflowRatioLabel": "オーバーフロー比率",
   "overflowRatioDescription": "新しくインポートしたエントリに適用される既定のオーバーフロー比率です。LQAゲートでテキストのオーバーフローを検出するために使用します。既定値：1.75。",
