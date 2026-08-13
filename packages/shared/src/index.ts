@@ -375,5 +375,6 @@ export {
   getFreeTierSnapshot,
   freeTierProvider,
   freeTierModel,
+  hasSharedPool,
 } from './freeway/free-tier-snapshot.js';
 export { windowStart, nextReset } from './freeway/windows.js';

@@ -7,7 +7,7 @@
  * remaining groups with fresh BucketViews.
  */
 import type { BucketView, JobGroup, RunPlan } from './types.js';
-import { selectBucket } from './selector.js';
+import { bucketResumeAt, selectBucket } from './selector.js';
 
 export interface PlanOptions {
   now: number;
@@ -87,14 +87,14 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
       }
       continue;
     }
-    const everCandidates = buckets.filter((b) => everServable(b, group));
+    // Estimated against the WORKING copies, so headroom this plan already
+    // committed to earlier groups isn't offered to this one as stock.
+    const everCandidates = working.filter((b) => everServable(b, group));
     if (everCandidates.length === 0) {
       plan.blocked.push(group);
       continue;
     }
-    const resumeAt = Math.min(
-      ...everCandidates.map((b) => Math.max(b.nextResetAt, b.cooldownUntil ?? 0)),
-    );
+    const resumeAt = Math.min(...everCandidates.map((b) => bucketResumeAt(b, group)));
     plan.deferred.push({ group, resumeAt });
   }
   return plan;

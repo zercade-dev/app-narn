@@ -9,10 +9,15 @@ import type { FreeTierModel, FreeTierProvider, FreewayWindowKind } from '@zercad
 import {
   freeTierProvider,
   getFreeTierSnapshot,
+  hasSharedPool,
   nextReset,
   windowStart,
 } from '@zercade-dev/narn-shared';
-import type { FreewayLedgerStore, FreewayWindowRef } from '../../storage/types.js';
+import type {
+  FreewayLedgerStore,
+  FreewayWindowRef,
+  FreewayWindowUsage,
+} from '../../storage/types.js';
 import { getFreewayLedgerStore } from '../../storage/registry.js';
 import { isCloudMode } from '../../identity/registry.js';
 import { moduleRegistry } from '../M6-module-registry.js';
@@ -98,25 +103,35 @@ function resolveSnapshotBucket(bucketKey: string): ResolvedSnapshotBucket | unde
   return { provider, model, dayWindow };
 }
 
+/** One model's day-scale window and the usage already read for it. */
+interface ModelUsage {
+  model: FreeTierModel;
+  dayWindow: DayWindow;
+  bucketKey: string;
+  usage: FreewayWindowUsage;
+}
+
 /**
- * Day headroom of a provider's account-wide pool — its `sharedLimits` rpd minus
- * the requests EVERY one of its models spent in the same day window (OpenRouter
- * counts all `:free` models against one allowance). Undefined for providers
- * without such a pool, whose models are limited individually only.
+ * Day headroom of a provider's account-wide pool — its shared `rpd` limit minus
+ * the requests every RPD-GOVERNED model spent in that window (OpenRouter counts
+ * all `:free` models against one allowance). Pure: it folds the per-model usage
+ * the caller has already read, so a pooled provider's cells are queried once,
+ * not once for the pool sum and again for each model's own headroom. Undefined
+ * for providers without a shared day budget, whose models are limited
+ * individually only.
  */
-async function sharedPoolRemaining(
+function sharedPoolRemaining(
   provider: FreeTierProvider,
-  now: number,
-  ledger: FreewayLedgerStore,
-): Promise<number | undefined> {
+  models: readonly ModelUsage[],
+): number | undefined {
+  if (!hasSharedPool(provider)) return undefined;
   const sharedRpd = provider.sharedLimits?.find((l) => l.window === 'rpd')?.limit;
   if (sharedRpd === undefined) return undefined;
-  const start = windowStart('rpd', now, provider.resetTimeZone);
   let spent = 0;
-  for (const model of provider.models) {
-    const key = freewayBucketKey(provider.moduleId, model.id);
-    const [usage] = await ledger.usage(key, [{ kind: 'rpd', start }]);
-    spent += usage.requests;
+  for (const entry of models) {
+    // A char-governed model in a pooled provider has no rpd cell to fold in.
+    if (entry.dayWindow.kind !== 'rpd') continue;
+    spent += entry.usage.requests;
   }
   return Math.max(0, sharedRpd - spent);
 }
@@ -136,14 +151,20 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
     const status = moduleStatus(provider.moduleId);
     if (!status || !status.credentialed || !status.enabled) continue;
 
-    const poolRemainingRequests = await sharedPoolRemaining(provider, now, ledger);
-
+    // ONE usage read per model, shared by that model's own headroom and by the
+    // provider's pool sum.
+    const models: ModelUsage[] = [];
     for (const model of provider.models) {
       const dayWindow = resolveDayWindow(model);
       if (!dayWindow) continue;
       const bucketKey = freewayBucketKey(provider.moduleId, model.id);
       const start = windowStart(dayWindow.kind, now, provider.resetTimeZone);
       const [usage] = await ledger.usage(bucketKey, [{ kind: dayWindow.kind, start }]);
+      models.push({ model, dayWindow, bucketKey, usage });
+    }
+    const poolRemainingRequests = sharedPoolRemaining(provider, models);
+
+    for (const { model, dayWindow, bucketKey, usage } of models) {
       const remainingRequests =
         dayWindow.kind === 'monthly_chars'
           ? Number.MAX_SAFE_INTEGER
@@ -231,7 +252,7 @@ export async function coolBucket(
       : now;
   }
   await ledger.setCooldown(bucketKey, until, flap ? { flap: true } : undefined);
-  if (scope !== 'pool' || !resolved?.provider.sharedLimits) return;
+  if (scope !== 'pool' || !resolved || !hasSharedPool(resolved.provider)) return;
   const siblingUntil = Math.min(until, now + POOL_SIBLING_COOLDOWN_CAP_MS);
   for (const model of resolved.provider.models) {
     const siblingKey = freewayBucketKey(resolved.provider.moduleId, model.id);

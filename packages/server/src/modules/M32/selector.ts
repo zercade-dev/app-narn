@@ -1,9 +1,11 @@
 /**
  * Chooses the concrete bucket for one job group. Filtering enforces the
- * quality floor and live quota state; ranking minimizes expected requests
- * per job (the scarce currency), tie-breaking toward buckets whose quota
- * expires soonest so daily allowances never rot unused; a reserve keeps
- * top-tier headroom for escalation retries.
+ * quality floor and live quota state. Ranking is reservoir-last FIRST — a
+ * monthly character budget (classical MT) sorts behind every daily-request
+ * bucket, because only the daily allowance perishes — and within each class it
+ * minimizes expected requests per job (the scarce currency), tie-breaking
+ * toward buckets whose quota expires soonest so daily allowances never rot
+ * unused; a reserve keeps top-tier headroom for escalation retries.
  */
 import type { BucketView, JobGroup } from './types.js';
 import { requestCost } from './scoring.js';
@@ -33,15 +35,35 @@ export function effectiveRemainingRequests(
   return Math.min(bucket.remainingRequests, bucket.poolRemainingRequests ?? Infinity);
 }
 
+/**
+ * Whether a bucket has the STOCK to serve this group, ignoring transient
+ * cooldown — i.e. everything {@link isEligible} checks except the clock. A
+ * bucket that has stock and is merely cooling becomes usable when the cooldown
+ * ends, NOT at its window reset, which is what the deferral estimates need to
+ * distinguish (a 70-second pool cool must not park a run until tomorrow).
+ */
+export function hasStock(bucket: BucketView, group: JobGroup): boolean {
+  if (bucket.remainingChars !== undefined && bucket.remainingChars < groupChars(group)) {
+    return false;
+  }
+  return effectiveRemainingRequests(bucket) >= 1;
+}
+
+/**
+ * Earliest instant this bucket could serve the group: when it is only cooling,
+ * that is the cooldown's end; when its stock is gone, the window reset it
+ * refills at (a cooldown outlasting the reset still wins).
+ */
+export function bucketResumeAt(bucket: BucketView, group: JobGroup): number {
+  return Math.max(bucket.cooldownUntil ?? 0, hasStock(bucket, group) ? 0 : bucket.nextResetAt);
+}
+
 export function isEligible(bucket: BucketView, group: JobGroup, now: number): boolean {
   if (bucket.disabledReason !== undefined) return false;
   if (bucket.cooldownUntil !== undefined && bucket.cooldownUntil > now) return false;
   if (bucket.qualityTier < group.band) return false;
   if (group.band >= 3 && bucket.weakLanguages?.includes(group.targetLanguage)) return false;
-  if (bucket.remainingChars !== undefined) {
-    if (bucket.remainingChars < groupChars(group)) return false;
-  }
-  return effectiveRemainingRequests(bucket) >= 1;
+  return hasStock(bucket, group);
 }
 
 /** A monthly character budget is a reservoir (1), a daily request window is not (0). */
@@ -96,6 +118,13 @@ export function selectBucket(
   return toSelection(winner, group);
 }
 
+/**
+ * The best strictly-higher-tier bucket to retry a gate-failed group on. The
+ * caller drives it through `retryWithFeedback`, so targets are assumed to
+ * implement feedback retry. Reservoir-last ranking applies here too: a
+ * char-window MT bucket can only become `better[0]` when no request-window
+ * candidate of a higher tier exists at all.
+ */
 export function selectEscalation(
   failedBucketKey: string,
   group: JobGroup,

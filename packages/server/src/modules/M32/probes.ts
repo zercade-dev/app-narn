@@ -9,7 +9,7 @@
  * hook) so a slow/unreachable provider never stalls run start.
  */
 import type { FreeTierProvider, FreewayWindowKind } from '@zercade-dev/narn-shared';
-import { getFreeTierSnapshot, windowStart } from '@zercade-dev/narn-shared';
+import { getFreeTierSnapshot, hasSharedPool, windowStart } from '@zercade-dev/narn-shared';
 import type { FreewayLedgerStore } from '../../storage/types.js';
 import { getFreewayLedgerStore } from '../../storage/registry.js';
 import { freewayBucketKey } from './bucket-source.js';
@@ -172,7 +172,7 @@ async function probeOpenRouter(
   if (requests === undefined) return;
   const kind: FreewayWindowKind = 'rpd';
   const start = windowStart(kind, now, provider.resetTimeZone);
-  const pooled = provider.sharedLimits?.some((l) => l.window === kind) === true;
+  const pooled = hasSharedPool(provider);
   // Pooled: the total lands on the canonical bucket and every other sibling is
   // zeroed. Unpooled: each model's own counter is independent, so all get it.
   const writes = rpdModels.map((model, index) => ({

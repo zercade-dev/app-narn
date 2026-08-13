@@ -72,16 +72,28 @@ export function retryAfterMsOf(err: unknown): number | undefined {
 export const PER_MINUTE_RATE_LIMIT_COOLDOWN_MS = 70_000;
 
 /**
- * Retry-After when the provider sent one; a short floor for per-minute pool
- * limits (OpenRouter names them "...-per-min") that arrive without one —
- * otherwise a minute-scale limit would cool a bucket until the daily reset.
- * Undefined for any other rate limit, which still falls back to that reset.
+ * A rate limit the provider named as per-MINUTE ("...-per-min",
+ * "requests per minute"). Word-bounded on BOTH sides so a camelCase quota name
+ * that merely contains the letters — `RequestsPerMinutePerProject` — is not
+ * read as a minute-scale limit.
+ */
+const PER_MINUTE_LIMIT_RE = /\bper[-_\s]?min(ute)?s?\b/i;
+
+/**
+ * How long a rate-limited Freeway bucket cools. A limit the provider named as
+ * per-minute gets AT LEAST the 70s floor: `Retry-After` is clamped to 60s
+ * (below the floor), so honoring a short one would put the bucket back before
+ * the minute window has certainly rolled over. Any other rate limit uses the
+ * provider's own `Retry-After`, or undefined — which falls back to the
+ * bucket's next day-scale reset.
  */
 export function rateLimitCooldownMs(err: unknown): number | undefined {
   const retryAfter = retryAfterMsOf(err);
-  if (retryAfter !== undefined) return retryAfter;
   const message = err instanceof Error ? err.message : String(err);
-  return /\bper[-_\s]?min/i.test(message) ? PER_MINUTE_RATE_LIMIT_COOLDOWN_MS : undefined;
+  if (PER_MINUTE_LIMIT_RE.test(message)) {
+    return Math.max(retryAfter ?? 0, PER_MINUTE_RATE_LIMIT_COOLDOWN_MS);
+  }
+  return retryAfter;
 }
 
 /**
