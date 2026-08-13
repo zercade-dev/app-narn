@@ -38,7 +38,6 @@
   "instanceKeyFallbackHint": "Optional — leave blank to use the base module's key instead of this instance-specific one.",
   "noKeys": "No credentials stored yet.",
   "addKey": "Add credential",
-  "remove": "Remove",
   "delete": "Delete",
   "discard": "Discard",
   "undoRemove": "Undo",

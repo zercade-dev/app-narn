@@ -40,7 +40,6 @@
   "instanceKeyFallbackHint": "Optional — leer lassen, um den Schlüssel des Basismoduls statt des instanzspezifischen Schlüssels zu verwenden.",
   "noKeys": "Noch keine Zugangsdaten gespeichert.",
   "addKey": "Zugangsdaten hinzufügen",
-  "remove": "Entfernen",
   "delete": "Löschen",
   "discard": "Verwerfen",
   "undoRemove": "Rückgängig",

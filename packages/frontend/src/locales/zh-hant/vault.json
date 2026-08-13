@@ -38,7 +38,6 @@
   "instanceKeyFallbackHint": "選填——留空即改用基礎模組的金鑰，而非這個實例專屬的金鑰。",
   "noKeys": "尚未儲存任何憑證。",
   "addKey": "新增憑證",
-  "remove": "移除",
   "delete": "刪除",
   "discard": "捨棄",
   "undoRemove": "復原",

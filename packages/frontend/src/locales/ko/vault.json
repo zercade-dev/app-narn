@@ -38,7 +38,6 @@
   "instanceKeyFallbackHint": "선택 사항이에요. 비워 두면 이 인스턴스 전용 키 대신 기본 모듈의 키를 사용해요.",
   "noKeys": "아직 저장된 자격 증명이 없어요.",
   "addKey": "자격 증명 추가",
-  "remove": "제거",
   "delete": "삭제",
   "discard": "변경 취소",
   "undoRemove": "되돌리기",
