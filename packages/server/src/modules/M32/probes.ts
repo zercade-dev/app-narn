@@ -132,8 +132,17 @@ async function probeDeepL(
  * canonical bucket (the provider's first `rpd`-governed model) rather than
  * written to each sibling: pool headroom is derived by SUMMING the provider's
  * buckets, so fanning the same total out would count it once per model and
- * drain the pool N times over. The siblings' own per-model counters stay
- * optimistic, which is harmless — the pool clamp is what governs them.
+ * drain the pool N times over.
+ *
+ * The siblings' own cells are RESET to zero in the same pass, because the
+ * account total already includes every request NARN spent on them — left
+ * standing they would be counted twice by that sum. The invariant this
+ * establishes: after a probe the canonical cell carries the authoritative
+ * account total, every sibling cell is zero, and later per-sibling dispatches
+ * accumulate on top of that total, so the pool sum stays exact. (It also
+ * clears a stale total from a bucket that used to be canonical, should the
+ * snapshot's model order ever change.)
+ *
  * A provider without a shared pool has genuinely independent per-model
  * counters, so it keeps the fan-out.
  *
@@ -164,14 +173,15 @@ async function probeOpenRouter(
   const kind: FreewayWindowKind = 'rpd';
   const start = windowStart(kind, now, provider.resetTimeZone);
   const pooled = provider.sharedLimits?.some((l) => l.window === kind) === true;
-  const targets = pooled ? rpdModels.slice(0, 1) : rpdModels;
+  // Pooled: the total lands on the canonical bucket and every other sibling is
+  // zeroed. Unpooled: each model's own counter is independent, so all get it.
+  const writes = rpdModels.map((model, index) => ({
+    bucketKey: freewayBucketKey(provider.moduleId, model.id),
+    requests: !pooled || index === 0 ? requests : 0,
+  }));
   await Promise.all(
-    targets.map((model) =>
-      ledger.syncAuthoritativeUsage(
-        freewayBucketKey(provider.moduleId, model.id),
-        { kind, start },
-        { requests },
-      ),
+    writes.map((write) =>
+      ledger.syncAuthoritativeUsage(write.bucketKey, { kind, start }, { requests: write.requests }),
     ),
   );
 }
