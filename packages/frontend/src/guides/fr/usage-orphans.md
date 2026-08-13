@@ -12,7 +12,7 @@ L’onglet **Orphelins** liste les entrées qui ne figurent plus dans le CSV imp
 
 ## Flux de travail
 
-1. Réimportez votre CSV source depuis l’onglet **Configuration**.
+1. Réimportez votre CSV source depuis l’onglet **Données**.
 2. Ouvrez **Orphelins** et vérifiez ce qui a disparu.
 3. **Réaffectez** toute entrée dont l’id ou le texte source a changé mais dont les traductions restent valables.
 4. **Supprimez** les entrées réellement disparues.
