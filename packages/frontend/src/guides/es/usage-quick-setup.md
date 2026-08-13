@@ -2,7 +2,7 @@
 
 ## Descripción general
 
-El recorrido completo para un proyecto nuevo: habilita proveedores, importa tus entradas, configura glosarios y enrutamiento, traduce y revisa. Los pasos marcados *(Opcional)* mejoran la calidad pero no son necesarios para una primera traducción — sáltatelos en una primera pasada y vuelve a ellos más tarde.
+El recorrido completo para un proyecto nuevo: habilita proveedores, importa tus entradas, configura glosarios y enrutamiento, traduce y revisa. Los pasos marcados *(Optional)* mejoran la calidad pero no son necesarios para una primera traducción — sáltatelos en una primera pasada y vuelve a ellos más tarde.
 
 ## 1. Habilita proveedores y guarda las credenciales
 
@@ -14,11 +14,11 @@ El recorrido completo para un proyecto nuevo: habilita proveedores, importa tus 
 
 Crea un proyecto, define su **idioma de origen**, y luego usa **Importar CSV** en la pestaña **Datos** para cargar tus entradas de origen (y cualquier traducción que ya traiga el archivo).
 
-## 3. *(Opcional)* Revisa primero tu texto de origen
+## 3. *(Optional)* Revisa primero tu texto de origen
 
 Ejecuta **Revisión IA del original** sobre el idioma de origen antes de traducir — corregir erratas y frases poco claras aquí beneficia a cada traducción que se haga después. Si una corrección cambia una entrada que ya tenía traducciones, las traducciones antiguas van a parar a la pestaña **Huérfanas** — **reasígnalas**, con retraducción opcional.
 
-## 4. *(Opcional)* Habilita glosarios
+## 4. *(Optional)* Habilita glosarios
 
 En la pestaña **Glosario**, habilita los glosarios que apliquen a tu proyecto. La aplicación automática busca coincidencias de términos como **palabras completas, sin distinguir mayúsculas de minúsculas** — las formas flexionadas (plurales, conjugaciones) no se detectan. ¿Traduces con **DeepL**? Envía los glosarios con **Enviar a DeepL** (arriba a la derecha), y vuelve a enviarlos después de editarlos.
 
@@ -26,11 +26,11 @@ En la pestaña **Glosario**, habilita los glosarios que apliquen a tu proyecto. 
 
 Abre la pestaña **Enrutamiento** y elige tu proveedor en el selector con el que se abre — eso envía cada entrada del proyecto a ese proveedor, que es todo lo que necesita una configuración de un solo proveedor. ¿Quieres proveedores distintos por idioma, categoría o longitud de entrada? Cambia a **Avanzado** y añade **reglas de enrutamiento** ahí. Tu elección se guarda sola en ambos casos. Este paso es obligatorio: una entrada sin ninguna regla que coincida falla la traducción con un error de *"no route"*.
 
-## 6. *(Opcional)* Construye glosarios a partir de tu propio contenido
+## 6. *(Optional)* Construye glosarios a partir de tu propio contenido
 
 Haz crecer tus glosarios antes de una traducción masiva: añade términos a mano, ejecuta **Generar glosarios** sobre todo el origen o — más dirigido — selecciona buenas entradas candidatas en **Traducciones** y usa **Generar glosario desde la selección** (incluyendo las traducciones existentes). Usa aquí un modelo capaz; la calidad del glosario se multiplica en todo lo que se traduzca después.
 
-## 7. *(Opcional)* Itera la calidad primero en Comparar
+## 7. *(Optional)* Itera la calidad primero en Comparar
 
 Antes de una ejecución de traducción completa, usa la pestaña **Comparar** para afinar un idioma que puedas juzgar tú mismo:
 

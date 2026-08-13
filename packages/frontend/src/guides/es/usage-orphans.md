@@ -12,7 +12,7 @@ La pestaña **Huérfanas** lista las entradas que ya no están en el CSV importa
 
 ## Flujo de trabajo
 
-1. Vuelve a importar tu CSV de origen desde la pestaña **Configuración**.
+1. Vuelve a importar tu CSV de origen desde la pestaña **Datos**.
 2. Abre **Huérfanas** y revisa qué se quedó fuera.
 3. **Reasigna** cualquier entrada cuyo id o texto de origen cambió pero cuyas traducciones siguen siendo válidas.
 4. **Elimina** las entradas que realmente ya no existen.

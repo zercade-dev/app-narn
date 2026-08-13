@@ -2,7 +2,7 @@
 
 ## Aperçu
 
-Le parcours complet pour un nouveau projet : activer des fournisseurs, importer vos entrées, configurer glossaires et routage, traduire, et réviser. Les étapes marquées *(Facultatif)* améliorent la qualité mais ne sont pas nécessaires pour une première traduction — ignorez-les lors d’un premier passage et revenez-y plus tard.
+Le parcours complet pour un nouveau projet : activer des fournisseurs, importer vos entrées, configurer glossaires et routage, traduire, et réviser. Les étapes marquées *(Optional)* améliorent la qualité mais ne sont pas nécessaires pour une première traduction — ignorez-les lors d’un premier passage et revenez-y plus tard.
 
 ## 1. Activer des fournisseurs et stocker les identifiants
 
@@ -14,11 +14,11 @@ Le parcours complet pour un nouveau projet : activer des fournisseurs, importer
 
 Créez un projet, définissez sa **langue source**, puis utilisez **Importer CSV** dans l’onglet **Données** pour charger vos entrées source (et les traductions déjà présentes dans le fichier, le cas échéant).
 
-## 3. *(Facultatif)* Réviser d’abord votre texte source
+## 3. *(Optional)* Réviser d’abord votre texte source
 
 Lancez une **révision IA de la source** sur la langue source avant de traduire — corriger fautes de frappe et formulations peu claires ici profite à chaque traduction faite ensuite. Si une correction modifie une entrée qui avait déjà des traductions, les anciennes traductions atterrissent dans l’onglet **Orphelins** — **réaffectez**-les, avec une retraduction optionnelle.
 
-## 4. *(Facultatif)* Activer des glossaires
+## 4. *(Optional)* Activer des glossaires
 
 Dans l’onglet **Glossaire**, activez les glossaires qui s’appliquent à votre projet. L’application automatique fait correspondre les termes en **mots entiers, sans tenir compte de la casse** — les formes fléchies (pluriels, conjugaisons) ne seront pas détectées. Vous traduisez avec **DeepL** ? Envoyez-lui les glossaires avec **Envoyer à DeepL** (en haut à droite), et renvoyez-les après modification.
 
@@ -26,11 +26,11 @@ Dans l’onglet **Glossaire**, activez les glossaires qui s’appliquent à votr
 
 Ouvrez l’onglet **Routage** et choisissez votre fournisseur dans le sélecteur qui s’ouvre par défaut — cela envoie chaque entrée du projet à ce fournisseur, ce qui suffit pour une configuration à un seul fournisseur. Vous voulez des fournisseurs différents par langue, catégorie ou longueur d’entrée ? Passez en **Avancé** et ajoutez-y plutôt des **règles de routage**. Votre choix est enregistré dans les deux cas. Cette étape est obligatoire : une entrée sans règle correspondante échoue à la traduction avec une erreur *"no route"*.
 
-## 6. *(Facultatif)* Construire des glossaires à partir de votre propre contenu
+## 6. *(Optional)* Construire des glossaires à partir de votre propre contenu
 
 Enrichissez vos glossaires avant une traduction en masse : ajoutez des termes manuellement, lancez **Générer des glossaires** sur toute la source, ou — de façon plus ciblée — sélectionnez de bonnes entrées candidates dans **Traductions** et utilisez **Générer un glossaire à partir de la sélection** (en incluant les traductions existantes). Utilisez ici un modèle performant ; la qualité du glossaire se répercute sur tout ce qui est traduit ensuite.
 
-## 7. *(Facultatif)* Affiner la qualité d’abord dans Comparer
+## 7. *(Optional)* Affiner la qualité d’abord dans Comparer
 
 Avant une exécution de traduction complète, utilisez l’onglet **Comparer** pour régler une langue que vous pouvez juger vous-même :
 
