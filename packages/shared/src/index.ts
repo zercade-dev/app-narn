@@ -275,6 +275,7 @@ export {
   resolveDeepSeekModels,
   resolveGenericModels,
   resolveOpenRouterModels,
+  resolveGroqModels,
   inspectOllamaFootprint,
   isOllamaBaseURL,
   unloadOllamaModel,

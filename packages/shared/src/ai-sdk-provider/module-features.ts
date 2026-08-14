@@ -21,6 +21,7 @@ import {
   resolveGenericModels,
   resolveAnthropicCompatibleModels,
   resolveOpenRouterModels,
+  resolveGroqModels,
 } from './reasoning-resolvers.js';
 // Shared, already-top-level helpers that stay owned by core.ts (translate path
 // also uses several of them). Importing them here forms a module cycle with
@@ -415,6 +416,8 @@ export function createFeatureMethods(
         return resolveAnthropicCompatibleModels(opts);
       case 'openrouter':
         return resolveOpenRouterModels({ apiKey: opts.apiKey });
+      case 'groq':
+        return resolveGroqModels({ apiKey: opts.apiKey });
       default:
         return [];
     }
