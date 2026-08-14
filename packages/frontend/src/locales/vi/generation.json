@@ -1,0 +1,17 @@
+{
+  "contextLabel": "Kèm thông tin của mục",
+  "contextHint": "Thêm chi tiết của mục vào lời nhắc để đề xuất tốt hơn.",
+  "fieldContext": "Ghi chú bối cảnh",
+  "fieldSources": "Nhãn nguồn",
+  "fieldCategories": "Danh mục đã gán",
+  "languagesLabel": "Gửi kèm các bản dịch sẵn có làm bối cảnh",
+  "languagesHint": "Gửi kèm bản dịch đã hoàn tất của từng mục ở những ngôn ngữ đã chọn, làm bối cảnh bổ sung.",
+  "selectAllLanguages": "Chọn tất cả",
+  "deselectAllLanguages": "Bỏ chọn tất cả",
+  "skipCategoriesLabel": "Loại trừ danh mục",
+  "skipCategoriesHint": "Những mục mang bất kỳ danh mục nào trong số này sẽ không được đưa vào yêu cầu.",
+  "skipCategoriesPlaceholder": "Chưa chọn gì",
+  "ignoreGlossariesLabel": "Bỏ qua bảng thuật ngữ đã có",
+  "ignoreGlossariesHint": "Thuật ngữ của những bảng đã chọn được coi là đã biết: khi sinh bảng thuật ngữ, chúng được gửi kèm như thuật ngữ đã biết để mô hình không đề xuất lại; khi sinh danh mục, những mục khớp các thuật ngữ đó sẽ không được đưa vào yêu cầu.",
+  "ignoreGlossariesPlaceholder": "Chưa chọn gì"
+}

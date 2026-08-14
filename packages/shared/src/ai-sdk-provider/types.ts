@@ -6,6 +6,7 @@ export type ProviderType =
   | 'openai'
   | 'anthropic'
   | 'openrouter'
+  | 'groq'
   | 'openai-compatible'
   | 'anthropic-compatible';
 

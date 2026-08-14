@@ -1,0 +1,17 @@
+{
+  "contextLabel": "包含条目上下文",
+  "contextHint": "在提示词中加入条目的额外信息，以提升建议质量。",
+  "fieldContext": "上下文备注",
+  "fieldSources": "来源标签",
+  "fieldCategories": "已分配的类别",
+  "languagesLabel": "把已有译文作为上下文发送",
+  "languagesHint": "把每个条目在所选语言中已完成的译文作为额外上下文一并发送。",
+  "selectAllLanguages": "全选",
+  "deselectAllLanguages": "取消全选",
+  "skipCategoriesLabel": "跳过的类别",
+  "skipCategoriesHint": "带有其中任一类别的条目会被完全排除在请求之外。",
+  "skipCategoriesPlaceholder": "未选择任何项",
+  "ignoreGlossariesLabel": "忽略已有术语表",
+  "ignoreGlossariesHint": "所选术语表中的术语会被视为已知术语：在生成术语表时，它们会作为已知内容发送，使模型不再重复建议；在生成类别时，匹配这些术语的条目会被完全排除在请求之外。",
+  "ignoreGlossariesPlaceholder": "未选择任何项"
+}

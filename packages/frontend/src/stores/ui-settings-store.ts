@@ -16,7 +16,22 @@ import {
  * (components/settings/SettingsView.tsx); `satisfies` and the exhaustive
  * `Record` make tsc enforce both.
  */
-export type UiLanguage = 'en' | 'es' | 'fr' | 'ru';
+export type UiLanguage =
+  | 'en'
+  | 'de'
+  | 'es'
+  | 'fr'
+  | 'id'
+  | 'it'
+  | 'ja'
+  | 'ko'
+  | 'pt-br'
+  | 'ru'
+  | 'th'
+  | 'tr'
+  | 'vi'
+  | 'zh-hans'
+  | 'zh-hant';
 export type ConsoleFilter = 'all' | 'info' | 'warn' | 'error' | 'debug' | 'notifications';
 
 interface UiSettingsState {

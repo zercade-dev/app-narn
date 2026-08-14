@@ -1,0 +1,18 @@
+{
+  "countdown": {
+    "message": "⚠️ Dịch vụ sẽ khởi động lại trong giây lát để áp dụng bản cập nhật — hãy lưu công việc của bạn ngay. Những lượt dịch đang chạy sẽ bị gián đoạn; các mục đã xong vẫn được giữ, nên hãy chạy lại phần chưa xong sau đó.",
+    "collapse": "Thu gọn",
+    "expand": "Mở rộng"
+  },
+  "restarted": {
+    "message": "Dịch vụ vừa được khởi động lại để áp dụng bản cập nhật; một số hoạt động có thể đã bị gián đoạn — hãy chạy lại những gì trông chưa hoàn tất.",
+    "dismiss": "Đóng"
+  },
+  "cancelled": {
+    "message": "Lượt khởi động lại dịch vụ theo lịch đã bị hủy — bạn có thể làm việc bình thường.",
+    "dismiss": "Đóng"
+  },
+  "slot": {
+    "aria": "Bạn đang dùng môi trường {{label}}"
+  }
+}

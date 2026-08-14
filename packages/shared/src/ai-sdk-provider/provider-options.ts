@@ -60,6 +60,13 @@ export function buildProviderOptions(
       // which is Ollama/vLLM-specific.
       return undefined;
     }
+    if (provider === 'groq') {
+      // Same reasoning as openrouter immediately above: Groq's gpt-oss
+      // reasoning models document the same 'none' rejection risk, so omission
+      // is the safe universal "off" here too. Deliberately NOT the
+      // openai-compatible 'none' path below, which is Ollama/vLLM-specific.
+      return undefined;
+    }
     if (provider === 'openai-compatible') {
       // Ollama/vLLM turn thinking off via reasoning_effort:"none" on the
       // /v1/chat/completions endpoint (verified on Ollama 0.24). The option is
@@ -135,12 +142,12 @@ export function buildProviderOptions(
     };
   }
 
-  if (provider === 'openai-compatible' || provider === 'openrouter') {
+  if (provider === 'openai-compatible' || provider === 'openrouter' || provider === 'groq') {
     // The @ai-sdk/openai-compatible provider reads reasoning_effort from the
     // `openaiCompatible` provider-options key (NOT `openai`), then emits it as
-    // `reasoning_effort` in the request body. openrouter shares this graded
-    // branch (OpenRouter accepts the OpenAI-compat `reasoning_effort` alias)
-    // but NOT the `disabled` branch above — for openrouter, "off" is omission.
+    // `reasoning_effort` in the request body. openrouter and groq share this
+    // graded branch (both accept the OpenAI-compat `reasoning_effort` alias)
+    // but NOT the `disabled` branch above — for them, "off" is omission.
     return { openaiCompatible: { reasoningEffort } };
   }
 

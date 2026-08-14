@@ -45,7 +45,13 @@ import type { RunStore } from '../../storage/types.js';
 import { getRunStore } from '../../storage/registry.js';
 import { getCurrentTenant } from '../../storage/pg/tenant-context.js';
 import { sanitizeLogObject } from '../M16-credential-store.js';
-import { isAbortError, withRateLimitRetry } from './errors.js';
+import { coolBucket, recordDispatch, type BucketSourceDeps } from '../M32/bucket-source.js';
+import {
+  isAbortError,
+  isRateLimitError,
+  rateLimitCooldownMs,
+  withRateLimitRetry,
+} from './errors.js';
 import type { ModuleLogFn } from './module-selection.js';
 import { JobQueue } from './queue.js';
 import { awaitAllWithTimeout, SettledTracker } from './run-settled.js';
@@ -102,12 +108,17 @@ export interface EnqueueBatchedOptions<TItem extends { entryId: string }, TRecor
   projectId: string;
   /** Loads the project + global config (subclass owns the stores). */
   loadContext: () => Promise<{ project: Project; global: GlobalConfig }>;
-  /** Selects the capable module/model; module logs are teed to `logSink`. */
+  /**
+   * Selects the capable module/model; module logs are teed to `logSink`. May be
+   * async: resolving a free-tier target reads the quota ledger.
+   */
   selectModule: (
     project: Project,
     global: GlobalConfig,
     logSink: ModuleLogFn | undefined,
-  ) => { module: TranslationModule; moduleId: string };
+  ) =>
+    | { module: TranslationModule; moduleId: string }
+    | Promise<{ module: TranslationModule; moduleId: string }>;
   /** Loads + scope-filters entries and builds the per-batch items + `entriesById`. */
   buildItems: (
     project: Project,
@@ -135,6 +146,12 @@ export interface EnqueueBatchedOptions<TItem extends { entryId: string }, TRecor
   dispatch: (ctx: BatchDispatchContext<TItem, TRecord>) => void;
 }
 
+/** The free-tier bucket a background run spends against, plus its test seams. */
+export interface FreewayBatchBinding {
+  bucketKey: string;
+  deps?: BucketSourceDeps;
+}
+
 /**
  * The engine-specific bits {@link BackgroundRunEngine.runBatchWithUsage} needs to
  * run the shared per-batch envelope. `TResult` carries the per-item `usage`.
@@ -150,6 +167,11 @@ export interface RunBatchOptions<TItem, TResult> {
   failureKey: (item: TItem) => { entryId: string; targetLanguage?: string };
   /** The per-result usage to fold (e.g. `(r) => r.usage`). */
   usageOf: (result: TResult) => TranslationUsage | undefined;
+  /**
+   * Set when the run is bound to a free-tier bucket: every provider call this
+   * batch makes is debited against that bucket's quota ledger.
+   */
+  freeway?: FreewayBatchBinding;
   /** Handles one result against the live `status` (persist + push, or recordFailure). */
   onResult: (result: TResult, status: RunStatus) => Promise<void>;
   /** Post-terminal hook forwarded to {@link finalizeTerminal} (e.g. M25 stamp). */
@@ -591,7 +613,7 @@ export abstract class BackgroundRunEngine<TRecord> {
     // sidecar on completion); a module that never logs leaves it empty.
     const { logSink, logs } = this.buildLogSink();
 
-    const { module, moduleId } = opts.selectModule(project, global, logSink);
+    const { module, moduleId } = await opts.selectModule(project, global, logSink);
 
     const { items, entriesById } = await opts.buildItems(project, global, module, moduleId);
 
@@ -689,19 +711,33 @@ export abstract class BackgroundRunEngine<TRecord> {
         // final exhausted attempt — falls through to the catch below
         // unchanged. CancelledError from a mid-wait cancel is named
         // 'AbortError', so the existing isAbortError guard swallows it.
-        results = await withRateLimitRetry(() => opts.call(signal), {
-          signal,
-          isCancelled: () => (status.status as RunStatusCode) === RunStatusCode.Cancelled,
-          onRetry: (attempt, delayMs) =>
-            this.logger.warn(`${this.logPrefix}:rate-limited - retrying batch`, {
-              runId,
-              moduleId,
-              attempt,
-              delayMs,
-            }),
-        });
+        results = await withRateLimitRetry(
+          async () => {
+            const attempt = await opts.call(signal);
+            // One provider call = one free-tier request, debited as soon as it
+            // returns (a retried attempt debits again, on its own return).
+            await this.recordFreewayDispatch(opts.freeway, attempt.map(opts.usageOf));
+            return attempt;
+          },
+          {
+            signal,
+            isCancelled: () => (status.status as RunStatusCode) === RunStatusCode.Cancelled,
+            onRetry: (attempt, delayMs) =>
+              this.logger.warn(`${this.logPrefix}:rate-limited - retrying batch`, {
+                runId,
+                moduleId,
+                attempt,
+                delayMs,
+              }),
+          },
+        );
       } catch (err) {
         if (isAbortError(err) || signal?.aborted) return;
+        // A free-tier bucket that rate-limited us through every retry is out of
+        // capacity, not merely unlucky: cool it so the pool stops ranking it
+        // ready for the next run. The batch still fails as it always has —
+        // background runs do not re-route mid-flight.
+        if (isRateLimitError(err)) await this.coolFreewayBucket(opts.freeway, err);
         // This message is persisted to the run sidecar (on the /data volume) and
         // served via the runs API, so value-scrub (live vault values) on top of
         // toErrorMessage's pattern redaction — a generic-ai custom key is value-only
@@ -725,6 +761,73 @@ export abstract class BackgroundRunEngine<TRecord> {
     } finally {
       this.emitProgress(status);
       await this.finalizeTerminal(status, opts.onComplete);
+    }
+  }
+
+  /**
+   * Debit one provider call against the run's free-tier bucket. No-op for a run
+   * that isn't bound to one. Never fails the batch: a ledger write that threw
+   * here would fail items whose provider call actually succeeded.
+   */
+  protected async recordFreewayDispatch(
+    binding: FreewayBatchBinding | undefined,
+    usages: readonly (TranslationUsage | undefined)[],
+  ): Promise<void> {
+    if (!binding) return;
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let chars = 0;
+    for (const usage of usages) {
+      if (!usage) continue;
+      inputTokens += usage.inputTokens ?? 0;
+      outputTokens += usage.outputTokens ?? 0;
+      // `characters` is the provider-billed count; the source-text total is the
+      // honest stand-in for token-billed providers.
+      chars += usage.characters ?? usage.sourceChars ?? 0;
+    }
+    try {
+      await recordDispatch(
+        binding.bucketKey,
+        Date.now(),
+        { inputTokens, outputTokens, chars },
+        binding.deps,
+      );
+    } catch (err) {
+      this.logger.warn(`${this.logPrefix}:freeway-ledger-write-failed`, {
+        bucketKey: binding.bucketKey,
+        error: toErrorMessage(err),
+      });
+    }
+  }
+
+  /**
+   * Cool the run's free-tier bucket after a rate limit outlived its retries, so
+   * the pool stops offering it until it recovers. Same semantics as the
+   * translate path's dispatch failover: a per-minute limit sent without a
+   * `Retry-After` cools for just over a minute rather than until the daily
+   * reset, and the cool is pool-scoped, since a provider with an account-wide
+   * allowance rate-limits every one of its models at once. No-op for a run that
+   * isn't bound to a bucket; never fails the batch (the items are already
+   * failing on the provider error — a ledger write must not change that).
+   */
+  private async coolFreewayBucket(
+    binding: FreewayBatchBinding | undefined,
+    err: unknown,
+  ): Promise<void> {
+    if (!binding) return;
+    try {
+      await coolBucket(
+        binding.bucketKey,
+        Date.now(),
+        rateLimitCooldownMs(err),
+        binding.deps,
+        'pool',
+      );
+    } catch (writeErr) {
+      this.logger.warn(`${this.logPrefix}:freeway-ledger-write-failed`, {
+        bucketKey: binding.bucketKey,
+        error: toErrorMessage(writeErr),
+      });
     }
   }
 

@@ -1,0 +1,15 @@
+{
+  "save": "Kaydet",
+  "cancel": "İptal",
+  "loading": "Yükleniyor…",
+  "changelogEntryError": "Bu sürümün değişiklik günlüğü yüklenemedi.",
+  "changelogShowOlder": "Eski sürümleri göster ({{count}})",
+  "saving": "Kaydediliyor…",
+  "thinking": "Düşünüyor… {{seconds}} sn",
+  "webSearch": {
+    "title": "Web araması",
+    "placeholder": "Google'da arayın…",
+    "hint": "Yeni bir sekmede aramak için Enter'a basın",
+    "action": "Ara"
+  }
+}

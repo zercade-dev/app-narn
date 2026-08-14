@@ -27,6 +27,7 @@ import createGenericAIModule, {
   manifest as genericAiManifest,
 } from '@zercade-dev/narn-module-generic-ai';
 import createGoogleModule, { manifest as googleManifest } from '@zercade-dev/narn-module-google';
+import createGroqModule, { manifest as groqManifest } from '@zercade-dev/narn-module-groq';
 import createOpenAIModule, { manifest as openaiManifest } from '@zercade-dev/narn-module-openai';
 import createOpenRouterModule, {
   manifest as openrouterManifest,
@@ -62,6 +63,10 @@ export const STATIC_MODULES: StaticModuleEntry[] = [
   {
     manifest: googleManifest as ModuleManifest,
     factory: createGoogleModule as (config: unknown) => TranslationModule,
+  },
+  {
+    manifest: groqManifest as ModuleManifest,
+    factory: createGroqModule as (config: unknown) => TranslationModule,
   },
   {
     manifest: openaiManifest as ModuleManifest,

@@ -1,0 +1,42 @@
+{
+  "title": "環境設定",
+  "appearance": "外観",
+  "appearanceDescription": "このデバイスでのnarnの見た目を選びます。",
+  "theme": "テーマ",
+  "mode": "モード",
+  "switchToLight": "ライトモードに切り替える",
+  "switchToDark": "ダークモードに切り替える",
+  "languageTitle": "言語",
+  "languageDescription": "ユーザーインターフェースの言語です。",
+  "preview": "プレビュー",
+  "previewHint": "選択中のテーマで表示したコントロールの例です。",
+  "previewSamples": {
+    "heading": "見出し",
+    "body": "本文テキストは、基本のフォントと色を示します。",
+    "muted": "淡色のテキストはこのように表示されます。",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "edit": "編集",
+    "delete": "削除",
+    "pass": "合格",
+    "warn": "警告",
+    "fail": "不合格",
+    "info": "情報",
+    "inputPlaceholder": "テキストフィールド",
+    "selectOptionA": "1つ目の選択肢",
+    "selectOptionB": "2つ目の選択肢",
+    "checkbox": "チェックボックス",
+    "badgeDefault": "デフォルト",
+    "badgeSecondary": "セカンダリ",
+    "badgeOutline": "アウトライン",
+    "badgeDestructive": "デストラクティブ",
+    "scrollHint": "スクロールすると、テーマに合わせたスクロールバーが表示されます",
+    "iconsLabel": "アイコン"
+  },
+  "themes": {
+    "default": { "name": "クラシック", "description": "narnの定番の見た目です。" },
+    "pixel": { "name": "ピクセル", "description": "ごつごつした8ビットゲーム機の雰囲気です。" },
+    "techno": { "name": "テクノ", "description": "ネオンが光るサイバーパンクなターミナルです。" },
+    "minimal": { "name": "ミニマル", "description": "フラットで静かなモノクロです。" }
+  }
+}

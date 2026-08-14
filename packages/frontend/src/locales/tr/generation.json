@@ -1,0 +1,17 @@
+{
+  "contextLabel": "Girdi bağlamını dahil et",
+  "contextHint": "Önerileri iyileştirmek için istem metnine fazladan girdi ayrıntıları ekleyin.",
+  "fieldContext": "Çevirmen bağlamı notları",
+  "fieldSources": "Kaynak etiketleri",
+  "fieldCategories": "Atanan kategoriler",
+  "languagesLabel": "Mevcut çevirileri bağlam olarak gönder",
+  "languagesHint": "Her girdinin seçili dillerdeki tamamlanmış çevirilerini fazladan bağlam olarak gönderin.",
+  "selectAllLanguages": "Tümünü seç",
+  "deselectAllLanguages": "Tümünün seçimini kaldır",
+  "skipCategoriesLabel": "Kategorileri atla",
+  "skipCategoriesHint": "Bu kategorilerden herhangi birini taşıyan girdiler istekten tamamen çıkarılır.",
+  "skipCategoriesPlaceholder": "Hiçbiri seçilmedi",
+  "ignoreGlossariesLabel": "Mevcut sözlükçeleri yok say",
+  "ignoreGlossariesHint": "Seçili sözlükçelerin terimleri hâlihazırda bilinen terminoloji sayılır: sözlükçe üretiminde, model bunları yeniden önermesin diye zaten bilinen terimler olarak gönderilir; kategori üretiminde ise bu terimlerle eşleşen girdiler istekten tamamen çıkarılır.",
+  "ignoreGlossariesPlaceholder": "Hiçbiri seçilmedi"
+}

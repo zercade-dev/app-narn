@@ -7,15 +7,24 @@
  * the capability predicate and the thrown error type differ, so they are passed
  * in by the caller.
  */
-import type {
-  CostTier,
-  GlobalConfig,
-  Project,
-  ProjectModuleConfigEntry,
-  TranslationModule,
+import {
+  type CostTier,
+  type GlobalConfig,
+  type Project,
+  type ProjectModuleConfigEntry,
+  type TranslationModule,
+  toErrorMessage,
 } from '@zercade-dev/narn-shared';
+import { sanitizeLogObject } from '../M16-credential-store.js';
 import type { ModuleRegistry } from '../M6-module-registry.js';
 import { resolveEffectiveModuleConfig } from '../M19-global-config-store.js';
+import { selectBackgroundBucket } from '../M32/background-select.js';
+import {
+  freewayModuleOverrides,
+  loadBucketViews,
+  type BucketSourceDeps,
+} from '../M32/bucket-source.js';
+import type { DifficultyBand } from '../M32/types.js';
 
 /** Cheapest-first ordering used to rank enabled modules when none is requested. */
 export const COST_TIER_ORDER: Record<CostTier, number> = { free: 0, low: 1, medium: 2, high: 3 };
@@ -27,7 +36,7 @@ export type ModuleLogFn = (
   meta?: Record<string, unknown>,
 ) => void;
 
-interface SelectCapableModuleOptions {
+export interface SelectCapableModuleOptions {
   /** Explicit module id; when set, only that module is considered. */
   requestedId?: string;
   /** Per-run model override (module config key `model`). */
@@ -45,10 +54,20 @@ interface SelectCapableModuleOptions {
   /**
    * Message used when a specific module was requested but cannot do the work
    * (e.g. `module "x" cannot judge translations`); the requested id is prefixed.
+   * Optional: callers that never surface a requested-module failure (the
+   * free-tier resolver skips such a bucket instead of throwing) omit it.
    */
-  requestedFailLabel: string;
+  requestedFailLabel?: string;
   /** Message used when no module is requested and none is capable. */
   noneAvailableMessage: string;
+  /**
+   * Config values applied LAST, after the effective global/project config and
+   * every per-run override — so they win over user configuration in both
+   * directions. Freeway uses this for the dispatch settings it manages itself
+   * from snapshot facts about the chosen model; ordinary selection leaves it
+   * unset.
+   */
+  configOverrides?: Record<string, unknown>;
 }
 
 /**
@@ -68,6 +87,7 @@ export function selectCapableModule(
     ProjectModuleConfigEntry | undefined
   >;
   const { requestedId, requestedModel, requestedEffort, verbose, logSink, capability } = options;
+  const configOverrides = options.configOverrides ?? {};
   const candidates = requestedId
     ? registry.listModules(sessionId).filter((m) => m.id === requestedId)
     : registry
@@ -99,6 +119,7 @@ export function selectCapableModule(
         ...effective.config,
         ...(typeof rps === 'number' && rps > 0 ? { requestsPerSecond: rps } : {}),
         ...overrides,
+        ...configOverrides,
       },
       sessionId,
     );
@@ -107,6 +128,122 @@ export function selectCapableModule(
     }
   }
   throw options.notPossible(
-    requestedId ? options.requestedFailLabel : options.noneAvailableMessage,
+    requestedId
+      ? (options.requestedFailLabel ?? options.noneAvailableMessage)
+      : options.noneAvailableMessage,
   );
+}
+
+/** A background run bound to one free-tier bucket for its whole duration. */
+export interface FreewayBackgroundSelection {
+  module: TranslationModule;
+  /** The concrete module/instance id the bucket dispatches to. */
+  moduleId: string;
+  /** Ledger key of the bucket this run spends against. */
+  bucketKey: string;
+}
+
+export interface SelectFreewayBackgroundOptions extends SelectCapableModuleOptions {
+  /** Difficulty band the run is scored at; defaults to the background band. */
+  band?: DifficultyBand;
+  /** Bucket-source overrides (ledger / module status / cloud mode) for tests. */
+  deps?: BucketSourceDeps;
+  /** Evaluation instant; defaults to now. */
+  now?: number;
+}
+
+/**
+ * Session-scoped `moduleStatus` for the bucket source: enablement from the
+ * effective (workspace + project) module config, credentials from the
+ * registry's per-session metadata. Mirrors the equivalent closure the
+ * translation engine threads into its own bucket loads, but built from
+ * `listModules` so it works with the narrowed registry the background engines
+ * hold.
+ */
+function backgroundModuleStatus(
+  registry: Pick<ModuleRegistry, 'listModules'>,
+  project: Project,
+  global: GlobalConfig,
+  sessionId: string | undefined,
+): (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined {
+  const projectEntries = project.moduleConfigs as Record<
+    string,
+    ProjectModuleConfigEntry | undefined
+  >;
+  // One registry sweep for the whole resolution rather than one per candidate.
+  const metadata = new Map(registry.listModules(sessionId).map((m) => [m.id, m]));
+  return (moduleId: string) => {
+    const meta = metadata.get(moduleId);
+    if (!meta) return undefined;
+    const effective = resolveEffectiveModuleConfig(moduleId, global, projectEntries[moduleId]);
+    return {
+      credentialed: meta.credentialStatus === 'ok',
+      enabled: effective.enabled && effective.active !== false,
+    };
+  };
+}
+
+/**
+ * Resolves the free-tier target for a background run: the cheapest adequate
+ * bucket whose module can actually do this kind of work, built with the run's
+ * per-run overrides exactly as {@link selectCapableModule} would have built an
+ * explicitly requested module. Called ONCE at run start — the run keeps the
+ * returned binding for its whole duration.
+ *
+ * Buckets are tried in the selector's order and one is skipped when its module
+ * cannot be built or fails the capability predicate (classical MT can't judge,
+ * for instance). Throws `options.notPossible(...)` when nothing is eligible, so
+ * the caller reports its ordinary module-unavailable failure instead of
+ * silently spending a paid module's quota.
+ */
+export async function selectFreewayBackgroundModule(
+  registry: Pick<ModuleRegistry, 'listModules' | 'createWithConfig'>,
+  project: Project,
+  global: GlobalConfig,
+  sessionId: string | undefined,
+  options: SelectFreewayBackgroundOptions,
+): Promise<FreewayBackgroundSelection> {
+  const now = options.now ?? Date.now();
+  const overrides = options.deps ?? {};
+  const deps: BucketSourceDeps = {
+    ...overrides,
+    moduleStatus:
+      overrides.moduleStatus ?? backgroundModuleStatus(registry, project, global, sessionId),
+  };
+  const remaining = await loadBucketViews(now, deps);
+  const bandOpts = options.band !== undefined ? { band: options.band } : undefined;
+  while (remaining.length > 0) {
+    const selection = selectBackgroundBucket(remaining, now, bandOpts);
+    if (!selection) break;
+    const { bucket } = selection;
+    remaining.splice(remaining.indexOf(bucket), 1);
+    try {
+      const built = selectCapableModule(registry, project, global, sessionId, {
+        ...options,
+        requestedId: bucket.moduleId,
+        // The bucket's model is the quota being spent, so it wins over any
+        // per-run model override (which named a different provider's model).
+        requestedModel: bucket.modelId,
+        // Same Freeway-managed dispatch settings the translate path applies:
+        // a per-model upstream fact outranks the workspace's own config.
+        configOverrides: {
+          ...options.configOverrides,
+          ...freewayModuleOverrides(bucket.moduleId, bucket.modelId),
+        },
+      });
+      return { ...built, bucketKey: bucket.bucketKey };
+    } catch (err) {
+      // This bucket's module can't be built or can't do this work — try the
+      // next-cheapest one rather than failing the whole run on it. Leave a
+      // breadcrumb so a resolution that walked past several buckets is
+      // explainable; the reason is value-scrubbed like every other logged
+      // provider error.
+      options.logSink?.('warn', 'freeway: skipping bucket', {
+        bucketKey: bucket.bucketKey,
+        reason: sanitizeLogObject({ m: toErrorMessage(err) }).m,
+      });
+      continue;
+    }
+  }
+  throw options.notPossible(options.noneAvailableMessage);
 }

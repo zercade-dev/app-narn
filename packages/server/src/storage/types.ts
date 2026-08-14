@@ -1,5 +1,6 @@
 import type {
   CategorySuggestion,
+  FreewayWindowKind,
   GlobalConfig,
   GlobalModuleConfigEntry,
   Glossary,
@@ -702,4 +703,78 @@ export interface CollabRoutingStore {
   get(): Promise<CollabRoutingConfig | null>;
   /** Upsert the ambient tenant's config (whole-document replace). */
   save(config: CollabRoutingConfig): Promise<CollabRoutingConfig>;
+}
+
+/** Additive usage recorded for one dispatch attempt (all fields default 0). */
+export interface FreewayUsageDelta {
+  requests?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  chars?: number;
+}
+
+/** One (window kind, window start) cell a caller wants counted or read. */
+export interface FreewayWindowRef {
+  kind: FreewayWindowKind;
+  /** Epoch ms — computed by the caller via shared `windowStart()`. */
+  start: number;
+}
+
+export interface FreewayWindowUsage extends FreewayWindowRef {
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+  chars: number;
+}
+
+/** Per-(model, language) quality EMAs, stored in freeway_buckets.stats. */
+export interface FreewayBucketStats {
+  /** key: target language → EMA of LQA gate pass (0..1). */
+  gatePassByLanguage?: Record<string, number>;
+  /** EMA of 429-per-request (0..1). */
+  rateLimitRate?: number;
+  /** EMA of latency ms per request. */
+  latencyMs?: number;
+}
+
+export interface FreewayBucketState {
+  /** `'<moduleOrInstanceId>::<modelId>'`, e.g. `google::gemini-2.5-flash`, `generic-ai:mistral::mistral-small-latest`. */
+  bucketKey: string;
+  cooldownUntil?: number;
+  disabledReason?: string;
+  flapCount: number;
+  stats: FreewayBucketStats;
+  updatedAt: number;
+}
+
+export interface FreewayLedgerStore {
+  /** Atomically add `delta` to EVERY listed window cell of `bucketKey` (upsert). */
+  recordAttempt(
+    bucketKey: string,
+    windows: FreewayWindowRef[],
+    delta: FreewayUsageDelta,
+  ): Promise<void>;
+  /** Read the listed window cells (missing cells come back zeroed). */
+  usage(bucketKey: string, windows: FreewayWindowRef[]): Promise<FreewayWindowUsage[]>;
+  /** All bucket states for the tenant (empty array when none). */
+  listBuckets(): Promise<FreewayBucketState[]>;
+  /** Overwrites cooldown_until (last write wins); bumps flap_count when `flap` is true. Upserts. */
+  setCooldown(bucketKey: string, until: number, opts?: { flap?: boolean }): Promise<void>;
+  /** Clear cooldown and reset flap_count to 0. No-op when the row is absent. */
+  clearCooldown(bucketKey: string): Promise<void>;
+  /** Mark a bucket disabled (bad credentials) or re-enabled (null). Upserts. */
+  setDisabled(bucketKey: string, reason: string | null): Promise<void>;
+  /** Shallow-merge `stats` into the stored stats object. Upserts. */
+  mergeStats(bucketKey: string, stats: FreewayBucketStats): Promise<void>;
+  /**
+   * Overwrite a window cell with authoritative usage from a provider probe
+   * (DeepL /v2/usage, OpenRouter /api/v1/key) — sets, does not add.
+   * Unspecified counter fields are written as 0 (the cell is fully
+   * overwritten, not partially patched).
+   */
+  syncAuthoritativeUsage(
+    bucketKey: string,
+    window: FreewayWindowRef,
+    usage: FreewayUsageDelta,
+  ): Promise<void>;
 }

@@ -1,0 +1,15 @@
+{
+  "save": "저장",
+  "cancel": "취소",
+  "loading": "불러오는 중…",
+  "changelogEntryError": "이 릴리스의 변경 이력을 불러오지 못했어요.",
+  "changelogShowOlder": "과거 릴리스 보기 ({{count}})",
+  "saving": "저장하는 중…",
+  "thinking": "생각하는 중… {{seconds}}초",
+  "webSearch": {
+    "title": "웹 검색",
+    "placeholder": "Google 검색…",
+    "hint": "Enter를 누르면 새 탭에서 검색해요",
+    "action": "검색"
+  }
+}

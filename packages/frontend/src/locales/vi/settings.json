@@ -1,0 +1,42 @@
+{
+  "title": "Cài đặt",
+  "appearance": "Giao diện",
+  "appearanceDescription": "Chọn cách narn hiển thị trên thiết bị này.",
+  "theme": "Chủ đề",
+  "mode": "Chế độ",
+  "switchToLight": "Chuyển sang chế độ sáng",
+  "switchToDark": "Chuyển sang chế độ tối",
+  "languageTitle": "Ngôn ngữ",
+  "languageDescription": "Ngôn ngữ của giao diện người dùng.",
+  "preview": "Xem trước",
+  "previewHint": "Các điều khiển mẫu hiển thị theo chủ đề đã chọn.",
+  "previewSamples": {
+    "heading": "Tiêu đề",
+    "body": "Văn bản thân bài cho thấy phông chữ và màu nền tảng.",
+    "muted": "Văn bản mờ trông như thế này.",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "edit": "Sửa",
+    "delete": "Xóa",
+    "pass": "Đạt",
+    "warn": "Cảnh báo",
+    "fail": "Trượt",
+    "info": "Thông tin",
+    "inputPlaceholder": "Ô nhập văn bản",
+    "selectOptionA": "Lựa chọn thứ nhất",
+    "selectOptionB": "Lựa chọn thứ hai",
+    "checkbox": "Ô đánh dấu",
+    "badgeDefault": "Mặc định",
+    "badgeSecondary": "Phụ",
+    "badgeOutline": "Viền",
+    "badgeDestructive": "Nguy hiểm",
+    "scrollHint": "Cuộn để xem thanh cuộn theo chủ đề",
+    "iconsLabel": "Biểu tượng"
+  },
+  "themes": {
+    "default": { "name": "Cổ điển", "description": "Vẻ ngoài cổ điển của narn." },
+    "pixel": { "name": "Pixel", "description": "Chất máy chơi game 8-bit thô mộc." },
+    "techno": { "name": "Techno", "description": "Cửa sổ dòng lệnh cyberpunk rực đèn neon." },
+    "minimal": { "name": "Tối giản", "description": "Phẳng, tĩnh, đơn sắc." }
+  }
+}

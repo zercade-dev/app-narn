@@ -23,6 +23,10 @@ export const GENERIC_API_KEY = 'GENERIC_API_KEY';
  * generic-ai's arbitrary baseURL, which is cloudDisabled). */
 export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
+/** Fixed GroqCloud endpoint. Never user-configurable — same SSRF rationale as
+ * OPENROUTER_BASE_URL above. */
+export const GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
+
 /** OpenRouter's recommended app-attribution headers. */
 const OPENROUTER_ATTRIBUTION_HEADERS = {
   'HTTP-Referer': 'https://github.com/zercade-dev/app-narn',
@@ -333,6 +337,22 @@ export function createModelForProvider(
     });
     return openrouter(opts.modelId);
   }
+  if (provider === 'groq') {
+    // Same OpenAI-compatible transport as openrouter, pinned to the GroqCloud
+    // endpoint (config.baseURL is deliberately ignored — fixed first-party
+    // endpoint, no SSRF surface). Structured output uses the same
+    // transformRequestBody response_format injection as openai-compatible.
+    const groq = createOpenAICompatible({
+      name: 'groq',
+      baseURL: GROQ_BASE_URL,
+      apiKey: opts.apiKey,
+      fetch,
+      ...(opts.responseFormatSchema
+        ? { transformRequestBody: withResponseFormat(opts.responseFormatSchema) }
+        : {}),
+    });
+    return groq(opts.modelId);
+  }
   if (provider === 'openai-compatible') {
     let baseURL = opts.baseURL || 'http://localhost:11434/v1';
 
@@ -371,6 +391,7 @@ export function credentialKeyForProvider(provider: ProviderType): string {
     openai: 'OPENAI_API_KEY',
     anthropic: 'ANTHROPIC_API_KEY',
     openrouter: 'OPENROUTER_API_KEY',
+    groq: 'GROQ_API_KEY',
     'openai-compatible': 'OPENAI_API_KEY',
     'anthropic-compatible': 'ANTHROPIC_API_KEY',
   };
@@ -387,6 +408,7 @@ export function defaultModelForProvider(provider: ProviderType): string {
     openai: 'gpt-4o',
     anthropic: 'claude-3-5-sonnet-20241022',
     openrouter: 'openai/gpt-4o-mini',
+    groq: 'llama-3.3-70b-versatile',
     'openai-compatible': 'gpt-4o',
     'anthropic-compatible': 'claude-3-5-sonnet-20241022',
   };

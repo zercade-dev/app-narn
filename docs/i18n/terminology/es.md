@@ -23,7 +23,7 @@ rows: a term the lexicon lacks goes in the additive queue in [`README.md`](READM
 
 ## Keyboard key names
 
-`../terminology.md`'s "Keyboard key names" section is not one of the 76 frozen term rows —
+`../terminology.md`'s "Keyboard key names" section is not one of the 84 frozen term rows —
 it is a per-locale rule (write the key name as engraved on that locale's keyboard). Spanish
 renderings, settled 2026-08-10: `Enter` → **Intro**, `Shift` → **Mayús**. `Esc` stays `Esc`
 — unlike `Enter`/`Shift`, the escape key is already labelled `Esc` on a Spanish keyboard, so
@@ -54,7 +54,9 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | writable language |  |  |
 | Pseudo Test |  |  |
 | run |  |  |
+| revert |  |  |
 | Activity |  |  |
+| log |  |  |
 | batch |  |  |
 | batch grouping |  |  |
 | AI review |  |  |
@@ -64,9 +66,11 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | suggestion |  |  |
 | discard |  |  |
 | needs review | necesita revisión | Verb phrase, so no gender to agree. Sentence-cased in the filter ("Necesita revisión" — `filters.needsReview`, `compare.needsReviewFilter`), lowercase in the row badge ("necesita revisión" — `compare.cellNeedsReviewBadge`), same wording in both. "Marcar todo como necesita revisión" is the bulk form. For the related *reviewed* adjective see the gender rule above: token form "revisado", agreeing form "revisada". |
-| flag |  |  |
+| flag | marcar | Verb on `review:flag`, participle on `review:filterFlagged`/`review:flaggedToast` — the review disposition, and only that. `review:sourceAi.runSummary`'s loose "flagged" (entries the source review marked as carrying findings, not the disposition) is not this term and takes *identificadas*, never *marcada(s)*. `glossary:flaggedTitle` still renders its own loose "flagged" as *marcados*, sharing the disposition root — a pre-existing collision this pass left untouched. |
+| ignore / ignored |  |  |
 | Review (the sidebar group) |  |  |
 | review queue |  |  |
+| back-translation |  |  |
 | module |  |  |
 | module instance |  |  |
 | provider |  |  |
@@ -101,16 +105,20 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | backup |  |  |
 | snapshot |  |  |
 | template |  |  |
+| omit (from an export) |  |  |
 | collaborator |  |  |
 | member |  |  |
 | nickname |  |  |
 | claim |  |  |
 | invite |  |  |
+| revoke |  |  |
 | recording |  |  |
 | stage |  |  |
 | Text Styler |  |  |
 | element |  |  |
+| assistant |  |  |
 | theme |  |  |
 | guide |  |  |
 | release |  |  |
 | changelog |  |  |
+| dismiss |  |  |

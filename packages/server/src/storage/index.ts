@@ -25,10 +25,17 @@ export type {
   ProjectMember,
   CollabRoutingConfig,
   CollabRoutingStore,
+  FreewayLedgerStore,
+  FreewayUsageDelta,
+  FreewayWindowRef,
+  FreewayWindowUsage,
+  FreewayBucketState,
+  FreewayBucketStats,
 } from './types.js';
 export { PgProjectStore } from './pg-project-store.js';
 export { PgTemplateStore } from './pg-template-store.js';
 export { PgCollabRoutingStore } from './pg-collab-routing-store.js';
+export { PgFreewayLedgerStore } from './pg-freeway-ledger-store.js';
 export { PgGlobalConfigStore } from './pg-global-config-store.js';
 export { PgTranslationMemory } from './pg-translation-memory.js';
 export { PgGlossaryStore } from './pg-glossary-store.js';
@@ -73,6 +80,8 @@ export {
   setDeviceVaultStore,
   getCollabRoutingStore,
   setCollabRoutingStore,
+  getFreewayLedgerStore,
+  setFreewayLedgerStore,
   // listDeviceVaultsForCurrentUser/deleteDeviceVaultForCurrentUser are the
   // free-function import surface the cloud composition root's `/auth/devices`
   // routes use directly — same direct-barrel-import pattern as

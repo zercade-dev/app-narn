@@ -1,0 +1,87 @@
+{
+  "action": {
+    "openRouting": "ตั้งค่ากฎการจ่ายงาน",
+    "openModuleSettings": "เปิดการตั้งค่าโมดูล",
+    "openQuality": "เปิดแดชบอร์ดคุณภาพ",
+    "openGlossary": "เปิดอภิธานศัพท์",
+    "unlockVault": "ปลดล็อกตู้นิรภัย"
+  },
+  "translation": {
+    "start": "กำลังแปลรายการหนึ่งเป็น {{language}}…",
+    "done": "แปลรายการหนึ่งเป็น {{language}} แล้ว",
+    "doneFromMemory": "ใช้คำแปลที่บันทึกไว้สำหรับ {{language}} ซ้ำ",
+    "queued": "เข้าคิวแปลแล้ว {{total}} งาน",
+    "queued_other": "เข้าคิวแปลแล้ว {{total}} งาน",
+    "runQueued": "รอบการแปลเข้าคิวแล้ว — ลำดับที่ {{position}}",
+    "retryQueued": "การลองใหม่เข้าคิวแล้ว — ลำดับที่ {{position}}",
+    "retry": "กำลังลองแปลรายการที่ล้มเหลวใหม่",
+    "failedNoRoute": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่มีกฎการจ่ายงานที่ตรงกัน",
+    "failedNoRoute_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่มีกฎการจ่ายงานที่ตรงกัน",
+    "failedModuleDisabled": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — โมดูล {{module}} ถูกปิดใช้งาน",
+    "failedModuleDisabled_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — โมดูล {{module}} ถูกปิดใช้งาน",
+    "failedModuleNotFound": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่ได้ติดตั้งโมดูล {{module}}",
+    "failedModuleNotFound_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่ได้ติดตั้งโมดูล {{module}}",
+    "failedGeneric": "แปลรายการหนึ่งเป็น {{language}} ไม่ได้",
+    "batchFailed": "แบตช์ของคำแปล {{count}} รายการเป็น {{languages}} ล้มเหลว",
+    "queueStartFailed": "เริ่มรอบการแปลไม่ได้",
+    "maskMismatch": "แท็กจัดรูปแบบไม่รอดจากการแปลเป็น {{language}}",
+    "tmRejected": "คำแปลที่บันทึกไว้สำหรับ {{language}} ไม่ผ่านการตรวจสอบคุณภาพ",
+    "lqaRetry": "การตรวจสอบคุณภาพไม่ผ่าน — กำลังขอให้โมเดลลองใหม่",
+    "authCancel": "การลงชื่อเข้าใช้ถูกยกเลิก การแปลจึงหยุดลง"
+  },
+  "lqa": {
+    "passed": "การตรวจสอบคุณภาพผ่าน",
+    "failed": "การตรวจสอบคุณภาพไม่ผ่าน",
+    "overflow": "คำแปลยาวเกินพื้นที่ที่มี",
+    "checkError": "การตรวจสอบคุณภาพอย่างหนึ่งทำงานไม่ได้"
+  },
+  "judge": {
+    "done": "รีวิวได้คะแนน {{score}} — ผลการประเมิน: {{verdict}}",
+    "suggestDone": "รีวิวเสร็จสิ้นพร้อมข้อเสนอแนะ",
+    "suggestNoChange": "รีวิวไม่พบสิ่งที่ต้องเปลี่ยน",
+    "suggestionDiscarded": "ทิ้งข้อเสนอแนะแล้ว"
+  },
+  "sourceReview": {
+    "done": "รีวิวต้นฉบับพบปัญหา {{findings}} ข้อ",
+    "done_other": "รีวิวต้นฉบับพบปัญหา {{findings}} ข้อ"
+  },
+  "glossaryGen": {
+    "done": "รอบอภิธานศัพท์เสร็จสิ้น — เสนอคำศัพท์ {{suggested}} คำจาก {{analyzed}} รายการ",
+    "failed": "การสร้างอภิธานศัพท์ล้มเหลว",
+    "saveSuggestionsFailed": "บันทึกข้อเสนอแนะของอภิธานศัพท์ไม่ได้"
+  },
+  "categoryGen": {
+    "queued": "การสร้างหมวดหมู่เข้าคิวแล้ว",
+    "done": "การสร้างหมวดหมู่เสร็จสิ้น — ข้อเสนอแนะ {{suggestions}} ข้อ",
+    "failed": "การสร้างหมวดหมู่ล้มเหลว"
+  },
+  "stageDetails": {
+    "queued": "รายละเอียดด่านเข้าคิวแล้ว",
+    "done": "รายละเอียดด่านเสร็จสิ้น — สำเร็จ {{completed}} ล้มเหลว {{failed}}",
+    "failed": "รายละเอียดด่านล้มเหลว"
+  },
+  "module": {
+    "loaded": "โหลดโมดูล {{module}} แล้ว",
+    "instanceRegistered": "เพิ่มการตั้งค่า {{instance}} แล้ว",
+    "instanceRegisterFailed": "เพิ่มการตั้งค่า {{instance}} ไม่ได้"
+  },
+  "vault": {
+    "unlocked": "ปลดล็อกตู้นิรภัยแล้ว",
+    "passwordChanged": "เปลี่ยนรหัสผ่านตู้นิรภัยแล้ว",
+    "credentialsEvicted": "ข้อมูลรับรองที่บันทึกไว้ของคุณถูกล้างออกจากหน่วยความจำแล้ว"
+  },
+  "orphan": {
+    "detected": "พบ {{count}} รายการที่ไม่มีอยู่ในไฟล์ต้นฉบับแล้ว",
+    "detected_other": "พบ {{count}} รายการที่ไม่มีอยู่ในไฟล์ต้นฉบับแล้ว",
+    "linked": "เชื่อมรายการกำพร้าแล้ว",
+    "deleted": "ลบรายการกำพร้าแล้ว"
+  },
+  "tm": {
+    "cleared": "ล้างหน่วยความจำการแปลแล้ว",
+    "variantDeleted": "นำคำแปลหนึ่งรายการออกจากหน่วยความจำการแปลแล้ว"
+  },
+  "backup": {
+    "restored": "กู้คืนข้อมูลสำรองแล้ว",
+    "pruneFailed": "ล้างข้อมูลสำรองเก่าไม่ได้"
+  }
+}

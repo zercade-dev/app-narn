@@ -1,0 +1,55 @@
+{
+  "title": "Entri Yatim",
+  "subtitle": "Entri yang sudah tidak ada dalam CSV terakhir yang diimpor. Hapus entri itu atau hubungkan ulang terjemahannya ke entri lain.",
+  "emptyTitle": "Semuanya terhubung",
+  "empty": "Tidak ada entri yatim — CSV yang diimpor cocok dengan proyek saat ini.",
+  "columns": {
+    "select": "Pilih",
+    "source": "Sumber",
+    "translations": "Terjemahan",
+    "actions": "Tindakan"
+  },
+  "actions": {
+    "delete": "Hapus",
+    "relink": "Hubungkan ulang",
+    "bulkDelete": "Hapus yang dipilih ({{count}})",
+    "refresh": "Segarkan",
+    "cancel": "Batal",
+    "back": "Kembali"
+  },
+  "confirmDelete": {
+    "title": "Hapus entri yatim?",
+    "body": "Tindakan ini menghapus permanen catatan yatim itu beserta terjemahannya. Tindakan ini tidak dapat diurungkan."
+  },
+  "relink": {
+    "title": "Hubungkan ulang entri yatim",
+    "description": "Pindahkan terjemahan dari entri yatim ini ke entri lain, diurutkan menurut kemiripan teks sumber tiap kandidat dengan teks sumber entri yatim ini.",
+    "searchPlaceholder": "Cari entri berdasarkan teks sumber…",
+    "noCandidates": "Tidak ada entri yang cocok",
+    "submit": "Lanjutkan",
+    "confirmTitle": "Konfirmasi penghubungan ulang",
+    "confirmDescription": "Pilih cara terjemahan entri yatim diterapkan ke entri tujuan sebelum dihubungkan ulang.",
+    "overrideModeLabel": "Mode penimpaan",
+    "overrideEmptyOnly": "Hanya isi terjemahan yang kosong (pertahankan milik entri tujuan)",
+    "overrideAll": "Timpa semua terjemahan dengan milik entri yatim",
+    "aiRetranslateLabel": "Pakai AI untuk menerjemahkan ulang",
+    "aiRetranslateHint": "Setelah dihubungkan ulang, sebuah lintasan AI membandingkan teks sumber lama entri yatim dengan teks sumber baru entri tujuan lalu memperbarui tiap terjemahan yang ada agar mencerminkan perubahan yang sama.",
+    "aiModuleLabel": "Modul AI",
+    "aiModelLabel": "Model",
+    "aiReasoningEffortLabel": "Upaya penalaran",
+    "aiModulePlaceholder": "Pilih modul…",
+    "aiNoModules": "Tidak ada modul berkemampuan AI yang aktif — aktifkan satu di Konfigurasi Global untuk memakai penerjemahan ulang AI.",
+    "confirmSubmit": "Hubungkan ulang"
+  },
+  "toast": {
+    "loadError": "Gagal memuat entri yatim",
+    "deleted": "Entri yatim dihapus",
+    "deleteError": "Penghapusan entri yatim gagal",
+    "bulkDeleted": "{{count}} entri yatim dihapus",
+    "relinked": "Terjemahan dipindahkan",
+    "relinkError": "Gagal menghubungkan ulang entri yatim",
+    "candidatesError": "Gagal memuat kandidat penghubungan ulang",
+    "aiRetranslateStarted": "Penerjemahan ulang AI dimulai — lihat tab Aktivitas",
+    "aiRetranslateUnavailable": "Sudah dihubungkan ulang, tetapi penerjemahan ulang AI tidak bisa dimulai (tidak ada modul berkemampuan AI yang tersedia)"
+  }
+}

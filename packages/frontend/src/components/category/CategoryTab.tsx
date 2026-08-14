@@ -90,6 +90,7 @@ const CATEGORY_CAPABLE_MODULE_IDS = new Set([
   'google',
   'deepseek',
   'openrouter',
+  'groq',
   'generic-ai',
 ]);
 

@@ -1,0 +1,10 @@
+{
+  "http": {
+    "unauthorized": "Anda perlu masuk lagi.",
+    "forbidden": "Anda tidak punya izin untuk melakukan itu.",
+    "vaultLocked": "Brankas Anda terkunci. Buka kuncinya lalu coba lagi.",
+    "rateLimited": "Terlalu banyak permintaan — tunggu sebentar lalu coba lagi.",
+    "server": "Server mengalami masalah. Coba lagi sebentar lagi.",
+    "offline": "Tidak bisa menjangkau server. Periksa koneksi Anda."
+  }
+}

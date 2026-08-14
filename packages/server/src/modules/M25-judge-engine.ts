@@ -12,6 +12,7 @@
  * the judge-specific scope, batch body, and persistence.
  */
 import {
+  FREEWAY_MODULE_ID,
   type GlobalConfig,
   type GlossaryTerm,
   type JudgeItem,
@@ -51,8 +52,18 @@ import {
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { getCurrentTenant, runWithTenant } from '../storage/pg/tenant-context.js';
 import { defaultPricingProvider, type PricingProvider } from './M9/usage-pricing.js';
-import { selectCapableModule, type ModuleLogFn } from './M9/module-selection.js';
-import { BackgroundRunEngine, sanitizeLLMText, type LoggerLike } from './M9/run-engine.js';
+import {
+  selectCapableModule,
+  selectFreewayBackgroundModule,
+  type ModuleLogFn,
+} from './M9/module-selection.js';
+import type { BucketSourceDeps } from './M32/bucket-source.js';
+import {
+  BackgroundRunEngine,
+  sanitizeLLMText,
+  type FreewayBatchBinding,
+  type LoggerLike,
+} from './M9/run-engine.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
 import { resolveRoutingRules } from './M9/resolve-routing.js';
 
@@ -162,6 +173,8 @@ export interface JudgeEngineDeps {
   glossaryProvider?: JudgeGlossaryProvider;
   logger?: LoggerLike;
   pricing?: PricingProvider;
+  /** Bucket-source overrides used when a run selects the free-tier target. */
+  freeway?: BucketSourceDeps;
 }
 
 const defaultGlossaryProvider: JudgeGlossaryProvider = async (projectId, targetLanguage, entry) => {
@@ -206,6 +219,8 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     return this._globalConfigStore ?? getGlobalConfigStore();
   }
   private readonly glossaryProvider: JudgeGlossaryProvider;
+  /** Injected Freeway bucket-source overrides (ledger / status / cloud mode). */
+  private readonly freewayOverrides: BucketSourceDeps;
 
   constructor(deps: JudgeEngineDeps = {}) {
     super({
@@ -222,6 +237,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     this._projectStore = deps.projectStore;
     this._globalConfigStore = deps.globalConfigStore;
     this.glossaryProvider = deps.glossaryProvider ?? defaultGlossaryProvider;
+    this.freewayOverrides = deps.freeway ?? {};
   }
 
   protected override async saveDetail(
@@ -260,29 +276,44 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
   /**
    * Picks the judge module/model. Precedence: the per-run `override` (chosen in
    * the AI-review dialog), then the project's `judgeConfig`, then the cheapest
-   * enabled judge-capable module. Throws JudgeNotPossibleError when nothing can
+   * enabled judge-capable module. The free-tier target resolves to a concrete
+   * bucket instead (see below). Throws JudgeNotPossibleError when nothing can
    * judge.
    */
-  private selectJudgeModule(
+  private async selectJudgeModule(
     project: Project,
     global: GlobalConfig,
     sessionId: string | undefined,
     override?: JudgeOverride,
     logSink?: ModuleLogFn,
-  ): { module: TranslationModule; moduleId: string } {
+  ): Promise<{ module: TranslationModule; moduleId: string; bucketKey?: string }> {
     const requestedId = override?.moduleId ?? project.judgeConfig?.moduleId;
     const requestedModel = override?.model ?? project.judgeConfig?.model;
     const requestedEffort = override?.reasoningEffort ?? project.judgeConfig?.reasoningEffort;
-    return selectCapableModule(this.moduleRegistry, project, global, sessionId, {
-      ...(requestedId !== undefined ? { requestedId } : {}),
-      ...(requestedModel ? { requestedModel } : {}),
+    const options = {
       ...(requestedEffort ? { requestedEffort } : {}),
       ...(override?.verbose ? { verbose: true } : {}),
       ...(logSink ? { logSink } : {}),
-      capability: (m) => typeof m.judgeTranslations === 'function',
-      notPossible: (msg) => new JudgeNotPossibleError(msg),
-      requestedFailLabel: `module "${requestedId}" cannot judge translations`,
+      capability: (m: TranslationModule) => typeof m.judgeTranslations === 'function',
+      notPossible: (msg: string) => new JudgeNotPossibleError(msg),
       noneAvailableMessage: 'no enabled judge-capable module available',
+    };
+    if (requestedId === FREEWAY_MODULE_ID) {
+      // Resolved ONCE, here at run start: the whole run stays bound to this
+      // bucket. A rate limit mid-run therefore fails the run exactly as a paid
+      // module's would — a background run never re-routes to another free
+      // bucket while it is in flight.
+      return selectFreewayBackgroundModule(this.moduleRegistry, project, global, sessionId, {
+        ...options,
+        deps: this.freewayOverrides,
+        noneAvailableMessage: 'no free-tier model is currently available to judge translations',
+      });
+    }
+    return selectCapableModule(this.moduleRegistry, project, global, sessionId, {
+      ...options,
+      requestedFailLabel: `module "${requestedId}" cannot judge translations`,
+      ...(requestedId !== undefined ? { requestedId } : {}),
+      ...(requestedModel ? { requestedModel } : {}),
     });
   }
 
@@ -338,14 +369,30 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     // writes stay tenant-scoped.
     const tenant = getCurrentTenant();
 
+    // Set by `selectModule` below, which `enqueueBatched` resolves strictly
+    // before it invokes `dispatch`: the free-tier bucket the run spends
+    // against, or undefined for an ordinary module.
+    let freeway: FreewayBatchBinding | undefined;
+
     return this.enqueueBatched<JudgeItem>({
       projectId,
       loadContext: async () => ({
         project: await this.projectStore.loadProject(projectId),
         global: await this.globalConfigStore.load(),
       }),
-      selectModule: (project, global, logSink) =>
-        this.selectJudgeModule(project, global, sessionId, override, logSink),
+      selectModule: async (project, global, logSink) => {
+        const selected = await this.selectJudgeModule(
+          project,
+          global,
+          sessionId,
+          override,
+          logSink,
+        );
+        if (selected.bucketKey !== undefined) {
+          freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+        }
+        return selected;
+      },
       buildItems: async (project) => {
         const allEntries = await this.stringStore.load(projectId);
         // Modern runs carry their request; legacy/request-less runs (e.g. created
@@ -476,6 +523,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
                 scoreTotal: () => scoreSum,
               },
               dispatchOptions,
+              freeway,
             );
           this.queue.add(runId, tenant ? () => runWithTenant(tenant, body) : body);
         }
@@ -553,7 +601,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     const priorLogs = await this.runStore.getJudgeLogs(projectId, runId);
     const runWasVerbose = priorLogs.length > 0;
     const { logSink, logs } = this.buildLogSink();
-    const { module, moduleId } = this.selectJudgeModule(
+    const { module, moduleId, bucketKey } = await this.selectJudgeModule(
       project,
       global,
       sessionId,
@@ -593,6 +641,12 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     let verdicts;
     try {
       verdicts = await module.judgeTranslations!([item]);
+      // One provider call, debited against the run's bucket when this
+      // single-item judge is running on the free-tier target.
+      await this.recordFreewayDispatch(
+        bucketKey !== undefined ? { bucketKey, deps: this.freewayOverrides } : undefined,
+        verdicts.map((v) => v.usage),
+      );
     } finally {
       if (runWasVerbose && logs.length > 0) {
         await this.runStore
@@ -710,6 +764,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     verdictRecords: JudgeVerdictRecord[],
     scores: { addScore: (score: number) => void; scoreTotal: () => number },
     dispatchOptions?: BatchDispatchOptions,
+    freeway?: FreewayBatchBinding,
   ): Promise<void> {
     // The exact (restored) text each item was judged against, so the verdict
     // record can carry it forward — the live translation may change or vanish
@@ -726,6 +781,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       call: (signal) => module.judgeTranslations!(batch, signal, dispatchOptions),
       failureKey: (item) => item,
       usageOf: (verdict) => verdict.usage,
+      ...(freeway ? { freeway } : {}),
       onComplete: (s) => this.stampSourceRun(s),
       onResult: async (verdict, status) => {
         if (verdict.error) {

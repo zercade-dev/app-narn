@@ -350,6 +350,14 @@ export interface RunDetails {
    * shipped. Backs the Activity tab's "Revert" action.
    */
   previousValues?: RunDetailPreviousValue[];
+  /**
+   * Human-readable "why routed" log for a Freeway-managed run: one line per
+   * resolution assignment, reroute, escalation, or quota deferral, in the
+   * order they occurred. Absent for runs with no Freeway (`freeway` virtual
+   * target) decisions. Surfaced behind the Activity tab's "Show details"
+   * affordance alongside the entry/retry log.
+   */
+  freeway?: string[];
 }
 
 /**
@@ -408,4 +416,17 @@ export interface RunStatus {
   reverted?: boolean;
   /** Epoch ms when the run was reverted. Absent unless `reverted` is true. */
   revertedAt?: number;
+  /**
+   * Set while the run is paused waiting on the freeway module's shared quota
+   * to free up. `resumeAt` is the epoch ms the engine will retry at; `pairs`
+   * are the still-pending (entry, target language) jobs. Absent otherwise.
+   *
+   * `skipReason` is set when the auto-resume declined to re-plan the run even
+   * though it was due — today only when the run's session can no longer see any
+   * free-tier bucket at all, which would turn every parked pair into a failure.
+   * It makes an otherwise silent, indefinitely-parked run explainable in the UI
+   * (the run keeps blocking its project's queue meanwhile); cleared the moment
+   * the run is actually resumed.
+   */
+  waitingForQuota?: { resumeAt: number; pairs: RunEntryLanguagePair[]; skipReason?: string };
 }

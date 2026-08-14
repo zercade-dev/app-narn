@@ -1,0 +1,15 @@
+{
+  "save": "保存",
+  "cancel": "キャンセル",
+  "loading": "読み込み中…",
+  "changelogEntryError": "このリリースの変更履歴を読み込めませんでした。",
+  "changelogShowOlder": "過去のリリースを表示（{{count}}）",
+  "saving": "保存中…",
+  "thinking": "思考中…{{seconds}}秒",
+  "webSearch": {
+    "title": "ウェブ検索",
+    "placeholder": "Googleで検索…",
+    "hint": "新しいタブで検索するには、Enterを押してください",
+    "action": "検索"
+  }
+}

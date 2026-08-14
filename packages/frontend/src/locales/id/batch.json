@@ -1,0 +1,10 @@
+{
+  "translateSelected": "Terjemahkan yang dipilih",
+  "toTranslateCount": "{{count}} untuk diterjemahkan",
+  "progressAriaLabel": "Diterjemahkan: {{completed}} dari {{total}}",
+  "cancelRun": "Batalkan putaran",
+  "runCancelled": "Putaran dibatalkan:",
+  "runCompleted": "Penerjemahan selesai — {{completed}} dari {{total}} berhasil.",
+  "runCompletedWithErrors": "Penerjemahan selesai — {{completed}} berhasil, {{failed}} gagal.",
+  "savedRulesNotice": "Putaran memakai aturan penyaluran yang tersimpan — suntingan yang belum disimpan di penyunting aturan tidak berpengaruh."
+}

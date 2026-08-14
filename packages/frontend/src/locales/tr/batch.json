@@ -1,0 +1,10 @@
+{
+  "translateSelected": "Seçilenleri çevir",
+  "toTranslateCount": "yapılacak {{count}} çeviri",
+  "progressAriaLabel": "{{total}} çeviriden {{completed}} tanesi tamamlandı",
+  "cancelRun": "Çalıştırmayı iptal et",
+  "runCancelled": "Çalıştırma iptal edildi:",
+  "runCompleted": "Çeviri tamamlandı — {{total}} çeviriden {{completed}} tanesi başarılı.",
+  "runCompletedWithErrors": "Çeviri tamamlandı — {{completed}} çeviri başarılı, {{failed}} çeviri başarısız.",
+  "savedRulesNotice": "Çalıştırmalar kayıtlı yönlendirme kurallarını kullanır — kural düzenleyicideki kaydedilmemiş değişikliklerin etkisi olmaz."
+}

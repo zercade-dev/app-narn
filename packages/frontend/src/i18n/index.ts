@@ -23,6 +23,20 @@ void i18n.use(initReactI18next).init({
   },
   lng: 'en',
   fallbackLng: 'en',
+  // The app's locale codes are all lowercase, including the three compound
+  // ones (`pt-br`, `zh-hans`, `zh-hant`) — that is what the locale folders on
+  // disk are named and what `UiLanguage`/`UI_LANGS` persist. Without this
+  // option, i18next canonicalizes a requested code before looking up its
+  // resource bundle (`zh-hans` -> `zh-Hans`, `pt-br` -> `pt-BR`), which does
+  // not match any bundle registered by `loadLocale()` below (bundles are
+  // stored under the raw lowercase code). The lookup misses and
+  // `resolvedLanguage` falls back to `en` — silently, with no error, so the
+  // picker still shows the compound locale selected while the whole UI
+  // renders in English. Two-letter codes are unaffected by canonicalization,
+  // which is why this only ever broke the three compound ones.
+  // `lowerCaseLng: true` makes i18next format requested codes to lowercase
+  // instead, matching the casing every bundle is actually stored under.
+  lowerCaseLng: true,
   // `escapeValue: false` disables i18next's own HTML-escaping of interpolated
   // values. This is SAFE here only because React already escapes every JSX text
   // child (translated strings render as `{t('key')}`), and no translated string
@@ -31,6 +45,39 @@ void i18n.use(initReactI18next).init({
   // (`escapeValue: true`) — or escape at that sink — to avoid XSS.
   interpolation: { escapeValue: false },
 });
+
+// Keep the document's language in step with the UI language.
+//
+// `index.html` ships a static `lang="en"`, and until this hook existed nothing
+// ever updated it — so every non-English UI claimed to be English. That is not
+// cosmetic: CSS `text-transform: uppercase` is language-sensitive *only* via
+// `lang`, and the app uppercases labels in several places (run detail headings,
+// guide group headings, AI-review column headings). With `lang="en"` the
+// browser applies default Unicode casing, so Turkish dotted "i" uppercases to
+// "I" instead of "İ" — "Çeviri" renders as "ÇEVIRI", which is misspelt in
+// Turkish. Twelve shipped Turkish labels were affected, and no guard can see it
+// because the JSON is correct; only the rendering is wrong.
+//
+// Screen-reader pronunciation, hyphenation, spell-check and font fallback all
+// key off the same attribute, so this is a correctness fix for every locale,
+// not only for the ones with locale-specific casing rules.
+//
+// `languageChanged` fires on `changeLanguage()`, including the initial call, and
+// `resolvedLanguage` is used rather than the requested code so a fallback is
+// reflected honestly.
+function syncDocumentLanguage() {
+  if (typeof document === 'undefined') return;
+  document.documentElement.lang = i18n.resolvedLanguage ?? 'en';
+}
+
+i18n.on('languageChanged', syncDocumentLanguage);
+
+// `init()` above emits `languageChanged` synchronously, before this listener
+// exists, so the initial value is set here rather than relied on from the event.
+// The markup already says `en` and the initial language is `en`, so this is
+// currently a no-op — it is written so the invariant holds by construction
+// instead of by that coincidence.
+syncDocumentLanguage();
 
 const loadedLocales = new Set<string>(['en']);
 

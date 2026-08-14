@@ -1,0 +1,17 @@
+{
+  "contextLabel": "Sertakan konteks entri",
+  "contextHint": "Tambahkan rincian entri ke prompt untuk memperbaiki sarannya.",
+  "fieldContext": "Catatan konteks",
+  "fieldSources": "Label sumber",
+  "fieldCategories": "Kategori yang ditugaskan",
+  "languagesLabel": "Kirim terjemahan yang ada sebagai konteks",
+  "languagesHint": "Kirim terjemahan tiap entri yang sudah selesai pada bahasa terpilih sebagai konteks tambahan.",
+  "selectAllLanguages": "Pilih semua",
+  "deselectAllLanguages": "Batal pilih semua",
+  "skipCategoriesLabel": "Lewati kategori",
+  "skipCategoriesHint": "Entri yang membawa salah satu kategori ini sama sekali tidak disertakan dalam permintaan.",
+  "skipCategoriesPlaceholder": "Belum ada yang dipilih",
+  "ignoreGlossariesLabel": "Abaikan glosarium yang ada",
+  "ignoreGlossariesHint": "Istilah dari glosarium terpilih diperlakukan sebagai terminologi yang sudah diketahui: untuk pembuatan glosarium, istilah itu dikirim sebagai sudah diketahui agar model tidak menyarankannya lagi; untuk pembuatan kategori, entri yang cocok dengan istilah tersebut sama sekali tidak disertakan dalam permintaan.",
+  "ignoreGlossariesPlaceholder": "Belum ada yang dipilih"
+}

@@ -1,0 +1,55 @@
+{
+  "title": "孤立條目",
+  "subtitle": "最新匯入的 CSV 中已不存在的條目。您可以刪除它們，或把譯文重新連結到其他條目上。",
+  "emptyTitle": "全部都已連結",
+  "empty": "沒有孤立條目——匯入的 CSV 與目前的專案相符。",
+  "columns": {
+    "select": "選取",
+    "source": "原文",
+    "translations": "譯文",
+    "actions": "動作"
+  },
+  "actions": {
+    "delete": "刪除",
+    "relink": "重新連結",
+    "bulkDelete": "刪除所選（{{count}}）",
+    "refresh": "重新整理",
+    "cancel": "取消",
+    "back": "返回"
+  },
+  "confirmDelete": {
+    "title": "要刪除孤立條目嗎？",
+    "body": "這會永久刪除這個孤立條目及其譯文，且無法復原。"
+  },
+  "relink": {
+    "title": "重新連結孤立條目",
+    "description": "把這個孤立條目的譯文移到另一個條目上；候選項會依原文與這個孤立條目的相似程度排序。",
+    "searchPlaceholder": "依原文搜尋條目…",
+    "noCandidates": "沒有符合的條目",
+    "submit": "繼續",
+    "confirmTitle": "確認重新連結",
+    "confirmDescription": "重新連結前，請選擇孤立條目的譯文要如何套用到目標條目上。",
+    "overrideModeLabel": "覆寫模式",
+    "overrideEmptyOnly": "只填入空白的譯文（保留目標條目既有的譯文）",
+    "overrideAll": "以孤立條目的譯文覆寫全部譯文",
+    "aiRetranslateLabel": "使用 AI 重新翻譯",
+    "aiRetranslateHint": "重新連結後，AI 會比對孤立條目的舊原文與目標條目的新原文，並更新每則既有譯文以反映相同的修改。",
+    "aiModuleLabel": "AI 模組",
+    "aiModelLabel": "模型",
+    "aiReasoningEffortLabel": "推理強度",
+    "aiModulePlaceholder": "選擇模組…",
+    "aiNoModules": "沒有已啟用且具備 AI 能力的模組——請在全域設定中啟用一個，才能使用 AI 重新翻譯。",
+    "confirmSubmit": "重新連結"
+  },
+  "toast": {
+    "loadError": "無法載入孤立條目",
+    "deleted": "已刪除孤立條目",
+    "deleteError": "刪除孤立條目失敗",
+    "bulkDeleted": "已刪除 {{count}} 個孤立條目",
+    "relinked": "譯文已移轉",
+    "relinkError": "無法重新連結孤立條目",
+    "candidatesError": "無法載入重新連結的候選條目",
+    "aiRetranslateStarted": "AI 重新翻譯已開始——請查看活動分頁",
+    "aiRetranslateUnavailable": "已重新連結，但 AI 重新翻譯無法開始（沒有可用且具備 AI 能力的模組）"
+  }
+}

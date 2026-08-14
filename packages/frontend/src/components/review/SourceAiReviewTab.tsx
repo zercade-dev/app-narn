@@ -4,6 +4,7 @@ import {
   type Glossary,
   type SourceReviewFindingType,
   type StringEntry,
+  FREEWAY_MODULE_ID,
 } from '@zercade-dev/narn-shared';
 import {
   Loader2,
@@ -31,7 +32,7 @@ import {
 } from '@/components/ui/dialog';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { LanguageSelect } from '@/components/ui/language-select';
-import { ModuleSelect } from '@/components/ui/module-select';
+import { ModuleSelect, type ModuleSelectOption } from '@/components/ui/module-select';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
@@ -149,6 +150,9 @@ const SOURCE_REVIEW_SETTINGS_DEFAULTS = {
  */
 export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   const { t } = useTranslation('review');
+  // Only for the synthetic Freeway option's label below (`config:routing.freewayLabel`,
+  // reused from the routing picker rather than duplicating the string here).
+  const { t: tConfig } = useTranslation('config');
 
   const runs = useRunStore((s) => s.runs);
   const fetchRuns = useRunStore((s) => s.fetchRuns);
@@ -247,12 +251,38 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   // modules that implement the judge). Only named instances (and any
   // non-instanceable module) are offered; bare instanceable base modules are
   // managed through their instances, mirroring the global config module list.
-  const reviewModules = useMemo(() => {
+  const realReviewModules = useMemo(() => {
     const withInstances = basesWithInstances(modules);
     return modules.filter(
       (m) => m.supportsJudge && isOfferableModule(m, withInstances) && isEnabledModule(m),
     );
   }, [modules]);
+  // The review picker also offers a synthetic NARN Freeway target (M26
+  // SourceReviewEngine already accepts moduleId 'freeway', resolving via the
+  // free pool at background priority) — appended here at THIS composition
+  // site only, mirroring AppShell's RoutingTabContent `routingModules`
+  // pattern, and run through the SAME isOfferableModule/isEnabledModule
+  // predicates real modules use (both accept it: `instanceable: false`,
+  // `enabled: true`), rather than being force-included. Only added once
+  // `realReviewModules` is non-empty — that both keeps Freeway from ever
+  // being the *sole* offered option (the "no review modules" empty state
+  // below stays exactly as it was: real API modules only) and avoids a
+  // mount-time race where the synthetic entry would otherwise appear on the
+  // very first render, before the async `/modules` fetch has resolved.
+  const reviewModules = useMemo<ModuleSelectOption[]>(() => {
+    if (realReviewModules.length === 0) return realReviewModules;
+    const withInstances = basesWithInstances(modules);
+    return [
+      ...modules,
+      {
+        id: FREEWAY_MODULE_ID,
+        name: tConfig('routing.freewayLabel'),
+        instanceable: false,
+        supportsJudge: true,
+        enabled: true,
+      },
+    ].filter((m) => m.supportsJudge && isOfferableModule(m, withInstances) && isEnabledModule(m));
+  }, [modules, realReviewModules, tConfig]);
 
   // Apply last-used module/model/effort when the config dialog opens. Stored
   // values are applied only while that module is still review-capable —
@@ -261,8 +291,8 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   // AiReviewDialog.)
   const [prevConfigOpen, setPrevConfigOpen] = useState(false);
   // Stashes a stored module/model/effort triple from the open transition below
-  // until `reviewModules` (async, [] on mount) has actually loaded — see the
-  // adjustment block right after this one.
+  // until `realReviewModules` (async, [] on mount) has actually loaded — see
+  // the adjustment block right after this one.
   const [pendingStored, setPendingStored] = useState<{
     moduleId: string;
     model: string;
@@ -285,11 +315,14 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   }
 
   // Apply the stashed stored module choice once the async module list has
-  // loaded (reviewModules is [] on the mount-time-adjacent open transition
-  // above if it fires before /modules resolves). Applied at most once per
-  // open; an unknown/no-longer-eligible stored module is dropped so the
-  // default chain below stays in charge.
-  if (pendingStored && reviewModules.length > 0) {
+  // loaded (realReviewModules is [] on the mount-time-adjacent open
+  // transition above if it fires before /modules resolves; gated on
+  // realReviewModules rather than reviewModules since the latter always
+  // contains at least the synthetic Freeway entry, which would never let this
+  // wait for the real fetch). Applied at most once per open; an
+  // unknown/no-longer-eligible stored module is dropped so the default chain
+  // below stays in charge.
+  if (pendingStored && realReviewModules.length > 0) {
     setPendingStored(null);
     if (reviewModules.some((m) => m.id === pendingStored.moduleId)) {
       setUserModuleId(pendingStored.moduleId);
@@ -321,7 +354,7 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
       : '';
   const reasoningEffort = userReasoningEffort ?? defaultReasoningEffort;
   const confidenceContext = useConfidenceContext('source-review', reasoningEffort);
-  const noReviewModules = modules.length > 0 && reviewModules.length === 0;
+  const noReviewModules = modules.length > 0 && realReviewModules.length === 0;
 
   // Ensure runs and entries load when opening the tab directly.
   useEffect(() => {
@@ -578,7 +611,7 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
                   />
                 </div>
 
-                {moduleId && (
+                {moduleId && moduleId !== FREEWAY_MODULE_ID && (
                   <div className="space-y-1.5">
                     <Label htmlFor="source-ai-model">{t('sourceAi.model')}</Label>
                     <ModuleModelSelector
@@ -594,7 +627,7 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
                   </div>
                 )}
 
-                {moduleId && (
+                {moduleId && moduleId !== FREEWAY_MODULE_ID && (
                   <ModuleReasoningEffortSelect
                     moduleId={moduleId}
                     model={userModel || undefined}
@@ -603,6 +636,18 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
                     id="source-ai-reasoning-effort"
                     label={t('sourceAi.reasoningEffort')}
                   />
+                )}
+
+                {/* Freeway picks its own model per batch — no model/effort route
+                    (`/api/modules/freeway/models`) exists for the selectors above
+                    to call, so they're replaced with a one-line explanation. */}
+                {moduleId === FREEWAY_MODULE_ID && (
+                  <p
+                    className="text-xs text-muted-foreground"
+                    data-testid="source-ai-freeway-model-hint"
+                  >
+                    {t('sourceAi.freewayModelHint')}
+                  </p>
                 )}
               </>
             )}

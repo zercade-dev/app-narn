@@ -1,0 +1,18 @@
+{
+  "countdown": {
+    "message": "⚠️ Il servizio verrà riavviato a breve per applicare un aggiornamento: salva subito il tuo lavoro. Le traduzioni in corso verranno interrotte; le voci completate vengono conservate, quindi riesegui in seguito ciò che è rimasto incompiuto.",
+    "collapse": "Comprimi",
+    "expand": "Espandi"
+  },
+  "restarted": {
+    "message": "Il servizio è stato riavviato di recente per applicare un aggiornamento; alcune attività potrebbero essere state interrotte: riesegui ciò che sembra incompleto.",
+    "dismiss": "Chiudi"
+  },
+  "cancelled": {
+    "message": "Il riavvio programmato del servizio è stato annullato: puoi continuare a lavorare normalmente.",
+    "dismiss": "Chiudi"
+  },
+  "slot": {
+    "aria": "Stai usando l'ambiente {{label}}"
+  }
+}

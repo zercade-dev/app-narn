@@ -40,6 +40,7 @@ export const CHAT_SUPPORTED_BASE = [
   'google',
   'deepseek',
   'openrouter',
+  'groq',
   'generic-ai',
 ] as const;
 
