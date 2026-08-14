@@ -6,8 +6,8 @@
  *
  * Data comes from `GET /api/freeway/status` (read-only, session-aware — a
  * locked vault simply reports every bucket 'uncredentialed'). The one-click
- * "Add" button posts `POST /api/freeway/presets/:key` for the three
- * generic-ai-backed providers (groq, mistral, cerebras); on success it opens
+ * "Add" button posts `POST /api/freeway/presets/:key` for the two
+ * generic-ai-backed providers (mistral, cerebras); on success it opens
  * the shared vault-key editor via `onEditVaultKey`, the same callback prop
  * `ModuleSettingsPanel` uses, and refreshes the status table. That preset
  * route is local-mode-only (v1): the status payload's `presetsAvailable` flag
@@ -75,15 +75,15 @@ const EMPTY_STATUS: FreewayStatusResponse = {
   presetsAvailable: false,
 };
 
-/** The three generic-ai-backed providers the one-click preset route can create. */
-const PRESET_PROVIDER_KEYS = new Set(['groq', 'mistral', 'cerebras']);
+/** The two generic-ai-backed providers the one-click preset route can create. */
+const PRESET_PROVIDER_KEYS = new Set(['mistral', 'cerebras']);
 
 /** Mirrors the server's `MODULE_DISABLED_REASON` (routes/freeway.ts). */
 const MODULE_DISABLED_REASON = 'module-disabled';
 
 /**
  * Display names for the bundled snapshot's providers — a small, stable set
- * mirroring the server's own `PRESET_DISPLAY_NAMES` for the three presets;
+ * mirroring the server's own `PRESET_DISPLAY_NAMES` for the two presets;
  * falls back to the raw key for any future provider added to the snapshot.
  */
 const PROVIDER_DISPLAY_NAMES: Record<string, string> = {

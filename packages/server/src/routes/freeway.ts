@@ -38,7 +38,7 @@ export const freewayRouter: Router = Router();
 
 const GENERIC_AI_BASE_MODULE_ID = 'generic-ai';
 
-const PRESET_KEYS = ['groq', 'mistral', 'cerebras'] as const;
+const PRESET_KEYS = ['mistral', 'cerebras'] as const;
 type PresetKey = (typeof PRESET_KEYS)[number];
 const presetKeySchema = z.enum(PRESET_KEYS);
 // The preset route takes no body fields. `express.json()` leaves `req.body`
@@ -47,7 +47,6 @@ const presetKeySchema = z.enum(PRESET_KEYS);
 const presetBodySchema = z.object({}).optional();
 
 const PRESET_DISPLAY_NAMES: Record<PresetKey, string> = {
-  groq: 'Groq',
   mistral: 'Mistral',
   cerebras: 'Cerebras',
 };
