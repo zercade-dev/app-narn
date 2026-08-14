@@ -41,6 +41,7 @@
     "@zercade-dev/narn-module-deepseek": "workspace:*",
     "@zercade-dev/narn-module-generic-ai": "workspace:*",
     "@zercade-dev/narn-module-google": "workspace:*",
+    "@zercade-dev/narn-module-groq": "workspace:*",
     "@zercade-dev/narn-module-openai": "workspace:*",
     "@zercade-dev/narn-module-openrouter": "workspace:*",
     "@zercade-dev/narn-module-pseudo": "workspace:*",

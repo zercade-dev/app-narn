@@ -14,10 +14,10 @@ characters, elements, reactions, stats, nations, ranks and Miliastra's own vocab
 writes back a file the game can import.
 
 It connects to AI models (Claude, GPT, Gemini, DeepSeek, GitHub Copilot, and more — Google
-AI Studio and OpenRouter both have free tiers) and classical machine translation (DeepL),
-keeps your terminology consistent with glossaries, never re-translates the same line twice
-with translation memory, and catches mistakes with AI-powered review — all from one
-workbench.
+AI Studio, OpenRouter, and Groq all have free tiers) and classical machine translation
+(DeepL), keeps your terminology consistent with glossaries, never re-translates the same
+line twice with translation memory, and catches mistakes with AI-powered review — all from
+one workbench.
 
 Nothing about it is Miliastra-only: if you have a CSV of text in any language, NARN will
 translate it. That is simply the workflow it was built around.

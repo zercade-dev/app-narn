@@ -738,7 +738,7 @@ export interface FreewayBucketStats {
 }
 
 export interface FreewayBucketState {
-  /** `'<moduleOrInstanceId>::<modelId>'`, e.g. `google::gemini-2.5-flash`, `generic-ai:groq::llama-3.3-70b-versatile`. */
+  /** `'<moduleOrInstanceId>::<modelId>'`, e.g. `google::gemini-2.5-flash`, `generic-ai:mistral::mistral-small-latest`. */
   bucketKey: string;
   cooldownUntil?: number;
   disabledReason?: string;

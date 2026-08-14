@@ -981,6 +981,51 @@ export async function resolveOpenRouterModels({
   }
 }
 
+// ─── Groq ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Non-text GroqCloud model families to exclude from the picker: speech-to-text
+ * (whisper), text-to-speech (including the `orpheus` TTS family, whose ids
+ * don't contain "tts"), and moderation/guard models can't serve a translate
+ * request. Matched against the model id, case-insensitively.
+ */
+const GROQ_NON_TEXT_ID_PATTERN = /whisper|tts|orpheus|guard|safety/i;
+
+/**
+ * Live GroqCloud catalog (openai/v1/models): id-only listing, no pricing or
+ * context-length fields in the response (unlike OpenRouter). Non-text model
+ * families (whisper/tts/orpheus/guard/safety) are filtered out.
+ */
+export async function resolveGroqModels({ apiKey }: { apiKey: string }): Promise<ModelInfo[]> {
+  try {
+    const headers: Record<string, string> = {};
+    if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+
+    const res = await ssrfFetch('https://api.groq.com/openai/v1/models', { headers });
+    if (!res.ok) {
+      console.warn(`[groq] fetch failed (HTTP ${res.status}) key=${maskSecret(apiKey)}`);
+      throwIfAuthOrRateLimitStatus('groq', res.status, '');
+      return [];
+    }
+
+    const json = (await res.json()) as { data: Array<{ id: string }> };
+
+    const models: ModelInfo[] = [];
+    for (const m of json.data) {
+      if (GROQ_NON_TEXT_ID_PATTERN.test(m.id)) continue;
+      models.push({ id: m.id, supportedReasoningEfforts: [] });
+    }
+    return models;
+  } catch (err) {
+    if (err instanceof AuthError || err instanceof RateLimitError) throw err;
+    console.error(
+      `[groq] fetch error key=${maskSecret(apiKey)}`,
+      redactSecretsFromError(err, [apiKey]),
+    );
+    return [];
+  }
+}
+
 export async function resolveGenericModels({
   apiKey,
   baseURL,

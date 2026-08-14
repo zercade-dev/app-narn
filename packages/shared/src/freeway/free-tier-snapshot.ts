@@ -53,7 +53,7 @@ export interface FreeTierProvider {
    */
   sharedLimits?: FreeTierLimit[];
   /**
-   * generic-ai preset providers only (groq, mistral, cerebras): the
+   * generic-ai preset providers only (mistral, cerebras): the
    * OpenAI-compatible base URL a one-click Freeway preset instance is
    * pre-shaped with.
    */

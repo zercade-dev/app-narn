@@ -65,6 +65,7 @@ export const GUIDE_GROUPS: GuideGroup[] = [
       { slug: 'configure-google', labelKey: 'guide.topicGoogle' },
       { slug: 'configure-claude', labelKey: 'guide.topicClaude' },
       { slug: 'configure-gpt', labelKey: 'guide.topicGpt' },
+      { slug: 'configure-groq', labelKey: 'guide.topicGroq' },
       { slug: 'configure-openrouter', labelKey: 'guide.topicOpenrouter' },
       { slug: 'configure-generic-ai', labelKey: 'guide.topicGenericAi', localOnly: true },
       { slug: 'configure-deepl', labelKey: 'guide.topicDeepl' },
