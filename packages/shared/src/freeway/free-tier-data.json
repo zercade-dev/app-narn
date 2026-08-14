@@ -251,7 +251,7 @@
       ]
     },
     "groq": {
-      "moduleId": "generic-ai:groq",
+      "moduleId": "groq",
       "resetTimeZone": "UTC",
       "presetBaseUrl": "https://api.groq.com/openai/v1",
       "presetDefaultModel": "llama-3.3-70b-versatile",
