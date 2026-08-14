@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-13",
+  "generatedAt": "2026-08-14",
   "providers": {
     "google": {
       "moduleId": "google",
@@ -12,8 +12,14 @@
           "maxBatch": 30,
           "contextLength": 1048576,
           "limits": [
-            { "window": "rpm", "limit": 10 },
-            { "window": "rpd", "limit": 250 }
+            {
+              "window": "rpm",
+              "limit": 5
+            },
+            {
+              "window": "rpd",
+              "limit": 20
+            }
           ]
         },
         {
@@ -23,8 +29,116 @@
           "maxBatch": 20,
           "contextLength": 1048576,
           "limits": [
-            { "window": "rpm", "limit": 15 },
-            { "window": "rpd", "limit": 1000 }
+            {
+              "window": "rpm",
+              "limit": 15
+            },
+            {
+              "window": "rpd",
+              "limit": 500
+            }
+          ]
+        },
+        {
+          "id": "gemma-4-31b-it",
+          "qualityTier": 3,
+          "useStructuredOutput": false,
+          "maxBatch": 20,
+          "contextLength": 262144,
+          "limits": [
+            {
+              "window": "rpm",
+              "limit": 30
+            },
+            {
+              "window": "rpd",
+              "limit": 14400
+            }
+          ]
+        },
+        {
+          "id": "gemma-4-26b-a4b-it",
+          "qualityTier": 3,
+          "useStructuredOutput": false,
+          "maxBatch": 20,
+          "contextLength": 262144,
+          "limits": [
+            {
+              "window": "rpm",
+              "limit": 30
+            },
+            {
+              "window": "rpd",
+              "limit": 14400
+            }
+          ]
+        },
+        {
+          "id": "gemini-3-flash-preview",
+          "qualityTier": 3,
+          "useStructuredOutput": true,
+          "maxBatch": 30,
+          "contextLength": 1048576,
+          "limits": [
+            {
+              "window": "rpm",
+              "limit": 5
+            },
+            {
+              "window": "rpd",
+              "limit": 20
+            }
+          ]
+        },
+        {
+          "id": "gemini-3.6-flash",
+          "qualityTier": 3,
+          "useStructuredOutput": true,
+          "maxBatch": 30,
+          "contextLength": 1048576,
+          "limits": [
+            {
+              "window": "rpm",
+              "limit": 5
+            },
+            {
+              "window": "rpd",
+              "limit": 20
+            }
+          ]
+        },
+        {
+          "id": "gemini-3.5-flash",
+          "qualityTier": 3,
+          "useStructuredOutput": true,
+          "maxBatch": 30,
+          "contextLength": 1048576,
+          "limits": [
+            {
+              "window": "rpm",
+              "limit": 5
+            },
+            {
+              "window": "rpd",
+              "limit": 20
+            }
+          ]
+        },
+        {
+          "id": "gemini-3.1-flash-lite",
+          "qualityTier": 2,
+          "useStructuredOutput": true,
+          "maxBatch": 20,
+          "contextLength": 1048576,
+          "limits": [
+            {
+              "window": "rpm",
+              "limit": 15
+            },
+            {
+              "window": "rpd",
+              "limit": 500
+            }
           ]
         }
       ]
@@ -34,8 +148,14 @@
       "resetTimeZone": "UTC",
       "probe": "openrouter-key",
       "sharedLimits": [
-        { "window": "rpm", "limit": 20 },
-        { "window": "rpd", "limit": 50 }
+        {
+          "window": "rpm",
+          "limit": 20
+        },
+        {
+          "window": "rpd",
+          "limit": 50
+        }
       ],
       "models": [
         {
@@ -45,8 +165,14 @@
           "maxBatch": 25,
           "contextLength": 1000000,
           "limits": [
-            { "window": "rpm", "limit": 20 },
-            { "window": "rpd", "limit": 50 }
+            {
+              "window": "rpm",
+              "limit": 20
+            },
+            {
+              "window": "rpd",
+              "limit": 50
+            }
           ]
         },
         {
@@ -56,8 +182,14 @@
           "maxBatch": 25,
           "contextLength": 262144,
           "limits": [
-            { "window": "rpm", "limit": 20 },
-            { "window": "rpd", "limit": 50 }
+            {
+              "window": "rpm",
+              "limit": 20
+            },
+            {
+              "window": "rpd",
+              "limit": 50
+            }
           ]
         },
         {
@@ -67,8 +199,14 @@
           "maxBatch": 20,
           "contextLength": 262144,
           "limits": [
-            { "window": "rpm", "limit": 20 },
-            { "window": "rpd", "limit": 50 }
+            {
+              "window": "rpm",
+              "limit": 20
+            },
+            {
+              "window": "rpd",
+              "limit": 50
+            }
           ]
         }
       ]
@@ -82,7 +220,12 @@
           "id": "deepl",
           "qualityTier": 3,
           "maxBatch": 50,
-          "limits": [{ "window": "monthly_chars", "limit": 500000 }]
+          "limits": [
+            {
+              "window": "monthly_chars",
+              "limit": 500000
+            }
+          ]
         }
       ]
     },
@@ -95,8 +238,14 @@
           "qualityTier": 2,
           "maxBatch": 20,
           "limits": [
-            { "window": "rpm", "limit": 10 },
-            { "window": "rpd", "limit": 80 }
+            {
+              "window": "rpm",
+              "limit": 10
+            },
+            {
+              "window": "rpd",
+              "limit": 80
+            }
           ]
         }
       ]
@@ -113,9 +262,18 @@
           "maxBatch": 25,
           "contextLength": 131072,
           "limits": [
-            { "window": "rpm", "limit": 30 },
-            { "window": "rpd", "limit": 1000 },
-            { "window": "tpm", "limit": 12000 }
+            {
+              "window": "rpm",
+              "limit": 30
+            },
+            {
+              "window": "rpd",
+              "limit": 1000
+            },
+            {
+              "window": "tpm",
+              "limit": 12000
+            }
           ]
         }
       ]
@@ -132,8 +290,14 @@
           "maxBatch": 20,
           "contextLength": 131072,
           "limits": [
-            { "window": "rpm", "limit": 60 },
-            { "window": "rpd", "limit": 500 }
+            {
+              "window": "rpm",
+              "limit": 60
+            },
+            {
+              "window": "rpd",
+              "limit": 500
+            }
           ]
         }
       ]
@@ -150,9 +314,18 @@
           "maxBatch": 20,
           "contextLength": 65536,
           "limits": [
-            { "window": "rpm", "limit": 30 },
-            { "window": "rpd", "limit": 14400 },
-            { "window": "tpm", "limit": 60000 }
+            {
+              "window": "rpm",
+              "limit": 30
+            },
+            {
+              "window": "rpd",
+              "limit": 14400
+            },
+            {
+              "window": "tpm",
+              "limit": 60000
+            }
           ]
         }
       ]
