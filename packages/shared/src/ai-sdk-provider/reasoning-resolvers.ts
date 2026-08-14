@@ -985,15 +985,16 @@ export async function resolveOpenRouterModels({
 
 /**
  * Non-text GroqCloud model families to exclude from the picker: speech-to-text
- * (whisper), text-to-speech, and moderation/guard models can't serve a
- * translate request. Matched against the model id, case-insensitively.
+ * (whisper), text-to-speech (including the `orpheus` TTS family, whose ids
+ * don't contain "tts"), and moderation/guard models can't serve a translate
+ * request. Matched against the model id, case-insensitively.
  */
-const GROQ_NON_TEXT_ID_PATTERN = /whisper|tts|guard|safety/i;
+const GROQ_NON_TEXT_ID_PATTERN = /whisper|tts|orpheus|guard|safety/i;
 
 /**
  * Live GroqCloud catalog (openai/v1/models): id-only listing, no pricing or
  * context-length fields in the response (unlike OpenRouter). Non-text model
- * families (whisper/tts/guard/safety) are filtered out.
+ * families (whisper/tts/orpheus/guard/safety) are filtered out.
  */
 export async function resolveGroqModels({ apiKey }: { apiKey: string }): Promise<ModelInfo[]> {
   try {

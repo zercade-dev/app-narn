@@ -358,6 +358,22 @@ importers:
         specifier: 'catalog:'
         version: 7.0.2
 
+  modules/groq:
+    dependencies:
+      '@zercade-dev/narn-shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      ai:
+        specifier: 'catalog:'
+        version: 7.0.52(zod@4.4.3)
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.2
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+
   modules/openai:
     dependencies:
       '@ai-sdk/openai':
@@ -523,6 +539,9 @@ importers:
       '@zercade-dev/narn-module-google':
         specifier: workspace:*
         version: link:../../modules/google
+      '@zercade-dev/narn-module-groq':
+        specifier: workspace:*
+        version: link:../../modules/groq
       '@zercade-dev/narn-module-openai':
         specifier: workspace:*
         version: link:../../modules/openai
@@ -3721,7 +3740,7 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
 
   '@types/connect@3.4.38':
     dependencies:
@@ -3729,7 +3748,7 @@ snapshots:
 
   '@types/cors@2.8.19':
     dependencies:
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
 
   '@types/debug@4.1.13':
     dependencies:
@@ -3745,7 +3764,7 @@ snapshots:
 
   '@types/express-serve-static-core@5.1.1':
     dependencies:
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
       '@types/qs': 6.15.1
       '@types/range-parser': 1.2.7
       '@types/send': 1.2.1
@@ -3784,7 +3803,7 @@ snapshots:
 
   '@types/papaparse@5.5.2':
     dependencies:
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
 
   '@types/pg@8.20.3':
     dependencies:
@@ -3811,7 +3830,7 @@ snapshots:
   '@types/serve-static@2.2.0':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
 
   '@types/unist@2.0.11': {}
 
@@ -3819,11 +3838,11 @@ snapshots:
 
   '@types/yauzl@3.4.0':
     dependencies:
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
 
   '@types/yazl@3.3.1':
     dependencies:
-      '@types/node': 26.1.1
+      '@types/node': 26.1.2
 
   '@typescript-eslint/eslint-plugin@8.65.0(@typescript-eslint/parser@8.65.0(eslint@10.8.0(jiti@2.7.0)))(eslint@10.8.0(jiti@2.7.0))':
     dependencies:

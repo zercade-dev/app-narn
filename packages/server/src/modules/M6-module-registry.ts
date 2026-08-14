@@ -87,6 +87,7 @@ const CHAT_PROVIDER_BY_MODULE: Record<string, ProviderType> = {
   google: 'google',
   deepseek: 'deepseek',
   openrouter: 'openrouter',
+  groq: 'groq',
 };
 
 /**

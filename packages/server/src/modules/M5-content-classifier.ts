@@ -53,6 +53,7 @@ const CATEGORY_CAPABLE_MODULES: Record<string, { provider: ProviderType; credent
     google: { provider: 'google', credentialKey: 'GOOGLE_API_KEY' },
     deepseek: { provider: 'deepseek', credentialKey: 'DEEPSEEK_API_KEY' },
     openrouter: { provider: 'openrouter', credentialKey: 'OPENROUTER_API_KEY' },
+    groq: { provider: 'groq', credentialKey: 'GROQ_API_KEY' },
     'generic-ai': { provider: 'openai-compatible', credentialKey: 'GENERIC_API_KEY' },
   };
 
