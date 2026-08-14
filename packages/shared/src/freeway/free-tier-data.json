@@ -255,9 +255,27 @@
       "resetTimeZone": "UTC",
       "models": [
         {
-          "id": "llama-3.3-70b-versatile",
+          "id": "openai/gpt-oss-120b",
           "qualityTier": 3,
-          "maxBatch": 25,
+          "useStructuredOutput": false,
+          "maxBatch": 15,
+          "contextLength": 131072,
+          "limits": [
+            {
+              "window": "rpd",
+              "limit": 1000
+            },
+            {
+              "window": "tpm",
+              "limit": 8000
+            }
+          ]
+        },
+        {
+          "id": "llama-3.3-70b-versatile",
+          "qualityTier": 2,
+          "useStructuredOutput": false,
+          "maxBatch": 20,
           "contextLength": 131072,
           "limits": [
             {

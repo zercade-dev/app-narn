@@ -11,6 +11,7 @@ import {
   billingFromOpenRouterPricing,
 } from './pricing-oracle.js';
 import { createSsrfGuardedFetch, redactUrlUserinfo, validateBaseURL } from './config-coerce.js';
+import { GROQ_BASE_URL, OPENROUTER_BASE_URL } from './model-factory.js';
 
 /**
  * SSRF redirect guard for every outbound discovery / probe / unload fetch in
@@ -932,7 +933,7 @@ export async function resolveOpenRouterModels({
     const headers: Record<string, string> = {};
     if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
 
-    const res = await ssrfFetch('https://openrouter.ai/api/v1/models', { headers });
+    const res = await ssrfFetch(`${OPENROUTER_BASE_URL}/models`, { headers });
     if (!res.ok) {
       console.warn(`[openrouter] fetch failed (HTTP ${res.status}) key=${maskSecret(apiKey)}`);
       throwIfAuthOrRateLimitStatus('openrouter', res.status, '');
@@ -992,28 +993,50 @@ export async function resolveOpenRouterModels({
 const GROQ_NON_TEXT_ID_PATTERN = /whisper|tts|orpheus|guard|safety/i;
 
 /**
- * Live GroqCloud catalog (openai/v1/models): id-only listing, no pricing or
- * context-length fields in the response (unlike OpenRouter). Non-text model
- * families (whisper/tts/orpheus/guard/safety) are filtered out.
+ * Live GroqCloud catalog (openai/v1/models): the response carries both
+ * pricing (dollar-per-token strings, same shape as OpenRouter's `pricing`
+ * block) and a context-window field — usually `context_length`, with some
+ * listings instead (or additionally) carrying `context_window` — plus a
+ * `supported_features` array that flags reasoning-capable models (e.g. the
+ * gpt-oss family). Non-text model families (whisper/tts/orpheus/guard/safety)
+ * are filtered out.
  */
 export async function resolveGroqModels({ apiKey }: { apiKey: string }): Promise<ModelInfo[]> {
   try {
     const headers: Record<string, string> = {};
     if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
 
-    const res = await ssrfFetch('https://api.groq.com/openai/v1/models', { headers });
+    const res = await ssrfFetch(`${GROQ_BASE_URL}/models`, { headers });
     if (!res.ok) {
       console.warn(`[groq] fetch failed (HTTP ${res.status}) key=${maskSecret(apiKey)}`);
       throwIfAuthOrRateLimitStatus('groq', res.status, '');
       return [];
     }
 
-    const json = (await res.json()) as { data: Array<{ id: string }> };
+    const json = (await res.json()) as {
+      data: Array<{
+        id: string;
+        pricing?: { prompt?: string; completion?: string };
+        context_length?: number;
+        context_window?: number;
+        supported_features?: string[];
+      }>;
+    };
 
     const models: ModelInfo[] = [];
     for (const m of json.data) {
       if (GROQ_NON_TEXT_ID_PATTERN.test(m.id)) continue;
-      models.push({ id: m.id, supportedReasoningEfforts: [] });
+      const hasReasoning = m.supported_features?.includes('reasoning') === true;
+      const efforts: ReasoningEffort[] = hasReasoning ? ['low', 'medium', 'high'] : [];
+      const billing = billingFromOpenRouterPricing(m.pricing);
+      const contextLength = normalizePositiveInt(m.context_length ?? m.context_window);
+      models.push({
+        id: m.id,
+        supportedReasoningEfforts: efforts,
+        ...(billing ? { billing } : {}),
+        ...(hasReasoning ? { defaultReasoningEffort: 'medium' as ReasoningEffort } : {}),
+        ...(contextLength !== undefined ? { contextLength } : {}),
+      });
     }
     return models;
   } catch (err) {
