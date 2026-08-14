@@ -284,6 +284,7 @@
     "topicGoogle": "Google AI (Gemini)",
     "topicClaude": "Anthropic (Claude)",
     "topicGpt": "OpenAI (GPT)",
+    "topicGroq": "Groq",
     "topicOpenrouter": "OpenRouter",
     "topicGenericAi": "Generic AI",
     "topicDeepl": "DeepL",
