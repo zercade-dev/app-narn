@@ -52,7 +52,7 @@ change that decides it.
 
 ## Never translated
 
-`NARN` · provider and module names (`DeepL`, `Copilot`, `OpenRouter`, `Anthropic`,
+`NARN` · provider and module names (`DeepL`, `Copilot`, `OpenRouter`, `Groq`, `Anthropic`,
 `Gemini`, `OpenAI`, `DeepSeek`, `GitHub Copilot`) · module ids and module-instance ids
 (`generic-ai`, `openai:default`) · model ids · vault key names (`OPENAI_API_KEY`) ·
 the language code `pseudo-test` · CSV header tokens · version numbers ·
