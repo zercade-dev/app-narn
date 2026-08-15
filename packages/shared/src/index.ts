@@ -7,6 +7,7 @@ export type {
   BatchGroupingDimension,
   AiRunModuleSelection,
 } from './types/project.js';
+export { BATCH_GROUPING_DIMENSIONS } from './types/project.js';
 export type {
   StageDetailFieldId,
   StageDetailTranslation,

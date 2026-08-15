@@ -27,6 +27,7 @@ import {
   isDefaultInstanceId,
   isValidInstanceSlug,
   parseModuleInstanceId,
+  BATCH_GROUPING_DIMENSIONS,
 } from '@zercade-dev/narn-shared';
 import { validateBody } from '../middleware/validate.js';
 import { moduleRegistry } from '../modules/M6-module-registry.js';
@@ -54,7 +55,7 @@ const settingsBodySchema = z.object({
   maxBackupsPerProject: z.number().int().min(1).optional(),
   overflowRatio: z.number().positive().nullable().optional(),
   requestsPerSecond: z.number().min(0).nullable().optional(),
-  batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).optional(),
+  batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   ignoreBatchSizeLimit: z.boolean().optional(),
   requestTimeoutMs: z.number().int().min(1000).nullable().optional(),
   // 0 = unlimited (omit the per-request cap; see core.ts DEFAULT_MAX_OUTPUT_TOKENS).

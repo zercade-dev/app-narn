@@ -15,7 +15,9 @@ import type { StageDetails } from './stage-details.js';
  * Grouping uses exact-set matching (not transitive/union-find) to avoid one
  * broad category merging the whole project into a single group.
  */
-export type BatchGroupingDimension = 'none' | 'category' | 'glossary' | 'both' | 'tone';
+export const BATCH_GROUPING_DIMENSIONS = ['none', 'category', 'glossary', 'both', 'tone'] as const;
+
+export type BatchGroupingDimension = (typeof BATCH_GROUPING_DIMENSIONS)[number];
 
 export type ModuleConfigValues = Record<string, unknown> & {
   batchMode?: ModuleBatchMode;

@@ -22,7 +22,7 @@ import { projectIdParam } from '../middleware/path-params.js';
 import { requireUnlockedVault } from '../middleware/require-vault.js';
 import { reviewOrderService } from '../modules/review-order.js';
 import { requireTenant } from '../storage/pg/tenant-context.js';
-import { PROJECT_ICONS } from '@zercade-dev/narn-shared';
+import { PROJECT_ICONS, BATCH_GROUPING_DIMENSIONS } from '@zercade-dev/narn-shared';
 
 export const projectsRouter: Router = Router();
 
@@ -113,7 +113,7 @@ export const updateProjectSchema = z.object({
   lqaConfig: lqaConfigSchema.optional(),
   tmPolicy: z.enum(['strict', 'relaxed', 'source-only', 'disabled']).optional(),
   /** Per-project override for related-entry batch grouping (absent/null = inherit workspace). */
-  batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).nullable().optional(),
+  batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).nullable().optional(),
   /** Per-project override for the ignore-batch-size-limit toggle (absent/null = inherit workspace). */
   ignoreBatchSizeLimit: z.boolean().nullable().optional(),
   /** Per-category descriptions, keyed by category name (max 500 chars each). */
