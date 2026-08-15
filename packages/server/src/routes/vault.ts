@@ -3,7 +3,8 @@ import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { validateBody } from '../middleware/validate.js';
 import { credentialStore } from '../modules/M16-credential-store.js';
-import { maskSecret } from '@zercade-dev/narn-shared';
+import { clearFreewayCredentialMarks } from '../modules/M32/bucket-source.js';
+import { maskSecret, toErrorMessage } from '@zercade-dev/narn-shared';
 import { validatePasswordStrength } from '../utils/password-validation.js';
 import { createEmptyVaultFile, decryptVault, encryptVault } from '../modules/M18-vault.js';
 import { getSessionId, getIdentity } from '../middleware/session.js';
@@ -270,6 +271,15 @@ vaultRouter.put(
     // never changes it.
     const newVault = await encryptVault({ credentials: snapshot }, password, existingVault.name);
     await getVaultStore().write(newVault);
+
+    // Replacing a key is how a user recovers a Freeway candidate that was
+    // marked bad. A ledger failure must never fail the credential write.
+    try {
+      await clearFreewayCredentialMarks(Object.keys(updates));
+    } catch (err) {
+      logger.warn('vault:freeway-mark-clear-failed', { error: toErrorMessage(err) });
+    }
+
     res.json({ keys: credentialStore.listKeys(sid) });
   }),
 );

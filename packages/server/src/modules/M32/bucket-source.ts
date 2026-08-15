@@ -26,6 +26,7 @@ import type {
 import { getFreewayLedgerStore } from '../../storage/registry.js';
 import { isCloudMode } from '../../identity/registry.js';
 import { moduleRegistry } from '../M6-module-registry.js';
+import { STATIC_MODULES } from '../module-index.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
 import type { BucketView } from './types.js';
 import { updateGatePassEma } from './stats.js';
@@ -140,6 +141,46 @@ export function freewayCandidateIds(
   const rest = instanceIds.filter((id) => id !== preferred).sort((a, b) => a.localeCompare(b));
   const ordered = [...(instanceIds.includes(preferred) ? [preferred] : []), ...rest, baseModuleId];
   return [...new Set(ordered)];
+}
+
+/** Base module id → its first declared manifest env var, from the static registry. */
+function defaultEnvVarFor(baseModuleId: string): string | undefined {
+  return STATIC_MODULES.find((e) => e.manifest.id === baseModuleId)?.manifest.requiredEnvVars?.[0];
+}
+
+/**
+ * Clear the bad-credential marks of every Freeway candidate whose vault key
+ * appears in `updatedVaultKeys`. Called after a credential write: replacing the
+ * key IS the recovery path, so the mark must not outlive it. A candidate's
+ * vault key is the base module's manifest env var for the bare base, and
+ * `deriveInstanceCredentialKey(envVar, slug)` for each instance.
+ */
+export async function clearFreewayCredentialMarks(
+  updatedVaultKeys: readonly string[],
+  deps: BucketSourceDeps & { envVarFor?: (baseModuleId: string) => string | undefined } = {},
+): Promise<void> {
+  const updated = new Set(updatedVaultKeys);
+  if (updated.size === 0) return;
+  const ledger = deps.ledger ?? getFreewayLedgerStore();
+  const snapshot = getFreeTierSnapshot();
+  const instanceIdsFor = deps.instanceIdsFor ?? defaultInstanceIdsFor;
+  const envVarFor = deps.envVarFor ?? defaultEnvVarFor;
+
+  const cleared = new Set<string>();
+  for (const provider of Object.values(snapshot.providers)) {
+    const envVar = envVarFor(provider.moduleId);
+    if (envVar === undefined) continue;
+    for (const candidateId of freewayCandidateIds(
+      provider.moduleId,
+      instanceIdsFor(provider.moduleId),
+    )) {
+      const parsed = parseModuleInstanceId(candidateId);
+      const vaultKey = parsed ? deriveInstanceCredentialKey(envVar, parsed.slug) : envVar;
+      if (!updated.has(vaultKey) || cleared.has(candidateId)) continue;
+      cleared.add(candidateId);
+      await ledger.setDisabled(freewayCredentialKey(candidateId), null);
+    }
+  }
 }
 
 /**
