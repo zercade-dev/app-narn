@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { sanitizeLogObject } from './M16-credential-store.js';
 import { getCurrentTenant } from '../storage/pg/tenant-context.js';
 import { isLogFormatJson } from '../config/env.js';
+import { LogEntryPools, isPriorityLevel, type LogPoolDropCounts } from '@zercade-dev/narn-shared';
 
 export interface LogEntry {
   id: string;
@@ -94,9 +95,24 @@ function clipLogValue(
   }
 }
 
+// Number of most-recent info entries carried alongside the FULL priority pool
+// in getConnectHistory() (the SSE connect replay). Bounded independently of
+// the info pool's own 1000-entry capacity so a freshly (re)connected client
+// gets a reasonably small initial payload — 670+ reconnects/hour have been
+// observed in practice (see the frontend logger-store's own comment), and
+// replaying the whole 1000-entry info pool on every one of those would be
+// wasteful when the priority pool is what a reconnect actually needs intact.
+const CONNECT_HISTORY_INFO_COUNT = 200;
+
 class ConsoleLogger extends EventEmitter {
-  private buffer: LogEntry[] = [];
-  private readonly MAX_BUFFER = 1000;
+  // Severity-partitioned ring buffer (shared `entry-pools.ts`): a `warn`/
+  // `error` entry gets its own capacity plus permanent head retention, so a
+  // flood of routine `info` activity during a large run can never evict it.
+  private readonly pools = new LogEntryPools<LogEntry>({
+    infoCapacity: 1000,
+    priorityCapacity: 1000,
+    priorityHeadCapacity: 50,
+  });
 
   log(level: LogEntry['level'], message: string, metadata?: Record<string, unknown>): void {
     // Defensive credential scrubbing — caller still owns primary masking.
@@ -120,11 +136,11 @@ class ConsoleLogger extends EventEmitter {
       tenantId: getCurrentTenant()?.userId,
     };
 
-    this.buffer.push(entry);
-    if (this.buffer.length > this.MAX_BUFFER) {
-      this.buffer.shift();
-    }
-
+    // Emission is unconditional and must NOT depend on push()'s return value
+    // (it only reports false for a duplicate id, which live logging never
+    // produces — every entry gets a fresh randomUUID() above). Gating emit()
+    // on it would silently drop a live log line the moment ids ever collided.
+    this.pools.push(entry);
     this.emit('log:entry', entry);
 
     // Mirror to Node.js console — never log raw API keys from metadata.
@@ -181,11 +197,8 @@ class ConsoleLogger extends EventEmitter {
       tenantId: getCurrentTenant()?.userId,
     };
 
-    this.buffer.push(entry);
-    if (this.buffer.length > this.MAX_BUFFER) {
-      this.buffer.shift();
-    }
-
+    // See the identical comment in log() above — emission stays unconditional.
+    this.pools.push(entry);
     this.emit('log:entry', entry);
   }
 
@@ -205,13 +218,46 @@ class ConsoleLogger extends EventEmitter {
     this.log('debug', message, metadata);
   }
 
+  /**
+   * The newest `n` entries across both pools, chronological (oldest first).
+   * All entries when `n` is omitted. `n`'s sign is ignored (matches the
+   * pre-pools contract, which used `Math.abs(n)`) — `n` mostly comes from an
+   * untrusted `?n=` query param on `GET /api/logs/history`, and a negative
+   * value there must not turn into an out-of-range slice that returns
+   * nothing.
+   */
   getHistory(n?: number): LogEntry[] {
-    if (n === undefined) return [...this.buffer];
-    return this.buffer.slice(-Math.abs(n));
+    return this.pools.recent(n === undefined ? undefined : Math.abs(n));
+  }
+
+  /**
+   * The SSE connect-replay payload: the FULL priority pool (every retained
+   * `warn`/`error`, including permanently-retained head entries) plus the
+   * most recent {@link CONNECT_HISTORY_INFO_COUNT} info entries, merged
+   * chronologically. Replaces the old `getHistory(50)` replay, which could
+   * silently drop an early error under a flood of routine info activity —
+   * the last 50 entries by insertion order were not necessarily the last 50
+   * that mattered.
+   */
+  getConnectHistory(): LogEntry[] {
+    const priorityEntries = this.pools.priority();
+    // Derive the info-only list from merged() rather than adding a
+    // pools-level "info only" accessor — the pools' public API is
+    // deliberately minimal (see entry-pools.ts) and this filter is cheap
+    // relative to an SSE connect, which happens far less often than a log
+    // call.
+    const infoEntries = this.pools.merged().filter((entry) => !isPriorityLevel(entry.level));
+    const recentInfo = infoEntries.slice(-CONNECT_HISTORY_INFO_COUNT);
+    return [...priorityEntries, ...recentInfo].sort((a, b) => a.timestamp - b.timestamp);
+  }
+
+  /** Eviction counts since the last `clearBuffer()`, one per pool. */
+  droppedCounts(): LogPoolDropCounts {
+    return this.pools.dropped();
   }
 
   clearBuffer(): void {
-    this.buffer = [];
+    this.pools.clear();
   }
 }
 
