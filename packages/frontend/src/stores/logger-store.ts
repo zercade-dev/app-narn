@@ -21,7 +21,7 @@ export interface LogEntry {
  *
  * Also the mechanism behind the SSE reconnect-replay dedupe: `push()` ignores
  * an entry whose id is already held, which matters because the server's
- * connect replay (Task 2) now sends the whole priority pool on every
+ * connect replay sends the whole priority pool on every
  * reconnect, and reconnects have been observed at 670+/hour in practice (see
  * `BASE_RETRY_DELAY_MS` below) — without dedupe, every one of those
  * reconnects would re-insert every priority entry it had already delivered.
@@ -29,7 +29,7 @@ export interface LogEntry {
 const pools = new LogEntryPools<LogEntry>({
   infoCapacity: 500,
   // Must match the server's priority pool capacity (`M15-console-logger.ts`).
-  // The SSE reconnect handler (Task 2) replays the server's ENTIRE priority
+  // The SSE reconnect handler replays the server's ENTIRE priority
   // pool on every reconnect, and reconnects happen 670+/hour in practice (see
   // `BASE_RETRY_DELAY_MS` below). If this is smaller than the server's
   // capacity, a maximal replay overflows this pool and evicts entries that
