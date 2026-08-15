@@ -213,6 +213,7 @@
     "keyPresent": "Schlüssel hinzugefügt",
     "keyMissing": "Noch kein Schlüssel",
     "viaInstance": "über {{instance}}",
+    "viaLegacyBase": "über {{module}} (veraltet)",
     "enableModuleHint": "Schlüssel ist gesetzt, aber das Modul ist deaktiviert.",
     "enableModuleButton": "Aktivieren",
     "disabledReasonChip": "Deaktiviert: {{reason}}",

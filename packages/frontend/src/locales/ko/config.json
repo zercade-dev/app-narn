@@ -208,6 +208,7 @@
     "keyPresent": "키 추가됨",
     "keyMissing": "아직 키 없음",
     "viaInstance": "{{instance}} 경유",
+    "viaLegacyBase": "{{module}} 경유(레거시)",
     "enableModuleHint": "키는 설정되어 있지만 모듈이 비활성화되어 있어요.",
     "enableModuleButton": "활성화",
     "disabledReasonChip": "비활성화: {{reason}}",

@@ -223,6 +223,7 @@
     "keyPresent": "Ключ добавлен",
     "keyMissing": "Ключа пока нет",
     "viaInstance": "через {{instance}}",
+    "viaLegacyBase": "через {{module}} (устаревшее)",
     "enableModuleHint": "Ключ задан, но модуль отключён.",
     "enableModuleButton": "Включить",
     "disabledReasonChip": "Отключено: {{reason}}",

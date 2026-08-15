@@ -208,6 +208,7 @@
     "keyPresent": "เพิ่มคีย์แล้ว",
     "keyMissing": "ยังไม่มีคีย์",
     "viaInstance": "ผ่าน {{instance}}",
+    "viaLegacyBase": "ผ่าน {{module}} (รุ่นเก่า)",
     "enableModuleHint": "ตั้งค่าคีย์แล้ว แต่โมดูลถูกปิดใช้งาน",
     "enableModuleButton": "เปิดใช้งาน",
     "disabledReasonChip": "ปิดใช้งาน: {{reason}}",

@@ -213,6 +213,7 @@
     "keyPresent": "Clé ajoutée",
     "keyMissing": "Pas encore de clé",
     "viaInstance": "via {{instance}}",
+    "viaLegacyBase": "via {{module}} (hérité)",
     "enableModuleHint": "La clé est définie, mais le module est désactivé.",
     "enableModuleButton": "L'activer",
     "disabledReasonChip": "Désactivé : {{reason}}",

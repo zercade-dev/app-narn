@@ -115,6 +115,7 @@ import {
   type BucketSourceDeps,
   coolBucket,
   freewayBucketBaseModuleId,
+  freewayCredentialKey,
   freewayModuleOverrides,
   loadBucketViews,
   recordDispatch,
@@ -2700,8 +2701,8 @@ export class TranslationEngine {
    * instance Freeway actually dispatches through: instance credentials are
    * vault-keyed under a DERIVED name, not the bare env var. Delegates to
    * {@link resolveFreewayProbeCredential}, which mirrors `loadBucketViews`'
-   * own resolution order (base id, then instances) so the probe finds the
-   * same credential Freeway itself would dispatch with.
+   * own resolution order (instances first, base id last) so the probe finds
+   * the same credential Freeway itself would dispatch with.
    */
   private credentialForFreewayProbe(
     sessionId: string | undefined,
@@ -2893,14 +2894,23 @@ export class TranslationEngine {
     }
   }
 
-  /** Mark a bucket unusable after a bad-credential failure. Never fails the batch. */
-  private async disableFreewayBucket(bucketKey: string, deps: BucketSourceDeps): Promise<void> {
+  /**
+   * Mark the dispatch candidate's credential bad after an auth failure. Keyed
+   * on the module id, not the bucket: a stale key on one instance must not
+   * disable buckets a sibling instance could still serve. Cleared when that
+   * module's credential is next written (see clearFreewayCredentialMarks).
+   * Never fails the batch.
+   */
+  private async markFreewayCredentialBad(moduleId: string, deps: BucketSourceDeps): Promise<void> {
     try {
-      await (deps.ledger ?? getFreewayLedgerStore()).setDisabled(bucketKey, 'bad credentials');
-      this.logger.warn('translation:freeway-bucket-disabled', { bucketKey });
+      await (deps.ledger ?? getFreewayLedgerStore()).setDisabled(
+        freewayCredentialKey(moduleId),
+        'bad credentials',
+      );
+      this.logger.warn('translation:freeway-credential-disabled', { moduleId });
     } catch (err) {
       this.logger.warn('translation:freeway-ledger-write-failed', {
-        bucketKey,
+        moduleId,
         error: toErrorMessage(err),
       });
     }
@@ -2924,10 +2934,13 @@ export class TranslationEngine {
 
   /**
    * Dispatch one Freeway batch, with a SINGLE failover hop: a 429 cools the
-   * bucket, a bad credential disables it, and either way the group is
-   * re-validated against fresh views and retried once on whatever bucket comes
-   * back. A second strike parks the batch (429) or lets it fail on the
-   * now-disabled bucket (auth) rather than spending more free requests.
+   * bucket, a bad credential marks the dispatch candidate (letting a sibling
+   * instance keep serving the bucket), and either way the group is
+   * re-validated against fresh views and retried once on whatever bucket or
+   * sibling instance comes back. A second strike parks the batch (429) or
+   * lets it fail (auth) rather than spending more free requests — not
+   * because every candidate is exhausted (a third sibling may still be
+   * usable), but because the one-hop-per-batch budget is spent.
    */
   private async dispatchFreewayBatch(args: {
     jobs: TranslationJob[];
@@ -2995,9 +3008,10 @@ export class TranslationEngine {
             return { kind: 'error', error: err, authCancel: false };
           }
           if (!rateLimited) {
-            // A repeat auth failure disables the failover bucket too, then
-            // fails this batch's pairs (a bad credential is not a quota wait).
-            await this.disableFreewayBucket(state.bucketKey, deps);
+            // A repeat auth failure marks the failover candidate's credential
+            // too, then fails this batch's pairs (a bad credential is not a
+            // quota wait).
+            await this.markFreewayCredentialBad(state.moduleId, deps);
             return { kind: 'error', error: err, authCancel: false };
           }
           await this.coolFreewayBucket(
@@ -3042,7 +3056,7 @@ export class TranslationEngine {
             deps,
           );
         } else {
-          await this.disableFreewayBucket(state.bucketKey, deps);
+          await this.markFreewayCredentialBad(state.moduleId, deps);
         }
         const buckets = await loadBucketViews(now, deps);
         const revalidated = revalidateGroup(
@@ -3090,8 +3104,37 @@ export class TranslationEngine {
             decision.moduleId = revalidated.moduleId;
             decision.modelOverride = revalidated.modelId;
           }
+        } else if (authFailure) {
+          // 'keep' after an auth failure normally means a SIBLING candidate now
+          // resolves this same bucket: loadBucketViews skips any candidate
+          // under a live credential mark, so the id that just failed does not
+          // eligibly re-resolve to itself. (The one exception: markFreeway-
+          // CredentialBad swallows ledger write failures, so if the mark never
+          // landed the same id can come back — the guard below then sees
+          // freshModuleId === state.moduleId and this hop simply retries it.)
+          // Retrying `state.module` unchanged would just replay the same bad
+          // credential and burn the batch's only failover hop for nothing —
+          // rebuild against the fresh dispatch id instead.
+          const freshBucket = buckets.find((bucket) => bucket.bucketKey === state.bucketKey);
+          const freshModuleId = freshBucket?.dispatchModuleId ?? freshBucket?.moduleId;
+          if (freshBucket && freshModuleId && freshModuleId !== state.moduleId) {
+            const next = createModule(freshModuleId, freshBucket.modelId, state.bucketKey);
+            if (!next) return { kind: 'error', error: err, authCancel: false };
+            state.module = next;
+            state.moduleId = freshModuleId;
+            state.modelId = freshBucket.modelId;
+            // Symmetric with the 'reroute' branch above: the decisions must
+            // record the instance that actually ends up serving them, or
+            // persistResult/retryLqaFailure attribute the translation (and
+            // its LQA stats) to the credential-marked instance instead.
+            for (const decision of decisions) {
+              decision.moduleId = freshModuleId;
+              decision.modelOverride = freshBucket.modelId;
+            }
+          }
         }
-        // 'keep' retries the same bucket once (its state moved back in our favour).
+        // Otherwise 'keep' retries the same bucket once (its state moved back
+        // in our favour — e.g. a 429 elsewhere cleared before this hop ran).
       }
     }
   }
@@ -3621,6 +3664,18 @@ export class TranslationEngine {
       // Indices parked for quota (or blocked) by a Freeway failover: neither
       // dispatched nor failed, so the persistence loop must skip them too.
       const deferredIndices = new Set<number>();
+      /**
+       * Live pointer to the in-flight Freeway dispatch's mutable state, set
+       * only while a dispatchFreewayBatch call is outstanding. The outer
+       * `moduleId` variable is synced from `state.moduleId` only AFTER
+       * dispatchFreewayBatch RETURNS (below), but `onJobComplete` — passed
+       * into that same call — can fire mid-dispatch, e.g. on the hop after a
+       * reroute. Reading `state.moduleId` live through this pointer (instead
+       * of the stale outer `moduleId`) is what lets a per-result auth error
+       * mark the module that actually produced it, not the one the batch
+       * already failed over from.
+       */
+      let currentFreewayState: FreewayBatchState | undefined;
 
       // Entries whose LQA gate failed, queued for a retryWithFeedback pass
       // after the whole batch has been persisted (the LQA corrective retry;
@@ -3676,14 +3731,20 @@ export class TranslationEngine {
           // result[k>0]-only auth error is acted on only after earlier
           // results persisted.
           if (moduleResult?.error) {
-            // A Freeway credential belongs to ONE bucket: disable that bucket
-            // and let the run continue on the others instead of cancelling.
+            // A Freeway credential belongs to ONE module, not the bucket it's
+            // dispatching: mark that module's credential and let the run
+            // continue on a sibling instance instead of cancelling. Read the
+            // LIVE dispatch id off currentFreewayState (not the outer
+            // moduleId, which this call can race — see its declaration).
             if (
               bucketKey !== undefined &&
               freewayDeps &&
               isRunCancellingAuthError(moduleResult.error)
             ) {
-              await this.disableFreewayBucket(bucketKey, freewayDeps);
+              await this.markFreewayCredentialBad(
+                currentFreewayState?.moduleId ?? moduleId,
+                freewayDeps,
+              );
               return false;
             }
             if (await this.maybeCancelForAuth(runId, moduleId, moduleResult.error)) {
@@ -3816,6 +3877,21 @@ export class TranslationEngine {
         await finalizeEntryResult(idx);
       };
 
+      // A FREEWAY batch (`bucketKey !== undefined`) always has exactly ONE
+      // entry in `dispatchBatches`, which is what makes the post-dispatch sync
+      // below safe: it moves the outer module/moduleId/metricsModel after a
+      // failover, while only the dispatched batch's own decisions are
+      // re-pointed (inside dispatchFreewayBatch) — and persistResult /
+      // retryLqaFailure attribute the text by `decision.moduleId`. A second
+      // batch here would therefore persist a stale producer. It cannot occur:
+      // M32 `groupJobs` keys groups by `targetLanguage + band`, `planRun`
+      // never merges groups, and `groupDecisions` only chunks WITHIN one
+      // assignment — so a Freeway group is homogeneous in target language and
+      // `jobsByTargetLanguage` yields a single batch. Should that ever change,
+      // attribution is not the first thing that breaks (revalidateGroup's band
+      // derivation, the per-group bucket/batchSize plan and
+      // freewayModuleOverrides all assume one language too), so this is
+      // recorded as an invariant rather than defended with a silent fix-up.
       for (const batchJobs of dispatchBatches) {
         if ((status.status as RunStatusCode) === RunStatusCode.Cancelled || signal?.aborted) break;
         let targetResults: TranslationResult[] = [];
@@ -3828,6 +3904,7 @@ export class TranslationEngine {
           // is a day-scale budget, not a momentary burst, so the bucket is
           // cooled and the batch fails over to another one (once).
           const state: FreewayBatchState = { module, moduleId, modelId: metricsModel, bucketKey };
+          currentFreewayState = state;
           const outcome = await this.dispatchFreewayBatch({
             jobs: batchJobs.map(({ job }) => job),
             decisions: batchJobs.map(({ index }) => uncachedNonTrivialEntries[index].decision),
@@ -3838,13 +3915,30 @@ export class TranslationEngine {
             signal,
             onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
           });
-          if (state.bucketKey !== bucketKey) {
-            this.logger.info('translation:freeway-rerouted', {
-              runId,
-              from: bucketKey,
-              to: state.bucketKey,
-              reason: 'dispatch-failure',
-            });
+          currentFreewayState = undefined;
+          // A same-bucket auth failover (a sibling instance took over, see
+          // dispatchFreewayBatch's 'keep' handling) changes state.moduleId
+          // without changing state.bucketKey — sync on EITHER moving, or the
+          // next batch in this run would start back on the marked module.
+          if (state.bucketKey !== bucketKey || state.moduleId !== moduleId) {
+            const bucketChanged = state.bucketKey !== bucketKey;
+            // A same-bucket instance swap is NOT a reroute — the bucket is
+            // identical, only the credential behind it changed — so log it
+            // under a distinct event (and always carry both module ids), or
+            // this reads as a from===to no-op reroute in the logs.
+            this.logger.info(
+              bucketChanged
+                ? 'translation:freeway-rerouted'
+                : 'translation:freeway-instance-swapped',
+              {
+                runId,
+                from: bucketKey,
+                to: state.bucketKey,
+                fromModuleId: moduleId,
+                toModuleId: state.moduleId,
+                reason: 'dispatch-failure',
+              },
+            );
             module = state.module;
             moduleId = state.moduleId;
             bucketKey = state.bucketKey;

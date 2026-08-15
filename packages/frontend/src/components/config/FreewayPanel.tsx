@@ -275,14 +275,16 @@ export function FreewayPanel(): React.JSX.Element {
                                 : t('freeway.keyMissing')}
                             </Badge>
                             {provider.dispatchModuleId &&
-                              provider.dispatchModuleId !== provider.moduleId && (
+                              provider.dispatchModuleId !== `${provider.moduleId}:default` && (
                                 <span
                                   className="text-xs text-muted-foreground"
                                   data-testid={`freeway-via-${provider.providerKey}`}
                                 >
-                                  {t('freeway.viaInstance', {
-                                    instance: provider.dispatchModuleId,
-                                  })}
+                                  {provider.dispatchModuleId === provider.moduleId
+                                    ? t('freeway.viaLegacyBase', { module: provider.moduleId })
+                                    : t('freeway.viaInstance', {
+                                        instance: provider.dispatchModuleId,
+                                      })}
                                 </span>
                               )}
                             {provider.moduleDisabled && (

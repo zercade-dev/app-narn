@@ -208,6 +208,7 @@
     "keyPresent": "Kunci ditambahkan",
     "keyMissing": "Belum ada kunci",
     "viaInstance": "via {{instance}}",
+    "viaLegacyBase": "via {{module}} (lawas)",
     "enableModuleHint": "Kunci sudah diatur, tetapi modul dinonaktifkan.",
     "enableModuleButton": "Aktifkan",
     "disabledReasonChip": "Nonaktif: {{reason}}",

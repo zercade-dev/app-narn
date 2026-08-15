@@ -208,6 +208,7 @@
     "keyPresent": "Đã thêm khóa",
     "keyMissing": "Chưa có khóa",
     "viaInstance": "qua {{instance}}",
+    "viaLegacyBase": "qua {{module}} (cũ)",
     "enableModuleHint": "Đã đặt khóa, nhưng mô-đun đang tắt.",
     "enableModuleButton": "Bật",
     "disabledReasonChip": "Đã tắt: {{reason}}",

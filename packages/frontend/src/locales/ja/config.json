@@ -208,6 +208,7 @@
     "keyPresent": "キー設定済み",
     "keyMissing": "キー未設定",
     "viaInstance": "{{instance}} 経由",
+    "viaLegacyBase": "{{module}} 経由（旧構成）",
     "enableModuleHint": "キーは設定済みですが、モジュールが無効です。",
     "enableModuleButton": "有効化",
     "disabledReasonChip": "無効：{{reason}}",
