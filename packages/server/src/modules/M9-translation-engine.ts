@@ -2700,8 +2700,8 @@ export class TranslationEngine {
    * instance Freeway actually dispatches through: instance credentials are
    * vault-keyed under a DERIVED name, not the bare env var. Delegates to
    * {@link resolveFreewayProbeCredential}, which mirrors `loadBucketViews`'
-   * own resolution order (base id, then instances) so the probe finds the
-   * same credential Freeway itself would dispatch with.
+   * own resolution order (instances first, base id last) so the probe finds
+   * the same credential Freeway itself would dispatch with.
    */
   private credentialForFreewayProbe(
     sessionId: string | undefined,

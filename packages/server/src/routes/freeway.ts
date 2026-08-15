@@ -88,8 +88,8 @@ const MODULE_DISABLED_REASON = 'module-disabled';
  * both into "not usable", so this re-derives which one applies from the same
  * `moduleStatus` the live pass used.
  *
- * Walks the same candidate order Freeway dispatch would (base, then
- * `<base>:default`, then remaining instances — see
+ * Walks the same candidate order Freeway dispatch would (`<base>:default`,
+ * then remaining instances, then the bare base last — see
  * {@link freewayCandidateIds}): the first candidate that IS credentialed but
  * not enabled names the "Enable it" target (`enableTargetModuleId`), since
  * that is the concrete card the UI can actually turn on. No credentialed
