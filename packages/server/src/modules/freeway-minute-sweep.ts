@@ -10,16 +10,22 @@
  * function directly), and none would even scope the delete since the
  * DEFINER ignores the caller's role.
  *
- * There is no existing app-wide periodic-maintenance hook to attach to, so
- * this is triggered lazily from the freeway status GET route instead of
- * adding a new always-on timer — mirrors `manual-edit-sweep.ts`'s own hook
- * into the manual-edits GET route.
+ * Unlike `manual-edit-sweep.ts` (which has no periodic hook to attach to and
+ * is instead triggered lazily from a GET route), this DOES have one: M9
+ * `TranslationEngine`'s process-wide quota-resume tick
+ * (`M9-translation-engine.ts`, `quotaSweepTimer`) runs unconditionally, every
+ * 60s, for the life of the process — independent of any route ever being
+ * called. Minute cells accrue from Freeway dispatches that don't require a
+ * human to open the status UI (automation-driven runs included), so a
+ * route-triggered sweep would leave those tenants' rows unbounded; the
+ * existing tick is the only invocation guaranteed to run regardless. This
+ * function is called from that tick's callback, not from a route.
  *
  * The throttle idiom mirrors `manual-edit-sweep.ts` / `services/audit-logger.ts`'s
  * `maybePurgeDisk()`: a module-level "last run" timestamp gates a floor
- * interval so a busy read path (the status route is polled by the UI
- * checklist) doesn't sweep on every request — at most once per window,
- * best-effort, never throwing into the caller.
+ * interval so a fast, frequent caller (the tick fires every 60s) doesn't
+ * sweep on every call — at most once per window, best-effort, never
+ * throwing into the caller.
  */
 import { getPool } from '../storage/pg/pool.js';
 import { logger } from './M15-console-logger.js';
@@ -31,11 +37,12 @@ let lastSweepAt = 0;
 /**
  * Run the sweep if the throttle window has elapsed; otherwise a no-op.
  * Returns a Promise so a test can await a forced sweep deterministically; the
- * route that triggers this lazily calls it WITHOUT awaiting (`void
- * maybeSweepExpiredFreewayWindows()`) so the sweep never delays the response.
- * Never throws — including when the DB pool itself is unavailable/unconfigured
- * (`getPool()` throws synchronously in that case), since a retention sweep
- * must never break the read path that triggers it.
+ * quota-sweep tick that calls this does so WITHOUT awaiting (`void
+ * maybeSweepExpiredFreewayWindows().catch(...)`) so a slow or failing sweep
+ * never blocks the tick's own quota-resume work. Never throws — including
+ * when the DB pool itself is unavailable/unconfigured (`getPool()` throws
+ * synchronously in that case) — since a retention sweep must never break the
+ * caller that triggers it.
  */
 export async function maybeSweepExpiredFreewayWindows(): Promise<void> {
   const now = Date.now();

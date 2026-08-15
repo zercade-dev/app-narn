@@ -18,7 +18,6 @@ import {
 } from '../modules/M32/bucket-source.js';
 import { effectiveRemainingRequests } from '../modules/M32/selector.js';
 import type { BucketView } from '../modules/M32/types.js';
-import { maybeSweepExpiredFreewayWindows } from '../modules/freeway-minute-sweep.js';
 import { moduleRegistry } from '../modules/M6-module-registry.js';
 import { resolveEffectiveModuleConfig } from '../modules/M19-global-config-store.js';
 import { getFreewayLedgerStore, getGlobalConfigStore } from '../storage/registry.js';
@@ -161,11 +160,6 @@ freewayRouter.get(
   '/status',
   asyncHandler(async (_req, res) => {
     const now = Date.now();
-
-    // Cheap, lazy retention trigger — fire-and-forget so it never delays the
-    // response (see freeway-minute-sweep.ts for the throttle).
-    void maybeSweepExpiredFreewayWindows();
-
     const sessionId = getSessionId(res);
     const global = await getGlobalConfigStore().load();
     const ledger = getFreewayLedgerStore();

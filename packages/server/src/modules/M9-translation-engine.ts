@@ -127,6 +127,7 @@ import { effectiveRemainingRequests, selectEscalation } from './M32/selector.js'
 import { difficultyBand } from './M32/difficulty.js';
 import type { BucketView, JobGroup } from './M32/types.js';
 import { syncAuthoritativeUsage } from './M32/probes.js';
+import { maybeSweepExpiredFreewayWindows } from './freeway-minute-sweep.js';
 import {
   buildAchievementPairMap,
   buildAchievementPromptContext,
@@ -655,6 +656,19 @@ export class TranslationEngine {
         // are already caught inside, this only covers the pass itself.
         void this.sweepQuotaResumes().catch((err: unknown) => {
           this.logger.warn('translation:quota-sweep-failed', { error: toErrorMessage(err) });
+        });
+        // Freeway's rpm/tpm minute-cell retention piggybacks on this same
+        // unconditional, process-wide 60s tick rather than a route hit —
+        // this is the only invocation guaranteed to run regardless of
+        // whether any user-facing route is ever called, so it's what
+        // actually bounds freeway_usage's growth. maybeSweepExpiredFreewayWindows
+        // already never throws (it catches internally and applies its own
+        // multi-hour throttle so this doesn't add real DB work every tick),
+        // but this mirrors the sweepQuotaResumes call above defensively so a
+        // future change to that contract can't reintroduce an unhandled
+        // rejection here.
+        void maybeSweepExpiredFreewayWindows().catch((err: unknown) => {
+          this.logger.warn('freeway:minute-sweep-failed', { error: toErrorMessage(err) });
         });
       }, sweepIntervalMs);
       this.quotaSweepTimer.unref?.();
