@@ -454,7 +454,7 @@ export function GlobalConfigView({
         onEditVaultKey={onEditVaultKey}
       />
 
-      <FreewayPanel onEditVaultKey={onEditVaultKey} />
+      <FreewayPanel />
 
       <Card>
         <CardHeader>

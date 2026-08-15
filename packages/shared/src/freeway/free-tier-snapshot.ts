@@ -39,7 +39,12 @@ export interface FreeTierModel {
 }
 
 export interface FreeTierProvider {
-  /** Module or module-instance id that dispatches this provider's jobs. */
+  /**
+   * The provider's base module id, always — never a module-instance id. This
+   * is what keys the quota ledger (`bucketKey`), not necessarily what
+   * dispatches the job: a workspace configured via a named instance
+   * dispatches through that instance instead (see `BucketView.dispatchModuleId`).
+   */
   moduleId: string;
   /** IANA zone the provider's daily/monthly windows reset in. */
   resetTimeZone: string;
@@ -52,14 +57,6 @@ export interface FreeTierProvider {
    * effective headroom of any bucket is the tighter of the two.
    */
   sharedLimits?: FreeTierLimit[];
-  /**
-   * generic-ai preset providers only (mistral, cerebras): the
-   * OpenAI-compatible base URL a one-click Freeway preset instance is
-   * pre-shaped with.
-   */
-  presetBaseUrl?: string;
-  /** The model id a one-click Freeway preset instance defaults to (this provider's first snapshot model). */
-  presetDefaultModel?: string;
 }
 
 export interface FreeTierSnapshot {

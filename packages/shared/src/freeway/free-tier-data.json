@@ -293,58 +293,6 @@
           ]
         }
       ]
-    },
-    "mistral": {
-      "moduleId": "generic-ai:mistral",
-      "resetTimeZone": "UTC",
-      "presetBaseUrl": "https://api.mistral.ai/v1",
-      "presetDefaultModel": "mistral-small-latest",
-      "models": [
-        {
-          "id": "mistral-small-latest",
-          "qualityTier": 2,
-          "maxBatch": 20,
-          "contextLength": 131072,
-          "limits": [
-            {
-              "window": "rpm",
-              "limit": 60
-            },
-            {
-              "window": "rpd",
-              "limit": 500
-            }
-          ]
-        }
-      ]
-    },
-    "cerebras": {
-      "moduleId": "generic-ai:cerebras",
-      "resetTimeZone": "UTC",
-      "presetBaseUrl": "https://api.cerebras.ai/v1",
-      "presetDefaultModel": "llama-3.3-70b",
-      "models": [
-        {
-          "id": "llama-3.3-70b",
-          "qualityTier": 2,
-          "maxBatch": 20,
-          "contextLength": 65536,
-          "limits": [
-            {
-              "window": "rpm",
-              "limit": 30
-            },
-            {
-              "window": "rpd",
-              "limit": 14400
-            },
-            {
-              "window": "tpm",
-              "limit": 60000
-            }
-          ]
-        }
-      ]
     }
   }
 }

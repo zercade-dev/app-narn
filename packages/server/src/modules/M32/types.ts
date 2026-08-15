@@ -9,10 +9,25 @@ import type { FreewayBucketStats } from '../../storage/types.js';
 export type DifficultyBand = 1 | 2 | 3 | 4;
 
 export interface BucketView {
-  /** '<moduleOrInstanceId>::<modelId>' */
+  /** `'<baseModuleId>::<modelId>'` */
   bucketKey: string;
-  /** Dispatch target: base module id or 'generic-ai:<slug>' instance id. */
+  /**
+   * The snapshot's base module id — always, even when the workspace serves
+   * this bucket through a named instance. This is what keys the quota ledger
+   * (`bucketKey`), never the id to instantiate; use `dispatchModuleId` for
+   * that.
+   */
   moduleId: string;
+  /**
+   * The module/instance id to instantiate for this bucket. Differs from
+   * `moduleId` (always the snapshot's base id, which keys the quota ledger)
+   * when the workspace configured the provider as a named instance. Absent
+   * means the base id itself serves this bucket — every dispatch site reads
+   * `dispatchModuleId ?? moduleId`. `loadBucketViews` always sets it
+   * explicitly; it is optional here only so the many pre-existing BucketView
+   * test fixtures don't all need a mechanical update.
+   */
+  dispatchModuleId?: string;
   /** Free-tier snapshot provider key ('google', 'groq', 'deepl', …). */
   providerKey: string;
   modelId: string;
@@ -64,6 +79,7 @@ export interface JobGroup {
 export interface Assignment {
   group: JobGroup;
   bucketKey: string;
+  /** The module/instance id to instantiate — the winning bucket's `dispatchModuleId` (falling back to its base `moduleId`), never the bare base when an instance actually serves it. */
   moduleId: string;
   modelId: string;
   batchSize: number;

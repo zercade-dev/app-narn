@@ -7,11 +7,15 @@
  */
 import type { FreeTierModel, FreeTierProvider, FreewayWindowKind } from '@zercade-dev/narn-shared';
 import {
+  buildModuleInstanceId,
+  DEFAULT_INSTANCE_SLUG,
+  deriveInstanceCredentialKey,
   freeTierModel,
   freeTierProvider,
   getFreeTierSnapshot,
   hasSharedPool,
   nextReset,
+  parseModuleInstanceId,
   windowStart,
 } from '@zercade-dev/narn-shared';
 import type {
@@ -43,6 +47,18 @@ export function freewayBucketKey(moduleId: string, modelId: string): string {
 }
 
 /**
+ * Recovers the snapshot's base module id from a bucket key — the inverse of
+ * the `moduleId` half of {@link freewayBucketKey}. `bucketKey` always keys on
+ * the base id even when a bucket's `dispatchModuleId` is a named instance, so
+ * callers that only have a bucket key in hand (not the BucketView) use this to
+ * get back to the id `freewayModuleOverrides` and the snapshot lookups expect.
+ */
+export function freewayBucketBaseModuleId(bucketKey: string): string {
+  const sep = bucketKey.indexOf('::');
+  return sep === -1 ? bucketKey : bucketKey.slice(0, sep);
+}
+
+/**
  * Module-config values Freeway imposes on the instance serving a bucket, over
  * and above the model id — dispatch-time facts about the model, not user
  * preferences, so they are applied LAST and win over the effective
@@ -67,6 +83,8 @@ export interface BucketSourceDeps {
   ledger?: FreewayLedgerStore;
   /** Test seam: candidate module metadata; default derives from the registry. */
   moduleStatus?: (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined;
+  /** Test seam: instance ids of a base module; default reads the registry. */
+  instanceIdsFor?: (baseModuleId: string) => string[];
   cloudMode?: boolean;
 }
 
@@ -83,6 +101,60 @@ function defaultModuleStatus(
   const meta = moduleRegistry.getMetadata(moduleId);
   if (!meta) return undefined;
   return { credentialed: meta.credentialStatus === 'ok', enabled: meta.enabled };
+}
+
+/** Default `instanceIdsFor`: every registered instance of a base module, tenant-scoped. */
+export function defaultInstanceIdsFor(baseModuleId: string): string[] {
+  return moduleRegistry
+    .listInstances()
+    .filter((i) => i.baseModuleId === baseModuleId)
+    .map((i) => i.instanceId);
+}
+
+/**
+ * Candidate module ids that can serve one snapshot provider, best first: the
+ * bare base (pre-instance workspaces), then `<base>:default`, then the base's
+ * remaining instances in id order. Freeway dispatches through whichever of
+ * these is credentialed AND enabled — the product's enablement UX only ever
+ * enables named instances, so a base-only lookup finds nothing in any
+ * workspace created after instances shipped.
+ */
+export function freewayCandidateIds(
+  baseModuleId: string,
+  instanceIds: readonly string[],
+): string[] {
+  const preferred = buildModuleInstanceId(baseModuleId, DEFAULT_INSTANCE_SLUG);
+  const rest = instanceIds.filter((id) => id !== preferred).sort((a, b) => a.localeCompare(b));
+  const ordered = [baseModuleId, ...(instanceIds.includes(preferred) ? [preferred] : []), ...rest];
+  return [...new Set(ordered)];
+}
+
+/**
+ * Resolve a Freeway probe's credential for a base module's manifest env var,
+ * trying it the same way `loadBucketViews` resolves a dispatch candidate: the
+ * bare base credential first, then — in {@link freewayCandidateIds}' order —
+ * each instance of that base module, read from its DERIVED vault key
+ * (`deriveInstanceCredentialKey`). Instance credentials are never stored
+ * under the bare env var, so a workspace whose only configured provider is a
+ * named instance (e.g. `openrouter:default`) needs this fallback or the probe
+ * silently finds nothing. `lookup` is a raw vault-key reader (no module-id
+ * awareness); `instanceIdsFor` defaults to the live registry.
+ */
+export function resolveFreewayProbeCredential(
+  baseModuleId: string,
+  envVar: string,
+  lookup: (vaultKey: string) => string | undefined,
+  instanceIdsFor: (baseModuleId: string) => string[] = defaultInstanceIdsFor,
+): string | undefined {
+  const base = lookup(envVar);
+  if (base !== undefined) return base;
+  for (const candidateId of freewayCandidateIds(baseModuleId, instanceIdsFor(baseModuleId))) {
+    const parsed = parseModuleInstanceId(candidateId);
+    if (!parsed) continue; // the bare base id was already tried above
+    const value = lookup(deriveInstanceCredentialKey(envVar, parsed.slug));
+    if (value !== undefined) return value;
+  }
+  return undefined;
 }
 
 /** The window that governs day-scale headroom for one snapshot model. */
@@ -114,7 +186,7 @@ interface ResolvedSnapshotBucket {
 function resolveSnapshotBucket(bucketKey: string): ResolvedSnapshotBucket | undefined {
   const sep = bucketKey.indexOf('::');
   if (sep === -1) return undefined;
-  const moduleId = bucketKey.slice(0, sep);
+  const moduleId = freewayBucketBaseModuleId(bucketKey);
   const modelId = bucketKey.slice(sep + 2);
   const provider = freeTierProvider(moduleId);
   if (!provider) return undefined;
@@ -162,6 +234,7 @@ function sharedPoolRemaining(
 export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Promise<BucketView[]> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const moduleStatus = deps?.moduleStatus ?? defaultModuleStatus;
+  const instanceIdsFor = deps?.instanceIdsFor ?? defaultInstanceIdsFor;
   const cloudMode = deps?.cloudMode ?? isCloudMode();
   const snapshot = getFreeTierSnapshot();
   const states = await ledger.listBuckets();
@@ -170,8 +243,20 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   const views: BucketView[] = [];
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
-    const status = moduleStatus(provider.moduleId);
-    if (!status || !status.credentialed || !status.enabled) continue;
+    // The bare base is checked first and, when usable, wins outright without
+    // ever consulting instances — this keeps a pre-instance workspace's
+    // resolution exactly as cheap (and as observable) as before instances
+    // existed. Only a base that is NOT itself usable pays for the instance
+    // lookup, walking the rest of freewayCandidateIds' ordered list.
+    const baseStatus = moduleStatus(provider.moduleId);
+    const dispatchModuleId =
+      baseStatus?.credentialed === true && baseStatus.enabled
+        ? provider.moduleId
+        : freewayCandidateIds(provider.moduleId, instanceIdsFor(provider.moduleId)).find((id) => {
+            const status = moduleStatus(id);
+            return status?.credentialed === true && status.enabled;
+          });
+    if (dispatchModuleId === undefined) continue;
 
     // ONE usage read per model, shared by that model's own headroom and by the
     // provider's pool sum.
@@ -197,6 +282,7 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
       views.push({
         bucketKey,
         moduleId: provider.moduleId,
+        dispatchModuleId,
         providerKey,
         modelId: model.id,
         qualityTier: model.qualityTier,
