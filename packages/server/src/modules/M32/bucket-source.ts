@@ -7,11 +7,15 @@
  */
 import type { FreeTierModel, FreeTierProvider, FreewayWindowKind } from '@zercade-dev/narn-shared';
 import {
+  buildModuleInstanceId,
+  DEFAULT_INSTANCE_SLUG,
+  deriveInstanceCredentialKey,
   freeTierModel,
   freeTierProvider,
   getFreeTierSnapshot,
   hasSharedPool,
   nextReset,
+  parseModuleInstanceId,
   windowStart,
 } from '@zercade-dev/narn-shared';
 import type {
@@ -43,6 +47,29 @@ export function freewayBucketKey(moduleId: string, modelId: string): string {
 }
 
 /**
+ * Ledger key holding a candidate module's bad-credential mark. A credential is
+ * a fact about a module id, not about one bucket: marking the shared
+ * `<base>::<model>` bucket key would disable every sibling instance that could
+ * still serve it. `credential::` is a reserved namespace — a bucket key is
+ * `<moduleId>::<modelId>` and no module id is the literal `credential`.
+ */
+export function freewayCredentialKey(moduleId: string): string {
+  return `credential::${moduleId}`;
+}
+
+/**
+ * Recovers the snapshot's base module id from a bucket key — the inverse of
+ * the `moduleId` half of {@link freewayBucketKey}. `bucketKey` always keys on
+ * the base id even when a bucket's `dispatchModuleId` is a named instance, so
+ * callers that only have a bucket key in hand (not the BucketView) use this to
+ * get back to the id `freewayModuleOverrides` and the snapshot lookups expect.
+ */
+export function freewayBucketBaseModuleId(bucketKey: string): string {
+  const sep = bucketKey.indexOf('::');
+  return sep === -1 ? bucketKey : bucketKey.slice(0, sep);
+}
+
+/**
  * Module-config values Freeway imposes on the instance serving a bucket, over
  * and above the model id — dispatch-time facts about the model, not user
  * preferences, so they are applied LAST and win over the effective
@@ -67,6 +94,8 @@ export interface BucketSourceDeps {
   ledger?: FreewayLedgerStore;
   /** Test seam: candidate module metadata; default derives from the registry. */
   moduleStatus?: (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined;
+  /** Test seam: instance ids of a base module; default reads the registry. */
+  instanceIdsFor?: (baseModuleId: string) => string[];
   cloudMode?: boolean;
 }
 
@@ -83,6 +112,123 @@ function defaultModuleStatus(
   const meta = moduleRegistry.getMetadata(moduleId);
   if (!meta) return undefined;
   return { credentialed: meta.credentialStatus === 'ok', enabled: meta.enabled };
+}
+
+/** Default `instanceIdsFor`: every registered instance of a base module, tenant-scoped. */
+export function defaultInstanceIdsFor(baseModuleId: string): string[] {
+  return moduleRegistry
+    .listInstances()
+    .filter((i) => i.baseModuleId === baseModuleId)
+    .map((i) => i.instanceId);
+}
+
+/**
+ * Candidate module ids that can serve one snapshot provider, best first:
+ * `<base>:default`, then the base's remaining instances in id order, then the
+ * bare base LAST. The product's enablement UX only ever enables named
+ * instances, and M27 leaves a migrated workspace's bare base enabled and
+ * credentialed but invisible in the UI — so preferring the base would dispatch
+ * through configuration the user cannot see or edit. The base remains a
+ * last-resort fallback for pre-instance workspaces, where it is the only
+ * candidate.
+ */
+export function freewayCandidateIds(
+  baseModuleId: string,
+  instanceIds: readonly string[],
+): string[] {
+  const preferred = buildModuleInstanceId(baseModuleId, DEFAULT_INSTANCE_SLUG);
+  const rest = instanceIds.filter((id) => id !== preferred).sort((a, b) => a.localeCompare(b));
+  const ordered = [...(instanceIds.includes(preferred) ? [preferred] : []), ...rest, baseModuleId];
+  return [...new Set(ordered)];
+}
+
+/**
+ * Base module id → its first declared manifest env var, read from the static
+ * module index — imported LAZILY, inside the one function that needs it.
+ *
+ * `module-index.js` imports all ten module packages (each re-exporting its
+ * `manifest.json`), so a static edge from this file would graft the entire
+ * module registry onto every importer of bucket-source — M9, M25, M26,
+ * M9/module-selection, routes/freeway, routes/vault — and through them onto
+ * most of the server. That mapping is needed only when a credential is
+ * written, so the import is paid there and nowhere else. The registry
+ * (`moduleRegistry.getMetadata`) is NOT an alternative source here: it is
+ * populated by `loadStatic` at boot, and this must also resolve manifest env
+ * vars in contexts that never boot the registry.
+ */
+async function loadEnvVarLookup(): Promise<(baseModuleId: string) => string | undefined> {
+  const { STATIC_MODULES } = await import('../module-index.js');
+  const byBaseId = new Map(
+    STATIC_MODULES.map((e) => [e.manifest.id, e.manifest.requiredEnvVars?.[0]] as const),
+  );
+  return (baseModuleId) => byBaseId.get(baseModuleId);
+}
+
+/**
+ * Clear the bad-credential marks of every Freeway candidate whose vault key
+ * appears in `updatedVaultKeys`. Called after a credential write: replacing the
+ * key IS the recovery path, so the mark must not outlive it. A candidate's
+ * vault key is the base module's manifest env var for the bare base, and
+ * `deriveInstanceCredentialKey(envVar, slug)` for each instance.
+ */
+export async function clearFreewayCredentialMarks(
+  updatedVaultKeys: readonly string[],
+  deps: BucketSourceDeps = {},
+): Promise<void> {
+  const updated = new Set(updatedVaultKeys);
+  if (updated.size === 0) return;
+  const ledger = deps.ledger ?? getFreewayLedgerStore();
+  const snapshot = getFreeTierSnapshot();
+  const instanceIdsFor = deps.instanceIdsFor ?? defaultInstanceIdsFor;
+  const envVarFor = await loadEnvVarLookup();
+
+  const cleared = new Set<string>();
+  for (const provider of Object.values(snapshot.providers)) {
+    const envVar = envVarFor(provider.moduleId);
+    if (envVar === undefined) continue;
+    for (const candidateId of freewayCandidateIds(
+      provider.moduleId,
+      instanceIdsFor(provider.moduleId),
+    )) {
+      const parsed = parseModuleInstanceId(candidateId);
+      const vaultKey = parsed ? deriveInstanceCredentialKey(envVar, parsed.slug) : envVar;
+      if (!updated.has(vaultKey) || cleared.has(candidateId)) continue;
+      cleared.add(candidateId);
+      await ledger.setDisabled(freewayCredentialKey(candidateId), null);
+    }
+  }
+}
+
+/**
+ * Resolve a Freeway probe's credential for a base module's manifest env var,
+ * walking the candidates in {@link freewayCandidateIds}' ORDER — each instance
+ * of that base module first, read from its DERIVED vault key
+ * (`deriveInstanceCredentialKey`), then the bare env var last. Instance
+ * credentials are never stored under the bare env var, so a workspace whose
+ * only configured provider is a named instance (e.g. `openrouter:default`)
+ * needs this fallback or the probe silently finds nothing.
+ *
+ * Order only — this is NOT mark-aware, so it can differ from the candidate
+ * `loadBucketViews` would actually dispatch with: with `openrouter:default`
+ * credential-marked and `openrouter:work` serving, the probe still returns
+ * `:default`'s key and its usage call just fails (a probe failure is a silent
+ * skip, never a run failure). `lookup` is a raw vault-key reader (no module-id
+ * awareness); `instanceIdsFor` defaults to the live registry.
+ */
+export function resolveFreewayProbeCredential(
+  baseModuleId: string,
+  envVar: string,
+  lookup: (vaultKey: string) => string | undefined,
+  instanceIdsFor: (baseModuleId: string) => string[] = defaultInstanceIdsFor,
+): string | undefined {
+  for (const candidateId of freewayCandidateIds(baseModuleId, instanceIdsFor(baseModuleId))) {
+    const parsed = parseModuleInstanceId(candidateId);
+    const value = parsed
+      ? lookup(deriveInstanceCredentialKey(envVar, parsed.slug))
+      : lookup(envVar);
+    if (value !== undefined) return value;
+  }
+  return undefined;
 }
 
 /** The window that governs day-scale headroom for one snapshot model. */
@@ -114,7 +260,7 @@ interface ResolvedSnapshotBucket {
 function resolveSnapshotBucket(bucketKey: string): ResolvedSnapshotBucket | undefined {
   const sep = bucketKey.indexOf('::');
   if (sep === -1) return undefined;
-  const moduleId = bucketKey.slice(0, sep);
+  const moduleId = freewayBucketBaseModuleId(bucketKey);
   const modelId = bucketKey.slice(sep + 2);
   const provider = freeTierProvider(moduleId);
   if (!provider) return undefined;
@@ -162,16 +308,38 @@ function sharedPoolRemaining(
 export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Promise<BucketView[]> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const moduleStatus = deps?.moduleStatus ?? defaultModuleStatus;
+  const instanceIdsFor = deps?.instanceIdsFor ?? defaultInstanceIdsFor;
   const cloudMode = deps?.cloudMode ?? isCloudMode();
   const snapshot = getFreeTierSnapshot();
   const states = await ledger.listBuckets();
   const stateByKey = new Map(states.map((s) => [s.bucketKey, s]));
+  const credentialBad = (id: string): boolean =>
+    stateByKey.get(freewayCredentialKey(id))?.disabledReason !== undefined;
 
   const views: BucketView[] = [];
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
-    const status = moduleStatus(provider.moduleId);
-    if (!status || !status.credentialed || !status.enabled) continue;
+
+    // A candidate rejected ONLY for a bad credential is remembered: if no
+    // candidate survives, the provider's buckets are still emitted carrying
+    // that reason, so the panel can explain the state (selector/planner
+    // exclude any bucket with a disabledReason, so nothing dispatches to it).
+    let markedCandidate: string | undefined;
+    const usableModuleId = freewayCandidateIds(
+      provider.moduleId,
+      instanceIdsFor(provider.moduleId),
+    ).find((id) => {
+      const status = moduleStatus(id);
+      if (status?.credentialed !== true || !status.enabled) return false;
+      if (credentialBad(id)) {
+        markedCandidate ??= id;
+        return false;
+      }
+      return true;
+    });
+    const dispatchModuleId = usableModuleId ?? markedCandidate;
+    if (dispatchModuleId === undefined) continue;
+    const badCredentials = usableModuleId === undefined;
 
     // ONE usage read per model, shared by that model's own headroom and by the
     // provider's pool sum.
@@ -197,6 +365,7 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
       views.push({
         bucketKey,
         moduleId: provider.moduleId,
+        dispatchModuleId,
         providerKey,
         modelId: model.id,
         qualityTier: model.qualityTier,
@@ -208,7 +377,11 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         poolRemainingRequests,
         nextResetAt: nextReset(dayWindow.kind, now, provider.resetTimeZone),
         cooldownUntil: state?.cooldownUntil,
-        disabledReason: state?.disabledReason,
+        // Bucket-keyed disable rows written by pre-upgrade code are
+        // deliberately no longer read here — a credential mark lives under
+        // `freewayCredentialKey`, keyed on the module that actually failed,
+        // not the shared bucket.
+        disabledReason: badCredentials ? 'bad credentials' : undefined,
         stats: state?.stats ?? {},
       });
     }

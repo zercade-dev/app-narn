@@ -220,7 +220,9 @@ export async function selectFreewayBackgroundModule(
     try {
       const built = selectCapableModule(registry, project, global, sessionId, {
         ...options,
-        requestedId: bucket.moduleId,
+        // Dispatch through the resolved instance, not the bare base — see
+        // BucketView.dispatchModuleId.
+        requestedId: bucket.dispatchModuleId ?? bucket.moduleId,
         // The bucket's model is the quota being spent, so it wins over any
         // per-run model override (which named a different provider's model).
         requestedModel: bucket.modelId,

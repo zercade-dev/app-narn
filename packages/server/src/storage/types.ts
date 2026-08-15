@@ -738,7 +738,14 @@ export interface FreewayBucketStats {
 }
 
 export interface FreewayBucketState {
-  /** `'<moduleOrInstanceId>::<modelId>'`, e.g. `google::gemini-2.5-flash`, `generic-ai:mistral::mistral-small-latest`. */
+  /**
+   * `'<baseModuleId>::<modelId>'`, e.g. `google::gemini-2.5-flash`,
+   * `groq::llama-3.3-70b-versatile` — but NOT always a bucket: the same table
+   * also holds the reserved `credential::<moduleId>` namespace (M32's
+   * `freewayCredentialKey`), whose rows carry a module's bad-credential mark in
+   * `disabledReason`. Any query that iterates rows as buckets must exclude that
+   * prefix.
+   */
   bucketKey: string;
   cooldownUntil?: number;
   disabledReason?: string;
@@ -762,7 +769,12 @@ export interface FreewayLedgerStore {
   setCooldown(bucketKey: string, until: number, opts?: { flap?: boolean }): Promise<void>;
   /** Clear cooldown and reset flap_count to 0. No-op when the row is absent. */
   clearCooldown(bucketKey: string): Promise<void>;
-  /** Mark a bucket disabled (bad credentials) or re-enabled (null). Upserts. */
+  /**
+   * Mark a bucket disabled (bad credentials) or re-enabled (null). Upserts.
+   * Also the writer for the `credential::<moduleId>` rows — see
+   * {@link FreewayBucketState.bucketKey} — so a caller may pass either a bucket
+   * key or a credential key here.
+   */
   setDisabled(bucketKey: string, reason: string | null): Promise<void>;
   /** Shallow-merge `stats` into the stored stats object. Upserts. */
   mergeStats(bucketKey: string, stats: FreewayBucketStats): Promise<void>;
