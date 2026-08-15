@@ -50,12 +50,36 @@ export function hasStock(bucket: BucketView, group: JobGroup): boolean {
 }
 
 /**
- * Earliest instant this bucket could serve the group: when it is only cooling,
- * that is the cooldown's end; when its stock is gone, the window reset it
- * refills at (a cooldown outlasting the reset still wins).
+ * Whether the bucket has spendable rpm/tpm headroom in the CURRENT minute.
+ * Deliberately separate from {@link hasStock}: minute exhaustion is the same
+ * shape as a cooldown, not stock exhaustion — the bucket refills on its own
+ * within seconds, so {@link bucketResumeAt} must defer to `minuteResetAt`,
+ * never fall through to the day-scale `nextResetAt`.
+ */
+export function hasMinuteHeadroom(bucket: BucketView): boolean {
+  const rpm = Math.min(
+    bucket.remainingMinuteRequests ?? Infinity,
+    bucket.poolRemainingMinuteRequests ?? Infinity,
+  );
+  if (rpm < 1) return false;
+  // tpm is best-effort: spend is only known after the call, so this bounds a
+  // runaway but cannot stop one oversized batch overshooting the ceiling.
+  return (bucket.remainingMinuteTokens ?? Infinity) > 0;
+}
+
+/**
+ * Earliest instant this bucket could serve the group: cooling and
+ * minute-exhaustion are both transient (whichever clock ends later wins);
+ * when its DAY-scale stock is gone, the window reset it refills at (a
+ * cooldown or a spent minute outlasting that reset still wins — a spent
+ * minute must never park a run until tomorrow).
  */
 export function bucketResumeAt(bucket: BucketView, group: JobGroup): number {
-  return Math.max(bucket.cooldownUntil ?? 0, hasStock(bucket, group) ? 0 : bucket.nextResetAt);
+  return Math.max(
+    bucket.cooldownUntil ?? 0,
+    hasMinuteHeadroom(bucket) ? 0 : (bucket.minuteResetAt ?? 0),
+    hasStock(bucket, group) ? 0 : bucket.nextResetAt,
+  );
 }
 
 export function isEligible(bucket: BucketView, group: JobGroup, now: number): boolean {
@@ -63,6 +87,7 @@ export function isEligible(bucket: BucketView, group: JobGroup, now: number): bo
   if (bucket.cooldownUntil !== undefined && bucket.cooldownUntil > now) return false;
   if (bucket.qualityTier < group.band) return false;
   if (group.band >= 3 && bucket.weakLanguages?.includes(group.targetLanguage)) return false;
+  if (!hasMinuteHeadroom(bucket)) return false;
   return hasStock(bucket, group);
 }
 

@@ -69,6 +69,16 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
         estimatedRequests,
       });
       bucket.remainingRequests = Math.max(0, bucket.remainingRequests - estimatedRequests);
+      // The minute figure needs the same working-copy spend as the day
+      // figure, or every group in this plan reads the same static rpm
+      // headroom and the planner bursts them all into one minute — exactly
+      // the failure this file exists to prevent.
+      if (bucket.remainingMinuteRequests !== undefined) {
+        bucket.remainingMinuteRequests = Math.max(
+          0,
+          bucket.remainingMinuteRequests - estimatedRequests,
+        );
+      }
       // An account-wide pool is spent by whichever of its models is used, so
       // the same requests come off every sibling's working headroom too —
       // otherwise the plan promises each model the whole shared allowance.
@@ -79,6 +89,21 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
           sibling.poolRemainingRequests = Math.max(
             0,
             sibling.poolRemainingRequests - estimatedRequests,
+          );
+        }
+      }
+      // A shared rpm pool doesn't require a shared rpd pool — a provider can
+      // share only its per-minute allowance, in which case poolKey above
+      // stays undefined (see BucketView.poolRemainingMinuteRequests) — so
+      // this folds independently across every bucket of the same provider
+      // rather than piggybacking on the poolKey loop.
+      if (bucket.poolRemainingMinuteRequests !== undefined) {
+        for (const sibling of working) {
+          if (sibling.providerKey !== bucket.providerKey) continue;
+          if (sibling.poolRemainingMinuteRequests === undefined) continue;
+          sibling.poolRemainingMinuteRequests = Math.max(
+            0,
+            sibling.poolRemainingMinuteRequests - estimatedRequests,
           );
         }
       }
