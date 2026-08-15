@@ -227,7 +227,7 @@ export function GenerateGlossaryDialog({
   // set-state-in-effect lint rule prefers over a state-resetting effect). The
   // run id and result are NOT reset here so reopening the dialog can resume a
   // run started before the dialog was closed.
-  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevOpen, setPrevOpen] = useState(false);
   if (prevOpen !== open) {
     setPrevOpen(open);
     if (open) {
@@ -745,15 +745,15 @@ export function GenerateGlossaryDialog({
               )}
             </div>
 
-            {genBatchCount > 0 && !noModules && (
-              <p
-                className="text-xs text-muted-foreground"
-                data-testid="glossary-generate-batch-count"
-              >
-                {t('generateBatchCount', { count: genBatchCount })}
-              </p>
-            )}
           </>
+        )}
+
+        {/* A consequence preview (what the run will spend), not a tuning
+            knob — unconditional even while Advanced is collapsed. */}
+        {genBatchCount > 0 && !noModules && (
+          <p className="text-xs text-muted-foreground" data-testid="glossary-generate-batch-count">
+            {t('generateBatchCount', { count: genBatchCount })}
+          </p>
         )}
 
         {error && (

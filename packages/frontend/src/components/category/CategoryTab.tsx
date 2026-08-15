@@ -1309,7 +1309,9 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
             </div>
           )}
 
-          {advanced && genBatchCount > 0 && !noAiModules && (
+          {/* A consequence preview (what the run will spend), not a tuning
+              knob — unconditional even while Advanced is collapsed. */}
+          {genBatchCount > 0 && !noAiModules && (
             <p className="text-xs text-muted-foreground" data-testid="category-gen-batch-count">
               {t('genBatchCount', { count: genBatchCount })}
             </p>

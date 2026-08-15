@@ -470,6 +470,19 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   const startDisabled =
     !anyCheck || !batchSizeValid || starting || activeRun !== undefined || !moduleId || scopeEmpty;
 
+  // Invariant: Start is never disabled without a visible cause. `!anyCheck`
+  // and `!batchSizeValid` are the only two causes that live behind Advanced
+  // (an unchecked checks row, or a batch size the user broke before
+  // collapsing) — if either is blocking Start while Advanced is collapsed,
+  // force it back open so the cause is on screen again. Self-maintaining if a
+  // third hidden cause is ever added, unlike a hand-picked list of
+  // unconditional warnings. Fires at most once per cause: setting `advanced`
+  // true makes the `!advanced` guard false on the next render, so it never
+  // fights a deliberate collapse the user makes while these are already fine.
+  if (!advanced && (!anyCheck || !batchSizeValid) && moduleId && !scopeEmpty) {
+    setAdvanced(true);
+  }
+
   const records = effectiveRunId !== null ? recordsByRun[effectiveRunId] : undefined;
   const flaggedRecords = useMemo(
     () => (records ?? []).filter((r) => r.findings.length > 0),
@@ -590,12 +603,70 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
               </span>
             </div>
 
-            {/* Shown regardless of Advanced — it explains why Start stays
-                disabled even before the module picker (below) is revealed. */}
-            {noReviewModules && (
+            {/* Which AI reviews the run is a defining choice, not tuning — same
+                cost/credentials profile as AiReviewDialog's judge picker, which
+                is never gated either. Unconditional (not just when Advanced is
+                open) so it also explains why Start stays disabled when no
+                review-capable module exists. */}
+            {noReviewModules ? (
               <p className="text-sm text-muted-foreground" data-testid="source-ai-no-modules">
                 {t('sourceAi.noModules')}
               </p>
+            ) : (
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="source-ai-module">{t('sourceAi.module')}</Label>
+                  <ModuleSelect
+                    id="source-ai-module"
+                    className="w-full"
+                    triggerTestId="source-ai-module-trigger"
+                    value={moduleId}
+                    onValueChange={handleModuleChange}
+                    modules={reviewModules}
+                    placeholder={t('sourceAi.modulePlaceholder')}
+                  />
+                </div>
+
+                {moduleId && moduleId !== FREEWAY_MODULE_ID && (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="source-ai-model">{t('sourceAi.model')}</Label>
+                    <ModuleModelSelector
+                      key={moduleId}
+                      id="source-ai-model"
+                      moduleId={moduleId}
+                      value={userModel}
+                      onValueChange={setUserModel}
+                      preferredModel={preferredModel}
+                      triggerClassName="min-w-0 flex-1 shrink"
+                      confidenceContext={confidenceContext}
+                    />
+                  </div>
+                )}
+
+                {moduleId && moduleId !== FREEWAY_MODULE_ID && (
+                  <ModuleReasoningEffortSelect
+                    moduleId={moduleId}
+                    model={userModel || undefined}
+                    value={reasoningEffort}
+                    onChange={setUserReasoningEffort}
+                    id="source-ai-reasoning-effort"
+                    label={t('sourceAi.reasoningEffort')}
+                  />
+                )}
+
+                {/* Freeway picks its own model per batch — no model/effort
+                    route (`/api/modules/freeway/models`) exists for the
+                    selectors above to call, so they're replaced with a
+                    one-line explanation. */}
+                {moduleId === FREEWAY_MODULE_ID && (
+                  <p
+                    className="text-xs text-muted-foreground"
+                    data-testid="source-ai-freeway-model-hint"
+                  >
+                    {t('sourceAi.freewayModelHint')}
+                  </p>
+                )}
+              </>
             )}
 
             {advanced && (
@@ -625,63 +696,6 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
                     </p>
                   )}
                 </div>
-
-                {!noReviewModules && (
-                  <>
-                    <div className="space-y-1.5">
-                      <Label htmlFor="source-ai-module">{t('sourceAi.module')}</Label>
-                      <ModuleSelect
-                        id="source-ai-module"
-                        className="w-full"
-                        triggerTestId="source-ai-module-trigger"
-                        value={moduleId}
-                        onValueChange={handleModuleChange}
-                        modules={reviewModules}
-                        placeholder={t('sourceAi.modulePlaceholder')}
-                      />
-                    </div>
-
-                    {moduleId && moduleId !== FREEWAY_MODULE_ID && (
-                      <div className="space-y-1.5">
-                        <Label htmlFor="source-ai-model">{t('sourceAi.model')}</Label>
-                        <ModuleModelSelector
-                          key={moduleId}
-                          id="source-ai-model"
-                          moduleId={moduleId}
-                          value={userModel}
-                          onValueChange={setUserModel}
-                          preferredModel={preferredModel}
-                          triggerClassName="min-w-0 flex-1 shrink"
-                          confidenceContext={confidenceContext}
-                        />
-                      </div>
-                    )}
-
-                    {moduleId && moduleId !== FREEWAY_MODULE_ID && (
-                      <ModuleReasoningEffortSelect
-                        moduleId={moduleId}
-                        model={userModel || undefined}
-                        value={reasoningEffort}
-                        onChange={setUserReasoningEffort}
-                        id="source-ai-reasoning-effort"
-                        label={t('sourceAi.reasoningEffort')}
-                      />
-                    )}
-
-                    {/* Freeway picks its own model per batch — no model/effort
-                        route (`/api/modules/freeway/models`) exists for the
-                        selectors above to call, so they're replaced with a
-                        one-line explanation. */}
-                    {moduleId === FREEWAY_MODULE_ID && (
-                      <p
-                        className="text-xs text-muted-foreground"
-                        data-testid="source-ai-freeway-model-hint"
-                      >
-                        {t('sourceAi.freewayModelHint')}
-                      </p>
-                    )}
-                  </>
-                )}
 
                 <div className="space-y-1">
                   <label htmlFor="source-ai-batch-size" className="text-xs font-medium">
