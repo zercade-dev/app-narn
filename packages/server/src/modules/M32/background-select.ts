@@ -60,13 +60,38 @@ function backgroundGroup(band: DifficultyBand): JobGroup {
  * glossary / category). Returns undefined when nothing is eligible — the caller
  * then fails the run through its own module-unavailable path rather than
  * falling back to a paid module.
+ *
+ * Prefers a bucket with spendable minute headroom, but does not require one.
+ * Unlike a translation run, this binds ONE bucket at start and has no
+ * park/resume path — a translation burst that has spent every eligible
+ * bucket's current minute would otherwise fail the whole run at start with
+ * "module unavailable", a failure that could not happen before minute
+ * pacing existed and that clears itself within seconds. So when nothing
+ * clears the paced selection, this retries the same ranking with the minute
+ * fields blanked out (day-scale/tier/cooldown/weak-language eligibility
+ * still applies in full) and returns whichever bucket that selects instead.
  */
 export function selectBackgroundBucket(
   buckets: BucketView[],
   now: number,
   opts?: { band?: DifficultyBand },
 ): Selection | undefined {
-  return selectBucket(backgroundGroup(opts?.band ?? DEFAULT_BACKGROUND_BAND), buckets, now, {
-    reserveRequests: FREEWAY_BACKGROUND_RESERVE,
-  });
+  const group = backgroundGroup(opts?.band ?? DEFAULT_BACKGROUND_BAND);
+  const selectOpts = { reserveRequests: FREEWAY_BACKGROUND_RESERVE };
+  const paced = selectBucket(group, buckets, now, selectOpts);
+  if (paced) return paced;
+  const withoutMinuteLimits = buckets.map((b) => ({
+    ...b,
+    remainingMinuteRequests: undefined,
+    remainingMinuteTokens: undefined,
+    poolRemainingMinuteRequests: undefined,
+  }));
+  const relaxed = selectBucket(group, withoutMinuteLimits, now, selectOpts);
+  if (!relaxed) return undefined;
+  // Return the caller's own bucket object, not the blanked-out clone: the
+  // caller identifies buckets by reference (it removes the tried one from
+  // its candidate list), and nothing about the relaxation changes the cost
+  // model (batchSize/estimatedRequests never read the minute fields).
+  const original = buckets.find((b) => b.bucketKey === relaxed.bucket.bucketKey);
+  return original ? { ...relaxed, bucket: original } : undefined;
 }

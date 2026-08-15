@@ -302,8 +302,6 @@ interface ModelUsage {
   rpmUsage?: FreewayWindowUsage;
   /** This minute's tpm cell, read only when the model declares tpm. */
   tpmUsage?: FreewayWindowUsage;
-  /** Epoch ms the current minute rolls over; set whenever rpm or tpm applies. */
-  minuteResetAt?: number;
 }
 
 /**
@@ -416,7 +414,6 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
       const usageResults = await ledger.usage(bucketKey, windows);
       const usageByKind = new Map(usageResults.map((u) => [u.kind, u] as const));
       const usage = usageByKind.get(dayWindow.kind)!;
-      const hasMinuteWindow = minuteWindow.rpm !== undefined || minuteWindow.tpm !== undefined;
       models.push({
         model,
         dayWindow,
@@ -425,22 +422,12 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         minuteWindow,
         rpmUsage: usageByKind.get('rpm'),
         tpmUsage: usageByKind.get('tpm'),
-        minuteResetAt: hasMinuteWindow ? nextReset('rpm', now, provider.resetTimeZone) : undefined,
       });
     }
     const poolRemainingRequests = sharedPoolRemaining(provider, models);
     const poolRemainingMinuteRequests = sharedPoolMinuteRemaining(provider, models);
 
-    for (const {
-      model,
-      dayWindow,
-      bucketKey,
-      usage,
-      minuteWindow,
-      rpmUsage,
-      tpmUsage,
-      minuteResetAt,
-    } of models) {
+    for (const { model, dayWindow, bucketKey, usage, minuteWindow, rpmUsage, tpmUsage } of models) {
       const remainingRequests =
         dayWindow.kind === 'monthly_chars'
           ? Number.MAX_SAFE_INTEGER
@@ -458,6 +445,18 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
               0,
               minuteWindow.tpm - ((tpmUsage?.inputTokens ?? 0) + (tpmUsage?.outputTokens ?? 0)),
             );
+      // A bucket can be capped by a shared rpm pool even when its OWN model
+      // declares no rpm/tpm (an rpm-less model of an rpm-pooled provider), so
+      // the reset time must follow whichever of "this model's own minute
+      // window" or "a pool minute figure applies to it" is true — not just
+      // the model's own declaration, or a drained pool would leave the
+      // bucket ineligible with nowhere to resume to.
+      const minuteResetAt =
+        minuteWindow.rpm !== undefined ||
+        minuteWindow.tpm !== undefined ||
+        poolRemainingMinuteRequests !== undefined
+          ? nextReset('rpm', now, provider.resetTimeZone)
+          : undefined;
       const state = stateByKey.get(bucketKey);
       views.push({
         bucketKey,
