@@ -199,6 +199,7 @@
   "freeway": {
     "title": "NARN Freeway",
     "description": "กลุ่มโมเดล AI ระดับฟรีที่ใช้ร่วมกัน ซึ่ง NARN จ่ายงานให้โดยอัตโนมัติ — ไม่ต้องใช้บัตรเครดิต เพิ่มคีย์ฟรีด้านล่าง แล้วตั้งกฎการจ่ายงานหรือเอนจินเบื้องหลังให้ชี้ไปที่ NARN Freeway เพื่อใช้งาน",
+    "toggleAria": "แสดงหรือซ่อนรายละเอียดของ NARN Freeway",
     "refresh": "รีเฟรช",
     "loading": "กำลังโหลดสถานะ NARN Freeway…",
     "loadFailed": "โหลดสถานะ NARN Freeway ไม่สำเร็จ: {{message}}",

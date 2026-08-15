@@ -204,6 +204,7 @@
   "freeway": {
     "title": "NARN Freeway",
     "description": "Un fondo compartido de modelos de IA de nivel gratuito al que NARN puede enrutar trabajo automáticamente, sin tarjeta de crédito. Añade una clave gratuita abajo y luego dirige una regla de enrutamiento o un motor en segundo plano a NARN Freeway para usarla.",
+    "toggleAria": "Mostrar u ocultar los detalles de NARN Freeway",
     "refresh": "Actualizar",
     "loading": "Cargando el estado de NARN Freeway…",
     "loadFailed": "No se pudo cargar el estado de NARN Freeway: {{message}}",

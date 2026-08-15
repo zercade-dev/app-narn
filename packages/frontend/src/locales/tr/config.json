@@ -204,6 +204,7 @@
   "freeway": {
     "title": "NARN Freeway",
     "description": "NARN'ın otomatik olarak iş yönlendirebileceği, ücretsiz katmandaki yapay zekâ modellerinden oluşan, paylaşılan bir havuz — kredi kartı gerekmez. Aşağıya ücretsiz bir anahtar ekleyin, ardından kullanmak için bir yönlendirme kuralını veya arka planda çalışan bir motoru NARN Freeway'e yönlendirin.",
+    "toggleAria": "NARN Freeway ayrıntılarını göster veya gizle",
     "refresh": "Yenile",
     "loading": "NARN Freeway durumu yükleniyor…",
     "loadFailed": "NARN Freeway durumu yüklenemedi: {{message}}",

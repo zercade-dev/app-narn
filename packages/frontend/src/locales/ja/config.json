@@ -199,6 +199,7 @@
   "freeway": {
     "title": "NARN Freeway",
     "description": "NARNが作業を自動で振り分けられる、無料枠のAIモデルの共有プールです（クレジットカード不要）。下から無料のキーを追加し、振り分けルールまたはバックグラウンドエンジンをNARN Freewayに向ければ使用できます。",
+    "toggleAria": "NARN Freewayの詳細表示を切り替え",
     "refresh": "更新",
     "loading": "NARN Freewayの状態を読み込み中…",
     "loadFailed": "NARN Freewayの状態の読み込みに失敗しました：{{message}}",

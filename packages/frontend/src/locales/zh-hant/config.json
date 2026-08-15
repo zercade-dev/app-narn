@@ -199,6 +199,7 @@
   "freeway": {
     "title": "NARN Freeway",
     "description": "NARN 可自動將工作分派給的免費 AI 模型共用資源池——無需信用卡。請在下方新增免費金鑰，然後將分派規則或背景引擎指向 NARN Freeway 即可使用。",
+    "toggleAria": "顯示或隱藏 NARN Freeway 詳情",
     "refresh": "重新整理",
     "loading": "載入 NARN Freeway 狀態中…",
     "loadFailed": "無法載入 NARN Freeway 狀態：{{message}}",

@@ -199,6 +199,7 @@
   "freeway": {
     "title": "NARN Freeway",
     "description": "Một kho dùng chung gồm các mô hình AI miễn phí mà NARN có thể tự động điều phối công việc đến — không cần thẻ tín dụng. Thêm một khóa miễn phí bên dưới, sau đó trỏ một quy tắc điều phối hoặc một công cụ chạy nền vào NARN Freeway để sử dụng.",
+    "toggleAria": "Hiện hoặc ẩn chi tiết NARN Freeway",
     "refresh": "Làm mới",
     "loading": "Đang tải trạng thái NARN Freeway…",
     "loadFailed": "Không tải được trạng thái NARN Freeway: {{message}}",

@@ -204,6 +204,7 @@
   "freeway": {
     "title": "NARN Freeway",
     "description": "Ein gemeinsamer Pool kostenloser KI-Modelle, an die NARN Arbeit automatisch weiterleiten kann — keine Kreditkarte nötig. Weiter unten einen kostenlosen Schlüssel hinzufügen und dann eine Routing-Regel oder eine Hintergrund-Engine auf NARN Freeway ausrichten, um es zu nutzen.",
+    "toggleAria": "NARN Freeway-Details ein- oder ausblenden",
     "refresh": "Aktualisieren",
     "loading": "Status von NARN Freeway wird geladen…",
     "loadFailed": "Status von NARN Freeway konnte nicht geladen werden: {{message}}",

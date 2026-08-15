@@ -204,6 +204,7 @@
   "freeway": {
     "title": "NARN Freeway",
     "description": "Um pool compartilhado de modelos de IA de nível gratuito para o qual o NARN pode rotear trabalho automaticamente — sem necessidade de cartão de crédito. Adicione uma chave gratuita abaixo e aponte uma regra de roteamento ou um mecanismo em segundo plano para o NARN Freeway para usá-lo.",
+    "toggleAria": "Mostrar ou ocultar os detalhes do NARN Freeway",
     "refresh": "Atualizar",
     "loading": "Carregando o status do NARN Freeway…",
     "loadFailed": "Falha ao carregar o status do NARN Freeway: {{message}}",
