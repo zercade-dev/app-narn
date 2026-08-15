@@ -52,14 +52,6 @@ export interface FreeTierProvider {
    * effective headroom of any bucket is the tighter of the two.
    */
   sharedLimits?: FreeTierLimit[];
-  /**
-   * generic-ai preset providers only (mistral, cerebras): the
-   * OpenAI-compatible base URL a one-click Freeway preset instance is
-   * pre-shaped with.
-   */
-  presetBaseUrl?: string;
-  /** The model id a one-click Freeway preset instance defaults to (this provider's first snapshot model). */
-  presetDefaultModel?: string;
 }
 
 export interface FreeTierSnapshot {
