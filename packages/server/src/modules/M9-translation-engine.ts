@@ -114,6 +114,7 @@ import { groupDecisions } from './M9/packing.js';
 import {
   type BucketSourceDeps,
   coolBucket,
+  freewayBucketBaseModuleId,
   freewayModuleOverrides,
   loadBucketViews,
   recordDispatch,
@@ -2924,7 +2925,11 @@ export class TranslationEngine {
     decisions: RoutingDecision[];
     state: FreewayBatchState;
     deps: BucketSourceDeps;
-    createModule: (moduleId: string, modelId: string) => TranslationModule | undefined;
+    createModule: (
+      moduleId: string,
+      modelId: string,
+      bucketKey: string,
+    ) => TranslationModule | undefined;
     translateOptions: BatchDispatchOptions;
     signal?: AbortSignal;
     /**
@@ -3056,7 +3061,11 @@ export class TranslationEngine {
             : { kind: 'blocked' };
         }
         if (revalidated.kind === 'reroute') {
-          const next = createModule(revalidated.moduleId, revalidated.modelId);
+          const next = createModule(
+            revalidated.moduleId,
+            revalidated.modelId,
+            revalidated.bucketKey,
+          );
           if (!next) return { kind: 'error', error: err, authCancel: false };
           onReroute?.({
             from: state.bucketKey,
@@ -3098,7 +3107,9 @@ export class TranslationEngine {
     );
     if (!selection) return undefined;
     return {
-      moduleId: selection.bucket.moduleId,
+      // Dispatch through the resolved instance, not the bare base — see
+      // BucketView.dispatchModuleId.
+      moduleId: selection.bucket.dispatchModuleId ?? selection.bucket.moduleId,
       modelId: selection.bucket.modelId,
       bucketKey: selection.bucket.bucketKey,
     };
@@ -3284,7 +3295,9 @@ export class TranslationEngine {
       // they win over the user's config. Empty (and therefore inert) for a
       // batch this run routed directly rather than through Freeway.
       const freewayOverrides =
-        bucketKey === undefined ? {} : freewayModuleOverrides(moduleId, first.modelOverride ?? '');
+        bucketKey === undefined
+          ? {}
+          : freewayModuleOverrides(freewayBucketBaseModuleId(bucketKey), first.modelOverride ?? '');
 
       const routedModule = this.moduleRegistry.createWithConfig(
         moduleId,
@@ -3301,9 +3314,13 @@ export class TranslationEngine {
       // that bucket's own module config plus its model as the override, and
       // the new bucket's own Freeway-managed dispatch settings (the hop may
       // cross from a model that wants structured output to one that must not).
+      // `nextModuleId` is the resolved dispatch id (base or instance) — the
+      // module is actually built from it — while `nextBucketKey` (always
+      // base-keyed) recovers the snapshot's base id for the overrides lookup.
       const createFreewayModule = (
         nextModuleId: string,
         modelId: string,
+        nextBucketKey: string,
       ): TranslationModule | undefined => {
         const nextEffective = resolveEffectiveModuleConfig(
           nextModuleId,
@@ -3316,7 +3333,7 @@ export class TranslationEngine {
             ...nextEffective.config,
             ...this.rateLimitConfig(global),
             model: modelId,
-            ...freewayModuleOverrides(nextModuleId, modelId),
+            ...freewayModuleOverrides(freewayBucketBaseModuleId(nextBucketKey), modelId),
             log: moduleLog,
           },
           sessionId,
@@ -4000,7 +4017,7 @@ export class TranslationEngine {
             freewayDeps,
           );
           const escalatedModule = escalation
-            ? createFreewayModule(escalation.moduleId, escalation.modelId)
+            ? createFreewayModule(escalation.moduleId, escalation.modelId, escalation.bucketKey)
             : undefined;
           if (
             escalation &&

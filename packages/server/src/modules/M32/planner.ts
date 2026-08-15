@@ -61,7 +61,9 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
       plan.assignments.push({
         group,
         bucketKey: bucket.bucketKey,
-        moduleId: bucket.moduleId,
+        // The instance Freeway actually dispatches to, not the bare base —
+        // see BucketView.dispatchModuleId.
+        moduleId: bucket.dispatchModuleId ?? bucket.moduleId,
         modelId: bucket.modelId,
         batchSize,
         estimatedRequests,

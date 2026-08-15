@@ -11,7 +11,11 @@ import { Router } from 'express';
 import type { GlobalConfig } from '@zercade-dev/narn-shared';
 import { asyncHandler } from '../http/index.js';
 import { getSessionId } from '../middleware/session.js';
-import { loadBucketViews } from '../modules/M32/bucket-source.js';
+import {
+  defaultInstanceIdsFor,
+  freewayCandidateIds,
+  loadBucketViews,
+} from '../modules/M32/bucket-source.js';
 import { effectiveRemainingRequests } from '../modules/M32/selector.js';
 import type { BucketView } from '../modules/M32/types.js';
 import { moduleRegistry } from '../modules/M6-module-registry.js';
@@ -35,6 +39,10 @@ interface FreewayStatusBucket {
   state: BucketStatusState;
   disabledReason?: string;
   gatePassByLanguage?: Record<string, number>;
+  /** The module/instance id actually serving this LIVE bucket, when it differs from `moduleId`. */
+  dispatchModuleId?: string;
+  /** For a 'disabled' missing row: the candidate id "Enable it" should scroll to / turn on. */
+  enableTargetModuleId?: string;
 }
 
 /**
@@ -79,14 +87,28 @@ const MODULE_DISABLED_REASON = 'module-disabled';
  * simply hasn't enabled (`enable module`) — `loadBucketViews` itself collapses
  * both into "not usable", so this re-derives which one applies from the same
  * `moduleStatus` the live pass used.
+ *
+ * Walks the same candidate order Freeway dispatch would (base, then
+ * `<base>:default`, then remaining instances — see
+ * {@link freewayCandidateIds}): the first candidate that IS credentialed but
+ * not enabled names the "Enable it" target (`enableTargetModuleId`), since
+ * that is the concrete card the UI can actually turn on. No credentialed
+ * candidate at all is 'uncredentialed' regardless of enablement.
  */
 function deriveMissingState(
   moduleId: string,
   moduleStatus: (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined,
-): { state: BucketStatusState; disabledReason?: string } {
-  const status = moduleStatus(moduleId);
-  if (status && status.credentialed && !status.enabled) {
-    return { state: 'disabled', disabledReason: MODULE_DISABLED_REASON };
+  instanceIdsFor: (baseModuleId: string) => string[],
+): { state: BucketStatusState; disabledReason?: string; enableTargetModuleId?: string } {
+  for (const candidateId of freewayCandidateIds(moduleId, instanceIdsFor(moduleId))) {
+    const status = moduleStatus(candidateId);
+    if (status && status.credentialed && !status.enabled) {
+      return {
+        state: 'disabled',
+        disabledReason: MODULE_DISABLED_REASON,
+        enableTargetModuleId: candidateId,
+      };
+    }
   }
   return { state: 'uncredentialed' };
 }
@@ -104,6 +126,7 @@ function toStatusBucket(view: BucketView, now: number): FreewayStatusBucket {
     state: deriveBucketState(view, now),
     disabledReason: view.disabledReason,
     gatePassByLanguage: view.stats.gatePassByLanguage,
+    ...(view.dispatchModuleId !== undefined ? { dispatchModuleId: view.dispatchModuleId } : {}),
   };
 }
 
@@ -167,7 +190,11 @@ freewayRouter.get(
     const buckets: FreewayStatusBucket[] = [
       ...liveViews.map((v) => toStatusBucket(v, now)),
       ...missingViews.map((v) => {
-        const { state, disabledReason } = deriveMissingState(v.moduleId, moduleStatus);
+        const { state, disabledReason, enableTargetModuleId } = deriveMissingState(
+          v.moduleId,
+          moduleStatus,
+          defaultInstanceIdsFor,
+        );
         return {
           bucketKey: v.bucketKey,
           providerKey: v.providerKey,
@@ -179,6 +206,7 @@ freewayRouter.get(
           nextResetAt: v.nextResetAt,
           state,
           ...(disabledReason ? { disabledReason } : {}),
+          ...(enableTargetModuleId !== undefined ? { enableTargetModuleId } : {}),
         };
       }),
     ];
