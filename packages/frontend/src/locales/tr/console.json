@@ -12,6 +12,7 @@
   "unreadErrors": "{{count}} okunmamış hata",
   "unreadErrors_one": "{{count}} okunmamış hata",
   "unreadErrors_other": "{{count}} okunmamış hata",
+  "droppedEntries": "{{count}} önceki günlük kaydı artık gösterilmiyor",
   "searchPlaceholder": "Günlüklerde arayın…",
   "exportLogs": "Günlükleri dışa aktar",
   "exportFormat": "Dışa aktarma biçimi",

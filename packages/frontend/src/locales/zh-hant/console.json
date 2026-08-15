@@ -11,6 +11,7 @@
   "statusDisconnected": "已中斷伺服器日誌串流連線",
   "unreadErrors": "{{count}} 則未讀錯誤",
   "unreadErrors_other": "{{count}} 則未讀錯誤",
+  "droppedEntries": "{{count}} 筆較早的日誌已不再顯示",
   "searchPlaceholder": "搜尋日誌…",
   "exportLogs": "匯出日誌",
   "exportFormat": "匯出格式",

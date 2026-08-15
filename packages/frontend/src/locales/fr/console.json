@@ -11,6 +11,7 @@
   "statusDisconnected": "Déconnecté du flux de journaux du serveur",
   "unreadErrors": "{{count}} erreur non lue",
   "unreadErrors_other": "{{count}} erreurs non lues",
+  "droppedEntries": "{{count}} entrées précédentes non disponibles",
   "searchPlaceholder": "Rechercher dans les journaux…",
   "exportLogs": "Exporter les journaux",
   "exportFormat": "Format d’exportation",

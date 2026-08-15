@@ -87,7 +87,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   const { t: tLogs } = useTranslation('logs');
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const vaultExists = useVaultStore((s) => s.hasVault);
-  const { entries, connected, clearEntries } = useLogger();
+  const { entries, droppedCounts, connected, clearEntries } = useLogger();
   const consoleFilter = useUiSettings((s) => s.consoleFilter);
   const setConsoleFilter = useUiSettings((s) => s.setConsoleFilter);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
@@ -429,6 +429,14 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
 
           <div className="relative flex-1 min-h-0 flex flex-col">
             <div ref={parentRef} className="flex-1 overflow-auto font-mono text-[11px]">
+              {droppedCounts.info + droppedCounts.priority > 0 && (
+                <div
+                  data-testid="console-dropped-marker"
+                  className="px-3 py-0.5 text-muted-foreground/60 italic"
+                >
+                  {t('droppedEntries', { count: droppedCounts.info + droppedCounts.priority })}
+                </div>
+              )}
               {groups.length === 0 && (
                 <div data-testid="console-empty" className="px-3 py-2 text-muted-foreground/60">
                   {t('empty')}

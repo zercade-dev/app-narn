@@ -11,6 +11,7 @@
   "statusDisconnected": "Đã ngắt kết nối khỏi luồng nhật ký của máy chủ",
   "unreadErrors": "{{count}} lỗi chưa đọc",
   "unreadErrors_other": "{{count}} lỗi chưa đọc",
+  "droppedEntries": "{{count}} mục nhật ký trước đó không còn hiển thị",
   "searchPlaceholder": "Tìm trong nhật ký…",
   "exportLogs": "Xuất nhật ký",
   "exportFormat": "Định dạng xuất",
