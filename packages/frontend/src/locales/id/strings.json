@@ -103,6 +103,7 @@
     "translateScopeAll": "Akan menerjemahkan seluruh {{count}} entri pada tampilan saat ini.",
     "translateModeUntranslated": "Hanya isi entri yang belum diterjemahkan",
     "translateModeRetranslate": "Terjemahkan ulang terjemahan yang sudah ada",
+    "translateAdvancedOptions": "Opsi lanjutan",
     "translateUseReference": "Pakai rujukan ({{language}}) sebagai konteks",
     "translateUseReferenceNone": "Pakai bahasa rujukan sebagai konteks",
     "translateNoReferenceHint": "Pilih bahasa rujukan di bilah alat untuk mengaktifkan opsi ini.",

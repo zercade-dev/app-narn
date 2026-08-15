@@ -103,6 +103,7 @@
     "translateScopeAll": "Zu übersetzen: alle Einträge in der aktuellen Ansicht ({{count}}).",
     "translateModeUntranslated": "Nur unübersetzte Einträge füllen",
     "translateModeRetranslate": "Vorhandene Übersetzungen neu übersetzen",
+    "translateAdvancedOptions": "Erweiterte Optionen",
     "translateUseReference": "Referenz ({{language}}) als Kontext verwenden",
     "translateUseReferenceNone": "Referenzsprache als Kontext verwenden",
     "translateNoReferenceHint": "Zum Aktivieren dieser Option in der Symbolleiste eine Referenzsprache auswählen.",

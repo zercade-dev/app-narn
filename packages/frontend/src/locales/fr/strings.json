@@ -103,6 +103,7 @@
     "translateScopeAll": "Les {{count}} entrées de la vue actuelle seront traduites.",
     "translateModeUntranslated": "Compléter uniquement les entrées non traduites",
     "translateModeRetranslate": "Retraduire les traductions existantes",
+    "translateAdvancedOptions": "Options avancées",
     "translateUseReference": "Utiliser la référence ({{language}}) comme contexte",
     "translateUseReferenceNone": "Utiliser la langue de référence comme contexte",
     "translateNoReferenceHint": "Sélectionnez une langue de référence dans la barre d'outils pour activer cette option.",

@@ -103,6 +103,7 @@
     "translateScopeAll": "現在の表示にあるエントリ{{count}}件すべてを翻訳します。",
     "translateModeUntranslated": "未翻訳のエントリのみ埋める",
     "translateModeRetranslate": "既存の翻訳を再翻訳する",
+    "translateAdvancedOptions": "詳細オプション",
     "translateUseReference": "参照（{{language}}）をコンテキストとして使用する",
     "translateUseReferenceNone": "参照言語をコンテキストとして使用する",
     "translateNoReferenceHint": "このオプションを有効にするには、ツールバーで参照言語を選択してください。",

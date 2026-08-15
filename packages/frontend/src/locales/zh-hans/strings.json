@@ -103,6 +103,7 @@
     "translateScopeAll": "将翻译当前视图中的全部 {{count}} 个条目。",
     "translateModeUntranslated": "仅填充未翻译的条目",
     "translateModeRetranslate": "重新翻译已有译文",
+    "translateAdvancedOptions": "高级选项",
     "translateUseReference": "使用参考语言（{{language}}）作为上下文",
     "translateUseReferenceNone": "使用参考语言作为上下文",
     "translateNoReferenceHint": "在工具栏中选择参考语言即可启用此选项。",

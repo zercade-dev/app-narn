@@ -103,6 +103,7 @@
     "translateScopeAll": "Будут переведены все записи в текущем представлении: {{count}}.",
     "translateModeUntranslated": "Заполнить только непереведенные записи",
     "translateModeRetranslate": "Перевести заново существующие переводы",
+    "translateAdvancedOptions": "Дополнительные параметры",
     "translateUseReference": "Использовать справочный язык ({{language}}) как контекст",
     "translateUseReferenceNone": "Использовать справочный язык как контекст",
     "translateNoReferenceHint": "Выберите справочный язык на панели инструментов, чтобы включить этот параметр.",

@@ -103,6 +103,7 @@
     "translateScopeAll": "Geçerli görünümdeki {{count}} girdinin tümü çevrilecek.",
     "translateModeUntranslated": "Yalnızca çevrilmemiş girdileri doldur",
     "translateModeRetranslate": "Mevcut çevirileri yeniden çevir",
+    "translateAdvancedOptions": "Gelişmiş seçenekler",
     "translateUseReference": "Referansı ({{language}}) bağlam olarak kullan",
     "translateUseReferenceNone": "Referans dili bağlam olarak kullan",
     "translateNoReferenceHint": "Bu seçeneği etkinleştirmek için araç çubuğundan bir referans dil seçin.",

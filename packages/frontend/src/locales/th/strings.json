@@ -103,6 +103,7 @@
     "translateScopeAll": "จะแปลทุกรายการในมุมมองปัจจุบัน {{count}} รายการ",
     "translateModeUntranslated": "เติมเฉพาะรายการที่ยังไม่ได้แปล",
     "translateModeRetranslate": "แปลคำแปลที่มีอยู่ใหม่",
+    "translateAdvancedOptions": "ตัวเลือกขั้นสูง",
     "translateUseReference": "ใช้ภาษาอ้างอิง ({{language}}) เป็นบริบท",
     "translateUseReferenceNone": "ใช้ภาษาอ้างอิงเป็นบริบท",
     "translateNoReferenceHint": "เลือกภาษาอ้างอิงในแถบเครื่องมือเพื่อเปิดใช้ตัวเลือกนี้",
