@@ -26,7 +26,6 @@ import type {
 import { getFreewayLedgerStore } from '../../storage/registry.js';
 import { isCloudMode } from '../../identity/registry.js';
 import { moduleRegistry } from '../M6-module-registry.js';
-import { STATIC_MODULES } from '../module-index.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
 import type { BucketView } from './types.js';
 import { updateGatePassEma } from './stats.js';
@@ -143,9 +142,26 @@ export function freewayCandidateIds(
   return [...new Set(ordered)];
 }
 
-/** Base module id → its first declared manifest env var, from the static registry. */
-function defaultEnvVarFor(baseModuleId: string): string | undefined {
-  return STATIC_MODULES.find((e) => e.manifest.id === baseModuleId)?.manifest.requiredEnvVars?.[0];
+/**
+ * Base module id → its first declared manifest env var, read from the static
+ * module index — imported LAZILY, inside the one function that needs it.
+ *
+ * `module-index.js` imports all ten module packages (each re-exporting its
+ * `manifest.json`), so a static edge from this file would graft the entire
+ * module registry onto every importer of bucket-source — M9, M25, M26,
+ * M9/module-selection, routes/freeway, routes/vault — and through them onto
+ * most of the server. That mapping is needed only when a credential is
+ * written, so the import is paid there and nowhere else. The registry
+ * (`moduleRegistry.getMetadata`) is NOT an alternative source here: it is
+ * populated by `loadStatic` at boot, and this must also resolve manifest env
+ * vars in contexts that never boot the registry.
+ */
+async function loadEnvVarLookup(): Promise<(baseModuleId: string) => string | undefined> {
+  const { STATIC_MODULES } = await import('../module-index.js');
+  const byBaseId = new Map(
+    STATIC_MODULES.map((e) => [e.manifest.id, e.manifest.requiredEnvVars?.[0]] as const),
+  );
+  return (baseModuleId) => byBaseId.get(baseModuleId);
 }
 
 /**
@@ -157,14 +173,14 @@ function defaultEnvVarFor(baseModuleId: string): string | undefined {
  */
 export async function clearFreewayCredentialMarks(
   updatedVaultKeys: readonly string[],
-  deps: BucketSourceDeps & { envVarFor?: (baseModuleId: string) => string | undefined } = {},
+  deps: BucketSourceDeps = {},
 ): Promise<void> {
   const updated = new Set(updatedVaultKeys);
   if (updated.size === 0) return;
   const ledger = deps.ledger ?? getFreewayLedgerStore();
   const snapshot = getFreeTierSnapshot();
   const instanceIdsFor = deps.instanceIdsFor ?? defaultInstanceIdsFor;
-  const envVarFor = deps.envVarFor ?? defaultEnvVarFor;
+  const envVarFor = await loadEnvVarLookup();
 
   const cleared = new Set<string>();
   for (const provider of Object.values(snapshot.providers)) {
@@ -185,13 +201,18 @@ export async function clearFreewayCredentialMarks(
 
 /**
  * Resolve a Freeway probe's credential for a base module's manifest env var,
- * trying it the same way `loadBucketViews` resolves a dispatch candidate: in
- * {@link freewayCandidateIds}' order, each instance of that base module first
- * — read from its DERIVED vault key (`deriveInstanceCredentialKey`) — then
- * the bare env var last. Instance credentials are never stored under the
- * bare env var, so a workspace whose only configured provider is a named
- * instance (e.g. `openrouter:default`) needs this fallback or the probe
- * silently finds nothing. `lookup` is a raw vault-key reader (no module-id
+ * walking the candidates in {@link freewayCandidateIds}' ORDER — each instance
+ * of that base module first, read from its DERIVED vault key
+ * (`deriveInstanceCredentialKey`), then the bare env var last. Instance
+ * credentials are never stored under the bare env var, so a workspace whose
+ * only configured provider is a named instance (e.g. `openrouter:default`)
+ * needs this fallback or the probe silently finds nothing.
+ *
+ * Order only — this is NOT mark-aware, so it can differ from the candidate
+ * `loadBucketViews` would actually dispatch with: with `openrouter:default`
+ * credential-marked and `openrouter:work` serving, the probe still returns
+ * `:default`'s key and its usage call just fails (a probe failure is a silent
+ * skip, never a run failure). `lookup` is a raw vault-key reader (no module-id
  * awareness); `instanceIdsFor` defaults to the live registry.
  */
 export function resolveFreewayProbeCredential(

@@ -3105,13 +3105,16 @@ export class TranslationEngine {
             decision.modelOverride = revalidated.modelId;
           }
         } else if (authFailure) {
-          // 'keep' after an auth failure can only mean a SIBLING candidate now
+          // 'keep' after an auth failure normally means a SIBLING candidate now
           // resolves this same bucket: loadBucketViews skips any candidate
-          // under a live credential mark, so the id that just failed can never
-          // eligibly re-resolve to itself. Retrying `state.module` unchanged
-          // would just replay the same bad credential and burn the batch's
-          // only failover hop for nothing — rebuild against the fresh
-          // dispatch id instead.
+          // under a live credential mark, so the id that just failed does not
+          // eligibly re-resolve to itself. (The one exception: markFreeway-
+          // CredentialBad swallows ledger write failures, so if the mark never
+          // landed the same id can come back — the guard below then sees
+          // freshModuleId === state.moduleId and this hop simply retries it.)
+          // Retrying `state.module` unchanged would just replay the same bad
+          // credential and burn the batch's only failover hop for nothing —
+          // rebuild against the fresh dispatch id instead.
           const freshBucket = buckets.find((bucket) => bucket.bucketKey === state.bucketKey);
           const freshModuleId = freshBucket?.dispatchModuleId ?? freshBucket?.moduleId;
           if (freshBucket && freshModuleId && freshModuleId !== state.moduleId) {
@@ -3876,6 +3879,25 @@ export class TranslationEngine {
 
       for (const batchJobs of dispatchBatches) {
         if ((status.status as RunStatusCode) === RunStatusCode.Cancelled || signal?.aborted) break;
+        // Invariant guard, not a live fix: keep every batch's decisions
+        // pointing at the module this run is CURRENTLY dispatching through.
+        // An earlier batch's failover moves the outer module/moduleId/
+        // metricsModel (synced below, deliberately, so the next batch doesn't
+        // start back on a marked module) but re-points only its OWN decisions,
+        // inside dispatchFreewayBatch — and persistResult/retryLqaFailure
+        // attribute the text by `decision.moduleId`. Today a Freeway group is
+        // homogeneous in target language (M32 `groupJobs` keys by language +
+        // band), so `dispatchBatches` holds exactly one batch here and this
+        // loop has nothing to do; it exists so that a grouping change which
+        // puts two batches in one call cannot silently mis-attribute the
+        // second one.
+        if (bucketKey !== undefined) {
+          for (const { index } of batchJobs) {
+            const decision = uncachedNonTrivialEntries[index].decision;
+            decision.moduleId = moduleId;
+            if (metricsModel !== null) decision.modelOverride = metricsModel;
+          }
+        }
         let targetResults: TranslationResult[] = [];
         let batchError: unknown;
         /** Set when a Freeway failover ended in a park/block instead of results. */
