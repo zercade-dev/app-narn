@@ -198,7 +198,7 @@
   },
   "freeway": {
     "title": "NARN Freeway",
-    "description": "NARN이 작업을 자동으로 배정할 수 있는 무료 등급 AI 모델 공유 풀이에요 — 신용카드가 필요 없어요. 아래에서 무료 키를 추가한 다음, 배정 규칙이나 백그라운드 엔진을 NARN Freeway로 지정하면 사용할 수 있어요.",
+    "description": "NARN이 작업을 자동으로 배정할 수 있는 무료 등급 AI 모델 공유 풀이에요 — 신용카드가 필요 없어요. 아래에서 원하는 제공업체를 모듈로 설정한 다음, 배정 규칙이나 백그라운드 엔진을 NARN Freeway로 지정하면 사용할 수 있어요.",
     "toggleAria": "NARN Freeway 상세 정보 표시 전환",
     "refresh": "새로 고침",
     "loading": "NARN Freeway 상태를 불러오는 중…",
@@ -207,6 +207,7 @@
     "sourcesTitle": "무료 제공업체",
     "keyPresent": "키 추가됨",
     "keyMissing": "아직 키 없음",
+    "viaInstance": "{{instance}} 경유",
     "enableModuleHint": "키는 설정되어 있지만 모듈이 비활성화되어 있어요.",
     "enableModuleButton": "활성화",
     "disabledReasonChip": "비활성화: {{reason}}",

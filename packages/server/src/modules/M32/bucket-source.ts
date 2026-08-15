@@ -9,11 +9,13 @@ import type { FreeTierModel, FreeTierProvider, FreewayWindowKind } from '@zercad
 import {
   buildModuleInstanceId,
   DEFAULT_INSTANCE_SLUG,
+  deriveInstanceCredentialKey,
   freeTierModel,
   freeTierProvider,
   getFreeTierSnapshot,
   hasSharedPool,
   nextReset,
+  parseModuleInstanceId,
   windowStart,
 } from '@zercade-dev/narn-shared';
 import type {
@@ -125,6 +127,34 @@ export function freewayCandidateIds(
   const rest = instanceIds.filter((id) => id !== preferred).sort((a, b) => a.localeCompare(b));
   const ordered = [baseModuleId, ...(instanceIds.includes(preferred) ? [preferred] : []), ...rest];
   return [...new Set(ordered)];
+}
+
+/**
+ * Resolve a Freeway probe's credential for a base module's manifest env var,
+ * trying it the same way `loadBucketViews` resolves a dispatch candidate: the
+ * bare base credential first, then — in {@link freewayCandidateIds}' order —
+ * each instance of that base module, read from its DERIVED vault key
+ * (`deriveInstanceCredentialKey`). Instance credentials are never stored
+ * under the bare env var, so a workspace whose only configured provider is a
+ * named instance (e.g. `openrouter:default`) needs this fallback or the probe
+ * silently finds nothing. `lookup` is a raw vault-key reader (no module-id
+ * awareness); `instanceIdsFor` defaults to the live registry.
+ */
+export function resolveFreewayProbeCredential(
+  baseModuleId: string,
+  envVar: string,
+  lookup: (vaultKey: string) => string | undefined,
+  instanceIdsFor: (baseModuleId: string) => string[] = defaultInstanceIdsFor,
+): string | undefined {
+  const base = lookup(envVar);
+  if (base !== undefined) return base;
+  for (const candidateId of freewayCandidateIds(baseModuleId, instanceIdsFor(baseModuleId))) {
+    const parsed = parseModuleInstanceId(candidateId);
+    if (!parsed) continue; // the bare base id was already tried above
+    const value = lookup(deriveInstanceCredentialKey(envVar, parsed.slug));
+    if (value !== undefined) return value;
+  }
+  return undefined;
 }
 
 /** The window that governs day-scale headroom for one snapshot model. */

@@ -203,7 +203,7 @@
   },
   "freeway": {
     "title": "NARN Freeway",
-    "description": "Un pool condiviso di modelli IA di livello gratuito verso cui NARN può instradare automaticamente il lavoro — nessuna carta di credito richiesta. Aggiungi una chiave gratuita qui sotto, poi punta una regola di routing o un motore in background su NARN Freeway per usarlo.",
+    "description": "Un pool condiviso di modelli IA di livello gratuito verso cui NARN può instradare automaticamente il lavoro — nessuna carta di credito richiesta. Configura qualsiasi provider qui sotto come modulo, poi punta una regola di routing o un motore in background su NARN Freeway per usarlo.",
     "toggleAria": "Mostra o nascondi i dettagli di NARN Freeway",
     "refresh": "Aggiorna",
     "loading": "Caricamento dello stato di NARN Freeway…",
@@ -212,6 +212,7 @@
     "sourcesTitle": "Provider gratuiti",
     "keyPresent": "Chiave aggiunta",
     "keyMissing": "Ancora nessuna chiave",
+    "viaInstance": "tramite {{instance}}",
     "enableModuleHint": "La chiave è impostata, ma il modulo è disattivato.",
     "enableModuleButton": "Attivalo",
     "disabledReasonChip": "Disattivato: {{reason}}",

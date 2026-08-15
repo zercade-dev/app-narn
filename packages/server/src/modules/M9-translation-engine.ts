@@ -119,6 +119,7 @@ import {
   loadBucketViews,
   recordDispatch,
   recordGateOutcomes,
+  resolveFreewayProbeCredential,
 } from './M32/bucket-source.js';
 import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
 import { effectiveRemainingRequests, selectEscalation } from './M32/selector.js';
@@ -2693,14 +2694,22 @@ export class TranslationEngine {
   /**
    * Reads a Freeway probe's credential (DeepL/OpenRouter) by its manifest
    * env-var name, scoped to this run's session — the only way `syncAuthoritativeUsage`
-   * is allowed to see a credential (never `process.env`). `moduleId` is
-   * unused here: the vault is keyed by env-var name, which is already
-   * module-specific (`DEEPL_API_KEY`, `OPENROUTER_API_KEY`).
+   * is allowed to see a credential (never `process.env`). `moduleId` here is
+   * always the snapshot's base module id (see {@link syncAuthoritativeUsage}'s
+   * callers), but the credential the probe needs may live on whichever
+   * instance Freeway actually dispatches through: instance credentials are
+   * vault-keyed under a DERIVED name, not the bare env var. Delegates to
+   * {@link resolveFreewayProbeCredential}, which mirrors `loadBucketViews`'
+   * own resolution order (base id, then instances) so the probe finds the
+   * same credential Freeway itself would dispatch with.
    */
   private credentialForFreewayProbe(
     sessionId: string | undefined,
   ): (moduleId: string, envVar: string) => string | undefined {
-    return (_moduleId: string, envVar: string) => credentialStore.getOptional(envVar, sessionId);
+    return (moduleId: string, envVar: string) =>
+      resolveFreewayProbeCredential(moduleId, envVar, (vaultKey) =>
+        credentialStore.getOptional(vaultKey, sessionId),
+      );
   }
 
   /**

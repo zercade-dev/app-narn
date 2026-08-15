@@ -39,7 +39,12 @@ export interface FreeTierModel {
 }
 
 export interface FreeTierProvider {
-  /** Module or module-instance id that dispatches this provider's jobs. */
+  /**
+   * The provider's base module id, always — never a module-instance id. This
+   * is what keys the quota ledger (`bucketKey`), not necessarily what
+   * dispatches the job: a workspace configured via a named instance
+   * dispatches through that instance instead (see `BucketView.dispatchModuleId`).
+   */
   moduleId: string;
   /** IANA zone the provider's daily/monthly windows reset in. */
   resetTimeZone: string;

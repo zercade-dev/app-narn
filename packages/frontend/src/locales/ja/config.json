@@ -198,7 +198,7 @@
   },
   "freeway": {
     "title": "NARN Freeway",
-    "description": "NARNが作業を自動で振り分けられる、無料枠のAIモデルの共有プールです（クレジットカード不要）。下から無料のキーを追加し、振り分けルールまたはバックグラウンドエンジンをNARN Freewayに向ければ使用できます。",
+    "description": "NARNが作業を自動で振り分けられる、無料枠のAIモデルの共有プールです（クレジットカード不要）。下で任意のプロバイダーをモジュールとして設定し、振り分けルールまたはバックグラウンドエンジンをNARN Freewayに向ければ使用できます。",
     "toggleAria": "NARN Freewayの詳細表示を切り替え",
     "refresh": "更新",
     "loading": "NARN Freewayの状態を読み込み中…",
@@ -207,6 +207,7 @@
     "sourcesTitle": "無料プロバイダー",
     "keyPresent": "キー設定済み",
     "keyMissing": "キー未設定",
+    "viaInstance": "{{instance}} 経由",
     "enableModuleHint": "キーは設定済みですが、モジュールが無効です。",
     "enableModuleButton": "有効化",
     "disabledReasonChip": "無効：{{reason}}",

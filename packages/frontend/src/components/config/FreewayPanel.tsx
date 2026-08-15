@@ -97,6 +97,8 @@ const STATE_BADGE_VARIANT: Record<
 interface ProviderSummary {
   providerKey: string;
   moduleId: string;
+  /** The module/instance id actually serving this provider, when it differs from `moduleId`. */
+  dispatchModuleId?: string;
   keyPresent: boolean;
   /** True only for the 'module-disabled' reason — a credentialed module the user toggled off. */
   moduleDisabled: boolean;
@@ -137,6 +139,9 @@ function summarizeProviders(buckets: readonly FreewayStatusBucket[]): ProviderSu
     }
     if (!summary.enableTargetModuleId && bucket.enableTargetModuleId) {
       summary.enableTargetModuleId = bucket.enableTargetModuleId;
+    }
+    if (!summary.dispatchModuleId && bucket.dispatchModuleId) {
+      summary.dispatchModuleId = bucket.dispatchModuleId;
     }
   }
   return order.map((key) => byKey.get(key)!);
@@ -211,16 +216,18 @@ export function FreewayPanel(): React.JSX.Element {
               <CardDescription>{t('freeway.description')}</CardDescription>
             </div>
           </CollapsibleTrigger>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => reload()}
-            disabled={loading}
-            data-testid="freeway-refresh-button"
-          >
-            <RotateCcw className="size-3.5" />
-            {t('freeway.refresh')}
-          </Button>
+          {open && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => reload()}
+              disabled={loading}
+              data-testid="freeway-refresh-button"
+            >
+              <RotateCcw className="size-3.5" />
+              {t('freeway.refresh')}
+            </Button>
+          )}
         </CardHeader>
         <CollapsibleContent>
           <CardContent className="space-y-4">
@@ -267,6 +274,17 @@ export function FreewayPanel(): React.JSX.Element {
                                 ? t('freeway.keyPresent')
                                 : t('freeway.keyMissing')}
                             </Badge>
+                            {provider.dispatchModuleId &&
+                              provider.dispatchModuleId !== provider.moduleId && (
+                                <span
+                                  className="text-xs text-muted-foreground"
+                                  data-testid={`freeway-via-${provider.providerKey}`}
+                                >
+                                  {t('freeway.viaInstance', {
+                                    instance: provider.dispatchModuleId,
+                                  })}
+                                </span>
+                              )}
                             {provider.moduleDisabled && (
                               <span className="text-xs text-muted-foreground">
                                 {t('freeway.enableModuleHint')}

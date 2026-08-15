@@ -203,7 +203,7 @@
   },
   "freeway": {
     "title": "NARN Freeway",
-    "description": "A shared pool of free-tier AI models NARN can route work to automatically — no credit card required. Add a free key below, then point a routing rule or a background engine at NARN Freeway to use it.",
+    "description": "A shared pool of free-tier AI models NARN can route work to automatically — no credit card required. Set up any provider below as a module, then point a routing rule or a background engine at NARN Freeway to use it.",
     "toggleAria": "Show or hide NARN Freeway details",
     "refresh": "Refresh",
     "loading": "Loading NARN Freeway status…",
@@ -212,6 +212,7 @@
     "sourcesTitle": "Free providers",
     "keyPresent": "Key added",
     "keyMissing": "No key yet",
+    "viaInstance": "via {{instance}}",
     "enableModuleHint": "Key is set, but the module is turned off.",
     "enableModuleButton": "Enable it",
     "disabledReasonChip": "Disabled: {{reason}}",

@@ -203,7 +203,7 @@
   },
   "freeway": {
     "title": "NARN Freeway",
-    "description": "NARN'ın otomatik olarak iş yönlendirebileceği, ücretsiz katmandaki yapay zekâ modellerinden oluşan, paylaşılan bir havuz — kredi kartı gerekmez. Aşağıya ücretsiz bir anahtar ekleyin, ardından kullanmak için bir yönlendirme kuralını veya arka planda çalışan bir motoru NARN Freeway'e yönlendirin.",
+    "description": "NARN'ın otomatik olarak iş yönlendirebileceği, ücretsiz katmandaki yapay zekâ modellerinden oluşan, paylaşılan bir havuz — kredi kartı gerekmez. Aşağıda istediğiniz bir sağlayıcıyı modül olarak ayarlayın, ardından kullanmak için bir yönlendirme kuralını veya arka planda çalışan bir motoru NARN Freeway'e yönlendirin.",
     "toggleAria": "NARN Freeway ayrıntılarını göster veya gizle",
     "refresh": "Yenile",
     "loading": "NARN Freeway durumu yükleniyor…",
@@ -212,6 +212,7 @@
     "sourcesTitle": "Ücretsiz sağlayıcılar",
     "keyPresent": "Anahtar eklendi",
     "keyMissing": "Henüz anahtar yok",
+    "viaInstance": "{{instance}} üzerinden",
     "enableModuleHint": "Anahtar ayarlı, ancak modül devre dışı.",
     "enableModuleButton": "Etkinleştir",
     "disabledReasonChip": "Devre dışı: {{reason}}",

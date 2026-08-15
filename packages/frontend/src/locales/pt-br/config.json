@@ -203,7 +203,7 @@
   },
   "freeway": {
     "title": "NARN Freeway",
-    "description": "Um pool compartilhado de modelos de IA de nível gratuito para o qual o NARN pode rotear trabalho automaticamente — sem necessidade de cartão de crédito. Adicione uma chave gratuita abaixo e aponte uma regra de roteamento ou um mecanismo em segundo plano para o NARN Freeway para usá-lo.",
+    "description": "Um pool compartilhado de modelos de IA de nível gratuito para o qual o NARN pode rotear trabalho automaticamente — sem necessidade de cartão de crédito. Configure qualquer provedor abaixo como um módulo e aponte uma regra de roteamento ou um mecanismo em segundo plano para o NARN Freeway para usá-lo.",
     "toggleAria": "Mostrar ou ocultar os detalhes do NARN Freeway",
     "refresh": "Atualizar",
     "loading": "Carregando o status do NARN Freeway…",
@@ -212,6 +212,7 @@
     "sourcesTitle": "Provedores gratuitos",
     "keyPresent": "Chave adicionada",
     "keyMissing": "Ainda sem chave",
+    "viaInstance": "via {{instance}}",
     "enableModuleHint": "A chave está definida, mas o módulo está desativado.",
     "enableModuleButton": "Ativar",
     "disabledReasonChip": "Desativado: {{reason}}",

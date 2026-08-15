@@ -9,7 +9,7 @@ import type { FreewayBucketStats } from '../../storage/types.js';
 export type DifficultyBand = 1 | 2 | 3 | 4;
 
 export interface BucketView {
-  /** '<moduleOrInstanceId>::<modelId>' */
+  /** `'<baseModuleId>::<modelId>'` */
   bucketKey: string;
   /**
    * The snapshot's base module id — always, even when the workspace serves
