@@ -3877,27 +3877,23 @@ export class TranslationEngine {
         await finalizeEntryResult(idx);
       };
 
+      // A FREEWAY batch (`bucketKey !== undefined`) always has exactly ONE
+      // entry in `dispatchBatches`, which is what makes the post-dispatch sync
+      // below safe: it moves the outer module/moduleId/metricsModel after a
+      // failover, while only the dispatched batch's own decisions are
+      // re-pointed (inside dispatchFreewayBatch) — and persistResult /
+      // retryLqaFailure attribute the text by `decision.moduleId`. A second
+      // batch here would therefore persist a stale producer. It cannot occur:
+      // M32 `groupJobs` keys groups by `targetLanguage + band`, `planRun`
+      // never merges groups, and `groupDecisions` only chunks WITHIN one
+      // assignment — so a Freeway group is homogeneous in target language and
+      // `jobsByTargetLanguage` yields a single batch. Should that ever change,
+      // attribution is not the first thing that breaks (revalidateGroup's band
+      // derivation, the per-group bucket/batchSize plan and
+      // freewayModuleOverrides all assume one language too), so this is
+      // recorded as an invariant rather than defended with a silent fix-up.
       for (const batchJobs of dispatchBatches) {
         if ((status.status as RunStatusCode) === RunStatusCode.Cancelled || signal?.aborted) break;
-        // Invariant guard, not a live fix: keep every batch's decisions
-        // pointing at the module this run is CURRENTLY dispatching through.
-        // An earlier batch's failover moves the outer module/moduleId/
-        // metricsModel (synced below, deliberately, so the next batch doesn't
-        // start back on a marked module) but re-points only its OWN decisions,
-        // inside dispatchFreewayBatch — and persistResult/retryLqaFailure
-        // attribute the text by `decision.moduleId`. Today a Freeway group is
-        // homogeneous in target language (M32 `groupJobs` keys by language +
-        // band), so `dispatchBatches` holds exactly one batch here and this
-        // loop has nothing to do; it exists so that a grouping change which
-        // puts two batches in one call cannot silently mis-attribute the
-        // second one.
-        if (bucketKey !== undefined) {
-          for (const { index } of batchJobs) {
-            const decision = uncachedNonTrivialEntries[index].decision;
-            decision.moduleId = moduleId;
-            if (metricsModel !== null) decision.modelOverride = metricsModel;
-          }
-        }
         let targetResults: TranslationResult[] = [];
         let batchError: unknown;
         /** Set when a Freeway failover ended in a park/block instead of results. */
