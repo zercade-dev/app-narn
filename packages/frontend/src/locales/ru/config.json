@@ -245,7 +245,8 @@
       "cooling": "Остывает",
       "exhausted": "Исчерпано на сегодня",
       "disabled": "Модуль отключён",
-      "uncredentialed": "Нет ключа"
+      "uncredentialed": "Нет ключа",
+      "badCredentials": "Неверные учетные данные"
     }
   },
   "overflowRatioLabel": "Коэффициент переполнения",

@@ -227,7 +227,8 @@
       "cooling": "กำลังคูลดาวน์",
       "exhausted": "หมดสำหรับวันนี้",
       "disabled": "โมดูลถูกปิดใช้งาน",
-      "uncredentialed": "ไม่มีคีย์"
+      "uncredentialed": "ไม่มีคีย์",
+      "badCredentials": "ข้อมูลรับรองไม่ถูกต้อง"
     }
   },
   "overflowRatioLabel": "อัตราส่วนการล้น",

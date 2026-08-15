@@ -234,7 +234,8 @@
       "cooling": "En refroidissement",
       "exhausted": "Épuisé pour aujourd'hui",
       "disabled": "Module désactivé",
-      "uncredentialed": "Pas de clé"
+      "uncredentialed": "Pas de clé",
+      "badCredentials": "Identifiants invalides"
     }
   },
   "overflowRatioLabel": "Ratio de débordement",

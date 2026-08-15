@@ -233,7 +233,8 @@
       "cooling": "Soğuyor",
       "exhausted": "Bugünlük tükendi",
       "disabled": "Modül devre dışı",
-      "uncredentialed": "Anahtar yok"
+      "uncredentialed": "Anahtar yok",
+      "badCredentials": "Kimlik bilgileri hatalı"
     }
   },
   "overflowRatioLabel": "Taşma oranı",

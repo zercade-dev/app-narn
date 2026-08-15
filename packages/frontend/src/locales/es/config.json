@@ -234,7 +234,8 @@
       "cooling": "En enfriamiento",
       "exhausted": "Agotado por hoy",
       "disabled": "Módulo desactivado",
-      "uncredentialed": "Sin clave"
+      "uncredentialed": "Sin clave",
+      "badCredentials": "Credenciales inválidas"
     }
   },
   "overflowRatioLabel": "Relación de desbordamiento",

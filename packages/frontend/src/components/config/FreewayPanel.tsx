@@ -355,7 +355,10 @@ export function FreewayPanel(): React.JSX.Element {
                                 variant={STATE_BADGE_VARIANT[bucket.state]}
                                 data-testid={`freeway-state-${bucket.bucketKey}`}
                               >
-                                {t(`freeway.state.${bucket.state}`)}
+                                {bucket.state === 'disabled' &&
+                                bucket.disabledReason !== MODULE_DISABLED_REASON
+                                  ? t('freeway.state.badCredentials')
+                                  : t(`freeway.state.${bucket.state}`)}
                               </Badge>
                             </TableCell>
                             <TableCell data-testid={`freeway-remaining-${bucket.bucketKey}`}>

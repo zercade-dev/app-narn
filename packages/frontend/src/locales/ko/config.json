@@ -227,7 +227,8 @@
       "cooling": "쿨다운 중",
       "exhausted": "오늘 소진",
       "disabled": "모듈 비활성화",
-      "uncredentialed": "키 없음"
+      "uncredentialed": "키 없음",
+      "badCredentials": "자격 증명 오류"
     }
   },
   "overflowRatioLabel": "초과 비율",

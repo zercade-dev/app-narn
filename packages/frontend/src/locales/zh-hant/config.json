@@ -227,7 +227,8 @@
       "cooling": "冷卻中",
       "exhausted": "今日已用完",
       "disabled": "模組已停用",
-      "uncredentialed": "尚無金鑰"
+      "uncredentialed": "尚無金鑰",
+      "badCredentials": "憑證無效"
     }
   },
   "overflowRatioLabel": "溢出比例",

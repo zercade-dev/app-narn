@@ -233,7 +233,8 @@
       "cooling": "Cooldown",
       "exhausted": "Für heute aufgebraucht",
       "disabled": "Modul deaktiviert",
-      "uncredentialed": "Kein Schlüssel"
+      "uncredentialed": "Kein Schlüssel",
+      "badCredentials": "Zugangsdaten ungültig"
     }
   },
   "overflowRatioLabel": "Überlauf-Verhältnis",
