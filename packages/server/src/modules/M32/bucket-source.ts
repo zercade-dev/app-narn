@@ -47,6 +47,17 @@ export function freewayBucketKey(moduleId: string, modelId: string): string {
 }
 
 /**
+ * Ledger key holding a candidate module's bad-credential mark. A credential is
+ * a fact about a module id, not about one bucket: marking the shared
+ * `<base>::<model>` bucket key would disable every sibling instance that could
+ * still serve it. `credential::` is a reserved namespace — a bucket key is
+ * `<moduleId>::<modelId>` and no module id is the literal `credential`.
+ */
+export function freewayCredentialKey(moduleId: string): string {
+  return `credential::${moduleId}`;
+}
+
+/**
  * Recovers the snapshot's base module id from a bucket key — the inverse of
  * the `moduleId` half of {@link freewayBucketKey}. `bucketKey` always keys on
  * the base id even when a bucket's `dispatchModuleId` is a named instance, so
@@ -244,14 +255,29 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   const views: BucketView[] = [];
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
-    const dispatchModuleId = freewayCandidateIds(
+    const credentialBad = (id: string): boolean =>
+      stateByKey.get(freewayCredentialKey(id))?.disabledReason !== undefined;
+
+    // A candidate rejected ONLY for a bad credential is remembered: if no
+    // candidate survives, the provider's buckets are still emitted carrying
+    // that reason, so the panel can explain the state (selector/planner
+    // exclude any bucket with a disabledReason, so nothing dispatches to it).
+    let markedCandidate: string | undefined;
+    const usableModuleId = freewayCandidateIds(
       provider.moduleId,
       instanceIdsFor(provider.moduleId),
     ).find((id) => {
       const status = moduleStatus(id);
-      return status?.credentialed === true && status.enabled;
+      if (status?.credentialed !== true || !status.enabled) return false;
+      if (credentialBad(id)) {
+        markedCandidate ??= id;
+        return false;
+      }
+      return true;
     });
+    const dispatchModuleId = usableModuleId ?? markedCandidate;
     if (dispatchModuleId === undefined) continue;
+    const badCredentials = usableModuleId === undefined;
 
     // ONE usage read per model, shared by that model's own headroom and by the
     // provider's pool sum.
@@ -289,7 +315,11 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         poolRemainingRequests,
         nextResetAt: nextReset(dayWindow.kind, now, provider.resetTimeZone),
         cooldownUntil: state?.cooldownUntil,
-        disabledReason: state?.disabledReason,
+        // Bucket-keyed disable rows written by pre-upgrade code are
+        // deliberately no longer read here — a credential mark lives under
+        // `freewayCredentialKey`, keyed on the module that actually failed,
+        // not the shared bucket.
+        disabledReason: badCredentials ? 'bad credentials' : undefined,
         stats: state?.stats ?? {},
       });
     }

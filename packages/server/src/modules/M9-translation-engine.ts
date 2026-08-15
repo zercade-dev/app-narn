@@ -115,6 +115,7 @@ import {
   type BucketSourceDeps,
   coolBucket,
   freewayBucketBaseModuleId,
+  freewayCredentialKey,
   freewayModuleOverrides,
   loadBucketViews,
   recordDispatch,
@@ -2893,14 +2894,23 @@ export class TranslationEngine {
     }
   }
 
-  /** Mark a bucket unusable after a bad-credential failure. Never fails the batch. */
-  private async disableFreewayBucket(bucketKey: string, deps: BucketSourceDeps): Promise<void> {
+  /**
+   * Mark the dispatch candidate's credential bad after an auth failure. Keyed
+   * on the module id, not the bucket: a stale key on one instance must not
+   * disable buckets a sibling instance could still serve. Cleared when that
+   * module's credential is next written (see clearFreewayCredentialMarks).
+   * Never fails the batch.
+   */
+  private async markFreewayCredentialBad(moduleId: string, deps: BucketSourceDeps): Promise<void> {
     try {
-      await (deps.ledger ?? getFreewayLedgerStore()).setDisabled(bucketKey, 'bad credentials');
-      this.logger.warn('translation:freeway-bucket-disabled', { bucketKey });
+      await (deps.ledger ?? getFreewayLedgerStore()).setDisabled(
+        freewayCredentialKey(moduleId),
+        'bad credentials',
+      );
+      this.logger.warn('translation:freeway-credential-disabled', { moduleId });
     } catch (err) {
       this.logger.warn('translation:freeway-ledger-write-failed', {
-        bucketKey,
+        moduleId,
         error: toErrorMessage(err),
       });
     }
@@ -2924,7 +2934,8 @@ export class TranslationEngine {
 
   /**
    * Dispatch one Freeway batch, with a SINGLE failover hop: a 429 cools the
-   * bucket, a bad credential disables it, and either way the group is
+   * bucket, a bad credential marks the dispatch candidate (letting a sibling
+   * instance keep serving the bucket), and either way the group is
    * re-validated against fresh views and retried once on whatever bucket comes
    * back. A second strike parks the batch (429) or lets it fail on the
    * now-disabled bucket (auth) rather than spending more free requests.
@@ -2995,9 +3006,10 @@ export class TranslationEngine {
             return { kind: 'error', error: err, authCancel: false };
           }
           if (!rateLimited) {
-            // A repeat auth failure disables the failover bucket too, then
-            // fails this batch's pairs (a bad credential is not a quota wait).
-            await this.disableFreewayBucket(state.bucketKey, deps);
+            // A repeat auth failure marks the failover candidate's credential
+            // too, then fails this batch's pairs (a bad credential is not a
+            // quota wait).
+            await this.markFreewayCredentialBad(state.moduleId, deps);
             return { kind: 'error', error: err, authCancel: false };
           }
           await this.coolFreewayBucket(
@@ -3042,7 +3054,7 @@ export class TranslationEngine {
             deps,
           );
         } else {
-          await this.disableFreewayBucket(state.bucketKey, deps);
+          await this.markFreewayCredentialBad(state.moduleId, deps);
         }
         const buckets = await loadBucketViews(now, deps);
         const revalidated = revalidateGroup(
@@ -3676,14 +3688,15 @@ export class TranslationEngine {
           // result[k>0]-only auth error is acted on only after earlier
           // results persisted.
           if (moduleResult?.error) {
-            // A Freeway credential belongs to ONE bucket: disable that bucket
-            // and let the run continue on the others instead of cancelling.
+            // A Freeway credential belongs to ONE module, not the bucket it's
+            // dispatching: mark that module's credential and let the run
+            // continue on a sibling instance instead of cancelling.
             if (
               bucketKey !== undefined &&
               freewayDeps &&
               isRunCancellingAuthError(moduleResult.error)
             ) {
-              await this.disableFreewayBucket(bucketKey, freewayDeps);
+              await this.markFreewayCredentialBad(moduleId, freewayDeps);
               return false;
             }
             if (await this.maybeCancelForAuth(runId, moduleId, moduleResult.error)) {
