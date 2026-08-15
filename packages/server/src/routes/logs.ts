@@ -147,7 +147,13 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
   const visibleTo = (entry: LogEntry): boolean => !isCloudMode() || entry.tenantId === subTenant;
 
   // Send recent history on connect (scoped to the subscriber in cloud mode).
-  const history = logger.getHistory(50);
+  // getConnectHistory() widens this from the last 50 entries to the FULL
+  // priority pool (every retained warn/error) plus the most recent 200 info
+  // entries — the old getHistory(50) replay could silently drop an early
+  // error under a flood of routine info activity. The per-entry visibleTo()
+  // filter below is the load-bearing cloud-mode tenancy boundary and stays
+  // wrapping every replayed entry unchanged.
+  const history = logger.getConnectHistory();
   for (const entry of history) {
     if (visibleTo(entry)) sse.send('log:entry', entry);
   }

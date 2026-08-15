@@ -227,7 +227,8 @@
       "cooling": "冷却中",
       "exhausted": "今日已用完",
       "disabled": "模块已停用",
-      "uncredentialed": "无密钥"
+      "uncredentialed": "无密钥",
+      "badCredentials": "凭据无效"
     }
   },
   "overflowRatioLabel": "溢出比例",

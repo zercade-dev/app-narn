@@ -12,6 +12,7 @@
   "unreadErrors": "Ungelesene Fehler: {{count}}",
   "unreadErrors_one": "{{count}} ungelesener Fehler",
   "unreadErrors_other": "{{count}} ungelesene Fehler",
+  "droppedEntries": "{{count}} frühere Einträge nicht mehr verfügbar",
   "searchPlaceholder": "Logs durchsuchen…",
   "exportLogs": "Logs exportieren",
   "exportFormat": "Exportformat",

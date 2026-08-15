@@ -234,7 +234,8 @@
       "cooling": "Resfriando",
       "exhausted": "Esgotado por hoje",
       "disabled": "Módulo desativado",
-      "uncredentialed": "Sem chave"
+      "uncredentialed": "Sem chave",
+      "badCredentials": "Credenciais inválidas"
     }
   },
   "overflowRatioLabel": "Proporção de estouro",

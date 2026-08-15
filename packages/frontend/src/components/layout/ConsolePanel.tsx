@@ -87,7 +87,11 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   const { t: tLogs } = useTranslation('logs');
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const vaultExists = useVaultStore((s) => s.hasVault);
-  const { entries, connected, clearEntries } = useLogger();
+  const { entries, droppedCounts: rawDroppedCounts, connected, clearEntries } = useLogger();
+  // Tolerate an absent `droppedCounts` (e.g. a test double or an older
+  // useLogger() shape that predates the field) rather than crashing the
+  // whole panel on `droppedCounts.info`.
+  const droppedCounts = rawDroppedCounts ?? { info: 0, priority: 0 };
   const consoleFilter = useUiSettings((s) => s.consoleFilter);
   const setConsoleFilter = useUiSettings((s) => s.setConsoleFilter);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
@@ -156,12 +160,31 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // Download the currently filtered entries (both level filter and search
   // applied) in the selected format. Runs in the browser, so a wall-clock
   // timestamp for the filename is fine.
+  //
+  // Includes the dropped counts alongside the entries: they're what started
+  // this whole feature (an exported log read clean even though the run had
+  // 142 failed entries the ring buffer had already evicted before export).
+  // The on-screen marker shows them; the file must too, or someone reading it
+  // offline has no way to tell entries are missing.
   function handleExport(): void {
     const stamp = new Date().getTime();
+    const totalDropped = droppedCounts.info + droppedCounts.priority;
     const blob =
       exportFormat === 'text'
-        ? new Blob([filteredEntries.map(entryToTextLine).join('\n')], { type: 'text/plain' })
-        : new Blob([JSON.stringify(filteredEntries, null, 2)], { type: 'application/json' });
+        ? new Blob(
+            [
+              [
+                totalDropped > 0 ? `# ${t('droppedEntries', { count: totalDropped })}` : undefined,
+                ...filteredEntries.map(entryToTextLine),
+              ]
+                .filter((line) => line !== undefined)
+                .join('\n'),
+            ],
+            { type: 'text/plain' },
+          )
+        : new Blob([JSON.stringify({ droppedCounts, entries: filteredEntries }, null, 2)], {
+            type: 'application/json',
+          });
     const extension = exportFormat === 'text' ? 'txt' : 'json';
     downloadBlob(blob, `console-logs-${stamp}.${extension}`);
   }
@@ -429,6 +452,14 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
 
           <div className="relative flex-1 min-h-0 flex flex-col">
             <div ref={parentRef} className="flex-1 overflow-auto font-mono text-[11px]">
+              {droppedCounts.info + droppedCounts.priority > 0 && (
+                <div
+                  data-testid="console-dropped-marker"
+                  className="px-3 py-0.5 text-muted-foreground/60 italic"
+                >
+                  {t('droppedEntries', { count: droppedCounts.info + droppedCounts.priority })}
+                </div>
+              )}
               {groups.length === 0 && (
                 <div data-testid="console-empty" className="px-3 py-2 text-muted-foreground/60">
                   {t('empty')}

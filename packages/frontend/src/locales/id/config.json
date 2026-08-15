@@ -227,7 +227,8 @@
       "cooling": "Mendingin",
       "exhausted": "Habis untuk hari ini",
       "disabled": "Modul dinonaktifkan",
-      "uncredentialed": "Tidak ada kunci"
+      "uncredentialed": "Tidak ada kunci",
+      "badCredentials": "Kredensial tidak valid"
     }
   },
   "overflowRatioLabel": "Rasio luapan",

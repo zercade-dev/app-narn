@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { LogEntryPools, type LogPoolDropCounts } from '@zercade-dev/narn-shared';
 import { useRunStore, type RunProgressEvent } from './run-store.js';
 import { useVaultStore } from './vault-store.js';
 
@@ -10,7 +11,34 @@ export interface LogEntry {
   timestamp: number;
 }
 
-const MAX_ENTRIES = 500;
+/**
+ * Severity-partitioned ring buffer (see `@zercade-dev/narn-shared`'s
+ * `entry-pools.ts`) so a flood of routine `info` activity during a large run
+ * can't evict the `warn`/`error` entries a user actually needs to see. Module
+ * scoped rather than store state: it holds mutable ring buffers, not
+ * something Zustand should track or serialise — the store mirrors its
+ * contents into `entries`/`droppedCounts` on every flush instead.
+ *
+ * Also the mechanism behind the SSE reconnect-replay dedupe: `push()` ignores
+ * an entry whose id is already held, which matters because the server's
+ * connect replay sends the whole priority pool on every
+ * reconnect, and reconnects have been observed at 670+/hour in practice (see
+ * `BASE_RETRY_DELAY_MS` below) — without dedupe, every one of those
+ * reconnects would re-insert every priority entry it had already delivered.
+ */
+const pools = new LogEntryPools<LogEntry>({
+  infoCapacity: 500,
+  // Must match the server's priority pool capacity (`M15-console-logger.ts`).
+  // The SSE reconnect handler replays the server's ENTIRE priority
+  // pool on every reconnect, and reconnects happen 670+/hour in practice (see
+  // `BASE_RETRY_DELAY_MS` below). If this is smaller than the server's
+  // capacity, a maximal replay overflows this pool and evicts entries that
+  // were never actually lost, inflating `droppedCounts.priority` with false
+  // positives and risking an un-replayed live entry landing mid-eviction. Keep
+  // this equal to the server's capacity so a full replay is exactly absorbed.
+  priorityCapacity: 1000,
+  priorityHeadCapacity: 50,
+});
 
 /**
  * Base delay before manually reopening a closed stream. The browser only
@@ -46,6 +74,8 @@ const FLUSH_INTERVAL_MS = 200;
 
 interface LoggerStoreState {
   entries: LogEntry[];
+  /** Counts of entries evicted from each pool since the last `clear()`. */
+  droppedCounts: LogPoolDropCounts;
   connected: boolean;
   _eventSource: EventSource | null;
   _retryTimer: ReturnType<typeof setTimeout> | null;
@@ -73,6 +103,7 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
 
   return {
     entries: [],
+    droppedCounts: { info: 0, priority: 0 },
     connected: false,
     _eventSource: null,
     _retryTimer: null,
@@ -166,12 +197,19 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
 
     addEntries: (batch) => {
       if (batch.length === 0) return;
-      set((s) => {
-        const entries = [...s.entries, ...batch];
-        return { entries: entries.length > MAX_ENTRIES ? entries.slice(-MAX_ENTRIES) : entries };
-      });
+      // push() is a no-op for an id already held (reconnect-replay dedupe) —
+      // its boolean return is discarded, same as the server's ConsoleLogger.
+      for (const entry of batch) pools.push(entry);
+      // One `set()` for the whole batch, inside the existing 200ms flush this
+      // is always called from — a second `set()` here (or moving this work
+      // out of the flush) would double the per-batch re-render cost the flush
+      // batching exists to avoid.
+      set({ entries: pools.merged(), droppedCounts: pools.dropped() });
     },
 
-    clear: () => set({ entries: [] }),
+    clear: () => {
+      pools.clear();
+      set({ entries: [], droppedCounts: { info: 0, priority: 0 } });
+    },
   };
 });

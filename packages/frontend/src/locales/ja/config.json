@@ -227,7 +227,8 @@
       "cooling": "クールダウン中",
       "exhausted": "本日分終了",
       "disabled": "モジュール無効",
-      "uncredentialed": "キーなし"
+      "uncredentialed": "キーなし",
+      "badCredentials": "認証情報が無効"
     }
   },
   "overflowRatioLabel": "オーバーフロー比率",

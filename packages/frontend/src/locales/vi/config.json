@@ -227,7 +227,8 @@
       "cooling": "Đang hạ nhiệt",
       "exhausted": "Hết cho hôm nay",
       "disabled": "Mô-đun đang tắt",
-      "uncredentialed": "Không có khóa"
+      "uncredentialed": "Không có khóa",
+      "badCredentials": "Thông tin xác thực không hợp lệ"
     }
   },
   "overflowRatioLabel": "Tỷ lệ tràn",

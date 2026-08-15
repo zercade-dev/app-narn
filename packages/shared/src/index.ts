@@ -379,3 +379,6 @@ export {
   hasSharedPool,
 } from './freeway/free-tier-snapshot.js';
 export { windowStart, nextReset } from './freeway/windows.js';
+
+export type { PoolableEntry, LogPoolOptions, LogPoolDropCounts } from './logging/entry-pools.js';
+export { LogEntryPools, isPriorityLevel } from './logging/entry-pools.js';
