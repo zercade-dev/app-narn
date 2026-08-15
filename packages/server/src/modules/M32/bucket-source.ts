@@ -251,12 +251,12 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   const snapshot = getFreeTierSnapshot();
   const states = await ledger.listBuckets();
   const stateByKey = new Map(states.map((s) => [s.bucketKey, s]));
+  const credentialBad = (id: string): boolean =>
+    stateByKey.get(freewayCredentialKey(id))?.disabledReason !== undefined;
 
   const views: BucketView[] = [];
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
-    const credentialBad = (id: string): boolean =>
-      stateByKey.get(freewayCredentialKey(id))?.disabledReason !== undefined;
 
     // A candidate rejected ONLY for a bad credential is remembered: if no
     // candidate survives, the provider's buckets are still emitted carrying

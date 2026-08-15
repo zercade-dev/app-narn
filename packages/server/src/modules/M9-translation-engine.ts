@@ -2938,8 +2938,9 @@ export class TranslationEngine {
    * instance keep serving the bucket), and either way the group is
    * re-validated against fresh views and retried once on whatever bucket or
    * sibling instance comes back. A second strike parks the batch (429) or
-   * lets it fail (auth) rather than spending more free requests — by then
-   * every candidate the bucket had is either cooling or credential-marked.
+   * lets it fail (auth) rather than spending more free requests — not
+   * because every candidate is exhausted (a third sibling may still be
+   * usable), but because the one-hop-per-batch budget is spent.
    */
   private async dispatchFreewayBatch(args: {
     jobs: TranslationJob[];
@@ -3119,6 +3120,14 @@ export class TranslationEngine {
             state.module = next;
             state.moduleId = freshModuleId;
             state.modelId = freshBucket.modelId;
+            // Symmetric with the 'reroute' branch above: the decisions must
+            // record the instance that actually ends up serving them, or
+            // persistResult/retryLqaFailure attribute the translation (and
+            // its LQA stats) to the credential-marked instance instead.
+            for (const decision of decisions) {
+              decision.moduleId = freshModuleId;
+              decision.modelOverride = freshBucket.modelId;
+            }
           }
         }
         // Otherwise 'keep' retries the same bucket once (its state moved back
@@ -3894,12 +3903,24 @@ export class TranslationEngine {
           // without changing state.bucketKey — sync on EITHER moving, or the
           // next batch in this run would start back on the marked module.
           if (state.bucketKey !== bucketKey || state.moduleId !== moduleId) {
-            this.logger.info('translation:freeway-rerouted', {
-              runId,
-              from: bucketKey,
-              to: state.bucketKey,
-              reason: 'dispatch-failure',
-            });
+            const bucketChanged = state.bucketKey !== bucketKey;
+            // A same-bucket instance swap is NOT a reroute — the bucket is
+            // identical, only the credential behind it changed — so log it
+            // under a distinct event (and always carry both module ids), or
+            // this reads as a from===to no-op reroute in the logs.
+            this.logger.info(
+              bucketChanged
+                ? 'translation:freeway-rerouted'
+                : 'translation:freeway-instance-swapped',
+              {
+                runId,
+                from: bucketKey,
+                to: state.bucketKey,
+                fromModuleId: moduleId,
+                toModuleId: state.moduleId,
+                reason: 'dispatch-failure',
+              },
+            );
             module = state.module;
             moduleId = state.moduleId;
             bucketKey = state.bucketKey;
