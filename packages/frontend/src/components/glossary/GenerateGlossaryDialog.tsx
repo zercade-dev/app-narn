@@ -744,7 +744,6 @@ export function GenerateGlossaryDialog({
                 </p>
               )}
             </div>
-
           </>
         )}
 
