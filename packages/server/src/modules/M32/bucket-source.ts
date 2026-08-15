@@ -490,7 +490,18 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   return views;
 }
 
-/** Record one dispatch attempt (requests=1 + token/char tallies) against a bucket's day-scale window(s). */
+/**
+ * Record one dispatch attempt (requests=1 + token/char tallies) against a
+ * bucket's day-scale window, plus whichever minute-scale windows (rpm/tpm)
+ * the model actually declares. One `recordAttempt` call carries the SAME
+ * delta to every listed cell — the day cell, and (when declared) the current
+ * minute's rpm and/or tpm cell — so token tallies land in the tpm cell the
+ * same way {@link loadBucketViews} sums them back out
+ * (`inputTokens + outputTokens`) when computing minute headroom. A model
+ * declaring neither rpm nor tpm gets no minute cell at all: writing one
+ * nobody will ever read is pure row growth on a table with no pruning below
+ * the day scale.
+ */
 export async function recordDispatch(
   bucketKey: string,
   now: number,
@@ -500,9 +511,19 @@ export async function recordDispatch(
   const resolved = resolveSnapshotBucket(bucketKey);
   if (!resolved) return;
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
-  const { provider, dayWindow } = resolved;
-  const start = windowStart(dayWindow.kind, now, provider.resetTimeZone);
-  const windows: FreewayWindowRef[] = [{ kind: dayWindow.kind, start }];
+  const { provider, model, dayWindow } = resolved;
+  const windows: FreewayWindowRef[] = [
+    { kind: dayWindow.kind, start: windowStart(dayWindow.kind, now, provider.resetTimeZone) },
+  ];
+  const minuteWindow = resolveMinuteWindows(model);
+  if (minuteWindow.rpm !== undefined || minuteWindow.tpm !== undefined) {
+    // Same zone-independent floor loadBucketViews reads back from — rpm/tpm
+    // ignore the zone argument, passed through only because the shared
+    // windowStart signature takes one.
+    const minuteStart = windowStart('rpm', now, provider.resetTimeZone);
+    if (minuteWindow.rpm !== undefined) windows.push({ kind: 'rpm', start: minuteStart });
+    if (minuteWindow.tpm !== undefined) windows.push({ kind: 'tpm', start: minuteStart });
+  }
   await ledger.recordAttempt(bucketKey, windows, {
     requests: 1,
     inputTokens: usage.inputTokens,
