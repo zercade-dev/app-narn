@@ -28,7 +28,15 @@ export interface LogEntry {
  */
 const pools = new LogEntryPools<LogEntry>({
   infoCapacity: 500,
-  priorityCapacity: 500,
+  // Must match the server's priority pool capacity (`M15-console-logger.ts`).
+  // The SSE reconnect handler (Task 2) replays the server's ENTIRE priority
+  // pool on every reconnect, and reconnects happen 670+/hour in practice (see
+  // `BASE_RETRY_DELAY_MS` below). If this is smaller than the server's
+  // capacity, a maximal replay overflows this pool and evicts entries that
+  // were never actually lost, inflating `droppedCounts.priority` with false
+  // positives and risking an un-replayed live entry landing mid-eviction. Keep
+  // this equal to the server's capacity so a full replay is exactly absorbed.
+  priorityCapacity: 1000,
   priorityHeadCapacity: 50,
 });
 
