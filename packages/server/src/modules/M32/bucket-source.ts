@@ -239,8 +239,9 @@ interface DayWindow {
 
 /**
  * `rpd` governs when present; char-only providers (no `rpd`) are governed by
- * `monthly_chars` instead. `rpm`/`tpm` never govern here — they are dispatcher
- * pacing concerns, not day-scale stock. Undefined when a model has neither.
+ * `monthly_chars` instead. `rpm`/`tpm` never govern here — day-scale stock is
+ * a separate concern from minute pacing, resolved by {@link resolveMinuteWindows}.
+ * Undefined when a model has neither.
  */
 function resolveDayWindow(model: FreeTierModel): DayWindow | undefined {
   const rpd = model.limits.find((l) => l.window === 'rpd');
@@ -248,6 +249,25 @@ function resolveDayWindow(model: FreeTierModel): DayWindow | undefined {
   const monthly = model.limits.find((l) => l.window === 'monthly_chars');
   if (monthly) return { kind: 'monthly_chars', limit: monthly.limit };
   return undefined;
+}
+
+/** The per-minute ceilings governing one snapshot model, when declared. */
+interface MinuteWindow {
+  rpm?: number;
+  tpm?: number;
+}
+
+/**
+ * The declared rpm/tpm ceilings for one snapshot model — the minute-scale
+ * sibling of {@link resolveDayWindow}. Unlike the day window, rpm and tpm are
+ * independent pacing constraints rather than alternatives: a model may
+ * declare both (neither field wins over the other), either one, or neither.
+ */
+function resolveMinuteWindows(model: FreeTierModel): MinuteWindow {
+  return {
+    rpm: model.limits.find((l) => l.window === 'rpm')?.limit,
+    tpm: model.limits.find((l) => l.window === 'tpm')?.limit,
+  };
 }
 
 interface ResolvedSnapshotBucket {
@@ -271,12 +291,19 @@ function resolveSnapshotBucket(bucketKey: string): ResolvedSnapshotBucket | unde
   return { provider, model, dayWindow };
 }
 
-/** One model's day-scale window and the usage already read for it. */
+/** One model's day-scale and minute-scale windows, plus the usage already read for both. */
 interface ModelUsage {
   model: FreeTierModel;
   dayWindow: DayWindow;
   bucketKey: string;
   usage: FreewayWindowUsage;
+  minuteWindow: MinuteWindow;
+  /** This minute's rpm cell, read only when the model declares rpm. */
+  rpmUsage?: FreewayWindowUsage;
+  /** This minute's tpm cell, read only when the model declares tpm. */
+  tpmUsage?: FreewayWindowUsage;
+  /** Epoch ms the current minute rolls over; set whenever rpm or tpm applies. */
+  minuteResetAt?: number;
 }
 
 /**
@@ -302,6 +329,31 @@ function sharedPoolRemaining(
     spent += entry.usage.requests;
   }
   return Math.max(0, sharedRpd - spent);
+}
+
+/**
+ * Minute headroom of a provider's account-wide pool — its shared `rpm` limit
+ * minus the requests every model spent THIS MINUTE against its own rpm cell.
+ * Pure, like {@link sharedPoolRemaining}: folds the per-model minute usage the
+ * caller already read, so nothing here issues a ledger call of its own. A
+ * shared per-minute cap is a pacing constraint rather than a day-scale
+ * allowance (see `hasSharedPool`'s rpd-only rule), so this checks the
+ * provider's `sharedLimits` directly instead of gating on `hasSharedPool` —
+ * a provider can have a shared rpm without a shared rpd, or vice versa.
+ * Undefined when the provider declares no shared rpm.
+ */
+function sharedPoolMinuteRemaining(
+  provider: FreeTierProvider,
+  models: readonly ModelUsage[],
+): number | undefined {
+  const sharedRpm = provider.sharedLimits?.find((l) => l.window === 'rpm')?.limit;
+  if (sharedRpm === undefined) return undefined;
+  let spent = 0;
+  for (const entry of models) {
+    if (entry.rpmUsage === undefined) continue;
+    spent += entry.rpmUsage.requests;
+  }
+  return Math.max(0, sharedRpm - spent);
 }
 
 /** Assemble live BucketViews for every snapshot bucket usable RIGHT NOW-ish. */
@@ -341,26 +393,71 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
     if (dispatchModuleId === undefined) continue;
     const badCredentials = usableModuleId === undefined;
 
-    // ONE usage read per model, shared by that model's own headroom and by the
-    // provider's pool sum.
+    // ONE usage read per model, covering the day cell AND whichever minute
+    // cells (rpm/tpm) that model declares in the same round trip — shared by
+    // that model's own headroom and by the provider's pool sums. Never a
+    // second ledger call per model for the minute figures.
     const models: ModelUsage[] = [];
     for (const model of provider.models) {
       const dayWindow = resolveDayWindow(model);
       if (!dayWindow) continue;
       const bucketKey = freewayBucketKey(provider.moduleId, model.id);
-      const start = windowStart(dayWindow.kind, now, provider.resetTimeZone);
-      const [usage] = await ledger.usage(bucketKey, [{ kind: dayWindow.kind, start }]);
-      models.push({ model, dayWindow, bucketKey, usage });
+      const minuteWindow = resolveMinuteWindows(model);
+      // rpm/tpm float to the same zone-independent minute regardless of the
+      // provider's day-scale reset zone (windowStart ignores the zone
+      // argument for these two kinds) — passed through only because the
+      // shared signature takes one.
+      const minuteStart = windowStart('rpm', now, provider.resetTimeZone);
+      const windows: FreewayWindowRef[] = [
+        { kind: dayWindow.kind, start: windowStart(dayWindow.kind, now, provider.resetTimeZone) },
+      ];
+      if (minuteWindow.rpm !== undefined) windows.push({ kind: 'rpm', start: minuteStart });
+      if (minuteWindow.tpm !== undefined) windows.push({ kind: 'tpm', start: minuteStart });
+      const usageResults = await ledger.usage(bucketKey, windows);
+      const usageByKind = new Map(usageResults.map((u) => [u.kind, u] as const));
+      const usage = usageByKind.get(dayWindow.kind)!;
+      const hasMinuteWindow = minuteWindow.rpm !== undefined || minuteWindow.tpm !== undefined;
+      models.push({
+        model,
+        dayWindow,
+        bucketKey,
+        usage,
+        minuteWindow,
+        rpmUsage: usageByKind.get('rpm'),
+        tpmUsage: usageByKind.get('tpm'),
+        minuteResetAt: hasMinuteWindow ? nextReset('rpm', now, provider.resetTimeZone) : undefined,
+      });
     }
     const poolRemainingRequests = sharedPoolRemaining(provider, models);
+    const poolRemainingMinuteRequests = sharedPoolMinuteRemaining(provider, models);
 
-    for (const { model, dayWindow, bucketKey, usage } of models) {
+    for (const {
+      model,
+      dayWindow,
+      bucketKey,
+      usage,
+      minuteWindow,
+      rpmUsage,
+      tpmUsage,
+      minuteResetAt,
+    } of models) {
       const remainingRequests =
         dayWindow.kind === 'monthly_chars'
           ? Number.MAX_SAFE_INTEGER
           : Math.max(0, dayWindow.limit - usage.requests);
       const remainingChars =
         dayWindow.kind === 'monthly_chars' ? Math.max(0, dayWindow.limit - usage.chars) : undefined;
+      const remainingMinuteRequests =
+        minuteWindow.rpm === undefined
+          ? undefined
+          : Math.max(0, minuteWindow.rpm - (rpmUsage?.requests ?? 0));
+      const remainingMinuteTokens =
+        minuteWindow.tpm === undefined
+          ? undefined
+          : Math.max(
+              0,
+              minuteWindow.tpm - ((tpmUsage?.inputTokens ?? 0) + (tpmUsage?.outputTokens ?? 0)),
+            );
       const state = stateByKey.get(bucketKey);
       views.push({
         bucketKey,
@@ -375,6 +472,10 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         remainingChars,
         poolKey: poolRemainingRequests === undefined ? undefined : providerKey,
         poolRemainingRequests,
+        remainingMinuteRequests,
+        remainingMinuteTokens,
+        minuteResetAt,
+        poolRemainingMinuteRequests,
         nextResetAt: nextReset(dayWindow.kind, now, provider.resetTimeZone),
         cooldownUntil: state?.cooldownUntil,
         // Bucket-keyed disable rows written by pre-upgrade code are

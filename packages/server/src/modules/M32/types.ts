@@ -37,8 +37,7 @@ export interface BucketView {
   /**
    * Day-scale request stock: headroom in the rpd window. For char-only
    * providers the monthly window governs remainingChars instead, and
-   * remainingRequests carries a large sentinel. rpm/tpm minute windows are
-   * dispatcher pacing concerns and never enter BucketView.
+   * remainingRequests carries a large sentinel.
    */
   remainingRequests: number;
   /** DeepL-style char headroom; undefined for request-limited providers. */
@@ -47,6 +46,14 @@ export interface BucketView {
   poolKey?: string;
   /** Shared-pool day headroom: sharedLimits rpd minus the provider-wide spend. */
   poolRemainingRequests?: number;
+  /** rpm headroom for the current minute. Undefined when the model declares no rpm. */
+  remainingMinuteRequests?: number;
+  /** tpm headroom for the current minute. Undefined when the model declares no tpm. */
+  remainingMinuteTokens?: number;
+  /** Epoch ms when the current minute window rolls over. Undefined when neither rpm nor tpm applies. */
+  minuteResetAt?: number;
+  /** Shared-pool rpm headroom, when the provider declares sharedLimits rpm. */
+  poolRemainingMinuteRequests?: number;
   /** Epoch ms when the day-scale window above (rpd, or the monthly char window) resets. */
   nextResetAt: number;
   cooldownUntil?: number;
