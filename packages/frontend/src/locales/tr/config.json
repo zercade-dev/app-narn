@@ -213,6 +213,7 @@
     "keyPresent": "Anahtar eklendi",
     "keyMissing": "Henüz anahtar yok",
     "viaInstance": "{{instance}} üzerinden",
+    "viaLegacyBase": "{{module}} üzerinden (eski)",
     "enableModuleHint": "Anahtar ayarlı, ancak modül devre dışı.",
     "enableModuleButton": "Etkinleştir",
     "disabledReasonChip": "Devre dışı: {{reason}}",

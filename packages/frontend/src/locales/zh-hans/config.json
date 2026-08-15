@@ -208,6 +208,7 @@
     "keyPresent": "密钥已添加",
     "keyMissing": "尚未添加密钥",
     "viaInstance": "经由 {{instance}}",
+    "viaLegacyBase": "经由 {{module}}（旧版）",
     "enableModuleHint": "密钥已设置，但模块已停用。",
     "enableModuleButton": "启用",
     "disabledReasonChip": "已停用：{{reason}}",

@@ -213,6 +213,7 @@
     "keyPresent": "Chave adicionada",
     "keyMissing": "Ainda sem chave",
     "viaInstance": "via {{instance}}",
+    "viaLegacyBase": "via {{module}} (legado)",
     "enableModuleHint": "A chave está definida, mas o módulo está desativado.",
     "enableModuleButton": "Ativar",
     "disabledReasonChip": "Desativado: {{reason}}",

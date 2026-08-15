@@ -213,6 +213,7 @@
     "keyPresent": "Key added",
     "keyMissing": "No key yet",
     "viaInstance": "via {{instance}}",
+    "viaLegacyBase": "via {{module}} (legacy)",
     "enableModuleHint": "Key is set, but the module is turned off.",
     "enableModuleButton": "Enable it",
     "disabledReasonChip": "Disabled: {{reason}}",
