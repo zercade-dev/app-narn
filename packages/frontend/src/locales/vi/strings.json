@@ -356,6 +356,7 @@
     "aiReviewModulePlaceholder": "Chọn một mô-đun",
     "aiReviewModel": "Mô hình",
     "aiReviewFreewayModelHint": "NARN Freeway tự động chọn mô hình miễn phí tốt nhất cho mỗi lô — không cần chọn mô hình hay mức độ suy luận.",
+    "aiReviewAdvancedOptions": "Tùy chọn nâng cao",
     "aiReviewVerbose": "Ghi nhật ký chi tiết (lời nhắc, tham số & phản hồi thô)",
     "aiReviewResponseLanguage": "Ngôn ngữ trả lời",
     "aiReviewLanguages": "Ngôn ngữ cần rà soát",

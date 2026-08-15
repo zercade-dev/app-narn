@@ -77,7 +77,8 @@
     "scopeLabel": "범위",
     "scopeNeverReviewed": "한 번도 검토하지 않은 항목만 ({{count}})",
     "scopeAll": "모든 항목 ({{count}})",
-    "scopeNoneHint": "이미 모든 항목을 검토했어요. 다시 검토하려면 “모든 항목”으로 바꾸세요."
+    "scopeNoneHint": "이미 모든 항목을 검토했어요. 다시 검토하려면 “모든 항목”으로 바꾸세요.",
+    "advancedOptions": "고급 옵션"
   },
   "title": "검토 대기열",
   "position": "{{current}}/{{total}}",

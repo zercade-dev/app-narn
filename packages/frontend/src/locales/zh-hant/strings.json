@@ -356,6 +356,7 @@
     "aiReviewModulePlaceholder": "選擇模組",
     "aiReviewModel": "模型",
     "aiReviewFreewayModelHint": "NARN Freeway 會自動為每個批次選擇最佳免費模型——不需要選擇模型或推理強度。",
+    "aiReviewAdvancedOptions": "進階選項",
     "aiReviewVerbose": "詳細日誌（提示詞、參數與原始回應）",
     "aiReviewResponseLanguage": "回覆語言",
     "aiReviewLanguages": "要審閱的語言",

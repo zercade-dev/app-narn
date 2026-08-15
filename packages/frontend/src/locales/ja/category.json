@@ -12,6 +12,7 @@
   "module": "モジュール",
   "modulePlaceholder": "モジュールを選択",
   "model": "モデル",
+  "aiAdvancedOptions": "詳細オプション",
   "noModules": "AIを利用できるモジュールがありません。設定タブでモジュールを設定してください。",
   "includeExisting": "既存のカテゴリにもエントリを割り当てる",
   "run": "生成",

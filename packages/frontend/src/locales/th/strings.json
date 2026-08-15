@@ -356,6 +356,7 @@
     "aiReviewModulePlaceholder": "เลือกโมดูล",
     "aiReviewModel": "โมเดล",
     "aiReviewFreewayModelHint": "NARN Freeway เลือกโมเดลฟรีที่ดีที่สุดให้อัตโนมัติในแต่ละแบตช์ — ไม่ต้องเลือกโมเดลหรือระดับการให้เหตุผล",
+    "aiReviewAdvancedOptions": "ตัวเลือกขั้นสูง",
     "aiReviewVerbose": "บันทึกล็อกแบบละเอียด (พรอมต์ พารามิเตอร์ และการตอบกลับดิบ)",
     "aiReviewResponseLanguage": "ภาษาที่ตอบกลับ",
     "aiReviewLanguages": "ภาษาที่จะรีวิว",

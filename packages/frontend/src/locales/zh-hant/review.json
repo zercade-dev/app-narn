@@ -77,7 +77,8 @@
     "scopeLabel": "範圍",
     "scopeNeverReviewed": "僅未曾審閱過的條目（{{count}}）",
     "scopeAll": "所有條目（{{count}}）",
-    "scopeNoneHint": "每個條目都已審閱過。切換到「所有條目」即可重新審閱。"
+    "scopeNoneHint": "每個條目都已審閱過。切換到「所有條目」即可重新審閱。",
+    "advancedOptions": "進階選項"
   },
   "title": "審校佇列",
   "position": "第 {{current}} 則，共 {{total}} 則",

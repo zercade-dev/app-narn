@@ -77,7 +77,8 @@
     "scopeLabel": "Phạm vi",
     "scopeNeverReviewed": "Chỉ những mục chưa từng được rà soát ({{count}})",
     "scopeAll": "Mọi mục ({{count}})",
-    "scopeNoneHint": "Mọi mục đều đã được rà soát. Hãy chuyển sang “Mọi mục” để rà soát lại."
+    "scopeNoneHint": "Mọi mục đều đã được rà soát. Hãy chuyển sang “Mọi mục” để rà soát lại.",
+    "advancedOptions": "Tùy chọn nâng cao"
   },
   "title": "Hàng chờ duyệt",
   "position": "{{current}} trên {{total}}",

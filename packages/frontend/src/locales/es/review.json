@@ -77,7 +77,8 @@
     "scopeLabel": "Alcance",
     "scopeNeverReviewed": "Solo entradas nunca revisadas ({{count}})",
     "scopeAll": "Todas las entradas ({{count}})",
-    "scopeNoneHint": "Todas las entradas ya fueron revisadas. Cambia a \"Todas las entradas\" para revisarlas de nuevo."
+    "scopeNoneHint": "Todas las entradas ya fueron revisadas. Cambia a \"Todas las entradas\" para revisarlas de nuevo.",
+    "advancedOptions": "Opciones avanzadas"
   },
   "title": "Cola de revisión",
   "position": "{{current}} de {{total}}",

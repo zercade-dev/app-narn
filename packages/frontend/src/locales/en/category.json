@@ -13,6 +13,7 @@
   "module": "Module",
   "modulePlaceholder": "Choose a module",
   "model": "Model",
+  "aiAdvancedOptions": "Advanced options",
   "noModules": "No AI-capable module is available. Configure one in Config.",
   "includeExisting": "Also assign entries into existing categories",
   "run": "Generate",

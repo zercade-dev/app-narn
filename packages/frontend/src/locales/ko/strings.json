@@ -356,6 +356,7 @@
     "aiReviewModulePlaceholder": "모듈을 선택하세요",
     "aiReviewModel": "모델",
     "aiReviewFreewayModelHint": "NARN Freeway가 배치마다 가장 좋은 무료 모델을 자동으로 선택해서, 모델이나 추론 강도를 선택할 필요가 없어요.",
+    "aiReviewAdvancedOptions": "고급 옵션",
     "aiReviewVerbose": "상세 로깅 (프롬프트, 파라미터, 원본 응답)",
     "aiReviewResponseLanguage": "응답 언어",
     "aiReviewLanguages": "검토할 언어",

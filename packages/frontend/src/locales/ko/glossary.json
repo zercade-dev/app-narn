@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "모듈을 선택하세요…",
   "generateModel": "모델",
   "generateReasoningEffort": "추론 강도",
+  "generateAdvancedOptions": "고급 옵션",
   "generateNoSuggestions": "AI가 제안할 새 용어를 찾지 못했어요.",
   "generateSuggestionCount": "용어 {{count}}개",
   "generateAccept": "용어집 {{count}}개 만들기",

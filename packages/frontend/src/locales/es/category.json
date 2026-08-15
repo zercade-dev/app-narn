@@ -13,6 +13,7 @@
   "module": "Módulo",
   "modulePlaceholder": "Elige un módulo",
   "model": "Modelo",
+  "aiAdvancedOptions": "Opciones avanzadas",
   "noModules": "No hay ningún módulo con IA disponible. Configura uno en Configuración.",
   "includeExisting": "Asignar también entradas a categorías existentes",
   "run": "Generar",

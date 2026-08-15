@@ -119,6 +119,7 @@ const DEFAULT_REPLY_LANGUAGE = 'en';
 
 /** Last-used per-browser values for the source-review config dialog. */
 const SOURCE_REVIEW_SETTINGS_DEFAULTS = {
+  advanced: false,
   enabled: {
     typo: true,
     grammar: true,
@@ -181,6 +182,11 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   // config-dialog-open block further down).
   const [settingsAtMount] = useState(() => readSettings());
 
+  // Everything below the scope choice is tuning, not the choice that defines
+  // the run — hidden behind this until ticked. Only its own visibility is
+  // gated; the values it wraps are never reset by hiding it. Seeded once at
+  // mount, like the other plain settings below (see `settingsAtMount`).
+  const [advanced, setAdvanced] = useState(settingsAtMount.advanced);
   // Check toggles; all on by default so a single click starts a useful review.
   const [enabled, setEnabled] = useState<Record<SourceReviewFindingType, boolean>>(
     () => ({ ...settingsAtMount.enabled }) as Record<SourceReviewFindingType, boolean>,
@@ -415,6 +421,7 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
     async () => {
       if (!anyCheck || !batchSizeValid || activeRun || !moduleId || scopeEmpty) return;
       saveSettings({
+        advanced,
         enabled: { ...enabled },
         batchSizeText,
         replyLanguage,
@@ -535,32 +542,6 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>{t('sourceAi.checksLabel')}</Label>
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {CHECKS.map((check) => (
-                  <label
-                    key={check}
-                    className="inline-flex cursor-pointer select-none items-center gap-1.5 text-sm"
-                  >
-                    <Checkbox
-                      checked={enabled[check]}
-                      onCheckedChange={(checked) =>
-                        setEnabled((prev) => ({ ...prev, [check]: checked === true }))
-                      }
-                      data-testid={`source-ai-check-${check}`}
-                    />
-                    {t(FINDING_TYPE_KEY[check])}
-                  </label>
-                ))}
-              </div>
-              {!anyCheck && (
-                <p className="text-xs text-status-warn" data-testid="source-ai-no-check">
-                  {t('sourceAi.noCheckHint')}
-                </p>
-              )}
-            </div>
-
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">{t('sourceAi.scopeLabel')}</legend>
               <label className="flex items-center gap-2 text-sm">
@@ -592,102 +573,154 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
               )}
             </fieldset>
 
-            {noReviewModules ? (
+            <div className="border-t pt-3">
+              <span className="inline-flex items-center gap-1.5">
+                <Checkbox
+                  id="source-ai-advanced"
+                  checked={advanced}
+                  onCheckedChange={(checked) => setAdvanced(checked === true)}
+                  data-testid="source-ai-advanced"
+                />
+                <Label
+                  htmlFor="source-ai-advanced"
+                  className="cursor-pointer select-none font-normal"
+                >
+                  {t('sourceAi.advancedOptions')}
+                </Label>
+              </span>
+            </div>
+
+            {/* Shown regardless of Advanced — it explains why Start stays
+                disabled even before the module picker (below) is revealed. */}
+            {noReviewModules && (
               <p className="text-sm text-muted-foreground" data-testid="source-ai-no-modules">
                 {t('sourceAi.noModules')}
               </p>
-            ) : (
+            )}
+
+            {advanced && (
               <>
                 <div className="space-y-1.5">
-                  <Label htmlFor="source-ai-module">{t('sourceAi.module')}</Label>
-                  <ModuleSelect
-                    id="source-ai-module"
-                    className="w-full"
-                    triggerTestId="source-ai-module-trigger"
-                    value={moduleId}
-                    onValueChange={handleModuleChange}
-                    modules={reviewModules}
-                    placeholder={t('sourceAi.modulePlaceholder')}
+                  <Label>{t('sourceAi.checksLabel')}</Label>
+                  <div className="flex flex-wrap gap-x-5 gap-y-2">
+                    {CHECKS.map((check) => (
+                      <label
+                        key={check}
+                        className="inline-flex cursor-pointer select-none items-center gap-1.5 text-sm"
+                      >
+                        <Checkbox
+                          checked={enabled[check]}
+                          onCheckedChange={(checked) =>
+                            setEnabled((prev) => ({ ...prev, [check]: checked === true }))
+                          }
+                          data-testid={`source-ai-check-${check}`}
+                        />
+                        {t(FINDING_TYPE_KEY[check])}
+                      </label>
+                    ))}
+                  </div>
+                  {!anyCheck && (
+                    <p className="text-xs text-status-warn" data-testid="source-ai-no-check">
+                      {t('sourceAi.noCheckHint')}
+                    </p>
+                  )}
+                </div>
+
+                {!noReviewModules && (
+                  <>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="source-ai-module">{t('sourceAi.module')}</Label>
+                      <ModuleSelect
+                        id="source-ai-module"
+                        className="w-full"
+                        triggerTestId="source-ai-module-trigger"
+                        value={moduleId}
+                        onValueChange={handleModuleChange}
+                        modules={reviewModules}
+                        placeholder={t('sourceAi.modulePlaceholder')}
+                      />
+                    </div>
+
+                    {moduleId && moduleId !== FREEWAY_MODULE_ID && (
+                      <div className="space-y-1.5">
+                        <Label htmlFor="source-ai-model">{t('sourceAi.model')}</Label>
+                        <ModuleModelSelector
+                          key={moduleId}
+                          id="source-ai-model"
+                          moduleId={moduleId}
+                          value={userModel}
+                          onValueChange={setUserModel}
+                          preferredModel={preferredModel}
+                          triggerClassName="min-w-0 flex-1 shrink"
+                          confidenceContext={confidenceContext}
+                        />
+                      </div>
+                    )}
+
+                    {moduleId && moduleId !== FREEWAY_MODULE_ID && (
+                      <ModuleReasoningEffortSelect
+                        moduleId={moduleId}
+                        model={userModel || undefined}
+                        value={reasoningEffort}
+                        onChange={setUserReasoningEffort}
+                        id="source-ai-reasoning-effort"
+                        label={t('sourceAi.reasoningEffort')}
+                      />
+                    )}
+
+                    {/* Freeway picks its own model per batch — no model/effort
+                        route (`/api/modules/freeway/models`) exists for the
+                        selectors above to call, so they're replaced with a
+                        one-line explanation. */}
+                    {moduleId === FREEWAY_MODULE_ID && (
+                      <p
+                        className="text-xs text-muted-foreground"
+                        data-testid="source-ai-freeway-model-hint"
+                      >
+                        {t('sourceAi.freewayModelHint')}
+                      </p>
+                    )}
+                  </>
+                )}
+
+                <div className="space-y-1">
+                  <label htmlFor="source-ai-batch-size" className="text-xs font-medium">
+                    {t('sourceAi.batchSize')}
+                  </label>
+                  <Input
+                    id="source-ai-batch-size"
+                    type="number"
+                    min={1}
+                    value={batchSizeText}
+                    onChange={(e) => setBatchSizeText(e.target.value)}
+                    className="w-24"
+                    aria-invalid={!batchSizeValid}
+                    data-testid="source-ai-batch-size"
                   />
                 </div>
 
-                {moduleId && moduleId !== FREEWAY_MODULE_ID && (
-                  <div className="space-y-1.5">
-                    <Label htmlFor="source-ai-model">{t('sourceAi.model')}</Label>
-                    <ModuleModelSelector
-                      key={moduleId}
-                      id="source-ai-model"
-                      moduleId={moduleId}
-                      value={userModel}
-                      onValueChange={setUserModel}
-                      preferredModel={preferredModel}
-                      triggerClassName="min-w-0 flex-1 shrink"
-                      confidenceContext={confidenceContext}
-                    />
-                  </div>
-                )}
-
-                {moduleId && moduleId !== FREEWAY_MODULE_ID && (
-                  <ModuleReasoningEffortSelect
-                    moduleId={moduleId}
-                    model={userModel || undefined}
-                    value={reasoningEffort}
-                    onChange={setUserReasoningEffort}
-                    id="source-ai-reasoning-effort"
-                    label={t('sourceAi.reasoningEffort')}
+                <div className="space-y-1.5">
+                  <Label htmlFor="source-ai-reply-language">{t('sourceAi.replyLanguage')}</Label>
+                  <LanguageSelect
+                    id="source-ai-reply-language"
+                    triggerTestId="source-ai-reply-language-trigger"
+                    value={replyLanguage}
+                    onValueChange={setReplyLanguage}
                   />
-                )}
+                  <p className="text-xs text-muted-foreground">{t('sourceAi.replyLanguageHint')}</p>
+                </div>
 
-                {/* Freeway picks its own model per batch — no model/effort route
-                    (`/api/modules/freeway/models`) exists for the selectors above
-                    to call, so they're replaced with a one-line explanation. */}
-                {moduleId === FREEWAY_MODULE_ID && (
-                  <p
-                    className="text-xs text-muted-foreground"
-                    data-testid="source-ai-freeway-model-hint"
-                  >
-                    {t('sourceAi.freewayModelHint')}
-                  </p>
-                )}
+                <BatchGroupingControls
+                  idPrefix="source-ai-grouping"
+                  grouping={grouping}
+                  onGroupingChange={setGrouping}
+                  ignoreLimit={ignoreLimit}
+                  onIgnoreLimitChange={setIgnoreLimit}
+                  customBatchSize={customBatchSize}
+                  onCustomBatchSizeChange={setCustomBatchSize}
+                />
               </>
             )}
-
-            <div className="space-y-1">
-              <label htmlFor="source-ai-batch-size" className="text-xs font-medium">
-                {t('sourceAi.batchSize')}
-              </label>
-              <Input
-                id="source-ai-batch-size"
-                type="number"
-                min={1}
-                value={batchSizeText}
-                onChange={(e) => setBatchSizeText(e.target.value)}
-                className="w-24"
-                aria-invalid={!batchSizeValid}
-                data-testid="source-ai-batch-size"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="source-ai-reply-language">{t('sourceAi.replyLanguage')}</Label>
-              <LanguageSelect
-                id="source-ai-reply-language"
-                triggerTestId="source-ai-reply-language-trigger"
-                value={replyLanguage}
-                onValueChange={setReplyLanguage}
-              />
-              <p className="text-xs text-muted-foreground">{t('sourceAi.replyLanguageHint')}</p>
-            </div>
-
-            <BatchGroupingControls
-              idPrefix="source-ai-grouping"
-              grouping={grouping}
-              onGroupingChange={setGrouping}
-              ignoreLimit={ignoreLimit}
-              onIgnoreLimitChange={setIgnoreLimit}
-              customBatchSize={customBatchSize}
-              onCustomBatchSizeChange={setCustomBatchSize}
-            />
           </div>
 
           <DialogFooter>

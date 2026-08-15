@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "Sélectionnez un module…",
   "generateModel": "Modèle",
   "generateReasoningEffort": "Effort de raisonnement",
+  "generateAdvancedOptions": "Options avancées",
   "generateNoSuggestions": "L'IA n'a trouvé aucun nouveau terme à suggérer.",
   "generateSuggestionCount": "{{count}} termes",
   "generateAccept": "Créer {{count}} glossaires",

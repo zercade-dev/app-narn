@@ -69,6 +69,7 @@ import { asGroupingChoice } from '../config/BatchGroupingControls.js';
 
 /** Last-used per-browser values. Focus source-texts input is NOT persisted (entry-specific). */
 const GLOSSARY_GEN_SETTINGS_DEFAULTS = {
+  advanced: false,
   moduleId: '',
   model: '',
   reasoningEffort: '',
@@ -150,6 +151,11 @@ export function GenerateGlossaryDialog({
   const [moduleId, setModuleId] = useState('');
   const [model, setModel] = useState('');
   const [reasoningEffort, setReasoningEffort] = useState('');
+  // Everything below the module/model/effort picker is tuning, not the choice
+  // that defines the run — hidden behind this until ticked. Only its own
+  // visibility is gated; the values it wraps are never reset by hiding it (see
+  // the open-reset block below).
+  const [advanced, setAdvanced] = useState(false);
   const confidenceContext = useConfidenceContext('glossary-gen', reasoningEffort);
   const [genContext, setGenContext] = useState<GenerationContextValue>({
     contextFields: [],
@@ -227,6 +233,7 @@ export function GenerateGlossaryDialog({
     if (open) {
       const stored = readSettings();
       setError(null);
+      setAdvanced(stored.advanced);
       setGenContext({
         contextFields: stored.contextFields as EntryContextField[],
         contextLanguages: stored.contextLanguages,
@@ -425,6 +432,7 @@ export function GenerateGlossaryDialog({
         // module when the user never touched the selector) — not the raw
         // `moduleId` state, which stays '' in that common case and would
         // otherwise make the stored value always falsy and never restored.
+        advanced,
         moduleId: effectiveModuleId,
         model,
         reasoningEffort,
@@ -664,64 +672,88 @@ export function GenerateGlossaryDialog({
           </div>
         )}
 
-        <GenerationContextControls
-          value={genContext}
-          onChange={setGenContext}
-          activeLanguages={project?.activeLanguages ?? []}
-          availableCategories={availableCategories}
-          availableGlossaries={enabledGlossaries}
-          languagesExtra={
-            <div
-              className="space-y-1.5 ml-4 border-l-2 border-border pl-3"
-              data-testid="glossary-generate-include-translations-group"
+        <div className="border-t pt-3">
+          <span className="inline-flex items-center gap-1.5">
+            <Checkbox
+              id="glossary-generate-advanced"
+              checked={advanced}
+              onCheckedChange={(checked) => setAdvanced(checked === true)}
+              data-testid="glossary-generate-advanced"
+            />
+            <Label
+              htmlFor="glossary-generate-advanced"
+              className="cursor-pointer select-none font-normal"
             >
-              <label
-                className={`inline-flex items-center gap-2 text-sm select-none ${
-                  canIncludeTranslations ? 'cursor-pointer' : 'opacity-50'
-                }`}
-              >
-                <Checkbox
-                  checked={includeTranslations && canIncludeTranslations}
-                  disabled={!canIncludeTranslations}
-                  onCheckedChange={(checked) => setIncludeTranslations(checked === true)}
-                  data-testid="glossary-generate-include-translations"
-                />
-                {t('generateIncludeTranslations')}
-              </label>
-              <p className="text-xs text-muted-foreground">
-                {t('generateIncludeTranslationsHint')}
-              </p>
-            </div>
-          }
-        />
-
-        <div className="space-y-1.5">
-          <Label htmlFor="glossary-generate-focus-source-texts">
-            {t('generateFocusSourceTextsLabel')}
-          </Label>
-          <p className="text-xs text-muted-foreground">{t('generateFocusSourceTextsHint')}</p>
-          <Textarea
-            id="glossary-generate-focus-source-texts"
-            data-testid="glossary-generate-focus-source-texts"
-            value={focusSourceTextsInput}
-            onChange={(e) => setFocusSourceTextsInput(e.target.value)}
-            placeholder={t('generateFocusSourceTextsPlaceholder')}
-            rows={3}
-          />
-          {focusSourceTexts.length > 0 && (
-            <p
-              className="text-xs text-muted-foreground"
-              data-testid="glossary-generate-focus-source-texts-count"
-            >
-              {t('generateFocusSourceTextsCount', { count: focusSourceTexts.length })}
-            </p>
-          )}
+              {t('generateAdvancedOptions')}
+            </Label>
+          </span>
         </div>
 
-        {genBatchCount > 0 && !noModules && (
-          <p className="text-xs text-muted-foreground" data-testid="glossary-generate-batch-count">
-            {t('generateBatchCount', { count: genBatchCount })}
-          </p>
+        {advanced && (
+          <>
+            <GenerationContextControls
+              value={genContext}
+              onChange={setGenContext}
+              activeLanguages={project?.activeLanguages ?? []}
+              availableCategories={availableCategories}
+              availableGlossaries={enabledGlossaries}
+              languagesExtra={
+                <div
+                  className="space-y-1.5 ml-4 border-l-2 border-border pl-3"
+                  data-testid="glossary-generate-include-translations-group"
+                >
+                  <label
+                    className={`inline-flex items-center gap-2 text-sm select-none ${
+                      canIncludeTranslations ? 'cursor-pointer' : 'opacity-50'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={includeTranslations && canIncludeTranslations}
+                      disabled={!canIncludeTranslations}
+                      onCheckedChange={(checked) => setIncludeTranslations(checked === true)}
+                      data-testid="glossary-generate-include-translations"
+                    />
+                    {t('generateIncludeTranslations')}
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('generateIncludeTranslationsHint')}
+                  </p>
+                </div>
+              }
+            />
+
+            <div className="space-y-1.5">
+              <Label htmlFor="glossary-generate-focus-source-texts">
+                {t('generateFocusSourceTextsLabel')}
+              </Label>
+              <p className="text-xs text-muted-foreground">{t('generateFocusSourceTextsHint')}</p>
+              <Textarea
+                id="glossary-generate-focus-source-texts"
+                data-testid="glossary-generate-focus-source-texts"
+                value={focusSourceTextsInput}
+                onChange={(e) => setFocusSourceTextsInput(e.target.value)}
+                placeholder={t('generateFocusSourceTextsPlaceholder')}
+                rows={3}
+              />
+              {focusSourceTexts.length > 0 && (
+                <p
+                  className="text-xs text-muted-foreground"
+                  data-testid="glossary-generate-focus-source-texts-count"
+                >
+                  {t('generateFocusSourceTextsCount', { count: focusSourceTexts.length })}
+                </p>
+              )}
+            </div>
+
+            {genBatchCount > 0 && !noModules && (
+              <p
+                className="text-xs text-muted-foreground"
+                data-testid="glossary-generate-batch-count"
+              >
+                {t('generateBatchCount', { count: genBatchCount })}
+              </p>
+            )}
+          </>
         )}
 
         {error && (

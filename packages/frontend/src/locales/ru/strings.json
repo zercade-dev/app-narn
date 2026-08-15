@@ -377,6 +377,7 @@
     "aiReviewModulePlaceholder": "Выберите модуль",
     "aiReviewModel": "Модель",
     "aiReviewFreewayModelHint": "NARN Freeway автоматически выбирает лучшую бесплатную модель для каждого пакета — выбирать модель или уровень рассуждений не нужно.",
+    "aiReviewAdvancedOptions": "Дополнительные параметры",
     "aiReviewVerbose": "Подробное журналирование (промпт, параметры и сырой ответ)",
     "aiReviewResponseLanguage": "Язык ответа",
     "aiReviewLanguages": "Языки для рецензии",

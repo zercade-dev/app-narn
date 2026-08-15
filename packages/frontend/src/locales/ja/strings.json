@@ -356,6 +356,7 @@
     "aiReviewModulePlaceholder": "モジュールを選択",
     "aiReviewModel": "モデル",
     "aiReviewFreewayModelHint": "NARN Freewayはバッチごとに最適な無料モデルを自動で選択するため、モデルや推論の強度を選ぶ必要はありません。",
+    "aiReviewAdvancedOptions": "詳細オプション",
     "aiReviewVerbose": "詳細ログ（プロンプト・パラメーター・生の応答）",
     "aiReviewResponseLanguage": "回答の言語",
     "aiReviewLanguages": "レビューする言語",

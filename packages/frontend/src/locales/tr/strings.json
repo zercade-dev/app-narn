@@ -363,6 +363,7 @@
     "aiReviewModulePlaceholder": "Bir modül seçin",
     "aiReviewModel": "Model",
     "aiReviewFreewayModelHint": "NARN Freeway, her yığın için en iyi ücretsiz modeli otomatik olarak seçer — model veya akıl yürütme çabası seçimi gerekmez.",
+    "aiReviewAdvancedOptions": "Gelişmiş seçenekler",
     "aiReviewVerbose": "Ayrıntılı günlükleme (istem, parametreler ve ham yanıt)",
     "aiReviewResponseLanguage": "Yanıt dili",
     "aiReviewLanguages": "İncelenecek diller",

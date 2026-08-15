@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "Modul auswählen…",
   "generateModel": "Modell",
   "generateReasoningEffort": "Reasoning-Aufwand",
+  "generateAdvancedOptions": "Erweiterte Optionen",
   "generateNoSuggestions": "Die KI hat keine neuen Begriffe gefunden, die sie vorschlagen kann.",
   "generateSuggestionCount": "Begriffe: {{count}}",
   "generateAccept": "Glossare erstellen ({{count}})",

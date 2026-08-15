@@ -363,6 +363,7 @@
     "aiReviewModulePlaceholder": "Select a module",
     "aiReviewModel": "Model",
     "aiReviewFreewayModelHint": "NARN Freeway automatically picks the best free model for each batch — no model or reasoning-effort choice needed.",
+    "aiReviewAdvancedOptions": "Advanced options",
     "aiReviewVerbose": "Verbose logging (prompt, params & raw response)",
     "aiReviewResponseLanguage": "Reply language",
     "aiReviewLanguages": "Languages to review",

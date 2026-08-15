@@ -77,7 +77,8 @@
     "scopeLabel": "Kapsam",
     "scopeNeverReviewed": "Yalnızca hiç incelenmemiş girdiler ({{count}})",
     "scopeAll": "Tüm girdiler ({{count}})",
-    "scopeNoneHint": "Her girdi zaten incelendi. Yeniden incelemek için “Tüm girdiler” seçeneğine geçin."
+    "scopeNoneHint": "Her girdi zaten incelendi. Yeniden incelemek için “Tüm girdiler” seçeneğine geçin.",
+    "advancedOptions": "Gelişmiş seçenekler"
   },
   "title": "İnceleme kuyruğu",
   "position": "{{current}} / {{total}}",

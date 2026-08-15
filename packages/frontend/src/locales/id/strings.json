@@ -356,6 +356,7 @@
     "aiReviewModulePlaceholder": "Pilih modul",
     "aiReviewModel": "Model",
     "aiReviewFreewayModelHint": "NARN Freeway otomatis memilih model gratis terbaik untuk setiap batch — tidak perlu memilih model atau upaya penalaran.",
+    "aiReviewAdvancedOptions": "Opsi lanjutan",
     "aiReviewVerbose": "Pencatatan rinci (prompt, parameter & respons mentah)",
     "aiReviewResponseLanguage": "Bahasa balasan",
     "aiReviewLanguages": "Bahasa yang ditinjau",

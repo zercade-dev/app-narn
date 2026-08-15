@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "Pilih modul…",
   "generateModel": "Model",
   "generateReasoningEffort": "Upaya penalaran",
+  "generateAdvancedOptions": "Opsi lanjutan",
   "generateNoSuggestions": "AI tidak menemukan istilah baru untuk disarankan.",
   "generateSuggestionCount": "{{count}} istilah",
   "generateAccept": "Buat {{count}} glosarium",

@@ -12,6 +12,7 @@
   "module": "模块",
   "modulePlaceholder": "选择模块",
   "model": "模型",
+  "aiAdvancedOptions": "高级选项",
   "noModules": "没有可用的 AI 模块。请在配置中设置一个。",
   "includeExisting": "同时把条目分配到已有类别中",
   "run": "生成",
