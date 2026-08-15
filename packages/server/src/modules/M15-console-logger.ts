@@ -224,10 +224,17 @@ class ConsoleLogger extends EventEmitter {
    * pre-pools contract, which used `Math.abs(n)`) — `n` mostly comes from an
    * untrusted `?n=` query param on `GET /api/logs/history`, and a negative
    * value there must not turn into an out-of-range slice that returns
-   * nothing.
+   * nothing. A count of exactly `0` also means "everything", matching the
+   * old `buffer.slice(-Math.abs(0))` — `slice`'s start arg treats `-0` as
+   * non-negative, so `slice(-0)` was `slice(0)`, the whole buffer.
+   * `LogEntryPools.recent(0)` has no such special case (it slices to
+   * `all.length - 0`, i.e. nothing), so `0` is normalized to `undefined`
+   * here rather than passed straight through.
    */
   getHistory(n?: number): LogEntry[] {
-    return this.pools.recent(n === undefined ? undefined : Math.abs(n));
+    if (n === undefined) return this.pools.recent();
+    const count = Math.abs(n);
+    return this.pools.recent(count === 0 ? undefined : count);
   }
 
   /**
@@ -240,15 +247,28 @@ class ConsoleLogger extends EventEmitter {
    * that mattered.
    */
   getConnectHistory(): LogEntry[] {
-    const priorityEntries = this.pools.priority();
-    // Derive the info-only list from merged() rather than adding a
-    // pools-level "info only" accessor — the pools' public API is
-    // deliberately minimal (see entry-pools.ts) and this filter is cheap
-    // relative to an SSE connect, which happens far less often than a log
-    // call.
-    const infoEntries = this.pools.merged().filter((entry) => !isPriorityLevel(entry.level));
-    const recentInfo = infoEntries.slice(-CONNECT_HISTORY_INFO_COUNT);
-    return [...priorityEntries, ...recentInfo].sort((a, b) => a.timestamp - b.timestamp);
+    // Walk pools.merged() ONCE rather than concatenating pools.priority()
+    // with a separately-filtered/sliced info list and re-sorting: merged()
+    // already carries the pools' own global (timestamp, seq) ordering (see
+    // entry-pools.ts), and re-sorting on timestamp alone would collapse that
+    // — a priority and an info entry sharing a millisecond would always
+    // resolve the tie by concatenation order (priority first) instead of
+    // true insertion order. Two passes over the already-sorted list (count,
+    // then keep) preserve that ordering exactly and never re-sort.
+    const merged = this.pools.merged();
+    const infoCount = merged.reduce((n, entry) => n + (isPriorityLevel(entry.level) ? 0 : 1), 0);
+    let infoToSkip = Math.max(0, infoCount - CONNECT_HISTORY_INFO_COUNT);
+    const result: LogEntry[] = [];
+    for (const entry of merged) {
+      if (isPriorityLevel(entry.level)) {
+        result.push(entry); // every priority entry is kept
+      } else if (infoToSkip > 0) {
+        infoToSkip--; // an older info entry beyond the most-recent-200 window
+      } else {
+        result.push(entry);
+      }
+    }
+    return result;
   }
 
   /** Eviction counts since the last `clearBuffer()`, one per pool. */
