@@ -11,7 +11,12 @@ export type DifficultyBand = 1 | 2 | 3 | 4;
 export interface BucketView {
   /** '<moduleOrInstanceId>::<modelId>' */
   bucketKey: string;
-  /** Dispatch target: base module id or 'generic-ai:<slug>' instance id. */
+  /**
+   * The snapshot's base module id — always, even when the workspace serves
+   * this bucket through a named instance. This is what keys the quota ledger
+   * (`bucketKey`), never the id to instantiate; use `dispatchModuleId` for
+   * that.
+   */
   moduleId: string;
   /**
    * The module/instance id to instantiate for this bucket. Differs from

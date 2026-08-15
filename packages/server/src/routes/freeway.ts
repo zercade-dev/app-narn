@@ -39,7 +39,7 @@ interface FreewayStatusBucket {
   state: BucketStatusState;
   disabledReason?: string;
   gatePassByLanguage?: Record<string, number>;
-  /** The module/instance id actually serving this LIVE bucket, when it differs from `moduleId`. */
+  /** The module/instance id actually serving this LIVE bucket. */
   dispatchModuleId?: string;
   /** For a 'disabled' missing row: the candidate id "Enable it" should scroll to / turn on. */
   enableTargetModuleId?: string;

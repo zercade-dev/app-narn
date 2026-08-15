@@ -156,7 +156,7 @@ interface ResolvedSnapshotBucket {
 function resolveSnapshotBucket(bucketKey: string): ResolvedSnapshotBucket | undefined {
   const sep = bucketKey.indexOf('::');
   if (sep === -1) return undefined;
-  const moduleId = bucketKey.slice(0, sep);
+  const moduleId = freewayBucketBaseModuleId(bucketKey);
   const modelId = bucketKey.slice(sep + 2);
   const provider = freeTierProvider(moduleId);
   if (!provider) return undefined;
