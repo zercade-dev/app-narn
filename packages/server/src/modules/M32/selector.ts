@@ -83,13 +83,26 @@ export function bucketResumeAt(bucket: BucketView, group: JobGroup): number {
   );
 }
 
-export function isEligible(bucket: BucketView, group: JobGroup, now: number): boolean {
+/**
+ * Every {@link isEligible} criterion except the minute check. Exported so a
+ * caller can ask "is this bucket eligible in every respect BUT its current
+ * minute" — e.g. to tell true minute starvation apart from a bucket that is
+ * ALSO cooling or day-exhausted, which just happens to have a spent minute
+ * too (the common case right after a gate failure, since dispatch activity
+ * tends to spend both together) — without duplicating this list and risking
+ * drift the next time isEligible gains a criterion.
+ */
+export function isEligibleIgnoringMinute(bucket: BucketView, group: JobGroup, now: number): boolean {
   if (bucket.disabledReason !== undefined) return false;
   if (bucket.cooldownUntil !== undefined && bucket.cooldownUntil > now) return false;
   if (bucket.qualityTier < group.band) return false;
   if (group.band >= 3 && bucket.weakLanguages?.includes(group.targetLanguage)) return false;
-  if (!hasMinuteHeadroom(bucket)) return false;
   return hasStock(bucket, group);
+}
+
+export function isEligible(bucket: BucketView, group: JobGroup, now: number): boolean {
+  if (!hasMinuteHeadroom(bucket)) return false;
+  return isEligibleIgnoringMinute(bucket, group, now);
 }
 
 /** A monthly character budget is a reservoir (1), a daily request window is not (0). */
