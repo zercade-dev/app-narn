@@ -3,9 +3,11 @@
  * quality floor and live quota state. Ranking is reservoir-last FIRST — a
  * monthly character budget (classical MT) sorts behind every daily-request
  * bucket, because only the daily allowance perishes — and within each class it
- * minimizes expected requests per job (the scarce currency), tie-breaking
- * toward buckets whose quota expires soonest so daily allowances never rot
- * unused; a reserve keeps top-tier headroom for escalation retries.
+ * minimizes the share of each bucket's REMAINING stock a group consumes
+ * (falling back to expected requests per job between buckets that are equally
+ * unstressed), tie-breaking toward buckets whose quota expires soonest so
+ * daily allowances never rot unused; a reserve keeps top-tier headroom for
+ * escalation retries.
  */
 import type { BucketView, JobGroup } from './types.js';
 import { requestCost } from './scoring.js';
@@ -97,18 +99,41 @@ function isReservoir(bucket: BucketView): number {
 }
 
 /**
- * Ranks the eligible buckets cheapest-first. Daily request quotas perish
+ * Ranks the eligible buckets cheapest-first, where "cheap" is measured
+ * RELATIVE to each bucket's own remaining stock. Daily request quotas perish
  * daily while a monthly character budget does not, so reservoir buckets sort
- * BEHIND every request-window bucket regardless of cost: use-it-or-lose-it
- * headroom is spent first, and the reservoir covers what's left once the daily
- * buckets are exhausted or cooling. Within each class the order is expected
- * requests per job, then soonest reset, then tier, then key.
+ * BEHIND every request-window bucket regardless of cost — and that class key
+ * must stay first, because a reservoir reports MAX_SAFE_INTEGER remaining
+ * requests and would otherwise win everything on a relative score of zero.
+ *
+ * Within each class the primary key is the share of the bucket's remaining
+ * stock this group would consume, quantized to permille. Absolute request
+ * count is nearly "prefer the largest batch", and in the shipped free-tier
+ * pool the largest-batch models are also the tightest daily allowances, so
+ * ranking on it alone drains the scarcest buckets on routine work. Quantizing
+ * is what keeps that correction narrow: buckets that are abundant relative to
+ * the work all score zero and fall through to the request-efficiency key, so
+ * scarcity only overrides efficiency once a bucket would give up a measurable
+ * slice of what it has left. Rounding also keeps the comparator a valid total
+ * order, which an epsilon tolerance would not.
+ *
+ * Remaining keys: expected requests per job, then soonest reset so daily
+ * allowances do not rot unused, then lowest adequate tier, then key.
  */
 export function rankCandidates(buckets: BucketView[], group: JobGroup, now: number): BucketView[] {
   const eligible = buckets.filter((b) => isEligible(b, group, now));
   const costs = new Map(eligible.map((b) => [b.bucketKey, requestCost(b, group)]));
+  const scarcity = new Map(
+    eligible.map((b) => [
+      b.bucketKey,
+      Math.round((costs.get(b.bucketKey)!.estimatedRequests / effectiveRemainingRequests(b)) * 1000),
+    ]),
+  );
   return [...eligible].sort((a, b) => {
     if (isReservoir(a) !== isReservoir(b)) return isReservoir(a) - isReservoir(b);
+    const sa = scarcity.get(a.bucketKey)!;
+    const sb = scarcity.get(b.bucketKey)!;
+    if (sa !== sb) return sa - sb;
     const ca = costs.get(a.bucketKey)!;
     const cb = costs.get(b.bucketKey)!;
     if (ca.requestsPerJob !== cb.requestsPerJob) return ca.requestsPerJob - cb.requestsPerJob;
