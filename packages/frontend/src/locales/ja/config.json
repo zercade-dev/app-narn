@@ -216,6 +216,7 @@
     "instanceSelectorAria": "{{provider}}を処理するインスタンスを選択",
     "instanceOverrideSaveFailed": "{{provider}}のインスタンスを更新できませんでした：{{message}}",
     "instanceOverridesLoadFailed": "Freewayのインスタンス設定の読み込みに失敗しました：{{message}}",
+    "instancesLoadFailed": "Freewayのモジュールインスタンスの読み込みに失敗しました：{{message}}",
     "statusTitle": "状態",
     "empty": "無料枠のプロバイダーはまだ設定されていません。",
     "colModel": "モデル",

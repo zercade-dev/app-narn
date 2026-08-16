@@ -67,10 +67,14 @@ interface TranslateRunDialogProps {
   /**
    * Number of (entry, language) pairs in scope that would auto-apply a stored
    * variant from translation memory instead of being sent to the model. When
-   * greater than 0, a warning is always shown (a consequence disclosure, not
-   * a tuning knob); the "disable memory for this run" toggle beside it IS a
-   * knob and stays behind Advanced. The toggle's choice is reported via
-   * `onStart`'s `disableMemory`.
+   * greater than 0, a warning is always shown (a consequence disclosure) ALONGSIDE
+   * the "disable memory for this run" toggle — unlike the rest of this dialog's
+   * tuning, that toggle is never gated behind Advanced, because it is the one
+   * control that can make the warning's own claim false. Hiding it there while
+   * a persisted `disableMemory: true` still applied would tell the user N
+   * entries will reuse memory when every one of them is actually about to be
+   * re-sent to the model. The toggle's choice is reported via `onStart`'s
+   * `disableMemory`.
    */
   memoryCount?: number;
   /**
@@ -272,10 +276,16 @@ export function TranslateRunDialog({
             </>
           )}
           {/* A consequence disclosure (what this run will actually do — reuse
-              stored translations instead of calling the model), not a tuning
-              knob — unconditional even while Advanced is collapsed. The
-              "disable memory for this run" toggle beside it IS a knob and
-              stays gated. */}
+              stored translations instead of calling the model), unconditional
+              even while Advanced is collapsed. The "disable memory for this
+              run" toggle beside it stays UNGATED too, deliberately breaking
+              the "tuning hides behind Advanced" pattern the rest of this
+              dialog follows: it is the one control whose hidden state could
+              make the warning's own claim false (a persisted disableMemory:true
+              would otherwise tell the user N entries reuse memory while every
+              one is actually re-sent to the model — real spend on a BYOK
+              product). Always showing it keeps the claim and the control that
+              governs it in the same place, so they can't drift apart again. */}
           {memoryCount > 0 && (
             <div
               className="space-y-1.5 rounded-md border border-status-warn/40 bg-status-warn/10 p-2.5"
@@ -284,22 +294,20 @@ export function TranslateRunDialog({
               <p className="text-xs text-status-warn">
                 {t('compare.translateMemoryWarning', { count: memoryCount })}
               </p>
-              {advanced && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Checkbox
-                    id="comparison-translate-disable-memory"
-                    checked={disableMemory}
-                    onCheckedChange={(checked) => setDisableMemory(checked === true)}
-                    data-testid="comparison-translate-disable-memory"
-                  />
-                  <label
-                    htmlFor="comparison-translate-disable-memory"
-                    className="text-sm cursor-pointer select-none"
-                  >
-                    {t('compare.translateDisableMemory')}
-                  </label>
-                </span>
-              )}
+              <span className="inline-flex items-center gap-1.5">
+                <Checkbox
+                  id="comparison-translate-disable-memory"
+                  checked={disableMemory}
+                  onCheckedChange={(checked) => setDisableMemory(checked === true)}
+                  data-testid="comparison-translate-disable-memory"
+                />
+                <label
+                  htmlFor="comparison-translate-disable-memory"
+                  className="text-sm cursor-pointer select-none"
+                >
+                  {t('compare.translateDisableMemory')}
+                </label>
+              </span>
             </div>
           )}
         </div>

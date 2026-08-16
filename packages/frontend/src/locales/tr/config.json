@@ -221,6 +221,7 @@
     "instanceSelectorAria": "“{{provider}}” için kullanılacak örneği seçin",
     "instanceOverrideSaveFailed": "“{{provider}}” için örnek güncellenemedi: {{message}}",
     "instanceOverridesLoadFailed": "Freeway örnek ayarları yüklenemedi: {{message}}",
+    "instancesLoadFailed": "Freeway modül örnekleri yüklenemedi: {{message}}",
     "statusTitle": "Durum",
     "empty": "Henüz yapılandırılmış ücretsiz sağlayıcı yok.",
     "colModel": "Model",

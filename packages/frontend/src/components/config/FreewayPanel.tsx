@@ -228,7 +228,16 @@ export function FreewayPanel(): React.JSX.Element {
           }).then((res) => res.instances ?? [])
         : Promise.resolve([]),
     [hasOpened],
-    { initial: [] },
+    {
+      initial: [],
+      // Without this, a failure here silently empties the instance list —
+      // the per-provider selector just disappears with no explanation,
+      // unlike every other Freeway-panel load (status, overrides) which
+      // toasts. `[]` on failure still degrades safely (no selector, no crash),
+      // this just tells the user why.
+      onError: (err) =>
+        toast.error(t('freeway.instancesLoadFailed', { message: (err as Error).message })),
+    },
   );
 
   const [overrides, setOverrides] = useState<Record<string, string>>({});
@@ -361,17 +370,31 @@ export function FreewayPanel(): React.JSX.Element {
                           (instance) => instance.baseModuleId === provider.moduleId,
                         );
                         const overrideId = overrides[provider.moduleId];
-                        // Selected only while the server is actually dispatching to it
-                        // (`dispatchModuleId`, already resolved via the SAME usability
-                        // scan freewayCandidateIds performs server-side) — an override
-                        // naming an instance that still exists but is disabled,
-                        // uncredentialed, or credential-marked falls through to
-                        // `<base>:default` there too, so the selector must agree rather
-                        // than keep showing a choice the server silently bypassed.
+                        // `dispatchModuleId` is absent for a "missing" bucket
+                        // (routes/freeway.ts) and for every bucket while the
+                        // vault is locked — that means "the server couldn't
+                        // tell us what it's dispatching to", not "it rejected
+                        // your override". Only demote to Automatic when the
+                        // server DID resolve a dispatch target and it names a
+                        // DIFFERENT live instance — the same usability scan
+                        // freewayCandidateIds performs server-side falling an
+                        // unusable override through to `<base>:default`, which
+                        // the selector must agree with. When dispatch is
+                        // simply unknown, fall back to the workspace's own
+                        // persisted choice (as long as it still names a live
+                        // instance) so the user can always see their own
+                        // configuration rather than a misleading "Automatic".
+                        const overrideIsLiveInstance =
+                          overrideId !== undefined &&
+                          providerInstances.some((instance) => instance.instanceId === overrideId);
                         const selectedValue =
-                          overrideId && provider.dispatchModuleId === overrideId
-                            ? overrideId
-                            : AUTOMATIC_OVERRIDE_VALUE;
+                          provider.dispatchModuleId === undefined
+                            ? overrideIsLiveInstance
+                              ? overrideId
+                              : AUTOMATIC_OVERRIDE_VALUE
+                            : overrideId && provider.dispatchModuleId === overrideId
+                              ? overrideId
+                              : AUTOMATIC_OVERRIDE_VALUE;
                         return (
                           <li
                             key={provider.providerKey}
@@ -423,9 +446,17 @@ export function FreewayPanel(): React.JSX.Element {
                               {providerInstances.length > 0 && (
                                 <Select
                                   value={selectedValue}
-                                  onValueChange={(value) =>
-                                    handleInstanceOverrideChange(provider.moduleId, value)
-                                  }
+                                  onValueChange={(value) => {
+                                    // base-ui's Select calls onValueChange on every
+                                    // item commit, including re-picking the option
+                                    // already shown (no equality check upstream) —
+                                    // without this guard, clicking the displayed
+                                    // "Automatic" while a persisted-but-unresolved
+                                    // override is showing (see `selectedValue`
+                                    // above) would fire a write that deletes it.
+                                    if (value === selectedValue) return;
+                                    handleInstanceOverrideChange(provider.moduleId, value);
+                                  }}
                                   disabled={
                                     providerInstances.length < 2 || overridesState !== 'loaded'
                                   }

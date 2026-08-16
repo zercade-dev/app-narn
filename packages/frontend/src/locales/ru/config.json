@@ -231,6 +231,7 @@
     "instanceSelectorAria": "Выбрать, какой экземпляр обслуживает {{provider}}",
     "instanceOverrideSaveFailed": "Не удалось обновить экземпляр для {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "Не удалось загрузить настройки экземпляров Freeway: {{message}}",
+    "instancesLoadFailed": "Не удалось загрузить экземпляры модулей Freeway: {{message}}",
     "statusTitle": "Состояние",
     "empty": "Бесплатные поставщики ещё не настроены.",
     "colModel": "Модель",

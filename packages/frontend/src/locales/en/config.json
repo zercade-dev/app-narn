@@ -221,6 +221,7 @@
     "instanceSelectorAria": "Choose which instance serves {{provider}}",
     "instanceOverrideSaveFailed": "Failed to update the instance for {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "Failed to load Freeway instance settings: {{message}}",
+    "instancesLoadFailed": "Failed to load Freeway module instances: {{message}}",
     "statusTitle": "Status",
     "empty": "No free-tier providers configured yet.",
     "colModel": "Model",

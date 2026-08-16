@@ -156,6 +156,16 @@ export function AiReviewDialog({
   // visibility is gated; the values it wraps are never reset by hiding it (see
   // the run-open reset block below).
   const [advanced, setAdvanced] = useState(false);
+  // Mirrors `advanced`, EXCEPT the noLanguagesChecked force-open below never
+  // touches it — only the open-transition seed and the user's own checkbox
+  // click do. `handleStart` persists THIS, not `advanced`: a transient
+  // validation state (Start disabled by an empty language list) forcing the
+  // section open must not permanently overwrite the user's remembered
+  // Advanced default the next time they Start a review. A ref would be
+  // simpler, but react-hooks/refs forbids writing one during render, and the
+  // open-transition seed below runs during render (the same "prev prop"
+  // pattern `advanced` itself uses) — so this has to be state too.
+  const [userAdvanced, setUserAdvanced] = useState(false);
   // `null` means "the user hasn't chosen"; the effective values fall back to the
   // run-derived defaults below. Reset per run via the parent's `key`.
   const [userModuleId, setUserModuleId] = useState<string | null>(null);
@@ -261,6 +271,7 @@ export function AiReviewDialog({
           : null,
       );
       setAdvanced(stored.advanced);
+      setUserAdvanced(stored.advanced);
       setVerbose(stored.verbose);
       setResponseLanguage(stored.responseLanguage || 'en');
       setGrouping(asGroupingChoice(stored.grouping));
@@ -348,7 +359,7 @@ export function AiReviewDialog({
   const handleStart = () => {
     if (!moduleId || noLanguagesChecked) return;
     saveSettings({
-      advanced,
+      advanced: userAdvanced,
       moduleId,
       model,
       reasoningEffort,
@@ -437,7 +448,11 @@ export function AiReviewDialog({
                 <Checkbox
                   id="ai-review-advanced"
                   checked={advanced}
-                  onCheckedChange={(checked) => setAdvanced(checked === true)}
+                  onCheckedChange={(checked) => {
+                    const next = checked === true;
+                    setAdvanced(next);
+                    setUserAdvanced(next);
+                  }}
                   data-testid="ai-review-advanced"
                 />
                 <Label

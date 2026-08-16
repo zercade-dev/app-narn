@@ -187,6 +187,13 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   // gated; the values it wraps are never reset by hiding it. Seeded once at
   // mount, like the other plain settings below (see `settingsAtMount`).
   const [advanced, setAdvanced] = useState(settingsAtMount.advanced);
+  // Mirrors `advanced`, EXCEPT the force-open effect below never touches it —
+  // only the mount seed and the user's own checkbox click do. `handleStart`
+  // persists THIS, not `advanced`: a transient validation state (an unchecked
+  // checks row, or a broken batch size) forcing the section open must not
+  // permanently overwrite the user's remembered Advanced default the next
+  // time they start a source review.
+  const userAdvancedRef = useRef(settingsAtMount.advanced);
   // Check toggles; all on by default so a single click starts a useful review.
   const [enabled, setEnabled] = useState<Record<SourceReviewFindingType, boolean>>(
     () => ({ ...settingsAtMount.enabled }) as Record<SourceReviewFindingType, boolean>,
@@ -421,7 +428,7 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
     async () => {
       if (!anyCheck || !batchSizeValid || activeRun || !moduleId || scopeEmpty) return;
       saveSettings({
-        advanced,
+        advanced: userAdvancedRef.current,
         enabled: { ...enabled },
         batchSizeText,
         replyLanguage,
@@ -591,7 +598,11 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
                 <Checkbox
                   id="source-ai-advanced"
                   checked={advanced}
-                  onCheckedChange={(checked) => setAdvanced(checked === true)}
+                  onCheckedChange={(checked) => {
+                    const next = checked === true;
+                    setAdvanced(next);
+                    userAdvancedRef.current = next;
+                  }}
                   data-testid="source-ai-advanced"
                 />
                 <Label

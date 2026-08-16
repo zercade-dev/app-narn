@@ -117,7 +117,7 @@ export interface BucketSourceDeps {
  * `moduleStatus` closure (mirroring how M9's callers thread `sessionId`
  * through `selectCapableModule`) rather than relying on this default.
  */
-function defaultModuleStatus(
+export function defaultModuleStatus(
   moduleId: string,
 ): { credentialed: boolean; enabled: boolean } | undefined {
   const meta = moduleRegistry.getMetadata(moduleId);
@@ -179,6 +179,50 @@ export function freewayCandidateIds(
       ? [overrideInstanceId, ...automatic]
       : automatic;
   return [...new Set(promoted)];
+}
+
+/**
+ * The one algorithm that decides which candidate module id actually serves a
+ * base module's Freeway traffic: the first id (in {@link freewayCandidateIds}
+ * order, override promoted) that is credentialed, enabled, and not
+ * credential-marked; falling back to the first credential-marked candidate so
+ * callers can still report WHY nothing qualifies (`badCredentials: true`),
+ * else `dispatchModuleId: undefined` when no candidate exists at all.
+ *
+ * {@link loadBucketViews} and the Freeway probe's credential lookup
+ * (`credentialForFreewayProbe` in M9) both resolve through this one function
+ * — that shared resolution is what guarantees they can never disagree about
+ * which account a base module's traffic goes through. An override this
+ * function rejects (disabled, uncredentialed, or credential-marked) is
+ * rejected identically everywhere else that calls it.
+ */
+export function resolveDispatchModuleId(
+  baseModuleId: string,
+  instanceIds: readonly string[],
+  moduleStatus: (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined,
+  credentialBad: (moduleId: string) => boolean,
+  overrideInstanceId?: string,
+): { dispatchModuleId: string | undefined; badCredentials: boolean } {
+  // A candidate rejected ONLY for a bad credential is remembered: if no
+  // candidate survives, callers can still explain the state (e.g. the panel
+  // surfaces `badCredentials`; selection/planning exclude any bucket with a
+  // disabledReason, so nothing dispatches to it either way).
+  let markedCandidate: string | undefined;
+  const usableModuleId = freewayCandidateIds(baseModuleId, instanceIds, overrideInstanceId).find(
+    (id) => {
+      const status = moduleStatus(id);
+      if (status?.credentialed !== true || !status.enabled) return false;
+      if (credentialBad(id)) {
+        markedCandidate ??= id;
+        return false;
+      }
+      return true;
+    },
+  );
+  return {
+    dispatchModuleId: usableModuleId ?? markedCandidate,
+    badCredentials: usableModuleId === undefined,
+  };
 }
 
 /**
@@ -256,16 +300,25 @@ export async function clearFreewayCredentialMarks(
  * stamp the wrong account's usage onto the ledger cell that instance reads
  * headroom from.
  *
- * Order only — this is NOT mark-aware, so it can differ from the candidate
- * `loadBucketViews` would actually dispatch with: with the resolved
- * candidate credential-marked, the probe still returns its key and its usage
- * call just fails (a probe failure is a silent skip, never a run failure).
- * An override naming an instance with no credential of its own degrades the
- * same way any other candidate does: `lookup` returns undefined for it and
- * the walk continues to the next candidate, so this still returns SOME
- * credential (the automatic one) rather than undefined. `lookup` is a raw
- * vault-key reader (no module-id awareness); `instanceIdsFor` defaults to
- * the live registry.
+ * This function itself is order-only — it is not enablement- or
+ * mark-aware, so in isolation it can differ from the candidate
+ * `loadBucketViews` would actually dispatch with. The guarantee that the
+ * probe reads usage for the SAME account Freeway dispatches through is NOT
+ * made here: it is made by this function's one caller,
+ * `credentialForFreewayProbe` in M9, which resolves `overrideInstanceId`
+ * through {@link resolveDispatchModuleId} first and only passes it through
+ * when it equals dispatch's own resolved id — an override naming a
+ * disabled, uncredentialed, or credential-marked instance is demoted to
+ * `undefined` before it ever reaches this function, so the walk below falls
+ * through to the same automatic order `loadBucketViews` would use. Called
+ * directly with an unfiltered `overrideInstanceId` (as tests do), this
+ * function has no way to enforce that agreement on its own. An override
+ * naming an instance with no credential of its own degrades the same way any
+ * other candidate does: `lookup` returns undefined for it and the walk
+ * continues to the next candidate, so this still returns SOME credential
+ * (the automatic one) rather than undefined. `lookup` is a raw vault-key
+ * reader (no module-id awareness); `instanceIdsFor` defaults to the live
+ * registry.
  */
 export function resolveFreewayProbeCredential(
   baseModuleId: string,
@@ -449,27 +502,14 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
 
-    // A candidate rejected ONLY for a bad credential is remembered: if no
-    // candidate survives, the provider's buckets are still emitted carrying
-    // that reason, so the panel can explain the state (selector/planner
-    // exclude any bucket with a disabledReason, so nothing dispatches to it).
-    let markedCandidate: string | undefined;
-    const usableModuleId = freewayCandidateIds(
+    const { dispatchModuleId, badCredentials } = resolveDispatchModuleId(
       provider.moduleId,
       instanceIdsFor(provider.moduleId),
+      moduleStatus,
+      credentialBad,
       instanceOverrides[provider.moduleId],
-    ).find((id) => {
-      const status = moduleStatus(id);
-      if (status?.credentialed !== true || !status.enabled) return false;
-      if (credentialBad(id)) {
-        markedCandidate ??= id;
-        return false;
-      }
-      return true;
-    });
-    const dispatchModuleId = usableModuleId ?? markedCandidate;
+    );
     if (dispatchModuleId === undefined) continue;
-    const badCredentials = usableModuleId === undefined;
 
     // ONE usage read per model, covering the day cell AND whichever minute
     // cells (rpm/tpm) that model declares in the same round trip — shared by
