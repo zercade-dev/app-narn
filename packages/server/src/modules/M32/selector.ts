@@ -117,11 +117,21 @@ function isReservoir(bucket: BucketView): number {
  * alone. Rounding also keeps the comparator a valid total order, which an
  * epsilon tolerance would not.
  *
- * The trade: a nearly-spent bucket now sorts LAST even when its window resets
+ * One trade: a nearly-spent bucket now sorts LAST even when its window resets
  * soonest, so the reset key can no longer stop a small perishing allowance
  * going unused. That costs nothing while demand is low enough for the abundant
  * buckets to cover the work, and when demand is high they drain and the scarce
  * bucket is reached anyway.
+ *
+ * The other trade is quality feedback: `gatePassByLanguage` is M32's only
+ * quality loop, and gate failures reach ranking only through the EMA that
+ * shrinks `batchSizeFor` and so inflates `estimatedRequests` — which
+ * absolute cost demoted directly. Dividing by remaining stock scales that
+ * signal down by the abundance ratio, which runs 14x to 720x across the
+ * shipped snapshot, so a degraded model on a large allowance can outrank a
+ * healthy one on a smaller allowance even at several times the request cost.
+ * Nothing in this comparator floors that; the quality band in
+ * {@link isEligible} and the provider-error cooldown are what bound it.
  *
  * Remaining keys: expected requests per job, then soonest reset, then lowest
  * adequate tier, then key.

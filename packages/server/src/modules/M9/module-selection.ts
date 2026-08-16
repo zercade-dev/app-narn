@@ -184,11 +184,12 @@ function backgroundModuleStatus(
 }
 
 /**
- * Resolves the free-tier target for a background run: the cheapest adequate
- * bucket whose module can actually do this kind of work, built with the run's
- * per-run overrides exactly as {@link selectCapableModule} would have built an
- * explicitly requested module. Called ONCE at run start — the run keeps the
- * returned binding for its whole duration.
+ * Resolves the free-tier target for a background run: the adequate bucket that
+ * consumes the smallest share of its own remaining free stock — the selector's
+ * first-ranked — whose module can actually do this kind of work, built with
+ * the run's per-run overrides exactly as {@link selectCapableModule} would
+ * have built an explicitly requested module. Called ONCE at run start — the
+ * run keeps the returned binding for its whole duration.
  *
  * Buckets are tried in the selector's order and one is skipped when its module
  * cannot be built or fails the capability predicate (classical MT can't judge,

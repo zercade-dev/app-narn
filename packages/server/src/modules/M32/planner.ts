@@ -1,7 +1,8 @@
 /**
  * Run-level planning: sees the whole run before dispatch, assigns each job
- * group to the cheapest adequate bucket against a working copy of quota
- * headroom, and decides UP FRONT what defers (with a resume estimate) when
+ * group to the adequate bucket that consumes the smallest share of its own
+ * remaining stock, against a working copy of quota headroom, and decides UP
+ * FRONT what defers (with a resume estimate) when
  * the run does not fit today's remaining free capacity. Re-planning after a
  * surprise (429, cooldown, drained bucket) is the same pure call on the
  * remaining groups with fresh BucketViews.
