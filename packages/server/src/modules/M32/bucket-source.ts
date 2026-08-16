@@ -190,11 +190,13 @@ export function freewayCandidateIds(
  * else `dispatchModuleId: undefined` when no candidate exists at all.
  *
  * {@link loadBucketViews} and the Freeway probe's credential lookup
- * (`credentialForFreewayProbe` in M9) both resolve through this one function
- * — that shared resolution is what guarantees they can never disagree about
- * which account a base module's traffic goes through. An override this
- * function rejects (disabled, uncredentialed, or credential-marked) is
- * rejected identically everywhere else that calls it.
+ * (`credentialForFreewayProbe` in M9) both call this one function to decide
+ * the dispatch id, and the probe seeds its vault walk with exactly the id
+ * this function returns (never a raw, unfiltered override) — that shared
+ * resolution is what guarantees the two can never disagree about which
+ * account a base module's traffic goes through. An override this function
+ * rejects (disabled, uncredentialed, or credential-marked) is rejected
+ * identically everywhere else that calls it.
  */
 export function resolveDispatchModuleId(
   baseModuleId: string,
@@ -305,20 +307,22 @@ export async function clearFreewayCredentialMarks(
  * `loadBucketViews` would actually dispatch with. The guarantee that the
  * probe reads usage for the SAME account Freeway dispatches through is NOT
  * made here: it is made by this function's one caller,
- * `credentialForFreewayProbe` in M9, which resolves `overrideInstanceId`
- * through {@link resolveDispatchModuleId} first and only passes it through
- * when it equals dispatch's own resolved id — an override naming a
- * disabled, uncredentialed, or credential-marked instance is demoted to
- * `undefined` before it ever reaches this function, so the walk below falls
- * through to the same automatic order `loadBucketViews` would use. Called
- * directly with an unfiltered `overrideInstanceId` (as tests do), this
- * function has no way to enforce that agreement on its own. An override
- * naming an instance with no credential of its own degrades the same way any
- * other candidate does: `lookup` returns undefined for it and the walk
- * continues to the next candidate, so this still returns SOME credential
- * (the automatic one) rather than undefined. `lookup` is a raw vault-key
- * reader (no module-id awareness); `instanceIdsFor` defaults to the live
- * registry.
+ * `credentialForFreewayProbe` in M9, which computes `dispatchModuleId` via
+ * {@link resolveDispatchModuleId} — the SAME enablement- and
+ * credential-mark-aware resolution `loadBucketViews` uses, fed the same
+ * override — and passes THAT id (never the raw, unfiltered override) as
+ * `overrideInstanceId` here. An override naming a disabled, uncredentialed,
+ * or credential-marked instance therefore never reaches this function as an
+ * `overrideInstanceId`; whatever `resolveDispatchModuleId` actually picked
+ * does, so the walk below always starts from the id dispatch would use.
+ * Called directly with an unfiltered `overrideInstanceId` (as tests do),
+ * this function has no way to enforce that agreement on its own. An
+ * override naming an instance with no credential of its own degrades the
+ * same way any other candidate does: `lookup` returns undefined for it and
+ * the walk continues to the next candidate, so this still returns SOME
+ * credential (the automatic one) rather than undefined. `lookup` is a raw
+ * vault-key reader (no module-id awareness); `instanceIdsFor` defaults to
+ * the live registry.
  */
 export function resolveFreewayProbeCredential(
   baseModuleId: string,

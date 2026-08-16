@@ -2719,19 +2719,23 @@ export class TranslationEngine {
    * instance Freeway actually dispatches through: instance credentials are
    * vault-keyed under a DERIVED name, not the bare env var. Delegates to
    * {@link resolveFreewayProbeCredential} for the actual vault walk, but
-   * FIRST resolves `instanceOverrides[moduleId]` through
-   * {@link resolveDispatchModuleId} — the same enablement- and
-   * credential-mark-aware algorithm `loadBucketViews` uses (fed the SAME
-   * `deps.moduleStatus`/`deps.instanceIdsFor` and `bucketStates` snapshot
-   * `resolveFreewayGroups` also hands `loadBucketViews`) — and only passes
-   * the override through when it equals the id dispatch would itself
-   * resolve to. An override naming an instance that is disabled or
-   * credential-marked (but still has a derived key in the vault) is
-   * therefore never honoured here even though a bare credential lookup would
-   * happily find it: doing so would probe (and overwrite the ledger for) an
-   * account other than the one `loadBucketViews` actually dispatches
-   * through. A stale/unusable override degrades to the fully-automatic
-   * order, exactly as it does for dispatch itself. `instanceOverrides` is
+   * FIRST computes `dispatchModuleId` via {@link resolveDispatchModuleId} —
+   * the same enablement- and credential-mark-aware algorithm `loadBucketViews`
+   * uses (fed the SAME `deps.moduleStatus`/`deps.instanceIdsFor` and
+   * `bucketStates` snapshot `resolveFreewayGroups` also hands
+   * `loadBucketViews`, and the SAME `instanceOverrides[moduleId]`) — and
+   * hands THAT resolved id, not the raw override, to the vault walk. This
+   * matters with or without an override set: `resolveFreewayProbeCredential`
+   * on its own walks candidates by credential PRESENCE only, so an instance
+   * that is disabled or credential-marked but still holds a vaulted key
+   * (e.g. `<base>:default` after the workspace was pointed at another
+   * instance, or simply left disabled) would otherwise be probed even though
+   * dispatch skips it. Seeding the walk with `dispatchModuleId` instead
+   * guarantees the probe always reads the SAME account dispatch actually
+   * uses — whether that id came from a live override, a stale override that
+   * fell back to automatic, or no override at all. When no candidate is
+   * usable, `dispatchModuleId` is `undefined` and the walk degrades to its
+   * own automatic order, matching prior behaviour. `instanceOverrides` is
    * the workspace's saved `WorkspaceSettings.freewayInstanceOverrides` map
    * (base module id -> instance id).
    */
@@ -2748,22 +2752,19 @@ export class TranslationEngine {
       stateByKey.get(freewayCredentialKey(id))?.disabledReason !== undefined;
 
     return (moduleId: string, envVar: string) => {
-      const overrideId = instanceOverrides?.[moduleId];
       const { dispatchModuleId } = resolveDispatchModuleId(
         moduleId,
         instanceIdsFor(moduleId),
         moduleStatus,
         credentialBad,
-        overrideId,
+        instanceOverrides?.[moduleId],
       );
-      const effectiveOverride =
-        overrideId !== undefined && overrideId === dispatchModuleId ? overrideId : undefined;
       return resolveFreewayProbeCredential(
         moduleId,
         envVar,
         (vaultKey) => credentialStore.getOptional(vaultKey, sessionId),
         instanceIdsFor,
-        effectiveOverride,
+        dispatchModuleId,
       );
     };
   }

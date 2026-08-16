@@ -449,12 +449,26 @@ export function FreewayPanel(): React.JSX.Element {
                                   onValueChange={(value) => {
                                     // base-ui's Select calls onValueChange on every
                                     // item commit, including re-picking the option
-                                    // already shown (no equality check upstream) —
-                                    // without this guard, clicking the displayed
-                                    // "Automatic" while a persisted-but-unresolved
-                                    // override is showing (see `selectedValue`
-                                    // above) would fire a write that deletes it.
-                                    if (value === selectedValue) return;
+                                    // already shown (no equality check upstream).
+                                    // Re-picking a displayed OVERRIDE is a no-op
+                                    // PUT (next[base] = sameId) and skipping it is
+                                    // a pure optimization. Automatic is different:
+                                    // when `overrideId` is still persisted (the
+                                    // selector is only showing "Automatic" because
+                                    // the override's instance is currently
+                                    // disabled/unusable — see `selectedValue`
+                                    // above), picking Automatic is the ONLY way to
+                                    // clear that stale override, so the guard must
+                                    // not swallow it.
+                                    if (
+                                      value === selectedValue &&
+                                      !(
+                                        value === AUTOMATIC_OVERRIDE_VALUE &&
+                                        overrideId !== undefined
+                                      )
+                                    ) {
+                                      return;
+                                    }
                                     handleInstanceOverrideChange(provider.moduleId, value);
                                   }}
                                   disabled={
