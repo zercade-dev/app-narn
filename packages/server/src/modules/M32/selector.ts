@@ -124,12 +124,13 @@ function isReservoir(bucket: BucketView): number {
  * bucket is reached anyway.
  *
  * The other trade is quality feedback: `gatePassByLanguage` is M32's only
- * quality loop, and gate failures reach ranking only through the EMA that
- * shrinks `batchSizeFor` and so inflates `estimatedRequests` — which
- * absolute cost demoted directly. Dividing by remaining stock scales that
- * signal down by the abundance ratio, which runs 14x to 720x across the
- * shipped snapshot, so a degraded model on a large allowance can outrank a
- * healthy one on a smaller allowance even at several times the request cost.
+ * quality loop, and gate failures reach ranking solely by inflating
+ * `estimatedRequests` — a depressed pass rate both shrinks `batchSizeFor` and
+ * divides the batch count — which absolute cost demoted directly. Dividing by
+ * remaining stock scales that signal down by the abundance ratio, which runs
+ * 14x to 720x across the shipped snapshot, so a degraded model on a large
+ * allowance can outrank a healthy one on a smaller allowance even at several
+ * times the request cost.
  * Nothing in this comparator floors that; the quality band in
  * {@link isEligible} and the provider-error cooldown are what bound it.
  *
