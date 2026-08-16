@@ -127,7 +127,7 @@ import {
   resolveFreewayProbeCredential,
 } from './M32/bucket-source.js';
 import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
-import { effectiveRemainingRequests, selectEscalation } from './M32/selector.js';
+import { effectiveRemainingRequests, hasMinuteHeadroom, selectEscalation } from './M32/selector.js';
 import { difficultyBand } from './M32/difficulty.js';
 import type { BucketView, JobGroup } from './M32/types.js';
 import { syncAuthoritativeUsage } from './M32/probes.js';
@@ -3223,7 +3223,29 @@ export class TranslationEngine {
       buckets,
       now,
     );
-    if (!selection) return undefined;
+    if (!selection) {
+      // Distinguish the two ways the ladder comes back empty. Ordinary
+      // exhaustion (no higher tier, or no day-scale stock) is expected and
+      // stays silent. Minute starvation is not: the bucket refills within
+      // seconds, the entry silently gets a same-module corrective retry
+      // instead of a better model, and nothing else records that it happened.
+      // Re-rank with the minute fields blanked purely to CLASSIFY — the clone
+      // never escapes this branch and is never dispatched to, because
+      // escalating into a spent minute risks a 429 whose missing Retry-After
+      // cools the bucket until the next day boundary.
+      const failedTier = buckets.find((b) => b.bucketKey === failedBucketKey)?.qualityTier ?? 0;
+      const starved = buckets.find(
+        (b) => b.qualityTier > failedTier && b.bucketKey !== failedBucketKey && !hasMinuteHeadroom(b),
+      );
+      if (starved) {
+        this.logger.warn('translation:freeway-escalation-minute-starved', {
+          failedBucketKey,
+          starvedBucketKey: starved.bucketKey,
+          minuteResetAt: starved.minuteResetAt,
+        });
+      }
+      return undefined;
+    }
     return {
       // Dispatch through the resolved instance, not the bare base — see
       // BucketView.dispatchModuleId.
