@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "モジュールを選択…",
   "generateModel": "モデル",
   "generateReasoningEffort": "推論の強度",
+  "generateAdvancedOptions": "詳細オプション",
   "generateNoSuggestions": "AIが提案できる新しい用語はありませんでした。",
   "generateSuggestionCount": "用語{{count}}語",
   "generateAccept": "用語集{{count}}件を作成",

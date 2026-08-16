@@ -16,6 +16,7 @@
  * re-exports these so its public surface is unchanged.
  */
 import { z } from 'zod';
+import { BATCH_GROUPING_DIMENSIONS } from '@zercade-dev/narn-shared';
 
 export const moduleConfigEntrySchema = z.object({
   enabled: z.boolean().optional(),
@@ -31,8 +32,12 @@ export const workspaceSettingsSchema = z.object({
   requestTimeoutMs: z.number().int().min(1000).optional(),
   // 0 = unlimited (omit the per-request cap; see core.ts DEFAULT_MAX_OUTPUT_TOKENS).
   maxOutputTokens: z.number().int().min(0).max(200000).optional(),
-  batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).optional(),
+  batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   ignoreBatchSizeLimit: z.boolean().optional(),
+  // Base module id -> instance id. `updateSettings` deletes the whole key
+  // (never stores a literal null) before this schema runs, so no `.nullable()`
+  // is needed here — only the route-layer body schema accepts null.
+  freewayInstanceOverrides: z.record(z.string(), z.string()).optional(),
 });
 
 export const moduleInstanceSchema = z.object({

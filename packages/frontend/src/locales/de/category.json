@@ -13,6 +13,7 @@
   "module": "Modul",
   "modulePlaceholder": "Modul auswählen",
   "model": "Modell",
+  "aiAdvancedOptions": "Erweiterte Optionen",
   "noModules": "Kein KI-fähiges Modul verfügbar. Eines im Tab Konfiguration einrichten.",
   "includeExisting": "Einträge auch vorhandenen Kategorien zuweisen",
   "run": "Generieren",

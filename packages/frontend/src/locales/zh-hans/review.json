@@ -77,7 +77,8 @@
     "scopeLabel": "范围",
     "scopeNeverReviewed": "仅从未审校过的条目（{{count}}）",
     "scopeAll": "全部条目（{{count}}）",
-    "scopeNoneHint": "每个条目都已审校过。切换到“全部条目”即可重新审校。"
+    "scopeNoneHint": "每个条目都已审校过。切换到“全部条目”即可重新审校。",
+    "advancedOptions": "高级选项"
   },
   "title": "审校队列",
   "position": "第 {{current}} / {{total}} 条",

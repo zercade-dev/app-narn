@@ -9,7 +9,7 @@ import { getSessionId } from '../middleware/session.js';
 import { asyncHandler } from '../http/index.js';
 import { projectIdParam } from '../middleware/path-params.js';
 import { assertRunVisible, assertProjectAccess } from '../middleware/authz.js';
-import { can } from '@zercade-dev/narn-shared';
+import { can, BATCH_GROUPING_DIMENSIONS } from '@zercade-dev/narn-shared';
 import { ForbiddenError } from '../types/errors.js';
 
 export const translationsRouter: Router = Router({ mergeParams: true });
@@ -61,7 +61,7 @@ const enqueueSchema = z.object({
    * Per-run override for related-entry batch grouping. Absent ⇒ the project /
    * workspace setting is used.
    */
-  batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).optional(),
+  batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   /** Per-run override for the ignore-batch-size-limit toggle. */
   ignoreBatchSizeLimit: z.boolean().optional(),
   /**

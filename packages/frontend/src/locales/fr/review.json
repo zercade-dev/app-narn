@@ -77,7 +77,8 @@
     "scopeLabel": "Portée",
     "scopeNeverReviewed": "Seulement les entrées jamais revues ({{count}})",
     "scopeAll": "Toutes les entrées ({{count}})",
-    "scopeNoneHint": "Toutes les entrées ont déjà été revues. Passez à « Toutes les entrées » pour les revoir."
+    "scopeNoneHint": "Toutes les entrées ont déjà été revues. Passez à « Toutes les entrées » pour les revoir.",
+    "advancedOptions": "Options avancées"
   },
   "title": "File de révision",
   "position": "{{current}} sur {{total}}",

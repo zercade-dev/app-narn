@@ -77,7 +77,8 @@
     "scopeLabel": "Ambito",
     "scopeNeverReviewed": "Solo le voci mai revisionate ({{count}})",
     "scopeAll": "Tutte le voci ({{count}})",
-    "scopeNoneHint": "Ogni voce è già stata revisionata. Passa a “Tutte le voci” per revisionare di nuovo."
+    "scopeNoneHint": "Ogni voce è già stata revisionata. Passa a “Tutte le voci” per revisionare di nuovo.",
+    "advancedOptions": "Opzioni avanzate"
   },
   "title": "Coda di revisione",
   "position": "{{current}} di {{total}}",

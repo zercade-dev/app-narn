@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { RunStatusCode, hasRunDetailsKind } from '@zercade-dev/narn-shared';
+import {
+  RunStatusCode,
+  hasRunDetailsKind,
+  BATCH_GROUPING_DIMENSIONS,
+} from '@zercade-dev/narn-shared';
 import { getProjectStore, getRunStore, getStringStore } from '../storage/registry.js';
 import type { SourceReviewRecord } from '../storage/types.js';
 import { logger } from '../modules/M15-console-logger.js';
@@ -83,7 +87,7 @@ const judgeSchema = z
     // language the source run covered.
     languages: z.array(z.string().min(1)).min(1).optional(),
     // Per-run related-entry grouping override (absent = project/workspace setting).
-    batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).optional(),
+    batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
     ignoreBatchSizeLimit: z.boolean().optional(),
     /**
      * Per-run override of how many items each provider call holds. `0` means
@@ -129,7 +133,7 @@ const sourceReviewSchema = z.object({
   responseLanguage: z.string().min(1).optional(),
   verbose: z.boolean().optional(),
   // Per-run related-entry grouping override (absent = project/workspace setting).
-  batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).optional(),
+  batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   ignoreBatchSizeLimit: z.boolean().optional(),
   /**
    * Per-run override of how many items each provider call holds. `0` means

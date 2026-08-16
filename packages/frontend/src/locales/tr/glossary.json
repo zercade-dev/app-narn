@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "Bir modül seçin…",
   "generateModel": "Model",
   "generateReasoningEffort": "Akıl yürütme çabası",
+  "generateAdvancedOptions": "Gelişmiş seçenekler",
   "generateNoSuggestions": "Yapay zekâ önerecek yeni terim bulamadı.",
   "generateSuggestionCount": "{{count}} terim",
   "generateAccept": "{{count}} sözlükçe oluştur",

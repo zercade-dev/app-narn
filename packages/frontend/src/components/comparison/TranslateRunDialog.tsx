@@ -30,6 +30,7 @@ import { ExampleEntryPicker, type ExampleCandidate } from './ExampleEntryPicker.
 /** Last-used per-browser values (backlog: settings per modal). reTranslate and
  * exampleIds are deliberately NOT persisted: destructive mode choice / entry-specific. */
 const TRANSLATE_RUN_SETTINGS_DEFAULTS = {
+  advanced: false,
   useReference: true,
   disableMemory: false,
   grouping: 'default' as string,
@@ -66,8 +67,14 @@ interface TranslateRunDialogProps {
   /**
    * Number of (entry, language) pairs in scope that would auto-apply a stored
    * variant from translation memory instead of being sent to the model. When
-   * greater than 0, a warning plus a "disable memory for this run" toggle is
-   * shown; the choice is reported via `onStart`'s `disableMemory`.
+   * greater than 0, a warning is always shown (a consequence disclosure) ALONGSIDE
+   * the "disable memory for this run" toggle — unlike the rest of this dialog's
+   * tuning, that toggle is never gated behind Advanced, because it is the one
+   * control that can make the warning's own claim false. Hiding it there while
+   * a persisted `disableMemory: true` still applied would tell the user N
+   * entries will reuse memory when every one of them is actually about to be
+   * re-sent to the model. The toggle's choice is reported via `onStart`'s
+   * `disableMemory`.
    */
   memoryCount?: number;
   /**
@@ -105,6 +112,10 @@ export function TranslateRunDialog({
     TRANSLATE_RUN_SETTINGS_DEFAULTS,
   );
   const [reTranslate, setReTranslate] = useState(false);
+  // Everything below the mode radio is tuning, not the choice that defines the
+  // run — hidden behind this until ticked. Only its own visibility is gated;
+  // the values it wraps are never reset by hiding it (see the open-reset block).
+  const [advanced, setAdvanced] = useState(false);
   const [useReference, setUseReference] = useState(true);
   const [disableMemory, setDisableMemory] = useState(false);
   const [grouping, setGrouping] = useState<GroupingChoice>('default');
@@ -120,6 +131,7 @@ export function TranslateRunDialog({
     if (open) {
       const stored = readSettings();
       setReTranslate(false);
+      setAdvanced(stored.advanced);
       setUseReference(stored.useReference);
       setDisableMemory(stored.disableMemory);
       setGrouping(asGroupingChoice(stored.grouping));
@@ -173,32 +185,107 @@ export function TranslateRunDialog({
               {t('compare.translateModeRetranslate')}
             </label>
           </fieldset>
-          {showReference && (
-            <div className="space-y-1">
-              <span className="inline-flex items-center gap-1.5">
-                <Checkbox
-                  id="comparison-translate-use-reference"
-                  checked={Boolean(referenceLanguage) && useReference}
-                  disabled={!referenceLanguage}
-                  onCheckedChange={(checked) => setUseReference(checked === true)}
-                  data-testid="comparison-translate-use-reference"
-                />
-                <label
-                  htmlFor="comparison-translate-use-reference"
-                  className="text-sm cursor-pointer select-none"
-                >
-                  {referenceLanguage
-                    ? t('compare.translateUseReference', { language: referenceLabel })
-                    : t('compare.translateUseReferenceNone')}
-                </label>
-              </span>
-              {!referenceLanguage && (
-                <p className="text-xs text-muted-foreground">
-                  {t('compare.translateNoReferenceHint')}
-                </p>
+          <div className="border-t pt-3">
+            <span className="inline-flex items-center gap-1.5">
+              <Checkbox
+                id="comparison-translate-advanced"
+                checked={advanced}
+                onCheckedChange={(checked) => setAdvanced(checked === true)}
+                data-testid="comparison-translate-advanced"
+              />
+              <label
+                htmlFor="comparison-translate-advanced"
+                className="text-sm cursor-pointer select-none"
+              >
+                {t('compare.translateAdvancedOptions')}
+              </label>
+            </span>
+          </div>
+          {advanced && (
+            <>
+              {showReference && (
+                <div className="space-y-1">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Checkbox
+                      id="comparison-translate-use-reference"
+                      checked={Boolean(referenceLanguage) && useReference}
+                      disabled={!referenceLanguage}
+                      onCheckedChange={(checked) => setUseReference(checked === true)}
+                      data-testid="comparison-translate-use-reference"
+                    />
+                    <label
+                      htmlFor="comparison-translate-use-reference"
+                      className="text-sm cursor-pointer select-none"
+                    >
+                      {referenceLanguage
+                        ? t('compare.translateUseReference', { language: referenceLabel })
+                        : t('compare.translateUseReferenceNone')}
+                    </label>
+                  </span>
+                  {!referenceLanguage && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('compare.translateNoReferenceHint')}
+                    </p>
+                  )}
+                </div>
               )}
-            </div>
+              <div className="border-t pt-3">
+                <BatchGroupingControls
+                  idPrefix="comparison-translate-grouping"
+                  grouping={grouping}
+                  onGroupingChange={setGrouping}
+                  ignoreLimit={ignoreLimit}
+                  onIgnoreLimitChange={setIgnoreLimit}
+                  customBatchSize={customBatchSize}
+                  onCustomBatchSizeChange={setCustomBatchSize}
+                />
+                {grouping === 'custom' && (
+                  <p className="text-xs text-muted-foreground pt-1">
+                    {t('compare.translateCustomBatchSizeCaveat')}
+                  </p>
+                )}
+              </div>
+              {enableExamples && (
+                <div className="border-t pt-3">
+                  <ExampleEntryPicker
+                    candidates={exampleCandidates}
+                    pickedIds={exampleIds}
+                    onChange={setExampleIds}
+                    max={10}
+                  />
+                </div>
+              )}
+              {localModelCount >= 2 && (
+                <div className="space-y-1 border-t pt-3">
+                  <span className="inline-flex items-center gap-1.5">
+                    <Checkbox
+                      id="comparison-translate-split-by-model"
+                      checked={splitByModel}
+                      onCheckedChange={(checked) => setSplitByModel(checked === true)}
+                      data-testid="comparison-translate-split-by-model"
+                    />
+                    <label
+                      htmlFor="comparison-translate-split-by-model"
+                      className="text-sm cursor-pointer select-none"
+                    >
+                      {t('compare.translateSplitByModel')}
+                    </label>
+                  </span>
+                </div>
+              )}
+            </>
           )}
+          {/* A consequence disclosure (what this run will actually do — reuse
+              stored translations instead of calling the model), unconditional
+              even while Advanced is collapsed. The "disable memory for this
+              run" toggle beside it stays UNGATED too, deliberately breaking
+              the "tuning hides behind Advanced" pattern the rest of this
+              dialog follows: it is the one control whose hidden state could
+              make the warning's own claim false (a persisted disableMemory:true
+              would otherwise tell the user N entries reuse memory while every
+              one is actually re-sent to the model — real spend on a BYOK
+              product). Always showing it keeps the claim and the control that
+              governs it in the same place, so they can't drift apart again. */}
           {memoryCount > 0 && (
             <div
               className="space-y-1.5 rounded-md border border-status-warn/40 bg-status-warn/10 p-2.5"
@@ -223,50 +310,6 @@ export function TranslateRunDialog({
               </span>
             </div>
           )}
-          <div className="border-t pt-3">
-            <BatchGroupingControls
-              idPrefix="comparison-translate-grouping"
-              grouping={grouping}
-              onGroupingChange={setGrouping}
-              ignoreLimit={ignoreLimit}
-              onIgnoreLimitChange={setIgnoreLimit}
-              customBatchSize={customBatchSize}
-              onCustomBatchSizeChange={setCustomBatchSize}
-            />
-            {grouping === 'custom' && (
-              <p className="text-xs text-muted-foreground pt-1">
-                {t('compare.translateCustomBatchSizeCaveat')}
-              </p>
-            )}
-          </div>
-          {enableExamples && (
-            <div className="border-t pt-3">
-              <ExampleEntryPicker
-                candidates={exampleCandidates}
-                pickedIds={exampleIds}
-                onChange={setExampleIds}
-                max={10}
-              />
-            </div>
-          )}
-          {localModelCount >= 2 && (
-            <div className="space-y-1 border-t pt-3">
-              <span className="inline-flex items-center gap-1.5">
-                <Checkbox
-                  id="comparison-translate-split-by-model"
-                  checked={splitByModel}
-                  onCheckedChange={(checked) => setSplitByModel(checked === true)}
-                  data-testid="comparison-translate-split-by-model"
-                />
-                <label
-                  htmlFor="comparison-translate-split-by-model"
-                  className="text-sm cursor-pointer select-none"
-                >
-                  {t('compare.translateSplitByModel')}
-                </label>
-              </span>
-            </div>
-          )}
         </div>
         <DialogFooter>
           <Button
@@ -279,6 +322,7 @@ export function TranslateRunDialog({
           <Button
             onClick={() => {
               saveSettings({
+                advanced,
                 useReference,
                 disableMemory,
                 grouping,

@@ -56,6 +56,7 @@ import {
   type ModuleRegistry,
 } from './M6-module-registry.js';
 import type {
+  FreewayBucketState,
   GlobalConfigStore,
   ProjectStore,
   RunStore,
@@ -114,12 +115,15 @@ import { groupDecisions } from './M9/packing.js';
 import {
   type BucketSourceDeps,
   coolBucket,
+  defaultInstanceIdsFor,
+  defaultModuleStatus,
   freewayBucketBaseModuleId,
   freewayCredentialKey,
   freewayModuleOverrides,
   loadBucketViews,
   recordDispatch,
   recordGateOutcomes,
+  resolveDispatchModuleId,
   resolveFreewayProbeCredential,
 } from './M32/bucket-source.js';
 import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
@@ -2714,17 +2718,55 @@ export class TranslationEngine {
    * callers), but the credential the probe needs may live on whichever
    * instance Freeway actually dispatches through: instance credentials are
    * vault-keyed under a DERIVED name, not the bare env var. Delegates to
-   * {@link resolveFreewayProbeCredential}, which mirrors `loadBucketViews`'
-   * own resolution order (instances first, base id last) so the probe finds
-   * the same credential Freeway itself would dispatch with.
+   * {@link resolveFreewayProbeCredential} for the actual vault walk, but
+   * FIRST computes `dispatchModuleId` via {@link resolveDispatchModuleId} —
+   * the same enablement- and credential-mark-aware algorithm `loadBucketViews`
+   * uses (fed the SAME `deps.moduleStatus`/`deps.instanceIdsFor` and
+   * `bucketStates` snapshot `resolveFreewayGroups` also hands
+   * `loadBucketViews`, and the SAME `instanceOverrides[moduleId]`) — and
+   * hands THAT resolved id, not the raw override, to the vault walk. This
+   * matters with or without an override set: `resolveFreewayProbeCredential`
+   * on its own walks candidates by credential PRESENCE only, so an instance
+   * that is disabled or credential-marked but still holds a vaulted key
+   * (e.g. `<base>:default` after the workspace was pointed at another
+   * instance, or simply left disabled) would otherwise be probed even though
+   * dispatch skips it. Seeding the walk with `dispatchModuleId` instead
+   * guarantees the probe always reads the SAME account dispatch actually
+   * uses — whether that id came from a live override, a stale override that
+   * fell back to automatic, or no override at all. When no candidate is
+   * usable, `dispatchModuleId` is `undefined` and the walk degrades to its
+   * own automatic order, matching prior behaviour. `instanceOverrides` is
+   * the workspace's saved `WorkspaceSettings.freewayInstanceOverrides` map
+   * (base module id -> instance id).
    */
   private credentialForFreewayProbe(
     sessionId: string | undefined,
+    deps: BucketSourceDeps,
+    bucketStates: readonly FreewayBucketState[],
+    instanceOverrides: Record<string, string> | undefined,
   ): (moduleId: string, envVar: string) => string | undefined {
-    return (moduleId: string, envVar: string) =>
-      resolveFreewayProbeCredential(moduleId, envVar, (vaultKey) =>
-        credentialStore.getOptional(vaultKey, sessionId),
+    const moduleStatus = deps.moduleStatus ?? defaultModuleStatus;
+    const instanceIdsFor = deps.instanceIdsFor ?? defaultInstanceIdsFor;
+    const stateByKey = new Map(bucketStates.map((s) => [s.bucketKey, s]));
+    const credentialBad = (id: string): boolean =>
+      stateByKey.get(freewayCredentialKey(id))?.disabledReason !== undefined;
+
+    return (moduleId: string, envVar: string) => {
+      const { dispatchModuleId } = resolveDispatchModuleId(
+        moduleId,
+        instanceIdsFor(moduleId),
+        moduleStatus,
+        credentialBad,
+        instanceOverrides?.[moduleId],
       );
+      return resolveFreewayProbeCredential(
+        moduleId,
+        envVar,
+        (vaultKey) => credentialStore.getOptional(vaultKey, sessionId),
+        instanceIdsFor,
+        dispatchModuleId,
+      );
+    };
   }
 
   /**
@@ -2749,6 +2791,11 @@ export class TranslationEngine {
     const { runId, status, decisions, isBatch, resolveBatchMode, bucketKeys } = args;
     const now = Date.now();
     const deps = this.freewayBucketDeps(args.global, args.projectEntries, args.sessionId);
+    // Read once, ahead of both the probe and `loadBucketViews` below: the
+    // probe's override gating needs the SAME credential-mark state
+    // `loadBucketViews` will use, or the two could resolve a base module's
+    // dispatch id differently (see `credentialForFreewayProbe`).
+    const bucketStates = await (deps.ledger ?? getFreewayLedgerStore()).listBuckets();
     // Best-effort, time-bounded correction against provider-authoritative
     // usage (DeepL/OpenRouter) before reading the ledger for this run's
     // resolution — never lets a slow/unreachable provider stall run start,
@@ -2757,7 +2804,12 @@ export class TranslationEngine {
       [
         syncAuthoritativeUsage(now, {
           ledger: deps.ledger,
-          credentialFor: this.credentialForFreewayProbe(args.sessionId),
+          credentialFor: this.credentialForFreewayProbe(
+            args.sessionId,
+            deps,
+            bucketStates,
+            args.global.settings?.freewayInstanceOverrides,
+          ),
         }),
       ],
       1500,

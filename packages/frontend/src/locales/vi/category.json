@@ -12,6 +12,7 @@
   "module": "Mô-đun",
   "modulePlaceholder": "Chọn một mô-đun",
   "model": "Mô hình",
+  "aiAdvancedOptions": "Tùy chọn nâng cao",
   "noModules": "Không có mô-đun nào dùng được AI. Hãy thiết lập một mô-đun ở tab Cấu hình.",
   "includeExisting": "Gán các mục vào cả những danh mục đã có",
   "run": "Sinh",

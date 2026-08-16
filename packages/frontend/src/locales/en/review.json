@@ -77,7 +77,8 @@
     "scopeLabel": "Scope",
     "scopeNeverReviewed": "Only entries never reviewed ({{count}})",
     "scopeAll": "All entries ({{count}})",
-    "scopeNoneHint": "Every entry has already been reviewed. Switch to \"All entries\" to re-review."
+    "scopeNoneHint": "Every entry has already been reviewed. Switch to \"All entries\" to re-review.",
+    "advancedOptions": "Advanced options"
   },
   "title": "Review queue",
   "position": "{{current}} of {{total}}",

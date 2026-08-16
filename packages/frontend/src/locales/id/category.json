@@ -12,6 +12,7 @@
   "module": "Modul",
   "modulePlaceholder": "Pilih modul",
   "model": "Model",
+  "aiAdvancedOptions": "Opsi lanjutan",
   "noModules": "Tidak ada modul berkemampuan AI yang tersedia. Atur satu di Konfigurasi.",
   "includeExisting": "Tugaskan juga entri ke kategori yang sudah ada",
   "run": "Buat",

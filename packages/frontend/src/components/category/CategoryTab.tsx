@@ -66,6 +66,7 @@ import { asGroupingChoice } from '../config/BatchGroupingControls.js';
 
 /** Last-used per-browser values. Scoped entry ids are NOT persisted (run-specific). */
 const CATEGORY_GEN_SETTINGS_DEFAULTS = {
+  advanced: false,
   moduleId: '',
   model: '',
   reasoningEffort: '',
@@ -172,6 +173,11 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
   const [userModel, setUserModel] = useState('');
   const [reasoningEffort, setReasoningEffort] = useState('');
   const confidenceContext = useConfidenceContext('category-gen', reasoningEffort);
+  // Everything below the module/model/effort picker is tuning, not the choice
+  // that defines the run — hidden behind this until ticked. Only its own
+  // visibility is gated; the values it wraps are never reset by hiding it (see
+  // the AI-dialog open-reset block below).
+  const [advanced, setAdvanced] = useState(false);
   const [includeExisting, setIncludeExisting] = useState(true);
   const [genContext, setGenContext] = useState<GenerationContextValue>({
     contextFields: [],
@@ -312,6 +318,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
     setPrevAiOpen(aiOpen);
     if (aiOpen) {
       const stored = readSettings();
+      setAdvanced(stored.advanced);
       setIncludeExisting(stored.includeExisting);
       setGenContext({
         contextFields: stored.contextFields as EntryContextField[],
@@ -706,6 +713,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
     async () => {
       if (!moduleId) return;
       saveSettings({
+        advanced,
         // Persist the resolved module (falls back to the first offerable
         // module when the user never touched the selector) — not the raw
         // `userModuleId` state, which stays null in that common case and
@@ -1261,25 +1269,48 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
                 </>
               )}
 
-              <label className="flex cursor-pointer select-none items-center gap-2 text-sm">
-                <Checkbox
-                  checked={includeExisting}
-                  onCheckedChange={(checked) => setIncludeExisting(checked === true)}
-                  data-testid="category-include-existing"
-                />
-                {t('includeExisting')}
-              </label>
+              <div className="border-t pt-3">
+                <span className="inline-flex items-center gap-1.5">
+                  <Checkbox
+                    id="category-ai-advanced"
+                    checked={advanced}
+                    onCheckedChange={(checked) => setAdvanced(checked === true)}
+                    data-testid="category-ai-advanced"
+                  />
+                  <Label
+                    htmlFor="category-ai-advanced"
+                    className="cursor-pointer select-none font-normal"
+                  >
+                    {t('aiAdvancedOptions')}
+                  </Label>
+                </span>
+              </div>
 
-              <GenerationContextControls
-                value={genContext}
-                onChange={setGenContext}
-                activeLanguages={project?.activeLanguages ?? []}
-                availableCategories={categories}
-                availableGlossaries={availableGlossaries.filter((g) => g.enabled !== false)}
-              />
+              {advanced && (
+                <>
+                  <label className="flex cursor-pointer select-none items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={includeExisting}
+                      onCheckedChange={(checked) => setIncludeExisting(checked === true)}
+                      data-testid="category-include-existing"
+                    />
+                    {t('includeExisting')}
+                  </label>
+
+                  <GenerationContextControls
+                    value={genContext}
+                    onChange={setGenContext}
+                    activeLanguages={project?.activeLanguages ?? []}
+                    availableCategories={categories}
+                    availableGlossaries={availableGlossaries.filter((g) => g.enabled !== false)}
+                  />
+                </>
+              )}
             </div>
           )}
 
+          {/* A consequence preview (what the run will spend), not a tuning
+              knob — unconditional even while Advanced is collapsed. */}
           {genBatchCount > 0 && !noAiModules && (
             <p className="text-xs text-muted-foreground" data-testid="category-gen-batch-count">
               {t('genBatchCount', { count: genBatchCount })}

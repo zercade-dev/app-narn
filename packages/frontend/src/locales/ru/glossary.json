@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "Выберите модуль…",
   "generateModel": "Модель",
   "generateReasoningEffort": "Уровень рассуждений",
+  "generateAdvancedOptions": "Дополнительные параметры",
   "generateNoSuggestions": "ИИ не нашел новых терминов для предложения.",
   "generateSuggestionCount": "Терминов: {{count}}",
   "generateAccept": "Создать глоссарии: {{count}}",

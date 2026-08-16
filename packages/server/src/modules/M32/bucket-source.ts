@@ -23,7 +23,7 @@ import type {
   FreewayWindowRef,
   FreewayWindowUsage,
 } from '../../storage/types.js';
-import { getFreewayLedgerStore } from '../../storage/registry.js';
+import { getFreewayLedgerStore, getGlobalConfigStore } from '../../storage/registry.js';
 import { isCloudMode } from '../../identity/registry.js';
 import { moduleRegistry } from '../M6-module-registry.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
@@ -96,6 +96,17 @@ export interface BucketSourceDeps {
   moduleStatus?: (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined;
   /** Test seam: instance ids of a base module; default reads the registry. */
   instanceIdsFor?: (baseModuleId: string) => string[];
+  /**
+   * Test seam: base module id -> instance id, consulted ahead of
+   * {@link freewayCandidateIds}' automatic order. Default reads
+   * `WorkspaceSettings.freewayInstanceOverrides` from the global config
+   * store. A stale entry (renamed/deleted/disabled/uncredentialed instance)
+   * is never dispatched to — {@link freewayCandidateIds} only moves it to the
+   * front of the list when it still names a live instance, and the
+   * usability scan below falls through the rest of that list exactly as it
+   * does for the fully-automatic case.
+   */
+  freewayInstanceOverrides?: Record<string, string>;
   cloudMode?: boolean;
 }
 
@@ -106,7 +117,7 @@ export interface BucketSourceDeps {
  * `moduleStatus` closure (mirroring how M9's callers thread `sessionId`
  * through `selectCapableModule`) rather than relying on this default.
  */
-function defaultModuleStatus(
+export function defaultModuleStatus(
   moduleId: string,
 ): { credentialed: boolean; enabled: boolean } | undefined {
   const meta = moduleRegistry.getMetadata(moduleId);
@@ -123,23 +134,97 @@ export function defaultInstanceIdsFor(baseModuleId: string): string[] {
 }
 
 /**
+ * Default `freewayInstanceOverrides`: the workspace's saved map, read once
+ * per {@link loadBucketViews} call (never per-provider) via the same
+ * per-tenant-cached `getSettings()` every other settings read already uses.
+ */
+async function defaultFreewayInstanceOverrides(): Promise<Record<string, string>> {
+  const settings = await getGlobalConfigStore().getSettings();
+  return settings.freewayInstanceOverrides ?? {};
+}
+
+/**
  * Candidate module ids that can serve one snapshot provider, best first:
- * `<base>:default`, then the base's remaining instances in id order, then the
- * bare base LAST. The product's enablement UX only ever enables named
- * instances, and M27 leaves a migrated workspace's bare base enabled and
- * credentialed but invisible in the UI — so preferring the base would dispatch
- * through configuration the user cannot see or edit. The base remains a
- * last-resort fallback for pre-instance workspaces, where it is the only
- * candidate.
+ * an `overrideInstanceId` (when it still names a live instance of this base),
+ * then `<base>:default`, then the base's remaining instances in id order,
+ * then the bare base LAST. The product's enablement UX only ever enables
+ * named instances, and M27 leaves a migrated workspace's bare base enabled
+ * and credentialed but invisible in the UI — so preferring the base would
+ * dispatch through configuration the user cannot see or edit. The base
+ * remains a last-resort fallback for pre-instance workspaces, where it is the
+ * only candidate.
+ *
+ * `overrideInstanceId` only ever REORDERS this list — it can promote an
+ * existing candidate, never add one that `instanceIds` doesn't already
+ * contain. A workspace override naming a renamed/deleted instance is
+ * therefore inert here (ignored, not appended), and the caller's usual
+ * best-first scan over the returned order is what supplies the "stale
+ * override falls back to automatic" behaviour — this function makes that
+ * fallback possible, it doesn't special-case it.
  */
 export function freewayCandidateIds(
   baseModuleId: string,
   instanceIds: readonly string[],
+  overrideInstanceId?: string,
 ): string[] {
   const preferred = buildModuleInstanceId(baseModuleId, DEFAULT_INSTANCE_SLUG);
   const rest = instanceIds.filter((id) => id !== preferred).sort((a, b) => a.localeCompare(b));
-  const ordered = [...(instanceIds.includes(preferred) ? [preferred] : []), ...rest, baseModuleId];
-  return [...new Set(ordered)];
+  const automatic = [
+    ...(instanceIds.includes(preferred) ? [preferred] : []),
+    ...rest,
+    baseModuleId,
+  ];
+  const promoted =
+    overrideInstanceId !== undefined && instanceIds.includes(overrideInstanceId)
+      ? [overrideInstanceId, ...automatic]
+      : automatic;
+  return [...new Set(promoted)];
+}
+
+/**
+ * The one algorithm that decides which candidate module id actually serves a
+ * base module's Freeway traffic: the first id (in {@link freewayCandidateIds}
+ * order, override promoted) that is credentialed, enabled, and not
+ * credential-marked; falling back to the first credential-marked candidate so
+ * callers can still report WHY nothing qualifies (`badCredentials: true`),
+ * else `dispatchModuleId: undefined` when no candidate exists at all.
+ *
+ * {@link loadBucketViews} and the Freeway probe's credential lookup
+ * (`credentialForFreewayProbe` in M9) both call this one function to decide
+ * the dispatch id, and the probe seeds its vault walk with exactly the id
+ * this function returns (never a raw, unfiltered override) — that shared
+ * resolution is what guarantees the two can never disagree about which
+ * account a base module's traffic goes through. An override this function
+ * rejects (disabled, uncredentialed, or credential-marked) is rejected
+ * identically everywhere else that calls it.
+ */
+export function resolveDispatchModuleId(
+  baseModuleId: string,
+  instanceIds: readonly string[],
+  moduleStatus: (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined,
+  credentialBad: (moduleId: string) => boolean,
+  overrideInstanceId?: string,
+): { dispatchModuleId: string | undefined; badCredentials: boolean } {
+  // A candidate rejected ONLY for a bad credential is remembered: if no
+  // candidate survives, callers can still explain the state (e.g. the panel
+  // surfaces `badCredentials`; selection/planning exclude any bucket with a
+  // disabledReason, so nothing dispatches to it either way).
+  let markedCandidate: string | undefined;
+  const usableModuleId = freewayCandidateIds(baseModuleId, instanceIds, overrideInstanceId).find(
+    (id) => {
+      const status = moduleStatus(id);
+      if (status?.credentialed !== true || !status.enabled) return false;
+      if (credentialBad(id)) {
+        markedCandidate ??= id;
+        return false;
+      }
+      return true;
+    },
+  );
+  return {
+    dispatchModuleId: usableModuleId ?? markedCandidate,
+    badCredentials: usableModuleId === undefined,
+  };
 }
 
 /**
@@ -201,30 +286,78 @@ export async function clearFreewayCredentialMarks(
 
 /**
  * Resolve a Freeway probe's credential for a base module's manifest env var,
- * walking the candidates in {@link freewayCandidateIds}' ORDER — each instance
- * of that base module first, read from its DERIVED vault key
- * (`deriveInstanceCredentialKey`), then the bare env var last. Instance
- * credentials are never stored under the bare env var, so a workspace whose
- * only configured provider is a named instance (e.g. `openrouter:default`)
- * needs this fallback or the probe silently finds nothing.
+ * walking the candidates in {@link freewayCandidateIds}' ORDER — an
+ * `overrideInstanceId` first (when it still names a live instance), then
+ * each instance of that base module, then the bare env var last. For each
+ * instance candidate, the credential itself is resolved the way M6's
+ * `buildCredentialProvider` resolves it for real dispatch: the instance's own
+ * DERIVED vault key (`deriveInstanceCredentialKey`) first, falling back to
+ * the bare env var when the derived key is absent (mirroring `credentialState`'s
+ * `fallbackFor`) — checked for THIS candidate before the walk moves on to the
+ * next one. Instances SHARE the base module's credential by default (M6,
+ * `buildCredentialProvider`), so a workspace whose only configured provider
+ * is a named instance with no derived key of its own (e.g. `openrouter:mine`,
+ * credentialed purely via base inheritance) still resolves here to the
+ * SAME credential M6 would hand that instance — not a later candidate's own
+ * derived key, and not silently nothing.
  *
- * Order only — this is NOT mark-aware, so it can differ from the candidate
- * `loadBucketViews` would actually dispatch with: with `openrouter:default`
- * credential-marked and `openrouter:work` serving, the probe still returns
- * `:default`'s key and its usage call just fails (a probe failure is a silent
- * skip, never a run failure). `lookup` is a raw vault-key reader (no module-id
- * awareness); `instanceIdsFor` defaults to the live registry.
+ * The override MUST be threaded through here, not just into dispatch: the
+ * probe overwrites the shared, base-id-keyed ledger cell with whichever
+ * account it reads, and that cell is exactly what the override-selected
+ * instance dispatches against next. Resolving `<base>:default`'s credential
+ * while a different instance actually serves the workspace would silently
+ * stamp the wrong account's usage onto the ledger cell that instance reads
+ * headroom from.
+ *
+ * This function itself is order-only — it is not enablement- or
+ * mark-aware, so in isolation it can differ from the candidate
+ * `loadBucketViews` would actually dispatch with. The guarantee that the
+ * probe reads usage for the SAME account Freeway dispatches through is NOT
+ * made here: it is made by this function's one caller,
+ * `credentialForFreewayProbe` in M9, which computes `dispatchModuleId` via
+ * {@link resolveDispatchModuleId} — the SAME enablement- and
+ * credential-mark-aware resolution `loadBucketViews` uses, fed the same
+ * override — and passes THAT id (never the raw, unfiltered override) as
+ * `overrideInstanceId` here. An override naming a disabled, uncredentialed,
+ * or credential-marked instance therefore never reaches this function as an
+ * `overrideInstanceId`; whatever `resolveDispatchModuleId` actually picked
+ * does, so the walk below always starts from the id dispatch would use.
+ * Called directly with an unfiltered `overrideInstanceId` (as tests do),
+ * this function has no way to enforce that agreement on its own. An
+ * override naming an instance with no derived key of its own is no longer a
+ * dead end: the per-candidate base-env-var fallback above resolves it to the
+ * base credential first (the account M6 would actually hand that instance),
+ * and only continues the outer walk to the next candidate if BOTH the
+ * derived key and the base env var are absent for it — so this still returns
+ * SOME credential (the automatic one) rather than undefined whenever any
+ * candidate in the walk is credentialed at all. `lookup` is a raw vault-key
+ * reader (no module-id awareness); `instanceIdsFor` defaults to the live
+ * registry.
  */
 export function resolveFreewayProbeCredential(
   baseModuleId: string,
   envVar: string,
   lookup: (vaultKey: string) => string | undefined,
   instanceIdsFor: (baseModuleId: string) => string[] = defaultInstanceIdsFor,
+  overrideInstanceId?: string,
 ): string | undefined {
-  for (const candidateId of freewayCandidateIds(baseModuleId, instanceIdsFor(baseModuleId))) {
+  for (const candidateId of freewayCandidateIds(
+    baseModuleId,
+    instanceIdsFor(baseModuleId),
+    overrideInstanceId,
+  )) {
     const parsed = parseModuleInstanceId(candidateId);
+    // Mirror M6's `buildCredentialProvider`/`credentialState` fallback
+    // exactly: an instance's own derived key wins when present, otherwise it
+    // inherits the base module's credential — checked for THIS candidate
+    // before moving on to the next one in the walk. Without this inner
+    // fallback, an instance credentialed only via base inheritance (M6's
+    // documented default) has no derived key for `lookup` to find, so the
+    // walk fell through to a LATER candidate's own derived key instead —
+    // reading a different account than the one M6 actually resolves for
+    // this instance.
     const value = parsed
-      ? lookup(deriveInstanceCredentialKey(envVar, parsed.slug))
+      ? (lookup(deriveInstanceCredentialKey(envVar, parsed.slug)) ?? lookup(envVar))
       : lookup(envVar);
     if (value !== undefined) return value;
   }
@@ -379,6 +512,8 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const moduleStatus = deps?.moduleStatus ?? defaultModuleStatus;
   const instanceIdsFor = deps?.instanceIdsFor ?? defaultInstanceIdsFor;
+  const instanceOverrides =
+    deps?.freewayInstanceOverrides ?? (await defaultFreewayInstanceOverrides());
   const cloudMode = deps?.cloudMode ?? isCloudMode();
   const snapshot = getFreeTierSnapshot();
   const states = await ledger.listBuckets();
@@ -390,26 +525,14 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
 
-    // A candidate rejected ONLY for a bad credential is remembered: if no
-    // candidate survives, the provider's buckets are still emitted carrying
-    // that reason, so the panel can explain the state (selector/planner
-    // exclude any bucket with a disabledReason, so nothing dispatches to it).
-    let markedCandidate: string | undefined;
-    const usableModuleId = freewayCandidateIds(
+    const { dispatchModuleId, badCredentials } = resolveDispatchModuleId(
       provider.moduleId,
       instanceIdsFor(provider.moduleId),
-    ).find((id) => {
-      const status = moduleStatus(id);
-      if (status?.credentialed !== true || !status.enabled) return false;
-      if (credentialBad(id)) {
-        markedCandidate ??= id;
-        return false;
-      }
-      return true;
-    });
-    const dispatchModuleId = usableModuleId ?? markedCandidate;
+      moduleStatus,
+      credentialBad,
+      instanceOverrides[provider.moduleId],
+    );
     if (dispatchModuleId === undefined) continue;
-    const badCredentials = usableModuleId === undefined;
 
     // ONE usage read per model, covering the day cell AND whichever minute
     // cells (rpm/tpm) that model declares in the same round trip — shared by

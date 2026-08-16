@@ -77,7 +77,8 @@
     "scopeLabel": "Escopo",
     "scopeNeverReviewed": "Apenas as entradas nunca revisadas ({{count}})",
     "scopeAll": "Todas as entradas ({{count}})",
-    "scopeNoneHint": "Todas as entradas já foram revisadas. Mude para “Todas as entradas” para revisar de novo."
+    "scopeNoneHint": "Todas as entradas já foram revisadas. Mude para “Todas as entradas” para revisar de novo.",
+    "advancedOptions": "Opções avançadas"
   },
   "title": "Fila de revisão",
   "position": "{{current}} de {{total}}",

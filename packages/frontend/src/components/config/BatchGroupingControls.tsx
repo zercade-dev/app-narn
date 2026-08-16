@@ -9,7 +9,7 @@
  * without changing saved config.
  */
 import { useTranslation } from 'react-i18next';
-import type { BatchGroupingDimension } from '@zercade-dev/narn-shared';
+import { BATCH_GROUPING_DIMENSIONS, type BatchGroupingDimension } from '@zercade-dev/narn-shared';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,11 +28,7 @@ export type GroupingChoice = BatchGroupingDimension | 'default' | 'custom';
 const GROUPING_CHOICES: readonly GroupingChoice[] = [
   'default',
   'custom',
-  'none',
-  'category',
-  'glossary',
-  'both',
-  'tone',
+  ...BATCH_GROUPING_DIMENSIONS,
 ];
 
 /** Coerces an untrusted (persisted) value to a GroupingChoice, falling back to 'default'. */

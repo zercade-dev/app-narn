@@ -77,7 +77,8 @@
     "scopeLabel": "対象範囲",
     "scopeNeverReviewed": "未レビューのエントリのみ（{{count}}）",
     "scopeAll": "すべてのエントリ（{{count}}）",
-    "scopeNoneHint": "すべてのエントリはレビュー済みです。再レビューするには「すべてのエントリ」に切り替えてください。"
+    "scopeNoneHint": "すべてのエントリはレビュー済みです。再レビューするには「すべてのエントリ」に切り替えてください。",
+    "advancedOptions": "詳細オプション"
   },
   "title": "レビューキュー",
   "position": "{{current}}/{{total}}",
