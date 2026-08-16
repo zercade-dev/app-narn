@@ -92,7 +92,11 @@ export function bucketResumeAt(bucket: BucketView, group: JobGroup): number {
  * tends to spend both together) — without duplicating this list and risking
  * drift the next time isEligible gains a criterion.
  */
-export function isEligibleIgnoringMinute(bucket: BucketView, group: JobGroup, now: number): boolean {
+export function isEligibleIgnoringMinute(
+  bucket: BucketView,
+  group: JobGroup,
+  now: number,
+): boolean {
   if (bucket.disabledReason !== undefined) return false;
   if (bucket.cooldownUntil !== undefined && bucket.cooldownUntil > now) return false;
   if (bucket.qualityTier < group.band) return false;
