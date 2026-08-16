@@ -240,27 +240,45 @@ export async function clearFreewayCredentialMarks(
 
 /**
  * Resolve a Freeway probe's credential for a base module's manifest env var,
- * walking the candidates in {@link freewayCandidateIds}' ORDER — each instance
- * of that base module first, read from its DERIVED vault key
+ * walking the candidates in {@link freewayCandidateIds}' ORDER — an
+ * `overrideInstanceId` first (when it still names a live instance), then
+ * each instance of that base module, read from its DERIVED vault key
  * (`deriveInstanceCredentialKey`), then the bare env var last. Instance
  * credentials are never stored under the bare env var, so a workspace whose
  * only configured provider is a named instance (e.g. `openrouter:default`)
  * needs this fallback or the probe silently finds nothing.
  *
+ * The override MUST be threaded through here, not just into dispatch: the
+ * probe overwrites the shared, base-id-keyed ledger cell with whichever
+ * account it reads, and that cell is exactly what the override-selected
+ * instance dispatches against next. Resolving `<base>:default`'s credential
+ * while a different instance actually serves the workspace would silently
+ * stamp the wrong account's usage onto the ledger cell that instance reads
+ * headroom from.
+ *
  * Order only — this is NOT mark-aware, so it can differ from the candidate
- * `loadBucketViews` would actually dispatch with: with `openrouter:default`
- * credential-marked and `openrouter:work` serving, the probe still returns
- * `:default`'s key and its usage call just fails (a probe failure is a silent
- * skip, never a run failure). `lookup` is a raw vault-key reader (no module-id
- * awareness); `instanceIdsFor` defaults to the live registry.
+ * `loadBucketViews` would actually dispatch with: with the resolved
+ * candidate credential-marked, the probe still returns its key and its usage
+ * call just fails (a probe failure is a silent skip, never a run failure).
+ * An override naming an instance with no credential of its own degrades the
+ * same way any other candidate does: `lookup` returns undefined for it and
+ * the walk continues to the next candidate, so this still returns SOME
+ * credential (the automatic one) rather than undefined. `lookup` is a raw
+ * vault-key reader (no module-id awareness); `instanceIdsFor` defaults to
+ * the live registry.
  */
 export function resolveFreewayProbeCredential(
   baseModuleId: string,
   envVar: string,
   lookup: (vaultKey: string) => string | undefined,
   instanceIdsFor: (baseModuleId: string) => string[] = defaultInstanceIdsFor,
+  overrideInstanceId?: string,
 ): string | undefined {
-  for (const candidateId of freewayCandidateIds(baseModuleId, instanceIdsFor(baseModuleId))) {
+  for (const candidateId of freewayCandidateIds(
+    baseModuleId,
+    instanceIdsFor(baseModuleId),
+    overrideInstanceId,
+  )) {
     const parsed = parseModuleInstanceId(candidateId);
     const value = parsed
       ? lookup(deriveInstanceCredentialKey(envVar, parsed.slug))

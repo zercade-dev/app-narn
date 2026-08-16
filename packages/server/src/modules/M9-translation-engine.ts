@@ -2715,15 +2715,28 @@ export class TranslationEngine {
    * instance Freeway actually dispatches through: instance credentials are
    * vault-keyed under a DERIVED name, not the bare env var. Delegates to
    * {@link resolveFreewayProbeCredential}, which mirrors `loadBucketViews`'
-   * own resolution order (instances first, base id last) so the probe finds
-   * the same credential Freeway itself would dispatch with.
+   * own resolution order (an override instance first, then other instances,
+   * base id last) so the probe reads usage for the SAME account Freeway
+   * actually dispatches through — the probe overwrites a base-id-keyed
+   * ledger cell with whichever account it reads, so probing the wrong
+   * account would silently corrupt the cell the override-selected instance
+   * relies on for headroom. `instanceOverrides` is the workspace's saved
+   * `WorkspaceSettings.freewayInstanceOverrides` map (base module id ->
+   * instance id); a stale entry degrades exactly like any other unusable
+   * candidate — `resolveFreewayProbeCredential` still returns the automatic
+   * credential, never undefined, purely because that instance had none.
    */
   private credentialForFreewayProbe(
     sessionId: string | undefined,
+    instanceOverrides: Record<string, string> | undefined,
   ): (moduleId: string, envVar: string) => string | undefined {
     return (moduleId: string, envVar: string) =>
-      resolveFreewayProbeCredential(moduleId, envVar, (vaultKey) =>
-        credentialStore.getOptional(vaultKey, sessionId),
+      resolveFreewayProbeCredential(
+        moduleId,
+        envVar,
+        (vaultKey) => credentialStore.getOptional(vaultKey, sessionId),
+        undefined,
+        instanceOverrides?.[moduleId],
       );
   }
 
@@ -2757,7 +2770,10 @@ export class TranslationEngine {
       [
         syncAuthoritativeUsage(now, {
           ledger: deps.ledger,
-          credentialFor: this.credentialForFreewayProbe(args.sessionId),
+          credentialFor: this.credentialForFreewayProbe(
+            args.sessionId,
+            args.global.settings?.freewayInstanceOverrides,
+          ),
         }),
       ],
       1500,
