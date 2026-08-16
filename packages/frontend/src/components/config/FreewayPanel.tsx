@@ -361,9 +361,15 @@ export function FreewayPanel(): React.JSX.Element {
                           (instance) => instance.baseModuleId === provider.moduleId,
                         );
                         const overrideId = overrides[provider.moduleId];
+                        // Selected only while the server is actually dispatching to it
+                        // (`dispatchModuleId`, already resolved via the SAME usability
+                        // scan freewayCandidateIds performs server-side) — an override
+                        // naming an instance that still exists but is disabled,
+                        // uncredentialed, or credential-marked falls through to
+                        // `<base>:default` there too, so the selector must agree rather
+                        // than keep showing a choice the server silently bypassed.
                         const selectedValue =
-                          overrideId &&
-                          providerInstances.some((instance) => instance.instanceId === overrideId)
+                          overrideId && provider.dispatchModuleId === overrideId
                             ? overrideId
                             : AUTOMATIC_OVERRIDE_VALUE;
                         return (

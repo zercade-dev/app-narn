@@ -88,8 +88,9 @@ const MODULE_DISABLED_REASON = 'module-disabled';
  * both into "not usable", so this re-derives which one applies from the same
  * `moduleStatus` the live pass used.
  *
- * Walks the same candidate order Freeway dispatch would (`<base>:default`,
- * then remaining instances, then the bare base last — see
+ * Walks the same candidate order Freeway dispatch would (`overrideInstanceId`
+ * first when it still names a live instance, then `<base>:default`, then
+ * remaining instances, then the bare base last — see
  * {@link freewayCandidateIds}): the first candidate that IS credentialed but
  * not enabled names the "Enable it" target (`enableTargetModuleId`), since
  * that is the concrete card the UI can actually turn on. No credentialed
@@ -99,8 +100,13 @@ function deriveMissingState(
   moduleId: string,
   moduleStatus: (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined,
   instanceIdsFor: (baseModuleId: string) => string[],
+  overrideInstanceId: string | undefined,
 ): { state: BucketStatusState; disabledReason?: string; enableTargetModuleId?: string } {
-  for (const candidateId of freewayCandidateIds(moduleId, instanceIdsFor(moduleId))) {
+  for (const candidateId of freewayCandidateIds(
+    moduleId,
+    instanceIdsFor(moduleId),
+    overrideInstanceId,
+  )) {
     const status = moduleStatus(candidateId);
     if (status && status.credentialed && !status.enabled) {
       return {
@@ -162,6 +168,7 @@ freewayRouter.get(
     const now = Date.now();
     const sessionId = getSessionId(res);
     const global = await getGlobalConfigStore().load();
+    const settings = await getGlobalConfigStore().getSettings();
     const ledger = getFreewayLedgerStore();
     const cloudMode = isCloudMode();
     const moduleStatus = freewayModuleStatus(global, sessionId);
@@ -194,6 +201,7 @@ freewayRouter.get(
           v.moduleId,
           moduleStatus,
           defaultInstanceIdsFor,
+          settings.freewayInstanceOverrides?.[v.moduleId],
         );
         return {
           bucketKey: v.bucketKey,

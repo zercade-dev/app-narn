@@ -67,8 +67,10 @@ interface TranslateRunDialogProps {
   /**
    * Number of (entry, language) pairs in scope that would auto-apply a stored
    * variant from translation memory instead of being sent to the model. When
-   * greater than 0, a warning plus a "disable memory for this run" toggle is
-   * shown; the choice is reported via `onStart`'s `disableMemory`.
+   * greater than 0, a warning is always shown (a consequence disclosure, not
+   * a tuning knob); the "disable memory for this run" toggle beside it IS a
+   * knob and stays behind Advanced. The toggle's choice is reported via
+   * `onStart`'s `disableMemory`.
    */
   memoryCount?: number;
   /**
@@ -223,30 +225,6 @@ export function TranslateRunDialog({
                   )}
                 </div>
               )}
-              {memoryCount > 0 && (
-                <div
-                  className="space-y-1.5 rounded-md border border-status-warn/40 bg-status-warn/10 p-2.5"
-                  data-testid="comparison-translate-memory-warning"
-                >
-                  <p className="text-xs text-status-warn">
-                    {t('compare.translateMemoryWarning', { count: memoryCount })}
-                  </p>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Checkbox
-                      id="comparison-translate-disable-memory"
-                      checked={disableMemory}
-                      onCheckedChange={(checked) => setDisableMemory(checked === true)}
-                      data-testid="comparison-translate-disable-memory"
-                    />
-                    <label
-                      htmlFor="comparison-translate-disable-memory"
-                      className="text-sm cursor-pointer select-none"
-                    >
-                      {t('compare.translateDisableMemory')}
-                    </label>
-                  </span>
-                </div>
-              )}
               <div className="border-t pt-3">
                 <BatchGroupingControls
                   idPrefix="comparison-translate-grouping"
@@ -292,6 +270,37 @@ export function TranslateRunDialog({
                 </div>
               )}
             </>
+          )}
+          {/* A consequence disclosure (what this run will actually do — reuse
+              stored translations instead of calling the model), not a tuning
+              knob — unconditional even while Advanced is collapsed. The
+              "disable memory for this run" toggle beside it IS a knob and
+              stays gated. */}
+          {memoryCount > 0 && (
+            <div
+              className="space-y-1.5 rounded-md border border-status-warn/40 bg-status-warn/10 p-2.5"
+              data-testid="comparison-translate-memory-warning"
+            >
+              <p className="text-xs text-status-warn">
+                {t('compare.translateMemoryWarning', { count: memoryCount })}
+              </p>
+              {advanced && (
+                <span className="inline-flex items-center gap-1.5">
+                  <Checkbox
+                    id="comparison-translate-disable-memory"
+                    checked={disableMemory}
+                    onCheckedChange={(checked) => setDisableMemory(checked === true)}
+                    data-testid="comparison-translate-disable-memory"
+                  />
+                  <label
+                    htmlFor="comparison-translate-disable-memory"
+                    className="text-sm cursor-pointer select-none"
+                  >
+                    {t('compare.translateDisableMemory')}
+                  </label>
+                </span>
+              )}
+            </div>
           )}
         </div>
         <DialogFooter>

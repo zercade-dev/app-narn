@@ -334,6 +334,17 @@ export function AiReviewDialog({
   // empty `languages` array, so keep Start disabled instead of sending one.
   const noLanguagesChecked = targetLanguages.length > 0 && checkedLanguages.length === 0;
 
+  // Invariant: Start is never disabled without a visible cause. `noLanguagesChecked`
+  // is the only cause that lives behind Advanced (the language checklist and its
+  // "Deselect all" button) — if it's blocking Start while Advanced is collapsed,
+  // force it back open so the cause is on screen again. Fires at most once per
+  // cause: setting `advanced` true makes the `!advanced` guard false on the next
+  // render, so it never fights a deliberate collapse the user makes once the
+  // checklist is fine again.
+  if (!advanced && noLanguagesChecked && moduleId) {
+    setAdvanced(true);
+  }
+
   const handleStart = () => {
     if (!moduleId || noLanguagesChecked) return;
     saveSettings({
