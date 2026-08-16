@@ -288,11 +288,18 @@ export async function clearFreewayCredentialMarks(
  * Resolve a Freeway probe's credential for a base module's manifest env var,
  * walking the candidates in {@link freewayCandidateIds}' ORDER — an
  * `overrideInstanceId` first (when it still names a live instance), then
- * each instance of that base module, read from its DERIVED vault key
- * (`deriveInstanceCredentialKey`), then the bare env var last. Instance
- * credentials are never stored under the bare env var, so a workspace whose
- * only configured provider is a named instance (e.g. `openrouter:default`)
- * needs this fallback or the probe silently finds nothing.
+ * each instance of that base module, then the bare env var last. For each
+ * instance candidate, the credential itself is resolved the way M6's
+ * `buildCredentialProvider` resolves it for real dispatch: the instance's own
+ * DERIVED vault key (`deriveInstanceCredentialKey`) first, falling back to
+ * the bare env var when the derived key is absent (mirroring `credentialState`'s
+ * `fallbackFor`) — checked for THIS candidate before the walk moves on to the
+ * next one. Instances SHARE the base module's credential by default (M6,
+ * `buildCredentialProvider`), so a workspace whose only configured provider
+ * is a named instance with no derived key of its own (e.g. `openrouter:mine`,
+ * credentialed purely via base inheritance) still resolves here to the
+ * SAME credential M6 would hand that instance — not a later candidate's own
+ * derived key, and not silently nothing.
  *
  * The override MUST be threaded through here, not just into dispatch: the
  * probe overwrites the shared, base-id-keyed ledger cell with whichever
@@ -317,12 +324,15 @@ export async function clearFreewayCredentialMarks(
  * does, so the walk below always starts from the id dispatch would use.
  * Called directly with an unfiltered `overrideInstanceId` (as tests do),
  * this function has no way to enforce that agreement on its own. An
- * override naming an instance with no credential of its own degrades the
- * same way any other candidate does: `lookup` returns undefined for it and
- * the walk continues to the next candidate, so this still returns SOME
- * credential (the automatic one) rather than undefined. `lookup` is a raw
- * vault-key reader (no module-id awareness); `instanceIdsFor` defaults to
- * the live registry.
+ * override naming an instance with no derived key of its own is no longer a
+ * dead end: the per-candidate base-env-var fallback above resolves it to the
+ * base credential first (the account M6 would actually hand that instance),
+ * and only continues the outer walk to the next candidate if BOTH the
+ * derived key and the base env var are absent for it — so this still returns
+ * SOME credential (the automatic one) rather than undefined whenever any
+ * candidate in the walk is credentialed at all. `lookup` is a raw vault-key
+ * reader (no module-id awareness); `instanceIdsFor` defaults to the live
+ * registry.
  */
 export function resolveFreewayProbeCredential(
   baseModuleId: string,
@@ -337,8 +347,17 @@ export function resolveFreewayProbeCredential(
     overrideInstanceId,
   )) {
     const parsed = parseModuleInstanceId(candidateId);
+    // Mirror M6's `buildCredentialProvider`/`credentialState` fallback
+    // exactly: an instance's own derived key wins when present, otherwise it
+    // inherits the base module's credential — checked for THIS candidate
+    // before moving on to the next one in the walk. Without this inner
+    // fallback, an instance credentialed only via base inheritance (M6's
+    // documented default) has no derived key for `lookup` to find, so the
+    // walk fell through to a LATER candidate's own derived key instead —
+    // reading a different account than the one M6 actually resolves for
+    // this instance.
     const value = parsed
-      ? lookup(deriveInstanceCredentialKey(envVar, parsed.slug))
+      ? (lookup(deriveInstanceCredentialKey(envVar, parsed.slug)) ?? lookup(envVar))
       : lookup(envVar);
     if (value !== undefined) return value;
   }
