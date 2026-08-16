@@ -12,6 +12,7 @@
   "unreadErrors": "ข้อผิดพลาดที่ยังไม่ได้อ่าน {{count}} ข้อ",
   "unreadErrors_other": "ข้อผิดพลาดที่ยังไม่ได้อ่าน {{count}} ข้อ",
   "droppedEntries": "รายการก่อนหน้า {{count}} รายการไม่แสดงแล้ว",
+  "droppedEntries_other": "รายการก่อนหน้า {{count}} รายการไม่แสดงแล้ว",
   "searchPlaceholder": "ค้นหาล็อก…",
   "exportLogs": "ส่งออกล็อก",
   "exportFormat": "รูปแบบการส่งออก",

@@ -12,6 +12,7 @@
   "unreadErrors": "읽지 않은 오류 {{count}}건",
   "unreadErrors_other": "읽지 않은 오류 {{count}}건",
   "droppedEntries": "이전 항목 {{count}}건은 더 이상 표시할 수 없어요",
+  "droppedEntries_other": "이전 항목 {{count}}건은 더 이상 표시할 수 없어요",
   "searchPlaceholder": "로그 검색…",
   "exportLogs": "로그 내보내기",
   "exportFormat": "내보내기 형식",

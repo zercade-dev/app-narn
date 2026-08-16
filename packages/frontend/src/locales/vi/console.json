@@ -12,6 +12,7 @@
   "unreadErrors": "{{count}} lỗi chưa đọc",
   "unreadErrors_other": "{{count}} lỗi chưa đọc",
   "droppedEntries": "{{count}} mục nhật ký trước đó không còn hiển thị",
+  "droppedEntries_other": "{{count}} mục nhật ký trước đó không còn hiển thị",
   "searchPlaceholder": "Tìm trong nhật ký…",
   "exportLogs": "Xuất nhật ký",
   "exportFormat": "Định dạng xuất",
