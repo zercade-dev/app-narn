@@ -3,7 +3,11 @@ import { randomUUID } from 'node:crypto';
 import { sanitizeLogObject } from './M16-credential-store.js';
 import { getCurrentTenant } from '../storage/pg/tenant-context.js';
 import { isLogFormatJson } from '../config/env.js';
-import { isCloudMode } from '../identity/registry.js';
+// Deliberately the leaf `cloud-mode.js` seam and NOT `identity/registry.js`:
+// registry pulls in the local vault store, which reaches `utils/fs.ts`, which
+// imports this file — and that cycle breaks `vi.mock` for every suite that
+// transitively loads M15. See cloud-mode.ts.
+import { isCloudMode } from '../identity/cloud-mode.js';
 import {
   LogEntryPools,
   TenantEntryPools,

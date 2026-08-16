@@ -1,6 +1,7 @@
 import type { IdentityProvider, VaultStore } from './types.js';
 import { LocalIdentityProvider } from './local-identity-provider.js';
 import { LocalVaultStore } from './local-vault-store.js';
+import { setCloudModeResolver, isCloudMode } from './cloud-mode.js';
 
 /**
  * Boot-time registration seam. Defaults to the local adapters so the public
@@ -43,12 +44,22 @@ export function setVaultStore(store: VaultStore): void {
  * stays correct across `__resetIdentityForTests()` (which reinstalls the
  * locals). Open-core boot never calls a setter, so this stays `false` and
  * every cloud-gated branch that reads it is inert.
+ *
+ * Registered into `cloud-mode.js` below and re-exported from there, so callers
+ * inside this module's own import chain (M15's logger, reached via the local
+ * vault store) can read cloud mode without closing an import cycle — see that
+ * file for why the cycle is harmful. `isCloudMode` therefore stays a single
+ * function under a single name; only the import path differs.
  */
-export function isCloudMode(): boolean {
+function resolveCloudMode(): boolean {
   return (
     !(identityProvider instanceof LocalIdentityProvider) || !(vaultStore instanceof LocalVaultStore)
   );
 }
+
+setCloudModeResolver(resolveCloudMode);
+
+export { isCloudMode };
 
 /** Test seam — restores the local defaults between tests. */
 export function __resetIdentityForTests(): void {
