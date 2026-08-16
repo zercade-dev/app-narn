@@ -5,9 +5,8 @@
  * bucket, because only the daily allowance perishes — and within each class it
  * minimizes the share of each bucket's REMAINING stock a group consumes
  * (falling back to expected requests per job between buckets that are equally
- * unstressed), tie-breaking toward buckets whose quota expires soonest so
- * daily allowances never rot unused; a reserve keeps top-tier headroom for
- * escalation retries.
+ * unstressed), tie-breaking toward buckets whose quota expires soonest; a
+ * reserve keeps top-tier headroom for escalation retries.
  */
 import type { BucketView, JobGroup } from './types.js';
 import { requestCost } from './scoring.js';
@@ -106,19 +105,26 @@ function isReservoir(bucket: BucketView): number {
  * must stay first, because a reservoir reports MAX_SAFE_INTEGER remaining
  * requests and would otherwise win everything on a relative score of zero.
  *
- * Within each class the primary key is the share of the bucket's remaining
- * stock this group would consume, quantized to permille. Absolute request
- * count is nearly "prefer the largest batch", and in the shipped free-tier
- * pool the largest-batch models are also the tightest daily allowances, so
- * ranking on it alone drains the scarcest buckets on routine work. Quantizing
- * is what keeps that correction narrow: buckets that are abundant relative to
- * the work all score zero and fall through to the request-efficiency key, so
- * scarcity only overrides efficiency once a bucket would give up a measurable
- * slice of what it has left. Rounding also keeps the comparator a valid total
- * order, which an epsilon tolerance would not.
+ * Within each class the primary key is the percentage of a bucket's remaining
+ * stock this group would consume. Absolute request count is nearly "prefer the
+ * largest batch", and in the shipped free-tier pool the largest-batch models
+ * are also the tightest daily allowances, so ranking on it alone drains the
+ * scarcest buckets on routine work.
  *
- * Remaining keys: expected requests per job, then soonest reset so daily
- * allowances do not rot unused, then lowest adequate tier, then key.
+ * Rounding to whole percent bounds the correction: a bucket with room to spare
+ * for this group scores zero and falls through to the request-efficiency key,
+ * so two comfortably-stocked buckets are still ordered by batch economics
+ * alone. Rounding also keeps the comparator a valid total order, which an
+ * epsilon tolerance would not.
+ *
+ * The trade: a nearly-spent bucket now sorts LAST even when its window resets
+ * soonest, so the reset key can no longer stop a small perishing allowance
+ * going unused. That costs nothing while demand is low enough for the abundant
+ * buckets to cover the work, and when demand is high they drain and the scarce
+ * bucket is reached anyway.
+ *
+ * Remaining keys: expected requests per job, then soonest reset, then lowest
+ * adequate tier, then key.
  */
 export function rankCandidates(buckets: BucketView[], group: JobGroup, now: number): BucketView[] {
   const eligible = buckets.filter((b) => isEligible(b, group, now));
@@ -126,7 +132,7 @@ export function rankCandidates(buckets: BucketView[], group: JobGroup, now: numb
   const scarcity = new Map(
     eligible.map((b) => [
       b.bucketKey,
-      Math.round((costs.get(b.bucketKey)!.estimatedRequests / effectiveRemainingRequests(b)) * 1000),
+      Math.round((costs.get(b.bucketKey)!.estimatedRequests / effectiveRemainingRequests(b)) * 100),
     ]),
   );
   return [...eligible].sort((a, b) => {
