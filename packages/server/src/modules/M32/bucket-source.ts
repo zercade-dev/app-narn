@@ -19,6 +19,7 @@ import {
   windowStart,
 } from '@zercade-dev/narn-shared';
 import type {
+  FreewayBucketState,
   FreewayLedgerStore,
   FreewayWindowRef,
   FreewayWindowUsage,
@@ -108,6 +109,14 @@ export interface BucketSourceDeps {
    */
   freewayInstanceOverrides?: Record<string, string>;
   cloudMode?: boolean;
+  /**
+   * Bucket states the caller already read this tick. Supplied so a caller that
+   * needs them for its own resolution — M9 threads them into the Freeway
+   * probe's dispatch-id lookup so the probe and this function can never
+   * disagree — does not pay a second `listBuckets()` round trip for the same
+   * rows. Absent means read them here, which is what every other caller does.
+   */
+  bucketStates?: readonly FreewayBucketState[];
 }
 
 /**
@@ -516,7 +525,7 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
     deps?.freewayInstanceOverrides ?? (await defaultFreewayInstanceOverrides());
   const cloudMode = deps?.cloudMode ?? isCloudMode();
   const snapshot = getFreeTierSnapshot();
-  const states = await ledger.listBuckets();
+  const states = deps?.bucketStates ?? (await ledger.listBuckets());
   const stateByKey = new Map(states.map((s) => [s.bucketKey, s]));
   const credentialBad = (id: string): boolean =>
     stateByKey.get(freewayCredentialKey(id))?.disabledReason !== undefined;

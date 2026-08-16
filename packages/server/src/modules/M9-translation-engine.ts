@@ -2814,7 +2814,7 @@ export class TranslationEngine {
       ],
       1500,
     );
-    const buckets = await loadBucketViews(now, deps);
+    const buckets = await loadBucketViews(now, { ...deps, bucketStates });
     const resolution = resolveFreewayDecisions(decisions, buckets, now);
     this.logger.info('translation:freeway-resolved', {
       runId,
