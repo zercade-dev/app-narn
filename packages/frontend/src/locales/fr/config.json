@@ -220,6 +220,7 @@
     "automaticOption": "Automatique",
     "instanceSelectorAria": "Choisir quelle instance dessert {{provider}}",
     "instanceOverrideSaveFailed": "Échec de la mise à jour de l'instance de {{provider}} : {{message}}",
+    "instanceOverridesLoadFailed": "Échec du chargement des paramètres d'instance de Freeway : {{message}}",
     "statusTitle": "État",
     "empty": "Aucun fournisseur gratuit configuré pour le moment.",
     "colModel": "Modèle",

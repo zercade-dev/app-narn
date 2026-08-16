@@ -215,6 +215,7 @@
     "automaticOption": "Tự động",
     "instanceSelectorAria": "Chọn thực thể phục vụ {{provider}}",
     "instanceOverrideSaveFailed": "Không cập nhật được thực thể cho {{provider}}: {{message}}",
+    "instanceOverridesLoadFailed": "Không tải được cài đặt thực thể Freeway: {{message}}",
     "statusTitle": "Trạng thái",
     "empty": "Chưa có nhà cung cấp miễn phí nào được cấu hình.",
     "colModel": "Mô hình",

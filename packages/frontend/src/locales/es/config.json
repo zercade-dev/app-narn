@@ -220,6 +220,7 @@
     "automaticOption": "Automático",
     "instanceSelectorAria": "Elegir qué instancia atiende a {{provider}}",
     "instanceOverrideSaveFailed": "No se pudo actualizar la instancia de {{provider}}: {{message}}",
+    "instanceOverridesLoadFailed": "No se pudo cargar la configuración de instancias de Freeway: {{message}}",
     "statusTitle": "Estado",
     "empty": "Aún no hay proveedores gratuitos configurados.",
     "colModel": "Modelo",

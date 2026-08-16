@@ -215,6 +215,7 @@
     "automaticOption": "Otomatis",
     "instanceSelectorAria": "Pilih instans mana yang melayani {{provider}}",
     "instanceOverrideSaveFailed": "Gagal memperbarui instans untuk {{provider}}: {{message}}",
+    "instanceOverridesLoadFailed": "Gagal memuat pengaturan instans Freeway: {{message}}",
     "statusTitle": "Status",
     "empty": "Belum ada penyedia gratis yang dikonfigurasi.",
     "colModel": "Model",

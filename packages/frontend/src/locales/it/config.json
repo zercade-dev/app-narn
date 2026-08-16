@@ -220,6 +220,7 @@
     "automaticOption": "Automatico",
     "instanceSelectorAria": "Scegli quale istanza serve {{provider}}",
     "instanceOverrideSaveFailed": "Impossibile aggiornare l'istanza per {{provider}}: {{message}}",
+    "instanceOverridesLoadFailed": "Impossibile caricare le impostazioni delle istanze di Freeway: {{message}}",
     "statusTitle": "Stato",
     "empty": "Ancora nessun provider gratuito configurato.",
     "colModel": "Modello",

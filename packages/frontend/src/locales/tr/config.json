@@ -220,6 +220,7 @@
     "automaticOption": "Otomatik",
     "instanceSelectorAria": "“{{provider}}” için kullanılacak örneği seçin",
     "instanceOverrideSaveFailed": "“{{provider}}” için örnek güncellenemedi: {{message}}",
+    "instanceOverridesLoadFailed": "Freeway örnek ayarları yüklenemedi: {{message}}",
     "statusTitle": "Durum",
     "empty": "Henüz yapılandırılmış ücretsiz sağlayıcı yok.",
     "colModel": "Model",

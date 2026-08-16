@@ -215,6 +215,7 @@
     "automaticOption": "อัตโนมัติ",
     "instanceSelectorAria": "เลือกอินสแตนซ์ที่ให้บริการ {{provider}}",
     "instanceOverrideSaveFailed": "อัปเดตอินสแตนซ์สำหรับ {{provider}} ไม่สำเร็จ: {{message}}",
+    "instanceOverridesLoadFailed": "โหลดการตั้งค่าอินสแตนซ์ของ Freeway ไม่สำเร็จ: {{message}}",
     "statusTitle": "สถานะ",
     "empty": "ยังไม่มีผู้ให้บริการระดับฟรีที่ตั้งค่าไว้",
     "colModel": "โมเดล",

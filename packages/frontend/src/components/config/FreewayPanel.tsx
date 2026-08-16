@@ -14,7 +14,7 @@
  * scrolls to where the user can turn it back on — see
  * {@link scrollToEnableTarget}.
  */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, RotateCcw } from 'lucide-react';
 import type { ModuleInstance } from '@zercade-dev/narn-shared';
@@ -46,6 +46,15 @@ import {
  * entry (automatic candidate resolution). Instance ids always contain a `:`
  * (`<base>:<slug>`), so this bare word can never collide with a real one. */
 const AUTOMATIC_OVERRIDE_VALUE = 'automatic';
+
+/**
+ * Load state for `freewayInstanceOverrides`. Three states, not two: `{}` is a
+ * legitimate loaded value (no provider has an override) and must stay
+ * distinguishable from "the GET hasn't succeeded yet" — collapsing them would
+ * let a silent load failure masquerade as an empty map, and the first edit made
+ * against that empty map would overwrite every other provider's real override.
+ */
+type OverridesLoadState = 'loading' | 'loaded' | 'failed';
 
 type FreewayBucketState = 'ready' | 'cooling' | 'exhausted' | 'disabled' | 'uncredentialed';
 
@@ -223,39 +232,67 @@ export function FreewayPanel(): React.JSX.Element {
   );
 
   const [overrides, setOverrides] = useState<Record<string, string>>({});
-  useEffect(() => {
-    if (!hasOpened) return;
-    let cancelled = false;
-    apiRequest<{ freewayInstanceOverrides?: Record<string, string> }>('/global-config/settings')
+  const [overridesState, setOverridesState] = useState<OverridesLoadState>('loading');
+  // Serializes writes to /global-config/settings: each write's PUT is chained behind
+  // the previous one's completion (not just its optimistic local-state update), so two
+  // rapid provider changes can never have their network requests land out of order —
+  // a reordered arrival would let an earlier, smaller payload overwrite a later one.
+  const writeChainRef = useRef<Promise<void>>(Promise.resolve());
+
+  const loadOverrides = useCallback(() => {
+    setOverridesState('loading');
+    return apiRequest<{ freewayInstanceOverrides?: Record<string, string> }>(
+      '/global-config/settings',
+    )
       .then((res) => {
-        if (!cancelled) setOverrides(res.freewayInstanceOverrides ?? {});
+        setOverrides(res.freewayInstanceOverrides ?? {});
+        setOverridesState('loaded');
       })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [hasOpened]);
+      .catch((err) => {
+        setOverridesState('failed');
+        toast.error(t('freeway.instanceOverridesLoadFailed', { message: (err as Error).message }));
+      });
+  }, [t]);
+
+  useEffect(() => {
+    // `loadOverrides`'s own reset (setOverridesState('loading')) is independent of the
+    // fetch result — only its .then/.catch reflect what the fetch actually returned —
+    // so this can't cause the cascading render react-hooks/set-state-in-effect guards
+    // against; same reasoning useAsyncData documents for its own unconditional
+    // setLoading(true).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (hasOpened) void loadOverrides();
+  }, [hasOpened, loadOverrides]);
 
   // Persists a per-provider instance override (or clears it on "Automatic"),
   // read-modify-write of the whole map so an unrelated provider's override is
-  // never disturbed by this one's change. Reverts the optimistic update and
-  // toasts on a failed save.
+  // never disturbed by this one's change. Guarded by `overridesState === 'loaded'`
+  // (selectors are also disabled in that case) so a write is never built from a map
+  // that either hasn't arrived yet or is known to have failed to load. A failed PUT
+  // means the local map may have diverged from the server's, so it re-fetches the
+  // authoritative map rather than leaving the panel willing to write a now-stale one
+  // on the next edit.
   const handleInstanceOverrideChange = (baseModuleId: string, value: string | null) => {
-    const previous = overrides;
-    const next = { ...previous };
+    if (overridesState !== 'loaded') return;
+    const next = { ...overrides };
     if (!value || value === AUTOMATIC_OVERRIDE_VALUE) {
       delete next[baseModuleId];
     } else {
       next[baseModuleId] = value;
     }
     setOverrides(next);
-    apiRequest('/global-config/settings', {
-      method: 'PUT',
-      body: JSON.stringify({ freewayInstanceOverrides: next }),
-    }).catch((err) => {
-      setOverrides(previous);
-      toast.error(t('freeway.instanceOverrideSaveFailed', { message: (err as Error).message }));
-    });
+    writeChainRef.current = writeChainRef.current
+      .then(() =>
+        apiRequest('/global-config/settings', {
+          method: 'PUT',
+          body: JSON.stringify({ freewayInstanceOverrides: next }),
+        }),
+      )
+      .then(() => undefined)
+      .catch((err) => {
+        toast.error(t('freeway.instanceOverrideSaveFailed', { message: (err as Error).message }));
+        void loadOverrides();
+      });
   };
 
   return (
@@ -383,7 +420,9 @@ export function FreewayPanel(): React.JSX.Element {
                                   onValueChange={(value) =>
                                     handleInstanceOverrideChange(provider.moduleId, value)
                                   }
-                                  disabled={providerInstances.length < 2}
+                                  disabled={
+                                    providerInstances.length < 2 || overridesState !== 'loaded'
+                                  }
                                 >
                                   <SelectTrigger
                                     size="sm"

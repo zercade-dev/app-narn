@@ -215,6 +215,7 @@
     "automaticOption": "自動",
     "instanceSelectorAria": "選擇為 {{provider}} 提供服務的實例",
     "instanceOverrideSaveFailed": "更新 {{provider}} 的實例失敗：{{message}}",
+    "instanceOverridesLoadFailed": "無法載入 Freeway 實例設定：{{message}}",
     "statusTitle": "狀態",
     "empty": "尚未設定任何免費供應商。",
     "colModel": "模型",

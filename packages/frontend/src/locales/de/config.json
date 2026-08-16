@@ -220,6 +220,7 @@
     "automaticOption": "Automatisch",
     "instanceSelectorAria": "Wählen, welche Instanz {{provider}} bedient",
     "instanceOverrideSaveFailed": "Instanz für {{provider}} konnte nicht aktualisiert werden: {{message}}",
+    "instanceOverridesLoadFailed": "Freeway-Instanzeinstellungen konnten nicht geladen werden: {{message}}",
     "statusTitle": "Status",
     "empty": "Noch keine kostenlosen Anbieter konfiguriert.",
     "colModel": "Modell",
