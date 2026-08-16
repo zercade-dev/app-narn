@@ -14,9 +14,10 @@
  * scrolls to where the user can turn it back on — see
  * {@link scrollToEnableTarget}.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, RotateCcw } from 'lucide-react';
+import type { ModuleInstance } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useAsyncData } from '../../hooks/use-async-data.js';
 import { relativeTime } from '@/lib/utils';
@@ -26,6 +27,13 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableHeader,
   TableBody,
@@ -33,6 +41,11 @@ import {
   TableHead,
   TableCell,
 } from '@/components/ui/table';
+
+/** Sentinel `Select` value that clears a provider's `freewayInstanceOverrides`
+ * entry (automatic candidate resolution). Instance ids always contain a `:`
+ * (`<base>:<slug>`), so this bare word can never collide with a real one. */
+const AUTOMATIC_OVERRIDE_VALUE = 'automatic';
 
 type FreewayBucketState = 'ready' | 'cooling' | 'exhausted' | 'disabled' | 'uncredentialed';
 
@@ -195,6 +208,56 @@ export function FreewayPanel(): React.JSX.Element {
 
   const providers = summarizeProviders(status.buckets);
 
+  // Module instances (for the per-provider "which instance serves this"
+  // picker) and the persisted overrides map — both loaded once, alongside the
+  // status fetch above, the first time the panel is opened.
+  const { data: instances } = useAsyncData<ModuleInstance[]>(
+    (signal) =>
+      hasOpened
+        ? apiRequest<{ instances?: ModuleInstance[] }>('/global-config/instances', {
+            signal,
+          }).then((res) => res.instances ?? [])
+        : Promise.resolve([]),
+    [hasOpened],
+    { initial: [] },
+  );
+
+  const [overrides, setOverrides] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (!hasOpened) return;
+    let cancelled = false;
+    apiRequest<{ freewayInstanceOverrides?: Record<string, string> }>('/global-config/settings')
+      .then((res) => {
+        if (!cancelled) setOverrides(res.freewayInstanceOverrides ?? {});
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [hasOpened]);
+
+  // Persists a per-provider instance override (or clears it on "Automatic"),
+  // read-modify-write of the whole map so an unrelated provider's override is
+  // never disturbed by this one's change. Reverts the optimistic update and
+  // toasts on a failed save.
+  const handleInstanceOverrideChange = (baseModuleId: string, value: string | null) => {
+    const previous = overrides;
+    const next = { ...previous };
+    if (!value || value === AUTOMATIC_OVERRIDE_VALUE) {
+      delete next[baseModuleId];
+    } else {
+      next[baseModuleId] = value;
+    }
+    setOverrides(next);
+    apiRequest('/global-config/settings', {
+      method: 'PUT',
+      body: JSON.stringify({ freewayInstanceOverrides: next }),
+    }).catch((err) => {
+      setOverrides(previous);
+      toast.error(t('freeway.instanceOverrideSaveFailed', { message: (err as Error).message }));
+    });
+  };
+
   return (
     <Collapsible
       open={open}
@@ -256,67 +319,121 @@ export function FreewayPanel(): React.JSX.Element {
                     </p>
                   ) : (
                     <ul className="space-y-2">
-                      {providers.map((provider) => (
-                        <li
-                          key={provider.providerKey}
-                          className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
-                          data-testid={`freeway-provider-row-${provider.providerKey}`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">
-                              {providerDisplayName(provider.providerKey)}
-                            </span>
-                            <Badge
-                              variant={provider.keyPresent ? 'default' : 'outline'}
-                              data-testid={`freeway-key-status-${provider.providerKey}`}
-                            >
-                              {provider.keyPresent
-                                ? t('freeway.keyPresent')
-                                : t('freeway.keyMissing')}
-                            </Badge>
-                            {provider.dispatchModuleId &&
-                              provider.dispatchModuleId !== `${provider.moduleId}:default` && (
-                                <span
-                                  className="text-xs text-muted-foreground"
-                                  data-testid={`freeway-via-${provider.providerKey}`}
-                                >
-                                  {provider.dispatchModuleId === provider.moduleId
-                                    ? t('freeway.viaLegacyBase', { module: provider.moduleId })
-                                    : t('freeway.viaInstance', {
-                                        instance: provider.dispatchModuleId,
-                                      })}
+                      {providers.map((provider) => {
+                        const providerInstances = instances.filter(
+                          (instance) => instance.baseModuleId === provider.moduleId,
+                        );
+                        const overrideId = overrides[provider.moduleId];
+                        const selectedValue =
+                          overrideId &&
+                          providerInstances.some((instance) => instance.instanceId === overrideId)
+                            ? overrideId
+                            : AUTOMATIC_OVERRIDE_VALUE;
+                        return (
+                          <li
+                            key={provider.providerKey}
+                            className="flex flex-wrap items-center justify-between gap-2 rounded-md border px-3 py-2"
+                            data-testid={`freeway-provider-row-${provider.providerKey}`}
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">
+                                {providerDisplayName(provider.providerKey)}
+                              </span>
+                              <Badge
+                                variant={provider.keyPresent ? 'default' : 'outline'}
+                                data-testid={`freeway-key-status-${provider.providerKey}`}
+                              >
+                                {provider.keyPresent
+                                  ? t('freeway.keyPresent')
+                                  : t('freeway.keyMissing')}
+                              </Badge>
+                              {provider.dispatchModuleId &&
+                                provider.dispatchModuleId !== `${provider.moduleId}:default` && (
+                                  <span
+                                    className="text-xs text-muted-foreground"
+                                    data-testid={`freeway-via-${provider.providerKey}`}
+                                  >
+                                    {provider.dispatchModuleId === provider.moduleId
+                                      ? t('freeway.viaLegacyBase', { module: provider.moduleId })
+                                      : t('freeway.viaInstance', {
+                                          instance: provider.dispatchModuleId,
+                                        })}
+                                  </span>
+                                )}
+                              {provider.moduleDisabled && (
+                                <span className="text-xs text-muted-foreground">
+                                  {t('freeway.enableModuleHint')}
                                 </span>
                               )}
-                            {provider.moduleDisabled && (
-                              <span className="text-xs text-muted-foreground">
-                                {t('freeway.enableModuleHint')}
-                              </span>
-                            )}
-                            {provider.otherDisabledReason && (
-                              <Badge
-                                variant="destructive"
-                                data-testid={`freeway-disabled-reason-${provider.providerKey}`}
-                              >
-                                {t('freeway.disabledReasonChip', {
-                                  reason: provider.otherDisabledReason,
-                                })}
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {provider.moduleDisabled && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => scrollToEnableTarget(provider.enableTargetModuleId)}
-                                data-testid={`freeway-enable-module-${provider.providerKey}`}
-                              >
-                                {t('freeway.enableModuleButton')}
-                              </Button>
-                            )}
-                          </div>
-                        </li>
-                      ))}
+                              {provider.otherDisabledReason && (
+                                <Badge
+                                  variant="destructive"
+                                  data-testid={`freeway-disabled-reason-${provider.providerKey}`}
+                                >
+                                  {t('freeway.disabledReasonChip', {
+                                    reason: provider.otherDisabledReason,
+                                  })}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {providerInstances.length > 0 && (
+                                <Select
+                                  value={selectedValue}
+                                  onValueChange={(value) =>
+                                    handleInstanceOverrideChange(provider.moduleId, value)
+                                  }
+                                  disabled={providerInstances.length < 2}
+                                >
+                                  <SelectTrigger
+                                    size="sm"
+                                    className="w-40"
+                                    data-testid={`freeway-instance-select-${provider.providerKey}`}
+                                    aria-label={t('freeway.instanceSelectorAria', {
+                                      provider: providerDisplayName(provider.providerKey),
+                                    })}
+                                  >
+                                    <SelectValue>
+                                      {(value) =>
+                                        value === AUTOMATIC_OVERRIDE_VALUE
+                                          ? t('freeway.automaticOption')
+                                          : (providerInstances.find(
+                                              (instance) => instance.instanceId === value,
+                                            )?.displayName ?? String(value))
+                                      }
+                                    </SelectValue>
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value={AUTOMATIC_OVERRIDE_VALUE}>
+                                      {t('freeway.automaticOption')}
+                                    </SelectItem>
+                                    {providerInstances.map((instance) => (
+                                      <SelectItem
+                                        key={instance.instanceId}
+                                        value={instance.instanceId}
+                                      >
+                                        {instance.displayName}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              )}
+                              {provider.moduleDisabled && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    scrollToEnableTarget(provider.enableTargetModuleId)
+                                  }
+                                  data-testid={`freeway-enable-module-${provider.providerKey}`}
+                                >
+                                  {t('freeway.enableModuleButton')}
+                                </Button>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </div>
