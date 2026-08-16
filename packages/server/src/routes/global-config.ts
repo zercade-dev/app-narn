@@ -60,6 +60,9 @@ const settingsBodySchema = z.object({
   requestTimeoutMs: z.number().int().min(1000).nullable().optional(),
   // 0 = unlimited (omit the per-request cap; see core.ts DEFAULT_MAX_OUTPUT_TOKENS).
   maxOutputTokens: z.number().int().min(0).max(200000).nullable().optional(),
+  // Base module id -> instance id. null clears the whole map, matching the
+  // other nullable settings fields above.
+  freewayInstanceOverrides: z.record(z.string(), z.string()).nullable().optional(),
 });
 
 globalConfigRouter.get(

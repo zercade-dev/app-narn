@@ -34,6 +34,10 @@ export const workspaceSettingsSchema = z.object({
   maxOutputTokens: z.number().int().min(0).max(200000).optional(),
   batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   ignoreBatchSizeLimit: z.boolean().optional(),
+  // Base module id -> instance id. `updateSettings` deletes the whole key
+  // (never stores a literal null) before this schema runs, so no `.nullable()`
+  // is needed here — only the route-layer body schema accepts null.
+  freewayInstanceOverrides: z.record(z.string(), z.string()).optional(),
 });
 
 export const moduleInstanceSchema = z.object({

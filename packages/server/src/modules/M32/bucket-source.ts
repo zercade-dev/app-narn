@@ -23,7 +23,7 @@ import type {
   FreewayWindowRef,
   FreewayWindowUsage,
 } from '../../storage/types.js';
-import { getFreewayLedgerStore } from '../../storage/registry.js';
+import { getFreewayLedgerStore, getGlobalConfigStore } from '../../storage/registry.js';
 import { isCloudMode } from '../../identity/registry.js';
 import { moduleRegistry } from '../M6-module-registry.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
@@ -96,6 +96,17 @@ export interface BucketSourceDeps {
   moduleStatus?: (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined;
   /** Test seam: instance ids of a base module; default reads the registry. */
   instanceIdsFor?: (baseModuleId: string) => string[];
+  /**
+   * Test seam: base module id -> instance id, consulted ahead of
+   * {@link freewayCandidateIds}' automatic order. Default reads
+   * `WorkspaceSettings.freewayInstanceOverrides` from the global config
+   * store. A stale entry (renamed/deleted/disabled/uncredentialed instance)
+   * is never dispatched to — {@link freewayCandidateIds} only moves it to the
+   * front of the list when it still names a live instance, and the
+   * usability scan below falls through the rest of that list exactly as it
+   * does for the fully-automatic case.
+   */
+  freewayInstanceOverrides?: Record<string, string>;
   cloudMode?: boolean;
 }
 
@@ -123,23 +134,51 @@ export function defaultInstanceIdsFor(baseModuleId: string): string[] {
 }
 
 /**
+ * Default `freewayInstanceOverrides`: the workspace's saved map, read once
+ * per {@link loadBucketViews} call (never per-provider) via the same
+ * per-tenant-cached `getSettings()` every other settings read already uses.
+ */
+async function defaultFreewayInstanceOverrides(): Promise<Record<string, string>> {
+  const settings = await getGlobalConfigStore().getSettings();
+  return settings.freewayInstanceOverrides ?? {};
+}
+
+/**
  * Candidate module ids that can serve one snapshot provider, best first:
- * `<base>:default`, then the base's remaining instances in id order, then the
- * bare base LAST. The product's enablement UX only ever enables named
- * instances, and M27 leaves a migrated workspace's bare base enabled and
- * credentialed but invisible in the UI — so preferring the base would dispatch
- * through configuration the user cannot see or edit. The base remains a
- * last-resort fallback for pre-instance workspaces, where it is the only
- * candidate.
+ * an `overrideInstanceId` (when it still names a live instance of this base),
+ * then `<base>:default`, then the base's remaining instances in id order,
+ * then the bare base LAST. The product's enablement UX only ever enables
+ * named instances, and M27 leaves a migrated workspace's bare base enabled
+ * and credentialed but invisible in the UI — so preferring the base would
+ * dispatch through configuration the user cannot see or edit. The base
+ * remains a last-resort fallback for pre-instance workspaces, where it is the
+ * only candidate.
+ *
+ * `overrideInstanceId` only ever REORDERS this list — it can promote an
+ * existing candidate, never add one that `instanceIds` doesn't already
+ * contain. A workspace override naming a renamed/deleted instance is
+ * therefore inert here (ignored, not appended), and the caller's usual
+ * best-first scan over the returned order is what supplies the "stale
+ * override falls back to automatic" behaviour — this function makes that
+ * fallback possible, it doesn't special-case it.
  */
 export function freewayCandidateIds(
   baseModuleId: string,
   instanceIds: readonly string[],
+  overrideInstanceId?: string,
 ): string[] {
   const preferred = buildModuleInstanceId(baseModuleId, DEFAULT_INSTANCE_SLUG);
   const rest = instanceIds.filter((id) => id !== preferred).sort((a, b) => a.localeCompare(b));
-  const ordered = [...(instanceIds.includes(preferred) ? [preferred] : []), ...rest, baseModuleId];
-  return [...new Set(ordered)];
+  const automatic = [
+    ...(instanceIds.includes(preferred) ? [preferred] : []),
+    ...rest,
+    baseModuleId,
+  ];
+  const promoted =
+    overrideInstanceId !== undefined && instanceIds.includes(overrideInstanceId)
+      ? [overrideInstanceId, ...automatic]
+      : automatic;
+  return [...new Set(promoted)];
 }
 
 /**
@@ -379,6 +418,8 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const moduleStatus = deps?.moduleStatus ?? defaultModuleStatus;
   const instanceIdsFor = deps?.instanceIdsFor ?? defaultInstanceIdsFor;
+  const instanceOverrides =
+    deps?.freewayInstanceOverrides ?? (await defaultFreewayInstanceOverrides());
   const cloudMode = deps?.cloudMode ?? isCloudMode();
   const snapshot = getFreeTierSnapshot();
   const states = await ledger.listBuckets();
@@ -398,6 +439,7 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
     const usableModuleId = freewayCandidateIds(
       provider.moduleId,
       instanceIdsFor(provider.moduleId),
+      instanceOverrides[provider.moduleId],
     ).find((id) => {
       const status = moduleStatus(id);
       if (status?.credentialed !== true || !status.enabled) return false;
