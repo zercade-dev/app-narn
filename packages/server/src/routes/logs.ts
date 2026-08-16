@@ -158,6 +158,11 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
   // per-entry comparison is the cheapest insurance in this file, so it keeps
   // wrapping every replayed entry unchanged even though the partitioned pool
   // makes it redundant in the common case.
+  // Send the subscriber's own server-side eviction counts before the replay,
+  // so a client attaching mid-run can tell that the history it is about to
+  // receive is incomplete. Cumulative, not a delta — the client replaces.
+  sse.send('log:dropped', logger.droppedCounts(subTenant));
+
   const history = logger.getConnectHistory(subTenant);
   for (const entry of history) {
     if (visibleTo(entry)) sse.send('log:entry', entry);

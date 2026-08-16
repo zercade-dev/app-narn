@@ -87,11 +87,23 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   const { t: tLogs } = useTranslation('logs');
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const vaultExists = useVaultStore((s) => s.hasVault);
-  const { entries, droppedCounts: rawDroppedCounts, connected, clearEntries } = useLogger();
-  // Tolerate an absent `droppedCounts` (e.g. a test double or an older
-  // useLogger() shape that predates the field) rather than crashing the
-  // whole panel on `droppedCounts.info`.
+  const {
+    entries,
+    droppedCounts: rawDroppedCounts,
+    serverDroppedCounts: rawServerDroppedCounts,
+    connected,
+    clearEntries,
+  } = useLogger();
+  // Tolerate an absent `droppedCounts`/`serverDroppedCounts` (e.g. a test
+  // double or an older useLogger() shape that predates the field) rather than
+  // crashing the whole panel on `.info`.
   const droppedCounts = rawDroppedCounts ?? { info: 0, priority: 0 };
+  const serverDroppedCounts = rawServerDroppedCounts ?? { info: 0, priority: 0 };
+  const totalDropped =
+    droppedCounts.info +
+    droppedCounts.priority +
+    serverDroppedCounts.info +
+    serverDroppedCounts.priority;
   const consoleFilter = useUiSettings((s) => s.consoleFilter);
   const setConsoleFilter = useUiSettings((s) => s.setConsoleFilter);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
@@ -168,7 +180,6 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // offline has no way to tell entries are missing.
   function handleExport(): void {
     const stamp = new Date().getTime();
-    const totalDropped = droppedCounts.info + droppedCounts.priority;
     const blob =
       exportFormat === 'text'
         ? new Blob(
@@ -182,9 +193,16 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
             ],
             { type: 'text/plain' },
           )
-        : new Blob([JSON.stringify({ droppedCounts, entries: filteredEntries }, null, 2)], {
-            type: 'application/json',
-          });
+        : new Blob(
+            [
+              JSON.stringify(
+                { droppedCounts, serverDroppedCounts, entries: filteredEntries },
+                null,
+                2,
+              ),
+            ],
+            { type: 'application/json' },
+          );
     const extension = exportFormat === 'text' ? 'txt' : 'json';
     downloadBlob(blob, `console-logs-${stamp}.${extension}`);
   }
@@ -452,12 +470,12 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
 
           <div className="relative flex-1 min-h-0 flex flex-col">
             <div ref={parentRef} className="flex-1 overflow-auto font-mono text-[11px]">
-              {droppedCounts.info + droppedCounts.priority > 0 && (
+              {totalDropped > 0 && (
                 <div
                   data-testid="console-dropped-marker"
                   className="px-3 py-0.5 text-muted-foreground/60 italic"
                 >
-                  {t('droppedEntries', { count: droppedCounts.info + droppedCounts.priority })}
+                  {t('droppedEntries', { count: totalDropped })}
                 </div>
               )}
               {groups.length === 0 && (

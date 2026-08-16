@@ -28,14 +28,10 @@ export interface LogEntry {
  */
 const pools = new LogEntryPools<LogEntry>({
   infoCapacity: 500,
-  // Must match the server's priority pool capacity (`M15-console-logger.ts`).
-  // The SSE reconnect handler replays the server's ENTIRE priority
-  // pool on every reconnect, and reconnects happen 670+/hour in practice (see
-  // `BASE_RETRY_DELAY_MS` below). If this is smaller than the server's
-  // capacity, a maximal replay overflows this pool and evicts entries that
-  // were never actually lost, inflating `droppedCounts.priority` with false
-  // positives and risking an un-replayed live entry landing mid-eviction. Keep
-  // this equal to the server's capacity so a full replay is exactly absorbed.
+  // Must be at least the server's priority capacity — 1000 local, 250 per
+  // tenant in cloud — so a maximal connect replay is absorbed without evicting
+  // entries that were never actually lost (which would inflate droppedCounts
+  // with false positives). Equality is not required, only this floor.
   priorityCapacity: 1000,
   priorityHeadCapacity: 50,
 });
@@ -76,6 +72,13 @@ interface LoggerStoreState {
   entries: LogEntry[];
   /** Counts of entries evicted from each pool since the last `clear()`. */
   droppedCounts: LogPoolDropCounts;
+  /**
+   * Evictions the SERVER reported for this subscriber, replayed on every
+   * connect. Kept separate from `droppedCounts` (this browser's own pool) so
+   * the JSON export can say which side lost entries.
+   */
+  serverDroppedCounts: LogPoolDropCounts;
+  setServerDroppedCounts: (counts: LogPoolDropCounts) => void;
   connected: boolean;
   _eventSource: EventSource | null;
   _retryTimer: ReturnType<typeof setTimeout> | null;
@@ -104,6 +107,11 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
   return {
     entries: [],
     droppedCounts: { info: 0, priority: 0 },
+    serverDroppedCounts: { info: 0, priority: 0 },
+    // REPLACE, never accumulate: the server resends the same cumulative
+    // figure on every reconnect, and reconnects have been observed at
+    // 670+/hour — adding would inflate the number on each one.
+    setServerDroppedCounts: (counts) => set({ serverDroppedCounts: counts }),
     connected: false,
     _eventSource: null,
     _retryTimer: null,
@@ -128,6 +136,14 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
           if (get()._flushTimer === null) {
             set({ _flushTimer: setTimeout(flushPending, FLUSH_INTERVAL_MS) });
           }
+        } catch {
+          // ignore malformed SSE data
+        }
+      });
+
+      es.addEventListener('log:dropped', (event: MessageEvent) => {
+        try {
+          get().setServerDroppedCounts(JSON.parse(event.data as string) as LogPoolDropCounts);
         } catch {
           // ignore malformed SSE data
         }
@@ -209,7 +225,11 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
 
     clear: () => {
       pools.clear();
-      set({ entries: [], droppedCounts: { info: 0, priority: 0 } });
+      set({
+        entries: [],
+        droppedCounts: { info: 0, priority: 0 },
+        serverDroppedCounts: { info: 0, priority: 0 },
+      });
     },
   };
 });
