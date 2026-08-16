@@ -146,6 +146,16 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
   const subTenant = getCurrentTenant()?.userId;
   const visibleTo = (entry: LogEntry): boolean => !isCloudMode() || entry.tenantId === subTenant;
 
+  // Send the subscriber's own server-side eviction counts BEFORE the replay,
+  // so a client attaching mid-run can tell that the history it is about to
+  // receive is incomplete. Cumulative since process start, not a delta — the
+  // client applies only the frame from its FIRST connect (later frames report
+  // evictions of entries it was already streamed live) and treats it as an
+  // upper bound on what it missed. `subTenant` scopes the figure to this
+  // subscriber; in cloud mode reporting a process-wide count to one tenant
+  // would leak another tenant's activity volume.
+  sse.send('log:dropped', logger.droppedCounts(subTenant));
+
   // Send recent history on connect (scoped to the subscriber in cloud mode).
   // getConnectHistory() widens this from the last 50 entries to the FULL
   // priority pool (every retained warn/error) plus the most recent 200 info
@@ -158,11 +168,6 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
   // per-entry comparison is the cheapest insurance in this file, so it keeps
   // wrapping every replayed entry unchanged even though the partitioned pool
   // makes it redundant in the common case.
-  // Send the subscriber's own server-side eviction counts before the replay,
-  // so a client attaching mid-run can tell that the history it is about to
-  // receive is incomplete. Cumulative, not a delta — the client replaces.
-  sse.send('log:dropped', logger.droppedCounts(subTenant));
-
   const history = logger.getConnectHistory(subTenant);
   for (const entry of history) {
     if (visibleTo(entry)) sse.send('log:entry', entry);

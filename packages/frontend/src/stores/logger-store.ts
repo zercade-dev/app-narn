@@ -73,12 +73,18 @@ interface LoggerStoreState {
   /** Counts of entries evicted from each pool since the last `clear()`. */
   droppedCounts: LogPoolDropCounts;
   /**
-   * Evictions the SERVER reported for this subscriber, replayed on every
-   * connect. Kept separate from `droppedCounts` (this browser's own pool) so
-   * the JSON export can say which side lost entries.
+   * Evictions the SERVER reported for this subscriber, taken from the FIRST
+   * connect of this page session only (see `setServerDroppedCounts`). Kept
+   * separate from `droppedCounts` (this browser's own pool) so the JSON export
+   * can say which side lost entries.
    */
   serverDroppedCounts: LogPoolDropCounts;
   setServerDroppedCounts: (counts: LogPoolDropCounts) => void;
+  /**
+   * Whether a `log:dropped` frame has already been applied since the last
+   * `clear()`. Gates {@link setServerDroppedCounts} to the first connect.
+   */
+  _serverDropsApplied: boolean;
   connected: boolean;
   _eventSource: EventSource | null;
   _retryTimer: ReturnType<typeof setTimeout> | null;
@@ -108,10 +114,34 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
     entries: [],
     droppedCounts: { info: 0, priority: 0 },
     serverDroppedCounts: { info: 0, priority: 0 },
-    // REPLACE, never accumulate: the server resends the same cumulative
-    // figure on every reconnect, and reconnects have been observed at
-    // 670+/hour — adding would inflate the number on each one.
-    setServerDroppedCounts: (counts) => set({ serverDroppedCounts: counts }),
+    _serverDropsApplied: false,
+    // FIRST CONNECT ONLY — later frames are ignored outright, not replaced.
+    //
+    // The panel adds this to the client's own `droppedCounts` to report what is
+    // missing from the view. Log emission is unconditional, so a continuously
+    // connected client already RECEIVED every entry the server later evicted
+    // from its own pool: those entries are not missing here, and counting them
+    // would over-report badly (a server pool shedding 550 info entries a client
+    // saw in full would inflate the marker by 550). The only server-side
+    // evictions this client genuinely never saw are the ones that happened
+    // BEFORE its stream opened, which is exactly the figure carried by the
+    // first frame.
+    //
+    // On a reconnect the client keeps its own pool, so it has lost nothing new
+    // in the gap beyond what its own `droppedCounts` already records — hence
+    // ignoring, rather than replacing with, the later cumulative figure. (That
+    // also disposes of the old accumulate hazard: reconnects have been observed
+    // at 670+/hour.)
+    //
+    // Honest caveat: even the first frame is cumulative since SERVER process
+    // start, not since this client loaded, so it can overstate what this
+    // particular client missed. It is an upper bound on the gap, not an exact
+    // count — which is the right direction for a "history may be incomplete"
+    // marker.
+    setServerDroppedCounts: (counts) => {
+      if (get()._serverDropsApplied) return;
+      set({ serverDroppedCounts: counts, _serverDropsApplied: true });
+    },
     connected: false,
     _eventSource: null,
     _retryTimer: null,
@@ -229,6 +259,9 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
         entries: [],
         droppedCounts: { info: 0, priority: 0 },
         serverDroppedCounts: { info: 0, priority: 0 },
+        // Re-arm the first-connect gate: the user asked for a clean slate, so
+        // the next connect's figure is allowed to land again.
+        _serverDropsApplied: false,
       });
     },
   };

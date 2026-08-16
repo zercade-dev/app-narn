@@ -99,6 +99,12 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // crashing the whole panel on `.info`.
   const droppedCounts = rawDroppedCounts ?? { info: 0, priority: 0 };
   const serverDroppedCounts = rawServerDroppedCounts ?? { info: 0, priority: 0 };
+  // The two sides are disjoint, so they add: `droppedCounts` is what THIS
+  // browser's pool evicted, while `serverDroppedCounts` is fixed at the first
+  // connect of the page session (see logger-store) and so only covers server
+  // history from before this client's stream existed. Everything the server
+  // shed afterwards was already delivered here and is counted, if at all, by
+  // this browser's own evictions.
   const totalDropped =
     droppedCounts.info +
     droppedCounts.priority +
