@@ -16,6 +16,7 @@ import { FREEWAY_MODULE_ID } from '@zercade-dev/narn-shared';
 import { Sparkles } from 'lucide-react';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
+import { hasNonDefaultValues } from '../../lib/advanced-modified.js';
 import type { ModuleSelectOption } from '../ui/module-select';
 import {
   Dialog,
@@ -29,6 +30,7 @@ import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import { LanguageSelect } from '../ui/language-select';
+import { AdvancedToggle } from '../common/AdvancedToggle.js';
 import { AiRunOptionsFields } from '../config/AiRunOptionsFields.js';
 import { useConfidenceContext } from '../../hooks/use-confidence-context.js';
 import {
@@ -394,6 +396,37 @@ export function AiReviewDialog({
     onOpenChange(false);
   };
 
+  // moduleId/model/reasoningEffort are excluded: their controls (AiRunOptionsFields,
+  // rendered above) are unconditionally visible, not inside {advanced && (…)} below.
+  // ignoreLimit/customBatchSize are gated on `grouping`, mirroring the exact
+  // condition BatchGroupingControls uses to show/hide each control — a grouping
+  // value that hides one must not make it count toward the badge.
+  // `checks` is compared key-by-key rather than via hasNonDefaultValues'
+  // JSON.stringify (sensitive to insertion order), since a persisted checks
+  // object's key order isn't guaranteed to match CHECK_KEYS'.
+  //
+  // `uncheckedLanguages` (the per-language checklist, rendered inside
+  // {advanced && (…)} below) is deliberately NOT part of this comparison: it
+  // has no key in AI_REVIEW_SETTINGS_DEFAULTS because it is never persisted
+  // (depends on the run being reviewed, see its declaration above) and always
+  // resets to an empty Set per run — the badge cannot reflect it, by design,
+  // not oversight.
+  const checksModified = CHECK_KEYS.some(
+    (key) => checks[key] !== AI_REVIEW_SETTINGS_DEFAULTS.checks[key],
+  );
+  const advancedModified =
+    checksModified ||
+    hasNonDefaultValues(
+      {
+        verbose,
+        responseLanguage,
+        grouping,
+        ...(grouping === 'custom' ? { customBatchSize } : {}),
+        ...(grouping !== 'default' && grouping !== 'custom' ? { ignoreLimit } : {}),
+      },
+      AI_REVIEW_SETTINGS_DEFAULTS,
+    );
+
   const noJudgeModules = modules.length > 0 && realJudgeModules.length === 0;
 
   return (
@@ -444,24 +477,17 @@ export function AiReviewDialog({
             )}
 
             <div className="border-t pt-3">
-              <span className="inline-flex items-center gap-1.5">
-                <Checkbox
-                  id="ai-review-advanced"
-                  checked={advanced}
-                  onCheckedChange={(checked) => {
-                    const next = checked === true;
-                    setAdvanced(next);
-                    setUserAdvanced(next);
-                  }}
-                  data-testid="ai-review-advanced"
-                />
-                <Label
-                  htmlFor="ai-review-advanced"
-                  className="cursor-pointer select-none font-normal"
-                >
-                  {t('runs.aiReviewAdvancedOptions')}
-                </Label>
-              </span>
+              <AdvancedToggle
+                id="ai-review-advanced"
+                testId="ai-review-advanced"
+                checked={advanced}
+                modified={advancedModified}
+                onCheckedChange={(next) => {
+                  setAdvanced(next);
+                  setUserAdvanced(next);
+                }}
+                label={t('runs.aiReviewAdvancedOptions')}
+              />
             </div>
 
             {advanced && (

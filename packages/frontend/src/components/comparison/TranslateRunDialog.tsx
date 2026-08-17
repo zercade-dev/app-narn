@@ -19,7 +19,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { AdvancedToggle } from '../common/AdvancedToggle.js';
 import { useDialogSettings } from '../../hooks/use-dialog-settings.js';
+import { hasNonDefaultValues } from '../../lib/advanced-modified.js';
 import {
   asGroupingChoice,
   BatchGroupingControls,
@@ -146,6 +148,35 @@ export function TranslateRunDialog({
     ? `${LANG_NAMES[referenceLanguage] ?? referenceLanguage} (${referenceLanguage})`
     : '';
 
+  // disableMemory is excluded: it renders under the memory-warning block
+  // ({memoryCount > 0 && (…)} — never gated on `advanced`), not inside
+  // {advanced && (…)}.
+  // useReference/splitByModel/exampleIds are further gated on the same props
+  // that gate their own controls (showReference, localModelCount >= 2,
+  // enableExamples): useDialogSettings('translate-run', …) shares ONE
+  // storage key across every mount of this dialog (e.g. the Strings tab
+  // mounts with showReference={false}), so a value persisted by a mount
+  // where the control WAS visible must not count toward the badge on a
+  // mount where it isn't — that control's state can't be "modified" here
+  // if the user could never have touched it from this screen.
+  // ignoreLimit/customBatchSize are gated on `grouping`, mirroring the
+  // condition BatchGroupingControls itself uses to show/hide each one.
+  // exampleIds isn't in TRANSLATE_RUN_SETTINGS_DEFAULTS (deliberately not
+  // persisted — see the comment above that constant), so it's compared
+  // against a literal empty-array default here instead.
+  const advancedDefaults = { ...TRANSLATE_RUN_SETTINGS_DEFAULTS, exampleIds: [] as string[] };
+  const advancedModified = hasNonDefaultValues(
+    {
+      ...(showReference ? { useReference } : {}),
+      grouping,
+      ...(grouping === 'custom' ? { customBatchSize } : {}),
+      ...(grouping !== 'default' && grouping !== 'custom' ? { ignoreLimit } : {}),
+      ...(localModelCount >= 2 ? { splitByModel } : {}),
+      ...(enableExamples ? { exampleIds } : {}),
+    },
+    advancedDefaults,
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -186,20 +217,14 @@ export function TranslateRunDialog({
             </label>
           </fieldset>
           <div className="border-t pt-3">
-            <span className="inline-flex items-center gap-1.5">
-              <Checkbox
-                id="comparison-translate-advanced"
-                checked={advanced}
-                onCheckedChange={(checked) => setAdvanced(checked === true)}
-                data-testid="comparison-translate-advanced"
-              />
-              <label
-                htmlFor="comparison-translate-advanced"
-                className="text-sm cursor-pointer select-none"
-              >
-                {t('compare.translateAdvancedOptions')}
-              </label>
-            </span>
+            <AdvancedToggle
+              id="comparison-translate-advanced"
+              testId="comparison-translate-advanced"
+              checked={advanced}
+              modified={advancedModified}
+              onCheckedChange={setAdvanced}
+              label={t('compare.translateAdvancedOptions')}
+            />
           </div>
           {advanced && (
             <>

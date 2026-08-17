@@ -328,9 +328,12 @@ class ConsoleLogger extends EventEmitter {
   }
 
   /**
-   * Eviction counts since the last `clearBuffer()`, one per pool. `tenantId`
-   * scopes cloud mode to one tenant (an omitted id reports zero drops rather
-   * than some other tenant's); local mode ignores it.
+   * Entries lost since the last `clearBuffer()`, one count per pool. In cloud
+   * mode this also includes entries that were still held — never individually
+   * evicted from either ring — when their tenant's whole pool was discarded
+   * for LRU space; the tenant lost them just as completely. `tenantId` scopes
+   * cloud mode to one tenant (an omitted id reports zero drops rather than
+   * some other tenant's); local mode ignores it.
    */
   droppedCounts(tenantId?: string): LogPoolDropCounts {
     if (!isCloudMode()) return this.pools.dropped();

@@ -38,10 +38,37 @@ export function effectivePassRate(
   return Math.min(MAX_PASS, Math.max(MIN_PASS, rate));
 }
 
+/** 0 healthy, 1 degraded, 2 bad — the three tiers `batchSizeFor` sizes batches by. */
+export type PassRateClass = 0 | 1 | 2;
+
+/**
+ * Which of `batchSizeFor`'s three tiers a pass rate falls in: 0 healthy (full
+ * batch), 1 degraded (half), 2 bad (quarter). Lower is better, so it sorts
+ * directly.
+ *
+ * Ranking and batch sizing MUST agree on where the cut points are, which is why
+ * this is one function both call rather than two copies of the same two
+ * comparisons. See the ranking key in selector.ts for why ranking needs it at
+ * all: relative-headroom ordering divides the request-cost penalty by remaining
+ * stock, which scales the gate-pass signal down by the abundance ratio until a
+ * bucket with a depressed effective pass rate on a large allowance can outrank
+ * a healthy one.
+ */
+export function passRateClass(passRate: number): PassRateClass {
+  if (passRate >= 0.9) return 0;
+  if (passRate >= 0.75) return 1;
+  return 2;
+}
+
 export function batchSizeFor(bucket: BucketView, passRate: number): number {
-  if (passRate >= 0.9) return bucket.maxBatch;
-  if (passRate >= 0.75) return Math.max(1, Math.floor(bucket.maxBatch / 2));
-  return Math.max(1, Math.floor(bucket.maxBatch / 4));
+  switch (passRateClass(passRate)) {
+    case 0:
+      return bucket.maxBatch;
+    case 1:
+      return Math.max(1, Math.floor(bucket.maxBatch / 2));
+    default:
+      return Math.max(1, Math.floor(bucket.maxBatch / 4));
+  }
 }
 
 export function estimatedRequests(jobCount: number, batchSize: number, passRate: number): number {

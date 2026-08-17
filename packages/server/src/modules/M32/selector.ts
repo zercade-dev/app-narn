@@ -2,14 +2,16 @@
  * Chooses the concrete bucket for one job group. Filtering enforces the
  * quality floor and live quota state. Ranking is reservoir-last FIRST — a
  * monthly character budget (classical MT) sorts behind every daily-request
- * bucket, because only the daily allowance perishes — and within each class it
- * minimizes the share of each bucket's REMAINING stock a group consumes
- * (falling back to expected requests per job between buckets that are equally
- * unstressed), tie-breaking toward buckets whose quota expires soonest; a
- * reserve keeps top-tier headroom for escalation retries.
+ * bucket, because only the daily allowance perishes — then, within a
+ * reservoir class, buckets are split by effective pass-rate class so a
+ * degraded bucket can never win on abundance alone; only within one pass-rate
+ * class does it minimize the share of each bucket's REMAINING stock a group
+ * consumes (falling back to expected requests per job between buckets that
+ * are equally unstressed), tie-breaking toward buckets whose quota expires
+ * soonest; a reserve keeps top-tier headroom for escalation retries.
  */
 import type { BucketView, JobGroup } from './types.js';
-import { requestCost } from './scoring.js';
+import { passRateClass, requestCost } from './scoring.js';
 
 export interface Selection {
   bucket: BucketView;
@@ -84,13 +86,15 @@ export function bucketResumeAt(bucket: BucketView, group: JobGroup): number {
 }
 
 /**
- * Every {@link isEligible} criterion except the minute check. Exported so a
- * caller can ask "is this bucket eligible in every respect BUT its current
- * minute" — e.g. to tell true minute starvation apart from a bucket that is
- * ALSO cooling or day-exhausted, which just happens to have a spent minute
- * too (the common case right after a gate failure, since dispatch activity
- * tends to spend both together) — without duplicating this list and risking
- * drift the next time isEligible gains a criterion.
+ * Every {@link isEligible} criterion except the minute check, factored out
+ * into its own function — rather than inlined into {@link isEligible} and
+ * duplicated — so the minute check and the rest of this list cannot drift
+ * apart as either gains a criterion. Both {@link isEligible} (AND the minute
+ * check) and {@link findMinuteStarvedEscalation} (to tell true minute
+ * starvation apart from a bucket that is ALSO cooling or day-exhausted,
+ * which just happens to have a spent minute too — the common case right
+ * after a gate failure, since dispatch activity tends to spend both
+ * together) compose it.
  */
 export function isEligibleIgnoringMinute(
   bucket: BucketView,
@@ -122,11 +126,12 @@ function isReservoir(bucket: BucketView): number {
  * must stay first, because a reservoir reports MAX_SAFE_INTEGER remaining
  * requests and would otherwise win everything on a relative score of zero.
  *
- * Within each class the primary key is the percentage of a bucket's remaining
- * stock this group would consume. Absolute request count is nearly "prefer the
- * largest batch", and in the shipped free-tier pool the largest-batch models
- * are also the tightest daily allowances, so ranking on it alone drains the
- * scarcest buckets on routine work.
+ * Within each reservoir class, buckets are first split by pass-rate class
+ * (below); within one pass-rate class the primary key is the percentage of a
+ * bucket's remaining stock this group would consume. Absolute request count
+ * is nearly "prefer the largest batch", and in the shipped free-tier pool the
+ * largest-batch models are also the tightest daily allowances, so ranking on
+ * it alone drains the scarcest buckets on routine work.
  *
  * Rounding to whole percent bounds the correction: a bucket with room to spare
  * for this group scores zero and falls through to the request-efficiency key,
@@ -140,19 +145,25 @@ function isReservoir(bucket: BucketView): number {
  * buckets to cover the work, and when demand is high they drain and the scarce
  * bucket is reached anyway.
  *
- * The other trade is quality feedback: `gatePassByLanguage` is M32's only
- * quality loop, and gate failures reach ranking solely by inflating
- * `estimatedRequests` — a depressed pass rate both shrinks `batchSizeFor` and
- * divides the batch count — which absolute cost demoted directly. Dividing by
- * remaining stock scales that signal down by the abundance ratio, which runs
- * 14x to 720x across the shipped snapshot, so a degraded model on a large
- * allowance can outrank a healthy one on a smaller allowance even at several
- * times the request cost.
- * Nothing in this comparator floors that; the quality band in
- * {@link isEligible} and the provider-error cooldown are what bound it.
+ * The pass-rate class is why that key sits above scarcity. It classifies
+ * `effectivePassRate` — the tier/band prior, adjusted for a curated
+ * weak-language penalty, blended 50/50 with live `gatePassByLanguage`
+ * feedback once any exists — which is M32's whole quality signal and reaches
+ * ranking only by inflating `estimatedRequests`: a depressed rate both
+ * shrinks `batchSizeFor` and divides the batch count. Dividing by remaining
+ * stock scales that signal down by the abundance ratio, which runs 14x to
+ * 720x across the shipped snapshot, so on cost alone a bucket with a
+ * depressed effective rate on a large allowance outranks a healthier one on a
+ * smaller allowance. This fires before any live feedback exists, too: a
+ * bucket listed in `weakLanguages` for this language at band 1–2 stays
+ * eligible (only band ≥ 3 excludes it) and lands a class worse purely on its
+ * curated prior. The class key stops all of that structurally: a worse-class
+ * bucket can never win on abundance. Within one class nothing changes, and
+ * when every candidate ties on class, ordering falls through to scarcity, so
+ * a hard language does not deadlock.
  *
- * Remaining keys: expected requests per job, then soonest reset, then lowest
- * adequate tier, then key.
+ * Remaining keys: scarcity percent, then expected requests per job, then
+ * soonest reset, then lowest adequate tier, then key.
  */
 export function rankCandidates(buckets: BucketView[], group: JobGroup, now: number): BucketView[] {
   const eligible = buckets.filter((b) => isEligible(b, group, now));
@@ -163,8 +174,14 @@ export function rankCandidates(buckets: BucketView[], group: JobGroup, now: numb
       Math.round((costs.get(b.bucketKey)!.estimatedRequests / effectiveRemainingRequests(b)) * 100),
     ]),
   );
+  const classes = new Map(
+    eligible.map((b) => [b.bucketKey, passRateClass(costs.get(b.bucketKey)!.passRate)]),
+  );
   return [...eligible].sort((a, b) => {
     if (isReservoir(a) !== isReservoir(b)) return isReservoir(a) - isReservoir(b);
+    const qa = classes.get(a.bucketKey)!;
+    const qb = classes.get(b.bucketKey)!;
+    if (qa !== qb) return qa - qb;
     const sa = scarcity.get(a.bucketKey)!;
     const sb = scarcity.get(b.bucketKey)!;
     if (sa !== sb) return sa - sb;
@@ -220,4 +237,52 @@ export function selectEscalation(
     (b) => b.qualityTier > failedTier && b.bucketKey !== failedBucketKey,
   );
   return better.length > 0 ? toSelection(better[0], group) : undefined;
+}
+
+/**
+ * The higher-tier bucket that WOULD have served this group if its current
+ * minute were not spent — for diagnostics only. Escalation deliberately does
+ * not dispatch into a spent minute (a 429 without a Retry-After cools the
+ * bucket until the next DAY boundary, and the alternative here is a working
+ * same-module corrective retry), so this exists purely so the log can name the
+ * bucket the caller actually lost.
+ *
+ * Ranked rather than found: with more than one starved candidate, snapshot
+ * iteration order would name an arbitrary bucket while the log implies "the one
+ * that would have served this".
+ *
+ * `isEligibleIgnoringMinute` gates it in addition to the tier check — a bucket
+ * that is ALSO cooling or day-exhausted commonly has a spent minute too, since
+ * dispatch activity right before a gate failure spends both together, and
+ * reporting "clears in ~60s" about a bucket cooled until tomorrow is worse than
+ * staying silent.
+ *
+ * The minute-blanked clones exist only to reach the comparator and never leave
+ * this function: the returned value is the caller's own BucketView, so its real
+ * `minuteResetAt` and minute counters are what gets reported.
+ */
+export function findMinuteStarvedEscalation(
+  failedBucketKey: string,
+  group: JobGroup,
+  buckets: BucketView[],
+  now: number,
+): BucketView | undefined {
+  const failedTier = buckets.find((b) => b.bucketKey === failedBucketKey)?.qualityTier ?? 0;
+  const starved = buckets.filter(
+    (b) =>
+      b.qualityTier > failedTier &&
+      b.bucketKey !== failedBucketKey &&
+      !hasMinuteHeadroom(b) &&
+      isEligibleIgnoringMinute(b, group, now),
+  );
+  if (starved.length === 0) return undefined;
+  const blanked = starved.map((b) => ({
+    ...b,
+    remainingMinuteRequests: undefined,
+    remainingMinuteTokens: undefined,
+    poolRemainingMinuteRequests: undefined,
+  }));
+  const best = rankCandidates(blanked, group, now)[0];
+  if (best === undefined) return undefined;
+  return starved.find((b) => b.bucketKey === best.bucketKey);
 }

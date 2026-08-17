@@ -20,7 +20,20 @@ import {
   type PoolableEntry,
 } from './entry-pools.js';
 
-const EMPTY_DROPS: LogPoolDropCounts = { info: 0, priority: 0 };
+const EMPTY_DROPS: LogPoolDropCounts = Object.freeze({ info: 0, priority: 0 });
+
+/**
+ * Tenants whose post-eviction loss figures are remembered. Two integers per
+ * tenant, so this is bounded far more generously than the pools themselves. A
+ * tenant evicted from THIS map reports zero again — an honest limit of a
+ * bounded structure, not a bug: the alternative is an unbounded map keyed by
+ * attacker-suppliable ids. Recency here is refreshed only by {@link carry} —
+ * never by a read, and never just because a tenant becomes live again in
+ * `pools` — so an actively-logging tenant that was evicted once long ago can
+ * still age out of this map after 1024 *other* tenants get carried, even
+ * though it is not itself inactive.
+ */
+const MAX_CARRIED_TENANTS = 1024;
 
 export interface TenantPoolOptions extends LogPoolOptions {
   /** Hard cap on retained tenant pools; the least-recently-pushed is evicted first. */
@@ -29,9 +42,16 @@ export interface TenantPoolOptions extends LogPoolOptions {
 
 export class TenantEntryPools<T extends PoolableEntry> {
   private readonly pools = new Map<string, LogEntryPools<T>>();
+  /** Losses belonging to tenants whose pool has been evicted; see MAX_CARRIED_TENANTS. */
+  private readonly carried = new Map<string, LogPoolDropCounts>();
   private readonly options: TenantPoolOptions;
 
   constructor(options: TenantPoolOptions) {
+    if (!Number.isInteger(options.maxTenants) || options.maxTenants < 1) {
+      throw new RangeError(
+        `TenantEntryPools: maxTenants must be at least 1, got ${options.maxTenants}`,
+      );
+    }
     this.options = options;
   }
 
@@ -42,6 +62,8 @@ export class TenantEntryPools<T extends PoolableEntry> {
       while (this.pools.size >= this.options.maxTenants) {
         const oldest = this.pools.keys().next();
         if (oldest.done === true) break;
+        const evicted = this.pools.get(oldest.value);
+        if (evicted !== undefined) this.carry(oldest.value, evicted);
         this.pools.delete(oldest.value);
       }
       pool = new LogEntryPools<T>(this.options);
@@ -67,12 +89,40 @@ export class TenantEntryPools<T extends PoolableEntry> {
     return this.pools.get(tenantId)?.recent(n) ?? [];
   }
 
+  /**
+   * Fold a pool's losses into the carried map before it is discarded. BOTH
+   * halves count: what it had already evicted, and what it was still holding —
+   * the tenant can no longer see either, and the held half is usually the
+   * larger. Without this the tenant's next connect gets an empty replay AND a
+   * marker asserting nothing was lost, which is the one case where the marker
+   * actively claims completeness while being maximally wrong.
+   */
+  private carry(tenantId: string, pool: LogEntryPools<T>): void {
+    const dropped = pool.dropped();
+    const held = pool.heldCounts();
+    const prior = this.carried.get(tenantId) ?? EMPTY_DROPS;
+    // Re-insert at the most-recent end so keys().next() is this map's LRU victim too.
+    this.carried.delete(tenantId);
+    while (this.carried.size >= MAX_CARRIED_TENANTS) {
+      const oldest = this.carried.keys().next();
+      if (oldest.done === true) break;
+      this.carried.delete(oldest.value);
+    }
+    this.carried.set(tenantId, {
+      info: prior.info + dropped.info + held.info,
+      priority: prior.priority + dropped.priority + held.priority,
+    });
+  }
+
   dropped(tenantId: string): LogPoolDropCounts {
-    return this.pools.get(tenantId)?.dropped() ?? { ...EMPTY_DROPS };
+    const live = this.pools.get(tenantId)?.dropped() ?? EMPTY_DROPS;
+    const carried = this.carried.get(tenantId) ?? EMPTY_DROPS;
+    return { info: live.info + carried.info, priority: live.priority + carried.priority };
   }
 
   clear(): void {
     this.pools.clear();
+    this.carried.clear();
   }
 
   /** Test seam: how many tenant pools are currently held. */

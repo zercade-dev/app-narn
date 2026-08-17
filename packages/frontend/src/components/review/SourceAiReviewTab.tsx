@@ -33,8 +33,10 @@ import {
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { LanguageSelect } from '@/components/ui/language-select';
 import { ModuleSelect, type ModuleSelectOption } from '@/components/ui/module-select';
+import { AdvancedToggle } from '@/components/common/AdvancedToggle';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
+import { hasNonDefaultValues } from '@/lib/advanced-modified';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
 import { ApiError } from '../../hooks/use-api.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
@@ -490,6 +492,32 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
     setAdvanced(true);
   }
 
+  // scope/moduleId/model/reasoningEffort are excluded: their controls render
+  // unconditionally, outside {advanced && (…)} below (`scope`'s fieldset above
+  // the Advanced toggle; the module/model/effort pickers below it, but still
+  // outside the gated block). ignoreLimit/customBatchSize are gated on
+  // `grouping`, mirroring the exact condition BatchGroupingControls uses to
+  // show/hide each control — a grouping value that hides one must not make it
+  // count toward the badge. `enabled` (the checks map) is compared key-by-key
+  // rather than via hasNonDefaultValues' JSON.stringify (sensitive to
+  // insertion order), since a persisted `enabled` object's key order isn't
+  // guaranteed to match CHECKS'.
+  const enabledModified = CHECKS.some(
+    (key) => enabled[key] !== SOURCE_REVIEW_SETTINGS_DEFAULTS.enabled[key],
+  );
+  const advancedModified =
+    enabledModified ||
+    hasNonDefaultValues(
+      {
+        batchSizeText,
+        replyLanguage,
+        grouping,
+        ...(grouping === 'custom' ? { customBatchSize } : {}),
+        ...(grouping !== 'default' && grouping !== 'custom' ? { ignoreLimit } : {}),
+      },
+      SOURCE_REVIEW_SETTINGS_DEFAULTS,
+    );
+
   const records = effectiveRunId !== null ? recordsByRun[effectiveRunId] : undefined;
   const flaggedRecords = useMemo(
     () => (records ?? []).filter((r) => r.findings.length > 0),
@@ -594,24 +622,17 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
             </fieldset>
 
             <div className="border-t pt-3">
-              <span className="inline-flex items-center gap-1.5">
-                <Checkbox
-                  id="source-ai-advanced"
-                  checked={advanced}
-                  onCheckedChange={(checked) => {
-                    const next = checked === true;
-                    setAdvanced(next);
-                    userAdvancedRef.current = next;
-                  }}
-                  data-testid="source-ai-advanced"
-                />
-                <Label
-                  htmlFor="source-ai-advanced"
-                  className="cursor-pointer select-none font-normal"
-                >
-                  {t('sourceAi.advancedOptions')}
-                </Label>
-              </span>
+              <AdvancedToggle
+                id="source-ai-advanced"
+                testId="source-ai-advanced"
+                checked={advanced}
+                modified={advancedModified}
+                onCheckedChange={(next) => {
+                  setAdvanced(next);
+                  userAdvancedRef.current = next;
+                }}
+                label={t('sourceAi.advancedOptions')}
+              />
             </div>
 
             {/* Which AI reviews the run is a defining choice, not tuning — same

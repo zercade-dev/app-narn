@@ -55,6 +55,7 @@ import { Label } from '../ui/label';
 import { Progress } from '../ui/progress';
 import { Textarea } from '../ui/textarea';
 import { ModuleSelect } from '../ui/module-select';
+import { AdvancedToggle } from '../common/AdvancedToggle.js';
 import { ModuleModelSelector } from '../config/ModuleModelSelector.js';
 import { useConfidenceContext } from '../../hooks/use-confidence-context.js';
 import { ModuleReasoningEffortSelect } from '../config/ModuleReasoningEffortSelect.js';
@@ -65,6 +66,7 @@ import {
 } from '../generation/GenerationContextControls.js';
 import { RunLogsPanel } from '../review/RunLogsPanel.js';
 import { useDialogSettings } from '../../hooks/use-dialog-settings.js';
+import { hasNonDefaultValues } from '../../lib/advanced-modified.js';
 import { asGroupingChoice } from '../config/BatchGroupingControls.js';
 
 /** Last-used per-browser values. Focus source-texts input is NOT persisted (entry-specific). */
@@ -515,6 +517,48 @@ export function GenerateGlossaryDialog({
   // bar until the first chunk lands, then a determinate bar that fills steadily.
   const progressValue = trackedRun && trackedRun.completed > 0 ? trackedRun.completed : undefined;
 
+  // moduleId/model/reasoningEffort are excluded: their controls render
+  // unconditionally, outside {advanced && (…)} below.
+  // contextLanguages is gated on activeLanguages (GenerationContextControls'
+  // language section renders only when non-empty). includeTranslations is
+  // gated on canIncludeTranslations (contextLanguages.length > 0), NOT on
+  // hasActiveLanguages: the checkbox itself renders
+  // `checked={includeTranslations && canIncludeTranslations}` and
+  // `disabled={!canIncludeTranslations}`, so with active languages but no
+  // context language checked it's on screen greyed out and unchecked — a
+  // stale `includeTranslations: true` there must not light the badge. No
+  // signal is lost: canIncludeTranslations implies contextLanguages is
+  // non-empty, which already lights the badge on its own.
+  // skipCategories/ignoreGlossaries are gated on availableCategories/
+  // enabledGlossaries being non-empty (that component's own render condition
+  // for each section); ignoreLimit/customBatchSize are gated on `grouping`,
+  // mirroring the exact condition BatchGroupingControls uses to show/hide each
+  // control — a value that hides a control must not make it count toward the
+  // badge.
+  //
+  // `focusSourceTextsInput` (the "focus on these exact source texts" textarea,
+  // rendered inside {advanced && (…)} below) is deliberately NOT part of this
+  // comparison: it has no key in GLOSSARY_GEN_SETTINGS_DEFAULTS because it is
+  // never persisted (entry-specific, see its declaration above) and always
+  // resets to '' on open, so there is no "default" for it to differ from — the
+  // badge cannot reflect it, by design, not oversight.
+  const hasActiveLanguages = (project?.activeLanguages?.length ?? 0) > 0;
+  const advancedModified = hasNonDefaultValues(
+    {
+      contextFields: genContext.contextFields,
+      grouping: genContext.grouping,
+      ...(hasActiveLanguages ? { contextLanguages: genContext.contextLanguages } : {}),
+      ...(canIncludeTranslations ? { includeTranslations } : {}),
+      ...(availableCategories.length > 0 ? { skipCategories: genContext.skipCategories } : {}),
+      ...(enabledGlossaries.length > 0 ? { ignoreGlossaries: genContext.ignoreGlossaries } : {}),
+      ...(genContext.grouping === 'custom' ? { customBatchSize: genContext.customBatchSize } : {}),
+      ...(genContext.grouping !== 'default' && genContext.grouping !== 'custom'
+        ? { ignoreLimit: genContext.ignoreLimit }
+        : {}),
+    },
+    GLOSSARY_GEN_SETTINGS_DEFAULTS,
+  );
+
   const renderBody = () => {
     if (noModules) {
       return (
@@ -673,20 +717,14 @@ export function GenerateGlossaryDialog({
         )}
 
         <div className="border-t pt-3">
-          <span className="inline-flex items-center gap-1.5">
-            <Checkbox
-              id="glossary-generate-advanced"
-              checked={advanced}
-              onCheckedChange={(checked) => setAdvanced(checked === true)}
-              data-testid="glossary-generate-advanced"
-            />
-            <Label
-              htmlFor="glossary-generate-advanced"
-              className="cursor-pointer select-none font-normal"
-            >
-              {t('generateAdvancedOptions')}
-            </Label>
-          </span>
+          <AdvancedToggle
+            id="glossary-generate-advanced"
+            testId="glossary-generate-advanced"
+            checked={advanced}
+            modified={advancedModified}
+            onCheckedChange={setAdvanced}
+            label={t('generateAdvancedOptions')}
+          />
         </div>
 
         {advanced && (
