@@ -139,6 +139,19 @@ export class LogEntryPools<T extends PoolableEntry> {
     return { ...this.dropCounts };
   }
 
+  /**
+   * How many entries each side is holding right now. Distinct from
+   * {@link dropped}, which counts what has already been evicted: a caller
+   * discarding a whole pool loses BOTH figures, and the held count is usually
+   * the larger of the two.
+   */
+  heldCounts(): LogPoolDropCounts {
+    return {
+      info: this.info.length,
+      priority: this.priorityHead.length + this.priorityTail.length,
+    };
+  }
+
   clear(): void {
     this.info = [];
     this.priorityHead = [];
