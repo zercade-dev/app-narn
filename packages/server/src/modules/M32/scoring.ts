@@ -7,12 +7,14 @@
  */
 import type { BucketView, DifficultyBand, JobGroup } from './types.js';
 import { languageHardness } from './difficulty.js';
+import { PRIOR_STRENGTH, isGatePassRecord } from './stats.js';
 
 /**
  * First-attempt gate-pass priors by quality tier (row) and difficulty band
- * (column, band-1..4). Corrected at runtime by live per-language EMAs. The
- * TIER-3 row is seeded from judged benchmark runs over the bundled free
- * models; every other row remains a curated estimate.
+ * (column, band-1..4). Corrected at runtime by live per-language evidence,
+ * weighted against this prior by sample count. The TIER-3 row is seeded from
+ * judged benchmark runs over the bundled free models; every other row remains
+ * a curated estimate.
  */
 const PASS_PRIORS: Record<1 | 2 | 3 | 4, [number, number, number, number]> = {
   4: [0.99, 0.985, 0.97, 0.95],
@@ -21,20 +23,40 @@ const PASS_PRIORS: Record<1 | 2 | 3 | 4, [number, number, number, number]> = {
   1: [0.96, 0.94, 0.85, 0.75],
 };
 
-const EMA_BLEND = 0.5;
 const MIN_PASS = 0.3;
 const MAX_PASS = 0.995;
 
+/**
+ * The curated first-attempt estimate, before any live evidence: the tier×band
+ * prior, penalized for a curated weak language and for language hardness.
+ * Unclamped — the clamp belongs to the posterior, not to its input.
+ */
+export function priorPassRate(bucket: BucketView, language: string, band: DifficultyBand): number {
+  let rate = PASS_PRIORS[bucket.qualityTier][band - 1];
+  if (bucket.weakLanguages?.includes(language)) rate *= 0.85;
+  return rate * (1 - 0.01 * languageHardness(language));
+}
+
+/**
+ * The posterior mean of a Beta-Binomial whose prior is worth PRIOR_STRENGTH
+ * pseudo-observations of `priorPassRate`. With no evidence this is exactly the
+ * prior; evidence takes over in proportion to how much of it there is, so a
+ * single unlucky string barely moves the estimate while a sustained pattern
+ * moves it decisively — and, unlike the fixed blend this replaced, a large
+ * sample can overrule the prior outright.
+ *
+ * Counts arrive already decayed: `loadBucketViews` ages them into the view,
+ * which is what keeps this a pure function of the snapshot.
+ */
 export function effectivePassRate(
   bucket: BucketView,
   language: string,
   band: DifficultyBand,
 ): number {
-  let rate = PASS_PRIORS[bucket.qualityTier][band - 1];
-  if (bucket.weakLanguages?.includes(language)) rate *= 0.85;
-  rate *= 1 - 0.01 * languageHardness(language);
-  const ema = bucket.stats.gatePassByLanguage?.[language];
-  if (typeof ema === 'number') rate = rate * (1 - EMA_BLEND) + ema * EMA_BLEND;
+  const prior = priorPassRate(bucket, language, band);
+  const record = bucket.stats.gatePassStats?.[language];
+  const evidence = isGatePassRecord(record) ? record : { s: 0, n: 0 };
+  const rate = (PRIOR_STRENGTH * prior + evidence.s) / (PRIOR_STRENGTH + evidence.n);
   return Math.min(MAX_PASS, Math.max(MIN_PASS, rate));
 }
 
