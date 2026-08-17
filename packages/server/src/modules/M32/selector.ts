@@ -2,11 +2,13 @@
  * Chooses the concrete bucket for one job group. Filtering enforces the
  * quality floor and live quota state. Ranking is reservoir-last FIRST — a
  * monthly character budget (classical MT) sorts behind every daily-request
- * bucket, because only the daily allowance perishes — and within each class it
- * minimizes the share of each bucket's REMAINING stock a group consumes
- * (falling back to expected requests per job between buckets that are equally
- * unstressed), tie-breaking toward buckets whose quota expires soonest; a
- * reserve keeps top-tier headroom for escalation retries.
+ * bucket, because only the daily allowance perishes — then, within a
+ * reservoir class, buckets are split by effective pass-rate class so a
+ * degraded bucket can never win on abundance alone; only within one pass-rate
+ * class does it minimize the share of each bucket's REMAINING stock a group
+ * consumes (falling back to expected requests per job between buckets that
+ * are equally unstressed), tie-breaking toward buckets whose quota expires
+ * soonest; a reserve keeps top-tier headroom for escalation retries.
  */
 import type { BucketView, JobGroup } from './types.js';
 import { passRateClass, requestCost } from './scoring.js';
@@ -122,11 +124,12 @@ function isReservoir(bucket: BucketView): number {
  * must stay first, because a reservoir reports MAX_SAFE_INTEGER remaining
  * requests and would otherwise win everything on a relative score of zero.
  *
- * Within each class the primary key is the percentage of a bucket's remaining
- * stock this group would consume. Absolute request count is nearly "prefer the
- * largest batch", and in the shipped free-tier pool the largest-batch models
- * are also the tightest daily allowances, so ranking on it alone drains the
- * scarcest buckets on routine work.
+ * Within each reservoir class, buckets are first split by pass-rate class
+ * (below); within one pass-rate class the primary key is the percentage of a
+ * bucket's remaining stock this group would consume. Absolute request count
+ * is nearly "prefer the largest batch", and in the shipped free-tier pool the
+ * largest-batch models are also the tightest daily allowances, so ranking on
+ * it alone drains the scarcest buckets on routine work.
  *
  * Rounding to whole percent bounds the correction: a bucket with room to spare
  * for this group scores zero and falls through to the request-efficiency key,
@@ -140,16 +143,22 @@ function isReservoir(bucket: BucketView): number {
  * buckets to cover the work, and when demand is high they drain and the scarce
  * bucket is reached anyway.
  *
- * Quality feedback is the reason for the class key above scarcity.
- * `gatePassByLanguage` is M32's only quality loop, and gate failures reach
- * ranking solely by inflating `estimatedRequests` — a depressed pass rate both
+ * The pass-rate class is why that key sits above scarcity. It classifies
+ * `effectivePassRate` — the tier/band prior, adjusted for a curated
+ * weak-language penalty, blended 50/50 with live `gatePassByLanguage`
+ * feedback once any exists — which is M32's whole quality signal and reaches
+ * ranking only by inflating `estimatedRequests`: a depressed rate both
  * shrinks `batchSizeFor` and divides the batch count. Dividing by remaining
- * stock scales that signal down by the abundance ratio, which runs 14x to 720x
- * across the shipped snapshot, so on cost alone a degraded model on a large
- * allowance outranks a healthy one on a smaller allowance. The class key stops
- * that structurally: a degraded bucket can never win on abundance. Within one
- * class nothing changes, and when every candidate is degraded they tie and
- * ordering falls through to scarcity, so a hard language does not deadlock.
+ * stock scales that signal down by the abundance ratio, which runs 14x to
+ * 720x across the shipped snapshot, so on cost alone a bucket with a
+ * depressed effective rate on a large allowance outranks a healthier one on a
+ * smaller allowance. This fires before any live feedback exists, too: a
+ * bucket listed in `weakLanguages` for this language at band 1–2 stays
+ * eligible (only band ≥ 3 excludes it) and lands a class worse purely on its
+ * curated prior. The class key stops all of that structurally: a worse-class
+ * bucket can never win on abundance. Within one class nothing changes, and
+ * when every candidate ties on class, ordering falls through to scarcity, so
+ * a hard language does not deadlock.
  *
  * Remaining keys: scarcity percent, then expected requests per job, then
  * soonest reset, then lowest adequate tier, then key.

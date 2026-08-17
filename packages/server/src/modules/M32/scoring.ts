@@ -38,6 +38,9 @@ export function effectivePassRate(
   return Math.min(MAX_PASS, Math.max(MIN_PASS, rate));
 }
 
+/** 0 healthy, 1 degraded, 2 bad — the three tiers `batchSizeFor` sizes batches by. */
+export type PassRateClass = 0 | 1 | 2;
+
 /**
  * Which of `batchSizeFor`'s three tiers a pass rate falls in: 0 healthy (full
  * batch), 1 degraded (half), 2 bad (quarter). Lower is better, so it sorts
@@ -48,10 +51,9 @@ export function effectivePassRate(
  * comparisons. See the ranking key in selector.ts for why ranking needs it at
  * all: relative-headroom ordering divides the request-cost penalty by remaining
  * stock, which scales the gate-pass signal down by the abundance ratio until a
- * failing model on a large allowance can outrank a healthy one.
+ * bucket with a depressed effective pass rate on a large allowance can outrank
+ * a healthy one.
  */
-export type PassRateClass = 0 | 1 | 2;
-
 export function passRateClass(passRate: number): PassRateClass {
   if (passRate >= 0.9) return 0;
   if (passRate >= 0.75) return 1;
