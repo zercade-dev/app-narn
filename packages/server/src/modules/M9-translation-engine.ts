@@ -129,8 +129,7 @@ import {
 import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
 import {
   effectiveRemainingRequests,
-  hasMinuteHeadroom,
-  isEligibleIgnoringMinute,
+  findMinuteStarvedEscalation,
   selectEscalation,
 } from './M32/selector.js';
 import { difficultyBand } from './M32/difficulty.js';
@@ -3231,20 +3230,7 @@ export class TranslationEngine {
       // not: the bucket refills within seconds, the entry silently gets a
       // same-module corrective retry instead of a better model, and nothing
       // else records that it happened.
-      // isEligibleIgnoringMinute must gate this in addition to the tier check
-      // — a bucket that is ALSO cooling or day-exhausted commonly has a spent
-      // minute too (dispatch activity right before a gate failure spends
-      // both together), and warning "clears in ~60s" about a bucket that is
-      // actually cooled until the next day boundary would be worse than
-      // staying silent.
-      const failedTier = buckets.find((b) => b.bucketKey === failedBucketKey)?.qualityTier ?? 0;
-      const starved = buckets.find(
-        (b) =>
-          b.qualityTier > failedTier &&
-          b.bucketKey !== failedBucketKey &&
-          !hasMinuteHeadroom(b) &&
-          isEligibleIgnoringMinute(b, group, now),
-      );
+      const starved = findMinuteStarvedEscalation(failedBucketKey, group, buckets, now);
       if (starved) {
         this.logger.warn('translation:freeway-escalation-minute-starved', {
           failedBucketKey,

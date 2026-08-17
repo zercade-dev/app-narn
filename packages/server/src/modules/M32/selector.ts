@@ -227,3 +227,51 @@ export function selectEscalation(
   );
   return better.length > 0 ? toSelection(better[0], group) : undefined;
 }
+
+/**
+ * The higher-tier bucket that WOULD have served this group if its current
+ * minute were not spent — for diagnostics only. Escalation deliberately does
+ * not dispatch into a spent minute (a 429 without a Retry-After cools the
+ * bucket until the next DAY boundary, and the alternative here is a working
+ * same-module corrective retry), so this exists purely so the log can name the
+ * bucket the caller actually lost.
+ *
+ * Ranked rather than found: with more than one starved candidate, snapshot
+ * iteration order would name an arbitrary bucket while the log implies "the one
+ * that would have served this".
+ *
+ * `isEligibleIgnoringMinute` gates it in addition to the tier check — a bucket
+ * that is ALSO cooling or day-exhausted commonly has a spent minute too, since
+ * dispatch activity right before a gate failure spends both together, and
+ * reporting "clears in ~60s" about a bucket cooled until tomorrow is worse than
+ * staying silent.
+ *
+ * The minute-blanked clones exist only to reach the comparator and never leave
+ * this function: the returned value is the caller's own BucketView, so its real
+ * `minuteResetAt` and minute counters are what gets reported.
+ */
+export function findMinuteStarvedEscalation(
+  failedBucketKey: string,
+  group: JobGroup,
+  buckets: BucketView[],
+  now: number,
+): BucketView | undefined {
+  const failedTier = buckets.find((b) => b.bucketKey === failedBucketKey)?.qualityTier ?? 0;
+  const starved = buckets.filter(
+    (b) =>
+      b.qualityTier > failedTier &&
+      b.bucketKey !== failedBucketKey &&
+      !hasMinuteHeadroom(b) &&
+      isEligibleIgnoringMinute(b, group, now),
+  );
+  if (starved.length === 0) return undefined;
+  const blanked = starved.map((b) => ({
+    ...b,
+    remainingMinuteRequests: undefined,
+    remainingMinuteTokens: undefined,
+    poolRemainingMinuteRequests: undefined,
+  }));
+  const best = rankCandidates(blanked, group, now)[0];
+  if (best === undefined) return undefined;
+  return starved.find((b) => b.bucketKey === best.bucketKey);
+}
