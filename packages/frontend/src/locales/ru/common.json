@@ -1,5 +1,6 @@
 {
   "save": "Сохранить",
+  "advancedModified": "Изменено",
   "cancel": "Отмена",
   "loading": "Загрузка…",
   "changelogEntryError": "Не удалось загрузить описание этого выпуска.",

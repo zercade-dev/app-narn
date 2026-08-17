@@ -19,7 +19,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { AdvancedToggle } from '../common/AdvancedToggle.js';
 import { useDialogSettings } from '../../hooks/use-dialog-settings.js';
+import { hasNonDefaultValues } from '../../lib/advanced-modified.js';
 import {
   asGroupingChoice,
   BatchGroupingControls,
@@ -146,6 +148,13 @@ export function TranslateRunDialog({
     ? `${LANG_NAMES[referenceLanguage] ?? referenceLanguage} (${referenceLanguage})`
     : '';
 
+  // disableMemory is excluded: it renders under the always-visible memory-warning
+  // block (see the comment above it), not inside {advanced && (…)}.
+  const advancedModified = hasNonDefaultValues(
+    { useReference, grouping, ignoreLimit, customBatchSize, splitByModel },
+    TRANSLATE_RUN_SETTINGS_DEFAULTS,
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -186,20 +195,14 @@ export function TranslateRunDialog({
             </label>
           </fieldset>
           <div className="border-t pt-3">
-            <span className="inline-flex items-center gap-1.5">
-              <Checkbox
-                id="comparison-translate-advanced"
-                checked={advanced}
-                onCheckedChange={(checked) => setAdvanced(checked === true)}
-                data-testid="comparison-translate-advanced"
-              />
-              <label
-                htmlFor="comparison-translate-advanced"
-                className="text-sm cursor-pointer select-none"
-              >
-                {t('compare.translateAdvancedOptions')}
-              </label>
-            </span>
+            <AdvancedToggle
+              id="comparison-translate-advanced"
+              testId="comparison-translate-advanced"
+              checked={advanced}
+              modified={advancedModified}
+              onCheckedChange={setAdvanced}
+              label={t('compare.translateAdvancedOptions')}
+            />
           </div>
           {advanced && (
             <>

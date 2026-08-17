@@ -1,5 +1,6 @@
 {
   "save": "Guardar",
+  "advancedModified": "Modificado",
   "cancel": "Cancelar",
   "loading": "Cargando…",
   "changelogEntryError": "No se pudo cargar esta entrada del registro de cambios.",

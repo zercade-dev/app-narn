@@ -1,5 +1,6 @@
 {
   "save": "保存",
+  "advancedModified": "已修改",
   "cancel": "取消",
   "loading": "加载中…",
   "changelogEntryError": "无法加载这条更新日志。",
