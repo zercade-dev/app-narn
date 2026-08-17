@@ -70,6 +70,14 @@ function backgroundGroup(band: DifficultyBand): JobGroup {
  * clears the paced selection, this retries the same ranking with the minute
  * fields blanked out (day-scale/tier/cooldown/weak-language eligibility
  * still applies in full) and returns whichever bucket that selects instead.
+ *
+ * The relaxation is safe HERE and nowhere else: it dispatches into a spent
+ * minute, and a 429 without a Retry-After header cools that bucket until the
+ * next DAY boundary (see coolBucket). That is worth risking only because the
+ * alternative here is failing the whole run at start with "module
+ * unavailable". Gate-failure escalation deliberately does NOT copy this — its
+ * alternative is a working same-module corrective retry, so the same trade
+ * would be a straight loss.
  */
 export function selectBackgroundBucket(
   buckets: BucketView[],

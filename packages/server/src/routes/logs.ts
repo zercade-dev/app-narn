@@ -146,14 +146,29 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
   const subTenant = getCurrentTenant()?.userId;
   const visibleTo = (entry: LogEntry): boolean => !isCloudMode() || entry.tenantId === subTenant;
 
+  // Send the subscriber's own server-side eviction counts BEFORE the replay,
+  // so a client attaching mid-run can tell that the history it is about to
+  // receive is incomplete. Cumulative since process start, not a delta — the
+  // client applies only the frame from its FIRST connect (later frames report
+  // evictions of entries it was already streamed live) and treats it as an
+  // upper bound on what it missed. `subTenant` scopes the figure to this
+  // subscriber; in cloud mode reporting a process-wide count to one tenant
+  // would leak another tenant's activity volume.
+  sse.send('log:dropped', logger.droppedCounts(subTenant));
+
   // Send recent history on connect (scoped to the subscriber in cloud mode).
   // getConnectHistory() widens this from the last 50 entries to the FULL
   // priority pool (every retained warn/error) plus the most recent 200 info
   // entries — the old getHistory(50) replay could silently drop an early
-  // error under a flood of routine info activity. The per-entry visibleTo()
-  // filter below is the load-bearing cloud-mode tenancy boundary and stays
-  // wrapping every replayed entry unchanged.
-  const history = logger.getConnectHistory();
+  // error under a flood of routine info activity. `subTenant` now also
+  // selects the tenant-scoped POOL itself (cloud mode partitions retention
+  // per tenant so one tenant's flood can't evict another's capacity — see
+  // M15's `store()`), but the per-entry `visibleTo()` filter below stays: it
+  // is the load-bearing cloud-mode tenancy boundary and a redundant
+  // per-entry comparison is the cheapest insurance in this file, so it keeps
+  // wrapping every replayed entry unchanged even though the partitioned pool
+  // makes it redundant in the common case.
+  const history = logger.getConnectHistory(subTenant);
   for (const entry of history) {
     if (visibleTo(entry)) sse.send('log:entry', entry);
   }
@@ -234,10 +249,15 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
 // GET /api/logs/history?n=100 — return last N log entries
 logsRouter.get('/history', requireUnlockedVault, (req: Request, res: Response) => {
   const n = Number.parseInt((req.query['n'] as string) ?? '100', 10);
-  let entries = logger.getHistory(Number.isNaN(n) ? 100 : n);
-  // Cloud mode: scope to the requesting tenant. Open-core: return all (unchanged).
+  const tenantId = isCloudMode() ? getCurrentTenant()?.userId : undefined;
+  let entries = logger.getHistory(Number.isNaN(n) ? 100 : n, tenantId);
+  // Cloud mode: scope to the requesting tenant. The pool is now already
+  // tenant-partitioned (see M15's getHistory), so this per-entry filter is
+  // redundant in the common case — kept anyway as the load-bearing tenancy
+  // boundary, the cheapest insurance against a partitioning bug ever leaking
+  // one tenant's entries into another's response. Open-core: return all
+  // (unchanged, tenantId is undefined so isCloudMode() gates this off).
   if (isCloudMode()) {
-    const tenantId = getCurrentTenant()?.userId;
     entries = entries.filter((e) => e.tenantId === tenantId);
   }
   res.json(entries);

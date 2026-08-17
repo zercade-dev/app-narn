@@ -28,14 +28,10 @@ export interface LogEntry {
  */
 const pools = new LogEntryPools<LogEntry>({
   infoCapacity: 500,
-  // Must match the server's priority pool capacity (`M15-console-logger.ts`).
-  // The SSE reconnect handler replays the server's ENTIRE priority
-  // pool on every reconnect, and reconnects happen 670+/hour in practice (see
-  // `BASE_RETRY_DELAY_MS` below). If this is smaller than the server's
-  // capacity, a maximal replay overflows this pool and evicts entries that
-  // were never actually lost, inflating `droppedCounts.priority` with false
-  // positives and risking an un-replayed live entry landing mid-eviction. Keep
-  // this equal to the server's capacity so a full replay is exactly absorbed.
+  // Must be at least the server's priority capacity — 1000 local, 250 per
+  // tenant in cloud — so a maximal connect replay is absorbed without evicting
+  // entries that were never actually lost (which would inflate droppedCounts
+  // with false positives). Equality is not required, only this floor.
   priorityCapacity: 1000,
   priorityHeadCapacity: 50,
 });
@@ -76,6 +72,19 @@ interface LoggerStoreState {
   entries: LogEntry[];
   /** Counts of entries evicted from each pool since the last `clear()`. */
   droppedCounts: LogPoolDropCounts;
+  /**
+   * Evictions the SERVER reported for this subscriber, taken from the FIRST
+   * connect of this page session only (see `setServerDroppedCounts`). Kept
+   * separate from `droppedCounts` (this browser's own pool) so the JSON export
+   * can say which side lost entries.
+   */
+  serverDroppedCounts: LogPoolDropCounts;
+  setServerDroppedCounts: (counts: LogPoolDropCounts) => void;
+  /**
+   * Whether a `log:dropped` frame has already been applied since the last
+   * `clear()`. Gates {@link setServerDroppedCounts} to the first connect.
+   */
+  _serverDropsApplied: boolean;
   connected: boolean;
   _eventSource: EventSource | null;
   _retryTimer: ReturnType<typeof setTimeout> | null;
@@ -104,6 +113,35 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
   return {
     entries: [],
     droppedCounts: { info: 0, priority: 0 },
+    serverDroppedCounts: { info: 0, priority: 0 },
+    _serverDropsApplied: false,
+    // FIRST CONNECT ONLY — later frames are ignored outright, not replaced.
+    //
+    // The panel adds this to the client's own `droppedCounts` to report what is
+    // missing from the view. Log emission is unconditional, so a continuously
+    // connected client already RECEIVED every entry the server later evicted
+    // from its own pool: those entries are not missing here, and counting them
+    // would over-report badly (a server pool shedding 550 info entries a client
+    // saw in full would inflate the marker by 550). The only server-side
+    // evictions this client genuinely never saw are the ones that happened
+    // BEFORE its stream opened, which is exactly the figure carried by the
+    // first frame.
+    //
+    // On a reconnect the client keeps its own pool, so it has lost nothing new
+    // in the gap beyond what its own `droppedCounts` already records — hence
+    // ignoring, rather than replacing with, the later cumulative figure. (That
+    // also disposes of the old accumulate hazard: reconnects have been observed
+    // at 670+/hour.)
+    //
+    // Honest caveat: even the first frame is cumulative since SERVER process
+    // start, not since this client loaded, so it can overstate what this
+    // particular client missed. It is an upper bound on the gap, not an exact
+    // count — which is the right direction for a "history may be incomplete"
+    // marker.
+    setServerDroppedCounts: (counts) => {
+      if (get()._serverDropsApplied) return;
+      set({ serverDroppedCounts: counts, _serverDropsApplied: true });
+    },
     connected: false,
     _eventSource: null,
     _retryTimer: null,
@@ -128,6 +166,14 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
           if (get()._flushTimer === null) {
             set({ _flushTimer: setTimeout(flushPending, FLUSH_INTERVAL_MS) });
           }
+        } catch {
+          // ignore malformed SSE data
+        }
+      });
+
+      es.addEventListener('log:dropped', (event: MessageEvent) => {
+        try {
+          get().setServerDroppedCounts(JSON.parse(event.data as string) as LogPoolDropCounts);
         } catch {
           // ignore malformed SSE data
         }
@@ -209,7 +255,14 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
 
     clear: () => {
       pools.clear();
-      set({ entries: [], droppedCounts: { info: 0, priority: 0 } });
+      set({
+        entries: [],
+        droppedCounts: { info: 0, priority: 0 },
+        serverDroppedCounts: { info: 0, priority: 0 },
+        // Re-arm the first-connect gate: the user asked for a clean slate, so
+        // the next connect's figure is allowed to land again.
+        _serverDropsApplied: false,
+      });
     },
   };
 });

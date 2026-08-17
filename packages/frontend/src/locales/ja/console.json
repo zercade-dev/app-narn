@@ -12,6 +12,7 @@
   "unreadErrors": "未読のエラー{{count}}件",
   "unreadErrors_other": "未読のエラー{{count}}件",
   "droppedEntries": "以前のエントリ{{count}}件は表示できません",
+  "droppedEntries_other": "以前のエントリ{{count}}件は表示できません",
   "searchPlaceholder": "ログを検索…",
   "exportLogs": "ログをエクスポート",
   "exportFormat": "エクスポート形式",

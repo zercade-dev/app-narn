@@ -12,6 +12,7 @@
   "unreadErrors": "{{count}} galat belum dibaca",
   "unreadErrors_other": "{{count}} galat belum dibaca",
   "droppedEntries": "{{count}} entri sebelumnya tidak lagi tersedia",
+  "droppedEntries_other": "{{count}} entri sebelumnya tidak lagi tersedia",
   "searchPlaceholder": "Cari log…",
   "exportLogs": "Ekspor log",
   "exportFormat": "Format ekspor",

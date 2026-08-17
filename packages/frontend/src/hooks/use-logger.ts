@@ -8,6 +8,8 @@ export interface UseLoggerResult {
   entries: LogEntry[];
   /** Entries evicted from the info/priority pools since the last clear. */
   droppedCounts: LogPoolDropCounts;
+  /** Entries the SERVER reported evicted for this subscriber, replayed on every connect. */
+  serverDroppedCounts: LogPoolDropCounts;
   connected: boolean;
   clearEntries: () => void;
 }
@@ -15,6 +17,7 @@ export interface UseLoggerResult {
 export function useLogger(): UseLoggerResult {
   const entries = useLoggerStore((s) => s.entries);
   const droppedCounts = useLoggerStore((s) => s.droppedCounts);
+  const serverDroppedCounts = useLoggerStore((s) => s.serverDroppedCounts);
   const connected = useLoggerStore((s) => s.connected);
   const connect = useLoggerStore((s) => s.connect);
   const disconnect = useLoggerStore((s) => s.disconnect);
@@ -35,5 +38,5 @@ export function useLogger(): UseLoggerResult {
     if (vaultUnlocked) connect();
   }, [vaultUnlocked, connect]);
 
-  return { entries, droppedCounts, connected, clearEntries };
+  return { entries, droppedCounts, serverDroppedCounts, connected, clearEntries };
 }

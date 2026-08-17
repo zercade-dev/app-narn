@@ -127,7 +127,12 @@ import {
   resolveFreewayProbeCredential,
 } from './M32/bucket-source.js';
 import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
-import { effectiveRemainingRequests, selectEscalation } from './M32/selector.js';
+import {
+  effectiveRemainingRequests,
+  hasMinuteHeadroom,
+  isEligibleIgnoringMinute,
+  selectEscalation,
+} from './M32/selector.js';
 import { difficultyBand } from './M32/difficulty.js';
 import type { BucketView, JobGroup } from './M32/types.js';
 import { syncAuthoritativeUsage } from './M32/probes.js';
@@ -2814,7 +2819,7 @@ export class TranslationEngine {
       ],
       1500,
     );
-    const buckets = await loadBucketViews(now, deps);
+    const buckets = await loadBucketViews(now, { ...deps, bucketStates });
     const resolution = resolveFreewayDecisions(decisions, buckets, now);
     this.logger.info('translation:freeway-resolved', {
       runId,
@@ -3217,13 +3222,38 @@ export class TranslationEngine {
   ): Promise<{ moduleId: string; modelId: string; bucketKey: string } | undefined> {
     const now = Date.now();
     const buckets = await loadBucketViews(now, deps);
-    const selection = selectEscalation(
-      failedBucketKey,
-      this.freewayJobGroup([decision]),
-      buckets,
-      now,
-    );
-    if (!selection) return undefined;
+    const group = this.freewayJobGroup([decision]);
+    const selection = selectEscalation(failedBucketKey, group, buckets, now);
+    if (!selection) {
+      // Distinguish the two ways the ladder comes back empty. Ordinary
+      // exhaustion (no higher tier, a cooldown, a weak-language exclusion, or
+      // no day-scale stock) is expected and stays silent. Minute starvation is
+      // not: the bucket refills within seconds, the entry silently gets a
+      // same-module corrective retry instead of a better model, and nothing
+      // else records that it happened.
+      // isEligibleIgnoringMinute must gate this in addition to the tier check
+      // — a bucket that is ALSO cooling or day-exhausted commonly has a spent
+      // minute too (dispatch activity right before a gate failure spends
+      // both together), and warning "clears in ~60s" about a bucket that is
+      // actually cooled until the next day boundary would be worse than
+      // staying silent.
+      const failedTier = buckets.find((b) => b.bucketKey === failedBucketKey)?.qualityTier ?? 0;
+      const starved = buckets.find(
+        (b) =>
+          b.qualityTier > failedTier &&
+          b.bucketKey !== failedBucketKey &&
+          !hasMinuteHeadroom(b) &&
+          isEligibleIgnoringMinute(b, group, now),
+      );
+      if (starved) {
+        this.logger.warn('translation:freeway-escalation-minute-starved', {
+          failedBucketKey,
+          starvedBucketKey: starved.bucketKey,
+          minuteResetAt: starved.minuteResetAt,
+        });
+      }
+      return undefined;
+    }
     return {
       // Dispatch through the resolved instance, not the bare base — see
       // BucketView.dispatchModuleId.
