@@ -551,9 +551,7 @@ export function GenerateGlossaryDialog({
       ...(canIncludeTranslations ? { includeTranslations } : {}),
       ...(availableCategories.length > 0 ? { skipCategories: genContext.skipCategories } : {}),
       ...(enabledGlossaries.length > 0 ? { ignoreGlossaries: genContext.ignoreGlossaries } : {}),
-      ...(genContext.grouping === 'custom'
-        ? { customBatchSize: genContext.customBatchSize }
-        : {}),
+      ...(genContext.grouping === 'custom' ? { customBatchSize: genContext.customBatchSize } : {}),
       ...(genContext.grouping !== 'default' && genContext.grouping !== 'custom'
         ? { ignoreLimit: genContext.ignoreLimit }
         : {}),

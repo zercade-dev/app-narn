@@ -756,12 +756,8 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
       grouping: genContext.grouping,
       ...(hasActiveLanguages ? { contextLanguages: genContext.contextLanguages } : {}),
       ...(categories.length > 0 ? { skipCategories: genContext.skipCategories } : {}),
-      ...(offerableGlossaries.length > 0
-        ? { ignoreGlossaries: genContext.ignoreGlossaries }
-        : {}),
-      ...(genContext.grouping === 'custom'
-        ? { customBatchSize: genContext.customBatchSize }
-        : {}),
+      ...(offerableGlossaries.length > 0 ? { ignoreGlossaries: genContext.ignoreGlossaries } : {}),
+      ...(genContext.grouping === 'custom' ? { customBatchSize: genContext.customBatchSize } : {}),
       ...(genContext.grouping !== 'default' && genContext.grouping !== 'custom'
         ? { ignoreLimit: genContext.ignoreLimit }
         : {}),
