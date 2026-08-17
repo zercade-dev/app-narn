@@ -86,13 +86,15 @@ export function bucketResumeAt(bucket: BucketView, group: JobGroup): number {
 }
 
 /**
- * Every {@link isEligible} criterion except the minute check. Exported so a
- * caller can ask "is this bucket eligible in every respect BUT its current
- * minute" — e.g. to tell true minute starvation apart from a bucket that is
- * ALSO cooling or day-exhausted, which just happens to have a spent minute
- * too (the common case right after a gate failure, since dispatch activity
- * tends to spend both together) — without duplicating this list and risking
- * drift the next time isEligible gains a criterion.
+ * Every {@link isEligible} criterion except the minute check, factored out
+ * into its own function — rather than inlined into {@link isEligible} and
+ * duplicated — so the minute check and the rest of this list cannot drift
+ * apart as either gains a criterion. Both {@link isEligible} (AND the minute
+ * check) and {@link findMinuteStarvedEscalation} (to tell true minute
+ * starvation apart from a bucket that is ALSO cooling or day-exhausted,
+ * which just happens to have a spent minute too — the common case right
+ * after a gate failure, since dispatch activity tends to spend both
+ * together) compose it.
  */
 export function isEligibleIgnoringMinute(
   bucket: BucketView,
