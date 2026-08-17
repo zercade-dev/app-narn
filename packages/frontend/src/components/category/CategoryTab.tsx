@@ -39,9 +39,11 @@ import {
 import { ModuleSelect } from '@/components/ui/module-select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RunProgressCard } from '@/components/common/RunProgressCard';
+import { AdvancedToggle } from '@/components/common/AdvancedToggle';
 import { isRunActive } from '@/lib/run-kind';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
 import { cn, errorMessage } from '@/lib/utils';
+import { hasNonDefaultValues } from '@/lib/advanced-modified';
 import { toast } from '@/lib/toast';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
@@ -736,6 +738,37 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
     { errorFallback: t('runFailed') },
   );
 
+  // moduleId/model/reasoningEffort are excluded: their controls render
+  // unconditionally above the Advanced toggle, not inside {advanced && (…)}
+  // below. contextLanguages is gated on activeLanguages (GenerationContext-
+  // Controls' language section renders only when non-empty); skipCategories/
+  // ignoreGlossaries are gated on categories/offerableGlossaries being
+  // non-empty (that component's own render condition for each section);
+  // ignoreLimit/customBatchSize are gated on `grouping`, mirroring the exact
+  // condition BatchGroupingControls uses to show/hide each control — a value
+  // that hides a control must not make it count toward the badge.
+  const hasActiveLanguages = (project?.activeLanguages?.length ?? 0) > 0;
+  const offerableGlossaries = availableGlossaries.filter((g) => g.enabled !== false);
+  const advancedModified = hasNonDefaultValues(
+    {
+      includeExisting,
+      contextFields: genContext.contextFields,
+      grouping: genContext.grouping,
+      ...(hasActiveLanguages ? { contextLanguages: genContext.contextLanguages } : {}),
+      ...(categories.length > 0 ? { skipCategories: genContext.skipCategories } : {}),
+      ...(offerableGlossaries.length > 0
+        ? { ignoreGlossaries: genContext.ignoreGlossaries }
+        : {}),
+      ...(genContext.grouping === 'custom'
+        ? { customBatchSize: genContext.customBatchSize }
+        : {}),
+      ...(genContext.grouping !== 'default' && genContext.grouping !== 'custom'
+        ? { ignoreLimit: genContext.ignoreLimit }
+        : {}),
+    },
+    CATEGORY_GEN_SETTINGS_DEFAULTS,
+  );
+
   const toggleSuggestion = (idx: number) => {
     setAcceptedIdx((prev) => {
       const next = new Set(prev);
@@ -1270,20 +1303,14 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
               )}
 
               <div className="border-t pt-3">
-                <span className="inline-flex items-center gap-1.5">
-                  <Checkbox
-                    id="category-ai-advanced"
-                    checked={advanced}
-                    onCheckedChange={(checked) => setAdvanced(checked === true)}
-                    data-testid="category-ai-advanced"
-                  />
-                  <Label
-                    htmlFor="category-ai-advanced"
-                    className="cursor-pointer select-none font-normal"
-                  >
-                    {t('aiAdvancedOptions')}
-                  </Label>
-                </span>
+                <AdvancedToggle
+                  id="category-ai-advanced"
+                  testId="category-ai-advanced"
+                  checked={advanced}
+                  modified={advancedModified}
+                  onCheckedChange={setAdvanced}
+                  label={t('aiAdvancedOptions')}
+                />
               </div>
 
               {advanced && (
@@ -1302,7 +1329,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
                     onChange={setGenContext}
                     activeLanguages={project?.activeLanguages ?? []}
                     availableCategories={categories}
-                    availableGlossaries={availableGlossaries.filter((g) => g.enabled !== false)}
+                    availableGlossaries={offerableGlossaries}
                   />
                 </>
               )}

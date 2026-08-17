@@ -13,7 +13,7 @@
  */
 export function hasNonDefaultValues<T extends Record<string, unknown>>(
   current: T,
-  defaults: T,
+  defaults: { readonly [K in keyof T]: unknown },
 ): boolean {
   return Object.keys(current).some(
     (key) => JSON.stringify(current[key]) !== JSON.stringify(defaults[key]),

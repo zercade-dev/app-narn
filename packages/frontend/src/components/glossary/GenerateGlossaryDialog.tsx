@@ -55,6 +55,7 @@ import { Label } from '../ui/label';
 import { Progress } from '../ui/progress';
 import { Textarea } from '../ui/textarea';
 import { ModuleSelect } from '../ui/module-select';
+import { AdvancedToggle } from '../common/AdvancedToggle.js';
 import { ModuleModelSelector } from '../config/ModuleModelSelector.js';
 import { useConfidenceContext } from '../../hooks/use-confidence-context.js';
 import { ModuleReasoningEffortSelect } from '../config/ModuleReasoningEffortSelect.js';
@@ -65,6 +66,7 @@ import {
 } from '../generation/GenerationContextControls.js';
 import { RunLogsPanel } from '../review/RunLogsPanel.js';
 import { useDialogSettings } from '../../hooks/use-dialog-settings.js';
+import { hasNonDefaultValues } from '../../lib/advanced-modified.js';
 import { asGroupingChoice } from '../config/BatchGroupingControls.js';
 
 /** Last-used per-browser values. Focus source-texts input is NOT persisted (entry-specific). */
@@ -673,20 +675,14 @@ export function GenerateGlossaryDialog({
         )}
 
         <div className="border-t pt-3">
-          <span className="inline-flex items-center gap-1.5">
-            <Checkbox
-              id="glossary-generate-advanced"
-              checked={advanced}
-              onCheckedChange={(checked) => setAdvanced(checked === true)}
-              data-testid="glossary-generate-advanced"
-            />
-            <Label
-              htmlFor="glossary-generate-advanced"
-              className="cursor-pointer select-none font-normal"
-            >
-              {t('generateAdvancedOptions')}
-            </Label>
-          </span>
+          <AdvancedToggle
+            id="glossary-generate-advanced"
+            testId="glossary-generate-advanced"
+            checked={advanced}
+            modified={advancedModified}
+            onCheckedChange={setAdvanced}
+            label={t('generateAdvancedOptions')}
+          />
         </div>
 
         {advanced && (
@@ -766,6 +762,37 @@ export function GenerateGlossaryDialog({
 
   const showProgress = isRunning || (runId !== null && suggestions === null && !isTerminalFailure);
   const showSetupActions = suggestions === null && !showProgress && !isTerminalFailure;
+
+  // moduleId/model/reasoningEffort are excluded: their controls render
+  // unconditionally above the Advanced toggle, not inside {advanced && (…)}
+  // below. contextLanguages/includeTranslations are gated on activeLanguages
+  // (GenerationContextControls' language section, incl. the includeTranslations
+  // toggle passed via `languagesExtra`, renders only when non-empty);
+  // skipCategories/ignoreGlossaries are gated on availableCategories/
+  // enabledGlossaries being non-empty (that component's own render condition
+  // for each section); ignoreLimit/customBatchSize are gated on `grouping`,
+  // mirroring the exact condition BatchGroupingControls uses to show/hide each
+  // control — a value that hides a control must not make it count toward the
+  // badge.
+  const hasActiveLanguages = (project?.activeLanguages?.length ?? 0) > 0;
+  const advancedModified = hasNonDefaultValues(
+    {
+      contextFields: genContext.contextFields,
+      grouping: genContext.grouping,
+      ...(hasActiveLanguages
+        ? { includeTranslations, contextLanguages: genContext.contextLanguages }
+        : {}),
+      ...(availableCategories.length > 0 ? { skipCategories: genContext.skipCategories } : {}),
+      ...(enabledGlossaries.length > 0 ? { ignoreGlossaries: genContext.ignoreGlossaries } : {}),
+      ...(genContext.grouping === 'custom'
+        ? { customBatchSize: genContext.customBatchSize }
+        : {}),
+      ...(genContext.grouping !== 'default' && genContext.grouping !== 'custom'
+        ? { ignoreLimit: genContext.ignoreLimit }
+        : {}),
+    },
+    GLOSSARY_GEN_SETTINGS_DEFAULTS,
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
