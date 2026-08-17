@@ -404,6 +404,13 @@ export function AiReviewDialog({
   // `checks` is compared key-by-key rather than via hasNonDefaultValues'
   // JSON.stringify (sensitive to insertion order), since a persisted checks
   // object's key order isn't guaranteed to match CHECK_KEYS'.
+  //
+  // `uncheckedLanguages` (the per-language checklist, rendered inside
+  // {advanced && (…)} below) is deliberately NOT part of this comparison: it
+  // has no key in AI_REVIEW_SETTINGS_DEFAULTS because it is never persisted
+  // (depends on the run being reviewed, see its declaration above) and always
+  // resets to an empty Set per run — the badge cannot reflect it, by design,
+  // not oversight.
   const checksModified = CHECK_KEYS.some(
     (key) => checks[key] !== AI_REVIEW_SETTINGS_DEFAULTS.checks[key],
   );

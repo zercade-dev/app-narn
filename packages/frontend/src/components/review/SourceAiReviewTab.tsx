@@ -493,13 +493,15 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   }
 
   // scope/moduleId/model/reasoningEffort are excluded: their controls render
-  // unconditionally above the Advanced toggle, not inside {advanced && (…)} below.
-  // ignoreLimit/customBatchSize are gated on `grouping`, mirroring the exact
-  // condition BatchGroupingControls uses to show/hide each control — a grouping
-  // value that hides one must not make it count toward the badge.
-  // `enabled` (the checks map) is compared key-by-key rather than via
-  // hasNonDefaultValues' JSON.stringify (sensitive to insertion order), since a
-  // persisted `enabled` object's key order isn't guaranteed to match CHECKS'.
+  // unconditionally, outside {advanced && (…)} below (`scope`'s fieldset above
+  // the Advanced toggle; the module/model/effort pickers below it, but still
+  // outside the gated block). ignoreLimit/customBatchSize are gated on
+  // `grouping`, mirroring the exact condition BatchGroupingControls uses to
+  // show/hide each control — a grouping value that hides one must not make it
+  // count toward the badge. `enabled` (the checks map) is compared key-by-key
+  // rather than via hasNonDefaultValues' JSON.stringify (sensitive to
+  // insertion order), since a persisted `enabled` object's key order isn't
+  // guaranteed to match CHECKS'.
   const enabledModified = CHECKS.some(
     (key) => enabled[key] !== SOURCE_REVIEW_SETTINGS_DEFAULTS.enabled[key],
   );
