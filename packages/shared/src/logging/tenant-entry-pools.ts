@@ -20,14 +20,18 @@ import {
   type PoolableEntry,
 } from './entry-pools.js';
 
-const EMPTY_DROPS: LogPoolDropCounts = { info: 0, priority: 0 };
+const EMPTY_DROPS: LogPoolDropCounts = Object.freeze({ info: 0, priority: 0 });
 
 /**
  * Tenants whose post-eviction loss figures are remembered. Two integers per
  * tenant, so this is bounded far more generously than the pools themselves. A
  * tenant evicted from THIS map reports zero again — an honest limit of a
  * bounded structure, not a bug: the alternative is an unbounded map keyed by
- * attacker-suppliable ids.
+ * attacker-suppliable ids. Recency here is refreshed only by {@link carry} —
+ * never by a read, and never just because a tenant becomes live again in
+ * `pools` — so an actively-logging tenant that was evicted once long ago can
+ * still age out of this map after 1024 *other* tenants get carried, even
+ * though it is not itself inactive.
  */
 const MAX_CARRIED_TENANTS = 1024;
 
@@ -39,11 +43,11 @@ export interface TenantPoolOptions extends LogPoolOptions {
 export class TenantEntryPools<T extends PoolableEntry> {
   private readonly pools = new Map<string, LogEntryPools<T>>();
   /** Losses belonging to tenants whose pool has been evicted; see MAX_CARRIED_TENANTS. */
-  private carried = new Map<string, LogPoolDropCounts>();
+  private readonly carried = new Map<string, LogPoolDropCounts>();
   private readonly options: TenantPoolOptions;
 
   constructor(options: TenantPoolOptions) {
-    if (options.maxTenants < 1) {
+    if (!Number.isInteger(options.maxTenants) || options.maxTenants < 1) {
       throw new RangeError(
         `TenantEntryPools: maxTenants must be at least 1, got ${options.maxTenants}`,
       );
