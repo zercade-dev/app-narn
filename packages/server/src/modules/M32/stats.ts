@@ -54,10 +54,18 @@ export function isGatePassRecord(value: unknown): value is FreewayGatePassRecord
   return n >= 0 && s >= 0 && s <= n + 1e-9;
 }
 
-/** Halve both counts for every HALF_LIFE_MS since `t`. A no-op when `now` is not later. */
+/**
+ * Halve both counts for every HALF_LIFE_MS since `t`. Returns the very same
+ * object when `now` exactly equals `t` — a true no-op, relied on by callers
+ * that fold many records in a loop. When `t` is ahead of `now` (clock skew,
+ * or an anchor that needs correcting), re-anchor to `now` without scaling the
+ * counts, rather than leaving a future `t` in place — that would keep
+ * `elapsed` negative or zero forever and freeze decay for the record.
+ */
 export function decayRecord(rec: FreewayGatePassRecord, now: number): FreewayGatePassRecord {
   const elapsed = now - rec.t;
-  if (elapsed <= 0) return rec;
+  if (elapsed === 0) return rec;
+  if (elapsed < 0) return { ...rec, t: now };
   const factor = Math.pow(2, -elapsed / HALF_LIFE_MS);
   return { s: rec.s * factor, n: rec.n * factor, t: now };
 }
@@ -87,7 +95,7 @@ function deriveDisplayRates(
  */
 export function decayStats(stats: FreewayBucketStats, now: number): FreewayBucketStats {
   const source = stats.gatePassStats;
-  if (source === undefined) return stats;
+  if (typeof source !== 'object' || source === null) return stats;
   const decayed: Record<string, FreewayGatePassRecord> = {};
   for (const [language, rec] of Object.entries(source)) {
     if (isGatePassRecord(rec)) decayed[language] = decayRecord(rec, now);
