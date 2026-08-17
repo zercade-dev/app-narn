@@ -9,7 +9,7 @@
  * reserve keeps top-tier headroom for escalation retries.
  */
 import type { BucketView, JobGroup } from './types.js';
-import { requestCost } from './scoring.js';
+import { passRateClass, requestCost } from './scoring.js';
 
 export interface Selection {
   bucket: BucketView;
@@ -140,19 +140,19 @@ function isReservoir(bucket: BucketView): number {
  * buckets to cover the work, and when demand is high they drain and the scarce
  * bucket is reached anyway.
  *
- * The other trade is quality feedback: `gatePassByLanguage` is M32's only
- * quality loop, and gate failures reach ranking solely by inflating
- * `estimatedRequests` — a depressed pass rate both shrinks `batchSizeFor` and
- * divides the batch count — which absolute cost demoted directly. Dividing by
- * remaining stock scales that signal down by the abundance ratio, which runs
- * 14x to 720x across the shipped snapshot, so a degraded model on a large
- * allowance can outrank a healthy one on a smaller allowance even at several
- * times the request cost.
- * Nothing in this comparator floors that; the quality band in
- * {@link isEligible} and the provider-error cooldown are what bound it.
+ * Quality feedback is the reason for the class key above scarcity.
+ * `gatePassByLanguage` is M32's only quality loop, and gate failures reach
+ * ranking solely by inflating `estimatedRequests` — a depressed pass rate both
+ * shrinks `batchSizeFor` and divides the batch count. Dividing by remaining
+ * stock scales that signal down by the abundance ratio, which runs 14x to 720x
+ * across the shipped snapshot, so on cost alone a degraded model on a large
+ * allowance outranks a healthy one on a smaller allowance. The class key stops
+ * that structurally: a degraded bucket can never win on abundance. Within one
+ * class nothing changes, and when every candidate is degraded they tie and
+ * ordering falls through to scarcity, so a hard language does not deadlock.
  *
- * Remaining keys: expected requests per job, then soonest reset, then lowest
- * adequate tier, then key.
+ * Remaining keys: scarcity percent, then expected requests per job, then
+ * soonest reset, then lowest adequate tier, then key.
  */
 export function rankCandidates(buckets: BucketView[], group: JobGroup, now: number): BucketView[] {
   const eligible = buckets.filter((b) => isEligible(b, group, now));
@@ -163,8 +163,14 @@ export function rankCandidates(buckets: BucketView[], group: JobGroup, now: numb
       Math.round((costs.get(b.bucketKey)!.estimatedRequests / effectiveRemainingRequests(b)) * 100),
     ]),
   );
+  const classes = new Map(
+    eligible.map((b) => [b.bucketKey, passRateClass(costs.get(b.bucketKey)!.passRate)]),
+  );
   return [...eligible].sort((a, b) => {
     if (isReservoir(a) !== isReservoir(b)) return isReservoir(a) - isReservoir(b);
+    const qa = classes.get(a.bucketKey)!;
+    const qb = classes.get(b.bucketKey)!;
+    if (qa !== qb) return qa - qb;
     const sa = scarcity.get(a.bucketKey)!;
     const sb = scarcity.get(b.bucketKey)!;
     if (sa !== sb) return sa - sb;
