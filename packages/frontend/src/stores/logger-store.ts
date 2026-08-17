@@ -68,6 +68,24 @@ const EVICTION_CHECK_FAILURE_THRESHOLD = 3;
  */
 const FLUSH_INTERVAL_MS = 200;
 
+/**
+ * `JSON.parse` accepts plenty of things that are not drop counts — `null` and
+ * `{}` most obviously. Applying one would consume the one-shot gate on
+ * `setServerDroppedCounts` and make the real frame behind it unreachable for the
+ * rest of the page session, so a frame that fails this check is dropped
+ * entirely: silently, like the sibling listeners, and without spending the gate.
+ */
+function isDropCounts(value: unknown): value is LogPoolDropCounts {
+  if (typeof value !== 'object' || value === null) return false;
+  const { info, priority } = value as Record<string, unknown>;
+  return (
+    typeof info === 'number' &&
+    Number.isFinite(info) &&
+    typeof priority === 'number' &&
+    Number.isFinite(priority)
+  );
+}
+
 interface LoggerStoreState {
   entries: LogEntry[];
   /** Counts of entries evicted from each pool since the last `clear()`. */
@@ -173,7 +191,8 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
 
       es.addEventListener('log:dropped', (event: MessageEvent) => {
         try {
-          get().setServerDroppedCounts(JSON.parse(event.data as string) as LogPoolDropCounts);
+          const parsed: unknown = JSON.parse(event.data as string);
+          if (isDropCounts(parsed)) get().setServerDroppedCounts(parsed);
         } catch {
           // ignore malformed SSE data
         }
