@@ -31,6 +31,15 @@ interface CaptureState {
   entries: LogEntry[];
   bytes: number;
   droppedCount: number;
+  /**
+   * Latched true on the FIRST drop (either cap) so the buffer stops
+   * appending for good rather than admitting a later, smaller entry that
+   * happens to fit under the byte cap — that would leave a silent
+   * mid-stream hole (kept, dropped, kept) that `droppedCount` alone can't
+   * locate. `start()` always creates a fresh `CaptureState`, so this resets
+   * with every new capture.
+   */
+  capped: boolean;
 }
 
 const LOCAL_SCOPE = '';
@@ -38,10 +47,15 @@ const LOCAL_SCOPE = '';
 /**
  * Opt-in full-fidelity retention beside the ring pools: while a capture is
  * active every entry that reaches ConsoleLogger.store() is also appended
- * here, bounded by entry and byte caps. Drop-NEWEST on cap: the ring pools
- * already retain a run's tail, capture preserves it from the start, so
- * head (capture) + tail (pools) bound the loss to a visible mid-run window
- * (droppedCount). Local mode keeps one buffer; cloud keys buffers by tenant
+ * here, bounded by entry and byte caps. Drop-NEWEST on cap: the FIRST entry
+ * that would exceed either cap latches the capture as `capped` and stops
+ * appending for good — every entry after that is counted in `droppedCount`
+ * but never admitted, even a later one small enough to fit under the byte
+ * cap, so the retained entries stay a contiguous prefix with no silent
+ * mid-stream holes. The ring pools already retain a run's tail, capture
+ * preserves it from the start, so head (capture) + tail (pools) bound the
+ * loss to a visible mid-run window. Local mode keeps one buffer; cloud keys
+ * buffers by tenant
  * with a small concurrent-capture slot limit so tenants cannot exhaust
  * process memory — once all slots are held, `start()` for a new tenant
  * evicts the oldest STOPPED (inactive) capture to free a slot, and only
@@ -76,6 +90,7 @@ export class LogCaptureBuffer {
       entries: [],
       bytes: 0,
       droppedCount: 0,
+      capped: false,
     };
     this.captures.set(key, fresh);
     return this.toStatus(fresh);
@@ -105,10 +120,15 @@ export class LogCaptureBuffer {
     if (key === undefined) return;
     const state = this.captures.get(key);
     if (!state?.active) return;
+    if (state.capped) {
+      state.droppedCount++;
+      return;
+    }
     const entryCap = this.caps.isCloud() ? this.caps.tenantEntryCap : this.caps.localEntryCap;
     const byteCap = this.caps.isCloud() ? this.caps.tenantByteCap : this.caps.localByteCap;
     const size = JSON.stringify(entry).length;
     if (state.entries.length >= entryCap || state.bytes + size > byteCap) {
+      state.capped = true;
       state.droppedCount++;
       return;
     }

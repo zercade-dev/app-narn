@@ -348,8 +348,8 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
     },
 
     downloadCapture: async () => {
-      const stamp = new Date().getTime();
-      await apiDownload('/logs/capture/download', `console-capture-${stamp}.ndjson`);
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      await apiDownload('/logs/capture/download', `narn-log-capture-${stamp}.ndjson`);
     },
   };
 });
