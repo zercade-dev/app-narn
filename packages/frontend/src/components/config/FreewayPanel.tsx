@@ -482,6 +482,13 @@ export function FreewayPanel(): React.JSX.Element {
                                     aria-label={t('freeway.instanceSelectorAria', {
                                       provider: providerDisplayName(provider.providerKey),
                                     })}
+                                    title={
+                                      selectedValue === AUTOMATIC_OVERRIDE_VALUE
+                                        ? t('freeway.automaticOption')
+                                        : (providerInstances.find(
+                                            (instance) => instance.instanceId === selectedValue,
+                                          )?.displayName ?? String(selectedValue))
+                                    }
                                   >
                                     <SelectValue>
                                       {(value) =>
@@ -493,7 +500,15 @@ export function FreewayPanel(): React.JSX.Element {
                                       }
                                     </SelectValue>
                                   </SelectTrigger>
-                                  <SelectContent>
+                                  {/* Content sizes to the longest instance name instead of the
+                                      160px trigger (`w-(--anchor-width)` in ui/select.tsx), so a
+                                      descriptive display name (`Name (slug)`) isn't clipped in the
+                                      open list. `cn` (tailwind-merge) resolves this `w-max` against
+                                      the base `w-(--anchor-width)` class, so it wins outright rather
+                                      than stacking. Bounded below by the trigger's own `w-40` and
+                                      above by 22rem so one pathological name can't blow out the
+                                      popup. */}
+                                  <SelectContent className="w-max min-w-40 max-w-[22rem]">
                                     <SelectItem value={AUTOMATIC_OVERRIDE_VALUE}>
                                       {t('freeway.automaticOption')}
                                     </SelectItem>
