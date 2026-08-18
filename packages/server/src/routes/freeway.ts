@@ -19,6 +19,7 @@ import {
 } from '@zercade-dev/narn-shared';
 import { asyncHandler } from '../http/index.js';
 import { getSessionId } from '../middleware/session.js';
+import { credentialStore } from '../modules/M16-credential-store.js';
 import {
   defaultInstanceIdsFor,
   freewayCandidateIds,
@@ -152,19 +153,32 @@ function deriveMissingState(
  * the condition that produces this disabledReason — so `view.dispatchModuleId`
  * is guaranteed to BE the marked candidate here, not merely a plausible
  * stand-in. `envVarFor` resolves the marked candidate's base module id to its
- * manifest env var; the key name is that env var for a bare-base candidate,
- * or its per-instance derived key for an instance candidate.
+ * manifest env var.
+ *
+ * The key name is that env var for a bare-base candidate. For an instance
+ * candidate it's the per-instance derived key ONLY when that key actually
+ * exists in `existingVaultKeys` — otherwise the instance is credentialed
+ * purely via base inheritance, so the key that would actually clear the mark
+ * is the base env var, not a derived key the user has never written. This
+ * mirrors condition 2 of `clearFreewayCredentialMarks` (the same
+ * instance→base fallback M6's `buildCredentialProvider` resolves credentials
+ * with, and {@link resolveFreewayProbeCredential} reads usage with) —
+ * without it, an inheriting instance would report a derived key that isn't
+ * the credential actually in use.
  */
 function deriveCredentialMark(
   view: BucketView,
   envVarFor: (baseModuleId: string) => string | undefined,
+  existingVaultKeys: ReadonlySet<string>,
 ): Pick<FreewayStatusBucket, 'credentialMarkModuleId' | 'credentialKeyName'> {
   const moduleId = view.dispatchModuleId;
   if (moduleId === undefined) return {};
   const envVar = envVarFor(view.moduleId);
   if (envVar === undefined) return {};
   const parsed = parseModuleInstanceId(moduleId);
-  const keyName = parsed ? deriveInstanceCredentialKey(envVar, parsed.slug) : envVar;
+  const derivedKey = parsed ? deriveInstanceCredentialKey(envVar, parsed.slug) : undefined;
+  const keyName =
+    derivedKey !== undefined && existingVaultKeys.has(derivedKey) ? derivedKey : envVar;
   return { credentialMarkModuleId: moduleId, credentialKeyName: keyName };
 }
 
@@ -172,6 +186,7 @@ function toStatusBucket(
   view: BucketView,
   now: number,
   envVarFor: (baseModuleId: string) => string | undefined,
+  existingVaultKeys: ReadonlySet<string>,
 ): FreewayStatusBucket {
   return {
     bucketKey: view.bucketKey,
@@ -186,7 +201,9 @@ function toStatusBucket(
     disabledReason: view.disabledReason,
     gatePassByLanguage: view.stats.gatePassByLanguage,
     ...(view.dispatchModuleId !== undefined ? { dispatchModuleId: view.dispatchModuleId } : {}),
-    ...(view.disabledReason === CREDENTIAL_BAD_REASON ? deriveCredentialMark(view, envVarFor) : {}),
+    ...(view.disabledReason === CREDENTIAL_BAD_REASON
+      ? deriveCredentialMark(view, envVarFor, existingVaultKeys)
+      : {}),
   };
 }
 
@@ -251,13 +268,20 @@ freewayRouter.get(
     // Only paid for when at least one live bucket is actually credential-marked
     // (the common case has none): loadEnvVarLookup's dynamic import of the
     // module registry is cheap once cached, but there is no reason to pay it
-    // on every poll of a healthy workspace.
-    const envVarFor = liveViews.some((v) => v.disabledReason === CREDENTIAL_BAD_REASON)
+    // on every poll of a healthy workspace. Same reasoning for the vault key
+    // set — read once per request (not per bucket) via the credential
+    // store's own presence check, mirroring how `clearFreewayCredentialMarks`
+    // consults `existingVaultKeys`.
+    const hasCredentialMark = liveViews.some((v) => v.disabledReason === CREDENTIAL_BAD_REASON);
+    const envVarFor = hasCredentialMark
       ? await loadEnvVarLookup()
       : (): string | undefined => undefined;
+    const existingVaultKeys: ReadonlySet<string> = hasCredentialMark
+      ? new Set(sessionId ? credentialStore.listKeys(sessionId) : [])
+      : new Set();
 
     const buckets: FreewayStatusBucket[] = [
-      ...liveViews.map((v) => toStatusBucket(v, now, envVarFor)),
+      ...liveViews.map((v) => toStatusBucket(v, now, envVarFor, existingVaultKeys)),
       ...missingViews.map((v) => {
         const { state, disabledReason, enableTargetModuleId } = deriveMissingState(
           v.moduleId,
