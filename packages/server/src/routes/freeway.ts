@@ -1,20 +1,30 @@
 /**
  * /api/freeway routes — NARN Freeway status.
  *
- * GET  /api/freeway/status  - live bucket status for the UI checklist
+ * GET  /api/freeway/status                              - live bucket status for the UI checklist
+ * POST /api/freeway/credential-marks/:moduleId/clear     - manually clear one candidate's bad-credential mark
  *
  * Read-only with respect to secrets: status never touches the vault (a
  * locked vault simply reports every bucket 'uncredentialed', which is the
- * correct signal, not an error).
+ * correct signal, not an error). The clear route is a mutation, but only of
+ * the Freeway quota ledger's mark row — it never reads or writes a
+ * credential itself, so it needs no vault access either.
  */
 import { Router } from 'express';
-import type { GlobalConfig } from '@zercade-dev/narn-shared';
+import {
+  deriveInstanceCredentialKey,
+  getFreeTierSnapshot,
+  parseModuleInstanceId,
+  type GlobalConfig,
+} from '@zercade-dev/narn-shared';
 import { asyncHandler } from '../http/index.js';
 import { getSessionId } from '../middleware/session.js';
 import {
   defaultInstanceIdsFor,
   freewayCandidateIds,
+  freewayCredentialKey,
   loadBucketViews,
+  loadEnvVarLookup,
 } from '../modules/M32/bucket-source.js';
 import { effectiveRemainingRequests } from '../modules/M32/selector.js';
 import type { BucketView } from '../modules/M32/types.js';
@@ -43,7 +53,22 @@ interface FreewayStatusBucket {
   dispatchModuleId?: string;
   /** For a 'disabled' missing row: the candidate id "Enable it" should scroll to / turn on. */
   enableTargetModuleId?: string;
+  /**
+   * The Freeway candidate that actually carries the bad-credential mark
+   * (`credential::<moduleId>` in the ledger) — present only when
+   * `disabledReason` is {@link CREDENTIAL_BAD_REASON}. This is deliberately a
+   * separate field from `dispatchModuleId`: that one already means "the id
+   * this bucket dispatches through" and is populated for healthy buckets
+   * too, so overloading it with a second meaning here would make both
+   * unreadable. Clear it via `POST /credential-marks/:moduleId/clear`.
+   */
+  credentialMarkModuleId?: string;
+  /** The vault key writing would clear {@link credentialMarkModuleId}'s mark. */
+  credentialKeyName?: string;
 }
+
+/** disabledReason bucket-source.ts's loadBucketViews sets when every usable candidate is credential-marked. */
+const CREDENTIAL_BAD_REASON = 'bad credentials';
 
 /**
  * disabledReason wins first (a ledger-recorded hard stop, e.g. bad
@@ -119,7 +144,35 @@ function deriveMissingState(
   return { state: 'uncredentialed' };
 }
 
-function toStatusBucket(view: BucketView, now: number): FreewayStatusBucket {
+/**
+ * Derive the credential-mark fields for a bucket whose `disabledReason` is
+ * {@link CREDENTIAL_BAD_REASON}. `resolveDispatchModuleId` (bucket-source.ts)
+ * only ever falls back to returning a credential-marked candidate AS
+ * `dispatchModuleId` when no OTHER candidate is usable — which is exactly
+ * the condition that produces this disabledReason — so `view.dispatchModuleId`
+ * is guaranteed to BE the marked candidate here, not merely a plausible
+ * stand-in. `envVarFor` resolves the marked candidate's base module id to its
+ * manifest env var; the key name is that env var for a bare-base candidate,
+ * or its per-instance derived key for an instance candidate.
+ */
+function deriveCredentialMark(
+  view: BucketView,
+  envVarFor: (baseModuleId: string) => string | undefined,
+): Pick<FreewayStatusBucket, 'credentialMarkModuleId' | 'credentialKeyName'> {
+  const moduleId = view.dispatchModuleId;
+  if (moduleId === undefined) return {};
+  const envVar = envVarFor(view.moduleId);
+  if (envVar === undefined) return {};
+  const parsed = parseModuleInstanceId(moduleId);
+  const keyName = parsed ? deriveInstanceCredentialKey(envVar, parsed.slug) : envVar;
+  return { credentialMarkModuleId: moduleId, credentialKeyName: keyName };
+}
+
+function toStatusBucket(
+  view: BucketView,
+  now: number,
+  envVarFor: (baseModuleId: string) => string | undefined,
+): FreewayStatusBucket {
   return {
     bucketKey: view.bucketKey,
     providerKey: view.providerKey,
@@ -133,6 +186,7 @@ function toStatusBucket(view: BucketView, now: number): FreewayStatusBucket {
     disabledReason: view.disabledReason,
     gatePassByLanguage: view.stats.gatePassByLanguage,
     ...(view.dispatchModuleId !== undefined ? { dispatchModuleId: view.dispatchModuleId } : {}),
+    ...(view.disabledReason === CREDENTIAL_BAD_REASON ? deriveCredentialMark(view, envVarFor) : {}),
   };
 }
 
@@ -194,8 +248,16 @@ freewayRouter.get(
     const liveKeys = new Set(liveViews.map((v) => v.bucketKey));
     const missingViews = allViews.filter((v) => !liveKeys.has(v.bucketKey));
 
+    // Only paid for when at least one live bucket is actually credential-marked
+    // (the common case has none): loadEnvVarLookup's dynamic import of the
+    // module registry is cheap once cached, but there is no reason to pay it
+    // on every poll of a healthy workspace.
+    const envVarFor = liveViews.some((v) => v.disabledReason === CREDENTIAL_BAD_REASON)
+      ? await loadEnvVarLookup()
+      : (): string | undefined => undefined;
+
     const buckets: FreewayStatusBucket[] = [
-      ...liveViews.map((v) => toStatusBucket(v, now)),
+      ...liveViews.map((v) => toStatusBucket(v, now, envVarFor)),
       ...missingViews.map((v) => {
         const { state, disabledReason, enableTargetModuleId } = deriveMissingState(
           v.moduleId,
@@ -220,5 +282,47 @@ freewayRouter.get(
     ];
 
     res.json({ buckets, generatedAt: now });
+  }),
+);
+
+/**
+ * Every module id the ledger's bad-credential mark could legitimately be
+ * keyed on right now: each free-tier provider's own candidate set
+ * ({@link freewayCandidateIds}), unioned across providers. Computed fresh per
+ * request — instance registration can change between requests, and this is
+ * only ever a handful of providers/instances, not worth caching.
+ */
+function validCredentialMarkIds(): Set<string> {
+  const snapshot = getFreeTierSnapshot();
+  const ids = new Set<string>();
+  for (const provider of Object.values(snapshot.providers)) {
+    for (const id of freewayCandidateIds(
+      provider.moduleId,
+      defaultInstanceIdsFor(provider.moduleId),
+    )) {
+      ids.add(id);
+    }
+  }
+  return ids;
+}
+
+// POST /api/freeway/credential-marks/:moduleId/clear — manual recovery path
+// alongside clearFreewayCredentialMarks' automatic one (fired when the vault
+// writes a matching credential). Lets a user unstick a bucket stuck reporting
+// bad credentials without having to re-save (or already know) the exact
+// vault key that would trigger the automatic clear.
+freewayRouter.post(
+  '/credential-marks/:moduleId/clear',
+  asyncHandler(async (req, res) => {
+    const { moduleId } = req.params;
+    // moduleId is a path param, so it must be checked against the real
+    // candidate set before it ever reaches the ledger — otherwise a caller
+    // could write an arbitrary `credential::<anything>` row.
+    if (!validCredentialMarkIds().has(moduleId)) {
+      res.status(400).json({ error: `Not a Freeway candidate module id: ${moduleId}` });
+      return;
+    }
+    await getFreewayLedgerStore().setDisabled(freewayCredentialKey(moduleId), null);
+    res.json({ cleared: true, moduleId });
   }),
 );

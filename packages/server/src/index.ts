@@ -174,8 +174,10 @@ app.use('/api/templates', templatesRouter);
 app.use('/api/collab-routing', collabRoutingRouter);
 app.use('/api/modules', modulesRouter);
 app.use('/api/global-config', globalConfigRouter);
-// Ungated: the router is read-only (one GET /status route), so there is
-// nothing here that needs the vault unlocked.
+// Ungated: GET /status is read-only, and the router's one mutating route
+// (clearing a bad-credential mark) only touches the Freeway quota ledger's
+// mark row — it never reads or writes a credential itself — so nothing here
+// needs the vault unlocked.
 app.use('/api/freeway', freewayRouter);
 app.use('/api/lqa', lqaRouter);
 app.use('/api/tm', tmRouter);
