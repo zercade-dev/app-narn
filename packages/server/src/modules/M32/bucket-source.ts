@@ -259,8 +259,15 @@ export function resolveDispatchModuleId(
  * (`moduleRegistry.getMetadata`) is NOT an alternative source here: it is
  * populated by `loadStatic` at boot, and this must also resolve manifest env
  * vars in contexts that never boot the registry.
+ *
+ * Exported (not just used internally) so a caller that needs the same
+ * base-id -> env-var mapping — e.g. the status route deriving the vault key
+ * that would clear a credential mark — gets it without re-deriving it. The
+ * dynamic `import('../module-index.js')` inside stays lazy either way: it
+ * only runs when this function is actually called, so exporting it adds no
+ * static edge onto the module registry.
  */
-async function loadEnvVarLookup(): Promise<(baseModuleId: string) => string | undefined> {
+export async function loadEnvVarLookup(): Promise<(baseModuleId: string) => string | undefined> {
   const { STATIC_MODULES } = await import('../module-index.js');
   const byBaseId = new Map(
     STATIC_MODULES.map((e) => [e.manifest.id, e.manifest.requiredEnvVars?.[0]] as const),
