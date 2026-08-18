@@ -472,10 +472,7 @@ logsRouter.get(
     }
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     res.setHeader('Content-Type', 'application/x-ndjson');
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="narn-log-capture-${stamp}.ndjson"`,
-    );
+    res.setHeader('Content-Disposition', `attachment; filename="narn-log-capture-${stamp}.ndjson"`);
     res.write(
       `${JSON.stringify({
         type: 'meta',
