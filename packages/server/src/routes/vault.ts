@@ -274,13 +274,17 @@ vaultRouter.put(
 
     // Replacing a key is how a user recovers a Freeway candidate that was
     // marked bad. A ledger failure must never fail the credential write.
+    // `existingVaultKeys` is this same post-write key list — read once and
+    // shared with the response below — so an instance with no derived key of
+    // its own is recognized as recovered by a base-only write too.
+    const existingVaultKeys = credentialStore.listKeys(sid);
     try {
-      await clearFreewayCredentialMarks(Object.keys(updates));
+      await clearFreewayCredentialMarks(Object.keys(updates), { existingVaultKeys });
     } catch (err) {
       logger.warn('vault:freeway-mark-clear-failed', { error: toErrorMessage(err) });
     }
 
-    res.json({ keys: credentialStore.listKeys(sid) });
+    res.json({ keys: existingVaultKeys });
   }),
 );
 
