@@ -458,7 +458,13 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                 className="size-3.5"
                 checked={captureStatus?.active ?? false}
                 onCheckedChange={(checked) => {
-                  void setCaptureActive(checked === true);
+                  // setCaptureActive() only swallows the 409 slots-exhausted
+                  // case itself (via captureError, toasted by the effect
+                  // above) — any other failure (network, 5xx) rethrows, so it
+                  // must be caught here or it becomes an unhandled rejection.
+                  setCaptureActive(checked === true).catch((err: unknown) => {
+                    toast.error((err as Error).message);
+                  });
                 }}
               />
               {t('captureLabel')}
@@ -470,7 +476,9 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                 className="h-6 gap-1 px-1.5 text-[10px] font-mono"
                 onClick={(e) => {
                   e.stopPropagation();
-                  void downloadCapture();
+                  downloadCapture().catch((err: unknown) => {
+                    toast.error((err as Error).message);
+                  });
                 }}
                 data-testid="console-capture-download"
               >

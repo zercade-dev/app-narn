@@ -312,9 +312,19 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
     captureStatus: null,
     captureError: null,
 
+    // Best-effort: this backs an advisory 5s poll (see ConsolePanel), so a
+    // transient failure (server restart, vault locked, offline tab) must not
+    // throw — there is no error UI for a status poll, and an uncaught
+    // rejection here would surface as an unhandled promise rejection on every
+    // tick. Leave `captureStatus` exactly as it was; the next successful poll
+    // catches the view back up.
     refreshCaptureStatus: async () => {
-      const status = await apiRequest<CaptureStatus>('/logs/capture');
-      set({ captureStatus: status });
+      try {
+        const status = await apiRequest<CaptureStatus>('/logs/capture');
+        set({ captureStatus: status });
+      } catch {
+        // swallow — advisory poll, no error surface
+      }
     },
 
     setCaptureActive: async (active) => {
