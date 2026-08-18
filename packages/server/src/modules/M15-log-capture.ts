@@ -43,7 +43,9 @@ const LOCAL_SCOPE = '';
  * head (capture) + tail (pools) bound the loss to a visible mid-run window
  * (droppedCount). Local mode keeps one buffer; cloud keys buffers by tenant
  * with a small concurrent-capture slot limit so tenants cannot exhaust
- * process memory.
+ * process memory — once all slots are held, `start()` for a new tenant
+ * evicts the oldest STOPPED (inactive) capture to free a slot, and only
+ * reports `'slots-exhausted'` when every held slot is still active.
  */
 export class LogCaptureBuffer {
   private readonly captures = new Map<string, CaptureState>();
@@ -64,7 +66,9 @@ export class LogCaptureBuffer {
       !this.captures.has(key) &&
       this.captures.size >= this.caps.maxTenantCaptures
     ) {
-      return 'slots-exhausted';
+      const evictKey = this.oldestInactiveKey();
+      if (evictKey === undefined) return 'slots-exhausted';
+      this.captures.delete(evictKey);
     }
     const fresh: CaptureState = {
       active: true,
@@ -114,6 +118,25 @@ export class LogCaptureBuffer {
 
   reset(): void {
     this.captures.clear();
+  }
+
+  /**
+   * The key of the oldest (smallest `startedAt`) currently-stopped capture,
+   * or undefined when every held slot is still active. Map iteration order
+   * is insertion order, and the strict `<` comparison below keeps the FIRST
+   * key seen on a `startedAt` tie, so ties resolve to the earlier-started
+   * (earlier-inserted) capture deterministically.
+   */
+  private oldestInactiveKey(): string | undefined {
+    let bestKey: string | undefined;
+    let bestStartedAt = Infinity;
+    for (const [key, state] of this.captures) {
+      if (!state.active && state.startedAt < bestStartedAt) {
+        bestKey = key;
+        bestStartedAt = state.startedAt;
+      }
+    }
+    return bestKey;
   }
 
   private toStatus(state: CaptureState | undefined): CaptureStatus {
