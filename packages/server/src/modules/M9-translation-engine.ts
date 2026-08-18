@@ -3257,7 +3257,7 @@ export class TranslationEngine {
     for (const [bucketKey, entries] of outcomes) {
       if (entries.length === 0) continue;
       try {
-        await recordGateOutcomes(bucketKey, entries, deps);
+        await recordGateOutcomes(bucketKey, Date.now(), entries, deps);
       } catch (err) {
         this.logger.warn('translation:freeway-stats-write-failed', {
           bucketKey,

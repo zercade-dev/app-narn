@@ -29,7 +29,7 @@ import { isCloudMode } from '../../identity/registry.js';
 import { moduleRegistry } from '../M6-module-registry.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
 import type { BucketView } from './types.js';
-import { updateGatePassEma } from './stats.js';
+import { decayStats, recordGatePass } from './stats.js';
 
 const FLAP_WINDOW_MS = 5 * 60_000;
 
@@ -642,7 +642,10 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         // `freewayCredentialKey`, keyed on the module that actually failed,
         // not the shared bucket.
         disabledReason: badCredentials ? 'bad credentials' : undefined,
-        stats: state?.stats ?? {},
+        // Aged to `now` for every consumer at once: this is the sole producer
+        // of a BucketView, so scoring never needs a clock of its own. Read-only
+        // — `t` is the age of the evidence, and reading does not refresh it.
+        stats: decayStats(state?.stats ?? {}, now),
       });
     }
   }
@@ -752,6 +755,7 @@ export async function coolBucket(
 /** Fold one run's gate outcomes into stats: ONE read + ONE mergeStats per bucket. */
 export async function recordGateOutcomes(
   bucketKey: string,
+  now: number,
   outcomes: Array<{ language: string; passed: boolean }>,
   deps?: BucketSourceDeps,
 ): Promise<void> {
@@ -760,7 +764,7 @@ export async function recordGateOutcomes(
   const existing = states.find((s) => s.bucketKey === bucketKey);
   let stats = existing?.stats ?? {};
   for (const outcome of outcomes) {
-    stats = updateGatePassEma(stats, outcome.language, outcome.passed);
+    stats = recordGatePass(stats, outcome.language, outcome.passed, now);
   }
   await ledger.mergeStats(bucketKey, stats);
 }

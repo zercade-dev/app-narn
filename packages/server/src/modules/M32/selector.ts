@@ -147,9 +147,9 @@ function isReservoir(bucket: BucketView): number {
  *
  * The pass-rate class is why that key sits above scarcity. It classifies
  * `effectivePassRate` — the tier/band prior, adjusted for a curated
- * weak-language penalty, blended 50/50 with live `gatePassByLanguage`
- * feedback once any exists — which is M32's whole quality signal and reaches
- * ranking only by inflating `estimatedRequests`: a depressed rate both
+ * weak-language penalty, then weighted against live per-language evidence by
+ * how much of that evidence exists — which is M32's whole quality signal and
+ * reaches ranking only by inflating `estimatedRequests`: a depressed rate both
  * shrinks `batchSizeFor` and divides the batch count. Dividing by remaining
  * stock scales that signal down by the abundance ratio, which runs 14x to
  * 720x across the shipped snapshot, so on cost alone a bucket with a
