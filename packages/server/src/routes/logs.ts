@@ -419,6 +419,89 @@ logsRouter.get(
   }),
 );
 
+// --- capture mode: full-fidelity opt-in retention beside the ring pools ---
+
+const captureRateLimiter = rateLimiter({ maxRequests: 30, windowMs: 60_000 });
+
+/** The caller's capture scope: current tenant in cloud, the single local scope otherwise. */
+function captureTenant(): string | undefined {
+  return isCloudMode() ? getCurrentTenant()?.userId : undefined;
+}
+
+// GET /api/logs/capture — status for the caller's scope (polled by the panel; unlimited)
+logsRouter.get('/capture', requireUnlockedVault, (_req: Request, res: Response) => {
+  res.json(logger.capture.status(captureTenant()));
+});
+
+// POST /api/logs/capture/start — begin (or restart) capturing for the caller's scope
+logsRouter.post(
+  '/capture/start',
+  requireUnlockedVault,
+  captureRateLimiter,
+  (_req: Request, res: Response) => {
+    const result = logger.capture.start(captureTenant());
+    if (result === 'slots-exhausted') {
+      res.status(409).json({ error: 'capture-slots-exhausted' });
+      return;
+    }
+    res.json(result);
+  },
+);
+
+// POST /api/logs/capture/stop — stop appending; the buffer stays downloadable
+logsRouter.post(
+  '/capture/stop',
+  requireUnlockedVault,
+  captureRateLimiter,
+  (_req: Request, res: Response) => {
+    res.json(logger.capture.stop(captureTenant()));
+  },
+);
+
+// GET /api/logs/capture/download — the captured run as NDJSON (meta record first)
+logsRouter.get(
+  '/capture/download',
+  requireUnlockedVault,
+  captureRateLimiter,
+  (_req: Request, res: Response) => {
+    const tenant = captureTenant();
+    const status = logger.capture.status(tenant);
+    if (status.startedAt === null) {
+      res.status(404).json({ error: 'no-capture' });
+      return;
+    }
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    res.setHeader('Content-Type', 'application/x-ndjson');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="narn-log-capture-${stamp}.ndjson"`,
+    );
+    res.write(
+      `${JSON.stringify({
+        type: 'meta',
+        startedAt: status.startedAt,
+        generatedAt: Date.now(),
+        entryCount: status.entryCount,
+        droppedCount: status.droppedCount,
+        bytes: status.bytes,
+      })}\n`,
+    );
+    // One write per line: up to 100k entries must never be joined into one string.
+    // In cloud mode strip the tenantId scoping stamp — it is the requester's own
+    // id, and server-side scoping fields stay server-side (run-progress precedent).
+    const stripTenant = isCloudMode();
+    for (const entry of logger.capture.entriesFor(tenant)) {
+      if (stripTenant) {
+        const { tenantId: _tenantId, ...rest } = entry;
+        res.write(`${JSON.stringify(rest)}\n`);
+      } else {
+        res.write(`${JSON.stringify(entry)}\n`);
+      }
+    }
+    res.end();
+  },
+);
+
 // Helper function to read entries from file-based logs
 async function readLogFileEntries(): Promise<AuditLogEntry[]> {
   try {
