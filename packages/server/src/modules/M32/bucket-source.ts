@@ -117,6 +117,16 @@ export interface BucketSourceDeps {
    * rows. Absent means read them here, which is what every other caller does.
    */
   bucketStates?: readonly FreewayBucketState[];
+  /**
+   * {@link clearFreewayCredentialMarks} only: every vault key that exists for
+   * the session AFTER the credential write that triggered the clear. Used to
+   * tell whether an instance candidate has a derived key of its own — the
+   * caller (`routes/vault.ts`) already reads this list via
+   * `credentialStore.listKeys(sid)` for its response, so it is passed in
+   * rather than re-derived. Absent is treated as "no derived keys exist",
+   * i.e. every instance is assumed to inherit the base credential.
+   */
+  existingVaultKeys?: readonly string[];
 }
 
 /**
@@ -259,11 +269,26 @@ async function loadEnvVarLookup(): Promise<(baseModuleId: string) => string | un
 }
 
 /**
- * Clear the bad-credential marks of every Freeway candidate whose vault key
- * appears in `updatedVaultKeys`. Called after a credential write: replacing the
- * key IS the recovery path, so the mark must not outlive it. A candidate's
- * vault key is the base module's manifest env var for the bare base, and
- * `deriveInstanceCredentialKey(envVar, slug)` for each instance.
+ * Clear the bad-credential marks of every Freeway candidate a credential
+ * write just recovered. Called after a credential write: replacing the key
+ * IS the recovery path, so the mark must not outlive it. A candidate is
+ * recovered when either:
+ *
+ * 1. its OWN vault key was written — the bare base module's manifest env var
+ *    for the bare base candidate, `deriveInstanceCredentialKey(envVar, slug)`
+ *    for an instance — or
+ * 2. the base env var was written AND the candidate is an instance with no
+ *    derived key of its own currently in the vault (per `deps.existingVaultKeys`).
+ *
+ * Condition 2 mirrors credential RESOLUTION's own instance→base fallback
+ * (M6's `buildCredentialProvider`/`credentialState.fallbackFor`, and
+ * {@link resolveFreewayProbeCredential} above): an instance with no derived
+ * key of its own dispatches with the base credential, so writing the base
+ * key recovers it exactly as it recovers the bare base candidate. An
+ * instance that DOES have its own derived key is unaffected by a base-only
+ * write — it still dispatches with its own (still-bad) key — so its mark
+ * must survive; that's what the "no derived key of its own" half guards
+ * against dropping.
  */
 export async function clearFreewayCredentialMarks(
   updatedVaultKeys: readonly string[],
@@ -274,19 +299,24 @@ export async function clearFreewayCredentialMarks(
   const ledger = deps.ledger ?? getFreewayLedgerStore();
   const snapshot = getFreeTierSnapshot();
   const instanceIdsFor = deps.instanceIdsFor ?? defaultInstanceIdsFor;
+  const existingVaultKeys = new Set(deps.existingVaultKeys ?? []);
   const envVarFor = await loadEnvVarLookup();
 
   const cleared = new Set<string>();
   for (const provider of Object.values(snapshot.providers)) {
     const envVar = envVarFor(provider.moduleId);
     if (envVar === undefined) continue;
+    const baseWasWritten = updated.has(envVar);
     for (const candidateId of freewayCandidateIds(
       provider.moduleId,
       instanceIdsFor(provider.moduleId),
     )) {
       const parsed = parseModuleInstanceId(candidateId);
       const vaultKey = parsed ? deriveInstanceCredentialKey(envVar, parsed.slug) : envVar;
-      if (!updated.has(vaultKey) || cleared.has(candidateId)) continue;
+      const ownKeyWasWritten = updated.has(vaultKey);
+      const recoveredViaBaseFallback =
+        parsed !== null && baseWasWritten && !existingVaultKeys.has(vaultKey);
+      if ((!ownKeyWasWritten && !recoveredViaBaseFallback) || cleared.has(candidateId)) continue;
       cleared.add(candidateId);
       await ledger.setDisabled(freewayCredentialKey(candidateId), null);
     }
