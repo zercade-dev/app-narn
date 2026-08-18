@@ -14,6 +14,7 @@ import {
   isPriorityLevel,
   type LogPoolDropCounts,
 } from '@zercade-dev/narn-shared';
+import { LogCaptureBuffer, DEFAULT_CAPTURE_CAPS } from './M15-log-capture.js';
 
 export interface LogEntry {
   id: string;
@@ -138,6 +139,14 @@ class ConsoleLogger extends EventEmitter {
   });
 
   /**
+   * Opt-in full-fidelity capture, separate from the ring pools above: while
+   * active for a scope (local, or a tenant in cloud mode) it retains every
+   * entry that reaches `store()` in insertion order, bounded by its own
+   * entry/byte caps. See M15-log-capture.ts.
+   */
+  readonly capture = new LogCaptureBuffer({ ...DEFAULT_CAPTURE_CAPS, isCloud: isCloudMode });
+
+  /**
    * Cloud partitions retention by tenant; local keeps the single shared pool.
    * An entry with no tenant is NOT pooled in cloud: `visibleTo()` in
    * routes/logs.ts requires an exact tenant match, so startup logs, sweep ticks
@@ -151,10 +160,12 @@ class ConsoleLogger extends EventEmitter {
   private store(entry: LogEntry): void {
     if (!isCloudMode()) {
       this.pools.push(entry);
-      return;
+    } else if (entry.tenantId !== undefined) {
+      this.tenantPools.push(entry.tenantId, entry);
     }
-    if (entry.tenantId === undefined) return;
-    this.tenantPools.push(entry.tenantId, entry);
+    // Capture sees every pooled-or-poolable entry; its own record() re-checks
+    // mode/tenant, so an unpoolable cloud entry (no tenantId) stays uncaptured.
+    this.capture.record(entry);
   }
 
   log(level: LogEntry['level'], message: string, metadata?: Record<string, unknown>): void {
@@ -348,6 +359,7 @@ class ConsoleLogger extends EventEmitter {
   clearBuffer(): void {
     this.pools.clear();
     this.tenantPools.clear();
+    this.capture.reset();
   }
 }
 
