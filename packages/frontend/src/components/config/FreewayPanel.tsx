@@ -74,6 +74,14 @@ interface FreewayStatusBucket {
   dispatchModuleId?: string;
   /** For a 'disabled' missing row: the candidate id "Enable it" should scroll to / turn on. */
   enableTargetModuleId?: string;
+  /**
+   * The Freeway candidate that actually carries the bad-credential mark, present
+   * only when `disabledReason` is the bad-credentials reason. Always paired with
+   * {@link credentialKeyName}. Pass to `POST /freeway/credential-marks/:id/clear`.
+   */
+  credentialMarkModuleId?: string;
+  /** The vault key writing would clear {@link credentialMarkModuleId}'s mark. */
+  credentialKeyName?: string;
 }
 
 interface FreewayStatusResponse {
@@ -133,6 +141,9 @@ interface ProviderSummary {
   otherDisabledReason?: string;
   /** First non-empty `enableTargetModuleId` seen across this provider's buckets. */
   enableTargetModuleId?: string;
+  /** First non-empty `credentialMarkModuleId`/`credentialKeyName` pair seen across this provider's buckets. */
+  credentialMarkModuleId?: string;
+  credentialKeyName?: string;
 }
 
 /** One row per distinct providerKey, in first-seen order. */
@@ -164,6 +175,10 @@ function summarizeProviders(buckets: readonly FreewayStatusBucket[]): ProviderSu
     }
     if (!summary.dispatchModuleId && bucket.dispatchModuleId) {
       summary.dispatchModuleId = bucket.dispatchModuleId;
+    }
+    if (!summary.credentialMarkModuleId && bucket.credentialMarkModuleId) {
+      summary.credentialMarkModuleId = bucket.credentialMarkModuleId;
+      summary.credentialKeyName = bucket.credentialKeyName;
     }
   }
   return order.map((key) => byKey.get(key)!);
@@ -239,6 +254,32 @@ export function FreewayPanel(): React.JSX.Element {
         toast.error(t('freeway.instancesLoadFailed', { message: (err as Error).message })),
     },
   );
+
+  // Credential-mark ids currently being cleared, so their "Try again" button can
+  // be disabled for the duration of the request — otherwise a double click could
+  // fire the clear POST twice.
+  const [retryingCredentialMarkIds, setRetryingCredentialMarkIds] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const handleCredentialMarkRetry = (moduleId: string) => {
+    if (retryingCredentialMarkIds.has(moduleId)) return;
+    setRetryingCredentialMarkIds((prev) => new Set(prev).add(moduleId));
+    apiRequest(`/freeway/credential-marks/${encodeURIComponent(moduleId)}/clear`, {
+      method: 'POST',
+    })
+      .then(() => reload())
+      .catch((err) => {
+        toast.error(t('freeway.credentialMarkClearFailed', { message: (err as Error).message }));
+      })
+      .finally(() => {
+        setRetryingCredentialMarkIds((prev) => {
+          const next = new Set(prev);
+          next.delete(moduleId);
+          return next;
+        });
+      });
+  };
 
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [overridesState, setOverridesState] = useState<OverridesLoadState>('loading');
@@ -441,6 +482,21 @@ export function FreewayPanel(): React.JSX.Element {
                                   })}
                                 </Badge>
                               )}
+                              {provider.credentialMarkModuleId && (
+                                <span
+                                  className="text-xs text-muted-foreground"
+                                  data-testid={`freeway-credential-mark-${provider.providerKey}`}
+                                >
+                                  {t('freeway.credentialMarkStatus', {
+                                    module:
+                                      instances.find(
+                                        (instance) =>
+                                          instance.instanceId === provider.credentialMarkModuleId,
+                                      )?.displayName ?? provider.credentialMarkModuleId,
+                                    key: provider.credentialKeyName,
+                                  })}
+                                </span>
+                              )}
                             </div>
                             <div className="flex items-center gap-2">
                               {providerInstances.length > 0 && (
@@ -533,6 +589,21 @@ export function FreewayPanel(): React.JSX.Element {
                                   data-testid={`freeway-enable-module-${provider.providerKey}`}
                                 >
                                   {t('freeway.enableModuleButton')}
+                                </Button>
+                              )}
+                              {provider.credentialMarkModuleId && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() =>
+                                    handleCredentialMarkRetry(provider.credentialMarkModuleId!)
+                                  }
+                                  disabled={retryingCredentialMarkIds.has(
+                                    provider.credentialMarkModuleId,
+                                  )}
+                                  data-testid={`freeway-credential-retry-${provider.providerKey}`}
+                                >
+                                  {t('freeway.credentialRetryButton')}
                                 </Button>
                               )}
                             </div>
