@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { LogEntryPools, type LogPoolDropCounts } from '@zercade-dev/narn-shared';
 import { useRunStore, type RunProgressEvent } from './run-store.js';
 import { useVaultStore } from './vault-store.js';
+import { apiRequest, apiDownload, ApiError } from '../hooks/use-api.js';
 
 export interface LogEntry {
   id: string;
@@ -9,6 +10,15 @@ export interface LogEntry {
   message: string;
   metadata?: Record<string, unknown>;
   timestamp: number;
+}
+
+/** Server-side console log capture status, mirroring the server's `CaptureStatus`. */
+export interface CaptureStatus {
+  active: boolean;
+  startedAt: number | null;
+  entryCount: number;
+  droppedCount: number;
+  bytes: number;
 }
 
 /**
@@ -119,6 +129,21 @@ interface LoggerStoreState {
   addEntry: (entry: LogEntry) => void;
   addEntries: (batch: LogEntry[]) => void;
   clear: () => void;
+
+  /** Server-side capture status, `null` until the first fetch. */
+  captureStatus: CaptureStatus | null;
+  /**
+   * Set when the server refused to start a capture because every capture slot
+   * is already in use (409 `capture-slots-exhausted`). The panel surfaces this
+   * once, then clears it.
+   */
+  captureError: 'slots-exhausted' | null;
+  /** Pulls the current capture status (used for the panel's open-time fetch and its 5s poll). */
+  refreshCaptureStatus: () => Promise<void>;
+  /** Starts or stops the server-side capture. On a 409 leaves `captureStatus` untouched and sets `captureError`. */
+  setCaptureActive: (active: boolean) => Promise<void>;
+  /** Downloads the current capture as an NDJSON attachment. */
+  downloadCapture: () => Promise<void>;
 }
 
 export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
@@ -282,6 +307,39 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
         // the next connect's figure is allowed to land again.
         _serverDropsApplied: false,
       });
+    },
+
+    captureStatus: null,
+    captureError: null,
+
+    refreshCaptureStatus: async () => {
+      const status = await apiRequest<CaptureStatus>('/logs/capture');
+      set({ captureStatus: status });
+    },
+
+    setCaptureActive: async (active) => {
+      try {
+        const status = await apiRequest<CaptureStatus>(
+          active ? '/logs/capture/start' : '/logs/capture/stop',
+          { method: 'POST' },
+        );
+        set({ captureStatus: status });
+      } catch (err) {
+        // The server holds a bounded number of capture slots; a 409 means
+        // they're all in use. Leave `captureStatus` as-is (the capture this
+        // client just tried to start never became active) and surface the
+        // condition once via `captureError` for the panel to toast and clear.
+        if (err instanceof ApiError && err.status === 409) {
+          set({ captureError: 'slots-exhausted' });
+          return;
+        }
+        throw err;
+      }
+    },
+
+    downloadCapture: async () => {
+      const stamp = new Date().getTime();
+      await apiDownload('/logs/capture/download', `console-capture-${stamp}.ndjson`);
     },
   };
 });

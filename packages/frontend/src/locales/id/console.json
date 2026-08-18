@@ -27,5 +27,10 @@
   "repeatCount": "Terulang {{count}} kali",
   "showDetails": "Tampilkan rincian teknis",
   "membersNotShown": "{{count}} baris log lagi tidak ditampilkan",
-  "membersNotShown_other": "{{count}} baris log lagi tidak ditampilkan"
+  "membersNotShown_other": "{{count}} baris log lagi tidak ditampilkan",
+  "captureLabel": "Rekam semua log",
+  "captureTooltip": "Saat aktif, server menyimpan setiap entri log sesi ini agar proses yang panjang bisa dianalisis tanpa kehilangan data.",
+  "captureDownload": "Unduh rekaman ({{captured}})",
+  "captureDropped": "+{{dropped}} tidak tersimpan",
+  "captureSlotsExhausted": "Perekaman sedang sibuk — terlalu banyak perekaman yang berjalan di server ini. Coba lagi nanti."
 }

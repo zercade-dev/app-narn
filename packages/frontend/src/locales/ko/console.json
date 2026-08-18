@@ -27,5 +27,10 @@
   "repeatCount": "{{count}}번 반복됐어요",
   "showDetails": "기술 상세 보기",
   "membersNotShown": "{{count}}개는 더 표시하지 않았어요",
-  "membersNotShown_other": "{{count}}개는 더 표시하지 않았어요"
+  "membersNotShown_other": "{{count}}개는 더 표시하지 않았어요",
+  "captureLabel": "모든 로그 캡처",
+  "captureTooltip": "켜져 있는 동안 서버가 이 세션의 모든 로그 항목을 보관해서, 긴 실행도 유실 없이 분석할 수 있어요.",
+  "captureDownload": "캡처 다운로드 ({{captured}}개)",
+  "captureDropped": "+{{dropped}}개 누락",
+  "captureSlotsExhausted": "지금은 캡처가 사용 중이에요 — 이 서버에서 이미 너무 많은 캡처가 실행 중이에요. 나중에 다시 시도해 주세요."
 }

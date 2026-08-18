@@ -11,11 +11,13 @@ import {
   Lock,
 } from 'lucide-react';
 import { useLogger } from '../../hooks/use-logger.js';
-import type { LogEntry } from '../../stores/logger-store.js';
+import { useLoggerStore, type LogEntry } from '../../stores/logger-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { vaultLockedEvent } from '../../lib/vault-events.js';
 import { useUiSettings, type ConsoleFilter } from '../../stores/ui-settings-store.js';
+import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -94,6 +96,11 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     connected,
     clearEntries,
   } = useLogger();
+  const captureStatus = useLoggerStore((s) => s.captureStatus);
+  const captureError = useLoggerStore((s) => s.captureError);
+  const refreshCaptureStatus = useLoggerStore((s) => s.refreshCaptureStatus);
+  const setCaptureActive = useLoggerStore((s) => s.setCaptureActive);
+  const downloadCapture = useLoggerStore((s) => s.downloadCapture);
   // Tolerate an absent `droppedCounts`/`serverDroppedCounts` (e.g. a test
   // double or an older useLogger() shape that predates the field) rather than
   // crashing the whole panel on `.info`.
@@ -285,6 +292,34 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     virtualizer.measure();
   }, [expandedIds, virtualizer]);
 
+  // Pull the capture status once whenever the panel opens, so the toggle and
+  // download button reflect the server's current state (e.g. a capture
+  // started from another tab/session).
+  useEffect(() => {
+    if (!open) return;
+    void refreshCaptureStatus();
+  }, [open, refreshCaptureStatus]);
+
+  // While the panel is open AND a capture is active, poll the status every 5s
+  // so entryCount/droppedCount/bytes keep advancing on screen during a long
+  // run. Lives here, not in the store, so a background tab with the panel
+  // closed never pays for it.
+  useEffect(() => {
+    if (!open || !captureStatus?.active) return;
+    const interval = setInterval(() => {
+      void refreshCaptureStatus();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [open, captureStatus?.active, refreshCaptureStatus]);
+
+  // Surface a server-refused capture start (all capture slots busy) once via
+  // the app's shared toast pattern, then clear the flag so it doesn't re-fire.
+  useEffect(() => {
+    if (captureError !== 'slots-exhausted') return;
+    toast.error(t('captureSlotsExhausted'));
+    useLoggerStore.setState({ captureError: null });
+  }, [captureError, t]);
+
   // Mark entries as seen on every open/close transition. State is adjusted
   // during render (not in an effect) so the closed bar never paints a frame
   // counting errors the user just watched scroll by while the panel was open.
@@ -412,6 +447,42 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
             >
               <Download className="size-3.5" />
             </Button>
+            <label
+              htmlFor="console-capture-toggle"
+              title={t('captureTooltip')}
+              className="flex items-center gap-1 text-[10px] font-mono uppercase cursor-pointer select-none"
+            >
+              <Checkbox
+                id="console-capture-toggle"
+                data-testid="console-capture-toggle"
+                className="size-3.5"
+                checked={captureStatus?.active ?? false}
+                onCheckedChange={(checked) => {
+                  void setCaptureActive(checked === true);
+                }}
+              />
+              {t('captureLabel')}
+            </label>
+            {captureStatus && captureStatus.entryCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 gap-1 px-1.5 text-[10px] font-mono"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void downloadCapture();
+                }}
+                data-testid="console-capture-download"
+              >
+                <ArrowDownToLine className="size-3" />
+                {t('captureDownload', { captured: captureStatus.entryCount })}
+                {captureStatus.droppedCount > 0 && (
+                  <span className="text-status-warn">
+                    {t('captureDropped', { dropped: captureStatus.droppedCount })}
+                  </span>
+                )}
+              </Button>
+            )}
           </>
         )}
         <Button

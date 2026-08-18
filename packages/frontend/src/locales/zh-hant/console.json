@@ -27,5 +27,10 @@
   "repeatCount": "重複 {{count}} 次",
   "showDetails": "顯示技術細節",
   "membersNotShown": "另有 {{count}} 筆日誌未顯示",
-  "membersNotShown_other": "另有 {{count}} 筆日誌未顯示"
+  "membersNotShown_other": "另有 {{count}} 筆日誌未顯示",
+  "captureLabel": "擷取所有日誌",
+  "captureTooltip": "開啟後，伺服器會保留本次工作階段的每一筆日誌，讓長時間執行的內容也能完整分析、不遺漏。",
+  "captureDownload": "下載擷取記錄（{{captured}} 筆）",
+  "captureDropped": "另有 {{dropped}} 筆已捨棄",
+  "captureSlotsExhausted": "擷取功能目前忙碌中——這台伺服器上執行中的擷取已經太多。請稍後再試。"
 }

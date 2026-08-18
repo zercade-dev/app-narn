@@ -30,5 +30,10 @@
   "showDetails": "Mostra i dettagli tecnici",
   "membersNotShown": "Altre righe non mostrate: {{count}}",
   "membersNotShown_one": "{{count}} altra riga non mostrata",
-  "membersNotShown_other": "{{count}} altre righe non mostrate"
+  "membersNotShown_other": "{{count}} altre righe non mostrate",
+  "captureLabel": "Cattura tutti i log",
+  "captureTooltip": "Quando è attiva, il server conserva ogni voce di log di questa sessione, così un'esecuzione lunga può essere analizzata senza perdite.",
+  "captureDownload": "Scarica la cattura ({{captured}})",
+  "captureDropped": "+{{dropped}} scartate",
+  "captureSlotsExhausted": "La cattura è occupata al momento — sul server sono già in corso troppe catture. Riprova più tardi."
 }

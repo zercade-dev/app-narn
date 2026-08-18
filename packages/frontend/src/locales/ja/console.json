@@ -27,5 +27,10 @@
   "repeatCount": "{{count}}回繰り返されました",
   "showDetails": "技術的な詳細を表示",
   "membersNotShown": "他{{count}}件は表示していません",
-  "membersNotShown_other": "他{{count}}件は表示していません"
+  "membersNotShown_other": "他{{count}}件は表示していません",
+  "captureLabel": "すべてのログを記録",
+  "captureTooltip": "オンにすると、サーバーはこのセッションのすべてのログエントリを保持するため、長時間の実行を欠落なく分析できます。",
+  "captureDownload": "記録をダウンロード（{{captured}}件）",
+  "captureDropped": "+{{dropped}}件破棄",
+  "captureSlotsExhausted": "現在、記録機能が混み合っています（このサーバーで実行中の記録が多すぎます）。しばらくしてからもう一度お試しください。"
 }
