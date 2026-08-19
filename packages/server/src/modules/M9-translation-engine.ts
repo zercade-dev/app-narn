@@ -3520,10 +3520,14 @@ export class TranslationEngine {
           );
           for (const d of decisions) settled.add(settleKey(d));
           return;
-        } else if (freewayDegraded) {
-          // 'keep': dispatching on the exact bucket the plan already relaxed
-          // this batch's band floor onto (Addendum G) — surface why a
-          // lower-tier bucket is serving a hard-band entry.
+        }
+        if (freewayDegraded) {
+          // Reaching here means the batch WILL dispatch ('keep' or
+          // 'reroute') while its band floor is relaxed (Addendum G) —
+          // surface why a lower-tier bucket serves a hard-band entry,
+          // whichever revalidation branch routed it. `bucketKey` is already
+          // the post-reroute key at this point, so the log names the
+          // bucket that is actually about to serve the batch.
           this.logger.info('translation:freeway-degraded', {
             runId,
             bucketKey,
@@ -4215,6 +4219,20 @@ export class TranslationEngine {
                 reason: 'dispatch-failure',
               },
             );
+            if (freewayDegraded && state.bucketKey !== bucketKey) {
+              // The degraded batch failed over mid-dispatch: name the bucket
+              // that actually served it, or the earlier degrade line
+              // attributes the tier relaxation to a bucket that never
+              // produced the text.
+              this.logger.info('translation:freeway-degraded', {
+                runId,
+                bucketKey: state.bucketKey,
+                band: freewayDegraded.fromTier,
+                fromTier: freewayDegraded.fromTier,
+                toTier: freewayDegraded.toTier,
+                waitedAlternativeMs: freewayDegraded.waitedAlternativeMs,
+              });
+            }
             module = state.module;
             moduleId = state.moduleId;
             bucketKey = state.bucketKey;
