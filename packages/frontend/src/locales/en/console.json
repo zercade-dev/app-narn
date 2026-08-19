@@ -27,5 +27,10 @@
   "repeatCount": "Repeated {{count}} times",
   "showDetails": "Show technical details",
   "membersNotShown": "{{count}} more entry not shown",
-  "membersNotShown_other": "{{count}} more entries not shown"
+  "membersNotShown_other": "{{count}} more entries not shown",
+  "captureLabel": "Capture all logs",
+  "captureTooltip": "While on, the server keeps every log entry for this session so a long run can be analyzed without losses.",
+  "captureDownload": "Download capture ({{captured}})",
+  "captureDropped": "+{{dropped}} dropped",
+  "captureSlotsExhausted": "Capture is busy right now — too many captures are running on this server. Try again later."
 }

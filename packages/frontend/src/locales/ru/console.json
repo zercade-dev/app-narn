@@ -36,5 +36,10 @@
   "membersNotShown_one": "Еще {{count}} запись не показана",
   "membersNotShown_few": "Еще {{count}} записи не показано",
   "membersNotShown_many": "Еще {{count}} записей не показано",
-  "membersNotShown_other": "Еще {{count}} записи не показано"
+  "membersNotShown_other": "Еще {{count}} записи не показано",
+  "captureLabel": "Записывать весь журнал",
+  "captureTooltip": "Пока эта функция включена, сервер сохраняет каждую запись журнала за эту сессию, чтобы долгий запуск можно было проанализировать без потерь.",
+  "captureDownload": "Скачать захваченный журнал ({{captured}})",
+  "captureDropped": "ещё {{dropped}} потеряно",
+  "captureSlotsExhausted": "Захват журнала сейчас занят — на этом сервере уже выполняется слишком много захватов. Повторите попытку позже."
 }

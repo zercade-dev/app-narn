@@ -27,5 +27,10 @@
   "repeatCount": "Repetido {{count}} veces",
   "showDetails": "Mostrar detalles técnicos",
   "membersNotShown": "{{count}} entrada más no mostrada",
-  "membersNotShown_other": "{{count}} entradas más no mostradas"
+  "membersNotShown_other": "{{count}} entradas más no mostradas",
+  "captureLabel": "Capturar todos los registros",
+  "captureTooltip": "Mientras esté activado, el servidor conserva cada entrada de registro de esta sesión para poder analizar una ejecución larga sin pérdidas.",
+  "captureDownload": "Descargar captura ({{captured}})",
+  "captureDropped": "+{{dropped}} descartadas",
+  "captureSlotsExhausted": "La captura está ocupada en este momento: hay demasiadas capturas en curso en este servidor. Inténtalo de nuevo más tarde."
 }

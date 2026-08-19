@@ -30,5 +30,10 @@
   "showDetails": "Ver detalhes técnicos",
   "membersNotShown": "Outras linhas não exibidas: {{count}}",
   "membersNotShown_one": "Mais {{count}} linha não exibida",
-  "membersNotShown_other": "Mais {{count}} linhas não exibidas"
+  "membersNotShown_other": "Mais {{count}} linhas não exibidas",
+  "captureLabel": "Capturar todos os logs",
+  "captureTooltip": "Enquanto estiver ativado, o servidor mantém cada entrada de log desta sessão para que uma execução longa possa ser analisada sem perdas.",
+  "captureDownload": "Baixar captura ({{captured}})",
+  "captureDropped": "+{{dropped}} descartados",
+  "captureSlotsExhausted": "A captura está ocupada agora — há capturas demais em execução neste servidor. Tente novamente mais tarde."
 }
