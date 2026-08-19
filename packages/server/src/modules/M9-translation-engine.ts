@@ -3076,17 +3076,37 @@ export class TranslationEngine {
           // spending requests — the single failover hop is used up.
           const strikeAt = Date.now();
           if (providerFailure) {
-            // Cool it too (so later batches skip it), then fail these pairs:
-            // a provider that isn't answering is not a quota wait. A dead
-            // model is never coming back this window, so it cools to the day
-            // reset instead of the generic 15-minute provider-error window.
+            // Cool it too (so later batches skip it) — a provider that isn't
+            // answering is not a quota wait. A dead model is never coming
+            // back this window, so it cools to the day reset instead of the
+            // generic 15-minute provider-error window.
             await this.coolFreewayBucket(
               state.bucketKey,
               strikeAt,
               isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
               deps,
             );
-            return { kind: 'error', error: err, authCancel: false };
+            // The one-hop budget is spent either way, but whether these pairs
+            // FAIL depends on whether the field is actually empty. Revalidate
+            // against fresh views (this cool's own write included): a
+            // standing bucket — 'reroute', or 'keep' from the same stale-read
+            // race the hop-0 branch guards against — parks the pairs on the
+            // short floor instead of failing them; only 'blocked' (nothing
+            // left, ever) earns the provider's own error. 'defer' keeps its
+            // own resume estimate.
+            const freshBuckets = await loadBucketViews(strikeAt, deps);
+            const revalidated = revalidateGroup(
+              { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
+              freshBuckets,
+              strikeAt,
+            );
+            if (revalidated.kind === 'blocked') {
+              return { kind: 'error', error: err, authCancel: false };
+            }
+            return {
+              kind: 'defer',
+              resumeAt: revalidated.kind === 'defer' ? revalidated.resumeAt : strikeAt + 60_000,
+            };
           }
           if (!rateLimited) {
             // A repeat auth failure marks the failover candidate's credential
@@ -3152,6 +3172,16 @@ export class TranslationEngine {
         // error on these pairs — never a quota park (this is not a quota
         // problem) and never the 'add a free key' hint.
         if (providerFailure && revalidated.kind !== 'reroute') {
+          // 'keep' here is never a genuine reprieve: the cool above just wrote
+          // this bucket's cooldown, so a fresh read reporting it still
+          // eligible means the read raced ahead of that write (concurrent
+          // sibling batches hitting the same dead bucket within milliseconds
+          // of each other). Park instead of failing the pairs — the write
+          // did land, so the next planning pass sees the cooldown and routes
+          // around it.
+          if (revalidated.kind === 'keep') {
+            return { kind: 'defer', resumeAt: now + 60_000 };
+          }
           return { kind: 'error', error: err, authCancel: false };
         }
         if (revalidated.kind === 'defer') {
