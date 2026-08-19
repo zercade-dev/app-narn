@@ -12,6 +12,7 @@
   "module": "模組",
   "modulePlaceholder": "選擇模組",
   "model": "模型",
+  "freewayModelHint": "NARN Freeway 會自動為每個批次選擇最佳免費模型——不需要選擇模型或推理強度。",
   "aiAdvancedOptions": "進階選項",
   "noModules": "沒有可用的 AI 模組。請先在設定分頁中設定一個。",
   "includeExisting": "同時把條目指派到既有類別",

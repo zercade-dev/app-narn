@@ -512,6 +512,10 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
         enabled: true,
       },
     ].filter(
+      // The `m.id === FREEWAY_MODULE_ID` branch only ever matches the
+      // synthetic entry appended above — module-index.ts's static registry
+      // guarantees no real module is ever registered under the 'freeway' id,
+      // so this can't accidentally admit a real (non-capable) module.
       (m) =>
         (m.id === FREEWAY_MODULE_ID || CATEGORY_CAPABLE_MODULE_IDS.has(m.baseModuleId ?? m.id)) &&
         isOfferableModule(m, withInstances) &&
@@ -1313,7 +1317,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
                 />
               </div>
 
-              {moduleId && (
+              {moduleId && moduleId !== FREEWAY_MODULE_ID && (
                 <>
                   <div className="space-y-1.5">
                     <Label htmlFor="category-ai-model">{t('model')}</Label>
@@ -1333,6 +1337,19 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
                     onChange={setReasoningEffort}
                   />
                 </>
+              )}
+
+              {/* Freeway picks its own model per batch — no model/effort
+                  route (`/api/modules/freeway/models`) exists for the
+                  suppressed selectors to call, so a one-line explanation
+                  replaces them. */}
+              {moduleId === FREEWAY_MODULE_ID && (
+                <p
+                  className="text-xs text-muted-foreground"
+                  data-testid="category-ai-freeway-model-hint"
+                >
+                  {t('freewayModelHint')}
+                </p>
               )}
 
               <div className="border-t pt-3">

@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "Bir modül seçin…",
   "generateModel": "Model",
   "generateReasoningEffort": "Akıl yürütme çabası",
+  "generateFreewayModelHint": "NARN Freeway, her yığın için en iyi ücretsiz modeli otomatik olarak seçer — model veya akıl yürütme çabası seçimi gerekmez.",
   "generateAdvancedOptions": "Gelişmiş seçenekler",
   "generateNoSuggestions": "Yapay zekâ önerecek yeni terim bulamadı.",
   "generateSuggestionCount": "{{count}} terim",

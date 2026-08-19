@@ -727,7 +727,7 @@ export function GenerateGlossaryDialog({
           />
         </div>
 
-        {effectiveModuleId && (
+        {effectiveModuleId && effectiveModuleId !== FREEWAY_MODULE_ID && (
           <div className="space-y-1.5">
             <Label htmlFor="glossary-generate-model">{t('generateModel')}</Label>
             <ModuleModelSelector
@@ -746,6 +746,18 @@ export function GenerateGlossaryDialog({
               label={t('generateReasoningEffort')}
             />
           </div>
+        )}
+
+        {/* Freeway picks its own model per batch — no model/effort route
+            (`/api/modules/freeway/models`) exists for the suppressed
+            selectors to call, so a one-line explanation replaces them. */}
+        {effectiveModuleId === FREEWAY_MODULE_ID && (
+          <p
+            className="text-xs text-muted-foreground"
+            data-testid="glossary-generate-freeway-model-hint"
+          >
+            {t('generateFreewayModelHint')}
+          </p>
         )}
 
         <div className="border-t pt-3">

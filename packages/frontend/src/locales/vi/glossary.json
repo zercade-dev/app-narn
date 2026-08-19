@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "Chọn một mô-đun…",
   "generateModel": "Mô hình",
   "generateReasoningEffort": "Mức độ suy luận",
+  "generateFreewayModelHint": "NARN Freeway tự động chọn mô hình miễn phí tốt nhất cho mỗi lô — không cần chọn mô hình hay mức độ suy luận.",
   "generateAdvancedOptions": "Tùy chọn nâng cao",
   "generateNoSuggestions": "AI không tìm thấy thuật ngữ mới nào để đề xuất.",
   "generateSuggestionCount": "{{count}} thuật ngữ",

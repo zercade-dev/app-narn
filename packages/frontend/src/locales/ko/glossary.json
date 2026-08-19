@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "모듈을 선택하세요…",
   "generateModel": "모델",
   "generateReasoningEffort": "추론 강도",
+  "generateFreewayModelHint": "NARN Freeway가 배치마다 가장 좋은 무료 모델을 자동으로 선택해서, 모델이나 추론 강도를 선택할 필요가 없어요.",
   "generateAdvancedOptions": "고급 옵션",
   "generateNoSuggestions": "AI가 제안할 새 용어를 찾지 못했어요.",
   "generateSuggestionCount": "용어 {{count}}개",
