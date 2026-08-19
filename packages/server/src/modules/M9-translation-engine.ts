@@ -105,6 +105,7 @@ import { assertRunCapacity, sweepOrphanedRuns } from './M9/run-capacity.js';
 import { PreviewNotPossibleError } from '../types/errors.js';
 import {
   isAbortError,
+  isModelUnavailableError,
   isRateLimitError,
   isRunCancellingAuthError,
   rateLimitCooldownMs,
@@ -3047,8 +3048,16 @@ export class TranslationEngine {
         // has to trigger the failover — surface it as a throw (mirrors the
         // non-Freeway `withRateLimitRetry` path).
         const rateLimited = results.find((r) => r?.error && isRateLimitError(r.error));
-        if (!rateLimited?.error) return { kind: 'results', results };
-        throw new Error(rateLimited.error);
+        if (rateLimited?.error) throw new Error(rateLimited.error);
+        // An all-errored batch is bucket-shaped, not content-shaped: a dead
+        // model, an exhausted quota, or a bad credential takes out every job
+        // at once, while a content refusal fails one. Surface it as a throw
+        // so the same classify → cool → failover hop that handles a thrown
+        // module error runs.
+        const allErrored =
+          results.length > 0 && results.every((r) => r?.error !== undefined && r.error !== '');
+        if (allErrored) throw new Error(results[0]!.error);
+        return { kind: 'results', results };
       } catch (err) {
         if (isAbortError(err) || signal?.aborted) {
           return { kind: 'error', error: err, authCancel: false };
@@ -3068,11 +3077,13 @@ export class TranslationEngine {
           const strikeAt = Date.now();
           if (providerFailure) {
             // Cool it too (so later batches skip it), then fail these pairs:
-            // a provider that isn't answering is not a quota wait.
+            // a provider that isn't answering is not a quota wait. A dead
+            // model is never coming back this window, so it cools to the day
+            // reset instead of the generic 15-minute provider-error window.
             await this.coolFreewayBucket(
               state.bucketKey,
               strikeAt,
-              FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
+              isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
               deps,
             );
             return { kind: 'error', error: err, authCancel: false };
@@ -3119,10 +3130,12 @@ export class TranslationEngine {
             'pool',
           );
         } else if (providerFailure) {
+          // A dead model is never coming back this window, so it cools to
+          // the day reset instead of the generic 15-minute provider window.
           await this.coolFreewayBucket(
             state.bucketKey,
             now,
-            FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
+            isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
             deps,
           );
         } else {
