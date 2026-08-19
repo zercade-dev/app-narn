@@ -73,11 +73,20 @@ export const PER_MINUTE_RATE_LIMIT_COOLDOWN_MS = 70_000;
 
 /**
  * A rate limit the provider named as per-MINUTE ("...-per-min",
- * "requests per minute"). Word-bounded on BOTH sides so a camelCase quota name
- * that merely contains the letters — `RequestsPerMinutePerProject` — is not
- * read as a minute-scale limit.
+ * "requests per minute").
  */
 const PER_MINUTE_LIMIT_RE = /\bper[-_\s]?min(ute)?s?\b/i;
+
+/**
+ * A camelCase PerMinute quota id (Google style:
+ * `GenerateRequestsPerMinutePerProjectPerModel`). Google's minute-scale 429
+ * carries the same "exceeded your current quota" prose as the daily one, with
+ * the scale visible only in the violated quota's id — the id names THIS
+ * limit's window, so it is authoritative and must be tested before the
+ * day-scale guard. Case-sensitive so lower-case prose that merely contains
+ * the letters ("supermini") never matches.
+ */
+const CAMEL_MINUTE_QUOTA_RE = /PerMinute/;
 
 /**
  * Day-scale quota vocabulary that overrides any short provider Retry-After:
@@ -100,7 +109,7 @@ const DAY_SCALE_QUOTA_RE =
 export function rateLimitCooldownMs(err: unknown): number | undefined {
   const retryAfter = retryAfterMsOf(err);
   const message = err instanceof Error ? err.message : String(err);
-  if (PER_MINUTE_LIMIT_RE.test(message)) {
+  if (PER_MINUTE_LIMIT_RE.test(message) || CAMEL_MINUTE_QUOTA_RE.test(message)) {
     return Math.max(retryAfter ?? 0, PER_MINUTE_RATE_LIMIT_COOLDOWN_MS);
   }
   if (DAY_SCALE_QUOTA_RE.test(message)) return undefined;
