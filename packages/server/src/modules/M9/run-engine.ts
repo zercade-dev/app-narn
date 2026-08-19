@@ -172,6 +172,15 @@ export interface RunBatchOptions<TItem, TResult> {
    * batch makes is debited against that bucket's quota ledger.
    */
   freeway?: FreewayBatchBinding;
+  /**
+   * Re-selects a free-tier bucket for this batch. Called at most ONCE per
+   * batch, and only after a rate limit outlived the retries on a Freeway-bound
+   * batch: the engine re-selects, rebuilds its module and swaps the reference
+   * {@link RunBatchOptions.call} dispatches through, then returns the NEW
+   * binding. `undefined` means nothing is eligible — the batch then fails
+   * exactly as it did before the hop existed.
+   */
+  freewayReroute?: () => Promise<FreewayBatchBinding | undefined>;
   /** Handles one result against the live `status` (persist + push, or recordFailure). */
   onResult: (result: TResult, status: RunStatus) => Promise<void>;
   /** Post-terminal hook forwarded to {@link finalizeTerminal} (e.g. M25 stamp). */
@@ -673,9 +682,12 @@ export abstract class BackgroundRunEngine<TRecord> {
    * failure handling), the usage fold, the cancel-guarded per-result loop, and
    * the `finally { emitProgress; finalizeTerminal }` terminal flip.
    *
-   * Await ordering and control flow are byte-identical to the original inline
+   * Await ordering and control flow are preserved from the original inline
    * `processBatch`: every early `return` (cancelled/aborted, whole-batch
-   * failure, per-result cancel guard) and the single `finally` are preserved.
+   * failure, per-result cancel guard) and the single `finally` still hold. The
+   * one addition is the bounded re-route hop (see
+   * {@link RunBatchOptions.freewayReroute}), which is reachable only from a
+   * rate-limited free-tier batch and leaves every other failure path untouched.
    *
    * This thin wrapper only brackets the detached task with {@link
    * taskStarted}/{@link taskEnded} (for the settled-deferred drain) — the
@@ -703,51 +715,74 @@ export abstract class BackgroundRunEngine<TRecord> {
 
     try {
       let results: TResult[];
-      try {
-        // Rate-limit-aware retry shared with M9's dispatch paths: a typed
-        // 429 (RateLimitError, incl. quota-phrased ones) waits the provider
-        // cool-down (clamped) and re-sends the WHOLE batch instead of
-        // failing every item on the first hit. Any other error — and the
-        // final exhausted attempt — falls through to the catch below
-        // unchanged. CancelledError from a mid-wait cancel is named
-        // 'AbortError', so the existing isAbortError guard swallows it.
-        results = await withRateLimitRetry(
-          async () => {
-            const attempt = await opts.call(signal);
-            // One provider call = one free-tier request, debited as soon as it
-            // returns (a retried attempt debits again, on its own return).
-            await this.recordFreewayDispatch(opts.freeway, attempt.map(opts.usageOf));
-            return attempt;
-          },
-          {
-            signal,
-            isCancelled: () => (status.status as RunStatusCode) === RunStatusCode.Cancelled,
-            onRetry: (attempt, delayMs) =>
-              this.logger.warn(`${this.logPrefix}:rate-limited - retrying batch`, {
+      // The bucket this batch currently spends against; a re-route swaps it for
+      // the next hop. Undefined for an ordinary (non-free-tier) run.
+      let binding = opts.freeway;
+      for (let hop = 0; ; hop++) {
+        try {
+          // Rate-limit-aware retry shared with M9's dispatch paths: a typed
+          // 429 (RateLimitError, incl. quota-phrased ones) waits the provider
+          // cool-down (clamped) and re-sends the WHOLE batch instead of
+          // failing every item on the first hit. Any other error — and the
+          // final exhausted attempt — falls through to the catch below
+          // unchanged. CancelledError from a mid-wait cancel is named
+          // 'AbortError', so the existing isAbortError guard swallows it.
+          results = await withRateLimitRetry(
+            async () => {
+              const attempt = await opts.call(signal);
+              // One provider call = one free-tier request, debited as soon as it
+              // returns (a retried attempt debits again, on its own return).
+              await this.recordFreewayDispatch(binding, attempt.map(opts.usageOf));
+              return attempt;
+            },
+            {
+              signal,
+              isCancelled: () => (status.status as RunStatusCode) === RunStatusCode.Cancelled,
+              onRetry: (attempt, delayMs) =>
+                this.logger.warn(`${this.logPrefix}:rate-limited - retrying batch`, {
+                  runId,
+                  moduleId,
+                  attempt,
+                  delayMs,
+                }),
+            },
+          );
+          break;
+        } catch (err) {
+          if (isAbortError(err) || signal?.aborted) return;
+          // A free-tier bucket that rate-limited us through every retry is out of
+          // capacity, not merely unlucky: cool it so the pool stops ranking it
+          // ready for the next run.
+          if (isRateLimitError(err)) await this.coolFreewayBucket(binding, err);
+          // One re-route hop: a free-tier run whose bucket is spent moves to a
+          // sibling bucket instead of dying while healthy ones idle. Only for a
+          // Freeway-bound batch, only on a rate limit, and only once — a second
+          // exhaustion (or nothing eligible to move to) fails the batch exactly
+          // as it always has.
+          if (hop === 0 && binding && isRateLimitError(err) && opts.freewayReroute) {
+            const next = await opts.freewayReroute();
+            if (next) {
+              this.logger.info(`${this.logPrefix}:freeway-rerouted`, {
                 runId,
-                moduleId,
-                attempt,
-                delayMs,
-              }),
-          },
-        );
-      } catch (err) {
-        if (isAbortError(err) || signal?.aborted) return;
-        // A free-tier bucket that rate-limited us through every retry is out of
-        // capacity, not merely unlucky: cool it so the pool stops ranking it
-        // ready for the next run. The batch still fails as it always has —
-        // background runs do not re-route mid-flight.
-        if (isRateLimitError(err)) await this.coolFreewayBucket(opts.freeway, err);
-        // This message is persisted to the run sidecar (on the /data volume) and
-        // served via the runs API, so value-scrub (live vault values) on top of
-        // toErrorMessage's pattern redaction — a generic-ai custom key is value-only
-        // detectable and would slip past the pattern stripper alone.
-        const message = sanitizeLogObject({ m: toErrorMessage(err) }).m;
-        for (const item of batch) {
-          this.recordFailure(status, opts.failureKey(item), message);
+                from: binding.bucketKey,
+                to: next.bucketKey,
+                reason: 'rate-limit',
+              });
+              binding = next;
+              continue;
+            }
+          }
+          // This message is persisted to the run sidecar (on the /data volume) and
+          // served via the runs API, so value-scrub (live vault values) on top of
+          // toErrorMessage's pattern redaction — a generic-ai custom key is value-only
+          // detectable and would slip past the pattern stripper alone.
+          const message = sanitizeLogObject({ m: toErrorMessage(err) }).m;
+          for (const item of batch) {
+            this.recordFailure(status, opts.failureKey(item), message);
+          }
+          this.logger.warn(`${this.logPrefix}:batch-failed`, { runId, moduleId, error: message });
+          return;
         }
-        this.logger.warn(`${this.logPrefix}:batch-failed`, { runId, moduleId, error: message });
-        return;
       }
 
       accumulateUsage(status, moduleId, results.map(opts.usageOf));
