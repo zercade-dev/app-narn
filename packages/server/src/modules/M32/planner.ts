@@ -172,6 +172,24 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
         });
         continue;
       }
+      // The degrade wait qualified but no sub-tier bucket is servable RIGHT
+      // NOW (e.g. the only tier-below bucket is minute-cooling at this
+      // instant). Park until the sooner of the qualified wait and that
+      // bucket's own resume, or the group day-parks a wait the degrade was
+      // meant to avoid. Weak-language check at the ORIGINAL band, mirroring
+      // the comment above.
+      const subTier = working.filter(
+        (b) =>
+          b.disabledReason === undefined &&
+          b.qualityTier === toTier &&
+          !(group.band >= 3 && b.weakLanguages?.includes(group.targetLanguage)),
+      );
+      if (subTier.length > 0) {
+        const relaxedGroup = { ...group, band: toTier };
+        const subResume = Math.min(...subTier.map((b) => bucketResumeAt(b, relaxedGroup)));
+        plan.deferred.push({ group, resumeAt: Math.min(resumeAt, subResume) });
+        continue;
+      }
     }
     plan.deferred.push({ group, resumeAt });
   }

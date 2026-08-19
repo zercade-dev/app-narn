@@ -786,10 +786,17 @@ export interface FreewayLedgerStore {
   usage(bucketKey: string, windows: FreewayWindowRef[]): Promise<FreewayWindowUsage[]>;
   /** All bucket states for the tenant (empty array when none). */
   listBuckets(): Promise<FreewayBucketState[]>;
+  /** Single-row read of one bucket's state, or undefined when the row is absent. */
+  getBucket(bucketKey: string): Promise<FreewayBucketState | undefined>;
   /** Overwrites cooldown_until (last write wins); bumps flap_count when `flap` is true. Upserts. */
   setCooldown(bucketKey: string, until: number, opts?: { flap?: boolean }): Promise<void>;
   /** Clear cooldown and reset flap_count to 0. No-op when the row is absent. */
   clearCooldown(bucketKey: string): Promise<void>;
+  /**
+   * Reset flap_count to 0 without touching cooldown_until. Plain UPDATE, not
+   * an upsert — a no-op when the row is absent or already at 0.
+   */
+  resetFlap(bucketKey: string): Promise<void>;
   /**
    * Mark a bucket disabled (bad credentials) or re-enabled (null). Upserts.
    * Also the writer for the `credential::<moduleId>` rows — see

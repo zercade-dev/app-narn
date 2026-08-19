@@ -117,6 +117,25 @@ export class PgFreewayLedgerStore implements FreewayLedgerStore {
     }));
   }
 
+  /** Single-row read of one bucket's state, or undefined when the row is absent. */
+  async getBucket(bucketKey: string): Promise<FreewayBucketState | undefined> {
+    const { rows } = await this.db.query<FreewayBucketRow>(
+      `select bucket_key, cooldown_until, disabled_reason, flap_count, stats, updated_at
+         from freeway_buckets where bucket_key = $1`,
+      [bucketKey],
+    );
+    const row = rows[0];
+    if (!row) return undefined;
+    return {
+      bucketKey: row.bucket_key,
+      cooldownUntil: row.cooldown_until == null ? undefined : Number(row.cooldown_until),
+      disabledReason: row.disabled_reason ?? undefined,
+      flapCount: Number(row.flap_count ?? 0),
+      stats: row.stats ?? {},
+      updatedAt: Number(row.updated_at ?? 0),
+    };
+  }
+
   async setCooldown(bucketKey: string, until: number, opts?: { flap?: boolean }): Promise<void> {
     const flapDelta = opts?.flap ? 1 : 0;
     const now = Date.now();
@@ -136,6 +155,15 @@ export class PgFreewayLedgerStore implements FreewayLedgerStore {
     await this.db.query(
       `update freeway_buckets set cooldown_until = null, flap_count = 0, updated_at = $2
         where bucket_key = $1`,
+      [bucketKey, Date.now()],
+    );
+  }
+
+  /** No-op when the row is absent or already at 0 (plain UPDATE, not an upsert). */
+  async resetFlap(bucketKey: string): Promise<void> {
+    await this.db.query(
+      `update freeway_buckets set flap_count = 0, updated_at = $2
+        where bucket_key = $1 and flap_count > 0`,
       [bucketKey, Date.now()],
     );
   }

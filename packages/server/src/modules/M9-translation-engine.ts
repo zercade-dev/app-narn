@@ -77,6 +77,7 @@ import {
   runWithTenant,
   type TenantContext,
 } from '../storage/pg/tenant-context.js';
+import { listQuotaParkedRuns } from '../storage/quota-parked-runs.js';
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { credentialStore, sanitizeLogObject } from './M16-credential-store.js';
 import { lqaGate } from './M10-lqa-gate.js';
@@ -89,7 +90,7 @@ import {
   maskDiagnosticsToIssues,
 } from './M17-translation-masker.js';
 import { resolveEffectiveModuleConfig } from './M19-global-config-store.js';
-import { runTrivialMatchers } from './trivial-matchers.js';
+import { needsTranslation, runTrivialMatchers } from './trivial-matchers.js';
 import { metricsCollector } from './metrics-collector.js';
 import {
   buildTmFingerprint,
@@ -125,6 +126,7 @@ import {
   loadBucketViews,
   recordDispatch,
   recordGateOutcomes,
+  resetBucketFlap,
   resolveDispatchModuleId,
   resolveFreewayProbeCredential,
 } from './M32/bucket-source.js';
@@ -132,7 +134,7 @@ import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/re
 import {
   effectiveRemainingRequests,
   findMinuteStarvedEscalation,
-  selectEscalation,
+  selectEscalationCandidates,
 } from './M32/selector.js';
 import { difficultyBand } from './M32/difficulty.js';
 import type { Assignment, BucketView, DifficultyBand, JobGroup } from './M32/types.js';
@@ -210,6 +212,12 @@ export interface TranslationEngineDeps {
    * {@link TranslationEngine.QUOTA_SWEEP_INTERVAL_MS}.
    */
   quotaSweepIntervalMs?: number;
+  /**
+   * Cross-tenant scan for runs the store has parked on free quota, consulted
+   * once per process by the sweep (see {@link TranslationEngine.sweepQuotaResumes}).
+   * Test seam only: the default is the real storage helper.
+   */
+  listParkedRuns?: typeof listQuotaParkedRuns;
   /**
    * Overrides for the Freeway bucket source (quota ledger, module status,
    * cloud-mode flag). Only `ledger`/`cloudMode` are normally injected: the
@@ -569,6 +577,12 @@ export class TranslationEngine {
   private readonly freewayTransientParkedPairs = new Map<string, Set<string>>();
   /** Set while a sweep pass is running, so a slow pass can't overlap the next tick. */
   private quotaSweepInFlight = false;
+  /**
+   * Whether the store has already been scanned for parks this process (see
+   * {@link adoptPersistedParks}). Set only after a scan that actually
+   * completed, so a boot-time DB outage retries instead of stranding them.
+   */
+  private parkAdoptionDone = false;
   /** The armed sweep interval (unref'd), when the engine opted in. */
   private quotaSweepTimer?: ReturnType<typeof setInterval>;
   /**
@@ -656,6 +670,8 @@ export class TranslationEngine {
   private readonly logger: LoggerLike;
   private readonly pricing: PricingProvider;
   private readonly retryBaseDelayMs: number;
+  /** Injected persisted-park scan; defaults to the real storage helper. */
+  private readonly _listParkedRuns?: typeof listQuotaParkedRuns;
 
   constructor(deps: TranslationEngineDeps = {}) {
     const concurrency = deps.concurrency ?? Number.parseInt(getTranslationConcurrency(), 10);
@@ -672,6 +688,7 @@ export class TranslationEngine {
     this.logger = deps.logger ?? defaultLogger;
     this.pricing = deps.pricing ?? defaultPricingProvider;
     this.retryBaseDelayMs = deps.retryBaseDelayMs ?? 1000;
+    this._listParkedRuns = deps.listParkedRuns;
     this.freewayOverrides = deps.freeway ?? {};
     const sweepIntervalMs = deps.quotaSweepIntervalMs ?? 0;
     if (sweepIntervalMs > 0) {
@@ -1455,7 +1472,7 @@ export class TranslationEngine {
       for (const targetLanguage of targetLanguages) {
         if (targetLanguage === project.sourceLanguage) continue;
         if (pairAllow && !pairAllow.has(`${entry.id}\0${targetLanguage}`)) continue;
-        if (!reTranslate && entry.translations[targetLanguage]?.text) continue;
+        if (!needsTranslation(entry, targetLanguage, reTranslate)) continue;
         decisions.push(this.router.route(entry, targetLanguage, rules, availableModules));
       }
     }
@@ -2312,20 +2329,75 @@ export class TranslationEngine {
    *   permanently-unservable and FAIL it. The run is left parked instead — a
    *   manual resume (or resume-with-module) under a live session recovers it.
    *
+   * The pass also adopts the parks a restart left behind (see
+   * {@link adoptPersistedParks}), so a park never depends on the process that
+   * created it still being alive.
+   *
+   * `opts` is the vault-unlock nudge's entry point:
+   * - `fallbackSessionId` — a session to stand in for runs whose OWN captured
+   *   session did not survive the restart. Applied only to a run of the
+   *   CALLING tenant (a session must never cross tenants) that has no session
+   *   of its own.
+   * - `force` — skip the per-run re-attempt throttle for this pass (an unlock
+   *   is a real state change, not a tick). Applied to the CALLING tenant's own
+   *   runs only: another tenant's park learned nothing from this unlock, so it
+   *   keeps its ordinary throttle. The `resumeAt` requirement always holds: a
+   *   park that is not due yet is never re-planned.
+   *
    * @returns how many runs were actually re-dispatched.
    */
-  async sweepQuotaResumes(now: number = Date.now()): Promise<number> {
+  async sweepQuotaResumes(
+    now: number = Date.now(),
+    opts?: { fallbackSessionId?: string; force?: boolean },
+  ): Promise<number> {
     if (this.quotaSweepInFlight) return 0;
     this.quotaSweepInFlight = true;
     try {
-      const due = [...this.runs.values()].filter((status) => this.isQuotaResumeDue(status, now));
+      await this.adoptPersistedParks();
+      // Read the ambient tenant HERE, not inside `attempt`: the attempt runs
+      // inside runWithTenant(tenant, …), which re-scopes the ambient tenant to
+      // the RUN's own — the guards below would then compare the run against
+      // itself and always pass.
+      const callerTenant = getCurrentTenant();
+      const due = [...this.runs.values()].filter((status) => {
+        // `force` is news about the CALLER's own state (their vault just
+        // unlocked), so it may only waive the throttle on the caller's own
+        // runs. Another tenant's park keeps its ordinary throttle — same
+        // both-sides-known guard the fallback session uses below.
+        const owner = this.runTenants.get(status.runId) ?? this.queuedTenants.get(status.runId);
+        const forceThisRun =
+          opts?.force === true &&
+          owner?.userId !== undefined &&
+          owner.userId === callerTenant?.userId;
+        return this.isQuotaResumeDue(status, now, forceThisRun);
+      });
       let resumed = 0;
       for (const status of due) {
         const { runId, projectId } = status;
+        // Per-project dispatch guard. It matters most for adopted parks:
+        // `resume`'s own guard only covers a run IT adopts, so without this a
+        // park adopted here could start alongside a run that began before the
+        // adoption — and a restart can hand back SEVERAL parks for one
+        // project, which would then all start at once. Deliberately not
+        // stamped as an attempt: the project frees up on its own and the next
+        // tick should retry immediately.
+        if (this.hasDispatchingProjectRun(projectId, runId)) continue;
         this.lastQuotaResumeAttempt.set(runId, now);
         const tenant = this.runTenants.get(runId) ?? this.queuedTenants.get(runId);
         const attempt = async (): Promise<boolean> => {
-          const sessionId = this.runSessions.get(runId) ?? this.queuedSessions.get(runId);
+          const ownSession = this.runSessions.get(runId) ?? this.queuedSessions.get(runId);
+          // A fallback session (the vault-unlock nudge) may only stand in for a
+          // run whose own captured session did not survive the restart AND
+          // whose tenant is the calling one — a session must never cross
+          // tenants. Both sides must be KNOWN and equal: a run with no captured
+          // tenant is not "everyone's", it is unattributable, so it gets
+          // nothing. (Local mode still matches: both are 'local'.)
+          const fallbackApplies =
+            opts?.fallbackSessionId !== undefined &&
+            ownSession === undefined &&
+            tenant?.userId !== undefined &&
+            tenant.userId === callerTenant?.userId;
+          const sessionId = ownSession ?? (fallbackApplies ? opts?.fallbackSessionId : undefined);
           if (!(await this.hasAnyFreewayBucket(projectId, sessionId))) {
             this.logger.info('translation:quota-sweep-skipped', {
               runId,
@@ -2337,12 +2409,13 @@ export class TranslationEngine {
             await this.markQuotaResumeSkipped(projectId, status, NO_BUCKETS_SKIP_REASON);
             return false;
           }
-          // Deliberately no sessionId: the run's own captured session is the
-          // right one here (there is no requesting caller), and
-          // resumeWaitingForQuota falls back to it.
+          // The run's own captured session is the right one when it has one
+          // (there is no requesting caller) — passing it explicitly is what
+          // resumeWaitingForQuota would fall back to anyway; only the nudge's
+          // fallback adds anything.
           // Null means nothing was resumable after all (e.g. the run went
           // terminal between the scan and here) — not a re-dispatch.
-          return (await this.resume(projectId, runId)) !== null;
+          return (await this.resume(projectId, runId, sessionId)) !== null;
         };
         try {
           if (await (tenant ? runWithTenant(tenant, attempt) : attempt())) resumed++;
@@ -2356,6 +2429,45 @@ export class TranslationEngine {
       return resumed;
     } finally {
       this.quotaSweepInFlight = false;
+    }
+  }
+
+  /**
+   * Adopt the free-quota parks that only the RunStore knows about — once per
+   * process, at the head of the first sweep pass.
+   *
+   * A park outlives the process by design (it can last until tomorrow's
+   * reset), but the sweep walks in-memory runs, so after a restart the park
+   * exists only in the store and the run would sit paused until a manual
+   * resume. The scan is cross-tenant (a system read on the raw pool — see
+   * `storage/quota-parked-runs.ts`), so each adopted run also gets its OWN
+   * tenant re-established here; every later touch runs inside it.
+   *
+   * Once, not every tick: from the adoption on, the ordinary in-memory pass
+   * owns these runs (throttle, skip reasons, resume), and a run already in
+   * memory is never overwritten by its persisted copy.
+   */
+  private async adoptPersistedParks(): Promise<void> {
+    if (this.parkAdoptionDone) return;
+    try {
+      const parked = await (this._listParkedRuns ?? listQuotaParkedRuns)();
+      let adopted = 0;
+      for (const row of parked) {
+        if (this.runs.has(row.runId)) continue;
+        if (!this.isParkedForQuota(row.status)) continue;
+        this.runs.set(row.runId, row.status);
+        this.runTenants.set(row.runId, { userId: row.tenantId });
+        adopted++;
+      }
+      if (adopted > 0) {
+        this.logger.info('translation:quota-park-adopted', { count: adopted });
+      }
+      this.parkAdoptionDone = true;
+    } catch (err) {
+      // The flag stays unset deliberately: a failed scan (the DB briefly down
+      // at boot) retries on the next tick rather than silently stranding the
+      // parks for the life of the process.
+      this.logger.warn('translation:quota-park-adopt-failed', { error: toErrorMessage(err) });
     }
   }
 
@@ -2402,10 +2514,18 @@ export class TranslationEngine {
     });
   }
 
-  /** A parked run the sweep may re-plan right now (see {@link sweepQuotaResumes}). */
-  private isQuotaResumeDue(status: RunStatus, now: number): boolean {
+  /**
+   * A parked run the sweep may re-plan right now (see {@link sweepQuotaResumes}).
+   * `force` waives only the per-run re-attempt throttle (the vault-unlock
+   * nudge: a fresh session is new information, not another tick) — never the
+   * park's own `resumeAt`, which is what the free quota actually requires. The
+   * caller decides `force` per run, since an unlock only speaks for the
+   * unlocking tenant's own parks.
+   */
+  private isQuotaResumeDue(status: RunStatus, now: number, force = false): boolean {
     if (!this.isParkedForQuota(status)) return false;
     if ((status.waitingForQuota?.resumeAt ?? 0) > now) return false;
+    if (force) return true;
     const last = this.lastQuotaResumeAttempt.get(status.runId);
     return last === undefined || now - last >= TranslationEngine.QUOTA_RESUME_MIN_INTERVAL_MS;
   }
@@ -2572,6 +2692,24 @@ export class TranslationEngine {
     for (const status of this.runs.values()) {
       if (status.projectId !== projectId) continue;
       if (status.status === RunStatusCode.Paused) return true;
+      if (status.status !== RunStatusCode.Running) continue;
+      if (status.completed + status.failed >= status.total) continue;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Is some OTHER run for this project mid-dispatch right now (starting, or
+   * running with work left)? The quota sweep's guard: a parked run counts as
+   * "active" by {@link hasActiveProjectRun}, so two sibling parks would block
+   * each other forever under that test — what actually must not overlap is a
+   * second DISPATCH pass over the same project.
+   */
+  private hasDispatchingProjectRun(projectId: string, exceptRunId: string): boolean {
+    if (this.startingProjects.has(projectId)) return true;
+    for (const status of this.runs.values()) {
+      if (status.projectId !== projectId || status.runId === exceptRunId) continue;
       if (status.status !== RunStatusCode.Running) continue;
       if (status.completed + status.failed >= status.total) continue;
       return true;
@@ -2991,9 +3129,10 @@ export class TranslationEngine {
     retryAfterMs: number | undefined,
     deps: BucketSourceDeps,
     scope: 'bucket' | 'pool' = 'bucket',
+    opts?: { escalateOnFlap?: boolean },
   ): Promise<void> {
     try {
-      await coolBucket(bucketKey, now, retryAfterMs, deps, scope);
+      await coolBucket(bucketKey, now, retryAfterMs, deps, scope, opts);
     } catch (err) {
       this.logger.warn('translation:freeway-ledger-write-failed', {
         bucketKey,
@@ -3114,6 +3253,7 @@ export class TranslationEngine {
         const allErrored =
           results.length > 0 && results.every((r) => r?.error !== undefined && r.error !== '');
         if (allErrored) throw new Error(results[0]!.error);
+        await resetBucketFlap(state.bucketKey, deps);
         return { kind: 'results', results };
       } catch (err) {
         if (isAbortError(err) || signal?.aborted) {
@@ -3142,6 +3282,8 @@ export class TranslationEngine {
               strikeAt,
               isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
               deps,
+              'bucket',
+              { escalateOnFlap: true },
             );
             // The one-hop budget is spent either way, but whether these pairs
             // FAIL depends on whether the field is actually empty. Revalidate
@@ -3216,6 +3358,8 @@ export class TranslationEngine {
             now,
             isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
             deps,
+            'bucket',
+            { escalateOnFlap: true },
           );
         } else {
           await this.markFreewayCredentialBad(state.moduleId, deps);
@@ -3324,22 +3468,22 @@ export class TranslationEngine {
   }
 
   /**
-   * A higher-tier bucket with quota for a gate-failed entry, or undefined when
-   * the ladder is exhausted (the caller then falls back to a same-module
-   * corrective retry).
+   * Every strictly-higher-tier bucket with quota for a gate-failed entry,
+   * ranked best first, or an empty array when the ladder is exhausted (the
+   * caller then falls back to a same-module corrective retry). The caller
+   * walks the list past any candidate whose module can't take corrective
+   * feedback (DeepL).
    */
   private async selectFreewayEscalation(
     failedBucketKey: string,
     decision: RoutingDecision,
     deps: BucketSourceDeps,
-  ): Promise<
-    { moduleId: string; modelId: string; bucketKey: string; qualityTier: number } | undefined
-  > {
+  ): Promise<Array<{ moduleId: string; modelId: string; bucketKey: string; qualityTier: number }>> {
     const now = Date.now();
     const buckets = await loadBucketViews(now, deps);
     const group = this.freewayJobGroup([decision]);
-    const selection = selectEscalation(failedBucketKey, group, buckets, now);
-    if (!selection) {
+    const candidates = selectEscalationCandidates(failedBucketKey, group, buckets, now);
+    if (candidates.length === 0) {
       // Distinguish the two ways the ladder comes back empty. Ordinary
       // exhaustion (no higher tier, a cooldown, a weak-language exclusion, or
       // no day-scale stock) is expected and stays silent. Minute starvation is
@@ -3354,16 +3498,16 @@ export class TranslationEngine {
           minuteResetAt: starved.minuteResetAt,
         });
       }
-      return undefined;
+      return [];
     }
-    return {
+    return candidates.map((selection) => ({
       // Dispatch through the resolved instance, not the bare base — see
       // BucketView.dispatchModuleId.
       moduleId: selection.bucket.dispatchModuleId ?? selection.bucket.moduleId,
       modelId: selection.bucket.modelId,
       bucketKey: selection.bucket.bucketKey,
       qualityTier: selection.bucket.qualityTier,
-    };
+    }));
   }
 
   /** Fold a settled batch's gate outcomes into bucket stats: one write per bucket. */
@@ -3513,19 +3657,6 @@ export class TranslationEngine {
           );
           for (const d of decisions) settled.add(settleKey(d));
           return;
-        } else if (freewayDegraded) {
-          // 'keep': dispatching on the exact bucket the plan already relaxed
-          // this batch's band floor onto (Addendum G) — surface why a
-          // lower-tier bucket is serving a hard-band entry.
-          this.logger.info('translation:freeway-degraded', {
-            runId,
-            bucketKey,
-            band: freewayDegraded.fromTier,
-            fromTier: freewayDegraded.fromTier,
-            toTier: freewayDegraded.toTier,
-            waitedAlternativeMs: freewayDegraded.waitedAlternativeMs,
-          });
-          this.recordFreewayDetail(runId, formatDegradedDetail(freewayDegraded));
         }
       }
 
@@ -3551,6 +3682,26 @@ export class TranslationEngine {
         }
         this.emitProgress(runId, status);
         return;
+      }
+
+      if (bucketKey !== undefined && freewayDegraded) {
+        // Reaching here means the batch WILL dispatch ('keep' or 'reroute')
+        // while its band floor is relaxed (Addendum G) — surface why a
+        // lower-tier bucket serves a hard-band entry, whichever revalidation
+        // branch routed it. `bucketKey` is already the post-reroute key at this
+        // point, so the log names the bucket that is actually about to serve
+        // the batch. After the module-disabled gate, too: a batch that fails
+        // there dispatches nothing, and a degrade line for it would describe a
+        // routing decision no bucket ever acted on.
+        this.logger.info('translation:freeway-degraded', {
+          runId,
+          bucketKey,
+          band: freewayDegraded.fromTier,
+          fromTier: freewayDegraded.fromTier,
+          toTier: freewayDegraded.toTier,
+          waitedAlternativeMs: freewayDegraded.waitedAlternativeMs,
+        });
+        this.recordFreewayDetail(runId, formatDegradedDetail(freewayDegraded));
       }
 
       const batchOverrides: Record<string, unknown> = {};
@@ -4166,6 +4317,13 @@ export class TranslationEngine {
         let batchError: unknown;
         /** Set when a Freeway failover ended in a park/block instead of results. */
         let batchAuthCancel = true;
+        /**
+         * Set when a degraded batch changed bucket mid-dispatch. The degrade is
+         * re-stated only once the hop actually produces results — a hop that
+         * ends in a park or a block served nothing, so naming its bucket would
+         * credit it with text it never produced.
+         */
+        let degradedHop = false;
         const batchStartedAt = Date.now();
         if (bucketKey !== undefined && freewayDeps) {
           // Freeway batches never retry a 429 in place: the free quota they hit
@@ -4208,6 +4366,7 @@ export class TranslationEngine {
                 reason: 'dispatch-failure',
               },
             );
+            if (freewayDegraded && bucketChanged) degradedHop = true;
             module = state.module;
             moduleId = state.moduleId;
             bucketKey = state.bucketKey;
@@ -4215,6 +4374,21 @@ export class TranslationEngine {
           }
           if (outcome.kind === 'results') {
             targetResults = outcome.results;
+            if (freewayDegraded && degradedHop) {
+              // The degraded batch failed over mid-dispatch and the new bucket
+              // served it: name that bucket, or the earlier degrade line
+              // attributes the tier relaxation to one that never produced the
+              // text. `bucketKey` is already the post-hop key here.
+              this.logger.info('translation:freeway-degraded', {
+                runId,
+                bucketKey,
+                band: freewayDegraded.fromTier,
+                fromTier: freewayDegraded.fromTier,
+                toTier: freewayDegraded.toTier,
+                waitedAlternativeMs: freewayDegraded.waitedAlternativeMs,
+              });
+              this.recordFreewayDetail(runId, formatDegradedDetail(freewayDegraded));
+            }
             metricsCollector.recordLatency(moduleId, metricsModel, Date.now() - batchStartedAt);
           } else if (outcome.kind === 'defer' || outcome.kind === 'blocked') {
             const pairs: RunEntryLanguagePair[] = [];
@@ -4383,19 +4557,39 @@ export class TranslationEngine {
         let retryDecision = item.entry.decision;
         let escalatedBucketKey: string | undefined;
         if (bucketKey !== undefined && freewayDeps) {
-          const escalation = await this.selectFreewayEscalation(
+          const escalationCandidates = await this.selectFreewayEscalation(
             bucketKey,
             item.entry.decision,
             freewayDeps,
           );
-          const escalatedModule = escalation
-            ? createFreewayModule(escalation.moduleId, escalation.modelId, escalation.bucketKey)
-            : undefined;
-          if (
-            escalation &&
-            escalatedModule &&
-            typeof escalatedModule.retryWithFeedback === 'function'
-          ) {
+          let escalation: (typeof escalationCandidates)[number] | undefined;
+          let escalatedModule: TranslationModule | undefined;
+          for (const candidate of escalationCandidates) {
+            let built: TranslationModule | undefined;
+            try {
+              built = createFreewayModule(
+                candidate.moduleId,
+                candidate.modelId,
+                candidate.bucketKey,
+              );
+            } catch {
+              // An unbuildable candidate (e.g. a module factory that throws
+              // on invalid config) is skipped, not terminal — try the next rung.
+              continue;
+            }
+            if (!built) continue;
+            if (typeof built.retryWithFeedback === 'function') {
+              escalation = candidate;
+              escalatedModule = built;
+              break;
+            }
+            // A higher-tier bucket whose module cannot do feedback retry
+            // (DeepL) is skipped, not terminal — the next rung may be capable.
+            this.logger.info('translation:freeway-escalation-skipped-incapable', {
+              bucketKey: candidate.bucketKey,
+            });
+          }
+          if (escalation && escalatedModule) {
             retryModule = escalatedModule;
             retryDecision = {
               ...item.entry.decision,

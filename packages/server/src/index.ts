@@ -386,3 +386,9 @@ export { app };
 // account deletion, to drain a tenant's in-flight background runs. Exposed via the
 // root barrel only — NOT `./storage` (storage must not import modules/engines).
 export { drainProjectRuns, type DrainLogger } from './modules/run-drain.js';
+// A cloud composition root calls this from its own vault-unlock handler, to
+// recover runs parked on free quota whose sessions a restart dropped. Exposed
+// via the root barrel only (like drainProjectRuns above) and imported LAZILY by
+// the cloud side — a static import of this barrel from a cloud route module
+// runs `applyRegisteredRoutes(app)` too early; see account-routes.ts.
+export { nudgeQuotaResumes } from './modules/quota-resume-nudge.js';

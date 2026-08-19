@@ -28,6 +28,7 @@ import { getFreewayLedgerStore, getGlobalConfigStore } from '../../storage/regis
 import { isCloudMode } from '../../identity/registry.js';
 import { moduleRegistry } from '../M6-module-registry.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
+import { KeyedAsyncLock } from '../../utils/keyed-lock.js';
 import type { BucketView } from './types.js';
 import { decayStats, recordGatePass } from './stats.js';
 
@@ -750,7 +751,9 @@ export async function recordDispatch(
 
 /**
  * 429/quota error: cooldown until retryAfterMs (when given) else the bucket's
- * next day-scale reset; flap-bumps when already recently cooled.
+ * next day-scale reset. A re-strike within FLAP_WINDOW_MS counts against the
+ * escalation ladder — but only on the escalating path (`escalateOnFlap`), the
+ * one that also consumes the counter.
  *
  * `scope: 'pool'` widens the cooldown to every bucket of a provider whose quota
  * is account-wide (`sharedLimits`): a 429 there is a statement about the shared
@@ -767,6 +770,7 @@ export async function coolBucket(
   retryAfterMs: number | undefined,
   deps?: BucketSourceDeps,
   scope: 'bucket' | 'pool' = 'bucket',
+  opts?: { escalateOnFlap?: boolean },
 ): Promise<void> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const states = await ledger.listBuckets();
@@ -776,15 +780,41 @@ export async function coolBucket(
     existing.cooldownUntil <= now &&
     now - existing.cooldownUntil < FLAP_WINDOW_MS;
   const resolved = resolveSnapshotBucket(bucketKey);
+  const dayReset = resolved
+    ? nextReset(resolved.dayWindow.kind, now, resolved.provider.resetTimeZone)
+    : undefined;
   let until: number;
   if (retryAfterMs !== undefined) {
     until = now + retryAfterMs;
   } else {
-    until = resolved
-      ? nextReset(resolved.dayWindow.kind, now, resolved.provider.resetTimeZone)
-      : now;
+    until = dayReset ?? now;
   }
-  await ledger.setCooldown(bucketKey, until, flap ? { flap: true } : undefined);
+  if (opts?.escalateOnFlap && retryAfterMs !== undefined) {
+    // A bucket that keeps flapping (re-struck within FLAP_WINDOW_MS of each
+    // cooldown expiring) is having a sustained outage, not a blip: escalate
+    // repeat strikes toward the day reset instead of re-parking the run
+    // every base interval forever. Strikes count the persisted flap history
+    // plus this strike; a successful dispatch resets the counter
+    // (resetBucketFlap).
+    const strikes = (existing?.flapCount ?? 0) + (flap ? 1 : 0);
+    const ladderMs =
+      strikes <= 1 ? undefined : strikes === 2 ? 60 * 60_000 : strikes === 3 ? 240 * 60_000 : null;
+    if (ladderMs === null) {
+      // >=4 strikes: dead until the window rolls (fall back to the last
+      // finite rung when no snapshot resolves a reset time).
+      until = dayReset ?? now + 240 * 60_000;
+    } else if (ladderMs !== undefined) {
+      until = now + ladderMs;
+    }
+    if (dayReset !== undefined) until = Math.min(until, dayReset);
+  }
+  // The strike counter belongs to the ladder: only the escalating path (the
+  // engine's provider-error cool) may add to it. Counting every cool would let
+  // ordinary repeat 429s — a minute-scale limit re-struck all day — pump the
+  // count to the day-park rung, so the next provider error would sideline a
+  // perfectly healthy bucket until tomorrow.
+  const strike = flap && opts?.escalateOnFlap === true;
+  await ledger.setCooldown(bucketKey, until, strike ? { flap: true } : undefined);
   if (scope !== 'pool' || !resolved || !hasSharedPool(resolved.provider)) return;
   const siblingUntil = Math.min(until, now + POOL_SIBLING_COOLDOWN_CAP_MS);
   for (const model of resolved.provider.models) {
@@ -797,6 +827,25 @@ export async function coolBucket(
   }
 }
 
+/**
+ * Clears a bucket's flap history after a successful dispatch, so the
+ * escalation ladder measures a CURRENT outage, not lifetime bad luck.
+ * Best-effort: a failed reset self-heals on the next success.
+ */
+export async function resetBucketFlap(bucketKey: string, deps?: BucketSourceDeps): Promise<void> {
+  const ledger = deps?.ledger ?? getFreewayLedgerStore();
+  await ledger.resetFlap(bucketKey).catch(() => undefined);
+}
+
+/**
+ * Serializes gate-outcome folds per bucket: two sibling batches of one run
+ * settling on the same bucket are read-modify-write over the same stats row,
+ * and mergeStats replaces gatePassStats wholesale — an unserialized pair
+ * silently discards one fold. In-process only (single-replica invariant, see
+ * utils/keyed-lock.ts).
+ */
+const gateOutcomeLock = new KeyedAsyncLock();
+
 /** Fold one run's gate outcomes into stats: ONE read + ONE mergeStats per bucket. */
 export async function recordGateOutcomes(
   bucketKey: string,
@@ -805,11 +854,12 @@ export async function recordGateOutcomes(
   deps?: BucketSourceDeps,
 ): Promise<void> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
-  const states = await ledger.listBuckets();
-  const existing = states.find((s) => s.bucketKey === bucketKey);
-  let stats = existing?.stats ?? {};
-  for (const outcome of outcomes) {
-    stats = recordGatePass(stats, outcome.language, outcome.passed, now);
-  }
-  await ledger.mergeStats(bucketKey, stats);
+  await gateOutcomeLock.withLock(bucketKey, async () => {
+    const existing = await ledger.getBucket(bucketKey);
+    let stats = existing?.stats ?? {};
+    for (const outcome of outcomes) {
+      stats = recordGatePass(stats, outcome.language, outcome.passed, now);
+    }
+    await ledger.mergeStats(bucketKey, stats);
+  });
 }

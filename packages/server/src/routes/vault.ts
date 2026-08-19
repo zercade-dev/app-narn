@@ -207,6 +207,28 @@ vaultRouter.post(
     // same `maskSecret` M16 applies to this value on eviction.
     logger.info('vault:unlocked', { sessionId: maskSecret(sid) });
     auditLogger.log('vault.unlocked', { sessionId: maskSecret(sid) }, req);
+    // A restart drops every run's captured session, and Freeway bucket
+    // visibility is session-scoped — so a run parked on free quota is adopted
+    // by the sweep but can see no bucket, and would stay parked (stamping a
+    // skip reason forever) until someone resumed it by hand. The first
+    // unlocked session is the natural recovery point: nudge ONE forced sweep
+    // pass with this session standing in for the ones the restart lost, scoped
+    // by the sweep to this caller's OWN tenant. Detached deliberately — the
+    // response is already sent, and a background resume must never surface as
+    // an unlock failure.
+    //
+    // Imported LAZILY: a static import would pull the whole M9 engine graph
+    // (and its process-wide singleton, timer included) into every module that
+    // merely mounts this router — the vault router is imported by a lot of
+    // suites, and this repo has been bitten before by a new static edge into
+    // the engine/module registry.
+    void import('../modules/quota-resume-nudge.js')
+      .then(({ nudgeQuotaResumes }) => {
+        nudgeQuotaResumes(sid);
+      })
+      .catch((err: unknown) => {
+        logger.warn('vault:quota-resume-nudge-failed', { error: toErrorMessage(err) });
+      });
   }),
 );
 
