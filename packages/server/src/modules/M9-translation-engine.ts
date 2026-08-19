@@ -2378,11 +2378,14 @@ export class TranslationEngine {
           // A fallback session (the vault-unlock nudge) may only stand in for a
           // run whose own captured session did not survive the restart AND
           // whose tenant is the calling one — a session must never cross
-          // tenants. A run with no captured tenant at all is pre-tenancy/local.
+          // tenants. Both sides must be KNOWN and equal: a run with no captured
+          // tenant is not "everyone's", it is unattributable, so it gets
+          // nothing. (Local mode still matches: both are 'local'.)
           const fallbackApplies =
             opts?.fallbackSessionId !== undefined &&
             ownSession === undefined &&
-            (tenant?.userId === undefined || tenant.userId === callerTenant?.userId);
+            tenant?.userId !== undefined &&
+            tenant.userId === callerTenant?.userId;
           const sessionId = ownSession ?? (fallbackApplies ? opts?.fallbackSessionId : undefined);
           if (!(await this.hasAnyFreewayBucket(projectId, sessionId))) {
             this.logger.info('translation:quota-sweep-skipped', {

@@ -4,7 +4,6 @@ import { randomUUID } from 'node:crypto';
 import { validateBody } from '../middleware/validate.js';
 import { credentialStore } from '../modules/M16-credential-store.js';
 import { clearFreewayCredentialMarks } from '../modules/M32/bucket-source.js';
-import { translationEngine } from '../modules/M9-translation-engine.js';
 import { maskSecret, toErrorMessage } from '@zercade-dev/narn-shared';
 import { validatePasswordStrength } from '../utils/password-validation.js';
 import { createEmptyVaultFile, decryptVault, encryptVault } from '../modules/M18-vault.js';
@@ -213,13 +212,23 @@ vaultRouter.post(
     // by the sweep but can see no bucket, and would stay parked (stamping a
     // skip reason forever) until someone resumed it by hand. The first
     // unlocked session is the natural recovery point: nudge ONE forced sweep
-    // pass with this session standing in for the ones the restart lost. The
-    // sweep applies it only to this caller's OWN tenant's runs. Detached
-    // deliberately — the unlock response is already sent, and a sweep failure
-    // must never surface as an unlock failure.
-    void translationEngine
-      .sweepQuotaResumes(Date.now(), { fallbackSessionId: sid, force: true })
-      .catch(() => undefined);
+    // pass with this session standing in for the ones the restart lost, scoped
+    // by the sweep to this caller's OWN tenant. Detached deliberately — the
+    // response is already sent, and a background resume must never surface as
+    // an unlock failure.
+    //
+    // Imported LAZILY: a static import would pull the whole M9 engine graph
+    // (and its process-wide singleton, timer included) into every module that
+    // merely mounts this router — the vault router is imported by a lot of
+    // suites, and this repo has been bitten before by a new static edge into
+    // the engine/module registry.
+    void import('../modules/quota-resume-nudge.js')
+      .then(({ nudgeQuotaResumes }) => {
+        nudgeQuotaResumes(sid);
+      })
+      .catch((err: unknown) => {
+        logger.warn('vault:quota-resume-nudge-failed', { error: toErrorMessage(err) });
+      });
   }),
 );
 
