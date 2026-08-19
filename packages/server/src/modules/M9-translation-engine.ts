@@ -4416,11 +4416,18 @@ export class TranslationEngine {
           let escalation: (typeof escalationCandidates)[number] | undefined;
           let escalatedModule: TranslationModule | undefined;
           for (const candidate of escalationCandidates) {
-            const built = createFreewayModule(
-              candidate.moduleId,
-              candidate.modelId,
-              candidate.bucketKey,
-            );
+            let built: TranslationModule | undefined;
+            try {
+              built = createFreewayModule(
+                candidate.moduleId,
+                candidate.modelId,
+                candidate.bucketKey,
+              );
+            } catch {
+              // An unbuildable candidate (e.g. a module factory that throws
+              // on invalid config) is skipped, not terminal — try the next rung.
+              continue;
+            }
             if (!built) continue;
             if (typeof built.retryWithFeedback === 'function') {
               escalation = candidate;
