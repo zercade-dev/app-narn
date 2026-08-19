@@ -88,6 +88,15 @@ export interface AISDKModuleConfig {
   costPatterns?: Array<{ pattern: RegExp; tier: CostTier }>;
   /** Fallback tier when no costPattern matches; defaults to manifest.costTier. */
   costFallback?: CostTier;
+  /**
+   * AI SDK's own internal retry count for a `generateText`/`generateObject`
+   * call (the SDK's default is 2, i.e. 3 attempts). Absent leaves the SDK
+   * default untouched — set explicitly only when a caller owns retry policy
+   * itself (e.g. Freeway dispatch, which sets `0` so a dead-bucket failure
+   * surfaces on the first attempt instead of being burned on internal
+   * retries the engine's own failover already supersedes).
+   */
+  maxRetries?: number;
 }
 
 /**
