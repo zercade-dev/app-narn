@@ -100,14 +100,18 @@ async function applyJudgeSuggestion(
     timestamp: Date.now(),
     needsReview: true,
   };
+  const patched: TranslationRecord = {
+    ...base,
+    text: verdict.suggestion,
+    moduleId: 'manual',
+    timestamp: Date.now(),
+  };
+  // The judge's suggestion is a fresh manual rewrite of the text — never carry
+  // over a Freeway tier the OLD text was produced under.
+  delete patched.freewayTier;
   await updateEntry(projectId, verdict.entryId, {
     translations: {
-      [verdict.targetLanguage]: {
-        ...base,
-        text: verdict.suggestion,
-        moduleId: 'manual',
-        timestamp: Date.now(),
-      },
+      [verdict.targetLanguage]: patched,
     },
   });
   return true;

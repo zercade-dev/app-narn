@@ -727,6 +727,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
           model,
           ...body,
           ...(maxOutputTokens !== undefined ? { maxOutputTokens } : {}),
+          ...(config.maxRetries !== undefined ? { maxRetries: config.maxRetries } : {}),
           abortSignal: combined,
           ...providerOptionsSpread,
         });

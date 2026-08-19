@@ -84,11 +84,19 @@ export function freewayBucketBaseModuleId(bucketKey: string): string {
  */
 export function freewayModuleOverrides(moduleId: string, modelId: string): Record<string, unknown> {
   const model = freeTierModel(moduleId, modelId);
-  if (model?.useStructuredOutput === undefined) return {};
-  // Structured-output support is upstream-dependent and measured per model: a
-  // model that mis-parses under a schema constraint (or pays a quality tax for
-  // it) must run without it however the workspace has the module configured.
-  return { useStructuredOutput: model.useStructuredOutput };
+  // The engine owns retry/failover policy for a Freeway dispatch (bucket cool
+  // + revalidate + single failover hop): the AI SDK's own internal retry loop
+  // (default maxRetries: 2, i.e. 3 attempts) only burns free-tier quota and
+  // hides the terminal error the engine's failover needs to see. Set
+  // unconditionally, independent of the snapshot's per-model data.
+  const overrides: Record<string, unknown> = { maxRetries: 0 };
+  if (model?.useStructuredOutput !== undefined) {
+    // Structured-output support is upstream-dependent and measured per model: a
+    // model that mis-parses under a schema constraint (or pays a quality tax for
+    // it) must run without it however the workspace has the module configured.
+    overrides.useStructuredOutput = model.useStructuredOutput;
+  }
+  return overrides;
 }
 
 export interface BucketSourceDeps {

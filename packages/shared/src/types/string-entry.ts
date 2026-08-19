@@ -29,6 +29,16 @@ export interface TranslationRecord {
    * whenever a record's text changes; never supplied by clients.
    */
   previousVersions?: TranslationVersion[];
+  /**
+   * The Freeway serving bucket's quality tier (1-4) at the moment this
+   * translation was produced — the bucket that ACTUALLY served the job
+   * (post-failover/degrade), not the one originally planned. Set only for
+   * Freeway-dispatched translations; absent for every other module, and for
+   * trivial-matcher/translation-memory short-circuits that never reached a
+   * provider at all. Additive history field — existing records without it are
+   * untouched, and it enables a future "retranslate below tier N" bulk action.
+   */
+  freewayTier?: number;
 }
 
 /** Category of a source-language AI-review finding. */
