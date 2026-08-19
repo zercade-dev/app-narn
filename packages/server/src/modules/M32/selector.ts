@@ -220,23 +220,23 @@ export function selectBucket(
 }
 
 /**
- * The best strictly-higher-tier bucket to retry a gate-failed group on. The
- * caller drives it through `retryWithFeedback`, so targets are assumed to
- * implement feedback retry. Reservoir-last ranking applies here too: a
- * char-window MT bucket can only become `better[0]` when no request-window
- * candidate of a higher tier exists at all.
+ * Every strictly-higher-tier bucket that could retry a gate-failed group,
+ * best first. The caller drives the retry through `retryWithFeedback` and is
+ * the only layer that can test whether a candidate's MODULE implements it
+ * (DeepL does not) — so this returns the ranked ladder and the caller takes
+ * the first capable rung, rather than this function guessing at capability.
+ * Reservoir-last ranking applies here too.
  */
-export function selectEscalation(
+export function selectEscalationCandidates(
   failedBucketKey: string,
   group: JobGroup,
   buckets: BucketView[],
   now: number,
-): Selection | undefined {
+): Selection[] {
   const failedTier = buckets.find((b) => b.bucketKey === failedBucketKey)?.qualityTier ?? 0;
-  const better = rankCandidates(buckets, group, now).filter(
-    (b) => b.qualityTier > failedTier && b.bucketKey !== failedBucketKey,
-  );
-  return better.length > 0 ? toSelection(better[0], group) : undefined;
+  return rankCandidates(buckets, group, now)
+    .filter((b) => b.qualityTier > failedTier && b.bucketKey !== failedBucketKey)
+    .map((b) => toSelection(b, group));
 }
 
 /**

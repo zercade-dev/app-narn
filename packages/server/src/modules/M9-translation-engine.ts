@@ -133,7 +133,7 @@ import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/re
 import {
   effectiveRemainingRequests,
   findMinuteStarvedEscalation,
-  selectEscalation,
+  selectEscalationCandidates,
 } from './M32/selector.js';
 import { difficultyBand } from './M32/difficulty.js';
 import type { Assignment, BucketView, DifficultyBand, JobGroup } from './M32/types.js';
@@ -3331,22 +3331,22 @@ export class TranslationEngine {
   }
 
   /**
-   * A higher-tier bucket with quota for a gate-failed entry, or undefined when
-   * the ladder is exhausted (the caller then falls back to a same-module
-   * corrective retry).
+   * Every strictly-higher-tier bucket with quota for a gate-failed entry,
+   * ranked best first, or an empty array when the ladder is exhausted (the
+   * caller then falls back to a same-module corrective retry). The caller
+   * walks the list past any candidate whose module can't take corrective
+   * feedback (DeepL).
    */
   private async selectFreewayEscalation(
     failedBucketKey: string,
     decision: RoutingDecision,
     deps: BucketSourceDeps,
-  ): Promise<
-    { moduleId: string; modelId: string; bucketKey: string; qualityTier: number } | undefined
-  > {
+  ): Promise<Array<{ moduleId: string; modelId: string; bucketKey: string; qualityTier: number }>> {
     const now = Date.now();
     const buckets = await loadBucketViews(now, deps);
     const group = this.freewayJobGroup([decision]);
-    const selection = selectEscalation(failedBucketKey, group, buckets, now);
-    if (!selection) {
+    const candidates = selectEscalationCandidates(failedBucketKey, group, buckets, now);
+    if (candidates.length === 0) {
       // Distinguish the two ways the ladder comes back empty. Ordinary
       // exhaustion (no higher tier, a cooldown, a weak-language exclusion, or
       // no day-scale stock) is expected and stays silent. Minute starvation is
@@ -3361,16 +3361,16 @@ export class TranslationEngine {
           minuteResetAt: starved.minuteResetAt,
         });
       }
-      return undefined;
+      return [];
     }
-    return {
+    return candidates.map((selection) => ({
       // Dispatch through the resolved instance, not the bare base — see
       // BucketView.dispatchModuleId.
       moduleId: selection.bucket.dispatchModuleId ?? selection.bucket.moduleId,
       modelId: selection.bucket.modelId,
       bucketKey: selection.bucket.bucketKey,
       qualityTier: selection.bucket.qualityTier,
-    };
+    }));
   }
 
   /** Fold a settled batch's gate outcomes into bucket stats: one write per bucket. */
@@ -4408,19 +4408,32 @@ export class TranslationEngine {
         let retryDecision = item.entry.decision;
         let escalatedBucketKey: string | undefined;
         if (bucketKey !== undefined && freewayDeps) {
-          const escalation = await this.selectFreewayEscalation(
+          const escalationCandidates = await this.selectFreewayEscalation(
             bucketKey,
             item.entry.decision,
             freewayDeps,
           );
-          const escalatedModule = escalation
-            ? createFreewayModule(escalation.moduleId, escalation.modelId, escalation.bucketKey)
-            : undefined;
-          if (
-            escalation &&
-            escalatedModule &&
-            typeof escalatedModule.retryWithFeedback === 'function'
-          ) {
+          let escalation: (typeof escalationCandidates)[number] | undefined;
+          let escalatedModule: TranslationModule | undefined;
+          for (const candidate of escalationCandidates) {
+            const built = createFreewayModule(
+              candidate.moduleId,
+              candidate.modelId,
+              candidate.bucketKey,
+            );
+            if (!built) continue;
+            if (typeof built.retryWithFeedback === 'function') {
+              escalation = candidate;
+              escalatedModule = built;
+              break;
+            }
+            // A higher-tier bucket whose module cannot do feedback retry
+            // (DeepL) is skipped, not terminal — the next rung may be capable.
+            this.logger.info('translation:freeway-escalation-skipped-incapable', {
+              bucketKey: candidate.bucketKey,
+            });
+          }
+          if (escalation && escalatedModule) {
             retryModule = escalatedModule;
             retryDecision = {
               ...item.entry.decision,
