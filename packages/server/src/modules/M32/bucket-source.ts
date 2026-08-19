@@ -768,6 +768,7 @@ export async function coolBucket(
   retryAfterMs: number | undefined,
   deps?: BucketSourceDeps,
   scope: 'bucket' | 'pool' = 'bucket',
+  opts?: { escalateOnFlap?: boolean },
 ): Promise<void> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const states = await ledger.listBuckets();
@@ -777,13 +778,33 @@ export async function coolBucket(
     existing.cooldownUntil <= now &&
     now - existing.cooldownUntil < FLAP_WINDOW_MS;
   const resolved = resolveSnapshotBucket(bucketKey);
+  const dayReset = resolved
+    ? nextReset(resolved.dayWindow.kind, now, resolved.provider.resetTimeZone)
+    : undefined;
   let until: number;
   if (retryAfterMs !== undefined) {
     until = now + retryAfterMs;
   } else {
-    until = resolved
-      ? nextReset(resolved.dayWindow.kind, now, resolved.provider.resetTimeZone)
-      : now;
+    until = dayReset ?? now;
+  }
+  if (opts?.escalateOnFlap && retryAfterMs !== undefined) {
+    // A bucket that keeps flapping (re-struck within FLAP_WINDOW_MS of each
+    // cooldown expiring) is having a sustained outage, not a blip: escalate
+    // repeat strikes toward the day reset instead of re-parking the run
+    // every base interval forever. Strikes count the persisted flap history
+    // plus this strike; a successful dispatch resets the counter
+    // (resetBucketFlap).
+    const strikes = (existing?.flapCount ?? 0) + (flap ? 1 : 0);
+    const ladderMs =
+      strikes <= 1 ? undefined : strikes === 2 ? 60 * 60_000 : strikes === 3 ? 240 * 60_000 : null;
+    if (ladderMs === null) {
+      // >=4 strikes: dead until the window rolls (fall back to the last
+      // finite rung when no snapshot resolves a reset time).
+      until = dayReset ?? now + 240 * 60_000;
+    } else if (ladderMs !== undefined) {
+      until = now + ladderMs;
+    }
+    if (dayReset !== undefined) until = Math.min(until, dayReset);
   }
   await ledger.setCooldown(bucketKey, until, flap ? { flap: true } : undefined);
   if (scope !== 'pool' || !resolved || !hasSharedPool(resolved.provider)) return;
@@ -796,6 +817,16 @@ export async function coolBucket(
     // provider-error cool on a retired model) must stay sidelined.
     await ledger.setCooldown(siblingKey, Math.max(prior, siblingUntil));
   }
+}
+
+/**
+ * Clears a bucket's flap history after a successful dispatch, so the
+ * escalation ladder measures a CURRENT outage, not lifetime bad luck.
+ * Best-effort: a failed reset self-heals on the next success.
+ */
+export async function resetBucketFlap(bucketKey: string, deps?: BucketSourceDeps): Promise<void> {
+  const ledger = deps?.ledger ?? getFreewayLedgerStore();
+  await ledger.resetFlap(bucketKey).catch(() => undefined);
 }
 
 /**

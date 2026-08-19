@@ -159,6 +159,15 @@ export class PgFreewayLedgerStore implements FreewayLedgerStore {
     );
   }
 
+  /** No-op when the row is absent or already at 0 (plain UPDATE, not an upsert). */
+  async resetFlap(bucketKey: string): Promise<void> {
+    await this.db.query(
+      `update freeway_buckets set flap_count = 0, updated_at = $2
+        where bucket_key = $1 and flap_count > 0`,
+      [bucketKey, Date.now()],
+    );
+  }
+
   async setDisabled(bucketKey: string, reason: string | null): Promise<void> {
     await this.db.query(
       `insert into freeway_buckets (tenant_id, bucket_key, disabled_reason, updated_at)

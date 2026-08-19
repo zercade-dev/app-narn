@@ -125,6 +125,7 @@ import {
   loadBucketViews,
   recordDispatch,
   recordGateOutcomes,
+  resetBucketFlap,
   resolveDispatchModuleId,
   resolveFreewayProbeCredential,
 } from './M32/bucket-source.js';
@@ -2991,9 +2992,10 @@ export class TranslationEngine {
     retryAfterMs: number | undefined,
     deps: BucketSourceDeps,
     scope: 'bucket' | 'pool' = 'bucket',
+    opts?: { escalateOnFlap?: boolean },
   ): Promise<void> {
     try {
-      await coolBucket(bucketKey, now, retryAfterMs, deps, scope);
+      await coolBucket(bucketKey, now, retryAfterMs, deps, scope, opts);
     } catch (err) {
       this.logger.warn('translation:freeway-ledger-write-failed', {
         bucketKey,
@@ -3114,6 +3116,7 @@ export class TranslationEngine {
         const allErrored =
           results.length > 0 && results.every((r) => r?.error !== undefined && r.error !== '');
         if (allErrored) throw new Error(results[0]!.error);
+        await resetBucketFlap(state.bucketKey, deps);
         return { kind: 'results', results };
       } catch (err) {
         if (isAbortError(err) || signal?.aborted) {
@@ -3142,6 +3145,8 @@ export class TranslationEngine {
               strikeAt,
               isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
               deps,
+              'bucket',
+              { escalateOnFlap: true },
             );
             // The one-hop budget is spent either way, but whether these pairs
             // FAIL depends on whether the field is actually empty. Revalidate
@@ -3216,6 +3221,8 @@ export class TranslationEngine {
             now,
             isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
             deps,
+            'bucket',
+            { escalateOnFlap: true },
           );
         } else {
           await this.markFreewayCredentialBad(state.moduleId, deps);

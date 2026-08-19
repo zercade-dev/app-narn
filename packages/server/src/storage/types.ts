@@ -793,6 +793,11 @@ export interface FreewayLedgerStore {
   /** Clear cooldown and reset flap_count to 0. No-op when the row is absent. */
   clearCooldown(bucketKey: string): Promise<void>;
   /**
+   * Reset flap_count to 0 without touching cooldown_until. Plain UPDATE, not
+   * an upsert — a no-op when the row is absent or already at 0.
+   */
+  resetFlap(bucketKey: string): Promise<void>;
+  /**
    * Mark a bucket disabled (bad credentials) or re-enabled (null). Upserts.
    * Also the writer for the `credential::<moduleId>` rows — see
    * {@link FreewayBucketState.bucketKey} — so a caller may pass either a bucket
