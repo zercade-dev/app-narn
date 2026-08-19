@@ -139,6 +139,8 @@ export interface FreewayBackgroundSelection {
   module: TranslationModule;
   /** The concrete module/instance id the bucket dispatches to. */
   moduleId: string;
+  /** The bucket's model id — the quota being spent. */
+  modelId: string;
   /** Ledger key of the bucket this run spends against. */
   bucketKey: string;
 }
@@ -150,6 +152,8 @@ export interface SelectFreewayBackgroundOptions extends SelectCapableModuleOptio
   deps?: BucketSourceDeps;
   /** Evaluation instant; defaults to now. */
   now?: number;
+  /** Reserve forwarded to {@link selectBackgroundBucket}; defaults there. */
+  reserveRequests?: number;
 }
 
 /**
@@ -214,9 +218,12 @@ export async function selectFreewayBackgroundModule(
       overrides.moduleStatus ?? backgroundModuleStatus(registry, project, global, sessionId),
   };
   const remaining = await loadBucketViews(now, deps);
-  const bandOpts = options.band !== undefined ? { band: options.band } : undefined;
+  const selectOpts = {
+    ...(options.band !== undefined ? { band: options.band } : {}),
+    ...(options.reserveRequests !== undefined ? { reserveRequests: options.reserveRequests } : {}),
+  };
   while (remaining.length > 0) {
-    const selection = selectBackgroundBucket(remaining, now, bandOpts);
+    const selection = selectBackgroundBucket(remaining, now, selectOpts);
     if (!selection) break;
     const { bucket } = selection;
     remaining.splice(remaining.indexOf(bucket), 1);
@@ -236,7 +243,7 @@ export async function selectFreewayBackgroundModule(
           ...freewayModuleOverrides(bucket.moduleId, bucket.modelId),
         },
       });
-      return { ...built, bucketKey: bucket.bucketKey };
+      return { ...built, modelId: bucket.modelId, bucketKey: bucket.bucketKey };
     } catch (err) {
       // This bucket's module can't be built or can't do this work — try the
       // next one the selector offers rather than failing the whole run on it.

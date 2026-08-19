@@ -82,10 +82,10 @@ function backgroundGroup(band: DifficultyBand): JobGroup {
 export function selectBackgroundBucket(
   buckets: BucketView[],
   now: number,
-  opts?: { band?: DifficultyBand },
+  opts?: { band?: DifficultyBand; reserveRequests?: number },
 ): Selection | undefined {
   const group = backgroundGroup(opts?.band ?? DEFAULT_BACKGROUND_BAND);
-  const selectOpts = { reserveRequests: FREEWAY_BACKGROUND_RESERVE };
+  const selectOpts = { reserveRequests: opts?.reserveRequests ?? FREEWAY_BACKGROUND_RESERVE };
   const paced = selectBucket(group, buckets, now, selectOpts);
   if (paced) return paced;
   const withoutMinuteLimits = buckets.map((b) => ({
