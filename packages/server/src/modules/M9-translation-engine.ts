@@ -3182,6 +3182,15 @@ export class TranslationEngine {
           if (revalidated.kind === 'keep') {
             return { kind: 'defer', resumeAt: now + 60_000 };
           }
+          // 'defer' means every other candidate is merely cooling (or
+          // minute-starved), not gone for good — the normal state of a
+          // minute-paced saturated run. Park on the revalidation's own
+          // estimate instead of failing pairs that would have rerouted
+          // themselves once a sibling's cooldown clears; only a truly empty
+          // field ('blocked', handled below) earns the provider's own error.
+          if (revalidated.kind === 'defer') {
+            return { kind: 'defer', resumeAt: revalidated.resumeAt };
+          }
           return { kind: 'error', error: err, authCancel: false };
         }
         if (revalidated.kind === 'defer') {
