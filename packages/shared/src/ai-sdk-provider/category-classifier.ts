@@ -153,6 +153,16 @@ export interface GenerateCategorySuggestionsOptions {
    * resolved module config.
    */
   useStructuredOutput?: boolean;
+  /**
+   * AI SDK's own internal retry count for each chunk's call (default 2, i.e. 3
+   * attempts). Absent leaves the SDK default untouched; mirrors the module
+   * closure's `config.maxRetries` passthrough. The caller (M5) sources this
+   * from a Freeway dispatch's `freewayModuleOverrides` when the run is bound
+   * to a free-tier bucket — the engine owns retry/failover policy there, so
+   * the SDK's own retries would only burn quota the engine's cool+reroute
+   * already supersedes.
+   */
+  maxRetries?: number;
   /** Entries to classify. */
   entries: CategoryEntryInput[];
   /**
@@ -358,6 +368,7 @@ export async function generateCategorySuggestions(
     baseURL,
     reasoningEffort,
     useStructuredOutput,
+    maxRetries,
     entries,
     existingCategories = [],
     maxCategories = 12,
@@ -429,6 +440,7 @@ export async function generateCategorySuggestions(
               maxOutputTokens: opts.maxOutputTokens,
               providerOptions: providerOpts,
               signal: combined,
+              ...(maxRetries !== undefined ? { maxRetries } : {}),
             },
           );
         } catch (err) {

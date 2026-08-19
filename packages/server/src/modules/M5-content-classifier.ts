@@ -1,4 +1,4 @@
-import type { StringEntry, TranslationModule } from '@zercade-dev/narn-shared';
+import type { StringEntry } from '@zercade-dev/narn-shared';
 import {
   generateCategorySuggestions,
   parseModuleInstanceId,
@@ -363,19 +363,27 @@ export class ContentClassifier {
        *  instance's config has verbose:true. */
       logSink?: ModuleLogFn;
       /**
-       * Pre-resolved module to dispatch this call against instead of
-       * resolving `request.moduleId` through the project's configured
-       * modules — set by the M29 background engine when it has already
-       * resolved `request.moduleId` (the synthetic Freeway pool id) to a
-       * concrete free-tier bucket. The capability check below runs against
-       * THIS module's base id instead of `request.moduleId` (the pool id is
-       * never itself category-capable), and the project/global
-       * effective-config resolution is skipped: there is no project config
-       * for the synthetic pool id to layer on top of, so the model comes
-       * from the per-run `request.model` override (the bucket's own
-       * resolved model, set by the caller) instead.
+       * Pre-resolved dispatch target instead of resolving `request.moduleId`
+       * through the project's configured modules — set by the M29 background
+       * engine when it has already resolved `request.moduleId` (the synthetic
+       * Freeway pool id) to a concrete free-tier bucket. This call dispatches
+       * via the standalone `generateCategorySuggestions` helper, not a
+       * `TranslationModule` instance method, so there is no built module to
+       * hand down here — only the SETTINGS a Freeway dispatch must carry
+       * travel: `moduleId` (for the capability gate + vault instance-key
+       * derivation, below) and `configOverrides` (the bucket's own
+       * Freeway-managed dispatch facts — `maxRetries`/`useStructuredOutput`
+       * from `freewayModuleOverrides` — which must reach the raw provider
+       * call the same way they'd reach a `TranslationModule`'s config). The
+       * project/global effective-config resolution is otherwise skipped:
+       * there is no project config for the synthetic pool id to layer on top
+       * of, so the model comes from the per-run `request.model` override
+       * (the bucket's own resolved model, set by the caller) instead.
        */
-      moduleOverride?: { module: TranslationModule; moduleId: string };
+      moduleOverride?: {
+        moduleId: string;
+        configOverrides?: { maxRetries?: number; useStructuredOutput?: boolean };
+      };
     },
   ): Promise<GenerateCategorySuggestionsResult> {
     // Resolve through the base module id so a named instance (e.g.
@@ -434,15 +442,38 @@ export class ContentClassifier {
     let baseURL: string | undefined;
     let allowInsecureHttp = false;
     let useStructuredOutput: boolean;
-    let verbose = false;
+    let maxRetries: number | undefined;
+    let verbose: boolean;
     if (opts?.moduleOverride) {
       // A pre-resolved override (a Freeway bucket) already IS the resolved
       // module/model — there is no project/global config entry for the
       // synthetic pool id to layer on top of, so skip that resolution
-      // entirely and take the per-run overrides at face value.
+      // entirely and take the per-run overrides at face value. The bucket's
+      // own Freeway-managed dispatch facts (maxRetries: 0 so the engine's own
+      // cool+reroute owns retry policy instead of the AI SDK burning quota on
+      // its internal retries; useStructuredOutput per the snapshot's measured
+      // per-model support) are explicit config overrides, not a config lookup
+      // — an explicit `useStructuredOutput` (including `false`) wins over the
+      // provider default, matching resolveUseStructuredOutput's contract.
       modelId = request.model;
       reasoningEffort = request.reasoningEffort;
-      useStructuredOutput = resolveUseStructuredOutput(undefined, capability.provider);
+      useStructuredOutput = resolveUseStructuredOutput(
+        opts.moduleOverride.configOverrides?.useStructuredOutput,
+        capability.provider,
+      );
+      maxRetries = opts.moduleOverride.configOverrides?.maxRetries;
+      // Verbose logging is a per-instance USER preference, not a
+      // Freeway-managed dispatch fact — still read from the resolved
+      // instance's own effective config, same lookup the non-override branch
+      // below does, just keyed off the override's (possibly instance) id
+      // instead of the synthetic pool id.
+      const overrideProjectEntry = project.moduleConfigs[opts.moduleOverride.moduleId];
+      const overrideEffective = resolveEffectiveModuleConfig(
+        opts.moduleOverride.moduleId,
+        global,
+        overrideProjectEntry,
+      );
+      verbose = (overrideEffective.config as { verbose?: unknown }).verbose === true;
     } else {
       const projectEntry = project.moduleConfigs[request.moduleId];
       const effective = resolveEffectiveModuleConfig(request.moduleId, global, projectEntry);
@@ -538,6 +569,9 @@ export class ContentClassifier {
       ...(allowInsecureHttp ? { allowInsecureHttp: true } : {}),
       ...(reasoningEffort ? { reasoningEffort } : {}),
       ...(useStructuredOutput ? { useStructuredOutput: true } : {}),
+      // 0 is a meaningful explicit value (Freeway's "no SDK-internal
+      // retries"), so this must check `!== undefined`, not truthiness.
+      ...(maxRetries !== undefined ? { maxRetries } : {}),
       entries,
       existingCategories,
       ...(batches

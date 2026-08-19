@@ -53,7 +53,12 @@ import {
   type ModuleRegistry,
 } from './M6-module-registry.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
-import { coolBucket, recordDispatch } from './M32/bucket-source.js';
+import {
+  coolBucket,
+  freewayBucketBaseModuleId,
+  freewayModuleOverrides,
+  recordDispatch,
+} from './M32/bucket-source.js';
 import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import { ValidationError } from '../types/errors.js';
 import {
@@ -83,6 +88,18 @@ interface FreewayCategoryTarget {
   modelId: string;
   bucketKey: string;
 }
+
+/**
+ * The dispatch settings a Freeway-bound `suggestCategories` call must carry.
+ * M5 dispatches through the standalone `generateCategorySuggestions` helper,
+ * not a `TranslationModule` instance method, so there is no built module to
+ * hand it — only `moduleId` (capability gate + vault instance-key
+ * derivation) and the bucket's own Freeway-managed dispatch facts travel.
+ */
+type CategoryModuleOverride = {
+  moduleId: string;
+  configOverrides?: { maxRetries?: number; useStructuredOutput?: boolean };
+};
 
 export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
   protected readonly logPrefix = 'category-gen';
@@ -163,6 +180,29 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
       deps: this.freewayOverrides,
       ...(reserveRequests !== undefined ? { reserveRequests } : {}),
     });
+  }
+
+  /**
+   * Builds the `moduleOverride` `suggestCategories` receives from a resolved
+   * Freeway target: the dispatch id, plus the bucket's own Freeway-managed
+   * config facts (`freewayModuleOverrides`, same source the ordinary
+   * `selectFreewayBackgroundModule` → `selectCapableModule` path applies to a
+   * built module's config) — `maxRetries: 0` so the engine's own cool+reroute
+   * owns retry policy instead of the AI SDK burning free-tier quota on its
+   * internal retries, and the snapshot's per-model `useStructuredOutput` fact
+   * where one exists. `freewayModuleOverrides` wants the bucket's BASE module
+   * id, recovered from `bucketKey` (`<baseModuleId>::<modelId>`) rather than
+   * `target.moduleId`, which can be a dispatched-through named instance.
+   */
+  private buildModuleOverride(target: FreewayCategoryTarget): CategoryModuleOverride {
+    const baseModuleId = freewayBucketBaseModuleId(target.bucketKey);
+    const raw = freewayModuleOverrides(baseModuleId, target.modelId);
+    const configOverrides: NonNullable<CategoryModuleOverride['configOverrides']> = {};
+    if (typeof raw.maxRetries === 'number') configOverrides.maxRetries = raw.maxRetries;
+    if (typeof raw.useStructuredOutput === 'boolean') {
+      configOverrides.useStructuredOutput = raw.useStructuredOutput;
+    }
+    return { moduleId: target.moduleId, configOverrides };
   }
 
   // M29 persists its all-or-nothing result directly in `run`; the base flush
@@ -255,15 +295,16 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
     try {
       // A `'freeway'` run resolves a concrete free-tier bucket BEFORE the
       // classify call — the pool id itself is never category-capable, so
-      // suggestCategories needs the resolved module (and its model, via the
-      // per-run `model` override) passed down as an override rather than
-      // trying to resolve `request.moduleId` through the project's config.
-      let moduleOverride: { module: TranslationModule; moduleId: string } | undefined;
+      // suggestCategories needs the resolved dispatch settings (and the
+      // model, via the per-run `model` override) passed down as an override
+      // rather than trying to resolve `request.moduleId` through the
+      // project's config.
+      let moduleOverride: CategoryModuleOverride | undefined;
       let bucketKey: string | undefined;
       let effectiveRequest = request;
       if (request.moduleId === FREEWAY_MODULE_ID) {
         const target = await this.selectFreewayTarget(projectId, request, sessionId, logSink);
-        moduleOverride = { module: target.module, moduleId: target.moduleId };
+        moduleOverride = this.buildModuleOverride(target);
         bucketKey = target.bucketKey;
         effectiveRequest = { ...request, model: target.modelId };
       }
@@ -305,7 +346,7 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
             if (hop === 0) {
               try {
                 const next = await this.selectFreewayTarget(projectId, request, sessionId, logSink);
-                moduleOverride = { module: next.module, moduleId: next.moduleId };
+                moduleOverride = this.buildModuleOverride(next);
                 bucketKey = next.bucketKey;
                 effectiveRequest = { ...request, model: next.modelId };
                 continue;
