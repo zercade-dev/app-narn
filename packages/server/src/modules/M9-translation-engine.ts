@@ -3073,9 +3073,29 @@ export class TranslationEngine {
       reason: 'rate-limit' | 'auth' | 'provider-error';
       retryAfterMs?: number;
     }) => void;
+    /**
+     * Set when the plan degraded this batch's band floor one tier (Addendum
+     * G): every re-validation this hop performs must check the CURRENT bucket
+     * against the accepted (relaxed) tier, not the group's natural, higher
+     * one — otherwise a degraded batch that hits a 429/provider error here
+     * revalidates at the natural floor, its own (degraded) bucket is excluded
+     * by that stricter check, and it parks on the long-cooling top-tier
+     * bucket's resumeAt — reproducing the exact stuck-waiting symptom the
+     * degrade exists to remove.
+     */
+    degradedFloor?: DifficultyBand;
   }): Promise<FreewayDispatchOutcome> {
-    const { jobs, decisions, state, deps, createModule, translateOptions, signal, onReroute } =
-      args;
+    const {
+      jobs,
+      decisions,
+      state,
+      deps,
+      createModule,
+      translateOptions,
+      signal,
+      onReroute,
+      degradedFloor,
+    } = args;
     for (let hop = 0; ; hop++) {
       let results: TranslationResult[] | undefined;
       try {
@@ -3136,6 +3156,7 @@ export class TranslationEngine {
               { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
               freshBuckets,
               strikeAt,
+              degradedFloor !== undefined ? { degradedFloor } : undefined,
             );
             if (revalidated.kind === 'blocked') {
               return { kind: 'error', error: err, authCancel: false };
@@ -3164,6 +3185,7 @@ export class TranslationEngine {
             { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
             buckets,
             strikeAt,
+            degradedFloor !== undefined ? { degradedFloor } : undefined,
           );
           if (parked.kind === 'blocked') return { kind: 'blocked' };
           // 'defer' carries the soonest useful reset. 'reroute'/'keep' (another
@@ -3203,6 +3225,7 @@ export class TranslationEngine {
           { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
           buckets,
           now,
+          degradedFloor !== undefined ? { degradedFloor } : undefined,
         );
         // Only a reroute rescues a generic provider failure: with nothing else
         // able to serve the group, the honest outcome is the provider's own
@@ -4159,6 +4182,7 @@ export class TranslationEngine {
             translateOptions: { ...dispatchOptions, onJobComplete },
             signal,
             onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
+            degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
           });
           currentFreewayState = undefined;
           // A same-bucket auth failover (a sibling instance took over, see
