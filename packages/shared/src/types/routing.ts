@@ -59,6 +59,16 @@ export interface RoutingDecision {
   modelOverride?: string;
   /** Per-rule reasoning effort override for Copilot-based modules. */
   reasoningEffortOverride?: ReasoningEffort;
+  /**
+   * The Freeway serving bucket's quality tier (1-4), threaded through the
+   * same channel as `moduleId`/`modelOverride` above: set at plan time and
+   * kept in sync on every failover/degrade/escalation re-point, so it always
+   * names the bucket that will actually serve (or just served) this decision.
+   * Undefined for non-Freeway decisions, and explicitly cleared by any
+   * short-circuit persist path (trivial matcher, translation memory) that
+   * never reaches a provider.
+   */
+  freewayTier?: number;
 }
 
 /**

@@ -3262,6 +3262,7 @@ export class TranslationEngine {
           for (const decision of decisions) {
             decision.moduleId = revalidated.moduleId;
             decision.modelOverride = revalidated.modelId;
+            decision.freewayTier = revalidated.qualityTier;
           }
         } else if (authFailure) {
           // 'keep' after an auth failure normally means a SIBLING candidate now
@@ -3289,6 +3290,7 @@ export class TranslationEngine {
             for (const decision of decisions) {
               decision.moduleId = freshModuleId;
               decision.modelOverride = freshBucket.modelId;
+              decision.freewayTier = freshBucket.qualityTier;
             }
           }
         }
@@ -3307,7 +3309,9 @@ export class TranslationEngine {
     failedBucketKey: string,
     decision: RoutingDecision,
     deps: BucketSourceDeps,
-  ): Promise<{ moduleId: string; modelId: string; bucketKey: string } | undefined> {
+  ): Promise<
+    { moduleId: string; modelId: string; bucketKey: string; qualityTier: number } | undefined
+  > {
     const now = Date.now();
     const buckets = await loadBucketViews(now, deps);
     const group = this.freewayJobGroup([decision]);
@@ -3335,6 +3339,7 @@ export class TranslationEngine {
       moduleId: selection.bucket.dispatchModuleId ?? selection.bucket.moduleId,
       modelId: selection.bucket.modelId,
       bucketKey: selection.bucket.bucketKey,
+      qualityTier: selection.bucket.qualityTier,
     };
   }
 
@@ -3456,6 +3461,7 @@ export class TranslationEngine {
           for (const d of decisions) {
             d.moduleId = revalidated.moduleId;
             d.modelOverride = revalidated.modelId;
+            d.freewayTier = revalidated.qualityTier;
           }
         } else if (revalidated.kind === 'defer') {
           this.deferPairsForQuota(
@@ -3674,7 +3680,14 @@ export class TranslationEngine {
           targetLanguage: e.decision.targetLanguage,
           translatedText: restored,
         };
-        const persistDecision: RoutingDecision = { ...e.decision, moduleId: 'glossary-constant' };
+        // A glossary-constant short-circuit never reaches a bucket — even for
+        // a Freeway-routed decision the plan already stamped — so the tier
+        // must be explicitly cleared, not inherited via the spread above.
+        const persistDecision: RoutingDecision = {
+          ...e.decision,
+          moduleId: 'glossary-constant',
+          freewayTier: undefined,
+        };
         await this.persistResult(
           projectId,
           e.decision.entry,
@@ -3749,6 +3762,10 @@ export class TranslationEngine {
               {
                 ...e.decision,
                 moduleId: TM_MODULE_ID,
+                // A translation-memory hit never touched a bucket either —
+                // clear a tier the plan may have stamped, same as the
+                // glossary-constant short-circuit above.
+                freewayTier: undefined,
               },
               runId,
             );
@@ -4360,6 +4377,7 @@ export class TranslationEngine {
               ...item.entry.decision,
               moduleId: escalation.moduleId,
               modelOverride: escalation.modelId,
+              freewayTier: escalation.qualityTier,
             };
             escalatedBucketKey = escalation.bucketKey;
             this.logger.info('translation:freeway-escalated', {
@@ -4655,6 +4673,12 @@ export class TranslationEngine {
         timestamp: Date.now(),
         needsReview: true,
         ...(runId ? { runId } : {}),
+        // Stamps the SERVING Freeway bucket's tier (Addendum H) — decision
+        // .freewayTier is threaded through the exact same channel as
+        // moduleId/modelOverride above, kept in sync on every failover/
+        // degrade/escalation re-point, and explicitly cleared by every
+        // short-circuit persist path that never reached a bucket at all.
+        ...(decision.freewayTier !== undefined ? { freewayTier: decision.freewayTier } : {}),
       },
       // Preserve a human 'reviewed' verdict when this run re-produces the exact
       // same text (re-translate / TM auto-apply). The check runs inside the
@@ -5257,7 +5281,9 @@ export class TranslationEngine {
       targetLanguage: d.targetLanguage,
       translatedText: trivialText,
     };
-    const persistDecision: RoutingDecision = { ...d, moduleId: matcherId };
+    // A built-in trivial matcher (empty/numeric/URL) never touches a bucket
+    // either, so clear any tier a Freeway-routed decision was stamped with.
+    const persistDecision: RoutingDecision = { ...d, moduleId: matcherId, freewayTier: undefined };
     await this.persistResult(
       projectId,
       d.entry,
