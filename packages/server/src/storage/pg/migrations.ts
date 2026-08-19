@@ -1064,4 +1064,39 @@ export const MIGRATIONS: ReadonlyArray<{ name: string; statements: readonly stri
       `grant execute on function narn_sweep_expired_freeway_windows() to app_user`,
     ],
   },
+  {
+    // Cross-tenant listing of the runs parked on free quota, for the M9
+    // auto-resume sweep's boot-time recovery. A parked run outlives the
+    // process by design (a park can last until tomorrow's reset), but the
+    // sweep walks IN-MEMORY runs — so after a deploy the park exists only
+    // here and the run stays paused until a manual resume.
+    //
+    // Mirrors narn_sweep_expired_manual_edits() (0026) /
+    // narn_sweep_expired_freeway_windows() (0028) exactly: a SECURITY DEFINER
+    // function that bypasses `runs`' project_members-scoped RLS (0009) and
+    // reports across ALL tenants in one call — a system operation, not a
+    // per-tenant one, and its caller (the process-wide sweep, off any
+    // request) has no app.user_id GUC to scope by. EXECUTE is revoked from
+    // PUBLIC and granted only to app_user. READ-only, and each row carries
+    // its own tenant_id so the caller re-establishes the run's OWN tenant
+    // before touching it.
+    //
+    // The predicate is the narrow one the sweep needs: the scalar `status`
+    // mirror column pinned to 'paused' (RunStatusCode.Paused) — so no
+    // running/terminal run is ever returned — AND a `waitingForQuota`
+    // existence test on the `data` jsonb. Drainedness and `resumeAt` are
+    // decided by the engine on the returned status, not here.
+    name: '0029_quota_parked_runs',
+    statements: [
+      `create or replace function narn_list_quota_parked_runs()
+         returns table (tenant_id text, project_id text, run_id text, data jsonb)
+         language sql security definer set search_path = public as $$
+           select r.tenant_id, r.project_id, r.run_id, r.data
+           from runs r
+           where r.status = 'paused' and jsonb_exists(r.data, 'waitingForQuota')
+         $$`,
+      `revoke execute on function narn_list_quota_parked_runs() from public`,
+      `grant execute on function narn_list_quota_parked_runs() to app_user`,
+    ],
+  },
 ];

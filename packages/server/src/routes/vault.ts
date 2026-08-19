@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { validateBody } from '../middleware/validate.js';
 import { credentialStore } from '../modules/M16-credential-store.js';
 import { clearFreewayCredentialMarks } from '../modules/M32/bucket-source.js';
+import { translationEngine } from '../modules/M9-translation-engine.js';
 import { maskSecret, toErrorMessage } from '@zercade-dev/narn-shared';
 import { validatePasswordStrength } from '../utils/password-validation.js';
 import { createEmptyVaultFile, decryptVault, encryptVault } from '../modules/M18-vault.js';
@@ -207,6 +208,18 @@ vaultRouter.post(
     // same `maskSecret` M16 applies to this value on eviction.
     logger.info('vault:unlocked', { sessionId: maskSecret(sid) });
     auditLogger.log('vault.unlocked', { sessionId: maskSecret(sid) }, req);
+    // A restart drops every run's captured session, and Freeway bucket
+    // visibility is session-scoped — so a run parked on free quota is adopted
+    // by the sweep but can see no bucket, and would stay parked (stamping a
+    // skip reason forever) until someone resumed it by hand. The first
+    // unlocked session is the natural recovery point: nudge ONE forced sweep
+    // pass with this session standing in for the ones the restart lost. The
+    // sweep applies it only to this caller's OWN tenant's runs. Detached
+    // deliberately — the unlock response is already sent, and a sweep failure
+    // must never surface as an unlock failure.
+    void translationEngine
+      .sweepQuotaResumes(Date.now(), { fallbackSessionId: sid, force: true })
+      .catch(() => undefined);
   }),
 );
 

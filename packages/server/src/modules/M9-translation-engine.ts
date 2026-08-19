@@ -77,6 +77,7 @@ import {
   runWithTenant,
   type TenantContext,
 } from '../storage/pg/tenant-context.js';
+import { listQuotaParkedRuns } from '../storage/quota-parked-runs.js';
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { credentialStore, sanitizeLogObject } from './M16-credential-store.js';
 import { lqaGate } from './M10-lqa-gate.js';
@@ -211,6 +212,12 @@ export interface TranslationEngineDeps {
    * {@link TranslationEngine.QUOTA_SWEEP_INTERVAL_MS}.
    */
   quotaSweepIntervalMs?: number;
+  /**
+   * Cross-tenant scan for runs the store has parked on free quota, consulted
+   * once per process by the sweep (see {@link TranslationEngine.sweepQuotaResumes}).
+   * Test seam only: the default is the real storage helper.
+   */
+  listParkedRuns?: typeof listQuotaParkedRuns;
   /**
    * Overrides for the Freeway bucket source (quota ledger, module status,
    * cloud-mode flag). Only `ledger`/`cloudMode` are normally injected: the
@@ -570,6 +577,12 @@ export class TranslationEngine {
   private readonly freewayTransientParkedPairs = new Map<string, Set<string>>();
   /** Set while a sweep pass is running, so a slow pass can't overlap the next tick. */
   private quotaSweepInFlight = false;
+  /**
+   * Whether the store has already been scanned for parks this process (see
+   * {@link adoptPersistedParks}). Set only after a scan that actually
+   * completed, so a boot-time DB outage retries instead of stranding them.
+   */
+  private parkAdoptionDone = false;
   /** The armed sweep interval (unref'd), when the engine opted in. */
   private quotaSweepTimer?: ReturnType<typeof setInterval>;
   /**
@@ -657,6 +670,8 @@ export class TranslationEngine {
   private readonly logger: LoggerLike;
   private readonly pricing: PricingProvider;
   private readonly retryBaseDelayMs: number;
+  /** Injected persisted-park scan; defaults to the real storage helper. */
+  private readonly _listParkedRuns?: typeof listQuotaParkedRuns;
 
   constructor(deps: TranslationEngineDeps = {}) {
     const concurrency = deps.concurrency ?? Number.parseInt(getTranslationConcurrency(), 10);
@@ -673,6 +688,7 @@ export class TranslationEngine {
     this.logger = deps.logger ?? defaultLogger;
     this.pricing = deps.pricing ?? defaultPricingProvider;
     this.retryBaseDelayMs = deps.retryBaseDelayMs ?? 1000;
+    this._listParkedRuns = deps.listParkedRuns;
     this.freewayOverrides = deps.freeway ?? {};
     const sweepIntervalMs = deps.quotaSweepIntervalMs ?? 0;
     if (sweepIntervalMs > 0) {
@@ -2313,20 +2329,61 @@ export class TranslationEngine {
    *   permanently-unservable and FAIL it. The run is left parked instead — a
    *   manual resume (or resume-with-module) under a live session recovers it.
    *
+   * The pass also adopts the parks a restart left behind (see
+   * {@link adoptPersistedParks}), so a park never depends on the process that
+   * created it still being alive.
+   *
+   * `opts` is the vault-unlock nudge's entry point:
+   * - `fallbackSessionId` — a session to stand in for runs whose OWN captured
+   *   session did not survive the restart. Applied only to a run of the
+   *   CALLING tenant (a session must never cross tenants) that has no session
+   *   of its own.
+   * - `force` — skip the per-run re-attempt throttle for this pass (an unlock
+   *   is a real state change, not a tick). The `resumeAt` requirement always
+   *   holds: a park that is not due yet is never re-planned.
+   *
    * @returns how many runs were actually re-dispatched.
    */
-  async sweepQuotaResumes(now: number = Date.now()): Promise<number> {
+  async sweepQuotaResumes(
+    now: number = Date.now(),
+    opts?: { fallbackSessionId?: string; force?: boolean },
+  ): Promise<number> {
     if (this.quotaSweepInFlight) return 0;
     this.quotaSweepInFlight = true;
     try {
-      const due = [...this.runs.values()].filter((status) => this.isQuotaResumeDue(status, now));
+      await this.adoptPersistedParks();
+      const due = [...this.runs.values()].filter((status) =>
+        this.isQuotaResumeDue(status, now, opts?.force === true),
+      );
       let resumed = 0;
       for (const status of due) {
         const { runId, projectId } = status;
+        // Per-project dispatch guard. It matters most for adopted parks:
+        // `resume`'s own guard only covers a run IT adopts, so without this a
+        // park adopted here could start alongside a run that began before the
+        // adoption — and a restart can hand back SEVERAL parks for one
+        // project, which would then all start at once. Deliberately not
+        // stamped as an attempt: the project frees up on its own and the next
+        // tick should retry immediately.
+        if (this.hasDispatchingProjectRun(projectId, runId)) continue;
         this.lastQuotaResumeAttempt.set(runId, now);
         const tenant = this.runTenants.get(runId) ?? this.queuedTenants.get(runId);
+        // Read the ambient tenant HERE, not inside `attempt`: the attempt runs
+        // inside runWithTenant(tenant, …), which re-scopes the ambient tenant
+        // to the RUN's own — the guard below would then compare the run
+        // against itself and always pass.
+        const callerTenant = getCurrentTenant();
         const attempt = async (): Promise<boolean> => {
-          const sessionId = this.runSessions.get(runId) ?? this.queuedSessions.get(runId);
+          const ownSession = this.runSessions.get(runId) ?? this.queuedSessions.get(runId);
+          // A fallback session (the vault-unlock nudge) may only stand in for a
+          // run whose own captured session did not survive the restart AND
+          // whose tenant is the calling one — a session must never cross
+          // tenants. A run with no captured tenant at all is pre-tenancy/local.
+          const fallbackApplies =
+            opts?.fallbackSessionId !== undefined &&
+            ownSession === undefined &&
+            (tenant?.userId === undefined || tenant.userId === callerTenant?.userId);
+          const sessionId = ownSession ?? (fallbackApplies ? opts?.fallbackSessionId : undefined);
           if (!(await this.hasAnyFreewayBucket(projectId, sessionId))) {
             this.logger.info('translation:quota-sweep-skipped', {
               runId,
@@ -2338,12 +2395,13 @@ export class TranslationEngine {
             await this.markQuotaResumeSkipped(projectId, status, NO_BUCKETS_SKIP_REASON);
             return false;
           }
-          // Deliberately no sessionId: the run's own captured session is the
-          // right one here (there is no requesting caller), and
-          // resumeWaitingForQuota falls back to it.
+          // The run's own captured session is the right one when it has one
+          // (there is no requesting caller) — passing it explicitly is what
+          // resumeWaitingForQuota would fall back to anyway; only the nudge's
+          // fallback adds anything.
           // Null means nothing was resumable after all (e.g. the run went
           // terminal between the scan and here) — not a re-dispatch.
-          return (await this.resume(projectId, runId)) !== null;
+          return (await this.resume(projectId, runId, sessionId)) !== null;
         };
         try {
           if (await (tenant ? runWithTenant(tenant, attempt) : attempt())) resumed++;
@@ -2357,6 +2415,45 @@ export class TranslationEngine {
       return resumed;
     } finally {
       this.quotaSweepInFlight = false;
+    }
+  }
+
+  /**
+   * Adopt the free-quota parks that only the RunStore knows about — once per
+   * process, at the head of the first sweep pass.
+   *
+   * A park outlives the process by design (it can last until tomorrow's
+   * reset), but the sweep walks in-memory runs, so after a restart the park
+   * exists only in the store and the run would sit paused until a manual
+   * resume. The scan is cross-tenant (a system read on the raw pool — see
+   * `storage/quota-parked-runs.ts`), so each adopted run also gets its OWN
+   * tenant re-established here; every later touch runs inside it.
+   *
+   * Once, not every tick: from the adoption on, the ordinary in-memory pass
+   * owns these runs (throttle, skip reasons, resume), and a run already in
+   * memory is never overwritten by its persisted copy.
+   */
+  private async adoptPersistedParks(): Promise<void> {
+    if (this.parkAdoptionDone) return;
+    try {
+      const parked = await (this._listParkedRuns ?? listQuotaParkedRuns)();
+      let adopted = 0;
+      for (const row of parked) {
+        if (this.runs.has(row.runId)) continue;
+        if (!this.isParkedForQuota(row.status)) continue;
+        this.runs.set(row.runId, row.status);
+        this.runTenants.set(row.runId, { userId: row.tenantId });
+        adopted++;
+      }
+      if (adopted > 0) {
+        this.logger.info('translation:quota-park-adopted', { count: adopted });
+      }
+      this.parkAdoptionDone = true;
+    } catch (err) {
+      // The flag stays unset deliberately: a failed scan (the DB briefly down
+      // at boot) retries on the next tick rather than silently stranding the
+      // parks for the life of the process.
+      this.logger.warn('translation:quota-park-adopt-failed', { error: toErrorMessage(err) });
     }
   }
 
@@ -2403,10 +2500,16 @@ export class TranslationEngine {
     });
   }
 
-  /** A parked run the sweep may re-plan right now (see {@link sweepQuotaResumes}). */
-  private isQuotaResumeDue(status: RunStatus, now: number): boolean {
+  /**
+   * A parked run the sweep may re-plan right now (see {@link sweepQuotaResumes}).
+   * `force` waives only the per-run re-attempt throttle (the vault-unlock
+   * nudge: a fresh session is new information, not another tick) — never the
+   * park's own `resumeAt`, which is what the free quota actually requires.
+   */
+  private isQuotaResumeDue(status: RunStatus, now: number, force = false): boolean {
     if (!this.isParkedForQuota(status)) return false;
     if ((status.waitingForQuota?.resumeAt ?? 0) > now) return false;
+    if (force) return true;
     const last = this.lastQuotaResumeAttempt.get(status.runId);
     return last === undefined || now - last >= TranslationEngine.QUOTA_RESUME_MIN_INTERVAL_MS;
   }
@@ -2573,6 +2676,24 @@ export class TranslationEngine {
     for (const status of this.runs.values()) {
       if (status.projectId !== projectId) continue;
       if (status.status === RunStatusCode.Paused) return true;
+      if (status.status !== RunStatusCode.Running) continue;
+      if (status.completed + status.failed >= status.total) continue;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Is some OTHER run for this project mid-dispatch right now (starting, or
+   * running with work left)? The quota sweep's guard: a parked run counts as
+   * "active" by {@link hasActiveProjectRun}, so two sibling parks would block
+   * each other forever under that test — what actually must not overlap is a
+   * second DISPATCH pass over the same project.
+   */
+  private hasDispatchingProjectRun(projectId: string, exceptRunId: string): boolean {
+    if (this.startingProjects.has(projectId)) return true;
+    for (const status of this.runs.values()) {
+      if (status.projectId !== projectId || status.runId === exceptRunId) continue;
       if (status.status !== RunStatusCode.Running) continue;
       if (status.completed + status.failed >= status.total) continue;
       return true;
