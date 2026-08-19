@@ -356,8 +356,13 @@ export function ReviewTab({ projectId }: Readonly<ReviewTabProps>) {
   const patchRecord = useCallback(
     async (item: ReviewItem, patch: Partial<TranslationRecord>): Promise<boolean> => {
       try {
+        const merged: TranslationRecord = { ...item.record, ...patch };
+        // A patch that replaces the text (a manual edit or its undo) leaves the
+        // old record's Freeway tier attributed to text that tier never
+        // produced — clear it, never carry it onto human-written text.
+        if (patch.text !== undefined) delete merged.freewayTier;
         await updateEntry(projectId, item.entry.id, {
-          translations: { [item.language]: { ...item.record, ...patch } },
+          translations: { [item.language]: merged },
         });
         return true;
       } catch (err) {

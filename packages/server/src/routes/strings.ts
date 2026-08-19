@@ -52,7 +52,7 @@ const translationRecordSchema = z.object({
   // a client round-trip (load an entry, edit, PUT it back) doesn't silently
   // drop a tier the server already stamped — the field is never set BY this
   // schema, only preserved through it.
-  freewayTier: z.number().optional(),
+  freewayTier: z.number().int().min(1).max(4).optional(),
 });
 
 // For PATCH operations we must not apply defaults, otherwise partial flag
@@ -63,7 +63,7 @@ const translationRecordPatchSchema = z.object({
   moduleId: z.string().optional(),
   timestamp: z.number().optional(),
   needsReview: z.boolean().optional(),
-  freewayTier: z.number().optional(),
+  freewayTier: z.number().int().min(1).max(4).optional(),
 });
 
 // Exported so its shape can be tested directly (schema-only, no Express/mocking) —
