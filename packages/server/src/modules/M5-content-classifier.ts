@@ -1,4 +1,4 @@
-import type { StringEntry } from '@zercade-dev/narn-shared';
+import type { StringEntry, TranslationModule } from '@zercade-dev/narn-shared';
 import {
   generateCategorySuggestions,
   parseModuleInstanceId,
@@ -56,6 +56,20 @@ const CATEGORY_CAPABLE_MODULES: Record<string, { provider: ProviderType; credent
     groq: { provider: 'groq', credentialKey: 'GROQ_API_KEY' },
     'generic-ai': { provider: 'openai-compatible', credentialKey: 'GENERIC_API_KEY' },
   };
+
+/**
+ * True when `moduleId` (a bare base id or a named `<base>:<slug>` instance)
+ * can generate category suggestions — resolves through the base id exactly
+ * like {@link ContentClassifier.suggestCategories}'s own capability gate.
+ * Used by the M29 background engine as the capability predicate when
+ * resolving a Freeway free-tier bucket, so only buckets whose base module is
+ * category-capable are considered.
+ */
+export function isCategoryCapableModule(moduleId: string): boolean {
+  const instance = parseModuleInstanceId(moduleId);
+  const baseModuleId = instance?.baseModuleId ?? moduleId;
+  return baseModuleId in CATEGORY_CAPABLE_MODULES;
+}
 
 export interface SuggestCategoriesRequest {
   /** Module to run the suggestion with; must be category-capable. */
@@ -348,16 +362,33 @@ export class ContentClassifier {
       /** Verbose log sink (from the M29 run); used only when the selected
        *  instance's config has verbose:true. */
       logSink?: ModuleLogFn;
+      /**
+       * Pre-resolved module to dispatch this call against instead of
+       * resolving `request.moduleId` through the project's configured
+       * modules — set by the M29 background engine when it has already
+       * resolved `request.moduleId` (the synthetic Freeway pool id) to a
+       * concrete free-tier bucket. The capability check below runs against
+       * THIS module's base id instead of `request.moduleId` (the pool id is
+       * never itself category-capable), and the project/global
+       * effective-config resolution is skipped: there is no project config
+       * for the synthetic pool id to layer on top of, so the model comes
+       * from the per-run `request.model` override (the bucket's own
+       * resolved model, set by the caller) instead.
+       */
+      moduleOverride?: { module: TranslationModule; moduleId: string };
     },
   ): Promise<GenerateCategorySuggestionsResult> {
     // Resolve through the base module id so a named instance (e.g.
     // `openai:my-key`) of a category-capable base is accepted, not just the bare
     // base id. The instance's slug is used to derive its per-instance vault key.
-    const instance = parseModuleInstanceId(request.moduleId);
-    const baseModuleId = instance?.baseModuleId ?? request.moduleId;
+    // A moduleOverride's id wins over `request.moduleId`: it's the module
+    // actually resolved to do the work.
+    const capabilityModuleId = opts?.moduleOverride?.moduleId ?? request.moduleId;
+    const instance = parseModuleInstanceId(capabilityModuleId);
+    const baseModuleId = instance?.baseModuleId ?? capabilityModuleId;
     const capability = CATEGORY_CAPABLE_MODULES[baseModuleId];
     if (!capability) {
-      throw new ValidationError(`module "${request.moduleId}" cannot generate categories`);
+      throw new ValidationError(`module "${capabilityModuleId}" cannot generate categories`);
     }
 
     const allEntries = await this.store.load(projectId);
@@ -397,43 +428,60 @@ export class ContentClassifier {
         return { entryId: e.id, sourceText: e.sourceText, ...(ctx ? { ctx } : {}) };
       });
     if (entries.length === 0) return { suggestions: [], usages: [] };
-    const projectEntry = project.moduleConfigs[request.moduleId];
-    const effective = resolveEffectiveModuleConfig(request.moduleId, global, projectEntry);
 
-    const cfg = effective.config as {
-      model?: unknown;
-      reasoningEffort?: unknown;
-      baseURL?: unknown;
-      allowInsecureHttp?: unknown;
-      useStructuredOutput?: unknown;
-      verbose?: unknown;
-    };
-    const modelId =
-      request.model || (typeof cfg.model === 'string' && cfg.model ? cfg.model : undefined);
-    if (!modelId) {
-      throw new ValidationError(`no model configured for module "${request.moduleId}"`);
+    let modelId: string | undefined;
+    let reasoningEffort: string | undefined;
+    let baseURL: string | undefined;
+    let allowInsecureHttp = false;
+    let useStructuredOutput: boolean;
+    let verbose = false;
+    if (opts?.moduleOverride) {
+      // A pre-resolved override (a Freeway bucket) already IS the resolved
+      // module/model — there is no project/global config entry for the
+      // synthetic pool id to layer on top of, so skip that resolution
+      // entirely and take the per-run overrides at face value.
+      modelId = request.model;
+      reasoningEffort = request.reasoningEffort;
+      useStructuredOutput = resolveUseStructuredOutput(undefined, capability.provider);
+    } else {
+      const projectEntry = project.moduleConfigs[request.moduleId];
+      const effective = resolveEffectiveModuleConfig(request.moduleId, global, projectEntry);
+
+      const cfg = effective.config as {
+        model?: unknown;
+        reasoningEffort?: unknown;
+        baseURL?: unknown;
+        allowInsecureHttp?: unknown;
+        useStructuredOutput?: unknown;
+        verbose?: unknown;
+      };
+      modelId =
+        request.model || (typeof cfg.model === 'string' && cfg.model ? cfg.model : undefined);
+      // Truthiness (not nullish): an empty-string override must fall back to
+      // the configured/default effort, never reach buildProviderOptions as ''.
+      reasoningEffort =
+        request.reasoningEffort ||
+        (typeof cfg.reasoningEffort === 'string' ? cfg.reasoningEffort : undefined);
+      baseURL = typeof cfg.baseURL === 'string' ? cfg.baseURL : undefined;
+      // Mirror validate-module-config.ts / the translate path: coerce the same
+      // `allowInsecureHttp` opt-in from the resolved config so a LAN `http:` LLM
+      // endpoint (Ollama/LM Studio) category-gen can use is validated identically.
+      allowInsecureHttp = coerceBoolean(cfg.allowInsecureHttp);
+      // Honor the module's structured-output flag with the same resolution
+      // createAISDKModule applies on the translation/judge/etc. paths: strict
+      // `=== true` for a set value (a stringy or legacy value is treated as off),
+      // per-provider default for an unset one (ON for google). generic-ai is
+      // pinned to openai-compatible here, so its "openai-format-only" guard does
+      // not apply.
+      useStructuredOutput = resolveUseStructuredOutput(
+        cfg.useStructuredOutput,
+        capability.provider,
+      );
+      verbose = cfg.verbose === true;
     }
-    // Truthiness (not nullish): an empty-string override must fall back to the
-    // configured/default effort, never reach buildProviderOptions as ''.
-    const reasoningEffort =
-      request.reasoningEffort ||
-      (typeof cfg.reasoningEffort === 'string' ? cfg.reasoningEffort : undefined);
-    const baseURL = typeof cfg.baseURL === 'string' ? cfg.baseURL : undefined;
-    // Mirror validate-module-config.ts / the translate path: coerce the same
-    // `allowInsecureHttp` opt-in from the resolved config so a LAN `http:` LLM
-    // endpoint (Ollama/LM Studio) category-gen can use is validated identically.
-    const allowInsecureHttp = coerceBoolean(cfg.allowInsecureHttp);
-    // Honor the module's structured-output flag with the same resolution
-    // createAISDKModule applies on the translation/judge/etc. paths: strict
-    // `=== true` for a set value (a stringy or legacy value is treated as off),
-    // per-provider default for an unset one (ON for google). generic-ai is
-    // pinned to openai-compatible here, so its "openai-format-only" guard does
-    // not apply.
-    const useStructuredOutput = resolveUseStructuredOutput(
-      cfg.useStructuredOutput,
-      capability.provider,
-    );
-    const verbose = cfg.verbose === true;
+    if (!modelId) {
+      throw new ValidationError(`no model configured for module "${capabilityModuleId}"`);
+    }
     const useVerboseSink = verbose && !!opts?.logSink;
 
     // Credentials come from the per-session vault (M16), never process.env.
