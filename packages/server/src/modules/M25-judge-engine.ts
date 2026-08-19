@@ -376,12 +376,18 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     // before it invokes `dispatch`: the free-tier bucket the run spends
     // against, or undefined for an ordinary module.
     let freeway: FreewayBatchBinding | undefined;
-    // Re-selects that bucket after a rate limit exhausted the retries, and
-    // swaps `target` so the already-queued dispatch closures pick up the new
-    // module. Left undefined for an ordinary module (nothing to re-route to).
-    let freewayReroute: (() => Promise<FreewayBatchBinding | undefined>) | undefined;
-    // The module every queued batch dispatches through, held by reference so a
-    // re-route can replace it mid-run.
+    // Builds a batch's re-route: on a rate-limit exhaustion it re-selects, then
+    // moves BOTH the run (so batches that start later begin on the new bucket)
+    // and that batch's OWN selection copy. Per batch, because a sibling batch
+    // between retries must keep dispatching through the module whose bucket its
+    // debits are keyed to. Left undefined for an ordinary module.
+    let makeFreewayReroute:
+      | ((selection: {
+          module: TranslationModule;
+          moduleId: string;
+        }) => () => Promise<FreewayBatchBinding | undefined>)
+      | undefined;
+    // The run's current selection; each batch copies it when it starts.
     let target: { module: TranslationModule; moduleId: string } | undefined;
 
     // The reserve the free-tier selector should fence: this run's own scope
@@ -415,11 +421,10 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
           logSink,
           reserveRequests,
         );
-        const holder = { module: selected.module, moduleId: selected.moduleId };
-        target = holder;
+        target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
           freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
-          freewayReroute = async () => {
+          makeFreewayReroute = (selection) => async () => {
             try {
               // The struck bucket is cooled before this runs, so the selector
               // offers a different one (or nothing, and the batch fails).
@@ -432,12 +437,21 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
                 reserveRequests,
               );
               if (next.bucketKey === undefined) return undefined;
-              holder.module = next.module;
-              holder.moduleId = next.moduleId;
-              freeway = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
-              return freeway;
-            } catch {
-              // Nothing eligible: the batch fails exactly as it did before.
+              const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
+              target = { module: next.module, moduleId: next.moduleId };
+              freeway = binding;
+              selection.module = next.module;
+              selection.moduleId = next.moduleId;
+              return binding;
+            } catch (err) {
+              // Nothing eligible — or the re-selection itself failed (a vault
+              // re-lock mid-run, say), which is worth telling apart from a
+              // genuinely empty pool. Either way the batch fails as it did
+              // before the hop existed.
+              this.logger.warn(`${this.logPrefix}:freeway-reroute-select-failed`, {
+                projectId,
+                error: toErrorMessage(err),
+              });
               return undefined;
             }
           };
@@ -555,14 +569,18 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         ? { customBatchSizeOverride: override.customBatchSize }
         : {}),
       dispatch: ({ runId, module, moduleId, entriesById, records, batches, dispatchOptions }) => {
-        // `selectModule` above always sets `target`; the fallback keeps this
-        // independent of that ordering.
-        const selection = target ?? { module, moduleId };
         // Mean score needs the sum; keep it engine-side and derive averageScore.
         let scoreSum = 0;
         for (const batch of batches) {
-          const body = () =>
-            this.processBatch(
+          const body = () => {
+            // Read when the batch actually starts (so it begins on whatever
+            // bucket the run is on by then) and COPIED, so this batch's module
+            // and its debited bucket only ever move together — a sibling's hop
+            // cannot swap the module out from under it mid-retry.
+            // `selectModule` always sets `target`; the fallback keeps this
+            // independent of that ordering.
+            const selection = target ? { ...target } : { module, moduleId };
+            return this.processBatch(
               runId,
               projectId,
               selection,
@@ -577,8 +595,9 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
               },
               dispatchOptions,
               freeway,
-              freewayReroute,
+              makeFreewayReroute?.(selection),
             );
+          };
           this.queue.add(runId, tenant ? () => runWithTenant(tenant, body) : body);
         }
       },

@@ -760,7 +760,16 @@ export abstract class BackgroundRunEngine<TRecord> {
           // exhaustion (or nothing eligible to move to) fails the batch exactly
           // as it always has.
           if (hop === 0 && binding && isRateLimitError(err) && opts.freewayReroute) {
-            const next = await opts.freewayReroute();
+            // The hop must never be able to skip the failure block below: a
+            // re-selection that throws leaves these items unrecorded, and the
+            // queue swallows the rejection, so the run would report them
+            // complete. Engines log their own reason before returning here.
+            let next: FreewayBatchBinding | undefined;
+            try {
+              next = await opts.freewayReroute();
+            } catch {
+              next = undefined;
+            }
             if (next) {
               this.logger.info(`${this.logPrefix}:freeway-rerouted`, {
                 runId,
