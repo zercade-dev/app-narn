@@ -91,6 +91,15 @@ export interface Assignment {
   modelId: string;
   batchSize: number;
   estimatedRequests: number;
+  /**
+   * Set when this assignment relaxed the group's band floor one tier below
+   * because the soonest band-qualified bucket was more than
+   * FREEWAY_DEGRADE_WAIT_MS away (see planner.ts's deferral tail /
+   * Addendum G). `fromTier` is the group's own band; `toTier` is exactly
+   * one below it; `waitedAlternativeMs` is how long the band-qualified
+   * bucket would have taken to come back.
+   */
+  degraded?: { fromTier: number; toTier: number; waitedAlternativeMs: number };
 }
 
 export interface RunPlan {

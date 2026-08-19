@@ -135,7 +135,7 @@ import {
   selectEscalation,
 } from './M32/selector.js';
 import { difficultyBand } from './M32/difficulty.js';
-import type { BucketView, JobGroup } from './M32/types.js';
+import type { Assignment, BucketView, DifficultyBand, JobGroup } from './M32/types.js';
 import { syncAuthoritativeUsage } from './M32/probes.js';
 import { maybeSweepExpiredFreewayWindows } from './freeway-minute-sweep.js';
 import {
@@ -338,6 +338,12 @@ function formatResumeTime(resumeAt: number): string {
 /** One-liner for a Freeway batch parked on quota, at either the plan-time or dispatch-time deferral site. */
 function formatDeferralDetail(pairCount: number, resumeAt: number): string {
   return `${pairCount} pairs waiting for quota — resumes ~${formatResumeTime(resumeAt)}`;
+}
+
+/** One-liner for a batch dispatching on a bucket one tier below its band floor (Addendum G). */
+function formatDegradedDetail(degraded: NonNullable<Assignment['degraded']>): string {
+  const mins = Math.round(degraded.waitedAlternativeMs / 60_000);
+  return `tier ${degraded.fromTier} bucket ~${mins}m out — degraded to tier ${degraded.toTier} instead of waiting`;
 }
 
 /** One-liner for a dispatch-time Freeway failover (see {@link TranslationEngine.dispatchFreewayBatch}'s `onReroute`). */
@@ -1625,6 +1631,8 @@ export class TranslationEngine {
         : routable.filter((d) => d.moduleId !== FREEWAY_MODULE_ID);
     /** Freeway-managed batches, mapped to the bucket their jobs were planned on. */
     const freewayBucketKeys = new Map<RoutingDecision[], string>();
+    /** Freeway-managed batches whose band floor the plan relaxed one tier. */
+    const freewayDegraded = new Map<RoutingDecision[], Assignment['degraded']>();
 
     const groups = groupDecisions(directDecisions, isBatch, resolveBatchMode, {
       dimension: batchGroupingDimension,
@@ -1684,6 +1692,7 @@ export class TranslationEngine {
           isBatch,
           resolveBatchMode,
           bucketKeys: freewayBucketKeys,
+          degraded: freewayDegraded,
         })),
       );
       if (groups.length === 0) {
@@ -1720,6 +1729,7 @@ export class TranslationEngine {
           project,
           achievementPairMap,
           freewayBucketKeys.get(group),
+          freewayDegraded.get(group),
         );
 
     // Split-by-model: when the user asked for it AND the run touches ≥2 distinct
@@ -2803,8 +2813,10 @@ export class TranslationEngine {
     isBatch: (moduleId: string | null) => boolean;
     resolveBatchMode: (moduleId: string) => ModuleBatchMode;
     bucketKeys: Map<RoutingDecision[], string>;
+    /** Set for a batch whose band floor the plan relaxed one tier — see Addendum G. */
+    degraded: Map<RoutingDecision[], Assignment['degraded']>;
   }): Promise<RoutingDecision[][]> {
-    const { runId, status, decisions, isBatch, resolveBatchMode, bucketKeys } = args;
+    const { runId, status, decisions, isBatch, resolveBatchMode, bucketKeys, degraded } = args;
     const now = Date.now();
     const deps = this.freewayBucketDeps(args.global, args.projectEntries, args.sessionId);
     // Read once, ahead of both the probe and `loadBucketViews` below: the
@@ -2867,6 +2879,7 @@ export class TranslationEngine {
       });
       for (const batch of batches) {
         bucketKeys.set(batch, assignment.bucketKey);
+        if (assignment.degraded) degraded.set(batch, assignment.degraded);
         groups.push(batch);
       }
     }
@@ -2944,15 +2957,28 @@ export class TranslationEngine {
     };
   }
 
-  /** Fresh bucket views + one re-validation of a batch's planned bucket. */
+  /**
+   * Fresh bucket views + one re-validation of a batch's planned bucket.
+   * `degradedFloor` re-validates a degraded batch (see Addendum G) against
+   * the relaxed tier the plan already accepted, not the group's natural
+   * (higher) floor — otherwise every degraded assignment would bounce
+   * straight back to deferred the moment it reaches this coarse re-check,
+   * since the bucket the plan chose is by construction below the natural floor.
+   */
   private async revalidateFreewayBatch(
     decisions: RoutingDecision[],
     bucketKey: string,
     deps: BucketSourceDeps,
     now: number,
+    degradedFloor?: DifficultyBand,
   ): Promise<ReturnType<typeof revalidateGroup>> {
     const buckets = await loadBucketViews(now, deps);
-    return revalidateGroup({ decisions, bucketKey, batchSize: decisions.length }, buckets, now);
+    return revalidateGroup(
+      { decisions, bucketKey, batchSize: decisions.length },
+      buckets,
+      now,
+      degradedFloor !== undefined ? { degradedFloor } : undefined,
+    );
   }
 
   /** Cool a bucket after a 429. Never fails the batch (a ledger write that
@@ -3346,6 +3372,8 @@ export class TranslationEngine {
     achievementPairMap: Map<string, StringEntry[]> = new Map(),
     /** Set for a Freeway-managed batch: the bucket its jobs were planned on. */
     freewayBucketKey?: string,
+    /** Set when the plan relaxed this batch's band floor one tier (Addendum G). */
+    freewayDegraded?: Assignment['degraded'],
   ): Promise<void> {
     const status = this.runs.get(runId);
     if (!status || status.status === RunStatusCode.Cancelled) return;
@@ -3410,6 +3438,7 @@ export class TranslationEngine {
           bucketKey,
           freewayDeps,
           Date.now(),
+          freewayDegraded?.toTier as DifficultyBand | undefined,
         );
         if (revalidated.kind === 'reroute') {
           this.logger.info('translation:freeway-rerouted', {
@@ -3455,6 +3484,19 @@ export class TranslationEngine {
           );
           for (const d of decisions) settled.add(settleKey(d));
           return;
+        } else if (freewayDegraded) {
+          // 'keep': dispatching on the exact bucket the plan already relaxed
+          // this batch's band floor onto (Addendum G) — surface why a
+          // lower-tier bucket is serving a hard-band entry.
+          this.logger.info('translation:freeway-degraded', {
+            runId,
+            bucketKey,
+            band: freewayDegraded.fromTier,
+            fromTier: freewayDegraded.fromTier,
+            toTier: freewayDegraded.toTier,
+            waitedAlternativeMs: freewayDegraded.waitedAlternativeMs,
+          });
+          this.recordFreewayDetail(runId, formatDegradedDetail(freewayDegraded));
         }
       }
 
