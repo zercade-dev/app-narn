@@ -89,7 +89,7 @@ import {
   maskDiagnosticsToIssues,
 } from './M17-translation-masker.js';
 import { resolveEffectiveModuleConfig } from './M19-global-config-store.js';
-import { runTrivialMatchers } from './trivial-matchers.js';
+import { needsTranslation, runTrivialMatchers } from './trivial-matchers.js';
 import { metricsCollector } from './metrics-collector.js';
 import {
   buildTmFingerprint,
@@ -1456,7 +1456,7 @@ export class TranslationEngine {
       for (const targetLanguage of targetLanguages) {
         if (targetLanguage === project.sourceLanguage) continue;
         if (pairAllow && !pairAllow.has(`${entry.id}\0${targetLanguage}`)) continue;
-        if (!reTranslate && entry.translations[targetLanguage]?.text) continue;
+        if (!needsTranslation(entry, targetLanguage, reTranslate)) continue;
         decisions.push(this.router.route(entry, targetLanguage, rules, availableModules));
       }
     }

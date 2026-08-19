@@ -1,3 +1,5 @@
+import type { StringEntry } from '@zercade-dev/narn-shared';
+
 export interface TrivialMatcher {
   id: string;
   /** Returns translated text if this matcher handles the source, or null to pass through. */
@@ -56,4 +58,24 @@ export function runTrivialMatchers(
     if (result !== null) return [matcher.id, result];
   }
   return null;
+}
+
+/**
+ * Whether a run should (re-)translate this (entry, language) pair. A pair
+ * with produced text is done; a pair whose source is EMPTY and whose record
+ * was produced by the trivial-empty matcher is also done — without this,
+ * every empty-source row re-enters every run's totals forever (its text is
+ * '' — falsy — so a truthiness check re-selects it each time), inflating
+ * "missing" counts with rows that cost nothing and change nothing.
+ */
+export function needsTranslation(
+  entry: StringEntry,
+  targetLanguage: string,
+  reTranslate: boolean,
+): boolean {
+  if (reTranslate) return true;
+  const record = entry.translations[targetLanguage];
+  if (!record) return true;
+  if (record.text) return false;
+  return !(entry.sourceText.trim() === '' && record.moduleId === emptyMatcher.id);
 }
