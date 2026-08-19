@@ -137,6 +137,39 @@ export function isModelUnavailableError(err: unknown): boolean {
 }
 
 /**
+ * Vocabulary for a passing provider fault — a 5xx, a timeout, or the
+ * provider's own "high demand"/"try again later" phrasing — worth one retry,
+ * as opposed to a rate limit, an auth failure, or a model that is gone for
+ * good. Deliberately disjoint from {@link RATE_LIMIT_MESSAGE_RE},
+ * {@link AUTH_MESSAGE_RE}/{@link AUTH_STATUS_TOKEN_RE}, and
+ * {@link MODEL_UNAVAILABLE_RE} (see {@link isTransientProviderError}'s
+ * precedence contract and the negative tests pinning it).
+ */
+const TRANSIENT_PROVIDER_RE =
+  /high[\s-]?demand|try again later|temporarily unavailable|\boverloaded\b|service unavailable|\b503\b|internal error|\b500\b|\btimed?[\s-]?out\b|\btimeout\b/i;
+
+/**
+ * Whether an error (or a module's per-result `error` string) signals a
+ * TRANSIENT provider fault — a passing 5xx, a timeout, or the provider's own
+ * "high demand"/"try again later" messaging — worth one retry, as opposed to
+ * a rate limit, an auth failure, or a model the provider will never serve
+ * again this window.
+ *
+ * PRECEDENCE CONTRACT: this classifier's vocabulary is disjoint from
+ * {@link isRateLimitError}, {@link isRunCancellingAuthError}/{@link isAuthError},
+ * and {@link isModelUnavailableError} by construction — but an error can
+ * still carry BOTH a structured signal one of those owns (a 401 statusCode,
+ * a typed RateLimitError) AND transient-sounding prose in its message.
+ * Callers MUST check the other three classifiers FIRST and only fall
+ * through to this one when none of them matched; this function does not
+ * re-derive that ordering itself.
+ */
+export function isTransientProviderError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return TRANSIENT_PROVIDER_RE.test(msg);
+}
+
+/**
  * Whether an error (or a module's per-result `error` string) signals a 429.
  * Detects the shared typed RateLimitError by name first, then falls back to
  * the canonical shared message vocabulary (which covers Google's quota

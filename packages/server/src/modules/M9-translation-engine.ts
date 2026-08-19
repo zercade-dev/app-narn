@@ -108,6 +108,7 @@ import {
   isModelUnavailableError,
   isRateLimitError,
   isRunCancellingAuthError,
+  isTransientProviderError,
   rateLimitCooldownMs,
   retryAfterMsOf,
   withRateLimitRetry,
@@ -550,6 +551,16 @@ export class TranslationEngine {
    * independently of the tick period. Manual resumes are never throttled.
    */
   private readonly lastQuotaResumeAttempt = new Map<string, number>();
+  /**
+   * (entryId, targetLanguage) pairs already parked once for a transient
+   * per-result error in a PARTIAL Freeway batch, keyed by runId (see the
+   * Freeway transient-park branch inside `finalizeEntryResult`'s error
+   * handling below). A pair's SECOND transient hit in the same run fails it
+   * instead of parking again, bounding the extra spend at one retry per
+   * pair. In-memory only: a restart loses the count and grants one more
+   * park — harmless, since it only ever costs one wasted request.
+   */
+  private readonly freewayTransientParkedPairs = new Map<string, Set<string>>();
   /** Set while a sweep pass is running, so a slow pass can't overlap the next tick. */
   private quotaSweepInFlight = false;
   /** The armed sweep interval (unref'd), when the engine opted in. */
@@ -3835,6 +3846,47 @@ export class TranslationEngine {
         const emptyOutput =
           !!moduleResult && !moduleResult.error && !moduleResult.translatedText?.trim();
         if (!moduleResult || moduleResult.error || emptyOutput) {
+          // Freeway partial-batch: a transient-shaped per-result error (a
+          // passing 5xx, timeout, or "high demand"/"try again later"
+          // provider messaging) parks once instead of failing, so one flaky
+          // call in an otherwise-healthy batch doesn't strand the pair.
+          // Only a GENUINE error (not empty-output-only) qualifies, and
+          // only when none of the more specific classifiers
+          // — rate-limit (which never reaches here: a per-result rate limit
+          // is surfaced as a throw earlier in dispatchFreewayBatch), auth,
+          // or model-unavailable — claim it first, mirroring the precedence
+          // every other call site in this engine follows. And only the
+          // FIRST time this (entry, language) pair sees one in this run: a
+          // second transient hit fails it like any other error, capping the
+          // extra spend at one retry per pair. Never cools the bucket — the
+          // bucket's OTHER jobs in this very batch are proof it works.
+          if (
+            bucketKey !== undefined &&
+            freewayDeps &&
+            moduleResult?.error &&
+            !isRunCancellingAuthError(moduleResult.error) &&
+            !isModelUnavailableError(moduleResult.error) &&
+            isTransientProviderError(moduleResult.error)
+          ) {
+            const pairKey = `${e.decision.entry.id} ${e.decision.targetLanguage}`;
+            let parkedOnce = this.freewayTransientParkedPairs.get(runId);
+            if (!parkedOnce) {
+              parkedOnce = new Set<string>();
+              this.freewayTransientParkedPairs.set(runId, parkedOnce);
+            }
+            if (!parkedOnce.has(pairKey)) {
+              parkedOnce.add(pairKey);
+              this.deferPairsForQuota(
+                status,
+                [{ entryId: e.decision.entry.id, targetLanguage: e.decision.targetLanguage }],
+                Date.now() + 60_000,
+              );
+              settled.add(settleKey(e.decision));
+              deferredIndices.add(i);
+              this.emitProgress(runId, status);
+              return false;
+            }
+          }
           // A module-provided error string may echo a raw credential (e.g. a
           // provider auth failure quoting the key) — sanitize before it's
           // recorded/logged (pattern-strip + live-vault value scrub), same as
@@ -4916,6 +4968,7 @@ export class TranslationEngine {
     this.runSessions.delete(runId);
     this.runTenants.delete(runId);
     this.lastQuotaResumeAttempt.delete(runId);
+    this.freewayTransientParkedPairs.delete(runId);
     this.queuedTenants.delete(runId);
     this.queuedRetryRequests.delete(runId);
     // Resolve a dangling settled deferred before dropping it so any drain
