@@ -18,6 +18,7 @@ import { ChevronRight, Loader2, Save, Sparkles, Tags, Trash2, X, XCircle } from 
 import {
   RunStatusCode,
   CATEGORY_CHUNK_SIZE,
+  FREEWAY_MODULE_ID,
   type EntryContextField,
   type GlossarySummary,
   type JudgeLogEntry,
@@ -36,7 +37,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ModuleSelect } from '@/components/ui/module-select';
+import { ModuleSelect, type ModuleSelectOption } from '@/components/ui/module-select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RunProgressCard } from '@/components/common/RunProgressCard';
 import { AdvancedToggle } from '@/components/common/AdvancedToggle';
@@ -145,6 +146,9 @@ interface CategorySuggestion {
 
 export function CategoryTab({ projectId }: { readonly projectId: string }): React.JSX.Element {
   const { t } = useTranslation('category');
+  // Only for the synthetic Freeway option's label below (`config:routing.freewayLabel`,
+  // reused from the routing picker rather than duplicating the string here).
+  const { t: tConfig } = useTranslation('config');
 
   const entries = useStringStore((s) => s.entries);
   const loadedProjectId = useStringStore((s) => s.loadedProjectId);
@@ -472,7 +476,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
   const storedDesc = selectedCategory ? (descriptions[selectedCategory] ?? '') : '';
   const descDirty = descDraft.trim() !== storedDesc;
 
-  const aiModules = useMemo(() => {
+  const realAiModules = useMemo(() => {
     const withInstances = basesWithInstances(modules);
     return modules.filter(
       (m) =>
@@ -481,6 +485,39 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
         isEnabledModule(m),
     );
   }, [modules]);
+  // The category-suggest picker also offers a synthetic NARN Freeway target
+  // (M29 CategoryGenEngine already accepts moduleId 'freeway', resolving via
+  // the free pool at background priority — bypassing CATEGORY_CAPABLE_MODULE_IDS
+  // server-side too, since freeway is a router target rather than one of the
+  // real base providers that Set mirrors) — appended here at THIS composition
+  // site only, mirroring AiReviewDialog's judge-picker pattern, and run
+  // through the SAME isOfferableModule/isEnabledModule predicates real
+  // modules use (both accept it: `instanceable: false`, `enabled: true`),
+  // rather than being force-included. Only added once `realAiModules` is
+  // non-empty — that both keeps Freeway from ever being the *sole* offered
+  // option (the "no modules" empty state stays exactly as it was: real API
+  // modules only) and avoids a mount-time race where the synthetic entry
+  // would otherwise appear on the very first render, before the async
+  // `/modules` fetch has resolved.
+  const aiModules = useMemo<ModuleSelectOption[]>(() => {
+    if (realAiModules.length === 0) return realAiModules;
+    const withInstances = basesWithInstances(modules);
+    return [
+      ...modules,
+      {
+        id: FREEWAY_MODULE_ID,
+        name: tConfig('routing.freewayLabel'),
+        baseModuleId: undefined,
+        instanceable: false,
+        enabled: true,
+      },
+    ].filter(
+      (m) =>
+        (m.id === FREEWAY_MODULE_ID || CATEGORY_CAPABLE_MODULE_IDS.has(m.baseModuleId ?? m.id)) &&
+        isOfferableModule(m, withInstances) &&
+        isEnabledModule(m),
+    );
+  }, [modules, realAiModules, tConfig]);
   const moduleId = userModuleId ?? aiModules[0]?.id ?? '';
   const noAiModules = modules.length > 0 && aiModules.length === 0;
 
