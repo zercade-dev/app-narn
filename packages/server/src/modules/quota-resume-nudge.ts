@@ -9,12 +9,12 @@
  * The first successful unlock is the natural recovery point.
  *
  * Deliberately a standalone module, not inline in a route: BOTH unlock paths
- * need it — the open-core `/api/vault/unlock` route and the cloud
- * `/auth/vault-unlock` handler, which lives in the parent repo and reaches
- * this through the server package's root barrel via a LAZY import (the same
- * shape `drainProjectRuns` uses). Callers import this module lazily too, so
- * merely mounting a route never pulls the engine graph (and its process-wide
- * singleton) into the importing module's graph.
+ * need it — the open-core `/api/vault/unlock` route here, and a cloud
+ * composition root's own `/auth/vault-unlock` handler, which reaches this seam
+ * through this package's root export via a LAZY import (the same shape
+ * `drainProjectRuns` is consumed with). Callers import this module lazily too,
+ * so merely mounting a route never pulls the engine graph (and its
+ * process-wide singleton) into the importing module's graph.
  */
 import { toErrorMessage } from '@zercade-dev/narn-shared';
 import { translationEngine } from './M9-translation-engine.js';
