@@ -2339,8 +2339,10 @@ export class TranslationEngine {
    *   CALLING tenant (a session must never cross tenants) that has no session
    *   of its own.
    * - `force` — skip the per-run re-attempt throttle for this pass (an unlock
-   *   is a real state change, not a tick). The `resumeAt` requirement always
-   *   holds: a park that is not due yet is never re-planned.
+   *   is a real state change, not a tick). Applied to the CALLING tenant's own
+   *   runs only: another tenant's park learned nothing from this unlock, so it
+   *   keeps its ordinary throttle. The `resumeAt` requirement always holds: a
+   *   park that is not due yet is never re-planned.
    *
    * @returns how many runs were actually re-dispatched.
    */
@@ -2352,9 +2354,23 @@ export class TranslationEngine {
     this.quotaSweepInFlight = true;
     try {
       await this.adoptPersistedParks();
-      const due = [...this.runs.values()].filter((status) =>
-        this.isQuotaResumeDue(status, now, opts?.force === true),
-      );
+      // Read the ambient tenant HERE, not inside `attempt`: the attempt runs
+      // inside runWithTenant(tenant, …), which re-scopes the ambient tenant to
+      // the RUN's own — the guards below would then compare the run against
+      // itself and always pass.
+      const callerTenant = getCurrentTenant();
+      const due = [...this.runs.values()].filter((status) => {
+        // `force` is news about the CALLER's own state (their vault just
+        // unlocked), so it may only waive the throttle on the caller's own
+        // runs. Another tenant's park keeps its ordinary throttle — same
+        // both-sides-known guard the fallback session uses below.
+        const owner = this.runTenants.get(status.runId) ?? this.queuedTenants.get(status.runId);
+        const forceThisRun =
+          opts?.force === true &&
+          owner?.userId !== undefined &&
+          owner.userId === callerTenant?.userId;
+        return this.isQuotaResumeDue(status, now, forceThisRun);
+      });
       let resumed = 0;
       for (const status of due) {
         const { runId, projectId } = status;
@@ -2368,11 +2384,6 @@ export class TranslationEngine {
         if (this.hasDispatchingProjectRun(projectId, runId)) continue;
         this.lastQuotaResumeAttempt.set(runId, now);
         const tenant = this.runTenants.get(runId) ?? this.queuedTenants.get(runId);
-        // Read the ambient tenant HERE, not inside `attempt`: the attempt runs
-        // inside runWithTenant(tenant, …), which re-scopes the ambient tenant
-        // to the RUN's own — the guard below would then compare the run
-        // against itself and always pass.
-        const callerTenant = getCurrentTenant();
         const attempt = async (): Promise<boolean> => {
           const ownSession = this.runSessions.get(runId) ?? this.queuedSessions.get(runId);
           // A fallback session (the vault-unlock nudge) may only stand in for a
@@ -2507,7 +2518,9 @@ export class TranslationEngine {
    * A parked run the sweep may re-plan right now (see {@link sweepQuotaResumes}).
    * `force` waives only the per-run re-attempt throttle (the vault-unlock
    * nudge: a fresh session is new information, not another tick) — never the
-   * park's own `resumeAt`, which is what the free quota actually requires.
+   * park's own `resumeAt`, which is what the free quota actually requires. The
+   * caller decides `force` per run, since an unlock only speaks for the
+   * unlocking tenant's own parks.
    */
   private isQuotaResumeDue(status: RunStatus, now: number, force = false): boolean {
     if (!this.isParkedForQuota(status)) return false;
@@ -3645,23 +3658,6 @@ export class TranslationEngine {
           for (const d of decisions) settled.add(settleKey(d));
           return;
         }
-        if (freewayDegraded) {
-          // Reaching here means the batch WILL dispatch ('keep' or
-          // 'reroute') while its band floor is relaxed (Addendum G) —
-          // surface why a lower-tier bucket serves a hard-band entry,
-          // whichever revalidation branch routed it. `bucketKey` is already
-          // the post-reroute key at this point, so the log names the
-          // bucket that is actually about to serve the batch.
-          this.logger.info('translation:freeway-degraded', {
-            runId,
-            bucketKey,
-            band: freewayDegraded.fromTier,
-            fromTier: freewayDegraded.fromTier,
-            toTier: freewayDegraded.toTier,
-            waitedAlternativeMs: freewayDegraded.waitedAlternativeMs,
-          });
-          this.recordFreewayDetail(runId, formatDegradedDetail(freewayDegraded));
-        }
       }
 
       const projectEntry = projectEntries[moduleId];
@@ -3686,6 +3682,26 @@ export class TranslationEngine {
         }
         this.emitProgress(runId, status);
         return;
+      }
+
+      if (bucketKey !== undefined && freewayDegraded) {
+        // Reaching here means the batch WILL dispatch ('keep' or 'reroute')
+        // while its band floor is relaxed (Addendum G) — surface why a
+        // lower-tier bucket serves a hard-band entry, whichever revalidation
+        // branch routed it. `bucketKey` is already the post-reroute key at this
+        // point, so the log names the bucket that is actually about to serve
+        // the batch. After the module-disabled gate, too: a batch that fails
+        // there dispatches nothing, and a degrade line for it would describe a
+        // routing decision no bucket ever acted on.
+        this.logger.info('translation:freeway-degraded', {
+          runId,
+          bucketKey,
+          band: freewayDegraded.fromTier,
+          fromTier: freewayDegraded.fromTier,
+          toTier: freewayDegraded.toTier,
+          waitedAlternativeMs: freewayDegraded.waitedAlternativeMs,
+        });
+        this.recordFreewayDetail(runId, formatDegradedDetail(freewayDegraded));
       }
 
       const batchOverrides: Record<string, unknown> = {};
@@ -4301,6 +4317,13 @@ export class TranslationEngine {
         let batchError: unknown;
         /** Set when a Freeway failover ended in a park/block instead of results. */
         let batchAuthCancel = true;
+        /**
+         * Set when a degraded batch changed bucket mid-dispatch. The degrade is
+         * re-stated only once the hop actually produces results — a hop that
+         * ends in a park or a block served nothing, so naming its bucket would
+         * credit it with text it never produced.
+         */
+        let degradedHop = false;
         const batchStartedAt = Date.now();
         if (bucketKey !== undefined && freewayDeps) {
           // Freeway batches never retry a 429 in place: the free quota they hit
@@ -4343,20 +4366,7 @@ export class TranslationEngine {
                 reason: 'dispatch-failure',
               },
             );
-            if (freewayDegraded && state.bucketKey !== bucketKey) {
-              // The degraded batch failed over mid-dispatch: name the bucket
-              // that actually served it, or the earlier degrade line
-              // attributes the tier relaxation to a bucket that never
-              // produced the text.
-              this.logger.info('translation:freeway-degraded', {
-                runId,
-                bucketKey: state.bucketKey,
-                band: freewayDegraded.fromTier,
-                fromTier: freewayDegraded.fromTier,
-                toTier: freewayDegraded.toTier,
-                waitedAlternativeMs: freewayDegraded.waitedAlternativeMs,
-              });
-            }
+            if (freewayDegraded && bucketChanged) degradedHop = true;
             module = state.module;
             moduleId = state.moduleId;
             bucketKey = state.bucketKey;
@@ -4364,6 +4374,21 @@ export class TranslationEngine {
           }
           if (outcome.kind === 'results') {
             targetResults = outcome.results;
+            if (freewayDegraded && degradedHop) {
+              // The degraded batch failed over mid-dispatch and the new bucket
+              // served it: name that bucket, or the earlier degrade line
+              // attributes the tier relaxation to one that never produced the
+              // text. `bucketKey` is already the post-hop key here.
+              this.logger.info('translation:freeway-degraded', {
+                runId,
+                bucketKey,
+                band: freewayDegraded.fromTier,
+                fromTier: freewayDegraded.fromTier,
+                toTier: freewayDegraded.toTier,
+                waitedAlternativeMs: freewayDegraded.waitedAlternativeMs,
+              });
+              this.recordFreewayDetail(runId, formatDegradedDetail(freewayDegraded));
+            }
             metricsCollector.recordLatency(moduleId, metricsModel, Date.now() - batchStartedAt);
           } else if (outcome.kind === 'defer' || outcome.kind === 'blocked') {
             const pairs: RunEntryLanguagePair[] = [];

@@ -751,7 +751,9 @@ export async function recordDispatch(
 
 /**
  * 429/quota error: cooldown until retryAfterMs (when given) else the bucket's
- * next day-scale reset; flap-bumps when already recently cooled.
+ * next day-scale reset. A re-strike within FLAP_WINDOW_MS counts against the
+ * escalation ladder — but only on the escalating path (`escalateOnFlap`), the
+ * one that also consumes the counter.
  *
  * `scope: 'pool'` widens the cooldown to every bucket of a provider whose quota
  * is account-wide (`sharedLimits`): a 429 there is a statement about the shared
@@ -806,7 +808,13 @@ export async function coolBucket(
     }
     if (dayReset !== undefined) until = Math.min(until, dayReset);
   }
-  await ledger.setCooldown(bucketKey, until, flap ? { flap: true } : undefined);
+  // The strike counter belongs to the ladder: only the escalating path (the
+  // engine's provider-error cool) may add to it. Counting every cool would let
+  // ordinary repeat 429s — a minute-scale limit re-struck all day — pump the
+  // count to the day-park rung, so the next provider error would sideline a
+  // perfectly healthy bucket until tomorrow.
+  const strike = flap && opts?.escalateOnFlap === true;
+  await ledger.setCooldown(bucketKey, until, strike ? { flap: true } : undefined);
   if (scope !== 'pool' || !resolved || !hasSharedPool(resolved.provider)) return;
   const siblingUntil = Math.min(until, now + POOL_SIBLING_COOLDOWN_CAP_MS);
   for (const model of resolved.provider.models) {
