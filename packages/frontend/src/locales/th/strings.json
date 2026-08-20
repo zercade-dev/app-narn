@@ -230,7 +230,9 @@
     "generateGlossaryFromSelection": "สร้างอภิธานศัพท์จากรายการที่เลือก",
     "generateCategoriesFromSelection": "สร้างหมวดหมู่จากรายการที่เลือก",
     "retranslateBelowTier": "แปลใหม่ต่ำกว่าระดับ:",
-    "retranslateBelowTierApply": "แปลใหม่"
+    "retranslateBelowTierApply": "แปลใหม่",
+    "retranslateBelowTierApplyHint_zero": "ไม่มีคู่ที่ต่ำกว่าระดับ {{tier}} ในรายการที่เลือก",
+    "retranslateBelowTierApplyHint_other": "มี {{count}} คู่ที่ต่ำกว่าระดับ {{tier}} ในรายการที่เลือก"
   },
   "order": {
     "label": "การเรียงลำดับ:",

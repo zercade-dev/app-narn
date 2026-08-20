@@ -4200,6 +4200,11 @@ export class TranslationEngine {
             }
             if (!parkedOnce.has(pairKey)) {
               parkedOnce.add(pairKey);
+              // Labeled 'quota' (not a third reason) same as the auth-tail
+              // adjudication above: this is one flaky call in an otherwise
+              // healthy batch — the bucket was never cooled, so what the
+              // pair is actually waiting out is quota/pacing, not a
+              // provider outage.
               this.deferPairsForQuota(
                 status,
                 [{ entryId: e.decision.entry.id, targetLanguage: e.decision.targetLanguage }],

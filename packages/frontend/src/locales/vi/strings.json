@@ -230,7 +230,9 @@
     "generateGlossaryFromSelection": "Sinh bảng thuật ngữ từ phần đã chọn",
     "generateCategoriesFromSelection": "Sinh danh mục từ phần đã chọn",
     "retranslateBelowTier": "Dịch lại dưới bậc:",
-    "retranslateBelowTierApply": "Dịch lại"
+    "retranslateBelowTierApply": "Dịch lại",
+    "retranslateBelowTierApplyHint_zero": "Không có cặp nào dưới bậc {{tier}} trong lựa chọn",
+    "retranslateBelowTierApplyHint_other": "{{count}} cặp dưới bậc {{tier}} trong lựa chọn"
   },
   "order": {
     "label": "Thứ tự:",

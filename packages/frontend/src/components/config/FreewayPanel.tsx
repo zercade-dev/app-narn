@@ -210,6 +210,12 @@ type StatusRowItem =
  * FIRST member bucket, and every later bucket sharing that poolKey folds
  * into the existing group rather than starting a new row. Buckets with no
  * `poolKey` render exactly as a standalone row, unchanged.
+ *
+ * A `poolKey` that (in this status snapshot) has only ever gathered ONE
+ * member never gets a header: "pool" is a claim about sharing, and a header
+ * row over a single model reads as implying pooling that isn't observably
+ * happening, plus it costs an extra row for no information. Such an item is
+ * demoted back to a plain `bucket` row before returning.
  */
 function groupStatusRows(buckets: readonly FreewayStatusBucket[]): StatusRowItem[] {
   const items: StatusRowItem[] = [];
@@ -228,7 +234,11 @@ function groupStatusRows(buckets: readonly FreewayStatusBucket[]): StatusRowItem
       if (item.kind === 'pool') item.members.push(bucket);
     }
   }
-  return items;
+  return items.map((item) =>
+    item.kind === 'pool' && item.members.length === 1
+      ? { kind: 'bucket', bucket: item.members[0] }
+      : item,
+  );
 }
 
 /** The N languages with the lowest observed LQA-gate pass rate, lowest first. */
@@ -291,7 +301,15 @@ function BucketRow({
           {formatRemaining(bucket, t)}
         </TableCell>
       ) : (
-        <TableCell />
+        // Suppressed for a pool member: the shared allowance already shows
+        // once on the pool header row above. An em dash (not a blank cell)
+        // marks that as intentional rather than a missing value.
+        <TableCell
+          className="text-muted-foreground"
+          data-testid={`freeway-remaining-suppressed-${bucket.bucketKey}`}
+        >
+          —
+        </TableCell>
       )}
       <TableCell data-testid={`freeway-next-reset-${bucket.bucketKey}`}>
         {new Date(bucket.nextResetAt).toLocaleString()}

@@ -230,7 +230,9 @@
     "generateGlossaryFromSelection": "선택한 항목에서 용어집 생성",
     "generateCategoriesFromSelection": "선택한 항목에서 카테고리 생성",
     "retranslateBelowTier": "티어 미만 다시 번역:",
-    "retranslateBelowTierApply": "다시 번역"
+    "retranslateBelowTierApply": "다시 번역",
+    "retranslateBelowTierApplyHint_zero": "선택 항목에 티어 {{tier}} 미만 쌍이 없습니다",
+    "retranslateBelowTierApplyHint_other": "선택 항목에 티어 {{tier}} 미만 쌍 {{count}}개"
   },
   "order": {
     "label": "정렬:",

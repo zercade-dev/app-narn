@@ -430,9 +430,10 @@ export function StringTableBulkBar({
         <span className="text-muted-foreground">|</span>
 
         {/* "Retranslate below tier N": scopes to exactly the selection's weak
-            Freeway pairs (see collectFreewayRetranslatePairs in StringTable.tsx)
-            rather than the full entryIds × targetLanguages product, so it never
-            overwrites a good translation in another language. Own testids
+            Freeway pairs (see collectFreewayRetranslatePairs in
+            string-table-helpers.ts) rather than the full entryIds ×
+            targetLanguages product, so it never overwrites a good
+            translation in another language. Own testids
             (bulk-retranslate-tier-*), distinct from the filter's
             filter-freeway-tier-below-* ids. */}
         <div className="flex items-center gap-1.5 text-xs">
@@ -475,6 +476,18 @@ export function StringTableBulkBar({
             onClick={onRetranslateBelowTier}
             disabled={batchRunId !== null || retranslateBelowTierPairCount === 0}
             data-testid="bulk-retranslate-tier-apply"
+            // The button being disabled with no qualifying pairs has no
+            // other explanation on screen (the filter dimension scopes to
+            // ANY language; this action scopes to writable ∩ active) — the
+            // title surfaces the actual count so that's discoverable on hover.
+            title={
+              retranslateBelowTier === null
+                ? undefined
+                : t('bulk.retranslateBelowTierApplyHint', {
+                    count: retranslateBelowTierPairCount,
+                    tier: retranslateBelowTier,
+                  })
+            }
           >
             {t('bulk.retranslateBelowTierApply')}
           </Button>

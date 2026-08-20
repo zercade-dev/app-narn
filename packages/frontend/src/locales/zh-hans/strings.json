@@ -230,7 +230,9 @@
     "generateGlossaryFromSelection": "从所选内容生成术语表",
     "generateCategoriesFromSelection": "从所选内容生成类别",
     "retranslateBelowTier": "重新翻译低于层级：",
-    "retranslateBelowTierApply": "重新翻译"
+    "retranslateBelowTierApply": "重新翻译",
+    "retranslateBelowTierApplyHint_zero": "所选内容中没有低于层级 {{tier}} 的翻译对",
+    "retranslateBelowTierApplyHint_other": "所选内容中有 {{count}} 个低于层级 {{tier}} 的翻译对"
   },
   "order": {
     "label": "排序：",

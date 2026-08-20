@@ -234,7 +234,10 @@
     "generateGlossaryFromSelection": "Glossar aus Auswahl generieren",
     "generateCategoriesFromSelection": "Kategorien aus Auswahl generieren",
     "retranslateBelowTier": "Unter Stufe neu übersetzen:",
-    "retranslateBelowTierApply": "Neu übersetzen"
+    "retranslateBelowTierApply": "Neu übersetzen",
+    "retranslateBelowTierApplyHint_zero": "Keine Paare unter Stufe {{tier}} in der Auswahl",
+    "retranslateBelowTierApplyHint_one": "{{count}} Paar unter Stufe {{tier}} in der Auswahl",
+    "retranslateBelowTierApplyHint_other": "{{count}} Paare unter Stufe {{tier}} in der Auswahl"
   },
   "order": {
     "label": "Reihenfolge:",

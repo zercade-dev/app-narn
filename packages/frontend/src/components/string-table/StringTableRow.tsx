@@ -137,7 +137,9 @@ export const Cell = memo(function Cell({
         <Tooltip>
           <TooltipTrigger
             render={<span />}
-            className="absolute top-0.5 left-0.5 cursor-help"
+            // Solid bg-background base so the badge stays legible when long
+            // cell text runs underneath it, same as the LQA badge below.
+            className="absolute top-0.5 left-0.5 cursor-help bg-background rounded-sm"
             data-testid="freeway-tier-badge"
           >
             <Badge

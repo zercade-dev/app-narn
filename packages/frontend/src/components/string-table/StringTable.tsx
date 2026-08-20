@@ -788,6 +788,10 @@ export function StringTable() {
       projectId: activeProjectId,
       body: JSON.stringify({
         reTranslate: true,
+        // Translation memory would otherwise re-apply the same weak
+        // translation this run exists to replace, silently discarding the
+        // tier evidence that flagged it.
+        disableMemory: true,
         freewayMinTier: retranslateBelowTier,
         pairs,
         entryIds,

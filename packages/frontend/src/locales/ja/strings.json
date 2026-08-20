@@ -230,7 +230,9 @@
     "generateGlossaryFromSelection": "選択範囲から用語集を生成",
     "generateCategoriesFromSelection": "選択範囲からカテゴリを生成",
     "retranslateBelowTier": "指定ティア未満を再翻訳：",
-    "retranslateBelowTierApply": "再翻訳"
+    "retranslateBelowTierApply": "再翻訳",
+    "retranslateBelowTierApplyHint_zero": "選択範囲内にティア{{tier}}未満のペアはありません",
+    "retranslateBelowTierApplyHint_other": "選択範囲内にティア{{tier}}未満のペアが{{count}}件あります"
   },
   "order": {
     "label": "並び順：",

@@ -230,7 +230,9 @@
     "generateGlossaryFromSelection": "Buat glosarium dari pilihan",
     "generateCategoriesFromSelection": "Buat kategori dari pilihan",
     "retranslateBelowTier": "Terjemahkan ulang di bawah tingkat:",
-    "retranslateBelowTierApply": "Terjemahkan ulang"
+    "retranslateBelowTierApply": "Terjemahkan ulang",
+    "retranslateBelowTierApplyHint_zero": "Tidak ada pasangan di bawah tingkat {{tier}} dalam pilihan",
+    "retranslateBelowTierApplyHint_other": "{{count}} pasangan di bawah tingkat {{tier}} dalam pilihan"
   },
   "order": {
     "label": "Urutan:",

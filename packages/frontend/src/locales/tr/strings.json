@@ -234,7 +234,10 @@
     "generateGlossaryFromSelection": "Seçimden sözlükçe üret",
     "generateCategoriesFromSelection": "Seçimden kategori üret",
     "retranslateBelowTier": "Kademenin altında yeniden çevir:",
-    "retranslateBelowTierApply": "Yeniden çevir"
+    "retranslateBelowTierApply": "Yeniden çevir",
+    "retranslateBelowTierApplyHint_zero": "Seçimde {{tier}}. kademenin altında çift yok",
+    "retranslateBelowTierApplyHint_one": "Seçimde {{tier}}. kademenin altında {{count}} çift",
+    "retranslateBelowTierApplyHint_other": "Seçimde {{tier}}. kademenin altında {{count}} çift"
   },
   "order": {
     "label": "Sıralama:",

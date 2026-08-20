@@ -234,7 +234,10 @@
     "generateGlossaryFromSelection": "Generar glosario desde la selección",
     "generateCategoriesFromSelection": "Generar categorías desde la selección",
     "retranslateBelowTier": "Retraducir por debajo del nivel:",
-    "retranslateBelowTierApply": "Retraducir"
+    "retranslateBelowTierApply": "Retraducir",
+    "retranslateBelowTierApplyHint_zero": "Ningún par por debajo del nivel {{tier}} en la selección",
+    "retranslateBelowTierApplyHint_one": "{{count}} par por debajo del nivel {{tier}} en la selección",
+    "retranslateBelowTierApplyHint_other": "{{count}} pares por debajo del nivel {{tier}} en la selección"
   },
   "order": {
     "label": "Orden:",

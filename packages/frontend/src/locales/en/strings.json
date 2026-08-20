@@ -234,7 +234,10 @@
     "generateGlossaryFromSelection": "Generate glossary from selection",
     "generateCategoriesFromSelection": "Generate categories from selection",
     "retranslateBelowTier": "Re-translate below tier:",
-    "retranslateBelowTierApply": "Re-translate"
+    "retranslateBelowTierApply": "Re-translate",
+    "retranslateBelowTierApplyHint_zero": "No pairs below tier {{tier}} in the selection",
+    "retranslateBelowTierApplyHint_one": "{{count}} pair below tier {{tier}} in the selection",
+    "retranslateBelowTierApplyHint_other": "{{count}} pairs below tier {{tier}} in the selection"
   },
   "order": {
     "label": "Order:",
