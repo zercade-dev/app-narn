@@ -337,9 +337,9 @@ function formatBucketHeadroom(view: BucketView | undefined): string {
 
 /**
  * The run's Freeway tier floor as a band, or undefined when it set none. The
- * value is range-checked at the route (2-4); anything outside that is treated
- * as no floor rather than trusted into the band arithmetic, so a run persisted
- * by an older/looser caller can never widen what a bucket may serve.
+ * value is range-checked at the route (2-4); a persisted value outside that
+ * range is treated as no floor rather than cast into the band arithmetic, so
+ * the run plans at its natural band instead of an undefined one.
  */
 function freewayMinBand(request: RunRequest | undefined): DifficultyBand | undefined {
   const tier = request?.freewayMinTier;

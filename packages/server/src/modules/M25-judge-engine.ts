@@ -399,10 +399,19 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       override?.customBatchSize !== undefined && override.customBatchSize > 0
         ? override.customBatchSize
         : JUDGE_BATCH_SIZE;
+    // A pair-restricted run (the retranslate-below-tier action, "retry failed")
+    // translated far fewer pairs than its entryIds × targetLanguages product,
+    // and `buildItems` reviews exactly those pairs — so size the fence on the
+    // same number, or the run fences capacity it can never spend.
+    const scopePairs = override?.pairs ?? scope?.pairs;
     const reserveRequests = scope
       ? Math.max(
           FREEWAY_BACKGROUND_RESERVE,
-          Math.ceil((scope.entryIds.length * scope.targetLanguages.length) / itemsPerCall),
+          Math.ceil(
+            (scopePairs
+              ? scopePairs.length
+              : scope.entryIds.length * scope.targetLanguages.length) / itemsPerCall,
+          ),
         )
       : undefined;
 
@@ -491,10 +500,16 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
         const entriesById = new Map(entries.map((e) => [e.id, e]));
 
-        // When override.pairs is set, restrict to exactly those (entry, language)
-        // pairs (used by "retry failed"); otherwise the full scope cross-product.
-        const pairFilter = override?.pairs
-          ? new Set(override.pairs.map((p) => `${p.entryId} ${p.targetLanguage}`))
+        // Restrict to exactly these (entry, language) pairs; otherwise the full
+        // scope cross-product. Two independent sources, override first: the
+        // AI-review dialog's "retry failed" narrows THIS review, while the run's
+        // own `request.pairs` records that the run itself only ever translated
+        // a subset of its product (the retranslate-below-tier action). Judging
+        // the product of a pair-restricted run would write verdicts onto
+        // translations that run never touched.
+        const pairSource = override?.pairs ?? scope.pairs;
+        const pairFilter = pairSource
+          ? new Set(pairSource.map((p) => `${p.entryId} ${p.targetLanguage}`))
           : null;
 
         // Resolve the glossary once per (targetLanguage, glossary-id set) rather
