@@ -26,6 +26,14 @@ export interface EntryFilters {
   categories: string[];
   /** Filter to entries assigned any of these glossary ids (OR-within-dimension — mirrors `categories`). */
   glossaryIds: string[];
+  /**
+   * Show only entries where at least one language's translation record was
+   * served by a Freeway model below this quality tier
+   * (`TranslationRecord.freewayTier !== undefined && freewayTier < freewayTierBelow`).
+   * `null` = inactive (the default) — mirrors `runId`'s "empty string means
+   * off" idiom but with `null` since 0 is not a valid tier.
+   */
+  freewayTierBelow: number | null;
   /** Filter to entries whose `metadata.tone` matches any of these values (OR-within-dimension — mirrors `categories`). */
   tones: string[];
   visibleLanguages: string[];
@@ -143,6 +151,7 @@ function matchesEntry(entry: StringEntry, filters: EntryFilters, needle: string)
     () => matchesPlaceholderMismatch(entry, filters),
     () => matchesRunId(entry, filters),
     () => matchesFlaggedNew(entry, filters),
+    () => matchesFreewayTier(entry, filters),
   ];
   return combineDimensions(dimensions, filters.filterMode);
 }
@@ -303,4 +312,18 @@ function matchesPlaceholderMismatch(entry: StringEntry, filters: EntryFilters): 
 function matchesFlaggedNew(entry: StringEntry, filters: EntryFilters): boolean | null {
   if (!filters.flaggedNewOnly) return null;
   return entry.flaggedNew === true;
+}
+
+/**
+ * `null` when `freewayTierBelow` is inactive (`null`); else true when ANY
+ * language's translation record was served by a Freeway model below the
+ * threshold tier. A record with no `freewayTier` (non-Freeway-produced, or
+ * cleared on trivial/TM short-circuit or manual edit) never matches.
+ */
+function matchesFreewayTier(entry: StringEntry, filters: EntryFilters): boolean | null {
+  const threshold = filters.freewayTierBelow;
+  if (threshold === null) return null;
+  return Object.values(entry.translations).some(
+    (r) => r.freewayTier !== undefined && r.freewayTier < threshold,
+  );
 }

@@ -44,6 +44,7 @@ export const DEFAULT_FILTERS: Omit<EntryFilters, 'activeLanguages' | 'orderMode'
   placeholderMismatch: false,
   flaggedNewOnly: false,
   filterMode: 'AND',
+  freewayTierBelow: null,
 };
 
 /**

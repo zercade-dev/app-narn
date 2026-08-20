@@ -17,6 +17,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+/** Options for the "served below tier N" threshold select — a tier-1 floor would match nothing (1 is the lowest tier). */
+const FREEWAY_TIER_BELOW_OPTIONS = [2, 3, 4] as const;
 
 export function StringTableFilters() {
   const { t, i18n } = useTranslation('strings');
@@ -179,6 +189,7 @@ export function StringTableFilters() {
     filters.sameAsSource,
     filters.placeholderMismatch,
     filters.flaggedNewOnly,
+    filters.freewayTierBelow !== null,
   ].filter(Boolean).length;
 
   // Show reset button when any non-default filter is active
@@ -198,6 +209,7 @@ export function StringTableFilters() {
     filters.sameAsSource ||
     filters.placeholderMismatch ||
     filters.flaggedNewOnly ||
+    filters.freewayTierBelow !== null ||
     filters.filterMode !== 'AND';
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -478,6 +490,53 @@ export function StringTableFilters() {
             {t('filters.clearFilters')}
           </Button>
         )}
+
+        {/* "Served below tier N" filter — a standalone control (not nested inside
+            the status dropdown above) because its popup content portals to
+            document.body, outside the status dropdown's outside-click ref, which
+            would otherwise close the dropdown before onValueChange fires. */}
+        <div className="flex items-center gap-1.5 text-xs">
+          <span className="text-muted-foreground">{t('filters.freewayTierBelow')}</span>
+          <Select
+            value={filters.freewayTierBelow === null ? 'off' : String(filters.freewayTierBelow)}
+            onValueChange={(v) => setFilter({ freewayTierBelow: v === 'off' ? null : Number(v) })}
+          >
+            <SelectTrigger
+              size="sm"
+              className={cn(
+                'w-20 h-7 text-xs',
+                filters.freewayTierBelow !== null && 'border-primary bg-primary/10 text-primary',
+              )}
+              data-testid="filter-freeway-tier-below"
+            >
+              {/* base-ui shows the raw value without a render-function. */}
+              <SelectValue>
+                {(value: string | null) =>
+                  value === 'off' || value === null ? t('filters.freewayTierBelowOff') : value
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem
+                value="off"
+                className="text-xs"
+                data-testid="filter-freeway-tier-below-off"
+              >
+                {t('filters.freewayTierBelowOff')}
+              </SelectItem>
+              {FREEWAY_TIER_BELOW_OPTIONS.map((n) => (
+                <SelectItem
+                  key={n}
+                  value={String(n)}
+                  className="text-xs"
+                  data-testid={`filter-freeway-tier-below-${n}`}
+                >
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         {/* Category multi-select */}
         {availableCategories.length > 0 && (
