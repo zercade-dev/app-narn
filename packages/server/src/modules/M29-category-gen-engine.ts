@@ -33,6 +33,7 @@ import {
   RunStatusCode,
   toErrorMessage,
   type TranslationModule,
+  type TranslationUsage,
 } from '@zercade-dev/narn-shared';
 import {
   contentClassifier as defaultContentClassifier,
@@ -310,6 +311,26 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
       }
 
       let result: Awaited<ReturnType<ContentClassifier['suggestCategories']>>;
+      // Debit each provider call against the bucket serving it AS IT RETURNS
+      // — the returned `usages` never arrive when a later chunk rate-limits,
+      // so a post-hoc debit both loses the calls made before the 429 and
+      // charges the re-routed bucket for quota the struck one actually spent.
+      // Reads `bucketKey` at call time, so post-hop calls debit the NEW
+      // bucket. Best-effort: a ledger write must never fail a run whose
+      // provider work succeeded.
+      const debitCall = (usage: TranslationUsage): void => {
+        if (!bucketKey) return;
+        void recordDispatch(
+          bucketKey,
+          Date.now(),
+          {
+            inputTokens: usage.inputTokens ?? 0,
+            outputTokens: usage.outputTokens ?? 0,
+            chars: usage.characters ?? usage.sourceChars ?? 0,
+          },
+          this.freewayOverrides,
+        ).catch(() => undefined);
+      };
       // One re-route hop: a free-tier call whose bucket rate-limited it moves
       // to a sibling bucket instead of failing while a healthy one idles. Only
       // for a Freeway-bound call, only on a rate limit, and only once — a
@@ -331,21 +352,36 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
               },
               logSink,
               ...(moduleOverride ? { moduleOverride } : {}),
+              ...(bucketKey ? { onUsage: debitCall } : {}),
             },
           );
           break;
         } catch (err) {
           if (bucketKey && isRateLimitError(err)) {
+            // A call that threw still spent a request against the bucket.
+            await recordDispatch(
+              bucketKey,
+              Date.now(),
+              { inputTokens: 0, outputTokens: 0, chars: 0 },
+              this.freewayOverrides,
+            ).catch(() => undefined);
             await coolBucket(
               bucketKey,
               Date.now(),
               rateLimitCooldownMs(err),
-              undefined,
+              this.freewayOverrides,
               'pool',
             ).catch(() => undefined);
             if (hop === 0) {
               try {
                 const next = await this.selectFreewayTarget(projectId, request, sessionId, logSink);
+                this.logger.info('category-gen:freeway-rerouted', {
+                  runId,
+                  projectId,
+                  from: bucketKey,
+                  to: next.bucketKey,
+                  reason: 'rate-limit',
+                });
                 moduleOverride = this.buildModuleOverride(next);
                 bucketKey = next.bucketKey;
                 effectiveRequest = { ...request, model: next.modelId };
@@ -363,18 +399,6 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
         }
       }
       const { suggestions, usages } = result;
-
-      // Debit the bucket's ledger for a Freeway run (best-effort — a debit
-      // failure must not fail an otherwise-successful run).
-      if (bucketKey) {
-        for (const usage of usages) {
-          await recordDispatch(bucketKey, Date.now(), {
-            inputTokens: usage.inputTokens ?? 0,
-            outputTokens: usage.outputTokens ?? 0,
-            chars: usage.characters ?? usage.sourceChars ?? 0,
-          }).catch(() => undefined);
-        }
-      }
 
       // Fold usage into the run BEFORE the cancel check: the provider call(s)
       // already happened (and cost money) by the time suggestCategories()

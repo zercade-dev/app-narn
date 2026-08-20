@@ -362,7 +362,10 @@ export async function generateGlossary(
   // The reserve a free-tier resolution should fence: this call's own scope
   // bounds how many provider calls it can make, sized from the real item
   // count (known only now that items are built) rather than a flat default.
-  const reserveRequests = Math.max(FREEWAY_BACKGROUND_RESERVE, Math.ceil(items.length / cap));
+  const reserveRequests = Math.max(
+    FREEWAY_BACKGROUND_RESERVE,
+    batches ? batches.length : ignore ? 1 : Math.ceil(items.length / cap),
+  );
   let { module, moduleId, bucketKey } = await selectSuggestModule(
     project,
     global,
@@ -374,17 +377,36 @@ export async function generateGlossary(
 
   if (items.length === 0) return { suggestions: [], analyzed: 0, usages: [], moduleId };
 
+  // A free-tier run binds to the resolved bucket for debiting/cooling; an
+  // ordinary module selection leaves this undefined, so none of the ledger
+  // traffic below ever runs for it. A re-route reassigns it, and the `onUsage`
+  // debit below reads it at call time — so post-hop calls spend the NEW bucket.
+  let binding = bucketKey !== undefined ? { bucketKey } : undefined;
+
   const suggestOptions = {
     excludedSources,
     ...(translationLanguages.length > 0 ? { translationLanguages } : {}),
     ...(onProgress ? { onProgress } : {}),
     ...(batches ? { batches } : ignore && items.length > 0 ? { chunkSize: items.length } : {}),
+    // Debit each provider call against the bucket serving it AS IT RETURNS —
+    // the returned `usages` never arrive when a later chunk rate-limits, so a
+    // post-hoc debit both loses the calls made before the 429 and charges the
+    // re-routed bucket for quota the struck one actually spent. Best-effort:
+    // a ledger write must never fail a call whose provider work succeeded.
+    ...(binding
+      ? {
+          onUsage: (usage: TranslationUsage) => {
+            const bucket = binding?.bucketKey;
+            if (bucket === undefined) return;
+            void recordDispatch(bucket, Date.now(), {
+              inputTokens: usage.inputTokens ?? 0,
+              outputTokens: usage.outputTokens ?? 0,
+              chars: usage.characters ?? usage.sourceChars ?? 0,
+            }).catch(() => undefined);
+          },
+        }
+      : {}),
   };
-
-  // A free-tier run binds to the resolved bucket for debiting/cooling; an
-  // ordinary module selection leaves this undefined, so none of the ledger
-  // traffic below ever runs for it.
-  let binding = bucketKey !== undefined ? { bucketKey } : undefined;
   let result: Awaited<ReturnType<NonNullable<TranslationModule['suggestGlossaries']>>>;
   for (let hop = 0; ; hop++) {
     try {
@@ -396,6 +418,12 @@ export async function generateGlossary(
       // for a Freeway-bound call, only on a rate limit, and only once — a
       // second exhaustion fails exactly as it always has.
       if (binding && isRateLimitError(err)) {
+        // A call that threw still spent a request against the bucket.
+        await recordDispatch(binding.bucketKey, Date.now(), {
+          inputTokens: 0,
+          outputTokens: 0,
+          chars: 0,
+        }).catch(() => undefined);
         await coolBucket(
           binding.bucketKey,
           Date.now(),
@@ -414,6 +442,12 @@ export async function generateGlossary(
               reserveRequests,
             );
             if (next.bucketKey !== undefined) {
+              logger.info('glossary-gen:freeway-rerouted', {
+                projectId,
+                from: binding.bucketKey,
+                to: next.bucketKey,
+                reason: 'rate-limit',
+              });
               module = next.module;
               moduleId = next.moduleId;
               binding = { bucketKey: next.bucketKey };
@@ -428,16 +462,6 @@ export async function generateGlossary(
         }
       }
       throw err;
-    }
-  }
-
-  if (binding) {
-    for (const usage of result.usages) {
-      await recordDispatch(binding.bucketKey, Date.now(), {
-        inputTokens: usage.inputTokens ?? 0,
-        outputTokens: usage.outputTokens ?? 0,
-        chars: usage.characters ?? usage.sourceChars ?? 0,
-      }).catch(() => undefined);
     }
   }
 

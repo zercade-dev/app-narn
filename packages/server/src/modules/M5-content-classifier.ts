@@ -17,6 +17,7 @@ import {
   type CategorySuggestion,
   type GenerateCategorySuggestionsResult,
   type ProviderType,
+  type TranslationUsage,
 } from '@zercade-dev/narn-shared';
 import type { EntryContextField } from '@zercade-dev/narn-shared';
 import { ValidationError } from '../types/errors.js';
@@ -359,6 +360,14 @@ export class ContentClassifier {
     opts?: {
       signal?: AbortSignal;
       onChunkDone?: (done: number, total: number) => void;
+      /**
+       * Per-provider-call usage, handed over as each call returns (see the
+       * classifier's own `onUsage`). Set by the M29 background engine for a
+       * Freeway run so it can debit the bucket that served THAT call, rather
+       * than the returned `usages` — which never arrive when a later chunk
+       * rethrows a 429.
+       */
+      onUsage?: (usage: TranslationUsage) => void;
       /** Verbose log sink (from the M29 run); used only when the selected
        *  instance's config has verbose:true. */
       logSink?: ModuleLogFn;
@@ -455,6 +464,10 @@ export class ContentClassifier {
       // per-model support) are explicit config overrides, not a config lookup
       // — an explicit `useStructuredOutput` (including `false`) wins over the
       // provider default, matching resolveUseStructuredOutput's contract.
+      // baseURL/allowInsecureHttp stay unset here on purpose: every bucket in
+      // the free-tier snapshot is a hosted first-party provider, none is a
+      // generic-ai/self-hosted endpoint. Add one and this branch must carry
+      // that endpoint config too, or the call goes to the provider default.
       modelId = request.model;
       reasoningEffort = request.reasoningEffort;
       useStructuredOutput = resolveUseStructuredOutput(
@@ -584,6 +597,7 @@ export class ContentClassifier {
       maxOutputTokens: global.settings?.maxOutputTokens ?? DEFAULT_MAX_OUTPUT_TOKENS,
       ...(opts?.signal ? { signal: opts.signal } : {}),
       ...(opts?.onChunkDone ? { onChunkDone: opts.onChunkDone } : {}),
+      ...(opts?.onUsage ? { onUsage: opts.onUsage } : {}),
       ...(useVerboseSink ? { verbose: true } : {}),
       log: (level, message, meta) => {
         if (useVerboseSink) {

@@ -189,6 +189,15 @@ export interface GenerateCategorySuggestionsOptions {
    * total. Lets a caller report real progress for a long-running background run.
    */
   onChunkDone?: (done: number, total: number) => void;
+  /**
+   * Invoked with each chunk's usage AS THAT PROVIDER CALL RETURNS, before the
+   * next chunk is sent. The same entries are still accumulated into the
+   * returned `usages`, so an absent callback changes nothing — but a caller
+   * debiting a free-tier ledger needs them per call: the returned array never
+   * arrives when a later chunk rethrows a 429, and by then the earlier chunks
+   * have already spent quota on the bucket that served them.
+   */
+  onUsage?: (usage: TranslationUsage) => void;
   /** Pre-formed batches (one LLM call each); used verbatim instead of size-chunking. */
   batches?: CategoryEntryInput[][];
 }
@@ -376,6 +385,7 @@ export async function generateCategorySuggestions(
     log,
     verbose,
     onChunkDone,
+    onUsage,
   } = opts;
 
   if (entries.length === 0) return { suggestions: [], usages: [] };
@@ -456,7 +466,13 @@ export async function generateCategorySuggestions(
       }
       anyRequestSucceeded = true;
       const translationUsage = toTranslationUsage(usage, modelId);
-      if (translationUsage) usages.push(translationUsage);
+      if (translationUsage) {
+        usages.push(translationUsage);
+        // Hand this chunk's usage over immediately: a caller debiting a
+        // free-tier ledger must be able to charge the bucket that served THIS
+        // call, before a later chunk's 429 aborts the whole return.
+        onUsage?.(translationUsage);
+      }
       const parsed = parseCategoryResponse(text, batch);
       if (parsed === null) {
         log?.('warn', '[category-classifier] parse-failed', {
