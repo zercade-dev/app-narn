@@ -768,16 +768,16 @@ export function StringTable() {
 
   // Sibling of handleBatchTranslate, scoped to exactly the selection's weak
   // Freeway pairs at the chosen threshold rather than the full entryIds ×
-  // targetLanguages product — `pairs` (Task 1) restricts the run to those
-  // exact pairs so a good translation in another language of the same entry is
-  // never overwritten, and `freewayMinTier` floors the retry at a stronger
-  // tier. Fires directly (no confirm dialog): the threshold select + disabled
-  // state already gate the scope, mirroring the other one-click bulk actions
-  // (ignore, clear-new-flag). Reuses the same vault-retry + run-tracking
-  // plumbing as "Translate Selected" (batchRequestRef/batchTranslate) — the
-  // single-user model rules out two batches running at once anyway (the
-  // bulk bar's Retranslate button and Translate Selected are both disabled
-  // while `batchRunId` is set).
+  // targetLanguages product — the enqueue API's exact-pair intersection
+  // restricts the run to those exact pairs so a good translation in another
+  // language of the same entry is never overwritten, and `freewayMinTier`
+  // floors the retry at a stronger tier. Fires directly (no confirm dialog):
+  // the threshold select + disabled state already gate the scope, mirroring
+  // the other one-click bulk actions (ignore, clear-new-flag). Reuses the
+  // same vault-retry + run-tracking plumbing as "Translate Selected"
+  // (batchRequestRef/batchTranslate) — the single-user model rules out two
+  // batches running at once anyway (the bulk bar's Retranslate button and
+  // Translate Selected are both disabled while `batchRunId` is set).
   const handleRetranslateBelowTier = async () => {
     if (!activeProjectId || retranslateBelowTier === null || retranslateBelowTierPairs.length === 0)
       return;

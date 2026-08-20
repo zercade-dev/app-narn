@@ -319,10 +319,18 @@ function matchesFlaggedNew(entry: StringEntry, filters: EntryFilters): boolean |
  * language's translation record was served by a Freeway model below the
  * threshold tier. A record with no `freewayTier` (non-Freeway-produced, or
  * cleared on trivial/TM short-circuit or manual edit) never matches.
+ *
+ * Uses `== null` (not `=== null`) so a `filters` object built without the key
+ * at all — `freewayTierBelow` reading as `undefined` rather than the declared
+ * `null` default — is absorbed as inactive too, matching every other
+ * dimension in this file (each guards with `!filters.x`/`if (!needle)`, all of
+ * which treat `undefined` the same as their own "off" value). A strict
+ * `=== null` check would instead treat a missing key as an ACTIVE dimension
+ * that rejects every entry (`freewayTier < undefined` is always `false`).
  */
 function matchesFreewayTier(entry: StringEntry, filters: EntryFilters): boolean | null {
   const threshold = filters.freewayTierBelow;
-  if (threshold === null) return null;
+  if (threshold == null) return null;
   return Object.values(entry.translations).some(
     (r) => r.freewayTier !== undefined && r.freewayTier < threshold,
   );
