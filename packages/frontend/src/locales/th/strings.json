@@ -228,7 +228,9 @@
     "removeCategoryApply_other": "นำหมวดหมู่ออก {{count}} หมวด",
     "aiGeneration": "การสร้างด้วย AI",
     "generateGlossaryFromSelection": "สร้างอภิธานศัพท์จากรายการที่เลือก",
-    "generateCategoriesFromSelection": "สร้างหมวดหมู่จากรายการที่เลือก"
+    "generateCategoriesFromSelection": "สร้างหมวดหมู่จากรายการที่เลือก",
+    "retranslateBelowTier": "แปลใหม่ต่ำกว่าระดับ:",
+    "retranslateBelowTierApply": "แปลใหม่"
   },
   "order": {
     "label": "การเรียงลำดับ:",

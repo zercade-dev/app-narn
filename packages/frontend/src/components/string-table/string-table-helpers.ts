@@ -1,5 +1,5 @@
 import { useEffect, type RefObject } from 'react';
-import { LANGUAGE_REGISTRY, LANG_NAMES } from '@zercade-dev/narn-shared';
+import { LANGUAGE_REGISTRY, LANG_NAMES, type StringEntry } from '@zercade-dev/narn-shared';
 import type { EntryFilters } from '../../lib/filter-entries.js';
 
 /**
@@ -46,6 +46,36 @@ export const DEFAULT_FILTERS: Omit<EntryFilters, 'activeLanguages' | 'orderMode'
   filterMode: 'AND',
   freewayTierBelow: null,
 };
+
+/**
+ * Collect the exact (entryId, targetLanguage) pairs among `selectedIds` whose
+ * translation was served by a Freeway model below `belowTier` — the "Retranslate
+ * below tier N" bulk action's scope. Restricted to `targetLanguages` (the
+ * writable-subset the bulk bar already computes for "Translate Selected") rather
+ * than every language on the entry, so a collaborator's action never targets a
+ * language they can't write; the "below tier" filter itself has no such
+ * restriction since it's read-only. A pair qualifies only when the record
+ * carries a `freewayTier` at all (non-Freeway and cleared records never match).
+ */
+export function collectFreewayRetranslatePairs(
+  selectedIds: Iterable<string>,
+  entriesById: Map<string, StringEntry>,
+  targetLanguages: string[],
+  belowTier: number,
+): Array<{ entryId: string; targetLanguage: string }> {
+  const pairs: Array<{ entryId: string; targetLanguage: string }> = [];
+  for (const entryId of selectedIds) {
+    const entry = entriesById.get(entryId);
+    if (!entry) continue;
+    for (const targetLanguage of targetLanguages) {
+      const tier = entry.translations[targetLanguage]?.freewayTier;
+      if (tier !== undefined && tier < belowTier) {
+        pairs.push({ entryId, targetLanguage });
+      }
+    }
+  }
+  return pairs;
+}
 
 /**
  * Close a popover/picker when a `mousedown` lands outside its element. No-op

@@ -232,7 +232,9 @@
     "removeCategoryApply_other": "Retirer {{count}} catégories",
     "aiGeneration": "Génération IA",
     "generateGlossaryFromSelection": "Générer un glossaire à partir de la sélection",
-    "generateCategoriesFromSelection": "Générer des catégories à partir de la sélection"
+    "generateCategoriesFromSelection": "Générer des catégories à partir de la sélection",
+    "retranslateBelowTier": "Retraduire sous le niveau :",
+    "retranslateBelowTierApply": "Retraduire"
   },
   "order": {
     "label": "Ordre :",

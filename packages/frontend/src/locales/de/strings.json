@@ -232,7 +232,9 @@
     "removeCategoryApply_other": "{{count}} Kategorien entfernen",
     "aiGeneration": "KI-Generierung",
     "generateGlossaryFromSelection": "Glossar aus Auswahl generieren",
-    "generateCategoriesFromSelection": "Kategorien aus Auswahl generieren"
+    "generateCategoriesFromSelection": "Kategorien aus Auswahl generieren",
+    "retranslateBelowTier": "Unter Stufe neu übersetzen:",
+    "retranslateBelowTierApply": "Neu übersetzen"
   },
   "order": {
     "label": "Reihenfolge:",

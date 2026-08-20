@@ -228,7 +228,9 @@
     "removeCategoryApply_other": "카테고리 {{count}}개 제거",
     "aiGeneration": "AI 생성",
     "generateGlossaryFromSelection": "선택한 항목에서 용어집 생성",
-    "generateCategoriesFromSelection": "선택한 항목에서 카테고리 생성"
+    "generateCategoriesFromSelection": "선택한 항목에서 카테고리 생성",
+    "retranslateBelowTier": "티어 미만 다시 번역:",
+    "retranslateBelowTierApply": "다시 번역"
   },
   "order": {
     "label": "정렬:",

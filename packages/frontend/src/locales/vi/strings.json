@@ -228,7 +228,9 @@
     "removeCategoryApply_other": "Gỡ {{count}} danh mục",
     "aiGeneration": "Sinh bằng AI",
     "generateGlossaryFromSelection": "Sinh bảng thuật ngữ từ phần đã chọn",
-    "generateCategoriesFromSelection": "Sinh danh mục từ phần đã chọn"
+    "generateCategoriesFromSelection": "Sinh danh mục từ phần đã chọn",
+    "retranslateBelowTier": "Dịch lại dưới bậc:",
+    "retranslateBelowTierApply": "Dịch lại"
   },
   "order": {
     "label": "Thứ tự:",

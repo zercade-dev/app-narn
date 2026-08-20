@@ -232,7 +232,9 @@
     "removeCategoryApply_other": "{{count}} kategoriyi kaldır",
     "aiGeneration": "Yapay zekâ üretimi",
     "generateGlossaryFromSelection": "Seçimden sözlükçe üret",
-    "generateCategoriesFromSelection": "Seçimden kategori üret"
+    "generateCategoriesFromSelection": "Seçimden kategori üret",
+    "retranslateBelowTier": "Kademenin altında yeniden çevir:",
+    "retranslateBelowTierApply": "Yeniden çevir"
   },
   "order": {
     "label": "Sıralama:",

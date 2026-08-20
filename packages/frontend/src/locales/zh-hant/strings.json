@@ -228,7 +228,9 @@
     "removeCategoryApply_other": "移除 {{count}} 個類別",
     "aiGeneration": "AI 生成",
     "generateGlossaryFromSelection": "從選取範圍生成術語表",
-    "generateCategoriesFromSelection": "從選取範圍生成類別"
+    "generateCategoriesFromSelection": "從選取範圍生成類別",
+    "retranslateBelowTier": "重新翻譯低於層級：",
+    "retranslateBelowTierApply": "重新翻譯"
   },
   "order": {
     "label": "排序：",

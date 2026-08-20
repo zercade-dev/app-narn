@@ -228,7 +228,9 @@
     "removeCategoryApply_other": "Hapus {{count}} kategori",
     "aiGeneration": "Pembuatan oleh AI",
     "generateGlossaryFromSelection": "Buat glosarium dari pilihan",
-    "generateCategoriesFromSelection": "Buat kategori dari pilihan"
+    "generateCategoriesFromSelection": "Buat kategori dari pilihan",
+    "retranslateBelowTier": "Terjemahkan ulang di bawah tingkat:",
+    "retranslateBelowTierApply": "Terjemahkan ulang"
   },
   "order": {
     "label": "Urutan:",

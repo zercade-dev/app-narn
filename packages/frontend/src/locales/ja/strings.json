@@ -228,7 +228,9 @@
     "removeCategoryApply_other": "カテゴリ{{count}}件を外す",
     "aiGeneration": "AI生成",
     "generateGlossaryFromSelection": "選択範囲から用語集を生成",
-    "generateCategoriesFromSelection": "選択範囲からカテゴリを生成"
+    "generateCategoriesFromSelection": "選択範囲からカテゴリを生成",
+    "retranslateBelowTier": "指定ティア未満を再翻訳：",
+    "retranslateBelowTierApply": "再翻訳"
   },
   "order": {
     "label": "並び順：",

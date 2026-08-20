@@ -19,7 +19,11 @@ import { useViewStore } from '../../stores/view-store.js';
 import { filterEntries, orderByReviewSort } from '../../lib/filter-entries.js';
 import { countDistinctSourceTexts } from '../../lib/count-distinct-sources.js';
 import { StringTableFilters } from './StringTableFilters.js';
-import { DEFAULT_FILTERS, sortByRegistry } from './string-table-helpers.js';
+import {
+  collectFreewayRetranslatePairs,
+  DEFAULT_FILTERS,
+  sortByRegistry,
+} from './string-table-helpers.js';
 import { StringTableEditor } from './StringTableEditor.js';
 import { StringTablePagination } from './StringTablePagination.js';
 import { StringTableGrid } from './StringTableGrid.js';
@@ -180,6 +184,11 @@ export function StringTable() {
   const [reTranslate, setReTranslate] = useState(
     () => localStorage.getItem('translator-bulk-re-translate') === 'true',
   );
+  // "Retranslate below tier N" bulk action's own threshold select — independent
+  // of the "Served below tier N" filter's store state (a different control with
+  // a different purpose: this one scopes a WRITE, the filter scopes a VIEW).
+  // `null` = off, mirroring the filter's idiom.
+  const [retranslateBelowTier, setRetranslateBelowTier] = useState<number | null>(null);
 
   // Load the "last sorted" meta when the active project changes.
   useEffect(() => {
@@ -250,6 +259,22 @@ export function StringTable() {
         ),
       ),
     [activeProject?.activeLanguages, activeProject?.sourceLanguage, access],
+  );
+  // The exact (entryId, targetLanguage) pairs the "Retranslate below tier N"
+  // bulk action would target: every writable-language translation in the
+  // (visible) selection served by Freeway below the chosen threshold. `null`
+  // threshold (off) yields no pairs — the action stays disabled.
+  const retranslateBelowTierPairs = useMemo(
+    () =>
+      retranslateBelowTier === null
+        ? []
+        : collectFreewayRetranslatePairs(
+            visibleSelectedIds,
+            entriesById,
+            batchTargetLanguages,
+            retranslateBelowTier,
+          ),
+    [visibleSelectedIds, entriesById, batchTargetLanguages, retranslateBelowTier],
   );
   // Candidates for the Translate dialog's example picker: entries translated
   // in at least one of the run's target languages, excluding the entries being
@@ -741,6 +766,37 @@ export function StringTable() {
     }
   };
 
+  // Sibling of handleBatchTranslate, scoped to exactly the selection's weak
+  // Freeway pairs at the chosen threshold rather than the full entryIds ×
+  // targetLanguages product — `pairs` (Task 1) restricts the run to those
+  // exact pairs so a good translation in another language of the same entry is
+  // never overwritten, and `freewayMinTier` floors the retry at a stronger
+  // tier. Fires directly (no confirm dialog): the threshold select + disabled
+  // state already gate the scope, mirroring the other one-click bulk actions
+  // (ignore, clear-new-flag). Reuses the same vault-retry + run-tracking
+  // plumbing as "Translate Selected" (batchRequestRef/batchTranslate) — the
+  // single-user model rules out two batches running at once anyway (the
+  // bulk bar's Retranslate button and Translate Selected are both disabled
+  // while `batchRunId` is set).
+  const handleRetranslateBelowTier = async () => {
+    if (!activeProjectId || retranslateBelowTier === null || retranslateBelowTierPairs.length === 0)
+      return;
+    const pairs = retranslateBelowTierPairs;
+    const entryIds = Array.from(new Set(pairs.map((p) => p.entryId)));
+    const targetLanguages = Array.from(new Set(pairs.map((p) => p.targetLanguage)));
+    batchRequestRef.current = {
+      projectId: activeProjectId,
+      body: JSON.stringify({
+        reTranslate: true,
+        freewayMinTier: retranslateBelowTier,
+        pairs,
+        entryIds,
+        targetLanguages,
+      }),
+    };
+    await batchTranslate.invoke();
+  };
+
   const colWidth = 220;
   const sourceColWidth = 280;
   const typeColWidth = 110;
@@ -838,6 +894,10 @@ export function StringTable() {
           translatableCount={translatableCount}
           handleBatchCancel={handleBatchCancel}
           openBatchDialog={openBatchDialog}
+          retranslateBelowTier={retranslateBelowTier}
+          setRetranslateBelowTier={setRetranslateBelowTier}
+          retranslateBelowTierPairCount={retranslateBelowTierPairs.length}
+          onRetranslateBelowTier={() => void handleRetranslateBelowTier()}
           clearSelection={clearSelection}
         />
       )}

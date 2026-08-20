@@ -240,7 +240,9 @@
     "removeCategoryApply_other": "Убрать {{count}} категории",
     "aiGeneration": "ИИ-генерация",
     "generateGlossaryFromSelection": "Сгенерировать глоссарий из выбранного",
-    "generateCategoriesFromSelection": "Сгенерировать категории из выбранного"
+    "generateCategoriesFromSelection": "Сгенерировать категории из выбранного",
+    "retranslateBelowTier": "Перевести заново ниже уровня:",
+    "retranslateBelowTierApply": "Перевести заново"
   },
   "order": {
     "label": "Порядок:",
