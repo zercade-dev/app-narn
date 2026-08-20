@@ -335,6 +335,35 @@ function formatBucketHeadroom(view: BucketView | undefined): string {
   return `${effectiveRemainingRequests(view)} requests left today`;
 }
 
+/**
+ * The run's Freeway tier floor as a band, or undefined when it set none. The
+ * value is range-checked at the route (2-4); anything outside that is treated
+ * as no floor rather than trusted into the band arithmetic, so a run persisted
+ * by an older/looser caller can never widen what a bucket may serve.
+ */
+function freewayMinBand(request: RunRequest | undefined): DifficultyBand | undefined {
+  const tier = request?.freewayMinTier;
+  if (tier === undefined) return undefined;
+  return tier === 2 || tier === 3 || tier === 4 ? tier : undefined;
+}
+
+/**
+ * The band options one `revalidateGroup` call needs, or undefined when neither
+ * applies. The two floors are independent and must both survive: `degradedFloor`
+ * relaxes the band a degrade already settled on, `minBand` raises it to the
+ * run's requested tier — collapsing them would silently drop one.
+ */
+function freewayBandOpts(
+  degradedFloor: DifficultyBand | undefined,
+  minBand: DifficultyBand | undefined,
+): { degradedFloor?: DifficultyBand; minBand?: DifficultyBand } | undefined {
+  if (degradedFloor === undefined && minBand === undefined) return undefined;
+  return {
+    ...(degradedFloor !== undefined ? { degradedFloor } : {}),
+    ...(minBand !== undefined ? { minBand } : {}),
+  };
+}
+
 /** `HH:MM` in the server's local time, for the "resumes ~HH:MM" detail line. */
 function formatResumeTime(resumeAt: number): string {
   const d = new Date(resumeAt);
@@ -741,6 +770,8 @@ export class TranslationEngine {
       ignoreBatchSizeLimit?: boolean;
       splitByModel?: boolean;
       customBatchSize?: number;
+      /** Freeway-only per-run tier floor (2-4) — see {@link RunRequest.freewayMinTier}. */
+      freewayMinTier?: number;
     } = {},
   ): Promise<{ runId: string; total: number; status: RunStatusCode }> {
     // Reconcile crash/redeploy-orphaned runs for this project once per process,
@@ -771,6 +802,7 @@ export class TranslationEngine {
       ...(options.customBatchSize !== undefined
         ? { customBatchSize: options.customBatchSize }
         : {}),
+      ...(options.freewayMinTier !== undefined ? { freewayMinTier: options.freewayMinTier } : {}),
     };
 
     // Per-project run queue: starting a run while one is in progress (or
@@ -2981,7 +3013,13 @@ export class TranslationEngine {
       1500,
     );
     const buckets = await loadBucketViews(now, { ...deps, bucketStates });
-    const resolution = resolveFreewayDecisions(decisions, buckets, now);
+    const minBand = freewayMinBand(status.request);
+    const resolution = resolveFreewayDecisions(
+      decisions,
+      buckets,
+      now,
+      minBand !== undefined ? { minBand } : undefined,
+    );
     this.logger.info('translation:freeway-resolved', {
       runId,
       assigned: resolution.assignedGroups.map((g) => ({
@@ -3102,6 +3140,9 @@ export class TranslationEngine {
    * (higher) floor — otherwise every degraded assignment would bounce
    * straight back to deferred the moment it reaches this coarse re-check,
    * since the bucket the plan chose is by construction below the natural floor.
+   * `minBand` is the run's own tier floor and moves the OTHER way — it raises
+   * the band, exactly as planning did — so the two are threaded separately and
+   * never collapsed into one value.
    */
   private async revalidateFreewayBatch(
     decisions: RoutingDecision[],
@@ -3109,13 +3150,14 @@ export class TranslationEngine {
     deps: BucketSourceDeps,
     now: number,
     degradedFloor?: DifficultyBand,
+    minBand?: DifficultyBand,
   ): Promise<ReturnType<typeof revalidateGroup>> {
     const buckets = await loadBucketViews(now, deps);
     return revalidateGroup(
       { decisions, bucketKey, batchSize: decisions.length },
       buckets,
       now,
-      degradedFloor !== undefined ? { degradedFloor } : undefined,
+      freewayBandOpts(degradedFloor, minBand),
     );
   }
 
@@ -3223,6 +3265,13 @@ export class TranslationEngine {
      * degrade exists to remove.
      */
     degradedFloor?: DifficultyBand;
+    /**
+     * The run's own Freeway tier floor (`freewayMinTier`), if it set one. The
+     * opposite axis to `degradedFloor`: it RAISES the band every re-validation
+     * below runs at, so a failover cannot quietly drop the batch onto a bucket
+     * under the tier the run asked for.
+     */
+    minBand?: DifficultyBand;
   }): Promise<FreewayDispatchOutcome> {
     const {
       jobs,
@@ -3234,7 +3283,9 @@ export class TranslationEngine {
       signal,
       onReroute,
       degradedFloor,
+      minBand,
     } = args;
+    const bandOpts = freewayBandOpts(degradedFloor, minBand);
     for (let hop = 0; ; hop++) {
       let results: TranslationResult[] | undefined;
       try {
@@ -3298,7 +3349,7 @@ export class TranslationEngine {
               { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
               freshBuckets,
               strikeAt,
-              degradedFloor !== undefined ? { degradedFloor } : undefined,
+              bandOpts,
             );
             if (revalidated.kind === 'blocked') {
               return { kind: 'error', error: err, authCancel: false };
@@ -3327,7 +3378,7 @@ export class TranslationEngine {
             { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
             buckets,
             strikeAt,
-            degradedFloor !== undefined ? { degradedFloor } : undefined,
+            bandOpts,
           );
           if (parked.kind === 'blocked') return { kind: 'blocked' };
           // 'defer' carries the soonest useful reset. 'reroute'/'keep' (another
@@ -3369,7 +3420,7 @@ export class TranslationEngine {
           { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
           buckets,
           now,
-          degradedFloor !== undefined ? { degradedFloor } : undefined,
+          bandOpts,
         );
         // Only a reroute rescues a generic provider failure: with nothing else
         // able to serve the group, the honest outcome is the provider's own
@@ -3611,6 +3662,7 @@ export class TranslationEngine {
           freewayDeps,
           Date.now(),
           freewayDegraded?.toTier as DifficultyBand | undefined,
+          freewayMinBand(status.request),
         );
         if (revalidated.kind === 'reroute') {
           this.logger.info('translation:freeway-rerouted', {
@@ -4341,6 +4393,7 @@ export class TranslationEngine {
             signal,
             onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
+            minBand: freewayMinBand(status.request),
           });
           currentFreewayState = undefined;
           // A same-bucket auth failover (a sibling instance took over, see

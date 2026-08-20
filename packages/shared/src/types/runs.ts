@@ -84,6 +84,18 @@ export interface RunRequest {
    * models are affected. Absent/false = all jobs dispatched together, as usual.
    */
   splitByModel?: boolean;
+  /**
+   * Freeway-only quality floor for this run (2-4): every job group is planned
+   * — and re-validated at dispatch time — at `max(naturalBand, freewayMinTier)`
+   * instead of the band its content alone earns, so a re-translation targets a
+   * stronger tier rather than re-rolling the one that produced the weak text.
+   * Persisted with the request so a queued, parked, or retried run keeps the
+   * floor. Ordinary planner semantics apply on top: a group no bucket can serve
+   * at the floor defers or blocks like any other hard band, and the degrade
+   * relaxation may still settle it one tier lower after the qualified wait.
+   * Non-Freeway routing ignores the field.
+   */
+  freewayMinTier?: number;
 }
 
 /** A single (entry, target language) job target within a {@link RunRequest}. */
