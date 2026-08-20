@@ -346,7 +346,10 @@ freewayRouter.post(
     // candidate set before it ever reaches the ledger — otherwise a caller
     // could write an arbitrary `credential::<anything>` row.
     if (!validCredentialMarkIds().has(moduleId)) {
-      res.status(400).json({ error: `Not a Freeway candidate module id: ${moduleId}` });
+      res.status(400).json({
+        error: 'not-freeway-candidate',
+        message: `Not a Freeway candidate module id: ${moduleId}`,
+      });
       return;
     }
     await getFreewayLedgerStore().setDisabled(freewayCredentialKey(moduleId), null);

@@ -220,6 +220,7 @@
     "credentialMarkStatus": "Marcado como inválido: {{module}} — configura la entrada de la bóveda {{key}} para solucionarlo.",
     "credentialRetryButton": "Reintentar",
     "credentialMarkClearFailed": "No se pudo borrar la marca de credenciales: {{message}}",
+    "credentialMarkErrorNotCandidate": "Este módulo ya no se puede marcar como inválido — su estado en Freeway ha cambiado. Actualiza para ver el estado actual.",
     "automaticOption": "Automático",
     "instanceSelectorAria": "Elegir qué instancia atiende a {{provider}}",
     "instanceOverrideSaveFailed": "No se pudo actualizar la instancia de {{provider}}: {{message}}",

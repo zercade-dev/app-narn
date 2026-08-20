@@ -215,6 +215,7 @@
     "credentialMarkStatus": "已標記為無效：{{module}}——在保險庫中設定 {{key}} 即可清除。",
     "credentialRetryButton": "重試",
     "credentialMarkClearFailed": "清除憑證標記失敗：{{message}}",
+    "credentialMarkErrorNotCandidate": "此模組無法再被標記為無效——其 Freeway 狀態已變更。重新整理即可查看目前狀態。",
     "automaticOption": "自動",
     "instanceSelectorAria": "選擇為 {{provider}} 提供服務的實例",
     "instanceOverrideSaveFailed": "更新 {{provider}} 的實例失敗：{{message}}",

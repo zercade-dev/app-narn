@@ -220,6 +220,7 @@
     "credentialMarkStatus": "Als ungültig markiert: {{module}} — Tresor-Eintrag {{key}} setzen, um es zu beheben.",
     "credentialRetryButton": "Erneut versuchen",
     "credentialMarkClearFailed": "Markierung ungültiger Zugangsdaten konnte nicht aufgehoben werden: {{message}}",
+    "credentialMarkErrorNotCandidate": "Dieses Modul kann nicht mehr als ungültig markiert werden — sein Freeway-Status hat sich geändert. Aktualisiere, um den aktuellen Status zu sehen.",
     "automaticOption": "Automatisch",
     "instanceSelectorAria": "Wählen, welche Instanz {{provider}} bedient",
     "instanceOverrideSaveFailed": "Instanz für {{provider}} konnte nicht aktualisiert werden: {{message}}",

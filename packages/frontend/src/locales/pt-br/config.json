@@ -220,6 +220,7 @@
     "credentialMarkStatus": "Marcado como inválido: {{module}} — defina a entrada do cofre {{key}} para resolver.",
     "credentialRetryButton": "Tentar novamente",
     "credentialMarkClearFailed": "Falha ao limpar a marca de credenciais: {{message}}",
+    "credentialMarkErrorNotCandidate": "Este módulo não pode mais ser marcado como inválido — o status dele no Freeway mudou. Atualize para ver o status atual.",
     "automaticOption": "Automático",
     "instanceSelectorAria": "Escolher qual instância atende {{provider}}",
     "instanceOverrideSaveFailed": "Falha ao atualizar a instância de {{provider}}: {{message}}",

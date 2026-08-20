@@ -18,7 +18,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, RotateCcw } from 'lucide-react';
 import type { ModuleInstance } from '@zercade-dev/narn-shared';
-import { apiRequest } from '../../hooks/use-api.js';
+import { apiRequest, ApiError } from '../../hooks/use-api.js';
 import { useAsyncData } from '../../hooks/use-async-data.js';
 import { relativeTime } from '@/lib/utils';
 import { toast } from '@/lib/toast';
@@ -270,7 +270,13 @@ export function FreewayPanel(): React.JSX.Element {
     })
       .then(() => reload())
       .catch((err) => {
-        toast.error(t('freeway.credentialMarkClearFailed', { message: (err as Error).message }));
+        const code =
+          err instanceof ApiError ? (err.data as { error?: string } | undefined)?.error : undefined;
+        toast.error(
+          code === 'not-freeway-candidate'
+            ? t('freeway.credentialMarkErrorNotCandidate')
+            : t('freeway.credentialMarkClearFailed', { message: (err as Error).message }),
+        );
       })
       .finally(() => {
         setRetryingCredentialMarkIds((prev) => {

@@ -215,6 +215,7 @@
     "credentialMarkStatus": "ถูกทำเครื่องหมายว่าไม่ถูกต้อง: {{module}} — ตั้งค่ารายการในตู้นิรภัย {{key}} เพื่อแก้ไข",
     "credentialRetryButton": "ลองอีกครั้ง",
     "credentialMarkClearFailed": "ล้างเครื่องหมายข้อมูลรับรองไม่สำเร็จ: {{message}}",
+    "credentialMarkErrorNotCandidate": "โมดูลนี้ไม่สามารถถูกทำเครื่องหมายว่าไม่ถูกต้องได้อีกต่อไป — สถานะ Freeway ของโมดูลนี้เปลี่ยนไปแล้ว รีเฟรชเพื่อดูสถานะปัจจุบัน",
     "automaticOption": "อัตโนมัติ",
     "instanceSelectorAria": "เลือกอินสแตนซ์ที่ให้บริการ {{provider}}",
     "instanceOverrideSaveFailed": "อัปเดตอินสแตนซ์สำหรับ {{provider}} ไม่สำเร็จ: {{message}}",

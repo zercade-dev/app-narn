@@ -220,6 +220,7 @@
     "credentialMarkStatus": "Marqué invalide : {{module}} — définissez l'entrée du coffre {{key}} pour le résoudre.",
     "credentialRetryButton": "Réessayer",
     "credentialMarkClearFailed": "Échec de la suppression de la marque d'identifiants invalides : {{message}}",
+    "credentialMarkErrorNotCandidate": "Ce module ne peut plus être marqué comme invalide — son état Freeway a changé. Actualisez pour voir l'état actuel.",
     "automaticOption": "Automatique",
     "instanceSelectorAria": "Choisir quelle instance dessert {{provider}}",
     "instanceOverrideSaveFailed": "Échec de la mise à jour de l'instance de {{provider}} : {{message}}",

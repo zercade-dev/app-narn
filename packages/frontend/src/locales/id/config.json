@@ -215,6 +215,7 @@
     "credentialMarkStatus": "Ditandai tidak valid: {{module}} — isi entri brankas {{key}} untuk memperbaikinya.",
     "credentialRetryButton": "Coba lagi",
     "credentialMarkClearFailed": "Gagal menghapus tanda kredensial: {{message}}",
+    "credentialMarkErrorNotCandidate": "Modul ini tidak bisa lagi ditandai tidak valid — status Freeway-nya telah berubah. Segarkan untuk melihat status saat ini.",
     "automaticOption": "Otomatis",
     "instanceSelectorAria": "Pilih instans mana yang melayani {{provider}}",
     "instanceOverrideSaveFailed": "Gagal memperbarui instans untuk {{provider}}: {{message}}",

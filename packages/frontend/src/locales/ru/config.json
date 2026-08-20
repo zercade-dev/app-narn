@@ -230,6 +230,7 @@
     "credentialMarkStatus": "Отмечено как недействительное: {{module}} — задайте ключ хранилища {{key}}, чтобы снять отметку.",
     "credentialRetryButton": "Повторить",
     "credentialMarkClearFailed": "Не удалось снять отметку об учетных данных: {{message}}",
+    "credentialMarkErrorNotCandidate": "Этот модуль больше нельзя пометить как недействительный — его статус Freeway изменился. Обновите, чтобы увидеть текущий статус.",
     "automaticOption": "Автоматически",
     "instanceSelectorAria": "Выбрать, какой экземпляр обслуживает {{provider}}",
     "instanceOverrideSaveFailed": "Не удалось обновить экземпляр для {{provider}}: {{message}}",
