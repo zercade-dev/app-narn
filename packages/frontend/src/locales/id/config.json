@@ -228,6 +228,7 @@
     "colRemaining": "Sisa",
     "colNextReset": "Reset berikutnya",
     "colPassRate": "Tingkat lulus",
+    "sharedPoolLabel": "Kumpulan bersama",
     "remainingRequests_other": "{{count}} permintaan",
     "remainingChars": "{{count}} karakter",
     "passRateEntry": "{{language}}: {{rate}}%",

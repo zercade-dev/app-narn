@@ -228,6 +228,7 @@
     "colRemaining": "잔여",
     "colNextReset": "다음 초기화",
     "colPassRate": "통과율",
+    "sharedPoolLabel": "공유 풀",
     "remainingRequests_other": "요청 {{count}}번",
     "remainingChars": "{{count}}자",
     "passRateEntry": "{{language}}: {{rate}}%",

@@ -228,6 +228,7 @@
     "colRemaining": "คงเหลือ",
     "colNextReset": "รีเซ็ตถัดไป",
     "colPassRate": "อัตราผ่าน",
+    "sharedPoolLabel": "กลุ่มที่ใช้ร่วมกัน",
     "remainingRequests_other": "{{count}} คำขอ",
     "remainingChars": "{{count}} อักขระ",
     "passRateEntry": "{{language}}: {{rate}}%",

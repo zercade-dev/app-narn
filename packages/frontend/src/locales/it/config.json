@@ -233,6 +233,7 @@
     "colRemaining": "Rimanente",
     "colNextReset": "Prossimo reset",
     "colPassRate": "Tasso di superamento",
+    "sharedPoolLabel": "Pool condiviso",
     "remainingRequests_one": "{{count}} richiesta",
     "remainingRequests_other": "{{count}} richieste",
     "remainingRequests_many": "{{count}} richieste",

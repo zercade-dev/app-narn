@@ -228,6 +228,7 @@
     "colRemaining": "残り",
     "colNextReset": "次回リセット",
     "colPassRate": "合格率",
+    "sharedPoolLabel": "共有プール",
     "remainingRequests_other": "リクエスト{{count}}件",
     "remainingChars": "{{count}}文字",
     "passRateEntry": "{{language}}：{{rate}}%",

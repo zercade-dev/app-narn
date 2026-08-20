@@ -243,6 +243,7 @@
     "colRemaining": "Осталось",
     "colNextReset": "Следующий сброс",
     "colPassRate": "Доля прохождения",
+    "sharedPoolLabel": "Общий пул",
     "remainingRequests_one": "{{count}} запрос",
     "remainingRequests_few": "{{count}} запроса",
     "remainingRequests_many": "{{count}} запросов",

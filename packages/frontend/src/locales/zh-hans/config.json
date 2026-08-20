@@ -228,6 +228,7 @@
     "colRemaining": "剩余",
     "colNextReset": "下次重置",
     "colPassRate": "通过率",
+    "sharedPoolLabel": "共享池",
     "remainingRequests_other": "{{count}} 次请求",
     "remainingChars": "{{count}} 字符",
     "passRateEntry": "{{language}}：{{rate}}%",

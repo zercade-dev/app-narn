@@ -233,6 +233,7 @@
     "colRemaining": "Restante",
     "colNextReset": "Próximo reinicio",
     "colPassRate": "Tasa de aprobación",
+    "sharedPoolLabel": "Fondo compartido",
     "remainingRequests_one": "{{count}} solicitud",
     "remainingRequests_other": "{{count}} solicitudes",
     "remainingRequests_many": "{{count}} solicitudes",

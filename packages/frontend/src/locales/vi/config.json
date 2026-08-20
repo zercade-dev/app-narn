@@ -228,6 +228,7 @@
     "colRemaining": "Còn lại",
     "colNextReset": "Đặt lại tiếp theo",
     "colPassRate": "Tỷ lệ đạt",
+    "sharedPoolLabel": "Kho dùng chung",
     "remainingRequests_other": "{{count}} yêu cầu",
     "remainingChars": "{{count}} ký tự",
     "passRateEntry": "{{language}}: {{rate}}%",

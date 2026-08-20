@@ -233,6 +233,7 @@
     "colRemaining": "Restant",
     "colNextReset": "Prochaine réinitialisation",
     "colPassRate": "Taux de réussite",
+    "sharedPoolLabel": "Pool partagé",
     "remainingRequests_one": "{{count}} requête",
     "remainingRequests_other": "{{count}} requêtes",
     "remainingRequests_many": "{{count}} de requêtes",

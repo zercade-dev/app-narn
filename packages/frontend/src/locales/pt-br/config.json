@@ -233,6 +233,7 @@
     "colRemaining": "Restante",
     "colNextReset": "Próximo reset",
     "colPassRate": "Taxa de aprovação",
+    "sharedPoolLabel": "Pool compartilhado",
     "remainingRequests_one": "{{count}} requisição",
     "remainingRequests_other": "{{count}} requisições",
     "remainingRequests_many": "{{count}} requisições",

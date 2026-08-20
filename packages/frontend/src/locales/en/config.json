@@ -233,6 +233,7 @@
     "colRemaining": "Remaining",
     "colNextReset": "Next reset",
     "colPassRate": "Pass rate",
+    "sharedPoolLabel": "Shared pool",
     "remainingRequests_one": "{{count}} request",
     "remainingRequests_other": "{{count}} requests",
     "remainingChars": "{{count}} chars",

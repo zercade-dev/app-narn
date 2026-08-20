@@ -233,6 +233,7 @@
     "colRemaining": "Kalan",
     "colNextReset": "Sonraki sıfırlama",
     "colPassRate": "Geçme oranı",
+    "sharedPoolLabel": "Paylaşılan havuz",
     "remainingRequests_one": "{{count}} istek",
     "remainingRequests_other": "{{count}} istek",
     "remainingChars": "{{count}} karakter",
