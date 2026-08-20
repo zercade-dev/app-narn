@@ -50,6 +50,8 @@ interface FreewayStatusBucket {
   state: BucketStatusState;
   disabledReason?: string;
   gatePassByLanguage?: Record<string, number>;
+  /** Set when this bucket shares a day-scale pool with sibling buckets; equals providerKey. */
+  poolKey?: string;
   /** The module/instance id actually serving this LIVE bucket. */
   dispatchModuleId?: string;
   /** For a 'disabled' missing row: the candidate id "Enable it" should scroll to / turn on. */
@@ -200,6 +202,7 @@ function toStatusBucket(
     state: deriveBucketState(view, now),
     disabledReason: view.disabledReason,
     gatePassByLanguage: view.stats.gatePassByLanguage,
+    poolKey: view.poolKey,
     ...(view.dispatchModuleId !== undefined ? { dispatchModuleId: view.dispatchModuleId } : {}),
     ...(view.disabledReason === CREDENTIAL_BAD_REASON
       ? deriveCredentialMark(view, envVarFor, existingVaultKeys)
