@@ -2277,7 +2277,11 @@ export class TranslationEngine {
     sessionId?: string,
   ): Promise<RunStatus> {
     const parked = [...pairs];
-    const park = { resumeAt: status.waitingForQuota?.resumeAt ?? Date.now(), pairs: parked };
+    const park = {
+      resumeAt: status.waitingForQuota?.resumeAt ?? Date.now(),
+      pairs: parked,
+      reason: status.waitingForQuota?.reason,
+    };
     delete status.waitingForQuota;
     this.queue.resumeRun(runId);
     const request = this.parkedRetryRequest(status, parked);
@@ -2527,15 +2531,24 @@ export class TranslationEngine {
   /**
    * Undo a park-clearing re-dispatch that never got off the ground: `startRun`
    * threw, so the run is neither running nor parked — an invisible, permanently
-   * stuck state. Put the pairs back (dropping any stale skip reason), re-pause
-   * the run and persist, then let the caller rethrow.
+   * stuck state. Put the pairs back (dropping any stale skip reason but
+   * restoring the prior `reason` label verbatim), re-pause the run and
+   * persist, then let the caller rethrow.
    */
   private async restoreQuotaPark(
     projectId: string,
     status: RunStatus,
-    park: { resumeAt: number; pairs: RunEntryLanguagePair[] },
+    park: {
+      resumeAt: number;
+      pairs: RunEntryLanguagePair[];
+      reason?: 'quota' | 'provider-error';
+    },
   ): Promise<void> {
-    status.waitingForQuota = { resumeAt: park.resumeAt, pairs: park.pairs };
+    status.waitingForQuota = {
+      resumeAt: park.resumeAt,
+      pairs: park.pairs,
+      ...(park.reason ? { reason: park.reason } : {}),
+    };
     status.status = RunStatusCode.Paused;
     this.queue.pauseRun(status.runId);
     await this.runStore.updateRun(projectId, status).catch((err: unknown) => {
@@ -2623,7 +2636,7 @@ export class TranslationEngine {
     if (availability !== 'ok') return { ok: false, reason: availability };
 
     const parked = [...waiting.pairs];
-    const park = { resumeAt: waiting.resumeAt, pairs: parked };
+    const park = { resumeAt: waiting.resumeAt, pairs: parked, reason: waiting.reason };
     this.runs.set(runId, status);
     delete status.waitingForQuota;
     this.queue.resumeRun(runId);
@@ -3465,6 +3478,14 @@ export class TranslationEngine {
           }
           return { kind: 'error', error: err, authCancel: false };
         }
+        // Rate-limited AND hop-0 auth-failure share this tail (auth falls
+        // through here because `providerFailure` is false for it too). Both
+        // are deliberately labeled 'quota', not a third reason: for the auth
+        // case, markFreewayCredentialBad already sidelined the bad
+        // credential above, so what the run is actually parked on now is the
+        // OTHER buckets' quota/cooldowns — the credential problem itself is
+        // surfaced separately (the credential mark), not through the park
+        // reason. The enum stays two-valued on purpose.
         if (revalidated.kind === 'defer') {
           return { kind: 'defer', resumeAt: revalidated.resumeAt, reason: 'quota' };
         }
