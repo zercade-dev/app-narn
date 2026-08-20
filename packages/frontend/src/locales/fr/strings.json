@@ -336,6 +336,7 @@
     "waitingPairsCount_other": "{{count}} paires en attente",
     "waitingPairsCount_many": "{{count}} de paires en attente",
     "waitingSkipReasonWarning": "La reprise automatique n'a trouvé aucune clé gratuite utilisable — utilisez « Reprendre maintenant avec… » ci-dessous pour choisir un module.",
+    "waitingProviderErrorReason": "Un fournisseur a échoué de manière répétée — les paires en attente reprennent automatiquement dès qu'il se rétablit.",
     "pause": "Mettre en pause",
     "resume": "Reprendre",
     "resumeRetryFreePool": "Réessayer avec le quota gratuit",

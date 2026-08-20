@@ -439,6 +439,18 @@ export interface RunStatus {
    * It makes an otherwise silent, indefinitely-parked run explainable in the UI
    * (the run keeps blocking its project's queue meanwhile); cleared the moment
    * the run is actually resumed.
+   *
+   * `reason` distinguishes WHY the pairs are parked: `'provider-error'` means a
+   * provider itself kept failing (5xx/timeout/retired model), `'quota'` means
+   * the shared free-tier allowance is exhausted or a rate limit was hit. Purely
+   * a UI label — it does not change park/resume behavior. When a later defer
+   * merges into an existing park, `'provider-error'` always wins over `'quota'`
+   * (never silently downgraded). Absent on parks predating this field.
    */
-  waitingForQuota?: { resumeAt: number; pairs: RunEntryLanguagePair[]; skipReason?: string };
+  waitingForQuota?: {
+    resumeAt: number;
+    pairs: RunEntryLanguagePair[];
+    skipReason?: string;
+    reason?: 'quota' | 'provider-error';
+  };
 }

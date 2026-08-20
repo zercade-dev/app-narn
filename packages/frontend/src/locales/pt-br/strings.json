@@ -336,6 +336,7 @@
     "waitingPairsCount_other": "{{count}} pares pendentes",
     "waitingPairsCount_many": "{{count}} pares pendentes",
     "waitingSkipReasonWarning": "A retomada automática não encontrou uma chave gratuita utilizável — use “Retomar agora com…” abaixo para escolher um módulo.",
+    "waitingProviderErrorReason": "Um provedor continuou falhando — os pares pendentes retomam automaticamente assim que ele se recuperar.",
     "pause": "Pausar",
     "resume": "Retomar",
     "resumeRetryFreePool": "Repetir pool gratuito",

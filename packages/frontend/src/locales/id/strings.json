@@ -330,6 +330,7 @@
     "waitingResumesAt": "Dilanjutkan {{time}}",
     "waitingPairsCount_other": "{{count}} pasangan menunggu",
     "waitingSkipReasonWarning": "Pelanjutan otomatis tidak menemukan kunci gratis yang bisa dipakai — gunakan “Lanjutkan sekarang dengan…” di bawah untuk memilih modul.",
+    "waitingProviderErrorReason": "Penyedia terus gagal — pasangan yang menunggu akan dilanjutkan otomatis begitu penyedia itu pulih.",
     "pause": "Jeda",
     "resume": "Lanjutkan",
     "resumeRetryFreePool": "Coba ulang kumpulan gratis",

@@ -330,6 +330,7 @@
     "waitingResumesAt": "{{time}} 재개 예정",
     "waitingPairsCount_other": "대기 중인 쌍 {{count}}개",
     "waitingSkipReasonWarning": "자동 재개가 사용할 수 있는 무료 키를 찾지 못했어요 — 아래의 “지금 다른 모듈로 재개…”를 사용해 모듈을 선택하세요.",
+    "waitingProviderErrorReason": "제공업체가 계속 실패했어요 — 복구되면 대기 중인 쌍이 자동으로 재개돼요.",
     "pause": "일시 중지",
     "resume": "재개",
     "resumeRetryFreePool": "무료 풀 재시도",

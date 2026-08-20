@@ -330,6 +330,7 @@
     "waitingResumesAt": "再開：{{time}}",
     "waitingPairsCount_other": "保留中のペア{{count}}件",
     "waitingSkipReasonWarning": "自動再開で利用できる無料キーが見つかりませんでした。下の「別のモジュールで再開…」からモジュールを選択してください。",
+    "waitingProviderErrorReason": "プロバイダーが失敗し続けています。復旧すると、保留中のペアは自動的に再開します。",
     "pause": "一時停止",
     "resume": "再開",
     "resumeRetryFreePool": "無料プールを再試行",

@@ -335,6 +335,7 @@
     "waitingPairsCount_one": "{{count}} çift bekliyor",
     "waitingPairsCount_other": "{{count}} çift bekliyor",
     "waitingSkipReasonWarning": "Otomatik sürdürme, kullanılabilir bir ücretsiz anahtar bulamadı — bir modül seçmek için aşağıdaki “Şimdi başka modülle sürdür…” seçeneğini kullanın.",
+    "waitingProviderErrorReason": "Bir sağlayıcı sürekli hata verdi — bekleyen çiftler, sağlayıcı düzeldiğinde otomatik olarak sürdürülür.",
     "pause": "Duraklat",
     "resume": "Sürdür",
     "resumeRetryFreePool": "Ücretsiz havuzu yeniden dene",

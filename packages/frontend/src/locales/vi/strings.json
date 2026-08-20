@@ -330,6 +330,7 @@
     "waitingResumesAt": "Tiếp tục {{time}}",
     "waitingPairsCount_other": "{{count}} cặp đang chờ",
     "waitingSkipReasonWarning": "Tự động tiếp tục không tìm được khóa miễn phí khả dụng — hãy dùng “Tiếp tục ngay với…” bên dưới để chọn một mô-đun.",
+    "waitingProviderErrorReason": "Một nhà cung cấp liên tục gặp lỗi — các cặp đang chờ sẽ tự động tiếp tục ngay khi nhà cung cấp phục hồi.",
     "pause": "Tạm dừng",
     "resume": "Tiếp tục",
     "resumeRetryFreePool": "Thử lại kho miễn phí",

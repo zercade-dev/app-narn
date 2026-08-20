@@ -73,7 +73,7 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | back-translation |  |  |
 | module |  |  |
 | module instance |  |  |
-| provider |  |  |
+| provider | proveedor | The outside company/service behind a module. `config:enableModuleHelp` "Añade un proveedor de IA o de traducción para usarlo en tus proyectos." The three English strings that mislabel a module-instance picker *Provider* (`colorText:assistant.instanceLabel`, `stage-details:chatInstanceLabel`, `config:routing.simplePlaceholder` "Elige un proveedor") are translated as written and must not drag *módulo* toward this word anywhere else. |
 | model |  |  |
 | prompt |  |  |
 | reasoning effort |  |  |

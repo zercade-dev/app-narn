@@ -336,6 +336,7 @@
     "waitingPairsCount_other": "{{count}} coppie in attesa",
     "waitingPairsCount_many": "{{count}} coppie in attesa",
     "waitingSkipReasonWarning": "La ripresa automatica non ha trovato una chiave gratuita utilizzabile — usa “Riprendi ora con…” qui sotto per scegliere un modulo.",
+    "waitingProviderErrorReason": "Un provider ha continuato a fallire — le coppie in attesa riprendono automaticamente non appena si riprende.",
     "pause": "Metti in pausa",
     "resume": "Riprendi",
     "resumeRetryFreePool": "Riprova il pool gratuito",

@@ -439,7 +439,7 @@ interface FreewayBatchState {
 /** What the Freeway dispatch attempt(s) for one batch produced. */
 type FreewayDispatchOutcome =
   | { kind: 'results'; results: TranslationResult[] }
-  | { kind: 'defer'; resumeAt: number }
+  | { kind: 'defer'; resumeAt: number; reason?: 'quota' | 'provider-error' }
   | { kind: 'blocked' }
   /** `authCancel` is true only for an auth failure that leaves no bucket at all. */
   | { kind: 'error'; error: unknown; authCancel: boolean };
@@ -3042,7 +3042,12 @@ export class TranslationEngine {
       this.recordFreewayBlocked(runId, status, resolution.blocked);
     }
     if (resolution.deferred) {
-      this.deferPairsForQuota(status, resolution.deferred.pairs, resolution.deferred.resumeAt);
+      this.deferPairsForQuota(
+        status,
+        resolution.deferred.pairs,
+        resolution.deferred.resumeAt,
+        'quota',
+      );
       this.recordFreewayDetail(
         runId,
         formatDeferralDetail(resolution.deferred.pairs.length, resolution.deferred.resumeAt),
@@ -3097,16 +3102,23 @@ export class TranslationEngine {
    * Park (entry, language) pairs until free quota returns. Merges with any
    * pairs a sibling batch already parked (dedup by pair, earliest resume wins);
    * the pairs count toward neither `completed` nor `failed`.
+   *
+   * `reason` labels WHY (UI only — never changes park/resume behavior). When
+   * merging into an existing park, `'provider-error'` always wins over
+   * `'quota'`: a sibling batch parked for a genuine provider failure must
+   * never be silently downgraded to a plain quota wait by a later, milder
+   * defer landing on the same run.
    */
   private deferPairsForQuota(
     status: RunStatus,
     pairs: RunEntryLanguagePair[],
     resumeAt: number,
+    reason?: 'quota' | 'provider-error',
   ): void {
     if (pairs.length === 0) return;
     const existing = status.waitingForQuota;
     if (!existing) {
-      status.waitingForQuota = { resumeAt, pairs: [...pairs] };
+      status.waitingForQuota = { resumeAt, pairs: [...pairs], ...(reason ? { reason } : {}) };
       return;
     }
     const seen = new Set(existing.pairs.map((p) => `${p.entryId} ${p.targetLanguage}`));
@@ -3117,6 +3129,9 @@ export class TranslationEngine {
       existing.pairs.push(pair);
     }
     existing.resumeAt = Math.min(existing.resumeAt, resumeAt);
+    if (existing.reason !== 'provider-error' && reason !== undefined) {
+      existing.reason = reason;
+    }
   }
 
   /**
@@ -3357,6 +3372,7 @@ export class TranslationEngine {
             return {
               kind: 'defer',
               resumeAt: revalidated.kind === 'defer' ? revalidated.resumeAt : strikeAt + 60_000,
+              reason: 'provider-error',
             };
           }
           if (!rateLimited) {
@@ -3390,6 +3406,7 @@ export class TranslationEngine {
           return {
             kind: 'defer',
             resumeAt: parked.kind === 'defer' ? parked.resumeAt : strikeAt + 60_000,
+            reason: 'quota',
           };
         }
         const now = Date.now();
@@ -3435,7 +3452,7 @@ export class TranslationEngine {
           // did land, so the next planning pass sees the cooldown and routes
           // around it.
           if (revalidated.kind === 'keep') {
-            return { kind: 'defer', resumeAt: now + 60_000 };
+            return { kind: 'defer', resumeAt: now + 60_000, reason: 'provider-error' };
           }
           // 'defer' means every other candidate is merely cooling (or
           // minute-starved), not gone for good — the normal state of a
@@ -3444,12 +3461,12 @@ export class TranslationEngine {
           // themselves once a sibling's cooldown clears; only a truly empty
           // field ('blocked', handled below) earns the provider's own error.
           if (revalidated.kind === 'defer') {
-            return { kind: 'defer', resumeAt: revalidated.resumeAt };
+            return { kind: 'defer', resumeAt: revalidated.resumeAt, reason: 'provider-error' };
           }
           return { kind: 'error', error: err, authCancel: false };
         }
         if (revalidated.kind === 'defer') {
-          return { kind: 'defer', resumeAt: revalidated.resumeAt };
+          return { kind: 'defer', resumeAt: revalidated.resumeAt, reason: 'quota' };
         }
         if (revalidated.kind === 'blocked') {
           // An auth failure that leaves NO usable bucket at all is the classic
@@ -3687,6 +3704,7 @@ export class TranslationEngine {
             status,
             decisions.map((d) => ({ entryId: d.entry.id, targetLanguage: d.targetLanguage })),
             revalidated.resumeAt,
+            'quota',
           );
           for (const d of decisions) settled.add(settleKey(d));
           this.logger.info('translation:freeway-deferred', {
@@ -4165,6 +4183,7 @@ export class TranslationEngine {
                 status,
                 [{ entryId: e.decision.entry.id, targetLanguage: e.decision.targetLanguage }],
                 Date.now() + 60_000,
+                'quota',
               );
               settled.add(settleKey(e.decision));
               deferredIndices.add(i);
@@ -4456,7 +4475,7 @@ export class TranslationEngine {
               deferredIndices.add(index);
             }
             if (outcome.kind === 'defer') {
-              this.deferPairsForQuota(status, pairs, outcome.resumeAt);
+              this.deferPairsForQuota(status, pairs, outcome.resumeAt, outcome.reason);
               this.logger.info('translation:freeway-deferred', {
                 runId,
                 bucketKey,

@@ -335,6 +335,7 @@
     "waitingPairsCount_one": "{{count}} Paar wartet",
     "waitingPairsCount_other": "{{count}} Paare warten",
     "waitingSkipReasonWarning": "Die automatische Fortsetzung konnte keinen nutzbaren kostenlosen Schlüssel finden — nutze unten „Jetzt fortsetzen mit…“, um ein Modul auszuwählen.",
+    "waitingProviderErrorReason": "Ein Anbieter ist wiederholt fehlgeschlagen — wartende Paare werden automatisch fortgesetzt, sobald er sich erholt.",
     "pause": "Pausieren",
     "resume": "Fortsetzen",
     "resumeRetryFreePool": "Kostenlosen Pool erneut versuchen",

@@ -336,6 +336,7 @@
     "waitingPairsCount_other": "{{count}} pares pendientes",
     "waitingPairsCount_many": "{{count}} pares pendientes",
     "waitingSkipReasonWarning": "La reanudación automática no encontró una clave gratuita utilizable — usa «Reanudar ahora con…» abajo para elegir un módulo.",
+    "waitingProviderErrorReason": "Un proveedor falló repetidamente — los pares pendientes se reanudan automáticamente en cuanto se recupere.",
     "pause": "Pausar",
     "resume": "Reanudar",
     "resumeRetryFreePool": "Reintentar con la cuota gratuita",

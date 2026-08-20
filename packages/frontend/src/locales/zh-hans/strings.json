@@ -330,6 +330,7 @@
     "waitingResumesAt": "{{time}} 继续",
     "waitingPairsCount_other": "{{count}} 对待处理",
     "waitingSkipReasonWarning": "自动继续未找到可用的免费密钥——请使用下方的“立即换模块继续…”来选择模块。",
+    "waitingProviderErrorReason": "某个服务商持续失败——待处理的配对会在其恢复后自动继续。",
     "pause": "暂停",
     "resume": "继续",
     "resumeRetryFreePool": "重试免费池",
