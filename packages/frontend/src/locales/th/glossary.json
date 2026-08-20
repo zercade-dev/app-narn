@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "เลือกโมดูล…",
   "generateModel": "โมเดล",
   "generateReasoningEffort": "ระดับการให้เหตุผล",
+  "generateFreewayModelHint": "NARN Freeway เลือกโมเดลฟรีที่ดีที่สุดให้อัตโนมัติในแต่ละแบตช์ — ไม่ต้องเลือกโมเดลหรือระดับการให้เหตุผล",
   "generateAdvancedOptions": "ตัวเลือกขั้นสูง",
   "generateNoSuggestions": "AI ไม่พบคำศัพท์ใหม่ที่จะเสนอ",
   "generateSuggestionCount": "คำศัพท์ {{count}} คำ",

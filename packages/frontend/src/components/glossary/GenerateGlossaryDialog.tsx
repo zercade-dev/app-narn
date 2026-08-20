@@ -23,6 +23,7 @@ import { Sparkles } from 'lucide-react';
 import {
   RunStatusCode,
   GLOSSARY_SUGGEST_CHUNK_SIZE,
+  FREEWAY_MODULE_ID,
   type EntryContextField,
   type GlossarySuggestion,
   type GlossarySummary,
@@ -54,7 +55,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import { Progress } from '../ui/progress';
 import { Textarea } from '../ui/textarea';
-import { ModuleSelect } from '../ui/module-select';
+import { ModuleSelect, type ModuleSelectOption } from '../ui/module-select';
 import { AdvancedToggle } from '../common/AdvancedToggle.js';
 import { ModuleModelSelector } from '../config/ModuleModelSelector.js';
 import { useConfidenceContext } from '../../hooks/use-confidence-context.js';
@@ -124,6 +125,9 @@ export function GenerateGlossaryDialog({
   entryIds,
 }: GenerateGlossaryDialogProps): React.JSX.Element {
   const { t } = useTranslation('glossary');
+  // Only for the synthetic Freeway option's label below (`config:routing.freewayLabel`,
+  // reused from the routing picker rather than duplicating the string here).
+  const { t: tConfig } = useTranslation('config');
   const { read: readSettings, save: saveSettings } = useDialogSettings(
     'glossary-gen',
     GLOSSARY_GEN_SETTINGS_DEFAULTS,
@@ -306,10 +310,38 @@ export function GenerateGlossaryDialog({
   // Offer named instances, non-instanceable bases, and instanceable bases that
   // have no instances yet (managed directly) — the same rule the AI-review /
   // source-review pickers use; a base is excluded only once it has instances.
-  const baseInstanceSet = basesWithInstances(modules);
-  const suggestModules = modules.filter(
-    (m) => m.supportsJudge && isOfferableModule(m, baseInstanceSet) && isEnabledModule(m),
-  );
+  const realSuggestModules = useMemo(() => {
+    const withInstances = basesWithInstances(modules);
+    return modules.filter(
+      (m) => m.supportsJudge && isOfferableModule(m, withInstances) && isEnabledModule(m),
+    );
+  }, [modules]);
+  // The glossary-suggest picker also offers a synthetic NARN Freeway target
+  // (M28 GlossaryGenEngine already accepts moduleId 'freeway', resolving via
+  // the free pool at background priority) — appended here at THIS composition
+  // site only, mirroring AiReviewDialog's judge-picker pattern, and run
+  // through the SAME isOfferableModule/isEnabledModule predicates real
+  // modules use (both accept it: `instanceable: false`, `enabled: true`),
+  // rather than being force-included. Only added once `realSuggestModules` is
+  // non-empty — that both keeps Freeway from ever being the *sole* offered
+  // option (the "no modules" empty state below stays exactly as it was: real
+  // API modules only) and avoids a mount-time race where the synthetic entry
+  // would otherwise appear on the very first render, before the async
+  // `/modules` fetch has resolved.
+  const suggestModules = useMemo<ModuleSelectOption[]>(() => {
+    if (realSuggestModules.length === 0) return realSuggestModules;
+    const withInstances = basesWithInstances(modules);
+    return [
+      ...modules,
+      {
+        id: FREEWAY_MODULE_ID,
+        name: tConfig('routing.freewayLabel'),
+        instanceable: false,
+        supportsJudge: true,
+        enabled: true,
+      },
+    ].filter((m) => m.supportsJudge && isOfferableModule(m, withInstances) && isEnabledModule(m));
+  }, [modules, realSuggestModules, tConfig]);
   // Apply the stashed stored module choice once the async module list has
   // loaded (suggestModules is [] on the mount-time open transition above — the
   // list is fetched lazily on open, so that block always runs before modules
@@ -695,7 +727,7 @@ export function GenerateGlossaryDialog({
           />
         </div>
 
-        {effectiveModuleId && (
+        {effectiveModuleId && effectiveModuleId !== FREEWAY_MODULE_ID && (
           <div className="space-y-1.5">
             <Label htmlFor="glossary-generate-model">{t('generateModel')}</Label>
             <ModuleModelSelector
@@ -714,6 +746,18 @@ export function GenerateGlossaryDialog({
               label={t('generateReasoningEffort')}
             />
           </div>
+        )}
+
+        {/* Freeway picks its own model per batch — no model/effort route
+            (`/api/modules/freeway/models`) exists for the suppressed
+            selectors to call, so a one-line explanation replaces them. */}
+        {effectiveModuleId === FREEWAY_MODULE_ID && (
+          <p
+            className="text-xs text-muted-foreground"
+            data-testid="glossary-generate-freeway-model-hint"
+          >
+            {t('generateFreewayModelHint')}
+          </p>
         )}
 
         <div className="border-t pt-3">

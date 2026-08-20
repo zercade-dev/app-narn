@@ -878,13 +878,16 @@ export function createCopilotModule(
               : await retryOnceOnTransient(callComplete, signal);
             text = resp.text;
             anyRequestSucceeded = true;
-            usages.push(
-              toTranslationUsage(
-                resp.usage,
-                model,
-                batch.reduce((n, it) => n + it.s.length, 0),
-              ),
+            const usage = toTranslationUsage(
+              resp.usage,
+              model,
+              batch.reduce((n, it) => n + it.s.length, 0),
             );
+            usages.push(usage);
+            // Same per-call hand-over the AI-SDK modules do: a Freeway-bound
+            // caller debits the bucket that served THIS call, and a copilot
+            // bucket is selectable in local mode.
+            if (usage) opts.onUsage?.(usage);
             if (verbose)
               log('info', '[copilot] glossary-suggest:response', {
                 model,

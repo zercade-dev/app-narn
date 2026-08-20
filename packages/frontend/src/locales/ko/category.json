@@ -12,6 +12,7 @@
   "module": "모듈",
   "modulePlaceholder": "모듈을 선택하세요",
   "model": "모델",
+  "freewayModelHint": "NARN Freeway가 배치마다 가장 좋은 무료 모델을 자동으로 선택해서, 모델이나 추론 강도를 선택할 필요가 없어요.",
   "aiAdvancedOptions": "고급 옵션",
   "noModules": "사용할 수 있는 AI 모듈이 없어요. 설정에서 하나를 구성하세요.",
   "includeExisting": "기존 카테고리에도 항목 배정하기",

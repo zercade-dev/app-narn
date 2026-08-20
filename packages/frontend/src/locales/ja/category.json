@@ -12,6 +12,7 @@
   "module": "モジュール",
   "modulePlaceholder": "モジュールを選択",
   "model": "モデル",
+  "freewayModelHint": "NARN Freewayはバッチごとに最適な無料モデルを自動で選択するため、モデルや推論の強度を選ぶ必要はありません。",
   "aiAdvancedOptions": "詳細オプション",
   "noModules": "AIを利用できるモジュールがありません。設定タブでモジュールを設定してください。",
   "includeExisting": "既存のカテゴリにもエントリを割り当てる",

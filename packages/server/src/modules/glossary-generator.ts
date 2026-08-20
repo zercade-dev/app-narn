@@ -26,11 +26,13 @@ import type {
 import {
   batchGroupKey,
   collectEntryContext,
+  FREEWAY_MODULE_ID,
   GLOSSARY_SUGGEST_CHUNK_SIZE,
   groupAndPack,
   isExcludedFromAi,
   PSEUDO_LANGUAGE_CODE,
   resolveBatchGrouping,
+  toErrorMessage,
 } from '@zercade-dev/narn-shared';
 import { moduleRegistry } from './M6-module-registry.js';
 import {
@@ -39,7 +41,15 @@ import {
   getProjectStore,
   getStringStore,
 } from '../storage/registry.js';
-import { selectCapableModule, type ModuleLogFn } from './M9/module-selection.js';
+import { logger } from './M15-console-logger.js';
+import {
+  selectCapableModule,
+  selectFreewayBackgroundModule,
+  type ModuleLogFn,
+} from './M9/module-selection.js';
+import { isRateLimitError, rateLimitCooldownMs } from './M9/errors.js';
+import { coolBucket, recordDispatch } from './M32/bucket-source.js';
+import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import { resolveEffectiveModuleConfig } from './M19-global-config-store.js';
 
 /** Cap the number of distinct source entries sent in one generate request. */
@@ -133,14 +143,20 @@ export interface GenerateGlossaryResult {
  * Resolve the suggest-capable module (mirrors M26 selectModule). When the
  * selected instance is configured verbose AND a logSink is supplied, the module
  * is rebuilt with the verbose log routed to that sink (for sidecar capture).
+ *
+ * The `freeway` target resolves to a concrete free-tier bucket instead —
+ * resolved once at the start of a run, and again (at most once) when a rate
+ * limit outlives the retries in {@link generateGlossary}. Callers that can
+ * bound the run's scope pass the reserve it should fence.
  */
-function selectSuggestModule(
+async function selectSuggestModule(
   project: Project,
   global: GlobalConfig,
   sessionId: string | undefined,
   request: GenerateGlossaryRequest,
   logSink?: ModuleLogFn,
-): { module: TranslationModule; moduleId: string } {
+  reserveRequests?: number,
+): Promise<{ module: TranslationModule; moduleId: string; bucketKey?: string }> {
   const requestedId = request.moduleId;
   const baseOpts = {
     ...(requestedId !== undefined ? { requestedId } : {}),
@@ -156,6 +172,25 @@ function selectSuggestModule(
       : 'no enabled glossary-generation-capable module available',
     noneAvailableMessage: 'no enabled glossary-generation-capable module available',
   };
+  if (requestedId === FREEWAY_MODULE_ID) {
+    const selection = await selectFreewayBackgroundModule(
+      moduleRegistry,
+      project,
+      global,
+      sessionId,
+      {
+        ...baseOpts,
+        ...(logSink ? { logSink } : {}),
+        ...(reserveRequests !== undefined ? { reserveRequests } : {}),
+        noneAvailableMessage: 'no free-tier model is currently available to generate glossaries',
+      },
+    );
+    return {
+      module: selection.module,
+      moduleId: selection.moduleId,
+      bucketKey: selection.bucketKey,
+    };
+  }
   const selected = selectCapableModule(moduleRegistry, project, global, sessionId, baseOpts);
   const projectEntries = project.moduleConfigs as Record<
     string,
@@ -254,8 +289,6 @@ export async function generateGlossary(
   // are excluded from every AI dispatch, glossary generation included.
   const entries = allEntries.filter((e) => e.needsTranslation !== false && !isExcludedFromAi(e));
 
-  const { module, moduleId } = selectSuggestModule(project, global, sessionId, request, logSink);
-
   const excludedSources = await collectExcludedSources(projectId, request.excludeGlossaryIds ?? []);
 
   // Request-scoped filters (entryIds allowlist, then focusSourceTexts, then
@@ -286,7 +319,11 @@ export async function generateGlossary(
   const translationLanguages = request.includeTranslations
     ? languages.filter((l) => l !== PSEUDO_LANGUAGE_CODE)
     : [];
-  if (scoped.length === 0) return { suggestions: [], analyzed: 0, usages: [], moduleId };
+  // No early return here on an empty `scoped`: it always yields empty `items`
+  // below too (buildItems/groupAndPack on an empty list produce nothing), so
+  // the items.length===0 check further down already covers this case — and
+  // module selection (needed either way for the returned moduleId) has to run
+  // after items are sized for the free-tier reserve, not before.
 
   const { ignoreSizeLimit } = resolveBatchGrouping(project, global.settings);
   const customBatchSize = request.customBatchSize;
@@ -322,18 +359,112 @@ export async function generateGlossary(
     batches = undefined;
   }
 
+  // The reserve a free-tier resolution should fence: this call's own scope
+  // bounds how many provider calls it can make, sized from the real item
+  // count (known only now that items are built) rather than a flat default.
+  const reserveRequests = Math.max(
+    FREEWAY_BACKGROUND_RESERVE,
+    batches ? batches.length : ignore ? 1 : Math.ceil(items.length / cap),
+  );
+  let { module, moduleId, bucketKey } = await selectSuggestModule(
+    project,
+    global,
+    sessionId,
+    request,
+    logSink,
+    reserveRequests,
+  );
+
   if (items.length === 0) return { suggestions: [], analyzed: 0, usages: [], moduleId };
 
-  const result = await module.suggestGlossaries!(
-    items,
-    {
-      excludedSources,
-      ...(translationLanguages.length > 0 ? { translationLanguages } : {}),
-      ...(onProgress ? { onProgress } : {}),
-      ...(batches ? { batches } : ignore && items.length > 0 ? { chunkSize: items.length } : {}),
-    },
-    signal,
-  );
+  // A free-tier run binds to the resolved bucket for debiting/cooling; an
+  // ordinary module selection leaves this undefined, so none of the ledger
+  // traffic below ever runs for it. A re-route reassigns it, and the `onUsage`
+  // debit below reads it at call time — so post-hop calls spend the NEW bucket.
+  let binding = bucketKey !== undefined ? { bucketKey } : undefined;
+
+  const suggestOptions = {
+    excludedSources,
+    ...(translationLanguages.length > 0 ? { translationLanguages } : {}),
+    ...(onProgress ? { onProgress } : {}),
+    ...(batches ? { batches } : ignore && items.length > 0 ? { chunkSize: items.length } : {}),
+    // Debit each provider call against the bucket serving it AS IT RETURNS —
+    // the returned `usages` never arrive when a later chunk rate-limits, so a
+    // post-hoc debit both loses the calls made before the 429 and charges the
+    // re-routed bucket for quota the struck one actually spent. Best-effort:
+    // a ledger write must never fail a call whose provider work succeeded.
+    ...(binding
+      ? {
+          onUsage: (usage: TranslationUsage) => {
+            const bucket = binding?.bucketKey;
+            if (bucket === undefined) return;
+            void recordDispatch(bucket, Date.now(), {
+              inputTokens: usage.inputTokens ?? 0,
+              outputTokens: usage.outputTokens ?? 0,
+              chars: usage.characters ?? usage.sourceChars ?? 0,
+            }).catch(() => undefined);
+          },
+        }
+      : {}),
+  };
+  let result: Awaited<ReturnType<NonNullable<TranslationModule['suggestGlossaries']>>>;
+  for (let hop = 0; ; hop++) {
+    try {
+      result = await module.suggestGlossaries!(items, suggestOptions, signal);
+      break;
+    } catch (err) {
+      // One re-route hop: a free-tier call whose bucket rate-limited it moves
+      // to a sibling bucket instead of failing while a healthy one idles. Only
+      // for a Freeway-bound call, only on a rate limit, and only once — a
+      // second exhaustion fails exactly as it always has.
+      if (binding && isRateLimitError(err)) {
+        // A call that threw still spent a request against the bucket.
+        await recordDispatch(binding.bucketKey, Date.now(), {
+          inputTokens: 0,
+          outputTokens: 0,
+          chars: 0,
+        }).catch(() => undefined);
+        await coolBucket(
+          binding.bucketKey,
+          Date.now(),
+          rateLimitCooldownMs(err),
+          undefined,
+          'pool',
+        ).catch(() => undefined);
+        if (hop === 0) {
+          try {
+            const next = await selectSuggestModule(
+              project,
+              global,
+              sessionId,
+              request,
+              logSink,
+              reserveRequests,
+            );
+            if (next.bucketKey !== undefined) {
+              logger.info('glossary-gen:freeway-rerouted', {
+                projectId,
+                from: binding.bucketKey,
+                to: next.bucketKey,
+                reason: 'rate-limit',
+              });
+              module = next.module;
+              moduleId = next.moduleId;
+              binding = { bucketKey: next.bucketKey };
+              continue;
+            }
+          } catch (selectErr) {
+            logger.warn('glossary-gen:freeway-reroute-select-failed', {
+              projectId,
+              error: toErrorMessage(selectErr),
+            });
+          }
+        }
+      }
+      throw err;
+    }
+  }
+
   return {
     suggestions: result.suggestions,
     analyzed: items.length,
@@ -359,7 +490,7 @@ export async function assertSuggestModuleAvailable(
     getGlobalConfigStore().load(),
   ]);
   // Throws GlossaryGenerateNotPossibleError if nothing can suggest glossaries.
-  selectSuggestModule(project, global, sessionId, request);
+  await selectSuggestModule(project, global, sessionId, request);
 }
 
 /**

@@ -1,8 +1,9 @@
 /**
  * Bucket choice for a whole background engine run (AI review, source review,
  * glossary/category generation). Background work is not planned group-by-group
- * the way a translation run is: the engine binds ONE (module, model) target at
- * run start and keeps it, so this wraps the per-group selector with a synthetic
+ * the way a translation run is: the engine binds one (module, model) target at
+ * run start and keeps it unless a batch is rate-limited out of it (one
+ * re-select per batch), so this wraps the per-group selector with a synthetic
  * single-job group and an explicit reserve that keeps top-tier free headroom
  * for interactive translation. Pure — callers supply the bucket views.
  */
@@ -62,14 +63,15 @@ function backgroundGroup(band: DifficultyBand): JobGroup {
  * falling back to a paid module.
  *
  * Prefers a bucket with spendable minute headroom, but does not require one.
- * Unlike a translation run, this binds ONE bucket at start and has no
- * park/resume path — a translation burst that has spent every eligible
- * bucket's current minute would otherwise fail the whole run at start with
- * "module unavailable", a failure that could not happen before minute
- * pacing existed and that clears itself within seconds. So when nothing
- * clears the paced selection, this retries the same ranking with the minute
- * fields blanked out (day-scale/tier/cooldown/weak-language eligibility
- * still applies in full) and returns whichever bucket that selects instead.
+ * Unlike a translation run, this binds a bucket up front (a rate-limited batch
+ * re-selects at most once mid-run) and has no park/resume path — a translation
+ * burst that has spent every eligible bucket's current minute would otherwise
+ * fail the whole run at start with "module unavailable", a failure that could
+ * not happen before minute pacing existed and that clears itself within
+ * seconds. So when nothing clears the paced selection, this retries the same
+ * ranking with the minute fields blanked out (day-scale/tier/cooldown/
+ * weak-language eligibility still applies in full) and returns whichever
+ * bucket that selects instead.
  *
  * The relaxation is safe HERE and nowhere else: it dispatches into a spent
  * minute, and a 429 without a Retry-After header cools that bucket until the
@@ -82,10 +84,10 @@ function backgroundGroup(band: DifficultyBand): JobGroup {
 export function selectBackgroundBucket(
   buckets: BucketView[],
   now: number,
-  opts?: { band?: DifficultyBand },
+  opts?: { band?: DifficultyBand; reserveRequests?: number },
 ): Selection | undefined {
   const group = backgroundGroup(opts?.band ?? DEFAULT_BACKGROUND_BAND);
-  const selectOpts = { reserveRequests: FREEWAY_BACKGROUND_RESERVE };
+  const selectOpts = { reserveRequests: opts?.reserveRequests ?? FREEWAY_BACKGROUND_RESERVE };
   const paced = selectBucket(group, buckets, now, selectOpts);
   if (paced) return paced;
   const withoutMinuteLimits = buckets.map((b) => ({

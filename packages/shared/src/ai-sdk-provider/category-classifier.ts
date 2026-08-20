@@ -153,6 +153,16 @@ export interface GenerateCategorySuggestionsOptions {
    * resolved module config.
    */
   useStructuredOutput?: boolean;
+  /**
+   * AI SDK's own internal retry count for each chunk's call (default 2, i.e. 3
+   * attempts). Absent leaves the SDK default untouched; mirrors the module
+   * closure's `config.maxRetries` passthrough. The caller (M5) sources this
+   * from a Freeway dispatch's `freewayModuleOverrides` when the run is bound
+   * to a free-tier bucket — the engine owns retry/failover policy there, so
+   * the SDK's own retries would only burn quota the engine's cool+reroute
+   * already supersedes.
+   */
+  maxRetries?: number;
   /** Entries to classify. */
   entries: CategoryEntryInput[];
   /**
@@ -179,6 +189,15 @@ export interface GenerateCategorySuggestionsOptions {
    * total. Lets a caller report real progress for a long-running background run.
    */
   onChunkDone?: (done: number, total: number) => void;
+  /**
+   * Invoked with each chunk's usage AS THAT PROVIDER CALL RETURNS, before the
+   * next chunk is sent. The same entries are still accumulated into the
+   * returned `usages`, so an absent callback changes nothing — but a caller
+   * debiting a free-tier ledger needs them per call: the returned array never
+   * arrives when a later chunk rethrows a 429, and by then the earlier chunks
+   * have already spent quota on the bucket that served them.
+   */
+  onUsage?: (usage: TranslationUsage) => void;
   /** Pre-formed batches (one LLM call each); used verbatim instead of size-chunking. */
   batches?: CategoryEntryInput[][];
 }
@@ -358,6 +377,7 @@ export async function generateCategorySuggestions(
     baseURL,
     reasoningEffort,
     useStructuredOutput,
+    maxRetries,
     entries,
     existingCategories = [],
     maxCategories = 12,
@@ -365,6 +385,7 @@ export async function generateCategorySuggestions(
     log,
     verbose,
     onChunkDone,
+    onUsage,
   } = opts;
 
   if (entries.length === 0) return { suggestions: [], usages: [] };
@@ -429,6 +450,7 @@ export async function generateCategorySuggestions(
               maxOutputTokens: opts.maxOutputTokens,
               providerOptions: providerOpts,
               signal: combined,
+              ...(maxRetries !== undefined ? { maxRetries } : {}),
             },
           );
         } catch (err) {
@@ -444,7 +466,13 @@ export async function generateCategorySuggestions(
       }
       anyRequestSucceeded = true;
       const translationUsage = toTranslationUsage(usage, modelId);
-      if (translationUsage) usages.push(translationUsage);
+      if (translationUsage) {
+        usages.push(translationUsage);
+        // Hand this chunk's usage over immediately: a caller debiting a
+        // free-tier ledger must be able to charge the bucket that served THIS
+        // call, before a later chunk's 429 aborts the whole return.
+        onUsage?.(translationUsage);
+      }
       const parsed = parseCategoryResponse(text, batch);
       if (parsed === null) {
         log?.('warn', '[category-classifier] parse-failed', {

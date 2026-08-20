@@ -50,6 +50,7 @@
   "generateModulePlaceholder": "Sélectionnez un module…",
   "generateModel": "Modèle",
   "generateReasoningEffort": "Effort de raisonnement",
+  "generateFreewayModelHint": "NARN Freeway choisit automatiquement le meilleur modèle gratuit pour chaque lot — aucun choix de modèle ni d'effort de raisonnement n'est nécessaire.",
   "generateAdvancedOptions": "Options avancées",
   "generateNoSuggestions": "L'IA n'a trouvé aucun nouveau terme à suggérer.",
   "generateSuggestionCount": "{{count}} termes",

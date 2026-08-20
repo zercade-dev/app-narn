@@ -26,6 +26,7 @@ import {
   type BatchDispatchOptions,
   type BatchGroupingDimension,
   isExcludedFromAi,
+  toErrorMessage,
 } from '@zercade-dev/narn-shared';
 import {
   moduleRegistry as defaultModuleRegistry,
@@ -47,6 +48,7 @@ import {
   selectFreewayBackgroundModule,
   type ModuleLogFn,
 } from './M9/module-selection.js';
+import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
 import {
   BackgroundRunEngine,
@@ -198,6 +200,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     sessionId: string | undefined,
     request: SourceReviewRequest,
     logSink?: ModuleLogFn,
+    reserveRequests?: number,
   ): Promise<{ module: TranslationModule; moduleId: string; bucketKey?: string }> {
     const saved = project.sourceReviewConfig;
     const requestedId = request.moduleId ?? saved?.moduleId;
@@ -212,13 +215,14 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       noneAvailableMessage: 'no enabled source-review-capable module available',
     };
     if (requestedId === FREEWAY_MODULE_ID) {
-      // Resolved ONCE, here at run start: the whole run stays bound to this
-      // bucket. A rate limit mid-run therefore fails the run exactly as a paid
-      // module's would — a background run never re-routes to another free
-      // bucket while it is in flight.
+      // Resolved at run start, and again — at most once per batch — when a rate
+      // limit outlives the retries: the run then hops to whatever bucket is
+      // still healthy rather than failing while the pool has capacity. Callers
+      // that can bound the run's scope pass the reserve it should fence.
       return selectFreewayBackgroundModule(this.moduleRegistry, project, global, sessionId, {
         ...options,
         deps: this.freewayOverrides,
+        ...(reserveRequests !== undefined ? { reserveRequests } : {}),
         noneAvailableMessage: 'no free-tier model is currently available to review source text',
       });
     }
@@ -260,6 +264,34 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     // before it invokes `dispatch`: the free-tier bucket the run spends
     // against, or undefined for an ordinary module.
     let freeway: FreewayBatchBinding | undefined;
+    // Builds a batch's re-route: on a rate-limit exhaustion it re-selects, then
+    // moves BOTH the run (so batches that start later begin on the new bucket)
+    // and that batch's OWN selection copy. Per batch, because a sibling batch
+    // between retries must keep dispatching through the module whose bucket its
+    // debits are keyed to. Left undefined for an ordinary module.
+    let makeFreewayReroute:
+      | ((selection: {
+          module: TranslationModule;
+          moduleId: string;
+        }) => () => Promise<FreewayBatchBinding | undefined>)
+      | undefined;
+    // The run's current selection; each batch copies it when it starts.
+    let target: { module: TranslationModule; moduleId: string } | undefined;
+
+    // The reserve the free-tier selector should fence: an explicit entry scope
+    // bounds how many provider calls this run can make, so it fences the larger
+    // of that and the flat default. The needsTranslation fallback scope isn't
+    // knowable from the request, so there the flat fence stands alone.
+    const scopedEntries = request.entryIds?.length;
+    const itemsPerCall =
+      request.customBatchSize !== undefined && request.customBatchSize > 0
+        ? request.customBatchSize
+        : request.batchSize && request.batchSize > 0
+          ? request.batchSize
+          : SOURCE_REVIEW_BATCH_SIZE;
+    const reserveRequests = scopedEntries
+      ? Math.max(FREEWAY_BACKGROUND_RESERVE, Math.ceil(scopedEntries / itemsPerCall))
+      : undefined;
 
     return this.enqueueBatched<SourceReviewItem>({
       projectId,
@@ -268,9 +300,48 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         global: await this.globalConfigStore.load(),
       }),
       selectModule: async (project, global, logSink) => {
-        const selected = await this.selectModule(project, global, sessionId, request, logSink);
+        const selected = await this.selectModule(
+          project,
+          global,
+          sessionId,
+          request,
+          logSink,
+          reserveRequests,
+        );
+        target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
           freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+          makeFreewayReroute = (selection) => async () => {
+            try {
+              // The struck bucket is cooled before this runs, so the selector
+              // offers a different one (or nothing, and the batch fails).
+              const next = await this.selectModule(
+                project,
+                global,
+                sessionId,
+                request,
+                logSink,
+                reserveRequests,
+              );
+              if (next.bucketKey === undefined) return undefined;
+              const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
+              target = { module: next.module, moduleId: next.moduleId };
+              freeway = binding;
+              selection.module = next.module;
+              selection.moduleId = next.moduleId;
+              return binding;
+            } catch (err) {
+              // Nothing eligible — or the re-selection itself failed (a vault
+              // re-lock mid-run, say), which is worth telling apart from a
+              // genuinely empty pool. Either way the batch fails as it did
+              // before the hop existed.
+              this.logger.warn(`${this.logPrefix}:freeway-reroute-select-failed`, {
+                projectId,
+                error: toErrorMessage(err),
+              });
+              return undefined;
+            }
+          };
         }
         return selected;
       },
@@ -318,12 +389,18 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       dispatch: ({ runId, module, moduleId, entriesById, records, batches, dispatchOptions }) => {
         const project = loadedProject;
         for (const batch of batches) {
-          const body = () =>
-            this.processBatch(
+          const body = () => {
+            // Read when the batch actually starts (so it begins on whatever
+            // bucket the run is on by then) and COPIED, so this batch's module
+            // and its debited bucket only ever move together — a sibling's hop
+            // cannot swap the module out from under it mid-retry.
+            // `selectModule` always sets `target`; the fallback keeps this
+            // independent of that ordering.
+            const selection = target ? { ...target } : { module, moduleId };
+            return this.processBatch(
               runId,
               projectId,
-              module,
-              moduleId,
+              selection,
               batch,
               {
                 checks: request.checks,
@@ -334,7 +411,9 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
               records,
               dispatchOptions,
               freeway,
+              makeFreewayReroute?.(selection),
             );
+          };
           this.queue.add(runId, tenant ? () => runWithTenant(tenant, body) : body);
         }
       },
@@ -344,24 +423,26 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
   private async processBatch(
     runId: string,
     projectId: string,
-    module: TranslationModule,
-    moduleId: string,
+    /** Held by reference: a mid-run re-route replaces the module in place. */
+    selection: { module: TranslationModule; moduleId: string },
     batch: SourceReviewItem[],
     opts: SourceReviewOptions,
     entriesById: Map<string, StringEntry>,
     reviewRecords: SourceReviewRecord[],
     dispatchOptions?: BatchDispatchOptions,
     freeway?: FreewayBatchBinding,
+    freewayReroute?: () => Promise<FreewayBatchBinding | undefined>,
   ): Promise<void> {
     await this.runBatchWithUsage<SourceReviewItem, SourceReviewItemResult>({
       runId,
-      moduleId,
+      moduleId: selection.moduleId,
       batch,
       dispatchOptions,
-      call: (signal) => module.reviewSource!(batch, opts, signal, dispatchOptions),
+      call: (signal) => selection.module.reviewSource!(batch, opts, signal, dispatchOptions),
       failureKey: (item) => ({ entryId: item.entryId }),
       usageOf: (result) => result.usage,
       ...(freeway ? { freeway } : {}),
+      ...(freewayReroute ? { freewayReroute } : {}),
       onResult: async (result, status) => {
         if (result.error) {
           this.recordFailure(status, { entryId: result.entryId }, result.error);

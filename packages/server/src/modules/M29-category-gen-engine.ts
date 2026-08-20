@@ -26,19 +26,42 @@
  * Accordingly M29 registers no detail buffer and the base `cancel`'s flush is a
  * no-op for it.
  */
-import { type CategorySuggestion, RunStatusCode, toErrorMessage } from '@zercade-dev/narn-shared';
+import {
+  CATEGORY_CHUNK_SIZE,
+  type CategorySuggestion,
+  FREEWAY_MODULE_ID,
+  RunStatusCode,
+  toErrorMessage,
+  type TranslationModule,
+  type TranslationUsage,
+} from '@zercade-dev/narn-shared';
 import {
   contentClassifier as defaultContentClassifier,
+  isCategoryCapableModule,
   type ContentClassifier,
   type SuggestCategoriesRequest,
 } from './M5-content-classifier.js';
-import type { RunStore } from '../storage/types.js';
+import type { GlobalConfigStore, ProjectStore, RunStore } from '../storage/types.js';
+import { getGlobalConfigStore, getProjectStore } from '../storage/registry.js';
 import { getCurrentTenant, runWithTenant } from '../storage/pg/tenant-context.js';
 import { logger as defaultLogger } from './M15-console-logger.js';
-import { isAbortError } from './M9/errors.js';
+import { isAbortError, isRateLimitError, rateLimitCooldownMs } from './M9/errors.js';
 import { BackgroundRunEngine, type LoggerLike } from './M9/run-engine.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
-import type { ModuleLogFn } from './M9/module-selection.js';
+import { selectFreewayBackgroundModule, type ModuleLogFn } from './M9/module-selection.js';
+import {
+  moduleRegistry as defaultModuleRegistry,
+  type ModuleRegistry,
+} from './M6-module-registry.js';
+import type { BucketSourceDeps } from './M32/bucket-source.js';
+import {
+  coolBucket,
+  freewayBucketBaseModuleId,
+  freewayModuleOverrides,
+  recordDispatch,
+} from './M32/bucket-source.js';
+import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
+import { ValidationError } from '../types/errors.js';
 import {
   accumulateUsage,
   defaultPricingProvider,
@@ -52,11 +75,51 @@ export interface CategoryGenEngineDeps {
   logger?: LoggerLike;
   /** Pricing dependency (tests); defaults to the shared oracle-backed provider. */
   pricing?: PricingProvider;
+  moduleRegistry?: Pick<ModuleRegistry, 'listModules' | 'createWithConfig'>;
+  projectStore?: Pick<ProjectStore, 'loadProject'>;
+  globalConfigStore?: Pick<GlobalConfigStore, 'load'>;
+  /** Bucket-source overrides used when a run selects the free-tier target. */
+  freeway?: BucketSourceDeps;
 }
+
+/** A module/model resolved for the run against a Freeway free-tier bucket. */
+interface FreewayCategoryTarget {
+  module: TranslationModule;
+  moduleId: string;
+  modelId: string;
+  bucketKey: string;
+}
+
+/**
+ * The dispatch settings a Freeway-bound `suggestCategories` call must carry.
+ * M5 dispatches through the standalone `generateCategorySuggestions` helper,
+ * not a `TranslationModule` instance method, so there is no built module to
+ * hand it — only `moduleId` (capability gate + vault instance-key
+ * derivation) and the bucket's own Freeway-managed dispatch facts travel.
+ */
+type CategoryModuleOverride = {
+  moduleId: string;
+  configOverrides?: { maxRetries?: number; useStructuredOutput?: boolean };
+};
 
 export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
   protected readonly logPrefix = 'category-gen';
   private readonly contentClassifier: Pick<ContentClassifier, 'suggestCategories'>;
+  private readonly moduleRegistry: Pick<ModuleRegistry, 'listModules' | 'createWithConfig'>;
+  // Resolve the project/global-config stores lazily so a later
+  // setProjectStore()/setGlobalConfigStore() (e.g. per-test injection) is
+  // honored even by the module-level singleton — a bare `?? getX()`
+  // constructor default would capture the store at import time.
+  private readonly _projectStore?: Pick<ProjectStore, 'loadProject'>;
+  private get projectStore(): Pick<ProjectStore, 'loadProject'> {
+    return this._projectStore ?? getProjectStore();
+  }
+  private readonly _globalConfigStore?: Pick<GlobalConfigStore, 'load'>;
+  private get globalConfigStore(): Pick<GlobalConfigStore, 'load'> {
+    return this._globalConfigStore ?? getGlobalConfigStore();
+  }
+  /** Injected Freeway bucket-source overrides (ledger / status / cloud mode). */
+  private readonly freewayOverrides: BucketSourceDeps;
 
   constructor(deps: CategoryGenEngineDeps = {}) {
     super({
@@ -70,6 +133,77 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
       pricing: deps.pricing ?? defaultPricingProvider,
     });
     this.contentClassifier = deps.contentClassifier ?? defaultContentClassifier;
+    this.moduleRegistry = deps.moduleRegistry ?? defaultModuleRegistry;
+    this._projectStore = deps.projectStore;
+    this._globalConfigStore = deps.globalConfigStore;
+    this.freewayOverrides = deps.freeway ?? {};
+  }
+
+  /**
+   * The reserve a free-tier resolution should fence: this run's own scope
+   * bounds how many provider calls it can make, sized from the requested
+   * entry count against the effective per-call batch cap (mirrors
+   * generateGlossary's reserve). A whole-project run (no `entryIds`) has no
+   * such bound, so the flat default (via selectFreewayBackgroundModule's own
+   * unset-reserve behavior) stands alone.
+   */
+  private freewayReserveRequests(request: SuggestCategoriesRequest): number | undefined {
+    if (!request.entryIds || request.entryIds.length === 0) return undefined;
+    const customBatchSize = request.customBatchSize;
+    const cap =
+      customBatchSize !== undefined && customBatchSize > 0 ? customBatchSize : CATEGORY_CHUNK_SIZE;
+    return Math.max(FREEWAY_BACKGROUND_RESERVE, Math.ceil(request.entryIds.length / cap));
+  }
+
+  /**
+   * Resolves the free-tier target for a `'freeway'` category-gen run: the
+   * adequate bucket whose base module can generate categories (see
+   * {@link isCategoryCapableModule}), built with the run's per-run overrides.
+   * Called once at run start and again — at most once — when a rate limit
+   * outlives the retry in `run()`.
+   */
+  private async selectFreewayTarget(
+    projectId: string,
+    request: SuggestCategoriesRequest,
+    sessionId: string | undefined,
+    logSink: ModuleLogFn,
+  ): Promise<FreewayCategoryTarget> {
+    const [project, global] = await Promise.all([
+      this.projectStore.loadProject(projectId),
+      this.globalConfigStore.load(),
+    ]);
+    const reserveRequests = this.freewayReserveRequests(request);
+    return selectFreewayBackgroundModule(this.moduleRegistry, project, global, sessionId, {
+      capability: (m) => isCategoryCapableModule(m.id),
+      notPossible: (msg) => new ValidationError(msg),
+      noneAvailableMessage: 'no free-tier model is currently available to generate categories',
+      logSink,
+      deps: this.freewayOverrides,
+      ...(reserveRequests !== undefined ? { reserveRequests } : {}),
+    });
+  }
+
+  /**
+   * Builds the `moduleOverride` `suggestCategories` receives from a resolved
+   * Freeway target: the dispatch id, plus the bucket's own Freeway-managed
+   * config facts (`freewayModuleOverrides`, same source the ordinary
+   * `selectFreewayBackgroundModule` → `selectCapableModule` path applies to a
+   * built module's config) — `maxRetries: 0` so the engine's own cool+reroute
+   * owns retry policy instead of the AI SDK burning free-tier quota on its
+   * internal retries, and the snapshot's per-model `useStructuredOutput` fact
+   * where one exists. `freewayModuleOverrides` wants the bucket's BASE module
+   * id, recovered from `bucketKey` (`<baseModuleId>::<modelId>`) rather than
+   * `target.moduleId`, which can be a dispatched-through named instance.
+   */
+  private buildModuleOverride(target: FreewayCategoryTarget): CategoryModuleOverride {
+    const baseModuleId = freewayBucketBaseModuleId(target.bucketKey);
+    const raw = freewayModuleOverrides(baseModuleId, target.modelId);
+    const configOverrides: NonNullable<CategoryModuleOverride['configOverrides']> = {};
+    if (typeof raw.maxRetries === 'number') configOverrides.maxRetries = raw.maxRetries;
+    if (typeof raw.useStructuredOutput === 'boolean') {
+      configOverrides.useStructuredOutput = raw.useStructuredOutput;
+    }
+    return { moduleId: target.moduleId, configOverrides };
   }
 
   // M29 persists its all-or-nothing result directly in `run`; the base flush
@@ -160,30 +294,120 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
     const status = this.runs.get(runId);
     if (!status) return;
     try {
-      const { suggestions, usages } = await this.contentClassifier.suggestCategories(
-        projectId,
-        request,
-        sessionId,
-        {
-          signal,
-          onChunkDone: (done, total) => {
-            const current = this.runs.get(runId);
-            if (!current || current.status !== RunStatusCode.Running) return;
-            current.total = total;
-            current.completed = done;
-            this.emitProgress(current);
+      // A `'freeway'` run resolves a concrete free-tier bucket BEFORE the
+      // classify call — the pool id itself is never category-capable, so
+      // suggestCategories needs the resolved dispatch settings (and the
+      // model, via the per-run `model` override) passed down as an override
+      // rather than trying to resolve `request.moduleId` through the
+      // project's config.
+      let moduleOverride: CategoryModuleOverride | undefined;
+      let bucketKey: string | undefined;
+      let effectiveRequest = request;
+      if (request.moduleId === FREEWAY_MODULE_ID) {
+        const target = await this.selectFreewayTarget(projectId, request, sessionId, logSink);
+        moduleOverride = this.buildModuleOverride(target);
+        bucketKey = target.bucketKey;
+        effectiveRequest = { ...request, model: target.modelId };
+      }
+
+      let result: Awaited<ReturnType<ContentClassifier['suggestCategories']>>;
+      // Debit each provider call against the bucket serving it AS IT RETURNS
+      // — the returned `usages` never arrive when a later chunk rate-limits,
+      // so a post-hoc debit both loses the calls made before the 429 and
+      // charges the re-routed bucket for quota the struck one actually spent.
+      // Reads `bucketKey` at call time, so post-hop calls debit the NEW
+      // bucket. Best-effort: a ledger write must never fail a run whose
+      // provider work succeeded.
+      const debitCall = (usage: TranslationUsage): void => {
+        if (!bucketKey) return;
+        void recordDispatch(
+          bucketKey,
+          Date.now(),
+          {
+            inputTokens: usage.inputTokens ?? 0,
+            outputTokens: usage.outputTokens ?? 0,
+            chars: usage.characters ?? usage.sourceChars ?? 0,
           },
-          logSink,
-        },
-      );
+          this.freewayOverrides,
+        ).catch(() => undefined);
+      };
+      // One re-route hop: a free-tier call whose bucket rate-limited it moves
+      // to a sibling bucket instead of failing while a healthy one idles. Only
+      // for a Freeway-bound call, only on a rate limit, and only once — a
+      // second exhaustion fails exactly as any provider error always has.
+      for (let hop = 0; ; hop++) {
+        try {
+          result = await this.contentClassifier.suggestCategories(
+            projectId,
+            effectiveRequest,
+            sessionId,
+            {
+              signal,
+              onChunkDone: (done, total) => {
+                const current = this.runs.get(runId);
+                if (!current || current.status !== RunStatusCode.Running) return;
+                current.total = total;
+                current.completed = done;
+                this.emitProgress(current);
+              },
+              logSink,
+              ...(moduleOverride ? { moduleOverride } : {}),
+              ...(bucketKey ? { onUsage: debitCall } : {}),
+            },
+          );
+          break;
+        } catch (err) {
+          if (bucketKey && isRateLimitError(err)) {
+            // A call that threw still spent a request against the bucket.
+            await recordDispatch(
+              bucketKey,
+              Date.now(),
+              { inputTokens: 0, outputTokens: 0, chars: 0 },
+              this.freewayOverrides,
+            ).catch(() => undefined);
+            await coolBucket(
+              bucketKey,
+              Date.now(),
+              rateLimitCooldownMs(err),
+              this.freewayOverrides,
+              'pool',
+            ).catch(() => undefined);
+            if (hop === 0) {
+              try {
+                const next = await this.selectFreewayTarget(projectId, request, sessionId, logSink);
+                this.logger.info('category-gen:freeway-rerouted', {
+                  runId,
+                  projectId,
+                  from: bucketKey,
+                  to: next.bucketKey,
+                  reason: 'rate-limit',
+                });
+                moduleOverride = this.buildModuleOverride(next);
+                bucketKey = next.bucketKey;
+                effectiveRequest = { ...request, model: next.modelId };
+                continue;
+              } catch (selectErr) {
+                this.logger.warn('category-gen:freeway-reroute-select-failed', {
+                  runId,
+                  projectId,
+                  error: toErrorMessage(selectErr),
+                });
+              }
+            }
+          }
+          throw err;
+        }
+      }
+      const { suggestions, usages } = result;
 
       // Fold usage into the run BEFORE the cancel check: the provider call(s)
       // already happened (and cost money) by the time suggestCategories()
       // resolves, regardless of whether a cancel raced in — mirrors M28's
       // processRun, which folds usage ahead of its own cancel check for the
-      // same reason. request.moduleId is required on SuggestCategoriesRequest,
-      // so it's always a concrete id.
-      accumulateUsage(status, request.moduleId, usages);
+      // same reason. Billed against the resolved module id (the concrete
+      // bucket for a Freeway run, matching M28's `result.moduleId`) rather
+      // than the synthetic pool id, so usage attributes to what actually ran.
+      accumulateUsage(status, moduleOverride?.moduleId ?? request.moduleId, usages);
       if (this.pricing) await finalizeUsageCosts(status, this.pricing);
 
       // A cancel that landed while the provider call was in flight wins: don't
