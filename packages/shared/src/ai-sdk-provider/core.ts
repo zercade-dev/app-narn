@@ -641,7 +641,10 @@ export const MIXED_PARSE_FAILURE_MESSAGE =
   'parseMixedTargetBatchResponse: malformed JSON from provider';
 
 export function isParseFailureMessage(message: string): boolean {
-  return message.includes(PARSE_FAILURE_MESSAGE) || message.includes(MIXED_PARSE_FAILURE_MESSAGE);
+  // Substring match on the phrase every producer shares: core.ts prefixes it
+  // with the parser name, while the copilot module (its own SDK client, not
+  // this file) records it bare — both must classify as format-shaped.
+  return message.includes('malformed JSON from provider');
 }
 
 export function createAISDKModule(config: AISDKModuleConfig): TranslationModule {
