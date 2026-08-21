@@ -404,7 +404,7 @@ function formatRerouteDetail(info: {
 }
 
 /** One-liner for a parse-failure split (see {@link TranslationEngine.dispatchFreewayBatch}'s `onSplit`). */
-function formatSplitDetail(info: { bucketKey: string; size: number; depth: number }): string {
+function formatSplitDetail(info: { bucketKey: string; size: number }): string {
   return `${info.size} strings came back malformed on ${info.bucketKey} — retrying in halves`;
 }
 
@@ -3291,7 +3291,7 @@ export class TranslationEngine {
     /** Recursion depth of the parse-failure split (0 = the original batch). */
     splitDepth?: number;
     /** Reports a parse-failure split so the caller can record a run detail. */
-    onSplit?: (info: { bucketKey: string; size: number; depth: number }) => void;
+    onSplit?: (info: { bucketKey: string; size: number }) => void;
     /**
      * Set when the plan degraded this batch's band floor one tier (Addendum
      * G): every re-validation this hop performs must check the CURRENT bucket
@@ -3356,7 +3356,7 @@ export class TranslationEngine {
           jobs.length >= 2 &&
           isParseFailureMessage(results[0]!.error!)
         ) {
-          onSplit?.({ bucketKey: state.bucketKey, size: jobs.length, depth: splitDepth });
+          onSplit?.({ bucketKey: state.bucketKey, size: jobs.length });
           const mid = Math.ceil(jobs.length / 2);
           const merged: TranslationResult[] = [];
           for (const [start, end] of [
@@ -3372,12 +3372,33 @@ export class TranslationEngine {
               decisions: decisions.slice(start, end),
               splitDepth: splitDepth + 1,
             });
-            // A half that parks/blocks/errors bubbles out unchanged; pairs
-            // the other half already completed streamed through
-            // onJobComplete, so the caller's outcome handling (which skips
-            // processedIndices) leaves them settled.
-            if (half.kind !== 'results') return half;
-            merged.push(...half.results);
+            if (half.kind !== 'results') {
+              // A non-streaming module's earlier half-results only exist in
+              // `merged` — settle them before bubbling, or the caller's
+              // batch-failed handling records translated pairs as failures.
+              // A streaming module already delivered them via
+              // onJobComplete (processedIndices dedupes this replay), and
+              // the provisional-error guard there keeps error results from
+              // finalizing early.
+              for (const r of merged) await translateOptions.onJobComplete?.(r);
+              return half;
+            }
+            const halfJobs = jobs.slice(start, end);
+            if (half.results.length === halfJobs.length) {
+              merged.push(...half.results);
+            } else {
+              // Positional integrity is what the caller's targetResults
+              // mapping depends on: a short half silently shifts every
+              // later result onto the wrong entry.
+              merged.push(
+                ...halfJobs.map((job) => ({
+                  entryId: job.entryId,
+                  targetLanguage: job.targetLanguage,
+                  translatedText: '',
+                  error: 'incomplete batch result',
+                })),
+              );
+            }
           }
           return { kind: 'results', results: merged };
         }
@@ -4491,12 +4512,7 @@ export class TranslationEngine {
             state,
             deps: freewayDeps,
             createModule: createFreewayModule,
-            // The engine pre-chunks Freeway groups to the PLANNED batch size
-            // (assignment.batchSize), so the module must send each chunk as
-            // exactly one provider call — a module-config maxBatchSize
-            // re-chunk would silently turn one planned (debited, paced)
-            // request into several.
-            translateOptions: { ...dispatchOptions, ignoreSizeLimit: true, onJobComplete },
+            translateOptions: { ...dispatchOptions, onJobComplete },
             signal,
             onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
             onSplit: (info) => this.recordFreewayDetail(runId, formatSplitDetail(info)),
