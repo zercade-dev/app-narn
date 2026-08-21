@@ -61,6 +61,7 @@ import {
   getFreeTierSnapshot,
   isParseFailureMessage,
   LANGUAGE_REGISTRY,
+  PSEUDO_LANGUAGE_CODE,
   toErrorMessage,
 } from '../packages/shared/src/index.js';
 import type {
@@ -116,10 +117,33 @@ const CANDIDATE_MANIFESTS: Record<string, { requiredEnvVars?: string[] }> = {
 };
 
 const JUDGE_PROVIDER_KEY = 'google';
-const JUDGE_MODEL_ID = 'gemini-flash-latest';
+/**
+ * Coordinator decision (review round 1, CRITICAL 2): NOT gemini-flash-latest.
+ * That model's snapshot limits are rpm 5 / rpd 20 — at the judge layer's own
+ * hard cap of 10 items/request (see JUDGE_BATCH_SIZE) a single 24-string cell
+ * already costs ~3 judge requests, so rpd 20 covers roughly 6 cells/day
+ * against a multi-hundred-cell plan. gemma-4-31b-it (rpm 30, rpd 14400, tier
+ * 3) has the headroom to judge a full wave in one run. One judge model for
+ * every cell, so every score in results.json is comparable.
+ */
+const JUDGE_MODEL_ID = 'gemma-4-31b-it';
 const TRANSLATE_CHUNK_SIZE = 12;
-const JUDGE_CHUNK_SIZE = 24;
+/**
+ * The judge layer hard-caps its own batch at 10 regardless of what's passed
+ * in (`module-features.ts`'s `judgeTranslations`: `resolveBatchSize(...,
+ * {default: 10, cap: 10})`), so chunking externally at the SAME size makes
+ * each of our `ctx.judge(chunk)` calls map 1:1 to one real provider request
+ * (nominal — an internal transient retry can still add an invisible extra
+ * one) — which both the per-request pacing and the `ceil(items/10)` spend
+ * accounting below depend on.
+ */
+const JUDGE_BATCH_SIZE = 10;
 const PACING_FLOOR_MS = 1500;
+/** Provider API key shapes — never let one reach a printed error line. */
+const KEY_SHAPE_RE = /\b(gsk_|sk-[A-Za-z0-9-]|AIza)[A-Za-z0-9_-]*/g;
+function redact(text: string): string {
+  return text.replace(KEY_SHAPE_RE, '[redacted]');
+}
 
 // ---------------------------------------------------------------------------
 // CLI
@@ -128,11 +152,14 @@ const PACING_FLOOR_MS = 1500;
 const USAGE = `Usage: tsx scripts/freeway-benchmark.ts [options]
 
   --langs a,b,c       Target language codes (default: every LANGUAGE_REGISTRY
-                       code except 'en').
+                       code except 'en' and the synthetic 'pseudo-test').
   --providers a,b      Restrict to these snapshot provider keys (default:
                        every candidate provider, i.e. everything except
                        'copilot').
-  --max-requests N     Per-provider translate-request ceiling for this run.
+  --max-requests N     Per-provider request ceiling for this run. For
+                       google this counts its OWN translate requests PLUS
+                       every judge request (judging always runs through
+                       google, regardless of --providers).
   --refresh            Re-run cells that already exist in results.json
                        (default: skip them — the run is crash-resumable).
   --plan               Print the cell plan + key-presence report and exit.
@@ -140,6 +167,7 @@ const USAGE = `Usage: tsx scripts/freeway-benchmark.ts [options]
   --distill            Fold results.json into the bundled free-tier snapshot
                        (free-tier-data.json) and print coverage. No network
                        calls.
+  --help, -h            Print this usage and exit 0.
 `;
 
 interface CliArgs {
@@ -167,6 +195,11 @@ function parseArgs(argv: string[]): CliArgs {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     switch (arg) {
+      case '--help':
+      case '-h':
+        console.log(USAGE);
+        process.exit(0);
+        break;
       case '--langs':
         args.langs = next(++i, '--langs')
           .split(',')
@@ -274,14 +307,14 @@ function readCorpus(): { entries: CorpusEntry[]; committedVersion: string; local
   try {
     committedRaw = readFileSync(CORPUS_PATH, 'utf8');
   } catch (err) {
-    console.error(`Cannot read committed corpus at ${CORPUS_PATH}: ${toErrorMessage(err)}`);
+    console.error(`Cannot read committed corpus at ${CORPUS_PATH}: ${redact(toErrorMessage(err))}`);
     process.exit(1);
   }
   let committedEntries: CorpusEntry[];
   try {
     committedEntries = parseCorpus(JSON.parse(committedRaw));
   } catch (err) {
-    console.error(`Committed corpus is invalid: ${toErrorMessage(err)}`);
+    console.error(`Committed corpus is invalid: ${redact(toErrorMessage(err))}`);
     process.exit(1);
   }
   const committedVersion = corpusVersion(committedRaw);
@@ -291,7 +324,7 @@ function readCorpus(): { entries: CorpusEntry[]; committedVersion: string; local
     try {
       localEntries = parseCorpus(JSON.parse(readFileSync(CORPUS_LOCAL_PATH, 'utf8')));
     } catch (err) {
-      console.error(`Local corpus (${CORPUS_LOCAL_PATH}) is invalid: ${toErrorMessage(err)}`);
+      console.error(`Local corpus (${CORPUS_LOCAL_PATH}) is invalid: ${redact(toErrorMessage(err))}`);
       process.exit(1);
     }
   }
@@ -317,7 +350,7 @@ function readResultsFile(): ResultsFile | undefined {
   try {
     return JSON.parse(readFileSync(RESULTS_PATH, 'utf8')) as ResultsFile;
   } catch (err) {
-    console.error(`results.json is invalid: ${toErrorMessage(err)}`);
+    console.error(`results.json is invalid: ${redact(toErrorMessage(err))}`);
     process.exit(1);
   }
 }
@@ -390,7 +423,14 @@ function classify(message: string, isDeepl: boolean): Classification {
 // Provider/run state
 // ---------------------------------------------------------------------------
 
-type DeferReason = 'cooling' | 'auth-failed' | 'budget-capped' | 'parse-failed' | 'judge-failed' | 'error';
+type DeferReason =
+  | 'cooling'
+  | 'auth-failed'
+  | 'budget-capped'
+  | 'parse-failed'
+  | 'judge-failed'
+  | 'judge-cooling'
+  | 'error';
 
 interface ProviderStats {
   requestsMade: number;
@@ -430,10 +470,13 @@ function getStats(ctx: RunContext, providerKey: string): ProviderStats {
   return s;
 }
 
+/** Quota/budget reasons are expected outcomes (requirement 10) — everything else trips the exit code. */
+const QUOTA_DEFER_REASONS: ReadonlySet<DeferReason> = new Set(['cooling', 'auth-failed', 'budget-capped', 'judge-cooling']);
+
 function deferCell(ctx: RunContext, providerKey: string, reason: DeferReason): void {
   const stats = getStats(ctx, providerKey);
   stats.cellsDeferred[reason] = (stats.cellsDeferred[reason] ?? 0) + 1;
-  if (reason !== 'cooling' && reason !== 'auth-failed' && reason !== 'budget-capped') {
+  if (!QUOTA_DEFER_REASONS.has(reason)) {
     ctx.hadUnexpectedFailure = true;
   }
 }
@@ -477,10 +520,14 @@ async function getOrCreateModule(
   const apiKey = ctx.apiKeys[providerKey];
   const config: Record<string, unknown> =
     providerKey === 'deepl'
-      ? { apiKey }
+      ? { apiKey } // DeepL is classical MT, not an AI-SDK module — no maxRetries field on DeepLConfig.
       : {
           model: modelId,
           apiKey,
+          // Mirrors freewayModuleOverrides (M32/bucket-source.ts): the AI SDK's own internal
+          // retry loop (default 2, i.e. 3 attempts) would otherwise burn free-tier quota
+          // silently and undercount `requests`/`--max-requests` by up to 3x on any failing call.
+          maxRetries: 0,
           ...(snapModel.useStructuredOutput !== undefined ? { useStructuredOutput: snapModel.useStructuredOutput } : {}),
         };
   const mod = factory(config);
@@ -489,50 +536,66 @@ async function getOrCreateModule(
 }
 
 // ---------------------------------------------------------------------------
-// Judging (requirement 5): chunks of <=24, one split-in-half retry on a
-// thrown parse-failure-shaped error. A chunk that still fails after that (or
-// fails for any other reason) fails the WHOLE cell's judging — unlike
-// translate parse-failures, there is no partial credit here, because the
-// judge is a shared dependency for every provider and a broken judge call
-// says nothing about the candidate model's own quality.
+// Judging (requirement 5, rewritten per review round 1 CRITICAL 1).
+//
+// `judgeTranslations` (shared `runJudgeFeature` + `splitAndRetry`,
+// packages/shared/src/ai-sdk-provider/{llm-module,module-features}.ts) NEVER
+// throws: every failure class — parse failure at singleton, 429, 401/403,
+// transport error — resolves as a `JudgeVerdict` carrying `.error` instead
+// ("so one bad batch never aborts a judge run"). There is no
+// `rethrowIfAuthOrRateLimit` anywhere on this path (unlike translate, which
+// does rethrow). So there is nothing to catch here, and no retry to run
+// ourselves — the shared layer already retries transients once and halves
+// on a parse failure, internally, below its own hard 10-item batch cap.
+//
+// What we DO own: detecting that a returned verdict is bad (the shared layer
+// reports failure via data, not control flow) and deciding what that means
+// for the cell/run. A cell with ANY unjudged or errored item must NOT be
+// written (stays absent, resumable) — writing it would let `distill()`
+// silently drop it forever (`medianScore: undefined`) with no error and no
+// way to retry short of `--refresh` on the whole run.
 // ---------------------------------------------------------------------------
 
-async function runJudgeChunk(ctx: RunContext, items: JudgeItem[]): Promise<JudgeVerdict[] | null> {
-  try {
-    const verdicts = await ctx.judge(items);
-    await paceAfterCall(ctx.judgeSnapModel, ctx.judgeProvider);
-    return verdicts;
-  } catch (err) {
-    const message = toErrorMessage(err);
-    if (!isParseFailureMessage(message) || items.length < 2) {
-      console.error(`[judge] chunk of ${items.length} failed: ${message}`);
-      return null;
-    }
-    const mid = Math.ceil(items.length / 2);
-    const halves = [items.slice(0, mid), items.slice(mid)];
-    const collected: JudgeVerdict[] = [];
-    for (const half of halves) {
-      try {
-        const verdicts = await ctx.judge(half);
-        collected.push(...verdicts);
-        await paceAfterCall(ctx.judgeSnapModel, ctx.judgeProvider);
-      } catch (err2) {
-        console.error(`[judge] half-retry (${half.length} item(s)) failed: ${toErrorMessage(err2)}`);
-        return null;
-      }
-    }
-    return collected;
-  }
-}
+type JudgeRunOutcome =
+  | { kind: 'ok'; verdicts: JudgeVerdict[] }
+  | { kind: 'budget-capped' }
+  | { kind: 'cooling'; message: string }
+  | { kind: 'failed'; message: string };
 
-async function runJudge(ctx: RunContext, items: JudgeItem[]): Promise<JudgeVerdict[] | null> {
-  const all: JudgeVerdict[] = [];
-  for (const chunk of chunkArray(items, JUDGE_CHUNK_SIZE)) {
-    const verdicts = await runJudgeChunk(ctx, chunk);
-    if (verdicts === null) return null;
-    all.push(...verdicts);
+async function runJudge(ctx: RunContext, items: JudgeItem[]): Promise<JudgeRunOutcome> {
+  if (items.length === 0) return { kind: 'ok', verdicts: [] };
+  const judgeStats = getStats(ctx, JUDGE_PROVIDER_KEY);
+  const verdicts: JudgeVerdict[] = [];
+  // Chunk at the shared layer's own hard cap (JUDGE_BATCH_SIZE) so each call
+  // here is one real provider request — see the constant's comment.
+  for (const chunk of chunkArray(items, JUDGE_BATCH_SIZE)) {
+    if (ctx.maxRequests !== undefined && judgeStats.requestsMade >= ctx.maxRequests) {
+      return { kind: 'budget-capped' };
+    }
+    const chunkVerdicts = await ctx.judge(chunk);
+    judgeStats.requestsMade += 1;
+    await paceAfterCall(ctx.judgeSnapModel, ctx.judgeProvider);
+    verdicts.push(...chunkVerdicts);
   }
-  return all;
+
+  const verdictByEntry = new Map(verdicts.map((v) => [v.entryId, v]));
+  const badItem = items.find((item) => {
+    const v = verdictByEntry.get(item.entryId);
+    return v === undefined || v.error !== undefined;
+  });
+  if (badItem) {
+    const message = redact(verdictByEntry.get(badItem.entryId)?.error ?? 'judge returned no verdict for this item');
+    const classification = classify(message, false);
+    // 429/quota-ish: judging is dead for every remaining cell of every
+    // provider (they all share this one judge), so translating them further
+    // would only waste candidate quota on cells that can never be written.
+    if (classification.kind === 'cooling') return { kind: 'cooling', message };
+    // Any other judge error (including an auth-shaped one): defer just this
+    // cell and keep going — a single provider's transient/parse failure
+    // doesn't mean the judge is unusable for the next cell.
+    return { kind: 'failed', message };
+  }
+  return { kind: 'ok', verdicts };
 }
 
 // ---------------------------------------------------------------------------
@@ -584,18 +647,36 @@ function applyClassification(
 // Per-cell processing (requirements 3-7, 9)
 // ---------------------------------------------------------------------------
 
+function jobContext(c: CorpusEntry): string | undefined {
+  return (
+    [c.tone ? `Tone: ${c.tone}.` : '', c.maxLength ? `Hard limit: at most ${c.maxLength} characters.` : '']
+      .filter(Boolean)
+      .join(' ') || undefined
+  );
+}
+
 function buildJobs(corpus: CorpusEntry[], lang: string): TranslationJob[] {
   return corpus.map((c) => ({
     entryId: c.id,
     sourceText: c.text,
     targetLanguage: lang,
     sourceLanguage: 'en',
-    context:
-      [c.tone ? `Tone: ${c.tone}.` : '', c.maxLength ? `Hard limit: at most ${c.maxLength} characters.` : '']
-        .filter(Boolean)
-        .join(' ') || undefined,
+    context: jobContext(c),
   }));
 }
+
+/**
+ * DeepL groups jobs by (target, source, context) before chunking — within one
+ * cell, target/source are constant, so this reduces to distinct `context`
+ * values. Mirrors `jobContext` exactly so the --plan estimate matches actual
+ * DeepL sub-request behavior (M2, minor finding).
+ */
+function countDeeplContextGroups(corpus: CorpusEntry[]): number {
+  return new Set(corpus.map(jobContext)).size;
+}
+
+/** `'stop'` = judging just went dead (429-shaped) — the caller must end the whole run gracefully. */
+type CellOutcome = 'continue' | 'stop';
 
 async function processCell(
   ctx: RunContext,
@@ -604,14 +685,25 @@ async function processCell(
   lang: string,
   snapModel: FreeTierModel,
   provider: FreeTierProvider,
-): Promise<void> {
+): Promise<CellOutcome> {
   const key = cellKey(providerKey, modelId, lang);
-  if (ctx.resultsFile.cells[key] && !ctx.refresh) return; // resumable: already have it
+  if (ctx.resultsFile.cells[key] && !ctx.refresh) return 'continue'; // resumable: already have it
 
   const state = ctx.providerState.get(providerKey);
   if (state !== undefined) {
     deferCell(ctx, providerKey, state);
-    return;
+    return 'continue';
+  }
+  // The judge is google, always, regardless of which provider this cell candidates. If google's
+  // account is already known-bad (cooling/auth-failed/budget-capped — set either by google's own
+  // candidate-translate path or by a prior judge call) this cell can never be written no matter
+  // how well it translates, so defer now rather than spend candidate quota translating it first.
+  if (providerKey !== JUDGE_PROVIDER_KEY) {
+    const judgeState = ctx.providerState.get(JUDGE_PROVIDER_KEY);
+    if (judgeState !== undefined) {
+      deferCell(ctx, providerKey, judgeState === 'cooling' ? 'judge-cooling' : judgeState);
+      return 'continue';
+    }
   }
 
   const isDeepl = providerKey === 'deepl';
@@ -621,16 +713,19 @@ async function processCell(
   try {
     mod = await getOrCreateModule(ctx, providerKey, modelId, snapModel);
   } catch (err) {
-    console.error(`[${key}] ${toErrorMessage(err)}`);
+    console.error(`[${key}] ${redact(toErrorMessage(err))}`);
     deferCell(ctx, providerKey, 'error');
-    return;
+    return 'continue';
   }
 
   const jobs = buildJobs(ctx.corpus, lang);
   const chunks = isDeepl ? [jobs] : chunkArray(jobs, TRANSLATE_CHUNK_SIZE);
 
-  const successful: Array<{ entry: CorpusEntry; result: TranslationResult }> = [];
-  const partialFailures: TranslationResult[] = [];
+  // Judged: translated without error AND not blank (an empty/whitespace success is already a
+  // mechanical fail — judging it would spend the scarcest quota in the run for no signal).
+  const toJudge: Array<{ entry: CorpusEntry; result: TranslationResult }> = [];
+  // Mechanical-only: either the module reported .error, or it "succeeded" with blank text.
+  const mechOnly: TranslationResult[] = [];
   let parseFailures = 0;
   let parseFailedStrings = 0;
   let requests = 0;
@@ -640,7 +735,7 @@ async function processCell(
       console.error(`[${providerKey}] hit --max-requests (${ctx.maxRequests}); remaining cells deferred`);
       ctx.providerState.set(providerKey, 'budget-capped');
       deferCell(ctx, providerKey, 'budget-capped');
-      return;
+      return 'continue';
     }
 
     let results: TranslationResult[];
@@ -652,39 +747,40 @@ async function processCell(
     } catch (err) {
       requests++;
       stats.requestsMade++;
-      applyClassification(ctx, providerKey, key, classify(toErrorMessage(err), isDeepl), requests);
-      return;
+      await paceAfterCall(snapModel, provider); // a request was made even though it threw
+      applyClassification(ctx, providerKey, key, classify(redact(toErrorMessage(err)), isDeepl), requests);
+      return 'continue';
     }
 
     if (results.length > 0 && results.every((r) => r.error !== undefined)) {
-      const message = results[0].error ?? '';
+      const message = redact(results[0].error ?? '');
       if (isParseFailureMessage(message)) {
         parseFailures++;
         parseFailedStrings += chunk.length;
         continue;
       }
       applyClassification(ctx, providerKey, key, classify(message, isDeepl), requests);
-      return;
+      return 'continue';
     }
 
     for (const r of results) {
-      if (r.error !== undefined) {
-        partialFailures.push(r);
+      if (r.error !== undefined || r.translatedText.trim() === '') {
+        mechOnly.push(r);
         continue;
       }
       const entry = ctx.entryById.get(r.entryId);
       if (!entry) continue; // defensive: a result outside our corpus should never happen
-      successful.push({ entry, result: r });
+      toJudge.push({ entry, result: r });
     }
   }
 
-  if (successful.length === 0) {
-    console.error(`[${key}] every string failed to translate; cell deferred (resumable)`);
+  if (toJudge.length === 0) {
+    console.error(`[${key}] nothing to judge (every string errored or translated blank); cell deferred (resumable)`);
     deferCell(ctx, providerKey, 'parse-failed');
-    return;
+    return 'continue';
   }
 
-  const judgeItems: JudgeItem[] = successful.map(({ entry, result }) => ({
+  const judgeItems: JudgeItem[] = toJudge.map(({ entry, result }) => ({
     entryId: entry.id,
     targetLanguage: lang,
     sourceText: entry.text,
@@ -692,44 +788,59 @@ async function processCell(
     sourceLanguage: 'en',
   }));
 
-  const verdicts = await runJudge(ctx, judgeItems);
-  if (verdicts === null) {
-    console.error(`[${key}] judging did not complete; cell deferred (resumable)`);
-    deferCell(ctx, providerKey, 'judge-failed');
-    return;
+  const judgeOutcome = await runJudge(ctx, judgeItems);
+  if (judgeOutcome.kind === 'budget-capped') {
+    console.error(`[${key}] google hit --max-requests (${ctx.maxRequests}) via judge spend; cell deferred, google budget-capped`);
+    ctx.providerState.set(JUDGE_PROVIDER_KEY, 'budget-capped');
+    deferCell(ctx, providerKey, 'budget-capped');
+    return 'continue';
   }
-  const verdictByEntry = new Map(verdicts.map((v) => [v.entryId, v]));
+  if (judgeOutcome.kind === 'cooling') {
+    console.error(
+      `[judge] rate-limited: ${judgeOutcome.message} — ending run gracefully; every remaining cell deferred (judge-cooling)`,
+    );
+    ctx.providerState.set(JUDGE_PROVIDER_KEY, 'cooling');
+    deferCell(ctx, providerKey, 'judge-cooling');
+    return 'stop';
+  }
+  if (judgeOutcome.kind === 'failed') {
+    console.error(`[${key}] judge error: ${judgeOutcome.message} — cell deferred (resumable)`);
+    deferCell(ctx, providerKey, 'judge-failed');
+    return 'continue';
+  }
+  // judgeOutcome.kind === 'ok': every item in judgeItems has a clean (error-free) verdict.
+  const verdictByEntry = new Map(judgeOutcome.verdicts.map((v) => [v.entryId, v]));
 
   const outcomes: PerStringOutcome[] = [];
   const detail: DetailEntry[] = [];
 
-  for (const { entry, result } of successful) {
+  for (const { entry, result } of toJudge) {
     const issues = mechanicalIssues(entry, result.translatedText, lang);
     const mechPass = issues.length === 0;
     const mechWrongScript = issues.includes('wrong-script');
-    const verdict = verdictByEntry.get(entry.id);
-    const hasVerdict = verdict !== undefined && verdict.error === undefined;
-    const judgeMistranslation =
-      hasVerdict && verdict.verdict === 'fail' && verdict.issues.some((i) => i.type === 'mistranslation');
+    const verdict = verdictByEntry.get(entry.id)!; // guaranteed present & error-free by runJudge's 'ok' contract
+    const judgeMistranslation = verdict.verdict === 'fail' && verdict.issues.some((i) => i.type === 'mistranslation');
     outcomes.push({
       id: entry.id,
       mechPass,
       wrongLanguage: mechWrongScript || judgeMistranslation,
-      ...(hasVerdict ? { score: verdict.score } : {}),
+      score: verdict.score,
     });
     detail.push({
       id: entry.id,
       translated: result.translatedText,
-      ...(hasVerdict ? { score: verdict.score, verdict: verdict.verdict, issues: verdict.issues.map((i) => i.type) } : {}),
+      score: verdict.score,
+      verdict: verdict.verdict,
+      issues: verdict.issues.map((i) => i.type),
     });
   }
 
-  for (const r of partialFailures) {
+  for (const r of mechOnly) {
     const entry = ctx.entryById.get(r.entryId);
     if (!entry) continue;
-    const issues = mechanicalIssues(entry, '', lang);
+    const issues = mechanicalIssues(entry, r.translatedText, lang);
     outcomes.push({ id: entry.id, mechPass: issues.length === 0, wrongLanguage: false });
-    detail.push({ id: entry.id, translated: '' });
+    detail.push({ id: entry.id, translated: r.translatedText });
   }
 
   const cell = aggregateCell({
@@ -744,6 +855,7 @@ async function processCell(
 
   writeCell(ctx, key, cell, detail);
   stats.cellsCompleted++;
+  return 'continue';
 }
 
 // ---------------------------------------------------------------------------
@@ -782,28 +894,33 @@ function buildPlan(
   return { cells, missingKeyProviders };
 }
 
-function printPlan(opts: {
-  cells: PlannedCell[];
-  missingKeyProviders: string[];
-  keyReport: KeyReportRow[];
-  corpusSize: number;
-  localCount: number;
-  committedVersion: string;
-  existingResults: ResultsFile | undefined;
-}): void {
+/** Printed at startup in BOTH --plan and a real run (review I2) — never only under --plan. */
+function printKeyReport(keyReport: KeyReportRow[], missingKeyProviders: string[]): void {
   console.log('Freeway benchmark — API key presence (scripts/.env):');
-  for (const r of opts.keyReport) {
+  for (const r of keyReport) {
     console.log(`  ${r.providerKey.padEnd(12)} ${r.envVar.padEnd(24)} ${r.present ? 'present' : 'MISSING'}`);
   }
   console.log(`  ${'copilot'.padEnd(12)} ${'(no key path)'.padEnd(24)} SKIPPED (always excluded)`);
-  const googlePresent = opts.keyReport.find((r) => r.providerKey === 'google')?.present ?? false;
+  const googlePresent = keyReport.find((r) => r.providerKey === 'google')?.present ?? false;
   console.log(
     `  note: every real run also judges via google/${JUDGE_MODEL_ID}, regardless of --providers — ` +
       `GOOGLE_API_KEY is ${googlePresent ? 'present' : 'MISSING'}`,
   );
-  console.log();
+  if (missingKeyProviders.length > 0) {
+    console.log(`  skipped (missing key): ${missingKeyProviders.join(', ')}`);
+  }
+}
+
+function printPlan(opts: {
+  cells: PlannedCell[];
+  corpus: CorpusEntry[];
+  localCount: number;
+  committedVersion: string;
+  existingResults: ResultsFile | undefined;
+}): void {
+  const corpusSize = opts.corpus.length;
   console.log(
-    `Corpus: ${opts.corpusSize} string(s) (${opts.corpusSize - opts.localCount} committed, ${opts.localCount} local)` +
+    `Corpus: ${corpusSize} string(s) (${corpusSize - opts.localCount} committed, ${opts.localCount} local)` +
       ` — committed corpusVersion ${opts.committedVersion}`,
   );
   console.log();
@@ -818,9 +935,14 @@ function printPlan(opts: {
   console.log('Cell plan:');
   let totalTranslateRequests = 0;
   let totalJudgeRequests = 0;
+  let googleOwnTranslateRequests = 0;
+  const deeplContextGroups = countDeeplContextGroups(opts.corpus);
   for (const [providerKey, cells] of [...byProvider.entries()].sort(([a], [b]) => (a < b ? -1 : 1))) {
-    const translatePerCell = providerKey === 'deepl' ? 1 : Math.ceil(opts.corpusSize / TRANSLATE_CHUNK_SIZE);
-    const judgePerCell = Math.ceil(opts.corpusSize / JUDGE_CHUNK_SIZE);
+    // DeepL batches by (target, source, context) before chunking — one request per distinct
+    // context group in the corpus, not one request for the whole cell (M2).
+    const translatePerCell = providerKey === 'deepl' ? deeplContextGroups : Math.ceil(corpusSize / TRANSLATE_CHUNK_SIZE);
+    // The judge layer's own hard cap is JUDGE_BATCH_SIZE (10), not our old external chunk size.
+    const judgePerCell = Math.ceil(corpusSize / JUDGE_BATCH_SIZE);
     const models = new Set(cells.map((c) => c.modelId));
     const alreadyDone = opts.existingResults
       ? cells.filter((c) => opts.existingResults!.cells[cellKey(c.providerKey, c.modelId, c.lang)]).length
@@ -832,15 +954,20 @@ function printPlan(opts: {
     );
     totalTranslateRequests += cells.length * translatePerCell;
     totalJudgeRequests += cells.length * judgePerCell;
-  }
-  if (opts.missingKeyProviders.length > 0) {
-    console.log();
-    console.log(`Skipped (missing key): ${opts.missingKeyProviders.join(', ')}`);
+    if (providerKey === JUDGE_PROVIDER_KEY) googleOwnTranslateRequests = cells.length * translatePerCell;
   }
   console.log();
   console.log(
     `Total: ${opts.cells.length} cell(s), ~${totalTranslateRequests} translate request(s)` +
       ` + ~${totalJudgeRequests} judge request(s) (judge always via google/${JUDGE_MODEL_ID})`,
+  );
+  // google carries every OTHER provider's judging too (--max-requests shares one counter across
+  // google's own candidate-translate spend and every judge call — review IMPORTANT 3) — the
+  // per-provider line above only shows google's OWN candidate share, so spell out the true total.
+  console.log(
+    `google total (candidate + judge for every provider's cells): ` +
+      `~${googleOwnTranslateRequests} + ~${totalJudgeRequests} = ~${googleOwnTranslateRequests + totalJudgeRequests} request(s)` +
+      ` — size --max-requests for google accordingly`,
   );
 }
 
@@ -901,8 +1028,13 @@ function printSummary(ctx: RunContext): void {
     const deferredParts = Object.entries(stats.cellsDeferred)
       .map(([reason, count]) => `${reason}: ${count}`)
       .join(', ');
+    // google's requestsMade blends its own candidate-translate calls with every judge call across
+    // every provider's cells (they share one counter — review IMPORTANT 3); label it accordingly
+    // so "attribution stays visible in the summary" for the one provider where the count isn't
+    // purely translate requests.
+    const requestLabel = providerKey === JUDGE_PROVIDER_KEY ? 'request(s) (candidate translate + judge)' : 'translate request(s)';
     console.log(
-      `${providerKey}: ${stats.requestsMade} translate request(s), ${stats.cellsCompleted} cell(s) completed` +
+      `${providerKey}: ${stats.requestsMade} ${requestLabel}, ${stats.cellsCompleted} cell(s) completed` +
         (stats.cellsUnsupported > 0 ? `, ${stats.cellsUnsupported} unsupported` : '') +
         (deferredParts ? `, deferred (${deferredParts})` : ''),
     );
@@ -928,20 +1060,21 @@ async function main(): Promise<void> {
   const { report: keyReport, apiKeys } = buildKeyReport(snapshot, env);
 
   const { entries: corpus, committedVersion, localCount } = readCorpus();
-  const langs = args.langs ?? LANGUAGE_REGISTRY.filter((l) => l.code !== 'en').map((l) => l.code);
+  // Default excludes 'en' (never a target) AND the synthetic pseudo-test language (M7 never
+  // routes it to a real provider, so benchmarking it burns quota on a case that can't occur in
+  // production — review I4). An explicit `--langs pseudo-test` still works if ever wanted.
+  const langs =
+    args.langs ?? LANGUAGE_REGISTRY.filter((l) => l.code !== 'en' && l.code !== PSEUDO_LANGUAGE_CODE).map((l) => l.code);
   const { cells, missingKeyProviders } = buildPlan(snapshot, langs, args.providers, apiKeys);
   const existingResults = readResultsFile();
 
+  // Printed at startup in BOTH modes (review I2) — a real run is exactly where "which provider got
+  // silently skipped" matters most.
+  printKeyReport(keyReport, missingKeyProviders);
+  console.log();
+
   if (args.plan) {
-    printPlan({
-      cells,
-      missingKeyProviders,
-      keyReport,
-      corpusSize: corpus.length,
-      localCount,
-      committedVersion,
-      existingResults,
-    });
+    printPlan({ cells, corpus, localCount, committedVersion, existingResults });
     return;
   }
 
@@ -950,8 +1083,8 @@ async function main(): Promise<void> {
     return;
   }
   // Real run: every cell needs judging, and judging always goes through
-  // google/gemini-flash-latest — so this key is non-negotiable even when
-  // --providers excludes google from the candidates being benchmarked.
+  // google, regardless of --providers, so this key is non-negotiable even
+  // when google itself isn't one of the candidates being benchmarked.
   if (!apiKeys.google) {
     console.error(
       `GOOGLE_API_KEY is required even when not benchmarking google — every cell is judged via ` +
@@ -973,10 +1106,12 @@ async function main(): Promise<void> {
     judgeModule = factory({
       model: JUDGE_MODEL_ID,
       apiKey: apiKeys.google,
+      // See getOrCreateModule's comment — same reasoning applies to the judge call.
+      maxRetries: 0,
       ...(judgeSnapModel.useStructuredOutput !== undefined ? { useStructuredOutput: judgeSnapModel.useStructuredOutput } : {}),
     });
   } catch (err) {
-    console.error(`Failed to load the judge module: ${toErrorMessage(err)}`);
+    console.error(`Failed to load the judge module: ${redact(toErrorMessage(err))}`);
     process.exit(1);
   }
   const judgeFn = judgeModule.judgeTranslations;
@@ -992,7 +1127,11 @@ async function main(): Promise<void> {
     apiKeys,
     maxRequests: args.maxRequests,
     refresh: args.refresh,
-    resultsFile: existingResults ?? { corpusVersion: committedVersion, cells: {} },
+    // Resuming against a newer committed corpus refreshes the top-level version unconditionally;
+    // per-cell CellResult.corpusVersion stays whatever it was when that cell was written (M5).
+    resultsFile: existingResults
+      ? { ...existingResults, corpusVersion: committedVersion }
+      : { corpusVersion: committedVersion, cells: {} },
     detailFile: readDetailFile(),
     providerState: new Map(),
     providerStats: new Map(),
@@ -1013,8 +1152,18 @@ async function main(): Promise<void> {
   }
   console.log();
 
-  for (const planned of cells) {
-    await processCell(ctx, planned.providerKey, planned.modelId, planned.lang, planned.snapModel, planned.provider);
+  for (let i = 0; i < cells.length; i++) {
+    const planned = cells[i];
+    const outcome = await processCell(ctx, planned.providerKey, planned.modelId, planned.lang, planned.snapModel, planned.provider);
+    if (outcome === 'stop') {
+      // Judge just went cooling (429-shaped) — it's shared by every provider's cells, so nothing
+      // remaining can be judged either. Attribute each of them to its own provider bucket so the
+      // summary shows exactly how much was left on the table, then stop (review CRITICAL 1/2).
+      for (const remaining of cells.slice(i + 1)) {
+        deferCell(ctx, remaining.providerKey, 'judge-cooling');
+      }
+      break;
+    }
   }
 
   printSummary(ctx);
@@ -1022,6 +1171,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  console.error(`Unexpected error: ${toErrorMessage(err)}`);
+  console.error(`Unexpected error: ${redact(toErrorMessage(err))}`);
   process.exitCode = 1;
 });
