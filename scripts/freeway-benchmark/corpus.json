@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "entries": [
+    { "id": "ui-attack", "text": "Attack" },
+    { "id": "ui-defend", "text": "Defend" },
+    { "id": "ui-inventory", "text": "Inventory" },
+    { "id": "ui-settings-audio", "text": "Audio Settings" },
+    { "id": "ui-quit-confirm", "text": "Are you sure you want to quit? Unsaved progress will be lost." },
+    { "id": "ph-level-up", "text": "Level {0} reached!" },
+    { "id": "ph-damage", "text": "<color=#FF0000>Critical!</color> {0} damage dealt to {1}" },
+    { "id": "ph-gold", "text": "You received {0} gold and {1} experience points." },
+    { "id": "ph-cooldown", "text": "Ready in {0:lv.Timer.Cooldown} seconds" },
+    { "id": "esc-multiline", "text": "Quest complete!\nRewards:\n- {0} gold\n- {1} items" },
+    { "id": "tag-tooltip", "text": "Grants <b>+{0}%</b> attack speed for <color=#00FF00>{1} seconds</color>" },
+    { "id": "lim-button-start", "text": "Start Game", "maxLength": 12 },
+    { "id": "lim-button-continue", "text": "Continue", "maxLength": 10 },
+    { "id": "lim-hud-energy", "text": "Energy restored", "maxLength": 18 },
+    { "id": "lim-shop-buy", "text": "Buy now for {0} gems", "maxLength": 24 },
+    { "id": "lim-error-conn", "text": "Connection lost. Trying to reconnect…", "maxLength": 40 },
+    { "id": "tone-npc-greet", "text": "Well met, traveler! What brings you to these lands?", "tone": "medieval, formal" },
+    { "id": "tone-system", "text": "Your account has been temporarily suspended due to unusual activity.", "tone": "formal" },
+    { "id": "tone-flavor", "text": "Legend says this blade once split a mountain in two.", "tone": "epic" },
+    { "id": "long-lore", "text": "The Kingdom of Aldenmoor stood for a thousand years before the Sundering tore its foundations apart. Now scattered survivors rebuild among the ruins, trading stories of the old world while new dangers stir beneath the shattered peaks." },
+    { "id": "long-tutorial", "text": "Drag items from your inventory to the equipment slots on the left. Equipped items improve your stats immediately, and set bonuses activate when you wear two or more pieces from the same set. Press {0} to open the equipment screen at any time." },
+    { "id": "mid-desc-potion", "text": "Restores 50 health points over 10 seconds. Cannot be used while in combat." },
+    { "id": "mid-desc-quest", "text": "Find the missing caravan on the northern road and report back to Captain Aldric before nightfall." },
+    { "id": "mixed-hard", "text": "<b>Warning:</b> Deleting save slot {0} cannot be undone.\nType {1:ui.Confirm.Word} to continue.", "maxLength": 120 }
+  ]
+}
