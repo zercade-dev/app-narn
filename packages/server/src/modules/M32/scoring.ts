@@ -82,15 +82,84 @@ export function passRateClass(passRate: number): PassRateClass {
   return 2;
 }
 
-export function batchSizeFor(bucket: BucketView, passRate: number): number {
+/**
+ * The request stock a bucket can actually spend: a provider with an
+ * account-wide pool caps every one of its buckets, so the usable figure is the
+ * tighter of this model's own headroom and the pool's. Every surface that
+ * reports or reasons about remaining requests must use this, or a drained pool
+ * reads as full on each sibling.
+ */
+export function effectiveRemainingRequests(
+  bucket: Pick<BucketView, 'remainingRequests' | 'poolRemainingRequests'>,
+): number {
+  return Math.min(bucket.remainingRequests, bucket.poolRemainingRequests ?? Infinity);
+}
+
+/**
+ * A group should fit within this share of a bucket's remaining day stock
+ * before batches grow past the comfort size: free requests are the scarce
+ * currency, so a group that would eat more than a quarter of what's left
+ * packs more strings per request instead.
+ */
+const SPEND_SHARE = 0.25;
+/**
+ * Remaining stock at or above this many times the comfort-size request count
+ * reads as abundant: requests are nearly free there, so a half-size batch
+ * buys parse/gate reliability at negligible quota cost.
+ */
+const ABUNDANCE_FACTOR = 40;
+/** Never shrink a comfort batch below this many strings. */
+const SHRINK_FLOOR = 4;
+
+function passRateDivisor(passRate: number): number {
   switch (passRateClass(passRate)) {
     case 0:
-      return bucket.maxBatch;
+      return 1;
     case 1:
-      return Math.max(1, Math.floor(bucket.maxBatch / 2));
+      return 2;
     default:
-      return Math.max(1, Math.floor(bucket.maxBatch / 4));
+      return 4;
   }
+}
+
+/**
+ * Strings per request for this bucket and group. Without a curated
+ * charBudget the size is the flat maxBatch (scaled by pass-rate class), as
+ * before. With one, the size is length-aware and scarcity-aware: the char
+ * budget bounds how many of THESE strings fit reliably in one request, the
+ * comfort size (maxBatch) is the unpressured default, scarcity grows batches
+ * toward the char-derived ceiling so a tight daily allowance covers more of
+ * the run, and abundance shrinks them for reliability since retries are
+ * nearly free there. The pass-rate divisor stacks on top in every case.
+ */
+export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: number): number {
+  const divisor = passRateDivisor(passRate);
+  if (bucket.charBudget === undefined) {
+    return Math.max(1, Math.floor(bucket.maxBatch / divisor));
+  }
+  const ceiling = bucket.batchCeiling ?? bucket.maxBatch;
+  const jobs = group.jobs.length;
+  let base: number;
+  if (jobs === 0) {
+    base = Math.min(bucket.maxBatch, ceiling);
+  } else {
+    let totalChars = 0;
+    for (const job of group.jobs) totalChars += job.sourceText.length;
+    const avgChars = Math.max(1, Math.round(totalChars / jobs));
+    const sizeByChars = Math.min(Math.max(1, Math.floor(bucket.charBudget / avgChars)), ceiling);
+    const comfort = Math.min(bucket.maxBatch, sizeByChars);
+    const remaining = effectiveRemainingRequests(bucket);
+    const requestsAtComfort = Math.ceil(jobs / comfort);
+    const affordable = Math.max(1, Math.floor(remaining * SPEND_SHARE));
+    if (requestsAtComfort > affordable) {
+      base = Math.min(Math.max(comfort, Math.ceil(jobs / affordable)), sizeByChars);
+    } else if (remaining >= ABUNDANCE_FACTOR * requestsAtComfort) {
+      base = Math.max(Math.min(SHRINK_FLOOR, comfort), Math.floor(comfort / 2));
+    } else {
+      base = comfort;
+    }
+  }
+  return Math.max(1, Math.floor(base / divisor));
 }
 
 export function estimatedRequests(jobCount: number, batchSize: number, passRate: number): number {
@@ -102,7 +171,7 @@ export function requestCost(
   group: JobGroup,
 ): { batchSize: number; estimatedRequests: number; requestsPerJob: number; passRate: number } {
   const passRate = effectivePassRate(bucket, group.targetLanguage, group.band);
-  const batchSize = batchSizeFor(bucket, passRate);
+  const batchSize = batchSizeFor(bucket, group, passRate);
   if (group.jobs.length === 0) {
     return { batchSize, estimatedRequests: 0, requestsPerJob: 0, passRate };
   }

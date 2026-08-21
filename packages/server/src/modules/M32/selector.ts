@@ -11,7 +11,9 @@
  * soonest; a reserve keeps top-tier headroom for escalation retries.
  */
 import type { BucketView, JobGroup } from './types.js';
-import { passRateClass, requestCost } from './scoring.js';
+import { effectiveRemainingRequests, passRateClass, requestCost } from './scoring.js';
+
+export { effectiveRemainingRequests };
 
 export interface Selection {
   bucket: BucketView;
@@ -23,19 +25,6 @@ function groupChars(group: JobGroup): number {
   let total = 0;
   for (const job of group.jobs) total += job.sourceText.length;
   return total;
-}
-
-/**
- * The request stock a bucket can actually spend: a provider with an
- * account-wide pool caps every one of its buckets, so the usable figure is the
- * tighter of this model's own headroom and the pool's. Every surface that
- * reports or reasons about remaining requests must use this, or a drained pool
- * reads as full on each sibling.
- */
-export function effectiveRemainingRequests(
-  bucket: Pick<BucketView, 'remainingRequests' | 'poolRemainingRequests'>,
-): number {
-  return Math.min(bucket.remainingRequests, bucket.poolRemainingRequests ?? Infinity);
 }
 
 /**

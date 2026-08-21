@@ -672,6 +672,8 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         modelId: model.id,
         qualityTier: model.qualityTier,
         maxBatch: model.maxBatch,
+        charBudget: model.charBudget,
+        batchCeiling: model.batchCeiling,
         weakLanguages: model.weakLanguages,
         remainingRequests,
         remainingChars,
