@@ -49,6 +49,7 @@ import {
   projectTargetLanguages,
   effectivePromptOptions,
   isExcludedFromAi,
+  isParseFailureMessage,
 } from '@zercade-dev/narn-shared';
 import { router as defaultRouter, type Router } from './M7-router.js';
 import {
@@ -400,6 +401,11 @@ function formatRerouteDetail(info: {
     return `${info.from} is not answering — cooled, rerouted to ${info.to}`;
   }
   return `credential rejected on ${info.from} — rerouted to ${info.to}`;
+}
+
+/** One-liner for a parse-failure split (see {@link TranslationEngine.dispatchFreewayBatch}'s `onSplit`). */
+function formatSplitDetail(info: { bucketKey: string; size: number; depth: number }): string {
+  return `${info.size} strings came back malformed on ${info.bucketKey} — retrying in halves`;
 }
 
 /** Token/character tallies of one provider call, for the Freeway quota ledger. */
@@ -3282,6 +3288,10 @@ export class TranslationEngine {
       reason: 'rate-limit' | 'auth' | 'provider-error';
       retryAfterMs?: number;
     }) => void;
+    /** Recursion depth of the parse-failure split (0 = the original batch). */
+    splitDepth?: number;
+    /** Reports a parse-failure split so the caller can record a run detail. */
+    onSplit?: (info: { bucketKey: string; size: number; depth: number }) => void;
     /**
      * Set when the plan degraded this batch's band floor one tier (Addendum
      * G): every re-validation this hop performs must check the CURRENT bucket
@@ -3310,6 +3320,8 @@ export class TranslationEngine {
       translateOptions,
       signal,
       onReroute,
+      splitDepth = 0,
+      onSplit,
       degradedFloor,
       minBand,
     } = args;
@@ -3331,6 +3343,44 @@ export class TranslationEngine {
         // module error runs.
         const allErrored =
           results.length > 0 && results.every((r) => r?.error !== undefined && r.error !== '');
+        // A parse failure is format-shaped, not bucket-shaped: the model
+        // answered, its JSON just didn't parse — and smaller batches parse
+        // more reliably. Cooling this bucket and failing over would spend a
+        // SECOND provider's quota on a problem a half-size retry usually
+        // fixes, so halve on the same bucket instead, twice at most
+        // (batch → halves → quarters). A singleton that still mis-parses
+        // falls through to the bucket-shaped path below.
+        if (
+          allErrored &&
+          splitDepth < 2 &&
+          jobs.length >= 2 &&
+          isParseFailureMessage(results[0]!.error!)
+        ) {
+          onSplit?.({ bucketKey: state.bucketKey, size: jobs.length, depth: splitDepth });
+          const mid = Math.ceil(jobs.length / 2);
+          const merged: TranslationResult[] = [];
+          for (const [start, end] of [
+            [0, mid],
+            [mid, jobs.length],
+          ] as const) {
+            if (signal?.aborted) {
+              return { kind: 'error', error: new Error('cancelled'), authCancel: false };
+            }
+            const half = await this.dispatchFreewayBatch({
+              ...args,
+              jobs: jobs.slice(start, end),
+              decisions: decisions.slice(start, end),
+              splitDepth: splitDepth + 1,
+            });
+            // A half that parks/blocks/errors bubbles out unchanged; pairs
+            // the other half already completed streamed through
+            // onJobComplete, so the caller's outcome handling (which skips
+            // processedIndices) leaves them settled.
+            if (half.kind !== 'results') return half;
+            merged.push(...half.results);
+          }
+          return { kind: 'results', results: merged };
+        }
         if (allErrored) throw new Error(results[0]!.error);
         await resetBucketFlap(state.bucketKey, deps);
         return { kind: 'results', results };
@@ -4388,6 +4438,13 @@ export class TranslationEngine {
         if ((status.status as RunStatusCode) === RunStatusCode.Cancelled) return;
         const idx = keyToIndex.get(`${result.entryId}::${result.targetLanguage}`);
         if (idx === undefined || processedIndices.has(idx)) return;
+        // A Freeway per-result ERROR is provisional: the dispatch layer may
+        // still rescue those pairs (parse-failure split, all-errored
+        // failover), and finalizing here would turn the rescue's streamed
+        // result into a dedupe no-op. The post-dispatch loops finalize
+        // whatever the OUTCOME carries — for a partial-batch error that is
+        // this same error result, via the positional targetResults mapping.
+        if (bucketKey !== undefined && freewayDeps && result.error) return;
         moduleResults[idx] = result;
         processedIndices.add(idx);
         await finalizeEntryResult(idx);
@@ -4434,9 +4491,15 @@ export class TranslationEngine {
             state,
             deps: freewayDeps,
             createModule: createFreewayModule,
-            translateOptions: { ...dispatchOptions, onJobComplete },
+            // The engine pre-chunks Freeway groups to the PLANNED batch size
+            // (assignment.batchSize), so the module must send each chunk as
+            // exactly one provider call — a module-config maxBatchSize
+            // re-chunk would silently turn one planned (debited, paced)
+            // request into several.
+            translateOptions: { ...dispatchOptions, ignoreSizeLimit: true, onJobComplete },
             signal,
             onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
+            onSplit: (info) => this.recordFreewayDetail(runId, formatSplitDetail(info)),
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
             minBand: freewayMinBand(status.request),
           });
