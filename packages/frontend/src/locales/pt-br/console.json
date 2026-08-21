@@ -12,6 +12,9 @@
   "unreadErrors": "Erros não lidos: {{count}}",
   "unreadErrors_one": "{{count}} erro não lido",
   "unreadErrors_other": "{{count}} erros não lidos",
+  "droppedEntries": "Entradas anteriores não disponíveis: {{count}}",
+  "droppedEntries_one": "{{count}} entrada anterior não está mais disponível",
+  "droppedEntries_other": "{{count}} entradas anteriores não estão mais disponíveis",
   "searchPlaceholder": "Pesquisar nos logs…",
   "exportLogs": "Exportar logs",
   "exportFormat": "Formato de exportação",
@@ -27,5 +30,10 @@
   "showDetails": "Ver detalhes técnicos",
   "membersNotShown": "Outras linhas não exibidas: {{count}}",
   "membersNotShown_one": "Mais {{count}} linha não exibida",
-  "membersNotShown_other": "Mais {{count}} linhas não exibidas"
+  "membersNotShown_other": "Mais {{count}} linhas não exibidas",
+  "captureLabel": "Capturar todos os logs",
+  "captureTooltip": "Enquanto estiver ativado, o servidor mantém cada entrada de log desta sessão para que uma execução longa possa ser analisada sem perdas.",
+  "captureDownload": "Baixar captura ({{captured}})",
+  "captureDropped": "+{{dropped}} descartados",
+  "captureSlotsExhausted": "A captura está ocupada agora — há capturas demais em execução neste servidor. Tente novamente mais tarde."
 }

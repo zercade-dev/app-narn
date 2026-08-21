@@ -77,7 +77,8 @@
     "scopeLabel": "Cakupan",
     "scopeNeverReviewed": "Hanya entri yang belum pernah ditinjau ({{count}})",
     "scopeAll": "Semua entri ({{count}})",
-    "scopeNoneHint": "Setiap entri sudah pernah ditinjau. Beralihlah ke “Semua entri” untuk meninjau ulang."
+    "scopeNoneHint": "Setiap entri sudah pernah ditinjau. Beralihlah ke “Semua entri” untuk meninjau ulang.",
+    "advancedOptions": "Opsi lanjutan"
   },
   "title": "Antrean tinjauan",
   "position": "{{current}} dari {{total}}",

@@ -33,8 +33,10 @@ import {
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { LanguageSelect } from '@/components/ui/language-select';
 import { ModuleSelect, type ModuleSelectOption } from '@/components/ui/module-select';
+import { AdvancedToggle } from '@/components/common/AdvancedToggle';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
+import { hasNonDefaultValues } from '@/lib/advanced-modified';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
 import { ApiError } from '../../hooks/use-api.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
@@ -119,6 +121,7 @@ const DEFAULT_REPLY_LANGUAGE = 'en';
 
 /** Last-used per-browser values for the source-review config dialog. */
 const SOURCE_REVIEW_SETTINGS_DEFAULTS = {
+  advanced: false,
   enabled: {
     typo: true,
     grammar: true,
@@ -181,6 +184,18 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   // config-dialog-open block further down).
   const [settingsAtMount] = useState(() => readSettings());
 
+  // Everything below the scope choice is tuning, not the choice that defines
+  // the run — hidden behind this until ticked. Only its own visibility is
+  // gated; the values it wraps are never reset by hiding it. Seeded once at
+  // mount, like the other plain settings below (see `settingsAtMount`).
+  const [advanced, setAdvanced] = useState(settingsAtMount.advanced);
+  // Mirrors `advanced`, EXCEPT the force-open effect below never touches it —
+  // only the mount seed and the user's own checkbox click do. `handleStart`
+  // persists THIS, not `advanced`: a transient validation state (an unchecked
+  // checks row, or a broken batch size) forcing the section open must not
+  // permanently overwrite the user's remembered Advanced default the next
+  // time they start a source review.
+  const userAdvancedRef = useRef(settingsAtMount.advanced);
   // Check toggles; all on by default so a single click starts a useful review.
   const [enabled, setEnabled] = useState<Record<SourceReviewFindingType, boolean>>(
     () => ({ ...settingsAtMount.enabled }) as Record<SourceReviewFindingType, boolean>,
@@ -415,6 +430,7 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
     async () => {
       if (!anyCheck || !batchSizeValid || activeRun || !moduleId || scopeEmpty) return;
       saveSettings({
+        advanced: userAdvancedRef.current,
         enabled: { ...enabled },
         batchSizeText,
         replyLanguage,
@@ -462,6 +478,45 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
 
   const startDisabled =
     !anyCheck || !batchSizeValid || starting || activeRun !== undefined || !moduleId || scopeEmpty;
+
+  // Invariant: Start is never disabled without a visible cause. `!anyCheck`
+  // and `!batchSizeValid` are the only two causes that live behind Advanced
+  // (an unchecked checks row, or a batch size the user broke before
+  // collapsing) — if either is blocking Start while Advanced is collapsed,
+  // force it back open so the cause is on screen again. Self-maintaining if a
+  // third hidden cause is ever added, unlike a hand-picked list of
+  // unconditional warnings. Fires at most once per cause: setting `advanced`
+  // true makes the `!advanced` guard false on the next render, so it never
+  // fights a deliberate collapse the user makes while these are already fine.
+  if (!advanced && (!anyCheck || !batchSizeValid) && moduleId && !scopeEmpty) {
+    setAdvanced(true);
+  }
+
+  // scope/moduleId/model/reasoningEffort are excluded: their controls render
+  // unconditionally, outside {advanced && (…)} below (`scope`'s fieldset above
+  // the Advanced toggle; the module/model/effort pickers below it, but still
+  // outside the gated block). ignoreLimit/customBatchSize are gated on
+  // `grouping`, mirroring the exact condition BatchGroupingControls uses to
+  // show/hide each control — a grouping value that hides one must not make it
+  // count toward the badge. `enabled` (the checks map) is compared key-by-key
+  // rather than via hasNonDefaultValues' JSON.stringify (sensitive to
+  // insertion order), since a persisted `enabled` object's key order isn't
+  // guaranteed to match CHECKS'.
+  const enabledModified = CHECKS.some(
+    (key) => enabled[key] !== SOURCE_REVIEW_SETTINGS_DEFAULTS.enabled[key],
+  );
+  const advancedModified =
+    enabledModified ||
+    hasNonDefaultValues(
+      {
+        batchSizeText,
+        replyLanguage,
+        grouping,
+        ...(grouping === 'custom' ? { customBatchSize } : {}),
+        ...(grouping !== 'default' && grouping !== 'custom' ? { ignoreLimit } : {}),
+      },
+      SOURCE_REVIEW_SETTINGS_DEFAULTS,
+    );
 
   const records = effectiveRunId !== null ? recordsByRun[effectiveRunId] : undefined;
   const flaggedRecords = useMemo(
@@ -535,32 +590,6 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>{t('sourceAi.checksLabel')}</Label>
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {CHECKS.map((check) => (
-                  <label
-                    key={check}
-                    className="inline-flex cursor-pointer select-none items-center gap-1.5 text-sm"
-                  >
-                    <Checkbox
-                      checked={enabled[check]}
-                      onCheckedChange={(checked) =>
-                        setEnabled((prev) => ({ ...prev, [check]: checked === true }))
-                      }
-                      data-testid={`source-ai-check-${check}`}
-                    />
-                    {t(FINDING_TYPE_KEY[check])}
-                  </label>
-                ))}
-              </div>
-              {!anyCheck && (
-                <p className="text-xs text-status-warn" data-testid="source-ai-no-check">
-                  {t('sourceAi.noCheckHint')}
-                </p>
-              )}
-            </div>
-
             <fieldset className="space-y-2">
               <legend className="text-sm font-medium">{t('sourceAi.scopeLabel')}</legend>
               <label className="flex items-center gap-2 text-sm">
@@ -592,6 +621,25 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
               )}
             </fieldset>
 
+            <div className="border-t pt-3">
+              <AdvancedToggle
+                id="source-ai-advanced"
+                testId="source-ai-advanced"
+                checked={advanced}
+                modified={advancedModified}
+                onCheckedChange={(next) => {
+                  setAdvanced(next);
+                  userAdvancedRef.current = next;
+                }}
+                label={t('sourceAi.advancedOptions')}
+              />
+            </div>
+
+            {/* Which AI reviews the run is a defining choice, not tuning — same
+                cost/credentials profile as AiReviewDialog's judge picker, which
+                is never gated either. Unconditional (not just when Advanced is
+                open) so it also explains why Start stays disabled when no
+                review-capable module exists. */}
             {noReviewModules ? (
               <p className="text-sm text-muted-foreground" data-testid="source-ai-no-modules">
                 {t('sourceAi.noModules')}
@@ -638,9 +686,10 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
                   />
                 )}
 
-                {/* Freeway picks its own model per batch — no model/effort route
-                    (`/api/modules/freeway/models`) exists for the selectors above
-                    to call, so they're replaced with a one-line explanation. */}
+                {/* Freeway picks its own model per batch — no model/effort
+                    route (`/api/modules/freeway/models`) exists for the
+                    selectors above to call, so they're replaced with a
+                    one-line explanation. */}
                 {moduleId === FREEWAY_MODULE_ID && (
                   <p
                     className="text-xs text-muted-foreground"
@@ -652,42 +701,72 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
               </>
             )}
 
-            <div className="space-y-1">
-              <label htmlFor="source-ai-batch-size" className="text-xs font-medium">
-                {t('sourceAi.batchSize')}
-              </label>
-              <Input
-                id="source-ai-batch-size"
-                type="number"
-                min={1}
-                value={batchSizeText}
-                onChange={(e) => setBatchSizeText(e.target.value)}
-                className="w-24"
-                aria-invalid={!batchSizeValid}
-                data-testid="source-ai-batch-size"
-              />
-            </div>
+            {advanced && (
+              <>
+                <div className="space-y-1.5">
+                  <Label>{t('sourceAi.checksLabel')}</Label>
+                  <div className="flex flex-wrap gap-x-5 gap-y-2">
+                    {CHECKS.map((check) => (
+                      <label
+                        key={check}
+                        className="inline-flex cursor-pointer select-none items-center gap-1.5 text-sm"
+                      >
+                        <Checkbox
+                          checked={enabled[check]}
+                          onCheckedChange={(checked) =>
+                            setEnabled((prev) => ({ ...prev, [check]: checked === true }))
+                          }
+                          data-testid={`source-ai-check-${check}`}
+                        />
+                        {t(FINDING_TYPE_KEY[check])}
+                      </label>
+                    ))}
+                  </div>
+                  {!anyCheck && (
+                    <p className="text-xs text-status-warn" data-testid="source-ai-no-check">
+                      {t('sourceAi.noCheckHint')}
+                    </p>
+                  )}
+                </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="source-ai-reply-language">{t('sourceAi.replyLanguage')}</Label>
-              <LanguageSelect
-                id="source-ai-reply-language"
-                triggerTestId="source-ai-reply-language-trigger"
-                value={replyLanguage}
-                onValueChange={setReplyLanguage}
-              />
-              <p className="text-xs text-muted-foreground">{t('sourceAi.replyLanguageHint')}</p>
-            </div>
+                <div className="space-y-1">
+                  <label htmlFor="source-ai-batch-size" className="text-xs font-medium">
+                    {t('sourceAi.batchSize')}
+                  </label>
+                  <Input
+                    id="source-ai-batch-size"
+                    type="number"
+                    min={1}
+                    value={batchSizeText}
+                    onChange={(e) => setBatchSizeText(e.target.value)}
+                    className="w-24"
+                    aria-invalid={!batchSizeValid}
+                    data-testid="source-ai-batch-size"
+                  />
+                </div>
 
-            <BatchGroupingControls
-              idPrefix="source-ai-grouping"
-              grouping={grouping}
-              onGroupingChange={setGrouping}
-              ignoreLimit={ignoreLimit}
-              onIgnoreLimitChange={setIgnoreLimit}
-              customBatchSize={customBatchSize}
-              onCustomBatchSizeChange={setCustomBatchSize}
-            />
+                <div className="space-y-1.5">
+                  <Label htmlFor="source-ai-reply-language">{t('sourceAi.replyLanguage')}</Label>
+                  <LanguageSelect
+                    id="source-ai-reply-language"
+                    triggerTestId="source-ai-reply-language-trigger"
+                    value={replyLanguage}
+                    onValueChange={setReplyLanguage}
+                  />
+                  <p className="text-xs text-muted-foreground">{t('sourceAi.replyLanguageHint')}</p>
+                </div>
+
+                <BatchGroupingControls
+                  idPrefix="source-ai-grouping"
+                  grouping={grouping}
+                  onGroupingChange={setGrouping}
+                  ignoreLimit={ignoreLimit}
+                  onIgnoreLimitChange={setIgnoreLimit}
+                  customBatchSize={customBatchSize}
+                  onCustomBatchSizeChange={setCustomBatchSize}
+                />
+              </>
+            )}
           </div>
 
           <DialogFooter>

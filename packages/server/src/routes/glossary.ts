@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { BATCH_GROUPING_DIMENSIONS } from '@zercade-dev/narn-shared';
 import { glossarySyncService } from '../modules/M21-glossary-sync-service.js';
 import { getGlossaryStore, getProjectStore, getRunStore } from '../storage/registry.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
@@ -109,7 +110,7 @@ const generateGlossarySchema = z
     contextFields: z.array(z.enum(['context', 'sources', 'categories'])).optional(),
     contextLanguages: z.array(z.string()).optional(),
     ignoreBatchSizeLimit: z.boolean().optional(),
-    batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).optional(),
+    batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
     /**
      * Per-run override of how many distinct source strings each provider call
      * holds. `0` means unlimited. Mutually exclusive with

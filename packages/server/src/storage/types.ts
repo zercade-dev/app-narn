@@ -727,9 +727,30 @@ export interface FreewayWindowUsage extends FreewayWindowRef {
   chars: number;
 }
 
-/** Per-(model, language) quality EMAs, stored in freeway_buckets.stats. */
+/**
+ * One (bucket, language) gate-pass record: decayed Beta-Binomial counts. Lives
+ * in the `freeway_buckets.stats` jsonb, so a reader must treat any shape it did
+ * not write — including the bare EMA numbers this replaced — as absent. See
+ * M32's `isGatePassRecord`.
+ */
+export interface FreewayGatePassRecord {
+  /** Decayed successful gate passes. */
+  s: number;
+  /** Decayed total attempts. */
+  n: number;
+  /** Epoch ms of the last update — the origin for time decay. */
+  t: number;
+}
+
+/** Per-(model, language) quality stats, stored in freeway_buckets.stats. */
 export interface FreewayBucketStats {
-  /** key: target language → EMA of LQA gate pass (0..1). */
+  /** key: target language → decayed gate-pass counts. The router's only live quality input. */
+  gatePassStats?: Record<string, FreewayGatePassRecord>;
+  /**
+   * key: target language → observed gate-pass rate (0..1), the `s / n` of the
+   * matching `gatePassStats` record. DISPLAY ONLY: written for the Freeway
+   * status route and panel, never read by the router.
+   */
   gatePassByLanguage?: Record<string, number>;
   /** EMA of 429-per-request (0..1). */
   rateLimitRate?: number;
@@ -765,10 +786,17 @@ export interface FreewayLedgerStore {
   usage(bucketKey: string, windows: FreewayWindowRef[]): Promise<FreewayWindowUsage[]>;
   /** All bucket states for the tenant (empty array when none). */
   listBuckets(): Promise<FreewayBucketState[]>;
+  /** Single-row read of one bucket's state, or undefined when the row is absent. */
+  getBucket(bucketKey: string): Promise<FreewayBucketState | undefined>;
   /** Overwrites cooldown_until (last write wins); bumps flap_count when `flap` is true. Upserts. */
   setCooldown(bucketKey: string, until: number, opts?: { flap?: boolean }): Promise<void>;
   /** Clear cooldown and reset flap_count to 0. No-op when the row is absent. */
   clearCooldown(bucketKey: string): Promise<void>;
+  /**
+   * Reset flap_count to 0 without touching cooldown_until. Plain UPDATE, not
+   * an upsert — a no-op when the row is absent or already at 0.
+   */
+  resetFlap(bucketKey: string): Promise<void>;
   /**
    * Mark a bucket disabled (bad credentials) or re-enabled (null). Upserts.
    * Also the writer for the `credential::<moduleId>` rows — see

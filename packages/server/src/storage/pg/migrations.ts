@@ -1018,4 +1018,85 @@ export const MIGRATIONS: ReadonlyArray<{ name: string; statements: readonly stri
       `grant select, insert, update, delete on freeway_buckets to app_user`,
     ],
   },
+  {
+    // Pruning for freeway_usage's rpm/tpm minute cells. Those windows are
+    // now written once per bucket per MINUTE (per-minute rate pacing),
+    // versus rpd/monthly_chars' once per bucket per day/month — left
+    // unpruned that grows the table roughly 1400x faster with no bound, on
+    // a shared multi-tenant database. Nothing reads a minute cell once its
+    // own window is stale.
+    //
+    // Mirrors narn_sweep_expired_manual_edits() (0026) exactly: a SECURITY
+    // DEFINER cleanup function that bypasses freeway_usage's tenant_isolation
+    // policy (0027) and deletes across ALL tenants in one call — a
+    // system/cron operation, not a per-tenant one — with EXECUTE revoked
+    // from PUBLIC and granted only to app_user.
+    //
+    // Retention is 5 minutes measured from a row's window_start, which is
+    // itself floored to the START of its minute (see windowStart() in
+    // packages/shared/src/freeway/windows.ts) — so a row's window doesn't
+    // even CLOSE until window_start + 60s. A 5-minute cutoff therefore
+    // leaves at least 4 minutes of margin past the window's own close,
+    // comfortably covering both the current minute and the previous one
+    // (which an in-flight request or a skewed clock may still be reading
+    // headroom from) — a few minutes, not the handful of seconds
+    // "nothing reads this anymore" would technically allow. rpd/monthly_chars
+    // rows are excluded by window_kind regardless of age: those are the
+    // day/month quota ledger, and deleting one would silently refund a
+    // tenant's spent quota.
+    name: '0028_freeway_minute_prune',
+    statements: [
+      // Supports the sweep's window_kind + window_start predicate; the
+      // table's primary key leads with tenant_id/bucket_key, neither of
+      // which the sweep filters on.
+      `create index if not exists freeway_usage_window_kind_start_idx on freeway_usage (window_kind, window_start)`,
+      `create or replace function narn_sweep_expired_freeway_windows() returns bigint
+         language sql security definer set search_path = public as $$
+           with del as (
+             delete from freeway_usage
+             where window_kind in ('rpm', 'tpm')
+               and window_start < (extract(epoch from now()) * 1000)::bigint - 300000
+             returning 1
+           )
+           select count(*)::bigint from del
+         $$`,
+      `revoke execute on function narn_sweep_expired_freeway_windows() from public`,
+      `grant execute on function narn_sweep_expired_freeway_windows() to app_user`,
+    ],
+  },
+  {
+    // Cross-tenant listing of the runs parked on free quota, for the M9
+    // auto-resume sweep's boot-time recovery. A parked run outlives the
+    // process by design (a park can last until tomorrow's reset), but the
+    // sweep walks IN-MEMORY runs — so after a deploy the park exists only
+    // here and the run stays paused until a manual resume.
+    //
+    // Mirrors narn_sweep_expired_manual_edits() (0026) /
+    // narn_sweep_expired_freeway_windows() (0028) exactly: a SECURITY DEFINER
+    // function that bypasses `runs`' project_members-scoped RLS (0009) and
+    // reports across ALL tenants in one call — a system operation, not a
+    // per-tenant one, and its caller (the process-wide sweep, off any
+    // request) has no app.user_id GUC to scope by. EXECUTE is revoked from
+    // PUBLIC and granted only to app_user. READ-only, and each row carries
+    // its own tenant_id so the caller re-establishes the run's OWN tenant
+    // before touching it.
+    //
+    // The predicate is the narrow one the sweep needs: the scalar `status`
+    // mirror column pinned to 'paused' (RunStatusCode.Paused) — so no
+    // running/terminal run is ever returned — AND a `waitingForQuota`
+    // existence test on the `data` jsonb. Drainedness and `resumeAt` are
+    // decided by the engine on the returned status, not here.
+    name: '0029_quota_parked_runs',
+    statements: [
+      `create or replace function narn_list_quota_parked_runs()
+         returns table (tenant_id text, project_id text, run_id text, data jsonb)
+         language sql security definer set search_path = public as $$
+           select r.tenant_id, r.project_id, r.run_id, r.data
+           from runs r
+           where r.status = 'paused' and jsonb_exists(r.data, 'waitingForQuota')
+         $$`,
+      `revoke execute on function narn_list_quota_parked_runs() from public`,
+      `grant execute on function narn_list_quota_parked_runs() to app_user`,
+    ],
+  },
 ];

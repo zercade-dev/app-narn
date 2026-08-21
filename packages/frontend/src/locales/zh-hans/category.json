@@ -12,6 +12,8 @@
   "module": "模块",
   "modulePlaceholder": "选择模块",
   "model": "模型",
+  "freewayModelHint": "NARN Freeway 会自动为每个批次选择最佳免费模型——无需选择模型或推理强度。",
+  "aiAdvancedOptions": "高级选项",
   "noModules": "没有可用的 AI 模块。请在配置中设置一个。",
   "includeExisting": "同时把条目分配到已有类别中",
   "run": "生成",

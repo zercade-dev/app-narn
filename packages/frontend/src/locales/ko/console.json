@@ -11,6 +11,8 @@
   "statusDisconnected": "서버 로그 스트림 연결 끊김",
   "unreadErrors": "읽지 않은 오류 {{count}}건",
   "unreadErrors_other": "읽지 않은 오류 {{count}}건",
+  "droppedEntries": "이전 항목 {{count}}건은 더 이상 표시할 수 없어요",
+  "droppedEntries_other": "이전 항목 {{count}}건은 더 이상 표시할 수 없어요",
   "searchPlaceholder": "로그 검색…",
   "exportLogs": "로그 내보내기",
   "exportFormat": "내보내기 형식",
@@ -25,5 +27,10 @@
   "repeatCount": "{{count}}번 반복됐어요",
   "showDetails": "기술 상세 보기",
   "membersNotShown": "{{count}}개는 더 표시하지 않았어요",
-  "membersNotShown_other": "{{count}}개는 더 표시하지 않았어요"
+  "membersNotShown_other": "{{count}}개는 더 표시하지 않았어요",
+  "captureLabel": "모든 로그 캡처",
+  "captureTooltip": "켜져 있는 동안 서버가 이 세션의 모든 로그 항목을 보관해서, 긴 실행도 유실 없이 분석할 수 있어요.",
+  "captureDownload": "캡처 다운로드 ({{captured}}개)",
+  "captureDropped": "+{{dropped}}개 누락",
+  "captureSlotsExhausted": "지금은 캡처가 사용 중이에요 — 이 서버에서 이미 너무 많은 캡처가 실행 중이에요. 나중에 다시 시도해 주세요."
 }

@@ -139,6 +139,8 @@ export interface FreewayBackgroundSelection {
   module: TranslationModule;
   /** The concrete module/instance id the bucket dispatches to. */
   moduleId: string;
+  /** The bucket's model id — the quota being spent. */
+  modelId: string;
   /** Ledger key of the bucket this run spends against. */
   bucketKey: string;
 }
@@ -150,6 +152,8 @@ export interface SelectFreewayBackgroundOptions extends SelectCapableModuleOptio
   deps?: BucketSourceDeps;
   /** Evaluation instant; defaults to now. */
   now?: number;
+  /** Reserve forwarded to {@link selectBackgroundBucket}; defaults there. */
+  reserveRequests?: number;
 }
 
 /**
@@ -184,11 +188,14 @@ function backgroundModuleStatus(
 }
 
 /**
- * Resolves the free-tier target for a background run: the cheapest adequate
- * bucket whose module can actually do this kind of work, built with the run's
- * per-run overrides exactly as {@link selectCapableModule} would have built an
- * explicitly requested module. Called ONCE at run start — the run keeps the
- * returned binding for its whole duration.
+ * Resolves the free-tier target for a background run: the adequate bucket the
+ * selector hands back once it has minimized the share of a bucket's own
+ * remaining free stock the run would consume AND applied the background
+ * reserve (which can deflect a top-ranked tier-4 bucket to a lower-tier
+ * fallback), whose module can actually do this kind of work, built with the
+ * run's per-run overrides exactly as {@link selectCapableModule} would have
+ * built an explicitly requested module. Called ONCE at run start — the run
+ * keeps the returned binding for its whole duration.
  *
  * Buckets are tried in the selector's order and one is skipped when its module
  * cannot be built or fails the capability predicate (classical MT can't judge,
@@ -211,9 +218,12 @@ export async function selectFreewayBackgroundModule(
       overrides.moduleStatus ?? backgroundModuleStatus(registry, project, global, sessionId),
   };
   const remaining = await loadBucketViews(now, deps);
-  const bandOpts = options.band !== undefined ? { band: options.band } : undefined;
+  const selectOpts = {
+    ...(options.band !== undefined ? { band: options.band } : {}),
+    ...(options.reserveRequests !== undefined ? { reserveRequests: options.reserveRequests } : {}),
+  };
   while (remaining.length > 0) {
-    const selection = selectBackgroundBucket(remaining, now, bandOpts);
+    const selection = selectBackgroundBucket(remaining, now, selectOpts);
     if (!selection) break;
     const { bucket } = selection;
     remaining.splice(remaining.indexOf(bucket), 1);
@@ -233,12 +243,12 @@ export async function selectFreewayBackgroundModule(
           ...freewayModuleOverrides(bucket.moduleId, bucket.modelId),
         },
       });
-      return { ...built, bucketKey: bucket.bucketKey };
+      return { ...built, modelId: bucket.modelId, bucketKey: bucket.bucketKey };
     } catch (err) {
       // This bucket's module can't be built or can't do this work — try the
-      // next-cheapest one rather than failing the whole run on it. Leave a
-      // breadcrumb so a resolution that walked past several buckets is
-      // explainable; the reason is value-scrubbed like every other logged
+      // next one the selector offers rather than failing the whole run on it.
+      // Leave a breadcrumb so a resolution that walked past several buckets
+      // is explainable; the reason is value-scrubbed like every other logged
       // provider error.
       options.logSink?.('warn', 'freeway: skipping bucket', {
         bucketKey: bucket.bucketKey,

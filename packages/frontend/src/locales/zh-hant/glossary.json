@@ -50,6 +50,8 @@
   "generateModulePlaceholder": "選擇模組…",
   "generateModel": "模型",
   "generateReasoningEffort": "推理強度",
+  "generateFreewayModelHint": "NARN Freeway 會自動為每個批次選擇最佳免費模型——不需要選擇模型或推理強度。",
+  "generateAdvancedOptions": "進階選項",
   "generateNoSuggestions": "AI 沒有找到可建議的新術語。",
   "generateSuggestionCount": "{{count}} 個術語",
   "generateAccept": "建立 {{count}} 個術語表",

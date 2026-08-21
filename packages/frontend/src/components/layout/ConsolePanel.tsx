@@ -11,11 +11,13 @@ import {
   Lock,
 } from 'lucide-react';
 import { useLogger } from '../../hooks/use-logger.js';
-import type { LogEntry } from '../../stores/logger-store.js';
+import { useLoggerStore, type LogEntry } from '../../stores/logger-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { vaultLockedEvent } from '../../lib/vault-events.js';
 import { useUiSettings, type ConsoleFilter } from '../../stores/ui-settings-store.js';
+import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -87,7 +89,34 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   const { t: tLogs } = useTranslation('logs');
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const vaultExists = useVaultStore((s) => s.hasVault);
-  const { entries, connected, clearEntries } = useLogger();
+  const {
+    entries,
+    droppedCounts: rawDroppedCounts,
+    serverDroppedCounts: rawServerDroppedCounts,
+    connected,
+    clearEntries,
+  } = useLogger();
+  const captureStatus = useLoggerStore((s) => s.captureStatus);
+  const captureError = useLoggerStore((s) => s.captureError);
+  const refreshCaptureStatus = useLoggerStore((s) => s.refreshCaptureStatus);
+  const setCaptureActive = useLoggerStore((s) => s.setCaptureActive);
+  const downloadCapture = useLoggerStore((s) => s.downloadCapture);
+  // Tolerate an absent `droppedCounts`/`serverDroppedCounts` (e.g. a test
+  // double or an older useLogger() shape that predates the field) rather than
+  // crashing the whole panel on `.info`.
+  const droppedCounts = rawDroppedCounts ?? { info: 0, priority: 0 };
+  const serverDroppedCounts = rawServerDroppedCounts ?? { info: 0, priority: 0 };
+  // The two sides are disjoint, so they add: `droppedCounts` is what THIS
+  // browser's pool evicted, while `serverDroppedCounts` is fixed at the first
+  // connect of the page session (see logger-store) and so only covers server
+  // history from before this client's stream existed. Everything the server
+  // shed afterwards was already delivered here and is counted, if at all, by
+  // this browser's own evictions.
+  const totalDropped =
+    droppedCounts.info +
+    droppedCounts.priority +
+    serverDroppedCounts.info +
+    serverDroppedCounts.priority;
   const consoleFilter = useUiSettings((s) => s.consoleFilter);
   const setConsoleFilter = useUiSettings((s) => s.setConsoleFilter);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
@@ -156,12 +185,37 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // Download the currently filtered entries (both level filter and search
   // applied) in the selected format. Runs in the browser, so a wall-clock
   // timestamp for the filename is fine.
+  //
+  // Includes the dropped counts alongside the entries: they're what started
+  // this whole feature (an exported log read clean even though the run had
+  // 142 failed entries the ring buffer had already evicted before export).
+  // The on-screen marker shows them; the file must too, or someone reading it
+  // offline has no way to tell entries are missing.
   function handleExport(): void {
     const stamp = new Date().getTime();
     const blob =
       exportFormat === 'text'
-        ? new Blob([filteredEntries.map(entryToTextLine).join('\n')], { type: 'text/plain' })
-        : new Blob([JSON.stringify(filteredEntries, null, 2)], { type: 'application/json' });
+        ? new Blob(
+            [
+              [
+                totalDropped > 0 ? `# ${t('droppedEntries', { count: totalDropped })}` : undefined,
+                ...filteredEntries.map(entryToTextLine),
+              ]
+                .filter((line) => line !== undefined)
+                .join('\n'),
+            ],
+            { type: 'text/plain' },
+          )
+        : new Blob(
+            [
+              JSON.stringify(
+                { droppedCounts, serverDroppedCounts, entries: filteredEntries },
+                null,
+                2,
+              ),
+            ],
+            { type: 'application/json' },
+          );
     const extension = exportFormat === 'text' ? 'txt' : 'json';
     downloadBlob(blob, `console-logs-${stamp}.${extension}`);
   }
@@ -237,6 +291,34 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   useEffect(() => {
     virtualizer.measure();
   }, [expandedIds, virtualizer]);
+
+  // Pull the capture status once whenever the panel opens, so the toggle and
+  // download button reflect the server's current state (e.g. a capture
+  // started from another tab/session).
+  useEffect(() => {
+    if (!open) return;
+    void refreshCaptureStatus();
+  }, [open, refreshCaptureStatus]);
+
+  // While the panel is open AND a capture is active, poll the status every 5s
+  // so entryCount/droppedCount/bytes keep advancing on screen during a long
+  // run. Lives here, not in the store, so a background tab with the panel
+  // closed never pays for it.
+  useEffect(() => {
+    if (!open || !captureStatus?.active) return;
+    const interval = setInterval(() => {
+      void refreshCaptureStatus();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [open, captureStatus?.active, refreshCaptureStatus]);
+
+  // Surface a server-refused capture start (all capture slots busy) once via
+  // the app's shared toast pattern, then clear the flag so it doesn't re-fire.
+  useEffect(() => {
+    if (captureError !== 'slots-exhausted') return;
+    toast.error(t('captureSlotsExhausted'));
+    useLoggerStore.setState({ captureError: null });
+  }, [captureError, t]);
 
   // Mark entries as seen on every open/close transition. State is adjusted
   // during render (not in an effect) so the closed bar never paints a frame
@@ -365,6 +447,50 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
             >
               <Download className="size-3.5" />
             </Button>
+            <label
+              htmlFor="console-capture-toggle"
+              title={t('captureTooltip')}
+              className="flex items-center gap-1 text-[10px] font-mono uppercase cursor-pointer select-none"
+            >
+              <Checkbox
+                id="console-capture-toggle"
+                data-testid="console-capture-toggle"
+                className="size-3.5"
+                checked={captureStatus?.active ?? false}
+                onCheckedChange={(checked) => {
+                  // setCaptureActive() only swallows the 409 slots-exhausted
+                  // case itself (via captureError, toasted by the effect
+                  // above) — any other failure (network, 5xx) rethrows, so it
+                  // must be caught here or it becomes an unhandled rejection.
+                  setCaptureActive(checked === true).catch((err: unknown) => {
+                    toast.error((err as Error).message);
+                  });
+                }}
+              />
+              {t('captureLabel')}
+            </label>
+            {captureStatus && captureStatus.entryCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 gap-1 px-1.5 text-[10px] font-mono"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  downloadCapture().catch((err: unknown) => {
+                    toast.error((err as Error).message);
+                  });
+                }}
+                data-testid="console-capture-download"
+              >
+                <ArrowDownToLine className="size-3" />
+                {t('captureDownload', { captured: captureStatus.entryCount })}
+                {captureStatus.droppedCount > 0 && (
+                  <span className="text-status-warn">
+                    {t('captureDropped', { dropped: captureStatus.droppedCount })}
+                  </span>
+                )}
+              </Button>
+            )}
           </>
         )}
         <Button
@@ -429,6 +555,14 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
 
           <div className="relative flex-1 min-h-0 flex flex-col">
             <div ref={parentRef} className="flex-1 overflow-auto font-mono text-[11px]">
+              {totalDropped > 0 && (
+                <div
+                  data-testid="console-dropped-marker"
+                  className="px-3 py-0.5 text-muted-foreground/60 italic"
+                >
+                  {t('droppedEntries', { count: totalDropped })}
+                </div>
+              )}
               {groups.length === 0 && (
                 <div data-testid="console-empty" className="px-3 py-2 text-muted-foreground/60">
                   {t('empty')}

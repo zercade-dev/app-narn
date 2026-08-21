@@ -73,27 +73,109 @@ export const PER_MINUTE_RATE_LIMIT_COOLDOWN_MS = 70_000;
 
 /**
  * A rate limit the provider named as per-MINUTE ("...-per-min",
- * "requests per minute"). Word-bounded on BOTH sides so a camelCase quota name
- * that merely contains the letters — `RequestsPerMinutePerProject` — is not
- * read as a minute-scale limit.
+ * "requests per minute").
  */
 const PER_MINUTE_LIMIT_RE = /\bper[-_\s]?min(ute)?s?\b/i;
+
+/**
+ * A camelCase PerMinute quota id (Google style:
+ * `GenerateRequestsPerMinutePerProjectPerModel`). Google's minute-scale 429
+ * carries the same "exceeded your current quota" prose as the daily one, with
+ * the scale visible only in the violated quota's id — the id names THIS
+ * limit's window, so it is authoritative and must be tested before the
+ * day-scale guard. Case-sensitive so lower-case prose that merely contains
+ * the letters ("supermini") never matches.
+ */
+const CAMEL_MINUTE_QUOTA_RE = /PerMinute/;
+
+/**
+ * Day-scale quota vocabulary that overrides any short provider Retry-After:
+ * Google's daily 429 carries both "exceeded your current quota" and a
+ * misleading "retry in Ns", and honoring the seconds re-offers a bucket that
+ * is dead until the day window rolls.
+ */
+const DAY_SCALE_QUOTA_RE =
+  /\bper[-_\s]?day\b|\bdaily\b|exceeded\s+your[\s\w]*\s+quota|check your plan and billing/i;
 
 /**
  * How long a rate-limited Freeway bucket cools. A limit the provider named as
  * per-minute gets AT LEAST the 70s floor: `Retry-After` is clamped to 60s
  * (below the floor), so honoring a short one would put the bucket back before
- * the minute window has certainly rolled over. Any other rate limit uses the
- * provider's own `Retry-After`, or undefined — which falls back to the
- * bucket's next day-scale reset.
+ * the minute window has certainly rolled over. A limit whose message names a
+ * day-scale quota is dead for the day regardless of any Retry-After it
+ * carries. Any other rate limit uses the provider's own `Retry-After`, or
+ * undefined — which falls back to the bucket's next day-scale reset.
  */
 export function rateLimitCooldownMs(err: unknown): number | undefined {
   const retryAfter = retryAfterMsOf(err);
   const message = err instanceof Error ? err.message : String(err);
-  if (PER_MINUTE_LIMIT_RE.test(message)) {
+  if (PER_MINUTE_LIMIT_RE.test(message) || CAMEL_MINUTE_QUOTA_RE.test(message)) {
     return Math.max(retryAfter ?? 0, PER_MINUTE_RATE_LIMIT_COOLDOWN_MS);
   }
+  if (DAY_SCALE_QUOTA_RE.test(message)) return undefined;
   return retryAfter;
+}
+
+/**
+ * A provider reporting the MODEL itself is gone — retired, renamed, or never
+ * accessible to this key — as opposed to a transient fault. Distinct from a
+ * rate limit or auth failure: the bucket can never serve again this window,
+ * so its cooldown should run to the day reset, not the 15-minute
+ * provider-error window.
+ */
+const MODEL_UNAVAILABLE_RE =
+  /model[\s\S]{0,80}?(does not exist|not found|no longer (available|supported))|no such model|decommissioned|has been retired|deprecated[\s\S]{0,40}removed/i;
+
+/**
+ * Whether an error (or a module's per-result `error` string) signals that
+ * the MODEL is unavailable, not just rate-limited or unauthenticated: "The
+ * model `x` does not exist or you do not have access to it", "model not
+ * found", "no such model", "has been decommissioned/deprecated/retired", or
+ * a structured 404. Word-anchored on "model" for the does-not-exist/
+ * not-found forms so a generic 404 page ("page not found") doesn't match.
+ */
+export function isModelUnavailableError(err: unknown): boolean {
+  if (err && typeof err === 'object') {
+    const e = err as { statusCode?: unknown; message?: unknown };
+    const msg = typeof e.message === 'string' ? e.message : '';
+    if (e.statusCode === 404) return true;
+    if (MODEL_UNAVAILABLE_RE.test(msg)) return true;
+    return false;
+  }
+  return MODEL_UNAVAILABLE_RE.test(String(err));
+}
+
+/**
+ * Vocabulary for a passing provider fault — a 5xx, a timeout, or the
+ * provider's own "high demand"/"try again later" phrasing — worth one retry,
+ * as opposed to a rate limit, an auth failure, or a model that is gone for
+ * good. Deliberately disjoint from {@link RATE_LIMIT_MESSAGE_RE},
+ * {@link AUTH_MESSAGE_RE}/{@link AUTH_STATUS_TOKEN_RE}, and
+ * {@link MODEL_UNAVAILABLE_RE} (see {@link isTransientProviderError}'s
+ * precedence contract and the negative tests pinning it).
+ */
+const TRANSIENT_PROVIDER_RE =
+  /high[\s-]?demand|try again later|temporarily unavailable|\boverloaded\b|service unavailable|\b503\b|internal error|\b500\b|\btimed?[\s-]?out\b|\btimeout\b/i;
+
+/**
+ * Whether an error (or a module's per-result `error` string) signals a
+ * TRANSIENT provider fault — a passing 5xx, a timeout, or the provider's own
+ * "high demand"/"try again later" messaging — worth one retry, as opposed to
+ * a rate limit, an auth failure, or a model the provider will never serve
+ * again this window.
+ *
+ * PRECEDENCE CONTRACT: this classifier's vocabulary is disjoint from
+ * {@link isRateLimitError}, {@link isRunCancellingAuthError}/{@link isAuthError},
+ * and {@link isModelUnavailableError} by construction — but an error can
+ * still carry BOTH a structured signal one of those owns (a 401 statusCode,
+ * a typed RateLimitError) AND transient-sounding prose in its message.
+ * Callers MUST check the other three classifiers FIRST and only fall
+ * through to this one when none of them matched; this function does not
+ * re-derive that ordering itself.
+ */
+export function isTransientProviderError(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return TRANSIENT_PROVIDER_RE.test(msg);
 }
 
 /**

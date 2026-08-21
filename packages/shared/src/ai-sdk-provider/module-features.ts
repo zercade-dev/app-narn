@@ -313,7 +313,13 @@ export function createFeatureMethods(
         text = res.text;
         anyRequestSucceeded = true;
         const usage = toTranslationUsage(res.usage, modelId);
-        if (usage) usages.push(usage);
+        if (usage) {
+          usages.push(usage);
+          // Hand this call's usage over immediately: a caller debiting a
+          // free-tier ledger must be able to charge the bucket that served
+          // THIS call, before a later chunk's 429 aborts the whole return.
+          opts.onUsage?.(usage);
+        }
         logVerbose('glossary-suggest', 'response', {
           text,
           usage: res.usage,

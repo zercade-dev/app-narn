@@ -217,6 +217,15 @@
     "enableModuleHint": "La chiave è impostata, ma il modulo è disattivato.",
     "enableModuleButton": "Attivalo",
     "disabledReasonChip": "Disattivato: {{reason}}",
+    "credentialMarkStatus": "Contrassegnato non valido: {{module}} — imposta nella cassaforte la chiave {{key}} per risolverlo.",
+    "credentialRetryButton": "Riprova",
+    "credentialMarkClearFailed": "Impossibile rimuovere il contrassegno delle credenziali: {{message}}",
+    "credentialMarkErrorNotCandidate": "Questo modulo non può più essere contrassegnato come non valido — il suo stato Freeway è cambiato. Aggiorna per vedere lo stato attuale.",
+    "automaticOption": "Automatico",
+    "instanceSelectorAria": "Scegli quale istanza serve {{provider}}",
+    "instanceOverrideSaveFailed": "Impossibile aggiornare l'istanza per {{provider}}: {{message}}",
+    "instanceOverridesLoadFailed": "Impossibile caricare le impostazioni delle istanze di Freeway: {{message}}",
+    "instancesLoadFailed": "Impossibile caricare le istanze dei moduli Freeway: {{message}}",
     "statusTitle": "Stato",
     "empty": "Ancora nessun provider gratuito configurato.",
     "colModel": "Modello",
@@ -224,6 +233,7 @@
     "colRemaining": "Rimanente",
     "colNextReset": "Prossimo reset",
     "colPassRate": "Tasso di superamento",
+    "sharedPoolLabel": "Pool condiviso",
     "remainingRequests_one": "{{count}} richiesta",
     "remainingRequests_other": "{{count}} richieste",
     "remainingRequests_many": "{{count}} richieste",
@@ -234,7 +244,8 @@
       "cooling": "In raffreddamento",
       "exhausted": "Esaurito per oggi",
       "disabled": "Modulo disattivato",
-      "uncredentialed": "Nessuna chiave"
+      "uncredentialed": "Nessuna chiave",
+      "badCredentials": "Credenziali non valide"
     }
   },
   "overflowRatioLabel": "Rapporto di overflow",

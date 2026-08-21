@@ -18,6 +18,7 @@ import { ChevronRight, Loader2, Save, Sparkles, Tags, Trash2, X, XCircle } from 
 import {
   RunStatusCode,
   CATEGORY_CHUNK_SIZE,
+  FREEWAY_MODULE_ID,
   type EntryContextField,
   type GlossarySummary,
   type JudgeLogEntry,
@@ -36,12 +37,14 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { ModuleSelect } from '@/components/ui/module-select';
+import { ModuleSelect, type ModuleSelectOption } from '@/components/ui/module-select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RunProgressCard } from '@/components/common/RunProgressCard';
+import { AdvancedToggle } from '@/components/common/AdvancedToggle';
 import { isRunActive } from '@/lib/run-kind';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
 import { cn, errorMessage } from '@/lib/utils';
+import { hasNonDefaultValues } from '@/lib/advanced-modified';
 import { toast } from '@/lib/toast';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
@@ -66,6 +69,7 @@ import { asGroupingChoice } from '../config/BatchGroupingControls.js';
 
 /** Last-used per-browser values. Scoped entry ids are NOT persisted (run-specific). */
 const CATEGORY_GEN_SETTINGS_DEFAULTS = {
+  advanced: false,
   moduleId: '',
   model: '',
   reasoningEffort: '',
@@ -142,6 +146,9 @@ interface CategorySuggestion {
 
 export function CategoryTab({ projectId }: { readonly projectId: string }): React.JSX.Element {
   const { t } = useTranslation('category');
+  // Only for the synthetic Freeway option's label below (`config:routing.freewayLabel`,
+  // reused from the routing picker rather than duplicating the string here).
+  const { t: tConfig } = useTranslation('config');
 
   const entries = useStringStore((s) => s.entries);
   const loadedProjectId = useStringStore((s) => s.loadedProjectId);
@@ -172,6 +179,11 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
   const [userModel, setUserModel] = useState('');
   const [reasoningEffort, setReasoningEffort] = useState('');
   const confidenceContext = useConfidenceContext('category-gen', reasoningEffort);
+  // Everything below the module/model/effort picker is tuning, not the choice
+  // that defines the run — hidden behind this until ticked. Only its own
+  // visibility is gated; the values it wraps are never reset by hiding it (see
+  // the AI-dialog open-reset block below).
+  const [advanced, setAdvanced] = useState(false);
   const [includeExisting, setIncludeExisting] = useState(true);
   const [genContext, setGenContext] = useState<GenerationContextValue>({
     contextFields: [],
@@ -312,6 +324,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
     setPrevAiOpen(aiOpen);
     if (aiOpen) {
       const stored = readSettings();
+      setAdvanced(stored.advanced);
       setIncludeExisting(stored.includeExisting);
       setGenContext({
         contextFields: stored.contextFields as EntryContextField[],
@@ -463,7 +476,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
   const storedDesc = selectedCategory ? (descriptions[selectedCategory] ?? '') : '';
   const descDirty = descDraft.trim() !== storedDesc;
 
-  const aiModules = useMemo(() => {
+  const realAiModules = useMemo(() => {
     const withInstances = basesWithInstances(modules);
     return modules.filter(
       (m) =>
@@ -472,6 +485,43 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
         isEnabledModule(m),
     );
   }, [modules]);
+  // The category-suggest picker also offers a synthetic NARN Freeway target
+  // (M29 CategoryGenEngine already accepts moduleId 'freeway', resolving via
+  // the free pool at background priority — bypassing CATEGORY_CAPABLE_MODULE_IDS
+  // server-side too, since freeway is a router target rather than one of the
+  // real base providers that Set mirrors) — appended here at THIS composition
+  // site only, mirroring AiReviewDialog's judge-picker pattern, and run
+  // through the SAME isOfferableModule/isEnabledModule predicates real
+  // modules use (both accept it: `instanceable: false`, `enabled: true`),
+  // rather than being force-included. Only added once `realAiModules` is
+  // non-empty — that both keeps Freeway from ever being the *sole* offered
+  // option (the "no modules" empty state stays exactly as it was: real API
+  // modules only) and avoids a mount-time race where the synthetic entry
+  // would otherwise appear on the very first render, before the async
+  // `/modules` fetch has resolved.
+  const aiModules = useMemo<ModuleSelectOption[]>(() => {
+    if (realAiModules.length === 0) return realAiModules;
+    const withInstances = basesWithInstances(modules);
+    return [
+      ...modules,
+      {
+        id: FREEWAY_MODULE_ID,
+        name: tConfig('routing.freewayLabel'),
+        baseModuleId: undefined,
+        instanceable: false,
+        enabled: true,
+      },
+    ].filter(
+      // The `m.id === FREEWAY_MODULE_ID` branch only ever matches the
+      // synthetic entry appended above — module-index.ts's static registry
+      // guarantees no real module is ever registered under the 'freeway' id,
+      // so this can't accidentally admit a real (non-capable) module.
+      (m) =>
+        (m.id === FREEWAY_MODULE_ID || CATEGORY_CAPABLE_MODULE_IDS.has(m.baseModuleId ?? m.id)) &&
+        isOfferableModule(m, withInstances) &&
+        isEnabledModule(m),
+    );
+  }, [modules, realAiModules, tConfig]);
   const moduleId = userModuleId ?? aiModules[0]?.id ?? '';
   const noAiModules = modules.length > 0 && aiModules.length === 0;
 
@@ -706,6 +756,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
     async () => {
       if (!moduleId) return;
       saveSettings({
+        advanced,
         // Persist the resolved module (falls back to the first offerable
         // module when the user never touched the selector) — not the raw
         // `userModuleId` state, which stays null in that common case and
@@ -726,6 +777,33 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
       await suggestRun.invoke();
     },
     { errorFallback: t('runFailed') },
+  );
+
+  // moduleId/model/reasoningEffort are excluded: their controls render
+  // unconditionally above the Advanced toggle, not inside {advanced && (…)}
+  // below. contextLanguages is gated on activeLanguages (GenerationContext-
+  // Controls' language section renders only when non-empty); skipCategories/
+  // ignoreGlossaries are gated on categories/offerableGlossaries being
+  // non-empty (that component's own render condition for each section);
+  // ignoreLimit/customBatchSize are gated on `grouping`, mirroring the exact
+  // condition BatchGroupingControls uses to show/hide each control — a value
+  // that hides a control must not make it count toward the badge.
+  const hasActiveLanguages = (project?.activeLanguages?.length ?? 0) > 0;
+  const offerableGlossaries = availableGlossaries.filter((g) => g.enabled !== false);
+  const advancedModified = hasNonDefaultValues(
+    {
+      includeExisting,
+      contextFields: genContext.contextFields,
+      grouping: genContext.grouping,
+      ...(hasActiveLanguages ? { contextLanguages: genContext.contextLanguages } : {}),
+      ...(categories.length > 0 ? { skipCategories: genContext.skipCategories } : {}),
+      ...(offerableGlossaries.length > 0 ? { ignoreGlossaries: genContext.ignoreGlossaries } : {}),
+      ...(genContext.grouping === 'custom' ? { customBatchSize: genContext.customBatchSize } : {}),
+      ...(genContext.grouping !== 'default' && genContext.grouping !== 'custom'
+        ? { ignoreLimit: genContext.ignoreLimit }
+        : {}),
+    },
+    CATEGORY_GEN_SETTINGS_DEFAULTS,
   );
 
   const toggleSuggestion = (idx: number) => {
@@ -1239,7 +1317,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
                 />
               </div>
 
-              {moduleId && (
+              {moduleId && moduleId !== FREEWAY_MODULE_ID && (
                 <>
                   <div className="space-y-1.5">
                     <Label htmlFor="category-ai-model">{t('model')}</Label>
@@ -1261,25 +1339,55 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
                 </>
               )}
 
-              <label className="flex cursor-pointer select-none items-center gap-2 text-sm">
-                <Checkbox
-                  checked={includeExisting}
-                  onCheckedChange={(checked) => setIncludeExisting(checked === true)}
-                  data-testid="category-include-existing"
-                />
-                {t('includeExisting')}
-              </label>
+              {/* Freeway picks its own model per batch — no model/effort
+                  route (`/api/modules/freeway/models`) exists for the
+                  suppressed selectors to call, so a one-line explanation
+                  replaces them. */}
+              {moduleId === FREEWAY_MODULE_ID && (
+                <p
+                  className="text-xs text-muted-foreground"
+                  data-testid="category-ai-freeway-model-hint"
+                >
+                  {t('freewayModelHint')}
+                </p>
+              )}
 
-              <GenerationContextControls
-                value={genContext}
-                onChange={setGenContext}
-                activeLanguages={project?.activeLanguages ?? []}
-                availableCategories={categories}
-                availableGlossaries={availableGlossaries.filter((g) => g.enabled !== false)}
-              />
+              <div className="border-t pt-3">
+                <AdvancedToggle
+                  id="category-ai-advanced"
+                  testId="category-ai-advanced"
+                  checked={advanced}
+                  modified={advancedModified}
+                  onCheckedChange={setAdvanced}
+                  label={t('aiAdvancedOptions')}
+                />
+              </div>
+
+              {advanced && (
+                <>
+                  <label className="flex cursor-pointer select-none items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={includeExisting}
+                      onCheckedChange={(checked) => setIncludeExisting(checked === true)}
+                      data-testid="category-include-existing"
+                    />
+                    {t('includeExisting')}
+                  </label>
+
+                  <GenerationContextControls
+                    value={genContext}
+                    onChange={setGenContext}
+                    activeLanguages={project?.activeLanguages ?? []}
+                    availableCategories={categories}
+                    availableGlossaries={offerableGlossaries}
+                  />
+                </>
+              )}
             </div>
           )}
 
+          {/* A consequence preview (what the run will spend), not a tuning
+              knob — unconditional even while Advanced is collapsed. */}
           {genBatchCount > 0 && !noAiModules && (
             <p className="text-xs text-muted-foreground" data-testid="category-gen-batch-count">
               {t('genBatchCount', { count: genBatchCount })}

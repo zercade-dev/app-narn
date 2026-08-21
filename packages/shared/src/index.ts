@@ -7,6 +7,7 @@ export type {
   BatchGroupingDimension,
   AiRunModuleSelection,
 } from './types/project.js';
+export { BATCH_GROUPING_DIMENSIONS } from './types/project.js';
 export type {
   StageDetailFieldId,
   StageDetailTranslation,
@@ -379,3 +380,7 @@ export {
   hasSharedPool,
 } from './freeway/free-tier-snapshot.js';
 export { windowStart, nextReset } from './freeway/windows.js';
+
+export type { PoolableEntry, LogPoolOptions, LogPoolDropCounts } from './logging/entry-pools.js';
+export { LogEntryPools, isPriorityLevel } from './logging/entry-pools.js';
+export { TenantEntryPools, type TenantPoolOptions } from './logging/tenant-entry-pools.js';

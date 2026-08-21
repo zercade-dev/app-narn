@@ -217,6 +217,15 @@
     "enableModuleHint": "Key is set, but the module is turned off.",
     "enableModuleButton": "Enable it",
     "disabledReasonChip": "Disabled: {{reason}}",
+    "credentialMarkStatus": "Marked bad: {{module}} — write {{key}} in the vault to clear it.",
+    "credentialRetryButton": "Try again",
+    "credentialMarkClearFailed": "Failed to clear the credential mark: {{message}}",
+    "credentialMarkErrorNotCandidate": "This module can no longer be marked bad — its Freeway status has changed. Refresh to see the current state.",
+    "automaticOption": "Automatic",
+    "instanceSelectorAria": "Choose which instance serves {{provider}}",
+    "instanceOverrideSaveFailed": "Failed to update the instance for {{provider}}: {{message}}",
+    "instanceOverridesLoadFailed": "Failed to load Freeway instance settings: {{message}}",
+    "instancesLoadFailed": "Failed to load Freeway module instances: {{message}}",
     "statusTitle": "Status",
     "empty": "No free-tier providers configured yet.",
     "colModel": "Model",
@@ -224,6 +233,7 @@
     "colRemaining": "Remaining",
     "colNextReset": "Next reset",
     "colPassRate": "Pass rate",
+    "sharedPoolLabel": "Shared pool",
     "remainingRequests_one": "{{count}} request",
     "remainingRequests_other": "{{count}} requests",
     "remainingChars": "{{count}} chars",
@@ -233,7 +243,8 @@
       "cooling": "Cooling down",
       "exhausted": "Exhausted for today",
       "disabled": "Module disabled",
-      "uncredentialed": "No key"
+      "uncredentialed": "No key",
+      "badCredentials": "Bad credentials"
     }
   },
   "overflowRatioLabel": "Overflow ratio",

@@ -58,6 +58,8 @@ interface CellProps {
   isTranslating?: boolean;
   /** True when the translation was auto-applied from the translation memory. */
   isTmHit?: boolean;
+  /** Quality tier (1-4) of the Freeway model that served this translation; absent for non-Freeway records. */
+  freewayTier?: number;
   /**
    * When true, the cell uses `width` as a flex basis/min and grows to claim the
    * spare horizontal space in the row instead of staying pinned to a fixed
@@ -87,6 +89,7 @@ export const Cell = memo(function Cell({
   translationStatus,
   isTranslating,
   isTmHit,
+  freewayTier,
   grow,
 }: CellProps) {
   const { t } = useTranslation('strings');
@@ -130,6 +133,28 @@ export const Cell = memo(function Cell({
       data-selected={selected ? 'true' : undefined}
     >
       {empty ? '—' : <span data-content>{text}</span>}
+      {typeof freewayTier === 'number' && !empty && (
+        <Tooltip>
+          <TooltipTrigger
+            render={<span />}
+            // Solid bg-background base so the badge stays legible when long
+            // cell text runs underneath it, same as the LQA badge below.
+            className="absolute top-0.5 left-0.5 cursor-help bg-background rounded-sm"
+            data-testid="freeway-tier-badge"
+          >
+            <Badge
+              variant="secondary"
+              className="h-3.5 px-1 text-[9px] font-bold pointer-events-none"
+              aria-label={t('row.freewayTier', { tier: freewayTier })}
+            >
+              {freewayTier}
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="text-xs">
+            {t('row.freewayTier', { tier: freewayTier })}
+          </TooltipContent>
+        </Tooltip>
+      )}
       {isTmHit && !empty && (
         <Tooltip>
           <TooltipTrigger
@@ -627,6 +652,7 @@ export const StringTableRow = memo(function StringTableRow({
               }
               isTranslating={translatingCells?.has(`${entry.id}:${lang}`)}
               isTmHit={rec?.moduleId === TM_MODULE_ID}
+              freewayTier={rec?.freewayTier}
               grow
             />
           );

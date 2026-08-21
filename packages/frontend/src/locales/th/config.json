@@ -212,6 +212,15 @@
     "enableModuleHint": "ตั้งค่าคีย์แล้ว แต่โมดูลถูกปิดใช้งาน",
     "enableModuleButton": "เปิดใช้งาน",
     "disabledReasonChip": "ปิดใช้งาน: {{reason}}",
+    "credentialMarkStatus": "ถูกทำเครื่องหมายว่าไม่ถูกต้อง: {{module}} — ตั้งค่ารายการในตู้นิรภัย {{key}} เพื่อแก้ไข",
+    "credentialRetryButton": "ลองอีกครั้ง",
+    "credentialMarkClearFailed": "ล้างเครื่องหมายข้อมูลรับรองไม่สำเร็จ: {{message}}",
+    "credentialMarkErrorNotCandidate": "โมดูลนี้ไม่สามารถถูกทำเครื่องหมายว่าไม่ถูกต้องได้อีกต่อไป — สถานะ Freeway ของโมดูลนี้เปลี่ยนไปแล้ว รีเฟรชเพื่อดูสถานะปัจจุบัน",
+    "automaticOption": "อัตโนมัติ",
+    "instanceSelectorAria": "เลือกอินสแตนซ์ที่ให้บริการ {{provider}}",
+    "instanceOverrideSaveFailed": "อัปเดตอินสแตนซ์สำหรับ {{provider}} ไม่สำเร็จ: {{message}}",
+    "instanceOverridesLoadFailed": "โหลดการตั้งค่าอินสแตนซ์ของ Freeway ไม่สำเร็จ: {{message}}",
+    "instancesLoadFailed": "โหลดอินสแตนซ์โมดูลของ Freeway ไม่สำเร็จ: {{message}}",
     "statusTitle": "สถานะ",
     "empty": "ยังไม่มีผู้ให้บริการระดับฟรีที่ตั้งค่าไว้",
     "colModel": "โมเดล",
@@ -219,6 +228,7 @@
     "colRemaining": "คงเหลือ",
     "colNextReset": "รีเซ็ตถัดไป",
     "colPassRate": "อัตราผ่าน",
+    "sharedPoolLabel": "กลุ่มที่ใช้ร่วมกัน",
     "remainingRequests_other": "{{count}} คำขอ",
     "remainingChars": "{{count}} อักขระ",
     "passRateEntry": "{{language}}: {{rate}}%",
@@ -227,7 +237,8 @@
       "cooling": "กำลังคูลดาวน์",
       "exhausted": "หมดสำหรับวันนี้",
       "disabled": "โมดูลถูกปิดใช้งาน",
-      "uncredentialed": "ไม่มีคีย์"
+      "uncredentialed": "ไม่มีคีย์",
+      "badCredentials": "ข้อมูลรับรองไม่ถูกต้อง"
     }
   },
   "overflowRatioLabel": "อัตราส่วนการล้น",

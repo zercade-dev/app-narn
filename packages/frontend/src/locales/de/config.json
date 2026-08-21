@@ -217,6 +217,15 @@
     "enableModuleHint": "Schlüssel ist gesetzt, aber das Modul ist deaktiviert.",
     "enableModuleButton": "Aktivieren",
     "disabledReasonChip": "Deaktiviert: {{reason}}",
+    "credentialMarkStatus": "Als ungültig markiert: {{module}} — Tresor-Eintrag {{key}} setzen, um es zu beheben.",
+    "credentialRetryButton": "Erneut versuchen",
+    "credentialMarkClearFailed": "Markierung ungültiger Zugangsdaten konnte nicht aufgehoben werden: {{message}}",
+    "credentialMarkErrorNotCandidate": "Dieses Modul kann nicht mehr als ungültig markiert werden — sein Freeway-Status hat sich geändert. Aktualisiere, um den aktuellen Status zu sehen.",
+    "automaticOption": "Automatisch",
+    "instanceSelectorAria": "Wählen, welche Instanz {{provider}} bedient",
+    "instanceOverrideSaveFailed": "Instanz für {{provider}} konnte nicht aktualisiert werden: {{message}}",
+    "instanceOverridesLoadFailed": "Freeway-Instanzeinstellungen konnten nicht geladen werden: {{message}}",
+    "instancesLoadFailed": "Freeway-Modulinstanzen konnten nicht geladen werden: {{message}}",
     "statusTitle": "Status",
     "empty": "Noch keine kostenlosen Anbieter konfiguriert.",
     "colModel": "Modell",
@@ -224,6 +233,7 @@
     "colRemaining": "Verbleibend",
     "colNextReset": "Nächster Reset",
     "colPassRate": "Bestehensquote",
+    "sharedPoolLabel": "Gemeinsamer Pool",
     "remainingRequests_one": "{{count}} Anfrage",
     "remainingRequests_other": "{{count}} Anfragen",
     "remainingChars": "Zeichen: {{count}}",
@@ -233,7 +243,8 @@
       "cooling": "Cooldown",
       "exhausted": "Für heute aufgebraucht",
       "disabled": "Modul deaktiviert",
-      "uncredentialed": "Kein Schlüssel"
+      "uncredentialed": "Kein Schlüssel",
+      "badCredentials": "Zugangsdaten ungültig"
     }
   },
   "overflowRatioLabel": "Überlauf-Verhältnis",

@@ -23,6 +23,7 @@ import { Sparkles } from 'lucide-react';
 import {
   RunStatusCode,
   GLOSSARY_SUGGEST_CHUNK_SIZE,
+  FREEWAY_MODULE_ID,
   type EntryContextField,
   type GlossarySuggestion,
   type GlossarySummary,
@@ -54,7 +55,8 @@ import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import { Progress } from '../ui/progress';
 import { Textarea } from '../ui/textarea';
-import { ModuleSelect } from '../ui/module-select';
+import { ModuleSelect, type ModuleSelectOption } from '../ui/module-select';
+import { AdvancedToggle } from '../common/AdvancedToggle.js';
 import { ModuleModelSelector } from '../config/ModuleModelSelector.js';
 import { useConfidenceContext } from '../../hooks/use-confidence-context.js';
 import { ModuleReasoningEffortSelect } from '../config/ModuleReasoningEffortSelect.js';
@@ -65,10 +67,12 @@ import {
 } from '../generation/GenerationContextControls.js';
 import { RunLogsPanel } from '../review/RunLogsPanel.js';
 import { useDialogSettings } from '../../hooks/use-dialog-settings.js';
+import { hasNonDefaultValues } from '../../lib/advanced-modified.js';
 import { asGroupingChoice } from '../config/BatchGroupingControls.js';
 
 /** Last-used per-browser values. Focus source-texts input is NOT persisted (entry-specific). */
 const GLOSSARY_GEN_SETTINGS_DEFAULTS = {
+  advanced: false,
   moduleId: '',
   model: '',
   reasoningEffort: '',
@@ -121,6 +125,9 @@ export function GenerateGlossaryDialog({
   entryIds,
 }: GenerateGlossaryDialogProps): React.JSX.Element {
   const { t } = useTranslation('glossary');
+  // Only for the synthetic Freeway option's label below (`config:routing.freewayLabel`,
+  // reused from the routing picker rather than duplicating the string here).
+  const { t: tConfig } = useTranslation('config');
   const { read: readSettings, save: saveSettings } = useDialogSettings(
     'glossary-gen',
     GLOSSARY_GEN_SETTINGS_DEFAULTS,
@@ -150,6 +157,11 @@ export function GenerateGlossaryDialog({
   const [moduleId, setModuleId] = useState('');
   const [model, setModel] = useState('');
   const [reasoningEffort, setReasoningEffort] = useState('');
+  // Everything below the module/model/effort picker is tuning, not the choice
+  // that defines the run — hidden behind this until ticked. Only its own
+  // visibility is gated; the values it wraps are never reset by hiding it (see
+  // the open-reset block below).
+  const [advanced, setAdvanced] = useState(false);
   const confidenceContext = useConfidenceContext('glossary-gen', reasoningEffort);
   const [genContext, setGenContext] = useState<GenerationContextValue>({
     contextFields: [],
@@ -221,12 +233,13 @@ export function GenerateGlossaryDialog({
   // set-state-in-effect lint rule prefers over a state-resetting effect). The
   // run id and result are NOT reset here so reopening the dialog can resume a
   // run started before the dialog was closed.
-  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevOpen, setPrevOpen] = useState(false);
   if (prevOpen !== open) {
     setPrevOpen(open);
     if (open) {
       const stored = readSettings();
       setError(null);
+      setAdvanced(stored.advanced);
       setGenContext({
         contextFields: stored.contextFields as EntryContextField[],
         contextLanguages: stored.contextLanguages,
@@ -297,10 +310,38 @@ export function GenerateGlossaryDialog({
   // Offer named instances, non-instanceable bases, and instanceable bases that
   // have no instances yet (managed directly) — the same rule the AI-review /
   // source-review pickers use; a base is excluded only once it has instances.
-  const baseInstanceSet = basesWithInstances(modules);
-  const suggestModules = modules.filter(
-    (m) => m.supportsJudge && isOfferableModule(m, baseInstanceSet) && isEnabledModule(m),
-  );
+  const realSuggestModules = useMemo(() => {
+    const withInstances = basesWithInstances(modules);
+    return modules.filter(
+      (m) => m.supportsJudge && isOfferableModule(m, withInstances) && isEnabledModule(m),
+    );
+  }, [modules]);
+  // The glossary-suggest picker also offers a synthetic NARN Freeway target
+  // (M28 GlossaryGenEngine already accepts moduleId 'freeway', resolving via
+  // the free pool at background priority) — appended here at THIS composition
+  // site only, mirroring AiReviewDialog's judge-picker pattern, and run
+  // through the SAME isOfferableModule/isEnabledModule predicates real
+  // modules use (both accept it: `instanceable: false`, `enabled: true`),
+  // rather than being force-included. Only added once `realSuggestModules` is
+  // non-empty — that both keeps Freeway from ever being the *sole* offered
+  // option (the "no modules" empty state below stays exactly as it was: real
+  // API modules only) and avoids a mount-time race where the synthetic entry
+  // would otherwise appear on the very first render, before the async
+  // `/modules` fetch has resolved.
+  const suggestModules = useMemo<ModuleSelectOption[]>(() => {
+    if (realSuggestModules.length === 0) return realSuggestModules;
+    const withInstances = basesWithInstances(modules);
+    return [
+      ...modules,
+      {
+        id: FREEWAY_MODULE_ID,
+        name: tConfig('routing.freewayLabel'),
+        instanceable: false,
+        supportsJudge: true,
+        enabled: true,
+      },
+    ].filter((m) => m.supportsJudge && isOfferableModule(m, withInstances) && isEnabledModule(m));
+  }, [modules, realSuggestModules, tConfig]);
   // Apply the stashed stored module choice once the async module list has
   // loaded (suggestModules is [] on the mount-time open transition above — the
   // list is fetched lazily on open, so that block always runs before modules
@@ -425,6 +466,7 @@ export function GenerateGlossaryDialog({
         // module when the user never touched the selector) — not the raw
         // `moduleId` state, which stays '' in that common case and would
         // otherwise make the stored value always falsy and never restored.
+        advanced,
         moduleId: effectiveModuleId,
         model,
         reasoningEffort,
@@ -506,6 +548,48 @@ export function GenerateGlossaryDialog({
   // internal chunk of the suggest call settles. Render an indeterminate (pulsing)
   // bar until the first chunk lands, then a determinate bar that fills steadily.
   const progressValue = trackedRun && trackedRun.completed > 0 ? trackedRun.completed : undefined;
+
+  // moduleId/model/reasoningEffort are excluded: their controls render
+  // unconditionally, outside {advanced && (…)} below.
+  // contextLanguages is gated on activeLanguages (GenerationContextControls'
+  // language section renders only when non-empty). includeTranslations is
+  // gated on canIncludeTranslations (contextLanguages.length > 0), NOT on
+  // hasActiveLanguages: the checkbox itself renders
+  // `checked={includeTranslations && canIncludeTranslations}` and
+  // `disabled={!canIncludeTranslations}`, so with active languages but no
+  // context language checked it's on screen greyed out and unchecked — a
+  // stale `includeTranslations: true` there must not light the badge. No
+  // signal is lost: canIncludeTranslations implies contextLanguages is
+  // non-empty, which already lights the badge on its own.
+  // skipCategories/ignoreGlossaries are gated on availableCategories/
+  // enabledGlossaries being non-empty (that component's own render condition
+  // for each section); ignoreLimit/customBatchSize are gated on `grouping`,
+  // mirroring the exact condition BatchGroupingControls uses to show/hide each
+  // control — a value that hides a control must not make it count toward the
+  // badge.
+  //
+  // `focusSourceTextsInput` (the "focus on these exact source texts" textarea,
+  // rendered inside {advanced && (…)} below) is deliberately NOT part of this
+  // comparison: it has no key in GLOSSARY_GEN_SETTINGS_DEFAULTS because it is
+  // never persisted (entry-specific, see its declaration above) and always
+  // resets to '' on open, so there is no "default" for it to differ from — the
+  // badge cannot reflect it, by design, not oversight.
+  const hasActiveLanguages = (project?.activeLanguages?.length ?? 0) > 0;
+  const advancedModified = hasNonDefaultValues(
+    {
+      contextFields: genContext.contextFields,
+      grouping: genContext.grouping,
+      ...(hasActiveLanguages ? { contextLanguages: genContext.contextLanguages } : {}),
+      ...(canIncludeTranslations ? { includeTranslations } : {}),
+      ...(availableCategories.length > 0 ? { skipCategories: genContext.skipCategories } : {}),
+      ...(enabledGlossaries.length > 0 ? { ignoreGlossaries: genContext.ignoreGlossaries } : {}),
+      ...(genContext.grouping === 'custom' ? { customBatchSize: genContext.customBatchSize } : {}),
+      ...(genContext.grouping !== 'default' && genContext.grouping !== 'custom'
+        ? { ignoreLimit: genContext.ignoreLimit }
+        : {}),
+    },
+    GLOSSARY_GEN_SETTINGS_DEFAULTS,
+  );
 
   const renderBody = () => {
     if (noModules) {
@@ -643,7 +727,7 @@ export function GenerateGlossaryDialog({
           />
         </div>
 
-        {effectiveModuleId && (
+        {effectiveModuleId && effectiveModuleId !== FREEWAY_MODULE_ID && (
           <div className="space-y-1.5">
             <Label htmlFor="glossary-generate-model">{t('generateModel')}</Label>
             <ModuleModelSelector
@@ -664,60 +748,89 @@ export function GenerateGlossaryDialog({
           </div>
         )}
 
-        <GenerationContextControls
-          value={genContext}
-          onChange={setGenContext}
-          activeLanguages={project?.activeLanguages ?? []}
-          availableCategories={availableCategories}
-          availableGlossaries={enabledGlossaries}
-          languagesExtra={
-            <div
-              className="space-y-1.5 ml-4 border-l-2 border-border pl-3"
-              data-testid="glossary-generate-include-translations-group"
-            >
-              <label
-                className={`inline-flex items-center gap-2 text-sm select-none ${
-                  canIncludeTranslations ? 'cursor-pointer' : 'opacity-50'
-                }`}
-              >
-                <Checkbox
-                  checked={includeTranslations && canIncludeTranslations}
-                  disabled={!canIncludeTranslations}
-                  onCheckedChange={(checked) => setIncludeTranslations(checked === true)}
-                  data-testid="glossary-generate-include-translations"
-                />
-                {t('generateIncludeTranslations')}
-              </label>
-              <p className="text-xs text-muted-foreground">
-                {t('generateIncludeTranslationsHint')}
-              </p>
-            </div>
-          }
-        />
+        {/* Freeway picks its own model per batch — no model/effort route
+            (`/api/modules/freeway/models`) exists for the suppressed
+            selectors to call, so a one-line explanation replaces them. */}
+        {effectiveModuleId === FREEWAY_MODULE_ID && (
+          <p
+            className="text-xs text-muted-foreground"
+            data-testid="glossary-generate-freeway-model-hint"
+          >
+            {t('generateFreewayModelHint')}
+          </p>
+        )}
 
-        <div className="space-y-1.5">
-          <Label htmlFor="glossary-generate-focus-source-texts">
-            {t('generateFocusSourceTextsLabel')}
-          </Label>
-          <p className="text-xs text-muted-foreground">{t('generateFocusSourceTextsHint')}</p>
-          <Textarea
-            id="glossary-generate-focus-source-texts"
-            data-testid="glossary-generate-focus-source-texts"
-            value={focusSourceTextsInput}
-            onChange={(e) => setFocusSourceTextsInput(e.target.value)}
-            placeholder={t('generateFocusSourceTextsPlaceholder')}
-            rows={3}
+        <div className="border-t pt-3">
+          <AdvancedToggle
+            id="glossary-generate-advanced"
+            testId="glossary-generate-advanced"
+            checked={advanced}
+            modified={advancedModified}
+            onCheckedChange={setAdvanced}
+            label={t('generateAdvancedOptions')}
           />
-          {focusSourceTexts.length > 0 && (
-            <p
-              className="text-xs text-muted-foreground"
-              data-testid="glossary-generate-focus-source-texts-count"
-            >
-              {t('generateFocusSourceTextsCount', { count: focusSourceTexts.length })}
-            </p>
-          )}
         </div>
 
+        {advanced && (
+          <>
+            <GenerationContextControls
+              value={genContext}
+              onChange={setGenContext}
+              activeLanguages={project?.activeLanguages ?? []}
+              availableCategories={availableCategories}
+              availableGlossaries={enabledGlossaries}
+              languagesExtra={
+                <div
+                  className="space-y-1.5 ml-4 border-l-2 border-border pl-3"
+                  data-testid="glossary-generate-include-translations-group"
+                >
+                  <label
+                    className={`inline-flex items-center gap-2 text-sm select-none ${
+                      canIncludeTranslations ? 'cursor-pointer' : 'opacity-50'
+                    }`}
+                  >
+                    <Checkbox
+                      checked={includeTranslations && canIncludeTranslations}
+                      disabled={!canIncludeTranslations}
+                      onCheckedChange={(checked) => setIncludeTranslations(checked === true)}
+                      data-testid="glossary-generate-include-translations"
+                    />
+                    {t('generateIncludeTranslations')}
+                  </label>
+                  <p className="text-xs text-muted-foreground">
+                    {t('generateIncludeTranslationsHint')}
+                  </p>
+                </div>
+              }
+            />
+
+            <div className="space-y-1.5">
+              <Label htmlFor="glossary-generate-focus-source-texts">
+                {t('generateFocusSourceTextsLabel')}
+              </Label>
+              <p className="text-xs text-muted-foreground">{t('generateFocusSourceTextsHint')}</p>
+              <Textarea
+                id="glossary-generate-focus-source-texts"
+                data-testid="glossary-generate-focus-source-texts"
+                value={focusSourceTextsInput}
+                onChange={(e) => setFocusSourceTextsInput(e.target.value)}
+                placeholder={t('generateFocusSourceTextsPlaceholder')}
+                rows={3}
+              />
+              {focusSourceTexts.length > 0 && (
+                <p
+                  className="text-xs text-muted-foreground"
+                  data-testid="glossary-generate-focus-source-texts-count"
+                >
+                  {t('generateFocusSourceTextsCount', { count: focusSourceTexts.length })}
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* A consequence preview (what the run will spend), not a tuning
+            knob — unconditional even while Advanced is collapsed. */}
         {genBatchCount > 0 && !noModules && (
           <p className="text-xs text-muted-foreground" data-testid="glossary-generate-batch-count">
             {t('generateBatchCount', { count: genBatchCount })}

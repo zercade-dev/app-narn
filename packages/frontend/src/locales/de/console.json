@@ -12,6 +12,9 @@
   "unreadErrors": "Ungelesene Fehler: {{count}}",
   "unreadErrors_one": "{{count}} ungelesener Fehler",
   "unreadErrors_other": "{{count}} ungelesene Fehler",
+  "droppedEntries": "Frühere Einträge nicht mehr verfügbar: {{count}}",
+  "droppedEntries_one": "{{count}} früherer Eintrag nicht mehr verfügbar",
+  "droppedEntries_other": "{{count}} frühere Einträge nicht mehr verfügbar",
   "searchPlaceholder": "Logs durchsuchen…",
   "exportLogs": "Logs exportieren",
   "exportFormat": "Exportformat",
@@ -27,5 +30,10 @@
   "showDetails": "Technische Details anzeigen",
   "membersNotShown": "Weitere nicht angezeigte Einträge: {{count}}",
   "membersNotShown_one": "{{count}} weiterer Eintrag wird nicht angezeigt",
-  "membersNotShown_other": "{{count}} weitere Einträge werden nicht angezeigt"
+  "membersNotShown_other": "{{count}} weitere Einträge werden nicht angezeigt",
+  "captureLabel": "Alle Logs erfassen",
+  "captureTooltip": "Wenn aktiviert, behält der Server jeden Log-Eintrag dieser Sitzung, damit ein langer Lauf ohne Datenverlust analysiert werden kann.",
+  "captureDownload": "Erfassung herunterladen ({{captured}})",
+  "captureDropped": "+{{dropped}} verworfen",
+  "captureSlotsExhausted": "Die Erfassung ist gerade ausgelastet — auf diesem Server laufen bereits zu viele Erfassungen. Bitte später erneut versuchen."
 }

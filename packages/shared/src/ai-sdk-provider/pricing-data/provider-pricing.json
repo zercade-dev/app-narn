@@ -1,38 +1,40 @@
 {
-  "generatedAt": "2026-08-15T15:57:34.064Z",
+  "generatedAt": "2026-08-21T14:08:30.643Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
       "models": [
         {
           "id": "deepseek-v4-flash",
-          "cachedInputCostPerMillion": 0.0028,
-          "inputCostPerMillion": 0.14,
-          "outputCostPerMillion": 0.28,
+          "cachedInputCostPerMillion": 0.007,
           "contextLength": 1000000,
           "capabilityTags": ["tools"]
         },
         {
           "id": "deepseek-v4-pro",
-          "cachedInputCostPerMillion": 0.003625,
-          "inputCostPerMillion": 0.435,
-          "outputCostPerMillion": 0.87,
+          "cachedInputCostPerMillion": 0.022,
+          "inputCostPerMillion": 0.22,
+          "outputCostPerMillion": 0.66,
+          "contextLength": 1000000,
+          "capabilityTags": ["tools"]
+        },
+        {
+          "id": "deepseek-v4-flash-vision-exp",
+          "cachedInputCostPerMillion": 0.007,
+          "inputCostPerMillion": 0.66,
+          "outputCostPerMillion": 1.98,
           "contextLength": 1000000,
           "capabilityTags": ["tools"]
         },
         {
           "id": "deepseek-chat",
-          "cachedInputCostPerMillion": 0.0028,
-          "inputCostPerMillion": 0.14,
-          "outputCostPerMillion": 0.28,
+          "cachedInputCostPerMillion": 0.007,
           "contextLength": 1000000,
           "capabilityTags": ["tools"]
         },
         {
           "id": "deepseek-reasoner",
-          "cachedInputCostPerMillion": 0.0028,
-          "inputCostPerMillion": 0.14,
-          "outputCostPerMillion": 0.28,
+          "cachedInputCostPerMillion": 0.007,
           "contextLength": 1000000,
           "capabilityTags": ["tools"]
         }

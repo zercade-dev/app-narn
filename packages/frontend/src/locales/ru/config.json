@@ -227,6 +227,15 @@
     "enableModuleHint": "Ключ задан, но модуль отключён.",
     "enableModuleButton": "Включить",
     "disabledReasonChip": "Отключено: {{reason}}",
+    "credentialMarkStatus": "Отмечено как недействительное: {{module}} — задайте ключ хранилища {{key}}, чтобы снять отметку.",
+    "credentialRetryButton": "Повторить",
+    "credentialMarkClearFailed": "Не удалось снять отметку об учетных данных: {{message}}",
+    "credentialMarkErrorNotCandidate": "Этот модуль больше нельзя пометить как недействительный — его статус Freeway изменился. Обновите, чтобы увидеть текущий статус.",
+    "automaticOption": "Автоматически",
+    "instanceSelectorAria": "Выбрать, какой экземпляр обслуживает {{provider}}",
+    "instanceOverrideSaveFailed": "Не удалось обновить экземпляр для {{provider}}: {{message}}",
+    "instanceOverridesLoadFailed": "Не удалось загрузить настройки экземпляров Freeway: {{message}}",
+    "instancesLoadFailed": "Не удалось загрузить экземпляры модулей Freeway: {{message}}",
     "statusTitle": "Состояние",
     "empty": "Бесплатные поставщики ещё не настроены.",
     "colModel": "Модель",
@@ -234,6 +243,7 @@
     "colRemaining": "Осталось",
     "colNextReset": "Следующий сброс",
     "colPassRate": "Доля прохождения",
+    "sharedPoolLabel": "Общий пул",
     "remainingRequests_one": "{{count}} запрос",
     "remainingRequests_few": "{{count}} запроса",
     "remainingRequests_many": "{{count}} запросов",
@@ -245,7 +255,8 @@
       "cooling": "Остывает",
       "exhausted": "Исчерпано на сегодня",
       "disabled": "Модуль отключён",
-      "uncredentialed": "Нет ключа"
+      "uncredentialed": "Нет ключа",
+      "badCredentials": "Неверные учетные данные"
     }
   },
   "overflowRatioLabel": "Коэффициент переполнения",

@@ -11,6 +11,8 @@
   "statusDisconnected": "Đã ngắt kết nối khỏi luồng nhật ký của máy chủ",
   "unreadErrors": "{{count}} lỗi chưa đọc",
   "unreadErrors_other": "{{count}} lỗi chưa đọc",
+  "droppedEntries": "{{count}} mục nhật ký trước đó không còn hiển thị",
+  "droppedEntries_other": "{{count}} mục nhật ký trước đó không còn hiển thị",
   "searchPlaceholder": "Tìm trong nhật ký…",
   "exportLogs": "Xuất nhật ký",
   "exportFormat": "Định dạng xuất",
@@ -25,5 +27,10 @@
   "repeatCount": "Lặp lại {{count}} lần",
   "showDetails": "Xem chi tiết kỹ thuật",
   "membersNotShown": "Còn {{count}} dòng nữa không hiển thị",
-  "membersNotShown_other": "Còn {{count}} dòng nữa không hiển thị"
+  "membersNotShown_other": "Còn {{count}} dòng nữa không hiển thị",
+  "captureLabel": "Ghi lại toàn bộ nhật ký",
+  "captureTooltip": "Khi bật, máy chủ sẽ giữ lại mọi mục nhật ký của phiên này để có thể phân tích một lượt chạy dài mà không bị mất dữ liệu.",
+  "captureDownload": "Tải bản ghi xuống ({{captured}})",
+  "captureDropped": "+{{dropped}} bị bỏ qua",
+  "captureSlotsExhausted": "Tính năng ghi lại đang bận — máy chủ này đã có quá nhiều lượt ghi đang chạy. Vui lòng thử lại sau."
 }

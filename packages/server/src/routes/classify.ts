@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { BATCH_GROUPING_DIMENSIONS } from '@zercade-dev/narn-shared';
 import { contentClassifier } from '../modules/M5-content-classifier.js';
 import { categoryGenEngine } from '../modules/M29-category-gen-engine.js';
 import { createSnapshot } from '../modules/auto-snapshot.js';
@@ -29,7 +30,7 @@ const suggestCategoriesSchema = z.object({
   contextFields: z.array(z.enum(['context', 'sources', 'categories'])).optional(),
   contextLanguages: z.array(z.string()).optional(),
   ignoreBatchSizeLimit: z.boolean().optional(),
-  batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).optional(),
+  batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   /**
    * Per-run override of how many entries each provider call holds. `0` means
    * unlimited. Mutually exclusive with `batchGrouping`/`ignoreBatchSizeLimit`.

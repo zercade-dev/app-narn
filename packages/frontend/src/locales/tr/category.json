@@ -13,6 +13,8 @@
   "module": "Modül",
   "modulePlaceholder": "Bir modül seçin",
   "model": "Model",
+  "freewayModelHint": "NARN Freeway, her yığın için en iyi ücretsiz modeli otomatik olarak seçer — model veya akıl yürütme çabası seçimi gerekmez.",
+  "aiAdvancedOptions": "Gelişmiş seçenekler",
   "noModules": "Yapay zekâ yeteneği olan bir modül yok. Yapılandırma'da birini yapılandırın.",
   "includeExisting": "Girdileri mevcut kategorilere de ata",
   "run": "Üret",

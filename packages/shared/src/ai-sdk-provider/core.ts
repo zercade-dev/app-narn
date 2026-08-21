@@ -529,6 +529,16 @@ export function runGenerateTextOnce(
     // type internally, mirroring the closure's `providerOptionsSpread`.
     providerOptions?: Record<string, unknown>;
     signal?: AbortSignal;
+    /**
+     * AI SDK's own internal retry count for this call (default 2, i.e. 3
+     * attempts). Absent leaves the SDK default untouched; mirrors the
+     * `createAISDKModule` closure's identical `config.maxRetries` passthrough
+     * (core.ts's `runGenerateText`) — set explicitly by a caller that owns
+     * retry policy itself (e.g. a Freeway dispatch, which sets 0 so a
+     * dead-bucket failure surfaces on the first attempt instead of being
+     * burned on internal retries the engine's own failover already supersedes).
+     */
+    maxRetries?: number;
   },
 ): ReturnType<typeof generateText> {
   const maxOutputTokens = resolveMaxOutputTokens(opts.maxOutputTokens);
@@ -536,6 +546,7 @@ export function runGenerateTextOnce(
     model,
     ...body,
     ...(maxOutputTokens !== undefined ? { maxOutputTokens } : {}),
+    ...(opts.maxRetries !== undefined ? { maxRetries: opts.maxRetries } : {}),
     abortSignal: opts.signal,
     ...(opts.providerOptions ? { providerOptions: opts.providerOptions as ProviderOptions } : {}),
   });
@@ -727,6 +738,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
           model,
           ...body,
           ...(maxOutputTokens !== undefined ? { maxOutputTokens } : {}),
+          ...(config.maxRetries !== undefined ? { maxRetries: config.maxRetries } : {}),
           abortSignal: combined,
           ...providerOptionsSpread,
         });

@@ -15,7 +15,9 @@ import type { StageDetails } from './stage-details.js';
  * Grouping uses exact-set matching (not transitive/union-find) to avoid one
  * broad category merging the whole project into a single group.
  */
-export type BatchGroupingDimension = 'none' | 'category' | 'glossary' | 'both' | 'tone';
+export const BATCH_GROUPING_DIMENSIONS = ['none', 'category', 'glossary', 'both', 'tone'] as const;
+
+export type BatchGroupingDimension = (typeof BATCH_GROUPING_DIMENSIONS)[number];
 
 export type ModuleConfigValues = Record<string, unknown> & {
   batchMode?: ModuleBatchMode;
@@ -213,6 +215,15 @@ export interface WorkspaceSettings {
    * structured-output response).
    */
   maxOutputTokens?: number;
+  /**
+   * Per-provider Freeway routing override, keyed by BASE module id -> instance
+   * id. Absent or unresolvable ⇒ automatic candidate resolution (see
+   * `freewayCandidateIds` in the server's M32 bucket-source). A stale entry —
+   * naming an instance that was renamed, deleted, disabled, or lost its
+   * credentials — is never honoured; Freeway falls through to the automatic
+   * order rather than taking the provider offline.
+   */
+  freewayInstanceOverrides?: Record<string, string>;
 }
 
 /** Workspace-wide module configuration shared by all projects. */

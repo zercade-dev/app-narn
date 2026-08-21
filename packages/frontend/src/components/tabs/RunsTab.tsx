@@ -939,6 +939,14 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                     count: run.waitingForQuota.pairs.length,
                                   })}
                                 </div>
+                                {run.waitingForQuota.reason === 'provider-error' && (
+                                  <div
+                                    className="text-[10px] text-muted-foreground"
+                                    data-testid={`run-waiting-provider-reason-${run.runId}`}
+                                  >
+                                    {t('runs.waitingProviderErrorReason')}
+                                  </div>
+                                )}
                                 {run.waitingForQuota.skipReason && (
                                   <div
                                     className="flex items-center gap-1 text-[10px] text-status-warn"

@@ -3,6 +3,18 @@ import { randomUUID } from 'node:crypto';
 import { sanitizeLogObject } from './M16-credential-store.js';
 import { getCurrentTenant } from '../storage/pg/tenant-context.js';
 import { isLogFormatJson } from '../config/env.js';
+// Deliberately the leaf `cloud-mode.js` seam and NOT `identity/registry.js`:
+// registry pulls in the local vault store, which reaches `utils/fs.ts`, which
+// imports this file — and that cycle breaks `vi.mock` for every suite that
+// transitively loads M15. See cloud-mode.ts.
+import { isCloudMode } from '../identity/cloud-mode.js';
+import {
+  LogEntryPools,
+  TenantEntryPools,
+  isPriorityLevel,
+  type LogPoolDropCounts,
+} from '@zercade-dev/narn-shared';
+import { LogCaptureBuffer, DEFAULT_CAPTURE_CAPS } from './M15-log-capture.js';
 
 export interface LogEntry {
   id: string;
@@ -94,9 +106,67 @@ function clipLogValue(
   }
 }
 
+// Number of most-recent info entries carried alongside the FULL priority pool
+// in getConnectHistory() (the SSE connect replay). Bounded independently of
+// the info pool's own 1000-entry capacity so a freshly (re)connected client
+// gets a reasonably small initial payload — 670+ reconnects/hour have been
+// observed in practice (see the frontend logger-store's own comment), and
+// replaying the whole 1000-entry info pool on every one of those would be
+// wasteful when the priority pool is what a reconnect actually needs intact.
+const CONNECT_HISTORY_INFO_COUNT = 200;
+
 class ConsoleLogger extends EventEmitter {
-  private buffer: LogEntry[] = [];
-  private readonly MAX_BUFFER = 1000;
+  // Severity-partitioned ring buffer (shared `entry-pools.ts`): a `warn`/
+  // `error` entry gets its own capacity plus permanent head retention, so a
+  // flood of routine `info` activity during a large run can never evict it.
+  private readonly pools = new LogEntryPools<LogEntry>({
+    infoCapacity: 1000,
+    priorityCapacity: 1000,
+    priorityHeadCapacity: 50,
+  });
+
+  // Cloud capacities are per TENANT and deliberately smaller than local's
+  // single shared pool: a tenant's own 250 info entries beat their diluted
+  // share of a shared 1000 in every realistic multi-tenant case, and
+  // 64 x 500 bounds worst-case retention to something one process can hold.
+  // 64 matches setMaxListeners(64) below — the cap on concurrent log streams,
+  // so the most tenants that can be actively reading at once.
+  private readonly tenantPools = new TenantEntryPools<LogEntry>({
+    infoCapacity: 250,
+    priorityCapacity: 250,
+    priorityHeadCapacity: 25,
+    maxTenants: 64,
+  });
+
+  /**
+   * Opt-in full-fidelity capture, separate from the ring pools above: while
+   * active for a scope (local, or a tenant in cloud mode) it retains every
+   * entry that reaches `store()` in insertion order, bounded by its own
+   * entry/byte caps. See M15-log-capture.ts.
+   */
+  readonly capture = new LogCaptureBuffer({ ...DEFAULT_CAPTURE_CAPS, isCloud: isCloudMode });
+
+  /**
+   * Cloud partitions retention by tenant; local keeps the single shared pool.
+   * An entry with no tenant is NOT pooled in cloud: `visibleTo()` in
+   * routes/logs.ts requires an exact tenant match, so startup logs, sweep ticks
+   * and background engine ticks already reach neither the SSE replay nor
+   * /api/logs/history there — they stay console-only, and pooling them would
+   * only consume capacity nobody can read. Local pools everything, because
+   * there `visibleTo()` is always true and those entries are most of the panel.
+   * isCloudMode() is read per call: this class is constructed at module load,
+   * before cloud mode is necessarily resolved.
+   */
+  private store(entry: LogEntry): void {
+    if (!isCloudMode()) {
+      this.pools.push(entry);
+    } else if (entry.tenantId !== undefined) {
+      this.tenantPools.push(entry.tenantId, entry);
+    }
+    // Capture sees every pooled-or-poolable entry; its own record() re-checks
+    // mode/tenant, so an unpoolable cloud entry (no tenantId) stays uncaptured.
+    this.capture.record(entry);
+  }
 
   log(level: LogEntry['level'], message: string, metadata?: Record<string, unknown>): void {
     // Defensive credential scrubbing — caller still owns primary masking.
@@ -120,11 +190,11 @@ class ConsoleLogger extends EventEmitter {
       tenantId: getCurrentTenant()?.userId,
     };
 
-    this.buffer.push(entry);
-    if (this.buffer.length > this.MAX_BUFFER) {
-      this.buffer.shift();
-    }
-
+    // Emission is unconditional and must NOT depend on push()'s return value
+    // (it only reports false for a duplicate id, which live logging never
+    // produces — every entry gets a fresh randomUUID() above). Gating emit()
+    // on it would silently drop a live log line the moment ids ever collided.
+    this.store(entry);
     this.emit('log:entry', entry);
 
     // Mirror to Node.js console — never log raw API keys from metadata.
@@ -181,11 +251,8 @@ class ConsoleLogger extends EventEmitter {
       tenantId: getCurrentTenant()?.userId,
     };
 
-    this.buffer.push(entry);
-    if (this.buffer.length > this.MAX_BUFFER) {
-      this.buffer.shift();
-    }
-
+    // See the identical comment in log() above — emission stays unconditional.
+    this.store(entry);
     this.emit('log:entry', entry);
   }
 
@@ -205,13 +272,94 @@ class ConsoleLogger extends EventEmitter {
     this.log('debug', message, metadata);
   }
 
-  getHistory(n?: number): LogEntry[] {
-    if (n === undefined) return [...this.buffer];
-    return this.buffer.slice(-Math.abs(n));
+  /**
+   * The newest `n` entries, chronological (oldest first). All entries when
+   * `n` is omitted. `n`'s sign is ignored (matches the pre-pools contract,
+   * which used `Math.abs(n)`) — `n` mostly comes from an untrusted `?n=`
+   * query param on `GET /api/logs/history`, and a negative value there must
+   * not turn into an out-of-range slice that returns nothing. A count of
+   * exactly `0` also means "everything", matching the old
+   * `buffer.slice(-Math.abs(0))` — `slice`'s start arg treats `-0` as
+   * non-negative, so `slice(-0)` was `slice(0)`, the whole buffer.
+   * `LogEntryPools.recent(0)` has no such special case (it slices to
+   * `all.length - 0`, i.e. nothing), so `0` is normalized to `undefined`
+   * here rather than passed straight through (`Math.abs(0) || undefined` is
+   * `undefined`).
+   *
+   * `tenantId` scopes cloud mode to one tenant's pool; local mode ignores it
+   * (one shared pool, `visibleTo()` in routes/logs.ts is always true there).
+   * An omitted `tenantId` in cloud mode returns nothing rather than falling
+   * back to some other tenant's data.
+   */
+  getHistory(n?: number, tenantId?: string): LogEntry[] {
+    const count = n === undefined ? undefined : Math.abs(n) || undefined;
+    if (!isCloudMode()) return this.pools.recent(count);
+    return tenantId === undefined ? [] : this.tenantPools.recent(tenantId, count);
   }
 
+  /**
+   * The SSE connect-replay payload: the FULL priority pool (every retained
+   * `warn`/`error`, including permanently-retained head entries) plus the
+   * most recent {@link CONNECT_HISTORY_INFO_COUNT} info entries, merged
+   * chronologically. Replaces the old `getHistory(50)` replay, which could
+   * silently drop an early error under a flood of routine info activity —
+   * the last 50 entries by insertion order were not necessarily the last 50
+   * that mattered.
+   *
+   * `tenantId` scopes cloud mode to one tenant's pool (an omitted id returns
+   * nothing); local mode ignores it and always merges the single shared pool.
+   */
+  getConnectHistory(tenantId?: string): LogEntry[] {
+    // Walk pools.merged() ONCE rather than concatenating pools.priority()
+    // with a separately-filtered/sliced info list and re-sorting: merged()
+    // already carries the pools' own global (timestamp, seq) ordering (see
+    // entry-pools.ts), and re-sorting on timestamp alone would collapse that
+    // — a priority and an info entry sharing a millisecond would always
+    // resolve the tie by concatenation order (priority first) instead of
+    // true insertion order. Two passes over the already-sorted list (count,
+    // then keep) preserve that ordering exactly and never re-sort.
+    const merged = isCloudMode()
+      ? tenantId === undefined
+        ? []
+        : this.tenantPools.merged(tenantId)
+      : this.pools.merged();
+    const infoCount = merged.reduce((n, entry) => n + (isPriorityLevel(entry.level) ? 0 : 1), 0);
+    let infoToSkip = Math.max(0, infoCount - CONNECT_HISTORY_INFO_COUNT);
+    const result: LogEntry[] = [];
+    for (const entry of merged) {
+      if (isPriorityLevel(entry.level)) {
+        result.push(entry); // every priority entry is kept
+      } else if (infoToSkip > 0) {
+        infoToSkip--; // an older info entry beyond the most-recent-200 window
+      } else {
+        result.push(entry);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Entries lost since the last `clearBuffer()`, one count per pool. In cloud
+   * mode this also includes entries that were still held — never individually
+   * evicted from either ring — when their tenant's whole pool was discarded
+   * for LRU space; the tenant lost them just as completely. `tenantId` scopes
+   * cloud mode to one tenant (an omitted id reports zero drops rather than
+   * some other tenant's); local mode ignores it.
+   */
+  droppedCounts(tenantId?: string): LogPoolDropCounts {
+    if (!isCloudMode()) return this.pools.dropped();
+    return tenantId === undefined ? { info: 0, priority: 0 } : this.tenantPools.dropped(tenantId);
+  }
+
+  /**
+   * Clears every pool, both modes. No route calls this — the frontend's Clear
+   * button is client-side only — so there are no per-tenant clear semantics to
+   * define. It exists for tests and for a future ops surface.
+   */
   clearBuffer(): void {
-    this.buffer = [];
+    this.pools.clear();
+    this.tenantPools.clear();
+    this.capture.reset();
   }
 }
 

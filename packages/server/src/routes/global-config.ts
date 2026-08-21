@@ -27,6 +27,7 @@ import {
   isDefaultInstanceId,
   isValidInstanceSlug,
   parseModuleInstanceId,
+  BATCH_GROUPING_DIMENSIONS,
 } from '@zercade-dev/narn-shared';
 import { validateBody } from '../middleware/validate.js';
 import { moduleRegistry } from '../modules/M6-module-registry.js';
@@ -50,15 +51,43 @@ const updateBodySchema = z.object({
   config: z.record(z.string(), z.unknown()),
 });
 
+// Comfortably above NARN's current ~10 Freeway-eligible base modules (with
+// room for new ones) — bounds the map without constraining real usage; a
+// legitimate workspace never approaches this.
+const MAX_FREEWAY_INSTANCE_OVERRIDES = 64;
+
+// Each value must have the `<baseModuleId>:<slug>` shape freewayCandidateIds
+// expects — anything else already falls through as inert there (a
+// non-instance-shaped override never matches a candidate and the automatic
+// order takes over), so rejecting it here is a payload-hygiene bound on the
+// settings blob, not a behavior change.
+const freewayInstanceOverrideValueSchema = z.string().refine(
+  (value) => {
+    const parsed = parseModuleInstanceId(value);
+    return parsed !== null && parsed.baseModuleId.length > 0 && isValidInstanceSlug(parsed.slug);
+  },
+  { message: 'must be a "<module>:<instance>" module-instance id' },
+);
+
 const settingsBodySchema = z.object({
   maxBackupsPerProject: z.number().int().min(1).optional(),
   overflowRatio: z.number().positive().nullable().optional(),
   requestsPerSecond: z.number().min(0).nullable().optional(),
-  batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).optional(),
+  batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   ignoreBatchSizeLimit: z.boolean().optional(),
   requestTimeoutMs: z.number().int().min(1000).nullable().optional(),
   // 0 = unlimited (omit the per-request cap; see core.ts DEFAULT_MAX_OUTPUT_TOKENS).
   maxOutputTokens: z.number().int().min(0).max(200000).nullable().optional(),
+  // Base module id -> instance id. null clears the whole map, matching the
+  // other nullable settings fields above. Bounded (key count + value shape)
+  // so a tenant can't persist arbitrary junk into their settings blob.
+  freewayInstanceOverrides: z
+    .record(z.string().min(1).max(64), freewayInstanceOverrideValueSchema)
+    .refine((map) => Object.keys(map).length <= MAX_FREEWAY_INSTANCE_OVERRIDES, {
+      message: `freewayInstanceOverrides may not exceed ${MAX_FREEWAY_INSTANCE_OVERRIDES} entries`,
+    })
+    .nullable()
+    .optional(),
 });
 
 globalConfigRouter.get(

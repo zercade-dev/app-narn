@@ -12,6 +12,9 @@
   "unreadErrors": "{{count}} okunmamış hata",
   "unreadErrors_one": "{{count}} okunmamış hata",
   "unreadErrors_other": "{{count}} okunmamış hata",
+  "droppedEntries": "{{count}} önceki günlük kaydı artık gösterilmiyor",
+  "droppedEntries_one": "{{count}} önceki günlük kaydı artık gösterilmiyor",
+  "droppedEntries_other": "{{count}} önceki günlük kaydı artık gösterilmiyor",
   "searchPlaceholder": "Günlüklerde arayın…",
   "exportLogs": "Günlükleri dışa aktar",
   "exportFormat": "Dışa aktarma biçimi",
@@ -27,5 +30,10 @@
   "showDetails": "Teknik ayrıntıları göster",
   "membersNotShown": "{{count}} girdi daha gösterilmiyor",
   "membersNotShown_one": "{{count}} girdi daha gösterilmiyor",
-  "membersNotShown_other": "{{count}} girdi daha gösterilmiyor"
+  "membersNotShown_other": "{{count}} girdi daha gösterilmiyor",
+  "captureLabel": "Tüm günlükleri yakala",
+  "captureTooltip": "Açıkken sunucu, uzun bir çalıştırmanın kayıp olmadan incelenebilmesi için bu oturumun tüm günlük kayıtlarını tutar.",
+  "captureDownload": "Yakalamayı indir ({{captured}})",
+  "captureDropped": "+{{dropped}} atlandı",
+  "captureSlotsExhausted": "Yakalama şu anda meşgul — bu sunucuda zaten çok fazla yakalama çalışıyor. Daha sonra tekrar deneyin."
 }

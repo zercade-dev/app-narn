@@ -146,8 +146,29 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
   const subTenant = getCurrentTenant()?.userId;
   const visibleTo = (entry: LogEntry): boolean => !isCloudMode() || entry.tenantId === subTenant;
 
+  // Send the subscriber's own server-side eviction counts BEFORE the replay,
+  // so a client attaching mid-run can tell that the history it is about to
+  // receive is incomplete. Cumulative since process start, not a delta — the
+  // client applies only the frame from its FIRST connect (later frames report
+  // evictions of entries it was already streamed live) and treats it as an
+  // upper bound on what it missed. `subTenant` scopes the figure to this
+  // subscriber; in cloud mode reporting a process-wide count to one tenant
+  // would leak another tenant's activity volume.
+  sse.send('log:dropped', logger.droppedCounts(subTenant));
+
   // Send recent history on connect (scoped to the subscriber in cloud mode).
-  const history = logger.getHistory(50);
+  // getConnectHistory() widens this from the last 50 entries to the FULL
+  // priority pool (every retained warn/error) plus the most recent 200 info
+  // entries — the old getHistory(50) replay could silently drop an early
+  // error under a flood of routine info activity. `subTenant` now also
+  // selects the tenant-scoped POOL itself (cloud mode partitions retention
+  // per tenant so one tenant's flood can't evict another's capacity — see
+  // M15's `store()`), but the per-entry `visibleTo()` filter below stays: it
+  // is the load-bearing cloud-mode tenancy boundary and a redundant
+  // per-entry comparison is the cheapest insurance in this file, so it keeps
+  // wrapping every replayed entry unchanged even though the partitioned pool
+  // makes it redundant in the common case.
+  const history = logger.getConnectHistory(subTenant);
   for (const entry of history) {
     if (visibleTo(entry)) sse.send('log:entry', entry);
   }
@@ -228,10 +249,15 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
 // GET /api/logs/history?n=100 — return last N log entries
 logsRouter.get('/history', requireUnlockedVault, (req: Request, res: Response) => {
   const n = Number.parseInt((req.query['n'] as string) ?? '100', 10);
-  let entries = logger.getHistory(Number.isNaN(n) ? 100 : n);
-  // Cloud mode: scope to the requesting tenant. Open-core: return all (unchanged).
+  const tenantId = isCloudMode() ? getCurrentTenant()?.userId : undefined;
+  let entries = logger.getHistory(Number.isNaN(n) ? 100 : n, tenantId);
+  // Cloud mode: scope to the requesting tenant. The pool is now already
+  // tenant-partitioned (see M15's getHistory), so this per-entry filter is
+  // redundant in the common case — kept anyway as the load-bearing tenancy
+  // boundary, the cheapest insurance against a partitioning bug ever leaking
+  // one tenant's entries into another's response. Open-core: return all
+  // (unchanged, tenantId is undefined so isCloudMode() gates this off).
   if (isCloudMode()) {
-    const tenantId = getCurrentTenant()?.userId;
     entries = entries.filter((e) => e.tenantId === tenantId);
   }
   res.json(entries);
@@ -391,6 +417,86 @@ logsRouter.get(
     // above) rather than a possibly relative joined path.
     res.sendFile(storedName, { root: path.resolve(LOG_DIR) });
   }),
+);
+
+// --- capture mode: full-fidelity opt-in retention beside the ring pools ---
+
+const captureRateLimiter = rateLimiter({ maxRequests: 30, windowMs: 60_000 });
+
+/** The caller's capture scope: current tenant in cloud, the single local scope otherwise. */
+function captureTenant(): string | undefined {
+  return isCloudMode() ? getCurrentTenant()?.userId : undefined;
+}
+
+// GET /api/logs/capture — status for the caller's scope (polled by the panel; unlimited)
+logsRouter.get('/capture', requireUnlockedVault, (_req: Request, res: Response) => {
+  res.json(logger.capture.status(captureTenant()));
+});
+
+// POST /api/logs/capture/start — begin (or restart) capturing for the caller's scope
+logsRouter.post(
+  '/capture/start',
+  requireUnlockedVault,
+  captureRateLimiter,
+  (_req: Request, res: Response) => {
+    const result = logger.capture.start(captureTenant());
+    if (result === 'slots-exhausted') {
+      res.status(409).json({ error: 'capture-slots-exhausted' });
+      return;
+    }
+    res.json(result);
+  },
+);
+
+// POST /api/logs/capture/stop — stop appending; the buffer stays downloadable
+logsRouter.post(
+  '/capture/stop',
+  requireUnlockedVault,
+  captureRateLimiter,
+  (_req: Request, res: Response) => {
+    res.json(logger.capture.stop(captureTenant()));
+  },
+);
+
+// GET /api/logs/capture/download — the captured run as NDJSON (meta record first)
+logsRouter.get(
+  '/capture/download',
+  requireUnlockedVault,
+  captureRateLimiter,
+  (_req: Request, res: Response) => {
+    const tenant = captureTenant();
+    const status = logger.capture.status(tenant);
+    if (status.startedAt === null) {
+      res.status(404).json({ error: 'no-capture' });
+      return;
+    }
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    res.setHeader('Content-Type', 'application/x-ndjson');
+    res.setHeader('Content-Disposition', `attachment; filename="narn-log-capture-${stamp}.ndjson"`);
+    res.write(
+      `${JSON.stringify({
+        type: 'meta',
+        startedAt: status.startedAt,
+        generatedAt: Date.now(),
+        entryCount: status.entryCount,
+        droppedCount: status.droppedCount,
+        bytes: status.bytes,
+      })}\n`,
+    );
+    // One write per line: up to 100k entries must never be joined into one string.
+    // In cloud mode strip the tenantId scoping stamp — it is the requester's own
+    // id, and server-side scoping fields stay server-side (run-progress precedent).
+    const stripTenant = isCloudMode();
+    for (const entry of logger.capture.entriesFor(tenant)) {
+      if (stripTenant) {
+        const { tenantId: _tenantId, ...rest } = entry;
+        res.write(`${JSON.stringify(rest)}\n`);
+      } else {
+        res.write(`${JSON.stringify(entry)}\n`);
+      }
+    }
+    res.end();
+  },
 );
 
 // Helper function to read entries from file-based logs

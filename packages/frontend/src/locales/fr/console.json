@@ -11,6 +11,8 @@
   "statusDisconnected": "Déconnecté du flux de journaux du serveur",
   "unreadErrors": "{{count}} erreur non lue",
   "unreadErrors_other": "{{count}} erreurs non lues",
+  "droppedEntries": "{{count}} entrée précédente non disponible",
+  "droppedEntries_other": "{{count}} entrées précédentes non disponibles",
   "searchPlaceholder": "Rechercher dans les journaux…",
   "exportLogs": "Exporter les journaux",
   "exportFormat": "Format d’exportation",
@@ -25,5 +27,10 @@
   "repeatCount": "Répété {{count}} fois",
   "showDetails": "Afficher les détails techniques",
   "membersNotShown": "{{count}} entrée supplémentaire non affichée",
-  "membersNotShown_other": "{{count}} entrées supplémentaires non affichées"
+  "membersNotShown_other": "{{count}} entrées supplémentaires non affichées",
+  "captureLabel": "Capturer tous les journaux",
+  "captureTooltip": "Lorsque cette option est activée, le serveur conserve chaque entrée de journal de cette session afin qu’une longue exécution puisse être analysée sans perte.",
+  "captureDownload": "Télécharger la capture ({{captured}})",
+  "captureDropped": "+{{dropped}} ignorées",
+  "captureSlotsExhausted": "La capture est occupée pour le moment — trop de captures sont en cours sur ce serveur. Réessayez plus tard."
 }

@@ -49,6 +49,15 @@ export interface GlossarySuggestOptions {
    * the request's `includeTranslations` flag + context languages.
    */
   translationLanguages?: string[];
+  /**
+   * Invoked with each provider call's usage AS THAT CALL RETURNS, before the
+   * next one is sent. The same entries are still accumulated into the returned
+   * `usages`, so an absent callback changes nothing — but a caller debiting a
+   * free-tier ledger needs them per call: the returned array never arrives when
+   * a later chunk rethrows a 429, and by then the earlier calls have already
+   * spent quota on the bucket that served them.
+   */
+  onUsage?: (usage: TranslationUsage) => void;
 }
 
 /** One suggested glossary returned by the model. */

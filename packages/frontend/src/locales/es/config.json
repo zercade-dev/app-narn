@@ -217,6 +217,15 @@
     "enableModuleHint": "La clave está configurada, pero el módulo está desactivado.",
     "enableModuleButton": "Activarlo",
     "disabledReasonChip": "Desactivado: {{reason}}",
+    "credentialMarkStatus": "Marcado como inválido: {{module}} — configura la entrada de la bóveda {{key}} para solucionarlo.",
+    "credentialRetryButton": "Reintentar",
+    "credentialMarkClearFailed": "No se pudo borrar la marca de credenciales: {{message}}",
+    "credentialMarkErrorNotCandidate": "Este módulo ya no se puede marcar como inválido — su estado en Freeway ha cambiado. Actualiza para ver el estado actual.",
+    "automaticOption": "Automático",
+    "instanceSelectorAria": "Elegir qué instancia atiende a {{provider}}",
+    "instanceOverrideSaveFailed": "No se pudo actualizar la instancia de {{provider}}: {{message}}",
+    "instanceOverridesLoadFailed": "No se pudo cargar la configuración de instancias de Freeway: {{message}}",
+    "instancesLoadFailed": "No se pudieron cargar las instancias de módulos de Freeway: {{message}}",
     "statusTitle": "Estado",
     "empty": "Aún no hay proveedores gratuitos configurados.",
     "colModel": "Modelo",
@@ -224,6 +233,7 @@
     "colRemaining": "Restante",
     "colNextReset": "Próximo reinicio",
     "colPassRate": "Tasa de aprobación",
+    "sharedPoolLabel": "Fondo compartido",
     "remainingRequests_one": "{{count}} solicitud",
     "remainingRequests_other": "{{count}} solicitudes",
     "remainingRequests_many": "{{count}} solicitudes",
@@ -234,7 +244,8 @@
       "cooling": "En enfriamiento",
       "exhausted": "Agotado por hoy",
       "disabled": "Módulo desactivado",
-      "uncredentialed": "Sin clave"
+      "uncredentialed": "Sin clave",
+      "badCredentials": "Credenciales inválidas"
     }
   },
   "overflowRatioLabel": "Relación de desbordamiento",

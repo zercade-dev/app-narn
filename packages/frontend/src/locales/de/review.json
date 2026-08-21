@@ -77,7 +77,8 @@
     "scopeLabel": "Umfang",
     "scopeNeverReviewed": "Nur bisher nicht untersuchte Einträge ({{count}})",
     "scopeAll": "Alle Einträge ({{count}})",
-    "scopeNoneHint": "Alle Einträge wurden bereits untersucht. Für ein erneutes Review auf „Alle Einträge“ umschalten."
+    "scopeNoneHint": "Alle Einträge wurden bereits untersucht. Für ein erneutes Review auf „Alle Einträge“ umschalten.",
+    "advancedOptions": "Erweiterte Optionen"
   },
   "title": "Prüfwarteschlange",
   "position": "{{current}} von {{total}}",

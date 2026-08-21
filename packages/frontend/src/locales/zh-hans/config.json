@@ -212,6 +212,15 @@
     "enableModuleHint": "密钥已设置，但模块已停用。",
     "enableModuleButton": "启用",
     "disabledReasonChip": "已停用：{{reason}}",
+    "credentialMarkStatus": "已标记为无效：{{module}}——在保险库中设置 {{key}} 即可清除。",
+    "credentialRetryButton": "重试",
+    "credentialMarkClearFailed": "清除凭据标记失败：{{message}}",
+    "credentialMarkErrorNotCandidate": "此模块无法再被标记为无效——其 Freeway 状态已发生变化。刷新即可查看当前状态。",
+    "automaticOption": "自动",
+    "instanceSelectorAria": "选择为 {{provider}} 提供服务的实例",
+    "instanceOverrideSaveFailed": "更新 {{provider}} 的实例失败：{{message}}",
+    "instanceOverridesLoadFailed": "加载 Freeway 实例设置失败：{{message}}",
+    "instancesLoadFailed": "加载 Freeway 模块实例失败：{{message}}",
     "statusTitle": "状态",
     "empty": "尚未配置免费服务商。",
     "colModel": "模型",
@@ -219,6 +228,7 @@
     "colRemaining": "剩余",
     "colNextReset": "下次重置",
     "colPassRate": "通过率",
+    "sharedPoolLabel": "共享池",
     "remainingRequests_other": "{{count}} 次请求",
     "remainingChars": "{{count}} 字符",
     "passRateEntry": "{{language}}：{{rate}}%",
@@ -227,7 +237,8 @@
       "cooling": "冷却中",
       "exhausted": "今日已用完",
       "disabled": "模块已停用",
-      "uncredentialed": "无密钥"
+      "uncredentialed": "无密钥",
+      "badCredentials": "凭据无效"
     }
   },
   "overflowRatioLabel": "溢出比例",

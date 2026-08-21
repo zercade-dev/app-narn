@@ -16,6 +16,7 @@ import { FREEWAY_MODULE_ID } from '@zercade-dev/narn-shared';
 import { Sparkles } from 'lucide-react';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
+import { hasNonDefaultValues } from '../../lib/advanced-modified.js';
 import type { ModuleSelectOption } from '../ui/module-select';
 import {
   Dialog,
@@ -29,6 +30,7 @@ import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
 import { LanguageSelect } from '../ui/language-select';
+import { AdvancedToggle } from '../common/AdvancedToggle.js';
 import { AiRunOptionsFields } from '../config/AiRunOptionsFields.js';
 import { useConfidenceContext } from '../../hooks/use-confidence-context.js';
 import {
@@ -66,6 +68,7 @@ const CHECK_LABEL_KEY: Record<keyof JudgeChecks, string> = {
  * depend on the run being reviewed). moduleId '' means "never chosen". Every
  * check defaults to OFF — the opposite of Source AI review's all-on default. */
 const AI_REVIEW_SETTINGS_DEFAULTS = {
+  advanced: false,
   moduleId: '',
   model: '',
   reasoningEffort: '',
@@ -150,6 +153,21 @@ export function AiReviewDialog({
     (lang) => lang !== activeProject?.sourceLanguage,
   );
   const modules = useModules();
+  // Everything below the module/model/effort picker is tuning, not the choice
+  // that defines the run — hidden behind this until ticked. Only its own
+  // visibility is gated; the values it wraps are never reset by hiding it (see
+  // the run-open reset block below).
+  const [advanced, setAdvanced] = useState(false);
+  // Mirrors `advanced`, EXCEPT the noLanguagesChecked force-open below never
+  // touches it — only the open-transition seed and the user's own checkbox
+  // click do. `handleStart` persists THIS, not `advanced`: a transient
+  // validation state (Start disabled by an empty language list) forcing the
+  // section open must not permanently overwrite the user's remembered
+  // Advanced default the next time they Start a review. A ref would be
+  // simpler, but react-hooks/refs forbids writing one during render, and the
+  // open-transition seed below runs during render (the same "prev prop"
+  // pattern `advanced` itself uses) — so this has to be state too.
+  const [userAdvanced, setUserAdvanced] = useState(false);
   // `null` means "the user hasn't chosen"; the effective values fall back to the
   // run-derived defaults below. Reset per run via the parent's `key`.
   const [userModuleId, setUserModuleId] = useState<string | null>(null);
@@ -254,6 +272,8 @@ export function AiReviewDialog({
             }
           : null,
       );
+      setAdvanced(stored.advanced);
+      setUserAdvanced(stored.advanced);
       setVerbose(stored.verbose);
       setResponseLanguage(stored.responseLanguage || 'en');
       setGrouping(asGroupingChoice(stored.grouping));
@@ -327,9 +347,21 @@ export function AiReviewDialog({
   // empty `languages` array, so keep Start disabled instead of sending one.
   const noLanguagesChecked = targetLanguages.length > 0 && checkedLanguages.length === 0;
 
+  // Invariant: Start is never disabled without a visible cause. `noLanguagesChecked`
+  // is the only cause that lives behind Advanced (the language checklist and its
+  // "Deselect all" button) — if it's blocking Start while Advanced is collapsed,
+  // force it back open so the cause is on screen again. Fires at most once per
+  // cause: setting `advanced` true makes the `!advanced` guard false on the next
+  // render, so it never fights a deliberate collapse the user makes once the
+  // checklist is fine again.
+  if (!advanced && noLanguagesChecked && moduleId) {
+    setAdvanced(true);
+  }
+
   const handleStart = () => {
     if (!moduleId || noLanguagesChecked) return;
     saveSettings({
+      advanced: userAdvanced,
       moduleId,
       model,
       reasoningEffort,
@@ -363,6 +395,37 @@ export function AiReviewDialog({
     });
     onOpenChange(false);
   };
+
+  // moduleId/model/reasoningEffort are excluded: their controls (AiRunOptionsFields,
+  // rendered above) are unconditionally visible, not inside {advanced && (…)} below.
+  // ignoreLimit/customBatchSize are gated on `grouping`, mirroring the exact
+  // condition BatchGroupingControls uses to show/hide each control — a grouping
+  // value that hides one must not make it count toward the badge.
+  // `checks` is compared key-by-key rather than via hasNonDefaultValues'
+  // JSON.stringify (sensitive to insertion order), since a persisted checks
+  // object's key order isn't guaranteed to match CHECK_KEYS'.
+  //
+  // `uncheckedLanguages` (the per-language checklist, rendered inside
+  // {advanced && (…)} below) is deliberately NOT part of this comparison: it
+  // has no key in AI_REVIEW_SETTINGS_DEFAULTS because it is never persisted
+  // (depends on the run being reviewed, see its declaration above) and always
+  // resets to an empty Set per run — the badge cannot reflect it, by design,
+  // not oversight.
+  const checksModified = CHECK_KEYS.some(
+    (key) => checks[key] !== AI_REVIEW_SETTINGS_DEFAULTS.checks[key],
+  );
+  const advancedModified =
+    checksModified ||
+    hasNonDefaultValues(
+      {
+        verbose,
+        responseLanguage,
+        grouping,
+        ...(grouping === 'custom' ? { customBatchSize } : {}),
+        ...(grouping !== 'default' && grouping !== 'custom' ? { ignoreLimit } : {}),
+      },
+      AI_REVIEW_SETTINGS_DEFAULTS,
+    );
 
   const noJudgeModules = modules.length > 0 && realJudgeModules.length === 0;
 
@@ -413,100 +476,121 @@ export function AiReviewDialog({
               </p>
             )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="ai-review-response-language">
-                {t('runs.aiReviewResponseLanguage')}
-              </Label>
-              <LanguageSelect
-                id="ai-review-response-language"
-                triggerTestId="ai-review-response-language-trigger"
-                value={responseLanguage}
-                onValueChange={setResponseLanguage}
+            <div className="border-t pt-3">
+              <AdvancedToggle
+                id="ai-review-advanced"
+                testId="ai-review-advanced"
+                checked={advanced}
+                modified={advancedModified}
+                onCheckedChange={(next) => {
+                  setAdvanced(next);
+                  setUserAdvanced(next);
+                }}
+                label={t('runs.aiReviewAdvancedOptions')}
               />
             </div>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label>{t('runs.aiReviewLanguages')}</Label>
-                <Button
-                  type="button"
-                  variant="link"
-                  size="sm"
-                  className="h-auto p-0"
-                  data-testid="ai-review-languages-toggle-all"
-                  onClick={() =>
-                    setUncheckedLanguages(
-                      uncheckedLanguages.size > 0 ? new Set() : new Set(targetLanguages),
-                    )
-                  }
-                >
-                  {uncheckedLanguages.size > 0
-                    ? t('runs.aiReviewLanguagesSelectAll')
-                    : t('runs.aiReviewLanguagesDeselectAll')}
-                </Button>
-              </div>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-x-3 gap-y-1.5">
-                {targetLanguages.map((lang) => (
-                  <span key={lang} className="inline-flex items-center gap-1.5">
-                    <Checkbox
-                      id={`ai-review-language-${lang}`}
-                      checked={!uncheckedLanguages.has(lang)}
-                      onCheckedChange={(checked) => toggleLanguage(lang, checked === true)}
-                      data-testid={`ai-review-language-${lang}`}
-                    />
-                    <Label
-                      htmlFor={`ai-review-language-${lang}`}
-                      className="cursor-pointer select-none font-normal"
-                    >
-                      {lang}
-                    </Label>
-                  </span>
-                ))}
-              </div>
-            </div>
+            {advanced && (
+              <>
+                <div className="space-y-1.5">
+                  <Label htmlFor="ai-review-response-language">
+                    {t('runs.aiReviewResponseLanguage')}
+                  </Label>
+                  <LanguageSelect
+                    id="ai-review-response-language"
+                    triggerTestId="ai-review-response-language-trigger"
+                    value={responseLanguage}
+                    onValueChange={setResponseLanguage}
+                  />
+                </div>
 
-            <div className="space-y-1.5">
-              <Label>{t('runs.aiReviewChecksLabel')}</Label>
-              <div className="flex flex-wrap gap-x-5 gap-y-2">
-                {CHECK_KEYS.map((check) => (
-                  <label
-                    key={check}
-                    className="inline-flex cursor-pointer select-none items-center gap-1.5 text-sm"
-                  >
-                    <Checkbox
-                      checked={checks[check]}
-                      onCheckedChange={(checked) =>
-                        setChecks((prev) => ({ ...prev, [check]: checked === true }))
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label>{t('runs.aiReviewLanguages')}</Label>
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0"
+                      data-testid="ai-review-languages-toggle-all"
+                      onClick={() =>
+                        setUncheckedLanguages(
+                          uncheckedLanguages.size > 0 ? new Set() : new Set(targetLanguages),
+                        )
                       }
-                      data-testid={`ai-review-check-${check}`}
-                    />
-                    {t(CHECK_LABEL_KEY[check])}
-                  </label>
-                ))}
-              </div>
-            </div>
+                    >
+                      {uncheckedLanguages.size > 0
+                        ? t('runs.aiReviewLanguagesSelectAll')
+                        : t('runs.aiReviewLanguagesDeselectAll')}
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-x-3 gap-y-1.5">
+                    {targetLanguages.map((lang) => (
+                      <span key={lang} className="inline-flex items-center gap-1.5">
+                        <Checkbox
+                          id={`ai-review-language-${lang}`}
+                          checked={!uncheckedLanguages.has(lang)}
+                          onCheckedChange={(checked) => toggleLanguage(lang, checked === true)}
+                          data-testid={`ai-review-language-${lang}`}
+                        />
+                        <Label
+                          htmlFor={`ai-review-language-${lang}`}
+                          className="cursor-pointer select-none font-normal"
+                        >
+                          {lang}
+                        </Label>
+                      </span>
+                    ))}
+                  </div>
+                </div>
 
-            <span className="inline-flex items-center gap-1.5">
-              <Checkbox
-                id="ai-review-verbose"
-                checked={verbose}
-                onCheckedChange={(checked) => setVerbose(checked === true)}
-                data-testid="ai-review-verbose"
-              />
-              <Label htmlFor="ai-review-verbose" className="cursor-pointer select-none font-normal">
-                {t('runs.aiReviewVerbose')}
-              </Label>
-            </span>
+                <div className="space-y-1.5">
+                  <Label>{t('runs.aiReviewChecksLabel')}</Label>
+                  <div className="flex flex-wrap gap-x-5 gap-y-2">
+                    {CHECK_KEYS.map((check) => (
+                      <label
+                        key={check}
+                        className="inline-flex cursor-pointer select-none items-center gap-1.5 text-sm"
+                      >
+                        <Checkbox
+                          checked={checks[check]}
+                          onCheckedChange={(checked) =>
+                            setChecks((prev) => ({ ...prev, [check]: checked === true }))
+                          }
+                          data-testid={`ai-review-check-${check}`}
+                        />
+                        {t(CHECK_LABEL_KEY[check])}
+                      </label>
+                    ))}
+                  </div>
+                </div>
 
-            <BatchGroupingControls
-              idPrefix="ai-review-grouping"
-              grouping={grouping}
-              onGroupingChange={setGrouping}
-              ignoreLimit={ignoreLimit}
-              onIgnoreLimitChange={setIgnoreLimit}
-              customBatchSize={customBatchSize}
-              onCustomBatchSizeChange={setCustomBatchSize}
-            />
+                <span className="inline-flex items-center gap-1.5">
+                  <Checkbox
+                    id="ai-review-verbose"
+                    checked={verbose}
+                    onCheckedChange={(checked) => setVerbose(checked === true)}
+                    data-testid="ai-review-verbose"
+                  />
+                  <Label
+                    htmlFor="ai-review-verbose"
+                    className="cursor-pointer select-none font-normal"
+                  >
+                    {t('runs.aiReviewVerbose')}
+                  </Label>
+                </span>
+
+                <BatchGroupingControls
+                  idPrefix="ai-review-grouping"
+                  grouping={grouping}
+                  onGroupingChange={setGrouping}
+                  ignoreLimit={ignoreLimit}
+                  onIgnoreLimitChange={setIgnoreLimit}
+                  customBatchSize={customBatchSize}
+                  onCustomBatchSizeChange={setCustomBatchSize}
+                />
+              </>
+            )}
           </div>
         )}
 

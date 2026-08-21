@@ -9,7 +9,7 @@ import { getSessionId } from '../middleware/session.js';
 import { asyncHandler } from '../http/index.js';
 import { projectIdParam } from '../middleware/path-params.js';
 import { assertRunVisible, assertProjectAccess } from '../middleware/authz.js';
-import { can } from '@zercade-dev/narn-shared';
+import { can, BATCH_GROUPING_DIMENSIONS } from '@zercade-dev/narn-shared';
 import { ForbiddenError } from '../types/errors.js';
 
 export const translationsRouter: Router = Router({ mergeParams: true });
@@ -61,7 +61,7 @@ const enqueueSchema = z.object({
    * Per-run override for related-entry batch grouping. Absent ⇒ the project /
    * workspace setting is used.
    */
-  batchGrouping: z.enum(['none', 'category', 'glossary', 'both']).optional(),
+  batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   /** Per-run override for the ignore-batch-size-limit toggle. */
   ignoreBatchSizeLimit: z.boolean().optional(),
   /**
@@ -84,6 +84,25 @@ const enqueueSchema = z.object({
    * `entryIds` are dropped server-side. Hard cap 10.
    */
   exampleEntryIds: z.array(z.string()).min(1).max(10).optional(),
+  /**
+   * Restricts the run to exactly these (entryId, targetLanguage) pairs instead
+   * of the full `entryIds × targetLanguages` product. `entryIds`/
+   * `targetLanguages` stay required and still bound the run — `pairs` only
+   * intersects that product, so a pair outside it is inert. Lets a caller
+   * re-translate a few weak pairs without overwriting good translations in the
+   * selection's other languages. Bounded by the same fan-out cap as `entryIds`.
+   */
+  pairs: z
+    .array(z.object({ entryId: z.string(), targetLanguage: z.string() }))
+    .min(1)
+    .max(MAX_ENTRY_IDS)
+    .optional(),
+  /**
+   * Freeway-only per-run quality floor: plan (and re-validate) every job group
+   * at least this tier rather than the one its content alone earns. 2-4 — tier
+   * 1 is no floor at all and 5 is not a tier. Ignored by non-Freeway routing.
+   */
+  freewayMinTier: z.number().int().min(2).max(4).optional(),
 });
 
 /** Dry-run TM preview: how many of these pairs would auto-apply from memory. */
@@ -161,6 +180,8 @@ translationsRouter.post(
       splitByModel,
       customBatchSize,
       exampleEntryIds,
+      pairs,
+      freewayMinTier,
     } = req.body as z.infer<typeof enqueueSchema>;
     const sessionId = getSessionId(res);
 
@@ -218,6 +239,8 @@ translationsRouter.post(
         ...(splitByModel ? { splitByModel: true } : {}),
         ...(customBatchSize !== undefined ? { customBatchSize } : {}),
         ...(exampleEntryIds?.length ? { exampleEntryIds } : {}),
+        ...(pairs?.length ? { pairs } : {}),
+        ...(freewayMinTier !== undefined ? { freewayMinTier } : {}),
       },
     );
     res.status(202).json(result);

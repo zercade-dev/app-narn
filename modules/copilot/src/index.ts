@@ -89,6 +89,8 @@ export interface CopilotConfig {
   verbose?: boolean;
   /** Maximum number of strings to include in a single batch prompt. Default: 20. */
   maxBatchSize?: number;
+  /** When exactly 0, disables every internal transient retry (one attempt per request); any other value or absent leaves today's retry behavior unchanged. Injected by the host's Freeway routing overrides. */
+  maxRetries?: number;
   /** Per-request timeout (ms) injected by the host from workspace settings. Default DEFAULT_REQUEST_TIMEOUT_MS. */
   requestTimeoutMs?: number;
   /** Optional client factory override (injected by server pool; falls back to getCopilotClient). */
@@ -361,6 +363,7 @@ export function createCopilotModule(
   const verbose = config.verbose ?? false;
   const reasoningEffort = config.reasoningEffort || undefined;
   const timeoutMs = config.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
+  const internalRetriesDisabled = config.maxRetries === 0;
 
   const log =
     config.log ??
@@ -519,7 +522,7 @@ export function createCopilotModule(
             // batch; rethrow as the shared typed error so M9 cancels/retries
             // the whole run rather than recording every job in the chunk failed.
             rethrowIfAuthOrRateLimit(err);
-            if (!isTransientError(err)) {
+            if (!isTransientError(err) || internalRetriesDisabled) {
               log('warn', '[copilot] batch:chunk-error', {
                 count: batchJobs.length,
                 error: toErrorMessage(err),
@@ -716,7 +719,7 @@ export function createCopilotModule(
           signal,
           logPrefix: '[copilot] judge',
           parseFailMessage: 'malformed JSON from provider',
-          retryTransient: true,
+          retryTransient: !internalRetriesDisabled,
           splitAndRetry,
           onRequest: (batch, { system, user }) => {
             if (verbose)
@@ -785,7 +788,7 @@ export function createCopilotModule(
           signal,
           logPrefix: '[copilot] source-review',
           parseFailMessage: 'malformed JSON from provider',
-          retryTransient: true,
+          retryTransient: !internalRetriesDisabled,
           splitAndRetry,
           onRequest: (reindexed, { system, user }) => {
             if (verbose)
@@ -861,27 +864,30 @@ export function createCopilotModule(
 
           let text: string;
           try {
-            const resp = await retryOnceOnTransient(
-              () =>
-                client.complete({
-                  model,
-                  system,
-                  user,
-                  reasoningEffort: effort,
-                  signal,
-                  timeoutMs,
-                }),
-              signal,
-            );
+            const callComplete = () =>
+              client.complete({
+                model,
+                system,
+                user,
+                reasoningEffort: effort,
+                signal,
+                timeoutMs,
+              });
+            const resp = internalRetriesDisabled
+              ? await callComplete()
+              : await retryOnceOnTransient(callComplete, signal);
             text = resp.text;
             anyRequestSucceeded = true;
-            usages.push(
-              toTranslationUsage(
-                resp.usage,
-                model,
-                batch.reduce((n, it) => n + it.s.length, 0),
-              ),
+            const usage = toTranslationUsage(
+              resp.usage,
+              model,
+              batch.reduce((n, it) => n + it.s.length, 0),
             );
+            usages.push(usage);
+            // Same per-call hand-over the AI-SDK modules do: a Freeway-bound
+            // caller debits the bucket that served THIS call, and a copilot
+            // bucket is selectable in local mode.
+            if (usage) opts.onUsage?.(usage);
             if (verbose)
               log('info', '[copilot] glossary-suggest:response', {
                 model,

@@ -50,6 +50,8 @@
   "generateModulePlaceholder": "Modul auswählen…",
   "generateModel": "Modell",
   "generateReasoningEffort": "Reasoning-Aufwand",
+  "generateFreewayModelHint": "NARN Freeway wählt automatisch das beste kostenlose Modell für jeden Batch aus — eine Auswahl von Modell oder Reasoning-Aufwand ist nicht nötig.",
+  "generateAdvancedOptions": "Erweiterte Optionen",
   "generateNoSuggestions": "Die KI hat keine neuen Begriffe gefunden, die sie vorschlagen kann.",
   "generateSuggestionCount": "Begriffe: {{count}}",
   "generateAccept": "Glossare erstellen ({{count}})",

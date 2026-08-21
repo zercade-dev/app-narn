@@ -1,5 +1,6 @@
 {
   "save": "저장",
+  "advancedModified": "변경됨",
   "cancel": "취소",
   "loading": "불러오는 중…",
   "changelogEntryError": "이 릴리스의 변경 이력을 불러오지 못했어요.",

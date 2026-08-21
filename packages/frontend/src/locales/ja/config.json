@@ -212,6 +212,15 @@
     "enableModuleHint": "キーは設定済みですが、モジュールが無効です。",
     "enableModuleButton": "有効化",
     "disabledReasonChip": "無効：{{reason}}",
+    "credentialMarkStatus": "認証情報が無効としてマークされています：{{module}} — 保管庫の{{key}}を設定すると解除されます。",
+    "credentialRetryButton": "再試行",
+    "credentialMarkClearFailed": "認証情報マークの解除に失敗しました：{{message}}",
+    "credentialMarkErrorNotCandidate": "このモジュールはもう無効としてマークできません — Freewayの状態が変わりました。更新すると最新の状態を確認できます。",
+    "automaticOption": "自動",
+    "instanceSelectorAria": "{{provider}}を処理するインスタンスを選択",
+    "instanceOverrideSaveFailed": "{{provider}}のインスタンスを更新できませんでした：{{message}}",
+    "instanceOverridesLoadFailed": "Freewayのインスタンス設定の読み込みに失敗しました：{{message}}",
+    "instancesLoadFailed": "Freewayのモジュールインスタンスの読み込みに失敗しました：{{message}}",
     "statusTitle": "状態",
     "empty": "無料枠のプロバイダーはまだ設定されていません。",
     "colModel": "モデル",
@@ -219,6 +228,7 @@
     "colRemaining": "残り",
     "colNextReset": "次回リセット",
     "colPassRate": "合格率",
+    "sharedPoolLabel": "共有プール",
     "remainingRequests_other": "リクエスト{{count}}件",
     "remainingChars": "{{count}}文字",
     "passRateEntry": "{{language}}：{{rate}}%",
@@ -227,7 +237,8 @@
       "cooling": "クールダウン中",
       "exhausted": "本日分終了",
       "disabled": "モジュール無効",
-      "uncredentialed": "キーなし"
+      "uncredentialed": "キーなし",
+      "badCredentials": "認証情報が無効"
     }
   },
   "overflowRatioLabel": "オーバーフロー比率",

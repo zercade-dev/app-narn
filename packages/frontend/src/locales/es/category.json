@@ -13,6 +13,8 @@
   "module": "Módulo",
   "modulePlaceholder": "Elige un módulo",
   "model": "Modelo",
+  "freewayModelHint": "NARN Freeway elige automáticamente el mejor modelo gratuito para cada lote — no hace falta elegir modelo ni esfuerzo de razonamiento.",
+  "aiAdvancedOptions": "Opciones avanzadas",
   "noModules": "No hay ningún módulo con IA disponible. Configura uno en Configuración.",
   "includeExisting": "Asignar también entradas a categorías existentes",
   "run": "Generar",

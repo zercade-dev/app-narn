@@ -11,6 +11,8 @@
   "statusDisconnected": "已断开与服务器日志流的连接",
   "unreadErrors": "{{count}} 条未读错误",
   "unreadErrors_other": "{{count}} 条未读错误",
+  "droppedEntries": "{{count}} 条较早的日志已不再可用",
+  "droppedEntries_other": "{{count}} 条较早的日志已不再可用",
   "searchPlaceholder": "搜索日志…",
   "exportLogs": "导出日志",
   "exportFormat": "导出格式",
@@ -25,5 +27,10 @@
   "repeatCount": "重复了 {{count}} 次",
   "showDetails": "显示技术细节",
   "membersNotShown": "另有 {{count}} 项未显示",
-  "membersNotShown_other": "另有 {{count}} 项未显示"
+  "membersNotShown_other": "另有 {{count}} 项未显示",
+  "captureLabel": "捕获所有日志",
+  "captureTooltip": "开启后，服务器会保留本次会话的每一条日志，以便对长时间运行进行完整分析而不丢失记录。",
+  "captureDownload": "下载捕获记录（{{captured}} 条）",
+  "captureDropped": "另有 {{dropped}} 条已丢弃",
+  "captureSlotsExhausted": "捕获功能当前繁忙——此服务器上正在运行的捕获过多。请稍后再试。"
 }
