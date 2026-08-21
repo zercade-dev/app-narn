@@ -1093,6 +1093,9 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
    * rather than being recursively halved and re-dispatched. The run surfaces
    * the failed (entry, language) pairs in the Activity tab, where the user
    * retries explicitly ("Retry failed") — by default at the same batch size.
+   * Freeway-routed batches are the exception, handled a layer up: the
+   * server's Freeway dispatch splits a parse-failed batch in bounded halves
+   * on the same bucket before any failover.
    */
   async function sameLanguageBatch(
     batch: TranslationJob[],
