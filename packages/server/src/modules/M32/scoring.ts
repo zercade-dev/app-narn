@@ -123,6 +123,26 @@ function passRateDivisor(passRate: number): number {
 }
 
 /**
+ * The char-derived per-request cap for THESE jobs on THIS bucket — how many
+ * of them fit one reliable request, ignoring scarcity/abundance/pass-rate.
+ * Those size the PLANNED batch; this caps what a bucket can physically take
+ * when a batch sized for another bucket lands on it mid-dispatch.
+ */
+export function charCappedBatch(
+  bucket: Pick<BucketView, 'maxBatch' | 'charBudget' | 'batchCeiling'>,
+  jobs: readonly { sourceText: string }[],
+): number {
+  if (bucket.charBudget === undefined || jobs.length === 0) return bucket.maxBatch;
+  let totalChars = 0;
+  for (const job of jobs) totalChars += job.sourceText.length;
+  const avgChars = Math.max(1, Math.round(totalChars / jobs.length));
+  return Math.min(
+    Math.max(1, Math.floor(bucket.charBudget / avgChars)),
+    bucket.batchCeiling ?? bucket.maxBatch,
+  );
+}
+
+/**
  * Strings per request for this bucket and group. Without a curated
  * charBudget the size is the flat maxBatch (scaled by pass-rate class), as
  * before. With one, the size is length-aware and scarcity-aware: the char
@@ -143,10 +163,7 @@ export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: numb
   if (jobs === 0) {
     base = Math.min(bucket.maxBatch, ceiling);
   } else {
-    let totalChars = 0;
-    for (const job of group.jobs) totalChars += job.sourceText.length;
-    const avgChars = Math.max(1, Math.round(totalChars / jobs));
-    const sizeByChars = Math.min(Math.max(1, Math.floor(bucket.charBudget / avgChars)), ceiling);
+    const sizeByChars = charCappedBatch(bucket, group.jobs);
     const comfort = Math.min(bucket.maxBatch, sizeByChars);
     const remaining = effectiveRemainingRequests(bucket);
     const requestsAtComfort = Math.ceil(jobs / comfort);

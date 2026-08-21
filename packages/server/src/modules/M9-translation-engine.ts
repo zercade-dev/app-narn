@@ -137,6 +137,7 @@ import {
   findMinuteStarvedEscalation,
   selectEscalationCandidates,
 } from './M32/selector.js';
+import { charCappedBatch } from './M32/scoring.js';
 import { difficultyBand } from './M32/difficulty.js';
 import type { Assignment, BucketView, DifficultyBand, JobGroup } from './M32/types.js';
 import { syncAuthoritativeUsage } from './M32/probes.js';
@@ -408,6 +409,11 @@ function formatSplitDetail(info: { bucketKey: string; size: number }): string {
   return `${info.size} strings came back malformed on ${info.bucketKey} — retrying in halves`;
 }
 
+/** One-liner for a proactive re-chunk (see {@link TranslationEngine.dispatchFreewayBatch}'s `onRechunk`). */
+function formatRechunkDetail(info: { bucketKey: string; size: number; parts: number }): string {
+  return `batch of ${info.size} re-chunked into ${info.parts} requests for ${info.bucketKey}`;
+}
+
 /** Token/character tallies of one provider call, for the Freeway quota ledger. */
 function freewayUsageOf(results: readonly (TranslationResult | undefined)[]): {
   inputTokens?: number;
@@ -449,6 +455,63 @@ type FreewayDispatchOutcome =
   | { kind: 'blocked' }
   /** `authCancel` is true only for an auth failure that leaves no bucket at all. */
   | { kind: 'error'; error: unknown; authCancel: boolean };
+
+/** Args for {@link TranslationEngine.dispatchFreewayBatch} and {@link TranslationEngine.dispatchFreewayInParts}. */
+interface FreewayDispatchArgs {
+  jobs: TranslationJob[];
+  decisions: RoutingDecision[];
+  state: FreewayBatchState;
+  deps: BucketSourceDeps;
+  createModule: (
+    moduleId: string,
+    modelId: string,
+    bucketKey: string,
+  ) => TranslationModule | undefined;
+  translateOptions: BatchDispatchOptions;
+  signal?: AbortSignal;
+  /**
+   * Reports the single failover hop's reroute, if it produces one — raw
+   * facts only (which bucket, why, how long it cooled), so the caller (which
+   * owns the run's detail accumulator) turns it into a "why routed" line.
+   */
+  onReroute?: (info: {
+    from: string;
+    to: string;
+    reason: 'rate-limit' | 'auth' | 'provider-error';
+    retryAfterMs?: number;
+  }) => void;
+  /** Recursion depth of the parse-failure split (0 = the original batch). */
+  splitDepth?: number;
+  /** Reports a parse-failure split so the caller can record a run detail. */
+  onSplit?: (info: { bucketKey: string; size: number }) => void;
+  /**
+   * Set when the plan degraded this batch's band floor one tier (Addendum
+   * G): every re-validation this hop performs must check the CURRENT bucket
+   * against the accepted (relaxed) tier, not the group's natural, higher
+   * one — otherwise a degraded batch that hits a 429/provider error here
+   * revalidates at the natural floor, its own (degraded) bucket is excluded
+   * by that stricter check, and it parks on the long-cooling top-tier
+   * bucket's resumeAt — reproducing the exact stuck-waiting symptom the
+   * degrade exists to remove.
+   */
+  degradedFloor?: DifficultyBand;
+  /**
+   * The run's own Freeway tier floor (`freewayMinTier`), if it set one. The
+   * opposite axis to `degradedFloor`: it RAISES the band every re-validation
+   * below runs at, so a failover cannot quietly drop the batch onto a bucket
+   * under the tier the run asked for.
+   */
+  minBand?: DifficultyBand;
+  /**
+   * Run-scoped format-strike caps, keyed by bucketKey: the batch size a
+   * bucket is known to parse reliably at after a split recovery this run.
+   * Dispatch entry pre-chunks at the cap instead of re-paying the failed
+   * full-size call on every subsequent batch.
+   */
+  splitCaps?: Map<string, number>;
+  /** Reports a proactive re-chunk (strike cap or rescue-bucket char cap). */
+  onRechunk?: (info: { bucketKey: string; size: number; parts: number }) => void;
+}
 
 /**
  * Hard output limit to attach to a job. Only set when the entry's current
@@ -541,6 +604,17 @@ interface RunDetailsAcc {
    * no Freeway decisions never persists an empty log.
    */
   freeway?: string[];
+  /**
+   * Run-scoped format-strike caps (see {@link FreewayDispatchArgs.splitCaps}),
+   * keyed by bucketKey. Lives here rather than per-batch: a Freeway run
+   * dispatches its planned batches as SEPARATE `processBatchJob` calls (one
+   * per assignment chunk — see {@link TranslationEngine.resolveFreewayGroups}),
+   * so only an accumulator that outlives one call lets a later batch learn
+   * from an earlier one's split. In-memory only, never persisted to the
+   * sidecar: losing it across a restart costs at most one re-paid failed
+   * call, not correctness.
+   */
+  freewaySplitCaps: Map<string, number>;
 }
 
 export class TranslationEngine {
@@ -3255,6 +3329,68 @@ export class TranslationEngine {
     }
   }
 
+  /** Chunk bounds [start, end) covering 0..len at the given size. */
+  private static partBounds(len: number, size: number): Array<[number, number]> {
+    const bounds: Array<[number, number]> = [];
+    for (let start = 0; start < len; start += size) {
+      bounds.push([start, Math.min(start + size, len)]);
+    }
+    return bounds;
+  }
+
+  /**
+   * Dispatch `args.jobs` as a sequence of {@link TranslationEngine.dispatchFreewayBatch}
+   * calls over the given `bounds`, in order, merging their results
+   * positionally. Shared by the parse-failure split (halves) and the
+   * proactive re-chunk paths (strike cap, rescue-bucket char cap) — same
+   * order-preserving merge, length guard, and replay-before-bubble either
+   * way.
+   */
+  private async dispatchFreewayInParts(
+    args: FreewayDispatchArgs,
+    bounds: ReadonlyArray<readonly [number, number]>,
+  ): Promise<FreewayDispatchOutcome> {
+    const { jobs, decisions, translateOptions, signal } = args;
+    const merged: TranslationResult[] = [];
+    for (const [start, end] of bounds) {
+      if (signal?.aborted) {
+        return { kind: 'error', error: new Error('cancelled'), authCancel: false };
+      }
+      const part = await this.dispatchFreewayBatch({
+        ...args,
+        jobs: jobs.slice(start, end),
+        decisions: decisions.slice(start, end),
+      });
+      if (part.kind !== 'results') {
+        // A non-streaming module's earlier part-results only exist in
+        // `merged` — settle them before bubbling, or the caller's
+        // batch-failed handling records translated pairs as failures.
+        // Streaming modules already delivered them (processedIndices
+        // dedupes), and the provisional-error guard keeps error results
+        // from finalizing here.
+        for (const r of merged) await translateOptions.onJobComplete?.(r);
+        return part;
+      }
+      const partJobs = jobs.slice(start, end);
+      if (part.results.length !== partJobs.length) {
+        // Positional integrity is what the caller's targetResults mapping
+        // depends on — a short part must not shift later results onto the
+        // wrong entries.
+        merged.push(
+          ...partJobs.map((job) => ({
+            entryId: job.entryId,
+            targetLanguage: job.targetLanguage,
+            translatedText: '',
+            error: 'incomplete batch result',
+          })),
+        );
+      } else {
+        merged.push(...part.results);
+      }
+    }
+    return { kind: 'results', results: merged };
+  }
+
   /**
    * Dispatch one Freeway batch, with a SINGLE failover hop: a 429 cools the
    * bucket, a bad credential marks the dispatch candidate (letting a sibling
@@ -3265,52 +3401,7 @@ export class TranslationEngine {
    * because every candidate is exhausted (a third sibling may still be
    * usable), but because the one-hop-per-batch budget is spent.
    */
-  private async dispatchFreewayBatch(args: {
-    jobs: TranslationJob[];
-    decisions: RoutingDecision[];
-    state: FreewayBatchState;
-    deps: BucketSourceDeps;
-    createModule: (
-      moduleId: string,
-      modelId: string,
-      bucketKey: string,
-    ) => TranslationModule | undefined;
-    translateOptions: BatchDispatchOptions;
-    signal?: AbortSignal;
-    /**
-     * Reports the single failover hop's reroute, if it produces one — raw
-     * facts only (which bucket, why, how long it cooled), so the caller (which
-     * owns the run's detail accumulator) turns it into a "why routed" line.
-     */
-    onReroute?: (info: {
-      from: string;
-      to: string;
-      reason: 'rate-limit' | 'auth' | 'provider-error';
-      retryAfterMs?: number;
-    }) => void;
-    /** Recursion depth of the parse-failure split (0 = the original batch). */
-    splitDepth?: number;
-    /** Reports a parse-failure split so the caller can record a run detail. */
-    onSplit?: (info: { bucketKey: string; size: number }) => void;
-    /**
-     * Set when the plan degraded this batch's band floor one tier (Addendum
-     * G): every re-validation this hop performs must check the CURRENT bucket
-     * against the accepted (relaxed) tier, not the group's natural, higher
-     * one — otherwise a degraded batch that hits a 429/provider error here
-     * revalidates at the natural floor, its own (degraded) bucket is excluded
-     * by that stricter check, and it parks on the long-cooling top-tier
-     * bucket's resumeAt — reproducing the exact stuck-waiting symptom the
-     * degrade exists to remove.
-     */
-    degradedFloor?: DifficultyBand;
-    /**
-     * The run's own Freeway tier floor (`freewayMinTier`), if it set one. The
-     * opposite axis to `degradedFloor`: it RAISES the band every re-validation
-     * below runs at, so a failover cannot quietly drop the batch onto a bucket
-     * under the tier the run asked for.
-     */
-    minBand?: DifficultyBand;
-  }): Promise<FreewayDispatchOutcome> {
+  private async dispatchFreewayBatch(args: FreewayDispatchArgs): Promise<FreewayDispatchOutcome> {
     const {
       jobs,
       decisions,
@@ -3324,7 +3415,14 @@ export class TranslationEngine {
       onSplit,
       degradedFloor,
       minBand,
+      onRechunk,
     } = args;
+    const strikeCap = args.splitCaps?.get(state.bucketKey);
+    if (strikeCap !== undefined && strikeCap >= 1 && strikeCap < jobs.length) {
+      const bounds = TranslationEngine.partBounds(jobs.length, strikeCap);
+      onRechunk?.({ bucketKey: state.bucketKey, size: jobs.length, parts: bounds.length });
+      return this.dispatchFreewayInParts(args, bounds);
+    }
     const bandOpts = freewayBandOpts(degradedFloor, minBand);
     for (let hop = 0; ; hop++) {
       let results: TranslationResult[] | undefined;
@@ -3357,50 +3455,22 @@ export class TranslationEngine {
           isParseFailureMessage(results[0]!.error!)
         ) {
           onSplit?.({ bucketKey: state.bucketKey, size: jobs.length });
+          const failedBucketKey = state.bucketKey;
           const mid = Math.ceil(jobs.length / 2);
-          const merged: TranslationResult[] = [];
-          for (const [start, end] of [
-            [0, mid],
-            [mid, jobs.length],
-          ] as const) {
-            if (signal?.aborted) {
-              return { kind: 'error', error: new Error('cancelled'), authCancel: false };
-            }
-            const half = await this.dispatchFreewayBatch({
-              ...args,
-              jobs: jobs.slice(start, end),
-              decisions: decisions.slice(start, end),
-              splitDepth: splitDepth + 1,
-            });
-            if (half.kind !== 'results') {
-              // A non-streaming module's earlier half-results only exist in
-              // `merged` — settle them before bubbling, or the caller's
-              // batch-failed handling records translated pairs as failures.
-              // A streaming module already delivered them via
-              // onJobComplete (processedIndices dedupes this replay), and
-              // the provisional-error guard there keeps error results from
-              // finalizing early.
-              for (const r of merged) await translateOptions.onJobComplete?.(r);
-              return half;
-            }
-            const halfJobs = jobs.slice(start, end);
-            if (half.results.length === halfJobs.length) {
-              merged.push(...half.results);
-            } else {
-              // Positional integrity is what the caller's targetResults
-              // mapping depends on: a short half silently shifts every
-              // later result onto the wrong entry.
-              merged.push(
-                ...halfJobs.map((job) => ({
-                  entryId: job.entryId,
-                  targetLanguage: job.targetLanguage,
-                  translatedText: '',
-                  error: 'incomplete batch result',
-                })),
-              );
-            }
+          const outcome = await this.dispatchFreewayInParts(
+            { ...args, splitDepth: splitDepth + 1 },
+            [
+              [0, mid],
+              [mid, jobs.length],
+            ],
+          );
+          if (outcome.kind === 'results' && args.splitCaps) {
+            const prior = args.splitCaps.get(failedBucketKey);
+            // Remember the size that parsed, so later batches this run
+            // pre-chunk instead of re-paying the failed full-size call.
+            args.splitCaps.set(failedBucketKey, Math.min(prior ?? Number.MAX_SAFE_INTEGER, mid));
           }
-          return { kind: 'results', results: merged };
+          return outcome;
         }
         if (allErrored) throw new Error(results[0]!.error);
         await resetBucketFlap(state.bucketKey, deps);
@@ -3590,6 +3660,21 @@ export class TranslationEngine {
             decision.moduleId = revalidated.moduleId;
             decision.modelOverride = revalidated.modelId;
             decision.freewayTier = revalidated.qualityTier;
+          }
+          const rescue = buckets.find((b) => b.bucketKey === revalidated.bucketKey);
+          const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
+          if (rescueCap >= 1 && rescueCap < jobs.length) {
+            // A batch grown for the failed bucket's char budget can
+            // physically exceed the rescue bucket's — dispatch it in
+            // cap-sized parts instead of letting an oversized call fail
+            // (or split) its way down.
+            const bounds = TranslationEngine.partBounds(jobs.length, rescueCap);
+            onRechunk?.({
+              bucketKey: revalidated.bucketKey,
+              size: jobs.length,
+              parts: bounds.length,
+            });
+            return this.dispatchFreewayInParts(args, bounds);
           }
         } else if (authFailure) {
           // 'keep' after an auth failure normally means a SIBLING candidate now
@@ -4443,6 +4528,15 @@ export class TranslationEngine {
         return false;
       };
 
+      // Format-strike caps this RUN has learned, keyed by bucketKey (see
+      // RunDetailsAcc.freewaySplitCaps): a Freeway group's planned batches
+      // each run as their OWN `processBatchJob` call, so this must come from
+      // the run-scoped accumulator (not a local declared here) or a bucket
+      // that mis-parsed a full-size call in an earlier batch could never
+      // teach a later one to pre-chunk instead of re-paying the same failure.
+      // Undefined only when the run has no accumulator (e.g. after a
+      // restart) — dispatchFreewayBatch treats that as "no caps known".
+      const freewaySplitCaps = this.details.get(runId)?.freewaySplitCaps;
       // Maps a streamed result back to its index in uncachedNonTrivialEntries,
       // so onJobComplete (fired by the module mid-dispatch) can persist it
       // immediately instead of waiting for the whole dispatch batch to resolve.
@@ -4518,6 +4612,8 @@ export class TranslationEngine {
             onSplit: (info) => this.recordFreewayDetail(runId, formatSplitDetail(info)),
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
             minBand: freewayMinBand(status.request),
+            splitCaps: freewaySplitCaps,
+            onRechunk: (info) => this.recordFreewayDetail(runId, formatRechunkDetail(info)),
           });
           currentFreewayState = undefined;
           // A same-bucket auth failover (a sibling instance took over, see
@@ -5130,6 +5226,7 @@ export class TranslationEngine {
       retries: new Map(),
       chars: { inputTotal: 0, inputSource: 0, outputTotal: 0, outputUsed: 0 },
       previousValues: new Map(),
+      freewaySplitCaps: new Map(),
     });
   }
 
@@ -5163,6 +5260,7 @@ export class TranslationEngine {
       retries,
       chars: { ...existing.chars },
       previousValues,
+      freewaySplitCaps: new Map(),
       ...(existing.freeway ? { freeway: [...existing.freeway] } : {}),
     });
   }
