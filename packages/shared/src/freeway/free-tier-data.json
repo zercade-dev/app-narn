@@ -10,6 +10,8 @@
           "qualityTier": 4,
           "useStructuredOutput": true,
           "maxBatch": 30,
+          "charBudget": 24000,
+          "batchCeiling": 120,
           "contextLength": 1048576,
           "limits": [
             {
@@ -27,6 +29,8 @@
           "qualityTier": 2,
           "useStructuredOutput": true,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "contextLength": 1048576,
           "limits": [
             {
@@ -44,6 +48,8 @@
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "contextLength": 262144,
           "limits": [
             {
@@ -61,6 +67,8 @@
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "contextLength": 262144,
           "limits": [
             {
@@ -78,6 +86,8 @@
           "qualityTier": 3,
           "useStructuredOutput": true,
           "maxBatch": 30,
+          "charBudget": 24000,
+          "batchCeiling": 120,
           "contextLength": 1048576,
           "limits": [
             {
@@ -95,6 +105,8 @@
           "qualityTier": 3,
           "useStructuredOutput": true,
           "maxBatch": 30,
+          "charBudget": 24000,
+          "batchCeiling": 120,
           "contextLength": 1048576,
           "limits": [
             {
@@ -112,6 +124,8 @@
           "qualityTier": 3,
           "useStructuredOutput": true,
           "maxBatch": 30,
+          "charBudget": 24000,
+          "batchCeiling": 120,
           "contextLength": 1048576,
           "limits": [
             {
@@ -129,6 +143,8 @@
           "qualityTier": 2,
           "useStructuredOutput": true,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "contextLength": 1048576,
           "limits": [
             {
@@ -163,6 +179,8 @@
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 25,
+          "charBudget": 16000,
+          "batchCeiling": 80,
           "contextLength": 1000000,
           "limits": [
             {
@@ -180,6 +198,8 @@
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 25,
+          "charBudget": 16000,
+          "batchCeiling": 80,
           "contextLength": 262144,
           "limits": [
             {
@@ -197,6 +217,8 @@
           "qualityTier": 3,
           "useStructuredOutput": true,
           "maxBatch": 20,
+          "charBudget": 10000,
+          "batchCeiling": 50,
           "contextLength": 262144,
           "limits": [
             {
@@ -237,6 +259,8 @@
           "id": "gpt-4o-mini",
           "qualityTier": 2,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "limits": [
             {
               "window": "rpm",
@@ -259,6 +283,8 @@
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 15,
+          "charBudget": 4000,
+          "batchCeiling": 15,
           "contextLength": 131072,
           "limits": [
             {
@@ -276,6 +302,8 @@
           "qualityTier": 2,
           "useStructuredOutput": false,
           "maxBatch": 20,
+          "charBudget": 6000,
+          "batchCeiling": 20,
           "contextLength": 131072,
           "limits": [
             {

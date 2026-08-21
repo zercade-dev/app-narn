@@ -629,6 +629,21 @@ export function createProviderModule(
   });
 }
 
+/**
+ * The exact messages a malformed batch response is thrown (and recorded
+ * per-result) with, plus the predicate the server's Freeway dispatch uses to
+ * tell a format-shaped batch failure (split and retry on the same bucket)
+ * from a bucket-shaped one (cool and fail over) — one definition so the
+ * producer and that consumer cannot drift on the strings.
+ */
+export const PARSE_FAILURE_MESSAGE = 'parseBatchResponse: malformed JSON from provider';
+export const MIXED_PARSE_FAILURE_MESSAGE =
+  'parseMixedTargetBatchResponse: malformed JSON from provider';
+
+export function isParseFailureMessage(message: string): boolean {
+  return message.includes(PARSE_FAILURE_MESSAGE) || message.includes(MIXED_PARSE_FAILURE_MESSAGE);
+}
+
 export function createAISDKModule(config: AISDKModuleConfig): TranslationModule {
   const { provider, manifest, credentials } = config;
   const log = config.log ?? createDefaultModuleLogger();
@@ -858,7 +873,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     logVerbose('single', 'response', { text, usage });
 
     const parsed = parseBatchResponse(text, [job]);
-    if (!parsed) throw new Error('parseBatchResponse: malformed JSON from provider');
+    if (!parsed) throw new Error(PARSE_FAILURE_MESSAGE);
 
     return {
       entryId: job.entryId,
@@ -892,7 +907,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     logVerbose('batch:mixed-target', 'success', { text, usage, count: batch.length });
 
     const parsed = parseMixedTargetBatchResponse(text, batch);
-    if (!parsed) throw new Error('parseMixedTargetBatchResponse: malformed JSON from provider');
+    if (!parsed) throw new Error(MIXED_PARSE_FAILURE_MESSAGE);
 
     const batchUsage = toTranslationUsage(
       usage,
@@ -1033,7 +1048,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     logVerbose('batch', 'success', { text, usage, count: batch.length });
 
     const parsed = parseBatchResponse(text, batch);
-    if (!parsed) throw new Error('parseBatchResponse: malformed JSON from provider');
+    if (!parsed) throw new Error(PARSE_FAILURE_MESSAGE);
 
     // Per the TranslationUsage contract the batch-total usage rides on the
     // first result only (each halving level's sub-batch is its own provider
