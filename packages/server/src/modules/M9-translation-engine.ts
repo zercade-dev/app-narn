@@ -3399,7 +3399,10 @@ export class TranslationEngine {
    * sibling instance comes back. A second strike parks the batch (429) or
    * lets it fail (auth) rather than spending more free requests — not
    * because every candidate is exhausted (a third sibling may still be
-   * usable), but because the one-hop-per-batch budget is spent.
+   * usable), but because the one-hop-per-batch budget is spent. A
+   * parse-failure split (see below) restarts this hop budget at 0 for each
+   * half, so a batch that keeps mis-parsing can spend more than one hop in
+   * total across its parts.
    */
   private async dispatchFreewayBatch(args: FreewayDispatchArgs): Promise<FreewayDispatchOutcome> {
     const {
@@ -3464,7 +3467,12 @@ export class TranslationEngine {
               [mid, jobs.length],
             ],
           );
-          if (outcome.kind === 'results' && args.splitCaps) {
+          if (outcome.kind === 'results' && args.splitCaps && state.bucketKey === failedBucketKey) {
+            // Only credit the failed bucket itself: `state.bucketKey` is
+            // mutated in place on a reroute, so a mismatch here means a part
+            // succeeded by failing over to a DIFFERENT bucket, not by
+            // parsing at half size on this one — nothing was demonstrated
+            // about this bucket's own reliability at `mid`.
             const prior = args.splitCaps.get(failedBucketKey);
             // Remember the size that parsed, so later batches this run
             // pre-chunk instead of re-paying the failed full-size call.
