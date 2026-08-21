@@ -102,6 +102,24 @@ export function passRateClass(passRate: number): PassRateClass {
 }
 
 /**
+ * Coarse judged-quality class for (bucket, language): 0 publishable (score
+ * ≥85), 1 usable / unmeasured (≥70 or no benchmark data), 2 measurably poor
+ * (<70). Three classes on purpose: quality only overrides the economics keys
+ * when the measured gap is real; ties fall through to scarcity as before.
+ * Exact-code lookup — zh-hans evidence never speaks for zh-hant.
+ */
+export function langQualityClass(
+  bucket: Pick<BucketView, 'langScores'>,
+  language: string,
+): 0 | 1 | 2 {
+  const score = bucket.langScores?.[language];
+  if (score === undefined) return 1;
+  if (score >= 85) return 0;
+  if (score >= 70) return 1;
+  return 2;
+}
+
+/**
  * The request stock a bucket can actually spend: a provider with an
  * account-wide pool caps every one of its buckets, so the usable figure is the
  * tighter of this model's own headroom and the pool's. Every surface that
