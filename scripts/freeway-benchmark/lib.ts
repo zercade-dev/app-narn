@@ -140,10 +140,7 @@ export function distill(file: ResultsFile, registryCodes: string[]): Map<string,
   const out = new Map<string, DistilledModel>();
   for (const [key, cell] of Object.entries(file.cells)) {
     const [providerKey, modelId, lang] = splitKey(key);
-    // An unsupported-language signal is an unconditional provider-capability fact and is
-    // recorded even for a lang the registry doesn't currently list; a scored cell for a
-    // non-registry lang is dropped entirely (see the "ignores non-registry codes" case).
-    if (!cell.unsupported && !registry.has(lang)) continue;
+    if (!registry.has(lang)) continue;
     const modelKey = `${providerKey}::${modelId}`;
     let d = out.get(modelKey);
     if (!d) {
