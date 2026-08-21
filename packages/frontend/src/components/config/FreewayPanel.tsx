@@ -14,11 +14,11 @@
  * scrolls to where the user can turn it back on — see
  * {@link scrollToEnableTarget}.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, RotateCcw } from 'lucide-react';
 import type { ModuleInstance } from '@zercade-dev/narn-shared';
-import { apiRequest } from '../../hooks/use-api.js';
+import { apiRequest, ApiError } from '../../hooks/use-api.js';
 import { useAsyncData } from '../../hooks/use-async-data.js';
 import { relativeTime } from '@/lib/utils';
 import { toast } from '@/lib/toast';
@@ -70,6 +70,8 @@ interface FreewayStatusBucket {
   state: FreewayBucketState;
   disabledReason?: string;
   gatePassByLanguage?: Record<string, number>;
+  /** Set when this bucket shares a day-scale pool with sibling buckets; equals providerKey. */
+  poolKey?: string;
   /** The module/instance id actually serving this LIVE bucket, when it differs from `moduleId`. */
   dispatchModuleId?: string;
   /** For a 'disabled' missing row: the candidate id "Enable it" should scroll to / turn on. */
@@ -111,6 +113,16 @@ const PROVIDER_DISPLAY_NAMES: Record<string, string> = {
 
 function providerDisplayName(providerKey: string): string {
   return PROVIDER_DISPLAY_NAMES[providerKey] ?? providerKey;
+}
+
+/** Formats a bucket's (or a pool's) day-scale remaining allowance the same way for both. */
+function formatRemaining(
+  bucket: Pick<FreewayStatusBucket, 'remainingChars' | 'remainingRequests'>,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  return bucket.remainingChars !== undefined
+    ? t('freeway.remainingChars', { count: bucket.remainingChars })
+    : t('freeway.remainingRequests', { count: bucket.remainingRequests });
 }
 
 const STATE_BADGE_VARIANT: Record<
@@ -184,6 +196,51 @@ function summarizeProviders(buckets: readonly FreewayStatusBucket[]): ProviderSu
   return order.map((key) => byKey.get(key)!);
 }
 
+/** One status-table row: either a standalone bucket, or a pool header plus its member buckets. */
+type StatusRowItem =
+  | { kind: 'bucket'; bucket: FreewayStatusBucket }
+  | { kind: 'pool'; poolKey: string; members: FreewayStatusBucket[] };
+
+/**
+ * Groups buckets sharing a `poolKey` (a day-scale allowance actually shared
+ * across several models, e.g. OpenRouter's free tier) into one row, so the
+ * panel doesn't render the same day allowance three times over and imply
+ * 3x the real headroom. First-seen order, same idiom as
+ * {@link summarizeProviders}: a pool's row lands at the position of its
+ * FIRST member bucket, and every later bucket sharing that poolKey folds
+ * into the existing group rather than starting a new row. Buckets with no
+ * `poolKey` render exactly as a standalone row, unchanged.
+ *
+ * A `poolKey` that (in this status snapshot) has only ever gathered ONE
+ * member never gets a header: "pool" is a claim about sharing, and a header
+ * row over a single model reads as implying pooling that isn't observably
+ * happening, plus it costs an extra row for no information. Such an item is
+ * demoted back to a plain `bucket` row before returning.
+ */
+function groupStatusRows(buckets: readonly FreewayStatusBucket[]): StatusRowItem[] {
+  const items: StatusRowItem[] = [];
+  const poolIndex = new Map<string, number>();
+  for (const bucket of buckets) {
+    if (bucket.poolKey === undefined) {
+      items.push({ kind: 'bucket', bucket });
+      continue;
+    }
+    const existingIndex = poolIndex.get(bucket.poolKey);
+    if (existingIndex === undefined) {
+      poolIndex.set(bucket.poolKey, items.length);
+      items.push({ kind: 'pool', poolKey: bucket.poolKey, members: [bucket] });
+    } else {
+      const item = items[existingIndex];
+      if (item.kind === 'pool') item.members.push(bucket);
+    }
+  }
+  return items.map((item) =>
+    item.kind === 'pool' && item.members.length === 1
+      ? { kind: 'bucket', bucket: item.members[0] }
+      : item,
+  );
+}
+
 /** The N languages with the lowest observed LQA-gate pass rate, lowest first. */
 function worstPassRates(
   byLanguage: Record<string, number> | undefined,
@@ -204,6 +261,68 @@ function scrollToEnableTarget(moduleId: string | undefined): void {
   const card = moduleId ? document.querySelector(`[data-testid="module-card-${moduleId}"]`) : null;
   const target = card ?? document.querySelector('[data-testid="enable-module-selector"]');
   target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/**
+ * One status-table row for a single bucket. `showRemaining` is false for a
+ * pool's member rows — their shared day allowance is already shown once on
+ * the pool header row above them, so repeating it per model would recreate
+ * the "3x the real headroom" illusion this grouping exists to kill.
+ */
+function BucketRow({
+  bucket,
+  showRemaining,
+  t,
+}: {
+  bucket: FreewayStatusBucket;
+  showRemaining: boolean;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}): React.JSX.Element {
+  return (
+    <TableRow data-testid={`freeway-bucket-row-${bucket.bucketKey}`}>
+      <TableCell>
+        <div className="font-mono text-xs">{bucket.modelId}</div>
+        <div className="text-xs text-muted-foreground">
+          {providerDisplayName(bucket.providerKey)}
+        </div>
+      </TableCell>
+      <TableCell>
+        <Badge
+          variant={STATE_BADGE_VARIANT[bucket.state]}
+          data-testid={`freeway-state-${bucket.bucketKey}`}
+        >
+          {bucket.state === 'disabled' && bucket.disabledReason !== MODULE_DISABLED_REASON
+            ? t('freeway.state.badCredentials')
+            : t(`freeway.state.${bucket.state}`)}
+        </Badge>
+      </TableCell>
+      {showRemaining ? (
+        <TableCell data-testid={`freeway-remaining-${bucket.bucketKey}`}>
+          {formatRemaining(bucket, t)}
+        </TableCell>
+      ) : (
+        // Suppressed for a pool member: the shared allowance already shows
+        // once on the pool header row above. An em dash (not a blank cell)
+        // marks that as intentional rather than a missing value.
+        <TableCell
+          className="text-muted-foreground"
+          data-testid={`freeway-remaining-suppressed-${bucket.bucketKey}`}
+        >
+          —
+        </TableCell>
+      )}
+      <TableCell data-testid={`freeway-next-reset-${bucket.bucketKey}`}>
+        {new Date(bucket.nextResetAt).toLocaleString()}
+      </TableCell>
+      <TableCell data-testid={`freeway-pass-rate-${bucket.bucketKey}`}>
+        {worstPassRates(bucket.gatePassByLanguage, 2)
+          .map(([language, rate]) =>
+            t('freeway.passRateEntry', { language, rate: Math.round(rate * 100) }),
+          )
+          .join(' · ')}
+      </TableCell>
+    </TableRow>
+  );
 }
 
 export function FreewayPanel(): React.JSX.Element {
@@ -231,6 +350,7 @@ export function FreewayPanel(): React.JSX.Element {
   );
 
   const providers = summarizeProviders(status.buckets);
+  const statusRows = groupStatusRows(status.buckets);
 
   // Module instances (for the per-provider "which instance serves this"
   // picker) and the persisted overrides map — both loaded once, alongside the
@@ -270,7 +390,13 @@ export function FreewayPanel(): React.JSX.Element {
     })
       .then(() => reload())
       .catch((err) => {
-        toast.error(t('freeway.credentialMarkClearFailed', { message: (err as Error).message }));
+        const code =
+          err instanceof ApiError ? (err.data as { error?: string } | undefined)?.error : undefined;
+        toast.error(
+          code === 'not-freeway-candidate'
+            ? t('freeway.credentialMarkErrorNotCandidate')
+            : t('freeway.credentialMarkClearFailed', { message: (err as Error).message }),
+        );
       })
       .finally(() => {
         setRetryingCredentialMarkIds((prev) => {
@@ -632,50 +758,58 @@ export function FreewayPanel(): React.JSX.Element {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {status.buckets.map((bucket) => (
-                          <TableRow
-                            key={bucket.bucketKey}
-                            data-testid={`freeway-bucket-row-${bucket.bucketKey}`}
-                          >
-                            <TableCell>
-                              <div className="font-mono text-xs">{bucket.modelId}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {providerDisplayName(bucket.providerKey)}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant={STATE_BADGE_VARIANT[bucket.state]}
-                                data-testid={`freeway-state-${bucket.bucketKey}`}
+                        {statusRows.map((row) => {
+                          if (row.kind === 'bucket') {
+                            return (
+                              <BucketRow
+                                key={row.bucket.bucketKey}
+                                bucket={row.bucket}
+                                showRemaining
+                                t={t}
+                              />
+                            );
+                          }
+                          // Pool header: the shared day-scale allowance rendered ONCE,
+                          // taken from the first member (the server clamps every
+                          // pooled bucket's effective remaining to the same shared
+                          // figure) — never summed or re-derived here, so the panel
+                          // can't drift from what the selector actually spends
+                          // against.
+                          const first = row.members[0];
+                          return (
+                            <Fragment key={`pool-${row.poolKey}`}>
+                              <TableRow
+                                data-testid={`freeway-pool-row-${row.poolKey}`}
+                                className="bg-muted/40"
                               >
-                                {bucket.state === 'disabled' &&
-                                bucket.disabledReason !== MODULE_DISABLED_REASON
-                                  ? t('freeway.state.badCredentials')
-                                  : t(`freeway.state.${bucket.state}`)}
-                              </Badge>
-                            </TableCell>
-                            <TableCell data-testid={`freeway-remaining-${bucket.bucketKey}`}>
-                              {bucket.remainingChars !== undefined
-                                ? t('freeway.remainingChars', { count: bucket.remainingChars })
-                                : t('freeway.remainingRequests', {
-                                    count: bucket.remainingRequests,
-                                  })}
-                            </TableCell>
-                            <TableCell data-testid={`freeway-next-reset-${bucket.bucketKey}`}>
-                              {new Date(bucket.nextResetAt).toLocaleString()}
-                            </TableCell>
-                            <TableCell data-testid={`freeway-pass-rate-${bucket.bucketKey}`}>
-                              {worstPassRates(bucket.gatePassByLanguage, 2)
-                                .map(([language, rate]) =>
-                                  t('freeway.passRateEntry', {
-                                    language,
-                                    rate: Math.round(rate * 100),
-                                  }),
-                                )
-                                .join(' · ')}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                                <TableCell>
+                                  <div className="text-sm font-medium">
+                                    {providerDisplayName(row.poolKey)}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {t('freeway.sharedPoolLabel')}
+                                  </div>
+                                </TableCell>
+                                <TableCell />
+                                <TableCell data-testid={`freeway-pool-remaining-${row.poolKey}`}>
+                                  {formatRemaining(first, t)}
+                                </TableCell>
+                                <TableCell>
+                                  {new Date(first.nextResetAt).toLocaleString()}
+                                </TableCell>
+                                <TableCell />
+                              </TableRow>
+                              {row.members.map((bucket) => (
+                                <BucketRow
+                                  key={bucket.bucketKey}
+                                  bucket={bucket}
+                                  showRemaining={false}
+                                  t={t}
+                                />
+                              ))}
+                            </Fragment>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   )}

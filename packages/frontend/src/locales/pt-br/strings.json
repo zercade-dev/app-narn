@@ -165,6 +165,8 @@
     "sameAsSource": "Igual à origem",
     "placeholderMismatch": "Placeholder divergente",
     "newOnly": "Novas (da última importação)",
+    "freewayTierBelow": "Abaixo do nível:",
+    "freewayTierBelowOff": "Desativado",
     "clearNewFlags": "Limpar marcações de novas ({{count}})",
     "allSources": "Todas as origens",
     "showColumns": "Mostrar colunas:",
@@ -191,6 +193,7 @@
     "lqaIssues_one": "{{count}} problema de LQA",
     "lqaIssues_other": "{{count}} problemas de LQA",
     "tmHit": "Reutilizada da memória de tradução",
+    "freewayTier": "Fornecida por um modelo gratuito de nível {{tier}}",
     "ignored": "Ignorada",
     "ignoredTooltip": "Fora de todo envio para a IA (tradução, revisão, revisão da origem, geração de glossário/categoria)",
     "ignoreAction": "Ignorar entrada",
@@ -229,7 +232,12 @@
     "removeCategoryApply_other": "Remover {{count}} categorias",
     "aiGeneration": "Geração por IA",
     "generateGlossaryFromSelection": "Gerar glossário a partir da seleção",
-    "generateCategoriesFromSelection": "Gerar categorias a partir da seleção"
+    "generateCategoriesFromSelection": "Gerar categorias a partir da seleção",
+    "retranslateBelowTier": "Retraduzir abaixo do nível:",
+    "retranslateBelowTierApply": "Retraduzir",
+    "retranslateBelowTierApplyHint_zero": "Nenhum par abaixo do nível {{tier}} na seleção",
+    "retranslateBelowTierApplyHint_one": "{{count}} par abaixo do nível {{tier}} na seleção",
+    "retranslateBelowTierApplyHint_other": "{{count}} pares abaixo do nível {{tier}} na seleção"
   },
   "order": {
     "label": "Ordem:",
@@ -336,6 +344,7 @@
     "waitingPairsCount_other": "{{count}} pares pendentes",
     "waitingPairsCount_many": "{{count}} pares pendentes",
     "waitingSkipReasonWarning": "A retomada automática não encontrou uma chave gratuita utilizável — use “Retomar agora com…” abaixo para escolher um módulo.",
+    "waitingProviderErrorReason": "Um provedor continuou falhando — os pares pendentes retomam automaticamente assim que ele se recuperar.",
     "pause": "Pausar",
     "resume": "Retomar",
     "resumeRetryFreePool": "Repetir pool gratuito",

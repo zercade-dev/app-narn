@@ -165,6 +165,8 @@
     "sameAsSource": "เหมือนต้นฉบับ",
     "placeholderMismatch": "ตัวแทนค่าไม่ตรงกัน",
     "newOnly": "ใหม่ (จากการนำเข้าครั้งล่าสุด)",
+    "freewayTierBelow": "ต่ำกว่าระดับ:",
+    "freewayTierBelowOff": "ปิด",
     "clearNewFlags": "ล้างเครื่องหมายใหม่ ({{count}})",
     "allSources": "ทุกแหล่งที่มา",
     "showColumns": "แสดงคอลัมน์:",
@@ -190,6 +192,7 @@
     "lqaPassed": "ผ่าน LQA",
     "lqaIssues_other": "ปัญหา LQA {{count}} ข้อ",
     "tmHit": "ใช้ซ้ำจากหน่วยความจำการแปล",
+    "freewayTier": "ให้บริการโดยโมเดลฟรีระดับ {{tier}}",
     "ignored": "ละเว้นแล้ว",
     "ignoredTooltip": "ไม่รวมในทุกการส่งงานให้ AI (แปล รีวิว รีวิวต้นฉบับ สร้างอภิธานศัพท์และหมวดหมู่)",
     "ignoreAction": "ละเว้นรายการ",
@@ -225,7 +228,11 @@
     "removeCategoryApply_other": "นำหมวดหมู่ออก {{count}} หมวด",
     "aiGeneration": "การสร้างด้วย AI",
     "generateGlossaryFromSelection": "สร้างอภิธานศัพท์จากรายการที่เลือก",
-    "generateCategoriesFromSelection": "สร้างหมวดหมู่จากรายการที่เลือก"
+    "generateCategoriesFromSelection": "สร้างหมวดหมู่จากรายการที่เลือก",
+    "retranslateBelowTier": "แปลใหม่ต่ำกว่าระดับ:",
+    "retranslateBelowTierApply": "แปลใหม่",
+    "retranslateBelowTierApplyHint_zero": "ไม่มีคู่ที่ต่ำกว่าระดับ {{tier}} ในรายการที่เลือก",
+    "retranslateBelowTierApplyHint_other": "มี {{count}} คู่ที่ต่ำกว่าระดับ {{tier}} ในรายการที่เลือก"
   },
   "order": {
     "label": "การเรียงลำดับ:",
@@ -330,6 +337,7 @@
     "waitingResumesAt": "ทำต่อ {{time}}",
     "waitingPairsCount_other": "รอดำเนินการ {{count}} คู่",
     "waitingSkipReasonWarning": "ระบบทำต่ออัตโนมัติไม่พบคีย์ฟรีที่ใช้งานได้ — ใช้ \"ทำต่อตอนนี้กับโมดูลอื่น…\" ด้านล่างเพื่อเลือกโมดูล",
+    "waitingProviderErrorReason": "ผู้ให้บริการยังคงล้มเหลวซ้ำ ๆ — คู่ที่รอดำเนินการจะทำต่อโดยอัตโนมัติเมื่อกลับมาใช้งานได้",
     "pause": "หยุดชั่วคราว",
     "resume": "ทำต่อ",
     "resumeRetryFreePool": "ลองใหม่กับกลุ่มฟรี",

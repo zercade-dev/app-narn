@@ -165,6 +165,8 @@
     "sameAsSource": "원문과 동일",
     "placeholderMismatch": "자리 표시자 불일치",
     "newOnly": "신규 (최근 가져오기)",
+    "freewayTierBelow": "티어 미만:",
+    "freewayTierBelowOff": "끄기",
     "clearNewFlags": "새 항목 표시 지우기 ({{count}})",
     "allSources": "모든 출처",
     "showColumns": "표시할 열:",
@@ -190,6 +192,7 @@
     "lqaPassed": "LQA 통과",
     "lqaIssues_other": "LQA 이슈 {{count}}건",
     "tmHit": "번역 메모리에서 재사용됨",
+    "freewayTier": "티어 {{tier}} 무료 모델로 제공됨",
     "ignored": "무시됨",
     "ignoredTooltip": "모든 AI 전송(번역, 검토, 원문 검토, 용어집·카테고리 생성)에서 빠져요",
     "ignoreAction": "항목 무시",
@@ -225,7 +228,11 @@
     "removeCategoryApply_other": "카테고리 {{count}}개 제거",
     "aiGeneration": "AI 생성",
     "generateGlossaryFromSelection": "선택한 항목에서 용어집 생성",
-    "generateCategoriesFromSelection": "선택한 항목에서 카테고리 생성"
+    "generateCategoriesFromSelection": "선택한 항목에서 카테고리 생성",
+    "retranslateBelowTier": "티어 미만 다시 번역:",
+    "retranslateBelowTierApply": "다시 번역",
+    "retranslateBelowTierApplyHint_zero": "선택 항목에 티어 {{tier}} 미만 쌍이 없습니다",
+    "retranslateBelowTierApplyHint_other": "선택 항목에 티어 {{tier}} 미만 쌍 {{count}}개"
   },
   "order": {
     "label": "정렬:",
@@ -330,6 +337,7 @@
     "waitingResumesAt": "{{time}} 재개 예정",
     "waitingPairsCount_other": "대기 중인 쌍 {{count}}개",
     "waitingSkipReasonWarning": "자동 재개가 사용할 수 있는 무료 키를 찾지 못했어요 — 아래의 “지금 다른 모듈로 재개…”를 사용해 모듈을 선택하세요.",
+    "waitingProviderErrorReason": "제공업체가 계속 실패했어요 — 복구되면 대기 중인 쌍이 자동으로 재개돼요.",
     "pause": "일시 중지",
     "resume": "재개",
     "resumeRetryFreePool": "무료 풀 재시도",

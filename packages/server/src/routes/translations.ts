@@ -84,6 +84,25 @@ const enqueueSchema = z.object({
    * `entryIds` are dropped server-side. Hard cap 10.
    */
   exampleEntryIds: z.array(z.string()).min(1).max(10).optional(),
+  /**
+   * Restricts the run to exactly these (entryId, targetLanguage) pairs instead
+   * of the full `entryIds × targetLanguages` product. `entryIds`/
+   * `targetLanguages` stay required and still bound the run — `pairs` only
+   * intersects that product, so a pair outside it is inert. Lets a caller
+   * re-translate a few weak pairs without overwriting good translations in the
+   * selection's other languages. Bounded by the same fan-out cap as `entryIds`.
+   */
+  pairs: z
+    .array(z.object({ entryId: z.string(), targetLanguage: z.string() }))
+    .min(1)
+    .max(MAX_ENTRY_IDS)
+    .optional(),
+  /**
+   * Freeway-only per-run quality floor: plan (and re-validate) every job group
+   * at least this tier rather than the one its content alone earns. 2-4 — tier
+   * 1 is no floor at all and 5 is not a tier. Ignored by non-Freeway routing.
+   */
+  freewayMinTier: z.number().int().min(2).max(4).optional(),
 });
 
 /** Dry-run TM preview: how many of these pairs would auto-apply from memory. */
@@ -161,6 +180,8 @@ translationsRouter.post(
       splitByModel,
       customBatchSize,
       exampleEntryIds,
+      pairs,
+      freewayMinTier,
     } = req.body as z.infer<typeof enqueueSchema>;
     const sessionId = getSessionId(res);
 
@@ -218,6 +239,8 @@ translationsRouter.post(
         ...(splitByModel ? { splitByModel: true } : {}),
         ...(customBatchSize !== undefined ? { customBatchSize } : {}),
         ...(exampleEntryIds?.length ? { exampleEntryIds } : {}),
+        ...(pairs?.length ? { pairs } : {}),
+        ...(freewayMinTier !== undefined ? { freewayMinTier } : {}),
       },
     );
     res.status(202).json(result);

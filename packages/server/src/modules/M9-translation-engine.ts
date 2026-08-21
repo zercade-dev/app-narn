@@ -335,6 +335,35 @@ function formatBucketHeadroom(view: BucketView | undefined): string {
   return `${effectiveRemainingRequests(view)} requests left today`;
 }
 
+/**
+ * The run's Freeway tier floor as a band, or undefined when it set none. The
+ * value is range-checked at the route (2-4); a persisted value outside that
+ * range is treated as no floor rather than cast into the band arithmetic, so
+ * the run plans at its natural band instead of an undefined one.
+ */
+function freewayMinBand(request: RunRequest | undefined): DifficultyBand | undefined {
+  const tier = request?.freewayMinTier;
+  if (tier === undefined) return undefined;
+  return tier === 2 || tier === 3 || tier === 4 ? tier : undefined;
+}
+
+/**
+ * The band options one `revalidateGroup` call needs, or undefined when neither
+ * applies. The two floors are independent and must both survive: `degradedFloor`
+ * relaxes the band a degrade already settled on, `minBand` raises it to the
+ * run's requested tier — collapsing them would silently drop one.
+ */
+function freewayBandOpts(
+  degradedFloor: DifficultyBand | undefined,
+  minBand: DifficultyBand | undefined,
+): { degradedFloor?: DifficultyBand; minBand?: DifficultyBand } | undefined {
+  if (degradedFloor === undefined && minBand === undefined) return undefined;
+  return {
+    ...(degradedFloor !== undefined ? { degradedFloor } : {}),
+    ...(minBand !== undefined ? { minBand } : {}),
+  };
+}
+
 /** `HH:MM` in the server's local time, for the "resumes ~HH:MM" detail line. */
 function formatResumeTime(resumeAt: number): string {
   const d = new Date(resumeAt);
@@ -410,7 +439,7 @@ interface FreewayBatchState {
 /** What the Freeway dispatch attempt(s) for one batch produced. */
 type FreewayDispatchOutcome =
   | { kind: 'results'; results: TranslationResult[] }
-  | { kind: 'defer'; resumeAt: number }
+  | { kind: 'defer'; resumeAt: number; reason?: 'quota' | 'provider-error' }
   | { kind: 'blocked' }
   /** `authCancel` is true only for an auth failure that leaves no bucket at all. */
   | { kind: 'error'; error: unknown; authCancel: boolean };
@@ -741,6 +770,8 @@ export class TranslationEngine {
       ignoreBatchSizeLimit?: boolean;
       splitByModel?: boolean;
       customBatchSize?: number;
+      /** Freeway-only per-run tier floor (2-4) — see {@link RunRequest.freewayMinTier}. */
+      freewayMinTier?: number;
     } = {},
   ): Promise<{ runId: string; total: number; status: RunStatusCode }> {
     // Reconcile crash/redeploy-orphaned runs for this project once per process,
@@ -771,6 +802,7 @@ export class TranslationEngine {
       ...(options.customBatchSize !== undefined
         ? { customBatchSize: options.customBatchSize }
         : {}),
+      ...(options.freewayMinTier !== undefined ? { freewayMinTier: options.freewayMinTier } : {}),
     };
 
     // Per-project run queue: starting a run while one is in progress (or
@@ -2245,7 +2277,11 @@ export class TranslationEngine {
     sessionId?: string,
   ): Promise<RunStatus> {
     const parked = [...pairs];
-    const park = { resumeAt: status.waitingForQuota?.resumeAt ?? Date.now(), pairs: parked };
+    const park = {
+      resumeAt: status.waitingForQuota?.resumeAt ?? Date.now(),
+      pairs: parked,
+      reason: status.waitingForQuota?.reason,
+    };
     delete status.waitingForQuota;
     this.queue.resumeRun(runId);
     const request = this.parkedRetryRequest(status, parked);
@@ -2495,15 +2531,24 @@ export class TranslationEngine {
   /**
    * Undo a park-clearing re-dispatch that never got off the ground: `startRun`
    * threw, so the run is neither running nor parked — an invisible, permanently
-   * stuck state. Put the pairs back (dropping any stale skip reason), re-pause
-   * the run and persist, then let the caller rethrow.
+   * stuck state. Put the pairs back (dropping any stale skip reason but
+   * restoring the prior `reason` label verbatim), re-pause the run and
+   * persist, then let the caller rethrow.
    */
   private async restoreQuotaPark(
     projectId: string,
     status: RunStatus,
-    park: { resumeAt: number; pairs: RunEntryLanguagePair[] },
+    park: {
+      resumeAt: number;
+      pairs: RunEntryLanguagePair[];
+      reason?: 'quota' | 'provider-error';
+    },
   ): Promise<void> {
-    status.waitingForQuota = { resumeAt: park.resumeAt, pairs: park.pairs };
+    status.waitingForQuota = {
+      resumeAt: park.resumeAt,
+      pairs: park.pairs,
+      ...(park.reason ? { reason: park.reason } : {}),
+    };
     status.status = RunStatusCode.Paused;
     this.queue.pauseRun(status.runId);
     await this.runStore.updateRun(projectId, status).catch((err: unknown) => {
@@ -2591,7 +2636,7 @@ export class TranslationEngine {
     if (availability !== 'ok') return { ok: false, reason: availability };
 
     const parked = [...waiting.pairs];
-    const park = { resumeAt: waiting.resumeAt, pairs: parked };
+    const park = { resumeAt: waiting.resumeAt, pairs: parked, reason: waiting.reason };
     this.runs.set(runId, status);
     delete status.waitingForQuota;
     this.queue.resumeRun(runId);
@@ -2981,7 +3026,13 @@ export class TranslationEngine {
       1500,
     );
     const buckets = await loadBucketViews(now, { ...deps, bucketStates });
-    const resolution = resolveFreewayDecisions(decisions, buckets, now);
+    const minBand = freewayMinBand(status.request);
+    const resolution = resolveFreewayDecisions(
+      decisions,
+      buckets,
+      now,
+      minBand !== undefined ? { minBand } : undefined,
+    );
     this.logger.info('translation:freeway-resolved', {
       runId,
       assigned: resolution.assignedGroups.map((g) => ({
@@ -3004,7 +3055,12 @@ export class TranslationEngine {
       this.recordFreewayBlocked(runId, status, resolution.blocked);
     }
     if (resolution.deferred) {
-      this.deferPairsForQuota(status, resolution.deferred.pairs, resolution.deferred.resumeAt);
+      this.deferPairsForQuota(
+        status,
+        resolution.deferred.pairs,
+        resolution.deferred.resumeAt,
+        'quota',
+      );
       this.recordFreewayDetail(
         runId,
         formatDeferralDetail(resolution.deferred.pairs.length, resolution.deferred.resumeAt),
@@ -3059,16 +3115,23 @@ export class TranslationEngine {
    * Park (entry, language) pairs until free quota returns. Merges with any
    * pairs a sibling batch already parked (dedup by pair, earliest resume wins);
    * the pairs count toward neither `completed` nor `failed`.
+   *
+   * `reason` labels WHY (UI only — never changes park/resume behavior). When
+   * merging into an existing park, `'provider-error'` always wins over
+   * `'quota'`: a sibling batch parked for a genuine provider failure must
+   * never be silently downgraded to a plain quota wait by a later, milder
+   * defer landing on the same run.
    */
   private deferPairsForQuota(
     status: RunStatus,
     pairs: RunEntryLanguagePair[],
     resumeAt: number,
+    reason?: 'quota' | 'provider-error',
   ): void {
     if (pairs.length === 0) return;
     const existing = status.waitingForQuota;
     if (!existing) {
-      status.waitingForQuota = { resumeAt, pairs: [...pairs] };
+      status.waitingForQuota = { resumeAt, pairs: [...pairs], ...(reason ? { reason } : {}) };
       return;
     }
     const seen = new Set(existing.pairs.map((p) => `${p.entryId} ${p.targetLanguage}`));
@@ -3079,6 +3142,9 @@ export class TranslationEngine {
       existing.pairs.push(pair);
     }
     existing.resumeAt = Math.min(existing.resumeAt, resumeAt);
+    if (existing.reason !== 'provider-error' && reason !== undefined) {
+      existing.reason = reason;
+    }
   }
 
   /**
@@ -3102,6 +3168,9 @@ export class TranslationEngine {
    * (higher) floor — otherwise every degraded assignment would bounce
    * straight back to deferred the moment it reaches this coarse re-check,
    * since the bucket the plan chose is by construction below the natural floor.
+   * `minBand` is the run's own tier floor and moves the OTHER way — it raises
+   * the band, exactly as planning did — so the two are threaded separately and
+   * never collapsed into one value.
    */
   private async revalidateFreewayBatch(
     decisions: RoutingDecision[],
@@ -3109,13 +3178,14 @@ export class TranslationEngine {
     deps: BucketSourceDeps,
     now: number,
     degradedFloor?: DifficultyBand,
+    minBand?: DifficultyBand,
   ): Promise<ReturnType<typeof revalidateGroup>> {
     const buckets = await loadBucketViews(now, deps);
     return revalidateGroup(
       { decisions, bucketKey, batchSize: decisions.length },
       buckets,
       now,
-      degradedFloor !== undefined ? { degradedFloor } : undefined,
+      freewayBandOpts(degradedFloor, minBand),
     );
   }
 
@@ -3223,6 +3293,13 @@ export class TranslationEngine {
      * degrade exists to remove.
      */
     degradedFloor?: DifficultyBand;
+    /**
+     * The run's own Freeway tier floor (`freewayMinTier`), if it set one. The
+     * opposite axis to `degradedFloor`: it RAISES the band every re-validation
+     * below runs at, so a failover cannot quietly drop the batch onto a bucket
+     * under the tier the run asked for.
+     */
+    minBand?: DifficultyBand;
   }): Promise<FreewayDispatchOutcome> {
     const {
       jobs,
@@ -3234,7 +3311,9 @@ export class TranslationEngine {
       signal,
       onReroute,
       degradedFloor,
+      minBand,
     } = args;
+    const bandOpts = freewayBandOpts(degradedFloor, minBand);
     for (let hop = 0; ; hop++) {
       let results: TranslationResult[] | undefined;
       try {
@@ -3298,7 +3377,7 @@ export class TranslationEngine {
               { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
               freshBuckets,
               strikeAt,
-              degradedFloor !== undefined ? { degradedFloor } : undefined,
+              bandOpts,
             );
             if (revalidated.kind === 'blocked') {
               return { kind: 'error', error: err, authCancel: false };
@@ -3306,6 +3385,7 @@ export class TranslationEngine {
             return {
               kind: 'defer',
               resumeAt: revalidated.kind === 'defer' ? revalidated.resumeAt : strikeAt + 60_000,
+              reason: 'provider-error',
             };
           }
           if (!rateLimited) {
@@ -3327,7 +3407,7 @@ export class TranslationEngine {
             { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
             buckets,
             strikeAt,
-            degradedFloor !== undefined ? { degradedFloor } : undefined,
+            bandOpts,
           );
           if (parked.kind === 'blocked') return { kind: 'blocked' };
           // 'defer' carries the soonest useful reset. 'reroute'/'keep' (another
@@ -3339,6 +3419,7 @@ export class TranslationEngine {
           return {
             kind: 'defer',
             resumeAt: parked.kind === 'defer' ? parked.resumeAt : strikeAt + 60_000,
+            reason: 'quota',
           };
         }
         const now = Date.now();
@@ -3369,7 +3450,7 @@ export class TranslationEngine {
           { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
           buckets,
           now,
-          degradedFloor !== undefined ? { degradedFloor } : undefined,
+          bandOpts,
         );
         // Only a reroute rescues a generic provider failure: with nothing else
         // able to serve the group, the honest outcome is the provider's own
@@ -3384,7 +3465,7 @@ export class TranslationEngine {
           // did land, so the next planning pass sees the cooldown and routes
           // around it.
           if (revalidated.kind === 'keep') {
-            return { kind: 'defer', resumeAt: now + 60_000 };
+            return { kind: 'defer', resumeAt: now + 60_000, reason: 'provider-error' };
           }
           // 'defer' means every other candidate is merely cooling (or
           // minute-starved), not gone for good — the normal state of a
@@ -3393,12 +3474,20 @@ export class TranslationEngine {
           // themselves once a sibling's cooldown clears; only a truly empty
           // field ('blocked', handled below) earns the provider's own error.
           if (revalidated.kind === 'defer') {
-            return { kind: 'defer', resumeAt: revalidated.resumeAt };
+            return { kind: 'defer', resumeAt: revalidated.resumeAt, reason: 'provider-error' };
           }
           return { kind: 'error', error: err, authCancel: false };
         }
+        // Rate-limited AND hop-0 auth-failure share this tail (auth falls
+        // through here because `providerFailure` is false for it too). Both
+        // are deliberately labeled 'quota', not a third reason: for the auth
+        // case, markFreewayCredentialBad already sidelined the bad
+        // credential above, so what the run is actually parked on now is the
+        // OTHER buckets' quota/cooldowns — the credential problem itself is
+        // surfaced separately (the credential mark), not through the park
+        // reason. The enum stays two-valued on purpose.
         if (revalidated.kind === 'defer') {
-          return { kind: 'defer', resumeAt: revalidated.resumeAt };
+          return { kind: 'defer', resumeAt: revalidated.resumeAt, reason: 'quota' };
         }
         if (revalidated.kind === 'blocked') {
           // An auth failure that leaves NO usable bucket at all is the classic
@@ -3611,6 +3700,7 @@ export class TranslationEngine {
           freewayDeps,
           Date.now(),
           freewayDegraded?.toTier as DifficultyBand | undefined,
+          freewayMinBand(status.request),
         );
         if (revalidated.kind === 'reroute') {
           this.logger.info('translation:freeway-rerouted', {
@@ -3635,6 +3725,7 @@ export class TranslationEngine {
             status,
             decisions.map((d) => ({ entryId: d.entry.id, targetLanguage: d.targetLanguage })),
             revalidated.resumeAt,
+            'quota',
           );
           for (const d of decisions) settled.add(settleKey(d));
           this.logger.info('translation:freeway-deferred', {
@@ -4109,10 +4200,16 @@ export class TranslationEngine {
             }
             if (!parkedOnce.has(pairKey)) {
               parkedOnce.add(pairKey);
+              // Labeled 'quota' (not a third reason) same as the auth-tail
+              // adjudication above: this is one flaky call in an otherwise
+              // healthy batch — the bucket was never cooled, so what the
+              // pair is actually waiting out is quota/pacing, not a
+              // provider outage.
               this.deferPairsForQuota(
                 status,
                 [{ entryId: e.decision.entry.id, targetLanguage: e.decision.targetLanguage }],
                 Date.now() + 60_000,
+                'quota',
               );
               settled.add(settleKey(e.decision));
               deferredIndices.add(i);
@@ -4341,6 +4438,7 @@ export class TranslationEngine {
             signal,
             onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
+            minBand: freewayMinBand(status.request),
           });
           currentFreewayState = undefined;
           // A same-bucket auth failover (a sibling instance took over, see
@@ -4403,7 +4501,7 @@ export class TranslationEngine {
               deferredIndices.add(index);
             }
             if (outcome.kind === 'defer') {
-              this.deferPairsForQuota(status, pairs, outcome.resumeAt);
+              this.deferPairsForQuota(status, pairs, outcome.resumeAt, outcome.reason);
               this.logger.info('translation:freeway-deferred', {
                 runId,
                 bucketKey,

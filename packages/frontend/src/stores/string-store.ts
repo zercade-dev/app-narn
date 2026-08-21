@@ -67,6 +67,7 @@ export const DEFAULT_STRING_FILTERS: EntryFilters = {
   runId: '',
   orderMode: 'import',
   filterMode: 'AND',
+  freewayTierBelow: null,
 };
 
 export const useStringStore = create<StringStoreState>()(

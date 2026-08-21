@@ -165,6 +165,8 @@
     "sameAsSource": "Sama dengan sumber",
     "placeholderMismatch": "Placeholder tidak cocok",
     "newOnly": "Baru (dari impor terakhir)",
+    "freewayTierBelow": "Di bawah tingkat:",
+    "freewayTierBelowOff": "Nonaktif",
     "clearNewFlags": "Hapus tanda baru ({{count}})",
     "allSources": "Semua sumber",
     "showColumns": "Tampilkan kolom:",
@@ -190,6 +192,7 @@
     "lqaPassed": "LQA lulus",
     "lqaIssues_other": "{{count}} isu LQA",
     "tmHit": "Dipakai ulang dari memori terjemahan",
+    "freewayTier": "Disediakan oleh model gratis tingkat {{tier}}",
     "ignored": "Diabaikan",
     "ignoredTooltip": "Dikecualikan dari semua pengiriman AI (terjemah, tinjauan, tinjauan sumber, pembuatan glosarium/kategori)",
     "ignoreAction": "Abaikan entri",
@@ -225,7 +228,11 @@
     "removeCategoryApply_other": "Hapus {{count}} kategori",
     "aiGeneration": "Pembuatan oleh AI",
     "generateGlossaryFromSelection": "Buat glosarium dari pilihan",
-    "generateCategoriesFromSelection": "Buat kategori dari pilihan"
+    "generateCategoriesFromSelection": "Buat kategori dari pilihan",
+    "retranslateBelowTier": "Terjemahkan ulang di bawah tingkat:",
+    "retranslateBelowTierApply": "Terjemahkan ulang",
+    "retranslateBelowTierApplyHint_zero": "Tidak ada pasangan di bawah tingkat {{tier}} dalam pilihan",
+    "retranslateBelowTierApplyHint_other": "{{count}} pasangan di bawah tingkat {{tier}} dalam pilihan"
   },
   "order": {
     "label": "Urutan:",
@@ -330,6 +337,7 @@
     "waitingResumesAt": "Dilanjutkan {{time}}",
     "waitingPairsCount_other": "{{count}} pasangan menunggu",
     "waitingSkipReasonWarning": "Pelanjutan otomatis tidak menemukan kunci gratis yang bisa dipakai — gunakan “Lanjutkan sekarang dengan…” di bawah untuk memilih modul.",
+    "waitingProviderErrorReason": "Penyedia terus gagal — pasangan yang menunggu akan dilanjutkan otomatis begitu penyedia itu pulih.",
     "pause": "Jeda",
     "resume": "Lanjutkan",
     "resumeRetryFreePool": "Coba ulang kumpulan gratis",

@@ -50,6 +50,8 @@ interface FreewayStatusBucket {
   state: BucketStatusState;
   disabledReason?: string;
   gatePassByLanguage?: Record<string, number>;
+  /** Set when this bucket shares a day-scale pool with sibling buckets; equals providerKey. */
+  poolKey?: string;
   /** The module/instance id actually serving this LIVE bucket. */
   dispatchModuleId?: string;
   /** For a 'disabled' missing row: the candidate id "Enable it" should scroll to / turn on. */
@@ -200,6 +202,7 @@ function toStatusBucket(
     state: deriveBucketState(view, now),
     disabledReason: view.disabledReason,
     gatePassByLanguage: view.stats.gatePassByLanguage,
+    poolKey: view.poolKey,
     ...(view.dispatchModuleId !== undefined ? { dispatchModuleId: view.dispatchModuleId } : {}),
     ...(view.disabledReason === CREDENTIAL_BAD_REASON
       ? deriveCredentialMark(view, envVarFor, existingVaultKeys)
@@ -343,7 +346,10 @@ freewayRouter.post(
     // candidate set before it ever reaches the ledger — otherwise a caller
     // could write an arbitrary `credential::<anything>` row.
     if (!validCredentialMarkIds().has(moduleId)) {
-      res.status(400).json({ error: `Not a Freeway candidate module id: ${moduleId}` });
+      res.status(400).json({
+        error: 'not-freeway-candidate',
+        message: `Not a Freeway candidate module id: ${moduleId}`,
+      });
       return;
     }
     await getFreewayLedgerStore().setDisabled(freewayCredentialKey(moduleId), null);

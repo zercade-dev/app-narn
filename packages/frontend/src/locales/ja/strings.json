@@ -165,6 +165,8 @@
     "sameAsSource": "原文と同一",
     "placeholderMismatch": "プレースホルダーの不一致",
     "newOnly": "新規（前回のインポート分）",
+    "freewayTierBelow": "指定ティア未満：",
+    "freewayTierBelowOff": "オフ",
     "clearNewFlags": "新規フラグを解除（{{count}}）",
     "allSources": "すべてのソース",
     "showColumns": "表示する列：",
@@ -190,6 +192,7 @@
     "lqaPassed": "LQA合格",
     "lqaIssues_other": "LQAの問題{{count}}件",
     "tmHit": "翻訳メモリから再利用",
+    "freewayTier": "ティア{{tier}}の無料モデルによる翻訳",
     "ignored": "無視中",
     "ignoredTooltip": "AIのすべての処理（翻訳・レビュー・原文レビュー・用語集・カテゴリの生成）の対象から除外されます",
     "ignoreAction": "エントリを無視",
@@ -225,7 +228,11 @@
     "removeCategoryApply_other": "カテゴリ{{count}}件を外す",
     "aiGeneration": "AI生成",
     "generateGlossaryFromSelection": "選択範囲から用語集を生成",
-    "generateCategoriesFromSelection": "選択範囲からカテゴリを生成"
+    "generateCategoriesFromSelection": "選択範囲からカテゴリを生成",
+    "retranslateBelowTier": "指定ティア未満を再翻訳：",
+    "retranslateBelowTierApply": "再翻訳",
+    "retranslateBelowTierApplyHint_zero": "選択範囲内にティア{{tier}}未満のペアはありません",
+    "retranslateBelowTierApplyHint_other": "選択範囲内にティア{{tier}}未満のペアが{{count}}件あります"
   },
   "order": {
     "label": "並び順：",
@@ -330,6 +337,7 @@
     "waitingResumesAt": "再開：{{time}}",
     "waitingPairsCount_other": "保留中のペア{{count}}件",
     "waitingSkipReasonWarning": "自動再開で利用できる無料キーが見つかりませんでした。下の「別のモジュールで再開…」からモジュールを選択してください。",
+    "waitingProviderErrorReason": "プロバイダーが失敗し続けています。復旧すると、保留中のペアは自動的に再開します。",
     "pause": "一時停止",
     "resume": "再開",
     "resumeRetryFreePool": "無料プールを再試行",

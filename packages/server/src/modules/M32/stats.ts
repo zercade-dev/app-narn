@@ -78,7 +78,7 @@ export function capRecord(rec: FreewayGatePassRecord): FreewayGatePassRecord {
 }
 
 /** The display map the status route and Freeway panel read: observed `s / n` per language. */
-function deriveDisplayRates(
+export function deriveDisplayRates(
   records: Record<string, FreewayGatePassRecord>,
 ): Record<string, number> {
   const rates: Record<string, number> = {};
@@ -91,7 +91,11 @@ function deriveDisplayRates(
 /**
  * Decay every language's record to `now`, dropping any that fails the guard.
  * The read path uses this to build a BucketView's stats; the result is never
- * written back.
+ * written back. `gatePassByLanguage` is recomputed from the decayed counts
+ * (mirroring `recordGatePass`'s write-time derivation) rather than passed
+ * through — otherwise it would parrot the stale write-time ratio forever
+ * while the decayed counts (and the router's Beta-Binomial estimate over
+ * them) have long since moved on.
  */
 export function decayStats(stats: FreewayBucketStats, now: number): FreewayBucketStats {
   const source = stats.gatePassStats;
@@ -100,7 +104,7 @@ export function decayStats(stats: FreewayBucketStats, now: number): FreewayBucke
   for (const [language, rec] of Object.entries(source)) {
     if (isGatePassRecord(rec)) decayed[language] = decayRecord(rec, now);
   }
-  return { ...stats, gatePassStats: decayed };
+  return { ...stats, gatePassStats: decayed, gatePassByLanguage: deriveDisplayRates(decayed) };
 }
 
 /**

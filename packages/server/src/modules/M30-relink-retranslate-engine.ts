@@ -479,6 +479,10 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
           });
         }
         try {
+          // No `freewayTier` stamp here: `selectModule` above calls
+          // `selectCapableModule` directly with no `requestedId === FREEWAY_MODULE_ID`
+          // branch (unlike M25/M26/M29), so this engine can never resolve a
+          // Freeway bucket — `moduleId` is always a real registered module id.
           await this.stringStore.setTranslation(projectId, result.entryId, result.targetLanguage, {
             text: result.translatedText,
             status: 'translated',

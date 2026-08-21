@@ -165,6 +165,8 @@
     "sameAsSource": "與原文相同",
     "placeholderMismatch": "佔位符不符",
     "newOnly": "新（來自上次匯入）",
+    "freewayTierBelow": "低於層級：",
+    "freewayTierBelowOff": "關閉",
     "clearNewFlags": "清除新標記（{{count}}）",
     "allSources": "所有來源",
     "showColumns": "顯示欄：",
@@ -190,6 +192,7 @@
     "lqaPassed": "LQA 已通過",
     "lqaIssues_other": "{{count}} 個 LQA 問題",
     "tmHit": "重用自翻譯記憶庫",
+    "freewayTier": "由層級 {{tier}} 的免費模型提供",
     "ignored": "已忽略",
     "ignoredTooltip": "已排除於所有 AI 派送之外（翻譯、審閱、原文審閱、術語表與類別生成）",
     "ignoreAction": "忽略條目",
@@ -225,7 +228,11 @@
     "removeCategoryApply_other": "移除 {{count}} 個類別",
     "aiGeneration": "AI 生成",
     "generateGlossaryFromSelection": "從選取範圍生成術語表",
-    "generateCategoriesFromSelection": "從選取範圍生成類別"
+    "generateCategoriesFromSelection": "從選取範圍生成類別",
+    "retranslateBelowTier": "重新翻譯低於層級：",
+    "retranslateBelowTierApply": "重新翻譯",
+    "retranslateBelowTierApplyHint_zero": "所選項目中沒有低於層級 {{tier}} 的翻譯對",
+    "retranslateBelowTierApplyHint_other": "所選項目中有 {{count}} 個低於層級 {{tier}} 的翻譯對"
   },
   "order": {
     "label": "排序：",
@@ -330,6 +337,7 @@
     "waitingResumesAt": "{{time}} 繼續",
     "waitingPairsCount_other": "{{count}} 對待處理",
     "waitingSkipReasonWarning": "自動繼續未找到可用的免費金鑰——請使用下方的「立即換模組繼續…」來選擇模組。",
+    "waitingProviderErrorReason": "某個供應商持續失敗——待處理的配對會在其恢復後自動繼續。",
     "pause": "暫停",
     "resume": "繼續",
     "resumeRetryFreePool": "重試免費資源池",

@@ -21,8 +21,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Label } from '@/components/ui/label';
 import { RunProgressBar } from '@/components/ui/run-progress-bar';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type BulkOpMode = 'menu' | 'add-category' | 'remove-category';
+
+/** Threshold options for the "Retranslate below tier N" select — mirrors the
+ * "Served below tier N" filter's off/2/3/4 idiom (a tier-1 floor matches
+ * nothing; 1 is the lowest tier). */
+const RETRANSLATE_BELOW_TIER_OPTIONS = [2, 3, 4] as const;
 
 interface StringTableBulkBarProps {
   /**
@@ -67,6 +79,16 @@ interface StringTableBulkBarProps {
   readonly translatableCount: number;
   readonly handleBatchCancel: () => Promise<void>;
   readonly openBatchDialog: () => Promise<void>;
+  /**
+   * "Retranslate below tier N" — the quality-floor threshold currently chosen
+   * in the bulk bar's own select (independent of the "Served below tier N"
+   * filter's store state). `null` = off (mirrors the filter's idiom).
+   */
+  readonly retranslateBelowTier: number | null;
+  readonly setRetranslateBelowTier: (value: number | null) => void;
+  /** Count of (entryId, targetLanguage) pairs the current threshold + selection qualify — the action is disabled at 0. */
+  readonly retranslateBelowTierPairCount: number;
+  readonly onRetranslateBelowTier: () => void;
   readonly clearSelection: () => void;
 }
 
@@ -105,6 +127,10 @@ export function StringTableBulkBar({
   translatableCount,
   handleBatchCancel,
   openBatchDialog,
+  retranslateBelowTier,
+  setRetranslateBelowTier,
+  retranslateBelowTierPairCount,
+  onRetranslateBelowTier,
   clearSelection,
 }: Readonly<StringTableBulkBarProps>): React.JSX.Element {
   const { t } = useTranslation('strings');
@@ -400,6 +426,73 @@ export function StringTableBulkBar({
         <span className="text-xs text-muted-foreground" data-testid="bulk-translatable-count">
           {tBatch('toTranslateCount', { count: translatableCount })}
         </span>
+
+        <span className="text-muted-foreground">|</span>
+
+        {/* "Retranslate below tier N": scopes to exactly the selection's weak
+            Freeway pairs (see collectFreewayRetranslatePairs in
+            string-table-helpers.ts) rather than the full entryIds ×
+            targetLanguages product, so it never overwrites a good
+            translation in another language. Own testids
+            (bulk-retranslate-tier-*), distinct from the filter's
+            filter-freeway-tier-below-* ids. */}
+        <div className="flex items-center gap-1.5 text-xs">
+          <span className="text-muted-foreground">{t('bulk.retranslateBelowTier')}</span>
+          <Select
+            value={retranslateBelowTier === null ? 'off' : String(retranslateBelowTier)}
+            onValueChange={(v) => setRetranslateBelowTier(v === 'off' ? null : Number(v))}
+          >
+            <SelectTrigger
+              size="sm"
+              className="w-16 h-7 text-xs"
+              data-testid="bulk-retranslate-tier-select"
+            >
+              {/* base-ui shows the raw value without a render-function. */}
+              <SelectValue>
+                {(value: string | null) =>
+                  value === 'off' || value === null ? t('filters.freewayTierBelowOff') : value
+                }
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="off" className="text-xs" data-testid="bulk-retranslate-tier-off">
+                {t('filters.freewayTierBelowOff')}
+              </SelectItem>
+              {RETRANSLATE_BELOW_TIER_OPTIONS.map((n) => (
+                <SelectItem
+                  key={n}
+                  value={String(n)}
+                  className="text-xs"
+                  data-testid={`bulk-retranslate-tier-${n}`}
+                >
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onRetranslateBelowTier}
+            disabled={batchRunId !== null || retranslateBelowTierPairCount === 0}
+            data-testid="bulk-retranslate-tier-apply"
+            // The button being disabled with no qualifying pairs has no
+            // other explanation on screen (the filter dimension scopes to
+            // ANY language; this action scopes to writable ∩ active) — the
+            // title surfaces the actual count so that's discoverable on hover.
+            title={
+              retranslateBelowTier === null
+                ? undefined
+                : t('bulk.retranslateBelowTierApplyHint', {
+                    count: retranslateBelowTierPairCount,
+                    tier: retranslateBelowTier,
+                  })
+            }
+          >
+            {t('bulk.retranslateBelowTierApply')}
+          </Button>
+        </div>
+
         <Button
           variant="link"
           size="sm"

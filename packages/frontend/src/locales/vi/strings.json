@@ -165,6 +165,8 @@
     "sameAsSource": "Giống văn bản nguồn",
     "placeholderMismatch": "Lệch phần giữ chỗ",
     "newOnly": "Mới (từ lần nhập gần nhất)",
+    "freewayTierBelow": "Dưới bậc:",
+    "freewayTierBelowOff": "Tắt",
     "clearNewFlags": "Xóa cờ mới ({{count}})",
     "allSources": "Mọi nguồn",
     "showColumns": "Hiện cột:",
@@ -190,6 +192,7 @@
     "lqaPassed": "Đạt LQA",
     "lqaIssues_other": "{{count}} vấn đề LQA",
     "tmHit": "Dùng lại từ bộ nhớ dịch",
+    "freewayTier": "Được cung cấp bởi mô hình miễn phí bậc {{tier}}",
     "ignored": "Đã bỏ qua",
     "ignoredTooltip": "Bị loại khỏi mọi lượt gửi cho AI (dịch, rà soát, rà soát nguồn, sinh bảng thuật ngữ và danh mục)",
     "ignoreAction": "Bỏ qua mục",
@@ -225,7 +228,11 @@
     "removeCategoryApply_other": "Gỡ {{count}} danh mục",
     "aiGeneration": "Sinh bằng AI",
     "generateGlossaryFromSelection": "Sinh bảng thuật ngữ từ phần đã chọn",
-    "generateCategoriesFromSelection": "Sinh danh mục từ phần đã chọn"
+    "generateCategoriesFromSelection": "Sinh danh mục từ phần đã chọn",
+    "retranslateBelowTier": "Dịch lại dưới bậc:",
+    "retranslateBelowTierApply": "Dịch lại",
+    "retranslateBelowTierApplyHint_zero": "Không có cặp nào dưới bậc {{tier}} trong lựa chọn",
+    "retranslateBelowTierApplyHint_other": "{{count}} cặp dưới bậc {{tier}} trong lựa chọn"
   },
   "order": {
     "label": "Thứ tự:",
@@ -330,6 +337,7 @@
     "waitingResumesAt": "Tiếp tục {{time}}",
     "waitingPairsCount_other": "{{count}} cặp đang chờ",
     "waitingSkipReasonWarning": "Tự động tiếp tục không tìm được khóa miễn phí khả dụng — hãy dùng “Tiếp tục ngay với…” bên dưới để chọn một mô-đun.",
+    "waitingProviderErrorReason": "Một nhà cung cấp liên tục gặp lỗi — các cặp đang chờ sẽ tự động tiếp tục ngay khi nhà cung cấp phục hồi.",
     "pause": "Tạm dừng",
     "resume": "Tiếp tục",
     "resumeRetryFreePool": "Thử lại kho miễn phí",

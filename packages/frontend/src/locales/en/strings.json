@@ -165,6 +165,8 @@
     "sameAsSource": "Same as source",
     "placeholderMismatch": "Placeholder mismatch",
     "newOnly": "New (from last import)",
+    "freewayTierBelow": "Served below tier:",
+    "freewayTierBelowOff": "Off",
     "clearNewFlags": "Clear new flags ({{count}})",
     "allSources": "All sources",
     "showColumns": "Show columns:",
@@ -191,6 +193,7 @@
     "lqaIssues_one": "{{count}} LQA issue",
     "lqaIssues_other": "{{count}} LQA issues",
     "tmHit": "Reused from translation memory",
+    "freewayTier": "Served by a tier-{{tier}} free model",
     "ignored": "Ignored",
     "ignoredTooltip": "Excluded from all AI dispatch (translate, review, source review, glossary/category generation)",
     "ignoreAction": "Ignore entry",
@@ -229,7 +232,12 @@
     "removeCategoryApply_other": "Remove {{count}} categories",
     "aiGeneration": "AI generation",
     "generateGlossaryFromSelection": "Generate glossary from selection",
-    "generateCategoriesFromSelection": "Generate categories from selection"
+    "generateCategoriesFromSelection": "Generate categories from selection",
+    "retranslateBelowTier": "Re-translate below tier:",
+    "retranslateBelowTierApply": "Re-translate",
+    "retranslateBelowTierApplyHint_zero": "No pairs below tier {{tier}} in the selection",
+    "retranslateBelowTierApplyHint_one": "{{count}} pair below tier {{tier}} in the selection",
+    "retranslateBelowTierApplyHint_other": "{{count}} pairs below tier {{tier}} in the selection"
   },
   "order": {
     "label": "Order:",
@@ -335,6 +343,7 @@
     "waitingPairsCount_one": "{{count}} pair pending",
     "waitingPairsCount_other": "{{count}} pairs pending",
     "waitingSkipReasonWarning": "Auto-resume couldn't find a usable free key — use \"Resume now with…\" below to pick a module.",
+    "waitingProviderErrorReason": "A provider kept failing — parked pairs resume automatically once it recovers.",
     "pause": "Pause",
     "resume": "Resume",
     "resumeRetryFreePool": "Retry free pool",
