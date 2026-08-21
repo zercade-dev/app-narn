@@ -33,6 +33,10 @@ export interface BucketView {
   modelId: string;
   qualityTier: 1 | 2 | 3 | 4;
   maxBatch: number;
+  /** Snapshot charBudget (see FreeTierModel); absent → legacy flat sizing. */
+  charBudget?: number;
+  /** Snapshot batchCeiling (see FreeTierModel); absent → maxBatch caps. */
+  batchCeiling?: number;
   weakLanguages?: string[];
   /**
    * Day-scale request stock: headroom in the rpd window. For char-only

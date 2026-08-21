@@ -304,6 +304,9 @@ export {
   RequestTimeoutError,
   resolveUseStructuredOutput,
   streamChatText,
+  MIXED_PARSE_FAILURE_MESSAGE,
+  PARSE_FAILURE_MESSAGE,
+  isParseFailureMessage,
 } from './ai-sdk-provider/index.js';
 export type { ChatTurn, StreamChatTextDeps } from './ai-sdk-provider/index.js';
 export type {

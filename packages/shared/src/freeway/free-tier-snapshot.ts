@@ -33,6 +33,17 @@ export interface FreeTierModel {
   limits: FreeTierLimit[];
   /** Recommended max strings per request for a reliable model of this tier. */
   maxBatch: number;
+  /**
+   * Source characters this model reliably translates in ONE request. Curation
+   * must respect the provider's output cap (translated output is roughly
+   * input-sized) and any tpm limit. Absent: legacy flat-maxBatch sizing.
+   */
+  charBudget?: number;
+  /**
+   * Hard cap on strings per request no matter how short they are — the
+   * counting/parse reliability limit. Absent: `maxBatch` is the cap.
+   */
+  batchCeiling?: number;
   contextLength?: number;
   /** Target languages this model is curated as weak at (selector demotes). */
   weakLanguages?: string[];
