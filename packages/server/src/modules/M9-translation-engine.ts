@@ -115,7 +115,7 @@ import {
   retryAfterMsOf,
   withRateLimitRetry,
 } from './M9/errors.js';
-import { groupDecisions } from './M9/packing.js';
+import { chunkPackedDecisions, groupDecisions, packAssignedGroups } from './M9/packing.js';
 import {
   type BucketSourceDeps,
   coolBucket,
@@ -414,6 +414,22 @@ function formatRechunkDetail(info: { bucketKey: string; size: number; parts: num
   return `batch of ${info.size} re-chunked into ${info.parts} requests for ${info.bucketKey}`;
 }
 
+/** One-liner for a mixed chunk unpacked back into single-language parts (see `onUnpack`). */
+function formatUnpackDetail(info: {
+  bucketKey: string;
+  languages: number;
+  reason: 'parse-failure' | 'rate-limit' | 'provider-error' | 'auth';
+}): string {
+  return `unpacking ${info.languages} languages after ${info.reason} on ${info.bucketKey}`;
+}
+
+/** One-liner for a mixed-target pack (see {@link TranslationEngine.resolveFreewayGroups}). */
+function formatPackDetail(languages: readonly string[], chunks: number, bucketKey: string): string {
+  return `packed ${languages.length} languages (${languages.join(', ')}) into ${chunks} request${
+    chunks === 1 ? '' : 's'
+  } on ${bucketKey}`;
+}
+
 /** Token/character tallies of one provider call, for the Freeway quota ledger. */
 function freewayUsageOf(results: readonly (TranslationResult | undefined)[]): {
   inputTokens?: number;
@@ -511,6 +527,25 @@ interface FreewayDispatchArgs {
   splitCaps?: Map<string, number>;
   /** Reports a proactive re-chunk (strike cap or rescue-bucket char cap). */
   onRechunk?: (info: { bucketKey: string; size: number; parts: number }) => void;
+  /**
+   * Set on a part produced by the mixed-chunk UNPACK (see
+   * {@link TranslationEngine.dispatchFreewayBatch}'s header): re-validate THIS
+   * part's own (language, band) group against fresh views before spending a
+   * call, instead of translating first. Two reasons, both specific to the
+   * unpack: the planned bucket has just failed for the chunk (a translate-first
+   * part would knowingly re-pay a failing call), and eligibility is per
+   * language (blocked/weak languages, ranking), so every part must decide for
+   * ITSELF rather than inherit a sibling part's failover.
+   */
+  revalidateFirst?: boolean;
+  /** Why the mixed chunk failed — labels a `revalidateFirst` swap in the run's detail log. */
+  unpackReason?: 'rate-limit' | 'auth' | 'provider-error';
+  /** Reports a mixed chunk being unpacked into single-language parts. */
+  onUnpack?: (info: {
+    bucketKey: string;
+    languages: number;
+    reason: 'parse-failure' | 'rate-limit' | 'provider-error' | 'auth';
+  }) => void;
 }
 
 /**
@@ -608,7 +643,8 @@ interface RunDetailsAcc {
    * Run-scoped format-strike caps (see {@link FreewayDispatchArgs.splitCaps}),
    * keyed by bucketKey. Lives here rather than per-batch: a Freeway run
    * dispatches its planned batches as SEPARATE `processBatchJob` calls (one
-   * per assignment chunk — see {@link TranslationEngine.resolveFreewayGroups}),
+   * per chunk of an assignment, or of a packed mixed-target group — see
+   * {@link TranslationEngine.resolveFreewayGroups}),
    * so only an accumulator that outlives one call lets a later batch learn
    * from an earlier one's split. In-memory only, never persisted to the
    * sidecar: losing it across a restart costs at most one re-paid failed
@@ -3147,13 +3183,26 @@ export class TranslationEngine {
       );
     }
     const groups: RoutingDecision[][] = [];
-    for (const assignment of resolution.assignedGroups) {
-      const batches = groupDecisions(assignment.decisions, isBatch, resolveBatchMode, {
-        customBatchSize: assignment.batchSize,
-      });
+    // Same-(bucket, band) assignments a mixed-batch-capable provider can serve
+    // in one request are merged first; everything else passes through as its
+    // own assignment (see packAssignedGroups).
+    for (const group of packAssignedGroups(resolution.assignedGroups, buckets)) {
+      // A merged group must NOT go through groupDecisions: its language-mode
+      // partitioning would split the languages straight back apart.
+      const batches = group.packedLanguages
+        ? chunkPackedDecisions(group.decisions, group.batchSize)
+        : groupDecisions(group.decisions, isBatch, resolveBatchMode, {
+            customBatchSize: group.batchSize,
+          });
+      if (group.packedLanguages) {
+        this.recordFreewayDetail(
+          runId,
+          formatPackDetail(group.packedLanguages, batches.length, group.bucketKey),
+        );
+      }
       for (const batch of batches) {
-        bucketKeys.set(batch, assignment.bucketKey);
-        if (assignment.degraded) degraded.set(batch, assignment.degraded);
+        bucketKeys.set(batch, group.bucketKey);
+        if (group.degraded) degraded.set(batch, group.degraded);
         groups.push(batch);
       }
     }
@@ -3228,9 +3277,14 @@ export class TranslationEngine {
   }
 
   /**
-   * The Freeway job group a dispatch batch represents. Batches are homogeneous
-   * in (target language, difficulty band) by construction — they come from one
-   * planner assignment — so the first job's band represents them all.
+   * The Freeway job group a set of decisions represents, derived from the
+   * FIRST job's language and band. That derivation is only sound for a group
+   * that is homogeneous in (target language, band) — true of a planner
+   * assignment and of every call site here (all pass a single decision, or a
+   * single-language part), but NOT of a packed mixed-target chunk. Anything
+   * holding more than one language must be unpacked before it reaches this
+   * (see dispatchFreewayBatch's unpack, and processBatchJob's entry-time
+   * split).
    */
   private freewayJobGroup(decisions: RoutingDecision[]): JobGroup {
     const jobs = decisions.map(toFreewayJob);
@@ -3339,27 +3393,101 @@ export class TranslationEngine {
   }
 
   /**
+   * Bounds [start, end) of each contiguous run of one target language. A
+   * mixed-target chunk keeps its languages in blocks (assignments concatenate
+   * whole and chunkPackedDecisions only slices), so this is the chunk's own
+   * language segmentation — one bound for a single-language batch.
+   */
+  private static languageBounds(
+    jobs: readonly { targetLanguage: string }[],
+  ): Array<[number, number]> {
+    const bounds: Array<[number, number]> = [];
+    let start = 0;
+    for (let i = 1; i <= jobs.length; i++) {
+      if (i === jobs.length || jobs[i].targetLanguage !== jobs[start].targetLanguage) {
+        bounds.push([start, i]);
+        start = i;
+      }
+    }
+    return bounds;
+  }
+
+  /**
+   * {@link TranslationEngine.partBounds} applied WITHIN each language segment,
+   * so a forced re-chunk (strike cap, rescue-bucket char cap) never carves a
+   * mixed part out of a packed chunk — a part that spans two languages would
+   * be a mixed batch nobody planned for the bucket it lands on. Degenerates to
+   * exactly `partBounds(jobs.length, size)` for a single-language batch.
+   */
+  private static cappedLanguageBounds(
+    jobs: readonly { targetLanguage: string }[],
+    size: number,
+  ): Array<[number, number]> {
+    const bounds: Array<[number, number]> = [];
+    for (const [segmentStart, segmentEnd] of TranslationEngine.languageBounds(jobs)) {
+      for (const [start, end] of TranslationEngine.partBounds(segmentEnd - segmentStart, size)) {
+        bounds.push([segmentStart + start, segmentStart + end]);
+      }
+    }
+    return bounds;
+  }
+
+  /**
    * Dispatch `args.jobs` as a sequence of {@link TranslationEngine.dispatchFreewayBatch}
    * calls over the given `bounds`, in order, merging their results
-   * positionally. Shared by the parse-failure split (halves) and the
-   * proactive re-chunk paths (strike cap, rescue-bucket char cap) — same
-   * order-preserving merge, length guard, and replay-before-bubble either
-   * way.
+   * positionally. Shared by the parse-failure split (halves), the mixed-chunk
+   * unpack, and the proactive re-chunk paths (strike cap, rescue-bucket char
+   * cap) — same order-preserving merge, length guard, and replay-before-bubble
+   * every way.
+   *
+   * When the parts span MORE THAN ONE target language — the mixed-chunk unpack,
+   * and a forced re-chunk of a packed chunk — every part starts from the state
+   * the batch was PLANNED on, restored before each part runs. A failover is a
+   * decision one part made for ITS OWN jobs, re-validated against its own
+   * language; letting the next language inherit it would dispatch onto a bucket
+   * nothing ever checked THAT language against (blocked/weak languages and
+   * ranking are per-language). When every part shares ONE language the failover
+   * does transfer, as it always has: same language, same band (a group is
+   * homogeneous in band by construction), so the sibling part's re-validation
+   * would reach the same answer — and re-starting it on the bucket that just
+   * failed would only spend a second doomed request. The restore is per PART,
+   * not per language run, so consecutive same-language parts of a
+   * cross-language re-chunk do NOT inherit each other's failover — each starts
+   * from the planned bucket and can re-pay one doomed call. Accepted: the
+   * alternative is tracking a per-language cursor through the bounds for a case
+   * only a capped re-chunk of a packed batch produces. `splitCaps` stays shared
+   * either way: it is a run-scoped learning, not per-part routing state.
+   *
+   * The state object is reused rather than cloned on purpose: `processBatchJob`
+   * holds a reference to it as `currentFreewayState` and reads the LIVE
+   * dispatch id off it while a call is in flight (bad-credential attribution),
+   * so handing parts detached clones would silently stale that read.
    */
   private async dispatchFreewayInParts(
     args: FreewayDispatchArgs,
     bounds: ReadonlyArray<readonly [number, number]>,
+    opts?: {
+      /** Parts re-validate their own group before their first call (unpack only). */
+      revalidateFirst?: boolean;
+      /** Why the mixed chunk failed, for the parts' reroute detail lines. */
+      unpackReason?: 'rate-limit' | 'auth' | 'provider-error';
+    },
   ): Promise<FreewayDispatchOutcome> {
-    const { jobs, decisions, translateOptions, signal } = args;
+    const { jobs, decisions, state, translateOptions, signal } = args;
+    const crossLanguage = new Set(jobs.map((job) => job.targetLanguage)).size > 1;
+    const planned: FreewayBatchState = { ...state };
     const merged: TranslationResult[] = [];
     for (const [start, end] of bounds) {
       if (signal?.aborted) {
         return { kind: 'error', error: new Error('cancelled'), authCancel: false };
       }
+      if (crossLanguage) Object.assign(state, planned);
       const part = await this.dispatchFreewayBatch({
         ...args,
         jobs: jobs.slice(start, end),
         decisions: decisions.slice(start, end),
+        ...(opts?.revalidateFirst ? { revalidateFirst: true } : {}),
+        ...(opts?.unpackReason ? { unpackReason: opts.unpackReason } : {}),
       });
       if (part.kind !== 'results') {
         // A non-streaming module's earlier part-results only exist in
@@ -3403,6 +3531,16 @@ export class TranslationEngine {
    * parse-failure split (see below) restarts this hop budget at 0 for each
    * half, so a batch that keeps mis-parsing can spend more than one hop in
    * total across its parts.
+   *
+   * A MIXED-TARGET chunk (several languages packed onto one bucket) never
+   * takes that hop as one unit: the languages were merged only because THIS
+   * bucket could serve them together, so the hop-0 handler unpacks the chunk
+   * into single-language parts and lets each re-enter this method with its own
+   * hop budget. Each part starts from the PLANNED bucket (no part inherits a
+   * sibling's failover) and runs `revalidateFirst`: it re-validates its own
+   * (language, band) group against fresh views BEFORE its first call, so a
+   * language is only ever dispatched to a bucket eligible for IT, and no part
+   * re-pays a probing call on the bucket that just failed.
    */
   private async dispatchFreewayBatch(args: FreewayDispatchArgs): Promise<FreewayDispatchOutcome> {
     const {
@@ -3419,14 +3557,98 @@ export class TranslationEngine {
       degradedFloor,
       minBand,
       onRechunk,
+      onUnpack,
+      unpackReason,
     } = args;
     const strikeCap = args.splitCaps?.get(state.bucketKey);
     if (strikeCap !== undefined && strikeCap >= 1 && strikeCap < jobs.length) {
-      const bounds = TranslationEngine.partBounds(jobs.length, strikeCap);
+      const bounds = TranslationEngine.cappedLanguageBounds(jobs, strikeCap);
       onRechunk?.({ bucketKey: state.bucketKey, size: jobs.length, parts: bounds.length });
+      // `revalidateFirst`/`unpackReason` deliberately propagate here, unlike at
+      // the post-call recursion sites below: this pre-chunk runs BEFORE the
+      // re-validation block, so an unpacked part reaching it has not
+      // re-validated yet and its sub-parts are the ones that must. Clearing the
+      // flag here would send them straight onto the bucket whose failure caused
+      // the unpack — re-paying exactly the probing call the unpack exists to
+      // avoid — and their reroutes really are that unpack's, so the reason
+      // label still applies. (Narrow by construction: a part is smaller than
+      // the chunk that passed this same check, so only a concurrent batch
+      // lowering the shared run-scoped cap mid-flight can put an unpacked part
+      // here at all.)
       return this.dispatchFreewayInParts(args, bounds);
     }
     const bandOpts = freewayBandOpts(degradedFloor, minBand);
+    if (args.revalidateFirst) {
+      // An unpacked part: the bucket this chunk was planned on has just failed
+      // for the chunk as a whole, so decide where THIS language goes before
+      // spending anything. 'keep' means the bucket is still eligible for this
+      // part's own group (the strike raced a state that recovered, or the
+      // cooldown does not apply to it) and the part dispatches there as
+      // planned; a reroute swaps it once, here, instead of paying a call that
+      // is known to be failing and reaching the same decision from the catch.
+      const now = Date.now();
+      const buckets = await loadBucketViews(now, deps);
+      const revalidated = revalidateGroup(
+        { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
+        buckets,
+        now,
+        bandOpts,
+      );
+      if (revalidated.kind === 'blocked') return { kind: 'blocked' };
+      if (revalidated.kind === 'defer') {
+        return {
+          kind: 'defer',
+          resumeAt: revalidated.resumeAt,
+          // Same two-valued convention as the hop-0 tail: a rate limit and an
+          // auth failure both park the pairs on the OTHER buckets' quota (the
+          // credential problem is surfaced by its own mark), and only a
+          // provider failure is labelled as one.
+          reason: unpackReason === 'provider-error' ? 'provider-error' : 'quota',
+        };
+      }
+      if (revalidated.kind === 'reroute') {
+        const next = createModule(revalidated.moduleId, revalidated.modelId, revalidated.bucketKey);
+        if (!next) {
+          return {
+            kind: 'error',
+            error: new Error(`freeway: no module for ${revalidated.bucketKey}`),
+            authCancel: false,
+          };
+        }
+        onReroute?.({
+          from: state.bucketKey,
+          to: revalidated.bucketKey,
+          reason: unpackReason ?? 'provider-error',
+        });
+        state.module = next;
+        state.moduleId = revalidated.moduleId;
+        state.modelId = revalidated.modelId;
+        state.bucketKey = revalidated.bucketKey;
+        for (const decision of decisions) {
+          decision.moduleId = revalidated.moduleId;
+          decision.modelOverride = revalidated.modelId;
+          decision.freewayTier = revalidated.qualityTier;
+        }
+        // Same guard the hop-0 reroute applies: a part sized for the planned
+        // bucket's char budget can physically exceed the rescue bucket's.
+        const rescue = buckets.find((bucket) => bucket.bucketKey === revalidated.bucketKey);
+        const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
+        if (rescueCap >= 1 && rescueCap < jobs.length) {
+          const rescueBounds = TranslationEngine.cappedLanguageBounds(jobs, rescueCap);
+          onRechunk?.({
+            bucketKey: revalidated.bucketKey,
+            size: jobs.length,
+            parts: rescueBounds.length,
+          });
+          // The re-validation is spent: its sub-parts translate first, from the
+          // rescue bucket this part just settled on.
+          return this.dispatchFreewayInParts(
+            { ...args, revalidateFirst: false, unpackReason: undefined },
+            rescueBounds,
+          );
+        }
+      }
+    }
     for (let hop = 0; ; hop++) {
       let results: TranslationResult[] | undefined;
       try {
@@ -3451,17 +3673,36 @@ export class TranslationEngine {
         // fixes, so halve on the same bucket instead, twice at most
         // (batch → halves → quarters). A singleton that still mis-parses
         // falls through to the bucket-shaped path below.
+        // Mixed-target chunks are excluded: the shared provider core already
+        // regrouped the failed mixed call per language internally, so the
+        // format problem is contained and halving here would re-pay a call
+        // that has nothing left to demonstrate. Such a batch falls through to
+        // the bucket-shaped path below (which unpacks it by language).
         if (
           allErrored &&
           splitDepth < 2 &&
           jobs.length >= 2 &&
+          new Set(jobs.map((job) => job.targetLanguage)).size === 1 &&
           isParseFailureMessage(results[0]!.error!)
         ) {
           onSplit?.({ bucketKey: state.bucketKey, size: jobs.length });
           const failedBucketKey = state.bucketKey;
           const mid = Math.ceil(jobs.length / 2);
+          // The halves must retry on THIS bucket at half size — that is the
+          // whole point of the split. Any re-validation this batch owed as an
+          // unpacked part is already spent (it ran before the call that just
+          // mis-parsed), so re-validating per half would only re-read views and
+          // could reroute the halves off the bucket whose parse behavior the
+          // split is measuring — taking the `splitCaps` learning with it. The
+          // unpack reason goes with it: it labels the mixed chunk's failure,
+          // not this parse failure.
           const outcome = await this.dispatchFreewayInParts(
-            { ...args, splitDepth: splitDepth + 1 },
+            {
+              ...args,
+              splitDepth: splitDepth + 1,
+              revalidateFirst: false,
+              unpackReason: undefined,
+            },
             [
               [0, mid],
               [mid, jobs.length],
@@ -3496,6 +3737,15 @@ export class TranslationEngine {
         // batch: it earns the same single failover hop plus a cooldown, so one
         // dead model cannot drain a run while healthy buckets sit idle.
         const providerFailure = !rateLimited && !authFailure;
+        const languages = new Set(jobs.map((job) => job.targetLanguage));
+        // A mixed chunk that came back all-errored with a PARSE message is a
+        // format problem, not a sick bucket: the shared provider core already
+        // regrouped it per language internally and those calls answered — they
+        // just did not parse. It still cools (the run should stop feeding a
+        // bucket that is mangling output), but without the flap ladder, which
+        // exists to escalate a SUSTAINED provider outage toward the day reset.
+        const parseShapedMixed =
+          languages.size > 1 && providerFailure && isParseFailureMessage(toErrorMessage(err));
         if (hop > 0) {
           // The failover bucket failed the same way: record its state and stop
           // spending requests — the single failover hop is used up.
@@ -3589,10 +3839,35 @@ export class TranslationEngine {
             isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
             deps,
             'bucket',
-            { escalateOnFlap: true },
+            { escalateOnFlap: !parseShapedMixed },
           );
         } else {
           await this.markFreewayCredentialBad(state.moduleId, deps);
+        }
+        // Unpack on deviation: a mixed-target chunk lives and dies on its
+        // planned bucket. The re-validation below derives ONE band and ONE
+        // language from the group's first job, so keeping or rerouting a mixed
+        // chunk as a unit would move languages onto a bucket nothing checked
+        // them against. Hand each language its own part instead: parts start
+        // from the planned bucket (no part inherits another's failover) and
+        // re-validate their own group before spending anything, so this
+        // failure costs exactly the one call that already happened.
+        if (languages.size > 1) {
+          onUnpack?.({
+            bucketKey: state.bucketKey,
+            languages: languages.size,
+            reason: parseShapedMixed
+              ? 'parse-failure'
+              : rateLimited
+                ? 'rate-limit'
+                : providerFailure
+                  ? 'provider-error'
+                  : 'auth',
+          });
+          return this.dispatchFreewayInParts(args, TranslationEngine.languageBounds(jobs), {
+            revalidateFirst: true,
+            unpackReason: rateLimited ? 'rate-limit' : providerFailure ? 'provider-error' : 'auth',
+          });
         }
         const buckets = await loadBucketViews(now, deps);
         const revalidated = revalidateGroup(
@@ -3676,13 +3951,20 @@ export class TranslationEngine {
             // physically exceed the rescue bucket's — dispatch it in
             // cap-sized parts instead of letting an oversized call fail
             // (or split) its way down.
-            const bounds = TranslationEngine.partBounds(jobs.length, rescueCap);
+            const bounds = TranslationEngine.cappedLanguageBounds(jobs, rescueCap);
             onRechunk?.({
               bucketKey: revalidated.bucketKey,
               size: jobs.length,
               parts: bounds.length,
             });
-            return this.dispatchFreewayInParts(args, bounds);
+            // Post-call recursion: the re-validation that produced this rescue
+            // bucket is the parts' re-validation, so they must not repeat it —
+            // and the unpack reason labelled the mixed chunk's failure, not
+            // this one.
+            return this.dispatchFreewayInParts(
+              { ...args, revalidateFirst: false, unpackReason: undefined },
+              bounds,
+            );
           }
         } else if (authFailure) {
           // 'keep' after an auth failure normally means a SIBLING candidate now
@@ -3866,6 +4148,41 @@ export class TranslationEngine {
           freewayDegraded?.toTier as DifficultyBand | undefined,
           freewayMinBand(status.request),
         );
+        // A packed mixed-target batch is valid only on the bucket it was
+        // planned for. `revalidateGroup` derives one band and one language
+        // from the group's FIRST decision, so anything other than 'keep' —
+        // rerouting to a substitute bucket, parking, or blaming the whole
+        // batch — would decide for languages it never examined. Split into
+        // single-language segments and run each through this same path, which
+        // then revalidates (and reroutes/defers/blocks) per language.
+        if (
+          revalidated.kind !== 'keep' &&
+          new Set(decisions.map((d) => d.targetLanguage)).size > 1
+        ) {
+          for (const [start, end] of TranslationEngine.languageBounds(decisions)) {
+            const segment = decisions.slice(start, end);
+            await this.processBatchJob(
+              runId,
+              projectId,
+              segment,
+              sourceLanguage,
+              moduleConfigs,
+              sessionId,
+              tmPolicy,
+              referenceLanguage,
+              examplesByLanguage,
+              dispatchOptions,
+              project,
+              achievementPairMap,
+              bucketKey,
+              freewayDegraded,
+            );
+            // The segment's own call has counted (or parked) every pair in it;
+            // record that here so this call's catch-all cannot fail them twice.
+            for (const d of segment) settled.add(settleKey(d));
+          }
+          return;
+        }
         if (revalidated.kind === 'reroute') {
           this.logger.info('translation:freeway-rerouted', {
             runId,
@@ -4239,7 +4556,13 @@ export class TranslationEngine {
 
       const isEntryBatchMode = effective.config.batchMode === 'entry';
       const targetLanguages = Array.from(new Set(decisions.map((d) => d.targetLanguage)));
-      const shouldDispatchMixedTargetChunk = isEntryBatchMode && targetLanguages.length > 1;
+      // A multi-language FREEWAY batch is a packed mixed-target chunk (M9's
+      // packAssignedGroups merges languages only onto a bucket whose provider
+      // declares supportsMixedBatch, and sizes the batch as ONE request), so it
+      // dispatches mixed whatever batch mode the workspace configured — Freeway
+      // owns its own dispatch shape, like the rest of freewayModuleOverrides.
+      const shouldDispatchMixedTargetChunk =
+        targetLanguages.length > 1 && (isEntryBatchMode || bucketKey !== undefined);
       const jobsByTargetLanguage = new Map<string, Array<{ index: number; job: TranslationJob }>>();
       const indexedJobs: Array<{ index: number; job: TranslationJob }> = [];
       for (let index = 0; index < uncachedNonTrivialEntries.length; index++) {
@@ -4580,14 +4903,17 @@ export class TranslationEngine {
       // re-pointed (inside dispatchFreewayBatch) — and persistResult /
       // retryLqaFailure attribute the text by `decision.moduleId`. A second
       // batch here would therefore persist a stale producer. It cannot occur:
-      // M32 `groupJobs` keys groups by `targetLanguage + band`, `planRun`
-      // never merges groups, and `groupDecisions` only chunks WITHIN one
-      // assignment — so a Freeway group is homogeneous in target language and
-      // `jobsByTargetLanguage` yields a single batch. Should that ever change,
-      // attribution is not the first thing that breaks (revalidateGroup's band
-      // derivation, the per-group bucket/batchSize plan and
-      // freewayModuleOverrides all assume one language too), so this is
-      // recorded as an invariant rather than defended with a silent fix-up.
+      // a single-language Freeway group takes the `jobsByTargetLanguage` path
+      // with exactly one language in it, and a PACKED mixed-target group takes
+      // the `shouldDispatchMixedTargetChunk` path, which is one batch by
+      // construction — packing is the only way a Freeway group holds more than
+      // one language, and it merges only what one bucket serves in one
+      // request. Should that ever change, attribution is not the first thing
+      // that breaks (revalidateGroup still derives ONE band and language from
+      // the first decision — which is why a mixed chunk must be unpacked
+      // before any re-validation — and the per-group bucket/batchSize plan and
+      // freewayModuleOverrides are per assignment too), so this is recorded as
+      // an invariant rather than defended with a silent fix-up.
       for (const batchJobs of dispatchBatches) {
         if ((status.status as RunStatusCode) === RunStatusCode.Cancelled || signal?.aborted) break;
         let targetResults: TranslationResult[] = [];
@@ -4622,6 +4948,7 @@ export class TranslationEngine {
             minBand: freewayMinBand(status.request),
             splitCaps: freewaySplitCaps,
             onRechunk: (info) => this.recordFreewayDetail(runId, formatRechunkDetail(info)),
+            onUnpack: (info) => this.recordFreewayDetail(runId, formatUnpackDetail(info)),
           });
           currentFreewayState = undefined;
           // A same-bucket auth failover (a sibling instance took over, see

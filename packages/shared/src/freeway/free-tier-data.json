@@ -3,6 +3,7 @@
   "providers": {
     "google": {
       "moduleId": "google",
+      "supportsMixedBatch": true,
       "resetTimeZone": "America/Los_Angeles",
       "models": [
         {
@@ -161,6 +162,7 @@
     },
     "openrouter": {
       "moduleId": "openrouter",
+      "supportsMixedBatch": true,
       "resetTimeZone": "UTC",
       "probe": "openrouter-key",
       "sharedLimits": [
@@ -276,6 +278,7 @@
     },
     "groq": {
       "moduleId": "groq",
+      "supportsMixedBatch": true,
       "resetTimeZone": "UTC",
       "models": [
         {

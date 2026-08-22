@@ -15,11 +15,14 @@
 import type { FreewayBucketStats, FreewayGatePassRecord } from '../../storage/types.js';
 
 /**
- * Pseudo-observations the curated tier/band prior is worth. Gate outcomes are
- * recorded per translated string, so a batch delivers tens of observations at
- * once and this is overtaken almost immediately — it buys a cold start, not
- * lasting inertia. At 10, a bucket's first failure costs it half its batch
- * size rather than three quarters and a last-place ranking.
+ * Pseudo-observations the first-attempt prior is worth — whichever prior
+ * `priorPassRate` produced for this bucket and language: a measured
+ * per-language rate when the snapshot carries one, the curated tier/band
+ * estimate otherwise. Gate outcomes are recorded per translated string, so a
+ * batch delivers tens of observations at once and this is overtaken almost
+ * immediately — it buys a cold start, not lasting inertia. At 10, a bucket's
+ * first failure costs it half its batch size rather than three quarters and a
+ * last-place ranking.
  */
 export const PRIOR_STRENGTH = 10;
 
@@ -32,7 +35,7 @@ export const MAX_SAMPLES = 200;
 
 /**
  * Evidence half-life. An idle record's counts halve every three days, which
- * regresses its posterior toward the curated prior and is what eventually gives
+ * regresses its posterior back toward its prior and is what eventually gives
  * a written-off model another try. Cheap, because re-demotion after recovery
  * takes only a handful of failures.
  */
@@ -41,8 +44,8 @@ export const HALF_LIFE_MS = 3 * 24 * 60 * 60 * 1000;
 /**
  * `stats` is jsonb and can hold whatever a rollback or a hand-edit left behind,
  * including the bare per-language EMA numbers this estimator replaced. Anything
- * failing this guard is treated as absent, so the bucket scores its curated
- * prior until its next observation.
+ * failing this guard is treated as absent, so the bucket scores its
+ * first-attempt prior — measured or curated — until its next observation.
  */
 export function isGatePassRecord(value: unknown): value is FreewayGatePassRecord {
   if (typeof value !== 'object' || value === null) return false;

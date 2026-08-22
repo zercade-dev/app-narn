@@ -27,11 +27,30 @@ const MIN_PASS = 0.3;
 const MAX_PASS = 0.995;
 
 /**
- * The curated first-attempt estimate, before any live evidence: the tier×band
- * prior, penalized for a curated weak language and for language hardness.
- * Unclamped — the clamp belongs to the posterior, not to its input.
+ * How much harder a band is than band 1 for a given tier, per the curated
+ * matrix. A measured per-language prior is a band-agnostic compliance rate
+ * over the benchmark corpus; multiplying by this factor re-imposes the band
+ * shape without re-imposing the language guesses the measurement replaces.
+ */
+export function bandFactor(tier: 1 | 2 | 3 | 4, band: DifficultyBand): number {
+  return PASS_PRIORS[tier][band - 1] / PASS_PRIORS[tier][0];
+}
+
+/**
+ * The first-attempt estimate, before any live per-language evidence. When the
+ * bucket carries a measured pass prior for this exact language (from the
+ * benchmark snapshot — no fallback across compound codes like zh-hans/
+ * zh-hant), that measured rate replaces the curated tier×band estimate
+ * outright, scaled by `bandFactor` to keep the band shape; the curated
+ * weak-language and language-hardness multipliers are guesses the
+ * measurement supersedes, so neither applies. Otherwise this is the curated
+ * tier×band prior, penalized for a curated weak language and for language
+ * hardness. Unclamped either way — the clamp belongs to the posterior in
+ * `effectivePassRate`, not to its input.
  */
 export function priorPassRate(bucket: BucketView, language: string, band: DifficultyBand): number {
+  const measured = bucket.langPassPriors?.[language];
+  if (measured !== undefined) return measured * bandFactor(bucket.qualityTier, band);
   let rate = PASS_PRIORS[bucket.qualityTier][band - 1];
   if (bucket.weakLanguages?.includes(language)) rate *= 0.85;
   return rate * (1 - 0.01 * languageHardness(language));
@@ -79,6 +98,24 @@ export type PassRateClass = 0 | 1 | 2;
 export function passRateClass(passRate: number): PassRateClass {
   if (passRate >= 0.9) return 0;
   if (passRate >= 0.75) return 1;
+  return 2;
+}
+
+/**
+ * Coarse judged-quality class for (bucket, language): 0 publishable (score
+ * ≥85), 1 usable / unmeasured (≥70 or no benchmark data), 2 measurably poor
+ * (<70). Three classes on purpose: quality only overrides the economics keys
+ * when the measured gap is real; ties fall through to scarcity as before.
+ * Exact-code lookup — zh-hans evidence never speaks for zh-hant.
+ */
+export function langQualityClass(
+  bucket: Pick<BucketView, 'langScores'>,
+  language: string,
+): 0 | 1 | 2 {
+  const score = bucket.langScores?.[language];
+  if (score === undefined) return 1;
+  if (score >= 85) return 0;
+  if (score >= 70) return 1;
   return 2;
 }
 

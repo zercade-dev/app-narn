@@ -33,6 +33,7 @@ export const FREEWAY_DEGRADE_WAIT_MS = 15 * 60_000;
 function everServable(bucket: BucketView, group: JobGroup): boolean {
   if (bucket.disabledReason !== undefined) return false;
   if (bucket.qualityTier < group.band) return false;
+  if (bucket.blockedLanguages?.includes(group.targetLanguage)) return false;
   if (group.band >= 3 && bucket.weakLanguages?.includes(group.targetLanguage)) return false;
   return true;
 }
@@ -182,6 +183,7 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
         (b) =>
           b.disabledReason === undefined &&
           b.qualityTier === toTier &&
+          !b.blockedLanguages?.includes(group.targetLanguage) &&
           !(group.band >= 3 && b.weakLanguages?.includes(group.targetLanguage)),
       );
       if (subTier.length > 0) {
