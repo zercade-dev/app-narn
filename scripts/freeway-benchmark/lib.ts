@@ -11,7 +11,14 @@ export interface CorpusEntry { id: string; text: string; maxLength?: number; ton
 export interface PerStringOutcome { id: string; mechPass: boolean; wrongLanguage: boolean; score?: number }
 export interface CellResult {
   ts: number; corpusVersion: string; judgeModel: string; strings: number; requests: number;
-  parseFailures: number; mechPassRate: number; medianScore?: number; wrongLanguageCount: number;
+  parseFailures: number; mechPassRate: number;
+  /**
+   * Rounded mean of this cell's judged scores. Mean, not median: live results
+   * showed a generous judge saturates the median at 100, while tail failures
+   * — the actual routing signal — still pull the mean down.
+   */
+  meanScore?: number;
+  wrongLanguageCount: number;
   perStringScores: number[]; unsupported?: true;
 }
 export interface ResultsFile { corpusVersion: string; cells: Record<string, CellResult> }
@@ -106,18 +113,17 @@ function stripTokens(text: string): string {
   }
 }
 
+/** Rounded arithmetic mean, or undefined for an empty list (nothing was scored). */
+function roundedMean(scores: number[]): number | undefined {
+  return scores.length === 0 ? undefined : Math.round(scores.reduce((sum, s) => sum + s, 0) / scores.length);
+}
+
 export function aggregateCell(args: {
   ts: number; corpusVer: string; judgeModel: string; requests: number; parseFailures: number;
   outcomes: PerStringOutcome[]; parseFailedStrings: number;
 }): CellResult {
   const scored = args.outcomes.map((o) => o.score).filter((s): s is number => s !== undefined);
-  const sorted = [...scored].sort((a, b) => a - b);
-  const median =
-    sorted.length === 0
-      ? undefined
-      : sorted.length % 2 === 1
-        ? sorted[(sorted.length - 1) / 2]
-        : Math.round((sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2);
+  const mean = roundedMean(scored);
   const strings = args.outcomes.length + args.parseFailedStrings;
   const mechPasses = args.outcomes.filter((o) => o.mechPass).length;
   return {
@@ -128,7 +134,7 @@ export function aggregateCell(args: {
     requests: args.requests,
     parseFailures: args.parseFailures,
     mechPassRate: strings === 0 ? 0 : Number((mechPasses / strings).toFixed(2)),
-    ...(median !== undefined ? { medianScore: median } : {}),
+    ...(mean !== undefined ? { meanScore: mean } : {}),
     wrongLanguageCount: args.outcomes.filter((o) => o.wrongLanguage).length,
     perStringScores: scored.map((s) => Math.round(s)),
   };
@@ -139,6 +145,20 @@ export function sortedResults(file: ResultsFile): ResultsFile {
     corpusVersion: file.corpusVersion,
     cells: Object.fromEntries(Object.entries(file.cells).sort(([a], [b]) => (a < b ? -1 : 1))),
   };
+}
+
+/**
+ * Backward compatibility for results.json cells written before `meanScore`
+ * replaced `medianScore`: those cells still carry `perStringScores`, so
+ * recompute the mean from them (identical to what a fresh `aggregateCell`
+ * run now produces) rather than treating the cell as unmeasured. Only a
+ * cell with neither falls back to its old `medianScore`.
+ */
+function effectiveMeanScore(cell: CellResult): number | undefined {
+  if (cell.meanScore !== undefined) return cell.meanScore;
+  const recomputed = roundedMean(cell.perStringScores);
+  if (recomputed !== undefined) return recomputed;
+  return (cell as unknown as { medianScore?: number }).medianScore;
 }
 
 export function distill(file: ResultsFile, registryCodes: string[]): Map<string, DistilledModel> {
@@ -157,15 +177,16 @@ export function distill(file: ResultsFile, registryCodes: string[]): Map<string,
       d.blockedLanguages.push(lang);
       continue;
     }
-    if (cell.medianScore === undefined) continue; // incomplete cell: not measured
-    d.langScores[lang] = cell.medianScore;
+    const meanScore = effectiveMeanScore(cell);
+    if (meanScore === undefined) continue; // incomplete cell: not measured
+    d.langScores[lang] = meanScore;
     d.langPassPriors[lang] = Number(cell.mechPassRate.toFixed(2));
     const blocked =
-      cell.medianScore < BLOCKED_SCORE ||
+      meanScore < BLOCKED_SCORE ||
       cell.wrongLanguageCount >= Math.ceil(WRONG_LANGUAGE_FRACTION * cell.strings) ||
       cell.mechPassRate < BLOCKED_MECH;
     if (blocked) d.blockedLanguages.push(lang);
-    else if (cell.medianScore < WEAK_SCORE || cell.mechPassRate < WEAK_MECH) d.weakLanguages.push(lang);
+    else if (meanScore < WEAK_SCORE || cell.mechPassRate < WEAK_MECH) d.weakLanguages.push(lang);
   }
   for (const d of out.values()) {
     d.weakLanguages.sort();

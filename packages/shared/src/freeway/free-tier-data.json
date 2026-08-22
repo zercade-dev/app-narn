@@ -23,7 +23,37 @@
               "window": "rpd",
               "limit": 20
             }
-          ]
+          ],
+          "langScores": {
+            "de": 96,
+            "es": 99,
+            "fr": 98,
+            "id": 99,
+            "it": 99,
+            "ja": 100,
+            "ko": 100,
+            "ru": 98,
+            "th": 100,
+            "tr": 100,
+            "vi": 99,
+            "zh-hans": 100,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 1,
+            "es": 1,
+            "fr": 1,
+            "id": 1,
+            "it": 1,
+            "ja": 1,
+            "ko": 1,
+            "ru": 1,
+            "th": 1,
+            "tr": 1,
+            "vi": 1,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemini-flash-lite-latest",
@@ -42,7 +72,38 @@
               "window": "rpd",
               "limit": 500
             }
-          ]
+          ],
+          "langScores": {
+            "de": 83,
+            "es": 88,
+            "fr": 95,
+            "id": 95,
+            "it": 99,
+            "ja": 87,
+            "ko": 100,
+            "ru": 95,
+            "th": 98,
+            "tr": 95,
+            "vi": 100,
+            "zh-hans": 100,
+            "zh-hant": 99
+          },
+          "langPassPriors": {
+            "de": 0.88,
+            "es": 0.92,
+            "fr": 0.96,
+            "id": 0.96,
+            "it": 0.92,
+            "ja": 1,
+            "ko": 1,
+            "ru": 0.96,
+            "th": 0.88,
+            "tr": 1,
+            "vi": 0.5,
+            "zh-hans": 1,
+            "zh-hant": 1
+          },
+          "weakLanguages": ["vi"]
         },
         {
           "id": "gemma-4-31b-it",
@@ -61,7 +122,37 @@
               "window": "rpd",
               "limit": 14400
             }
-          ]
+          ],
+          "langScores": {
+            "de": 99,
+            "es": 100,
+            "fr": 100,
+            "id": 98,
+            "it": 99,
+            "ja": 100,
+            "ko": 100,
+            "ru": 100,
+            "th": 100,
+            "tr": 100,
+            "vi": 100,
+            "zh-hans": 100,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 0.83,
+            "es": 1,
+            "fr": 0.92,
+            "id": 1,
+            "it": 0.96,
+            "ja": 1,
+            "ko": 1,
+            "ru": 1,
+            "th": 0.92,
+            "tr": 1,
+            "vi": 1,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemma-4-26b-a4b-it",
@@ -80,7 +171,37 @@
               "window": "rpd",
               "limit": 14400
             }
-          ]
+          ],
+          "langScores": {
+            "de": 99,
+            "es": 98,
+            "fr": 100,
+            "id": 99,
+            "it": 98,
+            "ja": 100,
+            "ko": 100,
+            "ru": 100,
+            "th": 100,
+            "tr": 99,
+            "vi": 100,
+            "zh-hans": 99,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 1,
+            "es": 1,
+            "fr": 1,
+            "id": 1,
+            "it": 1,
+            "ja": 1,
+            "ko": 1,
+            "ru": 1,
+            "th": 1,
+            "tr": 1,
+            "vi": 1,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemini-3-flash-preview",
@@ -99,7 +220,37 @@
               "window": "rpd",
               "limit": 20
             }
-          ]
+          ],
+          "langScores": {
+            "de": 99,
+            "es": 98,
+            "fr": 97,
+            "id": 97,
+            "it": 99,
+            "ja": 100,
+            "ko": 99,
+            "ru": 99,
+            "th": 98,
+            "tr": 98,
+            "vi": 99,
+            "zh-hans": 100,
+            "zh-hant": 99
+          },
+          "langPassPriors": {
+            "de": 1,
+            "es": 0.96,
+            "fr": 0.92,
+            "id": 1,
+            "it": 0.96,
+            "ja": 1,
+            "ko": 0.96,
+            "ru": 1,
+            "th": 0.96,
+            "tr": 0.96,
+            "vi": 0.96,
+            "zh-hans": 1,
+            "zh-hant": 0.96
+          }
         },
         {
           "id": "gemini-3.6-flash",
@@ -118,7 +269,37 @@
               "window": "rpd",
               "limit": 20
             }
-          ]
+          ],
+          "langScores": {
+            "de": 97,
+            "es": 99,
+            "fr": 99,
+            "id": 99,
+            "it": 98,
+            "ja": 100,
+            "ko": 100,
+            "ru": 99,
+            "th": 100,
+            "tr": 98,
+            "vi": 100,
+            "zh-hans": 99,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 1,
+            "es": 1,
+            "fr": 1,
+            "id": 1,
+            "it": 1,
+            "ja": 1,
+            "ko": 1,
+            "ru": 1,
+            "th": 1,
+            "tr": 1,
+            "vi": 1,
+            "zh-hans": 0.96,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemini-3.5-flash",
@@ -137,7 +318,37 @@
               "window": "rpd",
               "limit": 20
             }
-          ]
+          ],
+          "langScores": {
+            "de": 96,
+            "es": 98,
+            "fr": 99,
+            "id": 98,
+            "it": 98,
+            "ja": 99,
+            "ko": 100,
+            "ru": 100,
+            "th": 100,
+            "tr": 99,
+            "vi": 99,
+            "zh-hans": 100,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 0.96,
+            "es": 0.96,
+            "fr": 1,
+            "id": 0.96,
+            "it": 0.96,
+            "ja": 0.96,
+            "ko": 1,
+            "ru": 1,
+            "th": 1,
+            "tr": 0.96,
+            "vi": 0.96,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemini-3.1-flash-lite",
@@ -156,7 +367,37 @@
               "window": "rpd",
               "limit": 500
             }
-          ]
+          ],
+          "langScores": {
+            "de": 97,
+            "es": 99,
+            "fr": 96,
+            "id": 96,
+            "it": 97,
+            "ja": 96,
+            "ko": 97,
+            "ru": 96,
+            "th": 98,
+            "tr": 97,
+            "vi": 99,
+            "zh-hans": 98,
+            "zh-hant": 98
+          },
+          "langPassPriors": {
+            "de": 0.88,
+            "es": 0.96,
+            "fr": 0.92,
+            "id": 0.92,
+            "it": 0.83,
+            "ja": 0.92,
+            "ko": 0.92,
+            "ru": 0.88,
+            "th": 0.88,
+            "tr": 0.96,
+            "vi": 0.92,
+            "zh-hans": 0.96,
+            "zh-hant": 0.96
+          }
         }
       ]
     },

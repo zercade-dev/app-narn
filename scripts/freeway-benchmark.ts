@@ -559,7 +559,7 @@ async function getOrCreateModule(
 // reports failure via data, not control flow) and deciding what that means
 // for the cell/run. A cell with ANY unjudged or errored item must NOT be
 // written (stays absent, resumable) — writing it would let `distill()`
-// silently drop it forever (`medianScore: undefined`) with no error and no
+// silently drop it forever (`meanScore: undefined`) with no error and no
 // way to retry short of `--refresh` on the whole run.
 // ---------------------------------------------------------------------------
 
@@ -988,7 +988,7 @@ function formatCellNumbers(cell: CellResult | undefined): string {
   if (!cell) return '';
   if (cell.unsupported) return ' (unsupported by provider)';
   const parts = [
-    cell.medianScore !== undefined ? `medianScore=${cell.medianScore}` : undefined,
+    cell.meanScore !== undefined ? `meanScore=${cell.meanScore}` : undefined,
     `mechPassRate=${cell.mechPassRate}`,
     `wrongLanguageCount=${cell.wrongLanguageCount}/${cell.strings}`,
   ].filter((p): p is string => p !== undefined);
