@@ -3446,12 +3446,17 @@ export class TranslationEngine {
    * decision one part made for ITS OWN jobs, re-validated against its own
    * language; letting the next language inherit it would dispatch onto a bucket
    * nothing ever checked THAT language against (blocked/weak languages and
-   * ranking are per-language). Within ONE language the failover does transfer,
-   * as it always has: same language, same band (a group is homogeneous in band
-   * by construction), so the sibling part's re-validation would reach the same
-   * answer — and re-starting it on the bucket that just failed would only spend
-   * a second doomed request. `splitCaps` stays shared either way: it is a
-   * run-scoped learning, not per-part routing state.
+   * ranking are per-language). When every part shares ONE language the failover
+   * does transfer, as it always has: same language, same band (a group is
+   * homogeneous in band by construction), so the sibling part's re-validation
+   * would reach the same answer — and re-starting it on the bucket that just
+   * failed would only spend a second doomed request. The restore is per PART,
+   * not per language run, so consecutive same-language parts of a
+   * cross-language re-chunk do NOT inherit each other's failover — each starts
+   * from the planned bucket and can re-pay one doomed call. Accepted: the
+   * alternative is tracking a per-language cursor through the bounds for a case
+   * only a capped re-chunk of a packed batch produces. `splitCaps` stays shared
+   * either way: it is a run-scoped learning, not per-part routing state.
    *
    * The state object is reused rather than cloned on purpose: `processBatchJob`
    * holds a reference to it as `currentFreewayState` and reads the LIVE
@@ -3559,6 +3564,17 @@ export class TranslationEngine {
     if (strikeCap !== undefined && strikeCap >= 1 && strikeCap < jobs.length) {
       const bounds = TranslationEngine.cappedLanguageBounds(jobs, strikeCap);
       onRechunk?.({ bucketKey: state.bucketKey, size: jobs.length, parts: bounds.length });
+      // `revalidateFirst`/`unpackReason` deliberately propagate here, unlike at
+      // the post-call recursion sites below: this pre-chunk runs BEFORE the
+      // re-validation block, so an unpacked part reaching it has not
+      // re-validated yet and its sub-parts are the ones that must. Clearing the
+      // flag here would send them straight onto the bucket whose failure caused
+      // the unpack — re-paying exactly the probing call the unpack exists to
+      // avoid — and their reroutes really are that unpack's, so the reason
+      // label still applies. (Narrow by construction: a part is smaller than
+      // the chunk that passed this same check, so only a concurrent batch
+      // lowering the shared run-scoped cap mid-flight can put an unpacked part
+      // here at all.)
       return this.dispatchFreewayInParts(args, bounds);
     }
     const bandOpts = freewayBandOpts(degradedFloor, minBand);
@@ -3626,7 +3642,10 @@ export class TranslationEngine {
           });
           // The re-validation is spent: its sub-parts translate first, from the
           // rescue bucket this part just settled on.
-          return this.dispatchFreewayInParts({ ...args, revalidateFirst: false }, rescueBounds);
+          return this.dispatchFreewayInParts(
+            { ...args, revalidateFirst: false, unpackReason: undefined },
+            rescueBounds,
+          );
         }
       }
     }
@@ -3669,8 +3688,21 @@ export class TranslationEngine {
           onSplit?.({ bucketKey: state.bucketKey, size: jobs.length });
           const failedBucketKey = state.bucketKey;
           const mid = Math.ceil(jobs.length / 2);
+          // The halves must retry on THIS bucket at half size — that is the
+          // whole point of the split. Any re-validation this batch owed as an
+          // unpacked part is already spent (it ran before the call that just
+          // mis-parsed), so re-validating per half would only re-read views and
+          // could reroute the halves off the bucket whose parse behavior the
+          // split is measuring — taking the `splitCaps` learning with it. The
+          // unpack reason goes with it: it labels the mixed chunk's failure,
+          // not this parse failure.
           const outcome = await this.dispatchFreewayInParts(
-            { ...args, splitDepth: splitDepth + 1 },
+            {
+              ...args,
+              splitDepth: splitDepth + 1,
+              revalidateFirst: false,
+              unpackReason: undefined,
+            },
             [
               [0, mid],
               [mid, jobs.length],
@@ -3925,7 +3957,14 @@ export class TranslationEngine {
               size: jobs.length,
               parts: bounds.length,
             });
-            return this.dispatchFreewayInParts(args, bounds);
+            // Post-call recursion: the re-validation that produced this rescue
+            // bucket is the parts' re-validation, so they must not repeat it —
+            // and the unpack reason labelled the mixed chunk's failure, not
+            // this one.
+            return this.dispatchFreewayInParts(
+              { ...args, revalidateFirst: false, unpackReason: undefined },
+              bounds,
+            );
           }
         } else if (authFailure) {
           // 'keep' after an auth failure normally means a SIBLING candidate now

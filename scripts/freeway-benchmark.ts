@@ -15,8 +15,8 @@
  * Network calls only happen in the default (neither --plan nor --distill)
  * mode. The four provider-module factories are loaded via a runtime
  * `import()` of their *source* file (relative path, not the package name):
- * `app/package.json` doesn't depend on the module/shared workspace packages
- * (only `packages/server` and `packages/frontend` do), so a bare
+ * the workspace-root `package.json` doesn't depend on the module/shared workspace
+ * packages (only `packages/server` and `packages/frontend` do), so a bare
  * `@zercade-dev/narn-module-google`-style import never resolves from
  * `scripts/`. Loading the source directly — the same fix
  * `validate-recommended-models.ts` already uses for `@zercade-dev/narn-shared`
@@ -118,7 +118,7 @@ const CANDIDATE_MANIFESTS: Record<string, { requiredEnvVars?: string[] }> = {
 
 const JUDGE_PROVIDER_KEY = 'google';
 /**
- * Coordinator decision (review round 1, CRITICAL 2): NOT gemini-flash-latest.
+ * The judge model is deliberately NOT gemini-flash-latest.
  * That model's snapshot limits are rpm 5 / rpd 20 — at the judge layer's own
  * hard cap of 10 items/request (see JUDGE_BATCH_SIZE) a single 24-string cell
  * already costs ~3 judge requests, so rpd 20 covers roughly 6 cells/day
@@ -139,8 +139,15 @@ const TRANSLATE_CHUNK_SIZE = 12;
  */
 const JUDGE_BATCH_SIZE = 10;
 const PACING_FLOOR_MS = 1500;
-/** Provider API key shapes — never let one reach a printed error line. */
-const KEY_SHAPE_RE = /\b(gsk_|sk-[A-Za-z0-9-]|AIza)[A-Za-z0-9_-]*/g;
+/**
+ * Provider API key shapes — never let one reach a printed error line. Covers
+ * the prefixed shapes (groq `gsk_…`, OpenAI/OpenRouter `sk-…`, Google
+ * `AIza…`) plus DeepL's prefix-less key: a hex-and-dash UUID with an optional
+ * `:fx` free-tier suffix. That last alternative is deliberately loose — it
+ * also swallows long hex digests, which is the harmless direction for a
+ * redaction pass over error text.
+ */
+const KEY_SHAPE_RE = /\b(?:(?:gsk_|sk-[A-Za-z0-9-]|AIza)[A-Za-z0-9_-]*|[0-9a-f][0-9a-f-]{29,}(?::fx)?)/g;
 function redact(text: string): string {
   return text.replace(KEY_SHAPE_RE, '[redacted]');
 }
@@ -299,7 +306,7 @@ function buildKeyReport(
 // Corpus: committed + optional local, merged. corpusVersion is always the
 // hash of the COMMITTED file's bytes — local strings never change the
 // recorded corpus identity, even though their scores flow into the same
-// aggregates (the Hybrid corpus decision).
+// aggregates.
 // ---------------------------------------------------------------------------
 
 function readCorpus(): { entries: CorpusEntry[]; committedVersion: string; localCount: number } {
@@ -403,7 +410,7 @@ async function paceAfterCall(snapModel: FreeTierModel | undefined, provider: Fre
 }
 
 // ---------------------------------------------------------------------------
-// Error classification (requirement 4)
+// Error classification
 // ---------------------------------------------------------------------------
 
 type Classification =
@@ -470,7 +477,7 @@ function getStats(ctx: RunContext, providerKey: string): ProviderStats {
   return s;
 }
 
-/** Quota/budget reasons are expected outcomes (requirement 10) — everything else trips the exit code. */
+/** Quota/budget reasons are expected outcomes — everything else trips the exit code. */
 const QUOTA_DEFER_REASONS: ReadonlySet<DeferReason> = new Set(['cooling', 'auth-failed', 'budget-capped', 'judge-cooling']);
 
 function deferCell(ctx: RunContext, providerKey: string, reason: DeferReason): void {
@@ -502,7 +509,7 @@ async function loadFactory(providerKey: string): Promise<(config: Record<string,
     throw new Error(
       `failed to load provider module "${providerKey}": ${toErrorMessage(err)}\n` +
         '  packages/shared must be built first — run `pnpm --filter @zercade-dev/narn-shared build` ' +
-        '(or `pnpm build`) from app/, then retry.',
+        '(or `pnpm build`) from the workspace root, then retry.',
     );
   }
 }
@@ -536,7 +543,7 @@ async function getOrCreateModule(
 }
 
 // ---------------------------------------------------------------------------
-// Judging (requirement 5, rewritten per review round 1 CRITICAL 1).
+// Judging
 //
 // `judgeTranslations` (shared `runJudgeFeature` + `splitAndRetry`,
 // packages/shared/src/ai-sdk-provider/{llm-module,module-features}.ts) NEVER
@@ -669,7 +676,7 @@ function buildJobs(corpus: CorpusEntry[], lang: string): TranslationJob[] {
  * DeepL groups jobs by (target, source, context) before chunking — within one
  * cell, target/source are constant, so this reduces to distinct `context`
  * values. Mirrors `jobContext` exactly so the --plan estimate matches actual
- * DeepL sub-request behavior (M2, minor finding).
+ * DeepL sub-request behavior.
  */
 function countDeeplContextGroups(corpus: CorpusEntry[]): number {
   return new Set(corpus.map(jobContext)).size;
@@ -859,7 +866,7 @@ async function processCell(
 }
 
 // ---------------------------------------------------------------------------
-// Cell plan (requirement 2) — shared by --plan and the real run.
+// Cell plan — shared by --plan and the real run.
 // ---------------------------------------------------------------------------
 
 interface PlannedCell {
@@ -894,7 +901,7 @@ function buildPlan(
   return { cells, missingKeyProviders };
 }
 
-/** Printed at startup in BOTH --plan and a real run (review I2) — never only under --plan. */
+/** Printed at startup in BOTH --plan and a real run — never only under --plan. */
 function printKeyReport(keyReport: KeyReportRow[], missingKeyProviders: string[]): void {
   console.log('Freeway benchmark — API key presence (scripts/.env):');
   for (const r of keyReport) {
@@ -939,7 +946,7 @@ function printPlan(opts: {
   const deeplContextGroups = countDeeplContextGroups(opts.corpus);
   for (const [providerKey, cells] of [...byProvider.entries()].sort(([a], [b]) => (a < b ? -1 : 1))) {
     // DeepL batches by (target, source, context) before chunking — one request per distinct
-    // context group in the corpus, not one request for the whole cell (M2).
+    // context group in the corpus, not one request for the whole cell.
     const translatePerCell = providerKey === 'deepl' ? deeplContextGroups : Math.ceil(corpusSize / TRANSLATE_CHUNK_SIZE);
     // The judge layer's own hard cap is JUDGE_BATCH_SIZE (10), not our old external chunk size.
     const judgePerCell = Math.ceil(corpusSize / JUDGE_BATCH_SIZE);
@@ -962,7 +969,7 @@ function printPlan(opts: {
       ` + ~${totalJudgeRequests} judge request(s) (judge always via google/${JUDGE_MODEL_ID})`,
   );
   // google carries every OTHER provider's judging too (--max-requests shares one counter across
-  // google's own candidate-translate spend and every judge call — review IMPORTANT 3) — the
+  // google's own candidate-translate spend and every judge call) — the
   // per-provider line above only shows google's OWN candidate share, so spell out the true total.
   console.log(
     `google total (candidate + judge for every provider's cells): ` +
@@ -972,7 +979,7 @@ function printPlan(opts: {
 }
 
 // ---------------------------------------------------------------------------
-// --distill (requirement 8): no network. Reads results.json, folds it onto
+// --distill: no network. Reads results.json, folds it onto
 // the bundled free-tier snapshot via lib.ts's distill()/applyDistilled(), and
 // writes free-tier-data.json back in place.
 // ---------------------------------------------------------------------------
@@ -1019,7 +1026,7 @@ function runDistill(): void {
 }
 
 // ---------------------------------------------------------------------------
-// Summary + exit code (requirement 10)
+// Summary + exit code
 // ---------------------------------------------------------------------------
 
 function printSummary(ctx: RunContext): void {
@@ -1029,7 +1036,7 @@ function printSummary(ctx: RunContext): void {
       .map(([reason, count]) => `${reason}: ${count}`)
       .join(', ');
     // google's requestsMade blends its own candidate-translate calls with every judge call across
-    // every provider's cells (they share one counter — review IMPORTANT 3); label it accordingly
+    // every provider's cells (they share one counter); label it accordingly
     // so "attribution stays visible in the summary" for the one provider where the count isn't
     // purely translate requests.
     const requestLabel = providerKey === JUDGE_PROVIDER_KEY ? 'request(s) (candidate translate + judge)' : 'translate request(s)';
@@ -1062,13 +1069,13 @@ async function main(): Promise<void> {
   const { entries: corpus, committedVersion, localCount } = readCorpus();
   // Default excludes 'en' (never a target) AND the synthetic pseudo-test language (M7 never
   // routes it to a real provider, so benchmarking it burns quota on a case that can't occur in
-  // production — review I4). An explicit `--langs pseudo-test` still works if ever wanted.
+  // production). An explicit `--langs pseudo-test` still works if ever wanted.
   const langs =
     args.langs ?? LANGUAGE_REGISTRY.filter((l) => l.code !== 'en' && l.code !== PSEUDO_LANGUAGE_CODE).map((l) => l.code);
   const { cells, missingKeyProviders } = buildPlan(snapshot, langs, args.providers, apiKeys);
   const existingResults = readResultsFile();
 
-  // Printed at startup in BOTH modes (review I2) — a real run is exactly where "which provider got
+  // Printed at startup in BOTH modes — a real run is exactly where "which provider got
   // silently skipped" matters most.
   printKeyReport(keyReport, missingKeyProviders);
   console.log();
@@ -1128,7 +1135,7 @@ async function main(): Promise<void> {
     maxRequests: args.maxRequests,
     refresh: args.refresh,
     // Resuming against a newer committed corpus refreshes the top-level version unconditionally;
-    // per-cell CellResult.corpusVersion stays whatever it was when that cell was written (M5).
+    // per-cell CellResult.corpusVersion stays whatever it was when that cell was written.
     resultsFile: existingResults
       ? { ...existingResults, corpusVersion: committedVersion }
       : { corpusVersion: committedVersion, cells: {} },
@@ -1158,7 +1165,7 @@ async function main(): Promise<void> {
     if (outcome === 'stop') {
       // Judge just went cooling (429-shaped) — it's shared by every provider's cells, so nothing
       // remaining can be judged either. Attribute each of them to its own provider bucket so the
-      // summary shows exactly how much was left on the table, then stop (review CRITICAL 1/2).
+      // summary shows exactly how much was left on the table, then stop.
       for (const remaining of cells.slice(i + 1)) {
         deferCell(ctx, remaining.providerKey, 'judge-cooling');
       }
