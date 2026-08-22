@@ -97,7 +97,13 @@ function tokenPattern(token: string): RegExp {
   return new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
 }
 function stripTokens(text: string): string {
-  return text.replace(/\{[^{}]*\}|<[^<>]+>/g, '');
+  // Stripping runs to a fixpoint so token fragments cannot recombine into new token shapes.
+  let stripped = text;
+  for (;;) {
+    const next = stripped.replace(/\{[^{}]*\}|<[^<>]+>/g, '');
+    if (next === stripped) return next;
+    stripped = next;
+  }
 }
 
 export function aggregateCell(args: {
