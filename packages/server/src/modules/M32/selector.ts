@@ -47,15 +47,19 @@ export function hasStock(bucket: BucketView, group: JobGroup): boolean {
 }
 
 /**
+ * A nominal anti-dribble floor: below this many minute-tokens the remainder
+ * is too thin to bother admitting a bucket for, even though it is not
+ * literally zero.
+ */
+export const MIN_MINUTE_TOKENS_FLOOR = 200;
+
+/**
  * Whether the bucket has spendable rpm/tpm headroom in the CURRENT minute.
  * Deliberately separate from {@link hasStock}: minute exhaustion is the same
  * shape as a cooldown, not stock exhaustion — the bucket refills on its own
  * within seconds, so {@link bucketResumeAt} must defer to `minuteResetAt`,
  * never fall through to the day-scale `nextResetAt`.
  */
-/** Below this many minute-tokens no real request fits, so the bucket is not spendable this minute. */
-export const MIN_MINUTE_TOKENS_FLOOR = 200;
-
 export function hasMinuteHeadroom(bucket: BucketView): boolean {
   const rpm = Math.min(
     bucket.remainingMinuteRequests ?? Infinity,

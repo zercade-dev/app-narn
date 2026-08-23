@@ -83,7 +83,7 @@ function spendAssignment(
   // its own tokens-per-minute ceiling.
   if (bucket.remainingMinuteTokens !== undefined) {
     const avgChars = group.jobs.length === 0 ? 0 : groupChars / group.jobs.length;
-    const requestChars = Math.round(avgChars * batchSize);
+    const requestChars = Math.round(avgChars * Math.min(batchSize, group.jobs.length));
     bucket.remainingMinuteTokens = Math.max(
       0,
       bucket.remainingMinuteTokens -
