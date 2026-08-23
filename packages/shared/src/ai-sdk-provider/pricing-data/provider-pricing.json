@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-21T14:08:30.643Z",
+  "generatedAt": "2026-08-23T08:27:27.712Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
@@ -218,9 +218,9 @@
       "models": [
         {
           "id": "gpt-5.6-sol",
-          "inputCostPerMillion": 5,
-          "cachedInputCostPerMillion": 0.5,
-          "outputCostPerMillion": 6.25,
+          "inputCostPerMillion": 4,
+          "cachedInputCostPerMillion": 0.4,
+          "outputCostPerMillion": 5,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 1050000
         },
