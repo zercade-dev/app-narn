@@ -12,6 +12,7 @@ import {
 import {
   forbiddenTermsCheck,
   glossaryAdherenceCheck,
+  htmlEntityCheck,
   regexAssertionsCheck,
 } from './content-checks.js';
 import { PARITY_CHECKS } from './parity-checks.js';
@@ -33,6 +34,7 @@ export const ALL_CHECKS: readonly LQACheck[] = [
   glossaryAdherenceCheck,
   forbiddenTermsCheck,
   regexAssertionsCheck,
+  htmlEntityCheck,
   ...PARITY_CHECKS,
 ];
 
