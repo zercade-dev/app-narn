@@ -702,6 +702,8 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         minuteResetAt,
         poolRemainingMinuteRequests,
         nextResetAt: nextReset(dayWindow.kind, now, provider.resetTimeZone),
+        dayInputTokens: usage.inputTokens,
+        dayOutputTokens: usage.outputTokens,
         cooldownUntil: state?.cooldownUntil,
         // Bucket-keyed disable rows written by pre-upgrade code are
         // deliberately no longer read here — a credential mark lives under

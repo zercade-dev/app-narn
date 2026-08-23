@@ -68,6 +68,16 @@ export interface BucketView {
   poolRemainingMinuteRequests?: number;
   /** Epoch ms when the day-scale window above (rpd, or the monthly char window) resets. */
   nextResetAt: number;
+  /**
+   * Day-window token tallies backing `projectedRequestTokens`' observed
+   * ratio — the governing day-scale cell (rpd, or the monthly char window
+   * for a char-only provider). Optional so pre-existing fixtures that don't
+   * care about token projection don't all need updating; `loadBucketViews`
+   * always sets them, and an absent tally reads as the function's cold-start
+   * case.
+   */
+  dayInputTokens?: number;
+  dayOutputTokens?: number;
   cooldownUntil?: number;
   disabledReason?: string;
   stats: FreewayBucketStats;

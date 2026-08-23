@@ -232,3 +232,35 @@ export function requestCost(
   const est = estimatedRequests(group.jobs.length, batchSize, passRate);
   return { batchSize, estimatedRequests: est, requestsPerJob: est / group.jobs.length, passRate };
 }
+
+/** Prompt scaffolding tokens per request beyond the strings themselves. */
+const REQUEST_TOKEN_OVERHEAD = 120;
+/** Bounds for the observed output-per-input token ratio. */
+const MIN_OUT_RATIO = 0.5;
+const MAX_OUT_RATIO = 12;
+/** Ratio assumed until the day window has a meaningful input sample. */
+const DEFAULT_OUT_RATIO = 2;
+const OUT_RATIO_MIN_SAMPLE = 500;
+
+/**
+ * Projected TOTAL tokens (input + output) of one request of avgRequestChars
+ * source payload on this bucket. Output dominates real token spend on
+ * reasoning models (observed 2–10× input), so minute-token budgeting from
+ * input alone overshoots provider TPM ceilings; the bucket's own day-window
+ * tallies calibrate the ratio without per-model curation. A bucket with no
+ * observed tally yet (fixture or brand-new day window) reads as zero input,
+ * which is the same cold-start branch as a thin sample.
+ */
+export function projectedRequestTokens(
+  bucket: Pick<BucketView, 'dayInputTokens' | 'dayOutputTokens'>,
+  avgRequestChars: number,
+): number {
+  const estInput = Math.ceil(avgRequestChars / 4) + REQUEST_TOKEN_OVERHEAD;
+  const dayInputTokens = bucket.dayInputTokens ?? 0;
+  const dayOutputTokens = bucket.dayOutputTokens ?? 0;
+  const outRatio =
+    dayInputTokens >= OUT_RATIO_MIN_SAMPLE
+      ? Math.min(MAX_OUT_RATIO, Math.max(MIN_OUT_RATIO, dayOutputTokens / dayInputTokens))
+      : DEFAULT_OUT_RATIO;
+  return Math.ceil(estInput * (1 + outRatio));
+}
