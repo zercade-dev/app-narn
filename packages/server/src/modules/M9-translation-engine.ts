@@ -565,14 +565,27 @@ export function lengthLimitForJob(
 }
 
 /**
+ * Character budget the entry's overflow check enforces: its source length
+ * times its allowed ratio (see M10's overflowCheck, which measures the same
+ * two values). `undefined` when the check cannot fire for the entry at all,
+ * so there is no budget to quote. Exported for unit tests.
+ */
+export function overflowBudgetChars(entry: StringEntry): number | undefined {
+  if (entry.ignoreOverflow || entry.sourceText.length === 0) return undefined;
+  return Math.floor(entry.sourceText.length * entry.overflowRatio);
+}
+
+/**
  * Corrective follow-up sent to the module after a failed LQA gate.
  * When the failure includes a `too-long` issue, an explicit shorten request
- * with the language's hard limits is appended. Exported for unit tests.
+ * with the language's hard limits is appended; an `overflow` issue gets the
+ * same treatment against the entry's own ratio budget. Exported for unit tests.
  */
 export function buildLqaRetryFeedback(
   lqaResult: import('@zercade-dev/narn-shared').LQAResult,
   targetLanguage: string,
   achievement?: AchievementPromptContext,
+  overflowBudget?: number,
 ): string {
   // The feedback is replayed to the model as a new user turn. issue.detail
   // can echo LLM-produced text, so sanitize it before interpolation: strip
@@ -592,6 +605,7 @@ export function buildLqaRetryFeedback(
     .slice(0, 20)
     .map(summarizeIssue)
     .join('; ')}. Please correct the translation.`;
+  let shortenRequested = false;
   if (lqaResult.issues.some((i) => i.type === 'too-long')) {
     const limit = getLengthLimit(targetLanguage);
     if (limit) {
@@ -599,7 +613,24 @@ export function buildLqaRetryFeedback(
         ` The translation MUST NOT exceed ${limit.maxChars} characters or ` +
         `${limit.maxBytes} UTF-8 bytes — provide a shorter version that preserves ` +
         `the essential meaning, condensing rather than truncating.`;
+      shortenRequested = true;
     }
+  }
+  // `overflow` is the ratio-against-source check, a different measure from the
+  // language's absolute cap, so it carries its own budget. Without this clause
+  // an over-length retry is told only that the text "failed quality checks:
+  // overflow: …" and is given no instruction to shorten and no target to hit.
+  // Skipped when the too-long clause already stated a budget, so the model is
+  // never handed two different limits for the same string.
+  if (
+    !shortenRequested &&
+    overflowBudget !== undefined &&
+    lqaResult.issues.some((i) => i.type === 'overflow')
+  ) {
+    feedback +=
+      ` The translation MUST NOT exceed ${overflowBudget} characters — provide a ` +
+      `shorter version that preserves the essential meaning, condensing rather ` +
+      `than truncating.`;
   }
   // Achievement entries: restate the hard byte budget the LQA gate enforces.
   if (achievement) {
@@ -5173,11 +5204,14 @@ export class TranslationEngine {
         // HIGHER tier with quota when one exists — a same-model retry usually
         // just spends another free request on the same mistake. Falls back to
         // the same-module retry when the ladder is exhausted (or the escalated
-        // module cannot take corrective feedback).
+        // module cannot take corrective feedback). An OVERFLOW retry is exempt:
+        // being too long is a length problem, not a model-quality one, so
+        // burning a scarcer tier's quota on it buys nothing (and the detail
+        // line would read "gate-failed", which it was not).
         let retryModule = module;
         let retryDecision = item.entry.decision;
         let escalatedBucketKey: string | undefined;
-        if (bucketKey !== undefined && freewayDeps) {
+        if (item.reason !== 'overflow' && bucketKey !== undefined && freewayDeps) {
           const escalationCandidates = await this.selectFreewayEscalation(
             bucketKey,
             item.entry.decision,
@@ -5322,11 +5356,16 @@ export class TranslationEngine {
    * the retry result, and records it in the TM when the gate passes.
    *
    * Outcomes: 'persisted' — the retry result replaced the original;
-   * 'accepted-original' — retry unavailable/failed, keep the first result;
-   * 'aborted' — the run was cancelled mid-retry.
+   * 'accepted-original' — retry unavailable/failed, or rejected as still
+   * over-length, so the first result stands; 'aborted' — the run was cancelled
+   * mid-retry.
    *
-   * `reason` says what queued the entry and sets the bar the retry has to
-   * clear to replace the first pass: see the re-gate below.
+   * `reason` says what queued the entry and sets the bar the retry has to clear
+   * to replace the first pass: a 'failed' gate takes any usable retry, an
+   * 'overflow' takes it only when the retry itself gates clean and short. That
+   * bar costs a gate pass to evaluate, so a rejected overflow retry runs the
+   * gate three times for the entry (first pass, retry, restore) — all local
+   * checks, no provider call.
    */
   private async retryLqaFailure(args: {
     runId: string;
@@ -5384,7 +5423,12 @@ export class TranslationEngine {
           achievementPairMap ?? new Map(),
         )
       : undefined;
-    const feedback = buildLqaRetryFeedback(lqaResult, targetLanguage, achievement);
+    const feedback = buildLqaRetryFeedback(
+      lqaResult,
+      targetLanguage,
+      achievement,
+      overflowBudgetChars(entry),
+    );
     metricsCollector.recordLqaRetry(decision.moduleId, metricsModel);
     this.recordRetry(runId, entry.id, entry.sourceText, targetLanguage);
     this.logger.info('translation:lqa-retry', {
@@ -5437,47 +5481,66 @@ export class TranslationEngine {
         translatedText: retryRestored,
         rawResponse: retryModuleResult.rawResponse,
       };
-      // The retry's own verdict has to be in hand BEFORE the write, because it
-      // is what decides whether the write happens at all. A gate-failure retry
-      // is taken unconditionally (the corrective pass is the best text the
-      // module will give for that entry), but an overflow retry only earns the
-      // overwrite by coming back both clean and within the limit: a
-      // still-too-long replacement is no better than the text it would destroy,
-      // so the first pass stands — exactly as it does when no retry runs.
-      const retryLqaResult = await this.lqaGate(
-        entry,
-        retryResult,
-        projectId,
-        targetLanguage,
-        retryMaskIssues,
-      );
-      if (reason === 'overflow' && !(retryLqaResult?.passed === true && !retryLqaResult.overflow)) {
-        // The first pass keeps the entry, so its verdict has to go back onto it
-        // — the gate call above stored the rejected attempt's in its place, and
-        // a verdict describing text that is not the stored text is a lie the UI
-        // reads. Recomputed from the masked first-pass output exactly as the
-        // first pass computed it, so this restores that verdict rather than an
-        // approximation of it.
-        await this.lqaGate(
+      // An overflow retry has to clear its own gate BEFORE it may overwrite
+      // anything: a still-too-long replacement is no better than the text it
+      // would destroy, so the first pass stands, exactly as it does when no
+      // retry runs. This call is a DECISION only — its return value is never
+      // reused as the stored verdict, because the gate a caller sees can be a
+      // warning-filtered copy of the one it persisted, and because the persist
+      // below invalidates it anyway (see the re-gate after the write).
+      if (reason === 'overflow') {
+        const preGate = await this.lqaGate(
           entry,
-          {
-            entryId: entry.id,
-            targetLanguage,
-            translatedText: restoreFinal(
-              entry.sourceText,
-              originalText,
-              plan,
-              glossaryById,
-              targetLanguage,
-            ),
-          },
+          retryResult,
           projectId,
           targetLanguage,
-          maskDiagnosticsToIssues(verifyMaskedTranslation(originalText, plan)),
+          retryMaskIssues,
         );
-        return { outcome: 'accepted-original' };
+        if (!(preGate?.passed === true && !preGate.overflow)) {
+          // The first pass keeps the entry, so its verdict has to go back onto
+          // it — the decision call above stored the rejected attempt's in its
+          // place, and a verdict describing text that is not the stored text is
+          // read as fact by lengthLimitForJob, the judge's merge, and the UI.
+          // Recomputed from the masked first-pass output exactly as the first
+          // pass computed it, so this restores that verdict rather than an
+          // approximation of it. Isolated from the outer catch: a restore that
+          // throws must not be reported as a failed retry, and leaves the entry
+          // no worse than the line above already left it.
+          try {
+            await this.lqaGate(
+              entry,
+              {
+                entryId: entry.id,
+                targetLanguage,
+                translatedText: restoreFinal(
+                  entry.sourceText,
+                  originalText,
+                  plan,
+                  glossaryById,
+                  targetLanguage,
+                ),
+              },
+              projectId,
+              targetLanguage,
+              maskDiagnosticsToIssues(verifyMaskedTranslation(originalText, plan)),
+            );
+          } catch (restoreErr) {
+            this.logger.warn('translation:lqa-verdict-restore-failed', {
+              runId,
+              entryId: entry.id,
+              targetLanguage,
+              error: restoreErr instanceof Error ? restoreErr.message : `${restoreErr}`,
+            });
+          }
+          return { outcome: 'accepted-original' };
+        }
       }
       await this.persistResult(projectId, entry, targetLanguage, retryResult, decision, runId);
+      // The gate MUST run after the write, never before it: setTranslation drops
+      // the language's verdict whenever its text changes (clearStaleLqaResults in
+      // pg-string-store), delegating the recompute to exactly this call. Gate
+      // first and the retry lands with no verdict at all.
+      await this.lqaGate(entry, retryResult, projectId, targetLanguage, retryMaskIssues);
       // No TM auto-record — only approved translations are written to the memory.
       return {
         outcome: 'persisted',
