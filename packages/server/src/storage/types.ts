@@ -761,7 +761,7 @@ export interface FreewayBucketStats {
 export interface FreewayBucketState {
   /**
    * `'<baseModuleId>::<modelId>'`, e.g. `google::gemini-2.5-flash`,
-   * `groq::llama-3.3-70b-versatile` — but NOT always a bucket: the same table
+   * `groq::openai/gpt-oss-120b` — but NOT always a bucket: the same table
    * also holds the reserved `credential::<moduleId>` namespace (M32's
    * `freewayCredentialKey`), whose rows carry a module's bad-credential mark in
    * `disabledReason`. Any query that iterates rows as buckets must exclude that
