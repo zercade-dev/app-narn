@@ -204,6 +204,7 @@
     "loading": "กำลังโหลดสถานะ NARN Freeway…",
     "loadFailed": "โหลดสถานะ NARN Freeway ไม่สำเร็จ: {{message}}",
     "generatedAtLabel": "อัปเดตเมื่อ {{time}}",
+    "vaultLockedNotice": "Credential vault is locked — Freeway providers show as missing keys until you unlock it.",
     "sourcesTitle": "ผู้ให้บริการฟรี",
     "keyPresent": "เพิ่มคีย์แล้ว",
     "keyMissing": "ยังไม่มีคีย์",

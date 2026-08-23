@@ -209,6 +209,7 @@
     "loading": "Status von NARN Freeway wird geladen…",
     "loadFailed": "Status von NARN Freeway konnte nicht geladen werden: {{message}}",
     "generatedAtLabel": "Aktualisiert {{time}}",
+    "vaultLockedNotice": "Der Schlüsseltresor ist gesperrt – Freeway-Anbieter erscheinen ohne Schlüssel, bis du ihn entsperrst.",
     "sourcesTitle": "Kostenlose Anbieter",
     "keyPresent": "Schlüssel hinzugefügt",
     "keyMissing": "Noch kein Schlüssel",

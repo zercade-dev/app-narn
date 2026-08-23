@@ -209,6 +209,7 @@
     "loading": "NARN Freeway durumu yükleniyor…",
     "loadFailed": "NARN Freeway durumu yüklenemedi: {{message}}",
     "generatedAtLabel": "{{time}} güncellendi",
+    "vaultLockedNotice": "Kimlik bilgisi kasası kilitli — kilidini açana kadar Freeway sağlayıcıları anahtarsız görünür.",
     "sourcesTitle": "Ücretsiz sağlayıcılar",
     "keyPresent": "Anahtar eklendi",
     "keyMissing": "Henüz anahtar yok",

@@ -20,6 +20,7 @@ import { ChevronDown, RotateCcw } from 'lucide-react';
 import type { ModuleInstance } from '@zercade-dev/narn-shared';
 import { apiRequest, ApiError } from '../../hooks/use-api.js';
 import { useAsyncData } from '../../hooks/use-async-data.js';
+import { useVaultStore } from '../../stores/vault-store.js';
 import { relativeTime } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
@@ -329,6 +330,7 @@ export function FreewayPanel(): React.JSX.Element {
   const { t } = useTranslation('config');
   const [open, setOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
+  const vaultUnlocked = useVaultStore((s) => s.unlocked);
 
   const {
     data: status,
@@ -507,6 +509,14 @@ export function FreewayPanel(): React.JSX.Element {
         </CardHeader>
         <CollapsibleContent>
           <CardContent className="space-y-4">
+            {!vaultUnlocked && (
+              <p
+                className="text-sm text-muted-foreground"
+                data-testid="freeway-vault-locked-notice"
+              >
+                {t('freeway.vaultLockedNotice')}
+              </p>
+            )}
             {loading && status.buckets.length === 0 ? (
               <p className="text-sm text-muted-foreground" data-testid="freeway-loading">
                 {t('freeway.loading')}

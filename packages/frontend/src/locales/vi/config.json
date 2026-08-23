@@ -204,6 +204,7 @@
     "loading": "Đang tải trạng thái NARN Freeway…",
     "loadFailed": "Không tải được trạng thái NARN Freeway: {{message}}",
     "generatedAtLabel": "Cập nhật lúc {{time}}",
+    "vaultLockedNotice": "Credential vault is locked — Freeway providers show as missing keys until you unlock it.",
     "sourcesTitle": "Nhà cung cấp miễn phí",
     "keyPresent": "Đã thêm khóa",
     "keyMissing": "Chưa có khóa",

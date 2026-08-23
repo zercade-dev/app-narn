@@ -209,6 +209,7 @@
     "loading": "Caricamento dello stato di NARN Freeway…",
     "loadFailed": "Impossibile caricare lo stato di NARN Freeway: {{message}}",
     "generatedAtLabel": "Aggiornato {{time}}",
+    "vaultLockedNotice": "Credential vault is locked — Freeway providers show as missing keys until you unlock it.",
     "sourcesTitle": "Provider gratuiti",
     "keyPresent": "Chiave aggiunta",
     "keyMissing": "Ancora nessuna chiave",

@@ -209,6 +209,7 @@
     "loading": "Cargando el estado de NARN Freeway…",
     "loadFailed": "No se pudo cargar el estado de NARN Freeway: {{message}}",
     "generatedAtLabel": "Actualizado {{time}}",
+    "vaultLockedNotice": "La bóveda de credenciales está bloqueada: los proveedores de Freeway aparecerán sin clave hasta que la desbloquees.",
     "sourcesTitle": "Proveedores gratuitos",
     "keyPresent": "Clave añadida",
     "keyMissing": "Aún sin clave",

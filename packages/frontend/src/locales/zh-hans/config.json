@@ -204,6 +204,7 @@
     "loading": "正在加载 NARN Freeway 状态…",
     "loadFailed": "加载 NARN Freeway 状态失败：{{message}}",
     "generatedAtLabel": "更新于 {{time}}",
+    "vaultLockedNotice": "Credential vault is locked — Freeway providers show as missing keys until you unlock it.",
     "sourcesTitle": "免费服务商",
     "keyPresent": "密钥已添加",
     "keyMissing": "尚未添加密钥",

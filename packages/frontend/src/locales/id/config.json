@@ -204,6 +204,7 @@
     "loading": "Memuat status NARN Freeway…",
     "loadFailed": "Gagal memuat status NARN Freeway: {{message}}",
     "generatedAtLabel": "Diperbarui {{time}}",
+    "vaultLockedNotice": "Credential vault is locked — Freeway providers show as missing keys until you unlock it.",
     "sourcesTitle": "Penyedia gratis",
     "keyPresent": "Kunci ditambahkan",
     "keyMissing": "Belum ada kunci",
