@@ -249,6 +249,7 @@ export function decodeLeakedHtmlEntities(text: string, sourceText: string): stri
       !Number.isFinite(code) ||
       code < 0x20 ||
       code > 0x10ffff ||
+      (code >= 0x7f && code <= 0x9f) ||
       (code >= 0xd800 && code <= 0xdfff)
     ) {
       return match;
@@ -1285,21 +1286,20 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       // \n) AS the translation. Fall back to the fence-stripped payload only
       // when the response isn't a well-formed single-item array.
       const parsedRetry = parseBatchResponse(text, [job]);
-      const translatedText = decodeLeakedHtmlEntities(
-        (parsedRetry ? (parsedRetry[0] ?? '') : extractJsonPayload(text)).trim(),
-        job.sourceText,
-      );
+      const rawTranslatedText = (
+        parsedRetry ? (parsedRetry[0] ?? '') : extractJsonPayload(text)
+      ).trim();
       // The retry sends the system prompt plus the whole message history
       // (original ask + prior attempt + feedback) — all of it is input.
       const promptText = system + user + assistantContent + feedbackContent;
       return {
         entryId: job.entryId,
         targetLanguage: job.targetLanguage,
-        translatedText,
+        translatedText: decodeLeakedHtmlEntities(rawTranslatedText, job.sourceText),
         usage: toTranslationUsage(
           usage,
           modelId,
-          charCounts(promptText, [job], text, [translatedText]),
+          charCounts(promptText, [job], text, [rawTranslatedText]),
         ),
       };
     } catch (err) {
