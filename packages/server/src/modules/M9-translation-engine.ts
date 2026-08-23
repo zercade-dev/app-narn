@@ -4634,13 +4634,16 @@ export class TranslationEngine {
        */
       let currentFreewayState: FreewayBatchState | undefined;
 
-      // Entries whose LQA gate failed, queued for a retryWithFeedback pass
-      // after the whole batch has been persisted (the LQA corrective retry;
-      // see retryLqaFailure).
+      // Entries whose LQA gate failed — or passed carrying an overflow warning
+      // — queued for a retryWithFeedback pass after the whole batch has been
+      // persisted (the LQA corrective retry; see retryLqaFailure). `reason`
+      // separates the two: only the corrective pass for a `failed` gate is
+      // taken unconditionally (see retryLqaFailure).
       const lqaRetryQueue: Array<{
         entry: MaskedEntry;
         originalText: string;
         lqaResult: import('@zercade-dev/narn-shared').LQAResult;
+        reason: 'failed' | 'overflow';
       }> = [];
 
       // Persists + LQA-gates + records progress for ONE entry's result. Called
@@ -4820,9 +4823,15 @@ export class TranslationEngine {
           else freewayGateOutcomes.set(bucketKey, [outcome]);
         }
         // No TM auto-record (memory holds only approved variants). On LQA
-        // failure, queue a session-reuse retry when the module supports it.
+        // failure — or on an over-length result — queue a session-reuse retry
+        // when the module supports it. Overflow needs its own arm because an
+        // overflow issue is warning-severity: the verdict still `passed`, so
+        // without it a translation too long for the game's UI would ship as-is
+        // and never get the one corrective pass that can shorten it.
         const retryLqaResult =
-          batchLqaResult && !batchLqaResult.passed && typeof module.retryWithFeedback === 'function'
+          batchLqaResult &&
+          (!batchLqaResult.passed || batchLqaResult.overflow) &&
+          typeof module.retryWithFeedback === 'function'
             ? batchLqaResult
             : undefined;
         // Mark this decision settled unconditionally: its first pass DID persist,
@@ -4843,6 +4852,9 @@ export class TranslationEngine {
             entry: e,
             originalText: moduleResult.translatedText,
             lqaResult: retryLqaResult,
+            // A verdict that still `passed` can only have reached the queue on
+            // its overflow warning — nothing else here is non-blocking.
+            reason: retryLqaResult.passed ? 'overflow' : 'failed',
           });
         } else {
           status.completed++;
@@ -5238,6 +5250,7 @@ export class TranslationEngine {
             : {}),
           originalText: item.originalText,
           lqaResult: item.lqaResult,
+          reason: item.reason,
           metricsModel,
           signal,
           ...(project ? { project } : {}),
@@ -5311,6 +5324,9 @@ export class TranslationEngine {
    * Outcomes: 'persisted' — the retry result replaced the original;
    * 'accepted-original' — retry unavailable/failed, keep the first result;
    * 'aborted' — the run was cancelled mid-retry.
+   *
+   * `reason` says what queued the entry and sets the bar the retry has to
+   * clear to replace the first pass: see the re-gate below.
    */
   private async retryLqaFailure(args: {
     runId: string;
@@ -5328,6 +5344,7 @@ export class TranslationEngine {
     examples?: TranslationJob['examples'];
     originalText: string;
     lqaResult: import('@zercade-dev/narn-shared').LQAResult;
+    reason: 'failed' | 'overflow';
     metricsModel: string | null;
     signal?: AbortSignal;
     project?: Project;
@@ -5349,6 +5366,7 @@ export class TranslationEngine {
       examples,
       originalText,
       lqaResult,
+      reason,
       metricsModel,
       signal,
       project,
@@ -5419,8 +5437,47 @@ export class TranslationEngine {
         translatedText: retryRestored,
         rawResponse: retryModuleResult.rawResponse,
       };
+      // The retry's own verdict has to be in hand BEFORE the write, because it
+      // is what decides whether the write happens at all. A gate-failure retry
+      // is taken unconditionally (the corrective pass is the best text the
+      // module will give for that entry), but an overflow retry only earns the
+      // overwrite by coming back both clean and within the limit: a
+      // still-too-long replacement is no better than the text it would destroy,
+      // so the first pass stands — exactly as it does when no retry runs.
+      const retryLqaResult = await this.lqaGate(
+        entry,
+        retryResult,
+        projectId,
+        targetLanguage,
+        retryMaskIssues,
+      );
+      if (reason === 'overflow' && !(retryLqaResult?.passed === true && !retryLqaResult.overflow)) {
+        // The first pass keeps the entry, so its verdict has to go back onto it
+        // — the gate call above stored the rejected attempt's in its place, and
+        // a verdict describing text that is not the stored text is a lie the UI
+        // reads. Recomputed from the masked first-pass output exactly as the
+        // first pass computed it, so this restores that verdict rather than an
+        // approximation of it.
+        await this.lqaGate(
+          entry,
+          {
+            entryId: entry.id,
+            targetLanguage,
+            translatedText: restoreFinal(
+              entry.sourceText,
+              originalText,
+              plan,
+              glossaryById,
+              targetLanguage,
+            ),
+          },
+          projectId,
+          targetLanguage,
+          maskDiagnosticsToIssues(verifyMaskedTranslation(originalText, plan)),
+        );
+        return { outcome: 'accepted-original' };
+      }
       await this.persistResult(projectId, entry, targetLanguage, retryResult, decision, runId);
-      await this.lqaGate(entry, retryResult, projectId, targetLanguage, retryMaskIssues);
       // No TM auto-record — only approved translations are written to the memory.
       return {
         outcome: 'persisted',
