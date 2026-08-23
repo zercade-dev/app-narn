@@ -53,6 +53,9 @@ export function hasStock(bucket: BucketView, group: JobGroup): boolean {
  * within seconds, so {@link bucketResumeAt} must defer to `minuteResetAt`,
  * never fall through to the day-scale `nextResetAt`.
  */
+/** Below this many minute-tokens no real request fits, so the bucket is not spendable this minute. */
+export const MIN_MINUTE_TOKENS_FLOOR = 200;
+
 export function hasMinuteHeadroom(bucket: BucketView): boolean {
   const rpm = Math.min(
     bucket.remainingMinuteRequests ?? Infinity,
@@ -61,7 +64,7 @@ export function hasMinuteHeadroom(bucket: BucketView): boolean {
   if (rpm < 1) return false;
   // tpm is best-effort: spend is only known after the call, so this bounds a
   // runaway but cannot stop one oversized batch overshooting the ceiling.
-  return (bucket.remainingMinuteTokens ?? Infinity) > 0;
+  return (bucket.remainingMinuteTokens ?? Infinity) >= MIN_MINUTE_TOKENS_FLOOR;
 }
 
 /**

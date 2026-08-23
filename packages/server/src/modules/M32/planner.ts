@@ -9,6 +9,7 @@
  */
 import type { Assignment, BucketView, DifficultyBand, JobGroup, RunPlan } from './types.js';
 import { bucketResumeAt, selectBucket, type Selection } from './selector.js';
+import { projectedRequestTokens } from './scoring.js';
 
 export interface PlanOptions {
   now: number;
@@ -53,6 +54,8 @@ function spendAssignment(
   degraded?: Assignment['degraded'],
 ): void {
   const { bucket, batchSize, estimatedRequests } = selection;
+  let groupChars = 0;
+  for (const job of group.jobs) groupChars += job.sourceText.length;
   plan.assignments.push({
     group,
     bucketKey: bucket.bucketKey,
@@ -73,6 +76,18 @@ function spendAssignment(
     bucket.remainingMinuteRequests = Math.max(
       0,
       bucket.remainingMinuteRequests - estimatedRequests,
+    );
+  }
+  // Tokens are per-bucket, with no pool-wide sibling fold: a shared rpm pool
+  // caps request counts across a provider's models, but each model still has
+  // its own tokens-per-minute ceiling.
+  if (bucket.remainingMinuteTokens !== undefined) {
+    const avgChars = group.jobs.length === 0 ? 0 : groupChars / group.jobs.length;
+    const requestChars = Math.round(avgChars * batchSize);
+    bucket.remainingMinuteTokens = Math.max(
+      0,
+      bucket.remainingMinuteTokens -
+        projectedRequestTokens(bucket, requestChars) * estimatedRequests,
     );
   }
   // An account-wide pool is spent by whichever of its models is used, so the
@@ -104,9 +119,7 @@ function spendAssignment(
     }
   }
   if (bucket.remainingChars !== undefined) {
-    let chars = 0;
-    for (const job of group.jobs) chars += job.sourceText.length;
-    bucket.remainingChars = Math.max(0, bucket.remainingChars - chars);
+    bucket.remainingChars = Math.max(0, bucket.remainingChars - groupChars);
   }
 }
 
