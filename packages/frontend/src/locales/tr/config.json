@@ -404,6 +404,10 @@
         "name": "Satır sonu eşliği",
         "description": "Gerçek satır sonları veya \\n kaçış dizileri kaynaktan farklı olan çevirileri bildirir — bozuk satır sonları oyun içinde yanlış görünür."
       },
+      "html-entity": {
+        "name": "HTML varlığı",
+        "description": "Çeviride bulunan, kaynakta olmayan HTML varlıklarını bildirir — bunlar oyun içinde temsil ettikleri karakter yerine düz metin olarak görünür."
+      },
       "end-punctuation": {
         "name": "Bitiş noktalaması",
         "description": "Kaynaktan farklı olan bitiş noktalama işaretlerini, dil başına eşdeğerlerini gözeterek bildirir (ör. CJK tam genişlikli işaretler)."

@@ -405,6 +405,10 @@
         "name": "Parité des sauts de ligne",
         "description": "Signale les traductions dont les échappements \\n littéraux ou les sauts de ligne réels diffèrent de la source ; des sauts cassés s'affichent mal en jeu."
       },
+      "html-entity": {
+        "name": "Entité HTML",
+        "description": "Signale les entités HTML présentes dans la traduction et absentes de la source ; elles s'affichent comme du texte littéral dans le jeu au lieu du caractère qu'elles représentent."
+      },
       "end-punctuation": {
         "name": "Ponctuation finale",
         "description": "Signale une ponctuation finale différente de la source, avec des équivalents par langue (p. ex. signes CJC pleine chasse)."

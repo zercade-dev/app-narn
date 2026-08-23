@@ -405,6 +405,10 @@
         "name": "Parità delle interruzioni di riga",
         "description": "Segnala le traduzioni le cui sequenze \\n o interruzioni di riga reali differiscono dall'origine: le interruzioni di riga danneggiate vengono visualizzate male nel gioco."
       },
+      "html-entity": {
+        "name": "Entità HTML",
+        "description": "Segnala le entità HTML nella traduzione che l'origine non ha: vengono visualizzate come testo letterale nel gioco anziché come il carattere che rappresentano."
+      },
       "end-punctuation": {
         "name": "Punteggiatura finale",
         "description": "Segnala la punteggiatura finale diversa da quella dell'origine, con gli equivalenti previsti per ogni lingua (ad es. i segni a larghezza intera CJK)."

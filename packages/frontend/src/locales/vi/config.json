@@ -398,6 +398,10 @@
         "name": "Trùng khớp ngắt dòng",
         "description": "Báo vấn đề với những bản dịch có ký tự thoát \\n hoặc ngắt dòng thật khác với văn bản nguồn — ngắt dòng hỏng sẽ hiển thị sai trong trò chơi."
       },
+      "html-entity": {
+        "name": "Thực thể HTML",
+        "description": "Báo vấn đề với các thực thể HTML có trong bản dịch mà văn bản nguồn không có — chúng sẽ hiển thị dưới dạng văn bản thuần thay vì ký tự mà chúng đại diện."
+      },
       "end-punctuation": {
         "name": "Dấu câu kết thúc",
         "description": "Báo vấn đề với dấu câu kết thúc khác với văn bản nguồn, có xét các dấu tương đương của từng ngôn ngữ (ví dụ dấu toàn rộng của CJK)."

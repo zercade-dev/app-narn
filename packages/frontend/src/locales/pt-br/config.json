@@ -405,6 +405,10 @@
         "name": "Paridade de quebras de linha",
         "description": "Aponta traduções cujos escapes literais \\n ou quebras de linha reais diferem da origem — quebras de linha danificadas são exibidas incorretamente no jogo."
       },
+      "html-entity": {
+        "name": "Entidade HTML",
+        "description": "Aponta entidades HTML na tradução que não existem na origem — elas aparecem como texto literal no jogo em vez do caractere que representam."
+      },
       "end-punctuation": {
         "name": "Pontuação final",
         "description": "Aponta a pontuação final que difere da origem, com equivalências por idioma (por exemplo, os sinais de largura plena do CJK)."

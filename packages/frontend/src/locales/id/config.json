@@ -398,6 +398,10 @@
         "name": "Paritas pemisah baris",
         "description": "Menandai terjemahan yang escape \\n literal atau pemisah baris sungguhannya berbeda dari sumber — pemisah baris yang rusak tampil salah di dalam gim."
       },
+      "html-entity": {
+        "name": "Entitas HTML",
+        "description": "Menandai entitas HTML dalam terjemahan yang tidak ada di sumber — entitas ini tampil sebagai teks harfiah di dalam gim, bukan karakter yang diwakilinya."
+      },
       "end-punctuation": {
         "name": "Tanda baca akhir",
         "description": "Menandai tanda baca penutup yang berbeda dari sumber, dengan padanan per bahasa (misalnya tanda lebar penuh CJK)."

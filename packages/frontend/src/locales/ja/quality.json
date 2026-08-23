@@ -35,6 +35,7 @@
     "number-parity": "数字の一致",
     "whitespace-parity": "空白の一致",
     "line-break-parity": "改行の一致",
+    "html-entity": "HTMLエンティティ",
     "end-punctuation": "文末の句読点",
     "double-spacing": "連続する空白",
     "double-words": "単語の重複",

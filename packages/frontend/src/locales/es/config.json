@@ -405,6 +405,10 @@
         "name": "Paridad de saltos de línea",
         "description": "Señala traducciones cuyos escapes \\n literales o saltos de línea reales difieren del original; los saltos rotos se muestran mal en el juego."
       },
+      "html-entity": {
+        "name": "Entidad HTML",
+        "description": "Señala entidades HTML en la traducción que el original no tiene; se muestran como texto literal en el juego en lugar del carácter que representan."
+      },
       "end-punctuation": {
         "name": "Puntuación final",
         "description": "Señala puntuación final que difiere del original, con equivalentes por idioma (p. ej. marcas CJK de ancho completo)."

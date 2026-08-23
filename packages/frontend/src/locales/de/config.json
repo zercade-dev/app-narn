@@ -404,6 +404,10 @@
         "name": "Zeilenumbruchparität",
         "description": "Markiert Übersetzungen, deren literale \\n-Escapes oder echte Zeilenumbrüche vom Quelltext abweichen — kaputte Zeilenumbrüche werden im Spiel falsch dargestellt."
       },
+      "html-entity": {
+        "name": "HTML-Entität",
+        "description": "Markiert HTML-Entitäten in der Übersetzung, die der Quelltext nicht hat — sie werden im Spiel als reiner Text angezeigt statt als das Zeichen, das sie darstellen."
+      },
       "end-punctuation": {
         "name": "Schlusszeichensetzung",
         "description": "Markiert Satzzeichen am Ende, die vom Quelltext abweichen, mit sprachspezifischen Entsprechungen (z. B. CJK-Zeichen voller Breite)."

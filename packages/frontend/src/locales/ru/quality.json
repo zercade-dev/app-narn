@@ -35,6 +35,7 @@
     "number-parity": "Соответствие чисел",
     "whitespace-parity": "Соответствие пробелов",
     "line-break-parity": "Соответствие переносов строк",
+    "html-entity": "HTML-сущность",
     "end-punctuation": "Конечная пунктуация",
     "double-spacing": "Двойные пробелы",
     "double-words": "Двойные слова",

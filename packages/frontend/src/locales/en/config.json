@@ -404,6 +404,10 @@
         "name": "Line-break parity",
         "description": "Flags translations whose literal \\n escapes or real line breaks differ from the source — broken line breaks render wrong in-game."
       },
+      "html-entity": {
+        "name": "HTML entity",
+        "description": "Flags HTML entities in the translation that the source does not have — they render as literal text in-game instead of the character they represent."
+      },
       "end-punctuation": {
         "name": "End punctuation",
         "description": "Flags terminal punctuation that differs from the source, with per-language equivalents (e.g. CJK fullwidth marks)."
