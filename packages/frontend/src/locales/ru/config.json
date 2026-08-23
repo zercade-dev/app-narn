@@ -219,7 +219,7 @@
     "loading": "Загрузка состояния NARN Freeway…",
     "loadFailed": "Не удалось загрузить состояние NARN Freeway: {{message}}",
     "generatedAtLabel": "Обновлено {{time}}",
-    "vaultLockedNotice": "Credential vault is locked — Freeway providers show as missing keys until you unlock it.",
+    "vaultLockedNotice": "Хранилище учетных данных заблокировано — поставщики Freeway будут отображаться без ключа, пока оно не будет разблокировано.",
     "sourcesTitle": "Бесплатные поставщики",
     "keyPresent": "Ключ добавлен",
     "keyMissing": "Ключа пока нет",

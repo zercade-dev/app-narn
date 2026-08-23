@@ -209,7 +209,7 @@
     "loading": "Chargement de l'état de NARN Freeway…",
     "loadFailed": "Échec du chargement de l'état de NARN Freeway : {{message}}",
     "generatedAtLabel": "Mis à jour {{time}}",
-    "vaultLockedNotice": "Le coffre d'identifiants est verrouillé — les fournisseurs Freeway apparaîtront sans clé tant qu'il n'est pas déverrouillé.",
+    "vaultLockedNotice": "Le coffre de credentials est verrouillé — les fournisseurs Freeway apparaîtront sans clé jusqu'à ce que vous le déverrouilliez.",
     "sourcesTitle": "Fournisseurs gratuits",
     "keyPresent": "Clé ajoutée",
     "keyMissing": "Pas encore de clé",

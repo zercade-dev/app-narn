@@ -79,7 +79,7 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | reasoning effort |  |  |
 | routing rule |  |  |
 | rule group |  |  |
-| credential vault |  |  |
+| credential vault | bóveda de credenciales | Feminine. Full form for naming the term (`vault:statusLabel` "Bóveda de credenciales", `vault:unlockTitle` "Desbloquear bóveda de credenciales", `vault:createTitle` "Crear bóveda de credenciales"). Shortened to "la bóveda" where the context is unambiguous — `config:credentialsVaultLockedChip` "Bóveda bloqueada", `config:credentialsUnlockButton` "Desbloquear bóveda", `console:vaultLocked` "Bóveda bloqueada". The standalone status word is feminine too: "Bloqueada", "Desbloqueada". |
 | credential |  |  |
 | LQA |  |  |
 | quality gate |  |  |

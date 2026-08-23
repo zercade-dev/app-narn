@@ -204,7 +204,7 @@
     "loading": "NARN Freeway 상태를 불러오는 중…",
     "loadFailed": "NARN Freeway 상태를 불러오지 못했어요: {{message}}",
     "generatedAtLabel": "{{time}} 업데이트됨",
-    "vaultLockedNotice": "Credential vault is locked — Freeway providers show as missing keys until you unlock it.",
+    "vaultLockedNotice": "자격 증명 보관함이 잠겨 있어요 — 잠금을 해제할 때까지 Freeway 제공업체는 키 없음으로 표시돼요.",
     "sourcesTitle": "무료 제공업체",
     "keyPresent": "키 추가됨",
     "keyMissing": "아직 키 없음",
