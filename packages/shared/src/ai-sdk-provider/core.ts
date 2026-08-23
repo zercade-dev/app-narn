@@ -224,7 +224,7 @@ export function parseRetryDelayFromMessage(message: string): number | undefined 
 const LEAKED_ENTITY_RE = /&(?:(nbsp|amp|lt|gt|quot|apos)|#(\d{1,7})|#x([0-9a-fA-F]{1,6}));/g;
 
 const NAMED_ENTITY_MAP: Record<string, string> = {
-  nbsp: ' ',
+  nbsp: '\u00a0',
   amp: '&',
   lt: '<',
   gt: '>',
