@@ -88,14 +88,23 @@ const PER_MINUTE_LIMIT_RE = /\bper[-_\s]?min(ute)?s?\b/i;
  */
 const CAMEL_MINUTE_QUOTA_RE = /PerMinute/;
 
+/** A camelCase PerDay quota id (Google style) — the id names this limit's window. */
+const CAMEL_DAY_QUOTA_RE = /PerDay/;
+
+/** Day-scale prose ("per day", "daily") — explicit, authoritative. */
+const DAY_PROSE_RE = /\bper[-_\s]?day\b|\bdaily\b/i;
+
 /**
- * Day-scale quota vocabulary that overrides any short provider Retry-After:
- * Google's daily 429 carries both "exceeded your current quota" and a
- * misleading "retry in Ns", and honoring the seconds re-offers a bucket that
- * is dead until the day window rolls.
+ * Generic quota boilerplate that appears on Google 429s of EVERY scale
+ * ("exceeded your current quota", "check your plan and billing"). Alone it
+ * still day-parks (a genuinely daily 429 carries a misleading short
+ * "retry in Ns"), but a stated `limit: N` matching the bucket's rpm
+ * reclassifies it as minute-scale first.
  */
-const DAY_SCALE_QUOTA_RE =
-  /\bper[-_\s]?day\b|\bdaily\b|exceeded\s+your[\s\w]*\s+quota|check your plan and billing/i;
+const GENERIC_QUOTA_RE = /exceeded\s+your[\s\w]*\s+quota|check your plan and billing/i;
+
+/** The violated limit's stated value ("limit: 5"), when the provider names it. */
+const STATED_LIMIT_RE = /\blimit:?\s*(\d+)\b/i;
 
 /**
  * How long a rate-limited Freeway bucket cools. A limit the provider named as
@@ -103,16 +112,31 @@ const DAY_SCALE_QUOTA_RE =
  * (below the floor), so honoring a short one would put the bucket back before
  * the minute window has certainly rolled over. A limit whose message names a
  * day-scale quota is dead for the day regardless of any Retry-After it
- * carries. Any other rate limit uses the provider's own `Retry-After`, or
- * undefined — which falls back to the bucket's next day-scale reset.
+ * carries. Otherwise, when the caller passes the bucket's declared `rpm`/
+ * `rpd` and the 429's prose states a `limit: N` naming neither window
+ * explicitly, a stated limit equal to `rpm` (and not also equal to `rpd`)
+ * reclassifies generic quota boilerplate as minute-scale; a stated limit
+ * equal to `rpd` confirms the day-scale park. Any other rate limit uses the
+ * provider's own `Retry-After`, or undefined — which falls back to the
+ * bucket's next day-scale reset.
  */
-export function rateLimitCooldownMs(err: unknown): number | undefined {
+export function rateLimitCooldownMs(
+  err: unknown,
+  limits?: { rpm?: number; rpd?: number },
+): number | undefined {
   const retryAfter = retryAfterMsOf(err);
   const message = err instanceof Error ? err.message : String(err);
   if (PER_MINUTE_LIMIT_RE.test(message) || CAMEL_MINUTE_QUOTA_RE.test(message)) {
     return Math.max(retryAfter ?? 0, PER_MINUTE_RATE_LIMIT_COOLDOWN_MS);
   }
-  if (DAY_SCALE_QUOTA_RE.test(message)) return undefined;
+  if (DAY_PROSE_RE.test(message) || CAMEL_DAY_QUOTA_RE.test(message)) return undefined;
+  const stated = STATED_LIMIT_RE.exec(message);
+  if (stated && limits !== undefined && limits.rpm !== limits.rpd) {
+    const n = Number(stated[1]);
+    if (n === limits.rpm) return Math.max(retryAfter ?? 0, PER_MINUTE_RATE_LIMIT_COOLDOWN_MS);
+    if (n === limits.rpd) return undefined;
+  }
+  if (GENERIC_QUOTA_RE.test(message)) return undefined;
   return retryAfter;
 }
 
