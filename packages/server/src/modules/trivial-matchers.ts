@@ -49,23 +49,29 @@ export const hexColorMatcher: TrivialMatcher = {
 };
 
 /**
- * Matches strings that are ONLY markup: after stripping <tags> and {placeholders}
- * (nested up to a bounded depth), no Unicode letter remains — pure color
- * wrappers, separators, and placeholder plumbing that a model can only echo
- * back or corrupt. Anything with real words around the markup passes through.
+ * Matches strings that are ONLY markup: a single left-to-right scan tracks
+ * separate nesting depths for <tags> and {placeholders} (a stray closer never
+ * takes a depth below zero) and rejects the moment a Unicode letter appears
+ * while both depths are zero — pure color wrappers, separators, and
+ * placeholder plumbing that a model can only echo back or corrupt. A run that
+ * ends with either depth still open is unbalanced and also passes through.
+ * Decided without ever materializing a stripped copy of the string.
  */
 export const markupOnlyMatcher: TrivialMatcher = {
   id: 'trivial-markup-only',
   match(src) {
     const trimmed = src.trim();
     if (trimmed === '' || !/[<{]/.test(trimmed)) return null;
-    let stripped = trimmed;
-    for (let i = 0; i < 10; i++) {
-      const next = stripped.replace(/<[^<>]*>/g, '').replace(/\{[^{}]*\}/g, '');
-      if (next === stripped) break;
-      stripped = next;
+    let angleDepth = 0;
+    let braceDepth = 0;
+    for (const ch of trimmed) {
+      if (ch === '<') angleDepth++;
+      else if (ch === '>') angleDepth = Math.max(0, angleDepth - 1);
+      else if (ch === '{') braceDepth++;
+      else if (ch === '}') braceDepth = Math.max(0, braceDepth - 1);
+      else if (angleDepth === 0 && braceDepth === 0 && /\p{L}/u.test(ch)) return null;
     }
-    return /\p{L}/u.test(stripped) ? null : src;
+    return angleDepth === 0 && braceDepth === 0 ? src : null;
   },
 };
 
