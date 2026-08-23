@@ -242,6 +242,7 @@ export {
   toRateLimitError,
   rethrowIfAuthOrRateLimit,
   throwIfAllChunksFailed,
+  decodeLeakedHtmlEntities,
   AUTH_401_MESSAGE_RE,
   RATE_LIMIT_MESSAGE_RE,
   unwrapRetryError,

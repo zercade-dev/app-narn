@@ -221,6 +221,42 @@ export function parseRetryDelayFromMessage(message: string): number | undefined 
   return m ? Math.ceil(parseFloat(m[1]) * 1000) : undefined;
 }
 
+const LEAKED_ENTITY_RE = /&(?:(nbsp|amp|lt|gt|quot|apos)|#(\d{1,7})|#x([0-9a-fA-F]{1,6}));/g;
+
+const NAMED_ENTITY_MAP: Record<string, string> = {
+  nbsp: ' ',
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+};
+
+/**
+ * Some providers (observed: Gemini flash-lite on French) HTML-escape their
+ * output, leaking literal `&nbsp;` / `&#39;` into game strings. Decode a
+ * bounded entity set — but only occurrences the SOURCE text does not itself
+ * contain, so a source legitimately holding `&amp;` round-trips verbatim.
+ * Control-range and surrogate code points stay encoded (never emit them).
+ */
+export function decodeLeakedHtmlEntities(text: string, sourceText: string): string {
+  if (!text.includes('&')) return text;
+  return text.replace(LEAKED_ENTITY_RE, (match, named, dec, hex) => {
+    if (sourceText.includes(match)) return match;
+    if (named !== undefined) return NAMED_ENTITY_MAP[named] ?? match;
+    const code = dec !== undefined ? Number(dec) : parseInt(hex as string, 16);
+    if (
+      !Number.isFinite(code) ||
+      code < 0x20 ||
+      code > 0x10ffff ||
+      (code >= 0xd800 && code <= 0xdfff)
+    ) {
+      return match;
+    }
+    return String.fromCodePoint(code);
+  });
+}
+
 /**
  * Recasts a provider error as a shared RateLimitError (carrying the parsed
  * Retry-After delay) when it is a 429/rate-limit failure, so M9's retry loop
@@ -881,7 +917,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     return {
       entryId: job.entryId,
       targetLanguage: job.targetLanguage,
-      translatedText: parsed[0]?.trim() ?? '',
+      translatedText: decodeLeakedHtmlEntities(parsed[0]?.trim() ?? '', job.sourceText),
       usedGlossaryId: job.glossary && job.glossary.length > 0 ? job.glossaryId : undefined,
       usage: toTranslationUsage(
         usage,
@@ -921,7 +957,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       batch.map((job, i) => ({
         entryId: job.entryId,
         targetLanguage: job.targetLanguage,
-        translatedText: parsed[i]?.trim() ?? '',
+        translatedText: decodeLeakedHtmlEntities(parsed[i]?.trim() ?? '', job.sourceText),
         usedGlossaryId: job.glossary && job.glossary.length > 0 ? job.glossaryId : undefined,
       })),
       batchUsage,
@@ -1065,7 +1101,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       batch.map((job, i) => ({
         entryId: job.entryId,
         targetLanguage: job.targetLanguage,
-        translatedText: parsed[i]?.trim() ?? '',
+        translatedText: decodeLeakedHtmlEntities(parsed[i]?.trim() ?? '', job.sourceText),
         usedGlossaryId: job.glossary && job.glossary.length > 0 ? job.glossaryId : undefined,
       })),
       batchUsage,
@@ -1249,9 +1285,10 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       // \n) AS the translation. Fall back to the fence-stripped payload only
       // when the response isn't a well-formed single-item array.
       const parsedRetry = parseBatchResponse(text, [job]);
-      const translatedText = (
-        parsedRetry ? (parsedRetry[0] ?? '') : extractJsonPayload(text)
-      ).trim();
+      const translatedText = decodeLeakedHtmlEntities(
+        (parsedRetry ? (parsedRetry[0] ?? '') : extractJsonPayload(text)).trim(),
+        job.sourceText,
+      );
       // The retry sends the system prompt plus the whole message history
       // (original ask + prior attempt + feedback) — all of it is input.
       const promptText = system + user + assistantContent + feedbackContent;
