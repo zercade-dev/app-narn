@@ -408,7 +408,7 @@ export function defaultModelForProvider(provider: ProviderType): string {
     openai: 'gpt-4o',
     anthropic: 'claude-3-5-sonnet-20241022',
     openrouter: 'openai/gpt-4o-mini',
-    groq: 'llama-3.3-70b-versatile',
+    groq: 'openai/gpt-oss-120b',
     'openai-compatible': 'gpt-4o',
     'anthropic-compatible': 'claude-3-5-sonnet-20241022',
   };

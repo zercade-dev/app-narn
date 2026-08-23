@@ -33,9 +33,26 @@ export interface FreeTierModel {
   limits: FreeTierLimit[];
   /** Recommended max strings per request for a reliable model of this tier. */
   maxBatch: number;
+  /**
+   * Source characters this model reliably translates in ONE request. Curation
+   * must respect the provider's output cap (translated output is roughly
+   * input-sized) and any tpm limit. Absent: legacy flat-maxBatch sizing.
+   */
+  charBudget?: number;
+  /**
+   * Hard cap on strings per request no matter how short they are — the
+   * counting/parse reliability limit. Absent: `maxBatch` is the cap.
+   */
+  batchCeiling?: number;
   contextLength?: number;
   /** Target languages this model is curated as weak at (selector demotes). */
   weakLanguages?: string[];
+  /** Benchmark-derived judged quality per registry language code (0-100). */
+  langScores?: Record<string, number>;
+  /** Benchmark-derived first-attempt compliance rate per language (0-1). */
+  langPassPriors?: Record<string, number>;
+  /** Languages this model must never serve (unusable/unsupported per benchmark). */
+  blockedLanguages?: string[];
 }
 
 export interface FreeTierProvider {
@@ -50,6 +67,12 @@ export interface FreeTierProvider {
   resetTimeZone: string;
   /** Authoritative usage endpoint, when the provider has one. */
   probe?: 'deepl-usage' | 'openrouter-key';
+  /**
+   * True when this provider's modules run the shared AI-SDK core and accept a
+   * mixed-target batch (one request, entries in different languages). The M9
+   * dispatcher only packs multi-language chunks for providers marked here.
+   */
+  supportsMixedBatch?: boolean;
   models: FreeTierModel[];
   /**
    * Account-wide limits shared across ALL of this provider's models (e.g. the

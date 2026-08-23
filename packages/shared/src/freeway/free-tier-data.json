@@ -3,6 +3,7 @@
   "providers": {
     "google": {
       "moduleId": "google",
+      "supportsMixedBatch": true,
       "resetTimeZone": "America/Los_Angeles",
       "models": [
         {
@@ -10,6 +11,8 @@
           "qualityTier": 4,
           "useStructuredOutput": true,
           "maxBatch": 30,
+          "charBudget": 24000,
+          "batchCeiling": 120,
           "contextLength": 1048576,
           "limits": [
             {
@@ -20,13 +23,47 @@
               "window": "rpd",
               "limit": 20
             }
-          ]
+          ],
+          "langScores": {
+            "de": 96,
+            "es": 99,
+            "fr": 98,
+            "id": 99,
+            "it": 99,
+            "ja": 100,
+            "ko": 100,
+            "pt-br": 99,
+            "ru": 98,
+            "th": 100,
+            "tr": 100,
+            "vi": 99,
+            "zh-hans": 100,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 1,
+            "es": 1,
+            "fr": 1,
+            "id": 1,
+            "it": 1,
+            "ja": 1,
+            "ko": 1,
+            "pt-br": 1,
+            "ru": 1,
+            "th": 1,
+            "tr": 1,
+            "vi": 1,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemini-flash-lite-latest",
           "qualityTier": 2,
           "useStructuredOutput": true,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "contextLength": 1048576,
           "limits": [
             {
@@ -37,13 +74,48 @@
               "window": "rpd",
               "limit": 500
             }
-          ]
+          ],
+          "langScores": {
+            "de": 83,
+            "es": 88,
+            "fr": 95,
+            "id": 95,
+            "it": 99,
+            "ja": 87,
+            "ko": 100,
+            "pt-br": 88,
+            "ru": 95,
+            "th": 98,
+            "tr": 95,
+            "vi": 100,
+            "zh-hans": 100,
+            "zh-hant": 99
+          },
+          "langPassPriors": {
+            "de": 0.88,
+            "es": 0.92,
+            "fr": 0.96,
+            "id": 0.96,
+            "it": 0.92,
+            "ja": 1,
+            "ko": 1,
+            "pt-br": 0.96,
+            "ru": 0.96,
+            "th": 0.88,
+            "tr": 1,
+            "vi": 0.5,
+            "zh-hans": 1,
+            "zh-hant": 1
+          },
+          "weakLanguages": ["vi"]
         },
         {
           "id": "gemma-4-31b-it",
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "contextLength": 262144,
           "limits": [
             {
@@ -54,13 +126,47 @@
               "window": "rpd",
               "limit": 14400
             }
-          ]
+          ],
+          "langScores": {
+            "de": 99,
+            "es": 100,
+            "fr": 100,
+            "id": 98,
+            "it": 99,
+            "ja": 100,
+            "ko": 100,
+            "pt-br": 99,
+            "ru": 100,
+            "th": 100,
+            "tr": 100,
+            "vi": 100,
+            "zh-hans": 100,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 0.83,
+            "es": 1,
+            "fr": 0.92,
+            "id": 1,
+            "it": 0.96,
+            "ja": 1,
+            "ko": 1,
+            "pt-br": 1,
+            "ru": 1,
+            "th": 0.92,
+            "tr": 1,
+            "vi": 1,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemma-4-26b-a4b-it",
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "contextLength": 262144,
           "limits": [
             {
@@ -71,13 +177,47 @@
               "window": "rpd",
               "limit": 14400
             }
-          ]
+          ],
+          "langScores": {
+            "de": 99,
+            "es": 98,
+            "fr": 100,
+            "id": 99,
+            "it": 98,
+            "ja": 100,
+            "ko": 100,
+            "pt-br": 100,
+            "ru": 100,
+            "th": 100,
+            "tr": 99,
+            "vi": 100,
+            "zh-hans": 99,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 1,
+            "es": 1,
+            "fr": 1,
+            "id": 1,
+            "it": 1,
+            "ja": 1,
+            "ko": 1,
+            "pt-br": 0.96,
+            "ru": 1,
+            "th": 1,
+            "tr": 1,
+            "vi": 1,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemini-3-flash-preview",
           "qualityTier": 3,
           "useStructuredOutput": true,
           "maxBatch": 30,
+          "charBudget": 24000,
+          "batchCeiling": 120,
           "contextLength": 1048576,
           "limits": [
             {
@@ -88,13 +228,47 @@
               "window": "rpd",
               "limit": 20
             }
-          ]
+          ],
+          "langScores": {
+            "de": 99,
+            "es": 98,
+            "fr": 97,
+            "id": 97,
+            "it": 99,
+            "ja": 100,
+            "ko": 99,
+            "pt-br": 98,
+            "ru": 99,
+            "th": 98,
+            "tr": 98,
+            "vi": 99,
+            "zh-hans": 100,
+            "zh-hant": 99
+          },
+          "langPassPriors": {
+            "de": 1,
+            "es": 0.96,
+            "fr": 0.92,
+            "id": 1,
+            "it": 0.96,
+            "ja": 1,
+            "ko": 0.96,
+            "pt-br": 0.96,
+            "ru": 1,
+            "th": 0.96,
+            "tr": 0.96,
+            "vi": 0.96,
+            "zh-hans": 1,
+            "zh-hant": 0.96
+          }
         },
         {
           "id": "gemini-3.6-flash",
           "qualityTier": 3,
           "useStructuredOutput": true,
           "maxBatch": 30,
+          "charBudget": 24000,
+          "batchCeiling": 120,
           "contextLength": 1048576,
           "limits": [
             {
@@ -105,13 +279,47 @@
               "window": "rpd",
               "limit": 20
             }
-          ]
+          ],
+          "langScores": {
+            "de": 97,
+            "es": 99,
+            "fr": 99,
+            "id": 99,
+            "it": 98,
+            "ja": 100,
+            "ko": 100,
+            "pt-br": 100,
+            "ru": 99,
+            "th": 100,
+            "tr": 98,
+            "vi": 100,
+            "zh-hans": 99,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 1,
+            "es": 1,
+            "fr": 1,
+            "id": 1,
+            "it": 1,
+            "ja": 1,
+            "ko": 1,
+            "pt-br": 1,
+            "ru": 1,
+            "th": 1,
+            "tr": 1,
+            "vi": 1,
+            "zh-hans": 0.96,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemini-3.5-flash",
           "qualityTier": 3,
           "useStructuredOutput": true,
           "maxBatch": 30,
+          "charBudget": 24000,
+          "batchCeiling": 120,
           "contextLength": 1048576,
           "limits": [
             {
@@ -122,13 +330,47 @@
               "window": "rpd",
               "limit": 20
             }
-          ]
+          ],
+          "langScores": {
+            "de": 96,
+            "es": 98,
+            "fr": 99,
+            "id": 98,
+            "it": 98,
+            "ja": 99,
+            "ko": 100,
+            "pt-br": 98,
+            "ru": 100,
+            "th": 100,
+            "tr": 99,
+            "vi": 99,
+            "zh-hans": 100,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 0.96,
+            "es": 0.96,
+            "fr": 1,
+            "id": 0.96,
+            "it": 0.96,
+            "ja": 0.96,
+            "ko": 1,
+            "pt-br": 0.96,
+            "ru": 1,
+            "th": 1,
+            "tr": 0.96,
+            "vi": 0.96,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "gemini-3.1-flash-lite",
           "qualityTier": 2,
           "useStructuredOutput": true,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "contextLength": 1048576,
           "limits": [
             {
@@ -139,12 +381,45 @@
               "window": "rpd",
               "limit": 500
             }
-          ]
+          ],
+          "langScores": {
+            "de": 97,
+            "es": 99,
+            "fr": 96,
+            "id": 96,
+            "it": 97,
+            "ja": 96,
+            "ko": 97,
+            "pt-br": 98,
+            "ru": 96,
+            "th": 98,
+            "tr": 97,
+            "vi": 99,
+            "zh-hans": 98,
+            "zh-hant": 98
+          },
+          "langPassPriors": {
+            "de": 0.88,
+            "es": 0.96,
+            "fr": 0.92,
+            "id": 0.92,
+            "it": 0.83,
+            "ja": 0.92,
+            "ko": 0.92,
+            "pt-br": 0.96,
+            "ru": 0.88,
+            "th": 0.88,
+            "tr": 0.96,
+            "vi": 0.92,
+            "zh-hans": 0.96,
+            "zh-hant": 0.96
+          }
         }
       ]
     },
     "openrouter": {
       "moduleId": "openrouter",
+      "supportsMixedBatch": true,
       "resetTimeZone": "UTC",
       "probe": "openrouter-key",
       "sharedLimits": [
@@ -163,6 +438,8 @@
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 25,
+          "charBudget": 16000,
+          "batchCeiling": 80,
           "contextLength": 1000000,
           "limits": [
             {
@@ -173,13 +450,47 @@
               "window": "rpd",
               "limit": 50
             }
-          ]
+          ],
+          "langScores": {
+            "de": 97,
+            "es": 100,
+            "fr": 94,
+            "id": 92,
+            "it": 100,
+            "ja": 100,
+            "ko": 100,
+            "pt-br": 100,
+            "ru": 98,
+            "th": 86,
+            "tr": 93,
+            "vi": 98,
+            "zh-hans": 100,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 0.96,
+            "es": 1,
+            "fr": 0.96,
+            "id": 0.96,
+            "it": 0.92,
+            "ja": 1,
+            "ko": 1,
+            "pt-br": 1,
+            "ru": 1,
+            "th": 0.92,
+            "tr": 0.96,
+            "vi": 0.96,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "nvidia/nemotron-3-super-120b-a12b:free",
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 25,
+          "charBudget": 16000,
+          "batchCeiling": 80,
           "contextLength": 262144,
           "limits": [
             {
@@ -190,13 +501,47 @@
               "window": "rpd",
               "limit": 50
             }
-          ]
+          ],
+          "langScores": {
+            "de": 97,
+            "es": 98,
+            "fr": 95,
+            "id": 94,
+            "it": 95,
+            "ja": 97,
+            "ko": 95,
+            "pt-br": 95,
+            "ru": 99,
+            "th": 94,
+            "tr": 87,
+            "vi": 89,
+            "zh-hans": 95,
+            "zh-hant": 93
+          },
+          "langPassPriors": {
+            "de": 0.83,
+            "es": 0.96,
+            "fr": 0.96,
+            "id": 1,
+            "it": 1,
+            "ja": 0.96,
+            "ko": 0.96,
+            "pt-br": 0.96,
+            "ru": 0.96,
+            "th": 0.92,
+            "tr": 0.92,
+            "vi": 0.96,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         },
         {
           "id": "google/gemma-4-26b-a4b-it:free",
           "qualityTier": 3,
           "useStructuredOutput": true,
           "maxBatch": 20,
+          "charBudget": 10000,
+          "batchCeiling": 50,
           "contextLength": 262144,
           "limits": [
             {
@@ -225,7 +570,39 @@
               "window": "monthly_chars",
               "limit": 500000
             }
-          ]
+          ],
+          "langScores": {
+            "de": 97,
+            "es": 99,
+            "fr": 96,
+            "id": 96,
+            "it": 98,
+            "ja": 96,
+            "ko": 97,
+            "pt-br": 97,
+            "ru": 94,
+            "th": 94,
+            "tr": 97,
+            "vi": 93,
+            "zh-hans": 97,
+            "zh-hant": 97
+          },
+          "langPassPriors": {
+            "de": 0.79,
+            "es": 0.83,
+            "fr": 0.83,
+            "id": 0.88,
+            "it": 0.79,
+            "ja": 1,
+            "ko": 1,
+            "pt-br": 0.92,
+            "ru": 0.88,
+            "th": 0.96,
+            "tr": 0.92,
+            "vi": 0.88,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         }
       ]
     },
@@ -237,6 +614,8 @@
           "id": "gpt-4o-mini",
           "qualityTier": 2,
           "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
           "limits": [
             {
               "window": "rpm",
@@ -252,6 +631,7 @@
     },
     "groq": {
       "moduleId": "groq",
+      "supportsMixedBatch": true,
       "resetTimeZone": "UTC",
       "models": [
         {
@@ -259,6 +639,8 @@
           "qualityTier": 3,
           "useStructuredOutput": false,
           "maxBatch": 15,
+          "charBudget": 4000,
+          "batchCeiling": 15,
           "contextLength": 131072,
           "limits": [
             {
@@ -269,28 +651,39 @@
               "window": "tpm",
               "limit": 8000
             }
-          ]
-        },
-        {
-          "id": "llama-3.3-70b-versatile",
-          "qualityTier": 2,
-          "useStructuredOutput": false,
-          "maxBatch": 20,
-          "contextLength": 131072,
-          "limits": [
-            {
-              "window": "rpm",
-              "limit": 30
-            },
-            {
-              "window": "rpd",
-              "limit": 1000
-            },
-            {
-              "window": "tpm",
-              "limit": 12000
-            }
-          ]
+          ],
+          "langScores": {
+            "de": 96,
+            "es": 98,
+            "fr": 97,
+            "id": 94,
+            "it": 96,
+            "ja": 100,
+            "ko": 97,
+            "pt-br": 95,
+            "ru": 95,
+            "th": 97,
+            "tr": 94,
+            "vi": 95,
+            "zh-hans": 98,
+            "zh-hant": 100
+          },
+          "langPassPriors": {
+            "de": 1,
+            "es": 0.92,
+            "fr": 0.96,
+            "id": 0.96,
+            "it": 1,
+            "ja": 1,
+            "ko": 1,
+            "pt-br": 0.96,
+            "ru": 0.88,
+            "th": 0.96,
+            "tr": 0.96,
+            "vi": 0.96,
+            "zh-hans": 1,
+            "zh-hant": 1
+          }
         }
       ]
     }

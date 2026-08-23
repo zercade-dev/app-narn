@@ -62,3 +62,7 @@ tmp.md
 
 # Runtime artifact: the Copilot model-discovery cache
 packages/server/copilot-models-cache.json
+
+# Freeway per-language benchmark: local-only working files (large, provider-call-derived)
+scripts/freeway-benchmark/corpus.local.json
+scripts/freeway-benchmark/results-detail.local.json

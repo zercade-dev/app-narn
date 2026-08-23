@@ -33,7 +33,19 @@ export interface BucketView {
   modelId: string;
   qualityTier: 1 | 2 | 3 | 4;
   maxBatch: number;
+  /** Snapshot charBudget (see FreeTierModel); absent → legacy flat sizing. */
+  charBudget?: number;
+  /** Snapshot batchCeiling (see FreeTierModel); absent → maxBatch caps. */
+  batchCeiling?: number;
   weakLanguages?: string[];
+  /** Snapshot langScores (see FreeTierModel); absent → unmeasured. */
+  langScores?: Record<string, number>;
+  /** Snapshot langPassPriors; absent → curated tier×band prior applies. */
+  langPassPriors?: Record<string, number>;
+  /** Snapshot blockedLanguages; never eligible for these target languages. */
+  blockedLanguages?: string[];
+  /** Snapshot provider supportsMixedBatch, threaded for the M9 packer. */
+  mixedBatch?: boolean;
   /**
    * Day-scale request stock: headroom in the rpd window. For char-only
    * providers the monthly window governs remainingChars instead, and

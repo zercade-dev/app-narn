@@ -7,6 +7,10 @@ import type {
   ModuleBatchMode,
   RoutingDecision,
 } from '@zercade-dev/narn-shared';
+import { difficultyBand } from '../M32/difficulty.js';
+import { toFreewayJob, type FreewayResolution } from '../M32/resolve.js';
+import { charCappedBatch } from '../M32/scoring.js';
+import type { Assignment, BucketView } from '../M32/types.js';
 
 /**
  * Reorders decisions so both members of an achievement pair (entries sharing
@@ -241,4 +245,160 @@ export function groupDecisions(
     }
   }
   return result;
+}
+
+/**
+ * One Freeway dispatch group after mixed-target packing: either a single
+ * assignment passed through untouched, or several same-(bucket, band)
+ * assignments merged into one mixed-target group.
+ */
+export interface PackedGroup {
+  decisions: RoutingDecision[];
+  bucketKey: string;
+  batchSize: number;
+  degraded?: Assignment['degraded'];
+  /** Distinct target languages, in first-appearance order — set ONLY on a merged (>=2 assignment) group. */
+  packedLanguages?: string[];
+}
+
+/** Distinct target languages of `decisions`, in first-appearance order. */
+function distinctLanguages(decisions: readonly RoutingDecision[]): string[] {
+  const languages: string[] = [];
+  for (const decision of decisions) {
+    if (!languages.includes(decision.targetLanguage)) languages.push(decision.targetLanguage);
+  }
+  return languages;
+}
+
+/**
+ * The per-batch dispatch overrides M9 applies from a group's FIRST decision
+ * (model + reasoning effort), as a partition key. `groupDecisions` splits on
+ * these; the packed path bypasses it, so a group that is not uniform in them
+ * must never be merged into one call — the first decision's values would
+ * silently govern the rest.
+ */
+function overrideKey(decisions: readonly RoutingDecision[]): string | undefined {
+  const first = decisions[0];
+  if (!first) return undefined;
+  const key = `${first.modelOverride ?? ''} ${first.reasoningEffortOverride ?? ''}`;
+  for (const decision of decisions) {
+    if (`${decision.modelOverride ?? ''} ${decision.reasoningEffortOverride ?? ''}` !== key) {
+      return undefined;
+    }
+  }
+  return key;
+}
+
+/**
+ * Merges the assignments a mixed-batch-capable bucket can serve in ONE request
+ * into shared mixed-target groups.
+ *
+ * Two assignments merge when they share a bucket AND a difficulty band, the
+ * bucket's provider declares `supportsMixedBatch`, neither relaxed its band
+ * floor (a degrade is that assignment's own accepted compromise — spreading it
+ * over another language would hand a second language a tier its own plan never
+ * agreed to), and both carry the same per-batch dispatch overrides. Everything
+ * else passes through untouched and in its original position; a merged group
+ * sits at its first member's position.
+ *
+ * The merged batch size is the smallest of the members' planned sizes, further
+ * capped by what the bucket's char budget can physically take for the merged
+ * job set — a size either member alone could afford is not automatically
+ * affordable for their union.
+ */
+export function packAssignedGroups(
+  assigned: FreewayResolution['assignedGroups'],
+  buckets: BucketView[],
+): PackedGroup[] {
+  const bucketByKey = new Map(buckets.map((bucket) => [bucket.bucketKey, bucket]));
+  /** Output groups, plus the bookkeeping a later member needs to re-size the merge. */
+  const slots: Array<{
+    packed: PackedGroup;
+    /** Smallest planned batch size among the members merged so far. */
+    minBatchSize: number;
+    languages: string[];
+  }> = [];
+  /** `<bucketKey> <band> <overrides>` -> index in `slots` of the group it merges into. */
+  const mergeSlots = new Map<string, number>();
+
+  for (const group of assigned) {
+    const first = group.decisions[0];
+    const bucket = bucketByKey.get(group.bucketKey);
+    const overrides = overrideKey(group.decisions);
+    if (
+      first !== undefined &&
+      group.degraded === undefined &&
+      bucket?.mixedBatch === true &&
+      overrides !== undefined
+    ) {
+      const mergeKey = `${group.bucketKey} ${difficultyBand(toFreewayJob(first))} ${overrides}`;
+      const index = mergeSlots.get(mergeKey);
+      const slot = index === undefined ? undefined : slots[index];
+      if (slot) {
+        slot.packed.decisions.push(...group.decisions);
+        slot.minBatchSize = Math.min(slot.minBatchSize, group.batchSize);
+        for (const language of distinctLanguages(group.decisions)) {
+          if (!slot.languages.includes(language)) slot.languages.push(language);
+        }
+        slot.packed.packedLanguages = slot.languages;
+        slot.packed.batchSize = Math.max(
+          1,
+          Math.min(
+            slot.minBatchSize,
+            // StringEntry carries `sourceText`, which is all the char cap reads.
+            charCappedBatch(
+              bucket,
+              slot.packed.decisions.map((decision) => decision.entry),
+            ),
+          ),
+        );
+        continue;
+      }
+      mergeSlots.set(mergeKey, slots.length);
+    }
+    slots.push({
+      packed: {
+        decisions: [...group.decisions],
+        bucketKey: group.bucketKey,
+        batchSize: group.batchSize,
+        ...(group.degraded ? { degraded: group.degraded } : {}),
+      },
+      minBatchSize: group.batchSize,
+      languages: distinctLanguages(group.decisions),
+    });
+  }
+
+  return slots.map((slot) => slot.packed);
+}
+
+/**
+ * Chunks a packed group into dispatch batches of at most `batchSize`
+ * decisions, preserving the input order — and with it the language blocks the
+ * assignments contributed, which the dispatcher's language-segment splits
+ * (unpack-on-deviation, capped re-chunks) rely on.
+ *
+ * Achievement pairs are co-located WITHIN each language block, never across
+ * one: the same entry translated to two target languages carries the same
+ * `achievementId`, so co-locating the whole mixed array would pull one
+ * language's member into another language's block and shred the contiguity.
+ * A pair always shares a target language, so nothing is lost by scoping it.
+ *
+ * Deliberately NOT `groupDecisions`: its language-mode partitioning would undo
+ * the merge this chunking exists to dispatch.
+ */
+export function chunkPackedDecisions(
+  decisions: RoutingDecision[],
+  batchSize: number,
+): RoutingDecision[][] {
+  if (decisions.length === 0) return [];
+  const size = Number.isFinite(batchSize) ? Math.max(1, Math.floor(batchSize)) : decisions.length;
+  const ordered: RoutingDecision[] = [];
+  let start = 0;
+  for (let i = 1; i <= decisions.length; i++) {
+    if (i === decisions.length || decisions[i].targetLanguage !== decisions[start].targetLanguage) {
+      ordered.push(...colocateAchievementPairs(decisions.slice(start, i)));
+      start = i;
+    }
+  }
+  return chunkArray(ordered, size);
 }

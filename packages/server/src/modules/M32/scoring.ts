@@ -27,11 +27,30 @@ const MIN_PASS = 0.3;
 const MAX_PASS = 0.995;
 
 /**
- * The curated first-attempt estimate, before any live evidence: the tier×band
- * prior, penalized for a curated weak language and for language hardness.
- * Unclamped — the clamp belongs to the posterior, not to its input.
+ * How much harder a band is than band 1 for a given tier, per the curated
+ * matrix. A measured per-language prior is a band-agnostic compliance rate
+ * over the benchmark corpus; multiplying by this factor re-imposes the band
+ * shape without re-imposing the language guesses the measurement replaces.
+ */
+export function bandFactor(tier: 1 | 2 | 3 | 4, band: DifficultyBand): number {
+  return PASS_PRIORS[tier][band - 1] / PASS_PRIORS[tier][0];
+}
+
+/**
+ * The first-attempt estimate, before any live per-language evidence. When the
+ * bucket carries a measured pass prior for this exact language (from the
+ * benchmark snapshot — no fallback across compound codes like zh-hans/
+ * zh-hant), that measured rate replaces the curated tier×band estimate
+ * outright, scaled by `bandFactor` to keep the band shape; the curated
+ * weak-language and language-hardness multipliers are guesses the
+ * measurement supersedes, so neither applies. Otherwise this is the curated
+ * tier×band prior, penalized for a curated weak language and for language
+ * hardness. Unclamped either way — the clamp belongs to the posterior in
+ * `effectivePassRate`, not to its input.
  */
 export function priorPassRate(bucket: BucketView, language: string, band: DifficultyBand): number {
+  const measured = bucket.langPassPriors?.[language];
+  if (measured !== undefined) return measured * bandFactor(bucket.qualityTier, band);
   let rate = PASS_PRIORS[bucket.qualityTier][band - 1];
   if (bucket.weakLanguages?.includes(language)) rate *= 0.85;
   return rate * (1 - 0.01 * languageHardness(language));
@@ -82,15 +101,119 @@ export function passRateClass(passRate: number): PassRateClass {
   return 2;
 }
 
-export function batchSizeFor(bucket: BucketView, passRate: number): number {
+/**
+ * Coarse judged-quality class for (bucket, language): 0 publishable (score
+ * ≥85), 1 usable / unmeasured (≥70 or no benchmark data), 2 measurably poor
+ * (<70). Three classes on purpose: quality only overrides the economics keys
+ * when the measured gap is real; ties fall through to scarcity as before.
+ * Exact-code lookup — zh-hans evidence never speaks for zh-hant.
+ */
+export function langQualityClass(
+  bucket: Pick<BucketView, 'langScores'>,
+  language: string,
+): 0 | 1 | 2 {
+  const score = bucket.langScores?.[language];
+  if (score === undefined) return 1;
+  if (score >= 85) return 0;
+  if (score >= 70) return 1;
+  return 2;
+}
+
+/**
+ * The request stock a bucket can actually spend: a provider with an
+ * account-wide pool caps every one of its buckets, so the usable figure is the
+ * tighter of this model's own headroom and the pool's. Every surface that
+ * reports or reasons about remaining requests must use this, or a drained pool
+ * reads as full on each sibling.
+ */
+export function effectiveRemainingRequests(
+  bucket: Pick<BucketView, 'remainingRequests' | 'poolRemainingRequests'>,
+): number {
+  return Math.min(bucket.remainingRequests, bucket.poolRemainingRequests ?? Infinity);
+}
+
+/**
+ * A group should fit within this share of a bucket's remaining day stock
+ * before batches grow past the comfort size: free requests are the scarce
+ * currency, so a group that would eat more than a quarter of what's left
+ * packs more strings per request instead.
+ */
+const SPEND_SHARE = 0.25;
+/**
+ * Remaining stock at or above this many times the comfort-size request count
+ * reads as abundant: requests are nearly free there, so a half-size batch
+ * buys parse/gate reliability at negligible quota cost.
+ */
+const ABUNDANCE_FACTOR = 40;
+/** Never shrink a comfort batch below this many strings. */
+const SHRINK_FLOOR = 4;
+
+function passRateDivisor(passRate: number): number {
   switch (passRateClass(passRate)) {
     case 0:
-      return bucket.maxBatch;
+      return 1;
     case 1:
-      return Math.max(1, Math.floor(bucket.maxBatch / 2));
+      return 2;
     default:
-      return Math.max(1, Math.floor(bucket.maxBatch / 4));
+      return 4;
   }
+}
+
+/**
+ * The char-derived per-request cap for THESE jobs on THIS bucket — how many
+ * of them fit one reliable request, ignoring scarcity/abundance/pass-rate.
+ * Those size the PLANNED batch; this caps what a bucket can physically take
+ * when a batch sized for another bucket lands on it mid-dispatch.
+ */
+export function charCappedBatch(
+  bucket: Pick<BucketView, 'maxBatch' | 'charBudget' | 'batchCeiling'>,
+  jobs: readonly { sourceText: string }[],
+): number {
+  if (bucket.charBudget === undefined || jobs.length === 0) return bucket.maxBatch;
+  let totalChars = 0;
+  for (const job of jobs) totalChars += job.sourceText.length;
+  const avgChars = Math.max(1, Math.round(totalChars / jobs.length));
+  return Math.min(
+    Math.max(1, Math.floor(bucket.charBudget / avgChars)),
+    bucket.batchCeiling ?? bucket.maxBatch,
+  );
+}
+
+/**
+ * Strings per request for this bucket and group. Without a curated
+ * charBudget the size is the flat maxBatch (scaled by pass-rate class), as
+ * before. With one, the size is length-aware and scarcity-aware: the char
+ * budget bounds how many of THESE strings fit reliably in one request, the
+ * comfort size (maxBatch) is the unpressured default, scarcity grows batches
+ * toward the char-derived ceiling so a tight daily allowance covers more of
+ * the run, and abundance shrinks them for reliability since retries are
+ * nearly free there. The pass-rate divisor stacks on top in every case.
+ */
+export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: number): number {
+  const divisor = passRateDivisor(passRate);
+  if (bucket.charBudget === undefined) {
+    return Math.max(1, Math.floor(bucket.maxBatch / divisor));
+  }
+  const ceiling = bucket.batchCeiling ?? bucket.maxBatch;
+  const jobs = group.jobs.length;
+  let base: number;
+  if (jobs === 0) {
+    base = Math.min(bucket.maxBatch, ceiling);
+  } else {
+    const sizeByChars = charCappedBatch(bucket, group.jobs);
+    const comfort = Math.min(bucket.maxBatch, sizeByChars);
+    const remaining = effectiveRemainingRequests(bucket);
+    const requestsAtComfort = Math.ceil(jobs / comfort);
+    const affordable = Math.max(1, Math.floor(remaining * SPEND_SHARE));
+    if (requestsAtComfort > affordable) {
+      base = Math.min(Math.max(comfort, Math.ceil(jobs / affordable)), sizeByChars);
+    } else if (remaining >= ABUNDANCE_FACTOR * requestsAtComfort) {
+      base = Math.max(Math.min(SHRINK_FLOOR, comfort), Math.floor(comfort / 2));
+    } else {
+      base = comfort;
+    }
+  }
+  return Math.max(1, Math.floor(base / divisor));
 }
 
 export function estimatedRequests(jobCount: number, batchSize: number, passRate: number): number {
@@ -102,7 +225,7 @@ export function requestCost(
   group: JobGroup,
 ): { batchSize: number; estimatedRequests: number; requestsPerJob: number; passRate: number } {
   const passRate = effectivePassRate(bucket, group.targetLanguage, group.band);
-  const batchSize = batchSizeFor(bucket, passRate);
+  const batchSize = batchSizeFor(bucket, group, passRate);
   if (group.jobs.length === 0) {
     return { batchSize, estimatedRequests: 0, requestsPerJob: 0, passRate };
   }

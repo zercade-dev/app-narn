@@ -16,6 +16,9 @@ export {
   charCounts,
   DEFAULT_MAX_OUTPUT_TOKENS,
   GLOSSARY_SUGGEST_CHUNK_SIZE,
+  MIXED_PARSE_FAILURE_MESSAGE,
+  PARSE_FAILURE_MESSAGE,
+  isParseFailureMessage,
 } from './core.js';
 export type { CharCounts } from './core.js';
 export { runJudgeFeature, runSourceReviewFeature, attachUsageToFirst } from './llm-module.js';

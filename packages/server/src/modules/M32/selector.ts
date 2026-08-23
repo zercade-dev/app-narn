@@ -11,7 +11,14 @@
  * soonest; a reserve keeps top-tier headroom for escalation retries.
  */
 import type { BucketView, JobGroup } from './types.js';
-import { passRateClass, requestCost } from './scoring.js';
+import {
+  effectiveRemainingRequests,
+  langQualityClass,
+  passRateClass,
+  requestCost,
+} from './scoring.js';
+
+export { effectiveRemainingRequests };
 
 export interface Selection {
   bucket: BucketView;
@@ -23,19 +30,6 @@ function groupChars(group: JobGroup): number {
   let total = 0;
   for (const job of group.jobs) total += job.sourceText.length;
   return total;
-}
-
-/**
- * The request stock a bucket can actually spend: a provider with an
- * account-wide pool caps every one of its buckets, so the usable figure is the
- * tighter of this model's own headroom and the pool's. Every surface that
- * reports or reasons about remaining requests must use this, or a drained pool
- * reads as full on each sibling.
- */
-export function effectiveRemainingRequests(
-  bucket: Pick<BucketView, 'remainingRequests' | 'poolRemainingRequests'>,
-): number {
-  return Math.min(bucket.remainingRequests, bucket.poolRemainingRequests ?? Infinity);
 }
 
 /**
@@ -104,6 +98,7 @@ export function isEligibleIgnoringMinute(
   if (bucket.disabledReason !== undefined) return false;
   if (bucket.cooldownUntil !== undefined && bucket.cooldownUntil > now) return false;
   if (bucket.qualityTier < group.band) return false;
+  if (bucket.blockedLanguages?.includes(group.targetLanguage)) return false;
   if (group.band >= 3 && bucket.weakLanguages?.includes(group.targetLanguage)) return false;
   return hasStock(bucket, group);
 }
@@ -154,13 +149,29 @@ function isReservoir(bucket: BucketView): number {
  * stock scales that signal down by the abundance ratio, which runs 14x to
  * 720x across the shipped snapshot, so on cost alone a bucket with a
  * depressed effective rate on a large allowance outranks a healthier one on a
- * smaller allowance. This fires before any live feedback exists, too: a
- * bucket listed in `weakLanguages` for this language at band 1–2 stays
- * eligible (only band ≥ 3 excludes it) and lands a class worse purely on its
- * curated prior. The class key stops all of that structurally: a worse-class
- * bucket can never win on abundance. Within one class nothing changes, and
- * when every candidate ties on class, ordering falls through to scarcity, so
- * a hard language does not deadlock.
+ * smaller allowance. This fires before any live feedback exists, too: an
+ * unmeasured bucket listed in `weakLanguages` for this language at band 1–2
+ * stays eligible (only band ≥ 3 excludes it) and lands a class worse purely
+ * on its curated prior — once a bucket has a MEASURED `langPassPriors` entry
+ * for the language, `priorPassRate` uses that rate outright and the curated
+ * weak-language multiplier no longer applies, so this only degrades buckets
+ * with no live-benchmark evidence for the language. The class key stops all
+ * of that structurally: a worse-class bucket can never win on abundance.
+ * Within one class nothing changes, and when every candidate ties on class,
+ * ordering falls through to the next key, so a hard language does not
+ * deadlock.
+ *
+ * `langQualityClass` (below) sits directly beneath pass-rate class and above
+ * scarcity, for the same structural reason but a different signal: it reads
+ * JUDGED per-language benchmark scores (`langScores`) rather than the
+ * estimated gate-pass rate `passRateClass` reads, so a bucket that has never
+ * failed a live gate check for this language can still be outranked here
+ * once the benchmark has judged its actual output poor. A bucket with no
+ * `langScores` entry for the language lands in class 1 alongside merely
+ * adequate ones, so missing benchmark data is neutral — it neither penalizes
+ * nor rewards a candidate, and a bucket only gains ground on this key against
+ * a rival with a worse MEASURED score. Ties, including the common
+ * both-unmeasured case, fall through to scarcity exactly as before.
  *
  * Remaining keys: scarcity percent, then expected requests per job, then
  * soonest reset, then lowest adequate tier, then key.
@@ -177,11 +188,17 @@ export function rankCandidates(buckets: BucketView[], group: JobGroup, now: numb
   const classes = new Map(
     eligible.map((b) => [b.bucketKey, passRateClass(costs.get(b.bucketKey)!.passRate)]),
   );
+  const langClasses = new Map(
+    eligible.map((b) => [b.bucketKey, langQualityClass(b, group.targetLanguage)]),
+  );
   return [...eligible].sort((a, b) => {
     if (isReservoir(a) !== isReservoir(b)) return isReservoir(a) - isReservoir(b);
     const qa = classes.get(a.bucketKey)!;
     const qb = classes.get(b.bucketKey)!;
     if (qa !== qb) return qa - qb;
+    const la = langClasses.get(a.bucketKey)!;
+    const lb = langClasses.get(b.bucketKey)!;
+    if (la !== lb) return la - lb;
     const sa = scarcity.get(a.bucketKey)!;
     const sb = scarcity.get(b.bucketKey)!;
     if (sa !== sb) return sa - sb;
