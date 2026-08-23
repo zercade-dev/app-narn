@@ -35,6 +35,7 @@
     "number-parity": "Parité des nombres",
     "whitespace-parity": "Parité des espaces",
     "line-break-parity": "Parité des sauts de ligne",
+    "html-entity": "Entité HTML",
     "end-punctuation": "Ponctuation finale",
     "double-spacing": "Espaces doubles",
     "double-words": "Mots doublés",

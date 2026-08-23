@@ -209,6 +209,7 @@
     "loading": "Chargement de l'état de NARN Freeway…",
     "loadFailed": "Échec du chargement de l'état de NARN Freeway : {{message}}",
     "generatedAtLabel": "Mis à jour {{time}}",
+    "vaultLockedNotice": "Le coffre de credentials est verrouillé — les fournisseurs Freeway apparaîtront sans clé jusqu'à ce que vous le déverrouilliez.",
     "sourcesTitle": "Fournisseurs gratuits",
     "keyPresent": "Clé ajoutée",
     "keyMissing": "Pas encore de clé",
@@ -403,6 +404,10 @@
       "line-break-parity": {
         "name": "Parité des sauts de ligne",
         "description": "Signale les traductions dont les échappements \\n littéraux ou les sauts de ligne réels diffèrent de la source ; des sauts cassés s'affichent mal en jeu."
+      },
+      "html-entity": {
+        "name": "Entité HTML",
+        "description": "Signale les entités HTML présentes dans la traduction et absentes de la source ; elles s'affichent comme du texte littéral dans le jeu au lieu du caractère qu'elles représentent."
       },
       "end-punctuation": {
         "name": "Ponctuation finale",

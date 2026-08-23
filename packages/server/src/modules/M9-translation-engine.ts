@@ -118,6 +118,7 @@ import {
 import { chunkPackedDecisions, groupDecisions, packAssignedGroups } from './M9/packing.js';
 import {
   type BucketSourceDeps,
+  bucketRateLimits,
   coolBucket,
   defaultInstanceIdsFor,
   defaultModuleStatus,
@@ -3797,7 +3798,7 @@ export class TranslationEngine {
           await this.coolFreewayBucket(
             state.bucketKey,
             strikeAt,
-            rateLimitCooldownMs(err),
+            rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey)),
             deps,
             'pool',
           );
@@ -3826,7 +3827,7 @@ export class TranslationEngine {
           await this.coolFreewayBucket(
             state.bucketKey,
             now,
-            rateLimitCooldownMs(err),
+            rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey)),
             deps,
             'pool',
           );

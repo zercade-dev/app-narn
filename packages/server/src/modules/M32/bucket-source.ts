@@ -479,6 +479,20 @@ function resolveSnapshotBucket(bucketKey: string): ResolvedSnapshotBucket | unde
   return { provider, model, dayWindow };
 }
 
+/**
+ * Snapshot rpm/rpd for one bucket key — the scale context M9's 429
+ * classifier uses to read a provider's "limit: N" when the quota id names
+ * no window (see rateLimitCooldownMs).
+ */
+export function bucketRateLimits(bucketKey: string): { rpm?: number; rpd?: number } | undefined {
+  const resolved = resolveSnapshotBucket(bucketKey);
+  if (!resolved) return undefined;
+  return {
+    rpm: resolved.model.limits.find((l) => l.window === 'rpm')?.limit,
+    rpd: resolved.model.limits.find((l) => l.window === 'rpd')?.limit,
+  };
+}
+
 /** One model's day-scale and minute-scale windows, plus the usage already read for both. */
 interface ModelUsage {
   model: FreeTierModel;
@@ -688,6 +702,8 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
         minuteResetAt,
         poolRemainingMinuteRequests,
         nextResetAt: nextReset(dayWindow.kind, now, provider.resetTimeZone),
+        dayInputTokens: usage.inputTokens,
+        dayOutputTokens: usage.outputTokens,
         cooldownUntil: state?.cooldownUntil,
         // Bucket-keyed disable rows written by pre-upgrade code are
         // deliberately no longer read here — a credential mark lives under

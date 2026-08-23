@@ -209,6 +209,7 @@
     "loading": "Caricamento dello stato di NARN Freeway…",
     "loadFailed": "Impossibile caricare lo stato di NARN Freeway: {{message}}",
     "generatedAtLabel": "Aggiornato {{time}}",
+    "vaultLockedNotice": "La cassaforte delle credenziali è bloccata: i provider di Freeway compaiono senza chiave finché non la sblocchi.",
     "sourcesTitle": "Provider gratuiti",
     "keyPresent": "Chiave aggiunta",
     "keyMissing": "Ancora nessuna chiave",
@@ -403,6 +404,10 @@
       "line-break-parity": {
         "name": "Parità delle interruzioni di riga",
         "description": "Segnala le traduzioni le cui sequenze \\n o interruzioni di riga reali differiscono dall'origine: le interruzioni di riga danneggiate vengono visualizzate male nel gioco."
+      },
+      "html-entity": {
+        "name": "Entità HTML",
+        "description": "Segnala le entità HTML nella traduzione che l'origine non ha: vengono visualizzate come testo letterale nel gioco anziché come il carattere che rappresentano."
       },
       "end-punctuation": {
         "name": "Punteggiatura finale",

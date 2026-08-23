@@ -35,6 +35,7 @@
     "number-parity": "Paritas angka",
     "whitespace-parity": "Paritas spasi",
     "line-break-parity": "Paritas pemisah baris",
+    "html-entity": "Entitas HTML",
     "end-punctuation": "Tanda baca akhir",
     "double-spacing": "Spasi ganda",
     "double-words": "Kata ganda",

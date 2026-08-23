@@ -55,6 +55,7 @@ import {
 } from './M6-module-registry.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
 import {
+  bucketRateLimits,
   coolBucket,
   freewayBucketBaseModuleId,
   freewayModuleOverrides,
@@ -368,7 +369,7 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
             await coolBucket(
               bucketKey,
               Date.now(),
-              rateLimitCooldownMs(err),
+              rateLimitCooldownMs(err, bucketRateLimits(bucketKey)),
               this.freewayOverrides,
               'pool',
             ).catch(() => undefined);

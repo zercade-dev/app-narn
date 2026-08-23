@@ -78,7 +78,7 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | reasoning effort |  |  |
 | routing rule |  |  |
 | rule group |  |  |
-| credential vault |  |  |
+| credential vault | coffre de credentials | Masculine. **"credentials" is kept as an English loanword inside this specific compound**, lowercase, not translated to "identifiants" — that is what's already shipped three times (`vault:statusLabel` "Coffre de credentials", `vault:unlockTitle` "Déverrouiller le coffre de credentials", `vault:createTitle` "Créer le coffre de credentials") and is a deliberate exception to the ordinary "credential" → "identifiants" rendering used elsewhere in the same file (`config:credentialsMissingChip` "Identifiants manquants"). Shortened to "le coffre" where the context is unambiguous — `config:credentialsVaultLockedChip` "Coffre verrouillé", `config:credentialsUnlockButton` "Déverrouiller le coffre", `console:vaultLocked` "Coffre verrouillé". |
 | credential |  |  |
 | LQA |  |  |
 | quality gate |  |  |

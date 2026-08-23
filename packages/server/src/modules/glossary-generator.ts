@@ -48,7 +48,7 @@ import {
   type ModuleLogFn,
 } from './M9/module-selection.js';
 import { isRateLimitError, rateLimitCooldownMs } from './M9/errors.js';
-import { coolBucket, recordDispatch } from './M32/bucket-source.js';
+import { bucketRateLimits, coolBucket, recordDispatch } from './M32/bucket-source.js';
 import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import { resolveEffectiveModuleConfig } from './M19-global-config-store.js';
 
@@ -427,7 +427,7 @@ export async function generateGlossary(
         await coolBucket(
           binding.bucketKey,
           Date.now(),
-          rateLimitCooldownMs(err),
+          rateLimitCooldownMs(err, bucketRateLimits(binding.bucketKey)),
           undefined,
           'pool',
         ).catch(() => undefined);

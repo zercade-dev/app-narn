@@ -204,6 +204,7 @@
     "loading": "NARN Freeway 상태를 불러오는 중…",
     "loadFailed": "NARN Freeway 상태를 불러오지 못했어요: {{message}}",
     "generatedAtLabel": "{{time}} 업데이트됨",
+    "vaultLockedNotice": "자격 증명 보관함이 잠겨 있어요 — 잠금을 해제할 때까지 Freeway 제공업체는 키 없음으로 표시돼요.",
     "sourcesTitle": "무료 제공업체",
     "keyPresent": "키 추가됨",
     "keyMissing": "아직 키 없음",
@@ -396,6 +397,10 @@
       "line-break-parity": {
         "name": "줄바꿈 일치",
         "description": "리터럴 \\n 이스케이프나 실제 줄바꿈이 원문과 다른 번역을 표시해요. 줄바꿈이 깨지면 게임에서 잘못 표시돼요."
+      },
+      "html-entity": {
+        "name": "HTML 엔티티",
+        "description": "원문에는 없는데 번역에 있는 HTML 엔티티를 표시해요. 게임에서는 나타내려는 문자 대신 그대로 텍스트로 표시돼요."
       },
       "end-punctuation": {
         "name": "끝 문장 부호",

@@ -35,6 +35,7 @@
     "number-parity": "ความตรงกันของตัวเลข",
     "whitespace-parity": "ความตรงกันของช่องว่าง",
     "line-break-parity": "ความตรงกันของการขึ้นบรรทัดใหม่",
+    "html-entity": "HTML เอนทิตี",
     "end-punctuation": "เครื่องหมายวรรคตอนท้ายข้อความ",
     "double-spacing": "ช่องว่างซ้ำ",
     "double-words": "คำซ้ำ",

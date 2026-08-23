@@ -9,6 +9,7 @@ export {
   toRateLimitError,
   unwrapRetryError,
   parseRetryDelayFromMessage,
+  decodeLeakedHtmlEntities,
   RATE_LIMIT_MESSAGE_RE,
   rethrowIfAuthOrRateLimit,
   throwIfAllChunksFailed,

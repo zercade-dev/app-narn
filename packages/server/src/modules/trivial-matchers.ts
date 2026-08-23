@@ -40,8 +40,49 @@ export const urlMatcher: TrivialMatcher = {
   },
 };
 
+/** Matches bare hex color literals (#rgb/#rgba/#rrggbb/#rrggbbaa) → returns source unchanged. */
+export const hexColorMatcher: TrivialMatcher = {
+  id: 'trivial-hex-color',
+  match(src) {
+    return /^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(src.trim()) ? src : null;
+  },
+};
+
+/**
+ * Matches strings that are ONLY markup: a single left-to-right scan tracks
+ * separate nesting depths for <tags> and {placeholders} (a stray closer never
+ * takes a depth below zero) and rejects the moment a Unicode letter appears
+ * while both depths are zero — pure color wrappers, separators, and
+ * placeholder plumbing that a model can only echo back or corrupt. A run that
+ * ends with either depth still open is unbalanced and also passes through.
+ * Decided without ever materializing a stripped copy of the string.
+ */
+export const markupOnlyMatcher: TrivialMatcher = {
+  id: 'trivial-markup-only',
+  match(src) {
+    const trimmed = src.trim();
+    if (trimmed === '' || !/[<{]/.test(trimmed)) return null;
+    let angleDepth = 0;
+    let braceDepth = 0;
+    for (const ch of trimmed) {
+      if (ch === '<') angleDepth++;
+      else if (ch === '>') angleDepth = Math.max(0, angleDepth - 1);
+      else if (ch === '{') braceDepth++;
+      else if (ch === '}') braceDepth = Math.max(0, braceDepth - 1);
+      else if (angleDepth === 0 && braceDepth === 0 && /\p{L}/u.test(ch)) return null;
+    }
+    return angleDepth === 0 && braceDepth === 0 ? src : null;
+  },
+};
+
 /** The default built-in matchers applied before module dispatch. */
-export const builtInMatchers: TrivialMatcher[] = [emptyMatcher, pureNumericMatcher, urlMatcher];
+export const builtInMatchers: TrivialMatcher[] = [
+  emptyMatcher,
+  pureNumericMatcher,
+  urlMatcher,
+  hexColorMatcher,
+  markupOnlyMatcher,
+];
 
 /**
  * Runs the built-in matchers against sourceText.
