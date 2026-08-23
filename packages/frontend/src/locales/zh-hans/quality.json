@@ -35,6 +35,7 @@
     "number-parity": "数字一致性",
     "whitespace-parity": "空白一致性",
     "line-break-parity": "换行一致性",
+    "html-entity": "HTML 实体",
     "end-punctuation": "句末标点",
     "double-spacing": "重复空格",
     "double-words": "重复词",

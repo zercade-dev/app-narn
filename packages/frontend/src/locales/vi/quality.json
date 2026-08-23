@@ -35,6 +35,7 @@
     "number-parity": "Trùng khớp chữ số",
     "whitespace-parity": "Trùng khớp khoảng trắng",
     "line-break-parity": "Trùng khớp ngắt dòng",
+    "html-entity": "Thực thể HTML",
     "end-punctuation": "Dấu câu kết thúc",
     "double-spacing": "Khoảng trắng lặp",
     "double-words": "Từ lặp",

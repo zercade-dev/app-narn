@@ -209,6 +209,7 @@
     "loading": "Status von NARN Freeway wird geladen…",
     "loadFailed": "Status von NARN Freeway konnte nicht geladen werden: {{message}}",
     "generatedAtLabel": "Aktualisiert {{time}}",
+    "vaultLockedNotice": "Der Zugangsdaten-Tresor ist gesperrt — Freeway-Anbieter erscheinen ohne Schlüssel, bis du ihn entsperrst.",
     "sourcesTitle": "Kostenlose Anbieter",
     "keyPresent": "Schlüssel hinzugefügt",
     "keyMissing": "Noch kein Schlüssel",
@@ -402,6 +403,10 @@
       "line-break-parity": {
         "name": "Zeilenumbruchparität",
         "description": "Markiert Übersetzungen, deren literale \\n-Escapes oder echte Zeilenumbrüche vom Quelltext abweichen — kaputte Zeilenumbrüche werden im Spiel falsch dargestellt."
+      },
+      "html-entity": {
+        "name": "HTML-Entität",
+        "description": "Markiert HTML-Entitäten in der Übersetzung, die der Quelltext nicht hat — sie werden im Spiel als reiner Text angezeigt statt als das Zeichen, das sie darstellen."
       },
       "end-punctuation": {
         "name": "Schlusszeichensetzung",

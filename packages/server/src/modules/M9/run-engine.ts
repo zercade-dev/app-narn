@@ -45,7 +45,12 @@ import type { RunStore } from '../../storage/types.js';
 import { getRunStore } from '../../storage/registry.js';
 import { getCurrentTenant } from '../../storage/pg/tenant-context.js';
 import { sanitizeLogObject } from '../M16-credential-store.js';
-import { coolBucket, recordDispatch, type BucketSourceDeps } from '../M32/bucket-source.js';
+import {
+  bucketRateLimits,
+  coolBucket,
+  recordDispatch,
+  type BucketSourceDeps,
+} from '../M32/bucket-source.js';
 import {
   isAbortError,
   isRateLimitError,
@@ -863,7 +868,7 @@ export abstract class BackgroundRunEngine<TRecord> {
       await coolBucket(
         binding.bucketKey,
         Date.now(),
-        rateLimitCooldownMs(err),
+        rateLimitCooldownMs(err, bucketRateLimits(binding.bucketKey)),
         binding.deps,
         'pool',
       );

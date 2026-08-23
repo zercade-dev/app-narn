@@ -35,6 +35,7 @@
     "number-parity": "Sayı eşliği",
     "whitespace-parity": "Boşluk eşliği",
     "line-break-parity": "Satır sonu eşliği",
+    "html-entity": "HTML varlığı",
     "end-punctuation": "Bitiş noktalaması",
     "double-spacing": "Çift boşluk",
     "double-words": "Çift sözcük",

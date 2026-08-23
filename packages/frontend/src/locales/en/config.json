@@ -209,6 +209,7 @@
     "loading": "Loading NARN Freeway status…",
     "loadFailed": "Failed to load NARN Freeway status: {{message}}",
     "generatedAtLabel": "Updated {{time}}",
+    "vaultLockedNotice": "Credential vault is locked — Freeway providers show as missing keys until you unlock it.",
     "sourcesTitle": "Free providers",
     "keyPresent": "Key added",
     "keyMissing": "No key yet",
@@ -402,6 +403,10 @@
       "line-break-parity": {
         "name": "Line-break parity",
         "description": "Flags translations whose literal \\n escapes or real line breaks differ from the source — broken line breaks render wrong in-game."
+      },
+      "html-entity": {
+        "name": "HTML entity",
+        "description": "Flags HTML entities in the translation that the source does not have — they render as literal text in-game instead of the character they represent."
       },
       "end-punctuation": {
         "name": "End punctuation",

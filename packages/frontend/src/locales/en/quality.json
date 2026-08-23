@@ -35,6 +35,7 @@
     "number-parity": "Number parity",
     "whitespace-parity": "Whitespace parity",
     "line-break-parity": "Line-break parity",
+    "html-entity": "HTML entity",
     "end-punctuation": "End punctuation",
     "double-spacing": "Double spacing",
     "double-words": "Double words",

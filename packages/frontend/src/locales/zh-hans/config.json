@@ -204,6 +204,7 @@
     "loading": "正在加载 NARN Freeway 状态…",
     "loadFailed": "加载 NARN Freeway 状态失败：{{message}}",
     "generatedAtLabel": "更新于 {{time}}",
+    "vaultLockedNotice": "凭据保险库已锁定——在解锁前，Freeway 服务商会显示为无密钥。",
     "sourcesTitle": "免费服务商",
     "keyPresent": "密钥已添加",
     "keyMissing": "尚未添加密钥",
@@ -396,6 +397,10 @@
       "line-break-parity": {
         "name": "换行一致性",
         "description": "标出字面量 \\n 转义或实际换行与原文不一致的译文——换行损坏会导致游戏内显示错误。"
+      },
+      "html-entity": {
+        "name": "HTML 实体",
+        "description": "标出译文中出现而原文没有的 HTML 实体——它们会在游戏中显示为字面文本，而非所代表的字符。"
       },
       "end-punctuation": {
         "name": "句末标点",

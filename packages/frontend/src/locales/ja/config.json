@@ -204,6 +204,7 @@
     "loading": "NARN Freewayの状態を読み込み中…",
     "loadFailed": "NARN Freewayの状態の読み込みに失敗しました：{{message}}",
     "generatedAtLabel": "更新日時：{{time}}",
+    "vaultLockedNotice": "認証情報の保管庫がロックされています。ロックを解除するまで、Freewayのプロバイダーはキーなしと表示されます。",
     "sourcesTitle": "無料プロバイダー",
     "keyPresent": "キー設定済み",
     "keyMissing": "キー未設定",
@@ -396,6 +397,10 @@
       "line-break-parity": {
         "name": "改行の一致",
         "description": "リテラルの\\nエスケープや実際の改行が原文と異なる翻訳を検出します。改行が壊れると、ゲーム内で正しく表示されません。"
+      },
+      "html-entity": {
+        "name": "HTMLエンティティ",
+        "description": "原文にはない、翻訳内のHTMLエンティティを検出します。ゲーム内では表す文字ではなく、そのままの文字列として表示されます。"
       },
       "end-punctuation": {
         "name": "文末の句読点",

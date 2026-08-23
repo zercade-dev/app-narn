@@ -204,6 +204,7 @@
     "loading": "Memuat status NARN Freeway…",
     "loadFailed": "Gagal memuat status NARN Freeway: {{message}}",
     "generatedAtLabel": "Diperbarui {{time}}",
+    "vaultLockedNotice": "Brankas kredensial terkunci — penyedia Freeway akan tampil tanpa kunci sampai brankasnya dibuka.",
     "sourcesTitle": "Penyedia gratis",
     "keyPresent": "Kunci ditambahkan",
     "keyMissing": "Belum ada kunci",
@@ -396,6 +397,10 @@
       "line-break-parity": {
         "name": "Paritas pemisah baris",
         "description": "Menandai terjemahan yang escape \\n literal atau pemisah baris sungguhannya berbeda dari sumber — pemisah baris yang rusak tampil salah di dalam gim."
+      },
+      "html-entity": {
+        "name": "Entitas HTML",
+        "description": "Menandai entitas HTML dalam terjemahan yang tidak ada di sumber — entitas ini tampil sebagai teks harfiah di dalam gim, bukan karakter yang diwakilinya."
       },
       "end-punctuation": {
         "name": "Tanda baca akhir",

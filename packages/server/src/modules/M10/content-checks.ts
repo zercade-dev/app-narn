@@ -166,3 +166,37 @@ export const regexAssertionsCheck: LQACheck = {
     return issues;
   },
 };
+
+/**
+ * Named entities up to 32 chars, or numeric decimal/hex references, each
+ * terminated by `;`. Deliberately wider than the fixed set the shared
+ * decoder (`decodeLeakedHtmlEntities` in ai-sdk-provider/core.ts) resolves
+ * before storage — unknown named entities (`&copy;`), double escapes
+ * (`&amp;nbsp;`), and anything reaching storage another way still match
+ * here even though the decoder declines them. A bare `&` has no terminating
+ * `;` and never matches.
+ */
+const HTML_ENTITY_RE = /&(?:[a-zA-Z][a-zA-Z0-9]{1,31}|#\d{1,7}|#x[0-9a-fA-F]{1,6});/g;
+
+/**
+ * HTML entity syntax that shows up in the translation but not the source is
+ * markup leaking out of the model's output rather than deliberate content —
+ * the source is the ground truth for what belongs in the string.
+ */
+export const htmlEntityCheck: LQACheck = {
+  id: 'html-entity',
+  defaultSeverity: 'warning',
+  defaultEnabled: true,
+  run(entry, translatedText) {
+    const leaked = (translatedText.match(HTML_ENTITY_RE) ?? []).filter(
+      (entity) => !entry.sourceText.includes(entity),
+    );
+    if (leaked.length === 0) return [];
+    return [
+      {
+        type: 'html-entity',
+        detail: `translation contains HTML entity ${leaked[0]} not present in the source`,
+      },
+    ];
+  },
+};
