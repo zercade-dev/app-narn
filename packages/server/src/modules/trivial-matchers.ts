@@ -40,8 +40,43 @@ export const urlMatcher: TrivialMatcher = {
   },
 };
 
+/** Matches bare hex color literals (#rgb/#rgba/#rrggbb/#rrggbbaa) → returns source unchanged. */
+export const hexColorMatcher: TrivialMatcher = {
+  id: 'trivial-hex-color',
+  match(src) {
+    return /^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(src.trim()) ? src : null;
+  },
+};
+
+/**
+ * Matches strings that are ONLY markup: after stripping <tags> and {placeholders}
+ * (nested up to a bounded depth), no Unicode letter remains — pure color
+ * wrappers, separators, and placeholder plumbing that a model can only echo
+ * back or corrupt. Anything with real words around the markup passes through.
+ */
+export const markupOnlyMatcher: TrivialMatcher = {
+  id: 'trivial-markup-only',
+  match(src) {
+    const trimmed = src.trim();
+    if (trimmed === '' || !/[<{]/.test(trimmed)) return null;
+    let stripped = trimmed;
+    for (let i = 0; i < 10; i++) {
+      const next = stripped.replace(/<[^<>]*>/g, '').replace(/\{[^{}]*\}/g, '');
+      if (next === stripped) break;
+      stripped = next;
+    }
+    return /\p{L}/u.test(stripped) ? null : src;
+  },
+};
+
 /** The default built-in matchers applied before module dispatch. */
-export const builtInMatchers: TrivialMatcher[] = [emptyMatcher, pureNumericMatcher, urlMatcher];
+export const builtInMatchers: TrivialMatcher[] = [
+  emptyMatcher,
+  pureNumericMatcher,
+  urlMatcher,
+  hexColorMatcher,
+  markupOnlyMatcher,
+];
 
 /**
  * Runs the built-in matchers against sourceText.
