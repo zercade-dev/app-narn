@@ -154,6 +154,12 @@ export interface SelectFreewayBackgroundOptions extends SelectCapableModuleOptio
   now?: number;
   /** Reserve forwarded to {@link selectBackgroundBucket}; defaults there. */
   reserveRequests?: number;
+  /**
+   * Target languages the run will work in, forwarded to the selector's
+   * exclude-only language filter. Only the judge engine knows these at
+   * selection time; every other background caller omits it.
+   */
+  languages?: readonly string[];
 }
 
 /**
@@ -221,6 +227,14 @@ export async function selectFreewayBackgroundModule(
   const selectOpts = {
     ...(options.band !== undefined ? { band: options.band } : {}),
     ...(options.reserveRequests !== undefined ? { reserveRequests: options.reserveRequests } : {}),
+    ...(options.languages !== undefined ? { languages: options.languages } : {}),
+    onFallback: (reason: 'languages') => {
+      options.logSink?.('warn', 'freeway: language filter left no candidates', {
+        reason,
+        languages: options.languages?.join(','),
+        candidates: remaining.length,
+      });
+    },
   };
   while (remaining.length > 0) {
     const selection = selectBackgroundBucket(remaining, now, selectOpts);

@@ -288,6 +288,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     override?: JudgeOverride,
     logSink?: ModuleLogFn,
     reserveRequests?: number,
+    languages?: readonly string[],
   ): Promise<{ module: TranslationModule; moduleId: string; bucketKey?: string }> {
     const requestedId = override?.moduleId ?? project.judgeConfig?.moduleId;
     const requestedModel = override?.model ?? project.judgeConfig?.model;
@@ -309,6 +310,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         ...options,
         deps: this.freewayOverrides,
         ...(reserveRequests !== undefined ? { reserveRequests } : {}),
+        ...(languages !== undefined ? { languages } : {}),
         noneAvailableMessage: 'no free-tier model is currently available to judge translations',
       });
     }
@@ -404,6 +406,26 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     // and `buildItems` reviews exactly those pairs — so size the fence on the
     // same number, or the run fences capacity it can never spend.
     const scopePairs = override?.pairs ?? scope?.pairs;
+
+    // The languages this run will actually review, for the selector's
+    // exclude-only language filter. Derived from the SAME scope the reserve is
+    // sized from, so a run can never fence one set of pairs and be routed for
+    // another. A run whose scope is reconstructed after selection
+    // (`reconstructScope` below) has no languages to offer here and is scored
+    // neutral, exactly as every background run was before: reordering the run
+    // to make them available earlier would be a far larger change than the
+    // routing improvement is worth.
+    const judgeLanguages = scope
+      ? [
+          ...new Set(
+            (scopePairs
+              ? scopePairs.map((p) => p.targetLanguage)
+              : scope.targetLanguages
+            ).filter((l) => (override?.languages ? override.languages.includes(l) : true)),
+          ),
+        ]
+      : undefined;
+
     const reserveRequests = scope
       ? Math.max(
           FREEWAY_BACKGROUND_RESERVE,
@@ -429,6 +451,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
           override,
           logSink,
           reserveRequests,
+          judgeLanguages,
         );
         target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
@@ -444,6 +467,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
                 override,
                 logSink,
                 reserveRequests,
+                judgeLanguages,
               );
               if (next.bucketKey === undefined) return undefined;
               const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };

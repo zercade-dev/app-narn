@@ -57,6 +57,36 @@ function backgroundGroup(band: DifficultyBand): JobGroup {
 }
 
 /**
+ * The languages a background run will actually work in, when its caller knows
+ * them at selection time. Only a judge run does: it reviews translations in
+ * specific target languages, and the block that resolves its module already
+ * reads them to size the reserve. Source review reads source text, and
+ * glossary/category generation are language-neutral, so those callers pass
+ * nothing and score neutral English exactly as before.
+ *
+ * Used to EXCLUDE, never to rank: a bucket the snapshot measured as weak in a
+ * language this run reviews is dropped from the candidate list, and the
+ * surviving candidates are then ranked by the unchanged economics. Scoring the
+ * synthetic group per-language instead would let a soft quality number reorder
+ * a capacity decision, which is a change of a different and riskier kind.
+ */
+function excludeWeakLanguages(
+  buckets: BucketView[],
+  languages: readonly string[],
+  band: DifficultyBand,
+): BucketView[] {
+  return buckets.filter((b) => {
+    for (const language of languages) {
+      // Exact-code match, mirroring isEligibleIgnoringMinute: zh-hans evidence
+      // never speaks for zh-hant.
+      if (b.blockedLanguages?.includes(language)) return false;
+      if (band >= 3 && b.weakLanguages?.includes(language)) return false;
+    }
+    return true;
+  });
+}
+
+/**
  * Pick one bucket for a whole background engine run (judge / source review /
  * glossary / category). Returns undefined when nothing is eligible — the caller
  * then fails the run through its own module-unavailable path rather than
@@ -80,17 +110,38 @@ function backgroundGroup(band: DifficultyBand): JobGroup {
  * unavailable". Gate-failure escalation deliberately does NOT copy this — its
  * alternative is a working same-module corrective retry, so the same trade
  * would be a straight loss.
+ *
+ * A language filter (see {@link excludeWeakLanguages}) may have narrowed the
+ * candidate list before either of these passes runs.
  */
 export function selectBackgroundBucket(
   buckets: BucketView[],
   now: number,
-  opts?: { band?: DifficultyBand; reserveRequests?: number },
+  opts?: {
+    band?: DifficultyBand;
+    reserveRequests?: number;
+    /** Target languages this run will work in; see {@link excludeWeakLanguages}. */
+    languages?: readonly string[];
+    /** Called when a relaxation was needed, so the caller can log it. */
+    onFallback?: (reason: 'languages') => void;
+  },
 ): Selection | undefined {
-  const group = backgroundGroup(opts?.band ?? DEFAULT_BACKGROUND_BAND);
+  const band = opts?.band ?? DEFAULT_BACKGROUND_BAND;
+  let candidates = buckets;
+  if (opts?.languages?.length) {
+    const filtered = excludeWeakLanguages(buckets, opts.languages, band);
+    // An empty filter result means every candidate is weak somewhere in this
+    // run. Failing here would be a NEW failure mode for a run that starts
+    // fine today, so fall back to the full list: preferring a bucket that is
+    // not measurably weak is worth having, insisting on one is not.
+    if (filtered.length > 0) candidates = filtered;
+    else opts.onFallback?.('languages');
+  }
+  const group = backgroundGroup(band);
   const selectOpts = { reserveRequests: opts?.reserveRequests ?? FREEWAY_BACKGROUND_RESERVE };
-  const paced = selectBucket(group, buckets, now, selectOpts);
+  const paced = selectBucket(group, candidates, now, selectOpts);
   if (paced) return paced;
-  const withoutMinuteLimits = buckets.map((b) => ({
+  const withoutMinuteLimits = candidates.map((b) => ({
     ...b,
     remainingMinuteRequests: undefined,
     remainingMinuteTokens: undefined,
@@ -102,6 +153,6 @@ export function selectBackgroundBucket(
   // caller identifies buckets by reference (it removes the tried one from
   // its candidate list), and nothing about the relaxation changes the cost
   // model (batchSize/estimatedRequests never read the minute fields).
-  const original = buckets.find((b) => b.bucketKey === relaxed.bucket.bucketKey);
+  const original = candidates.find((b) => b.bucketKey === relaxed.bucket.bucketKey);
   return original ? { ...relaxed, bucket: original } : undefined;
 }
