@@ -24,7 +24,7 @@ import {
   loadBucketViews,
   type BucketSourceDeps,
 } from '../M32/bucket-source.js';
-import type { DifficultyBand } from '../M32/types.js';
+import type { BucketView, DifficultyBand } from '../M32/types.js';
 
 /** Cheapest-first ordering used to rank enabled modules when none is requested. */
 export const COST_TIER_ORDER: Record<CostTier, number> = { free: 0, low: 1, medium: 2, high: 3 };
@@ -143,6 +143,14 @@ export interface FreewayBackgroundSelection {
   modelId: string;
   /** Ledger key of the bucket this run spends against. */
   bucketKey: string;
+  /**
+   * The selected bucket's view, as it stood at selection. Carried so a caller
+   * can size its batches to the bucket it actually landed on (maxBatch /
+   * charBudget / batchCeiling / remaining stock) instead of a flat constant.
+   * A point-in-time snapshot like every other BucketView — a mid-run re-route
+   * replaces it, it is never refreshed in place.
+   */
+  bucket: BucketView;
 }
 
 export interface SelectFreewayBackgroundOptions extends SelectCapableModuleOptions {
@@ -257,7 +265,7 @@ export async function selectFreewayBackgroundModule(
           ...freewayModuleOverrides(bucket.moduleId, bucket.modelId),
         },
       });
-      return { ...built, modelId: bucket.modelId, bucketKey: bucket.bucketKey };
+      return { ...built, modelId: bucket.modelId, bucketKey: bucket.bucketKey, bucket };
     } catch (err) {
       // This bucket's module can't be built or can't do this work — try the
       // next one the selector offers rather than failing the whole run on it.

@@ -133,8 +133,13 @@ export interface EnqueueBatchedOptions<TItem extends { entryId: string }, TRecor
   ) => Promise<{ items: TItem[]; entriesById: Map<string, StringEntry> }>;
   /** Extra run-status fields (`kind` + the engine's summary object). */
   summary: Partial<RunStatus> & Pick<RunStatus, 'kind'>;
-  /** Max items per provider batch. */
-  batchSize: number;
+  /**
+   * Max items per provider batch — either a flat number, or a resolver called
+   * once with the built items. The resolver exists so a Freeway-routed run can
+   * size its batches to the bucket it landed on (which is known only after
+   * `selectModule`) while every other caller keeps passing its constant.
+   */
+  batchSize: number | ((items: TItem[]) => number);
   /** Per-run related-entry grouping override; absent ⇒ project/workspace. */
   batchGroupingOverride?: BatchGroupingDimension;
   /** Per-run ignore-batch-size-limit override; absent ⇒ project/workspace. */
@@ -655,8 +660,15 @@ export abstract class BackgroundRunEngine<TRecord> {
       customBatchSize !== undefined
         ? customBatchSize === 0
         : (opts.ignoreBatchSizeLimitOverride ?? resolvedGrouping.ignoreSizeLimit);
+    // An explicit custom size (the AI-review dialog) still wins over
+    // everything; the resolver is consulted only when the user asked for no
+    // particular size, so bucket sizing can never override a deliberate choice.
     const effectiveBatchSize =
-      customBatchSize !== undefined && customBatchSize > 0 ? customBatchSize : opts.batchSize;
+      customBatchSize !== undefined && customBatchSize > 0
+        ? customBatchSize
+        : typeof opts.batchSize === 'function'
+          ? opts.batchSize(items)
+          : opts.batchSize;
     const batches = groupAndPack(items, effectiveBatchSize, ignoreSizeLimit, (item) =>
       batchGroupKey(entriesById.get(item.entryId) ?? {}, dimension),
     );
