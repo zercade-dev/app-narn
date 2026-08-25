@@ -208,12 +208,16 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     request: SourceReviewRequest,
     logSink?: ModuleLogFn,
     reserveRequests?: number,
-  ): Promise<{
-    module: TranslationModule;
-    moduleId: string;
-    bucketKey?: string;
-    bucket?: BucketView;
-  }> {
+  ): Promise<
+    // See the matching union in M25: `deps` is the session-scoped bucket-source
+    // context this resolution ran with, and it travels WITH the bucket so no
+    // later ledger read can fall back to the bare overrides (which report every
+    // module disabled and would leave the caller with an empty bucket list).
+    { module: TranslationModule; moduleId: string } & (
+      | { bucketKey: string; bucket: BucketView; deps: BucketSourceDeps }
+      | { bucketKey?: undefined; bucket?: undefined; deps?: undefined }
+    )
+  > {
     const saved = project.sourceReviewConfig;
     const requestedId = request.moduleId ?? saved?.moduleId;
     const requestedModel = request.model ?? saved?.model;
@@ -354,7 +358,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         );
         target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
-          freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+          freeway = { bucketKey: selected.bucketKey, deps: selected.deps };
           bucket = selected.bucket;
           makeFreewayReroute = (selection) => async () => {
             try {
@@ -369,7 +373,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
                 reserveRequests,
               );
               if (next.bucketKey === undefined) return undefined;
-              const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
+              const binding = { bucketKey: next.bucketKey, deps: next.deps };
               target = { module: next.module, moduleId: next.moduleId };
               freeway = binding;
               bucket = next.bucket;

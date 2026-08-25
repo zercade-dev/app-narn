@@ -48,7 +48,7 @@ import { getCurrentTenant } from '../../storage/pg/tenant-context.js';
 import { sanitizeLogObject } from '../M16-credential-store.js';
 import { DEFAULT_BACKGROUND_BAND } from '../M32/background-select.js';
 import {
-  bucketHasMinuteTokenLimit,
+  bucketHasMinuteWindow,
   bucketRateLimits,
   coolBucket,
   loadBucketViews,
@@ -843,6 +843,28 @@ export abstract class BackgroundRunEngine<TRecord> {
               binding.deps,
             );
             if (wait === undefined) {
+              // A bucket that cannot serve this batch is exactly what the
+              // re-route hop exists for, so offer it before failing. Before
+              // this gate, such a batch dispatched, took its 429 and hopped to
+              // a healthy sibling — which also re-points the run's binding for
+              // every later batch — so failing outright here would cost a whole
+              // re-route, not just one wasted request. The struck bucket needs
+              // no cool first: the ledger already knows it is spent or cooling,
+              // which is why the gate declined it, so the re-selection skips it
+              // on its own.
+              const next =
+                hop === 0 && opts.freewayReroute
+                  ? await this.tryFreewayReroute(
+                      runId,
+                      binding.bucketKey,
+                      'minute-gate',
+                      opts.freewayReroute,
+                    )
+                  : undefined;
+              if (next) {
+                binding = next;
+                continue;
+              }
               // Thrown rather than recorded here so the batch fails through the
               // single failure block below: the same per-item recording, the
               // same value-scrubbed message, the same `batch-failed` log.
@@ -928,23 +950,13 @@ export abstract class BackgroundRunEngine<TRecord> {
           // exhaustion (or nothing eligible to move to) fails the batch exactly
           // as it always has.
           if (hop === 0 && binding && isRateLimitError(err) && opts.freewayReroute) {
-            // The hop must never be able to skip the failure block below: a
-            // re-selection that throws leaves these items unrecorded, and the
-            // queue swallows the rejection, so the run would report them
-            // complete. Engines log their own reason before returning here.
-            let next: FreewayBatchBinding | undefined;
-            try {
-              next = await opts.freewayReroute();
-            } catch {
-              next = undefined;
-            }
+            const next = await this.tryFreewayReroute(
+              runId,
+              binding.bucketKey,
+              'rate-limit',
+              opts.freewayReroute,
+            );
             if (next) {
-              this.logger.info(`${this.logPrefix}:freeway-rerouted`, {
-                runId,
-                from: binding.bucketKey,
-                to: next.bucketKey,
-                reason: 'rate-limit',
-              });
               binding = next;
               continue;
             }
@@ -1010,15 +1022,20 @@ export abstract class BackgroundRunEngine<TRecord> {
    * `bucketKey`: `0` to go now, a positive delay to wait out a spent minute
    * window, or `undefined` to stop waiting and fail the batch.
    *
-   * Two measured gaps meet here. The background path had only a flat
-   * remaining-minute-tokens floor (`MIN_MINUTE_TOKENS_FLOOR`), whose own
-   * comment concedes it cannot stop one oversized batch overshooting the
-   * ceiling — and it did not: a judge batch blew an 8000 TPM window four times
-   * in one live run. And a minute-scale limit with nothing to re-route to
-   * failed a whole review run outright, when the difference between failing
-   * and succeeding was about a minute of waiting. So this projects the batch
-   * the way the translate planner projects its own, and turns a request the
-   * provider would certainly reject into a short pause instead.
+   * Two measured failures meet here, and both are the same mistake: spending a
+   * request the current minute could not afford. One live run blew an 8000 TPM
+   * window four times, because the only pre-dispatch check was a flat
+   * remaining-tokens floor its own comment concedes cannot stop an oversized
+   * batch. Another failed all forty of its items against an account-wide
+   * `free-models-per-min` ceiling, because dispatching into that spent minute
+   * cooled the whole pool and left nothing to re-route to.
+   *
+   * Both are prevented the same way: check the minute BEFORE dispatching —
+   * requests against the live rpm figures, tokens against the same projection
+   * the translate planner uses — and turn a request the provider would
+   * certainly reject into a short pause instead. Prevention is the whole fix
+   * for the second case: once a 429 has cooled the pool, waiting is no longer
+   * available (a cooling bucket is not minute-starved, per the rule below).
    *
    * Waiting is justified ONLY by a spent minute. A bucket that is also cooling
    * or day-exhausted will be no more usable when the window rolls over, so
@@ -1033,17 +1050,37 @@ export abstract class BackgroundRunEngine<TRecord> {
     now: number,
     deps: BucketSourceDeps | undefined,
   ): Promise<number | undefined> {
-    // Answered from the snapshot before anything is read: a model with no tpm
-    // has no minute-token budget to overshoot, so the live bucket sweep below
-    // — which this asks for once per batch — would only ever confirm that it
-    // has nothing to say.
-    if (!bucketHasMinuteTokenLimit(bucketKey)) return 0;
+    // Answered from the snapshot before anything is read: a model under no
+    // per-minute ceiling at all has no spent minute to wait for, so the live
+    // sweep below — asked once per batch — would only ever confirm it has
+    // nothing to say.
+    if (!bucketHasMinuteWindow(bucketKey)) return 0;
     const bucket = (await loadBucketViews(now, deps ?? {})).find((b) => b.bucketKey === bucketKey);
     // Unknown bucket (a snapshot refresh dropped the model mid-run): nothing to
     // project against, and nothing a pause would fix.
-    if (!bucket || bucket.remainingMinuteTokens === undefined) return 0;
-    // The budget covers the batch: the ordinary path, dispatched immediately.
-    if (bucket.remainingMinuteTokens >= projectedRequestTokens(bucket, batchChars)) return 0;
+    if (!bucket) return 0;
+    // A spent minute has two shapes, and both belong here.
+    //
+    // REQUESTS: the same test `hasMinuteHeadroom` applies, repeated because
+    // selection does not always honour it — `selectBackgroundBucket` relaxes
+    // the minute limits entirely when no paced bucket is available, so a run
+    // can be deliberately bound to a bucket whose minute is already gone. That
+    // is the shape the live smoke hit: an account-wide `free-models-per-min`
+    // ceiling, which is why the provider pool's own figure counts here too.
+    //
+    // TOKENS: the projection, because the flat `MIN_MINUTE_TOKENS_FLOOR` its
+    // own comment calls best-effort cannot see an oversized batch coming — a
+    // judge batch blew an 8000 TPM window four times in that same run.
+    const minuteRequestsLeft = Math.min(
+      bucket.remainingMinuteRequests ?? Infinity,
+      bucket.poolRemainingMinuteRequests ?? Infinity,
+    );
+    const minuteSpent =
+      minuteRequestsLeft < 1 ||
+      (bucket.remainingMinuteTokens !== undefined &&
+        bucket.remainingMinuteTokens < projectedRequestTokens(bucket, batchChars));
+    // The minute covers this batch: the ordinary path, dispatched immediately.
+    if (!minuteSpent) return 0;
     // Carries no jobs on purpose: the eligibility check reads the group's
     // character total only for a monthly character reservoir (classical MT),
     // which declares no minute window and so can never be what got this batch
@@ -1065,6 +1102,40 @@ export abstract class BackgroundRunEngine<TRecord> {
     // true. Anything past the cap is by definition not minute starvation.
     if (delay > FREEWAY_MINUTE_WAIT_CAP_MS) return undefined;
     return delay + FREEWAY_MINUTE_WAIT_MARGIN_MS;
+  }
+
+  /**
+   * Take the one re-route hop a batch gets: re-select a bucket, log the move,
+   * and hand back the new binding. `undefined` means nothing eligible — the
+   * caller then fails the batch exactly as it did before the hop existed.
+   *
+   * Never throws, and that is the point: the hop must not be able to skip its
+   * caller's failure block, because a re-selection that threw would leave
+   * these items unrecorded, the queue would swallow the rejection, and the run
+   * would report them complete. Engines log their own reason before returning
+   * `undefined` here.
+   */
+  private async tryFreewayReroute(
+    runId: string,
+    from: string,
+    reason: 'rate-limit' | 'minute-gate',
+    reroute: () => Promise<FreewayBatchBinding | undefined>,
+  ): Promise<FreewayBatchBinding | undefined> {
+    let next: FreewayBatchBinding | undefined;
+    try {
+      next = await reroute();
+    } catch {
+      next = undefined;
+    }
+    if (next) {
+      this.logger.info(`${this.logPrefix}:freeway-rerouted`, {
+        runId,
+        from,
+        to: next.bucketKey,
+        reason,
+      });
+    }
+    return next;
   }
 
   /**

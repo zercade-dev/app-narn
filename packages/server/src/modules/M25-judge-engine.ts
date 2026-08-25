@@ -293,12 +293,18 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     logSink?: ModuleLogFn,
     reserveRequests?: number,
     languages?: readonly string[],
-  ): Promise<{
-    module: TranslationModule;
-    moduleId: string;
-    bucketKey?: string;
-    bucket?: BucketView;
-  }> {
+  ): Promise<
+    // A union rather than four independent optionals: `deps` is the
+    // session-scoped bucket-source context the resolution ran with, and every
+    // later ledger read MUST use it rather than the bare overrides (which
+    // resolve to `defaultModuleStatus` and report every module disabled). Tying
+    // it to `bucketKey` makes narrowing on the bucket prove the deps came with
+    // it, so the pairing cannot be dropped without a type error.
+    { module: TranslationModule; moduleId: string } & (
+      | { bucketKey: string; bucket: BucketView; deps: BucketSourceDeps }
+      | { bucketKey?: undefined; bucket?: undefined; deps?: undefined }
+    )
+  > {
     const requestedId = override?.moduleId ?? project.judgeConfig?.moduleId;
     const requestedModel = override?.model ?? project.judgeConfig?.model;
     const requestedEffort = override?.reasoningEffort ?? project.judgeConfig?.reasoningEffort;
@@ -487,7 +493,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         );
         target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
-          freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+          freeway = { bucketKey: selected.bucketKey, deps: selected.deps };
           bucket = selected.bucket;
           makeFreewayReroute = (selection) => async () => {
             try {
@@ -503,7 +509,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
                 judgeLanguages,
               );
               if (next.bucketKey === undefined) return undefined;
-              const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
+              const binding = { bucketKey: next.bucketKey, deps: next.deps };
               target = { module: next.module, moduleId: next.moduleId };
               freeway = binding;
               bucket = next.bucket;
@@ -752,7 +758,12 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     const priorLogs = await this.runStore.getJudgeLogs(projectId, runId);
     const runWasVerbose = priorLogs.length > 0;
     const { logSink, logs } = this.buildLogSink();
-    const { module, moduleId, bucketKey } = await this.selectJudgeModule(
+    const {
+      module,
+      moduleId,
+      bucketKey,
+      deps: bucketDeps,
+    } = await this.selectJudgeModule(
       project,
       global,
       sessionId,
@@ -799,7 +810,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       const outcome = await runCountingProviderCalls(() => module.judgeTranslations!([item]));
       verdicts = outcome.result;
       await this.recordFreewayDispatch(
-        bucketKey !== undefined ? { bucketKey, deps: this.freewayOverrides } : undefined,
+        bucketKey !== undefined ? { bucketKey, deps: bucketDeps } : undefined,
         verdicts.map((v) => v.usage),
         outcome.calls,
       );

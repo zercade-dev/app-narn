@@ -494,15 +494,24 @@ export function bucketRateLimits(bucketKey: string): { rpm?: number; rpd?: numbe
 }
 
 /**
- * Whether this bucket's model declares a per-minute TOKEN ceiling at all.
- * Snapshot-only, so a caller can decide whether a minute-token question is
- * even askable before paying for the live bucket sweep {@link loadBucketViews}
- * costs — which matters for the pre-dispatch projection in `M9/run-engine.ts`,
- * asked once per batch on a path that can never act for a model with no tpm.
+ * Whether any per-minute ceiling governs this bucket — its model's own rpm or
+ * tpm, or a shared per-minute pool its provider declares. Composed from the
+ * same two helpers {@link loadBucketViews} composes when it decides whether a
+ * bucket has a `minuteResetAt` at all, so "has a minute window" cannot come to
+ * mean two different things in two places.
+ *
+ * Snapshot-only, so a caller can ask whether a minute question is even askable
+ * before paying for the live sweep {@link loadBucketViews} costs — which
+ * matters for the pre-dispatch gate in `M9/run-engine.ts`, asked once per
+ * batch and unable to act at all for a model with no minute window.
  */
-export function bucketHasMinuteTokenLimit(bucketKey: string): boolean {
+export function bucketHasMinuteWindow(bucketKey: string): boolean {
   const resolved = resolveSnapshotBucket(bucketKey);
-  return resolved?.model.limits.some((limit) => limit.window === 'tpm') ?? false;
+  if (!resolved) return false;
+  const { rpm, tpm } = resolveMinuteWindows(resolved.model);
+  return (
+    rpm !== undefined || tpm !== undefined || sharedMinutePoolLimit(resolved.provider) !== undefined
+  );
 }
 
 /** One model's day-scale and minute-scale windows, plus the usage already read for both. */

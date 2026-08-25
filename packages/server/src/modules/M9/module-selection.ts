@@ -151,6 +151,18 @@ export interface FreewayBackgroundSelection {
    * replaces it, it is never refreshed in place.
    */
   bucket: BucketView;
+  /**
+   * The bucket-source deps this resolution actually ran with — the caller's
+   * own overrides plus the session-scoped `moduleStatus` built below. Carried
+   * so that everything the run does against the ledger LATER (per-call debits,
+   * cools, and the pre-dispatch minute gate, which re-reads the live bucket
+   * views) asks the question the way selection asked it. Passing the bare
+   * overrides instead would fall back to `defaultModuleStatus`, which knows
+   * nothing of this session's credentials or the workspace's enablement and
+   * reports every module disabled — leaving the caller with an EMPTY bucket
+   * list and no way to notice, since nothing throws.
+   */
+  deps: BucketSourceDeps;
 }
 
 export interface SelectFreewayBackgroundOptions extends SelectCapableModuleOptions {
@@ -265,7 +277,7 @@ export async function selectFreewayBackgroundModule(
           ...freewayModuleOverrides(bucket.moduleId, bucket.modelId),
         },
       });
-      return { ...built, modelId: bucket.modelId, bucketKey: bucket.bucketKey, bucket };
+      return { ...built, modelId: bucket.modelId, bucketKey: bucket.bucketKey, bucket, deps };
     } catch (err) {
       // This bucket's module can't be built or can't do this work — try the
       // next one the selector offers rather than failing the whole run on it.
