@@ -45,6 +45,7 @@ import {
   type BatchDispatchOptions,
   type BatchGroupingDimension,
   resetRateLimiters,
+  runCountingProviderCalls,
   toErrorMessage,
   projectTargetLanguages,
   effectivePromptOptions,
@@ -3368,14 +3369,19 @@ export class TranslationEngine {
     }
   }
 
-  /** Ledger accounting for one provider call. Never fails the batch. */
+  /**
+   * Ledger accounting for one provider call by default — `requests` overrides
+   * that when the caller counted more (or fewer) actual provider calls, e.g.
+   * a dispatch the provider layer split. Never fails the batch.
+   */
   private async recordFreewayDispatch(
     bucketKey: string,
     results: readonly (TranslationResult | undefined)[],
     deps: BucketSourceDeps,
+    requests = 1,
   ): Promise<void> {
     try {
-      await recordDispatch(bucketKey, Date.now(), freewayUsageOf(results), deps);
+      await recordDispatch(bucketKey, Date.now(), freewayUsageOf(results), deps, requests);
     } catch (err) {
       this.logger.warn('translation:freeway-ledger-write-failed', {
         bucketKey,
@@ -3654,8 +3660,14 @@ export class TranslationEngine {
     for (let hop = 0; ; hop++) {
       let results: TranslationResult[] | undefined;
       try {
-        results = await state.module.translate(jobs, signal, translateOptions);
-        await this.recordFreewayDispatch(state.bucketKey, results, deps);
+        // Counted, not assumed: one translate() call can make several provider
+        // requests when the provider layer halves a failing batch, and the
+        // ledger has to debit what was actually spent.
+        const outcome = await runCountingProviderCalls(() =>
+          state.module.translate(jobs, signal, translateOptions),
+        );
+        results = outcome.result;
+        await this.recordFreewayDispatch(state.bucketKey, results, deps, outcome.calls);
         // A module that flattens a 429 into a per-result `error` string still
         // has to trigger the failover — surface it as a throw (mirrors the
         // non-Freeway `withRateLimitRetry` path).

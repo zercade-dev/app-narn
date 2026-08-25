@@ -35,6 +35,7 @@ import {
   projectTargetLanguages,
   effectivePromptOptions,
   isExcludedFromAi,
+  runCountingProviderCalls,
   toErrorMessage,
 } from '@zercade-dev/narn-shared';
 import { router as defaultRouter, type Router } from './M7-router.js';
@@ -790,12 +791,17 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
 
     let verdicts;
     try {
-      verdicts = await module.judgeTranslations!([item]);
+      // Counted, not assumed: one judgeTranslations() call can make several
+      // provider requests when the provider layer retries or splits, and the
+      // ledger has to debit what was actually spent.
+      const outcome = await runCountingProviderCalls(() => module.judgeTranslations!([item]));
+      verdicts = outcome.result;
       // One provider call, debited against the run's bucket when this
       // single-item judge is running on the free-tier target.
       await this.recordFreewayDispatch(
         bucketKey !== undefined ? { bucketKey, deps: this.freewayOverrides } : undefined,
         verdicts.map((v) => v.usage),
+        outcome.calls,
       );
     } finally {
       if (runWasVerbose && logs.length > 0) {
