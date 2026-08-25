@@ -48,8 +48,10 @@ import {
   selectFreewayBackgroundModule,
   type ModuleLogFn,
 } from './M9/module-selection.js';
-import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
+import { DEFAULT_BACKGROUND_BAND, FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
+import { batchSizeFor, effectivePassRate } from './M32/scoring.js';
+import type { BucketView, JobGroup } from './M32/types.js';
 import {
   BackgroundRunEngine,
   sanitizeLLMText,
@@ -58,8 +60,18 @@ import {
 } from './M9/run-engine.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
 
-/** Items reviewed per provider call (engine-level batching). */
+/** Items reviewed per provider call — the default for a non-Freeway module, and
+ *  the resolver's own fallback when a Freeway run has no bucket yet. */
 const SOURCE_REVIEW_BATCH_SIZE = 12;
+
+/**
+ * Sizing scores against neutral English. Source review has no target
+ * language at all (it reviews the source text, never a translation), so
+ * there is no real per-language rate to score against here — this mirrors
+ * the judge engine's own neutral-language constant so both engines call
+ * `batchSizeFor` the same way.
+ */
+const NEUTRAL_SIZING_LANGUAGE = 'en';
 
 /** The review categories (canonical definition lives in `@zercade-dev/narn-shared`). */
 export type { SourceReviewChecks };
@@ -201,7 +213,12 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     request: SourceReviewRequest,
     logSink?: ModuleLogFn,
     reserveRequests?: number,
-  ): Promise<{ module: TranslationModule; moduleId: string; bucketKey?: string }> {
+  ): Promise<{
+    module: TranslationModule;
+    moduleId: string;
+    bucketKey?: string;
+    bucket?: BucketView;
+  }> {
     const saved = project.sourceReviewConfig;
     const requestedId = request.moduleId ?? saved?.moduleId;
     const requestedModel = request.model ?? saved?.model;
@@ -277,6 +294,9 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       | undefined;
     // The run's current selection; each batch copies it when it starts.
     let target: { module: TranslationModule; moduleId: string } | undefined;
+    // The bucket the run is currently on, for batch sizing. Set by selectModule
+    // and replaced by a mid-run re-route; undefined for non-Freeway runs.
+    let bucket: BucketView | undefined;
 
     // The reserve the free-tier selector should fence: an explicit entry scope
     // bounds how many provider calls this run can make, so it fences the larger
@@ -311,6 +331,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
           freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+          bucket = selected.bucket;
           makeFreewayReroute = (selection) => async () => {
             try {
               // The struck bucket is cooled before this runs, so the selector
@@ -327,6 +348,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
               const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
               target = { module: next.module, moduleId: next.moduleId };
               freeway = binding;
+              bucket = next.bucket;
               selection.module = next.module;
               selection.moduleId = next.moduleId;
               return binding;
@@ -374,8 +396,39 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         kind: 'source-review',
         sourceReviewSummary: { reviewed: 0, flagged: 0, findings: 0 },
       },
-      batchSize:
-        request.batchSize && request.batchSize > 0 ? request.batchSize : SOURCE_REVIEW_BATCH_SIZE,
+      // Sized to the bucket the run landed on: a fixed constant either overruns
+      // a char-tight bucket's per-call budget on prose, or spends several times
+      // the daily requests a high-capacity/low-rpd bucket needed. Falls back to
+      // the flat constant (or the request's own explicit `batchSize`) for every
+      // non-Freeway module, which has no bucket.
+      //
+      // Source review reviews source text only — a source-review item has no
+      // translation, so its payload is honest as-is: `sourceText` here IS the
+      // real payload, not a proxy standing in for something larger.
+      batchSize: (items: SourceReviewItem[]) => {
+        const flat =
+          request.batchSize && request.batchSize > 0
+            ? request.batchSize
+            : SOURCE_REVIEW_BATCH_SIZE;
+        if (!bucket) return flat;
+        const group: JobGroup = {
+          targetLanguage: NEUTRAL_SIZING_LANGUAGE,
+          band: DEFAULT_BACKGROUND_BAND,
+          jobs: items.map((item) => ({
+            entryId: item.entryId,
+            targetLanguage: NEUTRAL_SIZING_LANGUAGE,
+            sourceText: item.s,
+            maskCount: 0,
+            hasLengthLimit: false,
+            glossaryTermCount: 0,
+          })),
+        };
+        return batchSizeFor(
+          bucket,
+          group,
+          effectivePassRate(bucket, NEUTRAL_SIZING_LANGUAGE, DEFAULT_BACKGROUND_BAND),
+        );
+      },
       // Per-run override (AI-review dialog) → project → workspace → none.
       ...(request.batchGrouping !== undefined
         ? { batchGroupingOverride: request.batchGrouping }

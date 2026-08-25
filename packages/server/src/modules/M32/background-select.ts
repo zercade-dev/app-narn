@@ -22,7 +22,7 @@ import type { BucketView, DifficultyBand, JobGroup } from './types.js';
 export const FREEWAY_BACKGROUND_RESERVE = 20;
 
 /** Engine work is judgment-heavy, so it defaults to the second-hardest band. */
-const DEFAULT_BACKGROUND_BAND: DifficultyBand = 3;
+export const DEFAULT_BACKGROUND_BAND: DifficultyBand = 3;
 
 /**
  * Neutral target language for the synthetic group. A background run's real

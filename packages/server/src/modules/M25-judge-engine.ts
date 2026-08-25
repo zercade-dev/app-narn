@@ -57,8 +57,10 @@ import {
   selectFreewayBackgroundModule,
   type ModuleLogFn,
 } from './M9/module-selection.js';
-import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
+import { DEFAULT_BACKGROUND_BAND, FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
+import { batchSizeFor, effectivePassRate } from './M32/scoring.js';
+import type { BucketView, JobGroup } from './M32/types.js';
 import {
   BackgroundRunEngine,
   sanitizeLLMText,
@@ -70,8 +72,18 @@ import { resolveRoutingRules } from './M9/resolve-routing.js';
 
 export const LLM_JUDGE_CHECK_ID = 'llm-judge';
 
-/** Items judged per provider call. */
+/** Items judged per provider call — the default for a non-Freeway module, and
+ *  the resolver's own fallback when a Freeway run has no bucket yet. */
 const JUDGE_BATCH_SIZE = 10;
+
+/**
+ * Sizing scores against neutral English even for a judge run that knows its
+ * real languages. The per-language signal is restricted to EXCLUDING a weak
+ * bucket (see the selector's language filter); letting it also shrink batches
+ * would make a soft quality number move throughput, which is a different and
+ * riskier kind of change. Exclusion and sizing stay independent.
+ */
+const NEUTRAL_SIZING_LANGUAGE = 'en';
 
 export class JudgeNotPossibleError extends Error {
   // 409 by default; a missing source run is a not-found condition (404). Mapped
@@ -289,7 +301,12 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     logSink?: ModuleLogFn,
     reserveRequests?: number,
     languages?: readonly string[],
-  ): Promise<{ module: TranslationModule; moduleId: string; bucketKey?: string }> {
+  ): Promise<{
+    module: TranslationModule;
+    moduleId: string;
+    bucketKey?: string;
+    bucket?: BucketView;
+  }> {
     const requestedId = override?.moduleId ?? project.judgeConfig?.moduleId;
     const requestedModel = override?.model ?? project.judgeConfig?.model;
     const requestedEffort = override?.reasoningEffort ?? project.judgeConfig?.reasoningEffort;
@@ -391,6 +408,9 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       | undefined;
     // The run's current selection; each batch copies it when it starts.
     let target: { module: TranslationModule; moduleId: string } | undefined;
+    // The bucket the run is currently on, for batch sizing. Set by selectModule
+    // and replaced by a mid-run re-route; undefined for non-Freeway runs.
+    let bucket: BucketView | undefined;
 
     // The reserve the free-tier selector should fence: this run's own scope
     // bounds how many provider calls it can make, so it fences the larger of
@@ -456,6 +476,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
           freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+          bucket = selected.bucket;
           makeFreewayReroute = (selection) => async () => {
             try {
               // The struck bucket is cooled before this runs, so the selector
@@ -473,6 +494,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
               const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
               target = { module: next.module, moduleId: next.moduleId };
               freeway = binding;
+              bucket = next.bucket;
               selection.module = next.module;
               selection.moduleId = next.moduleId;
               return binding;
@@ -596,7 +618,35 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         ...(sourceRunId ? { sourceRunId } : {}),
         judgeSummary: { judged: 0, flagged: 0 },
       },
-      batchSize: JUDGE_BATCH_SIZE,
+      // Sized to the bucket the run landed on: a fixed constant either overruns
+      // a char-tight bucket's per-call budget on prose, or spends several times
+      // the daily requests a high-capacity/low-rpd bucket needed. Falls back to
+      // the flat constant for every non-Freeway module, which has no bucket.
+      //
+      // `sourceText` here is a LENGTH PROXY for the whole judge payload
+      // (source + translation), never a value that is sent anywhere:
+      // charCappedBatch sums sourceText alone, so passing the bare source
+      // would undercount the payload by roughly half.
+      batchSize: (items: JudgeItem[]) => {
+        if (!bucket) return JUDGE_BATCH_SIZE;
+        const group: JobGroup = {
+          targetLanguage: NEUTRAL_SIZING_LANGUAGE,
+          band: DEFAULT_BACKGROUND_BAND,
+          jobs: items.map((item) => ({
+            entryId: item.entryId,
+            targetLanguage: NEUTRAL_SIZING_LANGUAGE,
+            sourceText: item.sourceText + item.translatedText,
+            maskCount: 0,
+            hasLengthLimit: false,
+            glossaryTermCount: 0,
+          })),
+        };
+        return batchSizeFor(
+          bucket,
+          group,
+          effectivePassRate(bucket, NEUTRAL_SIZING_LANGUAGE, DEFAULT_BACKGROUND_BAND),
+        );
+      },
       // Per-run override (AI-review dialog) → project → workspace → none.
       ...(override?.batchGrouping !== undefined
         ? { batchGroupingOverride: override.batchGrouping }
