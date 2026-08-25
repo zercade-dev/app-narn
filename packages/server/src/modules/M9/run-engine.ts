@@ -133,8 +133,33 @@ export interface EnqueueBatchedOptions<TItem extends { entryId: string }, TRecor
   ) => Promise<{ items: TItem[]; entriesById: Map<string, StringEntry> }>;
   /** Extra run-status fields (`kind` + the engine's summary object). */
   summary: Partial<RunStatus> & Pick<RunStatus, 'kind'>;
-  /** Max items per provider batch. */
-  batchSize: number;
+  /**
+   * Max items per provider batch — either a flat number, or a resolver called
+   * once with the built items. The resolver exists so a Freeway-routed run can
+   * size its batches to the bucket it landed on (which is known only after
+   * `selectModule`) while every other caller keeps passing its constant.
+   */
+  batchSize: number | ((items: TItem[]) => number);
+  /**
+   * Reports — after `batchSize` has run — whether those batches were sized to
+   * one specific model's own limits (Freeway bucket sizing) rather than to a
+   * flat constant. Consulted ONLY when building `dispatchOptions`, never when
+   * packing: "how should these items be grouped" and "may the provider re-chunk
+   * the result" are different questions.
+   *
+   * A bucket-sized batch has to reach the provider whole. The provider layer
+   * otherwise re-chunks it at its own review cap, so a batch the run planned as
+   * one call becomes several — spending free-tier requests the plan never
+   * budgeted, and under-counting them in the quota ledger, which debits once per
+   * engine batch. Mirrors the translate path's per-group `ignoreSizeLimit` for
+   * Freeway batches in M9-translation-engine.ts.
+   *
+   * Deliberately optional and deliberately not forced for every review run:
+   * `ignoreSizeLimit` unconditionally would silently disable a module's own
+   * configured `maxBatchSize`. Only a run that actually bucket-sized its batches
+   * may set it.
+   */
+  batchesPreSized?: () => boolean;
   /** Per-run related-entry grouping override; absent ⇒ project/workspace. */
   batchGroupingOverride?: BatchGroupingDimension;
   /** Per-run ignore-batch-size-limit override; absent ⇒ project/workspace. */
@@ -190,6 +215,26 @@ export interface RunBatchOptions<TItem, TResult> {
   onResult: (result: TResult, status: RunStatus) => Promise<void>;
   /** Post-terminal hook forwarded to {@link finalizeTerminal} (e.g. M25 stamp). */
   onComplete?: (status: RunStatus) => Promise<void>;
+  /**
+   * Fires once THIS batch's dispatch has settled — success, abort, whole-batch
+   * failure, a per-result cancel, or the run having already been cancelled
+   * before this batch even started — always inside the settled-drain bracket
+   * ({@link BackgroundRunEngine.taskStarted}/{@link BackgroundRunEngine.taskEnded})
+   * and always BEFORE {@link finalizeTerminal} runs, so it is reachable even if
+   * `finalizeTerminal` (or a caller's own `onComplete`) were to throw, and even
+   * on the run-already-cancelled path that never reaches `finalizeTerminal` at
+   * all. (Every step `finalizeTerminal` currently takes already guards its own
+   * failures — `finalizeUsageCosts`/`flushDetail`/`updateRun` all swallow
+   * internally — so this is a placement invariant for whatever a future
+   * `onComplete` or terminal step turns out NOT to guard, not a fix for a
+   * concrete throw that exists today.) Distinct from {@link onComplete}, which
+   * BackgroundRunEngine only ever invokes once per RUN (the last batch to go
+   * terminal) — a per-batch write (e.g. M25's judge-verdict stats fold) needs
+   * THIS hook, not that one, or every batch but the last silently loses its
+   * write. No `status` argument: a run-already-cancelled batch may have none
+   * to offer, and no current user needs one.
+   */
+  onBatchSettled?: () => Promise<void>;
 }
 
 /**
@@ -655,17 +700,31 @@ export abstract class BackgroundRunEngine<TRecord> {
       customBatchSize !== undefined
         ? customBatchSize === 0
         : (opts.ignoreBatchSizeLimitOverride ?? resolvedGrouping.ignoreSizeLimit);
+    // An explicit custom size (the AI-review dialog) still wins over
+    // everything; the resolver is consulted only when the user asked for no
+    // particular size, so bucket sizing can never override a deliberate choice.
     const effectiveBatchSize =
-      customBatchSize !== undefined && customBatchSize > 0 ? customBatchSize : opts.batchSize;
+      customBatchSize !== undefined && customBatchSize > 0
+        ? customBatchSize
+        : typeof opts.batchSize === 'function'
+          ? opts.batchSize(items)
+          : opts.batchSize;
     const batches = groupAndPack(items, effectiveBatchSize, ignoreSizeLimit, (item) =>
       batchGroupKey(entriesById.get(item.entryId) ?? {}, dimension),
     );
+    // Asked only now, so it reflects what the resolver above actually did.
+    const preSized = opts.batchesPreSized?.() ?? false;
     // When grouping is active, batches are already arranged; tell the provider
     // not to re-chunk them (which could tear a footprint apart). The same
     // applies when a custom batch size was set — the batches above are already
-    // sized exactly as requested.
+    // sized exactly as requested — and when the resolver sized them to the
+    // chosen model's own maxBatch: letting the provider re-chunk THAT would
+    // spend more free requests than the plan budgeted for (see
+    // {@link EnqueueBatchedOptions.batchesPreSized}).
     const dispatchOptions: BatchDispatchOptions | undefined =
-      dimension !== 'none' || customBatchSize !== undefined ? { ignoreSizeLimit: true } : undefined;
+      dimension !== 'none' || customBatchSize !== undefined || preSized
+        ? { ignoreSizeLimit: true }
+        : undefined;
 
     opts.dispatch({
       runId,
@@ -715,7 +774,14 @@ export abstract class BackgroundRunEngine<TRecord> {
   ): Promise<void> {
     const { runId, moduleId, batch } = opts;
     const status = this.runs.get(runId);
-    if (!status || status.status === RunStatusCode.Cancelled) return;
+    if (!status || status.status === RunStatusCode.Cancelled) {
+      // This batch never reaches the try/finally below (there is nothing to
+      // dispatch), so onBatchSettled — which every OTHER terminal path fires
+      // from that finally — is invoked explicitly here instead. Exactly one
+      // of these two call sites runs per invocation, never both.
+      await opts.onBatchSettled?.();
+      return;
+    }
     const signal = this.controllers.get(runId)?.signal;
 
     try {
@@ -809,6 +875,12 @@ export abstract class BackgroundRunEngine<TRecord> {
       }
     } finally {
       this.emitProgress(status);
+      // Fires BEFORE finalizeTerminal, and inside this finally rather than
+      // after runBatchWithUsage returns, so a per-batch write here does not
+      // depend on finalizeTerminal (or a caller's own onComplete) succeeding —
+      // a throw there would otherwise reject the whole call and skip anything
+      // placed after it.
+      await opts.onBatchSettled?.();
       await this.finalizeTerminal(status, opts.onComplete);
     }
   }

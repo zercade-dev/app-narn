@@ -39,6 +39,16 @@ export interface TranslationRecord {
    * untouched, and it enables a future "retranslate below tier N" bulk action.
    */
   freewayTier?: number;
+  /**
+   * Ledger key of the Freeway bucket that ACTUALLY served this translation
+   * (post-failover/degrade), the companion to {@link freewayTier}. Set only for
+   * Freeway-dispatched translations; absent for every other module and for
+   * trivial-matcher/translation-memory short-circuits that never reached a
+   * provider. Additive history field — it is what lets a later AI review
+   * attribute its verdict to the model that produced the text rather than to
+   * the model doing the reviewing.
+   */
+  freewayBucketKey?: string;
 }
 
 /** Category of a source-language AI-review finding. */

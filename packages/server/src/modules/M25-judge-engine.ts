@@ -58,7 +58,9 @@ import {
   type ModuleLogFn,
 } from './M9/module-selection.js';
 import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
-import type { BucketSourceDeps } from './M32/bucket-source.js';
+import { recordJudgeOutcomes, type BucketSourceDeps } from './M32/bucket-source.js';
+import { createReviewBatchSizer } from './M32/review-batch.js';
+import type { BucketView } from './M32/types.js';
 import {
   BackgroundRunEngine,
   sanitizeLLMText,
@@ -70,7 +72,8 @@ import { resolveRoutingRules } from './M9/resolve-routing.js';
 
 export const LLM_JUDGE_CHECK_ID = 'llm-judge';
 
-/** Items judged per provider call. */
+/** Items judged per provider call — the default for a non-Freeway module, and
+ *  the resolver's own fallback when a Freeway run has no bucket yet. */
 const JUDGE_BATCH_SIZE = 10;
 
 export class JudgeNotPossibleError extends Error {
@@ -288,7 +291,13 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     override?: JudgeOverride,
     logSink?: ModuleLogFn,
     reserveRequests?: number,
-  ): Promise<{ module: TranslationModule; moduleId: string; bucketKey?: string }> {
+    languages?: readonly string[],
+  ): Promise<{
+    module: TranslationModule;
+    moduleId: string;
+    bucketKey?: string;
+    bucket?: BucketView;
+  }> {
     const requestedId = override?.moduleId ?? project.judgeConfig?.moduleId;
     const requestedModel = override?.model ?? project.judgeConfig?.model;
     const requestedEffort = override?.reasoningEffort ?? project.judgeConfig?.reasoningEffort;
@@ -309,6 +318,7 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         ...options,
         deps: this.freewayOverrides,
         ...(reserveRequests !== undefined ? { reserveRequests } : {}),
+        ...(languages !== undefined ? { languages } : {}),
         noneAvailableMessage: 'no free-tier model is currently available to judge translations',
       });
     }
@@ -389,11 +399,23 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       | undefined;
     // The run's current selection; each batch copies it when it starts.
     let target: { module: TranslationModule; moduleId: string } | undefined;
+    // The bucket the run is currently on, for batch sizing. Set by selectModule
+    // and replaced by a mid-run re-route; undefined for non-Freeway runs. The
+    // reassignment on a hop is correct future-proofing, not something THIS run
+    // currently observes mid-flight: the batch-size resolver below runs once,
+    // before dispatch, and every batch is packed from that one result — a hop
+    // changes which bucket later batches debit against, never their size.
+    let bucket: BucketView | undefined;
 
-    // The reserve the free-tier selector should fence: this run's own scope
-    // bounds how many provider calls it can make, so it fences the larger of
-    // that and the flat default. A run whose scope is reconstructed from the
-    // whole project has no such bound, so the flat fence stands alone.
+    // The reserve the free-tier selector should fence: an ESTIMATE computed
+    // before the bucket (and therefore the real per-call size) is known, so
+    // this run's own scope, sized at the flat per-call constant, bounds how
+    // many provider calls it can make — fenced at the larger of that and the
+    // flat default. A char-tight bucket can size batches below that constant,
+    // so the run can end up making more calls than this estimate assumed; an
+    // exact fence isn't possible this early. A run whose scope is
+    // reconstructed from the whole project has no such bound, so the flat
+    // fence stands alone.
     const scope = sourceRun?.request;
     const itemsPerCall =
       override?.customBatchSize !== undefined && override.customBatchSize > 0
@@ -404,6 +426,25 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     // and `buildItems` reviews exactly those pairs — so size the fence on the
     // same number, or the run fences capacity it can never spend.
     const scopePairs = override?.pairs ?? scope?.pairs;
+
+    // The languages this run will actually review, for the selector's
+    // exclude-only language filter. Derived from the SAME scope the reserve is
+    // sized from, so a run can never fence one set of pairs and be routed for
+    // another. A run whose scope is reconstructed after selection
+    // (`reconstructScope` below) has no languages to offer here and is scored
+    // neutral, exactly as every background run was before: reordering the run
+    // to make them available earlier would be a far larger change than the
+    // routing improvement is worth.
+    const judgeLanguages = scope
+      ? [
+          ...new Set(
+            (scopePairs ? scopePairs.map((p) => p.targetLanguage) : scope.targetLanguages).filter(
+              (l) => (override?.languages ? override.languages.includes(l) : true),
+            ),
+          ),
+        ]
+      : undefined;
+
     const reserveRequests = scope
       ? Math.max(
           FREEWAY_BACKGROUND_RESERVE,
@@ -414,6 +455,18 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
           ),
         )
       : undefined;
+
+    // Sized to the bucket the run lands on (known only after `selectModule`,
+    // hence the getter), falling back to the flat constant for every
+    // non-Freeway module. `sourceText + translatedText` is a LENGTH PROXY for
+    // the whole judge payload, never a value that is sent anywhere: the judge
+    // sends both halves, so measuring the bare source would undercount by
+    // roughly half.
+    const sizer = createReviewBatchSizer<JudgeItem>({
+      bucket: () => bucket,
+      fallbackSize: JUDGE_BATCH_SIZE,
+      lengthProxy: (item) => item.sourceText + item.translatedText,
+    });
 
     return this.enqueueBatched<JudgeItem>({
       projectId,
@@ -429,10 +482,12 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
           override,
           logSink,
           reserveRequests,
+          judgeLanguages,
         );
         target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
           freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+          bucket = selected.bucket;
           makeFreewayReroute = (selection) => async () => {
             try {
               // The struck bucket is cooled before this runs, so the selector
@@ -444,11 +499,13 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
                 override,
                 logSink,
                 reserveRequests,
+                judgeLanguages,
               );
               if (next.bucketKey === undefined) return undefined;
               const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
               target = { module: next.module, moduleId: next.moduleId };
               freeway = binding;
+              bucket = next.bucket;
               selection.module = next.module;
               selection.moduleId = next.moduleId;
               return binding;
@@ -572,7 +629,12 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         ...(sourceRunId ? { sourceRunId } : {}),
         judgeSummary: { judged: 0, flagged: 0 },
       },
-      batchSize: JUDGE_BATCH_SIZE,
+      batchSize: sizer.resolve,
+      // A bucket-sized batch is already final: the provider must send it whole
+      // rather than re-chunking it at its own judge cap, which would turn one
+      // planned free-tier request into several (and the ledger, debiting once
+      // per engine batch, would under-count them).
+      batchesPreSized: sizer.bucketSized,
       // Per-run override (AI-review dialog) → project → workspace → none.
       ...(override?.batchGrouping !== undefined
         ? { batchGroupingOverride: override.batchGrouping }
@@ -862,6 +924,25 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       batch.map((item) => [`${item.entryId}::${item.targetLanguage}`, item.translatedText]),
     );
 
+    // Judge outcomes for THIS batch, grouped by the bucket that produced each
+    // translation. Flushed via onBatchSettled below — never from onComplete,
+    // which BackgroundRunEngine only invokes once the WHOLE RUN is terminal
+    // (the last batch to finish), so a per-batch map read there would see only
+    // that one batch's outcomes and silently drop every other batch's.
+    // onBatchSettled fires once per batch, inside the settled-drain bracket
+    // and before finalizeTerminal can throw it away — see its doc comment in
+    // M9/run-engine.ts. A fold per verdict would also be one ledger
+    // read-modify-write per item, which this batches against too.
+    const judgeOutcomes = new Map<string, Array<{ language: string; score: number }>>();
+    // The bucket actually serving THIS batch right now — starts as the bucket
+    // selection ran with, and follows a mid-batch re-route (freewayReroute
+    // below) the instant it completes, since a hop always finishes before any
+    // onResult for the batch it hopped. Comparing against this, not the
+    // dispatch-time `freeway` binding, is what keeps the self-judgment skip
+    // correct across a hop: after a re-route this batch's items were produced
+    // by the NEW bucket, not the one `freeway` was captured from.
+    let servingKey = freeway?.bucketKey;
+
     await this.runBatchWithUsage<JudgeItem, JudgeVerdict>({
       runId,
       moduleId: selection.moduleId,
@@ -871,8 +952,26 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       failureKey: (item) => item,
       usageOf: (verdict) => verdict.usage,
       ...(freeway ? { freeway } : {}),
-      ...(freewayReroute ? { freewayReroute } : {}),
+      ...(freewayReroute
+        ? {
+            freewayReroute: async () => {
+              const next = await freewayReroute();
+              if (next) servingKey = next.bucketKey;
+              return next;
+            },
+          }
+        : {}),
       onComplete: (s) => this.stampSourceRun(s),
+      onBatchSettled: async () => {
+        const now = Date.now();
+        for (const [producedBy, outcomes] of judgeOutcomes) {
+          // Best-effort, like every other stats fold: a failed write self-heals
+          // on the next run rather than failing a completed review.
+          await recordJudgeOutcomes(producedBy, now, outcomes, this.freewayOverrides).catch(
+            () => undefined,
+          );
+        }
+      },
       onResult: async (verdict, status) => {
         if (verdict.error) {
           this.recordFailure(status, verdict, verdict.error);
@@ -894,6 +993,21 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         summary.judged++;
         if (verdict.verdict === 'fail' || verdict.issues.length > 0) summary.flagged++;
         scores.addScore(verdict.score);
+        // Teach the router what this verdict says about the model that
+        // PRODUCED the translation — not the one that judged it. Skipped
+        // when the record carries no serving bucket (non-Freeway, manual,
+        // imported, or a trivial-matcher/TM short circuit that never reached
+        // a provider), and skipped when the producing bucket IS the bucket
+        // serving THIS batch right now (`servingKey`, hop included — see
+        // above): a model grading its own output is not independent evidence,
+        // and folding it would close a loop between the score that routed
+        // this run and the score this run writes.
+        const producedBy = entry.translations[verdict.targetLanguage]?.freewayBucketKey;
+        if (producedBy !== undefined && producedBy !== servingKey) {
+          const list = judgeOutcomes.get(producedBy) ?? [];
+          list.push({ language: verdict.targetLanguage, score: verdict.score });
+          judgeOutcomes.set(producedBy, list);
+        }
         summary.averageScore = Math.round(scores.scoreTotal() / summary.judged);
         const judgedText = judgedTextByPair.get(`${verdict.entryId}::${verdict.targetLanguage}`);
         verdictRecords.push({

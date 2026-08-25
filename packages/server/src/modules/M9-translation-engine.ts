@@ -3629,6 +3629,7 @@ export class TranslationEngine {
           decision.moduleId = revalidated.moduleId;
           decision.modelOverride = revalidated.modelId;
           decision.freewayTier = revalidated.qualityTier;
+          decision.freewayBucketKey = revalidated.bucketKey;
         }
         // Same guard the hop-0 reroute applies: a part sized for the planned
         // bucket's char budget can physically exceed the rescue bucket's.
@@ -3944,6 +3945,7 @@ export class TranslationEngine {
             decision.moduleId = revalidated.moduleId;
             decision.modelOverride = revalidated.modelId;
             decision.freewayTier = revalidated.qualityTier;
+            decision.freewayBucketKey = revalidated.bucketKey;
           }
           const rescue = buckets.find((b) => b.bucketKey === revalidated.bucketKey);
           const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
@@ -3994,6 +3996,7 @@ export class TranslationEngine {
               decision.moduleId = freshModuleId;
               decision.modelOverride = freshBucket.modelId;
               decision.freewayTier = freshBucket.qualityTier;
+              decision.freewayBucketKey = freshBucket.bucketKey;
             }
           }
         }
@@ -4201,6 +4204,7 @@ export class TranslationEngine {
             d.moduleId = revalidated.moduleId;
             d.modelOverride = revalidated.modelId;
             d.freewayTier = revalidated.qualityTier;
+            d.freewayBucketKey = revalidated.bucketKey;
           }
         } else if (revalidated.kind === 'defer') {
           this.deferPairsForQuota(
@@ -4429,11 +4433,13 @@ export class TranslationEngine {
         };
         // A glossary-constant short-circuit never reaches a bucket — even for
         // a Freeway-routed decision the plan already stamped — so the tier
-        // must be explicitly cleared, not inherited via the spread above.
+        // and its bucket key must be explicitly cleared, not inherited via
+        // the spread above.
         const persistDecision: RoutingDecision = {
           ...e.decision,
           moduleId: 'glossary-constant',
           freewayTier: undefined,
+          freewayBucketKey: undefined,
         };
         await this.persistResult(
           projectId,
@@ -4510,9 +4516,10 @@ export class TranslationEngine {
                 ...e.decision,
                 moduleId: TM_MODULE_ID,
                 // A translation-memory hit never touched a bucket either —
-                // clear a tier the plan may have stamped, same as the
-                // glossary-constant short-circuit above.
+                // clear a tier (and its bucket key) the plan may have
+                // stamped, same as the glossary-constant short-circuit above.
                 freewayTier: undefined,
+                freewayBucketKey: undefined,
               },
               runId,
             );
@@ -5205,6 +5212,7 @@ export class TranslationEngine {
               moduleId: escalation.moduleId,
               modelOverride: escalation.modelId,
               freewayTier: escalation.qualityTier,
+              freewayBucketKey: escalation.bucketKey,
             };
             escalatedBucketKey = escalation.bucketKey;
             this.logger.info('translation:freeway-escalated', {
@@ -5500,12 +5508,16 @@ export class TranslationEngine {
         timestamp: Date.now(),
         needsReview: true,
         ...(runId ? { runId } : {}),
-        // Stamps the SERVING Freeway bucket's tier (Addendum H) — decision
-        // .freewayTier is threaded through the exact same channel as
-        // moduleId/modelOverride above, kept in sync on every failover/
-        // degrade/escalation re-point, and explicitly cleared by every
-        // short-circuit persist path that never reached a bucket at all.
+        // Stamps the SERVING Freeway bucket's tier and ledger key (Addendum
+        // H) — decision.freewayTier/.freewayBucketKey are threaded through
+        // the exact same channel as moduleId/modelOverride above, kept in
+        // sync on every failover/degrade/escalation re-point, and explicitly
+        // cleared by every short-circuit persist path that never reached a
+        // bucket at all.
         ...(decision.freewayTier !== undefined ? { freewayTier: decision.freewayTier } : {}),
+        ...(decision.freewayBucketKey !== undefined
+          ? { freewayBucketKey: decision.freewayBucketKey }
+          : {}),
       },
       // Preserve a human 'reviewed' verdict when this run re-produces the exact
       // same text (re-translate / TM auto-apply). The check runs inside the
@@ -6111,8 +6123,14 @@ export class TranslationEngine {
       translatedText: trivialText,
     };
     // A built-in trivial matcher (empty/numeric/URL) never touches a bucket
-    // either, so clear any tier a Freeway-routed decision was stamped with.
-    const persistDecision: RoutingDecision = { ...d, moduleId: matcherId, freewayTier: undefined };
+    // either, so clear any tier (and bucket key) a Freeway-routed decision
+    // was stamped with.
+    const persistDecision: RoutingDecision = {
+      ...d,
+      moduleId: matcherId,
+      freewayTier: undefined,
+      freewayBucketKey: undefined,
+    };
     await this.persistResult(
       projectId,
       d.entry,

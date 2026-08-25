@@ -94,20 +94,36 @@ export function deriveDisplayRates(
 /**
  * Decay every language's record to `now`, dropping any that fails the guard.
  * The read path uses this to build a BucketView's stats; the result is never
- * written back. `gatePassByLanguage` is recomputed from the decayed counts
- * (mirroring `recordGatePass`'s write-time derivation) rather than passed
- * through — otherwise it would parrot the stale write-time ratio forever
- * while the decayed counts (and the router's Beta-Binomial estimate over
- * them) have long since moved on.
+ * written back. Each map's *ByLanguage display map is recomputed from its own
+ * decayed counts (mirroring `recordGatePass`'s write-time derivation) rather
+ * than passed through — otherwise it would parrot the stale write-time ratio
+ * forever while the decayed counts (and the router's Beta-Binomial estimate
+ * over them) have long since moved on.
  */
 export function decayStats(stats: FreewayBucketStats, now: number): FreewayBucketStats {
-  const source = stats.gatePassStats;
-  if (typeof source !== 'object' || source === null) return stats;
+  let next = stats;
+  const gate = decayRecordMap(stats.gatePassStats, now);
+  if (gate) {
+    next = { ...next, gatePassStats: gate, gatePassByLanguage: deriveDisplayRates(gate) };
+  }
+  const judge = decayRecordMap(stats.judgeScoreStats, now);
+  if (judge) {
+    next = { ...next, judgeScoreStats: judge, judgeScoreByLanguage: deriveDisplayRates(judge) };
+  }
+  return next;
+}
+
+/** Decay every record in one map, dropping any that fails the guard. */
+function decayRecordMap(
+  source: Record<string, FreewayGatePassRecord> | undefined,
+  now: number,
+): Record<string, FreewayGatePassRecord> | undefined {
+  if (typeof source !== 'object' || source === null) return undefined;
   const decayed: Record<string, FreewayGatePassRecord> = {};
   for (const [language, rec] of Object.entries(source)) {
     if (isGatePassRecord(rec)) decayed[language] = decayRecord(rec, now);
   }
-  return { ...stats, gatePassStats: decayed, gatePassByLanguage: deriveDisplayRates(decayed) };
+  return decayed;
 }
 
 /**
@@ -128,4 +144,31 @@ export function recordGatePass(
   const next = capRecord({ s: base.s + (passed ? 1 : 0), n: base.n + 1, t: now });
   const gatePassStats = { ...stats.gatePassStats, [language]: next };
   return { ...stats, gatePassStats, gatePassByLanguage: deriveDisplayRates(gatePassStats) };
+}
+
+/**
+ * Fold ONE judge score in: decay, then add, then cap — the same order and the
+ * same helpers as {@link recordGatePass}, over the judge statistic instead of
+ * the gate one. The score is clamped to 0..100 before normalizing, because it
+ * comes from a model's structured output and nothing upstream guarantees the
+ * range the prompt asked for.
+ */
+export function recordJudgeScore(
+  stats: FreewayBucketStats,
+  language: string,
+  score: number,
+  now: number,
+): FreewayBucketStats {
+  const existing = stats.judgeScoreStats?.[language];
+  const base: FreewayGatePassRecord = isGatePassRecord(existing)
+    ? decayRecord(existing, now)
+    : { s: 0, n: 0, t: now };
+  const normalized = Math.min(1, Math.max(0, score / 100));
+  const next = capRecord({ s: base.s + normalized, n: base.n + 1, t: now });
+  const judgeScoreStats = { ...stats.judgeScoreStats, [language]: next };
+  return {
+    ...stats,
+    judgeScoreStats,
+    judgeScoreByLanguage: deriveDisplayRates(judgeScoreStats),
+  };
 }
