@@ -107,8 +107,9 @@ async function applyJudgeSuggestion(
     timestamp: Date.now(),
   };
   // The judge's suggestion is a fresh manual rewrite of the text — never carry
-  // over a Freeway tier the OLD text was produced under.
+  // over a Freeway tier (or its bucket key) the OLD text was produced under.
   delete patched.freewayTier;
+  delete patched.freewayBucketKey;
   await updateEntry(projectId, verdict.entryId, {
     translations: {
       [verdict.targetLanguage]: patched,
