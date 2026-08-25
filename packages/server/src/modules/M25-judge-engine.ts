@@ -800,22 +800,45 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       ...(instructions ? { userGuidance: instructions } : {}),
     };
 
+    // The bucket this suggestion spends against, resolved once so the success
+    // and failure debits below cannot name different targets.
+    const spendAgainst =
+      selected.bucketKey !== undefined
+        ? { bucketKey: selected.bucketKey, deps: selected.deps }
+        : undefined;
     let verdicts;
+    // Captured via onSettled so the catch below can see it too: a call that
+    // throws rejects the whole runCountingProviderCalls promise, and the count
+    // has to escape that rejection some way other than the (unreachable, on a
+    // throw) return value.
+    let calls = 0;
     try {
       // Counted, not assumed: one judgeTranslations() call can make several
       // provider requests when the provider layer retries or splits, and the
       // ledger has to debit what was actually spent — against the run's
       // bucket, when this single-item judge is running on the free-tier
       // target.
-      const outcome = await runCountingProviderCalls(() => module.judgeTranslations!([item]));
-      verdicts = outcome.result;
-      await this.recordFreewayDispatch(
-        selected.bucketKey !== undefined
-          ? { bucketKey: selected.bucketKey, deps: selected.deps }
-          : undefined,
-        verdicts.map((v) => v.usage),
-        outcome.calls,
+      const outcome = await runCountingProviderCalls(
+        () => module.judgeTranslations!([item]),
+        (settledCalls) => {
+          calls = settledCalls;
+        },
       );
+      const usages = outcome.result.map((v) => v.usage);
+      verdicts = outcome.result;
+      await this.recordFreewayDispatch(spendAgainst, usages, outcome.calls);
+    } catch (err) {
+      // Same rule as every other Freeway dispatch: a suggestion that spent N
+      // requests and then threw debits those N, and one that counted zero
+      // still debits `recordDispatch`'s floor of 1 — a module dispatching
+      // through its own provider SDK rather than the AI SDK's guarded fetch
+      // (Copilot, DeepL) never reaches the counting seam, so zero is silence,
+      // not proof of an unspent request. `verdicts === undefined` is what
+      // keeps this from double-debiting an attempt the success path above
+      // already recorded. Empty usages: a call that threw reported no
+      // token/char tallies to fold.
+      if (verdicts === undefined) await this.recordFreewayDispatch(spendAgainst, [], calls);
+      throw err;
     } finally {
       if (runWasVerbose && logs.length > 0) {
         await this.runStore

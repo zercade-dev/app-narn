@@ -3754,9 +3754,10 @@ export class TranslationEngine {
         // throwing (2-6 is routine: a 429, or a 5xx then a 429, each burn a
         // counted attempt) — observed via `calls`, not assumed to be one.
         // `results === undefined` keeps this from double-debiting the success
-        // path above; `recordDispatch`'s own floor keeps a genuinely
-        // uncounted dispatch (Copilot's own SDK never reaches the counted
-        // fetch seam) at 1 rather than dropping to 0.
+        // path above; `recordDispatch`'s own floor keeps a genuinely uncounted
+        // dispatch at 1 rather than dropping to 0 — the modules that dispatch
+        // through their own provider SDK rather than the AI SDK's guarded
+        // fetch (Copilot and DeepL) never reach the counted seam at all.
         if (results === undefined) {
           await this.recordFreewayDispatch(state.bucketKey, [], deps, calls);
         }
@@ -5262,8 +5263,9 @@ export class TranslationEngine {
         // one provider request. retryLqaFailure never rethrows (its own
         // try/catch converts every failure into 'accepted-original' or
         // 'aborted'), so there is no separate failure-path debit to gate here
-        // — recordDispatch's own floor of 1 already covers a module (Copilot)
-        // that never reaches the counted fetch seam.
+        // — recordDispatch's own floor of 1 already covers the modules that
+        // dispatch through their own provider SDK rather than the AI SDK's
+        // guarded fetch (Copilot, DeepL) and so never reach the counted seam.
         const outcome = await runCountingProviderCalls(() =>
           this.retryLqaFailure({
             runId,

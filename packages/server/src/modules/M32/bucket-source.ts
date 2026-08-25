@@ -597,8 +597,39 @@ async function sharedPoolMinuteRemaining(
   return Math.max(0, sharedRpm - spent);
 }
 
-/** Assemble live BucketViews for every snapshot bucket usable RIGHT NOW-ish. */
-export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Promise<BucketView[]> {
+/** Narrowing options for {@link loadBucketViews}. */
+export interface LoadBucketViewsOptions {
+  /**
+   * Assemble the view for THIS bucket only, instead of every snapshot bucket.
+   *
+   * Purely a read-volume narrowing — the one view it returns is built from
+   * exactly the same live cells, read at the same instant, as the full sweep
+   * would have built it from, so a caller gains no staleness by asking for
+   * less. What it saves is the per-model `ledger.usage()` round trip for every
+   * bucket it was never going to look at: the pre-dispatch minute gate asks
+   * about ONE bucket once per batch, and the unscoped sweep charged it ~14
+   * serial reads (one per snapshot model) to answer.
+   *
+   * Sibling models of the SAME provider are still read when that provider
+   * declares an account-wide pool (`sharedLimits`), because the pool figures
+   * are sums over its models and a partial sum would read high — i.e. would
+   * let the gate dispatch into a pool minute that is already spent.
+   */
+  onlyBucketKey?: string;
+}
+
+/**
+ * Assemble live BucketViews for every snapshot bucket usable RIGHT NOW-ish, or
+ * for just one of them (see {@link LoadBucketViewsOptions.onlyBucketKey}).
+ */
+export async function loadBucketViews(
+  now: number,
+  deps?: BucketSourceDeps,
+  options?: LoadBucketViewsOptions,
+): Promise<BucketView[]> {
+  const onlyBucketKey = options?.onlyBucketKey;
+  const onlyModuleId =
+    onlyBucketKey === undefined ? undefined : freewayBucketBaseModuleId(onlyBucketKey);
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const moduleStatus = deps?.moduleStatus ?? defaultModuleStatus;
   const instanceIdsFor = deps?.instanceIdsFor ?? defaultInstanceIdsFor;
@@ -614,6 +645,13 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   const views: BucketView[] = [];
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
+    // A narrowed sweep touches only the provider that owns the asked-for
+    // bucket; every other provider's models are read for nothing.
+    if (onlyModuleId !== undefined && provider.moduleId !== onlyModuleId) continue;
+    // Whether this provider's siblings still have to be read: both pool
+    // figures below are sums across its models, so a narrowed sweep may only
+    // skip siblings when neither sum exists.
+    const pooled = hasSharedPool(provider) || sharedMinutePoolLimit(provider) !== undefined;
 
     const { dispatchModuleId, badCredentials } = resolveDispatchModuleId(
       provider.moduleId,
@@ -636,6 +674,7 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
       const dayWindow = resolveDayWindow(model);
       if (!dayWindow) continue;
       const bucketKey = freewayBucketKey(provider.moduleId, model.id);
+      if (onlyBucketKey !== undefined && bucketKey !== onlyBucketKey && !pooled) continue;
       const minuteWindow = resolveMinuteWindows(model);
       // rpm/tpm float to the same zone-independent minute regardless of the
       // provider's day-scale reset zone (windowStart ignores the zone
@@ -669,6 +708,10 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
     );
 
     for (const { model, dayWindow, bucketKey, usage, minuteWindow, rpmUsage, tpmUsage } of models) {
+      // A pooled provider's siblings were read for their contribution to the
+      // pool sums above, not to be returned: a narrowed sweep hands back the
+      // one bucket it was asked for and nothing else.
+      if (onlyBucketKey !== undefined && bucketKey !== onlyBucketKey) continue;
       const remainingRequests =
         dayWindow.kind === 'monthly_chars'
           ? Number.MAX_SAFE_INTEGER
@@ -793,10 +836,13 @@ export async function recordDispatch(
     if (minuteWindow.tpm !== undefined) windows.push({ kind: 'tpm', start: minuteStart });
   }
   await ledger.recordAttempt(bucketKey, windows, {
-    // Floor of 1: a dispatch that somehow counted zero (a provider that does
-    // not route through the guarded fetch, e.g. Copilot's own SDK) must still
-    // cost what it costs today — this can only ever correct the ledger
-    // upward, never downward.
+    // Floor of 1: a dispatch that somehow counted zero must still cost what it
+    // costs today — this can only ever correct the ledger upward, never
+    // downward. Zero is not rare and not a bug: a whole CLASS of modules
+    // dispatches through its provider's OWN SDK rather than the AI SDK's
+    // guarded fetch (Copilot and DeepL today), so the counting seam never sees
+    // their requests at all. They spend exactly one request per dispatch, which
+    // is what this floor records for them.
     requests: Math.max(1, Math.round(requests)),
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,

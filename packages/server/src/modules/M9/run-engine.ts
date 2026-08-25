@@ -934,6 +934,16 @@ export abstract class BackgroundRunEngine<TRecord> {
               // ledger has to debit what was actually spent — as soon as the
               // call returns, and again on its own return for a retried attempt.
               let calls = 0;
+              // Proof that the success debit below already ran, and the ONLY
+              // thing the catch may reason from. `calls >= 1` cannot serve:
+              // it is true of a successful attempt too, so anything throwing
+              // after the debit — `usageOf`, the ledger write itself — would
+              // debit the same attempt twice. Assigned only once the usages
+              // are in hand, so a throw while mapping them still reaches the
+              // failure debit rather than falling into the gap between the
+              // two. Same idiom, same reason, as the translate engine's
+              // `results === undefined`.
+              let attemptResults: TResult[] | undefined;
               try {
                 const outcome = await runCountingProviderCalls(
                   () => opts.call(signal),
@@ -941,24 +951,28 @@ export abstract class BackgroundRunEngine<TRecord> {
                     calls = settledCalls;
                   },
                 );
-                await this.recordFreewayDispatch(
-                  binding,
-                  outcome.result.map(opts.usageOf),
-                  outcome.calls,
-                );
-                return outcome.result;
+                const usages = outcome.result.map(opts.usageOf);
+                attemptResults = outcome.result;
+                await this.recordFreewayDispatch(binding, usages, outcome.calls);
+                return attemptResults;
               } catch (err) {
-                // A dispatch that made calls and then threw still spent them — the
-                // provider already counted them against quota even though this
-                // attempt never produced a result to debit through the path above.
-                // Nothing observed (the throw fired before any call went out, or
-                // this module never reaches the counted fetch seam — Copilot's own
-                // SDK) must NOT acquire a debit it never had, so this only fires
-                // once at least one call was actually made. The usages are empty
-                // on purpose: a call that threw never reported its token/char
-                // tallies, so the request count is the only honest thing to
-                // debit — those dispatches are spent but unmeasured, by nature.
-                if (calls >= 1) await this.recordFreewayDispatch(binding, [], calls);
+                // A dispatch that threw still went to a provider, so it debits —
+                // unconditionally, exactly as the translate engine's failure path
+                // does. A count of zero is not evidence that nothing was spent:
+                // modules that dispatch through their OWN SDK rather than the AI
+                // SDK's guarded fetch (Copilot, DeepL) never reach the counted
+                // seam at all, so `recordDispatch`'s floor of 1 is what stands in
+                // for them here — erring upward, which is the only direction a
+                // quota ledger can safely be wrong in. Under-debiting is what
+                // keeps a run dispatching against stock it has already spent.
+                // The usages are empty on purpose: a call that threw never
+                // reported its token/char tallies, so the request count is the
+                // only honest thing to debit — those dispatches are spent but
+                // unmeasured, by nature. An abort is deliberately not exempted:
+                // a cancel that fired mid-flight has already spent its calls.
+                if (attemptResults === undefined) {
+                  await this.recordFreewayDispatch(binding, [], calls);
+                }
                 throw err;
               }
             },
@@ -1092,7 +1106,17 @@ export abstract class BackgroundRunEngine<TRecord> {
     // sweep below — asked once per batch — would only ever confirm it has
     // nothing to say.
     if (!bucketHasMinuteWindow(bucketKey)) return 0;
-    const bucket = (await loadBucketViews(now, deps)).find((b) => b.bucketKey === bucketKey);
+    // Narrowed to the one bucket this batch is bound to. The gate runs once
+    // per batch on a path that previously did no reads at all, and the
+    // unscoped sweep costs one serial ledger round trip PER snapshot model —
+    // a few hundred batches of a review run would pay thousands of reads for
+    // views of buckets it never inspects. Narrowing costs no freshness: the
+    // view it returns is assembled from the same live cells, read now, that
+    // the full sweep would have assembled it from (siblings of a pooled
+    // provider included, since the pool sums need them).
+    const bucket = (await loadBucketViews(now, deps, { onlyBucketKey: bucketKey })).find(
+      (b) => b.bucketKey === bucketKey,
+    );
     // Unknown bucket (a snapshot refresh dropped the model mid-run): nothing to
     // project against, and nothing a pause would fix.
     if (!bucket) return 0;
