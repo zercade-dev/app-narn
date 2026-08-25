@@ -200,10 +200,21 @@ export const FREEWAY_MINUTE_WAIT_CAP_MS = 90_000;
  */
 const FREEWAY_MINUTE_WAIT_MARGIN_MS = 1_000;
 
-/** The free-tier bucket a background run spends against, plus its test seams. */
+/**
+ * The free-tier bucket a background run spends against, plus the bucket-source
+ * context to reach it with.
+ *
+ * `deps` is REQUIRED, and that is load-bearing rather than tidy: it must be the
+ * session-scoped object the run's resolution built (`moduleStatus` included),
+ * because `loadBucketViews` with no `moduleStatus` falls back to
+ * `defaultModuleStatus`, reports every module disabled, and hands back an EMPTY
+ * bucket list without erroring. A binding that defaulted its deps therefore
+ * would not fail — it would silently see no buckets, which is exactly how the
+ * minute gate shipped inert once already.
+ */
 export interface FreewayBatchBinding {
   bucketKey: string;
-  deps?: BucketSourceDeps;
+  deps: BucketSourceDeps;
 }
 
 /**
@@ -842,22 +853,46 @@ export abstract class BackgroundRunEngine<TRecord> {
               Date.now(),
               binding.deps,
             );
-            if (wait === undefined) {
-              // A bucket that cannot serve this batch is exactly what the
-              // re-route hop exists for, so offer it before failing. Before
-              // this gate, such a batch dispatched, took its 429 and hopped to
-              // a healthy sibling — which also re-points the run's binding for
-              // every later batch — so failing outright here would cost a whole
-              // re-route, not just one wasted request. The struck bucket needs
-              // no cool first: the ledger already knows it is spent or cooling,
-              // which is why the gate declined it, so the re-selection skips it
-              // on its own.
+            if (wait !== 0) {
+              // Serve now, pause briefly, fail — in that order. A bucket that
+              // cannot serve this batch right now is exactly what the re-route
+              // hop exists for, whether it recovers in seconds or not at all,
+              // so the hop is offered FIRST and the pause is what happens when
+              // nothing else can serve.
+              //
+              // Preferring the pause would be worse in the common case, not
+              // the rare one: a large judge run bound to a 5-rpm bucket is
+              // ~100 batches, and pausing each of them out of its spent minute
+              // adds the better part of an hour of dead time while a healthy
+              // sibling idles. The gate exists to convert a request the
+              // provider would certainly reject into a short pause, never to
+              // prefer waiting over a bucket that could serve immediately.
+              //
+              // The trade is that a batch which hops here has spent its one
+              // hop, so a genuinely transient 429 on the NEW bucket has
+              // nowhere left to move to. That is the narrower risk: the new
+              // bucket was chosen BECAUSE it is eligible, its pause is still
+              // unspent, and before this gate existed the batch would have
+              // dispatched into the spent minute and taken that 429 anyway.
+              //
+              // The hop can only move a run the SELECTOR agrees is stuck. A
+              // spent rpm window it sees too (`hasMinuteHeadroom`), so the
+              // measured pathology — ~100 batches pacing against a 5-rpm
+              // bucket — moves. A token projection it does NOT see, since that
+              // is the flat floor's blind spot this gate exists to cover, so
+              // there the re-selection offers the same bucket back and the
+              // batch pauses instead. Short, bounded, and better than
+              // dispatching into a window that cannot hold the batch.
+              //
+              // The declined bucket needs no cool first: the ledger already
+              // knows it is spent or cooling — that is why the gate declined
+              // it — so the re-selection skips it unaided.
               const next =
                 hop === 0 && opts.freewayReroute
                   ? await this.tryFreewayReroute(
                       runId,
                       binding.bucketKey,
-                      'minute-gate',
+                      wait === undefined ? 'minute-gate' : 'minute-wait',
                       opts.freewayReroute,
                     )
                   : undefined;
@@ -865,21 +900,23 @@ export abstract class BackgroundRunEngine<TRecord> {
                 binding = next;
                 continue;
               }
-              // Thrown rather than recorded here so the batch fails through the
-              // single failure block below: the same per-item recording, the
-              // same value-scrubbed message, the same `batch-failed` log.
-              throw new Error(
-                `free-tier bucket ${binding.bucketKey} has no capacity for this batch and does not recover within ${Math.round(FREEWAY_MINUTE_WAIT_CAP_MS / 1_000)}s`,
-              );
-            }
-            // A batch that has already spent its one pause dispatches anyway
-            // rather than failing on a projection: the budget for waiting is
-            // gone, not the batch's right to take its chances with the
-            // provider, which is exactly what it would have done before.
-            if (wait > 0 && !paused) {
-              paused = true;
-              if (!(await this.freewayPause(runId, binding.bucketKey, wait, status, signal))) {
-                return;
+              if (wait === undefined) {
+                // Thrown rather than recorded here so the batch fails through
+                // the single failure block below: the same per-item recording,
+                // the same value-scrubbed message, the same `batch-failed` log.
+                throw new Error(
+                  `free-tier bucket ${binding.bucketKey} has no capacity for this batch and does not recover within ${Math.round(FREEWAY_MINUTE_WAIT_CAP_MS / 1_000)}s`,
+                );
+              }
+              // A batch that has already spent its one pause dispatches anyway
+              // rather than failing on a projection: the budget for waiting is
+              // gone, not the batch's right to take its chances with the
+              // provider, which is exactly what it would have done before.
+              if (!paused) {
+                paused = true;
+                if (!(await this.freewayPause(runId, binding.bucketKey, wait, status, signal))) {
+                  return;
+                }
               }
             }
           }
@@ -1048,14 +1085,14 @@ export abstract class BackgroundRunEngine<TRecord> {
     bucketKey: string,
     batchChars: number,
     now: number,
-    deps: BucketSourceDeps | undefined,
+    deps: BucketSourceDeps,
   ): Promise<number | undefined> {
     // Answered from the snapshot before anything is read: a model under no
     // per-minute ceiling at all has no spent minute to wait for, so the live
     // sweep below — asked once per batch — would only ever confirm it has
     // nothing to say.
     if (!bucketHasMinuteWindow(bucketKey)) return 0;
-    const bucket = (await loadBucketViews(now, deps ?? {})).find((b) => b.bucketKey === bucketKey);
+    const bucket = (await loadBucketViews(now, deps)).find((b) => b.bucketKey === bucketKey);
     // Unknown bucket (a snapshot refresh dropped the model mid-run): nothing to
     // project against, and nothing a pause would fix.
     if (!bucket) return 0;
@@ -1118,7 +1155,7 @@ export abstract class BackgroundRunEngine<TRecord> {
   private async tryFreewayReroute(
     runId: string,
     from: string,
-    reason: 'rate-limit' | 'minute-gate',
+    reason: 'rate-limit' | 'minute-gate' | 'minute-wait',
     reroute: () => Promise<FreewayBatchBinding | undefined>,
   ): Promise<FreewayBatchBinding | undefined> {
     let next: FreewayBatchBinding | undefined;
@@ -1127,14 +1164,20 @@ export abstract class BackgroundRunEngine<TRecord> {
     } catch {
       next = undefined;
     }
-    if (next) {
-      this.logger.info(`${this.logPrefix}:freeway-rerouted`, {
-        runId,
-        from,
-        to: next.bucketKey,
-        reason,
-      });
-    }
+    // A re-selection that lands back on the SAME bucket is not a hop, and
+    // must not consume the one this batch gets. It happens at the minute gate
+    // and only there: the gate declines on a projection the selector's own
+    // flat minute floor cannot see, so the selector still ranks this bucket
+    // best and offers it straight back. (The rate-limit caller cools the
+    // struck bucket first, so its re-selection can never return it.) Reporting
+    // "nothing to move to" leaves the caller its pause.
+    if (!next || next.bucketKey === from) return undefined;
+    this.logger.info(`${this.logPrefix}:freeway-rerouted`, {
+      runId,
+      from,
+      to: next.bucketKey,
+      reason,
+    });
     return next;
   }
 

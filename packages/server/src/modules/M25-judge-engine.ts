@@ -758,18 +758,18 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     const priorLogs = await this.runStore.getJudgeLogs(projectId, runId);
     const runWasVerbose = priorLogs.length > 0;
     const { logSink, logs } = this.buildLogSink();
-    const {
-      module,
-      moduleId,
-      bucketKey,
-      deps: bucketDeps,
-    } = await this.selectJudgeModule(
+    // Held whole rather than destructured: `bucketKey` and `deps` are
+    // correlated by the return type, and pulling them into separate consts
+    // discards that — the debit below would then compile with a missing deps
+    // object, which is the failure this pairing exists to prevent.
+    const selected = await this.selectJudgeModule(
       project,
       global,
       sessionId,
       runWasVerbose ? { verbose: true } : undefined,
       runWasVerbose ? logSink : undefined,
     );
+    const { module, moduleId } = selected;
 
     const entries = await this.stringStore.load(projectId);
     const entry = entries.find((e) => e.id === entryId);
@@ -810,7 +810,9 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       const outcome = await runCountingProviderCalls(() => module.judgeTranslations!([item]));
       verdicts = outcome.result;
       await this.recordFreewayDispatch(
-        bucketKey !== undefined ? { bucketKey, deps: bucketDeps } : undefined,
+        selected.bucketKey !== undefined
+          ? { bucketKey: selected.bucketKey, deps: selected.deps }
+          : undefined,
         verdicts.map((v) => v.usage),
         outcome.calls,
       );
