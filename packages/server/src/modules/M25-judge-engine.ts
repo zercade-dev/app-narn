@@ -409,13 +409,22 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     // The run's current selection; each batch copies it when it starts.
     let target: { module: TranslationModule; moduleId: string } | undefined;
     // The bucket the run is currently on, for batch sizing. Set by selectModule
-    // and replaced by a mid-run re-route; undefined for non-Freeway runs.
+    // and replaced by a mid-run re-route; undefined for non-Freeway runs. The
+    // reassignment on a hop is correct future-proofing, not something THIS run
+    // currently observes mid-flight: the batch-size resolver below runs once,
+    // before dispatch, and every batch is packed from that one result — a hop
+    // changes which bucket later batches debit against, never their size.
     let bucket: BucketView | undefined;
 
-    // The reserve the free-tier selector should fence: this run's own scope
-    // bounds how many provider calls it can make, so it fences the larger of
-    // that and the flat default. A run whose scope is reconstructed from the
-    // whole project has no such bound, so the flat fence stands alone.
+    // The reserve the free-tier selector should fence: an ESTIMATE computed
+    // before the bucket (and therefore the real per-call size) is known, so
+    // this run's own scope, sized at the flat per-call constant, bounds how
+    // many provider calls it can make — fenced at the larger of that and the
+    // flat default. A char-tight bucket can size batches below that constant,
+    // so the run can end up making more calls than this estimate assumed; an
+    // exact fence isn't possible this early. A run whose scope is
+    // reconstructed from the whole project has no such bound, so the flat
+    // fence stands alone.
     const scope = sourceRun?.request;
     const itemsPerCall =
       override?.customBatchSize !== undefined && override.customBatchSize > 0
@@ -438,10 +447,9 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     const judgeLanguages = scope
       ? [
           ...new Set(
-            (scopePairs
-              ? scopePairs.map((p) => p.targetLanguage)
-              : scope.targetLanguages
-            ).filter((l) => (override?.languages ? override.languages.includes(l) : true)),
+            (scopePairs ? scopePairs.map((p) => p.targetLanguage) : scope.targetLanguages).filter(
+              (l) => (override?.languages ? override.languages.includes(l) : true),
+            ),
           ),
         ]
       : undefined;

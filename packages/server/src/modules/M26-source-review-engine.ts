@@ -295,13 +295,22 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     // The run's current selection; each batch copies it when it starts.
     let target: { module: TranslationModule; moduleId: string } | undefined;
     // The bucket the run is currently on, for batch sizing. Set by selectModule
-    // and replaced by a mid-run re-route; undefined for non-Freeway runs.
+    // and replaced by a mid-run re-route; undefined for non-Freeway runs. The
+    // reassignment on a hop is correct future-proofing, not something THIS run
+    // currently observes mid-flight: the batch-size resolver below runs once,
+    // before dispatch, and every batch is packed from that one result — a hop
+    // changes which bucket later batches debit against, never their size.
     let bucket: BucketView | undefined;
 
-    // The reserve the free-tier selector should fence: an explicit entry scope
-    // bounds how many provider calls this run can make, so it fences the larger
-    // of that and the flat default. The needsTranslation fallback scope isn't
-    // knowable from the request, so there the flat fence stands alone.
+    // The reserve the free-tier selector should fence: an ESTIMATE computed
+    // before the bucket (and therefore the real per-call size) is known, so an
+    // explicit entry scope, sized at `itemsPerCall` below, bounds how many
+    // provider calls this run can make — fenced at the larger of that and the
+    // flat default. A char-tight bucket can size batches below `itemsPerCall`
+    // when no explicit request size was given, so the run can end up making
+    // more calls than this estimate assumed; an exact fence isn't possible this
+    // early. The needsTranslation fallback scope isn't knowable from the
+    // request, so there the flat fence stands alone.
     const scopedEntries = request.entryIds?.length;
     const itemsPerCall =
       request.customBatchSize !== undefined && request.customBatchSize > 0
@@ -396,21 +405,24 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         kind: 'source-review',
         sourceReviewSummary: { reviewed: 0, flagged: 0, findings: 0 },
       },
-      // Sized to the bucket the run landed on: a fixed constant either overruns
-      // a char-tight bucket's per-call budget on prose, or spends several times
-      // the daily requests a high-capacity/low-rpd bucket needed. Falls back to
-      // the flat constant (or the request's own explicit `batchSize`) for every
-      // non-Freeway module, which has no bucket.
+      // Precedence: `customBatchSize` (handled upstream in run-engine.ts, before
+      // this resolver ever runs) → an explicit `request.batchSize` (the AI-review
+      // dialog's plain "Batch size" field — the dialog omits it at its own
+      // default so a Freeway run isn't pinned to that default on every start,
+      // but a value the user actually changed still arrives here) → bucket
+      // sizing for a Freeway-routed run with no explicit size → the flat
+      // `SOURCE_REVIEW_BATCH_SIZE` constant. An explicit request size always
+      // wins over bucket sizing — it is a deliberate user choice, not a default
+      // the bucket is free to override — so bucket sizing only ever replaces
+      // the FLAT CONSTANT's role, never a size the caller actually asked for.
       //
       // Source review reviews source text only — a source-review item has no
       // translation, so its payload is honest as-is: `sourceText` here IS the
       // real payload, not a proxy standing in for something larger.
       batchSize: (items: SourceReviewItem[]) => {
-        const flat =
-          request.batchSize && request.batchSize > 0
-            ? request.batchSize
-            : SOURCE_REVIEW_BATCH_SIZE;
-        if (!bucket) return flat;
+        const explicit = request.batchSize && request.batchSize > 0 ? request.batchSize : undefined;
+        if (explicit !== undefined) return explicit;
+        if (!bucket) return SOURCE_REVIEW_BATCH_SIZE;
         const group: JobGroup = {
           targetLanguage: NEUTRAL_SIZING_LANGUAGE,
           band: DEFAULT_BACKGROUND_BAND,
