@@ -1,0 +1,518 @@
+{
+ "reference": "fable",
+ "rubric": "FAIL = breaks runtime (placeholder/tag), corrupts text, leaves source untranslated, leaks markup entities, adds content absent from the source, or breaks established terminology. PASS = accurate, intact, terminologically consistent.",
+ "verdicts": {
+  "fr:e00": {
+   "lang": "fr",
+   "entryId": "e00",
+   "arm": "injected",
+   "designedDefect": "untranslated",
+   "verdict": "fail",
+   "score": 10,
+   "issues": [
+    "untranslated"
+   ]
+  },
+  "ja:e00": {
+   "lang": "ja",
+   "entryId": "e00",
+   "arm": "injected",
+   "designedDefect": "entity-leak",
+   "verdict": "fail",
+   "score": 60,
+   "issues": [
+    "entity-leak"
+   ]
+  },
+  "fr:e01": {
+   "lang": "fr",
+   "entryId": "e01",
+   "arm": "injected",
+   "designedDefect": "terminology-drift",
+   "verdict": "fail",
+   "score": 45,
+   "issues": [
+    "terminology"
+   ]
+  },
+  "ja:e01": {
+   "lang": "ja",
+   "entryId": "e01",
+   "arm": "injected",
+   "designedDefect": "terminology-drift",
+   "verdict": "fail",
+   "score": 40,
+   "issues": [
+    "terminology"
+   ]
+  },
+  "fr:e02": {
+   "lang": "fr",
+   "entryId": "e02",
+   "arm": "injected",
+   "designedDefect": "entity-leak",
+   "verdict": "fail",
+   "score": 60,
+   "issues": [
+    "entity-leak"
+   ]
+  },
+  "ja:e02": {
+   "lang": "ja",
+   "entryId": "e02",
+   "arm": "injected",
+   "designedDefect": "untranslated",
+   "verdict": "fail",
+   "score": 10,
+   "issues": [
+    "untranslated"
+   ]
+  },
+  "fr:e03": {
+   "lang": "fr",
+   "entryId": "e03",
+   "arm": "injected",
+   "designedDefect": "overflow",
+   "verdict": "fail",
+   "score": 30,
+   "issues": [
+    "added-content"
+   ]
+  },
+  "ja:e03": {
+   "lang": "ja",
+   "entryId": "e03",
+   "arm": "injected",
+   "designedDefect": "overflow",
+   "verdict": "fail",
+   "score": 30,
+   "issues": [
+    "added-content"
+   ]
+  },
+  "fr:e04": {
+   "lang": "fr",
+   "entryId": "e04",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "ja:e04": {
+   "lang": "ja",
+   "entryId": "e04",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "fr:e05": {
+   "lang": "fr",
+   "entryId": "e05",
+   "arm": "injected",
+   "designedDefect": "entity-leak",
+   "verdict": "fail",
+   "score": 60,
+   "issues": [
+    "entity-leak"
+   ]
+  },
+  "ja:e05": {
+   "lang": "ja",
+   "entryId": "e05",
+   "arm": "injected",
+   "designedDefect": "entity-leak",
+   "verdict": "fail",
+   "score": 60,
+   "issues": [
+    "entity-leak"
+   ]
+  },
+  "fr:e06": {
+   "lang": "fr",
+   "entryId": "e06",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 90,
+   "issues": []
+  },
+  "ja:e06": {
+   "lang": "ja",
+   "entryId": "e06",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "fail",
+   "score": 65,
+   "issues": [
+    "terminology"
+   ]
+  },
+  "fr:e07": {
+   "lang": "fr",
+   "entryId": "e07",
+   "arm": "injected",
+   "designedDefect": "overflow",
+   "verdict": "fail",
+   "score": 30,
+   "issues": [
+    "added-content",
+    "terminology"
+   ]
+  },
+  "ja:e07": {
+   "lang": "ja",
+   "entryId": "e07",
+   "arm": "injected",
+   "designedDefect": "overflow",
+   "verdict": "fail",
+   "score": 30,
+   "issues": [
+    "added-content"
+   ]
+  },
+  "fr:e08": {
+   "lang": "fr",
+   "entryId": "e08",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "fail",
+   "score": 65,
+   "issues": [
+    "terminology"
+   ]
+  },
+  "ja:e08": {
+   "lang": "ja",
+   "entryId": "e08",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 92,
+   "issues": []
+  },
+  "fr:e09": {
+   "lang": "fr",
+   "entryId": "e09",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "fail",
+   "score": 65,
+   "issues": [
+    "terminology"
+   ]
+  },
+  "ja:e09": {
+   "lang": "ja",
+   "entryId": "e09",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 92,
+   "issues": []
+  },
+  "fr:e10": {
+   "lang": "fr",
+   "entryId": "e10",
+   "arm": "injected",
+   "designedDefect": "placeholder-dropped",
+   "verdict": "fail",
+   "score": 5,
+   "issues": [
+    "placeholder-missing"
+   ]
+  },
+  "ja:e10": {
+   "lang": "ja",
+   "entryId": "e10",
+   "arm": "injected",
+   "designedDefect": "placeholder-dropped",
+   "verdict": "fail",
+   "score": 5,
+   "issues": [
+    "placeholder-missing"
+   ]
+  },
+  "fr:e11": {
+   "lang": "fr",
+   "entryId": "e11",
+   "arm": "injected",
+   "designedDefect": "placeholder-translated",
+   "verdict": "fail",
+   "score": 5,
+   "issues": [
+    "placeholder-corrupted"
+   ]
+  },
+  "ja:e11": {
+   "lang": "ja",
+   "entryId": "e11",
+   "arm": "injected",
+   "designedDefect": "placeholder-translated",
+   "verdict": "fail",
+   "score": 5,
+   "issues": [
+    "placeholder-corrupted"
+   ]
+  },
+  "fr:e12": {
+   "lang": "fr",
+   "entryId": "e12",
+   "arm": "injected",
+   "designedDefect": "tag-unclosed",
+   "verdict": "fail",
+   "score": 20,
+   "issues": [
+    "tag-unbalanced"
+   ]
+  },
+  "ja:e12": {
+   "lang": "ja",
+   "entryId": "e12",
+   "arm": "injected",
+   "designedDefect": "tag-unclosed",
+   "verdict": "fail",
+   "score": 20,
+   "issues": [
+    "tag-unbalanced"
+   ]
+  },
+  "fr:e13": {
+   "lang": "fr",
+   "entryId": "e13",
+   "arm": "injected",
+   "designedDefect": "tag-unclosed",
+   "verdict": "fail",
+   "score": 20,
+   "issues": [
+    "tag-unbalanced"
+   ]
+  },
+  "ja:e13": {
+   "lang": "ja",
+   "entryId": "e13",
+   "arm": "injected",
+   "designedDefect": "tag-unclosed",
+   "verdict": "fail",
+   "score": 20,
+   "issues": [
+    "tag-unbalanced"
+   ]
+  },
+  "fr:e14": {
+   "lang": "fr",
+   "entryId": "e14",
+   "arm": "injected",
+   "designedDefect": "placeholder-dropped",
+   "verdict": "fail",
+   "score": 5,
+   "issues": [
+    "placeholder-missing"
+   ]
+  },
+  "ja:e14": {
+   "lang": "ja",
+   "entryId": "e14",
+   "arm": "injected",
+   "designedDefect": "placeholder-dropped",
+   "verdict": "fail",
+   "score": 5,
+   "issues": [
+    "placeholder-missing"
+   ]
+  },
+  "fr:e15": {
+   "lang": "fr",
+   "entryId": "e15",
+   "arm": "injected",
+   "designedDefect": "placeholder-translated",
+   "verdict": "fail",
+   "score": 5,
+   "issues": [
+    "placeholder-corrupted",
+    "mistranslation"
+   ]
+  },
+  "ja:e15": {
+   "lang": "ja",
+   "entryId": "e15",
+   "arm": "injected",
+   "designedDefect": "placeholder-translated",
+   "verdict": "fail",
+   "score": 5,
+   "issues": [
+    "placeholder-corrupted"
+   ]
+  },
+  "fr:e16": {
+   "lang": "fr",
+   "entryId": "e16",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "ja:e16": {
+   "lang": "ja",
+   "entryId": "e16",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "fr:e17": {
+   "lang": "fr",
+   "entryId": "e17",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "ja:e17": {
+   "lang": "ja",
+   "entryId": "e17",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "fr:e18": {
+   "lang": "fr",
+   "entryId": "e18",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 92,
+   "issues": []
+  },
+  "ja:e18": {
+   "lang": "ja",
+   "entryId": "e18",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "fr:e19": {
+   "lang": "fr",
+   "entryId": "e19",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "ja:e19": {
+   "lang": "ja",
+   "entryId": "e19",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "fr:e20": {
+   "lang": "fr",
+   "entryId": "e20",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "fail",
+   "score": 25,
+   "issues": [
+    "corrupted-text",
+    "typography"
+   ]
+  },
+  "ja:e20": {
+   "lang": "ja",
+   "entryId": "e20",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 92,
+   "issues": []
+  },
+  "fr:e21": {
+   "lang": "fr",
+   "entryId": "e21",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "ja:e21": {
+   "lang": "ja",
+   "entryId": "e21",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "fr:e22": {
+   "lang": "fr",
+   "entryId": "e22",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 100,
+   "issues": []
+  },
+  "ja:e22": {
+   "lang": "ja",
+   "entryId": "e22",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 100,
+   "issues": []
+  },
+  "fr:e23": {
+   "lang": "fr",
+   "entryId": "e23",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "ja:e23": {
+   "lang": "ja",
+   "entryId": "e23",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  },
+  "fr:e24": {
+   "lang": "fr",
+   "entryId": "e24",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "fail",
+   "score": 30,
+   "issues": [
+    "corrupted-text",
+    "typography"
+   ]
+  },
+  "ja:e24": {
+   "lang": "ja",
+   "entryId": "e24",
+   "arm": "clean",
+   "designedDefect": null,
+   "verdict": "pass",
+   "score": 95,
+   "issues": []
+  }
+ }
+}
