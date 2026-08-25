@@ -3659,12 +3659,20 @@ export class TranslationEngine {
     }
     for (let hop = 0; ; hop++) {
       let results: TranslationResult[] | undefined;
+      // Captured via onSettled so the catch below can see it too: a call that
+      // throws still rejects the whole runCountingProviderCalls promise, and
+      // the count has to escape that rejection some way other than the
+      // (unreachable, on a throw) return value.
+      let calls = 0;
       try {
         // Counted, not assumed: one translate() call can make several provider
         // requests when the provider layer halves a failing batch, and the
         // ledger has to debit what was actually spent.
-        const outcome = await runCountingProviderCalls(() =>
-          state.module.translate(jobs, signal, translateOptions),
+        const outcome = await runCountingProviderCalls(
+          () => state.module.translate(jobs, signal, translateOptions),
+          (settledCalls) => {
+            calls = settledCalls;
+          },
         );
         results = outcome.result;
         await this.recordFreewayDispatch(state.bucketKey, results, deps, outcome.calls);
@@ -3742,8 +3750,16 @@ export class TranslationEngine {
         if (isAbortError(err) || signal?.aborted) {
           return { kind: 'error', error: err, authCancel: false };
         }
-        // A call that threw still spent a request against the bucket.
-        if (results === undefined) await this.recordFreewayDispatch(state.bucketKey, [], deps);
+        // A call that threw still spent whatever requests it made before
+        // throwing (2-6 is routine: a 429, or a 5xx then a 429, each burn a
+        // counted attempt) — observed via `calls`, not assumed to be one.
+        // `results === undefined` keeps this from double-debiting the success
+        // path above; `recordDispatch`'s own floor keeps a genuinely
+        // uncounted dispatch (Copilot's own SDK never reaches the counted
+        // fetch seam) at 1 rather than dropping to 0.
+        if (results === undefined) {
+          await this.recordFreewayDispatch(state.bucketKey, [], deps, calls);
+        }
         const rateLimited = isRateLimitError(err);
         const authFailure = !rateLimited && isRunCancellingAuthError(err);
         // Everything else the provider can throw — 5xx, timeout, or a model it

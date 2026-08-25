@@ -793,11 +793,11 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     try {
       // Counted, not assumed: one judgeTranslations() call can make several
       // provider requests when the provider layer retries or splits, and the
-      // ledger has to debit what was actually spent.
+      // ledger has to debit what was actually spent — against the run's
+      // bucket, when this single-item judge is running on the free-tier
+      // target.
       const outcome = await runCountingProviderCalls(() => module.judgeTranslations!([item]));
       verdicts = outcome.result;
-      // One provider call, debited against the run's bucket when this
-      // single-item judge is running on the free-tier target.
       await this.recordFreewayDispatch(
         bucketKey !== undefined ? { bucketKey, deps: this.freewayOverrides } : undefined,
         verdicts.map((v) => v.usage),
