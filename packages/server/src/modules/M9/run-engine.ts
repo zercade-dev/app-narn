@@ -39,6 +39,7 @@ import {
   groupAndPack,
   resetRateLimiters,
   resolveBatchGrouping,
+  runCountingProviderCalls,
   toErrorMessage,
 } from '@zercade-dev/narn-shared';
 import type { RunStore } from '../../storage/types.js';
@@ -800,11 +801,36 @@ export abstract class BackgroundRunEngine<TRecord> {
           // 'AbortError', so the existing isAbortError guard swallows it.
           results = await withRateLimitRetry(
             async () => {
-              const attempt = await opts.call(signal);
-              // One provider call = one free-tier request, debited as soon as it
-              // returns (a retried attempt debits again, on its own return).
-              await this.recordFreewayDispatch(binding, attempt.map(opts.usageOf));
-              return attempt;
+              // Counted, not assumed: one `opts.call` can make several provider
+              // requests when the provider layer halves a failing batch, and the
+              // ledger has to debit what was actually spent.
+              let calls = 0;
+              try {
+                const outcome = await runCountingProviderCalls(
+                  () => opts.call(signal),
+                  (settledCalls) => {
+                    calls = settledCalls;
+                  },
+                );
+                // One provider call = one free-tier request, debited as soon as it
+                // returns (a retried attempt debits again, on its own return).
+                await this.recordFreewayDispatch(
+                  binding,
+                  outcome.result.map(opts.usageOf),
+                  outcome.calls,
+                );
+                return outcome.result;
+              } catch (err) {
+                // A dispatch that made calls and then threw still spent them — the
+                // provider already counted them against quota even though this
+                // attempt never produced a result to debit through the path above.
+                // Nothing observed (the throw fired before any call went out, or
+                // this module never reaches the counted fetch seam — Copilot's own
+                // SDK) must NOT acquire a debit it never had, so this only fires
+                // once at least one call was actually made.
+                if (calls >= 1) await this.recordFreewayDispatch(binding, [], calls);
+                throw err;
+              }
             },
             {
               signal,
@@ -886,13 +912,15 @@ export abstract class BackgroundRunEngine<TRecord> {
   }
 
   /**
-   * Debit one provider call against the run's free-tier bucket. No-op for a run
-   * that isn't bound to one. Never fails the batch: a ledger write that threw
-   * here would fail items whose provider call actually succeeded.
+   * Debit the given number of provider calls (default one) against the run's
+   * free-tier bucket. No-op for a run that isn't bound to one. Never fails the
+   * batch: a ledger write that threw here would fail items whose provider
+   * call actually succeeded.
    */
   protected async recordFreewayDispatch(
     binding: FreewayBatchBinding | undefined,
     usages: readonly (TranslationUsage | undefined)[],
+    requests = 1,
   ): Promise<void> {
     if (!binding) return;
     let inputTokens = 0;
@@ -912,6 +940,7 @@ export abstract class BackgroundRunEngine<TRecord> {
         Date.now(),
         { inputTokens, outputTokens, chars },
         binding.deps,
+        requests,
       );
     } catch (err) {
       this.logger.warn(`${this.logPrefix}:freeway-ledger-write-failed`, {

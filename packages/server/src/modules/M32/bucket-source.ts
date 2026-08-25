@@ -743,6 +743,14 @@ export async function recordDispatch(
   now: number,
   usage: { inputTokens?: number; outputTokens?: number; chars?: number },
   deps?: BucketSourceDeps,
+  /**
+   * Provider calls this dispatch actually made. Defaults to 1 — the old
+   * assumption — so every caller that cannot count stays exactly as it was.
+   * One dispatch is NOT one call whenever the provider layer splits a failing
+   * batch, and a ledger that assumes otherwise reads low against the quota the
+   * provider is enforcing.
+   */
+  requests = 1,
 ): Promise<void> {
   const resolved = resolveSnapshotBucket(bucketKey);
   if (!resolved) return;
@@ -764,7 +772,11 @@ export async function recordDispatch(
     if (minuteWindow.tpm !== undefined) windows.push({ kind: 'tpm', start: minuteStart });
   }
   await ledger.recordAttempt(bucketKey, windows, {
-    requests: 1,
+    // Floor of 1: a dispatch that somehow counted zero (a provider that does
+    // not route through the guarded fetch, e.g. Copilot's own SDK) must still
+    // cost what it costs today — this can only ever correct the ledger
+    // upward, never downward.
+    requests: Math.max(1, Math.round(requests)),
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     chars: usage.chars,

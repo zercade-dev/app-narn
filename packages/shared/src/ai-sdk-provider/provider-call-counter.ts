@@ -27,10 +27,23 @@ const storage = new AsyncLocalStorage<{ calls: number }>();
  */
 export async function runCountingProviderCalls<T>(
   fn: () => Promise<T>,
+  /**
+   * Called once the scope settles, successfully or not. A dispatch that made
+   * provider calls and then threw still spent them, and the ledger has to see
+   * that — the normal return value cannot carry a count out of a rejection.
+   */
+  onSettled?: (calls: number) => void,
 ): Promise<{ result: T; calls: number }> {
   const ctx = { calls: 0 };
-  const result = await storage.run(ctx, fn);
-  return { result, calls: ctx.calls };
+  try {
+    const result = await storage.run(ctx, fn);
+    return { result, calls: ctx.calls };
+  } finally {
+    // `ctx.calls` is already final by the time this runs, on both the
+    // success and rejection paths — `finally` always runs after `fn`
+    // settles, whichever way, and before the outer promise itself settles.
+    onSettled?.(ctx.calls);
+  }
 }
 
 /** Records one outbound provider request against the enclosing scope, if any. */
