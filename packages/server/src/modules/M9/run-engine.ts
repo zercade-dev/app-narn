@@ -140,6 +140,26 @@ export interface EnqueueBatchedOptions<TItem extends { entryId: string }, TRecor
    * `selectModule`) while every other caller keeps passing its constant.
    */
   batchSize: number | ((items: TItem[]) => number);
+  /**
+   * Reports — after `batchSize` has run — whether those batches were sized to
+   * one specific model's own limits (Freeway bucket sizing) rather than to a
+   * flat constant. Consulted ONLY when building `dispatchOptions`, never when
+   * packing: "how should these items be grouped" and "may the provider re-chunk
+   * the result" are different questions.
+   *
+   * A bucket-sized batch has to reach the provider whole. The provider layer
+   * otherwise re-chunks it at its own review cap, so a batch the run planned as
+   * one call becomes several — spending free-tier requests the plan never
+   * budgeted, and under-counting them in the quota ledger, which debits once per
+   * engine batch. Mirrors the translate path's per-group `ignoreSizeLimit` for
+   * Freeway batches in M9-translation-engine.ts.
+   *
+   * Deliberately optional and deliberately not forced for every review run:
+   * `ignoreSizeLimit` unconditionally would silently disable a module's own
+   * configured `maxBatchSize`. Only a run that actually bucket-sized its batches
+   * may set it.
+   */
+  batchesPreSized?: () => boolean;
   /** Per-run related-entry grouping override; absent ⇒ project/workspace. */
   batchGroupingOverride?: BatchGroupingDimension;
   /** Per-run ignore-batch-size-limit override; absent ⇒ project/workspace. */
@@ -692,12 +712,19 @@ export abstract class BackgroundRunEngine<TRecord> {
     const batches = groupAndPack(items, effectiveBatchSize, ignoreSizeLimit, (item) =>
       batchGroupKey(entriesById.get(item.entryId) ?? {}, dimension),
     );
+    // Asked only now, so it reflects what the resolver above actually did.
+    const preSized = opts.batchesPreSized?.() ?? false;
     // When grouping is active, batches are already arranged; tell the provider
     // not to re-chunk them (which could tear a footprint apart). The same
     // applies when a custom batch size was set — the batches above are already
-    // sized exactly as requested.
+    // sized exactly as requested — and when the resolver sized them to the
+    // chosen model's own maxBatch: letting the provider re-chunk THAT would
+    // spend more free requests than the plan budgeted for (see
+    // {@link EnqueueBatchedOptions.batchesPreSized}).
     const dispatchOptions: BatchDispatchOptions | undefined =
-      dimension !== 'none' || customBatchSize !== undefined ? { ignoreSizeLimit: true } : undefined;
+      dimension !== 'none' || customBatchSize !== undefined || preSized
+        ? { ignoreSizeLimit: true }
+        : undefined;
 
     opts.dispatch({
       runId,

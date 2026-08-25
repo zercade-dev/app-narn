@@ -48,10 +48,10 @@ import {
   selectFreewayBackgroundModule,
   type ModuleLogFn,
 } from './M9/module-selection.js';
-import { DEFAULT_BACKGROUND_BAND, FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
+import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
-import { batchSizeFor, effectivePassRate } from './M32/scoring.js';
-import type { BucketView, JobGroup } from './M32/types.js';
+import { createReviewBatchSizer } from './M32/review-batch.js';
+import type { BucketView } from './M32/types.js';
 import {
   BackgroundRunEngine,
   sanitizeLLMText,
@@ -63,15 +63,6 @@ import { assertRunCapacity } from './M9/run-capacity.js';
 /** Items reviewed per provider call — the default for a non-Freeway module, and
  *  the resolver's own fallback when a Freeway run has no bucket yet. */
 const SOURCE_REVIEW_BATCH_SIZE = 12;
-
-/**
- * Sizing scores against neutral English. Source review has no target
- * language at all (it reviews the source text, never a translation), so
- * there is no real per-language rate to score against here — this mirrors
- * the judge engine's own neutral-language constant so both engines call
- * `batchSizeFor` the same way.
- */
-const NEUTRAL_SIZING_LANGUAGE = 'en';
 
 /** The review categories (canonical definition lives in `@zercade-dev/narn-shared`). */
 export type { SourceReviewChecks };
@@ -322,6 +313,24 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       ? Math.max(FREEWAY_BACKGROUND_RESERVE, Math.ceil(scopedEntries / itemsPerCall))
       : undefined;
 
+    // Precedence: `customBatchSize` (handled upstream in run-engine.ts, before
+    // this resolver ever runs) → an explicit `request.batchSize` (the AI-review
+    // dialog's plain "Batch size" field — the dialog omits it at its own default
+    // so a Freeway run isn't pinned to that default on every start, but a value
+    // the user actually changed still arrives here) → bucket sizing for a
+    // Freeway-routed run with no explicit size (the bucket is known only after
+    // `selectModule`, hence the getter) → the flat `SOURCE_REVIEW_BATCH_SIZE`.
+    //
+    // Source review reviews source text only — an item has no translation, so
+    // its payload is honest as-is: `s` here IS the real payload, not a proxy
+    // standing in for something larger.
+    const sizer = createReviewBatchSizer<SourceReviewItem>({
+      bucket: () => bucket,
+      explicitSize: request.batchSize && request.batchSize > 0 ? request.batchSize : undefined,
+      fallbackSize: SOURCE_REVIEW_BATCH_SIZE,
+      lengthProxy: (item) => item.s,
+    });
+
     return this.enqueueBatched<SourceReviewItem>({
       projectId,
       loadContext: async () => ({
@@ -405,42 +414,14 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         kind: 'source-review',
         sourceReviewSummary: { reviewed: 0, flagged: 0, findings: 0 },
       },
-      // Precedence: `customBatchSize` (handled upstream in run-engine.ts, before
-      // this resolver ever runs) → an explicit `request.batchSize` (the AI-review
-      // dialog's plain "Batch size" field — the dialog omits it at its own
-      // default so a Freeway run isn't pinned to that default on every start,
-      // but a value the user actually changed still arrives here) → bucket
-      // sizing for a Freeway-routed run with no explicit size → the flat
-      // `SOURCE_REVIEW_BATCH_SIZE` constant. An explicit request size always
-      // wins over bucket sizing — it is a deliberate user choice, not a default
-      // the bucket is free to override — so bucket sizing only ever replaces
-      // the FLAT CONSTANT's role, never a size the caller actually asked for.
-      //
-      // Source review reviews source text only — a source-review item has no
-      // translation, so its payload is honest as-is: `sourceText` here IS the
-      // real payload, not a proxy standing in for something larger.
-      batchSize: (items: SourceReviewItem[]) => {
-        const explicit = request.batchSize && request.batchSize > 0 ? request.batchSize : undefined;
-        if (explicit !== undefined) return explicit;
-        if (!bucket) return SOURCE_REVIEW_BATCH_SIZE;
-        const group: JobGroup = {
-          targetLanguage: NEUTRAL_SIZING_LANGUAGE,
-          band: DEFAULT_BACKGROUND_BAND,
-          jobs: items.map((item) => ({
-            entryId: item.entryId,
-            targetLanguage: NEUTRAL_SIZING_LANGUAGE,
-            sourceText: item.s,
-            maskCount: 0,
-            hasLengthLimit: false,
-            glossaryTermCount: 0,
-          })),
-        };
-        return batchSizeFor(
-          bucket,
-          group,
-          effectivePassRate(bucket, NEUTRAL_SIZING_LANGUAGE, DEFAULT_BACKGROUND_BAND),
-        );
-      },
+      batchSize: sizer.resolve,
+      // A bucket-sized batch is already final: the provider must send it whole
+      // rather than re-chunking it at its own review cap, which would turn one
+      // planned free-tier request into several (and the ledger, debiting once
+      // per engine batch, would under-count them). Never set for an explicit
+      // request size or a non-Freeway run — those batches are a flat constant
+      // the module's own `maxBatchSize` is still entitled to bound.
+      batchesPreSized: sizer.bucketSized,
       // Per-run override (AI-review dialog) → project → workspace → none.
       ...(request.batchGrouping !== undefined
         ? { batchGroupingOverride: request.batchGrouping }
