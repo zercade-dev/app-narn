@@ -243,29 +243,101 @@ export function incompleteRunKey(providerKey: string, modelId: string, run: numb
   return `${providerKey}::${modelId}::run${run}`;
 }
 
+export interface DispatchItem {
+  lang: JudgeLang;
+  item: ReviewItem;
+}
+
+/** `arm === 'clean'` categorizes as `'clean'`; an injected item categorizes as its own defect type. The category a model is actually tested on, independent of whether "clean" happens to also be defect-free (see `cleanFlaw`). */
+export function itemCategory(item: ReviewItem): DefectType | 'clean' {
+  return item.arm === 'clean' ? 'clean' : item.defect;
+}
+
 /**
- * The (lang, ReviewItem) pairs a (model, run) still needs a verdict for —
- * i.e. everything in the review corpus MINUS whatever already has a
- * verdictKey entry in `verdicts`. This is the resumability primitive: a run
- * interrupted after 22/50 items only re-requests the other 28 on the next
- * invocation, because those 22 already have keys. Pass `undefined` for
- * `verdicts` (or the caller's own `--refresh` branch) to treat the run as
- * fully pending regardless of what's on disk.
+ * Fixed, deterministic (category, language) group order the interleave below
+ * round-robins over. `'clean'` first only because it needs to be somewhere
+ * stable; DEFECT_TYPES is itself a fixed literal array (never sorted at
+ * runtime), so this order is 100% reproducible across machines/runs.
+ */
+const DISPATCH_GROUP_ORDER: readonly (DefectType | 'clean')[] = ['clean', ...DEFECT_TYPES];
+
+/**
+ * Interleaves the two languages' review corpora so that any CONTIGUOUS
+ * PREFIX is a representative sample of the whole — balanced across defect
+ * categories (7 defect types + "clean") and both languages — rather than
+ * one corpus-order block. This fixes a real scoring defect: the corpus is
+ * curated in blocks (e.g. fr e00-e09 = the "subtle" defects, e10-e19 = the
+ * "mechanical" ones, e20-e24 = all clean), dispatch used to walk it in that
+ * same corpus order language-by-language, and a model abandoned partway
+ * (rate-limited — see RATE_LIMIT_WAIT_CAP_MS in judge-benchmark.ts) ended up
+ * tested on exactly one category in exactly one language instead of a
+ * cross-section — not comparable to a model that saw the full 50.
+ *
+ * Method: group items by `(itemCategory, lang)` — a fixed key derived only
+ * from stable corpus data (never `Math.random`, never wall-clock, never
+ * insertion order beyond the corpus's own ascending entry-id order that
+ * `buildReviewCorpus` already produces) — then deal them round-robin, one
+ * item per group per round, cycling `DISPATCH_GROUP_ORDER`. Every group has
+ * at least one item, so round 0 alone already touches every category in
+ * both languages; a first chunk of 10 (JUDGE_BATCH_SIZE) draws from up to
+ * 10 distinct (category, lang) groups before any group repeats. Entry
+ * identities (e00-e24) are untouched — this only reorders DISPATCH, not the
+ * corpus itself.
+ */
+export function buildDispatchOrder(reviewCorpora: Record<JudgeLang, ReviewItem[]>): DispatchItem[] {
+  const groups = new Map<string, DispatchItem[]>();
+  const groupKeys: string[] = [];
+  for (const category of DISPATCH_GROUP_ORDER) {
+    for (const lang of JUDGE_LANGS) {
+      groupKeys.push(`${category}:${lang}`);
+    }
+  }
+  for (const lang of JUDGE_LANGS) {
+    for (const item of reviewCorpora[lang]) {
+      const key = `${itemCategory(item)}:${lang}`;
+      const list = groups.get(key);
+      const entry: DispatchItem = { lang, item };
+      if (list) list.push(entry);
+      else groups.set(key, [entry]);
+    }
+  }
+  const out: DispatchItem[] = [];
+  for (let round = 0; ; round++) {
+    let tookAny = false;
+    for (const key of groupKeys) {
+      const list = groups.get(key);
+      if (!list || round >= list.length) continue;
+      out.push(list[round]);
+      tookAny = true;
+    }
+    if (!tookAny) break;
+  }
+  return out;
+}
+
+/**
+ * The dispatch items a (model, run) still needs a verdict for — i.e. the
+ * dispatch order MINUS whatever already has a verdictKey entry in
+ * `verdicts`, preserving the interleaved order. This is the resumability
+ * primitive: a run interrupted after 22/50 items only re-requests the other
+ * 28 on the next invocation, because those 22 already have keys — and the
+ * 28 remaining are themselves still a representative slice of what's left,
+ * not a corpus-order remainder. Pass `undefined` for `verdicts` (or the
+ * caller's own `--refresh` branch) to treat the run as fully pending
+ * regardless of what's on disk.
  */
 export function pendingRunItems(
   providerKey: string,
   modelId: string,
   run: number,
-  reviewCorpora: Record<JudgeLang, ReviewItem[]>,
+  dispatchOrder: DispatchItem[],
   verdicts: Record<string, VerdictRecord> | undefined,
-): Array<{ lang: JudgeLang; item: ReviewItem }> {
-  const out: Array<{ lang: JudgeLang; item: ReviewItem }> = [];
-  for (const lang of JUDGE_LANGS) {
-    for (const item of reviewCorpora[lang]) {
-      const key = verdictKey(providerKey, modelId, run, lang, item.id);
-      if (verdicts && key in verdicts) continue;
-      out.push({ lang, item });
-    }
+): DispatchItem[] {
+  const out: DispatchItem[] = [];
+  for (const { lang, item } of dispatchOrder) {
+    const key = verdictKey(providerKey, modelId, run, lang, item.id);
+    if (verdicts && key in verdicts) continue;
+    out.push({ lang, item });
   }
   return out;
 }
@@ -333,6 +405,17 @@ export interface VerdictsFile {
   corpusVersion: string;
   /** `lang -> ordered review corpus for that language` — regenerable via buildReviewCorpus, recorded so a scorer never has to re-read corpus.json to know which arm/defect each item carried. */
   reviewCorpus: Record<string, Array<{ id: string; arm: Arm; defect: DefectType; cleanFlaw: DefectType | null }>>;
+  /**
+   * The exact sequence every model's items were (or would be) requested in
+   * — `buildDispatchOrder`'s output, serialized. NOT resorted by
+   * `sortedVerdictsFile` (unlike every other field here): the order IS the
+   * content. Persisted so a reader can reconstruct precisely what any given
+   * partial run was shown (e.g. "this model got items 0-21" = the first 22
+   * entries here) without re-deriving the interleave themselves, even
+   * though it IS fully reproducible from `reviewCorpus` alone via the same
+   * function.
+   */
+  dispatchOrder?: Array<{ lang: JudgeLang; entryId: string }>;
   verdicts: Record<string, VerdictRecord>;
   /**
    * `provider::model::run<N>` -> why that run currently sits short of all 50
@@ -356,6 +439,8 @@ export function sortedVerdictsFile(file: VerdictsFile): VerdictsFile {
     version: 1,
     corpusVersion: file.corpusVersion,
     reviewCorpus,
+    // Order preserved verbatim — see the field's own doc comment.
+    ...(file.dispatchOrder ? { dispatchOrder: file.dispatchOrder } : {}),
     verdicts: Object.fromEntries(Object.entries(file.verdicts).sort(([a], [b]) => (a < b ? -1 : 1))),
     ...(incompleteRuns ? { incompleteRuns } : {}),
   };

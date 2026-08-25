@@ -74,10 +74,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import {
+  buildDispatchOrder,
   buildReviewCorpus,
   DEFECT_TYPES,
   hashBytes,
   incompleteRunKey,
+  itemCategory,
   JUDGE_LANGS,
   modelKey,
   parseCorpus,
@@ -91,13 +93,14 @@ import {
   type CorpusSourceEntry,
   type CuratedCorpusEntry,
   type DefectType,
+  type DispatchItem,
   type IncompleteRunRecord,
   type JudgeLang,
   type ReviewItem,
   type VerdictsFile,
 } from './judge-benchmark/lib.js';
 
-import { computeScoreReport, parseReferenceFile, type ModelMetrics, type ScoreReport } from './judge-benchmark/score.js';
+import { COMPARABLE_THRESHOLD, computeScoreReport, parseReferenceFile, type ModelMetrics, type ScoreReport } from './judge-benchmark/score.js';
 
 import {
   chunkArray,
@@ -821,7 +824,7 @@ interface JudgePlanRow {
 function buildJudgePlan(
   candidates: JudgeCandidate[],
   runs: number,
-  reviewCorpora: Record<JudgeLang, ReviewItem[]>,
+  dispatchOrder: DispatchItem[],
   existing: VerdictsFile | undefined,
   refresh: boolean,
 ): JudgePlanRow[] {
@@ -834,7 +837,7 @@ function buildJudgePlan(
         candidate.providerKey,
         candidate.modelId,
         run,
-        reviewCorpora,
+        dispatchOrder,
         refresh ? undefined : existing?.verdicts,
       );
       if (pending.length === 0) {
@@ -884,6 +887,21 @@ function printCorpusSummary(reviewCorpora: Record<JudgeLang, ReviewItem[]>): voi
   }
 }
 
+const DISPATCH_PREVIEW_COUNT = 12;
+
+/**
+ * Shows the actual per-request order (see buildDispatchOrder) so a stale or
+ * accidentally-block-ordered corpus is visible before any network call —
+ * printed unconditionally, same convention as printKeyReport/printCorpusSummary.
+ */
+function printDispatchOrderPreview(dispatchOrder: DispatchItem[]): void {
+  const n = Math.min(DISPATCH_PREVIEW_COUNT, dispatchOrder.length);
+  console.log(`Dispatch order (interleaved by category + language; first ${n}/${dispatchOrder.length} shown):`);
+  dispatchOrder.slice(0, n).forEach(({ lang, item }, i) => {
+    console.log(`  ${String(i + 1).padStart(2)}. ${item.id} (${lang}, ${itemCategory(item)})`);
+  });
+}
+
 function printJudgePlan(
   plan: JudgePlanRow[],
   apiKeys: Record<string, string>,
@@ -928,6 +946,13 @@ async function runJudge(args: CliArgs, snapshot: FreeTierSnapshot): Promise<void
     ja: buildReviewCorpus(curatedEntries, 'ja'),
   };
   const entryById = new Map(curatedEntries.map((e) => [e.id, e]));
+  // The actual per-request dispatch order — interleaved across defect category AND
+  // language so any prefix (in particular the items an abandoned model manages to see
+  // before hitting RATE_LIMIT_WAIT_CAP_MS/rpd) is a representative cross-section, not one
+  // corpus-order block. Computed ONCE per invocation and reused everywhere below (the
+  // plan, the real dispatch loop, and what gets persisted to verdicts.json) so every
+  // consumer agrees on exactly the same sequence.
+  const dispatchOrder = buildDispatchOrder(reviewCorpora);
 
   const candidates = judgeCandidates(snapshot, args.models, args.skipModels);
   if (candidates.length === 0) {
@@ -942,9 +967,11 @@ async function runJudge(args: CliArgs, snapshot: FreeTierSnapshot): Promise<void
   console.log();
   printCorpusSummary(reviewCorpora);
   console.log();
+  printDispatchOrderPreview(dispatchOrder);
+  console.log();
 
   const existing = readVerdictsFile();
-  const plan = buildJudgePlan(candidates, args.runs, reviewCorpora, existing, args.refresh);
+  const plan = buildJudgePlan(candidates, args.runs, dispatchOrder, existing, args.refresh);
 
   if (args.plan) {
     printJudgePlan(plan, apiKeys, existing?.incompleteRuns);
@@ -958,16 +985,20 @@ async function runJudge(args: CliArgs, snapshot: FreeTierSnapshot): Promise<void
     fr: reviewCorpora.fr.map(({ id, arm, defect, cleanFlaw }) => ({ id, arm, defect, cleanFlaw })),
     ja: reviewCorpora.ja.map(({ id, arm, defect, cleanFlaw }) => ({ id, arm, defect, cleanFlaw })),
   };
+  // Persisted verbatim so a later reader can reconstruct exactly what any given (possibly
+  // partial) run was shown without re-deriving buildDispatchOrder themselves.
+  const dispatchOrderForFile: VerdictsFile['dispatchOrder'] = dispatchOrder.map(({ lang, item }) => ({ lang, entryId: item.id }));
   const verdictsFile: VerdictsFile = existing
-    ? { ...existing, corpusVersion, reviewCorpus: reviewCorpusForFile }
+    ? { ...existing, corpusVersion, reviewCorpus: reviewCorpusForFile, dispatchOrder: dispatchOrderForFile }
     : {
         version: 1,
         corpusVersion,
         reviewCorpus: reviewCorpusForFile,
+        dispatchOrder: dispatchOrderForFile,
         verdicts: {},
       };
   const detailFile = readDetailFile();
-  const totalItemsPerRun = JUDGE_LANGS.reduce((sum, lang) => sum + reviewCorpora[lang].length, 0);
+  const totalItemsPerRun = dispatchOrder.length;
 
   console.log(`Judging with ${plan.length} model(s), ${args.runs} run(s) each (default unless overridden).\n`);
 
@@ -1009,7 +1040,7 @@ async function runJudge(args: CliArgs, snapshot: FreeTierSnapshot): Promise<void
         candidate.providerKey,
         candidate.modelId,
         run,
-        reviewCorpora,
+        dispatchOrder,
         args.refresh ? undefined : verdictsFile.verdicts,
       );
       if (pending.length === 0) continue; // already fully recorded (resumed, or completed earlier this run)
@@ -1167,8 +1198,33 @@ function printOverview(report: ScoreReport): void {
   if (report.missingModels.length > 0) {
     console.log(`Models with no data yet in verdicts.json: ${report.missingModels.length} (${report.missingModels.join(', ')}).`);
   }
+  console.log(
+    `A model must have a USABLE verdict for >=${(COMPARABLE_THRESHOLD * 100).toFixed(0)}% of the applicable corpus ` +
+      `to be ranked as "comparable" below — a model interrupted mid-collection (rate limit/rpd cap) is listed ` +
+      `separately as partial coverage, never ranked by F1 alongside a fully-reviewed model. ` +
+      `"n/a" means the model was never meaningfully tested on that signal; "0.0%" means it was tested and missed every time — these are never the same thing.`,
+  );
 }
 
+function f1Str(x: number | null): string {
+  return x === null ? 'n/a' : x.toFixed(3);
+}
+
+function printRankingRow(nameWidth: number, r: ModelMetrics, label: string): void {
+  console.log(
+    `  ${label.padEnd(5)}${r.modelKey.padEnd(nameWidth + 2)}${f1Str(r.f1).padStart(6)}${pct(r.recall).padStart(8)}` +
+      `${pct(r.precision).padStart(11)}${pct(r.falsePositiveRate).padStart(8)}${pct(r.stability).padStart(11)}` +
+      `${pct(r.coverage).padStart(10)}${num1(r.scoreMae).padStart(7)}  ${pct(r.reviewedFraction).padStart(6)} (${r.itemsReviewed}/${r.totalItemsInScope})`,
+  );
+}
+
+/**
+ * Splits into two blocks — comparable models ranked by F1, then
+ * partial-coverage models listed separately (never interleaved into the
+ * same rank order, even though `rows` already sorts comparable-first —
+ * printing them as visually distinct tables is what actually keeps a
+ * reader from mistaking a 10-item slice for a 50-item evaluation).
+ */
 function printRankingTable(title: string, rows: ModelMetrics[]): void {
   console.log(`\n${title}`);
   if (rows.length === 0) {
@@ -1176,17 +1232,28 @@ function printRankingTable(title: string, rows: ModelMetrics[]): void {
     return;
   }
   const nameWidth = Math.max(5, ...rows.map((r) => r.modelKey.length));
-  console.log(
+  const header =
     `  ${'Rank'.padEnd(5)}${'Model'.padEnd(nameWidth + 2)}${'F1'.padStart(6)}${'Recall'.padStart(8)}` +
-      `${'Precision'.padStart(11)}${'FPR'.padStart(8)}${'Stability'.padStart(11)}${'Coverage'.padStart(10)}${'MAE'.padStart(7)}`,
-  );
-  rows.forEach((r, i) => {
+    `${'Precision'.padStart(11)}${'FPR'.padStart(8)}${'Stability'.padStart(11)}${'Coverage'.padStart(10)}${'MAE'.padStart(7)}` +
+    `  ${'Reviewed'.padStart(6)}`;
+
+  const comparableRows = rows.filter((r) => r.comparable);
+  const partialRows = rows.filter((r) => !r.comparable);
+
+  if (comparableRows.length > 0) {
+    console.log(header);
+    comparableRows.forEach((r, i) => printRankingRow(nameWidth, r, String(i + 1)));
+  } else {
+    console.log('  (no comparable models — every model below reviewed too little of the corpus to rank)');
+  }
+
+  if (partialRows.length > 0) {
     console.log(
-      `  ${String(i + 1).padEnd(5)}${r.modelKey.padEnd(nameWidth + 2)}${r.f1.toFixed(3).padStart(6)}${pct(r.recall).padStart(8)}` +
-        `${pct(r.precision).padStart(11)}${pct(r.falsePositiveRate).padStart(8)}${pct(r.stability).padStart(11)}` +
-        `${pct(r.coverage).padStart(10)}${num1(r.scoreMae).padStart(7)}`,
+      `\n  Partial coverage — NOT comparable (reviewed <${(COMPARABLE_THRESHOLD * 100).toFixed(0)}% of the corpus; excluded from the ranking above):`,
     );
-  });
+    console.log(header);
+    partialRows.forEach((r) => printRankingRow(nameWidth, r, '-'));
+  }
 }
 
 function printDefectMatrix(rows: ModelMetrics[]): void {

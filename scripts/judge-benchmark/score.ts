@@ -129,6 +129,17 @@ export function groupObservationsByModel(verdictsFile: VerdictsFile | undefined)
 // Per-model metrics
 // ---------------------------------------------------------------------------
 
+/**
+ * A model must have returned a USABLE (non-malformed) verdict for at least
+ * this fraction of the applicable corpus (50 items overall, 25 per
+ * language) before its rate metrics are considered commensurable with a
+ * fully-reviewed model's. Chosen as a round, clearly-stated cutoff — not
+ * tuned — so a model interrupted after a handful of items (a rate-limit or
+ * rpd cap mid-run) doesn't get ranked by F1 next to one that saw everything.
+ * 0.8 = 40/50 overall, 20/25 per language.
+ */
+export const COMPARABLE_THRESHOLD = 0.8;
+
 export interface ModelMetrics {
   modelKey: string;
   /**
@@ -143,24 +154,69 @@ export interface ModelMetrics {
   runsPresent: number[];
   totalObservations: number;
   malformedCount: number;
-  /** Fraction of observations with a usable (non-malformed) verdict — 1.0 means the model answered every item it was asked about. */
-  coverage: number;
-  /** Of the items the reference fails, the fraction the model also failed. */
-  recall: number;
-  /** Of the items the model failed, the fraction the reference also fails. */
-  precision: number;
-  f1: number;
-  /** Of the items the reference passes, the fraction the model failed anyway — a judge that flags everything scores 1.0 here regardless of how good recall/precision look. */
-  falsePositiveRate: number;
+  /**
+   * Fraction of observations with a usable (non-malformed) verdict — 1.0
+   * means every attempt this model made came back parseable. Null when the
+   * model has zero observations in this scope (e.g. a per-language slice
+   * for a language it never touched) — there is nothing to rate.
+   */
+  coverage: number | null;
+  /**
+   * Distinct corpus items (lang, entryId) this model returned a USABLE
+   * verdict for — the basis for `reviewedFraction`/`comparable`. Malformed
+   * attempts do NOT count: an item the model was asked about but never
+   * produced a parseable answer for taught us nothing about its judging,
+   * the same way an item it was never asked about at all didn't.
+   */
+  itemsReviewed: number;
+  /** Size of the corpus this call was scored against — 50 overall, 25 for a single-language slice. */
+  totalItemsInScope: number;
+  /** `itemsReviewed / totalItemsInScope`. */
+  reviewedFraction: number;
+  /** `reviewedFraction >= COMPARABLE_THRESHOLD`. A model below this reviewed too little of the corpus for its rate metrics to mean the same thing as a fully-reviewed model's — see `compareModelMetrics`, which ranks these AFTER every comparable model regardless of F1. */
+  comparable: boolean;
+  /**
+   * Of the reference-fail items the model returned a usable verdict for,
+   * the fraction it also failed. Null when the model returned zero usable
+   * verdicts on any reference-fail item — there were no true fails to
+   * measure recall against, not a recall of zero.
+   */
+  recall: number | null;
+  /**
+   * Of the items the model failed (a usable verdict, `verdict: 'fail'`),
+   * the fraction the reference also fails. Null when the model never
+   * predicted "fail" at all — no denominator to divide by.
+   */
+  precision: number | null;
+  /** Null only when there's no usable data to compute EITHER precision or recall from (see each field) — otherwise a real number, treating a null half as 0 so a model with some data still ranks. */
+  f1: number | null;
+  /**
+   * Of the reference-pass items the model returned a usable verdict for,
+   * the fraction it failed anyway — a judge that flags everything scores
+   * 1.0 here regardless of how good recall/precision look. Null when the
+   * model never returned a usable verdict on any reference-pass item.
+   */
+  falsePositiveRate: number | null;
   /** Mean absolute error between the model's score and the reference's, over items where both produced a numeric score. Null when there is no overlap to compare (e.g. every observation was malformed). */
   scoreMae: number | null;
   /** Fraction of items with usable verdicts in >=2 of this model's runs that agree with each other. Null when the model has fewer than 2 comparable runs for any item (nothing to compare yet). */
   stability: number | null;
-  /** Catch rate per designed defect type, pooled over every item carrying that defect. Null for a type with zero occurrences in the scored subset (defensive — the full corpus always has >=1 per type per language). */
+  /**
+   * Catch rate per designed defect type, over items the model returned a
+   * usable verdict for. Null means the model returned NO usable verdict
+   * for any item of that type — it was never meaningfully tested on it,
+   * which is a completely different fact from "tested and missed every
+   * time" (0). The two must never render the same way.
+   */
   perDefectRecall: Record<DefectType, number | null>;
-  /** Catch rate over just the reference-fail items that sit in the `clean` arm — the hardest, most interesting signal in the corpus. Null if the scored subset contains none of them (e.g. a single-language slice missing that particular entry). */
+  /**
+   * Catch rate over just the reference-fail items that sit in the `clean`
+   * arm — the hardest, most interesting signal in the corpus — restricted
+   * to items the model returned a usable verdict for. Null if it returned
+   * none (never meaningfully tested on this signal), never 0 for that case.
+   */
   cleanArmReferenceFailRecall: number | null;
-  /** Raw numerator/denominator behind `cleanArmReferenceFailRecall`, kept alongside the ratio so a report can show "3/10 caught" rather than just "30.0%". */
+  /** Raw numerator/denominator behind `cleanArmReferenceFailRecall` — counts only usable verdicts, so this reads as "caught/seen", never "caught/corpus-total". */
   cleanArmReferenceFailCaught: number;
   cleanArmReferenceFailDenominator: number;
 }
@@ -203,13 +259,33 @@ function computeStability(observations: Observation[]): number | null {
 /**
  * Reduces one model's flattened observations against the reference to the
  * full metric set. Reused for the overall ranking and for each per-language
- * slice (called again with `observations` pre-filtered to one language) —
- * every field is well-defined for any subset, including an empty one.
+ * slice (called again with `observations` pre-filtered to one language, and
+ * `totalItemsInScope` set to that language's own corpus size) — every field
+ * is well-defined for any subset, including an empty one.
+ *
+ * THE CENTRAL RULE: a malformed observation (`record.malformed === true`,
+ * meaning the judge returned no verdict or one carrying `.error`) is not
+ * "the model reviewed this and missed it" — it is "we don't know what this
+ * model would have said." Every rate below is built from ONLY the
+ * non-malformed observations, both numerator and denominator; a malformed
+ * observation is skipped before it can inflate any denominator. This is
+ * what makes "unseen" (no observation at all) and "seen but unparseable"
+ * (malformed) collapse to the same correct outcome — null/n-a, never 0% —
+ * everywhere a rate is computed. `malformedCount`/`coverage` are the one
+ * place malformed observations DO count, because reporting the malformed
+ * rate itself is the point of those two fields.
  */
-export function computeModelMetrics(mk: string, observations: Observation[], reference: Record<string, ReferenceVerdict>): ModelMetrics {
+export function computeModelMetrics(
+  mk: string,
+  observations: Observation[],
+  reference: Record<string, ReferenceVerdict>,
+  totalItemsInScope: number,
+  comparableThreshold: number = COMPARABLE_THRESHOLD,
+): ModelMetrics {
   const runsPresent = [...new Set(observations.map((o) => o.run))].sort((a, b) => a - b);
 
   let malformedCount = 0;
+  const usableItemKeys = new Set<string>();
   let refFailTotal = 0;
   let caught = 0;
   let refPassTotal = 0;
@@ -227,10 +303,14 @@ export function computeModelMetrics(mk: string, observations: Observation[], ref
     const ref = reference[referenceKey(obs.lang, obs.entryId)];
     if (!ref) continue; // defensive: an item outside the canonical 50 — never happens against the real corpus, but a scorer must not crash on it
 
+    if (obs.record.malformed === true) {
+      malformedCount++;
+      continue; // no usable verdict was returned — excluded from every rate below, per THE CENTRAL RULE above
+    }
+    usableItemKeys.add(referenceKey(obs.lang, obs.entryId));
+
     const refFail = ref.verdict === 'fail';
-    const malformed = obs.record.malformed === true;
-    if (malformed) malformedCount++;
-    const modelFail = !malformed && obs.record.verdict === 'fail';
+    const modelFail = obs.record.verdict === 'fail';
 
     if (refFail) {
       refFailTotal++;
@@ -243,7 +323,7 @@ export function computeModelMetrics(mk: string, observations: Observation[], ref
       modelFailTotal++;
       if (refFail) truePositives++;
     }
-    if (!malformed && obs.record.score !== undefined) {
+    if (obs.record.score !== undefined) {
       maeSum += Math.abs(obs.record.score - ref.score);
       maeCount++;
     }
@@ -258,24 +338,38 @@ export function computeModelMetrics(mk: string, observations: Observation[], ref
   }
 
   const total = observations.length;
-  // Precision/recall use the standard 0-when-no-positive-predictions convention (0/0 := 0)
-  // rather than NaN/undefined, so F1 stays a real number for every model, including one that
-  // never predicts "fail" at all.
-  const recall = refFailTotal > 0 ? caught / refFailTotal : 0;
-  const precision = modelFailTotal > 0 ? truePositives / modelFailTotal : 0;
-  const f1 = precision + recall > 0 ? (2 * precision * recall) / (precision + recall) : 0;
-  const falsePositiveRate = refPassTotal > 0 ? falseAlarms / refPassTotal : 0;
+  const recall = refFailTotal > 0 ? round(caught / refFailTotal, 3) : null;
+  const precision = modelFailTotal > 0 ? round(truePositives / modelFailTotal, 3) : null;
+  const falsePositiveRate = refPassTotal > 0 ? round(falseAlarms / refPassTotal, 3) : null;
+  // F1 is null only when there's NOTHING to compute either half from (recall AND precision both
+  // null — e.g. zero usable observations). Otherwise a null half contributes 0, same convention
+  // as "no positive predictions" always has: a model with SOME usable data still gets a real F1.
+  const f1 =
+    recall === null && precision === null
+      ? null
+      : (() => {
+          const p = precision ?? 0;
+          const r = recall ?? 0;
+          return p + r > 0 ? round((2 * p * r) / (p + r), 3) : 0;
+        })();
+
+  const itemsReviewed = usableItemKeys.size;
+  const reviewedFraction = totalItemsInScope > 0 ? round(itemsReviewed / totalItemsInScope, 3) : 0;
 
   return {
     modelKey: mk,
     runsPresent,
     totalObservations: total,
     malformedCount,
-    coverage: total > 0 ? round(1 - malformedCount / total, 3) : 0,
-    recall: round(recall, 3),
-    precision: round(precision, 3),
-    f1: round(f1, 3),
-    falsePositiveRate: round(falsePositiveRate, 3),
+    coverage: total > 0 ? round(1 - malformedCount / total, 3) : null,
+    itemsReviewed,
+    totalItemsInScope,
+    reviewedFraction,
+    comparable: reviewedFraction >= comparableThreshold,
+    recall,
+    precision,
+    f1,
+    falsePositiveRate,
     scoreMae: maeCount > 0 ? round(maeSum / maeCount, 1) : null,
     stability: computeStability(observations),
     perDefectRecall: Object.fromEntries(
@@ -287,10 +381,21 @@ export function computeModelMetrics(mk: string, observations: Observation[], ref
   };
 }
 
-/** F1 desc, then recall desc, then modelKey asc — makes the ranking fully deterministic even between models tied on every metric. */
+/**
+ * Comparable models first (see `COMPARABLE_THRESHOLD`) — a partial-coverage
+ * model never outranks a fully-reviewed one just because its small sample
+ * happened to score well. Within each group: F1 desc, then recall desc,
+ * then modelKey asc. Null F1/recall (no usable data at all) sort as the
+ * worst possible value, never crash the comparator.
+ */
 export function compareModelMetrics(a: ModelMetrics, b: ModelMetrics): number {
-  if (a.f1 !== b.f1) return b.f1 - a.f1;
-  if (a.recall !== b.recall) return b.recall - a.recall;
+  if (a.comparable !== b.comparable) return a.comparable ? -1 : 1;
+  const af1 = a.f1 ?? -1;
+  const bf1 = b.f1 ?? -1;
+  if (af1 !== bf1) return bf1 - af1;
+  const ar = a.recall ?? -1;
+  const br = b.recall ?? -1;
+  if (ar !== br) return br - ar;
   return a.modelKey < b.modelKey ? -1 : a.modelKey > b.modelKey ? 1 : 0;
 }
 
@@ -320,23 +425,30 @@ export function computeScoreReport(
   verdictsFile: VerdictsFile | undefined,
   referenceFile: ReferenceFile,
   expectedModelKeys: string[] = [],
+  comparableThreshold: number = COMPARABLE_THRESHOLD,
 ): ScoreReport {
   const reference = referenceFile.verdicts;
   const cleanArmReferenceFailKeys = Object.entries(reference)
     .filter(([, v]) => v.arm === 'clean' && v.verdict === 'fail')
     .map(([key]) => key)
     .sort();
+  const totalItemsOverall = Object.keys(reference).length;
+  const totalItemsByLang = Object.fromEntries(
+    JUDGE_LANGS.map((lang) => [lang, Object.values(reference).filter((v) => v.lang === lang).length]),
+  ) as Record<JudgeLang, number>;
 
   const grouped = groupObservationsByModel(verdictsFile);
   const presentModels = [...grouped.keys()].sort();
   const missingModels = expectedModelKeys.filter((k) => !grouped.has(k)).sort();
 
-  const overall = presentModels.map((mk) => computeModelMetrics(mk, grouped.get(mk)!, reference)).sort(compareModelMetrics);
+  const overall = presentModels
+    .map((mk) => computeModelMetrics(mk, grouped.get(mk)!, reference, totalItemsOverall, comparableThreshold))
+    .sort(compareModelMetrics);
 
   const byLanguage = {} as Record<JudgeLang, ModelMetrics[]>;
   for (const lang of JUDGE_LANGS) {
     byLanguage[lang] = presentModels
-      .map((mk) => computeModelMetrics(mk, grouped.get(mk)!.filter((o) => o.lang === lang), reference))
+      .map((mk) => computeModelMetrics(mk, grouped.get(mk)!.filter((o) => o.lang === lang), reference, totalItemsByLang[lang], comparableThreshold))
       .sort(compareModelMetrics);
   }
 
