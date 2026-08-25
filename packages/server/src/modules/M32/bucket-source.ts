@@ -30,7 +30,7 @@ import { moduleRegistry } from '../M6-module-registry.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
 import { KeyedAsyncLock } from '../../utils/keyed-lock.js';
 import type { BucketView } from './types.js';
-import { decayStats, recordGatePass } from './stats.js';
+import { decayStats, recordGatePass, recordJudgeScore } from './stats.js';
 
 const FLAP_WINDOW_MS = 5 * 60_000;
 
@@ -860,13 +860,13 @@ export async function resetBucketFlap(bucketKey: string, deps?: BucketSourceDeps
 }
 
 /**
- * Serializes gate-outcome folds per bucket: two sibling batches of one run
- * settling on the same bucket are read-modify-write over the same stats row,
- * and mergeStats replaces gatePassStats wholesale — an unserialized pair
- * silently discards one fold. In-process only (single-replica invariant, see
- * utils/keyed-lock.ts).
+ * Serializes stats folds per bucket. Every writer here does a read-modify-write
+ * of the SAME `stats` row and hands the whole object to mergeStats, so gate
+ * folds and judge folds must share ONE lock: two locks keyed differently would
+ * let a concurrent pair drop one fold silently. In-process only (single-replica
+ * invariant, see utils/keyed-lock.ts).
  */
-const gateOutcomeLock = new KeyedAsyncLock();
+const statsFoldLock = new KeyedAsyncLock();
 
 /** Fold one run's gate outcomes into stats: ONE read + ONE mergeStats per bucket. */
 export async function recordGateOutcomes(
@@ -876,11 +876,33 @@ export async function recordGateOutcomes(
   deps?: BucketSourceDeps,
 ): Promise<void> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
-  await gateOutcomeLock.withLock(bucketKey, async () => {
+  await statsFoldLock.withLock(bucketKey, async () => {
     const existing = await ledger.getBucket(bucketKey);
     let stats = existing?.stats ?? {};
     for (const outcome of outcomes) {
       stats = recordGatePass(stats, outcome.language, outcome.passed, now);
+    }
+    await ledger.mergeStats(bucketKey, stats);
+  });
+}
+
+/**
+ * Fold one judge run's scores into the PRODUCING bucket's judge statistic:
+ * ONE read + ONE mergeStats per bucket. Callers group their outcomes by bucket
+ * before calling, exactly as the gate path does.
+ */
+export async function recordJudgeOutcomes(
+  bucketKey: string,
+  now: number,
+  outcomes: Array<{ language: string; score: number }>,
+  deps?: BucketSourceDeps,
+): Promise<void> {
+  const ledger = deps?.ledger ?? getFreewayLedgerStore();
+  await statsFoldLock.withLock(bucketKey, async () => {
+    const existing = await ledger.getBucket(bucketKey);
+    let stats = existing?.stats ?? {};
+    for (const outcome of outcomes) {
+      stats = recordJudgeScore(stats, outcome.language, outcome.score, now);
     }
     await ledger.mergeStats(bucketKey, stats);
   });
