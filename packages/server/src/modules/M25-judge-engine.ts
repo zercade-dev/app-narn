@@ -945,12 +945,14 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     );
 
     // Judge outcomes for THIS batch, grouped by the bucket that produced each
-    // translation. Flushed once THIS batch settles (below, after
-    // runBatchWithUsage returns) — never from onComplete, which BackgroundRunEngine
-    // only invokes once the WHOLE RUN is terminal (the last batch to finish),
-    // so a per-batch map read there would see only that one batch's outcomes
-    // and silently drop every other batch's. A fold per verdict would also be
-    // one ledger read-modify-write per item, which this batches against too.
+    // translation. Flushed via onBatchSettled below — never from onComplete,
+    // which BackgroundRunEngine only invokes once the WHOLE RUN is terminal
+    // (the last batch to finish), so a per-batch map read there would see only
+    // that one batch's outcomes and silently drop every other batch's.
+    // onBatchSettled fires once per batch, inside the settled-drain bracket
+    // and before finalizeTerminal can throw it away — see its doc comment in
+    // M9/run-engine.ts. A fold per verdict would also be one ledger
+    // read-modify-write per item, which this batches against too.
     const judgeOutcomes = new Map<string, Array<{ language: string; score: number }>>();
     // The bucket actually serving THIS batch right now — starts as the bucket
     // selection ran with, and follows a mid-batch re-route (freewayReroute
@@ -980,6 +982,16 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
           }
         : {}),
       onComplete: (s) => this.stampSourceRun(s),
+      onBatchSettled: async () => {
+        const now = Date.now();
+        for (const [producedBy, outcomes] of judgeOutcomes) {
+          // Best-effort, like every other stats fold: a failed write self-heals
+          // on the next run rather than failing a completed review.
+          await recordJudgeOutcomes(producedBy, now, outcomes, this.freewayOverrides).catch(
+            () => undefined,
+          );
+        }
+      },
       onResult: async (verdict, status) => {
         if (verdict.error) {
           this.recordFailure(status, verdict, verdict.error);
@@ -1037,20 +1049,6 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         });
       },
     });
-
-    // THIS batch is genuinely done dispatching (retries, any re-route, and
-    // every onResult above have all completed) — flush its collected judge
-    // outcomes now, one read + one mergeStats per producing bucket, batch by
-    // batch, rather than waiting for a run-terminal hook that only the LAST
-    // batch to finish would ever reach.
-    const now = Date.now();
-    for (const [producedBy, outcomes] of judgeOutcomes) {
-      // Best-effort, like every other stats fold: a failed write self-heals
-      // on the next run rather than failing a completed review.
-      await recordJudgeOutcomes(producedBy, now, outcomes, this.freewayOverrides).catch(
-        () => undefined,
-      );
-    }
   }
 
   /**

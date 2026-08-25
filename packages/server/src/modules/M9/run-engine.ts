@@ -195,6 +195,26 @@ export interface RunBatchOptions<TItem, TResult> {
   onResult: (result: TResult, status: RunStatus) => Promise<void>;
   /** Post-terminal hook forwarded to {@link finalizeTerminal} (e.g. M25 stamp). */
   onComplete?: (status: RunStatus) => Promise<void>;
+  /**
+   * Fires once THIS batch's dispatch has settled — success, abort, whole-batch
+   * failure, a per-result cancel, or the run having already been cancelled
+   * before this batch even started — always inside the settled-drain bracket
+   * ({@link BackgroundRunEngine.taskStarted}/{@link BackgroundRunEngine.taskEnded})
+   * and always BEFORE {@link finalizeTerminal} runs, so it is reachable even if
+   * `finalizeTerminal` (or a caller's own `onComplete`) were to throw, and even
+   * on the run-already-cancelled path that never reaches `finalizeTerminal` at
+   * all. (Every step `finalizeTerminal` currently takes already guards its own
+   * failures — `finalizeUsageCosts`/`flushDetail`/`updateRun` all swallow
+   * internally — so this is a placement invariant for whatever a future
+   * `onComplete` or terminal step turns out NOT to guard, not a fix for a
+   * concrete throw that exists today.) Distinct from {@link onComplete}, which
+   * BackgroundRunEngine only ever invokes once per RUN (the last batch to go
+   * terminal) — a per-batch write (e.g. M25's judge-verdict stats fold) needs
+   * THIS hook, not that one, or every batch but the last silently loses its
+   * write. No `status` argument: a run-already-cancelled batch may have none
+   * to offer, and no current user needs one.
+   */
+  onBatchSettled?: () => Promise<void>;
 }
 
 /**
@@ -727,7 +747,14 @@ export abstract class BackgroundRunEngine<TRecord> {
   ): Promise<void> {
     const { runId, moduleId, batch } = opts;
     const status = this.runs.get(runId);
-    if (!status || status.status === RunStatusCode.Cancelled) return;
+    if (!status || status.status === RunStatusCode.Cancelled) {
+      // This batch never reaches the try/finally below (there is nothing to
+      // dispatch), so onBatchSettled — which every OTHER terminal path fires
+      // from that finally — is invoked explicitly here instead. Exactly one
+      // of these two call sites runs per invocation, never both.
+      await opts.onBatchSettled?.();
+      return;
+    }
     const signal = this.controllers.get(runId)?.signal;
 
     try {
@@ -821,6 +848,12 @@ export abstract class BackgroundRunEngine<TRecord> {
       }
     } finally {
       this.emitProgress(status);
+      // Fires BEFORE finalizeTerminal, and inside this finally rather than
+      // after runBatchWithUsage returns, so a per-batch write here does not
+      // depend on finalizeTerminal (or a caller's own onComplete) succeeding —
+      // a throw there would otherwise reject the whole call and skip anything
+      // placed after it.
+      await opts.onBatchSettled?.();
       await this.finalizeTerminal(status, opts.onComplete);
     }
   }
