@@ -46,13 +46,20 @@ import type { RunStore } from '../../storage/types.js';
 import { getRunStore } from '../../storage/registry.js';
 import { getCurrentTenant } from '../../storage/pg/tenant-context.js';
 import { sanitizeLogObject } from '../M16-credential-store.js';
+import { DEFAULT_BACKGROUND_BAND } from '../M32/background-select.js';
 import {
+  bucketHasMinuteTokenLimit,
   bucketRateLimits,
   coolBucket,
+  loadBucketViews,
   recordDispatch,
   type BucketSourceDeps,
 } from '../M32/bucket-source.js';
+import { projectedRequestTokens } from '../M32/scoring.js';
+import { isEligibleIgnoringMinute } from '../M32/selector.js';
+import type { JobGroup } from '../M32/types.js';
 import {
+  abortableSleep,
   isAbortError,
   isRateLimitError,
   rateLimitCooldownMs,
@@ -177,6 +184,22 @@ export interface EnqueueBatchedOptions<TItem extends { entryId: string }, TRecor
   dispatch: (ctx: BatchDispatchContext<TItem, TRecord>) => void;
 }
 
+/**
+ * Longest a Freeway-bound background batch will wait for a bucket to become
+ * spendable again before failing. Just over one minute window, so a genuine
+ * minute wait always fits and anything longer is by definition not minute
+ * starvation — which keeps this a short pause, never a stand-in for the
+ * park/resume the background path deliberately does not have.
+ */
+export const FREEWAY_MINUTE_WAIT_CAP_MS = 90_000;
+
+/**
+ * Added to a computed wait so the window has certainly rolled over on the
+ * other side of it: `minuteResetAt` is this process's idea of the boundary,
+ * and the provider's own clock is not synchronised with it.
+ */
+const FREEWAY_MINUTE_WAIT_MARGIN_MS = 1_000;
+
 /** The free-tier bucket a background run spends against, plus its test seams. */
 export interface FreewayBatchBinding {
   bucketKey: string;
@@ -203,6 +226,16 @@ export interface RunBatchOptions<TItem, TResult> {
    * batch makes is debited against that bucket's quota ledger.
    */
   freeway?: FreewayBatchBinding;
+  /**
+   * Characters this batch will send, for the minute-token projection at
+   * dispatch. Supplied by the engine because this class is generic over
+   * `TItem` and cannot measure one. Use the SAME payload proxy the batch sizer
+   * uses (`M32/review-batch.ts`), or the projection and the sizing disagree
+   * about what the batch costs and the gate is wrong in a way nothing
+   * surfaces. An engine that supplies nothing keeps today's behaviour exactly:
+   * no projection, no pause, dispatch as it always has.
+   */
+  batchChars?: number;
   /**
    * Re-selects a free-tier bucket for this batch. Called at most ONCE per
    * batch, and only after a rate limit outlived the retries on a Freeway-bound
@@ -790,8 +823,44 @@ export abstract class BackgroundRunEngine<TRecord> {
       // The bucket this batch currently spends against; a re-route swaps it for
       // the next hop. Undefined for an ordinary (non-free-tier) run.
       let binding = opts.freeway;
+      // At most ONE pause per batch, wherever it is taken — before the first
+      // dispatch, or after a rate limit outlived both its retries and its
+      // re-route. This is a pause inside one batch's dispatch, not a parked
+      // run: nothing is persisted, no run state changes, the batch never
+      // leaves the queue, and its total wait can never exceed one cap.
+      let paused = false;
       for (let hop = 0; ; hop++) {
         try {
+          // The pre-dispatch gate: project this batch against the bucket's
+          // LIVE minute budget before spending a request on it. Only for an
+          // engine that measured its own batch — one that supplies no
+          // `batchChars` keeps today's behaviour exactly.
+          if (binding && opts.batchChars !== undefined) {
+            const wait = await this.minuteWaitMs(
+              binding.bucketKey,
+              opts.batchChars,
+              Date.now(),
+              binding.deps,
+            );
+            if (wait === undefined) {
+              // Thrown rather than recorded here so the batch fails through the
+              // single failure block below: the same per-item recording, the
+              // same value-scrubbed message, the same `batch-failed` log.
+              throw new Error(
+                `free-tier bucket ${binding.bucketKey} has no capacity for this batch and does not recover within ${Math.round(FREEWAY_MINUTE_WAIT_CAP_MS / 1_000)}s`,
+              );
+            }
+            // A batch that has already spent its one pause dispatches anyway
+            // rather than failing on a projection: the budget for waiting is
+            // gone, not the batch's right to take its chances with the
+            // provider, which is exactly what it would have done before.
+            if (wait > 0 && !paused) {
+              paused = true;
+              if (!(await this.freewayPause(runId, binding.bucketKey, wait, status, signal))) {
+                return;
+              }
+            }
+          }
           // Rate-limit-aware retry shared with M9's dispatch paths: a typed
           // 429 (RateLimitError, incl. quota-phrased ones) waits the provider
           // cool-down (clamped) and re-sends the WHOLE batch instead of
@@ -803,7 +872,8 @@ export abstract class BackgroundRunEngine<TRecord> {
             async () => {
               // Counted, not assumed: one `opts.call` can make several provider
               // requests when the provider layer halves a failing batch, and the
-              // ledger has to debit what was actually spent.
+              // ledger has to debit what was actually spent — as soon as the
+              // call returns, and again on its own return for a retried attempt.
               let calls = 0;
               try {
                 const outcome = await runCountingProviderCalls(
@@ -812,8 +882,6 @@ export abstract class BackgroundRunEngine<TRecord> {
                     calls = settledCalls;
                   },
                 );
-                // One provider call = one free-tier request, debited as soon as it
-                // returns (a retried attempt debits again, on its own return).
                 await this.recordFreewayDispatch(
                   binding,
                   outcome.result.map(opts.usageOf),
@@ -827,7 +895,10 @@ export abstract class BackgroundRunEngine<TRecord> {
                 // Nothing observed (the throw fired before any call went out, or
                 // this module never reaches the counted fetch seam — Copilot's own
                 // SDK) must NOT acquire a debit it never had, so this only fires
-                // once at least one call was actually made.
+                // once at least one call was actually made. The usages are empty
+                // on purpose: a call that threw never reported its token/char
+                // tallies, so the request count is the only honest thing to
+                // debit — those dispatches are spent but unmeasured, by nature.
                 if (calls >= 1) await this.recordFreewayDispatch(binding, [], calls);
                 throw err;
               }
@@ -878,6 +949,29 @@ export abstract class BackgroundRunEngine<TRecord> {
               continue;
             }
           }
+          // Nothing eligible to re-route to. If the bucket's ONLY problem is a
+          // spent minute, pause once and re-send rather than failing a run over
+          // a limit that clears in seconds — the same terms as the gate above,
+          // so a bucket that is also cooling or day-exhausted still fails right
+          // here. In practice `coolFreewayBucket` above has usually just cooled
+          // this bucket, which is exactly such a bucket; this fires when that
+          // cool did not take (its ledger write is best-effort) or had already
+          // elapsed by the time the retries ran out.
+          if (binding && !paused && isRateLimitError(err) && opts.batchChars !== undefined) {
+            const wait = await this.minuteWaitMs(
+              binding.bucketKey,
+              opts.batchChars,
+              Date.now(),
+              binding.deps,
+            );
+            if (wait !== undefined && wait > 0) {
+              paused = true;
+              if (!(await this.freewayPause(runId, binding.bucketKey, wait, status, signal))) {
+                return;
+              }
+              continue;
+            }
+          }
           // This message is persisted to the run sidecar (on the /data volume) and
           // served via the runs API, so value-scrub (live vault values) on top of
           // toErrorMessage's pattern redaction — a generic-ai custom key is value-only
@@ -909,6 +1003,87 @@ export abstract class BackgroundRunEngine<TRecord> {
       await opts.onBatchSettled?.();
       await this.finalizeTerminal(status, opts.onComplete);
     }
+  }
+
+  /**
+   * How long a Freeway-bound batch should pause before dispatching against
+   * `bucketKey`: `0` to go now, a positive delay to wait out a spent minute
+   * window, or `undefined` to stop waiting and fail the batch.
+   *
+   * Two measured gaps meet here. The background path had only a flat
+   * remaining-minute-tokens floor (`MIN_MINUTE_TOKENS_FLOOR`), whose own
+   * comment concedes it cannot stop one oversized batch overshooting the
+   * ceiling — and it did not: a judge batch blew an 8000 TPM window four times
+   * in one live run. And a minute-scale limit with nothing to re-route to
+   * failed a whole review run outright, when the difference between failing
+   * and succeeding was about a minute of waiting. So this projects the batch
+   * the way the translate planner projects its own, and turns a request the
+   * provider would certainly reject into a short pause instead.
+   *
+   * Waiting is justified ONLY by a spent minute. A bucket that is also cooling
+   * or day-exhausted will be no more usable when the window rolls over, so
+   * failing immediately is both honest and faster —
+   * `isEligibleIgnoringMinute` is what tells the two apart, and it is the same
+   * predicate the selector composes, so this cannot drift from what "usable
+   * apart from the minute" means everywhere else.
+   */
+  private async minuteWaitMs(
+    bucketKey: string,
+    batchChars: number,
+    now: number,
+    deps: BucketSourceDeps | undefined,
+  ): Promise<number | undefined> {
+    // Answered from the snapshot before anything is read: a model with no tpm
+    // has no minute-token budget to overshoot, so the live bucket sweep below
+    // — which this asks for once per batch — would only ever confirm that it
+    // has nothing to say.
+    if (!bucketHasMinuteTokenLimit(bucketKey)) return 0;
+    const bucket = (await loadBucketViews(now, deps ?? {})).find((b) => b.bucketKey === bucketKey);
+    // Unknown bucket (a snapshot refresh dropped the model mid-run): nothing to
+    // project against, and nothing a pause would fix.
+    if (!bucket || bucket.remainingMinuteTokens === undefined) return 0;
+    // The budget covers the batch: the ordinary path, dispatched immediately.
+    if (bucket.remainingMinuteTokens >= projectedRequestTokens(bucket, batchChars)) return 0;
+    // Carries no jobs on purpose: the eligibility check reads the group's
+    // character total only for a monthly character reservoir (classical MT),
+    // which declares no minute window and so can never be what got this batch
+    // here. The empty language deliberately makes the language filters inert
+    // too — this bucket already passed them at selection for the run's REAL
+    // languages, and re-checking it against a placeholder could reject it for
+    // a language it was never asked to serve. What is live, and the reason for
+    // the call, is the cooldown and day-stock half.
+    const group: JobGroup = { targetLanguage: '', band: DEFAULT_BACKGROUND_BAND, jobs: [] };
+    if (!isEligibleIgnoringMinute(bucket, group, now)) return undefined;
+    // Not reachable while `remainingMinuteTokens` is set (`loadBucketViews`
+    // fills both together): with no instant to wait for, the honest move is
+    // the one this path always took.
+    if (bucket.minuteResetAt === undefined) return 0;
+    const delay = bucket.minuteResetAt - now;
+    if (delay <= 0) return 0;
+    // A hard bound rather than a live branch: today's `minuteResetAt` is never
+    // more than a window away, so this only fires if that ever stops being
+    // true. Anything past the cap is by definition not minute starvation.
+    if (delay > FREEWAY_MINUTE_WAIT_CAP_MS) return undefined;
+    return delay + FREEWAY_MINUTE_WAIT_MARGIN_MS;
+  }
+
+  /**
+   * Take the single pause a batch is allowed: log it, then sleep — abandoning
+   * the sleep the moment the run is cancelled, so a cancel is never held up by
+   * a wait nobody wants any more. Returns whether the run is still live:
+   * `false` means the caller must take its cancelled path instead of
+   * dispatching on the other side of the pause.
+   */
+  private async freewayPause(
+    runId: string,
+    bucketKey: string,
+    delayMs: number,
+    status: RunStatus,
+    signal: AbortSignal | undefined,
+  ): Promise<boolean> {
+    this.logger.info(`${this.logPrefix}:freeway-minute-wait`, { runId, bucketKey, delayMs });
+    await abortableSleep(delayMs, signal);
+    return !signal?.aborted && (status.status as RunStatusCode) !== RunStatusCode.Cancelled;
   }
 
   /**

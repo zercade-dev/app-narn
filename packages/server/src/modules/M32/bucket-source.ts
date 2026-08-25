@@ -493,6 +493,18 @@ export function bucketRateLimits(bucketKey: string): { rpm?: number; rpd?: numbe
   };
 }
 
+/**
+ * Whether this bucket's model declares a per-minute TOKEN ceiling at all.
+ * Snapshot-only, so a caller can decide whether a minute-token question is
+ * even askable before paying for the live bucket sweep {@link loadBucketViews}
+ * costs — which matters for the pre-dispatch projection in `M9/run-engine.ts`,
+ * asked once per batch on a path that can never act for a model with no tpm.
+ */
+export function bucketHasMinuteTokenLimit(bucketKey: string): boolean {
+  const resolved = resolveSnapshotBucket(bucketKey);
+  return resolved?.model.limits.some((limit) => limit.window === 'tpm') ?? false;
+}
+
 /** One model's day-scale and minute-scale windows, plus the usage already read for both. */
 interface ModelUsage {
   model: FreeTierModel;

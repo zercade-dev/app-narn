@@ -50,7 +50,11 @@ import {
 } from './M9/module-selection.js';
 import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
-import { createReviewBatchSizer } from './M32/review-batch.js';
+import {
+  batchPayloadChars,
+  createReviewBatchSizer,
+  sourceReviewLengthProxy,
+} from './M32/review-batch.js';
 import type { BucketView } from './M32/types.js';
 import {
   BackgroundRunEngine,
@@ -322,13 +326,15 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     // `selectModule`, hence the getter) → the flat `SOURCE_REVIEW_BATCH_SIZE`.
     //
     // Source review reviews source text only — an item has no translation, so
-    // its payload is honest as-is: `s` here IS the real payload, not a proxy
-    // standing in for something larger.
+    // its payload is honest as-is: `sourceReviewLengthProxy` IS the real
+    // payload, not a proxy standing in for something larger. Shared with the
+    // per-batch `batchChars` below so sizing and the minute-token projection
+    // measure the same payload.
     const sizer = createReviewBatchSizer<SourceReviewItem>({
       bucket: () => bucket,
       explicitSize: request.batchSize && request.batchSize > 0 ? request.batchSize : undefined,
       fallbackSize: SOURCE_REVIEW_BATCH_SIZE,
-      lengthProxy: (item) => item.s,
+      lengthProxy: sourceReviewLengthProxy,
     });
 
     return this.enqueueBatched<SourceReviewItem>({
@@ -485,6 +491,9 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       batch,
       dispatchOptions,
       call: (signal) => selection.module.reviewSource!(batch, opts, signal, dispatchOptions),
+      // What this batch costs the bucket's minute-token budget, measured with
+      // the same proxy the sizer sized it with.
+      batchChars: batchPayloadChars(batch, sourceReviewLengthProxy),
       failureKey: (item) => ({ entryId: item.entryId }),
       usageOf: (result) => result.usage,
       ...(freeway ? { freeway } : {}),

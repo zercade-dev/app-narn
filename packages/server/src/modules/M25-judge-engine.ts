@@ -60,7 +60,7 @@ import {
 } from './M9/module-selection.js';
 import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import { recordJudgeOutcomes, type BucketSourceDeps } from './M32/bucket-source.js';
-import { createReviewBatchSizer } from './M32/review-batch.js';
+import { batchPayloadChars, createReviewBatchSizer, judgeLengthProxy } from './M32/review-batch.js';
 import type { BucketView } from './M32/types.js';
 import {
   BackgroundRunEngine,
@@ -459,14 +459,14 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
 
     // Sized to the bucket the run lands on (known only after `selectModule`,
     // hence the getter), falling back to the flat constant for every
-    // non-Freeway module. `sourceText + translatedText` is a LENGTH PROXY for
-    // the whole judge payload, never a value that is sent anywhere: the judge
-    // sends both halves, so measuring the bare source would undercount by
-    // roughly half.
+    // non-Freeway module. `judgeLengthProxy` is a LENGTH PROXY for the whole
+    // judge payload, never a value that is sent anywhere; it is shared with
+    // the per-batch `batchChars` below so sizing and the minute-token
+    // projection measure the same payload.
     const sizer = createReviewBatchSizer<JudgeItem>({
       bucket: () => bucket,
       fallbackSize: JUDGE_BATCH_SIZE,
-      lengthProxy: (item) => item.sourceText + item.translatedText,
+      lengthProxy: judgeLengthProxy,
     });
 
     return this.enqueueBatched<JudgeItem>({
@@ -955,6 +955,9 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       batch,
       dispatchOptions,
       call: (signal) => selection.module.judgeTranslations!(batch, signal, dispatchOptions),
+      // What this batch costs the bucket's minute-token budget, measured with
+      // the same proxy the sizer sized it with.
+      batchChars: batchPayloadChars(batch, judgeLengthProxy),
       failureKey: (item) => item,
       usageOf: (verdict) => verdict.usage,
       ...(freeway ? { freeway } : {}),
