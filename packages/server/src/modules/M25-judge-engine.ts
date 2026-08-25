@@ -58,7 +58,7 @@ import {
   type ModuleLogFn,
 } from './M9/module-selection.js';
 import { DEFAULT_BACKGROUND_BAND, FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
-import type { BucketSourceDeps } from './M32/bucket-source.js';
+import { recordJudgeOutcomes, type BucketSourceDeps } from './M32/bucket-source.js';
 import { batchSizeFor, effectivePassRate } from './M32/scoring.js';
 import type { BucketView, JobGroup } from './M32/types.js';
 import {
@@ -944,6 +944,11 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       batch.map((item) => [`${item.entryId}::${item.targetLanguage}`, item.translatedText]),
     );
 
+    // Judge outcomes for THIS batch, grouped by the bucket that produced each
+    // translation. Flushed once when the batch settles: a fold per verdict
+    // would be one ledger read-modify-write per item.
+    const judgeOutcomes = new Map<string, Array<{ language: string; score: number }>>();
+
     await this.runBatchWithUsage<JudgeItem, JudgeVerdict>({
       runId,
       moduleId: selection.moduleId,
@@ -954,7 +959,17 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       usageOf: (verdict) => verdict.usage,
       ...(freeway ? { freeway } : {}),
       ...(freewayReroute ? { freewayReroute } : {}),
-      onComplete: (s) => this.stampSourceRun(s),
+      onComplete: async (status) => {
+        await this.stampSourceRun(status);
+        const now = Date.now();
+        for (const [producedBy, outcomes] of judgeOutcomes) {
+          // Best-effort, like every other stats fold: a failed write self-heals
+          // on the next run rather than failing a completed review.
+          await recordJudgeOutcomes(producedBy, now, outcomes, this.freewayOverrides).catch(
+            () => undefined,
+          );
+        }
+      },
       onResult: async (verdict, status) => {
         if (verdict.error) {
           this.recordFailure(status, verdict, verdict.error);
@@ -976,6 +991,20 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         summary.judged++;
         if (verdict.verdict === 'fail' || verdict.issues.length > 0) summary.flagged++;
         scores.addScore(verdict.score);
+        // Teach the router what this verdict says about the model that
+        // PRODUCED the translation — not the one that judged it. Skipped
+        // when the record carries no serving bucket (non-Freeway, manual,
+        // imported, or a trivial-matcher/TM short circuit that never reached
+        // a provider), and skipped when the producing bucket IS the judging
+        // bucket: a model grading its own output is not independent evidence,
+        // and folding it would close a loop between the score that routed
+        // this run and the score this run writes.
+        const producedBy = entry.translations[verdict.targetLanguage]?.freewayBucketKey;
+        if (producedBy !== undefined && producedBy !== freeway?.bucketKey) {
+          const list = judgeOutcomes.get(producedBy) ?? [];
+          list.push({ language: verdict.targetLanguage, score: verdict.score });
+          judgeOutcomes.set(producedBy, list);
+        }
         summary.averageScore = Math.round(scores.scoreTotal() / summary.judged);
         const judgedText = judgedTextByPair.get(`${verdict.entryId}::${verdict.targetLanguage}`);
         verdictRecords.push({
