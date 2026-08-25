@@ -945,9 +945,21 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     );
 
     // Judge outcomes for THIS batch, grouped by the bucket that produced each
-    // translation. Flushed once when the batch settles: a fold per verdict
-    // would be one ledger read-modify-write per item.
+    // translation. Flushed once THIS batch settles (below, after
+    // runBatchWithUsage returns) — never from onComplete, which BackgroundRunEngine
+    // only invokes once the WHOLE RUN is terminal (the last batch to finish),
+    // so a per-batch map read there would see only that one batch's outcomes
+    // and silently drop every other batch's. A fold per verdict would also be
+    // one ledger read-modify-write per item, which this batches against too.
     const judgeOutcomes = new Map<string, Array<{ language: string; score: number }>>();
+    // The bucket actually serving THIS batch right now — starts as the bucket
+    // selection ran with, and follows a mid-batch re-route (freewayReroute
+    // below) the instant it completes, since a hop always finishes before any
+    // onResult for the batch it hopped. Comparing against this, not the
+    // dispatch-time `freeway` binding, is what keeps the self-judgment skip
+    // correct across a hop: after a re-route this batch's items were produced
+    // by the NEW bucket, not the one `freeway` was captured from.
+    let servingKey = freeway?.bucketKey;
 
     await this.runBatchWithUsage<JudgeItem, JudgeVerdict>({
       runId,
@@ -958,18 +970,16 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       failureKey: (item) => item,
       usageOf: (verdict) => verdict.usage,
       ...(freeway ? { freeway } : {}),
-      ...(freewayReroute ? { freewayReroute } : {}),
-      onComplete: async (status) => {
-        await this.stampSourceRun(status);
-        const now = Date.now();
-        for (const [producedBy, outcomes] of judgeOutcomes) {
-          // Best-effort, like every other stats fold: a failed write self-heals
-          // on the next run rather than failing a completed review.
-          await recordJudgeOutcomes(producedBy, now, outcomes, this.freewayOverrides).catch(
-            () => undefined,
-          );
-        }
-      },
+      ...(freewayReroute
+        ? {
+            freewayReroute: async () => {
+              const next = await freewayReroute();
+              if (next) servingKey = next.bucketKey;
+              return next;
+            },
+          }
+        : {}),
+      onComplete: (s) => this.stampSourceRun(s),
       onResult: async (verdict, status) => {
         if (verdict.error) {
           this.recordFailure(status, verdict, verdict.error);
@@ -995,12 +1005,13 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         // PRODUCED the translation — not the one that judged it. Skipped
         // when the record carries no serving bucket (non-Freeway, manual,
         // imported, or a trivial-matcher/TM short circuit that never reached
-        // a provider), and skipped when the producing bucket IS the judging
-        // bucket: a model grading its own output is not independent evidence,
+        // a provider), and skipped when the producing bucket IS the bucket
+        // serving THIS batch right now (`servingKey`, hop included — see
+        // above): a model grading its own output is not independent evidence,
         // and folding it would close a loop between the score that routed
         // this run and the score this run writes.
         const producedBy = entry.translations[verdict.targetLanguage]?.freewayBucketKey;
-        if (producedBy !== undefined && producedBy !== freeway?.bucketKey) {
+        if (producedBy !== undefined && producedBy !== servingKey) {
           const list = judgeOutcomes.get(producedBy) ?? [];
           list.push({ language: verdict.targetLanguage, score: verdict.score });
           judgeOutcomes.set(producedBy, list);
@@ -1026,6 +1037,20 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         });
       },
     });
+
+    // THIS batch is genuinely done dispatching (retries, any re-route, and
+    // every onResult above have all completed) — flush its collected judge
+    // outcomes now, one read + one mergeStats per producing bucket, batch by
+    // batch, rather than waiting for a run-terminal hook that only the LAST
+    // batch to finish would ever reach.
+    const now = Date.now();
+    for (const [producedBy, outcomes] of judgeOutcomes) {
+      // Best-effort, like every other stats fold: a failed write self-heals
+      // on the next run rather than failing a completed review.
+      await recordJudgeOutcomes(producedBy, now, outcomes, this.freewayOverrides).catch(
+        () => undefined,
+      );
+    }
   }
 
   /**

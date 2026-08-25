@@ -141,7 +141,7 @@ export function langQualityClass(
   const staticScore = bucket.langScores?.[language];
   // Exact-code lookup on both halves — zh-hans evidence never speaks for
   // zh-hant, in the live record just as in the snapshot.
-  const record = bucket.stats?.judgeScoreStats?.[language];
+  const record = bucket.stats.judgeScoreStats?.[language];
   const evidence = isGatePassRecord(record) ? record : undefined;
   if (staticScore === undefined && evidence === undefined) return 1;
   const prior = staticScore ?? UNMEASURED_SCORE;
