@@ -4,6 +4,7 @@
  * single canonical definition — generic-ai (and any other module/server
  * consumer) imports these rather than keeping local copies.
  */
+import { countProviderCall } from './provider-call-counter.js';
 
 /**
  * Loopback hosts that are exempt from the plain-HTTP rejection in
@@ -328,6 +329,10 @@ export function createSsrfGuardedFetch(
       if (cloudDeploymentActive()) {
         await assertResolvedHostSafe(currentHost, resolveHost);
       }
+
+      // Counted per ATTEMPT, redirect hops included: each hop is a separate
+      // request the provider bills and rate-limits, so the ledger must see it.
+      countProviderCall();
 
       // redirect:'manual' makes the underlying fetch surface the 3xx instead of
       // transparently following it — that is the whole point of the guard.

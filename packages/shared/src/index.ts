@@ -261,6 +261,7 @@ export {
   parseMixedTargetBatchResponse,
   groupJobsByEntry,
   buildProviderOptions,
+  runCountingProviderCalls,
   createModelForProvider,
   credentialKeyForProvider,
   defaultModelForProvider,

@@ -45,6 +45,7 @@ import {
   type BatchDispatchOptions,
   type BatchGroupingDimension,
   resetRateLimiters,
+  runCountingProviderCalls,
   toErrorMessage,
   projectTargetLanguages,
   effectivePromptOptions,
@@ -3368,14 +3369,19 @@ export class TranslationEngine {
     }
   }
 
-  /** Ledger accounting for one provider call. Never fails the batch. */
+  /**
+   * Ledger accounting for one provider call by default — `requests` overrides
+   * that when the caller counted more (or fewer) actual provider calls, e.g.
+   * a dispatch the provider layer split. Never fails the batch.
+   */
   private async recordFreewayDispatch(
     bucketKey: string,
     results: readonly (TranslationResult | undefined)[],
     deps: BucketSourceDeps,
+    requests = 1,
   ): Promise<void> {
     try {
-      await recordDispatch(bucketKey, Date.now(), freewayUsageOf(results), deps);
+      await recordDispatch(bucketKey, Date.now(), freewayUsageOf(results), deps, requests);
     } catch (err) {
       this.logger.warn('translation:freeway-ledger-write-failed', {
         bucketKey,
@@ -3653,9 +3659,23 @@ export class TranslationEngine {
     }
     for (let hop = 0; ; hop++) {
       let results: TranslationResult[] | undefined;
+      // Captured via onSettled so the catch below can see it too: a call that
+      // throws still rejects the whole runCountingProviderCalls promise, and
+      // the count has to escape that rejection some way other than the
+      // (unreachable, on a throw) return value.
+      let calls = 0;
       try {
-        results = await state.module.translate(jobs, signal, translateOptions);
-        await this.recordFreewayDispatch(state.bucketKey, results, deps);
+        // Counted, not assumed: one translate() call can make several provider
+        // requests when the provider layer halves a failing batch, and the
+        // ledger has to debit what was actually spent.
+        const outcome = await runCountingProviderCalls(
+          () => state.module.translate(jobs, signal, translateOptions),
+          (settledCalls) => {
+            calls = settledCalls;
+          },
+        );
+        results = outcome.result;
+        await this.recordFreewayDispatch(state.bucketKey, results, deps, outcome.calls);
         // A module that flattens a 429 into a per-result `error` string still
         // has to trigger the failover — surface it as a throw (mirrors the
         // non-Freeway `withRateLimitRetry` path).
@@ -3730,8 +3750,17 @@ export class TranslationEngine {
         if (isAbortError(err) || signal?.aborted) {
           return { kind: 'error', error: err, authCancel: false };
         }
-        // A call that threw still spent a request against the bucket.
-        if (results === undefined) await this.recordFreewayDispatch(state.bucketKey, [], deps);
+        // A call that threw still spent whatever requests it made before
+        // throwing (2-6 is routine: a 429, or a 5xx then a 429, each burn a
+        // counted attempt) — observed via `calls`, not assumed to be one.
+        // `results === undefined` keeps this from double-debiting the success
+        // path above; `recordDispatch`'s own floor keeps a genuinely uncounted
+        // dispatch at 1 rather than dropping to 0 — the modules that dispatch
+        // through their own provider SDK rather than the AI SDK's guarded
+        // fetch (Copilot and DeepL) never reach the counted seam at all.
+        if (results === undefined) {
+          await this.recordFreewayDispatch(state.bucketKey, [], deps, calls);
+        }
         const rateLimited = isRateLimitError(err);
         const authFailure = !rateLimited && isRunCancellingAuthError(err);
         // Everything else the provider can throw — 5xx, timeout, or a model it
@@ -5228,34 +5257,52 @@ export class TranslationEngine {
             );
           }
         }
-        const retry = await this.retryLqaFailure({
-          runId,
-          projectId,
-          status,
-          module: retryModule,
-          decision: retryDecision,
-          sourceLanguage,
-          masked: item.entry.masked,
-          plan: item.entry.plan,
-          glossaryById: item.entry.glossaryById,
-          nonConstantTerms: item.entry.nonConstantTerms,
-          jobContext: appendTmHints(item.entry.decision.entry.context, item.entry.tmHints),
-          ...(item.entry.reference ? { reference: item.entry.reference } : {}),
-          ...(examplesByLanguage?.get(item.entry.decision.targetLanguage)?.length
-            ? { examples: examplesByLanguage.get(item.entry.decision.targetLanguage) }
-            : {}),
-          originalText: item.originalText,
-          lqaResult: item.lqaResult,
-          metricsModel,
-          signal,
-          ...(project ? { project } : {}),
-          achievementPairMap,
-        });
-        // The corrective attempt is a real provider call either way — debit the
-        // bucket that served it (the escalation target, or the origin bucket
-        // when the same-module retry ran).
+        // Counted, not assumed: retryWithFeedback is a single-item call, but a
+        // transient-error retry inside splitAndRetry can still fire once more
+        // at that same size, so this corrective attempt can spend more than
+        // one provider request. retryLqaFailure never rethrows (its own
+        // try/catch converts every failure into 'accepted-original' or
+        // 'aborted'), so there is no separate failure-path debit to gate here
+        // — recordDispatch's own floor of 1 already covers the modules that
+        // dispatch through their own provider SDK rather than the AI SDK's
+        // guarded fetch (Copilot, DeepL) and so never reach the counted seam.
+        const outcome = await runCountingProviderCalls(() =>
+          this.retryLqaFailure({
+            runId,
+            projectId,
+            status,
+            module: retryModule,
+            decision: retryDecision,
+            sourceLanguage,
+            masked: item.entry.masked,
+            plan: item.entry.plan,
+            glossaryById: item.entry.glossaryById,
+            nonConstantTerms: item.entry.nonConstantTerms,
+            jobContext: appendTmHints(item.entry.decision.entry.context, item.entry.tmHints),
+            ...(item.entry.reference ? { reference: item.entry.reference } : {}),
+            ...(examplesByLanguage?.get(item.entry.decision.targetLanguage)?.length
+              ? { examples: examplesByLanguage.get(item.entry.decision.targetLanguage) }
+              : {}),
+            originalText: item.originalText,
+            lqaResult: item.lqaResult,
+            metricsModel,
+            signal,
+            ...(project ? { project } : {}),
+            achievementPairMap,
+          }),
+        );
+        const retry = outcome.result;
+        // The corrective attempt is a real provider call, and may make several
+        // — debit the bucket that served it (the escalation target, or the
+        // origin bucket when the same-module retry ran) for what it actually
+        // spent.
         if (bucketKey !== undefined && freewayDeps) {
-          await this.recordFreewayDispatch(escalatedBucketKey ?? bucketKey, [], freewayDeps);
+          await this.recordFreewayDispatch(
+            escalatedBucketKey ?? bucketKey,
+            [],
+            freewayDeps,
+            outcome.calls,
+          );
         }
         if (retry.outcome === 'aborted') break;
         status.completed++;
