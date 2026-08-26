@@ -58,5 +58,6 @@
   "retrySuccess_other": "ロックを解除しました。{{count}}回の操作が完了しました。",
   "retryFailed": "ロックを解除しましたが、再試行した操作は失敗しました。もう一度やり直してください。",
   "retryFailed_other": "ロックを解除しましたが、再試行した操作は失敗しました。もう一度やり直してください。",
-  "retryPartialFailed": "完了した操作：{{count}}/{{total}}。失敗した操作をもう一度実行してください。"
+  "retryPartialFailed": "完了した操作：{{count}}/{{total}}。失敗した操作をもう一度実行してください。",
+  "replace": "置き換える"
 }

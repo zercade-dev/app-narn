@@ -58,5 +58,6 @@
   "retrySuccess_other": "已解锁——全部 {{count}} 项操作均已完成。",
   "retryFailed": "已解锁，但您重试的操作失败了——请再试一次。",
   "retryFailed_other": "已解锁，但您重试的操作都失败了——请重新执行。",
-  "retryPartialFailed": "{{total}} 项操作中有 {{count}} 项已完成——请重试失败的部分。"
+  "retryPartialFailed": "{{total}} 项操作中有 {{count}} 项已完成——请重试失败的部分。",
+  "replace": "替换"
 }

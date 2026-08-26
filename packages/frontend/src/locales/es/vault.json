@@ -58,5 +58,6 @@
   "retrySuccess_other": "Desbloqueada — las {{count}} acciones se completaron.",
   "retryFailed": "Desbloqueada, pero la acción reintentada falló — inténtalo de nuevo.",
   "retryFailed_other": "Desbloqueada, pero las acciones reintentadas fallaron — inténtalo de nuevo.",
-  "retryPartialFailed": "Se completaron {{count}} de {{total}} acciones — reintenta las que fallaron."
+  "retryPartialFailed": "Se completaron {{count}} de {{total}} acciones — reintenta las que fallaron.",
+  "replace": "Reemplazar"
 }

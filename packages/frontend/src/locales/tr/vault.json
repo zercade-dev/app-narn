@@ -62,5 +62,6 @@
   "retryFailed": "Kilit açıldı, ancak yeniden denenen işleminiz başarısız oldu — tekrar deneyin.",
   "retryFailed_one": "Kilit açıldı, ancak yeniden denenen işleminiz başarısız oldu — tekrar deneyin.",
   "retryFailed_other": "Kilit açıldı, ancak yeniden denenen işlemleriniz başarısız oldu — tekrar deneyin.",
-  "retryPartialFailed": "{{total}} işlemin {{count}} tanesi tamamlandı — başarısız olanları yeniden deneyin."
+  "retryPartialFailed": "{{total}} işlemin {{count}} tanesi tamamlandı — başarısız olanları yeniden deneyin.",
+  "replace": "Değiştir"
 }

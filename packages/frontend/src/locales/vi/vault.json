@@ -58,5 +58,6 @@
   "retrySuccess_other": "Đã mở khóa — cả {{count}} thao tác đều đã được thực hiện.",
   "retryFailed": "Đã mở khóa, nhưng thao tác thử lại của bạn không thành công — hãy thử lại.",
   "retryFailed_other": "Đã mở khóa, nhưng các thao tác thử lại của bạn không thành công — hãy thử lại.",
-  "retryPartialFailed": "{{count}} trên {{total}} thao tác đã được thực hiện — hãy thử lại những thao tác thất bại."
+  "retryPartialFailed": "{{count}} trên {{total}} thao tác đã được thực hiện — hãy thử lại những thao tác thất bại.",
+  "replace": "Thay thế"
 }

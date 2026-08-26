@@ -51,6 +51,13 @@ interface RowState {
   existing: boolean;
   /** True when user marks the row for deletion. */
   remove: boolean;
+  /**
+   * True once the user has explicitly chosen to overwrite an existing key's
+   * value. Until then the row's value input stays disabled, so a stray
+   * keystroke cannot silently rewrite a stored credential. Meaningless on
+   * non-existing rows, which are editable from the start.
+   */
+  replacing?: boolean;
 }
 
 export function VaultEditorDialog({
@@ -96,7 +103,16 @@ export function VaultEditorDialog({
       setNewPasswordVal('');
       setConfirmPasswordVal('');
       setChangePasswordError(null);
-      const newRows = keys.map((k) => ({ key: k, value: '', existing: true, remove: false }));
+      // A row opened via `focusKey` starts already replacing: the caller sent
+      // the user here specifically to set that key, and the sheet's initial
+      // focus targets its value input — which a disabled input would refuse.
+      const newRows: RowState[] = keys.map((k) => ({
+        key: k,
+        value: '',
+        existing: true,
+        remove: false,
+        replacing: focusKey === k,
+      }));
       if (focusKey && !keys.includes(focusKey)) {
         newRows.push({ key: focusKey, value: '', existing: false, remove: false });
       }
@@ -321,18 +337,42 @@ export function VaultEditorDialog({
                             </SelectContent>
                           </Select>
                         )}
-                        <Input
-                          ref={focusKey === row.key ? focusValueInputRef : undefined}
-                          type="password"
-                          placeholder={
-                            row.existing ? t('valuePlaceholderExisting') : t('valuePlaceholderNew')
-                          }
-                          value={row.value}
-                          disabled={row.remove || loading}
-                          onChange={(e) => updateRow(index, { value: e.target.value })}
-                          data-testid={`vault-editor-value-${index}`}
-                          autoFocus={!row.existing && focusKey === row.key}
-                        />
+                        <div className="flex items-center gap-2">
+                          <Input
+                            ref={focusKey === row.key ? focusValueInputRef : undefined}
+                            id={`vault-editor-value-${index}`}
+                            type="password"
+                            placeholder={
+                              row.existing
+                                ? t('valuePlaceholderExisting')
+                                : t('valuePlaceholderNew')
+                            }
+                            value={row.value}
+                            disabled={(row.existing && !row.replacing) || row.remove || loading}
+                            onChange={(e) => updateRow(index, { value: e.target.value })}
+                            data-testid={`vault-editor-value-${index}`}
+                            autoFocus={!row.existing && focusKey === row.key}
+                          />
+                          {row.existing && !row.replacing && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              disabled={row.remove || loading}
+                              onClick={() => {
+                                updateRow(index, { replacing: true });
+                                // The input is disabled on this render; focus it
+                                // once React has re-enabled it.
+                                requestAnimationFrame(() =>
+                                  document.getElementById(`vault-editor-value-${index}`)?.focus(),
+                                );
+                              }}
+                              data-testid={`vault-editor-replace-${index}`}
+                            >
+                              {t('replace')}
+                            </Button>
+                          )}
+                        </div>
                         {row.existing ? (
                           <Button
                             type="button"

@@ -58,5 +58,6 @@
   "retrySuccess_other": "Unlocked — all {{count}} actions went through.",
   "retryFailed": "Unlocked, but your retried action failed — try it again.",
   "retryFailed_other": "Unlocked, but your retried actions failed — try them again.",
-  "retryPartialFailed": "{{count}} of {{total}} actions went through — retry the ones that failed."
+  "retryPartialFailed": "{{count}} of {{total}} actions went through — retry the ones that failed.",
+  "replace": "Replace"
 }
