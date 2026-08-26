@@ -15,9 +15,9 @@ Uma entrada, ou um par específico de entrada e idioma, fica de fora quando qual
 * **Já está traduzida**, e você não pediu para retraduzir.
 * **Você a marcou como Ignorada.** Isso a tira de *todas* as operações de IA — tradução, revisão por IA, revisão de origem e geração de glossários ou categorias. Entradas ignoradas continuam visíveis na tabela com um selo, então a decisão está sempre à vista e sempre pode ser desfeita.
 * **Está órfã** — sumiu da sua última importação de CSV e aguarda na aba [Órfãos](guide:usage-orphans).
-* **Foi importada com `Precisa de tradução? = FALSE`.** Veja abaixo.
+* **Foi importada com `Precisa de tradução? = FALSE`.**
 * **O destino é o idioma de origem.** Uma entrada nunca é traduzida para o próprio idioma de origem, mesmo que você selecione esse idioma como destino.
-* **Não há nada para traduzir.** Texto vazio, um número como `3.14` ou `100%`, uma URL solta, uma cor hexadecimal como `#ff8800`, ou um texto que é só tags e marcadores como `<b>{count}</b>` são copiados sem alteração, sem chamar nenhum provedor.
+* **Não há nada para traduzir.** Texto vazio, um número como `3.14` ou `100%`, uma cor hexadecimal como `#ff8800`, ou um texto que é só tags e marcadores como `<b>{count}</b>` são copiados sem alteração, sem chamar nenhum provedor.
 
 Uma entrada preenchida pela [Memória de tradução](guide:usage-translation-memory) também nunca chega a um provedor — a tradução armazenada é reaproveitada. Ainda assim ela conta como traduzida.
 
@@ -27,13 +27,7 @@ Pode, mas precisa pedir, já que as execuções pulam pares concluídos por padr
 
 ### Por que uma entrada voltou com o texto de origem inalterado?
 
-Quase sempre porque não havia nada para traduzir — o último item da lista acima. Números, URLs, cores e marcação pura são reconhecidos e copiados como estão, porque um modelo só consegue repeti-los ou estragá-los. Nada foi enviado a um provedor e nada foi cobrado por essas entradas.
-
-### O que é a coluna “Precisa de tradução?” no meu CSV, e como ela difere de Ignorada?
-
-**Precisa de tradução?** é uma coluna opcional de importação. Uma linha cujo valor é `FALSE` continua sendo importada e mantida, mas é tratada como não traduzível: ela é filtrada por completo da aba **Traduções** e nunca entra numa execução. Use-a para linhas que precisam sobreviver intactas a uma ida e volta em CSV. Ela só é definida na importação — não existe nenhum interruptor para ela no aplicativo — então, para mudá-la, edite a coluna e importe de novo.
-
-**Ignorada** é o equivalente dentro do aplicativo, e se comporta de forma diferente em um ponto que importa: uma entrada ignorada continua visível na tabela com um selo, então você a vê e pode mudar de ideia. Use *Precisa de tradução?* para linhas que o aplicativo nunca deveria mostrar, e **Ignorar entrada** para aquelas que você quer manter de olho.
+Quase sempre porque não havia nada para traduzir — o último item da lista acima. Números, cores e marcação pura são reconhecidos e copiados como estão, porque um modelo só consegue repeti-los ou estragá-los. Nada foi enviado a um provedor e nada foi cobrado por essas entradas.
 
 ## Provedores, modelos e roteamento
 

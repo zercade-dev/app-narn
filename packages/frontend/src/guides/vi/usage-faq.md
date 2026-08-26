@@ -15,9 +15,9 @@ Một mục, hoặc một cặp mục-và-ngôn-ngữ cụ thể, sẽ bị lo�
 * **Nó đã được dịch**, và bạn không yêu cầu dịch lại.
 * **Bạn đã đánh dấu Đã bỏ qua.** Việc này đưa nó ra khỏi *mọi* thao tác AI — dịch, rà soát AI, rà soát nguồn, tạo bảng thuật ngữ và danh mục. Các mục đã bỏ qua vẫn hiện trong bảng kèm một nhãn, nên quyết định đó luôn nhìn thấy được và luôn có thể đảo ngược.
 * **Nó đã mồ côi** — nó biến mất khỏi lần nhập CSV gần nhất và đang chờ ở tab [Mục mồ côi](guide:usage-orphans).
-* **Nó được nhập với `Muốn dịch chứ? = FALSE`.** Xem bên dưới.
+* **Nó được nhập với `Muốn dịch chứ? = FALSE`.**
 * **Đích chính là ngôn ngữ nguồn.** Một mục không bao giờ được dịch sang chính ngôn ngữ nguồn của nó, kể cả khi bạn chọn ngôn ngữ đó làm đích.
-* **Không có gì để dịch.** Văn bản rỗng, một con số như `3.14` hay `100%`, một URL đứng riêng, một mã màu như `#ff8800`, hoặc một chuỗi chỉ gồm thẻ và chỗ giữ chỗ như `<b>{count}</b>` đều được sao chép nguyên vẹn, không gọi tới nhà cung cấp nào.
+* **Không có gì để dịch.** Văn bản rỗng, một con số như `3.14` hay `100%`, một mã màu như `#ff8800`, hoặc một chuỗi chỉ gồm thẻ và chỗ giữ chỗ như `<b>{count}</b>` đều được sao chép nguyên vẹn, không gọi tới nhà cung cấp nào.
 
 Một mục được điền từ [Bộ nhớ dịch](guide:usage-translation-memory) cũng không bao giờ đến tay nhà cung cấp — bản dịch đã lưu được dùng lại. Nó vẫn được tính là đã dịch.
 
@@ -27,13 +27,7 @@ Một mục được điền từ [Bộ nhớ dịch](guide:usage-translation-me
 
 ### Vì sao một mục quay lại mà văn bản nguồn không đổi?
 
-Gần như luôn là vì không có gì để dịch — gạch đầu dòng cuối trong danh sách trên. Con số, URL, mã màu và đánh dấu thuần túy đều được nhận diện rồi sao chép nguyên vẹn, bởi một mô hình chỉ có thể lặp lại hoặc làm hỏng chúng. Với những mục này, không có gì được gửi tới nhà cung cấp và không phát sinh chi phí.
-
-### Cột "Muốn dịch chứ?" trong CSV của tôi là gì, và khác Đã bỏ qua ở chỗ nào?
-
-**Muốn dịch chứ?** là một cột nhập tùy chọn. Hàng có giá trị `FALSE` vẫn được nhập và giữ lại, nhưng được coi là không dịch: nó bị lọc hoàn toàn khỏi tab **Bản dịch** và không bao giờ vào một lần chạy. Hãy dùng cho những hàng phải đi một vòng CSV mà vẫn nguyên vẹn. Cột này chỉ được đặt lúc nhập — trong ứng dụng không có công tắc nào cho nó — nên muốn đổi thì sửa cột rồi nhập lại.
-
-**Đã bỏ qua** là thứ tương đương ngay trong ứng dụng, và khác ở một điểm đáng kể: mục đã bỏ qua vẫn hiện trong bảng kèm nhãn, nên bạn nhìn thấy nó và có thể đổi ý. Dùng *Muốn dịch chứ?* cho những hàng ứng dụng không bao giờ nên hiển thị, và **Bỏ qua mục** cho những hàng bạn còn muốn để mắt tới.
+Gần như luôn là vì không có gì để dịch — gạch đầu dòng cuối trong danh sách trên. Con số, mã màu và đánh dấu thuần túy đều được nhận diện rồi sao chép nguyên vẹn, bởi một mô hình chỉ có thể lặp lại hoặc làm hỏng chúng. Với những mục này, không có gì được gửi tới nhà cung cấp và không phát sinh chi phí.
 
 ## Nhà cung cấp, mô hình và điều phối
 

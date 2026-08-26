@@ -15,9 +15,9 @@ Une entrée, ou une paire entrée-langue précise, est écartée dès que l'une 
 * **Elle est déjà traduite**, et vous n'avez pas demandé de retraduction.
 * **Vous l'avez marquée Ignorée.** Cela la retire de *toutes* les opérations d'IA — traduction, révision par IA, révision de la source et génération de glossaires ou de catégories. Les entrées ignorées restent visibles dans le tableau avec un badge : la décision est donc toujours visible et toujours réversible.
 * **Elle est orpheline** — elle a disparu de votre dernier import CSV et attend dans l'onglet [Orphelins](guide:usage-orphans).
-* **Elle a été importée avec `Besoin de traduction ? = FALSE`.** Voir plus bas.
+* **Elle a été importée avec `Besoin de traduction ? = FALSE`.**
 * **La cible est la langue source.** Une entrée n'est jamais traduite vers sa propre langue source, même si vous sélectionnez cette langue comme cible.
-* **Il n'y a rien à traduire.** Un texte vide, un nombre comme `3.14` ou `100%`, une URL seule, une couleur hexadécimale comme `#ff8800`, ou une chaîne qui n'est que balises et espaces réservés comme `<b>{count}</b>` sont recopiés tels quels, sans appeler de fournisseur.
+* **Il n'y a rien à traduire.** Un texte vide, un nombre comme `3.14` ou `100%`, une couleur hexadécimale comme `#ff8800`, ou une chaîne qui n'est que balises et espaces réservés comme `<b>{count}</b>` sont recopiés tels quels, sans appeler de fournisseur.
 
 Une entrée remplie depuis la [Mémoire de traduction](guide:usage-translation-memory) n'atteint elle non plus jamais un fournisseur — c'est la traduction stockée qui est réutilisée. Elle compte tout de même comme traduite.
 
@@ -27,13 +27,7 @@ Oui, mais il faut le demander, car les exécutions ignorent par défaut les pair
 
 ### Pourquoi une entrée est-elle revenue avec son texte source inchangé ?
 
-Presque toujours parce qu'il n'y avait rien à traduire — le dernier point de la liste ci-dessus. Les nombres, les URL, les couleurs et le balisage pur sont reconnus et recopiés tels quels, car un modèle ne peut que les répéter ou les abîmer. Rien n'a été envoyé à un fournisseur et rien n'a été facturé pour ces entrées.
-
-### Qu'est-ce que la colonne « Besoin de traduction ? » de mon CSV, et en quoi diffère-t-elle d'Ignorée ?
-
-**Besoin de traduction ?** est une colonne d'import facultative. Une ligne dont la valeur est `FALSE` est tout de même importée et conservée, mais traitée comme non traduisible : elle est entièrement filtrée de l'onglet **Traductions** et n'entre jamais dans une exécution. Utilisez-la pour les lignes qui doivent survivre intactes à un aller-retour CSV. Elle ne se définit qu'à l'import — il n'existe aucun interrupteur pour elle dans l'application — donc pour la changer, modifiez la colonne et réimportez.
-
-**Ignorée** en est l'équivalent dans l'application, et se comporte différemment sur un point qui compte : une entrée ignorée reste visible dans le tableau avec un badge, vous pouvez donc la voir et changer d'avis. Utilisez *Besoin de traduction ?* pour les lignes que l'application ne devrait jamais vous montrer, et **Ignorer l'entrée** pour celles que vous voulez garder à l'œil.
+Presque toujours parce qu'il n'y avait rien à traduire — le dernier point de la liste ci-dessus. Les nombres, les couleurs et le balisage pur sont reconnus et recopiés tels quels, car un modèle ne peut que les répéter ou les abîmer. Rien n'a été envoyé à un fournisseur et rien n'a été facturé pour ces entrées.
 
 ## Fournisseurs, modèles et routage
 

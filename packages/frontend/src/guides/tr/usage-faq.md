@@ -15,9 +15,9 @@ Yalnızca hâlâ ihtiyacı olanları. Seçtiğiniz her girdi ve her hedef dil i�
 * **Zaten çevrilmiş** ve yeniden çeviri istemediniz.
 * **Yok sayıldı olarak işaretlediniz.** Bu, girdiyi *tüm* yapay zekâ işlemlerinden çıkarır: çeviri, yapay zekâ incelemesi, kaynak incelemesi, sözlükçe ve kategori üretimi. Yok sayılan girdiler tabloda bir rozetle görünmeye devam eder, böylece karar her zaman görünür ve her zaman geri alınabilir kalır.
 * **Yetim kalmış** — son CSV içe aktarımınızdan düşmüş ve [Yetimler](guide:usage-orphans) sekmesinde bekliyor.
-* **`Çeviri gerekiyor mu? = FALSE` ile içe aktarılmış.** Aşağıya bakın.
+* **`Çeviri gerekiyor mu? = FALSE` ile içe aktarılmış.**
 * **Hedef, kaynak dilin kendisi.** O dili hedef olarak seçseniz bile bir girdi kendi kaynak diline asla çevrilmez.
-* **Çevrilecek bir şey yok.** Boş metin, `3.14` ya da `100%` gibi bir sayı, tek başına bir URL, `#ff8800` gibi bir onaltılık renk ya da `<b>{count}</b>` gibi yalnızca etiket ve yer tutuculardan oluşan bir dize, hiçbir sağlayıcı çağrılmadan olduğu gibi kopyalanır.
+* **Çevrilecek bir şey yok.** Boş metin, `3.14` ya da `100%` gibi bir sayı, `#ff8800` gibi bir onaltılık renk ya da `<b>{count}</b>` gibi yalnızca etiket ve yer tutuculardan oluşan bir dize, hiçbir sağlayıcı çağrılmadan olduğu gibi kopyalanır.
 
 [Çeviri belleği](guide:usage-translation-memory)nden doldurulan bir girdi de sağlayıcıya hiç ulaşmaz — saklanan çeviri yeniden kullanılır. Yine de çevrilmiş sayılır.
 
@@ -27,13 +27,7 @@ Evet, ama bunu istemeniz gerekir; çalıştırmalar tamamlanmış eşleşmeleri 
 
 ### Bir girdi neden kaynak metni değişmeden geri geldi?
 
-Neredeyse her zaman çevrilecek bir şey olmadığı için — yukarıdaki listenin son maddesi. Sayılar, URL'ler, renkler ve saf işaretleme tanınır ve olduğu gibi kopyalanır, çünkü bir model onları ya aynen tekrarlayabilir ya da bozabilir. Bu girdiler için hiçbir sağlayıcıya bir şey gönderilmedi ve ücret işlenmedi.
-
-### CSV'mdeki “Çeviri gerekiyor mu?” sütunu nedir ve Yok sayıldı'dan farkı ne?
-
-**Çeviri gerekiyor mu?** isteğe bağlı bir içe aktarma sütunudur. Değeri `FALSE` olan bir satır yine içe aktarılır ve saklanır, ama çevrilmeyecek olarak ele alınır: **Çeviriler** sekmesinden tümüyle filtrelenir ve hiçbir çalıştırmaya girmez. Bir CSV gidiş-dönüşünden dokunulmadan çıkması gereken satırlar için kullanın. Yalnızca içe aktarma sırasında ayarlanır — uygulamada bunun için bir anahtar yoktur — bu yüzden değiştirmek için sütunu düzenleyip yeniden içe aktarın.
-
-**Yok sayıldı** bunun uygulama içindeki karşılığıdır ve önemli bir noktada farklı davranır: yok sayılan girdi tabloda bir rozetle görünmeye devam eder, yani onu görürsünüz ve fikrinizi değiştirebilirsiniz. Uygulamanın size hiç göstermemesi gereken satırlar için *Çeviri gerekiyor mu?*, göz ucuyla izlemek istedikleriniz için **Girdiyi yok say** kullanın.
+Neredeyse her zaman çevrilecek bir şey olmadığı için — yukarıdaki listenin son maddesi. Sayılar, renkler ve saf işaretleme tanınır ve olduğu gibi kopyalanır, çünkü bir model onları ya aynen tekrarlayabilir ya da bozabilir. Bu girdiler için hiçbir sağlayıcıya bir şey gönderilmedi ve ücret işlenmedi.
 
 ## Sağlayıcılar, modeller ve yönlendirme
 

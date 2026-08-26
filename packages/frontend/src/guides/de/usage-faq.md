@@ -15,9 +15,9 @@ Ein Eintrag — oder ein einzelnes Eintrag-Sprache-Paar — bleibt außen vor, s
 * **Er ist bereits übersetzt**, und Sie haben kein Neuübersetzen verlangt.
 * **Sie haben ihn als Ignoriert markiert.** Das nimmt ihn aus *allen* KI-Vorgängen heraus — Übersetzung, KI-Review, Quelltext-Review sowie Glossar- und Kategorie-Generierung. Ignorierte Einträge bleiben mit einem Abzeichen in der Tabelle sichtbar; die Entscheidung ist damit immer sichtbar und immer umkehrbar.
 * **Er ist verwaist** — er fehlte in Ihrem letzten CSV-Import und wartet im Tab [Waisen](guide:usage-orphans).
-* **Er wurde mit `Übersetzen? = FALSE` importiert.** Siehe unten.
+* **Er wurde mit `Übersetzen? = FALSE` importiert.**
 * **Das Ziel ist die Ausgangssprache.** Ein Eintrag wird nie in seine eigene Ausgangssprache übersetzt, auch wenn Sie diese als Ziel auswählen.
-* **Es gibt nichts zu übersetzen.** Leerer Text, eine Zahl wie `3.14` oder `100%`, eine nackte URL, eine Hex-Farbe wie `#ff8800` oder eine Zeichenkette, die nur aus Tags und Platzhaltern besteht wie `<b>{count}</b>`, wird unverändert durchgereicht, ohne einen Anbieter aufzurufen.
+* **Es gibt nichts zu übersetzen.** Leerer Text, eine Zahl wie `3.14` oder `100%`, eine Hex-Farbe wie `#ff8800` oder eine Zeichenkette, die nur aus Tags und Platzhaltern besteht wie `<b>{count}</b>`, wird unverändert durchgereicht, ohne einen Anbieter aufzurufen.
 
 Ein Eintrag, der aus dem [Translation Memory](guide:usage-translation-memory) gefüllt wird, erreicht ebenfalls nie einen Anbieter — stattdessen wird die gespeicherte Übersetzung wiederverwendet. Er zählt trotzdem als übersetzt.
 
@@ -27,13 +27,7 @@ Ja, aber Sie müssen es verlangen, denn Läufe überspringen fertige Paare stand
 
 ### Warum kam ein Eintrag mit unverändertem Ausgangstext zurück?
 
-Fast immer, weil es nichts zu übersetzen gab — der letzte Punkt der Liste oben. Zahlen, URLs, Farben und reines Markup werden erkannt und unverändert durchgereicht, weil ein Modell sie nur wiederholen oder beschädigen kann. Für diese Einträge wurde nichts an einen Anbieter geschickt und nichts berechnet.
-
-### Was ist die Spalte „Übersetzen?“ in meiner CSV, und wie unterscheidet sie sich von Ignoriert?
-
-**Übersetzen?** ist eine optionale Importspalte. Eine Zeile mit dem Wert `FALSE` wird trotzdem importiert und behalten, aber als nicht zu übersetzen behandelt: Sie wird vollständig aus dem Tab **Übersetzungen** herausgefiltert und geht nie in einen Lauf ein. Nutzen Sie sie für Zeilen, die einen CSV-Rundlauf unberührt überstehen müssen. Sie wird ausschließlich beim Import gesetzt — in der App gibt es keinen Schalter dafür — zum Ändern also die Spalte bearbeiten und neu importieren.
-
-**Ignoriert** ist das Gegenstück in der App und verhält sich in einem wesentlichen Punkt anders: Ein ignorierter Eintrag bleibt mit einem Abzeichen in der Tabelle sichtbar, Sie sehen ihn also und können es sich anders überlegen. Nutzen Sie *Übersetzen?* für Zeilen, die die App Ihnen nie zeigen soll, und **Eintrag ignorieren** für die, die Sie im Blick behalten wollen.
+Fast immer, weil es nichts zu übersetzen gab — der letzte Punkt der Liste oben. Zahlen, Farben und reines Markup werden erkannt und unverändert durchgereicht, weil ein Modell sie nur wiederholen oder beschädigen kann. Für diese Einträge wurde nichts an einen Anbieter geschickt und nichts berechnet.
 
 ## Anbieter, Modelle und Routing
 

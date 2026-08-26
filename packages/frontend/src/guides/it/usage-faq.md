@@ -15,9 +15,9 @@ Una voce, o una singola coppia voce-lingua, resta fuori quando è vera una quals
 * **È già tradotta**, e non hai chiesto di ritradurre.
 * **L'hai contrassegnata come Ignorata.** Questo la esclude da *tutte* le operazioni con IA — traduzione, revisione IA, revisione della fonte e generazione di glossari o categorie. Le voci ignorate restano visibili nella tabella con un badge, così la decisione è sempre visibile e sempre reversibile.
 * **È orfana** — è sparita dall'ultimo import CSV e attende nella scheda [Orfane](guide:usage-orphans).
-* **È stata importata con `Hai bisogno di una traduzione? = FALSE`.** Vedi sotto.
+* **È stata importata con `Hai bisogno di una traduzione? = FALSE`.**
 * **La destinazione è la lingua di origine.** Una voce non viene mai tradotta nella propria lingua di origine, anche se selezioni quella lingua come destinazione.
-* **Non c'è nulla da tradurre.** Testo vuoto, un numero come `3.14` o `100%`, un URL da solo, un colore esadecimale come `#ff8800`, o una stringa fatta solo di tag e segnaposto come `<b>{count}</b>` vengono ricopiati invariati, senza chiamare alcun provider.
+* **Non c'è nulla da tradurre.** Testo vuoto, un numero come `3.14` o `100%`, un colore esadecimale come `#ff8800`, o una stringa fatta solo di tag e segnaposto come `<b>{count}</b>` vengono ricopiati invariati, senza chiamare alcun provider.
 
 Anche una voce riempita dalla [Memoria di traduzione](guide:usage-translation-memory) non raggiunge mai un provider — viene riusata la traduzione salvata. Conta comunque come tradotta.
 
@@ -27,13 +27,7 @@ Sì, ma devi chiederlo, perché le esecuzioni saltano per impostazione predefini
 
 ### Perché una voce è tornata con il testo di origine invariato?
 
-Quasi sempre perché non c'era nulla da tradurre — l'ultimo punto dell'elenco qui sopra. Numeri, URL, colori e markup puro vengono riconosciuti e ricopiati così come sono, perché un modello può solo ripeterli o rovinarli. Per quelle voci non è stato inviato nulla a un provider e non è stato addebitato nulla.
-
-### Che cos'è la colonna "Hai bisogno di una traduzione?" nel mio CSV, e in cosa differisce da Ignorata?
-
-**Hai bisogno di una traduzione?** è una colonna di import facoltativa. Una riga il cui valore è `FALSE` viene comunque importata e conservata, ma trattata come non traducibile: è filtrata del tutto dalla scheda **Traduzioni** e non entra mai in un'esecuzione. Usala per le righe che devono sopravvivere intatte a un giro di andata e ritorno in CSV. Si imposta solo al momento dell'import — nell'app non c'è alcun interruttore — quindi per cambiarla modifica la colonna e reimporta.
-
-**Ignorata** è l'equivalente dentro l'app, e si comporta diversamente su un punto che conta: una voce ignorata resta visibile nella tabella con un badge, quindi la vedi e puoi cambiare idea. Usa *Hai bisogno di una traduzione?* per le righe che l'app non dovrebbe mai mostrarti, e **Ignora la voce** per quelle che vuoi tenere d'occhio.
+Quasi sempre perché non c'era nulla da tradurre — l'ultimo punto dell'elenco qui sopra. Numeri, colori e markup puro vengono riconosciuti e ricopiati così come sono, perché un modello può solo ripeterli o rovinarli. Per quelle voci non è stato inviato nulla a un provider e non è stato addebitato nulla.
 
 ## Provider, modelli e routing
 

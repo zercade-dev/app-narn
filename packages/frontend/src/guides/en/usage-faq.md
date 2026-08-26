@@ -15,9 +15,9 @@ An entry, or a single entry-and-language pair, is left out when any of these is 
 * **It is already translated**, and you didn't ask to re-translate.
 * **You marked it Ignored.** That takes it out of *every* AI operation — translation, AI review, source review, and glossary or category generation. Ignored entries stay visible in the table with a badge, so the decision is always visible and always reversible.
 * **It is orphaned** — it dropped out of your last CSV import and is waiting in the [Orphans](guide:usage-orphans) tab.
-* **It was imported with `Need translation? = FALSE`.** See below.
+* **It was imported with `Need translation? = FALSE`.**
 * **The target is the source language.** An entry is never translated into its own source language, even if you select that language as a target.
-* **There is nothing to translate.** Empty text, a number like `3.14` or `100%`, a bare URL, a hex colour like `#ff8800`, or a string that is only tags and placeholders such as `<b>{count}</b>` are copied through unchanged, without calling a provider.
+* **There is nothing to translate.** Empty text, a number like `3.14` or `100%`, a hex colour like `#ff8800`, or a string that is only tags and placeholders such as `<b>{count}</b>` are copied through unchanged, without calling a provider.
 
 An entry filled from [Translation Memory](guide:usage-translation-memory) also never reaches a provider — the stored translation is reused instead. It still counts as translated.
 
@@ -27,13 +27,7 @@ Yes, but you have to ask for it, since runs skip finished pairs by default. Tick
 
 ### Why did an entry come back with its source text unchanged?
 
-Almost always because there was nothing to translate — the last bullet in the skip list above. Numbers, URLs, colours and pure markup are recognised and copied through, because a model can only echo them back or corrupt them. Nothing was sent to a provider and nothing was charged for those entries.
-
-### What is the "Need translation?" column in my CSV, and how is it different from Ignored?
-
-**Need translation?** is an optional import column. A row whose value is `FALSE` is still imported and kept, but is treated as not-for-translation: it is filtered out of the **Translations** tab entirely and never enters a run. Use it for rows that must survive a CSV round-trip untouched. It is set at import time only — there is no toggle for it in the app — so to change it, edit the column and re-import.
-
-**Ignored** is the in-app equivalent, and it behaves differently in one way that matters: an ignored entry stays visible in the table with a badge, so you can see it and change your mind. Use *Need translation?* for rows the app should never show you, and **Ignore entry** for ones you want to keep an eye on.
+Almost always because there was nothing to translate — the last bullet in the skip list above. Numbers, colours and pure markup are recognised and copied through, because a model can only echo them back or corrupt them. Nothing was sent to a provider and nothing was charged for those entries.
 
 ## Providers, models and routing
 

@@ -15,9 +15,9 @@ Una entrada, o un par concreto de entrada e idioma, queda fuera cuando se cumple
 * **Ya está traducida**, y no has pedido retraducir.
 * **La has marcado como Ignorada.** Eso la saca de *todas* las operaciones con IA — traducción, revisión con IA, revisión de origen y generación de glosarios o categorías. Las entradas ignoradas siguen visibles en la tabla con una etiqueta, así que la decisión siempre se ve y siempre se puede deshacer.
 * **Está huérfana** — desapareció en tu última importación de CSV y espera en la pestaña [Huérfanos](guide:usage-orphans).
-* **Se importó con `Traducción requerida = FALSE`.** Ver más abajo.
+* **Se importó con `Traducción requerida = FALSE`.**
 * **El destino es el idioma de origen.** Una entrada nunca se traduce a su propio idioma de origen, aunque selecciones ese idioma como destino.
-* **No hay nada que traducir.** El texto vacío, un número como `3.14` o `100%`, una URL suelta, un color hexadecimal como `#ff8800` o una cadena que solo son etiquetas y marcadores de posición como `<b>{count}</b>` se copian sin cambios, sin llamar a ningún proveedor.
+* **No hay nada que traducir.** El texto vacío, un número como `3.14` o `100%`, un color hexadecimal como `#ff8800` o una cadena que solo son etiquetas y marcadores de posición como `<b>{count}</b>` se copian sin cambios, sin llamar a ningún proveedor.
 
 Una entrada que se rellena desde la [Memoria de traducción](guide:usage-translation-memory) tampoco llega nunca a un proveedor — se reutiliza la traducción almacenada. Aun así cuenta como traducida.
 
@@ -27,13 +27,7 @@ Sí, pero tienes que pedirlo, porque las ejecuciones se saltan por defecto los p
 
 ### ¿Por qué una entrada ha vuelto con su texto de origen sin cambios?
 
-Casi siempre porque no había nada que traducir — el último punto de la lista de arriba. Los números, las URL, los colores y el marcado puro se reconocen y se copian tal cual, porque un modelo solo puede repetirlos o estropearlos. No se envió nada a ningún proveedor y no se cobró nada por esas entradas.
-
-### ¿Qué es la columna "Traducción requerida" de mi CSV y en qué se diferencia de Ignorada?
-
-**Traducción requerida** es una columna de importación opcional. Una fila cuyo valor es `FALSE` se importa y se conserva igualmente, pero se trata como no traducible: se filtra por completo de la pestaña **Traducciones** y nunca entra en una ejecución. Úsala para filas que deben sobrevivir intactas a un viaje de ida y vuelta por CSV. Solo se fija en el momento de la importación — no hay ningún interruptor para ella en la aplicación — así que para cambiarla, edita la columna y vuelve a importar.
-
-**Ignorada** es el equivalente dentro de la aplicación, y se comporta de forma distinta en un punto que importa: una entrada ignorada sigue visible en la tabla con una etiqueta, así que puedes verla y cambiar de opinión. Usa *Traducción requerida* para filas que la aplicación no debería mostrarte nunca, e **Ignorar entrada** para aquellas a las que quieras seguir echando un ojo.
+Casi siempre porque no había nada que traducir — el último punto de la lista de arriba. Los números, los colores y el marcado puro se reconocen y se copian tal cual, porque un modelo solo puede repetirlos o estropearlos. No se envió nada a ningún proveedor y no se cobró nada por esas entradas.
 
 ## Proveedores, modelos y enrutamiento
 

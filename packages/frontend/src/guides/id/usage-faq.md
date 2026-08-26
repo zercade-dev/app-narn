@@ -15,9 +15,9 @@ Sebuah entri, atau satu pasangan entri-dan-bahasa, dikecualikan bila salah satu 
 * **Sudah diterjemahkan**, dan Anda tidak meminta terjemahan ulang.
 * **Anda menandainya Diabaikan.** Itu mengeluarkannya dari *semua* operasi AI — terjemahan, tinjauan AI, tinjauan sumber, serta pembuatan glosarium atau kategori. Entri yang diabaikan tetap terlihat di tabel dengan lencana, sehingga keputusannya selalu terlihat dan selalu bisa dibatalkan.
 * **Entrinya yatim** — hilang dari impor CSV terakhir Anda dan menunggu di tab [Entri Yatim](guide:usage-orphans).
-* **Diimpor dengan `Apakah perlu diterjemahkan = FALSE`.** Lihat di bawah.
+* **Diimpor dengan `Apakah perlu diterjemahkan = FALSE`.**
 * **Tujuannya adalah bahasa sumber.** Sebuah entri tidak pernah diterjemahkan ke bahasa sumbernya sendiri, sekalipun Anda memilih bahasa itu sebagai tujuan.
-* **Tidak ada yang perlu diterjemahkan.** Teks kosong, angka seperti `3.14` atau `100%`, URL yang berdiri sendiri, warna heksadesimal seperti `#ff8800`, atau string yang hanya berisi tag dan placeholder seperti `<b>{count}</b>` disalin apa adanya, tanpa memanggil penyedia mana pun.
+* **Tidak ada yang perlu diterjemahkan.** Teks kosong, angka seperti `3.14` atau `100%`, warna heksadesimal seperti `#ff8800`, atau string yang hanya berisi tag dan placeholder seperti `<b>{count}</b>` disalin apa adanya, tanpa memanggil penyedia mana pun.
 
 Entri yang diisi dari [Memori Terjemahan](guide:usage-translation-memory) juga tidak pernah sampai ke penyedia — terjemahan tersimpan dipakai ulang. Entri itu tetap dihitung sebagai sudah diterjemahkan.
 
@@ -27,13 +27,7 @@ Bisa, tetapi Anda harus memintanya, karena proses melewati pasangan yang sudah s
 
 ### Mengapa sebuah entri kembali dengan teks sumber yang tidak berubah?
 
-Hampir selalu karena tidak ada yang bisa diterjemahkan — butir terakhir pada daftar di atas. Angka, URL, warna, dan markah murni dikenali lalu disalin apa adanya, sebab model hanya bisa mengulanginya atau merusaknya. Untuk entri-entri itu tidak ada yang dikirim ke penyedia dan tidak ada biaya yang timbul.
-
-### Apa itu kolom “Apakah perlu diterjemahkan” di CSV saya, dan apa bedanya dengan Diabaikan?
-
-**Apakah perlu diterjemahkan** adalah kolom impor opsional. Baris yang nilainya `FALSE` tetap diimpor dan disimpan, tetapi diperlakukan sebagai bukan untuk diterjemahkan: baris itu tersaring seluruhnya dari tab **Terjemahan** dan tidak pernah masuk ke sebuah proses. Gunakan untuk baris yang harus melewati perjalanan bolak-balik CSV tanpa tersentuh. Kolom ini hanya ditetapkan saat impor — tidak ada sakelarnya di dalam aplikasi — jadi untuk mengubahnya, sunting kolomnya lalu impor ulang.
-
-**Diabaikan** adalah padanannya di dalam aplikasi, dan berbeda pada satu hal yang penting: entri yang diabaikan tetap terlihat di tabel dengan lencana, jadi Anda bisa melihatnya dan berubah pikiran. Gunakan *Apakah perlu diterjemahkan* untuk baris yang seharusnya tidak pernah ditampilkan aplikasi, dan **Abaikan entri** untuk baris yang ingin Anda pantau.
+Hampir selalu karena tidak ada yang bisa diterjemahkan — butir terakhir pada daftar di atas. Angka, warna, dan markah murni dikenali lalu disalin apa adanya, sebab model hanya bisa mengulanginya atau merusaknya. Untuk entri-entri itu tidak ada yang dikirim ke penyedia dan tidak ada biaya yang timbul.
 
 ## Penyedia, model, dan penyaluran
 
