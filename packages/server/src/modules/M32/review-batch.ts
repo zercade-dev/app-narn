@@ -24,6 +24,46 @@ import type { BucketView, JobGroup } from './types.js';
  */
 const NEUTRAL_SIZING_LANGUAGE = 'en';
 
+/**
+ * The judge's length proxy: the judge sends BOTH halves of the pair, so
+ * measuring the bare source undercounts the payload by roughly half.
+ *
+ * Exported rather than written inline at M25's sizer because the minute-token
+ * projection at dispatch ({@link batchPayloadChars} feeding
+ * `RunBatchOptions.batchChars`) must measure a batch with the SAME proxy the
+ * sizer measured it with. If the two ever disagreed about what a batch costs,
+ * the pre-dispatch gate would be wrong in a way nothing surfaces — it would
+ * pause, or decline to pause, against a payload the run never sends.
+ */
+export function judgeLengthProxy(item: { sourceText: string; translatedText: string }): string {
+  return item.sourceText + item.translatedText;
+}
+
+/**
+ * Source review's length proxy. Not a proxy at all, strictly speaking: an item
+ * has no translation, so its source text IS the whole payload rather than a
+ * stand-in for something larger. It lives here beside the judge's for the same
+ * sizing/projection reason.
+ */
+export function sourceReviewLengthProxy(item: { s: string }): string {
+  return item.s;
+}
+
+/**
+ * Characters one packed batch will send, summed with the run's own length
+ * proxy — the figure `RunBatchOptions.batchChars` wants for its minute-token
+ * projection. The same proxy and the same plain sum `charCappedBatch` sizes
+ * with, so the projection and the sizing cannot drift apart.
+ */
+export function batchPayloadChars<TItem>(
+  batch: readonly TItem[],
+  lengthProxy: (item: TItem) => string,
+): number {
+  let total = 0;
+  for (const item of batch) total += lengthProxy(item).length;
+  return total;
+}
+
 /** The `batchSize` resolver plus the pre-sized signal, bound to one run. */
 export interface ReviewBatchSizer<TItem> {
   /** The `EnqueueBatchedOptions.batchSize` resolver; called once per run. */

@@ -50,7 +50,11 @@ import {
 } from './M9/module-selection.js';
 import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
-import { createReviewBatchSizer } from './M32/review-batch.js';
+import {
+  batchPayloadChars,
+  createReviewBatchSizer,
+  sourceReviewLengthProxy,
+} from './M32/review-batch.js';
 import type { BucketView } from './M32/types.js';
 import {
   BackgroundRunEngine,
@@ -204,12 +208,16 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     request: SourceReviewRequest,
     logSink?: ModuleLogFn,
     reserveRequests?: number,
-  ): Promise<{
-    module: TranslationModule;
-    moduleId: string;
-    bucketKey?: string;
-    bucket?: BucketView;
-  }> {
+  ): Promise<
+    // See the matching union in M25: `deps` is the session-scoped bucket-source
+    // context this resolution ran with, and it travels WITH the bucket so no
+    // later ledger read can fall back to the bare overrides (which report every
+    // module disabled and would leave the caller with an empty bucket list).
+    { module: TranslationModule; moduleId: string } & (
+      | { bucketKey: string; bucket: BucketView; deps: BucketSourceDeps }
+      | { bucketKey?: undefined; bucket?: undefined; deps?: undefined }
+    )
+  > {
     const saved = project.sourceReviewConfig;
     const requestedId = request.moduleId ?? saved?.moduleId;
     const requestedModel = request.model ?? saved?.model;
@@ -322,13 +330,15 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     // `selectModule`, hence the getter) → the flat `SOURCE_REVIEW_BATCH_SIZE`.
     //
     // Source review reviews source text only — an item has no translation, so
-    // its payload is honest as-is: `s` here IS the real payload, not a proxy
-    // standing in for something larger.
+    // its payload is honest as-is: `sourceReviewLengthProxy` IS the real
+    // payload, not a proxy standing in for something larger. Shared with the
+    // per-batch `batchChars` below so sizing and the minute-token projection
+    // measure the same payload.
     const sizer = createReviewBatchSizer<SourceReviewItem>({
       bucket: () => bucket,
       explicitSize: request.batchSize && request.batchSize > 0 ? request.batchSize : undefined,
       fallbackSize: SOURCE_REVIEW_BATCH_SIZE,
-      lengthProxy: (item) => item.s,
+      lengthProxy: sourceReviewLengthProxy,
     });
 
     return this.enqueueBatched<SourceReviewItem>({
@@ -348,7 +358,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         );
         target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
-          freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+          freeway = { bucketKey: selected.bucketKey, deps: selected.deps };
           bucket = selected.bucket;
           makeFreewayReroute = (selection) => async () => {
             try {
@@ -363,7 +373,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
                 reserveRequests,
               );
               if (next.bucketKey === undefined) return undefined;
-              const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
+              const binding = { bucketKey: next.bucketKey, deps: next.deps };
               target = { module: next.module, moduleId: next.moduleId };
               freeway = binding;
               bucket = next.bucket;
@@ -485,6 +495,9 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       batch,
       dispatchOptions,
       call: (signal) => selection.module.reviewSource!(batch, opts, signal, dispatchOptions),
+      // What this batch costs the bucket's minute-token budget, measured with
+      // the same proxy the sizer sized it with.
+      batchChars: batchPayloadChars(batch, sourceReviewLengthProxy),
       failureKey: (item) => ({ entryId: item.entryId }),
       usageOf: (result) => result.usage,
       ...(freeway ? { freeway } : {}),

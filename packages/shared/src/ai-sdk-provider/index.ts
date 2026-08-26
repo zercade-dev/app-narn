@@ -36,6 +36,7 @@ export {
   coerceBooleanDefaultTrue,
   LOOPBACK_HOSTS,
 } from './config-coerce.js';
+export { runCountingProviderCalls } from './provider-call-counter.js';
 export {
   buildBatchPrompt,
   parseBatchResponse,
