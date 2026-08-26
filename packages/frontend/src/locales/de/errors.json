@@ -6,5 +6,9 @@
     "rateLimited": "Zu viele Anfragen — einen Moment warten und erneut versuchen.",
     "server": "Auf dem Server ist ein Problem aufgetreten. In einem Moment erneut versuchen.",
     "offline": "Der Server ist nicht erreichbar. Verbindung prüfen."
+  },
+  "noRoute": {
+    "title": "Routing erforderlich",
+    "body": "Keine Routing-Regel passt zu {{languages}}. Richten Sie zuerst das Routing ein – der Lauf würde nichts übersetzen."
   }
 }

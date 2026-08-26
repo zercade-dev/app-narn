@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
 import { RunStatusCode, type BatchGroupingDimension, type TagNode } from '@zercade-dev/narn-shared';
 import { apiRequest, ApiError } from '../../hooks/use-api.js';
+import { useNoRouteDialog } from '../../hooks/use-no-route-dialog.js';
 import { usePersistentState } from '../../hooks/use-persistent-state.js';
 import {
   entryMatchesRun,
@@ -72,6 +73,7 @@ export function ComparisonTab({
   const logEntries = useLoggerStore((s) => s.entries);
   const fetchRuns = useRunStore((s) => s.fetchRuns);
   const allRuns = useRunStore((s) => s.runs);
+  const { handle: handleNoRoute, dialog: noRouteDialog } = useNoRouteDialog();
 
   // Per-cell in-flight retranslates, keyed by `entryId:language` (matches
   // ComparisonCell's `retranslateKey`). A Map — rather than a single slot —
@@ -659,10 +661,13 @@ export function ComparisonTab({
         retranslateResolversRef.current.get(key)?.();
         retranslateResolversRef.current.delete(key);
         if (err instanceof ApiError && err.status === 423) return;
+        // A refused run (no routing rule for this language) gets the actionable
+        // dialog instead of a toast; every other failure is unchanged.
+        if (handleNoRoute(err)) return;
         toast.error(errorMessage(err, 'Failed to queue re-translation'));
       }
     },
-    [projectId, fetchRuns],
+    [projectId, fetchRuns, handleNoRoute],
   );
 
   const handleMarkReviewed = useCallback(
@@ -857,10 +862,20 @@ export function ComparisonTab({
         void fetchRuns(projectId);
         setTranslateDialogOpen(false);
       } catch (err) {
+        if (handleNoRoute(err)) return;
         toast.error(errorMessage(err, 'Failed to start translation'));
       }
     },
-    [projectId, targetLang, rows, effectiveSelection, referenceLanguage, t, fetchRuns],
+    [
+      projectId,
+      targetLang,
+      rows,
+      effectiveSelection,
+      referenceLanguage,
+      t,
+      fetchRuns,
+      handleNoRoute,
+    ],
   );
 
   const handleBulkTranslateCancel = useCallback(async (): Promise<void> => {
@@ -922,6 +937,7 @@ export function ComparisonTab({
 
   return (
     <div className="flex flex-col h-full overflow-hidden" data-testid="comparison-tab">
+      {noRouteDialog}
       {access.role === 'collaborator' && (
         <div
           className="px-3 py-1.5 text-xs text-muted-foreground border-b border-border shrink-0"

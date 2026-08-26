@@ -6,5 +6,9 @@
     "rateLimited": "Trop de requ\u00eates. Patientez un instant, puis r\u00e9essayez.",
     "server": "Le serveur a rencontr\u00e9 un probl\u00e8me. R\u00e9essayez dans un instant.",
     "offline": "Impossible de joindre le serveur. V\u00e9rifiez votre connexion."
+  },
+  "noRoute": {
+    "title": "Routage requis",
+    "body": "Aucune règle de routage ne correspond à {{languages}}. Configurez d’abord le routage — l’exécution ne traduirait rien."
   }
 }

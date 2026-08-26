@@ -14,6 +14,7 @@ import {
 import { RunStatusCode, type Glossary, type TranslationRecord } from '@zercade-dev/narn-shared';
 import { apiRequest, ApiError } from '../../hooks/use-api.js';
 import { useVaultRetryAction } from '../../hooks/use-vault-retry-action.js';
+import { useNoRouteDialog } from '../../hooks/use-no-route-dialog.js';
 import { useStringStore } from '../../stores/string-store.js';
 import { useRunStore } from '../../stores/run-store.js';
 import { useProjectStore, accessFor } from '../../stores/project-store.js';
@@ -551,6 +552,8 @@ export function ReviewTab({ projectId }: Readonly<ReviewTabProps>) {
   // runs exactly once via `onResult` whether the request resolved directly or
   // replayed after a vault unlock; a 423 is swallowed by the hook (the global
   // unlock dialog already shows). Other failures surface a toast via `onError`.
+  const { handle: handleNoRoute, dialog: noRouteDialog } = useNoRouteDialog();
+
   const { invoke: invokeRetranslate } = useVaultRetryAction<{
     runId: string;
     total: number;
@@ -582,7 +585,12 @@ export function ReviewTab({ projectId }: Readonly<ReviewTabProps>) {
         void fetchRuns(projectId);
         toast.info(t('retranslateQueued'));
       },
-      onError: (err) => toast.error(errorMessage(err, t('actionFailed'))),
+      onError: (err) => {
+        // A refused run (no routing rule for this language) gets the actionable
+        // dialog instead of a toast; every other failure is unchanged.
+        if (handleNoRoute(err)) return;
+        toast.error(errorMessage(err, t('actionFailed')));
+      },
     },
   );
 
@@ -671,6 +679,7 @@ export function ReviewTab({ projectId }: Readonly<ReviewTabProps>) {
       className="mx-auto flex w-full max-w-4xl xl:max-w-6xl 2xl:max-w-7xl flex-col gap-4"
       data-testid="review-tab"
     >
+      {noRouteDialog}
       {access.role === 'collaborator' && (
         <div className="text-xs text-muted-foreground" data-testid="review-collab-hint">
           {t('collab:locks.reviewLanguagesScoped')}

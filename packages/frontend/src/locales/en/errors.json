@@ -6,5 +6,9 @@
     "rateLimited": "Too many requests — wait a moment and try again.",
     "server": "The server ran into a problem. Try again in a moment.",
     "offline": "Can't reach the server. Check your connection."
+  },
+  "noRoute": {
+    "title": "Routing needed",
+    "body": "No routing rule matches {{languages}}. Set up routing first — the run would translate nothing."
   }
 }

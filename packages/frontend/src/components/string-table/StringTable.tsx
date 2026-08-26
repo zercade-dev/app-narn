@@ -7,6 +7,7 @@ import { isRunActive } from '@/lib/run-kind';
 import { apiRequest, ApiError } from '../../hooks/use-api.js';
 import { usePersistentState } from '../../hooks/use-persistent-state.js';
 import { useVaultRetryAction } from '../../hooks/use-vault-retry-action.js';
+import { useNoRouteDialog } from '../../hooks/use-no-route-dialog.js';
 import { useGlossaryGenAccept } from '../../hooks/use-glossary-gen-accept.js';
 import { accessFor, useProjectStore } from '../../stores/project-store.js';
 import { NoProjectEmptyState } from '../common/NoProjectEmptyState.js';
@@ -152,6 +153,8 @@ export function StringTable() {
   // (the project at trigger time, matching the old closure-captured value). The
   // single-user model rules out overlapping batches, and a stale immediate fetch
   // would self-correct on the next poll anyway.
+  const { handle: handleNoRoute, dialog: noRouteDialog } = useNoRouteDialog();
+
   const batchTranslate = useVaultRetryAction<{ runId: string; total: number }>(
     // `run` is only invoked by `invoke()`, which `handleBatchTranslate` calls
     // immediately after pinning `batchRequestRef`, so it is always set here.
@@ -169,7 +172,12 @@ export function StringTable() {
         const projectId = batchRequestRef.current?.projectId;
         if (projectId) void fetchRuns(projectId); // immediate fetch; polling starts via effect
       },
-      onError: (err) => toast.error(errorMessage(err, t('bulk.startFailed'))),
+      onError: (err) => {
+        // A refused run (no routing rule for the target language) gets the
+        // actionable dialog instead of a toast; everything else is unchanged.
+        if (handleNoRoute(err)) return;
+        toast.error(errorMessage(err, t('bulk.startFailed')));
+      },
     },
   );
 
@@ -817,6 +825,7 @@ export function StringTable() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden" data-testid="string-table">
+      {noRouteDialog}
       <StringTableFilters key={filtersResetKey} />
 
       {/* Top: pagination + click-to-edit detail panel */}
