@@ -1245,6 +1245,12 @@ export const IDENTICAL_ALLOWLIST = {
   '*:strings:guide.topicGenericAi':
     'Module name "Generic AI" — the product\'s own name for the bring-your-own-endpoint ' +
     'module, shown in the module picker, so it must match the picker verbatim',
+  '*:strings:guide.topicFreeway':
+    'Feature name "NARN Freeway" — the free-tier model pool\'s own name. "NARN" is already ' +
+    'on the do-not-translate list above, and "Freeway" is the other half of the same proper ' +
+    'noun, not a describable word: it appears verbatim as an option in the routing selector ' +
+    'and as the Config panel heading, so a translated topic label would name something the ' +
+    'reader cannot find in the interface.',
 
   '*:vault:keyPlaceholder':
     'A sample VAULT KEY NAME — "KEY_NAME", ASCII uppercase with an underscore — shown as the ' +

@@ -9,6 +9,7 @@ import { useViewStore, type Tab } from '../../stores/view-store.js';
 import { useTemplateStore } from '../../stores/template-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { useNotificationStore } from '../../stores/notification-store.js';
+import { useOnboardingStore } from '../../stores/onboarding-store.js';
 import { VaultUnlockDialog } from '../vault/VaultUnlockDialog.js';
 import { ConfirmSheet } from '../ui/confirm-sheet';
 import { apiRequest } from '../../hooks/use-api.js';
@@ -223,6 +224,13 @@ export function Sidebar() {
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const cloudManaged = useVaultStore((s) => s.cloudManaged ?? false);
   const unreadNotificationCount = useNotificationStore((s) => s.unreadCount);
+  // Onboarding nudge: until this browser has produced a translation — by a run
+  // or by hand — the Guide button carries a faint tint, so on a sidebar full of
+  // tabs a new reader has no use for yet, the help is the thing that stands
+  // out. `sidebar-primary` is redefined by every theme in both light and dark,
+  // so the tint follows the palette rather than pinning one colour; at /10 it
+  // stays clear of the hover and active states, which use `sidebar-accent`.
+  const firstTranslationSeen = useOnboardingStore((s) => s.firstTranslationSeen);
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState<string>(DEFAULT_ICON);
   const { templates, fetchTemplates, applyTemplate } = useTemplateStore();
@@ -730,7 +738,11 @@ export function Sidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   data-testid="sidebar-guide"
+                  data-nudge={!firstTranslationSeen && view !== 'guide' ? 'true' : undefined}
                   isActive={view === 'guide'}
+                  className={
+                    !firstTranslationSeen && view !== 'guide' ? 'bg-sidebar-primary/10' : undefined
+                  }
                   onClick={() => {
                     setView('guide');
                     closeMobileNav();

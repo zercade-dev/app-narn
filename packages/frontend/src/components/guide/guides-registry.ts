@@ -18,11 +18,11 @@ const files = import.meta.glob('../../guides/*/*.md', {
 
 /**
  * Returns the raw Markdown content for the given guide slug and locale.
- * Falls back to 'en' when the locale-specific file is missing — including
- * when the locale's guide directory doesn't exist at all yet (today, only
- * `guides/en/` ships; import.meta.glob simply has no keys for the other
- * fourteen locales, so this resolves to the English chunk for all of them
- * until per-locale guides land).
+ * Falls back to 'en' when the locale-specific file is missing — either because
+ * that locale has no directory at all, or because a newly added topic has not
+ * been translated yet. All fifteen shipped locales now have guide directories,
+ * so the fallback is per-FILE rather than per-locale: a locale gets its own
+ * translation for every topic that has one and English for the rest.
  */
 export async function getGuideContent(slug: string, locale: string): Promise<string> {
   const key = `../../guides/${locale}/${slug}.md`;
@@ -52,14 +52,21 @@ export type GuideGroup = {
 // Setup → Translate → Review → Content → Maintenance, then the Translation
 // Memory workspace view. The seven configure-* module how-tos live under
 // Setup because modules are configured on the Config/Setup screen.
+//
+// Two Setup entries are placed by reading order rather than by tab: the Q&A
+// topic follows Quick Setup (someone with a doubt looks second, not last),
+// and NARN Freeway precedes the per-provider how-tos because it is the
+// cross-provider free pool those providers feed.
 export const GUIDE_GROUPS: GuideGroup[] = [
   {
     titleKey: 'guide.groupSetup',
     topics: [
       { slug: 'usage-quick-setup', labelKey: 'guide.topicQuickSetup' },
+      { slug: 'usage-faq', labelKey: 'guide.topicFaq' },
       { slug: 'usage-vault', labelKey: 'guide.topicVault' },
       { slug: 'usage-config', labelKey: 'guide.topicConfig' },
       { slug: 'usage-docker', labelKey: 'guide.topicDocker', localOnly: true },
+      { slug: 'usage-freeway', labelKey: 'guide.topicFreeway' },
       { slug: 'configure-copilot', labelKey: 'guide.topicCopilot', localOnly: true },
       { slug: 'configure-deepseek', labelKey: 'guide.topicDeepseek' },
       { slug: 'configure-google', labelKey: 'guide.topicGoogle' },
