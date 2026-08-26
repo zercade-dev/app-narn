@@ -6,7 +6,7 @@
  *
  * Rendered as a Sheet because no shadcn `dialog` primitive is installed.
  */
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { redirectTo } from '../../lib/auth-redirect.js';
@@ -165,6 +165,28 @@ export function VaultEditorDialog({
   useRefocusOnLoadingDone(passwordInputRef, loading, open);
 
   const usedKeys = useMemo(() => new Set(rows.map((r) => r.key.trim()).filter(Boolean)), [rows]);
+
+  // Focus the value input of the row the user just chose to replace, so they
+  // can type straight away. This MUST run in an effect rather than from the
+  // click handler: during that render the input is still `disabled`, and
+  // focusing a disabled element is a no-op. (A requestAnimationFrame from the
+  // handler was tried first and lost the same race — verified in a browser,
+  // where focus landed on the sheet body instead.)
+  // The index is parked on a ref rather than in state so the effect never calls
+  // setState (react-hooks/set-state-in-effect); it fires off the `rows` change
+  // that enabling the input already causes.
+  const pendingFocusIndexRef = useRef<number | null>(null);
+  useEffect(() => {
+    const index = pendingFocusIndexRef.current;
+    if (index === null) return;
+    pendingFocusIndexRef.current = null;
+    document.getElementById(`vault-editor-value-${index}`)?.focus();
+  }, [rows]);
+
+  const startReplacing = (index: number) => {
+    pendingFocusIndexRef.current = index;
+    updateRow(index, { replacing: true });
+  };
 
   const addRow = () => {
     setRows((prev) => [...prev, { key: '', value: '', existing: false, remove: false }]);
@@ -359,14 +381,7 @@ export function VaultEditorDialog({
                               variant="ghost"
                               size="sm"
                               disabled={row.remove || loading}
-                              onClick={() => {
-                                updateRow(index, { replacing: true });
-                                // The input is disabled on this render; focus it
-                                // once React has re-enabled it.
-                                requestAnimationFrame(() =>
-                                  document.getElementById(`vault-editor-value-${index}`)?.focus(),
-                                );
-                              }}
+                              onClick={() => startReplacing(index)}
                               data-testid={`vault-editor-replace-${index}`}
                             >
                               {t('replace')}
