@@ -9,7 +9,11 @@
     "ja:e06"
   ],
   "presentModels": [
+    "google::gemini-3-flash-preview",
     "google::gemini-3.1-flash-lite",
+    "google::gemini-3.5-flash",
+    "google::gemini-3.6-flash",
+    "google::gemini-flash-latest",
     "google::gemini-flash-lite-latest",
     "google::gemma-4-26b-a4b-it",
     "google::gemma-4-31b-it",
@@ -18,12 +22,7 @@
     "openrouter::nvidia/nemotron-3-super-120b-a12b:free",
     "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free"
   ],
-  "missingModels": [
-    "google::gemini-3-flash-preview",
-    "google::gemini-3.5-flash",
-    "google::gemini-3.6-flash",
-    "google::gemini-flash-latest"
-  ],
+  "missingModels": [],
   "overall": [
     {
       "modelKey": "groq::openai/gpt-oss-120b",
@@ -31,19 +30,19 @@
         1,
         2
       ],
-      "totalObservations": 90,
+      "totalObservations": 100,
       "malformedCount": 15,
-      "coverage": 0.833,
+      "coverage": 0.85,
       "itemsReviewed": 50,
       "totalItemsInScope": 50,
       "reviewedFraction": 1,
       "comparable": true,
-      "recall": 0.844,
-      "precision": 0.974,
-      "f1": 0.904,
-      "falsePositiveRate": 0.033,
-      "scoreMae": 21,
-      "stability": 0.525,
+      "recall": 0.848,
+      "precision": 0.975,
+      "f1": 0.907,
+      "falsePositiveRate": 0.026,
+      "scoreMae": 19.6,
+      "stability": 0.6,
       "perDefectRecall": {
         "placeholder-dropped": 1,
         "placeholder-translated": 1,
@@ -56,6 +55,134 @@
       "cleanArmReferenceFailRecall": 0.889,
       "cleanArmReferenceFailCaught": 8,
       "cleanArmReferenceFailDenominator": 9
+    },
+    {
+      "modelKey": "google::gemma-4-26b-a4b-it",
+      "runsPresent": [
+        1,
+        2
+      ],
+      "totalObservations": 90,
+      "malformedCount": 30,
+      "coverage": 0.667,
+      "itemsReviewed": 45,
+      "totalItemsInScope": 50,
+      "reviewedFraction": 0.9,
+      "comparable": true,
+      "recall": 0.78,
+      "precision": 1,
+      "f1": 0.876,
+      "falsePositiveRate": 0,
+      "scoreMae": 19.9,
+      "stability": 0.475,
+      "perDefectRecall": {
+        "placeholder-dropped": 1,
+        "placeholder-translated": 1,
+        "tag-unclosed": 1,
+        "terminology-drift": 0.667,
+        "entity-leak": 0,
+        "untranslated": 1,
+        "overflow": 1
+      },
+      "cleanArmReferenceFailRecall": 0.6,
+      "cleanArmReferenceFailCaught": 3,
+      "cleanArmReferenceFailDenominator": 5
+    },
+    {
+      "modelKey": "google::gemma-4-31b-it",
+      "runsPresent": [
+        1,
+        2
+      ],
+      "totalObservations": 100,
+      "malformedCount": 20,
+      "coverage": 0.8,
+      "itemsReviewed": 50,
+      "totalItemsInScope": 50,
+      "reviewedFraction": 1,
+      "comparable": true,
+      "recall": 0.773,
+      "precision": 1,
+      "f1": 0.872,
+      "falsePositiveRate": 0,
+      "scoreMae": 16.8,
+      "stability": 0.6,
+      "perDefectRecall": {
+        "placeholder-dropped": 1,
+        "placeholder-translated": 1,
+        "tag-unclosed": 1,
+        "terminology-drift": 0.5,
+        "entity-leak": 0,
+        "untranslated": 1,
+        "overflow": 1
+      },
+      "cleanArmReferenceFailRecall": 0.333,
+      "cleanArmReferenceFailCaught": 2,
+      "cleanArmReferenceFailDenominator": 6
+    },
+    {
+      "modelKey": "google::gemini-3.6-flash",
+      "runsPresent": [
+        1,
+        2
+      ],
+      "totalObservations": 100,
+      "malformedCount": 0,
+      "coverage": 1,
+      "itemsReviewed": 50,
+      "totalItemsInScope": 50,
+      "reviewedFraction": 1,
+      "comparable": true,
+      "recall": 0.741,
+      "precision": 0.977,
+      "f1": 0.843,
+      "falsePositiveRate": 0.024,
+      "scoreMae": 22.1,
+      "stability": 0.96,
+      "perDefectRecall": {
+        "placeholder-dropped": 1,
+        "placeholder-translated": 1,
+        "tag-unclosed": 1,
+        "terminology-drift": 0.5,
+        "entity-leak": 0,
+        "untranslated": 1,
+        "overflow": 1
+      },
+      "cleanArmReferenceFailRecall": 0.5,
+      "cleanArmReferenceFailCaught": 5,
+      "cleanArmReferenceFailDenominator": 10
+    },
+    {
+      "modelKey": "google::gemini-3.5-flash",
+      "runsPresent": [
+        1,
+        2
+      ],
+      "totalObservations": 100,
+      "malformedCount": 0,
+      "coverage": 1,
+      "itemsReviewed": 50,
+      "totalItemsInScope": 50,
+      "reviewedFraction": 1,
+      "comparable": true,
+      "recall": 0.724,
+      "precision": 0.977,
+      "f1": 0.832,
+      "falsePositiveRate": 0.024,
+      "scoreMae": 22.9,
+      "stability": 0.98,
+      "perDefectRecall": {
+        "placeholder-dropped": 1,
+        "placeholder-translated": 1,
+        "tag-unclosed": 1,
+        "terminology-drift": 0.5,
+        "entity-leak": 0,
+        "untranslated": 1,
+        "overflow": 1
+      },
+      "cleanArmReferenceFailRecall": 0.4,
+      "cleanArmReferenceFailCaught": 4,
+      "cleanArmReferenceFailDenominator": 10
     },
     {
       "modelKey": "google::gemini-3.1-flash-lite",
@@ -122,66 +249,36 @@
       "cleanArmReferenceFailDenominator": 10
     },
     {
-      "modelKey": "google::gemma-4-31b-it",
-      "runsPresent": [
-        1
-      ],
-      "totalObservations": 30,
-      "malformedCount": 20,
-      "coverage": 0.333,
-      "itemsReviewed": 10,
-      "totalItemsInScope": 50,
-      "reviewedFraction": 0.2,
-      "comparable": false,
-      "recall": 1,
-      "precision": 1,
-      "f1": 1,
-      "falsePositiveRate": 0,
-      "scoreMae": 19.3,
-      "stability": null,
-      "perDefectRecall": {
-        "placeholder-dropped": 1,
-        "placeholder-translated": 1,
-        "tag-unclosed": 1,
-        "terminology-drift": null,
-        "entity-leak": null,
-        "untranslated": null,
-        "overflow": null
-      },
-      "cleanArmReferenceFailRecall": null,
-      "cleanArmReferenceFailCaught": 0,
-      "cleanArmReferenceFailDenominator": 0
-    },
-    {
       "modelKey": "openrouter::nvidia/nemotron-3-super-120b-a12b:free",
       "runsPresent": [
-        1
+        1,
+        2
       ],
-      "totalObservations": 30,
-      "malformedCount": 15,
-      "coverage": 0.5,
-      "itemsReviewed": 15,
+      "totalObservations": 100,
+      "malformedCount": 25,
+      "coverage": 0.75,
+      "itemsReviewed": 49,
       "totalItemsInScope": 50,
-      "reviewedFraction": 0.3,
-      "comparable": false,
-      "recall": 0.7,
+      "reviewedFraction": 0.98,
+      "comparable": true,
+      "recall": 0.511,
       "precision": 1,
-      "f1": 0.824,
+      "f1": 0.676,
       "falsePositiveRate": 0,
-      "scoreMae": 19.8,
-      "stability": null,
+      "scoreMae": 24.6,
+      "stability": 0.4,
       "perDefectRecall": {
-        "placeholder-dropped": 1,
-        "placeholder-translated": 1,
-        "tag-unclosed": 1,
+        "placeholder-dropped": 0.75,
+        "placeholder-translated": 0.75,
+        "tag-unclosed": 0.625,
         "terminology-drift": 0,
-        "entity-leak": 0,
+        "entity-leak": 0.167,
         "untranslated": 1,
-        "overflow": 0
+        "overflow": 0.167
       },
-      "cleanArmReferenceFailRecall": null,
-      "cleanArmReferenceFailCaught": 0,
-      "cleanArmReferenceFailDenominator": 0
+      "cleanArmReferenceFailRecall": 0.4,
+      "cleanArmReferenceFailCaught": 2,
+      "cleanArmReferenceFailDenominator": 5
     },
     {
       "modelKey": "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free",
@@ -189,22 +286,22 @@
         1,
         2
       ],
-      "totalObservations": 90,
+      "totalObservations": 100,
       "malformedCount": 70,
-      "coverage": 0.222,
-      "itemsReviewed": 10,
+      "coverage": 0.3,
+      "itemsReviewed": 20,
       "totalItemsInScope": 50,
-      "reviewedFraction": 0.2,
+      "reviewedFraction": 0.4,
       "comparable": false,
-      "recall": 0.25,
+      "recall": 0.235,
       "precision": 1,
-      "f1": 0.4,
+      "f1": 0.381,
       "falsePositiveRate": 0,
-      "scoreMae": 18.5,
-      "stability": 0.95,
+      "scoreMae": 15.9,
+      "stability": 0.76,
       "perDefectRecall": {
         "placeholder-dropped": null,
-        "placeholder-translated": null,
+        "placeholder-translated": 0,
         "tag-unclosed": null,
         "terminology-drift": 0,
         "entity-leak": 0,
@@ -216,12 +313,43 @@
       "cleanArmReferenceFailDenominator": 4
     },
     {
-      "modelKey": "google::gemma-4-26b-a4b-it",
+      "modelKey": "google::gemini-3-flash-preview",
       "runsPresent": [
         1
       ],
-      "totalObservations": 20,
-      "malformedCount": 20,
+      "totalObservations": 10,
+      "malformedCount": 10,
+      "coverage": 0,
+      "itemsReviewed": 0,
+      "totalItemsInScope": 50,
+      "reviewedFraction": 0,
+      "comparable": false,
+      "recall": null,
+      "precision": null,
+      "f1": null,
+      "falsePositiveRate": null,
+      "scoreMae": null,
+      "stability": null,
+      "perDefectRecall": {
+        "placeholder-dropped": null,
+        "placeholder-translated": null,
+        "tag-unclosed": null,
+        "terminology-drift": null,
+        "entity-leak": null,
+        "untranslated": null,
+        "overflow": null
+      },
+      "cleanArmReferenceFailRecall": null,
+      "cleanArmReferenceFailCaught": 0,
+      "cleanArmReferenceFailDenominator": 0
+    },
+    {
+      "modelKey": "google::gemini-flash-latest",
+      "runsPresent": [
+        1
+      ],
+      "totalObservations": 10,
+      "malformedCount": 10,
       "coverage": 0,
       "itemsReviewed": 0,
       "totalItemsInScope": 50,
@@ -314,6 +442,38 @@
         "cleanArmReferenceFailDenominator": 8
       },
       {
+        "modelKey": "google::gemma-4-31b-it",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 50,
+        "malformedCount": 15,
+        "coverage": 0.7,
+        "itemsReviewed": 25,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 1,
+        "comparable": true,
+        "recall": 0.773,
+        "precision": 1,
+        "f1": 0.872,
+        "falsePositiveRate": 0,
+        "scoreMae": 18.3,
+        "stability": 0.4,
+        "perDefectRecall": {
+          "placeholder-dropped": 1,
+          "placeholder-translated": 1,
+          "tag-unclosed": 1,
+          "terminology-drift": 0,
+          "entity-leak": 0,
+          "untranslated": 1,
+          "overflow": 1
+        },
+        "cleanArmReferenceFailRecall": 0.5,
+        "cleanArmReferenceFailCaught": 2,
+        "cleanArmReferenceFailDenominator": 4
+      },
+      {
         "modelKey": "google::gemini-3.1-flash-lite",
         "runsPresent": [
           1,
@@ -343,6 +503,102 @@
         },
         "cleanArmReferenceFailRecall": 1,
         "cleanArmReferenceFailCaught": 8,
+        "cleanArmReferenceFailDenominator": 8
+      },
+      {
+        "modelKey": "google::gemma-4-26b-a4b-it",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 45,
+        "malformedCount": 25,
+        "coverage": 0.444,
+        "itemsReviewed": 20,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 0.8,
+        "comparable": true,
+        "recall": 0.733,
+        "precision": 1,
+        "f1": 0.846,
+        "falsePositiveRate": 0,
+        "scoreMae": 20.8,
+        "stability": 0.25,
+        "perDefectRecall": {
+          "placeholder-dropped": 1,
+          "placeholder-translated": 1,
+          "tag-unclosed": 1,
+          "terminology-drift": 0,
+          "entity-leak": 0,
+          "untranslated": 1,
+          "overflow": 1
+        },
+        "cleanArmReferenceFailRecall": 0.667,
+        "cleanArmReferenceFailCaught": 2,
+        "cleanArmReferenceFailDenominator": 3
+      },
+      {
+        "modelKey": "google::gemini-3.5-flash",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 50,
+        "malformedCount": 0,
+        "coverage": 1,
+        "itemsReviewed": 25,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 1,
+        "comparable": true,
+        "recall": 0.688,
+        "precision": 0.957,
+        "f1": 0.801,
+        "falsePositiveRate": 0.056,
+        "scoreMae": 25.3,
+        "stability": 0.96,
+        "perDefectRecall": {
+          "placeholder-dropped": 1,
+          "placeholder-translated": 1,
+          "tag-unclosed": 1,
+          "terminology-drift": 0,
+          "entity-leak": 0,
+          "untranslated": 1,
+          "overflow": 1
+        },
+        "cleanArmReferenceFailRecall": 0.5,
+        "cleanArmReferenceFailCaught": 4,
+        "cleanArmReferenceFailDenominator": 8
+      },
+      {
+        "modelKey": "google::gemini-3.6-flash",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 50,
+        "malformedCount": 0,
+        "coverage": 1,
+        "itemsReviewed": 25,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 1,
+        "comparable": true,
+        "recall": 0.688,
+        "precision": 0.957,
+        "f1": 0.801,
+        "falsePositiveRate": 0.056,
+        "scoreMae": 24.7,
+        "stability": 0.96,
+        "perDefectRecall": {
+          "placeholder-dropped": 1,
+          "placeholder-translated": 1,
+          "tag-unclosed": 1,
+          "terminology-drift": 0,
+          "entity-leak": 0,
+          "untranslated": 1,
+          "overflow": 1
+        },
+        "cleanArmReferenceFailRecall": 0.5,
+        "cleanArmReferenceFailCaught": 4,
         "cleanArmReferenceFailDenominator": 8
       },
       {
@@ -378,66 +634,36 @@
         "cleanArmReferenceFailDenominator": 8
       },
       {
-        "modelKey": "google::gemma-4-31b-it",
-        "runsPresent": [
-          1
-        ],
-        "totalObservations": 25,
-        "malformedCount": 15,
-        "coverage": 0.4,
-        "itemsReviewed": 10,
-        "totalItemsInScope": 25,
-        "reviewedFraction": 0.4,
-        "comparable": false,
-        "recall": 1,
-        "precision": 1,
-        "f1": 1,
-        "falsePositiveRate": 0,
-        "scoreMae": 19.3,
-        "stability": null,
-        "perDefectRecall": {
-          "placeholder-dropped": 1,
-          "placeholder-translated": 1,
-          "tag-unclosed": 1,
-          "terminology-drift": null,
-          "entity-leak": null,
-          "untranslated": null,
-          "overflow": null
-        },
-        "cleanArmReferenceFailRecall": null,
-        "cleanArmReferenceFailCaught": 0,
-        "cleanArmReferenceFailDenominator": 0
-      },
-      {
         "modelKey": "openrouter::nvidia/nemotron-3-super-120b-a12b:free",
         "runsPresent": [
-          1
+          1,
+          2
         ],
-        "totalObservations": 25,
-        "malformedCount": 10,
-        "coverage": 0.6,
-        "itemsReviewed": 15,
+        "totalObservations": 50,
+        "malformedCount": 15,
+        "coverage": 0.7,
+        "itemsReviewed": 24,
         "totalItemsInScope": 25,
-        "reviewedFraction": 0.6,
-        "comparable": false,
-        "recall": 0.7,
+        "reviewedFraction": 0.96,
+        "comparable": true,
+        "recall": 0.52,
         "precision": 1,
-        "f1": 0.824,
+        "f1": 0.684,
         "falsePositiveRate": 0,
-        "scoreMae": 19.8,
-        "stability": null,
+        "scoreMae": 25.4,
+        "stability": 0.36,
         "perDefectRecall": {
-          "placeholder-dropped": 1,
-          "placeholder-translated": 1,
-          "tag-unclosed": 1,
+          "placeholder-dropped": 0.75,
+          "placeholder-translated": 0.75,
+          "tag-unclosed": 0.75,
           "terminology-drift": 0,
           "entity-leak": 0,
           "untranslated": 1,
           "overflow": 0
         },
-        "cleanArmReferenceFailRecall": null,
-        "cleanArmReferenceFailCaught": 0,
-        "cleanArmReferenceFailDenominator": 0
+        "cleanArmReferenceFailRecall": 0.667,
+        "cleanArmReferenceFailCaught": 2,
+        "cleanArmReferenceFailDenominator": 3
       },
       {
         "modelKey": "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free",
@@ -472,12 +698,43 @@
         "cleanArmReferenceFailDenominator": 4
       },
       {
-        "modelKey": "google::gemma-4-26b-a4b-it",
+        "modelKey": "google::gemini-3-flash-preview",
         "runsPresent": [
           1
         ],
-        "totalObservations": 20,
-        "malformedCount": 20,
+        "totalObservations": 5,
+        "malformedCount": 5,
+        "coverage": 0,
+        "itemsReviewed": 0,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 0,
+        "comparable": false,
+        "recall": null,
+        "precision": null,
+        "f1": null,
+        "falsePositiveRate": null,
+        "scoreMae": null,
+        "stability": null,
+        "perDefectRecall": {
+          "placeholder-dropped": null,
+          "placeholder-translated": null,
+          "tag-unclosed": null,
+          "terminology-drift": null,
+          "entity-leak": null,
+          "untranslated": null,
+          "overflow": null
+        },
+        "cleanArmReferenceFailRecall": null,
+        "cleanArmReferenceFailCaught": 0,
+        "cleanArmReferenceFailDenominator": 0
+      },
+      {
+        "modelKey": "google::gemini-flash-latest",
+        "runsPresent": [
+          1
+        ],
+        "totalObservations": 5,
+        "malformedCount": 5,
         "coverage": 0,
         "itemsReviewed": 0,
         "totalItemsInScope": 25,
@@ -537,24 +794,152 @@
     ],
     "ja": [
       {
-        "modelKey": "groq::openai/gpt-oss-120b",
+        "modelKey": "google::gemini-3.6-flash",
         "runsPresent": [
           1,
           2
         ],
-        "totalObservations": 40,
-        "malformedCount": 15,
-        "coverage": 0.625,
+        "totalObservations": 50,
+        "malformedCount": 0,
+        "coverage": 1,
+        "itemsReviewed": 25,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 1,
+        "comparable": true,
+        "recall": 0.808,
+        "precision": 1,
+        "f1": 0.894,
+        "falsePositiveRate": 0,
+        "scoreMae": 19.5,
+        "stability": 0.96,
+        "perDefectRecall": {
+          "placeholder-dropped": 1,
+          "placeholder-translated": 1,
+          "tag-unclosed": 1,
+          "terminology-drift": 1,
+          "entity-leak": 0,
+          "untranslated": 1,
+          "overflow": 1
+        },
+        "cleanArmReferenceFailRecall": 0.5,
+        "cleanArmReferenceFailCaught": 1,
+        "cleanArmReferenceFailDenominator": 2
+      },
+      {
+        "modelKey": "google::gemma-4-26b-a4b-it",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 45,
+        "malformedCount": 5,
+        "coverage": 0.889,
+        "itemsReviewed": 25,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 1,
+        "comparable": true,
+        "recall": 0.808,
+        "precision": 1,
+        "f1": 0.894,
+        "falsePositiveRate": 0,
+        "scoreMae": 19.4,
+        "stability": 0.7,
+        "perDefectRecall": {
+          "placeholder-dropped": 1,
+          "placeholder-translated": 1,
+          "tag-unclosed": 1,
+          "terminology-drift": 1,
+          "entity-leak": 0,
+          "untranslated": 1,
+          "overflow": 1
+        },
+        "cleanArmReferenceFailRecall": 0.5,
+        "cleanArmReferenceFailCaught": 1,
+        "cleanArmReferenceFailDenominator": 2
+      },
+      {
+        "modelKey": "google::gemma-4-31b-it",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 50,
+        "malformedCount": 5,
+        "coverage": 0.9,
+        "itemsReviewed": 25,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 1,
+        "comparable": true,
+        "recall": 0.773,
+        "precision": 1,
+        "f1": 0.872,
+        "falsePositiveRate": 0,
+        "scoreMae": 15.6,
+        "stability": 0.8,
+        "perDefectRecall": {
+          "placeholder-dropped": 1,
+          "placeholder-translated": 1,
+          "tag-unclosed": 1,
+          "terminology-drift": 1,
+          "entity-leak": 0,
+          "untranslated": 1,
+          "overflow": 1
+        },
+        "cleanArmReferenceFailRecall": 0,
+        "cleanArmReferenceFailCaught": 0,
+        "cleanArmReferenceFailDenominator": 2
+      },
+      {
+        "modelKey": "google::gemini-3.5-flash",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 50,
+        "malformedCount": 0,
+        "coverage": 1,
         "itemsReviewed": 25,
         "totalItemsInScope": 25,
         "reviewedFraction": 1,
         "comparable": true,
         "recall": 0.769,
-        "precision": 0.909,
-        "f1": 0.833,
-        "falsePositiveRate": 0.083,
-        "scoreMae": 21.9,
-        "stability": 0,
+        "precision": 1,
+        "f1": 0.869,
+        "falsePositiveRate": 0,
+        "scoreMae": 20.5,
+        "stability": 1,
+        "perDefectRecall": {
+          "placeholder-dropped": 1,
+          "placeholder-translated": 1,
+          "tag-unclosed": 1,
+          "terminology-drift": 1,
+          "entity-leak": 0,
+          "untranslated": 1,
+          "overflow": 1
+        },
+        "cleanArmReferenceFailRecall": 0,
+        "cleanArmReferenceFailCaught": 0,
+        "cleanArmReferenceFailDenominator": 2
+      },
+      {
+        "modelKey": "groq::openai/gpt-oss-120b",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 50,
+        "malformedCount": 15,
+        "coverage": 0.7,
+        "itemsReviewed": 25,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 1,
+        "comparable": true,
+        "recall": 0.786,
+        "precision": 0.917,
+        "f1": 0.846,
+        "falsePositiveRate": 0.048,
+        "scoreMae": 18.1,
+        "stability": 0.36,
         "perDefectRecall": {
           "placeholder-dropped": 1,
           "placeholder-translated": 1,
@@ -633,11 +1018,77 @@
         "cleanArmReferenceFailDenominator": 2
       },
       {
-        "modelKey": "google::gemma-4-26b-a4b-it",
-        "runsPresent": [],
-        "totalObservations": 0,
-        "malformedCount": 0,
-        "coverage": null,
+        "modelKey": "openrouter::nvidia/nemotron-3-super-120b-a12b:free",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 50,
+        "malformedCount": 10,
+        "coverage": 0.8,
+        "itemsReviewed": 25,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 1,
+        "comparable": true,
+        "recall": 0.5,
+        "precision": 1,
+        "f1": 0.667,
+        "falsePositiveRate": 0,
+        "scoreMae": 23.9,
+        "stability": 0.44,
+        "perDefectRecall": {
+          "placeholder-dropped": 0.75,
+          "placeholder-translated": 0.75,
+          "tag-unclosed": 0.5,
+          "terminology-drift": 0,
+          "entity-leak": 0.333,
+          "untranslated": 1,
+          "overflow": 0.333
+        },
+        "cleanArmReferenceFailRecall": 0,
+        "cleanArmReferenceFailCaught": 0,
+        "cleanArmReferenceFailDenominator": 2
+      },
+      {
+        "modelKey": "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free",
+        "runsPresent": [
+          1,
+          2
+        ],
+        "totalObservations": 50,
+        "malformedCount": 40,
+        "coverage": 0.2,
+        "itemsReviewed": 10,
+        "totalItemsInScope": 25,
+        "reviewedFraction": 0.4,
+        "comparable": false,
+        "recall": 0,
+        "precision": null,
+        "f1": 0,
+        "falsePositiveRate": 0,
+        "scoreMae": 10.7,
+        "stability": 0.6,
+        "perDefectRecall": {
+          "placeholder-dropped": null,
+          "placeholder-translated": 0,
+          "tag-unclosed": null,
+          "terminology-drift": null,
+          "entity-leak": null,
+          "untranslated": null,
+          "overflow": null
+        },
+        "cleanArmReferenceFailRecall": null,
+        "cleanArmReferenceFailCaught": 0,
+        "cleanArmReferenceFailDenominator": 0
+      },
+      {
+        "modelKey": "google::gemini-3-flash-preview",
+        "runsPresent": [
+          1
+        ],
+        "totalObservations": 5,
+        "malformedCount": 5,
+        "coverage": 0,
         "itemsReviewed": 0,
         "totalItemsInScope": 25,
         "reviewedFraction": 0,
@@ -662,7 +1113,7 @@
         "cleanArmReferenceFailDenominator": 0
       },
       {
-        "modelKey": "google::gemma-4-31b-it",
+        "modelKey": "google::gemini-flash-latest",
         "runsPresent": [
           1
         ],
@@ -700,69 +1151,6 @@
         ],
         "totalObservations": 50,
         "malformedCount": 50,
-        "coverage": 0,
-        "itemsReviewed": 0,
-        "totalItemsInScope": 25,
-        "reviewedFraction": 0,
-        "comparable": false,
-        "recall": null,
-        "precision": null,
-        "f1": null,
-        "falsePositiveRate": null,
-        "scoreMae": null,
-        "stability": 1,
-        "perDefectRecall": {
-          "placeholder-dropped": null,
-          "placeholder-translated": null,
-          "tag-unclosed": null,
-          "terminology-drift": null,
-          "entity-leak": null,
-          "untranslated": null,
-          "overflow": null
-        },
-        "cleanArmReferenceFailRecall": null,
-        "cleanArmReferenceFailCaught": 0,
-        "cleanArmReferenceFailDenominator": 0
-      },
-      {
-        "modelKey": "openrouter::nvidia/nemotron-3-super-120b-a12b:free",
-        "runsPresent": [
-          1
-        ],
-        "totalObservations": 5,
-        "malformedCount": 5,
-        "coverage": 0,
-        "itemsReviewed": 0,
-        "totalItemsInScope": 25,
-        "reviewedFraction": 0,
-        "comparable": false,
-        "recall": null,
-        "precision": null,
-        "f1": null,
-        "falsePositiveRate": null,
-        "scoreMae": null,
-        "stability": null,
-        "perDefectRecall": {
-          "placeholder-dropped": null,
-          "placeholder-translated": null,
-          "tag-unclosed": null,
-          "terminology-drift": null,
-          "entity-leak": null,
-          "untranslated": null,
-          "overflow": null
-        },
-        "cleanArmReferenceFailRecall": null,
-        "cleanArmReferenceFailCaught": 0,
-        "cleanArmReferenceFailDenominator": 0
-      },
-      {
-        "modelKey": "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free",
-        "runsPresent": [
-          1,
-          2
-        ],
-        "totalObservations": 40,
-        "malformedCount": 40,
         "coverage": 0,
         "itemsReviewed": 0,
         "totalItemsInScope": 25,

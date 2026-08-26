@@ -226,6 +226,11 @@ const USAGE = `Usage: tsx scripts/judge-benchmark.ts --translate-weak [options]
                          (applied after --models; lets you run the fast
                          providers now and the tight-quota ones separately).
   --runs N               Number of independent judge passes per model (default: ${DEFAULT_RUNS}).
+  --wait-cap SECONDS     Per-(model, run) cumulative rate-limit wait budget
+                         (default: ${RATE_LIMIT_WAIT_CAP_MS / 1000}). Raise it for
+                         providers whose free tier makes you wait minutes between
+                         chunks; the default keeps one throttled model from eating
+                         a whole run.
   --refresh              Re-run (model, run) pairs already fully in verdicts.json
                          (default: skip them — the run is crash-resumable).
   --plan                 Print the request plan + key-presence report and exit.
@@ -246,6 +251,7 @@ interface CliArgs {
   runs: number;
   refresh: boolean;
   plan: boolean;
+  waitCapMs?: number;
 }
 
 function usageError(message: string): never {
@@ -308,6 +314,13 @@ function parseArgs(argv: string[]): CliArgs {
         args.runs = n;
         break;
       }
+      case '--wait-cap': {
+        const raw = next(++i, '--wait-cap');
+        const n = Number(raw);
+        if (!Number.isFinite(n) || n <= 0) usageError(`--wait-cap must be a positive number of seconds (got "${raw}")`);
+        args.waitCapMs = Math.round(n * 1000);
+        break;
+      }
       case '--refresh':
         args.refresh = true;
         break;
@@ -326,6 +339,7 @@ function parseArgs(argv: string[]): CliArgs {
   if (args.skipModels?.length === 0) usageError('--skip-models must name at least one provider::modelId pair');
   if (args.score && args.models) usageError('--models only applies to --judge (--score scores every model present in verdicts.json)');
   if (!args.judge && args.skipModels) usageError('--skip-models only applies to --judge');
+  if (!args.judge && args.waitCapMs !== undefined) usageError('--wait-cap only applies to --judge');
   return args;
 }
 
@@ -936,6 +950,10 @@ function printJudgePlan(
 }
 
 async function runJudge(args: CliArgs, snapshot: FreeTierSnapshot): Promise<void> {
+  // The cap is a default, not a law: a provider whose free tier answers once every
+  // few minutes needs a bigger budget than one that answers instantly, and which is
+  // which is only knowable per invocation. --wait-cap raises it for those runs.
+  const waitCapMs = args.waitCapMs ?? RATE_LIMIT_WAIT_CAP_MS;
   const { corpus, corpusVersion } = readCorpus();
   // --judge needs the curated defect-injection fields (injected/defect/arm/cleanFlaw) on
   // every entry — --translate-weak alone can never produce them (see requireCuratedEntries).
@@ -1063,10 +1081,10 @@ async function runJudge(args: CliArgs, snapshot: FreeTierSnapshot): Promise<void
         // chunk's wait to whatever's left of this run's budget via AbortSignal — a real timeout,
         // not just a post-hoc check — so a single very slow chunk is itself capped, not only the
         // chunk after it.
-        const remainingBudgetMs = RATE_LIMIT_WAIT_CAP_MS - elapsedMsThisRun;
+        const remainingBudgetMs = waitCapMs - elapsedMsThisRun;
         if (remainingBudgetMs <= 0) {
-          abandonReason = `exceeded the ${RATE_LIMIT_WAIT_CAP_MS}ms cumulative rate-limit wait budget for this run`;
-          console.error(`[${key}] rate-limit wait budget (${RATE_LIMIT_WAIT_CAP_MS}ms) exhausted for run ${run} — abandoning remaining work for this model.`);
+          abandonReason = `exceeded the ${waitCapMs}ms cumulative rate-limit wait budget for this run`;
+          console.error(`[${key}] rate-limit wait budget (${waitCapMs}ms) exhausted for run ${run} — abandoning remaining work for this model.`);
           modelAbandoned = true;
           break;
         }
@@ -1107,8 +1125,8 @@ async function runJudge(args: CliArgs, snapshot: FreeTierSnapshot): Promise<void
             abandonReason = `unexpected error: ${unexpectedError}`;
             console.error(`[${key}] judge call threw unexpectedly: ${unexpectedError} — stopping this model.`);
           } else {
-            abandonReason = `a chunk was aborted after ${elapsedThisChunk}ms — exceeded the ${RATE_LIMIT_WAIT_CAP_MS}ms wait budget for this run (provider is likely rate-limited)`;
-            console.error(`[${key}] chunk timed out after ${elapsedThisChunk}ms (budget cap ${RATE_LIMIT_WAIT_CAP_MS}ms) — abandoning remaining work for this model.`);
+            abandonReason = `a chunk was aborted after ${elapsedThisChunk}ms — exceeded the ${waitCapMs}ms wait budget for this run (provider is likely rate-limited)`;
+            console.error(`[${key}] chunk timed out after ${elapsedThisChunk}ms (budget cap ${waitCapMs}ms) — abandoning remaining work for this model.`);
           }
           modelAbandoned = true;
           break;

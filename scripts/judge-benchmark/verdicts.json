@@ -307,7 +307,279 @@
       }
     ]
   },
+  "dispatchOrder": [
+    {
+      "lang": "fr",
+      "entryId": "e04"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e04"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e10"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e10"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e11"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e11"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e12"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e12"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e01"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e01"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e02"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e00"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e00"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e02"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e03"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e03"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e06"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e06"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e14"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e14"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e15"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e15"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e13"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e13"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e05"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e05"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e07"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e07"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e08"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e08"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e09"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e09"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e16"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e16"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e17"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e17"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e18"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e18"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e19"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e19"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e20"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e20"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e21"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e21"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e22"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e22"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e23"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e23"
+    },
+    {
+      "lang": "fr",
+      "entryId": "e24"
+    },
+    {
+      "lang": "ja",
+      "entryId": "e24"
+    }
+  ],
   "verdicts": {
+    "google::gemini-3-flash-preview::run1::fr::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-3-flash-preview::run1::fr::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-3-flash-preview::run1::fr::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-3-flash-preview::run1::fr::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-3-flash-preview::run1::fr::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-3-flash-preview::run1::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-3-flash-preview::run1::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-3-flash-preview::run1::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-3-flash-preview::run1::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-3-flash-preview::run1::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
     "google::gemini-3.1-flash-lite::run1::fr::e00": {
       "arm": "injected",
       "defect": "untranslated",
@@ -1299,6 +1571,2096 @@
       "score": 100,
       "issues": [],
       "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e00": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": "entity-leak",
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 85,
+      "issues": [
+        "terminology"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e02": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 45,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e08": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e09": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 80,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e19": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e20": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e23": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::fr::e24": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e00": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "terminology"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e02": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 45,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run1::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e00": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": "entity-leak",
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 85,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e02": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e08": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e09": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 80,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 75,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e19": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e20": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e23": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::fr::e24": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e00": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "terminology"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e02": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 80,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.5-flash::run2::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e00": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": "entity-leak",
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 80,
+      "issues": [
+        "terminology"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e02": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 85,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 65,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e08": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e09": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 80,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e19": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e20": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e23": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::fr::e24": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e00": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e02": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 85,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "terminology"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 65,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run1::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e00": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": "entity-leak",
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 80,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e02": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 88,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 88,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e08": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e09": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 80,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e19": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e20": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e23": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::fr::e24": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e00": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 88,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e02": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 88,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 80,
+      "issues": [
+        "terminology"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-3.6-flash::run2::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemini-flash-latest::run1::fr::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-flash-latest::run1::fr::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-flash-latest::run1::fr::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-flash-latest::run1::fr::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-flash-latest::run1::fr::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-flash-latest::run1::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-flash-latest::run1::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-flash-latest::run1::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-flash-latest::run1::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemini-flash-latest::run1::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
     },
     "google::gemini-flash-lite-latest::run1::fr::e00": {
       "arm": "injected",
@@ -2441,6 +4803,686 @@
       "malformed": true,
       "error": "cancelled"
     },
+    "google::gemma-4-26b-a4b-it::run1::fr::e20": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::fr::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::fr::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::fr::e23": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::fr::e24": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e00": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e02": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run1::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e00": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": "entity-leak",
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e02": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e08": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e09": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy",
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 20,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 20,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy",
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemma-4-26b-a4b-it::run2::fr::e19": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e00": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e02": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 0,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 20,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 20,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
+    "google::gemma-4-26b-a4b-it::run2::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "cancelled"
+    },
     "google::gemma-4-31b-it::run1::fr::e00": {
       "arm": "injected",
       "defect": "untranslated",
@@ -2682,6 +5724,703 @@
       "cleanFlaw": null,
       "malformed": true,
       "error": "cancelled"
+    },
+    "google::gemma-4-31b-it::run1::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run1::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e00": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": "entity-leak",
+      "verdict": "fail",
+      "score": 20,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e02": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e08": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e09": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy",
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e19": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e20": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e23": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::fr::e24": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e00": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e02": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 20,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "tone"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "google::gemma-4-31b-it::run2::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
     },
     "groq::openai/gpt-oss-120b::run1::fr::e00": {
       "arm": "injected",
@@ -3553,6 +7292,100 @@
       "cleanFlaw": null,
       "malformed": true,
       "error": "cancelled"
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 97,
+      "issues": [],
+      "malformed": false
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 82,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 96,
+      "issues": [],
+      "malformed": false
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "groq::openai/gpt-oss-120b::run2::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 99,
+      "issues": [],
+      "malformed": false
     },
     "openrouter::google/gemma-4-26b-a4b-it:free::run1::fr::e00": {
       "arm": "injected",
@@ -4517,6 +8350,683 @@
       "malformed": true,
       "error": "cancelled"
     },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 90,
+      "issues": [
+        "fluency"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 45,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 45,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 60,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 85,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e00": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": "entity-leak",
+      "verdict": "fail",
+      "score": 20,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e02": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 90,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 80,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 88,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 85,
+      "issues": [
+        "accuracy",
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 55,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e08": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 85,
+      "issues": [
+        "terminology"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e09": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 45,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 55,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 50,
+      "issues": [
+        "accuracy",
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e19": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e20": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 50,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e23": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::fr::e24": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 78,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e00": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 80,
+      "issues": [
+        "accuracy",
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e01": {
+      "arm": "injected",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e02": {
+      "arm": "injected",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 20,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e03": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 80,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e04": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e05": {
+      "arm": "injected",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 88,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e06": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e07": {
+      "arm": "injected",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e08": {
+      "arm": "clean",
+      "defect": "terminology-drift",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e09": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e10": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 30,
+      "issues": [
+        "mistranslation"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e11": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 40,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e12": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "fail",
+      "score": 55,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e13": {
+      "arm": "injected",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e14": {
+      "arm": "injected",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 70,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 75,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "malformed": true,
+      "error": "Invalid JSON response"
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run2::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 95,
+      "issues": [],
+      "malformed": false
+    },
     "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run1::fr::e00": {
       "arm": "injected",
       "defect": "untranslated",
@@ -5220,36 +9730,116 @@
       "cleanFlaw": null,
       "malformed": true,
       "error": "cancelled"
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e15": {
+      "arm": "injected",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 85,
+      "issues": [
+        "accuracy"
+      ],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e16": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e17": {
+      "arm": "clean",
+      "defect": "tag-unclosed",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e18": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e19": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e20": {
+      "arm": "clean",
+      "defect": "overflow",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e21": {
+      "arm": "clean",
+      "defect": "placeholder-dropped",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e22": {
+      "arm": "clean",
+      "defect": "placeholder-translated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 100,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e23": {
+      "arm": "clean",
+      "defect": "entity-leak",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
+    },
+    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2::ja::e24": {
+      "arm": "clean",
+      "defect": "untranslated",
+      "cleanFlaw": null,
+      "verdict": "pass",
+      "score": 98,
+      "issues": [],
+      "malformed": false
     }
   },
   "incompleteRuns": {
-    "google::gemma-4-26b-a4b-it::run1": {
-      "reason": "exceeded the 90000ms cumulative rate-limit wait budget for this run",
-      "ts": 1787699195386,
-      "itemsDone": 20,
+    "google::gemini-3-flash-preview::run1": {
+      "reason": "exceeded the 600000ms cumulative rate-limit wait budget for this run",
+      "ts": 1787756440237,
+      "itemsDone": 10,
       "itemsTotal": 50
     },
-    "google::gemma-4-31b-it::run1": {
-      "reason": "exceeded the 90000ms cumulative rate-limit wait budget for this run",
-      "ts": 1787699103378,
-      "itemsDone": 30,
+    "google::gemini-flash-latest::run1": {
+      "reason": "exceeded the 600000ms cumulative rate-limit wait budget for this run",
+      "ts": 1787754250946,
+      "itemsDone": 10,
       "itemsTotal": 50
     },
-    "groq::openai/gpt-oss-120b::run2": {
-      "reason": "exceeded the 90000ms cumulative rate-limit wait budget for this run",
-      "ts": 1787699525982,
-      "itemsDone": 40,
-      "itemsTotal": 50
-    },
-    "openrouter::nvidia/nemotron-3-super-120b-a12b:free::run1": {
-      "reason": "exceeded the 90000ms cumulative rate-limit wait budget for this run",
-      "ts": 1787699414364,
-      "itemsDone": 30,
-      "itemsTotal": 50
-    },
-    "openrouter::nvidia/nemotron-3-ultra-550b-a55b:free::run2": {
-      "reason": "exceeded the 90000ms cumulative rate-limit wait budget for this run",
-      "ts": 1787699318352,
+    "google::gemma-4-26b-a4b-it::run2": {
+      "reason": "exceeded the 600000ms cumulative rate-limit wait budget for this run",
+      "ts": 1787755828220,
       "itemsDone": 40,
       "itemsTotal": 50
     }
