@@ -6,5 +6,9 @@
     "rateLimited": "Terlalu banyak permintaan — tunggu sebentar lalu coba lagi.",
     "server": "Server mengalami masalah. Coba lagi sebentar lagi.",
     "offline": "Tidak bisa menjangkau server. Periksa koneksi Anda."
+  },
+  "noRoute": {
+    "title": "Perlu penyaluran",
+    "body": "Tidak ada aturan penyaluran yang cocok dengan {{languages}}. Siapkan penyaluran terlebih dahulu — proses ini tidak akan menerjemahkan apa pun."
   }
 }

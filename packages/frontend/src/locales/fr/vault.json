@@ -58,5 +58,6 @@
   "retrySuccess_other": "Déverrouillé — les {{count}} actions ont abouti.",
   "retryFailed": "Déverrouillé, mais l'action relancée a échoué — réessayez.",
   "retryFailed_other": "Déverrouillé, mais les actions relancées ont échoué — réessayez.",
-  "retryPartialFailed": "{{count}} actions sur {{total}} ont abouti — relancez celles qui ont échoué."
+  "retryPartialFailed": "{{count}} actions sur {{total}} ont abouti — relancez celles qui ont échoué.",
+  "replace": "Remplacer"
 }

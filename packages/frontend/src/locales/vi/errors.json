@@ -6,5 +6,9 @@
     "rateLimited": "Quá nhiều yêu cầu — hãy chờ một lát rồi thử lại.",
     "server": "Máy chủ gặp sự cố. Hãy thử lại sau ít phút.",
     "offline": "Không kết nối được tới máy chủ. Hãy kiểm tra đường truyền của bạn."
+  },
+  "noRoute": {
+    "title": "Cần thiết lập điều phối",
+    "body": "Không có quy tắc điều phối nào khớp với {{languages}}. Hãy thiết lập điều phối trước — nếu không, lần chạy này sẽ không dịch được gì."
   }
 }

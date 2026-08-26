@@ -6,5 +6,9 @@
     "rateLimited": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
     "server": "El servidor tuvo un problema. Inténtalo de nuevo en un momento.",
     "offline": "No se puede conectar con el servidor. Comprueba tu conexión."
+  },
+  "noRoute": {
+    "title": "Falta enrutamiento",
+    "body": "Ninguna regla de enrutamiento coincide con {{languages}}. Configura el enrutamiento primero: la ejecución no traduciría nada."
   }
 }

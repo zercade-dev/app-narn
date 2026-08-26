@@ -216,6 +216,44 @@ translationsRouter.post(
     }
     // -----------------------------------------------------------------------
 
+    // --- Routing pre-flight -------------------------------------------------
+    // A target language that matches no routing rule can only produce
+    // `no-route` failures, so refuse the request instead of queuing a run that
+    // is guaranteed to translate nothing.
+    //
+    // Runs AFTER the glossary check above, for two reasons: this one loads
+    // every entry in the project while that one is a single indexed query, so
+    // the cheap gate goes first; and putting a new check ahead of an existing
+    // one would silently change which error an unchanged request reports.
+    //
+    // Deliberately language-level. A rule constrained by `maxLength`,
+    // `categories`, `tones` or `achievementTypes` legitimately leaves SOME
+    // entries unmatched while the language as a whole routes; those stay
+    // per-entry failures reported by the run-completion notice, because
+    // refusing them here would break working configurations.
+    const { unroutableLanguages } = await translationEngine.preflightRouting(
+      projectId,
+      entryIds,
+      targetLanguages,
+      { reTranslate: reTranslate ?? false, ...(pairs?.length ? { pairs } : {}) },
+    );
+    if (unroutableLanguages.length > 0) {
+      // Human-readable prose in `error` (the frontend's generic toast path);
+      // `code` + `unroutableLanguages` carry the structured detail the
+      // no-route dialog renders with localized language names. `code` reuses
+      // the engine's own ControlledFailureReason string so both surfaces speak
+      // one vocabulary.
+      res.status(400).json({
+        error:
+          `Cannot start translation: no routing rule matches ${unroutableLanguages.join(', ')}. ` +
+          `Add a routing rule for ${unroutableLanguages.length === 1 ? 'it' : 'them'}, then try again.`,
+        code: 'no-route',
+        unroutableLanguages,
+      });
+      return;
+    }
+    // -----------------------------------------------------------------------
+
     // --- Automatic safety snapshot (pre-retranslate) -----------------------
     // Re-translation overwrites existing translations, so snapshot the project
     // BEFORE the run is enqueued. Awaited deliberately — never race the engine.
