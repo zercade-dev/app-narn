@@ -1251,6 +1251,63 @@ export class TranslationEngine {
   }
 
   /**
+   * Dry-run routing check: which of `targetLanguages` would produce nothing but
+   * `no-route` failures if this request were started as a run.
+   *
+   * The pair filter below MIRRORS {@link startRunInner}'s decision loop — same
+   * `isExcludedFromAi` exclusion, same source-language skip, same `pairs`
+   * allow-set, same `needsTranslation` gate — because a pre-flight that
+   * disagrees with the run it guards is worse than no pre-flight at all.
+   * Routing itself happens BEFORE trivial matchers and the TM consult in a real
+   * run, so an unroutable pair fails with `no-route` even when its source would
+   * have been produced locally; this check therefore needs neither.
+   *
+   * A language is reported only when it produced at least one pair AND every
+   * pair routed nowhere. A language with zero pairs (everything already
+   * translated without `reTranslate`) is a no-op, not a failure, and must never
+   * block the request. `pseudo-test` can never be reported: M7 binds it to the
+   * pseudo module with no rule.
+   *
+   * Needs no vault session — no LLM calls, no persistence, no queuing.
+   */
+  async preflightRouting(
+    projectId: string,
+    entryIds: string[],
+    targetLanguages: string[],
+    opts: { reTranslate?: boolean; pairs?: RunEntryLanguagePair[] } = {},
+  ): Promise<{ unroutableLanguages: string[] }> {
+    const project = await this.projectStore.loadProject(projectId);
+    // This tenant's effective routing (owner→project, collaborator→collab doc).
+    const rules = await resolveRoutingRules(project);
+    const availableModules = this.deriveAvailableModuleIds(rules);
+    const allEntries = await this.stringStore.load(projectId);
+    const wanted = new Set(entryIds);
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    const reTranslate = opts.reTranslate ?? false;
+    const pairAllow = opts.pairs
+      ? new Set(opts.pairs.map((p) => `${p.entryId}\0${p.targetLanguage}`))
+      : null;
+
+    const unroutableLanguages: string[] = [];
+    for (const targetLanguage of targetLanguages) {
+      if (targetLanguage === project.sourceLanguage) continue;
+      let considered = 0;
+      let routable = false;
+      for (const entry of entries) {
+        if (pairAllow && !pairAllow.has(`${entry.id}\0${targetLanguage}`)) continue;
+        if (!needsTranslation(entry, targetLanguage, reTranslate)) continue;
+        considered++;
+        if (this.router.route(entry, targetLanguage, rules, availableModules).moduleId !== null) {
+          routable = true;
+          break;
+        }
+      }
+      if (considered > 0 && !routable) unroutableLanguages.push(targetLanguage);
+    }
+    return { unroutableLanguages };
+  }
+
+  /**
    * Dry-run "which local Ollama models would this run touch" preview: routes
    * every (entry × targetLanguage) pair exactly as {@link startRunInner} does,
    * resolves each routed instance's `baseURL` and effective model
