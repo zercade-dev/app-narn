@@ -311,7 +311,7 @@ export function VaultEditorDialog({
                       key={`${row.existing ? 'k' : 'n'}-${index}`}
                       data-testid={`vault-editor-row-${index}`}
                     >
-                      <div className="grid grid-cols-[1fr,1fr,auto] gap-2 items-center">
+                      <div className="grid grid-cols-[1fr_1fr_auto] gap-2 items-center">
                         {row.existing ? (
                           <ComboboxInput
                             id={`vault-editor-key-${index}`}

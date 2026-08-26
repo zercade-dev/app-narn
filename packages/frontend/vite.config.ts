@@ -202,6 +202,12 @@ export default defineConfig({
     alias: {
       '@zercade-dev/narn-shared': path.resolve(__dirname, '../shared/src/index.ts'),
       '@/': path.resolve(__dirname, './src') + '/',
+      // The shared root barrel drags a server-only module (the provider-call
+      // counter) into the browser graph, and Vite's dev server replaces
+      // `node:async_hooks` with a shim that throws on the import itself — which
+      // broke `pnpm dev` outright while the production build, which tree-shakes
+      // the module away, stayed fine. See the stub for the full reasoning.
+      'node:async_hooks': path.resolve(__dirname, './src/lib/async-hooks-browser-stub.ts'),
     },
   },
   build: {
