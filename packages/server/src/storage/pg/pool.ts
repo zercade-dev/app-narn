@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 
 import { requireTenant } from './tenant-context.js';
-import { getDatabaseUrl, getMigrationDatabaseUrl } from '../../config/env.js';
+import { getDatabaseUrl, getMigrationDatabaseUrl, getPgPoolMax } from '../../config/env.js';
 
 /**
  * Minimal query surface shared by the prod `pg.Pool` and the in-process
@@ -25,7 +25,11 @@ export function getPool(): Queryable {
     if (!connectionString) {
       throw new Error('DATABASE_URL is not set — the Postgres storage backend requires it.');
     }
-    pool = new Pool({ connectionString });
+    const max = Number.parseInt(getPgPoolMax(), 10);
+    pool = new Pool({
+      connectionString,
+      max: Number.isFinite(max) && max > 0 ? max : 48,
+    });
   }
   return pool;
 }

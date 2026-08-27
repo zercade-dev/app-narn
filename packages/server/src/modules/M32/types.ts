@@ -66,6 +66,25 @@ export interface BucketView {
   minuteResetAt?: number;
   /** Shared-pool rpm headroom, when the provider declares sharedLimits rpm. */
   poolRemainingMinuteRequests?: number;
+  /**
+   * Declared per-minute request ceiling from the snapshot — the value the
+   * window refills TO at each rollover, as distinct from
+   * `remainingMinuteRequests`, which is what is LEFT of the CURRENT window.
+   * Undefined when the model declares no rpm.
+   */
+  rpm?: number;
+  /**
+   * Declared per-minute token ceiling from the snapshot — the ceiling
+   * `remainingMinuteTokens` counts down from within the current window.
+   * Undefined when the model declares no tpm.
+   */
+  tpm?: number;
+  /**
+   * Declared shared-pool per-minute request ceiling (`sharedLimits` rpm) —
+   * the ceiling `poolRemainingMinuteRequests` counts down from within the
+   * current window. Undefined when the provider declares no shared rpm.
+   */
+  poolRpm?: number;
   /** Epoch ms when the day-scale window above (rpd, or the monthly char window) resets. */
   nextResetAt: number;
   /**

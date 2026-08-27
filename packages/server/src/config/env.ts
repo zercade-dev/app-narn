@@ -232,6 +232,40 @@ export function getTranslationConcurrency(): string {
   return process.env.TRANSLATION_CONCURRENCY ?? '3';
 }
 
+/**
+ * `FREEWAY_MAX_CONCURRENCY` — absolute process ceiling for RATE-GOVERNED
+ * dispatch tasks; default string `'32'`. Distinct from
+ * {@link getTranslationConcurrency}, which still bounds ungoverned
+ * (direct-module) tasks at 3 so local/BYOK dispatch is unchanged. The call
+ * site applies `Number.parseInt(..., 10)` then guards finite/>0.
+ * (modules/M9-translation-engine.ts)
+ */
+export function getFreewayMaxConcurrency(): string {
+  return process.env.FREEWAY_MAX_CONCURRENCY ?? '32';
+}
+
+/**
+ * `FREEWAY_TARGET_UTILIZATION` — share of a bucket's live per-minute headroom
+ * the rate governor will spend, as a decimal; default string `'0.7'`. Below 1
+ * on purpose: retries, parse-splits and failover reroutes also consume
+ * requests, and the slack is what keeps them from turning into 429s. The call
+ * site applies `Number.parseFloat` then clamps to (0, 1].
+ * (modules/M9/rate-governor.ts)
+ */
+export function getFreewayTargetUtilization(): string {
+  return process.env.FREEWAY_TARGET_UTILIZATION ?? '0.7';
+}
+
+/**
+ * `PG_POOL_MAX` — node-postgres pool size; default string `'48'`. The library
+ * default of 10 is below the sum of the two dispatch ceilings, which would make
+ * the connection pool the bottleneck the governor exists to remove.
+ * (storage/pg/pool.ts)
+ */
+export function getPgPoolMax(): string {
+  return process.env.PG_POOL_MAX ?? '48';
+}
+
 /* ────────────────────────────── Restart / ops ──────────────────────── */
 
 /**
