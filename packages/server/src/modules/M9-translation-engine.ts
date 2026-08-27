@@ -4376,7 +4376,24 @@ export class TranslationEngine {
     failedBucketKey: string,
     decision: RoutingDecision,
     deps: BucketSourceDeps,
-  ): Promise<Array<{ moduleId: string; modelId: string; bucketKey: string; qualityTier: number }>> {
+  ): Promise<
+    Array<{
+      moduleId: string;
+      modelId: string;
+      bucketKey: string;
+      qualityTier: number;
+      /**
+       * The live view the candidate was selected from — carried through so a
+       * caller that force-acquires this bucket against the governor (the LQA
+       * corrective retry, which dispatches outside the queue's own admission)
+       * can seed it first. An escalation target is by construction a bucket
+       * the RUN PLAN did not assign (`resolveFreewayGroups` only seeds
+       * assigned groups), so without this the governor has no entry for it
+       * at all and a force-acquire against it is a silent no-op.
+       */
+      bucket: BucketView;
+    }>
+  > {
     const now = Date.now();
     const buckets = await loadBucketViews(now, deps);
     const group = this.freewayJobGroup([decision]);
@@ -4405,6 +4422,7 @@ export class TranslationEngine {
       modelId: selection.bucket.modelId,
       bucketKey: selection.bucket.bucketKey,
       qualityTier: selection.bucket.qualityTier,
+      bucket: selection.bucket,
     }));
   }
 
@@ -4460,9 +4478,22 @@ export class TranslationEngine {
      * invoked: from that point its own "permit spent" invariant owns the
      * accounting, and refunding on top of it would return a permit a real
      * call already spent.
+     *
+     * `admission.spent` already true ON ENTRY to this call is a SEPARATE
+     * case from that: it means this admission is not the queue's own — it is
+     * a per-language segment's synthetic stand-in (built a few frames up,
+     * for `i > 0` of a multi-language reroute split), pre-marked `spent`
+     * precisely because the queue never ran `tryAcquire` on it at all. Its
+     * permits are meant to be taken later, by the "permit spent" invariant
+     * at its own eventual dispatch — never here. A real queue admission is
+     * never spent yet at any point this function can reach it (spent is set
+     * only once `dispatchFreewayBatch`'s hop loop actually runs, strictly
+     * after every site that calls this), so checking `spent` reliably tells
+     * the two apart.
      */
     const refundUnusedAdmission = (): void => {
-      if (admission) this.governor.refund(admission.key, admission.projectedTokens);
+      if (admission && !admission.spent)
+        this.governor.refund(admission.key, admission.projectedTokens);
     };
     const status = this.runs.get(runId);
     if (!status || status.status === RunStatusCode.Cancelled) {
@@ -5649,6 +5680,8 @@ export class TranslationEngine {
         let retryModule = module;
         let retryDecision = item.entry.decision;
         let escalatedBucketKey: string | undefined;
+        /** The live view `escalatedBucketKey` was selected from — see the debit below. */
+        let escalatedBucketView: BucketView | undefined;
         if (bucketKey !== undefined && freewayDeps) {
           const escalationCandidates = await this.selectFreewayEscalation(
             bucketKey,
@@ -5692,6 +5725,7 @@ export class TranslationEngine {
               freewayBucketKey: escalation.bucketKey,
             };
             escalatedBucketKey = escalation.bucketKey;
+            escalatedBucketView = escalation.bucket;
             this.logger.info('translation:freeway-escalated', {
               runId,
               entryId: item.entry.decision.entry.id,
@@ -5750,17 +5784,44 @@ export class TranslationEngine {
           // This corrective retry never goes through the queue's own
           // admission — it dispatches directly, outside any Admission — so
           // unlike every other real call in this engine, nothing has debited
-          // the governor for it. Escalation makes the gap concrete: it can
-          // land on a bucket the governor never seeded for this run at all,
-          // which `admits()` then waves through unconditionally (an
-          // unseeded key is ungoverned by design) — so without this the
-          // corrective attempt is genuinely invisible to pacing, not merely
-          // under-counted.
+          // the governor for it on its own. Escalation makes that concrete:
+          // by construction `selectFreewayEscalation` only ever proposes a
+          // bucket the RUN PLAN did NOT assign (`resolveFreewayGroups` seeds
+          // just `resolution.assignedGroups`), so the governor has no entry
+          // for it at all — force-acquiring a never-seeded key is a silent
+          // no-op (`admits()`/`take()` both early-return without an entry),
+          // which would leave the escalated bucket admitting for free
+          // indefinitely. Seed it first, from the SAME live view the
+          // escalation was selected against, exactly as `resolveFreewayGroups`
+          // seeds an assigned bucket at plan time — only then does the
+          // force-acquire below actually debit anything. The same-module
+          // (non-escalated) retry needs none of this: that bucket is the
+          // run's own origin bucket, already seeded at plan time.
           const tenantId = requireTenant().userId;
-          const debitKey = { tenantId, bucketKey: debitBucketKey };
+          let debitKey: GovernorKey = { tenantId, bucketKey: debitBucketKey };
+          if (escalatedBucketView !== undefined) {
+            debitKey = {
+              tenantId,
+              bucketKey: debitBucketKey,
+              poolKey: escalatedBucketView.poolKey,
+            };
+            this.governor.seed(
+              debitKey,
+              {
+                rpm: escalatedBucketView.rpm,
+                tpm: escalatedBucketView.tpm,
+                poolRpm: escalatedBucketView.poolRpm,
+                minuteRequests: escalatedBucketView.remainingMinuteRequests,
+                minuteTokens: escalatedBucketView.remainingMinuteTokens,
+                poolMinuteRequests: escalatedBucketView.poolRemainingMinuteRequests,
+                minuteResetAt: escalatedBucketView.minuteResetAt,
+              },
+              Date.now(),
+            );
+          }
           this.governor.forceAcquire(
             debitKey,
-            projectedRequestTokens({}, item.originalText.length),
+            projectedRequestTokens(escalatedBucketView ?? {}, item.originalText.length),
             Date.now(),
           );
           if (outcome.calls > 1) {
