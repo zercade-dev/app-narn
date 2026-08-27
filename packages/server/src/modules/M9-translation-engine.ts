@@ -1982,7 +1982,9 @@ export class TranslationEngine {
     if (request.splitByModel) {
       const phases = this.partitionGroupsByLocalModel(groups, global, projectEntries);
       if (phases.localPhases.length >= 2) {
-        void this.dispatchGroupsByModelSequentially(runId, phases, makeGroupTask);
+        void this.dispatchGroupsByModelSequentially(runId, phases, makeGroupTask, (group) =>
+          freewayAdmissions.get(group),
+        );
         return { runId, total: decisions.length, status: RunStatusCode.Running };
       }
     }
@@ -2077,6 +2079,8 @@ export class TranslationEngine {
       nonLocal: RoutingDecision[][];
     },
     makeGroupTask: (group: RoutingDecision[]) => () => Promise<void>,
+    /** Rate-governor admission for a group, when it was Freeway-planned (see {@link resolveFreewayGroups}). */
+    admissionFor: (group: RoutingDecision[]) => Admission | undefined,
   ): Promise<void> {
     try {
       for (const phase of phases.localPhases) {
@@ -2086,7 +2090,7 @@ export class TranslationEngine {
           model: phase.model,
           groups: phase.groups.length,
         });
-        await this.runGroupsPhase(runId, phase.groups, makeGroupTask);
+        await this.runGroupsPhase(runId, phase.groups, makeGroupTask, admissionFor);
         // Free VRAM before the next model loads. Best-effort: a failed unload
         // (endpoint down, already evicted) never blocks the next phase.
         await unloadLocalModel({
@@ -2101,7 +2105,7 @@ export class TranslationEngine {
         });
       }
       if (phases.nonLocal.length > 0) {
-        await this.runGroupsPhase(runId, phases.nonLocal, makeGroupTask);
+        await this.runGroupsPhase(runId, phases.nonLocal, makeGroupTask, admissionFor);
       }
     } catch (err) {
       this.logger.error('translation:split-dispatch-failed', {
@@ -2123,6 +2127,8 @@ export class TranslationEngine {
     runId: string,
     groups: RoutingDecision[][],
     makeGroupTask: (group: RoutingDecision[]) => () => Promise<void>,
+    /** Rate-governor admission for a group, when it was Freeway-planned (see {@link resolveFreewayGroups}). */
+    admissionFor: (group: RoutingDecision[]) => Admission | undefined,
   ): Promise<void> {
     if (groups.length === 0) return;
     const signal = this.controllers.get(runId)?.signal;
@@ -2147,7 +2153,11 @@ export class TranslationEngine {
               resolve();
             }
           };
-          this.queue.add(runId, tenant ? () => runWithTenant(tenant, body) : body);
+          this.queue.add(
+            runId,
+            tenant ? () => runWithTenant(tenant, body) : body,
+            admissionFor(group),
+          );
         });
       }),
     );
