@@ -52,7 +52,6 @@ interface Entry {
   requests?: Allowance;
   tokens?: Allowance;
   windowEndsAt?: number;
-  inFlight: number;
 }
 
 const MINUTE_MS = 60_000;
@@ -80,7 +79,7 @@ export class RateGovernor {
    */
   seed(key: GovernorKey, seed: GovernorSeed, now: number): void {
     const share = (n: number): number => Math.floor(n * this.utilization);
-    const entry: Entry = { inFlight: this.entries.get(entryKey(key))?.inFlight ?? 0 };
+    const entry: Entry = {};
     if (seed.rpm !== undefined) {
       entry.requests = { limit: seed.rpm, remaining: share(seed.minuteRequests ?? seed.rpm) };
     }
@@ -95,7 +94,6 @@ export class RateGovernor {
     const pk = poolEntryKey(key);
     if (pk !== undefined && seed.poolRpm !== undefined) {
       this.entries.set(pk, {
-        inFlight: this.entries.get(pk)?.inFlight ?? 0,
         requests: {
           limit: seed.poolRpm,
           remaining: share(seed.poolMinuteRequests ?? seed.poolRpm),
@@ -142,7 +140,6 @@ export class RateGovernor {
     if (entry === undefined) return;
     if (entry.requests !== undefined) entry.requests.remaining -= 1;
     if (!requestsOnly && entry.tokens !== undefined) entry.tokens.remaining -= projectedTokens;
-    entry.inFlight += 1;
   }
 
   /** Atomic check-and-take across the bucket's own allowance and its shared pool. */
@@ -183,16 +180,8 @@ export class RateGovernor {
    */
   release(key: GovernorKey, projectedTokens = 0, actualTokens?: number): void {
     const entry = this.entries.get(entryKey(key));
-    if (entry === undefined) return;
-    entry.inFlight = Math.max(0, entry.inFlight - 1);
-    if (actualTokens !== undefined && entry.tokens !== undefined) {
-      entry.tokens.remaining += projectedTokens - actualTokens;
-    }
-    const pool = poolEntryKey(key);
-    if (pool !== undefined) {
-      const poolEntry = this.entries.get(pool);
-      if (poolEntry !== undefined) poolEntry.inFlight = Math.max(0, poolEntry.inFlight - 1);
-    }
+    if (entry === undefined || actualTokens === undefined || entry.tokens === undefined) return;
+    entry.tokens.remaining += projectedTokens - actualTokens;
   }
 
   /** Soonest window rollover among governed entries, for the queue's re-arm timer. */
