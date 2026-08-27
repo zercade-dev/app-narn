@@ -72,6 +72,26 @@ export class RateGovernor {
   }
 
   /**
+   * `next` clamped against `previous` when both fall in the SAME window
+   * (`previous`'s window and `next`'s window are the identical instant): a
+   * second seed() mid-window (e.g. a later run's `resolveFreewayGroups`
+   * starting while an earlier run of the same tenant still has calls in
+   * flight) may only LOWER `remaining`, never raise it back up — the ledger
+   * that headroom reads from only records at completion, so re-seeding from
+   * it mid-window would hand back permits the earlier run has already spent.
+   * A genuine window rollover (different window instant, or no `previous`)
+   * always takes `next` as-is — that IS the refill.
+   */
+  private static clampToWindow(
+    previous: Allowance | undefined,
+    next: Allowance,
+    sameWindow: boolean,
+  ): Allowance {
+    if (!sameWindow || previous === undefined) return next;
+    return { limit: next.limit, remaining: Math.min(previous.remaining, next.remaining) };
+  }
+
+  /**
    * Install (or replace) the allowance for a bucket from its live BucketView.
    * The CURRENT window gets the view's actual headroom; every later window
    * refills from the declared ceiling, so the governor keeps pacing without a
@@ -79,26 +99,50 @@ export class RateGovernor {
    */
   seed(key: GovernorKey, seed: GovernorSeed, now: number): void {
     const share = (n: number): number => Math.floor(n * this.utilization);
+    const name = entryKey(key);
+    const previous = this.entries.get(name);
+    const windowEndsAt =
+      seed.rpm !== undefined || seed.tpm !== undefined
+        ? (seed.minuteResetAt ?? now + MINUTE_MS)
+        : undefined;
+    const sameWindow =
+      previous?.windowEndsAt !== undefined && previous.windowEndsAt === windowEndsAt;
     const entry: Entry = {};
     if (seed.rpm !== undefined) {
-      entry.requests = { limit: seed.rpm, remaining: share(seed.minuteRequests ?? seed.rpm) };
+      entry.requests = RateGovernor.clampToWindow(
+        previous?.requests,
+        { limit: seed.rpm, remaining: share(seed.minuteRequests ?? seed.rpm) },
+        sameWindow,
+      );
     }
     if (seed.tpm !== undefined) {
-      entry.tokens = { limit: seed.tpm, remaining: share(seed.minuteTokens ?? seed.tpm) };
+      entry.tokens = RateGovernor.clampToWindow(
+        previous?.tokens,
+        { limit: seed.tpm, remaining: share(seed.minuteTokens ?? seed.tpm) },
+        sameWindow,
+      );
     }
     if (entry.requests !== undefined || entry.tokens !== undefined) {
-      entry.windowEndsAt = seed.minuteResetAt ?? now + MINUTE_MS;
+      entry.windowEndsAt = windowEndsAt;
     }
-    this.entries.set(entryKey(key), entry);
+    this.entries.set(name, entry);
 
     const pk = poolEntryKey(key);
     if (pk !== undefined && seed.poolRpm !== undefined) {
+      const previousPool = this.entries.get(pk);
+      const poolWindowEndsAt = seed.minuteResetAt ?? now + MINUTE_MS;
+      const poolSameWindow =
+        previousPool?.windowEndsAt !== undefined && previousPool.windowEndsAt === poolWindowEndsAt;
       this.entries.set(pk, {
-        requests: {
-          limit: seed.poolRpm,
-          remaining: share(seed.poolMinuteRequests ?? seed.poolRpm),
-        },
-        windowEndsAt: seed.minuteResetAt ?? now + MINUTE_MS,
+        requests: RateGovernor.clampToWindow(
+          previousPool?.requests,
+          {
+            limit: seed.poolRpm,
+            remaining: share(seed.poolMinuteRequests ?? seed.poolRpm),
+          },
+          poolSameWindow,
+        ),
+        windowEndsAt: poolWindowEndsAt,
       });
     }
   }
@@ -170,6 +214,53 @@ export class RateGovernor {
       const poolEntry = this.entries.get(pool);
       if (poolEntry !== undefined) this.rollWindow(poolEntry, now);
       this.take(pool, 0, true);
+    }
+  }
+
+  /**
+   * Debit `count` additional REQUEST-only permits for calls the provider
+   * layer made inside a dispatch this governor already accounted for once —
+   * a `splitAndRetry` half or an in-SDK transient retry, invisible to the
+   * engine's own "permit spent" bookkeeping since they never reach a
+   * separate `translate()` call site. No token debit: the one projection the
+   * enclosing dispatch was admitted (or force-acquired) under already covers
+   * these, and `release()` reconciles it against real usage regardless of
+   * how many requests it took.
+   */
+  forceAcquireRequests(key: GovernorKey, count: number, now: number): void {
+    if (count <= 0) return;
+    const own = entryKey(key);
+    const pool = poolEntryKey(key);
+    const entry = this.entries.get(own);
+    if (entry !== undefined) this.rollWindow(entry, now);
+    for (let i = 0; i < count; i++) this.take(own, 0, true);
+    if (pool !== undefined) {
+      const poolEntry = this.entries.get(pool);
+      if (poolEntry !== undefined) this.rollWindow(poolEntry, now);
+      for (let i = 0; i < count; i++) this.take(pool, 0, true);
+    }
+  }
+
+  /**
+   * Undo an admission that never produced a call: the queue's `tryAcquire`
+   * already spent one request permit (own bucket AND its shared pool) plus
+   * the full token projection, but a pre-dispatch short-circuit — a
+   * TM/glossary/trivial hit that absorbed the whole batch, a park, a block —
+   * meant no provider call ever went out. Restores exactly what `tryAcquire`
+   * took. Callers must never reach this once a call has actually happened:
+   * from that point on the "permit spent" invariant owns the accounting, and
+   * refunding on top of it would hand back a permit that really was spent.
+   */
+  refund(key: GovernorKey, projectedTokens: number): void {
+    const own = this.entries.get(entryKey(key));
+    if (own !== undefined) {
+      if (own.requests !== undefined) own.requests.remaining += 1;
+      if (own.tokens !== undefined) own.tokens.remaining += projectedTokens;
+    }
+    const pk = poolEntryKey(key);
+    if (pk !== undefined) {
+      const pool = this.entries.get(pk);
+      if (pool?.requests !== undefined) pool.requests.remaining += 1;
     }
   }
 

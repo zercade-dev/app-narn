@@ -3853,18 +3853,27 @@ export class TranslationEngine {
         // bucket's char budget can physically exceed the rescue bucket's.
         const rescue = buckets.find((bucket) => bucket.bucketKey === revalidated.bucketKey);
         if (admission) {
-          // Re-point the admission at the bucket actually serving this batch.
-          // Never release the old bucket's permit: the call it was admitted
-          // for already went out and spent that provider's real quota, 429
-          // or not — handing the permit back would let the run re-spend it
-          // this window. No forceAcquire here either: the single "permit
-          // spent" invariant at the next translate() call site handles it,
-          // against this (now current) key.
+          // Re-point the admission at the bucket actually serving this part.
+          // Never release the old bucket's permit — but NOT because this
+          // part's own call already went out on it: revalidateFirst runs
+          // BEFORE this part's first translate(), precisely to decide where
+          // THIS language goes before spending anything on it. The debit
+          // against the old bucket belongs to the PARENT (mixed) chunk's own
+          // call, which already failed and spent that quota before the
+          // unpack that produced this part ever ran; handing it back here
+          // would credit this part with a spend it was never charged for.
+          // Mark `spent` explicitly rather than leave it to fall out of the
+          // (currently always-already-true) inherited value: it is what
+          // makes the single "permit spent" invariant at this part's own
+          // next translate() call site force-acquire against this (now
+          // current) key, instead of assuming the queue's tryAcquire — which
+          // admitted the OLD bucket — covers it.
           admission.key = {
             tenantId: admission.key.tenantId,
             bucketKey: revalidated.bucketKey,
             poolKey: rescue?.poolKey,
           };
+          admission.spent = true;
         }
         const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
         if (rescueCap >= 1 && rescueCap < jobs.length) {
@@ -3925,6 +3934,17 @@ export class TranslationEngine {
         );
         results = outcome.result;
         await this.recordFreewayDispatch(state.bucketKey, results, deps, outcome.calls);
+        if (admission && outcome.calls > 1) {
+          // The ledger write above already debits every real call this ONE
+          // translate() made, but the governor permit taken above (spend or
+          // forceAcquire) only ever accounts for exactly one. A provider-layer
+          // internal split (splitAndRetry, an in-SDK transient retry) can
+          // turn one translate() into several real HTTP requests with no
+          // separate call site of its own to force-acquire at — debit the
+          // rest here as request-only: the one projection this call was
+          // admitted under already covers their token cost.
+          this.governor.forceAcquireRequests(admission.key, outcome.calls - 1, Date.now());
+        }
         // A module that flattens a 429 into a per-result `error` string still
         // has to trigger the failover — surface it as a throw (mirrors the
         // non-Freeway `withRateLimitRetry` path).
@@ -4043,6 +4063,13 @@ export class TranslationEngine {
         // fetch (Copilot and DeepL) never reach the counted seam at all.
         if (results === undefined) {
           await this.recordFreewayDispatch(state.bucketKey, [], deps, calls);
+          if (admission && calls > 1) {
+            // Same request-only catch-up as the success path above: the
+            // permit taken at the top of this hop's try only ever accounts
+            // for one call, but a thrown attempt can still have made several
+            // real requests before failing (a 429 after a retry, e.g.).
+            this.governor.forceAcquireRequests(admission.key, calls - 1, Date.now());
+          }
         }
         const rateLimited = isRateLimitError(err);
         const authFailure = !rateLimited && isRunCancellingAuthError(err);
@@ -4267,12 +4294,18 @@ export class TranslationEngine {
             // quota, 429 or not — handing the permit back would let the run
             // re-spend it this window. No forceAcquire here either: the
             // single "permit spent" invariant at the next translate() call
-            // site handles it, against this (now current) key.
+            // site handles it, against this (now current) key — set `spent`
+            // explicitly (this hop's own try block already set it before the
+            // call that just failed, but stating it here too means this site
+            // stays correct by construction, not merely because every path
+            // that reaches it today happens to have spent the admission
+            // already).
             admission.key = {
               tenantId: admission.key.tenantId,
               bucketKey: revalidated.bucketKey,
               poolKey: rescue?.poolKey,
             };
+            admission.spent = true;
           }
           const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
           if (rescueCap >= 1 && rescueCap < jobs.length) {
@@ -4414,8 +4447,28 @@ export class TranslationEngine {
     /** Set for a Freeway-managed batch: its rate-governor admission descriptor. */
     admission?: Admission,
   ): Promise<void> {
+    /**
+     * Undo this batch's queue admission on a pre-dispatch short-circuit — a
+     * no-route/disabled/missing module, a Freeway park or block, or every
+     * decision absorbed by a trivial/glossary/TM hit before a provider call
+     * was ever made. The queue's own `tryAcquire` already spent one request
+     * permit and the full projected token cost before this task even started
+     * running (see JobQueue.canStart), and nothing else gives either back —
+     * left alone, a run where TM/glossary/trivial hits absorb most batches
+     * would pace itself against calls it is barely making. Callers must
+     * never reach this after `dispatchFreewayBatch` has actually been
+     * invoked: from that point its own "permit spent" invariant owns the
+     * accounting, and refunding on top of it would return a permit a real
+     * call already spent.
+     */
+    const refundUnusedAdmission = (): void => {
+      if (admission) this.governor.refund(admission.key, admission.projectedTokens);
+    };
     const status = this.runs.get(runId);
-    if (!status || status.status === RunStatusCode.Cancelled) return;
+    if (!status || status.status === RunStatusCode.Cancelled) {
+      refundUnusedAdmission();
+      return;
+    }
     const signal = this.controllers.get(runId)?.signal;
     /** Gate outcomes observed on each bucket this batch touched (flushed once, at settle). */
     const freewayGateOutcomes = new Map<string, Array<{ language: string; passed: boolean }>>();
@@ -4438,7 +4491,10 @@ export class TranslationEngine {
       ) => this.logger[level](message, metadata);
 
       const first = decisions[0];
-      if (!first) return;
+      if (!first) {
+        refundUnusedAdmission();
+        return;
+      }
 
       const { moduleId: routedModuleId } = first;
       // Null-routed decisions (router found no rule) fail authoritatively
@@ -4458,6 +4514,7 @@ export class TranslationEngine {
           });
         }
         this.emitProgress(runId, status);
+        refundUnusedAdmission();
         return;
       }
       const projectEntries = moduleConfigs as Record<string, ProjectModuleConfigEntry | undefined>;
@@ -4595,6 +4652,7 @@ export class TranslationEngine {
             formatDeferralDetail(decisions.length, revalidated.resumeAt),
           );
           this.emitProgress(runId, status);
+          refundUnusedAdmission();
           return;
         } else if (revalidated.kind === 'blocked') {
           this.recordFreewayBlocked(
@@ -4603,6 +4661,7 @@ export class TranslationEngine {
             decisions.map((d) => ({ entryId: d.entry.id, targetLanguage: d.targetLanguage })),
           );
           for (const d of decisions) settled.add(settleKey(d));
+          refundUnusedAdmission();
           return;
         }
       }
@@ -4628,6 +4687,7 @@ export class TranslationEngine {
           });
         }
         this.emitProgress(runId, status);
+        refundUnusedAdmission();
         return;
       }
 
@@ -4720,6 +4780,7 @@ export class TranslationEngine {
           });
         }
         this.emitProgress(runId, status);
+        refundUnusedAdmission();
         return;
       }
       // Mutable: a Freeway failover can move this batch to another bucket's
@@ -4751,6 +4812,7 @@ export class TranslationEngine {
       }
 
       if (remaining.length === 0) {
+        refundUnusedAdmission();
         return;
       }
 
@@ -4833,6 +4895,7 @@ export class TranslationEngine {
       }
 
       if (nonTrivialEntries.length === 0) {
+        refundUnusedAdmission();
         return;
       }
 
@@ -4840,6 +4903,7 @@ export class TranslationEngine {
       const tmMisses: MaskedEntry[] = [];
       for (const e of nonTrivialEntries) {
         if ((status.status as RunStatusCode) === RunStatusCode.Cancelled || signal?.aborted) {
+          refundUnusedAdmission();
           return;
         }
         let tmLookup = await this.tmLookupSafe(
@@ -4927,6 +4991,10 @@ export class TranslationEngine {
       }
 
       if (tmMisses.length === 0) {
+        // Translation-memory/glossary/trivial hits absorbed the whole batch —
+        // no provider call will ever happen for the admission this batch was
+        // queued under.
+        refundUnusedAdmission();
         return;
       }
 
@@ -5677,12 +5745,27 @@ export class TranslationEngine {
         // origin bucket when the same-module retry ran) for what it actually
         // spent.
         if (bucketKey !== undefined && freewayDeps) {
-          await this.recordFreewayDispatch(
-            escalatedBucketKey ?? bucketKey,
-            [],
-            freewayDeps,
-            outcome.calls,
+          const debitBucketKey = escalatedBucketKey ?? bucketKey;
+          await this.recordFreewayDispatch(debitBucketKey, [], freewayDeps, outcome.calls);
+          // This corrective retry never goes through the queue's own
+          // admission — it dispatches directly, outside any Admission — so
+          // unlike every other real call in this engine, nothing has debited
+          // the governor for it. Escalation makes the gap concrete: it can
+          // land on a bucket the governor never seeded for this run at all,
+          // which `admits()` then waves through unconditionally (an
+          // unseeded key is ungoverned by design) — so without this the
+          // corrective attempt is genuinely invisible to pacing, not merely
+          // under-counted.
+          const tenantId = requireTenant().userId;
+          const debitKey = { tenantId, bucketKey: debitBucketKey };
+          this.governor.forceAcquire(
+            debitKey,
+            projectedRequestTokens({}, item.originalText.length),
+            Date.now(),
           );
+          if (outcome.calls > 1) {
+            this.governor.forceAcquireRequests(debitKey, outcome.calls - 1, Date.now());
+          }
         }
         if (retry.outcome === 'aborted') break;
         status.completed++;

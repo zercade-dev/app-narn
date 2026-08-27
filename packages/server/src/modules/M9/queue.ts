@@ -127,14 +127,17 @@ export class JobQueue {
   /**
    * Whether `entry`'s run may take another slot: not paused and under its
    * per-run cap. Ungoverned tasks keep the static `perRunCap`; governed tasks
-   * use the dynamic share of the governed ceiling.
+   * use the dynamic share of the governed ceiling — `governedCap` is computed
+   * ONCE per `pump()` call (see there) rather than recomputed per candidate,
+   * since neither `this.tasks` nor `governedInFlightByRun` changes between
+   * candidates within one `pump()` invocation's dequeue loop.
    */
-  private isEligible(entry: Entry): boolean {
+  private isEligible(entry: Entry, governedCap: number): boolean {
     if (this.pausedRuns.has(entry.runId)) return false;
     if (entry.admission === undefined) {
       return (this.inFlightByRun.get(entry.runId) ?? 0) < this.perRunCap;
     }
-    return (this.governedInFlightByRun.get(entry.runId) ?? 0) < this.governedRunCap();
+    return (this.governedInFlightByRun.get(entry.runId) ?? 0) < governedCap;
   }
 
   /**
@@ -160,9 +163,9 @@ export class JobQueue {
    * Returns -1 when every waiting task belongs to a paused run, or every
    * otherwise-eligible task is refused by the governor.
    */
-  private nextIndex(now: number): number {
+  private nextIndex(now: number, governedCap: number): number {
     const eligible = this.tasks.findIndex(
-      (entry) => this.isEligible(entry) && this.canStart(entry, now),
+      (entry) => this.isEligible(entry, governedCap) && this.canStart(entry, now),
     );
     if (eligible !== -1) return eligible;
     return this.tasks.findIndex(
@@ -172,8 +175,19 @@ export class JobQueue {
 
   private pump(): void {
     const now = Date.now();
+    // Computed ONCE per pump() call, not per candidate `nextIndex` examines:
+    // `governedRunCap()` iterates every queued task, so recomputing it inside
+    // `nextIndex`'s `findIndex` predicate made one `pump()` call O(N^3) in the
+    // queue depth. Neither `this.tasks` nor `governedInFlightByRun` changes
+    // mid-loop in a way that moves this value — a dequeue in one iteration
+    // either leaves its run's membership in the union unchanged (it moves
+    // from the `tasks` side to the `governedInFlightByRun` side) or has no
+    // governed admission at all, so the cap computed here stays correct for
+    // every iteration of the loop below, identical to recomputing it fresh
+    // each time.
+    const governedCap = this.governedRunCap();
     for (;;) {
-      const index = this.nextIndex(now);
+      const index = this.nextIndex(now, governedCap);
       if (index === -1) break;
       const [entry] = this.tasks.splice(index, 1);
       if (entry.admission === undefined) {
@@ -186,8 +200,21 @@ export class JobQueue {
         );
       }
       this.inFlightByRun.set(entry.runId, (this.inFlightByRun.get(entry.runId) ?? 0) + 1);
-      entry
-        .task()
+      // `entry.task()` is caller-supplied and may throw SYNCHRONOUSLY rather
+      // than returning a rejected promise — a bug in the task, not a runtime
+      // rejection. Uncaught, that would escape this loop entirely, stranding
+      // this slot's counters (and the governor permit already taken by
+      // `canStart` above) and skipping `armRefillTimer()` below, so the queue
+      // can wedge rather than merely miscount one task. Converting it to a
+      // rejection here routes it through the same `.catch()`/`.finally()`
+      // teardown as an async failure.
+      let taskResult: Promise<void>;
+      try {
+        taskResult = entry.task();
+      } catch (err) {
+        taskResult = Promise.reject(err);
+      }
+      taskResult
         .catch(() => {
           /* swallow — task already records its own failure */
         })
