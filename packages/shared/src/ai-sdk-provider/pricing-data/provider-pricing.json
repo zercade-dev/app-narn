@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-23T16:23:47.850Z",
+  "generatedAt": "2026-08-27T00:05:40.263Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
@@ -65,6 +65,16 @@
           "id": "gemini-3.5-live-translate-preview",
           "inputCostPerMillion": 3.5,
           "outputCostPerMillion": 21
+        },
+        {
+          "id": "gemini-3.5-transcribe-live",
+          "inputCostPerMillion": 3.5,
+          "outputCostPerMillion": 21
+        },
+        {
+          "id": "gemini-3.5-transcribe",
+          "inputCostPerMillion": 2,
+          "outputCostPerMillion": 12
         },
         {
           "id": "gemini-3.5-flash-lite",
@@ -148,11 +158,6 @@
           "capabilityTags": ["tools", "vision", "audio"]
         },
         {
-          "id": "gemini-2.5-flash-lite-preview-09-2025",
-          "inputCostPerMillion": 0.1,
-          "outputCostPerMillion": 0.4
-        },
-        {
           "id": "gemini-2.5-flash-native-audio-preview-12-2025",
           "inputCostPerMillion": 0.5,
           "outputCostPerMillion": 2
@@ -172,16 +177,6 @@
           "id": "gemini-2.5-pro-preview-tts",
           "inputCostPerMillion": 1,
           "outputCostPerMillion": 20
-        },
-        {
-          "id": "gemini-2.0-flash",
-          "inputCostPerMillion": 0.1,
-          "outputCostPerMillion": 0.4
-        },
-        {
-          "id": "gemini-2.0-flash-lite",
-          "inputCostPerMillion": 0.075,
-          "outputCostPerMillion": 0.3
         },
         {
           "id": "gemini-embedding-2",
