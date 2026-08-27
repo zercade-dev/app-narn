@@ -24,7 +24,7 @@ import {
   loadBucketViews,
   type BucketSourceDeps,
 } from '../M32/bucket-source.js';
-import type { DifficultyBand } from '../M32/types.js';
+import type { BucketView, DifficultyBand } from '../M32/types.js';
 
 /** Cheapest-first ordering used to rank enabled modules when none is requested. */
 export const COST_TIER_ORDER: Record<CostTier, number> = { free: 0, low: 1, medium: 2, high: 3 };
@@ -143,6 +143,26 @@ export interface FreewayBackgroundSelection {
   modelId: string;
   /** Ledger key of the bucket this run spends against. */
   bucketKey: string;
+  /**
+   * The selected bucket's view, as it stood at selection. Carried so a caller
+   * can size its batches to the bucket it actually landed on (maxBatch /
+   * charBudget / batchCeiling / remaining stock) instead of a flat constant.
+   * A point-in-time snapshot like every other BucketView — a mid-run re-route
+   * replaces it, it is never refreshed in place.
+   */
+  bucket: BucketView;
+  /**
+   * The bucket-source deps this resolution actually ran with — the caller's
+   * own overrides plus the session-scoped `moduleStatus` built below. Carried
+   * so that everything the run does against the ledger LATER (per-call debits,
+   * cools, and the pre-dispatch minute gate, which re-reads the live bucket
+   * views) asks the question the way selection asked it. Passing the bare
+   * overrides instead would fall back to `defaultModuleStatus`, which knows
+   * nothing of this session's credentials or the workspace's enablement and
+   * reports every module disabled — leaving the caller with an EMPTY bucket
+   * list and no way to notice, since nothing throws.
+   */
+  deps: BucketSourceDeps;
 }
 
 export interface SelectFreewayBackgroundOptions extends SelectCapableModuleOptions {
@@ -154,6 +174,12 @@ export interface SelectFreewayBackgroundOptions extends SelectCapableModuleOptio
   now?: number;
   /** Reserve forwarded to {@link selectBackgroundBucket}; defaults there. */
   reserveRequests?: number;
+  /**
+   * Target languages the run will work in, forwarded to the selector's
+   * exclude-only language filter. Only the judge engine knows these at
+   * selection time; every other background caller omits it.
+   */
+  languages?: readonly string[];
 }
 
 /**
@@ -221,6 +247,14 @@ export async function selectFreewayBackgroundModule(
   const selectOpts = {
     ...(options.band !== undefined ? { band: options.band } : {}),
     ...(options.reserveRequests !== undefined ? { reserveRequests: options.reserveRequests } : {}),
+    ...(options.languages !== undefined ? { languages: options.languages } : {}),
+    onFallback: (reason: 'languages') => {
+      options.logSink?.('warn', 'freeway: language filter left no candidates', {
+        reason,
+        languages: options.languages?.join(','),
+        candidates: remaining.length,
+      });
+    },
   };
   while (remaining.length > 0) {
     const selection = selectBackgroundBucket(remaining, now, selectOpts);
@@ -243,7 +277,7 @@ export async function selectFreewayBackgroundModule(
           ...freewayModuleOverrides(bucket.moduleId, bucket.modelId),
         },
       });
-      return { ...built, modelId: bucket.modelId, bucketKey: bucket.bucketKey };
+      return { ...built, modelId: bucket.modelId, bucketKey: bucket.bucketKey, bucket, deps };
     } catch (err) {
       // This bucket's module can't be built or can't do this work — try the
       // next one the selector offers rather than failing the whole run on it.

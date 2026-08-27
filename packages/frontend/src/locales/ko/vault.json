@@ -58,5 +58,6 @@
   "retrySuccess_other": "잠금을 해제했어요. 작업 {{count}}건이 모두 처리됐어요.",
   "retryFailed": "잠금을 해제했지만 다시 시도한 작업이 실패했어요. 한 번 더 시도해 주세요.",
   "retryFailed_other": "잠금을 해제했지만 다시 시도한 작업이 실패했어요. 한 번 더 시도해 주세요.",
-  "retryPartialFailed": "작업 {{total}}건 중 {{count}}건이 처리됐어요. 실패한 작업은 다시 시도하세요."
+  "retryPartialFailed": "작업 {{total}}건 중 {{count}}건이 처리됐어요. 실패한 작업은 다시 시도하세요.",
+  "replace": "교체"
 }

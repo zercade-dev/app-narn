@@ -752,6 +752,21 @@ export interface FreewayBucketStats {
    * status route and panel, never read by the router.
    */
   gatePassByLanguage?: Record<string, number>;
+  /**
+   * key: target language → decayed AI-review score counts for the bucket that
+   * PRODUCED the translations, kept deliberately apart from `gatePassStats`.
+   * The two measure different things (an LQA gate verdict and a judge model's
+   * score), and keeping one statistic per signal means either can be read,
+   * weighted or disabled without disturbing the other.
+   *
+   * Reuses FreewayGatePassRecord verbatim by storing the score normalized to
+   * [0,1]: `s += score / 100`, `n += 1`. That keeps `s <= n` — the invariant
+   * the shared guard, decay and cap arithmetic all rely on — so no second copy
+   * of that arithmetic exists.
+   */
+  judgeScoreStats?: Record<string, FreewayGatePassRecord>;
+  /** key: language → mean normalized judge score (0..1). DISPLAY ONLY. */
+  judgeScoreByLanguage?: Record<string, number>;
   /** EMA of 429-per-request (0..1). */
   rateLimitRate?: number;
   /** EMA of latency ms per request. */

@@ -30,7 +30,7 @@ import { moduleRegistry } from '../M6-module-registry.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
 import { KeyedAsyncLock } from '../../utils/keyed-lock.js';
 import type { BucketView } from './types.js';
-import { decayStats, recordGatePass } from './stats.js';
+import { decayStats, recordGatePass, recordJudgeScore } from './stats.js';
 
 const FLAP_WINDOW_MS = 5 * 60_000;
 
@@ -493,6 +493,27 @@ export function bucketRateLimits(bucketKey: string): { rpm?: number; rpd?: numbe
   };
 }
 
+/**
+ * Whether any per-minute ceiling governs this bucket — its model's own rpm or
+ * tpm, or a shared per-minute pool its provider declares. Composed from the
+ * same two helpers {@link loadBucketViews} composes when it decides whether a
+ * bucket has a `minuteResetAt` at all, so "has a minute window" cannot come to
+ * mean two different things in two places.
+ *
+ * Snapshot-only, so a caller can ask whether a minute question is even askable
+ * before paying for the live sweep {@link loadBucketViews} costs — which
+ * matters for the pre-dispatch gate in `M9/run-engine.ts`, asked once per
+ * batch and unable to act at all for a model with no minute window.
+ */
+export function bucketHasMinuteWindow(bucketKey: string): boolean {
+  const resolved = resolveSnapshotBucket(bucketKey);
+  if (!resolved) return false;
+  const { rpm, tpm } = resolveMinuteWindows(resolved.model);
+  return (
+    rpm !== undefined || tpm !== undefined || sharedMinutePoolLimit(resolved.provider) !== undefined
+  );
+}
+
 /** One model's day-scale and minute-scale windows, plus the usage already read for both. */
 interface ModelUsage {
   model: FreeTierModel;
@@ -576,8 +597,39 @@ async function sharedPoolMinuteRemaining(
   return Math.max(0, sharedRpm - spent);
 }
 
-/** Assemble live BucketViews for every snapshot bucket usable RIGHT NOW-ish. */
-export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Promise<BucketView[]> {
+/** Narrowing options for {@link loadBucketViews}. */
+export interface LoadBucketViewsOptions {
+  /**
+   * Assemble the view for THIS bucket only, instead of every snapshot bucket.
+   *
+   * Purely a read-volume narrowing — the one view it returns is built from
+   * exactly the same live cells, read at the same instant, as the full sweep
+   * would have built it from, so a caller gains no staleness by asking for
+   * less. What it saves is the per-model `ledger.usage()` round trip for every
+   * bucket it was never going to look at: the pre-dispatch minute gate asks
+   * about ONE bucket once per batch, and the unscoped sweep charged it ~14
+   * serial reads (one per snapshot model) to answer.
+   *
+   * Sibling models of the SAME provider are still read when that provider
+   * declares an account-wide pool (`sharedLimits`), because the pool figures
+   * are sums over its models and a partial sum would read high — i.e. would
+   * let the gate dispatch into a pool minute that is already spent.
+   */
+  onlyBucketKey?: string;
+}
+
+/**
+ * Assemble live BucketViews for every snapshot bucket usable RIGHT NOW-ish, or
+ * for just one of them (see {@link LoadBucketViewsOptions.onlyBucketKey}).
+ */
+export async function loadBucketViews(
+  now: number,
+  deps?: BucketSourceDeps,
+  options?: LoadBucketViewsOptions,
+): Promise<BucketView[]> {
+  const onlyBucketKey = options?.onlyBucketKey;
+  const onlyModuleId =
+    onlyBucketKey === undefined ? undefined : freewayBucketBaseModuleId(onlyBucketKey);
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const moduleStatus = deps?.moduleStatus ?? defaultModuleStatus;
   const instanceIdsFor = deps?.instanceIdsFor ?? defaultInstanceIdsFor;
@@ -593,6 +645,13 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
   const views: BucketView[] = [];
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
+    // A narrowed sweep touches only the provider that owns the asked-for
+    // bucket; every other provider's models are read for nothing.
+    if (onlyModuleId !== undefined && provider.moduleId !== onlyModuleId) continue;
+    // Whether this provider's siblings still have to be read: both pool
+    // figures below are sums across its models, so a narrowed sweep may only
+    // skip siblings when neither sum exists.
+    const pooled = hasSharedPool(provider) || sharedMinutePoolLimit(provider) !== undefined;
 
     const { dispatchModuleId, badCredentials } = resolveDispatchModuleId(
       provider.moduleId,
@@ -615,6 +674,7 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
       const dayWindow = resolveDayWindow(model);
       if (!dayWindow) continue;
       const bucketKey = freewayBucketKey(provider.moduleId, model.id);
+      if (onlyBucketKey !== undefined && bucketKey !== onlyBucketKey && !pooled) continue;
       const minuteWindow = resolveMinuteWindows(model);
       // rpm/tpm float to the same zone-independent minute regardless of the
       // provider's day-scale reset zone (windowStart ignores the zone
@@ -648,6 +708,10 @@ export async function loadBucketViews(now: number, deps?: BucketSourceDeps): Pro
     );
 
     for (const { model, dayWindow, bucketKey, usage, minuteWindow, rpmUsage, tpmUsage } of models) {
+      // A pooled provider's siblings were read for their contribution to the
+      // pool sums above, not to be returned: a narrowed sweep hands back the
+      // one bucket it was asked for and nothing else.
+      if (onlyBucketKey !== undefined && bucketKey !== onlyBucketKey) continue;
       const remainingRequests =
         dayWindow.kind === 'monthly_chars'
           ? Number.MAX_SAFE_INTEGER
@@ -743,6 +807,14 @@ export async function recordDispatch(
   now: number,
   usage: { inputTokens?: number; outputTokens?: number; chars?: number },
   deps?: BucketSourceDeps,
+  /**
+   * Provider calls this dispatch actually made. Defaults to 1 — the old
+   * assumption — so every caller that cannot count stays exactly as it was.
+   * One dispatch is NOT one call whenever the provider layer splits a failing
+   * batch, and a ledger that assumes otherwise reads low against the quota the
+   * provider is enforcing.
+   */
+  requests = 1,
 ): Promise<void> {
   const resolved = resolveSnapshotBucket(bucketKey);
   if (!resolved) return;
@@ -764,7 +836,14 @@ export async function recordDispatch(
     if (minuteWindow.tpm !== undefined) windows.push({ kind: 'tpm', start: minuteStart });
   }
   await ledger.recordAttempt(bucketKey, windows, {
-    requests: 1,
+    // Floor of 1: a dispatch that somehow counted zero must still cost what it
+    // costs today — this can only ever correct the ledger upward, never
+    // downward. Zero is not rare and not a bug: a whole CLASS of modules
+    // dispatches through its provider's OWN SDK rather than the AI SDK's
+    // guarded fetch (Copilot and DeepL today), so the counting seam never sees
+    // their requests at all. They spend exactly one request per dispatch, which
+    // is what this floor records for them.
+    requests: Math.max(1, Math.round(requests)),
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     chars: usage.chars,
@@ -860,13 +939,13 @@ export async function resetBucketFlap(bucketKey: string, deps?: BucketSourceDeps
 }
 
 /**
- * Serializes gate-outcome folds per bucket: two sibling batches of one run
- * settling on the same bucket are read-modify-write over the same stats row,
- * and mergeStats replaces gatePassStats wholesale — an unserialized pair
- * silently discards one fold. In-process only (single-replica invariant, see
- * utils/keyed-lock.ts).
+ * Serializes stats folds per bucket. Every writer here does a read-modify-write
+ * of the SAME `stats` row and hands the whole object to mergeStats, so gate
+ * folds and judge folds must share ONE lock: two locks keyed differently would
+ * let a concurrent pair drop one fold silently. In-process only (single-replica
+ * invariant, see utils/keyed-lock.ts).
  */
-const gateOutcomeLock = new KeyedAsyncLock();
+const statsFoldLock = new KeyedAsyncLock();
 
 /** Fold one run's gate outcomes into stats: ONE read + ONE mergeStats per bucket. */
 export async function recordGateOutcomes(
@@ -876,11 +955,33 @@ export async function recordGateOutcomes(
   deps?: BucketSourceDeps,
 ): Promise<void> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
-  await gateOutcomeLock.withLock(bucketKey, async () => {
+  await statsFoldLock.withLock(bucketKey, async () => {
     const existing = await ledger.getBucket(bucketKey);
     let stats = existing?.stats ?? {};
     for (const outcome of outcomes) {
       stats = recordGatePass(stats, outcome.language, outcome.passed, now);
+    }
+    await ledger.mergeStats(bucketKey, stats);
+  });
+}
+
+/**
+ * Fold one judge run's scores into the PRODUCING bucket's judge statistic:
+ * ONE read + ONE mergeStats per bucket. Callers group their outcomes by bucket
+ * before calling, exactly as the gate path does.
+ */
+export async function recordJudgeOutcomes(
+  bucketKey: string,
+  now: number,
+  outcomes: Array<{ language: string; score: number }>,
+  deps?: BucketSourceDeps,
+): Promise<void> {
+  const ledger = deps?.ledger ?? getFreewayLedgerStore();
+  await statsFoldLock.withLock(bucketKey, async () => {
+    const existing = await ledger.getBucket(bucketKey);
+    let stats = existing?.stats ?? {};
+    for (const outcome of outcomes) {
+      stats = recordJudgeScore(stats, outcome.language, outcome.score, now);
     }
     await ledger.mergeStats(bucketKey, stats);
   });

@@ -62,5 +62,6 @@
   "retryFailed": "Sbloccata, ma l'azione ritentata non è riuscita: riprova.",
   "retryFailed_one": "Sbloccata, ma la tua azione ritentata non è riuscita: riprovala.",
   "retryFailed_other": "Sbloccata, ma le tue azioni ritentate non sono riuscite: riprovale.",
-  "retryPartialFailed": "Azioni andate a buon fine: {{count}} di {{total}} — riprova quelle non riuscite."
+  "retryPartialFailed": "Azioni andate a buon fine: {{count}} di {{total}} — riprova quelle non riuscite.",
+  "replace": "Sostituisci"
 }

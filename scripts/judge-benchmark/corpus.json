@@ -1,0 +1,734 @@
+{
+ "version": 1,
+ "sourceVersion": "ac144b1e",
+ "weakModel": "google::gemini-flash-lite-latest",
+ "generatedAt": "2026-08-25T21:36:15.160Z",
+ "entries": [
+  {
+   "id": "e00",
+   "class": "short-ui",
+   "en": "How To Play?",
+   "good": {
+    "fr": "Comment jouer&nbsp;?",
+    "ja": "遊び方"
+   },
+   "weak": {
+    "fr": "Comment jouer ?",
+    "ja": "遊び方"
+   },
+   "injected": {
+    "fr": "How To Play?",
+    "ja": "遊び方&nbsp;"
+   },
+   "defect": {
+    "fr": "untranslated",
+    "ja": "entity-leak"
+   },
+   "cleanFlaw": {
+    "fr": "entity-leak",
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e01",
+   "class": "short-ui",
+   "en": "Anemo Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Anémo",
+    "ja": "風スライムのクリーム"
+   },
+   "weak": {
+    "fr": "Crème de Bloblob Anémo",
+    "ja": "風スライムクリーム"
+   },
+   "injected": {
+    "fr": "Crème de Slime Vent",
+    "ja": "風ぬるぬるのクリーム"
+   },
+   "defect": {
+    "fr": "terminology-drift",
+    "ja": "terminology-drift"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e02",
+   "class": "short-ui",
+   "en": "Cryo Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Cryo",
+    "ja": "氷スライムのクリーム"
+   },
+   "weak": {
+    "fr": "Crème de Bloblob Cryo",
+    "ja": "氷スライムクリーム"
+   },
+   "injected": {
+    "fr": "Crème de Slime Cryo&nbsp;",
+    "ja": "Cryo Slime Cream"
+   },
+   "defect": {
+    "fr": "entity-leak",
+    "ja": "untranslated"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e03",
+   "class": "short-ui",
+   "en": "Dendro Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Dendro",
+    "ja": "草スライムのクリーム"
+   },
+   "weak": {
+    "fr": "Crème de Bloblob Dendro",
+    "ja": "草スライムクリーム"
+   },
+   "injected": {
+    "fr": "Crème de Slime Dendro (veuillez patienter pendant le chargement complet de la partie)",
+    "ja": "草スライムのクリーム（ゲームが完全に読み込まれるまでしばらくお待ちください）"
+   },
+   "defect": {
+    "fr": "overflow",
+    "ja": "overflow"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e04",
+   "class": "sentence",
+   "en": "Electro Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Électro",
+    "ja": "雷スライムのクリーム"
+   },
+   "weak": {
+    "fr": "Crème de Bloblob Électro",
+    "ja": "雷スライムクリーム"
+   },
+   "injected": {
+    "fr": "Crème de Gluant Électro",
+    "ja": "雷ぬるぬるのクリーム"
+   },
+   "defect": {
+    "fr": "terminology-drift",
+    "ja": "terminology-drift"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e05",
+   "class": "short-ui",
+   "en": "Game Platform",
+   "good": {
+    "fr": "Plateforme de jeu",
+    "ja": "ゲームプラットフォーム"
+   },
+   "weak": {
+    "fr": "Plateforme de jeu",
+    "ja": "ゲームプラットフォーム"
+   },
+   "injected": {
+    "fr": "Plateforme de jeu&nbsp;",
+    "ja": "ゲームプラットフォーム&nbsp;"
+   },
+   "defect": {
+    "fr": "entity-leak",
+    "ja": "entity-leak"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e06",
+   "class": "sentence",
+   "en": "Yellow Electro Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Électro jaune",
+    "ja": "黄色の電気スライムクリーム"
+   },
+   "weak": {
+    "fr": "Crème de Slime électro jaune",
+    "ja": "イエローエレクトロスライムクリーム"
+   },
+   "injected": {
+    "fr": "Yellow Electro Slime Cream",
+    "ja": "Yellow Electro Slime Cream"
+   },
+   "defect": {
+    "fr": "untranslated",
+    "ja": "untranslated"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e07",
+   "class": "sentence",
+   "en": "Catch a falling Slime Cream!",
+   "good": {
+    "fr": "Attrape une Glace Gluante tombante !",
+    "ja": "落ちてくるスライムクリームをキャッチしよう！"
+   },
+   "weak": {
+    "fr": "Attrapez une crème de slime tombante !",
+    "ja": "落下するスライムクリームを受け止めろ！"
+   },
+   "injected": {
+    "fr": "Attrape une Glace Gluante tombante ! (veuillez patienter pendant le chargement complet de la partie)",
+    "ja": "落ちてくるスライムクリームをキャッチしよう！（ゲームが完全に読み込まれるまでしばらくお待ちください）"
+   },
+   "defect": {
+    "fr": "overflow",
+    "ja": "overflow"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e08",
+   "class": "sentence",
+   "en": "Stack 1000 lifetime Slime Creams!",
+   "good": {
+    "fr": "Empile 1000 Glaces Gluantes au total !",
+    "ja": "累計でスライムクリームを1000個積み上げろ！"
+   },
+   "weak": {
+    "fr": "Empilez 1000 crèmes de slime au total !",
+    "ja": "累計1000個のスライムクリームを積み上げろ！"
+   },
+   "injected": {
+    "fr": "Empile 1000 Glaces Gluantes au total&nbsp;!",
+    "ja": "累計でぬるぬるクリームを1000個積み上げろ！"
+   },
+   "defect": {
+    "fr": "entity-leak",
+    "ja": "terminology-drift"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e09",
+   "class": "sentence",
+   "en": "Stack 20 slimes in a single round!",
+   "good": {
+    "fr": "Empile 20 gluants en une seule manche !",
+    "ja": "1ラウンドでスライムを20個積み上げろ！"
+   },
+   "weak": {
+    "fr": "Empilez 20 slimes en une seule manche !",
+    "ja": "1ラウンドで20匹のスライムを積み上げろ！"
+   },
+   "injected": {
+    "fr": "Stack 20 slimes in a single round!",
+    "ja": "1ラウンドでスライムを20個積み上げろ！&nbsp;"
+   },
+   "defect": {
+    "fr": "untranslated",
+    "ja": "entity-leak"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e10",
+   "class": "placeholder",
+   "en": "{1:lv.Expected Players} Players are left!",
+   "good": {
+    "fr": "{1:lv.Expected Players} joueurs restants !",
+    "ja": "残りプレイヤー: {1:lv.Expected Players}人！"
+   },
+   "weak": {
+    "fr": "Il reste {1:lv.Expected Players} joueurs !",
+    "ja": "残りプレイヤー数：{1:lv.Expected Players}"
+   },
+   "injected": {
+    "fr": "joueurs restants !",
+    "ja": "残りプレイヤー: 人！"
+   },
+   "defect": {
+    "fr": "placeholder-dropped",
+    "ja": "placeholder-dropped"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e11",
+   "class": "placeholder",
+   "en": "{4:Countdown Number}",
+   "good": {
+    "fr": "{4:Countdown Number}",
+    "ja": "{4:Countdown Number}"
+   },
+   "weak": {
+    "fr": "{4:Countdown Number}",
+    "ja": "{4:Countdown Number}"
+   },
+   "injected": {
+    "fr": "{4:Nombre du compte à rebours}",
+    "ja": "{4:カウントダウン数}"
+   },
+   "defect": {
+    "fr": "placeholder-translated",
+    "ja": "placeholder-translated"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e12",
+   "class": "placeholder",
+   "en": "<color=#4cfc4c>{1:lv.Continue Votes}</color> | <color=#fc4c4c>{1:lv.Settle Votes}</color>",
+   "good": {
+    "fr": "<color=#4cfc4c>{1:lv.Continue Votes}</color> | <color=#fc4c4c>{1:lv.Settle Votes}</color>",
+    "ja": "<color=#4cfc4c>{1:lv.Continue Votes}</color> | <color=#fc4c4c>{1:lv.Settle Votes}</color>"
+   },
+   "weak": {
+    "fr": "<color=#4cfc4c>{1:lv.Continue Votes}</color> | <color=#fc4c4c>{1:lv.Settle Votes}</color>",
+    "ja": "<color=#4cfc4c>{1:lv.Continue Votes}</color> | <color=#fc4c4c>{1:lv.Settle Votes}</color>"
+   },
+   "injected": {
+    "fr": "<color=#4cfc4c>{1:lv.Continue Votes} | <color=#fc4c4c>{1:lv.Settle Votes}</color>",
+    "ja": "<color=#4cfc4c>{1:lv.Continue Votes} | <color=#fc4c4c>{1:lv.Settle Votes}</color>"
+   },
+   "defect": {
+    "fr": "tag-unclosed",
+    "ja": "tag-unclosed"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e13",
+   "class": "richtext",
+   "en": "<color=#dddddd><size=25>Current:</size></color>",
+   "good": {
+    "fr": "<color=#dddddd><size=25>Actuel :</size></color>",
+    "ja": "<color=#dddddd><size=25>現在:</size></color>"
+   },
+   "weak": {
+    "fr": "<color=#dddddd><size=25>Actuel :</size></color>",
+    "ja": "<color=#dddddd><size=25>現在：</size></color>"
+   },
+   "injected": {
+    "fr": "<color=#dddddd><size=25>Actuel :</color>",
+    "ja": "<color=#dddddd><size=25>現在:</color>"
+   },
+   "defect": {
+    "fr": "tag-unclosed",
+    "ja": "tag-unclosed"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e14",
+   "class": "placeholder",
+   "en": "<color=#dddddd>❖ <color=#ffffff>{4:Slime Cream Entity Name}</color></color>",
+   "good": {
+    "fr": "<color=#dddddd>❖ <color=#ffffff>{4:Slime Cream Entity Name}</color></color>",
+    "ja": "<color=#dddddd>❖ <color=#ffffff>{4:Slime Cream Entity Name}</color></color>"
+   },
+   "weak": {
+    "fr": "<color=#dddddd>❖ <color=#ffffff>{4:Slime Cream Entity Name}</color></color>",
+    "ja": "<color=#dddddd>❖ <color=#ffffff>{4:Slime Cream Entity Name}</color></color>"
+   },
+   "injected": {
+    "fr": "<color=#dddddd>❖ <color=#ffffff></color></color>",
+    "ja": "<color=#dddddd>❖ <color=#ffffff></color></color>"
+   },
+   "defect": {
+    "fr": "placeholder-dropped",
+    "ja": "placeholder-dropped"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e15",
+   "class": "placeholder",
+   "en": "<color=#dddddd>Flavor:</color> <color={4:Flavor Color Tag}>{4:Flavor}</color>",
+   "good": {
+    "fr": "<color=#dddddd>Description :</color> <color={4:Flavor Color Tag}>{4:Flavor}</color>",
+    "ja": "<color=#dddddd>フレーバー:</color> <color={4:Flavor Color Tag}>{4:Flavor}</color>"
+   },
+   "weak": {
+    "fr": "<color=#dddddd>Saveur :</color> <color={4:Flavor Color Tag}>{4:Flavor}</color>",
+    "ja": "<color=#dddddd>フレーバー：</color> <color={4:Flavor Color Tag}>{4:Flavor}</color>"
+   },
+   "injected": {
+    "fr": "<color=#dddddd>Description :</color> <color={4:Balise de couleur}>{4:Flavor}</color>",
+    "ja": "<color=#dddddd>フレーバー:</color> <color={4:色タグ}>{4:Flavor}</color>"
+   },
+   "defect": {
+    "fr": "placeholder-translated",
+    "ja": "placeholder-translated"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "injected",
+    "ja": "injected"
+   }
+  },
+  {
+   "id": "e16",
+   "class": "placeholder",
+   "en": "<color=#eeeeee>Best:</color> {1:ps.1_chip_1.0.High Score}",
+   "good": {
+    "fr": "<color=#eeeeee>Record :</color> {1:ps.1_chip_1.0.High Score}",
+    "ja": "<color=#eeeeee>ベスト:</color> {1:ps.1_chip_1.0.High Score}"
+   },
+   "weak": {
+    "fr": "<color=#eeeeee>Meilleur :</color> {1:ps.1_chip_1.0.High Score}",
+    "ja": "<color=#eeeeee>ベスト：</color> {1:ps.1_chip_1.0.High Score}"
+   },
+   "injected": {
+    "fr": "<color=#eeeeee>Record :</color>",
+    "ja": "<color=#eeeeee>ベスト:</color>"
+   },
+   "defect": {
+    "fr": "placeholder-dropped",
+    "ja": "placeholder-dropped"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e17",
+   "class": "richtext",
+   "en": "<color=#FC9>You may leave at any time from here on to get Victory!</color>",
+   "good": {
+    "fr": "<color=#FC9>Vous pouvez partir à tout moment à partir d'ici pour remporter la Victoire !</color>",
+    "ja": "<color=#FC9>ここからはいつでも離脱して勝利を得ることができます！</color>"
+   },
+   "weak": {
+    "fr": "<color=#FC9>Vous pouvez partir à tout moment à partir d'ici pour obtenir la victoire !</color>",
+    "ja": "<color=#FC9>ここから先はいつでも離脱して勝利を手に入れることができます！</color>"
+   },
+   "injected": {
+    "fr": "<color=#FC9>Vous pouvez partir à tout moment à partir d'ici pour remporter la Victoire !",
+    "ja": "<color=#FC9>ここからはいつでも離脱して勝利を得ることができます！"
+   },
+   "defect": {
+    "fr": "tag-unclosed",
+    "ja": "tag-unclosed"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e18",
+   "class": "placeholder",
+   "en": "<color=#FC9>{1:lv.Loaded Players}</color> / <color=#FA9>{1:lv.Expected Players}</color> Players Joined",
+   "good": {
+    "fr": "<color=#FC9>{1:lv.Loaded Players}</color> / <color=#FA9>{1:lv.Expected Players}</color> joueurs rejoints",
+    "ja": "<color=#FC9>{1:lv.Loaded Players}</color> / <color=#FA9>{1:lv.Expected Players}</color> 人のプレイヤーが参加中"
+   },
+   "weak": {
+    "fr": "<color=#FC9>{1:lv.Loaded Players}</color> / <color=#FA9>{1:lv.Expected Players}</color> joueurs ont rejoint",
+    "ja": "<color=#FC9>{1:lv.Loaded Players}</color> / <color=#FA9>{1:lv.Expected Players}</color> 人的玩家已加入"
+   },
+   "injected": {
+    "fr": "<color=#FC9>{1:Joueurs chargés}</color> / <color=#FA9>{1:lv.Expected Players}</color> joueurs rejoints",
+    "ja": "<color=#FC9>{1:読込済プレイヤー}</color> / <color=#FA9>{1:lv.Expected Players}</color> 人のプレイヤーが参加中"
+   },
+   "defect": {
+    "fr": "placeholder-translated",
+    "ja": "placeholder-translated"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e19",
+   "class": "placeholder",
+   "en": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> Bonus Points!",
+   "good": {
+    "fr": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> Points bonus !",
+    "ja": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> ボーナスポイント！"
+   },
+   "weak": {
+    "fr": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> Points bonus !",
+    "ja": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> 褒赏点数！"
+   },
+   "injected": {
+    "fr": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> Points bonus ! (veuillez patienter pendant le chargement complet de la partie)",
+    "ja": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> Bonus Points!"
+   },
+   "defect": {
+    "fr": "overflow",
+    "ja": "untranslated"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e20",
+   "class": "sentence",
+   "en": "You may leave at any time from here on to get Victory!",
+   "good": {
+    "fr": "Vous pouvez partir $to$ moment d$s ici pour obtenir la Victoire!",
+    "ja": "ここからはいつでも退出すれば勝利となります！"
+   },
+   "weak": {
+    "fr": "Vous pouvez partir à tout moment à partir d'ici pour obtenir la Victoire !",
+    "ja": "从这里开始，您可以随时离开并取得胜利！"
+   },
+   "injected": {
+    "fr": "Vous pouvez partir $to$ moment d$s ici pour obtenir la Victoire!&nbsp;",
+    "ja": "ここからはいつでも退出すれば勝利となります！（ゲームが完全に読み込まれるまでしばらくお待ちください）"
+   },
+   "defect": {
+    "fr": "entity-leak",
+    "ja": "overflow"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e21",
+   "class": "placeholder",
+   "en": "<color=#eeeeee>Points:</color> {1:ps.Current Points}",
+   "good": {
+    "fr": "<color=#eeeeee>Points :</color> {1:ps.Current Points}",
+    "ja": "<color=#eeeeee>ポイント:</color> {1:ps.Current Points}"
+   },
+   "weak": {
+    "fr": "<color=#eeeeee>Points :</color> {1:ps.Current Points}",
+    "ja": "<color=#eeeeee>点数：</color>{1:ps.Current Points}"
+   },
+   "injected": {
+    "fr": "<color=#eeeeee>Points :</color>",
+    "ja": "<color=#eeeeee>ポイント:</color>"
+   },
+   "defect": {
+    "fr": "placeholder-dropped",
+    "ja": "placeholder-dropped"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e22",
+   "class": "placeholder",
+   "en": "<color={4:Color Tag}>{4:Countdown Number}</color>",
+   "good": {
+    "fr": "<color={4:Color Tag}>{4:Countdown Number}</color>",
+    "ja": "<color={4:Color Tag}>{4:Countdown Number}</color>"
+   },
+   "weak": {
+    "fr": "<color={4:Color Tag}>{4:Countdown Number}</color>",
+    "ja": "<color={4:Color Tag}>{4:Countdown Number}</color>"
+   },
+   "injected": {
+    "fr": "<color={4:Balise de couleur}>{4:Countdown Number}</color>",
+    "ja": "<color={4:色タグ}>{4:Countdown Number}</color>"
+   },
+   "defect": {
+    "fr": "placeholder-translated",
+    "ja": "placeholder-translated"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e23",
+   "class": "placeholder",
+   "en": "Minimum Goal: {1:lv.Minimum Stack Goal}",
+   "good": {
+    "fr": "Objectif minimum : {1:lv.Minimum Stack Goal}",
+    "ja": "最低目標: {1:lv.Minimum Stack Goal}"
+   },
+   "weak": {
+    "fr": "Objectif minimum : {1:lv.Minimum Stack Goal}",
+    "ja": "最低目标：{1:lv.Minimum Stack Goal}"
+   },
+   "injected": {
+    "fr": "Minimum Goal: {1:lv.Minimum Stack Goal}",
+    "ja": "最低目標: {1:lv.Minimum Stack Goal}&nbsp;"
+   },
+   "defect": {
+    "fr": "untranslated",
+    "ja": "entity-leak"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  },
+  {
+   "id": "e24",
+   "class": "sentence",
+   "en": "The next game will start soon!",
+   "good": {
+    "fr": "Le prochain jeu va bient$f commencer!",
+    "ja": "まもなく次のゲームが始まります！"
+   },
+   "weak": {
+    "fr": "La prochaine partie va bientôt commencer !",
+    "ja": "次のゲームはまもなく始まります！"
+   },
+   "injected": {
+    "fr": "Le prochain jeu va bient$f commencer! (veuillez patienter pendant le chargement complet de la partie)",
+    "ja": "The next game will start soon!"
+   },
+   "defect": {
+    "fr": "overflow",
+    "ja": "untranslated"
+   },
+   "cleanFlaw": {
+    "fr": null,
+    "ja": null
+   },
+   "arm": {
+    "fr": "clean",
+    "ja": "clean"
+   }
+  }
+ ],
+ "armNote": "clean arm = good translation from the Aug run; injected arm = one catalogued defect. cleanFlaw marks clean-arm items that already carried a real defect."
+}

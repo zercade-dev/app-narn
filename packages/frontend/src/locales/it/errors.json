@@ -6,5 +6,9 @@
     "rateLimited": "Troppe richieste: attendi un momento e riprova.",
     "server": "Il server ha riscontrato un problema. Riprova tra poco.",
     "offline": "Impossibile raggiungere il server. Controlla la connessione."
+  },
+  "noRoute": {
+    "title": "Routing necessario",
+    "body": "Nessuna regola di routing corrisponde a {{languages}}. Configura prima il routing: l’esecuzione non tradurrebbe nulla."
   }
 }

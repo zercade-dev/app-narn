@@ -51,6 +51,12 @@ import {
 import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
 import {
+  batchPayloadChars,
+  createReviewBatchSizer,
+  sourceReviewLengthProxy,
+} from './M32/review-batch.js';
+import type { BucketView } from './M32/types.js';
+import {
   BackgroundRunEngine,
   sanitizeLLMText,
   type FreewayBatchBinding,
@@ -58,7 +64,8 @@ import {
 } from './M9/run-engine.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
 
-/** Items reviewed per provider call (engine-level batching). */
+/** Items reviewed per provider call — the default for a non-Freeway module, and
+ *  the resolver's own fallback when a Freeway run has no bucket yet. */
 const SOURCE_REVIEW_BATCH_SIZE = 12;
 
 /** The review categories (canonical definition lives in `@zercade-dev/narn-shared`). */
@@ -201,7 +208,16 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     request: SourceReviewRequest,
     logSink?: ModuleLogFn,
     reserveRequests?: number,
-  ): Promise<{ module: TranslationModule; moduleId: string; bucketKey?: string }> {
+  ): Promise<
+    // See the matching union in M25: `deps` is the session-scoped bucket-source
+    // context this resolution ran with, and it travels WITH the bucket so no
+    // later ledger read can fall back to the bare overrides (which report every
+    // module disabled and would leave the caller with an empty bucket list).
+    { module: TranslationModule; moduleId: string } & (
+      | { bucketKey: string; bucket: BucketView; deps: BucketSourceDeps }
+      | { bucketKey?: undefined; bucket?: undefined; deps?: undefined }
+    )
+  > {
     const saved = project.sourceReviewConfig;
     const requestedId = request.moduleId ?? saved?.moduleId;
     const requestedModel = request.model ?? saved?.model;
@@ -277,11 +293,23 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       | undefined;
     // The run's current selection; each batch copies it when it starts.
     let target: { module: TranslationModule; moduleId: string } | undefined;
+    // The bucket the run is currently on, for batch sizing. Set by selectModule
+    // and replaced by a mid-run re-route; undefined for non-Freeway runs. The
+    // reassignment on a hop is correct future-proofing, not something THIS run
+    // currently observes mid-flight: the batch-size resolver below runs once,
+    // before dispatch, and every batch is packed from that one result — a hop
+    // changes which bucket later batches debit against, never their size.
+    let bucket: BucketView | undefined;
 
-    // The reserve the free-tier selector should fence: an explicit entry scope
-    // bounds how many provider calls this run can make, so it fences the larger
-    // of that and the flat default. The needsTranslation fallback scope isn't
-    // knowable from the request, so there the flat fence stands alone.
+    // The reserve the free-tier selector should fence: an ESTIMATE computed
+    // before the bucket (and therefore the real per-call size) is known, so an
+    // explicit entry scope, sized at `itemsPerCall` below, bounds how many
+    // provider calls this run can make — fenced at the larger of that and the
+    // flat default. A char-tight bucket can size batches below `itemsPerCall`
+    // when no explicit request size was given, so the run can end up making
+    // more calls than this estimate assumed; an exact fence isn't possible this
+    // early. The needsTranslation fallback scope isn't knowable from the
+    // request, so there the flat fence stands alone.
     const scopedEntries = request.entryIds?.length;
     const itemsPerCall =
       request.customBatchSize !== undefined && request.customBatchSize > 0
@@ -292,6 +320,26 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     const reserveRequests = scopedEntries
       ? Math.max(FREEWAY_BACKGROUND_RESERVE, Math.ceil(scopedEntries / itemsPerCall))
       : undefined;
+
+    // Precedence: `customBatchSize` (handled upstream in run-engine.ts, before
+    // this resolver ever runs) → an explicit `request.batchSize` (the AI-review
+    // dialog's plain "Batch size" field — the dialog omits it at its own default
+    // so a Freeway run isn't pinned to that default on every start, but a value
+    // the user actually changed still arrives here) → bucket sizing for a
+    // Freeway-routed run with no explicit size (the bucket is known only after
+    // `selectModule`, hence the getter) → the flat `SOURCE_REVIEW_BATCH_SIZE`.
+    //
+    // Source review reviews source text only — an item has no translation, so
+    // its payload is honest as-is: `sourceReviewLengthProxy` IS the real
+    // payload, not a proxy standing in for something larger. Shared with the
+    // per-batch `batchChars` below so sizing and the minute-token projection
+    // measure the same payload.
+    const sizer = createReviewBatchSizer<SourceReviewItem>({
+      bucket: () => bucket,
+      explicitSize: request.batchSize && request.batchSize > 0 ? request.batchSize : undefined,
+      fallbackSize: SOURCE_REVIEW_BATCH_SIZE,
+      lengthProxy: sourceReviewLengthProxy,
+    });
 
     return this.enqueueBatched<SourceReviewItem>({
       projectId,
@@ -310,7 +358,8 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         );
         target = { module: selected.module, moduleId: selected.moduleId };
         if (selected.bucketKey !== undefined) {
-          freeway = { bucketKey: selected.bucketKey, deps: this.freewayOverrides };
+          freeway = { bucketKey: selected.bucketKey, deps: selected.deps };
+          bucket = selected.bucket;
           makeFreewayReroute = (selection) => async () => {
             try {
               // The struck bucket is cooled before this runs, so the selector
@@ -324,9 +373,10 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
                 reserveRequests,
               );
               if (next.bucketKey === undefined) return undefined;
-              const binding = { bucketKey: next.bucketKey, deps: this.freewayOverrides };
+              const binding = { bucketKey: next.bucketKey, deps: next.deps };
               target = { module: next.module, moduleId: next.moduleId };
               freeway = binding;
+              bucket = next.bucket;
               selection.module = next.module;
               selection.moduleId = next.moduleId;
               return binding;
@@ -374,8 +424,14 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
         kind: 'source-review',
         sourceReviewSummary: { reviewed: 0, flagged: 0, findings: 0 },
       },
-      batchSize:
-        request.batchSize && request.batchSize > 0 ? request.batchSize : SOURCE_REVIEW_BATCH_SIZE,
+      batchSize: sizer.resolve,
+      // A bucket-sized batch is already final: the provider must send it whole
+      // rather than re-chunking it at its own review cap, which would turn one
+      // planned free-tier request into several (and the ledger, debiting once
+      // per engine batch, would under-count them). Never set for an explicit
+      // request size or a non-Freeway run — those batches are a flat constant
+      // the module's own `maxBatchSize` is still entitled to bound.
+      batchesPreSized: sizer.bucketSized,
       // Per-run override (AI-review dialog) → project → workspace → none.
       ...(request.batchGrouping !== undefined
         ? { batchGroupingOverride: request.batchGrouping }
@@ -439,6 +495,9 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       batch,
       dispatchOptions,
       call: (signal) => selection.module.reviewSource!(batch, opts, signal, dispatchOptions),
+      // What this batch costs the bucket's minute-token budget, measured with
+      // the same proxy the sizer sized it with.
+      batchChars: batchPayloadChars(batch, sourceReviewLengthProxy),
       failureKey: (item) => ({ entryId: item.entryId }),
       usageOf: (result) => result.usage,
       ...(freeway ? { freeway } : {}),

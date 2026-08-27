@@ -45,6 +45,7 @@ import {
   type BatchDispatchOptions,
   type BatchGroupingDimension,
   resetRateLimiters,
+  runCountingProviderCalls,
   toErrorMessage,
   projectTargetLanguages,
   effectivePromptOptions,
@@ -1247,6 +1248,63 @@ export class TranslationEngine {
       }
     }
     return { memoryCount, total };
+  }
+
+  /**
+   * Dry-run routing check: which of `targetLanguages` would produce nothing but
+   * `no-route` failures if this request were started as a run.
+   *
+   * The pair filter below MIRRORS {@link startRunInner}'s decision loop — same
+   * `isExcludedFromAi` exclusion, same source-language skip, same `pairs`
+   * allow-set, same `needsTranslation` gate — because a pre-flight that
+   * disagrees with the run it guards is worse than no pre-flight at all.
+   * Routing itself happens BEFORE trivial matchers and the TM consult in a real
+   * run, so an unroutable pair fails with `no-route` even when its source would
+   * have been produced locally; this check therefore needs neither.
+   *
+   * A language is reported only when it produced at least one pair AND every
+   * pair routed nowhere. A language with zero pairs (everything already
+   * translated without `reTranslate`) is a no-op, not a failure, and must never
+   * block the request. `pseudo-test` can never be reported: M7 binds it to the
+   * pseudo module with no rule.
+   *
+   * Needs no vault session — no LLM calls, no persistence, no queuing.
+   */
+  async preflightRouting(
+    projectId: string,
+    entryIds: string[],
+    targetLanguages: string[],
+    opts: { reTranslate?: boolean; pairs?: RunEntryLanguagePair[] } = {},
+  ): Promise<{ unroutableLanguages: string[] }> {
+    const project = await this.projectStore.loadProject(projectId);
+    // This tenant's effective routing (owner→project, collaborator→collab doc).
+    const rules = await resolveRoutingRules(project);
+    const availableModules = this.deriveAvailableModuleIds(rules);
+    const allEntries = await this.stringStore.load(projectId);
+    const wanted = new Set(entryIds);
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    const reTranslate = opts.reTranslate ?? false;
+    const pairAllow = opts.pairs
+      ? new Set(opts.pairs.map((p) => `${p.entryId}\0${p.targetLanguage}`))
+      : null;
+
+    const unroutableLanguages: string[] = [];
+    for (const targetLanguage of targetLanguages) {
+      if (targetLanguage === project.sourceLanguage) continue;
+      let considered = 0;
+      let routable = false;
+      for (const entry of entries) {
+        if (pairAllow && !pairAllow.has(`${entry.id}\0${targetLanguage}`)) continue;
+        if (!needsTranslation(entry, targetLanguage, reTranslate)) continue;
+        considered++;
+        if (this.router.route(entry, targetLanguage, rules, availableModules).moduleId !== null) {
+          routable = true;
+          break;
+        }
+      }
+      if (considered > 0 && !routable) unroutableLanguages.push(targetLanguage);
+    }
+    return { unroutableLanguages };
   }
 
   /**
@@ -3368,14 +3426,19 @@ export class TranslationEngine {
     }
   }
 
-  /** Ledger accounting for one provider call. Never fails the batch. */
+  /**
+   * Ledger accounting for one provider call by default — `requests` overrides
+   * that when the caller counted more (or fewer) actual provider calls, e.g.
+   * a dispatch the provider layer split. Never fails the batch.
+   */
   private async recordFreewayDispatch(
     bucketKey: string,
     results: readonly (TranslationResult | undefined)[],
     deps: BucketSourceDeps,
+    requests = 1,
   ): Promise<void> {
     try {
-      await recordDispatch(bucketKey, Date.now(), freewayUsageOf(results), deps);
+      await recordDispatch(bucketKey, Date.now(), freewayUsageOf(results), deps, requests);
     } catch (err) {
       this.logger.warn('translation:freeway-ledger-write-failed', {
         bucketKey,
@@ -3629,6 +3692,7 @@ export class TranslationEngine {
           decision.moduleId = revalidated.moduleId;
           decision.modelOverride = revalidated.modelId;
           decision.freewayTier = revalidated.qualityTier;
+          decision.freewayBucketKey = revalidated.bucketKey;
         }
         // Same guard the hop-0 reroute applies: a part sized for the planned
         // bucket's char budget can physically exceed the rescue bucket's.
@@ -3652,9 +3716,23 @@ export class TranslationEngine {
     }
     for (let hop = 0; ; hop++) {
       let results: TranslationResult[] | undefined;
+      // Captured via onSettled so the catch below can see it too: a call that
+      // throws still rejects the whole runCountingProviderCalls promise, and
+      // the count has to escape that rejection some way other than the
+      // (unreachable, on a throw) return value.
+      let calls = 0;
       try {
-        results = await state.module.translate(jobs, signal, translateOptions);
-        await this.recordFreewayDispatch(state.bucketKey, results, deps);
+        // Counted, not assumed: one translate() call can make several provider
+        // requests when the provider layer halves a failing batch, and the
+        // ledger has to debit what was actually spent.
+        const outcome = await runCountingProviderCalls(
+          () => state.module.translate(jobs, signal, translateOptions),
+          (settledCalls) => {
+            calls = settledCalls;
+          },
+        );
+        results = outcome.result;
+        await this.recordFreewayDispatch(state.bucketKey, results, deps, outcome.calls);
         // A module that flattens a 429 into a per-result `error` string still
         // has to trigger the failover — surface it as a throw (mirrors the
         // non-Freeway `withRateLimitRetry` path).
@@ -3729,8 +3807,17 @@ export class TranslationEngine {
         if (isAbortError(err) || signal?.aborted) {
           return { kind: 'error', error: err, authCancel: false };
         }
-        // A call that threw still spent a request against the bucket.
-        if (results === undefined) await this.recordFreewayDispatch(state.bucketKey, [], deps);
+        // A call that threw still spent whatever requests it made before
+        // throwing (2-6 is routine: a 429, or a 5xx then a 429, each burn a
+        // counted attempt) — observed via `calls`, not assumed to be one.
+        // `results === undefined` keeps this from double-debiting the success
+        // path above; `recordDispatch`'s own floor keeps a genuinely uncounted
+        // dispatch at 1 rather than dropping to 0 — the modules that dispatch
+        // through their own provider SDK rather than the AI SDK's guarded
+        // fetch (Copilot and DeepL) never reach the counted seam at all.
+        if (results === undefined) {
+          await this.recordFreewayDispatch(state.bucketKey, [], deps, calls);
+        }
         const rateLimited = isRateLimitError(err);
         const authFailure = !rateLimited && isRunCancellingAuthError(err);
         // Everything else the provider can throw — 5xx, timeout, or a model it
@@ -3944,6 +4031,7 @@ export class TranslationEngine {
             decision.moduleId = revalidated.moduleId;
             decision.modelOverride = revalidated.modelId;
             decision.freewayTier = revalidated.qualityTier;
+            decision.freewayBucketKey = revalidated.bucketKey;
           }
           const rescue = buckets.find((b) => b.bucketKey === revalidated.bucketKey);
           const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
@@ -3994,6 +4082,7 @@ export class TranslationEngine {
               decision.moduleId = freshModuleId;
               decision.modelOverride = freshBucket.modelId;
               decision.freewayTier = freshBucket.qualityTier;
+              decision.freewayBucketKey = freshBucket.bucketKey;
             }
           }
         }
@@ -4201,6 +4290,7 @@ export class TranslationEngine {
             d.moduleId = revalidated.moduleId;
             d.modelOverride = revalidated.modelId;
             d.freewayTier = revalidated.qualityTier;
+            d.freewayBucketKey = revalidated.bucketKey;
           }
         } else if (revalidated.kind === 'defer') {
           this.deferPairsForQuota(
@@ -4429,11 +4519,13 @@ export class TranslationEngine {
         };
         // A glossary-constant short-circuit never reaches a bucket — even for
         // a Freeway-routed decision the plan already stamped — so the tier
-        // must be explicitly cleared, not inherited via the spread above.
+        // and its bucket key must be explicitly cleared, not inherited via
+        // the spread above.
         const persistDecision: RoutingDecision = {
           ...e.decision,
           moduleId: 'glossary-constant',
           freewayTier: undefined,
+          freewayBucketKey: undefined,
         };
         await this.persistResult(
           projectId,
@@ -4510,9 +4602,10 @@ export class TranslationEngine {
                 ...e.decision,
                 moduleId: TM_MODULE_ID,
                 // A translation-memory hit never touched a bucket either —
-                // clear a tier the plan may have stamped, same as the
-                // glossary-constant short-circuit above.
+                // clear a tier (and its bucket key) the plan may have
+                // stamped, same as the glossary-constant short-circuit above.
                 freewayTier: undefined,
+                freewayBucketKey: undefined,
               },
               runId,
             );
@@ -5205,6 +5298,7 @@ export class TranslationEngine {
               moduleId: escalation.moduleId,
               modelOverride: escalation.modelId,
               freewayTier: escalation.qualityTier,
+              freewayBucketKey: escalation.bucketKey,
             };
             escalatedBucketKey = escalation.bucketKey;
             this.logger.info('translation:freeway-escalated', {
@@ -5220,34 +5314,52 @@ export class TranslationEngine {
             );
           }
         }
-        const retry = await this.retryLqaFailure({
-          runId,
-          projectId,
-          status,
-          module: retryModule,
-          decision: retryDecision,
-          sourceLanguage,
-          masked: item.entry.masked,
-          plan: item.entry.plan,
-          glossaryById: item.entry.glossaryById,
-          nonConstantTerms: item.entry.nonConstantTerms,
-          jobContext: appendTmHints(item.entry.decision.entry.context, item.entry.tmHints),
-          ...(item.entry.reference ? { reference: item.entry.reference } : {}),
-          ...(examplesByLanguage?.get(item.entry.decision.targetLanguage)?.length
-            ? { examples: examplesByLanguage.get(item.entry.decision.targetLanguage) }
-            : {}),
-          originalText: item.originalText,
-          lqaResult: item.lqaResult,
-          metricsModel,
-          signal,
-          ...(project ? { project } : {}),
-          achievementPairMap,
-        });
-        // The corrective attempt is a real provider call either way — debit the
-        // bucket that served it (the escalation target, or the origin bucket
-        // when the same-module retry ran).
+        // Counted, not assumed: retryWithFeedback is a single-item call, but a
+        // transient-error retry inside splitAndRetry can still fire once more
+        // at that same size, so this corrective attempt can spend more than
+        // one provider request. retryLqaFailure never rethrows (its own
+        // try/catch converts every failure into 'accepted-original' or
+        // 'aborted'), so there is no separate failure-path debit to gate here
+        // — recordDispatch's own floor of 1 already covers the modules that
+        // dispatch through their own provider SDK rather than the AI SDK's
+        // guarded fetch (Copilot, DeepL) and so never reach the counted seam.
+        const outcome = await runCountingProviderCalls(() =>
+          this.retryLqaFailure({
+            runId,
+            projectId,
+            status,
+            module: retryModule,
+            decision: retryDecision,
+            sourceLanguage,
+            masked: item.entry.masked,
+            plan: item.entry.plan,
+            glossaryById: item.entry.glossaryById,
+            nonConstantTerms: item.entry.nonConstantTerms,
+            jobContext: appendTmHints(item.entry.decision.entry.context, item.entry.tmHints),
+            ...(item.entry.reference ? { reference: item.entry.reference } : {}),
+            ...(examplesByLanguage?.get(item.entry.decision.targetLanguage)?.length
+              ? { examples: examplesByLanguage.get(item.entry.decision.targetLanguage) }
+              : {}),
+            originalText: item.originalText,
+            lqaResult: item.lqaResult,
+            metricsModel,
+            signal,
+            ...(project ? { project } : {}),
+            achievementPairMap,
+          }),
+        );
+        const retry = outcome.result;
+        // The corrective attempt is a real provider call, and may make several
+        // — debit the bucket that served it (the escalation target, or the
+        // origin bucket when the same-module retry ran) for what it actually
+        // spent.
         if (bucketKey !== undefined && freewayDeps) {
-          await this.recordFreewayDispatch(escalatedBucketKey ?? bucketKey, [], freewayDeps);
+          await this.recordFreewayDispatch(
+            escalatedBucketKey ?? bucketKey,
+            [],
+            freewayDeps,
+            outcome.calls,
+          );
         }
         if (retry.outcome === 'aborted') break;
         status.completed++;
@@ -5500,12 +5612,16 @@ export class TranslationEngine {
         timestamp: Date.now(),
         needsReview: true,
         ...(runId ? { runId } : {}),
-        // Stamps the SERVING Freeway bucket's tier (Addendum H) — decision
-        // .freewayTier is threaded through the exact same channel as
-        // moduleId/modelOverride above, kept in sync on every failover/
-        // degrade/escalation re-point, and explicitly cleared by every
-        // short-circuit persist path that never reached a bucket at all.
+        // Stamps the SERVING Freeway bucket's tier and ledger key (Addendum
+        // H) — decision.freewayTier/.freewayBucketKey are threaded through
+        // the exact same channel as moduleId/modelOverride above, kept in
+        // sync on every failover/degrade/escalation re-point, and explicitly
+        // cleared by every short-circuit persist path that never reached a
+        // bucket at all.
         ...(decision.freewayTier !== undefined ? { freewayTier: decision.freewayTier } : {}),
+        ...(decision.freewayBucketKey !== undefined
+          ? { freewayBucketKey: decision.freewayBucketKey }
+          : {}),
       },
       // Preserve a human 'reviewed' verdict when this run re-produces the exact
       // same text (re-translate / TM auto-apply). The check runs inside the
@@ -6111,8 +6227,14 @@ export class TranslationEngine {
       translatedText: trivialText,
     };
     // A built-in trivial matcher (empty/numeric/URL) never touches a bucket
-    // either, so clear any tier a Freeway-routed decision was stamped with.
-    const persistDecision: RoutingDecision = { ...d, moduleId: matcherId, freewayTier: undefined };
+    // either, so clear any tier (and bucket key) a Freeway-routed decision
+    // was stamped with.
+    const persistDecision: RoutingDecision = {
+      ...d,
+      moduleId: matcherId,
+      freewayTier: undefined,
+      freewayBucketKey: undefined,
+    };
     await this.persistResult(
       projectId,
       d.entry,

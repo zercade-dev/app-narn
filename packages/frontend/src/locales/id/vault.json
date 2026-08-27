@@ -58,5 +58,6 @@
   "retrySuccess_other": "Terbuka — seluruh {{count}} tindakan berhasil dijalankan.",
   "retryFailed": "Terbuka, tetapi tindakan yang Anda coba ulang gagal — coba sekali lagi.",
   "retryFailed_other": "Terbuka, tetapi tindakan yang Anda coba ulang gagal — coba sekali lagi.",
-  "retryPartialFailed": "{{count}} dari {{total}} tindakan berhasil — coba ulang yang gagal."
+  "retryPartialFailed": "{{count}} dari {{total}} tindakan berhasil — coba ulang yang gagal.",
+  "replace": "Ganti"
 }

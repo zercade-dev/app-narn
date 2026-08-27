@@ -102,21 +102,55 @@ export function passRateClass(passRate: number): PassRateClass {
 }
 
 /**
+ * Pseudo-observations the static snapshot score is worth when live AI-review
+ * evidence is blended over it. Deliberately heavier than the gate estimator's
+ * PRIOR_STRENGTH: gate outcomes arrive per translated string in the hundreds,
+ * while judge verdicts are far rarer and each one can move a class boundary
+ * that reorders TRANSLATION routing. With the 3-day half-life and the
+ * MAX_SAMPLES cap that already govern these records, a bad patch of verdicts
+ * decays out instead of cementing.
+ */
+export const JUDGE_PRIOR_STRENGTH = 20;
+
+/**
+ * Score used as the prior for a (bucket, language) the snapshot never measured.
+ * The neutral middle of the "usable/unmeasured" class, so an unmeasured pair
+ * with no evidence classifies exactly as it did before this blend existed.
+ */
+const UNMEASURED_SCORE = 75;
+
+/**
  * Coarse judged-quality class for (bucket, language): 0 publishable (score
  * ≥85), 1 usable / unmeasured (≥70 or no benchmark data), 2 measurably poor
  * (<70). Three classes on purpose: quality only overrides the economics keys
  * when the measured gap is real; ties fall through to scarcity as before.
- * Exact-code lookup — zh-hans evidence never speaks for zh-hant.
+ * The score itself is a live blend: the static snapshot score (or
+ * UNMEASURED_SCORE when the snapshot has none) is a JUDGE_PRIOR_STRENGTH-
+ * pseudo-observation prior, corrected by live per-language AI-review verdicts
+ * in proportion to how many there are — the same Beta-Binomial shape
+ * effectivePassRate uses for gate outcomes, applied to the judge score
+ * statistic instead. With neither a static score nor any verdicts, the pair
+ * still classifies as unmeasured (1), exactly as it did before this blend
+ * existed. Exact-code lookup on both halves — zh-hans evidence never speaks
+ * for zh-hant, in the live record just as in the static snapshot.
  */
 export function langQualityClass(
-  bucket: Pick<BucketView, 'langScores'>,
+  bucket: Pick<BucketView, 'langScores' | 'stats'>,
   language: string,
 ): 0 | 1 | 2 {
-  const score = bucket.langScores?.[language];
-  if (score === undefined) return 1;
-  if (score >= 85) return 0;
-  if (score >= 70) return 1;
-  return 2;
+  const staticScore = bucket.langScores?.[language];
+  // Exact-code lookup on both halves — zh-hans evidence never speaks for
+  // zh-hant, in the live record just as in the snapshot.
+  const record = bucket.stats.judgeScoreStats?.[language];
+  const evidence = isGatePassRecord(record) ? record : undefined;
+  if (staticScore === undefined && evidence === undefined) return 1;
+  const prior = staticScore ?? UNMEASURED_SCORE;
+  if (evidence === undefined || evidence.n === 0) {
+    return prior >= 85 ? 0 : prior >= 70 ? 1 : 2;
+  }
+  const live =
+    (JUDGE_PRIOR_STRENGTH * prior + 100 * evidence.s) / (JUDGE_PRIOR_STRENGTH + evidence.n);
+  return live >= 85 ? 0 : live >= 70 ? 1 : 2;
 }
 
 /**

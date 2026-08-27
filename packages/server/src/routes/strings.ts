@@ -53,6 +53,9 @@ const translationRecordSchema = z.object({
   // drop a tier the server already stamped — the field is never set BY this
   // schema, only preserved through it.
   freewayTier: z.number().int().min(1).max(4).optional(),
+  // Companion ledger key of the serving Freeway bucket (Addendum H), same
+  // round-trip-preservation rationale as freewayTier above.
+  freewayBucketKey: z.string().optional(),
 });
 
 // For PATCH operations we must not apply defaults, otherwise partial flag
@@ -64,6 +67,7 @@ const translationRecordPatchSchema = z.object({
   timestamp: z.number().optional(),
   needsReview: z.boolean().optional(),
   freewayTier: z.number().int().min(1).max(4).optional(),
+  freewayBucketKey: z.string().optional(),
 });
 
 // Exported so its shape can be tested directly (schema-only, no Express/mocking) —

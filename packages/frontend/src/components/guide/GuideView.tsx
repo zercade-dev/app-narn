@@ -107,7 +107,17 @@ export function GuideView() {
   const rawContent = loadedForCurrent?.status === 'ready' ? loadedForCurrent.content : null;
   const content =
     rawContent === null ? null : cloudManaged ? stripLocalOnly(rawContent) : rawContent;
-  const rendered = content === null ? null : renderMarkdown(content);
+  const rendered =
+    content === null
+      ? null
+      : renderMarkdown(content, {
+          // `[label](guide:<slug>)` cross-references switch topic in place.
+          // Gated on `visibleSlugs` so a reference to a local-only topic
+          // renders as plain text in cloud mode rather than as a control that
+          // would select a topic the sidebar does not offer.
+          onTopicLink: setActiveSlug,
+          isTopicAvailable: (slug) => visibleSlugs.has(slug),
+        });
 
   return (
     <div className="flex h-full" data-testid="guide-view">

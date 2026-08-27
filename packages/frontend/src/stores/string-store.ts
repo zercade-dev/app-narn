@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { StringEntry, TranslationRecord } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../hooks/use-api.js';
 import { filterEntries, type EntryFilters } from '../lib/filter-entries.js';
+import { noteTranslations } from './onboarding-store.js';
 import { runAction } from './store-helpers.js';
 
 type StringFilters = EntryFilters;
@@ -90,6 +91,7 @@ export const useStringStore = create<StringStoreState>()(
             const entries = await apiRequest<StringEntry[]>(`/projects/${projectId}/strings`);
             // Stale response guard: only commit when this is still the latest fetch.
             if (token !== entriesFetchToken) return;
+            noteTranslations(entries);
             set({ entries, loadedProjectId: projectId });
           },
           { loading: true },
@@ -108,6 +110,7 @@ export const useStringStore = create<StringStoreState>()(
           method: 'PUT',
           body: JSON.stringify(partial),
         });
+        noteTranslations([updated]);
         set((s) => ({
           entries: s.entries.map((e) => (e.id === id ? updated : e)),
         }));
@@ -133,6 +136,7 @@ export const useStringStore = create<StringStoreState>()(
             })),
           );
         }
+        noteTranslations(updated);
         const updatedMap = new Map(updated.map((e) => [e.id, e]));
         // Surface a partially-applied bulk op: any requested id the server didn't
         // echo back keeps its stale local row (via the `?? e` fallback below), so

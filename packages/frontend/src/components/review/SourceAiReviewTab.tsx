@@ -451,7 +451,11 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
           clarity: enabled.clarity,
           unsafe: enabled.unsafe,
         },
-        batchSize,
+        // Omitted at the default: the server's own flat constant is the same
+        // 12, so this is behaviour-neutral for a non-Freeway run, and it lets
+        // a Freeway-routed run size to its bucket instead of being pinned to
+        // this field's default value on every single start.
+        ...(batchSize !== DEFAULT_BATCH_SIZE ? { batchSize } : {}),
         moduleId,
         ...(userModel ? { model: userModel } : {}),
         ...(reasoningEffort ? { reasoningEffort } : {}),

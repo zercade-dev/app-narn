@@ -62,5 +62,6 @@
   "retryFailed": "Desbloqueado, mas a repetição da sua ação falhou — tente de novo.",
   "retryFailed_one": "Desbloqueado, mas a sua ação repetida falhou — tente de novo.",
   "retryFailed_other": "Desbloqueado, mas as suas ações repetidas falharam — tente de novo.",
-  "retryPartialFailed": "Ações concluídas: {{count}} de {{total}} — repita as que falharam."
+  "retryPartialFailed": "Ações concluídas: {{count}} de {{total}} — repita as que falharam.",
+  "replace": "Substituir"
 }

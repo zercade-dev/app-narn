@@ -62,5 +62,6 @@
   "retryFailed": "Entsperrt, aber die Wiederholung ist fehlgeschlagen — bitte erneut versuchen.",
   "retryFailed_one": "Entsperrt, aber die wiederholte Aktion ist fehlgeschlagen — bitte erneut versuchen.",
   "retryFailed_other": "Entsperrt, aber die wiederholten Aktionen sind fehlgeschlagen — bitte erneut versuchen.",
-  "retryPartialFailed": "Erfolgreiche Aktionen: {{count}} von {{total}} — die fehlgeschlagenen erneut versuchen."
+  "retryPartialFailed": "Erfolgreiche Aktionen: {{count}} von {{total}} — die fehlgeschlagenen erneut versuchen.",
+  "replace": "Ersetzen"
 }

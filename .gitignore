@@ -66,3 +66,7 @@ packages/server/copilot-models-cache.json
 # Freeway per-language benchmark: local-only working files (large, provider-call-derived)
 scripts/freeway-benchmark/corpus.local.json
 scripts/freeway-benchmark/results-detail.local.json
+
+# Judge-quality benchmark: local-only per-verdict diagnostic detail (raw issue text,
+# suggestions, usage) — verdicts.json itself (pass/fail, score, issue types) is committed.
+scripts/judge-benchmark/verdicts-detail.local.json

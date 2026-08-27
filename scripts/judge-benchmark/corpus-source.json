@@ -1,0 +1,230 @@
+{
+ "version": 1,
+ "entries": [
+  {
+   "class": "short-ui",
+   "en": "How To Play?",
+   "good": {
+    "fr": "Comment jouer&nbsp;?",
+    "ja": "遊び方"
+   },
+   "id": "e00"
+  },
+  {
+   "class": "short-ui",
+   "en": "Anemo Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Anémo",
+    "ja": "風スライムのクリーム"
+   },
+   "id": "e01"
+  },
+  {
+   "class": "short-ui",
+   "en": "Cryo Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Cryo",
+    "ja": "氷スライムのクリーム"
+   },
+   "id": "e02"
+  },
+  {
+   "class": "short-ui",
+   "en": "Dendro Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Dendro",
+    "ja": "草スライムのクリーム"
+   },
+   "id": "e03"
+  },
+  {
+   "class": "sentence",
+   "en": "Electro Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Électro",
+    "ja": "雷スライムのクリーム"
+   },
+   "id": "e04"
+  },
+  {
+   "class": "short-ui",
+   "en": "Game Platform",
+   "good": {
+    "fr": "Plateforme de jeu",
+    "ja": "ゲームプラットフォーム"
+   },
+   "id": "e05"
+  },
+  {
+   "class": "sentence",
+   "en": "Yellow Electro Slime Cream",
+   "good": {
+    "fr": "Crème de Slime Électro jaune",
+    "ja": "黄色の電気スライムクリーム"
+   },
+   "id": "e06"
+  },
+  {
+   "class": "sentence",
+   "en": "Catch a falling Slime Cream!",
+   "good": {
+    "fr": "Attrape une Glace Gluante tombante !",
+    "ja": "落ちてくるスライムクリームをキャッチしよう！"
+   },
+   "id": "e07"
+  },
+  {
+   "class": "sentence",
+   "en": "Stack 1000 lifetime Slime Creams!",
+   "good": {
+    "fr": "Empile 1000 Glaces Gluantes au total !",
+    "ja": "累計でスライムクリームを1000個積み上げろ！"
+   },
+   "id": "e08"
+  },
+  {
+   "class": "sentence",
+   "en": "Stack 20 slimes in a single round!",
+   "good": {
+    "fr": "Empile 20 gluants en une seule manche !",
+    "ja": "1ラウンドでスライムを20個積み上げろ！"
+   },
+   "id": "e09"
+  },
+  {
+   "class": "placeholder",
+   "en": "{1:lv.Expected Players} Players are left!",
+   "good": {
+    "fr": "{1:lv.Expected Players} joueurs restants !",
+    "ja": "残りプレイヤー: {1:lv.Expected Players}人！"
+   },
+   "id": "e10"
+  },
+  {
+   "class": "placeholder",
+   "en": "{4:Countdown Number}",
+   "good": {
+    "fr": "{4:Countdown Number}",
+    "ja": "{4:Countdown Number}"
+   },
+   "id": "e11"
+  },
+  {
+   "class": "placeholder",
+   "en": "<color=#4cfc4c>{1:lv.Continue Votes}</color> | <color=#fc4c4c>{1:lv.Settle Votes}</color>",
+   "good": {
+    "fr": "<color=#4cfc4c>{1:lv.Continue Votes}</color> | <color=#fc4c4c>{1:lv.Settle Votes}</color>",
+    "ja": "<color=#4cfc4c>{1:lv.Continue Votes}</color> | <color=#fc4c4c>{1:lv.Settle Votes}</color>"
+   },
+   "id": "e12"
+  },
+  {
+   "class": "richtext",
+   "en": "<color=#dddddd><size=25>Current:</size></color>",
+   "good": {
+    "fr": "<color=#dddddd><size=25>Actuel :</size></color>",
+    "ja": "<color=#dddddd><size=25>現在:</size></color>"
+   },
+   "id": "e13"
+  },
+  {
+   "class": "placeholder",
+   "en": "<color=#dddddd>❖ <color=#ffffff>{4:Slime Cream Entity Name}</color></color>",
+   "good": {
+    "fr": "<color=#dddddd>❖ <color=#ffffff>{4:Slime Cream Entity Name}</color></color>",
+    "ja": "<color=#dddddd>❖ <color=#ffffff>{4:Slime Cream Entity Name}</color></color>"
+   },
+   "id": "e14"
+  },
+  {
+   "class": "placeholder",
+   "en": "<color=#dddddd>Flavor:</color> <color={4:Flavor Color Tag}>{4:Flavor}</color>",
+   "good": {
+    "fr": "<color=#dddddd>Description :</color> <color={4:Flavor Color Tag}>{4:Flavor}</color>",
+    "ja": "<color=#dddddd>フレーバー:</color> <color={4:Flavor Color Tag}>{4:Flavor}</color>"
+   },
+   "id": "e15"
+  },
+  {
+   "class": "placeholder",
+   "en": "<color=#eeeeee>Best:</color> {1:ps.1_chip_1.0.High Score}",
+   "good": {
+    "fr": "<color=#eeeeee>Record :</color> {1:ps.1_chip_1.0.High Score}",
+    "ja": "<color=#eeeeee>ベスト:</color> {1:ps.1_chip_1.0.High Score}"
+   },
+   "id": "e16"
+  },
+  {
+   "class": "richtext",
+   "en": "<color=#FC9>You may leave at any time from here on to get Victory!</color>",
+   "good": {
+    "fr": "<color=#FC9>Vous pouvez partir à tout moment à partir d'ici pour remporter la Victoire !</color>",
+    "ja": "<color=#FC9>ここからはいつでも離脱して勝利を得ることができます！</color>"
+   },
+   "id": "e17"
+  },
+  {
+   "class": "placeholder",
+   "en": "<color=#FC9>{1:lv.Loaded Players}</color> / <color=#FA9>{1:lv.Expected Players}</color> Players Joined",
+   "good": {
+    "fr": "<color=#FC9>{1:lv.Loaded Players}</color> / <color=#FA9>{1:lv.Expected Players}</color> joueurs rejoints",
+    "ja": "<color=#FC9>{1:lv.Loaded Players}</color> / <color=#FA9>{1:lv.Expected Players}</color> 人のプレイヤーが参加中"
+   },
+   "id": "e18"
+  },
+  {
+   "class": "placeholder",
+   "en": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> Bonus Points!",
+   "good": {
+    "fr": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> Points bonus !",
+    "ja": "<color={4:Flavor Color Tag}>+{4:Stack Streak}</color> ボーナスポイント！"
+   },
+   "id": "e19"
+  },
+  {
+   "class": "sentence",
+   "en": "You may leave at any time from here on to get Victory!",
+   "good": {
+    "fr": "Vous pouvez partir $to$ moment d$s ici pour obtenir la Victoire!",
+    "ja": "ここからはいつでも退出すれば勝利となります！"
+   },
+   "id": "e20"
+  },
+  {
+   "class": "placeholder",
+   "en": "<color=#eeeeee>Points:</color> {1:ps.Current Points}",
+   "good": {
+    "fr": "<color=#eeeeee>Points :</color> {1:ps.Current Points}",
+    "ja": "<color=#eeeeee>ポイント:</color> {1:ps.Current Points}"
+   },
+   "id": "e21"
+  },
+  {
+   "class": "placeholder",
+   "en": "<color={4:Color Tag}>{4:Countdown Number}</color>",
+   "good": {
+    "fr": "<color={4:Color Tag}>{4:Countdown Number}</color>",
+    "ja": "<color={4:Color Tag}>{4:Countdown Number}</color>"
+   },
+   "id": "e22"
+  },
+  {
+   "class": "placeholder",
+   "en": "Minimum Goal: {1:lv.Minimum Stack Goal}",
+   "good": {
+    "fr": "Objectif minimum : {1:lv.Minimum Stack Goal}",
+    "ja": "最低目標: {1:lv.Minimum Stack Goal}"
+   },
+   "id": "e23"
+  },
+  {
+   "class": "sentence",
+   "en": "The next game will start soon!",
+   "good": {
+    "fr": "Le prochain jeu va bient$f commencer!",
+    "ja": "まもなく次のゲームが始まります！"
+   },
+   "id": "e24"
+  }
+ ]
+}

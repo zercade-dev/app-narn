@@ -69,6 +69,8 @@ export interface RoutingDecision {
    * never reaches a provider.
    */
   freewayTier?: number;
+  /** Ledger key of the serving Freeway bucket; threaded with freewayTier. */
+  freewayBucketKey?: string;
 }
 
 /**

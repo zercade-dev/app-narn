@@ -6,5 +6,9 @@
     "rateLimited": "Çok fazla istek — biraz bekleyip yeniden deneyin.",
     "server": "Sunucuda bir sorun oluştu. Birazdan yeniden deneyin.",
     "offline": "Sunucuya ulaşılamıyor. Bağlantınızı kontrol edin."
+  },
+  "noRoute": {
+    "title": "Yönlendirme gerekli",
+    "body": "{{languages}} ile eşleşen bir yönlendirme kuralı yok. Önce yönlendirmeyi ayarlayın — bu çalıştırma hiçbir şeyi çevirmez."
   }
 }

@@ -6,5 +6,9 @@
     "rateLimited": "Requisições demais — espere um momento e tente de novo.",
     "server": "O servidor teve um problema. Tente de novo em instantes.",
     "offline": "Não é possível acessar o servidor. Verifique a sua conexão."
+  },
+  "noRoute": {
+    "title": "Roteamento necessário",
+    "body": "Nenhuma regra de roteamento corresponde a {{languages}}. Configure o roteamento primeiro — a execução não traduziria nada."
   }
 }
