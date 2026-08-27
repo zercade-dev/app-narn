@@ -6,6 +6,7 @@
  * currency even though both are free.
  */
 import type { BucketView, DifficultyBand, JobGroup } from './types.js';
+import { getShrinkMaxRequests } from '../../config/env.js';
 import { languageHardness } from './difficulty.js';
 import { PRIOR_STRENGTH, isGatePassRecord } from './stats.js';
 
@@ -181,6 +182,18 @@ const SPEND_SHARE = 0.25;
 const ABUNDANCE_FACTOR = 40;
 /** Never shrink a comfort batch below this many strings. */
 const SHRINK_FLOOR = 4;
+/**
+ * Largest group, in comfort-size requests, that the abundance shrink may still
+ * halve. Above this the shrink is refused: `ABUNDANCE_FACTOR` measures whether
+ * requests are cheap in QUOTA, and on an abundant bucket they are — but every
+ * request is also a provider round trip on the wall clock, and doubling a
+ * ten-request group costs far more time than the reliability is worth. Small
+ * groups keep the benefit, where it is nearly free in both currencies.
+ */
+export const SHRINK_MAX_REQUESTS = (() => {
+  const n = Number.parseInt(getShrinkMaxRequests(), 10);
+  return Number.isFinite(n) && n > 0 ? n : 4;
+})();
 
 function passRateDivisor(passRate: number): number {
   switch (passRateClass(passRate)) {
@@ -221,7 +234,10 @@ export function charCappedBatch(
  * comfort size (maxBatch) is the unpressured default, scarcity grows batches
  * toward the char-derived ceiling so a tight daily allowance covers more of
  * the run, and abundance shrinks them for reliability since retries are
- * nearly free there. The pass-rate divisor stacks on top in every case.
+ * nearly free there — but only up to {@link SHRINK_MAX_REQUESTS} comfort-size
+ * requests, past which halving would trade too many extra provider round
+ * trips for that reliability. The pass-rate divisor stacks on top in every
+ * case.
  */
 export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: number): number {
   const divisor = passRateDivisor(passRate);
@@ -241,7 +257,7 @@ export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: numb
     const affordable = Math.max(1, Math.floor(remaining * SPEND_SHARE));
     if (requestsAtComfort > affordable) {
       base = Math.min(Math.max(comfort, Math.ceil(jobs / affordable)), sizeByChars);
-    } else if (remaining >= ABUNDANCE_FACTOR * requestsAtComfort) {
+    } else if (remaining >= ABUNDANCE_FACTOR * requestsAtComfort && requestsAtComfort <= SHRINK_MAX_REQUESTS) {
       base = Math.max(Math.min(SHRINK_FLOOR, comfort), Math.floor(comfort / 2));
     } else {
       base = comfort;
