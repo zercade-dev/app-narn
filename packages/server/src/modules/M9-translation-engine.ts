@@ -76,6 +76,7 @@ import {
 } from '../storage/registry.js';
 import {
   getCurrentTenant,
+  requireTenant,
   runWithTenant,
   type TenantContext,
 } from '../storage/pg/tenant-context.js';
@@ -101,7 +102,8 @@ import {
   MAX_TM_HINTS,
   type TmLookupResult,
 } from './M23-translation-memory.js';
-import { JobQueue } from './M9/queue.js';
+import { JobQueue, type Admission } from './M9/queue.js';
+import { rateGovernor, type RateGovernor } from './M9/rate-governor.js';
 import { awaitAllWithTimeout, SettledTracker } from './M9/run-settled.js';
 import { emitRunProgress, recordRunFailure } from './M9/run-status-helpers.js';
 import { assertRunCapacity, sweepOrphanedRuns } from './M9/run-capacity.js';
@@ -139,7 +141,7 @@ import {
   findMinuteStarvedEscalation,
   selectEscalationCandidates,
 } from './M32/selector.js';
-import { charCappedBatch } from './M32/scoring.js';
+import { charCappedBatch, projectedRequestTokens } from './M32/scoring.js';
 import { difficultyBand } from './M32/difficulty.js';
 import type { Assignment, BucketView, DifficultyBand, JobGroup } from './M32/types.js';
 import { syncAuthoritativeUsage } from './M32/probes.js';
@@ -161,7 +163,7 @@ import {
   finalizeUsageCosts,
   type PricingProvider,
 } from './M9/usage-pricing.js';
-import { getTranslationConcurrency } from '../config/env.js';
+import { getFreewayMaxConcurrency, getTranslationConcurrency } from '../config/env.js';
 
 export type { PricingProvider } from './M9/usage-pricing.js';
 
@@ -669,6 +671,13 @@ export class TranslationEngine {
   /** Floor on how often ONE run may be auto-resumed (see {@link lastQuotaResumeAttempt}). */
   private static readonly QUOTA_RESUME_MIN_INTERVAL_MS = 60_000;
   private readonly queue: JobQueue;
+  /**
+   * The rate governor consulted for Freeway admission and seeded per run (see
+   * {@link resolveFreewayGroups}). Defaults to the process-wide singleton;
+   * `deps.freeway.governor` overrides it (test seam — mirrors the other
+   * `BucketSourceDeps` overrides).
+   */
+  private readonly governor: RateGovernor;
   private readonly runs = new Map<string, RunStatus>();
   /**
    * Per-run detail accumulator (which entries were translated, retry counts,
@@ -822,7 +831,14 @@ export class TranslationEngine {
 
   constructor(deps: TranslationEngineDeps = {}) {
     const concurrency = deps.concurrency ?? Number.parseInt(getTranslationConcurrency(), 10);
-    this.queue = new JobQueue(Number.isFinite(concurrency) && concurrency > 0 ? concurrency : 3);
+    this.governor = deps.freeway?.governor ?? rateGovernor;
+    this.queue = new JobQueue(Number.isFinite(concurrency) && concurrency > 0 ? concurrency : 3, {
+      governor: this.governor,
+      governedConcurrency: (() => {
+        const n = Number.parseInt(getFreewayMaxConcurrency(), 10);
+        return Number.isFinite(n) && n > 0 ? n : 32;
+      })(),
+    });
     this.glossaryProvider = deps.glossaryProvider ?? defaultGlossaryProvider;
     this.lqaGate = deps.lqaGate ?? defaultLqaGate;
     this.router = deps.router ?? defaultRouter;
@@ -1857,6 +1873,8 @@ export class TranslationEngine {
     const freewayBucketKeys = new Map<RoutingDecision[], string>();
     /** Freeway-managed batches whose band floor the plan relaxed one tier. */
     const freewayDegraded = new Map<RoutingDecision[], Assignment['degraded']>();
+    /** Freeway-managed batches, mapped to their rate-governor admission descriptor. */
+    const freewayAdmissions = new Map<RoutingDecision[], Admission>();
 
     const groups = groupDecisions(directDecisions, isBatch, resolveBatchMode, {
       dimension: batchGroupingDimension,
@@ -1917,6 +1935,7 @@ export class TranslationEngine {
           resolveBatchMode,
           bucketKeys: freewayBucketKeys,
           degraded: freewayDegraded,
+          admissions: freewayAdmissions,
         })),
       );
       if (groups.length === 0) {
@@ -1979,7 +1998,8 @@ export class TranslationEngine {
     const tenant = this.queuedTenants.get(runId) ?? getCurrentTenant();
     for (const group of groups) {
       const body = this.trackTask(runId, makeGroupTask(group));
-      this.queue.add(runId, tenant ? () => runWithTenant(tenant, body) : body);
+      const wrapped = tenant ? () => runWithTenant(tenant, body) : body;
+      this.queue.add(runId, wrapped, freewayAdmissions.get(group));
     }
 
     return { runId, total: decisions.length, status: RunStatusCode.Running };
@@ -3173,8 +3193,19 @@ export class TranslationEngine {
     bucketKeys: Map<RoutingDecision[], string>;
     /** Set for a batch whose band floor the plan relaxed one tier — see Addendum G. */
     degraded: Map<RoutingDecision[], Assignment['degraded']>;
+    /** Populated per batch with its rate-governor admission descriptor. */
+    admissions: Map<RoutingDecision[], Admission>;
   }): Promise<RoutingDecision[][]> {
-    const { runId, status, decisions, isBatch, resolveBatchMode, bucketKeys, degraded } = args;
+    const {
+      runId,
+      status,
+      decisions,
+      isBatch,
+      resolveBatchMode,
+      bucketKeys,
+      degraded,
+      admissions,
+    } = args;
     const now = Date.now();
     const deps = this.freewayBucketDeps(args.global, args.projectEntries, args.sessionId);
     // Read once, ahead of both the probe and `loadBucketViews` below: the
@@ -3241,6 +3272,30 @@ export class TranslationEngine {
         formatDeferralDetail(resolution.deferred.pairs.length, resolution.deferred.resumeAt),
       );
     }
+    // Seed the governor with the live headroom this plan was resolved against,
+    // for exactly the buckets the plan actually assigned — an unassigned
+    // bucket has nothing dispatching against it this pass, so seeding it would
+    // only cost a map entry no admission check will ever consult.
+    // `requireTenant().userId` is the governor's tenant id — the same value
+    // `freeway_usage` is RLS-scoped on.
+    const tenantId = requireTenant().userId;
+    for (const assignment of resolution.assignedGroups) {
+      const view = buckets.find((b) => b.bucketKey === assignment.bucketKey);
+      if (view === undefined) continue;
+      this.governor.seed(
+        { tenantId, bucketKey: view.bucketKey, poolKey: view.poolKey },
+        {
+          rpm: view.rpm,
+          tpm: view.tpm,
+          poolRpm: view.poolRpm,
+          minuteRequests: view.remainingMinuteRequests,
+          minuteTokens: view.remainingMinuteTokens,
+          poolMinuteRequests: view.poolRemainingMinuteRequests,
+          minuteResetAt: view.minuteResetAt,
+        },
+        now,
+      );
+    }
     const groups: RoutingDecision[][] = [];
     // Same-(bucket, band) assignments a mixed-batch-capable provider can serve
     // in one request are merged first; everything else passes through as its
@@ -3259,9 +3314,25 @@ export class TranslationEngine {
           formatPackDetail(group.packedLanguages, batches.length, group.bucketKey),
         );
       }
+      const view = buckets.find((b) => b.bucketKey === group.bucketKey);
       for (const batch of batches) {
         bucketKeys.set(batch, group.bucketKey);
         if (group.degraded) degraded.set(batch, group.degraded);
+        // The projection is the batch's OWN combined size, not per-decision:
+        // `avgChars` is the mean source length across the batch, so
+        // multiplying back by its length recovers the batch total —
+        // `projectedRequestTokens` estimates tokens for the ONE provider
+        // call this batch will make.
+        const avgChars =
+          batch.length === 0
+            ? 0
+            : Math.round(
+                batch.reduce((sum, d) => sum + d.entry.sourceText.length, 0) / batch.length,
+              );
+        admissions.set(batch, {
+          key: { tenantId, bucketKey: group.bucketKey, poolKey: view?.poolKey },
+          projectedTokens: projectedRequestTokens(view ?? {}, avgChars * batch.length),
+        });
         groups.push(batch);
       }
     }
