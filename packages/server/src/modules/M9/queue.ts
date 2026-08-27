@@ -145,10 +145,7 @@ export class JobQueue {
         })
         .finally(() => {
           if (entry.admission === undefined) this.ungoverned--;
-          else {
-            this.governed--;
-            this.governor?.release(entry.admission.key, entry.admission.projectedTokens);
-          }
+          else this.governed--;
           const remaining = (this.inFlightByRun.get(entry.runId) ?? 1) - 1;
           if (remaining <= 0) this.inFlightByRun.delete(entry.runId);
           else this.inFlightByRun.set(entry.runId, remaining);
