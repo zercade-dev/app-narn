@@ -13,9 +13,9 @@
  * must never throttle another's.
  *
  * DEPLOY INVARIANT: in-process only — authoritative at exactly ONE server
- * replica, the same footing `assertSingleReplica` and every other rate limiter
- * in this stack already stand on. Scaling out requires moving all of them to a
- * shared store together.
+ * replica, the same footing every other rate limiter in this stack already
+ * stands on. The deployment enforces that single-replica contract at boot.
+ * Scaling out requires moving all of them to a shared store together.
  */
 import { getFreewayTargetUtilization } from '../../config/env.js';
 
