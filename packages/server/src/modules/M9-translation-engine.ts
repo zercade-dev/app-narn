@@ -3891,10 +3891,10 @@ export class TranslationEngine {
       // (unreachable, on a throw) return value.
       let calls = 0;
       try {
-        // The single "permit spent" invariant every unadmitted call this task
-        // accounts for (a same-bucket retry, a reroute's own call, a split
-        // half) relies on: the admission covers exactly ONE real call, on
-        // whichever bucket `admission.key` currently names (a reroute
+        // The single "permit spent" invariant every unadmitted call this
+        // dispatch accounts for (a same-bucket retry, a reroute's own call, a
+        // split half) relies on: the admission covers exactly ONE real call,
+        // on whichever bucket `admission.key` currently names (a reroute
         // re-points the key above, never this flag). The first translate()
         // this admission ever reaches just marks itself spent — the queue's
         // own tryAcquire already covers it. Every call after that
@@ -4004,15 +4004,21 @@ export class TranslationEngine {
           //
           // `freewayUsageOf` accumulates from a starting 0 and always
           // returns a number, never `undefined` — so a dispatch where NOT
-          // ONE result carried a `usage` object (Copilot's own aggregator
-          // does this) would otherwise release() the FULL projection back as
-          // "actual usage of 0", crediting the governor tokens the call may
-          // well have spent but never reported. Only pass a real figure when
-          // at least one result actually carried usage; otherwise `release`
-          // gets no third argument and stays the no-op it is without one —
-          // the projection simply stands uncorrected, same as any other call
-          // this task cannot observe the true cost of.
-          const hadUsage = results.some((r) => r?.usage !== undefined);
+          // ONE result carried a TOKEN figure (Copilot's own aggregator does
+          // this; DeepL-shaped `usage` objects that report only `characters`/
+          // `sourceChars` do too) would otherwise release() the FULL
+          // projection back as "actual usage of 0", crediting the governor
+          // tokens the call may well have spent but never reported. Checking
+          // for `usage !== undefined` alone is not enough — a usage object
+          // that reports characters but no tokens would still pass that and
+          // trigger the same false-zero credit. Only pass a real figure when
+          // at least one result actually reports a TOKEN count; otherwise
+          // `release` gets no third argument and stays the no-op it is
+          // without one — the projection simply stands uncorrected, same as
+          // any other call this dispatch cannot observe the true cost of.
+          const hadUsage = results.some(
+            (r) => r?.usage?.inputTokens !== undefined || r?.usage?.outputTokens !== undefined,
+          );
           const actual = hadUsage ? freewayUsageOf(results) : undefined;
           this.governor.release(
             admission.key,
@@ -5316,6 +5322,19 @@ export class TranslationEngine {
             });
             const view = rebased.find((b) => b.bucketKey === bucketKey);
             admission.key = { tenantId: admission.key.tenantId, bucketKey, poolKey: view?.poolKey };
+            // The queue's tryAcquire admitted the ORIGINAL (now-stale)
+            // bucket, not this one. If no call has happened on this
+            // admission yet, the imminent first call is still unadmitted —
+            // on the new bucket — so mark it spent here, BEFORE dispatch,
+            // so the "permit spent" invariant force-acquires it (request AND
+            // token cost) instead of treating it as already covered. Without
+            // this, the new bucket goes un-debited AND gets credited on
+            // success — manufactured headroom on the bucket the run is
+            // actually spending on. The stale bucket's original debit stays
+            // stranded on purpose: that call never happened there, and
+            // handing it back would let the run re-spend headroom it was
+            // never really promised on the bucket serving it.
+            admission.spent = true;
           }
           // Freeway batches never retry a 429 in place: the free quota they hit
           // is a day-scale budget, not a momentary burst, so the bucket is
