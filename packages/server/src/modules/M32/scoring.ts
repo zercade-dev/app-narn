@@ -257,7 +257,10 @@ export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: numb
     const affordable = Math.max(1, Math.floor(remaining * SPEND_SHARE));
     if (requestsAtComfort > affordable) {
       base = Math.min(Math.max(comfort, Math.ceil(jobs / affordable)), sizeByChars);
-    } else if (remaining >= ABUNDANCE_FACTOR * requestsAtComfort && requestsAtComfort <= SHRINK_MAX_REQUESTS) {
+    } else if (
+      remaining >= ABUNDANCE_FACTOR * requestsAtComfort &&
+      requestsAtComfort <= SHRINK_MAX_REQUESTS
+    ) {
       base = Math.max(Math.min(SHRINK_FLOOR, comfort), Math.floor(comfort / 2));
     } else {
       base = comfort;
