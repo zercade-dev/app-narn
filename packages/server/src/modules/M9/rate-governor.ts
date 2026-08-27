@@ -194,6 +194,20 @@ export class RateGovernor {
     }
     return soonest;
   }
+
+  /**
+   * `key`'s OWN next window rollover — never the process-wide soonest that
+   * {@link nextRefillAt} reports. That one mixes in every other bucket AND
+   * every other tenant's windows, which is both the wrong number for a
+   * detail line naming `key`'s bucket and, per-tenant being a hard invariant
+   * here, a cross-tenant leak in cloud. Undefined when `key` was never
+   * seeded (ungoverned) or has no `windowEndsAt` of its own.
+   */
+  nextRefillAtFor(key: GovernorKey, now: number): number | undefined {
+    const entry = this.entries.get(entryKey(key));
+    if (entry?.windowEndsAt === undefined) return undefined;
+    return entry.windowEndsAt <= now ? now : entry.windowEndsAt;
+  }
 }
 
 export const rateGovernor = new RateGovernor(Number.parseFloat(getFreewayTargetUtilization()));

@@ -4,6 +4,14 @@ import type { GovernorKey, RateGovernor } from './rate-governor.js';
 export interface Admission {
   key: GovernorKey;
   projectedTokens: number;
+  /**
+   * Set (by the dispatch pipeline, not the queue) once this admission's one
+   * originally-admitted provider call has been made. Every subsequent real
+   * call on this admission — a same-bucket retry, a reroute, a split half —
+   * must force-acquire against the governor instead of assuming the queue's
+   * `tryAcquire` covers it too. The queue itself never reads or sets this.
+   */
+  spent?: boolean;
 }
 
 interface Entry {
