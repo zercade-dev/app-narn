@@ -24,7 +24,11 @@ interface Entry {
  * every slot while another tenant's run waits. Each run is bounded to a
  * per-run in-flight cap; `pump()` prefers a waiting run that is still under its
  * cap, and only falls back to an at-cap run when NO under-cap run has work (so
- * a lone run is never throttled and no slot idles needlessly).
+ * a lone run is never throttled and no slot idles needlessly). For ungoverned
+ * tasks this cap is the static `perRunCap`; for governed tasks it is a dynamic
+ * share of `governedConcurrency` (see `governedRunCap()`), since the governed
+ * ceiling can be far larger than `concurrency` and a static fraction of the
+ * latter would not bound a run's share of the former.
  *
  * Rate-governed admission (Freeway): a task may optionally carry an
  * `Admission` — a governor key plus its projected token cost. Such a task is
@@ -40,6 +44,8 @@ export class JobQueue {
   private readonly tasks: Array<Entry> = [];
   /** In-flight task count per runId (entries are deleted when they reach 0). */
   private readonly inFlightByRun = new Map<string, number>();
+  /** In-flight GOVERNED task count per runId (entries are deleted when they reach 0). */
+  private readonly governedInFlightByRun = new Map<string, number>();
   private readonly pausedRuns = new Set<string>();
   /**
    * Max slots one run may hold while another run is waiting. Derived from
@@ -91,9 +97,36 @@ export class JobQueue {
     this.pump();
   }
 
-  /** Whether `runId` may take another slot: not paused and under its per-run cap. */
-  private isEligible(runId: string): boolean {
-    return !this.pausedRuns.has(runId) && (this.inFlightByRun.get(runId) ?? 0) < this.perRunCap;
+  /**
+   * Distinct runs with governed work queued or in flight. The governed per-run
+   * cap is a share of the governed ceiling rather than the static
+   * `concurrency - 1`: at a ceiling of 32 that constant would leave one run
+   * holding 31 slots, which is not a fairness bound at all.
+   */
+  private governedRunCount(): number {
+    const runs = new Set<string>();
+    for (const entry of this.tasks) {
+      if (entry.admission !== undefined && !this.pausedRuns.has(entry.runId)) runs.add(entry.runId);
+    }
+    for (const runId of this.governedInFlightByRun.keys()) runs.add(runId);
+    return Math.max(1, runs.size);
+  }
+
+  private governedRunCap(): number {
+    return Math.max(1, Math.floor(this.governedConcurrency / this.governedRunCount()));
+  }
+
+  /**
+   * Whether `entry`'s run may take another slot: not paused and under its
+   * per-run cap. Ungoverned tasks keep the static `perRunCap`; governed tasks
+   * use the dynamic share of the governed ceiling.
+   */
+  private isEligible(entry: Entry): boolean {
+    if (this.pausedRuns.has(entry.runId)) return false;
+    if (entry.admission === undefined) {
+      return (this.inFlightByRun.get(entry.runId) ?? 0) < this.perRunCap;
+    }
+    return (this.governedInFlightByRun.get(entry.runId) ?? 0) < this.governedRunCap();
   }
 
   /**
@@ -121,7 +154,7 @@ export class JobQueue {
    */
   private nextIndex(now: number): number {
     const eligible = this.tasks.findIndex(
-      (entry) => this.isEligible(entry.runId) && this.canStart(entry, now),
+      (entry) => this.isEligible(entry) && this.canStart(entry, now),
     );
     if (eligible !== -1) return eligible;
     return this.tasks.findIndex(
@@ -135,8 +168,15 @@ export class JobQueue {
       const index = this.nextIndex(now);
       if (index === -1) break;
       const [entry] = this.tasks.splice(index, 1);
-      if (entry.admission === undefined) this.ungoverned++;
-      else this.governed++;
+      if (entry.admission === undefined) {
+        this.ungoverned++;
+      } else {
+        this.governed++;
+        this.governedInFlightByRun.set(
+          entry.runId,
+          (this.governedInFlightByRun.get(entry.runId) ?? 0) + 1,
+        );
+      }
       this.inFlightByRun.set(entry.runId, (this.inFlightByRun.get(entry.runId) ?? 0) + 1);
       entry
         .task()
@@ -144,8 +184,14 @@ export class JobQueue {
           /* swallow — task already records its own failure */
         })
         .finally(() => {
-          if (entry.admission === undefined) this.ungoverned--;
-          else this.governed--;
+          if (entry.admission === undefined) {
+            this.ungoverned--;
+          } else {
+            this.governed--;
+            const remainingGoverned = (this.governedInFlightByRun.get(entry.runId) ?? 1) - 1;
+            if (remainingGoverned <= 0) this.governedInFlightByRun.delete(entry.runId);
+            else this.governedInFlightByRun.set(entry.runId, remainingGoverned);
+          }
           const remaining = (this.inFlightByRun.get(entry.runId) ?? 1) - 1;
           if (remaining <= 0) this.inFlightByRun.delete(entry.runId);
           else this.inFlightByRun.set(entry.runId, remaining);
