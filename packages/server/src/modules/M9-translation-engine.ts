@@ -3858,9 +3858,9 @@ export class TranslationEngine {
           // part's own call already went out on it: revalidateFirst runs
           // BEFORE this part's first translate(), precisely to decide where
           // THIS language goes before spending anything on it. The debit
-          // against the old bucket belongs to the PARENT (mixed) chunk's own
-          // call, which already failed and spent that quota before the
-          // unpack that produced this part ever ran; handing it back here
+          // against the old bucket belongs to the enclosing mixed-language
+          // chunk's own call, which already failed and spent that quota
+          // before the unpack producing this part ran; handing it back here
           // would credit this part with a spend it was never charged for.
           // Mark `spent` explicitly rather than leave it to fall out of the
           // (currently always-already-true) inherited value: it is what
