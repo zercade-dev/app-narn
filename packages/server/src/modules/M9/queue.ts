@@ -1,3 +1,17 @@
+import type { GovernorKey, RateGovernor } from './rate-governor.js';
+
+/** What a rate-governed task needs before it may take a slot. */
+export interface Admission {
+  key: GovernorKey;
+  projectedTokens: number;
+}
+
+interface Entry {
+  runId: string;
+  task: () => Promise<void>;
+  admission?: Admission;
+}
+
 /**
  * Bounded-concurrency job queue used by the M9 TranslationEngine.
  *
@@ -11,10 +25,19 @@
  * per-run in-flight cap; `pump()` prefers a waiting run that is still under its
  * cap, and only falls back to an at-cap run when NO under-cap run has work (so
  * a lone run is never throttled and no slot idles needlessly).
+ *
+ * Rate-governed admission (Freeway): a task may optionally carry an
+ * `Admission` — a governor key plus its projected token cost. Such a task is
+ * gated by a `RateGovernor` *before* it may take a slot: when its bucket has
+ * no permit the task is skipped (left in the queue), never dequeued, so a
+ * scarce bucket can never hold slots that another bucket's work needs.
+ * Governed and ungoverned tasks are tracked and capped separately —
+ * `governed`/`ungoverned` — since they draw from different ceilings
+ * (`governedConcurrency` vs `concurrency`). A task without an `Admission`
+ * takes the legacy, ungoverned path unchanged.
  */
 export class JobQueue {
-  private readonly tasks: Array<{ runId: string; task: () => Promise<void> }> = [];
-  private inFlight = 0;
+  private readonly tasks: Array<Entry> = [];
   /** In-flight task count per runId (entries are deleted when they reach 0). */
   private readonly inFlightByRun = new Map<string, number>();
   private readonly pausedRuns = new Set<string>();
@@ -26,12 +49,23 @@ export class JobQueue {
    */
   private readonly perRunCap: number;
 
-  constructor(private readonly concurrency: number) {
+  private readonly governor?: RateGovernor;
+  private readonly governedConcurrency: number;
+  private governed = 0;
+  private ungoverned = 0;
+  private refillTimer?: ReturnType<typeof setTimeout>;
+
+  constructor(
+    private readonly concurrency: number,
+    opts?: { governor?: RateGovernor; governedConcurrency?: number },
+  ) {
     this.perRunCap = Math.max(1, concurrency - 1);
+    this.governor = opts?.governor;
+    this.governedConcurrency = opts?.governedConcurrency ?? concurrency;
   }
 
-  add(runId: string, task: () => Promise<void>): void {
-    this.tasks.push({ runId, task });
+  add(runId: string, task: () => Promise<void>, admission?: Admission): void {
+    this.tasks.push({ runId, task, admission });
     this.pump();
   }
 
@@ -63,24 +97,46 @@ export class JobQueue {
   }
 
   /**
+   * A task may start when its run is eligible AND — for a rate-governed task —
+   * its bucket has a permit. The governor check is deliberately last: it TAKES
+   * the permit, so it must not run for a candidate that fairness would reject
+   * anyway.
+   */
+  private canStart(entry: Entry, now: number): boolean {
+    if (entry.admission === undefined) return this.ungoverned < this.concurrency;
+    if (this.governed >= this.governedConcurrency) return false;
+    if (this.governor === undefined) return true;
+    return this.governor.tryAcquire(entry.admission.key, entry.admission.projectedTokens, now);
+  }
+
+  /**
    * Pick the next runnable task index, honoring fairness:
    *  1. the first task whose run is eligible (not paused, under its per-run cap), else
    *  2. the first task whose run is merely not paused (fallback so a lone or
    *     fully-saturated-but-uncontended run still drains and no slot idles).
-   * Returns -1 when every waiting task belongs to a paused run.
+   * Each clause is further filtered by `canStart`, so a rate-governed task
+   * that has no permit right now is skipped rather than dequeued.
+   * Returns -1 when every waiting task belongs to a paused run, or every
+   * otherwise-eligible task is refused by the governor.
    */
-  private nextIndex(): number {
-    const eligible = this.tasks.findIndex((entry) => this.isEligible(entry.runId));
+  private nextIndex(now: number): number {
+    const eligible = this.tasks.findIndex(
+      (entry) => this.isEligible(entry.runId) && this.canStart(entry, now),
+    );
     if (eligible !== -1) return eligible;
-    return this.tasks.findIndex((entry) => !this.pausedRuns.has(entry.runId));
+    return this.tasks.findIndex(
+      (entry) => !this.pausedRuns.has(entry.runId) && this.canStart(entry, now),
+    );
   }
 
   private pump(): void {
-    while (this.inFlight < this.concurrency) {
-      const index = this.nextIndex();
+    const now = Date.now();
+    for (;;) {
+      const index = this.nextIndex(now);
       if (index === -1) break;
       const [entry] = this.tasks.splice(index, 1);
-      this.inFlight++;
+      if (entry.admission === undefined) this.ungoverned++;
+      else this.governed++;
       this.inFlightByRun.set(entry.runId, (this.inFlightByRun.get(entry.runId) ?? 0) + 1);
       entry
         .task()
@@ -88,12 +144,43 @@ export class JobQueue {
           /* swallow — task already records its own failure */
         })
         .finally(() => {
-          this.inFlight--;
+          if (entry.admission === undefined) this.ungoverned--;
+          else {
+            this.governed--;
+            this.governor?.release(entry.admission.key, entry.admission.projectedTokens);
+          }
           const remaining = (this.inFlightByRun.get(entry.runId) ?? 1) - 1;
           if (remaining <= 0) this.inFlightByRun.delete(entry.runId);
           else this.inFlightByRun.set(entry.runId, remaining);
           this.pump();
         });
     }
+    this.armRefillTimer();
+  }
+
+  /**
+   * When every waiting task is governed and refused, nothing will call pump()
+   * again on its own — no task is in flight to fire a `.finally()`. One timer
+   * at the soonest window rollover is what restarts the queue.
+   */
+  private armRefillTimer(): void {
+    if (this.refillTimer !== undefined) {
+      clearTimeout(this.refillTimer);
+      this.refillTimer = undefined;
+    }
+    const waiting = this.tasks.some(
+      (t) => t.admission !== undefined && !this.pausedRuns.has(t.runId),
+    );
+    if (!waiting || this.governor === undefined) return;
+    const at = this.governor.nextRefillAt(Date.now());
+    if (at === undefined) return;
+    this.refillTimer = setTimeout(
+      () => {
+        this.refillTimer = undefined;
+        this.pump();
+      },
+      Math.max(50, at - Date.now()),
+    );
+    this.refillTimer.unref?.();
   }
 }
