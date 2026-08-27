@@ -706,6 +706,7 @@ export async function loadBucketViews(
       ledger,
       windowStart('rpm', now, provider.resetTimeZone),
     );
+    const poolRpm = sharedMinutePoolLimit(provider);
 
     for (const { model, dayWindow, bucketKey, usage, minuteWindow, rpmUsage, tpmUsage } of models) {
       // A pooled provider's siblings were read for their contribution to the
@@ -765,6 +766,9 @@ export async function loadBucketViews(
         remainingMinuteTokens,
         minuteResetAt,
         poolRemainingMinuteRequests,
+        rpm: minuteWindow.rpm,
+        tpm: minuteWindow.tpm,
+        poolRpm,
         nextResetAt: nextReset(dayWindow.kind, now, provider.resetTimeZone),
         dayInputTokens: usage.inputTokens,
         dayOutputTokens: usage.outputTokens,
