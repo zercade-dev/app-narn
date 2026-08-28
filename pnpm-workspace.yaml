@@ -87,7 +87,7 @@ catalog:
   express: 5.2.1
   helmet: 8.3.0
   multer: 2.2.0
-  papaparse: 5.5.4
+  papaparse: 5.7.0
   zod: 4.4.3
   yauzl: 3.4.0
   yazl: 3.3.1
