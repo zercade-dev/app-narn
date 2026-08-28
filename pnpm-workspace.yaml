@@ -71,7 +71,7 @@ catalog:
 
   # Module dependencies
   '@github/copilot-sdk': 1.0.8
-  deepl-node: 1.27.0
+  deepl-node: 1.28.0
 
   # AI SDK dependencies
   ai: 7.0.83
