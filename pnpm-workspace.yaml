@@ -67,7 +67,7 @@ catalog:
   eslint-config-prettier: 10.1.8
   eslint-plugin-react-hooks: 7.1.1
   '@typescript-eslint/eslint-plugin': 8.65.0
-  '@typescript-eslint/parser': 8.65.0
+  '@typescript-eslint/parser': 8.68.0
 
   # Module dependencies
   '@github/copilot-sdk': 1.0.8
