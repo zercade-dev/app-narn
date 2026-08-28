@@ -58,7 +58,7 @@ catalog:
   # Shared tooling
   typescript: 7.0.2
   prettier: 3.9.6
-  eslint: 10.8.0
+  eslint: 10.8.1
   # Maintenance scripts (e.g. scripts/update-provider-pricing.ts) — the browser
   # automation used to scrape provider pricing and capability pages.
   playwright: 1.62.1
