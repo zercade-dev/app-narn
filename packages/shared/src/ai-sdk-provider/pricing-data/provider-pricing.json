@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-27T00:05:40.263Z",
+  "generatedAt": "2026-08-28T21:21:11.601Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
@@ -87,6 +87,11 @@
           "inputCostPerMillion": 0.25,
           "outputCostPerMillion": 1.5,
           "capabilityTags": ["tools", "vision", "audio"]
+        },
+        {
+          "id": "gemini-omni-1.1-flash",
+          "inputCostPerMillion": 1.5,
+          "outputCostPerMillion": 9
         },
         {
           "id": "gemini-omni-flash-preview",
