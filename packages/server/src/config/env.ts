@@ -257,6 +257,18 @@ export function getFreewayTargetUtilization(): string {
 }
 
 /**
+ * `SHRINK_MAX_REQUESTS` — largest group, measured in comfort-size requests,
+ * that the abundance batch shrink may still halve; default string `'4'`.
+ * Quota-cheap is not the same as time-cheap: each extra request is a full
+ * provider round trip, so halving a ten-request group costs the user minutes
+ * to buy parse reliability the group did not need. The call site applies
+ * `Number.parseInt(..., 10)` then guards finite/>0. (modules/M32/scoring.ts)
+ */
+export function getShrinkMaxRequests(): string {
+  return process.env.SHRINK_MAX_REQUESTS ?? '4';
+}
+
+/**
  * `PG_POOL_MAX` — node-postgres pool size; default string `'48'`. The library
  * default of 10 is below the sum of the two dispatch ceilings, which would make
  * the connection pool the bottleneck the governor exists to remove.
