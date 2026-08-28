@@ -257,6 +257,19 @@ export function getFreewayTargetUtilization(): string {
 }
 
 /**
+ * `PLAN_HORIZON_MINUTES` — how many minutes of a bucket's per-minute allowance
+ * the run planner may commit in one plan; default string `'10'`. The planner
+ * sees a whole run at once but spends minute headroom as though every request
+ * fired in the same instant, which makes a 5-rpm bucket worth 5 requests to a
+ * run that will span ten minutes. Runtime pacing is the rate governor's job,
+ * not the planner's. The call site applies `Number.parseInt(..., 10)` then
+ * guards finite/>0. (modules/M32/planner.ts)
+ */
+export function getPlanHorizonMinutes(): string {
+  return process.env.PLAN_HORIZON_MINUTES ?? '10';
+}
+
+/**
  * `SHRINK_MAX_REQUESTS` — largest group, measured in comfort-size requests,
  * that the abundance batch shrink may still halve; default string `'4'`.
  * Quota-cheap is not the same as time-cheap: each extra request is a full
