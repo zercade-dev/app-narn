@@ -10,6 +10,7 @@
 import type { Assignment, BucketView, DifficultyBand, JobGroup, RunPlan } from './types.js';
 import { bucketResumeAt, selectBucket, type Selection } from './selector.js';
 import { projectedRequestTokens } from './scoring.js';
+import { getPlanHorizonMinutes } from '../../config/env.js';
 
 export interface PlanOptions {
   now: number;
@@ -29,6 +30,33 @@ export function defaultReserve(totalJobs: number): number {
  * otherwise run to the next day-scale reset.
  */
 export const FREEWAY_DEGRADE_WAIT_MS = 15 * 60_000;
+
+/**
+ * How many minutes of a bucket's per-minute allowance one plan may commit.
+ *
+ * A plan sees the whole run, but `spendAssignment` charges minute headroom as
+ * though every request in it fired at the same instant. For a run that will
+ * genuinely span ten minutes that reads a 5-rpm bucket as worth five requests
+ * — so the highest-quality buckets, which are exactly the scarce ones, get
+ * skipped in favour of whatever still has minute headroom this second. The
+ * horizon budgets the allowance over the run's real span instead; the rate
+ * governor enforces the pacing at dispatch time. Day, pool and character
+ * limits are untouched and still bind.
+ */
+export const PLAN_HORIZON_MINUTES = (() => {
+  const n = Number.parseInt(getPlanHorizonMinutes(), 10);
+  return Number.isFinite(n) && n > 0 ? n : 10;
+})();
+
+/** A bucket's minute budget for one plan: this window's headroom plus the horizon's worth. */
+function horizonBudget(
+  remaining: number | undefined,
+  declared: number | undefined,
+): number | undefined {
+  if (remaining === undefined) return undefined;
+  if (declared === undefined) return remaining;
+  return remaining + declared * (PLAN_HORIZON_MINUTES - 1);
+}
 
 /** Tier/language/credential eligibility ignoring transient quota state. */
 function everServable(bucket: BucketView, group: JobGroup): boolean {
@@ -141,6 +169,9 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
       background && b.poolRemainingRequests !== undefined
         ? Math.max(0, b.poolRemainingRequests - reserve)
         : b.poolRemainingRequests,
+    remainingMinuteRequests: horizonBudget(b.remainingMinuteRequests, b.rpm),
+    remainingMinuteTokens: horizonBudget(b.remainingMinuteTokens, b.tpm),
+    poolRemainingMinuteRequests: horizonBudget(b.poolRemainingMinuteRequests, b.poolRpm),
   }));
   const ordered = [...groups].sort((a, b) => {
     if (a.band !== b.band) return b.band - a.band;

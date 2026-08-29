@@ -381,7 +381,7 @@ hosted NARN service: `modules/copilot/manifest.json` sets `"cloudDisabled": true
 
 ### `@github/copilot` — GitHub Copilot CLI License
 
-Reproduced verbatim from the `LICENSE.md` file published in `@github/copilot` 1.0.75 on
+Reproduced verbatim from the `LICENSE.md` file published in `@github/copilot` 1.0.80 on
 the npm registry. The byte-identical file ships in all eight platform binary packages.
 
 GitHub Copilot CLI License
@@ -422,7 +422,7 @@ GitHub Copilot CLI License
 
 ### `@github/copilot-sdk` — MIT License
 
-`@github/copilot-sdk` 1.0.8 declares `"license": "MIT"` and `"author": "GitHub"` in its
+`@github/copilot-sdk` 1.0.11 declares `"license": "MIT"` and `"author": "GitHub"` in its
 manifest, but its published tarball contains no licence file. The text below is the
 `LICENSE` file of the source repository that same manifest names,
 <https://github.com/github/copilot-sdk>.

@@ -232,6 +232,65 @@ export function getTranslationConcurrency(): string {
   return process.env.TRANSLATION_CONCURRENCY ?? '3';
 }
 
+/**
+ * `FREEWAY_MAX_CONCURRENCY` — absolute process ceiling for RATE-GOVERNED
+ * dispatch tasks; default string `'32'`. Distinct from
+ * {@link getTranslationConcurrency}, which still bounds ungoverned
+ * (direct-module) tasks at 3 so local/BYOK dispatch is unchanged. The call
+ * site applies `Number.parseInt(..., 10)` then guards finite/>0.
+ * (modules/M9-translation-engine.ts)
+ */
+export function getFreewayMaxConcurrency(): string {
+  return process.env.FREEWAY_MAX_CONCURRENCY ?? '32';
+}
+
+/**
+ * `FREEWAY_TARGET_UTILIZATION` — share of a bucket's live per-minute headroom
+ * the rate governor will spend, as a decimal; default string `'0.7'`. Below 1
+ * on purpose: retries, parse-splits and failover reroutes also consume
+ * requests, and the slack is what keeps them from turning into 429s. The call
+ * site applies `Number.parseFloat` then clamps to (0, 1].
+ * (modules/M9/rate-governor.ts)
+ */
+export function getFreewayTargetUtilization(): string {
+  return process.env.FREEWAY_TARGET_UTILIZATION ?? '0.7';
+}
+
+/**
+ * `PLAN_HORIZON_MINUTES` — how many minutes of a bucket's per-minute allowance
+ * the run planner may commit in one plan; default string `'10'`. The planner
+ * sees a whole run at once but spends minute headroom as though every request
+ * fired in the same instant, which makes a 5-rpm bucket worth 5 requests to a
+ * run that will span ten minutes. Runtime pacing is the rate governor's job,
+ * not the planner's. The call site applies `Number.parseInt(..., 10)` then
+ * guards finite/>0. (modules/M32/planner.ts)
+ */
+export function getPlanHorizonMinutes(): string {
+  return process.env.PLAN_HORIZON_MINUTES ?? '10';
+}
+
+/**
+ * `SHRINK_MAX_REQUESTS` — largest group, measured in comfort-size requests,
+ * that the abundance batch shrink may still halve; default string `'4'`.
+ * Quota-cheap is not the same as time-cheap: each extra request is a full
+ * provider round trip, so halving a ten-request group costs the user minutes
+ * to buy parse reliability the group did not need. The call site applies
+ * `Number.parseInt(..., 10)` then guards finite/>0. (modules/M32/scoring.ts)
+ */
+export function getShrinkMaxRequests(): string {
+  return process.env.SHRINK_MAX_REQUESTS ?? '4';
+}
+
+/**
+ * `PG_POOL_MAX` — node-postgres pool size; default string `'48'`. The library
+ * default of 10 is below the sum of the two dispatch ceilings, which would make
+ * the connection pool the bottleneck the governor exists to remove.
+ * (storage/pg/pool.ts)
+ */
+export function getPgPoolMax(): string {
+  return process.env.PG_POOL_MAX ?? '48';
+}
+
 /* ────────────────────────────── Restart / ops ──────────────────────── */
 
 /**

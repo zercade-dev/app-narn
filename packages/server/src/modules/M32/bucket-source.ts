@@ -29,6 +29,7 @@ import { isCloudMode } from '../../identity/registry.js';
 import { moduleRegistry } from '../M6-module-registry.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
 import { KeyedAsyncLock } from '../../utils/keyed-lock.js';
+import type { RateGovernor } from '../M9/rate-governor.js';
 import type { BucketView } from './types.js';
 import { decayStats, recordGatePass, recordJudgeScore } from './stats.js';
 
@@ -136,6 +137,13 @@ export interface BucketSourceDeps {
    * i.e. every instance is assumed to inherit the base credential.
    */
   existingVaultKeys?: readonly string[];
+  /**
+   * Test seam: the rate governor M9 seeds per-run and consults at dispatch
+   * time. Default is the process-wide singleton (`rateGovernor` in
+   * `../M9/rate-governor.js`); a test injects its own instance here to
+   * observe or control admission.
+   */
+  governor?: RateGovernor;
 }
 
 /**
@@ -706,6 +714,7 @@ export async function loadBucketViews(
       ledger,
       windowStart('rpm', now, provider.resetTimeZone),
     );
+    const poolRpm = sharedMinutePoolLimit(provider);
 
     for (const { model, dayWindow, bucketKey, usage, minuteWindow, rpmUsage, tpmUsage } of models) {
       // A pooled provider's siblings were read for their contribution to the
@@ -765,6 +774,9 @@ export async function loadBucketViews(
         remainingMinuteTokens,
         minuteResetAt,
         poolRemainingMinuteRequests,
+        rpm: minuteWindow.rpm,
+        tpm: minuteWindow.tpm,
+        poolRpm,
         nextResetAt: nextReset(dayWindow.kind, now, provider.resetTimeZone),
         dayInputTokens: usage.inputTokens,
         dayOutputTokens: usage.outputTokens,
