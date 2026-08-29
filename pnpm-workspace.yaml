@@ -75,7 +75,7 @@ catalog:
 
   # AI SDK dependencies
   ai: 7.0.83
-  '@ai-sdk/google': 4.0.54
+  '@ai-sdk/google': 4.0.56
   '@ai-sdk/deepseek': 3.0.35
   '@ai-sdk/openai': 4.0.50
   '@ai-sdk/anthropic': 4.0.44
