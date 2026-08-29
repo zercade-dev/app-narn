@@ -223,6 +223,7 @@
     "credentialMarkClearFailed": "Markierung ungültiger Zugangsdaten konnte nicht aufgehoben werden: {{message}}",
     "credentialMarkErrorNotCandidate": "Dieses Modul kann nicht mehr als ungültig markiert werden — sein Freeway-Status hat sich geändert. Aktualisiere, um den aktuellen Status zu sehen.",
     "automaticOption": "Automatisch",
+    "disabledOption": "Deaktiviert",
     "instanceSelectorAria": "Wählen, welche Instanz {{provider}} bedient",
     "instanceOverrideSaveFailed": "Instanz für {{provider}} konnte nicht aktualisiert werden: {{message}}",
     "instanceOverridesLoadFailed": "Freeway-Instanzeinstellungen konnten nicht geladen werden: {{message}}",
@@ -244,6 +245,7 @@
       "cooling": "Cooldown",
       "exhausted": "Für heute aufgebraucht",
       "disabled": "Modul deaktiviert",
+      "freewayDisabled": "Für Freeway deaktiviert",
       "uncredentialed": "Kein Schlüssel",
       "badCredentials": "Zugangsdaten ungültig"
     }

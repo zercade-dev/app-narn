@@ -224,6 +224,16 @@ export interface WorkspaceSettings {
    * order rather than taking the provider offline.
    */
   freewayInstanceOverrides?: Record<string, string>;
+  /**
+   * Base module ids excluded from Freeway's automatic candidate pool
+   * entirely — no instance of that provider is dispatched to, or counted as
+   * "missing a key/enablement" in the status checklist; it just reports as
+   * disabled. Independent of {@link freewayInstanceOverrides}: disabling a
+   * provider does not clear its pinned instance, so re-enabling it restores
+   * that choice. Direct (non-Freeway) routing rules naming the module are
+   * unaffected — this only removes it from Freeway's own automatic pool.
+   */
+  freewayDisabledProviders?: string[];
 }
 
 /** Workspace-wide module configuration shared by all projects. */

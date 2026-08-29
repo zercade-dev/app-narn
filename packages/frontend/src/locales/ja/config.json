@@ -218,6 +218,7 @@
     "credentialMarkClearFailed": "認証情報マークの解除に失敗しました：{{message}}",
     "credentialMarkErrorNotCandidate": "このモジュールはもう無効としてマークできません — Freewayの状態が変わりました。更新すると最新の状態を確認できます。",
     "automaticOption": "自動",
+    "disabledOption": "無効",
     "instanceSelectorAria": "{{provider}}を処理するインスタンスを選択",
     "instanceOverrideSaveFailed": "{{provider}}のインスタンスを更新できませんでした：{{message}}",
     "instanceOverridesLoadFailed": "Freewayのインスタンス設定の読み込みに失敗しました：{{message}}",
@@ -238,6 +239,7 @@
       "cooling": "クールダウン中",
       "exhausted": "本日分終了",
       "disabled": "モジュール無効",
+      "freewayDisabled": "Freeway無効",
       "uncredentialed": "キーなし",
       "badCredentials": "認証情報が無効"
     }

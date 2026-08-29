@@ -223,6 +223,7 @@
     "credentialMarkClearFailed": "Falha ao limpar a marca de credenciais: {{message}}",
     "credentialMarkErrorNotCandidate": "Este módulo não pode mais ser marcado como inválido — o status dele no Freeway mudou. Atualize para ver o status atual.",
     "automaticOption": "Automático",
+    "disabledOption": "Desativado",
     "instanceSelectorAria": "Escolher qual instância atende {{provider}}",
     "instanceOverrideSaveFailed": "Falha ao atualizar a instância de {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "Falha ao carregar as configurações de instância do Freeway: {{message}}",
@@ -245,6 +246,7 @@
       "cooling": "Resfriando",
       "exhausted": "Esgotado por hoje",
       "disabled": "Módulo desativado",
+      "freewayDisabled": "Desativado para o Freeway",
       "uncredentialed": "Sem chave",
       "badCredentials": "Credenciais inválidas"
     }

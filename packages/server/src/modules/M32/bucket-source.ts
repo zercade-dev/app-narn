@@ -118,6 +118,14 @@ export interface BucketSourceDeps {
    * does for the fully-automatic case.
    */
   freewayInstanceOverrides?: Record<string, string>;
+  /**
+   * Test seam: base module ids excluded from Freeway's automatic pool
+   * entirely. Default reads `WorkspaceSettings.freewayDisabledProviders` from
+   * the global config store. A caller that wants every provider visible
+   * regardless of this setting (the status route's permissive "all buckets"
+   * pass) passes an explicit empty set rather than relying on the default.
+   */
+  freewayDisabledProviders?: ReadonlySet<string>;
   cloudMode?: boolean;
   /**
    * Bucket states the caller already read this tick. Supplied so a caller that
@@ -177,6 +185,16 @@ export function defaultInstanceIdsFor(baseModuleId: string): string[] {
 async function defaultFreewayInstanceOverrides(): Promise<Record<string, string>> {
   const settings = await getGlobalConfigStore().getSettings();
   return settings.freewayInstanceOverrides ?? {};
+}
+
+/**
+ * Default `freewayDisabledProviders`: the workspace's saved list, read once
+ * per {@link loadBucketViews} call (never per-provider) via the same
+ * per-tenant-cached `getSettings()` every other settings read already uses.
+ */
+async function defaultFreewayDisabledProviders(): Promise<ReadonlySet<string>> {
+  const settings = await getGlobalConfigStore().getSettings();
+  return new Set(settings.freewayDisabledProviders ?? []);
 }
 
 /**
@@ -643,6 +661,8 @@ export async function loadBucketViews(
   const instanceIdsFor = deps?.instanceIdsFor ?? defaultInstanceIdsFor;
   const instanceOverrides =
     deps?.freewayInstanceOverrides ?? (await defaultFreewayInstanceOverrides());
+  const disabledProviders =
+    deps?.freewayDisabledProviders ?? (await defaultFreewayDisabledProviders());
   const cloudMode = deps?.cloudMode ?? isCloudMode();
   const snapshot = getFreeTierSnapshot();
   const states = deps?.bucketStates ?? (await ledger.listBuckets());
@@ -653,6 +673,10 @@ export async function loadBucketViews(
   const views: BucketView[] = [];
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
+    // A user-disabled provider is excluded from Freeway entirely, before any
+    // credential/enablement check — the status route's missing-row diff
+    // reports WHY via freewayDisabledProviders on its own permissive pass.
+    if (disabledProviders.has(provider.moduleId)) continue;
     // A narrowed sweep touches only the provider that owns the asked-for
     // bucket; every other provider's models are read for nothing.
     if (onlyModuleId !== undefined && provider.moduleId !== onlyModuleId) continue;
