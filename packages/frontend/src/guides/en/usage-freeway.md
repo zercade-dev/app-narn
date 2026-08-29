@@ -35,12 +35,15 @@ A provider you haven't given a key to is simply skipped. Adding one more key wid
 
 The **NARN Freeway** panel on the Config screen shows the whole pool at a glance: each provider's key status, and each model's **state**, **remaining** quota, **next reset**, and recent **pass rate** per language.
 
+Each provider also has a dropdown next to it that controls how Freeway uses it: **Automatic** lets the pool pick as usual, choosing a named instance pins Freeway to that specific account, and **Disabled** takes the provider out of the pool entirely — without switching off the module itself anywhere else. Switching a disabled provider back to Automatic (or a named instance) picks up right where it left off.
+
 A model's state is one of:
 
 * **Ready** — usable now.
 * **Cooling down** — briefly rate-limited; it comes back on its own.
 * **Exhausted for today** — the daily allowance is spent, and the panel shows when it resets.
 * **Module disabled** — the key is stored but the module is switched off. The panel offers to enable it.
+* **Disabled for Freeway** — you turned this provider off for the pool from its dropdown; everything else about the module is untouched.
 * **No key** — nothing stored in the vault for this provider yet.
 * **Bad credentials** — the key was rejected. Write a working key into the vault to clear the mark.
 

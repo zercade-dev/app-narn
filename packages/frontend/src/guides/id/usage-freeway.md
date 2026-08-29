@@ -35,12 +35,15 @@ Penyedia yang belum Anda beri kunci cukup dilewati. Menambah satu kunci lagi mem
 
 Panel **NARN Freeway** di layar konfigurasi menampilkan seluruh kumpulan sekilas: status kunci tiap penyedia, dan untuk tiap model **Status**-nya, **Sisa** kuota, **Reset berikutnya**, serta **Tingkat lulus** terkini per bahasa.
 
+Tiap penyedia juga punya menu tarik-turun di sampingnya yang mengatur cara Freeway memakainya: **Otomatis** membiarkan kumpulan itu memilih seperti biasa, memilih instans bernama akan mengunci Freeway ke akun spesifik itu, dan **Dinonaktifkan** mengeluarkan penyedia itu sepenuhnya dari kumpulan — tanpa mematikan modulnya di tempat lain mana pun. Mengembalikan penyedia yang dinonaktifkan ke Otomatis (atau ke instans bernama) akan melanjutkan persis dari titik ia berhenti.
+
 Status sebuah model adalah salah satu dari:
 
 * **Siap** — bisa dipakai sekarang.
 * **Mendingin** — sebentar terkena batas laju; ia pulih sendiri.
 * **Habis untuk hari ini** — jatah harian sudah terpakai, dan panel menunjukkan kapan ia direset.
 * **Modul dinonaktifkan** — kuncinya tersimpan tetapi modulnya dimatikan. Panel menawarkan untuk mengaktifkannya.
+* **Dinonaktifkan untuk Freeway** — Anda menonaktifkan penyedia ini untuk kumpulan lewat menu tarik-turunnya; bagian modul yang lain tidak terpengaruh.
 * **Tidak ada kunci** — belum ada apa pun di brankas untuk penyedia ini.
 * **Kredensial tidak valid** — kuncinya ditolak. Tulis kunci yang berfungsi ke brankas untuk menghapus tandanya.
 
