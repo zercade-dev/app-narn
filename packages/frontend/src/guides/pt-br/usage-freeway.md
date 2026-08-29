@@ -35,12 +35,15 @@ Um provedor sem chave é simplesmente ignorado. Cada chave a mais amplia o conju
 
 O painel **NARN Freeway** na tela de configuração mostra o conjunto inteiro de relance: o status da chave de cada provedor e, por modelo, seu **Estado**, a cota **Restante**, o **Próximo reset** e a **Taxa de aprovação** recente por idioma.
 
+Cada provedor também tem um menu suspenso ao lado que controla como o Freeway o usa: **Automático** deixa o conjunto escolher como de costume, uma instância nomeada fixa o Freeway naquela conta específica, e **Desativado** tira o provedor do conjunto por completo — sem desligar o módulo em nenhum outro lugar. Voltar um provedor desativado para Automático (ou para uma instância nomeada) retoma exatamente de onde parou.
+
 O estado de um modelo é um destes:
 
 * **Pronto** — utilizável agora.
 * **Resfriando** — com limite de taxa por um instante; volta sozinho.
 * **Esgotado por hoje** — a franquia diária acabou, e o painel mostra quando ela se renova.
 * **Módulo desativado** — a chave está guardada, mas o módulo está desligado. O painel oferece ligá-lo.
+* **Desativado para o Freeway** — você desativou este provedor para o conjunto pelo seu menu suspenso; o resto do módulo continua igual.
 * **Sem chave** — ainda não há nada no cofre para este provedor.
 * **Credenciais inválidas** — a chave foi rejeitada. Grave uma chave que funcione no cofre para limpar a marca.
 

@@ -218,6 +218,7 @@
     "credentialMarkClearFailed": "清除憑證標記失敗：{{message}}",
     "credentialMarkErrorNotCandidate": "此模組無法再被標記為無效——其 Freeway 狀態已變更。重新整理即可查看目前狀態。",
     "automaticOption": "自動",
+    "disabledOption": "已停用",
     "instanceSelectorAria": "選擇為 {{provider}} 提供服務的實例",
     "instanceOverrideSaveFailed": "更新 {{provider}} 的實例失敗：{{message}}",
     "instanceOverridesLoadFailed": "無法載入 Freeway 實例設定：{{message}}",
@@ -238,6 +239,7 @@
       "cooling": "冷卻中",
       "exhausted": "今日已用完",
       "disabled": "模組已停用",
+      "freewayDisabled": "已針對 Freeway 停用",
       "uncredentialed": "尚無金鑰",
       "badCredentials": "憑證無效"
     }

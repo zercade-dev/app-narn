@@ -223,6 +223,7 @@
     "credentialMarkClearFailed": "Failed to clear the credential mark: {{message}}",
     "credentialMarkErrorNotCandidate": "This module can no longer be marked bad — its Freeway status has changed. Refresh to see the current state.",
     "automaticOption": "Automatic",
+    "disabledOption": "Disabled",
     "instanceSelectorAria": "Choose which instance serves {{provider}}",
     "instanceOverrideSaveFailed": "Failed to update the instance for {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "Failed to load Freeway instance settings: {{message}}",
@@ -244,6 +245,7 @@
       "cooling": "Cooling down",
       "exhausted": "Exhausted for today",
       "disabled": "Module disabled",
+      "freewayDisabled": "Disabled for Freeway",
       "uncredentialed": "No key",
       "badCredentials": "Bad credentials"
     }

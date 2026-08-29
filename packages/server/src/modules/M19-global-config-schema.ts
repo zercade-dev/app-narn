@@ -38,6 +38,10 @@ export const workspaceSettingsSchema = z.object({
   // (never stores a literal null) before this schema runs, so no `.nullable()`
   // is needed here — only the route-layer body schema accepts null.
   freewayInstanceOverrides: z.record(z.string(), z.string()).optional(),
+  // Base module ids Freeway must never auto-dispatch to. Same null-clears
+  // convention as freewayInstanceOverrides — `updateSettings` deletes the
+  // whole key before this schema runs, so no `.nullable()` is needed here.
+  freewayDisabledProviders: z.array(z.string()).optional(),
 });
 
 export const moduleInstanceSchema = z.object({

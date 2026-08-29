@@ -48,6 +48,12 @@ import {
  * (`<base>:<slug>`), so this bare word can never collide with a real one. */
 const AUTOMATIC_OVERRIDE_VALUE = 'automatic';
 
+/** Sentinel `Select` value that excludes a provider from Freeway's automatic
+ * pool entirely (`WorkspaceSettings.freewayDisabledProviders`). Same
+ * bare-word reasoning as {@link AUTOMATIC_OVERRIDE_VALUE} — instance ids
+ * always contain a `:`. */
+const DISABLED_OVERRIDE_VALUE = 'disabled';
+
 /**
  * Load state for `freewayInstanceOverrides`. Three states, not two: `{}` is a
  * legitimate loaded value (no provider has an override) and must stay
@@ -100,6 +106,9 @@ const EMPTY_STATUS: FreewayStatusResponse = {
 /** Mirrors the server's `MODULE_DISABLED_REASON` (routes/freeway.ts). */
 const MODULE_DISABLED_REASON = 'module-disabled';
 
+/** Mirrors the server's `FREEWAY_DISABLED_REASON` (routes/freeway.ts). */
+const FREEWAY_DISABLED_REASON = 'freeway-disabled';
+
 /**
  * Display names for the bundled snapshot's providers — a small, stable set;
  * falls back to the raw key for any future provider added to the snapshot.
@@ -147,9 +156,12 @@ interface ProviderSummary {
   moduleDisabled: boolean;
   /**
    * The disabledReason text for a 'disabled' bucket whose reason ISN'T
-   * 'module-disabled' (e.g. a ledger-recorded hard stop like bad
-   * credentials) — shown as a state chip instead of the enable-module hint,
-   * since enabling the module wouldn't fix it.
+   * 'module-disabled' or 'freeway-disabled' (e.g. a ledger-recorded hard stop
+   * like bad credentials) — shown as a state chip instead of the
+   * enable-module hint, since enabling the module wouldn't fix it.
+   * 'freeway-disabled' gets no chip of its own: the per-provider selector
+   * below already shows "Disabled" for it, so a second chip here would be
+   * redundant.
    */
   otherDisabledReason?: string;
   /** First non-empty `enableTargetModuleId` seen across this provider's buckets. */
@@ -179,7 +191,7 @@ function summarizeProviders(buckets: readonly FreewayStatusBucket[]): ProviderSu
     if (bucket.state === 'disabled') {
       if (bucket.disabledReason === MODULE_DISABLED_REASON) {
         summary.moduleDisabled = true;
-      } else if (bucket.disabledReason) {
+      } else if (bucket.disabledReason && bucket.disabledReason !== FREEWAY_DISABLED_REASON) {
         summary.otherDisabledReason = bucket.disabledReason;
       }
     }
@@ -265,6 +277,22 @@ function scrollToEnableTarget(moduleId: string | undefined): void {
 }
 
 /**
+ * A 'disabled' bucket's badge text depends on WHY, not just that it is:
+ * `module-disabled` and `freeway-disabled` each have their own label; any
+ * other reason (e.g. a ledger-recorded hard stop like bad credentials) falls
+ * back to "Bad credentials". Non-disabled states map straight to their own key.
+ */
+function bucketStateLabel(
+  bucket: Pick<FreewayStatusBucket, 'state' | 'disabledReason'>,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string {
+  if (bucket.state !== 'disabled') return t(`freeway.state.${bucket.state}`);
+  if (bucket.disabledReason === MODULE_DISABLED_REASON) return t('freeway.state.disabled');
+  if (bucket.disabledReason === FREEWAY_DISABLED_REASON) return t('freeway.state.freewayDisabled');
+  return t('freeway.state.badCredentials');
+}
+
+/**
  * One status-table row for a single bucket. `showRemaining` is false for a
  * pool's member rows — their shared day allowance is already shown once on
  * the pool header row above them, so repeating it per model would recreate
@@ -292,9 +320,7 @@ function BucketRow({
           variant={STATE_BADGE_VARIANT[bucket.state]}
           data-testid={`freeway-state-${bucket.bucketKey}`}
         >
-          {bucket.state === 'disabled' && bucket.disabledReason !== MODULE_DISABLED_REASON
-            ? t('freeway.state.badCredentials')
-            : t(`freeway.state.${bucket.state}`)}
+          {bucketStateLabel(bucket, t)}
         </Badge>
       </TableCell>
       {showRemaining ? (
@@ -410,6 +436,7 @@ export function FreewayPanel(): React.JSX.Element {
   };
 
   const [overrides, setOverrides] = useState<Record<string, string>>({});
+  const [disabledProviders, setDisabledProviders] = useState<Set<string>>(new Set());
   const [overridesState, setOverridesState] = useState<OverridesLoadState>('loading');
   // Serializes writes to /global-config/settings: each write's PUT is chained behind
   // the previous one's completion (not just its optimistic local-state update), so two
@@ -419,11 +446,13 @@ export function FreewayPanel(): React.JSX.Element {
 
   const loadOverrides = useCallback(() => {
     setOverridesState('loading');
-    return apiRequest<{ freewayInstanceOverrides?: Record<string, string> }>(
-      '/global-config/settings',
-    )
+    return apiRequest<{
+      freewayInstanceOverrides?: Record<string, string>;
+      freewayDisabledProviders?: string[];
+    }>('/global-config/settings')
       .then((res) => {
         setOverrides(res.freewayInstanceOverrides ?? {});
+        setDisabledProviders(new Set(res.freewayDisabledProviders ?? []));
         setOverridesState('loaded');
       })
       .catch((err) => {
@@ -442,28 +471,56 @@ export function FreewayPanel(): React.JSX.Element {
     if (hasOpened) void loadOverrides();
   }, [hasOpened, loadOverrides]);
 
-  // Persists a per-provider instance override (or clears it on "Automatic"),
-  // read-modify-write of the whole map so an unrelated provider's override is
-  // never disturbed by this one's change. Guarded by `overridesState === 'loaded'`
-  // (selectors are also disabled in that case) so a write is never built from a map
-  // that either hasn't arrived yet or is known to have failed to load. A failed PUT
-  // means the local map may have diverged from the server's, so it re-fetches the
-  // authoritative map rather than leaving the panel willing to write a now-stale one
-  // on the next edit.
-  const handleInstanceOverrideChange = (baseModuleId: string, value: string | null) => {
+  // Persists a per-provider routing choice: a specific instance, "Automatic"
+  // (clears the override), or "Disabled" (excludes the provider from
+  // Freeway's automatic pool entirely). Read-modify-write of the whole
+  // override map / disabled set so an unrelated provider's setting is never
+  // disturbed by this one's change. Guarded by `overridesState === 'loaded'`
+  // (selectors are also disabled in that case) so a write is never built from
+  // state that either hasn't arrived yet or is known to have failed to load.
+  // A failed PUT means local state may have diverged from the server's, so it
+  // re-fetches the authoritative settings rather than leaving the panel
+  // willing to write a now-stale value on the next edit.
+  //
+  // The two settings are independent — disabling a provider does not touch
+  // its pinned instance, so re-enabling it restores that choice — but PUT
+  // only ever carries `freewayDisabledProviders` when leaving or entering the
+  // disabled set, matching the existing convention that an unrelated field
+  // is never sent in a write it didn't change.
+  const handleProviderRoutingChange = (baseModuleId: string, value: string | null) => {
     if (overridesState !== 'loaded') return;
-    const next = { ...overrides };
-    if (!value || value === AUTOMATIC_OVERRIDE_VALUE) {
-      delete next[baseModuleId];
+    const wasDisabled = disabledProviders.has(baseModuleId);
+    const body: {
+      freewayInstanceOverrides?: Record<string, string>;
+      freewayDisabledProviders?: string[];
+    } = {};
+
+    if (value === DISABLED_OVERRIDE_VALUE) {
+      const nextDisabled = new Set(disabledProviders).add(baseModuleId);
+      setDisabledProviders(nextDisabled);
+      body.freewayDisabledProviders = [...nextDisabled];
     } else {
-      next[baseModuleId] = value;
+      const nextOverrides = { ...overrides };
+      if (!value || value === AUTOMATIC_OVERRIDE_VALUE) {
+        delete nextOverrides[baseModuleId];
+      } else {
+        nextOverrides[baseModuleId] = value;
+      }
+      setOverrides(nextOverrides);
+      body.freewayInstanceOverrides = nextOverrides;
+      if (wasDisabled) {
+        const nextDisabled = new Set(disabledProviders);
+        nextDisabled.delete(baseModuleId);
+        setDisabledProviders(nextDisabled);
+        body.freewayDisabledProviders = [...nextDisabled];
+      }
     }
-    setOverrides(next);
+
     writeChainRef.current = writeChainRef.current
       .then(() =>
         apiRequest('/global-config/settings', {
           method: 'PUT',
-          body: JSON.stringify({ freewayInstanceOverrides: next }),
+          body: JSON.stringify(body),
         }),
       )
       .then(() => undefined)
@@ -564,8 +621,10 @@ export function FreewayPanel(): React.JSX.Element {
                         const overrideIsLiveInstance =
                           overrideId !== undefined &&
                           providerInstances.some((instance) => instance.instanceId === overrideId);
-                        const selectedValue =
-                          provider.dispatchModuleId === undefined
+                        const isFreewayDisabled = disabledProviders.has(provider.moduleId);
+                        const selectedValue = isFreewayDisabled
+                          ? DISABLED_OVERRIDE_VALUE
+                          : provider.dispatchModuleId === undefined
                             ? overrideIsLiveInstance
                               ? overrideId
                               : AUTOMATIC_OVERRIDE_VALUE
@@ -635,64 +694,57 @@ export function FreewayPanel(): React.JSX.Element {
                               )}
                             </div>
                             <div className="flex items-center gap-2">
-                              {providerInstances.length > 0 && (
-                                <Select
-                                  value={selectedValue}
-                                  onValueChange={(value) => {
-                                    // base-ui's Select calls onValueChange on every
-                                    // item commit, including re-picking the option
-                                    // already shown (no equality check upstream).
-                                    // Re-picking a displayed OVERRIDE is a no-op
-                                    // PUT (next[base] = sameId) and skipping it is
-                                    // a pure optimization. Automatic is different:
-                                    // when `overrideId` is still persisted (the
-                                    // selector is only showing "Automatic" because
-                                    // the override's instance is currently
-                                    // disabled/unusable — see `selectedValue`
-                                    // above), picking Automatic is the ONLY way to
-                                    // clear that stale override, so the guard must
-                                    // not swallow it.
-                                    if (
-                                      value === selectedValue &&
-                                      !(
-                                        value === AUTOMATIC_OVERRIDE_VALUE &&
-                                        overrideId !== undefined
-                                      )
-                                    ) {
-                                      return;
-                                    }
-                                    handleInstanceOverrideChange(provider.moduleId, value);
-                                  }}
-                                  disabled={
-                                    providerInstances.length < 2 || overridesState !== 'loaded'
-                                  }
-                                >
-                                  <SelectTrigger
-                                    size="sm"
-                                    className="w-40"
-                                    data-testid={`freeway-instance-select-${provider.providerKey}`}
-                                    aria-label={t('freeway.instanceSelectorAria', {
-                                      provider: providerDisplayName(provider.providerKey),
-                                    })}
-                                    title={
-                                      selectedValue === AUTOMATIC_OVERRIDE_VALUE
-                                        ? t('freeway.automaticOption')
-                                        : (providerInstances.find(
-                                            (instance) => instance.instanceId === selectedValue,
-                                          )?.displayName ?? String(selectedValue))
-                                    }
-                                  >
-                                    <SelectValue>
-                                      {(value) =>
-                                        value === AUTOMATIC_OVERRIDE_VALUE
-                                          ? t('freeway.automaticOption')
-                                          : (providerInstances.find(
-                                              (instance) => instance.instanceId === value,
-                                            )?.displayName ?? String(value))
+                              {(() => {
+                                const optionLabel = (value: string): string =>
+                                  value === AUTOMATIC_OVERRIDE_VALUE
+                                    ? t('freeway.automaticOption')
+                                    : value === DISABLED_OVERRIDE_VALUE
+                                      ? t('freeway.disabledOption')
+                                      : (providerInstances.find(
+                                          (instance) => instance.instanceId === value,
+                                        )?.displayName ?? value);
+                                return (
+                                  <Select
+                                    value={selectedValue}
+                                    onValueChange={(value) => {
+                                      // base-ui's Select calls onValueChange on every
+                                      // item commit, including re-picking the option
+                                      // already shown (no equality check upstream).
+                                      // Re-picking a displayed OVERRIDE (or Disabled)
+                                      // is a no-op PUT and skipping it is a pure
+                                      // optimization. Automatic is different: when
+                                      // `overrideId` is still persisted (the selector
+                                      // is only showing "Automatic" because the
+                                      // override's instance is currently
+                                      // disabled/unusable — see `selectedValue`
+                                      // above), picking Automatic is the ONLY way to
+                                      // clear that stale override, so the guard must
+                                      // not swallow it.
+                                      if (
+                                        value === selectedValue &&
+                                        !(
+                                          value === AUTOMATIC_OVERRIDE_VALUE &&
+                                          overrideId !== undefined
+                                        )
+                                      ) {
+                                        return;
                                       }
-                                    </SelectValue>
-                                  </SelectTrigger>
-                                  {/* Content sizes to the longest instance name instead of the
+                                      handleProviderRoutingChange(provider.moduleId, value);
+                                    }}
+                                    disabled={overridesState !== 'loaded'}
+                                  >
+                                    <SelectTrigger
+                                      size="sm"
+                                      className="w-40"
+                                      data-testid={`freeway-instance-select-${provider.providerKey}`}
+                                      aria-label={t('freeway.instanceSelectorAria', {
+                                        provider: providerDisplayName(provider.providerKey),
+                                      })}
+                                      title={optionLabel(selectedValue)}
+                                    >
+                                      <SelectValue>{optionLabel}</SelectValue>
+                                    </SelectTrigger>
+                                    {/* Content sizes to the longest instance name instead of the
                                       160px trigger (`w-(--anchor-width)` in ui/select.tsx), so a
                                       descriptive display name (`Name (slug)`) isn't clipped in the
                                       open list. `cn` (tailwind-merge) resolves this `w-max` against
@@ -700,21 +752,25 @@ export function FreewayPanel(): React.JSX.Element {
                                       than stacking. Bounded below by the trigger's own `w-40` and
                                       above by 22rem so one pathological name can't blow out the
                                       popup. */}
-                                  <SelectContent className="w-max min-w-40 max-w-[22rem]">
-                                    <SelectItem value={AUTOMATIC_OVERRIDE_VALUE}>
-                                      {t('freeway.automaticOption')}
-                                    </SelectItem>
-                                    {providerInstances.map((instance) => (
-                                      <SelectItem
-                                        key={instance.instanceId}
-                                        value={instance.instanceId}
-                                      >
-                                        {instance.displayName}
+                                    <SelectContent className="w-max min-w-40 max-w-[22rem]">
+                                      <SelectItem value={AUTOMATIC_OVERRIDE_VALUE}>
+                                        {t('freeway.automaticOption')}
                                       </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
+                                      {providerInstances.map((instance) => (
+                                        <SelectItem
+                                          key={instance.instanceId}
+                                          value={instance.instanceId}
+                                        >
+                                          {instance.displayName}
+                                        </SelectItem>
+                                      ))}
+                                      <SelectItem value={DISABLED_OVERRIDE_VALUE}>
+                                        {t('freeway.disabledOption')}
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                );
+                              })()}
                               {provider.moduleDisabled && (
                                 <Button
                                   size="sm"

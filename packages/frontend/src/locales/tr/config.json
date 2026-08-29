@@ -223,6 +223,7 @@
     "credentialMarkClearFailed": "Kimlik bilgisi işareti kaldırılamadı: {{message}}",
     "credentialMarkErrorNotCandidate": "Bu modül artık geçersiz olarak işaretlenemez — Freeway durumu değişti. Güncel durumu görmek için yenileyin.",
     "automaticOption": "Otomatik",
+    "disabledOption": "Devre dışı",
     "instanceSelectorAria": "“{{provider}}” için kullanılacak örneği seçin",
     "instanceOverrideSaveFailed": "“{{provider}}” için örnek güncellenemedi: {{message}}",
     "instanceOverridesLoadFailed": "Freeway örnek ayarları yüklenemedi: {{message}}",
@@ -244,6 +245,7 @@
       "cooling": "Soğuyor",
       "exhausted": "Bugünlük tükendi",
       "disabled": "Modül devre dışı",
+      "freewayDisabled": "Freeway için devre dışı",
       "uncredentialed": "Anahtar yok",
       "badCredentials": "Kimlik bilgileri hatalı"
     }

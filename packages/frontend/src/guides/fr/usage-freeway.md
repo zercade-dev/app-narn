@@ -35,12 +35,15 @@ Un fournisseur auquel vous n'avez pas donné de clé est simplement ignoré. Ajo
 
 Le panneau **NARN Freeway** de l'écran de configuration montre tout le pool d'un coup d'œil : l'état de la clé de chaque fournisseur et, par modèle, son **État**, le quota **Restant**, la **Prochaine réinitialisation** et le **Taux de réussite** récent par langue.
 
+Chaque fournisseur a aussi, juste à côté, un menu déroulant qui contrôle comment Freeway l'utilise : **Automatique** laisse le pool choisir comme d'habitude, une instance nommée épingle Freeway à ce compte précis, et **Désactivé** retire complètement le fournisseur du pool — sans éteindre le module ailleurs. Repasser un fournisseur désactivé en Automatique (ou sur une instance nommée) reprend exactement là où il s'était arrêté.
+
 L'état d'un modèle est l'un des suivants :
 
 * **Prêt** — utilisable tout de suite.
 * **En refroidissement** — brièvement limité en fréquence ; il revient tout seul.
 * **Épuisé pour aujourd'hui** — l'allocation quotidienne est consommée, et le panneau indique quand elle se réinitialise.
 * **Module désactivé** — la clé est enregistrée mais le module est éteint. Le panneau propose de l'activer.
+* **Désactivé pour Freeway** — vous avez désactivé ce fournisseur pour le pool depuis son menu déroulant ; le reste du module n'est pas touché.
 * **Pas de clé** — rien n'est encore enregistré dans le coffre pour ce fournisseur.
 * **Identifiants invalides** — la clé a été rejetée. Enregistrez une clé valide dans le coffre pour lever la marque.
 

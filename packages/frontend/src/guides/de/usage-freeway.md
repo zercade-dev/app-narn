@@ -35,12 +35,15 @@ Ein Anbieter ohne hinterlegten Schlüssel wird schlicht übersprungen. Jeder zus
 
 Das Panel **NARN Freeway** auf dem Konfigurationsbildschirm zeigt den ganzen Pool auf einen Blick: den Schlüsselstatus jedes Anbieters und pro Modell dessen **Zustand**, das **Verbleibend**e Kontingent, den **Nächsten Reset** und die jüngste **Bestehensquote** je Sprache.
 
+Jeder Anbieter hat daneben außerdem eine Auswahlliste, die steuert, wie Freeway ihn nutzt: **Automatisch** lässt den Pool wie gewohnt wählen, eine benannte Instanz bindet Freeway an genau dieses Konto, und **Deaktiviert** nimmt den Anbieter ganz aus dem Pool — ohne das Modul selbst anderswo abzuschalten. Schalten Sie einen deaktivierten Anbieter wieder auf Automatisch (oder eine benannte Instanz), macht er genau dort weiter, wo er aufgehört hat.
+
 Der Zustand eines Modells ist einer von:
 
 * **Bereit** — jetzt nutzbar.
 * **Cooldown** — kurz rate-limitiert; kommt von selbst zurück.
 * **Für heute aufgebraucht** — das Tageskontingent ist verbraucht, und das Panel zeigt, wann es zurückgesetzt wird.
 * **Modul deaktiviert** — der Schlüssel liegt vor, aber das Modul ist ausgeschaltet. Das Panel bietet an, es einzuschalten.
+* **Für Freeway deaktiviert** — Sie haben diesen Anbieter über seine Auswahlliste für den Pool abgeschaltet; alles andere am Modul bleibt unberührt.
 * **Kein Schlüssel** — für diesen Anbieter liegt noch nichts im Tresor.
 * **Zugangsdaten ungültig** — der Schlüssel wurde abgelehnt. Legen Sie einen funktionierenden Schlüssel im Tresor ab, um die Markierung zu löschen.
 
