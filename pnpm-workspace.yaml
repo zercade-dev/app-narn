@@ -88,7 +88,7 @@ catalog:
   helmet: 8.3.0
   multer: 2.2.0
   papaparse: 5.7.0
-  zod: 4.4.3
+  zod: 4.5.4
   yauzl: 3.4.0
   yazl: 3.3.1
   pg: 8.23.0
