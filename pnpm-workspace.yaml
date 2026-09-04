@@ -139,7 +139,7 @@ catalog:
   # regex literals, so a regex stripper would corrupt code).
   parse5: 8.0.1
   acorn: 8.18.0
-  postcss: 8.5.26
+  postcss: 8.5.27
 
 # Supply-chain cooldown: refuse dependency versions published fewer than this many
 # minutes ago (1440 = 1 day), which blunts compromised "just-published" package attacks
