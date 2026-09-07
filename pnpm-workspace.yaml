@@ -53,6 +53,16 @@ overrides:
   # its tarball was diff-audited against 2.2.2 (owner-approved during the
   # dependency freeze). Relax to '>=2.3.0' once the freeze lifts.
   body-parser: 2.3.0
+  # GHSA-c83g-rgw3-j3cx (high, published 2026-09-01): browserslist <=4.28.6 never
+  # evicts from its query-result cache, so distinct queries grow memory without
+  # bound until the process OOMs.
+  # GHSA-73wf-gq98-2v4g (high, published 2026-09-01): the same versions crash
+  # uncaught — and can write to Object.prototype — in normalizeStats() when fed
+  # an untrusted browserslist-stats.json. Both are patched in 4.28.7.
+  # Pulled in transitively via @vitejs/plugin-react -> @babel/core ->
+  # @babel/helper-compilation-targets (dev/build-only chain, never shipped at
+  # runtime) — force the patched range until Babel bumps its own pin.
+  browserslist: '>=4.28.7'
 
 catalog:
   # Shared tooling
