@@ -114,7 +114,7 @@ catalog:
   tsx: 4.23.13
 
   # Frontend runtime
-  '@base-ui/react': 1.7.0
+  '@base-ui/react': 1.8.0
   '@tanstack/react-virtual': 3.14.10
   class-variance-authority: 0.7.1
   clsx: 2.1.1
