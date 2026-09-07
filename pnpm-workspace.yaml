@@ -101,7 +101,7 @@ catalog:
   '@types/yauzl': 3.4.0
   '@types/yazl': 3.3.1
   '@types/pg': 8.23.1
-  tsx: 4.23.12
+  tsx: 4.23.13
 
   # Frontend runtime
   '@base-ui/react': 1.7.0
