@@ -51,6 +51,8 @@ import {
   bucketHasMinuteWindow,
   bucketRateLimits,
   coolBucket,
+  freewayBucketBaseModuleId,
+  isFreewayProviderDisabled,
   loadBucketViews,
   recordDispatch,
   type BucketSourceDeps,
@@ -249,11 +251,12 @@ export interface RunBatchOptions<TItem, TResult> {
   batchChars?: number;
   /**
    * Re-selects a free-tier bucket for this batch. Called at most ONCE per
-   * batch, and only after a rate limit outlived the retries on a Freeway-bound
-   * batch: the engine re-selects, rebuilds its module and swaps the reference
-   * {@link RunBatchOptions.call} dispatches through, then returns the NEW
-   * binding. `undefined` means nothing is eligible — the batch then fails
-   * exactly as it did before the hop existed.
+   * batch, when its bucket can no longer serve it — a rate limit outlived
+   * the retries, the minute gate declined it, or the workspace disabled its
+   * provider for Freeway mid-run: the engine re-selects, rebuilds its module
+   * and swaps the reference {@link RunBatchOptions.call} dispatches through,
+   * then returns the NEW binding. `undefined` means nothing is eligible — the
+   * batch then fails exactly as it did before the hop existed.
    */
   freewayReroute?: () => Promise<FreewayBatchBinding | undefined>;
   /** Handles one result against the live `status` (persist + push, or recordFailure). */
@@ -795,8 +798,10 @@ export abstract class BackgroundRunEngine<TRecord> {
    * `processBatch`: every early `return` (cancelled/aborted, whole-batch
    * failure, per-result cancel guard) and the single `finally` still hold. The
    * one addition is the bounded re-route hop (see
-   * {@link RunBatchOptions.freewayReroute}), which is reachable only from a
-   * rate-limited free-tier batch and leaves every other failure path untouched.
+   * {@link RunBatchOptions.freewayReroute}), reachable only from a free-tier
+   * batch whose bucket can no longer serve it (rate-limited, minute-starved,
+   * or its provider disabled for Freeway mid-run) and leaving every other
+   * failure path untouched.
    *
    * This thin wrapper only brackets the detached task with {@link
    * taskStarted}/{@link taskEnded} (for the settled-deferred drain) — the
@@ -842,6 +847,37 @@ export abstract class BackgroundRunEngine<TRecord> {
       let paused = false;
       for (let hop = 0; ; hop++) {
         try {
+          // A provider the workspace disabled for Freeway while this run was
+          // in flight must not be spent against again. The run bound its
+          // bucket once, at start, so nothing else would notice the change
+          // until the run ended: read the setting live (a cached lookup),
+          // before the minute gate, and take the one hop this batch has
+          // rather than finishing on the provider. Nothing is cooled — a
+          // disable is a workspace choice, not a provider fault — and the
+          // re-selection skips the provider on its own, so it can never hand
+          // the same bucket back. Undefined `binding` (an ordinary run) skips
+          // this entirely.
+          if (binding && (await isFreewayProviderDisabled(binding.bucketKey, binding.deps))) {
+            const next =
+              hop === 0 && opts.freewayReroute
+                ? await this.tryFreewayReroute(
+                    runId,
+                    binding.bucketKey,
+                    'provider-disabled',
+                    opts.freewayReroute,
+                  )
+                : undefined;
+            if (next) {
+              binding = next;
+              continue;
+            }
+            // Thrown rather than recorded here so the batch fails through the
+            // single failure block below: the same per-item recording, the
+            // same value-scrubbed message, the same `batch-failed` log.
+            throw new Error(
+              `free-tier provider ${freewayBucketBaseModuleId(binding.bucketKey)} was disabled for Freeway while this run was in progress and this batch cannot move to another free-tier bucket`,
+            );
+          }
           // The pre-dispatch gate: project this batch against the bucket's
           // LIVE minute budget before spending a request on it. Only for an
           // engine that measured its own batch — one that supplies no
@@ -1179,7 +1215,7 @@ export abstract class BackgroundRunEngine<TRecord> {
   private async tryFreewayReroute(
     runId: string,
     from: string,
-    reason: 'rate-limit' | 'minute-gate' | 'minute-wait',
+    reason: 'rate-limit' | 'minute-gate' | 'minute-wait' | 'provider-disabled',
     reroute: () => Promise<FreewayBatchBinding | undefined>,
   ): Promise<FreewayBatchBinding | undefined> {
     let next: FreewayBatchBinding | undefined;
