@@ -11,14 +11,14 @@ NARN redistributes third-party code in three forms, and this file covers all thr
 2. **Font binaries built into the frontend** — six typeface families whose `.woff2` and
    `.woff` binaries are redistributed by every production build. See _Fonts_.
 3. **Declared dependencies** — packages named in `package.json` manifests and fetched
-   from the public npm registry at install time, each under its own licence. One of them,
-   GitHub's Copilot CLI, is proprietary and has conditions of its own. See _GitHub
-   Copilot_.
+   from the public npm registry at install time, each under its own licence. GitHub's
+   proprietary Copilot CLI used to be one of them; `@github/copilot-sdk` 1.0.13 dropped
+   that dependency. See _GitHub Copilot_.
 
-Two of those attach conditions that travel with anything NARN ships: the SIL Open Font
+One of those attaches conditions that travel with anything NARN ships: the SIL Open Font
 License on the fonts, which requires their copyright notices and licence to accompany the
-font files, and GitHub's proprietary CLI licence. Both are reproduced below in full. The
-permissive licences covering the rest (MIT, Apache-2.0, ISC, BSD) attach conditions too,
+font files. It is reproduced below in full. The permissive licences covering the rest
+(MIT, Apache-2.0, ISC, BSD) attach conditions too,
 chiefly that their copyright and permission notices be retained. Where NARN is distributed
 as source, those notices travel inside the installed `node_modules` tree. The production
 frontend bundle is built with all comments stripped, so they do not survive inside its
@@ -286,7 +286,7 @@ The same build emits an aggregated licence file into its output directory, next 
 writes it. What it contains:
 
 - **One entry per third-party package whose code, styles or font files are in that
-  build** — 94 packages in the build measured on 2026-08-01, among them React, react-dom,
+  build** — 93 packages in the build measured on 2026-09-08, among them React, react-dom,
   `@base-ui/react`, zustand, lucide-react, sonner, react-markdown, i18next, clsx,
   `class-variance-authority`, tailwind-merge, `@tanstack/react-virtual`, all six font
   families, and the AI SDK packages the shared code pulls into the frontend.
@@ -340,20 +340,26 @@ should keep that file with it.
 
 NARN ships a GitHub Copilot translation provider in `modules/copilot`, one of nine
 translation providers. It reaches Copilot through `@github/copilot-sdk`, which is
-licensed MIT. That SDK depends in turn on `@github/copilot` — GitHub's Copilot CLI —
-which is **proprietary**: its manifest declares `"license": "SEE LICENSE IN LICENSE.md"`,
-and that file is reproduced in full below.
+licensed MIT.
 
-The CLI package selects a platform binary at install time from eight sibling packages,
-`@github/copilot-{linux,linuxmusl,darwin,win32}-{x64,arm64}`. All eight carry the same
-licence text as the CLI package itself.
+Up to and including SDK 1.0.11 it also depended on `@github/copilot` — GitHub's Copilot
+CLI — which is **proprietary**, and this file reproduced that licence in full. SDK 1.0.13
+dropped the dependency; no 1.0.12 was ever published, so those two releases are adjacent.
+Neither the CLI nor its eight `@github/copilot-{linux,linuxmusl,darwin,win32}-{x64,arm64}`
+platform packages is installed by NARN any more, at any version, so their licence is no
+longer reproduced here.
+
+The SDK now selects a platform binary at install time from its own eight sibling packages,
+`@github/copilot-sdk-{linux,linuxmusl,darwin,win32}-{x64,arm64}`, declared under its
+`optionalDependencies` and published in lockstep at the SDK's own version. The one
+matching the host carries the Copilot runtime binary the provider talks to.
 
 ### What "optional" means here
 
 `@github/copilot-sdk` is declared under `optionalDependencies` in
 `modules/copilot/package.json`. **That does not exclude it from a normal install.** npm
 and pnpm install optional dependencies by default, so a plain `pnpm install` fetches the
-SDK, the CLI, and the platform binary matching the machine doing the install.
+SDK and the platform binary matching the machine doing the install.
 
 What the optional declaration buys is that opting out is _possible_:
 `pnpm install --no-optional` skips both packages. NARN is written so that this degrades
@@ -363,69 +369,34 @@ so the compiler never resolves it — which means the Copilot provider still com
 loads and registers without the package present. Only an actual Copilot translation
 resolves the SDK, and if it is missing that one call fails with an install hint instead of
 taking the provider registry down at import time. A given NARN installation may therefore
-carry the CLI or not, depending on how it was installed.
+carry the Copilot runtime or not, depending on how it was installed.
 
 ### Unmodified redistribution
 
-NARN does not modify the Copilot CLI, rebuild it, patch it, or copy any part of it into
-this repository. It is installed from GitHub's own published packages and run as a
-separate process, spoken to over JSON-RPC. Wherever a NARN installation or container
-image includes the CLI, the CLI is present exactly as GitHub published it, and GitHub's
-licence — with all copyright, trademark and attribution notices intact — is reproduced
-verbatim below.
+NARN does not modify the Copilot SDK or its platform binary, rebuild them, patch them, or
+copy any part of them into this repository. They are installed from GitHub's own published
+packages, and the runtime binary is run as a separate process, spoken to over JSON-RPC on
+stdio. Wherever a NARN installation or container image includes them, they are present
+exactly as GitHub published them, with all copyright, trademark and attribution notices
+intact.
 
 ### Availability in the hosted service
 
 The Copilot provider is available for local and self-hosted use. It is disabled in the
 hosted NARN service: `modules/copilot/manifest.json` sets `"cloudDisabled": true`.
 
-### `@github/copilot` — GitHub Copilot CLI License
-
-Reproduced verbatim from the `LICENSE.md` file published in `@github/copilot` 1.0.80 on
-the npm registry. The byte-identical file ships in all eight platform binary packages.
-
-GitHub Copilot CLI License
-
-1. License Grant
-   Subject to the terms of this License, GitHub grants you a non‑exclusive, non‑transferable, royalty‑free license to install and run copies of the GitHub Copilot CLI (the “Software”). Subject to Section 2 below, GitHub also grants you the right to reproduce and redistribute unmodified copies of the Software as part of an application or service.
-
-2. Redistribution Rights and Conditions
-   You may reproduce and redistribute the Software only in accordance with all of the following conditions:
-   The Software is distributed only in unmodified form;
-   The Software is redistributed solely as part of an application or service that provides material functionality beyond the Software itself;
-   The Software is not distributed on a standalone basis or as a primary product;
-   You include a copy of this License and retain all applicable copyright, trademark, and attribution notices; and
-   Your application or service is licensed independently of the Software.
-   Nothing in this License restricts your choice of license for your application or service, including distribution under an open source license. This License applies solely to the Software and does not modify or supersede the license terms governing your application or its source code.
-
-3. Scope Limitations
-   This License does not grant you the right to:
-   Modify, adapt, translate, or create derivative works of the Software;
-   Redistribute the Software except as expressly permitted in Section 2;
-   Remove, alter, or obscure any proprietary notices included in the Software; or
-   Use GitHub trademarks, logos, or branding except as necessary to identify the Software.
-
-4. Reservation of Rights
-   GitHub and its licensors retain all right, title, and interest in and to the Software. All rights not expressly granted by this License are reserved.
-
-5. Disclaimer of Warranty
-   THE SOFTWARE IS PROVIDED “AS IS,” WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED, OR STATUTORY, INCLUDING WITHOUT LIMITATION WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON‑INFRINGEMENT. THE ENTIRE RISK ARISING OUT OF USE OF THE SOFTWARE REMAINS WITH YOU.
-
-6. Limitation of Liability
-   TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL GITHUB OR ITS LICENSORS BE LIABLE FOR ANY DAMAGES ARISING OUT OF OR RELATING TO THIS LICENSE OR THE USE OR DISTRIBUTION OF THE SOFTWARE, WHETHER IN CONTRACT, TORT, OR OTHERWISE.
-
-7. Termination
-   This License terminates automatically if you fail to comply with its terms. Upon termination, you must cease all use and distribution of the Software.
-
-8. Notice Regarding GitHub Services (Informational Only)
-   Use of the Software may require access to GitHub services and is subject to the applicable GitHub Terms of Service and GitHub Copilot terms. This License governs only rights related to the Software and does not grant any rights to access or use GitHub services.
-
 ### `@github/copilot-sdk` — MIT License
 
-`@github/copilot-sdk` 1.0.11 declares `"license": "MIT"` and `"author": "GitHub"` in its
+`@github/copilot-sdk` 1.0.13 declares `"license": "MIT"` and `"author": "GitHub"` in its
 manifest, but its published tarball contains no licence file. The text below is the
 `LICENSE` file of the source repository that same manifest names,
 <https://github.com/github/copilot-sdk>.
+
+The eight `@github/copilot-sdk-{linux,linuxmusl,darwin,win32}-{x64,arm64}` platform
+packages are published at the SDK's own version. Only the one matching the host is
+installed, so it is the only one this file can measure: its manifest declares
+`"license": "MIT"` and names that same repository, and like the SDK it ships no licence
+file of its own.
 
 MIT License
 
@@ -459,18 +430,18 @@ pnpm install
 pnpm licenses list --prod          # add --json for machine-readable output
 ```
 
-Measured on 2026-08-01 on a linux-x64 host, that command reported **250** packages: 216
-MIT (among them `@github/copilot-sdk` and `@base-ui/react`), 15 Apache-2.0, 8 ISC, 6
-OFL-1.1 — the six font families, see _Fonts_ — 1 BSD-2-Clause, 1 BSD-3-Clause, 1
-`(AFL-2.1 OR BSD-3-Clause)`, and 2 that pnpm classifies as `Unknown` — `@github/copilot`
-and the platform binary package it pulled in — because their manifests point at a licence
-file instead of naming an SPDX identifier. No copyleft licence appears among those 250.
+Measured on 2026-09-08 on a linux-x64 host, that command reported **248** packages: 217
+MIT (among them `@github/copilot-sdk` and `@base-ui/react`), 14 Apache-2.0, 8 ISC, 6
+OFL-1.1 — the six font families, see _Fonts_ — 1 BSD-2-Clause, 1 BSD-3-Clause, and 1
+`(AFL-2.1 OR BSD-3-Clause)`. Every package in that frame names an SPDX identifier. The two
+entries pnpm previously reported as `Unknown` were `@github/copilot` and the platform
+binary it pulled in, whose manifests pointed at a licence file instead; both left the tree
+when SDK 1.0.13 dropped the CLI dependency. No copyleft licence appears among those 248.
 
-The host matters to what that list names. At least three of the 250 are platform-specific
-— `@github/copilot-linux-x64` (`Unknown`), `@koromix/koffi-linux-x64` (MIT) and
+The host matters to what that list names. At least three of the 248 are platform-specific
+— `@github/copilot-sdk-linux-x64` (MIT), `@koromix/koffi-linux-x64` (MIT) and
 `@typescript/typescript-linux-x64` (Apache-2.0) — so running the same command on macOS or
-Windows substitutes different packages in more than one licence category, not just among
-the `Unknown` entries.
+Windows substitutes different packages in more than one licence category.
 
 ### What that command does not cover
 
@@ -502,7 +473,8 @@ an accessibility auditing tool. It is loaded behind an `import.meta.env.DEV` gua
 the built output), so it is not redistributed.
 
 Finally, the claim that installed packages carry their own licence files is the norm rather
-than a rule. Of the 250, seven ship none: `@ai-sdk/provider-utils`, `@github/copilot-sdk`,
-`@koromix/koffi-linux-x64`, `agent-base`, `https-proxy-agent`, `pg-types` and `pgpass`.
-Each declares its licence in its manifest; `@github/copilot-sdk` is the one that mattered
-here, which is why its MIT text is reproduced above from its source repository.
+than a rule. Of the 248, eight ship none: `@ai-sdk/provider-utils`, `@github/copilot-sdk`,
+`@github/copilot-sdk-linux-x64`, `@koromix/koffi-linux-x64`, `agent-base`,
+`https-proxy-agent`, `pg-types` and `pgpass`. Each declares its licence in its manifest;
+the two `@github/copilot-sdk` packages are the ones that mattered here, which is why the
+SDK's MIT text is reproduced above from its source repository.
