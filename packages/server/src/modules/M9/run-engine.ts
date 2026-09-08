@@ -1230,7 +1230,10 @@ export abstract class BackgroundRunEngine<TRecord> {
     // flat minute floor cannot see, so the selector still ranks this bucket
     // best and offers it straight back. (The rate-limit caller cools the
     // struck bucket first, so its re-selection can never return it.) Reporting
-    // "nothing to move to" leaves the caller its pause.
+    // "nothing to move to" leaves the caller its pause. The provider-disabled
+    // caller can never get the same bucket back either, for a third reason:
+    // its re-selection excludes the disabled provider from candidates before
+    // ranking even begins.
     if (!next || next.bucketKey === from) return undefined;
     this.logger.info(`${this.logPrefix}:freeway-rerouted`, {
       runId,
