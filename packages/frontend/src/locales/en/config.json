@@ -224,7 +224,7 @@
     "credentialMarkErrorNotCandidate": "This module can no longer be marked bad — its Freeway status has changed. Refresh to see the current state.",
     "automaticOption": "Automatic",
     "disabledOption": "Disabled",
-    "instanceSelectorAria": "Choose which instance serves {{provider}}",
+    "instanceSelectorAria": "Choose how Freeway uses {{provider}}",
     "instanceOverrideSaveFailed": "Failed to update the instance for {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "Failed to load Freeway instance settings: {{message}}",
     "instancesLoadFailed": "Failed to load Freeway module instances: {{message}}",

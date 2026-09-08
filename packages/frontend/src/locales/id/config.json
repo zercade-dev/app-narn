@@ -219,7 +219,7 @@
     "credentialMarkErrorNotCandidate": "Modul ini tidak bisa lagi ditandai tidak valid — status Freeway-nya telah berubah. Segarkan untuk melihat status saat ini.",
     "automaticOption": "Otomatis",
     "disabledOption": "Dinonaktifkan",
-    "instanceSelectorAria": "Pilih instans mana yang melayani {{provider}}",
+    "instanceSelectorAria": "Pilih cara Freeway memakai {{provider}}",
     "instanceOverrideSaveFailed": "Gagal memperbarui instans untuk {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "Gagal memuat pengaturan instans Freeway: {{message}}",
     "instancesLoadFailed": "Gagal memuat instans modul Freeway: {{message}}",

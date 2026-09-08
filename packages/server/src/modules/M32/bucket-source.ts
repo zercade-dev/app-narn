@@ -198,6 +198,23 @@ async function defaultFreewayDisabledProviders(): Promise<ReadonlySet<string>> {
 }
 
 /**
+ * Whether the workspace has excluded the provider owning `bucketKey` from
+ * Freeway. Read LIVE — the per-tenant-cached `getSettings()`, a Map lookup
+ * after the first read — rather than from anything a run resolved at start:
+ * a background run binds its bucket once, so this is the only way a disable
+ * taken mid-run reaches the batches still to dispatch. `deps` honours the
+ * same `freewayDisabledProviders` seam {@link loadBucketViews} does, so a
+ * caller that pinned the set gets the same answer from both.
+ */
+export async function isFreewayProviderDisabled(
+  bucketKey: string,
+  deps?: BucketSourceDeps,
+): Promise<boolean> {
+  const disabled = deps?.freewayDisabledProviders ?? (await defaultFreewayDisabledProviders());
+  return disabled.has(freewayBucketBaseModuleId(bucketKey));
+}
+
+/**
  * Candidate module ids that can serve one snapshot provider, best first:
  * an `overrideInstanceId` (when it still names a live instance of this base),
  * then `<base>:default`, then the base's remaining instances in id order,

@@ -224,7 +224,7 @@
     "credentialMarkErrorNotCandidate": "Questo modulo non può più essere contrassegnato come non valido — il suo stato Freeway è cambiato. Aggiorna per vedere lo stato attuale.",
     "automaticOption": "Automatico",
     "disabledOption": "Disattivato",
-    "instanceSelectorAria": "Scegli quale istanza serve {{provider}}",
+    "instanceSelectorAria": "Scegli come Freeway usa {{provider}}",
     "instanceOverrideSaveFailed": "Impossibile aggiornare l'istanza per {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "Impossibile caricare le impostazioni delle istanze di Freeway: {{message}}",
     "instancesLoadFailed": "Impossibile caricare le istanze dei moduli Freeway: {{message}}",

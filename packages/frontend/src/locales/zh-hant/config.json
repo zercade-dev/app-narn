@@ -219,7 +219,7 @@
     "credentialMarkErrorNotCandidate": "此模組無法再被標記為無效——其 Freeway 狀態已變更。重新整理即可查看目前狀態。",
     "automaticOption": "自動",
     "disabledOption": "已停用",
-    "instanceSelectorAria": "選擇為 {{provider}} 提供服務的實例",
+    "instanceSelectorAria": "選擇 Freeway 使用 {{provider}} 的方式",
     "instanceOverrideSaveFailed": "更新 {{provider}} 的實例失敗：{{message}}",
     "instanceOverridesLoadFailed": "無法載入 Freeway 實例設定：{{message}}",
     "instancesLoadFailed": "無法載入 Freeway 模組實例：{{message}}",

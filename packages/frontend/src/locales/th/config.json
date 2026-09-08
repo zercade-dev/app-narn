@@ -219,7 +219,7 @@
     "credentialMarkErrorNotCandidate": "โมดูลนี้ไม่สามารถถูกทำเครื่องหมายว่าไม่ถูกต้องได้อีกต่อไป — สถานะ Freeway ของโมดูลนี้เปลี่ยนไปแล้ว รีเฟรชเพื่อดูสถานะปัจจุบัน",
     "automaticOption": "อัตโนมัติ",
     "disabledOption": "ปิดใช้งาน",
-    "instanceSelectorAria": "เลือกอินสแตนซ์ที่ให้บริการ {{provider}}",
+    "instanceSelectorAria": "เลือกว่า Freeway จะใช้ {{provider}} อย่างไร",
     "instanceOverrideSaveFailed": "อัปเดตอินสแตนซ์สำหรับ {{provider}} ไม่สำเร็จ: {{message}}",
     "instanceOverridesLoadFailed": "โหลดการตั้งค่าอินสแตนซ์ของ Freeway ไม่สำเร็จ: {{message}}",
     "instancesLoadFailed": "โหลดอินสแตนซ์โมดูลของ Freeway ไม่สำเร็จ: {{message}}",

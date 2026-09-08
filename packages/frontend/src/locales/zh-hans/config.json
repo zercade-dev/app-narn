@@ -219,7 +219,7 @@
     "credentialMarkErrorNotCandidate": "此模块无法再被标记为无效——其 Freeway 状态已发生变化。刷新即可查看当前状态。",
     "automaticOption": "自动",
     "disabledOption": "已停用",
-    "instanceSelectorAria": "选择为 {{provider}} 提供服务的实例",
+    "instanceSelectorAria": "选择 Freeway 使用 {{provider}} 的方式",
     "instanceOverrideSaveFailed": "更新 {{provider}} 的实例失败：{{message}}",
     "instanceOverridesLoadFailed": "加载 Freeway 实例设置失败：{{message}}",
     "instancesLoadFailed": "加载 Freeway 模块实例失败：{{message}}",

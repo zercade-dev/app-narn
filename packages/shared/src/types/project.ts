@@ -225,13 +225,19 @@ export interface WorkspaceSettings {
    */
   freewayInstanceOverrides?: Record<string, string>;
   /**
-   * Base module ids excluded from Freeway's automatic candidate pool
-   * entirely — no instance of that provider is dispatched to, or counted as
-   * "missing a key/enablement" in the status checklist; it just reports as
-   * disabled. Independent of {@link freewayInstanceOverrides}: disabling a
-   * provider does not clear its pinned instance, so re-enabling it restores
-   * that choice. Direct (non-Freeway) routing rules naming the module are
-   * unaffected — this only removes it from Freeway's own automatic pool.
+   * Base module ids excluded from Freeway's automatic candidate pool. No NEW
+   * Freeway selection dispatches to any instance of such a provider, and the
+   * status checklist reports it as disabled rather than as "missing a
+   * key/enablement". A run already bound to one of the provider's buckets
+   * leaves it at its next batch wherever the engine re-checks the pool — a
+   * translation run re-plans each batch against the live pool, and an AI
+   * review or source review re-checks its bucket before each batch — while
+   * glossary and category generation pick their module once at start and
+   * finish where they began. Independent of
+   * {@link freewayInstanceOverrides}: disabling a provider does not clear its
+   * pinned instance, so re-enabling it restores that choice. Direct
+   * (non-Freeway) routing rules naming the module are unaffected — this only
+   * removes it from Freeway's own automatic pool.
    */
   freewayDisabledProviders?: string[];
 }
