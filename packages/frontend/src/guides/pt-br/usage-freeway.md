@@ -35,7 +35,7 @@ Um provedor sem chave é simplesmente ignorado. Cada chave a mais amplia o conju
 
 O painel **NARN Freeway** na tela de configuração mostra o conjunto inteiro de relance: o status da chave de cada provedor e, por modelo, seu **Estado**, a cota **Restante**, o **Próximo reset** e a **Taxa de aprovação** recente por idioma.
 
-Cada provedor também tem um menu suspenso ao lado que controla como o Freeway o usa: **Automático** deixa o conjunto escolher como de costume, uma instância nomeada fixa o Freeway naquela conta específica, e **Desativado** tira o provedor do conjunto por completo — sem desligar o módulo em nenhum outro lugar. Voltar um provedor desativado para Automático (ou para uma instância nomeada) retoma exatamente de onde parou.
+Cada provedor também tem um menu suspenso ao lado que controla como o Freeway o usa: **Automático** deixa o conjunto escolher como de costume, uma instância nomeada fixa o Freeway naquela conta específica, e **Desativado** tira o provedor do conjunto por completo — sem desligar o módulo em nenhum outro lugar. O menu suspenso só orienta as escolhas automáticas do conjunto e é uma configuração da sua própria conta: uma regra de roteamento que aponta diretamente para o provedor continua usando-o, e qualquer outra pessoa que trabalhe nos seus projetos com o roteamento dela segue as próprias configurações do Freeway. Uma tradução em andamento deixa de usar um provedor recém-desativado a partir do lote seguinte; outras execuções já iniciadas podem terminar no modelo com que começaram. Voltar um provedor desativado para Automático (ou para uma instância nomeada) retoma exatamente de onde parou.
 
 O estado de um modelo é um destes:
 

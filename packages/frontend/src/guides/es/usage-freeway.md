@@ -35,7 +35,7 @@ Un proveedor al que no le hayas dado clave simplemente se omite. Añadir una cla
 
 El panel **NARN Freeway** de la pantalla de configuración muestra todo el conjunto de un vistazo: el estado de la clave de cada proveedor y, por modelo, su **Estado**, la cuota **Restante**, el **Próximo reinicio** y la **Tasa de aprobación** reciente por idioma.
 
-Cada proveedor tiene además un desplegable al lado que controla cómo lo usa Freeway: **Automático** deja que el conjunto elija como de costumbre, una instancia con nombre fija Freeway a esa cuenta concreta, y **Desactivado** saca al proveedor del conjunto por completo — sin apagar el módulo en ningún otro sitio. Si vuelves a poner un proveedor desactivado en Automático (o en una instancia con nombre), retoma justo donde lo dejó.
+Cada proveedor tiene además un desplegable al lado que controla cómo lo usa Freeway: **Automático** deja que el conjunto elija como de costumbre, una instancia con nombre fija Freeway a esa cuenta concreta, y **Desactivado** saca al proveedor del conjunto por completo — sin apagar el módulo en ningún otro sitio. El desplegable solo orienta las elecciones automáticas del conjunto y es un ajuste de tu propia cuenta: una regla de enrutamiento que apunta directamente a ese proveedor lo sigue usando, y cualquier otra persona que trabaje en tus proyectos con su propio enrutamiento sigue sus propios ajustes de Freeway. Una traducción ya en curso deja de usar un proveedor recién desactivado a partir de su siguiente lote; otras ejecuciones ya iniciadas pueden terminar con el modelo con el que empezaron. Si vuelves a poner un proveedor desactivado en Automático (o en una instancia con nombre), retoma justo donde lo dejó.
 
 El estado de un modelo es uno de estos:
 

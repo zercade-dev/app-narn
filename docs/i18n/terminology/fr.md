@@ -52,11 +52,11 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | reference language |  |  |
 | writable language |  |  |
 | Pseudo Test |  |  |
-| run |  |  |
+| run | exécution | Feminine. Already shipped: `batch:cancelRun` "Annuler l'exécution", `batch:runCancelled` "Exécution annulée :", `logs:translation.runQueued` "Exécution de traduction en file d'attente — position {{position}}." Noun only — never the anglicism "un run" (see `style/fr.md`); the verbs stay "traduire", "lancer", "générer". The Activity tab that lists runs is "Activité", a separate term. |
 | revert |  |  |
 | Activity |  |  |
 | log |  |  |
-| batch |  |  |
+| batch | lot | Masculine. Already shipped: `config:module.batchMode` "Mode de lot", `config:batchGroupingLabel` "Regroupement des lots", `config:batchGroupingDescription` "…dans le même lot…". Keep it distinct from *run* ("exécution"), which contains several lots, and do not reuse "lot" for bulk operations over selected rows. |
 | batch grouping |  |  |
 | AI review |  |  |
 | judge |  |  |
@@ -73,10 +73,10 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | module |  |  |
 | module instance |  |  |
 | provider | fournisseur | The outside company/service behind a module. `config:enableModuleHelp` "Ajoutez un fournisseur d'IA ou de traduction à utiliser dans vos projets." The three English strings that mislabel a module-instance picker *Provider* (`colorText:assistant.instanceLabel`, `stage-details:chatInstanceLabel`, `config:routing.simplePlaceholder` "Choisissez un fournisseur") are translated as written and must not drag *module* toward this word anywhere else. |
-| model |  |  |
+| model | modèle | Masculine. Already shipped: `config:routing.labelModelOverride` "Modèle personnalisé", `config:freeway.colModel` "Modèle", and throughout the Freeway guide. The collision `style/fr.md` warns about is still live — `sidebar:templateNone` ships as "Aucun modèle" — and the word stays with *model*: it is *template* that has to move to another rendering. Model ids themselves are never translated. |
 | prompt |  |  |
 | reasoning effort |  |  |
-| routing rule |  |  |
+| routing rule | règle de routage | Feminine. Already shipped: `config:routing.title` "Règles de routage". "routage" is content routing, not network routing, and it is also the bare noun for the Routing tab and its settings ("Pointez le routage vers Freeway", `guides/fr/usage-freeway.md`); the verb used in prose is "acheminer". Never "filtre", "condition" or "redirection". |
 | rule group |  |  |
 | credential vault | coffre de credentials | Masculine. **"credentials" is kept as an English loanword inside this specific compound**, lowercase, not translated to "identifiants" — that is what's already shipped three times (`vault:statusLabel` "Coffre de credentials", `vault:unlockTitle` "Déverrouiller le coffre de credentials", `vault:createTitle` "Créer le coffre de credentials") and is a deliberate exception to the ordinary "credential" → "identifiants" rendering used elsewhere in the same file (`config:credentialsMissingChip` "Identifiants manquants"). Shortened to "le coffre" where the context is unambiguous — `config:credentialsVaultLockedChip` "Coffre verrouillé", `config:credentialsUnlockButton` "Déverrouiller le coffre", `console:vaultLocked` "Coffre verrouillé". |
 | credential |  |  |

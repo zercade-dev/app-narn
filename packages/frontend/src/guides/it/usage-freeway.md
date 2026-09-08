@@ -35,7 +35,7 @@ Un provider a cui non hai dato una chiave viene semplicemente saltato. Ogni chia
 
 Il pannello **NARN Freeway** nella schermata di configurazione mostra tutto il pool a colpo d'occhio: lo stato della chiave di ogni provider e, per ciascun modello, il suo **Stato**, la quota **Rimanente**, il **Prossimo reset** e il recente **Tasso di superamento** per lingua.
 
-Ogni provider ha anche un menu a tendina accanto che controlla come Freeway lo usa: **Automatico** lascia scegliere il pool come al solito, un'istanza con nome vincola Freeway a quell'account specifico, e **Disattivato** toglie del tutto il provider dal pool — senza spegnere il modulo altrove. Rimettere un provider disattivato su Automatico (o su un'istanza con nome) riprende esattamente da dove si era interrotto.
+Ogni provider ha anche un menu a tendina accanto che controlla come Freeway lo usa: **Automatico** lascia scegliere il pool come al solito, un'istanza con nome vincola Freeway a quell'account specifico, e **Disattivato** toglie del tutto il provider dal pool — senza spegnere il modulo altrove. Il menu a tendina orienta soltanto le scelte automatiche del pool ed è un'impostazione del tuo account: una regola di routing che indica direttamente il provider continua a usarlo, e chiunque altro lavori ai tuoi progetti con il proprio routing segue le proprie impostazioni di Freeway. Una traduzione già in corso smette di usare un provider appena disattivato a partire dal lotto successivo; le altre esecuzioni già avviate potrebbero concludersi sul modello con cui hanno iniziato. Rimettere un provider disattivato su Automatico (o su un'istanza con nome) riprende esattamente da dove si era interrotto.
 
 Lo stato di un modello è uno tra:
 

@@ -224,7 +224,7 @@
     "credentialMarkErrorNotCandidate": "Este módulo ya no se puede marcar como inválido — su estado en Freeway ha cambiado. Actualiza para ver el estado actual.",
     "automaticOption": "Automático",
     "disabledOption": "Desactivado",
-    "instanceSelectorAria": "Elegir qué instancia atiende a {{provider}}",
+    "instanceSelectorAria": "Elegir cómo usa Freeway {{provider}}",
     "instanceOverrideSaveFailed": "No se pudo actualizar la instancia de {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "No se pudo cargar la configuración de instancias de Freeway: {{message}}",
     "instancesLoadFailed": "No se pudieron cargar las instancias de módulos de Freeway: {{message}}",
