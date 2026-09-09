@@ -829,8 +829,16 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                     // waitingForQuota field (set before it was cancelled) must
                     // never render the waiting chip — only a currently-Paused,
                     // still-parked run does.
-                    const isWaitingForQuota =
-                      isPaused && (run.waitingForQuota?.pairs?.length ?? 0) > 0;
+                    //
+                    // "Still-parked" is measured by `pairCount`, not by
+                    // `pairs.length`: GET /runs projects `waitingForQuota.pairs`
+                    // away (a park can hold six figures of pairs and this tab
+                    // re-polls every two seconds) and sends the size instead.
+                    // `pairs.length` stays the fallback for a FULL record — an
+                    // engine/SSE-sourced run, a test fixture, or an older server.
+                    const waitingPairCount =
+                      run.waitingForQuota?.pairCount ?? run.waitingForQuota?.pairs?.length ?? 0;
+                    const isWaitingForQuota = isPaused && waitingPairCount > 0;
                     const isQueued = run.status === RunStatusCode.Queued;
                     const queueIndex = isQueued ? queuedIds.indexOf(run.runId) : -1;
 
@@ -936,7 +944,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                   data-testid={`run-waiting-pairs-${run.runId}`}
                                 >
                                   {t('runs.waitingPairsCount', {
-                                    count: run.waitingForQuota.pairs.length,
+                                    count: waitingPairCount,
                                   })}
                                 </div>
                                 {run.waitingForQuota.reason === 'provider-error' && (
