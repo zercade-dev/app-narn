@@ -16,12 +16,22 @@
  * the typed health snapshot is built around; wiring them up lives in M9, which
  * is outside this module.
  *
+ * Tenancy: a key's `moduleId` is a named instance id (`<base>:<slug>`, the slug
+ * user-chosen) and its `model` comes straight from that tenant's module config,
+ * so both halves are tenant-private strings, and the counters beside them are
+ * that tenant's activity volume. Buckets are therefore partitioned by the
+ * ambient tenant at record time, and there are two deliberately distinct reads:
+ * {@link MetricsCollector.snapshot} is process-wide (the operator/Prometheus
+ * view) and {@link MetricsCollector.snapshotForTenant} is what a cloud tenant
+ * may see.
+ *
  * Exposed via `GET /api/modules/health`.
  */
+import { getCurrentTenant } from '../storage/pg/tenant-context.js';
 
-/** Max latency samples retained per (moduleId, model) key. */
+/** Max latency samples retained per (tenant, moduleId, model) key. */
 const LATENCY_BUFFER_SIZE = 256;
-/** Max recent-429 timestamps retained per (moduleId, model) key. */
+/** Max recent-429 timestamps retained per (tenant, moduleId, model) key. */
 const RATE_LIMIT_BUFFER_SIZE = 100;
 
 /**
@@ -102,6 +112,13 @@ export interface ModuleHealthSnapshot {
 }
 
 interface MetricEntry {
+  /**
+   * The tenant whose activity this bucket counts — the ambient tenant at record
+   * time — or undefined for activity recorded outside any tenant context
+   * (open-core boot, background sweeps). It selects which rows a tenant may
+   * read and is never a reported field, so the payload shape is unchanged.
+   */
+  tenantId: string | undefined;
   moduleId: string;
   model: string | null;
   success: number;
@@ -119,10 +136,16 @@ export class MetricsCollector {
   private readonly entries = new Map<string, MetricEntry>();
 
   private entry(moduleId: string, model: string | null): MetricEntry {
-    const key = `${moduleId}${KEY_SEPARATOR}${model ?? ''}`;
+    // Partitioned by the ambient tenant. Both halves of the old key are
+    // tenant-private strings — moduleId is a named instance id (<base>:<slug>,
+    // the slug user-chosen) and model comes from that tenant's own module
+    // config — and the counters beside them are that tenant's activity volume.
+    const tenantId = getCurrentTenant()?.userId;
+    const key = `${tenantId ?? ''}${KEY_SEPARATOR}${moduleId}${KEY_SEPARATOR}${model ?? ''}`;
     let entry = this.entries.get(key);
     if (!entry) {
       entry = {
+        tenantId,
         moduleId,
         model,
         success: 0,
@@ -180,11 +203,33 @@ export class MetricsCollector {
     this.entry(moduleId, model).maskMismatches++;
   }
 
+  /**
+   * Every partition, unfiltered — the OPERATOR view. `ops-metrics.ts` feeds
+   * this to the cloud Prometheus exporter, whose success/failure series are
+   * the live error-rate alert signal, so it must stay process-wide: scoping it
+   * would silently blind that alerting. In a multi-tenant process it must
+   * never be served to a tenant — see {@link snapshotForTenant}.
+   */
   snapshot(): ModuleHealthSnapshot {
+    return this.build(() => true);
+  }
+
+  /**
+   * Only the buckets recorded under `tenantId` — the view a cloud tenant may
+   * read. Fail-closed: an undefined tenantId matches nothing, so a caller with
+   * no tenant context sees an empty snapshot rather than everything.
+   */
+  snapshotForTenant(tenantId: string | undefined): ModuleHealthSnapshot {
+    if (tenantId === undefined) return this.build(() => false);
+    return this.build((e) => e.tenantId === tenantId);
+  }
+
+  private build(include: (entry: MetricEntry) => boolean): ModuleHealthSnapshot {
     const stats: ModuleHealthKeyStats[] = [];
     const byModule = new Map<string, MetricEntry[]>();
 
     for (const entry of this.entries.values()) {
+      if (!include(entry)) continue;
       stats.push(this.toStats(entry));
       const group = byModule.get(entry.moduleId);
       if (group) group.push(entry);
