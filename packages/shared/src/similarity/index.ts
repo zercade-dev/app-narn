@@ -12,8 +12,9 @@
  * Scaling: a naive all-pairs nearest-neighbour search is O(n²). To keep large
  * inputs reasonable we restrict each entry's candidate neighbours to the other
  * entries that share at least one of its tokens (an inverted index), and cap
- * how many candidates we score per step (`MAX_CANDIDATES_PER_STEP`). This is an
- * approximation: when an entry's rarest tokens are shared by a very large
+ * how many candidates we score per step (`MAX_CANDIDATES_PER_STEP`) as well as
+ * how many index entries we examine to find them (`MAX_SCANNED_PER_STEP`). This
+ * is an approximation: when an entry's rarest tokens are shared by a very large
  * bucket, some genuine neighbours may be missed — acceptable for a pre-sort.
  */
 
@@ -37,6 +38,25 @@ const PLACEHOLDER_PATTERNS: RegExp[] = [
 
 /** Cap on candidate neighbours scored per chaining step (bounds the O(n²) search). */
 const MAX_CANDIDATES_PER_STEP = 256;
+
+/**
+ * Cap on bucket entries *examined* per chaining step, accepted or not.
+ *
+ * {@link MAX_CANDIDATES_PER_STEP} bounds how many unvisited neighbours are
+ * collected, which is not the same as bounding the work: an already-visited
+ * index is skipped without counting toward it. Late in the greedy chain almost
+ * every bucket entry is already visited, so a step falls through its rare
+ * tokens and scans a ubiquitous token's whole posting list — Σ df(t), with no
+ * early exit — to find almost nothing. With a token whose document frequency
+ * approaches n that degenerates to the O(n²) this index exists to avoid, in one
+ * synchronous loop on the only process the deployment has.
+ *
+ * A step that reaches its candidate cap within this budget behaves exactly as
+ * before, so ordinary inputs are unaffected. Only a step that scans this far
+ * without filling its candidate set stops early — precisely the case where the
+ * remaining postings are overwhelmingly visited and yield nothing anyway.
+ */
+const MAX_SCANNED_PER_STEP = MAX_CANDIDATES_PER_STEP * 8;
 
 /**
  * Tokenize source text into a lowercase word list.
@@ -167,10 +187,14 @@ export function computeSimilarityOrder(
     // keep the candidate set small.
     const sortedTokens = [...tokens].sort((a, b) => (docFreq.get(a) ?? 0) - (docFreq.get(b) ?? 0));
     const seen = new Set<number>();
+    // Counts every element looked at, including the ones skipped below — see
+    // MAX_SCANNED_PER_STEP for why the candidate cap alone does not bound this.
+    let scanned = 0;
     for (const tok of sortedTokens) {
       const bucket = invIndex.get(tok);
       if (!bucket) continue;
       for (const idx of bucket) {
+        if (++scanned > MAX_SCANNED_PER_STEP) return [...seen];
         if (idx === current || visited[idx]) continue;
         seen.add(idx);
         if (seen.size >= MAX_CANDIDATES_PER_STEP) return [...seen];
