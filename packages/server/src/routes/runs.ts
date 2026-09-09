@@ -202,13 +202,26 @@ runsRouter.post(
  * applied here as a list filter instead of a per-run 404 (a legacy run with no
  * `createdBy` is treated as the owner's, so it's filtered out for collaborators
  * too). Owners see every run, unfiltered.
+ *
+ * Serves the SUMMARY shape (`listRunSummaries`), not the full records: the
+ * Activity tab re-polls this endpoint every two seconds for as long as any run
+ * is active, and a full `RunStatus` carries two arrays that grow with the size
+ * of the WORK and that no client reads from the list — a translation run's
+ * `request.entryIds` (up to 50 000 ids, kept for the life of the run) and a
+ * quota-parked run's `waitingForQuota.pairs`. Both are projected away in SQL;
+ * the parked-pair count survives as `waitingForQuota.pairCount`. Anything that
+ * writes a run back must keep using `listRuns` — see the store's doc.
  */
 runsRouter.get(
   '/:projectId/runs',
   asyncHandler(async (req, res) => {
     const { projectId } = req.params;
     const access = await assertProjectAccess(projectId, { type: 'read' });
-    const runs = await getRunStore().listRuns(projectId);
+    // The collaborator filter and the JS sort below are unaffected by the
+    // projection: `createdBy` (a mirror column, overlaid by the store) and
+    // `startedAt` both survive it. Filtering/sorting a few dozen now-small
+    // objects here is free, and keeps the role logic out of the storage layer.
+    const runs = await getRunStore().listRunSummaries(projectId);
     const visible =
       access.role === 'collaborator'
         ? runs.filter((r) => r.createdBy === requireTenant().userId)

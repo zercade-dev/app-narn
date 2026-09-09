@@ -467,6 +467,21 @@ export interface RunStore {
   getRelinkRetranslate(projectId: string, runId: string): Promise<RelinkRetranslateRecord[]>;
   listRuns(projectId: string): Promise<RunStatus[]>;
   /**
+   * The run list in its SUMMARY shape: every run for the project, ordered by
+   * start time, with the two unbounded per-run payloads projected away in SQL —
+   * `request` (whose `entryIds` runs to tens of thousands of ids and is never
+   * cleared) and `waitingForQuota.pairs` (replaced by
+   * `waitingForQuota.pairCount`). Backs `GET /api/projects/:projectId/runs`,
+   * which the Activity tab re-polls every two seconds while any run is active.
+   *
+   * Every OTHER caller — project snapshot/backup, tenant export, the M9 orphan
+   * sweep, chat-usage, the revert route's multi-run guard — needs the full
+   * record and must keep using {@link listRuns}: these records are LOSSY, so
+   * one written back through `updateRun` would erase that run's stored
+   * `request` (a queued run without it cannot be routed) and its parked pairs.
+   */
+  listRunSummaries(projectId: string): Promise<RunStatus[]>;
+  /**
    * Count of the CURRENT TENANT's non-terminal runs across all their projects
    * (RLS-scoped — no projectId arg). Non-terminal = pending/queued/running/
    * paused. Used by the per-tenant run-concurrency cap.
