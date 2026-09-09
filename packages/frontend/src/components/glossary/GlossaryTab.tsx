@@ -912,28 +912,36 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                           <Lock className="w-3 h-3" /> {t('readOnly')}
                         </span>
                       )}
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-6 px-2 text-xs font-normal"
-                        onClick={() =>
-                          handleToggleEnabled(selectedGlossary.id, selectedGlossary.enabled ?? true)
-                        }
-                        data-testid="glossary-toggle-enabled-btn"
-                        title={(selectedGlossary.enabled ?? true) ? t('disable') : t('enable')}
-                      >
-                        {(selectedGlossary.enabled ?? true) ? (
-                          <>
-                            <EyeOff className="w-3 h-3 mr-1" />
-                            {t('disable')}
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="w-3 h-3 mr-1" />
-                            {t('enable')}
-                          </>
-                        )}
-                      </Button>
+                      {/* Enabling/disabling PATCHes the glossary, which asserts
+                          manage access — hidden for collaborators rather than
+                          offered only to 403. */}
+                      {!isCollaborator && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-xs font-normal"
+                          onClick={() =>
+                            handleToggleEnabled(
+                              selectedGlossary.id,
+                              selectedGlossary.enabled ?? true,
+                            )
+                          }
+                          data-testid="glossary-toggle-enabled-btn"
+                          title={(selectedGlossary.enabled ?? true) ? t('disable') : t('enable')}
+                        >
+                          {(selectedGlossary.enabled ?? true) ? (
+                            <>
+                              <EyeOff className="w-3 h-3 mr-1" />
+                              {t('disable')}
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="w-3 h-3 mr-1" />
+                              {t('enable')}
+                            </>
+                          )}
+                        </Button>
+                      )}
                     </CardTitle>
                     {isReadOnly && (
                       <p className="text-xs text-muted-foreground">
@@ -980,7 +988,10 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                         <Download className="w-3.5 h-3.5 mr-1" />
                         {t('exportTbx')}
                       </Button>
-                      {!isReadOnly && (
+                      {/* Import rewrites the glossary's terms — 'manage'-only
+                          server-side, so both the trigger and the hidden file
+                          input are withheld from collaborators. */}
+                      {!isReadOnly && !isCollaborator && (
                         <>
                           <input
                             ref={importFileInputRef}
@@ -1030,38 +1041,41 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                     )}
 
                     {/* Group: AI generation + DeepL push, in that order. Also kept
-                        as one non-wrapping unit (see above). */}
-                    <div className="flex flex-nowrap items-center gap-2">
-                      {/* Also 'manage'-only server-side (translate-terms route),
-                          and its dialog is already hidden outright for
-                          collaborators below — so the trigger is hidden too
-                          rather than left as a dead click. */}
-                      {!isReadOnly && !isCollaborator && (
+                        as one non-wrapping unit (see above). Every action in it is
+                        'manage'-only server-side — the translate-terms route and
+                        both push-to-DeepL routes assert manage access — so the
+                        whole group is hidden for collaborators rather than left as
+                        dead clicks. The translate-terms dialog is likewise not
+                        rendered for them below. */}
+                    {!isCollaborator && (
+                      <div className="flex flex-nowrap items-center gap-2">
+                        {!isReadOnly && (
+                          <Button
+                            onClick={() => setTranslateTermsOpen(true)}
+                            data-testid="glossary-translate-terms-btn"
+                          >
+                            <Languages className="w-3.5 h-3.5 mr-1" />
+                            {t('translateTerms')}
+                          </Button>
+                        )}
                         <Button
-                          onClick={() => setTranslateTermsOpen(true)}
-                          data-testid="glossary-translate-terms-btn"
+                          variant="outline"
+                          onClick={() => void handlePushDeepL(false)}
+                          data-testid="glossary-push-deepl-btn"
+                          disabled={!isDeepLEnabled || selectedGlossary?.enabled === false}
                         >
-                          <Languages className="w-3.5 h-3.5 mr-1" />
-                          {t('translateTerms')}
+                          {t('pushToDeepL')}
                         </Button>
-                      )}
-                      <Button
-                        variant="outline"
-                        onClick={() => void handlePushDeepL(false)}
-                        data-testid="glossary-push-deepl-btn"
-                        disabled={!isDeepLEnabled || selectedGlossary?.enabled === false}
-                      >
-                        {t('pushToDeepL')}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => setPushReplaceConfirmOpen(true)}
-                        data-testid="glossary-push-deepl-replace-btn"
-                        disabled={!isDeepLEnabled || selectedGlossary?.enabled === false}
-                      >
-                        {t('pushToDeepLReplace')}
-                      </Button>
-                    </div>
+                        <Button
+                          variant="outline"
+                          onClick={() => setPushReplaceConfirmOpen(true)}
+                          data-testid="glossary-push-deepl-replace-btn"
+                          disabled={!isDeepLEnabled || selectedGlossary?.enabled === false}
+                        >
+                          {t('pushToDeepLReplace')}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1251,6 +1265,7 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
             selectedEntryIds={selectedEntryIds}
             assigningBusy={assigningBusy}
             canOpenMatches={canOpenMatches}
+            canAssign={!isCollaborator}
             onMatchTermIdChange={handleMatchTermIdChange}
             onMatchAssignmentChange={handleMatchAssignmentChange}
             onSetMainOpen={setMainOpen}

@@ -260,7 +260,8 @@
     "save": "保存",
     "saving": "保存中…",
     "clearNeedsReview": "清除“待审校”标记",
-    "clearReviewed": "清除“已审校”状态"
+    "clearReviewed": "清除“已审校”状态",
+    "updateFailed": "无法更新此条目"
   },
   "editor": {
     "sourceReadOnly": "原文（只读）",

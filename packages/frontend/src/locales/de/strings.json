@@ -265,7 +265,8 @@
     "save": "Speichern",
     "saving": "Wird gespeichert…",
     "clearNeedsReview": "Markierung „zu prüfen“ entfernen",
-    "clearReviewed": "Status „geprüft“ entfernen"
+    "clearReviewed": "Status „geprüft“ entfernen",
+    "updateFailed": "Dieser Eintrag konnte nicht aktualisiert werden"
   },
   "editor": {
     "sourceReadOnly": "Quelltext (schreibgeschützt)",
