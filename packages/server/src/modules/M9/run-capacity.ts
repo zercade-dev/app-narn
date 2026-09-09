@@ -35,7 +35,11 @@ const TERMINAL_STATUSES: ReadonlySet<RunStatusCode> = new Set([
  * legitimately dequeue them). Idempotent and safe to run repeatedly: a second
  * pass finds only terminal or current-process runs and changes nothing. Runs
  * started by the CURRENT process (`startedAt >= PROCESS_START_MS`) are never
- * touched, so an active run is never dropped.
+ * touched, so an active run is never dropped — which is why every path that
+ * re-dispatches a run adopted from a PRIOR generation (M9's in-place retry and
+ * quota resumes, and the chat-run lifecycle) re-stamps `startedAt` as the run
+ * goes live: without that, this sweep reads a live run as an orphan and fails
+ * it mid-flight.
  *
  * Runs parked on free quota (`Paused` + `waitingForQuota`) are ALSO left alone,
  * regardless of age: they hold no in-flight work to reconcile, they are meant

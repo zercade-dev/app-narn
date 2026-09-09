@@ -93,6 +93,16 @@ export class SettledTracker {
     if (!this.settled.has(runId)) this.settled.set(runId, createSettledDeferred());
   }
 
+  /**
+   * Is `runId` armed and not yet resolved — i.e. past the point where detached
+   * tasks may be in flight for it? An engine cleaning up a run's own failed
+   * START asks this first, so it never steals the terminal transition from
+   * tasks that already own it.
+   */
+  isArmed(runId: string): boolean {
+    return this.settled.has(runId);
+  }
+
   /** Increment the in-flight detached-task count for a run. */
   taskStarted(runId: string): void {
     this.activeTasks.set(runId, (this.activeTasks.get(runId) ?? 0) + 1);
