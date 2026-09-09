@@ -19,7 +19,9 @@
   },
   "confirmDelete": {
     "title": "Xóa mục mồ côi?",
-    "body": "Thao tác này xóa vĩnh viễn mục mồ côi cùng các bản dịch của nó. Không thể hoàn tác."
+    "body": "Thao tác này xóa vĩnh viễn mục mồ côi cùng các bản dịch của nó. Không thể hoàn tác.",
+    "bulkTitle": "Xóa các mục mồ côi đã chọn?",
+    "bulkBody_other": "Thao tác này xóa vĩnh viễn {{count}} mục mồ côi cùng các bản dịch của chúng. Không thể hoàn tác."
   },
   "relink": {
     "title": "Liên kết lại mục mồ côi",

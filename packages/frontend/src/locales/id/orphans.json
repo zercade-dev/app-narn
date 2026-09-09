@@ -19,7 +19,9 @@
   },
   "confirmDelete": {
     "title": "Hapus entri yatim?",
-    "body": "Tindakan ini menghapus permanen catatan yatim itu beserta terjemahannya. Tindakan ini tidak dapat diurungkan."
+    "body": "Tindakan ini menghapus permanen catatan yatim itu beserta terjemahannya. Tindakan ini tidak dapat diurungkan.",
+    "bulkTitle": "Hapus entri yatim yang dipilih?",
+    "bulkBody_other": "Tindakan ini menghapus permanen {{count}} catatan yatim beserta terjemahannya. Tindakan ini tidak dapat diurungkan."
   },
   "relink": {
     "title": "Hubungkan ulang entri yatim",
