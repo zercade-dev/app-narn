@@ -5310,7 +5310,7 @@ export class TranslationEngine {
             !isModelUnavailableError(moduleResult.error) &&
             isTransientProviderError(moduleResult.error)
           ) {
-            const pairKey = `${e.decision.entry.id} ${e.decision.targetLanguage}`;
+            const pairKey = `${e.decision.entry.id}\0${e.decision.targetLanguage}`;
             let parkedOnce = this.freewayTransientParkedPairs.get(runId);
             if (!parkedOnce) {
               parkedOnce = new Set<string>();
