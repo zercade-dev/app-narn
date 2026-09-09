@@ -6,6 +6,10 @@
   "capabilities": ["translate", "batch"],
   "costTier": "medium",
   "configSchema": {
+    "apiKey": {
+      "type": "string",
+      "format": "password"
+    },
     "model": {
       "type": "string",
       "description": "Anthropic model id (e.g. claude-3-5-sonnet-20241022, claude-3-haiku-20240307, claude-opus-4-5). Left blank until live discovery selects the cheapest available model."
