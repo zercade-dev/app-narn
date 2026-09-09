@@ -19,7 +19,10 @@
   },
   "confirmDelete": {
     "title": "Delete orphan?",
-    "body": "This permanently deletes the orphaned record and its translations. This cannot be undone."
+    "body": "This permanently deletes the orphaned record and its translations. This cannot be undone.",
+    "bulkTitle": "Delete the selected orphans?",
+    "bulkBody_one": "This permanently deletes {{count}} orphaned record and its translations. This cannot be undone.",
+    "bulkBody_other": "This permanently deletes {{count}} orphaned records and their translations. This cannot be undone."
   },
   "relink": {
     "title": "Relink orphan",
