@@ -260,7 +260,8 @@
     "save": "저장",
     "saving": "저장하는 중…",
     "clearNeedsReview": "“검토 필요” 표시 지우기",
-    "clearReviewed": "“검토됨” 상태 지우기"
+    "clearReviewed": "“검토됨” 상태 지우기",
+    "updateFailed": "이 항목을 업데이트하지 못했어요"
   },
   "editor": {
     "sourceReadOnly": "원문 (읽기 전용)",

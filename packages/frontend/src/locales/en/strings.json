@@ -265,7 +265,8 @@
     "save": "Save",
     "saving": "Saving…",
     "clearNeedsReview": "Clear \"needs review\" flag",
-    "clearReviewed": "Clear \"reviewed\" status"
+    "clearReviewed": "Clear \"reviewed\" status",
+    "updateFailed": "Couldn't update this entry"
   },
   "editor": {
     "sourceReadOnly": "Source text (read-only)",

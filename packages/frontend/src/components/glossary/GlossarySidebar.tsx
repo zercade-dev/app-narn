@@ -32,7 +32,9 @@ interface GlossarySidebarProps {
    * Both creation paths are 'manage'-only server-side — `POST /glossaries`
    * asserts manage access, and AI generation does too (its dialog is already
    * hidden outright for collaborators in GlossaryTab.tsx) — so both triggers
-   * are hidden rather than left as dead clicks that 403 or open nothing.
+   * are hidden rather than left as dead clicks that 403 or open nothing. The
+   * per-glossary rename and delete triggers are the same: `PATCH` and `DELETE
+   * /glossaries/:glossaryId` both assert manage access too.
    */
   readonly isCollaborator: boolean;
 }
@@ -239,7 +241,7 @@ export function GlossarySidebar({
                       {summary.termCount}
                     </span>
                   </button>
-                  {!summary.readOnly && isSelected && (
+                  {!summary.readOnly && !isCollaborator && isSelected && (
                     <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         size="icon"

@@ -260,7 +260,8 @@
     "save": "儲存",
     "saving": "儲存中…",
     "clearNeedsReview": "清除「待審校」標記",
-    "clearReviewed": "清除「已審校」狀態"
+    "clearReviewed": "清除「已審校」狀態",
+    "updateFailed": "無法更新這個條目"
   },
   "editor": {
     "sourceReadOnly": "原文（唯讀）",

@@ -265,7 +265,8 @@
     "save": "Salvar",
     "saving": "Salvando…",
     "clearNeedsReview": "Limpar a marcação “precisa de revisão”",
-    "clearReviewed": "Limpar o status “revisado”"
+    "clearReviewed": "Limpar o status “revisado”",
+    "updateFailed": "Não foi possível atualizar esta entrada"
   },
   "editor": {
     "sourceReadOnly": "Texto de origem (somente leitura)",

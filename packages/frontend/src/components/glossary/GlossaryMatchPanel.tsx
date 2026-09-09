@@ -24,6 +24,13 @@ interface GlossaryMatchPanelProps {
   readonly selectedEntryIds: Set<string>;
   readonly assigningBusy: boolean;
   readonly canOpenMatches: boolean;
+  /**
+   * Whether the viewer may write the assignment. Assigning or unassigning a
+   * glossary PATCHes each matched entry's `assignedGlossaryIds`, which
+   * `assertEntryPatchAllowed` rejects for collaborators — so the action button
+   * is hidden for them while the match list itself stays readable.
+   */
+  readonly canAssign: boolean;
   readonly onMatchTermIdChange: (v: string | null) => void;
   readonly onMatchAssignmentChange: (v: 'with' | 'without') => void;
   readonly onSetMainOpen: (open: boolean) => void;
@@ -43,6 +50,7 @@ export function GlossaryMatchPanel({
   selectedEntryIds,
   assigningBusy,
   canOpenMatches,
+  canAssign,
   onMatchTermIdChange,
   onMatchAssignmentChange,
   onSetMainOpen,
@@ -165,16 +173,18 @@ export function GlossaryMatchPanel({
                     ? t('deselectAll')
                     : t('selectAll')}
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-6 px-2 text-[10px]"
-                  disabled={selectedEntryIds.size === 0 || assigningBusy}
-                  onClick={matchAssignment === 'with' ? onUnassignGlossary : onAssignGlossary}
-                  data-testid="glossary-match-action-btn"
-                >
-                  {matchAssignment === 'with' ? t('unassignGlossary') : t('assignGlossary')}
-                </Button>
+                {canAssign && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-6 px-2 text-[10px]"
+                    disabled={selectedEntryIds.size === 0 || assigningBusy}
+                    onClick={matchAssignment === 'with' ? onUnassignGlossary : onAssignGlossary}
+                    data-testid="glossary-match-action-btn"
+                  >
+                    {matchAssignment === 'with' ? t('unassignGlossary') : t('assignGlossary')}
+                  </Button>
+                )}
               </div>
             </div>
             <div className="flex flex-col gap-1 px-2">

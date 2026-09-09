@@ -265,7 +265,8 @@
     "save": "Guardar",
     "saving": "Guardando…",
     "clearNeedsReview": "Quitar la marca «necesita revisión»",
-    "clearReviewed": "Quitar el estado «revisado»"
+    "clearReviewed": "Quitar el estado «revisado»",
+    "updateFailed": "No se pudo actualizar esta entrada"
   },
   "editor": {
     "sourceReadOnly": "Texto de origen (solo lectura)",
