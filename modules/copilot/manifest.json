@@ -6,6 +6,10 @@
   "capabilities": ["translate", "batch"],
   "costTier": "medium",
   "configSchema": {
+    "githubToken": {
+      "type": "string",
+      "format": "password"
+    },
     "model": {
       "type": "string",
       "description": "Model identifier — populated at runtime from the Copilot models API; defaults to the cheapest discovered model."

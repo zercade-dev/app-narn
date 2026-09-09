@@ -6,6 +6,10 @@
   "capabilities": ["translate", "batch"],
   "costTier": "high",
   "configSchema": {
+    "apiKey": {
+      "type": "string",
+      "format": "password"
+    },
     "model": {
       "type": "string",
       "description": "DeepSeek model id. deepseek-chat and deepseek-reasoner are legacy aliases (deprecating 2026-07-24). Free text accepted for new/custom models. Left blank until live discovery selects the cheapest available model."

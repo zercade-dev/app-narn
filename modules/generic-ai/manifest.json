@@ -6,6 +6,10 @@
   "capabilities": ["translate", "batch"],
   "costTier": "medium",
   "configSchema": {
+    "apiKey": {
+      "type": "string",
+      "format": "password"
+    },
     "format": {
       "type": "string",
       "enum": ["openai", "anthropic"],
