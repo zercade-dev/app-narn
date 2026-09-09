@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
+    "dev": "vite",
     "build": "tsc && vite build",
     "clean": "rm -rf dist coverage",
     "preview": "vite preview"

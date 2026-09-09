@@ -73,6 +73,12 @@ pnpm build     # clean + tsc build of all packages
 pnpm lint      # eslint over packages/*/src
 ```
 
+Both halves listen on loopback, which is where forwarded ports reach them. To
+open the frontend to another device — a phone on the same network, a published
+Codespaces port — start it with `VITE_HOST=0.0.0.0`, and know what that opens:
+the dev server proxies `/api` to a server that has no authentication in this
+mode, so anyone who can reach port 5173 can read every project on the machine.
+
 ## The local gate
 
 ```bash
