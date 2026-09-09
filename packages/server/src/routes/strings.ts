@@ -42,12 +42,21 @@ const upload = singleFileUpload({
 // Bound CSV import frequency so repeated large uploads cannot exhaust memory/CPU.
 const importRateLimiter = rateLimiter({ maxRequests: 30, windowMs: 60_000 });
 
-const translationRecordSchema = z.object({
+// Exported so its shape can be tested directly — kept in parity with
+// TranslationRecord by a schema-parity test, the same way updateEntrySchema is
+// kept in parity with StringEntry.
+export const translationRecordSchema = z.object({
   text: z.string(),
   status: z.enum(['pending', 'translated', 'reviewed', 'flagged']).default('translated'),
   moduleId: z.string().default('manual'),
   timestamp: z.number().default(() => Date.now()),
   needsReview: z.boolean().optional(),
+  // Id of the run that produced this translation, stamped by the engine on the
+  // record it wrote. Accepted for the same round-trip reason as the two Freeway
+  // fields below and, like them, never set BY a client — `dropStaleRunAttribution`
+  // clears it from any language whose text the request rewrites, so it can only
+  // ever ride back in unchanged.
+  runId: z.string().optional(),
   // Freeway serving-bucket quality tier (Addendum H). Accepted here purely so
   // a client round-trip (load an entry, edit, PUT it back) doesn't silently
   // drop a tier the server already stamped — the field is never set BY this
@@ -195,14 +204,37 @@ function withPendingWrites(stored: StringEntry, patch: EntryFieldPatch): StringE
   };
 }
 
+/**
+ * Drops the run attribution a client echoed back for any language whose text
+ * this request rewrites. `runId` names the run that produced the record's TEXT,
+ * so it survives only a round-trip that leaves that text alone — a hand-written
+ * replacement carries none, the same rule the editor already applies to
+ * freewayTier/freewayBucketKey.
+ */
+function dropStaleRunAttribution(
+  stored: StringEntry,
+  translations: NonNullable<z.infer<typeof updateEntrySchema>['translations']>,
+): NonNullable<z.infer<typeof updateEntrySchema>['translations']> {
+  let result = translations;
+  for (const [lang, record] of Object.entries(translations)) {
+    if (record?.runId === undefined) continue;
+    if (record.text === stored.translations[lang]?.text) continue;
+    if (result === translations) result = { ...translations };
+    const stripped = { ...record };
+    delete stripped.runId;
+    result[lang] = stripped;
+  }
+  return result;
+}
+
 async function buildTranslationLqa(
   projectId: string,
-  entryId: string,
+  stored: StringEntry,
   patch: EntryFieldPatch & {
     translations: NonNullable<z.infer<typeof updateEntrySchema>['translations']>;
   },
 ): Promise<StringEntry['lqaResults']> {
-  const existing = withPendingWrites(await getStringStore().getById(projectId, entryId), patch);
+  const existing = withPendingWrites(stored, patch);
   const translations = patch.translations;
   // Seed from {} (NOT { ...existing.lqaResults }): this whole map is passed as
   // `partial.lqaResults` to `updateEntry`, which per-key MERGES it onto the
@@ -282,15 +314,16 @@ stringsRouter.put(
     }
 
     // If translations are being updated, run basic LQA and attach results
-    const partial: Partial<Omit<StringEntry, 'id' | 'createdAt'>> = rest.translations
-      ? {
-          ...rest,
-          lqaResults: await buildTranslationLqa(projectId, entryId, {
-            ...rest,
-            translations: rest.translations,
-          }),
-        }
-      : rest;
+    let partial: Partial<Omit<StringEntry, 'id' | 'createdAt'>> = rest;
+    if (rest.translations) {
+      const stored = await getStringStore().getById(projectId, entryId);
+      const translations = dropStaleRunAttribution(stored, rest.translations);
+      partial = {
+        ...rest,
+        translations,
+        lqaResults: await buildTranslationLqa(projectId, stored, { ...rest, translations }),
+      };
+    }
 
     // A client-driven assignedGlossaryIds write is only a genuine manual
     // override for the ids that actually CHANGED — the UI always sends the
