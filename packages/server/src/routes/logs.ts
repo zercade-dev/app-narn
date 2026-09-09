@@ -93,11 +93,22 @@ function validateLogFilename(filename: string): boolean {
 /**
  * True for a rotated audit-log file (`audit.log.<timestamp>`). The active log is
  * always `audit.log`; rotation renames it to `audit.log.<timestamp>` (see
- * audit-logger.ts). Single predicate shared by the file-listing route and the
- * export reader so both agree on exactly which files count as rotated logs.
+ * audit-logger.ts). Used by the file-listing route, which offers the rotated
+ * history for download, and by {@link isAuditLogFile}.
  */
 function isRotatedAuditLog(name: string): boolean {
   return name.startsWith('audit.log.') && name.length > 'audit.log.'.length;
+}
+
+/**
+ * True for any audit-log file the export has to read: the active `audit.log` as
+ * well as every rotated `audit.log.<timestamp>`. The active file is the half a
+ * restart would otherwise lose — `AuditLogger` starts with an empty ring and
+ * never hydrates from disk, so an export that skipped it would return only the
+ * events logged since the process came up.
+ */
+function isAuditLogFile(name: string): boolean {
+  return name === 'audit.log' || isRotatedAuditLog(name);
 }
 
 /**
@@ -115,6 +126,30 @@ function buildAuditQueryOptions(
   if (src['startTime']) options.startTime = src['startTime'] as string;
   if (src['endTime']) options.endTime = src['endTime'] as string;
   return options;
+}
+
+/**
+ * The eventType / time-window predicate `auditLogger.getEntries` applies to the
+ * in-memory ring, for entries read back off disk — so a filtered export narrows
+ * BOTH halves of the merge rather than only the memory one.
+ */
+function matchesAuditFilter(
+  entry: AuditLogEntry,
+  options: NonNullable<Parameters<typeof auditLogger.getEntries>[0]>,
+): boolean {
+  if (options.eventType && entry.eventType !== options.eventType) {
+    return false;
+  }
+  const ts = new Date(entry.timestamp).getTime();
+  // Negated `>=`/`<=` rather than `<`/`>`: an unparseable timestamp is NaN, which
+  // must fail the bound the same way getEntries' filters drop it.
+  if (options.startTime && !(ts >= new Date(options.startTime).getTime())) {
+    return false;
+  }
+  if (options.endTime && !(ts <= new Date(options.endTime).getTime())) {
+    return false;
+  }
+  return true;
 }
 
 /**
@@ -297,11 +332,25 @@ logsRouter.post(
   asyncHandler(async (req: Request, res: Response) => {
     const options = buildAuditQueryOptions(req.body || {});
 
-    let entries = auditLogger.getEntries(options);
-
-    // Also include entries from file-based logs
-    const fileEntries = await readLogFileEntries();
-    entries = [...entries, ...fileEntries];
+    // The in-memory ring and the on-disk logs overlap — every entry still in the
+    // ring was also appended to the active `audit.log` — so merge on `id` instead
+    // of concatenating, or every recent entry is exported twice. First writer
+    // wins, keeping the ring's copy; a line with no id (a hand-edited file) is
+    // kept as-is rather than collapsed with every other id-less line.
+    const seen = new Set<string>();
+    const entries: AuditLogEntry[] = [];
+    for (const entry of [
+      ...auditLogger.getEntries(options),
+      ...(await readLogFileEntries(options)),
+    ]) {
+      if (typeof entry.id === 'string') {
+        if (seen.has(entry.id)) {
+          continue;
+        }
+        seen.add(entry.id);
+      }
+      entries.push(entry);
+    }
 
     // Sort by timestamp
     entries.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
@@ -500,20 +549,25 @@ logsRouter.get(
 );
 
 // Helper function to read entries from file-based logs
-async function readLogFileEntries(): Promise<AuditLogEntry[]> {
+async function readLogFileEntries(
+  options: NonNullable<Parameters<typeof auditLogger.getEntries>[0]>,
+): Promise<AuditLogEntry[]> {
   try {
     const files = await fs.readdir(LOG_DIR);
     const entries: AuditLogEntry[] = [];
 
     for (const file of files) {
-      if (isRotatedAuditLog(file)) {
+      if (isAuditLogFile(file)) {
         try {
           const filepath = path.join(LOG_DIR, file);
           const content = await fs.readFile(filepath, 'utf8');
           for (const line of content.trim().split('\n')) {
             if (line.trim()) {
               try {
-                entries.push(JSON.parse(line) as AuditLogEntry);
+                const entry = JSON.parse(line) as AuditLogEntry;
+                if (matchesAuditFilter(entry, options)) {
+                  entries.push(entry);
+                }
               } catch {
                 // Skip malformed lines
               }
