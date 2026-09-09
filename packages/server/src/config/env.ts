@@ -222,6 +222,15 @@ export function getMaxConcurrentRunsPerTenant(): string | undefined {
 }
 
 /**
+ * `MAX_STRING_ENTRIES_PER_TENANT` — raw value. Same contract as the run cap
+ * above: the call site early-returns on unset/non-finite/≤0 (unbounded), so the
+ * coercion stays there. (services/tenant-storage-quota.ts)
+ */
+export function getMaxStringEntriesPerTenant(): string | undefined {
+  return process.env.MAX_STRING_ENTRIES_PER_TENANT;
+}
+
+/**
  * `MAX_BACKUPS_PER_PROJECT` — raw value; passed through `sanitizeMaxBackups`
  * (which rejects malformed input) at the call site. (modules/auto-snapshot.ts)
  */

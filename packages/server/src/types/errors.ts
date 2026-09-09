@@ -153,6 +153,22 @@ export class TooManyRunsError extends Error {
 }
 
 /**
+ * A write would take the tenant past a per-tenant storage quota (today
+ * `MAX_STRING_ENTRIES_PER_TENANT`). 413 rather than 429 because waiting does
+ * not help — the caller has to delete stored data first — so the message is
+ * surfaced verbatim and names the limit, the current usage and what the
+ * request would have added.
+ */
+export class StorageQuotaExceededError extends Error {
+  readonly statusCode = 413;
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'StorageQuotaExceededError';
+  }
+}
+
+/**
  * The request resolved to a cloud identity but the caller's device is not
  * enrolled (no per-device vault row / no ambient deviceId), so a per-device
  * vault operation cannot proceed. The central error handler surfaces it as

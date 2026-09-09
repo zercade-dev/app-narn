@@ -238,6 +238,12 @@ export interface StringStore {
   load(projectId: string): Promise<StringEntry[]>;
   getById(projectId: string, id: string): Promise<StringEntry>;
   query(projectId: string, filters: StringQueryFilters): Promise<StringEntry[]>;
+  /**
+   * Count of every entry the CURRENT TENANT can see, across all their projects
+   * (RLS-scoped — no projectId arg). Used by the per-tenant stored-entry quota,
+   * the storage counterpart of {@link RunStore.countActiveRuns}.
+   */
+  countAllEntries(): Promise<number>;
   save(projectId: string, entries: StringEntry[]): Promise<void>;
   mutateAll(
     projectId: string,
