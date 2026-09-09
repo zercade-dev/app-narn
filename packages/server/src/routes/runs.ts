@@ -4,7 +4,7 @@ import {
   RunStatusCode,
   hasRunDetailsKind,
   BATCH_GROUPING_DIMENSIONS,
-  can,
+  type RunStatus,
 } from '@zercade-dev/narn-shared';
 import { getProjectStore, getRunStore, getStringStore } from '../storage/registry.js';
 import type { SourceReviewRecord } from '../storage/types.js';
@@ -21,9 +21,12 @@ import { requireUnlockedVault } from '../middleware/require-vault.js';
 import { getSessionId } from '../middleware/session.js';
 import { asyncHandler, enqueueRun } from '../http/index.js';
 import { projectIdParam } from '../middleware/path-params.js';
-import { assertRunVisible, assertProjectAccess } from '../middleware/authz.js';
+import {
+  assertRunVisible,
+  assertProjectAccess,
+  assertLanguagesWritable,
+} from '../middleware/authz.js';
 import { requireTenant } from '../storage/pg/tenant-context.js';
-import { ForbiddenError } from '../types/errors.js';
 
 export const runsRouter: Router = Router();
 
@@ -62,6 +65,33 @@ async function rememberReviewSelection(
       ...(err instanceof Error ? { error: err.message } : {}),
     });
   }
+}
+
+/**
+ * The target languages a retry would re-attempt: the run's own recorded
+ * failures, deduplicated exactly as `retryFailed` rebuilds its pairs from them
+ * (an error missing either id is skipped there too, so nothing is re-dispatched
+ * for it). Read off the errors rather than the run's request scope — a retry
+ * re-sends only what failed, and `request` is optional on a run while `errors`
+ * is not.
+ */
+function retryTargetLanguages(run: RunStatus): string[] {
+  const languages = new Set<string>();
+  for (const err of run.errors) {
+    if (err.stringId && err.targetLang) languages.add(err.targetLang);
+  }
+  return [...languages];
+}
+
+/**
+ * The target languages a resume could still write: the run's request scope plus
+ * any pairs parked on free quota. Both are needed — a park that has not drained
+ * resumes the rest of the run's scope alongside its parked pairs.
+ */
+function resumeTargetLanguages(run: RunStatus): string[] {
+  const languages = new Set(run.request?.targetLanguages ?? []);
+  for (const pair of run.waitingForQuota?.pairs ?? []) languages.add(pair.targetLanguage);
+  return [...languages];
 }
 
 const reorderSchema = z.object({
@@ -463,7 +493,11 @@ runsRouter.post(
     // run map keyed by runId ALONE (no membership check), and vault-unlock is not
     // membership — confirm the run is visible under `:projectId` (404 otherwise)
     // before re-enqueuing, so a tenant can't retry another tenant's run by its UUID.
-    await assertRunVisible(projectId, runId);
+    const run = await assertRunVisible(projectId, runId);
+    // Re-translating the recorded failures is a translation write, so every
+    // language among them must be one the caller can STILL write — the grant
+    // that allowed the original run may have been narrowed since.
+    await assertLanguagesWritable(projectId, retryTargetLanguages(run));
     const sessionId = getSessionId(res);
     const result = await translationEngine.retryFailed(projectId, runId, sessionId);
     if (!result) {
@@ -649,7 +683,10 @@ runsRouter.post(
     // Cross-tenant gate: behind the caller's OWN vault, but vault-unlock is not
     // membership — confirm the run is visible under `:projectId` (404 otherwise)
     // before resuming, so a tenant can't resume another tenant's run by its UUID.
-    await assertRunVisible(projectId, runId);
+    const run = await assertRunVisible(projectId, runId);
+    // Resuming re-dispatches whatever the run has left, so the caller must still
+    // be able to write every language it could reach (see the retry route).
+    await assertLanguagesWritable(projectId, resumeTargetLanguages(run));
     // The caller's session is what the resumed pass reads credentials under
     // (a quota-parked run can resume days after its original session died).
     const status = await translationEngine.resume(projectId, runId, getSessionId(res));
@@ -720,7 +757,8 @@ runsRouter.post(
     // Cross-tenant gate: the engine keys its in-memory runs by `runId` alone and
     // vault-unlock is not membership — confirm the run is visible under
     // `:projectId` (404 otherwise) before re-dispatching it.
-    await assertRunVisible(projectId, runId);
+    const run = await assertRunVisible(projectId, runId);
+    await assertLanguagesWritable(projectId, resumeTargetLanguages(run));
     const { moduleId } = req.body as z.infer<typeof resumeWithSchema>;
     const result = await translationEngine.resumeWithModule(
       projectId,
@@ -832,12 +870,10 @@ runsRouter.post(
     // caller cannot write rejects the WHOLE revert rather than being skipped:
     // a partial restore would still mark the run `reverted` below, locking the
     // owner out of ever finishing it.
-    const access = await assertProjectAccess(projectId, { type: 'read' });
-    for (const language of new Set(previousValues.map((pv) => pv.targetLanguage))) {
-      if (!can(access, { type: 'write-language', language })) {
-        throw new ForbiddenError(`write-language:${language}`);
-      }
-    }
+    await assertLanguagesWritable(
+      projectId,
+      new Set(previousValues.map((pv) => pv.targetLanguage)),
+    );
 
     const stringStore = getStringStore();
     let reverted = 0;
