@@ -110,7 +110,7 @@ jobs:
           # tag: if develop advanced between release-prep and this merge, `:develop`
           # already points at a newer build and would ship code this release never
           # contained. HEAD^2 is the merged develop head; on a fast-forward main IS it.
-          SRC_SHA="$(git rev-parse HEAD^2 2>/dev/null || git rev-parse HEAD)"
+          SRC_SHA="$(git rev-parse -q --verify HEAD^2 || git rev-parse HEAD)"
           SHORT="${SRC_SHA:0:7}"
           if ! err="$(docker buildx imagetools inspect "${IMG}:sha-${SHORT}" 2>&1 1>/dev/null)"; then
             echo "::error::Could not resolve ${IMG}:sha-${SHORT} (commit ${SRC_SHA}): ${err}"
