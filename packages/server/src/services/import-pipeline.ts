@@ -6,6 +6,7 @@ import { assignGlossaryIds } from '../modules/M20-glossary-assigner.js';
 import { setOrphanIds } from '../modules/orphan-id-store.js';
 import { logger } from '../modules/M15-console-logger.js';
 import { createSnapshot } from '../modules/auto-snapshot.js';
+import { assertStringEntryCapacity } from './tenant-storage-quota.js';
 import { DEFAULT_OVERFLOW_RATIO } from '@zercade-dev/narn-shared';
 
 /** Compact, JSON-friendly counts derived from an {@link ImportDiff}. */
@@ -90,6 +91,12 @@ export async function runImportPipeline(
     languagesWithData,
     rawNewlineLanguages,
   } = await csvImporter.importCSV(csvContent, projectId, { defaultOverflowRatio });
+
+  // Per-tenant stored-entry ceiling, charged on what this import would ADD, so
+  // a re-import that only updates existing rows is never refused. Ahead of the
+  // dry-run return as well: a preview must not promise an apply that the same
+  // check would then reject.
+  await assertStringEntryCapacity(getStringStore(), diff.newEntries.length);
 
   const orphans = orphanManager.detectOrphans(diff, previousEntries);
 

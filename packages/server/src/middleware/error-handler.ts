@@ -18,6 +18,7 @@ import {
   PreviewNotPossibleError,
   TooManyRunsError,
   DeviceNotEnrolledError,
+  StorageQuotaExceededError,
 } from '../types/errors.js';
 import { NoTenantContextError } from '../storage/pg/tenant-context.js';
 import { PathTraversalError } from '../errors/PathTraversalError.js';
@@ -116,6 +117,7 @@ export function errorHandler(
     err instanceof EntryNotFoundError ||
     err instanceof InvalidLanguageError ||
     err instanceof ValidationError ||
+    err instanceof StorageQuotaExceededError ||
     err instanceof TemplateNotFoundError ||
     err instanceof ModuleNotFoundError ||
     err instanceof GlossaryNotFoundError ||
