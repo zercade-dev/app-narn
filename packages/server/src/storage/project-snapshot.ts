@@ -14,6 +14,7 @@
 // project backup and are deliberately excluded.
 import type { Glossary, Project, RunStatus, StringEntry } from '@zercade-dev/narn-shared';
 import { globalGlossaryIds } from '../data/global-glossaries/index.js';
+import { ForbiddenError } from '../types/errors.js';
 import type { ReviewOrderMeta } from './types.js';
 import type { Queryable } from './pg/pool.js';
 import { withTenantTransaction } from './pg/pool.js';
@@ -238,6 +239,13 @@ async function dumpProjectAtomic(projectId: string, db: Queryable): Promise<Proj
  * `current_setting('app.user_id')` (the current tenant) rather than a hardcoded
  * value. Restore is HTTP-only, so the request's tenant context is present;
  * `withTenantTransaction` is fail-closed (`requireTenant()` throws otherwise).
+ *
+ * That owner insert is NOT by itself an authorization check — it no-ops for a
+ * caller who is already a member in any role — so an explicit ownership
+ * assertion follows it and throws `ForbiddenError` (403) before anything is
+ * deleted or written. `POST /api/backup/restore` takes its project id from the
+ * uploaded archive rather than a route parameter, so this is the only place
+ * that can gate it. Every by-id backup route is separately `manage`-gated.
  */
 export async function restoreProject(db: Queryable, snap: ProjectSnapshot): Promise<void> {
   await withTenantTransaction(db, async (tx) => {
@@ -252,6 +260,32 @@ export async function restoreProject(db: Queryable, snap: ProjectSnapshot): Prom
        on conflict (project_id, user_id) do nothing`,
       [projectId],
     );
+
+    // OWNERSHIP GATE. The insert above is a NO-OP whenever the caller already
+    // has a `project_members` row for this project — which is precisely the
+    // case for a COLLABORATOR on someone else's project. Its conflict arbiter
+    // is the `(project_id, user_id)` primary key, so Postgres never consults
+    // the partial `project_members_single_owner` index (non-arbiter unique
+    // indexes are only checked for a row that actually gets inserted). That
+    // index therefore rejects a NON-member's cross-tenant restore but silently
+    // lets a member's through. Every table swept below is guarded by a
+    // ROLE-LESS membership-`EXISTS` policy, which a collaborator satisfies, so
+    // without this check an invited read-only collaborator could upload an
+    // archive naming the owner's project id and DELETE-and-replace the whole
+    // project. Assert ownership inside the tx: it is fail-closed and rolls the
+    // restore back. Legitimate paths all pass — a new (or previously deleted)
+    // project id inserts the owner row in this same tx, and an owner restoring
+    // their own project already has one.
+    const ownership = await tx.query(
+      `select 1 from project_members
+       where project_id = $1
+         and user_id = current_setting('app.user_id')
+         and role = 'owner'`,
+      [projectId],
+    );
+    if (ownership.rows.length === 0) {
+      throw new ForbiddenError('manage');
+    }
 
     // projects (id, tenant_id, data) — tenant_id is the current tenant.
     await tx.query(
