@@ -22,13 +22,17 @@
  * invoked fire-and-forget by the chat routes, so neither may sit on the
  * response's critical path — callers `.catch()` any rejection.
  *
- * Race note: `updateRun` holds the store's per-project write lock only for the
- * upsert itself, NOT across the preceding `getRun`, so two turns of the SAME
- * session racing would lose one turn's tokens (last write wins). In practice a
- * session's turns are strictly sequential (the user awaits each streamed reply
- * before sending the next), and this is best-effort usage telemetry, so the
- * unlocked read-modify-write window is acceptable. Different sessions write
- * different run rows and never contend.
+ * Ordering note: because nothing awaits either phase, their order is not free. A
+ * turn that fails in pure microtasks (an unresolvable module instance, a missing
+ * credential) reaches the settle while the open is still mid-store, and the late
+ * open would rewrite the row as `Running` — stranding it non-terminal, where
+ * `countActiveRuns` keeps charging it against the tenant's concurrency cap. Both
+ * phases therefore run under {@link chatRunWriteLock}, keyed by the run row: the
+ * open takes the lock synchronously at dispatch, so the settle always queues
+ * behind it. The same lock closes the read-modify-write window between `getRun`
+ * and `updateRun` (the store's per-project lock covers the upsert only), so two
+ * turns of the SAME session can no longer lose one turn's tokens. Different
+ * sessions write different run rows and never contend.
  */
 import { RunStatusCode, type ChatKindLabel, type RunStatus } from '@zercade-dev/narn-shared';
 import { getRunStore } from '../storage/registry.js';
@@ -41,6 +45,7 @@ import {
 } from '../modules/M9/usage-pricing.js';
 import { sweepOrphanedRuns, PROCESS_START_MS } from '../modules/M9/run-capacity.js';
 import { logger } from '../modules/M15-console-logger.js';
+import { KeyedAsyncLock } from '../utils/keyed-lock.js';
 
 /** The stable run id a chat session maps to (one run per session). */
 export function chatRunId(chatSessionId: string): string {
@@ -103,6 +108,15 @@ export function __resetChatSweepForTests(): void {
 }
 
 /**
+ * Serializes a session's two phases against its own run row, keyed
+ * `${projectId}:${runId}`. `withLock` installs its entry synchronously, so the
+ * open — issued at dispatch, before the reply stream is drained — always holds
+ * the lock before the settle can ask for it, however fast the turn fails.
+ * In-process only (single-replica invariant, see utils/keyed-lock.ts).
+ */
+const chatRunWriteLock = new KeyedAsyncLock();
+
+/**
  * Reconcile `projectId`'s crash/redeploy-orphaned runs the first time a chat
  * turn touches it this process, reusing M9's `sweepOrphanedRuns`.
  *
@@ -147,50 +161,52 @@ export async function startChatTurn(
   const runId = chatRunId(opts.chatSessionId);
   const now = Date.now();
 
-  // Reconcile this project's crash/redeploy-orphaned runs once per process,
-  // BEFORE writing this turn's row — so a chat run stranded `Running` by a
-  // restart is settled even when the project never sees a translation (M9's
-  // enqueue is the only other sweep trigger).
-  await sweepChatProjectOnce(opts.projectId, runStore);
+  await chatRunWriteLock.withLock(`${opts.projectId}:${runId}`, async () => {
+    // Reconcile this project's crash/redeploy-orphaned runs once per process,
+    // BEFORE writing this turn's row — so a chat run stranded `Running` by a
+    // restart is settled even when the project never sees a translation (M9's
+    // enqueue is the only other sweep trigger).
+    await sweepChatProjectOnce(opts.projectId, runStore);
 
-  const existing = await runStore.getRun(opts.projectId, runId);
-  const turns = (existing?.chatSummary?.turns ?? 0) + 1;
+    const existing = await runStore.getRun(opts.projectId, runId);
+    const turns = (existing?.chatSummary?.turns ?? 0) + 1;
 
-  const status: RunStatus = {
-    runId,
-    projectId: opts.projectId,
-    status: RunStatusCode.Running,
-    total: turns,
-    completed: turns - 1,
-    failed: 0,
-    // Preserve the session's original start time WITHIN a process, but re-stamp
-    // it when it predates this process. `sweepOrphanedRuns` classifies a
-    // non-terminal run as orphaned purely by `startedAt < PROCESS_START_MS`, so
-    // a resumed pre-restart session that kept its old timestamp would be flipped
-    // to `Failed` by a concurrent sweep WHILE its turn was still streaming.
-    startedAt:
-      existing?.startedAt !== undefined && existing.startedAt >= PROCESS_START_MS
-        ? existing.startedAt
-        : now,
-    // Deliberately no `finishedAt`: an in-flight run has not finished, and the
-    // Activity tab keys "still running" off its absence.
-    errors: existing?.errors ?? [],
-    // Carry the accumulated usage/cost forward untouched — this phase adds no
-    // tokens, it only flips the row to Running.
-    usageByModule: existing?.usageByModule ?? [],
-    ...(existing?.estimatedCostUsd !== undefined
-      ? { estimatedCostUsd: existing.estimatedCostUsd }
-      : {}),
-    kind: 'chat',
-    chatSummary: {
-      chatKind: opts.kindLabel,
-      instanceId: opts.instanceId,
-      model: opts.model,
-      turns,
-    },
-  };
+    const status: RunStatus = {
+      runId,
+      projectId: opts.projectId,
+      status: RunStatusCode.Running,
+      total: turns,
+      completed: turns - 1,
+      failed: 0,
+      // Preserve the session's original start time WITHIN a process, but re-stamp
+      // it when it predates this process. `sweepOrphanedRuns` classifies a
+      // non-terminal run as orphaned purely by `startedAt < PROCESS_START_MS`, so
+      // a resumed pre-restart session that kept its old timestamp would be flipped
+      // to `Failed` by a concurrent sweep WHILE its turn was still streaming.
+      startedAt:
+        existing?.startedAt !== undefined && existing.startedAt >= PROCESS_START_MS
+          ? existing.startedAt
+          : now,
+      // Deliberately no `finishedAt`: an in-flight run has not finished, and the
+      // Activity tab keys "still running" off its absence.
+      errors: existing?.errors ?? [],
+      // Carry the accumulated usage/cost forward untouched — this phase adds no
+      // tokens, it only flips the row to Running.
+      usageByModule: existing?.usageByModule ?? [],
+      ...(existing?.estimatedCostUsd !== undefined
+        ? { estimatedCostUsd: existing.estimatedCostUsd }
+        : {}),
+      kind: 'chat',
+      chatSummary: {
+        chatKind: opts.kindLabel,
+        instanceId: opts.instanceId,
+        model: opts.model,
+        turns,
+      },
+    };
 
-  await runStore.updateRun(opts.projectId, status);
+    await runStore.updateRun(opts.projectId, status);
+  });
 }
 
 /**
@@ -200,6 +216,9 @@ export async function startChatTurn(
  * Tokens are folded in even for a cancelled turn — the provider call already
  * happened and cost money regardless of whether the client stayed connected,
  * matching the run engines' rule.
+ *
+ * Queues behind its own turn's {@link startChatTurn} — both hold
+ * {@link chatRunWriteLock} — so the terminal status is the run row's last write.
  */
 export async function finishChatTurn(
   opts: FinishChatTurnOpts,
@@ -210,47 +229,49 @@ export async function finishChatTurn(
   const runId = chatRunId(opts.chatSessionId);
   const now = Date.now();
 
-  const existing = await runStore.getRun(opts.projectId, runId);
-  // `turns` was incremented by startChatTurn. Defaulting to 1 (not 0) keeps the
-  // count honest if that write failed or never ran — a settled turn is a turn.
-  const turns = existing?.chatSummary?.turns ?? 1;
-  const errors = [...(existing?.errors ?? [])];
-  if (opts.errorMessage) errors.push({ message: opts.errorMessage, timestamp: now });
+  await chatRunWriteLock.withLock(`${opts.projectId}:${runId}`, async () => {
+    const existing = await runStore.getRun(opts.projectId, runId);
+    // `turns` was incremented by startChatTurn. Defaulting to 1 (not 0) keeps the
+    // count honest if that write failed or never ran — a settled turn is a turn.
+    const turns = existing?.chatSummary?.turns ?? 1;
+    const errors = [...(existing?.errors ?? [])];
+    if (opts.errorMessage) errors.push({ message: opts.errorMessage, timestamp: now });
 
-  const status: RunStatus = {
-    runId,
-    projectId: opts.projectId,
-    status: OUTCOME_STATUS[opts.outcome],
-    total: turns,
-    completed: opts.outcome === 'completed' ? turns : turns - 1,
-    failed: opts.outcome === 'failed' ? 1 : 0,
-    startedAt: existing?.startedAt ?? now,
-    finishedAt: now,
-    errors,
-    // Carry the accumulated per-(module, model) usage forward so this turn adds
-    // to it rather than replacing it.
-    usageByModule: existing?.usageByModule ?? [],
-    kind: 'chat',
-    chatSummary: {
-      chatKind: opts.kindLabel,
-      instanceId: opts.instanceId,
-      model: opts.model,
-      turns,
-    },
-  };
+    const status: RunStatus = {
+      runId,
+      projectId: opts.projectId,
+      status: OUTCOME_STATUS[opts.outcome],
+      total: turns,
+      completed: opts.outcome === 'completed' ? turns : turns - 1,
+      failed: opts.outcome === 'failed' ? 1 : 0,
+      startedAt: existing?.startedAt ?? now,
+      finishedAt: now,
+      errors,
+      // Carry the accumulated per-(module, model) usage forward so this turn adds
+      // to it rather than replacing it.
+      usageByModule: existing?.usageByModule ?? [],
+      kind: 'chat',
+      chatSummary: {
+        chatKind: opts.kindLabel,
+        instanceId: opts.instanceId,
+        model: opts.model,
+        turns,
+      },
+    };
 
-  // Fold this turn's tokens into usageByModule keyed by (instanceId, model),
-  // reusing M9's aggregation so the accounting matches translation runs.
-  accumulateUsage(status, opts.instanceId, [
-    {
-      inputTokens: opts.usage.inputTokens,
-      outputTokens: opts.usage.outputTokens,
-      model: opts.model,
-    },
-  ]);
-  // Re-price the whole aggregate from the bundled pricing snapshot — idempotent,
-  // recomputing estimatedCostUsd from the accumulated totals on every turn.
-  await finalizeUsageCosts(status, pricing);
+    // Fold this turn's tokens into usageByModule keyed by (instanceId, model),
+    // reusing M9's aggregation so the accounting matches translation runs.
+    accumulateUsage(status, opts.instanceId, [
+      {
+        inputTokens: opts.usage.inputTokens,
+        outputTokens: opts.usage.outputTokens,
+        model: opts.model,
+      },
+    ]);
+    // Re-price the whole aggregate from the bundled pricing snapshot — idempotent,
+    // recomputing estimatedCostUsd from the accumulated totals on every turn.
+    await finalizeUsageCosts(status, pricing);
 
-  await runStore.updateRun(opts.projectId, status);
+    await runStore.updateRun(opts.projectId, status);
+  });
 }
