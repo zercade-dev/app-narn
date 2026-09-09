@@ -21,6 +21,13 @@ export interface CaptureStatus {
   bytes: number;
 }
 
+/** Newest counters carried by a run's `translation:progress` entries. */
+export interface RunProgressCounts {
+  completed: number;
+  failed: number;
+  total: number;
+}
+
 /**
  * Severity-partitioned ring buffer (see `@zercade-dev/narn-shared`'s
  * `entry-pools.ts`) so a flood of routine `info` activity during a large run
@@ -96,8 +103,95 @@ function isDropCounts(value: unknown): value is LogPoolDropCounts {
   );
 }
 
+/**
+ * The two views of the log stream the string table and the comparison grid
+ * need, folded here rather than in the components: `entries` gets a fresh array
+ * reference on every flush — five a second for the length of a run — so a
+ * component selecting it re-renders at that rate even when nothing it shows has
+ * moved. Both are recomputed from the pooled entries on each flush and then
+ * handed back BY IDENTITY when they describe the same state as before; that
+ * identity is the whole point, since it is what decides whether a subscriber
+ * re-renders.
+ */
+
+/** `entryId:targetLanguage` — how both grids key a translatable cell. */
+function translationCellKey(entry: LogEntry): string {
+  return `${String(entry.metadata?.entryId)}:${String(entry.metadata?.targetLanguage)}`;
+}
+
+function deriveTranslatingCells(entries: LogEntry[]): Set<string> {
+  const inProgress = new Set<string>();
+  for (const e of entries) {
+    if (e.message === 'translation:start') {
+      inProgress.add(translationCellKey(e));
+    } else if (e.message === 'translation:done' || e.message === 'translation:failed') {
+      inProgress.delete(translationCellKey(e));
+    }
+  }
+  return inProgress;
+}
+
+function deriveLatestProgress(entries: LogEntry[]): Map<string, RunProgressCounts> {
+  const byRunId = new Map<string, RunProgressCounts>();
+  for (const e of entries) {
+    if (e.message !== 'translation:progress') continue;
+    const runId = e.metadata?.runId;
+    if (typeof runId !== 'string') continue;
+    byRunId.set(runId, {
+      completed: Number(e.metadata?.completed ?? 0),
+      failed: Number(e.metadata?.failed ?? 0),
+      total: Number(e.metadata?.total ?? 0),
+    });
+  }
+  return byRunId;
+}
+
+/** Keeps `prev` when `next` holds exactly the same cells. */
+function stableCells(prev: ReadonlySet<string>, next: Set<string>): ReadonlySet<string> {
+  if (prev.size !== next.size) return next;
+  for (const key of next) if (!prev.has(key)) return next;
+  return prev;
+}
+
+/**
+ * The same, per run: a run whose counters did not move keeps its previous
+ * object, so a subscriber watching one run is untouched by another run's
+ * progress, and the map itself is kept when no run moved at all.
+ */
+function stableProgress(
+  prev: ReadonlyMap<string, RunProgressCounts>,
+  next: Map<string, RunProgressCounts>,
+): ReadonlyMap<string, RunProgressCounts> {
+  let changed = prev.size !== next.size;
+  for (const [runId, counts] of next) {
+    const before = prev.get(runId);
+    if (
+      before !== undefined &&
+      before.completed === counts.completed &&
+      before.failed === counts.failed &&
+      before.total === counts.total
+    ) {
+      next.set(runId, before);
+    } else {
+      changed = true;
+    }
+  }
+  return changed ? next : prev;
+}
+
+/** Shared empties, so a cleared store hands subscribers back the references it started with. */
+const NO_TRANSLATING_CELLS: ReadonlySet<string> = new Set();
+const NO_RUN_PROGRESS: ReadonlyMap<string, RunProgressCounts> = new Map();
+
 interface LoggerStoreState {
   entries: LogEntry[];
+  /**
+   * Cells whose `translation:start` has not yet been answered by a
+   * `translation:done`/`translation:failed`.
+   */
+  translatingCells: ReadonlySet<string>;
+  /** Newest `translation:progress` counters, per run id. */
+  latestProgressByRunId: ReadonlyMap<string, RunProgressCounts>;
   /** Counts of entries evicted from each pool since the last `clear()`. */
   droppedCounts: LogPoolDropCounts;
   /**
@@ -155,6 +249,8 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
 
   return {
     entries: [],
+    translatingCells: NO_TRANSLATING_CELLS,
+    latestProgressByRunId: NO_RUN_PROGRESS,
     droppedCounts: { info: 0, priority: 0 },
     serverDroppedCounts: { info: 0, priority: 0 },
     _serverDropsApplied: false,
@@ -294,13 +390,24 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
       // is always called from — a second `set()` here (or moving this work
       // out of the flush) would double the per-batch re-render cost the flush
       // batching exists to avoid.
-      set({ entries: pools.merged(), droppedCounts: pools.dropped() });
+      const merged = pools.merged();
+      const prev = get();
+      const cells = deriveTranslatingCells(merged);
+      const progress = deriveLatestProgress(merged);
+      set({
+        entries: merged,
+        droppedCounts: pools.dropped(),
+        translatingCells: stableCells(prev.translatingCells, cells),
+        latestProgressByRunId: stableProgress(prev.latestProgressByRunId, progress),
+      });
     },
 
     clear: () => {
       pools.clear();
       set({
         entries: [],
+        translatingCells: NO_TRANSLATING_CELLS,
+        latestProgressByRunId: NO_RUN_PROGRESS,
         droppedCounts: { info: 0, priority: 0 },
         serverDroppedCounts: { info: 0, priority: 0 },
         // Re-arm the first-connect gate: the user asked for a clean slate, so
