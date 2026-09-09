@@ -6,6 +6,10 @@
   "capabilities": ["translate", "batch"],
   "costTier": "low",
   "configSchema": {
+    "apiKey": {
+      "type": "string",
+      "format": "password"
+    },
     "model": {
       "type": "string",
       "description": "Gemini model id. Free text accepted for preview/custom models. See ai.google.dev/gemini-api/docs/models for the full list. Left blank until live discovery selects the cheapest available model."

@@ -6,6 +6,10 @@
   "capabilities": ["translate", "batch"],
   "costTier": "medium",
   "configSchema": {
+    "apiKey": {
+      "type": "string",
+      "format": "password"
+    },
     "model": {
       "type": "string",
       "description": "OpenAI model id (e.g. gpt-4o, gpt-4o-mini, o1). Left blank until live discovery selects the cheapest available model."

@@ -17,13 +17,13 @@ import {
   toErrorMessage,
 } from '@zercade-dev/narn-shared';
 import { atomicWrite } from '../utils/fs.js';
-import { getVaultStore } from '../identity/registry.js';
+import { getVaultStore, isCloudMode } from '../identity/registry.js';
 import { asyncHandler } from '../http/index.js';
 import { projectIdParam } from '../middleware/path-params.js';
 import { assertSafeBaseURL, assertNoPasswordFields } from '../utils/validate-module-config.js';
 import { COPILOT_MODULE_ID, normalizeCopilotConfig } from '../utils/copilot-config.js';
 import { requireUnlockedVault } from '../middleware/require-vault.js';
-import { requireTenant } from '../storage/pg/tenant-context.js';
+import { getCurrentTenant, requireTenant } from '../storage/pg/tenant-context.js';
 import { resolveProjectPath } from '../utils/project-path.js';
 import { PathTraversalError } from '../errors/PathTraversalError.js';
 import { getModelsCacheBase } from '../config/env.js';
@@ -232,7 +232,16 @@ modulesRouter.get(
 // In-memory only: counters reset on server restart. Must be registered BEFORE the
 // dynamic /:id route so Express matches the static segment first.
 modulesRouter.get('/health', requireUnlockedVault, (_req, res) => {
-  res.json(metricsCollector.snapshot());
+  // requireUnlockedVault proves only that the CALLER unlocked their OWN vault,
+  // so in the shared cloud process the unfiltered snapshot handed every tenant
+  // every other tenant's named-instance ids, model strings and activity
+  // volumes. Serve each cloud tenant only their own partitions; local
+  // open-core is single-user, where the process-wide view IS the user's.
+  res.json(
+    isCloudMode()
+      ? metricsCollector.snapshotForTenant(getCurrentTenant()?.userId)
+      : metricsCollector.snapshot(),
+  );
 });
 
 // GET /api/modules/copilot/models/cache-status — returns metadata about the server-side model cache.

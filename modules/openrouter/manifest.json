@@ -6,6 +6,10 @@
   "capabilities": ["translate", "batch"],
   "costTier": "medium",
   "configSchema": {
+    "apiKey": {
+      "type": "string",
+      "format": "password"
+    },
     "model": {
       "type": "string",
       "description": "OpenRouter model slug, vendor-prefixed (e.g. 'anthropic/claude-sonnet-4.5', 'openai/gpt-4o-mini'). Free text accepted for new/custom models. The model picker lists the live catalog with per-model pricing; only text-generation models are shown."
