@@ -704,6 +704,23 @@ export class TranslationEngine {
   static readonly QUOTA_SWEEP_INTERVAL_MS = 60_000;
   /** Floor on how often ONE run may be auto-resumed (see {@link lastQuotaResumeAttempt}). */
   private static readonly QUOTA_RESUME_MIN_INTERVAL_MS = 60_000;
+  /**
+   * Ceiling on the (entry x target language) pairs ONE {@link memoryPreview}
+   * call evaluates. That preview is an advisory number behind the Translate
+   * dialog and its scope is whatever the user selected — "select all filtered"
+   * across every target language — which the route schema alone bounds only at
+   * 50_000 entry ids x 100 languages. Each evaluated pair costs a
+   * translation-memory lookup, and every lookup is its own tenant transaction
+   * (BEGIN / set role / set_config / statement / COMMIT), so an unbounded scan
+   * can hold a pooled connection — and the HTTP request — open past the proxy
+   * read timeout while starving every other request.
+   *
+   * Past this many pairs the scan stops and reports what it counted: an
+   * under-count, never an error, because both callers treat the number as a
+   * hint and swallow a failure outright. 5_000 covers any realistic dialog
+   * open while capping one request at roughly 25_000 database round trips.
+   */
+  static readonly MEMORY_PREVIEW_MAX_PAIRS = 5_000;
   private readonly queue: JobQueue;
   /**
    * The rate governor consulted for Freeway admission and seeded per run (see
@@ -1258,6 +1275,15 @@ export class TranslationEngine {
    * them from the TM consult — so the count reflects what a real run would do.
    * The project's stored `tmPolicy` is honoured (a `disabled` project always
    * reports 0). No vault session needed (no LLM calls).
+   *
+   * Bounded twice, because the scope is whatever the user selected ("select
+   * all filtered" times every target language) for a number that is only a
+   * hint on a dialog: the glossary is resolved through the same per-(target
+   * language, assigned-glossary set) memo the real run path uses (see
+   * {@link fetchGlossariesForBatch}), since `glossaryProvider` is a
+   * multi-query read whose every statement is its own tenant transaction; and
+   * at most {@link TranslationEngine.MEMORY_PREVIEW_MAX_PAIRS} pairs are
+   * evaluated at all.
    */
   async memoryPreview(
     projectId: string,
@@ -1275,11 +1301,28 @@ export class TranslationEngine {
     // here too so the preview's total matches what a real run would consider.
     const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
 
+    // Keyed by the run path's own `glossaryEntryKey`: for a fixed project that
+    // key already captures everything the provider varies on — target language
+    // plus the entry's `assignedGlossaryIds`, with entries that have none
+    // sharing the project-wide `forcedGlossaryIds` bucket.
+    const constantTermsByKey = new Map<string, GlossaryTerm[]>();
+
     let memoryCount = 0;
     let total = 0;
+    // Pairs the scan actually looked at, including the ones excluded below:
+    // excluding a pair costs the same masking work as counting one, so both
+    // draw on the same budget.
+    let considered = 0;
+    let truncated = false;
     for (const entry of entries) {
+      if (truncated) break;
       for (const targetLanguage of targetLanguages) {
         if (targetLanguage === project.sourceLanguage) continue;
+        if (considered >= TranslationEngine.MEMORY_PREVIEW_MAX_PAIRS) {
+          truncated = true;
+          break;
+        }
+        considered++;
 
         // Trivial matchers short-circuit before the TM consult — exclude them.
         if (runTrivialMatchers(entry.sourceText, project.sourceLanguage, targetLanguage) !== null) {
@@ -1287,8 +1330,13 @@ export class TranslationEngine {
         }
 
         const decision = this.router.route(entry, targetLanguage, rules, availableModules);
-        const glossary = await this.glossaryProvider(projectId, targetLanguage, entry);
-        const constantTerms = glossary.filter((term) => term.constant);
+        const glossaryKey = this.glossaryEntryKey(targetLanguage, entry);
+        let constantTerms = constantTermsByKey.get(glossaryKey);
+        if (constantTerms === undefined) {
+          const glossary = await this.glossaryProvider(projectId, targetLanguage, entry);
+          constantTerms = glossary.filter((term) => term.constant);
+          constantTermsByKey.set(glossaryKey, constantTerms);
+        }
         const { masked, trivial } = maskText(entry.sourceText, constantTerms);
         // Fully-masked entries are produced locally and never consult the TM.
         if (trivial) continue;
@@ -1304,6 +1352,16 @@ export class TranslationEngine {
         );
         if (lookup.autoApply !== null) memoryCount++;
       }
+    }
+    if (truncated) {
+      // Logged, never signalled to the caller: the response shape is part of
+      // the route contract and both callers read nothing but `memoryCount`.
+      this.logger.warn('translation:memory-preview-truncated', {
+        projectId,
+        limit: TranslationEngine.MEMORY_PREVIEW_MAX_PAIRS,
+        entries: entries.length,
+        targetLanguages: targetLanguages.length,
+      });
     }
     return { memoryCount, total };
   }
