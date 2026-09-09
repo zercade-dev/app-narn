@@ -106,7 +106,7 @@ import { JobQueue, type Admission } from './M9/queue.js';
 import { rateGovernor, type GovernorKey, type RateGovernor } from './M9/rate-governor.js';
 import { awaitAllWithTimeout, SettledTracker } from './M9/run-settled.js';
 import { emitRunProgress, recordRunFailure } from './M9/run-status-helpers.js';
-import { assertRunCapacity, sweepOrphanedRuns } from './M9/run-capacity.js';
+import { assertRunCapacity, PROCESS_START_MS, sweepOrphanedRuns } from './M9/run-capacity.js';
 import { PreviewNotPossibleError } from '../types/errors.js';
 import {
   isAbortError,
@@ -1704,8 +1704,25 @@ export class TranslationEngine {
     resetRateLimiters();
     this.startingProjects.add(projectId);
     try {
-      const inner = () =>
-        this.startRunInner(runId, projectId, request, sessionId, existing, retry, moduleOverride);
+      // The failure cleanup sits INSIDE the tenant scope: it writes the run
+      // store, which is RLS-scoped exactly like every other write this start
+      // makes.
+      const inner = async () => {
+        try {
+          return await this.startRunInner(
+            runId,
+            projectId,
+            request,
+            sessionId,
+            existing,
+            retry,
+            moduleOverride,
+          );
+        } catch (err) {
+          await this.failUndispatchedRun(runId, projectId);
+          throw err;
+        }
+      };
       return await (tenant ? runWithTenant(tenant, inner) : inner());
     } finally {
       this.startingProjects.delete(projectId);
@@ -1719,6 +1736,38 @@ export class TranslationEngine {
       // idempotent for the normal (slow-module) path.
       this.startNextQueued(projectId);
     }
+  }
+
+  /**
+   * Settle a start that threw before any dispatch task was queued.
+   * {@link startRunInner} registers the run `Running` ahead of several awaits
+   * (details hydration, the run-store write, the global-config load, freeway
+   * resolution), so a transient fault in that window would otherwise leave the
+   * run Running with nothing to advance it: {@link hasActiveProjectRun} stays
+   * true for the life of the process and every later run for the project queues
+   * behind it. The deferred path compensates in {@link maybeStartNextQueued};
+   * this covers the immediate ones.
+   *
+   * Strictly the PRE-DISPATCH window: once the settled deferred is armed, tasks
+   * are in flight and own the run's terminal transition. The run is left in the
+   * in-memory maps like any other failed run (evicted on the normal grace
+   * schedule) rather than forgotten, so a caller that rolls back its own state
+   * afterwards — {@link restoreQuotaPark} — still finds the run and its captured
+   * session/tenant.
+   */
+  private async failUndispatchedRun(runId: string, projectId: string): Promise<void> {
+    if (this.tracker.isArmed(runId)) return;
+    const status = this.runs.get(runId);
+    if (!status || status.status !== RunStatusCode.Running) return;
+    status.status = RunStatusCode.Failed;
+    status.finishedAt = Date.now();
+    this.logger.warn('translation:start-aborted', { runId, projectId });
+    await this.runStore.updateRun(projectId, status).catch((err: unknown) => {
+      this.logger.warn('translation:start-abort-persist-failed', {
+        runId,
+        error: toErrorMessage(err),
+      });
+    });
   }
 
   private async startRunInner(
@@ -1883,6 +1932,13 @@ export class TranslationEngine {
       status.status = RunStatusCode.Running;
       delete status.finishedAt;
       delete status.queuePosition;
+      // A run adopted from a PRIOR process generation still carries its
+      // pre-restart `startedAt`, which is exactly what `sweepOrphanedRuns` reads
+      // as "left behind by a dead process" — a sweep firing during this
+      // re-dispatch would write the live run Failed. Re-stamp it in that case
+      // only; within one process the original start time is preserved, as the
+      // in-place retry contract above requires.
+      if (status.startedAt < PROCESS_START_MS) status.startedAt = Date.now();
       // A prior AI-review score is stale once translations change; drop it so
       // the run reads as needing re-review with the retried results included.
       delete status.aiScore;
