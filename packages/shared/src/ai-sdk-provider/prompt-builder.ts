@@ -350,8 +350,17 @@ export function parseBatchResponse(text: string, jobs: TranslationJob[]): string
     return null;
   }
   if (!Array.isArray(parsed) || parsed.length !== jobs.length) return null;
-  // Normalize {i, s} indexed-object arrays (e.g., Claude mirroring the batch input format)
+  // Normalize {i, s} indexed-object arrays (e.g., Claude mirroring the batch input format).
+  // The batch prompt never numbers its input, so `i` is the model's own ordering hint
+  // (0- or 1-based), not a slot address — sorted, not indexed into, and deliberately not
+  // range-checked. It must still be a total order: a repeated or non-integer index would
+  // silently zip one job's translation onto another entry.
   if (parsed.every(isIndexedItem)) {
+    const seen = new Set<number>();
+    for (const item of parsed) {
+      if (!Number.isInteger(item.i) || seen.has(item.i)) return null;
+      seen.add(item.i);
+    }
     return [...parsed].sort((a, b) => a.i - b.i).map((item) => item.s);
   }
   if (!parsed.every((item): item is string => typeof item === 'string')) return null;
