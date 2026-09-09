@@ -34,28 +34,43 @@ export interface ParsedGameCSV {
   /** Header-keyed data rows. Cells missing from a short row default to ''. */
   rows: Record<string, string>[];
   /**
-   * Count of data rows dropped because real content spilled past the last
-   * header column. That only happens when a cell's content contained an
-   * unescaped quote+delimiter (e.g. `","`) or quote+newline and the dialect's
-   * ambiguity (see file header) mis-split the row. Keeping such a row would
-   * shift every following column — landing one field's content in the wrong
-   * column (notably a translation fragment in the Source column), which is
-   * unrecoverable. They are excluded from `rows` and reported here instead.
+   * Count of data rows dropped because the dialect's ambiguity (see file
+   * header) mis-split them: real content spilled past the last header column,
+   * or a closing quote landed on the row's line break and cut the row short.
+   * Either way a cell's content contained an unescaped quote+delimiter (e.g.
+   * `","`) or quote+newline. Keeping such a row would shift every following
+   * column — landing one field's content in the wrong column (notably a
+   * translation fragment in the Source column), which is unrecoverable. They
+   * are excluded from `rows` and reported here instead.
    */
   malformedRows: number;
 }
 
-function splitRows(content: string, maxRows: number | undefined): string[][] {
+interface RawRow {
+  cells: string[];
+  /**
+   * The row's last cell was closed by a `"` sitting directly (modulo
+   * spaces/tabs) before the row's line break. On a full-length row that is
+   * simply the normal terminator; on a SHORT row it is the signature of a
+   * swallowed row boundary (see `parseGameCSV`).
+   */
+  quoteClosedRow: boolean;
+}
+
+function splitRows(content: string, maxRows: number | undefined): RawRow[] {
   // Strip a UTF-8 BOM so the first header matches by name.
   if (content.charCodeAt(0) === 0xfeff) content = content.slice(1);
 
-  const rows: string[][] = [];
+  const rows: RawRow[] = [];
   let row: string[] = [];
   let cell = '';
   let inQuotes = false;
   // True while the current cell has seen only spaces/tabs — a quote there
   // opens a quoted cell (leading whitespace before the quote is discarded).
   let atCellStart = true;
+  // Set when a closing quote lands on a line break; the very next iteration is
+  // that line break, which reads the flag and ends the row.
+  let quoteReachedBreak = false;
   const len = content.length;
 
   // If the quote at `i` closes the cell, returns the index of the delimiter
@@ -72,10 +87,11 @@ function splitRows(content: string, maxRows: number | undefined): string[][] {
     cell = '';
     atCellStart = true;
   };
-  const endRow = (): void => {
+  const endRow = (quoteClosedRow: boolean): void => {
     endCell();
-    rows.push(row);
+    rows.push({ cells: row, quoteClosedRow });
     row = [];
+    quoteReachedBreak = false;
   };
 
   let i = 0;
@@ -88,6 +104,7 @@ function splitRows(content: string, maxRows: number | undefined): string[][] {
         const j = closesAt(i);
         if (j !== -1) {
           inQuotes = false;
+          quoteReachedBreak = content[j] === '\n' || content[j] === '\r';
           i = j; // resume at the delimiter / EOF; handled by the outer loop
           continue;
         }
@@ -107,7 +124,7 @@ function splitRows(content: string, maxRows: number | undefined): string[][] {
     }
     if (ch === '\r' || ch === '\n') {
       if (ch === '\r' && content[i + 1] === '\n') i++;
-      endRow();
+      endRow(quoteReachedBreak);
       i++;
       continue;
     }
@@ -125,10 +142,10 @@ function splitRows(content: string, maxRows: number | undefined): string[][] {
 
   // Flush a final row without a trailing line break (tolerates an
   // unterminated quote at EOF: the cell keeps what was read).
-  if (cell.length > 0 || row.length > 0) endRow();
+  if (cell.length > 0 || row.length > 0) endRow(false);
 
   // Skip raw empty lines (a row of exactly one empty cell).
-  return rows.filter((r) => r.length > 1 || r[0] !== '');
+  return rows.filter((r) => r.cells.length > 1 || r.cells[0] !== '');
 }
 
 /**
@@ -139,12 +156,12 @@ function splitRows(content: string, maxRows: number | undefined): string[][] {
 export function parseGameCSV(content: string, opts: { maxRows?: number } = {}): ParsedGameCSV {
   const maxTotal = opts.maxRows === undefined ? undefined : opts.maxRows + 1; // + header row
   const raw = splitRows(content, maxTotal);
-  const headers = raw[0] ?? [];
+  const headers = raw[0]?.cells ?? [];
   const rows: Record<string, string>[] = [];
   let malformedRows = 0;
   for (let r = 1; r < raw.length; r++) {
     if (opts.maxRows !== undefined && rows.length >= opts.maxRows) break;
-    const cells = raw[r];
+    const { cells, quoteClosedRow } = raw[r];
     // A correctly-formed row has exactly `headers.length` cells. Extra cells
     // carrying real content mean the row mis-split on an unescaped
     // quote+delimiter inside a cell (the dialect is not RFC-4180; see file
@@ -152,6 +169,16 @@ export function parseGameCSV(content: string, opts: { maxRows?: number } = {}): 
     // rather than write corrupted, column-shifted data. Trailing empty cells
     // (e.g. a stray comma) are tolerated, matching the short-row leniency.
     if (cells.length > headers.length && cells.slice(headers.length).some((c) => c !== '')) {
+      malformedRows++;
+      continue;
+    }
+    // The mirror case: the row ended EARLY, on a quote that closed the last
+    // cell right at the line break. Missing trailing columns are legitimate
+    // and fill with '' below, but a quote-terminated short row means that
+    // quote was content and swallowed the real row boundary — the cells after
+    // it land under the wrong headers, the same shift the guard above rejects.
+    // A short row ending at EOF has no boundary to swallow and still imports.
+    if (quoteClosedRow && cells.length < headers.length) {
       malformedRows++;
       continue;
     }

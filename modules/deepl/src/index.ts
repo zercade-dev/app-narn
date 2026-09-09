@@ -304,6 +304,13 @@ export interface DeepLConfig {
   requestsPerSecond?: number;
   /** Credential provider injected by the host (e.g. CredentialStore adapter). */
   credentials?: CredentialProvider;
+  /**
+   * Rate-limiter pool identity injected by the host (M6 `createWithConfig`):
+   * the tenant that owns the DeepL quota plus the resolved module id, so two
+   * tenants spending their own keys never share one gate. Defaults to the bare
+   * module id — the single-tenant shape an open-core host has.
+   */
+  limiterKey?: string;
 }
 
 /**
@@ -348,7 +355,7 @@ export class DeepLApiError extends Error {
  * hex-token patterns in the underlying SDK message are redacted before the
  * engine records it.
  */
-function mapDeepLError(e: unknown): unknown {
+function mapDeepLError(e: unknown, limiterKey: string): unknown {
   if (e instanceof deepl.AuthorizationError) {
     return new AuthError(`DeepL authorization failed: ${toErrorMessage(e)}`, 403);
   }
@@ -357,7 +364,7 @@ function mapDeepLError(e: unknown): unknown {
   }
   if (e instanceof deepl.TooManyRequestsError) {
     // deepl-node surfaces no precise Retry-After on the error; omit retryAfterMs.
-    const backoff = reportRateLimitHit('deepl');
+    const backoff = reportRateLimitHit(limiterKey);
     if (backoff.changed) {
       debug('deepl', 'rate-limit:backoff', {
         previousIntervalMs: backoff.previousIntervalMs,
@@ -385,6 +392,7 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
   const englishVariant = config.englishVariant ?? 'en-US';
   // Which DeepL model to request; mirrors the configSchema/manifest default.
   const modelType: deepl.ModelType = config.model ?? 'quality_optimized';
+  const limiterKey = config.limiterKey ?? 'deepl';
 
   // Accumulate terms across pushGlossary calls into the single multilingual glossary.
   const freeTermPool = new Map<
@@ -434,7 +442,7 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
 
   /** Global client-side rate limit: one slot per outbound DeepL HTTP request. */
   function awaitRateLimit(): Promise<void> {
-    return acquireRateLimit('deepl', config.requestsPerSecond);
+    return acquireRateLimit(limiterKey, config.requestsPerSecond);
   }
 
   /**
@@ -495,7 +503,7 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
         freeTermPool.set(pair, pool);
       } catch (e) {
         freePoolSeeded = false; // retryable on the next push
-        throw mapDeepLError(e);
+        throw mapDeepLError(e, limiterKey);
       }
     }
   }
@@ -543,7 +551,7 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
         await client.deleteGlossary(g.glossaryId);
       }
     } catch (e) {
-      throw mapDeepLError(e);
+      throw mapDeepLError(e, limiterKey);
     }
     freeTermPool.clear();
     freeGlossaryId = undefined;
@@ -615,7 +623,7 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
       const raw = await client.translateText(encodedTexts, srcLang, tgtLang, options);
       results = Array.isArray(raw) ? raw : [raw];
     } catch (e) {
-      throw mapDeepLError(e);
+      throw mapDeepLError(e, limiterKey);
     }
     debug('deepl', 'translateText results', results);
     // DeepL preserves a strict 1:1 input↔output mapping. Surface any contract
@@ -896,7 +904,7 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
             );
           }
         } catch (e) {
-          throw mapDeepLError(e);
+          throw mapDeepLError(e, limiterKey);
         }
       } else {
         // Non-free mode: create/update one v2 glossary per language pair.
@@ -926,7 +934,7 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
               const remote = await client.getGlossaryEntries(existingId);
               for (const [k, v] of Object.entries(remote.entries())) mergedEntries.set(k, v);
             } catch (e) {
-              throw mapDeepLError(e);
+              throw mapDeepLError(e, limiterKey);
             }
             try {
               await awaitRateLimit();
@@ -951,7 +959,7 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
             const info = await client.createGlossary(glossaryName, srcCode, tgtCode, entries);
             pairGlossaries.set(pairKey, info.glossaryId);
           } catch (e) {
-            throw mapDeepLError(e);
+            throw mapDeepLError(e, limiterKey);
           }
         }
       }

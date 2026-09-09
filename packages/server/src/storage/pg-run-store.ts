@@ -127,13 +127,70 @@ export class PgRunStore implements RunStore {
     );
   }
 
-  /** Lists all runs for a project, ordered by start time. */
+  /**
+   * Lists all runs for a project, ordered by start time, as FULL records.
+   * Callers that write a run back (snapshot/backup, tenant export, the M9
+   * orphan sweep, chat-usage, the revert route's multi-run guard) must use
+   * this, never {@link listRunSummaries} — a summary fed through `updateRun`
+   * would erase that run's `request` and its parked pairs for good.
+   */
   async listRuns(projectId: string): Promise<RunStatus[]> {
     const { rows } = await this.db.query<{ data: RunStatus; created_by: string | null }>(
       'select data, created_by from runs where project_id = $1 order by started_at',
       [projectId],
     );
     return rows.map((r) => this.overlayCreatedBy(r.data, r.created_by));
+  }
+
+  /**
+   * The same list in its SUMMARY shape, for the two-second-polled
+   * `GET /api/projects/:projectId/runs`. Two payloads inside `RunStatus` grow
+   * with the size of the WORK rather than of the run record, and no client
+   * reads either one from the list:
+   *   - `request.entryIds` — up to MAX_ENTRY_IDS (50 000) 64-char content ids,
+   *     roughly 3.3 MB, recorded on every translation run and never cleared; and
+   *   - `waitingForQuota.pairs` — one object per parked (entry, language) job,
+   *     which survives even on a cancelled run.
+   * Both are removed IN SQL, so they never cross the wire from Postgres and are
+   * never parsed into JS; the parked-pair size is projected out separately as
+   * `waitingForQuota.pairCount`, the only thing the Activity tab reads off
+   * `pairs`. EVERY other field comes back verbatim — this is a jsonb
+   * subtraction, not a column projection — so `usageByModule`, `judgeSummary`,
+   * `chatSummary`, `errors`, `skipReason`, `aiScore`, `estimatedCostUsd` and
+   * `queuePosition` are all still there and the tab renders unchanged.
+   *
+   * The `jsonb_typeof` guard keeps a run with no park — or a legacy row whose
+   * `pairs` is not an array — from erroring inside `jsonb_array_length`.
+   */
+  async listRunSummaries(projectId: string): Promise<RunStatus[]> {
+    const { rows } = await this.db.query<{
+      data: RunStatus;
+      waiting_pair_count: number;
+      created_by: string | null;
+    }>(
+      `select
+         (data #- '{request}') #- '{waitingForQuota,pairs}' as data,
+         case when jsonb_typeof(data #> '{waitingForQuota,pairs}') = 'array'
+              then jsonb_array_length(data #> '{waitingForQuota,pairs}')
+              else 0 end as waiting_pair_count,
+         created_by
+       from runs where project_id = $1 order by started_at`,
+      [projectId],
+    );
+    return rows.map((r) => {
+      const status = this.overlayCreatedBy(r.data, r.created_by);
+      // `#-` deleted the key outright, but `pairs` is non-optional on the type
+      // (and a frontend bundle predating `pairCount` still reads `pairs.length`),
+      // so re-seat a well-typed empty array and carry the real size alongside it.
+      if (status.waitingForQuota) {
+        status.waitingForQuota = {
+          ...status.waitingForQuota,
+          pairs: [],
+          pairCount: Number(r.waiting_pair_count),
+        };
+      }
+      return status;
+    });
   }
 
   /**

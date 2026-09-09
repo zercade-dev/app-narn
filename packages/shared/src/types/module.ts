@@ -251,6 +251,17 @@ export interface BatchDispatchOptions {
    * resolved promise, exactly as before this option existed.
    */
   onJobComplete?: (result: TranslationResult) => void | Promise<void>;
+  /**
+   * When `true`, a rate limit (429) or auth failure (401/403) is THROWN by the
+   * provider instead of resolving as a per-item error result. Set by a caller
+   * that owns a response to one: the background AI-review engines set it for a
+   * free-tier-bound batch, whose 429 they answer with the provider cool-down, a
+   * bucket cool and one re-route hop — none of which a resolved error result can
+   * reach. Left unset, the provider keeps its split-to-singleton partial
+   * recovery, which is the better answer for a caller with nowhere to route the
+   * failure. Non-LLM / independent modules may ignore this flag.
+   */
+  surfaceTypedErrors?: boolean;
 }
 
 export interface TranslationModule {

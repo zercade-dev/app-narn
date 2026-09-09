@@ -84,6 +84,7 @@ export type SplitAndRetry = <TItem, TResult>(
   parseFailMessage: string,
   signal?: AbortSignal,
   retryTransient?: boolean,
+  surfaceTypedErrors?: boolean,
 ) => Promise<TResult[]>;
 
 /**
@@ -125,6 +126,15 @@ export interface JudgeFeatureDeps {
    * before splitting. Both call sites pass `true`.
    */
   retryTransient: boolean;
+  /**
+   * Whether a rate limit (429) or auth failure (401/403) is rethrown typed
+   * instead of flattened into per-item error results. Comes from the caller's
+   * {@link BatchDispatchOptions}: only a caller that can act on one asks for it
+   * — a free-tier background run answers a 429 with the provider cool-down, a
+   * bucket cool and one re-route hop, none of which a resolved error verdict
+   * can reach. Everyone else keeps the split-to-singleton recovery.
+   */
+  surfaceTypedErrors: boolean;
   /** Shared `splitAndRetry` (injected to avoid a cycle with core.ts). */
   splitAndRetry: SplitAndRetry;
   /** Verbose request hook — the caller owns its own verbose gate + log shape. */
@@ -145,6 +155,7 @@ export interface SourceReviewFeatureDeps {
   logPrefix: string;
   parseFailMessage: string;
   retryTransient: boolean;
+  surfaceTypedErrors: boolean;
   splitAndRetry: SplitAndRetry;
   /** The reindexed batch (dense 0-based `i`) is passed so the caller can log it. */
   onRequest?: (reindexed: SourceReviewItem[], prompt: { system: string; user: string }) => void;
@@ -211,6 +222,7 @@ export async function runJudgeFeature(
         deps.parseFailMessage,
         deps.signal,
         deps.retryTransient,
+        deps.surfaceTypedErrors,
       )),
     );
   }
@@ -273,6 +285,7 @@ export async function runSourceReviewFeature(
         deps.parseFailMessage,
         deps.signal,
         deps.retryTransient,
+        deps.surfaceTypedErrors,
       )),
     );
   }

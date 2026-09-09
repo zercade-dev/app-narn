@@ -64,12 +64,21 @@ export interface AISDKModuleConfig {
   rateLimitEnabled?: boolean;
   /**
    * Max simultaneous in-flight provider requests for this module. The gate is
-   * keyed by module id, so all of the module's LLM calls — translate, retry,
-   * judge, source-review, glossary — share the same slot pool. Unset / <= 0 =
-   * unlimited (the default for every module except generic-ai, which defaults
-   * to 1 for single local endpoints).
+   * keyed by {@link limiterKey}, so all of this instance's LLM calls —
+   * translate, retry, judge, source-review, glossary — share the same slot
+   * pool. Unset / <= 0 = unlimited (the default for every module except
+   * generic-ai, which defaults to 1 for single local endpoints).
    */
   maxParallel?: number;
+  /**
+   * Pool identity for the rate and concurrency limiters: the tenant that owns
+   * the provider quota plus the resolved instance id, injected by the host (M6
+   * `createWithConfig`). Two tenants spending their own BYOK quotas, and two
+   * named instances of one base module with different limits, must not share a
+   * gate. Defaults to `manifest.id` — the single-tenant, single-instance shape
+   * an open-core host or a direct factory call has.
+   */
+  limiterKey?: string;
   /**
    * When true, each feature's request enables the provider's NATIVE
    * structured-output mode, constraining the reply so malformed output is far

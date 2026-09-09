@@ -36,6 +36,7 @@ import {
   filterGlossaryForSource,
   buildMixedTargetBatchPrompt,
   parseMixedTargetBatchResponse,
+  decodeLeakedHtmlEntities,
   CORE_SYSTEM_PROMPT,
   ESCAPE_SEQUENCE_RULE,
   REFERENCE_CONTEXT_RULE,
@@ -254,20 +255,20 @@ async function runSingleJob(
       signal,
       timeoutMs,
     });
-    const translatedText = response.text.trim();
-    if (verbose) log('info', '[copilot] job:response', { text: translatedText });
+    const rawTranslatedText = response.text.trim();
+    if (verbose) log('info', '[copilot] job:response', { text: rawTranslatedText });
     log('info', '[copilot] job:done', { entryId: job.entryId, target: job.targetLanguage });
     return {
       entryId: job.entryId,
       targetLanguage: job.targetLanguage,
-      translatedText,
+      translatedText: decodeLeakedHtmlEntities(rawTranslatedText, job.sourceText),
       // Real provider token usage when the SDK reported it; otherwise source
       // characters as an estimate fallback.
       usage: toTranslationUsage(
         response.usage,
         model,
         job.sourceText.length,
-        charCounts(system + user, [job], response.text, [translatedText]),
+        charCounts(system + user, [job], response.text, [rawTranslatedText]),
       ),
     };
   } catch (err) {
@@ -338,7 +339,7 @@ export async function retryWithFeedback(
     return {
       entryId: job.entryId,
       targetLanguage: job.targetLanguage,
-      translatedText: correctedText,
+      translatedText: decodeLeakedHtmlEntities(correctedText, job.sourceText),
       usage: toTranslationUsage(combinedUsage, model, job.sourceText.length, chars),
     };
   } catch (err) {
@@ -586,7 +587,7 @@ export function createCopilotModule(
           return batchJobs.map((job, i) => ({
             entryId: job.entryId,
             targetLanguage: job.targetLanguage,
-            translatedText: outputs[i],
+            translatedText: decodeLeakedHtmlEntities(outputs[i], job.sourceText),
             usage: i === 0 ? batchUsage : undefined,
           }));
         };
@@ -720,6 +721,7 @@ export function createCopilotModule(
           logPrefix: '[copilot] judge',
           parseFailMessage: 'malformed JSON from provider',
           retryTransient: !internalRetriesDisabled,
+          surfaceTypedErrors: options?.surfaceTypedErrors ?? false,
           splitAndRetry,
           onRequest: (batch, { system, user }) => {
             if (verbose)
@@ -789,6 +791,7 @@ export function createCopilotModule(
           logPrefix: '[copilot] source-review',
           parseFailMessage: 'malformed JSON from provider',
           retryTransient: !internalRetriesDisabled,
+          surfaceTypedErrors: options?.surfaceTypedErrors ?? false,
           splitAndRetry,
           onRequest: (reindexed, { system, user }) => {
             if (verbose)

@@ -28,9 +28,15 @@ export function getPort(): number {
   return Number.parseInt(process.env.PORT ?? '3001', 10);
 }
 
-/** `HOST` — listen address. Loopback by default. (index.ts) */
+/**
+ * `HOST` — listen address. Loopback only when UNSET: a set-but-blank value is a
+ * wildcard, not the default — `listen(port, '')` binds every interface and
+ * `listen(port, '   ')` fails to resolve at all — so blank normalizes to
+ * `0.0.0.0` and the address reported is always the address bound. (index.ts)
+ */
 export function getHost(): string {
-  return process.env.HOST ?? '127.0.0.1';
+  const v = (process.env.HOST ?? '127.0.0.1').trim();
+  return v === '' ? '0.0.0.0' : v;
 }
 
 /**

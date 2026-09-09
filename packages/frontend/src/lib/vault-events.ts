@@ -2,8 +2,10 @@
  * The cross-component contract for the vault-unlock retry flow.
  *
  * When an API call gets a 423 Locked response, the client dispatches a
- * `vault:locked` window event carrying a `retry` thunk; `AppShell` opens the
- * unlock dialog and replays every accumulated `retry` after the vault unlocks.
+ * `vault:locked` window event carrying a `retry` thunk and its `cancel`
+ * counterpart; `AppShell` opens the unlock dialog and replays every accumulated
+ * `retry` after the vault unlocks, or `cancel`s the ones it drops unrun when the
+ * dialog is dismissed instead.
  * The `vault:retry-started` / `vault:retry-finished` events let an individual
  * component (e.g. an inline re-translate cell) reflect its own retry's progress,
  * correlated by `retryId` and the optional `vaultRetryKey`.
@@ -24,6 +26,12 @@ export const VAULT_RETRY_FINISHED_EVENT = 'vault:retry-finished';
 export interface VaultLockedDetail {
   /** Replays the original request after the vault unlocks. Absent for listener-only signals. */
   retry?: () => Promise<void>;
+  /**
+   * Abandons the queued `retry`, rejecting whatever the dispatcher left awaiting it
+   * with the original 423 so the caller's error handling runs instead of hanging.
+   * Inert once `retry` has started. Absent for listener-only signals.
+   */
+  cancel?: () => void;
   /** Correlation id linking this lock to its retry-started/finished events. */
   retryId?: string;
   /** Optional caller key (e.g. `${entryId}:${lang}`) so a component can match its own retry. */

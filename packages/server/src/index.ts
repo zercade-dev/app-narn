@@ -159,6 +159,15 @@ app.use('/api/projects', orphansRouter);
 // + identity middleware still apply globally. It must NOT sit behind the
 // paid-LLM vault gate below (see the CARVE-OUT comment in routes/translations.ts).
 app.use('/api/projects', translationsApproveRouter);
+// Ungated, and mounted BEFORE the vault-gated mounts, same reasoning as
+// orphansRouter above. Mounted with the `:projectId` param baked into the
+// prefix (mergeParams: true) rather than the flat `/api/projects` + internal
+// `/:projectId/...` pattern sibling project-scoped routers use, so `PATCH /`,
+// `POST /translate`, and `POST /chat` share one fixed prefix. Patching
+// stage-details text is not an LLM-credential operation, so it must neither sit
+// behind the gate nor spend its paid-run budget; `POST /translate` and
+// `POST /chat` self-gate their own routes with requireUnlockedVault.
+app.use('/api/projects/:projectId/stage-details', stageDetailsRouter);
 // The paid-LLM kickoff routers share ONE gate + limiter mount so a request is
 // gated and counted exactly once. Two separate positional mounts double-ran both
 // on the second router's routes (e.g. batch `/analyze`) via the same
@@ -185,13 +194,6 @@ app.use('/api/tm', tmRouter);
 // itself, per-route (`POST /chat`), so it doesn't need the shared
 // gatedProjectRouters gate/limiter (this isn't a `/api/projects` route anyway).
 app.use('/api/color-text', colorTextRouter);
-// Mounted with the `:projectId` param baked into the prefix (mergeParams:
-// true) rather than the flat `/api/projects` + internal `/:projectId/...`
-// pattern sibling project-scoped routers use, so `PATCH /`, `POST /translate`,
-// and `POST /chat` share one fixed prefix. Ungated: patching stage-details
-// text is not an LLM-credential operation (`POST /translate` and
-// `POST /chat` self-gate their own routes with requireUnlockedVault).
-app.use('/api/projects/:projectId/stage-details', stageDetailsRouter);
 // Ambient-tenant only, same reasoning as tmRouter above: no LLM-credential
 // dependency, so no requireUnlockedVault gate.
 app.use('/api/notifications', notificationsRouter);

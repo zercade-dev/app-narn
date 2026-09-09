@@ -44,6 +44,7 @@ import {
   type TranslationJob,
   type TranslationModule,
   type TranslationResult,
+  PSEUDO_LANGUAGE_CODE,
   RunStatusCode,
   toErrorMessage,
 } from '@zercade-dev/narn-shared';
@@ -314,8 +315,15 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
     // JudgeEngine falling back to a whole-project scope reconstruction
     // because relink runs never recorded a `request`.
     const entry = await this.stringStore.getById(projectId, request.entryId);
+    // The synthetic pseudo-test language is bound two-way to the free pseudo
+    // module (M7's carve-out), and this engine dispatches through the ONE module
+    // `selectModule` resolved rather than routing per language, so it drops
+    // pseudo-test itself — up front, keeping the items, the run's `total` and
+    // its persisted scope aligned with the languages it actually retranslates.
+    // Deliberately the only language filter: a translation whose language the
+    // project no longer lists still came from the source text that was edited.
     const languages = Object.entries(entry.translations)
-      .filter(([, rec]) => !!rec?.text)
+      .filter(([lang, rec]) => !!rec?.text && lang !== PSEUDO_LANGUAGE_CODE)
       .map(([lang]) => lang);
 
     // Captured by `buildItems` below (enqueueBatched calls it with the project

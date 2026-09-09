@@ -172,6 +172,7 @@ export function createFeatureMethods(
       logPrefix: `[${provider}] judge`,
       parseFailMessage: 'parseJudgeResponse: malformed JSON from provider',
       retryTransient: true,
+      surfaceTypedErrors: options?.surfaceTypedErrors ?? false,
       splitAndRetry,
       onRequest: (batch, { system, user }) =>
         logVerbose('judge', 'request', {
@@ -232,6 +233,7 @@ export function createFeatureMethods(
       logPrefix: `[${provider}] source-review`,
       parseFailMessage: 'parseSourceReviewResponse: malformed JSON from provider',
       retryTransient: true,
+      surfaceTypedErrors: options?.surfaceTypedErrors ?? false,
       splitAndRetry,
       onRequest: (reindexed, { system, user }) =>
         logVerbose('source-review', 'request', {
