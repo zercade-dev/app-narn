@@ -65,6 +65,8 @@ export interface ChatUsageRef {
  * recording usage. No-ops when the turn has no run scope.
  *
  * Fire-and-forget: never awaited, so it cannot delay the first streamed byte.
+ * `chat-usage.ts` serializes this write against the turn's settle, so a turn
+ * that fails before it lands still ends terminal rather than stranded `Running`.
  */
 export function openChatRun(meta: ChatTurnMeta): void {
   if (!meta.run) return;
