@@ -21,8 +21,11 @@ const SIZE_MIN = 8;
 const SIZE_MAX = 200;
 const SIZE_DEFAULT = 24;
 
-/** Matches one opening tag at position 0 of the remaining input. */
-const OPEN_RE = /^<(color=([^>]+)|size=([^>]+)|b|i)>/i;
+/** Matches one opening tag; sticky, so `lastIndex` picks the position to test. */
+const OPEN_RE = /<(color=([^>]+)|size=([^>]+)|b|i)>/iy;
+
+const TAG_KINDS: readonly TagKind[] = ['color', 'bold', 'italic', 'size'];
+const KIND_INDEX: Record<TagKind, number> = { color: 0, bold: 1, italic: 2, size: 3 };
 
 interface OpenTag {
   kind: TagKind;
@@ -30,8 +33,9 @@ interface OpenTag {
   raw: string;
 }
 
-function matchOpen(s: string): OpenTag | null {
-  const m = OPEN_RE.exec(s);
+function matchOpenAt(input: string, i: number): OpenTag | null {
+  OPEN_RE.lastIndex = i;
+  const m = OPEN_RE.exec(input);
   if (!m) return null;
   const body = m[1].toLowerCase();
   if (body === 'b') return { kind: 'bold', raw: m[0] };
@@ -50,64 +54,94 @@ function closeTagFor(kind: TagKind): string {
         : '</size>';
 }
 
+const CLOSE_TAGS: readonly string[] = TAG_KINDS.map(closeTagFor);
+
 /**
- * Parse `input` into a node tree. Text between/around tags becomes string
- * nodes. A tag whose matching close is missing is emitted as literal text.
+ * For every position in `input` and every tag kind, the index just past the close
+ * tag that ends a scan started there, or -1 when that scan reaches the end of the
+ * input without one. Filled right to left, so each entry only reads entries
+ * further along and a balanced nested tag is skipped whole, exactly as a scan
+ * skips it.
  */
-export function parseStyleTree(input: string): Node[] {
-  const [nodes] = parseChildren(input, 0, null);
-  return nodes;
+function buildCloseTable(input: string): Int32Array {
+  const width = TAG_KINDS.length;
+  const table = new Int32Array((input.length + 1) * width).fill(-1);
+  for (let i = input.length - 1; i >= 0; i -= 1) {
+    let skipTo = -1;
+    if (input[i] === '<') {
+      const open = matchOpenAt(input, i);
+      if (open) {
+        const inner = table[(i + open.raw.length) * width + KIND_INDEX[open.kind]];
+        if (inner >= 0) skipTo = inner;
+      }
+    }
+    const next = (skipTo >= 0 ? skipTo : i + 1) * width;
+    for (let k = 0; k < width; k += 1) {
+      table[i * width + k] = input.startsWith(CLOSE_TAGS[k], i)
+        ? i + CLOSE_TAGS[k].length
+        : table[next + k];
+    }
+  }
+  return table;
+}
+
+interface Frame {
+  kind: TagKind | null;
+  value?: string;
+  out: Node[];
+  textStart: number;
 }
 
 /**
- * Single-pass recursive descent. Parses children starting at `i` until either
- * end-of-input (closeKind === null) or the close tag for `closeKind` is reached.
- * Returns [nodes, nextIndex, closed]. `closed` is true exactly when the recursion
- * terminated by matching and consuming the close tag for `closeKind` (as opposed
- * to running off the end of input) — the caller uses this to decide whether an
- * opener is balanced, rather than re-deriving it from the returned index.
+ * Parse `input` into a node tree. Text between/around tags becomes string
+ * nodes. A tag whose matching close is missing is emitted as literal text.
+ *
+ * The close table settles balancedness before the walk starts, so an opener is
+ * pushed only when its close is reachable and the walk never revisits a position.
  */
-function parseChildren(
-  input: string,
-  i: number,
-  closeKind: TagKind | null,
-): [Node[], number, boolean] {
-  const out: Node[] = [];
-  let text = '';
-  const flush = () => {
-    if (text) {
-      out.push(text);
-      text = '';
-    }
+export function parseStyleTree(input: string): Node[] {
+  const width = TAG_KINDS.length;
+  const table = buildCloseTable(input);
+  const root: Node[] = [];
+  const stack: Frame[] = [{ kind: null, out: root, textStart: 0 }];
+  const flush = (frame: Frame, end: number) => {
+    if (end > frame.textStart) frame.out.push(input.slice(frame.textStart, end));
   };
+  let i = 0;
   while (i < input.length) {
-    if (closeKind && input.startsWith(closeTagFor(closeKind), i)) {
-      flush();
-      return [out, i + closeTagFor(closeKind).length, true];
-    }
-    if (input[i] === '<') {
-      const open = matchOpen(input.slice(i));
-      if (open) {
-        const contentStart = i + open.raw.length;
-        const [children, end, closed] = parseChildren(input, contentStart, open.kind);
-        if (closed) {
-          flush();
-          out.push({
-            kind: open.kind,
-            ...(open.value !== undefined ? { value: open.value } : {}),
-            children,
-          });
-          i = end;
-          continue;
-        }
-        // Unbalanced: the opener is literal. Fall through to emit '<' as text.
+    const top = stack[stack.length - 1];
+    if (top.kind !== null) {
+      const close = CLOSE_TAGS[KIND_INDEX[top.kind]];
+      if (input.startsWith(close, i)) {
+        flush(top, i);
+        stack.pop();
+        i += close.length;
+        const parent = stack[stack.length - 1];
+        parent.out.push({
+          kind: top.kind,
+          ...(top.value !== undefined ? { value: top.value } : {}),
+          children: top.out,
+        });
+        parent.textStart = i;
+        continue;
       }
     }
-    text += input[i];
+    if (input[i] === '<') {
+      const open = matchOpenAt(input, i);
+      if (open) {
+        const contentStart = i + open.raw.length;
+        if (table[contentStart * width + KIND_INDEX[open.kind]] >= 0) {
+          flush(top, i);
+          stack.push({ kind: open.kind, value: open.value, out: [], textStart: contentStart });
+          i = contentStart;
+          continue;
+        }
+      }
+    }
     i += 1;
   }
-  flush();
-  return [out, i, false];
+  flush(stack[stack.length - 1], input.length);
+  return root;
 }
 
 export function serializeStyleTree(nodes: Node[]): string {
