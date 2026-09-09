@@ -158,6 +158,13 @@ export interface GlossaryStore {
   ): Promise<GlossaryTerm>;
   // Overload: updateTerm(projectId, termId, partial) — default glossary (backward compat)
   // Overload: updateTerm(projectId, glossaryId, termId, partial) — specific glossary
+  //
+  // `partial.translations` merges onto the stored map PER LANGUAGE: a language
+  // absent from the patch keeps its stored value. Callers routinely send a
+  // subset — the collaborator term PATCH may only ever name languages it can
+  // write — so replacing the map wholesale destroys sibling languages. To clear
+  // one language, send it as an empty string. This is part of the port
+  // contract, not an implementation detail of the Postgres adapter.
   updateTerm(
     projectId: string,
     termId: string,

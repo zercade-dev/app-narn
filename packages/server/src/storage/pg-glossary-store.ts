@@ -376,10 +376,23 @@ export class PgGlossaryStore implements GlossaryStore {
         if (index === -1) {
           throw new GlossaryTermNotFoundError(termId);
         }
+        const existing = glossary.terms[index]!;
+        // `translations` merges PER LANGUAGE — it is never replaced wholesale.
+        // A caller legitimately sends a partial map: the collaborator term
+        // PATCH *must* send only the languages it may write, because
+        // assertGlossaryTermEditAllowed rejects a body naming any language the
+        // caller cannot write. A flat spread therefore deleted every sibling
+        // language's translation whenever a collaborator saved a term.
+        // Clearing one language is still expressed by sending it as an empty
+        // string, which merges through — every consumer treats '' as "no
+        // translation" (see getTermsForLanguage and findIncompleteGlossaries).
         const merged: GlossaryTerm = {
-          ...glossary.terms[index],
+          ...existing,
           ...partial,
-          id: glossary.terms[index].id,
+          translations: partial.translations
+            ? { ...existing.translations, ...partial.translations }
+            : existing.translations,
+          id: existing.id,
         };
         glossary.terms[index] = merged;
         await this.saveGlossary(projectId, glossaryId, glossary, tx);
