@@ -4,6 +4,7 @@ import {
   RunStatusCode,
   hasRunDetailsKind,
   BATCH_GROUPING_DIMENSIONS,
+  can,
 } from '@zercade-dev/narn-shared';
 import { getProjectStore, getRunStore, getStringStore } from '../storage/registry.js';
 import type { SourceReviewRecord } from '../storage/types.js';
@@ -22,6 +23,7 @@ import { asyncHandler, enqueueRun } from '../http/index.js';
 import { projectIdParam } from '../middleware/path-params.js';
 import { assertRunVisible, assertProjectAccess } from '../middleware/authz.js';
 import { requireTenant } from '../storage/pg/tenant-context.js';
+import { ForbiddenError } from '../types/errors.js';
 
 export const runsRouter: Router = Router();
 
@@ -754,7 +756,8 @@ runsRouter.post(
  * language) this COMPLETED translation or relink-retranslate run touched,
  * then marks the run `reverted` so it cannot be reverted again. No vault
  * gate — this only replays already-captured local data, no credentials/LLM
- * calls involved.
+ * calls involved — but it IS a translation write, so a caller who cannot write
+ * every captured target language is refused outright (403).
  *
  * Conservative simplification (deliberate, no multi-run diffing): revert is
  * blocked with 409 if ANY newer completed translation or relink-retranslate
@@ -835,6 +838,18 @@ runsRouter.post(
     if (previousValues.length === 0) {
       res.status(409).json({ error: 'No captured previous values to revert for this run' });
       return;
+    }
+
+    // Restoring a captured value is a translation write, so it takes the same
+    // per-language gate as every other write path. A captured language the
+    // caller cannot write rejects the WHOLE revert rather than being skipped:
+    // a partial restore would still mark the run `reverted` below, locking the
+    // owner out of ever finishing it.
+    const access = await assertProjectAccess(projectId, { type: 'read' });
+    for (const language of new Set(previousValues.map((pv) => pv.targetLanguage))) {
+      if (!can(access, { type: 'write-language', language })) {
+        throw new ForbiddenError(`write-language:${language}`);
+      }
     }
 
     const stringStore = getStringStore();
