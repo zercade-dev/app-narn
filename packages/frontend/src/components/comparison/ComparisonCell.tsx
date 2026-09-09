@@ -391,6 +391,16 @@ export function ComparisonCell({
 
   const handleCellKeyDown = (e: React.KeyboardEvent<HTMLDivElement>): void => {
     if (editing) return;
+    // Single-letter shortcuts must not fire while a modifier is held. The cell
+    // is a tabIndex={0} div that any plain click focuses, so a keystroke the
+    // user aims at the browser lands here: Ctrl/Cmd+C matched the 'c' branch
+    // and CLEARED the translation instead of copying it, and Ctrl/Cmd+R marked
+    // the cell reviewed instead of reloading — both after preventDefault()
+    // suppressed the browser's own action, so the user got the destructive
+    // half and none of what they asked for. Shift is included because a
+    // capital letter reaches these branches through toLowerCase() anyway;
+    // CapsLock (shiftKey false) still works, which the tests pin.
+    if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
     if (e.key.toLowerCase() === 't' && onRetranslate) {
       e.preventDefault();
       void handleRetranslate();
