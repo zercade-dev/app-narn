@@ -48,6 +48,16 @@ interface BackupManifest {
   files: Array<{ path: string; size: number }>;
 }
 
+/**
+ * What an uploaded archive would land on, read from its manifest server-side
+ * before anything is written. `projectName` is the CURRENT name of the project
+ * the archive's `projectId` resolves to, and is null when no such project
+ * exists here — the restore then creates it instead of overwriting anything.
+ */
+interface RestorePreview extends BackupManifest {
+  projectName: string | null;
+}
+
 interface ListBackupsResponse {
   files: BackupEntry[];
 }
@@ -67,6 +77,9 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [uploadPreview, setUploadPreview] = useState<RestorePreview | null>(null);
+  const [uploadPreviewFailed, setUploadPreviewFailed] = useState(false);
+  const [loadingUploadPreview, setLoadingUploadPreview] = useState(false);
   const [serverRestoreEntry, setServerRestoreEntry] = useState<BackupEntry | null>(null);
   const [serverRestoreManifest, setServerRestoreManifest] = useState<BackupManifest | null>(null);
   const [loadingManifest, setLoadingManifest] = useState(false);
@@ -109,6 +122,35 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
     setSelectedFile(file);
   };
 
+  const resetUploadPreview = () => {
+    setUploadPreview(null);
+    setUploadPreviewFailed(false);
+  };
+
+  // An uploaded archive names its own target project, which need not be the one
+  // this tab is open on, so the confirmation waits for the server to read the
+  // manifest and say what the restore would land on.
+  const handleOpenUploadRestore = async () => {
+    if (!selectedFile) return;
+    resetUploadPreview();
+    setConfirmOpen(true);
+    setLoadingUploadPreview(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      setUploadPreview(
+        await apiRequest<RestorePreview>('/backup/restore/preview', {
+          method: 'POST',
+          body: formData,
+        }),
+      );
+    } catch {
+      setUploadPreviewFailed(true);
+    } finally {
+      setLoadingUploadPreview(false);
+    }
+  };
+
   const handleConfirmRestore = async () => {
     if (!selectedFile) {
       setConfirmOpen(false);
@@ -136,6 +178,7 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
     } finally {
       setRestoring(false);
       setConfirmOpen(false);
+      resetUploadPreview();
     }
   };
 
@@ -253,7 +296,7 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
               />
             </div>
             <Button
-              onClick={() => setConfirmOpen(true)}
+              onClick={() => void handleOpenUploadRestore()}
               disabled={!selectedFile || restoring}
               data-testid="backup-restore-btn"
             >
@@ -334,17 +377,56 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
 
       <ConfirmSheet
         open={confirmOpen}
-        onOpenChange={setConfirmOpen}
+        onOpenChange={(open) => {
+          setConfirmOpen(open);
+          if (!open) resetUploadPreview();
+        }}
         title={t('confirmTitle')}
         description={t('confirmBody')}
         confirmLabel={t('confirmConfirm')}
-        confirmDisabled={restoring}
+        confirmDisabled={restoring || loadingUploadPreview}
         cancelDisabled={restoring}
         onConfirm={handleConfirmRestore}
         cancelLabel={t('confirmCancel')}
         cancelTestId="backup-restore-cancel"
         confirmTestId="backup-restore-confirm"
-      />
+      >
+        {loadingUploadPreview && (
+          <p className="px-4 py-2 text-sm text-muted-foreground">{t('previewLoading')}</p>
+        )}
+        {!loadingUploadPreview && uploadPreviewFailed && (
+          <p
+            className="px-4 py-2 text-sm text-destructive"
+            data-testid="backup-restore-preview-failed"
+          >
+            {t('previewUnavailable')}
+          </p>
+        )}
+        {!loadingUploadPreview && uploadPreview && (
+          <div className="px-4 py-2 text-sm space-y-1 border rounded-md mx-4 mt-2 bg-muted/40">
+            <p className="font-medium" data-testid="backup-restore-target">
+              {uploadPreview.projectName
+                ? t('previewOverwrites', { project: uploadPreview.projectName })
+                : t('previewCreates')}
+            </p>
+            {uploadPreview.projectId !== projectId && (
+              <p className="text-destructive" data-testid="backup-restore-target-mismatch">
+                {t('previewDifferentProject')}
+              </p>
+            )}
+            <p>
+              <span className="font-medium">{t('previewProject')}</span> {uploadPreview.projectId}
+            </p>
+            <p>
+              <span className="font-medium">{t('previewFiles')}</span> {uploadPreview.files.length}
+            </p>
+            <p>
+              <span className="font-medium">{t('previewCreatedAt')}</span>{' '}
+              {new Date(uploadPreview.createdAt).toLocaleString()}
+            </p>
+          </div>
+        )}
+      </ConfirmSheet>
 
       <ConfirmSheet
         open={serverRestoreEntry !== null}

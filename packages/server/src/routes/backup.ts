@@ -62,6 +62,28 @@ function resolveUploadTempPath(uploadPath: string): string {
   return resolved;
 }
 
+/**
+ * Magic-byte content verification for a staged upload: the extension and
+ * mimetype checked at upload time (fileFilter) are client-supplied and never
+ * trusted alone, so the first bytes actually written to disk are read back and
+ * anything that isn't a real ZIP is rejected — including a script or binary
+ * mis-named `.zip`.
+ */
+async function assertUploadedZip(tempPath: string, originalname?: string): Promise<void> {
+  const handle = await fs.open(tempPath, 'r');
+  let header: Buffer;
+  try {
+    header = Buffer.alloc(4);
+    await handle.read(header, 0, 4, 0);
+  } finally {
+    await handle.close();
+  }
+  validateUploadedFile(originalname, header, {
+    allowedExtensions: ['.zip'],
+    requireZipMagic: true,
+  });
+}
+
 // Guard for routes with a :backupId param. Backup ids are opaque store tokens
 // (`bk_<uuid>`) used ONLY as an exact-match SQL bind — never a path segment — so
 // this is a cheap charset bound that rejects obviously-malformed ids early with
@@ -241,6 +263,48 @@ backupRouter.get(
   }),
 );
 
+const backupRestorePreviewRateLimiter = rateLimiter({ maxRequests: 20, windowMs: 60_000 });
+
+// POST /api/backup/restore/preview — report what an uploaded archive WOULD
+// restore, without applying any of it. Not project-scoped, for the same reason
+// the restore below isn't: the archive names its own target. The client sends
+// the file twice (once to preview, once to commit) rather than the server
+// holding a staged copy between two requests; either way the copy is deleted
+// before the response. No vault gate — nothing is decrypted and nothing is
+// written.
+backupRouter.post(
+  '/backup/restore/preview',
+  backupRestorePreviewRateLimiter,
+  upload,
+  requireFile,
+  asyncHandler(async (req, res) => {
+    let tempPath: string | null = null;
+    try {
+      tempPath = resolveUploadTempPath(req.file!.path);
+      await assertUploadedZip(tempPath, req.file!.originalname);
+      const manifest = await backupManager.peekManifest(tempPath);
+      // The manifest names its target by id alone. The NAME belongs to whatever
+      // project that id resolves to here, and the lookup is RLS-scoped, so a
+      // non-member — or an id that exists nowhere — yields null, which is the
+      // honest answer: that restore would create a project, not overwrite one.
+      const project = await getProjectStore()
+        .loadProject(manifest.projectId)
+        .catch(() => null);
+      res.json({
+        projectId: manifest.projectId,
+        projectName: project?.name ?? null,
+        createdAt: manifest.createdAt,
+        trigger: manifest.trigger,
+        files: manifest.files.map((file) => ({ path: file.path, size: file.size })),
+      });
+    } finally {
+      if (tempPath) {
+        await fs.unlink(tempPath).catch(() => undefined);
+      }
+    }
+  }),
+);
+
 const backupRestoreRateLimiter = rateLimiter({ maxRequests: 10, windowMs: 60_000 });
 
 // POST /api/backup/restore — multipart zip upload, restores the project into
@@ -256,22 +320,7 @@ backupRouter.post(
     let tempPath: string | null = null;
     try {
       tempPath = resolveUploadTempPath(req.file!.path);
-      // Magic-byte content verification: the extension/mimetype checked at
-      // upload time (fileFilter) is client-supplied and never trusted alone —
-      // read the first few bytes actually written to disk and reject anything
-      // that isn't a real ZIP (including a script/binary mis-named `.zip`).
-      const handle = await fs.open(tempPath, 'r');
-      let header: Buffer;
-      try {
-        header = Buffer.alloc(4);
-        await handle.read(header, 0, 4, 0);
-      } finally {
-        await handle.close();
-      }
-      validateUploadedFile(req.file!.originalname, header, {
-        allowedExtensions: ['.zip'],
-        requireZipMagic: true,
-      });
+      await assertUploadedZip(tempPath, req.file!.originalname);
       const result = await backupManager.restoreBackup(tempPath);
       logger.info('Backup restored', {
         projectId: result.projectId,
