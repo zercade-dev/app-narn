@@ -168,9 +168,14 @@ export class ModuleRegistry {
    */
   private readonly instancesByTenant = new Map<string, Map<string, ModuleInstance>>();
 
+  /** The tenant whose instance keyspace and provider quota a call belongs to. */
+  private currentTenantId(): string {
+    return getCurrentTenant()?.userId ?? LOCAL_TENANT;
+  }
+
   /** The current tenant's instance map (lazily created), keyed by instanceId. */
   private tenantInstances(): Map<string, ModuleInstance> {
-    const tenant = getCurrentTenant()?.userId ?? LOCAL_TENANT;
+    const tenant = this.currentTenantId();
     let map = this.instancesByTenant.get(tenant);
     if (!map) {
       map = new Map<string, ModuleInstance>();
@@ -356,6 +361,11 @@ export class ModuleRegistry {
       ...factoryConfig,
       requestTimeoutMs,
       maxOutputTokens,
+      // Rate/concurrency pool for this module: the tenant that owns the BYOK
+      // quota plus the id actually resolved, so two tenants — and two named
+      // instances of one base module — never share a gate. Set after the config
+      // spread so persisted config cannot claim another tenant's pool.
+      limiterKey: `${this.currentTenantId()}::${id}`,
       credentials: this.buildCredentialProvider(sessionId, keyMap),
     });
   }

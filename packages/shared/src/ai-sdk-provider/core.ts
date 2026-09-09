@@ -697,20 +697,24 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
   // native path and treats it as a no-op for anthropic / anthropic-compatible.
   const structuredOutput = resolveUseStructuredOutput(config.useStructuredOutput, provider);
 
-  // Global client-side rate limit: one slot per outbound HTTP request,
-  // limiter keyed by module id. Not applied to healthCheck.
+  // Both gates pool by the quota owner the host resolved (tenant + instance),
+  // falling back to the module id when it supplied none. The rate-limit opt-in
+  // itself stays a property of the module TYPE, hence manifest.id below.
+  const limiterKey = config.limiterKey ?? manifest.id;
+
+  // Global client-side rate limit: one slot per outbound HTTP request. Not
+  // applied to healthCheck.
   const awaitRateLimit = (): Promise<void> =>
     rateLimitApplies(manifest.id, config.rateLimitEnabled)
-      ? acquireRateLimit(manifest.id, config.requestsPerSecond)
+      ? acquireRateLimit(limiterKey, config.requestsPerSecond)
       : Promise.resolve();
 
-  // Wrap a single provider call: hold one of the module's concurrency slots
-  // (keyed by module id, so all of this module's calls share the pool) for the
-  // whole request, applying the rate-limit spacing inside the slot. maxParallel
-  // unset/<=0 means the slot acquire is a no-op, so non-generic-ai modules are
-  // unaffected.
+  // Wrap a single provider call: hold one of this instance's concurrency slots
+  // (so all of its calls share one pool) for the whole request, applying the
+  // rate-limit spacing inside the slot. maxParallel unset/<=0 means the slot
+  // acquire is a no-op, so non-generic-ai modules are unaffected.
   async function callProvider<T>(fn: () => Promise<T>): Promise<T> {
-    const release = await acquireConcurrencySlot(manifest.id, config.maxParallel);
+    const release = await acquireConcurrencySlot(limiterKey, config.maxParallel);
     try {
       await awaitRateLimit();
       return await fn();
@@ -812,7 +816,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
         // the cost, and resetRateLimiters() clears it at the next run — do not "fix"
         // this into a once-per-job throttle.
         if (toRateLimitError(err)) {
-          const backoff = reportRateLimitHit(manifest.id);
+          const backoff = reportRateLimitHit(limiterKey);
           if (backoff.changed) {
             log('warn', `[${provider}] rate-limit:backoff`, {
               previousIntervalMs: backoff.previousIntervalMs,
