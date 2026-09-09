@@ -1,0 +1,10 @@
+# Source is always text: a stray NUL byte otherwise makes a file "binary" to
+# git, which silently drops it out of diffs and `--numstat` (reported as -\t-),
+# so a change lands where review cannot see it. `scripts/no-raw-nul-bytes.test.ts`
+# in the parent repo keeps the bytes clean; this keeps the diffs readable either
+# way, including across the commit that removes one.
+*.ts   text diff
+*.tsx  text diff
+*.js   text diff
+*.mjs  text diff
+*.json text diff
