@@ -10,14 +10,15 @@ start-secure:
 smoke-secure:
 	./scripts/smoke-secure.sh
 
-## Run security audit to check for vulnerabilities
+## Run security audit to check for vulnerabilities. Verbatim the gating step in
+## .github/workflows/security.yml, scope included: a failure here has to mean what a
+## failure there means. Build-chain advisories gate too — that chain produces the
+## published image, and its patched ranges live in pnpm-workspace.yaml's `overrides:`.
 security-check:
-	pnpm audit --json > audit-report.json || true
-	@echo "Checking for high/critical vulnerabilities in production dependencies..."
-	@node -e "const fs = require('fs'); const r = JSON.parse(fs.readFileSync('./audit-report.json', 'utf-8')); const prodHigh = Object.values(r.advisories).filter(a => a.severity === 'high' && !a.findings.every(f => f.dev)).length; const prodCritical = Object.values(r.advisories).filter(a => a.severity === 'critical' && !a.findings.every(f => f.dev)).length; if (prodHigh > 0 || prodCritical > 0) { console.error('High or critical severity vulnerabilities found in production dependencies!'); process.exit(1); }"
+	pnpm audit --audit-level=high
 
 ## Release gate for the public app: build + lint + format + locale checks +
-## prod security audit. check:locales and check:lexicon are both here because
+## dependency security audit. check:locales and check:lexicon are both here because
 ## CI's quality-gate job runs each of them directly too (see
 ## .github/workflows/ci.yml) and .githooks/pre-push runs this target —
 ## without them here, a push passes locally and fails in CI. check:lexicon

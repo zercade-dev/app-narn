@@ -86,8 +86,8 @@ make verify
 ```
 
 `make verify` runs `pnpm build`, `pnpm lint`, `pnpm format:check`, `pnpm check:locales`
-and a dependency security audit that fails on high or critical advisories in
-production dependencies. Run it before you open a pull request.
+and a dependency security audit that fails on any high or critical advisory, build
+tooling included. Run it before you open a pull request.
 
 `pnpm check:locales` is the interface-string gate — see [Translations](#translations)
 below. It is a standalone script rather than a test suite, it needs no browser or
