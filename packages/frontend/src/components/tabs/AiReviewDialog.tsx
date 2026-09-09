@@ -12,7 +12,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { JudgeChecks, RunStatus, RunUsageEntry } from '@zercade-dev/narn-shared';
-import { FREEWAY_MODULE_ID } from '@zercade-dev/narn-shared';
+import { FREEWAY_MODULE_ID, projectTargetLanguages } from '@zercade-dev/narn-shared';
 import { Sparkles } from 'lucide-react';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
@@ -147,11 +147,13 @@ export function AiReviewDialog({
   );
   const judgeConfig = useProjectStore((s) => s.getActiveProject()?.judgeConfig);
   const activeProject = useProjectStore((s) => s.getActiveProject());
-  // Every active language except the source is a reviewable target language,
-  // mirroring the server's own reconstructScope() language derivation.
-  const targetLanguages = (activeProject?.activeLanguages ?? []).filter(
-    (lang) => lang !== activeProject?.sourceLanguage,
-  );
+  // Every active language except the source and the synthetic pseudo-test one is
+  // a reviewable target language, mirroring the server's own reconstructScope()
+  // language derivation (both go through projectTargetLanguages).
+  const targetLanguages = projectTargetLanguages({
+    activeLanguages: activeProject?.activeLanguages ?? [],
+    sourceLanguage: activeProject?.sourceLanguage ?? '',
+  });
   const modules = useModules();
   // Everything below the module/model/effort picker is tuning, not the choice
   // that defines the run — hidden behind this until ticked. Only its own
