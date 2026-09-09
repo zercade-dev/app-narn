@@ -507,12 +507,46 @@ logsRouter.post(
   },
 );
 
+/** True once the response can no longer accept writes (client gone, or ended). */
+function isClosed(res: Response): boolean {
+  return res.writableEnded || res.destroyed;
+}
+
+/**
+ * `res.write` that honours backpressure.
+ *
+ * The capture caps are accounted in exactly the bytes this route writes — 256 MB
+ * locally, 32 MB per tenant in cloud — and the streaming nginx locations set
+ * `proxy_buffering off`, so a reader that stops draining otherwise queues the
+ * whole capture in the socket's userland buffer. At 30 requests/min per key one
+ * tenant could hold most of a gigabyte of queued strings, which is a
+ * multi-tenant availability problem rather than a slow download.
+ *
+ * The `close` listener is what keeps a dead reader from pinning the loop
+ * forever: a peer that vanishes mid-download never emits `drain`, so waiting on
+ * that alone would park this handler until the socket timed out.
+ */
+function writeBackpressured(res: Response, chunk: string): Promise<void> {
+  if (res.write(chunk)) return Promise.resolve();
+  return new Promise<void>((resolve) => {
+    const done = (): void => {
+      res.off('drain', done);
+      res.off('close', done);
+      res.off('error', done);
+      resolve();
+    };
+    res.once('drain', done);
+    res.once('close', done);
+    res.once('error', done);
+  });
+}
+
 // GET /api/logs/capture/download — the captured run as NDJSON (meta record first)
 logsRouter.get(
   '/capture/download',
   requireUnlockedVault,
   captureRateLimiter,
-  (_req: Request, res: Response) => {
+  asyncHandler(async (_req: Request, res: Response) => {
     const tenant = captureTenant();
     const status = logger.capture.status(tenant);
     if (status.startedAt === null) {
@@ -536,16 +570,24 @@ logsRouter.get(
     // In cloud mode strip the tenantId scoping stamp — it is the requester's own
     // id, and server-side scoping fields stay server-side (run-progress precedent).
     const stripTenant = isCloudMode();
-    for (const entry of logger.capture.entriesFor(tenant)) {
+    // `entriesFor` hands back the LIVE array and `record()` keeps appending to it
+    // while this loop awaits, so take a snapshot: the download is the capture as
+    // it stood when the request arrived.
+    const entries = [...logger.capture.entriesFor(tenant)];
+    for (const entry of entries) {
+      if (isClosed(res)) return;
+      let line: string;
       if (stripTenant) {
         const { tenantId: _tenantId, ...rest } = entry;
-        res.write(`${JSON.stringify(rest)}\n`);
+        line = JSON.stringify(rest);
       } else {
-        res.write(`${JSON.stringify(entry)}\n`);
+        line = JSON.stringify(entry);
       }
+      await writeBackpressured(res, `${line}\n`);
     }
+    if (isClosed(res)) return;
     res.end();
-  },
+  }),
 );
 
 // Helper function to read entries from file-based logs
