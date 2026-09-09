@@ -106,6 +106,11 @@ export class AuditLogger {
   // Serializes file writes so rotation stays atomic relative to appends and
   // entries land in append order even when log() is called concurrently.
   private writeChain: Promise<void> = Promise.resolve();
+  // Latches the "cannot write the audit log" report. An unwritable directory
+  // (read-only filesystem, missing volume) fails identically for every following
+  // event, and one console line per audit event buries the operator. Cleared by
+  // the next successful write, so a later outage is still reported.
+  private writeFailureReported = false;
 
   constructor(options: { maxSize?: number; retentionMs?: number } = {}) {
     this.maxSize = options.maxSize || 10000;
@@ -227,9 +232,16 @@ export class AuditLogger {
 
       const logLine = JSON.stringify(entry) + '\n';
       await fs.appendFile(LOG_FILE, logLine);
+      this.writeFailureReported = false;
     } catch (err) {
       // Log to console as fallback
-      console.error('Failed to write audit log:', err);
+      if (!this.writeFailureReported) {
+        this.writeFailureReported = true;
+        console.error(
+          `Failed to write audit log to ${LOG_FILE}. Audit events are in memory only and will not survive a restart — point AUDIT_LOG_DIR at a writable directory.`,
+          err,
+        );
+      }
     }
   }
 
