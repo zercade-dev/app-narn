@@ -41,56 +41,77 @@ export interface UrlState {
   lang?: UiLanguage;
 }
 
+/** The screen a path addresses: a shell view, plus the tab when it's the project view. */
 interface ScreenDef {
-  path: string;
   view: ShellView;
-  /** Present => the project view showing this tab. */
-  tab?: Tab;
+  activeTab: Tab;
 }
 
-/** Single source of truth for path <-> screen (mirrors the sidebar NAV_GROUPS). */
-const SCREENS: readonly ScreenDef[] = [
-  { path: '/g/config', view: 'global-config' },
-  { path: '/g/memory', view: 'translation-memory' },
-  { path: '/g/guide', view: 'guide' },
-  { path: '/account', view: 'account' },
-  { path: '/legal', view: 'legal' },
-  { path: '/page/changelog', view: 'changelog' },
-  { path: '/page/about-narn', view: 'about-narn' },
-  { path: '/join', view: 'join-project' },
-  { path: '/setup/config', view: 'project', tab: 'config' },
-  { path: '/setup/data', view: 'project', tab: 'data' },
-  { path: '/setup/sharing', view: 'project', tab: 'sharing' },
-  { path: '/translate/strings', view: 'project', tab: 'strings' },
-  { path: '/translate/compare', view: 'project', tab: 'compare' },
-  { path: '/translate/routing', view: 'project', tab: 'routing' },
-  { path: '/translate/runs', view: 'project', tab: 'runs' },
-  { path: '/translate/stage-details', view: 'project', tab: 'stage-details' },
-  { path: '/translate/quality', view: 'project', tab: 'quality' },
-  { path: '/review/source-ai', view: 'project', tab: 'review-source-ai' },
-  { path: '/review/translation-ai', view: 'project', tab: 'review-translation-ai' },
-  { path: '/review/manual', view: 'project', tab: 'review-manual' },
-  { path: '/content/glossary', view: 'project', tab: 'glossary' },
-  { path: '/content/category', view: 'project', tab: 'category' },
-  { path: '/content/color-text', view: 'project', tab: 'color-text' },
-  { path: '/maintenance/orphans', view: 'project', tab: 'orphans' },
-  { path: '/maintenance/backup', view: 'project', tab: 'backup' },
-];
-
 /** Where `/` and any unknown path resolve to. */
-export const DEFAULT_SCREEN: { view: ShellView; activeTab: Tab } = {
+export const DEFAULT_SCREEN: ScreenDef = {
   view: 'project',
   activeTab: 'config',
 };
 
-function findByPath(pathname: string): ScreenDef | undefined {
-  return SCREENS.find((s) => s.path === pathname);
+/**
+ * Path per shell view, or `null` for a view with no URL of its own: `project`
+ * is addressed per-tab (TAB_PATHS below), and `welcome` is what AppShell shows
+ * in place of the default screen on first load rather than a destination. The
+ * Record type makes TypeScript enforce that every new ShellView member is
+ * classified here (missing key = build error), like lib/mobile-gating.ts.
+ */
+const SHELL_VIEW_PATHS: Record<ShellView, string | null> = {
+  project: null,
+  'global-config': '/g/config',
+  'translation-memory': '/g/memory',
+  guide: '/g/guide',
+  account: '/account',
+  legal: '/legal',
+  changelog: '/page/changelog',
+  'about-narn': '/page/about-narn',
+  settings: '/settings',
+  'join-project': '/join',
+  welcome: null,
+};
+
+/** Path per project section (mirrors the sidebar NAV_GROUPS). */
+const TAB_PATHS: Record<Tab, string> = {
+  config: '/setup/config',
+  data: '/setup/data',
+  sharing: '/setup/sharing',
+  strings: '/translate/strings',
+  compare: '/translate/compare',
+  routing: '/translate/routing',
+  runs: '/translate/runs',
+  'stage-details': '/translate/stage-details',
+  quality: '/translate/quality',
+  'review-source-ai': '/review/source-ai',
+  'review-translation-ai': '/review/translation-ai',
+  'review-manual': '/review/manual',
+  glossary: '/content/glossary',
+  category: '/content/category',
+  'color-text': '/content/color-text',
+  orphans: '/maintenance/orphans',
+  backup: '/maintenance/backup',
+};
+
+function buildPathIndex(): ReadonlyMap<string, ScreenDef> {
+  const index = new Map<string, ScreenDef>();
+  for (const [tab, path] of Object.entries(TAB_PATHS) as [Tab, string][]) {
+    index.set(path, { view: 'project', activeTab: tab });
+  }
+  for (const [view, path] of Object.entries(SHELL_VIEW_PATHS) as [ShellView, string | null][]) {
+    if (path !== null) index.set(path, { view, activeTab: DEFAULT_SCREEN.activeTab });
+  }
+  return index;
 }
 
-function findByScreen(view: ShellView, activeTab: Tab): ScreenDef | undefined {
-  return view === 'project'
-    ? SCREENS.find((s) => s.view === 'project' && s.tab === activeTab)
-    : SCREENS.find((s) => s.view === view);
+/** Path -> screen, derived from the two tables above (paths are unique across them). */
+const PATH_TO_SCREEN = buildPathIndex();
+
+/** The path addressing this screen, or `null` when the view has no URL of its own. */
+function pathFor(view: ShellView, activeTab: Tab): string | null {
+  return view === 'project' ? TAB_PATHS[activeTab] : SHELL_VIEW_PATHS[view];
 }
 
 export function parseUrl(pathname: string, search: string): UrlState {
@@ -99,9 +120,7 @@ export function parseUrl(pathname: string, search: string): UrlState {
   const lang = isUiLang(langRaw) ? langRaw : undefined;
   const projectRaw = params.get('project');
 
-  const def = findByPath(pathname);
-  const view = def?.view ?? DEFAULT_SCREEN.view;
-  const activeTab = def?.tab ?? DEFAULT_SCREEN.activeTab;
+  const { view, activeTab } = PATH_TO_SCREEN.get(pathname) ?? DEFAULT_SCREEN;
 
   return {
     view,
@@ -112,11 +131,12 @@ export function parseUrl(pathname: string, search: string): UrlState {
 }
 
 export function buildUrl(state: UrlState): string {
-  const def = findByScreen(state.view, state.activeTab);
-  const path = def?.path ?? '/setup/config';
-  // The default fallback screen is the project view, so treat an unmatched
-  // state as a project screen too.
-  const isProjectScreen = def ? def.view === 'project' : true;
+  const viewPath = pathFor(state.view, state.activeTab);
+  // A view with no URL of its own (`welcome`, which AppShell shows in place of
+  // the default screen) addresses DEFAULT_SCREEN — a project screen, so
+  // `?project` survives the substitution.
+  const path = viewPath ?? TAB_PATHS[DEFAULT_SCREEN.activeTab];
+  const isProjectScreen = (viewPath === null ? DEFAULT_SCREEN.view : state.view) === 'project';
 
   const params = new URLSearchParams();
   if (isProjectScreen && state.projectId) params.set('project', state.projectId);
