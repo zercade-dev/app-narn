@@ -20,11 +20,11 @@ import { getPool, withTenantTransaction, type Queryable } from './pg/pool.js';
  *     `project_members`.
  *
  * This list IS the erase contract: every table with `enable row level security`
- * in `migrations.ts` must appear here (cross-checked: all 24 do). The count is
- * no longer the guard — `teardown-tenant.test.ts` derives the RLS table set from
- * the live catalog (`pg_class.relrowsecurity`) and fails when one is missing
- * here, because a hand-maintained count is exactly what let `manual_edits`,
- * `freeway_usage` and `freeway_buckets` sit unswept after migrations 0026/0027.
+ * in `migrations.ts` must appear here (cross-checked: all 24 do). Do not treat
+ * that count as the guard — a hand-maintained number is exactly what let
+ * `manual_edits`, `freeway_usage` and `freeway_buckets` sit unswept after
+ * migrations 0026/0027. The guard derives the RLS table set from the live
+ * catalog (`pg_class.relrowsecurity`) and fails when one is missing here.
  */
 const DELETE_ORDER: readonly string[] = [
   // project-scoped — children before parents, all before project_members
