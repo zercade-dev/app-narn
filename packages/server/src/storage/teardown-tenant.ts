@@ -20,7 +20,11 @@ import { getPool, withTenantTransaction, type Queryable } from './pg/pool.js';
  *     `project_members`.
  *
  * This list IS the erase contract: every table with `enable row level security`
- * in `migrations.ts` must appear here (cross-checked: all 21 do).
+ * in `migrations.ts` must appear here (cross-checked: all 24 do). The count is
+ * no longer the guard — `teardown-tenant.test.ts` derives the RLS table set from
+ * the live catalog (`pg_class.relrowsecurity`) and fails when one is missing
+ * here, because a hand-maintained count is exactly what let `manual_edits`,
+ * `freeway_usage` and `freeway_buckets` sit unswept after migrations 0026/0027.
  */
 const DELETE_ORDER: readonly string[] = [
   // project-scoped — children before parents, all before project_members
@@ -31,6 +35,13 @@ const DELETE_ORDER: readonly string[] = [
   'glossary_overrides',
   'glossaries',
   'project_backups',
+  // Membership-scoped like the rows above, so it MUST stay in this block,
+  // ahead of the trailing `project_members` delete — its RLS resolves through
+  // membership, and after that row is gone the delete silently matches zero.
+  // relinquishCollaboratorMemberships() runs first in every pass, so this only
+  // ever removes edits on projects the departing tenant OWNS; a collaborator's
+  // edits inside someone else's project are deliberately left alone.
+  'manual_edits',
   'projects',
   // user-global (GUC-scoped) — order-independent
   'templates',
@@ -45,6 +56,12 @@ const DELETE_ORDER: readonly string[] = [
   'policy_acceptances',
   'account_deletion_tokens',
   'notifications',
+  // Quota ledger + per-bucket cooldown/stats, both tenant_id-scoped. Deleting
+  // them is inert for every other tenant and only "refunds" quota to an account
+  // that no longer exists. The 0028 sweep never prunes the rpd/monthly cells,
+  // so without these the rows would outlive the account permanently.
+  'freeway_usage',
+  'freeway_buckets',
   // user-scoped membership anchor — MUST be last (every project-scoped policy
   // above resolves visibility through it)
   'project_members',
@@ -83,10 +100,10 @@ async function relinquishCollaboratorMemberships(tx: Queryable): Promise<number>
  *
  * Atomic per pass + converge-until-zero. The whole `DELETE_ORDER` sweep runs
  * inside ONE `withTenantTransaction` so the order-dependent RLS visibility holds
- * across all 21 deletes and each pass is all-or-nothing (a mid-sweep failure
+ * across all 24 deletes and each pass is all-or-nothing (a mid-sweep failure
  * rolls the pass back rather than leaving a half-erased tenant). That single-pass
  * transaction is then repeated in a bounded outer loop, summing the rows deleted
- * across the 21 statements, and STOPS the first pass that deletes zero. Because
+ * across the 24 statements, and STOPS the first pass that deletes zero. Because
  * each pass is its OWN transaction, a row a concurrent writer COMMITS after an
  * earlier pass began is picked up and swept by a later pass — the convergence
  * that shrinks the concurrent-writer window a single non-atomic sweep leaves
@@ -139,7 +156,7 @@ export async function teardownTenant(userId: string): Promise<void> {
   const uid = userId.trim();
   await runWithTenant({ userId: uid }, async () => {
     for (let pass = 1; pass <= MAX_SWEEP_PASSES; pass++) {
-      // One atomic pass: the relinquish + all 21 deletes share a single
+      // One atomic pass: the relinquish + all 24 deletes share a single
       // role/GUC setup and one transaction, so the order-dependent RLS
       // visibility holds and the pass is all-or-nothing. `returning 1` yields
       // one row per deleted row, so `rows.length` is the pass's per-statement
