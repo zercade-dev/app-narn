@@ -96,8 +96,11 @@ export function buildProviderOptions(
   if (provider === 'google') {
     const isGemini3 = /^gemini-3/i.test(modelId);
 
-    // Known value mappings
+    // Known value mappings. `minimal` clamps to `low`: Gemini 3's minimum
+    // thinkingLevel is model-dependent — the newer -flash ids bottom out at
+    // `low` — so `low` is the cheapest level the whole family accepts.
     const knownLevels: Record<string, string> = {
+      minimal: 'low',
       low: 'low',
       medium: 'medium',
       high: 'high',
