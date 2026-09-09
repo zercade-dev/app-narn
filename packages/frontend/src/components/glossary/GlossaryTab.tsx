@@ -569,6 +569,13 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
 
   const terms = useMemo(() => glossary?.terms ?? [], [glossary]);
 
+  // The terms arrive from the per-glossary detail fetch, which lands well
+  // after the summary list that picked the selection: until then `terms` is
+  // empty (or still the previous glossary's), so the "no terms yet" card
+  // below is gated on the loaded glossary actually being the selected one
+  // rather than on `terms.length` alone.
+  const termsLoaded = glossary?.id === selectedGlossaryId;
+
   // Read-only glossaries (global reference glossaries, or any project
   // glossary created with `readOnly: true`) auto-ignore NON-CONSTANT terms
   // that are missing a translation for one of the project's configured
@@ -1193,7 +1200,7 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                       )}
                     </TableBody>
                   </Table>
-                  {terms.length === 0 && (
+                  {termsLoaded && terms.length === 0 && (
                     <div
                       className="mt-4 flex flex-col items-center gap-1.5 rounded-md border border-dashed border-border/70 px-4 py-6 text-center"
                       data-testid="glossary-empty-terms"
