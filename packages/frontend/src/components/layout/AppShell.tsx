@@ -327,8 +327,8 @@ export function AppShell() {
   const [vaultDialogOpen, setVaultDialogOpen] = useState(false);
   const [vaultEditorOpen, setVaultEditorOpen] = useState(false);
   const [vaultFocusKey, setVaultFocusKey] = useState<string | undefined>(undefined);
-  const [pendingRetries, setPendingRetries] = useState<
-    Array<{ retry: () => Promise<void>; vaultRetryKey: string | null }>
+  const pendingRetriesRef = useRef<
+    Array<{ retry: () => Promise<void>; cancel?: () => void; vaultRetryKey: string | null }>
   >([]);
   const isMobile = useIsMobile();
   const view = useViewStore((s) => s.view);
@@ -411,15 +411,19 @@ export function AppShell() {
 
   // Open the vault unlock dialog whenever any API call gets a 423 Locked response.
   // Accumulate all retry functions so every failed call is retried after unlock.
+  // The queue is a ref, not state: nothing renders from it, and both dialog handlers
+  // must read it at call time — a 423 arriving while the password is in flight would
+  // otherwise be stranded in the stale closure the dialog is still holding.
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<VaultLockedDetail>).detail;
       const retry = detail?.retry ?? null;
       if (retry) {
-        setPendingRetries((prev) => [
-          ...prev,
-          { retry, vaultRetryKey: detail?.vaultRetryKey ?? null },
-        ]);
+        pendingRetriesRef.current.push({
+          retry,
+          cancel: detail?.cancel,
+          vaultRetryKey: detail?.vaultRetryKey ?? null,
+        });
       }
       setVaultDialogOpen(true);
     };
@@ -771,11 +775,17 @@ export function AppShell() {
             open={vaultDialogOpen}
             onOpenChange={(open) => {
               setVaultDialogOpen(open);
-              if (!open) setPendingRetries([]);
+              // Anything still queued here was dropped without running: a successful
+              // unlock calls onUnlocked, which drains the queue, before it closes the
+              // dialog — so this only ever cancels retries the user dismissed.
+              if (!open) {
+                for (const item of pendingRetriesRef.current) item.cancel?.();
+                pendingRetriesRef.current = [];
+              }
             }}
             onUnlocked={async () => {
-              const retries = pendingRetries;
-              setPendingRetries([]);
+              const retries = pendingRetriesRef.current;
+              pendingRetriesRef.current = [];
               if (retries.length === 0) return;
               const results = await Promise.allSettled(retries.map((item) => item.retry()));
               const fulfilled = results.filter((r) => r.status === 'fulfilled').length;
