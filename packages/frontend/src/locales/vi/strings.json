@@ -260,7 +260,8 @@
     "save": "Lưu",
     "saving": "Đang lưu…",
     "clearNeedsReview": "Xóa cờ “cần duyệt”",
-    "clearReviewed": "Xóa trạng thái “đã duyệt”"
+    "clearReviewed": "Xóa trạng thái “đã duyệt”",
+    "updateFailed": "Không cập nhật được mục này"
   },
   "editor": {
     "sourceReadOnly": "Văn bản nguồn (chỉ đọc)",

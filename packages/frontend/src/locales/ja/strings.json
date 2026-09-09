@@ -260,7 +260,8 @@
     "save": "保存",
     "saving": "保存中…",
     "clearNeedsReview": "「要レビュー」フラグを解除",
-    "clearReviewed": "「レビュー済み」の状態を解除"
+    "clearReviewed": "「レビュー済み」の状態を解除",
+    "updateFailed": "このエントリを更新できませんでした"
   },
   "editor": {
     "sourceReadOnly": "原文（読み取り専用）",

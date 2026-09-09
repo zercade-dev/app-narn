@@ -48,6 +48,21 @@ export function MembersSection({
   const [removeTarget, setRemoveTarget] = useState<ProjectMember | null>(null);
   const [removing, setRemoving] = useState(false);
 
+  // Every piece of state above belongs to one project, and a project change
+  // re-renders this component rather than remounting it (`SharingTab` carries
+  // no key). Reset during render — the idiom `useProjectScopedFetch` and
+  // `InvitesSection` share — so an unsaved language grant staged for one
+  // project can never be shown, or saved, against the next.
+  const [prevProjectId, setPrevProjectId] = useState(projectId);
+  if (prevProjectId !== projectId) {
+    setPrevProjectId(projectId);
+    setNicknames({});
+    setPendingLanguages({});
+    setSavingUserId(null);
+    setRemoveTarget(null);
+    setRemoving(false);
+  }
+
   const fetchMembers = useCallback(
     (id: string) => apiRequest<ProjectMember[]>(`/projects/${id}/members`),
     [],
@@ -118,7 +133,14 @@ export function MembersSection({
           body: JSON.stringify({ writableLanguages: languagesFor(member) }),
         },
       );
-      setMembers((prev) => prev.map((m) => (m.userId === member.userId ? updated : m)));
+      // The row must still belong to the project this PATCH was sent to: a
+      // response that lands after a project change must not rewrite the same
+      // user's row in another project.
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.userId === member.userId && m.projectId === member.projectId ? updated : m,
+        ),
+      );
       setPendingLanguages((prev) => {
         const next = { ...prev };
         delete next[member.userId];
@@ -138,7 +160,11 @@ export function MembersSection({
     setRemoving(true);
     try {
       await apiRequest(`/projects/${projectId}/members/${target.userId}`, { method: 'DELETE' });
-      setMembers((prev) => prev.filter((m) => m.userId !== target.userId));
+      // Project-matched like the save path: a DELETE that lands after a project
+      // change must not drop a row from the project now on screen.
+      setMembers((prev) =>
+        prev.filter((m) => m.userId !== target.userId || m.projectId !== target.projectId),
+      );
       toast.success(t('sharing.memberRemoved'));
     } catch (err) {
       toast.error(t('sharing.memberRemoveFailed', { message: getErrorMessage(err) }));

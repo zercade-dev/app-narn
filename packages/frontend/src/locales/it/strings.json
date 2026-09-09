@@ -265,7 +265,8 @@
     "save": "Salva",
     "saving": "Salvataggio in corso…",
     "clearNeedsReview": "Rimuovi il contrassegno “da revisionare”",
-    "clearReviewed": "Rimuovi lo stato “revisionato”"
+    "clearReviewed": "Rimuovi lo stato “revisionato”",
+    "updateFailed": "Impossibile aggiornare questa voce"
   },
   "editor": {
     "sourceReadOnly": "Testo di origine (sola lettura)",

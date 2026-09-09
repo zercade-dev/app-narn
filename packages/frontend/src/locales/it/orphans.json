@@ -19,7 +19,10 @@
   },
   "confirmDelete": {
     "title": "Eliminare l'orfana?",
-    "body": "Questa operazione elimina definitivamente il record orfano e le sue traduzioni. Non è possibile annullarla."
+    "body": "Questa operazione elimina definitivamente il record orfano e le sue traduzioni. Non è possibile annullarla.",
+    "bulkTitle": "Eliminare le orfane selezionate?",
+    "bulkBody_one": "Questa operazione elimina definitivamente {{count}} record orfano e le sue traduzioni. Non è possibile annullarla.",
+    "bulkBody_other": "Questa operazione elimina definitivamente {{count}} record orfani e le loro traduzioni. Non è possibile annullarla."
   },
   "relink": {
     "title": "Ricollegare l'orfana",

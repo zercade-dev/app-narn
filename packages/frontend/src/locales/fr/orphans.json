@@ -19,7 +19,10 @@
   },
   "confirmDelete": {
     "title": "Supprimer l\u2019orphelin\u00a0?",
-    "body": "Cette action supprime d\u00e9finitivement l\u2019enregistrement orphelin et ses traductions. Elle est irr\u00e9versible."
+    "body": "Cette action supprime d\u00e9finitivement l\u2019enregistrement orphelin et ses traductions. Elle est irr\u00e9versible.",
+    "bulkTitle": "Supprimer les orphelins s\u00e9lectionn\u00e9s\u00a0?",
+    "bulkBody_one": "Cette action supprime d\u00e9finitivement {{count}} enregistrement orphelin et ses traductions. Elle est irr\u00e9versible.",
+    "bulkBody_other": "Cette action supprime d\u00e9finitivement {{count}} enregistrements orphelins et leurs traductions. Elle est irr\u00e9versible."
   },
   "relink": {
     "title": "R\u00e9affecter l\u2019orphelin",

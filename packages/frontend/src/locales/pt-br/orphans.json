@@ -19,7 +19,10 @@
   },
   "confirmDelete": {
     "title": "Excluir o órfão?",
-    "body": "Isso exclui permanentemente a entrada órfã e as traduções dela. Não é possível desfazer."
+    "body": "Isso exclui permanentemente a entrada órfã e as traduções dela. Não é possível desfazer.",
+    "bulkTitle": "Excluir os órfãos selecionados?",
+    "bulkBody_one": "Isso exclui permanentemente {{count}} entrada órfã e as traduções dela. Não é possível desfazer.",
+    "bulkBody_other": "Isso exclui permanentemente {{count}} entradas órfãs e as traduções delas. Não é possível desfazer."
   },
   "relink": {
     "title": "Revincular órfão",

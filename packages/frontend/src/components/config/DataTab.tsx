@@ -180,10 +180,15 @@ export function DataTab() {
 
   const handleSourceLanguageChange = async (code: string) => {
     if (!activeProject) return;
-    const filteredLanguages = activeProject.activeLanguages.filter((l) => l !== code);
+    // A source change also commits any staged target-language edit: a draft left
+    // pending would survive into a later Save and write the new source language
+    // back into activeLanguages.
+    const base = pendingLanguages ?? activeProject.activeLanguages;
+    const filteredLanguages = base.filter((l) => l !== code);
     try {
       await updateLanguages(activeProject.id, filteredLanguages, code);
       await fetchProjects();
+      setPendingLanguages(null);
     } catch (err) {
       toast.error(t('sourceLanguageUpdateFailed', { message: (err as Error).message }));
     }

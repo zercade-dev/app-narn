@@ -54,12 +54,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Audits the shipping app only.
+      # Gates on every high/critical advisory in the installed tree, build tooling
+      # included — that chain produces the published image. `make security-check` runs
+      # this same command, so the local gate cannot disagree with this one.
       - name: Run security audit
         run: pnpm audit --audit-level=high
 
-      # Visibility only: dev-chain advisories (build tooling) are reported but
-      # never fail the workflow — the gating audit above covers what ships.
+      # Visibility only: moderate dev-chain advisories, which sit below the gate
+      # above and never fail the workflow.
       - name: Report dev-dependency advisories (non-gating)
         if: always()
         run: pnpm audit --dev --audit-level=moderate || true

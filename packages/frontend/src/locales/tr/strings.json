@@ -265,7 +265,8 @@
     "save": "Kaydet",
     "saving": "Kaydediliyor…",
     "clearNeedsReview": "“inceleme gerekli” işaretini temizle",
-    "clearReviewed": "“incelendi” durumunu temizle"
+    "clearReviewed": "“incelendi” durumunu temizle",
+    "updateFailed": "Bu girdi güncellenemedi"
   },
   "editor": {
     "sourceReadOnly": "Kaynak metin (salt okunur)",

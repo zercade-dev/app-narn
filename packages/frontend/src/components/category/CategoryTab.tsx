@@ -12,7 +12,7 @@
  * "apply to entries" affordance. AI generation is kept: it suggests
  * `{ category, entryIds }` groups and bulk-applies the accepted ones.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, Loader2, Save, Sparkles, Tags, Trash2, X, XCircle } from 'lucide-react';
 import {
@@ -258,6 +258,32 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
   // a suggestion whose subset is empty is dropped (== a whole-category skip).
   const [selectedEntries, setSelectedEntries] = useState<Map<number, Set<string>>>(new Map());
 
+  // A different project is a different document: drop the previous project's
+  // category list, selection, open dialogs and suggestion review panel during
+  // render (the load effect below re-fetches) rather than leaving them on
+  // screen — and, for the scoped entry ids and accepted suggestions, rather
+  // than letting them be POSTed against the project that replaced them. This
+  // component is rendered without a `key`, so a switch changes the prop on the
+  // same instance instead of remounting it. Deliberately ABOVE the cross-tab
+  // handoff block below, so a scope arriving in the same render still wins over
+  // this reset's `setAiOpen(false)`.
+  const [prevProjectId, setPrevProjectId] = useState(projectId);
+  if (prevProjectId !== projectId) {
+    setPrevProjectId(projectId);
+    setCategories([]);
+    setLoadingCategories(true);
+    setSelectedCategory(null);
+    setDeleteOpen(false);
+    setAiOpen(false);
+    setScopedEntryIds(null);
+    setStartedRunId(null);
+    setSuggestions(null);
+    setLogs(null);
+    setAcceptedIdx(new Set());
+    setExpandedIdx(new Set());
+    setSelectedEntries(new Map());
+  }
+
   // The run we're observing, resolved from the polled run list: the run the user
   // started this mount if it's still present, otherwise the most recent in-flight
   // category-gen run. The fallback is what lets the user leave this tab mid-run
@@ -352,21 +378,37 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
     if (projectId && loadedProjectId !== projectId) void fetchEntries(projectId);
   }, [projectId, loadedProjectId, fetchEntries]);
 
+  // Tracks the CURRENT project for `refreshCategories`' stale-response guard
+  // below (a ref rather than a dependency, so the callback's identity stays tied
+  // to the project its request was issued for). Synced in a layout effect — not
+  // during render, which `react-hooks/refs` forbids — so it is already up to
+  // date by the time a response for the project the user just left resolves.
+  const projectIdRef = useRef(projectId);
+  useLayoutEffect(() => {
+    projectIdRef.current = projectId;
+  }, [projectId]);
+
   // Fetches the project's categories and keeps a valid tab selected. State
   // updates land only in the promise continuation (never synchronously), so this
-  // is safe to call from both the load effect and after AI apply.
+  // is safe to call from both the load effect and after AI apply. A response for
+  // a project the user has since switched away from is dropped rather than
+  // overwriting the new project's tab strip — or, down the catch, blanking it.
   const refreshCategories = useCallback(
     () =>
       apiRequest<string[]>(`/projects/${projectId}/categories`)
         .then((list) => {
+          if (projectIdRef.current !== projectId) return;
           setCategories(list);
           setSelectedCategory((cur) => (cur && list.includes(cur) ? cur : (list[0] ?? null)));
         })
         .catch(() => {
+          if (projectIdRef.current !== projectId) return;
           setCategories([]);
           setSelectedCategory(null);
         })
-        .finally(() => setLoadingCategories(false)),
+        .finally(() => {
+          if (projectIdRef.current === projectId) setLoadingCategories(false);
+        }),
     [projectId],
   );
 

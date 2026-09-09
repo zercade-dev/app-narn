@@ -12,12 +12,18 @@
  * Unicode-aware (flags `iu`).
  *
  * CJK/Thai exception: those scripts are written without inter-word spacing, so
- * a genuine standalone occurrence of a term is still immediately adjacent to
- * more `\p{L}` characters — the boundary assertions above would never match,
- * silently dropping glossary enforcement (assignment, prompt filtering,
- * highlighting) for any CJK/Thai-source project. {@link buildTermBoundaryRegex}
- * detects the term's script and skips the boundary assertions in that case,
- * matching the literal wording wherever it occurs instead.
+ * a genuine standalone occurrence is still immediately adjacent to more `\p{L}`
+ * characters — the boundary assertions above would never match, silently
+ * dropping glossary enforcement (assignment, prompt filtering, highlighting).
+ * The exception therefore turns on the script at the match POSITION, not on the
+ * term alone: a term written in an unsegmented script drops the assertions
+ * altogether and matches its literal wording wherever it occurs, while every
+ * other term keeps them but accepts an unsegmented-script neighbour as a
+ * boundary. That second half matters in both directions — a Latin term like
+ * "HP" is a standalone occurrence in an unsegmented SOURCE (`残りHPが少ない`,
+ * for M20 and prompt filtering) and in an unsegmented TARGET (the M10
+ * forbidden-term and glossary-adherence checks) — while "concatenate" still
+ * hides no "cat".
  *
  * Note: M17's constant-glossary masker uses a deliberately different boundary
  * (it also treats `_` as a word character and uses a replacement form), so it is
@@ -48,11 +54,21 @@ function isUnsegmentedScript(term: string): boolean {
 }
 
 /**
- * Build a case-insensitive, Unicode-aware whole-word matcher for `term`. The
- * match must not be adjacent to a Unicode letter or digit on either side —
- * EXCEPT for a term written in an unsegmented script (CJK/Thai; see above),
- * where the boundary assertions are skipped and the term's literal wording is
- * matched wherever it occurs.
+ * Boundary assertions for a term that is not itself unsegmented: the usual
+ * "no adjacent letter or digit", relaxed to accept an unsegmented-script
+ * neighbour, where adjacency carries no word-boundary meaning. Built from
+ * {@link UNSEGMENTED_SCRIPT_RE}'s own class body so the two cannot drift.
+ */
+const UNSEGMENTED_CHAR_CLASS = UNSEGMENTED_SCRIPT_RE.source;
+const LEFT_BOUNDARY = String.raw`(?:(?<![\p{L}\p{N}])|(?<=${UNSEGMENTED_CHAR_CLASS}))`;
+const RIGHT_BOUNDARY = String.raw`(?:(?![\p{L}\p{N}])|(?=${UNSEGMENTED_CHAR_CLASS}))`;
+
+/**
+ * Build a case-insensitive, Unicode-aware whole-word matcher for `term`. A term
+ * written in an unsegmented script (CJK/Thai; see above) matches its literal
+ * wording wherever it occurs; every other term must not sit against a Unicode
+ * letter or digit on either side, unless that neighbour is itself from an
+ * unsegmented script.
  *
  * A bounded per-term RegExp cache could avoid recompiling in hot glossary-filter
  * loops, but profiling hasn't shown it matters for typical glossary sizes — left
@@ -63,7 +79,7 @@ export function buildTermBoundaryRegex(term: string): RegExp {
   if (isUnsegmentedScript(term)) {
     return new RegExp(escaped, 'iu');
   }
-  return new RegExp(String.raw`(?<![\p{L}\p{N}])${escaped}(?![\p{L}\p{N}])`, 'iu');
+  return new RegExp(`${LEFT_BOUNDARY}${escaped}${RIGHT_BOUNDARY}`, 'iu');
 }
 
 /** Whether `term`'s wording occurs (word-boundary) in `text`. Empty term → false. */

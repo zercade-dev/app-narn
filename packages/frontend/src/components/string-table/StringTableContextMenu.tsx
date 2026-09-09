@@ -18,7 +18,10 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
+import { toast } from '@/lib/toast';
+import { cn, errorMessage } from '@/lib/utils';
 import { apiRequest } from '../../hooks/use-api.js';
+import { accessFor, useProjectStore } from '../../stores/project-store.js';
 import { useStringStore } from '../../stores/string-store.js';
 
 interface StringTableContextMenuProps {
@@ -49,6 +52,13 @@ export function StringTableContextMenu({
   children,
 }: StringTableContextMenuProps) {
   const { t } = useTranslation('strings');
+  // An entry's categories and its glossary assignment are both 'manage'-only
+  // server-side (assertProjectAccess(..., {type:'manage'}) on the category
+  // routes, assertEntryPatchAllowed on the entry PUT), but the two sheets are
+  // also the only place either is readable — so a collaborator keeps them as a
+  // read view and loses only the controls that write.
+  const access = useProjectStore((s) => accessFor(s, projectId));
+  const isCollaborator = access.role === 'collaborator';
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [glossariesOpen, setGlossariesOpen] = useState(false);
   const [newCategory, setNewCategory] = useState('');
@@ -62,6 +72,12 @@ export function StringTableContextMenu({
   const replaceEntryInStore = (next: StringEntry) => {
     setEntries((s) => ({ entries: s.entries.map((e) => (e.id === next.id ? next : e)) }));
   };
+
+  // Shared error-toast tail for the entry mutations below. `t` is passed
+  // through so a recognised status names itself — notably the 403 a grant
+  // narrowed mid-session still returns after the affordance is hidden.
+  const reportError = (err: unknown) =>
+    toast.error(errorMessage(err, t('contextMenu.updateFailed'), t));
 
   const handleOpenGlossaries = async () => {
     try {
@@ -85,8 +101,8 @@ export function StringTableContextMenu({
         { method: 'POST', body: JSON.stringify({ category: value }) },
       );
       replaceEntryInStore(updated);
-    } catch {
-      // swallow; UI stays consistent because we never optimistically mutated
+    } catch (err) {
+      reportError(err);
     }
   };
 
@@ -97,8 +113,8 @@ export function StringTableContextMenu({
         { method: 'DELETE' },
       );
       replaceEntryInStore(updated);
-    } catch {
-      // ignore
+    } catch (err) {
+      reportError(err);
     }
   };
 
@@ -107,8 +123,8 @@ export function StringTableContextMenu({
     try {
       await updateEntry(projectId, entry.id, buildAssignedGlossariesPatch(selectedGlossaryIds));
       setGlossariesOpen(false);
-    } catch {
-      // ignore
+    } catch (err) {
+      reportError(err);
     } finally {
       setSavingGlossaries(false);
     }
@@ -122,8 +138,8 @@ export function StringTableContextMenu({
           [reviewStatus.targetLanguage]: { ...reviewStatus.record, needsReview: false },
         },
       });
-    } catch {
-      // swallow; UI stays consistent because we never optimistically mutated
+    } catch (err) {
+      reportError(err);
     }
   };
 
@@ -135,8 +151,8 @@ export function StringTableContextMenu({
           [reviewStatus.targetLanguage]: { ...reviewStatus.record, status: 'translated' },
         },
       });
-    } catch {
-      // ignore
+    } catch (err) {
+      reportError(err);
     }
   };
 
@@ -197,46 +213,50 @@ export function StringTableContextMenu({
                     data-testid={`category-chip-edit-${cat}`}
                   >
                     {cat}
-                    <button
-                      type="button"
-                      aria-label={t('contextMenu.removeCategory', { category: cat })}
-                      className="ml-0.5 opacity-60 hover:opacity-100 cursor-pointer"
-                      onClick={() => void handleRemoveCategory(cat)}
-                      data-testid={`category-chip-edit-remove-${cat}`}
-                    >
-                      <X className="size-3" aria-hidden="true" />
-                    </button>
+                    {!isCollaborator && (
+                      <button
+                        type="button"
+                        aria-label={t('contextMenu.removeCategory', { category: cat })}
+                        className="ml-0.5 opacity-60 hover:opacity-100 cursor-pointer"
+                        onClick={() => void handleRemoveCategory(cat)}
+                        data-testid={`category-chip-edit-remove-${cat}`}
+                      >
+                        <X className="size-3" aria-hidden="true" />
+                      </button>
+                    )}
                   </span>
                 ))
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                data-slot="input"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    void handleAddCategory();
-                  }
-                }}
-                placeholder={t('contextMenu.addCategoryPlaceholder')}
-                aria-label={t('contextMenu.categoryName')}
-                className="flex-1 text-sm h-8 px-2.5 rounded-md bg-background border border-input"
-                data-testid="category-add-input"
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => void handleAddCategory()}
-                data-testid="category-add-btn"
-              >
-                <Plus className="size-3.5 mr-1" />
-                {t('contextMenu.add')}
-              </Button>
-            </div>
+            {!isCollaborator && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  data-slot="input"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      void handleAddCategory();
+                    }
+                  }}
+                  placeholder={t('contextMenu.addCategoryPlaceholder')}
+                  aria-label={t('contextMenu.categoryName')}
+                  className="flex-1 text-sm h-8 px-2.5 rounded-md bg-background border border-input"
+                  data-testid="category-add-input"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => void handleAddCategory()}
+                  data-testid="category-add-btn"
+                >
+                  <Plus className="size-3.5 mr-1" />
+                  {t('contextMenu.add')}
+                </Button>
+              </div>
+            )}
           </div>
         </SheetContent>
       </Sheet>
@@ -253,10 +273,14 @@ export function StringTableContextMenu({
               <p className="text-sm text-muted-foreground">{t('contextMenu.noGlossaries')}</p>
             ) : (
               glossaries.map((g) => (
-                <label key={g.id} className="flex items-center gap-2.5 cursor-pointer">
+                <label
+                  key={g.id}
+                  className={cn('flex items-center gap-2.5', !isCollaborator && 'cursor-pointer')}
+                >
                   <input
                     type="checkbox"
                     checked={selectedGlossaryIds.includes(g.id)}
+                    disabled={isCollaborator}
                     onChange={(e) => {
                       setSelectedGlossaryIds((prev) =>
                         e.target.checked ? [...prev, g.id] : prev.filter((id) => id !== g.id),
@@ -274,15 +298,17 @@ export function StringTableContextMenu({
               ))
             )}
           </div>
-          <SheetFooter>
-            <Button
-              onClick={() => void handleSaveGlossaries()}
-              disabled={savingGlossaries}
-              data-testid="forced-glossaries-save-btn"
-            >
-              {savingGlossaries ? t('contextMenu.saving') : t('contextMenu.save')}
-            </Button>
-          </SheetFooter>
+          {!isCollaborator && (
+            <SheetFooter>
+              <Button
+                onClick={() => void handleSaveGlossaries()}
+                disabled={savingGlossaries}
+                data-testid="forced-glossaries-save-btn"
+              >
+                {savingGlossaries ? t('contextMenu.saving') : t('contextMenu.save')}
+              </Button>
+            </SheetFooter>
+          )}
         </SheetContent>
       </Sheet>
     </>

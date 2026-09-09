@@ -19,7 +19,10 @@
   },
   "confirmDelete": {
     "title": "Yetim silinsin mi?",
-    "body": "Bu işlem, yetim girdiyi ve çevirilerini kalıcı olarak siler. Bu geri alınamaz."
+    "body": "Bu işlem, yetim girdiyi ve çevirilerini kalıcı olarak siler. Bu geri alınamaz.",
+    "bulkTitle": "Seçili yetimler silinsin mi?",
+    "bulkBody_one": "Bu işlem, {{count}} yetim girdiyi ve çevirilerini kalıcı olarak siler. Bu geri alınamaz.",
+    "bulkBody_other": "Bu işlem, {{count}} yetim girdiyi ve çevirilerini kalıcı olarak siler. Bu geri alınamaz."
   },
   "relink": {
     "title": "Yetimi yeniden bağlama",

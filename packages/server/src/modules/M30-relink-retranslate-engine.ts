@@ -34,6 +34,8 @@
 import {
   type BatchDispatchOptions,
   type GlobalConfig,
+  type GlossaryTerm,
+  type LQAIssue,
   type LQAResult,
   type Project,
   type RunCharTotals,
@@ -63,6 +65,14 @@ import { getGlobalConfigStore, getProjectStore, getStringStore } from '../storag
 import { getCurrentTenant, runWithTenant } from '../storage/pg/tenant-context.js';
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { lqaGate } from './M10-lqa-gate.js';
+import {
+  type MaskPlan,
+  maskApprovedForMemory,
+  maskDiagnosticsToIssues,
+  maskText,
+  restoreFinal,
+  verifyMaskedTranslation,
+} from './M17-translation-masker.js';
 import { defaultPricingProvider, type PricingProvider } from './M9/usage-pricing.js';
 import { selectCapableModule, type ModuleLogFn } from './M9/module-selection.js';
 import { BackgroundRunEngine, type LoggerLike } from './M9/run-engine.js';
@@ -126,6 +136,18 @@ interface RelinkDetailsAcc {
   chars: RunCharTotals;
 }
 
+/** The strings a relink run puts in front of the model. */
+interface RelinkPromptTexts {
+  /** The orphan's source text before the edit (the "before" reference). */
+  oldSourceText: string;
+  /** The target entry's own source text (the "after"), and every job's source. */
+  newSourceText: string;
+  /** Orphan-entry translations by language (the PREVIOUS source's), pre-relink. */
+  previousTranslations: Record<string, string>;
+  /** Target-entry translations by language as stored when the run was prepared. */
+  currentTranslations: Record<string, string>;
+}
+
 /**
  * Builds the before/after edit-transfer instruction carried on each
  * TranslationJob's `taskInstruction` — the engine-authored, trusted-`Task:`-
@@ -146,14 +168,7 @@ interface RelinkDetailsAcc {
  *   the route BEFORE the relink persists — are the true previous-source
  *   reference, and the target's pre-relink texts are the current state.
  */
-function buildEditTransferContext(opts: {
-  oldSourceText: string;
-  newSourceText: string;
-  /** Orphan-entry translations by language (the PREVIOUS source's), pre-relink. */
-  previousTranslations: Record<string, string>;
-  /** Target-entry translations by language as stored when the run was prepared. */
-  currentTranslations: Record<string, string>;
-}): string {
+function buildEditTransferContext(opts: RelinkPromptTexts): string {
   const previous = Object.keys(opts.previousTranslations).length
     ? `Translations of the PREVIOUS source, by language: ${JSON.stringify(opts.previousTranslations)}. `
     : '';
@@ -168,6 +183,67 @@ function buildEditTransferContext(opts: {
     `wording and style except for the part that corresponds to the change, and return the updated ` +
     `translation only.`
   );
+}
+
+/**
+ * `maskText`'s term list and `restoreFinal`'s glossary lookup are always empty
+ * here: a `{g:N}` token restores to a PER-LANGUAGE term translation, while one
+ * relink run dispatches a SINGLE masked source text covering every language of
+ * the entry, so constant terms are deliberately left unmasked.
+ */
+const NO_CONSTANT_TERMS: GlossaryTerm[] = [];
+const NO_GLOSSARY_BY_ID = new Map<string, GlossaryTerm>();
+
+/** Applies `mask` to every language's text, or null as soon as one cannot be masked. */
+function maskByLanguage(
+  byLanguage: Record<string, string>,
+  mask: (text: string) => string | null,
+): Record<string, string> | null {
+  const out: Record<string, string> = {};
+  for (const [language, text] of Object.entries(byLanguage)) {
+    const masked = mask(text);
+    if (masked === null) return null;
+    out[language] = masked;
+  }
+  return out;
+}
+
+interface RelinkMasking {
+  /** The new source's mask plan — what every reply is verified and restored against. */
+  plan: MaskPlan;
+  /** The prompt texts, all re-expressed in `plan`'s tokens. */
+  texts: RelinkPromptTexts;
+}
+
+/**
+ * Re-expresses every string the run shows the model — the source each job
+ * carries plus the before/after texts quoted in the shared `Task:` line — in
+ * ONE mask plan, so the reply comes back in that plan's tokens and
+ * `verifyMaskedTranslation` can hold it to the source's placeholder inventory,
+ * the way M9 does around its own `module.translate` calls.
+ *
+ * All of them or none. The Task line quotes the same strings the jobs carry, so
+ * a half-masked prompt would show one variable in two spellings and the model
+ * would answer in the unmasked one — failing mask integrity for every language.
+ * `maskApprovedForMemory` re-numbers a text's tokens onto the source plan and
+ * returns null when its placeholder multiset differs from the source's, which a
+ * source edit that adds or drops a placeholder legitimately does; any such text
+ * gives up masking for the whole batch, which then dispatches verbatim.
+ */
+function buildRelinkMasking(texts: RelinkPromptTexts): RelinkMasking | null {
+  const { masked, plan } = maskText(texts.newSourceText, NO_CONSTANT_TERMS);
+  const underPlan = (text: string): string | null => {
+    const remapped = maskApprovedForMemory(texts.newSourceText, text, NO_CONSTANT_TERMS);
+    return remapped ? remapped.maskedTranslation : null;
+  };
+  const oldSourceText = underPlan(texts.oldSourceText);
+  const previousTranslations = maskByLanguage(texts.previousTranslations, underPlan);
+  const currentTranslations = maskByLanguage(texts.currentTranslations, underPlan);
+  if (oldSourceText === null || !previousTranslations || !currentTranslations) return null;
+  return {
+    plan,
+    texts: { oldSourceText, newSourceText: masked, previousTranslations, currentTranslations },
+  };
 }
 
 /**
@@ -187,6 +263,7 @@ type RelinkLqaGate = (
   translatedText: string,
   projectId: string,
   targetLanguage: string,
+  extraIssues: LQAIssue[],
 ) => Promise<LQAResult | undefined>;
 
 export interface RelinkRetranslateEngineDeps {
@@ -422,12 +499,17 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
           rec?.text ? [[lang, rec.text]] : [],
         ),
       );
-    const context = buildEditTransferContext({
+    const sourceText = entry?.sourceText ?? '';
+    const rawTexts: RelinkPromptTexts = {
       oldSourceText: request.oldSourceText,
-      newSourceText: entry?.sourceText ?? '',
+      newSourceText: sourceText,
       previousTranslations: request.previousTranslations ?? {},
       currentTranslations,
-    });
+    };
+    // Null when the prompt cannot be masked coherently — see buildRelinkMasking.
+    const masking = buildRelinkMasking(rawTexts);
+    const promptTexts = masking?.texts ?? rawTexts;
+    const context = buildEditTransferContext(promptTexts);
 
     await this.runBatchWithUsage<RelinkRetranslateItem, TranslationResult>({
       runId,
@@ -437,7 +519,7 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
       call: (signal) => {
         const jobs: TranslationJob[] = batch.map((item) => ({
           entryId: item.entryId,
-          sourceText: entry?.sourceText ?? '',
+          sourceText: promptTexts.newSourceText,
           sourceLanguage: project.sourceLanguage,
           targetLanguage: item.targetLanguage,
           taskInstruction: context,
@@ -472,6 +554,32 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
           });
           return;
         }
+        // Hold the reply to the source's placeholder inventory and unmask it
+        // before it is persisted, exactly as M9 does with its own module
+        // results. This engine has no retry pass, so a mask-broken reply is
+        // persisted carrying a blocking `mask-integrity` verdict rather than
+        // being re-asked.
+        const maskIssues = masking
+          ? maskDiagnosticsToIssues(verifyMaskedTranslation(result.translatedText, masking.plan))
+          : [];
+        if (maskIssues.length > 0) {
+          this.logger.warn('relink-retranslate:mask-mismatch', {
+            runId,
+            entryId: result.entryId,
+            targetLanguage: result.targetLanguage,
+            moduleId,
+            issues: maskIssues.map((issue) => issue.detail),
+          });
+        }
+        const translatedText = masking
+          ? restoreFinal(
+              sourceText,
+              result.translatedText,
+              masking.plan,
+              NO_GLOSSARY_BY_ID,
+              result.targetLanguage,
+            )
+          : result.translatedText;
         const pairKey = `${result.entryId}\0${result.targetLanguage}`;
         if (acc && !acc.pairKeys.has(pairKey)) {
           acc.pairKeys.add(pairKey);
@@ -482,7 +590,7 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
           });
           acc.entries.push({
             entryId: result.entryId,
-            sourceText: entry?.sourceText ?? '',
+            sourceText,
             targetLanguage: result.targetLanguage,
           });
         }
@@ -492,7 +600,7 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
           // branch (unlike M25/M26/M29), so this engine can never resolve a
           // Freeway bucket — `moduleId` is always a real registered module id.
           await this.stringStore.setTranslation(projectId, result.entryId, result.targetLanguage, {
-            text: result.translatedText,
+            text: translatedText,
             status: 'translated',
             moduleId,
             timestamp: Date.now(),
@@ -506,7 +614,7 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
           // existing defensive `entry?.` usage rather than introducing a new
           // failure mode.
           if (entry) {
-            await this.lqaGate(entry, result.translatedText, projectId, result.targetLanguage);
+            await this.lqaGate(entry, translatedText, projectId, result.targetLanguage, maskIssues);
           }
         } catch (err) {
           const message = toErrorMessage(err);
@@ -531,7 +639,7 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
         records.push({
           targetLanguage: result.targetLanguage,
           oldText,
-          newText: result.translatedText,
+          newText: translatedText,
         });
         this.logger.info('relink-retranslate:done', {
           runId,
@@ -544,8 +652,11 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
 }
 
 export const relinkRetranslateEngine = new RelinkRetranslateEngine({
-  lqaGate: async (entry, translatedText, projectId, targetLanguage) => {
-    const lqa = await lqaGate.check(entry, translatedText, targetLanguage, { projectId });
+  lqaGate: async (entry, translatedText, projectId, targetLanguage, extraIssues) => {
+    const lqa = await lqaGate.check(entry, translatedText, targetLanguage, {
+      projectId,
+      extraIssues,
+    });
     // Pass ONLY this language's verdict — updateEntry merges it into the
     // fresh on-disk lqaResults, preserving every sibling language exactly
     // like M9's own lqaGate wiring (M9-translation-engine.ts).

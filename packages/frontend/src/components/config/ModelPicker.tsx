@@ -411,6 +411,27 @@ function SortableHead({
   );
 }
 
+/** Keys a focused row handles itself; anything else is left to the browser. */
+const ROW_NAV_KEYS = new Set(['ArrowDown', 'ArrowUp', 'Home', 'End']);
+
+/** Inset outline, which a `<tr>` paints reliably where a ring does not. */
+const ROW_FOCUS_CLASS =
+  'focus-visible:outline-2 focus-visible:outline-ring focus-visible:outline-offset-[-2px]';
+
+/**
+ * Row a navigation key moves focus to, out of the body's selectable rows —
+ * they are the ones carrying a tabindex, so the empty-state row is skipped.
+ * Null at either end of the list: navigation does not wrap.
+ */
+function navTargetRow(key: string, row: HTMLTableRowElement): HTMLElement | null {
+  const rows = Array.from(row.parentElement?.querySelectorAll<HTMLElement>('tr[tabindex]') ?? []);
+  const index = rows.indexOf(row);
+  if (index === -1) return null;
+  if (key === 'Home') return rows[0] ?? null;
+  if (key === 'End') return rows[rows.length - 1] ?? null;
+  return rows[index + (key === 'ArrowDown' ? 1 : -1)] ?? null;
+}
+
 export function ModelPicker({
   id,
   value,
@@ -437,6 +458,7 @@ export function ModelPicker({
     key: 'input',
     dir: 'asc',
   });
+  const bodyRef = React.useRef<HTMLTableSectionElement>(null);
 
   // Reset the search box whenever the dialog toggles so it never reopens stale.
   const handleOpenChange = React.useCallback((next: boolean) => {
@@ -457,6 +479,35 @@ export function ModelPicker({
     },
     [onValueChange],
   );
+
+  // Rows are the grid's interactive unit, so they carry their own keys: Enter
+  // or Space picks the row, the arrows and Home/End move between rows.
+  const handleRowKeyDown = React.useCallback(
+    (e: React.KeyboardEvent<HTMLTableRowElement>, rowId: string) => {
+      // A held modifier means the keystroke is aimed at the browser (Ctrl+Home,
+      // Cmd+ArrowDown), not at the row under focus.
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        commit(rowId);
+        return;
+      }
+      if (!ROW_NAV_KEYS.has(e.key)) return;
+      e.preventDefault();
+      navTargetRow(e.key, e.currentTarget)?.focus();
+    },
+    [commit],
+  );
+
+  // ArrowDown hands the autofocused search box over to the list, so reaching a
+  // row never means tabbing past the sort headers first.
+  const handleSearchKeyDown = React.useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key !== 'ArrowDown' || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+    const anchor = bodyRef.current?.querySelector<HTMLElement>('tr[tabindex="0"]');
+    if (!anchor) return;
+    e.preventDefault();
+    anchor.focus();
+  }, []);
 
   const isRec = React.useCallback(
     // Guard against a missing/non-string id (partial ModelInfo occurs in
@@ -602,6 +653,17 @@ export function ModelPicker({
   const exactMatch = models.some((m) => m.id === trimmedQuery);
   const canUseCustom = trimmedQuery !== '' && !exactMatch;
 
+  // Ids of the selectable rows, in render order. Exactly one of them sits in
+  // the tab order — the selected row when it survives the filter, else the
+  // first — so reaching the list never means tabbing through a
+  // several-hundred-model provider catalogue; the arrows take it from there.
+  const rowIds = React.useMemo(() => {
+    const ids = filtered.map((m) => m.id);
+    if (specialOption && trimmedQuery === '') ids.unshift(specialOption.value);
+    return ids;
+  }, [filtered, specialOption, trimmedQuery]);
+  const anchorRowId = rowIds.includes(value) ? value : rowIds[0];
+
   // Trigger label: the discovered model's label, else the raw value (custom id),
   // else the special option's label, else the placeholder.
   const selectedModel = models.find((m) => m.id === value);
@@ -677,6 +739,7 @@ export function ModelPicker({
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
               placeholder={t('models.searchOrType')}
               className="h-9 pl-8"
               data-testid="model-picker-search"
@@ -711,7 +774,7 @@ export function ModelPicker({
           )}
 
           <div className="max-h-[70vh] overflow-y-auto rounded-md border">
-            <Table>
+            <Table role="grid" aria-label={t('models.pickTitle')}>
               <TableHeader className="sticky top-0 z-10 bg-popover">
                 <TableRow>
                   <SortableHead
@@ -793,12 +856,15 @@ export function ModelPicker({
                   )}
                 </TableRow>
               </TableHeader>
-              <TableBody>
+              <TableBody ref={bodyRef}>
                 {specialOption && trimmedQuery === '' && (
                   <TableRow
-                    className="cursor-pointer"
+                    className={cn('cursor-pointer', ROW_FOCUS_CLASS)}
+                    aria-selected={value === specialOption.value}
+                    tabIndex={specialOption.value === anchorRowId ? 0 : -1}
                     data-state={value === specialOption.value ? 'selected' : undefined}
                     onClick={() => commit(specialOption.value)}
+                    onKeyDown={(e) => handleRowKeyDown(e, specialOption.value)}
                   >
                     <TableCell className="font-medium">
                       <span className="flex items-center gap-1.5">
@@ -844,12 +910,16 @@ export function ModelPicker({
                     key={m.id}
                     className={cn(
                       'cursor-pointer',
+                      ROW_FOCUS_CLASS,
                       // De-emphasize models with no pricing (sunk to the bottom).
                       anyPriced && !hasPricing(m.billing) && 'opacity-60',
                     )}
+                    aria-selected={m.id === value}
+                    tabIndex={m.id === anchorRowId ? 0 : -1}
                     data-state={m.id === value ? 'selected' : undefined}
                     data-testid="model-picker-row"
                     onClick={() => commit(m.id)}
+                    onKeyDown={(e) => handleRowKeyDown(e, m.id)}
                   >
                     <TableCell>
                       <span className="flex items-center gap-1.5">

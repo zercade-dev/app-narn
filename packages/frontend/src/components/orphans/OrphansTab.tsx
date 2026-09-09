@@ -63,6 +63,7 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
   // shows the override-mode + AI-retranslate confirmation before submitting.
   const [relinkStep, setRelinkStep] = useState<'pick' | 'confirm'>('pick');
   const [pendingDelete, setPendingDelete] = useState<OrphanEntry | null>(null);
+  const [pendingBulkDelete, setPendingBulkDelete] = useState(false);
   const [candidates, setCandidates] = useState<RelinkCandidate[]>([]);
   const [candidateQuery, setCandidateQuery] = useState('');
   const [pickedCandidateId, setPickedCandidateId] = useState<string | null>(null);
@@ -184,6 +185,11 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
       toast.error(errorMessage(err, t('toast.deleteError')));
     }
   }, [selectedIds, orphans, projectId, t, setOrphans]);
+
+  const confirmBulkDelete = useCallback(async () => {
+    setPendingBulkDelete(false);
+    await handleBulkDelete();
+  }, [handleBulkDelete]);
 
   const openRelink = useCallback(
     async (orphan: OrphanEntry) => {
@@ -309,7 +315,7 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
             variant="destructive"
             size="sm"
             disabled={selectedIds.size === 0}
-            onClick={() => void handleBulkDelete()}
+            onClick={() => setPendingBulkDelete(true)}
             data-testid="orphans-bulk-delete"
           >
             {t('actions.bulkDelete', { count: selectedIds.size })}
@@ -533,6 +539,20 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
         confirmLabel={t('actions.delete')}
         confirmTestId="orphan-delete-confirm"
         onConfirm={() => void confirmDelete()}
+      />
+
+      <ConfirmSheet
+        open={pendingBulkDelete}
+        onOpenChange={setPendingBulkDelete}
+        side="bottom"
+        contentClassName="max-w-md mx-auto rounded-t-xl"
+        title={t('confirmDelete.bulkTitle')}
+        description={t('confirmDelete.bulkBody', { count: selectedIds.size })}
+        cancelLabel={t('actions.cancel')}
+        confirmLabel={t('actions.delete')}
+        cancelTestId="orphans-bulk-delete-cancel"
+        confirmTestId="orphans-bulk-delete-confirm"
+        onConfirm={() => void confirmBulkDelete()}
       />
     </Card>
   );
