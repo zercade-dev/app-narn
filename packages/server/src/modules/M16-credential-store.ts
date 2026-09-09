@@ -609,6 +609,17 @@ export class CredentialStore {
     }
   }
 
+  /**
+   * Scrub a log MESSAGE. A message has no owning key, so it takes the same leaf
+   * path as an array/Set element — exact-hash match, else the substring scan —
+   * giving text interpolated into a message (e.g. `${String(err)}` carrying a
+   * provider response body that echoed the key) the redaction the identical text
+   * would get as a metadata value.
+   */
+  sanitizeLogMessage(message: string): string {
+    return this.scrubLeafString(message, this.getCredentialHashes());
+  }
+
   /** Test-only: reset all sessions, lockouts, and session timestamps. */
   __resetForTests(): void {
     this.sessions.clear();
@@ -657,4 +668,8 @@ export { maskSecret } from '@zercade-dev/narn-shared';
 
 export function sanitizeLogObject<T>(obj: T): T {
   return credentialStore.sanitizeLogObject(obj);
+}
+
+export function sanitizeLogMessage(message: string): string {
+  return credentialStore.sanitizeLogMessage(message);
 }
