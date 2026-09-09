@@ -1,4 +1,12 @@
-import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type React from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
@@ -21,6 +29,7 @@ import { UndoVersionDialog } from './UndoVersionDialog.js';
 import { ComparisonToolbar } from './ComparisonToolbar.js';
 import { ComparisonGrid } from './ComparisonGrid.js';
 import { sortByRegistry } from '../string-table/string-table-helpers.js';
+import { mapWithConcurrency } from '../string-table/string-table-view-types.js';
 import {
   useRunCompletionNotice,
   collectRunFailureReasons,
@@ -32,6 +41,7 @@ import {
   COMPARE_REF_LANG_KEY,
   DEFAULT_PAGE_SIZE,
   PAGE_SIZE_OPTIONS,
+  PARSE_CONCURRENCY,
   entryHasEmptyContext,
   entryHasLqaIssue,
   entryNeedsAttention,
@@ -70,7 +80,6 @@ export function ComparisonTab({
   // across both. 'custom' applies the Source-review similarity pre-sort.
   const orderMode = useStringStore((s) => s.filters.orderMode);
   const setFilter = useStringStore((s) => s.setFilter);
-  const logEntries = useLoggerStore((s) => s.entries);
   const fetchRuns = useRunStore((s) => s.fetchRuns);
   const allRuns = useRunStore((s) => s.runs);
   const { handle: handleNoRoute, dialog: noRouteDialog } = useNoRouteDialog();
@@ -368,30 +377,25 @@ export function ComparisonTab({
   // SSE event (e.g. on reconnect) just leaves this stale until the run store
   // catches up — it does NOT gate completion (see below).
   const latestBulkRun = useRunStore((s) => s.runs?.find((r) => r.runId === bulkTranslateRunId));
+  // Only this run's counters: selecting the log itself would re-render the grid
+  // on every flush, nearly all of which carry nothing this tab shows.
+  const streamedBulkProgress = useLoggerStore((s) =>
+    bulkTranslateRunId ? (s.latestProgressByRunId.get(bulkTranslateRunId) ?? null) : null,
+  );
   const bulkTranslateProgress = useMemo(() => {
     if (!bulkTranslateRunId) return null;
-    const events = logEntries.filter(
-      (e) => e.message === 'translation:progress' && e.metadata?.runId === bulkTranslateRunId,
-    );
-    const latest = events.at(-1);
-    if (!latest) {
-      // Fall back to the run store's own totals (durable — reflects the
-      // polled run status even when no SSE progress event has landed yet).
-      if (latestBulkRun) {
-        return {
-          completed: latestBulkRun.completed,
-          failed: latestBulkRun.failed,
-          total: latestBulkRun.total,
-        };
-      }
-      return null;
+    if (streamedBulkProgress) return streamedBulkProgress;
+    // Fall back to the run store's own totals (durable — reflects the
+    // polled run status even when no SSE progress event has landed yet).
+    if (latestBulkRun) {
+      return {
+        completed: latestBulkRun.completed,
+        failed: latestBulkRun.failed,
+        total: latestBulkRun.total,
+      };
     }
-    return {
-      completed: Number(latest.metadata?.completed ?? 0),
-      failed: Number(latest.metadata?.failed ?? 0),
-      total: Number(latest.metadata?.total ?? 0),
-    };
-  }, [logEntries, bulkTranslateRunId, latestBulkRun]);
+    return null;
+  }, [streamedBulkProgress, bulkTranslateRunId, latestBulkRun]);
 
   // Completion is derived from the run store's polled status — durable,
   // unlike the SSE `translation:progress` stream, which can drop its final
@@ -499,6 +503,14 @@ export function ComparisonTab({
   // shows in rich mode.
   const [parseCache, setParseCache] = useState<ReadonlyMap<string, TagNode[]>>(() => new Map());
   const pendingRef = useRef(new Set<string>());
+  // The request effect below reads the cache through this ref, not the state
+  // value, so a resolved parse does not re-run it and re-scan every key the page
+  // wants. Synced in a layout effect — after commit, before that effect runs —
+  // so the two never disagree.
+  const parseCacheRef = useRef(parseCache);
+  useLayoutEffect(() => {
+    parseCacheRef.current = parseCache;
+  });
 
   // Drop the cache when the project changes so a new project doesn't start with
   // a full, irrelevant cache. (A parse request already in flight for the old
@@ -535,24 +547,41 @@ export function ComparisonTab({
         if (text) wanted.push({ key: `${entry.id}::${language}::${text}`, text });
       }
     }
-    for (const { key, text } of wanted) {
-      if (parseCache.has(key) || pendingRef.current.has(key)) continue;
-      pendingRef.current.add(key);
-      apiRequest<TagNode[]>(`/projects/${projectId}/parse-tags`, {
+    const cache = parseCacheRef.current;
+    const pending = pendingRef.current;
+    const todo = wanted.filter(({ key }) => !cache.has(key) && !pending.has(key));
+    if (todo.length === 0) return;
+    for (const { key } of todo) pending.add(key);
+    const controller = new AbortController();
+    void mapWithConcurrency(todo, PARSE_CONCURRENCY, ({ key, text }) => {
+      if (controller.signal.aborted) return Promise.resolve();
+      return apiRequest<TagNode[]>(`/projects/${projectId}/parse-tags`, {
         method: 'POST',
         body: JSON.stringify({ text }),
+        signal: controller.signal,
       })
         .then((nodes) => {
-          pendingRef.current.delete(key);
+          pending.delete(key);
           setParseCache((prev) => withParsed(prev, key, nodes));
         })
         .catch((err: unknown) => {
-          pendingRef.current.delete(key);
+          // An abort is the page or mode moving on, not a parse failure: the
+          // cleanup has already released the key, and caching the plain-text
+          // fallback here would pin the raw source in place for the next visit.
+          if (controller.signal.aborted) return;
+          pending.delete(key);
           setParseCache((prev) => withParsed(prev, key, [{ type: 'text', content: text }]));
           if (err instanceof Error) console.warn('parse-tags failed', err.message);
         });
-    }
-  }, [mode, pageEntries, sourceLanguage, targetLang, referenceLanguage, parseCache, projectId]);
+    });
+    return () => {
+      // Release the keys synchronously: React runs this before the next effect
+      // body, so a re-run can re-request whatever was abandoned rather than
+      // finding it stuck in `pending`.
+      controller.abort();
+      for (const { key } of todo) pending.delete(key);
+    };
+  }, [mode, pageEntries, sourceLanguage, targetLang, referenceLanguage, projectId]);
 
   const handleSaveTranslation = useCallback(
     async (entryId: string, language: string, text: string): Promise<void> => {

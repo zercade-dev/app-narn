@@ -21,6 +21,11 @@ export const DEFAULT_PAGE_SIZE = 50;
 // cost (otherwise paging through a large project in rich mode is O(n²)) and the
 // memory held; oldest entries are evicted FIFO once the cap is exceeded.
 export const PARSE_CACHE_MAX = 1000;
+// Cap on rich-mode tag-parse requests in flight at once. A page wants up to
+// three parses per row (source + target + reference), so at pageSize 200 an
+// unbounded fan-out would queue ~600 POSTs behind the browser's per-origin
+// connection limit and stall every other `/api` call the view needs.
+export const PARSE_CONCURRENCY = 6;
 
 /** Insert into the parse cache with FIFO eviction once {@link PARSE_CACHE_MAX} is reached. */
 export function withParsed(
