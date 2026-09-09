@@ -10,8 +10,8 @@
  * A 423 dispatches the SAME `vault:locked` event that `apiRequest` uses (via the
  * shared {@link vaultLockedEvent} helper) so the global unlock dialog opens and
  * replays the send; no bogus assistant message is appended. Aborts flow through
- * an `AbortController` kept in a ref — `stop()` aborts it and the partial reply is
- * kept as-is.
+ * an `AbortController` kept in a ref — `stop()`, or unmounting the consumer,
+ * aborts it and the partial reply is kept as-is.
  *
  * Each chat *session* (from mount, or since the last `reset()`) is identified by
  * a `chatSessionId` (`crypto.randomUUID()`, held in a ref so it survives
@@ -24,7 +24,7 @@
  * project; omitted when there is no active project (the server skips
  * recording rather than erroring).
  */
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useColorTextStore } from '../stores/color-text-store.js';
 import { useProjectStore } from '../stores/project-store.js';
 import { vaultLockedEvent } from '../lib/vault-events.js';
@@ -188,6 +188,10 @@ export function useColorTextChat(): UseColorTextChat {
   const stop = useCallback(() => {
     abortRef.current?.abort();
   }, []);
+
+  // Abort any in-flight stream on unmount (panel closed / tab left) — the
+  // provider keeps generating, and billing, until the request is cancelled.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const reset = useCallback(() => {
     commit([]);
