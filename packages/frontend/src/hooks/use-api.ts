@@ -37,6 +37,13 @@ export class ApiError extends Error {
  * replay never raises `unhandledrejection` (no awaiter is wired). Returns the
  * awaitable promise when `onResult` is set, else `null`.
  *
+ * The event also carries a `cancel` thunk for the other exit: the listener drops
+ * the queued `retry` without running it because the user dismissed the unlock
+ * dialog. It rejects the awaited promise with `lockError` — the original 423 —
+ * so the caller's existing 423 handling runs and its busy flag clears, instead of
+ * awaiting a promise nothing can settle. `cancel` is inert once `retry` has
+ * started, so a listener tearing down its queue may call it unconditionally.
+ *
  * `reissue` re-runs the original operation (already stripped of the vault-retry
  * control keys) and resolves with whatever value the caller wants delivered
  * through `onResult` — the parsed JSON for `apiRequest`, `undefined` for
@@ -46,6 +53,7 @@ function handleVaultLocked<R>(
   reissue: () => Promise<R>,
   vaultRetryKey: string | undefined,
   onResult: ((result: R) => void) | undefined,
+  lockError: ApiError,
 ): Promise<R> | null {
   const retryId = randomId();
   // Only the callback path awaits the retry's value, so only it gets a settleable
@@ -61,7 +69,11 @@ function handleVaultLocked<R>(
       })
     : null;
 
+  // Flips before `retry`'s first await, so `cancel` can tell an entry that was
+  // dropped unrun from one the unlock dialog has already replayed.
+  let started = false;
   const retry = async () => {
+    started = true;
     globalThis.dispatchEvent(vaultRetryStartedEvent({ retryId, vaultRetryKey }));
     let succeeded = false;
     try {
@@ -76,7 +88,11 @@ function handleVaultLocked<R>(
       globalThis.dispatchEvent(vaultRetryFinishedEvent({ retryId, vaultRetryKey, succeeded }));
     }
   };
-  globalThis.dispatchEvent(vaultLockedEvent({ retry, retryId, vaultRetryKey }));
+  const cancel = () => {
+    if (started) return;
+    rejectRetry?.(lockError);
+  };
+  globalThis.dispatchEvent(vaultLockedEvent({ retry, cancel, retryId, vaultRetryKey }));
   // With a callback, the caller awaits the retry's result via `retryResult`.
   // Without one (the "drive the unlock dialog only" path, e.g. ReviewTab), the
   // caller throws the 423 while `retry()` runs independently and delivers its
@@ -218,6 +234,7 @@ export async function apiRequest<T>(
           () => apiRequest<T>(urlPath, retryOptions),
           vaultRetryKey,
           onVaultLockedRetry,
+          err,
         );
         // With a callback, await the retry's result. Without one (the "drive the
         // unlock dialog only" path, e.g. ReviewTab), fall through and throw the
@@ -320,6 +337,7 @@ export async function apiDownload(
           // to deliver, so no result callback — keep it fire-and-forget and let
           // the original call reject with the 423 (callers swallow it).
           undefined,
+          err,
         );
         if (retryResult) return retryResult;
       }
