@@ -1039,6 +1039,14 @@ export class TranslationEngine {
    * re-attempts a failed batch, at the same size unless they change the
    * project/workspace batch setting themselves first.
    *
+   * A CANCELLED source is retryable too — a run auto-cancels when a provider
+   * rejects the credential, so "cancelled with failures" is the ordinary state
+   * a user retries from. One exception to the "original total preserved" rule
+   * applies there: a cancel drops still-pending pairs without ever counting
+   * them, so the run's total is rebased onto what it actually accounted for
+   * plus the re-attempts. Otherwise the re-dispatched run could never reach a
+   * terminal state again and would hold the project's queue open.
+   *
    * Returns null when the run is unknown, is not in a terminal state (an
    * in-progress or queued run is left untouched), or recorded no retryable
    * failures.
@@ -1673,6 +1681,11 @@ export class TranslationEngine {
       pairs,
       disableMemory,
     } = request;
+    // The status this start BEGAN with, captured before the first await so it
+    // is synchronous with the caller's decision to start. The cancel guard
+    // below must fire on a Cancelled TRANSITION across the awaits, not on a
+    // caller that deliberately hands us an already-Cancelled run.
+    const startedCancelled = existing?.status === RunStatusCode.Cancelled;
     // Cancel-vs-dequeue race: if a Queued run is cancelled at the exact
     // moment maybeStartNextQueued has dequeued it (removed from queuedSessions)
     // but not yet flipped it Running, `cancel` sets the shared `existing` status
@@ -1756,7 +1769,14 @@ export class TranslationEngine {
     // object — do NOT resurrect it to Running or begin work. cancel() of a
     // Queued run does not chain the queue (wasActive=false), so keep the
     // project's queue draining here and let the run stay terminal.
-    if (existing && existing.status === RunStatusCode.Cancelled) {
+    // Only a TRANSITION counts. A run that was ALREADY Cancelled when this
+    // start began was handed to us on purpose by `retryFailed`, whose whole
+    // job is to re-dispatch the recorded failures of a terminal run — and a
+    // run auto-cancels when a provider rejects the credential, so "cancelled
+    // with failures" is the ordinary state a user retries from. Bailing on the
+    // state rather than the transition made that retry a silent no-op: nothing
+    // was dispatched, yet the route answered 202 and the UI said it started.
+    if (existing && existing.status === RunStatusCode.Cancelled && !startedCancelled) {
       this.startNextQueued(projectId);
       return { runId, total: existing.total, status: RunStatusCode.Cancelled };
     }
@@ -1789,6 +1809,19 @@ export class TranslationEngine {
         (e) => !(e.stringId && e.targetLang && retryKeys.has(`${e.stringId} ${e.targetLang}`)),
       );
       status.failed = Math.max(0, status.failed - (errorsBefore - status.errors.length));
+      if (startedCancelled) {
+        // A cancelled source leaves the accounting SHORT: pairs still queued or
+        // in flight when `cancel` fired were dropped without ever being
+        // completed or failed, so `completed + failed < total` for good.
+        // `finalizeTranslationTerminal` only settles a run once those meet, so
+        // re-dispatching under the original total would leave this run Running
+        // forever and wedge the project's queue behind it. Rebase the total
+        // onto what the run actually accounted for plus the pairs being
+        // re-attempted. This is the one case where a retry does not preserve
+        // the original total, and it is why the guard fix above is not
+        // sufficient on its own.
+        status.total = status.completed + status.failed + decisions.length;
+      }
       status.status = RunStatusCode.Running;
       delete status.finishedAt;
       delete status.queuePosition;
