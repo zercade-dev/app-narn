@@ -390,3 +390,9 @@ export { windowStart, nextReset } from './freeway/windows.js';
 export type { PoolableEntry, LogPoolOptions, LogPoolDropCounts } from './logging/entry-pools.js';
 export { LogEntryPools, isPriorityLevel } from './logging/entry-pools.js';
 export { TenantEntryPools, type TenantPoolOptions } from './logging/tenant-entry-pools.js';
+
+export {
+  CHAT_STREAM_ERROR_MARKER,
+  CHAT_STREAM_ERROR_FALLBACK,
+  splitChatStreamError,
+} from './chat-stream-error.js';
