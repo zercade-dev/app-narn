@@ -2530,11 +2530,12 @@ export class TranslationEngine {
    * after a server restart — adopt a queued run persisted by the RunStore and
    * start it. Returns the run's status, or null when nothing was resumable.
    *
-   * `sessionId` is the RESUMING caller's session. It matters for the
-   * quota-resume path, which starts a fresh translation pass: credentials are
-   * read per session, and the run's own enqueue-time session may be long gone
-   * (a next-day resume is a different session entirely), so the caller's
-   * current one is both fresher and more correct than the captured one.
+   * `sessionId` is the RESUMING caller's session. It matters for every path
+   * that starts a fresh translation pass — the quota resume and the
+   * restart-adopt below: credentials are read per session, and the run's own
+   * enqueue-time session may be long gone (a next-day resume is a different
+   * session entirely) or lost with the restart, so the caller's current one is
+   * both fresher and more correct than the captured one.
    */
   async resume(projectId: string, runId: string, sessionId?: string): Promise<RunStatus | null> {
     const status = this.runs.get(runId);
@@ -2638,7 +2639,7 @@ export class TranslationEngine {
         runId,
         projectId,
         persisted.request,
-        undefined,
+        sessionId,
         persisted,
         false,
         getCurrentTenant(),
@@ -3409,10 +3410,15 @@ export class TranslationEngine {
     // usage (DeepL/OpenRouter) before reading the ledger for this run's
     // resolution — never lets a slow/unreachable provider stall run start,
     // and never throws (awaitAllWithTimeout treats a rejection as settled).
+    // The race only picks a winner, so the loser is cancelled here: its reply
+    // would SET the window cell back over every dispatch this run records in
+    // the meantime, and Node's fetch would otherwise hold the socket open.
+    const probeAbort = new AbortController();
     await awaitAllWithTimeout(
       [
         syncAuthoritativeUsage(now, {
           ledger: deps.ledger,
+          signal: probeAbort.signal,
           credentialFor: this.credentialForFreewayProbe(
             args.sessionId,
             deps,
@@ -3423,6 +3429,7 @@ export class TranslationEngine {
       ],
       1500,
     );
+    probeAbort.abort();
     const buckets = await loadBucketViews(now, { ...deps, bucketStates });
     const minBand = freewayMinBand(status.request);
     const resolution = resolveFreewayDecisions(
