@@ -461,6 +461,17 @@ export function resolveBatchSize(
  * batches truncate/mis-count less often. A singleton that still won't parse, or
  * a thrown API/transport error, becomes per-item error results via `makeErrors`
  * — so one bad batch never aborts the whole run. Honors `signal` up front.
+ *
+ * `surfaceTypedErrors` opts a caller out of that flattening for the two failure
+ * classes it can answer better than a split can: a rate limit (429), where the
+ * caller owns the provider cool-down and — on a free-tier run — the bucket cool
+ * and the one re-route hop, and an auth failure (401/403), where the same
+ * credential fails every half identically. Both are recast to their shared typed
+ * error and rethrown BEFORE any retry or split, since halving into a window the
+ * provider just closed only spends more of a quota it already refused. Left off,
+ * a caller with nowhere to route the failure keeps the split-to-singleton
+ * partial recovery, which is still the better outcome for a flaky 429 it can do
+ * nothing else about.
  */
 export async function splitAndRetry<TItem, TResult>(
   batch: TItem[],
@@ -471,6 +482,7 @@ export async function splitAndRetry<TItem, TResult>(
   parseFailMessage: string,
   signal?: AbortSignal,
   retryTransient = false,
+  surfaceTypedErrors = false,
 ): Promise<TResult[]> {
   if (signal?.aborted) return makeErrors(batch, 'cancelled');
   let parsed: TResult[] | null;
@@ -483,6 +495,7 @@ export async function splitAndRetry<TItem, TResult>(
       ...extractSafeErrorMetadata(err),
     });
     if (signal?.aborted) return makeErrors(batch, 'cancelled');
+    if (surfaceTypedErrors) rethrowIfAuthOrRateLimit(err);
     if (!retryTransient || !isTransientError(err)) {
       return makeErrors(batch, toErrorMessage(err));
     }
@@ -492,6 +505,8 @@ export async function splitAndRetry<TItem, TResult>(
       parsed = await runOnce(batch);
     } catch (err2) {
       if (signal?.aborted) return makeErrors(batch, 'cancelled');
+      // The same-size retry can hit a limit the first attempt did not.
+      if (surfaceTypedErrors) rethrowIfAuthOrRateLimit(err2);
       if (isTransientError(err2) && batch.length > 1) {
         const mid = Math.ceil(batch.length / 2);
         log('warn', `${logPrefix}:transient-splitting`, { count: batch.length });
@@ -504,6 +519,7 @@ export async function splitAndRetry<TItem, TResult>(
           parseFailMessage,
           signal,
           retryTransient,
+          surfaceTypedErrors,
         );
         const right = await splitAndRetry(
           batch.slice(mid),
@@ -514,6 +530,7 @@ export async function splitAndRetry<TItem, TResult>(
           parseFailMessage,
           signal,
           retryTransient,
+          surfaceTypedErrors,
         );
         return [...left, ...right];
       }
@@ -534,6 +551,7 @@ export async function splitAndRetry<TItem, TResult>(
     parseFailMessage,
     signal,
     retryTransient,
+    surfaceTypedErrors,
   );
   const right = await splitAndRetry(
     batch.slice(mid),
@@ -544,6 +562,7 @@ export async function splitAndRetry<TItem, TResult>(
     parseFailMessage,
     signal,
     retryTransient,
+    surfaceTypedErrors,
   );
   return [...left, ...right];
 }

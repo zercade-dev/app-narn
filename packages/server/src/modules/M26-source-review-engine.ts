@@ -489,12 +489,19 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
     freeway?: FreewayBatchBinding,
     freewayReroute?: () => Promise<FreewayBatchBinding | undefined>,
   ): Promise<void> {
+    // Only a free-tier-bound batch has an answer to a typed 429 — the bucket
+    // cool and the one re-route hop below — so only it asks the provider layer
+    // to surface one instead of flattening it into per-item error results.
+    const callOptions: BatchDispatchOptions | undefined = freeway
+      ? { ...dispatchOptions, surfaceTypedErrors: true }
+      : dispatchOptions;
+
     await this.runBatchWithUsage<SourceReviewItem, SourceReviewItemResult>({
       runId,
       moduleId: selection.moduleId,
       batch,
-      dispatchOptions,
-      call: (signal) => selection.module.reviewSource!(batch, opts, signal, dispatchOptions),
+      dispatchOptions: callOptions,
+      call: (signal) => selection.module.reviewSource!(batch, opts, signal, callOptions),
       // What this batch costs the bucket's minute-token budget, measured with
       // the same proxy the sizer sized it with.
       batchChars: batchPayloadChars(batch, sourceReviewLengthProxy),
