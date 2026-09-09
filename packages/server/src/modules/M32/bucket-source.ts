@@ -45,6 +45,17 @@ const FLAP_WINDOW_MS = 5 * 60_000;
  */
 export const POOL_SIBLING_COOLDOWN_CAP_MS = 70_000;
 
+/**
+ * Cooldown for an untimed 429 on a bucket whose only day-scale window is
+ * `monthly_chars` (DeepL). Falling back to that window's next reset is right
+ * for an `rpd` bucket — back tomorrow — but here it is the first of NEXT
+ * MONTH, so one transient burst would sideline the provider for weeks and
+ * nothing clears a cooldown early. A used-up allowance arrives as a different
+ * signal (DeepL reports it as an auth-shaped quota error, never a 429), so the
+ * bounded window costs at most one wasted request per interval.
+ */
+export const MONTHLY_CHARS_COOLDOWN_MS = 15 * 60_000;
+
 export function freewayBucketKey(moduleId: string, modelId: string): string {
   return `${moduleId}::${modelId}`;
 }
@@ -904,8 +915,9 @@ export async function recordDispatch(
 }
 
 /**
- * 429/quota error: cooldown until retryAfterMs (when given) else the bucket's
- * next day-scale reset. A re-strike within FLAP_WINDOW_MS counts against the
+ * 429/quota error: cooldown until retryAfterMs (when given), else the bucket's
+ * next day-scale reset — or {@link MONTHLY_CHARS_COOLDOWN_MS} when that reset
+ * is a month away. A re-strike within FLAP_WINDOW_MS counts against the
  * escalation ladder — but only on the escalating path (`escalateOnFlap`), the
  * one that also consumes the counter.
  *
@@ -940,6 +952,8 @@ export async function coolBucket(
   let until: number;
   if (retryAfterMs !== undefined) {
     until = now + retryAfterMs;
+  } else if (resolved?.dayWindow.kind === 'monthly_chars' && dayReset !== undefined) {
+    until = Math.min(now + MONTHLY_CHARS_COOLDOWN_MS, dayReset);
   } else {
     until = dayReset ?? now;
   }
