@@ -3,6 +3,7 @@ import type { StringEntry } from './string-entry.js';
 import type { ReasoningEffort } from './models.js';
 
 export type { ReasoningEffort } from './models.js';
+export { REASONING_EFFORTS } from './models.js';
 
 export interface RoutingRule {
   id: string;
