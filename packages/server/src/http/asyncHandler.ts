@@ -8,7 +8,7 @@ import { logger } from '../modules/M15-console-logger.js';
 type FlatParams = Record<string, string>;
 
 // Error names that error-handler.ts maps to a clean, well-understood HTTP
-// response (401/423/503/428/429 — see the `err.name === '…'` / `instanceof`
+// response (401/413/423/503/428/429 — see the `err.name === '…'` / `instanceof`
 // branches there). These are expected, routine control flow (an expired
 // session, a locked vault, a missing credential, ...) — not bugs — so they're
 // logged quietly (no stack) instead of as a scary ERROR.
@@ -18,6 +18,7 @@ const QUIETLY_LOGGED_ERROR_NAMES = new Set([
   'MissingCredentialError',
   'DeviceNotEnrolledError',
   'TooManyRunsError',
+  'StorageQuotaExceededError',
 ]);
 
 export const asyncHandler =

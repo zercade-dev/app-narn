@@ -77,6 +77,28 @@ export async function assertProjectAccess(
 }
 
 /**
+ * Run-control write gate: the routes that make an EXISTING run write again —
+ * retry, resume, resume-with, revert — resolve the caller's grant HERE rather
+ * than trusting the one checked when the run was created. A grant narrowed
+ * since then therefore takes effect at once: a single language outside the
+ * CURRENT grant refuses the whole operation (403) instead of the run quietly
+ * re-writing a language its owner has taken back. `languages` is what the
+ * operation would write, derived by the caller from the same record the engine
+ * re-dispatches from. Owners hold every capability, so they pass unconditionally.
+ */
+export async function assertLanguagesWritable(
+  projectId: string,
+  languages: Iterable<string>,
+): Promise<void> {
+  const access = await assertProjectAccess(projectId, { type: 'read' });
+  for (const language of languages) {
+    if (!can(access, { type: 'write-language', language })) {
+      throw new ForbiddenError(`write-language:${language}`);
+    }
+  }
+}
+
+/**
  * String-entry patch guard: collaborators may patch ONLY the `translations`
  * field, and only language keys they can write. Owners pass unconditionally.
  * Shared by the single-entry PUT and the bulk PATCH (strings.ts).

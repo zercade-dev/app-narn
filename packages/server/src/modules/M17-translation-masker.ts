@@ -518,7 +518,7 @@ export function maskApprovedForMemory(
   const tagRemap = pairSlotsByIdentity(
     transPlan.tags,
     sourcePlan.tags,
-    (s) => `${s.tagName} ${s.attribute}`,
+    (s) => `${s.tagName}\0${s.attribute}`,
   );
   if (!tagRemap) return null;
   const escapeRemap = pairSlotsByIdentity(transPlan.escapes, sourcePlan.escapes, (s) => s.original);

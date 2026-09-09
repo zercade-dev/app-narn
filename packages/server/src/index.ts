@@ -56,6 +56,8 @@ import {
 } from './middleware/security-headers.js';
 import { sessionCookieWouldBeSecure } from './identity/session-cookie.js';
 import { mountSpa } from './http/serve-spa.js';
+import { closeAllSSEStreams } from './http/setupSSE.js';
+import { shutdownGracefully } from './http/graceful-shutdown.js';
 import { applyRegisteredRoutes, applyRegisteredEarlyMiddleware } from './http/extra-routes.js';
 import { cspViolationRouter } from './routes/csp-violation.js';
 import { colorTextRouter } from './routes/color-text.js';
@@ -349,14 +351,22 @@ export function start(): Promise<void> {
       resolveStarted();
     });
 
-    // Graceful shutdown
+    // Graceful shutdown: drain the listener FIRST — the pool the in-flight
+    // requests are still using may only be torn down once they have finished.
+    // SIGINT after SIGTERM (or a repeated signal) must not restart the sequence.
+    let shuttingDown = false;
     const shutdown = () => {
+      if (shuttingDown) return;
+      shuttingDown = true;
       logger.info('Server shutting down...');
-      void copilotClientPool.destroyAll();
-      void closePool();
-      server.close(() => {
-        process.exit(0);
-      });
+      void shutdownGracefully(server, {
+        logger,
+        closeStreams: closeAllSSEStreams,
+        release: async () => {
+          await copilotClientPool.destroyAll();
+          await closePool();
+        },
+      }).finally(() => process.exit(0));
     };
 
     process.on('SIGTERM', shutdown);

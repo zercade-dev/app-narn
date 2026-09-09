@@ -179,6 +179,14 @@ export type LqaGate = (
   projectId?: string,
   targetLanguage?: string,
   extraIssues?: import('@zercade-dev/narn-shared').LQAIssue[],
+  /**
+   * The project this dispatch started from, so the gate reads its per-project
+   * check config off the caller's copy instead of loading the whole project
+   * again for every gated pair. Re-read at each start — including a resume, which
+   * goes back through `startRunInner` — so a mid-run config edit lands at the
+   * next one.
+   */
+  project?: Project,
 ) => Promise<import('@zercade-dev/narn-shared').LQAResult | undefined>;
 
 interface LoggerLike {
@@ -1195,6 +1203,11 @@ export class TranslationEngine {
     const availableModules = this.deriveAvailableModuleIds(rules);
     const entries = await this.stringStore.load(projectId);
     const byId = new Map(entries.map((e) => [e.id, e]));
+    // Keyed by the run path's own `glossaryEntryKey` (see fetchGlossariesForBatch):
+    // one approve request carries the whole selection x every batch target
+    // language, and `glossaryProvider` is a multi-query read whose every
+    // statement is its own tenant transaction.
+    const constantTermsByKey = new Map<string, GlossaryTerm[]>();
 
     let approved = 0;
     for (const { entryId, targetLanguage } of pairs) {
@@ -1224,8 +1237,13 @@ export class TranslationEngine {
       const currentRecord = flipped.translations[targetLanguage] ?? record;
       try {
         const decision = this.router.route(entry, targetLanguage, rules, availableModules);
-        const glossary = await this.glossaryProvider(projectId, targetLanguage, entry);
-        const constantTerms = glossary.filter((term) => term.constant);
+        const glossaryKey = this.glossaryEntryKey(targetLanguage, entry);
+        let constantTerms = constantTermsByKey.get(glossaryKey);
+        if (constantTerms === undefined) {
+          const glossary = await this.glossaryProvider(projectId, targetLanguage, entry);
+          constantTerms = glossary.filter((term) => term.constant);
+          constantTermsByKey.set(glossaryKey, constantTerms);
+        }
         // Mask source and approved text jointly so the stored translation carries
         // SOURCE-plan slot ids — the ids the engine restores against at apply time.
         // Masking them independently numbers ids by each text's own token order, so
@@ -4992,7 +5010,7 @@ export class TranslationEngine {
       );
 
       for (const { decision: d, matcherId, translatedText } of trivialResults) {
-        await this.persistTrivialResult(projectId, status, d, matcherId, translatedText);
+        await this.persistTrivialResult(projectId, status, d, matcherId, translatedText, project);
         settled.add(settleKey(d));
       }
 
@@ -5066,7 +5084,14 @@ export class TranslationEngine {
           persistDecision,
           runId,
         );
-        await this.lqaGate(e.decision.entry, result, projectId, e.decision.targetLanguage, []);
+        await this.lqaGate(
+          e.decision.entry,
+          result,
+          projectId,
+          e.decision.targetLanguage,
+          [],
+          project,
+        );
         status.completed++;
         settled.add(settleKey(e.decision));
         this.logger.info('translation:done', {
@@ -5124,6 +5149,7 @@ export class TranslationEngine {
             projectId,
             e.decision.targetLanguage,
             [],
+            project,
           );
           if (!tmLqaResult || tmLqaResult.passed) {
             await this.persistResult(
@@ -5310,7 +5336,7 @@ export class TranslationEngine {
             !isModelUnavailableError(moduleResult.error) &&
             isTransientProviderError(moduleResult.error)
           ) {
-            const pairKey = `${e.decision.entry.id} ${e.decision.targetLanguage}`;
+            const pairKey = `${e.decision.entry.id}\0${e.decision.targetLanguage}`;
             let parkedOnce = this.freewayTransientParkedPairs.get(runId);
             if (!parkedOnce) {
               parkedOnce = new Set<string>();
@@ -5440,6 +5466,7 @@ export class TranslationEngine {
           projectId,
           e.decision.targetLanguage,
           maskIssues,
+          project,
         );
         // The bucket's quality signal for this language, folded into its stats
         // once the whole batch has settled.
@@ -6153,7 +6180,7 @@ export class TranslationEngine {
         rawResponse: retryModuleResult.rawResponse,
       };
       await this.persistResult(projectId, entry, targetLanguage, retryResult, decision, runId);
-      await this.lqaGate(entry, retryResult, projectId, targetLanguage, retryMaskIssues);
+      await this.lqaGate(entry, retryResult, projectId, targetLanguage, retryMaskIssues, project);
       // No TM auto-record — only approved translations are written to the memory.
       return {
         outcome: 'persisted',
@@ -6843,6 +6870,7 @@ export class TranslationEngine {
     d: RoutingDecision,
     matcherId: string,
     trivialText: string,
+    project?: Project,
   ): Promise<void> {
     const result: TranslationResult = {
       entryId: d.entry.id,
@@ -6866,7 +6894,7 @@ export class TranslationEngine {
       persistDecision,
       status.runId,
     );
-    await this.lqaGate(d.entry, result, projectId, d.targetLanguage, []);
+    await this.lqaGate(d.entry, result, projectId, d.targetLanguage, [], project);
     status.completed++;
     this.logger.info('translation:done', {
       runId: status.runId,
@@ -6893,12 +6921,15 @@ export const translationEngine = new TranslationEngine({
       projectTargetLanguages(project),
     );
   },
-  lqaGate: async (entry, result, projectId, targetLanguage, extraIssues) => {
+  lqaGate: async (entry, result, projectId, targetLanguage, extraIssues, project) => {
     if (!projectId || !targetLanguage) return undefined;
     // The pipeline merges the engine's mask diagnostics (extraIssues) itself
-    // and computes `passed` as "no blocking issues" per project config.
+    // and computes `passed` as "no blocking issues" per project config. `project`
+    // is the caller's already-loaded copy; without it the pipeline loads the
+    // whole project again for every gated pair.
     const lqa = await lqaGate.check(entry, result.translatedText, targetLanguage, {
       projectId,
+      project,
       extraIssues,
     });
     // Pass ONLY this language's verdict. updateEntry merges it into the fresh

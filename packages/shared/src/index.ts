@@ -106,6 +106,7 @@ export type {
 } from './types/routing.js';
 export { CONTROLLED_FAILURE_HINTS, controlledFailureHint } from './types/routing.js';
 export type { ModelInfo, ModelBilling, ReasoningEffort } from './types/models.js';
+export { REASONING_EFFORTS } from './types/models.js';
 export type {
   ProjectTemplate,
   ProjectTemplateConfig,

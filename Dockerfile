@@ -8,7 +8,13 @@ FROM node:26-bookworm@sha256:9f94d34c787165dca03b74e5bf9c3bf90e8de79b19aa3d87fe1
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 # Node 26 no longer ships corepack — install it explicitly before activating pnpm.
-RUN npm install -g corepack && corepack enable && corepack prepare pnpm@11.2.2 --activate
+# Both corepack's version and the pnpm tarball's hash are pinned: this step fetches and
+# then runs the package manager for the whole install, so an unpinned fetch here is the
+# one unreproducible link in an otherwise digest-pinned build. The descriptor matches
+# package.json's `packageManager`; regenerate both with `corepack use pnpm@<version>`.
+RUN npm install -g corepack@0.36.0 \
+    && corepack enable \
+    && corepack prepare pnpm@11.2.2+sha512.36e6621fad506178936455e70247b8808ef4ec25797a9f437a93281a020484e2607f6a469a22e982987c3dbb8866e3071514ab10a4a1749e06edcd1ec118436f --activate
 WORKDIR /app
 COPY . .
 RUN pnpm install --frozen-lockfile

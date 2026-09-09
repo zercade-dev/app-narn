@@ -5,6 +5,22 @@ export interface SSEHandle {
   close: () => void;
 }
 
+/**
+ * Every open stream's `close`. An event stream is an ACTIVE connection that ends
+ * only when the client disconnects, so nothing else ever reclaims it and
+ * `server.close()` would wait on it indefinitely — shutdown ends them through
+ * this registry instead.
+ */
+const openStreams = new Set<() => void>();
+
+/** End every open SSE stream; returns how many were closed. */
+export function closeAllSSEStreams(): number {
+  const open = [...openStreams];
+  openStreams.clear();
+  for (const close of open) close();
+  return open.length;
+}
+
 export function setupSSE(
   req: Request,
   res: Response,
@@ -60,15 +76,21 @@ export function setupSSE(
   };
 
   // Idempotent teardown shared by caller-initiated close and client disconnect:
-  // stop the heartbeat timer. `close` additionally ends the response.
+  // stop the heartbeat timer and drop the stream from the shutdown registry.
+  // `close` additionally ends the response.
   const stopHeartbeat = () => clearInterval(heartbeat);
 
   const close = () => {
+    openStreams.delete(close);
     stopHeartbeat();
     res.end();
   };
 
-  req.on('close', stopHeartbeat);
+  openStreams.add(close);
+  req.on('close', () => {
+    openStreams.delete(close);
+    stopHeartbeat();
+  });
 
   return { send, close };
 }

@@ -187,6 +187,17 @@ export class PgStringStore implements StringStore {
     return rows.map((r) => stripLegacy(r.data));
   }
 
+  /**
+   * Count of every entry the current tenant can see, across all their projects.
+   * `this.db` is a tenant-scoped {@link TenantDb}, so the `strings` membership
+   * RLS policy scopes the count with no explicit filter. The `::int` cast makes
+   * node-pg / pglite return a JS number for `count(*)`.
+   */
+  async countAllEntries(): Promise<number> {
+    const { rows } = await this.db.query<{ n: number }>('select count(*)::int as n from strings');
+    return rows[0] ? Number(rows[0].n) : 0;
+  }
+
   async getById(projectId: string, id: string): Promise<StringEntry> {
     const { rows } = await this.db.query<{ data: StringEntry }>(
       'select data from strings where project_id = $1 and id = $2',

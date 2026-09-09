@@ -1,6 +1,6 @@
 import { EventEmitter } from 'node:events';
 import { randomUUID } from 'node:crypto';
-import { sanitizeLogObject } from './M16-credential-store.js';
+import { sanitizeLogMessage, sanitizeLogObject } from './M16-credential-store.js';
 import { getCurrentTenant } from '../storage/pg/tenant-context.js';
 import { isLogFormatJson } from '../config/env.js';
 // Deliberately the leaf `cloud-mode.js` seam and NOT `identity/registry.js`:
@@ -172,6 +172,10 @@ class ConsoleLogger extends EventEmitter {
     // Defensive credential scrubbing — caller still owns primary masking.
     // M16's `sanitizeLogObject` is the single redaction layer of record (it
     // masks by stored-credential value-hash and by `CREDENTIAL_KEY_PATTERN`).
+    // The message takes M16's leaf path (a bare string has no key to match on),
+    // and is scrubbed before the clip below so a secret straddling the clip
+    // boundary cannot survive as a fragment.
+    const safeMessage = sanitizeLogMessage(message);
     const safeMetadata = metadata ? sanitizeLogObject(metadata) : undefined;
     // Clip long string leaves for the broadcast/history entry (SSE log + UI) so a
     // multi-KB subprocess stderr/stack can never flood it. The console mirror
@@ -182,7 +186,7 @@ class ConsoleLogger extends EventEmitter {
     const entry: LogEntry = {
       id: randomUUID(),
       level,
-      message: clipLogString(message),
+      message: clipLogString(safeMessage),
       metadata: entryMetadata,
       timestamp: Date.now(),
       // Stamp the emitting tenant (cloud mode) so the /api/logs read routes can
@@ -207,7 +211,7 @@ class ConsoleLogger extends EventEmitter {
         JSON.stringify({
           timestamp: new Date(entry.timestamp).toISOString(),
           level,
-          message,
+          message: safeMessage,
           ...(safeMetadata && Object.keys(safeMetadata).length > 0
             ? { metadata: safeMetadata }
             : {}),
@@ -218,7 +222,7 @@ class ConsoleLogger extends EventEmitter {
         safeMetadata && Object.keys(safeMetadata).length > 0
           ? ` ${JSON.stringify(safeMetadata)}`
           : '';
-      consoleFn(`[${level.toUpperCase()}] ${message}${metaSuffix}`);
+      consoleFn(`[${level.toUpperCase()}] ${safeMessage}${metaSuffix}`);
     }
   }
 
@@ -236,11 +240,12 @@ class ConsoleLogger extends EventEmitter {
    * survives intact instead of being cut at 1000 chars.
    */
   browser(level: LogEntry['level'], message: string, metadata?: Record<string, unknown>): void {
+    const safeMessage = sanitizeLogMessage(message);
     const safeMetadata = metadata ? sanitizeLogObject(metadata) : undefined;
     const entry: LogEntry = {
       id: randomUUID(),
       level,
-      message: clipLogString(message, MAX_BROWSER_LOG_VALUE_CHARS),
+      message: clipLogString(safeMessage, MAX_BROWSER_LOG_VALUE_CHARS),
       metadata: safeMetadata
         ? (clipLogValue(safeMetadata, new WeakSet(), 0, MAX_BROWSER_LOG_VALUE_CHARS) as Record<
             string,
