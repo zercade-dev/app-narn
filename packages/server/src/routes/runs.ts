@@ -197,11 +197,14 @@ runsRouter.post(
 
 /**
  * GET /api/projects/:projectId/runs
- * Returns all runs for the project. Collaborators see only the runs they
- * themselves started — same own-run rule as {@link assertRunVisible},
- * applied here as a list filter instead of a per-run 404 (a legacy run with no
- * `createdBy` is treated as the owner's, so it's filtered out for collaborators
- * too). Owners see every run, unfiltered.
+ * Returns the project's runs: every non-terminal run plus the most recent
+ * terminal ones, up to `listRunSummaries`'s bound (X2-06 — see its doc; row
+ * count is no longer unbounded, but a run active right now is never among the
+ * rows dropped). Collaborators see only the runs they themselves started —
+ * same own-run rule as {@link assertRunVisible}, applied here as a list
+ * filter instead of a per-run 404 (a legacy run with no `createdBy` is
+ * treated as the owner's, so it's filtered out for collaborators too).
+ * Owners see every returned run, unfiltered.
  *
  * Serves the SUMMARY shape (`listRunSummaries`), not the full records: the
  * Activity tab re-polls this endpoint every two seconds for as long as any run

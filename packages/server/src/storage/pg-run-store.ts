@@ -37,6 +37,17 @@ export const SIDECAR_KINDS = [
 export type SidecarKind = (typeof SIDECAR_KINDS)[number];
 
 /**
+ * Default row cap for {@link PgRunStore.listRunSummaries} — see that method's
+ * doc for why this bounds only the terminal/historical tail, never an active
+ * run. 300 is deliberately generous: it comfortably covers a project's whole
+ * practical history (the Activity tab's own newest-first dropdown caps at 20 —
+ * `selectRecentRuns` in `RunFilterSelect.tsx`), while still turning the
+ * previously-unbounded row count (X2-06: every run a project has EVER had,
+ * every 2s poll, including one row per AI chat session) into a fixed ceiling.
+ */
+const DEFAULT_RUN_LIST_LIMIT = 300;
+
+/**
  * Postgres-backed RunStore: one row per run in `runs`, the whole RunStatus
  * stored in `data jsonb` with scalar write-mirror columns (status/kind/
  * timestamps/queue_position/…) for ordering and filtering — reads return `data`
@@ -161,8 +172,34 @@ export class PgRunStore implements RunStore {
    *
    * The `jsonb_typeof` guard keeps a run with no park — or a legacy row whose
    * `pairs` is not an array — from erroring inside `jsonb_array_length`.
+   *
+   * **Row count is bounded (X2-06)**, unlike {@link listRuns}: this backs
+   * `GET /api/projects/:id/runs`, which the frontend re-polls every
+   * `POLL_BASE_MS` (2s) for as long as any run is active, and the table grows
+   * monotonically — nothing ever deletes a run row except project deletion and
+   * snapshot restore, and every AI chat session mints one too. Unbounded, that
+   * poll eventually reads every run a project has ever had.
+   *
+   * The bound is NOT a plain `ORDER BY started_at DESC LIMIT n` — that would
+   * reintroduce a worse bug than the one it fixes. The frontend's poll control
+   * loop (`fetchRuns` in `run-store.ts`) computes `anyActive` and diffs
+   * failure transitions over the WHOLE returned list; a queued run can have an
+   * old `started_at` (it was queued behind others) while unrelated newer runs
+   * (including chat-usage rows) push it off a naive top-N page, so the client
+   * would see an empty/all-terminal page, conclude nothing is active, and stop
+   * polling a run that is still genuinely running server-side.
+   *
+   * So every NON-terminal run (pending/queued/running/paused — same set
+   * {@link countActiveRuns} uses) is always included, with no limit — the
+   * limit applies only to the terminal tail, via a `run_id in (...)`
+   * subquery bounded to the newest `limit` rows overall. A run can therefore
+   * only ever be excluded once it is terminal, at which point the poller no
+   * longer needs to observe it — it was already delivered its terminal state
+   * (via this same query, or via the SSE fast path `applyProgressEvent`
+   * consumes, which fires unconditionally on every status write regardless of
+   * whether the run stays on this list — see `runEvents.emitProgress`).
    */
-  async listRunSummaries(projectId: string): Promise<RunStatus[]> {
+  async listRunSummaries(projectId: string, limit = DEFAULT_RUN_LIST_LIMIT): Promise<RunStatus[]> {
     const { rows } = await this.db.query<{
       data: RunStatus;
       waiting_pair_count: number;
@@ -174,8 +211,16 @@ export class PgRunStore implements RunStore {
               then jsonb_array_length(data #> '{waitingForQuota,pairs}')
               else 0 end as waiting_pair_count,
          created_by
-       from runs where project_id = $1 order by started_at`,
-      [projectId],
+       from runs
+       where project_id = $1
+         and (
+           status in ('pending', 'queued', 'running', 'paused')
+           or run_id in (
+             select run_id from runs where project_id = $1 order by started_at desc limit $2
+           )
+         )
+       order by started_at`,
+      [projectId, limit],
     );
     return rows.map((r) => {
       const status = this.overlayCreatedBy(r.data, r.created_by);
