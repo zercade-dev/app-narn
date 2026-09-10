@@ -481,20 +481,28 @@ export interface RunStore {
   getRelinkRetranslate(projectId: string, runId: string): Promise<RelinkRetranslateRecord[]>;
   listRuns(projectId: string): Promise<RunStatus[]>;
   /**
-   * The run list in its SUMMARY shape: every run for the project, ordered by
-   * start time, with the two unbounded per-run payloads projected away in SQL —
-   * `request` (whose `entryIds` runs to tens of thousands of ids and is never
-   * cleared) and `waitingForQuota.pairs` (replaced by
-   * `waitingForQuota.pairCount`). Backs `GET /api/projects/:projectId/runs`,
-   * which the Activity tab re-polls every two seconds while any run is active.
+   * The run list in its SUMMARY shape, ordered by start time, with the two
+   * unbounded per-run payloads projected away in SQL — `request` (whose
+   * `entryIds` runs to tens of thousands of ids and is never cleared) and
+   * `waitingForQuota.pairs` (replaced by `waitingForQuota.pairCount`). Backs
+   * `GET /api/projects/:projectId/runs`, which the Activity tab re-polls every
+   * two seconds while any run is active.
+   *
+   * **Row count is bounded (X2-06)**: every non-terminal run is always
+   * included regardless of age (so the poller's own control loop never loses
+   * sight of a still-active run), but terminal/historical rows beyond `limit`
+   * (most recent first, default `DEFAULT_RUN_LIST_LIMIT` in the PG
+   * implementation) are omitted — see `PgRunStore.listRunSummaries`'s doc for
+   * why a naive top-N cannot be used here.
    *
    * Every OTHER caller — project snapshot/backup, tenant export, the M9 orphan
-   * sweep, chat-usage, the revert route's multi-run guard — needs the full
-   * record and must keep using {@link listRuns}: these records are LOSSY, so
-   * one written back through `updateRun` would erase that run's stored
-   * `request` (a queued run without it cannot be routed) and its parked pairs.
+   * sweep, chat-usage, the revert route's multi-run guard — needs the full,
+   * UNBOUNDED record set and must keep using {@link listRuns}: these records
+   * are also LOSSY, so one written back through `updateRun` would erase that
+   * run's stored `request` (a queued run without it cannot be routed) and its
+   * parked pairs.
    */
-  listRunSummaries(projectId: string): Promise<RunStatus[]>;
+  listRunSummaries(projectId: string, limit?: number): Promise<RunStatus[]>;
   /**
    * Count of the CURRENT TENANT's non-terminal runs across all their projects
    * (RLS-scoped — no projectId arg). Non-terminal = pending/queued/running/
