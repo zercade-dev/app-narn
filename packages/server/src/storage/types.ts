@@ -237,7 +237,21 @@ export interface RelinkCandidate {
 export interface StringStore {
   load(projectId: string): Promise<StringEntry[]>;
   getById(projectId: string, id: string): Promise<StringEntry>;
-  query(projectId: string, filters: StringQueryFilters): Promise<StringEntry[]>;
+  /**
+   * The list-view read: every entry matching `filters`, in `seq` order, yielded
+   * ONE AT A TIME so no caller is forced to hold the whole project in memory.
+   *
+   * Deliberately an `AsyncIterable` rather than the `Promise<StringEntry[]>` it
+   * replaced. The single consumer (`GET /:id/strings`) serialises straight to
+   * the response, and a 10k-entry x 15-language project is tens of MB — as an
+   * array that is resident twice over (parsed objects, then the JSON string
+   * `res.json` builds from them). Iterating keeps ONE entry live at a time.
+   *
+   * Iterating is NOT a promise of a per-entry round trip, and implementations
+   * must not make it one: `GET /:id/strings` is a list view, so every entry it
+   * returns must come from ONE consistent read. See `PgStringStore.queryEach`.
+   */
+  queryEach(projectId: string, filters: StringQueryFilters): AsyncIterable<StringEntry>;
   /**
    * Count of every entry the CURRENT TENANT can see, across all their projects
    * (RLS-scoped — no projectId arg). Used by the per-tenant stored-entry quota,

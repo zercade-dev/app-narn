@@ -209,9 +209,40 @@ export class PgStringStore implements StringStore {
     return stripLegacy(rows[0]!.data);
   }
 
-  async query(projectId: string, filters: StringQueryFilters): Promise<StringEntry[]> {
-    const entries = await this.load(projectId);
-    return entries.filter((entry) => matchesFilters(entry, filters));
+  /**
+   * List-view read, yielded one entry at a time (see {@link StringStore.queryEach}).
+   *
+   * Still exactly ONE `select`, so still one MVCC snapshot: the iteration walks
+   * the result set the driver already buffered, not a database cursor. An entry
+   * deleted or rewritten while the caller is consuming therefore appears exactly
+   * as it did when the query ran — the same guarantee the `load`-then-filter
+   * version gave, and the reason this is not a keyset walk.
+   *
+   * What changes is the peak heap. `load` selects `data` as jsonb, which node-pg
+   * parses into a JS object per row up front; a parsed StringEntry costs several
+   * times its own JSON text in V8, and the whole project stays resident while
+   * the caller serialises it. Selecting `data::text` leaves the rows as the
+   * strings the driver received and parses them one at a time, dropping the
+   * driver's reference as it goes, so only the row text (which the driver had to
+   * buffer regardless) and a single live entry are held.
+   */
+  async *queryEach(
+    projectId: string,
+    filters: StringQueryFilters,
+  ): AsyncGenerator<StringEntry, void, undefined> {
+    const { rows } = await this.db.query<{ data: string | undefined }>(
+      'select data::text as data from strings where project_id = $1 order by seq',
+      [projectId],
+    );
+    for (const row of rows) {
+      const raw = row.data;
+      // The rows array outlives the loop body, so release each string as it is
+      // consumed rather than keeping the whole project's text alive to the end.
+      row.data = undefined;
+      if (raw === undefined) continue;
+      const entry = stripLegacy(JSON.parse(raw) as StringEntry);
+      if (matchesFilters(entry, filters)) yield entry;
+    }
   }
 
   /**

@@ -17,7 +17,7 @@ import { ValidationError } from '../types/errors.js';
 import { assertProjectAccess, assertEntryPatchAllowed } from '../middleware/authz.js';
 import { getMemberStore, getProjectStore, getStringStore } from '../storage/registry.js';
 import type { StringQueryFilters } from '../storage/types.js';
-import { asyncHandler } from '../http/index.js';
+import { asyncHandler, sendJsonArray } from '../http/index.js';
 import { projectIdParam } from '../middleware/path-params.js';
 import { rateLimiter } from '../middleware/rate-limiter.js';
 import { logger } from '../modules/M15-console-logger.js';
@@ -140,11 +140,21 @@ stringsRouter.get(
       lqaFailed: lqaFailed === 'true',
       runId,
     };
-    const entries = await getStringStore().query(projectId, filters);
     const orphanIdSet = new Set(getOrphanIds(projectId));
+    const store = getStringStore();
     // Hide orphans from the working list: add-only orphans (in-memory ids)
     // and full-replace orphans (persisted orphanedAt).
-    res.json(entries.filter((e) => !orphanIdSet.has(e.id) && e.orphanedAt == null));
+    async function* liveEntries(): AsyncGenerator<StringEntry> {
+      for await (const entry of store.queryEach(projectId, filters)) {
+        if (!orphanIdSet.has(entry.id) && entry.orphanedAt == null) yield entry;
+      }
+    }
+    // Streamed rather than `res.json(...)`: this route returns the WHOLE project
+    // (the client filters and paginates locally), so a large project's body is
+    // tens of MB and `res.json` would build every byte of it as one string,
+    // synchronously, on top of the entries it was built from. See
+    // `http/json-array-response.ts` for what streaming costs in exchange.
+    await sendJsonArray(res, liveEntries());
   }),
 );
 
