@@ -90,6 +90,9 @@ catalogs:
     '@typescript-eslint/eslint-plugin':
       specifier: 8.70.0
       version: 8.70.0
+    '@typescript-eslint/parser':
+      specifier: 8.70.0
+      version: 8.70.0
     '@vitejs/plugin-react':
       specifier: 6.1.1
       version: 6.1.1
@@ -223,7 +226,7 @@ importers:
         specifier: 'catalog:'
         version: 8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(jiti@2.7.0)))(eslint@10.10.0(jiti@2.7.0))
       '@typescript-eslint/parser':
-        specifier: 8.70.0
+        specifier: 'catalog:'
         version: 8.70.0(eslint@10.10.0(jiti@2.7.0))
       eslint:
         specifier: 'catalog:'
