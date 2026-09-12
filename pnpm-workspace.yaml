@@ -11,11 +11,20 @@ allowBuilds:
 
 overrides:
   # GHSA-xcpc-8h2w-3j85 (high): adm-zip <0.6.0 allocates an attacker-declared
-  # uncompressed-size buffer (up to 4GB) before validating it. Pulled in
-  # transitively via modules/deepl -> deepl-node, which still pins ^0.5.16
-  # upstream (deepl-node 1.27.0, latest as of 2026-07-18) — force the patched
-  # range here until deepl-node bumps its own pin.
-  adm-zip: '>=0.6.0'
+  # uncompressed-size buffer (up to 4GB) before validating it.
+  # GHSA-vwc7-r8mq-g2x9 (medium, CVE-2026-76845, published 2026-09-09): adm-zip
+  # 0.5.9-0.6.0 follows a pre-existing symlink at the extraction destination
+  # (Utils.sanitize only checks the textual path, not what's actually on disk),
+  # letting an attacker who can plant a symlink in a shared/predictable
+  # extraction dir overwrite arbitrary files. Fixed in 0.6.1 (assertPathSafe,
+  # an lstatSync walk that rejects any symlink under the extraction root).
+  # Pulled in transitively via modules/deepl -> deepl-node, which pins ^0.6.0
+  # upstream (deepl-node 1.28.0) — force the patched range here until
+  # deepl-node bumps its own pin. Not currently reachable in this app (the
+  # deepl module only calls translateText, never translateDocument, the only
+  # deepl-node path that touches adm-zip's extraction), but there is no reason
+  # to leave a patched CVE unapplied once a fix exists.
+  adm-zip: '>=0.6.1'
   # GHSA-3jxr-9vmj-r5cp (high, published 2026-07-20): brace-expansion <5.0.7 has an
   # exponential-time regex DoS on consecutive non-expanding {} groups.
   # GHSA-mh99-v99m-4gvg (high, published 2026-07-24, supersedes the above): a second
