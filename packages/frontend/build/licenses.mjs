@@ -332,14 +332,21 @@ export function renderLicencesFile({ attributed, undocumented }, options = {}) {
   );
   out.push('');
   if (stylesheet.length > 0) {
+    // Agree with `stylesheet.length`, which moves: this sentence read "Two entries ...
+    // are" for a month after shadcn was removed on 2026-08-03 left a single entry,
+    // because the count and every verb were hard-coded.
+    const one = stylesheet.length === 1;
     out.push(
       wrap(
-        `Two entries are the exception, marked [stylesheet] below: ` +
-          `${stylesheet.map((pkg) => pkg.name).join(' and ')} are imported by the ` +
-          `application stylesheet and resolved inside the CSS pipeline, so their ` +
-          `output ships without their ever becoming modules the bundler can ` +
-          `report. They are named explicitly in the build for that reason; their ` +
-          `licence texts are read from the installed packages like every other.`,
+        `${one ? 'One entry is' : `${stylesheet.length} entries are`} the exception, ` +
+          `marked [stylesheet] below: ` +
+          `${stylesheet.map((pkg) => pkg.name).join(' and ')} ` +
+          `${one ? 'is' : 'are'} imported by the application stylesheet and resolved ` +
+          `inside the CSS pipeline, so ${one ? 'its' : 'their'} output ships without ` +
+          `${one ? 'its' : 'their'} ever becoming ${one ? 'a module' : 'modules'} the ` +
+          `bundler can report. ${one ? 'It is' : 'They are'} named explicitly in the ` +
+          `build for that reason; ${one ? 'its licence text is' : 'their licence texts are'} ` +
+          `read from the installed ${one ? 'package' : 'packages'} like every other.`,
       ),
     );
     out.push('');

@@ -35,12 +35,15 @@ Anahtar vermediğiniz bir sağlayıcı yalnızca atlanır. Bir anahtar daha ekle
 
 Yapılandırma ekranındaki **NARN Freeway** paneli bütün havuzu tek bakışta gösterir: her sağlayıcının anahtar durumu ve her modelin **Durum**u, **Kalan** kotası, **Sonraki sıfırlama**sı ve dil bazında son **Geçme oranı**.
 
+Her sağlayıcının yanında, Freeway'in onu nasıl kullanacağını denetleyen bir açılır menü de vardır: **Otomatik** havuzun her zamanki gibi seçmesini sağlar, adlandırılmış bir örnek seçmek Freeway'i o hesaba sabitler, **Devre dışı** ise sağlayıcıyı havuzdan tamamen çıkarır — modülü başka hiçbir yerde kapatmadan. Bu açılır menü yalnızca havuzun otomatik seçimlerini etkiler ve kendi hesabınızın bir ayarıdır: sağlayıcıyı doğrudan adıyla belirten bir yönlendirme kuralı onu kullanmayı sürdürür, projelerinizde kendi yönlendirmeleriyle çalışan başkaları da kendi Freeway ayarlarına uyar. Sürmekte olan bir çeviri, yeni devre dışı bırakılan bir sağlayıcıdan bir sonraki yığında ayrılır; zaten başlamış olan diğer çalıştırmalar ise başladıkları modelle tamamlanabilir. Devre dışı bir sağlayıcıyı yeniden Otomatik'e (ya da adlandırılmış bir örneğe) çevirmek, kaldığı yerden devam eder.
+
 Bir modelin durumu şunlardan biridir:
 
 * **Hazır** — şimdi kullanılabilir.
 * **Soğuyor** — kısa süreliğine hız sınırında; kendiliğinden geri döner.
 * **Bugünlük tükendi** — günlük hak harcandı ve panel ne zaman sıfırlanacağını gösterir.
 * **Modül devre dışı** — anahtar saklı ama modül kapalı. Panel açmayı önerir.
+* **Freeway için devre dışı** — bu sağlayıcıyı açılır menüsünden havuz için devre dışı bıraktınız; modülün geri kalanı etkilenmez.
 * **Anahtar yok** — bu sağlayıcı için kasada henüz bir şey yok.
 * **Kimlik bilgileri hatalı** — anahtar reddedildi. İşareti kaldırmak için kasaya çalışan bir anahtar yazın.
 

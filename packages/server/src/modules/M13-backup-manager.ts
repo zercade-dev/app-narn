@@ -229,6 +229,12 @@ export class BackupManager {
     if (!manifestEntry) {
       throw new BackupIntegrityError('Backup archive is missing manifest.json');
     }
+    // Bomb defense for this one entry. restoreBackup checks the archive's TOTAL
+    // uncompressed size before it gets here, but peekManifest inflates the
+    // manifest on its own, so the ceiling is re-asserted where the read is.
+    if (manifestEntry.uncompressedSize > MAX_UNCOMPRESSED_BYTES) {
+      throw new BackupIntegrityError('Backup manifest.json exceeds the 100 MB limit');
+    }
 
     let raw: Buffer;
     try {

@@ -450,6 +450,16 @@ export interface RunStatus {
   waitingForQuota?: {
     resumeAt: number;
     pairs: RunEntryLanguagePair[];
+    /**
+     * How many pairs are parked. Equal to `pairs.length` on a FULL record, and
+     * the ONLY pair information present on the run-LIST shape: the list served
+     * by `GET /api/projects/:projectId/runs` (`RunStore.listRunSummaries`)
+     * projects `pairs` away, because a park can hold six figures of pairs and
+     * the Activity tab re-polls that list every two seconds. A reader that
+     * needs only the size must therefore use `pairCount ?? pairs.length` —
+     * never `pairs.length` alone. Absent on a full record and on legacy rows.
+     */
+    pairCount?: number;
     skipReason?: string;
     reason?: 'quota' | 'provider-error';
   };

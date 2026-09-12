@@ -218,7 +218,8 @@
     "credentialMarkClearFailed": "Gagal menghapus tanda kredensial: {{message}}",
     "credentialMarkErrorNotCandidate": "Modul ini tidak bisa lagi ditandai tidak valid — status Freeway-nya telah berubah. Segarkan untuk melihat status saat ini.",
     "automaticOption": "Otomatis",
-    "instanceSelectorAria": "Pilih instans mana yang melayani {{provider}}",
+    "disabledOption": "Dinonaktifkan",
+    "instanceSelectorAria": "Pilih cara Freeway memakai {{provider}}",
     "instanceOverrideSaveFailed": "Gagal memperbarui instans untuk {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "Gagal memuat pengaturan instans Freeway: {{message}}",
     "instancesLoadFailed": "Gagal memuat instans modul Freeway: {{message}}",
@@ -238,6 +239,7 @@
       "cooling": "Mendingin",
       "exhausted": "Habis untuk hari ini",
       "disabled": "Modul dinonaktifkan",
+      "freewayDisabled": "Dinonaktifkan untuk Freeway",
       "uncredentialed": "Tidak ada kunci",
       "badCredentials": "Kredensial tidak valid"
     }

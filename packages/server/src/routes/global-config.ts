@@ -56,6 +56,10 @@ const updateBodySchema = z.object({
 // legitimate workspace never approaches this.
 const MAX_FREEWAY_INSTANCE_OVERRIDES = 64;
 
+// Same reasoning as MAX_FREEWAY_INSTANCE_OVERRIDES — comfortably above the
+// current base-module count, bounding the list without constraining real use.
+const MAX_FREEWAY_DISABLED_PROVIDERS = 64;
+
 // Each value must have the `<baseModuleId>:<slug>` shape freewayCandidateIds
 // expects — anything else already falls through as inert there (a
 // non-instance-shaped override never matches a candidate and the automatic
@@ -85,6 +89,15 @@ const settingsBodySchema = z.object({
     .record(z.string().min(1).max(64), freewayInstanceOverrideValueSchema)
     .refine((map) => Object.keys(map).length <= MAX_FREEWAY_INSTANCE_OVERRIDES, {
       message: `freewayInstanceOverrides may not exceed ${MAX_FREEWAY_INSTANCE_OVERRIDES} entries`,
+    })
+    .nullable()
+    .optional(),
+  // Base module ids to exclude from Freeway's automatic pool. null clears the
+  // whole list, matching the other nullable settings fields above.
+  freewayDisabledProviders: z
+    .array(z.string().min(1).max(64))
+    .max(MAX_FREEWAY_DISABLED_PROVIDERS, {
+      message: `freewayDisabledProviders may not exceed ${MAX_FREEWAY_DISABLED_PROVIDERS} entries`,
     })
     .nullable()
     .optional(),

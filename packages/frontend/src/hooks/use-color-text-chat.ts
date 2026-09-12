@@ -10,8 +10,8 @@
  * A 423 dispatches the SAME `vault:locked` event that `apiRequest` uses (via the
  * shared {@link vaultLockedEvent} helper) so the global unlock dialog opens and
  * replays the send; no bogus assistant message is appended. Aborts flow through
- * an `AbortController` kept in a ref — `stop()` aborts it and the partial reply is
- * kept as-is.
+ * an `AbortController` kept in a ref — `stop()`, or unmounting the consumer,
+ * aborts it and the partial reply is kept as-is.
  *
  * Each chat *session* (from mount, or since the last `reset()`) is identified by
  * a `chatSessionId` (`crypto.randomUUID()`, held in a ref so it survives
@@ -24,7 +24,8 @@
  * project; omitted when there is no active project (the server skips
  * recording rather than erroring).
  */
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { splitChatStreamError } from '@zercade-dev/narn-shared';
 import { useColorTextStore } from '../stores/color-text-store.js';
 import { useProjectStore } from '../stores/project-store.js';
 import { vaultLockedEvent } from '../lib/vault-events.js';
@@ -145,15 +146,31 @@ export function useColorTextChat(): UseColorTextChat {
         const reader = res.body!.getReader();
         const decoder = new TextDecoder();
         let accumulated = '';
+        // A failure after the first byte can no longer change the status, so the
+        // server appends the classified code to the stream itself (see the
+        // server's `http/stream-chat-response.ts`). Split it off on every chunk —
+        // the trailer must never reach the rendered turn — and keep the latest
+        // reading, so a trailer spread over two chunks resolves once complete.
+        let streamError: string | null = null;
         for (;;) {
           const { done, value } = await reader.read();
           if (done) break;
           setAwaitingFirstToken(false);
           accumulated += decoder.decode(value, { stream: true });
+          const { text, error: trailerError } = splitChatStreamError(accumulated);
+          streamError = trailerError;
           const base = messagesRef.current;
           const next = base.slice();
-          next[next.length - 1] = { role: 'assistant', content: accumulated };
+          next[next.length - 1] = { role: 'assistant', content: text };
           commit(next);
+        }
+        if (streamError !== null) {
+          // The partial reply stays on screen as it does after a Stop, but a
+          // provider failure is not a Stop: report it like every other failure
+          // rather than letting it pass for a complete short answer.
+          console.error('[color-text chat] stream failed mid-reply', { error: streamError });
+          setError(streamError);
+          toast.error(streamError);
         }
       } catch (err) {
         // A `stop()`/unmount abort finalizes gracefully — the partial assistant
@@ -188,6 +205,10 @@ export function useColorTextChat(): UseColorTextChat {
   const stop = useCallback(() => {
     abortRef.current?.abort();
   }, []);
+
+  // Abort any in-flight stream on unmount (panel closed / tab left) — the
+  // provider keeps generating, and billing, until the request is cancelled.
+  useEffect(() => () => abortRef.current?.abort(), []);
 
   const reset = useCallback(() => {
     commit([]);

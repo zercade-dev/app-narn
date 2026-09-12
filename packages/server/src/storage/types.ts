@@ -158,6 +158,13 @@ export interface GlossaryStore {
   ): Promise<GlossaryTerm>;
   // Overload: updateTerm(projectId, termId, partial) — default glossary (backward compat)
   // Overload: updateTerm(projectId, glossaryId, termId, partial) — specific glossary
+  //
+  // `partial.translations` merges onto the stored map PER LANGUAGE: a language
+  // absent from the patch keeps its stored value. Callers routinely send a
+  // subset — the collaborator term PATCH may only ever name languages it can
+  // write — so replacing the map wholesale destroys sibling languages. To clear
+  // one language, send it as an empty string. This is part of the port
+  // contract, not an implementation detail of the Postgres adapter.
   updateTerm(
     projectId: string,
     termId: string,
@@ -230,7 +237,27 @@ export interface RelinkCandidate {
 export interface StringStore {
   load(projectId: string): Promise<StringEntry[]>;
   getById(projectId: string, id: string): Promise<StringEntry>;
-  query(projectId: string, filters: StringQueryFilters): Promise<StringEntry[]>;
+  /**
+   * The list-view read: every entry matching `filters`, in `seq` order, yielded
+   * ONE AT A TIME so no caller is forced to hold the whole project in memory.
+   *
+   * Deliberately an `AsyncIterable` rather than the `Promise<StringEntry[]>` it
+   * replaced. The single consumer (`GET /:id/strings`) serialises straight to
+   * the response, and a 10k-entry x 15-language project is tens of MB — as an
+   * array that is resident twice over (parsed objects, then the JSON string
+   * `res.json` builds from them). Iterating keeps ONE entry live at a time.
+   *
+   * Iterating is NOT a promise of a per-entry round trip, and implementations
+   * must not make it one: `GET /:id/strings` is a list view, so every entry it
+   * returns must come from ONE consistent read. See `PgStringStore.queryEach`.
+   */
+  queryEach(projectId: string, filters: StringQueryFilters): AsyncIterable<StringEntry>;
+  /**
+   * Count of every entry the CURRENT TENANT can see, across all their projects
+   * (RLS-scoped — no projectId arg). Used by the per-tenant stored-entry quota,
+   * the storage counterpart of {@link RunStore.countActiveRuns}.
+   */
+  countAllEntries(): Promise<number>;
   save(projectId: string, entries: StringEntry[]): Promise<void>;
   mutateAll(
     projectId: string,
@@ -453,6 +480,29 @@ export interface RunStore {
   ): Promise<void>;
   getRelinkRetranslate(projectId: string, runId: string): Promise<RelinkRetranslateRecord[]>;
   listRuns(projectId: string): Promise<RunStatus[]>;
+  /**
+   * The run list in its SUMMARY shape, ordered by start time, with the two
+   * unbounded per-run payloads projected away in SQL — `request` (whose
+   * `entryIds` runs to tens of thousands of ids and is never cleared) and
+   * `waitingForQuota.pairs` (replaced by `waitingForQuota.pairCount`). Backs
+   * `GET /api/projects/:projectId/runs`, which the Activity tab re-polls every
+   * two seconds while any run is active.
+   *
+   * **Row count is bounded (X2-06)**: every non-terminal run is always
+   * included regardless of age (so the poller's own control loop never loses
+   * sight of a still-active run), but terminal/historical rows beyond `limit`
+   * (most recent first, default `DEFAULT_RUN_LIST_LIMIT` in the PG
+   * implementation) are omitted — see `PgRunStore.listRunSummaries`'s doc for
+   * why a naive top-N cannot be used here.
+   *
+   * Every OTHER caller — project snapshot/backup, tenant export, the M9 orphan
+   * sweep, chat-usage, the revert route's multi-run guard — needs the full,
+   * UNBOUNDED record set and must keep using {@link listRuns}: these records
+   * are also LOSSY, so one written back through `updateRun` would erase that
+   * run's stored `request` (a queued run without it cannot be routed) and its
+   * parked pairs.
+   */
+  listRunSummaries(projectId: string, limit?: number): Promise<RunStatus[]>;
   /**
    * Count of the CURRENT TENANT's non-terminal runs across all their projects
    * (RLS-scoped — no projectId arg). Non-terminal = pending/queued/running/

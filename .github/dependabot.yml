@@ -64,6 +64,30 @@ updates:
           - '@types/react'
           - '@types/react-dom'
 
+      # Bump every @typescript-eslint/* package in ONE PR. They are released in
+      # lockstep and pin each other exactly: @typescript-eslint/eslint-plugin@8.69.0
+      # depends on utils/type-utils/visitor-keys/scope-manager at an EXACT 8.69.0,
+      # and peers on '@typescript-eslint/parser': '^8.69.0'. A split therefore
+      # installs two full copies of the internal packages and, in one direction,
+      # breaks the peer outright.
+      #
+      # The danger is that the split is ASYMMETRIC, so CI does not reliably catch
+      # it. Parser-ahead-of-plugin satisfies the older plugin's caret peer and
+      # lints clean; plugin-ahead-of-parser violates the peer. That happened on
+      # 2026-09-07: PR #200 bumped the parser to 8.69.0 alone, `pnpm lint` passed,
+      # and the pair stayed split on develop until PR #218 bumped the plugin the
+      # next day. Grouping removes the window rather than relying on the second
+      # PR arriving.
+      #
+      # A SCOPED glob is correct here (as for '@ai-sdk/*', unlike the exact-name
+      # react rule above): everything published under @typescript-eslint/ belongs
+      # to this one release train. `typescript` itself is deliberately NOT in the
+      # group — it is a separate product on its own cadence, and the plugin peers
+      # on a wide range ('>=4.8.4 <6.1.0').
+      typescript-eslint:
+        patterns:
+          - '@typescript-eslint/*'
+
   # docker — narn's runtime image (Dockerfile: node base-image digest pins).
   - package-ecosystem: docker
     directory: /

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TranslationRecord } from '@zercade-dev/narn-shared';
 import { toast } from '@/lib/toast';
 import { errorMessage } from '@/lib/utils';
 import { canWriteLanguage } from '@/lib/collab-locks';
@@ -78,19 +79,28 @@ export function StringTableEditor({
     const language = selection.language as string;
     const prev = entry.translations[language];
     const priorText = initial; // text shown before this edit
+    // The server replaces this language's record wholesale, so the edit starts
+    // from the stored one rather than a fresh object — otherwise every field the
+    // pipeline stamped on it is dropped. The review flag in particular survives
+    // a hand-edit: clearing it is the context menu's own action, not a side
+    // effect of typing.
+    const record: TranslationRecord = {
+      ...prev,
+      text: draft,
+      status: 'translated',
+      moduleId: 'manual',
+      timestamp: Date.now(),
+    };
+    // Tier and bucket key describe the text this edit just replaced, so they
+    // never follow human-written text.
+    delete record.freewayTier;
+    delete record.freewayBucketKey;
     // Send only the edited language; the server merges per-language and
     // preserves the untouched siblings (avoids replaying history over every
     // language on each save).
     try {
       await updateEntry(activeProjectId, entry.id, {
-        translations: {
-          [language]: {
-            text: draft,
-            status: 'translated',
-            moduleId: prev?.moduleId ?? 'manual',
-            timestamp: Date.now(),
-          },
-        },
+        translations: { [language]: record },
       });
     } catch (err: unknown) {
       // A non-2xx from the store throws; surface it instead of an unhandled

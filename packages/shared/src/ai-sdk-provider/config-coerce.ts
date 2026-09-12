@@ -8,9 +8,9 @@ import { countProviderCall } from './provider-call-counter.js';
 
 /**
  * Loopback hosts that are exempt from the plain-HTTP rejection in
- * {@link validateBaseURL} (e.g. a local Ollama / LM Studio endpoint). Stored
- * de-bracketed so an IPv6 literal like `[::1]` and its bare form `::1` both
- * match the de-bracketed hostname.
+ * {@link validateBaseURL} (e.g. a local Ollama / LM Studio endpoint), and the
+ * name/IPv6 half of {@link isLoopbackHost}. Stored de-bracketed so an IPv6 literal
+ * like `[::1]` and its bare form `::1` both match the de-bracketed hostname.
  */
 export const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']);
 
@@ -21,7 +21,8 @@ export const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '[::1]']
  * hostname, the unspecified address `0.0.0.0`, and IPv6 link-local (`fe80::/10`)
  * / unique-local (`fc00::/7`) ranges. `host` is expected de-bracketed + lowercased
  * (as {@link validateBaseURL} produces). Loopback is intentionally NOT covered
- * here — it is the supported local-LLM endpoint and is allow-listed separately.
+ * here — {@link isLoopbackHost} owns it, because it is allowed or refused by
+ * deployment mode rather than blocked outright.
  *
  * Spellings: the WHATWG URL parser canonicalises hosts before this check, so the
  * denylist must catch every canonical form of the addresses it intends to block —
@@ -83,6 +84,24 @@ export function isInternalHost(host: string): boolean {
 }
 
 /**
+ * True for a loopback target in either family: the whole IPv4 `127.0.0.0/8` block
+ * (not just `127.0.0.1` — every address in it routes back to the local host), the
+ * IPv6 loopback `::1`, and the `localhost` name. A trailing-dot FQDN is stripped and
+ * mapped-IPv6 / NAT64 spellings are folded first, so `localhost.` and `::ffff:7f00:1`
+ * are caught too. `host` is expected de-bracketed + lowercased.
+ *
+ * Loopback is the supported local-LLM endpoint (Ollama / LM Studio) on a single-user
+ * box, but in a multi-tenant deployment it addresses the SERVICE's own container
+ * rather than anything the tenant owns — so {@link ssrfBlockReasonForHost} allows it
+ * only in the former.
+ */
+export function isLoopbackHost(host: string): boolean {
+  const stripped = host.endsWith('.') ? host.slice(0, -1) : host;
+  if (LOOPBACK_HOSTS.has(stripped)) return true;
+  return /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(canonicalizeMappedIpv4Host(stripped));
+}
+
+/**
  * Coerce a boolean-ish config value to a real boolean. Per-project config is
  * persisted as a record of unknowns, so a UI toggle can arrive as the string
  * "true"/"false". Treat literal `true` and the string "true" as true; anything
@@ -125,6 +144,22 @@ export function operatorAllowsInternalLLMHosts(): boolean {
   const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
     ?.env;
   return env?.ALLOW_INTERNAL_LLM_HOSTS === 'true';
+}
+
+/**
+ * Operator escape hatch (ENVIRONMENT-ONLY) for allowing a LOOPBACK baseURL host past
+ * the SSRF guard in a multi-tenant deployment — the self-hosted multi-tenant install
+ * with a co-located Ollama is the case it exists for.
+ *
+ * Deliberately narrower than {@link operatorAllowsInternalLLMHosts}, which also
+ * re-permits link-local/metadata: an operator who needs the co-located model must not
+ * have to re-open `169.254.169.254` to get it. Environment-sourced for the same reason
+ * as its sibling — an imported config blob must not be able to widen the guard.
+ */
+export function operatorAllowsLoopbackLLMHosts(): boolean {
+  const env = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process
+    ?.env;
+  return env?.ALLOW_LOOPBACK_LLM_HOSTS === 'true';
 }
 
 /**
@@ -172,18 +207,32 @@ export function cloudDeploymentActive(): boolean {
 }
 
 /**
+ * Whether a loopback target may be reached at all: always on a single-user local box
+ * (it is the local-LLM endpoint), and in a multi-tenant deployment only when the
+ * operator has set `ALLOW_LOOPBACK_LLM_HOSTS`.
+ */
+function loopbackAllowed(): boolean {
+  return !cloudDeploymentActive() || operatorAllowsLoopbackLLMHosts();
+}
+
+/**
  * The single SSRF decision for an already-de-bracketed + lowercased host: returns
  * a human-readable reason fragment when the host must be refused, or `undefined`
- * when it is allowed. Loopback is always allowed (the supported local-LLM
- * endpoint) and the operator's `ALLOW_INTERNAL_LLM_HOSTS` env override always
- * permits. Otherwise a link-local/metadata host is refused everywhere, and an
- * RFC-1918 / CGNAT host is refused only in a multi-tenant cloud deployment (where
- * a tenant-set target could reach internal services). Shared by
+ * when it is allowed. The operator's `ALLOW_INTERNAL_LLM_HOSTS` env override always
+ * permits. Otherwise loopback is allowed on a single-user box (the supported
+ * local-LLM endpoint) but refused in a multi-tenant deployment, where it reaches the
+ * service's own container rather than the tenant's machine, unless the operator has
+ * re-permitted it ({@link loopbackAllowed}); a link-local/metadata host is refused
+ * everywhere; and an RFC-1918 / CGNAT host is refused only in a multi-tenant cloud
+ * deployment (where a tenant-set target could reach internal services). Shared by
  * {@link validateBaseURL} (literal host) and {@link createSsrfGuardedFetch}
  * (redirect target) so both hold every host to the same rule.
  */
 export function ssrfBlockReasonForHost(host: string): string | undefined {
-  if (operatorAllowsInternalLLMHosts() || LOOPBACK_HOSTS.has(host)) return undefined;
+  if (operatorAllowsInternalLLMHosts()) return undefined;
+  if (isLoopbackHost(host)) {
+    return loopbackAllowed() ? undefined : 'is a loopback address in a multi-tenant deployment';
+  }
   if (isInternalHost(host)) return 'is a link-local/metadata address';
   if (cloudDeploymentActive() && isPrivateOrCgnatHost(host)) {
     return 'is a private/CGNAT address in a multi-tenant deployment';
@@ -247,13 +296,14 @@ async function defaultResolveHost(host: string): Promise<string[]> {
  * this resolves the host and runs every resolved IP through
  * {@link ssrfBlockReasonForHost}, refusing the request if any resolves to a blocked
  * address. Cloud-gated (RFC-1918 is a legitimate LAN target on a single-user local
- * box) and skips loopback / the operator override. This narrows but cannot fully
- * close the sub-second rebind window (the socket re-resolves independently); fully
- * pinning the resolved IP would require a custom undici connect dispatcher.
+ * box) and skips a host an operator override has already re-permitted. This narrows
+ * but cannot fully close the sub-second rebind window (the socket re-resolves
+ * independently); fully pinning the resolved IP would require a custom undici connect
+ * dispatcher.
  */
 async function assertResolvedHostSafe(host: string, resolve: HostResolver): Promise<void> {
   if (!cloudDeploymentActive()) return;
-  if (operatorAllowsInternalLLMHosts() || LOOPBACK_HOSTS.has(host)) return;
+  if (operatorAllowsInternalLLMHosts() || (loopbackAllowed() && isLoopbackHost(host))) return;
   let addresses: string[];
   try {
     addresses = await resolve(host);
@@ -385,8 +435,10 @@ export function createSsrfGuardedFetch(
  *
  * The link-local/metadata SSRF block can only be widened by the operator's
  * `ALLOW_INTERNAL_LLM_HOSTS` environment variable (see
- * {@link operatorAllowsInternalLLMHosts}) — never by a caller-supplied flag, so
- * an untrusted config blob cannot disable the guard on its own baseURL.
+ * {@link operatorAllowsInternalLLMHosts}), and the multi-tenant loopback block by
+ * `ALLOW_LOOPBACK_LLM_HOSTS` (see {@link operatorAllowsLoopbackLLMHosts}) — never by
+ * a caller-supplied flag, so an untrusted config blob cannot disable the guard on its
+ * own baseURL.
  *
  * DNS-rebinding: this function vets the literal host STRING, not the address it
  * resolves to. The resolve-then-check backstop lives in
@@ -426,9 +478,12 @@ export function validateBaseURL(baseURL: string | undefined, allowInsecureHttp?:
   // 3xx hop points at are held to one rule.
   const blocked = ssrfBlockReasonForHost(host);
   if (blocked) {
+    const overrideVar = isLoopbackHost(host)
+      ? 'ALLOW_LOOPBACK_LLM_HOSTS'
+      : 'ALLOW_INTERNAL_LLM_HOSTS';
     throw new Error(
       `baseURL host "${url.hostname}" ${blocked} and is blocked as an SSRF risk. ` +
-        `Set the ALLOW_INTERNAL_LLM_HOSTS=true environment variable (operator-only) to override.`,
+        `Set the ${overrideVar}=true environment variable (operator-only) to override.`,
     );
   }
 

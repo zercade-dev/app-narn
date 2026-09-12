@@ -19,7 +19,10 @@
   },
   "confirmDelete": {
     "title": "¿Eliminar huérfana?",
-    "body": "Esto elimina de forma permanente el registro huérfano y sus traducciones. No se puede deshacer."
+    "body": "Esto elimina de forma permanente el registro huérfano y sus traducciones. No se puede deshacer.",
+    "bulkTitle": "¿Eliminar las huérfanas seleccionadas?",
+    "bulkBody_one": "Esto elimina de forma permanente {{count}} registro huérfano y sus traducciones. No se puede deshacer.",
+    "bulkBody_other": "Esto elimina de forma permanente {{count}} registros huérfanos y sus traducciones. No se puede deshacer."
   },
   "relink": {
     "title": "Reasignar huérfana",

@@ -13,6 +13,7 @@
  */
 import {
   FREEWAY_MODULE_ID,
+  PSEUDO_LANGUAGE_CODE,
   type GlobalConfig,
   type GlossaryTerm,
   type JudgeItem,
@@ -93,13 +94,15 @@ export class JudgeNotPossibleError extends Error {
  * Reconstructs a review scope for a run that has no recorded `request`
  * (legacy runs created before the field was persisted on the direct path).
  * Once the original request is gone the best available approximation of "what
- * this run touched" is every entry, across the project's non-source active
- * languages. `enqueue`'s (entry, language) loop is the authoritative filter —
- * it skips pairs that have no stored translation — so we deliberately leave
- * `entryIds` unfiltered here rather than duplicating that check.
+ * this run touched" is every entry, across the project's judgeable target
+ * languages — active, minus the source and the synthetic pseudo-test language
+ * (`projectTargetLanguages`). `enqueue`'s (entry, language) loop is the
+ * authoritative filter — it skips pairs that have no stored translation — so we
+ * deliberately leave `entryIds` unfiltered here rather than duplicating that
+ * check.
  */
 function reconstructScope(project: Project, entries: StringEntry[]): RunRequest {
-  const targetLanguages = project.activeLanguages.filter((lang) => lang !== project.sourceLanguage);
+  const targetLanguages = projectTargetLanguages(project);
   return { entryIds: entries.map((e) => e.id), targetLanguages, reTranslate: false };
 }
 
@@ -541,13 +544,21 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         if (!scope) {
           scope = reconstructScope(project, allEntries);
           // Reconstruction needs something to review; a project with no entries or
-          // no non-source target language yields an empty scope — fail clearly
-          // rather than starting an empty run.
+          // no judgeable target language yields an empty scope — fail clearly
+          // rather than starting an empty run. pseudo-test is not judgeable, so a
+          // project whose only other active language is pseudo-test lands here and
+          // gets told that rather than "no translations".
           if (scope.entryIds.length === 0 || scope.targetLanguages.length === 0) {
+            const pseudoOnly =
+              scope.entryIds.length > 0 &&
+              scope.targetLanguages.length === 0 &&
+              project.activeLanguages.includes(PSEUDO_LANGUAGE_CODE);
             throw new JudgeNotPossibleError(
-              sourceRunId
-                ? 'source run has no recorded request'
-                : 'project has no translations to review',
+              pseudoOnly
+                ? 'pseudo-test is never AI-reviewed and the project has no other target language'
+                : sourceRunId
+                  ? 'source run has no recorded request'
+                  : 'project has no translations to review',
             );
           }
         }
@@ -608,6 +619,10 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
         for (const entry of entries) {
           for (const targetLanguage of targetLanguages) {
             if (targetLanguage === project.sourceLanguage) continue;
+            // Pseudo strings are deliberately garbled, so a verdict on one carries
+            // no information and no edit can improve it — never judge them, even
+            // when the run's own request or the dialog's picker named pseudo-test.
+            if (targetLanguage === PSEUDO_LANGUAGE_CODE) continue;
             if (pairFilter && !pairFilter.has(`${entry.id} ${targetLanguage}`)) continue;
             const translatedText = entry.translations[targetLanguage]?.text;
             if (!translatedText) continue;
@@ -985,12 +1000,19 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     // by the NEW bucket, not the one `freeway` was captured from.
     let servingKey = freeway?.bucketKey;
 
+    // Only a free-tier-bound batch has an answer to a typed 429 — the bucket
+    // cool and the one re-route hop below — so only it asks the provider layer
+    // to surface one instead of flattening it into per-item error verdicts.
+    const callOptions: BatchDispatchOptions | undefined = freeway
+      ? { ...dispatchOptions, surfaceTypedErrors: true }
+      : dispatchOptions;
+
     await this.runBatchWithUsage<JudgeItem, JudgeVerdict>({
       runId,
       moduleId: selection.moduleId,
       batch,
-      dispatchOptions,
-      call: (signal) => selection.module.judgeTranslations!(batch, signal, dispatchOptions),
+      dispatchOptions: callOptions,
+      call: (signal) => selection.module.judgeTranslations!(batch, signal, callOptions),
       // What this batch costs the bucket's minute-token budget, measured with
       // the same proxy the sizer sized it with.
       batchChars: batchPayloadChars(batch, judgeLengthProxy),

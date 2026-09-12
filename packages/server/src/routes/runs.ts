@@ -4,6 +4,7 @@ import {
   RunStatusCode,
   hasRunDetailsKind,
   BATCH_GROUPING_DIMENSIONS,
+  type RunStatus,
 } from '@zercade-dev/narn-shared';
 import { getProjectStore, getRunStore, getStringStore } from '../storage/registry.js';
 import type { SourceReviewRecord } from '../storage/types.js';
@@ -20,7 +21,11 @@ import { requireUnlockedVault } from '../middleware/require-vault.js';
 import { getSessionId } from '../middleware/session.js';
 import { asyncHandler, enqueueRun } from '../http/index.js';
 import { projectIdParam } from '../middleware/path-params.js';
-import { assertRunVisible, assertProjectAccess } from '../middleware/authz.js';
+import {
+  assertRunVisible,
+  assertProjectAccess,
+  assertLanguagesWritable,
+} from '../middleware/authz.js';
 import { requireTenant } from '../storage/pg/tenant-context.js';
 
 export const runsRouter: Router = Router();
@@ -60,6 +65,33 @@ async function rememberReviewSelection(
       ...(err instanceof Error ? { error: err.message } : {}),
     });
   }
+}
+
+/**
+ * The target languages a retry would re-attempt: the run's own recorded
+ * failures, deduplicated exactly as `retryFailed` rebuilds its pairs from them
+ * (an error missing either id is skipped there too, so nothing is re-dispatched
+ * for it). Read off the errors rather than the run's request scope — a retry
+ * re-sends only what failed, and `request` is optional on a run while `errors`
+ * is not.
+ */
+function retryTargetLanguages(run: RunStatus): string[] {
+  const languages = new Set<string>();
+  for (const err of run.errors) {
+    if (err.stringId && err.targetLang) languages.add(err.targetLang);
+  }
+  return [...languages];
+}
+
+/**
+ * The target languages a resume could still write: the run's request scope plus
+ * any pairs parked on free quota. Both are needed — a park that has not drained
+ * resumes the rest of the run's scope alongside its parked pairs.
+ */
+function resumeTargetLanguages(run: RunStatus): string[] {
+  const languages = new Set(run.request?.targetLanguages ?? []);
+  for (const pair of run.waitingForQuota?.pairs ?? []) languages.add(pair.targetLanguage);
+  return [...languages];
 }
 
 const reorderSchema = z.object({
@@ -165,18 +197,34 @@ runsRouter.post(
 
 /**
  * GET /api/projects/:projectId/runs
- * Returns all runs for the project. Collaborators see only the runs they
- * themselves started — same own-run rule as {@link assertRunVisible},
- * applied here as a list filter instead of a per-run 404 (a legacy run with no
- * `createdBy` is treated as the owner's, so it's filtered out for collaborators
- * too). Owners see every run, unfiltered.
+ * Returns the project's runs: every non-terminal run plus the most recent
+ * terminal ones, up to `listRunSummaries`'s bound (X2-06 — see its doc; row
+ * count is no longer unbounded, but a run active right now is never among the
+ * rows dropped). Collaborators see only the runs they themselves started —
+ * same own-run rule as {@link assertRunVisible}, applied here as a list
+ * filter instead of a per-run 404 (a legacy run with no `createdBy` is
+ * treated as the owner's, so it's filtered out for collaborators too).
+ * Owners see every returned run, unfiltered.
+ *
+ * Serves the SUMMARY shape (`listRunSummaries`), not the full records: the
+ * Activity tab re-polls this endpoint every two seconds for as long as any run
+ * is active, and a full `RunStatus` carries two arrays that grow with the size
+ * of the WORK and that no client reads from the list — a translation run's
+ * `request.entryIds` (up to 50 000 ids, kept for the life of the run) and a
+ * quota-parked run's `waitingForQuota.pairs`. Both are projected away in SQL;
+ * the parked-pair count survives as `waitingForQuota.pairCount`. Anything that
+ * writes a run back must keep using `listRuns` — see the store's doc.
  */
 runsRouter.get(
   '/:projectId/runs',
   asyncHandler(async (req, res) => {
     const { projectId } = req.params;
     const access = await assertProjectAccess(projectId, { type: 'read' });
-    const runs = await getRunStore().listRuns(projectId);
+    // The collaborator filter and the JS sort below are unaffected by the
+    // projection: `createdBy` (a mirror column, overlaid by the store) and
+    // `startedAt` both survive it. Filtering/sorting a few dozen now-small
+    // objects here is free, and keeps the role logic out of the storage layer.
+    const runs = await getRunStore().listRunSummaries(projectId);
     const visible =
       access.role === 'collaborator'
         ? runs.filter((r) => r.createdBy === requireTenant().userId)
@@ -461,7 +509,11 @@ runsRouter.post(
     // run map keyed by runId ALONE (no membership check), and vault-unlock is not
     // membership — confirm the run is visible under `:projectId` (404 otherwise)
     // before re-enqueuing, so a tenant can't retry another tenant's run by its UUID.
-    await assertRunVisible(projectId, runId);
+    const run = await assertRunVisible(projectId, runId);
+    // Re-translating the recorded failures is a translation write, so every
+    // language among them must be one the caller can STILL write — the grant
+    // that allowed the original run may have been narrowed since.
+    await assertLanguagesWritable(projectId, retryTargetLanguages(run));
     const sessionId = getSessionId(res);
     const result = await translationEngine.retryFailed(projectId, runId, sessionId);
     if (!result) {
@@ -647,7 +699,10 @@ runsRouter.post(
     // Cross-tenant gate: behind the caller's OWN vault, but vault-unlock is not
     // membership — confirm the run is visible under `:projectId` (404 otherwise)
     // before resuming, so a tenant can't resume another tenant's run by its UUID.
-    await assertRunVisible(projectId, runId);
+    const run = await assertRunVisible(projectId, runId);
+    // Resuming re-dispatches whatever the run has left, so the caller must still
+    // be able to write every language it could reach (see the retry route).
+    await assertLanguagesWritable(projectId, resumeTargetLanguages(run));
     // The caller's session is what the resumed pass reads credentials under
     // (a quota-parked run can resume days after its original session died).
     const status = await translationEngine.resume(projectId, runId, getSessionId(res));
@@ -718,7 +773,8 @@ runsRouter.post(
     // Cross-tenant gate: the engine keys its in-memory runs by `runId` alone and
     // vault-unlock is not membership — confirm the run is visible under
     // `:projectId` (404 otherwise) before re-dispatching it.
-    await assertRunVisible(projectId, runId);
+    const run = await assertRunVisible(projectId, runId);
+    await assertLanguagesWritable(projectId, resumeTargetLanguages(run));
     const { moduleId } = req.body as z.infer<typeof resumeWithSchema>;
     const result = await translationEngine.resumeWithModule(
       projectId,
@@ -741,7 +797,8 @@ runsRouter.post(
  * language) this COMPLETED translation or relink-retranslate run touched,
  * then marks the run `reverted` so it cannot be reverted again. No vault
  * gate — this only replays already-captured local data, no credentials/LLM
- * calls involved.
+ * calls involved — but it IS a translation write, so a caller who cannot write
+ * every captured target language is refused outright (403).
  *
  * Conservative simplification (deliberate, no multi-run diffing): revert is
  * blocked with 409 if ANY newer completed translation or relink-retranslate
@@ -823,6 +880,16 @@ runsRouter.post(
       res.status(409).json({ error: 'No captured previous values to revert for this run' });
       return;
     }
+
+    // Restoring a captured value is a translation write, so it takes the same
+    // per-language gate as every other write path. A captured language the
+    // caller cannot write rejects the WHOLE revert rather than being skipped:
+    // a partial restore would still mark the run `reverted` below, locking the
+    // owner out of ever finishing it.
+    await assertLanguagesWritable(
+      projectId,
+      new Set(previousValues.map((pv) => pv.targetLanguage)),
+    );
 
     const stringStore = getStringStore();
     let reverted = 0;

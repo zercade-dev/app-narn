@@ -78,6 +78,12 @@ const E2E_COVERAGE_MODE = process.env.E2E_COVERAGE === 'true';
 const VITE_PORT = Number(process.env.VITE_PORT ?? 5173);
 const API_PORT = Number(process.env.API_PORT ?? 3001);
 
+// The dev server binds loopback unless VITE_HOST names an interface. Its /api proxy
+// fronts a server with no authentication in local mode, and rewrites the upstream Host
+// on the way, so a wildcard bind hands every project on the machine to the network.
+// Devcontainer and Codespaces forwarding attach from inside, and need no wildcard.
+const VITE_HOST = process.env.VITE_HOST;
+
 // Generate a random nonce for this build
 const BUILD_NONCE = generateBuildNonce();
 
@@ -154,6 +160,7 @@ export default defineConfig({
   // concurrent dep-optimizer clashes; unset → Vite's default node_modules/.vite.
   cacheDir: process.env.VITE_CACHE_DIR,
   server: {
+    host: VITE_HOST,
     port: VITE_PORT,
     // When a port is requested explicitly, failing beats silently drifting to
     // port+1 (a parallel-runner health check would attach to the wrong app).

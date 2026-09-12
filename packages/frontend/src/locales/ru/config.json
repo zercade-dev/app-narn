@@ -233,7 +233,8 @@
     "credentialMarkClearFailed": "Не удалось снять отметку об учетных данных: {{message}}",
     "credentialMarkErrorNotCandidate": "Этот модуль больше нельзя пометить как недействительный — его статус Freeway изменился. Обновите, чтобы увидеть текущий статус.",
     "automaticOption": "Автоматически",
-    "instanceSelectorAria": "Выбрать, какой экземпляр обслуживает {{provider}}",
+    "disabledOption": "Отключено",
+    "instanceSelectorAria": "Выбрать, как Freeway использует {{provider}}",
     "instanceOverrideSaveFailed": "Не удалось обновить экземпляр для {{provider}}: {{message}}",
     "instanceOverridesLoadFailed": "Не удалось загрузить настройки экземпляров Freeway: {{message}}",
     "instancesLoadFailed": "Не удалось загрузить экземпляры модулей Freeway: {{message}}",
@@ -256,6 +257,7 @@
       "cooling": "Остывает",
       "exhausted": "Исчерпано на сегодня",
       "disabled": "Модуль отключён",
+      "freewayDisabled": "Отключено для Freeway",
       "uncredentialed": "Нет ключа",
       "badCredentials": "Неверные учетные данные"
     }

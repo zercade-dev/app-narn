@@ -35,12 +35,15 @@ Nhà cung cấp mà bạn chưa nhập khóa thì đơn giản là bị bỏ qua
 
 Bảng **NARN Freeway** trên màn hình cấu hình cho bạn thấy cả kho trong một cái nhìn: trạng thái khóa của từng nhà cung cấp, và với mỗi mô hình là **Trạng thái**, hạn mức **Còn lại**, **Đặt lại tiếp theo**, cùng **Tỷ lệ đạt** gần đây theo từng ngôn ngữ.
 
+Mỗi nhà cung cấp còn có một menu thả xuống bên cạnh để kiểm soát cách Freeway dùng nó: **Tự động** để kho tự chọn như thường lệ, chọn một thực thể có tên sẽ ghim Freeway vào đúng tài khoản đó, còn **Đã tắt** đưa nhà cung cấp đó ra khỏi kho hoàn toàn — mà không tắt mô-đun ở bất kỳ nơi nào khác. Menu thả xuống chỉ chi phối các lựa chọn tự động của kho và là thiết lập của riêng tài khoản bạn: một quy tắc điều phối trỏ thẳng tới nhà cung cấp đó vẫn tiếp tục dùng nó, còn những người khác cùng làm việc trong dự án của bạn bằng điều phối riêng của họ thì theo thiết lập Freeway của chính họ. Một lần chạy dịch đang diễn ra sẽ rời khỏi nhà cung cấp vừa bị tắt ngay từ lô tiếp theo; các lần chạy khác đã bắt đầu trước đó thì có thể hoàn tất bằng chính mô hình mà chúng đã khởi đầu. Chuyển một nhà cung cấp đã tắt trở lại Tự động (hoặc một thực thể có tên) sẽ tiếp tục đúng chỗ nó dừng lại.
+
 Trạng thái của một mô hình là một trong số:
 
 * **Sẵn sàng** — dùng được ngay.
 * **Đang hạ nhiệt** — bị giới hạn tần suất trong chốc lát; nó tự quay lại.
 * **Hết cho hôm nay** — hạn mức trong ngày đã dùng hết, và bảng cho biết khi nào đặt lại.
 * **Mô-đun đang tắt** — khóa đã lưu nhưng mô-đun bị tắt. Bảng sẽ mời bạn bật nó.
+* **Đã tắt cho Freeway** — bạn đã tắt nhà cung cấp này cho kho từ menu thả xuống của nó; phần còn lại của mô-đun không bị ảnh hưởng.
 * **Không có khóa** — kho chưa có gì cho nhà cung cấp này.
 * **Thông tin xác thực không hợp lệ** — khóa bị từ chối. Hãy ghi một khóa hoạt động được vào kho để gỡ dấu này.
 

@@ -106,6 +106,7 @@ export type {
 } from './types/routing.js';
 export { CONTROLLED_FAILURE_HINTS, controlledFailureHint } from './types/routing.js';
 export type { ModelInfo, ModelBilling, ReasoningEffort } from './types/models.js';
+export { REASONING_EFFORTS } from './types/models.js';
 export type {
   ProjectTemplate,
   ProjectTemplateConfig,
@@ -389,3 +390,9 @@ export { windowStart, nextReset } from './freeway/windows.js';
 export type { PoolableEntry, LogPoolOptions, LogPoolDropCounts } from './logging/entry-pools.js';
 export { LogEntryPools, isPriorityLevel } from './logging/entry-pools.js';
 export { TenantEntryPools, type TenantPoolOptions } from './logging/tenant-entry-pools.js';
+
+export {
+  CHAT_STREAM_ERROR_MARKER,
+  CHAT_STREAM_ERROR_FALLBACK,
+  splitChatStreamError,
+} from './chat-stream-error.js';

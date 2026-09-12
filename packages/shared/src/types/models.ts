@@ -10,8 +10,18 @@
  * Claude Haiku, which accepts adaptive thinking but errors on `effort`. Such
  * models advertise only ['disabled', 'enabled'].
  */
-export type ReasoningEffort =
-  'disabled' | 'enabled' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | 'max';
+export const REASONING_EFFORTS = [
+  'disabled',
+  'enabled',
+  'minimal',
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+  'max',
+] as const;
+
+export type ReasoningEffort = (typeof REASONING_EFFORTS)[number];
 
 export interface ModelBilling {
   /** Input cost in USD per 1 million tokens (or equivalent unit). */

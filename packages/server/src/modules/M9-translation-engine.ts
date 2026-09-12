@@ -106,7 +106,7 @@ import { JobQueue, type Admission } from './M9/queue.js';
 import { rateGovernor, type GovernorKey, type RateGovernor } from './M9/rate-governor.js';
 import { awaitAllWithTimeout, SettledTracker } from './M9/run-settled.js';
 import { emitRunProgress, recordRunFailure } from './M9/run-status-helpers.js';
-import { assertRunCapacity, sweepOrphanedRuns } from './M9/run-capacity.js';
+import { assertRunCapacity, PROCESS_START_MS, sweepOrphanedRuns } from './M9/run-capacity.js';
 import { PreviewNotPossibleError } from '../types/errors.js';
 import {
   isAbortError,
@@ -179,6 +179,14 @@ export type LqaGate = (
   projectId?: string,
   targetLanguage?: string,
   extraIssues?: import('@zercade-dev/narn-shared').LQAIssue[],
+  /**
+   * The project this dispatch started from, so the gate reads its per-project
+   * check config off the caller's copy instead of loading the whole project
+   * again for every gated pair. Re-read at each start — including a resume, which
+   * goes back through `startRunInner` — so a mid-run config edit lands at the
+   * next one.
+   */
+  project?: Project,
 ) => Promise<import('@zercade-dev/narn-shared').LQAResult | undefined>;
 
 interface LoggerLike {
@@ -704,6 +712,23 @@ export class TranslationEngine {
   static readonly QUOTA_SWEEP_INTERVAL_MS = 60_000;
   /** Floor on how often ONE run may be auto-resumed (see {@link lastQuotaResumeAttempt}). */
   private static readonly QUOTA_RESUME_MIN_INTERVAL_MS = 60_000;
+  /**
+   * Ceiling on the (entry x target language) pairs ONE {@link memoryPreview}
+   * call evaluates. That preview is an advisory number behind the Translate
+   * dialog and its scope is whatever the user selected — "select all filtered"
+   * across every target language — which the route schema alone bounds only at
+   * 50_000 entry ids x 100 languages. Each evaluated pair costs a
+   * translation-memory lookup, and every lookup is its own tenant transaction
+   * (BEGIN / set role / set_config / statement / COMMIT), so an unbounded scan
+   * can hold a pooled connection — and the HTTP request — open past the proxy
+   * read timeout while starving every other request.
+   *
+   * Past this many pairs the scan stops and reports what it counted: an
+   * under-count, never an error, because both callers treat the number as a
+   * hint and swallow a failure outright. 5_000 covers any realistic dialog
+   * open while capping one request at roughly 25_000 database round trips.
+   */
+  static readonly MEMORY_PREVIEW_MAX_PAIRS = 5_000;
   private readonly queue: JobQueue;
   /**
    * The rate governor consulted for Freeway admission and seeded per run (see
@@ -1039,6 +1064,14 @@ export class TranslationEngine {
    * re-attempts a failed batch, at the same size unless they change the
    * project/workspace batch setting themselves first.
    *
+   * A CANCELLED source is retryable too — a run auto-cancels when a provider
+   * rejects the credential, so "cancelled with failures" is the ordinary state
+   * a user retries from. One exception to the "original total preserved" rule
+   * applies there: a cancel drops still-pending pairs without ever counting
+   * them, so the run's total is rebased onto what it actually accounted for
+   * plus the re-attempts. Otherwise the re-dispatched run could never reach a
+   * terminal state again and would hold the project's queue open.
+   *
    * Returns null when the run is unknown, is not in a terminal state (an
    * in-progress or queued run is left untouched), or recorded no retryable
    * failures.
@@ -1170,6 +1203,11 @@ export class TranslationEngine {
     const availableModules = this.deriveAvailableModuleIds(rules);
     const entries = await this.stringStore.load(projectId);
     const byId = new Map(entries.map((e) => [e.id, e]));
+    // Keyed by the run path's own `glossaryEntryKey` (see fetchGlossariesForBatch):
+    // one approve request carries the whole selection x every batch target
+    // language, and `glossaryProvider` is a multi-query read whose every
+    // statement is its own tenant transaction.
+    const constantTermsByKey = new Map<string, GlossaryTerm[]>();
 
     let approved = 0;
     for (const { entryId, targetLanguage } of pairs) {
@@ -1199,8 +1237,13 @@ export class TranslationEngine {
       const currentRecord = flipped.translations[targetLanguage] ?? record;
       try {
         const decision = this.router.route(entry, targetLanguage, rules, availableModules);
-        const glossary = await this.glossaryProvider(projectId, targetLanguage, entry);
-        const constantTerms = glossary.filter((term) => term.constant);
+        const glossaryKey = this.glossaryEntryKey(targetLanguage, entry);
+        let constantTerms = constantTermsByKey.get(glossaryKey);
+        if (constantTerms === undefined) {
+          const glossary = await this.glossaryProvider(projectId, targetLanguage, entry);
+          constantTerms = glossary.filter((term) => term.constant);
+          constantTermsByKey.set(glossaryKey, constantTerms);
+        }
         // Mask source and approved text jointly so the stored translation carries
         // SOURCE-plan slot ids — the ids the engine restores against at apply time.
         // Masking them independently numbers ids by each text's own token order, so
@@ -1250,6 +1293,15 @@ export class TranslationEngine {
    * them from the TM consult — so the count reflects what a real run would do.
    * The project's stored `tmPolicy` is honoured (a `disabled` project always
    * reports 0). No vault session needed (no LLM calls).
+   *
+   * Bounded twice, because the scope is whatever the user selected ("select
+   * all filtered" times every target language) for a number that is only a
+   * hint on a dialog: the glossary is resolved through the same per-(target
+   * language, assigned-glossary set) memo the real run path uses (see
+   * {@link fetchGlossariesForBatch}), since `glossaryProvider` is a
+   * multi-query read whose every statement is its own tenant transaction; and
+   * at most {@link TranslationEngine.MEMORY_PREVIEW_MAX_PAIRS} pairs are
+   * evaluated at all.
    */
   async memoryPreview(
     projectId: string,
@@ -1267,11 +1319,28 @@ export class TranslationEngine {
     // here too so the preview's total matches what a real run would consider.
     const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
 
+    // Keyed by the run path's own `glossaryEntryKey`: for a fixed project that
+    // key already captures everything the provider varies on — target language
+    // plus the entry's `assignedGlossaryIds`, with entries that have none
+    // sharing the project-wide `forcedGlossaryIds` bucket.
+    const constantTermsByKey = new Map<string, GlossaryTerm[]>();
+
     let memoryCount = 0;
     let total = 0;
+    // Pairs the scan actually looked at, including the ones excluded below:
+    // excluding a pair costs the same masking work as counting one, so both
+    // draw on the same budget.
+    let considered = 0;
+    let truncated = false;
     for (const entry of entries) {
+      if (truncated) break;
       for (const targetLanguage of targetLanguages) {
         if (targetLanguage === project.sourceLanguage) continue;
+        if (considered >= TranslationEngine.MEMORY_PREVIEW_MAX_PAIRS) {
+          truncated = true;
+          break;
+        }
+        considered++;
 
         // Trivial matchers short-circuit before the TM consult — exclude them.
         if (runTrivialMatchers(entry.sourceText, project.sourceLanguage, targetLanguage) !== null) {
@@ -1279,8 +1348,13 @@ export class TranslationEngine {
         }
 
         const decision = this.router.route(entry, targetLanguage, rules, availableModules);
-        const glossary = await this.glossaryProvider(projectId, targetLanguage, entry);
-        const constantTerms = glossary.filter((term) => term.constant);
+        const glossaryKey = this.glossaryEntryKey(targetLanguage, entry);
+        let constantTerms = constantTermsByKey.get(glossaryKey);
+        if (constantTerms === undefined) {
+          const glossary = await this.glossaryProvider(projectId, targetLanguage, entry);
+          constantTerms = glossary.filter((term) => term.constant);
+          constantTermsByKey.set(glossaryKey, constantTerms);
+        }
         const { masked, trivial } = maskText(entry.sourceText, constantTerms);
         // Fully-masked entries are produced locally and never consult the TM.
         if (trivial) continue;
@@ -1296,6 +1370,16 @@ export class TranslationEngine {
         );
         if (lookup.autoApply !== null) memoryCount++;
       }
+    }
+    if (truncated) {
+      // Logged, never signalled to the caller: the response shape is part of
+      // the route contract and both callers read nothing but `memoryCount`.
+      this.logger.warn('translation:memory-preview-truncated', {
+        projectId,
+        limit: TranslationEngine.MEMORY_PREVIEW_MAX_PAIRS,
+        entries: entries.length,
+        targetLanguages: targetLanguages.length,
+      });
     }
     return { memoryCount, total };
   }
@@ -1638,8 +1722,25 @@ export class TranslationEngine {
     resetRateLimiters();
     this.startingProjects.add(projectId);
     try {
-      const inner = () =>
-        this.startRunInner(runId, projectId, request, sessionId, existing, retry, moduleOverride);
+      // The failure cleanup sits INSIDE the tenant scope: it writes the run
+      // store, which is RLS-scoped exactly like every other write this start
+      // makes.
+      const inner = async () => {
+        try {
+          return await this.startRunInner(
+            runId,
+            projectId,
+            request,
+            sessionId,
+            existing,
+            retry,
+            moduleOverride,
+          );
+        } catch (err) {
+          await this.failUndispatchedRun(runId, projectId);
+          throw err;
+        }
+      };
       return await (tenant ? runWithTenant(tenant, inner) : inner());
     } finally {
       this.startingProjects.delete(projectId);
@@ -1653,6 +1754,38 @@ export class TranslationEngine {
       // idempotent for the normal (slow-module) path.
       this.startNextQueued(projectId);
     }
+  }
+
+  /**
+   * Settle a start that threw before any dispatch task was queued.
+   * {@link startRunInner} registers the run `Running` ahead of several awaits
+   * (details hydration, the run-store write, the global-config load, freeway
+   * resolution), so a transient fault in that window would otherwise leave the
+   * run Running with nothing to advance it: {@link hasActiveProjectRun} stays
+   * true for the life of the process and every later run for the project queues
+   * behind it. The deferred path compensates in {@link maybeStartNextQueued};
+   * this covers the immediate ones.
+   *
+   * Strictly the PRE-DISPATCH window: once the settled deferred is armed, tasks
+   * are in flight and own the run's terminal transition. The run is left in the
+   * in-memory maps like any other failed run (evicted on the normal grace
+   * schedule) rather than forgotten, so a caller that rolls back its own state
+   * afterwards — {@link restoreQuotaPark} — still finds the run and its captured
+   * session/tenant.
+   */
+  private async failUndispatchedRun(runId: string, projectId: string): Promise<void> {
+    if (this.tracker.isArmed(runId)) return;
+    const status = this.runs.get(runId);
+    if (!status || status.status !== RunStatusCode.Running) return;
+    status.status = RunStatusCode.Failed;
+    status.finishedAt = Date.now();
+    this.logger.warn('translation:start-aborted', { runId, projectId });
+    await this.runStore.updateRun(projectId, status).catch((err: unknown) => {
+      this.logger.warn('translation:start-abort-persist-failed', {
+        runId,
+        error: toErrorMessage(err),
+      });
+    });
   }
 
   private async startRunInner(
@@ -1673,6 +1806,11 @@ export class TranslationEngine {
       pairs,
       disableMemory,
     } = request;
+    // The status this start BEGAN with, captured before the first await so it
+    // is synchronous with the caller's decision to start. The cancel guard
+    // below must fire on a Cancelled TRANSITION across the awaits, not on a
+    // caller that deliberately hands us an already-Cancelled run.
+    const startedCancelled = existing?.status === RunStatusCode.Cancelled;
     // Cancel-vs-dequeue race: if a Queued run is cancelled at the exact
     // moment maybeStartNextQueued has dequeued it (removed from queuedSessions)
     // but not yet flipped it Running, `cancel` sets the shared `existing` status
@@ -1756,7 +1894,14 @@ export class TranslationEngine {
     // object — do NOT resurrect it to Running or begin work. cancel() of a
     // Queued run does not chain the queue (wasActive=false), so keep the
     // project's queue draining here and let the run stay terminal.
-    if (existing && existing.status === RunStatusCode.Cancelled) {
+    // Only a TRANSITION counts. A run that was ALREADY Cancelled when this
+    // start began was handed to us on purpose by `retryFailed`, whose whole
+    // job is to re-dispatch the recorded failures of a terminal run — and a
+    // run auto-cancels when a provider rejects the credential, so "cancelled
+    // with failures" is the ordinary state a user retries from. Bailing on the
+    // state rather than the transition made that retry a silent no-op: nothing
+    // was dispatched, yet the route answered 202 and the UI said it started.
+    if (existing && existing.status === RunStatusCode.Cancelled && !startedCancelled) {
       this.startNextQueued(projectId);
       return { runId, total: existing.total, status: RunStatusCode.Cancelled };
     }
@@ -1789,9 +1934,29 @@ export class TranslationEngine {
         (e) => !(e.stringId && e.targetLang && retryKeys.has(`${e.stringId} ${e.targetLang}`)),
       );
       status.failed = Math.max(0, status.failed - (errorsBefore - status.errors.length));
+      if (startedCancelled) {
+        // A cancelled source leaves the accounting SHORT: pairs still queued or
+        // in flight when `cancel` fired were dropped without ever being
+        // completed or failed, so `completed + failed < total` for good.
+        // `finalizeTranslationTerminal` only settles a run once those meet, so
+        // re-dispatching under the original total would leave this run Running
+        // forever and wedge the project's queue behind it. Rebase the total
+        // onto what the run actually accounted for plus the pairs being
+        // re-attempted. This is the one case where a retry does not preserve
+        // the original total, and it is why the guard fix above is not
+        // sufficient on its own.
+        status.total = status.completed + status.failed + decisions.length;
+      }
       status.status = RunStatusCode.Running;
       delete status.finishedAt;
       delete status.queuePosition;
+      // A run adopted from a PRIOR process generation still carries its
+      // pre-restart `startedAt`, which is exactly what `sweepOrphanedRuns` reads
+      // as "left behind by a dead process" — a sweep firing during this
+      // re-dispatch would write the live run Failed. Re-stamp it in that case
+      // only; within one process the original start time is preserved, as the
+      // in-place retry contract above requires.
+      if (status.startedAt < PROCESS_START_MS) status.startedAt = Date.now();
       // A prior AI-review score is stale once translations change; drop it so
       // the run reads as needing re-review with the retried results included.
       delete status.aiScore;
@@ -2383,11 +2548,12 @@ export class TranslationEngine {
    * after a server restart — adopt a queued run persisted by the RunStore and
    * start it. Returns the run's status, or null when nothing was resumable.
    *
-   * `sessionId` is the RESUMING caller's session. It matters for the
-   * quota-resume path, which starts a fresh translation pass: credentials are
-   * read per session, and the run's own enqueue-time session may be long gone
-   * (a next-day resume is a different session entirely), so the caller's
-   * current one is both fresher and more correct than the captured one.
+   * `sessionId` is the RESUMING caller's session. It matters for every path
+   * that starts a fresh translation pass — the quota resume and the
+   * restart-adopt below: credentials are read per session, and the run's own
+   * enqueue-time session may be long gone (a next-day resume is a different
+   * session entirely) or lost with the restart, so the caller's current one is
+   * both fresher and more correct than the captured one.
    */
   async resume(projectId: string, runId: string, sessionId?: string): Promise<RunStatus | null> {
     const status = this.runs.get(runId);
@@ -2491,7 +2657,7 @@ export class TranslationEngine {
         runId,
         projectId,
         persisted.request,
-        undefined,
+        sessionId,
         persisted,
         false,
         getCurrentTenant(),
@@ -3262,10 +3428,15 @@ export class TranslationEngine {
     // usage (DeepL/OpenRouter) before reading the ledger for this run's
     // resolution — never lets a slow/unreachable provider stall run start,
     // and never throws (awaitAllWithTimeout treats a rejection as settled).
+    // The race only picks a winner, so the loser is cancelled here: its reply
+    // would SET the window cell back over every dispatch this run records in
+    // the meantime, and Node's fetch would otherwise hold the socket open.
+    const probeAbort = new AbortController();
     await awaitAllWithTimeout(
       [
         syncAuthoritativeUsage(now, {
           ledger: deps.ledger,
+          signal: probeAbort.signal,
           credentialFor: this.credentialForFreewayProbe(
             args.sessionId,
             deps,
@@ -3276,6 +3447,7 @@ export class TranslationEngine {
       ],
       1500,
     );
+    probeAbort.abort();
     const buckets = await loadBucketViews(now, { ...deps, bucketStates });
     const minBand = freewayMinBand(status.request);
     const resolution = resolveFreewayDecisions(
@@ -4838,7 +5010,7 @@ export class TranslationEngine {
       );
 
       for (const { decision: d, matcherId, translatedText } of trivialResults) {
-        await this.persistTrivialResult(projectId, status, d, matcherId, translatedText);
+        await this.persistTrivialResult(projectId, status, d, matcherId, translatedText, project);
         settled.add(settleKey(d));
       }
 
@@ -4912,7 +5084,14 @@ export class TranslationEngine {
           persistDecision,
           runId,
         );
-        await this.lqaGate(e.decision.entry, result, projectId, e.decision.targetLanguage, []);
+        await this.lqaGate(
+          e.decision.entry,
+          result,
+          projectId,
+          e.decision.targetLanguage,
+          [],
+          project,
+        );
         status.completed++;
         settled.add(settleKey(e.decision));
         this.logger.info('translation:done', {
@@ -4970,6 +5149,7 @@ export class TranslationEngine {
             projectId,
             e.decision.targetLanguage,
             [],
+            project,
           );
           if (!tmLqaResult || tmLqaResult.passed) {
             await this.persistResult(
@@ -5156,7 +5336,7 @@ export class TranslationEngine {
             !isModelUnavailableError(moduleResult.error) &&
             isTransientProviderError(moduleResult.error)
           ) {
-            const pairKey = `${e.decision.entry.id} ${e.decision.targetLanguage}`;
+            const pairKey = `${e.decision.entry.id}\0${e.decision.targetLanguage}`;
             let parkedOnce = this.freewayTransientParkedPairs.get(runId);
             if (!parkedOnce) {
               parkedOnce = new Set<string>();
@@ -5286,6 +5466,7 @@ export class TranslationEngine {
           projectId,
           e.decision.targetLanguage,
           maskIssues,
+          project,
         );
         // The bucket's quality signal for this language, folded into its stats
         // once the whole batch has settled.
@@ -5999,7 +6180,7 @@ export class TranslationEngine {
         rawResponse: retryModuleResult.rawResponse,
       };
       await this.persistResult(projectId, entry, targetLanguage, retryResult, decision, runId);
-      await this.lqaGate(entry, retryResult, projectId, targetLanguage, retryMaskIssues);
+      await this.lqaGate(entry, retryResult, projectId, targetLanguage, retryMaskIssues, project);
       // No TM auto-record — only approved translations are written to the memory.
       return {
         outcome: 'persisted',
@@ -6689,6 +6870,7 @@ export class TranslationEngine {
     d: RoutingDecision,
     matcherId: string,
     trivialText: string,
+    project?: Project,
   ): Promise<void> {
     const result: TranslationResult = {
       entryId: d.entry.id,
@@ -6712,7 +6894,7 @@ export class TranslationEngine {
       persistDecision,
       status.runId,
     );
-    await this.lqaGate(d.entry, result, projectId, d.targetLanguage, []);
+    await this.lqaGate(d.entry, result, projectId, d.targetLanguage, [], project);
     status.completed++;
     this.logger.info('translation:done', {
       runId: status.runId,
@@ -6739,12 +6921,15 @@ export const translationEngine = new TranslationEngine({
       projectTargetLanguages(project),
     );
   },
-  lqaGate: async (entry, result, projectId, targetLanguage, extraIssues) => {
+  lqaGate: async (entry, result, projectId, targetLanguage, extraIssues, project) => {
     if (!projectId || !targetLanguage) return undefined;
     // The pipeline merges the engine's mask diagnostics (extraIssues) itself
-    // and computes `passed` as "no blocking issues" per project config.
+    // and computes `passed` as "no blocking issues" per project config. `project`
+    // is the caller's already-loaded copy; without it the pipeline loads the
+    // whole project again for every gated pair.
     const lqa = await lqaGate.check(entry, result.translatedText, targetLanguage, {
       projectId,
+      project,
       extraIssues,
     });
     // Pass ONLY this language's verdict. updateEntry merges it into the fresh

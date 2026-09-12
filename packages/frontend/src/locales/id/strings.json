@@ -260,7 +260,8 @@
     "save": "Simpan",
     "saving": "Menyimpan…",
     "clearNeedsReview": "Hapus tanda “perlu ditinjau”",
-    "clearReviewed": "Hapus status “ditinjau”"
+    "clearReviewed": "Hapus status “ditinjau”",
+    "updateFailed": "Tidak bisa memperbarui entri ini"
   },
   "editor": {
     "sourceReadOnly": "Teks sumber (hanya-baca)",

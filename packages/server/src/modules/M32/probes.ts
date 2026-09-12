@@ -6,7 +6,9 @@
  * mid-window. This is a best-effort correction: it overwrites the ledger's
  * current window with ground truth from the provider, and never throws.
  * Callers race it against a short timeout (see M9's freeway resolution
- * hook) so a slow/unreachable provider never stalls run start.
+ * hook) so a slow/unreachable provider never stalls run start, and pass a
+ * `signal` so the loser of that race is cancelled rather than left holding a
+ * socket and writing late over a ledger it no longer speaks for.
  */
 import type { FreeTierProvider, FreewayWindowKind } from '@zercade-dev/narn-shared';
 import { getFreeTierSnapshot, hasSharedPool, windowStart } from '@zercade-dev/narn-shared';
@@ -22,6 +24,15 @@ export interface AuthoritativeUsageDeps {
   ledger?: FreewayLedgerStore;
   fetchImpl?: typeof fetch;
   /**
+   * Cancels the probe requests and suppresses their writes. The caller races
+   * this whole call against a short timeout and has no other way to stop the
+   * loser: Node's fetch has no default request timeout, and a reply that lands
+   * after the race is destructive, because
+   * `FreewayLedgerStore.syncAuthoritativeUsage` SETS the window cell — a late
+   * write erases every dispatch recorded in the meantime.
+   */
+  signal?: AbortSignal;
+  /**
    * Reads a module's credential by its manifest env-var name. Vault-backed
    * credentials (M16 CredentialStore) are exposed only per-session, so this
    * is a dependency rather than a module-level default: M9 passes a
@@ -33,6 +44,16 @@ export interface AuthoritativeUsageDeps {
 }
 
 type CredentialFor = (moduleId: string, envVar: string) => string | undefined;
+
+/**
+ * Whether the caller's race was already lost by the time a probe reached its
+ * write. Aborting normally rejects the fetch, but a reply that arrived just
+ * before the deadline still runs to completion — and the write it would make
+ * SETS the window cell, so landing it late erases every dispatch since.
+ */
+function raceLost(signal: AbortSignal | undefined): boolean {
+  return signal?.aborted === true;
+}
 
 /** Shape of the DeepL `/v2/usage` response this probe cares about. */
 interface DeepLUsageResponse {
@@ -51,10 +72,10 @@ interface OpenRouterKeyResponse {
 /**
  * Sync authoritative usage for every probe-capable free-tier provider
  * (DeepL, OpenRouter) that has a credential available. Best-effort and
- * time-unbounded on its own (the caller races it against a timeout): a
- * missing credential, network error, non-2xx response, or unrecognized
- * payload shape is a silent skip for that one provider, never a failure for
- * the run.
+ * time-unbounded on its own (the caller races it against a timeout and cancels
+ * the loser through `deps.signal`): a missing credential, network error,
+ * non-2xx response, or unrecognized payload shape is a silent skip for that
+ * one provider, never a failure for the run.
  */
 export async function syncAuthoritativeUsage(
   now: number,
@@ -66,7 +87,9 @@ export async function syncAuthoritativeUsage(
   const snapshot = getFreeTierSnapshot();
   const probes = Object.values(snapshot.providers)
     .filter((provider) => provider.probe !== undefined)
-    .map((provider) => probeProvider(provider, now, ledger, fetchImpl, credentialFor));
+    .map((provider) =>
+      probeProvider(provider, now, ledger, fetchImpl, credentialFor, deps?.signal),
+    );
   await Promise.allSettled(probes);
 }
 
@@ -77,12 +100,13 @@ async function probeProvider(
   ledger: FreewayLedgerStore,
   fetchImpl: typeof fetch,
   credentialFor: CredentialFor,
+  signal: AbortSignal | undefined,
 ): Promise<void> {
   try {
     if (provider.probe === 'deepl-usage') {
-      await probeDeepL(provider, now, ledger, fetchImpl, credentialFor);
+      await probeDeepL(provider, now, ledger, fetchImpl, credentialFor, signal);
     } else if (provider.probe === 'openrouter-key') {
-      await probeOpenRouter(provider, now, ledger, fetchImpl, credentialFor);
+      await probeOpenRouter(provider, now, ledger, fetchImpl, credentialFor, signal);
     }
   } catch {
     // Best-effort: never let one provider's probe failure affect another's,
@@ -104,6 +128,7 @@ async function probeDeepL(
   ledger: FreewayLedgerStore,
   fetchImpl: typeof fetch,
   credentialFor: CredentialFor,
+  signal: AbortSignal | undefined,
 ): Promise<void> {
   const key = credentialFor(provider.moduleId, DEEPL_ENV_VAR);
   if (!key) return;
@@ -111,10 +136,12 @@ async function probeDeepL(
   if (!model) return;
   const res = await fetchImpl('https://api-free.deepl.com/v2/usage', {
     headers: { Authorization: `DeepL-Auth-Key ${key}` },
+    signal,
   });
   if (!res.ok) return;
   const body = (await res.json()) as DeepLUsageResponse;
   if (typeof body.character_count !== 'number') return;
+  if (raceLost(signal)) return;
   const bucketKey = freewayBucketKey(provider.moduleId, model.id);
   const start = windowStart('monthly_chars', now, provider.resetTimeZone);
   await ledger.syncAuthoritativeUsage(
@@ -158,6 +185,7 @@ async function probeOpenRouter(
   ledger: FreewayLedgerStore,
   fetchImpl: typeof fetch,
   credentialFor: CredentialFor,
+  signal: AbortSignal | undefined,
 ): Promise<void> {
   const key = credentialFor(provider.moduleId, OPENROUTER_ENV_VAR);
   if (!key) return;
@@ -165,11 +193,13 @@ async function probeOpenRouter(
   if (rpdModels.length === 0) return;
   const res = await fetchImpl('https://openrouter.ai/api/v1/key', {
     headers: { Authorization: `Bearer ${key}` },
+    signal,
   });
   if (!res.ok) return;
   const body = (await res.json()) as OpenRouterKeyResponse;
   const requests = dailyRequestCount(body.data?.usage);
   if (requests === undefined) return;
+  if (raceLost(signal)) return;
   const kind: FreewayWindowKind = 'rpd';
   const start = windowStart(kind, now, provider.resetTimeZone);
   const pooled = hasSharedPool(provider);

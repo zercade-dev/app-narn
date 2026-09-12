@@ -3,15 +3,17 @@
  *
  * Extracted verbatim from `routes/color-text.ts` so every chat surface (the
  * Text Styler assistant and the stage-details assistant) classifies provider
- * errors identically and truncates identically once bytes are on the wire.
+ * errors identically and reports a mid-reply failure identically.
  *
  * Because the response streams, an error can only be mapped to an HTTP status
- * BEFORE the first byte; once bytes are written we can only end the (truncated)
- * stream and let the client detect the truncation — a `wroteAnything` flag
- * drives that choice. The caller owns the `AbortController` / client-disconnect
- * wiring (it constructs the provider stream); this helper only sets the
- * streaming headers, pumps the deltas, and does the before-first-byte error
- * classification + sanitized logging (the log label is a parameter).
+ * BEFORE the first byte; once bytes are written the failure can only travel in
+ * the stream itself, as the `CHAT_STREAM_ERROR_MARKER` trailer the client
+ * splits off (`splitChatStreamError`) to tell a cut-short reply from a complete
+ * one — a `wroteAnything` flag drives that choice. The caller owns the
+ * `AbortController` / client-disconnect wiring (it constructs the provider
+ * stream); this helper only sets the streaming headers, pumps the deltas, and
+ * does the before-first-byte error classification + sanitized logging (the log
+ * label is a parameter).
  *
  * Error classification reuses the shared AI-error helpers (`toAuthError` /
  * `toRateLimitError`, which unwrap the AI SDK's `AI_RetryError` envelope and
@@ -19,6 +21,7 @@
  */
 import type { Request, Response } from 'express';
 import {
+  CHAT_STREAM_ERROR_MARKER,
   MissingCredentialError,
   VaultLockedError,
   toAuthError,
@@ -68,7 +71,8 @@ export function classifyChatError(err: unknown): { status: number; body: { error
  * headers up front (so a zero-delta success still returns text/plain rather
  * than falling back to Express defaults; `setHeader` doesn't flush, so an error
  * thrown before the first delta can still take the classified-status path).
- * Once bytes are committed, a later error only ends the truncated stream.
+ * Once bytes are committed, a later error is appended to the stream as the
+ * `CHAT_STREAM_ERROR_MARKER` trailer instead.
  *
  * The caller owns the `AbortController` and client-disconnect (`res.on('close')`
  * — NOT `req.on('close')`, which fires once the request body is fully read
@@ -100,15 +104,22 @@ export async function streamPlainTextResponse(
     res.end();
   } catch (err) {
     if (wroteAnything || res.headersSent) {
-      // Headers/body already committed — we cannot change the status. End the
-      // truncated stream; the client detects the truncation.
+      // Headers/body already committed — we cannot change the status, so the
+      // classified code goes out in the stream itself and the client renders the
+      // reply as the incomplete one it is. A client that has already gone (Stop,
+      // closed tab) leaves a destroyed response, on which `write` is a no-op.
+      const { body: trailerBody } = classifyChatError(err);
       logger.error(
         `${logLabel} stream failed after first byte`,
         sanitizeLogObject({
+          error: trailerBody.error,
           message: err instanceof Error ? err.message : String(err),
           name: err instanceof Error ? err.name : undefined,
         }),
       );
+      if (!res.writableEnded && !res.destroyed) {
+        res.write(`${CHAT_STREAM_ERROR_MARKER}${JSON.stringify(trailerBody)}`);
+      }
       res.end();
       return;
     }

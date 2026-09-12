@@ -461,6 +461,17 @@ export function resolveBatchSize(
  * batches truncate/mis-count less often. A singleton that still won't parse, or
  * a thrown API/transport error, becomes per-item error results via `makeErrors`
  * — so one bad batch never aborts the whole run. Honors `signal` up front.
+ *
+ * `surfaceTypedErrors` opts a caller out of that flattening for the two failure
+ * classes it can answer better than a split can: a rate limit (429), where the
+ * caller owns the provider cool-down and — on a free-tier run — the bucket cool
+ * and the one re-route hop, and an auth failure (401/403), where the same
+ * credential fails every half identically. Both are recast to their shared typed
+ * error and rethrown BEFORE any retry or split, since halving into a window the
+ * provider just closed only spends more of a quota it already refused. Left off,
+ * a caller with nowhere to route the failure keeps the split-to-singleton
+ * partial recovery, which is still the better outcome for a flaky 429 it can do
+ * nothing else about.
  */
 export async function splitAndRetry<TItem, TResult>(
   batch: TItem[],
@@ -471,6 +482,7 @@ export async function splitAndRetry<TItem, TResult>(
   parseFailMessage: string,
   signal?: AbortSignal,
   retryTransient = false,
+  surfaceTypedErrors = false,
 ): Promise<TResult[]> {
   if (signal?.aborted) return makeErrors(batch, 'cancelled');
   let parsed: TResult[] | null;
@@ -483,6 +495,7 @@ export async function splitAndRetry<TItem, TResult>(
       ...extractSafeErrorMetadata(err),
     });
     if (signal?.aborted) return makeErrors(batch, 'cancelled');
+    if (surfaceTypedErrors) rethrowIfAuthOrRateLimit(err);
     if (!retryTransient || !isTransientError(err)) {
       return makeErrors(batch, toErrorMessage(err));
     }
@@ -492,6 +505,8 @@ export async function splitAndRetry<TItem, TResult>(
       parsed = await runOnce(batch);
     } catch (err2) {
       if (signal?.aborted) return makeErrors(batch, 'cancelled');
+      // The same-size retry can hit a limit the first attempt did not.
+      if (surfaceTypedErrors) rethrowIfAuthOrRateLimit(err2);
       if (isTransientError(err2) && batch.length > 1) {
         const mid = Math.ceil(batch.length / 2);
         log('warn', `${logPrefix}:transient-splitting`, { count: batch.length });
@@ -504,6 +519,7 @@ export async function splitAndRetry<TItem, TResult>(
           parseFailMessage,
           signal,
           retryTransient,
+          surfaceTypedErrors,
         );
         const right = await splitAndRetry(
           batch.slice(mid),
@@ -514,6 +530,7 @@ export async function splitAndRetry<TItem, TResult>(
           parseFailMessage,
           signal,
           retryTransient,
+          surfaceTypedErrors,
         );
         return [...left, ...right];
       }
@@ -534,6 +551,7 @@ export async function splitAndRetry<TItem, TResult>(
     parseFailMessage,
     signal,
     retryTransient,
+    surfaceTypedErrors,
   );
   const right = await splitAndRetry(
     batch.slice(mid),
@@ -544,6 +562,7 @@ export async function splitAndRetry<TItem, TResult>(
     parseFailMessage,
     signal,
     retryTransient,
+    surfaceTypedErrors,
   );
   return [...left, ...right];
 }
@@ -697,20 +716,24 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
   // native path and treats it as a no-op for anthropic / anthropic-compatible.
   const structuredOutput = resolveUseStructuredOutput(config.useStructuredOutput, provider);
 
-  // Global client-side rate limit: one slot per outbound HTTP request,
-  // limiter keyed by module id. Not applied to healthCheck.
+  // Both gates pool by the quota owner the host resolved (tenant + instance),
+  // falling back to the module id when it supplied none. The rate-limit opt-in
+  // itself stays a property of the module TYPE, hence manifest.id below.
+  const limiterKey = config.limiterKey ?? manifest.id;
+
+  // Global client-side rate limit: one slot per outbound HTTP request. Not
+  // applied to healthCheck.
   const awaitRateLimit = (): Promise<void> =>
     rateLimitApplies(manifest.id, config.rateLimitEnabled)
-      ? acquireRateLimit(manifest.id, config.requestsPerSecond)
+      ? acquireRateLimit(limiterKey, config.requestsPerSecond)
       : Promise.resolve();
 
-  // Wrap a single provider call: hold one of the module's concurrency slots
-  // (keyed by module id, so all of this module's calls share the pool) for the
-  // whole request, applying the rate-limit spacing inside the slot. maxParallel
-  // unset/<=0 means the slot acquire is a no-op, so non-generic-ai modules are
-  // unaffected.
+  // Wrap a single provider call: hold one of this instance's concurrency slots
+  // (so all of its calls share one pool) for the whole request, applying the
+  // rate-limit spacing inside the slot. maxParallel unset/<=0 means the slot
+  // acquire is a no-op, so non-generic-ai modules are unaffected.
   async function callProvider<T>(fn: () => Promise<T>): Promise<T> {
-    const release = await acquireConcurrencySlot(manifest.id, config.maxParallel);
+    const release = await acquireConcurrencySlot(limiterKey, config.maxParallel);
     try {
       await awaitRateLimit();
       return await fn();
@@ -812,7 +835,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
         // the cost, and resetRateLimiters() clears it at the next run — do not "fix"
         // this into a once-per-job throttle.
         if (toRateLimitError(err)) {
-          const backoff = reportRateLimitHit(manifest.id);
+          const backoff = reportRateLimitHit(limiterKey);
           if (backoff.changed) {
             log('warn', `[${provider}] rate-limit:backoff`, {
               previousIntervalMs: backoff.previousIntervalMs,

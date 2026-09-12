@@ -45,6 +45,17 @@ const FLAP_WINDOW_MS = 5 * 60_000;
  */
 export const POOL_SIBLING_COOLDOWN_CAP_MS = 70_000;
 
+/**
+ * Cooldown for an untimed 429 on a bucket whose only day-scale window is
+ * `monthly_chars` (DeepL). Falling back to that window's next reset is right
+ * for an `rpd` bucket — back tomorrow — but here it is the first of NEXT
+ * MONTH, so one transient burst would sideline the provider for weeks and
+ * nothing clears a cooldown early. A used-up allowance arrives as a different
+ * signal (DeepL reports it as an auth-shaped quota error, never a 429), so the
+ * bounded window costs at most one wasted request per interval.
+ */
+export const MONTHLY_CHARS_COOLDOWN_MS = 15 * 60_000;
+
 export function freewayBucketKey(moduleId: string, modelId: string): string {
   return `${moduleId}::${modelId}`;
 }
@@ -118,6 +129,14 @@ export interface BucketSourceDeps {
    * does for the fully-automatic case.
    */
   freewayInstanceOverrides?: Record<string, string>;
+  /**
+   * Test seam: base module ids excluded from Freeway's automatic pool
+   * entirely. Default reads `WorkspaceSettings.freewayDisabledProviders` from
+   * the global config store. A caller that wants every provider visible
+   * regardless of this setting (the status route's permissive "all buckets"
+   * pass) passes an explicit empty set rather than relying on the default.
+   */
+  freewayDisabledProviders?: ReadonlySet<string>;
   cloudMode?: boolean;
   /**
    * Bucket states the caller already read this tick. Supplied so a caller that
@@ -177,6 +196,33 @@ export function defaultInstanceIdsFor(baseModuleId: string): string[] {
 async function defaultFreewayInstanceOverrides(): Promise<Record<string, string>> {
   const settings = await getGlobalConfigStore().getSettings();
   return settings.freewayInstanceOverrides ?? {};
+}
+
+/**
+ * Default `freewayDisabledProviders`: the workspace's saved list, read once
+ * per {@link loadBucketViews} call (never per-provider) via the same
+ * per-tenant-cached `getSettings()` every other settings read already uses.
+ */
+async function defaultFreewayDisabledProviders(): Promise<ReadonlySet<string>> {
+  const settings = await getGlobalConfigStore().getSettings();
+  return new Set(settings.freewayDisabledProviders ?? []);
+}
+
+/**
+ * Whether the workspace has excluded the provider owning `bucketKey` from
+ * Freeway. Read LIVE — the per-tenant-cached `getSettings()`, a Map lookup
+ * after the first read — rather than from anything a run resolved at start:
+ * a background run binds its bucket once, so this is the only way a disable
+ * taken mid-run reaches the batches still to dispatch. `deps` honours the
+ * same `freewayDisabledProviders` seam {@link loadBucketViews} does, so a
+ * caller that pinned the set gets the same answer from both.
+ */
+export async function isFreewayProviderDisabled(
+  bucketKey: string,
+  deps?: BucketSourceDeps,
+): Promise<boolean> {
+  const disabled = deps?.freewayDisabledProviders ?? (await defaultFreewayDisabledProviders());
+  return disabled.has(freewayBucketBaseModuleId(bucketKey));
 }
 
 /**
@@ -643,6 +689,8 @@ export async function loadBucketViews(
   const instanceIdsFor = deps?.instanceIdsFor ?? defaultInstanceIdsFor;
   const instanceOverrides =
     deps?.freewayInstanceOverrides ?? (await defaultFreewayInstanceOverrides());
+  const disabledProviders =
+    deps?.freewayDisabledProviders ?? (await defaultFreewayDisabledProviders());
   const cloudMode = deps?.cloudMode ?? isCloudMode();
   const snapshot = getFreeTierSnapshot();
   const states = deps?.bucketStates ?? (await ledger.listBuckets());
@@ -653,6 +701,10 @@ export async function loadBucketViews(
   const views: BucketView[] = [];
   for (const [providerKey, provider] of Object.entries(snapshot.providers)) {
     if (cloudMode && provider.moduleId === COPILOT_MODULE_ID) continue;
+    // A user-disabled provider is excluded from Freeway entirely, before any
+    // credential/enablement check — the status route's missing-row diff
+    // reports WHY via freewayDisabledProviders on its own permissive pass.
+    if (disabledProviders.has(provider.moduleId)) continue;
     // A narrowed sweep touches only the provider that owns the asked-for
     // bucket; every other provider's models are read for nothing.
     if (onlyModuleId !== undefined && provider.moduleId !== onlyModuleId) continue;
@@ -863,8 +915,9 @@ export async function recordDispatch(
 }
 
 /**
- * 429/quota error: cooldown until retryAfterMs (when given) else the bucket's
- * next day-scale reset. A re-strike within FLAP_WINDOW_MS counts against the
+ * 429/quota error: cooldown until retryAfterMs (when given), else the bucket's
+ * next day-scale reset — or {@link MONTHLY_CHARS_COOLDOWN_MS} when that reset
+ * is a month away. A re-strike within FLAP_WINDOW_MS counts against the
  * escalation ladder — but only on the escalating path (`escalateOnFlap`), the
  * one that also consumes the counter.
  *
@@ -899,6 +952,8 @@ export async function coolBucket(
   let until: number;
   if (retryAfterMs !== undefined) {
     until = now + retryAfterMs;
+  } else if (resolved?.dayWindow.kind === 'monthly_chars' && dayReset !== undefined) {
+    until = Math.min(now + MONTHLY_CHARS_COOLDOWN_MS, dayReset);
   } else {
     until = dayReset ?? now;
   }

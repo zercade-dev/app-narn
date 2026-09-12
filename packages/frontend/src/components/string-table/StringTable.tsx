@@ -75,22 +75,10 @@ export function StringTable() {
   const loadedProjectId = useStringStore((s) => s.loadedProjectId);
   const fetchError = useStringStore((s) => s.error);
   const visibleLanguages = filters.visibleLanguages;
-  const logEntries = useLoggerStore((s) => s.entries);
-
-  // Derive the set of cells currently being translated from log events.
-  const translatingCells = useMemo(() => {
-    const inProgress = new Set<string>();
-    for (const e of logEntries) {
-      if (e.message === 'translation:start') {
-        const key = `${String(e.metadata?.entryId)}:${String(e.metadata?.targetLanguage)}`;
-        inProgress.add(key);
-      } else if (e.message === 'translation:done' || e.message === 'translation:failed') {
-        const key = `${String(e.metadata?.entryId)}:${String(e.metadata?.targetLanguage)}`;
-        inProgress.delete(key);
-      }
-    }
-    return inProgress;
-  }, [logEntries]);
+  // Cells with a translation in flight, folded from the log stream in
+  // logger-store: subscribing to that membership keeps this grid out of the
+  // 200ms log flush, which replaces the whole `entries` array every time.
+  const translatingCells = useLoggerStore((s) => s.translatingCells);
 
   const [page, setPage] = useState(1);
   // Persisted as a JSON number (matching the prior `String(pageSize)` writes,

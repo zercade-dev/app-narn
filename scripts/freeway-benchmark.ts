@@ -547,13 +547,15 @@ async function getOrCreateModule(
 //
 // `judgeTranslations` (shared `runJudgeFeature` + `splitAndRetry`,
 // packages/shared/src/ai-sdk-provider/{llm-module,module-features}.ts) NEVER
-// throws: every failure class — parse failure at singleton, 429, 401/403,
-// transport error — resolves as a `JudgeVerdict` carrying `.error` instead
-// ("so one bad batch never aborts a judge run"). There is no
-// `rethrowIfAuthOrRateLimit` anywhere on this path (unlike translate, which
-// does rethrow). So there is nothing to catch here, and no retry to run
-// ourselves — the shared layer already retries transients once and halves
-// on a parse failure, internally, below its own hard 10-item batch cap.
+// throws for THIS caller: every failure class — parse failure at singleton,
+// 429, 401/403, transport error — resolves as a `JudgeVerdict` carrying
+// `.error` instead ("so one bad batch never aborts a judge run"). The layer's
+// `rethrowIfAuthOrRateLimit` is opt-in on this path — reached only by a caller
+// passing `BatchDispatchOptions.surfaceTypedErrors` (the background engines,
+// which answer a 429 with a bucket cool and a re-route), and we never do. So
+// there is nothing to catch here, and no retry to run ourselves — the shared
+// layer already retries transients once and halves on a parse failure,
+// internally, below its own hard 10-item batch cap.
 //
 // What we DO own: detecting that a returned verdict is bad (the shared layer
 // reports failure via data, not control flow) and deciding what that means

@@ -4,11 +4,17 @@
 # Base image pinned by digest (multi-arch index) for reproducible, supply-chain-safe
 # builds. Dependabot's `docker` ecosystem (.github/dependabot.yml) proposes digest
 # bumps; refresh manually with: docker buildx imagetools inspect node:26-bookworm
-FROM node:26-bookworm@sha256:0353e48e0e8a993db87b720c242f54b207059d1bcc0106534896e8a11054c837 AS builder
+FROM node:26-bookworm@sha256:e7bc1a4cd2419953c91f9a6f7bb6efb3737773093fb4ded0b1c77a0a5831fac4 AS builder
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 # Node 26 no longer ships corepack — install it explicitly before activating pnpm.
-RUN npm install -g corepack && corepack enable && corepack prepare pnpm@11.2.2 --activate
+# Both corepack's version and the pnpm tarball's hash are pinned: this step fetches and
+# then runs the package manager for the whole install, so an unpinned fetch here is the
+# one unreproducible link in an otherwise digest-pinned build. The descriptor matches
+# package.json's `packageManager`; regenerate both with `corepack use pnpm@<version>`.
+RUN npm install -g corepack@0.36.0 \
+    && corepack enable \
+    && corepack prepare pnpm@11.2.2+sha512.36e6621fad506178936455e70247b8808ef4ec25797a9f437a93281a020484e2607f6a469a22e982987c3dbb8866e3071514ab10a4a1749e06edcd1ec118436f --activate
 WORKDIR /app
 COPY . .
 RUN pnpm install --frozen-lockfile
@@ -22,7 +28,7 @@ RUN pnpm --filter @zercade-dev/narn-server deploy --prod --legacy /deploy
 
 # ---- runtime: slim, no build tooling ----
 # Base image pinned by digest (multi-arch index); see the builder note above.
-FROM node:26-bookworm-slim@sha256:cd565714d4da3e84bfd341e31448f81d47c6362198f152345297c9c1154e6341 AS runtime
+FROM node:26-bookworm-slim@sha256:cd9f682fa2885cd1056e830424764158570061c59736a1da836bc3d73df095ae AS runtime
 # Links the published GHCR package to this repo (previously set by docker/metadata-action).
 LABEL org.opencontainers.image.source="https://github.com/zercade-dev/app-narn"
 ENV NODE_ENV=production

@@ -19,7 +19,10 @@
   },
   "confirmDelete": {
     "title": "Waise löschen?",
-    "body": "Dadurch werden der verwaiste Eintrag und seine Übersetzungen dauerhaft gelöscht. Das lässt sich nicht rückgängig machen."
+    "body": "Dadurch werden der verwaiste Eintrag und seine Übersetzungen dauerhaft gelöscht. Das lässt sich nicht rückgängig machen.",
+    "bulkTitle": "Ausgewählte Waisen löschen?",
+    "bulkBody_one": "Dadurch werden {{count}} verwaister Eintrag und seine Übersetzungen dauerhaft gelöscht. Das lässt sich nicht rückgängig machen.",
+    "bulkBody_other": "Dadurch werden {{count}} verwaiste Einträge und ihre Übersetzungen dauerhaft gelöscht. Das lässt sich nicht rückgängig machen."
   },
   "relink": {
     "title": "Waise neu verknüpfen",

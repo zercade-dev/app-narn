@@ -108,6 +108,9 @@ function deriveBucketState(
 /** disabledReason surfaced for a missing-pass row whose module IS credentialed but toggled off. */
 const MODULE_DISABLED_REASON = 'module-disabled';
 
+/** disabledReason surfaced for a base module the workspace excluded from Freeway's automatic pool. */
+const FREEWAY_DISABLED_REASON = 'freeway-disabled';
+
 /**
  * Classify a bucket that `loadBucketViews`' live pass excluded. `moduleStatus`
  * excludes a bucket for one of two distinct reasons that the UI needs to tell
@@ -123,13 +126,23 @@ const MODULE_DISABLED_REASON = 'module-disabled';
  * not enabled names the "Enable it" target (`enableTargetModuleId`), since
  * that is the concrete card the UI can actually turn on. No credentialed
  * candidate at all is 'uncredentialed' regardless of enablement.
+ *
+ * `disabledProviders` is checked FIRST, ahead of the candidate walk: a
+ * provider the workspace excluded from Freeway is reported that way
+ * regardless of its actual credential/enablement state, which would
+ * otherwise produce a misleading 'uncredentialed' or "enable module" hint
+ * for a provider that is, in fact, fully set up — just not for Freeway.
  */
 function deriveMissingState(
   moduleId: string,
   moduleStatus: (moduleId: string) => { credentialed: boolean; enabled: boolean } | undefined,
   instanceIdsFor: (baseModuleId: string) => string[],
   overrideInstanceId: string | undefined,
+  disabledProviders: ReadonlySet<string>,
 ): { state: BucketStatusState; disabledReason?: string; enableTargetModuleId?: string } {
+  if (disabledProviders.has(moduleId)) {
+    return { state: 'disabled', disabledReason: FREEWAY_DISABLED_REASON };
+  }
   for (const candidateId of freewayCandidateIds(
     moduleId,
     instanceIdsFor(moduleId),
@@ -246,11 +259,13 @@ freewayRouter.get(
     const ledger = getFreewayLedgerStore();
     const cloudMode = isCloudMode();
     const moduleStatus = freewayModuleStatus(global, sessionId);
+    const disabledProviders = new Set(settings.freewayDisabledProviders ?? []);
 
     const liveViews = await loadBucketViews(now, {
       ledger,
       moduleStatus,
       cloudMode,
+      freewayDisabledProviders: disabledProviders,
     });
 
     // loadBucketViews excludes any bucket whose module isn't credentialed AND
@@ -264,6 +279,11 @@ freewayRouter.get(
       ledger,
       moduleStatus: alwaysCredentialed,
       cloudMode,
+      // Permissive on this dimension too: a disabled provider must still
+      // appear here so the live/all diff below catches it as "missing" and
+      // deriveMissingState can report WHY, instead of the provider vanishing
+      // from the checklist entirely.
+      freewayDisabledProviders: new Set(),
     });
     const liveKeys = new Set(liveViews.map((v) => v.bucketKey));
     const missingViews = allViews.filter((v) => !liveKeys.has(v.bucketKey));
@@ -291,6 +311,7 @@ freewayRouter.get(
           moduleStatus,
           defaultInstanceIdsFor,
           settings.freewayInstanceOverrides?.[v.moduleId],
+          disabledProviders,
         );
         return {
           bucketKey: v.bucketKey,

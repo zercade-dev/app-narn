@@ -28,9 +28,15 @@ export function getPort(): number {
   return Number.parseInt(process.env.PORT ?? '3001', 10);
 }
 
-/** `HOST` — listen address. Loopback by default. (index.ts) */
+/**
+ * `HOST` — listen address. Loopback only when UNSET: a set-but-blank value is a
+ * wildcard, not the default — `listen(port, '')` binds every interface and
+ * `listen(port, '   ')` fails to resolve at all — so blank normalizes to
+ * `0.0.0.0` and the address reported is always the address bound. (index.ts)
+ */
 export function getHost(): string {
-  return process.env.HOST ?? '127.0.0.1';
+  const v = (process.env.HOST ?? '127.0.0.1').trim();
+  return v === '' ? '0.0.0.0' : v;
 }
 
 /**
@@ -213,6 +219,15 @@ export function isLogFormatJson(): boolean {
  */
 export function getMaxConcurrentRunsPerTenant(): string | undefined {
   return process.env.MAX_CONCURRENT_RUNS_PER_TENANT;
+}
+
+/**
+ * `MAX_STRING_ENTRIES_PER_TENANT` — raw value. Same contract as the run cap
+ * above: the call site early-returns on unset/non-finite/≤0 (unbounded), so the
+ * coercion stays there. (services/tenant-storage-quota.ts)
+ */
+export function getMaxStringEntriesPerTenant(): string | undefined {
+  return process.env.MAX_STRING_ENTRIES_PER_TENANT;
 }
 
 /**

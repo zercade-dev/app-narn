@@ -22,7 +22,11 @@ import { projectIdParam } from '../middleware/path-params.js';
 import { requireUnlockedVault } from '../middleware/require-vault.js';
 import { reviewOrderService } from '../modules/review-order.js';
 import { requireTenant } from '../storage/pg/tenant-context.js';
-import { PROJECT_ICONS, BATCH_GROUPING_DIMENSIONS } from '@zercade-dev/narn-shared';
+import {
+  PROJECT_ICONS,
+  BATCH_GROUPING_DIMENSIONS,
+  REASONING_EFFORTS,
+} from '@zercade-dev/narn-shared';
 
 export const projectsRouter: Router = Router();
 
@@ -66,7 +70,7 @@ export const routingRuleSchema = z.object({
   priority: z.number(),
   promptOptions: promptOptionsSchema,
   modelOverride: z.string().optional(),
-  reasoningEffortOverride: z.enum(['low', 'medium', 'high', 'xhigh', 'disabled']).optional(),
+  reasoningEffortOverride: z.enum(REASONING_EFFORTS).optional(),
 });
 
 /** Shared with the templates router (template snapshots store module configs). */
