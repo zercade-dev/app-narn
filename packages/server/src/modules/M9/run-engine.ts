@@ -80,6 +80,14 @@ export interface LoggerLike {
 }
 
 /**
+ * Hard ceiling on one background run's total wall-clock time, independent
+ * of how many batches remain. Chosen well above a healthy run (a few
+ * minutes) but decisively below the ~17-minute stall this guards against
+ * (docs/superpowers/plans/2026-09-13-judge-review-stall-hardening.md).
+ */
+const MAX_RUN_ELAPSED_MS = 10 * 60_000; // 10 minutes
+
+/**
  * Sanitizes LLM-produced free text before it is persisted (inside an LQA issue,
  * a verdict record, or an entry's source-review). Always collapses control
  * characters and runs of whitespace to single spaces and trims. When `maxLen` is
@@ -829,6 +837,23 @@ export abstract class BackgroundRunEngine<TRecord> {
       // dispatch), so onBatchSettled — which every OTHER terminal path fires
       // from that finally — is invoked explicitly here instead. Exactly one
       // of these two call sites runs per invocation, never both.
+      await opts.onBatchSettled?.();
+      return;
+    }
+    // A run that has been going for longer than MAX_RUN_ELAPSED_MS is stalled
+    // (the reported incident: completed:0, failed:0, total:84 for 1013s
+    // before an external abort). Fail every item in THIS batch without
+    // spending a provider call — no new dispatch happens past the cap, so the
+    // run reaches its terminal state via the existing recordFailure/
+    // finalizeTerminal machinery instead of hanging indefinitely.
+    if (Date.now() - status.startedAt > MAX_RUN_ELAPSED_MS) {
+      for (const item of batch) {
+        this.recordFailure(
+          status,
+          opts.failureKey(item),
+          'review timed out — exceeded maximum run duration',
+        );
+      }
       await opts.onBatchSettled?.();
       return;
     }
