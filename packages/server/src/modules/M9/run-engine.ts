@@ -1038,6 +1038,17 @@ export abstract class BackgroundRunEngine<TRecord> {
               }
             },
             {
+              // A Freeway-bound batch gets exactly ONE attempt here: a rate
+              // limit on it is exactly the signal the reroute-to-a-healthier-
+              // bucket logic below (the outer catch, gated on `hop === 0 &&
+              // binding && isRateLimitError(err) && opts.freewayReroute`)
+              // exists to act on immediately. Retrying attempts 2 and 3 first
+              // would just re-dispatch the SAME full batch against the SAME
+              // proven-limited bucket before that logic ever got a chance to
+              // run. A non-Freeway dispatch has no bucket to reroute to, so it
+              // keeps the default 3 attempts (omitting the key) — retrying in
+              // place is still the only option there, unchanged from before.
+              ...(opts.freeway ? { attempts: 1 } : {}),
               signal,
               isCancelled: () => (status.status as RunStatusCode) === RunStatusCode.Cancelled,
               onRetry: (attempt, delayMs) =>
