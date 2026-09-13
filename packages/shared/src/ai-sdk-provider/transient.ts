@@ -45,10 +45,24 @@ export function isAbortLikeError(err: unknown): boolean {
 }
 
 /**
- * Whether an error should be retried. True for 429s, timeouts, 5xx, and network
- * resets; false for auth (401/403) and aborts/cancels. Best-effort: an
- * unclassifiable error returns false so the caller's existing non-transient path
- * (record-as-error) runs unchanged.
+ * A single request rejected as too big for the provider to accept at all — HTTP
+ * 413, or (when a provider reports its token-budget rejection without a
+ * structured 413, e.g. Groq's TPM cap) message wording naming the request/
+ * payload/message as too large. Unlike a 429 (too many requests — splitting
+ * one request into two makes that WORSE) or a 401/403 (same credential fails
+ * every half identically), a too-large rejection is exactly the case
+ * {@link splitAndRetry}'s halving already exists to fix: a smaller batch is a
+ * smaller request, which is the direct remedy for "this request is too big."
+ * @internal exported for unit-testing
+ */
+export const PAYLOAD_TOO_LARGE_MESSAGE_RE =
+  /request too large|payload too large|reduce your message size|message size and try again|context length exceeded|maximum context length/i;
+
+/**
+ * Whether an error should be retried. True for 429s, timeouts, 5xx, payload-
+ * too-large rejections, and network resets; false for auth (401/403) and
+ * aborts/cancels. Best-effort: an unclassifiable error returns false so the
+ * caller's existing non-transient path (record-as-error) runs unchanged.
  */
 export function isTransientError(err: unknown): boolean {
   if (isAbortLikeError(err)) return false;
@@ -58,11 +72,13 @@ export function isTransientError(err: unknown): boolean {
   const meta = extractSafeErrorMetadata(unwrapRetryError(err));
   const status = Number(meta.providerStatus);
   if (Number.isFinite(status) && status >= 500 && status <= 599) return true;
+  if (status === 413) return true;
   const name = typeof meta.errorName === 'string' ? meta.errorName : '';
   const message = toErrorMessage(err);
   if (name === 'TimeoutError' || /timed?\s*out|etimedout|esockettimedout/i.test(message)) {
     return true;
   }
+  if (PAYLOAD_TOO_LARGE_MESSAGE_RE.test(message)) return true;
   return /econnreset|econnrefused|eai_again|enotfound|fetch failed|socket hang up/i.test(message);
 }
 

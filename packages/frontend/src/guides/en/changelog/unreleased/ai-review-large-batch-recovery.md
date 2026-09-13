@@ -1,0 +1,5 @@
+An AI review that hit a provider's size limit now recovers automatically instead of failing outright.
+
+- A review batch too large for the model to accept in one request is now retried in smaller pieces until each piece fits.
+- Previously a single oversized batch could fail the whole review, leaving every entry in it unreviewed with no automatic recovery.
+- This applies whenever a provider rejects a request as too large, not just on Freeway-routed free-tier reviews.
