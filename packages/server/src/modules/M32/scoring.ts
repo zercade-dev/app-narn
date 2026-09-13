@@ -211,17 +211,30 @@ function passRateDivisor(passRate: number): number {
  * of them fit one reliable request, ignoring scarcity/abundance/pass-rate.
  * Those size the PLANNED batch; this caps what a bucket can physically take
  * when a batch sized for another bucket lands on it mid-dispatch.
+ *
+ * The char budget is divided by `1 + estimateOutputRatio(bucket)` before
+ * flooring: `charBudget` bounds total request size, but on a reasoning model
+ * output tokens can outweigh input several times over, so sizing purely off
+ * input characters can plan a batch whose PROJECTED total tokens (see
+ * {@link projectedRequestTokens}, which the pre-dispatch minute-window gate
+ * uses) already exceed the provider's TPM ceiling on the very first
+ * attempt — sizing and the gate must agree on what a batch costs.
  */
 export function charCappedBatch(
-  bucket: Pick<BucketView, 'maxBatch' | 'charBudget' | 'batchCeiling'>,
+  bucket: Pick<
+    BucketView,
+    'maxBatch' | 'charBudget' | 'batchCeiling' | 'dayInputTokens' | 'dayOutputTokens'
+  >,
   jobs: readonly { sourceText: string }[],
 ): number {
   if (bucket.charBudget === undefined || jobs.length === 0) return bucket.maxBatch;
   let totalChars = 0;
   for (const job of jobs) totalChars += job.sourceText.length;
   const avgChars = Math.max(1, Math.round(totalChars / jobs.length));
+  const outRatio = estimateOutputRatio(bucket);
+  const effectiveCharBudget = bucket.charBudget / (1 + outRatio);
   return Math.min(
-    Math.max(1, Math.floor(bucket.charBudget / avgChars)),
+    Math.max(1, Math.floor(effectiveCharBudget / avgChars)),
     bucket.batchCeiling ?? bucket.maxBatch,
   );
 }
@@ -296,6 +309,25 @@ const DEFAULT_OUT_RATIO = 2;
 const OUT_RATIO_MIN_SAMPLE = 500;
 
 /**
+ * The observed output/input token ratio for this bucket's day window,
+ * clamped to a sane range — or {@link DEFAULT_OUT_RATIO} until the window
+ * has a meaningful input sample. Shared by {@link projectedRequestTokens}
+ * (the pre-dispatch minuteWaitMs gate) and {@link charCappedBatch} (the
+ * initial sizing decision), so the two never disagree about what a batch on
+ * a reasoning-heavy model costs — see charCappedBatch's own doc comment for
+ * why that agreement matters.
+ */
+export function estimateOutputRatio(
+  bucket: Pick<BucketView, 'dayInputTokens' | 'dayOutputTokens'>,
+): number {
+  const dayInputTokens = bucket.dayInputTokens ?? 0;
+  const dayOutputTokens = bucket.dayOutputTokens ?? 0;
+  return dayInputTokens >= OUT_RATIO_MIN_SAMPLE
+    ? Math.min(MAX_OUT_RATIO, Math.max(MIN_OUT_RATIO, dayOutputTokens / dayInputTokens))
+    : DEFAULT_OUT_RATIO;
+}
+
+/**
  * Projected TOTAL tokens (input + output) of one request of avgRequestChars
  * source payload on this bucket. Output dominates real token spend on
  * reasoning models (observed 2–10× input), so minute-token budgeting from
@@ -309,11 +341,6 @@ export function projectedRequestTokens(
   avgRequestChars: number,
 ): number {
   const estInput = Math.ceil(avgRequestChars / 4) + REQUEST_TOKEN_OVERHEAD;
-  const dayInputTokens = bucket.dayInputTokens ?? 0;
-  const dayOutputTokens = bucket.dayOutputTokens ?? 0;
-  const outRatio =
-    dayInputTokens >= OUT_RATIO_MIN_SAMPLE
-      ? Math.min(MAX_OUT_RATIO, Math.max(MIN_OUT_RATIO, dayOutputTokens / dayInputTokens))
-      : DEFAULT_OUT_RATIO;
+  const outRatio = estimateOutputRatio(bucket);
   return Math.ceil(estInput * (1 + outRatio));
 }
