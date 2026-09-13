@@ -51,6 +51,18 @@ export interface FeatureGenerateResult {
 }
 
 /**
+ * True when a reasoning model burned its entire output budget on reasoning
+ * and produced no text at all — a failure signature independent of batch
+ * size (observed at sizes 84 down to 1 on the same run). `judgeOnce`/
+ * `reviewOnce` give this ONE same-size retry before giving up, instead of
+ * treating it like an ordinary parse failure that `splitAndRetry` would
+ * (ineffectively) try to fix by halving the batch and recursing.
+ */
+function isReasoningBudgetExhausted(res: FeatureGenerateResult): boolean {
+  return res.finishReason === 'length' && res.text.trim().length === 0;
+}
+
+/**
  * The transport SEAM: one bare "system + user in, text + raw-usage out" call.
  * The AI-SDK default binds `generateText` (through the module's
  * concurrency/rate-limit gate and per-feature response schema); Copilot binds
@@ -196,11 +208,20 @@ export async function runJudgeFeature(
     const { system, user } = buildJudgePrompt(batch);
     deps.onRequest?.(batch, { system, user });
 
-    const res = await deps.generate({ system, user, signal: deps.signal });
-
+    let res = await deps.generate({ system, user, signal: deps.signal });
     deps.onResponse?.(batch, res);
 
-    const parsed = parseJudgeResponse(res.text, batch);
+    let parsed = parseJudgeResponse(res.text, batch);
+    if (!parsed && isReasoningBudgetExhausted(res)) {
+      // One same-size retry: this model's reasoning-token usage is highly
+      // variable run-to-run (observed 900-4000 tokens on near-identical
+      // batches), so a retry has real odds of landing under the cap even
+      // without changing anything about the request.
+      deps.log('warn', `${deps.logPrefix}:reasoning-budget-retry`, { count: batch.length });
+      res = await deps.generate({ system, user, signal: deps.signal });
+      deps.onResponse?.(batch, res);
+      parsed = parseJudgeResponse(res.text, batch);
+    }
     if (!parsed) {
       deps.onParseFailed?.(batch, res);
       return null;
@@ -259,11 +280,17 @@ export async function runSourceReviewFeature(
     );
     deps.onRequest?.(reindexed, { system, user });
 
-    const res = await deps.generate({ system, user, signal: deps.signal });
-
+    let res = await deps.generate({ system, user, signal: deps.signal });
     deps.onResponse?.(batch, res);
 
-    const parsed = parseSourceReviewResponse(res.text, reindexed, opts.checks);
+    let parsed = parseSourceReviewResponse(res.text, reindexed, opts.checks);
+    if (!parsed && isReasoningBudgetExhausted(res)) {
+      // One same-size retry — see the identical comment in judgeOnce above.
+      deps.log('warn', `${deps.logPrefix}:reasoning-budget-retry`, { count: batch.length });
+      res = await deps.generate({ system, user, signal: deps.signal });
+      deps.onResponse?.(batch, res);
+      parsed = parseSourceReviewResponse(res.text, reindexed, opts.checks);
+    }
     if (!parsed) {
       deps.onParseFailed?.(batch, res);
       return null;
