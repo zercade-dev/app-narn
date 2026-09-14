@@ -212,29 +212,25 @@ function passRateDivisor(passRate: number): number {
  * Those size the PLANNED batch; this caps what a bucket can physically take
  * when a batch sized for another bucket lands on it mid-dispatch.
  *
- * The char budget is divided by `1 + estimateOutputRatio(bucket)` before
- * flooring: `charBudget` bounds total request size, but on a reasoning model
- * output tokens can outweigh input several times over, so sizing purely off
- * input characters can plan a batch whose PROJECTED total tokens (see
- * {@link projectedRequestTokens}, which the pre-dispatch minute-window gate
- * uses) already exceed the provider's TPM ceiling on the very first
- * attempt — sizing and the gate must agree on what a batch costs.
+ * `charBudget` is used undivided here. It is curated to bound a TRANSLATION
+ * request, whose output is roughly input-sized (see
+ * `shared/src/freeway/free-tier-snapshot.ts`), and this function backs the
+ * translate path's planning and rescue caps as well as review's. A caller
+ * whose output dwarfs its input — judge and source review, whose reasoning
+ * output runs several times the prompt — narrows the budget on its OWN side
+ * before calling in (see `createReviewBatchSizer` in `review-batch.ts`),
+ * rather than taxing every caller here.
  */
 export function charCappedBatch(
-  bucket: Pick<
-    BucketView,
-    'maxBatch' | 'charBudget' | 'batchCeiling' | 'dayInputTokens' | 'dayOutputTokens'
-  >,
+  bucket: Pick<BucketView, 'maxBatch' | 'charBudget' | 'batchCeiling'>,
   jobs: readonly { sourceText: string }[],
 ): number {
   if (bucket.charBudget === undefined || jobs.length === 0) return bucket.maxBatch;
   let totalChars = 0;
   for (const job of jobs) totalChars += job.sourceText.length;
   const avgChars = Math.max(1, Math.round(totalChars / jobs.length));
-  const outRatio = estimateOutputRatio(bucket);
-  const effectiveCharBudget = bucket.charBudget / (1 + outRatio);
   return Math.min(
-    Math.max(1, Math.floor(effectiveCharBudget / avgChars)),
+    Math.max(1, Math.floor(bucket.charBudget / avgChars)),
     bucket.batchCeiling ?? bucket.maxBatch,
   );
 }
@@ -312,10 +308,12 @@ const OUT_RATIO_MIN_SAMPLE = 500;
  * The observed output/input token ratio for this bucket's day window,
  * clamped to a sane range — or {@link DEFAULT_OUT_RATIO} until the window
  * has a meaningful input sample. Shared by {@link projectedRequestTokens}
- * (the pre-dispatch minuteWaitMs gate) and {@link charCappedBatch} (the
- * initial sizing decision), so the two never disagree about what a batch on
- * a reasoning-heavy model costs — see charCappedBatch's own doc comment for
- * why that agreement matters.
+ * (the pre-dispatch minuteWaitMs gate) and by `createReviewBatchSizer`
+ * (`review-batch.ts`), which narrows a judge/source-review run's char budget
+ * by the same ratio before sizing — so on those runs the sizing decision and
+ * the gate never disagree about what a batch on a reasoning-heavy model
+ * costs. Deliberately NOT applied inside {@link charCappedBatch}: that one is
+ * shared with the translate path, whose output is roughly input-sized.
  */
 export function estimateOutputRatio(
   bucket: Pick<BucketView, 'dayInputTokens' | 'dayOutputTokens'>,
