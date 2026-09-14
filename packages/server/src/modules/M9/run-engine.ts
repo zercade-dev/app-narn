@@ -83,8 +83,9 @@ export interface LoggerLike {
 /**
  * Hard ceiling on one background run's total wall-clock time, independent
  * of how many batches remain. Chosen well above a healthy run (a few
- * minutes) but decisively below the ~17-minute stall this guards against
- * (docs/superpowers/plans/2026-09-13-judge-review-stall-hardening.md).
+ * minutes) but decisively below a review that can otherwise stall for tens
+ * of minutes with zero visible progress when a provider's reasoning model
+ * burns its entire output budget on every recursive split-and-retry step.
  */
 const MAX_RUN_ELAPSED_MS = 10 * 60_000; // 10 minutes
 
