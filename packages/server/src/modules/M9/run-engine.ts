@@ -93,9 +93,10 @@ const MAX_RUN_ELAPSED_MS = 10 * 60_000; // 10 minutes
  * for a batch offered to an already-expired run (never dispatched) and for one
  * whose in-flight dispatch the deadline interrupted. One message for both so a
  * run that timed out reads the same way whichever side of the dispatch it was
- * on.
+ * on. "Run", not "review": this base class also backs non-review engines
+ * (M30's relink-retranslate among them), where "review" would be a lie.
  */
-const RUN_TIMED_OUT_MESSAGE = 'review timed out — exceeded maximum run duration';
+const RUN_TIMED_OUT_MESSAGE = 'run timed out — exceeded maximum run duration';
 
 /**
  * Sanitizes LLM-produced free text before it is persisted (inside an LQA issue,
@@ -850,52 +851,59 @@ export abstract class BackgroundRunEngine<TRecord> {
       await opts.onBatchSettled?.();
       return;
     }
-    // A run that has been going for longer than MAX_RUN_ELAPSED_MS is stalled
-    // (the reported incident: completed:0, failed:0, total:84 for 1013s
-    // before an external abort). Fail every item in THIS batch without
-    // spending a provider call — no new dispatch happens past the cap, so the
-    // run reaches its terminal state via the existing recordFailure/
-    // finalizeTerminal machinery instead of hanging indefinitely.
-    if (Date.now() - status.startedAt > MAX_RUN_ELAPSED_MS) {
-      for (const item of batch) {
-        this.recordFailure(status, opts.failureKey(item), RUN_TIMED_OUT_MESSAGE);
-      }
-      await opts.onBatchSettled?.();
-      return;
-    }
-    const signal = this.controllers.get(runId)?.signal;
-    // The guard above only protects the boundary BETWEEN batches; it can do
-    // nothing about a dispatch already in flight. That is exactly where the
-    // reported stall happened: ONE `judgeTranslations` call recursing inside
-    // the provider layer's split/retry for ~935s — every individual request
-    // within its own DEFAULT_REQUEST_TIMEOUT_MS, the recursion as a whole
-    // unbounded — so no "next batch" ever came along for the guard to stop.
-    //
-    // Bounding the dispatch itself needs nothing new: the signal threaded
-    // through `opts.call` is the SAME object every layer below already honours
-    // (the provider layer's `signal?.aborted` checkpoints between recursion
-    // steps, and its own per-request `combineAbortSignals`, which aborts an
-    // in-flight `generateText` too). Combining it once, here, with whatever is
-    // left of the run's overall budget therefore caps the batch's ENTIRE
-    // dispatch — every provider round trip the recursion makes — without
-    // touching the provider layer at all.
-    //
-    // Positive by construction: the guard above already returned for a run past
-    // the cap.
-    const remainingRunMs = MAX_RUN_ELAPSED_MS - (Date.now() - status.startedAt);
-    const dispatchSignal = combineAbortSignals(signal, remainingRunMs);
-    /**
-     * Did the RUN DEADLINE fire, as opposed to the run being cancelled? Only
-     * the combined signal reflects the deadline; `signal` (and the run's own
-     * status) stays untouched by it, which is precisely what keeps a timeout
-     * distinguishable from a user cancel here.
-     */
-    const deadlineFired = (): boolean =>
-      dispatchSignal.aborted &&
-      !signal?.aborted &&
-      (status.status as RunStatusCode) !== RunStatusCode.Cancelled;
-
     try {
+      // A run that has been going for longer than MAX_RUN_ELAPSED_MS is stalled
+      // (the reported incident: completed:0, failed:0, total:84 for 1013s
+      // before an external abort). Fail every item in THIS batch without
+      // spending a provider call — no new dispatch happens past the cap, so the
+      // run reaches its terminal state via the existing recordFailure/
+      // finalizeTerminal machinery instead of hanging indefinitely.
+      //
+      // Deliberately INSIDE the try: recording the failures is only half the
+      // job — this batch may well be the run's LAST unsettled one, and only
+      // the `finally` below flips the run terminal and persists it. Returning
+      // before the try (as an earlier revision did) left such a run Running
+      // forever with counters that never reached the store or the UI, which is
+      // the same hang wearing a hat. The mid-dispatch `deadlineFired()` branch
+      // further down returns from inside this try for exactly this reason.
+      if (Date.now() - status.startedAt > MAX_RUN_ELAPSED_MS) {
+        for (const item of batch) {
+          this.recordFailure(status, opts.failureKey(item), RUN_TIMED_OUT_MESSAGE);
+        }
+        return;
+      }
+      const signal = this.controllers.get(runId)?.signal;
+      // The guard above only protects the boundary BETWEEN batches; it can do
+      // nothing about a dispatch already in flight. That is exactly where the
+      // reported stall happened: ONE `judgeTranslations` call recursing inside
+      // the provider layer's split/retry for ~935s — every individual request
+      // within its own DEFAULT_REQUEST_TIMEOUT_MS, the recursion as a whole
+      // unbounded — so no "next batch" ever came along for the guard to stop.
+      //
+      // Bounding the dispatch itself needs nothing new: the signal threaded
+      // through `opts.call` is the SAME object every layer below already honours
+      // (the provider layer's `signal?.aborted` checkpoints between recursion
+      // steps, and its own per-request `combineAbortSignals`, which aborts an
+      // in-flight `generateText` too). Combining it once, here, with whatever is
+      // left of the run's overall budget therefore caps the batch's ENTIRE
+      // dispatch — every provider round trip the recursion makes — without
+      // touching the provider layer at all.
+      //
+      // Positive by construction: the guard above already returned for a run past
+      // the cap.
+      const remainingRunMs = MAX_RUN_ELAPSED_MS - (Date.now() - status.startedAt);
+      const dispatchSignal = combineAbortSignals(signal, remainingRunMs);
+      /**
+       * Did the RUN DEADLINE fire, as opposed to the run being cancelled? Only
+       * the combined signal reflects the deadline; `signal` (and the run's own
+       * status) stays untouched by it, which is precisely what keeps a timeout
+       * distinguishable from a user cancel here.
+       */
+      const deadlineFired = (): boolean =>
+        dispatchSignal.aborted &&
+        !signal?.aborted &&
+        (status.status as RunStatusCode) !== RunStatusCode.Cancelled;
+
       let results: TResult[];
       // The bucket this batch currently spends against; a re-route swaps it for
       // the next hop. Undefined for an ordinary (non-free-tier) run.
@@ -1087,7 +1095,14 @@ export abstract class BackgroundRunEngine<TRecord> {
               // run. A non-Freeway dispatch has no bucket to reroute to, so it
               // keeps the default 3 attempts (omitting the key) — retrying in
               // place is still the only option there, unchanged from before.
-              ...(opts.freeway ? { attempts: 1 } : {}),
+              //
+              // `hop === 0` for the same reason: past the one hop this batch
+              // gets, there is no longer a reroute for a 429 to be "the signal
+              // for". The bucket the batch moved TO must keep its full retry
+              // budget, or a rate limit there fails the whole batch faster
+              // than it did before any of this — retrying in place is all
+              // that's left there too.
+              ...(opts.freeway && hop === 0 ? { attempts: 1 } : {}),
               // Deadline-aware too: its between-attempt backoff sleep and its
               // pre-attempt abort check are part of the same dispatch, so a
               // run out of time must not sit out another rate-limit backoff
