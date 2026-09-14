@@ -10,7 +10,7 @@
  * a silent throughput or quota-accounting bug on one engine and not the other.
  */
 import { DEFAULT_BACKGROUND_BAND } from './background-select.js';
-import { batchSizeFor, effectivePassRate } from './scoring.js';
+import { batchSizeFor, effectivePassRate, estimateOutputRatio } from './scoring.js';
 import type { BucketView, JobGroup } from './types.js';
 
 /**
@@ -115,6 +115,22 @@ export function createReviewBatchSizer<TItem extends { entryId: string }>(opts: 
       // on prose, or spends several times the daily requests a high-capacity /
       // low-rpd bucket needed. With no bucket there is nothing to size against.
       if (!bucket) return opts.fallbackSize;
+      // A bucket's `charBudget` is curated to bound a TRANSLATION request,
+      // whose output is roughly input-sized. A review request is not that: the
+      // judge and the source reviewer send back verbose, reasoning-heavy
+      // output — observed 2-10x the prompt — so sizing off input characters
+      // alone plans a batch whose PROJECTED total tokens (the same
+      // `estimateOutputRatio` model the pre-dispatch minuteWaitMs gate uses)
+      // already exceed the provider's TPM ceiling on the very first attempt.
+      // That was the 2026-09-13 stall: an 84-item judge run at 0% for ~17
+      // minutes. Narrowing the budget HERE rather than inside
+      // `charCappedBatch` keeps the translate path — which shares that
+      // function and whose curated budget is already correct for it —
+      // untouched.
+      const adjustedBucket: BucketView =
+        bucket.charBudget !== undefined
+          ? { ...bucket, charBudget: bucket.charBudget / (1 + estimateOutputRatio(bucket)) }
+          : bucket;
       const group: JobGroup = {
         targetLanguage: NEUTRAL_SIZING_LANGUAGE,
         band: DEFAULT_BACKGROUND_BAND,
@@ -129,8 +145,10 @@ export function createReviewBatchSizer<TItem extends { entryId: string }>(opts: 
       };
       sizedToBucket = true;
       return batchSizeFor(
-        bucket,
+        adjustedBucket,
         group,
+        // Pass-rate is a quality signal, unrelated to the char budget — read
+        // it off the real bucket, not the narrowed copy.
         effectivePassRate(bucket, NEUTRAL_SIZING_LANGUAGE, DEFAULT_BACKGROUND_BAND),
       );
     },
