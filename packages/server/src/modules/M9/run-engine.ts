@@ -36,6 +36,7 @@ import {
   type TranslationModule,
   type TranslationUsage,
   batchGroupKey,
+  combineAbortSignals,
   groupAndPack,
   resetRateLimiters,
   resolveBatchGrouping,
@@ -86,6 +87,15 @@ export interface LoggerLike {
  * (docs/superpowers/plans/2026-09-13-judge-review-stall-hardening.md).
  */
 const MAX_RUN_ELAPSED_MS = 10 * 60_000; // 10 minutes
+
+/**
+ * The per-item failure recorded when {@link MAX_RUN_ELAPSED_MS} runs out — both
+ * for a batch offered to an already-expired run (never dispatched) and for one
+ * whose in-flight dispatch the deadline interrupted. One message for both so a
+ * run that timed out reads the same way whichever side of the dispatch it was
+ * on.
+ */
+const RUN_TIMED_OUT_MESSAGE = 'review timed out — exceeded maximum run duration';
 
 /**
  * Sanitizes LLM-produced free text before it is persisted (inside an LQA issue,
@@ -848,16 +858,42 @@ export abstract class BackgroundRunEngine<TRecord> {
     // finalizeTerminal machinery instead of hanging indefinitely.
     if (Date.now() - status.startedAt > MAX_RUN_ELAPSED_MS) {
       for (const item of batch) {
-        this.recordFailure(
-          status,
-          opts.failureKey(item),
-          'review timed out — exceeded maximum run duration',
-        );
+        this.recordFailure(status, opts.failureKey(item), RUN_TIMED_OUT_MESSAGE);
       }
       await opts.onBatchSettled?.();
       return;
     }
     const signal = this.controllers.get(runId)?.signal;
+    // The guard above only protects the boundary BETWEEN batches; it can do
+    // nothing about a dispatch already in flight. That is exactly where the
+    // reported stall happened: ONE `judgeTranslations` call recursing inside
+    // the provider layer's split/retry for ~935s — every individual request
+    // within its own DEFAULT_REQUEST_TIMEOUT_MS, the recursion as a whole
+    // unbounded — so no "next batch" ever came along for the guard to stop.
+    //
+    // Bounding the dispatch itself needs nothing new: the signal threaded
+    // through `opts.call` is the SAME object every layer below already honours
+    // (the provider layer's `signal?.aborted` checkpoints between recursion
+    // steps, and its own per-request `combineAbortSignals`, which aborts an
+    // in-flight `generateText` too). Combining it once, here, with whatever is
+    // left of the run's overall budget therefore caps the batch's ENTIRE
+    // dispatch — every provider round trip the recursion makes — without
+    // touching the provider layer at all.
+    //
+    // Positive by construction: the guard above already returned for a run past
+    // the cap.
+    const remainingRunMs = MAX_RUN_ELAPSED_MS - (Date.now() - status.startedAt);
+    const dispatchSignal = combineAbortSignals(signal, remainingRunMs);
+    /**
+     * Did the RUN DEADLINE fire, as opposed to the run being cancelled? Only
+     * the combined signal reflects the deadline; `signal` (and the run's own
+     * status) stays untouched by it, which is precisely what keeps a timeout
+     * distinguishable from a user cancel here.
+     */
+    const deadlineFired = (): boolean =>
+      dispatchSignal.aborted &&
+      !signal?.aborted &&
+      (status.status as RunStatusCode) !== RunStatusCode.Cancelled;
 
     try {
       let results: TResult[];
@@ -1007,7 +1043,10 @@ export abstract class BackgroundRunEngine<TRecord> {
               let attemptResults: TResult[] | undefined;
               try {
                 const outcome = await runCountingProviderCalls(
-                  () => opts.call(signal),
+                  // The deadline-aware signal, not the plain cancel signal:
+                  // this is the outbound dispatch the run's remaining budget
+                  // has to bound.
+                  () => opts.call(dispatchSignal),
                   (settledCalls) => {
                     calls = settledCalls;
                   },
@@ -1049,7 +1088,11 @@ export abstract class BackgroundRunEngine<TRecord> {
               // keeps the default 3 attempts (omitting the key) — retrying in
               // place is still the only option there, unchanged from before.
               ...(opts.freeway ? { attempts: 1 } : {}),
-              signal,
+              // Deadline-aware too: its between-attempt backoff sleep and its
+              // pre-attempt abort check are part of the same dispatch, so a
+              // run out of time must not sit out another rate-limit backoff
+              // or start another attempt.
+              signal: dispatchSignal,
               isCancelled: () => (status.status as RunStatusCode) === RunStatusCode.Cancelled,
               onRetry: (attempt, delayMs) =>
                 this.logger.warn(`${this.logPrefix}:rate-limited - retrying batch`, {
@@ -1062,6 +1105,23 @@ export abstract class BackgroundRunEngine<TRecord> {
           );
           break;
         } catch (err) {
+          // A deadline abort is NOT a cancel, and must not take the silent
+          // return below. A cancel can return without recording anything
+          // because `cancel()` has already driven the run terminal; a deadline
+          // leaves the run Running with these items unsettled, and
+          // `finalizeTerminal` only flips once completed+failed === total — so
+          // returning silently here would swap an indefinite provider hang for
+          // an indefinitely Running run, which is the same bug wearing a hat.
+          // Record the same timed-out failure the pre-dispatch guard records
+          // and stop: no re-route, no pause, nothing that would spend time the
+          // run no longer has.
+          if (deadlineFired()) {
+            for (const item of batch) {
+              this.recordFailure(status, opts.failureKey(item), RUN_TIMED_OUT_MESSAGE);
+            }
+            this.logger.warn(`${this.logPrefix}:batch-timed-out`, { runId, moduleId });
+            return;
+          }
           if (isAbortError(err) || signal?.aborted) return;
           // A free-tier bucket that rate-limited us through every retry is out of
           // capacity, not merely unlucky: cool it so the pool stops ranking it
