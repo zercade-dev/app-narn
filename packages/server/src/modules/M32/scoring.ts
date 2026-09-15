@@ -211,6 +211,15 @@ function passRateDivisor(passRate: number): number {
  * of them fit one reliable request, ignoring scarcity/abundance/pass-rate.
  * Those size the PLANNED batch; this caps what a bucket can physically take
  * when a batch sized for another bucket lands on it mid-dispatch.
+ *
+ * `charBudget` is used undivided here. It is curated to bound a TRANSLATION
+ * request, whose output is roughly input-sized (see
+ * `shared/src/freeway/free-tier-snapshot.ts`), and this function backs the
+ * translate path's planning and rescue caps as well as review's. A caller
+ * whose output dwarfs its input — judge and source review, whose reasoning
+ * output runs several times the prompt — narrows the budget on its OWN side
+ * before calling in (see `createReviewBatchSizer` in `review-batch.ts`),
+ * rather than taxing every caller here.
  */
 export function charCappedBatch(
   bucket: Pick<BucketView, 'maxBatch' | 'charBudget' | 'batchCeiling'>,
@@ -296,6 +305,27 @@ const DEFAULT_OUT_RATIO = 2;
 const OUT_RATIO_MIN_SAMPLE = 500;
 
 /**
+ * The observed output/input token ratio for this bucket's day window,
+ * clamped to a sane range — or {@link DEFAULT_OUT_RATIO} until the window
+ * has a meaningful input sample. Shared by {@link projectedRequestTokens}
+ * (the pre-dispatch minuteWaitMs gate) and by `createReviewBatchSizer`
+ * (`review-batch.ts`), which narrows a judge/source-review run's char budget
+ * by the same ratio before sizing — so on those runs the sizing decision and
+ * the gate never disagree about what a batch on a reasoning-heavy model
+ * costs. Deliberately NOT applied inside {@link charCappedBatch}: that one is
+ * shared with the translate path, whose output is roughly input-sized.
+ */
+export function estimateOutputRatio(
+  bucket: Pick<BucketView, 'dayInputTokens' | 'dayOutputTokens'>,
+): number {
+  const dayInputTokens = bucket.dayInputTokens ?? 0;
+  const dayOutputTokens = bucket.dayOutputTokens ?? 0;
+  return dayInputTokens >= OUT_RATIO_MIN_SAMPLE
+    ? Math.min(MAX_OUT_RATIO, Math.max(MIN_OUT_RATIO, dayOutputTokens / dayInputTokens))
+    : DEFAULT_OUT_RATIO;
+}
+
+/**
  * Projected TOTAL tokens (input + output) of one request of avgRequestChars
  * source payload on this bucket. Output dominates real token spend on
  * reasoning models (observed 2–10× input), so minute-token budgeting from
@@ -309,11 +339,6 @@ export function projectedRequestTokens(
   avgRequestChars: number,
 ): number {
   const estInput = Math.ceil(avgRequestChars / 4) + REQUEST_TOKEN_OVERHEAD;
-  const dayInputTokens = bucket.dayInputTokens ?? 0;
-  const dayOutputTokens = bucket.dayOutputTokens ?? 0;
-  const outRatio =
-    dayInputTokens >= OUT_RATIO_MIN_SAMPLE
-      ? Math.min(MAX_OUT_RATIO, Math.max(MIN_OUT_RATIO, dayOutputTokens / dayInputTokens))
-      : DEFAULT_OUT_RATIO;
+  const outRatio = estimateOutputRatio(bucket);
   return Math.ceil(estInput * (1 + outRatio));
 }
