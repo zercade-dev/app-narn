@@ -139,8 +139,8 @@ catalogs:
       specifier: 26.4.2
       version: 26.4.2
     lucide-react:
-      specifier: 1.44.0
-      version: 1.44.0
+      specifier: 1.46.0
+      version: 1.46.0
     multer:
       specifier: 2.3.0
       version: 2.3.0
@@ -463,7 +463,7 @@ importers:
         version: 26.4.2(typescript@7.0.2)
       lucide-react:
         specifier: 'catalog:'
-        version: 1.44.0(react@19.3.0)
+        version: 1.46.0(react@19.3.0)
       react:
         specifier: 'catalog:'
         version: 19.3.0
@@ -2436,8 +2436,8 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
-  lucide-react@1.44.0:
-    resolution: {integrity: sha512-2egNApH4hX4j/qdCgRublh88+9u3mEhz9iSlW5ckm4kaQEqZbXbMr0l5u5JZLy8nmWRx2dbHGQkEDYz6C9aCgw==}
+  lucide-react@1.46.0:
+    resolution: {integrity: sha512-Bv+FZXgZPrxc/NCl1e7JJVQFLdiCxYgxNVhqoV7X0p6I8ADJo8DxBnK1auH0fZz4AmqOJ3jgneL4f1i8LJQRAA==}
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
@@ -4756,7 +4756,7 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
-  lucide-react@1.44.0(react@19.3.0):
+  lucide-react@1.46.0(react@19.3.0):
     dependencies:
       react: 19.3.0
 
