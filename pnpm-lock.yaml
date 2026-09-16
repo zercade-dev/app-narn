@@ -13,8 +13,8 @@ catalogs:
       specifier: 3.0.44
       version: 3.0.44
     '@ai-sdk/google':
-      specifier: 4.0.69
-      version: 4.0.69
+      specifier: 4.0.70
+      version: 4.0.70
     '@ai-sdk/openai':
       specifier: 4.0.66
       version: 4.0.66
@@ -100,8 +100,8 @@ catalogs:
       specifier: 8.18.0
       version: 8.18.0
     ai:
-      specifier: 7.0.99
-      version: 7.0.99
+      specifier: 7.0.101
+      version: 7.0.101
     class-variance-authority:
       specifier: 0.7.1
       version: 0.7.1
@@ -263,7 +263,7 @@ importers:
         version: link:../../packages/shared
       ai:
         specifier: 'catalog:'
-        version: 7.0.99(zod@4.6.5)
+        version: 7.0.101(zod@4.6.5)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -315,7 +315,7 @@ importers:
         version: link:../../packages/shared
       ai:
         specifier: 'catalog:'
-        version: 7.0.99(zod@4.6.5)
+        version: 7.0.101(zod@4.6.5)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -331,7 +331,7 @@ importers:
         version: link:../../packages/shared
       ai:
         specifier: 'catalog:'
-        version: 7.0.99(zod@4.6.5)
+        version: 7.0.101(zod@4.6.5)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -344,13 +344,13 @@ importers:
     dependencies:
       '@ai-sdk/google':
         specifier: 'catalog:'
-        version: 4.0.69(zod@4.6.5)
+        version: 4.0.70(zod@4.6.5)
       '@zercade-dev/narn-shared':
         specifier: workspace:*
         version: link:../../packages/shared
       ai:
         specifier: 'catalog:'
-        version: 7.0.99(zod@4.6.5)
+        version: 7.0.101(zod@4.6.5)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -366,7 +366,7 @@ importers:
         version: link:../../packages/shared
       ai:
         specifier: 'catalog:'
-        version: 7.0.99(zod@4.6.5)
+        version: 7.0.101(zod@4.6.5)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -385,7 +385,7 @@ importers:
         version: link:../../packages/shared
       ai:
         specifier: 'catalog:'
-        version: 7.0.99(zod@4.6.5)
+        version: 7.0.101(zod@4.6.5)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -401,7 +401,7 @@ importers:
         version: link:../../packages/shared
       ai:
         specifier: 'catalog:'
-        version: 7.0.99(zod@4.6.5)
+        version: 7.0.101(zod@4.6.5)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -627,7 +627,7 @@ importers:
         version: 3.0.44(zod@4.6.5)
       '@ai-sdk/google':
         specifier: 'catalog:'
-        version: 4.0.69(zod@4.6.5)
+        version: 4.0.70(zod@4.6.5)
       '@ai-sdk/openai':
         specifier: 'catalog:'
         version: 4.0.66(zod@4.6.5)
@@ -636,7 +636,7 @@ importers:
         version: 3.0.48(zod@4.6.5)
       ai:
         specifier: 'catalog:'
-        version: 7.0.99(zod@4.6.5)
+        version: 7.0.101(zod@4.6.5)
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -659,14 +659,14 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@4.0.80':
-    resolution: {integrity: sha512-6t+07o8lSthpKf64Xb1qHWR2bWvJ3Fd2oFvS9fQc45p31bi2OUqan246e/ojAmZpWCiMPjKyQ4TBr4MYytnTiQ==}
+  '@ai-sdk/gateway@4.0.81':
+    resolution: {integrity: sha512-9TdKEg2l/qfaK7L4gC1FkrHNBrEXQjZSV3DvkRLCXkOSJTzojmarCn19ROWBbrlHqFVbW7OSOwQqz1n7ku9HQA==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google@4.0.69':
-    resolution: {integrity: sha512-clIivD3RQwutykzKQ8CV+BXIA6EX3xcrfJyXXvAni2SlR9JVATSRbu+JFK/j25a330aZ6WiDwbGyD/u951qXOg==}
+  '@ai-sdk/google@4.0.70':
+    resolution: {integrity: sha512-NghQ6tfTQwVFiYt41W4hGnOiUn8Sg/rt9K9m0Tx8t8wLr0qOPy5ZBAyFeIzhvypDVBpVgT8BJ3jEasq4vpU8hQ==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1716,8 +1716,8 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
 
-  ai@7.0.99:
-    resolution: {integrity: sha512-Ov+3j/nSajaVH5hO8C94wN9wisG5tAJ8HWsLV9d/+nlzrRGUh3oYO3Kp1fRyUNWjAWLSpGLHLPaHCdfxb307Vg==}
+  ai@7.0.101:
+    resolution: {integrity: sha512-EOhih2g2Gu6TJdnkBojXORtNT6oZ6J4YeVeJhZXFO384ONLdXpPa+VPH183IMpSB8SkswQHTYRRoZ1tt+9Jt3Q==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3133,14 +3133,14 @@ snapshots:
       '@ai-sdk/provider-utils': 5.0.40(zod@4.6.5)
       zod: 4.6.5
 
-  '@ai-sdk/gateway@4.0.80(zod@4.6.5)':
+  '@ai-sdk/gateway@4.0.81(zod@4.6.5)':
     dependencies:
       '@ai-sdk/provider': 4.0.14
       '@ai-sdk/provider-utils': 5.0.40(zod@4.6.5)
       '@vercel/oidc': 3.2.0
       zod: 4.6.5
 
-  '@ai-sdk/google@4.0.69(zod@4.6.5)':
+  '@ai-sdk/google@4.0.70(zod@4.6.5)':
     dependencies:
       '@ai-sdk/provider': 4.0.14
       '@ai-sdk/provider-utils': 5.0.40(zod@4.6.5)
@@ -4002,9 +4002,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ai@7.0.99(zod@4.6.5):
+  ai@7.0.101(zod@4.6.5):
     dependencies:
-      '@ai-sdk/gateway': 4.0.80(zod@4.6.5)
+      '@ai-sdk/gateway': 4.0.81(zod@4.6.5)
       '@ai-sdk/provider': 4.0.14
       '@ai-sdk/provider-utils': 5.0.40(zod@4.6.5)
       zod: 4.6.5

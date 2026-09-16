@@ -93,8 +93,8 @@ catalog:
   deepl-node: 1.28.0
 
   # AI SDK dependencies
-  ai: 7.0.99
-  '@ai-sdk/google': 4.0.69
+  ai: 7.0.101
+  '@ai-sdk/google': 4.0.70
   '@ai-sdk/deepseek': 3.0.44
   '@ai-sdk/openai': 4.0.66
   '@ai-sdk/anthropic': 4.0.53
