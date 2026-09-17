@@ -76,7 +76,7 @@ overrides:
 catalog:
   # Shared tooling
   typescript: 7.0.2
-  prettier: 3.9.6
+  prettier: 3.9.7
   eslint: 10.10.0
   # Maintenance scripts (e.g. scripts/update-provider-pricing.ts) — the browser
   # automation used to scrape provider pricing and capability pages.
