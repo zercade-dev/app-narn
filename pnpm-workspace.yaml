@@ -120,7 +120,7 @@ catalog:
   '@types/yauzl': 3.4.0
   '@types/yazl': 3.3.1
   '@types/pg': 8.23.1
-  tsx: 4.23.13
+  tsx: 4.23.15
 
   # Frontend runtime
   '@base-ui/react': 1.8.0
