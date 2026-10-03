@@ -118,7 +118,7 @@ catalog:
   zod: 4.6.5
   yauzl: 3.4.0
   yazl: 3.3.1
-  pg: 8.23.0
+  pg: 8.23.1
   # Server dev / types
   '@types/cors': 2.8.19
   '@types/express': 5.0.6
