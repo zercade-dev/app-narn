@@ -1,48 +1,52 @@
 {
-  "generatedAt": "2026-08-28T21:21:11.601Z",
+  "generatedAt": "2026-10-03T09:36:30.772Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
       "models": [
         {
-          "id": "deepseek-v4-flash",
-          "cachedInputCostPerMillion": 0.007,
+          "id": "deepseek-flash",
+          "cachedInputCostPerMillion": 0.006,
           "contextLength": 1000000,
-          "capabilityTags": ["tools"]
+          "capabilityTags": ["tools"],
+          "inputCostPerMillion": 0.3,
+          "outputCostPerMillion": 1.2
         },
         {
           "id": "deepseek-v4-pro",
-          "cachedInputCostPerMillion": 0.022,
-          "inputCostPerMillion": 0.22,
-          "outputCostPerMillion": 0.66,
+          "cachedInputCostPerMillion": 0.044,
+          "inputCostPerMillion": 1.32,
+          "outputCostPerMillion": 3.96,
           "contextLength": 1000000,
           "capabilityTags": ["tools"]
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "cachedInputCostPerMillion": 0.006,
+          "contextLength": 1000000,
+          "capabilityTags": ["tools"],
+          "inputCostPerMillion": 0.3,
+          "outputCostPerMillion": 1.2
         },
         {
           "id": "deepseek-v4-flash-vision-exp",
-          "cachedInputCostPerMillion": 0.007,
-          "inputCostPerMillion": 0.66,
-          "outputCostPerMillion": 1.98,
+          "cachedInputCostPerMillion": 0.006,
           "contextLength": 1000000,
-          "capabilityTags": ["tools"]
-        },
-        {
-          "id": "deepseek-chat",
-          "cachedInputCostPerMillion": 0.007,
-          "contextLength": 1000000,
-          "capabilityTags": ["tools"]
-        },
-        {
-          "id": "deepseek-reasoner",
-          "cachedInputCostPerMillion": 0.007,
-          "contextLength": 1000000,
-          "capabilityTags": ["tools"]
+          "capabilityTags": ["tools"],
+          "inputCostPerMillion": 0.3,
+          "outputCostPerMillion": 1.2
         }
       ]
     },
     "google": {
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
       "models": [
+        {
+          "id": "gemini-3.8-flash",
+          "inputCostPerMillion": 0.75,
+          "outputCostPerMillion": 3.75,
+          "capabilityTags": ["tools", "vision", "audio"]
+        },
         {
           "id": "gemini-3.7-flash",
           "inputCostPerMillion": 0.75,
@@ -60,6 +64,21 @@
           "inputCostPerMillion": 1.5,
           "outputCostPerMillion": 9,
           "capabilityTags": ["tools", "vision", "audio"]
+        },
+        {
+          "id": "gemini-3.8-live",
+          "inputCostPerMillion": 0.75,
+          "outputCostPerMillion": 4.5
+        },
+        {
+          "id": "gemini-3.8-live-extended-thinking",
+          "inputCostPerMillion": 0.75,
+          "outputCostPerMillion": 4.5
+        },
+        {
+          "id": "gemini-3.1-flash-live-preview",
+          "inputCostPerMillion": 0.75,
+          "outputCostPerMillion": 4.5
         },
         {
           "id": "gemini-3.5-live-translate-preview",
@@ -111,11 +130,6 @@
           "capabilityTags": ["tools", "vision", "audio"]
         },
         {
-          "id": "gemini-3.1-flash-live-preview",
-          "inputCostPerMillion": 0.75,
-          "outputCostPerMillion": 4.5
-        },
-        {
           "id": "gemini-3.1-flash-image",
           "inputCostPerMillion": 0.5,
           "outputCostPerMillion": 3,
@@ -126,6 +140,16 @@
           "inputCostPerMillion": 0.25,
           "outputCostPerMillion": 1.5,
           "capabilityTags": ["vision"]
+        },
+        {
+          "id": "gemini-3.8-flash-tts",
+          "inputCostPerMillion": 0.5,
+          "outputCostPerMillion": 9
+        },
+        {
+          "id": "gemini-3.8-flash-lite-tts",
+          "inputCostPerMillion": 0.5,
+          "outputCostPerMillion": 6
         },
         {
           "id": "gemini-3.1-flash-tts-preview",
@@ -188,28 +212,14 @@
           "inputCostPerMillion": 0.2
         },
         {
-          "id": "gemini-embedding-001",
-          "inputCostPerMillion": 0.15
-        },
-        {
           "id": "gemini-robotics-er-2-preview",
-          "inputCostPerMillion": 2,
-          "outputCostPerMillion": 10
-        },
-        {
-          "id": "gemini-robotics-er-2-streaming-preview",
-          "inputCostPerMillion": 2,
-          "outputCostPerMillion": 10
-        },
-        {
-          "id": "gemini-robotics-er-1.6-preview",
           "inputCostPerMillion": 1,
           "outputCostPerMillion": 5
         },
         {
-          "id": "gemini-2.5-computer-use-preview-10-2025",
-          "inputCostPerMillion": 1.25,
-          "outputCostPerMillion": 10
+          "id": "gemini-robotics-er-2-streaming-preview",
+          "inputCostPerMillion": 1,
+          "outputCostPerMillion": 5
         }
       ]
     },
@@ -217,26 +227,34 @@
       "sourceUrl": "https://developers.openai.com/api/docs/pricing",
       "models": [
         {
-          "id": "gpt-5.6-sol",
-          "inputCostPerMillion": 4,
-          "cachedInputCostPerMillion": 0.4,
-          "outputCostPerMillion": 5,
+          "id": "gpt-6-astra",
+          "inputCostPerMillion": 10,
+          "cachedInputCostPerMillion": 1,
+          "outputCostPerMillion": 12.5,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 1050000
         },
         {
-          "id": "gpt-5.6-terra",
+          "id": "gpt-6.1-sol",
           "inputCostPerMillion": 2,
-          "cachedInputCostPerMillion": 0.2,
+          "cachedInputCostPerMillion": 0.1,
           "outputCostPerMillion": 2.5,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 1050000
         },
         {
-          "id": "gpt-5.6-luna",
-          "inputCostPerMillion": 0.2,
-          "cachedInputCostPerMillion": 0.02,
-          "outputCostPerMillion": 0.25,
+          "id": "gpt-6-luna",
+          "inputCostPerMillion": 0.1,
+          "cachedInputCostPerMillion": 0.01,
+          "outputCostPerMillion": 0.125,
+          "capabilityTags": ["tools", "vision"],
+          "contextLength": 1050000
+        },
+        {
+          "id": "gpt-5.6-sol",
+          "inputCostPerMillion": 4,
+          "cachedInputCostPerMillion": 0.4,
+          "outputCostPerMillion": 5,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 1050000
         },
@@ -254,21 +272,21 @@
       "sourceUrl": "https://claude.com/pricing",
       "models": [
         {
-          "id": "claude-fable-5",
+          "id": "claude-fable-5-1",
           "inputCostPerMillion": 10,
           "outputCostPerMillion": 50,
           "cacheWriteCostPerMillion": 12.5,
-          "cachedInputCostPerMillion": 1
+          "cachedInputCostPerMillion": 0.25
         },
         {
-          "id": "claude-opus-5",
-          "inputCostPerMillion": 5,
-          "outputCostPerMillion": 25,
-          "cacheWriteCostPerMillion": 6.25,
-          "cachedInputCostPerMillion": 0.5
+          "id": "claude-opus-5-5",
+          "inputCostPerMillion": 4,
+          "outputCostPerMillion": 20,
+          "cacheWriteCostPerMillion": 5,
+          "cachedInputCostPerMillion": 0.2
         },
         {
-          "id": "claude-sonnet-5",
+          "id": "claude-sonnet-5-5",
           "inputCostPerMillion": 2,
           "outputCostPerMillion": 10,
           "cacheWriteCostPerMillion": 2.5,
@@ -280,6 +298,27 @@
           "outputCostPerMillion": 5,
           "cacheWriteCostPerMillion": 1.25,
           "cachedInputCostPerMillion": 0.1
+        },
+        {
+          "id": "claude-sonnet-5",
+          "inputCostPerMillion": 2,
+          "outputCostPerMillion": 10,
+          "cacheWriteCostPerMillion": 2.5,
+          "cachedInputCostPerMillion": 0.2
+        },
+        {
+          "id": "claude-opus-5",
+          "inputCostPerMillion": 5,
+          "outputCostPerMillion": 25,
+          "cacheWriteCostPerMillion": 6.25,
+          "cachedInputCostPerMillion": 0.5
+        },
+        {
+          "id": "claude-fable-5",
+          "inputCostPerMillion": 10,
+          "outputCostPerMillion": 50,
+          "cacheWriteCostPerMillion": 12.5,
+          "cachedInputCostPerMillion": 1
         },
         {
           "id": "claude-opus-4-8",
@@ -322,13 +361,6 @@
           "outputCostPerMillion": 25,
           "cacheWriteCostPerMillion": 6.25,
           "cachedInputCostPerMillion": 0.5
-        },
-        {
-          "id": "claude-opus-4-1",
-          "inputCostPerMillion": 15,
-          "outputCostPerMillion": 75,
-          "cacheWriteCostPerMillion": 18.75,
-          "cachedInputCostPerMillion": 1.5
         }
       ]
     }

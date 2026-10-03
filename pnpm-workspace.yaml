@@ -33,14 +33,22 @@ overrides:
   # via unbounded intermediate arrays was found, unpatched by 5.0.8 — patched in 5.0.9.
   # Pulled in transitively via eslint/@typescript-eslint's minimatch dependency
   # (dev-only chain, 30 paths) — force the patched range until upstream bumps minimatch.
-  brace-expansion: '>=5.0.9'
+  # September advisories include GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p,
+  # and GHSA-q2hr-2g5m-vwhr: expansion CPU/memory DoS. The last fix is 5.0.12.
+  brace-expansion: '>=5.0.12 <6'
   # GHSA-4cwx-7wf7-3272 (high, published 2026-08-03): undici <7.29.0 has a
   # cross-user information-disclosure and parse-time crash via degenerate
   # private cache directives. Pulled in transitively via every AI-SDK module's
   # @ai-sdk/provider-utils dependency (anthropic, deepseek, generic-ai,
   # google, openai, openrouter, packages/shared) — force the patched range
   # here until @ai-sdk/provider-utils bumps its own pin.
-  undici: '>=7.29.0'
+  # September WebSocket, TLS, and cache advisories require 8.10.2. Keep the
+  # already-resolved major (8) while raising the security floor.
+  undici: '>=8.10.2 <9'
+  # deepl-node's Axios dependency: September prototype-pollution gadgets can
+  # alter headers, routing, TLS, and resource limits. All are fixed in 1.20.0.
+  # Preserve the SDK's Axios major until its upstream dependency catches up.
+  axios: '>=1.20.0 <2'
   # GHSA-2v37-7h3g-55p8 (high, published 2026-07-29): nanoid loops indefinitely
   # when a custom generator gets size 0 (3.3.16 fixed only the negative-size
   # sibling GHSA-28wg-ghj8-5hjv). The 3.3.17 fix was incomplete — the advisory
@@ -76,65 +84,65 @@ overrides:
 catalog:
   # Shared tooling
   typescript: 7.0.2
-  prettier: 3.9.6
-  eslint: 10.10.0
+  prettier: 3.9.9
+  eslint: 10.11.0
   # Maintenance scripts (e.g. scripts/update-provider-pricing.ts) — the browser
   # automation used to scrape provider pricing and capability pages.
   playwright: 1.63.0
   '@eslint/js': 10.0.1
-  globals: 17.12.0
+  globals: 17.13.0
   eslint-config-prettier: 10.1.8
   eslint-plugin-react-hooks: 7.1.1
-  '@typescript-eslint/eslint-plugin': 8.70.0
-  '@typescript-eslint/parser': 8.70.0
+  '@typescript-eslint/eslint-plugin': 8.71.0
+  '@typescript-eslint/parser': 8.71.0
 
   # Module dependencies
-  '@github/copilot-sdk': 1.0.13
+  '@github/copilot-sdk': 1.0.16
   deepl-node: 1.28.0
 
   # AI SDK dependencies
-  ai: 7.0.97
-  '@ai-sdk/google': 4.0.67
-  '@ai-sdk/deepseek': 3.0.42
-  '@ai-sdk/openai': 4.0.65
-  '@ai-sdk/anthropic': 4.0.52
-  '@ai-sdk/openai-compatible': 3.0.47
+  ai: 7.0.102
+  '@ai-sdk/google': 4.0.72
+  '@ai-sdk/deepseek': 3.0.45
+  '@ai-sdk/openai': 4.0.67
+  '@ai-sdk/anthropic': 4.0.54
+  '@ai-sdk/openai-compatible': 3.0.49
 
   # Server runtime
   cors: 2.8.6
-  dotenv: 17.4.2
+  dotenv: 18.0.5
   express: 5.2.1
   helmet: 8.3.0
-  multer: 2.3.0
+  multer: 2.4.0
   papaparse: 5.7.0
-  zod: 4.6.1
+  zod: 4.6.5
   yauzl: 3.4.0
   yazl: 3.3.1
-  pg: 8.23.0
+  pg: 8.23.1
   # Server dev / types
   '@types/cors': 2.8.19
   '@types/express': 5.0.6
-  '@types/multer': 2.2.0
-  '@types/node': 26.5.1
+  '@types/multer': 2.3.0
+  '@types/node': 26.6.4
   '@types/papaparse': 5.5.2
   '@types/yauzl': 3.4.0
   '@types/yazl': 3.3.1
   '@types/pg': 8.23.1
-  tsx: 4.23.13
+  tsx: 4.23.15
 
   # Frontend runtime
   '@base-ui/react': 1.8.0
-  '@tanstack/react-virtual': 3.14.11
+  '@tanstack/react-virtual': 3.14.13
   class-variance-authority: 0.7.1
   clsx: 2.1.1
-  lucide-react: 1.44.0
+  lucide-react: 1.49.0
   react: 19.3.0
   react-dom: 19.3.0
   i18next: 26.4.2
-  react-i18next: 17.0.13
+  react-i18next: 17.0.15
   react-markdown: 10.1.0
   sonner: 2.0.8
-  tailwind-merge: 3.6.0
+  tailwind-merge: 3.7.0
   zustand: 5.0.15
 
   # Frontend dev
@@ -151,7 +159,7 @@ catalog:
   '@vitejs/plugin-react': 6.1.1
   esbuild: 0.28.2
   tailwindcss: 4.3.3
-  vite: 8.2.2
+  vite: 8.3.2
 
   # Frontend build tooling — parsers for the strip-comments Vite plugin (guarantee
   # no shipped comments). Real parsers, never regex (// and /* appear in string and

@@ -387,7 +387,7 @@ hosted NARN service: `modules/copilot/manifest.json` sets `"cloudDisabled": true
 
 ### `@github/copilot-sdk` — MIT License
 
-`@github/copilot-sdk` 1.0.13 declares `"license": "MIT"` and `"author": "GitHub"` in its
+`@github/copilot-sdk` 1.0.16 declares `"license": "MIT"` and `"author": "GitHub"` in its
 manifest, but its published tarball contains no licence file. The text below is the
 `LICENSE` file of the source repository that same manifest names,
 <https://github.com/github/copilot-sdk>.
@@ -430,15 +430,15 @@ pnpm install
 pnpm licenses list --prod          # add --json for machine-readable output
 ```
 
-Measured on 2026-09-08 on a linux-x64 host, that command reported **248** packages: 217
+Measured on 2026-10-03 on a linux-x64 host, that command reported **241** packages: 210
 MIT (among them `@github/copilot-sdk` and `@base-ui/react`), 14 Apache-2.0, 8 ISC, 6
 OFL-1.1 — the six font families, see _Fonts_ — 1 BSD-2-Clause, 1 BSD-3-Clause, and 1
 `(AFL-2.1 OR BSD-3-Clause)`. Every package in that frame names an SPDX identifier. The two
 entries pnpm previously reported as `Unknown` were `@github/copilot` and the platform
 binary it pulled in, whose manifests pointed at a licence file instead; both left the tree
-when SDK 1.0.13 dropped the CLI dependency. No copyleft licence appears among those 248.
+when SDK 1.0.13 dropped the CLI dependency. No copyleft licence appears among those 241.
 
-The host matters to what that list names. At least three of the 248 are platform-specific
+The host matters to what that list names. At least three of the 241 are platform-specific
 — `@github/copilot-sdk-linux-x64` (MIT), `@koromix/koffi-linux-x64` (MIT) and
 `@typescript/typescript-linux-x64` (Apache-2.0) — so running the same command on macOS or
 Windows substitutes different packages in more than one licence category.
@@ -473,7 +473,7 @@ an accessibility auditing tool. It is loaded behind an `import.meta.env.DEV` gua
 the built output), so it is not redistributed.
 
 Finally, the claim that installed packages carry their own licence files is the norm rather
-than a rule. Of the 248, eight ship none: `@ai-sdk/provider-utils`, `@github/copilot-sdk`,
+than a rule. Of the 241, eight ship none: `@ai-sdk/provider-utils`, `@github/copilot-sdk`,
 `@github/copilot-sdk-linux-x64`, `@koromix/koffi-linux-x64`, `agent-base`,
 `https-proxy-agent`, `pg-types` and `pgpass`. Each declares its licence in its manifest;
 the two `@github/copilot-sdk` packages are the ones that mattered here, which is why the
