@@ -33,14 +33,22 @@ overrides:
   # via unbounded intermediate arrays was found, unpatched by 5.0.8 — patched in 5.0.9.
   # Pulled in transitively via eslint/@typescript-eslint's minimatch dependency
   # (dev-only chain, 30 paths) — force the patched range until upstream bumps minimatch.
-  brace-expansion: '>=5.0.9'
+  # September advisories include GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p,
+  # and GHSA-q2hr-2g5m-vwhr: expansion CPU/memory DoS. The last fix is 5.0.12.
+  brace-expansion: '>=5.0.12 <6'
   # GHSA-4cwx-7wf7-3272 (high, published 2026-08-03): undici <7.29.0 has a
   # cross-user information-disclosure and parse-time crash via degenerate
   # private cache directives. Pulled in transitively via every AI-SDK module's
   # @ai-sdk/provider-utils dependency (anthropic, deepseek, generic-ai,
   # google, openai, openrouter, packages/shared) — force the patched range
   # here until @ai-sdk/provider-utils bumps its own pin.
-  undici: '>=7.29.0'
+  # September WebSocket, TLS, and cache advisories require 8.10.2. Keep the
+  # already-resolved major (8) while raising the security floor.
+  undici: '>=8.10.2 <9'
+  # deepl-node's Axios dependency: September prototype-pollution gadgets can
+  # alter headers, routing, TLS, and resource limits. All are fixed in 1.20.0.
+  # Preserve the SDK's Axios major until its upstream dependency catches up.
+  axios: '>=1.20.0 <2'
   # GHSA-2v37-7h3g-55p8 (high, published 2026-07-29): nanoid loops indefinitely
   # when a custom generator gets size 0 (3.3.16 fixed only the negative-size
   # sibling GHSA-28wg-ghj8-5hjv). The 3.3.17 fix was incomplete — the advisory
