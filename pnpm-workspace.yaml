@@ -90,7 +90,7 @@ catalog:
   # automation used to scrape provider pricing and capability pages.
   playwright: 1.63.0
   '@eslint/js': 10.0.1
-  globals: 17.12.0
+  globals: 17.13.0
   eslint-config-prettier: 10.1.8
   eslint-plugin-react-hooks: 7.1.1
   '@typescript-eslint/eslint-plugin': 8.71.0
