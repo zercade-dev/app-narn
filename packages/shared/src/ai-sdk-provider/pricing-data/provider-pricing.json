@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-03T09:36:30.772Z",
+  "generatedAt": "2026-10-10T23:33:29.797Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
@@ -8,7 +8,7 @@
           "id": "deepseek-flash",
           "cachedInputCostPerMillion": 0.006,
           "contextLength": 1000000,
-          "capabilityTags": ["tools"],
+          "capabilityTags": ["tools", "vision"],
           "inputCostPerMillion": 0.3,
           "outputCostPerMillion": 1.2
         },
@@ -220,6 +220,12 @@
           "id": "gemini-robotics-er-2-streaming-preview",
           "inputCostPerMillion": 1,
           "outputCostPerMillion": 5
+        },
+        {
+          "id": "gemini-nano-banana-2.1",
+          "inputCostPerMillion": 1.5,
+          "outputCostPerMillion": 7.5,
+          "capabilityTags": ["tools", "vision"]
         }
       ]
     },
@@ -230,41 +236,58 @@
           "id": "gpt-6-astra",
           "inputCostPerMillion": 10,
           "cachedInputCostPerMillion": 1,
-          "outputCostPerMillion": 12.5,
+          "outputCostPerMillion": 50,
           "capabilityTags": ["tools", "vision"],
-          "contextLength": 1050000
+          "contextLength": 1050000,
+          "cacheWriteCostPerMillion": 12.5
         },
         {
           "id": "gpt-6.1-sol",
           "inputCostPerMillion": 2,
           "cachedInputCostPerMillion": 0.1,
-          "outputCostPerMillion": 2.5,
+          "outputCostPerMillion": 10,
           "capabilityTags": ["tools", "vision"],
-          "contextLength": 1050000
+          "contextLength": 1050000,
+          "cacheWriteCostPerMillion": 2.5
         },
         {
           "id": "gpt-6-luna",
           "inputCostPerMillion": 0.1,
           "cachedInputCostPerMillion": 0.01,
-          "outputCostPerMillion": 0.125,
+          "outputCostPerMillion": 0.5,
           "capabilityTags": ["tools", "vision"],
-          "contextLength": 1050000
+          "contextLength": 1050000,
+          "cacheWriteCostPerMillion": 0.125
         },
         {
           "id": "gpt-5.6-sol",
           "inputCostPerMillion": 4,
           "cachedInputCostPerMillion": 0.4,
-          "outputCostPerMillion": 5,
+          "outputCostPerMillion": 20,
           "capabilityTags": ["tools", "vision"],
-          "contextLength": 1050000
+          "contextLength": 1050000,
+          "cacheWriteCostPerMillion": 5
         },
         {
           "id": "gpt-5.6-cyber",
           "inputCostPerMillion": 12.5,
           "cachedInputCostPerMillion": 1.25,
-          "outputCostPerMillion": 15.625,
+          "outputCostPerMillion": 75,
           "capabilityTags": ["tools", "vision"],
-          "contextLength": 400000
+          "contextLength": 400000,
+          "cacheWriteCostPerMillion": 15.625
+        },
+        {
+          "id": "gpt-rosalind-research",
+          "inputCostPerMillion": 5,
+          "cachedInputCostPerMillion": 0.5,
+          "outputCostPerMillion": 25
+        },
+        {
+          "id": "gpt-rosalind-discovery",
+          "inputCostPerMillion": 5,
+          "cachedInputCostPerMillion": 0.5,
+          "outputCostPerMillion": 25
         }
       ]
     },
@@ -290,7 +313,7 @@
           "inputCostPerMillion": 2,
           "outputCostPerMillion": 10,
           "cacheWriteCostPerMillion": 2.5,
-          "cachedInputCostPerMillion": 0.2
+          "cachedInputCostPerMillion": 0.1
         },
         {
           "id": "claude-haiku-4-5",
@@ -361,6 +384,13 @@
           "outputCostPerMillion": 25,
           "cacheWriteCostPerMillion": 6.25,
           "cachedInputCostPerMillion": 0.5
+        },
+        {
+          "id": "claude-haiku-5-5",
+          "inputCostPerMillion": 0.1,
+          "outputCostPerMillion": 0.5,
+          "cacheWriteCostPerMillion": 0.125,
+          "cachedInputCostPerMillion": 0.01
         }
       ]
     }

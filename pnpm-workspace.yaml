@@ -10,6 +10,10 @@ allowBuilds:
   koffi: false
 
 overrides:
+  # GHSA-jqcg-44mw-7w3h: reject overly broad IPv4-mapped IPv6 proxy trust.
+  proxy-addr: 2.0.8
+  # GHSA-68fv-2mgg-jv7q: bound indexed source-map section offsets.
+  source-map-js: 1.2.2
   # GHSA-xcpc-8h2w-3j85 (high): adm-zip <0.6.0 allocates an attacker-declared
   # uncompressed-size buffer (up to 4GB) before validating it.
   # GHSA-vwc7-r8mq-g2x9 (medium, CVE-2026-76845, published 2026-09-09): adm-zip
