@@ -10,6 +10,10 @@ allowBuilds:
   koffi: false
 
 overrides:
+  # GHSA-jqcg-44mw-7w3h: reject overly broad IPv4-mapped IPv6 proxy trust.
+  proxy-addr: 2.0.8
+  # GHSA-68fv-2mgg-jv7q: bound indexed source-map section offsets.
+  source-map-js: 1.2.2
   # GHSA-xcpc-8h2w-3j85 (high): adm-zip <0.6.0 allocates an attacker-declared
   # uncompressed-size buffer (up to 4GB) before validating it.
   # GHSA-vwc7-r8mq-g2x9 (medium, CVE-2026-76845, published 2026-09-09): adm-zip
@@ -85,7 +89,7 @@ catalog:
   # Shared tooling
   typescript: 7.0.2
   prettier: 3.9.9
-  eslint: 10.11.0
+  eslint: 10.12.0
   # Maintenance scripts (e.g. scripts/update-provider-pricing.ts) — the browser
   # automation used to scrape provider pricing and capability pages.
   playwright: 1.63.0
@@ -101,12 +105,12 @@ catalog:
   deepl-node: 1.28.0
 
   # AI SDK dependencies
-  ai: 7.0.102
-  '@ai-sdk/google': 4.0.72
-  '@ai-sdk/deepseek': 3.0.45
-  '@ai-sdk/openai': 4.0.67
-  '@ai-sdk/anthropic': 4.0.54
-  '@ai-sdk/openai-compatible': 3.0.49
+  ai: 7.0.127
+  '@ai-sdk/google': 4.0.87
+  '@ai-sdk/deepseek': 3.0.58
+  '@ai-sdk/openai': 4.0.83
+  '@ai-sdk/anthropic': 4.0.71
+  '@ai-sdk/openai-compatible': 3.0.62
 
   # Server runtime
   cors: 2.8.6
