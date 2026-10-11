@@ -157,8 +157,8 @@ catalogs:
       specifier: 1.63.0
       version: 1.63.0
     postcss:
-      specifier: 8.5.28
-      version: 8.5.28
+      specifier: 8.5.29
+      version: 8.5.29
     prettier:
       specifier: 3.9.9
       version: 3.9.9
@@ -512,7 +512,7 @@ importers:
         version: 8.0.1
       postcss:
         specifier: 'catalog:'
-        version: 8.5.28
+        version: 8.5.29
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.3
@@ -2710,6 +2710,10 @@ packages:
 
   postcss@8.5.28:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  postcss@8.5.29:
+    resolution: {integrity: sha512-49cGhUbXj8Qenv0iTMxA1cFBzxXoctpC9Ujd77t1WcbJIr6nF/eI7g/8MgxrYldFRuAXvja7xQRwavoW7kgrxQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   postgres-array@2.0.0:
@@ -5118,6 +5122,12 @@ snapshots:
       playwright-core: 1.63.0
 
   postcss@8.5.28:
+    dependencies:
+      nanoid: 3.3.18
+      picocolors: 1.1.1
+      source-map-js: 1.2.2
+
+  postcss@8.5.29:
     dependencies:
       nanoid: 3.3.18
       picocolors: 1.1.1
