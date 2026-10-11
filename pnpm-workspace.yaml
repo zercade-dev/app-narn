@@ -169,7 +169,7 @@ catalog:
   # no shipped comments). Real parsers, never regex (// and /* appear in string and
   # regex literals, so a regex stripper would corrupt code).
   parse5: 8.0.1
-  acorn: 8.18.0
+  acorn: 8.19.0
   postcss: 8.5.29
 
 # Supply-chain cooldown: refuse dependency versions published fewer than this many
