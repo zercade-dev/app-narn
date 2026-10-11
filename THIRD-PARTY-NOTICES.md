@@ -387,9 +387,11 @@ hosted NARN service: `modules/copilot/manifest.json` sets `"cloudDisabled": true
 
 ### `@github/copilot-sdk` — MIT License
 
-`@github/copilot-sdk` 1.0.16 declares `"license": "MIT"` and `"author": "GitHub"` in its
-manifest, but its published tarball contains no licence file. The text below is the
-`LICENSE` file of the source repository that same manifest names,
+`@github/copilot-sdk` 1.0.19 declares `"license": "MIT"` and `"author": "GitHub"` in its
+manifest, but its published tarball contains no licence file. Its repository field
+names <https://github.com/github/copilot-agent-runtime>, with the SDK under
+`src/sdk/nodejs`. That repository is not publicly accessible. The text below is the
+MIT `LICENSE` file published in GitHub's public SDK repository,
 <https://github.com/github/copilot-sdk>.
 
 The eight `@github/copilot-sdk-{linux,linuxmusl,darwin,win32}-{x64,arm64}` platform
