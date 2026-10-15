@@ -112,8 +112,8 @@ catalogs:
       specifier: 2.8.6
       version: 2.8.6
     deepl-node:
-      specifier: 1.28.0
-      version: 1.28.0
+      specifier: 1.28.1
+      version: 1.28.1
     dotenv:
       specifier: 18.0.7
       version: 18.0.7
@@ -299,7 +299,7 @@ importers:
         version: link:../../packages/shared
       deepl-node:
         specifier: 'catalog:'
-        version: 1.28.0
+        version: 1.28.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1884,8 +1884,8 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
-  deepl-node@1.28.0:
-    resolution: {integrity: sha512-Kb4K1OVYuqFrHMHBSQq25HAhrcLjlFrkxYsWRfhbuPpEVfODOWiIdggZA+8JQ43egP/vLAReAj9h2mrR+15Ezw==}
+  deepl-node@1.28.1:
+    resolution: {integrity: sha512-lij0T7t+8G+mmHltZ1U8pmDUu9tRCgxzqpuVdFkNAgUD3kfDYd8EwUmhXulWEf70KdHdoXRYCxEhOcyA0ucttg==}
     engines: {node: '>=14.17'}
 
   delayed-stream@1.0.0:
@@ -4177,7 +4177,7 @@ snapshots:
 
   deep-is@0.1.4: {}
 
-  deepl-node@1.28.0:
+  deepl-node@1.28.1:
     dependencies:
       '@types/node': 26.6.4
       adm-zip: 0.6.1
