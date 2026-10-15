@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-11T10:01:11.373Z",
+  "generatedAt": "2026-10-15T21:19:52.958Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
@@ -41,6 +41,13 @@
     "google": {
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
       "models": [
+        {
+          "id": "gemini-4-argon",
+          "inputCostPerMillion": 2,
+          "outputCostPerMillion": 10,
+          "capabilityTags": ["tools", "vision", "audio"],
+          "cachedInputCostPerMillion": 0.1
+        },
         {
           "id": "gemini-3.8-flash",
           "inputCostPerMillion": 0.75,
@@ -194,7 +201,7 @@
         {
           "id": "gemini-2.5-flash-image",
           "inputCostPerMillion": 0.3,
-          "outputCostPerMillion": 0.039,
+          "outputCostPerMillion": 2.5,
           "capabilityTags": ["vision"]
         },
         {
