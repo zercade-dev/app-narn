@@ -49,8 +49,8 @@ catalogs:
       specifier: 5.3.0
       version: 5.3.0
     '@github/copilot-sdk':
-      specifier: 1.0.21
-      version: 1.0.21
+      specifier: 1.0.22
+      version: 1.0.22
     '@tailwindcss/vite':
       specifier: 4.3.3
       version: 4.3.3
@@ -290,7 +290,7 @@ importers:
     optionalDependencies:
       '@github/copilot-sdk':
         specifier: 'catalog:'
-        version: 1.0.21
+        version: 1.0.22
 
   modules/deepl:
     dependencies:
@@ -1031,52 +1031,52 @@ packages:
   '@fontsource/silkscreen@5.3.0':
     resolution: {integrity: sha512-M1NQ3LQH0LFNvyFPd/piHEGMImPPtpLglNnLC6Vdcq9kL0jNIOtTQmksAWCc4enbDnw1OnIpZtjNEfRqYm/QmA==}
 
-  '@github/copilot-sdk-darwin-arm64@1.0.21':
-    resolution: {integrity: sha512-26hlRvSaWbyRYX0uuzD9+BON1z5aFti37Wytru58UIwGaukGTghtKhnLDJLcPE+O47MQqcKdmghDnbQsia5ZJg==}
+  '@github/copilot-sdk-darwin-arm64@1.0.22':
+    resolution: {integrity: sha512-qmCCCrPXZzspZgKEitQ5HGlVGHd5kxZPlNUk7AfFcPmhvhfF4p8ROoH2OER5fGMsQwIiuAfz2XyXqkUVCupWKw==}
     cpu: [arm64]
     os: [darwin]
 
-  '@github/copilot-sdk-darwin-x64@1.0.21':
-    resolution: {integrity: sha512-DRh6QRu/4e254zstyfylJ/CJiYzC7nP3u3lzUDpsCP+tA89WC3lHSJ3DNIJA2Fiu4C0wkg9jKCSgx/GPPHstwA==}
+  '@github/copilot-sdk-darwin-x64@1.0.22':
+    resolution: {integrity: sha512-oh0LlHEVTcC6r6rzxEhNPhUgoFRvnP85x4HwF5tEkzldegw6qVYCpB4zwgcy47o51ML4jHlP/jkzq5SOC2z89A==}
     cpu: [x64]
     os: [darwin]
 
-  '@github/copilot-sdk-linux-arm64@1.0.21':
-    resolution: {integrity: sha512-hNn//YpqGGHiKGYd6A56YptYSkFLNzJcd4bHoiuNb+fZGXlnLiH50tcbvobp+9WKBvON44wkFVXfMwhodQphhA==}
+  '@github/copilot-sdk-linux-arm64@1.0.22':
+    resolution: {integrity: sha512-E1MLsrO6bXTTqXFb+IZwdkSm3W1j7KOoGvX3aZdIrMPpjLneMeokZNec4716AYwdeWDF1t+mLYWU1ipfkRkhxA==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@github/copilot-sdk-linux-x64@1.0.21':
-    resolution: {integrity: sha512-lEmqwyRk7DqVw/prz/1YzV4exXfIAJOeoranCvRHoH9oGTdXzM7GRfMNYD78vtBSE9PUBRwIioqxe9KADSPrTg==}
+  '@github/copilot-sdk-linux-x64@1.0.22':
+    resolution: {integrity: sha512-9O0RBsP8Eyf5TOp99ISWDjWQwlUbgMSzdvGii4l6LazmWesukglwxLGBmPEVXa8wEpug+LDGifzeJ74+663YsA==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@github/copilot-sdk-linuxmusl-arm64@1.0.21':
-    resolution: {integrity: sha512-OqVEn+HJPU+RQkdjymuMXMIVzzxv4RhesKzkLFqNTKbLon07c1pz6v9oAODNJ6DJGyVcu5Wpejx6OCXmvlW7Ug==}
+  '@github/copilot-sdk-linuxmusl-arm64@1.0.22':
+    resolution: {integrity: sha512-wG79J/hMtj1i5xyntIp/vmyAzt7u4BVQQnUaCxnPlWxexmwiuZ5zYwlqrEqIEhl+uXirz90RmOPg3IxiDLfJIA==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@github/copilot-sdk-linuxmusl-x64@1.0.21':
-    resolution: {integrity: sha512-Io5pV8Pg1C8cPS/RvGQr++tOYMANhNHEUxieoXnLf0txVZtIuEFWzj5Jn/PH0Q+7nzqwSCwbHB17otztX7Tb5w==}
+  '@github/copilot-sdk-linuxmusl-x64@1.0.22':
+    resolution: {integrity: sha512-aV4Rw/NN+VABR7+Wq9+S22SvyHeJqANejjiiHLJPSxsdpQz7rK+HUkUNLjISiFmBCB4XqZMUwLUbTpsvMLAgHw==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@github/copilot-sdk-win32-arm64@1.0.21':
-    resolution: {integrity: sha512-64zU88TR/WngmBwmGj+P3c2ZTxbwLkenpby0I5ppFLoG3fhlQAMxJlLrIQkJ3KTvPg3PuCt2fxMLT0HrZnbQuw==}
+  '@github/copilot-sdk-win32-arm64@1.0.22':
+    resolution: {integrity: sha512-3fqjYt0LUofLpQoIqEeWukA/WnmwbqsyYjqimaKw+onVealtLXCdXwqMy5vcT0raY/f4D3+glvjWFchR5qZq7w==}
     cpu: [arm64]
     os: [win32]
 
-  '@github/copilot-sdk-win32-x64@1.0.21':
-    resolution: {integrity: sha512-UFZkvzZqWzI353N1G8be0Ywk9Cj4N5iR+i9sHF7C032CNNCMa84g3QasuNfGngETQfdSSMXMWot+IItcj67TiA==}
+  '@github/copilot-sdk-win32-x64@1.0.22':
+    resolution: {integrity: sha512-yUapm2AapONBj+ty3A/+C5ZjDcGi72CgAggeoEqmD6oQqUnA8+A71fR8avmCV7Rhmwwzb1mh2AZd9wAjrHuwig==}
     cpu: [x64]
     os: [win32]
 
-  '@github/copilot-sdk@1.0.21':
-    resolution: {integrity: sha512-XddDYQzszQgUupchgaj09CeWqleDix9YTCaIw4fJfm1tiFkAaOokOY2GoQnkAhjBeXAd5GPpAsCD3uACu2DNOA==}
+  '@github/copilot-sdk@1.0.22':
+    resolution: {integrity: sha512-LSyEvV9wMvsjy+MIeF/EfhceTnu64GOLqqmiMXJVqo9j/tOjKCExsKhtarLlriNmxV0der+SAL0Rf18KmMu7Mg==}
     engines: {node: ^20.19.0 || >=22.12.0}
 
   '@humanfs/core@0.19.2':
@@ -3476,44 +3476,44 @@ snapshots:
 
   '@fontsource/silkscreen@5.3.0': {}
 
-  '@github/copilot-sdk-darwin-arm64@1.0.21':
+  '@github/copilot-sdk-darwin-arm64@1.0.22':
     optional: true
 
-  '@github/copilot-sdk-darwin-x64@1.0.21':
+  '@github/copilot-sdk-darwin-x64@1.0.22':
     optional: true
 
-  '@github/copilot-sdk-linux-arm64@1.0.21':
+  '@github/copilot-sdk-linux-arm64@1.0.22':
     optional: true
 
-  '@github/copilot-sdk-linux-x64@1.0.21':
+  '@github/copilot-sdk-linux-x64@1.0.22':
     optional: true
 
-  '@github/copilot-sdk-linuxmusl-arm64@1.0.21':
+  '@github/copilot-sdk-linuxmusl-arm64@1.0.22':
     optional: true
 
-  '@github/copilot-sdk-linuxmusl-x64@1.0.21':
+  '@github/copilot-sdk-linuxmusl-x64@1.0.22':
     optional: true
 
-  '@github/copilot-sdk-win32-arm64@1.0.21':
+  '@github/copilot-sdk-win32-arm64@1.0.22':
     optional: true
 
-  '@github/copilot-sdk-win32-x64@1.0.21':
+  '@github/copilot-sdk-win32-x64@1.0.22':
     optional: true
 
-  '@github/copilot-sdk@1.0.21':
+  '@github/copilot-sdk@1.0.22':
     dependencies:
       koffi: 3.2.1
       vscode-jsonrpc: 8.2.1
       zod: 4.3.6
     optionalDependencies:
-      '@github/copilot-sdk-darwin-arm64': 1.0.21
-      '@github/copilot-sdk-darwin-x64': 1.0.21
-      '@github/copilot-sdk-linux-arm64': 1.0.21
-      '@github/copilot-sdk-linux-x64': 1.0.21
-      '@github/copilot-sdk-linuxmusl-arm64': 1.0.21
-      '@github/copilot-sdk-linuxmusl-x64': 1.0.21
-      '@github/copilot-sdk-win32-arm64': 1.0.21
-      '@github/copilot-sdk-win32-x64': 1.0.21
+      '@github/copilot-sdk-darwin-arm64': 1.0.22
+      '@github/copilot-sdk-darwin-x64': 1.0.22
+      '@github/copilot-sdk-linux-arm64': 1.0.22
+      '@github/copilot-sdk-linux-x64': 1.0.22
+      '@github/copilot-sdk-linuxmusl-arm64': 1.0.22
+      '@github/copilot-sdk-linuxmusl-x64': 1.0.22
+      '@github/copilot-sdk-win32-arm64': 1.0.22
+      '@github/copilot-sdk-win32-x64': 1.0.22
     optional: true
 
   '@humanfs/core@0.19.2':
