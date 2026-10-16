@@ -92,7 +92,7 @@ catalog:
   eslint: 10.12.0
   # Maintenance scripts (e.g. scripts/update-provider-pricing.ts) — the browser
   # automation used to scrape provider pricing and capability pages.
-  playwright: 1.64.0
+  playwright: 1.64.1
   '@eslint/js': 10.0.1
   globals: 17.13.0
   eslint-config-prettier: 10.1.8
