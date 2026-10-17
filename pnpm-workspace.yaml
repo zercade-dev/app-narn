@@ -140,8 +140,8 @@ catalog:
   class-variance-authority: 0.7.1
   clsx: 2.1.1
   lucide-react: 1.57.0
-  react: 19.3.0
-  react-dom: 19.3.0
+  react: 19.3.1
+  react-dom: 19.3.1
   i18next: 26.4.4
   react-i18next: 17.0.16
   react-markdown: 10.1.0
