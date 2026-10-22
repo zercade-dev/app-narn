@@ -108,12 +108,12 @@ catalog:
   deepl-node: 1.28.1
 
   # AI SDK dependencies
-  ai: 7.0.143
-  '@ai-sdk/google': 4.0.99
-  '@ai-sdk/deepseek': 3.0.67
-  '@ai-sdk/openai': 4.0.96
-  '@ai-sdk/anthropic': 4.0.82
-  '@ai-sdk/openai-compatible': 3.0.71
+  ai: 7.0.148
+  '@ai-sdk/google': 4.0.102
+  '@ai-sdk/deepseek': 3.0.70
+  '@ai-sdk/openai': 4.0.99
+  '@ai-sdk/anthropic': 4.0.85
+  '@ai-sdk/openai-compatible': 3.0.75
 
   # Server runtime
   cors: 2.8.6
@@ -145,7 +145,7 @@ catalog:
   lucide-react: 1.61.0
   react: 19.3.1
   react-dom: 19.3.1
-  i18next: 26.5.3
+  i18next: 26.5.4
   react-i18next: 17.1.0
   react-markdown: 10.1.0
   sonner: 2.0.8
@@ -166,7 +166,7 @@ catalog:
   '@vitejs/plugin-react': 6.1.2
   esbuild: 0.28.2
   tailwindcss: 4.3.3
-  vite: 8.3.4
+  vite: 8.3.5
 
   # Frontend build tooling — parsers for the strip-comments Vite plugin (guarantee
   # no shipped comments). Real parsers, never regex (// and /* appear in string and
