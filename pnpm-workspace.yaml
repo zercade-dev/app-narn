@@ -108,12 +108,12 @@ catalog:
   deepl-node: 1.28.1
 
   # AI SDK dependencies
-  ai: 7.0.143
-  '@ai-sdk/google': 4.0.99
-  '@ai-sdk/deepseek': 3.0.67
-  '@ai-sdk/openai': 4.0.96
-  '@ai-sdk/anthropic': 4.0.82
-  '@ai-sdk/openai-compatible': 3.0.71
+  ai: 7.0.148
+  '@ai-sdk/google': 4.0.102
+  '@ai-sdk/deepseek': 3.0.70
+  '@ai-sdk/openai': 4.0.99
+  '@ai-sdk/anthropic': 4.0.85
+  '@ai-sdk/openai-compatible': 3.0.75
 
   # Server runtime
   cors: 2.8.6
