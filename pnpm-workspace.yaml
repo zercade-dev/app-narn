@@ -53,6 +53,9 @@ overrides:
   # alter headers, routing, TLS, and resource limits. All are fixed in 1.20.0.
   # Preserve the SDK's Axios major until its upstream dependency catches up.
   axios: '>=1.20.0 <2'
+  # GHSA-q3jh-wrc6-jgq8 / GHSA-8r9p-f939-6h3c: preserve credential
+  # header stripping across redirects in deepl-node -> axios.
+  follow-redirects: 1.16.1
   # GHSA-2v37-7h3g-55p8 (high, published 2026-07-29): nanoid loops indefinitely
   # when a custom generator gets size 0 (3.3.16 fixed only the negative-size
   # sibling GHSA-28wg-ghj8-5hjv). The 3.3.17 fix was incomplete — the advisory
