@@ -150,7 +150,7 @@ catalog:
   zustand: 5.0.15
 
   # Frontend dev
-  '@axe-core/react': 4.13.0
+  '@axe-core/react': 4.14.0
   '@fontsource-variable/geist': 5.3.0
   '@fontsource-variable/geist-mono': 5.3.0
   '@fontsource/chakra-petch': 5.3.0
