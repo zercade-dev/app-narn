@@ -10,6 +10,9 @@ allowBuilds:
   koffi: false
 
 overrides:
+  # GHSA-mrhx-c7xc-m3w5: reject oversized constrained collections before
+  # validating every element. Cover Copilot SDK and React Hooks lint tooling.
+  'zod@<4.6.6': '>=4.6.6 <5'
   # GHSA-jqcg-44mw-7w3h: reject overly broad IPv4-mapped IPv6 proxy trust.
   proxy-addr: 2.0.8
   # GHSA-68fv-2mgg-jv7q: bound indexed source-map section offsets.
