@@ -49,8 +49,8 @@ catalogs:
       specifier: 5.3.0
       version: 5.3.0
     '@github/copilot-sdk':
-      specifier: 1.0.24
-      version: 1.0.24
+      specifier: 1.0.25
+      version: 1.0.25
     '@tailwindcss/vite':
       specifier: 4.3.3
       version: 4.3.3
@@ -136,8 +136,8 @@ catalogs:
       specifier: 8.3.0
       version: 8.3.0
     i18next:
-      specifier: 26.5.4
-      version: 26.5.4
+      specifier: 26.5.5
+      version: 26.5.5
     lucide-react:
       specifier: 1.61.0
       version: 1.61.0
@@ -169,8 +169,8 @@ catalogs:
       specifier: 19.3.1
       version: 19.3.1
     react-i18next:
-      specifier: 17.1.0
-      version: 17.1.0
+      specifier: 17.1.2
+      version: 17.1.2
     react-markdown:
       specifier: 10.1.0
       version: 10.1.0
@@ -202,10 +202,11 @@ catalogs:
       specifier: 4.6.7
       version: 4.6.7
     zustand:
-      specifier: 5.0.15
-      version: 5.0.15
+      specifier: 5.0.16
+      version: 5.0.16
 
 overrides:
+  zod@<4.6.6: '>=4.6.6 <5'
   proxy-addr: 2.0.8
   source-map-js: 1.2.2
   adm-zip: '>=0.6.1'
@@ -291,7 +292,7 @@ importers:
     optionalDependencies:
       '@github/copilot-sdk':
         specifier: 'catalog:'
-        version: 1.0.24
+        version: 1.0.25
 
   modules/deepl:
     dependencies:
@@ -464,7 +465,7 @@ importers:
         version: 2.1.1
       i18next:
         specifier: 'catalog:'
-        version: 26.5.4(typescript@7.0.2)
+        version: 26.5.5(typescript@7.0.2)
       lucide-react:
         specifier: 'catalog:'
         version: 1.61.0(@types/react@19.3.0)(react@19.3.1)
@@ -476,7 +477,7 @@ importers:
         version: 19.3.1(react@19.3.1)
       react-i18next:
         specifier: 'catalog:'
-        version: 17.1.0(i18next@26.5.4(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)
+        version: 17.1.2(i18next@26.5.5(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)
       react-markdown:
         specifier: 'catalog:'
         version: 10.1.0(@types/react@19.3.0)(react@19.3.1)
@@ -488,7 +489,7 @@ importers:
         version: 3.7.0
       zustand:
         specifier: 'catalog:'
-        version: 5.0.15(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
+        version: 5.0.16(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1))
     devDependencies:
       '@axe-core/react':
         specifier: 'catalog:'
@@ -655,43 +656,43 @@ packages:
     resolution: {integrity: sha512-nfv/vtR4HuNUZyCzdK37d2CaW1mzeZJlzSmC+4Jn8Dn8ces8R9HOAgF9d+8iwx+SedmzurKQQmNvJ7xYGBcPMQ==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: '>=4.6.6 <5'
 
   '@ai-sdk/deepseek@3.0.70':
     resolution: {integrity: sha512-smmwv3BVWiu5y71F6gxOOOVptjFbmKNlbLnBzwTADSPa0EQG3fJ5PYilJ65NsWbduNSsziMBB9UITHvAuoOsTA==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: '>=4.6.6 <5'
 
   '@ai-sdk/gateway@4.0.121':
     resolution: {integrity: sha512-cPNXvQ4B5OkmVAm98Dxe1fHdMthyqqqAG0HJx3D92NUa9FpcvkNxdAqiuZdeAhNAodFb9lBrslzzzEwxuVS53A==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: '>=4.6.6 <5'
 
   '@ai-sdk/google@4.0.102':
     resolution: {integrity: sha512-xbiBNOPcHDnxIGPhPAdHAhf1EAw7KuwMAP4/urT7mYBEwoIfEfFr7hVm2c0HQwrtL0hokw6WtpkolBec92vt1A==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: '>=4.6.6 <5'
 
   '@ai-sdk/openai-compatible@3.0.75':
     resolution: {integrity: sha512-Zs+EWsK1XprpCR6+VIva50W2YuD3TNSymd5DKFh8XSrroK0copxm2BlSDRKWVdx3SZEh1XqD+1cgYzGR7huL4A==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: '>=4.6.6 <5'
 
   '@ai-sdk/openai@4.0.99':
     resolution: {integrity: sha512-XRHUiXgxhVEe0smSp537lzCqMsOVg6jvGTWDbTZeGMTc+iHeOwgHgZMFBvOiNWXZ8n125Jta72m+64PtU1WNJA==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: '>=4.6.6 <5'
 
   '@ai-sdk/provider-utils@5.0.65':
     resolution: {integrity: sha512-LCugcsP8oWmdeI3BASf4Fuo1wiC6Qx0YrefFssl7n12s+LV4DNi5RdwWQrtrB4oek3GGNQRN/h/NSwVZM2eHKw==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: '>=4.6.6 <5'
 
   '@ai-sdk/provider@4.0.31':
     resolution: {integrity: sha512-3wJnwVTFg8SwOyoZCv+ov7Re2GB+7IQnU5a5MYJACrtiWDDUHgqTBeeesq2MB2ddgojzL8hgWleltwpAgtUqfg==}
@@ -1033,52 +1034,52 @@ packages:
   '@fontsource/silkscreen@5.3.0':
     resolution: {integrity: sha512-M1NQ3LQH0LFNvyFPd/piHEGMImPPtpLglNnLC6Vdcq9kL0jNIOtTQmksAWCc4enbDnw1OnIpZtjNEfRqYm/QmA==}
 
-  '@github/copilot-sdk-darwin-arm64@1.0.24':
-    resolution: {integrity: sha512-T2G3g/0kPFzBG4FmupZtz+t5RNhdqXdsaSJoq5I8m0Xr1bmto7sN44oanRohLPMQjXqgRGz0mYRsoIIa0A4YBQ==}
+  '@github/copilot-sdk-darwin-arm64@1.0.25':
+    resolution: {integrity: sha512-pNjCd0q8femu8zRtt96+i8peDHARkJhkf494CsmZhtDJCOg8+RA9VoqJch4GlgOx4qGNH6mF5x5o3k/Ub/O6XA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@github/copilot-sdk-darwin-x64@1.0.24':
-    resolution: {integrity: sha512-b/veOlxEzMdcaEFGJ7HwGVBXMWtrnF1Pgz19qpRY161yk47bZKaJYLTimInzBKUTXf4dwC2xkbeULElzLWr7Bg==}
+  '@github/copilot-sdk-darwin-x64@1.0.25':
+    resolution: {integrity: sha512-xg3m86m4D72tNOVlfnCZ60/QHhlJ+iXlZ+Ms33vCVhGyT1DOLbdoTOgdyuPuWVAmE5IUvDv2DDNvZgg/ZgKDmQ==}
     cpu: [x64]
     os: [darwin]
 
-  '@github/copilot-sdk-linux-arm64@1.0.24':
-    resolution: {integrity: sha512-78MQv23FAyrcu3uGjn+23Yw1t68pPGcNZ0JxA5ydilX8qyFpIWuWQIR/faRLyjh08bIXdfT7kX2n9mrp8yomFw==}
+  '@github/copilot-sdk-linux-arm64@1.0.25':
+    resolution: {integrity: sha512-vh5o1qD+w4LwyCb9O6gId+f9xR4LThyNnzzLrfBA5c8cMidhV2qljHJR+pXGu2fT+IWQJlC9wZadQhcbRcO8wg==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
 
-  '@github/copilot-sdk-linux-x64@1.0.24':
-    resolution: {integrity: sha512-qJsIzfTyaGDrcIDA30F2e6b5Dp3f9JMuK2TDfwDPkvnNDuI6jjltiI+L7VkHe5cWYd/NcNXhpMIZZ1Q9dv0ukg==}
+  '@github/copilot-sdk-linux-x64@1.0.25':
+    resolution: {integrity: sha512-36Tv2Xs18zMnKDXB5YkfL0s0vZPkdu/lKHa1wYLwicHj/u4TIvr7/ogGsiya8PoqSlKEG8ar+ALokRkX8zYMEg==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
 
-  '@github/copilot-sdk-linuxmusl-arm64@1.0.24':
-    resolution: {integrity: sha512-YPcgfbwKpX2EyOHf5J8fGLE1FmLBkQa4SPL0XkSxRU8mUHYZOElrQck72NcHoiQboO1KrLeXCNoY4uaRtYtESg==}
+  '@github/copilot-sdk-linuxmusl-arm64@1.0.25':
+    resolution: {integrity: sha512-f7lFJM4j6mDlxtdmDw0pP+TXHHnpJr5pwuwRkcpAJDLwtKiWaMVKeCUpfKGabEakfbOt4wCZwl0B4s69tsrYtA==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
 
-  '@github/copilot-sdk-linuxmusl-x64@1.0.24':
-    resolution: {integrity: sha512-nkIKtJNoO/aHcHwZW7t76P4hf3Yilz72Cjc0JgtS4eHkwicgg3PnPc7D/dZQULZ0wyW7AYQuVHF6W6UdoNoBcg==}
+  '@github/copilot-sdk-linuxmusl-x64@1.0.25':
+    resolution: {integrity: sha512-EuuYYmJ/2Y6Du+QwIMqMHHr9WllMWwwa6pHNuacveVOGR6JsxB4CoYUnCU5q8c6ZK1uyqvbv+T0BctLHMjXbBw==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
 
-  '@github/copilot-sdk-win32-arm64@1.0.24':
-    resolution: {integrity: sha512-ADIoDsGjvBtdzi6EjbP5CCB9nuDHUWQDyDXcRu/sfXJ6srHepKKwJesJ6x17KsNxVRUsZnn4r7bccIu0p2BEcQ==}
+  '@github/copilot-sdk-win32-arm64@1.0.25':
+    resolution: {integrity: sha512-nYdOLwLkAjFRhqQgkj/GLF0AWWVxBVL1BfN6ZyuOsjBngVKIxPRXTPIW7Gpo+GpVYju27Mmwy1Zrvo8HEsT31A==}
     cpu: [arm64]
     os: [win32]
 
-  '@github/copilot-sdk-win32-x64@1.0.24':
-    resolution: {integrity: sha512-ZmGjr4s1EqKqDGp7bZiQZ9pE+YUcJ0qaNhyWL5EiDdRzp8uAyzLoNdJU8KjD5Zmyo2ht9HB/NIuz4en9nZVTXg==}
+  '@github/copilot-sdk-win32-x64@1.0.25':
+    resolution: {integrity: sha512-7QsDyxBysOIuMnih9hYsCA5sRPpH4DC80yIjutsSN80iCmZxqz0YH61fI1oAq4dv+suRO7SBQcI3WKWAuw51Ow==}
     cpu: [x64]
     os: [win32]
 
-  '@github/copilot-sdk@1.0.24':
-    resolution: {integrity: sha512-ozOHTK4k/ptNty0x7okMybRT5I3/iCYxRSMAIYmat00To+pJyARR9Y4oaKzncVWtPAdQHy8V5b73LSdzVf6e/g==}
+  '@github/copilot-sdk@1.0.25':
+    resolution: {integrity: sha512-TtN0wKSTPu/EQklRa525UmsjzFO3tg4lHN2x+DCNTMElVUwkUEV1XFlH8atqel/1oaFud3XWPVDtqNw90molDg==}
     engines: {node: ^20.19.0 || >=22.12.0}
 
   '@humanfs/core@0.19.2':
@@ -1734,7 +1735,7 @@ packages:
     resolution: {integrity: sha512-FPgfIAhz/FrlzcvqTN7pGGibahR5rD19NXZWX9WQ1tskTic+CN+jxvubpreyq8uN1maIEHPwvZmil/3IYN8FIw==}
     engines: {node: '>=22'}
     peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
+      zod: '>=4.6.6 <5'
 
   ajv@6.15.0:
     resolution: {integrity: sha512-fgFx7Hfoq60ytK2c7DhnF8jIvzYgOMxfugjLOSMHjLIPgenqa7S7oaagATUq99mV6IYvN2tRmC0wnTYX6iPbMw==}
@@ -2178,8 +2179,8 @@ packages:
     resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
     engines: {node: '>= 6'}
 
-  i18next@26.5.4:
-    resolution: {integrity: sha512-Wg0O1u2xmnsve9gICDwGekLkMe9SIC7+ZiuLYfWUGb/A3TQdRKygQ4OY9ros4raf5D66ZnW9JMrTDtGP2b8a7Q==}
+  i18next@26.5.5:
+    resolution: {integrity: sha512-txdaNOlnZCdiTMSlEzl5hUJU8TC9R4J/RCR1G7XrDPbWT2t3mR142QPz84ZuZeXDt3yq+9zmsdPiakxYtmp3fw==}
     peerDependencies:
       typescript: ^5 || ^6 || ^7
     peerDependenciesMeta:
@@ -2771,8 +2772,8 @@ packages:
     peerDependencies:
       react: ^19.3.1
 
-  react-i18next@17.1.0:
-    resolution: {integrity: sha512-4VouOnTDyvhvqXx6WZ+s3/cgSiaLutILdYkO3P1Ms+4qcKR7At+JP4Vi7IeHkVLyVV+DmN1l23Pn73UcwSGGPA==}
+  react-i18next@17.1.2:
+    resolution: {integrity: sha512-v/dCmObvAI/4yj1rlcsiKn08BDfaJ/MZxQAkbILssfm3K0zglRAj+DQ5uJjhKyLrxDiCfw9Ay5PXAeiE7Y6LCQ==}
     peerDependencies:
       i18next: '>= 26.2.0'
       react: '>= 16.8.0'
@@ -3097,19 +3098,13 @@ packages:
     resolution: {integrity: sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
-      zod: ^3.25.0 || ^4.0.0
-
-  zod@4.3.6:
-    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
-
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+      zod: '>=4.6.6 <5'
 
   zod@4.6.7:
     resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
-  zustand@5.0.15:
-    resolution: {integrity: sha512-MpSEjRiBkA9crSYeOUH32rJC7SVqAbm0Fqcqge/bUi2PPoLcBWKOsG+C8mevmpr8TwXHBVkChbbJiyvkE+i/3A==}
+  zustand@5.0.16:
+    resolution: {integrity: sha512-Uv7e327ihlCfayfja3hDc0M64Upev1LWBKpRobdK4NyovDDPeeX4imWXc/wzC1yc6fkYPoAY/ncKVPAs2jrtQw==}
     engines: {node: '>=12.20.0'}
     peerDependencies:
       '@types/react': '>=18.0.0'
@@ -3464,44 +3459,44 @@ snapshots:
 
   '@fontsource/silkscreen@5.3.0': {}
 
-  '@github/copilot-sdk-darwin-arm64@1.0.24':
+  '@github/copilot-sdk-darwin-arm64@1.0.25':
     optional: true
 
-  '@github/copilot-sdk-darwin-x64@1.0.24':
+  '@github/copilot-sdk-darwin-x64@1.0.25':
     optional: true
 
-  '@github/copilot-sdk-linux-arm64@1.0.24':
+  '@github/copilot-sdk-linux-arm64@1.0.25':
     optional: true
 
-  '@github/copilot-sdk-linux-x64@1.0.24':
+  '@github/copilot-sdk-linux-x64@1.0.25':
     optional: true
 
-  '@github/copilot-sdk-linuxmusl-arm64@1.0.24':
+  '@github/copilot-sdk-linuxmusl-arm64@1.0.25':
     optional: true
 
-  '@github/copilot-sdk-linuxmusl-x64@1.0.24':
+  '@github/copilot-sdk-linuxmusl-x64@1.0.25':
     optional: true
 
-  '@github/copilot-sdk-win32-arm64@1.0.24':
+  '@github/copilot-sdk-win32-arm64@1.0.25':
     optional: true
 
-  '@github/copilot-sdk-win32-x64@1.0.24':
+  '@github/copilot-sdk-win32-x64@1.0.25':
     optional: true
 
-  '@github/copilot-sdk@1.0.24':
+  '@github/copilot-sdk@1.0.25':
     dependencies:
       koffi: 3.2.1
       vscode-jsonrpc: 8.2.1
-      zod: 4.3.6
+      zod: 4.6.7
     optionalDependencies:
-      '@github/copilot-sdk-darwin-arm64': 1.0.24
-      '@github/copilot-sdk-darwin-x64': 1.0.24
-      '@github/copilot-sdk-linux-arm64': 1.0.24
-      '@github/copilot-sdk-linux-x64': 1.0.24
-      '@github/copilot-sdk-linuxmusl-arm64': 1.0.24
-      '@github/copilot-sdk-linuxmusl-x64': 1.0.24
-      '@github/copilot-sdk-win32-arm64': 1.0.24
-      '@github/copilot-sdk-win32-x64': 1.0.24
+      '@github/copilot-sdk-darwin-arm64': 1.0.25
+      '@github/copilot-sdk-darwin-x64': 1.0.25
+      '@github/copilot-sdk-linux-arm64': 1.0.25
+      '@github/copilot-sdk-linux-x64': 1.0.25
+      '@github/copilot-sdk-linuxmusl-arm64': 1.0.25
+      '@github/copilot-sdk-linuxmusl-x64': 1.0.25
+      '@github/copilot-sdk-win32-arm64': 1.0.25
+      '@github/copilot-sdk-win32-x64': 1.0.25
     optional: true
 
   '@humanfs/core@0.19.2':
@@ -4265,8 +4260,8 @@ snapshots:
       '@babel/parser': 7.29.7
       eslint: 10.13.0(jiti@2.7.0)
       hermes-parser: 0.25.1
-      zod: 4.4.3
-      zod-validation-error: 4.0.2(zod@4.4.3)
+      zod: 4.6.7
+      zod-validation-error: 4.0.2(zod@4.6.7)
     transitivePeerDependencies:
       - supports-color
 
@@ -4541,7 +4536,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  i18next@26.5.4(typescript@7.0.2):
+  i18next@26.5.5(typescript@7.0.2):
     optionalDependencies:
       typescript: 7.0.2
 
@@ -5167,11 +5162,11 @@ snapshots:
       react: 19.3.1
       scheduler: 0.28.0
 
-  react-i18next@17.1.0(i18next@26.5.4(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2):
+  react-i18next@17.1.2(i18next@26.5.5(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2):
     dependencies:
       '@babel/runtime': 7.29.7
       html-parse-stringify: 4.0.1
-      i18next: 26.5.4(typescript@7.0.2)
+      i18next: 26.5.5(typescript@7.0.2)
       react: 19.3.1
       use-sync-external-store: 1.7.0(react@19.3.1)
     optionalDependencies:
@@ -5520,18 +5515,13 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod-validation-error@4.0.2(zod@4.4.3):
+  zod-validation-error@4.0.2(zod@4.6.7):
     dependencies:
-      zod: 4.4.3
-
-  zod@4.3.6:
-    optional: true
-
-  zod@4.4.3: {}
+      zod: 4.6.7
 
   zod@4.6.7: {}
 
-  zustand@5.0.15(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)):
+  zustand@5.0.16(@types/react@19.3.0)(react@19.3.1)(use-sync-external-store@1.7.0(react@19.3.1)):
     optionalDependencies:
       '@types/react': 19.3.0
       react: 19.3.1
