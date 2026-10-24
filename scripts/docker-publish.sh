@@ -37,6 +37,15 @@ if ! docker buildx inspect "$builder" >/dev/null 2>&1; then
 fi
 docker buildx use "$builder"
 
+# Trace the image to the commit it was built from (org.opencontainers.image.revision).
+# Read from the build context itself, so it is the checked-out commit however the
+# script is invoked. Fail rather than publish an image with a missing or bad label.
+revision="$(git -C "$context" rev-parse HEAD 2>/dev/null || true)"
+if ! [[ "$revision" =~ ^[0-9a-f]{40}$ ]]; then
+  echo "docker-publish: cannot read a 40-hex git commit from $context (got '${revision}'); refusing to build an image without a revision label" >&2
+  exit 1
+fi
+
 # Build the --tag flags from the space-separated TAGS (intentional word-split).
 tag_args=()
 for t in ${TAGS}; do tag_args+=(--tag "${IMAGE}:${t}"); done
@@ -49,6 +58,7 @@ set -x
 docker buildx build \
   --platform "$PLATFORMS" \
   --file "$context/Dockerfile" \
+  --label "org.opencontainers.image.revision=${revision}" \
   "${tag_args[@]}" \
   "$output_flag" \
   "$context"
