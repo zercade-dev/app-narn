@@ -51,7 +51,8 @@ overrides:
   # here until @ai-sdk/provider-utils bumps its own pin.
   # September WebSocket, TLS, and cache advisories require 8.10.2. Keep the
   # already-resolved major (8) while raising the security floor.
-  undici: '>=8.10.2 <9'
+  # October content-encoding, EventSource, and integrity advisories require 8.12.2.
+  undici: '>=8.12.2 <9'
   # deepl-node's Axios dependency: September prototype-pollution gadgets can
   # alter headers, routing, TLS, and resource limits. All are fixed in 1.20.0.
   # Preserve the SDK's Axios major until its upstream dependency catches up.
@@ -69,17 +70,9 @@ overrides:
   # async/index.native.js, README, version; owner-approved 2026-08-13).
   # Relax to a range once the freeze lifts.
   nanoid: 3.3.18
-  # GHSA-v422-hmwv-36x6 (low, published 2026-08-02): body-parser <2.3.0 silently
-  # skips the request-size check when `limit` is unparseable — bytes.parse()
-  # returns null and enforcement is dropped instead of erroring. Not reachable
-  # here (both call sites in packages/server/src/index.ts pass string literals,
-  # '10mb' and '64kb'), so this is hardening, not a live hole. Pulled in
-  # transitively via express, whose own '^2.2.1' range already admits 2.3.0.
-  # EXACT pin for the same reason as nanoid above: 2.3.0 was published
-  # 2026-06-15, seven weeks BEFORE the 2026-08-04 ChainDrop worm outbreak, and
-  # its tarball was diff-audited against 2.2.2 (owner-approved during the
-  # dependency freeze). Relax to '>=2.3.0' once the freeze lifts.
-  body-parser: 2.3.0
+  # GHSA-27r3-jxmh-p828: reject trailing bytes after compressed request bodies
+  # without crashing the process. Keep Express's body-parser major.
+  body-parser: 2.4.0
   # GHSA-c83g-rgw3-j3cx (high, published 2026-09-01): browserslist <=4.28.6 never
   # evicts from its query-result cache, so distinct queries grow memory without
   # bound until the process OOMs.
@@ -111,19 +104,19 @@ catalog:
   deepl-node: 1.28.1
 
   # AI SDK dependencies
-  ai: 7.0.148
-  '@ai-sdk/google': 4.0.102
-  '@ai-sdk/deepseek': 3.0.70
-  '@ai-sdk/openai': 4.0.99
-  '@ai-sdk/anthropic': 4.0.85
-  '@ai-sdk/openai-compatible': 3.0.75
+  ai: 7.0.153
+  '@ai-sdk/google': 4.0.105
+  '@ai-sdk/deepseek': 3.0.73
+  '@ai-sdk/openai': 4.0.102
+  '@ai-sdk/anthropic': 4.0.88
+  '@ai-sdk/openai-compatible': 3.0.78
 
   # Server runtime
   cors: 2.8.6
   dotenv: 18.0.9
   express: 5.3.0
   helmet: 8.3.0
-  multer: 2.4.0
+  multer: 2.5.0
   papaparse: 5.7.0
   zod: 4.6.7
   yauzl: 3.4.0
