@@ -123,7 +123,7 @@ catalog:
   dotenv: 18.0.8
   express: 5.3.0
   helmet: 8.3.0
-  multer: 2.4.0
+  multer: 2.5.0
   papaparse: 5.7.0
   zod: 4.6.7
   yauzl: 3.4.0
