@@ -100,7 +100,7 @@ catalog:
   '@typescript-eslint/parser': 8.72.1
 
   # Module dependencies
-  '@github/copilot-sdk': 1.0.26
+  '@github/copilot-sdk': 1.0.28
   deepl-node: 1.28.1
 
   # AI SDK dependencies
