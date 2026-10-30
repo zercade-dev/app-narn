@@ -4,7 +4,7 @@
 # Base image pinned by digest (multi-arch index) for reproducible, supply-chain-safe
 # builds. Dependabot's `docker` ecosystem (.github/dependabot.yml) proposes digest
 # bumps; refresh manually with: docker buildx imagetools inspect node:26-bookworm
-FROM node:26-bookworm@sha256:5c4012d11d9857c42713ba511fbc19645cac1706bb710d51d42b0d301dff7f88 AS builder
+FROM node:26-bookworm@sha256:fa52d1669505e29b58c042875b1d65c229e0787a3610fd52869b22b68e480853 AS builder
 ENV PNPM_HOME=/pnpm
 ENV PATH=$PNPM_HOME:$PATH
 # Node 26 no longer ships corepack — install it explicitly before activating pnpm.
@@ -28,7 +28,7 @@ RUN pnpm --filter @zercade-dev/narn-server deploy --prod --legacy /deploy
 
 # ---- runtime: slim, no build tooling ----
 # Base image pinned by digest (multi-arch index); see the builder note above.
-FROM node:26-bookworm-slim@sha256:28147155d47dc31abe0a46e0d12b59b2fb3d0a2dcc5dc65fce76a074180b16fe AS runtime
+FROM node:26-bookworm-slim@sha256:bc0a2afd3b74ce12222fc8bab99271e66257f021078f5f4a5d687a77d280c1d9 AS runtime
 # Links the published GHCR package to this repo (previously set by docker/metadata-action).
 LABEL org.opencontainers.image.source="https://github.com/zercade-dev/app-narn"
 ENV NODE_ENV=production
