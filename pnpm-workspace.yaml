@@ -96,20 +96,20 @@ catalog:
   globals: 17.13.0
   eslint-config-prettier: 10.1.8
   eslint-plugin-react-hooks: 7.1.1
-  '@typescript-eslint/eslint-plugin': 8.72.0
-  '@typescript-eslint/parser': 8.72.0
+  '@typescript-eslint/eslint-plugin': 8.72.1
+  '@typescript-eslint/parser': 8.72.1
 
   # Module dependencies
-  '@github/copilot-sdk': 1.0.26
+  '@github/copilot-sdk': 1.0.28
   deepl-node: 1.28.1
 
   # AI SDK dependencies
-  ai: 7.0.153
-  '@ai-sdk/google': 4.0.105
-  '@ai-sdk/deepseek': 3.0.73
-  '@ai-sdk/openai': 4.0.102
-  '@ai-sdk/anthropic': 4.0.88
-  '@ai-sdk/openai-compatible': 3.0.78
+  ai: 7.0.156
+  '@ai-sdk/google': 4.0.107
+  '@ai-sdk/deepseek': 3.0.75
+  '@ai-sdk/openai': 4.0.104
+  '@ai-sdk/anthropic': 4.0.91
+  '@ai-sdk/openai-compatible': 3.0.80
 
   # Server runtime
   cors: 2.8.6
@@ -126,7 +126,7 @@ catalog:
   '@types/cors': 2.8.19
   '@types/express': 5.0.6
   '@types/multer': 2.3.0
-  '@types/node': 26.6.5
+  '@types/node': 26.6.6
   '@types/papaparse': 5.5.2
   '@types/yauzl': 3.4.0
   '@types/yazl': 3.3.1
@@ -135,14 +135,14 @@ catalog:
 
   # Frontend runtime
   '@base-ui/react': 1.9.0
-  '@tanstack/react-virtual': 3.14.22
+  '@tanstack/react-virtual': 3.14.23
   class-variance-authority: 0.7.1
   clsx: 2.1.1
-  lucide-react: 1.61.0
+  lucide-react: 1.64.0
   react: 19.3.1
   react-dom: 19.3.1
-  i18next: 26.5.10
-  react-i18next: 17.1.8
+  i18next: 26.5.11
+  react-i18next: 17.1.9
   react-markdown: 10.1.0
   sonner: 2.0.8
   tailwind-merge: 3.7.0
@@ -169,7 +169,7 @@ catalog:
   # regex literals, so a regex stripper would corrupt code).
   parse5: 8.0.1
   acorn: 8.19.0
-  postcss: 8.5.31
+  postcss: 8.5.32
 
 # Supply-chain cooldown: refuse dependency versions published fewer than this many
 # minutes ago (1440 = 1 day), which blunts compromised "just-published" package attacks
