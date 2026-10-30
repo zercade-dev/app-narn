@@ -1,6 +1,6 @@
 {
   "name": "translator-v2",
-  "version": "1.73.11",
+  "version": "1.73.12",
   "license": "BUSL-1.1",
   "private": true,
   "type": "module",
