@@ -199,6 +199,8 @@ export interface PricingDataModel {
 /** One provider's slice of `provider-pricing.json`. */
 export interface PricingDataProvider {
   sourceUrl?: string;
+  /** When this provider was last scraped and accepted; `generatedAt` only dates the file. */
+  scrapedAt?: string;
   models: PricingDataModel[];
 }
 
