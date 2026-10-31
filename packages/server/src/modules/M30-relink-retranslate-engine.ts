@@ -66,6 +66,7 @@ import { getCurrentTenant, runWithTenant } from '../storage/pg/tenant-context.js
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { lqaGate } from './M10-lqa-gate.js';
 import {
+  type MaskOptions,
   type MaskPlan,
   maskApprovedForMemory,
   maskDiagnosticsToIssues,
@@ -230,10 +231,13 @@ interface RelinkMasking {
  * source edit that adds or drops a placeholder legitimately does; any such text
  * gives up masking for the whole batch, which then dispatches verbatim.
  */
-function buildRelinkMasking(texts: RelinkPromptTexts): RelinkMasking | null {
-  const { masked, plan } = maskText(texts.newSourceText, NO_CONSTANT_TERMS);
+function buildRelinkMasking(
+  texts: RelinkPromptTexts,
+  opts: MaskOptions = {},
+): RelinkMasking | null {
+  const { masked, plan } = maskText(texts.newSourceText, NO_CONSTANT_TERMS, opts);
   const underPlan = (text: string): string | null => {
-    const remapped = maskApprovedForMemory(texts.newSourceText, text, NO_CONSTANT_TERMS);
+    const remapped = maskApprovedForMemory(texts.newSourceText, text, NO_CONSTANT_TERMS, opts);
     return remapped ? remapped.maskedTranslation : null;
   };
   const oldSourceText = underPlan(texts.oldSourceText);
@@ -507,7 +511,9 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
       currentTranslations,
     };
     // Null when the prompt cannot be masked coherently — see buildRelinkMasking.
-    const masking = buildRelinkMasking(rawTexts);
+    const masking = buildRelinkMasking(rawTexts, {
+      runtimePlaceholders: entry?.collection === 'client',
+    });
     const promptTexts = masking?.texts ?? rawTexts;
     const context = buildEditTransferContext(promptTexts);
 

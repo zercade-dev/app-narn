@@ -339,6 +339,11 @@ export type {
 } from './ai-sdk-provider/index.js';
 export { MASK_TOKEN_SOURCE } from './masking/tokens.js';
 export {
+  RUNTIME_PLACEHOLDER_SOURCE,
+  extractRuntimePlaceholders,
+  isPrintfPlaceholder,
+} from './runtime-placeholders.js';
+export {
   CORE_SYSTEM_PROMPT,
   BATCH_SYSTEM_PROMPT,
   ESCAPE_SEQUENCE_RULE,
