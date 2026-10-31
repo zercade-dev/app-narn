@@ -474,6 +474,7 @@ const exportQuerySchema = z.object({
   languages: z.string().optional(),
   includeContext: booleanFlag,
   discardUntranslatable: booleanFlag,
+  protectForSpreadsheets: booleanFlag,
   template: z.enum(['true']).optional(),
   collection: z.enum(['main', 'client']).optional(),
   pseudoAs: z
@@ -538,6 +539,7 @@ stringsRouter.get(
       languages,
       pseudoAs,
       discardUntranslatable: req.query.discardUntranslatable === 'true',
+      protectForSpreadsheets: req.query.protectForSpreadsheets === 'true',
       collection,
     });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');

@@ -3,10 +3,12 @@
  * (project-string CSV, glossary CSV, game-dialect CSV).
  *
  * A cell whose content starts with one of these trigger characters would be
- * executed as a formula or DDE command when opened in a spreadsheet, so on
- * export it is prefixed with an apostrophe (`escapeFormulaGuard`); on import
- * that exact `apostrophe + trigger` prefix is stripped (`stripFormulaGuard`)
- * so the round-trip is lossless. Keeping the trigger set in one place means a
+ * executed as a formula or DDE command when opened in a spreadsheet, so where
+ * the guard applies it is prefixed with an apostrophe (`escapeFormulaGuard`);
+ * on main-text import that exact `apostrophe + trigger` prefix is stripped
+ * (`stripFormulaGuard`) so the round-trip is lossless. Project string exports
+ * apply it only on request, because the Miliastra editor keeps the apostrophe
+ * as visible text. Keeping the trigger set in one place means a
  * divergence (e.g. adding a trigger char) can't silently break round-tripping.
  *
  * This matches the trigger set Papa Parse's `escapeFormulae` option uses.
@@ -54,6 +56,27 @@ export function escapeFormulaGuard(value: string): string {
   return FORMULA_TRIGGER.test(value) || LEADING_APOSTROPHE_TRIGGER.test(value)
     ? `'${value}`
     : value;
+}
+
+/**
+ * Matches a cell the import strip would change: a run of one or more
+ * apostrophes followed by a trigger character.
+ */
+const GENUINE_APOSTROPHE_TRIGGER = /^'+[=+\-@\t\r]/;
+
+/**
+ * The guard for a file that is not protected for spreadsheets but will still be
+ * re-imported through {@link stripFormulaGuard}. Plain trigger text is left
+ * alone. Text that genuinely begins with apostrophes and a trigger gets the one
+ * extra apostrophe the strip removes, so the text and its hashed id survive.
+ */
+export function escapeForReimport(value: string): string {
+  return GENUINE_APOSTROPHE_TRIGGER.test(value) ? `'${value}` : value;
+}
+
+/** True when a cell begins with exactly one apostrophe and a trigger character. */
+export function hasFormulaGuard(value: string): boolean {
+  return /^'[=+\-@\t\r]/.test(value);
 }
 
 /** Removes the export-time formula guard, restoring the original cell value. */

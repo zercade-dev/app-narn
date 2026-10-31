@@ -24,6 +24,7 @@ A CSV with a **Text Mapping ID** column is a client script file. It is imported 
 * Importing a client file never changes main text, and importing a main file never changes client text.
 * When the English for an existing key changes, in either import mode, the old row moves to the **Orphans** tab and the new row keeps the translations from the file; only its empty cells are untranslated. Use **Relink** to carry translations across: the row with the same key is suggested first, and the override mode decides whether filled cells are kept or replaced.
 * Once a project has client strings, **Export CSV** lets you choose which collection to download, and a client export keeps its Text Mapping ID column.
+* Exports write your text as stored, with no apostrophe added before cells that start with = + - or @. Turn on **Protect for spreadsheets** only for a file you will open in a spreadsheet, because the Miliastra editor keeps that apostrophe as text. Translation runs skip rows whose Need translation? value is FALSE.
 
 ## Modules and models
 

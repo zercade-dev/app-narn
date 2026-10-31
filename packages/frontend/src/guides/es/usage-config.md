@@ -24,6 +24,7 @@ Un CSV con una columna **Text Mapping ID** es un archivo de script de cliente. S
 * Importar un archivo de cliente nunca cambia el texto principal, e importar un archivo principal nunca cambia el texto de cliente.
 * Cuando cambia el inglés de una clave existente, en cualquiera de los dos modos de importación, la fila anterior pasa a la pestaña **Huérfanas** y la nueva conserva las traducciones del archivo; solo sus celdas vacías quedan sin traducir. Usa **Reasignar** para trasladar las traducciones: primero se sugiere la fila con la misma clave, y el modo de sobrescritura decide si las celdas ya rellenas se conservan o se reemplazan.
 * Cuando un proyecto tiene cadenas de cliente, **Exportar CSV** permite elegir qué colección descargar, y una exportación de cliente mantiene su columna Text Mapping ID.
+* Las exportaciones escriben el texto tal como está guardado, sin añadir un apóstrofo delante de las celdas que empiezan por = + - o @. Activa **Proteger para hojas de cálculo** solo en archivos que vayas a abrir en una hoja de cálculo, porque el editor de Miliastra conserva ese apóstrofo como texto. Las ejecuciones de traducción omiten las filas cuyo valor de Need translation? es FALSE.
 
 ## Módulos y modelos
 

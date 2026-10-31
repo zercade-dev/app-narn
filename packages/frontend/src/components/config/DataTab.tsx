@@ -54,6 +54,10 @@ interface DiffSummary {
   duplicateLanguageHeaders?: string[];
   /** Languages with a cell containing a raw newline byte instead of the literal \n marker. */
   rawNewlineLanguages?: string[];
+  /** Main: guard apostrophes removed. Client: apostrophe + trigger cells kept as written. */
+  formulaGuardCells?: number;
+  /** Which collection the file belongs to. */
+  collection?: 'main' | 'client';
   /** Automatic pre-import safety snapshot taken by the server before the import. */
   snapshot?: { filename: string; createdAt: string };
   /** Entries missing from the file (marked orphaned when mode is full-replace). */
@@ -65,7 +69,7 @@ interface DiffSummary {
 type ImportMode = 'add-only' | 'full-replace';
 
 /** A dry run's counts for one import mode, or its in-flight marker. */
-type ImportPreview = 'loading' | { orphans: number; changed: number };
+type ImportPreview = 'loading' | { orphans: number; changed: number; formulaGuardCells: number };
 
 /**
  * Data tab — how strings get in and out of the project: source/target
@@ -111,6 +115,7 @@ export function DataTab() {
   const [pendingLanguages, setPendingLanguages] = useState<string[] | null>(null);
   const [includeContext, setIncludeContext] = useState(false);
   const [discardUntranslatable, setDiscardUntranslatable] = useState(false);
+  const [protectForSpreadsheets, setProtectForSpreadsheets] = useState(false);
   const [exportLanguages, setExportLanguages] = useState<string[] | null>(null);
   const [pseudoAs, setPseudoAs] = useState<string>('none');
   const [pendingCollection, setPendingCollection] = useState<CsvCollection>('main');
@@ -289,7 +294,11 @@ export function DataTab() {
       if (isCurrent()) {
         setImportPreviews((prev) => ({
           ...prev,
-          [mode]: { orphans: preview.orphans ?? 0, changed: preview.diff?.changed ?? 0 },
+          [mode]: {
+            orphans: preview.orphans ?? 0,
+            changed: preview.diff?.changed ?? 0,
+            formulaGuardCells: preview.formulaGuardCells ?? 0,
+          },
         }));
       }
     } catch {
@@ -373,6 +382,7 @@ export function DataTab() {
     const params = new URLSearchParams();
     if (includeContext) params.set('includeContext', 'true');
     if (discardUntranslatable) params.set('discardUntranslatable', 'true');
+    if (protectForSpreadsheets) params.set('protectForSpreadsheets', 'true');
     // Only send the languages param when it differs from the full selectable set
     if (
       selectedLangs.length !== exportableLanguages.length ||
@@ -750,6 +760,19 @@ export function DataTab() {
                 />
                 {t('discardUntranslatable')}
               </label>
+              <div>
+                <label className="flex items-center gap-1.5 text-sm">
+                  <Checkbox
+                    data-testid="protect-for-spreadsheets-checkbox"
+                    checked={protectForSpreadsheets}
+                    onCheckedChange={(c) => setProtectForSpreadsheets(c === true)}
+                  />
+                  {t('protectForSpreadsheets')}
+                </label>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {t('protectForSpreadsheetsHint')}
+                </p>
+              </div>
               {activeProject.activeLanguages.includes(PSEUDO_LANGUAGE_CODE) && (
                 <div>
                   <p className="text-sm font-medium mb-1.5">{t('pseudoExportAs')}</p>
@@ -889,6 +912,25 @@ export function DataTab() {
               </ul>
             </div>
           )}
+          {currentPreview &&
+            currentPreview !== 'loading' &&
+            currentPreview.formulaGuardCells > 0 && (
+              <p
+                className="mt-3 text-sm text-status-warn"
+                data-testid={
+                  pendingCollection === 'client'
+                    ? 'import-formula-guard-kept'
+                    : 'import-formula-guard-removed'
+                }
+              >
+                {t(
+                  pendingCollection === 'client'
+                    ? 'formulaGuardKeptNotice'
+                    : 'formulaGuardRemovedNotice',
+                  { cells: currentPreview.formulaGuardCells },
+                )}
+              </p>
+            )}
           {rawNewlineLanguages.length > 0 && (
             <div className="mt-3" data-testid="import-raw-newline-warning">
               <p className="text-sm font-medium">{t('rawNewlineLanguagesTitle')}</p>

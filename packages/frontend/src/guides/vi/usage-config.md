@@ -24,6 +24,7 @@ CSV có cột **Text Mapping ID** là tệp tập lệnh máy khách. Tệp này
 * Nhập tệp máy khách không bao giờ thay đổi văn bản chính, và nhập tệp chính không bao giờ thay đổi văn bản máy khách.
 * Khi tiếng Anh của một khóa hiện có thay đổi, ở cả hai chế độ nhập, hàng cũ chuyển sang tab **Mục mồ côi** và hàng mới giữ các bản dịch từ tệp; chỉ những ô trống mới chưa được dịch. Dùng **Liên kết lại** để chuyển bản dịch: hàng có cùng khóa được gợi ý trước, và chế độ ghi đè quyết định giữ hay thay thế các ô đã có nội dung.
 * Khi dự án có chuỗi máy khách, **Xuất CSV** cho phép chọn bộ sưu tập cần tải xuống, và bản xuất máy khách giữ nguyên cột Text Mapping ID.
+* Bản xuất ghi văn bản đúng như đã lưu, không thêm dấu nháy đơn trước các ô bắt đầu bằng = + - hoặc @. Chỉ bật **Bảo vệ cho bảng tính** với tệp bạn sẽ mở trong bảng tính, vì trình chỉnh sửa Miliastra giữ dấu nháy đó như văn bản. Các lượt dịch bỏ qua những hàng có giá trị Need translation? là FALSE.
 
 ## Mô-đun và mô hình
 

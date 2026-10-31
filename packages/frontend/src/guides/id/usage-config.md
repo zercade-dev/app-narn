@@ -38,6 +38,7 @@ CSV dengan kolom **Text Mapping ID** adalah berkas skrip klien. Berkas ini diimp
 * Mengimpor berkas klien tidak pernah mengubah teks utama, dan mengimpor berkas utama tidak pernah mengubah teks klien.
 * Saat teks Inggris pada kunci yang sudah ada berubah, dalam mode impor apa pun, baris lama pindah ke tab **Entri Yatim** dan baris baru mempertahankan terjemahan dari berkas; hanya sel kosongnya yang belum diterjemahkan. Gunakan **Hubungkan ulang** untuk memindahkan terjemahan: baris dengan kunci yang sama disarankan lebih dulu, dan mode penimpaan menentukan apakah sel yang sudah terisi dipertahankan atau diganti.
 * Setelah proyek memiliki string klien, **Ekspor CSV** memungkinkan Anda memilih koleksi yang diunduh, dan ekspor klien tetap menyertakan kolom Text Mapping ID.
+* Ekspor menulis teks sesuai yang tersimpan, tanpa menambahkan apostrof di depan sel yang diawali = + - atau @. Aktifkan **Lindungi untuk spreadsheet** hanya untuk file yang akan dibuka di spreadsheet, karena editor Miliastra mempertahankan apostrof itu sebagai teks. Proses terjemahan melewati baris yang nilai Need translation?-nya FALSE.
 
 ## Modul dan model
 

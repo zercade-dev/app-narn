@@ -24,6 +24,7 @@ Eine CSV mit der Spalte **Text Mapping ID** ist eine Client-Skript-Datei. Sie wi
 * Der Import einer Client-Datei ändert nie den Haupttext, und der Import einer Hauptdatei ändert nie den Client-Text.
 * Ändert sich der englische Text eines vorhandenen Schlüssels, wandert die alte Zeile in beiden Importmodi in den Tab **Waisen**, und die neue Zeile behält die Übersetzungen aus der Datei; nur ihre leeren Zellen sind unübersetzt. Mit **Neu verknüpfen** lassen sich Übersetzungen übernehmen: Die Zeile mit demselben Schlüssel wird zuerst vorgeschlagen, und der Überschreibmodus legt fest, ob gefüllte Zellen erhalten bleiben oder ersetzt werden.
 * Sobald ein Projekt Client-Strings enthält, lässt sich beim **CSV-Export** die Sammlung wählen, und ein Client-Export behält seine Spalte Text Mapping ID.
+* Exporte schreiben den Text wie gespeichert, ohne Apostroph vor Zellen, die mit = + - oder @ beginnen. Aktiviere **Für Tabellenkalkulationen schützen** nur für Dateien, die du in einer Tabellenkalkulation öffnest, denn der Miliastra-Editor behält dieses Apostroph als Text. Übersetzungsläufe überspringen Zeilen, deren Wert für Need translation? FALSE ist.
 
 ## Module und Modelle
 
