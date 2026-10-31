@@ -406,6 +406,10 @@
         "name": "Line-break parity",
         "description": "Flags translations whose literal \\n escapes or real line breaks differ from the source — broken line breaks render wrong in-game."
       },
+      "runtime-placeholder-parity": {
+        "name": "Runtime placeholders",
+        "description": "For client script strings, flags {name} and %s/%d placeholders that are missing, added, or (for %s/%d) reordered, and %% escapes that differ from the source."
+      },
       "html-entity": {
         "name": "HTML entity",
         "description": "Flags HTML entities in the translation that the source does not have — they render as literal text in-game instead of the character they represent."
