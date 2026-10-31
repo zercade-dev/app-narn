@@ -126,6 +126,7 @@ export {
   RequestTimeoutError,
   isAbortLikeError,
   isTransientError,
+  PAYLOAD_TOO_LARGE_MESSAGE_RE,
   transientRetryDelayMs,
   sleep,
   retryOnceOnTransient,

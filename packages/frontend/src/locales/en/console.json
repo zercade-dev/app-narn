@@ -11,6 +11,8 @@
   "statusDisconnected": "Disconnected from server log stream",
   "unreadErrors": "{{count}} unread error",
   "unreadErrors_other": "{{count}} unread errors",
+  "unreadWarnings": "{{count}} unread warning",
+  "unreadWarnings_other": "{{count}} unread warnings",
   "droppedEntries": "{{count}} earlier entry dropped",
   "droppedEntries_other": "{{count}} earlier entries dropped",
   "searchPlaceholder": "Search logs…",

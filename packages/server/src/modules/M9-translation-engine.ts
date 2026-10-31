@@ -51,6 +51,7 @@ import {
   effectivePromptOptions,
   isExcludedFromAi,
   isParseFailureMessage,
+  type ProviderFailureRouting,
 } from '@zercade-dev/narn-shared';
 import { router as defaultRouter, type Router } from './M7-router.js';
 import {
@@ -119,6 +120,13 @@ import {
   withRateLimitRetry,
 } from './M9/errors.js';
 import { chunkPackedDecisions, groupDecisions, packAssignedGroups } from './M9/packing.js';
+import {
+  countsAsProviderFailure,
+  createProviderFailureTracker,
+  recordProviderFailure,
+  routingForHeldFailure,
+  type ProviderFailureTracker,
+} from './M9/provider-failure-notices.js';
 import {
   type BucketSourceDeps,
   bucketRateLimits,
@@ -494,6 +502,14 @@ type FreewayDispatchOutcome =
   /** `authCancel` is true only for an auth failure that leaves no bucket at all. */
   | { kind: 'error'; error: unknown; authCancel: boolean };
 
+/** A failed provider call whose routing is decided when its batch settles. */
+interface HeldProviderFailure {
+  model: string;
+  error: unknown;
+  /** `entryId::targetLanguage` of each string in the failed call. */
+  pairKeys: string[];
+}
+
 /** Args for {@link TranslationEngine.dispatchFreewayBatch} and {@link TranslationEngine.dispatchFreewayInParts}. */
 interface FreewayDispatchArgs {
   jobs: TranslationJob[];
@@ -535,6 +551,11 @@ interface FreewayDispatchArgs {
     reason: 'rate-limit' | 'auth' | 'provider-error';
     retryAfterMs?: number;
   }) => void;
+  /**
+   * Reports a provider call that failed these strings at once. Its routing is
+   * not known yet: the caller settles that once the batch has.
+   */
+  onProviderFailure?: (info: HeldProviderFailure) => void;
   /** Recursion depth of the parse-failure split (0 = the original batch). */
   splitDepth?: number;
   /** Reports a parse-failure split so the caller can record a run detail. */
@@ -698,6 +719,8 @@ interface RunDetailsAcc {
    * one repeated line, not correctness.
    */
   freewayThrottled: Set<string>;
+  /** Repeated-failure counts below the notice threshold. In-memory only. */
+  providerFailures: ProviderFailureTracker;
 }
 
 export class TranslationEngine {
@@ -3964,6 +3987,7 @@ export class TranslationEngine {
       unpackReason,
       admission,
       onThrottle,
+      onProviderFailure,
     } = args;
     const strikeCap = args.splitCaps?.get(state.bucketKey);
     if (strikeCap !== undefined && strikeCap >= 1 && strikeCap < jobs.length) {
@@ -4264,6 +4288,13 @@ export class TranslationEngine {
         // batch: it earns the same single failover hop plus a cooldown, so one
         // dead model cannot drain a run while healthy buckets sit idle.
         const providerFailure = !rateLimited && !authFailure;
+        if (countsAsProviderFailure(err)) {
+          onProviderFailure?.({
+            model: state.modelId ?? state.moduleId,
+            error: err,
+            pairKeys: jobs.map((job) => `${job.entryId}::${job.targetLanguage}`),
+          });
+        }
         const languages = new Set(jobs.map((job) => job.targetLanguage));
         // A mixed chunk that came back all-errored with a PARSE message is a
         // format problem, not a sick bucket: the shared provider core already
@@ -5393,6 +5424,15 @@ export class TranslationEngine {
             error: errMsg,
             context: e.decision.entry.context ?? null,
           });
+          if (moduleResult?.error && countsAsProviderFailure(moduleResult.error)) {
+            this.noteProviderFailure(
+              runId,
+              status,
+              currentFreewayState?.modelId ?? metricsModel ?? moduleId,
+              moduleResult.error,
+              1,
+            );
+          }
           this.recordFailure(status, e.decision.entry.id, e.decision.targetLanguage, errMsg);
           settled.add(settleKey(e.decision));
           metricsCollector.recordFailure(moduleId, metricsModel);
@@ -5636,15 +5676,72 @@ export class TranslationEngine {
           // cooled and the batch fails over to another one (once).
           const state: FreewayBatchState = { module, moduleId, modelId: metricsModel, bucketKey };
           currentFreewayState = state;
-          const outcome = await this.dispatchFreewayBatch({
+          // Held until the batch settles, so a notice is only ever first seen
+          // saying what actually became of the requests.
+          const heldFailures: HeldProviderFailure[] = [];
+          // Which model served each entry. Read from `state` as results arrive,
+          // because a later language part overwrites it.
+          const servedBy = new Map<string, string>();
+          const settleHeldFailures = (settled?: FreewayDispatchOutcome): void => {
+            if (heldFailures.length === 0) return;
+            try {
+              if (settled?.kind === 'results') {
+                const decided = batchJobs.map(
+                  ({ index }) => uncachedNonTrivialEntries[index].decision,
+                );
+                for (const result of settled.results) {
+                  if (result?.error || !result?.translatedText) continue;
+                  const key = `${result.entryId}::${result.targetLanguage}`;
+                  if (servedBy.has(key)) continue;
+                  const decision = decided.find(
+                    (d) =>
+                      d.entry.id === result.entryId && d.targetLanguage === result.targetLanguage,
+                  );
+                  if (decision?.modelOverride) servedBy.set(key, decision.modelOverride);
+                }
+              }
+              for (const failure of heldFailures) {
+                this.noteProviderFailure(
+                  runId,
+                  status,
+                  failure.model,
+                  failure.error,
+                  failure.pairKeys.length,
+                  routingForHeldFailure(failure, servedBy, settled?.kind, !!signal?.aborted),
+                );
+              }
+              // A cancelled run has already made its final write.
+              if ((status.status as RunStatusCode) === RunStatusCode.Cancelled) {
+                this.emitProgress(runId, status);
+              }
+            } catch (err) {
+              this.logger.warn('translation:provider-failure-record-failed', {
+                runId,
+                error: toErrorMessage(err),
+              });
+            }
+          };
+          const dispatched = this.dispatchFreewayBatch({
             jobs: batchJobs.map(({ job }) => job),
             decisions: batchJobs.map(({ index }) => uncachedNonTrivialEntries[index].decision),
             state,
             deps: freewayDeps,
             createModule: createFreewayModule,
-            translateOptions: { ...dispatchOptions, onJobComplete },
+            translateOptions: {
+              ...dispatchOptions,
+              onJobComplete: async (result) => {
+                if (!result.error && result.translatedText) {
+                  servedBy.set(
+                    `${result.entryId}::${result.targetLanguage}`,
+                    state.modelId ?? state.moduleId,
+                  );
+                }
+                await onJobComplete(result);
+              },
+            },
             signal,
             onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
+            onProviderFailure: (info) => heldFailures.push(info),
             onSplit: (info) => this.recordFreewayDetail(runId, formatSplitDetail(info)),
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
             minBand: freewayMinBand(status.request),
@@ -5662,7 +5759,15 @@ export class TranslationEngine {
               this.recordFreewayDetail(runId, formatThrottleDetail(info.bucketKey, info.waitMs));
             },
           });
+          let outcome: FreewayDispatchOutcome;
+          try {
+            outcome = await dispatched;
+          } catch (err) {
+            settleHeldFailures();
+            throw err;
+          }
           currentFreewayState = undefined;
+          settleHeldFailures(outcome);
           // A same-bucket auth failover (a sibling instance took over, see
           // dispatchFreewayBatch's 'keep' handling) changes state.moduleId
           // without changing state.bucketKey — sync on EITHER moving, or the
@@ -5790,6 +5895,16 @@ export class TranslationEngine {
         if (batchError !== undefined) {
           if (isAbortError(batchError) || signal?.aborted) {
             return;
+          }
+          // A Freeway batch already reported this from its dispatch hop.
+          if (bucketKey === undefined && countsAsProviderFailure(batchError)) {
+            this.noteProviderFailure(
+              runId,
+              status,
+              metricsModel ?? moduleId,
+              batchError,
+              batchJobs.filter(({ index }) => !processedIndices.has(index)).length,
+            );
           }
           // A failed dispatch batch only fails its own jobs; other batches in
           // the group proceed and their results are persisted normally.
@@ -6343,6 +6458,7 @@ export class TranslationEngine {
       previousValues: new Map(),
       freewaySplitCaps: new Map(),
       freewayThrottled: new Set(),
+      providerFailures: createProviderFailureTracker(),
     });
   }
 
@@ -6378,6 +6494,7 @@ export class TranslationEngine {
       previousValues,
       freewaySplitCaps: new Map(),
       freewayThrottled: new Set(),
+      providerFailures: createProviderFailureTracker(),
       ...(existing.freeway ? { freeway: [...existing.freeway] } : {}),
     });
   }
@@ -6792,6 +6909,23 @@ export class TranslationEngine {
       });
     }
     this.emitProgress(runId, status);
+  }
+
+  /** Count a provider failure towards the run's repeated-failure notices. */
+  private noteProviderFailure(
+    runId: string,
+    status: RunStatus,
+    model: string,
+    error: unknown,
+    occurrences: number,
+    routing?: ProviderFailureRouting,
+  ): void {
+    if (occurrences === 0) return;
+    // A cancelled run's accumulator is already gone, and its last batches still
+    // have real failures to report.
+    const tracker = this.details.get(runId)?.providerFailures ?? createProviderFailureTracker();
+    const message = sanitizeLogObject({ m: toErrorMessage(error) }).m;
+    recordProviderFailure(status, tracker, { model, message, occurrences, routing });
   }
 
   private emitProgress(runId: string, status: RunStatus): void {

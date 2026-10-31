@@ -13,7 +13,13 @@ import {
   type CategorySuggestion,
 } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../hooks/use-api.js';
-import { RUN_TYPE_KEY, isChatRun, isRunActive } from '../lib/run-kind.js';
+import {
+  PROVIDER_FAILURE_ROUTING_KEY,
+  RUN_TYPE_KEY,
+  isChatRun,
+  joinProviderFailureSentences,
+  isRunActive,
+} from '../lib/run-kind.js';
 import { getErrorMessage } from '../lib/utils.js';
 import { mutateThenRefresh, runAction } from './store-helpers.js';
 import { toast } from '../lib/toast.js';
@@ -358,6 +364,42 @@ function notifyFailedRunTransitions(previousRuns: RunStatus[], nextRuns: RunStat
   }
 }
 
+/**
+ * Toasts repeated-failure groups the first time a poll shows them, at most once
+ * per run per poll: the first group in full, the rest as a count. A fetch
+ * with no earlier snapshot of THIS project is a first sighting and stays quiet
+ * (the store keeps a settled project's runs across a switch): a reload or a
+ * switch must not replay old notices, which the run card still shows.
+ */
+function notifyNewProviderFailures(
+  projectId: string,
+  previousRuns: RunStatus[],
+  nextRuns: RunStatus[],
+): void {
+  if (!previousRuns.some((r) => r.projectId === projectId)) return;
+  for (const run of nextRuns) {
+    const prev = previousRuns.find((r) => r.runId === run.runId);
+    const fresh = (run.providerFailureNotices ?? []).filter(
+      (notice) => !prev?.providerFailureNotices?.some((n) => n.id === notice.id),
+    );
+    const [notice] = fresh;
+    if (!notice) continue;
+    const summary = i18n.t('runs.providerFailureNotice', {
+      ns: 'strings',
+      model: notice.model,
+      count: notice.count,
+      message: notice.message,
+    });
+    const routing = i18n.t(PROVIDER_FAILURE_ROUTING_KEY[notice.routing], { ns: 'strings' });
+    const text = joinProviderFailureSentences(notice.message, summary, routing);
+    const more =
+      fresh.length > 1
+        ? ` ${i18n.t('runs.providerFailureMoreOnCard', { ns: 'strings', count: fresh.length - 1 })}`
+        : '';
+    toast.warning(`${text}${more}`);
+  }
+}
+
 export const useRunStore = create<RunStore>((set, get) => {
   /**
    * Arm the next poll tick `delay` ms out and record it as the live poller.
@@ -433,6 +475,7 @@ export const useRunStore = create<RunStore>((set, get) => {
         const previousRuns = get().runs;
         set({ runs, loading: false, error: null });
         notifyFailedRunTransitions(previousRuns, runs);
+        notifyNewProviderFailures(projectId, previousRuns, runs);
 
         // Poll while any run is in pending or running state.
         // Queued runs count as active: they will transition to running without

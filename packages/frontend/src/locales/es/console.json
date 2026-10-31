@@ -11,6 +11,8 @@
   "statusDisconnected": "Desconectado del flujo de registros del servidor",
   "unreadErrors": "{{count}} error sin leer",
   "unreadErrors_other": "{{count}} errores sin leer",
+  "unreadWarnings": "{{count}} advertencia sin leer",
+  "unreadWarnings_other": "{{count}} advertencias sin leer",
   "droppedEntries": "{{count}} entrada anterior ya no disponible",
   "droppedEntries_other": "{{count}} entradas anteriores ya no disponibles",
   "searchPlaceholder": "Buscar registros…",

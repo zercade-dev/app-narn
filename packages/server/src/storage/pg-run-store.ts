@@ -106,6 +106,17 @@ export class PgRunStore implements RunStore {
    * read-modify-write shares one tenant tx (one role/GUC setup, atomic).
    */
   private async upsert(run: RunStatus, db: Queryable = this.db): Promise<void> {
+    // Every way a run ends is written through here. Once it has ended nothing
+    // is going to retry, so a notice must stop saying something will.
+    if (
+      run.status === RunStatusCode.Completed ||
+      run.status === RunStatusCode.Failed ||
+      run.status === RunStatusCode.Cancelled
+    ) {
+      for (const notice of run.providerFailureNotices ?? []) {
+        if (notice.routing === 'retrying') notice.routing = 'none';
+      }
+    }
     // created_by is stamped inline from the GUC (never a param — see
     // project_backups' precedent) and deliberately absent from DO UPDATE SET:
     // the enqueue-time ambient tenant is the creator, and later status

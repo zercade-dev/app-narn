@@ -11,6 +11,8 @@
   "statusDisconnected": "Déconnecté du flux de journaux du serveur",
   "unreadErrors": "{{count}} erreur non lue",
   "unreadErrors_other": "{{count}} erreurs non lues",
+  "unreadWarnings": "{{count}} avertissement non lu",
+  "unreadWarnings_other": "{{count}} avertissements non lus",
   "droppedEntries": "{{count}} entrée précédente non disponible",
   "droppedEntries_other": "{{count}} entrées précédentes non disponibles",
   "searchPlaceholder": "Rechercher dans les journaux…",
