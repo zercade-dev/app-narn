@@ -78,10 +78,30 @@ export interface SourceReviewResult {
   approved?: boolean;
 }
 
+/** Which string collection a CSV file or entry belongs to. */
+export type CsvCollection = 'main' | 'client';
+
+/** Prefix on every client-collection entry id; main ids are bare hex digests. */
+export const CLIENT_ENTRY_ID_PREFIX = 'client:';
+
+/** True when the id belongs to the client collection. */
+export function isClientEntryId(id: string): boolean {
+  return id.startsWith(CLIENT_ENTRY_ID_PREFIX);
+}
+
+/** Collection an entry belongs to; entries without the field are main. */
+export function entryCollection(entry: Pick<StringEntry, 'collection'>): CsvCollection {
+  return entry.collection === 'client' ? 'client' : 'main';
+}
+
 export interface StringEntry {
   /** SHA-256 of raw source text (case-sensitive, no trim) */
   id: string;
   sourceText: string;
+  /** Present only on client-collection entries; absent means the main collection. */
+  collection?: 'client';
+  /** Opaque, case-sensitive "Text Mapping ID" key of a client-collection entry. */
+  textKey?: string;
   /**
    * Origin labels from the CSV "Source" column, split by comma. The exact
    * imported text is preserved here (and in import/export); the UI translates
