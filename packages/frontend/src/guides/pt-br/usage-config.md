@@ -30,7 +30,7 @@ A importação e exportação de CSV também ficam na aba **Dados**:
   dados deslocados de coluna.
 - **Exportar CSV** baixa o projeto; você pode escolher os idiomas e se deseja
   incluir a coluna de contexto do tradutor.
-- As exportações gravam o texto como está salvo, sem adicionar um apóstrofo antes das células que começam com = + - ou @. Em **Exportar para**, **Editor do jogo** é a opção padrão. Escolha **Excel ou Sheets** apenas para arquivos que você vai visualizar em uma planilha: isso adiciona esse apóstrofo, que o editor do Miliastra mantém como texto, e a escolha é redefinida após cada exportação. Um arquivo de script de cliente protegido não deve ser reimportado nem enviado ao editor. As execuções de tradução ignoram as linhas cujo valor de Need translation? é FALSE.
+- As exportações gravam o texto como está salvo, sem adicionar um apóstrofo antes das células que começam com = + - ou @. Em **Exportar para**, **Editor do jogo** é a opção padrão. Escolha **Excel ou Sheets** apenas para arquivos que você vai visualizar em uma planilha: isso adiciona esse apóstrofo, que o editor do Miliastra mantém como texto, e a escolha é redefinida após cada exportação. Um arquivo de script de cliente exportado para Excel ou Sheets não deve ser reimportado nem enviado ao editor. As execuções de tradução ignoram as linhas cujo valor de Need translation? é FALSE.
 
 ### Arquivos de script de cliente
 
