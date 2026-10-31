@@ -1004,6 +1004,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
         result = await translateOne(batch[0], languageModel, signal);
       } catch (err) {
         log('warn', `[${provider}] single:error`, {
+          model: modelId,
           error: toErrorMessage(err),
           ...extractSafeErrorMetadata(err),
         });
@@ -1030,6 +1031,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
         return await runMixedTargetBatchOnce(batch, mixedModel, onJobComplete, signal);
       } catch (err) {
         log('warn', `[${provider}] batch:mixed-target:error`, {
+          model: modelId,
           error: toErrorMessage(err),
           count: batch.length,
           ...extractSafeErrorMetadata(err),
@@ -1175,6 +1177,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       lastError = err;
       const isLeaf = batch.length === 1;
       log('warn', `[${provider}] ${isLeaf ? 'single' : 'batch'}:error`, {
+        model: modelId,
         ...(isLeaf
           ? { entryId: batch[0].entryId, targetLanguage: batch[0].targetLanguage }
           : { count: batch.length }),
