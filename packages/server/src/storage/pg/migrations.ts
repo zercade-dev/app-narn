@@ -1099,4 +1099,11 @@ export const MIGRATIONS: ReadonlyArray<{ name: string; statements: readonly stri
       `grant execute on function narn_list_quota_parked_runs() to app_user`,
     ],
   },
+  {
+    // Why a bucket is cooling, kept with the cooldown so a run planned during
+    // it can report the real cause. Null reads as a quota wait, which is what
+    // every existing row was treated as.
+    name: '0030_freeway_cooldown_reason',
+    statements: [`alter table freeway_buckets add column if not exists cooldown_reason text`],
+  },
 ];

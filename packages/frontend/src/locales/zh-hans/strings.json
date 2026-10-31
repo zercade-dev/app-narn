@@ -338,6 +338,7 @@
     "statusQueued": "已排队",
     "statusPaused": "已暂停",
     "statusWaitingForQuota": "等待免费额度",
+    "statusWaitingForProvider": "等待服务商",
     "waitingResumesAt": "{{time}} 继续",
     "waitingPairsCount_other": "{{count}} 对待处理",
     "waitingSkipReasonWarning": "自动继续未找到可用的免费密钥——请使用下方的“立即换模块继续…”来选择模块。",

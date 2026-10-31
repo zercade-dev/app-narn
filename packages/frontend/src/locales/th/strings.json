@@ -338,6 +338,7 @@
     "statusQueued": "อยู่ในคิว",
     "statusPaused": "หยุดชั่วคราวอยู่",
     "statusWaitingForQuota": "รอโควตาฟรี",
+    "statusWaitingForProvider": "รอผู้ให้บริการ",
     "waitingResumesAt": "ทำต่อ {{time}}",
     "waitingPairsCount_other": "รอดำเนินการ {{count}} คู่",
     "waitingSkipReasonWarning": "ระบบทำต่ออัตโนมัติไม่พบคีย์ฟรีที่ใช้งานได้ — ใช้ \"ทำต่อตอนนี้กับโมดูลอื่น…\" ด้านล่างเพื่อเลือกโมดูล",

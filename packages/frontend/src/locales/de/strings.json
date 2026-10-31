@@ -343,6 +343,7 @@
     "statusQueued": "In Warteschlange",
     "statusPaused": "Pausiert",
     "statusWaitingForQuota": "Wartet auf kostenloses Kontingent",
+    "statusWaitingForProvider": "Wartet auf den Anbieter",
     "waitingResumesAt": "Wird fortgesetzt {{time}}",
     "waitingPairsCount_one": "{{count}} Paar wartet",
     "waitingPairsCount_other": "{{count}} Paare warten",

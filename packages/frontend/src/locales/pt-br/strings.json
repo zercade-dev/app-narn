@@ -343,6 +343,7 @@
     "statusQueued": "Na fila",
     "statusPaused": "Pausada",
     "statusWaitingForQuota": "Aguardando cota gratuita",
+    "statusWaitingForProvider": "Aguardando o provedor",
     "waitingResumesAt": "Retoma {{time}}",
     "waitingPairsCount_one": "{{count}} par pendente",
     "waitingPairsCount_other": "{{count}} pares pendentes",

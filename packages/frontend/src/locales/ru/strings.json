@@ -353,6 +353,7 @@
     "statusQueued": "В очереди",
     "statusPaused": "Приостановлено",
     "statusWaitingForQuota": "Ожидание бесплатной квоты",
+    "statusWaitingForProvider": "Ожидание поставщика",
     "waitingResumesAt": "Возобновится {{time}}",
     "waitingPairsCount_one": "{{count}} пара ожидает",
     "waitingPairsCount_few": "{{count}} пары ожидают",

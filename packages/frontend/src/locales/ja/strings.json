@@ -338,6 +338,7 @@
     "statusQueued": "待機中",
     "statusPaused": "一時停止中",
     "statusWaitingForQuota": "無料枠待ち",
+    "statusWaitingForProvider": "プロバイダー待ち",
     "waitingResumesAt": "再開：{{time}}",
     "waitingPairsCount_other": "保留中のペア{{count}}件",
     "waitingSkipReasonWarning": "自動再開で利用できる無料キーが見つかりませんでした。下の「別のモジュールで再開…」からモジュールを選択してください。",

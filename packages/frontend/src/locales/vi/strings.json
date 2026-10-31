@@ -338,6 +338,7 @@
     "statusQueued": "Đang xếp hàng",
     "statusPaused": "Đã tạm dừng",
     "statusWaitingForQuota": "Đang chờ hạn mức miễn phí",
+    "statusWaitingForProvider": "Đang chờ nhà cung cấp",
     "waitingResumesAt": "Tiếp tục {{time}}",
     "waitingPairsCount_other": "{{count}} cặp đang chờ",
     "waitingSkipReasonWarning": "Tự động tiếp tục không tìm được khóa miễn phí khả dụng — hãy dùng “Tiếp tục ngay với…” bên dưới để chọn một mô-đun.",

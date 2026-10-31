@@ -202,6 +202,31 @@ export function isTransientProviderError(err: unknown): boolean {
   return TRANSIENT_PROVIDER_RE.test(msg);
 }
 
+/** HTTP statuses that report a passing fault, not a bad request or a missing endpoint. */
+const TRANSIENT_STATUS_CODES: ReadonlySet<number> = new Set([500, 502, 503, 504, 529]);
+/** Gateway faults {@link TRANSIENT_PROVIDER_RE} doesn't name, for downgraded error strings. */
+const TRANSIENT_GATEWAY_RE = /\b50[24]\b|\b529\b|bad gateway|gateway time-?out/i;
+/** A client-error marker, so a 400 quoting "at most 500 items" isn't read as a 500. */
+const CLIENT_ERROR_RE = /\b4\d\d\b|bad request/i;
+
+/**
+ * Whether a Freeway provider failure is a passing fault worth retrying the same
+ * model soon, rather than one that will keep failing until something changes (a
+ * 400, a retired model, anything unrecognised). Same precedence contract as
+ * {@link isTransientProviderError}: rate limits and auth failures are classified
+ * first. A structured status decides alone; a batch's downgraded per-result
+ * error string has only its text to go on.
+ */
+export function isTransientProviderFailure(err: unknown): boolean {
+  if (isModelUnavailableError(err)) return false;
+  const status =
+    err && typeof err === 'object' ? (err as { statusCode?: unknown }).statusCode : undefined;
+  if (typeof status === 'number') return TRANSIENT_STATUS_CODES.has(status);
+  const msg = err instanceof Error ? err.message : String(err);
+  if (CLIENT_ERROR_RE.test(msg)) return false;
+  return isTransientProviderError(msg) || TRANSIENT_GATEWAY_RE.test(msg);
+}
+
 /**
  * Whether an error (or a module's per-result `error` string) signals a 429.
  * Detects the shared typed RateLimitError by name first, then falls back to

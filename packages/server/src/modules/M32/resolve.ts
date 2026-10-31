@@ -10,7 +10,8 @@ import type { RoutingDecision } from '@zercade-dev/narn-shared';
 import { getLengthLimit } from '@zercade-dev/narn-shared';
 import { difficultyBand, groupJobs } from './difficulty.js';
 import { planRun } from './planner.js';
-import { bucketResumeAt, isEligible, selectBucket } from './selector.js';
+import { bucketResumeAt, deferralReason, isEligible, selectBucket } from './selector.js';
+import type { FreewayCooldownReason } from '../../storage/types.js';
 import type { Assignment, BucketView, DifficultyBand, FreewayJob, JobGroup } from './types.js';
 
 /**
@@ -34,7 +35,11 @@ export interface FreewayResolution {
     degraded?: Assignment['degraded'];
   }>;
   /** Pairs that wait for quota, with the plan's resume estimate. */
-  deferred: { pairs: Array<{ entryId: string; targetLanguage: string }>; resumeAt: number } | null;
+  deferred: {
+    pairs: Array<{ entryId: string; targetLanguage: string }>;
+    resumeAt: number;
+    reason?: FreewayCooldownReason;
+  } | null;
   /** Pairs no bucket can ever serve (surface as controlled failures). */
   blocked: Array<{ entryId: string; targetLanguage: string }>;
 }
@@ -54,7 +59,7 @@ export type RevalidateResult =
        */
       qualityTier: number;
     }
-  | { kind: 'defer'; resumeAt: number }
+  | { kind: 'defer'; resumeAt: number; reason?: FreewayCooldownReason }
   | { kind: 'blocked' };
 
 function pairKey(entryId: string, targetLanguage: string): string {
@@ -151,7 +156,9 @@ export function resolveFreewayDecisions(
 
   const deferredPairs: Array<{ entryId: string; targetLanguage: string }> = [];
   let resumeAt: number | undefined;
+  let deferredReason: FreewayCooldownReason | undefined;
   for (const deferred of plan.deferred) {
+    deferredReason ??= deferred.reason;
     for (const job of deferred.group.jobs) {
       deferredPairs.push({ entryId: job.entryId, targetLanguage: job.targetLanguage });
     }
@@ -167,7 +174,14 @@ export function resolveFreewayDecisions(
 
   return {
     assignedGroups,
-    deferred: resumeAt === undefined ? null : { pairs: deferredPairs, resumeAt },
+    deferred:
+      resumeAt === undefined
+        ? null
+        : {
+            pairs: deferredPairs,
+            resumeAt,
+            ...(deferredReason ? { reason: deferredReason } : {}),
+          },
     blocked,
   };
 }
@@ -243,5 +257,6 @@ export function revalidateGroup(
   // A bucket that still has stock is back when its cooldown ends, not at its
   // window reset — a 70-second pool cool must not park the batch until tomorrow.
   const resumeAt = Math.min(...everCandidates.map((bucket) => bucketResumeAt(bucket, jobGroup)));
-  return { kind: 'defer', resumeAt };
+  const reason = deferralReason(everCandidates, jobGroup, resumeAt);
+  return { kind: 'defer', resumeAt, ...(reason ? { reason } : {}) };
 }

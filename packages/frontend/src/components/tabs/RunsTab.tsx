@@ -909,7 +909,9 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                   data-testid={`run-waiting-badge-${run.runId}`}
                                 >
                                   <Hourglass data-icon="inline-start" className="size-3" />
-                                  {t('runs.statusWaitingForQuota')}
+                                  {run.waitingForQuota?.reason === 'provider-error'
+                                    ? t('runs.statusWaitingForProvider')
+                                    : t('runs.statusWaitingForQuota')}
                                 </Badge>
                               )}
                               {isJudge && (

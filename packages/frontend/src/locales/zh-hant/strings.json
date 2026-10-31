@@ -338,6 +338,7 @@
     "statusQueued": "已排入佇列",
     "statusPaused": "已暫停",
     "statusWaitingForQuota": "等待免費額度",
+    "statusWaitingForProvider": "等待供應商",
     "waitingResumesAt": "{{time}} 繼續",
     "waitingPairsCount_other": "{{count}} 對待處理",
     "waitingSkipReasonWarning": "自動繼續未找到可用的免費金鑰——請使用下方的「立即換模組繼續…」來選擇模組。",

@@ -4,7 +4,7 @@
  * assembled by the dispatch layer from the free-tier snapshot and the quota
  * ledger; nothing in M32 reads storage directly.
  */
-import type { FreewayBucketStats } from '../../storage/types.js';
+import type { FreewayBucketStats, FreewayCooldownReason } from '../../storage/types.js';
 
 export type DifficultyBand = 1 | 2 | 3 | 4;
 
@@ -98,6 +98,8 @@ export interface BucketView {
   dayInputTokens?: number;
   dayOutputTokens?: number;
   cooldownUntil?: number;
+  /** Set when a provider failure caused the cooldown; absent means a quota wait. */
+  cooldownReason?: FreewayCooldownReason;
   disabledReason?: string;
   stats: FreewayBucketStats;
 }
@@ -145,8 +147,11 @@ export interface Assignment {
 
 export interface RunPlan {
   assignments: Assignment[];
-  /** Groups that do not fit today's quota; resumeAt = soonest useful reset. */
-  deferred: { group: JobGroup; resumeAt: number }[];
+  /**
+   * Groups that do not fit today's quota; resumeAt = soonest useful reset.
+   * `reason` is set when that reset is a provider-error cooldown running out.
+   */
+  deferred: { group: JobGroup; resumeAt: number; reason?: FreewayCooldownReason }[];
   /** Groups no bucket can EVER serve (no eligible tier/provider at all). */
   blocked: JobGroup[];
 }

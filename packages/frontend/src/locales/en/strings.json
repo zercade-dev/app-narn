@@ -343,6 +343,7 @@
     "statusQueued": "Queued",
     "statusPaused": "Paused",
     "statusWaitingForQuota": "Waiting for free quota",
+    "statusWaitingForProvider": "Waiting for provider",
     "waitingResumesAt": "Resumes {{time}}",
     "waitingPairsCount_one": "{{count}} pair pending",
     "waitingPairsCount_other": "{{count}} pairs pending",

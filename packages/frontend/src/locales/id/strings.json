@@ -338,6 +338,7 @@
     "statusQueued": "Diantrekan",
     "statusPaused": "Dijeda",
     "statusWaitingForQuota": "Menunggu kuota gratis",
+    "statusWaitingForProvider": "Menunggu penyedia",
     "waitingResumesAt": "Dilanjutkan {{time}}",
     "waitingPairsCount_other": "{{count}} pasangan menunggu",
     "waitingSkipReasonWarning": "Pelanjutan otomatis tidak menemukan kunci gratis yang bisa dipakai — gunakan “Lanjutkan sekarang dengan…” di bawah untuk memilih modul.",
