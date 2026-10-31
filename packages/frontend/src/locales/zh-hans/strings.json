@@ -496,7 +496,7 @@
     "providerFailureRerouted": "请求已改派到其他模型。",
     "providerFailureRetrying": "这些条目将重试。",
     "providerFailureNotRerouted": "请求未改派。",
-    "providerFailureMoreOnCard_other": "以及运行卡片上的另外 {{count}} 条",
+    "providerFailureMoreOnCard_other": "运行卡片上还有 {{count}} 条。",
     "emptyState": "未找到活动历史。",
     "mobileEmpty": "暂无运行。在桌面端启动的运行会在这里显示进度。",
     "viewSwitchLabel": "活动视图",

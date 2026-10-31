@@ -496,7 +496,7 @@
     "providerFailureRerouted": "Các yêu cầu đã được chuyển sang mô hình khác.",
     "providerFailureRetrying": "Các mục này sẽ được thử lại.",
     "providerFailureNotRerouted": "Các yêu cầu không được chuyển đi.",
-    "providerFailureMoreOnCard_other": "và {{count}} cảnh báo khác trên thẻ lần chạy",
+    "providerFailureMoreOnCard_other": "Còn {{count}} cảnh báo khác trên thẻ lần chạy.",
     "emptyState": "Không tìm thấy lịch sử hoạt động nào.",
     "mobileEmpty": "Chưa có lần chạy nào. Những lần chạy khởi động trên máy tính sẽ hiện tiến độ ở đây.",
     "viewSwitchLabel": "Khung hoạt động",

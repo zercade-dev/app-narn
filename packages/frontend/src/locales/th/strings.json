@@ -496,7 +496,7 @@
     "providerFailureRerouted": "คำขอถูกเปลี่ยนเส้นทางไปยังโมเดลอื่นแล้ว",
     "providerFailureRetrying": "รายการเหล่านี้จะถูกลองใหม่",
     "providerFailureNotRerouted": "คำขอไม่ได้ถูกเปลี่ยนเส้นทาง",
-    "providerFailureMoreOnCard_other": "และอีก {{count}} รายการในการ์ดรอบ",
+    "providerFailureMoreOnCard_other": "อีก {{count}} รายการอยู่ในการ์ดรอบ",
     "emptyState": "ไม่พบประวัติกิจกรรม",
     "mobileEmpty": "ยังไม่มีรอบการทำงาน รอบที่เริ่มบนเดสก์ท็อปจะแสดงความคืบหน้าที่นี่",
     "viewSwitchLabel": "มุมมองกิจกรรม",
