@@ -364,6 +364,14 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
                     />
                   </TableCell>
                   <TableCell className="w-full max-w-0 whitespace-normal font-mono text-sm">
+                    {orphan.textKey !== undefined && (
+                      <div
+                        className="text-xs text-muted-foreground break-all"
+                        data-testid={`orphan-key-${orphan.id}`}
+                      >
+                        {orphan.textKey}
+                      </div>
+                    )}
                     <div className="line-clamp-3 break-words" title={orphan.sourceText}>
                       {orphan.sourceText}
                     </div>
@@ -408,6 +416,14 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
           {relinkOrphan ? (
             <div className="space-y-4 px-4 py-4">
               <div className="rounded border border-border bg-muted/30 p-2 text-sm break-words">
+                {relinkOrphan.textKey !== undefined && (
+                  <span
+                    className="block text-xs text-muted-foreground break-all"
+                    data-testid="relink-orphan-key"
+                  >
+                    {relinkOrphan.textKey}
+                  </span>
+                )}
                 {relinkOrphan.sourceText}
               </div>
               <Input

@@ -14,7 +14,7 @@ L’onglet **Orphelins** liste les entrées qui ne figurent plus dans le CSV imp
 
 1. Réimportez votre CSV source depuis l’onglet **Données**.
 2. Ouvrez **Orphelins** et vérifiez ce qui a disparu.
-3. **Réaffectez** toute entrée dont l’id ou le texte source a changé mais dont les traductions restent valables.
+3. **Réaffectez** toute entrée dont l’id ou le texte source a changé mais dont les traductions restent valables. Pour le texte de script client, la ligne active ayant le même Text Mapping ID est suggérée en premier, ce qui permet de reporter les traductions quand l’anglais change.
 4. **Supprimez** les entrées réellement disparues.
 
 Quand la liste est vide, chaque entrée importée correspond au projet actuel — rien n’est orphelin.

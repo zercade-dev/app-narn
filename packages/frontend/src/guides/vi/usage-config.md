@@ -16,6 +16,15 @@ Việc nhập và xuất CSV cũng nằm ở tab **Dữ liệu**:
 * Những hàng không thể phân tích gọn gàng (một dấu nháy đứng ngay trước dấu phẩy) sẽ bị loại và được báo cáo, thay vì được ghi thành dữ liệu lệch cột.
 * **Xuất CSV** tải dự án xuống; bạn có thể chọn ngôn ngữ và có kèm cột bối cảnh cho người dịch hay không.
 
+### Tệp tập lệnh máy khách
+
+CSV có cột **Text Mapping ID** là tệp tập lệnh máy khách. Tệp này được nhập vào bộ sưu tập riêng, **Văn bản tập lệnh máy khách**, tách biệt với **Văn bản chính** của bạn — bảng nhập cho biết đã phát hiện loại nào.
+
+* Mỗi chuỗi máy khách được nhận diện bằng Text Mapping ID, nên cùng một nội dung tiếng Anh có thể xuất hiện ở cả hai bộ sưu tập và trên nhiều hàng máy khách mà không bị gộp lại.
+* Nhập tệp máy khách không bao giờ thay đổi văn bản chính, và nhập tệp chính không bao giờ thay đổi văn bản máy khách.
+* Khi tiếng Anh của một khóa hiện có thay đổi, ở cả hai chế độ nhập, hàng cũ chuyển sang tab **Mục mồ côi** và hàng mới giữ các bản dịch từ tệp; chỉ những ô trống mới chưa được dịch. Dùng **Liên kết lại** để chuyển bản dịch: hàng có cùng khóa được gợi ý trước, và chế độ ghi đè quyết định giữ hay thay thế các ô đã có nội dung.
+* Khi dự án có chuỗi máy khách, **Xuất CSV** cho phép chọn bộ sưu tập cần tải xuống, và bản xuất máy khách giữ nguyên cột Text Mapping ID.
+
 ## Mô-đun và mô hình
 
 Bật các nhà cung cấp một lần ở **Cấu hình chung**. Ở đây, trong Cấu hình, bạn chọn, theo từng dự án, **mô hình** và **mức độ suy luận** cho mỗi mô-đun đã bật — hoặc để nguyên ở *Kế thừa từ cấu hình chung*. Mô-đun nào thực sự chạy cho một mục nhất định do **quy tắc điều phối** quyết định (xem hướng dẫn *Tab Điều phối*).

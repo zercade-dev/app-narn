@@ -10,6 +10,7 @@ import {
   buildCsvColumnMap,
   findRawNewlineLanguages,
   detectCsvCollection,
+  csvHasKeyAndSourceColumns,
   entryCollection,
   type CsvCollection,
 } from '@zercade-dev/narn-shared';
@@ -61,6 +62,11 @@ interface DiffSummary {
   mode?: 'add-only' | 'full-replace';
 }
 
+type ImportMode = 'add-only' | 'full-replace';
+
+/** A dry run's counts for one import mode, or its in-flight marker. */
+type ImportPreview = 'loading' | { orphans: number; changed: number };
+
 /**
  * Data tab — how strings get in and out of the project: source/target
  * language selection, CSV import (with an unknown-headers confirmation gate),
@@ -97,16 +103,19 @@ export function DataTab() {
   const [unknownHeaders, setUnknownHeaders] = useState<string[]>([]);
   const [rawNewlineLanguages, setRawNewlineLanguages] = useState<string[]>([]);
   const [importWarnOpen, setImportWarnOpen] = useState(false);
-  const [importMode, setImportMode] = useState<'add-only' | 'full-replace'>('full-replace');
-  const [orphanPreview, setOrphanPreview] = useState<number | null>(null);
-  const [previewLoading, setPreviewLoading] = useState(false);
+  const [importMode, setImportMode] = useState<ImportMode>('full-replace');
+  // Dry-run results per mode: the two modes orphan different rows in a client file.
+  const [importPreviews, setImportPreviews] = useState<Partial<Record<ImportMode, ImportPreview>>>(
+    {},
+  );
   const [pendingLanguages, setPendingLanguages] = useState<string[] | null>(null);
   const [includeContext, setIncludeContext] = useState(false);
   const [discardUntranslatable, setDiscardUntranslatable] = useState(false);
   const [exportLanguages, setExportLanguages] = useState<string[] | null>(null);
   const [pseudoAs, setPseudoAs] = useState<string>('none');
   const [pendingCollection, setPendingCollection] = useState<CsvCollection>('main');
-  const [exportCollection, setExportCollection] = useState<CsvCollection>('main');
+  // Null until the user picks one; the default then follows what the project holds.
+  const [exportCollection, setExportCollection] = useState<CsvCollection | null>(null);
 
   const activeProject = projects.find((p) => p.id === activeProjectId);
 
@@ -129,7 +138,7 @@ export function DataTab() {
     setPrevActiveProjectId(activeProjectId);
     setPendingLanguages(null);
     setExportLanguages(null);
-    setExportCollection('main');
+    setExportCollection(null);
     setPendingCollection('main');
     setDiffNotice(null);
     setPendingImportFile(null);
@@ -137,8 +146,7 @@ export function DataTab() {
     setRawNewlineLanguages([]);
     setImportWarnOpen(false);
     setImportMode('full-replace');
-    setOrphanPreview(null);
-    setPreviewLoading(false);
+    setImportPreviews({});
     setImporting(false);
   }
 
@@ -151,11 +159,14 @@ export function DataTab() {
   const exportableLanguages = (activeProject?.activeLanguages ?? []).filter(
     (code) => code !== PSEUDO_LANGUAGE_CODE,
   );
-  const hasClientStrings =
-    loadedEntriesProjectId === activeProjectId &&
-    loadedEntries.some((e) => entryCollection(e) === 'client' && !e.orphanedAt);
+  const liveEntries =
+    loadedEntriesProjectId === activeProjectId ? loadedEntries.filter((e) => !e.orphanedAt) : [];
+  const hasClientStrings = liveEntries.some((e) => entryCollection(e) === 'client');
+  const hasMainStrings = liveEntries.some((e) => entryCollection(e) === 'main');
   // A stale 'client' choice must not outlive the last client string.
-  const effectiveExportCollection: CsvCollection = hasClientStrings ? exportCollection : 'main';
+  const effectiveExportCollection: CsvCollection = !hasClientStrings
+    ? 'main'
+    : (exportCollection ?? (hasMainStrings ? 'main' : 'client'));
   const currentLanguages = pendingLanguages ?? activeProject?.activeLanguages ?? [];
   const isDirty = pendingLanguages !== null;
   const allChecked =
@@ -221,7 +232,7 @@ export function DataTab() {
     }
   };
 
-  const doImport = async (file: File, mode: 'add-only' | 'full-replace') => {
+  const doImport = async (file: File, mode: ImportMode) => {
     if (!activeProject) return;
     const importProjectId = activeProject.id;
     setImporting(true);
@@ -256,43 +267,50 @@ export function DataTab() {
     }
   };
 
-  // Fetches the full-replace dry-run so the sheet can say how many entries
-  // would be orphaned. Takes the file explicitly: on sheet open the state
-  // setter hasn't committed yet.
-  const fetchOrphanPreview = async (file: File) => {
+  // Fetches a dry run so the sheet can say what the import would do in this
+  // mode. Takes the file explicitly: on sheet open the state setter hasn't
+  // committed yet.
+  const fetchImportPreview = async (file: File, mode: ImportMode) => {
     if (!activeProject) return;
     const importProjectId = activeProject.id;
     previewFileRef.current = file;
-    setPreviewLoading(true);
+    setImportPreviews((prev) => ({ ...prev, [mode]: 'loading' }));
+    const isCurrent = () =>
+      previewFileRef.current === file && activeProjectIdRef.current === importProjectId;
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('dryRun', 'true');
-      formData.append('mode', 'full-replace');
+      formData.append('mode', mode);
       const preview = await apiRequest<DiffSummary>(`/projects/${importProjectId}/import`, {
         method: 'POST',
         body: formData,
       });
-      if (previewFileRef.current === file && activeProjectIdRef.current === importProjectId) {
-        setOrphanPreview(preview.orphans ?? 0);
+      if (isCurrent()) {
+        setImportPreviews((prev) => ({
+          ...prev,
+          [mode]: { orphans: preview.orphans ?? 0, changed: preview.diff?.changed ?? 0 },
+        }));
       }
     } catch {
       // preview is best-effort; import still allowed
-      if (previewFileRef.current === file && activeProjectIdRef.current === importProjectId) {
-        setOrphanPreview(null);
-      }
-    } finally {
-      if (previewFileRef.current === file && activeProjectIdRef.current === importProjectId) {
-        setPreviewLoading(false);
+      if (isCurrent()) {
+        setImportPreviews((prev) => {
+          const next = { ...prev };
+          delete next[mode];
+          return next;
+        });
       }
     }
   };
 
-  const selectImportMode = (mode: 'add-only' | 'full-replace') => {
+  const selectImportMode = (mode: ImportMode) => {
     setImportMode(mode);
-    if (mode !== 'full-replace' || !pendingImportFile) return;
-    if (orphanPreview !== null || previewLoading) return; // already fetched
-    void fetchOrphanPreview(pendingImportFile);
+    if (!pendingImportFile) return;
+    // A main add-only import orphans nothing, so there is nothing to preview.
+    if (mode === 'add-only' && pendingCollection === 'main') return;
+    if (importPreviews[mode]) return; // already fetched or in flight
+    void fetchImportPreview(pendingImportFile, mode);
   };
 
   // Clears the import-review warning sheet, dropping the pending file. Used by
@@ -305,8 +323,7 @@ export function DataTab() {
     setRawNewlineLanguages([]);
     setPendingCollection('main');
     setImportMode('full-replace');
-    setOrphanPreview(null);
-    setPreviewLoading(false);
+    setImportPreviews({});
     previewFileRef.current = null;
   };
 
@@ -317,6 +334,10 @@ export function DataTab() {
     try {
       const text = await file.text();
       const parsed = parseGameCSV(text);
+      if (csvHasKeyAndSourceColumns(parsed.headers)) {
+        toast.error(t('importMixedCollections'));
+        return;
+      }
       const known = buildKnownHeadersSet();
       const unknown = parsed.headers.filter((h) => !known.has(h.toLowerCase()));
       const { colToCode } = buildCsvColumnMap(parsed.headers);
@@ -329,9 +350,9 @@ export function DataTab() {
       setRawNewlineLanguages(rawNewline);
       setPendingCollection(detectCsvCollection(parsed.headers));
       setImportMode('full-replace');
-      setOrphanPreview(null);
+      setImportPreviews({});
       setImportWarnOpen(true);
-      void fetchOrphanPreview(file);
+      void fetchImportPreview(file, 'full-replace');
       return;
     } catch (err) {
       // Reading/parsing the file client-side failed (e.g. it became unreadable);
@@ -410,6 +431,8 @@ export function DataTab() {
       toast.error(t('exportFailed', { message: (err as Error).message }));
     }
   };
+
+  const currentPreview = importPreviews[importMode];
 
   if (!activeProject) {
     return (
@@ -561,11 +584,9 @@ export function DataTab() {
                         {t('orphanedCount', { count: diffNotice.orphans })}
                       </Badge>
                     )}
-                    {diffNotice.diff.changed > 0 && (
-                      <Badge variant="outline" data-testid="import-changed-badge">
-                        {t('changed', { count: diffNotice.diff.changed })}
-                      </Badge>
-                    )}
+                    <Badge variant="outline" data-testid="import-changed-badge">
+                      {t('changed', { count: diffNotice.diff.changed })}
+                    </Badge>
                     {(diffNotice.skippedRows ?? 0) + (diffNotice.ghostsBlocked ?? 0) > 0 && (
                       <Badge variant="outline" className="text-status-warn border-status-warn/40">
                         {t('skipped', {
@@ -828,12 +849,33 @@ export function DataTab() {
                 ? t('importModeAddOnlyHint')
                 : t('importModeFullReplaceHint')}
             </p>
-            {importMode === 'full-replace' && (
+            {pendingCollection === 'main' && importMode === 'full-replace' && (
               <p className="text-xs text-status-warn mt-2" data-testid="full-replace-orphan-notice">
-                {previewLoading
+                {currentPreview === 'loading'
                   ? t('fullReplacePreviewLoading')
-                  : t('fullReplaceOrphanNotice', { count: orphanPreview ?? 0 })}
+                  : t('fullReplaceOrphanNotice', { count: currentPreview?.orphans ?? 0 })}
               </p>
+            )}
+            {pendingCollection === 'client' && (
+              <div
+                className="text-xs text-status-warn mt-2 space-y-1"
+                data-testid="client-import-notice"
+              >
+                <p>
+                  {importMode === 'add-only'
+                    ? t('clientImportAddOnlyNotice')
+                    : t('clientImportFullReplaceNotice')}
+                </p>
+                {currentPreview === 'loading' && <p>{t('fullReplacePreviewLoading')}</p>}
+                {currentPreview && currentPreview !== 'loading' && (
+                  <p data-testid="client-import-preview-counts">
+                    {t('clientImportPreviewCounts', {
+                      changed: currentPreview.changed,
+                      orphans: currentPreview.orphans,
+                    })}
+                  </p>
+                )}
+              </div>
             )}
           </div>
           {unknownHeaders.length > 0 && (
@@ -871,7 +913,7 @@ export function DataTab() {
                 setPendingImportFile(null);
                 setUnknownHeaders([]);
                 setRawNewlineLanguages([]);
-                setOrphanPreview(null);
+                setImportPreviews({});
                 setImportMode('full-replace');
                 if (file) await doImport(file, mode);
               }}

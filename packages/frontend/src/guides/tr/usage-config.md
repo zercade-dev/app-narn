@@ -16,6 +16,15 @@ CSV içe ve dışa aktarma da **Veri** sekmesinde bulunur:
 * Düzgün ayrıştırılamayan satırlar (bir tırnak işaretinin hemen ardından gelen bir virgül) sütun kaymış veri olarak yazılmak yerine atlanır ve bildirilir.
 * **CSV dışa aktarma**, projeyi indirir; dilleri ve çevirmen bağlamı sütununun eklenip eklenmeyeceğini seçebilirsiniz.
 
+### İstemci betiği dosyaları
+
+**Text Mapping ID** sütunu olan bir CSV, istemci betiği dosyasıdır. **Ana metin**den ayrı tutulan kendi koleksiyonuna, **İstemci betiği metni**ne aktarılır; içe aktarma sayfası hangisini algıladığını gösterir.
+
+* Her istemci dizesi kendi Text Mapping ID değeriyle tanımlanır; bu nedenle aynı İngilizce her iki koleksiyonda ve birden çok istemci satırında birleştirilmeden yer alabilir.
+* İstemci dosyasını içe aktarmak ana metni asla değiştirmez, ana dosyayı içe aktarmak da istemci metnini asla değiştirmez.
+* Mevcut bir anahtarın İngilizcesi değiştiğinde, her iki içe aktarma modunda da eski satır **Yetimler** sekmesine taşınır ve yeni satır dosyadaki çevirileri korur; yalnızca boş hücreleri çevrilmemiş kalır. Çevirileri aktarmak için **yeniden bağlayın**: önce aynı anahtarlı satır önerilir, üzerine yazma modu da dolu hücrelerin korunup korunmayacağını belirler.
+* Bir projede istemci dizeleri olduğunda **CSV dışa aktarma** hangi koleksiyonun indirileceğini seçmenizi sağlar; istemci dışa aktarımı Text Mapping ID sütununu korur.
+
 ## Modüller ve modeller
 
 Sağlayıcıları **Genel yapılandırmada** bir kez etkinleştirin. Burada, Yapılandırma'da, her etkin modül için proje başına **modeli** ve **akıl yürütme çabasını** seçersiniz — ya da *Genel yapılandırmadan devral* olarak bırakırsınız. Belirli bir girdi için hangi modülün gerçekten çalışacağına **yönlendirme kuralları** karar verir (bkz. *Yönlendirme* kılavuzu).

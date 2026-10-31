@@ -14,7 +14,7 @@ La pestaña **Huérfanas** lista las entradas que ya no están en el CSV importa
 
 1. Vuelve a importar tu CSV de origen desde la pestaña **Datos**.
 2. Abre **Huérfanas** y revisa qué se quedó fuera.
-3. **Reasigna** cualquier entrada cuyo id o texto de origen cambió pero cuyas traducciones siguen siendo válidas.
+3. **Reasigna** cualquier entrada cuyo id o texto de origen cambió pero cuyas traducciones siguen siendo válidas. En el texto de script de cliente, primero se sugiere la fila activa con el mismo Text Mapping ID: así se trasladan las traducciones cuando cambia el inglés.
 4. **Elimina** las entradas que realmente ya no existen.
 
 Cuando la lista está vacía, todas las entradas importadas coinciden con el proyecto actual — no hay ninguna huérfana.

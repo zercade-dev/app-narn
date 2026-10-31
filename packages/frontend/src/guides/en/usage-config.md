@@ -22,7 +22,7 @@ A CSV with a **Text Mapping ID** column is a client script file. It is imported 
 
 * Each client string is identified by its Text Mapping ID, so the same English can appear in both collections, and on several client rows, without being merged.
 * Importing a client file never changes main text, and importing a main file never changes client text.
-* When the English for an existing key changes, the old row moves to the **Orphans** tab and the new one starts empty. Use **Relink** to carry the translations across; the row with the same key is suggested first.
+* When the English for an existing key changes, in either import mode, the old row moves to the **Orphans** tab and the new row keeps the translations from the file; only its empty cells are untranslated. Use **Relink** to carry translations across: the row with the same key is suggested first, and the override mode decides whether filled cells are kept or replaced.
 * Once a project has client strings, **Export CSV** lets you choose which collection to download, and a client export keeps its Text Mapping ID column.
 
 ## Modules and models

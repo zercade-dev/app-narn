@@ -7,6 +7,7 @@ import {
   CLIENT_KEY_COLUMN_NAME,
   CLIENT_SCRIPT_SOURCE_LABEL,
   detectCsvCollection,
+  csvHasKeyAndSourceColumns,
   entryCollection,
   DEFAULT_OVERFLOW_RATIO,
   buildCsvColumnMap,
@@ -129,7 +130,7 @@ export class CSVImporter {
       collection === 'client'
         ? headers.find((h) => h.trim().toLowerCase() === CLIENT_KEY_COLUMN_NAME.toLowerCase())
         : undefined;
-    if (keyColName !== undefined && headers.some((h) => SOURCE_COLUMN_NAMES.has(h.toLowerCase()))) {
+    if (csvHasKeyAndSourceColumns(headers)) {
       throw new ValidationError(
         `A CSV cannot have both a "${CLIENT_KEY_COLUMN_NAME}" column and a "Source" column. ` +
           'Client script files and main text files are imported separately.',
@@ -306,9 +307,10 @@ export class CSVImporter {
 
     if (keyColName !== undefined) {
       // Client rows are identified by their key; rows without a key or without
-      // English are dropped even when they carry translations.
+      // English are dropped even when they carry translations. A whitespace-only
+      // cell counts as empty, but stored values keep their exact spacing.
       const textKey = row[keyColName] ?? '';
-      if (!textKey || !sourceText) return null;
+      if (!textKey.trim() || !sourceText.trim()) return null;
       if (seen.has(textKey)) return null;
       seen.add(textKey);
       const needsCell = needsTransColName ? (row[needsTransColName] ?? 'TRUE') : 'TRUE';

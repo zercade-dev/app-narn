@@ -95,7 +95,10 @@ export function entryCollection(entry: Pick<StringEntry, 'collection'>): CsvColl
 }
 
 export interface StringEntry {
-  /** SHA-256 of raw source text (case-sensitive, no trim) */
+  /**
+   * Main entries: SHA-256 of raw source text (case-sensitive, no trim).
+   * Client entries: `client:` + a hash of the key and the text.
+   */
   id: string;
   sourceText: string;
   /** Present only on client-collection entries; absent means the main collection. */

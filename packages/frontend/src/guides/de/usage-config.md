@@ -16,6 +16,15 @@ CSV-Import und -Export liegen ebenfalls im Tab **Daten**:
 * Zeilen, die sich nicht sauber parsen lassen (ein Anführungszeichen direkt gefolgt von einem Komma), werden verworfen und gemeldet, statt als spaltenverschobene Daten geschrieben zu werden.
 * **CSV-Export** lädt das Projekt herunter; dabei lassen sich Sprachen wählen und festlegen, ob die Übersetzerkontext-Spalte einbezogen wird.
 
+### Client-Skript-Dateien
+
+Eine CSV mit der Spalte **Text Mapping ID** ist eine Client-Skript-Datei. Sie wird in eine eigene Sammlung importiert, **Client-Skript-Text**, getrennt vom **Haupttext** — das Import-Fenster zeigt an, welche Sammlung erkannt wurde.
+
+* Jeder Client-String wird über seine Text Mapping ID identifiziert, sodass derselbe englische Text in beiden Sammlungen und in mehreren Client-Zeilen vorkommen kann, ohne zusammengeführt zu werden.
+* Der Import einer Client-Datei ändert nie den Haupttext, und der Import einer Hauptdatei ändert nie den Client-Text.
+* Ändert sich der englische Text eines vorhandenen Schlüssels, wandert die alte Zeile in beiden Importmodi in den Tab **Waisen**, und die neue Zeile behält die Übersetzungen aus der Datei; nur ihre leeren Zellen sind unübersetzt. Mit **Neu verknüpfen** lassen sich Übersetzungen übernehmen: Die Zeile mit demselben Schlüssel wird zuerst vorgeschlagen, und der Überschreibmodus legt fest, ob gefüllte Zellen erhalten bleiben oder ersetzt werden.
+* Sobald ein Projekt Client-Strings enthält, lässt sich beim **CSV-Export** die Sammlung wählen, und ein Client-Export behält seine Spalte Text Mapping ID.
+
 ## Module und Modelle
 
 Anbieter werden einmal in der **Globalen Konfiguration** aktiviert. Hier im Tab Konfiguration wird je Projekt das **Modell** und der **Reasoning-Aufwand** für jedes aktivierte Modul gewählt — oder auf *Von der globalen Konfiguration erben* belassen. Welches Modul für einen bestimmten Eintrag tatsächlich läuft, entscheiden die **Routing-Regeln** (siehe den *Routing*-Guide).

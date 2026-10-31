@@ -23,7 +23,7 @@ le vecchie traduzioni restano qui così non perdi il lavoro fatto.
 1. Reimporta il tuo CSV di origine dalla scheda **Dati**.
 2. Apri **Orfane** e rivedi cosa è stato rimosso.
 3. **Ricollega** ogni voce il cui id o testo di origine è cambiato ma le
-   cui traduzioni sono ancora valide.
+   cui traduzioni sono ancora valide. Per il testo dello script client, la riga attiva con lo stesso Text Mapping ID viene proposta per prima: è così che si trasferiscono le traduzioni quando l'inglese cambia.
 4. **Elimina** le voci realmente scomparse.
 
 Quando l'elenco è vuoto, ogni voce importata corrisponde al progetto

@@ -350,6 +350,14 @@ export function detectCsvCollection(headers: string[]): CsvCollection {
   return headers.some((h) => h.trim().toLowerCase() === key) ? 'client' : 'main';
 }
 
+/** True for a file carrying both a client key column and a main Source column. */
+export function csvHasKeyAndSourceColumns(headers: string[]): boolean {
+  return (
+    detectCsvCollection(headers) === 'client' &&
+    headers.some((h) => SOURCE_COLUMN_NAMES.has(h.toLowerCase()))
+  );
+}
+
 /**
  * Returns a Set of all known lowercase CSV header names — language columns and
  * special columns combined. Used for pre-import header validation.

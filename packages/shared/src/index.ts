@@ -159,6 +159,7 @@ export {
   CLIENT_KEY_COLUMN_NAME,
   CLIENT_SCRIPT_SOURCE_LABEL,
   detectCsvCollection,
+  csvHasKeyAndSourceColumns,
 } from './csv-headers.js';
 export { parseGameCSV, buildCsvColumnMap, findRawNewlineLanguages } from './game-csv.js';
 export type { ParsedGameCSV } from './game-csv.js';

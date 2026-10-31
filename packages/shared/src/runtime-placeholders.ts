@@ -2,6 +2,8 @@
  * Runtime placeholders found in client script text: named `{player}` slots and
  * printf-style `%s`/`%d` tokens that the game substitutes at runtime. `%%` is a
  * literal percent and is matched only so it is consumed, never treated as a token.
+ * A letter right after a printf token means ordinary text, not a slot: "50%faster"
+ * or Turkish "%50si" must not be read as `%f` or `%50s`.
  */
 export const RUNTIME_PLACEHOLDER_SOURCE = String.raw`\{[A-Za-z_][A-Za-z0-9_.]*\}|%%|%[-+0#]*\d*(?:\.\d+)?[sdfgxXq](?![A-Za-z])`;
 
