@@ -101,6 +101,27 @@ function boundMessage(message: string): string {
 }
 
 /**
+ * What became of the requests in one failure, once its batch has settled. Judged
+ * from its own entries: a batch can end parked after other languages were served,
+ * and it can return results in which every entry errored. `outcomeKind` is absent
+ * when the dispatch threw. A cancelled batch claims nothing.
+ */
+export function routingForHeldFailure(
+  failure: { model: string; pairKeys: readonly string[] },
+  servedBy: ReadonlyMap<string, string>,
+  outcomeKind: string | undefined,
+  aborted: boolean,
+): ProviderFailureRouting {
+  if (aborted) return 'none';
+  const moved = failure.pairKeys.some((key) => {
+    const server = servedBy.get(key);
+    return server !== undefined && server !== failure.model;
+  });
+  if (moved) return 'rerouted';
+  return outcomeKind === 'defer' ? 'retrying' : 'none';
+}
+
+/**
  * Count `occurrences` strings failed by `model`. `message` must already have
  * credentials scrubbed. `routing` is what became of those requests. Later occurrences update an existing notice, which
  * is also how a run resumed with a fresh tracker keeps counting onto it.
