@@ -46,6 +46,7 @@ export interface RefreshProviderEntry {
 }
 export interface RefreshSnapshot {
   generatedAt: string;
+  lastCheckedAt?: string;
   providers: Record<string, RefreshProviderEntry>;
 }
 
@@ -64,7 +65,7 @@ export interface HeaderLimits {
 }
 export type ProbeOutcome =
   | { kind: 'ok'; headerLimits?: HeaderLimits }
-  | { kind: 'rejected'; detail: string }
+  | { kind: 'rejected'; detail: string; decommissioned?: boolean }
   | { kind: 'rate-limited'; detail: string }
   | { kind: 'auth-failed'; detail: string }
   | { kind: 'error'; detail: string; retryable: boolean };
@@ -89,7 +90,10 @@ export interface ProviderReport {
   status: ProviderStatus;
   notes: string[];
   usable: string[];
+  /** Unlisted and rejected, on evidence strong enough to change the snapshot. */
   retired: string[];
+  /** Looks retired, but the evidence can't rule out this key simply lacking access. Never removed. */
+  retiredUnconfirmed: ModelNote[];
   unusable: ModelNote[];
   unresolved: ModelNote[];
   unlistedWorking: string[];
@@ -127,7 +131,7 @@ export function pickKeys(envText: string): Partial<Record<RefreshProvider, strin
 
 const KEY_SHAPE_RE =
   /\b(?:(?:gsk_|sk-[A-Za-z0-9-]|AIza)[A-Za-z0-9_-]*|[0-9a-f][0-9a-f-]{29,}(?::fx)?)/g;
-const CONTROL_CHARS_RE = /\p{Cc}+/gu;
+const CONTROL_CHARS_RE = /[\p{Cc}\p{Cf}]+/gu;
 const MAX_DETAIL_CHARS = 160;
 
 /** Makes upstream text safe to print: no keys, no terminal control sequences, bounded length. */
@@ -270,9 +274,14 @@ export function parseLiveList(provider: RefreshProvider, json: unknown): LiveMod
 
 const AUTH_MESSAGE_RE = /api.?key|\bkey\b|leaked|credential|unauthori[sz]ed/i;
 const QUOTA_MESSAGE_RE = /resource.?exhausted|quota|rate.?limit/i;
-const MODEL_MESSAGE_RE = /\bmodels?\b|decommission/i;
+const MODEL_MESSAGE_RE = /\bmodels?\b|decommission|no endpoints found/i;
+const PERMISSION_MESSAGE_RE = /permission|denied|access|authori[sz]|gated|allowlist/i;
 
-/** Classifies a probe's status and body. Only a response that names the model counts as a rejection. */
+/**
+ * Classifies a probe's status and body. Only a response that names the model
+ * counts as a rejection: a bare 404, or one about permissions, says nothing about
+ * whether the model still exists.
+ */
 export function classifyProbeResponse(
   status: number,
   text: string,
@@ -289,10 +298,17 @@ export function classifyProbeResponse(
   const message = typeof error?.message === 'string' ? error.message : '';
   const inBandStatus = typeof code === 'number' ? code : 500;
   const effective = status >= 200 && status < 300 && error ? inBandStatus : status;
-  const detail = sanitizeText(
-    message ? `HTTP ${effective}: ${message}` : `HTTP ${effective}`,
-    secrets,
-  );
+  const quoted = sanitizeText(message, secrets).replace(/"/g, "'");
+  const detail = quoted
+    ? `HTTP ${effective}, provider text (untrusted): "${quoted}"`
+    : `HTTP ${effective}`;
+  const decommissioned =
+    (typeof code === 'string' && code === 'model_decommissioned') || /decommission/i.test(message);
+  const rejection: ProbeOutcome = {
+    kind: 'rejected',
+    detail,
+    ...(decommissioned ? { decommissioned } : {}),
+  };
 
   if (effective >= 200 && effective < 300) {
     return json === undefined
@@ -301,13 +317,15 @@ export function classifyProbeResponse(
   }
   if (effective === 429) return { kind: 'rate-limited', detail };
   if (effective === 401) return { kind: 'auth-failed', detail };
-  if (effective === 404 || effective === 410) return { kind: 'rejected', detail };
-  if (typeof code === 'string' && /model_(not_found|decommissioned)/.test(code))
-    return { kind: 'rejected', detail };
+  if (typeof code === 'string' && /model_(not_found|decommissioned)/.test(code)) return rejection;
+  if (effective === 404 || effective === 410) {
+    if (MODEL_MESSAGE_RE.test(message) && !PERMISSION_MESSAGE_RE.test(message)) return rejection;
+    return { kind: 'error', detail, retryable: false };
+  }
   if (effective === 400 || effective === 403) {
     if (QUOTA_MESSAGE_RE.test(message)) return { kind: 'rate-limited', detail };
     if (AUTH_MESSAGE_RE.test(message)) return { kind: 'auth-failed', detail };
-    if (MODEL_MESSAGE_RE.test(message)) return { kind: 'rejected', detail };
+    if (MODEL_MESSAGE_RE.test(message)) return rejection;
     if (effective === 403) return { kind: 'auth-failed', detail };
   }
   return { kind: 'error', detail, retryable: effective >= 500 };
@@ -374,6 +392,20 @@ function limitChangesFor(entry: RefreshModel, limits: HeaderLimits | undefined):
   return changes;
 }
 
+/**
+ * Whether an unlisted model's rejection is strong enough to remove it. Google and
+ * Groq list per key, so absence plus a rejection may only mean this key lacks access,
+ * unless Groq says outright that the model was decommissioned. OpenRouter's list is
+ * public, so absence there holds for everyone.
+ */
+function confirmsRetirement(
+  provider: RefreshProvider,
+  outcome: { decommissioned?: boolean },
+): boolean {
+  if (provider === 'openrouter') return true;
+  return provider === 'groq' && outcome.decommissioned === true;
+}
+
 export function buildProviderReport(input: ReportInput): ProviderReport {
   const { provider, snapshotProvider, hasKey, list, probes, candidateProbes } = input;
   const report: ProviderReport = {
@@ -382,6 +414,7 @@ export function buildProviderReport(input: ReportInput): ProviderReport {
     notes: [],
     usable: [],
     retired: [],
+    retiredUnconfirmed: [],
     unusable: [],
     unresolved: [],
     unlistedWorking: [],
@@ -423,12 +456,17 @@ export function buildProviderReport(input: ReportInput): ProviderReport {
       else report.unlistedWorking.push(model.id);
     } else if (outcome?.kind === 'rejected') {
       if (isListed) report.unusable.push({ id: model.id, reason: outcome.detail });
-      else {
+      else if (confirmsRetirement(provider, outcome)) {
         report.retired.push(model.id);
         report.notes.push(`Retired ${model.id}: ${outcome.detail}`);
+      } else {
+        report.retiredUnconfirmed.push({ id: model.id, reason: outcome.detail });
       }
     } else if (!hasKey && !isListed) {
-      report.retired.push(model.id);
+      report.retiredUnconfirmed.push({
+        id: model.id,
+        reason: 'absent from the list; no key to probe with',
+      });
     } else {
       report.unresolved.push({ id: model.id, reason: unknownReason(outcome) });
     }
@@ -439,8 +477,14 @@ export function buildProviderReport(input: ReportInput): ProviderReport {
     report.status = 'unknown';
     report.notes = report.notes.filter((note) => !note.startsWith('Retired '));
     report.notes.push(`Key rejected, status unknown: ${authFailure.detail}`);
-    report.unresolved.push(...report.retired.map((id) => ({ id, reason: 'provider unknown' })));
+    report.unresolved.push(
+      ...[...report.retired, ...report.retiredUnconfirmed.map((m) => m.id)].map((id) => ({
+        id,
+        reason: 'provider unknown',
+      })),
+    );
     report.retired = [];
+    report.retiredUnconfirmed = [];
   }
 
   const known = new Set(snapshotProvider.models.map((m) => m.id));
@@ -652,15 +696,31 @@ export function suggestedSnapshot(
   return out;
 }
 
-/** What --apply-retired writes: the suggestion, redated only if a model actually went. */
+function withCheckDate(snapshot: RefreshSnapshot, today: string): RefreshSnapshot {
+  const { generatedAt, lastCheckedAt: _previous, ...rest } = snapshot;
+  return { generatedAt, lastCheckedAt: today, ...rest };
+}
+
+/** What --apply-retired writes: the suggestion, stamped as checked, redated only if a model actually went. */
 export function retiredSnapshot(
   snapshot: RefreshSnapshot,
   reports: readonly ProviderReport[],
   today: string,
 ): RefreshSnapshot {
-  const out = suggestedSnapshot(snapshot, reports);
+  const out = withCheckDate(suggestedSnapshot(snapshot, reports), today);
   const removed = reports.some((r) => r.retired.length > 0);
   return removed ? { ...out, generatedAt: today } : out;
+}
+
+/** The snapshot stamped as checked, or undefined unless every provider's status is ok. */
+export function stampChecked(
+  snapshot: RefreshSnapshot,
+  reports: readonly ProviderReport[],
+  today: string,
+): RefreshSnapshot | undefined {
+  return reports.every((r) => r.status === 'ok')
+    ? withCheckDate(structuredClone(snapshot), today)
+    : undefined;
 }
 
 /** Guards on --apply-retired: every provider must be fully known, and no provider may lose more than half. */
@@ -671,6 +731,13 @@ export function checkApply(
   const reasons: string[] = [];
   for (const report of reports) {
     if (report.status !== 'ok') reasons.push(`${report.provider} status is ${report.status}`);
+    const unresolved = new Set(report.unresolved.map((m) => m.id));
+    const unverified = report.retired.filter((id) => unresolved.has(id));
+    if (unverified.length > 0) {
+      reasons.push(
+        `${report.provider} has unresolved models it would remove: ${unverified.join(', ')}`,
+      );
+    }
     const total = snapshot.providers[report.provider]?.models.length ?? 0;
     if (report.retired.length * 2 > total) {
       reasons.push(
@@ -704,6 +771,11 @@ export function formatReport(reports: readonly ProviderReport[]): string {
     section(lines, 'retired', r.retired);
     section(
       lines,
+      'retired (unconfirmed, not removed)',
+      r.retiredUnconfirmed.map((m) => `${m.id}: ${m.reason}`),
+    );
+    section(
+      lines,
       'unusable (listed but rejected)',
       r.unusable.map((m) => `${m.id}: ${m.reason}`),
     );
@@ -733,4 +805,26 @@ export function formatReport(reports: readonly ProviderReport[]): string {
   );
   lines.push(`Calls made: ${total} (${perProvider.join(', ')})`);
   return lines.join('\n');
+}
+
+/** Reads a response body, throwing past maxBytes so a hostile or broken server can't exhaust memory. */
+export async function readBodyCapped(
+  body: ReadableStream<Uint8Array> | null,
+  maxBytes: number,
+): Promise<string> {
+  if (!body) return '';
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let total = 0;
+  let text = '';
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) return text + decoder.decode();
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new Error(`response body too large (over ${maxBytes} bytes)`);
+    }
+    text += decoder.decode(value, { stream: true });
+  }
 }

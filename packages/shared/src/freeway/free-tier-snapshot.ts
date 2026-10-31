@@ -84,6 +84,8 @@ export interface FreeTierProvider {
 
 export interface FreeTierSnapshot {
   generatedAt: string;
+  /** When `make freeway-refresh` last checked the list with every provider reachable. */
+  lastCheckedAt?: string;
   providers: Record<string, FreeTierProvider>;
 }
 

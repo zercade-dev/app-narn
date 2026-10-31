@@ -5,6 +5,7 @@
  *   make freeway-refresh FLAGS=--probe-candidates
  *   make freeway-refresh FLAGS="--write-suggestion scripts/freeway-refresh/suggested.local.json"
  *   make freeway-refresh FLAGS=--apply-retired
+ *   make freeway-refresh FLAGS=--stamp-checked
  *
  * Makes real provider calls, and each probe spends one request of free quota.
  * Keys are read only from the file named by NARN_ENV_FILE (default scripts/.env),
@@ -24,9 +25,11 @@ import {
   checkApply,
   formatReport,
   pickKeys,
+  readBodyCapped,
   retiredSnapshot,
   runProvider,
   sanitizeText,
+  stampChecked,
   suggestedSnapshot,
   type HttpRequest,
   type HttpResponse,
@@ -46,6 +49,9 @@ const SNAPSHOT_PATH = path.join(
   'free-tier-data.json',
 );
 
+/** Far above any real model list, which runs to a few megabytes at most. */
+const MAX_BODY_BYTES = 32 * 1024 * 1024;
+
 const USAGE = `Usage: tsx scripts/freeway-refresh.ts [options]
 
   (no options)               Report only. Lists each provider and probes every snapshot model once.
@@ -53,18 +59,21 @@ const USAGE = `Usage: tsx scripts/freeway-refresh.ts [options]
   --write-suggestion <path>  Write a snapshot minus confirmed retirements. The path must be gitignored.
   --apply-retired            Remove confirmed retirements from the real snapshot. Refuses if any
                              provider's status is not ok, or a provider would lose more than half
-                             its models.
+                             its models. Records the check even when nothing is removed.
+  --stamp-checked            Record today as lastCheckedAt in the real snapshot, only if every
+                             provider's status is ok.
   --help, -h                 Print this usage.
 `;
 
 interface CliArgs {
   probeCandidates: boolean;
   applyRetired: boolean;
+  stampChecked: boolean;
   suggestionPath?: string;
 }
 
 function parseArgs(argv: string[]): CliArgs | undefined {
-  const args: CliArgs = { probeCandidates: false, applyRetired: false };
+  const args: CliArgs = { probeCandidates: false, applyRetired: false, stampChecked: false };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === '--help' || arg === '-h') {
@@ -74,6 +83,8 @@ function parseArgs(argv: string[]): CliArgs | undefined {
       args.probeCandidates = true;
     } else if (arg === '--apply-retired') {
       args.applyRetired = true;
+    } else if (arg === '--stamp-checked') {
+      args.stampChecked = true;
     } else if (arg === '--write-suggestion') {
       const value = argv[++i];
       if (!value) throw new Error('--write-suggestion requires a path');
@@ -113,7 +124,7 @@ async function realHttp(req: HttpRequest): Promise<HttpResponse> {
     signal: AbortSignal.timeout(req.timeoutMs),
     redirect: 'error',
   });
-  const text = await res.text();
+  const text = await readBodyCapped(res.body, MAX_BODY_BYTES);
   return { status: res.status, text, header: (name) => res.headers.get(name) };
 }
 
@@ -156,21 +167,30 @@ async function main(secrets: string[]): Promise<void> {
     console.log(`\nSuggestion written to ${args.suggestionPath}`);
   }
 
+  const today = new Date().toISOString().slice(0, 10);
+  let toWrite: RefreshSnapshot | undefined;
   if (args.applyRetired) {
     const retiredCount = reports.reduce((n, r) => n + r.retired.length, 0);
+    const unresolvedCount = reports.reduce((n, r) => n + r.unresolved.length, 0);
+    const unconfirmedCount = reports.reduce((n, r) => n + r.retiredUnconfirmed.length, 0);
+    const counts = `${unresolvedCount} unresolved, ${unconfirmedCount} unconfirmed, neither removed`;
     const verdict = checkApply(snapshot, reports);
-    if (!verdict.allowed) {
-      console.log(
-        `\n--apply-retired REFUSED, snapshot unchanged:\n  ${verdict.reasons.join('\n  ')}`,
-      );
-    } else if (retiredCount === 0) {
-      console.log('\n--apply-retired: nothing confirmed retired, snapshot unchanged.');
+    if (verdict.allowed) {
+      toWrite = retiredSnapshot(snapshot, reports, today);
+      console.log(`\n--apply-retired: removed ${retiredCount} model(s) (${counts}).`);
     } else {
-      const today = new Date().toISOString().slice(0, 10);
-      writeFileSync(SNAPSHOT_PATH, await formatJson(retiredSnapshot(snapshot, reports, today)));
-      console.log(`\n--apply-retired: removed ${retiredCount} model(s) from ${SNAPSHOT_PATH}`);
+      console.log(`\n--apply-retired REFUSED (${counts}):\n  ${verdict.reasons.join('\n  ')}`);
     }
   }
+  if (args.stampChecked && !toWrite) {
+    toWrite = stampChecked(snapshot, reports, today);
+    console.log(
+      toWrite
+        ? `\n--stamp-checked: lastCheckedAt set to ${today}.`
+        : "\n--stamp-checked REFUSED: every provider's status must be ok.",
+    );
+  }
+  if (toWrite) writeFileSync(SNAPSHOT_PATH, await formatJson(toWrite));
 }
 
 const secrets: string[] = [];

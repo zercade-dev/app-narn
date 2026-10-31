@@ -1,5 +1,6 @@
 {
   "generatedAt": "2026-10-31",
+  "lastCheckedAt": "2026-10-31",
   "providers": {
     "google": {
       "moduleId": "google",
