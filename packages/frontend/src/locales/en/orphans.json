@@ -54,6 +54,7 @@
     "relinkError": "Failed to relink orphan",
     "candidatesError": "Failed to load relink candidates",
     "aiRetranslateStarted": "AI re-translate started — see the Activity tab",
+    "aiRetranslateSkipped": "Relinked, but not re-translated: this row is marked as not needing translation",
     "aiRetranslateUnavailable": "Relinked, but AI re-translate could not start (no AI-capable module available)"
   }
 }

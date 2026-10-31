@@ -6,6 +6,7 @@ import { validateBody } from '../middleware/validate.js';
 import { asyncHandler } from '../http/index.js';
 import { projectIdParam } from '../middleware/path-params.js';
 import { getStringStore } from '../storage/registry.js';
+import { isExcludedFromTranslation } from '../modules/M9/engine-helpers.js';
 
 export const batchRouter: Router = Router({ mergeParams: true });
 
@@ -26,7 +27,7 @@ batchRouter.post(
     const { entryIds, targetLanguages } = req.body as z.infer<typeof analyzeSchema>;
     const all = await getStringStore().load(projectId);
     const wanted = new Set(entryIds);
-    const entries = all.filter((e) => wanted.has(e.id));
+    const entries = all.filter((e) => wanted.has(e.id) && !isExcludedFromTranslation(e));
     const modules = moduleRegistry.listModules();
     const analysis = batchAnalyzer.analyze(entries, targetLanguages, modules);
     res.json(analysis);

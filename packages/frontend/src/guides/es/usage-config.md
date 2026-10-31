@@ -15,6 +15,7 @@ La importación y exportación de CSV también viven en la pestaña **Datos**:
 * **Importar CSV** carga las entradas de origen y las traducciones que ya tuviera el archivo. Se toma automáticamente una instantánea de seguridad justo antes de cada importación, así que puedes retroceder desde la pestaña **Copia de seguridad**.
 * Las filas que no se pueden analizar correctamente (una comilla seguida inmediatamente de una coma) se descartan y se notifican, en lugar de escribirse con las columnas desplazadas.
 * **Exportar CSV** descarga el proyecto; puedes elegir los idiomas y si incluir la columna de contexto del traductor.
+* Las exportaciones escriben el texto tal como está guardado, sin añadir un apóstrofo delante de las celdas que empiezan por = + - o @. En **Exportar para**, **Editor del juego** es la opción predeterminada. Elige **Excel o Sheets** solo para archivos que vayas a ver en una hoja de cálculo: añade ese apóstrofo, que el editor de Miliastra conserva como texto, y la elección se restablece tras cada exportación. Un archivo de script de cliente exportado para Excel o Sheets no debe volver a importarse ni enviarse al editor. Las ejecuciones de traducción omiten las filas cuyo valor de Need translation? es FALSE.
 
 ### Archivos de script de cliente
 

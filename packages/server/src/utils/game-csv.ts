@@ -7,19 +7,37 @@
  * which depend on the server-only `escapeFormulaGuard`.
  */
 
-import { escapeFormulaGuard } from './formula-guard.js';
+import { escapeForReimport, escapeFormulaGuard } from './formula-guard.js';
 
 export { parseGameCSV, type ParsedGameCSV } from '@zercade-dev/narn-shared';
 
 /**
+ * - `full`: apostrophe before any formula-trigger cell, safe to open in a spreadsheet.
+ * - `reimport-safe`: only text that genuinely starts with apostrophes and a
+ *   trigger gets one, so the main-text import strip restores it.
+ * - `off`: cells are written exactly as stored.
+ */
+export type FormulaGuardMode = 'full' | 'reimport-safe' | 'off';
+
+const GUARDS: Record<FormulaGuardMode, (value: string) => string> = {
+  full: escapeFormulaGuard,
+  'reimport-safe': escapeForReimport,
+  off: (value) => value,
+};
+
+/**
  * Serializes rows to game-dialect CSV: every cell (headers included) wrapped
  * in exactly one pair of double quotes, inner quotes emitted literally
- * (no RFC doubling), rows joined with CRLF. The formula/DDE guard
- * (`escapeFormulaGuard`) is applied per cell; importCSV's stripFormulaGuard
- * reverses it.
+ * (no RFC doubling), rows joined with CRLF. `formulaGuard` picks what each cell
+ * gets: see {@link FormulaGuardMode}.
  */
-export function serializeGameCSV(headers: string[], rows: Record<string, string>[]): string {
-  const cell = (value: string): string => `"${escapeFormulaGuard(value)}"`;
+export function serializeGameCSV(
+  headers: string[],
+  rows: Record<string, string>[],
+  options: { formulaGuard?: FormulaGuardMode } = {},
+): string {
+  const guard = GUARDS[options.formulaGuard ?? 'full'];
+  const cell = (value: string): string => `"${guard(value)}"`;
   const lines: string[] = [headers.map(cell).join(',')];
   for (const row of rows) {
     lines.push(headers.map((h) => cell(row[h] ?? '')).join(','));

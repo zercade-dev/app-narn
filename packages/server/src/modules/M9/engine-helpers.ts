@@ -110,6 +110,17 @@ export function buildExamplesByLanguage(
 }
 
 /**
+ * True when a translation run must leave the entry alone: it is excluded from
+ * all AI dispatch, or marked as not needing translation. Kept apart from
+ * `isExcludedFromAi` because review and other engines may still see those rows.
+ */
+export function isExcludedFromTranslation(
+  entry: Pick<StringEntry, 'ignored' | 'orphanedAt' | 'needsTranslation'>,
+): boolean {
+  return isExcludedFromAi(entry) || entry.needsTranslation === false;
+}
+
+/**
  * Achievement prompt context for a job: the byte budget the LQA gate will
  * enforce (same resolver, same options bag) plus the linked counterpart's
  * source and usable translation. `pairMap` is built once per run from ALL

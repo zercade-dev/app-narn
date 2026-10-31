@@ -130,7 +130,8 @@ orphansRouter.post(
     // instead of letting it propagate to the central error handler.
     let retranslateRunId: string | undefined;
     let retranslateError: string | undefined;
-    if (retranslateWithAi && orphanSourceText !== undefined) {
+    const retranslateSkipped = retranslateWithAi === true && updated.needsTranslation === false;
+    if (retranslateWithAi && !retranslateSkipped && orphanSourceText !== undefined) {
       try {
         const sessionId = getSessionId(res);
         const result = await relinkRetranslateEngine.enqueue(
@@ -156,6 +157,7 @@ orphansRouter.post(
       ...updated,
       ...(retranslateRunId ? { retranslateRunId } : {}),
       ...(retranslateError ? { retranslateError } : {}),
+      ...(retranslateSkipped ? { retranslateSkipped } : {}),
     });
   }),
 );
