@@ -51,6 +51,10 @@
   "includeContext": "Bağlam sütununu dahil et",
   "discardUntranslatable": "Çeviri gerektirmeyen girdileri dışarıda bırak",
   "exportLanguages": "Diller",
+  "exportCollection": "Koleksiyon",
+  "collectionMain": "Ana metin",
+  "collectionClient": "İstemci betiği metni",
+  "detectedCollection": "Algılanan: {{collection}}",
   "exportLanguagesHint": "Bu dışa aktarmaya hangi sütunların ekleneceği",
   "pseudoExportAs": "Pseudo metni şu dil olarak dışa aktar",
   "pseudoExportNone": "Değiştirme yok",
@@ -405,6 +409,10 @@
       "line-break-parity": {
         "name": "Satır sonu eşliği",
         "description": "Gerçek satır sonları veya \\n kaçış dizileri kaynaktan farklı olan çevirileri bildirir — bozuk satır sonları oyun içinde yanlış görünür."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Çalışma zamanı yer tutucuları",
+        "description": "İstemci betiği metinlerinde eksik, eklenmiş ya da (%s/%d için) sırası değişmiş {name} ve %s/%d yer tutucularını ve kaynaktan farklı %% kaçışlarını işaretler."
       },
       "html-entity": {
         "name": "HTML varlığı",

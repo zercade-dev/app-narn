@@ -51,6 +51,10 @@
   "includeContext": "Incluir columna de contexto",
   "discardUntranslatable": "Descartar entradas que no necesitan traducción",
   "exportLanguages": "Idiomas",
+  "exportCollection": "Colección",
+  "collectionMain": "Texto principal",
+  "collectionClient": "Texto de script de cliente",
+  "detectedCollection": "Detectado: {{collection}}",
   "exportLanguagesHint": "Qué columnas incluir en esta exportación",
   "pseudoExportAs": "Exportar texto pseudo como",
   "pseudoExportNone": "Sin sustitución",
@@ -406,6 +410,10 @@
       "line-break-parity": {
         "name": "Paridad de saltos de línea",
         "description": "Señala traducciones cuyos escapes \\n literales o saltos de línea reales difieren del original; los saltos rotos se muestran mal en el juego."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Marcadores en tiempo de ejecución",
+        "description": "En los textos de scripts de cliente, señala los marcadores {name} y %s/%d que faltan, sobran o (en %s/%d) están en otro orden, y los escapes %% que difieren del origen."
       },
       "html-entity": {
         "name": "Entidad HTML",

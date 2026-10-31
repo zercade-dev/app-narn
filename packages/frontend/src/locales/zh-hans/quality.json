@@ -35,6 +35,7 @@
     "number-parity": "数字一致性",
     "whitespace-parity": "空白一致性",
     "line-break-parity": "换行一致性",
+    "runtime-placeholder-parity": "运行时占位符",
     "html-entity": "HTML 实体",
     "end-punctuation": "句末标点",
     "double-spacing": "重复空格",
@@ -52,6 +53,10 @@
     "whitespace-leading": "行首空白",
     "whitespace-trailing": "行尾空白",
     "line-break-mismatch": "换行不一致",
+    "placeholder-missing": "占位符缺失",
+    "placeholder-extra": "占位符多余",
+    "placeholder-order": "占位符顺序",
+    "printf-escape-mismatch": "百分号转义不一致",
     "end-punctuation-mismatch": "句末标点不一致",
     "mask-mismatch": "掩码不一致"
   },

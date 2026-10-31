@@ -29,6 +29,7 @@
     "description": "D\u00e9place les traductions de cette entr\u00e9e orpheline vers une autre, class\u00e9es selon la similarit\u00e9 du texte source de chaque candidate avec celui de cet orphelin.",
     "searchPlaceholder": "Rechercher des entr\u00e9es par texte source\u2026",
     "noCandidates": "Aucune entr\u00e9e correspondante",
+    "suggested": "Suggéré",
     "submit": "Continuer",
     "confirmTitle": "Confirmer la r\u00e9affectation",
     "confirmDescription": "Choisissez comment les traductions de l\u2019orphelin sont appliqu\u00e9es \u00e0 l\u2019entr\u00e9e cible avant de r\u00e9affecter.",

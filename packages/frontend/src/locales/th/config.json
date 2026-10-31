@@ -49,6 +49,10 @@
   "includeContext": "รวมคอลัมน์บริบท",
   "discardUntranslatable": "ไม่รวมรายการที่ไม่ต้องแปล",
   "exportLanguages": "ภาษา",
+  "exportCollection": "คอลเลกชัน",
+  "collectionMain": "ข้อความหลัก",
+  "collectionClient": "ข้อความสคริปต์ไคลเอนต์",
+  "detectedCollection": "ตรวจพบ: {{collection}}",
   "exportLanguagesHint": "คอลัมน์ที่จะรวมในการส่งออกครั้งนี้",
   "pseudoExportAs": "ส่งออกข้อความเทียมเป็น",
   "pseudoExportNone": "ไม่แทนที่",
@@ -399,6 +403,10 @@
       "line-break-parity": {
         "name": "ความตรงกันของการขึ้นบรรทัดใหม่",
         "description": "รายงานคำแปลที่มีอักขระหลีก \\n หรือการขึ้นบรรทัดใหม่จริงต่างจากต้นฉบับ — การขึ้นบรรทัดที่ผิดจะแสดงผลผิดในเกม"
+      },
+      "runtime-placeholder-parity": {
+        "name": "ตัวแทนค่าขณะรัน",
+        "description": "สำหรับสตริงสคริปต์ไคลเอนต์ ตรวจหาตัวแทนค่า {name} และ %s/%d ที่ขาดหาย เพิ่มเข้ามา หรือ (สำหรับ %s/%d) สลับลำดับ และ escape %% ที่ต่างจากต้นฉบับ"
       },
       "html-entity": {
         "name": "HTML เอนทิตี",

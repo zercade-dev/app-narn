@@ -265,6 +265,7 @@
   },
   "editor": {
     "sourceReadOnly": "原文（読み取り専用）",
+    "textKey": "キー: {{key}}",
     "translationLabel": "翻訳：{{lang}}",
     "ignoreOverflow": "オーバーフローを無視",
     "overflowIgnored": "オーバーフローを無視中",

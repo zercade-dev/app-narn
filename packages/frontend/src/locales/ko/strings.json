@@ -265,6 +265,7 @@
   },
   "editor": {
     "sourceReadOnly": "원문 (읽기 전용)",
+    "textKey": "키: {{key}}",
     "translationLabel": "번역 — {{lang}}",
     "ignoreOverflow": "길이 초과 무시",
     "overflowIgnored": "길이 초과 무시됨",

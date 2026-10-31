@@ -265,6 +265,7 @@
   },
   "editor": {
     "sourceReadOnly": "原文（只读）",
+    "textKey": "键：{{key}}",
     "translationLabel": "译文——{{lang}}",
     "ignoreOverflow": "忽略溢出",
     "overflowIgnored": "已忽略溢出",

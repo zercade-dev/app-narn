@@ -35,6 +35,7 @@
     "number-parity": "Paritas angka",
     "whitespace-parity": "Paritas spasi",
     "line-break-parity": "Paritas pemisah baris",
+    "runtime-placeholder-parity": "Placeholder runtime",
     "html-entity": "Entitas HTML",
     "end-punctuation": "Tanda baca akhir",
     "double-spacing": "Spasi ganda",
@@ -52,6 +53,10 @@
     "whitespace-leading": "Spasi di awal",
     "whitespace-trailing": "Spasi di akhir",
     "line-break-mismatch": "Pemisah baris tidak cocok",
+    "placeholder-missing": "Placeholder hilang",
+    "placeholder-extra": "Placeholder bertambah",
+    "placeholder-order": "Urutan placeholder",
+    "printf-escape-mismatch": "Escape persen tidak cocok",
     "end-punctuation-mismatch": "Tanda baca akhir tidak cocok",
     "mask-mismatch": "Penyamaran tidak cocok"
   },

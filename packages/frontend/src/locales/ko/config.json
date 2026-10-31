@@ -49,6 +49,10 @@
   "includeContext": "참고 정보 열 포함",
   "discardUntranslatable": "번역이 필요 없는 항목 제외",
   "exportLanguages": "언어",
+  "exportCollection": "컬렉션",
+  "collectionMain": "메인 텍스트",
+  "collectionClient": "클라이언트 스크립트 텍스트",
+  "detectedCollection": "감지됨: {{collection}}",
   "exportLanguagesHint": "이번 내보내기에 포함할 열",
   "pseudoExportAs": "슈도 텍스트를 내보낼 언어",
   "pseudoExportNone": "대체 없음",
@@ -399,6 +403,10 @@
       "line-break-parity": {
         "name": "줄바꿈 일치",
         "description": "리터럴 \\n 이스케이프나 실제 줄바꿈이 원문과 다른 번역을 표시해요. 줄바꿈이 깨지면 게임에서 잘못 표시돼요."
+      },
+      "runtime-placeholder-parity": {
+        "name": "런타임 자리 표시자",
+        "description": "클라이언트 스크립트 문자열에서 {name} 및 %s/%d 자리 표시자가 빠졌거나 추가되었거나 (%s/%d의 경우) 순서가 바뀐 경우와, 원문과 다른 %% 이스케이프를 표시합니다."
       },
       "html-entity": {
         "name": "HTML 엔티티",

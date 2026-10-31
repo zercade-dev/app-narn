@@ -49,6 +49,10 @@
   "includeContext": "Sertakan kolom konteks",
   "discardUntranslatable": "Kecualikan entri yang tidak perlu diterjemahkan",
   "exportLanguages": "Bahasa",
+  "exportCollection": "Koleksi",
+  "collectionMain": "Teks utama",
+  "collectionClient": "Teks skrip klien",
+  "detectedCollection": "Terdeteksi: {{collection}}",
   "exportLanguagesHint": "Kolom mana saja yang disertakan dalam ekspor ini",
   "pseudoExportAs": "Ekspor teks pseudo sebagai",
   "pseudoExportNone": "Tanpa penggantian",
@@ -399,6 +403,10 @@
       "line-break-parity": {
         "name": "Paritas pemisah baris",
         "description": "Menandai terjemahan yang escape \\n literal atau pemisah baris sungguhannya berbeda dari sumber — pemisah baris yang rusak tampil salah di dalam gim."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Placeholder runtime",
+        "description": "Untuk teks skrip klien, menandai placeholder {name} dan %s/%d yang hilang, bertambah, atau (untuk %s/%d) urutannya berubah, serta escape %% yang berbeda dari teks sumber."
       },
       "html-entity": {
         "name": "Entitas HTML",

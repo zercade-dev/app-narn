@@ -35,6 +35,7 @@
     "number-parity": "Parità dei numeri",
     "whitespace-parity": "Parità degli spazi",
     "line-break-parity": "Parità delle interruzioni di riga",
+    "runtime-placeholder-parity": "Segnaposto di runtime",
     "html-entity": "Entità HTML",
     "end-punctuation": "Punteggiatura finale",
     "double-spacing": "Spazi doppi",
@@ -52,6 +53,10 @@
     "whitespace-leading": "Spazi iniziali",
     "whitespace-trailing": "Spazi finali",
     "line-break-mismatch": "Interruzioni di riga non corrispondenti",
+    "placeholder-missing": "Segnaposto mancante",
+    "placeholder-extra": "Segnaposto aggiunto",
+    "placeholder-order": "Ordine dei segnaposto",
+    "printf-escape-mismatch": "Escape di percentuale non corrispondente",
     "end-punctuation-mismatch": "Punteggiatura finale non corrispondente",
     "mask-mismatch": "Maschere non corrispondenti"
   },

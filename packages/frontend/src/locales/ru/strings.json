@@ -280,6 +280,7 @@
   },
   "editor": {
     "sourceReadOnly": "Исходный текст (только для чтения)",
+    "textKey": "Ключ: {{key}}",
     "translationLabel": "Перевод — {{lang}}",
     "ignoreOverflow": "Игнорировать переполнение",
     "overflowIgnored": "Переполнение игнорируется",

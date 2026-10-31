@@ -29,6 +29,7 @@
     "description": "Übersetzungen von dieser Waise auf einen anderen Eintrag verschieben; die Kandidaten sind danach sortiert, wie ähnlich ihr Quelltext dem Quelltext dieser Waise ist.",
     "searchPlaceholder": "Einträge nach Quelltext durchsuchen…",
     "noCandidates": "Keine passenden Einträge",
+    "suggested": "Vorgeschlagen",
     "submit": "Weiter",
     "confirmTitle": "Neuverknüpfung bestätigen",
     "confirmDescription": "Festlegen, wie die Übersetzungen der Waise vor der Neuverknüpfung auf den Zieleintrag angewendet werden.",

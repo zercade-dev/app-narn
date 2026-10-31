@@ -49,6 +49,10 @@
   "includeContext": "包含譯者情境欄",
   "discardUntranslatable": "排除不需翻譯的條目",
   "exportLanguages": "語言",
+  "exportCollection": "文字集",
+  "collectionMain": "主要文字",
+  "collectionClient": "用戶端指令碼文字",
+  "detectedCollection": "偵測到：{{collection}}",
   "exportLanguagesHint": "本次匯出要包含哪些欄",
   "pseudoExportAs": "將偽翻譯文字匯出為",
   "pseudoExportNone": "不替換",
@@ -399,6 +403,10 @@
       "line-break-parity": {
         "name": "換行一致性",
         "description": "標出字面 \\n 逸出字元或實際換行與原文不同的譯文——換行若損壞，遊戲中會顯示錯誤。"
+      },
+      "runtime-placeholder-parity": {
+        "name": "執行階段佔位符",
+        "description": "針對用戶端指令碼字串，標出缺少、多出或（%s/%d）順序改變的 {name} 與 %s/%d 佔位符，以及與原文不同的 %% 逸出。"
       },
       "html-entity": {
         "name": "HTML 實體",

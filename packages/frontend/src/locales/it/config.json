@@ -51,6 +51,10 @@
   "includeContext": "Includi la colonna del contesto",
   "discardUntranslatable": "Escludi le voci che non richiedono traduzione",
   "exportLanguages": "Lingue",
+  "exportCollection": "Raccolta",
+  "collectionMain": "Testo principale",
+  "collectionClient": "Testo dello script client",
+  "detectedCollection": "Rilevato: {{collection}}",
   "exportLanguagesHint": "Quali colonne includere in questa esportazione",
   "pseudoExportAs": "Esporta il testo pseudo come",
   "pseudoExportNone": "Nessuna sostituzione",
@@ -406,6 +410,10 @@
       "line-break-parity": {
         "name": "Parità delle interruzioni di riga",
         "description": "Segnala le traduzioni le cui sequenze \\n o interruzioni di riga reali differiscono dall'origine: le interruzioni di riga danneggiate vengono visualizzate male nel gioco."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Segnaposto di runtime",
+        "description": "Per i testi degli script client, segnala i segnaposto {name} e %s/%d mancanti, aggiunti o (per %s/%d) in un altro ordine, e gli escape %% diversi dall'origine."
       },
       "html-entity": {
         "name": "Entità HTML",

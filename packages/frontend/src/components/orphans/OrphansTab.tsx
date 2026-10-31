@@ -15,6 +15,7 @@ import {
 import { useProjectScopedFetch } from './use-project-scoped-fetch.js';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -36,6 +37,8 @@ interface OrphansTabProps {
 interface RelinkCandidate {
   id: string;
   sourceText: string;
+  textKey?: string;
+  suggested?: true;
 }
 
 function countTranslations(entry: OrphanEntry | StringEntry): number {
@@ -294,7 +297,11 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
 
   const filteredCandidates = useMemo(() => {
     const q = candidateQuery.trim().toLowerCase();
-    const all = q ? candidates.filter((c) => c.sourceText.toLowerCase().includes(q)) : candidates;
+    const all = q
+      ? candidates.filter(
+          (c) => c.sourceText.toLowerCase().includes(q) || c.textKey?.toLowerCase().includes(q),
+        )
+      : candidates;
     return all.slice(0, 50);
   }, [candidates, candidateQuery]);
 
@@ -421,7 +428,21 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
                     }`}
                     onClick={() => setPickedCandidateId(c.id)}
                   >
+                    {c.textKey !== undefined && (
+                      <span className="block text-xs text-muted-foreground break-all">
+                        {c.textKey}
+                      </span>
+                    )}
                     <span data-content>{c.sourceText}</span>
+                    {c.suggested && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-2"
+                        data-testid="relink-candidate-suggested"
+                      >
+                        {t('relink.suggested')}
+                      </Badge>
+                    )}
                   </button>
                 ))}
                 {filteredCandidates.length === 0 && (

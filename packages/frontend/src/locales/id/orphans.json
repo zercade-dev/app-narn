@@ -28,6 +28,7 @@
     "description": "Pindahkan terjemahan dari entri yatim ini ke entri lain, diurutkan menurut kemiripan teks sumber tiap kandidat dengan teks sumber entri yatim ini.",
     "searchPlaceholder": "Cari entri berdasarkan teks sumber…",
     "noCandidates": "Tidak ada entri yang cocok",
+    "suggested": "Disarankan",
     "submit": "Lanjutkan",
     "confirmTitle": "Konfirmasi penghubungan ulang",
     "confirmDescription": "Pilih cara terjemahan entri yatim diterapkan ke entri tujuan sebelum dihubungkan ulang.",

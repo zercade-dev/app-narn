@@ -49,6 +49,10 @@
   "includeContext": "翻訳者コンテキストの列を含める",
   "discardUntranslatable": "翻訳が不要なエントリを除外する",
   "exportLanguages": "言語",
+  "exportCollection": "コレクション",
+  "collectionMain": "メインテキスト",
+  "collectionClient": "クライアントスクリプトテキスト",
+  "detectedCollection": "検出: {{collection}}",
   "exportLanguagesHint": "このエクスポートに含める列",
   "pseudoExportAs": "疑似テキストの出力先",
   "pseudoExportNone": "置き換えなし",
@@ -399,6 +403,10 @@
       "line-break-parity": {
         "name": "改行の一致",
         "description": "リテラルの\\nエスケープや実際の改行が原文と異なる翻訳を検出します。改行が壊れると、ゲーム内で正しく表示されません。"
+      },
+      "runtime-placeholder-parity": {
+        "name": "ランタイムのプレースホルダー",
+        "description": "クライアントスクリプトの文字列で、{name}や%s/%dのプレースホルダーの欠落・追加・（%s/%dの）順序の入れ替わり、および原文と異なる%%エスケープを検出します。"
       },
       "html-entity": {
         "name": "HTMLエンティティ",

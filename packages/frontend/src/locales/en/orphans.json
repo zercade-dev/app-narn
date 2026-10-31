@@ -29,6 +29,7 @@
     "description": "Move translations from this orphan onto another entry, ranked by how similar each candidate's source text is to this orphan's.",
     "searchPlaceholder": "Search entries by source text…",
     "noCandidates": "No matching entries",
+    "suggested": "Suggested",
     "submit": "Continue",
     "confirmTitle": "Confirm relink",
     "confirmDescription": "Choose how the orphan's translations are applied to the target entry before relinking.",

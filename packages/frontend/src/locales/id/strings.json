@@ -265,6 +265,7 @@
   },
   "editor": {
     "sourceReadOnly": "Teks sumber (hanya-baca)",
+    "textKey": "Kunci: {{key}}",
     "translationLabel": "Terjemahan — {{lang}}",
     "ignoreOverflow": "Abaikan luapan",
     "overflowIgnored": "Luapan diabaikan",

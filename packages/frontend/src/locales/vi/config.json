@@ -49,6 +49,10 @@
   "includeContext": "Kèm cột bối cảnh",
   "discardUntranslatable": "Loại trừ các mục không cần dịch",
   "exportLanguages": "Ngôn ngữ",
+  "exportCollection": "Bộ sưu tập",
+  "collectionMain": "Văn bản chính",
+  "collectionClient": "Văn bản tập lệnh máy khách",
+  "detectedCollection": "Đã phát hiện: {{collection}}",
   "exportLanguagesHint": "Những cột nào sẽ có mặt trong lần xuất này",
   "pseudoExportAs": "Xuất văn bản pseudo dưới dạng",
   "pseudoExportNone": "Không thay thế",
@@ -399,6 +403,10 @@
       "line-break-parity": {
         "name": "Trùng khớp ngắt dòng",
         "description": "Báo vấn đề với những bản dịch có ký tự thoát \\n hoặc ngắt dòng thật khác với văn bản nguồn — ngắt dòng hỏng sẽ hiển thị sai trong trò chơi."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Phần giữ chỗ khi chạy",
+        "description": "Với chuỗi tập lệnh máy khách, đánh dấu các phần giữ chỗ {name} và %s/%d bị thiếu, thêm vào hoặc (với %s/%d) đổi thứ tự, cùng các ký tự thoát %% khác với bản gốc."
       },
       "html-entity": {
         "name": "Thực thể HTML",

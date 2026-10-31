@@ -29,6 +29,7 @@
     "description": "Sposta le traduzioni da questa orfana a un'altra voce, in ordine di somiglianza fra il testo di origine di ciascun candidato e quello dell'orfana.",
     "searchPlaceholder": "Cerca le voci per testo di origine…",
     "noCandidates": "Nessuna voce corrisponde",
+    "suggested": "Suggerito",
     "submit": "Continua",
     "confirmTitle": "Conferma del ricollegamento",
     "confirmDescription": "Scegli come applicare le traduzioni dell'orfana alla voce di destinazione prima di ricollegarla.",

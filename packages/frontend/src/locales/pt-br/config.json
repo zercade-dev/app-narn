@@ -51,6 +51,10 @@
   "includeContext": "Incluir coluna de contexto",
   "discardUntranslatable": "Omitir entradas que não precisam de tradução",
   "exportLanguages": "Idiomas",
+  "exportCollection": "Coleção",
+  "collectionMain": "Texto principal",
+  "collectionClient": "Texto de script de cliente",
+  "detectedCollection": "Detectado: {{collection}}",
   "exportLanguagesHint": "Quais colunas incluir nesta exportação",
   "pseudoExportAs": "Exportar o texto pseudo como",
   "pseudoExportNone": "Sem substituição",
@@ -406,6 +410,10 @@
       "line-break-parity": {
         "name": "Paridade de quebras de linha",
         "description": "Aponta traduções cujos escapes literais \\n ou quebras de linha reais diferem da origem — quebras de linha danificadas são exibidas incorretamente no jogo."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Placeholders de execução",
+        "description": "Nos textos de script de cliente, sinaliza placeholders {name} e %s/%d ausentes, adicionados ou (em %s/%d) fora de ordem, e escapes %% diferentes do texto de origem."
       },
       "html-entity": {
         "name": "Entidade HTML",

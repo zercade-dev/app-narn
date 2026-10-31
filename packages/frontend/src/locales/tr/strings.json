@@ -270,6 +270,7 @@
   },
   "editor": {
     "sourceReadOnly": "Kaynak metin (salt okunur)",
+    "textKey": "Anahtar: {{key}}",
     "translationLabel": "Çeviri — {{lang}}",
     "ignoreOverflow": "Taşmayı yok say",
     "overflowIgnored": "Taşma yok sayıldı",

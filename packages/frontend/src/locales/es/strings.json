@@ -270,6 +270,7 @@
   },
   "editor": {
     "sourceReadOnly": "Texto de origen (solo lectura)",
+    "textKey": "Clave: {{key}}",
     "translationLabel": "Traducción — {{lang}}",
     "ignoreOverflow": "Ignorar desbordamiento",
     "overflowIgnored": "Desbordamiento ignorado",

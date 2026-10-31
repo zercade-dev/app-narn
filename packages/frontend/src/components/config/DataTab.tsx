@@ -9,8 +9,12 @@ import {
   parseGameCSV,
   buildCsvColumnMap,
   findRawNewlineLanguages,
+  detectCsvCollection,
+  entryCollection,
+  type CsvCollection,
 } from '@zercade-dev/narn-shared';
 import { useProjectStore } from '../../stores/project-store.js';
+import { useStringStore } from '../../stores/string-store.js';
 import { apiRequest, apiDownload } from '../../hooks/use-api.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
 import { PseudoTestHelp } from './PseudoTestHelp.js';
@@ -69,6 +73,10 @@ export function DataTab() {
   const { t } = useTranslation('config');
   const { t: tCommon } = useTranslation('common');
   const { projects, activeProjectId, fetchProjects, updateLanguages } = useProjectStore();
+  // Entries the string table already loaded; used to decide whether the
+  // project has any live client strings worth offering an export choice for.
+  const loadedEntries = useStringStore((s) => s.entries);
+  const loadedEntriesProjectId = useStringStore((s) => s.loadedProjectId);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Always reflects the current activeProjectId; used to guard async import callbacks.
   const activeProjectIdRef = useRef(activeProjectId);
@@ -96,6 +104,8 @@ export function DataTab() {
   const [discardUntranslatable, setDiscardUntranslatable] = useState(false);
   const [exportLanguages, setExportLanguages] = useState<string[] | null>(null);
   const [pseudoAs, setPseudoAs] = useState<string>('none');
+  const [pendingCollection, setPendingCollection] = useState<CsvCollection>('main');
+  const [exportCollection, setExportCollection] = useState<CsvCollection>('main');
 
   const activeProject = projects.find((p) => p.id === activeProjectId);
 
@@ -109,6 +119,8 @@ export function DataTab() {
     setPrevActiveProjectId(activeProjectId);
     setPendingLanguages(null);
     setExportLanguages(null);
+    setExportCollection('main');
+    setPendingCollection('main');
     setDiffNotice(null);
     setPendingImportFile(null);
     setUnknownHeaders([]);
@@ -129,6 +141,11 @@ export function DataTab() {
   const exportableLanguages = (activeProject?.activeLanguages ?? []).filter(
     (code) => code !== PSEUDO_LANGUAGE_CODE,
   );
+  const hasClientStrings =
+    loadedEntriesProjectId === activeProjectId &&
+    loadedEntries.some((e) => entryCollection(e) === 'client' && !e.orphanedAt);
+  // A stale 'client' choice must not outlive the last client string.
+  const effectiveExportCollection: CsvCollection = hasClientStrings ? exportCollection : 'main';
   const currentLanguages = pendingLanguages ?? activeProject?.activeLanguages ?? [];
   const isDirty = pendingLanguages !== null;
   const allChecked =
@@ -274,6 +291,7 @@ export function DataTab() {
     setPendingImportFile(null);
     setUnknownHeaders([]);
     setRawNewlineLanguages([]);
+    setPendingCollection('main');
     setImportMode('full-replace');
     setOrphanPreview(null);
     setPreviewLoading(false);
@@ -297,6 +315,7 @@ export function DataTab() {
       setPendingImportFile(file);
       setUnknownHeaders(unknown);
       setRawNewlineLanguages(rawNewline);
+      setPendingCollection(detectCsvCollection(parsed.headers));
       setImportMode('full-replace');
       setOrphanPreview(null);
       setImportWarnOpen(true);
@@ -329,22 +348,29 @@ export function DataTab() {
       params.set('languages', selectedLangs.join(','));
     }
     if (pseudoAs !== 'none') params.set('pseudoAs', pseudoAs);
+    if (effectiveExportCollection === 'client') params.set('collection', 'client');
     const query = params.toString();
     const path = query
       ? `/projects/${activeProject.id}/export?${query}`
       : `/projects/${activeProject.id}/export`;
     try {
-      await apiDownload(path, `${activeProject.id}.csv`, {
-        onResponse: (response) => {
-          // Advisory warning (export still succeeded): some cells contain a
-          // quote+comma/newline that mis-splits if this CSV is re-imported.
-          const warnCount = Number(response.headers.get('X-Export-Roundtrip-Warnings') ?? '0');
-          if (warnCount > 0) {
-            const columns = response.headers.get('X-Export-Roundtrip-Columns') ?? '';
-            toast.warning(t('exportRoundtripWarning', { count: warnCount, columns }));
-          }
+      await apiDownload(
+        path,
+        effectiveExportCollection === 'client'
+          ? `client-${activeProject.id}.csv`
+          : `${activeProject.id}.csv`,
+        {
+          onResponse: (response) => {
+            // Advisory warning (export still succeeded): some cells contain a
+            // quote+comma/newline that mis-splits if this CSV is re-imported.
+            const warnCount = Number(response.headers.get('X-Export-Roundtrip-Warnings') ?? '0');
+            if (warnCount > 0) {
+              const columns = response.headers.get('X-Export-Roundtrip-Columns') ?? '';
+              toast.warning(t('exportRoundtripWarning', { count: warnCount, columns }));
+            }
+          },
         },
-      });
+      );
     } catch (err) {
       toast.error(t('exportFailed', { message: (err as Error).message }));
     }
@@ -354,6 +380,7 @@ export function DataTab() {
     if (!activeProject) return;
     const selectedLangs = exportLanguages ?? exportableLanguages;
     const params = new URLSearchParams({ template: 'true' });
+    if (effectiveExportCollection === 'client') params.set('collection', 'client');
     if (
       selectedLangs.length !== exportableLanguages.length ||
       selectedLangs.some((l) => !exportableLanguages.includes(l))
@@ -363,7 +390,9 @@ export function DataTab() {
     try {
       await apiDownload(
         `/projects/${activeProject.id}/export?${params.toString()}`,
-        `${activeProject.id}-template.csv`,
+        effectiveExportCollection === 'client'
+          ? `template-client-${activeProject.id}.csv`
+          : `${activeProject.id}-template.csv`,
       );
     } catch (err) {
       toast.error(t('exportFailed', { message: (err as Error).message }));
@@ -520,9 +549,11 @@ export function DataTab() {
                         {t('orphanedCount', { count: diffNotice.orphans })}
                       </Badge>
                     )}
-                    <Badge variant="outline">
-                      {t('changed', { count: diffNotice.diff.changed })}
-                    </Badge>
+                    {diffNotice.diff.changed > 0 && (
+                      <Badge variant="outline" data-testid="import-changed-badge">
+                        {t('changed', { count: diffNotice.diff.changed })}
+                      </Badge>
+                    )}
                     {(diffNotice.skippedRows ?? 0) + (diffNotice.ghostsBlocked ?? 0) > 0 && (
                       <Badge variant="outline" className="text-status-warn border-status-warn/40">
                         {t('skipped', {
@@ -641,6 +672,35 @@ export function DataTab() {
                   </div>
                 </div>
               )}
+              {hasClientStrings && (
+                <div data-testid="export-collection-control">
+                  <p className="text-sm font-medium mb-1.5">{t('exportCollection')}</p>
+                  <div
+                    className="inline-flex rounded-lg border bg-muted p-0.5"
+                    role="radiogroup"
+                    aria-label={t('exportCollection')}
+                  >
+                    {(['main', 'client'] as const).map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        role="radio"
+                        aria-checked={effectiveExportCollection === c}
+                        data-testid={`export-collection-${c}`}
+                        onClick={() => setExportCollection(c)}
+                        className={cn(
+                          'cursor-pointer rounded-md px-3 py-1 text-sm transition-colors',
+                          effectiveExportCollection === c
+                            ? 'bg-background font-medium shadow'
+                            : 'text-muted-foreground hover:text-foreground',
+                        )}
+                      >
+                        {t(c === 'client' ? 'collectionClient' : 'collectionMain')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <label className="flex items-center gap-1.5 text-sm">
                 <Checkbox
                   data-testid="include-context-checkbox"
@@ -717,6 +777,11 @@ export function DataTab() {
                 : t('importSheetDescription')}
             </SheetDescription>
           </SheetHeader>
+          <p className="mt-3 text-center text-sm" data-testid="import-detected-collection">
+            {t('detectedCollection', {
+              collection: t(pendingCollection === 'client' ? 'collectionClient' : 'collectionMain'),
+            })}
+          </p>
           <div
             className="mt-3 flex flex-col items-center gap-1.5 text-center"
             data-testid="import-mode-control"

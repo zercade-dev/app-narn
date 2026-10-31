@@ -51,6 +51,10 @@
   "includeContext": "Kontextspalte einbeziehen",
   "discardUntranslatable": "Einträge ohne Übersetzungsbedarf weglassen",
   "exportLanguages": "Sprachen",
+  "exportCollection": "Sammlung",
+  "collectionMain": "Haupttext",
+  "collectionClient": "Client-Skript-Text",
+  "detectedCollection": "Erkannt: {{collection}}",
   "exportLanguagesHint": "Welche Spalten in diesen Export aufgenommen werden",
   "pseudoExportAs": "Pseudo-Text exportieren als",
   "pseudoExportNone": "Keine Ersetzung",
@@ -405,6 +409,10 @@
       "line-break-parity": {
         "name": "Zeilenumbruchparität",
         "description": "Markiert Übersetzungen, deren literale \\n-Escapes oder echte Zeilenumbrüche vom Quelltext abweichen — kaputte Zeilenumbrüche werden im Spiel falsch dargestellt."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Laufzeit-Platzhalter",
+        "description": "Markiert bei Client-Skript-Texten {name}- und %s/%d-Platzhalter, die fehlen, hinzugefügt wurden oder (bei %s/%d) in anderer Reihenfolge stehen, sowie %%-Escapes, die vom Quelltext abweichen."
       },
       "html-entity": {
         "name": "HTML-Entität",

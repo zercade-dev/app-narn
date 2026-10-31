@@ -35,6 +35,7 @@
     "number-parity": "Sayı eşliği",
     "whitespace-parity": "Boşluk eşliği",
     "line-break-parity": "Satır sonu eşliği",
+    "runtime-placeholder-parity": "Çalışma zamanı yer tutucuları",
     "html-entity": "HTML varlığı",
     "end-punctuation": "Bitiş noktalaması",
     "double-spacing": "Çift boşluk",
@@ -52,6 +53,10 @@
     "whitespace-leading": "Baştaki boşluk",
     "whitespace-trailing": "Sondaki boşluk",
     "line-break-mismatch": "Satır sonu uyuşmazlığı",
+    "placeholder-missing": "Yer tutucu eksik",
+    "placeholder-extra": "Yer tutucu eklendi",
+    "placeholder-order": "Yer tutucu sırası",
+    "printf-escape-mismatch": "Yüzde kaçışı uyuşmazlığı",
     "end-punctuation-mismatch": "Bitiş noktalaması uyuşmazlığı",
     "mask-mismatch": "Maske uyuşmazlığı"
   },
