@@ -441,6 +441,7 @@ export class CSVImporter {
       languages?: string[];
       pseudoAs?: string;
       discardUntranslatable?: boolean;
+      collection?: CsvCollection;
     },
   ): Promise<string> {
     const { headerOrder, rows } = await this.buildExportRows(projectId, options);
@@ -460,6 +461,7 @@ export class CSVImporter {
       languages?: string[];
       pseudoAs?: string;
       discardUntranslatable?: boolean;
+      collection?: CsvCollection;
     },
   ): Promise<{ csv: string; roundTripWarnings: { count: number; columns: string[] } }> {
     const { headerOrder, rows } = await this.buildExportRows(projectId, options);
@@ -471,7 +473,12 @@ export class CSVImporter {
 
   private async buildExportHeader(
     projectId: string,
-    options?: { includeContext?: boolean; languages?: string[]; pseudoAs?: string },
+    options?: {
+      includeContext?: boolean;
+      languages?: string[];
+      pseudoAs?: string;
+      collection?: CsvCollection;
+    },
   ): Promise<{
     headerOrder: string[];
     translationLangs: string[];
@@ -509,7 +516,8 @@ export class CSVImporter {
         (registryIndex.get(a) ?? Number.MAX_SAFE_INTEGER) -
         (registryIndex.get(b) ?? Number.MAX_SAFE_INTEGER),
     );
-    const headerOrder: string[] = ['Source', 'Need translation?', sourceLangName];
+    const keyColumn = options?.collection === 'client' ? CLIENT_KEY_COLUMN_NAME : 'Source';
+    const headerOrder: string[] = [keyColumn, 'Need translation?', sourceLangName];
     for (const code of translationLangs) headerOrder.push(codeToName.get(code) ?? code);
     if (options?.includeContext === true) headerOrder.push('Context');
     return { headerOrder, translationLangs, sourceLangName, codeToName };
@@ -522,13 +530,20 @@ export class CSVImporter {
       languages?: string[];
       pseudoAs?: string;
       discardUntranslatable?: boolean;
+      collection?: CsvCollection;
     },
   ): Promise<{ headerOrder: string[]; rows: Record<string, string>[] }> {
     const allEntries = await this.ss.load(projectId);
+    const isClient = options?.collection === 'client';
+    // Orphaned client rows are superseded or removed strings; dropping them
+    // keeps a key from appearing twice. Main export keeps orphans as before.
+    const inCollection = allEntries.filter((e) =>
+      isClient ? entryCollection(e) === 'client' && !e.orphanedAt : entryCollection(e) === 'main',
+    );
     const entries =
       options?.discardUntranslatable === true
-        ? allEntries.filter((e) => e.needsTranslation !== false)
-        : allEntries;
+        ? inCollection.filter((e) => e.needsTranslation !== false)
+        : inCollection;
     const { headerOrder, translationLangs, sourceLangName, codeToName } =
       await this.buildExportHeader(projectId, options);
     const pseudoAs = options?.pseudoAs;
@@ -546,7 +561,9 @@ export class CSVImporter {
 
     const rows = ordered.map((entry) => {
       const row: Record<string, string> = {
-        Source: entry.sources.join(', '),
+        [isClient ? CLIENT_KEY_COLUMN_NAME : 'Source']: isClient
+          ? (entry.textKey ?? '')
+          : entry.sources.join(', '),
         'Need translation?': entry.needsTranslation ? 'TRUE' : 'FALSE',
         [sourceLangName]: entry.sourceText,
       };
@@ -574,12 +591,12 @@ export class CSVImporter {
    */
   async exportTemplateCSVString(
     projectId: string,
-    options?: { includeContext?: boolean; languages?: string[] },
+    options?: { includeContext?: boolean; languages?: string[]; collection?: CsvCollection },
   ): Promise<string> {
     const { headerOrder, translationLangs, sourceLangName, codeToName } =
       await this.buildExportHeader(projectId, options);
     const example: Record<string, string> = {
-      Source: 'example_key',
+      [headerOrder[0]]: 'example_key',
       'Need translation?': 'TRUE',
       [sourceLangName]: 'Example source text',
     };
@@ -601,6 +618,7 @@ export class CSVImporter {
       languages?: string[];
       pseudoAs?: string;
       discardUntranslatable?: boolean;
+      collection?: CsvCollection;
     },
   ): Promise<void> {
     const csv = await this.exportCSVString(projectId, options);

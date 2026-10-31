@@ -475,6 +475,7 @@ const exportQuerySchema = z.object({
   includeContext: booleanFlag,
   discardUntranslatable: booleanFlag,
   template: z.enum(['true']).optional(),
+  collection: z.enum(['main', 'client']).optional(),
   pseudoAs: z
     .string()
     .refine((code) => LANGUAGE_REGISTRY.some((l) => l.code === code), {
@@ -492,10 +493,13 @@ stringsRouter.get(
   validateQuery(exportQuerySchema),
   asyncHandler(async (req, res) => {
     const projectId = req.params.id as string;
+    const collection = req.query.collection === 'client' ? 'client' : 'main';
+    const filePrefix = collection === 'client' ? 'client-' : '';
 
     if (req.query.template === 'true') {
       const csv = await csvImporter.exportTemplateCSVString(projectId, {
         includeContext: req.query.includeContext === 'true',
+        collection,
         languages:
           typeof req.query.languages === 'string' && req.query.languages
             ? req.query.languages
@@ -505,7 +509,10 @@ stringsRouter.get(
             : undefined,
       });
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="template-${projectId}.csv"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="template-${filePrefix}${projectId}.csv"`,
+      );
       res.send(csv);
       return;
     }
@@ -531,9 +538,13 @@ stringsRouter.get(
       languages,
       pseudoAs,
       discardUntranslatable: req.query.discardUntranslatable === 'true',
+      collection,
     });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="export-${projectId}.csv"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${collection === 'client' ? 'client' : 'export'}-${projectId}.csv"`,
+    );
     // Advisory: cells whose content contains a quote+comma/newline mis-split on
     // re-import (game dialect is not RFC-4180). Surfaced as response headers so
     // the client can warn without altering the CSV body. The columns header is
