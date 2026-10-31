@@ -213,7 +213,10 @@ const TRANSIENT_STATUS_CODES: ReadonlySet<number> = new Set([500, 502, 503, 504,
  * different content isn't a passing fault.
  */
 const PASSING_FAULT_RE =
-  /\b(?:status|code|http|error|upstream)[\s:=]*5\d\d\b|\b5\d\d\b[\s:-]*(?:service|server|internal|bad gateway|gateway)|high[\s-]?demand|try again later(?!\s+\w)|temporarily unavailable|\boverloaded\b|service unavailable|service is currently unavailable|internal error|bad gateway|gateway time|internal server error|server had an error|provider returned error|connection error|\bterminated\b|cannot connect to api|other side closed|upstream connect error|fetch failed|network error|socket hang up|econn\w+|enotfound/i;
+  /high[\s-]?demand|try again later(?!\s+\w)|temporarily unavailable|\boverloaded\b|service unavailable|service is currently unavailable|internal error|bad gateway|gateway time|internal server error|server had an error|provider returned error|connection error|\bterminated\b|cannot connect to api|other side closed|upstream connect error|fetch failed|network error|socket hang up|econn\w+|enotfound/i;
+/** A 5xx named as a status. Only this form yields to {@link CLIENT_ERROR_RE}. */
+const PASSING_FAULT_STATUS_RE =
+  /\b(?:status|code|http|error|upstream)[\s:=]*5\d\d\b|\b5\d\d\b[\s:-]*(?:service|server|internal|gateway)/i;
 /**
  * A request that ran out of time. It keeps the generic cooldown: each attempt
  * can hold a batch for minutes, so a strike tends to land outside the flap
@@ -221,6 +224,8 @@ const PASSING_FAULT_RE =
  * came back at once, so it isn't one of these.
  */
 const TIMEOUT_RE = /(?<!gateway[\s-])\btimed?[\s-]?out\b|etimedout/i;
+/** Longest stated delay honoured, as the text comes straight from the provider. */
+const MAX_STATED_RETRY_MS = 24 * 60 * 60_000;
 /** A stated retry delay in an error's text, such as Google's "Please retry in 43.5s". */
 const RETRY_IN_TEXT_RE = /\bretry in (\d+(?:\.\d+)?)\s*s(?:ec(?:ond)?s?)?\b/i;
 /** A client-error marker, so a 400 quoting "at most 500 items" isn't read as a 500. */
@@ -240,8 +245,9 @@ export function isTransientProviderFailure(err: unknown): boolean {
     err && typeof err === 'object' ? (err as { statusCode?: unknown }).statusCode : undefined;
   if (typeof status === 'number') return TRANSIENT_STATUS_CODES.has(status);
   const msg = err instanceof Error ? err.message : String(err);
-  if (CLIENT_ERROR_RE.test(msg) || TIMEOUT_RE.test(msg)) return false;
-  return PASSING_FAULT_RE.test(msg);
+  if (TIMEOUT_RE.test(msg)) return false;
+  if (PASSING_FAULT_RE.test(msg)) return true;
+  return PASSING_FAULT_STATUS_RE.test(msg) && !CLIENT_ERROR_RE.test(msg);
 }
 
 /** Whether a failure is a request running out of time; see {@link TIMEOUT_RE}. */
@@ -252,7 +258,11 @@ export function isTimeoutFailure(err: unknown): boolean {
 /** How long a provider asked us to wait: the longer of its Retry-After and any delay in its text. */
 export function providerRetryHintMs(err: unknown): number | undefined {
   const stated = RETRY_IN_TEXT_RE.exec(err instanceof Error ? err.message : String(err));
-  const fromText = stated ? Math.ceil(Number(stated[1]) * 1000) : undefined;
+  const statedMs = stated ? Math.ceil(Number(stated[1]) * 1000) : undefined;
+  const fromText =
+    statedMs !== undefined && Number.isFinite(statedMs)
+      ? Math.min(statedMs, MAX_STATED_RETRY_MS)
+      : undefined;
   const fromHeader = retryAfterMsOf(err);
   if (fromText === undefined) return fromHeader;
   return Math.max(fromText, fromHeader ?? 0);
