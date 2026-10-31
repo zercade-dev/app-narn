@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import type { Project } from '@zercade-dev/narn-shared';
 import { ProjectNotFoundError } from '../types/errors.js';
 import { KeyedAsyncLock } from '../utils/keyed-lock.js';
@@ -11,6 +12,14 @@ import {
   normalizeRuleList,
   normalizeRoutingGroups,
 } from './project-normalize.js';
+
+/**
+ * Project ids are global across tenants, so the timestamp alone isn't enough:
+ * two same-named projects created in one millisecond would collide.
+ */
+function generateProjectId(name: string): string {
+  return `${slugify(name)}-${Date.now()}-${randomBytes(4).toString('hex')}`;
+}
 
 export class PgProjectStore implements ProjectStore {
   private readonly db: Queryable;
@@ -50,8 +59,7 @@ export class PgProjectStore implements ProjectStore {
     activeLanguages: string[],
     icon?: string,
   ): Promise<Project> {
-    const slug = slugify(name);
-    const id = `${slug}-${Date.now()}`;
+    const id = generateProjectId(name);
     return this.writeLock.withLock(id, async () => {
       const now = Date.now();
       const project: Project = {
@@ -185,7 +193,7 @@ export class PgProjectStore implements ProjectStore {
     return this.writeLock.withLock(id, async () => {
       const source = await this.loadProject(id);
       const newName = `${source.name} (copy)`;
-      const newId = `${slugify(newName)}-${Date.now()}`;
+      const newId = generateProjectId(newName);
       const now = Date.now();
       const newProject: Project = {
         ...source,
