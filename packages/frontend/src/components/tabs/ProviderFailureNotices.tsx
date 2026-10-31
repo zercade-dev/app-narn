@@ -13,13 +13,17 @@ export function ProviderFailureNotices({ run }: Readonly<{ run: RunStatus }>) {
       data-testid={`run-provider-failure-${run.runId}-${notice.id}`}
     >
       <AlertCircle className="size-3 shrink-0" />
-      <span className="min-w-0 break-words">
-        {t('runs.providerFailureNotice', {
-          model: notice.model,
-          count: notice.count,
-          message: notice.message,
-        })}{' '}
-        {t(PROVIDER_FAILURE_ROUTING_KEY[notice.routing])}
+      <span className="min-w-0">
+        <span className="block [overflow-wrap:anywhere]" data-testid="run-provider-failure-message">
+          {t('runs.providerFailureNotice', {
+            model: notice.model,
+            count: notice.count,
+            message: notice.message,
+          })}
+        </span>
+        <span className="block" data-testid="run-provider-failure-routing">
+          {t(PROVIDER_FAILURE_ROUTING_KEY[notice.routing])}
+        </span>
       </span>
     </div>
   ));

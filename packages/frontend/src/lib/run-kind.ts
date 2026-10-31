@@ -19,6 +19,20 @@ export const PROVIDER_FAILURE_ROUTING_KEY = {
 } as const;
 
 /**
+ * Joins a notice's summary, which ends with the provider's message, to its routing
+ * sentence on one line. Provider messages often stop without punctuation, and the
+ * two would read as one sentence.
+ */
+export function joinProviderFailureSentences(
+  message: string,
+  summary: string,
+  routing: string,
+): string {
+  const closed = /[.!?。！？…]["'”’)）」]*$/.test(message.trimEnd());
+  return `${summary}${closed ? ' ' : ' — '}${routing}`;
+}
+
+/**
  * User-facing run "type" i18n key (namespace `strings`), derived from the run's
  * kind via `runTypeLabel`. Lives here rather than beside the run-status tint
  * tokens because it is consumed by the run STORE (the failure toast) as well as

@@ -17,6 +17,7 @@ import {
   PROVIDER_FAILURE_ROUTING_KEY,
   RUN_TYPE_KEY,
   isChatRun,
+  joinProviderFailureSentences,
   isRunActive,
 } from '../lib/run-kind.js';
 import { getErrorMessage } from '../lib/utils.js';
@@ -364,7 +365,8 @@ function notifyFailedRunTransitions(previousRuns: RunStatus[], nextRuns: RunStat
 }
 
 /**
- * Toasts each repeated-failure group the first time a poll shows it. A fetch
+ * Toasts repeated-failure groups the first time a poll shows them, at most once
+ * per run per poll: the first group in full, the rest as a count. A fetch
  * with no earlier snapshot of THIS project is a first sighting and stays quiet
  * (the store keeps a settled project's runs across a switch): a reload or a
  * switch must not replay old notices, which the run card still shows.
@@ -377,17 +379,24 @@ function notifyNewProviderFailures(
   if (!previousRuns.some((r) => r.projectId === projectId)) return;
   for (const run of nextRuns) {
     const prev = previousRuns.find((r) => r.runId === run.runId);
-    for (const notice of run.providerFailureNotices ?? []) {
-      if (prev?.providerFailureNotices?.some((n) => n.id === notice.id)) continue;
-      const summary = i18n.t('runs.providerFailureNotice', {
-        ns: 'strings',
-        model: notice.model,
-        count: notice.count,
-        message: notice.message,
-      });
-      const routing = i18n.t(PROVIDER_FAILURE_ROUTING_KEY[notice.routing], { ns: 'strings' });
-      toast.warning(`${summary} ${routing}`);
-    }
+    const fresh = (run.providerFailureNotices ?? []).filter(
+      (notice) => !prev?.providerFailureNotices?.some((n) => n.id === notice.id),
+    );
+    const [notice] = fresh;
+    if (!notice) continue;
+    const summary = i18n.t('runs.providerFailureNotice', {
+      ns: 'strings',
+      model: notice.model,
+      count: notice.count,
+      message: notice.message,
+    });
+    const routing = i18n.t(PROVIDER_FAILURE_ROUTING_KEY[notice.routing], { ns: 'strings' });
+    const text = joinProviderFailureSentences(notice.message, summary, routing);
+    const more =
+      fresh.length > 1
+        ? ` ${i18n.t('runs.providerFailureMoreOnCard', { ns: 'strings', count: fresh.length - 1 })}`
+        : '';
+    toast.warning(`${text}${more}`);
   }
 }
 

@@ -496,6 +496,7 @@
     "providerFailureRerouted": "Permintaan dialihkan ke model lain.",
     "providerFailureRetrying": "Entri ini akan dicoba lagi.",
     "providerFailureNotRerouted": "Permintaan tidak dialihkan.",
+    "providerFailureMoreOnCard_other": "dan {{count}} lainnya di kartu putaran",
     "emptyState": "Tidak ada riwayat aktivitas.",
     "mobileEmpty": "Belum ada putaran. Putaran yang dimulai di desktop menampilkan kemajuannya di sini.",
     "viewSwitchLabel": "Tampilan aktivitas",

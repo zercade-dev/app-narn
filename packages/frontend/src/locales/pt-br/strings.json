@@ -510,6 +510,8 @@
     "providerFailureRerouted": "As solicitações foram redirecionadas para outro modelo.",
     "providerFailureRetrying": "Essas entradas serão tentadas novamente.",
     "providerFailureNotRerouted": "As solicitações não foram redirecionadas.",
+    "providerFailureMoreOnCard_one": "e mais {{count}} aviso no cartão da execução",
+    "providerFailureMoreOnCard_other": "e mais {{count}} avisos no cartão da execução",
     "emptyState": "Nenhum histórico de atividade encontrado.",
     "mobileEmpty": "Ainda não há execuções. As execuções iniciadas no computador mostram o progresso aqui.",
     "viewSwitchLabel": "Visualização de atividade",

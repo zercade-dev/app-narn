@@ -510,6 +510,8 @@
     "providerFailureRerouted": "Le richieste sono state reindirizzate a un altro modello.",
     "providerFailureRetrying": "Queste voci verranno ritentate.",
     "providerFailureNotRerouted": "Le richieste non sono state reindirizzate.",
+    "providerFailureMoreOnCard_one": "e {{count}} altro avviso sulla scheda dell'esecuzione",
+    "providerFailureMoreOnCard_other": "e altri {{count}} avvisi sulla scheda dell'esecuzione",
     "emptyState": "Nessuna cronologia delle attività trovata.",
     "mobileEmpty": "Ancora nessuna esecuzione. Le esecuzioni avviate da desktop mostrano qui il loro avanzamento.",
     "viewSwitchLabel": "Vista attività",

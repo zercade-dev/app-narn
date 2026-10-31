@@ -510,6 +510,8 @@
     "providerFailureRerouted": "Les requêtes ont été redirigées vers un autre modèle.",
     "providerFailureRetrying": "Ces entrées seront retentées.",
     "providerFailureNotRerouted": "Les requêtes n'ont pas été redirigées.",
+    "providerFailureMoreOnCard_one": "et {{count}} autre alerte sur la carte de l'exécution",
+    "providerFailureMoreOnCard_other": "et {{count}} autres alertes sur la carte de l'exécution",
     "emptyState": "Aucun historique d'activité trouvé.",
     "mobileEmpty": "Aucune exécution pour l'instant. Les exécutions lancées sur le bureau affichent leur progression ici.",
     "viewSwitchLabel": "Vue de l'activité",

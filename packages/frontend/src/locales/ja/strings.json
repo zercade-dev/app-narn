@@ -496,6 +496,7 @@
     "providerFailureRerouted": "リクエストは別のモデルに振り替えられました。",
     "providerFailureRetrying": "これらのエントリは再試行されます。",
     "providerFailureNotRerouted": "リクエストは振り替えられませんでした。",
+    "providerFailureMoreOnCard_other": "ほか{{count}}件は実行カードに表示されています",
     "emptyState": "アクティビティ履歴がありません。",
     "mobileEmpty": "実行はまだありません。デスクトップで開始した実行の進捗が、ここに表示されます。",
     "viewSwitchLabel": "アクティビティの表示",
