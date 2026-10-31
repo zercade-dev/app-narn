@@ -47,6 +47,7 @@ import {
   selectCapableModule,
   selectFreewayBackgroundModule,
   type ModuleLogFn,
+  savedTuningForRequest,
 } from './M9/module-selection.js';
 import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import type { BucketSourceDeps } from './M32/bucket-source.js';
@@ -220,8 +221,9 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
   > {
     const saved = project.sourceReviewConfig;
     const requestedId = request.moduleId ?? saved?.moduleId;
-    const requestedModel = request.model ?? saved?.model;
-    const requestedEffort = request.reasoningEffort ?? saved?.reasoningEffort;
+    const savedTuning = savedTuningForRequest(request.moduleId, saved);
+    const requestedModel = request.model ?? savedTuning.model;
+    const requestedEffort = request.reasoningEffort ?? savedTuning.reasoningEffort;
     const options = {
       ...(requestedEffort ? { requestedEffort } : {}),
       ...(request.verbose ? { verbose: true } : {}),
