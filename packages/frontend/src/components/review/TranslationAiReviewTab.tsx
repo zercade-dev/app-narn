@@ -883,12 +883,19 @@ export function TranslationAiReviewTab({ projectId }: { projectId: string }) {
   // reviewingAll) across every currently-translated entry in the project. The
   // new run shows up in the selector once polling observes it.
   const startReview = (override: AiReviewOverride) => {
-    if (reviewingAll) {
-      judgeRun(projectId, undefined, override).catch(handleJudgeStartError);
-      return;
-    }
-    if (!reviewTargetRun) return;
-    judgeRun(projectId, reviewTargetRun.runId, override).catch(handleJudgeStartError);
+    // Drop any pick/deep-link once the run has started, so the focus falls back
+    // to the newest run instead of leaving an older run's details on screen. A
+    // failed start keeps the current focus; a 423 start reports through the
+    // post-unlock callback instead of resolving.
+    const focusNewestRun = () => {
+      setPickedRunId(null);
+      if (reviewRunId !== null) clearReviewRunId();
+    };
+    const sourceRunId = reviewingAll ? undefined : reviewTargetRun?.runId;
+    if (!reviewingAll && sourceRunId === undefined) return;
+    judgeRun(projectId, sourceRunId, override, focusNewestRun)
+      .then(focusNewestRun)
+      .catch(handleJudgeStartError);
   };
 
   // One-verdict-at-a-time navigation index for the focused run's detail. Reset
