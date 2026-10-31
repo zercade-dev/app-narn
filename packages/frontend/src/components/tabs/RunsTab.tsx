@@ -909,7 +909,9 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                   data-testid={`run-waiting-badge-${run.runId}`}
                                 >
                                   <Hourglass data-icon="inline-start" className="size-3" />
-                                  {t('runs.statusWaitingForQuota')}
+                                  {run.waitingForQuota?.reason === 'provider-error'
+                                    ? t('runs.statusWaitingForProvider')
+                                    : t('runs.statusWaitingForQuota')}
                                 </Badge>
                               )}
                               {isJudge && (
@@ -1352,7 +1354,12 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
             <DialogContent data-testid="run-resume-with-dialog">
               <DialogHeader>
                 <DialogTitle>{t('runs.resumeWithTitle')}</DialogTitle>
-                <DialogDescription>{t('runs.resumeWithDescription')}</DialogDescription>
+                <DialogDescription>
+                  {runs.find((r) => r.runId === resumeWithRunId)?.waitingForQuota?.reason ===
+                  'provider-error'
+                    ? t('runs.resumeWithDescriptionProvider')
+                    : t('runs.resumeWithDescription')}
+                </DialogDescription>
               </DialogHeader>
               {resumeWithOptions.length > 0 ? (
                 <ModuleSelect

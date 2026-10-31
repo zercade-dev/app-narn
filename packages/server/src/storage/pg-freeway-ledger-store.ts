@@ -12,6 +12,7 @@ import { withTransaction, type Queryable } from './pg/pool.js';
 import type {
   FreewayBucketState,
   FreewayBucketStats,
+  FreewayCooldownReason,
   FreewayLedgerStore,
   FreewayUsageDelta,
   FreewayWindowRef,
@@ -35,6 +36,7 @@ interface FreewayUsageRow {
 interface FreewayBucketRow {
   bucket_key: string;
   cooldown_until: number | string | null;
+  cooldown_reason: string | null;
   disabled_reason: string | null;
   flap_count: number | string;
   stats: FreewayBucketStats | null;
@@ -104,12 +106,13 @@ export class PgFreewayLedgerStore implements FreewayLedgerStore {
     // No explicit WHERE — RLS confines this to the ambient tenant's own rows,
     // exactly like PgCollabRoutingStore.get().
     const { rows } = await this.db.query<FreewayBucketRow>(
-      `select bucket_key, cooldown_until, disabled_reason, flap_count, stats, updated_at
+      `select bucket_key, cooldown_until, cooldown_reason, disabled_reason, flap_count, stats, updated_at
          from freeway_buckets order by bucket_key`,
     );
     return rows.map((row) => ({
       bucketKey: row.bucket_key,
       cooldownUntil: row.cooldown_until == null ? undefined : Number(row.cooldown_until),
+      cooldownReason: row.cooldown_reason === 'provider-error' ? 'provider-error' : undefined,
       disabledReason: row.disabled_reason ?? undefined,
       flapCount: Number(row.flap_count ?? 0),
       stats: row.stats ?? {},
@@ -120,7 +123,7 @@ export class PgFreewayLedgerStore implements FreewayLedgerStore {
   /** Single-row read of one bucket's state, or undefined when the row is absent. */
   async getBucket(bucketKey: string): Promise<FreewayBucketState | undefined> {
     const { rows } = await this.db.query<FreewayBucketRow>(
-      `select bucket_key, cooldown_until, disabled_reason, flap_count, stats, updated_at
+      `select bucket_key, cooldown_until, cooldown_reason, disabled_reason, flap_count, stats, updated_at
          from freeway_buckets where bucket_key = $1`,
       [bucketKey],
     );
@@ -129,6 +132,7 @@ export class PgFreewayLedgerStore implements FreewayLedgerStore {
     return {
       bucketKey: row.bucket_key,
       cooldownUntil: row.cooldown_until == null ? undefined : Number(row.cooldown_until),
+      cooldownReason: row.cooldown_reason === 'provider-error' ? 'provider-error' : undefined,
       disabledReason: row.disabled_reason ?? undefined,
       flapCount: Number(row.flap_count ?? 0),
       stats: row.stats ?? {},
@@ -136,24 +140,30 @@ export class PgFreewayLedgerStore implements FreewayLedgerStore {
     };
   }
 
-  async setCooldown(bucketKey: string, until: number, opts?: { flap?: boolean }): Promise<void> {
+  async setCooldown(
+    bucketKey: string,
+    until: number,
+    opts?: { flap?: boolean; reason?: FreewayCooldownReason },
+  ): Promise<void> {
     const flapDelta = opts?.flap ? 1 : 0;
     const now = Date.now();
     await this.db.query(
-      `insert into freeway_buckets (tenant_id, bucket_key, cooldown_until, flap_count, updated_at)
-       values (current_setting('app.user_id'), $1, $2, $3, $4)
+      `insert into freeway_buckets
+         (tenant_id, bucket_key, cooldown_until, cooldown_reason, flap_count, updated_at)
+       values (current_setting('app.user_id'), $1, $2, $3, $4, $5)
        on conflict (tenant_id, bucket_key) do update set
          cooldown_until = excluded.cooldown_until,
-         flap_count = freeway_buckets.flap_count + $3,
+         cooldown_reason = excluded.cooldown_reason,
+         flap_count = freeway_buckets.flap_count + $4,
          updated_at = excluded.updated_at`,
-      [bucketKey, until, flapDelta, now],
+      [bucketKey, until, opts?.reason ?? null, flapDelta, now],
     );
   }
 
   /** No-op when the row is absent (plain UPDATE, not an upsert). */
   async clearCooldown(bucketKey: string): Promise<void> {
     await this.db.query(
-      `update freeway_buckets set cooldown_until = null, flap_count = 0, updated_at = $2
+      `update freeway_buckets set cooldown_until = null, cooldown_reason = null, flap_count = 0, updated_at = $2
         where bucket_key = $1`,
       [bucketKey, Date.now()],
     );

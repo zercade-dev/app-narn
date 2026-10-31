@@ -115,6 +115,8 @@ import {
   isRateLimitError,
   isRunCancellingAuthError,
   isTransientProviderError,
+  isTransientProviderFailure,
+  providerRetryHintMs,
   rateLimitCooldownMs,
   retryAfterMsOf,
   withRateLimitRetry,
@@ -290,7 +292,8 @@ const NO_BUCKETS_SKIP_REASON = 'no-free-buckets-for-session';
 
 /**
  * Cooldown applied to a Freeway bucket whose provider call failed for a reason
- * that is neither a rate limit nor a bad credential — a 5xx, a timeout, or a
+ * that is neither a rate limit nor a bad credential, nor a passing fault (see
+ * {@link FREEWAY_TRANSIENT_ERROR_COOLDOWN_MS}) — a rejected request, say, or a
  * model the provider has since retired ("this model is unavailable for free").
  * Such a bucket answers nothing but keeps getting picked, draining a run's
  * batches one 404 at a time, so it is sidelined for a while. Deliberately
@@ -299,6 +302,33 @@ const NO_BUCKETS_SKIP_REASON = 'no-free-buckets-for-session';
  * the real fix for that).
  */
 const FREEWAY_PROVIDER_ERROR_COOLDOWN_MS = 15 * 60_000;
+/**
+ * The first cooldown after a passing fault ({@link isTransientProviderFailure}):
+ * long enough not to hammer a provider that just said it's busy, short enough
+ * that work with no other qualified model isn't held for a blip. Repeat strikes
+ * escalate in {@link coolBucket}.
+ */
+const FREEWAY_TRANSIENT_ERROR_COOLDOWN_MS = 60_000;
+
+/**
+ * How one provider failure cools its bucket: a dead model to the day reset, a
+ * passing fault briefly, anything else for the generic window.
+ */
+function providerFailureCooling(err: unknown): {
+  retryAfterMs: number | undefined;
+  transient: boolean;
+  minCooldownMs?: number;
+} {
+  if (isModelUnavailableError(err)) return { retryAfterMs: undefined, transient: false };
+  if (!isTransientProviderFailure(err)) {
+    return { retryAfterMs: FREEWAY_PROVIDER_ERROR_COOLDOWN_MS, transient: false };
+  }
+  return {
+    retryAfterMs: FREEWAY_TRANSIENT_ERROR_COOLDOWN_MS,
+    transient: true,
+    minCooldownMs: providerRetryHintMs(err),
+  };
+}
 
 const defaultGlossaryProvider: GlossaryProvider = async () => [];
 const defaultLqaGate: LqaGate = async () => undefined;
@@ -396,8 +426,13 @@ function formatResumeTime(resumeAt: number): string {
 }
 
 /** One-liner for a Freeway batch parked on quota, at either the plan-time or dispatch-time deferral site. */
-function formatDeferralDetail(pairCount: number, resumeAt: number): string {
-  return `${pairCount} pairs waiting for quota — resumes ~${formatResumeTime(resumeAt)}`;
+function formatDeferralDetail(
+  pairCount: number,
+  resumeAt: number,
+  reason?: 'quota' | 'provider-error',
+): string {
+  const waitingFor = reason === 'provider-error' ? 'a provider to recover' : 'quota';
+  return `${pairCount} pairs waiting for ${waitingFor} — resumes ~${formatResumeTime(resumeAt)}`;
 }
 
 /** One-liner for a batch dispatching on a bucket one tier below its band floor (Addendum G). */
@@ -3519,11 +3554,15 @@ export class TranslationEngine {
         status,
         resolution.deferred.pairs,
         resolution.deferred.resumeAt,
-        'quota',
+        resolution.deferred.reason ?? 'quota',
       );
       this.recordFreewayDetail(
         runId,
-        formatDeferralDetail(resolution.deferred.pairs.length, resolution.deferred.resumeAt),
+        formatDeferralDetail(
+          resolution.deferred.pairs.length,
+          resolution.deferred.resumeAt,
+          resolution.deferred.reason,
+        ),
       );
     }
     // Seed the governor with the live headroom this plan was resolved against,
@@ -3717,7 +3756,7 @@ export class TranslationEngine {
     retryAfterMs: number | undefined,
     deps: BucketSourceDeps,
     scope: 'bucket' | 'pool' = 'bucket',
-    opts?: { escalateOnFlap?: boolean },
+    opts?: Parameters<typeof coolBucket>[5],
   ): Promise<void> {
     try {
       await coolBucket(bucketKey, now, retryAfterMs, deps, scope, opts);
@@ -4310,16 +4349,20 @@ export class TranslationEngine {
           const strikeAt = Date.now();
           if (providerFailure) {
             // Cool it too (so later batches skip it) — a provider that isn't
-            // answering is not a quota wait. A dead model is never coming
-            // back this window, so it cools to the day reset instead of the
-            // generic 15-minute provider-error window.
+            // answering is not a quota wait.
+            const cooling = providerFailureCooling(err);
             await this.coolFreewayBucket(
               state.bucketKey,
               strikeAt,
-              isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
+              cooling.retryAfterMs,
               deps,
               'bucket',
-              { escalateOnFlap: true },
+              {
+                escalateOnFlap: true,
+                transient: cooling.transient,
+                minCooldownMs: cooling.minCooldownMs,
+                reason: 'provider-error',
+              },
             );
             // The one-hop budget is spent either way, but whether these pairs
             // FAIL depends on whether the field is actually empty. Revalidate
@@ -4389,16 +4432,16 @@ export class TranslationEngine {
             'pool',
           );
         } else if (providerFailure) {
-          // A dead model is never coming back this window, so it cools to
-          // the day reset instead of the generic 15-minute provider window.
-          await this.coolFreewayBucket(
-            state.bucketKey,
-            now,
-            isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
-            deps,
-            'bucket',
-            { escalateOnFlap: !parseShapedMixed },
-          );
+          // A parse-shaped mixed chunk answered, so it is never a passing fault.
+          const cooling = parseShapedMixed
+            ? { retryAfterMs: FREEWAY_PROVIDER_ERROR_COOLDOWN_MS, transient: false }
+            : providerFailureCooling(err);
+          await this.coolFreewayBucket(state.bucketKey, now, cooling.retryAfterMs, deps, 'bucket', {
+            escalateOnFlap: !parseShapedMixed,
+            transient: cooling.transient,
+            minCooldownMs: cooling.minCooldownMs,
+            reason: 'provider-error',
+          });
         } else {
           await this.markFreewayCredentialBad(state.moduleId, deps);
         }
@@ -4886,7 +4929,7 @@ export class TranslationEngine {
             status,
             decisions.map((d) => ({ entryId: d.entry.id, targetLanguage: d.targetLanguage })),
             revalidated.resumeAt,
-            'quota',
+            revalidated.reason ?? 'quota',
           );
           for (const d of decisions) settled.add(settleKey(d));
           this.logger.info('translation:freeway-deferred', {
@@ -4897,7 +4940,7 @@ export class TranslationEngine {
           });
           this.recordFreewayDetail(
             runId,
-            formatDeferralDetail(decisions.length, revalidated.resumeAt),
+            formatDeferralDetail(decisions.length, revalidated.resumeAt, revalidated.reason),
           );
           this.emitProgress(runId, status);
           refundUnusedAdmission();
@@ -5390,16 +5433,11 @@ export class TranslationEngine {
             }
             if (!parkedOnce.has(pairKey)) {
               parkedOnce.add(pairKey);
-              // Labeled 'quota' (not a third reason) same as the auth-tail
-              // adjudication above: this is one flaky call in an otherwise
-              // healthy batch — the bucket was never cooled, so what the
-              // pair is actually waiting out is quota/pacing, not a
-              // provider outage.
               this.deferPairsForQuota(
                 status,
                 [{ entryId: e.decision.entry.id, targetLanguage: e.decision.targetLanguage }],
                 Date.now() + 60_000,
-                'quota',
+                'provider-error',
               );
               settled.add(settleKey(e.decision));
               deferredIndices.add(i);
@@ -5835,7 +5873,10 @@ export class TranslationEngine {
                 pairs: pairs.length,
                 resumeAt: outcome.resumeAt,
               });
-              this.recordFreewayDetail(runId, formatDeferralDetail(pairs.length, outcome.resumeAt));
+              this.recordFreewayDetail(
+                runId,
+                formatDeferralDetail(pairs.length, outcome.resumeAt, outcome.reason),
+              );
               this.emitProgress(runId, status);
             } else {
               this.recordFreewayBlocked(runId, status, pairs);

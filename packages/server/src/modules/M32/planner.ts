@@ -8,7 +8,7 @@
  * remaining groups with fresh BucketViews.
  */
 import type { Assignment, BucketView, DifficultyBand, JobGroup, RunPlan } from './types.js';
-import { bucketResumeAt, selectBucket, type Selection } from './selector.js';
+import { bucketResumeAt, deferralReason, selectBucket, type Selection } from './selector.js';
 import { projectedRequestTokens } from './scoring.js';
 import { getPlanHorizonMinutes } from '../../config/env.js';
 
@@ -233,11 +233,17 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
       if (subTier.length > 0) {
         const relaxedGroup = { ...group, band: toTier };
         const subResume = Math.min(...subTier.map((b) => bucketResumeAt(b, relaxedGroup)));
-        plan.deferred.push({ group, resumeAt: Math.min(resumeAt, subResume) });
+        const soonest = Math.min(resumeAt, subResume);
+        const reason =
+          soonest === subResume
+            ? deferralReason(subTier, relaxedGroup, soonest)
+            : deferralReason(everCandidates, group, soonest);
+        plan.deferred.push({ group, resumeAt: soonest, ...(reason ? { reason } : {}) });
         continue;
       }
     }
-    plan.deferred.push({ group, resumeAt });
+    const reason = deferralReason(everCandidates, group, resumeAt);
+    plan.deferred.push({ group, resumeAt, ...(reason ? { reason } : {}) });
   }
   return plan;
 }

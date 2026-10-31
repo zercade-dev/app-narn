@@ -20,7 +20,8 @@ import {
   isModelUnavailableError,
   isRateLimitError,
   isRunCancellingAuthError,
-  isTransientProviderError,
+  isTimeoutFailure,
+  isTransientProviderFailure,
 } from './errors.js';
 
 export const PROVIDER_FAILURE_NOTICE_THRESHOLD = 3;
@@ -28,14 +29,6 @@ export const MAX_PROVIDER_FAILURE_NOTICES = 10;
 export const MAX_PROVIDER_FAILURE_MESSAGE_CHARS = 300;
 /** Sub-threshold groups tracked per run: a stream of unique messages must not grow without limit. */
 const MAX_TRACKED_GROUPS = 200;
-
-/**
- * Outages the shared transient vocabulary does not name. Module results flatten
- * errors to strings, so these are recognized by the wording providers use for
- * them. Local on purpose: the shared vocabulary also decides what gets parked.
- */
-const EXTRA_TRANSIENT_RE =
-  /\b50\d\b|bad gateway|gateway time|internal server error|server had an error|provider returned error|connection error|\bterminated\b|cannot connect to api|other side closed|upstream connect error|fetch failed|network error|socket hang up|econn\w+|enotfound|etimedout/i;
 
 /** Groups still below the notice threshold, for one run. In-memory only. */
 export interface ProviderFailureTracker {
@@ -54,7 +47,7 @@ export function createProviderFailureTracker(): ProviderFailureTracker {
 export function countsAsProviderFailure(err: unknown): boolean {
   if (isAbortError(err)) return false;
   if (isRateLimitError(err) || isRunCancellingAuthError(err)) return false;
-  // Checked before the transient vocabulary, per its precedence contract.
+  // Checked before the passing-fault test, per its precedence contract.
   if (isModelUnavailableError(err)) return true;
   const statusCode =
     typeof err === 'object' && err !== null
@@ -62,7 +55,10 @@ export function countsAsProviderFailure(err: unknown): boolean {
       : undefined;
   if (typeof statusCode === 'number' && statusCode >= 500) return false;
   const message = err instanceof Error ? err.message : String(err);
-  if (isTransientProviderError(err) || EXTRA_TRANSIENT_RE.test(message)) return false;
+  // Same test the cooldown uses, so a fault is never both retried soon as
+  // passing and reported as a repeated failure. A timeout is also a passing
+  // fault, whatever its cooldown.
+  if (isTransientProviderFailure(err) || isTimeoutFailure(err)) return false;
   // Depends on the input, not the model.
   if (PAYLOAD_TOO_LARGE_MESSAGE_RE.test(message)) return false;
   return !isParseFailureMessage(message);
