@@ -1,4 +1,5 @@
 import type { OrphanEntry, StringEntry } from '@zercade-dev/narn-shared';
+import { entryCollection } from '@zercade-dev/narn-shared';
 import type { ImportDiff } from './M2-csv-importer.js';
 import type { StringStore } from '../storage/types.js';
 import { getStringStore } from '../storage/registry.js';
@@ -111,6 +112,9 @@ export class OrphanManager {
     if (!orphan) throw new EntryNotFoundError(orphanId);
     const target = entries.find((e) => e.id === newSourceId);
     if (!target) throw new EntryNotFoundError(newSourceId);
+    if (entryCollection(orphan) !== entryCollection(target)) {
+      throw new ValidationError('orphan and target must belong to the same collection');
+    }
 
     const mergedTranslations = { ...target.translations };
     // Languages whose translation text this merge actually overwrites — the

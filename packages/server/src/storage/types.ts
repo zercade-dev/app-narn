@@ -12,6 +12,7 @@ import type {
   JudgeVerdictRecord,
   ModuleInstance,
   NotificationRecord,
+  CsvCollection,
   Project,
   ProjectTemplate,
   ProjectTemplateConfig,
@@ -222,6 +223,10 @@ export interface StringQueryFilters {
 export interface RelinkCandidate {
   id: string;
   sourceText: string;
+  /** Present on client-collection candidates. */
+  textKey?: string;
+  /** True on the live string sharing the orphan's key; listed first. */
+  suggested?: true;
 }
 
 /**
@@ -369,12 +374,14 @@ export interface StringStore {
    * their `sourceText` is to `query`, most-similar first, via native Postgres
    * pg_trgm trigram `similarity()` (migration 0018). Falls back to
    * unranked stored order when the extension is unavailable — see the
-   * implementation's guard.
+   * implementation's guard. Only entries of `collection` (default `'main'`)
+   * are candidates.
    */
   rankBySourceSimilarity(
     projectId: string,
     query: string,
     excludeIds: string[],
+    collection?: CsvCollection,
   ): Promise<RelinkCandidate[]>;
 }
 
