@@ -35,6 +35,7 @@
     "number-parity": "Trùng khớp chữ số",
     "whitespace-parity": "Trùng khớp khoảng trắng",
     "line-break-parity": "Trùng khớp ngắt dòng",
+    "runtime-placeholder-parity": "Phần giữ chỗ khi chạy",
     "html-entity": "Thực thể HTML",
     "end-punctuation": "Dấu câu kết thúc",
     "double-spacing": "Khoảng trắng lặp",
@@ -52,6 +53,10 @@
     "whitespace-leading": "Khoảng trắng đầu",
     "whitespace-trailing": "Khoảng trắng cuối",
     "line-break-mismatch": "Lệch ngắt dòng",
+    "placeholder-missing": "Thiếu phần giữ chỗ",
+    "placeholder-extra": "Thêm phần giữ chỗ",
+    "placeholder-order": "Thứ tự phần giữ chỗ",
+    "printf-escape-mismatch": "Ký tự thoát phần trăm không khớp",
     "end-punctuation-mismatch": "Lệch dấu câu kết thúc",
     "mask-mismatch": "Lệch phần che"
   },

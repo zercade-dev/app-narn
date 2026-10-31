@@ -15,6 +15,16 @@ L’import et l’export CSV vivent aussi dans l’onglet **Données** :
 * **Importer CSV** charge les entrées source et les traductions existantes éventuelles. Un instantané de sécurité est pris automatiquement juste avant chaque import, ce qui vous permet de revenir en arrière depuis l’onglet **Sauvegarde**.
 * Les lignes qui ne peuvent pas être analysées proprement (un guillemet immédiatement suivi d’une virgule) sont ignorées et signalées, plutôt qu’écrites sous forme de données décalées de colonne.
 * **Exporter CSV** télécharge le projet ; vous pouvez choisir les langues et si la colonne de contexte du traducteur doit être incluse.
+* Les exports écrivent le texte tel qu’il est enregistré, sans apostrophe ajoutée devant les cellules commençant par = + - ou @. Dans **Exporter pour**, **Éditeur du jeu** est le choix par défaut. Choisissez **Excel ou Sheets** uniquement pour un fichier à consulter dans un tableur : cela ajoute cette apostrophe, que l’éditeur Miliastra conserve comme du texte, et le choix est réinitialisé après chaque export. Un fichier de script client exporté pour Excel ou Sheets ne doit être ni réimporté ni envoyé à l’éditeur. Les exécutions de traduction ignorent les lignes dont la valeur Need translation? est FALSE.
+
+### Fichiers de script client
+
+Un CSV doté d’une colonne **Text Mapping ID** est un fichier de script client. Il est importé dans sa propre collection, **Texte de script client**, à part de votre **Texte principal** — la fenêtre d’import indique laquelle a été détectée.
+
+* Chaque chaîne client est identifiée par son Text Mapping ID, si bien que le même anglais peut figurer dans les deux collections, et sur plusieurs lignes client, sans être fusionné.
+* Importer un fichier client ne modifie jamais le texte principal, et importer un fichier principal ne modifie jamais le texte client.
+* Lorsque l’anglais d’une clé existante change, quel que soit le mode d’import, l’ancienne ligne passe dans l’onglet **Orphelins** et la nouvelle conserve les traductions du fichier ; seules ses cellules vides restent non traduites. Utilisez **Réaffecter** pour reporter les traductions : la ligne ayant la même clé est suggérée en premier, et le mode de remplacement détermine si les cellules remplies sont conservées ou remplacées.
+* Dès qu’un projet contient des chaînes client, **Exporter CSV** permet de choisir la collection à télécharger, et un export client conserve sa colonne Text Mapping ID.
 
 ## Modules et modèles
 

@@ -442,7 +442,13 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
         model: userModel,
         reasoningEffort,
       });
-      await startSourceReview(projectId, {
+      // Only a started run moves the details to it: a failed start keeps the
+      // current focus; a 423 start reports through the post-unlock callback.
+      const focusNewestRun = () => {
+        setPickedRunId(null);
+        if (reviewRunId !== null) clearReviewRunId();
+      };
+      const body = {
         ...(scope === 'never-reviewed' ? { entryIds: neverReviewedEntries.map((e) => e.id) } : {}),
         checks: {
           typo: enabled.typo,
@@ -469,7 +475,9 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
           : grouping !== 'default'
             ? { batchGrouping: grouping, ignoreBatchSizeLimit: ignoreLimit }
             : {}),
-      });
+      };
+      await startSourceReview(projectId, body, focusNewestRun);
+      focusNewestRun();
       setConfigOpen(false);
     },
     {

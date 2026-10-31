@@ -23,7 +23,7 @@ terjemahan lamanya disimpan di sini agar Anda tidak kehilangan hasil kerja.
 1. Impor ulang CSV sumber Anda dari tab **Data**.
 2. Buka **Entri Yatim** dan tinjau apa yang tersisih.
 3. **Hubungkan ulang** entri mana pun yang id atau teks sumbernya berubah
-   tetapi terjemahannya masih berlaku.
+   tetapi terjemahannya masih berlaku. Untuk teks skrip klien, baris aktif dengan Text Mapping ID yang sama disarankan lebih dulu; begitulah cara memindahkan terjemahan setelah teks Inggris berubah.
 4. **Hapus** entri yang benar-benar sudah tidak ada.
 
 Ketika daftarnya kosong, setiap entri yang diimpor cocok dengan proyek saat

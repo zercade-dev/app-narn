@@ -14,7 +14,7 @@ Der Tab **Waisen** listet Einträge auf, die in der zuletzt importierten CSV nic
 
 1. Die eigene Quell-CSV im Tab **Daten** erneut importieren.
 2. **Waisen** öffnen und durchsehen, was weggefallen ist.
-3. Jeden Eintrag, dessen ID oder Quelltext sich geändert hat, dessen Übersetzungen aber noch gültig sind, **neu verknüpfen**.
+3. Jeden Eintrag, dessen ID oder Quelltext sich geändert hat, dessen Übersetzungen aber noch gültig sind, **neu verknüpfen**. Bei Client-Skript-Text wird die aktive Zeile mit derselben Text Mapping ID zuerst vorgeschlagen; so lassen sich Übersetzungen übernehmen, wenn sich der englische Text ändert.
 4. Einträge, die wirklich verschwunden sind, **löschen**.
 
 Ist die Liste leer, stimmt jeder importierte Eintrag mit dem aktuellen Projekt überein — nichts ist verwaist.

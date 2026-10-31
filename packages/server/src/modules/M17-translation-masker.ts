@@ -30,6 +30,7 @@ import {
   type LQAIssue,
   type TagNode,
   MASK_TOKEN_SOURCE,
+  RUNTIME_PLACEHOLDER_SOURCE,
   escapeRegExp,
 } from '@zercade-dev/narn-shared';
 import { parse } from './M14-tag-parser.js';
@@ -236,7 +237,16 @@ function hasTextOutsideMaskTokens(masked: string): boolean {
   return masked.replace(new RegExp(MASK_TOKEN_SOURCE, 'g'), '').trim().length > 0;
 }
 
-export function maskText(text: string, constantTerms: GlossaryTerm[]): MaskResult {
+export interface MaskOptions {
+  /** Also mask `{name}` and printf (`%s`, `%d`) tokens; set for client script strings. */
+  runtimePlaceholders?: boolean;
+}
+
+export function maskText(
+  text: string,
+  constantTerms: GlossaryTerm[],
+  opts: MaskOptions = {},
+): MaskResult {
   const tags = new Map<number, TagSlot>();
   const vars = new Map<number, VarSlot>();
   const glossary = new Map<number, GlossarySlot>();
@@ -278,6 +288,16 @@ export function maskText(text: string, constantTerms: GlossaryTerm[]): MaskResul
       vars.set(id, { original: match });
       return `{v:${id}}`;
     });
+    // Pass 2b: runtime placeholders (`{player}`, `%s`), client strings only.
+    // `%%` is a literal percent and stays as written.
+    if (opts.runtimePlaceholders) {
+      out = out.replace(new RegExp(RUNTIME_PLACEHOLDER_SOURCE, 'g'), (match) => {
+        if (match === '%%') return match;
+        const id = ++varCounter;
+        vars.set(id, { original: match });
+        return `{v:${id}}`;
+      });
+    }
     // Pass 3: constant glossary matches (word-boundary, case-insensitive).
     // Glossary replacement runs only on the text spans *between* the `{e:N}`/
     // `{v:N}` tokens inserted above. A term whose source happens to be a token
@@ -509,9 +529,14 @@ export function maskApprovedForMemory(
   sourceText: string,
   approvedText: string,
   constantTerms: GlossaryTerm[],
+  opts: MaskOptions = {},
 ): { maskedSource: string; maskedTranslation: string } | null {
-  const { masked: maskedSource, plan: sourcePlan } = maskText(sourceText, constantTerms);
-  const { masked: maskedTranslation, plan: transPlan } = maskText(approvedText, constantTerms);
+  const { masked: maskedSource, plan: sourcePlan } = maskText(sourceText, constantTerms, opts);
+  const { masked: maskedTranslation, plan: transPlan } = maskText(
+    approvedText,
+    constantTerms,
+    opts,
+  );
 
   const varRemap = pairSlotsByIdentity(transPlan.vars, sourcePlan.vars, (s) => s.original);
   if (!varRemap) return null;

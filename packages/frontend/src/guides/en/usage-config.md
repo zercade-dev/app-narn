@@ -15,6 +15,16 @@ CSV import and export also live on the **Data** tab:
 * **Import CSV** loads source entries and any existing translations. A safety snapshot is taken automatically just before each import, so you can roll back from the **Backup** tab.
 * Rows that can't be parsed cleanly (a quote immediately followed by a comma) are dropped and reported, rather than written as column-shifted data.
 * **Export CSV** downloads the project; you can choose languages and whether to include the translator-context column.
+* Exports write your text as stored, with no apostrophe added before cells that start with = + - or @. Under **Export for**, **Game editor** is the default. Choose **Excel or Sheets** only for a file you will view in a spreadsheet: it adds that apostrophe, which the Miliastra editor keeps as text, and the choice resets after each export. A client script file exported for Excel or Sheets must not be re-imported or sent to the editor. Translation runs skip rows whose Need translation? value is FALSE.
+
+### Client script files
+
+A CSV with a **Text Mapping ID** column is a client script file. It is imported into its own collection, **Client script text**, kept apart from your **Main text** — the Import sheet tells you which one it detected.
+
+* Each client string is identified by its Text Mapping ID, so the same English can appear in both collections, and on several client rows, without being merged.
+* Importing a client file never changes main text, and importing a main file never changes client text.
+* When the English for an existing key changes, in either import mode, the old row moves to the **Orphans** tab and the new row keeps the translations from the file; only its empty cells are untranslated. Use **Relink** to carry translations across: the row with the same key is suggested first, and the override mode decides whether filled cells are kept or replaced.
+* Once a project has client strings, **Export CSV** lets you choose which collection to download, and a client export keeps its Text Mapping ID column.
 
 ## Modules and models
 

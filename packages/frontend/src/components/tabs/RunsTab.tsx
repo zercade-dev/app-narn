@@ -29,6 +29,7 @@ import {
   chatTypeKey,
 } from './run-status-ui.js';
 import { RunStatusBadge } from './RunStatusBadge.js';
+import { ProviderFailureNotices } from './ProviderFailureNotices.js';
 import { RunProgressBar } from '../ui/run-progress-bar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Button } from '../ui/button';
@@ -894,7 +895,9 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
 
                     return (
                       <Fragment key={run.runId}>
-                        <TableRow>
+                        <TableRow
+                          className={run.providerFailureNotices?.length ? 'border-b-0' : undefined}
+                        >
                           <TableCell className={rowAccentClass(run.status)}>
                             <div className="flex items-center gap-2">
                               {getStatusIcon(run.status)}
@@ -906,7 +909,9 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                   data-testid={`run-waiting-badge-${run.runId}`}
                                 >
                                   <Hourglass data-icon="inline-start" className="size-3" />
-                                  {t('runs.statusWaitingForQuota')}
+                                  {run.waitingForQuota?.reason === 'provider-error'
+                                    ? t('runs.statusWaitingForProvider')
+                                    : t('runs.statusWaitingForQuota')}
                                 </Badge>
                               )}
                               {isJudge && (
@@ -1286,6 +1291,19 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                             </div>
                           </TableCell>
                         </TableRow>
+                        {run.providerFailureNotices?.length ? (
+                          // Its own row: table cells size to their content, so in
+                          // the Status cell a long message pushes every other
+                          // column off the table.
+                          <TableRow className="hover:bg-transparent">
+                            <TableCell
+                              colSpan={showTriggeredBy ? 8 : 7}
+                              className="whitespace-normal pt-0"
+                            >
+                              <ProviderFailureNotices run={run} />
+                            </TableCell>
+                          </TableRow>
+                        ) : null}
                       </Fragment>
                     );
                   })
@@ -1336,7 +1354,12 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
             <DialogContent data-testid="run-resume-with-dialog">
               <DialogHeader>
                 <DialogTitle>{t('runs.resumeWithTitle')}</DialogTitle>
-                <DialogDescription>{t('runs.resumeWithDescription')}</DialogDescription>
+                <DialogDescription>
+                  {runs.find((r) => r.runId === resumeWithRunId)?.waitingForQuota?.reason ===
+                  'provider-error'
+                    ? t('runs.resumeWithDescriptionProvider')
+                    : t('runs.resumeWithDescription')}
+                </DialogDescription>
               </DialogHeader>
               {resumeWithOptions.length > 0 ? (
                 <ModuleSelect

@@ -218,13 +218,14 @@ function matchesGlossaries(entry: StringEntry, filters: EntryFilters): boolean |
 }
 
 /**
- * True when the lowercased `needle` appears in the entry's source text or any
- * of its translations. Exported so the compare tab (which filters with its own
+ * True when the lowercased `needle` appears in the entry's source text, its
+ * client text key, or any of its translations. Exported so the compare tab (which filters with its own
  * local state rather than the shared {@link EntryFilters}) shares the same
  * free-text search semantics. `needle` is expected to be pre-lowercased.
  */
 export function entryMatchesSearch(entry: StringEntry, needle: string): boolean {
   if (entry.sourceText.toLowerCase().includes(needle)) return true;
+  if (entry.textKey?.toLowerCase().includes(needle)) return true;
   return Object.values(entry.translations).some((r) => r.text.toLowerCase().includes(needle));
 }
 

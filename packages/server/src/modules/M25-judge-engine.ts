@@ -58,6 +58,7 @@ import {
   selectCapableModule,
   selectFreewayBackgroundModule,
   type ModuleLogFn,
+  savedTuningForRequest,
 } from './M9/module-selection.js';
 import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import { recordJudgeOutcomes, type BucketSourceDeps } from './M32/bucket-source.js';
@@ -309,8 +310,9 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
     )
   > {
     const requestedId = override?.moduleId ?? project.judgeConfig?.moduleId;
-    const requestedModel = override?.model ?? project.judgeConfig?.model;
-    const requestedEffort = override?.reasoningEffort ?? project.judgeConfig?.reasoningEffort;
+    const savedTuning = savedTuningForRequest(override?.moduleId, project.judgeConfig);
+    const requestedModel = override?.model ?? savedTuning.model;
+    const requestedEffort = override?.reasoningEffort ?? savedTuning.reasoningEffort;
     const options = {
       ...(requestedEffort ? { requestedEffort } : {}),
       ...(override?.verbose ? { verbose: true } : {}),

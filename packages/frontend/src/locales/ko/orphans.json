@@ -28,6 +28,7 @@
     "description": "이 미연결 항목의 번역을 다른 항목으로 옮겨요. 후보는 원문이 이 미연결 항목과 얼마나 비슷한지에 따라 정렬돼요.",
     "searchPlaceholder": "원문으로 항목 검색…",
     "noCandidates": "일치하는 항목이 없어요",
+    "suggested": "추천",
     "submit": "계속",
     "confirmTitle": "재연결 확인",
     "confirmDescription": "재연결하기 전에 미연결 항목의 번역을 대상 항목에 어떻게 적용할지 선택하세요.",
@@ -52,6 +53,7 @@
     "relinkError": "미연결 항목을 재연결하지 못했어요",
     "candidatesError": "재연결 후보를 불러오지 못했어요",
     "aiRetranslateStarted": "AI 재번역을 시작했어요 — 활동 탭에서 확인하세요",
+    "aiRetranslateSkipped": "재연결했지만 재번역하지 않았어요. 이 행은 번역이 필요 없다고 표시되어 있어요",
     "aiRetranslateUnavailable": "재연결했지만 AI 재번역을 시작하지 못했어요(사용할 수 있는 AI 모듈이 없어요)"
   }
 }

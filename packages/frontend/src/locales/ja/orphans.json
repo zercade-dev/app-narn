@@ -28,6 +28,7 @@
     "description": "この孤立エントリの翻訳を別のエントリに移します。候補は、その原文がこの孤立エントリの原文とどれだけ似ているかの順に並びます。",
     "searchPlaceholder": "原文でエントリを検索…",
     "noCandidates": "一致するエントリがありません",
+    "suggested": "おすすめ",
     "submit": "続ける",
     "confirmTitle": "再リンクの確認",
     "confirmDescription": "再リンクの前に、孤立エントリの翻訳を対象のエントリにどう適用するかを選んでください。",
@@ -52,6 +53,7 @@
     "relinkError": "孤立エントリを再リンクできませんでした",
     "candidatesError": "再リンクの候補を読み込めませんでした",
     "aiRetranslateStarted": "AIによる再翻訳を開始しました。アクティビティタブで確認できます",
+    "aiRetranslateSkipped": "再リンクしましたが、再翻訳はしていません。この行は翻訳不要とマークされています",
     "aiRetranslateUnavailable": "再リンクしましたが、AIによる再翻訳を開始できませんでした（AIに対応したモジュールがありません）"
   }
 }

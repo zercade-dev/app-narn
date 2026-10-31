@@ -35,6 +35,10 @@
   "importModeFullReplaceHint": "As entradas ausentes deste arquivo são marcadas como órfãs (ficam de fora das execuções de IA até serem revinculadas ou excluídas).",
   "fullReplacePreviewLoading": "Verificando quantas entradas isso deixaria órfãs…",
   "fullReplaceOrphanNotice": "Entradas existentes ausentes deste arquivo, que serão marcadas como órfãs: {{count}}. Resolva-as depois na aba Órfãos.",
+  "clientImportAddOnlyNotice": "As entradas ausentes permanecem, mas se o inglês de uma entrada mudou, a linha antiga vai para a aba Órfãos.",
+  "clientImportFullReplaceNotice": "As linhas cujo inglês mudou vão para a aba Órfãos junto com as ausentes deste arquivo.",
+  "clientImportPreviewCounts": "Inglês alterado: {{changed}}. Linhas que ficarão órfãs: {{orphans}}.",
+  "importMixedCollections": "Este arquivo tem uma coluna \"Text Mapping ID\" e também uma coluna \"Source\". Importe separadamente os arquivos de script de cliente e os de texto principal.",
   "importSheetDescription": "Escolha como este arquivo é aplicado ao projeto.",
   "orphanedCount": "Órfãs: {{count}}",
   "importWarningsTitle": "Revise antes de importar",
@@ -50,7 +54,18 @@
   "downloadTemplate": "Baixar CSV de exemplo",
   "includeContext": "Incluir coluna de contexto",
   "discardUntranslatable": "Omitir entradas que não precisam de tradução",
+  "exportTarget": "Exportar para",
+  "exportTargetEditor": "Editor do jogo",
+  "exportTargetSpreadsheet": "Excel ou Sheets",
+  "exportTargetSpreadsheetNote": "Para visualizar em uma planilha. Adiciona um apóstrofo antes das células que começam com = + - ou @, então este arquivo não deve voltar ao editor.",
+  "protectForSpreadsheetsClientWarning": "Não reimporte este arquivo de script de cliente nem o envie ao editor. Os apóstrofos ficariam no texto, e a reimportação substituiria linhas e deixaria as antigas órfãs.",
+  "formulaGuardRemovedNotice": "Apóstrofos de planilha removidos do início das células: {{cells}}",
+  "formulaGuardKeptNotice": "Células com um apóstrofo antes de = + - ou @: {{cells}}. Elas são mantidas como estão, então verifique-as: uma exportação protegida anterior pode tê-lo adicionado.",
   "exportLanguages": "Idiomas",
+  "exportCollection": "Coleção",
+  "collectionMain": "Texto principal",
+  "collectionClient": "Texto de script de cliente",
+  "detectedCollection": "Detectado: {{collection}}",
   "exportLanguagesHint": "Quais colunas incluir nesta exportação",
   "pseudoExportAs": "Exportar o texto pseudo como",
   "pseudoExportNone": "Sem substituição",
@@ -406,6 +421,10 @@
       "line-break-parity": {
         "name": "Paridade de quebras de linha",
         "description": "Aponta traduções cujos escapes literais \\n ou quebras de linha reais diferem da origem — quebras de linha danificadas são exibidas incorretamente no jogo."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Placeholders de execução",
+        "description": "Nos textos de script de cliente, sinaliza placeholders {name} e %s/%d ausentes, adicionados ou (em %s/%d) fora de ordem, e escapes %% diferentes do texto de origem."
       },
       "html-entity": {
         "name": "Entidade HTML",

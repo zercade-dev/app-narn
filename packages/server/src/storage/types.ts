@@ -12,6 +12,7 @@ import type {
   JudgeVerdictRecord,
   ModuleInstance,
   NotificationRecord,
+  CsvCollection,
   Project,
   ProjectTemplate,
   ProjectTemplateConfig,
@@ -222,6 +223,10 @@ export interface StringQueryFilters {
 export interface RelinkCandidate {
   id: string;
   sourceText: string;
+  /** Present on client-collection candidates. */
+  textKey?: string;
+  /** True on the live string sharing the orphan's key; listed first. */
+  suggested?: true;
 }
 
 /**
@@ -369,12 +374,14 @@ export interface StringStore {
    * their `sourceText` is to `query`, most-similar first, via native Postgres
    * pg_trgm trigram `similarity()` (migration 0018). Falls back to
    * unranked stored order when the extension is unavailable — see the
-   * implementation's guard.
+   * implementation's guard. Only entries of `collection` (default `'main'`)
+   * are candidates.
    */
   rankBySourceSimilarity(
     projectId: string,
     query: string,
     excludeIds: string[],
+    collection?: CsvCollection,
   ): Promise<RelinkCandidate[]>;
 }
 
@@ -823,6 +830,9 @@ export interface FreewayBucketStats {
   latencyMs?: number;
 }
 
+/** Why a Freeway bucket is cooling, when it isn't a quota wait. */
+export type FreewayCooldownReason = 'provider-error';
+
 export interface FreewayBucketState {
   /**
    * `'<baseModuleId>::<modelId>'`, e.g. `google::gemini-2.5-flash`,
@@ -834,6 +844,8 @@ export interface FreewayBucketState {
    */
   bucketKey: string;
   cooldownUntil?: number;
+  /** Set when a provider failure caused the cooldown; absent means a quota wait. */
+  cooldownReason?: FreewayCooldownReason;
   disabledReason?: string;
   flapCount: number;
   stats: FreewayBucketStats;
@@ -853,8 +865,15 @@ export interface FreewayLedgerStore {
   listBuckets(): Promise<FreewayBucketState[]>;
   /** Single-row read of one bucket's state, or undefined when the row is absent. */
   getBucket(bucketKey: string): Promise<FreewayBucketState | undefined>;
-  /** Overwrites cooldown_until (last write wins); bumps flap_count when `flap` is true. Upserts. */
-  setCooldown(bucketKey: string, until: number, opts?: { flap?: boolean }): Promise<void>;
+  /**
+   * Overwrites cooldown_until and cooldown_reason together (last write wins);
+   * bumps flap_count when `flap` is true. Upserts.
+   */
+  setCooldown(
+    bucketKey: string,
+    until: number,
+    opts?: { flap?: boolean; reason?: FreewayCooldownReason },
+  ): Promise<void>;
   /** Clear cooldown and reset flap_count to 0. No-op when the row is absent. */
   clearCooldown(bucketKey: string): Promise<void>;
   /**

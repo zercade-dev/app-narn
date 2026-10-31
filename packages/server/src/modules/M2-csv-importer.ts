@@ -4,16 +4,28 @@ import {
   SOURCE_COLUMN_NAMES,
   NEEDS_TRANSLATION_COLUMN_NAMES,
   CONTEXT_COLUMN_NAMES,
+  CLIENT_KEY_COLUMN_NAME,
+  CLIENT_SCRIPT_SOURCE_LABEL,
+  detectCsvCollection,
+  csvHasKeyAndSourceColumns,
+  entryCollection,
   DEFAULT_OVERFLOW_RATIO,
   buildCsvColumnMap,
   findRawNewlineLanguages,
+  type CsvCollection,
   type StringEntry,
   type TranslationRecord,
 } from '@zercade-dev/narn-shared';
 import { atomicWriteText } from '../utils/fs.js';
-import { generateEntryId } from '../utils/entry-id.js';
-import { parseGameCSV, serializeGameCSV, findRoundTripUnsafeCells } from '../utils/game-csv.js';
-import { stripFormulaGuard } from '../utils/formula-guard.js';
+import { generateClientEntryId, generateEntryId } from '../utils/entry-id.js';
+import {
+  parseGameCSV,
+  serializeGameCSV,
+  findRoundTripUnsafeCells,
+  type FormulaGuardMode,
+} from '../utils/game-csv.js';
+import { hasFormulaGuard, stripFormulaGuard } from '../utils/formula-guard.js';
+import { ValidationError } from '../types/errors.js';
 import type { ProjectStore, StringStore } from '../storage/types.js';
 import { getProjectStore, getStringStore } from '../storage/registry.js';
 
@@ -21,9 +33,16 @@ export interface ImportDiff {
   newEntries: StringEntry[];
   changed: StringEntry[];
   removed: string[];
+  /**
+   * Old IDs of live client entries whose key arrived with different English.
+   * Always a subset of `removed`; always empty for main files.
+   */
+  superseded: string[];
 }
 
 export interface ImportResult {
+  /** Which collection the file belongs to, from its headers. */
+  collection: CsvCollection;
   entries: StringEntry[];
   diff: ImportDiff;
   unrecognizedHeaders: string[];
@@ -59,6 +78,29 @@ export interface ImportResult {
    * if that client-side gate is ever bypassed (e.g. a direct API call).
    */
   rawNewlineLanguages: string[];
+  /**
+   * Main: cells whose leading formula-guard apostrophe was removed. Client:
+   * cells that begin with apostrophes and a trigger character, kept as written.
+   */
+  formulaGuardCells: number;
+}
+
+/** Shared options of the project string CSV exports. */
+export interface ExportOptions {
+  includeContext?: boolean;
+  languages?: string[];
+  pseudoAs?: string;
+  discardUntranslatable?: boolean;
+  collection?: CsvCollection;
+  /** Apostrophe-guard formula-trigger cells for opening in a spreadsheet. */
+  protectForSpreadsheets?: boolean;
+}
+
+function exportGuardMode(options?: ExportOptions): FormulaGuardMode {
+  if (options?.protectForSpreadsheets === true) return 'full';
+  // Client imports never strip, so client text is written exactly. Main imports
+  // always strip, so genuine apostrophe + trigger text needs one extra apostrophe.
+  return options?.collection === 'client' ? 'off' : 'reimport-safe';
 }
 
 // Constant for import limits
@@ -111,6 +153,17 @@ export class CSVImporter {
     }
 
     const headers = parsed.headers;
+    const collection = detectCsvCollection(headers);
+    const keyColName =
+      collection === 'client'
+        ? headers.find((h) => h.trim().toLowerCase() === CLIENT_KEY_COLUMN_NAME.toLowerCase())
+        : undefined;
+    if (csvHasKeyAndSourceColumns(headers)) {
+      throw new ValidationError(
+        `A CSV cannot have both a "${CLIENT_KEY_COLUMN_NAME}" column and a "Source" column. ` +
+          'Client script files and main text files are imported separately.',
+      );
+    }
     const { colToCode, duplicateLanguageHeaders } = buildCsvColumnMap(headers);
 
     // Locate special-purpose columns using translated name sets so CSVs
@@ -128,6 +181,7 @@ export class CSVImporter {
       ...(sourceMetaColName ? [sourceMetaColName] : []),
       ...(needsTransColName ? [needsTransColName] : []),
       ...(contextColName ? [contextColName] : []),
+      ...(keyColName ? [keyColName] : []),
     ]);
     const unrecognizedHeaders = headers.filter((h) => !recognisedHeaders.has(h));
 
@@ -140,10 +194,22 @@ export class CSVImporter {
     let skippedRows = 0;
 
     let rowIndex = 0;
+    let formulaGuardCells = 0;
     for (const row of parsed.rows) {
       for (const header of headers) {
         const cell = row[header];
-        if (cell) row[header] = stripFormulaGuard(cell);
+        if (!cell) continue;
+        // Main ids hash source text and older exports carry the guard, so main
+        // strips it. Client text is kept exactly; the count lets the user check it.
+        if (collection === 'client') {
+          if (hasFormulaGuard(cell)) formulaGuardCells++;
+          continue;
+        }
+        const stripped = stripFormulaGuard(cell);
+        if (stripped !== cell) {
+          row[header] = stripped;
+          formulaGuardCells++;
+        }
       }
       const entry = this.parseRow(row, {
         headers,
@@ -154,6 +220,7 @@ export class CSVImporter {
         needsTransColName,
         contextColName,
         defaultOverflowRatio: opts?.defaultOverflowRatio,
+        keyColName,
         seen,
         now,
         rowIndex,
@@ -169,9 +236,24 @@ export class CSVImporter {
     // StringStore.load returns [] for a missing/corrupt strings file (it never
     // throws for "no existing entries"), so a thrown error here is a genuine
     // failure that should surface rather than be masked as a fresh project.
-    const existing = await this.ss.load(projectId);
+    const allExisting = await this.ss.load(projectId);
+    // A file only ever diffs against its own collection, so a client import
+    // can never remove or change a main string, nor the reverse.
+    const existing = allExisting.filter((e) => entryCollection(e) === collection);
 
     const diff = this.generateDiff(existing, imported);
+    if (collection === 'client') {
+      const incomingByKey = new Map(imported.map((e) => [e.textKey, e]));
+      const changed = new Set<StringEntry>();
+      for (const old of existing) {
+        if (old.orphanedAt != null) continue;
+        const incoming = incomingByKey.get(old.textKey);
+        if (!incoming || incoming.id === old.id) continue;
+        diff.superseded.push(old.id);
+        changed.add(incoming);
+      }
+      diff.changed = [...changed];
+    }
 
     // Flag only the genuinely-new side of the diff (entries with no prior id
     // match) so the Multi-language Text tab can filter to "just imported"
@@ -196,6 +278,7 @@ export class CSVImporter {
     const rawNewlineLanguages = findRawNewlineLanguages(parsed.rows, colToCode);
 
     return {
+      collection,
       entries: imported,
       diff,
       unrecognizedHeaders,
@@ -204,6 +287,7 @@ export class CSVImporter {
       malformedRows: parsed.malformedRows,
       languagesWithData,
       rawNewlineLanguages,
+      formulaGuardCells,
     };
   }
 
@@ -225,6 +309,7 @@ export class CSVImporter {
       needsTransColName: string | undefined;
       contextColName: string | undefined;
       defaultOverflowRatio: number | undefined;
+      keyColName: string | undefined;
       seen: Set<string>;
       now: number;
       rowIndex: number;
@@ -239,6 +324,7 @@ export class CSVImporter {
       needsTransColName,
       contextColName,
       defaultOverflowRatio,
+      keyColName,
       seen,
       now,
       rowIndex,
@@ -258,6 +344,34 @@ export class CSVImporter {
           needsReview: false,
         };
       }
+    }
+
+    if (keyColName !== undefined) {
+      // Client rows are identified by their key; rows without a key or without
+      // English are dropped even when they carry translations. A whitespace-only
+      // cell counts as empty, but stored values keep their exact spacing.
+      const textKey = row[keyColName] ?? '';
+      if (!textKey.trim() || !sourceText.trim()) return null;
+      if (seen.has(textKey)) return null;
+      seen.add(textKey);
+      const needsCell = needsTransColName ? (row[needsTransColName] ?? 'TRUE') : 'TRUE';
+      return {
+        id: generateClientEntryId(textKey, sourceText),
+        collection: 'client',
+        textKey,
+        sourceText,
+        sources: [CLIENT_SCRIPT_SOURCE_LABEL],
+        needsTranslation: needsCell.trim().toUpperCase() !== 'FALSE',
+        categories: [],
+        context: contextColName ? (row[contextColName] ?? '') : '',
+        overflowRatio: defaultOverflowRatio ?? DEFAULT_OVERFLOW_RATIO,
+        metadata: {},
+        translations,
+        lqaResults: {},
+        createdAt: now,
+        updatedAt: now,
+        sortIndex: rowIndex,
+      };
     }
 
     const needsTranslationCell = needsTransColName ? (row[needsTransColName] ?? 'TRUE') : 'TRUE';
@@ -333,7 +447,7 @@ export class CSVImporter {
       }
     }
 
-    return { newEntries, changed, removed };
+    return { newEntries, changed, removed, superseded: [] };
   }
 
   /**
@@ -358,22 +472,15 @@ export class CSVImporter {
    *
    * `options.pseudoAs` substitutes the synthetic pseudo-test column into a
    * real language's column: the chosen language's cells are filled from the
-   * entry's `pseudo-test` translation (its real translations are NOT exported)
+   * entry's `pseudo-test` translation (its real translations are NOT exported,
+   * except on a row marked as not needing translation that has no pseudo text)
    * and the pseudo-test column itself is omitted. This lets pseudo text be
    * loaded in the game under a shippable language without ever touching the
    * stored translations. It may not be the source language or `pseudo-test`.
    */
-  async exportCSVString(
-    projectId: string,
-    options?: {
-      includeContext?: boolean;
-      languages?: string[];
-      pseudoAs?: string;
-      discardUntranslatable?: boolean;
-    },
-  ): Promise<string> {
+  async exportCSVString(projectId: string, options?: ExportOptions): Promise<string> {
     const { headerOrder, rows } = await this.buildExportRows(projectId, options);
-    return serializeGameCSV(headerOrder, rows);
+    return serializeGameCSV(headerOrder, rows, { formulaGuard: exportGuardMode(options) });
   }
 
   /**
@@ -384,23 +491,23 @@ export class CSVImporter {
    */
   async exportCSVWithWarnings(
     projectId: string,
-    options?: {
-      includeContext?: boolean;
-      languages?: string[];
-      pseudoAs?: string;
-      discardUntranslatable?: boolean;
-    },
+    options?: ExportOptions,
   ): Promise<{ csv: string; roundTripWarnings: { count: number; columns: string[] } }> {
     const { headerOrder, rows } = await this.buildExportRows(projectId, options);
     return {
-      csv: serializeGameCSV(headerOrder, rows),
+      csv: serializeGameCSV(headerOrder, rows, { formulaGuard: exportGuardMode(options) }),
       roundTripWarnings: findRoundTripUnsafeCells(headerOrder, rows),
     };
   }
 
   private async buildExportHeader(
     projectId: string,
-    options?: { includeContext?: boolean; languages?: string[]; pseudoAs?: string },
+    options?: {
+      includeContext?: boolean;
+      languages?: string[];
+      pseudoAs?: string;
+      collection?: CsvCollection;
+    },
   ): Promise<{
     headerOrder: string[];
     translationLangs: string[];
@@ -438,7 +545,8 @@ export class CSVImporter {
         (registryIndex.get(a) ?? Number.MAX_SAFE_INTEGER) -
         (registryIndex.get(b) ?? Number.MAX_SAFE_INTEGER),
     );
-    const headerOrder: string[] = ['Source', 'Need translation?', sourceLangName];
+    const keyColumn = options?.collection === 'client' ? CLIENT_KEY_COLUMN_NAME : 'Source';
+    const headerOrder: string[] = [keyColumn, 'Need translation?', sourceLangName];
     for (const code of translationLangs) headerOrder.push(codeToName.get(code) ?? code);
     if (options?.includeContext === true) headerOrder.push('Context');
     return { headerOrder, translationLangs, sourceLangName, codeToName };
@@ -446,18 +554,19 @@ export class CSVImporter {
 
   private async buildExportRows(
     projectId: string,
-    options?: {
-      includeContext?: boolean;
-      languages?: string[];
-      pseudoAs?: string;
-      discardUntranslatable?: boolean;
-    },
+    options?: ExportOptions,
   ): Promise<{ headerOrder: string[]; rows: Record<string, string>[] }> {
     const allEntries = await this.ss.load(projectId);
+    const isClient = options?.collection === 'client';
+    // Orphaned client rows are superseded or removed strings; dropping them
+    // keeps a key from appearing twice. Main export keeps orphans as before.
+    const inCollection = allEntries.filter((e) =>
+      isClient ? entryCollection(e) === 'client' && !e.orphanedAt : entryCollection(e) === 'main',
+    );
     const entries =
       options?.discardUntranslatable === true
-        ? allEntries.filter((e) => e.needsTranslation !== false)
-        : allEntries;
+        ? inCollection.filter((e) => e.needsTranslation !== false)
+        : inCollection;
     const { headerOrder, translationLangs, sourceLangName, codeToName } =
       await this.buildExportHeader(projectId, options);
     const pseudoAs = options?.pseudoAs;
@@ -475,7 +584,9 @@ export class CSVImporter {
 
     const rows = ordered.map((entry) => {
       const row: Record<string, string> = {
-        Source: entry.sources.join(', '),
+        [isClient ? CLIENT_KEY_COLUMN_NAME : 'Source']: isClient
+          ? (entry.textKey ?? '')
+          : entry.sources.join(', '),
         'Need translation?': entry.needsTranslation ? 'TRUE' : 'FALSE',
         [sourceLangName]: entry.sourceText,
       };
@@ -483,7 +594,13 @@ export class CSVImporter {
       for (const code of translationLangs) {
         const header = codeToName.get(code) ?? code;
         const sourceCode = code === pseudoAs ? PSEUDO_LANGUAGE_CODE : code;
-        row[header] = entry.translations[sourceCode]?.text ?? '';
+        // Runs skip rows marked as not needing translation, so those have no
+        // pseudo text; they keep their real translation in the substituted column.
+        const fallback =
+          code === pseudoAs && entry.needsTranslation === false
+            ? entry.translations[code]?.text
+            : undefined;
+        row[header] = entry.translations[sourceCode]?.text ?? fallback ?? '';
       }
 
       if (options?.includeContext === true) {
@@ -503,12 +620,12 @@ export class CSVImporter {
    */
   async exportTemplateCSVString(
     projectId: string,
-    options?: { includeContext?: boolean; languages?: string[] },
+    options?: { includeContext?: boolean; languages?: string[]; collection?: CsvCollection },
   ): Promise<string> {
     const { headerOrder, translationLangs, sourceLangName, codeToName } =
       await this.buildExportHeader(projectId, options);
     const example: Record<string, string> = {
-      Source: 'example_key',
+      [headerOrder[0]]: 'example_key',
       'Need translation?': 'TRUE',
       [sourceLangName]: 'Example source text',
     };
@@ -522,16 +639,7 @@ export class CSVImporter {
   /**
    * Exports entries for a project to a CSV file on disk.
    */
-  async exportCSV(
-    projectId: string,
-    outputPath: string,
-    options?: {
-      includeContext?: boolean;
-      languages?: string[];
-      pseudoAs?: string;
-      discardUntranslatable?: boolean;
-    },
-  ): Promise<void> {
+  async exportCSV(projectId: string, outputPath: string, options?: ExportOptions): Promise<void> {
     const csv = await this.exportCSVString(projectId, options);
     await atomicWriteText(outputPath, csv);
   }

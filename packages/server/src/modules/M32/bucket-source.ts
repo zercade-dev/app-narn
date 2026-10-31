@@ -21,6 +21,7 @@ import {
 import type {
   FreewayBucketState,
   FreewayLedgerStore,
+  FreewayCooldownReason,
   FreewayWindowRef,
   FreewayWindowUsage,
 } from '../../storage/types.js';
@@ -34,6 +35,8 @@ import type { BucketView } from './types.js';
 import { decayStats, recordGatePass, recordJudgeScore } from './stats.js';
 
 const FLAP_WINDOW_MS = 5 * 60_000;
+/** Cooldowns for strikes 1, 2, … of a passing fault; past the end, the day reset. */
+const TRANSIENT_LADDER_MS: readonly number[] = [5, 15, 60, 240].map((minutes) => minutes * 60_000);
 
 /**
  * Upper bound on how long a shared-pool cooldown may sideline the buckets that
@@ -833,6 +836,7 @@ export async function loadBucketViews(
         dayInputTokens: usage.inputTokens,
         dayOutputTokens: usage.outputTokens,
         cooldownUntil: state?.cooldownUntil,
+        cooldownReason: state?.cooldownReason,
         // Bucket-keyed disable rows written by pre-upgrade code are
         // deliberately no longer read here — a credential mark lives under
         // `freewayCredentialKey`, keyed on the module that actually failed,
@@ -929,6 +933,13 @@ export async function recordDispatch(
  * {@link POOL_SIBLING_COOLDOWN_CAP_MS}). Flap detection stays a property of the
  * bucket that was actually struck. On a provider WITHOUT a shared pool the scope
  * is inert — a model-specific 429 must never sideline unrelated siblings.
+ *
+ * `opts.reason` records why the bucket is cooling, for runs planned during the
+ * cooldown. `opts.transient` marks a passing fault (a 5xx, "high demand"): it
+ * starts from the caller's short base and climbs {@link TRANSIENT_LADDER_MS}, one
+ * more attempt per outage than the generic ladder, and a sibling batch's late
+ * failure can't cut short a longer cooldown already in force. `opts.minCooldownMs`
+ * is a delay the provider asked for, so a rung never retries sooner than that.
  */
 export async function coolBucket(
   bucketKey: string,
@@ -936,7 +947,12 @@ export async function coolBucket(
   retryAfterMs: number | undefined,
   deps?: BucketSourceDeps,
   scope: 'bucket' | 'pool' = 'bucket',
-  opts?: { escalateOnFlap?: boolean },
+  opts?: {
+    escalateOnFlap?: boolean;
+    transient?: boolean;
+    reason?: FreewayCooldownReason;
+    minCooldownMs?: number;
+  },
 ): Promise<void> {
   const ledger = deps?.ledger ?? getFreewayLedgerStore();
   const states = await ledger.listBuckets();
@@ -965,14 +981,24 @@ export async function coolBucket(
     // plus this strike; a successful dispatch resets the counter
     // (resetBucketFlap).
     const strikes = (existing?.flapCount ?? 0) + (flap ? 1 : 0);
-    const ladderMs =
-      strikes <= 1 ? undefined : strikes === 2 ? 60 * 60_000 : strikes === 3 ? 240 * 60_000 : null;
+    const ladderMs = opts.transient
+      ? (TRANSIENT_LADDER_MS[strikes - 1] ?? (strikes <= 0 ? undefined : null))
+      : strikes <= 1
+        ? undefined
+        : strikes === 2
+          ? 60 * 60_000
+          : strikes === 3
+            ? 240 * 60_000
+            : null;
     if (ladderMs === null) {
       // >=4 strikes: dead until the window rolls (fall back to the last
       // finite rung when no snapshot resolves a reset time).
       until = dayReset ?? now + 240 * 60_000;
     } else if (ladderMs !== undefined) {
       until = now + ladderMs;
+    }
+    if (opts.transient && opts.minCooldownMs !== undefined) {
+      until = Math.max(until, now + opts.minCooldownMs);
     }
     if (dayReset !== undefined) until = Math.min(until, dayReset);
   }
@@ -982,16 +1008,30 @@ export async function coolBucket(
   // count to the day-park rung, so the next provider error would sideline a
   // perfectly healthy bucket until tomorrow.
   const strike = flap && opts?.escalateOnFlap === true;
-  await ledger.setCooldown(bucketKey, until, strike ? { flap: true } : undefined);
+  if (opts?.transient && existing?.cooldownUntil !== undefined && existing.cooldownUntil > until) {
+    return;
+  }
+  const write = {
+    ...(strike ? { flap: true } : {}),
+    ...(opts?.reason ? { reason: opts.reason } : {}),
+  };
+  await ledger.setCooldown(bucketKey, until, Object.keys(write).length > 0 ? write : undefined);
   if (scope !== 'pool' || !resolved || !hasSharedPool(resolved.provider)) return;
   const siblingUntil = Math.min(until, now + POOL_SIBLING_COOLDOWN_CAP_MS);
   for (const model of resolved.provider.models) {
     const siblingKey = freewayBucketKey(resolved.provider.moduleId, model.id);
     if (siblingKey === bucketKey) continue;
-    const prior = states.find((s) => s.bucketKey === siblingKey)?.cooldownUntil ?? 0;
+    const siblingState = states.find((s) => s.bucketKey === siblingKey);
+    const prior = siblingState?.cooldownUntil ?? 0;
     // Never shorten: a sibling already sidelined for longer (its own 429, or a
-    // provider-error cool on a retired model) must stay sidelined.
-    await ledger.setCooldown(siblingKey, Math.max(prior, siblingUntil));
+    // provider-error cool on a retired model) must stay sidelined, and keeps
+    // the reason it was sidelined for.
+    const keepReason = prior > siblingUntil ? siblingState?.cooldownReason : undefined;
+    await ledger.setCooldown(
+      siblingKey,
+      Math.max(prior, siblingUntil),
+      ...(keepReason ? [{ reason: keepReason }] : []),
+    );
   }
 }
 

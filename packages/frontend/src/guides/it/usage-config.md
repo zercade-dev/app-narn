@@ -31,6 +31,16 @@ L'importazione e l'esportazione CSV vivono anch'esse nella scheda **Dati**:
   invece di essere scritte come dati con le colonne spostate.
 - **Esportazione CSV** scarica il progetto; puoi scegliere le lingue e se
   includere la colonna del contesto per il traduttore.
+- Le esportazioni scrivono il testo così come è salvato, senza aggiungere un apostrofo davanti alle celle che iniziano con = + - o @. In **Esporta per**, **Editor di gioco** è l'opzione predefinita. Scegli **Excel o Sheets** solo per i file da consultare in un foglio di calcolo: aggiunge quell'apostrofo, che l'editor di Miliastra conserva come testo, e la scelta si reimposta dopo ogni esportazione. Un file di script client esportato per Excel o Sheets non va reimportato né inviato all'editor. Le esecuzioni di traduzione saltano le righe con valore Need translation? uguale a FALSE.
+
+### File di script client
+
+Un CSV con una colonna **Text Mapping ID** è un file di script client. Viene importato in una raccolta propria, **Testo dello script client**, separata dal **Testo principale**: il pannello di importazione indica quale ha rilevato.
+
+* Ogni stringa client è identificata dal suo Text Mapping ID, quindi lo stesso inglese può comparire in entrambe le raccolte, e su più righe client, senza essere unito.
+* Importare un file client non modifica mai il testo principale, e importare un file principale non modifica mai il testo client.
+* Quando l'inglese di una chiave esistente cambia, in entrambe le modalità di importazione, la vecchia riga passa nella scheda **Orfane** e quella nuova mantiene le traduzioni del file; solo le sue celle vuote restano da tradurre. Usa **Ricollega** per trasferire le traduzioni: la riga con la stessa chiave viene proposta per prima, e la modalità di sovrascrittura decide se le celle già compilate vengono mantenute o sostituite.
+* Quando un progetto ha stringhe client, l'**Esportazione CSV** permette di scegliere quale raccolta scaricare, e un'esportazione client mantiene la colonna Text Mapping ID.
 
 ## Moduli e modelli
 

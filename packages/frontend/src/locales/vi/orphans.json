@@ -28,6 +28,7 @@
     "description": "Chuyển bản dịch từ mục mồ côi này sang một mục khác, xếp hạng theo mức giống nhau giữa văn bản nguồn của từng ứng viên và của mục mồ côi này.",
     "searchPlaceholder": "Tìm mục theo văn bản nguồn…",
     "noCandidates": "Không có mục nào khớp",
+    "suggested": "Đề xuất",
     "submit": "Tiếp tục",
     "confirmTitle": "Xác nhận liên kết lại",
     "confirmDescription": "Chọn cách áp dụng bản dịch của mục mồ côi vào mục đích trước khi liên kết lại.",
@@ -52,6 +53,7 @@
     "relinkError": "Không liên kết lại được mục mồ côi",
     "candidatesError": "Không tải được danh sách ứng viên để liên kết lại",
     "aiRetranslateStarted": "Đã bắt đầu lượt AI dịch lại — xem ở tab Hoạt động",
+    "aiRetranslateSkipped": "Đã liên kết lại nhưng không dịch lại: hàng này được đánh dấu là không cần dịch",
     "aiRetranslateUnavailable": "Đã liên kết lại, nhưng lượt AI dịch lại không bắt đầu được (không có mô-đun nào dùng được AI)"
   }
 }

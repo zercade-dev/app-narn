@@ -29,6 +29,7 @@
     "description": "Move translations from this orphan onto another entry, ranked by how similar each candidate's source text is to this orphan's.",
     "searchPlaceholder": "Search entries by source text…",
     "noCandidates": "No matching entries",
+    "suggested": "Suggested",
     "submit": "Continue",
     "confirmTitle": "Confirm relink",
     "confirmDescription": "Choose how the orphan's translations are applied to the target entry before relinking.",
@@ -53,6 +54,7 @@
     "relinkError": "Failed to relink orphan",
     "candidatesError": "Failed to load relink candidates",
     "aiRetranslateStarted": "AI re-translate started — see the Activity tab",
+    "aiRetranslateSkipped": "Relinked, but not re-translated: this row is marked as not needing translation",
     "aiRetranslateUnavailable": "Relinked, but AI re-translate could not start (no AI-capable module available)"
   }
 }

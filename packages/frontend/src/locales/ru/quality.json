@@ -35,6 +35,7 @@
     "number-parity": "Соответствие чисел",
     "whitespace-parity": "Соответствие пробелов",
     "line-break-parity": "Соответствие переносов строк",
+    "runtime-placeholder-parity": "Подстановки времени выполнения",
     "html-entity": "HTML-сущность",
     "end-punctuation": "Конечная пунктуация",
     "double-spacing": "Двойные пробелы",
@@ -52,6 +53,10 @@
     "whitespace-leading": "Пробелы в начале",
     "whitespace-trailing": "Пробелы в конце",
     "line-break-mismatch": "Несовпадение переносов строк",
+    "placeholder-missing": "Подстановка отсутствует",
+    "placeholder-extra": "Подстановка добавлена",
+    "placeholder-order": "Порядок подстановок",
+    "printf-escape-mismatch": "Несовпадение экранирования процента",
     "end-punctuation-mismatch": "Несовпадение конечной пунктуации",
     "mask-mismatch": "Несовпадение масок"
   },

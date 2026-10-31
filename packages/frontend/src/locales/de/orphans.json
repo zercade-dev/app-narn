@@ -29,6 +29,7 @@
     "description": "Übersetzungen von dieser Waise auf einen anderen Eintrag verschieben; die Kandidaten sind danach sortiert, wie ähnlich ihr Quelltext dem Quelltext dieser Waise ist.",
     "searchPlaceholder": "Einträge nach Quelltext durchsuchen…",
     "noCandidates": "Keine passenden Einträge",
+    "suggested": "Vorgeschlagen",
     "submit": "Weiter",
     "confirmTitle": "Neuverknüpfung bestätigen",
     "confirmDescription": "Festlegen, wie die Übersetzungen der Waise vor der Neuverknüpfung auf den Zieleintrag angewendet werden.",
@@ -53,6 +54,7 @@
     "relinkError": "Waise konnte nicht neu verknüpft werden",
     "candidatesError": "Kandidaten für die Neuverknüpfung konnten nicht geladen werden",
     "aiRetranslateStarted": "KI-Neuübersetzung gestartet — siehe Tab Aktivität",
+    "aiRetranslateSkipped": "Neu verknüpft, aber nicht neu übersetzt: Diese Zeile ist als nicht übersetzungsbedürftig markiert",
     "aiRetranslateUnavailable": "Neu verknüpft, aber die KI-Neuübersetzung konnte nicht gestartet werden (kein KI-fähiges Modul verfügbar)"
   }
 }

@@ -29,6 +29,7 @@
     "description": "Bu yetimin çevirilerini başka bir girdiye taşıyın; adaylar, kaynak metinlerinin bu yetiminkine ne kadar benzediğine göre sıralanır.",
     "searchPlaceholder": "Girdileri kaynak metne göre arayın…",
     "noCandidates": "Eşleşen girdi yok",
+    "suggested": "Önerilen",
     "submit": "Devam et",
     "confirmTitle": "Yeniden bağlama onayı",
     "confirmDescription": "Yeniden bağlamadan önce, yetimin çevirilerinin hedef girdiye nasıl uygulanacağını seçin.",
@@ -53,6 +54,7 @@
     "relinkError": "Yetim yeniden bağlanamadı",
     "candidatesError": "Yeniden bağlama adayları yüklenemedi",
     "aiRetranslateStarted": "Yapay zekâ ile yeniden çeviri başlatıldı — Etkinlik sekmesine bakın",
+    "aiRetranslateSkipped": "Yeniden bağlandı, ancak yeniden çevrilmedi: bu satır çeviri gerektirmiyor olarak işaretli",
     "aiRetranslateUnavailable": "Yeniden bağlandı, ancak yapay zekâ ile yeniden çeviri başlatılamadı (yapay zekâ yeteneği olan modül yok)"
   }
 }

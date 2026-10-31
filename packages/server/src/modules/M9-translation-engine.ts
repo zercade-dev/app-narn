@@ -51,6 +51,7 @@ import {
   effectivePromptOptions,
   isExcludedFromAi,
   isParseFailureMessage,
+  type ProviderFailureRouting,
 } from '@zercade-dev/narn-shared';
 import { router as defaultRouter, type Router } from './M7-router.js';
 import {
@@ -114,11 +115,20 @@ import {
   isRateLimitError,
   isRunCancellingAuthError,
   isTransientProviderError,
+  isTransientProviderFailure,
+  providerRetryHintMs,
   rateLimitCooldownMs,
   retryAfterMsOf,
   withRateLimitRetry,
 } from './M9/errors.js';
 import { chunkPackedDecisions, groupDecisions, packAssignedGroups } from './M9/packing.js';
+import {
+  countsAsProviderFailure,
+  createProviderFailureTracker,
+  recordProviderFailure,
+  routingForHeldFailure,
+  type ProviderFailureTracker,
+} from './M9/provider-failure-notices.js';
 import {
   type BucketSourceDeps,
   bucketRateLimits,
@@ -153,6 +163,7 @@ import {
   deriveAvailableModuleIds,
   type ExamplesByLanguage,
   glossaryEntryKey,
+  isExcludedFromTranslation,
   jobReference,
   rateLimitConfig,
 } from './M9/engine-helpers.js';
@@ -281,7 +292,8 @@ const NO_BUCKETS_SKIP_REASON = 'no-free-buckets-for-session';
 
 /**
  * Cooldown applied to a Freeway bucket whose provider call failed for a reason
- * that is neither a rate limit nor a bad credential — a 5xx, a timeout, or a
+ * that is neither a rate limit nor a bad credential, nor a passing fault (see
+ * {@link FREEWAY_TRANSIENT_ERROR_COOLDOWN_MS}) — a rejected request, say, or a
  * model the provider has since retired ("this model is unavailable for free").
  * Such a bucket answers nothing but keeps getting picked, draining a run's
  * batches one 404 at a time, so it is sidelined for a while. Deliberately
@@ -290,6 +302,33 @@ const NO_BUCKETS_SKIP_REASON = 'no-free-buckets-for-session';
  * the real fix for that).
  */
 const FREEWAY_PROVIDER_ERROR_COOLDOWN_MS = 15 * 60_000;
+/**
+ * The first cooldown after a passing fault ({@link isTransientProviderFailure}):
+ * long enough not to hammer a provider that just said it's busy, short enough
+ * that work with no other qualified model isn't held for a blip. Repeat strikes
+ * escalate in {@link coolBucket}.
+ */
+const FREEWAY_TRANSIENT_ERROR_COOLDOWN_MS = 60_000;
+
+/**
+ * How one provider failure cools its bucket: a dead model to the day reset, a
+ * passing fault briefly, anything else for the generic window.
+ */
+function providerFailureCooling(err: unknown): {
+  retryAfterMs: number | undefined;
+  transient: boolean;
+  minCooldownMs?: number;
+} {
+  if (isModelUnavailableError(err)) return { retryAfterMs: undefined, transient: false };
+  if (!isTransientProviderFailure(err)) {
+    return { retryAfterMs: FREEWAY_PROVIDER_ERROR_COOLDOWN_MS, transient: false };
+  }
+  return {
+    retryAfterMs: FREEWAY_TRANSIENT_ERROR_COOLDOWN_MS,
+    transient: true,
+    minCooldownMs: providerRetryHintMs(err),
+  };
+}
 
 const defaultGlossaryProvider: GlossaryProvider = async () => [];
 const defaultLqaGate: LqaGate = async () => undefined;
@@ -387,8 +426,13 @@ function formatResumeTime(resumeAt: number): string {
 }
 
 /** One-liner for a Freeway batch parked on quota, at either the plan-time or dispatch-time deferral site. */
-function formatDeferralDetail(pairCount: number, resumeAt: number): string {
-  return `${pairCount} pairs waiting for quota — resumes ~${formatResumeTime(resumeAt)}`;
+function formatDeferralDetail(
+  pairCount: number,
+  resumeAt: number,
+  reason?: 'quota' | 'provider-error',
+): string {
+  const waitingFor = reason === 'provider-error' ? 'a provider to recover' : 'quota';
+  return `${pairCount} pairs waiting for ${waitingFor} — resumes ~${formatResumeTime(resumeAt)}`;
 }
 
 /** One-liner for a batch dispatching on a bucket one tier below its band floor (Addendum G). */
@@ -493,6 +537,14 @@ type FreewayDispatchOutcome =
   /** `authCancel` is true only for an auth failure that leaves no bucket at all. */
   | { kind: 'error'; error: unknown; authCancel: boolean };
 
+/** A failed provider call whose routing is decided when its batch settles. */
+interface HeldProviderFailure {
+  model: string;
+  error: unknown;
+  /** `entryId::targetLanguage` of each string in the failed call. */
+  pairKeys: string[];
+}
+
 /** Args for {@link TranslationEngine.dispatchFreewayBatch} and {@link TranslationEngine.dispatchFreewayInParts}. */
 interface FreewayDispatchArgs {
   jobs: TranslationJob[];
@@ -534,6 +586,11 @@ interface FreewayDispatchArgs {
     reason: 'rate-limit' | 'auth' | 'provider-error';
     retryAfterMs?: number;
   }) => void;
+  /**
+   * Reports a provider call that failed these strings at once. Its routing is
+   * not known yet: the caller settles that once the batch has.
+   */
+  onProviderFailure?: (info: HeldProviderFailure) => void;
   /** Recursion depth of the parse-failure split (0 = the original batch). */
   splitDepth?: number;
   /** Reports a parse-failure split so the caller can record a run detail. */
@@ -697,6 +754,8 @@ interface RunDetailsAcc {
    * one repeated line, not correctness.
    */
   freewayThrottled: Set<string>;
+  /** Repeated-failure counts below the notice threshold. In-memory only. */
+  providerFailures: ProviderFailureTracker;
 }
 
 export class TranslationEngine {
@@ -1250,7 +1309,14 @@ export class TranslationEngine {
         // a human variant that reorders indexed tokens would restore them swapped.
         // Use the CURRENT text (`currentRecord.text`), not the snapshot, so a
         // mid-review edit isn't recorded to the TM as the stale variant.
-        const remapped = maskApprovedForMemory(entry.sourceText, currentRecord.text, constantTerms);
+        const remapped = maskApprovedForMemory(
+          entry.sourceText,
+          currentRecord.text,
+          constantTerms,
+          {
+            runtimePlaceholders: entry.collection === 'client',
+          },
+        );
         if (!remapped) {
           this.logger.warn('translation:tm-approve-skip-token-mismatch', {
             entryId,
@@ -1317,7 +1383,7 @@ export class TranslationEngine {
     const wanted = new Set(entryIds);
     // `ignored` entries never reach a real run (see startRunInner) — excluded
     // here too so the preview's total matches what a real run would consider.
-    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromTranslation(e));
 
     // Keyed by the run path's own `glossaryEntryKey`: for a fixed project that
     // key already captures everything the provider varies on — target language
@@ -1355,7 +1421,9 @@ export class TranslationEngine {
           constantTerms = glossary.filter((term) => term.constant);
           constantTermsByKey.set(glossaryKey, constantTerms);
         }
-        const { masked, trivial } = maskText(entry.sourceText, constantTerms);
+        const { masked, trivial } = maskText(entry.sourceText, constantTerms, {
+          runtimePlaceholders: entry.collection === 'client',
+        });
         // Fully-masked entries are produced locally and never consult the TM.
         if (trivial) continue;
 
@@ -1389,7 +1457,7 @@ export class TranslationEngine {
    * `no-route` failures if this request were started as a run.
    *
    * The pair filter below MIRRORS {@link startRunInner}'s decision loop — same
-   * `isExcludedFromAi` exclusion, same source-language skip, same `pairs`
+   * `isExcludedFromTranslation` exclusion, same source-language skip, same `pairs`
    * allow-set, same `needsTranslation` gate — because a pre-flight that
    * disagrees with the run it guards is worse than no pre-flight at all.
    * Routing itself happens BEFORE trivial matchers and the TM consult in a real
@@ -1416,7 +1484,7 @@ export class TranslationEngine {
     const availableModules = this.deriveAvailableModuleIds(rules);
     const allEntries = await this.stringStore.load(projectId);
     const wanted = new Set(entryIds);
-    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromTranslation(e));
     const reTranslate = opts.reTranslate ?? false;
     const pairAllow = opts.pairs
       ? new Set(opts.pairs.map((p) => `${p.entryId}\0${p.targetLanguage}`))
@@ -1477,7 +1545,7 @@ export class TranslationEngine {
     const wanted = new Set(entryIds);
     // `ignored` entries never reach a real run (see startRunInner) — excluded
     // here too so this preview's routed set matches startRunInner's exactly.
-    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromTranslation(e));
 
     // Dedupe by (baseURL, model): the same instance configured with a
     // per-rule modelOverride counts as a distinct local model phase.
@@ -1561,6 +1629,9 @@ export class TranslationEngine {
     // preview calls a real module.translate(), same as a real run.
     if (isExcludedFromAi(entry)) {
       throw new PreviewNotPossibleError(`entry-ignored: ${entryId}`);
+    }
+    if (entry.needsTranslation === false) {
+      throw new PreviewNotPossibleError(`entry-not-translatable: ${entryId}`);
     }
 
     const global = await this.globalConfigStore.load();
@@ -1846,8 +1917,9 @@ export class TranslationEngine {
     // Entries in their stored (import) order. Related-entry batch grouping (by
     // glossary/category) is applied later in groupDecisions; the word-similarity
     // pre-sort (reviewSortIndex) is now a UI-only display sort, not a batch input.
-    // `ignored` entries are excluded from every AI dispatch, translation included.
-    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    // `ignored` entries are excluded from every AI dispatch, translation included,
+    // and a run leaves rows marked as not needing translation alone.
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromTranslation(e));
 
     // "Retry failed" restricts the run to exactly the (entry, language) pairs
     // that errored, rather than the full entryIds × targetLanguages product.
@@ -3482,11 +3554,15 @@ export class TranslationEngine {
         status,
         resolution.deferred.pairs,
         resolution.deferred.resumeAt,
-        'quota',
+        resolution.deferred.reason ?? 'quota',
       );
       this.recordFreewayDetail(
         runId,
-        formatDeferralDetail(resolution.deferred.pairs.length, resolution.deferred.resumeAt),
+        formatDeferralDetail(
+          resolution.deferred.pairs.length,
+          resolution.deferred.resumeAt,
+          resolution.deferred.reason,
+        ),
       );
     }
     // Seed the governor with the live headroom this plan was resolved against,
@@ -3680,7 +3756,7 @@ export class TranslationEngine {
     retryAfterMs: number | undefined,
     deps: BucketSourceDeps,
     scope: 'bucket' | 'pool' = 'bucket',
-    opts?: { escalateOnFlap?: boolean },
+    opts?: Parameters<typeof coolBucket>[5],
   ): Promise<void> {
     try {
       await coolBucket(bucketKey, now, retryAfterMs, deps, scope, opts);
@@ -3950,6 +4026,7 @@ export class TranslationEngine {
       unpackReason,
       admission,
       onThrottle,
+      onProviderFailure,
     } = args;
     const strikeCap = args.splitCaps?.get(state.bucketKey);
     if (strikeCap !== undefined && strikeCap >= 1 && strikeCap < jobs.length) {
@@ -4250,6 +4327,13 @@ export class TranslationEngine {
         // batch: it earns the same single failover hop plus a cooldown, so one
         // dead model cannot drain a run while healthy buckets sit idle.
         const providerFailure = !rateLimited && !authFailure;
+        if (countsAsProviderFailure(err)) {
+          onProviderFailure?.({
+            model: state.modelId ?? state.moduleId,
+            error: err,
+            pairKeys: jobs.map((job) => `${job.entryId}::${job.targetLanguage}`),
+          });
+        }
         const languages = new Set(jobs.map((job) => job.targetLanguage));
         // A mixed chunk that came back all-errored with a PARSE message is a
         // format problem, not a sick bucket: the shared provider core already
@@ -4265,16 +4349,20 @@ export class TranslationEngine {
           const strikeAt = Date.now();
           if (providerFailure) {
             // Cool it too (so later batches skip it) — a provider that isn't
-            // answering is not a quota wait. A dead model is never coming
-            // back this window, so it cools to the day reset instead of the
-            // generic 15-minute provider-error window.
+            // answering is not a quota wait.
+            const cooling = providerFailureCooling(err);
             await this.coolFreewayBucket(
               state.bucketKey,
               strikeAt,
-              isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
+              cooling.retryAfterMs,
               deps,
               'bucket',
-              { escalateOnFlap: true },
+              {
+                escalateOnFlap: true,
+                transient: cooling.transient,
+                minCooldownMs: cooling.minCooldownMs,
+                reason: 'provider-error',
+              },
             );
             // The one-hop budget is spent either way, but whether these pairs
             // FAIL depends on whether the field is actually empty. Revalidate
@@ -4344,16 +4432,16 @@ export class TranslationEngine {
             'pool',
           );
         } else if (providerFailure) {
-          // A dead model is never coming back this window, so it cools to
-          // the day reset instead of the generic 15-minute provider window.
-          await this.coolFreewayBucket(
-            state.bucketKey,
-            now,
-            isModelUnavailableError(err) ? undefined : FREEWAY_PROVIDER_ERROR_COOLDOWN_MS,
-            deps,
-            'bucket',
-            { escalateOnFlap: !parseShapedMixed },
-          );
+          // A parse-shaped mixed chunk answered, so it is never a passing fault.
+          const cooling = parseShapedMixed
+            ? { retryAfterMs: FREEWAY_PROVIDER_ERROR_COOLDOWN_MS, transient: false }
+            : providerFailureCooling(err);
+          await this.coolFreewayBucket(state.bucketKey, now, cooling.retryAfterMs, deps, 'bucket', {
+            escalateOnFlap: !parseShapedMixed,
+            transient: cooling.transient,
+            minCooldownMs: cooling.minCooldownMs,
+            reason: 'provider-error',
+          });
         } else {
           await this.markFreewayCredentialBad(state.moduleId, deps);
         }
@@ -4841,7 +4929,7 @@ export class TranslationEngine {
             status,
             decisions.map((d) => ({ entryId: d.entry.id, targetLanguage: d.targetLanguage })),
             revalidated.resumeAt,
-            'quota',
+            revalidated.reason ?? 'quota',
           );
           for (const d of decisions) settled.add(settleKey(d));
           this.logger.info('translation:freeway-deferred', {
@@ -4852,7 +4940,7 @@ export class TranslationEngine {
           });
           this.recordFreewayDetail(
             runId,
-            formatDeferralDetail(decisions.length, revalidated.resumeAt),
+            formatDeferralDetail(decisions.length, revalidated.resumeAt, revalidated.reason),
           );
           this.emitProgress(runId, status);
           refundUnusedAdmission();
@@ -5037,6 +5125,7 @@ export class TranslationEngine {
         const { masked, plan, trivial } = maskText(
           d.entry.sourceText,
           glossary?.constantTerms ?? [],
+          { runtimePlaceholders: d.entry.collection === 'client' },
         );
         const reference = this.jobReference(d.entry, d.targetLanguage, referenceLanguage);
         return {
@@ -5344,16 +5433,11 @@ export class TranslationEngine {
             }
             if (!parkedOnce.has(pairKey)) {
               parkedOnce.add(pairKey);
-              // Labeled 'quota' (not a third reason) same as the auth-tail
-              // adjudication above: this is one flaky call in an otherwise
-              // healthy batch — the bucket was never cooled, so what the
-              // pair is actually waiting out is quota/pacing, not a
-              // provider outage.
               this.deferPairsForQuota(
                 status,
                 [{ entryId: e.decision.entry.id, targetLanguage: e.decision.targetLanguage }],
                 Date.now() + 60_000,
-                'quota',
+                'provider-error',
               );
               settled.add(settleKey(e.decision));
               deferredIndices.add(i);
@@ -5378,6 +5462,15 @@ export class TranslationEngine {
             error: errMsg,
             context: e.decision.entry.context ?? null,
           });
+          if (moduleResult?.error && countsAsProviderFailure(moduleResult.error)) {
+            this.noteProviderFailure(
+              runId,
+              status,
+              currentFreewayState?.modelId ?? metricsModel ?? moduleId,
+              moduleResult.error,
+              1,
+            );
+          }
           this.recordFailure(status, e.decision.entry.id, e.decision.targetLanguage, errMsg);
           settled.add(settleKey(e.decision));
           metricsCollector.recordFailure(moduleId, metricsModel);
@@ -5621,15 +5714,72 @@ export class TranslationEngine {
           // cooled and the batch fails over to another one (once).
           const state: FreewayBatchState = { module, moduleId, modelId: metricsModel, bucketKey };
           currentFreewayState = state;
-          const outcome = await this.dispatchFreewayBatch({
+          // Held until the batch settles, so a notice is only ever first seen
+          // saying what actually became of the requests.
+          const heldFailures: HeldProviderFailure[] = [];
+          // Which model served each entry. Read from `state` as results arrive,
+          // because a later language part overwrites it.
+          const servedBy = new Map<string, string>();
+          const settleHeldFailures = (settled?: FreewayDispatchOutcome): void => {
+            if (heldFailures.length === 0) return;
+            try {
+              if (settled?.kind === 'results') {
+                const decided = batchJobs.map(
+                  ({ index }) => uncachedNonTrivialEntries[index].decision,
+                );
+                for (const result of settled.results) {
+                  if (result?.error || !result?.translatedText) continue;
+                  const key = `${result.entryId}::${result.targetLanguage}`;
+                  if (servedBy.has(key)) continue;
+                  const decision = decided.find(
+                    (d) =>
+                      d.entry.id === result.entryId && d.targetLanguage === result.targetLanguage,
+                  );
+                  if (decision?.modelOverride) servedBy.set(key, decision.modelOverride);
+                }
+              }
+              for (const failure of heldFailures) {
+                this.noteProviderFailure(
+                  runId,
+                  status,
+                  failure.model,
+                  failure.error,
+                  failure.pairKeys.length,
+                  routingForHeldFailure(failure, servedBy, settled?.kind, !!signal?.aborted),
+                );
+              }
+              // A cancelled run has already made its final write.
+              if ((status.status as RunStatusCode) === RunStatusCode.Cancelled) {
+                this.emitProgress(runId, status);
+              }
+            } catch (err) {
+              this.logger.warn('translation:provider-failure-record-failed', {
+                runId,
+                error: toErrorMessage(err),
+              });
+            }
+          };
+          const dispatched = this.dispatchFreewayBatch({
             jobs: batchJobs.map(({ job }) => job),
             decisions: batchJobs.map(({ index }) => uncachedNonTrivialEntries[index].decision),
             state,
             deps: freewayDeps,
             createModule: createFreewayModule,
-            translateOptions: { ...dispatchOptions, onJobComplete },
+            translateOptions: {
+              ...dispatchOptions,
+              onJobComplete: async (result) => {
+                if (!result.error && result.translatedText) {
+                  servedBy.set(
+                    `${result.entryId}::${result.targetLanguage}`,
+                    state.modelId ?? state.moduleId,
+                  );
+                }
+                await onJobComplete(result);
+              },
+            },
             signal,
             onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
+            onProviderFailure: (info) => heldFailures.push(info),
             onSplit: (info) => this.recordFreewayDetail(runId, formatSplitDetail(info)),
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
             minBand: freewayMinBand(status.request),
@@ -5647,7 +5797,15 @@ export class TranslationEngine {
               this.recordFreewayDetail(runId, formatThrottleDetail(info.bucketKey, info.waitMs));
             },
           });
+          let outcome: FreewayDispatchOutcome;
+          try {
+            outcome = await dispatched;
+          } catch (err) {
+            settleHeldFailures();
+            throw err;
+          }
           currentFreewayState = undefined;
+          settleHeldFailures(outcome);
           // A same-bucket auth failover (a sibling instance took over, see
           // dispatchFreewayBatch's 'keep' handling) changes state.moduleId
           // without changing state.bucketKey — sync on EITHER moving, or the
@@ -5715,7 +5873,10 @@ export class TranslationEngine {
                 pairs: pairs.length,
                 resumeAt: outcome.resumeAt,
               });
-              this.recordFreewayDetail(runId, formatDeferralDetail(pairs.length, outcome.resumeAt));
+              this.recordFreewayDetail(
+                runId,
+                formatDeferralDetail(pairs.length, outcome.resumeAt, outcome.reason),
+              );
               this.emitProgress(runId, status);
             } else {
               this.recordFreewayBlocked(runId, status, pairs);
@@ -5775,6 +5936,16 @@ export class TranslationEngine {
         if (batchError !== undefined) {
           if (isAbortError(batchError) || signal?.aborted) {
             return;
+          }
+          // A Freeway batch already reported this from its dispatch hop.
+          if (bucketKey === undefined && countsAsProviderFailure(batchError)) {
+            this.noteProviderFailure(
+              runId,
+              status,
+              metricsModel ?? moduleId,
+              batchError,
+              batchJobs.filter(({ index }) => !processedIndices.has(index)).length,
+            );
           }
           // A failed dispatch batch only fails its own jobs; other batches in
           // the group proceed and their results are persisted normally.
@@ -6328,6 +6499,7 @@ export class TranslationEngine {
       previousValues: new Map(),
       freewaySplitCaps: new Map(),
       freewayThrottled: new Set(),
+      providerFailures: createProviderFailureTracker(),
     });
   }
 
@@ -6363,6 +6535,7 @@ export class TranslationEngine {
       previousValues,
       freewaySplitCaps: new Map(),
       freewayThrottled: new Set(),
+      providerFailures: createProviderFailureTracker(),
       ...(existing.freeway ? { freeway: [...existing.freeway] } : {}),
     });
   }
@@ -6777,6 +6950,23 @@ export class TranslationEngine {
       });
     }
     this.emitProgress(runId, status);
+  }
+
+  /** Count a provider failure towards the run's repeated-failure notices. */
+  private noteProviderFailure(
+    runId: string,
+    status: RunStatus,
+    model: string,
+    error: unknown,
+    occurrences: number,
+    routing?: ProviderFailureRouting,
+  ): void {
+    if (occurrences === 0) return;
+    // A cancelled run's accumulator is already gone, and its last batches still
+    // have real failures to report.
+    const tracker = this.details.get(runId)?.providerFailures ?? createProviderFailureTracker();
+    const message = sanitizeLogObject({ m: toErrorMessage(error) }).m;
+    recordProviderFailure(status, tracker, { model, message, occurrences, routing });
   }
 
   private emitProgress(runId: string, status: RunStatus): void {

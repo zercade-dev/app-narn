@@ -35,6 +35,7 @@
     "number-parity": "ความตรงกันของตัวเลข",
     "whitespace-parity": "ความตรงกันของช่องว่าง",
     "line-break-parity": "ความตรงกันของการขึ้นบรรทัดใหม่",
+    "runtime-placeholder-parity": "ตัวแทนค่าขณะรัน",
     "html-entity": "HTML เอนทิตี",
     "end-punctuation": "เครื่องหมายวรรคตอนท้ายข้อความ",
     "double-spacing": "ช่องว่างซ้ำ",
@@ -52,6 +53,10 @@
     "whitespace-leading": "ช่องว่างนำหน้า",
     "whitespace-trailing": "ช่องว่างต่อท้าย",
     "line-break-mismatch": "การขึ้นบรรทัดใหม่ไม่ตรงกัน",
+    "placeholder-missing": "ตัวแทนค่าขาดหาย",
+    "placeholder-extra": "ตัวแทนค่าที่เพิ่มเข้ามา",
+    "placeholder-order": "ลำดับตัวแทนค่า",
+    "printf-escape-mismatch": "escape เปอร์เซ็นต์ไม่ตรงกัน",
     "end-punctuation-mismatch": "เครื่องหมายวรรคตอนท้ายไม่ตรงกัน",
     "mask-mismatch": "มาสก์ไม่ตรงกัน"
   },

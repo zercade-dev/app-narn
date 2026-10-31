@@ -6,6 +6,7 @@
  * with `header.toLowerCase()` before looking them up.
  */
 import { LANGUAGE_REGISTRY } from './types/language.js';
+import type { CsvCollection } from './types/string-entry.js';
 
 /**
  * Maps lowercase translated language column names → language codes.
@@ -337,6 +338,26 @@ export const CONTEXT_COLUMN_NAMES: ReadonlySet<string> = new Set([
   'ghi chú',
 ]);
 
+/** Header of the key column that identifies a client script CSV. */
+export const CLIENT_KEY_COLUMN_NAME = 'Text Mapping ID';
+
+/** Source label stamped on every client-collection entry. */
+export const CLIENT_SCRIPT_SOURCE_LABEL = 'Client Script';
+
+/** Classifies a CSV by its headers: a key column marks a client script file. */
+export function detectCsvCollection(headers: string[]): CsvCollection {
+  const key = CLIENT_KEY_COLUMN_NAME.toLowerCase();
+  return headers.some((h) => h.trim().toLowerCase() === key) ? 'client' : 'main';
+}
+
+/** True for a file carrying both a client key column and a main Source column. */
+export function csvHasKeyAndSourceColumns(headers: string[]): boolean {
+  return (
+    detectCsvCollection(headers) === 'client' &&
+    headers.some((h) => SOURCE_COLUMN_NAMES.has(h.toLowerCase()))
+  );
+}
+
 /**
  * Returns a Set of all known lowercase CSV header names — language columns and
  * special columns combined. Used for pre-import header validation.
@@ -357,6 +378,7 @@ export function buildKnownHeadersSet(): Set<string> {
   for (const name of SOURCE_COLUMN_NAMES) known.add(name);
   for (const name of NEEDS_TRANSLATION_COLUMN_NAMES) known.add(name);
   for (const name of CONTEXT_COLUMN_NAMES) known.add(name);
+  known.add(CLIENT_KEY_COLUMN_NAME.toLowerCase());
 
   return known;
 }

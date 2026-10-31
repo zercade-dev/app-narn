@@ -29,6 +29,7 @@
     "description": "Sposta le traduzioni da questa orfana a un'altra voce, in ordine di somiglianza fra il testo di origine di ciascun candidato e quello dell'orfana.",
     "searchPlaceholder": "Cerca le voci per testo di origine…",
     "noCandidates": "Nessuna voce corrisponde",
+    "suggested": "Suggerito",
     "submit": "Continua",
     "confirmTitle": "Conferma del ricollegamento",
     "confirmDescription": "Scegli come applicare le traduzioni dell'orfana alla voce di destinazione prima di ricollegarla.",
@@ -53,6 +54,7 @@
     "relinkError": "Impossibile ricollegare l'orfana",
     "candidatesError": "Impossibile caricare i candidati per il ricollegamento",
     "aiRetranslateStarted": "Ritraduzione con l'IA avviata — vedi la scheda Attività",
+    "aiRetranslateSkipped": "Ricollegata, ma non ritradotta: questa riga è contrassegnata come non da tradurre",
     "aiRetranslateUnavailable": "Ricollegata, ma non è stato possibile avviare la ritraduzione con l'IA (nessun modulo con IA disponibile)"
   }
 }

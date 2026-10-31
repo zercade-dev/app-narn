@@ -29,6 +29,7 @@
     "description": "Mueve las traducciones de esta entrada huérfana a otra, ordenadas por lo similar que es el texto de origen de cada candidata al de esta huérfana.",
     "searchPlaceholder": "Buscar entradas por texto de origen…",
     "noCandidates": "No hay entradas coincidentes",
+    "suggested": "Sugerido",
     "submit": "Continuar",
     "confirmTitle": "Confirmar reasignación",
     "confirmDescription": "Elige cómo se aplican las traducciones de la huérfana a la entrada destino antes de reasignar.",
@@ -53,6 +54,7 @@
     "relinkError": "No se pudo reasignar la huérfana",
     "candidatesError": "No se pudieron cargar las entradas candidatas",
     "aiRetranslateStarted": "Retraducción IA iniciada — consulta la pestaña Actividad",
+    "aiRetranslateSkipped": "Reasignado, pero sin retraducir: esta fila está marcada como que no necesita traducción",
     "aiRetranslateUnavailable": "Reasignado, pero la retraducción IA no pudo iniciarse (no hay ningún módulo con IA disponible)"
   }
 }

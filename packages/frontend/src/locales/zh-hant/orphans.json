@@ -28,6 +28,7 @@
     "description": "把這個孤立條目的譯文移到另一個條目上；候選項會依原文與這個孤立條目的相似程度排序。",
     "searchPlaceholder": "依原文搜尋條目…",
     "noCandidates": "沒有符合的條目",
+    "suggested": "建議",
     "submit": "繼續",
     "confirmTitle": "確認重新連結",
     "confirmDescription": "重新連結前，請選擇孤立條目的譯文要如何套用到目標條目上。",
@@ -52,6 +53,7 @@
     "relinkError": "無法重新連結孤立條目",
     "candidatesError": "無法載入重新連結的候選條目",
     "aiRetranslateStarted": "AI 重新翻譯已開始——請查看活動分頁",
+    "aiRetranslateSkipped": "已重新連結，但未重新翻譯：此列已標記為不需翻譯",
     "aiRetranslateUnavailable": "已重新連結，但 AI 重新翻譯無法開始（沒有可用且具備 AI 能力的模組）"
   }
 }

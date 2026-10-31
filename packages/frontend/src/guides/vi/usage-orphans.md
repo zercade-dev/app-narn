@@ -14,7 +14,7 @@ Tab **Mục mồ côi** liệt kê các mục không còn có mặt trong tệp 
 
 1. Nhập lại tệp CSV nguồn của bạn từ tab **Dữ liệu**.
 2. Mở **Mục mồ côi** và xem lại những gì đã rơi rụng.
-3. **Liên kết lại** mọi mục có id hoặc văn bản nguồn thay đổi nhưng bản dịch của nó vẫn còn giá trị.
+3. **Liên kết lại** mọi mục có id hoặc văn bản nguồn thay đổi nhưng bản dịch của nó vẫn còn giá trị. Với văn bản tập lệnh máy khách, hàng đang hoạt động có cùng Text Mapping ID được gợi ý trước; đây là cách chuyển bản dịch sau khi tiếng Anh thay đổi.
 4. **Xóa** những mục thực sự đã biến mất.
 
 Khi danh sách trống, mọi mục đã nhập đều khớp với dự án hiện tại — không có gì bị mồ côi.

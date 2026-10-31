@@ -22,7 +22,7 @@ traduções antigas ficam guardadas aqui para você não perder o trabalho.
 1. Reimporte seu CSV de origem pela aba **Dados**.
 2. Abra **Órfãos** e revise o que caiu fora.
 3. **Revincule** qualquer entrada cujo id ou texto de origem mudou, mas cujas
-   traduções ainda são válidas.
+   traduções ainda são válidas. No texto de script de cliente, a linha ativa com o mesmo Text Mapping ID é sugerida primeiro; é assim que as traduções são levadas depois que o inglês muda.
 4. **Exclua** as entradas que realmente sumiram.
 
 Quando a lista está vazia, toda entrada importada corresponde ao projeto

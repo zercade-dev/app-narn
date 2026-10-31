@@ -29,6 +29,7 @@
     "description": "Mova as traduções deste órfão para outra entrada, ordenadas pela semelhança entre o texto de origem de cada candidata e o deste órfão.",
     "searchPlaceholder": "Pesquisar entradas pelo texto de origem…",
     "noCandidates": "Nenhuma entrada corresponde",
+    "suggested": "Sugerido",
     "submit": "Continuar",
     "confirmTitle": "Confirmar a revinculação",
     "confirmDescription": "Escolha como as traduções do órfão são aplicadas à entrada de destino antes de revincular.",
@@ -53,6 +54,7 @@
     "relinkError": "Falha ao revincular o órfão",
     "candidatesError": "Falha ao carregar as candidatas à revinculação",
     "aiRetranslateStarted": "Retradução por IA iniciada — veja a aba Atividade",
+    "aiRetranslateSkipped": "Revinculado, mas não retraduzido: esta linha está marcada como sem necessidade de tradução",
     "aiRetranslateUnavailable": "Revinculado, mas não foi possível iniciar a retradução por IA (nenhum módulo com IA disponível)"
   }
 }

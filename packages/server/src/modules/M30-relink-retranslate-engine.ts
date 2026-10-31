@@ -66,6 +66,7 @@ import { getCurrentTenant, runWithTenant } from '../storage/pg/tenant-context.js
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { lqaGate } from './M10-lqa-gate.js';
 import {
+  type MaskOptions,
   type MaskPlan,
   maskApprovedForMemory,
   maskDiagnosticsToIssues,
@@ -230,10 +231,13 @@ interface RelinkMasking {
  * source edit that adds or drops a placeholder legitimately does; any such text
  * gives up masking for the whole batch, which then dispatches verbatim.
  */
-function buildRelinkMasking(texts: RelinkPromptTexts): RelinkMasking | null {
-  const { masked, plan } = maskText(texts.newSourceText, NO_CONSTANT_TERMS);
+function buildRelinkMasking(
+  texts: RelinkPromptTexts,
+  opts: MaskOptions = {},
+): RelinkMasking | null {
+  const { masked, plan } = maskText(texts.newSourceText, NO_CONSTANT_TERMS, opts);
   const underPlan = (text: string): string | null => {
-    const remapped = maskApprovedForMemory(texts.newSourceText, text, NO_CONSTANT_TERMS);
+    const remapped = maskApprovedForMemory(texts.newSourceText, text, NO_CONSTANT_TERMS, opts);
     return remapped ? remapped.maskedTranslation : null;
   };
   const oldSourceText = underPlan(texts.oldSourceText);
@@ -399,9 +403,13 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
     // its persisted scope aligned with the languages it actually retranslates.
     // Deliberately the only language filter: a translation whose language the
     // project no longer lists still came from the source text that was edited.
-    const languages = Object.entries(entry.translations)
-      .filter(([lang, rec]) => !!rec?.text && lang !== PSEUDO_LANGUAGE_CODE)
-      .map(([lang]) => lang);
+    // A row marked as not needing translation has nothing to retranslate.
+    const languages =
+      entry.needsTranslation === false
+        ? []
+        : Object.entries(entry.translations)
+            .filter(([lang, rec]) => !!rec?.text && lang !== PSEUDO_LANGUAGE_CODE)
+            .map(([lang]) => lang);
 
     // Captured by `buildItems` below (enqueueBatched calls it with the project
     // it already loaded via `loadContext`) so `dispatch`/`processBatch` can
@@ -507,7 +515,9 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
       currentTranslations,
     };
     // Null when the prompt cannot be masked coherently — see buildRelinkMasking.
-    const masking = buildRelinkMasking(rawTexts);
+    const masking = buildRelinkMasking(rawTexts, {
+      runtimePlaceholders: entry?.collection === 'client',
+    });
     const promptTexts = masking?.texts ?? rawTexts;
     const context = buildEditTransferContext(promptTexts);
 

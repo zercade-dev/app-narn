@@ -10,6 +10,7 @@
  * are equally unstressed), tie-breaking toward buckets whose quota expires
  * soonest; a reserve keeps top-tier headroom for escalation retries.
  */
+import type { FreewayCooldownReason } from '../../storage/types.js';
 import type { BucketView, JobGroup } from './types.js';
 import {
   effectiveRemainingRequests,
@@ -84,6 +85,26 @@ export function bucketResumeAt(bucket: BucketView, group: JobGroup): number {
     hasMinuteHeadroom(bucket) ? 0 : (bucket.minuteResetAt ?? 0),
     hasStock(bucket, group) ? 0 : bucket.nextResetAt,
   );
+}
+
+/**
+ * Why a group is waiting until `resumeAt`: `'provider-error'` when a bucket
+ * that comes back at that instant is held by a provider-error cooldown, so a
+ * run planned during someone else's failure reports the failure and not a quota
+ * wait. A bucket that would still be out of quota at `resumeAt` doesn't count.
+ */
+export function deferralReason(
+  candidates: BucketView[],
+  group: JobGroup,
+  resumeAt: number,
+): FreewayCooldownReason | undefined {
+  const held = candidates.some(
+    (bucket) =>
+      bucket.cooldownReason === 'provider-error' &&
+      bucket.cooldownUntil === resumeAt &&
+      bucketResumeAt(bucket, group) === resumeAt,
+  );
+  return held ? 'provider-error' : undefined;
 }
 
 /**

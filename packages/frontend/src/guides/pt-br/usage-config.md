@@ -30,6 +30,16 @@ A importação e exportação de CSV também ficam na aba **Dados**:
   dados deslocados de coluna.
 - **Exportar CSV** baixa o projeto; você pode escolher os idiomas e se deseja
   incluir a coluna de contexto do tradutor.
+- As exportações gravam o texto como está salvo, sem adicionar um apóstrofo antes das células que começam com = + - ou @. Em **Exportar para**, **Editor do jogo** é a opção padrão. Escolha **Excel ou Sheets** apenas para arquivos que você vai visualizar em uma planilha: isso adiciona esse apóstrofo, que o editor do Miliastra mantém como texto, e a escolha é redefinida após cada exportação. Um arquivo de script de cliente exportado para Excel ou Sheets não deve ser reimportado nem enviado ao editor. As execuções de tradução ignoram as linhas cujo valor de Need translation? é FALSE.
+
+### Arquivos de script de cliente
+
+Um CSV com a coluna **Text Mapping ID** é um arquivo de script de cliente. Ele é importado para uma coleção própria, **Texto de script de cliente**, separada do seu **Texto principal** — a planilha de importação informa qual foi detectada.
+
+* Cada string de cliente é identificada pelo seu Text Mapping ID, então o mesmo inglês pode aparecer nas duas coleções, e em várias linhas de cliente, sem ser mesclado.
+* Importar um arquivo de cliente nunca altera o texto principal, e importar um arquivo principal nunca altera o texto de cliente.
+* Quando o inglês de uma chave existente muda, em qualquer modo de importação, a linha antiga vai para a aba **Órfãos** e a nova mantém as traduções do arquivo; só as células vazias ficam sem tradução. Use **Revincular** para levar as traduções: a linha com a mesma chave é sugerida primeiro, e o modo de substituição decide se as células preenchidas são mantidas ou substituídas.
+* Quando um projeto tem strings de cliente, a **Exportação de CSV** permite escolher qual coleção baixar, e uma exportação de cliente mantém a coluna Text Mapping ID.
 
 ## Módulos e modelos
 

@@ -14,7 +14,7 @@
 
 1. Kaynak CSV dosyanızı **Veri** sekmesinden yeniden içe aktarın.
 2. **Yetimler** sekmesini açın ve neyin düştüğünü inceleyin.
-3. Kimliği veya kaynak metni değişen ama çevirileri hâlâ geçerli olan girdileri **yeniden bağlayın**.
+3. Kimliği veya kaynak metni değişen ama çevirileri hâlâ geçerli olan girdileri **yeniden bağlayın**. İstemci betiği metninde önce aynı Text Mapping ID değerine sahip etkin satır önerilir; İngilizce değiştikten sonra çeviriler bu şekilde aktarılır.
 4. Gerçekten kaybolmuş girdileri **silin**.
 
 Liste boş olduğunda, içe aktarılan her girdi geçerli projeyle eşleşir — hiçbir şey yetim değildir.

@@ -28,6 +28,7 @@
     "description": "Pindahkan terjemahan dari entri yatim ini ke entri lain, diurutkan menurut kemiripan teks sumber tiap kandidat dengan teks sumber entri yatim ini.",
     "searchPlaceholder": "Cari entri berdasarkan teks sumber…",
     "noCandidates": "Tidak ada entri yang cocok",
+    "suggested": "Disarankan",
     "submit": "Lanjutkan",
     "confirmTitle": "Konfirmasi penghubungan ulang",
     "confirmDescription": "Pilih cara terjemahan entri yatim diterapkan ke entri tujuan sebelum dihubungkan ulang.",
@@ -52,6 +53,7 @@
     "relinkError": "Gagal menghubungkan ulang entri yatim",
     "candidatesError": "Gagal memuat kandidat penghubungan ulang",
     "aiRetranslateStarted": "Penerjemahan ulang AI dimulai — lihat tab Aktivitas",
+    "aiRetranslateSkipped": "Sudah dihubungkan ulang, tetapi tidak diterjemahkan ulang: baris ini ditandai tidak perlu diterjemahkan",
     "aiRetranslateUnavailable": "Sudah dihubungkan ulang, tetapi penerjemahan ulang AI tidak bisa dimulai (tidak ada modul berkemampuan AI yang tersedia)"
   }
 }

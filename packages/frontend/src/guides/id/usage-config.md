@@ -29,6 +29,16 @@ Impor dan ekspor CSV juga berada di tab **Data**:
   bergeser kolom.
 * **Ekspor CSV** mengunduh proyeknya; Anda bisa memilih bahasa dan apakah
   akan menyertakan kolom konteks penerjemah.
+* Ekspor menulis teks sesuai yang tersimpan, tanpa menambahkan apostrof di depan sel yang diawali = + - atau @. Pada **Ekspor untuk**, **Editor game** adalah pilihan default. Pilih **Excel atau Sheets** hanya untuk berkas yang akan dilihat di spreadsheet: pilihan ini menambahkan apostrof tersebut, yang dipertahankan editor Miliastra sebagai teks, dan pilihan direset setelah setiap ekspor. Berkas skrip klien yang diekspor untuk Excel atau Sheets tidak boleh diimpor ulang atau dikirim ke editor. Proses terjemahan melewati baris yang nilai Need translation?-nya FALSE.
+
+### Berkas skrip klien
+
+CSV dengan kolom **Text Mapping ID** adalah berkas skrip klien. Berkas ini diimpor ke koleksinya sendiri, **Teks skrip klien**, terpisah dari **Teks utama** Anda — lembar impor memberi tahu koleksi mana yang terdeteksi.
+
+* Setiap string klien dikenali dari Text Mapping ID-nya, sehingga teks Inggris yang sama bisa muncul di kedua koleksi, dan di beberapa baris klien, tanpa digabungkan.
+* Mengimpor berkas klien tidak pernah mengubah teks utama, dan mengimpor berkas utama tidak pernah mengubah teks klien.
+* Saat teks Inggris pada kunci yang sudah ada berubah, dalam mode impor apa pun, baris lama pindah ke tab **Entri Yatim** dan baris baru mempertahankan terjemahan dari berkas; hanya sel kosongnya yang belum diterjemahkan. Gunakan **Hubungkan ulang** untuk memindahkan terjemahan: baris dengan kunci yang sama disarankan lebih dulu, dan mode penimpaan menentukan apakah sel yang sudah terisi dipertahankan atau diganti.
+* Setelah proyek memiliki string klien, **Ekspor CSV** memungkinkan Anda memilih koleksi yang diunduh, dan ekspor klien tetap menyertakan kolom Text Mapping ID.
 
 ## Modul dan model
 

@@ -6,6 +6,7 @@ import { useRunStore } from '../../stores/run-store.js';
 import { Card } from '../ui/card';
 import { RunProgressBar } from '../ui/run-progress-bar';
 import { RunStatusBadge } from './RunStatusBadge.js';
+import { ProviderFailureNotices } from './ProviderFailureNotices.js';
 import { chatRunData, chatTypeKey } from './run-status-ui.js';
 import { RUN_TYPE_KEY, isChatRun } from '@/lib/run-kind';
 import { relativeTime } from '@/lib/utils';
@@ -99,6 +100,7 @@ export function MobileRunsList({ projectId }: Readonly<{ projectId: string }>) {
                   {relativeTime(new Date(run.startedAt))}
                 </span>
               </div>
+              <ProviderFailureNotices run={run} />
             </Card>
           );
         })

@@ -474,7 +474,9 @@ const exportQuerySchema = z.object({
   languages: z.string().optional(),
   includeContext: booleanFlag,
   discardUntranslatable: booleanFlag,
+  protectForSpreadsheets: booleanFlag,
   template: z.enum(['true']).optional(),
+  collection: z.enum(['main', 'client']).optional(),
   pseudoAs: z
     .string()
     .refine((code) => LANGUAGE_REGISTRY.some((l) => l.code === code), {
@@ -486,16 +488,30 @@ const exportQuerySchema = z.object({
     .optional(),
 });
 
+function exportFileName(
+  collection: 'main' | 'client',
+  projectId: string,
+  forSpreadsheet: boolean,
+): string {
+  if (forSpreadsheet) {
+    return `${collection === 'client' ? 'client-' : ''}${projectId}-spreadsheet.csv`;
+  }
+  return `${collection === 'client' ? 'client' : 'export'}-${projectId}.csv`;
+}
+
 // GET /api/projects/:id/export
 stringsRouter.get(
   '/:id/export',
   validateQuery(exportQuerySchema),
   asyncHandler(async (req, res) => {
     const projectId = req.params.id as string;
+    const collection = req.query.collection === 'client' ? 'client' : 'main';
+    const filePrefix = collection === 'client' ? 'client-' : '';
 
     if (req.query.template === 'true') {
       const csv = await csvImporter.exportTemplateCSVString(projectId, {
         includeContext: req.query.includeContext === 'true',
+        collection,
         languages:
           typeof req.query.languages === 'string' && req.query.languages
             ? req.query.languages
@@ -505,7 +521,10 @@ stringsRouter.get(
             : undefined,
       });
       res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="template-${projectId}.csv"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="template-${filePrefix}${projectId}.csv"`,
+      );
       res.send(csv);
       return;
     }
@@ -526,14 +545,20 @@ stringsRouter.get(
         return;
       }
     }
+    const protectForSpreadsheets = req.query.protectForSpreadsheets === 'true';
     const { csv, roundTripWarnings } = await csvImporter.exportCSVWithWarnings(projectId, {
       includeContext: req.query.includeContext === 'true',
       languages,
       pseudoAs,
       discardUntranslatable: req.query.discardUntranslatable === 'true',
+      protectForSpreadsheets,
+      collection,
     });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Content-Disposition', `attachment; filename="export-${projectId}.csv"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${exportFileName(collection, projectId, protectForSpreadsheets)}"`,
+    );
     // Advisory: cells whose content contains a quote+comma/newline mis-split on
     // re-import (game dialect is not RFC-4180). Surfaced as response headers so
     // the client can warn without altering the CSV body. The columns header is

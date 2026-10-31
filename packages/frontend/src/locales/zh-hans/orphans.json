@@ -28,6 +28,7 @@
     "description": "把此孤立条目的译文移到另一个条目上，候选项按其原文与此孤立条目原文的相似度排序。",
     "searchPlaceholder": "按原文搜索条目…",
     "noCandidates": "没有匹配的条目",
+    "suggested": "推荐",
     "submit": "继续",
     "confirmTitle": "确认重新关联",
     "confirmDescription": "在重新关联之前，请选择孤立条目的译文如何应用到目标条目上。",
@@ -52,6 +53,7 @@
     "relinkError": "重新关联孤立条目失败",
     "candidatesError": "加载重新关联候选项失败",
     "aiRetranslateStarted": "AI 重新翻译已开始——请查看活动标签页",
+    "aiRetranslateSkipped": "已重新关联，但未重新翻译：此行已标记为无需翻译",
     "aiRetranslateUnavailable": "已重新关联，但 AI 重新翻译无法启动（没有可用的 AI 模块）"
   }
 }
