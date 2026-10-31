@@ -204,15 +204,32 @@ export function isTransientProviderError(err: unknown): boolean {
 
 /** HTTP statuses that report a passing fault, not a bad request or a missing endpoint. */
 const TRANSIENT_STATUS_CODES: ReadonlySet<number> = new Set([500, 502, 503, 504, 529]);
-/** Gateway faults {@link TRANSIENT_PROVIDER_RE} doesn't name, for downgraded error strings. */
-const TRANSIENT_GATEWAY_RE = /\b50[24]\b|\b529\b|bad gateway|gateway time-?out/i;
+/**
+ * Wording for a passing provider fault. Module results flatten errors to strings,
+ * so this is usually all there is to go on. Separate from
+ * {@link TRANSIENT_PROVIDER_RE}, which also decides partial-batch parking, and
+ * stricter: a status number needs context, so "exceeds the maximum (500)" isn't
+ * a 500, and "try again later" must end the thought, so advice to retry with
+ * different content isn't a passing fault.
+ */
+const PASSING_FAULT_RE =
+  /\b(?:status|code|http|error|upstream)[\s:=]*5\d\d\b|\b5\d\d\b[\s:-]*(?:service|server|internal|bad gateway|gateway)|high[\s-]?demand|try again later(?!\s+\w)|temporarily unavailable|\boverloaded\b|service unavailable|service is currently unavailable|internal error|bad gateway|gateway time|internal server error|server had an error|provider returned error|connection error|\bterminated\b|cannot connect to api|other side closed|upstream connect error|fetch failed|network error|socket hang up|econn\w+|enotfound/i;
+/**
+ * A request that ran out of time. It keeps the generic cooldown: each attempt
+ * can hold a batch for minutes, so a strike tends to land outside the flap
+ * window and a short cooldown would never escalate. A gateway's own 504 reply
+ * came back at once, so it isn't one of these.
+ */
+const TIMEOUT_RE = /(?<!gateway[\s-])\btimed?[\s-]?out\b|etimedout/i;
+/** A stated retry delay in an error's text, such as Google's "Please retry in 43.5s". */
+const RETRY_IN_TEXT_RE = /\bretry in (\d+(?:\.\d+)?)\s*s(?:ec(?:ond)?s?)?\b/i;
 /** A client-error marker, so a 400 quoting "at most 500 items" isn't read as a 500. */
 const CLIENT_ERROR_RE = /\b4\d\d\b|bad request/i;
 
 /**
  * Whether a Freeway provider failure is a passing fault worth retrying the same
  * model soon, rather than one that will keep failing until something changes (a
- * 400, a retired model, anything unrecognised). Same precedence contract as
+ * 400, a retired model, anything unrecognised) or a timeout. Same precedence contract as
  * {@link isTransientProviderError}: rate limits and auth failures are classified
  * first. A structured status decides alone; a batch's downgraded per-result
  * error string has only its text to go on.
@@ -223,8 +240,22 @@ export function isTransientProviderFailure(err: unknown): boolean {
     err && typeof err === 'object' ? (err as { statusCode?: unknown }).statusCode : undefined;
   if (typeof status === 'number') return TRANSIENT_STATUS_CODES.has(status);
   const msg = err instanceof Error ? err.message : String(err);
-  if (CLIENT_ERROR_RE.test(msg)) return false;
-  return isTransientProviderError(msg) || TRANSIENT_GATEWAY_RE.test(msg);
+  if (CLIENT_ERROR_RE.test(msg) || TIMEOUT_RE.test(msg)) return false;
+  return PASSING_FAULT_RE.test(msg);
+}
+
+/** Whether a failure is a request running out of time; see {@link TIMEOUT_RE}. */
+export function isTimeoutFailure(err: unknown): boolean {
+  return TIMEOUT_RE.test(err instanceof Error ? err.message : String(err));
+}
+
+/** How long a provider asked us to wait: the longer of its Retry-After and any delay in its text. */
+export function providerRetryHintMs(err: unknown): number | undefined {
+  const stated = RETRY_IN_TEXT_RE.exec(err instanceof Error ? err.message : String(err));
+  const fromText = stated ? Math.ceil(Number(stated[1]) * 1000) : undefined;
+  const fromHeader = retryAfterMsOf(err);
+  if (fromText === undefined) return fromHeader;
+  return Math.max(fromText, fromHeader ?? 0);
 }
 
 /**

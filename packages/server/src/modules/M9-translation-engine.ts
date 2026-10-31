@@ -116,6 +116,7 @@ import {
   isRunCancellingAuthError,
   isTransientProviderError,
   isTransientProviderFailure,
+  providerRetryHintMs,
   rateLimitCooldownMs,
   retryAfterMsOf,
   withRateLimitRetry,
@@ -316,11 +317,17 @@ const FREEWAY_TRANSIENT_ERROR_COOLDOWN_MS = 60_000;
 function providerFailureCooling(err: unknown): {
   retryAfterMs: number | undefined;
   transient: boolean;
+  minCooldownMs?: number;
 } {
   if (isModelUnavailableError(err)) return { retryAfterMs: undefined, transient: false };
-  return isTransientProviderFailure(err)
-    ? { retryAfterMs: FREEWAY_TRANSIENT_ERROR_COOLDOWN_MS, transient: true }
-    : { retryAfterMs: FREEWAY_PROVIDER_ERROR_COOLDOWN_MS, transient: false };
+  if (!isTransientProviderFailure(err)) {
+    return { retryAfterMs: FREEWAY_PROVIDER_ERROR_COOLDOWN_MS, transient: false };
+  }
+  return {
+    retryAfterMs: FREEWAY_TRANSIENT_ERROR_COOLDOWN_MS,
+    transient: true,
+    minCooldownMs: providerRetryHintMs(err),
+  };
 }
 
 const defaultGlossaryProvider: GlossaryProvider = async () => [];
@@ -4350,7 +4357,12 @@ export class TranslationEngine {
               cooling.retryAfterMs,
               deps,
               'bucket',
-              { escalateOnFlap: true, transient: cooling.transient, reason: 'provider-error' },
+              {
+                escalateOnFlap: true,
+                transient: cooling.transient,
+                minCooldownMs: cooling.minCooldownMs,
+                reason: 'provider-error',
+              },
             );
             // The one-hop budget is spent either way, but whether these pairs
             // FAIL depends on whether the field is actually empty. Revalidate
@@ -4427,6 +4439,7 @@ export class TranslationEngine {
           await this.coolFreewayBucket(state.bucketKey, now, cooling.retryAfterMs, deps, 'bucket', {
             escalateOnFlap: !parseShapedMixed,
             transient: cooling.transient,
+            minCooldownMs: cooling.minCooldownMs,
             reason: 'provider-error',
           });
         } else {
@@ -5420,16 +5433,11 @@ export class TranslationEngine {
             }
             if (!parkedOnce.has(pairKey)) {
               parkedOnce.add(pairKey);
-              // Labeled 'quota' (not a third reason) same as the auth-tail
-              // adjudication above: this is one flaky call in an otherwise
-              // healthy batch — the bucket was never cooled, so what the
-              // pair is actually waiting out is quota/pacing, not a
-              // provider outage.
               this.deferPairsForQuota(
                 status,
                 [{ entryId: e.decision.entry.id, targetLanguage: e.decision.targetLanguage }],
                 Date.now() + 60_000,
-                'quota',
+                'provider-error',
               );
               settled.add(settleKey(e.decision));
               deferredIndices.add(i);
