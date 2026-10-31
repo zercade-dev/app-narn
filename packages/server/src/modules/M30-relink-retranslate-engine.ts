@@ -403,9 +403,13 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
     // its persisted scope aligned with the languages it actually retranslates.
     // Deliberately the only language filter: a translation whose language the
     // project no longer lists still came from the source text that was edited.
-    const languages = Object.entries(entry.translations)
-      .filter(([lang, rec]) => !!rec?.text && lang !== PSEUDO_LANGUAGE_CODE)
-      .map(([lang]) => lang);
+    // A row marked as not needing translation has nothing to retranslate.
+    const languages =
+      entry.needsTranslation === false
+        ? []
+        : Object.entries(entry.translations)
+            .filter(([lang, rec]) => !!rec?.text && lang !== PSEUDO_LANGUAGE_CODE)
+            .map(([lang]) => lang);
 
     // Captured by `buildItems` below (enqueueBatched calls it with the project
     // it already loaded via `loadContext`) so `dispatch`/`processBatch` can

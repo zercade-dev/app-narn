@@ -161,6 +161,7 @@ import {
   deriveAvailableModuleIds,
   type ExamplesByLanguage,
   glossaryEntryKey,
+  isExcludedFromTranslation,
   jobReference,
   rateLimitConfig,
 } from './M9/engine-helpers.js';
@@ -1347,7 +1348,7 @@ export class TranslationEngine {
     const wanted = new Set(entryIds);
     // `ignored` entries never reach a real run (see startRunInner) — excluded
     // here too so the preview's total matches what a real run would consider.
-    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromTranslation(e));
 
     // Keyed by the run path's own `glossaryEntryKey`: for a fixed project that
     // key already captures everything the provider varies on — target language
@@ -1421,7 +1422,7 @@ export class TranslationEngine {
    * `no-route` failures if this request were started as a run.
    *
    * The pair filter below MIRRORS {@link startRunInner}'s decision loop — same
-   * `isExcludedFromAi` exclusion, same source-language skip, same `pairs`
+   * `isExcludedFromTranslation` exclusion, same source-language skip, same `pairs`
    * allow-set, same `needsTranslation` gate — because a pre-flight that
    * disagrees with the run it guards is worse than no pre-flight at all.
    * Routing itself happens BEFORE trivial matchers and the TM consult in a real
@@ -1448,7 +1449,7 @@ export class TranslationEngine {
     const availableModules = this.deriveAvailableModuleIds(rules);
     const allEntries = await this.stringStore.load(projectId);
     const wanted = new Set(entryIds);
-    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromTranslation(e));
     const reTranslate = opts.reTranslate ?? false;
     const pairAllow = opts.pairs
       ? new Set(opts.pairs.map((p) => `${p.entryId}\0${p.targetLanguage}`))
@@ -1509,7 +1510,7 @@ export class TranslationEngine {
     const wanted = new Set(entryIds);
     // `ignored` entries never reach a real run (see startRunInner) — excluded
     // here too so this preview's routed set matches startRunInner's exactly.
-    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromTranslation(e));
 
     // Dedupe by (baseURL, model): the same instance configured with a
     // per-rule modelOverride counts as a distinct local model phase.
@@ -1593,6 +1594,9 @@ export class TranslationEngine {
     // preview calls a real module.translate(), same as a real run.
     if (isExcludedFromAi(entry)) {
       throw new PreviewNotPossibleError(`entry-ignored: ${entryId}`);
+    }
+    if (entry.needsTranslation === false) {
+      throw new PreviewNotPossibleError(`entry-not-translatable: ${entryId}`);
     }
 
     const global = await this.globalConfigStore.load();
@@ -1878,8 +1882,9 @@ export class TranslationEngine {
     // Entries in their stored (import) order. Related-entry batch grouping (by
     // glossary/category) is applied later in groupDecisions; the word-similarity
     // pre-sort (reviewSortIndex) is now a UI-only display sort, not a batch input.
-    // `ignored` entries are excluded from every AI dispatch, translation included.
-    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromAi(e));
+    // `ignored` entries are excluded from every AI dispatch, translation included,
+    // and a run leaves rows marked as not needing translation alone.
+    const entries = allEntries.filter((e) => wanted.has(e.id) && !isExcludedFromTranslation(e));
 
     // "Retry failed" restricts the run to exactly the (entry, language) pairs
     // that errored, rather than the full entryIds × targetLanguages product.

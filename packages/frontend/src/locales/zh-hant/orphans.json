@@ -53,6 +53,7 @@
     "relinkError": "無法重新連結孤立條目",
     "candidatesError": "無法載入重新連結的候選條目",
     "aiRetranslateStarted": "AI 重新翻譯已開始——請查看活動分頁",
+    "aiRetranslateSkipped": "已重新連結，但未重新翻譯：此列已標記為不需翻譯",
     "aiRetranslateUnavailable": "已重新連結，但 AI 重新翻譯無法開始（沒有可用且具備 AI 能力的模組）"
   }
 }

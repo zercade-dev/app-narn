@@ -15,6 +15,7 @@ CSV-Import und -Export liegen ebenfalls im Tab **Daten**:
 * **CSV-Import** lädt Quelltexteinträge und vorhandene Übersetzungen. Vor jedem Import wird automatisch ein Sicherheits-Snapshot erstellt, sodass sich der Import über den Tab **Backup** rückgängig machen lässt.
 * Zeilen, die sich nicht sauber parsen lassen (ein Anführungszeichen direkt gefolgt von einem Komma), werden verworfen und gemeldet, statt als spaltenverschobene Daten geschrieben zu werden.
 * **CSV-Export** lädt das Projekt herunter; dabei lassen sich Sprachen wählen und festlegen, ob die Übersetzerkontext-Spalte einbezogen wird.
+* Exporte schreiben den Text wie gespeichert, ohne Apostroph vor Zellen, die mit = + - oder @ beginnen. Unter **Exportieren für** ist **Spiel-Editor** voreingestellt. Wähle **Excel oder Sheets** nur für Dateien, die du in einer Tabellenkalkulation ansiehst: Das fügt dieses Apostroph hinzu, das der Miliastra-Editor als Text behält, und die Auswahl wird nach jedem Export zurückgesetzt. Eine für Excel oder Sheets exportierte Client-Skriptdatei darf nicht erneut importiert oder an den Editor gegeben werden. Übersetzungsläufe überspringen Zeilen, deren Wert für Need translation? FALSE ist.
 
 ### Client-Skript-Dateien
 

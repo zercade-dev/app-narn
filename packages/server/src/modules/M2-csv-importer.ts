@@ -18,8 +18,13 @@ import {
 } from '@zercade-dev/narn-shared';
 import { atomicWriteText } from '../utils/fs.js';
 import { generateClientEntryId, generateEntryId } from '../utils/entry-id.js';
-import { parseGameCSV, serializeGameCSV, findRoundTripUnsafeCells } from '../utils/game-csv.js';
-import { stripFormulaGuard } from '../utils/formula-guard.js';
+import {
+  parseGameCSV,
+  serializeGameCSV,
+  findRoundTripUnsafeCells,
+  type FormulaGuardMode,
+} from '../utils/game-csv.js';
+import { hasFormulaGuard, stripFormulaGuard } from '../utils/formula-guard.js';
 import { ValidationError } from '../types/errors.js';
 import type { ProjectStore, StringStore } from '../storage/types.js';
 import { getProjectStore, getStringStore } from '../storage/registry.js';
@@ -73,6 +78,29 @@ export interface ImportResult {
    * if that client-side gate is ever bypassed (e.g. a direct API call).
    */
   rawNewlineLanguages: string[];
+  /**
+   * Main: cells whose leading formula-guard apostrophe was removed. Client:
+   * cells that begin with apostrophes and a trigger character, kept as written.
+   */
+  formulaGuardCells: number;
+}
+
+/** Shared options of the project string CSV exports. */
+export interface ExportOptions {
+  includeContext?: boolean;
+  languages?: string[];
+  pseudoAs?: string;
+  discardUntranslatable?: boolean;
+  collection?: CsvCollection;
+  /** Apostrophe-guard formula-trigger cells for opening in a spreadsheet. */
+  protectForSpreadsheets?: boolean;
+}
+
+function exportGuardMode(options?: ExportOptions): FormulaGuardMode {
+  if (options?.protectForSpreadsheets === true) return 'full';
+  // Client imports never strip, so client text is written exactly. Main imports
+  // always strip, so genuine apostrophe + trigger text needs one extra apostrophe.
+  return options?.collection === 'client' ? 'off' : 'reimport-safe';
 }
 
 // Constant for import limits
@@ -166,10 +194,22 @@ export class CSVImporter {
     let skippedRows = 0;
 
     let rowIndex = 0;
+    let formulaGuardCells = 0;
     for (const row of parsed.rows) {
       for (const header of headers) {
         const cell = row[header];
-        if (cell) row[header] = stripFormulaGuard(cell);
+        if (!cell) continue;
+        // Main ids hash source text and older exports carry the guard, so main
+        // strips it. Client text is kept exactly; the count lets the user check it.
+        if (collection === 'client') {
+          if (hasFormulaGuard(cell)) formulaGuardCells++;
+          continue;
+        }
+        const stripped = stripFormulaGuard(cell);
+        if (stripped !== cell) {
+          row[header] = stripped;
+          formulaGuardCells++;
+        }
       }
       const entry = this.parseRow(row, {
         headers,
@@ -247,6 +287,7 @@ export class CSVImporter {
       malformedRows: parsed.malformedRows,
       languagesWithData,
       rawNewlineLanguages,
+      formulaGuardCells,
     };
   }
 
@@ -431,23 +472,15 @@ export class CSVImporter {
    *
    * `options.pseudoAs` substitutes the synthetic pseudo-test column into a
    * real language's column: the chosen language's cells are filled from the
-   * entry's `pseudo-test` translation (its real translations are NOT exported)
+   * entry's `pseudo-test` translation (its real translations are NOT exported,
+   * except on a row marked as not needing translation that has no pseudo text)
    * and the pseudo-test column itself is omitted. This lets pseudo text be
    * loaded in the game under a shippable language without ever touching the
    * stored translations. It may not be the source language or `pseudo-test`.
    */
-  async exportCSVString(
-    projectId: string,
-    options?: {
-      includeContext?: boolean;
-      languages?: string[];
-      pseudoAs?: string;
-      discardUntranslatable?: boolean;
-      collection?: CsvCollection;
-    },
-  ): Promise<string> {
+  async exportCSVString(projectId: string, options?: ExportOptions): Promise<string> {
     const { headerOrder, rows } = await this.buildExportRows(projectId, options);
-    return serializeGameCSV(headerOrder, rows);
+    return serializeGameCSV(headerOrder, rows, { formulaGuard: exportGuardMode(options) });
   }
 
   /**
@@ -458,17 +491,11 @@ export class CSVImporter {
    */
   async exportCSVWithWarnings(
     projectId: string,
-    options?: {
-      includeContext?: boolean;
-      languages?: string[];
-      pseudoAs?: string;
-      discardUntranslatable?: boolean;
-      collection?: CsvCollection;
-    },
+    options?: ExportOptions,
   ): Promise<{ csv: string; roundTripWarnings: { count: number; columns: string[] } }> {
     const { headerOrder, rows } = await this.buildExportRows(projectId, options);
     return {
-      csv: serializeGameCSV(headerOrder, rows),
+      csv: serializeGameCSV(headerOrder, rows, { formulaGuard: exportGuardMode(options) }),
       roundTripWarnings: findRoundTripUnsafeCells(headerOrder, rows),
     };
   }
@@ -527,13 +554,7 @@ export class CSVImporter {
 
   private async buildExportRows(
     projectId: string,
-    options?: {
-      includeContext?: boolean;
-      languages?: string[];
-      pseudoAs?: string;
-      discardUntranslatable?: boolean;
-      collection?: CsvCollection;
-    },
+    options?: ExportOptions,
   ): Promise<{ headerOrder: string[]; rows: Record<string, string>[] }> {
     const allEntries = await this.ss.load(projectId);
     const isClient = options?.collection === 'client';
@@ -573,7 +594,13 @@ export class CSVImporter {
       for (const code of translationLangs) {
         const header = codeToName.get(code) ?? code;
         const sourceCode = code === pseudoAs ? PSEUDO_LANGUAGE_CODE : code;
-        row[header] = entry.translations[sourceCode]?.text ?? '';
+        // Runs skip rows marked as not needing translation, so those have no
+        // pseudo text; they keep their real translation in the substituted column.
+        const fallback =
+          code === pseudoAs && entry.needsTranslation === false
+            ? entry.translations[code]?.text
+            : undefined;
+        row[header] = entry.translations[sourceCode]?.text ?? fallback ?? '';
       }
 
       if (options?.includeContext === true) {
@@ -612,17 +639,7 @@ export class CSVImporter {
   /**
    * Exports entries for a project to a CSV file on disk.
    */
-  async exportCSV(
-    projectId: string,
-    outputPath: string,
-    options?: {
-      includeContext?: boolean;
-      languages?: string[];
-      pseudoAs?: string;
-      discardUntranslatable?: boolean;
-      collection?: CsvCollection;
-    },
-  ): Promise<void> {
+  async exportCSV(projectId: string, outputPath: string, options?: ExportOptions): Promise<void> {
     const csv = await this.exportCSVString(projectId, options);
     await atomicWriteText(outputPath, csv);
   }

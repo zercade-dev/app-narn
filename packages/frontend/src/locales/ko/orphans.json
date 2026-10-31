@@ -53,6 +53,7 @@
     "relinkError": "미연결 항목을 재연결하지 못했어요",
     "candidatesError": "재연결 후보를 불러오지 못했어요",
     "aiRetranslateStarted": "AI 재번역을 시작했어요 — 활동 탭에서 확인하세요",
+    "aiRetranslateSkipped": "재연결했지만 재번역하지 않았어요. 이 행은 번역이 필요 없다고 표시되어 있어요",
     "aiRetranslateUnavailable": "재연결했지만 AI 재번역을 시작하지 못했어요(사용할 수 있는 AI 모듈이 없어요)"
   }
 }

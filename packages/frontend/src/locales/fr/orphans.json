@@ -54,6 +54,7 @@
     "relinkError": "Impossible de r\u00e9affecter l\u2019orphelin",
     "candidatesError": "Impossible de charger les entr\u00e9es candidates",
     "aiRetranslateStarted": "Retraduction IA d\u00e9marr\u00e9e \u2014 voir l\u2019onglet Activit\u00e9",
+    "aiRetranslateSkipped": "Réaffecté, mais non retraduit : cette ligne est marquée comme n’ayant pas besoin de traduction",
     "aiRetranslateUnavailable": "R\u00e9affect\u00e9, mais la retraduction IA n\u2019a pas pu d\u00e9marrer (aucun module compatible IA disponible)"
   }
 }

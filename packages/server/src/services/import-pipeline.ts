@@ -46,6 +46,11 @@ export interface ImportPipelineResult {
    * — present on both dry-run and real-run results.
    */
   rawNewlineLanguages: string[];
+  /**
+   * Main: cells whose leading formula-guard apostrophe was removed. Client:
+   * cells beginning with an apostrophe and a trigger, kept as written.
+   */
+  formulaGuardCells: number;
   /** Pre-import safety snapshot; absent on dry runs (nothing is written). */
   snapshot?: { id: string; createdAt: string };
   /** Mode this pipeline ran (or, on dry runs, would run) under. */
@@ -98,6 +103,7 @@ export async function runImportPipeline(
     malformedRows,
     languagesWithData,
     rawNewlineLanguages,
+    formulaGuardCells,
     collection,
   } = await csvImporter.importCSV(csvContent, projectId, { defaultOverflowRatio });
 
@@ -134,6 +140,7 @@ export async function runImportPipeline(
       glossariesSkipped: 0,
       activatedLanguages,
       rawNewlineLanguages,
+      formulaGuardCells,
       mode,
       collection,
     };
@@ -195,6 +202,7 @@ export async function runImportPipeline(
     glossariesSkipped,
     activatedLanguages,
     rawNewlineLanguages,
+    formulaGuardCells,
     snapshot: { id: snapshot.id, createdAt: snapshot.createdAt },
     mode,
     collection,

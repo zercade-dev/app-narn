@@ -54,6 +54,7 @@
     "relinkError": "Yetim yeniden bağlanamadı",
     "candidatesError": "Yeniden bağlama adayları yüklenemedi",
     "aiRetranslateStarted": "Yapay zekâ ile yeniden çeviri başlatıldı — Etkinlik sekmesine bakın",
+    "aiRetranslateSkipped": "Yeniden bağlandı, ancak yeniden çevrilmedi: bu satır çeviri gerektirmiyor olarak işaretli",
     "aiRetranslateUnavailable": "Yeniden bağlandı, ancak yapay zekâ ile yeniden çeviri başlatılamadı (yapay zekâ yeteneği olan modül yok)"
   }
 }
