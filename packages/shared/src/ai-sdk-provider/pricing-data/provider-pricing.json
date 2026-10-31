@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-31T19:37:33.048Z",
+  "generatedAt": "2026-10-31T19:42:41.906Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
-      "scrapedAt": "2026-10-31T19:37:33.048Z",
+      "scrapedAt": "2026-10-31T19:42:41.906Z",
       "models": [
         {
           "id": "deepseek-flash",
@@ -41,7 +41,7 @@
     },
     "google": {
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
-      "scrapedAt": "2026-10-31T19:37:33.048Z",
+      "scrapedAt": "2026-10-31T19:42:41.906Z",
       "models": [
         {
           "id": "gemini-4-argon",
@@ -227,12 +227,35 @@
           "id": "gemini-robotics-er-2-streaming-preview",
           "inputCostPerMillion": 1,
           "outputCostPerMillion": 5
+        },
+        {
+          "id": "gemini-3.7-flash",
+          "inputCostPerMillion": 0.75,
+          "outputCostPerMillion": 3.75,
+          "capabilityTags": ["tools", "vision", "audio"]
+        },
+        {
+          "id": "gemini-3.5-flash",
+          "inputCostPerMillion": 1.5,
+          "outputCostPerMillion": 9,
+          "capabilityTags": ["tools", "vision", "audio"]
+        },
+        {
+          "id": "gemini-omni-flash-preview",
+          "inputCostPerMillion": 1.5,
+          "outputCostPerMillion": 9
+        },
+        {
+          "id": "gemini-2.5-flash-image",
+          "inputCostPerMillion": 0.3,
+          "outputCostPerMillion": 2.5,
+          "capabilityTags": ["vision"]
         }
       ]
     },
     "openai": {
       "sourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "scrapedAt": "2026-10-31T19:37:33.048Z",
+      "scrapedAt": "2026-10-31T19:42:41.906Z",
       "models": [
         {
           "id": "gpt-6-astra",
@@ -327,7 +350,7 @@
     },
     "anthropic": {
       "sourceUrl": "https://claude.com/pricing",
-      "scrapedAt": "2026-10-31T19:37:33.048Z",
+      "scrapedAt": "2026-10-31T19:42:41.906Z",
       "models": [
         {
           "id": "claude-fable-5-1",
