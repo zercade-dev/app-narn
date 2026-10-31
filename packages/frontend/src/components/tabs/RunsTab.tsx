@@ -444,6 +444,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
     startPolling,
   } = useRunStore();
   const openReview = useViewStore((s) => s.openReview);
+  const clearReviewRunId = useViewStore((s) => s.clearReviewRunId);
   const openSuggestions = useViewStore((s) => s.openSuggestions);
   const setActiveTab = useViewStore((s) => s.setActiveTab);
 
@@ -564,11 +565,15 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
   const startReview = useCallback(
     (override: AiReviewOverride) => {
       if (reviewRunId === null) return;
-      judgeRun(projectId, reviewRunId, override).catch((err: unknown) => {
-        toast.error((err as Error).message);
-      });
+      // Release any deep-link left by viewing an older review, so the review
+      // tab opens on this new run rather than on that one.
+      judgeRun(projectId, reviewRunId, override, clearReviewRunId)
+        .then(clearReviewRunId)
+        .catch((err: unknown) => {
+          toast.error((err as Error).message);
+        });
     },
-    [judgeRun, projectId, reviewRunId],
+    [clearReviewRunId, judgeRun, projectId, reviewRunId],
   );
 
   useEffect(() => {
