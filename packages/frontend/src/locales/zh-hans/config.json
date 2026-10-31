@@ -33,6 +33,10 @@
   "importModeFullReplaceHint": "文件中缺失的条目将被标记为孤立（在重新关联或删除前不参与任何 AI 运行）。",
   "fullReplacePreviewLoading": "正在检查此操作会使多少条目变为孤立…",
   "fullReplaceOrphanNotice": "文件中缺失 {{count}} 个现有条目，它们将被标记为孤立——请稍后在孤立条目标签页中处理。",
+  "clientImportAddOnlyNotice": "文件中缺失的条目会保留，但英文发生变化的条目，其旧行会移至孤立条目标签页。",
+  "clientImportFullReplaceNotice": "英文发生变化的行会与此文件中缺失的行一起移至孤立条目标签页。",
+  "clientImportPreviewCounts": "英文已变更：{{changed}}。将变为孤立的行：{{orphans}}。",
+  "importMixedCollections": "此文件同时包含“Text Mapping ID”列和“Source”列。请分别导入客户端脚本文件和主文本文件。",
   "importSheetDescription": "选择此文件如何应用到项目。",
   "orphanedCount": "{{count}} 个已孤立",
   "importWarningsTitle": "导入前请检查",
@@ -49,6 +53,10 @@
   "includeContext": "包含上下文列",
   "discardUntranslatable": "排除无需翻译的条目",
   "exportLanguages": "语言",
+  "exportCollection": "文本集",
+  "collectionMain": "主文本",
+  "collectionClient": "客户端脚本文本",
+  "detectedCollection": "检测到：{{collection}}",
   "exportLanguagesHint": "本次导出包含哪些列",
   "pseudoExportAs": "将伪翻译文本导出为",
   "pseudoExportNone": "不替换",
@@ -399,6 +407,10 @@
       "line-break-parity": {
         "name": "换行一致性",
         "description": "标出字面量 \\n 转义或实际换行与原文不一致的译文——换行损坏会导致游戏内显示错误。"
+      },
+      "runtime-placeholder-parity": {
+        "name": "运行时占位符",
+        "description": "针对客户端脚本字符串，标出缺失、多出或（%s/%d）顺序改变的 {name} 与 %s/%d 占位符，以及与原文不同的 %% 转义。"
       },
       "html-entity": {
         "name": "HTML 实体",

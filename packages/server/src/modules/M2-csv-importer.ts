@@ -4,16 +4,23 @@ import {
   SOURCE_COLUMN_NAMES,
   NEEDS_TRANSLATION_COLUMN_NAMES,
   CONTEXT_COLUMN_NAMES,
+  CLIENT_KEY_COLUMN_NAME,
+  CLIENT_SCRIPT_SOURCE_LABEL,
+  detectCsvCollection,
+  csvHasKeyAndSourceColumns,
+  entryCollection,
   DEFAULT_OVERFLOW_RATIO,
   buildCsvColumnMap,
   findRawNewlineLanguages,
+  type CsvCollection,
   type StringEntry,
   type TranslationRecord,
 } from '@zercade-dev/narn-shared';
 import { atomicWriteText } from '../utils/fs.js';
-import { generateEntryId } from '../utils/entry-id.js';
+import { generateClientEntryId, generateEntryId } from '../utils/entry-id.js';
 import { parseGameCSV, serializeGameCSV, findRoundTripUnsafeCells } from '../utils/game-csv.js';
 import { stripFormulaGuard } from '../utils/formula-guard.js';
+import { ValidationError } from '../types/errors.js';
 import type { ProjectStore, StringStore } from '../storage/types.js';
 import { getProjectStore, getStringStore } from '../storage/registry.js';
 
@@ -21,9 +28,16 @@ export interface ImportDiff {
   newEntries: StringEntry[];
   changed: StringEntry[];
   removed: string[];
+  /**
+   * Old IDs of live client entries whose key arrived with different English.
+   * Always a subset of `removed`; always empty for main files.
+   */
+  superseded: string[];
 }
 
 export interface ImportResult {
+  /** Which collection the file belongs to, from its headers. */
+  collection: CsvCollection;
   entries: StringEntry[];
   diff: ImportDiff;
   unrecognizedHeaders: string[];
@@ -111,6 +125,17 @@ export class CSVImporter {
     }
 
     const headers = parsed.headers;
+    const collection = detectCsvCollection(headers);
+    const keyColName =
+      collection === 'client'
+        ? headers.find((h) => h.trim().toLowerCase() === CLIENT_KEY_COLUMN_NAME.toLowerCase())
+        : undefined;
+    if (csvHasKeyAndSourceColumns(headers)) {
+      throw new ValidationError(
+        `A CSV cannot have both a "${CLIENT_KEY_COLUMN_NAME}" column and a "Source" column. ` +
+          'Client script files and main text files are imported separately.',
+      );
+    }
     const { colToCode, duplicateLanguageHeaders } = buildCsvColumnMap(headers);
 
     // Locate special-purpose columns using translated name sets so CSVs
@@ -128,6 +153,7 @@ export class CSVImporter {
       ...(sourceMetaColName ? [sourceMetaColName] : []),
       ...(needsTransColName ? [needsTransColName] : []),
       ...(contextColName ? [contextColName] : []),
+      ...(keyColName ? [keyColName] : []),
     ]);
     const unrecognizedHeaders = headers.filter((h) => !recognisedHeaders.has(h));
 
@@ -154,6 +180,7 @@ export class CSVImporter {
         needsTransColName,
         contextColName,
         defaultOverflowRatio: opts?.defaultOverflowRatio,
+        keyColName,
         seen,
         now,
         rowIndex,
@@ -169,9 +196,24 @@ export class CSVImporter {
     // StringStore.load returns [] for a missing/corrupt strings file (it never
     // throws for "no existing entries"), so a thrown error here is a genuine
     // failure that should surface rather than be masked as a fresh project.
-    const existing = await this.ss.load(projectId);
+    const allExisting = await this.ss.load(projectId);
+    // A file only ever diffs against its own collection, so a client import
+    // can never remove or change a main string, nor the reverse.
+    const existing = allExisting.filter((e) => entryCollection(e) === collection);
 
     const diff = this.generateDiff(existing, imported);
+    if (collection === 'client') {
+      const incomingByKey = new Map(imported.map((e) => [e.textKey, e]));
+      const changed = new Set<StringEntry>();
+      for (const old of existing) {
+        if (old.orphanedAt != null) continue;
+        const incoming = incomingByKey.get(old.textKey);
+        if (!incoming || incoming.id === old.id) continue;
+        diff.superseded.push(old.id);
+        changed.add(incoming);
+      }
+      diff.changed = [...changed];
+    }
 
     // Flag only the genuinely-new side of the diff (entries with no prior id
     // match) so the Multi-language Text tab can filter to "just imported"
@@ -196,6 +238,7 @@ export class CSVImporter {
     const rawNewlineLanguages = findRawNewlineLanguages(parsed.rows, colToCode);
 
     return {
+      collection,
       entries: imported,
       diff,
       unrecognizedHeaders,
@@ -225,6 +268,7 @@ export class CSVImporter {
       needsTransColName: string | undefined;
       contextColName: string | undefined;
       defaultOverflowRatio: number | undefined;
+      keyColName: string | undefined;
       seen: Set<string>;
       now: number;
       rowIndex: number;
@@ -239,6 +283,7 @@ export class CSVImporter {
       needsTransColName,
       contextColName,
       defaultOverflowRatio,
+      keyColName,
       seen,
       now,
       rowIndex,
@@ -258,6 +303,34 @@ export class CSVImporter {
           needsReview: false,
         };
       }
+    }
+
+    if (keyColName !== undefined) {
+      // Client rows are identified by their key; rows without a key or without
+      // English are dropped even when they carry translations. A whitespace-only
+      // cell counts as empty, but stored values keep their exact spacing.
+      const textKey = row[keyColName] ?? '';
+      if (!textKey.trim() || !sourceText.trim()) return null;
+      if (seen.has(textKey)) return null;
+      seen.add(textKey);
+      const needsCell = needsTransColName ? (row[needsTransColName] ?? 'TRUE') : 'TRUE';
+      return {
+        id: generateClientEntryId(textKey, sourceText),
+        collection: 'client',
+        textKey,
+        sourceText,
+        sources: [CLIENT_SCRIPT_SOURCE_LABEL],
+        needsTranslation: needsCell.trim().toUpperCase() !== 'FALSE',
+        categories: [],
+        context: contextColName ? (row[contextColName] ?? '') : '',
+        overflowRatio: defaultOverflowRatio ?? DEFAULT_OVERFLOW_RATIO,
+        metadata: {},
+        translations,
+        lqaResults: {},
+        createdAt: now,
+        updatedAt: now,
+        sortIndex: rowIndex,
+      };
     }
 
     const needsTranslationCell = needsTransColName ? (row[needsTransColName] ?? 'TRUE') : 'TRUE';
@@ -333,7 +406,7 @@ export class CSVImporter {
       }
     }
 
-    return { newEntries, changed, removed };
+    return { newEntries, changed, removed, superseded: [] };
   }
 
   /**
@@ -370,6 +443,7 @@ export class CSVImporter {
       languages?: string[];
       pseudoAs?: string;
       discardUntranslatable?: boolean;
+      collection?: CsvCollection;
     },
   ): Promise<string> {
     const { headerOrder, rows } = await this.buildExportRows(projectId, options);
@@ -389,6 +463,7 @@ export class CSVImporter {
       languages?: string[];
       pseudoAs?: string;
       discardUntranslatable?: boolean;
+      collection?: CsvCollection;
     },
   ): Promise<{ csv: string; roundTripWarnings: { count: number; columns: string[] } }> {
     const { headerOrder, rows } = await this.buildExportRows(projectId, options);
@@ -400,7 +475,12 @@ export class CSVImporter {
 
   private async buildExportHeader(
     projectId: string,
-    options?: { includeContext?: boolean; languages?: string[]; pseudoAs?: string },
+    options?: {
+      includeContext?: boolean;
+      languages?: string[];
+      pseudoAs?: string;
+      collection?: CsvCollection;
+    },
   ): Promise<{
     headerOrder: string[];
     translationLangs: string[];
@@ -438,7 +518,8 @@ export class CSVImporter {
         (registryIndex.get(a) ?? Number.MAX_SAFE_INTEGER) -
         (registryIndex.get(b) ?? Number.MAX_SAFE_INTEGER),
     );
-    const headerOrder: string[] = ['Source', 'Need translation?', sourceLangName];
+    const keyColumn = options?.collection === 'client' ? CLIENT_KEY_COLUMN_NAME : 'Source';
+    const headerOrder: string[] = [keyColumn, 'Need translation?', sourceLangName];
     for (const code of translationLangs) headerOrder.push(codeToName.get(code) ?? code);
     if (options?.includeContext === true) headerOrder.push('Context');
     return { headerOrder, translationLangs, sourceLangName, codeToName };
@@ -451,13 +532,20 @@ export class CSVImporter {
       languages?: string[];
       pseudoAs?: string;
       discardUntranslatable?: boolean;
+      collection?: CsvCollection;
     },
   ): Promise<{ headerOrder: string[]; rows: Record<string, string>[] }> {
     const allEntries = await this.ss.load(projectId);
+    const isClient = options?.collection === 'client';
+    // Orphaned client rows are superseded or removed strings; dropping them
+    // keeps a key from appearing twice. Main export keeps orphans as before.
+    const inCollection = allEntries.filter((e) =>
+      isClient ? entryCollection(e) === 'client' && !e.orphanedAt : entryCollection(e) === 'main',
+    );
     const entries =
       options?.discardUntranslatable === true
-        ? allEntries.filter((e) => e.needsTranslation !== false)
-        : allEntries;
+        ? inCollection.filter((e) => e.needsTranslation !== false)
+        : inCollection;
     const { headerOrder, translationLangs, sourceLangName, codeToName } =
       await this.buildExportHeader(projectId, options);
     const pseudoAs = options?.pseudoAs;
@@ -475,7 +563,9 @@ export class CSVImporter {
 
     const rows = ordered.map((entry) => {
       const row: Record<string, string> = {
-        Source: entry.sources.join(', '),
+        [isClient ? CLIENT_KEY_COLUMN_NAME : 'Source']: isClient
+          ? (entry.textKey ?? '')
+          : entry.sources.join(', '),
         'Need translation?': entry.needsTranslation ? 'TRUE' : 'FALSE',
         [sourceLangName]: entry.sourceText,
       };
@@ -503,12 +593,12 @@ export class CSVImporter {
    */
   async exportTemplateCSVString(
     projectId: string,
-    options?: { includeContext?: boolean; languages?: string[] },
+    options?: { includeContext?: boolean; languages?: string[]; collection?: CsvCollection },
   ): Promise<string> {
     const { headerOrder, translationLangs, sourceLangName, codeToName } =
       await this.buildExportHeader(projectId, options);
     const example: Record<string, string> = {
-      Source: 'example_key',
+      [headerOrder[0]]: 'example_key',
       'Need translation?': 'TRUE',
       [sourceLangName]: 'Example source text',
     };
@@ -530,6 +620,7 @@ export class CSVImporter {
       languages?: string[];
       pseudoAs?: string;
       discardUntranslatable?: boolean;
+      collection?: CsvCollection;
     },
   ): Promise<void> {
     const csv = await this.exportCSVString(projectId, options);

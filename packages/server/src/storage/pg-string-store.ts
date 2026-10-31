@@ -1,11 +1,16 @@
 import { randomUUID } from 'node:crypto';
-import type { LQAResult, StringEntry, TranslationRecord } from '@zercade-dev/narn-shared';
-import { MAX_PREVIOUS_VERSIONS } from '@zercade-dev/narn-shared';
+import type {
+  CsvCollection,
+  LQAResult,
+  StringEntry,
+  TranslationRecord,
+} from '@zercade-dev/narn-shared';
+import { MAX_PREVIOUS_VERSIONS, entryCollection } from '@zercade-dev/narn-shared';
 import { KeyedAsyncLock } from '../utils/keyed-lock.js';
 import { EntryNotFoundError } from '../types/errors.js';
 import type { Queryable } from './pg/pool.js';
 import { withTransaction } from './pg/pool.js';
-import type { StringStore, StringQueryFilters } from './types.js';
+import type { StringStore, StringQueryFilters, RelinkCandidate } from './types.js';
 // Resolved lazily (call-time, inside deleteEntry — not at module-eval time) so
 // the registry↔pg-string-store import cycle resolves via live bindings, the
 // same pattern already established for the M6↔registry cycle (see
@@ -960,25 +965,38 @@ export class PgStringStore implements StringStore {
     projectId: string,
     query: string,
     excludeIds: string[],
-  ): Promise<Array<{ id: string; sourceText: string }>> {
+    collection: CsvCollection = 'main',
+  ): Promise<RelinkCandidate[]> {
+    const toCandidate = (id: string, sourceText: string, textKey: string | null | undefined) => ({
+      id,
+      sourceText,
+      ...(textKey != null ? { textKey } : {}),
+    });
     try {
-      const { rows } = await this.db.query<{ id: string; source_text: string }>(
-        `select id, data->>'sourceText' as source_text
+      const { rows } = await this.db.query<{
+        id: string;
+        source_text: string;
+        text_key: string | null;
+      }>(
+        `select id, data->>'sourceText' as source_text, data->>'textKey' as text_key
          from strings
          where project_id = $1 and not (id = any($2))
            and (data->>'orphanedAt') is null
+           and (data->>'collection') is not distinct from $4::text
          order by similarity(data->>'sourceText', $3) desc, seq asc
          limit 200`,
-        [projectId, excludeIds, query],
+        [projectId, excludeIds, query, collection === 'client' ? 'client' : null],
       );
-      return rows.map((r) => ({ id: r.id, sourceText: r.source_text }));
+      return rows.map((r) => toCandidate(r.id, r.source_text, r.text_key));
     } catch (err) {
       if (!isUndefinedFunctionError(err)) throw err;
       const excluded = new Set(excludeIds);
       const entries = await this.load(projectId);
       return entries
-        .filter((e) => !excluded.has(e.id) && e.orphanedAt == null)
-        .map((e) => ({ id: e.id, sourceText: e.sourceText }));
+        .filter(
+          (e) => !excluded.has(e.id) && e.orphanedAt == null && entryCollection(e) === collection,
+        )
+        .map((e) => toCandidate(e.id, e.sourceText, e.textKey));
     }
   }
 }

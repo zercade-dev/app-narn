@@ -35,6 +35,10 @@
   "importModeFullReplaceHint": "Le voci assenti da questo file vengono contrassegnate come orfane (escluse dalle esecuzioni IA finché non vengono ricollegate o eliminate).",
   "fullReplacePreviewLoading": "Verifica di quante voci diventerebbero orfane…",
   "fullReplaceOrphanNotice": "Voci esistenti assenti da questo file: {{count}}. Verranno contrassegnate come orfane; potrai risolverle più tardi nella scheda Orfane.",
+  "clientImportAddOnlyNotice": "Le voci assenti restano, ma se l'inglese di una voce è cambiato, la sua vecchia riga passa nella scheda Orfane.",
+  "clientImportFullReplaceNotice": "Le righe il cui inglese è cambiato passano nella scheda Orfane insieme a quelle assenti da questo file.",
+  "clientImportPreviewCounts": "Inglese modificato: {{changed}}. Righe che diventeranno orfane: {{orphans}}.",
+  "importMixedCollections": "Questo file ha sia una colonna «Text Mapping ID» sia una colonna «Source». I file di script client e quelli di testo principale vanno importati separatamente.",
   "importSheetDescription": "Scegli come applicare questo file al progetto.",
   "orphanedCount": "Orfane: {{count}}",
   "importWarningsTitle": "Verifiche prima dell'importazione",
@@ -51,6 +55,10 @@
   "includeContext": "Includi la colonna del contesto",
   "discardUntranslatable": "Escludi le voci che non richiedono traduzione",
   "exportLanguages": "Lingue",
+  "exportCollection": "Raccolta",
+  "collectionMain": "Testo principale",
+  "collectionClient": "Testo dello script client",
+  "detectedCollection": "Rilevato: {{collection}}",
   "exportLanguagesHint": "Quali colonne includere in questa esportazione",
   "pseudoExportAs": "Esporta il testo pseudo come",
   "pseudoExportNone": "Nessuna sostituzione",
@@ -406,6 +414,10 @@
       "line-break-parity": {
         "name": "Parità delle interruzioni di riga",
         "description": "Segnala le traduzioni le cui sequenze \\n o interruzioni di riga reali differiscono dall'origine: le interruzioni di riga danneggiate vengono visualizzate male nel gioco."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Segnaposto di runtime",
+        "description": "Per i testi degli script client, segnala i segnaposto {name} e %s/%d mancanti, aggiunti o (per %s/%d) in un altro ordine, e gli escape %% diversi dall'origine."
       },
       "html-entity": {
         "name": "Entità HTML",

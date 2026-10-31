@@ -265,6 +265,7 @@
   },
   "editor": {
     "sourceReadOnly": "Văn bản nguồn (chỉ đọc)",
+    "textKey": "Khóa: {{key}}",
     "translationLabel": "Bản dịch — {{lang}}",
     "ignoreOverflow": "Bỏ qua phần tràn",
     "overflowIgnored": "Đã bỏ qua phần tràn",

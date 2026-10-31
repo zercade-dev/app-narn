@@ -3,7 +3,12 @@
  * native LQACheck implementations, no external dependency. All compare a
  * surface property of the source text against the translation.
  */
-import type { LQAIssue } from '@zercade-dev/narn-shared';
+import {
+  entryCollection,
+  extractRuntimePlaceholders,
+  isPrintfPlaceholder,
+  type LQAIssue,
+} from '@zercade-dev/narn-shared';
 import { runTrivialMatchers } from '../trivial-matchers.js';
 import { MASK_PLACEHOLDER_RE, type LQACheck } from './types.js';
 
@@ -116,6 +121,67 @@ export const lineBreakParityCheck: LQACheck = {
       });
     }
 
+    return issues;
+  },
+};
+
+const ESCAPED_PERCENT_RE = /%%/g;
+
+/**
+ * Client script strings carry runtime placeholders (`{player}`, `%s`, `%d`)
+ * that the game fills in. Every placeholder in the source must appear in the
+ * translation the same number of times. Named tokens may be reordered freely;
+ * a reordered printf sequence is only a warning, since some languages need a
+ * different word order but positional tokens then bind to different values.
+ * Applies to client-collection entries only.
+ */
+export const runtimePlaceholderParityCheck: LQACheck = {
+  id: 'runtime-placeholder-parity',
+  defaultSeverity: 'blocking',
+  defaultEnabled: true,
+  run(entry, translatedText) {
+    if (entryCollection(entry) !== 'client') return [];
+    const issues: LQAIssue[] = [];
+    const sourceTokens = extractRuntimePlaceholders(entry.sourceText);
+    const translatedTokens = extractRuntimePlaceholders(translatedText);
+    const source = countByValue(sourceTokens);
+    const translated = countByValue(translatedTokens);
+    for (const [token, count] of source) {
+      if ((translated.get(token) ?? 0) < count) {
+        issues.push({
+          type: 'placeholder-missing',
+          detail: `placeholder "${token}" from the source is missing in the translation`,
+        });
+      }
+    }
+    for (const [token, count] of translated) {
+      if ((source.get(token) ?? 0) < count) {
+        issues.push({
+          type: 'placeholder-extra',
+          detail: `placeholder "${token}" appears in the translation but not in the source`,
+        });
+      }
+    }
+    if (issues.length === 0) {
+      const sourcePrintf = sourceTokens.filter(isPrintfPlaceholder);
+      const translatedPrintf = translatedTokens.filter(isPrintfPlaceholder);
+      if (sourcePrintf.some((token, i) => token !== translatedPrintf[i])) {
+        issues.push({
+          type: 'placeholder-order',
+          severity: 'warning',
+          detail: `printf placeholders are in a different order: source ${sourcePrintf.join(' ')}, translation ${translatedPrintf.join(' ')}`,
+        });
+      }
+    }
+    const sourceEscapes = countMatches(entry.sourceText, ESCAPED_PERCENT_RE);
+    const translatedEscapes = countMatches(translatedText, ESCAPED_PERCENT_RE);
+    if (sourceEscapes !== translatedEscapes) {
+      issues.push({
+        type: 'printf-escape-mismatch',
+        severity: 'warning',
+        detail: `source has ${sourceEscapes} literal %% escape(s), translation has ${translatedEscapes}`,
+      });
+    }
     return issues;
   },
 };
@@ -241,6 +307,7 @@ export const PARITY_CHECKS: readonly LQACheck[] = [
   numberParityCheck,
   whitespaceParityCheck,
   lineBreakParityCheck,
+  runtimePlaceholderParityCheck,
   endPunctuationCheck,
   doubleSpacingCheck,
   doubleWordsCheck,

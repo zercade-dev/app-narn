@@ -15,6 +15,7 @@ import {
 import { useProjectScopedFetch } from './use-project-scoped-fetch.js';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Badge } from '../ui/badge';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
@@ -36,6 +37,8 @@ interface OrphansTabProps {
 interface RelinkCandidate {
   id: string;
   sourceText: string;
+  textKey?: string;
+  suggested?: true;
 }
 
 function countTranslations(entry: OrphanEntry | StringEntry): number {
@@ -294,7 +297,11 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
 
   const filteredCandidates = useMemo(() => {
     const q = candidateQuery.trim().toLowerCase();
-    const all = q ? candidates.filter((c) => c.sourceText.toLowerCase().includes(q)) : candidates;
+    const all = q
+      ? candidates.filter(
+          (c) => c.sourceText.toLowerCase().includes(q) || c.textKey?.toLowerCase().includes(q),
+        )
+      : candidates;
     return all.slice(0, 50);
   }, [candidates, candidateQuery]);
 
@@ -357,6 +364,14 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
                     />
                   </TableCell>
                   <TableCell className="w-full max-w-0 whitespace-normal font-mono text-sm">
+                    {orphan.textKey !== undefined && (
+                      <div
+                        className="text-xs text-muted-foreground break-all"
+                        data-testid={`orphan-key-${orphan.id}`}
+                      >
+                        {orphan.textKey}
+                      </div>
+                    )}
                     <div className="line-clamp-3 break-words" title={orphan.sourceText}>
                       {orphan.sourceText}
                     </div>
@@ -401,6 +416,14 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
           {relinkOrphan ? (
             <div className="space-y-4 px-4 py-4">
               <div className="rounded border border-border bg-muted/30 p-2 text-sm break-words">
+                {relinkOrphan.textKey !== undefined && (
+                  <span
+                    className="block text-xs text-muted-foreground break-all"
+                    data-testid="relink-orphan-key"
+                  >
+                    {relinkOrphan.textKey}
+                  </span>
+                )}
                 {relinkOrphan.sourceText}
               </div>
               <Input
@@ -421,7 +444,21 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
                     }`}
                     onClick={() => setPickedCandidateId(c.id)}
                   >
+                    {c.textKey !== undefined && (
+                      <span className="block text-xs text-muted-foreground break-all">
+                        {c.textKey}
+                      </span>
+                    )}
                     <span data-content>{c.sourceText}</span>
+                    {c.suggested && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-2"
+                        data-testid="relink-candidate-suggested"
+                      >
+                        {t('relink.suggested')}
+                      </Badge>
+                    )}
                   </button>
                 ))}
                 {filteredCandidates.length === 0 && (

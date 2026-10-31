@@ -3,11 +3,15 @@ import { getGlobalConfigStore, getProjectStore, getStringStore } from '../storag
 import { languageConfig } from '../modules/M4-language-config.js';
 import { orphanManager } from '../modules/M11-orphan-manager.js';
 import { assignGlossaryIds } from '../modules/M20-glossary-assigner.js';
-import { setOrphanIds } from '../modules/orphan-id-store.js';
+import { getOrphanIds, setOrphanIds } from '../modules/orphan-id-store.js';
 import { logger } from '../modules/M15-console-logger.js';
 import { createSnapshot } from '../modules/auto-snapshot.js';
 import { assertStringEntryCapacity } from './tenant-storage-quota.js';
-import { DEFAULT_OVERFLOW_RATIO } from '@zercade-dev/narn-shared';
+import {
+  DEFAULT_OVERFLOW_RATIO,
+  isClientEntryId,
+  type CsvCollection,
+} from '@zercade-dev/narn-shared';
 
 /** Compact, JSON-friendly counts derived from an {@link ImportDiff}. */
 export interface ImportDiffSummary {
@@ -46,11 +50,15 @@ export interface ImportPipelineResult {
   snapshot?: { id: string; createdAt: string };
   /** Mode this pipeline ran (or, on dry runs, would run) under. */
   mode: ImportMode;
+  /** Which string collection the file belongs to, detected from its headers. */
+  collection: CsvCollection;
 }
 
 function summarizeDiff(diff: ImportDiff): ImportDiffSummary {
+  // A superseding client entry sits in both newEntries and changed; count it once.
+  const changedIds = new Set(diff.changed.map((e) => e.id));
   return {
-    new: diff.newEntries.length,
+    new: diff.newEntries.filter((e) => !changedIds.has(e.id)).length,
     changed: diff.changed.length,
     removed: diff.removed.length,
   };
@@ -90,6 +98,7 @@ export async function runImportPipeline(
     malformedRows,
     languagesWithData,
     rawNewlineLanguages,
+    collection,
   } = await csvImporter.importCSV(csvContent, projectId, { defaultOverflowRatio });
 
   // Per-tenant stored-entry ceiling, charged on what this import would ADD, so
@@ -98,7 +107,11 @@ export async function runImportPipeline(
   // check would then reject.
   await assertStringEntryCapacity(getStringStore(), diff.newEntries.length);
 
-  const orphans = orphanManager.detectOrphans(diff, previousEntries);
+  // Full replace orphans everything the file dropped from its own collection;
+  // add-only orphans only the rows a changed client string superseded.
+  const orphanDiff = mode === 'full-replace' ? diff : { ...diff, removed: diff.superseded };
+  const orphans = orphanManager.detectOrphans(orphanDiff, previousEntries);
+  const orphanIds = orphans.map((o) => o.id);
 
   // Languages whose column carries translations but are not active yet —
   // activated on apply so the imported data is immediately visible.
@@ -112,7 +125,7 @@ export async function runImportPipeline(
     return {
       imported: entries.length,
       diff: summarizeDiff(diff),
-      orphans: mode === 'full-replace' ? orphans.length : 0,
+      orphans: orphans.length,
       unrecognizedHeaders,
       duplicateLanguageHeaders,
       skippedRows,
@@ -122,6 +135,7 @@ export async function runImportPipeline(
       activatedLanguages,
       rawNewlineLanguages,
       mode,
+      collection,
     };
   }
 
@@ -135,21 +149,17 @@ export async function runImportPipeline(
   const { glossariesSkipped } = await assignGlossaryIds(projectId, entries);
   const { ghostsBlocked } = await getStringStore().bulkUpsert(projectId, entries);
 
-  // Full replace: soft-delete entries missing from the file by stamping
-  // orphanedAt, and surface them in the Relink tab via the in-memory list.
-  // Add-only never orphans: entries missing from the file stay fully live
-  // and visible; clear any stale in-memory list instead.
-  if (mode === 'full-replace') {
-    if (diff.removed.length > 0) {
-      await getStringStore().markOrphaned(projectId, diff.removed, Date.now());
-    }
-    setOrphanIds(
-      projectId,
-      orphans.map((o) => o.id),
-    );
-  } else {
-    setOrphanIds(projectId, []);
+  // Soft-delete the orphaned rows by stamping orphanedAt, and surface them in
+  // the Relink tab via the in-memory list. Add-only leaves rows missing from
+  // the file fully live; only rows a changed client string superseded are
+  // orphaned. The other collection's in-memory orphans are left untouched.
+  if (orphanIds.length > 0) {
+    await getStringStore().markOrphaned(projectId, orphanIds, Date.now());
   }
+  const otherCollectionOrphans = getOrphanIds(projectId).filter(
+    (id) => isClientEntryId(id) !== (collection === 'client'),
+  );
+  setOrphanIds(projectId, [...orphanIds, ...otherCollectionOrphans]);
 
   if (activatedLanguages.length > 0) {
     await languageConfig.setActiveLanguages(projectId, [
@@ -170,12 +180,13 @@ export async function runImportPipeline(
     glossariesSkipped,
     activatedLanguages,
     mode,
+    collection,
   });
 
   return {
     imported: entries.length,
     diff: summarizeDiff(diff),
-    orphans: mode === 'full-replace' ? orphans.length : 0,
+    orphans: orphans.length,
     unrecognizedHeaders,
     duplicateLanguageHeaders,
     skippedRows,
@@ -186,5 +197,6 @@ export async function runImportPipeline(
     rawNewlineLanguages,
     snapshot: { id: snapshot.id, createdAt: snapshot.createdAt },
     mode,
+    collection,
   };
 }

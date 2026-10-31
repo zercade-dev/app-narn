@@ -9,8 +9,13 @@ import {
   parseGameCSV,
   buildCsvColumnMap,
   findRawNewlineLanguages,
+  detectCsvCollection,
+  csvHasKeyAndSourceColumns,
+  entryCollection,
+  type CsvCollection,
 } from '@zercade-dev/narn-shared';
 import { useProjectStore } from '../../stores/project-store.js';
+import { useStringStore } from '../../stores/string-store.js';
 import { apiRequest, apiDownload } from '../../hooks/use-api.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
 import { PseudoTestHelp } from './PseudoTestHelp.js';
@@ -57,6 +62,11 @@ interface DiffSummary {
   mode?: 'add-only' | 'full-replace';
 }
 
+type ImportMode = 'add-only' | 'full-replace';
+
+/** A dry run's counts for one import mode, or its in-flight marker. */
+type ImportPreview = 'loading' | { orphans: number; changed: number };
+
 /**
  * Data tab — how strings get in and out of the project: source/target
  * language selection, CSV import (with an unknown-headers confirmation gate),
@@ -69,6 +79,11 @@ export function DataTab() {
   const { t } = useTranslation('config');
   const { t: tCommon } = useTranslation('common');
   const { projects, activeProjectId, fetchProjects, updateLanguages } = useProjectStore();
+  // Entries the string table already loaded; used to decide whether the
+  // project has any live client strings worth offering an export choice for.
+  const loadedEntries = useStringStore((s) => s.entries);
+  const loadedEntriesProjectId = useStringStore((s) => s.loadedProjectId);
+  const fetchEntries = useStringStore((s) => s.fetchEntries);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Always reflects the current activeProjectId; used to guard async import callbacks.
   const activeProjectIdRef = useRef(activeProjectId);
@@ -88,14 +103,19 @@ export function DataTab() {
   const [unknownHeaders, setUnknownHeaders] = useState<string[]>([]);
   const [rawNewlineLanguages, setRawNewlineLanguages] = useState<string[]>([]);
   const [importWarnOpen, setImportWarnOpen] = useState(false);
-  const [importMode, setImportMode] = useState<'add-only' | 'full-replace'>('full-replace');
-  const [orphanPreview, setOrphanPreview] = useState<number | null>(null);
-  const [previewLoading, setPreviewLoading] = useState(false);
+  const [importMode, setImportMode] = useState<ImportMode>('full-replace');
+  // Dry-run results per mode: the two modes orphan different rows in a client file.
+  const [importPreviews, setImportPreviews] = useState<Partial<Record<ImportMode, ImportPreview>>>(
+    {},
+  );
   const [pendingLanguages, setPendingLanguages] = useState<string[] | null>(null);
   const [includeContext, setIncludeContext] = useState(false);
   const [discardUntranslatable, setDiscardUntranslatable] = useState(false);
   const [exportLanguages, setExportLanguages] = useState<string[] | null>(null);
   const [pseudoAs, setPseudoAs] = useState<string>('none');
+  const [pendingCollection, setPendingCollection] = useState<CsvCollection>('main');
+  // Null until the user picks one; the default then follows what the project holds.
+  const [exportCollection, setExportCollection] = useState<CsvCollection | null>(null);
 
   const activeProject = projects.find((p) => p.id === activeProjectId);
 
@@ -103,20 +123,30 @@ export function DataTab() {
     fetchProjects();
   }, [fetchProjects]);
 
+  // The strings table normally loads entries; the Data tab needs them too to
+  // know whether the project has client strings. Skip when already loaded. A
+  // failed fetch just leaves the export collection control hidden.
+  useEffect(() => {
+    if (!activeProjectId) return;
+    if (useStringStore.getState().loadedProjectId === activeProjectId) return;
+    void Promise.resolve(fetchEntries(activeProjectId)).catch(() => {});
+  }, [activeProjectId, fetchEntries]);
+
   // Reset pending state during render when the active project changes
   const [prevActiveProjectId, setPrevActiveProjectId] = useState(activeProjectId);
   if (prevActiveProjectId !== activeProjectId) {
     setPrevActiveProjectId(activeProjectId);
     setPendingLanguages(null);
     setExportLanguages(null);
+    setExportCollection(null);
+    setPendingCollection('main');
     setDiffNotice(null);
     setPendingImportFile(null);
     setUnknownHeaders([]);
     setRawNewlineLanguages([]);
     setImportWarnOpen(false);
     setImportMode('full-replace');
-    setOrphanPreview(null);
-    setPreviewLoading(false);
+    setImportPreviews({});
     setImporting(false);
   }
 
@@ -129,6 +159,14 @@ export function DataTab() {
   const exportableLanguages = (activeProject?.activeLanguages ?? []).filter(
     (code) => code !== PSEUDO_LANGUAGE_CODE,
   );
+  const liveEntries =
+    loadedEntriesProjectId === activeProjectId ? loadedEntries.filter((e) => !e.orphanedAt) : [];
+  const hasClientStrings = liveEntries.some((e) => entryCollection(e) === 'client');
+  const hasMainStrings = liveEntries.some((e) => entryCollection(e) === 'main');
+  // A stale 'client' choice must not outlive the last client string.
+  const effectiveExportCollection: CsvCollection = !hasClientStrings
+    ? 'main'
+    : (exportCollection ?? (hasMainStrings ? 'main' : 'client'));
   const currentLanguages = pendingLanguages ?? activeProject?.activeLanguages ?? [];
   const isDirty = pendingLanguages !== null;
   const allChecked =
@@ -194,7 +232,7 @@ export function DataTab() {
     }
   };
 
-  const doImport = async (file: File, mode: 'add-only' | 'full-replace') => {
+  const doImport = async (file: File, mode: ImportMode) => {
     if (!activeProject) return;
     const importProjectId = activeProject.id;
     setImporting(true);
@@ -209,6 +247,8 @@ export function DataTab() {
       });
       if (activeProjectIdRef.current === importProjectId) {
         setDiffNotice(result);
+        // Imported rows may have added or removed client strings.
+        void Promise.resolve(fetchEntries(importProjectId)).catch(() => {});
       }
       // The server may have auto-activated languages found in the file;
       // refresh so the language checkboxes reflect the new active set.
@@ -227,43 +267,50 @@ export function DataTab() {
     }
   };
 
-  // Fetches the full-replace dry-run so the sheet can say how many entries
-  // would be orphaned. Takes the file explicitly: on sheet open the state
-  // setter hasn't committed yet.
-  const fetchOrphanPreview = async (file: File) => {
+  // Fetches a dry run so the sheet can say what the import would do in this
+  // mode. Takes the file explicitly: on sheet open the state setter hasn't
+  // committed yet.
+  const fetchImportPreview = async (file: File, mode: ImportMode) => {
     if (!activeProject) return;
     const importProjectId = activeProject.id;
     previewFileRef.current = file;
-    setPreviewLoading(true);
+    setImportPreviews((prev) => ({ ...prev, [mode]: 'loading' }));
+    const isCurrent = () =>
+      previewFileRef.current === file && activeProjectIdRef.current === importProjectId;
     try {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('dryRun', 'true');
-      formData.append('mode', 'full-replace');
+      formData.append('mode', mode);
       const preview = await apiRequest<DiffSummary>(`/projects/${importProjectId}/import`, {
         method: 'POST',
         body: formData,
       });
-      if (previewFileRef.current === file && activeProjectIdRef.current === importProjectId) {
-        setOrphanPreview(preview.orphans ?? 0);
+      if (isCurrent()) {
+        setImportPreviews((prev) => ({
+          ...prev,
+          [mode]: { orphans: preview.orphans ?? 0, changed: preview.diff?.changed ?? 0 },
+        }));
       }
     } catch {
       // preview is best-effort; import still allowed
-      if (previewFileRef.current === file && activeProjectIdRef.current === importProjectId) {
-        setOrphanPreview(null);
-      }
-    } finally {
-      if (previewFileRef.current === file && activeProjectIdRef.current === importProjectId) {
-        setPreviewLoading(false);
+      if (isCurrent()) {
+        setImportPreviews((prev) => {
+          const next = { ...prev };
+          delete next[mode];
+          return next;
+        });
       }
     }
   };
 
-  const selectImportMode = (mode: 'add-only' | 'full-replace') => {
+  const selectImportMode = (mode: ImportMode) => {
     setImportMode(mode);
-    if (mode !== 'full-replace' || !pendingImportFile) return;
-    if (orphanPreview !== null || previewLoading) return; // already fetched
-    void fetchOrphanPreview(pendingImportFile);
+    if (!pendingImportFile) return;
+    // A main add-only import orphans nothing, so there is nothing to preview.
+    if (mode === 'add-only' && pendingCollection === 'main') return;
+    if (importPreviews[mode]) return; // already fetched or in flight
+    void fetchImportPreview(pendingImportFile, mode);
   };
 
   // Clears the import-review warning sheet, dropping the pending file. Used by
@@ -274,9 +321,9 @@ export function DataTab() {
     setPendingImportFile(null);
     setUnknownHeaders([]);
     setRawNewlineLanguages([]);
+    setPendingCollection('main');
     setImportMode('full-replace');
-    setOrphanPreview(null);
-    setPreviewLoading(false);
+    setImportPreviews({});
     previewFileRef.current = null;
   };
 
@@ -287,6 +334,10 @@ export function DataTab() {
     try {
       const text = await file.text();
       const parsed = parseGameCSV(text);
+      if (csvHasKeyAndSourceColumns(parsed.headers)) {
+        toast.error(t('importMixedCollections'));
+        return;
+      }
       const known = buildKnownHeadersSet();
       const unknown = parsed.headers.filter((h) => !known.has(h.toLowerCase()));
       const { colToCode } = buildCsvColumnMap(parsed.headers);
@@ -297,10 +348,11 @@ export function DataTab() {
       setPendingImportFile(file);
       setUnknownHeaders(unknown);
       setRawNewlineLanguages(rawNewline);
+      setPendingCollection(detectCsvCollection(parsed.headers));
       setImportMode('full-replace');
-      setOrphanPreview(null);
+      setImportPreviews({});
       setImportWarnOpen(true);
-      void fetchOrphanPreview(file);
+      void fetchImportPreview(file, 'full-replace');
       return;
     } catch (err) {
       // Reading/parsing the file client-side failed (e.g. it became unreadable);
@@ -329,22 +381,29 @@ export function DataTab() {
       params.set('languages', selectedLangs.join(','));
     }
     if (pseudoAs !== 'none') params.set('pseudoAs', pseudoAs);
+    if (effectiveExportCollection === 'client') params.set('collection', 'client');
     const query = params.toString();
     const path = query
       ? `/projects/${activeProject.id}/export?${query}`
       : `/projects/${activeProject.id}/export`;
     try {
-      await apiDownload(path, `${activeProject.id}.csv`, {
-        onResponse: (response) => {
-          // Advisory warning (export still succeeded): some cells contain a
-          // quote+comma/newline that mis-splits if this CSV is re-imported.
-          const warnCount = Number(response.headers.get('X-Export-Roundtrip-Warnings') ?? '0');
-          if (warnCount > 0) {
-            const columns = response.headers.get('X-Export-Roundtrip-Columns') ?? '';
-            toast.warning(t('exportRoundtripWarning', { count: warnCount, columns }));
-          }
+      await apiDownload(
+        path,
+        effectiveExportCollection === 'client'
+          ? `client-${activeProject.id}.csv`
+          : `${activeProject.id}.csv`,
+        {
+          onResponse: (response) => {
+            // Advisory warning (export still succeeded): some cells contain a
+            // quote+comma/newline that mis-splits if this CSV is re-imported.
+            const warnCount = Number(response.headers.get('X-Export-Roundtrip-Warnings') ?? '0');
+            if (warnCount > 0) {
+              const columns = response.headers.get('X-Export-Roundtrip-Columns') ?? '';
+              toast.warning(t('exportRoundtripWarning', { count: warnCount, columns }));
+            }
+          },
         },
-      });
+      );
     } catch (err) {
       toast.error(t('exportFailed', { message: (err as Error).message }));
     }
@@ -354,6 +413,7 @@ export function DataTab() {
     if (!activeProject) return;
     const selectedLangs = exportLanguages ?? exportableLanguages;
     const params = new URLSearchParams({ template: 'true' });
+    if (effectiveExportCollection === 'client') params.set('collection', 'client');
     if (
       selectedLangs.length !== exportableLanguages.length ||
       selectedLangs.some((l) => !exportableLanguages.includes(l))
@@ -363,12 +423,16 @@ export function DataTab() {
     try {
       await apiDownload(
         `/projects/${activeProject.id}/export?${params.toString()}`,
-        `${activeProject.id}-template.csv`,
+        effectiveExportCollection === 'client'
+          ? `template-client-${activeProject.id}.csv`
+          : `${activeProject.id}-template.csv`,
       );
     } catch (err) {
       toast.error(t('exportFailed', { message: (err as Error).message }));
     }
   };
+
+  const currentPreview = importPreviews[importMode];
 
   if (!activeProject) {
     return (
@@ -520,7 +584,7 @@ export function DataTab() {
                         {t('orphanedCount', { count: diffNotice.orphans })}
                       </Badge>
                     )}
-                    <Badge variant="outline">
+                    <Badge variant="outline" data-testid="import-changed-badge">
                       {t('changed', { count: diffNotice.diff.changed })}
                     </Badge>
                     {(diffNotice.skippedRows ?? 0) + (diffNotice.ghostsBlocked ?? 0) > 0 && (
@@ -641,6 +705,35 @@ export function DataTab() {
                   </div>
                 </div>
               )}
+              {hasClientStrings && (
+                <div data-testid="export-collection-control">
+                  <p className="text-sm font-medium mb-1.5">{t('exportCollection')}</p>
+                  <div
+                    className="inline-flex rounded-lg border bg-muted p-0.5"
+                    role="radiogroup"
+                    aria-label={t('exportCollection')}
+                  >
+                    {(['main', 'client'] as const).map((c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        role="radio"
+                        aria-checked={effectiveExportCollection === c}
+                        data-testid={`export-collection-${c}`}
+                        onClick={() => setExportCollection(c)}
+                        className={cn(
+                          'cursor-pointer rounded-md px-3 py-1 text-sm transition-colors',
+                          effectiveExportCollection === c
+                            ? 'bg-background font-medium shadow'
+                            : 'text-muted-foreground hover:text-foreground',
+                        )}
+                      >
+                        {t(c === 'client' ? 'collectionClient' : 'collectionMain')}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               <label className="flex items-center gap-1.5 text-sm">
                 <Checkbox
                   data-testid="include-context-checkbox"
@@ -717,6 +810,11 @@ export function DataTab() {
                 : t('importSheetDescription')}
             </SheetDescription>
           </SheetHeader>
+          <p className="mt-3 text-center text-sm" data-testid="import-detected-collection">
+            {t('detectedCollection', {
+              collection: t(pendingCollection === 'client' ? 'collectionClient' : 'collectionMain'),
+            })}
+          </p>
           <div
             className="mt-3 flex flex-col items-center gap-1.5 text-center"
             data-testid="import-mode-control"
@@ -751,12 +849,33 @@ export function DataTab() {
                 ? t('importModeAddOnlyHint')
                 : t('importModeFullReplaceHint')}
             </p>
-            {importMode === 'full-replace' && (
+            {pendingCollection === 'main' && importMode === 'full-replace' && (
               <p className="text-xs text-status-warn mt-2" data-testid="full-replace-orphan-notice">
-                {previewLoading
+                {currentPreview === 'loading'
                   ? t('fullReplacePreviewLoading')
-                  : t('fullReplaceOrphanNotice', { count: orphanPreview ?? 0 })}
+                  : t('fullReplaceOrphanNotice', { count: currentPreview?.orphans ?? 0 })}
               </p>
+            )}
+            {pendingCollection === 'client' && (
+              <div
+                className="text-xs text-status-warn mt-2 space-y-1"
+                data-testid="client-import-notice"
+              >
+                <p>
+                  {importMode === 'add-only'
+                    ? t('clientImportAddOnlyNotice')
+                    : t('clientImportFullReplaceNotice')}
+                </p>
+                {currentPreview === 'loading' && <p>{t('fullReplacePreviewLoading')}</p>}
+                {currentPreview && currentPreview !== 'loading' && (
+                  <p data-testid="client-import-preview-counts">
+                    {t('clientImportPreviewCounts', {
+                      changed: currentPreview.changed,
+                      orphans: currentPreview.orphans,
+                    })}
+                  </p>
+                )}
+              </div>
             )}
           </div>
           {unknownHeaders.length > 0 && (
@@ -794,7 +913,7 @@ export function DataTab() {
                 setPendingImportFile(null);
                 setUnknownHeaders([]);
                 setRawNewlineLanguages([]);
-                setOrphanPreview(null);
+                setImportPreviews({});
                 setImportMode('full-replace');
                 if (file) await doImport(file, mode);
               }}

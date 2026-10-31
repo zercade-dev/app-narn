@@ -14,6 +14,16 @@ export type EditorSelection =
   | { entryId: string; column: 'translation'; language: string }
   | null;
 
+function TextKeyLine({ textKey }: { textKey: string | undefined }) {
+  const { t } = useTranslation('strings');
+  if (textKey === undefined) return null;
+  return (
+    <div className="text-xs text-muted-foreground break-all" data-testid="string-text-key">
+      {t('editor.textKey', { key: textKey })}
+    </div>
+  );
+}
+
 export function StringTableEditor({
   selection,
   onClear,
@@ -161,6 +171,7 @@ export function StringTableEditor({
             ? t('editor.sourceReadOnly')
             : t('editor.translationLabel', { lang: selection.language })}
       </div>
+      <TextKeyLine textKey={entry.textKey} />
       <textarea
         className="w-full min-h-[5rem] resize-y rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
         value={draft}

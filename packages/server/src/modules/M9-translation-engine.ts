@@ -1250,7 +1250,14 @@ export class TranslationEngine {
         // a human variant that reorders indexed tokens would restore them swapped.
         // Use the CURRENT text (`currentRecord.text`), not the snapshot, so a
         // mid-review edit isn't recorded to the TM as the stale variant.
-        const remapped = maskApprovedForMemory(entry.sourceText, currentRecord.text, constantTerms);
+        const remapped = maskApprovedForMemory(
+          entry.sourceText,
+          currentRecord.text,
+          constantTerms,
+          {
+            runtimePlaceholders: entry.collection === 'client',
+          },
+        );
         if (!remapped) {
           this.logger.warn('translation:tm-approve-skip-token-mismatch', {
             entryId,
@@ -1355,7 +1362,9 @@ export class TranslationEngine {
           constantTerms = glossary.filter((term) => term.constant);
           constantTermsByKey.set(glossaryKey, constantTerms);
         }
-        const { masked, trivial } = maskText(entry.sourceText, constantTerms);
+        const { masked, trivial } = maskText(entry.sourceText, constantTerms, {
+          runtimePlaceholders: entry.collection === 'client',
+        });
         // Fully-masked entries are produced locally and never consult the TM.
         if (trivial) continue;
 
@@ -5037,6 +5046,7 @@ export class TranslationEngine {
         const { masked, plan, trivial } = maskText(
           d.entry.sourceText,
           glossary?.constantTerms ?? [],
+          { runtimePlaceholders: d.entry.collection === 'client' },
         );
         const reference = this.jobReference(d.entry, d.targetLanguage, referenceLanguage);
         return {

@@ -33,6 +33,10 @@
   "importModeFullReplaceHint": "このファイルに含まれないエントリは孤立として扱われます（再リンクまたは削除するまで、AIの実行対象から除外されます）。",
   "fullReplacePreviewLoading": "孤立になるエントリの件数を確認中…",
   "fullReplaceOrphanNotice": "既存のエントリ{{count}}件がこのファイルに含まれないため、孤立として扱われます。あとで孤立エントリタブで解決してください。",
+  "clientImportAddOnlyNotice": "ファイルにないエントリは保持されますが、英語が変更されたエントリの古い行は孤立エントリタブに移動します。",
+  "clientImportFullReplaceNotice": "英語が変更された行は、このファイルに含まれない行とともに孤立エントリタブに移動します。",
+  "clientImportPreviewCounts": "英語が変更：{{changed}}件。孤立になる行：{{orphans}}件。",
+  "importMixedCollections": "このファイルには「Text Mapping ID」列と「Source」列の両方があります。クライアントスクリプトのファイルとメインテキストのファイルは別々にインポートしてください。",
   "importSheetDescription": "このファイルをプロジェクトにどう適用するかを選択します。",
   "orphanedCount": "孤立{{count}}件",
   "importWarningsTitle": "インポート前の確認",
@@ -49,6 +53,10 @@
   "includeContext": "翻訳者コンテキストの列を含める",
   "discardUntranslatable": "翻訳が不要なエントリを除外する",
   "exportLanguages": "言語",
+  "exportCollection": "コレクション",
+  "collectionMain": "メインテキスト",
+  "collectionClient": "クライアントスクリプトテキスト",
+  "detectedCollection": "検出: {{collection}}",
   "exportLanguagesHint": "このエクスポートに含める列",
   "pseudoExportAs": "疑似テキストの出力先",
   "pseudoExportNone": "置き換えなし",
@@ -399,6 +407,10 @@
       "line-break-parity": {
         "name": "改行の一致",
         "description": "リテラルの\\nエスケープや実際の改行が原文と異なる翻訳を検出します。改行が壊れると、ゲーム内で正しく表示されません。"
+      },
+      "runtime-placeholder-parity": {
+        "name": "ランタイムのプレースホルダー",
+        "description": "クライアントスクリプトの文字列で、{name}や%s/%dのプレースホルダーの欠落・追加・（%s/%dの）順序の入れ替わり、および原文と異なる%%エスケープを検出します。"
       },
       "html-entity": {
         "name": "HTMLエンティティ",

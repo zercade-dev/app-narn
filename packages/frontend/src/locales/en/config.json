@@ -35,6 +35,10 @@
   "importModeFullReplaceHint": "Entries missing from this file are marked orphaned (excluded from AI runs until relinked or deleted).",
   "fullReplacePreviewLoading": "Checking how many entries this would orphan…",
   "fullReplaceOrphanNotice": "{{count}} existing entries are missing from this file and will be marked orphaned — resolve them later in the Relink tab.",
+  "clientImportAddOnlyNotice": "Missing entries stay, but when an entry's English changed, its old row moves to the Relink tab.",
+  "clientImportFullReplaceNotice": "Rows whose English changed move to the Relink tab along with rows missing from this file.",
+  "clientImportPreviewCounts": "English changed: {{changed}}. Rows to be orphaned: {{orphans}}.",
+  "importMixedCollections": "This file has both a \"Text Mapping ID\" column and a \"Source\" column. Import client script files and main text files separately.",
   "importSheetDescription": "Choose how this file is applied to the project.",
   "orphanedCount": "{{count}} orphaned",
   "importWarningsTitle": "Review before importing",
@@ -51,6 +55,10 @@
   "includeContext": "Include context column",
   "discardUntranslatable": "Discard entries that don't need translation",
   "exportLanguages": "Languages",
+  "exportCollection": "Collection",
+  "collectionMain": "Main text",
+  "collectionClient": "Client script text",
+  "detectedCollection": "Detected: {{collection}}",
   "exportLanguagesHint": "Which columns to include in this export",
   "pseudoExportAs": "Export pseudo text as",
   "pseudoExportNone": "No substitution",
@@ -405,6 +413,10 @@
       "line-break-parity": {
         "name": "Line-break parity",
         "description": "Flags translations whose literal \\n escapes or real line breaks differ from the source — broken line breaks render wrong in-game."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Runtime placeholders",
+        "description": "For client script strings, flags {name} and %s/%d placeholders that are missing, added, or (for %s/%d) reordered, and %% escapes that differ from the source."
       },
       "html-entity": {
         "name": "HTML entity",

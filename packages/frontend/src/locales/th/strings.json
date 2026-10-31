@@ -265,6 +265,7 @@
   },
   "editor": {
     "sourceReadOnly": "ข้อความต้นฉบับ (อ่านอย่างเดียว)",
+    "textKey": "คีย์: {{key}}",
     "translationLabel": "คำแปล — {{lang}}",
     "ignoreOverflow": "ละเว้นการล้น",
     "overflowIgnored": "ละเว้นการล้นแล้ว",

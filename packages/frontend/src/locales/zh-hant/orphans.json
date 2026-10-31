@@ -28,6 +28,7 @@
     "description": "把這個孤立條目的譯文移到另一個條目上；候選項會依原文與這個孤立條目的相似程度排序。",
     "searchPlaceholder": "依原文搜尋條目…",
     "noCandidates": "沒有符合的條目",
+    "suggested": "建議",
     "submit": "繼續",
     "confirmTitle": "確認重新連結",
     "confirmDescription": "重新連結前，請選擇孤立條目的譯文要如何套用到目標條目上。",

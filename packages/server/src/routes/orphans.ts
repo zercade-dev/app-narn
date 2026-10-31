@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import type { StringEntry } from '@zercade-dev/narn-shared';
+import type { CsvCollection, StringEntry } from '@zercade-dev/narn-shared';
+import { entryCollection } from '@zercade-dev/narn-shared';
 import { orphanManager } from '../modules/M11-orphan-manager.js';
 import { getOrphanIds, removeOrphanId } from '../modules/orphan-id-store.js';
 import { relinkRetranslateEngine } from '../modules/M30-relink-retranslate-engine.js';
@@ -173,21 +174,58 @@ orphansRouter.get(
     const orphanId = typeof req.query.orphanId === 'string' ? req.query.orphanId : undefined;
 
     if (orphanId) {
-      const orphan = await getStringStore().getById(projectId, orphanId);
-      const ranked = await getStringStore().rankBySourceSimilarity(projectId, orphan.sourceText, [
-        ...excludeIds,
-        orphanId,
-      ]);
+      const store = getStringStore();
+      const orphan = await store.getById(projectId, orphanId);
+      const collection = entryCollection(orphan);
+      const ranked = await store.rankBySourceSimilarity(
+        projectId,
+        orphan.sourceText,
+        [...excludeIds, orphanId],
+        collection,
+      );
+      // A re-imported client row keeps its key but gets a new id, so the live
+      // string with the orphan's key is the likely target. Look it up directly
+      // so it leads the list even when similarity would drop it from the top.
+      const suggestedEntry =
+        collection === 'client' && orphan.textKey != null
+          ? (await store.load(projectId)).find(
+              (e) =>
+                e.id !== orphanId &&
+                e.textKey === orphan.textKey &&
+                e.orphanedAt == null &&
+                !excludeIds.includes(e.id) &&
+                entryCollection(e) === 'client',
+            )
+          : undefined;
+      if (suggestedEntry) {
+        res.json([
+          {
+            id: suggestedEntry.id,
+            sourceText: suggestedEntry.sourceText,
+            textKey: suggestedEntry.textKey,
+            suggested: true,
+          },
+          ...ranked.filter((c) => c.id !== suggestedEntry.id),
+        ]);
+        return;
+      }
       res.json(ranked);
       return;
     }
 
+    const collection: CsvCollection = req.query.collection === 'client' ? 'client' : 'main';
     const excluded = new Set(excludeIds);
     const entries = await getStringStore().load(projectId);
     res.json(
       entries
-        .filter((e) => !excluded.has(e.id) && e.orphanedAt == null)
-        .map((e) => ({ id: e.id, sourceText: e.sourceText })),
+        .filter(
+          (e) => !excluded.has(e.id) && e.orphanedAt == null && entryCollection(e) === collection,
+        )
+        .map((e) => ({
+          id: e.id,
+          sourceText: e.sourceText,
+          ...(e.textKey != null ? { textKey: e.textKey } : {}),
+        })),
     );
   }),
 );

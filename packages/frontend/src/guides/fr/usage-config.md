@@ -16,6 +16,15 @@ L’import et l’export CSV vivent aussi dans l’onglet **Données** :
 * Les lignes qui ne peuvent pas être analysées proprement (un guillemet immédiatement suivi d’une virgule) sont ignorées et signalées, plutôt qu’écrites sous forme de données décalées de colonne.
 * **Exporter CSV** télécharge le projet ; vous pouvez choisir les langues et si la colonne de contexte du traducteur doit être incluse.
 
+### Fichiers de script client
+
+Un CSV doté d’une colonne **Text Mapping ID** est un fichier de script client. Il est importé dans sa propre collection, **Texte de script client**, à part de votre **Texte principal** — la fenêtre d’import indique laquelle a été détectée.
+
+* Chaque chaîne client est identifiée par son Text Mapping ID, si bien que le même anglais peut figurer dans les deux collections, et sur plusieurs lignes client, sans être fusionné.
+* Importer un fichier client ne modifie jamais le texte principal, et importer un fichier principal ne modifie jamais le texte client.
+* Lorsque l’anglais d’une clé existante change, quel que soit le mode d’import, l’ancienne ligne passe dans l’onglet **Orphelins** et la nouvelle conserve les traductions du fichier ; seules ses cellules vides restent non traduites. Utilisez **Réaffecter** pour reporter les traductions : la ligne ayant la même clé est suggérée en premier, et le mode de remplacement détermine si les cellules remplies sont conservées ou remplacées.
+* Dès qu’un projet contient des chaînes client, **Exporter CSV** permet de choisir la collection à télécharger, et un export client conserve sa colonne Text Mapping ID.
+
 ## Modules et modèles
 
 Activez les fournisseurs une fois pour toutes dans **Configuration globale**. Ici, dans Configuration, vous choisissez, par projet, le **modèle** et l’**effort de raisonnement** de chaque module activé — ou vous les laissez réglés sur *Hériter de la configuration globale*. Quel module s’exécute réellement pour une entrée donnée est décidé par les **règles de routage** (voir le guide *Routage*).

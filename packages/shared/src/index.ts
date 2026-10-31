@@ -39,7 +39,14 @@ export type {
   SourceReviewFindingType,
   SourceReviewResult,
 } from './types/string-entry.js';
-export { DEFAULT_OVERFLOW_RATIO, MAX_PREVIOUS_VERSIONS } from './types/string-entry.js';
+export {
+  DEFAULT_OVERFLOW_RATIO,
+  MAX_PREVIOUS_VERSIONS,
+  CLIENT_ENTRY_ID_PREFIX,
+  isClientEntryId,
+  entryCollection,
+} from './types/string-entry.js';
+export type { CsvCollection } from './types/string-entry.js';
 export {
   ACHIEVEMENT_SOURCE_LABELS,
   isAchievementSourceLabel,
@@ -149,6 +156,10 @@ export {
   NEEDS_TRANSLATION_COLUMN_NAMES,
   CONTEXT_COLUMN_NAMES,
   buildKnownHeadersSet,
+  CLIENT_KEY_COLUMN_NAME,
+  CLIENT_SCRIPT_SOURCE_LABEL,
+  detectCsvCollection,
+  csvHasKeyAndSourceColumns,
 } from './csv-headers.js';
 export { parseGameCSV, buildCsvColumnMap, findRawNewlineLanguages } from './game-csv.js';
 export type { ParsedGameCSV } from './game-csv.js';
@@ -328,6 +339,11 @@ export type {
   SplitAndRetry,
 } from './ai-sdk-provider/index.js';
 export { MASK_TOKEN_SOURCE } from './masking/tokens.js';
+export {
+  RUNTIME_PLACEHOLDER_SOURCE,
+  extractRuntimePlaceholders,
+  isPrintfPlaceholder,
+} from './runtime-placeholders.js';
 export {
   CORE_SYSTEM_PROMPT,
   BATCH_SYSTEM_PROMPT,

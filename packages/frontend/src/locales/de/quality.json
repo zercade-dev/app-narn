@@ -35,6 +35,7 @@
     "number-parity": "Zahlenparität",
     "whitespace-parity": "Leerraumparität",
     "line-break-parity": "Zeilenumbruchparität",
+    "runtime-placeholder-parity": "Laufzeit-Platzhalter",
     "html-entity": "HTML-Entität",
     "end-punctuation": "Schlusszeichensetzung",
     "double-spacing": "Doppelte Leerzeichen",
@@ -52,6 +53,10 @@
     "whitespace-leading": "Führender Leerraum",
     "whitespace-trailing": "Nachgestellter Leerraum",
     "line-break-mismatch": "Zeilenumbruch-Abweichung",
+    "placeholder-missing": "Platzhalter fehlt",
+    "placeholder-extra": "Platzhalter hinzugefügt",
+    "placeholder-order": "Platzhalter-Reihenfolge",
+    "printf-escape-mismatch": "Prozent-Escape-Abweichung",
     "end-punctuation-mismatch": "Schlusszeichen-Abweichung",
     "mask-mismatch": "Masken-Abweichung"
   },

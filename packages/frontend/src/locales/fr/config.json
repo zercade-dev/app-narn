@@ -35,6 +35,10 @@
   "importModeFullReplaceHint": "Les entrées absentes de ce fichier sont marquées orphelines (exclues des exécutions IA jusqu'à leur reliaison ou suppression).",
   "fullReplacePreviewLoading": "Vérification du nombre d'entrées qui deviendraient orphelines…",
   "fullReplaceOrphanNotice": "{{count}} entrées existantes sont absentes de ce fichier et seront marquées orphelines — réglez-les plus tard dans l'onglet Relier.",
+  "clientImportAddOnlyNotice": "Les entrées absentes sont conservées, mais si l'anglais d'une entrée a changé, son ancienne ligne passe dans l'onglet Relier.",
+  "clientImportFullReplaceNotice": "Les lignes dont l'anglais a changé passent dans l'onglet Relier, avec celles absentes de ce fichier.",
+  "clientImportPreviewCounts": "Anglais modifié : {{changed}}. Lignes qui deviendront orphelines : {{orphans}}.",
+  "importMixedCollections": "Ce fichier contient à la fois une colonne « Text Mapping ID » et une colonne « Source ». Importez séparément les fichiers de script client et les fichiers de texte principal.",
   "importSheetDescription": "Choisissez comment ce fichier est appliqué au projet.",
   "orphanedCount": "{{count}} orphelines",
   "importWarningsTitle": "À vérifier avant d'importer",
@@ -51,6 +55,10 @@
   "includeContext": "Inclure la colonne de contexte",
   "discardUntranslatable": "Exclure les entrées qui n'ont pas besoin de traduction",
   "exportLanguages": "Langues",
+  "exportCollection": "Collection",
+  "collectionMain": "Texte principal",
+  "collectionClient": "Texte de script client",
+  "detectedCollection": "Détecté : {{collection}}",
   "exportLanguagesHint": "Quelles colonnes inclure dans cet export",
   "pseudoExportAs": "Exporter le texte pseudo comme",
   "pseudoExportNone": "Aucune substitution",
@@ -406,6 +414,10 @@
       "line-break-parity": {
         "name": "Parité des sauts de ligne",
         "description": "Signale les traductions dont les échappements \\n littéraux ou les sauts de ligne réels diffèrent de la source ; des sauts cassés s'affichent mal en jeu."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Variables d'exécution",
+        "description": "Pour les textes de script client, signale les variables {name} et %s/%d manquantes, ajoutées ou (pour %s/%d) dans un autre ordre, ainsi que les échappements %% qui diffèrent de la source."
       },
       "html-entity": {
         "name": "Entité HTML",

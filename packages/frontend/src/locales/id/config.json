@@ -33,6 +33,10 @@
   "importModeFullReplaceHint": "Entri yang tidak ada dalam berkas ini ditandai yatim (dikecualikan dari operasi AI sampai dihubungkan ulang atau dihapus).",
   "fullReplacePreviewLoading": "Menghitung berapa entri yang akan menjadi yatim…",
   "fullReplaceOrphanNotice": "{{count}} entri lama tidak ada dalam berkas ini dan akan ditandai yatim — selesaikan nanti di tab Entri Yatim.",
+  "clientImportAddOnlyNotice": "Entri yang tidak ada tetap dibiarkan, tetapi jika teks Inggris sebuah entri berubah, baris lamanya pindah ke tab Entri Yatim.",
+  "clientImportFullReplaceNotice": "Baris yang teks Inggrisnya berubah pindah ke tab Entri Yatim bersama baris yang tidak ada dalam berkas ini.",
+  "clientImportPreviewCounts": "Teks Inggris berubah: {{changed}}. Baris yang akan menjadi yatim: {{orphans}}.",
+  "importMixedCollections": "Berkas ini memiliki kolom \"Text Mapping ID\" sekaligus kolom \"Source\". Impor berkas skrip klien dan berkas teks utama secara terpisah.",
   "importSheetDescription": "Pilih cara berkas ini diterapkan ke proyek.",
   "orphanedCount": "{{count}} jadi yatim",
   "importWarningsTitle": "Periksa dulu sebelum mengimpor",
@@ -49,6 +53,10 @@
   "includeContext": "Sertakan kolom konteks",
   "discardUntranslatable": "Kecualikan entri yang tidak perlu diterjemahkan",
   "exportLanguages": "Bahasa",
+  "exportCollection": "Koleksi",
+  "collectionMain": "Teks utama",
+  "collectionClient": "Teks skrip klien",
+  "detectedCollection": "Terdeteksi: {{collection}}",
   "exportLanguagesHint": "Kolom mana saja yang disertakan dalam ekspor ini",
   "pseudoExportAs": "Ekspor teks pseudo sebagai",
   "pseudoExportNone": "Tanpa penggantian",
@@ -399,6 +407,10 @@
       "line-break-parity": {
         "name": "Paritas pemisah baris",
         "description": "Menandai terjemahan yang escape \\n literal atau pemisah baris sungguhannya berbeda dari sumber — pemisah baris yang rusak tampil salah di dalam gim."
+      },
+      "runtime-placeholder-parity": {
+        "name": "Placeholder runtime",
+        "description": "Untuk teks skrip klien, menandai placeholder {name} dan %s/%d yang hilang, bertambah, atau (untuk %s/%d) urutannya berubah, serta escape %% yang berbeda dari teks sumber."
       },
       "html-entity": {
         "name": "Entitas HTML",

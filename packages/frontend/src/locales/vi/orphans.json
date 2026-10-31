@@ -28,6 +28,7 @@
     "description": "Chuyển bản dịch từ mục mồ côi này sang một mục khác, xếp hạng theo mức giống nhau giữa văn bản nguồn của từng ứng viên và của mục mồ côi này.",
     "searchPlaceholder": "Tìm mục theo văn bản nguồn…",
     "noCandidates": "Không có mục nào khớp",
+    "suggested": "Đề xuất",
     "submit": "Tiếp tục",
     "confirmTitle": "Xác nhận liên kết lại",
     "confirmDescription": "Chọn cách áp dụng bản dịch của mục mồ côi vào mục đích trước khi liên kết lại.",
