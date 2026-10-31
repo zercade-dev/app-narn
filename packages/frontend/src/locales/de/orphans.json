@@ -54,6 +54,7 @@
     "relinkError": "Waise konnte nicht neu verknüpft werden",
     "candidatesError": "Kandidaten für die Neuverknüpfung konnten nicht geladen werden",
     "aiRetranslateStarted": "KI-Neuübersetzung gestartet — siehe Tab Aktivität",
+    "aiRetranslateSkipped": "Neu verknüpft, aber nicht neu übersetzt: Diese Zeile ist als nicht übersetzungsbedürftig markiert",
     "aiRetranslateUnavailable": "Neu verknüpft, aber die KI-Neuübersetzung konnte nicht gestartet werden (kein KI-fähiges Modul verfügbar)"
   }
 }

@@ -54,6 +54,7 @@
     "relinkError": "Falha ao revincular o órfão",
     "candidatesError": "Falha ao carregar as candidatas à revinculação",
     "aiRetranslateStarted": "Retradução por IA iniciada — veja a aba Atividade",
+    "aiRetranslateSkipped": "Revinculado, mas não retraduzido: esta linha está marcada como sem necessidade de tradução",
     "aiRetranslateUnavailable": "Revinculado, mas não foi possível iniciar a retradução por IA (nenhum módulo com IA disponível)"
   }
 }

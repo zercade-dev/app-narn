@@ -80,7 +80,7 @@ export interface ImportResult {
   rawNewlineLanguages: string[];
   /**
    * Main: cells whose leading formula-guard apostrophe was removed. Client:
-   * cells that begin with an apostrophe and a trigger character, kept as written.
+   * cells that begin with apostrophes and a trigger character, kept as written.
    */
   formulaGuardCells: number;
 }
@@ -472,7 +472,8 @@ export class CSVImporter {
    *
    * `options.pseudoAs` substitutes the synthetic pseudo-test column into a
    * real language's column: the chosen language's cells are filled from the
-   * entry's `pseudo-test` translation (its real translations are NOT exported)
+   * entry's `pseudo-test` translation (its real translations are NOT exported,
+   * except on a row marked as not needing translation that has no pseudo text)
    * and the pseudo-test column itself is omitted. This lets pseudo text be
    * loaded in the game under a shippable language without ever touching the
    * stored translations. It may not be the source language or `pseudo-test`.
@@ -593,7 +594,13 @@ export class CSVImporter {
       for (const code of translationLangs) {
         const header = codeToName.get(code) ?? code;
         const sourceCode = code === pseudoAs ? PSEUDO_LANGUAGE_CODE : code;
-        row[header] = entry.translations[sourceCode]?.text ?? '';
+        // Runs skip rows marked as not needing translation, so those have no
+        // pseudo text; they keep their real translation in the substituted column.
+        const fallback =
+          code === pseudoAs && entry.needsTranslation === false
+            ? entry.translations[code]?.text
+            : undefined;
+        row[header] = entry.translations[sourceCode]?.text ?? fallback ?? '';
       }
 
       if (options?.includeContext === true) {

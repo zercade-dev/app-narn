@@ -74,9 +74,9 @@ export function escapeForReimport(value: string): string {
   return GENUINE_APOSTROPHE_TRIGGER.test(value) ? `'${value}` : value;
 }
 
-/** True when a cell begins with exactly one apostrophe and a trigger character. */
+/** True when a cell begins with one or more apostrophes and a trigger character. */
 export function hasFormulaGuard(value: string): boolean {
-  return /^'[=+\-@\t\r]/.test(value);
+  return GENUINE_APOSTROPHE_TRIGGER.test(value);
 }
 
 /** Removes the export-time formula guard, restoring the original cell value. */

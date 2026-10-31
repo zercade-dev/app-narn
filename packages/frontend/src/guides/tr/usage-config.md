@@ -15,6 +15,7 @@ CSV içe ve dışa aktarma da **Veri** sekmesinde bulunur:
 * **CSV içe aktarma**, kaynak girdileri ve varsa mevcut çevirileri yükler. Her içe aktarmadan hemen önce otomatik olarak bir güvenlik anlık görüntüsü alınır, böylece **Yedekleme** sekmesinden geri dönebilirsiniz.
 * Düzgün ayrıştırılamayan satırlar (bir tırnak işaretinin hemen ardından gelen bir virgül) sütun kaymış veri olarak yazılmak yerine atlanır ve bildirilir.
 * **CSV dışa aktarma**, projeyi indirir; dilleri ve çevirmen bağlamı sütununun eklenip eklenmeyeceğini seçebilirsiniz.
+* Dışa aktarmalar metni kaydedildiği gibi yazar ve = + - veya @ ile başlayan hücrelerin önüne kesme işareti eklemez. **E-tablolar için koru** seçeneğini yalnızca e-tabloda açacağınız dosyalar için açın, çünkü Miliastra düzenleyicisi bu işareti metin olarak korur. Çeviri çalıştırmaları, Need translation? değeri FALSE olan satırları atlar. Korumalı bir istemci betiği dosyası yeniden içe aktarılmamalı veya düzenleyiciye gönderilmemelidir.
 
 ### İstemci betiği dosyaları
 
@@ -24,7 +25,6 @@ CSV içe ve dışa aktarma da **Veri** sekmesinde bulunur:
 * İstemci dosyasını içe aktarmak ana metni asla değiştirmez, ana dosyayı içe aktarmak da istemci metnini asla değiştirmez.
 * Mevcut bir anahtarın İngilizcesi değiştiğinde, her iki içe aktarma modunda da eski satır **Yetimler** sekmesine taşınır ve yeni satır dosyadaki çevirileri korur; yalnızca boş hücreleri çevrilmemiş kalır. Çevirileri aktarmak için **yeniden bağlayın**: önce aynı anahtarlı satır önerilir, üzerine yazma modu da dolu hücrelerin korunup korunmayacağını belirler.
 * Bir projede istemci dizeleri olduğunda **CSV dışa aktarma** hangi koleksiyonun indirileceğini seçmenizi sağlar; istemci dışa aktarımı Text Mapping ID sütununu korur.
-* Dışa aktarmalar metni kaydedildiği gibi yazar ve = + - veya @ ile başlayan hücrelerin önüne kesme işareti eklemez. **E-tablolar için koru** seçeneğini yalnızca e-tabloda açacağınız dosyalar için açın, çünkü Miliastra düzenleyicisi bu işareti metin olarak korur. Çeviri çalıştırmaları, Need translation? değeri FALSE olan satırları atlar.
 
 ## Modüller ve modeller
 

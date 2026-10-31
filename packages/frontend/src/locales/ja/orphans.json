@@ -53,6 +53,7 @@
     "relinkError": "孤立エントリを再リンクできませんでした",
     "candidatesError": "再リンクの候補を読み込めませんでした",
     "aiRetranslateStarted": "AIによる再翻訳を開始しました。アクティビティタブで確認できます",
+    "aiRetranslateSkipped": "再リンクしましたが、再翻訳はしていません。この行は翻訳不要とマークされています",
     "aiRetranslateUnavailable": "再リンクしましたが、AIによる再翻訳を開始できませんでした（AIに対応したモジュールがありません）"
   }
 }

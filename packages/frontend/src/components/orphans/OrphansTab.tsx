@@ -258,7 +258,11 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
     closeRelink();
     try {
       const result = await apiRequest<
-        StringEntry & { retranslateRunId?: string; retranslateError?: string }
+        StringEntry & {
+          retranslateRunId?: string;
+          retranslateError?: string;
+          retranslateSkipped?: boolean;
+        }
       >(`/projects/${projectId}/orphans/${orphanId}/relink`, {
         method: 'POST',
         body: JSON.stringify({
@@ -272,6 +276,8 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
       if (withAi) {
         if (result.retranslateRunId) {
           toast.success(t('toast.aiRetranslateStarted'));
+        } else if (result.retranslateSkipped) {
+          toast.warning(t('toast.aiRetranslateSkipped'));
         } else if (result.retranslateError) {
           toast.warning(t('toast.aiRetranslateUnavailable'));
         }

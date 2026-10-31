@@ -31,6 +31,7 @@ L'importazione e l'esportazione CSV vivono anch'esse nella scheda **Dati**:
   invece di essere scritte come dati con le colonne spostate.
 - **Esportazione CSV** scarica il progetto; puoi scegliere le lingue e se
   includere la colonna del contesto per il traduttore.
+- Le esportazioni scrivono il testo così come è salvato, senza aggiungere un apostrofo davanti alle celle che iniziano con = + - o @. Attiva **Proteggi per i fogli di calcolo** solo per i file che aprirai in un foglio di calcolo, perché l'editor di Miliastra conserva quell'apostrofo come testo. Le esecuzioni di traduzione saltano le righe con valore Need translation? uguale a FALSE. Un file di script client protetto non va reimportato né inviato all'editor.
 
 ### File di script client
 
@@ -40,7 +41,6 @@ Un CSV con una colonna **Text Mapping ID** è un file di script client. Viene im
 * Importare un file client non modifica mai il testo principale, e importare un file principale non modifica mai il testo client.
 * Quando l'inglese di una chiave esistente cambia, in entrambe le modalità di importazione, la vecchia riga passa nella scheda **Orfane** e quella nuova mantiene le traduzioni del file; solo le sue celle vuote restano da tradurre. Usa **Ricollega** per trasferire le traduzioni: la riga con la stessa chiave viene proposta per prima, e la modalità di sovrascrittura decide se le celle già compilate vengono mantenute o sostituite.
 * Quando un progetto ha stringhe client, l'**Esportazione CSV** permette di scegliere quale raccolta scaricare, e un'esportazione client mantiene la colonna Text Mapping ID.
-* Le esportazioni scrivono il testo così come è salvato, senza aggiungere un apostrofo davanti alle celle che iniziano con = + - o @. Attiva **Proteggi per i fogli di calcolo** solo per i file che aprirai in un foglio di calcolo, perché l'editor di Miliastra conserva quell'apostrofo come testo. Le esecuzioni di traduzione saltano le righe con valore Need translation? uguale a FALSE.
 
 ## Moduli e modelli
 

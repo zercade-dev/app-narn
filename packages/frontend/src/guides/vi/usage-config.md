@@ -15,6 +15,7 @@ Việc nhập và xuất CSV cũng nằm ở tab **Dữ liệu**:
 * **Nhập CSV** nạp các mục nguồn và mọi bản dịch sẵn có. Một bản chụp an toàn được tạo tự động ngay trước mỗi lần nhập, nên bạn có thể khôi phục lại từ tab **Sao lưu**.
 * Những hàng không thể phân tích gọn gàng (một dấu nháy đứng ngay trước dấu phẩy) sẽ bị loại và được báo cáo, thay vì được ghi thành dữ liệu lệch cột.
 * **Xuất CSV** tải dự án xuống; bạn có thể chọn ngôn ngữ và có kèm cột bối cảnh cho người dịch hay không.
+* Bản xuất ghi văn bản đúng như đã lưu, không thêm dấu nháy đơn trước các ô bắt đầu bằng = + - hoặc @. Chỉ bật **Bảo vệ cho bảng tính** với tệp bạn sẽ mở trong bảng tính, vì trình chỉnh sửa Miliastra giữ dấu nháy đó như văn bản. Các lượt dịch bỏ qua những hàng có giá trị Need translation? là FALSE. Không được nhập lại hoặc gửi tệp script máy khách đã bảo vệ tới trình chỉnh sửa.
 
 ### Tệp tập lệnh máy khách
 
@@ -24,7 +25,6 @@ CSV có cột **Text Mapping ID** là tệp tập lệnh máy khách. Tệp này
 * Nhập tệp máy khách không bao giờ thay đổi văn bản chính, và nhập tệp chính không bao giờ thay đổi văn bản máy khách.
 * Khi tiếng Anh của một khóa hiện có thay đổi, ở cả hai chế độ nhập, hàng cũ chuyển sang tab **Mục mồ côi** và hàng mới giữ các bản dịch từ tệp; chỉ những ô trống mới chưa được dịch. Dùng **Liên kết lại** để chuyển bản dịch: hàng có cùng khóa được gợi ý trước, và chế độ ghi đè quyết định giữ hay thay thế các ô đã có nội dung.
 * Khi dự án có chuỗi máy khách, **Xuất CSV** cho phép chọn bộ sưu tập cần tải xuống, và bản xuất máy khách giữ nguyên cột Text Mapping ID.
-* Bản xuất ghi văn bản đúng như đã lưu, không thêm dấu nháy đơn trước các ô bắt đầu bằng = + - hoặc @. Chỉ bật **Bảo vệ cho bảng tính** với tệp bạn sẽ mở trong bảng tính, vì trình chỉnh sửa Miliastra giữ dấu nháy đó như văn bản. Các lượt dịch bỏ qua những hàng có giá trị Need translation? là FALSE.
 
 ## Mô-đun và mô hình
 

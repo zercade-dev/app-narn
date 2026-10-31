@@ -56,8 +56,6 @@ interface DiffSummary {
   rawNewlineLanguages?: string[];
   /** Main: guard apostrophes removed. Client: apostrophe + trigger cells kept as written. */
   formulaGuardCells?: number;
-  /** Which collection the file belongs to. */
-  collection?: 'main' | 'client';
   /** Automatic pre-import safety snapshot taken by the server before the import. */
   snapshot?: { filename: string; createdAt: string };
   /** Entries missing from the file (marked orphaned when mode is full-replace). */
@@ -772,6 +770,11 @@ export function DataTab() {
                 <p className="mt-1 text-xs text-muted-foreground">
                   {t('protectForSpreadsheetsHint')}
                 </p>
+                {protectForSpreadsheets && effectiveExportCollection === 'client' && (
+                  <p className="mt-1 text-xs text-status-warn" data-testid="protect-client-warning">
+                    {t('protectForSpreadsheetsClientWarning')}
+                  </p>
+                )}
               </div>
               {activeProject.activeLanguages.includes(PSEUDO_LANGUAGE_CODE) && (
                 <div>
