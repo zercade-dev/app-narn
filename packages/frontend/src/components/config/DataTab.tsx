@@ -77,6 +77,7 @@ export function DataTab() {
   // project has any live client strings worth offering an export choice for.
   const loadedEntries = useStringStore((s) => s.entries);
   const loadedEntriesProjectId = useStringStore((s) => s.loadedProjectId);
+  const fetchEntries = useStringStore((s) => s.fetchEntries);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Always reflects the current activeProjectId; used to guard async import callbacks.
   const activeProjectIdRef = useRef(activeProjectId);
@@ -112,6 +113,15 @@ export function DataTab() {
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
+
+  // The strings table normally loads entries; the Data tab needs them too to
+  // know whether the project has client strings. Skip when already loaded. A
+  // failed fetch just leaves the export collection control hidden.
+  useEffect(() => {
+    if (!activeProjectId) return;
+    if (useStringStore.getState().loadedProjectId === activeProjectId) return;
+    void Promise.resolve(fetchEntries(activeProjectId)).catch(() => {});
+  }, [activeProjectId, fetchEntries]);
 
   // Reset pending state during render when the active project changes
   const [prevActiveProjectId, setPrevActiveProjectId] = useState(activeProjectId);
@@ -226,6 +236,8 @@ export function DataTab() {
       });
       if (activeProjectIdRef.current === importProjectId) {
         setDiffNotice(result);
+        // Imported rows may have added or removed client strings.
+        void Promise.resolve(fetchEntries(importProjectId)).catch(() => {});
       }
       // The server may have auto-activated languages found in the file;
       // refresh so the language checkboxes reflect the new active set.
