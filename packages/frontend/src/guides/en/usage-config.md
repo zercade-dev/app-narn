@@ -16,6 +16,15 @@ CSV import and export also live on the **Data** tab:
 * Rows that can't be parsed cleanly (a quote immediately followed by a comma) are dropped and reported, rather than written as column-shifted data.
 * **Export CSV** downloads the project; you can choose languages and whether to include the translator-context column.
 
+### Client script files
+
+A CSV with a **Text Mapping ID** column is a client script file. It is imported into its own collection, **Client script text**, kept apart from your **Main text** — the Import sheet tells you which one it detected.
+
+* Each client string is identified by its Text Mapping ID, so the same English can appear in both collections, and on several client rows, without being merged.
+* Importing a client file never changes main text, and importing a main file never changes client text.
+* When the English for an existing key changes, the old row moves to the **Orphans** tab and the new one starts empty. Use **Relink** to carry the translations across; the row with the same key is suggested first.
+* Once a project has client strings, **Export CSV** lets you choose which collection to download, and a client export keeps its Text Mapping ID column.
+
 ## Modules and models
 
 Enable providers once in **Global Config**. Here in Config you choose, per project, the **model** and **reasoning effort** for each enabled module — or leave them set to *Inherit from global config*. Which module actually runs for a given entry is decided by **routing rules** (see the *Routing* guide).

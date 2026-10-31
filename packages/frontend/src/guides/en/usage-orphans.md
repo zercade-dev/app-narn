@@ -14,7 +14,7 @@ The **Orphans** tab lists entries that are no longer present in the most recentl
 
 1. Re-import your source CSV from the **Data** tab.
 2. Open **Orphans** and review what dropped out.
-3. **Relink** any entry whose id or source text changed but whose translations are still valid.
+3. **Relink** any entry whose id or source text changed but whose translations are still valid. For client script text, the live row with the same Text Mapping ID is suggested first, which is how you carry translations across after the English changes.
 4. **Delete** entries that are genuinely gone.
 
 When the list is empty, every imported entry matches the current project — nothing is orphaned.
