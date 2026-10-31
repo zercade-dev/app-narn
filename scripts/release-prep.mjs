@@ -16,6 +16,8 @@
 import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { warnIfFreeTierStale } from './freeway-refresh/staleness.mjs';
+
 const CHANGELOG_DIR = 'packages/frontend/src/guides/en/changelog';
 const UNRELEASED_DIR = join(CHANGELOG_DIR, 'unreleased');
 const PKG = 'package.json';
@@ -163,3 +165,5 @@ writeFileSync(PKG, bumped);
 console.log(`v${version} — consolidated ${fragments.length} fragment(s) into ${target}`);
 for (const f of fragments) console.log(`  - ${f}`);
 console.log(`Bumped ${PKG} to ${version}. Review the diff, then commit and merge to main.`);
+
+warnIfFreeTierStale();

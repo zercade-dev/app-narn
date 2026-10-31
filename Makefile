@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: verify start-secure smoke-secure security-check sync-glossaries bump-version release-prep
+.PHONY: verify start-secure smoke-secure security-check sync-glossaries bump-version release-prep freeway-refresh
 
 ## Launch the API under Node's experimental permission model
 start-secure:
@@ -39,26 +39,54 @@ verify:
 sync-glossaries:
 	pnpm exec tsx scripts/sync-global-glossaries.ts $(FLAGS)
 
-## Bump the app version and refresh scraped pricing/capability/context data in
-## one step. Usage: make bump-version VERSION=1.10.3
+## Check the bundled Freeway free-tier snapshot against the live providers. Report
+## only unless asked: FLAGS=--probe-candidates, --write-suggestion <path>, --apply-retired.
+## Makes real calls, one request of free quota per model.
+freeway-refresh:
+	pnpm exec tsx scripts/freeway-refresh.ts $(FLAGS)
+
+## Refresh the pricing snapshot, or stop with recovery steps. Runs before anything else
+## in the targets below, so a stop leaves the version and fragments untouched and the
+## same command can simply be run again. Accepted providers stay written in the working
+## tree. SKIP_PRICING=1 deliberately keeps the existing prices.
+define refresh_pricing
+@if [ "$(SKIP_PRICING)" = "1" ]; then \
+	echo "SKIP_PRICING=1: not refreshing the pricing snapshot."; \
+elif ! pnpm exec tsx scripts/update-provider-pricing.ts; then \
+	echo ""; \
+	echo "$@ STOPPED: the pricing refresh failed or rejected a provider (summary above)."; \
+	echo "Rejected providers kept their existing prices; accepted ones are written in the working tree."; \
+	echo "The version and changelog fragments are untouched."; \
+	echo "The release can proceed only by a deliberate choice:"; \
+	echo "  - fix the scraper, then rerun: make $@ VERSION=$(VERSION)"; \
+	echo "  - or keep the existing prices: make $@ VERSION=$(VERSION) SKIP_PRICING=1"; \
+	exit 1; \
+fi
+endef
+
+## Refresh scraped pricing/capability/context data and bump the app version in one
+## step. Usage: make bump-version VERSION=1.10.3 [SKIP_PRICING=1]
 ## Prefer `make release-prep` when cutting a release — it also consolidates the
 ## unreleased changelog fragments into the version entry the release notes read.
 bump-version:
 	@test -n "$(VERSION)" || (echo "Usage: make bump-version VERSION=x.y.z" && exit 1)
+	$(refresh_pricing)
 	npm version $(VERSION) --no-git-tag-version --allow-same-version
-	pnpm exec tsx scripts/update-provider-pricing.ts
 	@echo "Version bumped to $(VERSION). Still needed:"
 	@echo "  - packages/frontend/src/guides/en/changelog/v$(VERSION).md"
 	@echo "  - commit both"
 
-## Prepare a release ON DEVELOP: consolidate the unreleased changelog fragments
-## into v$(VERSION).md, bump the version, and refresh the bundled pricing snapshot
-## so it is not stale at release time. Commit the result, then merge develop -> main;
-## that merge promotes the smoked image, cuts vX.Y.Z, and publishes the release
-## notes from the file this writes. Usage: make release-prep VERSION=1.60.0
+## Prepare a release ON DEVELOP: refresh the bundled pricing snapshot so it is not
+## stale at release time, then consolidate the unreleased changelog fragments into
+## v$(VERSION).md and bump the version. Commit the result, then merge develop -> main;
+## that merge promotes the smoked image, cuts vX.Y.Z, and publishes the release notes
+## from the file this writes. Usage: make release-prep VERSION=1.60.0
+## The refresh runs first because consolidation deletes the fragments; see
+## refresh_pricing above for what a stop leaves behind and for SKIP_PRICING=1:
+## make release-prep VERSION=1.60.0 SKIP_PRICING=1
 release-prep:
 	@test -n "$(VERSION)" || (echo "Usage: make release-prep VERSION=x.y.z" && exit 1)
+	$(refresh_pricing)
 	node scripts/release-prep.mjs $(VERSION)
-	pnpm exec tsx scripts/update-provider-pricing.ts
 	@echo ""
 	@echo "Next: review the diff, commit, then merge develop -> main."

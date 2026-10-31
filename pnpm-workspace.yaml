@@ -43,6 +43,10 @@ overrides:
   # September advisories include GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p,
   # and GHSA-q2hr-2g5m-vwhr: expansion CPU/memory DoS. The last fix is 5.0.12.
   brace-expansion: '>=5.0.12 <6'
+  # GHSA-g3hv-75wg-m249 (medium): globparts amplification DoS, fixed in 11.0.1.
+  # Dev-only, via eslint's @eslint/config-array, which asks for ^10.2.4, so this
+  # crosses a major until upstream moves to 11.
+  minimatch: 11.0.3
   # GHSA-4cwx-7wf7-3272 (high, published 2026-08-03): undici <7.29.0 has a
   # cross-user information-disclosure and parse-time crash via degenerate
   # private cache directives. Pulled in transitively via every AI-SDK module's
