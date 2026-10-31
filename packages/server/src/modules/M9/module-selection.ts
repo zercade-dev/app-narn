@@ -8,6 +8,7 @@
  * in by the caller.
  */
 import {
+  type AiRunModuleSelection,
   type CostTier,
   type GlobalConfig,
   type Project,
@@ -75,6 +76,19 @@ export interface SelectCapableModuleOptions {
  * cheapest enabled+active module whose built instance satisfies `capability`.
  * Throws `notPossible(...)` when nothing qualifies.
  */
+/**
+ * The part of a saved module selection that still applies to this run. A saved
+ * model and effort belong to the saved module, so they are dropped when the run
+ * asks for a different module: that module's own configured model applies instead.
+ */
+export function savedTuningForRequest(
+  requestedModuleId: string | undefined,
+  saved: AiRunModuleSelection | undefined,
+): { model?: string; reasoningEffort?: string } {
+  if (requestedModuleId !== undefined && requestedModuleId !== saved?.moduleId) return {};
+  return saved ?? {};
+}
+
 export function selectCapableModule(
   registry: Pick<ModuleRegistry, 'listModules' | 'createWithConfig'>,
   project: Project,

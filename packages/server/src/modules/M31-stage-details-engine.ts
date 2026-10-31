@@ -48,7 +48,11 @@ import { logger as defaultLogger } from './M15-console-logger.js';
 import { isAbortError } from './M9/errors.js';
 import { BackgroundRunEngine, type LoggerLike } from './M9/run-engine.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
-import { selectCapableModule, type ModuleLogFn } from './M9/module-selection.js';
+import {
+  savedTuningForRequest,
+  selectCapableModule,
+  type ModuleLogFn,
+} from './M9/module-selection.js';
 import {
   accumulateUsage,
   defaultPricingProvider,
@@ -154,15 +158,16 @@ export class StageDetailsEngine extends BackgroundRunEngine<never> {
     // Requested selection: an explicit request override wins over the saved
     // config; when the request carries one, persist it so it becomes the default.
     const saved = project.stageDetailsConfig;
+    const savedTuning = savedTuningForRequest(request.moduleId, saved);
     const requested: RequestedSelection = {
       ...((request.moduleId ?? saved?.moduleId) !== undefined
         ? { requestedId: request.moduleId ?? saved?.moduleId }
         : {}),
-      ...((request.model ?? saved?.model) !== undefined
-        ? { requestedModel: request.model ?? saved?.model }
+      ...((request.model ?? savedTuning.model) !== undefined
+        ? { requestedModel: request.model ?? savedTuning.model }
         : {}),
-      ...((request.reasoningEffort ?? saved?.reasoningEffort) !== undefined
-        ? { requestedEffort: request.reasoningEffort ?? saved?.reasoningEffort }
+      ...((request.reasoningEffort ?? savedTuning.reasoningEffort) !== undefined
+        ? { requestedEffort: request.reasoningEffort ?? savedTuning.reasoningEffort }
         : {}),
     };
     if (
