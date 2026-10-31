@@ -129,6 +129,8 @@ export function modelSupportsReasoning(
       return undefined;
     }
     case 'google': {
+      // Gemma rejects any thinkingConfig with a 400 ("Thinking budget is not supported").
+      if (/^gemma/i.test(modelId)) return false;
       if (/^gemini-1/i.test(modelId) || /^gemini-2\.0/i.test(modelId)) return false;
       if (/^gemini-2\.5/i.test(modelId) || /^gemini-3/i.test(modelId)) return true;
       return undefined;
@@ -523,7 +525,7 @@ export async function resolveGoogleModels({
         // the feed knows emits non-text output (image generators).
         if (modelEmitsNonTextOnly(id)) continue;
 
-        const thinking = model.thinking === true;
+        const thinking = model.thinking === true && modelSupportsReasoning('google', id) !== false;
         const supportedReasoningEfforts = thinking ? googleEffortsForThinkingModel(id) : [];
 
         const liveContextLength = normalizePositiveInt(model.inputTokenLimit);
