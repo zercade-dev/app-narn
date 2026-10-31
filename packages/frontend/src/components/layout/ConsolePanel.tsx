@@ -332,6 +332,9 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   const unreadErrorCount = open
     ? 0
     : entries.filter((e) => e.level === 'error' && e.timestamp > lastSeenAt).length;
+  const unreadWarningCount = open
+    ? 0
+    : entries.filter((e) => e.level === 'warn' && e.timestamp > lastSeenAt).length;
 
   return (
     <div
@@ -401,6 +404,16 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
               className="font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-fail/10 text-status-fail"
             >
               {unreadErrorCount}
+            </span>
+          )}
+          {unreadWarningCount > 0 && (
+            <span
+              data-testid="console-unread-warnings"
+              aria-label={t('unreadWarnings', { count: unreadWarningCount })}
+              title={t('unreadWarnings', { count: unreadWarningCount })}
+              className="font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-warn/10 text-status-warn"
+            >
+              {unreadWarningCount}
             </span>
           )}
         </button>
@@ -583,7 +596,9 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                       className={cn(
                         'absolute top-0 left-0 w-full flex flex-col py-0.5 px-3',
                         (isLqaFailed || entry.level === 'error') && 'text-status-fail',
-                        isLqaOverflow && 'text-status-warn',
+                        !isLqaFailed &&
+                          (isLqaOverflow || entry.level === 'warn') &&
+                          'text-status-warn',
                       )}
                       style={{ transform: `translateY(${vRow.start}px)` }}
                     >

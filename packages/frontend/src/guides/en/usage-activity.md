@@ -8,6 +8,8 @@ The **Activity** tab is the control center for background jobs. Every long-runni
 
 Each run shows its **type**, **status** (Queued, Running, Paused, Completed, Failed, or Cancelled), progress, and an estimated **cost**. Costs are module-reported estimates derived from each model's price per million tokens, so thinking models can show large token totals relative to characters. Use **Show details** to see exactly what a run translated, any retries, and character/token usage. You can copy a run's id for reference.
 
+If a model keeps rejecting requests with the same error, the run also shows a warning line that names the model, how many strings were affected, what the provider said, and whether those requests moved to another model. A run can finish successfully and still show this line, because the strings may have been translated by another model. Rate limits and passing outages don't trigger it.
+
 ## Managing the queue
 
 * **Pause** / **Resume** a run, or **Start now** to jump a queued run ahead.

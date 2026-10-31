@@ -11,6 +11,8 @@
   "statusDisconnected": "Terputus dari aliran log server",
   "unreadErrors": "{{count}} galat belum dibaca",
   "unreadErrors_other": "{{count}} galat belum dibaca",
+  "unreadWarnings": "{{count}} peringatan belum dibaca",
+  "unreadWarnings_other": "{{count}} peringatan belum dibaca",
   "droppedEntries": "{{count}} entri sebelumnya tidak lagi tersedia",
   "droppedEntries_other": "{{count}} entri sebelumnya tidak lagi tersedia",
   "searchPlaceholder": "Cari log…",

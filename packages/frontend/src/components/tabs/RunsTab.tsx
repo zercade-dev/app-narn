@@ -971,6 +971,27 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                 )}
                               </div>
                             )}
+                            {run.providerFailureNotices?.map((notice) => (
+                              <div
+                                key={notice.id}
+                                className="mt-1 flex items-start gap-1 text-[10px] text-status-warn"
+                                data-testid={`run-provider-failure-${run.runId}-${notice.id}`}
+                              >
+                                <AlertCircle className="size-3 shrink-0" />
+                                <span className="min-w-0 break-words">
+                                  {t('runs.providerFailureNotice', {
+                                    model: notice.model,
+                                    count: notice.count,
+                                    message: notice.message,
+                                  })}{' '}
+                                  {t(
+                                    notice.rerouted
+                                      ? 'runs.providerFailureRerouted'
+                                      : 'runs.providerFailureNotRerouted',
+                                  )}
+                                </span>
+                              </div>
+                            ))}
                             {isJudge && run.judgeSummary && run.judgeSummary.judged > 0 && (
                               <>
                                 <div

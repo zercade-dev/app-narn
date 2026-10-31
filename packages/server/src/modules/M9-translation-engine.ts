@@ -120,6 +120,13 @@ import {
 } from './M9/errors.js';
 import { chunkPackedDecisions, groupDecisions, packAssignedGroups } from './M9/packing.js';
 import {
+  countsAsProviderFailure,
+  createProviderFailureTracker,
+  markProviderFailuresRerouted,
+  recordProviderFailure,
+  type ProviderFailureTracker,
+} from './M9/provider-failure-notices.js';
+import {
   type BucketSourceDeps,
   bucketRateLimits,
   coolBucket,
@@ -530,10 +537,14 @@ interface FreewayDispatchArgs {
    */
   onReroute?: (info: {
     from: string;
+    /** The model the batch is moving off. */
+    fromModel: string;
     to: string;
     reason: 'rate-limit' | 'auth' | 'provider-error';
     retryAfterMs?: number;
   }) => void;
+  /** Reports a provider call that failed `occurrences` strings at once. */
+  onProviderFailure?: (info: { model: string; error: unknown; occurrences: number }) => void;
   /** Recursion depth of the parse-failure split (0 = the original batch). */
   splitDepth?: number;
   /** Reports a parse-failure split so the caller can record a run detail. */
@@ -697,6 +708,8 @@ interface RunDetailsAcc {
    * one repeated line, not correctness.
    */
   freewayThrottled: Set<string>;
+  /** Repeated-failure counts below the notice threshold. In-memory only. */
+  providerFailures: ProviderFailureTracker;
 }
 
 export class TranslationEngine {
@@ -3959,6 +3972,7 @@ export class TranslationEngine {
       unpackReason,
       admission,
       onThrottle,
+      onProviderFailure,
     } = args;
     const strikeCap = args.splitCaps?.get(state.bucketKey);
     if (strikeCap !== undefined && strikeCap >= 1 && strikeCap < jobs.length) {
@@ -4017,6 +4031,7 @@ export class TranslationEngine {
         }
         onReroute?.({
           from: state.bucketKey,
+          fromModel: state.modelId ?? state.moduleId,
           to: revalidated.bucketKey,
           reason: unpackReason ?? 'provider-error',
         });
@@ -4259,6 +4274,13 @@ export class TranslationEngine {
         // batch: it earns the same single failover hop plus a cooldown, so one
         // dead model cannot drain a run while healthy buckets sit idle.
         const providerFailure = !rateLimited && !authFailure;
+        if (countsAsProviderFailure(err)) {
+          onProviderFailure?.({
+            model: state.modelId ?? state.moduleId,
+            error: err,
+            occurrences: jobs.length,
+          });
+        }
         const languages = new Set(jobs.map((job) => job.targetLanguage));
         // A mixed chunk that came back all-errored with a PARSE message is a
         // format problem, not a sick bucket: the shared provider core already
@@ -4453,6 +4475,7 @@ export class TranslationEngine {
           if (!next) return { kind: 'error', error: err, authCancel: false };
           onReroute?.({
             from: state.bucketKey,
+            fromModel: state.modelId ?? state.moduleId,
             to: revalidated.bucketKey,
             reason: rateLimited ? 'rate-limit' : providerFailure ? 'provider-error' : 'auth',
             ...(rateLimited ? { retryAfterMs: retryAfterMsOf(err) } : {}),
@@ -5388,6 +5411,15 @@ export class TranslationEngine {
             error: errMsg,
             context: e.decision.entry.context ?? null,
           });
+          if (moduleResult?.error && countsAsProviderFailure(moduleResult.error)) {
+            this.noteProviderFailure(
+              runId,
+              status,
+              currentFreewayState?.modelId ?? metricsModel ?? moduleId,
+              moduleResult.error,
+              1,
+            );
+          }
           this.recordFailure(status, e.decision.entry.id, e.decision.targetLanguage, errMsg);
           settled.add(settleKey(e.decision));
           metricsCollector.recordFailure(moduleId, metricsModel);
@@ -5639,7 +5671,15 @@ export class TranslationEngine {
             createModule: createFreewayModule,
             translateOptions: { ...dispatchOptions, onJobComplete },
             signal,
-            onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
+            onReroute: (info) => {
+              this.recordFreewayDetail(runId, formatRerouteDetail(info));
+              const tracker = this.details.get(runId)?.providerFailures;
+              if (info.reason === 'provider-error' && tracker) {
+                markProviderFailuresRerouted(status, tracker, info.fromModel);
+              }
+            },
+            onProviderFailure: (info) =>
+              this.noteProviderFailure(runId, status, info.model, info.error, info.occurrences),
             onSplit: (info) => this.recordFreewayDetail(runId, formatSplitDetail(info)),
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
             minBand: freewayMinBand(status.request),
@@ -5785,6 +5825,16 @@ export class TranslationEngine {
         if (batchError !== undefined) {
           if (isAbortError(batchError) || signal?.aborted) {
             return;
+          }
+          // A Freeway batch already reported this from its dispatch hop.
+          if (bucketKey === undefined && countsAsProviderFailure(batchError)) {
+            this.noteProviderFailure(
+              runId,
+              status,
+              metricsModel ?? moduleId,
+              batchError,
+              batchJobs.filter(({ index }) => !processedIndices.has(index)).length,
+            );
           }
           // A failed dispatch batch only fails its own jobs; other batches in
           // the group proceed and their results are persisted normally.
@@ -6338,6 +6388,7 @@ export class TranslationEngine {
       previousValues: new Map(),
       freewaySplitCaps: new Map(),
       freewayThrottled: new Set(),
+      providerFailures: createProviderFailureTracker(),
     });
   }
 
@@ -6373,6 +6424,7 @@ export class TranslationEngine {
       previousValues,
       freewaySplitCaps: new Map(),
       freewayThrottled: new Set(),
+      providerFailures: createProviderFailureTracker(),
       ...(existing.freeway ? { freeway: [...existing.freeway] } : {}),
     });
   }
@@ -6787,6 +6839,20 @@ export class TranslationEngine {
       });
     }
     this.emitProgress(runId, status);
+  }
+
+  /** Count a provider failure towards the run's repeated-failure notices. */
+  private noteProviderFailure(
+    runId: string,
+    status: RunStatus,
+    model: string,
+    error: unknown,
+    occurrences: number,
+  ): void {
+    const tracker = this.details.get(runId)?.providerFailures;
+    if (!tracker || occurrences === 0) return;
+    const message = sanitizeLogObject({ m: toErrorMessage(error) }).m;
+    recordProviderFailure(status, tracker, { model, message, occurrences });
   }
 
   private emitProgress(runId: string, status: RunStatus): void {

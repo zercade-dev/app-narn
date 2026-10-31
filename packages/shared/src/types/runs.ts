@@ -375,6 +375,22 @@ export interface RunDetails {
 /**
  * Core data structure for tracking the progress and history of translation runs.
  */
+/**
+ * A provider failure that kept recurring during a run: one group of failures
+ * sharing a model and a normalized message. `message` is sanitized and bounded
+ * before it is stored.
+ */
+export interface ProviderFailureNotice {
+  /** Stable for the group within the run; lets the client notify once per group. */
+  id: string;
+  model: string;
+  message: string;
+  /** Strings this failure has hit so far. */
+  count: number;
+  /** True when requests that failed this way moved to another model. */
+  rerouted: boolean;
+}
+
 export interface RunStatus {
   runId: string;
   projectId: string;
@@ -463,4 +479,9 @@ export interface RunStatus {
     skipReason?: string;
     reason?: 'quota' | 'provider-error';
   };
+  /**
+   * For translation runs: failures that recurred on one model with one error,
+   * at most ten groups. Absent when nothing recurred.
+   */
+  providerFailureNotices?: ProviderFailureNotice[];
 }

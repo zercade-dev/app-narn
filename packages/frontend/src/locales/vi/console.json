@@ -11,6 +11,8 @@
   "statusDisconnected": "Đã ngắt kết nối khỏi luồng nhật ký của máy chủ",
   "unreadErrors": "{{count}} lỗi chưa đọc",
   "unreadErrors_other": "{{count}} lỗi chưa đọc",
+  "unreadWarnings": "{{count}} cảnh báo chưa đọc",
+  "unreadWarnings_other": "{{count}} cảnh báo chưa đọc",
   "droppedEntries": "{{count}} mục nhật ký trước đó không còn hiển thị",
   "droppedEntries_other": "{{count}} mục nhật ký trước đó không còn hiển thị",
   "searchPlaceholder": "Tìm trong nhật ký…",

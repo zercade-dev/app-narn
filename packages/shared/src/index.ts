@@ -127,6 +127,7 @@ export {
 } from './types/runs.js';
 export type {
   RunStatus,
+  ProviderFailureNotice,
   RunErrorEntry,
   RunUsageEntry,
   RunRequest,

@@ -11,6 +11,8 @@
   "statusDisconnected": "已断开与服务器日志流的连接",
   "unreadErrors": "{{count}} 条未读错误",
   "unreadErrors_other": "{{count}} 条未读错误",
+  "unreadWarnings": "{{count}} 条未读警告",
+  "unreadWarnings_other": "{{count}} 条未读警告",
   "droppedEntries": "{{count}} 条较早的日志已不再可用",
   "droppedEntries_other": "{{count}} 条较早的日志已不再可用",
   "searchPlaceholder": "搜索日志…",
