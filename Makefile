@@ -51,14 +51,30 @@ bump-version:
 	@echo "  - packages/frontend/src/guides/en/changelog/v$(VERSION).md"
 	@echo "  - commit both"
 
-## Prepare a release ON DEVELOP: consolidate the unreleased changelog fragments
-## into v$(VERSION).md, bump the version, and refresh the bundled pricing snapshot
-## so it is not stale at release time. Commit the result, then merge develop -> main;
-## that merge promotes the smoked image, cuts vX.Y.Z, and publishes the release
-## notes from the file this writes. Usage: make release-prep VERSION=1.60.0
+## Prepare a release ON DEVELOP: refresh the bundled pricing snapshot so it is not
+## stale at release time, then consolidate the unreleased changelog fragments into
+## v$(VERSION).md and bump the version. Commit the result, then merge develop -> main;
+## that merge promotes the smoked image, cuts vX.Y.Z, and publishes the release notes
+## from the file this writes. Usage: make release-prep VERSION=1.60.0
+## The refresh runs first because consolidation deletes the fragments, so a stop here
+## leaves them in place and the same command can simply be run again. If a provider's
+## new prices fail validation, this stops; accepted providers stay written in the
+## working tree. Fix the scraper and rerun, or deliberately release on the existing
+## prices with SKIP_PRICING=1: make release-prep VERSION=1.60.0 SKIP_PRICING=1
 release-prep:
 	@test -n "$(VERSION)" || (echo "Usage: make release-prep VERSION=x.y.z" && exit 1)
+	@if [ "$(SKIP_PRICING)" = "1" ]; then \
+		echo "SKIP_PRICING=1: not refreshing the pricing snapshot."; \
+	elif ! pnpm exec tsx scripts/update-provider-pricing.ts; then \
+		echo ""; \
+		echo "release-prep STOPPED: the pricing refresh failed or rejected a provider (summary above)."; \
+		echo "Rejected providers kept their existing prices; accepted ones are written in the working tree."; \
+		echo "Nothing was consolidated: the fragments and version are untouched."; \
+		echo "The release can proceed only by a deliberate choice:"; \
+		echo "  - fix the scraper, then rerun: make release-prep VERSION=$(VERSION)"; \
+		echo "  - or keep the existing prices: make release-prep VERSION=$(VERSION) SKIP_PRICING=1"; \
+		exit 1; \
+	fi
 	node scripts/release-prep.mjs $(VERSION)
-	pnpm exec tsx scripts/update-provider-pricing.ts
 	@echo ""
 	@echo "Next: review the diff, commit, then merge develop -> main."

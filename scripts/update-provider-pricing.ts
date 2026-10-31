@@ -27,37 +27,33 @@
  *   npx tsx scripts/update-provider-pricing.ts --provider=google   (single provider)
  *
  * Re-run periodically (prices change without notice) and commit the diff in
- * pricing-data/provider-pricing.json.
+ * pricing-data/provider-pricing.json. A provider whose new result fails the checks in
+ * provider-pricing-lib.ts keeps its existing data and makes this exit non-zero; the others
+ * are still written.
  */
 import { chromium, type Page } from 'playwright';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as prettier from 'prettier';
+import {
+  applyProviderResults,
+  formatPricingSummary,
+  parseAnthropicPricing,
+  parseDeepSeekPricing,
+  parseGoogleSections,
+  parseOpenAIFlightPayload,
+  parseOpenAITables,
+  type PricingSnapshot,
+  type ScrapedProviderResult,
+  type TableRows,
+} from './provider-pricing-lib.js';
 
 const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_PATH = resolve(
   SCRIPT_DIR,
   '../packages/shared/src/ai-sdk-provider/pricing-data/provider-pricing.json',
 );
-
-export interface ScrapedModelPricing {
-  /** Provider-native model id (or family-prefix pattern), e.g. "gpt-4o". */
-  id: string;
-  inputCostPerMillion?: number;
-  outputCostPerMillion?: number;
-  cachedInputCostPerMillion?: number;
-  cacheWriteCostPerMillion?: number;
-  contextLength?: number;
-  capabilityTags?: string[];
-}
-
-export interface ScrapedProviderResult {
-  sourceUrl: string;
-  models: ScrapedModelPricing[];
-}
-
-type TableRows = string[][];
 
 async function extractTables(page: Page): Promise<TableRows[]> {
   return page.$$eval('table', (tables) =>
@@ -69,20 +65,6 @@ async function extractTables(page: Page): Promise<TableRows[]> {
   );
 }
 
-function parseFirstDollarAmount(cell: string | undefined): number | undefined {
-  if (!cell) return undefined;
-  const m = cell.match(/\$?([\d]+(?:\.\d+)?)/);
-  return m ? Number(m[1]) : undefined;
-}
-
-function parseContextTokens(cell: string | undefined): number | undefined {
-  if (!cell) return undefined;
-  const m = cell.match(/([\d.]+)\s*([MK])\b/i);
-  if (!m) return undefined;
-  const n = Number(m[1]);
-  return m[2].toUpperCase() === 'M' ? Math.round(n * 1_000_000) : Math.round(n * 1_000);
-}
-
 // ─── DeepSeek ─────────────────────────────────────────────────────────────────
 
 const DEEPSEEK_URL = 'https://api-docs.deepseek.com/quick_start/pricing';
@@ -90,53 +72,8 @@ const DEEPSEEK_URL = 'https://api-docs.deepseek.com/quick_start/pricing';
 async function scrapeDeepSeek(page: Page): Promise<ScrapedProviderResult> {
   await page.goto(DEEPSEEK_URL, { waitUntil: 'networkidle' });
   const tables = await extractTables(page);
-  const table = tables.find((rows) => rows[0]?.[0]?.toUpperCase().includes('MODEL'));
-  if (!table) throw new Error('[deepseek] model/pricing table not found on page');
-
-  const header = table[0];
-  const modelIds = header.slice(1).map((h) => h.replace(/\(\d+\)/g, '').trim());
-  const findRow = (label: string) =>
-    table.find((r) => r[0]?.toUpperCase().includes(label.toUpperCase()));
-  // A merged "PRICING" section-header cell only appears in the DOM on the
-  // FIRST row of its rowspan group (extractTables() doesn't virtualize
-  // rowspans) — confirmed live: the CACHE HIT row is
-  // ["PRICING", "1M INPUT TOKENS (CACHE HIT)", "$0.0028", "$0.003625"], one
-  // cell ahead of the plain CACHE MISS row ["1M INPUT TOKENS (CACHE MISS)",
-  // "$0.14", "$0.435"]. findRow()'s cell[0]-only check never finds the CACHE
-  // HIT row. Search any cell for the label and read values from the END of
-  // the row instead — correct regardless of how many leading label/header
-  // cells precede them.
-  const findRowValuesFromEnd = (label: string, count: number): string[] | undefined => {
-    const row = table.find((r) => r.some((c) => c.toUpperCase().includes(label.toUpperCase())));
-    return row?.slice(-count);
-  };
-  const cacheHitValues = findRowValuesFromEnd('CACHE HIT', modelIds.length);
-  const cacheMissRow = findRow('CACHE MISS');
-  const outputRow = table.find(
-    (r) => /OUTPUT TOKENS/i.test(r[0] ?? '') && !/INPUT/i.test(r[0] ?? ''),
-  );
-  const contextRow = findRow('CONTEXT LENGTH');
-  const toolCallsRow = findRow('TOOL CALLS');
-
-  const models: ScrapedModelPricing[] = modelIds.map((id, i) => ({
-    id,
-    cachedInputCostPerMillion: parseFirstDollarAmount(cacheHitValues?.[i]),
-    inputCostPerMillion: parseFirstDollarAmount(cacheMissRow?.[i + 1]),
-    outputCostPerMillion: parseFirstDollarAmount(outputRow?.[i + 1]),
-    contextLength: parseContextTokens(contextRow?.[1]),
-    ...(toolCallsRow?.[i + 1]?.includes('✓') ? { capabilityTags: ['tools'] } : {}),
-  }));
-
-  // `deepseek-chat` / `deepseek-reasoner` are deprecated 2026-07-24 but still
-  // served until then, aliasing v4-flash's non-thinking/thinking modes at the
-  // same price (per the page's own footnote).
-  const flash = models.find((m) => m.id === 'deepseek-v4-flash');
-  if (flash) {
-    models.push({ ...flash, id: 'deepseek-chat' });
-    models.push({ ...flash, id: 'deepseek-reasoner' });
-  }
-
-  return { sourceUrl: DEEPSEEK_URL, models };
+  const pageText = await page.locator('body').innerText();
+  return { sourceUrl: DEEPSEEK_URL, models: parseDeepSeekPricing(tables, pageText) };
 }
 
 // ─── Google (Gemini) ────────────────────────────────────────────────────────
@@ -171,20 +108,7 @@ async function scrapeGoogle(page: Page): Promise<ScrapedProviderResult> {
     return out;
   });
 
-  const models: ScrapedModelPricing[] = [];
-  for (const { id, rows } of sections) {
-    const inputRow = rows.find((r) => /input price/i.test(r[0] ?? ''));
-    const outputRow = rows.find((r) => /output price/i.test(r[0] ?? ''));
-    if (!inputRow && !outputRow) continue;
-    // Paid-tier price is the last populated column; tiered prices (e.g. "<=200k
-    // / >200k") list the smaller/base tier first — take the first $ amount.
-    const inputCostPerMillion = parseFirstDollarAmount(inputRow?.[inputRow.length - 1]);
-    const outputCostPerMillion = parseFirstDollarAmount(outputRow?.[outputRow.length - 1]);
-    if (inputCostPerMillion === undefined && outputCostPerMillion === undefined) continue;
-    models.push({ id, inputCostPerMillion, outputCostPerMillion });
-  }
-
-  return { sourceUrl: GOOGLE_URL, models };
+  return { sourceUrl: GOOGLE_URL, models: parseGoogleSections(sections) };
 }
 
 // ─── OpenAI ───────────────────────────────────────────────────────────────────
@@ -212,45 +136,8 @@ async function scrapeOpenAI(page: Page): Promise<ScrapedProviderResult> {
   await page.goto(OPENAI_URL, { waitUntil: 'networkidle' });
   const tables = await extractTables(page);
 
-  const models: ScrapedModelPricing[] = [];
-  for (const rows of tables) {
-    // The page renders each chat-model family as several SAME-SHAPED tables
-    // side by side — one per pricing tier (Standard/Batch/Flex/Priority),
-    // sharing the same model ids at different prices — plus unrelated tables
-    // (Modality-based realtime/image pricing, tool pricing, fine-tuning) that
-    // don't share the `[id, input, cachedInput, output, ...]` column layout.
-    // Only accept the chat-model shape (a header row of exactly
-    // `[Model, Input, Cached input, Output, ...]`), and only its first
-    // occurrence of each id (tiers appear in Standard-first DOM order, so
-    // later same-id rows are the non-Standard tiers, e.g. Priority runs ~2.5x
-    // Standard and Batch/Flex run ~0.5x — confirmed by inspecting the tier
-    // tab labels alongside the raw table prices on 2026-07-06).
-    const headerRow = rows.find((r) => r[0]?.toUpperCase() === 'MODEL');
-    if (headerRow?.[1]?.toUpperCase() !== 'INPUT') continue;
-    for (const row of rows) {
-      const id = row[0];
-      if (!id || !/^(gpt-|o[1-9]|chatgpt|chat-latest)/i.test(id)) continue;
-      if (models.some((m) => m.id === id)) continue;
-      const inputCostPerMillion = parseFirstDollarAmount(row[1]);
-      const cachedInputCostPerMillion = parseFirstDollarAmount(row[2]);
-      const outputCostPerMillion = parseFirstDollarAmount(row[3]);
-      if (inputCostPerMillion === undefined && outputCostPerMillion === undefined) continue;
-      models.push({ id, inputCostPerMillion, cachedInputCostPerMillion, outputCostPerMillion });
-    }
-  }
-
-  // Safety-net fallback only: if the chat-model tables above yielded nothing
-  // (e.g. the page's rendering strategy changes again), recover pricing from
-  // the raw-HTML embedded React Server Components "flight" payload, which
-  // carries the same data as compact [0,"id"],[0,price]... tuples even before
-  // hydration (confirmed present via curl on 2026-07-06).
-  if (models.length === 0) {
-    const html = await page.content();
-    const rscModels = parseOpenAIFlightPayload(html);
-    for (const m of rscModels) {
-      if (!models.some((existing) => existing.id === m.id)) models.push(m);
-    }
-  }
+  let models = parseOpenAITables(tables);
+  if (models.length === 0) models = parseOpenAIFlightPayload(await page.content());
 
   // Real per-model data from each model's own detail page: the Features
   // section's "Function calling: Supported|Not supported" field, the plain-
@@ -301,57 +188,9 @@ async function scrapeOpenAI(page: Page): Promise<ScrapedProviderResult> {
   return { sourceUrl: OPENAI_URL, models };
 }
 
-/**
- * Best-effort decoder for the specific `[0,{"model":[0,"gpt-4o"],"rows":[...
- * [0,2.5],[0,1.25],[0,10]...]}]`-shaped tuples OpenAI's Next.js build embeds in
- * the raw page HTML. Deliberately narrow (regex over the raw HTML text, not a
- * general RSC-payload parser) — it only needs to recover `model` + the first
- * three numeric `rows` entries (standard input / cached-input / output) for
- * ids this script doesn't already have from a real <table>.
- */
-export function parseOpenAIFlightPayload(html: string): ScrapedModelPricing[] {
-  const out: ScrapedModelPricing[] = [];
-  const seen = new Set<string>();
-  const modelBlockRe =
-    /"model":\[0,&quot;([\w.-]+)&quot;\][^[]*?"rows":\[1,\[\[1,\[((?:\[0,(?:&quot;[^&]*&quot;|-?[\d.]+|null)\],?)+)\]/g;
-  let match: RegExpExecArray | null;
-  while ((match = modelBlockRe.exec(html))) {
-    const id = match[1];
-    if (seen.has(id) || !/^(gpt-4o|gpt-4\.1|o[1-9])/i.test(id)) continue;
-    const nums = Array.from(match[2].matchAll(/\[0,(&quot;[^&]*&quot;|-?[\d.]+|null)\]/g)).map(
-      (m) => m[1],
-    );
-    const parseNum = (s: string | undefined): number | undefined => {
-      if (!s || s === 'null' || s.includes('&quot;-&quot;')) return undefined;
-      const n = Number(s);
-      return Number.isFinite(n) ? n : undefined;
-    };
-    const [input, cached, output] = nums;
-    if (parseNum(input) === undefined && parseNum(output) === undefined) continue;
-    seen.add(id);
-    out.push({
-      id,
-      inputCostPerMillion: parseNum(input),
-      cachedInputCostPerMillion: parseNum(cached),
-      outputCostPerMillion: parseNum(output),
-    });
-  }
-  return out;
-}
-
 // ─── Anthropic ────────────────────────────────────────────────────────────────
 
 const ANTHROPIC_URL = 'https://claude.com/pricing';
-
-/** "Opus 4.8" -> "claude-opus-4-8" (matches the live API's hyphenated-minor-version ids). */
-function anthropicDisplayNameToId(name: string): string {
-  const slug = name
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/(\d)\.(\d)/g, '$1-$2');
-  return `claude-${slug}`;
-}
 
 async function scrapeAnthropic(page: Page): Promise<ScrapedProviderResult> {
   await page.goto(ANTHROPIC_URL, { waitUntil: 'networkidle' });
@@ -363,28 +202,7 @@ async function scrapeAnthropic(page: Page): Promise<ScrapedProviderResult> {
   await page.waitForTimeout(1000);
   const text = await page.locator('body').innerText();
 
-  const models: ScrapedModelPricing[] = [];
-  // Card pattern (innerText, no markup) — each label and its value are on
-  // SEPARATE lines, an optional "*" footnote marker can follow a label, and
-  // the one-line description under a "latest model" card's name is absent on
-  // "legacy model" cards:
-  //   "Opus 4.8\nIdeal for complex agentic coding...\nInput\n$5 / MTok\n
-  //    Output\n$25 / MTok\nPrompt caching\nWrite\n$6.25 / MTok\nRead\n$0.50 / MTok"
-  const cardRe =
-    /\n([A-Z][a-zA-Z]+ \d+(?:\.\d+)?)\n(?:[^\n]*\n){0,2}?Input\*?\n\$?([\d.]+)\s*\/\s*MTok\nOutput\*?\n\$?([\d.]+)\s*\/\s*MTok(?:\n(?:[^\n]*\n){0,2}?Write\*?\n\$?([\d.]+)\s*\/\s*MTok\nRead\*?\n\$?([\d.]+)\s*\/\s*MTok)?/g;
-  let match: RegExpExecArray | null;
-  while ((match = cardRe.exec(text))) {
-    const [, name, input, output, cacheWrite, cacheRead] = match;
-    models.push({
-      id: anthropicDisplayNameToId(name),
-      inputCostPerMillion: Number(input),
-      outputCostPerMillion: Number(output),
-      ...(cacheWrite ? { cacheWriteCostPerMillion: Number(cacheWrite) } : {}),
-      ...(cacheRead ? { cachedInputCostPerMillion: Number(cacheRead) } : {}),
-    });
-  }
-
-  return { sourceUrl: ANTHROPIC_URL, models };
+  return { sourceUrl: ANTHROPIC_URL, models: parseAnthropicPricing(text) };
 }
 
 // ─── OpenRouter capability gap-fill (scrape-time only, capabilities never pricing) ──
@@ -612,11 +430,13 @@ async function main(): Promise<void> {
 
   const browser = await chromium.launch();
   const results: Record<string, ScrapedProviderResult> = {};
+  const failures: Record<string, string> = {};
   try {
     for (const provider of providers) {
       const scrape = SCRAPERS[provider];
       if (!scrape) {
         console.error(`Unknown provider "${provider}". Known: ${Object.keys(SCRAPERS).join(', ')}`);
+        failures[provider] = 'unknown provider';
         continue;
       }
       const page = await browser.newPage();
@@ -638,6 +458,7 @@ async function main(): Promise<void> {
         }
       } catch (err) {
         console.error(`  FAILED to scrape ${provider}:`, err);
+        failures[provider] = err instanceof Error ? err.message : String(err);
       } finally {
         await page.close();
       }
@@ -650,37 +471,44 @@ async function main(): Promise<void> {
 
   await checkLiveModelCoverage(results);
 
-  if (Object.keys(results).length === 0) {
-    console.error('No providers scraped successfully; not writing output.');
-    process.exitCode = 1;
-    return;
-  }
-
   // Merge into any existing file so a single-provider re-run (--provider=x)
   // doesn't wipe out the other three.
-  let existing: { providers?: Record<string, ScrapedProviderResult> } = {};
+  let existing: PricingSnapshot = {};
   try {
     existing = (await import(OUTPUT_PATH, { with: { type: 'json' } })).default;
   } catch {
     // No existing file yet — first run.
   }
 
-  const merged = {
-    generatedAt: new Date().toISOString(),
-    providers: { ...existing.providers, ...results },
-  };
+  const { data, reports, anyRejected } = applyProviderResults(
+    existing,
+    results,
+    failures,
+    new Date().toISOString(),
+  );
+  console.log(`\n${formatPricingSummary(reports)}`);
+  if (anyRejected) process.exitCode = 1;
+
+  if (!data) {
+    console.error('\nNo provider was accepted; not writing output.');
+    process.exitCode = 1;
+    return;
+  }
 
   mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
   // Format with this repo's own prettier config so `pnpm format:check` doesn't
   // flag the freshly-scraped snapshot (prettier collapses short arrays like
   // `capabilityTags` onto one line; plain JSON.stringify never does).
   const config = await prettier.resolveConfig(OUTPUT_PATH);
-  const formatted = await prettier.format(JSON.stringify(merged, null, 2), {
+  const formatted = await prettier.format(JSON.stringify(data, null, 2), {
     ...config,
     filepath: OUTPUT_PATH,
   });
   writeFileSync(OUTPUT_PATH, formatted);
   console.log(`\nWrote ${OUTPUT_PATH}`);
+  if (anyRejected) {
+    console.error('Rejected providers kept their existing data. See the summary above.');
+  }
 }
 
 main().catch((err) => {
