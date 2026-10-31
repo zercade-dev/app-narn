@@ -25,6 +25,8 @@
  * Usage (from the workspace root):
  *   npx tsx scripts/update-provider-pricing.ts
  *   npx tsx scripts/update-provider-pricing.ts --provider=google   (single provider)
+ *   npx tsx scripts/update-provider-pricing.ts --prune-unlisted    (drop models the page
+ *                                                                   no longer lists)
  *
  * Re-run periodically (prices change without notice) and commit the diff in
  * pricing-data/provider-pricing.json. A provider whose new result fails the checks in
@@ -485,6 +487,7 @@ async function main(): Promise<void> {
     results,
     failures,
     new Date().toISOString(),
+    { pruneUnlisted: process.argv.includes('--prune-unlisted') },
   );
   console.log(`\n${formatPricingSummary(reports)}`);
   if (anyRejected) process.exitCode = 1;

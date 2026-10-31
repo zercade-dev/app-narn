@@ -369,6 +369,7 @@ export function parseAnthropicPricing(text: string): ScrapedModelPricing[] {
 
 const MIN_COUNT_RATIO = 0.6;
 const MAX_PRICE_FACTOR = 5;
+const MAX_LOST_CACHE_PRICE_RATIO = 0.2;
 
 const PRICE_FIELDS = [
   ['input', 'inputCostPerMillion'],
@@ -433,6 +434,21 @@ export function validateProviderResult(
       }
     }
   }
+
+  // A parser that stops finding a cache column loses that price everywhere without any
+  // single value looking wrong. Models missing from the scrape aren't counted: their old
+  // rows are carried forward, prices included.
+  for (const [label, field] of PRICE_FIELDS) {
+    if (label !== 'cached' && label !== 'cacheWrite') continue;
+    const had = (previous ?? []).filter((p) => p[field] !== undefined);
+    const remaining = had.filter((p) => next.some((m) => m.id === p.id));
+    const lost = remaining.filter((p) => next.find((m) => m.id === p.id)?.[field] === undefined);
+    if (lost.length > remaining.length * MAX_LOST_CACHE_PRICE_RATIO) {
+      reasons.push(
+        `${label} price disappeared from ${lost.length} of ${remaining.length} models that had it`,
+      );
+    }
+  }
   return reasons;
 }
 
@@ -472,6 +488,8 @@ export interface ProviderReport {
   oldCount: number;
   newCount: number;
   diff: ProviderDiff;
+  /** Previous models the page no longer lists, whose old rows were carried forward. */
+  keptUnlisted: string[];
   /** Set when the new result was refused and the existing data kept. */
   rejected?: string[];
 }
@@ -487,24 +505,42 @@ export interface AppliedResults {
  * Merges scraped results over the existing snapshot, accepted providers only. `failures`
  * holds providers whose scrape threw, by message. A provider outside `results` and
  * `failures` (a single-provider run) is left alone without being reported. `generatedAt`
- * only moves when something was accepted, and `scrapedAt` says which providers that was.
+ * only moves when something was accepted, and `scrapedAt` says which providers that was;
+ * a rejected provider with no `scrapedAt` yet is dated by the old `generatedAt`.
+ *
+ * A model the page stops listing keeps its old row: lookups are by exact id, and a model
+ * can stay callable after leaving a pricing page. `pruneUnlisted` drops those rows instead.
  */
 export function applyProviderResults(
   existing: PricingSnapshot,
   results: Record<string, ScrapedProviderResult>,
   failures: Record<string, string>,
   now: string,
+  options: { pruneUnlisted?: boolean } = {},
 ): AppliedResults {
   const providers = { ...existing.providers };
   const reports: Record<string, ProviderReport> = {};
   let anyAccepted = false;
 
+  const keepExisting = (name: string) => {
+    const old = existing.providers?.[name];
+    if (old && !old.scrapedAt && existing.generatedAt) {
+      providers[name] = {
+        sourceUrl: old.sourceUrl,
+        scrapedAt: existing.generatedAt,
+        models: old.models,
+      };
+    }
+  };
+
   for (const [name, message] of Object.entries(failures)) {
+    keepExisting(name);
     const oldCount = existing.providers?.[name]?.models.length ?? 0;
     reports[name] = {
       oldCount,
       newCount: 0,
       diff: { added: [], removed: [], changed: [] },
+      keptUnlisted: [],
       rejected: [`scrape failed: ${message}`],
     };
   }
@@ -512,15 +548,30 @@ export function applyProviderResults(
   for (const [name, result] of Object.entries(results)) {
     const previous = existing.providers?.[name]?.models;
     const rejected = validateProviderResult(previous, result.models);
+    const diff = diffProviderModels(previous ?? [], result.models);
+    if (rejected.length > 0) {
+      keepExisting(name);
+      reports[name] = {
+        oldCount: previous?.length ?? 0,
+        newCount: result.models.length,
+        diff,
+        keptUnlisted: [],
+        rejected,
+      };
+      continue;
+    }
+    const carried = options.pruneUnlisted
+      ? []
+      : (previous ?? []).filter((p) => diff.removed.includes(p.id));
+    const models = [...result.models, ...carried];
     reports[name] = {
       oldCount: previous?.length ?? 0,
-      newCount: result.models.length,
-      diff: diffProviderModels(previous ?? [], result.models),
-      ...(rejected.length > 0 ? { rejected } : {}),
+      newCount: models.length,
+      diff,
+      keptUnlisted: carried.map((m) => m.id),
     };
-    if (rejected.length > 0) continue;
     anyAccepted = true;
-    providers[name] = { sourceUrl: result.sourceUrl, scrapedAt: now, models: result.models };
+    providers[name] = { sourceUrl: result.sourceUrl, scrapedAt: now, models };
   }
 
   return {
@@ -534,7 +585,7 @@ export function formatPricingSummary(reports: Record<string, ProviderReport>): s
   const lines: string[] = ['Pricing summary:'];
   const show = (value: number | undefined) => (value === undefined ? '-' : String(value));
   for (const [name, report] of Object.entries(reports)) {
-    const { oldCount, newCount, diff, rejected } = report;
+    const { oldCount, newCount, diff, keptUnlisted, rejected } = report;
     lines.push(
       rejected
         ? `  ${name}: REJECTED, keeping ${oldCount} existing model(s) (scraped ${newCount})`
@@ -542,7 +593,13 @@ export function formatPricingSummary(reports: Record<string, ProviderReport>): s
     );
     for (const reason of rejected ?? []) lines.push(`    reason: ${reason}`);
     if (diff.added.length > 0) lines.push(`    added: ${diff.added.join(', ')}`);
-    if (diff.removed.length > 0) lines.push(`    removed: ${diff.removed.join(', ')}`);
+    const removed = diff.removed.filter((id) => !keptUnlisted.includes(id));
+    if (keptUnlisted.length > 0) {
+      lines.push(`    kept, not listed on page: ${keptUnlisted.join(', ')}`);
+    }
+    if (removed.length > 0) {
+      lines.push(`    ${rejected ? 'not listed on page' : 'removed'}: ${removed.join(', ')}`);
+    }
     for (const c of diff.changed) {
       lines.push(`    changed: ${c.id} ${c.field} ${show(c.from)} -> ${show(c.to)}`);
     }

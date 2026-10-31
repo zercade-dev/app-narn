@@ -39,14 +39,33 @@ verify:
 sync-glossaries:
 	pnpm exec tsx scripts/sync-global-glossaries.ts $(FLAGS)
 
-## Bump the app version and refresh scraped pricing/capability/context data in
-## one step. Usage: make bump-version VERSION=1.10.3
+## Refresh the pricing snapshot, or stop with recovery steps. Runs before anything else
+## in the targets below, so a stop leaves the version and fragments untouched and the
+## same command can simply be run again. Accepted providers stay written in the working
+## tree. SKIP_PRICING=1 deliberately keeps the existing prices.
+define refresh_pricing
+@if [ "$(SKIP_PRICING)" = "1" ]; then \
+	echo "SKIP_PRICING=1: not refreshing the pricing snapshot."; \
+elif ! pnpm exec tsx scripts/update-provider-pricing.ts; then \
+	echo ""; \
+	echo "$@ STOPPED: the pricing refresh failed or rejected a provider (summary above)."; \
+	echo "Rejected providers kept their existing prices; accepted ones are written in the working tree."; \
+	echo "The version and changelog fragments are untouched."; \
+	echo "The release can proceed only by a deliberate choice:"; \
+	echo "  - fix the scraper, then rerun: make $@ VERSION=$(VERSION)"; \
+	echo "  - or keep the existing prices: make $@ VERSION=$(VERSION) SKIP_PRICING=1"; \
+	exit 1; \
+fi
+endef
+
+## Refresh scraped pricing/capability/context data and bump the app version in one
+## step. Usage: make bump-version VERSION=1.10.3 [SKIP_PRICING=1]
 ## Prefer `make release-prep` when cutting a release — it also consolidates the
 ## unreleased changelog fragments into the version entry the release notes read.
 bump-version:
 	@test -n "$(VERSION)" || (echo "Usage: make bump-version VERSION=x.y.z" && exit 1)
+	$(refresh_pricing)
 	npm version $(VERSION) --no-git-tag-version --allow-same-version
-	pnpm exec tsx scripts/update-provider-pricing.ts
 	@echo "Version bumped to $(VERSION). Still needed:"
 	@echo "  - packages/frontend/src/guides/en/changelog/v$(VERSION).md"
 	@echo "  - commit both"
@@ -56,25 +75,12 @@ bump-version:
 ## v$(VERSION).md and bump the version. Commit the result, then merge develop -> main;
 ## that merge promotes the smoked image, cuts vX.Y.Z, and publishes the release notes
 ## from the file this writes. Usage: make release-prep VERSION=1.60.0
-## The refresh runs first because consolidation deletes the fragments, so a stop here
-## leaves them in place and the same command can simply be run again. If a provider's
-## new prices fail validation, this stops; accepted providers stay written in the
-## working tree. Fix the scraper and rerun, or deliberately release on the existing
-## prices with SKIP_PRICING=1: make release-prep VERSION=1.60.0 SKIP_PRICING=1
+## The refresh runs first because consolidation deletes the fragments; see
+## refresh_pricing above for what a stop leaves behind and for SKIP_PRICING=1:
+## make release-prep VERSION=1.60.0 SKIP_PRICING=1
 release-prep:
 	@test -n "$(VERSION)" || (echo "Usage: make release-prep VERSION=x.y.z" && exit 1)
-	@if [ "$(SKIP_PRICING)" = "1" ]; then \
-		echo "SKIP_PRICING=1: not refreshing the pricing snapshot."; \
-	elif ! pnpm exec tsx scripts/update-provider-pricing.ts; then \
-		echo ""; \
-		echo "release-prep STOPPED: the pricing refresh failed or rejected a provider (summary above)."; \
-		echo "Rejected providers kept their existing prices; accepted ones are written in the working tree."; \
-		echo "Nothing was consolidated: the fragments and version are untouched."; \
-		echo "The release can proceed only by a deliberate choice:"; \
-		echo "  - fix the scraper, then rerun: make release-prep VERSION=$(VERSION)"; \
-		echo "  - or keep the existing prices: make release-prep VERSION=$(VERSION) SKIP_PRICING=1"; \
-		exit 1; \
-	fi
+	$(refresh_pricing)
 	node scripts/release-prep.mjs $(VERSION)
 	@echo ""
 	@echo "Next: review the diff, commit, then merge develop -> main."
