@@ -31,7 +31,7 @@ L'importazione e l'esportazione CSV vivono anch'esse nella scheda **Dati**:
   invece di essere scritte come dati con le colonne spostate.
 - **Esportazione CSV** scarica il progetto; puoi scegliere le lingue e se
   includere la colonna del contesto per il traduttore.
-- Le esportazioni scrivono il testo così come è salvato, senza aggiungere un apostrofo davanti alle celle che iniziano con = + - o @. Attiva **Proteggi per i fogli di calcolo** solo per i file che aprirai in un foglio di calcolo, perché l'editor di Miliastra conserva quell'apostrofo come testo. Le esecuzioni di traduzione saltano le righe con valore Need translation? uguale a FALSE. Un file di script client protetto non va reimportato né inviato all'editor.
+- Le esportazioni scrivono il testo così come è salvato, senza aggiungere un apostrofo davanti alle celle che iniziano con = + - o @. In **Esporta per**, **Editor di gioco** è l'opzione predefinita. Scegli **Excel o Sheets** solo per i file da consultare in un foglio di calcolo: aggiunge quell'apostrofo, che l'editor di Miliastra conserva come testo, e la scelta si reimposta dopo ogni esportazione. Un file di script client protetto non va reimportato né inviato all'editor. Le esecuzioni di traduzione saltano le righe con valore Need translation? uguale a FALSE.
 
 ### File di script client
 

@@ -15,7 +15,7 @@ Việc nhập và xuất CSV cũng nằm ở tab **Dữ liệu**:
 * **Nhập CSV** nạp các mục nguồn và mọi bản dịch sẵn có. Một bản chụp an toàn được tạo tự động ngay trước mỗi lần nhập, nên bạn có thể khôi phục lại từ tab **Sao lưu**.
 * Những hàng không thể phân tích gọn gàng (một dấu nháy đứng ngay trước dấu phẩy) sẽ bị loại và được báo cáo, thay vì được ghi thành dữ liệu lệch cột.
 * **Xuất CSV** tải dự án xuống; bạn có thể chọn ngôn ngữ và có kèm cột bối cảnh cho người dịch hay không.
-* Bản xuất ghi văn bản đúng như đã lưu, không thêm dấu nháy đơn trước các ô bắt đầu bằng = + - hoặc @. Chỉ bật **Bảo vệ cho bảng tính** với tệp bạn sẽ mở trong bảng tính, vì trình chỉnh sửa Miliastra giữ dấu nháy đó như văn bản. Các lượt dịch bỏ qua những hàng có giá trị Need translation? là FALSE. Không được nhập lại hoặc gửi tệp script máy khách đã bảo vệ tới trình chỉnh sửa.
+* Bản xuất ghi văn bản đúng như đã lưu, không thêm dấu nháy đơn trước các ô bắt đầu bằng = + - hoặc @. Trong **Xuất cho**, mặc định là **Trình chỉnh sửa game**. Chỉ chọn **Excel hoặc Sheets** với tệp bạn sẽ xem trong bảng tính: tùy chọn này thêm dấu nháy mà trình chỉnh sửa Miliastra giữ như văn bản, và lựa chọn được đặt lại sau mỗi lần xuất. Không được nhập lại hoặc gửi tệp script máy khách đã bảo vệ tới trình chỉnh sửa. Các lượt dịch bỏ qua những hàng có giá trị Need translation? là FALSE.
 
 ### Tệp tập lệnh máy khách
 

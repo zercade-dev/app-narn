@@ -29,7 +29,7 @@ Impor dan ekspor CSV juga berada di tab **Data**:
   bergeser kolom.
 * **Ekspor CSV** mengunduh proyeknya; Anda bisa memilih bahasa dan apakah
   akan menyertakan kolom konteks penerjemah.
-* Ekspor menulis teks sesuai yang tersimpan, tanpa menambahkan apostrof di depan sel yang diawali = + - atau @. Aktifkan **Lindungi untuk spreadsheet** hanya untuk file yang akan dibuka di spreadsheet, karena editor Miliastra mempertahankan apostrof itu sebagai teks. Proses terjemahan melewati baris yang nilai Need translation?-nya FALSE. Berkas skrip klien yang dilindungi tidak boleh diimpor ulang atau dikirim ke editor.
+* Ekspor menulis teks sesuai yang tersimpan, tanpa menambahkan apostrof di depan sel yang diawali = + - atau @. Pada **Ekspor untuk**, **Editor game** adalah pilihan default. Pilih **Excel atau Sheets** hanya untuk berkas yang akan dilihat di spreadsheet: pilihan ini menambahkan apostrof tersebut, yang dipertahankan editor Miliastra sebagai teks, dan pilihan direset setelah setiap ekspor. Berkas skrip klien yang dilindungi tidak boleh diimpor ulang atau dikirim ke editor. Proses terjemahan melewati baris yang nilai Need translation?-nya FALSE.
 
 ### Berkas skrip klien
 

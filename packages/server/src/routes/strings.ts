@@ -488,6 +488,17 @@ const exportQuerySchema = z.object({
     .optional(),
 });
 
+function exportFileName(
+  collection: 'main' | 'client',
+  projectId: string,
+  forSpreadsheet: boolean,
+): string {
+  if (forSpreadsheet) {
+    return `${collection === 'client' ? 'client-' : ''}${projectId}-spreadsheet.csv`;
+  }
+  return `${collection === 'client' ? 'client' : 'export'}-${projectId}.csv`;
+}
+
 // GET /api/projects/:id/export
 stringsRouter.get(
   '/:id/export',
@@ -534,18 +545,19 @@ stringsRouter.get(
         return;
       }
     }
+    const protectForSpreadsheets = req.query.protectForSpreadsheets === 'true';
     const { csv, roundTripWarnings } = await csvImporter.exportCSVWithWarnings(projectId, {
       includeContext: req.query.includeContext === 'true',
       languages,
       pseudoAs,
       discardUntranslatable: req.query.discardUntranslatable === 'true',
-      protectForSpreadsheets: req.query.protectForSpreadsheets === 'true',
+      protectForSpreadsheets,
       collection,
     });
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
     res.setHeader(
       'Content-Disposition',
-      `attachment; filename="${collection === 'client' ? 'client' : 'export'}-${projectId}.csv"`,
+      `attachment; filename="${exportFileName(collection, projectId, protectForSpreadsheets)}"`,
     );
     // Advisory: cells whose content contains a quote+comma/newline mis-split on
     // re-import (game dialect is not RFC-4180). Surfaced as response headers so

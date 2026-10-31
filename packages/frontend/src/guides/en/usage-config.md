@@ -15,7 +15,7 @@ CSV import and export also live on the **Data** tab:
 * **Import CSV** loads source entries and any existing translations. A safety snapshot is taken automatically just before each import, so you can roll back from the **Backup** tab.
 * Rows that can't be parsed cleanly (a quote immediately followed by a comma) are dropped and reported, rather than written as column-shifted data.
 * **Export CSV** downloads the project; you can choose languages and whether to include the translator-context column.
-* Exports write your text as stored, with no apostrophe added before cells that start with = + - or @. Turn on **Protect for spreadsheets** only for a file you will open in a spreadsheet, because the Miliastra editor keeps that apostrophe as text. Translation runs skip rows whose Need translation? value is FALSE. A protected client script file must not be re-imported or sent to the editor.
+* Exports write your text as stored, with no apostrophe added before cells that start with = + - or @. Under **Export for**, **Game editor** is the default. Choose **Excel or Sheets** only for a file you will view in a spreadsheet: it adds that apostrophe, which the Miliastra editor keeps as text, and the choice resets after each export. A protected client script file must not be re-imported or sent to the editor. Translation runs skip rows whose Need translation? value is FALSE.
 
 ### Client script files
 

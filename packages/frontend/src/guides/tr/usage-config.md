@@ -15,7 +15,7 @@ CSV içe ve dışa aktarma da **Veri** sekmesinde bulunur:
 * **CSV içe aktarma**, kaynak girdileri ve varsa mevcut çevirileri yükler. Her içe aktarmadan hemen önce otomatik olarak bir güvenlik anlık görüntüsü alınır, böylece **Yedekleme** sekmesinden geri dönebilirsiniz.
 * Düzgün ayrıştırılamayan satırlar (bir tırnak işaretinin hemen ardından gelen bir virgül) sütun kaymış veri olarak yazılmak yerine atlanır ve bildirilir.
 * **CSV dışa aktarma**, projeyi indirir; dilleri ve çevirmen bağlamı sütununun eklenip eklenmeyeceğini seçebilirsiniz.
-* Dışa aktarmalar metni kaydedildiği gibi yazar ve = + - veya @ ile başlayan hücrelerin önüne kesme işareti eklemez. **E-tablolar için koru** seçeneğini yalnızca e-tabloda açacağınız dosyalar için açın, çünkü Miliastra düzenleyicisi bu işareti metin olarak korur. Çeviri çalıştırmaları, Need translation? değeri FALSE olan satırları atlar. Korumalı bir istemci betiği dosyası yeniden içe aktarılmamalı veya düzenleyiciye gönderilmemelidir.
+* Dışa aktarmalar metni kaydedildiği gibi yazar ve = + - veya @ ile başlayan hücrelerin önüne kesme işareti eklemez. **Dışa aktarma hedefi** altında varsayılan **Oyun düzenleyicisi** seçeneğidir. **Excel veya Sheets** seçeneğini yalnızca e-tabloda görüntüleyeceğiniz dosyalar için seçin: Miliastra düzenleyicisinin metin olarak koruduğu bu işareti ekler ve seçim her dışa aktarmadan sonra sıfırlanır. Korumalı bir istemci betiği dosyası yeniden içe aktarılmamalı veya düzenleyiciye gönderilmemelidir. Çeviri çalıştırmaları, Need translation? değeri FALSE olan satırları atlar.
 
 ### İstemci betiği dosyaları
 

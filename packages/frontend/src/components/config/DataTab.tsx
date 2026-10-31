@@ -66,6 +66,8 @@ interface DiffSummary {
 
 type ImportMode = 'add-only' | 'full-replace';
 
+type ExportTarget = 'editor' | 'spreadsheet';
+
 /** A dry run's counts for one import mode, or its in-flight marker. */
 type ImportPreview = 'loading' | { orphans: number; changed: number; formulaGuardCells: number };
 
@@ -113,7 +115,14 @@ export function DataTab() {
   const [pendingLanguages, setPendingLanguages] = useState<string[] | null>(null);
   const [includeContext, setIncludeContext] = useState(false);
   const [discardUntranslatable, setDiscardUntranslatable] = useState(false);
-  const [protectForSpreadsheets, setProtectForSpreadsheets] = useState(false);
+  // Never persisted: a spreadsheet file can't be mistaken for an editor file on
+  // a later export, so this falls back to the editor at every reset point.
+  const [exportTarget, setExportTarget] = useState<ExportTarget>('editor');
+  const [exportTargetProjectId, setExportTargetProjectId] = useState(activeProjectId);
+  if (exportTargetProjectId !== activeProjectId) {
+    setExportTargetProjectId(activeProjectId);
+    setExportTarget('editor');
+  }
   const [exportLanguages, setExportLanguages] = useState<string[] | null>(null);
   const [pseudoAs, setPseudoAs] = useState<string>('none');
   const [pendingCollection, setPendingCollection] = useState<CsvCollection>('main');
@@ -380,7 +389,8 @@ export function DataTab() {
     const params = new URLSearchParams();
     if (includeContext) params.set('includeContext', 'true');
     if (discardUntranslatable) params.set('discardUntranslatable', 'true');
-    if (protectForSpreadsheets) params.set('protectForSpreadsheets', 'true');
+    const forSpreadsheet = exportTarget === 'spreadsheet';
+    if (forSpreadsheet) params.set('protectForSpreadsheets', 'true');
     // Only send the languages param when it differs from the full selectable set
     if (
       selectedLangs.length !== exportableLanguages.length ||
@@ -395,23 +405,20 @@ export function DataTab() {
       ? `/projects/${activeProject.id}/export?${query}`
       : `/projects/${activeProject.id}/export`;
     try {
-      await apiDownload(
-        path,
-        effectiveExportCollection === 'client'
-          ? `client-${activeProject.id}.csv`
-          : `${activeProject.id}.csv`,
-        {
-          onResponse: (response) => {
-            // Advisory warning (export still succeeded): some cells contain a
-            // quote+comma/newline that mis-splits if this CSV is re-imported.
-            const warnCount = Number(response.headers.get('X-Export-Roundtrip-Warnings') ?? '0');
-            if (warnCount > 0) {
-              const columns = response.headers.get('X-Export-Roundtrip-Columns') ?? '';
-              toast.warning(t('exportRoundtripWarning', { count: warnCount, columns }));
-            }
-          },
+      const baseName =
+        effectiveExportCollection === 'client' ? `client-${activeProject.id}` : activeProject.id;
+      await apiDownload(path, `${baseName}${forSpreadsheet ? '-spreadsheet' : ''}.csv`, {
+        onResponse: (response) => {
+          // Advisory warning (export still succeeded): some cells contain a
+          // quote+comma/newline that mis-splits if this CSV is re-imported.
+          const warnCount = Number(response.headers.get('X-Export-Roundtrip-Warnings') ?? '0');
+          if (warnCount > 0) {
+            const columns = response.headers.get('X-Export-Roundtrip-Columns') ?? '';
+            toast.warning(t('exportRoundtripWarning', { count: warnCount, columns }));
+          }
         },
-      );
+      });
+      setExportTarget('editor');
     } catch (err) {
       toast.error(t('exportFailed', { message: (err as Error).message }));
     }
@@ -758,19 +765,41 @@ export function DataTab() {
                 />
                 {t('discardUntranslatable')}
               </label>
-              <div>
-                <label className="flex items-center gap-1.5 text-sm">
-                  <Checkbox
-                    data-testid="protect-for-spreadsheets-checkbox"
-                    checked={protectForSpreadsheets}
-                    onCheckedChange={(c) => setProtectForSpreadsheets(c === true)}
-                  />
-                  {t('protectForSpreadsheets')}
-                </label>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {t('protectForSpreadsheetsHint')}
-                </p>
-                {protectForSpreadsheets && effectiveExportCollection === 'client' && (
+              <div data-testid="export-target-control">
+                <p className="text-sm font-medium mb-1.5">{t('exportTarget')}</p>
+                <div
+                  className="inline-flex rounded-lg border bg-muted p-0.5"
+                  role="radiogroup"
+                  aria-label={t('exportTarget')}
+                >
+                  {(['editor', 'spreadsheet'] as const).map((target) => (
+                    <button
+                      key={target}
+                      type="button"
+                      role="radio"
+                      aria-checked={exportTarget === target}
+                      data-testid={`export-target-${target}`}
+                      onClick={() => setExportTarget(target)}
+                      className={cn(
+                        'cursor-pointer rounded-md px-3 py-1 text-sm transition-colors',
+                        exportTarget === target
+                          ? 'bg-background font-medium shadow'
+                          : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {t(target === 'editor' ? 'exportTargetEditor' : 'exportTargetSpreadsheet')}
+                    </button>
+                  ))}
+                </div>
+                {exportTarget === 'spreadsheet' && (
+                  <p
+                    className="mt-1 text-xs text-muted-foreground"
+                    data-testid="export-target-spreadsheet-note"
+                  >
+                    {t('exportTargetSpreadsheetNote')}
+                  </p>
+                )}
+                {exportTarget === 'spreadsheet' && effectiveExportCollection === 'client' && (
                   <p className="mt-1 text-xs text-status-warn" data-testid="protect-client-warning">
                     {t('protectForSpreadsheetsClientWarning')}
                   </p>
