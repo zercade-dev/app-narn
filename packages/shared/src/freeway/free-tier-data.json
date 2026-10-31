@@ -1,5 +1,6 @@
 {
-  "generatedAt": "2026-08-14",
+  "generatedAt": "2026-10-31",
+  "lastCheckedAt": "2026-10-31",
   "providers": {
     "google": {
       "moduleId": "google",
@@ -479,57 +480,6 @@
             "ru": 1,
             "th": 0.92,
             "tr": 0.96,
-            "vi": 0.96,
-            "zh-hans": 1,
-            "zh-hant": 1
-          }
-        },
-        {
-          "id": "nvidia/nemotron-3-super-120b-a12b:free",
-          "qualityTier": 3,
-          "useStructuredOutput": false,
-          "maxBatch": 25,
-          "charBudget": 16000,
-          "batchCeiling": 80,
-          "contextLength": 262144,
-          "limits": [
-            {
-              "window": "rpm",
-              "limit": 20
-            },
-            {
-              "window": "rpd",
-              "limit": 50
-            }
-          ],
-          "langScores": {
-            "de": 97,
-            "es": 98,
-            "fr": 95,
-            "id": 94,
-            "it": 95,
-            "ja": 97,
-            "ko": 95,
-            "pt-br": 95,
-            "ru": 99,
-            "th": 94,
-            "tr": 87,
-            "vi": 89,
-            "zh-hans": 95,
-            "zh-hant": 93
-          },
-          "langPassPriors": {
-            "de": 0.83,
-            "es": 0.96,
-            "fr": 0.96,
-            "id": 1,
-            "it": 1,
-            "ja": 0.96,
-            "ko": 0.96,
-            "pt-br": 0.96,
-            "ru": 0.96,
-            "th": 0.92,
-            "tr": 0.92,
             "vi": 0.96,
             "zh-hans": 1,
             "zh-hant": 1

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-.PHONY: verify start-secure smoke-secure security-check sync-glossaries bump-version release-prep
+.PHONY: verify start-secure smoke-secure security-check sync-glossaries bump-version release-prep freeway-refresh
 
 ## Launch the API under Node's experimental permission model
 start-secure:
@@ -38,6 +38,12 @@ verify:
 ## pipeline). Preview with FLAGS=--dry-run.
 sync-glossaries:
 	pnpm exec tsx scripts/sync-global-glossaries.ts $(FLAGS)
+
+## Check the bundled Freeway free-tier snapshot against the live providers. Report
+## only unless asked: FLAGS=--probe-candidates, --write-suggestion <path>, --apply-retired.
+## Makes real calls, one request of free quota per model.
+freeway-refresh:
+	pnpm exec tsx scripts/freeway-refresh.ts $(FLAGS)
 
 ## Refresh the pricing snapshot, or stop with recovery steps. Runs before anything else
 ## in the targets below, so a stop leaves the version and fragments untouched and the
