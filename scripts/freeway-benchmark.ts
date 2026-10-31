@@ -33,10 +33,12 @@
  *   pnpm exec tsx scripts/freeway-benchmark.ts --langs ja,ko --providers google,groq --max-requests 40
  *   pnpm exec tsx scripts/freeway-benchmark.ts --refresh --langs ja
  *   pnpm exec tsx scripts/freeway-benchmark.ts --distill
+ *   pnpm exec tsx scripts/freeway-benchmark.ts --candidates c.json --results-out scripts/freeway-benchmark/candidates-x.local.json --langs es
  *
  * Keys are read from scripts/.env (override with NARN_ENV_FILE) — never
  * accepted on argv, never printed. Only name presence/absence is ever logged.
  */
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -44,11 +46,16 @@ import { fileURLToPath } from 'node:url';
 import {
   aggregateCell,
   applyDistilled,
+  candidateDetailPath,
+  candidateSnapshot,
   cellKey,
   corpusVersion,
   distill,
+  judgeBudgetFits,
   mechanicalIssues,
+  parseCandidates,
   parseCorpus,
+  restrictCandidateEnv,
   sortedResults,
   type CellResult,
   type CorpusEntry,
@@ -171,6 +178,14 @@ const USAGE = `Usage: tsx scripts/freeway-benchmark.ts [options]
                        (default: skip them — the run is crash-resumable).
   --plan               Print the cell plan + key-presence report and exit.
                        No network calls.
+  --candidates <file>  Benchmark the models in this JSON file instead of the
+                       snapshot's: {"providers":{"groq":[{"id":"…","rpm":6}]}}.
+                       Reads only GOOGLE/GROQ/OPENROUTER keys, also enforces
+                       --max-requests per host on real HTTP calls, and records
+                       translate latency. Requires --results-out.
+  --results-out <path> Results file for --candidates; must be gitignored and end
+                       in .local.json. results.json is neither read nor written.
+  --judge-pace-ms N    Minimum wait after each judge request.
   --distill            Fold results.json into the bundled free-tier snapshot
                        (free-tier-data.json) and print coverage. No network
                        calls.
@@ -184,6 +199,9 @@ interface CliArgs {
   refresh: boolean;
   plan: boolean;
   distill: boolean;
+  candidatesPath?: string;
+  resultsOut?: string;
+  judgePaceMs?: number;
 }
 
 function usageError(message: string): never {
@@ -226,6 +244,19 @@ function parseArgs(argv: string[]): CliArgs {
         args.maxRequests = n;
         break;
       }
+      case '--candidates':
+        args.candidatesPath = path.resolve(next(++i, '--candidates'));
+        break;
+      case '--results-out':
+        args.resultsOut = path.resolve(next(++i, '--results-out'));
+        break;
+      case '--judge-pace-ms': {
+        const raw = next(++i, '--judge-pace-ms');
+        const n = Number(raw);
+        if (!Number.isFinite(n) || n <= 0) usageError(`--judge-pace-ms must be a positive number (got "${raw}")`);
+        args.judgePaceMs = n;
+        break;
+      }
       case '--refresh':
         args.refresh = true;
         break;
@@ -241,6 +272,10 @@ function parseArgs(argv: string[]): CliArgs {
   }
   if (args.langs?.length === 0) usageError('--langs must name at least one language');
   if (args.providers?.length === 0) usageError('--providers must name at least one provider');
+  if ((args.candidatesPath === undefined) !== (args.resultsOut === undefined)) {
+    usageError('--candidates and --results-out must be used together');
+  }
+  if (args.candidatesPath && args.distill) usageError('--distill cannot be used with --candidates');
   return args;
 }
 
@@ -352,10 +387,13 @@ function readCorpus(): { entries: CorpusEntry[]; committedVersion: string; local
 // results.json / results-detail.local.json persistence
 // ---------------------------------------------------------------------------
 
+let resultsPath = RESULTS_PATH;
+let detailPath = DETAIL_PATH;
+
 function readResultsFile(): ResultsFile | undefined {
-  if (!existsSync(RESULTS_PATH)) return undefined;
+  if (!existsSync(resultsPath)) return undefined;
   try {
-    return JSON.parse(readFileSync(RESULTS_PATH, 'utf8')) as ResultsFile;
+    return JSON.parse(readFileSync(resultsPath, 'utf8')) as ResultsFile;
   } catch (err) {
     console.error(`results.json is invalid: ${redact(toErrorMessage(err))}`);
     process.exit(1);
@@ -363,7 +401,7 @@ function readResultsFile(): ResultsFile | undefined {
 }
 
 function writeResultsFile(file: ResultsFile): void {
-  writeFileSync(RESULTS_PATH, JSON.stringify(sortedResults(file), null, 2) + '\n');
+  writeFileSync(resultsPath, JSON.stringify(sortedResults(file), null, 2) + '\n');
 }
 
 interface DetailEntry {
@@ -376,9 +414,9 @@ interface DetailEntry {
 type DetailFile = Record<string, DetailEntry[]>;
 
 function readDetailFile(): DetailFile {
-  if (!existsSync(DETAIL_PATH)) return {};
+  if (!existsSync(detailPath)) return {};
   try {
-    return JSON.parse(readFileSync(DETAIL_PATH, 'utf8')) as DetailFile;
+    return JSON.parse(readFileSync(detailPath, 'utf8')) as DetailFile;
   } catch {
     return {}; // local-only diagnostic file: corrupt/missing is non-fatal, just start fresh
   }
@@ -386,7 +424,7 @@ function readDetailFile(): DetailFile {
 
 function writeDetailFile(file: DetailFile): void {
   const sorted: DetailFile = Object.fromEntries(Object.entries(file).sort(([a], [b]) => (a < b ? -1 : 1)));
-  writeFileSync(DETAIL_PATH, JSON.stringify(sorted, null, 2) + '\n');
+  writeFileSync(detailPath, JSON.stringify(sorted, null, 2) + '\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -466,6 +504,8 @@ interface RunContext {
   judgeSnapModel: FreeTierModel;
   judgeProvider: FreeTierProvider;
   hadUnexpectedFailure: boolean;
+  judgePaceMs: number | undefined;
+  recordLatency: boolean;
 }
 
 function getStats(ctx: RunContext, providerKey: string): ProviderStats {
@@ -584,6 +624,7 @@ async function runJudge(ctx: RunContext, items: JudgeItem[]): Promise<JudgeRunOu
     const chunkVerdicts = await ctx.judge(chunk);
     judgeStats.requestsMade += 1;
     await paceAfterCall(ctx.judgeSnapModel, ctx.judgeProvider);
+    if (ctx.judgePaceMs !== undefined) await sleepMs(ctx.judgePaceMs);
     verdicts.push(...chunkVerdicts);
   }
 
@@ -732,12 +773,28 @@ async function processCell(
 
   // Judged: translated without error AND not blank (an empty/whitespace success is already a
   // mechanical fail — judging it would spend the scarcest quota in the run for no signal).
+  const judgeStats = getStats(ctx, JUDGE_PROVIDER_KEY);
+  if (
+    !judgeBudgetFits({
+      used: judgeStats.requestsMade,
+      maxRequests: ctx.maxRequests,
+      judgeRequests: Math.ceil(jobs.length / JUDGE_BATCH_SIZE),
+      ownTranslateRequests: providerKey === JUDGE_PROVIDER_KEY ? chunks.length : 0,
+    })
+  ) {
+    console.error(`[${key}] a full judge pass would cross --max-requests (${ctx.maxRequests}); cell deferred before translating`);
+    ctx.providerState.set(JUDGE_PROVIDER_KEY, 'budget-capped');
+    deferCell(ctx, providerKey, 'budget-capped');
+    return 'continue';
+  }
+
   const toJudge: Array<{ entry: CorpusEntry; result: TranslationResult }> = [];
   // Mechanical-only: either the module reported .error, or it "succeeded" with blank text.
   const mechOnly: TranslationResult[] = [];
   let parseFailures = 0;
   let parseFailedStrings = 0;
   let requests = 0;
+  let translateMs = 0;
 
   for (const chunk of chunks) {
     if (ctx.maxRequests !== undefined && stats.requestsMade >= ctx.maxRequests) {
@@ -749,7 +806,9 @@ async function processCell(
 
     let results: TranslationResult[];
     try {
+      const startedAt = Date.now();
       results = await mod.translate(chunk, undefined);
+      translateMs += Date.now() - startedAt;
       requests++;
       stats.requestsMade++;
       await paceAfterCall(snapModel, provider);
@@ -862,7 +921,7 @@ async function processCell(
     parseFailedStrings,
   });
 
-  writeCell(ctx, key, cell, detail);
+  writeCell(ctx, key, ctx.recordLatency ? { ...cell, meanTranslateMs: Math.round(translateMs / requests) } as CellResult : cell, detail);
   stats.cellsCompleted++;
   return 'continue';
 }
@@ -1052,6 +1111,38 @@ function printSummary(ctx: RunContext): void {
 }
 
 // ---------------------------------------------------------------------------
+// Candidate-run guards
+// ---------------------------------------------------------------------------
+
+function assertGitignored(target: string): void {
+  const res = spawnSync('git', ['check-ignore', '-q', target], { cwd: path.dirname(target), stdio: 'ignore' });
+  if (res.status !== 0) {
+    console.error(`${target} is not gitignored — refusing to write candidate results there.`);
+    process.exit(1);
+  }
+}
+
+/**
+ * The shared layer retries and splits batches below the per-call counters, so a
+ * candidate run also counts and caps real HTTP calls by host. Hostnames only:
+ * a URL can carry a key.
+ */
+function installHttpCounter(maxRequests: number | undefined): Map<string, number> {
+  const counts = new Map<string, number>();
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (input, init) => {
+    const host = new URL(input instanceof Request ? input.url : String(input)).hostname;
+    const used = counts.get(host) ?? 0;
+    if (maxRequests !== undefined && used >= maxRequests) {
+      return Promise.reject(new Error(`HTTP ceiling reached for ${host}`));
+    }
+    counts.set(host, used + 1);
+    return realFetch(input, init);
+  };
+  return counts;
+}
+
+// ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
 
@@ -1064,8 +1155,20 @@ async function main(): Promise<void> {
   }
 
   const envPath = process.env.NARN_ENV_FILE ?? 'scripts/.env';
-  const env = readEnvFile(envPath);
+  const candidateRun = args.candidatesPath !== undefined;
+  const env = candidateRun ? restrictCandidateEnv(readEnvFile(envPath)) : readEnvFile(envPath);
   const snapshot = getFreeTierSnapshot();
+  let planSnapshot = snapshot;
+  if (args.candidatesPath && args.resultsOut) {
+    assertGitignored(args.resultsOut);
+    try {
+      detailPath = candidateDetailPath(args.resultsOut);
+      planSnapshot = candidateSnapshot(snapshot, parseCandidates(JSON.parse(readFileSync(args.candidatesPath, 'utf8'))));
+    } catch (err) {
+      usageError(redact(toErrorMessage(err)));
+    }
+    resultsPath = args.resultsOut;
+  }
   const { report: keyReport, apiKeys } = buildKeyReport(snapshot, env);
 
   const { entries: corpus, committedVersion, localCount } = readCorpus();
@@ -1074,7 +1177,7 @@ async function main(): Promise<void> {
   // production). An explicit `--langs pseudo-test` still works if ever wanted.
   const langs =
     args.langs ?? LANGUAGE_REGISTRY.filter((l) => l.code !== 'en' && l.code !== PSEUDO_LANGUAGE_CODE).map((l) => l.code);
-  const { cells, missingKeyProviders } = buildPlan(snapshot, langs, args.providers, apiKeys);
+  const { cells, missingKeyProviders } = buildPlan(planSnapshot, langs, args.providers, apiKeys);
   const existingResults = readResultsFile();
 
   // Printed at startup in BOTH modes — a real run is exactly where "which provider got
@@ -1149,7 +1252,10 @@ async function main(): Promise<void> {
     judgeSnapModel,
     judgeProvider,
     hadUnexpectedFailure: false,
+    judgePaceMs: args.judgePaceMs,
+    recordLatency: candidateRun,
   };
+  const httpCounts = candidateRun ? installHttpCounter(args.maxRequests) : undefined;
 
   console.log(
     `Freeway benchmark: ${cells.length} cell(s) planned across ${new Set(cells.map((c) => c.providerKey)).size} provider(s).`,
@@ -1176,6 +1282,9 @@ async function main(): Promise<void> {
   }
 
   printSummary(ctx);
+  if (httpCounts) {
+    console.log(`HTTP calls by host: ${[...httpCounts].map(([host, n]) => `${host}=${n}`).join(', ') || 'none'}`);
+  }
   process.exitCode = ctx.hadUnexpectedFailure ? 1 : 0;
 }
 

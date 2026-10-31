@@ -225,3 +225,73 @@ function setOrDelete(obj: Record<string, unknown>, key: string, value: unknown):
 function sortRecord(rec: Record<string, number>): Record<string, number> {
   return Object.fromEntries(Object.entries(rec).sort(([a], [b]) => (a < b ? -1 : 1)));
 }
+
+// ---------------------------------------------------------------------------
+// Candidate runs: models that are not in the bundled snapshot yet. Their
+// results go to a separate gitignored file and never reach the snapshot.
+// ---------------------------------------------------------------------------
+
+export const CANDIDATE_ENV_NAMES = ['GOOGLE_API_KEY', 'GROQ_API_KEY', 'OPENROUTER_API_KEY'] as const;
+const CANDIDATE_PROVIDERS: ReadonlySet<string> = new Set(['google', 'groq', 'openrouter']);
+
+export interface CandidateModel { id: string; rpm: number; useStructuredOutput?: boolean }
+export type CandidateFile = Record<string, CandidateModel[]>;
+
+/** Only the three keys a candidate run may use; every other env-file name is dropped. */
+export function restrictCandidateEnv(env: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const name of CANDIDATE_ENV_NAMES) {
+    if (env[name] !== undefined) out[name] = env[name];
+  }
+  return out;
+}
+
+export function parseCandidates(raw: unknown): CandidateFile {
+  const root = (raw as { providers?: unknown } | null)?.providers;
+  if (typeof root !== 'object' || root === null) throw new Error('candidates: missing providers{}');
+  const out: CandidateFile = {};
+  for (const [provider, models] of Object.entries(root)) {
+    if (!CANDIDATE_PROVIDERS.has(provider)) throw new Error(`candidates: provider "${provider}" is not allowed`);
+    if (!Array.isArray(models) || models.length === 0) throw new Error(`candidates: "${provider}" needs models[]`);
+    out[provider] = models.map((m) => {
+      const { id, rpm, useStructuredOutput } = m as Record<string, unknown>;
+      if (typeof id !== 'string' || !id || typeof rpm !== 'number' || rpm <= 0) {
+        throw new Error(`candidates: every "${provider}" model needs id + positive rpm`);
+      }
+      return { id, rpm, ...(typeof useStructuredOutput === 'boolean' ? { useStructuredOutput } : {}) };
+    });
+  }
+  return out;
+}
+
+/** A copy of the snapshot holding only the candidate models, in a shape the cell plan can walk. */
+export function candidateSnapshot<S extends { providers: Record<string, object> }>(snapshot: S, candidates: CandidateFile): S {
+  const providers: Record<string, object> = {};
+  for (const [providerKey, models] of Object.entries(candidates)) {
+    const provider = snapshot.providers[providerKey];
+    if (!provider) throw new Error(`candidates: provider "${providerKey}" is not in the snapshot`);
+    providers[providerKey] = {
+      ...provider,
+      models: models.map(({ id, rpm, useStructuredOutput }) => ({
+        id,
+        limits: [{ window: 'rpm', limit: rpm }],
+        ...(useStructuredOutput !== undefined ? { useStructuredOutput } : {}),
+      })),
+    };
+  }
+  return { ...snapshot, providers };
+}
+
+/** Detail file beside a candidate results file; both match the gitignored *.local.* shape. */
+export function candidateDetailPath(resultsPath: string): string {
+  if (!resultsPath.endsWith('.local.json')) throw new Error('candidate results path must end in .local.json');
+  return `${resultsPath.slice(0, -'.local.json'.length)}.detail.local.json`;
+}
+
+/** False when judging a whole cell would cross the ceiling, so its translations would be thrown away. */
+export function judgeBudgetFits(args: {
+  used: number; maxRequests: number | undefined; judgeRequests: number; ownTranslateRequests: number;
+}): boolean {
+  if (args.maxRequests === undefined) return true;
+  return args.used + args.judgeRequests + args.ownTranslateRequests <= args.maxRequests;
+}
