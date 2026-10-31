@@ -51,6 +51,7 @@ import {
   effectivePromptOptions,
   isExcludedFromAi,
   isParseFailureMessage,
+  type ProviderFailureRouting,
 } from '@zercade-dev/narn-shared';
 import { router as defaultRouter, type Router } from './M7-router.js';
 import {
@@ -122,7 +123,6 @@ import { chunkPackedDecisions, groupDecisions, packAssignedGroups } from './M9/p
 import {
   countsAsProviderFailure,
   createProviderFailureTracker,
-  markProviderFailuresRerouted,
   recordProviderFailure,
   type ProviderFailureTracker,
 } from './M9/provider-failure-notices.js';
@@ -537,13 +537,14 @@ interface FreewayDispatchArgs {
    */
   onReroute?: (info: {
     from: string;
-    /** The model the batch is moving off. */
-    fromModel: string;
     to: string;
     reason: 'rate-limit' | 'auth' | 'provider-error';
     retryAfterMs?: number;
   }) => void;
-  /** Reports a provider call that failed `occurrences` strings at once. */
+  /**
+   * Reports a provider call that failed `occurrences` strings at once. Its
+   * routing is not known yet: the caller settles that from the batch's outcome.
+   */
   onProviderFailure?: (info: { model: string; error: unknown; occurrences: number }) => void;
   /** Recursion depth of the parse-failure split (0 = the original batch). */
   splitDepth?: number;
@@ -4031,7 +4032,6 @@ export class TranslationEngine {
         }
         onReroute?.({
           from: state.bucketKey,
-          fromModel: state.modelId ?? state.moduleId,
           to: revalidated.bucketKey,
           reason: unpackReason ?? 'provider-error',
         });
@@ -4475,7 +4475,6 @@ export class TranslationEngine {
           if (!next) return { kind: 'error', error: err, authCancel: false };
           onReroute?.({
             from: state.bucketKey,
-            fromModel: state.modelId ?? state.moduleId,
             to: revalidated.bucketKey,
             reason: rateLimited ? 'rate-limit' : providerFailure ? 'provider-error' : 'auth',
             ...(rateLimited ? { retryAfterMs: retryAfterMsOf(err) } : {}),
@@ -5663,6 +5662,13 @@ export class TranslationEngine {
           // cooled and the batch fails over to another one (once).
           const state: FreewayBatchState = { module, moduleId, modelId: metricsModel, bucketKey };
           currentFreewayState = state;
+          // Held until the outcome is in, so a notice is only ever first seen
+          // saying what actually became of the requests.
+          const batchProviderFailures: Array<{
+            model: string;
+            error: unknown;
+            occurrences: number;
+          }> = [];
           const outcome = await this.dispatchFreewayBatch({
             jobs: batchJobs.map(({ job }) => job),
             decisions: batchJobs.map(({ index }) => uncachedNonTrivialEntries[index].decision),
@@ -5671,15 +5677,8 @@ export class TranslationEngine {
             createModule: createFreewayModule,
             translateOptions: { ...dispatchOptions, onJobComplete },
             signal,
-            onReroute: (info) => {
-              this.recordFreewayDetail(runId, formatRerouteDetail(info));
-              const tracker = this.details.get(runId)?.providerFailures;
-              if (info.reason === 'provider-error' && tracker) {
-                markProviderFailuresRerouted(status, tracker, info.fromModel);
-              }
-            },
-            onProviderFailure: (info) =>
-              this.noteProviderFailure(runId, status, info.model, info.error, info.occurrences),
+            onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
+            onProviderFailure: (info) => batchProviderFailures.push(info),
             onSplit: (info) => this.recordFreewayDetail(runId, formatSplitDetail(info)),
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
             minBand: freewayMinBand(status.request),
@@ -5698,6 +5697,25 @@ export class TranslationEngine {
             },
           });
           currentFreewayState = undefined;
+          if (!signal?.aborted) {
+            for (const failure of batchProviderFailures) {
+              const routing: ProviderFailureRouting =
+                outcome.kind === 'defer'
+                  ? 'retrying'
+                  : outcome.kind === 'results' &&
+                      (state.modelId ?? state.moduleId) !== failure.model
+                    ? 'rerouted'
+                    : 'none';
+              this.noteProviderFailure(
+                runId,
+                status,
+                failure.model,
+                failure.error,
+                failure.occurrences,
+                routing,
+              );
+            }
+          }
           // A same-bucket auth failover (a sibling instance took over, see
           // dispatchFreewayBatch's 'keep' handling) changes state.moduleId
           // without changing state.bucketKey — sync on EITHER moving, or the
@@ -6848,11 +6866,12 @@ export class TranslationEngine {
     model: string,
     error: unknown,
     occurrences: number,
+    routing?: ProviderFailureRouting,
   ): void {
     const tracker = this.details.get(runId)?.providerFailures;
     if (!tracker || occurrences === 0) return;
     const message = sanitizeLogObject({ m: toErrorMessage(error) }).m;
-    recordProviderFailure(status, tracker, { model, message, occurrences });
+    recordProviderFailure(status, tracker, { model, message, occurrences, routing });
   }
 
   private emitProgress(runId: string, status: RunStatus): void {

@@ -11,6 +11,13 @@ import {
   type RunStatus,
 } from '@zercade-dev/narn-shared';
 
+/** Sentence saying what became of a repeated-failure notice's requests (namespace `strings`). */
+export const PROVIDER_FAILURE_ROUTING_KEY = {
+  rerouted: 'runs.providerFailureRerouted',
+  retrying: 'runs.providerFailureRetrying',
+  none: 'runs.providerFailureNotRerouted',
+} as const;
+
 /**
  * User-facing run "type" i18n key (namespace `strings`), derived from the run's
  * kind via `runTypeLabel`. Lives here rather than beside the run-status tint

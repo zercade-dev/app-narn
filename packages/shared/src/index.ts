@@ -128,6 +128,7 @@ export {
 export type {
   RunStatus,
   ProviderFailureNotice,
+  ProviderFailureRouting,
   RunErrorEntry,
   RunUsageEntry,
   RunRequest,
@@ -309,6 +310,7 @@ export {
   CATEGORY_CHUNK_SIZE,
   isTransientError,
   isAbortLikeError,
+  PAYLOAD_TOO_LARGE_MESSAGE_RE,
   transientRetryDelayMs,
   sleep,
   retryOnceOnTransient,

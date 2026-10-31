@@ -4,11 +4,15 @@
  * otherwise go unnoticed. Failures are grouped by (model, normalized message)
  * and a group that reaches the threshold becomes a notice on the run status,
  * which persists with it and reaches the client through the normal run polling.
+ * Stored messages have credentials scrubbed but are otherwise the provider's
+ * text, so one may echo up to 300 characters of the source text it was sent.
  */
 import { createHash } from 'node:crypto';
 import {
+  PAYLOAD_TOO_LARGE_MESSAGE_RE,
   isParseFailureMessage,
   type ProviderFailureNotice,
+  type ProviderFailureRouting,
   type RunStatus,
 } from '@zercade-dev/narn-shared';
 import {
@@ -25,18 +29,21 @@ export const MAX_PROVIDER_FAILURE_MESSAGE_CHARS = 300;
 /** Sub-threshold groups tracked per run: a stream of unique messages must not grow without limit. */
 const MAX_TRACKED_GROUPS = 200;
 
-/** 5xx and connection-level faults the transient classifier's vocabulary does not name. */
+/**
+ * Outages the shared transient vocabulary does not name. Module results flatten
+ * errors to strings, so these are recognized by the wording providers use for
+ * them. Local on purpose: the shared vocabulary also decides what gets parked.
+ */
 const EXTRA_TRANSIENT_RE =
-  /\b50\d\b|bad gateway|gateway time|fetch failed|network error|socket hang up|econn\w+|enotfound|etimedout/i;
+  /\b50\d\b|bad gateway|gateway time|internal server error|server had an error|provider returned error|connection error|\bterminated\b|cannot connect to api|other side closed|upstream connect error|fetch failed|network error|socket hang up|econn\w+|enotfound|etimedout/i;
 
-/** Sub-threshold counts and rerouted models for one run. In-memory only. */
+/** Groups still below the notice threshold, for one run. In-memory only. */
 export interface ProviderFailureTracker {
-  counts: Map<string, number>;
-  reroutedModels: Set<string>;
+  pending: Map<string, { count: number; routing: ProviderFailureRouting }>;
 }
 
 export function createProviderFailureTracker(): ProviderFailureTracker {
-  return { counts: new Map(), reroutedModels: new Set() };
+  return { pending: new Map() };
 }
 
 /**
@@ -56,6 +63,8 @@ export function countsAsProviderFailure(err: unknown): boolean {
   if (typeof statusCode === 'number' && statusCode >= 500) return false;
   const message = err instanceof Error ? err.message : String(err);
   if (isTransientProviderError(err) || EXTRA_TRANSIENT_RE.test(message)) return false;
+  // Depends on the input, not the model.
+  if (PAYLOAD_TOO_LARGE_MESSAGE_RE.test(message)) return false;
   return !isParseFailureMessage(message);
 }
 
@@ -71,6 +80,15 @@ export function normalizeProviderFailureMessage(message: string): string {
     .slice(0, MAX_PROVIDER_FAILURE_MESSAGE_CHARS);
 }
 
+const ROUTING_RANK: Record<ProviderFailureRouting, number> = { none: 0, retrying: 1, rerouted: 2 };
+
+function betterRouting(
+  a: ProviderFailureRouting,
+  b: ProviderFailureRouting,
+): ProviderFailureRouting {
+  return ROUTING_RANK[b] > ROUTING_RANK[a] ? b : a;
+}
+
 function boundMessage(message: string): string {
   return (
     message
@@ -83,16 +101,21 @@ function boundMessage(message: string): string {
 }
 
 /**
- * Count `occurrences` strings failed by `model`. `message` must already be
- * sanitized for credentials. Later occurrences update an existing notice, which
+ * Count `occurrences` strings failed by `model`. `message` must already have
+ * credentials scrubbed. `routing` is what became of those requests. Later occurrences update an existing notice, which
  * is also how a run resumed with a fresh tracker keeps counting onto it.
  */
 export function recordProviderFailure(
   status: RunStatus,
   tracker: ProviderFailureTracker,
-  failure: { model: string; message: string; occurrences: number },
+  failure: {
+    model: string;
+    message: string;
+    occurrences: number;
+    routing?: ProviderFailureRouting;
+  },
 ): void {
-  const { model, occurrences } = failure;
+  const { model, occurrences, routing = 'none' } = failure;
   const message = boundMessage(failure.message);
   const id = createHash('sha256')
     .update(`${model}\0${normalizeProviderFailureMessage(message)}`)
@@ -102,12 +125,14 @@ export function recordProviderFailure(
   const existing = status.providerFailureNotices?.find((notice) => notice.id === id);
   if (existing) {
     existing.count += occurrences;
+    existing.routing = betterRouting(existing.routing, routing);
     return;
   }
-  const previous = tracker.counts.get(id);
-  if (previous === undefined && tracker.counts.size >= MAX_TRACKED_GROUPS) return;
-  const count = (previous ?? 0) + occurrences;
-  tracker.counts.set(id, count);
+  const previous = tracker.pending.get(id);
+  if (!previous && tracker.pending.size >= MAX_TRACKED_GROUPS) return;
+  const count = (previous?.count ?? 0) + occurrences;
+  const merged = betterRouting(previous?.routing ?? 'none', routing);
+  tracker.pending.set(id, { count, routing: merged });
   if (count < PROVIDER_FAILURE_NOTICE_THRESHOLD) return;
   if ((status.providerFailureNotices?.length ?? 0) >= MAX_PROVIDER_FAILURE_NOTICES) return;
   const notice: ProviderFailureNotice = {
@@ -115,20 +140,8 @@ export function recordProviderFailure(
     model,
     message,
     count,
-    rerouted: tracker.reroutedModels.has(model),
+    routing: merged,
   };
   (status.providerFailureNotices ??= []).push(notice);
-  tracker.counts.delete(id);
-}
-
-/** Requests that failed on `model` moved to another one. */
-export function markProviderFailuresRerouted(
-  status: RunStatus,
-  tracker: ProviderFailureTracker,
-  model: string,
-): void {
-  tracker.reroutedModels.add(model);
-  for (const notice of status.providerFailureNotices ?? []) {
-    if (notice.model === model) notice.rerouted = true;
-  }
+  tracker.pending.delete(id);
 }

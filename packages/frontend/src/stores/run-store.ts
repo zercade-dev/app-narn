@@ -13,7 +13,12 @@ import {
   type CategorySuggestion,
 } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../hooks/use-api.js';
-import { RUN_TYPE_KEY, isChatRun, isRunActive } from '../lib/run-kind.js';
+import {
+  PROVIDER_FAILURE_ROUTING_KEY,
+  RUN_TYPE_KEY,
+  isChatRun,
+  isRunActive,
+} from '../lib/run-kind.js';
 import { getErrorMessage } from '../lib/utils.js';
 import { mutateThenRefresh, runAction } from './store-helpers.js';
 import { toast } from '../lib/toast.js';
@@ -359,12 +364,17 @@ function notifyFailedRunTransitions(previousRuns: RunStatus[], nextRuns: RunStat
 }
 
 /**
- * Toasts each repeated-failure group the first time a poll shows it. The first
- * fetch of a poll session has no earlier snapshot to diff, so it stays quiet: a
- * reload must not replay old notices, which the run card still shows.
+ * Toasts each repeated-failure group the first time a poll shows it. A fetch
+ * with no earlier snapshot of THIS project is a first sighting and stays quiet
+ * (the store keeps a settled project's runs across a switch): a reload or a
+ * switch must not replay old notices, which the run card still shows.
  */
-function notifyNewProviderFailures(previousRuns: RunStatus[], nextRuns: RunStatus[]): void {
-  if (previousRuns.length === 0) return;
+function notifyNewProviderFailures(
+  projectId: string,
+  previousRuns: RunStatus[],
+  nextRuns: RunStatus[],
+): void {
+  if (!previousRuns.some((r) => r.projectId === projectId)) return;
   for (const run of nextRuns) {
     const prev = previousRuns.find((r) => r.runId === run.runId);
     for (const notice of run.providerFailureNotices ?? []) {
@@ -375,10 +385,7 @@ function notifyNewProviderFailures(previousRuns: RunStatus[], nextRuns: RunStatu
         count: notice.count,
         message: notice.message,
       });
-      const routing = i18n.t(
-        notice.rerouted ? 'runs.providerFailureRerouted' : 'runs.providerFailureNotRerouted',
-        { ns: 'strings' },
-      );
+      const routing = i18n.t(PROVIDER_FAILURE_ROUTING_KEY[notice.routing], { ns: 'strings' });
       toast.warning(`${summary} ${routing}`);
     }
   }
@@ -459,7 +466,7 @@ export const useRunStore = create<RunStore>((set, get) => {
         const previousRuns = get().runs;
         set({ runs, loading: false, error: null });
         notifyFailedRunTransitions(previousRuns, runs);
-        notifyNewProviderFailures(previousRuns, runs);
+        notifyNewProviderFailures(projectId, previousRuns, runs);
 
         // Poll while any run is in pending or running state.
         // Queued runs count as active: they will transition to running without
