@@ -288,6 +288,11 @@ export function candidateDetailPath(resultsPath: string): string {
   return `${resultsPath.slice(0, -'.local.json'.length)}.detail.local.json`;
 }
 
+export function candidateTranslationsPath(resultsPath: string): string {
+  if (!resultsPath.endsWith('.local.json')) throw new Error('candidate results path must end in .local.json');
+  return `${resultsPath.slice(0, -'.local.json'.length)}.translations.local.json`;
+}
+
 const HTTP_CEILING_PREFIX = 'HTTP ceiling reached for ';
 
 export function httpCeilingMessage(host: string): string {
