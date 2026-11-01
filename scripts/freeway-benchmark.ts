@@ -33,10 +33,12 @@
  *   pnpm exec tsx scripts/freeway-benchmark.ts --langs ja,ko --providers google,groq --max-requests 40
  *   pnpm exec tsx scripts/freeway-benchmark.ts --refresh --langs ja
  *   pnpm exec tsx scripts/freeway-benchmark.ts --distill
+ *   pnpm exec tsx scripts/freeway-benchmark.ts --candidates c.json --results-out scripts/freeway-benchmark/candidates-x.local.json --langs es
  *
  * Keys are read from scripts/.env (override with NARN_ENV_FILE) — never
  * accepted on argv, never printed. Only name presence/absence is ever logged.
  */
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -44,11 +46,19 @@ import { fileURLToPath } from 'node:url';
 import {
   aggregateCell,
   applyDistilled,
+  candidateDetailPath,
+  candidateTranslationsPath,
+  candidateSnapshot,
   cellKey,
   corpusVersion,
   distill,
+  httpCeilingMessage,
+  isHttpCeilingMessage,
+  judgeBudgetFits,
   mechanicalIssues,
+  parseCandidates,
   parseCorpus,
+  restrictCandidateEnv,
   sortedResults,
   type CellResult,
   type CorpusEntry,
@@ -171,6 +181,17 @@ const USAGE = `Usage: tsx scripts/freeway-benchmark.ts [options]
                        (default: skip them — the run is crash-resumable).
   --plan               Print the cell plan + key-presence report and exit.
                        No network calls.
+  --candidates <file>  Benchmark the models in this JSON file instead of the
+                       snapshot's: {"providers":{"groq":[{"id":"…","rpm":6}]}}.
+                       Reads only GOOGLE/GROQ/OPENROUTER keys, also enforces
+                       --max-requests per host on real HTTP calls, and records
+                       translate latency. Requires --results-out.
+  --results-out <path> Results file for --candidates; must be gitignored and end
+                       in .local.json. results.json is neither read nor written.
+  --judge-pace-ms N    Minimum wait after each judge request.
+  --translate-only     With --candidates: translate and save to a sidecar file
+                       without judging. A later run without this flag judges
+                       the saved translations instead of translating again.
   --distill            Fold results.json into the bundled free-tier snapshot
                        (free-tier-data.json) and print coverage. No network
                        calls.
@@ -184,6 +205,10 @@ interface CliArgs {
   refresh: boolean;
   plan: boolean;
   distill: boolean;
+  candidatesPath?: string;
+  resultsOut?: string;
+  judgePaceMs?: number;
+  translateOnly?: boolean;
 }
 
 function usageError(message: string): never {
@@ -226,6 +251,22 @@ function parseArgs(argv: string[]): CliArgs {
         args.maxRequests = n;
         break;
       }
+      case '--translate-only':
+        args.translateOnly = true;
+        break;
+      case '--candidates':
+        args.candidatesPath = path.resolve(next(++i, '--candidates'));
+        break;
+      case '--results-out':
+        args.resultsOut = path.resolve(next(++i, '--results-out'));
+        break;
+      case '--judge-pace-ms': {
+        const raw = next(++i, '--judge-pace-ms');
+        const n = Number(raw);
+        if (!Number.isFinite(n) || n <= 0) usageError(`--judge-pace-ms must be a positive number (got "${raw}")`);
+        args.judgePaceMs = n;
+        break;
+      }
       case '--refresh':
         args.refresh = true;
         break;
@@ -241,6 +282,11 @@ function parseArgs(argv: string[]): CliArgs {
   }
   if (args.langs?.length === 0) usageError('--langs must name at least one language');
   if (args.providers?.length === 0) usageError('--providers must name at least one provider');
+  if ((args.candidatesPath === undefined) !== (args.resultsOut === undefined)) {
+    usageError('--candidates and --results-out must be used together');
+  }
+  if (args.translateOnly && !args.candidatesPath) usageError('--translate-only requires --candidates');
+  if (args.candidatesPath && args.distill) usageError('--distill cannot be used with --candidates');
   return args;
 }
 
@@ -352,10 +398,13 @@ function readCorpus(): { entries: CorpusEntry[]; committedVersion: string; local
 // results.json / results-detail.local.json persistence
 // ---------------------------------------------------------------------------
 
+let resultsPath = RESULTS_PATH;
+let detailPath = DETAIL_PATH;
+
 function readResultsFile(): ResultsFile | undefined {
-  if (!existsSync(RESULTS_PATH)) return undefined;
+  if (!existsSync(resultsPath)) return undefined;
   try {
-    return JSON.parse(readFileSync(RESULTS_PATH, 'utf8')) as ResultsFile;
+    return JSON.parse(readFileSync(resultsPath, 'utf8')) as ResultsFile;
   } catch (err) {
     console.error(`results.json is invalid: ${redact(toErrorMessage(err))}`);
     process.exit(1);
@@ -363,7 +412,7 @@ function readResultsFile(): ResultsFile | undefined {
 }
 
 function writeResultsFile(file: ResultsFile): void {
-  writeFileSync(RESULTS_PATH, JSON.stringify(sortedResults(file), null, 2) + '\n');
+  writeFileSync(resultsPath, JSON.stringify(sortedResults(file), null, 2) + '\n');
 }
 
 interface DetailEntry {
@@ -376,9 +425,9 @@ interface DetailEntry {
 type DetailFile = Record<string, DetailEntry[]>;
 
 function readDetailFile(): DetailFile {
-  if (!existsSync(DETAIL_PATH)) return {};
+  if (!existsSync(detailPath)) return {};
   try {
-    return JSON.parse(readFileSync(DETAIL_PATH, 'utf8')) as DetailFile;
+    return JSON.parse(readFileSync(detailPath, 'utf8')) as DetailFile;
   } catch {
     return {}; // local-only diagnostic file: corrupt/missing is non-fatal, just start fresh
   }
@@ -386,7 +435,7 @@ function readDetailFile(): DetailFile {
 
 function writeDetailFile(file: DetailFile): void {
   const sorted: DetailFile = Object.fromEntries(Object.entries(file).sort(([a], [b]) => (a < b ? -1 : 1)));
-  writeFileSync(DETAIL_PATH, JSON.stringify(sorted, null, 2) + '\n');
+  writeFileSync(detailPath, JSON.stringify(sorted, null, 2) + '\n');
 }
 
 // ---------------------------------------------------------------------------
@@ -430,6 +479,8 @@ function classify(message: string, isDeepl: boolean): Classification {
 // Provider/run state
 // ---------------------------------------------------------------------------
 
+type TranslationCache = Record<string, Record<number, { results: TranslationResult[]; ms: number }>>;
+
 type DeferReason =
   | 'cooling'
   | 'auth-failed'
@@ -466,6 +517,12 @@ interface RunContext {
   judgeSnapModel: FreeTierModel;
   judgeProvider: FreeTierProvider;
   hadUnexpectedFailure: boolean;
+  judgePaceMs: number | undefined;
+  recordLatency: boolean;
+  translateOnly: boolean;
+  /** Candidate runs only: translated chunks by cell key, so a judge failure never re-spends translate quota. */
+  translationCache: TranslationCache | undefined;
+  translationCachePath: string | undefined;
 }
 
 function getStats(ctx: RunContext, providerKey: string): ProviderStats {
@@ -584,6 +641,11 @@ async function runJudge(ctx: RunContext, items: JudgeItem[]): Promise<JudgeRunOu
     const chunkVerdicts = await ctx.judge(chunk);
     judgeStats.requestsMade += 1;
     await paceAfterCall(ctx.judgeSnapModel, ctx.judgeProvider);
+    if (ctx.judgePaceMs !== undefined) await sleepMs(ctx.judgePaceMs);
+    // The ceiling can't lift during this run, so the rest of this cell can never be judged.
+    if (chunkVerdicts.some((v) => v.error !== undefined && isHttpCeilingMessage(v.error))) {
+      return { kind: 'budget-capped' };
+    }
     verdicts.push(...chunkVerdicts);
   }
 
@@ -684,6 +746,12 @@ function countDeeplContextGroups(corpus: CorpusEntry[]): number {
   return new Set(corpus.map(jobContext)).size;
 }
 
+function capProviderAtHttpCeiling(ctx: RunContext, providerKey: string, key: string): void {
+  console.error(`[${key}] hit the HTTP ceiling; "${providerKey}" budget-capped, remaining cells deferred`);
+  ctx.providerState.set(providerKey, 'budget-capped');
+  deferCell(ctx, providerKey, 'budget-capped');
+}
+
 /** `'stop'` = judging just went dead (429-shaped) — the caller must end the whole run gracefully. */
 type CellOutcome = 'continue' | 'stop';
 
@@ -707,7 +775,7 @@ async function processCell(
   // account is already known-bad (cooling/auth-failed/budget-capped — set either by google's own
   // candidate-translate path or by a prior judge call) this cell can never be written no matter
   // how well it translates, so defer now rather than spend candidate quota translating it first.
-  if (providerKey !== JUDGE_PROVIDER_KEY) {
+  if (providerKey !== JUDGE_PROVIDER_KEY && !ctx.translateOnly) {
     const judgeState = ctx.providerState.get(JUDGE_PROVIDER_KEY);
     if (judgeState !== undefined) {
       deferCell(ctx, providerKey, judgeState === 'cooling' ? 'judge-cooling' : judgeState);
@@ -732,14 +800,55 @@ async function processCell(
 
   // Judged: translated without error AND not blank (an empty/whitespace success is already a
   // mechanical fail — judging it would spend the scarcest quota in the run for no signal).
+  const judgeStats = getStats(ctx, JUDGE_PROVIDER_KEY);
+  if (
+    !ctx.translateOnly &&
+    !judgeBudgetFits({
+      used: judgeStats.requestsMade,
+      maxRequests: ctx.maxRequests,
+      judgeRequests: Math.ceil(jobs.length / JUDGE_BATCH_SIZE),
+      ownTranslateRequests: providerKey === JUDGE_PROVIDER_KEY ? chunks.length : 0,
+    })
+  ) {
+    console.error(`[${key}] a full judge pass would cross --max-requests (${ctx.maxRequests}); cell deferred before translating`);
+    ctx.providerState.set(JUDGE_PROVIDER_KEY, 'budget-capped');
+    deferCell(ctx, providerKey, 'budget-capped');
+    return 'continue';
+  }
+
   const toJudge: Array<{ entry: CorpusEntry; result: TranslationResult }> = [];
   // Mechanical-only: either the module reported .error, or it "succeeded" with blank text.
   const mechOnly: TranslationResult[] = [];
   let parseFailures = 0;
   let parseFailedStrings = 0;
   let requests = 0;
+  let translateMs = 0;
 
-  for (const chunk of chunks) {
+  const remember = (index: number, results: TranslationResult[], ms: number): void => {
+    if (!ctx.translationCache || !ctx.translationCachePath) return;
+    (ctx.translationCache[key] ??= {})[index] = { results, ms };
+    writeFileSync(ctx.translationCachePath, `${JSON.stringify(ctx.translationCache, null, 2)}\n`);
+  };
+
+  for (const [chunkIndex, chunk] of chunks.entries()) {
+    const saved = ctx.translationCache?.[key]?.[chunkIndex];
+    if (saved && !ctx.refresh) {
+      requests++;
+      translateMs += saved.ms;
+      const failed = saved.results.length > 0 && saved.results.every((r) => r.error !== undefined);
+      if (failed) {
+        parseFailures++;
+        parseFailedStrings += chunk.length;
+        continue;
+      }
+      for (const r of saved.results) {
+        const entry = ctx.entryById.get(r.entryId);
+        if (r.error !== undefined || r.translatedText.trim() === '') mechOnly.push(r);
+        else if (entry) toJudge.push({ entry, result: r });
+      }
+      continue;
+    }
+
     if (ctx.maxRequests !== undefined && stats.requestsMade >= ctx.maxRequests) {
       console.error(`[${providerKey}] hit --max-requests (${ctx.maxRequests}); remaining cells deferred`);
       ctx.providerState.set(providerKey, 'budget-capped');
@@ -748,8 +857,12 @@ async function processCell(
     }
 
     let results: TranslationResult[];
+    let chunkMs = 0;
     try {
+      const startedAt = Date.now();
       results = await mod.translate(chunk, undefined);
+      chunkMs = Date.now() - startedAt;
+      translateMs += chunkMs;
       requests++;
       stats.requestsMade++;
       await paceAfterCall(snapModel, provider);
@@ -757,7 +870,17 @@ async function processCell(
       requests++;
       stats.requestsMade++;
       await paceAfterCall(snapModel, provider); // a request was made even though it threw
-      applyClassification(ctx, providerKey, key, classify(redact(toErrorMessage(err)), isDeepl), requests);
+      const message = redact(toErrorMessage(err));
+      if (isHttpCeilingMessage(message)) {
+        capProviderAtHttpCeiling(ctx, providerKey, key);
+        return 'continue';
+      }
+      applyClassification(ctx, providerKey, key, classify(message, isDeepl), requests);
+      return 'continue';
+    }
+
+    if (results.some((r) => r.error !== undefined && isHttpCeilingMessage(r.error))) {
+      capProviderAtHttpCeiling(ctx, providerKey, key);
       return 'continue';
     }
 
@@ -766,12 +889,14 @@ async function processCell(
       if (isParseFailureMessage(message)) {
         parseFailures++;
         parseFailedStrings += chunk.length;
+        remember(chunkIndex, results, chunkMs);
         continue;
       }
       applyClassification(ctx, providerKey, key, classify(message, isDeepl), requests);
       return 'continue';
     }
 
+    remember(chunkIndex, results, chunkMs);
     for (const r of results) {
       if (r.error !== undefined || r.translatedText.trim() === '') {
         mechOnly.push(r);
@@ -781,6 +906,11 @@ async function processCell(
       if (!entry) continue; // defensive: a result outside our corpus should never happen
       toJudge.push({ entry, result: r });
     }
+  }
+
+  if (ctx.translateOnly) {
+    console.error(`[${key}] translated ${toJudge.length} string(s), ${parseFailures} parse failure(s), ${Math.round(translateMs / Math.max(1, requests))} ms/request`);
+    return 'continue';
   }
 
   if (toJudge.length === 0) {
@@ -862,7 +992,7 @@ async function processCell(
     parseFailedStrings,
   });
 
-  writeCell(ctx, key, cell, detail);
+  writeCell(ctx, key, ctx.recordLatency ? { ...cell, meanTranslateMs: Math.round(translateMs / requests) } as CellResult : cell, detail);
   stats.cellsCompleted++;
   return 'continue';
 }
@@ -1052,6 +1182,38 @@ function printSummary(ctx: RunContext): void {
 }
 
 // ---------------------------------------------------------------------------
+// Candidate-run guards
+// ---------------------------------------------------------------------------
+
+function assertGitignored(target: string): void {
+  const res = spawnSync('git', ['check-ignore', '-q', target], { cwd: path.dirname(target), stdio: 'ignore' });
+  if (res.status !== 0) {
+    console.error(`${target} is not gitignored — refusing to write candidate results there.`);
+    process.exit(1);
+  }
+}
+
+/**
+ * The shared layer retries and splits batches below the per-call counters, so a
+ * candidate run also counts and caps real HTTP calls by host. Hostnames only:
+ * a URL can carry a key.
+ */
+function installHttpCounter(maxRequests: number | undefined): Map<string, number> {
+  const counts = new Map<string, number>();
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (input, init) => {
+    const host = new URL(input instanceof Request ? input.url : String(input)).hostname;
+    const used = counts.get(host) ?? 0;
+    if (maxRequests !== undefined && used >= maxRequests) {
+      return Promise.reject(new Error(httpCeilingMessage(host)));
+    }
+    counts.set(host, used + 1);
+    return realFetch(input, init);
+  };
+  return counts;
+}
+
+// ---------------------------------------------------------------------------
 // main
 // ---------------------------------------------------------------------------
 
@@ -1064,8 +1226,20 @@ async function main(): Promise<void> {
   }
 
   const envPath = process.env.NARN_ENV_FILE ?? 'scripts/.env';
-  const env = readEnvFile(envPath);
+  const candidateRun = args.candidatesPath !== undefined;
+  const env = candidateRun ? restrictCandidateEnv(readEnvFile(envPath)) : readEnvFile(envPath);
   const snapshot = getFreeTierSnapshot();
+  let planSnapshot = snapshot;
+  if (args.candidatesPath && args.resultsOut) {
+    assertGitignored(args.resultsOut);
+    try {
+      detailPath = candidateDetailPath(args.resultsOut);
+      planSnapshot = candidateSnapshot(snapshot, parseCandidates(JSON.parse(readFileSync(args.candidatesPath, 'utf8'))));
+    } catch (err) {
+      usageError(redact(toErrorMessage(err)));
+    }
+    resultsPath = args.resultsOut;
+  }
   const { report: keyReport, apiKeys } = buildKeyReport(snapshot, env);
 
   const { entries: corpus, committedVersion, localCount } = readCorpus();
@@ -1074,7 +1248,7 @@ async function main(): Promise<void> {
   // production). An explicit `--langs pseudo-test` still works if ever wanted.
   const langs =
     args.langs ?? LANGUAGE_REGISTRY.filter((l) => l.code !== 'en' && l.code !== PSEUDO_LANGUAGE_CODE).map((l) => l.code);
-  const { cells, missingKeyProviders } = buildPlan(snapshot, langs, args.providers, apiKeys);
+  const { cells, missingKeyProviders } = buildPlan(planSnapshot, langs, args.providers, apiKeys);
   const existingResults = readResultsFile();
 
   // Printed at startup in BOTH modes — a real run is exactly where "which provider got
@@ -1129,6 +1303,13 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  const translationCachePath = args.resultsOut && candidateRun ? candidateTranslationsPath(args.resultsOut) : undefined;
+  const translationCache: TranslationCache | undefined = translationCachePath
+    ? existsSync(translationCachePath)
+      ? (JSON.parse(readFileSync(translationCachePath, 'utf8')) as TranslationCache)
+      : {}
+    : undefined;
+
   const ctx: RunContext = {
     corpus,
     entryById: new Map(corpus.map((e) => [e.id, e])),
@@ -1149,7 +1330,13 @@ async function main(): Promise<void> {
     judgeSnapModel,
     judgeProvider,
     hadUnexpectedFailure: false,
+    judgePaceMs: args.judgePaceMs,
+    translateOnly: args.translateOnly === true,
+    translationCache,
+    translationCachePath,
+    recordLatency: candidateRun,
   };
+  const httpCounts = candidateRun ? installHttpCounter(args.maxRequests) : undefined;
 
   console.log(
     `Freeway benchmark: ${cells.length} cell(s) planned across ${new Set(cells.map((c) => c.providerKey)).size} provider(s).`,
@@ -1176,6 +1363,9 @@ async function main(): Promise<void> {
   }
 
   printSummary(ctx);
+  if (httpCounts) {
+    console.log(`HTTP calls by host: ${[...httpCounts].map(([host, n]) => `${host}=${n}`).join(', ') || 'none'}`);
+  }
   process.exitCode = ctx.hadUnexpectedFailure ? 1 : 0;
 }
 
