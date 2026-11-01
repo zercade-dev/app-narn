@@ -149,10 +149,12 @@ import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/re
 import {
   effectiveRemainingRequests,
   findMinuteStarvedEscalation,
+  isEligible,
   selectEscalationCandidates,
 } from './M32/selector.js';
 import { charCappedBatch, projectedRequestTokens } from './M32/scoring.js';
 import { difficultyBand } from './M32/difficulty.js';
+import { FREEWAY_DEGRADE_WAIT_MS } from './M32/planner.js';
 import type { Assignment, BucketView, DifficultyBand, JobGroup } from './M32/types.js';
 import { syncAuthoritativeUsage } from './M32/probes.js';
 import { maybeSweepExpiredFreewayWindows } from './freeway-minute-sweep.js';
@@ -289,6 +291,7 @@ export type ResumeWithModuleResult =
  * classify every parked pair as permanently unservable and fail it.
  */
 const NO_BUCKETS_SKIP_REASON = 'no-free-buckets-for-session';
+const NO_FLOOR_RESUME_AT = 8_640_000_000_000_000;
 
 /**
  * Cooldown applied to a Freeway bucket whose provider call failed for a reason
@@ -621,6 +624,8 @@ interface FreewayDispatchArgs {
    * under the tier the run asked for.
    */
   minBand?: DifficultyBand;
+  /** Consent to continue below the target if the at-floor wait is long. */
+  allowBelowTarget?: boolean;
   /**
    * Run-scoped format-strike caps, keyed by bucketKey: the batch size a
    * bucket is known to parse reliably at after a split recovery this run.
@@ -1171,6 +1176,10 @@ export class TranslationEngine {
       pairs.push({ entryId: err.stringId, targetLanguage: err.targetLang });
     }
     if (pairs.length === 0) return null;
+
+    // A retry is a new decision to spend on the failed entries, even though
+    // retries retain the original run's identity and accumulated history.
+    delete source.belowTargetAccepted;
 
     const entryIds = [...new Set(pairs.map((p) => p.entryId))];
     const targetLanguages = [...new Set(pairs.map((p) => p.targetLanguage))];
@@ -2763,11 +2772,7 @@ export class TranslationEngine {
     sessionId?: string,
   ): Promise<RunStatus> {
     const parked = [...pairs];
-    const park = {
-      resumeAt: status.waitingForQuota?.resumeAt ?? Date.now(),
-      pairs: parked,
-      reason: status.waitingForQuota?.reason,
-    };
+    const park = { ...status.waitingForQuota!, pairs: parked };
     delete status.waitingForQuota;
     this.queue.resumeRun(runId);
     const request = this.parkedRetryRequest(status, parked);
@@ -2782,7 +2787,7 @@ export class TranslationEngine {
         sessionId ?? this.runSessions.get(runId) ?? this.queuedSessions.get(runId),
         status,
         true,
-        this.queuedTenants.get(runId) ?? getCurrentTenant(),
+        this.queuedTenants.get(runId) ?? this.runTenants.get(runId) ?? getCurrentTenant(),
       );
     } catch (err) {
       // The park was cleared for a dispatch that never happened — put it back
@@ -2791,6 +2796,43 @@ export class TranslationEngine {
       throw err;
     }
     return status;
+  }
+
+  async acceptBelowTarget(
+    projectId: string,
+    runId: string,
+    sessionId?: string,
+  ): Promise<{ ok: true } | { ok: false; reason: 'not-pending' | 'busy' }> {
+    const inMemory = this.runs.get(runId);
+    const status = inMemory ?? (await this.runStore.getRun(projectId, runId));
+    if (
+      !status ||
+      status.projectId !== projectId ||
+      status.waitingForQuota?.reason !== 'below-target' ||
+      !this.isParkedForQuota(status)
+    ) {
+      return { ok: false, reason: 'not-pending' };
+    }
+    if (
+      this.hasDispatchingProjectRun(projectId, runId) ||
+      (!inMemory && this.hasActiveProjectRun(projectId))
+    ) {
+      return { ok: false, reason: 'busy' };
+    }
+    const waiting = status.waitingForQuota;
+    this.startingProjects.add(projectId);
+    try {
+      status.belowTargetAccepted = true;
+      await this.runStore.updateRun(projectId, status);
+      if (!this.isParkedForQuota(status) || status.waitingForQuota !== waiting) {
+        return { ok: false, reason: 'not-pending' };
+      }
+      this.runs.set(runId, status);
+      await this.resumeWaitingForQuota(projectId, runId, status, waiting.pairs, sessionId);
+      return { ok: true };
+    } finally {
+      this.startingProjects.delete(projectId);
+    }
   }
 
   /**
@@ -2814,6 +2856,7 @@ export class TranslationEngine {
       ...(source?.ignoreBatchSizeLimit !== undefined
         ? { ignoreBatchSizeLimit: source.ignoreBatchSizeLimit }
         : {}),
+      ...(source?.freewayMinTier !== undefined ? { freewayMinTier: source.freewayMinTier } : {}),
     };
   }
 
@@ -2833,9 +2876,9 @@ export class TranslationEngine {
   }
 
   /**
-   * Auto-resume pass over the runs parked on free quota: every drained
-   * `Paused` run whose `resumeAt` has arrived is re-planned against fresh
-   * bucket views. Armed as an unref'd interval when the engine opts in (see
+   * Auto-resume pass over drained parks. Quota waits are re-planned when due;
+   * feedback waits are re-planned only when an at-floor bucket is available.
+   * Armed as an unref'd interval when the engine opts in (see
    * `quotaSweepIntervalMs`), and directly callable (tests, manual triggers).
    *
    * Three properties matter here:
@@ -2863,8 +2906,8 @@ export class TranslationEngine {
    * - `force` — skip the per-run re-attempt throttle for this pass (an unlock
    *   is a real state change, not a tick). Applied to the CALLING tenant's own
    *   runs only: another tenant's park learned nothing from this unlock, so it
-   *   keeps its ordinary throttle. The `resumeAt` requirement always holds: a
-   *   park that is not due yet is never re-planned.
+   *   keeps its ordinary throttle. Quota parks must still be due; feedback
+   *   parks are checked against live at-floor capacity on every eligible pass.
    *
    * @returns how many runs were actually re-dispatched.
    */
@@ -2929,6 +2972,15 @@ export class TranslationEngine {
             // indefinitely (and keeps blocking its project's queue), so the
             // reason must be visible to the user, not just in the log.
             await this.markQuotaResumeSkipped(projectId, status, NO_BUCKETS_SKIP_REASON);
+            return false;
+          }
+          if (
+            status.waitingForQuota?.reason === 'below-target' &&
+            !(await this.hasServableBelowTargetFloor(status, sessionId))
+          ) {
+            return false;
+          }
+          if (!this.isParkedForQuota(status) || this.hasDispatchingProjectRun(projectId, runId)) {
             return false;
           }
           // The run's own captured session is the right one when it has one
@@ -3024,17 +3076,10 @@ export class TranslationEngine {
   private async restoreQuotaPark(
     projectId: string,
     status: RunStatus,
-    park: {
-      resumeAt: number;
-      pairs: RunEntryLanguagePair[];
-      reason?: 'quota' | 'provider-error';
-    },
+    park: NonNullable<RunStatus['waitingForQuota']>,
   ): Promise<void> {
-    status.waitingForQuota = {
-      resumeAt: park.resumeAt,
-      pairs: park.pairs,
-      ...(park.reason ? { reason: park.reason } : {}),
-    };
+    const { skipReason: _skipReason, ...restored } = park;
+    status.waitingForQuota = restored;
     status.status = RunStatusCode.Paused;
     this.queue.pauseRun(status.runId);
     await this.runStore.updateRun(projectId, status).catch((err: unknown) => {
@@ -3047,15 +3092,17 @@ export class TranslationEngine {
 
   /**
    * A parked run the sweep may re-plan right now (see {@link sweepQuotaResumes}).
-   * `force` waives only the per-run re-attempt throttle (the vault-unlock
-   * nudge: a fresh session is new information, not another tick) — never the
-   * park's own `resumeAt`, which is what the free quota actually requires. The
-   * caller decides `force` per run, since an unlock only speaks for the
-   * unlocking tenant's own parks.
+   * `force` waives only the per-run re-attempt throttle. A feedback park is
+   * checked regardless of its estimate; the sweep verifies its floor before
+   * resuming. The caller decides `force` per run for the unlocking tenant.
    */
   private isQuotaResumeDue(status: RunStatus, now: number, force = false): boolean {
     if (!this.isParkedForQuota(status)) return false;
-    if ((status.waitingForQuota?.resumeAt ?? 0) > now) return false;
+    if (
+      status.waitingForQuota?.reason !== 'below-target' &&
+      (status.waitingForQuota?.resumeAt ?? 0) > now
+    )
+      return false;
     if (force) return true;
     const last = this.lastQuotaResumeAttempt.get(status.runId);
     return last === undefined || now - last >= TranslationEngine.QUOTA_RESUME_MIN_INTERVAL_MS;
@@ -3081,6 +3128,43 @@ export class TranslationEngine {
     const deps = this.freewayBucketDeps(global, projectEntries, sessionId);
     const buckets = await loadBucketViews(Date.now(), deps);
     return buckets.length > 0;
+  }
+
+  private async hasServableBelowTargetFloor(
+    status: RunStatus,
+    sessionId?: string,
+  ): Promise<boolean> {
+    const waiting = status.waitingForQuota;
+    if (!waiting?.belowTarget) return false;
+    const global = await this.globalConfigStore.load();
+    const project = await this.projectStore.loadProject(status.projectId);
+    const entries = await this.stringStore.load(status.projectId);
+    const entryById = new Map(entries.map((entry) => [entry.id, entry]));
+    const now = Date.now();
+    const buckets = await loadBucketViews(
+      now,
+      this.freewayBucketDeps(global, project.moduleConfigs, sessionId),
+    );
+    const minBand = freewayMinBand(status.request) ?? 1;
+    for (const pair of waiting.pairs) {
+      if (pair.belowTargetNeededTier === undefined) continue;
+      const entry = entryById.get(pair.entryId);
+      if (!entry) continue;
+      const job = toFreewayJob({
+        entry,
+        targetLanguage: pair.targetLanguage,
+        moduleId: FREEWAY_MODULE_ID,
+        ruleId: null,
+      });
+      const band = Math.max(
+        pair.belowTargetNeededTier,
+        difficultyBand(job),
+        minBand,
+      ) as DifficultyBand;
+      const group: JobGroup = { targetLanguage: pair.targetLanguage, band, jobs: [job] };
+      if (buckets.some((bucket) => isEligible(bucket, group, now))) return true;
+    }
+    return false;
   }
 
   /**
@@ -3122,7 +3206,7 @@ export class TranslationEngine {
     if (availability !== 'ok') return { ok: false, reason: availability };
 
     const parked = [...waiting.pairs];
-    const park = { resumeAt: waiting.resumeAt, pairs: parked, reason: waiting.reason };
+    const park = { ...waiting, pairs: parked };
     this.runs.set(runId, status);
     delete status.waitingForQuota;
     this.queue.resumeRun(runId);
@@ -3530,12 +3614,13 @@ export class TranslationEngine {
     probeAbort.abort();
     const buckets = await loadBucketViews(now, { ...deps, bucketStates });
     const minBand = freewayMinBand(status.request);
-    const resolution = resolveFreewayDecisions(
-      decisions,
-      buckets,
-      now,
-      minBand !== undefined ? { minBand } : undefined,
-    );
+    const resolution = resolveFreewayDecisions(decisions, buckets, now, {
+      ...(minBand !== undefined ? { minBand } : {}),
+      belowTarget:
+        args.global.settings?.freewayAlwaysContinueBelowTarget || status.belowTargetAccepted
+          ? 'allow'
+          : 'ask',
+    });
     this.logger.info('translation:freeway-resolved', {
       runId,
       assigned: resolution.assignedGroups.map((g) => ({
@@ -3544,6 +3629,7 @@ export class TranslationEngine {
         batchSize: g.batchSize,
       })),
       deferred: resolution.deferred?.pairs.length ?? 0,
+      needsConfirmation: resolution.needsConfirmation.length,
       blocked: resolution.blocked.length,
     });
     for (const assignment of resolution.assignedGroups) {
@@ -3572,6 +3658,9 @@ export class TranslationEngine {
           resolution.deferred.reason,
         ),
       );
+    }
+    for (const confirmation of resolution.needsConfirmation) {
+      this.parkBelowTarget(status, confirmation);
     }
     // Seed the governor with the live headroom this plan was resolved against,
     // for exactly the buckets the plan actually assigned — an unassigned
@@ -3640,6 +3729,29 @@ export class TranslationEngine {
     return groups;
   }
 
+  private parkBelowTarget(
+    status: RunStatus,
+    confirmation: ReturnType<typeof resolveFreewayDecisions>['needsConfirmation'][number],
+  ): void {
+    this.deferPairsForQuota(
+      status,
+      confirmation.pairs.map((pair) => ({
+        ...pair,
+        belowTargetNeededTier: confirmation.neededTier,
+      })),
+      confirmation.resumeAt ?? NO_FLOOR_RESUME_AT,
+      'below-target',
+      {
+        strings: new Set(confirmation.pairs.map((pair) => pair.entryId)).size,
+        languages: [...new Set(confirmation.pairs.map((pair) => pair.targetLanguage))],
+        bestTier: confirmation.bestTier,
+        neededTier: confirmation.neededTier,
+        bestModelId: confirmation.bestModelId,
+        resumeAt: confirmation.resumeAt,
+      },
+    );
+  }
+
   /**
    * Record (entry, language) pairs Freeway can never serve as controlled
    * failures — same accounting and aggregated logging as the pre-dispatch
@@ -3676,34 +3788,72 @@ export class TranslationEngine {
    * pairs a sibling batch already parked (dedup by pair, earliest resume wins);
    * the pairs count toward neither `completed` nor `failed`.
    *
-   * `reason` labels WHY (UI only — never changes park/resume behavior). When
-   * merging into an existing park, `'provider-error'` always wins over
-   * `'quota'`: a sibling batch parked for a genuine provider failure must
-   * never be silently downgraded to a plain quota wait by a later, milder
-   * defer landing on the same run.
+   * Feedback takes precedence over provider errors, which take precedence
+   * over quota. A pair's target tier stays with it for the resume sweep.
    */
   private deferPairsForQuota(
     status: RunStatus,
-    pairs: RunEntryLanguagePair[],
+    pairs: Array<RunEntryLanguagePair & { belowTargetNeededTier?: number }>,
     resumeAt: number,
-    reason?: 'quota' | 'provider-error',
+    reason?: 'quota' | 'provider-error' | 'below-target',
+    belowTarget?: NonNullable<RunStatus['waitingForQuota']>['belowTarget'],
   ): void {
     if (pairs.length === 0) return;
     const existing = status.waitingForQuota;
     if (!existing) {
-      status.waitingForQuota = { resumeAt, pairs: [...pairs], ...(reason ? { reason } : {}) };
+      status.waitingForQuota = {
+        resumeAt,
+        pairs: [...pairs],
+        ...(reason ? { reason } : {}),
+        ...(belowTarget ? { belowTarget } : {}),
+      };
       return;
     }
-    const seen = new Set(existing.pairs.map((p) => `${p.entryId} ${p.targetLanguage}`));
+    const seen = new Map(existing.pairs.map((p) => [`${p.entryId}\0${p.targetLanguage}`, p]));
     for (const pair of pairs) {
-      const key = `${pair.entryId} ${pair.targetLanguage}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
+      const key = `${pair.entryId}\0${pair.targetLanguage}`;
+      const previous = seen.get(key);
+      if (previous) {
+        if (pair.belowTargetNeededTier !== undefined) {
+          previous.belowTargetNeededTier = Math.max(
+            previous.belowTargetNeededTier ?? 0,
+            pair.belowTargetNeededTier,
+          );
+        }
+        continue;
+      }
+      seen.set(key, pair);
       existing.pairs.push(pair);
     }
     existing.resumeAt = Math.min(existing.resumeAt, resumeAt);
-    if (existing.reason !== 'provider-error' && reason !== undefined) {
+    if (
+      reason === 'below-target' ||
+      (existing.reason !== 'below-target' && existing.reason !== 'provider-error' && reason)
+    ) {
       existing.reason = reason;
+    }
+    if (belowTarget) {
+      const previous = existing.belowTarget;
+      const pending = existing.pairs.filter((pair) => pair.belowTargetNeededTier !== undefined);
+      const representative =
+        !previous ||
+        belowTarget.neededTier > previous.neededTier ||
+        (belowTarget.neededTier === previous.neededTier && belowTarget.bestTier < previous.bestTier)
+          ? belowTarget
+          : previous;
+      existing.belowTarget = {
+        strings: new Set(pending.map((pair) => pair.entryId)).size,
+        languages: [...new Set(pending.map((pair) => pair.targetLanguage))],
+        bestTier: representative.bestTier,
+        neededTier: representative.neededTier,
+        bestModelId: representative.bestModelId,
+        resumeAt:
+          previous?.resumeAt == null
+            ? belowTarget.resumeAt
+            : belowTarget.resumeAt == null
+              ? previous.resumeAt
+              : Math.min(previous.resumeAt, belowTarget.resumeAt),
+      };
     }
   }
 
@@ -4063,14 +4213,47 @@ export class TranslationEngine {
       return originalJobs.map((job) => retained.get(resultKey(job)) ?? byKey.get(resultKey(job))!);
     };
     const bandOpts = freewayBandOpts(degradedFloor, minBand);
+    const allowLowerTier = (
+      result: ReturnType<typeof revalidateGroup>,
+      buckets: BucketView[],
+      now: number,
+    ): ReturnType<typeof revalidateGroup> => {
+      if (!args.allowBelowTarget || (result.kind !== 'defer' && result.kind !== 'blocked')) {
+        return result;
+      }
+      const resolution = resolveFreewayDecisions(decisions, buckets, now, {
+        ...(minBand !== undefined ? { minBand } : {}),
+        belowTarget: 'allow',
+      });
+      const assignment = resolution.assignedGroups[0];
+      if (
+        resolution.assignedGroups.length !== 1 ||
+        !assignment?.degraded ||
+        assignment.decisions.length !== decisions.length
+      )
+        return result;
+      const decision = assignment.decisions[0]!;
+      return {
+        kind: 'reroute',
+        bucketKey: assignment.bucketKey,
+        moduleId: decision.moduleId!,
+        modelId: decision.modelOverride!,
+        qualityTier: decision.freewayTier!,
+        batchSize: assignment.batchSize,
+      };
+    };
     const parkAtLimit = async (): Promise<FreewayDispatchOutcome> => {
       const now = Date.now();
       const buckets = await loadBucketViews(now, deps);
-      const revalidated = revalidateGroup(
-        { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
+      const revalidated = allowLowerTier(
+        revalidateGroup(
+          { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
+          buckets,
+          now,
+          bandOpts,
+        ),
         buckets,
         now,
-        bandOpts,
       );
       if (revalidated.kind === 'blocked') return { kind: 'blocked' };
       return { kind: 'defer', resumeAt: now + 60_000, reason: 'provider-error' };
@@ -4103,11 +4286,15 @@ export class TranslationEngine {
       // is known to be failing and reaching the same decision from the catch.
       const now = Date.now();
       const buckets = await loadBucketViews(now, deps);
-      const revalidated = revalidateGroup(
-        { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
+      const revalidated = allowLowerTier(
+        revalidateGroup(
+          { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
+          buckets,
+          now,
+          bandOpts,
+        ),
         buckets,
         now,
-        bandOpts,
       );
       if (revalidated.kind === 'blocked') return { kind: 'blocked' };
       if (revalidated.kind === 'defer') {
@@ -4579,11 +4766,15 @@ export class TranslationEngine {
           });
         }
         const buckets = await loadBucketViews(now, deps);
-        const revalidated = revalidateGroup(
-          { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
+        const revalidated = allowLowerTier(
+          revalidateGroup(
+            { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
+            buckets,
+            now,
+            bandOpts,
+          ),
           buckets,
           now,
-          bandOpts,
         );
         // Only a reroute rescues a generic provider failure: with nothing else
         // able to serve the group, the honest outcome is the provider's own
@@ -4936,7 +5127,7 @@ export class TranslationEngine {
       let bucketKey = freewayBucketKey;
       if (bucketKey !== undefined) {
         freewayDeps = this.freewayBucketDeps(global, projectEntries, sessionId);
-        const revalidated = await this.revalidateFreewayBatch(
+        let revalidated = await this.revalidateFreewayBatch(
           decisions,
           bucketKey,
           freewayDeps,
@@ -5020,6 +5211,47 @@ export class TranslationEngine {
             for (const d of segment) settled.add(settleKey(d));
           }
           return;
+        }
+        if (revalidated.kind === 'defer' || revalidated.kind === 'blocked') {
+          const now = Date.now();
+          const views = await loadBucketViews(now, freewayDeps);
+          const minBand = freewayMinBand(status.request);
+          const resolution = resolveFreewayDecisions(decisions, views, now, {
+            ...(minBand !== undefined ? { minBand } : {}),
+            belowTarget:
+              global.settings?.freewayAlwaysContinueBelowTarget || status.belowTargetAccepted
+                ? 'allow'
+                : 'ask',
+          });
+          if (
+            resolution.needsConfirmation.reduce((count, group) => count + group.pairs.length, 0) ===
+            decisions.length
+          ) {
+            for (const confirmation of resolution.needsConfirmation) {
+              this.parkBelowTarget(status, confirmation);
+            }
+            for (const d of decisions) settled.add(settleKey(d));
+            this.emitProgress(runId, status);
+            refundUnusedAdmission();
+            return;
+          }
+          const assignment = resolution.assignedGroups[0];
+          if (
+            resolution.assignedGroups.length === 1 &&
+            assignment?.degraded &&
+            assignment.decisions.length === decisions.length
+          ) {
+            const firstDecision = assignment.decisions[0]!;
+            freewayDegraded = assignment.degraded;
+            revalidated = {
+              kind: 'reroute',
+              bucketKey: assignment.bucketKey,
+              moduleId: firstDecision.moduleId!,
+              modelId: firstDecision.modelOverride!,
+              qualityTier: firstDecision.freewayTier!,
+              batchSize: assignment.batchSize,
+            };
+          }
         }
         if (revalidated.kind === 'reroute') {
           this.logger.info('translation:freeway-rerouted', {
@@ -5906,6 +6138,9 @@ export class TranslationEngine {
             onSplit: (info) => this.recordFreewayDetail(runId, formatSplitDetail(info)),
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
             minBand: freewayMinBand(status.request),
+            allowBelowTarget: !!(
+              global.settings?.freewayAlwaysContinueBelowTarget || status.belowTargetAccepted
+            ),
             splitCaps: freewaySplitCaps,
             onRechunk: (info) => this.recordFreewayDetail(runId, formatRechunkDetail(info)),
             onUnpack: (info) => this.recordFreewayDetail(runId, formatUnpackDetail(info)),
@@ -5978,9 +6213,11 @@ export class TranslationEngine {
             metricsCollector.recordLatency(moduleId, metricsModel, Date.now() - batchStartedAt);
           } else if (outcome.kind === 'defer' || outcome.kind === 'blocked') {
             const pairs: RunEntryLanguagePair[] = [];
+            const remainingDecisions: RoutingDecision[] = [];
             for (const { index } of batchJobs) {
               if (processedIndices.has(index)) continue;
               const e = uncachedNonTrivialEntries[index];
+              remainingDecisions.push(e.decision);
               pairs.push({
                 entryId: e.decision.entry.id,
                 targetLanguage: e.decision.targetLanguage,
@@ -5988,8 +6225,35 @@ export class TranslationEngine {
               settled.add(settleKey(e.decision));
               deferredIndices.add(index);
             }
+            let remainingPairs = pairs;
+            if (
+              remainingDecisions.length > 0 &&
+              (outcome.kind === 'blocked' ||
+                outcome.resumeAt - Date.now() > FREEWAY_DEGRADE_WAIT_MS)
+            ) {
+              const now = Date.now();
+              const views = await loadBucketViews(now, freewayDeps);
+              const minBand = freewayMinBand(status.request);
+              const resolution = resolveFreewayDecisions(remainingDecisions, views, now, {
+                ...(minBand !== undefined ? { minBand } : {}),
+                belowTarget:
+                  global.settings?.freewayAlwaysContinueBelowTarget || status.belowTargetAccepted
+                    ? 'allow'
+                    : 'ask',
+              });
+              const feedbackPairs = new Set<string>();
+              for (const confirmation of resolution.needsConfirmation) {
+                this.parkBelowTarget(status, confirmation);
+                for (const pair of confirmation.pairs) {
+                  feedbackPairs.add(`${pair.entryId}\0${pair.targetLanguage}`);
+                }
+              }
+              remainingPairs = pairs.filter(
+                (pair) => !feedbackPairs.has(`${pair.entryId}\0${pair.targetLanguage}`),
+              );
+            }
             if (outcome.kind === 'defer') {
-              this.deferPairsForQuota(status, pairs, outcome.resumeAt, outcome.reason);
+              this.deferPairsForQuota(status, remainingPairs, outcome.resumeAt, outcome.reason);
               this.logger.info('translation:freeway-deferred', {
                 runId,
                 bucketKey,
@@ -6002,8 +6266,9 @@ export class TranslationEngine {
               );
               this.emitProgress(runId, status);
             } else {
-              this.recordFreewayBlocked(runId, status, pairs);
+              this.recordFreewayBlocked(runId, status, remainingPairs);
             }
+            if (remainingPairs.length === 0) this.emitProgress(runId, status);
             continue;
           } else {
             batchError = outcome.error;

@@ -463,16 +463,13 @@ export interface RunStatus {
    * (the run keeps blocking its project's queue meanwhile); cleared the moment
    * the run is actually resumed.
    *
-   * `reason` distinguishes WHY the pairs are parked: `'provider-error'` means a
-   * provider itself kept failing (5xx/timeout/retired model), `'quota'` means
-   * the shared free-tier allowance is exhausted or a rate limit was hit. Purely
-   * a UI label — it does not change park/resume behavior. When a later defer
-   * merges into an existing park, `'provider-error'` always wins over `'quota'`
-   * (never silently downgraded). Absent on parks predating this field.
+   * `reason` distinguishes a quality decision from provider errors and quota
+   * waits. Below-target feedback takes precedence over the other reasons.
    */
   waitingForQuota?: {
     resumeAt: number;
-    pairs: RunEntryLanguagePair[];
+    /** The optional tier marks feedback pairs for the at-floor resume check. */
+    pairs: Array<RunEntryLanguagePair & { belowTargetNeededTier?: number }>;
     /**
      * How many pairs are parked. Equal to `pairs.length` on a FULL record, and
      * the ONLY pair information present on the run-LIST shape: the list served
@@ -484,8 +481,18 @@ export interface RunStatus {
      */
     pairCount?: number;
     skipReason?: string;
-    reason?: 'quota' | 'provider-error';
+    reason?: 'quota' | 'provider-error' | 'below-target';
+    belowTarget?: {
+      strings: number;
+      languages: string[];
+      bestTier: number;
+      neededTier: number;
+      bestModelId: string;
+      resumeAt: number | null;
+    };
   };
+  /** The user accepted lower-tier translations for the rest of this run. */
+  belowTargetAccepted?: boolean;
   /**
    * For translation runs: failures that recurred on one model with one error,
    * at most ten groups. Absent when nothing recurred.
