@@ -270,6 +270,7 @@ export {
   LOOPBACK_HOSTS,
   buildBatchPrompt,
   parseBatchResponse,
+  parseIndexedTranslationResponse,
   filterGlossaryForSource,
   buildMixedTargetBatchPrompt,
   parseMixedTargetBatchResponse,

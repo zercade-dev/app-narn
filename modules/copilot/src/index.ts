@@ -33,6 +33,7 @@ import {
   throwIfAllChunksFailed,
   buildBatchPrompt,
   parseBatchResponse,
+  parseIndexedTranslationResponse,
   filterGlossaryForSource,
   buildMixedTargetBatchPrompt,
   parseMixedTargetBatchResponse,
@@ -93,6 +94,8 @@ export interface CopilotConfig {
   maxBatchSize?: number;
   /** When exactly 0, disables every internal transient retry (one attempt per request); any other value or absent leaves today's retry behavior unchanged. Injected by the host's Freeway routing overrides. */
   maxRetries?: number;
+  /** Use Freeway's indexed reply format for same-language batches. */
+  indexedBatchReplies?: boolean;
   /** Per-request timeout (ms) injected by the host from workspace settings. Default DEFAULT_REQUEST_TIMEOUT_MS. */
   requestTimeoutMs?: number;
   /** Optional client factory override (injected by server pool; falls back to getCopilotClient). */
@@ -505,7 +508,7 @@ export function createCopilotModule(
           const isMixed = new Set(batchJobs.map((j) => j.targetLanguage)).size > 1;
           const { system, user } = isMixed
             ? buildMixedTargetBatchPrompt(batchJobs)
-            : buildBatchPrompt(batchJobs, batchJobs[0].targetLanguage);
+            : buildBatchPrompt(batchJobs, batchJobs[0].targetLanguage, config.indexedBatchReplies);
           if (verbose)
             log('info', '[copilot] batch:prompt', {
               system,
@@ -567,10 +570,13 @@ export function createCopilotModule(
               count: batchJobs.length,
               mixedTarget: isMixed,
             });
+          const indexed = !isMixed && config.indexedBatchReplies === true;
           const parsed = isMixed
             ? parseMixedTargetBatchResponse(resp.text, batchJobs)
-            : parseBatchResponse(resp.text, batchJobs);
-          if (parsed === null) {
+            : indexed
+              ? parseIndexedTranslationResponse(resp.text, batchJobs)
+              : parseBatchResponse(resp.text, batchJobs);
+          if (parsed === null || (indexed && parsed.every((value) => value === undefined))) {
             log('warn', '[copilot] batch:parse-failed', {
               count: batchJobs.length,
               mixedTarget: isMixed,
@@ -582,7 +588,7 @@ export function createCopilotModule(
           // Batch-total usage rides on the first result only (see
           // TranslationUsage contract in @zercade-dev/narn-shared).
           const batchChars = batchJobs.reduce((sum, j) => sum + j.sourceText.length, 0);
-          const outputs = parsed.map((p) => p.trim());
+          const outputs = parsed.map((p) => p?.trim());
           const batchUsage = toTranslationUsage(
             resp.usage,
             model,
@@ -593,12 +599,20 @@ export function createCopilotModule(
             count: batchJobs.length,
             ...(isMixed ? { mixedTarget: true } : { targetLanguage: batchJobs[0].targetLanguage }),
           });
-          return batchJobs.map((job, i) => ({
+          const batchResults = batchJobs.map((job, i) => ({
             entryId: job.entryId,
             targetLanguage: job.targetLanguage,
-            translatedText: decodeLeakedHtmlEntities(outputs[i], job.sourceText),
+            translatedText:
+              outputs[i] === undefined ? '' : decodeLeakedHtmlEntities(outputs[i], job.sourceText),
+            ...(outputs[i] === undefined
+              ? { error: 'parseBatchResponse: malformed JSON from provider' }
+              : {}),
             usage: i === 0 ? batchUsage : undefined,
           }));
+          if (indexed) {
+            for (const result of batchResults) await options?.onJobComplete?.(result);
+          }
+          return batchResults;
         };
 
         for (const chunk of chunkArray(jobs, chunkSize)) {

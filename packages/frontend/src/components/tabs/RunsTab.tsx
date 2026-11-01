@@ -899,7 +899,9 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                       run.waitingForQuota?.pairCount ?? run.waitingForQuota?.pairs?.length ?? 0;
                     const isWaitingForQuota = isPaused && waitingPairCount > 0;
                     const isBelowTarget =
-                      isWaitingForQuota && run.waitingForQuota?.reason === 'below-target';
+                      isWaitingForQuota &&
+                      run.waitingForQuota?.reason === 'below-target' &&
+                      run.completed + run.failed + waitingPairCount >= run.total;
                     const isQueued = run.status === RunStatusCode.Queued;
                     const queueIndex = isQueued ? queuedIds.indexOf(run.runId) : -1;
 

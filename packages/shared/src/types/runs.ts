@@ -468,8 +468,14 @@ export interface RunStatus {
    */
   waitingForQuota?: {
     resumeAt: number;
-    /** The optional tier marks feedback pairs for the at-floor resume check. */
-    pairs: Array<RunEntryLanguagePair & { belowTargetNeededTier?: number }>;
+    /** Per-pair feedback floor and ordinary quota retry time, when applicable. */
+    pairs: Array<
+      RunEntryLanguagePair & {
+        belowTargetNeededTier?: number;
+        quotaResumeAt?: number;
+        quotaReason?: 'quota' | 'provider-error';
+      }
+    >;
     /**
      * How many pairs are parked. Equal to `pairs.length` on a FULL record, and
      * the ONLY pair information present on the run-LIST shape: the list served

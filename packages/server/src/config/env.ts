@@ -284,6 +284,11 @@ export function getPlanHorizonMinutes(): string {
   return process.env.PLAN_HORIZON_MINUTES ?? '10';
 }
 
+/** Largest review group, in comfort-size requests, eligible for abundance shrinking. */
+export function getShrinkMaxRequests(): string {
+  return process.env.SHRINK_MAX_REQUESTS ?? '4';
+}
+
 /**
  * `PG_POOL_MAX` — node-postgres pool size; default string `'48'`. The library
  * default of 10 is below the sum of the two dispatch ceilings, which would make

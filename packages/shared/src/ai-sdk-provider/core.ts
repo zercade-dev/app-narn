@@ -24,10 +24,12 @@ export const GLOSSARY_SUGGEST_CHUNK_SIZE = 60;
 import {
   buildBatchPrompt,
   parseBatchResponse,
+  parseIndexedTranslationResponse,
   buildMixedTargetBatchPrompt,
   parseMixedTargetBatchResponse,
   extractJsonPayload,
   TRANSLATION_RESPONSE_SCHEMA,
+  INDEXED_TRANSLATION_RESPONSE_SCHEMA,
   MIXED_TARGET_RESPONSE_SCHEMA,
 } from './prompt-builder.js';
 import { buildProviderOptions } from './provider-options.js';
@@ -997,6 +999,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
   async function handleBatch(
     batch: TranslationJob[],
     languageModel: LanguageModel,
+    getIndexedModel: () => LanguageModel,
     getMixedTargetModel: () => LanguageModel,
     onJobComplete: ((result: TranslationResult) => void | Promise<void>) | undefined,
     signal?: AbortSignal,
@@ -1082,7 +1085,12 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
             results = languageBatch.map(cancelledResult);
             for (const r of results) await onJobComplete?.(r);
           } else {
-            results = await sameLanguageBatch(languageBatch, languageModel, onJobComplete, signal);
+            results = await sameLanguageBatch(
+              languageBatch,
+              config.indexedBatchReplies ? getIndexedModel() : languageModel,
+              onJobComplete,
+              signal,
+            );
           }
           for (const result of results) {
             const idx = indexByJob.get(`${result.entryId}::${result.targetLanguage}`);
@@ -1093,7 +1101,12 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       }
     }
 
-    return sameLanguageBatch(batch, languageModel, onJobComplete, signal);
+    return sameLanguageBatch(
+      batch,
+      config.indexedBatchReplies ? getIndexedModel() : languageModel,
+      onJobComplete,
+      signal,
+    );
   }
 
   /**
@@ -1108,10 +1121,11 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     onJobComplete: ((result: TranslationResult) => void | Promise<void>) | undefined,
     signal?: AbortSignal,
   ): Promise<TranslationResult[]> {
-    const { system, user: batchPrompt } = buildBatchPrompt(batch, batch[0].targetLanguage);
-    const user =
-      batchPrompt +
-      '\nIf you return indexed objects, "i" must be the original zero-based input position, and "s" or "t" must contain its translation. Do not renumber after skipping an item.';
+    const { system, user } = buildBatchPrompt(
+      batch,
+      batch[0].targetLanguage,
+      config.indexedBatchReplies,
+    );
 
     logVerbose('batch', 'request', { system, user, count: batch.length });
 
@@ -1119,17 +1133,26 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
 
     logVerbose('batch', 'success', { text, usage, count: batch.length });
 
-    const fullResponse = parseBatchResponse(text, batch);
+    const fullResponse = config.indexedBatchReplies ? null : parseBatchResponse(text, batch);
     const parsed =
       fullResponse ??
-      salvageIndexedRows(text, batch, (row) => {
-        if (row.s !== undefined && row.t !== undefined && row.s !== row.t) return null;
-        const translation = row.s ?? row.t;
-        return typeof translation === 'string' && translation.trim() ? translation : null;
-      });
+      (config.indexedBatchReplies
+        ? parseIndexedTranslationResponse(text, batch)
+        : salvageIndexedRows(text, batch, (row) => {
+            if (row.s !== undefined && row.t !== undefined && row.s !== row.t) return null;
+            const translation = row.s ?? row.t;
+            return typeof translation === 'string' && translation.trim() ? translation : null;
+          }));
     // Full parsing accepts model-generated 0- or 1-based ordering hints. A
     // partial response without a usable zero cannot distinguish the two.
-    if (!fullResponse && parsed[0] === undefined) throw new Error(PARSE_FAILURE_MESSAGE);
+    if (
+      !fullResponse &&
+      (config.indexedBatchReplies
+        ? parsed.every((value) => value === undefined)
+        : parsed[0] === undefined)
+    ) {
+      throw new Error(PARSE_FAILURE_MESSAGE);
+    }
 
     // Per the TranslationUsage contract the batch-total usage rides on the
     // first result only (each halving level's sub-batch is its own provider
@@ -1259,6 +1282,11 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     }
 
     const languageModel = buildModel(TRANSLATION_RESPONSE_SCHEMA);
+    let indexedModel: LanguageModel | undefined;
+    const getIndexedModel = (): LanguageModel => {
+      indexedModel ??= buildModel(INDEXED_TRANSLATION_RESPONSE_SCHEMA);
+      return indexedModel;
+    };
 
     // Built lazily and memoized: most translate() calls are same-language only
     // and never need the mixed-target shape, so avoid an extra model build (and
@@ -1296,7 +1324,14 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
         continue;
       }
       results.push(
-        ...(await handleBatch(batch, languageModel, getMixedTargetModel, onJobComplete, signal)),
+        ...(await handleBatch(
+          batch,
+          languageModel,
+          getIndexedModel,
+          getMixedTargetModel,
+          onJobComplete,
+          signal,
+        )),
       );
     }
 

@@ -1,7 +1,7 @@
 import type { GlossaryTerm } from '../types/glossary.js';
 import type { PromptOptions, TranslationJob } from '../types/module.js';
 import type { LengthLimit } from '../length-limits.js';
-import { isRecord, extractJsonBetween } from './json.js';
+import { isRecord, extractJsonBetween, salvageIndexedRows } from './json.js';
 import { buildTermBoundaryRegex } from '../term-match.js';
 import { LANGUAGE_REGISTRY } from '../types/language.js';
 import { MASK_TOKEN_SOURCE } from '../masking/tokens.js';
@@ -80,6 +80,31 @@ export const TRANSLATION_RESPONSE_SCHEMA: Record<string, unknown> = {
   type: 'array',
   items: { type: 'string' },
 };
+
+/** Freeway's indexed same-language batch contract. */
+export const INDEXED_TRANSLATION_RESPONSE_SCHEMA: Record<string, unknown> = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: { i: { type: 'integer' }, s: { type: 'string' } },
+    required: ['i', 's'],
+    additionalProperties: false,
+  },
+};
+
+/** Retain each complete, uniquely indexed translation at its original slot. */
+export function parseIndexedTranslationResponse(
+  text: string,
+  jobs: TranslationJob[],
+): Array<string | undefined> {
+  return salvageIndexedRows(text, jobs, (row) =>
+    Object.keys(row).every((key) => key === 'i' || key === 's') &&
+    typeof row.s === 'string' &&
+    row.s.trim()
+      ? row.s
+      : null,
+  );
+}
 
 /**
  * JSON schema constraining a mixed-target-batch reply to the shape
@@ -265,6 +290,7 @@ export function renderContext(
 export function buildBatchPrompt(
   jobs: TranslationJob[],
   targetLanguage: string,
+  indexedReplies = false,
 ): { system: string; user: string } {
   // Merge glossary terms across all jobs, deduplicated by term.source
   const seenSources = new Set<string>();
@@ -324,10 +350,12 @@ export function buildBatchPrompt(
     (examplesBlock ? `${EXAMPLES_CONTEXT_RULE}\n` : '') +
     (lengthLimit ? `${renderLengthLimitRule(lengthLimit)}\n` : '') +
     `Input: ${JSON.stringify(items)}\n` +
-    `Output: a JSON array of exactly ${items.length} translated string${items.length === 1 ? '' : 's'}, in input order — one element per input item. ` +
-    `Each element must be the translation text itself as a plain string — never an object, and never an echo of the input fields. ` +
-    `Do not wrap the response in markdown or code fences. ` +
-    `For example, a two-item input must be answered as ["first translation","second translation"].`;
+    (indexedReplies
+      ? `Output: a JSON array of exactly ${items.length} objects, one per input item. Each object must have "i", the original zero-based input position, and "s", the translation text. Do not renumber after skipping an item. Do not wrap the response in markdown or code fences. For example, a two-item input must be answered as [{"i":0,"s":"first translation"},{"i":1,"s":"second translation"}].`
+      : `Output: a JSON array of exactly ${items.length} translated string${items.length === 1 ? '' : 's'}, in input order — one element per input item. ` +
+        `Each element must be the translation text itself as a plain string — never an object, and never an echo of the input fields. ` +
+        `Do not wrap the response in markdown or code fences. ` +
+        `For example, a two-item input must be answered as ["first translation","second translation"].`);
 
   return { system: systemParts.join('\n\n'), user };
 }

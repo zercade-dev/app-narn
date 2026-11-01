@@ -6,6 +6,7 @@
  * currency even though both are free.
  */
 import type { BucketView, DifficultyBand, JobGroup } from './types.js';
+import { getShrinkMaxRequests } from '../../config/env.js';
 import { languageHardness } from './difficulty.js';
 import { PRIOR_STRENGTH, isGatePassRecord } from './stats.js';
 
@@ -173,6 +174,12 @@ export function effectiveRemainingRequests(
  * packs more strings per request instead.
  */
 const SPEND_SHARE = 0.25;
+const ABUNDANCE_FACTOR = 40;
+const SHRINK_FLOOR = 4;
+const SHRINK_MAX_REQUESTS = (() => {
+  const n = Number.parseInt(getShrinkMaxRequests(), 10);
+  return Number.isFinite(n) && n > 0 ? n : 4;
+})();
 
 function passRateDivisor(passRate: number): number {
   switch (passRateClass(passRate)) {
@@ -223,7 +230,12 @@ export function charCappedBatch(
  * toward the char-derived ceiling so a tight daily allowance covers more of
  * the run. The pass-rate divisor stacks on top in every case.
  */
-export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: number): number {
+export function batchSizeFor(
+  bucket: BucketView,
+  group: JobGroup,
+  passRate: number,
+  options?: { shrinkOnAbundance?: boolean },
+): number {
   const divisor = passRateDivisor(passRate);
   if (bucket.charBudget === undefined) {
     return Math.max(1, Math.floor(bucket.maxBatch / divisor));
@@ -241,6 +253,12 @@ export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: numb
     const affordable = Math.max(1, Math.floor(remaining * SPEND_SHARE));
     if (requestsAtComfort > affordable) {
       base = Math.min(Math.max(comfort, Math.ceil(jobs / affordable)), sizeByChars);
+    } else if (
+      options?.shrinkOnAbundance &&
+      remaining >= ABUNDANCE_FACTOR * requestsAtComfort &&
+      requestsAtComfort <= SHRINK_MAX_REQUESTS
+    ) {
+      base = Math.max(Math.min(SHRINK_FLOOR, comfort), Math.floor(comfort / 2));
     } else {
       base = comfort;
     }

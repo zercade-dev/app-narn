@@ -40,6 +40,7 @@ export { runCountingProviderCalls, runMeasuredProviderCall } from './provider-ca
 export {
   buildBatchPrompt,
   parseBatchResponse,
+  parseIndexedTranslationResponse,
   filterGlossaryForSource,
   buildMixedTargetBatchPrompt,
   parseMixedTargetBatchResponse,
