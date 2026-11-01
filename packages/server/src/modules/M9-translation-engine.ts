@@ -2810,7 +2810,10 @@ export class TranslationEngine {
       status.waitingForQuota = {
         ...rest,
         pairs: remaining,
-        resumeAt: Math.min(...remaining.map((pair) => pair.quotaResumeAt ?? park.resumeAt)),
+        resumeAt: remaining.reduce(
+          (earliest, pair) => Math.min(earliest, pair.quotaResumeAt ?? park.resumeAt),
+          Infinity,
+        ),
         reason: remaining.some((pair) => pair.quotaReason === 'provider-error')
           ? 'provider-error'
           : 'quota',
