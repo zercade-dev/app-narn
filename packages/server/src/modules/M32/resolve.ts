@@ -9,7 +9,7 @@
 import type { RoutingDecision } from '@zercade-dev/narn-shared';
 import { getLengthLimit } from '@zercade-dev/narn-shared';
 import { difficultyBand, groupJobs } from './difficulty.js';
-import { planRun } from './planner.js';
+import { chooseBelowTargetBucket, planRun } from './planner.js';
 import { bucketResumeAt, deferralReason, isEligible, selectBucket } from './selector.js';
 import type { FreewayCooldownReason } from '../../storage/types.js';
 import type { Assignment, BucketView, DifficultyBand, FreewayJob, JobGroup } from './types.js';
@@ -31,7 +31,7 @@ export interface FreewayResolution {
     decisions: RoutingDecision[];
     bucketKey: string;
     batchSize: number;
-    /** Set when the plan relaxed this group's band floor one tier — see {@link Assignment.degraded}. */
+    /** Set when the plan relaxed this group's band floor — see {@link Assignment.degraded}. */
     degraded?: Assignment['degraded'];
   }>;
   /** Pairs that wait for quota, with the plan's resume estimate. */
@@ -40,6 +40,14 @@ export interface FreewayResolution {
     resumeAt: number;
     reason?: FreewayCooldownReason;
   } | null;
+  /** Pairs that need consent before using a currently available lower tier. */
+  needsConfirmation: Array<{
+    pairs: Array<{ entryId: string; targetLanguage: string }>;
+    resumeAt: number | null;
+    bestTier: number;
+    bestModelId: string;
+    neededTier: number;
+  }>;
   /** Pairs no bucket can ever serve (surface as controlled failures). */
   blocked: Array<{ entryId: string; targetLanguage: string }>;
 }
@@ -99,15 +107,15 @@ function everServable(bucket: BucketView, group: JobGroup): boolean {
  * `opts.minBand` raises every group's band floor to at least that value (the
  * run's `freewayMinTier`), so content whose difficulty alone would settle for a
  * cheap bucket is planned against a stronger one. It only ever raises: a group
- * whose natural band is already higher keeps it. Nothing downstream is
- * relaxed — a floored group that no bucket can serve defers or blocks exactly
- * as a naturally-hard one would.
+ * whose natural band is already higher keeps it. `opts.belowTarget` controls
+ * whether a long wait asks for consent or allows a lower tier; when omitted,
+ * planning retains the legacy one-tier degrade.
  */
 export function resolveFreewayDecisions(
   decisions: RoutingDecision[],
   buckets: BucketView[],
   now: number,
-  opts?: { minBand?: DifficultyBand },
+  opts?: { minBand?: DifficultyBand; belowTarget?: 'ask' | 'allow' },
 ): FreewayResolution {
   const jobs = decisions.map(toFreewayJob);
   const groups = groupJobs(jobs).map((group) =>
@@ -116,7 +124,11 @@ export function resolveFreewayDecisions(
       : group,
   );
   // reserveRequests omitted: planRun falls back to its own defaultReserve().
-  const plan = planRun(groups, buckets, { now, priorityClass: 'translate' });
+  const plan = planRun(groups, buckets, {
+    now,
+    priorityClass: 'translate',
+    belowTarget: opts?.belowTarget,
+  });
 
   const decisionByPair = new Map<string, RoutingDecision>();
   for (const decision of decisions) {
@@ -136,8 +148,8 @@ export function resolveFreewayDecisions(
   const assignedGroups = plan.assignments.map((assignment) => {
     // Looked up by bucketKey rather than trusting `assignment.group.band` as
     // the tier: a winning bucket only has to meet-or-exceed the group's band
-    // (or, for a degraded assignment, sit exactly one tier below it — see
-    // Assignment.degraded), so its OWN qualityTier is the only value that is
+    // (or, for a degraded assignment, sit below it — see Assignment.degraded),
+    // so its OWN qualityTier is the only value that is
     // always the tier that will actually serve.
     const bucket = buckets.find((b) => b.bucketKey === assignment.bucketKey);
     return {
@@ -182,6 +194,13 @@ export function resolveFreewayDecisions(
             resumeAt,
             ...(deferredReason ? { reason: deferredReason } : {}),
           },
+    needsConfirmation: plan.needsConfirmation.map(({ group, bestTier, bestModelId, resumeAt }) => ({
+      pairs: group.jobs.map(({ entryId, targetLanguage }) => ({ entryId, targetLanguage })),
+      resumeAt,
+      bestTier,
+      bestModelId,
+      neededTier: group.band,
+    })),
     blocked,
   };
 }
@@ -205,12 +224,16 @@ export function resolveFreewayDecisions(
  * group one tier below its planning band, `degradedFloor` still wins — the plan
  * accepted that tier for this batch, and a floored group relaxes under Addendum
  * G exactly like a naturally-hard one.
+ *
+ * `opts.allowBelowTarget` also accepts lower tiers for this group, including
+ * on a reroute. A reroute prefers a currently eligible bucket at the floor;
+ * weak-language exclusions still apply at the original band.
  */
 export function revalidateGroup(
   group: { decisions: RoutingDecision[]; bucketKey: string; batchSize: number },
   buckets: BucketView[],
   now: number,
-  opts?: { degradedFloor?: DifficultyBand; minBand?: DifficultyBand },
+  opts?: { degradedFloor?: DifficultyBand; minBand?: DifficultyBand; allowBelowTarget?: boolean },
 ): RevalidateResult {
   const jobs = group.decisions.map(toFreewayJob);
   // Groups are homogeneous by construction: every decision in it shares the
@@ -232,11 +255,19 @@ export function revalidateGroup(
       : buckets;
 
   const current = candidates.find((bucket) => bucket.bucketKey === group.bucketKey);
-  if (current && isEligible(current, jobGroup, now)) {
+  const currentGroup =
+    current && opts?.allowBelowTarget && current.qualityTier < band
+      ? { ...jobGroup, band: current.qualityTier }
+      : jobGroup;
+  if (current && isEligible(current, currentGroup, now)) {
     return { kind: 'keep' };
   }
 
-  const selection = selectBucket(jobGroup, candidates, now);
+  const selection =
+    selectBucket(jobGroup, candidates, now) ??
+    (opts?.allowBelowTarget
+      ? chooseBelowTargetBucket({ ...jobGroup, band: naturalBand }, candidates, now)
+      : undefined);
   if (selection) {
     return {
       kind: 'reroute',
@@ -250,7 +281,8 @@ export function revalidateGroup(
     };
   }
 
-  const everCandidates = candidates.filter((bucket) => everServable(bucket, jobGroup));
+  const everGroup = opts?.allowBelowTarget ? { ...jobGroup, band: 1 as const } : jobGroup;
+  const everCandidates = candidates.filter((bucket) => everServable(bucket, everGroup));
   if (everCandidates.length === 0) {
     return { kind: 'blocked' };
   }

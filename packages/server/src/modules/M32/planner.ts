@@ -16,6 +16,7 @@ export interface PlanOptions {
   now: number;
   reserveRequests?: number;
   priorityClass?: 'translate' | 'background';
+  belowTarget?: 'ask' | 'allow';
 }
 
 export function defaultReserve(totalJobs: number): number {
@@ -23,11 +24,9 @@ export function defaultReserve(totalJobs: number): number {
 }
 
 /**
- * A group parked below its band floor for longer than this waits for a
- * bucket one tier below the floor instead — see Addendum G. Minute-scale
- * waits (a cooldown or an rpm reset) still defer as before: rpm pacing must
- * not be routed around for seconds of gain, only for a park that would
- * otherwise run to the next day-scale reset.
+ * Waits at or under this threshold defer without relaxing the quality floor.
+ * Longer waits allow the below-target decision, or the legacy one-tier
+ * degrade when no decision mode is supplied (Addendum G).
  */
 export const FREEWAY_DEGRADE_WAIT_MS = 15 * 60_000;
 
@@ -67,12 +66,29 @@ function everServable(bucket: BucketView, group: JobGroup): boolean {
   return true;
 }
 
+/** Highest available tier below the target, with normal ranking within that tier. */
+export function chooseBelowTargetBucket(
+  group: JobGroup,
+  buckets: BucketView[],
+  now: number,
+): Selection | undefined {
+  for (const tier of [3, 2, 1] as const) {
+    if (tier >= group.band) continue;
+    const selection = selectBucket(
+      group,
+      buckets.filter((bucket) => bucket.qualityTier === tier),
+      now,
+      { tierFloor: tier },
+    );
+    if (selection) return selection;
+  }
+  return undefined;
+}
+
 /**
  * Records a winning selection onto the plan and spends the working-copy
  * headroom it consumes — day/minute/pool/char figures alike — exactly once,
- * whether the selection came from the group's own band floor or from a
- * one-tier degrade. Shared so the two call sites in {@link planRun} can never
- * drift apart on what a plan-time assignment actually costs.
+ * whether the selection came from the group's own band floor or a lower tier.
  */
 function spendAssignment(
   plan: RunPlan,
@@ -178,7 +194,7 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
     if (a.jobs.length !== b.jobs.length) return b.jobs.length - a.jobs.length;
     return a.targetLanguage < b.targetLanguage ? -1 : 1;
   });
-  const plan: RunPlan = { assignments: [], deferred: [], blocked: [] };
+  const plan: RunPlan = { assignments: [], deferred: [], needsConfirmation: [], blocked: [] };
   for (const group of ordered) {
     const selection = selectBucket(group, working, opts.now, {
       reserveRequests: background ? 0 : reserve,
@@ -190,6 +206,52 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
     // Estimated against the WORKING copies, so headroom this plan already
     // committed to earlier groups isn't offered to this one as stock.
     const everCandidates = working.filter((b) => everServable(b, group));
+    if (opts.belowTarget !== undefined) {
+      const resumeAt =
+        everCandidates.length === 0
+          ? null
+          : Math.min(...everCandidates.map((b) => bucketResumeAt(b, group)));
+      if (resumeAt !== null && resumeAt - opts.now <= FREEWAY_DEGRADE_WAIT_MS) {
+        const reason = deferralReason(everCandidates, group, resumeAt);
+        plan.deferred.push({ group, resumeAt, ...(reason ? { reason } : {}) });
+        continue;
+      }
+
+      const below = chooseBelowTargetBucket(group, working, opts.now);
+      if (below) {
+        if (opts.belowTarget === 'ask') {
+          plan.needsConfirmation.push({
+            group,
+            bestTier: below.bucket.qualityTier,
+            bestModelId: below.bucket.modelId,
+            resumeAt,
+          });
+        } else {
+          spendAssignment(plan, working, group, below, {
+            fromTier: group.band,
+            toTier: below.bucket.qualityTier,
+            waitedAlternativeMs: resumeAt === null ? null : resumeAt - opts.now,
+          });
+        }
+        continue;
+      }
+
+      const lowerCandidates = working.filter(
+        (bucket) =>
+          bucket.qualityTier < group.band &&
+          everServable(bucket, { ...group, band: bucket.qualityTier }) &&
+          !(group.band >= 3 && bucket.weakLanguages?.includes(group.targetLanguage)),
+      );
+      const candidates = [...everCandidates, ...lowerCandidates];
+      if (candidates.length === 0) {
+        plan.blocked.push(group);
+        continue;
+      }
+      const soonest = Math.min(...candidates.map((bucket) => bucketResumeAt(bucket, group)));
+      const reason = deferralReason(candidates, group, soonest);
+      plan.deferred.push({ group, resumeAt: soonest, ...(reason ? { reason } : {}) });
+      continue;
+    }
     if (everCandidates.length === 0) {
       plan.blocked.push(group);
       continue;

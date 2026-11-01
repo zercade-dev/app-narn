@@ -437,8 +437,11 @@ function formatDeferralDetail(
   return `${pairCount} pairs waiting for ${waitingFor} — resumes ~${formatResumeTime(resumeAt)}`;
 }
 
-/** One-liner for a batch dispatching on a bucket one tier below its band floor (Addendum G). */
+/** One-liner for a batch dispatching below its band floor. */
 function formatDegradedDetail(degraded: NonNullable<Assignment['degraded']>): string {
+  if (degraded.waitedAlternativeMs === null) {
+    return `no tier ${degraded.fromTier} bucket available — degraded to tier ${degraded.toTier}`;
+  }
   const mins = Math.round(degraded.waitedAlternativeMs / 60_000);
   return `tier ${degraded.fromTier} bucket ~${mins}m out — degraded to tier ${degraded.toTier} instead of waiting`;
 }
