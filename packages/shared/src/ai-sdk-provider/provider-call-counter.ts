@@ -22,6 +22,7 @@ const storage = new AsyncLocalStorage<{
   calls: number;
   maxCalls?: number;
   onLimit?: () => void;
+  providerMs?: number;
 }>();
 
 /**
@@ -36,11 +37,11 @@ export async function runCountingProviderCalls<T>(
    * provider calls and then threw still spent them, and the ledger has to see
    * that — the normal return value cannot carry a count out of a rejection.
    */
-  onSettled?: (calls: number) => void,
+  onSettled?: (calls: number, providerMs: number | undefined) => void,
   /** Stop counted requests before they exceed this dispatch's remaining allowance. */
   options?: { maxCalls: number; onLimit?: () => void },
 ): Promise<{ result: T; calls: number }> {
-  const ctx = { calls: 0, ...options };
+  const ctx = { calls: 0, providerMs: undefined as number | undefined, ...options };
   try {
     const result = await storage.run(ctx, fn);
     return { result, calls: ctx.calls };
@@ -48,8 +49,26 @@ export async function runCountingProviderCalls<T>(
     // `ctx.calls` is already final by the time this runs, on both the
     // success and rejection paths — `finally` always runs after `fn`
     // settles, whichever way, and before the outer promise itself settles.
-    onSettled?.(ctx.calls);
+    onSettled?.(ctx.calls, ctx.providerMs);
   }
+}
+
+/** Measure only time spent in a provider call, excluding limiter and retry waits. */
+export async function measureProviderCall<T>(fn: () => Promise<T>): Promise<T> {
+  const ctx = storage.getStore();
+  if (!ctx) return fn();
+  const started = performance.now();
+  try {
+    return await fn();
+  } finally {
+    ctx.providerMs = (ctx.providerMs ?? 0) + (performance.now() - started);
+  }
+}
+
+/** Count and time a provider SDK call that does not use the guarded fetch. */
+export function runMeasuredProviderCall<T>(fn: () => Promise<T>): Promise<T> {
+  countProviderCall();
+  return measureProviderCall(fn);
 }
 
 /** Records one outbound provider request against the enclosing scope, if any. */

@@ -165,6 +165,7 @@
     "sameAsSource": "與原文相同",
     "placeholderMismatch": "佔位符不符",
     "newOnly": "新（來自上次匯入）",
+    "freewayBelowTarget": "低於目標品質",
     "freewayTierBelow": "低於層級：",
     "freewayTierBelowOff": "關閉",
     "clearNewFlags": "清除新標記（{{count}}）",

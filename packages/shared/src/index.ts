@@ -276,6 +276,7 @@ export {
   groupJobsByEntry,
   buildProviderOptions,
   runCountingProviderCalls,
+  runMeasuredProviderCall,
   createModelForProvider,
   credentialKeyForProvider,
   defaultModelForProvider,

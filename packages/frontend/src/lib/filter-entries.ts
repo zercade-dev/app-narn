@@ -34,6 +34,8 @@ export interface EntryFilters {
    * off" idiom but with `null` since 0 is not a valid tier.
    */
   freewayTierBelow: number | null;
+  /** Show entries with a translation served below its own Freeway target. */
+  freewayBelowTarget: boolean;
   /** Filter to entries whose `metadata.tone` matches any of these values (OR-within-dimension — mirrors `categories`). */
   tones: string[];
   visibleLanguages: string[];
@@ -152,6 +154,10 @@ function matchesEntry(entry: StringEntry, filters: EntryFilters, needle: string)
     () => matchesRunId(entry, filters),
     () => matchesFlaggedNew(entry, filters),
     () => matchesFreewayTier(entry, filters),
+    () =>
+      filters.freewayBelowTarget
+        ? Object.values(entry.translations).some((r) => r.freewayBelowTarget === true)
+        : null,
   ];
   return combineDimensions(dimensions, filters.filterMode);
 }

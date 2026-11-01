@@ -39,6 +39,8 @@ export interface TranslationRecord {
    * untouched, and it enables a future "retranslate below tier N" bulk action.
    */
   freewayTier?: number;
+  /** Set when the serving tier was below this translation's target. */
+  freewayBelowTarget?: true;
   /**
    * Ledger key of the Freeway bucket that ACTUALLY served this translation
    * (post-failover/degrade), the companion to {@link freewayTier}. Set only for

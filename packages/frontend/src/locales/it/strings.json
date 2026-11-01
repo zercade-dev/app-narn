@@ -165,6 +165,7 @@
     "sameAsSource": "Uguale all'origine",
     "placeholderMismatch": "Segnaposto non corrispondenti",
     "newOnly": "Nuove (dall'ultima importazione)",
+    "freewayBelowTarget": "Qualità inferiore a quella prevista",
     "freewayTierBelow": "Sotto il livello:",
     "freewayTierBelowOff": "Disattivato",
     "clearNewFlags": "Azzera gli indicatori di novità ({{count}})",

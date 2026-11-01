@@ -165,6 +165,7 @@
     "sameAsSource": "원문과 동일",
     "placeholderMismatch": "자리 표시자 불일치",
     "newOnly": "신규 (최근 가져오기)",
+    "freewayBelowTarget": "목표 품질 미달",
     "freewayTierBelow": "티어 미만:",
     "freewayTierBelowOff": "끄기",
     "clearNewFlags": "새 항목 표시 지우기 ({{count}})",

@@ -165,6 +165,7 @@
     "sameAsSource": "Igual que el origen",
     "placeholderMismatch": "Discrepancia en marcadores",
     "newOnly": "Nuevo (de la última importación)",
+    "freewayBelowTarget": "Por debajo de la calidad objetivo",
     "freewayTierBelow": "Por debajo del nivel:",
     "freewayTierBelowOff": "Desactivado",
     "clearNewFlags": "Borrar marcas de nuevo ({{count}})",

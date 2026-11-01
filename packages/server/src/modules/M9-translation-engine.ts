@@ -606,6 +606,13 @@ interface FreewayDispatchArgs {
   splitDepth?: number;
   /** Reports a parse-failure split so the caller can record a run detail. */
   onSplit?: (info: { bucketKey: string; size: number }) => void;
+  onCall?: (info: {
+    model: string;
+    requests: number;
+    translateMs: number;
+    strings: number;
+  }) => void;
+  onSalvaged?: (strings: number) => void;
   /**
    * Set when the plan degraded this batch's band floor one tier (Addendum
    * G): every re-validation this hop performs must check the CURRENT bucket
@@ -3726,6 +3733,15 @@ export class TranslationEngine {
         groups.push(batch);
       }
     }
+    status.freewayStats ??= {
+      plannedRequests: groups.length,
+      actualRequests: 0,
+      splits: 0,
+      moves: [],
+      salvagedStrings: 0,
+      byModel: {},
+    };
+    await this.runStore.updateRun(status.projectId, status);
     return groups;
   }
 
@@ -4387,6 +4403,7 @@ export class TranslationEngine {
       // the count has to escape that rejection some way other than the
       // (unreachable, on a throw) return value.
       let calls = 0;
+      let providerMs: number | undefined;
       try {
         // The single "permit spent" invariant every unadmitted call this
         // dispatch accounts for (a same-bucket retry, a reroute's own call, a
@@ -4416,24 +4433,66 @@ export class TranslationEngine {
         // ledger has to debit what was actually spent.
         // A mixed call can regroup internally by language; its later unpacked
         // parts receive independent budgets including the mixed call's spend.
-        const outcome = await runCountingProviderCalls(
-          () => {
-            moduleStarted = true;
-            return state.module.translate(jobs, signal, translateOptions);
-          },
-          (settledCalls) => {
-            calls = settledCalls;
-            batchBudget.requests += Math.max(1, settledCalls);
-          },
-          new Set(jobs.map((job) => job.targetLanguage)).size === 1
-            ? {
-                maxCalls: FREEWAY_BATCH_REQUEST_CAP - batchBudget.requests,
-                onLimit: () => {
-                  limitReached = true;
+        const started = performance.now();
+        let callbackMs = 0;
+        const jobKeys = new Set(jobs.map(resultKey));
+        const delivered = new Set<string>();
+        const countResult = (result: TranslationResult | undefined) => {
+          if (
+            result &&
+            !result.error &&
+            result.translatedText?.trim() &&
+            jobKeys.has(resultKey(result))
+          ) {
+            delivered.add(resultKey(result));
+          }
+        };
+        let outcome: Awaited<ReturnType<typeof runCountingProviderCalls<TranslationResult[]>>>;
+        try {
+          outcome = await runCountingProviderCalls(
+            () => {
+              moduleStarted = true;
+              return state.module.translate(jobs, signal, {
+                ...translateOptions,
+                onJobComplete: async (result) => {
+                  countResult(result);
+                  const callbackStarted = performance.now();
+                  try {
+                    await translateOptions.onJobComplete?.(result);
+                  } finally {
+                    callbackMs += performance.now() - callbackStarted;
+                  }
                 },
-              }
-            : undefined,
-        );
+              });
+            },
+            (settledCalls, measuredMs) => {
+              calls = settledCalls;
+              providerMs = measuredMs;
+              batchBudget.requests += Math.max(1, settledCalls);
+            },
+            new Set(jobs.map((job) => job.targetLanguage)).size === 1
+              ? {
+                  maxCalls: FREEWAY_BATCH_REQUEST_CAP - batchBudget.requests,
+                  onLimit: () => {
+                    limitReached = true;
+                  },
+                }
+              : undefined,
+          );
+          for (let i = 0; i < jobs.length; i++) {
+            const result = outcome.result[i];
+            if (result && resultKey(result) === resultKey(jobs[i])) countResult(result);
+          }
+        } finally {
+          if (moduleStarted) {
+            args.onCall?.({
+              model: state.modelId ?? state.moduleId,
+              requests: Math.max(1, calls),
+              translateMs: Math.max(0, providerMs ?? performance.now() - started - callbackMs),
+              strings: delivered.size,
+            });
+          }
+        }
         results = outcome.result;
         await this.recordFreewayDispatch(state.bucketKey, results, deps, outcome.calls);
         if (admission && outcome.calls > 1) {
@@ -4502,6 +4561,12 @@ export class TranslationEngine {
         if (missing.some(Boolean)) {
           // Deliver readable entries before any retry can change the serving
           // bucket or park the batch. Streaming callbacks are deduped upstream.
+          args.onSalvaged?.(
+            results.filter(
+              (result, i) =>
+                !missing[i] && result && !result.error && result.translatedText?.trim(),
+            ).length,
+          );
           await retainOthers(missing);
           if (splitDepth >= 1) {
             const parseError = results.find(
@@ -4595,9 +4660,8 @@ export class TranslationEngine {
         // counted attempt) — observed via `calls`, not assumed to be one.
         // `results === undefined` keeps this from double-debiting the success
         // path above; `recordDispatch`'s own floor keeps a genuinely uncounted
-        // dispatch at 1 rather than dropping to 0 — the modules that dispatch
-        // through their own provider SDK rather than the AI SDK's guarded
-        // fetch (Copilot and DeepL) never reach the counted seam at all.
+        // dispatch at 1 rather than dropping to 0 when a module does not
+        // reach a counted provider-call seam.
         if (results === undefined && (!aborted || moduleStarted)) {
           await this.recordFreewayDispatch(state.bucketKey, [], deps, calls);
           if (admission && calls > 1) {
@@ -5264,6 +5328,7 @@ export class TranslationEngine {
             runId,
             `quota shifted on ${bucketKey} — rerouted to ${revalidated.bucketKey}`,
           );
+          this.recordFreewayMove(status, bucketKey, revalidated.bucketKey, 'revalidate');
           moduleId = revalidated.moduleId;
           bucketKey = revalidated.bucketKey;
           for (const d of decisions) {
@@ -6133,9 +6198,19 @@ export class TranslationEngine {
               },
             },
             signal,
-            onReroute: (info) => this.recordFreewayDetail(runId, formatRerouteDetail(info)),
+            onReroute: (info) => {
+              this.recordFreewayDetail(runId, formatRerouteDetail(info));
+              this.recordFreewayMove(status, info.from, info.to, info.reason);
+            },
             onProviderFailure: (info) => heldFailures.push(info),
-            onSplit: (info) => this.recordFreewayDetail(runId, formatSplitDetail(info)),
+            onSplit: (info) => {
+              this.recordFreewayDetail(runId, formatSplitDetail(info));
+              if (status.freewayStats) status.freewayStats.splits++;
+            },
+            onCall: (info) => this.recordFreewayCall(status, info),
+            onSalvaged: (count) => {
+              if (status.freewayStats) status.freewayStats.salvagedStrings += count;
+            },
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
             minBand: freewayMinBand(status.request),
             allowBelowTarget: !!(
@@ -6485,33 +6560,43 @@ export class TranslationEngine {
         // one provider request. retryLqaFailure never rethrows (its own
         // try/catch converts every failure into 'accepted-original' or
         // 'aborted'), so there is no separate failure-path debit to gate here
-        // — recordDispatch's own floor of 1 already covers the modules that
-        // dispatch through their own provider SDK rather than the AI SDK's
-        // guarded fetch (Copilot, DeepL) and so never reach the counted seam.
-        const outcome = await runCountingProviderCalls(() =>
-          this.retryLqaFailure({
-            runId,
-            projectId,
-            status,
-            module: retryModule,
-            decision: retryDecision,
-            sourceLanguage,
-            masked: item.entry.masked,
-            plan: item.entry.plan,
-            glossaryById: item.entry.glossaryById,
-            nonConstantTerms: item.entry.nonConstantTerms,
-            jobContext: appendTmHints(item.entry.decision.entry.context, item.entry.tmHints),
-            ...(item.entry.reference ? { reference: item.entry.reference } : {}),
-            ...(examplesByLanguage?.get(item.entry.decision.targetLanguage)?.length
-              ? { examples: examplesByLanguage.get(item.entry.decision.targetLanguage) }
-              : {}),
-            originalText: item.originalText,
-            lqaResult: item.lqaResult,
-            metricsModel,
-            signal,
-            ...(project ? { project } : {}),
-            achievementPairMap,
-          }),
+        // — recordDispatch's own floor of 1 covers modules that do not reach a
+        // counted provider-call seam.
+        let retryMs: number | undefined;
+        let retryStrings = 0;
+        let retryProviderMs: number | undefined;
+        const outcome = await runCountingProviderCalls(
+          () =>
+            this.retryLqaFailure({
+              runId,
+              projectId,
+              status,
+              module: retryModule,
+              decision: retryDecision,
+              sourceLanguage,
+              masked: item.entry.masked,
+              plan: item.entry.plan,
+              glossaryById: item.entry.glossaryById,
+              nonConstantTerms: item.entry.nonConstantTerms,
+              jobContext: appendTmHints(item.entry.decision.entry.context, item.entry.tmHints),
+              ...(item.entry.reference ? { reference: item.entry.reference } : {}),
+              ...(examplesByLanguage?.get(item.entry.decision.targetLanguage)?.length
+                ? { examples: examplesByLanguage.get(item.entry.decision.targetLanguage) }
+                : {}),
+              originalText: item.originalText,
+              lqaResult: item.lqaResult,
+              metricsModel,
+              signal,
+              ...(project ? { project } : {}),
+              achievementPairMap,
+              onAttempt: (ms, strings) => {
+                retryMs = ms;
+                retryStrings = strings;
+              },
+            }),
+          (_calls, measuredMs) => {
+            retryProviderMs = measuredMs;
+          },
         );
         const retry = outcome.result;
         // The corrective attempt is a real provider call, and may make several
@@ -6520,6 +6605,17 @@ export class TranslationEngine {
         // spent.
         if (bucketKey !== undefined && freewayDeps) {
           const debitBucketKey = escalatedBucketKey ?? bucketKey;
+          if (retryMs !== undefined) {
+            this.recordFreewayCall(status, {
+              model: retryDecision.modelOverride ?? retryDecision.moduleId ?? moduleId,
+              requests: Math.max(1, outcome.calls),
+              translateMs: retryProviderMs ?? retryMs,
+              strings: retryStrings,
+            });
+            if (escalatedBucketKey) {
+              this.recordFreewayMove(status, bucketKey, escalatedBucketKey, 'lqa');
+            }
+          }
           await this.recordFreewayDispatch(debitBucketKey, [], freewayDeps, outcome.calls);
           // This corrective retry never goes through the queue's own
           // admission — it dispatches directly, outside any Admission — so
@@ -6651,6 +6747,7 @@ export class TranslationEngine {
     signal?: AbortSignal;
     project?: Project;
     achievementPairMap?: Map<string, StringEntry[]>;
+    onAttempt?: (ms: number, strings: number) => void;
   }): Promise<{ outcome: 'persisted' | 'accepted-original' | 'aborted'; usedGlossaryId?: string }> {
     const {
       runId,
@@ -6710,12 +6807,23 @@ export class TranslationEngine {
         ...(reference ? { reference } : {}),
         ...(examples?.length ? { examples } : {}),
       };
-      const retryModuleResult = await module.retryWithFeedback(
-        retryJob,
-        originalText,
-        feedback,
-        signal,
-      );
+      let retryModuleResult: TranslationResult | undefined;
+      const started = performance.now();
+      try {
+        retryModuleResult = await module.retryWithFeedback(
+          retryJob,
+          originalText,
+          feedback,
+          signal,
+        );
+      } finally {
+        args.onAttempt?.(
+          performance.now() - started,
+          retryModuleResult && !retryModuleResult.error && retryModuleResult.translatedText?.trim()
+            ? 1
+            : 0,
+        );
+      }
       this.recordUsage(status, decision.moduleId, [retryModuleResult]);
       // An errored OR empty/whitespace retry keeps the first-pass text: never
       // overwrite good output with '' (mirrors M30's error||!translatedText).
@@ -6799,6 +6907,10 @@ export class TranslationEngine {
     runId?: string,
   ): Promise<void> {
     if (decision.moduleId === null) return;
+    const minTier = freewayMinBand(runId ? this.runs.get(runId)?.request : undefined) ?? 1;
+    const belowTarget =
+      decision.freewayTier !== undefined &&
+      decision.freewayTier < Math.max(difficultyBand(toFreewayJob(decision)), minTier);
     // Snapshot this pair's translation as it stood before this write, so the
     // run's revert action can restore it later. Must happen BEFORE
     // setTranslation below overwrites it; capturePreviousValue itself dedupes
@@ -6826,6 +6938,7 @@ export class TranslationEngine {
         // cleared by every short-circuit persist path that never reached a
         // bucket at all.
         ...(decision.freewayTier !== undefined ? { freewayTier: decision.freewayTier } : {}),
+        ...(belowTarget ? { freewayBelowTarget: true as const } : {}),
         ...(decision.freewayBucketKey !== undefined
           ? { freewayBucketKey: decision.freewayBucketKey }
           : {}),
@@ -7009,6 +7122,24 @@ export class TranslationEngine {
     const acc = this.details.get(runId);
     if (!acc) return;
     (acc.freeway ??= []).push(line);
+  }
+
+  private recordFreewayMove(status: RunStatus, from: string, to: string, reason: string): void {
+    const moves = status.freewayStats?.moves;
+    if (moves && moves.length < 50) moves.push({ from, to, reason });
+  }
+
+  private recordFreewayCall(
+    status: RunStatus,
+    call: { model: string; requests: number; translateMs: number; strings: number },
+  ): void {
+    const stats = status.freewayStats;
+    if (!stats) return;
+    stats.actualRequests += call.requests;
+    const model = (stats.byModel[call.model] ??= { translateMs: 0, strings: 0 });
+    model.translateMs += call.translateMs;
+    model.strings += call.strings;
+    this.emitProgress(status.runId, status);
   }
 
   /**

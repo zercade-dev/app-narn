@@ -165,6 +165,7 @@
     "sameAsSource": "Giống văn bản nguồn",
     "placeholderMismatch": "Lệch phần giữ chỗ",
     "newOnly": "Mới (từ lần nhập gần nhất)",
+    "freewayBelowTarget": "Dưới chất lượng mục tiêu",
     "freewayTierBelow": "Dưới bậc:",
     "freewayTierBelowOff": "Tắt",
     "clearNewFlags": "Xóa cờ mới ({{count}})",

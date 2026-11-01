@@ -65,6 +65,7 @@ import {
   resolveBatchSize,
   runJudgeFeature,
   runSourceReviewFeature,
+  runMeasuredProviderCall,
 } from '@zercade-dev/narn-shared';
 import type { FeatureGenerateResult } from '@zercade-dev/narn-shared';
 import { getCopilotClient, normalizeReasoningEffort, modelSupportsReasoningEffort } from './sdk.js';
@@ -247,14 +248,16 @@ async function runSingleJob(
   const effectiveReasoningEffort = normalizeReasoningEffort(model, effectiveConfigEffort);
   if (verbose) log('info', '[copilot] job:prompt', { system, user });
   try {
-    const response = await client.complete({
-      model,
-      system,
-      user,
-      reasoningEffort: effectiveReasoningEffort,
-      signal,
-      timeoutMs,
-    });
+    const response = await runMeasuredProviderCall(() =>
+      client.complete({
+        model,
+        system,
+        user,
+        reasoningEffort: effectiveReasoningEffort,
+        signal,
+        timeoutMs,
+      }),
+    );
     const rawTranslatedText = response.text.trim();
     if (verbose) log('info', '[copilot] job:response', { text: rawTranslatedText });
     log('info', '[copilot] job:done', { entryId: job.entryId, target: job.targetLanguage });
@@ -320,11 +323,15 @@ export async function retryWithFeedback(
   try {
     // First turn: establish conversation context (original translation)
     if (verbose) log('info', '[copilot] retry:prompt', { system, user });
-    const initial = await client.completeOnSession(handle, user, signal, timeoutMs);
+    const initial = await runMeasuredProviderCall(() =>
+      client.completeOnSession!(handle, user, signal, timeoutMs),
+    );
     if (verbose) log('info', '[copilot] retry:initial', { text: initial.text.trim() });
     // Second turn: corrective follow-up — only the feedback is billed
     if (verbose) log('info', '[copilot] retry:feedback', { feedback });
-    const corrected = await client.completeOnSession(handle, feedback, signal, timeoutMs);
+    const corrected = await runMeasuredProviderCall(() =>
+      client.completeOnSession!(handle, feedback, signal, timeoutMs),
+    );
     if (verbose) log('info', '[copilot] retry:corrected', { text: corrected.text.trim() });
     log('info', '[copilot] retry:done', { entryId: job.entryId, target: job.targetLanguage });
     // Both turns are billed; sum their real usage so the retry is accounted for
@@ -512,7 +519,9 @@ export function createCopilotModule(
             resolveHighestEffort(batchJobs, runReasoningEffort),
           );
           const completeOnce = () =>
-            client.complete({ model, system, user, reasoningEffort: eff, signal, timeoutMs });
+            runMeasuredProviderCall(() =>
+              client.complete({ model, system, user, reasoningEffort: eff, signal, timeoutMs }),
+            );
           try {
             resp = await completeOnce();
           } catch (err) {

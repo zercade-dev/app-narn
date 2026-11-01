@@ -33,6 +33,7 @@ import {
 import { buildProviderOptions } from './provider-options.js';
 import { salvageIndexedRows } from './json.js';
 import { attachUsageToFirst } from './llm-module.js';
+import { measureProviderCall } from './provider-call-counter.js';
 import { createFeatureMethods, type AISDKModuleContext } from './module-features.js';
 import {
   createModelForProvider,
@@ -813,14 +814,16 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       // combine inside its retry callback.
       const combined = combineAbortSignals(signal, timeoutMs);
       try {
-        return await generateText({
-          model,
-          ...body,
-          ...(maxOutputTokens !== undefined ? { maxOutputTokens } : {}),
-          ...(config.maxRetries !== undefined ? { maxRetries: config.maxRetries } : {}),
-          abortSignal: combined,
-          ...providerOptionsSpread,
-        });
+        return await measureProviderCall(() =>
+          generateText({
+            model,
+            ...body,
+            ...(maxOutputTokens !== undefined ? { maxOutputTokens } : {}),
+            ...(config.maxRetries !== undefined ? { maxRetries: config.maxRetries } : {}),
+            abortSignal: combined,
+            ...providerOptionsSpread,
+          }),
+        );
       } catch (err) {
         // A fired timeout (combined aborted, but the caller did NOT cancel) becomes a
         // typed transient error so the judge/review retry path retries at a smaller size.

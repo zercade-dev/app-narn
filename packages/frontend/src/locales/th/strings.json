@@ -165,6 +165,7 @@
     "sameAsSource": "เหมือนต้นฉบับ",
     "placeholderMismatch": "ตัวแทนค่าไม่ตรงกัน",
     "newOnly": "ใหม่ (จากการนำเข้าครั้งล่าสุด)",
+    "freewayBelowTarget": "ต่ำกว่าคุณภาพเป้าหมาย",
     "freewayTierBelow": "ต่ำกว่าระดับ:",
     "freewayTierBelowOff": "ปิด",
     "clearNewFlags": "ล้างเครื่องหมายใหม่ ({{count}})",

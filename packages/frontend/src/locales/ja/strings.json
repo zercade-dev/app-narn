@@ -165,6 +165,7 @@
     "sameAsSource": "原文と同一",
     "placeholderMismatch": "プレースホルダーの不一致",
     "newOnly": "新規（前回のインポート分）",
+    "freewayBelowTarget": "目標の品質を下回る翻訳",
     "freewayTierBelow": "指定ティア未満：",
     "freewayTierBelowOff": "オフ",
     "clearNewFlags": "新規フラグを解除（{{count}}）",

@@ -189,6 +189,7 @@ export function StringTableFilters() {
     filters.sameAsSource,
     filters.placeholderMismatch,
     filters.flaggedNewOnly,
+    filters.freewayBelowTarget,
     filters.freewayTierBelow !== null,
   ].filter(Boolean).length;
 
@@ -209,6 +210,7 @@ export function StringTableFilters() {
     filters.sameAsSource ||
     filters.placeholderMismatch ||
     filters.flaggedNewOnly ||
+    filters.freewayBelowTarget ||
     filters.freewayTierBelow !== null ||
     filters.filterMode !== 'AND';
 
@@ -442,6 +444,19 @@ export function StringTableFilters() {
                   onCheckedChange={(v) => setFilter({ placeholderMismatch: v === true })}
                 />
                 {t('filters.placeholderMismatch')}
+              </label>
+
+              <label
+                htmlFor="filter-freeway-below-target"
+                className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
+              >
+                <Checkbox
+                  id="filter-freeway-below-target"
+                  data-testid="filter-freeway-below-target"
+                  checked={filters.freewayBelowTarget === true}
+                  onCheckedChange={(v) => setFilter({ freewayBelowTarget: v === true })}
+                />
+                {t('filters.freewayBelowTarget')}
               </label>
 
               <label

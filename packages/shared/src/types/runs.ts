@@ -493,6 +493,15 @@ export interface RunStatus {
   };
   /** The user accepted lower-tier translations for the rest of this run. */
   belowTargetAccepted?: boolean;
+  /** Freeway request and provider timing totals, accumulated across resumes. */
+  freewayStats?: {
+    plannedRequests: number;
+    actualRequests: number;
+    splits: number;
+    moves: Array<{ from: string; to: string; reason: string }>;
+    salvagedStrings: number;
+    byModel: Record<string, { translateMs: number; strings: number }>;
+  };
   /**
    * For translation runs: failures that recurred on one model with one error,
    * at most ten groups. Absent when nothing recurred.

@@ -165,6 +165,7 @@
     "sameAsSource": "Identisch mit Quelltext",
     "placeholderMismatch": "Platzhalter-Abweichung",
     "newOnly": "Neu (aus dem letzten Import)",
+    "freewayBelowTarget": "Unter der angestrebten Qualität",
     "freewayTierBelow": "Unter Stufe:",
     "freewayTierBelowOff": "Aus",
     "clearNewFlags": "Neu-Markierungen entfernen ({{count}})",

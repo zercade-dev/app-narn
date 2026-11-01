@@ -165,6 +165,7 @@
     "sameAsSource": "Same as source",
     "placeholderMismatch": "Placeholder mismatch",
     "newOnly": "New (from last import)",
+    "freewayBelowTarget": "Below target quality",
     "freewayTierBelow": "Served below tier:",
     "freewayTierBelowOff": "Off",
     "clearNewFlags": "Clear new flags ({{count}})",

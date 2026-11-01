@@ -215,6 +215,7 @@ export interface StringQueryFilters {
   untranslatedOnly?: boolean;
   untranslatedForLanguage?: string;
   lqaFailed?: boolean;
+  freewayBelowTarget?: boolean;
   /** Match entries with at least one translation produced by this run id. */
   runId?: string;
 }

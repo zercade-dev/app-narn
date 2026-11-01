@@ -165,6 +165,7 @@
     "sameAsSource": "Identique à la source",
     "placeholderMismatch": "Incompatibilité de variables",
     "newOnly": "Nouveau (dernier import)",
+    "freewayBelowTarget": "Qualité inférieure à l’objectif",
     "freewayTierBelow": "Sous le niveau :",
     "freewayTierBelowOff": "Désactivé",
     "clearNewFlags": "Effacer les marques « nouveau » ({{count}})",

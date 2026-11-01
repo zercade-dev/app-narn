@@ -165,6 +165,7 @@
     "sameAsSource": "Совпадает с исходным текстом",
     "placeholderMismatch": "Несовпадение подстановок",
     "newOnly": "Новые (из последнего импорта)",
+    "freewayBelowTarget": "Ниже целевого качества",
     "freewayTierBelow": "Ниже уровня:",
     "freewayTierBelowOff": "Выкл.",
     "clearNewFlags": "Снять отметки «новое» ({{count}})",

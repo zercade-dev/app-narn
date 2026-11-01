@@ -165,6 +165,7 @@
     "sameAsSource": "Kaynakla aynı",
     "placeholderMismatch": "Yer tutucu uyuşmazlığı",
     "newOnly": "Yeni (son içe aktarmadan)",
+    "freewayBelowTarget": "Hedef kalitenin altında",
     "freewayTierBelow": "Kademenin altında:",
     "freewayTierBelowOff": "Kapalı",
     "clearNewFlags": "Yeni işaretlerini temizle ({{count}})",
