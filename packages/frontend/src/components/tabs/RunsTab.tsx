@@ -30,6 +30,7 @@ import {
 } from './run-status-ui.js';
 import { RunStatusBadge } from './RunStatusBadge.js';
 import { ProviderFailureNotices } from './ProviderFailureNotices.js';
+import { BelowTargetNotice } from './BelowTargetNotice.js';
 import { RunProgressBar } from '../ui/run-progress-bar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Button } from '../ui/button';
@@ -187,10 +188,12 @@ function StatCard({ id, label, value }: Readonly<{ id: string; label: string; va
 function RunDetailsContent({
   details,
   usage,
+  freewayStats,
   loading,
 }: Readonly<{
   details: RunDetails | null | undefined;
   usage: RunUsageEntry[] | undefined;
+  freewayStats: RunStatus['freewayStats'];
   loading: boolean;
 }>) {
   const { t } = useTranslation('strings');
@@ -263,7 +266,7 @@ function RunDetailsContent({
       </div>
     );
   }
-  if (!hasSidecar && !hasUsage) {
+  if (!hasSidecar && !hasUsage && !freewayStats) {
     return (
       <div className="py-3 text-xs text-muted-foreground" data-testid="run-details-empty">
         {t('runs.detailsEmpty')}
@@ -369,6 +372,55 @@ function RunDetailsContent({
         </div>
       )}
 
+      {freewayStats && (
+        <div className="space-y-1.5" data-testid="run-details-freeway-stats">
+          <h4 className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            {t('runs.freewayStatsHeading')}
+          </h4>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            <StatCard
+              id="freeway-planned"
+              label={t('runs.freewayPlanned')}
+              value={freewayStats.plannedRequests}
+            />
+            <StatCard
+              id="freeway-actual"
+              label={t('runs.freewayActual')}
+              value={freewayStats.actualRequests}
+            />
+            <StatCard
+              id="freeway-splits"
+              label={t('runs.freewaySplits')}
+              value={freewayStats.splits}
+            />
+            <StatCard
+              id="freeway-saved"
+              label={t('runs.freewaySaved')}
+              value={freewayStats.salvagedStrings}
+            />
+          </div>
+          {freewayStats.moves.map((move, index) => {
+            const reason =
+              move.reason === 'parse-failure'
+                ? t('runs.freewayMoveReasonParse')
+                : move.reason === 'rate-limit'
+                  ? t('runs.freewayMoveReasonRateLimit')
+                  : move.reason === 'auth'
+                    ? t('runs.freewayMoveReasonAuth')
+                    : move.reason === 'provider-error'
+                      ? t('runs.freewayMoveReasonProvider')
+                      : move.reason === 'lqa'
+                        ? t('runs.freewayMoveReasonQuality')
+                        : t('runs.freewayMoveReasonAvailability');
+            return (
+              <p key={index} className="text-xs text-muted-foreground">
+                {t('runs.freewayMove', { from: move.from, to: move.to, reason })}
+              </p>
+            );
+          })}
+        </div>
+      )}
+
       {details && details.freeway && details.freeway.length > 0 && (
         <div className="space-y-1.5" data-testid="run-details-freeway">
           <h4 className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -441,6 +493,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
     pauseRun,
     resumeRun,
     resumeRunWith,
+    acceptBelowTarget,
     reorderQueue,
     startPolling,
   } = useRunStore();
@@ -845,6 +898,8 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                     const waitingPairCount =
                       run.waitingForQuota?.pairCount ?? run.waitingForQuota?.pairs?.length ?? 0;
                     const isWaitingForQuota = isPaused && waitingPairCount > 0;
+                    const isBelowTarget =
+                      isWaitingForQuota && run.waitingForQuota?.reason === 'below-target';
                     const isQueued = run.status === RunStatusCode.Queued;
                     const queueIndex = isQueued ? queuedIds.indexOf(run.runId) : -1;
 
@@ -902,7 +957,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                             <div className="flex items-center gap-2">
                               {getStatusIcon(run.status)}
                               {getStatusBadge(run.status)}
-                              {isWaitingForQuota && (
+                              {isWaitingForQuota && !isBelowTarget && (
                                 <Badge
                                   variant="secondary"
                                   className="bg-status-warn/10 text-status-warn"
@@ -935,7 +990,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                 </Badge>
                               )}
                             </div>
-                            {isWaitingForQuota && run.waitingForQuota && (
+                            {isWaitingForQuota && !isBelowTarget && run.waitingForQuota && (
                               <div
                                 className="mt-1 space-y-0.5"
                                 data-testid={`run-waiting-detail-${run.runId}`}
@@ -1168,7 +1223,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                   {t('runs.pause')}
                                 </Button>
                               )}
-                              {isPaused && (
+                              {isPaused && !isBelowTarget && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -1189,7 +1244,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                     : t('runs.resume')}
                                 </Button>
                               )}
-                              {isWaitingForQuota && (
+                              {isWaitingForQuota && !isBelowTarget && (
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -1285,12 +1340,25 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                   data-testid={`run-cancel-${run.runId}`}
                                 >
                                   <XCircle className="size-4 mr-1" />
-                                  {t('runs.cancel')}
+                                  {isBelowTarget ? t('runs.belowTargetCancel') : t('runs.cancel')}
                                 </Button>
                               )}
                             </div>
                           </TableCell>
                         </TableRow>
+                        {isBelowTarget && (
+                          <TableRow className="hover:bg-transparent">
+                            <TableCell
+                              colSpan={showTriggeredBy ? 8 : 7}
+                              className="whitespace-normal pt-0"
+                            >
+                              <BelowTargetNotice
+                                run={run}
+                                onAccept={() => acceptBelowTarget(projectId, run.runId)}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        )}
                         {run.providerFailureNotices?.length ? (
                           // Its own row: table cells size to their content, so in
                           // the Status cell a long message pushes every other
@@ -1333,6 +1401,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                   <RunDetailsContent
                     details={detailsByRun[detailsRun.runId]}
                     usage={detailsRun.usageByModule}
+                    freewayStats={detailsRun.freewayStats}
                     loading={loadingDetailsRunId === detailsRun.runId}
                   />
                 )}
