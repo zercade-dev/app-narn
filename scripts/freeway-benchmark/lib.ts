@@ -288,6 +288,17 @@ export function candidateDetailPath(resultsPath: string): string {
   return `${resultsPath.slice(0, -'.local.json'.length)}.detail.local.json`;
 }
 
+const HTTP_CEILING_PREFIX = 'HTTP ceiling reached for ';
+
+export function httpCeilingMessage(host: string): string {
+  return `${HTTP_CEILING_PREFIX}${host}`;
+}
+
+/** Providers wrap errors in their own text, so this matches anywhere in the message. */
+export function isHttpCeilingMessage(message: string): boolean {
+  return message.includes(HTTP_CEILING_PREFIX);
+}
+
 /** False when judging a whole cell would cross the ceiling, so its translations would be thrown away. */
 export function judgeBudgetFits(args: {
   used: number; maxRequests: number | undefined; judgeRequests: number; ownTranslateRequests: number;

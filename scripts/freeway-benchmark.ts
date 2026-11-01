@@ -51,6 +51,8 @@ import {
   cellKey,
   corpusVersion,
   distill,
+  httpCeilingMessage,
+  isHttpCeilingMessage,
   judgeBudgetFits,
   mechanicalIssues,
   parseCandidates,
@@ -625,6 +627,10 @@ async function runJudge(ctx: RunContext, items: JudgeItem[]): Promise<JudgeRunOu
     judgeStats.requestsMade += 1;
     await paceAfterCall(ctx.judgeSnapModel, ctx.judgeProvider);
     if (ctx.judgePaceMs !== undefined) await sleepMs(ctx.judgePaceMs);
+    // The ceiling can't lift during this run, so the rest of this cell can never be judged.
+    if (chunkVerdicts.some((v) => v.error !== undefined && isHttpCeilingMessage(v.error))) {
+      return { kind: 'budget-capped' };
+    }
     verdicts.push(...chunkVerdicts);
   }
 
@@ -725,6 +731,12 @@ function countDeeplContextGroups(corpus: CorpusEntry[]): number {
   return new Set(corpus.map(jobContext)).size;
 }
 
+function capProviderAtHttpCeiling(ctx: RunContext, providerKey: string, key: string): void {
+  console.error(`[${key}] hit the HTTP ceiling; "${providerKey}" budget-capped, remaining cells deferred`);
+  ctx.providerState.set(providerKey, 'budget-capped');
+  deferCell(ctx, providerKey, 'budget-capped');
+}
+
 /** `'stop'` = judging just went dead (429-shaped) — the caller must end the whole run gracefully. */
 type CellOutcome = 'continue' | 'stop';
 
@@ -816,7 +828,17 @@ async function processCell(
       requests++;
       stats.requestsMade++;
       await paceAfterCall(snapModel, provider); // a request was made even though it threw
-      applyClassification(ctx, providerKey, key, classify(redact(toErrorMessage(err)), isDeepl), requests);
+      const message = redact(toErrorMessage(err));
+      if (isHttpCeilingMessage(message)) {
+        capProviderAtHttpCeiling(ctx, providerKey, key);
+        return 'continue';
+      }
+      applyClassification(ctx, providerKey, key, classify(message, isDeepl), requests);
+      return 'continue';
+    }
+
+    if (results.some((r) => r.error !== undefined && isHttpCeilingMessage(r.error))) {
+      capProviderAtHttpCeiling(ctx, providerKey, key);
       return 'continue';
     }
 
@@ -1134,7 +1156,7 @@ function installHttpCounter(maxRequests: number | undefined): Map<string, number
     const host = new URL(input instanceof Request ? input.url : String(input)).hostname;
     const used = counts.get(host) ?? 0;
     if (maxRequests !== undefined && used >= maxRequests) {
-      return Promise.reject(new Error(`HTTP ceiling reached for ${host}`));
+      return Promise.reject(new Error(httpCeilingMessage(host)));
     }
     counts.set(host, used + 1);
     return realFetch(input, init);
