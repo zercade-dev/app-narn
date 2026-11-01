@@ -49,6 +49,8 @@ export interface FreeTierModel {
   weakLanguages?: string[];
   /** Benchmark-derived judged quality per registry language code (0-100). */
   langScores?: Record<string, number>;
+  /** Benchmark-derived provider time per delivered string, in milliseconds. */
+  speedMsPerString?: number;
   /** Benchmark-derived first-attempt compliance rate per language (0-1). */
   langPassPriors?: Record<string, number>;
   /** Languages this model must never serve (unusable/unsupported per benchmark). */

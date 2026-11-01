@@ -353,6 +353,7 @@
     "belowTargetMarked": "これらの文字列には、後で見つけて確認できるよう印が付きます。",
     "belowTargetRestOfRun": "この選択は、この実行の残りにも適用されます。",
     "belowTargetKeepWaiting": "待機を続ける",
+    "belowTargetSlowModels": "低速モデル：{{models}}。",
     "belowTargetConfirm": "それでも続行",
     "waitingResumesAt": "再開：{{time}}",
     "waitingPairsCount_other": "保留中のペア{{count}}件",

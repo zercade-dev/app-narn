@@ -311,3 +311,103 @@ export function judgeBudgetFits(args: {
   if (args.maxRequests === undefined) return true;
   return args.used + args.judgeRequests + args.ownTranslateRequests <= args.maxRequests;
 }
+
+// ---------------------------------------------------------------------------
+// Speed pass: provider time per delivered string for the bundled models. The
+// speed sidecar is separate from the judged results; only a reviewed copy is
+// distilled onto the snapshot's `speedMsPerString`.
+// ---------------------------------------------------------------------------
+
+export interface SpeedCell { totalMs: number; strings: number; requests: number }
+export interface SpeedResultsFile {
+  cells: Record<string, SpeedCell>;
+  /** Chunk indexes whose every string was delivered, by cell key. */
+  completedChunks: Record<string, number[]>;
+  /** Corpus ids already delivered (nonblank, no error), by cell key. */
+  deliveredIds: Record<string, string[]>;
+  /** Requests charged (or reserved) per quota window, keyed by the window's start. */
+  spends: Record<string, number>;
+}
+
+export function emptySpeedResults(): SpeedResultsFile {
+  return { cells: {}, completedChunks: {}, deliveredIds: {}, spends: {} };
+}
+
+function validSpeedCell(cell: unknown): cell is SpeedCell {
+  if (typeof cell !== 'object' || cell === null) return false;
+  const { totalMs, strings, requests } = cell as Record<string, unknown>;
+  return (
+    typeof totalMs === 'number' && Number.isFinite(totalMs) && totalMs >= 0 &&
+    typeof strings === 'number' && Number.isInteger(strings) && strings >= 0 &&
+    typeof requests === 'number' && Number.isInteger(requests) && requests >= 0
+  );
+}
+
+/**
+ * Milliseconds per delivered string for each model: all its languages' time,
+ * failed and split calls included, over all its deliveries. A model with no
+ * delivery has no entry; malformed cells are ignored.
+ */
+export function distillSpeed(file: SpeedResultsFile): Map<string, number> {
+  const totals = new Map<string, { ms: number; strings: number }>();
+  for (const [key, cell] of Object.entries(file.cells ?? {})) {
+    if (!validSpeedCell(cell)) continue;
+    const [providerKey, modelId] = splitKey(key);
+    const modelKey = `${providerKey}::${modelId}`;
+    const t = totals.get(modelKey) ?? { ms: 0, strings: 0 };
+    t.ms += cell.totalMs;
+    t.strings += cell.strings;
+    totals.set(modelKey, t);
+  }
+  const out = new Map<string, number>();
+  for (const [modelKey, t] of totals) {
+    if (t.strings > 0) out.set(modelKey, t.ms / t.strings);
+  }
+  return out;
+}
+
+/** Sets `speedMsPerString` (rounded ms) on measured bundled models only; everything else is untouched. */
+export function applySpeedDistilled(snapshot: unknown, speed: Map<string, number>): unknown {
+  const copy = JSON.parse(JSON.stringify(snapshot)) as {
+    providers: Record<string, { models: Array<Record<string, unknown> & { id: string }> }>;
+  };
+  for (const [providerKey, provider] of Object.entries(copy.providers)) {
+    for (const model of provider.models) {
+      const ms = speed.get(`${providerKey}::${model.id}`);
+      if (ms === undefined || !Number.isFinite(ms) || ms <= 0) continue;
+      model.speedMsPerString = Math.round(ms);
+    }
+  }
+  return copy;
+}
+
+/** Reads a results file from disk defensively: anything missing or malformed becomes empty. */
+export function parseSpeedResults(raw: unknown): SpeedResultsFile {
+  const root = (typeof raw === 'object' && raw !== null ? raw : {}) as Partial<SpeedResultsFile>;
+  const record = <T>(v: unknown): Record<string, T> =>
+    typeof v === 'object' && v !== null && !Array.isArray(v) ? (v as Record<string, T>) : {};
+  return {
+    cells: record<SpeedCell>(root.cells),
+    completedChunks: record<number[]>(root.completedChunks),
+    deliveredIds: record<string[]>(root.deliveredIds),
+    spends: record<number>(root.spends),
+  };
+}
+
+/**
+ * Provider API key shapes — never let one reach a printed error line. Covers
+ * the prefixed shapes (groq `gsk_…`, OpenAI/OpenRouter `sk-…`, Google
+ * `AIza…`, GitHub `ghp_…`/`github_pat_…`) plus DeepL's prefix-less key: a
+ * hex-and-dash UUID with an optional `:fx` free-tier suffix. That last
+ * alternative is deliberately loose — it also swallows long hex digests, which
+ * is the harmless direction for a redaction pass over error text.
+ */
+const KEY_SHAPE_RE =
+  /\b(?:(?:gsk_|sk-[A-Za-z0-9-]|AIza|gh[pousr]_|github_pat_)[A-Za-z0-9_-]*|[0-9a-f][0-9a-f-]{29,}(?::fx)?)/g;
+export function redact(text: string, secrets: readonly string[] = []): string {
+  let out = text;
+  for (const secret of secrets) {
+    if (secret.length >= 8) out = out.split(secret).join('[redacted]');
+  }
+  return out.replace(KEY_SHAPE_RE, '[redacted]');
+}

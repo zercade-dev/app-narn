@@ -40,6 +40,8 @@ export interface BucketView {
   weakLanguages?: string[];
   /** Snapshot langScores (see FreeTierModel); absent → unmeasured. */
   langScores?: Record<string, number>;
+  /** Snapshot speed per delivered string; absent → unmeasured. */
+  speedMsPerString?: number;
   /** Snapshot langPassPriors; absent → curated tier×band prior applies. */
   langPassPriors?: Record<string, number>;
   /** Snapshot blockedLanguages; never eligible for these target languages. */
@@ -156,6 +158,8 @@ export interface RunPlan {
     bestTier: number;
     bestModelId: string;
     resumeAt: number | null;
+    /** The best available lower-tier choice is Too slow. */
+    bestIsTooSlow?: true;
   }[];
   /** Groups no bucket can EVER serve (no eligible tier/provider at all). */
   blocked: JobGroup[];

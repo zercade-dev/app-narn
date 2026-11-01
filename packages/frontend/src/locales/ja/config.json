@@ -240,6 +240,17 @@
     "alwaysContinue": "常に品質の低いモデルで続行",
     "alwaysContinueHelp": "オフ：実行を一時停止して確認します。オン：確認せず完了し、対象の文字列には印が付きます。",
     "alwaysContinueSaveFailed": "設定を保存できませんでした：{{message}}",
+    "priority": {
+      "label": "優先する項目",
+      "quality": "品質",
+      "balanced": "バランス",
+      "speed": "速度"
+    },
+    "priorityHelp": {
+      "quality": "翻訳品質を優先し、速度は同点のときの判断に使います。",
+      "balanced": "十分に良い高速なモデルがあるときは、遅いモデルを避けます。",
+      "speed": "翻訳品質を守りながら、より高速なモデルを優先します。"
+    },
     "instancesLoadFailed": "Freewayのモジュールインスタンスの読み込みに失敗しました：{{message}}",
     "statusTitle": "状態",
     "empty": "無料枠のプロバイダーはまだ設定されていません。",
@@ -247,6 +258,11 @@
     "colState": "状態",
     "colRemaining": "残り",
     "colNextReset": "次回リセット",
+    "colTranslation": "翻訳",
+    "colSpeed": "速度",
+    "colOverall": "総合",
+    "notMeasured": "未測定",
+    "tooSlow": "遅すぎる",
     "colPassRate": "合格率",
     "sharedPoolLabel": "共有プール",
     "remainingRequests_other": "リクエスト{{count}}件",

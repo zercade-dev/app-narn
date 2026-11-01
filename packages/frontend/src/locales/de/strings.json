@@ -358,6 +358,7 @@
     "belowTargetMarked": "Diese Zeichenfolgen werden markiert, damit du sie finden und prüfen kannst.",
     "belowTargetRestOfRun": "Diese Entscheidung gilt für den Rest dieses Laufs.",
     "belowTargetKeepWaiting": "Weiter warten",
+    "belowTargetSlowModels": "Langsame Modelle: {{models}}.",
     "belowTargetConfirm": "Trotzdem fortfahren",
     "waitingResumesAt": "Wird fortgesetzt {{time}}",
     "waitingPairsCount_one": "{{count}} Paar wartet",

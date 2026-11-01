@@ -240,6 +240,17 @@
     "alwaysContinue": "항상 품질이 낮은 모델로 계속",
     "alwaysContinueHelp": "끄기: 실행을 일시 정지하고 확인해요. 켜기: 확인 없이 완료하고 해당 문자열에는 표시를 남겨요.",
     "alwaysContinueSaveFailed": "설정을 저장하지 못했어요: {{message}}",
+    "priority": {
+      "label": "우선순위",
+      "quality": "품질",
+      "balanced": "균형",
+      "speed": "속도"
+    },
+    "priorityHelp": {
+      "quality": "번역 품질을 우선하고, 속도는 동점일 때 기준으로 써요.",
+      "balanced": "충분히 좋은 더 빠른 모델이 있으면 느린 모델을 피해요.",
+      "speed": "번역 품질을 지키면서 더 빠른 모델을 우선해요."
+    },
     "instancesLoadFailed": "Freeway 모듈 인스턴스를 불러오지 못했어요: {{message}}",
     "statusTitle": "상태",
     "empty": "아직 설정된 무료 제공업체가 없어요.",
@@ -247,6 +258,11 @@
     "colState": "상태",
     "colRemaining": "잔여",
     "colNextReset": "다음 초기화",
+    "colTranslation": "번역",
+    "colSpeed": "속도",
+    "colOverall": "종합",
+    "notMeasured": "측정 안 됨",
+    "tooSlow": "너무 느림",
     "colPassRate": "통과율",
     "sharedPoolLabel": "공유 풀",
     "remainingRequests_other": "요청 {{count}}번",

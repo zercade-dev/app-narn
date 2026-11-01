@@ -353,6 +353,7 @@
     "belowTargetMarked": "這些字串會被標記，方便你尋找和審核。",
     "belowTargetRestOfRun": "此選擇適用於本次執行的剩餘部分。",
     "belowTargetKeepWaiting": "繼續等待",
+    "belowTargetSlowModels": "慢速模型：{{models}}。",
     "belowTargetConfirm": "仍然繼續",
     "waitingResumesAt": "{{time}} 繼續",
     "waitingPairsCount_other": "{{count}} 對待處理",

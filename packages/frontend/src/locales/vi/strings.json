@@ -353,6 +353,7 @@
     "belowTargetMarked": "Các chuỗi này sẽ được đánh dấu để bạn tìm và kiểm tra.",
     "belowTargetRestOfRun": "Lựa chọn này áp dụng cho phần còn lại của lượt chạy.",
     "belowTargetKeepWaiting": "Tiếp tục chờ",
+    "belowTargetSlowModels": "Mô hình chậm: {{models}}.",
     "belowTargetConfirm": "Vẫn tiếp tục",
     "waitingResumesAt": "Tiếp tục {{time}}",
     "waitingPairsCount_other": "{{count}} cặp đang chờ",

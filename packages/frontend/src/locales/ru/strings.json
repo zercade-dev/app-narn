@@ -368,6 +368,7 @@
     "belowTargetMarked": "Эти строки будут помечены, чтобы их можно было найти и проверить.",
     "belowTargetRestOfRun": "Этот выбор действует до конца текущего запуска.",
     "belowTargetKeepWaiting": "Продолжить ожидание",
+    "belowTargetSlowModels": "Медленные модели: {{models}}.",
     "belowTargetConfirm": "Всё равно продолжить",
     "waitingResumesAt": "Возобновится {{time}}",
     "waitingPairsCount_one": "{{count}} пара ожидает",

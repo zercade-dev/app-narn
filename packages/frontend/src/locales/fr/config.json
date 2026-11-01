@@ -245,6 +245,17 @@
     "alwaysContinue": "Toujours continuer avec des modèles de moindre qualité",
     "alwaysContinueHelp": "Désactivé : les exécutions s’arrêtent et demandent votre avis. Activé : elles se terminent sans demander et ces chaînes restent marquées.",
     "alwaysContinueSaveFailed": "Impossible d’enregistrer ce réglage : {{message}}",
+    "priority": {
+      "label": "Prioriser",
+      "quality": "Qualité",
+      "balanced": "Équilibré",
+      "speed": "Vitesse"
+    },
+    "priorityHelp": {
+      "quality": "Privilégie la qualité de traduction ; la vitesse départage les ex æquo.",
+      "balanced": "Évite les modèles lents lorsqu’un bon modèle plus rapide est disponible.",
+      "speed": "Privilégie les modèles plus rapides tout en protégeant la qualité de traduction."
+    },
     "instancesLoadFailed": "Échec du chargement des instances de modules Freeway : {{message}}",
     "statusTitle": "État",
     "empty": "Aucun fournisseur gratuit configuré pour le moment.",
@@ -252,6 +263,11 @@
     "colState": "État",
     "colRemaining": "Restant",
     "colNextReset": "Prochaine réinitialisation",
+    "colTranslation": "Traduction",
+    "colSpeed": "Vitesse",
+    "colOverall": "Global",
+    "notMeasured": "Non mesuré",
+    "tooSlow": "Trop lent",
     "colPassRate": "Taux de réussite",
     "sharedPoolLabel": "Pool partagé",
     "remainingRequests_one": "{{count}} requête",

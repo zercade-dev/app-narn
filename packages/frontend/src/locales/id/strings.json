@@ -353,6 +353,7 @@
     "belowTargetMarked": "String ini akan ditandai agar dapat ditemukan dan ditinjau.",
     "belowTargetRestOfRun": "Pilihan ini berlaku untuk sisa proses ini.",
     "belowTargetKeepWaiting": "Tetap menunggu",
+    "belowTargetSlowModels": "Model lambat: {{models}}.",
     "belowTargetConfirm": "Tetap lanjutkan",
     "waitingResumesAt": "Dilanjutkan {{time}}",
     "waitingPairsCount_other": "{{count}} pasangan menunggu",
