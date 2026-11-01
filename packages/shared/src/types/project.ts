@@ -178,6 +178,8 @@ export interface GlobalModuleConfigEntry {
   config: ModuleConfigValues;
 }
 
+export type FreewayPriority = 'quality' | 'balanced' | 'speed';
+
 /** Workspace-wide non-module settings. */
 export interface WorkspaceSettings {
   maxBackupsPerProject?: number;
@@ -242,6 +244,8 @@ export interface WorkspaceSettings {
   freewayDisabledProviders?: string[];
   /** Continue below a translation's target tier without asking. Defaults to false. */
   freewayAlwaysContinueBelowTarget?: boolean;
+  /** Preference for Freeway translation routing. Defaults to balanced. */
+  freewayPriority?: FreewayPriority;
 }
 
 /** Workspace-wide module configuration shared by all projects. */

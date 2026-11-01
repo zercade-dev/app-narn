@@ -4,6 +4,7 @@ export type {
   GlobalModuleConfigEntry,
   GlobalConfig,
   WorkspaceSettings,
+  FreewayPriority,
   BatchGroupingDimension,
   AiRunModuleSelection,
 } from './types/project.js';

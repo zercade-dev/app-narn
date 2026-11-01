@@ -10,13 +10,16 @@
  * are equally unstressed), tie-breaking toward buckets whose quota expires
  * soonest; a reserve keeps top-tier headroom for escalation retries.
  */
+import type { FreewayPriority } from '@zercade-dev/narn-shared';
 import type { FreewayCooldownReason } from '../../storage/types.js';
 import type { BucketView, DifficultyBand, JobGroup } from './types.js';
 import {
   effectiveRemainingRequests,
+  effectiveSpeedMsPerString,
   langQualityClass,
   passRateClass,
   requestCost,
+  speedBand,
 } from './scoring.js';
 
 export { effectiveRemainingRequests };
@@ -202,13 +205,15 @@ function isReservoir(bucket: BucketView): number {
  * both-unmeasured case, fall through to scarcity exactly as before.
  *
  * Remaining keys: scarcity percent, then expected requests per job, then
- * soonest reset, then lowest adequate tier, then key.
+ * soonest reset, then lowest adequate tier, then key. An explicit priority
+ * puts too-slow buckets last and reorders fully funded buckets by speed within
+ * each of the three quality classes; omitted priority retains this order.
  */
 export function rankCandidates(
   buckets: BucketView[],
   group: JobGroup,
   now: number,
-  opts?: { tierFloor?: DifficultyBand },
+  opts?: { tierFloor?: DifficultyBand; priority?: FreewayPriority },
 ): BucketView[] {
   // Relax only tier eligibility; ranking and weak-language checks use the
   // original group's difficulty.
@@ -232,14 +237,16 @@ export function rankCandidates(
   const langClasses = new Map(
     eligible.map((b) => [b.bucketKey, langQualityClass(b, group.targetLanguage)]),
   );
-  return [...eligible].sort((a, b) => {
+  const compareQuality = (a: BucketView, b: BucketView): number => {
     if (isReservoir(a) !== isReservoir(b)) return isReservoir(a) - isReservoir(b);
     const qa = classes.get(a.bucketKey)!;
     const qb = classes.get(b.bucketKey)!;
     if (qa !== qb) return qa - qb;
     const la = langClasses.get(a.bucketKey)!;
     const lb = langClasses.get(b.bucketKey)!;
-    if (la !== lb) return la - lb;
+    return la - lb;
+  };
+  const compareEconomics = (a: BucketView, b: BucketView): number => {
     const sa = scarcity.get(a.bucketKey)!;
     const sb = scarcity.get(b.bucketKey)!;
     if (sa !== sb) return sa - sb;
@@ -247,9 +254,67 @@ export function rankCandidates(
     const cb = costs.get(b.bucketKey)!;
     if (ca.requestsPerJob !== cb.requestsPerJob) return ca.requestsPerJob - cb.requestsPerJob;
     if (a.nextResetAt !== b.nextResetAt) return a.nextResetAt - b.nextResetAt;
-    if (a.qualityTier !== b.qualityTier) return a.qualityTier - b.qualityTier;
-    return a.bucketKey < b.bucketKey ? -1 : 1;
-  });
+    return a.qualityTier - b.qualityTier;
+  };
+  const compareKey = (a: BucketView, b: BucketView): number =>
+    a.bucketKey < b.bucketKey ? -1 : a.bucketKey > b.bucketKey ? 1 : 0;
+  const ranked = [...eligible].sort(
+    (a, b) => compareQuality(a, b) || compareEconomics(a, b) || compareKey(a, b),
+  );
+  const priority = opts?.priority;
+  if (priority === undefined) return ranked;
+
+  const bandOrder = { fast: 0, medium: 1, slow: 2, 'too-slow': 3 } as const;
+  const bands = new Map(
+    ranked.map((bucket) => [
+      bucket.bucketKey,
+      bandOrder[speedBand(effectiveSpeedMsPerString(bucket))],
+    ]),
+  );
+  const ordered = [
+    ...ranked.filter((bucket) => bands.get(bucket.bucketKey)! < 3),
+    ...ranked.filter((bucket) => bands.get(bucket.bucketKey)! === 3),
+  ];
+
+  // Sort only the funded entries in each quality class. Keeping the other
+  // entries in place prevents speed from advancing a bucket that cannot
+  // cover the group, and avoids a non-transitive pairwise comparator.
+  let start = 0;
+  while (start < ordered.length) {
+    let end = start + 1;
+    while (
+      end < ordered.length &&
+      (bands.get(ordered[start].bucketKey)! === 3) === (bands.get(ordered[end].bucketKey)! === 3) &&
+      compareQuality(ordered[start], ordered[end]) === 0
+    ) {
+      end++;
+    }
+
+    const fundedPositions: number[] = [];
+    for (let i = start; i < end; i++) {
+      const bucket = ordered[i];
+      if (effectiveRemainingRequests(bucket) >= costs.get(bucket.bucketKey)!.estimatedRequests) {
+        fundedPositions.push(i);
+      }
+    }
+    const funded = fundedPositions
+      .map((i) => ordered[i])
+      .sort((a, b) => {
+        const aBand = bands.get(a.bucketKey)!;
+        const bBand = bands.get(b.bucketKey)!;
+        if (priority === 'speed' && aBand !== bBand) return aBand - bBand;
+        if (priority === 'balanced') {
+          const fastGroup = Number(aBand >= 2) - Number(bBand >= 2);
+          if (fastGroup !== 0) return fastGroup;
+        }
+        return compareEconomics(a, b) || aBand - bBand || compareKey(a, b);
+      });
+    fundedPositions.forEach((position, i) => {
+      ordered[position] = funded[i];
+    });
+    start = end;
+  }
+  return ordered;
 }
 
 function toSelection(bucket: BucketView, group: JobGroup): Selection {
@@ -261,7 +326,7 @@ export function selectBucket(
   group: JobGroup,
   buckets: BucketView[],
   now: number,
-  opts?: { reserveRequests?: number; tierFloor?: DifficultyBand },
+  opts?: { reserveRequests?: number; tierFloor?: DifficultyBand; priority?: FreewayPriority },
 ): Selection | undefined {
   const ranked = rankCandidates(buckets, group, now, opts);
   if (ranked.length === 0) return undefined;
@@ -271,7 +336,14 @@ export function selectBucket(
     const cost = requestCost(winner, group);
     if (effectiveRemainingRequests(winner) - cost.estimatedRequests < reserve) {
       const fallback = ranked.find((b) => b.qualityTier !== 4);
-      if (fallback) return toSelection(fallback, group);
+      if (fallback) {
+        // The reserve must not send work to a too-slow model when the winner can serve it.
+        const prefersTooSlow =
+          opts?.priority !== undefined &&
+          speedBand(effectiveSpeedMsPerString(winner)) !== 'too-slow' &&
+          speedBand(effectiveSpeedMsPerString(fallback)) === 'too-slow';
+        if (!prefersTooSlow) return toSelection(fallback, group);
+      }
     }
   }
   return toSelection(winner, group);
@@ -290,9 +362,10 @@ export function selectEscalationCandidates(
   group: JobGroup,
   buckets: BucketView[],
   now: number,
+  opts?: { priority?: FreewayPriority },
 ): Selection[] {
   const failedTier = buckets.find((b) => b.bucketKey === failedBucketKey)?.qualityTier ?? 0;
-  return rankCandidates(buckets, group, now)
+  return rankCandidates(buckets, group, now, opts)
     .filter((b) => b.qualityTier > failedTier && b.bucketKey !== failedBucketKey)
     .map((b) => toSelection(b, group));
 }
