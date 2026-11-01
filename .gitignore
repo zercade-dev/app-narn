@@ -66,6 +66,7 @@ packages/server/copilot-models-cache.json
 # Freeway per-language benchmark: local-only working files (large, provider-call-derived)
 scripts/freeway-benchmark/corpus.local.json
 scripts/freeway-benchmark/results-detail.local.json
+scripts/freeway-benchmark/speed-results.local.json
 scripts/freeway-benchmark/candidates*.local.*
 scripts/freeway-refresh/*.local.json
 

@@ -46,25 +46,32 @@ import { fileURLToPath } from 'node:url';
 import {
   aggregateCell,
   applyDistilled,
+  applySpeedDistilled,
   candidateDetailPath,
   candidateTranslationsPath,
   candidateSnapshot,
   cellKey,
   corpusVersion,
   distill,
+  distillSpeed,
+  emptySpeedResults,
   httpCeilingMessage,
   isHttpCeilingMessage,
   judgeBudgetFits,
   mechanicalIssues,
   parseCandidates,
   parseCorpus,
+  parseSpeedResults,
+  redact,
   restrictCandidateEnv,
   sortedResults,
   type CellResult,
   type CorpusEntry,
   type PerStringOutcome,
   type ResultsFile,
+  type SpeedResultsFile,
 } from './freeway-benchmark/lib.js';
+import { planSpeed, runSpeedPass, SPEED_ENV_NAMES } from './freeway-benchmark/speed.js';
 
 import {
   chunkArray,
@@ -100,6 +107,7 @@ const CORPUS_PATH = path.join(BENCH_DIR, 'corpus.json');
 const CORPUS_LOCAL_PATH = path.join(BENCH_DIR, 'corpus.local.json');
 const RESULTS_PATH = path.join(BENCH_DIR, 'results.json');
 const DETAIL_PATH = path.join(BENCH_DIR, 'results-detail.local.json');
+const SPEED_RESULTS_PATH = path.join(BENCH_DIR, 'speed-results.local.json');
 const FREE_TIER_DATA_PATH = path.join(
   SCRIPT_DIR,
   '..',
@@ -116,6 +124,7 @@ const MODULE_ENTRY: Record<string, string> = {
   openrouter: '../modules/openrouter/src/index.js',
   groq: '../modules/groq/src/index.js',
   deepl: '../modules/deepl/src/index.js',
+  copilot: '../modules/copilot/src/index.js',
 };
 
 /** Manifests are plain JSON — imported directly so env-name lookup never depends on a build. */
@@ -149,19 +158,6 @@ const TRANSLATE_CHUNK_SIZE = 12;
  */
 const JUDGE_BATCH_SIZE = 10;
 const PACING_FLOOR_MS = 1500;
-/**
- * Provider API key shapes — never let one reach a printed error line. Covers
- * the prefixed shapes (groq `gsk_…`, OpenAI/OpenRouter `sk-…`, Google
- * `AIza…`) plus DeepL's prefix-less key: a hex-and-dash UUID with an optional
- * `:fx` free-tier suffix. That last alternative is deliberately loose — it
- * also swallows long hex digests, which is the harmless direction for a
- * redaction pass over error text.
- */
-const KEY_SHAPE_RE = /\b(?:(?:gsk_|sk-[A-Za-z0-9-]|AIza)[A-Za-z0-9_-]*|[0-9a-f][0-9a-f-]{29,}(?::fx)?)/g;
-function redact(text: string): string {
-  return text.replace(KEY_SHAPE_RE, '[redacted]');
-}
-
 // ---------------------------------------------------------------------------
 // CLI
 // ---------------------------------------------------------------------------
@@ -195,6 +191,18 @@ const USAGE = `Usage: tsx scripts/freeway-benchmark.ts [options]
   --distill            Fold results.json into the bundled free-tier snapshot
                        (free-tier-data.json) and print coverage. No network
                        calls.
+  --speed              Measure provider time per delivered string for every bundled
+                       model (translate-only, no judge, two 12-string requests
+                       per language) into the gitignored
+                       scripts/freeway-benchmark/speed-results.local.json.
+                       Reads GOOGLE_API_KEY, GROQ_API_KEY, OPENROUTER_API_KEY and
+                       GITHUB_TOKEN from the process environment (no env file),
+                       only for the providers selected. Resumable and quota-aware
+                       across restarts. With --plan, makes no calls.
+  --distill-speed <path>
+                       Write a reviewed speed-results file's per-model
+                       ms/string into the bundled free-tier snapshot's
+                       speedMsPerString. No network calls.
   --help, -h            Print this usage and exit 0.
 `;
 
@@ -205,6 +213,8 @@ interface CliArgs {
   refresh: boolean;
   plan: boolean;
   distill: boolean;
+  speed: boolean;
+  distillSpeedPath?: string;
   candidatesPath?: string;
   resultsOut?: string;
   judgePaceMs?: number;
@@ -218,7 +228,7 @@ function usageError(message: string): never {
 }
 
 function parseArgs(argv: string[]): CliArgs {
-  const args: CliArgs = { refresh: false, plan: false, distill: false };
+  const args: CliArgs = { refresh: false, plan: false, distill: false, speed: false };
   const next = (i: number, flag: string): string => {
     const value = argv[i];
     if (value === undefined) usageError(`${flag} requires a value`);
@@ -276,6 +286,12 @@ function parseArgs(argv: string[]): CliArgs {
       case '--distill':
         args.distill = true;
         break;
+      case '--speed':
+        args.speed = true;
+        break;
+      case '--distill-speed':
+        args.distillSpeedPath = path.resolve(next(++i, '--distill-speed'));
+        break;
       default:
         usageError(`Unknown flag: ${arg}`);
     }
@@ -287,6 +303,12 @@ function parseArgs(argv: string[]): CliArgs {
   }
   if (args.translateOnly && !args.candidatesPath) usageError('--translate-only requires --candidates');
   if (args.candidatesPath && args.distill) usageError('--distill cannot be used with --candidates');
+  if (args.speed && (args.candidatesPath || args.distill || args.distillSpeedPath || args.translateOnly || args.refresh)) {
+    usageError('--speed cannot be combined with --candidates, --distill, --distill-speed, --translate-only or --refresh');
+  }
+  if (args.distillSpeedPath && (args.candidatesPath || args.distill || args.plan)) {
+    usageError('--distill-speed cannot be combined with --candidates, --distill or --plan');
+  }
   return args;
 }
 
@@ -592,7 +614,7 @@ async function getOrCreateModule(
           // retry loop (default 2, i.e. 3 attempts) would otherwise burn free-tier quota
           // silently and undercount `requests`/`--max-requests` by up to 3x on any failing call.
           maxRetries: 0,
-          indexedBatchReplies: process.env.FREEWAY_BENCH_INDEXED === '1',
+          indexedBatchReplies: false,
           ...(snapModel.useStructuredOutput !== undefined ? { useStructuredOutput: snapModel.useStructuredOutput } : {}),
         };
   const mod = factory(config);
@@ -1159,6 +1181,91 @@ function runDistill(): void {
 }
 
 // ---------------------------------------------------------------------------
+// --speed / --distill-speed
+// ---------------------------------------------------------------------------
+
+function readSpeedResults(file: string): SpeedResultsFile {
+  if (!existsSync(file)) return emptySpeedResults();
+  try {
+    return parseSpeedResults(JSON.parse(readFileSync(file, 'utf8')));
+  } catch (err) {
+    console.error(`${file} is invalid: ${redact(toErrorMessage(err))}`);
+    process.exit(1);
+  }
+}
+
+function runDistillSpeed(file: string): void {
+  if (!existsSync(file)) {
+    console.error(`No speed results at ${file} — run the speed pass first (--speed).`);
+    process.exit(1);
+  }
+  const speed = distillSpeed(readSpeedResults(file));
+  const updated = applySpeedDistilled(getFreeTierSnapshot(), speed);
+  writeFileSync(FREE_TIER_DATA_PATH, JSON.stringify(updated, null, 2) + '\n');
+  console.log(`Wrote speedMsPerString for ${speed.size} model(s) into ${FREE_TIER_DATA_PATH}\n`);
+  for (const [modelKey, ms] of [...speed.entries()].sort(([a], [b]) => (a < b ? -1 : 1))) {
+    console.log(`${modelKey}: ${Math.round(ms)} ms/string`);
+  }
+}
+
+async function runSpeed(args: CliArgs): Promise<void> {
+  const snapshot = getFreeTierSnapshot();
+  const { entries: corpus } = readCorpus();
+  const langs =
+    args.langs ?? LANGUAGE_REGISTRY.filter((l) => l.code !== 'en' && l.code !== PSEUDO_LANGUAGE_CODE).map((l) => l.code);
+  const file = readSpeedResults(SPEED_RESULTS_PATH);
+  const common = { snapshot, corpus, langs, env: process.env, providers: args.providers, now: Date.now };
+
+  console.log('Freeway speed pass — key presence (process environment):');
+  for (const [providerKey, envName] of Object.entries(SPEED_ENV_NAMES)) {
+    console.log(`  ${providerKey.padEnd(12)} ${envName.padEnd(24)} ${process.env[envName] ? 'present' : 'MISSING'}`);
+  }
+  console.log();
+
+  const plan = planSpeed({ ...common, file });
+  console.log(`Corpus: ${corpus.length} string(s); ${langs.length} language(s); ${plan.rows.length} model(s) selected.`);
+  for (const row of plan.rows) {
+    const windows = row.windows.map((w) => `${w.spent}/${w.limit} used until ${new Date(w.resetsAt).toISOString()}`).join('; ');
+    console.log(`  ${row.providerKey}::${row.modelId}: ${row.requests} request(s) to go${windows ? ` (daily window ${windows})` : ''}`);
+  }
+  if (plan.skippedProviders.length > 0) console.log(`  skipped (missing key): ${plan.skippedProviders.join(', ')}`);
+  if (args.plan) return;
+  if (plan.rows.length === 0) {
+    console.log('Nothing to do: no selected provider has a key in the environment.');
+    return;
+  }
+
+  assertGitignored(SPEED_RESULTS_PATH);
+  const report = await runSpeedPass({
+    ...common,
+    maxRequests: args.maxRequests,
+    sleep: sleepMs,
+    log: (line) => console.error(line),
+    createModule: async (providerKey, config) => (await loadFactory(providerKey))(config),
+    store: {
+      load: () => file,
+      save: (f) => writeFileSync(SPEED_RESULTS_PATH, JSON.stringify(f, null, 2) + '\n'),
+    },
+  });
+
+  console.log('\n=== Speed pass summary ===');
+  console.log(`Completed cells: ${report.completed.length}`);
+  const byReason = new Map<string, string[]>();
+  for (const [cell, reason] of Object.entries(report.incomplete)) byReason.set(reason, [...(byReason.get(reason) ?? []), cell]);
+  for (const [reason, cells] of [...byReason.entries()].sort(([a], [b]) => (a < b ? -1 : 1))) {
+    console.log(`Incomplete (${reason}): ${cells.length} cell(s)`);
+  }
+  if (report.skippedProviders.length > 0) console.log(`Skipped providers (no key): ${report.skippedProviders.join(', ')}`);
+  for (const [providerKey, n] of Object.entries(report.requests).sort(([a], [b]) => (a < b ? -1 : 1))) {
+    console.log(`${providerKey}: ${n} request(s) this run`);
+  }
+  for (const [window, spent] of Object.entries(report.spends).sort(([a], [b]) => (a < b ? -1 : 1))) {
+    console.log(`  window ${window}: ${spent} spent`);
+  }
+  process.exitCode = Object.values(report.incomplete).some((r) => r === 'failed' || r === 'auth-failed') ? 1 : 0;
+}
+
+// ---------------------------------------------------------------------------
 // Summary + exit code
 // ---------------------------------------------------------------------------
 
@@ -1223,6 +1330,14 @@ async function main(): Promise<void> {
 
   if (args.distill) {
     runDistill();
+    return;
+  }
+  if (args.distillSpeedPath) {
+    runDistillSpeed(args.distillSpeedPath);
+    return;
+  }
+  if (args.speed) {
+    await runSpeed(args);
     return;
   }
 
