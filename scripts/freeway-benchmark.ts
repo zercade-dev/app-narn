@@ -592,6 +592,7 @@ async function getOrCreateModule(
           // retry loop (default 2, i.e. 3 attempts) would otherwise burn free-tier quota
           // silently and undercount `requests`/`--max-requests` by up to 3x on any failing call.
           maxRetries: 0,
+          indexedBatchReplies: true,
           ...(snapModel.useStructuredOutput !== undefined ? { useStructuredOutput: snapModel.useStructuredOutput } : {}),
         };
   const mod = factory(config);
