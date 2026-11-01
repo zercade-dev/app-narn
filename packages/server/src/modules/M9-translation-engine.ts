@@ -417,13 +417,20 @@ function freewayBandOpts(
   degradedFloor: DifficultyBand | undefined,
   minBand: DifficultyBand | undefined,
   priority?: FreewayPriority,
+  belowTargetConsent?: boolean,
 ):
-  | { degradedFloor?: DifficultyBand; minBand?: DifficultyBand; priority?: FreewayPriority }
+  | {
+      degradedFloor?: DifficultyBand;
+      minBand?: DifficultyBand;
+      priority?: FreewayPriority;
+      belowTargetConsent?: boolean;
+    }
   | undefined {
   if (degradedFloor === undefined && minBand === undefined && priority === undefined) {
     return undefined;
   }
   return {
+    ...(belowTargetConsent ? { belowTargetConsent } : {}),
     ...(degradedFloor !== undefined ? { degradedFloor } : {}),
     ...(minBand !== undefined ? { minBand } : {}),
     ...(priority !== undefined ? { priority } : {}),
@@ -4070,13 +4077,14 @@ export class TranslationEngine {
     degradedFloor?: DifficultyBand,
     minBand?: DifficultyBand,
     priority?: FreewayPriority,
+    belowTargetConsent?: boolean,
   ): Promise<ReturnType<typeof revalidateGroup>> {
     const buckets = await loadBucketViews(now, deps);
     return revalidateGroup(
       { decisions, bucketKey, batchSize: decisions.length },
       buckets,
       now,
-      freewayBandOpts(degradedFloor, minBand, priority),
+      freewayBandOpts(degradedFloor, minBand, priority, belowTargetConsent),
     );
   }
 
@@ -4414,7 +4422,7 @@ export class TranslationEngine {
       const byKey = new Map(results.map((result) => [resultKey(result), result]));
       return originalJobs.map((job) => retained.get(resultKey(job)) ?? byKey.get(resultKey(job))!);
     };
-    const bandOpts = freewayBandOpts(degradedFloor, minBand, priority);
+    const bandOpts = freewayBandOpts(degradedFloor, minBand, priority, args.allowBelowTarget);
     const allowLowerTier = (
       result: ReturnType<typeof revalidateGroup>,
       buckets: BucketView[],
@@ -5408,6 +5416,7 @@ export class TranslationEngine {
           freewayDegraded?.toTier as DifficultyBand | undefined,
           freewayMinBand(status.request),
           freewayPriority,
+          !!(global.settings?.freewayAlwaysContinueBelowTarget || status.belowTargetAccepted),
         );
         // A packed mixed-target batch is valid only on the bucket it was
         // planned for. `revalidateGroup` derives one band and one language
@@ -5531,6 +5540,7 @@ export class TranslationEngine {
           }
         }
         if (revalidated.kind === 'reroute') {
+          if (revalidated.degraded) freewayDegraded = revalidated.degraded;
           this.logger.info('translation:freeway-rerouted', {
             runId,
             from: bucketKey,

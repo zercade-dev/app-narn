@@ -10,7 +10,7 @@ import type { RoutingDecision } from '@zercade-dev/narn-shared';
 import type { FreewayPriority } from '@zercade-dev/narn-shared';
 import { getLengthLimit } from '@zercade-dev/narn-shared';
 import { difficultyBand, groupJobs } from './difficulty.js';
-import { chooseBelowTargetBucket, planRun } from './planner.js';
+import { chooseBelowTargetBucket, isTooSlow, planRun, tooSlowAlternative } from './planner.js';
 import { bucketResumeAt, deferralReason, isEligible, selectBucket } from './selector.js';
 import type { FreewayCooldownReason } from '../../storage/types.js';
 import type { Assignment, BucketView, DifficultyBand, FreewayJob, JobGroup } from './types.js';
@@ -68,6 +68,8 @@ export type RevalidateResult =
        * above is the companion key value).
        */
       qualityTier: number;
+      /** Set when the reroute went below the group's floor under the run's permission. */
+      degraded?: Assignment['degraded'];
     }
   | { kind: 'defer'; resumeAt: number; reason?: FreewayCooldownReason }
   | { kind: 'blocked' };
@@ -244,6 +246,13 @@ export function revalidateGroup(
     minBand?: DifficultyBand;
     allowBelowTarget?: boolean;
     priority?: FreewayPriority;
+    /**
+     * The run may use a lower tier (confirmed or "Always continue"). With a
+     * priority set, it lets a Too slow selection give way to a faster
+     * below-target bucket, reported as degraded. Unlike `allowBelowTarget`
+     * it does not relax what counts as eligible.
+     */
+    belowTargetConsent?: boolean;
   },
 ): RevalidateResult {
   const jobs = group.decisions.map(toFreewayJob);
@@ -271,11 +280,44 @@ export function revalidateGroup(
       ? { ...jobGroup, band: current.qualityTier }
       : jobGroup;
   if (current && isEligible(current, currentGroup, now)) {
-    return { kind: 'keep' };
+    // A planned Too slow bucket is not kept once a faster one can serve now.
+    if (opts?.priority === undefined || !isTooSlow(current)) return { kind: 'keep' };
+    const faster = selectBucket(jobGroup, candidates, now, { priority: opts.priority });
+    if (!faster || isTooSlow(faster.bucket)) return { kind: 'keep' };
   }
 
+  const atTarget = selectBucket(jobGroup, candidates, now, { priority: opts?.priority });
+  if (atTarget && opts?.priority !== undefined && isTooSlow(atTarget.bucket)) {
+    const alternative = tooSlowAlternative(jobGroup, candidates, now, {
+      priority: opts.priority,
+      allowBelowTarget: opts.belowTargetConsent === true,
+    });
+    if (alternative?.kind === 'defer') {
+      return {
+        kind: 'defer',
+        resumeAt: alternative.resumeAt,
+        ...(alternative.reason ? { reason: alternative.reason } : {}),
+      };
+    }
+    if (alternative?.kind === 'degrade') {
+      const { bucket, batchSize } = alternative.selection;
+      return {
+        kind: 'reroute',
+        bucketKey: bucket.bucketKey,
+        modelId: bucket.modelId,
+        moduleId: bucket.dispatchModuleId ?? bucket.moduleId,
+        batchSize,
+        qualityTier: bucket.qualityTier,
+        degraded: {
+          fromTier: jobGroup.band,
+          toTier: bucket.qualityTier,
+          waitedAlternativeMs: null,
+        },
+      };
+    }
+  }
   const selection =
-    selectBucket(jobGroup, candidates, now, { priority: opts?.priority }) ??
+    atTarget ??
     (opts?.allowBelowTarget
       ? chooseBelowTargetBucket({ ...jobGroup, band: naturalBand }, candidates, now, opts.priority)
       : undefined);

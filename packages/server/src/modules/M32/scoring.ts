@@ -152,6 +152,14 @@ export function translationScore(
   return scores.length ? scores.reduce((sum, score) => sum + score, 0) / scores.length : undefined;
 }
 
+/**
+ * Without a seed, live speed evidence must cover at least this many decayed
+ * strings to count. Below it the model reads as unmeasured, so a single slow
+ * call fades back to Medium instead of keeping its ratio forever (decay scales
+ * time and strings together, so the ratio alone never changes).
+ */
+export const MIN_UNSEEDED_SPEED_STRINGS = 10;
+
 export function effectiveSpeedMsPerString(
   bucket: Pick<BucketView, 'speedMsPerString' | 'stats'>,
 ): number | undefined {
@@ -162,7 +170,11 @@ export function effectiveSpeedMsPerString(
       : undefined;
   const record = bucket.stats.speedStats;
   if (!isSpeedRecord(record) || record.strings === 0) return seed;
-  if (seed === undefined) return record.totalMs / record.strings;
+  if (seed === undefined) {
+    return record.strings >= MIN_UNSEEDED_SPEED_STRINGS
+      ? record.totalMs / record.strings
+      : undefined;
+  }
   return seed * (20 / (20 + record.strings)) + record.totalMs / (20 + record.strings);
 }
 

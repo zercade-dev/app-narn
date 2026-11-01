@@ -16,7 +16,16 @@ import {
   selectBucket,
   type Selection,
 } from './selector.js';
-import { effectiveSpeedMsPerString, projectedRequestTokens, speedBand } from './scoring.js';
+import {
+  effectiveRemainingRequests,
+  effectiveSpeedMsPerString,
+  langQualityClass,
+  passRateClass,
+  projectedRequestTokens,
+  requestCost,
+  speedBand,
+} from './scoring.js';
+import type { FreewayCooldownReason } from '../../storage/types.js';
 import { getPlanHorizonMinutes } from '../../config/env.js';
 
 export interface PlanOptions {
@@ -75,7 +84,7 @@ function everServable(bucket: BucketView, group: JobGroup): boolean {
   return true;
 }
 
-function isTooSlow(bucket: BucketView): boolean {
+export function isTooSlow(bucket: BucketView): boolean {
   return speedBand(effectiveSpeedMsPerString(bucket)) === 'too-slow';
 }
 
@@ -122,14 +131,75 @@ export function chooseBelowTargetBucket(
   if (pool.length === 0) return undefined;
   const topTier = Math.max(...pool.map((bucket) => bucket.qualityTier));
   const lowest = priority === 'speed' ? topTier - 1 : topTier;
-  return selectBucket(
+  const window = pool.filter((bucket) => bucket.qualityTier >= lowest);
+  const selection = selectBucket(
     group,
-    pool.filter((bucket) => bucket.qualityTier >= lowest),
+    window,
     now,
     // Below target, Balanced takes the faster band within the chosen tier, so it
     // ranks like Speed over a window of one tier.
     { tierFloor: 1, priority: priority === 'quality' ? 'quality' : 'speed' },
   );
+  if (!selection || priority !== 'speed') return selection;
+
+  // The window trades a tier for a faster band. Once the band is settled, a
+  // lower tier that is no faster and no better judged is a pure loss, so take
+  // the highest tier that matches the winner's band and quality classes.
+  const winner = selection.bucket;
+  const winnerBand = speedBand(effectiveSpeedMsPerString(winner));
+  const classesOf = (bucket: BucketView): string => {
+    const cost = requestCost(bucket, group);
+    return [
+      bucket.remainingChars !== undefined ? 1 : 0,
+      passRateClass(cost.passRate),
+      langQualityClass(bucket, group.targetLanguage),
+    ].join('/');
+  };
+  const winnerClasses = classesOf(winner);
+  const peers = rankCandidates(window, group, now, { tierFloor: 1, priority: 'speed' }).filter(
+    (bucket) =>
+      speedBand(effectiveSpeedMsPerString(bucket)) === winnerBand &&
+      classesOf(bucket) === winnerClasses &&
+      effectiveRemainingRequests(bucket) >= requestCost(bucket, group).estimatedRequests,
+  );
+  const best = peers.reduce(
+    (top, bucket) => (bucket.qualityTier > top.qualityTier ? bucket : top),
+    winner,
+  );
+  if (best.bucketKey === winner.bucketKey) return selection;
+  return selectBucket(group, [best], now, { tierFloor: 1, priority: 'speed' });
+}
+
+export type TooSlowAlternative =
+  | { kind: 'defer'; resumeAt: number; reason?: FreewayCooldownReason }
+  | { kind: 'degrade'; selection: Selection };
+
+/**
+ * The shared last-resort rule for a group whose selection is a Too slow model
+ * (only meaningful once a priority is set). A faster at-target bucket back
+ * within the short wait beats it; otherwise, with permission to go below
+ * target, a faster lower-tier bucket does. Undefined means use the Too slow
+ * selection. Used at plan time and when re-validating at dispatch.
+ */
+export function tooSlowAlternative(
+  group: JobGroup,
+  buckets: BucketView[],
+  now: number,
+  opts: { priority: FreewayPriority; allowBelowTarget: boolean },
+): TooSlowAlternative | undefined {
+  const faster = buckets.filter((b) => everServable(b, group) && !isTooSlow(b));
+  if (faster.length > 0) {
+    const soonest = Math.min(...faster.map((b) => bucketResumeAt(b, group)));
+    if (soonest - now <= FREEWAY_DEGRADE_WAIT_MS) {
+      const reason = deferralReason(faster, group, soonest);
+      return { kind: 'defer', resumeAt: soonest, ...(reason ? { reason } : {}) };
+    }
+  }
+  if (opts.allowBelowTarget) {
+    const below = chooseBelowTargetBucket(group, buckets, now, opts.priority);
+    if (below && !isTooSlow(below.bucket)) return { kind: 'degrade', selection: below };
+  }
+  return undefined;
 }
 
 /**
@@ -248,27 +318,25 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
       priority: opts.priority,
     });
     if (selection && opts.priority !== undefined && isTooSlow(selection.bucket)) {
-      // Too slow is the last resort: a faster at-target bucket returning
-      // within the short wait beats it.
-      const faster = working.filter((b) => everServable(b, group) && !isTooSlow(b));
-      if (faster.length > 0) {
-        const soonest = Math.min(...faster.map((b) => bucketResumeAt(b, group)));
-        if (soonest - opts.now <= FREEWAY_DEGRADE_WAIT_MS) {
-          const reason = deferralReason(faster, group, soonest);
-          plan.deferred.push({ group, resumeAt: soonest, ...(reason ? { reason } : {}) });
-          continue;
-        }
+      const alternative = tooSlowAlternative(group, working, opts.now, {
+        priority: opts.priority,
+        allowBelowTarget: opts.belowTarget === 'allow',
+      });
+      if (alternative?.kind === 'defer') {
+        plan.deferred.push({
+          group,
+          resumeAt: alternative.resumeAt,
+          ...(alternative.reason ? { reason: alternative.reason } : {}),
+        });
+        continue;
       }
-      if (opts.belowTarget === 'allow') {
-        const below = chooseBelowTargetBucket(group, working, opts.now, opts.priority);
-        if (below && !isTooSlow(below.bucket)) {
-          spendAssignment(plan, working, group, below, {
-            fromTier: group.band,
-            toTier: below.bucket.qualityTier,
-            waitedAlternativeMs: null,
-          });
-          continue;
-        }
+      if (alternative?.kind === 'degrade') {
+        spendAssignment(plan, working, group, alternative.selection, {
+          fromTier: group.band,
+          toTier: alternative.selection.bucket.qualityTier,
+          waitedAlternativeMs: null,
+        });
+        continue;
       }
     }
     if (selection) {
