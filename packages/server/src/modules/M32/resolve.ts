@@ -7,6 +7,7 @@
  * deterministic and unit-testable without a fake timer.
  */
 import type { RoutingDecision } from '@zercade-dev/narn-shared';
+import type { FreewayPriority } from '@zercade-dev/narn-shared';
 import { getLengthLimit } from '@zercade-dev/narn-shared';
 import { difficultyBand, groupJobs } from './difficulty.js';
 import { chooseBelowTargetBucket, planRun } from './planner.js';
@@ -47,6 +48,7 @@ export interface FreewayResolution {
     bestTier: number;
     bestModelId: string;
     neededTier: number;
+    bestIsTooSlow?: true;
   }>;
   /** Pairs no bucket can ever serve (surface as controlled failures). */
   blocked: Array<{ entryId: string; targetLanguage: string }>;
@@ -115,7 +117,7 @@ export function resolveFreewayDecisions(
   decisions: RoutingDecision[],
   buckets: BucketView[],
   now: number,
-  opts?: { minBand?: DifficultyBand; belowTarget?: 'ask' | 'allow' },
+  opts?: { minBand?: DifficultyBand; belowTarget?: 'ask' | 'allow'; priority?: FreewayPriority },
 ): FreewayResolution {
   const jobs = decisions.map(toFreewayJob);
   const groups = groupJobs(jobs).map((group) =>
@@ -128,6 +130,7 @@ export function resolveFreewayDecisions(
     now,
     priorityClass: 'translate',
     belowTarget: opts?.belowTarget,
+    priority: opts?.priority,
   });
 
   const decisionByPair = new Map<string, RoutingDecision>();
@@ -194,13 +197,16 @@ export function resolveFreewayDecisions(
             resumeAt,
             ...(deferredReason ? { reason: deferredReason } : {}),
           },
-    needsConfirmation: plan.needsConfirmation.map(({ group, bestTier, bestModelId, resumeAt }) => ({
-      pairs: group.jobs.map(({ entryId, targetLanguage }) => ({ entryId, targetLanguage })),
-      resumeAt,
-      bestTier,
-      bestModelId,
-      neededTier: group.band,
-    })),
+    needsConfirmation: plan.needsConfirmation.map(
+      ({ group, bestTier, bestModelId, resumeAt, bestIsTooSlow }) => ({
+        pairs: group.jobs.map(({ entryId, targetLanguage }) => ({ entryId, targetLanguage })),
+        resumeAt,
+        bestTier,
+        bestModelId,
+        neededTier: group.band,
+        ...(bestIsTooSlow ? { bestIsTooSlow } : {}),
+      }),
+    ),
     blocked,
   };
 }
@@ -233,7 +239,12 @@ export function revalidateGroup(
   group: { decisions: RoutingDecision[]; bucketKey: string; batchSize: number },
   buckets: BucketView[],
   now: number,
-  opts?: { degradedFloor?: DifficultyBand; minBand?: DifficultyBand; allowBelowTarget?: boolean },
+  opts?: {
+    degradedFloor?: DifficultyBand;
+    minBand?: DifficultyBand;
+    allowBelowTarget?: boolean;
+    priority?: FreewayPriority;
+  },
 ): RevalidateResult {
   const jobs = group.decisions.map(toFreewayJob);
   // Groups are homogeneous by construction: every decision in it shares the
@@ -264,9 +275,9 @@ export function revalidateGroup(
   }
 
   const selection =
-    selectBucket(jobGroup, candidates, now) ??
+    selectBucket(jobGroup, candidates, now, { priority: opts?.priority }) ??
     (opts?.allowBelowTarget
-      ? chooseBelowTargetBucket({ ...jobGroup, band: naturalBand }, candidates, now)
+      ? chooseBelowTargetBucket({ ...jobGroup, band: naturalBand }, candidates, now, opts.priority)
       : undefined);
   if (selection) {
     return {

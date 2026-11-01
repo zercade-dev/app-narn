@@ -7,9 +7,16 @@
  * surprise (429, cooldown, drained bucket) is the same pure call on the
  * remaining groups with fresh BucketViews.
  */
+import type { FreewayPriority } from '@zercade-dev/narn-shared';
 import type { Assignment, BucketView, DifficultyBand, JobGroup, RunPlan } from './types.js';
-import { bucketResumeAt, deferralReason, selectBucket, type Selection } from './selector.js';
-import { projectedRequestTokens } from './scoring.js';
+import {
+  bucketResumeAt,
+  deferralReason,
+  rankCandidates,
+  selectBucket,
+  type Selection,
+} from './selector.js';
+import { effectiveSpeedMsPerString, projectedRequestTokens, speedBand } from './scoring.js';
 import { getPlanHorizonMinutes } from '../../config/env.js';
 
 export interface PlanOptions {
@@ -17,6 +24,8 @@ export interface PlanOptions {
   reserveRequests?: number;
   priorityClass?: 'translate' | 'background';
   belowTarget?: 'ask' | 'allow';
+  /** Translation speed/quality priority; omitted keeps the background and Addendum G ordering. */
+  priority?: FreewayPriority;
 }
 
 export function defaultReserve(totalJobs: number): number {
@@ -66,8 +75,12 @@ function everServable(bucket: BucketView, group: JobGroup): boolean {
   return true;
 }
 
+function isTooSlow(bucket: BucketView): boolean {
+  return speedBand(effectiveSpeedMsPerString(bucket)) === 'too-slow';
+}
+
 /** Highest available tier below the target, with normal ranking within that tier. */
-export function chooseBelowTargetBucket(
+function legacyBelowTargetBucket(
   group: JobGroup,
   buckets: BucketView[],
   now: number,
@@ -83,6 +96,40 @@ export function chooseBelowTargetBucket(
     if (selection) return selection;
   }
   return undefined;
+}
+
+/**
+ * The lower-tier bucket to use below target. Too slow candidates only count
+ * when nothing else can serve. Quality and Balanced take the highest tier;
+ * Speed also considers one tier below it. The priority's own ranking then
+ * picks among those. Without a priority the legacy ordering applies.
+ */
+export function chooseBelowTargetBucket(
+  group: JobGroup,
+  buckets: BucketView[],
+  now: number,
+  priority?: FreewayPriority,
+): Selection | undefined {
+  if (priority === undefined) return legacyBelowTargetBucket(group, buckets, now);
+  const eligible = rankCandidates(
+    buckets.filter((bucket) => bucket.qualityTier < group.band),
+    group,
+    now,
+    { tierFloor: 1 },
+  );
+  const notTooSlow = eligible.filter((bucket) => !isTooSlow(bucket));
+  const pool = notTooSlow.length > 0 ? notTooSlow : eligible;
+  if (pool.length === 0) return undefined;
+  const topTier = Math.max(...pool.map((bucket) => bucket.qualityTier));
+  const lowest = priority === 'speed' ? topTier - 1 : topTier;
+  return selectBucket(
+    group,
+    pool.filter((bucket) => bucket.qualityTier >= lowest),
+    now,
+    // Below target, Balanced takes the faster band within the chosen tier, so it
+    // ranks like Speed over a window of one tier.
+    { tierFloor: 1, priority: priority === 'quality' ? 'quality' : 'speed' },
+  );
 }
 
 /**
@@ -198,7 +245,32 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
   for (const group of ordered) {
     const selection = selectBucket(group, working, opts.now, {
       reserveRequests: background ? 0 : reserve,
+      priority: opts.priority,
     });
+    if (selection && opts.priority !== undefined && isTooSlow(selection.bucket)) {
+      // Too slow is the last resort: a faster at-target bucket returning
+      // within the short wait beats it.
+      const faster = working.filter((b) => everServable(b, group) && !isTooSlow(b));
+      if (faster.length > 0) {
+        const soonest = Math.min(...faster.map((b) => bucketResumeAt(b, group)));
+        if (soonest - opts.now <= FREEWAY_DEGRADE_WAIT_MS) {
+          const reason = deferralReason(faster, group, soonest);
+          plan.deferred.push({ group, resumeAt: soonest, ...(reason ? { reason } : {}) });
+          continue;
+        }
+      }
+      if (opts.belowTarget === 'allow') {
+        const below = chooseBelowTargetBucket(group, working, opts.now, opts.priority);
+        if (below && !isTooSlow(below.bucket)) {
+          spendAssignment(plan, working, group, below, {
+            fromTier: group.band,
+            toTier: below.bucket.qualityTier,
+            waitedAlternativeMs: null,
+          });
+          continue;
+        }
+      }
+    }
     if (selection) {
       spendAssignment(plan, working, group, selection);
       continue;
@@ -217,7 +289,7 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
         continue;
       }
 
-      const below = chooseBelowTargetBucket(group, working, opts.now);
+      const below = chooseBelowTargetBucket(group, working, opts.now, opts.priority);
       if (below) {
         if (opts.belowTarget === 'ask') {
           plan.needsConfirmation.push({
@@ -225,6 +297,9 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
             bestTier: below.bucket.qualityTier,
             bestModelId: below.bucket.modelId,
             resumeAt,
+            ...(opts.priority !== undefined && isTooSlow(below.bucket)
+              ? { bestIsTooSlow: true as const }
+              : {}),
           });
         } else {
           spendAssignment(plan, working, group, below, {

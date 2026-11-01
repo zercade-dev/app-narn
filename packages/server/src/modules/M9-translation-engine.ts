@@ -52,6 +52,7 @@ import {
   isExcludedFromAi,
   isParseFailureMessage,
   type ProviderFailureRouting,
+  type FreewayPriority,
 } from '@zercade-dev/narn-shared';
 import { router as defaultRouter, type Router } from './M7-router.js';
 import {
@@ -415,12 +416,43 @@ function freewayMinBand(request: RunRequest | undefined): DifficultyBand | undef
 function freewayBandOpts(
   degradedFloor: DifficultyBand | undefined,
   minBand: DifficultyBand | undefined,
-): { degradedFloor?: DifficultyBand; minBand?: DifficultyBand } | undefined {
-  if (degradedFloor === undefined && minBand === undefined) return undefined;
+  priority?: FreewayPriority,
+):
+  | { degradedFloor?: DifficultyBand; minBand?: DifficultyBand; priority?: FreewayPriority }
+  | undefined {
+  if (degradedFloor === undefined && minBand === undefined && priority === undefined) {
+    return undefined;
+  }
   return {
     ...(degradedFloor !== undefined ? { degradedFloor } : {}),
     ...(minBand !== undefined ? { minBand } : {}),
+    ...(priority !== undefined ? { priority } : {}),
   };
+}
+
+/** Distinct Too slow model ids among parked below-target pairs, in first-seen order. */
+function slowModelIdsOf(
+  pairs: Array<{ belowTargetNeededTier?: number; belowTargetSlowModelId?: string }>,
+): string[] {
+  const ids: string[] = [];
+  for (const pair of pairs) {
+    if (pair.belowTargetNeededTier === undefined) continue;
+    const id = pair.belowTargetSlowModelId;
+    if (id !== undefined && !ids.includes(id)) ids.push(id);
+  }
+  return ids;
+}
+
+function omitSlowModelIds<T extends { slowModelIds?: string[] }>(
+  summary: T,
+): Omit<T, 'slowModelIds'> {
+  const { slowModelIds: _slowModelIds, ...rest } = summary;
+  return rest;
+}
+
+/** The Freeway speed/quality priority a plan captures; Balanced for workspaces that never chose. */
+function freewayPriorityOf(global: GlobalConfig): FreewayPriority {
+  return global.settings?.freewayPriority ?? 'balanced';
 }
 
 /** `HH:MM` in the server's local time, for the "resumes ~HH:MM" detail line. */
@@ -635,6 +667,8 @@ interface FreewayDispatchArgs {
    * under the tier the run asked for.
    */
   minBand?: DifficultyBand;
+  /** The speed/quality priority captured when this batch was planned. */
+  priority?: FreewayPriority;
   /** Consent to continue below the target if the at-floor wait is long. */
   allowBelowTarget?: boolean;
   /**
@@ -2190,6 +2224,8 @@ export class TranslationEngine {
     const freewayDegraded = new Map<RoutingDecision[], Assignment['degraded']>();
     /** Freeway-managed batches, mapped to their rate-governor admission descriptor. */
     const freewayAdmissions = new Map<RoutingDecision[], Admission>();
+    /** Freeway-managed batches, mapped to the speed/quality priority captured at plan time. */
+    const freewayPriorities = new Map<RoutingDecision[], FreewayPriority>();
 
     const groups = groupDecisions(directDecisions, isBatch, resolveBatchMode, {
       dimension: batchGroupingDimension,
@@ -2251,6 +2287,7 @@ export class TranslationEngine {
           bucketKeys: freewayBucketKeys,
           degraded: freewayDegraded,
           admissions: freewayAdmissions,
+          priorities: freewayPriorities,
         })),
       );
       if (groups.length === 0) {
@@ -2289,6 +2326,8 @@ export class TranslationEngine {
           freewayBucketKeys.get(group),
           freewayDegraded.get(group),
           freewayAdmissions.get(group),
+          undefined,
+          freewayPriorities.get(group),
         );
 
     // Split-by-model: when the user asked for it AND the run touches ≥2 distinct
@@ -2809,6 +2848,10 @@ export class TranslationEngine {
       // The sweep may resume feedback pairs before unrelated quota waits are
       // due. Keep those waits parked while the selected pairs run.
       const { belowTarget: _belowTarget, reason: _reason, pairCount: _pairCount, ...rest } = park;
+      // Pairs still waiting on consent keep the below-target park, with the
+      // summary re-derived from what is left (slow models included).
+      const pendingConsent = remaining.filter((pair) => pair.belowTargetNeededTier !== undefined);
+      const slowModelIds = slowModelIdsOf(pendingConsent);
       status.waitingForQuota = {
         ...rest,
         pairs: remaining,
@@ -2816,9 +2859,21 @@ export class TranslationEngine {
           (earliest, pair) => Math.min(earliest, pair.quotaResumeAt ?? park.resumeAt),
           Infinity,
         ),
-        reason: remaining.some((pair) => pair.quotaReason === 'provider-error')
-          ? 'provider-error'
-          : 'quota',
+        ...(park.belowTarget && pendingConsent.length > 0
+          ? {
+              reason: 'below-target' as const,
+              belowTarget: {
+                ...omitSlowModelIds(park.belowTarget),
+                strings: new Set(pendingConsent.map((pair) => pair.entryId)).size,
+                languages: [...new Set(pendingConsent.map((pair) => pair.targetLanguage))],
+                ...(slowModelIds.length > 0 ? { slowModelIds } : {}),
+              },
+            }
+          : {
+              reason: remaining.some((pair) => pair.quotaReason === 'provider-error')
+                ? ('provider-error' as const)
+                : ('quota' as const),
+            }),
       };
     } else {
       delete status.waitingForQuota;
@@ -3643,6 +3698,8 @@ export class TranslationEngine {
     degraded: Map<RoutingDecision[], Assignment['degraded']>;
     /** Populated per batch with its rate-governor admission descriptor. */
     admissions: Map<RoutingDecision[], Admission>;
+    /** Populated per batch with the priority this plan captured. */
+    priorities: Map<RoutingDecision[], FreewayPriority>;
   }): Promise<RoutingDecision[][]> {
     const {
       runId,
@@ -3653,7 +3710,9 @@ export class TranslationEngine {
       bucketKeys,
       degraded,
       admissions,
+      priorities,
     } = args;
+    const priority = freewayPriorityOf(args.global);
     const now = Date.now();
     const deps = this.freewayBucketDeps(args.global, args.projectEntries, args.sessionId);
     // Read once, ahead of both the probe and `loadBucketViews` below: the
@@ -3689,6 +3748,7 @@ export class TranslationEngine {
     const minBand = freewayMinBand(status.request);
     const resolution = resolveFreewayDecisions(decisions, buckets, now, {
       ...(minBand !== undefined ? { minBand } : {}),
+      priority,
       belowTarget:
         args.global.settings?.freewayAlwaysContinueBelowTarget || status.belowTargetAccepted
           ? 'allow'
@@ -3780,6 +3840,7 @@ export class TranslationEngine {
       const view = buckets.find((b) => b.bucketKey === group.bucketKey);
       for (const batch of batches) {
         bucketKeys.set(batch, group.bucketKey);
+        priorities.set(batch, priority);
         if (group.degraded) degraded.set(batch, group.degraded);
         // The projection is the batch's OWN combined size, not per-decision:
         // `avgChars` is the mean source length across the batch, so
@@ -3820,6 +3881,7 @@ export class TranslationEngine {
       confirmation.pairs.map((pair) => ({
         ...pair,
         belowTargetNeededTier: confirmation.neededTier,
+        ...(confirmation.bestIsTooSlow ? { belowTargetSlowModelId: confirmation.bestModelId } : {}),
       })),
       confirmation.resumeAt ?? NO_FLOOR_RESUME_AT,
       'below-target',
@@ -3875,7 +3937,9 @@ export class TranslationEngine {
    */
   private deferPairsForQuota(
     status: RunStatus,
-    pairs: Array<RunEntryLanguagePair & { belowTargetNeededTier?: number }>,
+    pairs: Array<
+      RunEntryLanguagePair & { belowTargetNeededTier?: number; belowTargetSlowModelId?: string }
+    >,
     resumeAt: number,
     reason?: 'quota' | 'provider-error' | 'below-target',
     belowTarget?: NonNullable<RunStatus['waitingForQuota']>['belowTarget'],
@@ -3892,11 +3956,19 @@ export class TranslationEngine {
     );
     const existing = status.waitingForQuota;
     if (!existing) {
+      const slowModelIds = belowTarget ? slowModelIdsOf(pendingPairs) : [];
       status.waitingForQuota = {
         resumeAt,
         pairs: pendingPairs,
         ...(reason ? { reason } : {}),
-        ...(belowTarget ? { belowTarget } : {}),
+        ...(belowTarget
+          ? {
+              belowTarget: {
+                ...belowTarget,
+                ...(slowModelIds.length > 0 ? { slowModelIds } : {}),
+              },
+            }
+          : {}),
       };
       return;
     }
@@ -3905,6 +3977,9 @@ export class TranslationEngine {
       const key = `${pair.entryId}\0${pair.targetLanguage}`;
       const previous = seen.get(key);
       if (previous) {
+        if (pair.belowTargetSlowModelId !== undefined) {
+          previous.belowTargetSlowModelId = pair.belowTargetSlowModelId;
+        }
         if (pair.belowTargetNeededTier !== undefined) {
           previous.belowTargetNeededTier = Math.max(
             previous.belowTargetNeededTier ?? 0,
@@ -3939,7 +4014,9 @@ export class TranslationEngine {
         (belowTarget.neededTier === previous.neededTier && belowTarget.bestTier < previous.bestTier)
           ? belowTarget
           : previous;
+      const slowModelIds = slowModelIdsOf(pending);
       existing.belowTarget = {
+        ...(slowModelIds.length > 0 ? { slowModelIds } : {}),
         strings: new Set(pending.map((pair) => pair.entryId)).size,
         languages: [...new Set(pending.map((pair) => pair.targetLanguage))],
         bestTier: representative.bestTier,
@@ -3992,13 +4069,14 @@ export class TranslationEngine {
     now: number,
     degradedFloor?: DifficultyBand,
     minBand?: DifficultyBand,
+    priority?: FreewayPriority,
   ): Promise<ReturnType<typeof revalidateGroup>> {
     const buckets = await loadBucketViews(now, deps);
     return revalidateGroup(
       { decisions, bucketKey, batchSize: decisions.length },
       buckets,
       now,
-      freewayBandOpts(degradedFloor, minBand),
+      freewayBandOpts(degradedFloor, minBand, priority),
     );
   }
 
@@ -4317,6 +4395,7 @@ export class TranslationEngine {
       onSplit,
       degradedFloor,
       minBand,
+      priority,
       onRechunk,
       onUnpack,
       unpackReason,
@@ -4335,7 +4414,7 @@ export class TranslationEngine {
       const byKey = new Map(results.map((result) => [resultKey(result), result]));
       return originalJobs.map((job) => retained.get(resultKey(job)) ?? byKey.get(resultKey(job))!);
     };
-    const bandOpts = freewayBandOpts(degradedFloor, minBand);
+    const bandOpts = freewayBandOpts(degradedFloor, minBand, priority);
     const allowLowerTier = (
       result: ReturnType<typeof revalidateGroup>,
       buckets: BucketView[],
@@ -4347,6 +4426,7 @@ export class TranslationEngine {
       const resolution = resolveFreewayDecisions(decisions, buckets, now, {
         ...(minBand !== undefined ? { minBand } : {}),
         belowTarget: 'allow',
+        ...(priority !== undefined ? { priority } : {}),
       });
       const assignment = resolution.assignedGroups[0];
       if (
@@ -5125,6 +5205,7 @@ export class TranslationEngine {
     failedBucketKey: string,
     decision: RoutingDecision,
     deps: BucketSourceDeps,
+    priority?: FreewayPriority,
   ): Promise<
     Array<{
       moduleId: string;
@@ -5146,7 +5227,9 @@ export class TranslationEngine {
     const now = Date.now();
     const buckets = await loadBucketViews(now, deps);
     const group = this.freewayJobGroup([decision]);
-    const candidates = selectEscalationCandidates(failedBucketKey, group, buckets, now);
+    const candidates = selectEscalationCandidates(failedBucketKey, group, buckets, now, {
+      ...(priority !== undefined ? { priority } : {}),
+    });
     if (candidates.length === 0) {
       // Distinguish the two ways the ladder comes back empty. Ordinary
       // exhaustion (no higher tier, a cooldown, a weak-language exclusion, or
@@ -5215,6 +5298,8 @@ export class TranslationEngine {
     admission?: Admission,
     /** Shared by every segment unpacked from the same original packed batch. */
     freewayBatchRequests: { count: number } = { count: 0 },
+    /** The speed/quality priority captured when this batch was planned. */
+    plannedPriority?: FreewayPriority,
   ): Promise<void> {
     /**
      * Undo this batch's queue admission on a pre-dispatch short-circuit — a
@@ -5301,6 +5386,7 @@ export class TranslationEngine {
       }
       const projectEntries = moduleConfigs as Record<string, ProjectModuleConfigEntry | undefined>;
       const global = await this.globalConfigStore.load();
+      const freewayPriority = plannedPriority ?? freewayPriorityOf(global);
       if (!global.settings?.freewayAlwaysContinueBelowTarget && !status.belowTargetAccepted) {
         freewayDegraded = undefined;
       }
@@ -5321,6 +5407,7 @@ export class TranslationEngine {
           Date.now(),
           freewayDegraded?.toTier as DifficultyBand | undefined,
           freewayMinBand(status.request),
+          freewayPriority,
         );
         // A packed mixed-target batch is valid only on the bucket it was
         // planned for. `revalidateGroup` derives one band and one language
@@ -5393,6 +5480,7 @@ export class TranslationEngine {
               freewayDegraded,
               segmentAdmission,
               freewayBatchRequests,
+              freewayPriority,
             );
             // The segment's own call has counted (or parked) every pair in it;
             // record that here so this call's catch-all cannot fail them twice.
@@ -5406,6 +5494,7 @@ export class TranslationEngine {
           const minBand = freewayMinBand(status.request);
           const resolution = resolveFreewayDecisions(decisions, views, now, {
             ...(minBand !== undefined ? { minBand } : {}),
+            priority: freewayPriority,
             belowTarget:
               global.settings?.freewayAlwaysContinueBelowTarget || status.belowTargetAccepted
                 ? 'allow'
@@ -6341,6 +6430,7 @@ export class TranslationEngine {
             },
             degradedFloor: freewayDegraded?.toTier as DifficultyBand | undefined,
             minBand: freewayMinBand(status.request),
+            priority: freewayPriority,
             allowBelowTarget: !!(
               global.settings?.freewayAlwaysContinueBelowTarget || status.belowTargetAccepted
             ),
@@ -6439,6 +6529,7 @@ export class TranslationEngine {
               const minBand = freewayMinBand(status.request);
               const resolution = resolveFreewayDecisions(remainingDecisions, views, now, {
                 ...(minBand !== undefined ? { minBand } : {}),
+                priority: freewayPriority,
                 belowTarget:
                   global.settings?.freewayAlwaysContinueBelowTarget || status.belowTargetAccepted
                     ? 'allow'
@@ -6630,6 +6721,7 @@ export class TranslationEngine {
             bucketKey,
             item.entry.decision,
             freewayDeps,
+            freewayPriority,
           );
           let escalation: (typeof escalationCandidates)[number] | undefined;
           let escalatedModule: TranslationModule | undefined;
