@@ -18,7 +18,11 @@
  */
 import { AsyncLocalStorage } from 'node:async_hooks';
 
-const storage = new AsyncLocalStorage<{ calls: number }>();
+const storage = new AsyncLocalStorage<{
+  calls: number;
+  maxCalls?: number;
+  onLimit?: () => void;
+}>();
 
 /**
  * Runs `fn` with a fresh tally and reports how many provider calls it made.
@@ -33,8 +37,10 @@ export async function runCountingProviderCalls<T>(
    * that — the normal return value cannot carry a count out of a rejection.
    */
   onSettled?: (calls: number) => void,
+  /** Stop counted requests before they exceed this dispatch's remaining allowance. */
+  options?: { maxCalls: number; onLimit?: () => void },
 ): Promise<{ result: T; calls: number }> {
-  const ctx = { calls: 0 };
+  const ctx = { calls: 0, ...options };
   try {
     const result = await storage.run(ctx, fn);
     return { result, calls: ctx.calls };
@@ -49,5 +55,10 @@ export async function runCountingProviderCalls<T>(
 /** Records one outbound provider request against the enclosing scope, if any. */
 export function countProviderCall(): void {
   const ctx = storage.getStore();
-  if (ctx) ctx.calls += 1;
+  if (!ctx) return;
+  if (ctx.maxCalls !== undefined && ctx.calls >= ctx.maxCalls) {
+    ctx.onLimit?.();
+    throw new Error('provider request limit reached');
+  }
+  ctx.calls += 1;
 }
