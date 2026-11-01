@@ -358,6 +358,7 @@
     "belowTargetMarked": "Bu dizeler, bulup inceleyebilmeniz için işaretlenecek.",
     "belowTargetRestOfRun": "Bu seçim bu işlemin geri kalanında geçerlidir.",
     "belowTargetKeepWaiting": "Beklemeye devam et",
+    "belowTargetSlowModels": "Yavaş modeller: {{models}}.",
     "belowTargetConfirm": "Yine de devam et",
     "waitingResumesAt": "{{time}} sürdürülecek",
     "waitingPairsCount_one": "{{count}} çift bekliyor",

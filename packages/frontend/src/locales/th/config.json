@@ -240,6 +240,17 @@
     "alwaysContinue": "ดำเนินการต่อด้วยโมเดลคุณภาพต่ำกว่าเสมอ",
     "alwaysContinueHelp": "ปิด: หยุดงานชั่วคราวและถามคุณ เปิด: ทำงานจนเสร็จโดยไม่ถามและยังทำเครื่องหมายสตริงเหล่านั้นไว้",
     "alwaysContinueSaveFailed": "บันทึกการตั้งค่าไม่ได้: {{message}}",
+    "priority": {
+      "label": "จัดลำดับความสำคัญ",
+      "quality": "คุณภาพ",
+      "balanced": "สมดุล",
+      "speed": "ความเร็ว"
+    },
+    "priorityHelp": {
+      "quality": "เน้นคุณภาพการแปล และใช้ความเร็วตัดสินเมื่อคะแนนเท่ากัน",
+      "balanced": "หลีกเลี่ยงโมเดลที่ช้าเมื่อมีโมเดลที่เร็วกว่าและดีพอ",
+      "speed": "เน้นโมเดลที่เร็วกว่า พร้อมรักษาคุณภาพการแปล"
+    },
     "instancesLoadFailed": "โหลดอินสแตนซ์โมดูลของ Freeway ไม่สำเร็จ: {{message}}",
     "statusTitle": "สถานะ",
     "empty": "ยังไม่มีผู้ให้บริการระดับฟรีที่ตั้งค่าไว้",
@@ -247,6 +258,11 @@
     "colState": "สภาพ",
     "colRemaining": "คงเหลือ",
     "colNextReset": "รีเซ็ตถัดไป",
+    "colTranslation": "การแปล",
+    "colSpeed": "ความเร็ว",
+    "colOverall": "โดยรวม",
+    "notMeasured": "ยังไม่ได้วัด",
+    "tooSlow": "ช้าเกินไป",
     "colPassRate": "อัตราผ่าน",
     "sharedPoolLabel": "กลุ่มที่ใช้ร่วมกัน",
     "remainingRequests_other": "{{count}} คำขอ",

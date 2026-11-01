@@ -245,6 +245,17 @@
     "alwaysContinue": "Always continue with lower-quality models",
     "alwaysContinueHelp": "Off: runs pause and ask you. On: runs finish without asking, and those strings are still marked.",
     "alwaysContinueSaveFailed": "Could not save this setting: {{message}}",
+    "priority": {
+      "label": "Prioritize",
+      "quality": "Quality",
+      "balanced": "Balanced",
+      "speed": "Speed"
+    },
+    "priorityHelp": {
+      "quality": "Favor translation quality; use speed to break ties.",
+      "balanced": "Avoid slow models when a good faster model is available.",
+      "speed": "Favor faster models while protecting translation quality."
+    },
     "instancesLoadFailed": "Failed to load Freeway module instances: {{message}}",
     "statusTitle": "Status",
     "empty": "No free-tier providers configured yet.",
@@ -252,6 +263,11 @@
     "colState": "State",
     "colRemaining": "Remaining",
     "colNextReset": "Next reset",
+    "colTranslation": "Translation",
+    "colSpeed": "Speed",
+    "colOverall": "Overall",
+    "notMeasured": "Not measured",
+    "tooSlow": "Too slow",
     "colPassRate": "Pass rate",
     "sharedPoolLabel": "Shared pool",
     "remainingRequests_one": "{{count}} request",

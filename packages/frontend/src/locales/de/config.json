@@ -245,6 +245,17 @@
     "alwaysContinue": "Immer mit Modellen geringerer Qualität fortfahren",
     "alwaysContinueHelp": "Aus: Läufe pausieren und fragen nach. Ein: Läufe enden ohne Nachfrage; die Zeichenfolgen bleiben markiert.",
     "alwaysContinueSaveFailed": "Einstellung konnte nicht gespeichert werden: {{message}}",
+    "priority": {
+      "label": "Priorisieren",
+      "quality": "Qualität",
+      "balanced": "Ausgewogen",
+      "speed": "Geschwindigkeit"
+    },
+    "priorityHelp": {
+      "quality": "Übersetzungsqualität bevorzugen; bei Gleichstand entscheidet die Geschwindigkeit.",
+      "balanced": "Langsame Modelle meiden, wenn ein gutes schnelleres Modell verfügbar ist.",
+      "speed": "Schnellere Modelle bevorzugen und dabei die Übersetzungsqualität schützen."
+    },
     "instancesLoadFailed": "Freeway-Modulinstanzen konnten nicht geladen werden: {{message}}",
     "statusTitle": "Status",
     "empty": "Noch keine kostenlosen Anbieter konfiguriert.",
@@ -252,6 +263,11 @@
     "colState": "Zustand",
     "colRemaining": "Verbleibend",
     "colNextReset": "Nächster Reset",
+    "colTranslation": "Übersetzung",
+    "colSpeed": "Geschwindigkeit",
+    "colOverall": "Gesamt",
+    "notMeasured": "Nicht gemessen",
+    "tooSlow": "Zu langsam",
     "colPassRate": "Bestehensquote",
     "sharedPoolLabel": "Gemeinsamer Pool",
     "remainingRequests_one": "{{count}} Anfrage",

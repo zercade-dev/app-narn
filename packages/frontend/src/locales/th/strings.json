@@ -353,6 +353,7 @@
     "belowTargetMarked": "สตริงเหล่านี้จะถูกทำเครื่องหมายเพื่อให้คุณค้นหาและตรวจสอบได้",
     "belowTargetRestOfRun": "ตัวเลือกนี้ใช้กับการทำงานที่เหลือในครั้งนี้",
     "belowTargetKeepWaiting": "รอต่อไป",
+    "belowTargetSlowModels": "โมเดลที่ช้า: {{models}}",
     "belowTargetConfirm": "ดำเนินการต่อ",
     "waitingResumesAt": "ทำต่อ {{time}}",
     "waitingPairsCount_other": "รอดำเนินการ {{count}} คู่",

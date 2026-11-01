@@ -92,7 +92,16 @@ interface FreewayStatusBucket {
   credentialMarkModuleId?: string;
   /** The vault key writing would clear {@link credentialMarkModuleId}'s mark. */
   credentialKeyName?: string;
+  /** Rounded informational scores; each is absent when it has not been measured. */
+  translationScore?: number;
+  speedScore?: number;
+  overallScore?: number;
+  tooSlow?: true;
 }
+
+type FreewayPriority = 'quality' | 'balanced' | 'speed';
+
+const FREEWAY_PRIORITIES: readonly FreewayPriority[] = ['quality', 'balanced', 'speed'];
 
 interface FreewayStatusResponse {
   buckets: FreewayStatusBucket[];
@@ -293,6 +302,33 @@ function bucketStateLabel(
   return t('freeway.state.badCredentials');
 }
 
+/** A 0-100 score, or "Not measured" — an absent score is never shown as a number. */
+function ScoreCell({
+  kind,
+  bucket,
+  value,
+  t,
+  children,
+}: {
+  kind: 'translation' | 'speed' | 'overall';
+  bucket: FreewayStatusBucket;
+  value: number | undefined;
+  t: (key: string, options?: Record<string, unknown>) => string;
+  children?: React.ReactNode;
+}): React.JSX.Element {
+  return (
+    <TableCell>
+      <span
+        className={value === undefined ? 'text-xs text-muted-foreground' : undefined}
+        data-testid={`freeway-${kind}-score-${bucket.bucketKey}`}
+      >
+        {value === undefined ? t('freeway.notMeasured') : value}
+      </span>
+      {children}
+    </TableCell>
+  );
+}
+
 /**
  * One status-table row for a single bucket. `showRemaining` is false for a
  * pool's member rows — their shared day allowance is already shown once on
@@ -342,6 +378,15 @@ function BucketRow({
       <TableCell data-testid={`freeway-next-reset-${bucket.bucketKey}`}>
         {new Date(bucket.nextResetAt).toLocaleString()}
       </TableCell>
+      <ScoreCell kind="translation" bucket={bucket} value={bucket.translationScore} t={t} />
+      <ScoreCell kind="speed" bucket={bucket} value={bucket.speedScore} t={t}>
+        {bucket.tooSlow && (
+          <Badge variant="destructive" data-testid={`freeway-too-slow-${bucket.bucketKey}`}>
+            {t('freeway.tooSlow')}
+          </Badge>
+        )}
+      </ScoreCell>
+      <ScoreCell kind="overall" bucket={bucket} value={bucket.overallScore} t={t} />
       <TableCell data-testid={`freeway-pass-rate-${bucket.bucketKey}`}>
         {worstPassRates(bucket.gatePassByLanguage, 2)
           .map(([language, rate]) =>
@@ -437,6 +482,7 @@ export function FreewayPanel(): React.JSX.Element {
   };
 
   const [alwaysContinue, setAlwaysContinue] = useState(false);
+  const [priority, setPriority] = useState<FreewayPriority>('balanced');
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [disabledProviders, setDisabledProviders] = useState<Set<string>>(new Set());
   const [overridesState, setOverridesState] = useState<OverridesLoadState>('loading');
@@ -452,8 +498,10 @@ export function FreewayPanel(): React.JSX.Element {
       freewayInstanceOverrides?: Record<string, string>;
       freewayDisabledProviders?: string[];
       freewayAlwaysContinueBelowTarget?: boolean;
+      freewayPriority?: FreewayPriority;
     }>('/global-config/settings')
       .then((res) => {
+        setPriority(res.freewayPriority ?? 'balanced');
         setAlwaysContinue(res.freewayAlwaysContinueBelowTarget ?? false);
         setOverrides(res.freewayInstanceOverrides ?? {});
         setDisabledProviders(new Set(res.freewayDisabledProviders ?? []));
@@ -556,6 +604,27 @@ export function FreewayPanel(): React.JSX.Element {
       });
   };
 
+  // Sent alone, like the other single-field writes. The score columns depend on
+  // the priority, so a successful save refreshes the status table.
+  const handlePriorityChange = (next: FreewayPriority) => {
+    if (overridesState !== 'loaded' || next === priority) return;
+    setPriority(next);
+    writeChainRef.current = writeChainRef.current
+      .then(() =>
+        apiRequest('/global-config/settings', {
+          method: 'PUT',
+          body: JSON.stringify({ freewayPriority: next }),
+        }),
+      )
+      .then(() => {
+        void reload();
+      })
+      .catch((err) => {
+        toast.error(t('freeway.alwaysContinueSaveFailed', { message: (err as Error).message }));
+        reloadSettingsAfterWrites();
+      });
+  };
+
   return (
     <Collapsible
       open={open}
@@ -604,6 +673,35 @@ export function FreewayPanel(): React.JSX.Element {
               </label>
               <p className="pl-6 text-xs text-muted-foreground">
                 {t('freeway.alwaysContinueHelp')}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium">{t('freeway.priority.label')}</span>
+                <Select
+                  value={priority}
+                  onValueChange={(value) => handlePriorityChange(value as FreewayPriority)}
+                  disabled={overridesState !== 'loaded'}
+                >
+                  <SelectTrigger
+                    size="sm"
+                    className="w-40"
+                    data-testid="freeway-priority"
+                    aria-label={t('freeway.priority.label')}
+                  >
+                    <SelectValue>{(value: string) => t(`freeway.priority.${value}`)}</SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FREEWAY_PRIORITIES.map((value) => (
+                      <SelectItem key={value} value={value}>
+                        {t(`freeway.priority.${value}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-xs text-muted-foreground" data-testid="freeway-priority-help">
+                {t(`freeway.priorityHelp.${priority}`)}
               </p>
             </div>
             {!vaultUnlocked && (
@@ -860,6 +958,9 @@ export function FreewayPanel(): React.JSX.Element {
                           <TableHead>{t('freeway.colState')}</TableHead>
                           <TableHead>{t('freeway.colRemaining')}</TableHead>
                           <TableHead>{t('freeway.colNextReset')}</TableHead>
+                          <TableHead>{t('freeway.colTranslation')}</TableHead>
+                          <TableHead>{t('freeway.colSpeed')}</TableHead>
+                          <TableHead>{t('freeway.colOverall')}</TableHead>
                           <TableHead>{t('freeway.colPassRate')}</TableHead>
                         </TableRow>
                       </TableHeader>
@@ -903,6 +1004,9 @@ export function FreewayPanel(): React.JSX.Element {
                                 <TableCell>
                                   {new Date(first.nextResetAt).toLocaleString()}
                                 </TableCell>
+                                <TableCell />
+                                <TableCell />
+                                <TableCell />
                                 <TableCell />
                               </TableRow>
                               {row.members.map((bucket) => (

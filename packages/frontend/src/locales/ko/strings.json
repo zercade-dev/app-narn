@@ -353,6 +353,7 @@
     "belowTargetMarked": "나중에 찾아 검토할 수 있도록 이 문자열에 표시가 남아요.",
     "belowTargetRestOfRun": "이 선택은 이번 실행이 끝날 때까지 적용돼요.",
     "belowTargetKeepWaiting": "계속 기다리기",
+    "belowTargetSlowModels": "느린 모델: {{models}}.",
     "belowTargetConfirm": "그래도 계속",
     "waitingResumesAt": "{{time}} 재개 예정",
     "waitingPairsCount_other": "대기 중인 쌍 {{count}}개",

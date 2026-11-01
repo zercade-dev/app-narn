@@ -240,6 +240,17 @@
     "alwaysContinue": "始终使用质量较低的模型继续",
     "alwaysContinueHelp": "关闭：运行会暂停并询问。开启：运行会直接完成，这些字符串仍会被标记。",
     "alwaysContinueSaveFailed": "无法保存此设置：{{message}}",
+    "priority": {
+      "label": "优先考虑",
+      "quality": "质量",
+      "balanced": "均衡",
+      "speed": "速度"
+    },
+    "priorityHelp": {
+      "quality": "优先保证翻译质量；速度仅用于在同等情况下择优。",
+      "balanced": "当有质量不错且更快的模型时，避开慢速模型。",
+      "speed": "优先选用更快的模型，同时保障翻译质量。"
+    },
     "instancesLoadFailed": "加载 Freeway 模块实例失败：{{message}}",
     "statusTitle": "状态",
     "empty": "尚未配置免费服务商。",
@@ -247,6 +258,11 @@
     "colState": "状态",
     "colRemaining": "剩余",
     "colNextReset": "下次重置",
+    "colTranslation": "翻译",
+    "colSpeed": "速度",
+    "colOverall": "综合",
+    "notMeasured": "未测量",
+    "tooSlow": "过慢",
     "colPassRate": "通过率",
     "sharedPoolLabel": "共享池",
     "remainingRequests_other": "{{count}} 次请求",

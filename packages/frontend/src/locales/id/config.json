@@ -240,6 +240,17 @@
     "alwaysContinue": "Selalu lanjutkan dengan model berkualitas lebih rendah",
     "alwaysContinueHelp": "Mati: proses dijeda dan meminta keputusan. Aktif: proses selesai tanpa bertanya dan string tersebut tetap ditandai.",
     "alwaysContinueSaveFailed": "Gagal menyimpan pengaturan: {{message}}",
+    "priority": {
+      "label": "Prioritaskan",
+      "quality": "Kualitas",
+      "balanced": "Seimbang",
+      "speed": "Kecepatan"
+    },
+    "priorityHelp": {
+      "quality": "Utamakan kualitas terjemahan; gunakan kecepatan sebagai penentu saat nilainya seri.",
+      "balanced": "Hindari model lambat jika tersedia model yang lebih cepat dan bagus.",
+      "speed": "Utamakan model yang lebih cepat sambil menjaga kualitas terjemahan."
+    },
     "instancesLoadFailed": "Gagal memuat instans modul Freeway: {{message}}",
     "statusTitle": "Status",
     "empty": "Belum ada penyedia gratis yang dikonfigurasi.",
@@ -247,6 +258,11 @@
     "colState": "Status",
     "colRemaining": "Sisa",
     "colNextReset": "Reset berikutnya",
+    "colTranslation": "Terjemahan",
+    "colSpeed": "Kecepatan",
+    "colOverall": "Keseluruhan",
+    "notMeasured": "Belum diukur",
+    "tooSlow": "Terlalu lambat",
     "colPassRate": "Tingkat lulus",
     "sharedPoolLabel": "Kumpulan bersama",
     "remainingRequests_other": "{{count}} permintaan",
