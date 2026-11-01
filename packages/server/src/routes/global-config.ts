@@ -79,6 +79,7 @@ const settingsBodySchema = z.object({
   requestsPerSecond: z.number().min(0).nullable().optional(),
   batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   ignoreBatchSizeLimit: z.boolean().optional(),
+  freewayAlwaysContinueBelowTarget: z.boolean().optional(),
   requestTimeoutMs: z.number().int().min(1000).nullable().optional(),
   // 0 = unlimited (omit the per-request cap; see core.ts DEFAULT_MAX_OUTPUT_TOKENS).
   maxOutputTokens: z.number().int().min(0).max(200000).nullable().optional(),

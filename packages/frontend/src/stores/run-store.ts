@@ -246,6 +246,7 @@ interface RunStore {
    * module-unavailable, module-not-eligible) surfaces to the caller.
    */
   resumeRunWith: (projectId: string, runId: string, moduleId: string) => Promise<void>;
+  acceptBelowTarget: (projectId: string, runId: string) => Promise<void>;
   reorderQueue: (projectId: string, runIds: string[]) => Promise<void>;
   startPolling: (projectId: string) => void;
   stopPolling: () => void;
@@ -480,9 +481,12 @@ export const useRunStore = create<RunStore>((set, get) => {
         // Poll while any run is in pending or running state.
         // Queued runs count as active: they will transition to running without
         // further user input, so polling must continue to observe the switch.
-        // Paused runs are excluded — they only change via explicit user actions,
-        // which refetch on their own.
-        const anyActive = runs.some(isRunActive);
+        // Below-target pauses can resume automatically when a suitable model returns.
+        const anyActive = runs.some(
+          (run) =>
+            isRunActive(run) ||
+            (run.status === RunStatusCode.Paused && run.waitingForQuota?.reason === 'below-target'),
+        );
         if (anyActive) {
           // Seeing an active run starts polling so a one-off fetch right after
           // enqueueing keeps observing the run until it finishes; polling stops
@@ -750,6 +754,19 @@ export const useRunStore = create<RunStore>((set, get) => {
           apiRequest(`/projects/${projectId}/runs/${runId}/resume-with`, {
             method: 'POST',
             body: JSON.stringify({ moduleId }),
+          }),
+        { poll: true, rethrow: true },
+      );
+    },
+
+    acceptBelowTarget: async (projectId: string, runId: string) => {
+      await mutateThenRefresh(
+        set,
+        get,
+        projectId,
+        () =>
+          apiRequest(`/projects/${projectId}/runs/${runId}/accept-below-target`, {
+            method: 'POST',
           }),
         { poll: true, rethrow: true },
       );

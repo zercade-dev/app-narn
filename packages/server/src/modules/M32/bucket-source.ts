@@ -105,7 +105,8 @@ export function freewayModuleOverrides(moduleId: string, modelId: string): Recor
   // (default maxRetries: 2, i.e. 3 attempts) only burns free-tier quota and
   // hides the terminal error the engine's failover needs to see. Set
   // unconditionally, independent of the snapshot's per-model data.
-  const overrides: Record<string, unknown> = { maxRetries: 0 };
+  // Numbered replies stay off until their translation quality has been scored.
+  const overrides: Record<string, unknown> = { maxRetries: 0, indexedBatchReplies: false };
   if (model?.useStructuredOutput !== undefined) {
     // Structured-output support is upstream-dependent and measured per model: a
     // model that mis-parses under a schema constraint (or pays a quality tax for

@@ -11,7 +11,7 @@
  * soonest; a reserve keeps top-tier headroom for escalation retries.
  */
 import type { FreewayCooldownReason } from '../../storage/types.js';
-import type { BucketView, JobGroup } from './types.js';
+import type { BucketView, DifficultyBand, JobGroup } from './types.js';
 import {
   effectiveRemainingRequests,
   langQualityClass,
@@ -204,8 +204,21 @@ function isReservoir(bucket: BucketView): number {
  * Remaining keys: scarcity percent, then expected requests per job, then
  * soonest reset, then lowest adequate tier, then key.
  */
-export function rankCandidates(buckets: BucketView[], group: JobGroup, now: number): BucketView[] {
-  const eligible = buckets.filter((b) => isEligible(b, group, now));
+export function rankCandidates(
+  buckets: BucketView[],
+  group: JobGroup,
+  now: number,
+  opts?: { tierFloor?: DifficultyBand },
+): BucketView[] {
+  // Relax only tier eligibility; ranking and weak-language checks use the
+  // original group's difficulty.
+  const eligibilityGroup =
+    opts?.tierFloor === undefined ? group : { ...group, band: opts.tierFloor };
+  const eligible = buckets.filter(
+    (b) =>
+      isEligible(b, eligibilityGroup, now) &&
+      !(group.band >= 3 && b.weakLanguages?.includes(group.targetLanguage)),
+  );
   const costs = new Map(eligible.map((b) => [b.bucketKey, requestCost(b, group)]));
   const scarcity = new Map(
     eligible.map((b) => [
@@ -248,9 +261,9 @@ export function selectBucket(
   group: JobGroup,
   buckets: BucketView[],
   now: number,
-  opts?: { reserveRequests?: number },
+  opts?: { reserveRequests?: number; tierFloor?: DifficultyBand },
 ): Selection | undefined {
-  const ranked = rankCandidates(buckets, group, now);
+  const ranked = rankCandidates(buckets, group, now, opts);
   if (ranked.length === 0) return undefined;
   const reserve = opts?.reserveRequests ?? 0;
   const winner = ranked[0];

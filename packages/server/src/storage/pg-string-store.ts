@@ -1018,6 +1018,11 @@ function matchesFilters(entry: StringEntry, filters: StringQueryFilters): boolea
   if (filters.source && !(entry.sources ?? []).includes(filters.source)) return false;
   if (filters.runId && !Object.values(entry.translations).some((r) => r.runId === filters.runId))
     return false;
+  if (
+    filters.freewayBelowTarget &&
+    !Object.values(entry.translations).some((r) => r.freewayBelowTarget === true)
+  )
+    return false;
   if (!matchesTranslationStatus(entry, filters)) return false;
   if (!matchesUntranslated(entry, filters)) return false;
   if (

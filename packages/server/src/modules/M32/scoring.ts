@@ -174,23 +174,9 @@ export function effectiveRemainingRequests(
  * packs more strings per request instead.
  */
 const SPEND_SHARE = 0.25;
-/**
- * Remaining stock at or above this many times the comfort-size request count
- * reads as abundant: requests are nearly free there, so a half-size batch
- * buys parse/gate reliability at negligible quota cost.
- */
 const ABUNDANCE_FACTOR = 40;
-/** Never shrink a comfort batch below this many strings. */
 const SHRINK_FLOOR = 4;
-/**
- * Largest group, in comfort-size requests, that the abundance shrink may still
- * halve. Above this the shrink is refused: `ABUNDANCE_FACTOR` measures whether
- * requests are cheap in QUOTA, and on an abundant bucket they are — but every
- * request is also a provider round trip on the wall clock, and doubling a
- * ten-request group costs far more time than the reliability is worth. Small
- * groups keep the benefit, where it is nearly free in both currencies.
- */
-export const SHRINK_MAX_REQUESTS = (() => {
+const SHRINK_MAX_REQUESTS = (() => {
   const n = Number.parseInt(getShrinkMaxRequests(), 10);
   return Number.isFinite(n) && n > 0 ? n : 4;
 })();
@@ -208,7 +194,7 @@ function passRateDivisor(passRate: number): number {
 
 /**
  * The char-derived per-request cap for THESE jobs on THIS bucket — how many
- * of them fit one reliable request, ignoring scarcity/abundance/pass-rate.
+ * of them fit one reliable request, ignoring scarcity and pass-rate.
  * Those size the PLANNED batch; this caps what a bucket can physically take
  * when a batch sized for another bucket lands on it mid-dispatch.
  *
@@ -242,13 +228,14 @@ export function charCappedBatch(
  * budget bounds how many of THESE strings fit reliably in one request, the
  * comfort size (maxBatch) is the unpressured default, scarcity grows batches
  * toward the char-derived ceiling so a tight daily allowance covers more of
- * the run, and abundance shrinks them for reliability since retries are
- * nearly free there — but only up to {@link SHRINK_MAX_REQUESTS} comfort-size
- * requests, past which halving would trade too many extra provider round
- * trips for that reliability. The pass-rate divisor stacks on top in every
- * case.
+ * the run. The pass-rate divisor stacks on top in every case.
  */
-export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: number): number {
+export function batchSizeFor(
+  bucket: BucketView,
+  group: JobGroup,
+  passRate: number,
+  options?: { shrinkOnAbundance?: boolean },
+): number {
   const divisor = passRateDivisor(passRate);
   if (bucket.charBudget === undefined) {
     return Math.max(1, Math.floor(bucket.maxBatch / divisor));
@@ -267,6 +254,7 @@ export function batchSizeFor(bucket: BucketView, group: JobGroup, passRate: numb
     if (requestsAtComfort > affordable) {
       base = Math.min(Math.max(comfort, Math.ceil(jobs / affordable)), sizeByChars);
     } else if (
+      options?.shrinkOnAbundance &&
       remaining >= ABUNDANCE_FACTOR * requestsAtComfort &&
       requestsAtComfort <= SHRINK_MAX_REQUESTS
     ) {

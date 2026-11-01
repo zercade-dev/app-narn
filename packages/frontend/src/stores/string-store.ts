@@ -69,6 +69,7 @@ export const DEFAULT_STRING_FILTERS: EntryFilters = {
   orderMode: 'import',
   filterMode: 'AND',
   freewayTierBelow: null,
+  freewayBelowTarget: false,
 };
 
 export const useStringStore = create<StringStoreState>()(

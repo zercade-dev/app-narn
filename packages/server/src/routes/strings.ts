@@ -62,6 +62,7 @@ export const translationRecordSchema = z.object({
   // drop a tier the server already stamped — the field is never set BY this
   // schema, only preserved through it.
   freewayTier: z.number().int().min(1).max(4).optional(),
+  freewayBelowTarget: z.literal(true).optional(),
   // Companion ledger key of the serving Freeway bucket (Addendum H), same
   // round-trip-preservation rationale as freewayTier above.
   freewayBucketKey: z.string().optional(),
@@ -76,6 +77,7 @@ const translationRecordPatchSchema = z.object({
   timestamp: z.number().optional(),
   needsReview: z.boolean().optional(),
   freewayTier: z.number().int().min(1).max(4).optional(),
+  freewayBelowTarget: z.literal(true).optional(),
   freewayBucketKey: z.string().optional(),
 });
 
@@ -118,6 +120,7 @@ const listStringsQuerySchema = z.object({
   status: z.enum(['pending', 'translated', 'reviewed', 'flagged']).optional(),
   untranslated: booleanFlag,
   lqaFailed: booleanFlag,
+  freewayBelowTarget: booleanFlag,
   runId: z.string().optional(),
 });
 
@@ -129,8 +132,16 @@ stringsRouter.get(
     const projectId = req.params.id as string;
     // Non-members get the standard existence-hiding 404 (RLS alone would return 200 []).
     await assertProjectAccess(projectId, { type: 'read' });
-    const { category, source, language, status, untranslated, lqaFailed, runId } =
-      req.query as z.infer<typeof listStringsQuerySchema>;
+    const {
+      category,
+      source,
+      language,
+      status,
+      untranslated,
+      lqaFailed,
+      runId,
+      freewayBelowTarget,
+    } = req.query as z.infer<typeof listStringsQuerySchema>;
     const filters: StringQueryFilters = {
       category,
       source,
@@ -138,6 +149,7 @@ stringsRouter.get(
       translationStatus: status,
       untranslatedOnly: untranslated === 'true',
       lqaFailed: lqaFailed === 'true',
+      freewayBelowTarget: freewayBelowTarget === 'true',
       runId,
     };
     const orphanIdSet = new Set(getOrphanIds(projectId));

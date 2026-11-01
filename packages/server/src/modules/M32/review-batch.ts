@@ -150,6 +150,7 @@ export function createReviewBatchSizer<TItem extends { entryId: string }>(opts: 
         // Pass-rate is a quality signal, unrelated to the char budget — read
         // it off the real bucket, not the narrowed copy.
         effectivePassRate(bucket, NEUTRAL_SIZING_LANGUAGE, DEFAULT_BACKGROUND_BAND),
+        { shrinkOnAbundance: true },
       );
     },
     bucketSized: () => sizedToBucket,

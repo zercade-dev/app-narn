@@ -14,6 +14,7 @@
  * scrolls to where the user can turn it back on — see
  * {@link scrollToEnableTarget}.
  */
+import { Checkbox } from '@/components/ui/checkbox';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, RotateCcw } from 'lucide-react';
@@ -435,6 +436,7 @@ export function FreewayPanel(): React.JSX.Element {
       });
   };
 
+  const [alwaysContinue, setAlwaysContinue] = useState(false);
   const [overrides, setOverrides] = useState<Record<string, string>>({});
   const [disabledProviders, setDisabledProviders] = useState<Set<string>>(new Set());
   const [overridesState, setOverridesState] = useState<OverridesLoadState>('loading');
@@ -449,8 +451,10 @@ export function FreewayPanel(): React.JSX.Element {
     return apiRequest<{
       freewayInstanceOverrides?: Record<string, string>;
       freewayDisabledProviders?: string[];
+      freewayAlwaysContinueBelowTarget?: boolean;
     }>('/global-config/settings')
       .then((res) => {
+        setAlwaysContinue(res.freewayAlwaysContinueBelowTarget ?? false);
         setOverrides(res.freewayInstanceOverrides ?? {});
         setDisabledProviders(new Set(res.freewayDisabledProviders ?? []));
         setOverridesState('loaded');
@@ -460,6 +464,11 @@ export function FreewayPanel(): React.JSX.Element {
         toast.error(t('freeway.instanceOverridesLoadFailed', { message: (err as Error).message }));
       });
   }, [t]);
+
+  const reloadSettingsAfterWrites = () => {
+    // A recovery read must follow any changes already queued behind the failed write.
+    writeChainRef.current = writeChainRef.current.then(loadOverrides);
+  };
 
   useEffect(() => {
     // `loadOverrides`'s own reset (setOverridesState('loading')) is independent of the
@@ -526,7 +535,24 @@ export function FreewayPanel(): React.JSX.Element {
       .then(() => undefined)
       .catch((err) => {
         toast.error(t('freeway.instanceOverrideSaveFailed', { message: (err as Error).message }));
-        void loadOverrides();
+        reloadSettingsAfterWrites();
+      });
+  };
+
+  const handleAlwaysContinueChange = (checked: boolean) => {
+    if (overridesState !== 'loaded') return;
+    setAlwaysContinue(checked);
+    writeChainRef.current = writeChainRef.current
+      .then(() =>
+        apiRequest('/global-config/settings', {
+          method: 'PUT',
+          body: JSON.stringify({ freewayAlwaysContinueBelowTarget: checked }),
+        }),
+      )
+      .then(() => undefined)
+      .catch((err) => {
+        toast.error(t('freeway.alwaysContinueSaveFailed', { message: (err as Error).message }));
+        reloadSettingsAfterWrites();
       });
   };
 
@@ -566,6 +592,20 @@ export function FreewayPanel(): React.JSX.Element {
         </CardHeader>
         <CollapsibleContent>
           <CardContent className="space-y-4">
+            <div className="space-y-1">
+              <label className="flex items-center gap-2 text-sm font-medium">
+                <Checkbox
+                  data-testid="freeway-always-continue"
+                  checked={alwaysContinue}
+                  disabled={overridesState !== 'loaded'}
+                  onCheckedChange={(checked) => handleAlwaysContinueChange(checked === true)}
+                />
+                {t('freeway.alwaysContinue')}
+              </label>
+              <p className="pl-6 text-xs text-muted-foreground">
+                {t('freeway.alwaysContinueHelp')}
+              </p>
+            </div>
             {!vaultUnlocked && (
               <p
                 className="text-sm text-muted-foreground"
