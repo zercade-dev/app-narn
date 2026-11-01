@@ -40,6 +40,8 @@ export interface BucketView {
   weakLanguages?: string[];
   /** Snapshot langScores (see FreeTierModel); absent → unmeasured. */
   langScores?: Record<string, number>;
+  /** Snapshot speed per delivered string; absent → unmeasured. */
+  speedMsPerString?: number;
   /** Snapshot langPassPriors; absent → curated tier×band prior applies. */
   langPassPriors?: Record<string, number>;
   /** Snapshot blockedLanguages; never eligible for these target languages. */

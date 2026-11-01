@@ -800,6 +800,12 @@ export interface FreewayGatePassRecord {
   t: number;
 }
 
+export interface FreewaySpeedRecord {
+  totalMs: number;
+  strings: number;
+  t: number;
+}
+
 /** Per-(model, language) quality stats, stored in freeway_buckets.stats. */
 export interface FreewayBucketStats {
   /** key: target language → decayed gate-pass counts. The router's only live quality input. */
@@ -827,7 +833,9 @@ export interface FreewayBucketStats {
   judgeScoreByLanguage?: Record<string, number>;
   /** EMA of 429-per-request (0..1). */
   rateLimitRate?: number;
-  /** EMA of latency ms per request. */
+  /** Decayed provider time and delivered strings across all languages. */
+  speedStats?: FreewaySpeedRecord;
+  /** Legacy EMA of latency ms per request; not used for speed scoring. */
   latencyMs?: number;
 }
 

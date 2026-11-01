@@ -8,7 +8,7 @@
 import type { BucketView, DifficultyBand, JobGroup } from './types.js';
 import { getShrinkMaxRequests } from '../../config/env.js';
 import { languageHardness } from './difficulty.js';
-import { PRIOR_STRENGTH, isGatePassRecord } from './stats.js';
+import { PRIOR_STRENGTH, isGatePassRecord, isSpeedRecord } from './stats.js';
 
 /**
  * First-attempt gate-pass priors by quality tier (row) and difficulty band
@@ -120,6 +120,82 @@ export const JUDGE_PRIOR_STRENGTH = 20;
  */
 const UNMEASURED_SCORE = 75;
 
+export function langQualityScore(
+  bucket: Pick<BucketView, 'langScores' | 'stats'>,
+  language: string,
+): number | undefined {
+  const measured = bucket.langScores?.[language];
+  const staticScore =
+    typeof measured === 'number' && Number.isFinite(measured) && measured >= 0 && measured <= 100
+      ? measured
+      : undefined;
+  const record = bucket.stats.judgeScoreStats?.[language];
+  const evidence = isGatePassRecord(record) && record.n > 0 ? record : undefined;
+  if (staticScore === undefined && evidence === undefined) return undefined;
+  if (!evidence) return staticScore;
+  return (
+    (JUDGE_PRIOR_STRENGTH * (staticScore ?? UNMEASURED_SCORE) + 100 * evidence.s) /
+    (JUDGE_PRIOR_STRENGTH + evidence.n)
+  );
+}
+
+export function translationScore(
+  bucket: Pick<BucketView, 'langScores' | 'stats'>,
+): number | undefined {
+  const languages = new Set([
+    ...Object.keys(bucket.langScores ?? {}),
+    ...Object.keys(bucket.stats.judgeScoreStats ?? {}),
+  ]);
+  const scores = [...languages]
+    .map((language) => langQualityScore(bucket, language))
+    .filter((score): score is number => score !== undefined);
+  return scores.length ? scores.reduce((sum, score) => sum + score, 0) / scores.length : undefined;
+}
+
+export function effectiveSpeedMsPerString(
+  bucket: Pick<BucketView, 'speedMsPerString' | 'stats'>,
+): number | undefined {
+  const candidate = bucket.speedMsPerString;
+  const seed =
+    typeof candidate === 'number' && Number.isFinite(candidate) && candidate > 0
+      ? candidate
+      : undefined;
+  const record = bucket.stats.speedStats;
+  if (!isSpeedRecord(record) || record.strings === 0) return seed;
+  if (seed === undefined) return record.totalMs / record.strings;
+  return seed * (20 / (20 + record.strings)) + record.totalMs / (20 + record.strings);
+}
+
+export function speedBand(ms: number | undefined): 'fast' | 'medium' | 'slow' | 'too-slow' {
+  if (ms === undefined || !Number.isFinite(ms) || ms < 0) return 'medium';
+  if (ms <= 1_000) return 'fast';
+  if (ms <= 5_000) return 'medium';
+  if (ms <= 15_000) return 'slow';
+  return 'too-slow';
+}
+
+export function speedScore(ms: number | undefined): number | undefined {
+  if (ms === undefined || !Number.isFinite(ms) || ms < 0) return undefined;
+  if (ms === 0) return 100;
+  return Math.min(100, Math.max(0, (100 * Math.log(30_000 / ms)) / Math.log(120)));
+}
+
+export function overallScore(
+  translation: number | undefined,
+  speed: number | undefined,
+  priority: 'quality' | 'balanced' | 'speed',
+): number | undefined {
+  if (
+    translation === undefined ||
+    speed === undefined ||
+    !Number.isFinite(translation) ||
+    !Number.isFinite(speed)
+  )
+    return undefined;
+  const weight = priority === 'quality' ? 0.9 : priority === 'balanced' ? 0.7 : 0.4;
+  return translation * weight + speed * (1 - weight);
+}
+
 /**
  * Coarse judged-quality class for (bucket, language): 0 publishable (score
  * ≥85), 1 usable / unmeasured (≥70 or no benchmark data), 2 measurably poor
@@ -139,19 +215,8 @@ export function langQualityClass(
   bucket: Pick<BucketView, 'langScores' | 'stats'>,
   language: string,
 ): 0 | 1 | 2 {
-  const staticScore = bucket.langScores?.[language];
-  // Exact-code lookup on both halves — zh-hans evidence never speaks for
-  // zh-hant, in the live record just as in the snapshot.
-  const record = bucket.stats.judgeScoreStats?.[language];
-  const evidence = isGatePassRecord(record) ? record : undefined;
-  if (staticScore === undefined && evidence === undefined) return 1;
-  const prior = staticScore ?? UNMEASURED_SCORE;
-  if (evidence === undefined || evidence.n === 0) {
-    return prior >= 85 ? 0 : prior >= 70 ? 1 : 2;
-  }
-  const live =
-    (JUDGE_PRIOR_STRENGTH * prior + 100 * evidence.s) / (JUDGE_PRIOR_STRENGTH + evidence.n);
-  return live >= 85 ? 0 : live >= 70 ? 1 : 2;
+  const score = langQualityScore(bucket, language);
+  return score === undefined ? 1 : score >= 85 ? 0 : score >= 70 ? 1 : 2;
 }
 
 /**

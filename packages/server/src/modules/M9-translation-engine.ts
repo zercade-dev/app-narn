@@ -141,6 +141,7 @@ import {
   loadBucketViews,
   recordDispatch,
   recordGateOutcomes,
+  recordSpeedOutcome,
   resetBucketFlap,
   resolveDispatchModuleId,
   resolveFreewayProbeCredential,
@@ -609,11 +610,12 @@ interface FreewayDispatchArgs {
   /** Reports a parse-failure split so the caller can record a run detail. */
   onSplit?: (info: { bucketKey: string; size: number }) => void;
   onCall?: (info: {
+    bucketKey: string;
     model: string;
     requests: number;
     translateMs: number;
     strings: number;
-  }) => void;
+  }) => void | Promise<void>;
   onSalvaged?: (strings: number) => void;
   /**
    * Set when the plan degraded this batch's band floor one tier (Addendum
@@ -4596,7 +4598,8 @@ export class TranslationEngine {
           }
         } finally {
           if (moduleStarted) {
-            args.onCall?.({
+            await args.onCall?.({
+              bucketKey: state.bucketKey,
               model: state.modelId ?? state.moduleId,
               requests: Math.max(1, calls),
               translateMs: Math.max(0, providerMs ?? performance.now() - started - callbackMs),
@@ -6214,6 +6217,7 @@ export class TranslationEngine {
         let degradedHop = false;
         const batchStartedAt = Date.now();
         if (bucketKey !== undefined && freewayDeps) {
+          const callDeps = freewayDeps;
           // Sync the admission onto the bucket actually about to dispatch.
           // processBatchJob's OWN pre-dispatch revalidation (above) can
           // reroute `bucketKey` away from the one `admission.key` was built
@@ -6329,7 +6333,7 @@ export class TranslationEngine {
               this.recordFreewayDetail(runId, formatSplitDetail(info));
               if (status.freewayStats) status.freewayStats.splits++;
             },
-            onCall: (info) => this.recordFreewayCall(status, info),
+            onCall: (info) => this.recordFreewayCall(status, info, callDeps),
             onUsage: (servingModuleId, results) =>
               this.recordUsage(status, servingModuleId, results),
             onSalvaged: (count) => {
@@ -6730,12 +6734,17 @@ export class TranslationEngine {
         if (bucketKey !== undefined && freewayDeps) {
           const debitBucketKey = escalatedBucketKey ?? bucketKey;
           if (retryMs !== undefined) {
-            this.recordFreewayCall(status, {
-              model: retryDecision.modelOverride ?? retryDecision.moduleId ?? moduleId,
-              requests: Math.max(1, outcome.calls),
-              translateMs: retryProviderMs ?? retryMs,
-              strings: retryStrings,
-            });
+            await this.recordFreewayCall(
+              status,
+              {
+                bucketKey: debitBucketKey,
+                model: retryDecision.modelOverride ?? retryDecision.moduleId ?? moduleId,
+                requests: Math.max(1, outcome.calls),
+                translateMs: retryProviderMs ?? retryMs,
+                strings: retryStrings,
+              },
+              freewayDeps,
+            );
             if (escalatedBucketKey) {
               this.recordFreewayMove(status, bucketKey, escalatedBucketKey, 'lqa');
             }
@@ -7253,17 +7262,33 @@ export class TranslationEngine {
     if (moves && moves.length < 50) moves.push({ from, to, reason });
   }
 
-  private recordFreewayCall(
+  private async recordFreewayCall(
     status: RunStatus,
-    call: { model: string; requests: number; translateMs: number; strings: number },
-  ): void {
+    call: {
+      bucketKey: string;
+      model: string;
+      requests: number;
+      translateMs: number;
+      strings: number;
+    },
+    deps: BucketSourceDeps,
+  ): Promise<void> {
     const stats = status.freewayStats;
-    if (!stats) return;
-    stats.actualRequests += call.requests;
-    const model = (stats.byModel[call.model] ??= { translateMs: 0, strings: 0 });
-    model.translateMs += call.translateMs;
-    model.strings += call.strings;
-    this.emitProgress(status.runId, status);
+    if (stats) {
+      stats.actualRequests += call.requests;
+      const model = (stats.byModel[call.model] ??= { translateMs: 0, strings: 0 });
+      model.translateMs += call.translateMs;
+      model.strings += call.strings;
+      this.emitProgress(status.runId, status);
+    }
+    try {
+      await recordSpeedOutcome(call.bucketKey, Date.now(), call, deps);
+    } catch (err) {
+      this.logger.warn('translation:freeway-stats-write-failed', {
+        bucketKey: call.bucketKey,
+        error: toErrorMessage(err),
+      });
+    }
   }
 
   /**
