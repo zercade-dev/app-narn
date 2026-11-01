@@ -31,6 +31,7 @@ import {
   MIXED_TARGET_RESPONSE_SCHEMA,
 } from './prompt-builder.js';
 import { buildProviderOptions } from './provider-options.js';
+import { salvageIndexedRows } from './json.js';
 import { attachUsageToFirst } from './llm-module.js';
 import { createFeatureMethods, type AISDKModuleContext } from './module-features.js';
 import {
@@ -1094,9 +1095,9 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
 
   /**
    * One same-language batch request: prompt → provider call → parse → usage →
-   * per-result onJobComplete. Throws on any failure — an API/transport error,
-   * or a parse failure surfaced as Error('parseBatchResponse: …') — so
-   * sameLanguageBatch can classify the failure and pick the retry strategy.
+   * per-result onJobComplete. A partly readable indexed response yields normal
+   * results for complete rows and parse errors for the missing rows. A wholly
+   * unreadable response throws so sameLanguageBatch can classify the failure.
    */
   async function runSameLanguageBatchOnce(
     batch: TranslationJob[],
@@ -1104,7 +1105,10 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     onJobComplete: ((result: TranslationResult) => void | Promise<void>) | undefined,
     signal?: AbortSignal,
   ): Promise<TranslationResult[]> {
-    const { system, user } = buildBatchPrompt(batch, batch[0].targetLanguage);
+    const { system, user: batchPrompt } = buildBatchPrompt(batch, batch[0].targetLanguage);
+    const user =
+      batchPrompt +
+      '\nIf you return indexed objects, "i" must be the original zero-based input position, and "s" or "t" must contain its translation. Do not renumber after skipping an item.';
 
     logVerbose('batch', 'request', { system, user, count: batch.length });
 
@@ -1112,8 +1116,17 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
 
     logVerbose('batch', 'success', { text, usage, count: batch.length });
 
-    const parsed = parseBatchResponse(text, batch);
-    if (!parsed) throw new Error(PARSE_FAILURE_MESSAGE);
+    const fullResponse = parseBatchResponse(text, batch);
+    const parsed =
+      fullResponse ??
+      salvageIndexedRows(text, batch, (row) => {
+        if (row.s !== undefined && row.t !== undefined && row.s !== row.t) return null;
+        const translation = row.s ?? row.t;
+        return typeof translation === 'string' && translation.trim() ? translation : null;
+      });
+    // Full parsing accepts model-generated 0- or 1-based ordering hints. A
+    // partial response without a usable zero cannot distinguish the two.
+    if (!fullResponse && parsed[0] === undefined) throw new Error(PARSE_FAILURE_MESSAGE);
 
     // Per the TranslationUsage contract the batch-total usage rides on the
     // first result only (each halving level's sub-batch is its own provider
@@ -1124,12 +1137,21 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       charCounts(system + user, batch, text, parsed),
     );
     const resultsOut = attachUsageToFirst(
-      batch.map((job, i) => ({
-        entryId: job.entryId,
-        targetLanguage: job.targetLanguage,
-        translatedText: decodeLeakedHtmlEntities(parsed[i]?.trim() ?? '', job.sourceText),
-        usedGlossaryId: job.glossary && job.glossary.length > 0 ? job.glossaryId : undefined,
-      })),
+      batch.map((job, i) =>
+        parsed[i] === undefined
+          ? {
+              entryId: job.entryId,
+              targetLanguage: job.targetLanguage,
+              translatedText: '',
+              error: PARSE_FAILURE_MESSAGE,
+            }
+          : {
+              entryId: job.entryId,
+              targetLanguage: job.targetLanguage,
+              translatedText: decodeLeakedHtmlEntities(parsed[i].trim(), job.sourceText),
+              usedGlossaryId: job.glossary && job.glossary.length > 0 ? job.glossaryId : undefined,
+            },
+      ),
       batchUsage,
     );
     for (const r of resultsOut) await onJobComplete?.(r);
