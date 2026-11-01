@@ -42,6 +42,7 @@ export const workspaceSettingsSchema = z.object({
   // convention as freewayInstanceOverrides — `updateSettings` deletes the
   // whole key before this schema runs, so no `.nullable()` is needed here.
   freewayDisabledProviders: z.array(z.string()).optional(),
+  freewayAlwaysContinueBelowTarget: z.boolean().optional(),
 });
 
 export const moduleInstanceSchema = z.object({

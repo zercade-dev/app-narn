@@ -93,6 +93,8 @@ export interface AISDKModuleConfig {
    * prompt-only contract.
    */
   useStructuredOutput?: boolean;
+  /** Use indexed replies for Freeway same-language translation batches. */
+  indexedBatchReplies?: boolean;
   /** When provided, overrides manifest.costTier by matching the configured model against these patterns. */
   costPatterns?: Array<{ pattern: RegExp; tier: CostTier }>;
   /** Fallback tier when no costPattern matches; defaults to manifest.costTier. */

@@ -284,14 +284,7 @@ export function getPlanHorizonMinutes(): string {
   return process.env.PLAN_HORIZON_MINUTES ?? '10';
 }
 
-/**
- * `SHRINK_MAX_REQUESTS` — largest group, measured in comfort-size requests,
- * that the abundance batch shrink may still halve; default string `'4'`.
- * Quota-cheap is not the same as time-cheap: each extra request is a full
- * provider round trip, so halving a ten-request group costs the user minutes
- * to buy parse reliability the group did not need. The call site applies
- * `Number.parseInt(..., 10)` then guards finite/>0. (modules/M32/scoring.ts)
- */
+/** Largest review group, in comfort-size requests, eligible for abundance shrinking. */
 export function getShrinkMaxRequests(): string {
   return process.env.SHRINK_MAX_REQUESTS ?? '4';
 }

@@ -109,6 +109,7 @@ async function applyJudgeSuggestion(
   // The judge's suggestion is a fresh manual rewrite of the text — never carry
   // over a Freeway tier (or its bucket key) the OLD text was produced under.
   delete patched.freewayTier;
+  delete patched.freewayBelowTarget;
   delete patched.freewayBucketKey;
   await updateEntry(projectId, verdict.entryId, {
     translations: {

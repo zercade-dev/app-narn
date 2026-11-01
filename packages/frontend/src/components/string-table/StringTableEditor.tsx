@@ -104,6 +104,7 @@ export function StringTableEditor({
     // Tier and bucket key describe the text this edit just replaced, so they
     // never follow human-written text.
     delete record.freewayTier;
+    delete record.freewayBelowTarget;
     delete record.freewayBucketKey;
     // Send only the edited language; the server merges per-language and
     // preserves the untouched siblings (avoids replaying history over every

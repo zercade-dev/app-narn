@@ -105,3 +105,66 @@ export function parseIndexedArray<TItem, TResult>(
   }
   return results.every((r): r is TResult => r !== undefined) ? results : null;
 }
+
+/** Salvage complete, uniquely indexed rows from an otherwise unusable array response. */
+export function salvageIndexedRows<TItem, TResult>(
+  text: string,
+  items: TItem[],
+  mapRow: (row: Record<string, unknown>, item: TItem, index: number) => TResult | null,
+): Array<TResult | undefined> {
+  const results = new Array<TResult | undefined>(items.length).fill(undefined);
+  const start = text.indexOf('[');
+  if (start < 0) return results;
+
+  const stack = ['['];
+  const seen = new Set<number>();
+  let rowStart = -1;
+  let inString = false;
+  let escaped = false;
+
+  for (let pos = start + 1; pos < text.length; pos++) {
+    const char = text[pos];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === '"') inString = false;
+      continue;
+    }
+    if (char === '"') {
+      inString = true;
+    } else if (char === '[' || char === '{') {
+      if (char === '{' && stack.length === 1) rowStart = pos;
+      stack.push(char);
+    } else if (char === ']' || char === '}') {
+      if (stack[stack.length - 1] !== (char === ']' ? '[' : '{')) break;
+      if (char === '}' && stack.length === 2 && rowStart >= 0) {
+        let row: unknown;
+        try {
+          row = JSON.parse(text.slice(rowStart, pos + 1));
+        } catch {
+          row = undefined;
+        }
+        if (isRecord(row)) {
+          const index = row.i;
+          if (
+            typeof index === 'number' &&
+            Number.isInteger(index) &&
+            index >= 0 &&
+            index < items.length
+          ) {
+            if (seen.has(index)) {
+              results[index] = undefined;
+            } else {
+              seen.add(index);
+              results[index] = mapRow(row, items[index], index) ?? undefined;
+            }
+          }
+        }
+        rowStart = -1;
+      }
+      stack.pop();
+      if (stack.length === 0) break;
+    }
+  }
+  return results;
+}

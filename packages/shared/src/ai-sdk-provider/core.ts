@@ -24,14 +24,18 @@ export const GLOSSARY_SUGGEST_CHUNK_SIZE = 60;
 import {
   buildBatchPrompt,
   parseBatchResponse,
+  parseIndexedTranslationResponse,
   buildMixedTargetBatchPrompt,
   parseMixedTargetBatchResponse,
   extractJsonPayload,
   TRANSLATION_RESPONSE_SCHEMA,
+  INDEXED_TRANSLATION_RESPONSE_SCHEMA,
   MIXED_TARGET_RESPONSE_SCHEMA,
 } from './prompt-builder.js';
 import { buildProviderOptions } from './provider-options.js';
+import { salvageIndexedRows } from './json.js';
 import { attachUsageToFirst } from './llm-module.js';
+import { measureProviderCall } from './provider-call-counter.js';
 import { createFeatureMethods, type AISDKModuleContext } from './module-features.js';
 import {
   createModelForProvider,
@@ -812,14 +816,16 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       // combine inside its retry callback.
       const combined = combineAbortSignals(signal, timeoutMs);
       try {
-        return await generateText({
-          model,
-          ...body,
-          ...(maxOutputTokens !== undefined ? { maxOutputTokens } : {}),
-          ...(config.maxRetries !== undefined ? { maxRetries: config.maxRetries } : {}),
-          abortSignal: combined,
-          ...providerOptionsSpread,
-        });
+        return await measureProviderCall(() =>
+          generateText({
+            model,
+            ...body,
+            ...(maxOutputTokens !== undefined ? { maxOutputTokens } : {}),
+            ...(config.maxRetries !== undefined ? { maxRetries: config.maxRetries } : {}),
+            abortSignal: combined,
+            ...providerOptionsSpread,
+          }),
+        );
       } catch (err) {
         // A fired timeout (combined aborted, but the caller did NOT cancel) becomes a
         // typed transient error so the judge/review retry path retries at a smaller size.
@@ -993,6 +999,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
   async function handleBatch(
     batch: TranslationJob[],
     languageModel: LanguageModel,
+    getIndexedModel: () => LanguageModel,
     getMixedTargetModel: () => LanguageModel,
     onJobComplete: ((result: TranslationResult) => void | Promise<void>) | undefined,
     signal?: AbortSignal,
@@ -1078,7 +1085,12 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
             results = languageBatch.map(cancelledResult);
             for (const r of results) await onJobComplete?.(r);
           } else {
-            results = await sameLanguageBatch(languageBatch, languageModel, onJobComplete, signal);
+            results = await sameLanguageBatch(
+              languageBatch,
+              config.indexedBatchReplies ? getIndexedModel() : languageModel,
+              onJobComplete,
+              signal,
+            );
           }
           for (const result of results) {
             const idx = indexByJob.get(`${result.entryId}::${result.targetLanguage}`);
@@ -1089,14 +1101,19 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       }
     }
 
-    return sameLanguageBatch(batch, languageModel, onJobComplete, signal);
+    return sameLanguageBatch(
+      batch,
+      config.indexedBatchReplies ? getIndexedModel() : languageModel,
+      onJobComplete,
+      signal,
+    );
   }
 
   /**
    * One same-language batch request: prompt → provider call → parse → usage →
-   * per-result onJobComplete. Throws on any failure — an API/transport error,
-   * or a parse failure surfaced as Error('parseBatchResponse: …') — so
-   * sameLanguageBatch can classify the failure and pick the retry strategy.
+   * per-result onJobComplete. A partly readable indexed response yields normal
+   * results for complete rows and parse errors for the missing rows. A wholly
+   * unreadable response throws so sameLanguageBatch can classify the failure.
    */
   async function runSameLanguageBatchOnce(
     batch: TranslationJob[],
@@ -1104,7 +1121,11 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     onJobComplete: ((result: TranslationResult) => void | Promise<void>) | undefined,
     signal?: AbortSignal,
   ): Promise<TranslationResult[]> {
-    const { system, user } = buildBatchPrompt(batch, batch[0].targetLanguage);
+    const { system, user } = buildBatchPrompt(
+      batch,
+      batch[0].targetLanguage,
+      config.indexedBatchReplies,
+    );
 
     logVerbose('batch', 'request', { system, user, count: batch.length });
 
@@ -1112,8 +1133,26 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
 
     logVerbose('batch', 'success', { text, usage, count: batch.length });
 
-    const parsed = parseBatchResponse(text, batch);
-    if (!parsed) throw new Error(PARSE_FAILURE_MESSAGE);
+    const fullResponse = config.indexedBatchReplies ? null : parseBatchResponse(text, batch);
+    const parsed =
+      fullResponse ??
+      (config.indexedBatchReplies
+        ? parseIndexedTranslationResponse(text, batch)
+        : salvageIndexedRows(text, batch, (row) => {
+            if (row.s !== undefined && row.t !== undefined && row.s !== row.t) return null;
+            const translation = row.s ?? row.t;
+            return typeof translation === 'string' && translation.trim() ? translation : null;
+          }));
+    // Full parsing accepts model-generated 0- or 1-based ordering hints. A
+    // partial response without a usable zero cannot distinguish the two.
+    if (
+      !fullResponse &&
+      (config.indexedBatchReplies
+        ? parsed.every((value) => value === undefined)
+        : parsed[0] === undefined)
+    ) {
+      throw new Error(PARSE_FAILURE_MESSAGE);
+    }
 
     // Per the TranslationUsage contract the batch-total usage rides on the
     // first result only (each halving level's sub-batch is its own provider
@@ -1124,12 +1163,21 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
       charCounts(system + user, batch, text, parsed),
     );
     const resultsOut = attachUsageToFirst(
-      batch.map((job, i) => ({
-        entryId: job.entryId,
-        targetLanguage: job.targetLanguage,
-        translatedText: decodeLeakedHtmlEntities(parsed[i]?.trim() ?? '', job.sourceText),
-        usedGlossaryId: job.glossary && job.glossary.length > 0 ? job.glossaryId : undefined,
-      })),
+      batch.map((job, i) =>
+        parsed[i] === undefined
+          ? {
+              entryId: job.entryId,
+              targetLanguage: job.targetLanguage,
+              translatedText: '',
+              error: PARSE_FAILURE_MESSAGE,
+            }
+          : {
+              entryId: job.entryId,
+              targetLanguage: job.targetLanguage,
+              translatedText: decodeLeakedHtmlEntities(parsed[i].trim(), job.sourceText),
+              usedGlossaryId: job.glossary && job.glossary.length > 0 ? job.glossaryId : undefined,
+            },
+      ),
       batchUsage,
     );
     for (const r of resultsOut) await onJobComplete?.(r);
@@ -1234,6 +1282,11 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     }
 
     const languageModel = buildModel(TRANSLATION_RESPONSE_SCHEMA);
+    let indexedModel: LanguageModel | undefined;
+    const getIndexedModel = (): LanguageModel => {
+      indexedModel ??= buildModel(INDEXED_TRANSLATION_RESPONSE_SCHEMA);
+      return indexedModel;
+    };
 
     // Built lazily and memoized: most translate() calls are same-language only
     // and never need the mixed-target shape, so avoid an extra model build (and
@@ -1271,7 +1324,14 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
         continue;
       }
       results.push(
-        ...(await handleBatch(batch, languageModel, getMixedTargetModel, onJobComplete, signal)),
+        ...(await handleBatch(
+          batch,
+          languageModel,
+          getIndexedModel,
+          getMixedTargetModel,
+          onJobComplete,
+          signal,
+        )),
       );
     }
 

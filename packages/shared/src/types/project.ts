@@ -240,6 +240,8 @@ export interface WorkspaceSettings {
    * removes it from Freeway's own automatic pool.
    */
   freewayDisabledProviders?: string[];
+  /** Continue below a translation's target tier without asking. Defaults to false. */
+  freewayAlwaysContinueBelowTarget?: boolean;
 }
 
 /** Workspace-wide module configuration shared by all projects. */

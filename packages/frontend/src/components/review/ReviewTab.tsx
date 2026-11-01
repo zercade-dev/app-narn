@@ -364,6 +364,7 @@ export function ReviewTab({ projectId }: Readonly<ReviewTabProps>) {
         // human-written text.
         if (patch.text !== undefined) {
           delete merged.freewayTier;
+          delete merged.freewayBelowTarget;
           delete merged.freewayBucketKey;
         }
         await updateEntry(projectId, item.entry.id, {

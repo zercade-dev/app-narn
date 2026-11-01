@@ -791,6 +791,22 @@ runsRouter.post(
   }),
 );
 
+runsRouter.post(
+  '/:projectId/runs/:runId/accept-below-target',
+  requireUnlockedVault,
+  asyncHandler(async (req, res) => {
+    const { projectId, runId } = req.params;
+    const run = await assertRunVisible(projectId, runId);
+    await assertLanguagesWritable(projectId, resumeTargetLanguages(run));
+    const result = await translationEngine.acceptBelowTarget(projectId, runId, getSessionId(res));
+    if (!result.ok) {
+      res.status(409).json({ error: result.reason });
+      return;
+    }
+    res.json({ success: true });
+  }),
+);
+
 /**
  * POST /api/projects/:projectId/runs/:runId/revert
  * Restores the pre-run translation values captured for every (entry, target

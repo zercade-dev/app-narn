@@ -59,6 +59,7 @@ import {
   chunkArray,
   debug,
   reportRateLimitHit,
+  runMeasuredProviderCall,
   toErrorMessage,
 } from '@zercade-dev/narn-shared';
 
@@ -302,6 +303,8 @@ export interface DeepLConfig {
    * the workspace settings; applied per outbound HTTP request. 0/unset = off.
    */
   requestsPerSecond?: number;
+  /** Freeway sets zero when the engine owns retries and failover. */
+  maxRetries?: number;
   /** Credential provider injected by the host (e.g. CredentialStore adapter). */
   credentials?: CredentialProvider;
   /**
@@ -434,7 +437,10 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
   function getClient(): deepl.DeepLClient {
     const key = resolveApiKey();
     if (!cachedClient || cachedKey !== key) {
-      cachedClient = new deepl.DeepLClient(key);
+      cachedClient =
+        config.maxRetries === 0
+          ? new deepl.DeepLClient(key, { maxRetries: 0 })
+          : new deepl.DeepLClient(key);
       cachedKey = key;
     }
     return cachedClient;
@@ -464,7 +470,9 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
         // reuses it (without a prior push this session) only attaches it for
         // pairs it actually has a dictionary for.
         for (const d of existing.dictionaries ?? []) {
-          freeGlossaryPairs.add(`${d.sourceLangCode.toLowerCase()}->${d.targetLangCode.toLowerCase()}`);
+          freeGlossaryPairs.add(
+            `${d.sourceLangCode.toLowerCase()}->${d.targetLangCode.toLowerCase()}`,
+          );
         }
       }
     } catch {
@@ -620,7 +628,9 @@ export function createDeepLModule(config: DeepLConfig = {}): TranslationModule {
     let results: deepl.TextResult[];
     try {
       await awaitRateLimit();
-      const raw = await client.translateText(encodedTexts, srcLang, tgtLang, options);
+      const raw = await runMeasuredProviderCall(() =>
+        client.translateText(encodedTexts, srcLang, tgtLang, options),
+      );
       results = Array.isArray(raw) ? raw : [raw];
     } catch (e) {
       throw mapDeepLError(e, limiterKey);
