@@ -56,7 +56,8 @@
             "vi": 1,
             "zh-hans": 1,
             "zh-hant": 1
-          }
+          },
+          "speedMsPerString": 24048
         },
         {
           "id": "gemini-flash-lite-latest",
@@ -108,7 +109,8 @@
             "zh-hans": 1,
             "zh-hant": 1
           },
-          "weakLanguages": ["vi"]
+          "weakLanguages": ["vi"],
+          "speedMsPerString": 138
         },
         {
           "id": "gemma-4-31b-it",
@@ -159,7 +161,8 @@
             "vi": 1,
             "zh-hans": 1,
             "zh-hant": 1
-          }
+          },
+          "speedMsPerString": 9822
         },
         {
           "id": "gemma-4-26b-a4b-it",
@@ -210,7 +213,8 @@
             "vi": 1,
             "zh-hans": 1,
             "zh-hant": 1
-          }
+          },
+          "speedMsPerString": 9368
         },
         {
           "id": "gemini-3-flash-preview",
@@ -261,7 +265,8 @@
             "vi": 0.96,
             "zh-hans": 1,
             "zh-hant": 0.96
-          }
+          },
+          "speedMsPerString": 1354
         },
         {
           "id": "gemini-3.6-flash",
@@ -312,7 +317,8 @@
             "vi": 1,
             "zh-hans": 0.96,
             "zh-hant": 1
-          }
+          },
+          "speedMsPerString": 743
         },
         {
           "id": "gemini-3.5-flash",
@@ -363,7 +369,8 @@
             "vi": 0.96,
             "zh-hans": 1,
             "zh-hant": 1
-          }
+          },
+          "speedMsPerString": 817
         },
         {
           "id": "gemini-3.1-flash-lite",
@@ -414,7 +421,8 @@
             "vi": 0.92,
             "zh-hans": 0.96,
             "zh-hant": 0.96
-          }
+          },
+          "speedMsPerString": 232
         }
       ]
     },
@@ -483,7 +491,8 @@
             "vi": 0.96,
             "zh-hans": 1,
             "zh-hant": 1
-          }
+          },
+          "speedMsPerString": 4945
         },
         {
           "id": "google/gemma-4-26b-a4b-it:free",
@@ -633,7 +642,8 @@
             "vi": 0.96,
             "zh-hans": 1,
             "zh-hant": 1
-          }
+          },
+          "speedMsPerString": 291
         }
       ]
     }
