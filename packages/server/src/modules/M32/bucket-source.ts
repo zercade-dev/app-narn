@@ -32,7 +32,7 @@ import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
 import { KeyedAsyncLock } from '../../utils/keyed-lock.js';
 import type { RateGovernor } from '../M9/rate-governor.js';
 import type { BucketView } from './types.js';
-import { decayStats, recordGatePass, recordJudgeScore } from './stats.js';
+import { decayStats, recordGatePass, recordJudgeScore, recordSpeed } from './stats.js';
 
 const FLAP_WINDOW_MS = 5 * 60_000;
 /** Cooldowns for strikes 1, 2, … of a passing fault; past the end, the day reset. */
@@ -819,6 +819,7 @@ export async function loadBucketViews(
         batchCeiling: model.batchCeiling,
         weakLanguages: model.weakLanguages,
         langScores: model.langScores,
+        speedMsPerString: model.speedMsPerString,
         langPassPriors: model.langPassPriors,
         blockedLanguages: model.blockedLanguages,
         mixedBatch: provider.supportsMixedBatch,
@@ -1091,6 +1092,21 @@ export async function recordJudgeOutcomes(
     for (const outcome of outcomes) {
       stats = recordJudgeScore(stats, outcome.language, outcome.score, now);
     }
+    await ledger.mergeStats(bucketKey, stats);
+  });
+}
+
+/** Fold one provider outcome into the same locked stats row as gate and judge evidence. */
+export async function recordSpeedOutcome(
+  bucketKey: string,
+  now: number,
+  outcome: { translateMs: number; strings: number },
+  deps?: BucketSourceDeps,
+): Promise<void> {
+  const ledger = deps?.ledger ?? getFreewayLedgerStore();
+  await statsFoldLock.withLock(bucketKey, async () => {
+    const existing = await ledger.getBucket(bucketKey);
+    const stats = recordSpeed(existing?.stats ?? {}, outcome, now);
     await ledger.mergeStats(bucketKey, stats);
   });
 }

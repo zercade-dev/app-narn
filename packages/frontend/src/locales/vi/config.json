@@ -240,6 +240,17 @@
     "alwaysContinue": "Luôn tiếp tục với mô hình chất lượng thấp hơn",
     "alwaysContinueHelp": "Tắt: lượt chạy tạm dừng và hỏi bạn. Bật: lượt chạy kết thúc không cần hỏi và các chuỗi đó vẫn được đánh dấu.",
     "alwaysContinueSaveFailed": "Không thể lưu cài đặt: {{message}}",
+    "priority": {
+      "label": "Ưu tiên",
+      "quality": "Chất lượng",
+      "balanced": "Cân bằng",
+      "speed": "Tốc độ"
+    },
+    "priorityHelp": {
+      "quality": "Ưu tiên chất lượng dịch; dùng tốc độ để phân định khi bằng điểm.",
+      "balanced": "Tránh mô hình chậm khi có mô hình nhanh hơn đủ tốt.",
+      "speed": "Ưu tiên mô hình nhanh hơn nhưng vẫn bảo vệ chất lượng dịch."
+    },
     "instancesLoadFailed": "Không tải được các thực thể mô-đun Freeway: {{message}}",
     "statusTitle": "Trạng thái",
     "empty": "Chưa có nhà cung cấp miễn phí nào được cấu hình.",
@@ -247,6 +258,11 @@
     "colState": "Trạng thái",
     "colRemaining": "Còn lại",
     "colNextReset": "Đặt lại tiếp theo",
+    "colTranslation": "Bản dịch",
+    "colSpeed": "Tốc độ",
+    "colOverall": "Tổng thể",
+    "notMeasured": "Chưa đo",
+    "tooSlow": "Quá chậm",
     "colPassRate": "Tỷ lệ đạt",
     "sharedPoolLabel": "Kho dùng chung",
     "remainingRequests_other": "{{count}} yêu cầu",

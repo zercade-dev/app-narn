@@ -12,7 +12,11 @@
  * merge replaces each top-level key wholesale — so the FULL updated maps are
  * returned, never a single-language fragment.
  */
-import type { FreewayBucketStats, FreewayGatePassRecord } from '../../storage/types.js';
+import type {
+  FreewayBucketStats,
+  FreewayGatePassRecord,
+  FreewaySpeedRecord,
+} from '../../storage/types.js';
 
 /**
  * Pseudo-observations the first-attempt prior is worth — whichever prior
@@ -55,6 +59,21 @@ export function isGatePassRecord(value: unknown): value is FreewayGatePassRecord
   if (typeof t !== 'number' || !Number.isFinite(t)) return false;
   // The float slop absorbs rounding from repeated decay scaling.
   return n >= 0 && s >= 0 && s <= n + 1e-9;
+}
+
+export function isSpeedRecord(value: unknown): value is FreewaySpeedRecord {
+  if (typeof value !== 'object' || value === null) return false;
+  const { totalMs, strings, t } = value as Record<string, unknown>;
+  return [totalMs, strings, t].every(
+    (part) => typeof part === 'number' && Number.isFinite(part) && part >= 0,
+  );
+}
+
+function decaySpeed(rec: FreewaySpeedRecord, now: number): FreewaySpeedRecord {
+  const elapsed = now - rec.t;
+  if (elapsed === 0) return rec;
+  const factor = elapsed < 0 ? 1 : Math.pow(2, -elapsed / HALF_LIFE_MS);
+  return { totalMs: rec.totalMs * factor, strings: rec.strings * factor, t: now };
 }
 
 /**
@@ -109,6 +128,12 @@ export function decayStats(stats: FreewayBucketStats, now: number): FreewayBucke
   const judge = decayRecordMap(stats.judgeScoreStats, now);
   if (judge) {
     next = { ...next, judgeScoreStats: judge, judgeScoreByLanguage: deriveDisplayRates(judge) };
+  }
+  if (isSpeedRecord(stats.speedStats)) {
+    next = { ...next, speedStats: decaySpeed(stats.speedStats, now) };
+  } else if (stats.speedStats !== undefined) {
+    const { speedStats: _invalid, ...rest } = next;
+    next = rest;
   }
   return next;
 }
@@ -171,4 +196,29 @@ export function recordJudgeScore(
     judgeScoreStats,
     judgeScoreByLanguage: deriveDisplayRates(judgeScoreStats),
   };
+}
+
+/** Fold provider time and delivered strings together, including failed-call time. */
+export function recordSpeed(
+  stats: FreewayBucketStats,
+  outcome: { translateMs: number; strings: number },
+  now: number,
+): FreewayBucketStats {
+  if (
+    !Number.isFinite(outcome.translateMs) ||
+    outcome.translateMs < 0 ||
+    !Number.isFinite(outcome.strings) ||
+    outcome.strings < 0 ||
+    !Number.isFinite(now) ||
+    now < 0
+  )
+    return stats;
+  const base = isSpeedRecord(stats.speedStats)
+    ? decaySpeed(stats.speedStats, now)
+    : { totalMs: 0, strings: 0, t: now };
+  const totalMs = base.totalMs + outcome.translateMs;
+  const strings = base.strings + outcome.strings;
+  if (!Number.isFinite(totalMs) || !Number.isFinite(strings)) return stats;
+  const scale = strings > MAX_SAMPLES ? MAX_SAMPLES / strings : 1;
+  return { ...stats, speedStats: { totalMs: totalMs * scale, strings: strings * scale, t: now } };
 }

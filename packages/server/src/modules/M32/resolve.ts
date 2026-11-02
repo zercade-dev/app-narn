@@ -7,9 +7,10 @@
  * deterministic and unit-testable without a fake timer.
  */
 import type { RoutingDecision } from '@zercade-dev/narn-shared';
+import type { FreewayPriority } from '@zercade-dev/narn-shared';
 import { getLengthLimit } from '@zercade-dev/narn-shared';
 import { difficultyBand, groupJobs } from './difficulty.js';
-import { chooseBelowTargetBucket, planRun } from './planner.js';
+import { chooseBelowTargetBucket, isTooSlow, planRun, tooSlowAlternative } from './planner.js';
 import { bucketResumeAt, deferralReason, isEligible, selectBucket } from './selector.js';
 import type { FreewayCooldownReason } from '../../storage/types.js';
 import type { Assignment, BucketView, DifficultyBand, FreewayJob, JobGroup } from './types.js';
@@ -47,6 +48,7 @@ export interface FreewayResolution {
     bestTier: number;
     bestModelId: string;
     neededTier: number;
+    bestIsTooSlow?: true;
   }>;
   /** Pairs no bucket can ever serve (surface as controlled failures). */
   blocked: Array<{ entryId: string; targetLanguage: string }>;
@@ -66,6 +68,8 @@ export type RevalidateResult =
        * above is the companion key value).
        */
       qualityTier: number;
+      /** Set when the reroute went below the group's floor under the run's permission. */
+      degraded?: Assignment['degraded'];
     }
   | { kind: 'defer'; resumeAt: number; reason?: FreewayCooldownReason }
   | { kind: 'blocked' };
@@ -115,7 +119,7 @@ export function resolveFreewayDecisions(
   decisions: RoutingDecision[],
   buckets: BucketView[],
   now: number,
-  opts?: { minBand?: DifficultyBand; belowTarget?: 'ask' | 'allow' },
+  opts?: { minBand?: DifficultyBand; belowTarget?: 'ask' | 'allow'; priority?: FreewayPriority },
 ): FreewayResolution {
   const jobs = decisions.map(toFreewayJob);
   const groups = groupJobs(jobs).map((group) =>
@@ -128,6 +132,7 @@ export function resolveFreewayDecisions(
     now,
     priorityClass: 'translate',
     belowTarget: opts?.belowTarget,
+    priority: opts?.priority,
   });
 
   const decisionByPair = new Map<string, RoutingDecision>();
@@ -194,13 +199,16 @@ export function resolveFreewayDecisions(
             resumeAt,
             ...(deferredReason ? { reason: deferredReason } : {}),
           },
-    needsConfirmation: plan.needsConfirmation.map(({ group, bestTier, bestModelId, resumeAt }) => ({
-      pairs: group.jobs.map(({ entryId, targetLanguage }) => ({ entryId, targetLanguage })),
-      resumeAt,
-      bestTier,
-      bestModelId,
-      neededTier: group.band,
-    })),
+    needsConfirmation: plan.needsConfirmation.map(
+      ({ group, bestTier, bestModelId, resumeAt, bestIsTooSlow }) => ({
+        pairs: group.jobs.map(({ entryId, targetLanguage }) => ({ entryId, targetLanguage })),
+        resumeAt,
+        bestTier,
+        bestModelId,
+        neededTier: group.band,
+        ...(bestIsTooSlow ? { bestIsTooSlow } : {}),
+      }),
+    ),
     blocked,
   };
 }
@@ -233,7 +241,19 @@ export function revalidateGroup(
   group: { decisions: RoutingDecision[]; bucketKey: string; batchSize: number },
   buckets: BucketView[],
   now: number,
-  opts?: { degradedFloor?: DifficultyBand; minBand?: DifficultyBand; allowBelowTarget?: boolean },
+  opts?: {
+    degradedFloor?: DifficultyBand;
+    minBand?: DifficultyBand;
+    allowBelowTarget?: boolean;
+    priority?: FreewayPriority;
+    /**
+     * The run may use a lower tier (confirmed or "Always continue"). With a
+     * priority set, it lets a Too slow selection give way to a faster
+     * below-target bucket, reported as degraded. Unlike `allowBelowTarget`
+     * it does not relax what counts as eligible.
+     */
+    belowTargetConsent?: boolean;
+  },
 ): RevalidateResult {
   const jobs = group.decisions.map(toFreewayJob);
   // Groups are homogeneous by construction: every decision in it shares the
@@ -260,13 +280,46 @@ export function revalidateGroup(
       ? { ...jobGroup, band: current.qualityTier }
       : jobGroup;
   if (current && isEligible(current, currentGroup, now)) {
-    return { kind: 'keep' };
+    // A planned Too slow bucket is not kept once a faster one can serve now.
+    if (opts?.priority === undefined || !isTooSlow(current)) return { kind: 'keep' };
+    const faster = selectBucket(jobGroup, candidates, now, { priority: opts.priority });
+    if (!faster || isTooSlow(faster.bucket)) return { kind: 'keep' };
   }
 
+  const atTarget = selectBucket(jobGroup, candidates, now, { priority: opts?.priority });
+  if (atTarget && opts?.priority !== undefined && isTooSlow(atTarget.bucket)) {
+    const alternative = tooSlowAlternative(jobGroup, candidates, now, {
+      priority: opts.priority,
+      allowBelowTarget: opts.belowTargetConsent === true,
+    });
+    if (alternative?.kind === 'defer') {
+      return {
+        kind: 'defer',
+        resumeAt: alternative.resumeAt,
+        ...(alternative.reason ? { reason: alternative.reason } : {}),
+      };
+    }
+    if (alternative?.kind === 'degrade') {
+      const { bucket, batchSize } = alternative.selection;
+      return {
+        kind: 'reroute',
+        bucketKey: bucket.bucketKey,
+        modelId: bucket.modelId,
+        moduleId: bucket.dispatchModuleId ?? bucket.moduleId,
+        batchSize,
+        qualityTier: bucket.qualityTier,
+        degraded: {
+          fromTier: jobGroup.band,
+          toTier: bucket.qualityTier,
+          waitedAlternativeMs: null,
+        },
+      };
+    }
+  }
   const selection =
-    selectBucket(jobGroup, candidates, now) ??
+    atTarget ??
     (opts?.allowBelowTarget
-      ? chooseBelowTargetBucket({ ...jobGroup, band: naturalBand }, candidates, now)
+      ? chooseBelowTargetBucket({ ...jobGroup, band: naturalBand }, candidates, now, opts.priority)
       : undefined);
   if (selection) {
     return {

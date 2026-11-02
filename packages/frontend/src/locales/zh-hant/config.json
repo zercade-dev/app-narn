@@ -240,6 +240,17 @@
     "alwaysContinue": "一律使用品質較低的模型繼續",
     "alwaysContinueHelp": "關閉：執行會暫停並詢問。開啟：執行會直接完成，這些字串仍會被標記。",
     "alwaysContinueSaveFailed": "無法儲存此設定：{{message}}",
+    "priority": {
+      "label": "優先考量",
+      "quality": "品質",
+      "balanced": "均衡",
+      "speed": "速度"
+    },
+    "priorityHelp": {
+      "quality": "優先確保翻譯品質；速度僅用於同等情況下擇優。",
+      "balanced": "當有品質不錯且更快的模型時，避開慢速模型。",
+      "speed": "優先選用更快的模型，同時保障翻譯品質。"
+    },
     "instancesLoadFailed": "無法載入 Freeway 模組實例：{{message}}",
     "statusTitle": "狀態",
     "empty": "尚未設定任何免費供應商。",
@@ -247,6 +258,11 @@
     "colState": "情況",
     "colRemaining": "剩餘",
     "colNextReset": "下次重設",
+    "colTranslation": "翻譯",
+    "colSpeed": "速度",
+    "colOverall": "綜合",
+    "notMeasured": "未測量",
+    "tooSlow": "過慢",
     "colPassRate": "通過率",
     "sharedPoolLabel": "共用資源池",
     "remainingRequests_other": "{{count}} 次請求",

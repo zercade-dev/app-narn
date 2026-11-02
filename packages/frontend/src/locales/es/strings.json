@@ -358,6 +358,7 @@
     "belowTargetMarked": "Estas cadenas se marcarán para que puedas encontrarlas y revisarlas.",
     "belowTargetRestOfRun": "Esta decisión se aplica al resto de la ejecución.",
     "belowTargetKeepWaiting": "Seguir esperando",
+    "belowTargetSlowModels": "Modelos lentos: {{models}}.",
     "belowTargetConfirm": "Continuar de todos modos",
     "waitingResumesAt": "Se reanuda {{time}}",
     "waitingPairsCount_one": "{{count}} par pendiente",

@@ -80,6 +80,7 @@ const settingsBodySchema = z.object({
   batchGrouping: z.enum(BATCH_GROUPING_DIMENSIONS).optional(),
   ignoreBatchSizeLimit: z.boolean().optional(),
   freewayAlwaysContinueBelowTarget: z.boolean().optional(),
+  freewayPriority: z.enum(['quality', 'balanced', 'speed']).optional(),
   requestTimeoutMs: z.number().int().min(1000).nullable().optional(),
   // 0 = unlimited (omit the per-request cap; see core.ts DEFAULT_MAX_OUTPUT_TOKENS).
   maxOutputTokens: z.number().int().min(0).max(200000).nullable().optional(),
@@ -117,7 +118,7 @@ globalConfigRouter.get(
   '/settings',
   asyncHandler(async (_req, res) => {
     const settings = await getGlobalConfigStore().getSettings();
-    res.json(settings);
+    res.json({ ...settings, freewayPriority: settings.freewayPriority ?? 'balanced' });
   }),
 );
 

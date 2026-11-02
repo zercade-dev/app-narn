@@ -15,6 +15,7 @@ import {
   deriveInstanceCredentialKey,
   getFreeTierSnapshot,
   parseModuleInstanceId,
+  type FreewayPriority,
   type GlobalConfig,
 } from '@zercade-dev/narn-shared';
 import { asyncHandler } from '../http/index.js';
@@ -28,6 +29,13 @@ import {
   loadEnvVarLookup,
 } from '../modules/M32/bucket-source.js';
 import { effectiveRemainingRequests } from '../modules/M32/selector.js';
+import {
+  effectiveSpeedMsPerString,
+  overallScore,
+  speedBand,
+  speedScore,
+  translationScore,
+} from '../modules/M32/scoring.js';
 import type { BucketView } from '../modules/M32/types.js';
 import { moduleRegistry } from '../modules/M6-module-registry.js';
 import { resolveEffectiveModuleConfig } from '../modules/M19-global-config-store.js';
@@ -68,6 +76,36 @@ interface FreewayStatusBucket {
   credentialMarkModuleId?: string;
   /** The vault key writing would clear {@link credentialMarkModuleId}'s mark. */
   credentialKeyName?: string;
+  /** Rounded 0-100 quality average; absent when nothing measured it. */
+  translationScore?: number;
+  /** Rounded 0-100 speed score; absent when speed is unmeasured. */
+  speedScore?: number;
+  /** Rounded 0-100 blend under the workspace priority; absent unless both halves are measured. */
+  overallScore?: number;
+  /** Present (true) when the model is slower than the "Too slow" cut-off. */
+  tooSlow?: true;
+}
+
+/**
+ * The informational scores for one bucket. Shared by the live and the
+ * permissive (missing/disabled) views so both score identically; measured
+ * values are rounded here and nowhere earlier, and an unmeasured score is
+ * left out rather than invented.
+ */
+function scoreFields(
+  view: BucketView,
+  priority: FreewayPriority,
+): Pick<FreewayStatusBucket, 'translationScore' | 'speedScore' | 'overallScore' | 'tooSlow'> {
+  const translation = translationScore(view);
+  const ms = effectiveSpeedMsPerString(view);
+  const speed = speedScore(ms);
+  const overall = overallScore(translation, speed, priority);
+  return {
+    ...(translation !== undefined ? { translationScore: Math.round(translation) } : {}),
+    ...(speed !== undefined ? { speedScore: Math.round(speed) } : {}),
+    ...(overall !== undefined ? { overallScore: Math.round(overall) } : {}),
+    ...(speedBand(ms) === 'too-slow' ? { tooSlow: true as const } : {}),
+  };
 }
 
 /** disabledReason bucket-source.ts's loadBucketViews sets when every usable candidate is credential-marked. */
@@ -202,6 +240,7 @@ function toStatusBucket(
   now: number,
   envVarFor: (baseModuleId: string) => string | undefined,
   existingVaultKeys: ReadonlySet<string>,
+  priority: FreewayPriority,
 ): FreewayStatusBucket {
   return {
     bucketKey: view.bucketKey,
@@ -216,6 +255,7 @@ function toStatusBucket(
     disabledReason: view.disabledReason,
     gatePassByLanguage: view.stats.gatePassByLanguage,
     poolKey: view.poolKey,
+    ...scoreFields(view, priority),
     ...(view.dispatchModuleId !== undefined ? { dispatchModuleId: view.dispatchModuleId } : {}),
     ...(view.disabledReason === CREDENTIAL_BAD_REASON
       ? deriveCredentialMark(view, envVarFor, existingVaultKeys)
@@ -260,6 +300,7 @@ freewayRouter.get(
     const cloudMode = isCloudMode();
     const moduleStatus = freewayModuleStatus(global, sessionId);
     const disabledProviders = new Set(settings.freewayDisabledProviders ?? []);
+    const priority = settings.freewayPriority ?? 'balanced';
 
     const liveViews = await loadBucketViews(now, {
       ledger,
@@ -304,7 +345,7 @@ freewayRouter.get(
       : new Set();
 
     const buckets: FreewayStatusBucket[] = [
-      ...liveViews.map((v) => toStatusBucket(v, now, envVarFor, existingVaultKeys)),
+      ...liveViews.map((v) => toStatusBucket(v, now, envVarFor, existingVaultKeys, priority)),
       ...missingViews.map((v) => {
         const { state, disabledReason, enableTargetModuleId } = deriveMissingState(
           v.moduleId,
@@ -322,6 +363,7 @@ freewayRouter.get(
           remainingRequests: effectiveRemainingRequests(v),
           remainingChars: v.remainingChars,
           nextResetAt: v.nextResetAt,
+          ...scoreFields(v, priority),
           state,
           ...(disabledReason ? { disabledReason } : {}),
           ...(enableTargetModuleId !== undefined ? { enableTargetModuleId } : {}),

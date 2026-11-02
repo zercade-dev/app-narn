@@ -7,9 +7,25 @@
  * surprise (429, cooldown, drained bucket) is the same pure call on the
  * remaining groups with fresh BucketViews.
  */
+import type { FreewayPriority } from '@zercade-dev/narn-shared';
 import type { Assignment, BucketView, DifficultyBand, JobGroup, RunPlan } from './types.js';
-import { bucketResumeAt, deferralReason, selectBucket, type Selection } from './selector.js';
-import { projectedRequestTokens } from './scoring.js';
+import {
+  bucketResumeAt,
+  deferralReason,
+  rankCandidates,
+  selectBucket,
+  type Selection,
+} from './selector.js';
+import {
+  effectiveRemainingRequests,
+  effectiveSpeedMsPerString,
+  langQualityClass,
+  passRateClass,
+  projectedRequestTokens,
+  requestCost,
+  speedBand,
+} from './scoring.js';
+import type { FreewayCooldownReason } from '../../storage/types.js';
 import { getPlanHorizonMinutes } from '../../config/env.js';
 
 export interface PlanOptions {
@@ -17,6 +33,8 @@ export interface PlanOptions {
   reserveRequests?: number;
   priorityClass?: 'translate' | 'background';
   belowTarget?: 'ask' | 'allow';
+  /** Translation speed/quality priority; omitted keeps the background and Addendum G ordering. */
+  priority?: FreewayPriority;
 }
 
 export function defaultReserve(totalJobs: number): number {
@@ -66,8 +84,12 @@ function everServable(bucket: BucketView, group: JobGroup): boolean {
   return true;
 }
 
+export function isTooSlow(bucket: BucketView): boolean {
+  return speedBand(effectiveSpeedMsPerString(bucket)) === 'too-slow';
+}
+
 /** Highest available tier below the target, with normal ranking within that tier. */
-export function chooseBelowTargetBucket(
+function legacyBelowTargetBucket(
   group: JobGroup,
   buckets: BucketView[],
   now: number,
@@ -81,6 +103,101 @@ export function chooseBelowTargetBucket(
       { tierFloor: tier },
     );
     if (selection) return selection;
+  }
+  return undefined;
+}
+
+/**
+ * The lower-tier bucket to use below target. Too slow candidates only count
+ * when nothing else can serve. Quality and Balanced take the highest tier;
+ * Speed also considers one tier below it. The priority's own ranking then
+ * picks among those. Without a priority the legacy ordering applies.
+ */
+export function chooseBelowTargetBucket(
+  group: JobGroup,
+  buckets: BucketView[],
+  now: number,
+  priority?: FreewayPriority,
+): Selection | undefined {
+  if (priority === undefined) return legacyBelowTargetBucket(group, buckets, now);
+  const eligible = rankCandidates(
+    buckets.filter((bucket) => bucket.qualityTier < group.band),
+    group,
+    now,
+    { tierFloor: 1 },
+  );
+  const notTooSlow = eligible.filter((bucket) => !isTooSlow(bucket));
+  const pool = notTooSlow.length > 0 ? notTooSlow : eligible;
+  if (pool.length === 0) return undefined;
+  const topTier = Math.max(...pool.map((bucket) => bucket.qualityTier));
+  const lowest = priority === 'speed' ? topTier - 1 : topTier;
+  const window = pool.filter((bucket) => bucket.qualityTier >= lowest);
+  const selection = selectBucket(
+    group,
+    window,
+    now,
+    // Below target, Balanced takes the faster band within the chosen tier, so it
+    // ranks like Speed over a window of one tier.
+    { tierFloor: 1, priority: priority === 'quality' ? 'quality' : 'speed' },
+  );
+  if (!selection || priority !== 'speed') return selection;
+
+  // The window trades a tier for a faster band. Once the band is settled, a
+  // lower tier that is no faster and no better judged is a pure loss, so take
+  // the highest tier that matches the winner's band and quality classes.
+  const winner = selection.bucket;
+  const winnerBand = speedBand(effectiveSpeedMsPerString(winner));
+  const classesOf = (bucket: BucketView): string => {
+    const cost = requestCost(bucket, group);
+    return [
+      bucket.remainingChars !== undefined ? 1 : 0,
+      passRateClass(cost.passRate),
+      langQualityClass(bucket, group.targetLanguage),
+    ].join('/');
+  };
+  const winnerClasses = classesOf(winner);
+  const peers = rankCandidates(window, group, now, { tierFloor: 1, priority: 'speed' }).filter(
+    (bucket) =>
+      speedBand(effectiveSpeedMsPerString(bucket)) === winnerBand &&
+      classesOf(bucket) === winnerClasses &&
+      effectiveRemainingRequests(bucket) >= requestCost(bucket, group).estimatedRequests,
+  );
+  const best = peers.reduce(
+    (top, bucket) => (bucket.qualityTier > top.qualityTier ? bucket : top),
+    winner,
+  );
+  if (best.bucketKey === winner.bucketKey) return selection;
+  return selectBucket(group, [best], now, { tierFloor: 1, priority: 'speed' });
+}
+
+export type TooSlowAlternative =
+  | { kind: 'defer'; resumeAt: number; reason?: FreewayCooldownReason }
+  | { kind: 'degrade'; selection: Selection };
+
+/**
+ * The shared last-resort rule for a group whose selection is a Too slow model
+ * (only meaningful once a priority is set). A faster at-target bucket back
+ * within the short wait beats it; otherwise, with permission to go below
+ * target, a faster lower-tier bucket does. Undefined means use the Too slow
+ * selection. Used at plan time and when re-validating at dispatch.
+ */
+export function tooSlowAlternative(
+  group: JobGroup,
+  buckets: BucketView[],
+  now: number,
+  opts: { priority: FreewayPriority; allowBelowTarget: boolean },
+): TooSlowAlternative | undefined {
+  const faster = buckets.filter((b) => everServable(b, group) && !isTooSlow(b));
+  if (faster.length > 0) {
+    const soonest = Math.min(...faster.map((b) => bucketResumeAt(b, group)));
+    if (soonest - now <= FREEWAY_DEGRADE_WAIT_MS) {
+      const reason = deferralReason(faster, group, soonest);
+      return { kind: 'defer', resumeAt: soonest, ...(reason ? { reason } : {}) };
+    }
+  }
+  if (opts.allowBelowTarget) {
+    const below = chooseBelowTargetBucket(group, buckets, now, opts.priority);
+    if (below && !isTooSlow(below.bucket)) return { kind: 'degrade', selection: below };
   }
   return undefined;
 }
@@ -198,7 +315,30 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
   for (const group of ordered) {
     const selection = selectBucket(group, working, opts.now, {
       reserveRequests: background ? 0 : reserve,
+      priority: opts.priority,
     });
+    if (selection && opts.priority !== undefined && isTooSlow(selection.bucket)) {
+      const alternative = tooSlowAlternative(group, working, opts.now, {
+        priority: opts.priority,
+        allowBelowTarget: opts.belowTarget === 'allow',
+      });
+      if (alternative?.kind === 'defer') {
+        plan.deferred.push({
+          group,
+          resumeAt: alternative.resumeAt,
+          ...(alternative.reason ? { reason: alternative.reason } : {}),
+        });
+        continue;
+      }
+      if (alternative?.kind === 'degrade') {
+        spendAssignment(plan, working, group, alternative.selection, {
+          fromTier: group.band,
+          toTier: alternative.selection.bucket.qualityTier,
+          waitedAlternativeMs: null,
+        });
+        continue;
+      }
+    }
     if (selection) {
       spendAssignment(plan, working, group, selection);
       continue;
@@ -217,7 +357,7 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
         continue;
       }
 
-      const below = chooseBelowTargetBucket(group, working, opts.now);
+      const below = chooseBelowTargetBucket(group, working, opts.now, opts.priority);
       if (below) {
         if (opts.belowTarget === 'ask') {
           plan.needsConfirmation.push({
@@ -225,6 +365,9 @@ export function planRun(groups: JobGroup[], buckets: BucketView[], opts: PlanOpt
             bestTier: below.bucket.qualityTier,
             bestModelId: below.bucket.modelId,
             resumeAt,
+            ...(opts.priority !== undefined && isTooSlow(below.bucket)
+              ? { bestIsTooSlow: true as const }
+              : {}),
           });
         } else {
           spendAssignment(plan, working, group, below, {

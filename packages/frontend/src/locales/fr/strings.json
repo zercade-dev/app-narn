@@ -358,6 +358,7 @@
     "belowTargetMarked": "Ces chaînes seront marquées pour que vous puissiez les retrouver et les vérifier.",
     "belowTargetRestOfRun": "Ce choix s’applique au reste de cette exécution.",
     "belowTargetKeepWaiting": "Continuer à attendre",
+    "belowTargetSlowModels": "Modèles lents : {{models}}.",
     "belowTargetConfirm": "Continuer quand même",
     "waitingResumesAt": "Reprend {{time}}",
     "waitingPairsCount_one": "{{count}} paire en attente",

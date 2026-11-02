@@ -29,6 +29,7 @@ export function BelowTargetNotice({
 
   const count = target.strings ?? waiting.pairCount ?? waiting.pairs?.length ?? 0;
   const languages = target.languages.join(', ');
+  const slowModels = target.slowModelIds?.length ? target.slowModelIds.join(', ') : undefined;
   const model = t('runs.belowTargetModel', {
     model: target.bestModelId,
     best: target.bestTier,
@@ -83,6 +84,11 @@ export function BelowTargetNotice({
             </DialogDescription>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">{model}</p>
+          {slowModels && (
+            <p className="text-sm text-muted-foreground" data-testid="below-target-slow-models">
+              {t('runs.belowTargetSlowModels', { models: slowModels })}
+            </p>
+          )}
           <p className="text-sm text-muted-foreground">{t('runs.belowTargetMarked')}</p>
           <p className="text-sm text-muted-foreground">{t('runs.belowTargetRestOfRun')}</p>
           <DialogFooter>

@@ -472,6 +472,8 @@ export interface RunStatus {
     pairs: Array<
       RunEntryLanguagePair & {
         belowTargetNeededTier?: number;
+        /** The Too slow model this pair's below-target choice would use. */
+        belowTargetSlowModelId?: string;
         quotaResumeAt?: number;
         quotaReason?: 'quota' | 'provider-error';
       }
@@ -495,6 +497,8 @@ export interface RunStatus {
       neededTier: number;
       bestModelId: string;
       resumeAt: number | null;
+      /** Distinct Too slow models among the pending choices; absent when none. */
+      slowModelIds?: string[];
     };
   };
   /** The user accepted lower-tier translations for the rest of this run. */

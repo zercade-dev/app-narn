@@ -358,6 +358,7 @@
     "belowTargetMarked": "Essas strings serão marcadas para você encontrá-las e revisá-las.",
     "belowTargetRestOfRun": "Esta escolha vale para o restante desta execução.",
     "belowTargetKeepWaiting": "Continuar esperando",
+    "belowTargetSlowModels": "Modelos lentos: {{models}}.",
     "belowTargetConfirm": "Continuar mesmo assim",
     "waitingResumesAt": "Retoma {{time}}",
     "waitingPairsCount_one": "{{count}} par pendente",

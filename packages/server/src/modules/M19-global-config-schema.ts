@@ -43,6 +43,7 @@ export const workspaceSettingsSchema = z.object({
   // whole key before this schema runs, so no `.nullable()` is needed here.
   freewayDisabledProviders: z.array(z.string()).optional(),
   freewayAlwaysContinueBelowTarget: z.boolean().optional(),
+  freewayPriority: z.enum(['quality', 'balanced', 'speed']).optional(),
 });
 
 export const moduleInstanceSchema = z.object({
