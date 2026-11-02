@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-02T01:25:19.741Z",
+  "generatedAt": "2026-11-02T19:59:48.347Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
-      "scrapedAt": "2026-11-02T01:25:19.741Z",
+      "scrapedAt": "2026-11-02T19:59:48.347Z",
       "models": [
         {
           "id": "deepseek-flash",
@@ -41,7 +41,7 @@
     },
     "google": {
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
-      "scrapedAt": "2026-11-02T01:25:19.741Z",
+      "scrapedAt": "2026-11-02T19:59:48.347Z",
       "models": [
         {
           "id": "gemini-4-argon",
@@ -65,6 +65,28 @@
           "capabilityTags": ["tools", "vision", "audio"]
         },
         {
+          "id": "gemini-3.5-transcribe-live",
+          "inputCostPerMillion": 3.5,
+          "outputCostPerMillion": 21
+        },
+        {
+          "id": "gemini-3.5-transcribe",
+          "inputCostPerMillion": 2,
+          "outputCostPerMillion": 12
+        },
+        {
+          "id": "gemini-3.5-flash-lite",
+          "inputCostPerMillion": 0.3,
+          "outputCostPerMillion": 2.5,
+          "cachedInputCostPerMillion": 0.03,
+          "capabilityTags": ["tools", "vision", "audio"]
+        },
+        {
+          "id": "gemini-omni-1.1-flash",
+          "inputCostPerMillion": 1.5,
+          "outputCostPerMillion": 9
+        },
+        {
           "id": "gemini-3.8-live",
           "inputCostPerMillion": 0.75,
           "outputCostPerMillion": 4.5
@@ -85,33 +107,11 @@
           "outputCostPerMillion": 21
         },
         {
-          "id": "gemini-3.5-transcribe-live",
-          "inputCostPerMillion": 3.5,
-          "outputCostPerMillion": 21
-        },
-        {
-          "id": "gemini-3.5-transcribe",
-          "inputCostPerMillion": 2,
-          "outputCostPerMillion": 12
-        },
-        {
-          "id": "gemini-3.5-flash-lite",
-          "inputCostPerMillion": 0.3,
-          "outputCostPerMillion": 2.5,
-          "cachedInputCostPerMillion": 0.03,
-          "capabilityTags": ["tools", "vision", "audio"]
-        },
-        {
           "id": "gemini-3.1-flash-lite",
           "inputCostPerMillion": 0.25,
           "outputCostPerMillion": 1.5,
           "cachedInputCostPerMillion": 0.025,
           "capabilityTags": ["tools", "vision", "audio"]
-        },
-        {
-          "id": "gemini-omni-1.1-flash",
-          "inputCostPerMillion": 1.5,
-          "outputCostPerMillion": 9
         },
         {
           "id": "gemini-3.1-pro-preview",
@@ -255,7 +255,7 @@
     },
     "openai": {
       "sourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "scrapedAt": "2026-11-02T01:25:19.741Z",
+      "scrapedAt": "2026-11-02T19:59:48.347Z",
       "models": [
         {
           "id": "gpt-6-astra",
@@ -350,7 +350,7 @@
     },
     "anthropic": {
       "sourceUrl": "https://claude.com/pricing",
-      "scrapedAt": "2026-11-02T01:25:19.741Z",
+      "scrapedAt": "2026-11-02T19:59:48.347Z",
       "models": [
         {
           "id": "claude-fable-5-1",
