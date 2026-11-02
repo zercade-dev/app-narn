@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-01T15:21:32.255Z",
+  "generatedAt": "2026-11-02T01:25:19.741Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
-      "scrapedAt": "2026-11-01T15:21:32.255Z",
+      "scrapedAt": "2026-11-02T01:25:19.741Z",
       "models": [
         {
           "id": "deepseek-flash",
@@ -41,7 +41,7 @@
     },
     "google": {
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
-      "scrapedAt": "2026-11-01T15:21:32.255Z",
+      "scrapedAt": "2026-11-02T01:25:19.741Z",
       "models": [
         {
           "id": "gemini-4-argon",
@@ -255,7 +255,7 @@
     },
     "openai": {
       "sourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "scrapedAt": "2026-11-01T15:21:32.255Z",
+      "scrapedAt": "2026-11-02T01:25:19.741Z",
       "models": [
         {
           "id": "gpt-6-astra",
@@ -350,7 +350,7 @@
     },
     "anthropic": {
       "sourceUrl": "https://claude.com/pricing",
-      "scrapedAt": "2026-11-01T15:21:32.255Z",
+      "scrapedAt": "2026-11-02T01:25:19.741Z",
       "models": [
         {
           "id": "claude-fable-5-1",
