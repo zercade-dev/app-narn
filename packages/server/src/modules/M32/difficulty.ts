@@ -3,9 +3,10 @@
  * (band) a bucket must have to attempt it. Higher bands are harder: long,
  * mask-dense, length-limited, toned, or hard-target-language strings fail
  * more on weak models, and every failure costs a full extra request.
- * "Length-limited" means the source is long enough to put pressure on the
- * target language's output limit (see LENGTH_LIMIT_PRESSURE_RATIO in
- * resolve.ts), not merely that the language has a limit.
+ * "Length-limited" means the target language has an output length limit. Every
+ * supported language does, so the signal is a constant offset that mostly
+ * shifts the band; its weight is kept at +2 so a short string with a single
+ * placeholder in a very hard language (ja, ko, th, zh) lands in band 3, not 4.
  */
 import type { DifficultyBand, FreewayJob, JobGroup } from './types.js';
 
@@ -24,6 +25,9 @@ const VERY_HARD_LANGUAGES = new Set([
 ]);
 const HARD_LANGUAGES = new Set(['tr', 'pl', 'cs', 'ru', 'el', 'vi']);
 
+/** Score added when the target language carries an output length limit. */
+export const LENGTH_LIMIT_WEIGHT = 2;
+
 export function languageHardness(language: string): 0 | 1 | 2 {
   const base = language.split('-')[0];
   if (VERY_HARD_LANGUAGES.has(language) || VERY_HARD_LANGUAGES.has(base)) return 2;
@@ -38,7 +42,7 @@ export function difficultyBand(job: FreewayJob): DifficultyBand {
   else if (len >= 80) score += 1;
   if (job.maskCount >= 3) score += 2;
   else if (job.maskCount >= 1) score += 1;
-  if (job.hasLengthLimit) score += 3;
+  if (job.hasLengthLimit) score += LENGTH_LIMIT_WEIGHT;
   if (job.glossaryTermCount >= 1) score += 1;
   if (job.tone !== undefined) score += 1;
   score += languageHardness(job.targetLanguage);

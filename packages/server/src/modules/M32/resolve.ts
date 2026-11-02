@@ -26,15 +26,6 @@ import type { Assignment, BucketView, DifficultyBand, FreewayJob, JobGroup } fro
  */
 const PLACEHOLDER_RE = /\{\{?[^}]*\}\}?|%[sd]/g;
 
-/**
- * A string only counts as length-limited for difficulty scoring when its
- * source length reaches this fraction of the target language's `maxChars`.
- * Every supported language has a limit, so "has a limit" alone says nothing
- * about the string; a long source is the case where the output can overrun it.
- * Measured in source characters (the output length is not known at plan time).
- */
-export const LENGTH_LIMIT_PRESSURE_RATIO = 0.5;
-
 export interface FreewayResolution {
   /** Rewritten concrete decisions, grouped per assignment (one array per assignment). */
   assignedGroups: Array<{
@@ -91,7 +82,6 @@ function pairKey(entryId: string, targetLanguage: string): string {
 export function toFreewayJob(decision: RoutingDecision): FreewayJob {
   const sourceText = decision.entry.sourceText;
   const maskCount = (sourceText.match(PLACEHOLDER_RE) ?? []).length;
-  const limit = getLengthLimit(decision.targetLanguage);
   return {
     entryId: decision.entry.id,
     // Project code passed verbatim: base-subtag normalization is a hardness/
@@ -99,8 +89,7 @@ export function toFreewayJob(decision: RoutingDecision): FreewayJob {
     targetLanguage: decision.targetLanguage,
     sourceText,
     maskCount,
-    hasLengthLimit:
-      limit !== undefined && sourceText.length >= limit.maxChars * LENGTH_LIMIT_PRESSURE_RATIO,
+    hasLengthLimit: getLengthLimit(decision.targetLanguage) !== undefined,
     // v1: glossary pressure is not measured at plan time.
     glossaryTermCount: 0,
     tone: decision.entry.metadata?.tone,
