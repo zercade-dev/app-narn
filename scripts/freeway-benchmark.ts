@@ -71,7 +71,8 @@ import {
   type ResultsFile,
   type SpeedResultsFile,
 } from './freeway-benchmark/lib.js';
-import { planSpeed, runSpeedPass, SPEED_ENV_NAMES } from './freeway-benchmark/speed.js';
+import { formatSnapshotJson } from './freeway-benchmark/format.js';
+import { benchIndexedReplies, planSpeed, runSpeedPass, SPEED_ENV_NAMES } from './freeway-benchmark/speed.js';
 
 import {
   chunkArray,
@@ -614,7 +615,7 @@ async function getOrCreateModule(
           // retry loop (default 2, i.e. 3 attempts) would otherwise burn free-tier quota
           // silently and undercount `requests`/`--max-requests` by up to 3x on any failing call.
           maxRetries: 0,
-          indexedBatchReplies: false,
+          indexedBatchReplies: benchIndexedReplies(),
           ...(snapModel.useStructuredOutput !== undefined ? { useStructuredOutput: snapModel.useStructuredOutput } : {}),
         };
   const mod = factory(config);
@@ -1150,7 +1151,7 @@ function formatCellNumbers(cell: CellResult | undefined): string {
   return ` (${parts.join(', ')})`;
 }
 
-function runDistill(): void {
+async function runDistill(): Promise<void> {
   const resultsFile = readResultsFile();
   if (!resultsFile) {
     console.error(
@@ -1163,7 +1164,7 @@ function runDistill(): void {
   const distilled = distill(resultsFile, registryCodes);
   const snapshot = getFreeTierSnapshot();
   const updated = applyDistilled(snapshot, distilled);
-  writeFileSync(FREE_TIER_DATA_PATH, JSON.stringify(updated, null, 2) + '\n');
+  writeFileSync(FREE_TIER_DATA_PATH, await formatSnapshotJson(updated, FREE_TIER_DATA_PATH));
 
   // Every registry code except 'en', which can never be a benchmark target.
   const totalTargetLangs = LANGUAGE_REGISTRY.length - 1;
@@ -1194,14 +1195,14 @@ function readSpeedResults(file: string): SpeedResultsFile {
   }
 }
 
-function runDistillSpeed(file: string): void {
+async function runDistillSpeed(file: string): Promise<void> {
   if (!existsSync(file)) {
     console.error(`No speed results at ${file} — run the speed pass first (--speed).`);
     process.exit(1);
   }
   const speed = distillSpeed(readSpeedResults(file));
   const updated = applySpeedDistilled(getFreeTierSnapshot(), speed);
-  writeFileSync(FREE_TIER_DATA_PATH, JSON.stringify(updated, null, 2) + '\n');
+  writeFileSync(FREE_TIER_DATA_PATH, await formatSnapshotJson(updated, FREE_TIER_DATA_PATH));
   console.log(`Wrote speedMsPerString for ${speed.size} model(s) into ${FREE_TIER_DATA_PATH}\n`);
   for (const [modelKey, ms] of [...speed.entries()].sort(([a], [b]) => (a < b ? -1 : 1))) {
     console.log(`${modelKey}: ${Math.round(ms)} ms/string`);
@@ -1329,11 +1330,11 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
 
   if (args.distill) {
-    runDistill();
+    await runDistill();
     return;
   }
   if (args.distillSpeedPath) {
-    runDistillSpeed(args.distillSpeedPath);
+    await runDistillSpeed(args.distillSpeedPath);
     return;
   }
   if (args.speed) {

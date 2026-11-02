@@ -53,6 +53,7 @@ import {
   type ChatTurnMeta,
   type ChatUsageRef,
 } from '../services/chat-observability.js';
+import { stageDetailsWriteLock } from '../utils/stage-details-lock.js';
 import { ensureProjectId } from '../utils/project-path.js';
 import {
   assertProjectAccess,
@@ -173,53 +174,56 @@ export function createStageDetailsRouter(
       const access = await assertProjectAccess(projectId, { type: 'read' });
       assertStageDetailsPatchAllowed(access, body);
 
-      // Throws ProjectNotFoundError (404, mapped centrally) for a missing or
-      // inaccessible (RLS-invisible) project.
-      const project = await getProjectStore().loadProject(projectId);
-      const current: StageDetails = project.stageDetails ?? emptyStageDetails();
-      const updated: StageDetails = { ...current };
+      const updated = await stageDetailsWriteLock.withLock(projectId, async () => {
+        // Throws ProjectNotFoundError (404, mapped centrally) for a missing or
+        // inaccessible (RLS-invisible) project.
+        const project = await getProjectStore().loadProject(projectId);
+        const current: StageDetails = project.stageDetails ?? emptyStageDetails();
+        const updated: StageDetails = { ...current };
 
-      for (const fieldId of FIELD_IDS) {
-        const patch = body[fieldId];
-        if (!patch) continue;
+        for (const fieldId of FIELD_IDS) {
+          const patch = body[fieldId];
+          if (!patch) continue;
 
-        // Defensive: a stored stageDetails missing a field key (partial legacy
-        // data) falls back to the empty field instead of spreading undefined.
-        const base = current[fieldId] ?? emptyStageDetails()[fieldId];
-        const field = {
-          ...base,
-          translations: { ...base.translations },
-        };
+          // Defensive: a stored stageDetails missing a field key (partial legacy
+          // data) falls back to the empty field instead of spreading undefined.
+          const base = current[fieldId] ?? emptyStageDetails()[fieldId];
+          const field = {
+            ...base,
+            translations: { ...base.translations },
+          };
 
-        // Source-text edit bumps sourceUpdatedAt (drives derived staleness on
-        // existing translations); an identical resubmission does NOT bump it.
-        if (patch.sourceText !== undefined && patch.sourceText !== field.sourceText) {
-          field.sourceText = patch.sourceText;
-          field.sourceUpdatedAt = Date.now();
-        }
-
-        if (patch.maxLength !== undefined) {
-          if (patch.maxLength === null) {
-            delete field.maxLength;
-          } else {
-            field.maxLength = patch.maxLength;
+          // Source-text edit bumps sourceUpdatedAt (drives derived staleness on
+          // existing translations); an identical resubmission does NOT bump it.
+          if (patch.sourceText !== undefined && patch.sourceText !== field.sourceText) {
+            field.sourceText = patch.sourceText;
+            field.sourceUpdatedAt = Date.now();
           }
-        }
 
-        if (patch.translations) {
-          for (const [lang, translation] of Object.entries(patch.translations)) {
-            field.translations[lang] = {
-              text: translation.text,
-              moduleId: translation.moduleId,
-              timestamp: Date.now(),
-            };
+          if (patch.maxLength !== undefined) {
+            if (patch.maxLength === null) {
+              delete field.maxLength;
+            } else {
+              field.maxLength = patch.maxLength;
+            }
           }
+
+          if (patch.translations) {
+            for (const [lang, translation] of Object.entries(patch.translations)) {
+              field.translations[lang] = {
+                text: translation.text,
+                moduleId: translation.moduleId,
+                timestamp: Date.now(),
+              };
+            }
+          }
+
+          updated[fieldId] = field;
         }
 
-        updated[fieldId] = field;
-      }
-
-      await getProjectStore().updateProject(projectId, { stageDetails: updated });
+        await getProjectStore().updateProject(projectId, { stageDetails: updated });
+        return updated;
+      });
       res.status(200).json(updated);
     }),
   );

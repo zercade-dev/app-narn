@@ -37,13 +37,18 @@ export const SPEED_ENV_NAMES: Record<string, string> = {
   copilot: 'GITHUB_TOKEN',
 };
 
-/** Module config for a speed call. Numbered replies stay off; the AI SDK's own retries would hide spend. */
+/** Numbered replies mirror the router; FREEWAY_BENCH_INDEXED=0 opts out. */
+export function benchIndexedReplies(): boolean {
+  return process.env.FREEWAY_BENCH_INDEXED !== '0';
+}
+
+/** Module config for a speed call. Numbered replies follow the router; the AI SDK's own retries would hide spend. */
 export function speedModuleConfig(providerKey: string, model: FreeTierModel, secret: string): Record<string, unknown> {
   return {
     model: model.id,
     ...(providerKey === 'copilot' ? { githubToken: secret } : { apiKey: secret }),
     maxRetries: 0,
-    indexedBatchReplies: false,
+    indexedBatchReplies: benchIndexedReplies(),
     ...(model.useStructuredOutput !== undefined ? { useStructuredOutput: model.useStructuredOutput } : {}),
   };
 }

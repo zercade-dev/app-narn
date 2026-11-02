@@ -21,6 +21,7 @@
  * the languages sequentially, so it has its own `run` rather than the base's
  * per-batch terminal flip.
  */
+import { stageDetailsWriteLock } from '../utils/stage-details-lock.js';
 import {
   type AiRunModuleSelection,
   type GlobalConfig,
@@ -409,37 +410,40 @@ export class StageDetailsEngine extends BackgroundRunEngine<never> {
 
         // Reload before writing so a concurrent PATCH edit is not clobbered
         // wholesale (last-write-wins per field is accepted single-user semantics).
-        const forWrite = await this.projectStore.loadProject(projectId);
-        const writeDetails = forWrite.stageDetails;
-        if (!writeDetails) {
-          throw new Error('project has no stage details to translate');
-        }
-        const byEntry = new Map(results.map((r) => [r.entryId, r]));
-        // Tracks whether ANY field for this language was actually written below —
-        // a language whose fields all came back with `result.error` (e.g. every
-        // field failed to parse from the provider response) must NOT count as
-        // completed just because the call itself didn't throw.
+        // Held across load->write so a concurrent PATCH is serialized, not clobbered.
         let anyFieldWritten = false;
-        for (const fieldId of fields) {
-          const result = byEntry.get(`stage:${fieldId}`);
-          if (!result || result.error) {
-            if (result?.error) {
-              this.recordFailure(
-                status,
-                { entryId: `stage:${fieldId}`, targetLanguage: lang },
-                result.error,
-              );
-            }
-            continue;
+        await stageDetailsWriteLock.withLock(projectId, async () => {
+          const forWrite = await this.projectStore.loadProject(projectId);
+          const writeDetails = forWrite.stageDetails;
+          if (!writeDetails) {
+            throw new Error('project has no stage details to translate');
           }
-          writeDetails[fieldId].translations[lang] = {
-            text: result.translatedText,
-            moduleId,
-            timestamp: Date.now(),
-          };
-          anyFieldWritten = true;
-        }
-        await this.projectStore.updateProject(projectId, { stageDetails: writeDetails });
+          const byEntry = new Map(results.map((r) => [r.entryId, r]));
+          // Tracks whether ANY field for this language was actually written below —
+          // a language whose fields all came back with `result.error` (e.g. every
+          // field failed to parse from the provider response) must NOT count as
+          // completed just because the call itself didn't throw.
+          for (const fieldId of fields) {
+            const result = byEntry.get(`stage:${fieldId}`);
+            if (!result || result.error) {
+              if (result?.error) {
+                this.recordFailure(
+                  status,
+                  { entryId: `stage:${fieldId}`, targetLanguage: lang },
+                  result.error,
+                );
+              }
+              continue;
+            }
+            writeDetails[fieldId].translations[lang] = {
+              text: result.translatedText,
+              moduleId,
+              timestamp: Date.now(),
+            };
+            anyFieldWritten = true;
+          }
+          await this.projectStore.updateProject(projectId, { stageDetails: writeDetails });
+        });
         if (anyFieldWritten) status.completed++;
         this.emitProgress(status);
       }
