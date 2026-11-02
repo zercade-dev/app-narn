@@ -49,6 +49,14 @@ interface StageDetailsStore {
   ) => Promise<{ runId: string }>;
 }
 
+/**
+ * Per-project tail of in-flight PATCHes. Overlapping patches are sent one at a
+ * time so responses apply in request order: each response carries the full
+ * StageDetails as of that write, and an earlier one landing late would
+ * otherwise overwrite a newer edit already in the project store.
+ */
+const patchTails = new Map<string, Promise<unknown>>();
+
 export const useStageDetailsStore = create<StageDetailsStore>()((set) => ({
   selectedLang: null,
   chatOpen: false,
@@ -58,19 +66,28 @@ export const useStageDetailsStore = create<StageDetailsStore>()((set) => ({
   setChatOpen: (open) => set({ chatOpen: open }),
   setChatFocus: (f) => set({ chatFocus: f }),
 
-  patch: async (projectId, body) => {
-    const updated = await apiRequest<StageDetails>(`/projects/${projectId}/stage-details`, {
-      method: 'PATCH',
-      body: JSON.stringify(body),
+  patch: (projectId, body) => {
+    const run = async (): Promise<StageDetails> => {
+      const updated = await apiRequest<StageDetails>(`/projects/${projectId}/stage-details`, {
+        method: 'PATCH',
+        body: JSON.stringify(body),
+      });
+      // stageDetails lives on the project object; merge the server's full
+      // updated StageDetails into the projects array locally (sibling pattern:
+      // project-store's updateProject / setManualEditAuditEnabled) so components
+      // reading `project.stageDetails` re-render — no second network call.
+      useProjectStore.setState((s) => ({
+        projects: s.projects.map((p) => (p.id === projectId ? { ...p, stageDetails: updated } : p)),
+      }));
+      return updated;
+    };
+    const result = (patchTails.get(projectId) ?? Promise.resolve()).then(run, run);
+    const tail = result.catch(() => undefined);
+    patchTails.set(projectId, tail);
+    void tail.then(() => {
+      if (patchTails.get(projectId) === tail) patchTails.delete(projectId);
     });
-    // stageDetails lives on the project object; merge the server's full
-    // updated StageDetails into the projects array locally (sibling pattern:
-    // project-store's updateProject / setManualEditAuditEnabled) so components
-    // reading `project.stageDetails` re-render — no second network call.
-    useProjectStore.setState((s) => ({
-      projects: s.projects.map((p) => (p.id === projectId ? { ...p, stageDetails: updated } : p)),
-    }));
-    return updated;
+    return result;
   },
 
   startTranslate: async (projectId, body) => {
