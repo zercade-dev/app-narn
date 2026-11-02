@@ -423,6 +423,23 @@
             "zh-hant": 0.96
           },
           "speedMsPerString": 232
+        },
+        {
+          "id": "gemini-3.5-flash-lite",
+          "qualityTier": 2,
+          "useStructuredOutput": true,
+          "maxBatch": 20,
+          "charBudget": 8000,
+          "batchCeiling": 40,
+          "contextLength": 1048576,
+          "limits": [
+            { "window": "rpm", "limit": 15 },
+            { "window": "tpm", "limit": 250000 },
+            { "window": "rpd", "limit": 500 }
+          ],
+          "langScores": { "es": 99, "fr": 98, "id": 97, "th": 96 },
+          "langPassPriors": { "es": 0.92, "fr": 0.96, "id": 1, "th": 0.96 },
+          "speedMsPerString": 139
         }
       ]
     },

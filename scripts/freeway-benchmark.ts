@@ -72,7 +72,7 @@ import {
   type SpeedResultsFile,
 } from './freeway-benchmark/lib.js';
 import { formatSnapshotJson } from './freeway-benchmark/format.js';
-import { planSpeed, runSpeedPass, SPEED_ENV_NAMES } from './freeway-benchmark/speed.js';
+import { benchIndexedReplies, planSpeed, runSpeedPass, SPEED_ENV_NAMES } from './freeway-benchmark/speed.js';
 
 import {
   chunkArray,
@@ -615,7 +615,7 @@ async function getOrCreateModule(
           // retry loop (default 2, i.e. 3 attempts) would otherwise burn free-tier quota
           // silently and undercount `requests`/`--max-requests` by up to 3x on any failing call.
           maxRetries: 0,
-          indexedBatchReplies: false,
+          indexedBatchReplies: benchIndexedReplies(),
           ...(snapModel.useStructuredOutput !== undefined ? { useStructuredOutput: snapModel.useStructuredOutput } : {}),
         };
   const mod = factory(config);
