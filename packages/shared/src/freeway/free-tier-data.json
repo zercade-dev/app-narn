@@ -270,7 +270,7 @@
         },
         {
           "id": "gemini-3.6-flash",
-          "qualityTier": 3,
+          "qualityTier": 4,
           "useStructuredOutput": true,
           "maxBatch": 30,
           "charBudget": 24000,

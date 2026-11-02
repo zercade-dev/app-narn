@@ -3,6 +3,9 @@
  * (band) a bucket must have to attempt it. Higher bands are harder: long,
  * mask-dense, length-limited, toned, or hard-target-language strings fail
  * more on weak models, and every failure costs a full extra request.
+ * "Length-limited" means the source is long enough to put pressure on the
+ * target language's output limit (see LENGTH_LIMIT_PRESSURE_RATIO in
+ * resolve.ts), not merely that the language has a limit.
  */
 import type { DifficultyBand, FreewayJob, JobGroup } from './types.js';
 
