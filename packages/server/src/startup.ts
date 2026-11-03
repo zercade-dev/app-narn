@@ -3,7 +3,7 @@ import { moduleRegistry } from './modules/M6-module-registry.js';
 import type { StaticModuleEntry } from './modules/M6-module-registry.js';
 import { STATIC_MODULES } from './modules/module-index.js';
 import { isCloudMode } from './identity/registry.js';
-import { runInstanceMigration, ensureDefaultInstances } from './modules/M27-instance-migration.js';
+import { runInstanceMigration } from './modules/M27-instance-migration.js';
 import { runEndpointTypeMigration } from './modules/M27b-endpoint-type-migration.js';
 import { getGlobalConfigStore, getMigrationPool, runMigrations } from './storage/index.js';
 import { NoTenantContextError, runWithTenant } from './storage/pg/tenant-context.js';
@@ -68,18 +68,10 @@ export async function initTenant(userId: string): Promise<void> {
     const instanceableBaseIds = new Set(
       activeModules.filter((m) => m.manifest.instanceable !== false).map((m) => m.manifest.id),
     );
-    const displayName = (baseId: string): string =>
-      activeModules.find((m) => m.manifest.id === baseId)?.manifest.name ?? baseId;
-    await runInstanceMigration(instanceableBaseIds, displayName).catch(
-      rethrowMissingTenant('Instance migration failed'),
-    );
-    // Local mode only: give a fresh workspace its `<base>:default` instances so
-    // "Enable a module" lists each provider. Cloud tenants are unchanged.
-    if (!isCloudMode()) {
-      await ensureDefaultInstances(instanceableBaseIds, displayName).catch(
-        rethrowMissingTenant('Default instance seeding failed'),
-      );
-    }
+    await runInstanceMigration(instanceableBaseIds, (baseId) => {
+      const name = activeModules.find((m) => m.manifest.id === baseId)?.manifest.name ?? baseId;
+      return name;
+    }).catch(rethrowMissingTenant('Instance migration failed'));
     await runEndpointTypeMigration().catch(rethrowMissingTenant('Endpoint-type migration failed'));
     const instances = await getGlobalConfigStore()
       .listModuleInstances()

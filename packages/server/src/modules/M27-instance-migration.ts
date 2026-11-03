@@ -288,39 +288,3 @@ export async function runInstanceMigration(
   });
   return { migrated: true, instances };
 }
-
-/**
- * Register a `<base>:default` instance for every instanceable base that has no
- * instance at all yet. {@link runInstanceMigration} only converts bases that
- * already have a stored config, so a fresh workspace ended up with zero
- * instances and the "Enable a module" list offered only "Add another … instance".
- * The default is registered disabled with no config; the user enables it like any
- * other instance. Idempotent, and a base that already has any instance (even a
- * non-default one) is left alone.
- */
-export async function ensureDefaultInstances(
-  instanceableBaseIds: ReadonlySet<string>,
-  displayName: (baseModuleId: string) => string,
-  stores: { gcs?: GlobalConfigStore } = {},
-): Promise<ModuleInstance[]> {
-  const gcs = stores.gcs ?? getGlobalConfigStore();
-  const existing = await gcs.listModuleInstances();
-  const basesWithInstance = new Set(existing.map((i) => i.baseModuleId));
-  const created: ModuleInstance[] = [];
-  for (const baseId of instanceableBaseIds) {
-    if (basesWithInstance.has(baseId)) continue;
-    const instance: ModuleInstance = {
-      instanceId: buildModuleInstanceId(baseId, DEFAULT_INSTANCE_SLUG),
-      baseModuleId: baseId,
-      displayName: displayName(baseId),
-    };
-    await gcs.addModuleInstance(instance);
-    created.push(instance);
-  }
-  if (created.length > 0) {
-    logger.info('instance-migration:default-instances-seeded', {
-      createdInstances: created.map((i) => i.instanceId),
-    });
-  }
-  return created;
-}
