@@ -24,7 +24,7 @@ Platzhalter und Markup-Tags im eigenen Text bleiben unangetastet — kommt einer
 
 ## In das eigene Spiel bringen
 
-Im Export-Bereich **Pseudo-Text exportieren als** auf eine Sprache setzen, die aktuell nicht ausgeliefert wird — Deutsch, zum Beispiel —, dann die Datei herunterladen und im Spiel mit dieser gewählten Sprache laden. Die Spalte der gewählten Sprache wird nur für diesen einen Download mit dem Pseudo-Test-Text gefüllt; gespeichert ändert sich nichts, und die echten Übersetzungen sind beim nächsten Export noch da.
+Im Export-Bereich **Pseudo-Text exportieren als** auf eine Sprache setzen, die aktuell nicht ausgeliefert wird — Deutsch, zum Beispiel; angeboten werden nur Sprachen, die unter *Zielsprachen* angehakt sind, also dort zuerst anhaken —, dann die Datei herunterladen und im Spiel mit dieser gewählten Sprache laden. Die Spalte der gewählten Sprache wird nur für diesen einen Download mit dem Pseudo-Test-Text gefüllt; gespeichert ändert sich nichts, und die echten Übersetzungen sind beim nächsten Export noch da.
 
 Ist das Testen abgeschlossen, erneut exportieren, mit der Ersetzung wieder auf **Keine Ersetzung** gesetzt. Ein normaler Export enthält nie eine Pseudo-Test-Spalte — der Pseudo-Text erreicht das eigene Spiel nur über die obige Ersetzung —, daher hat eingeschaltetes Pseudo Test keine Auswirkung auf die ausgelieferten Dateien.
 

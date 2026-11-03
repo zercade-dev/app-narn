@@ -33,7 +33,9 @@ Anahtar vermediğiniz bir sağlayıcı yalnızca atlanır. Bir anahtar daha ekle
 
 ## Havuzu izlemek
 
-Yapılandırma ekranındaki **NARN Freeway** paneli bütün havuzu tek bakışta gösterir: her sağlayıcının anahtar durumu ve her modelin **Durum**u, **Kalan** kotası, **Sonraki sıfırlama**sı ve dil bazında son **Geçme oranı**.
+Yapılandırma ekranındaki **NARN Freeway** paneli bütün havuzu tek bakışta gösterir: her sağlayıcının anahtar durumu ve her modelin **Durum**u, **Kalan** kotası, **Sonraki sıfırlama**sı ve 0–100 arası üç puanı — **Çeviri** kalitesi, **Hız** ve **Genel** — ardından dil bazında son **Geçme oranı**. Toplu iş için fazla yavaş olan bir model, hız puanı yerine **Çok yavaş** gösterir; **Ölçülmedi** ise NARN'ın henüz o model için verisi olmadığı anlamına gelir.
+
+Sağlayıcı listesinin üstünde iki ayar bulunur. **Önceliklendir**, havuzun kalite ile hızı nasıl dengeleyeceğini seçer: **Kalite** çeviri kalitesini öne alır ve hızı yalnızca eşitlik bozmak için kullanır, **Dengeli** (varsayılan) daha hızlı ve iyi bir model varken yavaş modellerden kaçınır, **Hız** ise çeviri kalitesini korumaya devam ederek daha hızlı modelleri öne alır. **Her zaman daha düşük kaliteli modellerle devam et** ise yalnızca daha zayıf modeller kaldığında ne olacağını belirler — aşağıya bakın.
 
 Her sağlayıcının yanında, Freeway'in onu nasıl kullanacağını denetleyen bir açılır menü de vardır: **Otomatik** havuzun her zamanki gibi seçmesini sağlar, adlandırılmış bir örnek seçmek Freeway'i o hesaba sabitler, **Devre dışı** ise sağlayıcıyı havuzdan tamamen çıkarır — modülü başka hiçbir yerde kapatmadan. Bu açılır menü yalnızca havuzun otomatik seçimlerini etkiler ve kendi hesabınızın bir ayarıdır: sağlayıcıyı doğrudan adıyla belirten bir yönlendirme kuralı onu kullanmayı sürdürür, projelerinizde kendi yönlendirmeleriyle çalışan başkaları da kendi Freeway ayarlarına uyar. Sürmekte olan bir çeviri, yeni devre dışı bırakılan bir sağlayıcıdan bir sonraki yığında ayrılır; zaten başlamış olan diğer çalıştırmalar ise başladıkları modelle tamamlanabilir. Devre dışı bir sağlayıcıyı yeniden Otomatik'e (ya da adlandırılmış bir örneğe) çevirmek, kaldığı yerden devam eder.
 
@@ -52,6 +54,10 @@ Bir modelin durumu şunlardan biridir:
 Havuzu tüketen bir çalıştırma başarısız olmaz. **Ücretsiz kota bekleniyor** durumuna geçer, henüz yapmadığı eşleşmeleri saklar ve bir sağlayıcının hakkı sıfırlanır sıfırlanmaz kendiliğinden devam eder — bırakıp sonra dönebilirsiniz.
 
 Beklemek istemiyorsanız çalıştırmayı [Etkinlik](guide:usage-activity) sekmesinde açın ve kalan eşleşmeleri ücretli bir sağlayıcıyla bitirmek için **Şimdi başka modülle sürdür…**'ü, havuzu hemen yeniden denemek için **Ücretsiz havuzu yeniden dene**'yi kullanın.
+
+## Yalnızca daha zayıf modeller kaldığında
+
+Bazı metinler hâlâ ücretsiz olan modellerden daha güçlü bir model ister. Kalan modeller bir çalıştırmanın ihtiyaç duyduğu kalitenin altında kaldığında çalıştırma **duraklar** ve [Etkinlik](guide:usage-activity) sekmesindeki kartı bunu söyler; kalan en iyi modeli ve bilebiliyorsa daha iyilerinin yaklaşık ne zaman boşalacağını belirtir. Beklemeye devam edebilir, **İşlemi iptal et** diyebilir ya da düşük kaliteli modellerle bitirmek için **Devam et…** seçebilirsiniz; seçim o çalıştırmanın geri kalanı için geçerlidir ve ürettiği dizeler daha sonra bulup gözden geçirebilmeniz için işaretlenir. Duraklamayı atlamak için Freeway panelinde **Her zaman daha düşük kaliteli modellerle devam et** seçeneğini açın — çalıştırmalar o zaman sormadan biter ve bu dizeler yine işaretlenir.
 
 ## Kalite kademeleri ve yalnızca gerekeni yükseltmek
 

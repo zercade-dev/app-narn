@@ -12,7 +12,7 @@ Die App wird als Docker-Image plus einer `docker-compose.yml` ausgeliefert, die 
 
 ## Ausführen
 
-Im Ordner, der `docker-compose.yml` enthält — die oberste Ebene der NARN-Quellen:
+Im Ordner, der `docker-compose.yml` enthält — eine heruntergeladene Kopie dieser einen Datei genügt, oder die oberste Ebene der NARN-Quellen:
 
 ```
 docker compose up

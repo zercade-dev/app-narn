@@ -7,7 +7,7 @@ API-Schlüssel von Anbietern werden nie in einfachen Konfigurationsdateien oder 
 <!-- local-only -->
 ## Passwort-Tresor (selbst gehostet)
 
-Bei einer selbst gehosteten Installation ist der Tresor eine verschlüsselte lokale Datei. Das erste Entsperren legt sie an: Das gewählte Passwort wird zum Tresor-Passwort, und jede gespeicherte Zugangsdaten verschlüsselt die Datei neu. Das Passwort selbst wird nirgends gespeichert — ohne es lässt sich die Datei nicht entschlüsseln. Entsperren über **Globale Konfiguration** oder über jede Karte mit *Tresor gesperrt*.
+Bei einer selbst gehosteten Installation ist der Tresor eine verschlüsselte lokale Datei. Das erste Entsperren legt sie an: Das gewählte Passwort wird zum Tresor-Passwort, und jede gespeicherte Zugangsdaten verschlüsselt die Datei neu. Das Passwort muss mindestens 12 Zeichen lang sein und einen Großbuchstaben, einen Kleinbuchstaben, eine Ziffer und ein Sonderzeichen enthalten. Das Passwort selbst wird nirgends gespeichert — ohne es lässt sich die Datei nicht entschlüsseln. Entsperren über **Globale Konfiguration** oder über jede Karte mit *Tresor gesperrt*.
 <!-- /local-only -->
 
 ## Gerätegebundener Tresor (Cloud)

@@ -33,7 +33,9 @@ Nhà cung cấp mà bạn chưa nhập khóa thì đơn giản là bị bỏ qua
 
 ## Theo dõi kho
 
-Bảng **NARN Freeway** trên màn hình cấu hình cho bạn thấy cả kho trong một cái nhìn: trạng thái khóa của từng nhà cung cấp, và với mỗi mô hình là **Trạng thái**, hạn mức **Còn lại**, **Đặt lại tiếp theo**, cùng **Tỷ lệ đạt** gần đây theo từng ngôn ngữ.
+Bảng **NARN Freeway** trên màn hình cấu hình cho bạn thấy cả kho trong một cái nhìn: trạng thái khóa của từng nhà cung cấp, và với mỗi mô hình là **Trạng thái**, hạn mức **Còn lại**, **Đặt lại tiếp theo**, cùng ba điểm số từ 0 đến 100 — chất lượng **Bản dịch**, **Tốc độ** và **Tổng thể** — rồi đến **Tỷ lệ đạt** gần đây theo từng ngôn ngữ. Mô hình quá chậm cho công việc theo lô sẽ hiện **Quá chậm** thay cho điểm tốc độ, còn **Chưa đo** nghĩa là NARN chưa có dữ liệu về nó.
+
+Có hai thiết lập nằm phía trên danh sách nhà cung cấp. **Ưu tiên** chọn cách kho cân bằng giữa chất lượng và tốc độ: **Chất lượng** ưu tiên chất lượng bản dịch và chỉ dùng tốc độ để phân định khi bằng nhau, **Cân bằng** (mặc định) tránh các mô hình chậm khi có mô hình nhanh hơn mà vẫn tốt, còn **Tốc độ** ưu tiên các mô hình nhanh hơn nhưng vẫn bảo vệ chất lượng bản dịch. **Luôn tiếp tục với mô hình chất lượng thấp hơn** quyết định điều xảy ra khi chỉ còn các mô hình yếu hơn — xem bên dưới.
 
 Mỗi nhà cung cấp còn có một menu thả xuống bên cạnh để kiểm soát cách Freeway dùng nó: **Tự động** để kho tự chọn như thường lệ, chọn một thực thể có tên sẽ ghim Freeway vào đúng tài khoản đó, còn **Đã tắt** đưa nhà cung cấp đó ra khỏi kho hoàn toàn — mà không tắt mô-đun ở bất kỳ nơi nào khác. Menu thả xuống chỉ chi phối các lựa chọn tự động của kho và là thiết lập của riêng tài khoản bạn: một quy tắc điều phối trỏ thẳng tới nhà cung cấp đó vẫn tiếp tục dùng nó, còn những người khác cùng làm việc trong dự án của bạn bằng điều phối riêng của họ thì theo thiết lập Freeway của chính họ. Một lần chạy dịch đang diễn ra sẽ rời khỏi nhà cung cấp vừa bị tắt ngay từ lô tiếp theo; các lần chạy khác đã bắt đầu trước đó thì có thể hoàn tất bằng chính mô hình mà chúng đã khởi đầu. Chuyển một nhà cung cấp đã tắt trở lại Tự động (hoặc một thực thể có tên) sẽ tiếp tục đúng chỗ nó dừng lại.
 
@@ -52,6 +54,10 @@ Trạng thái của một mô hình là một trong số:
 Một lần chạy làm cạn kho sẽ không thất bại. Nó chuyển sang **Đang chờ hạn mức miễn phí**, giữ lại những cặp chưa làm, và tự tiếp tục ngay khi hạn mức của một nhà cung cấp được đặt lại — bạn có thể để đó rồi quay lại sau.
 
 Nếu không muốn chờ, hãy mở lần chạy đó ở tab [Hoạt động](guide:usage-activity) và dùng **Tiếp tục ngay với…** để hoàn tất các cặp còn lại bằng một nhà cung cấp trả phí, hoặc **Thử lại kho miễn phí** để thử lại kho ngay lập tức.
+
+## Khi chỉ còn các mô hình yếu hơn
+
+Một số văn bản cần mô hình mạnh hơn những mô hình vẫn còn miễn phí. Khi các mô hình còn lại thấp hơn chất lượng mà một lần chạy cần, lần chạy đó sẽ **tạm dừng** và thẻ của nó trong thẻ [Hoạt động](guide:usage-activity) cho biết điều này, nêu tên mô hình tốt nhất còn lại và, khi biết được, khoảng khi nào các mô hình tốt hơn sẽ rảnh. Bạn có thể tiếp tục chờ, **Hủy lượt chạy**, hoặc chọn **Tiếp tục…** để hoàn tất bằng các mô hình chất lượng thấp hơn; lựa chọn này áp dụng cho phần còn lại của lần chạy đó, và các chuỗi do nó tạo ra được đánh dấu để bạn tìm và xem lại sau. Bật **Luôn tiếp tục với mô hình chất lượng thấp hơn** trong bảng Freeway để bỏ qua bước tạm dừng — các lần chạy khi đó hoàn tất mà không hỏi, và những chuỗi đó vẫn được đánh dấu.
 
 ## Bậc chất lượng, và chỉ nâng cấp phần thật sự cần
 

@@ -33,7 +33,9 @@ Un proveedor al que no le hayas dado clave simplemente se omite. Añadir una cla
 
 ## Cómo vigilar el conjunto
 
-El panel **NARN Freeway** de la pantalla de configuración muestra todo el conjunto de un vistazo: el estado de la clave de cada proveedor y, por modelo, su **Estado**, la cuota **Restante**, el **Próximo reinicio** y la **Tasa de aprobación** reciente por idioma.
+El panel **NARN Freeway** de la pantalla de configuración muestra todo el conjunto de un vistazo: el estado de la clave de cada proveedor y, por modelo, su **Estado**, la cuota **Restante**, el **Próximo reinicio** y tres puntuaciones de 0 a 100 — calidad de **Traducción**, **Velocidad** y **Global** —, seguidas de la **Tasa de aprobación** reciente por idioma. Un modelo demasiado lento para el trabajo por lotes muestra **Demasiado lento** en lugar de una puntuación de velocidad, y **Sin medir** significa que NARN todavía no tiene datos de él.
+
+Dos ajustes están encima de la lista de proveedores. **Priorizar** elige cómo el conjunto equilibra calidad y velocidad: **Calidad** favorece la calidad de traducción y usa la velocidad solo para desempatar, **Equilibrado** (el predeterminado) evita los modelos lentos cuando hay uno bueno más rápido, y **Velocidad** favorece los modelos más rápidos sin dejar de proteger la calidad de traducción. **Continuar siempre con modelos de menor calidad** controla lo que ocurre cuando solo quedan modelos más débiles — véase más abajo.
 
 Cada proveedor tiene además un desplegable al lado que controla cómo lo usa Freeway: **Automático** deja que el conjunto elija como de costumbre, una instancia con nombre fija Freeway a esa cuenta concreta, y **Desactivado** saca al proveedor del conjunto por completo — sin apagar el módulo en ningún otro sitio. El desplegable solo orienta las elecciones automáticas del conjunto y es un ajuste de tu propia cuenta: una regla de enrutamiento que apunta directamente a ese proveedor lo sigue usando, y cualquier otra persona que trabaje en tus proyectos con su propio enrutamiento sigue sus propios ajustes de Freeway. Una traducción ya en curso deja de usar un proveedor recién desactivado a partir de su siguiente lote; otras ejecuciones ya iniciadas pueden terminar con el modelo con el que empezaron. Si vuelves a poner un proveedor desactivado en Automático (o en una instancia con nombre), retoma justo donde lo dejó.
 
@@ -52,6 +54,10 @@ El estado de un modelo es uno de estos:
 Una ejecución que agota el conjunto no falla. Pasa a **Esperando cuota gratuita**, conserva los pares que le faltan y se reanuda sola en cuanto se reinicia la asignación de algún proveedor — puedes dejarla y volver más tarde.
 
 Si prefieres no esperar, abre la ejecución en la pestaña [Actividad](guide:usage-activity) y usa **Reanudar ahora con…** para terminar los pares restantes con un proveedor de pago, o **Reintentar con la cuota gratuita** para volver a intentarlo al momento.
+
+## Cuando solo quedan modelos más débiles
+
+Algunos textos necesitan un modelo más potente que los que siguen siendo gratuitos. Cuando los modelos restantes están por debajo de la calidad que necesita una ejecución, la ejecución se **pausa** y su tarjeta en la pestaña [Actividad](guide:usage-activity) lo indica, nombrando el mejor modelo que queda y, cuando puede saberlo, aproximadamente cuándo se liberarán otros mejores. Puedes seguir esperando, **Cancelar ejecución**, o elegir **Continuar…** para terminar con los modelos de menor calidad; la elección se aplica al resto de esa ejecución, y las cadenas que produce quedan marcadas para que puedas encontrarlas y revisarlas después. Activa **Continuar siempre con modelos de menor calidad** en el panel de Freeway para saltarte la pausa — las ejecuciones terminan entonces sin preguntar, y esas cadenas siguen marcadas.
 
 ## Niveles de calidad, y mejorar solo lo que hace falta
 

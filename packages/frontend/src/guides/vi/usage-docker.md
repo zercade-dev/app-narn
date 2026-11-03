@@ -12,7 +12,7 @@
 
 ## Chạy ứng dụng
 
-Từ thư mục chứa `docker-compose.yml` — thư mục gốc của mã nguồn NARN:
+Từ thư mục chứa `docker-compose.yml` — một bản tải về của riêng tệp đó là đủ, hoặc thư mục gốc của mã nguồn NARN:
 
 ```
 docker compose up

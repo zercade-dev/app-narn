@@ -6,7 +6,7 @@ Le parcours complet pour un nouveau projet : activer des fournisseurs, importer
 
 ## 1. Activer des fournisseurs et stocker les identifiants
 
-1. Ouvrez **Configuration globale** et **activez un module** pour chaque fournisseur souhaité (Anthropic, OpenAI, DeepL, et ainsi de suite). Un module peut avoir plusieurs **instances nommées** — utile pour deux configurations d’un même fournisseur avec des clés ou des réglages par défaut différents.
+1. Ouvrez **Configuration globale** et **activez un module** pour chaque fournisseur souhaité (Anthropic, OpenAI, DeepL, et ainsi de suite) depuis la liste **Activer un module** — DeepL y figure sous son nom, tandis que les fournisseurs d’IA apparaissent sous la forme **Ajouter une autre instance de …**, qui crée la première instance du fournisseur. Un module peut avoir plusieurs **instances nommées** — utile pour deux configurations d’un même fournisseur avec des clés ou des réglages par défaut différents.
 2. Les identifiants de fournisseur sont stockés dans le **coffre de credentials** chiffré — configurez-le à la première utilisation et déverrouillez-le une fois par session. Voir le guide *Coffre de credentials* pour son fonctionnement.
 3. Choisissez un **modèle** (et un **effort de raisonnement** optionnel) par module ou instance. Les modèles moins chers traduisent moins bien, attendez-vous donc à quelques essais avant de trouver votre équilibre. Surveillez l’**effort de raisonnement** — sur les modèles à raisonnement, il peut multiplier rapidement la facturation.
 

@@ -9,11 +9,7 @@ penerjemahan pertama — lewati di percobaan pertama dan kembali lagi nanti.
 
 ## 1. Aktifkan penyedia dan simpan kredensial
 
-1. Buka **Konfigurasi Global** dan **aktifkan sebuah modul** untuk setiap
-   penyedia yang Anda inginkan (Anthropic, OpenAI, DeepL, dan sebagainya).
-   Sebuah modul bisa memiliki beberapa **instans bernama** — berguna untuk
-   dua konfigurasi dari penyedia yang sama dengan kunci atau bawaan yang
-   berbeda.
+1. Buka **Konfigurasi Global** dan **aktifkan sebuah modul** untuk setiap penyedia yang Anda inginkan (Anthropic, OpenAI, DeepL, dan sebagainya) dari daftar **Aktifkan sebuah modul** — DeepL tercantum dengan namanya, sedangkan penyedia AI muncul sebagai **Tambahkan instans … lagi…**, yang membuat instans pertama penyedia itu. Sebuah modul bisa memiliki beberapa **instans bernama** — berguna untuk dua konfigurasi dari penyedia yang sama dengan kunci atau bawaan yang berbeda.
 2. Kredensial penyedia disimpan dalam **brankas kredensial** terenkripsi —
    siapkan saat pertama kali dipakai dan buka kuncinya sekali per sesi.
    Lihat panduan *Brankas Kredensial* untuk cara kerjanya.

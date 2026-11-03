@@ -33,7 +33,9 @@ Un provider a cui non hai dato una chiave viene semplicemente saltato. Ogni chia
 
 ## Tenere d'occhio il pool
 
-Il pannello **NARN Freeway** nella schermata di configurazione mostra tutto il pool a colpo d'occhio: lo stato della chiave di ogni provider e, per ciascun modello, il suo **Stato**, la quota **Rimanente**, il **Prossimo reset** e il recente **Tasso di superamento** per lingua.
+Il pannello **NARN Freeway** nella schermata di configurazione mostra tutto il pool a colpo d'occhio: lo stato della chiave di ogni provider e, per ciascun modello, il suo **Stato**, la quota **Rimanente**, il **Prossimo reset** e tre punteggi da 0 a 100 — qualità della **Traduzione**, **Velocità** e **Complessivo** — seguiti dal recente **Tasso di superamento** per lingua. Un modello troppo lento per il lavoro in batch mostra **Troppo lento** al posto del punteggio di velocità, e **Non misurato** significa che NARN non ha ancora dati su di esso.
+
+Due impostazioni stanno sopra l'elenco dei provider. **Priorità** sceglie come il pool bilancia qualità e velocità: **Qualità** favorisce la qualità della traduzione e usa la velocità solo per decidere a parità, **Bilanciata** (predefinita) evita i modelli lenti quando ce n'è uno buono e più veloce, e **Velocità** favorisce i modelli più veloci proteggendo comunque la qualità della traduzione. **Continua sempre con modelli di qualità inferiore** controlla cosa succede quando restano solo modelli più deboli — vedi sotto.
 
 Ogni provider ha anche un menu a tendina accanto che controlla come Freeway lo usa: **Automatico** lascia scegliere il pool come al solito, un'istanza con nome vincola Freeway a quell'account specifico, e **Disattivato** toglie del tutto il provider dal pool — senza spegnere il modulo altrove. Il menu a tendina orienta soltanto le scelte automatiche del pool ed è un'impostazione del tuo account: una regola di routing che indica direttamente il provider continua a usarlo, e chiunque altro lavori ai tuoi progetti con il proprio routing segue le proprie impostazioni di Freeway. Una traduzione già in corso smette di usare un provider appena disattivato a partire dal lotto successivo; le altre esecuzioni già avviate potrebbero concludersi sul modello con cui hanno iniziato. Rimettere un provider disattivato su Automatico (o su un'istanza con nome) riprende esattamente da dove si era interrotto.
 
@@ -52,6 +54,10 @@ Lo stato di un modello è uno tra:
 Un'esecuzione che esaurisce il pool non fallisce. Passa a **In attesa di quota gratuita**, conserva le coppie ancora da fare e riparte da sola non appena la franchigia di un provider si azzera — puoi lasciarla lì e tornare più tardi.
 
 Se preferisci non aspettare, apri l'esecuzione nella scheda [Attività](guide:usage-activity) e usa **Riprendi ora con…** per completare le coppie rimaste con un provider a pagamento, oppure **Riprova il pool gratuito** per ritentare subito.
+
+## Quando restano solo modelli più deboli
+
+Certi testi richiedono un modello più solido di quelli ancora gratuiti. Quando i modelli rimasti sono sotto la qualità che serve a un'esecuzione, l'esecuzione va in **pausa** e la sua scheda nella scheda [Attività](guide:usage-activity) lo dice, indicando il miglior modello rimasto e, quando è in grado di saperlo, più o meno quando se ne libereranno di migliori. Puoi continuare ad aspettare, **Annulla esecuzione**, oppure scegliere **Continua…** per completare con i modelli di qualità inferiore; la scelta vale per il resto di quell'esecuzione e le stringhe prodotte vengono contrassegnate, così potrai ritrovarle e rivederle in seguito. Attiva **Continua sempre con modelli di qualità inferiore** nel pannello Freeway per saltare la pausa — le esecuzioni finiscono allora senza chiedere, e quelle stringhe restano comunque contrassegnate.
 
 ## Livelli di qualità, e migliorare solo ciò che serve
 

@@ -6,7 +6,7 @@ Der vollständige Weg für ein neues Projekt: Anbieter aktivieren, eigene Eintr�
 
 ## 1. Anbieter aktivieren und Zugangsdaten speichern
 
-1. **Globale Konfiguration** öffnen und für jeden gewünschten Anbieter (Anthropic, OpenAI, DeepL und so weiter) **ein Modul aktivieren**. Ein Modul kann mehrere **benannte Instanzen** haben — nützlich für zwei Konfigurationen desselben Anbieters mit unterschiedlichen Schlüsseln oder Standardwerten.
+1. **Globale Konfiguration** öffnen und für jeden gewünschten Anbieter (Anthropic, OpenAI, DeepL und so weiter) **ein Modul aktivieren**, und zwar über die Liste **Modul aktivieren** — DeepL steht dort namentlich, die KI-Anbieter erscheinen als **Weitere …-Instanz hinzufügen…**, was die erste Instanz des Anbieters anlegt. Ein Modul kann mehrere **benannte Instanzen** haben — nützlich für zwei Konfigurationen desselben Anbieters mit unterschiedlichen Schlüsseln oder Standardwerten.
 2. Zugangsdaten von Anbietern werden im verschlüsselten **Zugangsdaten-Tresor** gespeichert — beim ersten Gebrauch einrichten und einmal pro Sitzung entsperren. Wie das funktioniert, steht im Guide *Zugangsdaten-Tresor*.
 3. Ein **Modell** (und optional **Reasoning-Aufwand**) je Modul oder Instanz wählen. Günstigere Modelle übersetzen schlechter — mit etwas Ausprobieren findet sich der eigene Sweet Spot. Beim **Reasoning-Aufwand** aufpassen — bei Thinking-Modellen kann er die Kosten schnell vervielfachen.
 

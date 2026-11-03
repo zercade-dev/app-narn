@@ -11,12 +11,7 @@ sekali per sesi peramban; kredensial hanya didekripsi dalam memori.
 <!-- local-only -->
 ## Brankas kata sandi (mandiri)
 
-Pada instalasi mandiri, brankasnya adalah berkas lokal terenkripsi.
-Pembukaan kunci pertama membuatnya: kata sandi yang Anda pilih menjadi
-kata sandi brankas, dan setiap kredensial yang Anda simpan mengenkripsi
-ulang berkasnya. Kata sandinya sendiri tidak pernah disimpan — tanpanya,
-berkas itu tidak bisa didekripsi. Buka kuncinya dari **Konfigurasi
-Global**, atau dari kartu *Brankas terkunci* mana pun.
+Pada instalasi mandiri, brankasnya adalah berkas lokal terenkripsi. Pembukaan kunci pertama membuatnya: kata sandi yang Anda pilih menjadi kata sandi brankas, dan setiap kredensial yang Anda simpan mengenkripsi ulang berkasnya. Kata sandi harus terdiri dari minimal 12 karakter dan mencakup huruf besar, huruf kecil, angka, dan karakter khusus. Kata sandinya sendiri tidak pernah disimpan — tanpanya, berkas itu tidak bisa didekripsi. Buka kuncinya dari **Konfigurasi Global**, atau dari kartu *Brankas terkunci* mana pun.
 <!-- /local-only -->
 
 ## Brankas terikat perangkat (cloud)

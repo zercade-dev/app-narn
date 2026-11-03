@@ -20,8 +20,7 @@ junto com ela.
 
 ## Rodando
 
-A partir da pasta que contém o `docker-compose.yml` — o nível superior do
-código-fonte do NARN:
+A partir da pasta que contém o `docker-compose.yml` — uma cópia baixada desse único arquivo basta, ou o nível superior do código-fonte do NARN:
 
 ```
 docker compose up
