@@ -128,7 +128,22 @@ function predominantUsage(run: RunStatus | undefined): RunUsageEntry | undefined
   if (!entries || entries.length === 0) return undefined;
   const weight = (e: RunUsageEntry) =>
     (e.inputTokens ?? 0) + (e.outputTokens ?? 0) + (e.characters ?? 0);
-  return entries.reduce((best, e) => (weight(e) > weight(best) ? e : best));
+  // Free and paid lines of one (module, model) are the same model: merge them
+  // so the free/paid split cannot change which model wins.
+  const merged = new Map<string, { moduleId: string; model?: string; weight: number }>();
+  for (const e of entries) {
+    const key = JSON.stringify([e.moduleId, e.model ?? null]);
+    const prev = merged.get(key);
+    if (prev) prev.weight += weight(e);
+    else
+      merged.set(key, {
+        moduleId: e.moduleId,
+        ...(e.model !== undefined ? { model: e.model } : {}),
+        weight: weight(e),
+      });
+  }
+  const best = [...merged.values()].reduce((a, b) => (b.weight > a.weight ? b : a));
+  return { moduleId: best.moduleId, ...(best.model !== undefined ? { model: best.model } : {}) };
 }
 
 export function AiReviewDialog({

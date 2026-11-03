@@ -139,15 +139,13 @@ function RunCostCell({ run }: Readonly<{ run: RunStatus }>) {
   const usage = run.usageByModule ?? [];
   const estimatedCostUsd = run.estimatedCostUsd;
 
-  const tokens = tokenTotal(usage);
-  const characters = characterTotal(usage);
+  // Free usage was never billed, so the unpriced fallbacks count paid entries only.
+  const paid = usage.filter((e) => e.free === undefined);
+  const tokens = tokenTotal(paid);
+  const characters = characterTotal(paid);
 
   let summary: React.ReactNode;
-  if (isAllFreeUsage(usage)) {
-    summary = (
-      <span className={`rounded px-1 font-medium ${TINT_EMERALD}`}>{t('runs.costFree')}</span>
-    );
-  } else if (estimatedCostUsd !== undefined) {
+  if (estimatedCostUsd !== undefined && !isAllFreeUsage(usage)) {
     summary = (
       <span className="font-medium">
         {t('runs.estimatedCost', { amount: formatUsd(estimatedCostUsd) })}{' '}
@@ -166,6 +164,10 @@ function RunCostCell({ run }: Readonly<{ run: RunStatus }>) {
       <span className="text-muted-foreground">
         {t('runs.charactersOnly', { count: characters.toLocaleString() })}
       </span>
+    );
+  } else if (usage.length > paid.length) {
+    summary = (
+      <span className={`rounded px-1 font-medium ${TINT_EMERALD}`}>{t('runs.costFree')}</span>
     );
   } else {
     summary = <span className="text-muted-foreground">—</span>;
