@@ -126,6 +126,13 @@ export interface RunUsageEntry extends ProviderUsageBilling {
   moduleId: string;
   /** Estimated cost in USD, when per-token pricing is known for `model`. */
   estimatedCostUsd?: number;
+  /**
+   * Why this usage should have cost nothing: `'freeway'` (routed through the
+   * Freeway router) or `'free-model'` (an always-free `:free` model id).
+   * Absent = paid. `estimatedCostUsd` still holds the paid-rate figure, but
+   * free entries are excluded from the run's `estimatedCostUsd` total.
+   */
+  free?: 'freeway' | 'free-model';
 }
 
 /** Aggregated verdicts of a judge (AI review) run. */

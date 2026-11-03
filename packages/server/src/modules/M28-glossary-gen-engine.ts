@@ -200,7 +200,7 @@ export class GlossaryGenEngine extends BackgroundRunEngine<GlossarySuggestion> {
       // Same rationale as the suggestions buffer: the provider calls already
       // happened (and cost money) by the time generate() resolves, regardless of
       // whether a cancel raced in — so fold the usage in before the cancel check.
-      accumulateUsage(status, result.moduleId, result.usages);
+      accumulateUsage(status, result.moduleId, result.usages, { freeway: result.freeway === true });
       status.glossaryGenSummary = {
         analyzed: result.analyzed,
         suggested: result.suggestions.length,

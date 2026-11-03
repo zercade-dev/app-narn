@@ -110,9 +110,9 @@ export function formatUsd(value: number): string {
 
 type TFn = (key: string, options?: Record<string, unknown>) => string;
 
-/** Stable React key for a per-(module, model) usage entry. */
+/** Stable React key for a per-(module, model, free) usage entry. */
 export function usageEntryKey(entry: RunUsageEntry): string {
-  return `${entry.moduleId}:${entry.model ?? ''}`;
+  return `${entry.moduleId}:${entry.model ?? ''}${entry.free ? `:${entry.free}` : ''}`;
 }
 
 /** Human label for a usage entry: `moduleId` plus the model when present. */
@@ -161,4 +161,9 @@ export function usageEntryFigures(entry: RunUsageEntry, t: TFn): string {
     parts.push(t('runs.estimatedCost', { amount: formatUsd(entry.estimatedCostUsd) }));
   }
   return parts.join(' · ');
+}
+
+/** True when the run has usage and every entry is free (so it billed nothing). */
+export function isAllFreeUsage(entries: RunUsageEntry[] | undefined): boolean {
+  return !!entries && entries.length > 0 && entries.every((e) => e.free !== undefined);
 }

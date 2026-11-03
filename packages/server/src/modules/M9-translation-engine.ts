@@ -6434,7 +6434,7 @@ export class TranslationEngine {
             },
             onCall: (info) => this.recordFreewayCall(status, info, callDeps),
             onUsage: (servingModuleId, results) =>
-              this.recordUsage(status, servingModuleId, results),
+              this.recordUsage(status, servingModuleId, results, { freeway: true }),
             onSalvaged: (count) => {
               if (status.freewayStats) status.freewayStats.salvagedStrings += count;
             },
@@ -7059,7 +7059,9 @@ export class TranslationEngine {
             : 0,
         );
       }
-      this.recordUsage(status, decision.moduleId, [retryModuleResult]);
+      this.recordUsage(status, decision.moduleId, [retryModuleResult], {
+        freeway: decision.freewayBucketKey !== undefined,
+      });
       // An errored OR empty/whitespace retry keeps the first-pass text: never
       // overwrite good output with '' (mirrors M30's error||!translatedText).
       if (retryModuleResult.error || !retryModuleResult.translatedText?.trim()) {
@@ -7199,6 +7201,7 @@ export class TranslationEngine {
     status: RunStatus,
     moduleId: string,
     results: readonly (TranslationResult | undefined)[],
+    opts?: { freeway?: boolean },
   ): void {
     // Fold each call's character accounting into the run's detail totals. Done
     // separately from the token aggregation below because char-only usage (e.g.
@@ -7222,6 +7225,7 @@ export class TranslationEngine {
       status,
       moduleId,
       results.map((r) => r?.usage),
+      opts,
     );
   }
 
