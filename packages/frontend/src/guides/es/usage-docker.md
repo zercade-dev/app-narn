@@ -12,7 +12,7 @@ La aplicación se distribuye como una imagen Docker más un `docker-compose.yml`
 
 ## Ejecución
 
-Desde la carpeta que contiene `docker-compose.yml` — la raíz del código fuente de NARN:
+Desde la carpeta que contiene `docker-compose.yml` — basta con una copia descargada de ese único archivo, o la raíz del código fuente de NARN:
 
 ```
 docker compose up

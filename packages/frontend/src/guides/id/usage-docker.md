@@ -22,7 +22,7 @@ resmi bersamanya.
 
 ## Menjalankan
 
-Dari folder yang berisi `docker-compose.yml` — tingkat teratas sumber NARN:
+Dari folder yang berisi `docker-compose.yml` — salinan hasil unduhan dari satu berkas itu saja sudah cukup, atau tingkat teratas sumber NARN:
 
 ```
 docker compose up

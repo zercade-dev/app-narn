@@ -24,7 +24,7 @@ Phần giữ chỗ và thẻ đánh dấu trong văn bản của bạn đi qua n
 
 ## Đưa nó vào trò chơi
 
-Ở thẻ xuất, đặt **Xuất văn bản pseudo dưới dạng** thành một ngôn ngữ bạn hiện chưa phát hành — tiếng Đức chẳng hạn — rồi tải tệp xuống và nạp vào trò chơi với ngôn ngữ đó được chọn. Cột của ngôn ngữ đã chọn được điền bằng văn bản Pseudo Test chỉ cho lần tải xuống này; không có gì trong bộ nhớ bị thay đổi, và các bản dịch thật vẫn còn nguyên ở lần xuất kế tiếp.
+Ở thẻ xuất, đặt **Xuất văn bản pseudo dưới dạng** thành một ngôn ngữ bạn hiện chưa phát hành — tiếng Đức chẳng hạn; danh sách chỉ liệt kê các ngôn ngữ đã được đánh dấu trong *Ngôn ngữ đích*, nên hãy đánh dấu nó ở đó trước — rồi tải tệp xuống và nạp vào trò chơi với ngôn ngữ đó được chọn. Cột của ngôn ngữ đã chọn được điền bằng văn bản Pseudo Test chỉ cho lần tải xuống này; không có gì trong bộ nhớ bị thay đổi, và các bản dịch thật vẫn còn nguyên ở lần xuất kế tiếp.
 
 Khi bạn kiểm thử xong, hãy xuất lại với phần thay thế đặt về **Không thay thế**. Một lần xuất bình thường không bao giờ chứa cột Pseudo Test — văn bản pseudo chỉ tới được trò chơi của bạn qua phần thay thế nói trên — nên việc để Pseudo Test bật không ảnh hưởng tới các tệp bạn phát hành.
 

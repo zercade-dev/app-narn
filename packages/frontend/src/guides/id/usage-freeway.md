@@ -33,7 +33,9 @@ Penyedia yang belum Anda beri kunci cukup dilewati. Menambah satu kunci lagi mem
 
 ## Memantau kumpulan
 
-Panel **NARN Freeway** di layar konfigurasi menampilkan seluruh kumpulan sekilas: status kunci tiap penyedia, dan untuk tiap model **Status**-nya, **Sisa** kuota, **Reset berikutnya**, serta **Tingkat lulus** terkini per bahasa.
+Panel **NARN Freeway** di layar konfigurasi menampilkan seluruh kumpulan sekilas: status kunci tiap penyedia, dan untuk tiap model **Status**-nya, **Sisa** kuota, **Reset berikutnya**, serta tiga skor 0–100 — kualitas **Terjemahan**, **Kecepatan**, dan **Keseluruhan** — diikuti **Tingkat lulus** terkini per bahasa. Model yang terlalu lambat untuk pekerjaan batch menampilkan **Terlalu lambat** sebagai ganti skor kecepatan, dan **Belum diukur** berarti NARN belum punya data untuknya.
+
+Dua pengaturan berada di atas daftar penyedia. **Prioritaskan** memilih bagaimana kumpulan menyeimbangkan kualitas dan kecepatan: **Kualitas** mengutamakan kualitas terjemahan dan memakai kecepatan hanya sebagai penentu saat seri, **Seimbang** (bawaan) menghindari model lambat bila ada model lebih cepat yang bagus, dan **Kecepatan** mengutamakan model yang lebih cepat sambil tetap menjaga kualitas terjemahan. **Selalu lanjutkan dengan model berkualitas lebih rendah** mengatur apa yang terjadi saat hanya tersisa model yang lebih lemah — lihat di bawah.
 
 Tiap penyedia juga punya menu tarik-turun di sampingnya yang mengatur cara Freeway memakainya: **Otomatis** membiarkan kumpulan itu memilih seperti biasa, memilih instans bernama akan mengunci Freeway ke akun spesifik itu, dan **Dinonaktifkan** mengeluarkan penyedia itu sepenuhnya dari kumpulan — tanpa mematikan modulnya di tempat lain mana pun. Menu tarik-turun itu hanya mengarahkan pilihan otomatis kumpulan itu dan merupakan setelan akun Anda sendiri: aturan penyaluran yang menyebut penyedia itu secara langsung tetap memakainya, dan orang lain yang mengerjakan proyek Anda dengan penyalurannya sendiri akan mengikuti setelan Freeway miliknya sendiri. Terjemahan yang sedang berjalan akan berpindah dari penyedia yang baru dinonaktifkan pada batch berikutnya; putaran lain yang sudah dimulai mungkin akan selesai dengan model yang dipakainya sejak awal. Mengembalikan penyedia yang dinonaktifkan ke Otomatis (atau ke instans bernama) akan melanjutkan persis dari titik ia berhenti.
 
@@ -52,6 +54,10 @@ Status sebuah model adalah salah satu dari:
 Proses yang menghabiskan kumpulan itu tidak gagal. Ia berpindah ke **Menunggu kuota gratis**, menyimpan pasangan yang belum dikerjakan, dan melanjut sendiri begitu jatah salah satu penyedia direset — Anda bisa meninggalkannya lalu kembali nanti.
 
 Kalau Anda tidak mau menunggu, buka prosesnya di tab [Aktivitas](guide:usage-activity) lalu gunakan **Lanjutkan sekarang dengan…** untuk menyelesaikan sisa pasangan dengan penyedia berbayar, atau **Coba ulang kumpulan gratis** untuk mencoba kumpulan itu lagi seketika.
+
+## Ketika hanya model yang lebih lemah yang tersisa
+
+Sebagian teks membutuhkan model yang lebih kuat daripada yang masih gratis. Ketika model yang tersisa berada di bawah kualitas yang dibutuhkan sebuah proses, proses itu **dijeda** dan kartunya di tab [Aktivitas](guide:usage-activity) menyatakannya, dengan menyebut model terbaik yang tersisa dan, bila bisa diketahui, kira-kira kapan model yang lebih baik kembali tersedia. Anda bisa terus menunggu, **Batalkan proses**, atau memilih **Lanjutkan…** untuk menyelesaikannya dengan model berkualitas lebih rendah; pilihan itu berlaku untuk sisa proses tersebut, dan string yang dihasilkannya diberi tanda agar bisa Anda temukan dan tinjau nanti. Aktifkan **Selalu lanjutkan dengan model berkualitas lebih rendah** di panel Freeway untuk melewati jeda — proses lalu selesai tanpa bertanya, dan string itu tetap diberi tanda.
 
 ## Tingkat kualitas, dan menaikkan hanya yang perlu
 

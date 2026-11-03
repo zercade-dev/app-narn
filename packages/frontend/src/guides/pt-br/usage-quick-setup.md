@@ -9,10 +9,7 @@ para uma primeira tradução — pule-os numa primeira passagem e volte depois.
 
 ## 1. Ative os provedores e armazene as credenciais
 
-1. Abra a **Configuração global** e **ative um módulo** para cada provedor
-   que você quiser (Anthropic, OpenAI, DeepL, e assim por diante). Um módulo
-   pode ter várias **instâncias nomeadas** — útil para duas configurações do
-   mesmo provedor com chaves ou padrões diferentes.
+1. Abra a **Configuração global** e **ative um módulo** para cada provedor que você quiser (Anthropic, OpenAI, DeepL, e assim por diante) na lista **Ativar um módulo** — o DeepL aparece pelo nome, enquanto os provedores de IA aparecem como **Adicionar outra instância de …**, que cria a primeira instância do provedor. Um módulo pode ter várias **instâncias nomeadas** — útil para duas configurações do mesmo provedor com chaves ou padrões diferentes.
 2. As credenciais dos provedores são armazenadas no **cofre de credenciais**
    criptografado — configure-o no primeiro uso e desbloqueie-o uma vez por
    sessão. Veja o guia *Cofre de credenciais* para saber como funciona.

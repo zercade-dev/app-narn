@@ -6,7 +6,7 @@ Yeni bir proje için tam yol: sağlayıcıları etkinleştirin, girdilerinizi i�
 
 ## 1. Sağlayıcıları etkinleştirme ve kimlik bilgilerini saklama
 
-1. **Genel yapılandırmayı** açın ve istediğiniz her sağlayıcı için (Anthropic, OpenAI, DeepL vb.) **bir modül etkinleştirin**. Bir modülün birden çok **adlandırılmış örneği** olabilir — aynı sağlayıcının farklı anahtarlar veya varsayılanlarla iki yapılandırması için yararlıdır.
+1. **Genel yapılandırmayı** açın ve istediğiniz her sağlayıcı için (Anthropic, OpenAI, DeepL vb.) **Bir modül etkinleştir** listesinden **bir modül etkinleştirin** — DeepL adıyla listelenir, yapay zekâ sağlayıcıları ise sağlayıcının ilk örneğini oluşturan **Başka bir … örneği ekle…** olarak görünür. Bir modülün birden çok **adlandırılmış örneği** olabilir — aynı sağlayıcının farklı anahtarlar veya varsayılanlarla iki yapılandırması için yararlıdır.
 2. Sağlayıcı kimlik bilgileri şifrelenmiş **kimlik bilgisi kasasında** saklanır — ilk kullanımda kurun ve oturum başına bir kez kilidini açın. Nasıl çalıştığını görmek için *Kimlik bilgisi kasası* kılavuzuna bakın.
 3. Modül veya örnek başına bir **model** (ve isteğe bağlı bir **akıl yürütme çabası**) seçin. Daha ucuz modeller daha kötü çevirir, bu yüzden kendi dengenizi bulmak için biraz deneme yanılma bekleyin. **Akıl yürütme çabasına** dikkat edin — düşünen modellerde faturalandırmayı hızla katlayabilir.
 

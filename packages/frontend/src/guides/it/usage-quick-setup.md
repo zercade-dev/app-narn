@@ -10,10 +10,7 @@ occupartene più tardi.
 
 ## 1. Attiva i provider e salva le credenziali
 
-1. Apri **Configurazione globale** e **attiva un modulo** per ogni provider
-   che vuoi usare (Anthropic, OpenAI, DeepL e così via). Un modulo può avere
-   diverse **istanze denominate** — utile per due configurazioni dello
-   stesso provider con chiavi o valori predefiniti diversi.
+1. Apri **Configurazione globale** e **attiva un modulo** per ogni provider che vuoi usare (Anthropic, OpenAI, DeepL e così via) dall'elenco **Attiva un modulo** — DeepL compare con il proprio nome, mentre i provider IA appaiono come **Aggiungi un'altra istanza di …**, che crea la prima istanza del provider. Un modulo può avere diverse **istanze denominate** — utile per due configurazioni dello stesso provider con chiavi o valori predefiniti diversi.
 2. Le credenziali dei provider sono conservate nella **cassaforte delle
    credenziali** cifrata — configurala al primo utilizzo e sbloccala una
    volta per sessione. Consulta la guida *Cassaforte delle credenziali* per

@@ -43,12 +43,7 @@ dilaporkan, bukan masalah tata letak.
 
 ## Memasukkannya ke dalam game Anda
 
-Di kartu ekspor, atur **Ekspor teks pseudo sebagai** ke sebuah bahasa yang
-tidak sedang Anda kirimkan — Jerman, misalnya — lalu unduh berkasnya dan
-muat di game dengan bahasa itu dipilih. Kolom bahasa yang dipilih diisi
-dengan teks Pseudo Test hanya untuk satu unduhan itu; tidak ada yang
-tersimpan berubah, dan terjemahan sungguhannya masih ada di ekspor
-berikutnya.
+Di kartu ekspor, atur **Ekspor teks pseudo sebagai** ke sebuah bahasa yang tidak sedang Anda kirimkan — Jerman, misalnya; hanya bahasa yang dicentang di *Bahasa target* yang ditampilkan, jadi centang dulu di sana — lalu unduh berkasnya dan muat di game dengan bahasa itu dipilih. Kolom bahasa yang dipilih diisi dengan teks Pseudo Test hanya untuk satu unduhan itu; tidak ada yang tersimpan berubah, dan terjemahan sungguhannya masih ada di ekspor berikutnya.
 
 Saat Anda selesai menguji, ekspor lagi dengan penggantiannya dikembalikan
 ke **Tanpa penggantian**. Ekspor normal tidak pernah berisi kolom Pseudo

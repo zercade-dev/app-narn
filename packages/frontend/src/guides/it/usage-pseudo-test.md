@@ -45,12 +45,7 @@ problema di layout.
 
 ## Portarlo nel tuo gioco
 
-Nella scheda di esportazione, imposta **Esporta il testo pseudo come** su
-una lingua che al momento non stai distribuendo — il tedesco, per esempio —
-poi scarica il file e caricalo nel gioco con quella lingua selezionata. La
-colonna della lingua scelta viene compilata con il testo di Pseudo Test
-solo per quel singolo download; nulla di salvato cambia, e le traduzioni
-vere sono ancora lì alla prossima esportazione.
+Nella scheda di esportazione, imposta **Esporta il testo pseudo come** su una lingua che al momento non stai distribuendo — il tedesco, per esempio; vengono elencate solo le lingue spuntate in *Lingue di destinazione*, quindi spuntala prima lì — poi scarica il file e caricalo nel gioco con quella lingua selezionata. La colonna della lingua scelta viene compilata con il testo di Pseudo Test solo per quel singolo download; nulla di salvato cambia, e le traduzioni vere sono ancora lì alla prossima esportazione.
 
 Quando hai finito di testare, esporta di nuovo con la sostituzione
 riportata su **Nessuna sostituzione**. Un'esportazione normale non contiene

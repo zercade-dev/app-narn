@@ -24,7 +24,7 @@ Los marcadores y las etiquetas de formato de tu texto pasan sin alterarse, así 
 
 ## Llevarlo a tu juego
 
-En la tarjeta de exportación, define **Exportar texto pseudo como** a un idioma que no estés publicando actualmente — el alemán, por ejemplo — y luego descarga el archivo y cárgalo en el juego con ese idioma seleccionado. La columna del idioma elegido se rellena con el texto de Pseudo Test solo para esa descarga; nada de lo guardado cambia, y las traducciones reales siguen ahí la próxima vez que exportes.
+En la tarjeta de exportación, define **Exportar texto pseudo como** a un idioma que no estés publicando actualmente — el alemán, por ejemplo; solo aparecen los idiomas marcados en *Idiomas de destino*, así que márcalo allí primero — y luego descarga el archivo y cárgalo en el juego con ese idioma seleccionado. La columna del idioma elegido se rellena con el texto de Pseudo Test solo para esa descarga; nada de lo guardado cambia, y las traducciones reales siguen ahí la próxima vez que exportes.
 
 Cuando termines de probar, exporta de nuevo con la sustitución vuelta a **Sin sustitución**. Una exportación normal nunca contiene una columna de Pseudo Test — el texto pseudo solo llega a tu juego a través de la sustitución anterior — así que dejar Pseudo Test activado no afecta a los archivos que publicas.
 

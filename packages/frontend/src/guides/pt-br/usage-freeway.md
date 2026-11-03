@@ -33,7 +33,9 @@ Um provedor sem chave é simplesmente ignorado. Cada chave a mais amplia o conju
 
 ## Acompanhando o conjunto
 
-O painel **NARN Freeway** na tela de configuração mostra o conjunto inteiro de relance: o status da chave de cada provedor e, por modelo, seu **Estado**, a cota **Restante**, o **Próximo reset** e a **Taxa de aprovação** recente por idioma.
+O painel **NARN Freeway** na tela de configuração mostra o conjunto inteiro de relance: o status da chave de cada provedor e, por modelo, seu **Estado**, a cota **Restante**, o **Próximo reset** e três notas de 0 a 100 — qualidade da **Tradução**, **Velocidade** e **Geral** —, seguidas da **Taxa de aprovação** recente por idioma. Um modelo lento demais para trabalho em lote mostra **Muito lento** no lugar da nota de velocidade, e **Não medido** significa que o NARN ainda não tem dados dele.
+
+Duas configurações ficam acima da lista de provedores. **Priorizar** escolhe como o conjunto equilibra qualidade e velocidade: **Qualidade** favorece a qualidade da tradução e usa a velocidade só para desempatar, **Equilibrado** (o padrão) evita modelos lentos quando há um bom e mais rápido disponível, e **Velocidade** favorece modelos mais rápidos sem deixar de proteger a qualidade da tradução. **Sempre continuar com modelos de qualidade inferior** controla o que acontece quando só restam modelos mais fracos — veja abaixo.
 
 Cada provedor também tem um menu suspenso ao lado que controla como o Freeway o usa: **Automático** deixa o conjunto escolher como de costume, uma instância nomeada fixa o Freeway naquela conta específica, e **Desativado** tira o provedor do conjunto por completo — sem desligar o módulo em nenhum outro lugar. O menu suspenso só orienta as escolhas automáticas do conjunto e é uma configuração da sua própria conta: uma regra de roteamento que aponta diretamente para o provedor continua usando-o, e qualquer outra pessoa que trabalhe nos seus projetos com o roteamento dela segue as próprias configurações do Freeway. Uma tradução em andamento deixa de usar um provedor recém-desativado a partir do lote seguinte; outras execuções já iniciadas podem terminar no modelo com que começaram. Voltar um provedor desativado para Automático (ou para uma instância nomeada) retoma exatamente de onde parou.
 
@@ -52,6 +54,10 @@ O estado de um modelo é um destes:
 Uma execução que esgota o conjunto não falha. Ela passa para **Aguardando cota gratuita**, guarda os pares que faltam e continua sozinha assim que a franquia de algum provedor se renova — dá para deixar e voltar depois.
 
 Se preferir não esperar, abra a execução na aba [Atividade](guide:usage-activity) e use **Retomar agora com…** para terminar os pares restantes com um provedor pago, ou **Repetir pool gratuito** para tentar o conjunto de novo na hora.
+
+## Quando só restam modelos mais fracos
+
+Alguns textos precisam de um modelo mais forte do que os que ainda são gratuitos. Quando os modelos restantes ficam abaixo da qualidade de que uma execução precisa, a execução **pausa** e o cartão dela na aba [Atividade](guide:usage-activity) avisa, nomeando o melhor modelo restante e, quando consegue saber, mais ou menos quando modelos melhores vão liberar. Você pode continuar esperando, **Cancelar execução**, ou escolher **Continuar…** para terminar com os modelos de qualidade inferior; a escolha vale para o resto daquela execução, e as strings que ela produz ficam marcadas para você encontrá-las e revisá-las depois. Ative **Sempre continuar com modelos de qualidade inferior** no painel do Freeway para pular a pausa — as execuções terminam então sem perguntar, e essas strings continuam marcadas.
 
 ## Níveis de qualidade, e melhorar só o que precisa
 
