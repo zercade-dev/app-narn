@@ -7,7 +7,7 @@ Provider API keys are never kept in plain config files or environment variables.
 <!-- local-only -->
 ## Password vault (self-hosted)
 
-On a self-hosted install the vault is an encrypted local file. The first unlock creates it: the password you choose becomes the vault password, and every credential you save re-encrypts the file. The password itself is never stored — without it, the file cannot be decrypted. Unlock from **Global Config**, or from any *Vault is locked* card.
+On a self-hosted install the vault is an encrypted local file. The first unlock creates it: the password you choose becomes the vault password, and every credential you save re-encrypts the file. The password must be at least 12 characters and include an uppercase letter, a lowercase letter, a number and a special character. The password itself is never stored — without it, the file cannot be decrypted. Unlock from **Global Config**, or from any *Vault is locked* card.
 <!-- /local-only -->
 
 ## Device-bound vault (cloud)

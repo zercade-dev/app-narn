@@ -12,7 +12,7 @@ The app ships as a Docker image plus a `docker-compose.yml` that brings up **two
 
 ## Running
 
-From the folder that contains `docker-compose.yml` — the top level of the NARN source:
+From the folder that contains `docker-compose.yml` — a downloaded copy of that one file is enough, or the top level of the NARN source:
 
 ```
 docker compose up

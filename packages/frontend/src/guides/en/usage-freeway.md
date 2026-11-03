@@ -33,7 +33,9 @@ A provider you haven't given a key to is simply skipped. Adding one more key wid
 
 ## Watching the pool
 
-The **NARN Freeway** panel on the Config screen shows the whole pool at a glance: each provider's key status, and each model's **state**, **remaining** quota, **next reset**, and recent **pass rate** per language.
+The **NARN Freeway** panel on the Config screen shows the whole pool at a glance: each provider's key status, and each model's **state**, **remaining** quota, **next reset**, and three 0–100 scores — **Translation** quality, **Speed** and **Overall** — followed by its recent **pass rate**. A model that is too slow for batch work shows **Too slow** instead of a speed score, and **Not measured** means NARN has no data for it yet.
+
+Two settings sit above the provider list. **Prioritize** chooses how the pool trades quality against speed: **Quality** favors translation quality and uses speed only to break ties, **Balanced** (the default) avoids slow models when a good faster one is available, and **Speed** favors faster models while still protecting translation quality. **Always continue with lower-quality models** controls what happens when only weaker models are left — see below.
 
 Each provider also has a dropdown next to it that controls how Freeway uses it: **Automatic** lets the pool pick as usual, choosing a named instance pins Freeway to that specific account, and **Disabled** takes the provider out of the pool entirely — without switching off the module itself anywhere else. The dropdown only steers the pool's automatic picks and is a setting of your own account: a routing rule that names the provider directly keeps using it, and anyone else who works on your projects with their own routing follows their own Freeway settings. A translation already in progress moves off a newly disabled provider at its next batch; other runs that have already started may finish on the model they began with. Switching a disabled provider back to Automatic (or a named instance) picks up right where it left off.
 
@@ -52,6 +54,10 @@ A model's state is one of:
 A run that exhausts the pool doesn't fail. It moves to **Waiting for free quota**, keeps the pairs it hasn't done yet, and resumes on its own once a provider's allowance resets — you can leave it and come back.
 
 If you would rather not wait, open the run in the [Activity](guide:usage-activity) tab and use **Resume now with…** to finish the remaining pairs with a paid provider, or **Retry free pool** to try the pool again immediately.
+
+## When only weaker models are left
+
+Some text needs a stronger model than whatever is still free. When the remaining models are below the quality a run needs, the run **pauses** and its card in the [Activity](guide:usage-activity) tab says so, naming the best model left and, when it can tell, roughly when better ones free up. You can keep waiting, **Cancel run**, or choose **Continue…** to finish with the lower-quality models; the choice applies to the rest of that run, and the strings it produces are marked so you can find and review them later. Turn on **Always continue with lower-quality models** in the Freeway panel to skip the pause — runs then finish without asking, and those strings are still marked.
 
 ## Quality tiers, and upgrading only what needs it
 
