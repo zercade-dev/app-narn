@@ -12,7 +12,7 @@
 
 ## 실행하기
 
-`docker-compose.yml`이 있는 폴더 — NARN 소스의 최상위 폴더 — 에서:
+`docker-compose.yml`이 있는 폴더 — 그 파일 하나만 내려받은 사본이면 충분하고, NARN 소스의 최상위 폴더도 괜찮아요 — 에서:
 
 ```
 docker compose up

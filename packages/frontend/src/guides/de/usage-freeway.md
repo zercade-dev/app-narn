@@ -33,7 +33,9 @@ Ein Anbieter ohne hinterlegten Schlüssel wird schlicht übersprungen. Jeder zus
 
 ## Den Pool im Blick behalten
 
-Das Panel **NARN Freeway** auf dem Konfigurationsbildschirm zeigt den ganzen Pool auf einen Blick: den Schlüsselstatus jedes Anbieters und pro Modell dessen **Zustand**, das **Verbleibend**e Kontingent, den **Nächsten Reset** und die jüngste **Bestehensquote** je Sprache.
+Das Panel **NARN Freeway** auf dem Konfigurationsbildschirm zeigt den ganzen Pool auf einen Blick: den Schlüsselstatus jedes Anbieters und pro Modell dessen **Zustand**, das **Verbleibend**e Kontingent, den **Nächsten Reset** und drei Bewertungen von 0 bis 100 — **Übersetzung** (Qualität), **Geschwindigkeit** und **Gesamt** —, gefolgt von der jüngsten **Bestehensquote** je Sprache. Ein Modell, das für Batch-Arbeit zu langsam ist, zeigt statt einer Geschwindigkeitsbewertung **Zu langsam**, und **Nicht gemessen** bedeutet, dass NARN dazu noch keine Daten hat.
+
+Über der Anbieterliste stehen zwei Einstellungen. **Priorisieren** legt fest, wie der Pool Qualität und Geschwindigkeit gegeneinander abwägt: **Qualität** bevorzugt die Übersetzungsqualität und zieht die Geschwindigkeit nur bei Gleichstand heran, **Ausgewogen** (Standard) meidet langsame Modelle, solange ein gutes schnelleres verfügbar ist, und **Geschwindigkeit** bevorzugt schnellere Modelle, schützt dabei aber weiterhin die Übersetzungsqualität. **Immer mit Modellen geringerer Qualität fortfahren** steuert, was passiert, wenn nur noch schwächere Modelle übrig sind — siehe unten.
 
 Jeder Anbieter hat daneben außerdem eine Auswahlliste, die steuert, wie Freeway ihn nutzt: **Automatisch** lässt den Pool wie gewohnt wählen, eine benannte Instanz bindet Freeway an genau dieses Konto, und **Deaktiviert** nimmt den Anbieter ganz aus dem Pool — ohne das Modul selbst anderswo abzuschalten. Die Auswahlliste beeinflusst nur die automatische Auswahl des Pools und ist eine Einstellung des eigenen Kontos: Eine Routing-Regel, die den Anbieter direkt benennt, nutzt ihn weiterhin, und wer sonst noch mit eigenem Routing an denselben Projekten arbeitet, folgt den eigenen Freeway-Einstellungen. Ein bereits laufender Übersetzungsdurchlauf nutzt einen neu deaktivierten Anbieter ab dem nächsten Batch nicht mehr; andere schon gestartete Durchläufe beenden ihre Arbeit möglicherweise noch mit dem Modell, mit dem sie begonnen haben. Schalten Sie einen deaktivierten Anbieter wieder auf Automatisch (oder eine benannte Instanz), macht er genau dort weiter, wo er aufgehört hat.
 
@@ -52,6 +54,10 @@ Der Zustand eines Modells ist einer von:
 Ein Lauf, der den Pool erschöpft, schlägt nicht fehl. Er geht auf **Wartet auf kostenloses Kontingent**, behält die noch offenen Paare und setzt sich von selbst fort, sobald das Kontingent eines Anbieters zurückgesetzt wird — Sie können ihn liegen lassen und später wiederkommen.
 
 Wenn Sie nicht warten möchten, öffnen Sie den Lauf im Tab [Aktivität](guide:usage-activity) und nutzen Sie **Jetzt fortsetzen mit…**, um die restlichen Paare mit einem bezahlten Anbieter abzuschließen, oder **Kostenlosen Pool erneut versuchen**, um es sofort noch einmal mit dem Pool zu probieren.
+
+## Wenn nur noch schwächere Modelle übrig sind
+
+Manche Texte brauchen ein stärkeres Modell, als noch kostenlos verfügbar ist. Liegen die verbleibenden Modelle unter der Qualität, die ein Lauf braucht, **pausiert** der Lauf, und seine Karte im Tab [Aktivität](guide:usage-activity) sagt das — mit dem besten verbleibenden Modell und, wenn bekannt, ungefähr wann bessere wieder frei werden. Sie können weiter warten, **Lauf abbrechen** oder mit **Weiter…** den Rest mit den Modellen geringerer Qualität abschließen; die Wahl gilt für den Rest dieses Laufs, und die dabei erzeugten Strings werden markiert, damit Sie sie später finden und prüfen können. Schalten Sie **Immer mit Modellen geringerer Qualität fortfahren** im Freeway-Panel ein, um die Pause zu überspringen — Läufe enden dann ohne Nachfrage, und diese Strings werden trotzdem markiert.
 
 ## Qualitätsstufen — und nur nachbessern, was es braucht
 

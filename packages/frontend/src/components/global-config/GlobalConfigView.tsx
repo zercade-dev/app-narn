@@ -8,7 +8,11 @@ import { Lock, LockOpen } from 'lucide-react';
 import type { BatchGroupingDimension, ProjectTemplate } from '@zercade-dev/narn-shared';
 import { ModuleSettingsPanel } from '../config/ModuleSettingsPanel.js';
 import { FreewayPanel } from '../config/FreewayPanel.js';
-import { AddInstanceForm, instanceSlugsOf } from '../config/AddInstanceForm.js';
+import {
+  AddInstanceForm,
+  createInstanceAndEnable,
+  instanceSlugsOf,
+} from '../config/AddInstanceForm.js';
 import { promptFirstMissingCredential } from '../config/credential-prompt.js';
 import { useVaultStatus } from '../../hooks/useVaultStatus.js';
 import { apiRequest, apiDownload } from '../../hooks/use-api.js';
@@ -65,6 +69,13 @@ interface WorkspaceSettingsDraft {
  * slug-like, so the `__`-prefixed value can never collide with a real id.
  */
 const ADD_INSTANCE_VALUE_PREFIX = '__add-instance__:';
+
+/**
+ * Sentinel prefix for the plain "<Provider>" picker item offered for an
+ * instanceable base that has no instances yet. It creates `<base>:default` in
+ * one step (no instance-id prompt), so a fresh workspace lists each provider.
+ */
+const CREATE_DEFAULT_VALUE_PREFIX = '__create-default__:';
 
 interface GlobalConfigViewProps {
   onUnlockVault: () => void;
@@ -335,6 +346,27 @@ export function GlobalConfigView({
           value=""
           onValueChange={async (moduleId) => {
             if (!moduleId) return;
+            if (moduleId.startsWith(CREATE_DEFAULT_VALUE_PREFIX)) {
+              const baseId = moduleId.slice(CREATE_DEFAULT_VALUE_PREFIX.length);
+              const base = availableModules.find((m) => m.id === baseId);
+              if (!base) return;
+              setEnablingModule(true);
+              try {
+                await createInstanceAndEnable({
+                  t,
+                  baseModule: base,
+                  slug: 'default',
+                  displayName: base.name,
+                  unlocked,
+                  existingKeys: keys,
+                  onEditVaultKey,
+                });
+              } finally {
+                setEnablingModule(false);
+                setPanelRefreshKey((k) => k + 1);
+              }
+              return;
+            }
             if (moduleId.startsWith(ADD_INSTANCE_VALUE_PREFIX)) {
               const baseId = moduleId.slice(ADD_INSTANCE_VALUE_PREFIX.length);
               const base = availableModules.find((m) => m.id === baseId);
@@ -400,6 +432,21 @@ export function GlobalConfigView({
               )
               .map((m) => (
                 <SelectItem key={m.id} value={m.id} data-testid={`enable-module-option-${m.id}`}>
+                  {m.name}
+                </SelectItem>
+              ))}
+            {/* A base with no instances yet gets a plain "<Provider>" entry that
+                creates its `default` instance in one step. */}
+            {availableModules
+              .filter(
+                (m) => m.instanceable !== false && !m.baseModuleId && !baseInstanceSet.has(m.id),
+              )
+              .map((m) => (
+                <SelectItem
+                  key={`${CREATE_DEFAULT_VALUE_PREFIX}${m.id}`}
+                  value={`${CREATE_DEFAULT_VALUE_PREFIX}${m.id}`}
+                  data-testid={`enable-module-default-${m.id}`}
+                >
                   {m.name}
                 </SelectItem>
               ))}

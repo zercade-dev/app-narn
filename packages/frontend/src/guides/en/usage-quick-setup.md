@@ -6,7 +6,7 @@ The full path for a new project: enable providers, import your entries, configur
 
 ## 1. Enable providers and store credentials
 
-1. Open **Global Config** and **enable a module** for each provider you want (Anthropic, OpenAI, DeepL, and so on). A module can have several **named instances** — useful for two configs of the same provider with different keys or defaults.
+1. Open **Global Config** and **enable a module** for each provider you want (Anthropic, OpenAI, DeepL, and so on) from the **Enable a module** list — DeepL is listed by name, while the AI providers appear as **Add another … instance…**, which creates the provider's first instance. A module can have several **named instances** — useful for two configs of the same provider with different keys or defaults.
 2. Provider credentials are stored in the encrypted **credential vault** — set it up on first use and unlock it once per session. See the *Credential Vault* guide for how it works.
 3. Pick a **model** (and optional **reasoning effort**) per module or instance. Cheaper models translate worse, so expect some trial and error to find your sweet spot. Watch **reasoning effort** — on thinking models it can multiply billing quickly.
 

@@ -12,7 +12,7 @@
 
 ## 运行
 
-在包含 `docker-compose.yml` 的目录中——即 NARN 源码的顶层目录：
+在包含 `docker-compose.yml` 的目录中——下载这一个文件的副本即可，或使用 NARN 源码的顶层目录：
 
 ```
 docker compose up

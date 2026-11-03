@@ -6,7 +6,7 @@ El recorrido completo para un proyecto nuevo: habilita proveedores, importa tus 
 
 ## 1. Habilita proveedores y guarda las credenciales
 
-1. Abre **Configuración global** y **habilita un módulo** por cada proveedor que quieras (Anthropic, OpenAI, DeepL, y así sucesivamente). Un módulo puede tener varias **instancias con nombre** — útil para tener dos configuraciones del mismo proveedor con claves o valores predeterminados distintos.
+1. Abre **Configuración global** y **habilita un módulo** por cada proveedor que quieras (Anthropic, OpenAI, DeepL, y así sucesivamente) desde la lista **Habilitar un módulo** — DeepL aparece con su nombre, mientras que los proveedores de IA aparecen como **Añadir otra instancia de …**, que crea la primera instancia del proveedor. Un módulo puede tener varias **instancias con nombre** — útil para tener dos configuraciones del mismo proveedor con claves o valores predeterminados distintos.
 2. Las credenciales de los proveedores se guardan en la **bóveda de credenciales** cifrada — configúrala la primera vez que la uses y desbloquéala una vez por sesión. Consulta la guía *Bóveda de credenciales* para saber cómo funciona.
 3. Elige un **modelo** (y, opcionalmente, un **esfuerzo de razonamiento**) por módulo o instancia. Los modelos más baratos traducen peor, así que espera algo de prueba y error hasta encontrar tu punto óptimo. Vigila el **esfuerzo de razonamiento** — en los modelos de razonamiento puede multiplicar el gasto rápidamente.
 

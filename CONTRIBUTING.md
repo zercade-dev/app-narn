@@ -61,17 +61,28 @@ You need Node 24 or newer and pnpm 11.2.2 — both are declared in the root
 
 The server stores its data in Postgres and will not start without `DATABASE_URL`
 set, so arrange that before `pnpm dev`: copy `.env.example` to `.env` at the
-workspace root and point it at a Postgres. `.env.example` documents the other
+workspace root and point it at a Postgres. A throwaway one is enough, for example
+`docker run -d -e POSTGRES_USER=translator -e POSTGRES_PASSWORD=translator -e POSTGRES_DB=translator -p 127.0.0.1:5432:5432 postgres:17-bookworm`,
+which matches the default `DATABASE_URL` in `.env.example`. (`docker-compose.yml`
+runs the published image against a Postgres of its own, but that Postgres has no
+host port, so it is no use for `pnpm dev`.) `.env.example` documents the other
 settings, and `packages/server/src/config/env.ts` is the authoritative list.
-Alternatively `docker-compose.yml` runs the published image against a Postgres of
-its own.
 
 ```bash
 pnpm install   # install workspace deps
+pnpm build     # clean + tsc build of all packages — required once before `pnpm dev`
 pnpm dev       # server (:3001) + frontend (:5173) in parallel
-pnpm build     # clean + tsc build of all packages
 pnpm lint      # eslint over packages/*/src
 ```
+
+`pnpm dev` imports the workspace packages from their built output, so it fails
+with `ERR_MODULE_NOT_FOUND` on a fresh checkout until `pnpm build` has run once.
+Open the app at <http://localhost:5173> (the frontend); the server on :3001 only
+serves the API. To use other ports, set `PORT` (the server's port, in `.env` or the
+shell) together with `API_PORT` (the port the frontend proxies `/api` to) and
+`VITE_PORT` (the frontend's own port). The frontend reads those last two from the
+shell environment, not from `.env`, so for example
+`PORT=3101 API_PORT=3101 VITE_PORT=5273 pnpm dev`.
 
 Both halves listen on loopback, which is where forwarded ports reach them. To
 open the frontend to another device — a phone on the same network, a published

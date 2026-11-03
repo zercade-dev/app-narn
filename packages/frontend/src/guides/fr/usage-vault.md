@@ -7,7 +7,7 @@ Les clés API des fournisseurs ne sont jamais conservées dans des fichiers de c
 <!-- local-only -->
 ## Coffre par mot de passe (auto-hébergé)
 
-Sur une installation auto-hébergée, le coffre est un fichier local chiffré. Le premier déverrouillage le crée : le mot de passe que vous choisissez devient le mot de passe du coffre, et chaque identifiant que vous enregistrez rechiffre le fichier. Le mot de passe lui-même n’est jamais stocké — sans lui, le fichier ne peut pas être déchiffré. Déverrouillez depuis **Configuration globale**, ou depuis n’importe quelle carte *Coffre verrouillé*.
+Sur une installation auto-hébergée, le coffre est un fichier local chiffré. Le premier déverrouillage le crée : le mot de passe que vous choisissez devient le mot de passe du coffre, et chaque identifiant que vous enregistrez rechiffre le fichier. Le mot de passe doit comporter au moins 12 caractères et inclure une majuscule, une minuscule, un chiffre et un caractère spécial. Le mot de passe lui-même n’est jamais stocké — sans lui, le fichier ne peut pas être déchiffré. Déverrouillez depuis **Configuration globale**, ou depuis n’importe quelle carte *Coffre verrouillé*.
 <!-- /local-only -->
 
 ## Coffre lié à l’appareil (cloud)

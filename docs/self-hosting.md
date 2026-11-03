@@ -12,7 +12,14 @@ file — a full checkout isn't needed — and from its directory run:
 docker compose up -d
 ```
 
-Then open <http://127.0.0.1:3001>.
+Then open <http://127.0.0.1:3001>. The server logs a `HOST=0.0.0.0 exposes the API beyond
+loopback` warning on startup; that is expected inside the container, because the published
+port is bound to host loopback only.
+
+If port 3001 is taken, edit the left-hand side of the `ports:` mapping in the downloaded
+file (`'127.0.0.1:8000:3001'`) and leave `HOST` and `PORT` alone. To run your own checkout
+instead of the pulled image, uncomment `build: .` and remove the `image:` and `platform:`
+lines.
 
 Compose is the recommended path because it also applies the parts that are easy to get wrong:
 Postgres joins an internal network with no host port, so only the app container can reach it,
@@ -49,7 +56,8 @@ To use a different host port, change only the left-hand side of the mapping
 ## After it starts
 
 Provider credentials are configured in the UI, not through the environment. On first run you
-choose a vault password; API keys are then stored in a local AES-256-GCM-encrypted vault and
+choose a vault password (at least 12 characters, with an uppercase letter, a lowercase
+letter, a number and a special character); API keys are then stored in a local AES-256-GCM-encrypted vault and
 are never read from environment variables.
 
 Two volumes hold everything that must survive a container replacement:

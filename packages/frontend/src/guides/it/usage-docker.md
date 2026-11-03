@@ -21,8 +21,7 @@ avvia accanto a essa un Postgres 17 ufficiale.
 
 ## Avvio
 
-Dalla cartella che contiene `docker-compose.yml` — il livello superiore dei
-sorgenti di NARN:
+Dalla cartella che contiene `docker-compose.yml` — basta una copia scaricata di quel solo file, oppure il livello superiore dei sorgenti di NARN:
 
 ```
 docker compose up

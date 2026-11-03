@@ -7,7 +7,7 @@ Sağlayıcı API anahtarları hiçbir zaman düz yapılandırma dosyalarında ve
 <!-- local-only -->
 ## Parola kasası (kendi barındırdığınız kurulum)
 
-Kendi barındırdığınız bir kurulumda kasa, şifrelenmiş bir yerel dosyadır. İlk kilit açma onu oluşturur: seçtiğiniz parola kasa parolası olur ve kaydettiğiniz her kimlik bilgisi dosyayı yeniden şifreler. Parolanın kendisi hiçbir zaman saklanmaz — parola olmadan dosyanın kilidi çözülemez. **Genel yapılandırmadan** ya da herhangi bir *Kasa kilitli* kartından kilidini açın.
+Kendi barındırdığınız bir kurulumda kasa, şifrelenmiş bir yerel dosyadır. İlk kilit açma onu oluşturur: seçtiğiniz parola kasa parolası olur ve kaydettiğiniz her kimlik bilgisi dosyayı yeniden şifreler. Parola en az 12 karakter olmalı; bir büyük harf, bir küçük harf, bir rakam ve bir özel karakter içermelidir. Parolanın kendisi hiçbir zaman saklanmaz — parola olmadan dosyanın kilidi çözülemez. **Genel yapılandırmadan** ya da herhangi bir *Kasa kilitli* kartından kilidini açın.
 <!-- /local-only -->
 
 ## Cihaza bağlı kasa (bulut)

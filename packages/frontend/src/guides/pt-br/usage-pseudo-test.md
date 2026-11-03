@@ -42,12 +42,7 @@ problema de layout.
 
 ## Levando para o seu jogo
 
-No cartão de exportação, defina **Exportar o texto pseudo como** para um idioma
-que você não está enviando no momento — o alemão, por exemplo — depois baixe
-o arquivo e carregue-o no jogo com esse idioma selecionado. A coluna do
-idioma escolhido é preenchida com o texto do Pseudo Test só para esse único
-download; nada armazenado muda, e as traduções reais continuam lá na próxima
-exportação.
+No cartão de exportação, defina **Exportar o texto pseudo como** para um idioma que você não está enviando no momento — o alemão, por exemplo; ele só lista os idiomas marcados em *Idiomas de destino*, então marque-o lá primeiro — depois baixe o arquivo e carregue-o no jogo com esse idioma selecionado. A coluna do idioma escolhido é preenchida com o texto do Pseudo Test só para esse único download; nada armazenado muda, e as traduções reais continuam lá na próxima exportação.
 
 Quando terminar os testes, exporte de novo com a substituição definida de
 volta para **Sem substituição**. Uma exportação normal nunca contém uma

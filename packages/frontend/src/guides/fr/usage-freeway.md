@@ -33,7 +33,9 @@ Un fournisseur auquel vous n'avez pas donné de clé est simplement ignoré. Ajo
 
 ## Surveiller le pool
 
-Le panneau **NARN Freeway** de l'écran de configuration montre tout le pool d'un coup d'œil : l'état de la clé de chaque fournisseur et, par modèle, son **État**, le quota **Restant**, la **Prochaine réinitialisation** et le **Taux de réussite** récent par langue.
+Le panneau **NARN Freeway** de l'écran de configuration montre tout le pool d'un coup d'œil : l'état de la clé de chaque fournisseur et, par modèle, son **État**, le quota **Restant**, la **Prochaine réinitialisation** et trois scores de 0 à 100 — qualité de **Traduction**, **Vitesse** et **Global** —, suivis du **Taux de réussite** récent par langue. Un modèle trop lent pour le travail par lots affiche **Trop lent** au lieu d'un score de vitesse, et **Non mesuré** signifie que NARN n'a pas encore de données sur lui.
+
+Deux réglages se trouvent au-dessus de la liste des fournisseurs. **Prioriser** choisit comment le pool arbitre entre qualité et vitesse : **Qualité** favorise la qualité de traduction et n'utilise la vitesse que pour départager, **Équilibré** (par défaut) évite les modèles lents lorsqu'un bon modèle plus rapide est disponible, et **Vitesse** favorise les modèles plus rapides tout en protégeant la qualité de traduction. **Toujours continuer avec des modèles de moindre qualité** détermine ce qui se passe lorsqu'il ne reste que des modèles plus faibles — voir ci-dessous.
 
 Chaque fournisseur a aussi, juste à côté, un menu déroulant qui contrôle comment Freeway l'utilise : **Automatique** laisse le pool choisir comme d'habitude, une instance nommée épingle Freeway à ce compte précis, et **Désactivé** retire complètement le fournisseur du pool — sans éteindre le module ailleurs. Le menu déroulant n'oriente que les choix automatiques du pool, et c'est un réglage propre à votre compte : une règle de routage qui désigne directement le fournisseur continue de l'utiliser, et toute autre personne qui travaille sur vos projets avec son propre routage suit ses propres réglages Freeway. Une traduction déjà en cours cesse, dès son lot suivant, d'utiliser un fournisseur que vous venez de désactiver ; les autres exécutions déjà démarrées peuvent se terminer sur le modèle avec lequel elles ont commencé. Repasser un fournisseur désactivé en Automatique (ou sur une instance nommée) reprend exactement là où il s'était arrêté.
 
@@ -52,6 +54,10 @@ L'état d'un modèle est l'un des suivants :
 Une exécution qui épuise le pool n'échoue pas. Elle passe en **En attente de quota gratuit**, garde les paires qu'il lui reste, et repart d'elle-même dès qu'un fournisseur voit son allocation réinitialisée — vous pouvez la laisser et revenir plus tard.
 
 Si vous préférez ne pas attendre, ouvrez l'exécution dans l'onglet [Activité](guide:usage-activity) et utilisez **Reprendre maintenant avec…** pour terminer les paires restantes avec un fournisseur payant, ou **Réessayer avec le quota gratuit** pour retenter le pool immédiatement.
+
+## Quand il ne reste que des modèles plus faibles
+
+Certains textes demandent un modèle plus solide que ceux qui restent gratuits. Lorsque les modèles restants sont en dessous de la qualité dont une exécution a besoin, l'exécution se met en **pause** et sa carte dans l'onglet [Activité](guide:usage-activity) l'indique, en nommant le meilleur modèle restant et, quand elle peut le savoir, à peu près quand de meilleurs se libéreront. Vous pouvez continuer à attendre, **Annuler l’exécution**, ou choisir **Continuer…** pour terminer avec les modèles de moindre qualité ; ce choix s'applique au reste de cette exécution, et les chaînes qu'elle produit sont marquées pour que vous puissiez les retrouver et les relire plus tard. Activez **Toujours continuer avec des modèles de moindre qualité** dans le panneau Freeway pour éviter la pause — les exécutions se terminent alors sans rien demander, et ces chaînes restent marquées.
 
 ## Niveaux de qualité, et n'améliorer que le nécessaire
 

@@ -7,7 +7,7 @@ Khóa API của nhà cung cấp không bao giờ được giữ trong tệp cấ
 <!-- local-only -->
 ## Kho mật khẩu (tự lưu trữ)
 
-Trên một bản cài đặt tự lưu trữ, kho bảo mật là một tệp cục bộ đã mã hóa. Lần mở khóa đầu tiên sẽ tạo ra nó: mật khẩu bạn chọn trở thành mật khẩu kho, và mỗi thông tin xác thực bạn lưu sẽ mã hóa lại tệp đó. Bản thân mật khẩu không bao giờ được lưu trữ — không có nó, tệp không thể giải mã được. Mở khóa từ **Cấu hình chung**, hoặc từ bất kỳ thẻ *Kho bảo mật đã khóa* nào.
+Trên một bản cài đặt tự lưu trữ, kho bảo mật là một tệp cục bộ đã mã hóa. Lần mở khóa đầu tiên sẽ tạo ra nó: mật khẩu bạn chọn trở thành mật khẩu kho, và mỗi thông tin xác thực bạn lưu sẽ mã hóa lại tệp đó. Mật khẩu phải có ít nhất 12 ký tự và gồm một chữ hoa, một chữ thường, một chữ số và một ký tự đặc biệt. Bản thân mật khẩu không bao giờ được lưu trữ — không có nó, tệp không thể giải mã được. Mở khóa từ **Cấu hình chung**, hoặc từ bất kỳ thẻ *Kho bảo mật đã khóa* nào.
 <!-- /local-only -->
 
 ## Kho gắn với thiết bị (đám mây)

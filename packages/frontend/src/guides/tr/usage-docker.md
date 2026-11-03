@@ -12,7 +12,7 @@ Uygulama, bir Docker imajı ve **iki hizmeti** ayağa kaldıran bir `docker-comp
 
 ## Çalıştırma
 
-`docker-compose.yml` dosyasını içeren klasörden — NARN kaynağının en üst düzeyinden:
+`docker-compose.yml` dosyasını içeren klasörden — o tek dosyanın indirilmiş bir kopyası yeterlidir, ya da NARN kaynağının en üst düzeyi:
 
 ```
 docker compose up

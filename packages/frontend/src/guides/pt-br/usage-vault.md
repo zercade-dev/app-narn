@@ -12,12 +12,7 @@ descriptografadas apenas em memória.
 <!-- local-only -->
 ## Cofre de senha (self-hosted)
 
-Em uma instalação self-hosted, o cofre é um arquivo local criptografado. O
-primeiro desbloqueio o cria: a senha que você escolhe se torna a senha do
-cofre, e toda credencial que você salva recriptografa o arquivo. A senha em
-si nunca é armazenada — sem ela, o arquivo não pode ser descriptografado.
-Desbloqueie pela **Configuração global**, ou por qualquer cartão *Cofre
-bloqueado*.
+Em uma instalação self-hosted, o cofre é um arquivo local criptografado. O primeiro desbloqueio o cria: a senha que você escolhe se torna a senha do cofre, e toda credencial que você salva recriptografa o arquivo. A senha deve ter pelo menos 12 caracteres e incluir uma letra maiúscula, uma minúscula, um número e um caractere especial. A senha em si nunca é armazenada — sem ela, o arquivo não pode ser descriptografado. Desbloqueie pela **Configuração global**, ou por qualquer cartão *Cofre bloqueado*.
 <!-- /local-only -->
 
 ## Cofre vinculado ao dispositivo (nuvem)

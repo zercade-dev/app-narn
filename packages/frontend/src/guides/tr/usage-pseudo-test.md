@@ -24,7 +24,7 @@ Metninizdeki yer tutucular ve biçimlendirme etiketleri değişmeden geçer; bu 
 
 ## Oyununuza aktarma
 
-Dışa aktarma kartında **Pseudo metni şu dil olarak dışa aktar** seçeneğini şu anda yayımlamadığınız bir dile — örneğin Almanca'ya — ayarlayın, ardından dosyayı indirip oyunda o dil seçiliyken yükleyin. Seçilen dilin sütunu, yalnızca o tek indirme için Pseudo Test metniyle doldurulur; kayıtlı hiçbir şey değişmez ve gerçek çeviriler bir sonraki dışa aktarmanızda hâlâ oradadır.
+Dışa aktarma kartında **Pseudo metni şu dil olarak dışa aktar** seçeneğini şu anda yayımlamadığınız bir dile — örneğin Almanca'ya; yalnızca *Hedef diller* altında işaretli diller listelenir, bu yüzden önce orada işaretleyin — ayarlayın, ardından dosyayı indirip oyunda o dil seçiliyken yükleyin. Seçilen dilin sütunu, yalnızca o tek indirme için Pseudo Test metniyle doldurulur; kayıtlı hiçbir şey değişmez ve gerçek çeviriler bir sonraki dışa aktarmanızda hâlâ oradadır.
 
 Testi bitirdiğinizde, ikame seçeneğini tekrar **Değiştirme yok** olarak ayarlayıp yeniden dışa aktarın. Normal bir dışa aktarma hiçbir zaman bir Pseudo Test sütunu içermez — pseudo metni oyununuza yalnızca yukarıdaki ikame yoluyla ulaşır — bu yüzden Pseudo Test'i açık bırakmak, gönderdiğiniz dosyaları etkilemez.
 

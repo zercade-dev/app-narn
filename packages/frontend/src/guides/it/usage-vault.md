@@ -12,12 +12,7 @@ vengono decifrate solo in memoria.
 <!-- local-only -->
 ## Cassaforte con password (self-hosted)
 
-Su un'installazione self-hosted la cassaforte è un file locale cifrato. Il
-primo sblocco la crea: la password che scegli diventa la password della
-cassaforte, e ogni credenziale che salvi ricifra il file. La password non
-viene mai conservata: senza di essa, il file non può essere decifrato.
-Sblocca da **Configurazione globale**, oppure da qualsiasi scheda *Cassaforte
-bloccata*.
+Su un'installazione self-hosted la cassaforte è un file locale cifrato. Il primo sblocco la crea: la password che scegli diventa la password della cassaforte, e ogni credenziale che salvi ricifra il file. La password deve contenere almeno 12 caratteri e includere una lettera maiuscola, una minuscola, un numero e un carattere speciale. La password non viene mai conservata: senza di essa, il file non può essere decifrato. Sblocca da **Configurazione globale**, oppure da qualsiasi scheda *Cassaforte bloccata*.
 <!-- /local-only -->
 
 ## Cassaforte legata al dispositivo (cloud)

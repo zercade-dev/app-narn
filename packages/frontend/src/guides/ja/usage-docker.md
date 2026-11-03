@@ -12,7 +12,7 @@
 
 ## 実行
 
-`docker-compose.yml`があるフォルダー — NARNのソースのトップレベル — で次を実行します。
+`docker-compose.yml`があるフォルダー — そのファイル1つだけをダウンロードしたものでも、NARNのソースのトップレベルでも構いません — で次を実行します。
 
 ```
 docker compose up

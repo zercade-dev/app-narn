@@ -7,7 +7,7 @@ Las claves de API de los proveedores nunca se guardan en archivos de configuraci
 <!-- local-only -->
 ## Bóveda con contraseña (autoalojado)
 
-En una instalación autoalojada, la bóveda es un archivo local cifrado. El primer desbloqueo la crea: la contraseña que elijas se convierte en la contraseña de la bóveda, y cada credencial que guardes vuelve a cifrar el archivo. La contraseña en sí nunca se almacena — sin ella, el archivo no se puede descifrar. Desbloquéala desde **Configuración global**, o desde cualquier tarjeta que muestre *Bóveda bloqueada*.
+En una instalación autoalojada, la bóveda es un archivo local cifrado. El primer desbloqueo la crea: la contraseña que elijas se convierte en la contraseña de la bóveda, y cada credencial que guardes vuelve a cifrar el archivo. La contraseña debe tener al menos 12 caracteres e incluir una letra mayúscula, una minúscula, un número y un carácter especial. La contraseña en sí nunca se almacena — sin ella, el archivo no se puede descifrar. Desbloquéala desde **Configuración global**, o desde cualquier tarjeta que muestre *Bóveda bloqueada*.
 <!-- /local-only -->
 
 ## Bóveda vinculada al dispositivo (nube)

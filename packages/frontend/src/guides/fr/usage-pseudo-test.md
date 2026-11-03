@@ -24,7 +24,7 @@ Les espaces réservés et les balises de mise en forme de votre texte passent in
 
 ## L’intégrer à votre jeu
 
-Dans la carte d’export, réglez **Exporter le texte pseudo comme** sur une langue que vous ne diffusez pas actuellement — l’allemand, par exemple — puis téléchargez le fichier et chargez-le dans le jeu avec cette langue sélectionnée. La colonne de la langue choisie est remplie avec le texte Pseudo Test pour ce seul téléchargement ; rien de stocké ne change, et les vraies traductions sont toujours là au prochain export.
+Dans la carte d’export, réglez **Exporter le texte pseudo comme** sur une langue que vous ne diffusez pas actuellement — l’allemand, par exemple ; seules les langues cochées sous *Langues cibles* sont proposées, cochez-la donc d’abord à cet endroit — puis téléchargez le fichier et chargez-le dans le jeu avec cette langue sélectionnée. La colonne de la langue choisie est remplie avec le texte Pseudo Test pour ce seul téléchargement ; rien de stocké ne change, et les vraies traductions sont toujours là au prochain export.
 
 Une fois vos tests terminés, exportez de nouveau avec la substitution remise sur **Aucune substitution**. Un export normal ne contient jamais de colonne Pseudo Test — le texte pseudo n’atteint votre jeu que par la substitution décrite ci-dessus — donc laisser Pseudo Test activé n’affecte pas les fichiers que vous diffusez.
 

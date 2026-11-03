@@ -6,7 +6,7 @@ Toàn bộ quy trình cho một dự án mới: bật nhà cung cấp, nhập c�
 
 ## 1. Bật nhà cung cấp và lưu thông tin xác thực
 
-1. Mở **Cấu hình chung** và **bật một mô-đun** cho mỗi nhà cung cấp bạn muốn dùng (Anthropic, OpenAI, DeepL, v.v.). Một mô-đun có thể có nhiều **thực thể có tên riêng** — hữu ích khi bạn cần hai cấu hình của cùng một nhà cung cấp với khóa hoặc mặc định khác nhau.
+1. Mở **Cấu hình chung** và **bật một mô-đun** cho mỗi nhà cung cấp bạn muốn dùng (Anthropic, OpenAI, DeepL, v.v.) từ danh sách **Bật một mô-đun** — DeepL được liệt kê theo tên, còn các nhà cung cấp AI xuất hiện dưới dạng **Thêm một thực thể … nữa…**, thao tác này tạo thực thể đầu tiên của nhà cung cấp. Một mô-đun có thể có nhiều **thực thể có tên riêng** — hữu ích khi bạn cần hai cấu hình của cùng một nhà cung cấp với khóa hoặc mặc định khác nhau.
 2. Thông tin xác thực của nhà cung cấp được lưu trong **kho bảo mật** đã mã hóa — thiết lập ở lần dùng đầu tiên và mở khóa một lần mỗi phiên. Xem hướng dẫn *Kho bảo mật* để biết cách nó hoạt động.
 3. Chọn một **mô hình** (và **mức độ suy luận** tùy chọn) cho mỗi mô-đun hoặc thực thể. Mô hình rẻ hơn dịch kém hơn, nên hãy chuẩn bị tinh thần thử-sai để tìm điểm cân bằng của bạn. Chú ý **mức độ suy luận** — ở các mô hình biết suy nghĩ, nó có thể nhân chi phí lên nhanh chóng.
 

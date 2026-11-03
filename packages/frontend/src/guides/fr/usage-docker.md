@@ -12,7 +12,7 @@ L’application est distribuée sous forme d’une image Docker accompagnée d�
 
 ## Lancer l’application
 
-Depuis le dossier contenant `docker-compose.yml` — la racine des sources de NARN :
+Depuis le dossier contenant `docker-compose.yml` — une copie téléchargée de ce seul fichier suffit, ou la racine des sources de NARN :
 
 ```
 docker compose up
