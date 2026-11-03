@@ -10,6 +10,7 @@ import {
   type RunUsageEntry,
   type TranslationUsage,
   ensurePricingFeed,
+  isAlwaysFreeModel,
   lookupBilling,
 } from '@zercade-dev/narn-shared';
 
@@ -43,7 +44,7 @@ const CHARS_PER_TOKEN = 4;
 
 /**
  * Folds a provider call's per-(module, model) token usage into the run's
- * `usageByModule` aggregate. One entry per (moduleId, model); input/output/
+ * `usageByModule` aggregate. One entry per (moduleId, model, free); input/output/
  * reasoning tokens and billed characters accumulate. Usages carrying none of
  * input tokens, output tokens, or characters are skipped (figures are only ever
  * attributed to the FIRST result of a call — see TranslationUsage), so a
@@ -59,6 +60,7 @@ export function accumulateUsage(
   status: RunStatus,
   moduleId: string,
   usages: Iterable<TranslationUsage | undefined>,
+  opts?: { freeway?: boolean },
 ): void {
   for (const usage of usages) {
     if (
@@ -70,11 +72,20 @@ export function accumulateUsage(
       continue;
     }
     status.usageByModule ??= [];
+    const free: RunUsageEntry['free'] = opts?.freeway
+      ? 'freeway'
+      : isAlwaysFreeModel(usage.model)
+        ? 'free-model'
+        : undefined;
     let entry = status.usageByModule.find(
-      (e) => e.moduleId === moduleId && e.model === usage.model,
+      (e) => e.moduleId === moduleId && e.model === usage.model && e.free === free,
     );
     if (!entry) {
-      entry = { moduleId, ...(usage.model !== undefined ? { model: usage.model } : {}) };
+      entry = {
+        moduleId,
+        ...(usage.model !== undefined ? { model: usage.model } : {}),
+        ...(free ? { free } : {}),
+      };
       status.usageByModule.push(entry);
     }
     if (usage.inputTokens !== undefined) {
@@ -173,7 +184,9 @@ function costFromCharacters(
  * SUMMED rather than one being dropped. Entries whose model has no known
  * pricing (or report characters with no model, e.g. DeepL) keep their figures
  * but get NO `estimatedCostUsd` (never $0 for unknown pricing);
- * `status.estimatedCostUsd` is set only when at least one entry priced.
+ * `status.estimatedCostUsd` is set only when at least one non-free entry priced
+ * (free entries are priced for display but excluded from the total), and is
+ * cleared otherwise so a re-run never leaves a stale total.
  */
 export async function finalizeUsageCosts(
   status: RunStatus,
@@ -208,7 +221,9 @@ export async function finalizeUsageCosts(
     if (tokenCost === undefined && charCost === undefined) continue;
     const estimatedCost = (tokenCost ?? 0) + (charCost ?? 0);
     entry.estimatedCostUsd = estimatedCost;
-    total = (total ?? 0) + estimatedCost;
+    // Free usage keeps its paid-rate figure for display but is not billed.
+    if (!entry.free) total = (total ?? 0) + estimatedCost;
   }
   if (total !== undefined) status.estimatedCostUsd = total;
+  else delete status.estimatedCostUsd;
 }

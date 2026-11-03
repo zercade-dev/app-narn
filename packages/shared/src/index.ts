@@ -150,6 +150,7 @@ export type {
   RunDetails,
   RunDetailPreviousValue,
 } from './types/runs.js';
+export { isAlwaysFreeModel } from './free-model.js';
 export { TM_MODULE_ID } from './types/tm.js';
 export type { TmMatchPolicy, TmFingerprint, TmVariant, TmSegment } from './types/tm.js';
 export type { NotificationRecord, NotificationSeverity } from './types/notification.js';

@@ -18,6 +18,7 @@ import {
 } from '@zercade-dev/narn-shared';
 import {
   typeTint,
+  TINT_EMERALD,
   scoreTint,
   rowAccentClass,
   formatUsd,
@@ -25,6 +26,7 @@ import {
   usageEntryKey,
   usageEntryLabel,
   sumUsage,
+  isAllFreeUsage,
   chatRunData,
   chatTypeKey,
 } from './run-status-ui.js';
@@ -102,9 +104,29 @@ function UsageEntryLine({
   className,
 }: Readonly<{ entry: RunUsageEntry; className: string }>) {
   const { t } = useTranslation('strings');
+  const free = entry.free;
   return (
     <div className={className}>
-      {usageEntryLabel(entry)}: {usageEntryFigures(entry, t)}
+      {usageEntryLabel(entry)}
+      {free && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Badge
+                variant="secondary"
+                className="ml-1 align-middle text-[10px]"
+                data-testid={`usage-free-badge-${free}`}
+              />
+            }
+          >
+            {free === 'freeway' ? t('runs.freeBadgeFreeway') : t('runs.freeBadgeModel')}
+          </TooltipTrigger>
+          <TooltipContent>
+            {free === 'freeway' ? t('runs.freeTooltipFreeway') : t('runs.freeTooltipModel')}
+          </TooltipContent>
+        </Tooltip>
+      )}
+      : {usageEntryFigures(entry, t)}
     </div>
   );
 }
@@ -121,7 +143,11 @@ function RunCostCell({ run }: Readonly<{ run: RunStatus }>) {
   const characters = characterTotal(usage);
 
   let summary: React.ReactNode;
-  if (estimatedCostUsd !== undefined) {
+  if (isAllFreeUsage(usage)) {
+    summary = (
+      <span className={`rounded px-1 font-medium ${TINT_EMERALD}`}>{t('runs.costFree')}</span>
+    );
+  } else if (estimatedCostUsd !== undefined) {
     summary = (
       <span className="font-medium">
         {t('runs.estimatedCost', { amount: formatUsd(estimatedCostUsd) })}{' '}
