@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
   deriveInstanceCredentialKey,
   isValidInstanceSlug,
@@ -62,6 +63,73 @@ export function suggestInstanceSlug(baseModuleId: string, takenSlugs?: Iterable<
 }
 
 /**
+ * Create a named instance of `baseModule`, enable it so its card appears
+ * immediately, and prompt for its first missing credential. Shared by the inline
+ * {@link AddInstanceForm} and the one-click `default` instance in the global
+ * "Enable a module" picker. Failures surface as toasts and never throw.
+ */
+export async function createInstanceAndEnable({
+  t,
+  baseModule,
+  slug,
+  displayName,
+  unlocked,
+  existingKeys,
+  onEditVaultKey,
+}: Readonly<{
+  t: TFunction<'config'>;
+  baseModule: AddInstanceBaseModule;
+  slug: string;
+  displayName?: string;
+  unlocked?: boolean;
+  existingKeys?: string[];
+  onEditVaultKey?: (key: string) => void;
+}>): Promise<void> {
+  let created: { instanceId: string };
+  try {
+    created = await apiRequest<{ instanceId: string }>('/global-config/instances', {
+      method: 'POST',
+      body: JSON.stringify({ baseModuleId: baseModule.id, slug, displayName }),
+    });
+  } catch (err) {
+    toast.error(t('instances.createFailed', { message: (err as Error).message }));
+    return;
+  }
+  try {
+    // First enable of a brand-new instance: no model has been chosen yet, so
+    // default `reasoningEffort` to 'disabled' when the model that will end up
+    // auto-selected (the cheapest discovered one) supports an explicit
+    // disabled state — otherwise leave `config` untouched, as before.
+    const config: Record<string, unknown> = {};
+    const reasoningEffort = await resolveDefaultReasoningEffort(created.instanceId);
+    if (reasoningEffort) config.reasoningEffort = reasoningEffort;
+    // Enable the new instance so its card appears immediately (same flow
+    // as enabling any module; projects start with the instance switched off).
+    await apiRequest(`/global-config/${encodeURIComponent(created.instanceId)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ enabled: true, config }),
+    });
+    toast.success(t('instances.created'));
+    // Keys are the base module's requiredEnvVars derived for this instance's
+    // slug; the shared helper does the present-filter + first-missing +
+    // unlocked guard.
+    const requiredKeys = baseModule.requiredEnvVars.map((v) =>
+      deriveInstanceCredentialKey(v, slug),
+    );
+    if (onEditVaultKey) {
+      promptFirstMissingCredential(requiredKeys, existingKeys ?? [], {
+        unlocked: unlocked ?? false,
+        onEditVaultKey,
+      });
+    }
+  } catch (err) {
+    // The instance exists even if enabling failed — surface the error; the
+    // caller still refreshes so the list reflects reality.
+    toast.error(t('instances.createFailed', { message: (err as Error).message }));
+  }
+}
+
+/**
  * Inline form for creating a named instance of a base module
  * (slug is immutable; display name is editable afterwards).
  */
@@ -119,56 +187,19 @@ export function AddInstanceForm({
 
   const handleCreate = async () => {
     setCreating(true);
-    let created: { instanceId: string };
     try {
-      created = await apiRequest<{ instanceId: string }>('/global-config/instances', {
-        method: 'POST',
-        body: JSON.stringify({
-          baseModuleId: baseModule.id,
-          slug,
-          displayName: displayName.trim() || undefined,
-        }),
+      await createInstanceAndEnable({
+        t,
+        baseModule,
+        slug,
+        displayName: displayName.trim() || undefined,
+        unlocked,
+        existingKeys,
+        onEditVaultKey,
       });
-    } catch (err) {
-      toast.error(t('instances.createFailed', { message: (err as Error).message }));
-      setCreating(false);
-      return;
-    }
-    try {
-      // First enable of a brand-new instance: no model has been chosen yet, so
-      // default `reasoningEffort` to 'disabled' when the model that will end up
-      // auto-selected (the cheapest discovered one) supports an explicit
-      // disabled state — otherwise leave `config` untouched, as before.
-      const config: Record<string, unknown> = {};
-      const reasoningEffort = await resolveDefaultReasoningEffort(created.instanceId);
-      if (reasoningEffort) config.reasoningEffort = reasoningEffort;
-      // Enable the new instance so its card appears immediately (same flow
-      // as enabling any module; projects start with the instance switched off).
-      await apiRequest(`/global-config/${encodeURIComponent(created.instanceId)}`, {
-        method: 'PUT',
-        body: JSON.stringify({ enabled: true, config }),
-      });
-      toast.success(t('instances.created'));
-      // Prompt for the instance's required credentials right away (mirrors the
-      // enable-a-plain-module flow in GlobalConfigView). Keys are the base
-      // module's requiredEnvVars derived for this instance's slug; the shared
-      // helper does the present-filter + first-missing + unlocked guard.
-      const requiredKeys = baseModule.requiredEnvVars.map((v) =>
-        deriveInstanceCredentialKey(v, slug),
-      );
-      if (onEditVaultKey) {
-        promptFirstMissingCredential(requiredKeys, existingKeys ?? [], {
-          unlocked: unlocked ?? false,
-          onEditVaultKey,
-        });
-      }
-    } catch (err) {
-      // The instance exists even if enabling failed — surface the error but
-      // still close the form and refresh so the list reflects reality.
-      toast.error(t('instances.createFailed', { message: (err as Error).message }));
     } finally {
       setCreating(false);
-      // Close the form and refresh the module list in both outcomes above.
+      // Close the form and refresh the module list whatever the outcome.
       onCreated();
     }
   };
