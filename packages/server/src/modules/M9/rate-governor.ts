@@ -82,9 +82,15 @@ function poolEntryKey(key: GovernorKey): string | undefined {
 export class RateGovernor {
   private readonly entries = new Map<string, Entry>();
   private readonly utilization: number;
+  private readonly pacing: boolean;
 
-  constructor(utilization: number) {
+  /**
+   * `pacing: true` spaces admissions across the window; the default admits
+   * purely on remaining budget (a window's whole allowance may leave at once).
+   */
+  constructor(utilization: number, opts?: { pacing?: boolean }) {
     this.utilization = utilization > 0 && utilization <= 1 ? utilization : 0.7;
+    this.pacing = opts?.pacing ?? false;
   }
 
   /**
@@ -188,6 +194,7 @@ export class RateGovernor {
    * requests, whichever is tighter. Zero for an entry with no allowance.
    */
   private paceMs(entry: Entry, projectedTokens: number, requestsOnly: boolean): number {
+    if (!this.pacing) return 0;
     const share = (n: number): number => Math.max(1, Math.floor(n * this.utilization));
     let fraction = 0;
     if (entry.requests !== undefined)
@@ -386,4 +393,6 @@ export class RateGovernor {
   }
 }
 
-export const rateGovernor = new RateGovernor(Number.parseFloat(getFreewayTargetUtilization()));
+export const rateGovernor = new RateGovernor(Number.parseFloat(getFreewayTargetUtilization()), {
+  pacing: true,
+});
