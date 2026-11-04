@@ -7556,6 +7556,7 @@ export class TranslationEngine {
             module: serving,
             override,
             servingBucketKey,
+            servingView,
             escalated,
             admission,
             deps: freeway ? freewayDeps() : undefined,
@@ -7573,6 +7574,19 @@ export class TranslationEngine {
     }
   }
 
+  /** Cool a correction chunk's rate-limited bucket and fold the 429 into the governor. */
+  private async coolCorrectionBucket(
+    err: unknown,
+    bucketKey: string,
+    admission: Admission | undefined,
+    deps: BucketSourceDeps,
+  ): Promise<void> {
+    const now = Date.now();
+    const cooldown = rateLimitCooldownMs(err, bucketRateLimits(bucketKey));
+    await this.coolFreewayBucket(bucketKey, now, cooldown, deps, 'pool');
+    this.observeFreewayRateLimit(err, bucketKey, admission, cooldown, now);
+  }
+
   /** One queued correction chunk: a single `correctBatch` call (or per-string fallback) and its results. */
   private async runCorrectionChunk(args: {
     status: RunStatus;
@@ -7583,6 +7597,7 @@ export class TranslationEngine {
     module: TranslationModule;
     override: Partial<RoutingDecision> | undefined;
     servingBucketKey: string | undefined;
+    servingView?: BucketView;
     escalated: boolean;
     admission: Admission | undefined;
     deps: BucketSourceDeps | undefined;
@@ -7657,6 +7672,53 @@ export class TranslationEngine {
         return { item, decision, job, feedback };
       });
 
+      // A per-string call that hits a rate limit or a run-cancelling auth error
+      // ends this chunk's per-string calls; the items not yet corrected keep
+      // their first-pass text.
+      const singleStop: { kind?: 'rate-limit' | 'auth'; err?: unknown; moduleId?: string | null } =
+        {};
+      // Per-string calls already charged to the governor (one request plus
+      // their projected tokens each).
+      let singleCharged = 0;
+      const singleCall = async (
+        p: (typeof prepared)[number],
+        charge: boolean,
+      ): Promise<TranslationResult | undefined> => {
+        if (charge && admission && args.servingView) {
+          this.governor.forceAcquire(
+            admission.key,
+            projectedRequestTokens(
+              args.servingView,
+              p.item.masked.length + p.item.record.previousText.length,
+            ),
+            Date.now(),
+          );
+          singleCharged++;
+        }
+        try {
+          return await module.retryWithFeedback?.(
+            p.job,
+            p.item.record.previousText,
+            p.feedback,
+            signal,
+          );
+        } catch (err) {
+          if (isAbortError(err) || signal?.aborted) throw err;
+          this.logger.warn('translation:lqa-retry-failed', {
+            runId,
+            entryId: p.decision.entry.id,
+            targetLanguage: p.decision.targetLanguage,
+            error: toErrorMessage(err),
+          });
+          if (isRateLimitError(err)) {
+            Object.assign(singleStop, { kind: 'rate-limit', err, moduleId: p.decision.moduleId });
+          } else if (isRunCancellingAuthError(err)) {
+            Object.assign(singleStop, { kind: 'auth', err, moduleId: p.decision.moduleId });
+          }
+          return undefined;
+        }
+      };
+
       const started = performance.now();
       let providerMs: number | undefined;
       const counted = await runCountingProviderCalls(
@@ -7689,52 +7751,24 @@ export class TranslationEngine {
                 for (let i = 0; i < prepared.length; i++) {
                   const got = results[i];
                   if (got && !got.error && got.translatedText?.trim()) continue;
-                  if (this.correctionHalted(status, signal)) break;
+                  if (singleStop.kind || this.correctionHalted(status, signal)) break;
                   const p = prepared[i]!;
-                  try {
-                    const single = await module.retryWithFeedback(
-                      p.job,
-                      p.item.record.previousText,
-                      p.feedback,
-                      signal,
-                    );
-                    if (p.decision.moduleId) {
-                      this.recordUsage(status, p.decision.moduleId, [single], {
-                        freeway: p.decision.freewayBucketKey !== undefined,
-                      });
-                    }
-                    results[i] = single;
-                  } catch (err) {
-                    if (isAbortError(err) || signal?.aborted) throw err;
-                    this.logger.warn('translation:lqa-retry-failed', {
-                      runId,
-                      entryId: p.decision.entry.id,
-                      targetLanguage: p.decision.targetLanguage,
-                      error: toErrorMessage(err),
+                  // The batch call used the chunk's admission; each extra call is charged.
+                  const single = await singleCall(p, true);
+                  if (!single) continue;
+                  if (p.decision.moduleId) {
+                    this.recordUsage(status, p.decision.moduleId, [single], {
+                      freeway: p.decision.freewayBucketKey !== undefined,
                     });
                   }
+                  results[i] = single;
                 }
               }
             } else {
-              for (const p of prepared) {
-                if (this.correctionHalted(status, signal)) break;
-                let result: TranslationResult | undefined;
-                try {
-                  result = await module.retryWithFeedback?.(
-                    p.job,
-                    p.item.record.previousText,
-                    p.feedback,
-                    signal,
-                  );
-                } catch (err) {
-                  if (isAbortError(err) || signal?.aborted) throw err;
-                  this.logger.warn('translation:lqa-retry-failed', {
-                    runId,
-                    entryId: p.decision.entry.id,
-                    targetLanguage: p.decision.targetLanguage,
-                    error: toErrorMessage(err),
-                  });
-                }
+              for (const [i, p] of prepared.entries()) {
+                if (singleStop.kind || this.correctionHalted(status, signal)) break;
+                // The first call uses the chunk's admission; each later one is charged.
+                const result = await singleCall(p, i > 0);
                 if (result && p.decision.moduleId) {
                   this.recordUsage(status, p.decision.moduleId, [result], {
                     freeway: p.decision.freewayBucketKey !== undefined,
@@ -7756,9 +7790,11 @@ export class TranslationEngine {
       const translateMs = providerMs ?? performance.now() - started;
 
       if (deps && args.servingBucketKey !== undefined && admission) {
-        // The queue admitted one request; anything beyond that is charged here.
-        if (counted.calls > 1) {
-          this.governor.forceAcquireRequests(admission.key, counted.calls - 1, Date.now());
+        // The queue admitted one request and per-string calls were charged as
+        // they went out; anything beyond that is charged here.
+        const uncharged = counted.calls - 1 - singleCharged;
+        if (uncharged > 0) {
+          this.governor.forceAcquireRequests(admission.key, uncharged, Date.now());
         }
         const first = prepared[0];
         if (first) {
@@ -7798,10 +7834,7 @@ export class TranslationEngine {
           args.servingBucketKey !== undefined &&
           args.attempt < 2
         ) {
-          const now = Date.now();
-          const cooldown = rateLimitCooldownMs(thrown, bucketRateLimits(args.servingBucketKey));
-          await this.coolFreewayBucket(args.servingBucketKey, now, cooldown, deps, 'pool');
-          this.observeFreewayRateLimit(thrown, args.servingBucketKey, admission, cooldown, now);
+          await this.coolCorrectionBucket(thrown, args.servingBucketKey, admission, deps);
           requeued = true;
           void this.scheduleCorrections(status, projectId, runId, unresolved(), args.attempt + 1);
           return;
@@ -7811,6 +7844,25 @@ export class TranslationEngine {
           targetLanguage: prepared[0]?.decision.targetLanguage,
           error: toErrorMessage(thrown),
         });
+      }
+
+      if (singleStop.kind === 'rate-limit' && deps && args.servingBucketKey !== undefined) {
+        await this.coolCorrectionBucket(singleStop.err, args.servingBucketKey, admission, deps);
+      }
+      const authError =
+        singleStop.kind === 'auth'
+          ? singleStop.err
+          : thrown !== undefined && isRunCancellingAuthError(thrown)
+            ? thrown
+            : undefined;
+      if (authError !== undefined) {
+        const moduleId = singleStop.moduleId ?? prepared[0]?.decision.moduleId ?? null;
+        if (deps && args.servingBucketKey !== undefined) {
+          // A Freeway credential belongs to one module: sideline it, the run goes on.
+          if (moduleId) await this.markFreewayCredentialBad(moduleId, deps);
+        } else if (await this.maybeCancelForAuth(runId, moduleId, authError)) {
+          return;
+        }
       }
 
       for (let i = 0; i < prepared.length; i++) {
