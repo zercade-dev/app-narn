@@ -23,6 +23,8 @@ export const DEFAULT_MAX_OUTPUT_TOKENS = 0;
 export const GLOSSARY_SUGGEST_CHUNK_SIZE = 60;
 import {
   buildBatchPrompt,
+  buildCorrectionBatchPrompt,
+  parseCorrectionBatchResponse,
   parseBatchResponse,
   parseIndexedTranslationResponse,
   buildMixedTargetBatchPrompt,
@@ -64,6 +66,7 @@ import type {
   TranslationUsage,
   ModuleManifest,
   BatchDispatchOptions,
+  CorrectionItem,
 } from '../types/module.js';
 import {
   IncompleteEntryError,
@@ -1403,6 +1406,139 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     }
   }
 
+  /**
+   * One correction request for a same-language chunk. Throws on a wholly
+   * unreadable reply; omitted/empty rows come back as per-item errors.
+   */
+  async function runCorrectionChunkOnce(
+    chunk: CorrectionItem[],
+    languageModel: LanguageModel,
+    signal?: AbortSignal,
+  ): Promise<TranslationResult[]> {
+    const jobs = chunk.map((item) => item.job);
+    const indexed = config.indexedBatchReplies === true;
+    const { system, user } = buildCorrectionBatchPrompt(chunk, jobs[0].targetLanguage, indexed);
+
+    logVerbose('correct-batch', 'request', { system, user, count: chunk.length });
+
+    const { text, usage } = await runGenerateText(languageModel, { system, prompt: user }, signal);
+
+    logVerbose('correct-batch', 'success', { text, usage, count: chunk.length });
+
+    const parsed = parseCorrectionBatchResponse(text, jobs, indexed);
+    if (!parsed) throw new Error(PARSE_FAILURE_MESSAGE);
+
+    const batchUsage = toTranslationUsage(
+      usage,
+      modelId,
+      charCounts(system + user, jobs, text, parsed),
+    );
+    return attachUsageToFirst(
+      jobs.map((job, i) => {
+        const value = parsed[i];
+        return value === undefined
+          ? {
+              entryId: job.entryId,
+              targetLanguage: job.targetLanguage,
+              translatedText: '',
+              error: PARSE_FAILURE_MESSAGE,
+            }
+          : {
+              entryId: job.entryId,
+              targetLanguage: job.targetLanguage,
+              translatedText: decodeLeakedHtmlEntities(value.trim(), job.sourceText),
+              usedGlossaryId: job.glossary && job.glossary.length > 0 ? job.glossaryId : undefined,
+            };
+      }),
+      batchUsage,
+    );
+  }
+
+  /**
+   * Batched corrective translation. Items are grouped by target language
+   * (a prompt is single-language) and chunked at the module's batch size;
+   * results come back in input order. A failed chunk (after one transient
+   * retry) yields per-item errors; auth / rate-limit errors are rethrown.
+   */
+  async function correctBatch(
+    items: CorrectionItem[],
+    signal?: AbortSignal,
+    options?: BatchDispatchOptions,
+  ): Promise<TranslationResult[]> {
+    if (items.length === 0) return [];
+
+    const languageModel = buildModel(
+      config.indexedBatchReplies
+        ? INDEXED_TRANSLATION_RESPONSE_SCHEMA
+        : TRANSLATION_RESPONSE_SCHEMA,
+    );
+    const maxBatch = resolveBatchSize(
+      items.length,
+      options?.ignoreSizeLimit ?? false,
+      config.maxBatchSize,
+      { default: 20 },
+    );
+
+    const byLanguage = new Map<string, number[]>();
+    items.forEach((item, i) => {
+      const list = byLanguage.get(item.job.targetLanguage) ?? [];
+      list.push(i);
+      byLanguage.set(item.job.targetLanguage, list);
+    });
+
+    const ordered = new Array<TranslationResult>(items.length);
+    for (const indices of byLanguage.values()) {
+      for (const indexChunk of chunkArray(indices, maxBatch)) {
+        const chunk = indexChunk.map((i) => items[i]);
+        let results: TranslationResult[];
+        if (signal?.aborted) {
+          results = chunk.map((item) => cancelledResult(item.job));
+        } else {
+          let lastError: unknown;
+          let attempt: TranslationResult[] | undefined;
+          try {
+            attempt = await runCorrectionChunkOnce(chunk, languageModel, signal);
+          } catch (err) {
+            lastError = err;
+            log('warn', `[${provider}] correct-batch:error`, {
+              count: chunk.length,
+              error: toErrorMessage(err),
+              ...extractSafeErrorMetadata(err),
+            });
+            rethrowIfAuthOrRateLimit(err);
+            if (isTransientError(err) && !signal?.aborted) {
+              await sleep(transientRetryDelayMs(err, 0));
+              if (!signal?.aborted) {
+                try {
+                  attempt = await runCorrectionChunkOnce(chunk, languageModel, signal);
+                } catch (err2) {
+                  lastError = err2;
+                  rethrowIfAuthOrRateLimit(err2);
+                }
+              }
+            }
+          }
+          results =
+            attempt ??
+            chunk.map((item) =>
+              signal?.aborted
+                ? cancelledResult(item.job)
+                : {
+                    entryId: item.job.entryId,
+                    targetLanguage: item.job.targetLanguage,
+                    translatedText: '',
+                    error: toErrorMessage(lastError),
+                  },
+            );
+        }
+        indexChunk.forEach((itemIndex, k) => {
+          ordered[itemIndex] = results[k];
+        });
+      }
+    }
+    return ordered;
+  }
+
   const effectiveCostTier = config.costPatterns
     ? deriveCostTierFromModel(
         modelId,
@@ -1437,6 +1573,7 @@ export function createAISDKModule(config: AISDKModuleConfig): TranslationModule 
     configSchema: manifest.configSchema,
     translate,
     retryWithFeedback,
+    correctBatch,
     ...features,
   };
 }
