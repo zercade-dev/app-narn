@@ -111,6 +111,7 @@ import { emitRunProgress, recordRunFailure } from './M9/run-status-helpers.js';
 import { assertRunCapacity, PROCESS_START_MS, sweepOrphanedRuns } from './M9/run-capacity.js';
 import { PreviewNotPossibleError } from '../types/errors.js';
 import {
+  abortableSleep,
   isAbortError,
   isModelUnavailableError,
   isRateLimitError,
@@ -119,6 +120,8 @@ import {
   isTransientProviderFailure,
   providerRetryHintMs,
   rateLimitCooldownMs,
+  rateLimitRetryHintMs,
+  rateLimitUsageOf,
   retryAfterMsOf,
   withRateLimitRetry,
 } from './M9/errors.js';
@@ -294,6 +297,12 @@ export type ResumeWithModuleResult =
  */
 const NO_BUCKETS_SKIP_REASON = 'no-free-buckets-for-session';
 const NO_FLOOR_RESUME_AT = 8_640_000_000_000_000;
+
+/** Longest a rerouted batch waits for its target bucket's governor slot before going out as a deficit. */
+const REROUTE_ADMISSION_MAX_WAIT_MS = 90_000;
+
+/** Cooldowns up to this long (per-minute scale) wake the dispatch queue when they end. */
+const MAX_WAKE_COOLDOWN_MS = 120_000;
 
 /**
  * Cooldown applied to a Freeway bucket whose provider call failed for a reason
@@ -477,7 +486,8 @@ function formatDeferralDetail(
   reason?: 'quota' | 'provider-error',
 ): string {
   const waitingFor = reason === 'provider-error' ? 'a provider to recover' : 'quota';
-  return `${pairCount} pairs waiting for ${waitingFor} — resumes ~${formatResumeTime(resumeAt)}`;
+  // A resume time already in the past means "due now"; never print a stale clock.
+  return `${pairCount} pairs waiting for ${waitingFor} — resumes ~${formatResumeTime(Math.max(Date.now(), resumeAt))}`;
 }
 
 /** One-liner for a batch dispatching below its band floor. */
@@ -618,6 +628,12 @@ interface FreewayDispatchArgs {
    * enters the governor at all.
    */
   admission?: Admission;
+  /**
+   * Largest batch the bucket this dispatch now runs on can take, when the batch
+   * was sized for a different one (a reroute before the first call). Parts are
+   * cut to it before anything is sent.
+   */
+  sizeCap?: number;
   /**
    * Reports a forced (ungoverned) call whose bucket is still far from its
    * next rate-governor refill, so the caller can surface a "paced" run
@@ -836,6 +852,8 @@ export class TranslationEngine {
   static readonly QUOTA_SWEEP_INTERVAL_MS = 60_000;
   /** Floor on how often ONE run may be auto-resumed (see {@link lastQuotaResumeAttempt}). */
   private static readonly QUOTA_RESUME_MIN_INTERVAL_MS = 60_000;
+  /** Runs with a mid-run park re-dispatch in flight. */
+  private readonly redispatchingParks = new Set<string>();
   /**
    * Ceiling on the (entry x target language) pairs ONE {@link memoryPreview}
    * call evaluates. That preview is an advisory number behind the Translate
@@ -1857,7 +1875,32 @@ export class TranslationEngine {
     // normal dispatch.
     moduleOverride?: string,
     quotaResume = false,
-  ): Promise<{ runId: string; total: number; status: RunStatusCode }> {
+    // Re-dispatch of due parked pairs into a run that is still Running (see
+    // {@link redispatchDueParks}): sibling tasks are live, so run-level setup
+    // (rate-limiter reset, abort controller, details hydration) is skipped.
+    midRun = false,
+  ): Promise<{ runId: string; total: number; status: RunStatusCode; skipped?: true }> {
+    if (midRun) {
+      const midInner = async () => {
+        try {
+          return await this.startRunInner(
+            runId,
+            projectId,
+            request,
+            sessionId,
+            existing,
+            retry,
+            moduleOverride,
+            quotaResume,
+            true,
+          );
+        } catch (err) {
+          await this.failUndispatchedRun(runId, projectId);
+          throw err;
+        }
+      };
+      return await (tenant ? runWithTenant(tenant, midInner) : midInner());
+    }
     // A fresh run should not inherit rate-limiter backoff state earned by a
     // previous, unrelated run against the same provider.
     resetRateLimiters();
@@ -1939,7 +1982,8 @@ export class TranslationEngine {
     retry = false,
     moduleOverride?: string,
     quotaResume = false,
-  ): Promise<{ runId: string; total: number; status: RunStatusCode }> {
+    midRun = false,
+  ): Promise<{ runId: string; total: number; status: RunStatusCode; skipped?: true }> {
     const {
       entryIds,
       targetLanguages,
@@ -2049,6 +2093,16 @@ export class TranslationEngine {
       this.startNextQueued(projectId);
       return { runId, total: existing.total, status: RunStatusCode.Cancelled };
     }
+    // A mid-run re-dispatch only joins a run that is still Running; a pause or
+    // cancel that landed during the awaits above leaves the pairs with the caller.
+    if (midRun && existing?.status !== RunStatusCode.Running) {
+      return {
+        runId,
+        total: existing?.total ?? 0,
+        status: existing?.status ?? RunStatusCode.Cancelled,
+        skipped: true,
+      };
+    }
 
     const status: RunStatus = existing ?? {
       runId,
@@ -2127,18 +2181,28 @@ export class TranslationEngine {
     this.runTenants.set(runId, getCurrentTenant());
     // A retry adds to the existing run detail (entries, retry counts, character
     // totals); a fresh run starts from an empty accumulator.
-    if (retry) {
-      await this.hydrateDetails(projectId, runId);
+    if (midRun) {
+      // The run's accumulator and abort controller are live; keep them.
+      if (!this.details.has(runId)) this.initDetails(runId);
+      if (!this.controllers.has(runId)) this.controllers.set(runId, new AbortController());
     } else {
-      this.initDetails(runId);
+      if (retry) {
+        await this.hydrateDetails(projectId, runId);
+      } else {
+        this.initDetails(runId);
+      }
+      this.controllers.set(runId, new AbortController());
     }
-    this.controllers.set(runId, new AbortController());
     await this.runStore.updateRun(projectId, status);
     // Warm the pricing feed in the background so cost finalization at run
     // completion can resolve synchronously from the cache.
     void this.pricing.ensure().catch(() => {});
 
     if (decisions.length === 0) {
+      if (midRun) {
+        await this.finalizeTranslationTerminal(status, projectId, runId);
+        return { runId, total: 0, status: status.status };
+      }
       if (status.waitingForQuota?.pairs.length) {
         await this.finalizeTranslationTerminal(status, projectId, runId);
         return { runId, total: 0, status: status.status };
@@ -2304,6 +2368,15 @@ export class TranslationEngine {
         await this.finalizeTranslationTerminal(status, projectId, runId);
         return { runId, total: decisions.length, status: status.status };
       }
+    }
+
+    if (
+      midRun &&
+      status.status !== RunStatusCode.Running &&
+      status.status !== RunStatusCode.Paused
+    ) {
+      // Cancelled while the plan awaited: nothing is enqueued for a dead run.
+      return { runId, total: decisions.length, status: status.status };
     }
 
     // Arm this run's settled deferred before any group task is queued so a
@@ -2846,45 +2919,7 @@ export class TranslationEngine {
   ): Promise<RunStatus> {
     const parked = [...pairs];
     const originalTotal = status.total;
-    const park = { ...status.waitingForQuota!, pairs: [...status.waitingForQuota!.pairs] };
-    const retryKeys = new Set(parked.map((pair) => `${pair.entryId}\0${pair.targetLanguage}`));
-    const remaining = park.pairs.filter(
-      (pair) => !retryKeys.has(`${pair.entryId}\0${pair.targetLanguage}`),
-    );
-    if (remaining.length > 0) {
-      // The sweep may resume feedback pairs before unrelated quota waits are
-      // due. Keep those waits parked while the selected pairs run.
-      const { belowTarget: _belowTarget, reason: _reason, pairCount: _pairCount, ...rest } = park;
-      // Pairs still waiting on consent keep the below-target park, with the
-      // summary re-derived from what is left (slow models included).
-      const pendingConsent = remaining.filter((pair) => pair.belowTargetNeededTier !== undefined);
-      const slowModelIds = slowModelIdsOf(pendingConsent);
-      status.waitingForQuota = {
-        ...rest,
-        pairs: remaining,
-        resumeAt: remaining.reduce(
-          (earliest, pair) => Math.min(earliest, pair.quotaResumeAt ?? park.resumeAt),
-          Infinity,
-        ),
-        ...(park.belowTarget && pendingConsent.length > 0
-          ? {
-              reason: 'below-target' as const,
-              belowTarget: {
-                ...omitSlowModelIds(park.belowTarget),
-                strings: new Set(pendingConsent.map((pair) => pair.entryId)).size,
-                languages: [...new Set(pendingConsent.map((pair) => pair.targetLanguage))],
-                ...(slowModelIds.length > 0 ? { slowModelIds } : {}),
-              },
-            }
-          : {
-              reason: remaining.some((pair) => pair.quotaReason === 'provider-error')
-                ? ('provider-error' as const)
-                : ('quota' as const),
-            }),
-      };
-    } else {
-      delete status.waitingForQuota;
-    }
+    const park = this.detachParkedPairs(status, parked);
     this.queue.resumeRun(runId);
     const request = this.parkedRetryRequest(status, parked);
     try {
@@ -2910,6 +2945,183 @@ export class TranslationEngine {
       throw err;
     }
     return status;
+  }
+
+  /**
+   * Take `pairs` out of the run's `waitingForQuota` park (so they are no longer
+   * counted as outstanding-but-parked) and return a snapshot of the park as it
+   * was, for {@link restoreQuotaPark} / {@link reattachParkedPairs}. Pairs that
+   * stay parked keep the park, with its summary and `resumeAt` re-derived.
+   */
+  private detachParkedPairs(
+    status: RunStatus,
+    pairs: RunEntryLanguagePair[],
+  ): NonNullable<RunStatus['waitingForQuota']> {
+    const park = { ...status.waitingForQuota!, pairs: [...status.waitingForQuota!.pairs] };
+    const retryKeys = new Set(pairs.map((pair) => `${pair.entryId}\0${pair.targetLanguage}`));
+    const remaining = park.pairs.filter(
+      (pair) => !retryKeys.has(`${pair.entryId}\0${pair.targetLanguage}`),
+    );
+    if (remaining.length > 0) {
+      // The sweep may resume feedback pairs before unrelated quota waits are
+      // due. Keep those waits parked while the selected pairs run.
+      const { belowTarget: _belowTarget, reason: _reason, pairCount: _pairCount, ...rest } = park;
+      // Pairs still waiting on consent keep the below-target park, with the
+      // summary re-derived from what is left (slow models included).
+      const pendingConsent = remaining.filter((pair) => pair.belowTargetNeededTier !== undefined);
+      const slowModelIds = slowModelIdsOf(pendingConsent);
+      status.waitingForQuota = {
+        ...rest,
+        pairs: remaining,
+        resumeAt: park.resumeAt,
+        ...(park.belowTarget && pendingConsent.length > 0
+          ? {
+              reason: 'below-target' as const,
+              belowTarget: {
+                ...omitSlowModelIds(park.belowTarget),
+                strings: new Set(pendingConsent.map((pair) => pair.entryId)).size,
+                languages: [...new Set(pendingConsent.map((pair) => pair.targetLanguage))],
+                ...(slowModelIds.length > 0 ? { slowModelIds } : {}),
+              },
+            }
+          : {
+              reason: remaining.some((pair) => pair.quotaReason === 'provider-error')
+                ? ('provider-error' as const)
+                : ('quota' as const),
+            }),
+      };
+      this.refreshWaitingResumeAt(status);
+    } else {
+      delete status.waitingForQuota;
+    }
+    return park;
+  }
+
+  /**
+   * Re-derive `waitingForQuota.resumeAt` from the pairs that are still parked:
+   * the earliest of their own resume times, never earlier than now (a past value
+   * means "due now"). Feedback (below-target) pairs wait on consent, not a
+   * clock; a park made only of them keeps its stored value.
+   */
+  private refreshWaitingResumeAt(status: RunStatus, now: number = Date.now()): void {
+    const waiting = status.waitingForQuota;
+    if (!waiting) return;
+    let earliest = Infinity;
+    for (const pair of waiting.pairs) {
+      if (pair.belowTargetNeededTier !== undefined) continue;
+      earliest = Math.min(earliest, pair.quotaResumeAt ?? waiting.resumeAt);
+    }
+    if (earliest === Infinity) return;
+    waiting.resumeAt = Math.max(now, earliest);
+  }
+
+  /**
+   * Put pairs taken by {@link detachParkedPairs} back after a mid-run
+   * re-dispatch that never got off the ground.
+   */
+  private reattachParkedPairs(
+    status: RunStatus,
+    park: NonNullable<RunStatus['waitingForQuota']>,
+    pairs: RunEntryLanguagePair[],
+  ): void {
+    const { skipReason: _skipReason, ...restored } = park;
+    const existing = status.waitingForQuota;
+    if (!existing) {
+      status.waitingForQuota = { ...restored, pairs: [...pairs] };
+    } else {
+      const have = new Set(existing.pairs.map((p) => `${p.entryId}\0${p.targetLanguage}`));
+      for (const pair of pairs) {
+        if (!have.has(`${pair.entryId}\0${pair.targetLanguage}`)) existing.pairs.push(pair);
+      }
+    }
+    this.refreshWaitingResumeAt(status);
+  }
+
+  /**
+   * Re-plan the parked pairs whose own resume time has arrived while the run is
+   * still Running, without waiting for it to drain and flip to Paused. Driven by
+   * the quota sweep and by every settling group task.
+   *
+   * Race-safety: the due pairs leave `waitingForQuota` synchronously (before any
+   * await past the bucket probe), so the finalize drain test can never count
+   * them as parked-and-done, and the same pair is never owned by two plans. A
+   * run that is paused, cancelled or already re-planning is left alone; a re-plan
+   * that still finds no quota simply parks the pairs again. The run keeps its
+   * place as the project's active run.
+   *
+   * @returns how many pairs were handed back to the dispatch queue.
+   */
+  private async redispatchDueParks(
+    projectId: string,
+    runId: string,
+    now: number = Date.now(),
+  ): Promise<number> {
+    const status = this.runs.get(runId);
+    if (!status || status.status !== RunStatusCode.Running) return 0;
+    if (this.redispatchingParks.has(runId)) return 0;
+    const dueOf = (): RunEntryLanguagePair[] => {
+      const waiting = status.waitingForQuota;
+      if (!waiting) return [];
+      return waiting.pairs.filter(
+        (pair) =>
+          pair.belowTargetNeededTier === undefined &&
+          (pair.quotaResumeAt ?? waiting.resumeAt) <= now,
+      );
+    };
+    if (dueOf().length === 0) return 0;
+    const last = this.lastQuotaResumeAttempt.get(runId);
+    if (last !== undefined && now - last < TranslationEngine.QUOTA_RESUME_MIN_INTERVAL_MS) {
+      return 0;
+    }
+    this.redispatchingParks.add(runId);
+    try {
+      const sessionId = this.runSessions.get(runId) ?? this.queuedSessions.get(runId);
+      // Same collateral-failure guard as the drained-park sweep.
+      if (!(await this.hasAnyFreewayBucket(projectId, sessionId))) return 0;
+      // State may have moved during the probe.
+      if (status.status !== RunStatusCode.Running || this.runs.get(runId) !== status) return 0;
+      const due = dueOf();
+      if (due.length === 0) return 0;
+      this.lastQuotaResumeAttempt.set(runId, now);
+      const originalTotal = status.total;
+      const park = this.detachParkedPairs(status, due);
+      const request = this.parkedRetryRequest(status, due);
+      try {
+        const started = await this.startRun(
+          runId,
+          projectId,
+          request,
+          sessionId,
+          status,
+          true,
+          this.runTenants.get(runId) ?? getCurrentTenant(),
+          undefined,
+          true,
+          true,
+        );
+        if (started.skipped) {
+          status.total = originalTotal;
+          if ((status.status as RunStatusCode) !== RunStatusCode.Cancelled) {
+            this.reattachParkedPairs(status, park, due);
+            await this.finalizeTranslationTerminal(status, projectId, runId);
+          }
+          return 0;
+        }
+      } catch (err) {
+        status.total = originalTotal;
+        this.reattachParkedPairs(status, park, due);
+        this.logger.warn('translation:quota-redispatch-failed', {
+          runId,
+          error: toErrorMessage(err),
+        });
+        await this.finalizeTranslationTerminal(status, projectId, runId);
+        return 0;
+      }
+      this.logger.info('translation:quota-redispatched', { runId, pairs: due.length });
+      return due.length;
+    } finally {
+      this.redispatchingParks.delete(runId);
+    }
   }
 
   async acceptBelowTarget(
@@ -3118,6 +3330,23 @@ export class TranslationEngine {
         };
         try {
           if (await (tenant ? runWithTenant(tenant, attempt) : attempt())) resumed++;
+        } catch (err) {
+          this.logger.warn('translation:quota-sweep-failed', {
+            runId,
+            error: toErrorMessage(err),
+          });
+        }
+      }
+      // Runs still Running: re-plan their own due parks in place.
+      for (const status of [...this.runs.values()]) {
+        if (status.status !== RunStatusCode.Running || !status.waitingForQuota?.pairs.length) {
+          continue;
+        }
+        const { runId, projectId } = status;
+        const tenant = this.runTenants.get(runId) ?? this.queuedTenants.get(runId);
+        const redispatch = () => this.redispatchDueParks(projectId, runId, now);
+        try {
+          if ((await (tenant ? runWithTenant(tenant, redispatch) : redispatch())) > 0) resumed++;
         } catch (err) {
           this.logger.warn('translation:quota-sweep-failed', {
             runId,
@@ -3977,6 +4206,7 @@ export class TranslationEngine {
             }
           : {}),
       };
+      this.refreshWaitingResumeAt(status);
       return;
     }
     const seen = new Map(existing.pairs.map((p) => [`${p.entryId}\0${p.targetLanguage}`, p]));
@@ -4006,6 +4236,7 @@ export class TranslationEngine {
       existing.pairs.push(pair);
     }
     existing.resumeAt = Math.min(existing.resumeAt, resumeAt);
+    this.refreshWaitingResumeAt(status);
     if (
       reason === 'below-target' ||
       (existing.reason !== 'below-target' && existing.reason !== 'provider-error' && reason)
@@ -4203,6 +4434,59 @@ export class TranslationEngine {
   }
 
   /**
+   * Take a governor slot on the bucket a rerouted batch now targets, waiting
+   * for its pacing slot / window as a queued batch would. Bounded: past
+   * {@link REROUTE_ADMISSION_MAX_WAIT_MS} the call is charged to the governor
+   * as a deficit and goes out anyway, so a saturated bucket delays a reroute
+   * rather than stranding it. Returns the instant the call was admitted.
+   */
+  private async admitReroutedCall(admission: Admission, signal?: AbortSignal): Promise<number> {
+    const deadline = Date.now() + REROUTE_ADMISSION_MAX_WAIT_MS;
+    for (;;) {
+      const now = Date.now();
+      if (this.governor.tryAcquire(admission.key, admission.projectedTokens, now)) return now;
+      if (signal?.aborted || now >= deadline) {
+        this.governor.forceAcquire(admission.key, admission.projectedTokens, now);
+        return now;
+      }
+      const at = this.governor.nextAdmitAtFor(admission.key, now) ?? now;
+      await abortableSleep(Math.min(Math.max(at - now, 50), 5_000, deadline - now), signal);
+    }
+  }
+
+  /**
+   * Fold a per-minute 429 into the rate governor (the provider's own usage
+   * count and retry delay) and wake the dispatch queue when the cooldown ends,
+   * so waiting work starts then instead of at the next window rollover.
+   */
+  private observeFreewayRateLimit(
+    err: unknown,
+    bucketKey: string,
+    admission: Admission | undefined,
+    cooldownMs: number | undefined,
+    now: number,
+  ): void {
+    const tenantId = admission?.key.tenantId ?? requireTenant().userId;
+    const key: GovernorKey =
+      admission && admission.key.bucketKey === bucketKey ? admission.key : { tenantId, bucketKey };
+    const usage = rateLimitUsageOf(err);
+    const retryAfterMs = rateLimitRetryHintMs(err);
+    if (usage !== undefined || retryAfterMs !== undefined) {
+      this.governor.observeRateLimit(
+        key,
+        {
+          ...(usage ? { kind: usage.kind, limit: usage.limit, used: usage.used } : {}),
+          ...(retryAfterMs !== undefined ? { retryAfterMs } : {}),
+        },
+        now,
+      );
+    }
+    if (cooldownMs !== undefined && cooldownMs <= MAX_WAKE_COOLDOWN_MS) {
+      this.queue.wakeAt(now + cooldownMs);
+    }
+  }
+
+  /**
    * Fire `onThrottle` for `bucketKey` when that bucket's own rate-governor
    * window is more than 5s from its next rollover — a forced (ungoverned)
    * call spent quota on a bucket that is not about to refill, so the run is
@@ -4300,6 +4584,7 @@ export class TranslationEngine {
     // or that part debits/reconciles the WRONG bucket relative to the one
     // `state` (correctly restored) is about to dispatch on.
     const plannedKey: GovernorKey | undefined = admission ? { ...admission.key } : undefined;
+    const plannedRerouted = admission?.rerouted;
     const merged: TranslationResult[] = [];
     for (const [start, end] of bounds) {
       if (signal?.aborted) {
@@ -4307,7 +4592,10 @@ export class TranslationEngine {
       }
       if (crossLanguage) {
         Object.assign(state, planned);
-        if (admission && plannedKey) admission.key = { ...plannedKey };
+        if (admission && plannedKey) {
+          admission.key = { ...plannedKey };
+          admission.rerouted = plannedRerouted;
+        }
       }
       const language = jobs[start]!.targetLanguage;
       let batchBudget = args.batchBudget;
@@ -4475,7 +4763,11 @@ export class TranslationEngine {
       return { kind: 'defer', resumeAt: now + 60_000, reason: 'provider-error' };
     };
     if (batchBudget.requests.count >= FREEWAY_BATCH_REQUEST_CAP) return parkAtLimit();
-    const strikeCap = args.splitCaps?.get(state.bucketKey);
+    const learnedCap = args.splitCaps?.get(state.bucketKey);
+    const strikeCap =
+      learnedCap !== undefined && args.sizeCap !== undefined
+        ? Math.min(learnedCap, args.sizeCap)
+        : (learnedCap ?? args.sizeCap);
     if (strikeCap !== undefined && strikeCap >= 1 && strikeCap < jobs.length) {
       const bounds = TranslationEngine.cappedLanguageBounds(jobs, strikeCap);
       onRechunk?.({ bucketKey: state.bucketKey, size: jobs.length, parts: bounds.length });
@@ -4576,6 +4868,7 @@ export class TranslationEngine {
             poolKey: rescue?.poolKey,
           };
           admission.spent = true;
+          admission.rerouted = true;
         }
         const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
         if (rescueCap >= 1 && rescueCap < jobs.length) {
@@ -4618,8 +4911,14 @@ export class TranslationEngine {
         // covers more than the one call it was actually granted for.
         if (admission) {
           if (admission.spent) {
-            const forcedAt = Date.now();
-            this.governor.forceAcquire(admission.key, admission.projectedTokens, forcedAt);
+            // A call on a rescue bucket the queue never admitted waits for that
+            // bucket's own governor slot; same-bucket extras are charged as before.
+            const forcedAt = admission.rerouted
+              ? await this.admitReroutedCall(admission, signal)
+              : Date.now();
+            if (!admission.rerouted) {
+              this.governor.forceAcquire(admission.key, admission.projectedTokens, forcedAt);
+            }
             this.reportThrottleIfSlow(
               admission.key.bucketKey,
               admission.key.tenantId,
@@ -4956,13 +5255,9 @@ export class TranslationEngine {
             }
             return { kind: 'defer', resumeAt: strikeAt + 60_000, reason: 'provider-error' };
           }
-          await this.coolFreewayBucket(
-            state.bucketKey,
-            strikeAt,
-            rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey)),
-            deps,
-            'pool',
-          );
+          const strikeCooldown = rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey));
+          await this.coolFreewayBucket(state.bucketKey, strikeAt, strikeCooldown, deps, 'pool');
+          this.observeFreewayRateLimit(err, state.bucketKey, admission, strikeCooldown, strikeAt);
           const buckets = await loadBucketViews(strikeAt, deps);
           const parked = revalidateGroup(
             { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
@@ -4988,13 +5283,9 @@ export class TranslationEngine {
         }
         const now = Date.now();
         if (rateLimited) {
-          await this.coolFreewayBucket(
-            state.bucketKey,
-            now,
-            rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey)),
-            deps,
-            'pool',
-          );
+          const hopCooldown = rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey));
+          await this.coolFreewayBucket(state.bucketKey, now, hopCooldown, deps, 'pool');
+          this.observeFreewayRateLimit(err, state.bucketKey, admission, hopCooldown, now);
         } else if (providerFailure) {
           // A parse-shaped mixed chunk answered, so it is never a passing fault.
           const cooling = parseShapedMixed
@@ -5137,6 +5428,7 @@ export class TranslationEngine {
               poolKey: rescue?.poolKey,
             };
             admission.spent = true;
+            admission.rerouted = true;
           }
           const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
           if (rescueCap >= 1 && rescueCap < jobs.length) {
@@ -5357,6 +5649,17 @@ export class TranslationEngine {
     // failed" delta, which would steal in-flight sibling decisions.
     const settled = new Set<string>();
     const settleKey = (d: RoutingDecision): string => `${d.entry.id}::${d.targetLanguage}`;
+    /** Overflow verdicts seen in this batch; logged as one line at settle. */
+    const overflowSeen = { count: 0, worstRatio: 0, languages: new Set<string>() };
+    const gateBatch: LqaGate = async (entry, result, gateProjectId, targetLanguage, ...rest) => {
+      const verdict = await this.lqaGate(entry, result, gateProjectId, targetLanguage, ...rest);
+      if (verdict?.overflow) {
+        overflowSeen.count++;
+        overflowSeen.worstRatio = Math.max(overflowSeen.worstRatio, verdict.overflowRatio ?? 0);
+        if (targetLanguage) overflowSeen.languages.add(targetLanguage);
+      }
+      return verdict;
+    };
 
     try {
       const moduleLog = (
@@ -5809,7 +6112,7 @@ export class TranslationEngine {
           persistDecision,
           runId,
         );
-        await this.lqaGate(
+        await gateBatch(
           e.decision.entry,
           result,
           projectId,
@@ -5868,7 +6171,7 @@ export class TranslationEngine {
           };
           // Gate BEFORE persisting: a rejected hit is demoted to a hint and
           // the entry joins the module batch.
-          const tmLqaResult = await this.lqaGate(
+          const tmLqaResult = await gateBatch(
             e.decision.entry,
             tmResult,
             projectId,
@@ -6189,7 +6492,7 @@ export class TranslationEngine {
           e.decision,
           runId,
         );
-        const batchLqaResult = await this.lqaGate(
+        const batchLqaResult = await gateBatch(
           e.decision.entry,
           result,
           projectId,
@@ -6326,26 +6629,42 @@ export class TranslationEngine {
           // dispatchFreewayBatch (and its eventual release()) would
           // force-acquire/reconcile against a bucket nothing is actually
           // dispatching to.
-          if (admission && admission.key.bucketKey !== bucketKey) {
+          // A batch planned for another bucket may be larger than this one takes.
+          const movedOffPlan = bucketKey !== freewayBucketKey;
+          let rerouteSizeCap: number | undefined;
+          if ((admission && admission.key.bucketKey !== bucketKey) || movedOffPlan) {
             const rebased = await loadBucketViews(Date.now(), freewayDeps, {
               onlyBucketKey: bucketKey,
             });
             const view = rebased.find((b) => b.bucketKey === bucketKey);
-            if (view) this.seedFreewayRescue(view, admission.key.tenantId, Date.now());
-            admission.key = { tenantId: admission.key.tenantId, bucketKey, poolKey: view?.poolKey };
-            // The queue's tryAcquire admitted the ORIGINAL (now-stale)
-            // bucket, not this one. If no call has happened on this
-            // admission yet, the imminent first call is still unadmitted —
-            // on the new bucket — so mark it spent here, BEFORE dispatch,
-            // so the "permit spent" invariant force-acquires it (request AND
-            // token cost) instead of treating it as already covered. Without
-            // this, the new bucket goes un-debited AND gets credited on
-            // success — manufactured headroom on the bucket the run is
-            // actually spending on. The stale bucket's original debit stays
-            // stranded on purpose: that call never happened there, and
-            // handing it back would let the run re-spend headroom it was
-            // never really promised on the bucket serving it.
-            admission.spent = true;
+            if (view && movedOffPlan) {
+              rerouteSizeCap = charCappedBatch(
+                view,
+                batchJobs.map(({ job }) => job),
+              );
+            }
+            if (admission && admission.key.bucketKey !== bucketKey) {
+              if (view) this.seedFreewayRescue(view, admission.key.tenantId, Date.now());
+              admission.key = {
+                tenantId: admission.key.tenantId,
+                bucketKey,
+                poolKey: view?.poolKey,
+              };
+              admission.rerouted = true;
+              // The queue's tryAcquire admitted the ORIGINAL (now-stale)
+              // bucket, not this one. If no call has happened on this
+              // admission yet, the imminent first call is still unadmitted —
+              // on the new bucket — so mark it spent here, BEFORE dispatch,
+              // so the "permit spent" invariant force-acquires it (request AND
+              // token cost) instead of treating it as already covered. Without
+              // this, the new bucket goes un-debited AND gets credited on
+              // success — manufactured headroom on the bucket the run is
+              // actually spending on. The stale bucket's original debit stays
+              // stranded on purpose: that call never happened there, and
+              // handing it back would let the run re-spend headroom it was
+              // never really promised on the bucket serving it.
+              admission.spent = true;
+            }
           }
           // Freeway batches never retry a 429 in place: the free quota they hit
           // is a day-scale budget, not a momentary burst, so the bucket is
@@ -6448,6 +6767,7 @@ export class TranslationEngine {
             onRechunk: (info) => this.recordFreewayDetail(runId, formatRechunkDetail(info)),
             onUnpack: (info) => this.recordFreewayDetail(runId, formatUnpackDetail(info)),
             admission,
+            ...(rerouteSizeCap !== undefined ? { sizeCap: rerouteSizeCap } : {}),
             onThrottle: (info) => {
               // Once per (run, bucket): a saturated bucket can force several
               // calls in one run, and the point is to tell the user the run
@@ -6942,12 +7262,28 @@ export class TranslationEngine {
       this.emitProgress(runId, status);
     } finally {
       // Batch settle: one stats write per bucket this batch touched.
+      if (overflowSeen.count > 0) {
+        this.logger.warn('lqa:overflow', {
+          runId,
+          strings: overflowSeen.count,
+          worstOverflowRatio: overflowSeen.worstRatio,
+          languages: [...overflowSeen.languages],
+        });
+      }
       if (freewayGateOutcomes.size > 0) {
         await this.flushFreewayGateOutcomes(
           freewayGateOutcomes,
           freewayDeps ?? this.freewayOverrides,
         );
       }
+      // Parked pairs that came due while this run kept working go back on the
+      // queue BEFORE the drain test, so they can't be mistaken for a parked tail.
+      await this.redispatchDueParks(projectId, runId).catch((err: unknown) => {
+        this.logger.warn('translation:quota-redispatch-failed', {
+          runId,
+          error: toErrorMessage(err),
+        });
+      });
       await this.finalizeTranslationTerminal(status, projectId, runId);
     }
   }
@@ -7457,6 +7793,7 @@ export class TranslationEngine {
         status.status = RunStatusCode.Paused;
         this.queue.pauseRun(runId);
       }
+      this.refreshWaitingResumeAt(status);
       this.logger.info('translation:waiting-for-quota', {
         runId,
         pairs: waitingPairs,
@@ -7895,6 +8232,7 @@ export const translationEngine = new TranslationEngine({
       projectId,
       project,
       extraIssues,
+      aggregateOverflow: true,
     });
     // Pass ONLY this language's verdict. updateEntry merges it into the fresh
     // on-disk lqaResults under the write lock, so sibling languages are

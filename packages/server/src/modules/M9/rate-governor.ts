@@ -52,6 +52,22 @@ interface Entry {
   requests?: Allowance;
   tokens?: Allowance;
   windowEndsAt?: number;
+  /**
+   * Earliest instant the next admission may start. Each admission pushes it out
+   * by its share of the window's budget, so a window's allowance trickles out
+   * across the minute instead of leaving in one burst.
+   */
+  nextAdmitAt?: number;
+}
+
+/** What a provider's 429 told us about a bucket's per-minute usage. */
+export interface RateLimitObservation {
+  /** Which allowance the figures describe. */
+  kind?: 'tokens' | 'requests';
+  limit?: number;
+  used?: number;
+  /** The provider's own retry delay. */
+  retryAfterMs?: number;
 }
 
 const MINUTE_MS = 60_000;
@@ -108,6 +124,9 @@ export class RateGovernor {
     const sameWindow =
       previous?.windowEndsAt !== undefined && previous.windowEndsAt === windowEndsAt;
     const entry: Entry = {};
+    // Pacing is continuous across re-seeds: a later run's plan must not hand
+    // back the spacing an earlier admission already earned.
+    if (previous?.nextAdmitAt !== undefined) entry.nextAdmitAt = previous.nextAdmitAt;
     if (seed.rpm !== undefined) {
       entry.requests = RateGovernor.clampToWindow(
         previous?.requests,
@@ -134,6 +153,9 @@ export class RateGovernor {
       const poolSameWindow =
         previousPool?.windowEndsAt !== undefined && previousPool.windowEndsAt === poolWindowEndsAt;
       this.entries.set(pk, {
+        ...(previousPool?.nextAdmitAt !== undefined
+          ? { nextAdmitAt: previousPool.nextAdmitAt }
+          : {}),
         requests: RateGovernor.clampToWindow(
           previousPool?.requests,
           {
@@ -160,6 +182,22 @@ export class RateGovernor {
     entry.windowEndsAt = now + MINUTE_MS - (elapsed % MINUTE_MS);
   }
 
+  /**
+   * How long one admission of `projectedTokens` occupies the entry at the pace
+   * its per-minute budget allows: its share of the window, by tokens or by
+   * requests, whichever is tighter. Zero for an entry with no allowance.
+   */
+  private paceMs(entry: Entry, projectedTokens: number, requestsOnly: boolean): number {
+    const share = (n: number): number => Math.max(1, Math.floor(n * this.utilization));
+    let fraction = 0;
+    if (entry.requests !== undefined)
+      fraction = Math.max(fraction, 1 / share(entry.requests.limit));
+    if (!requestsOnly && entry.tokens !== undefined) {
+      fraction = Math.max(fraction, projectedTokens / share(entry.tokens.limit));
+    }
+    return Math.min(MINUTE_MS, Math.round(fraction * MINUTE_MS));
+  }
+
   private admits(
     name: string,
     projectedTokens: number,
@@ -169,6 +207,7 @@ export class RateGovernor {
     const entry = this.entries.get(name);
     if (entry === undefined) return true; // never seeded ⇒ ungoverned
     this.rollWindow(entry, now);
+    if (entry.nextAdmitAt !== undefined && now < entry.nextAdmitAt) return false;
     if (entry.requests !== undefined && entry.requests.remaining < 1) return false;
     if (!requestsOnly && entry.tokens !== undefined && entry.tokens.remaining < projectedTokens) {
       // A single request larger than a whole window's token budget would
@@ -179,11 +218,13 @@ export class RateGovernor {
     return true;
   }
 
-  private take(name: string, projectedTokens: number, requestsOnly: boolean): void {
+  private take(name: string, projectedTokens: number, requestsOnly: boolean, now: number): void {
     const entry = this.entries.get(name);
     if (entry === undefined) return;
     if (entry.requests !== undefined) entry.requests.remaining -= 1;
     if (!requestsOnly && entry.tokens !== undefined) entry.tokens.remaining -= projectedTokens;
+    const pace = this.paceMs(entry, projectedTokens, requestsOnly);
+    if (pace > 0) entry.nextAdmitAt = Math.max(now, entry.nextAdmitAt ?? 0) + pace;
   }
 
   /** Atomic check-and-take across the bucket's own allowance and its shared pool. */
@@ -192,8 +233,8 @@ export class RateGovernor {
     const pool = poolEntryKey(key);
     if (!this.admits(own, projectedTokens, now, false)) return false;
     if (pool !== undefined && !this.admits(pool, 0, now, true)) return false;
-    this.take(own, projectedTokens, false);
-    if (pool !== undefined) this.take(pool, 0, true);
+    this.take(own, projectedTokens, false, now);
+    if (pool !== undefined) this.take(pool, 0, true, now);
     return true;
   }
 
@@ -209,11 +250,11 @@ export class RateGovernor {
     const pool = poolEntryKey(key);
     const entry = this.entries.get(own);
     if (entry !== undefined) this.rollWindow(entry, now);
-    this.take(own, projectedTokens, false);
+    this.take(own, projectedTokens, false, now);
     if (pool !== undefined) {
       const poolEntry = this.entries.get(pool);
       if (poolEntry !== undefined) this.rollWindow(poolEntry, now);
-      this.take(pool, 0, true);
+      this.take(pool, 0, true, now);
     }
   }
 
@@ -233,11 +274,11 @@ export class RateGovernor {
     const pool = poolEntryKey(key);
     const entry = this.entries.get(own);
     if (entry !== undefined) this.rollWindow(entry, now);
-    for (let i = 0; i < count; i++) this.take(own, 0, true);
+    for (let i = 0; i < count; i++) this.take(own, 0, true, now);
     if (pool !== undefined) {
       const poolEntry = this.entries.get(pool);
       if (poolEntry !== undefined) this.rollWindow(poolEntry, now);
-      for (let i = 0; i < count; i++) this.take(pool, 0, true);
+      for (let i = 0; i < count; i++) this.take(pool, 0, true, now);
     }
   }
 
@@ -256,6 +297,9 @@ export class RateGovernor {
     if (own !== undefined) {
       if (own.requests !== undefined) own.requests.remaining += 1;
       if (own.tokens !== undefined) own.tokens.remaining += projectedTokens;
+      if (own.nextAdmitAt !== undefined) {
+        own.nextAdmitAt = Math.max(0, own.nextAdmitAt - this.paceMs(own, projectedTokens, false));
+      }
     }
     const pk = poolEntryKey(key);
     if (pk !== undefined) {
@@ -280,10 +324,51 @@ export class RateGovernor {
     let soonest: number | undefined;
     for (const entry of this.entries.values()) {
       if (entry.windowEndsAt === undefined) continue;
-      const at = entry.windowEndsAt <= now ? now : entry.windowEndsAt;
+      let at = entry.windowEndsAt <= now ? now : entry.windowEndsAt;
+      // A paced entry admits again at its next slot, ahead of the rollover.
+      if (entry.nextAdmitAt !== undefined && entry.nextAdmitAt > now && entry.nextAdmitAt < at) {
+        at = entry.nextAdmitAt;
+      }
       if (soonest === undefined || at < soonest) soonest = at;
     }
     return soonest;
+  }
+
+  /**
+   * Fold a provider 429 into the bucket's allowance. The provider's own count
+   * of what the window already holds replaces our estimate (it includes calls
+   * we never made), and its retry delay pulls the next refill to when capacity
+   * is actually due back and holds admissions until then. A bucket the
+   * governor never seeded is left alone.
+   */
+  observeRateLimit(key: GovernorKey, obs: RateLimitObservation, now: number): void {
+    const entry = this.entries.get(entryKey(key));
+    if (entry === undefined) return;
+    this.rollWindow(entry, now);
+    const allowance = obs.kind === 'requests' ? entry.requests : entry.tokens;
+    if (allowance !== undefined && obs.limit !== undefined && obs.used !== undefined) {
+      allowance.remaining = obs.limit - obs.used;
+    }
+    if (obs.retryAfterMs !== undefined && obs.retryAfterMs > 0) {
+      const until = now + obs.retryAfterMs;
+      if (entry.windowEndsAt !== undefined)
+        entry.windowEndsAt = Math.min(entry.windowEndsAt, until);
+      entry.nextAdmitAt = Math.max(entry.nextAdmitAt ?? 0, until);
+    }
+  }
+
+  /** When `key` may next be admitted for `projectedTokens`: its pacing slot or window rollover. */
+  nextAdmitAtFor(key: GovernorKey, now: number): number | undefined {
+    const entry = this.entries.get(entryKey(key));
+    if (entry === undefined) return undefined;
+    const paced =
+      entry.nextAdmitAt !== undefined && entry.nextAdmitAt > now ? entry.nextAdmitAt : now;
+    const rollover = entry.windowEndsAt === undefined ? now : Math.max(now, entry.windowEndsAt);
+    // Out of budget waits for the rollover; otherwise only the pacing slot.
+    const spent =
+      (entry.requests !== undefined && entry.requests.remaining < 1) ||
+      (entry.tokens !== undefined && entry.tokens.remaining <= 0);
+    return spent ? Math.max(paced, rollover) : paced;
   }
 
   /**
