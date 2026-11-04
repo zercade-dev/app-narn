@@ -1,4 +1,4 @@
-Freeway runs now pick work back up much sooner after a provider hits its limits, instead of waiting for the whole run to finish.
+Translation runs recover faster from provider limits, and strings that fail a quality check are now fixed together near the end of the run.
 
 - Strings that were waiting on free quota restart as soon as their own wait is over, even while the rest of the run is still going.
 - The "resumes at" time shown for a waiting run is always the next real restart time, never one that has already passed.
@@ -6,5 +6,5 @@ Freeway runs now pick work back up much sooner after a provider hits its limits,
 - Requests to small-allowance models are spread across the minute instead of being sent all at once.
 - Work moved to another model now waits its turn there and is split to that model's batch size.
 - The activity log shows one summary line per batch for strings that came out longer than allowed, instead of one line per string.
-- Strings that fail a quality check are now fixed together in a few grouped requests at the end of the run, instead of one request each as they come up.
+- This applies to every AI provider: strings that fail a quality check are fixed together in a few grouped requests at the end of the run, instead of one request each as they come up.
 - While those fixes run, the Activity tab shows how many strings are being fixed.

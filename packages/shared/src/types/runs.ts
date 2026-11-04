@@ -1,5 +1,7 @@
 import type { JudgeVerdict } from './judge.js';
-import type { ProviderUsageBilling } from './module.js';
+import type { LQAIssue } from './lqa.js';
+import type { ProviderUsageBilling, PromptOptions } from './module.js';
+import type { ReasoningEffort } from './models.js';
 import type { BatchGroupingDimension } from './project.js';
 import type { TranslationRecord } from './string-entry.js';
 
@@ -405,6 +407,28 @@ export interface ProviderFailureNotice {
   routing: ProviderFailureRouting;
 }
 
+/**
+ * A string that failed the quality gate on the first pass and awaits its one
+ * corrective attempt. Holds only what is needed to rebuild the correction
+ * request later (masking, glossary and credentials are resolved when it runs).
+ */
+export interface PendingCorrectionRecord {
+  entryId: string;
+  targetLanguage: string;
+  /** The MASKED first-pass output, replayed as the rejected previous attempt. */
+  previousText: string;
+  /** The restored text this run stored for the pair; the correction applies only while it is still current. */
+  writtenText: string;
+  issues: LQAIssue[];
+  moduleId: string;
+  modelOverride?: string;
+  reasoningEffortOverride?: ReasoningEffort;
+  promptOptions?: PromptOptions;
+  /** Freeway bucket that served the first pass, with its tier. */
+  freewayBucketKey?: string;
+  freewayTier?: number;
+}
+
 export interface RunStatus {
   runId: string;
   projectId: string;
@@ -465,6 +489,15 @@ export interface RunStatus {
    * Absent otherwise.
    */
   correctionPhase?: { total: number; done: number };
+  /**
+   * Strings that failed the quality gate and have not had their corrective
+   * attempt yet. They are not counted completed until it resolves. Persisted so
+   * a parked run keeps them; absent on the run-list summary, which carries
+   * `pendingCorrectionCount` instead.
+   */
+  pendingCorrections?: PendingCorrectionRecord[];
+  /** Run-list summary stand-in for `pendingCorrections.length`. */
+  pendingCorrectionCount?: number;
   /**
    * Set while the run is paused waiting on the freeway module's shared quota
    * to free up. `resumeAt` is the epoch ms the engine will retry at; `pairs`

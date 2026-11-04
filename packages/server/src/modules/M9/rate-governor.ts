@@ -364,18 +364,32 @@ export class RateGovernor {
     }
   }
 
-  /** When `key` may next be admitted for `projectedTokens`: its pacing slot or window rollover. */
-  nextAdmitAtFor(key: GovernorKey, now: number): number | undefined {
-    const entry = this.entries.get(entryKey(key));
-    if (entry === undefined) return undefined;
-    const paced =
-      entry.nextAdmitAt !== undefined && entry.nextAdmitAt > now ? entry.nextAdmitAt : now;
-    const rollover = entry.windowEndsAt === undefined ? now : Math.max(now, entry.windowEndsAt);
-    // Out of budget waits for the rollover; otherwise only the pacing slot.
-    const spent =
-      (entry.requests !== undefined && entry.requests.remaining < 1) ||
-      (entry.tokens !== undefined && entry.tokens.remaining <= 0);
-    return spent ? Math.max(paced, rollover) : paced;
+  /**
+   * When `key` may next be admitted for `projectedTokens`: the later of its own
+   * and its shared pool's pacing slot / window rollover. An entry that cannot
+   * cover the request waits for its rollover, otherwise only for its pacing slot.
+   */
+  nextAdmitAtFor(key: GovernorKey, now: number, projectedTokens = 0): number | undefined {
+    const own = this.entries.get(entryKey(key));
+    if (own === undefined) return undefined;
+    const slot = (entry: Entry, requestsOnly: boolean): number => {
+      const paced =
+        entry.nextAdmitAt !== undefined && entry.nextAdmitAt > now ? entry.nextAdmitAt : now;
+      const rollover = entry.windowEndsAt === undefined ? now : Math.max(now, entry.windowEndsAt);
+      const spent =
+        (entry.requests !== undefined && entry.requests.remaining < 1) ||
+        (!requestsOnly &&
+          entry.tokens !== undefined &&
+          (entry.tokens.remaining <= 0 ||
+            (entry.tokens.remaining < projectedTokens &&
+              entry.tokens.remaining < Math.floor(entry.tokens.limit * this.utilization))));
+      return spent ? Math.max(paced, rollover) : paced;
+    };
+    let at = slot(own, false);
+    const poolName = poolEntryKey(key);
+    const pool = poolName === undefined ? undefined : this.entries.get(poolName);
+    if (pool !== undefined) at = Math.max(at, slot(pool, true));
+    return at;
   }
 
   /**

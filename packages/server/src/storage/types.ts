@@ -300,7 +300,15 @@ export interface StringStore {
     entryId: string,
     targetLanguage: string,
     record: TranslationRecord,
-    opts?: { preserveReviewedIfSameText?: boolean },
+    opts?: {
+      preserveReviewedIfSameText?: boolean;
+      /**
+       * Write only while the CURRENT record is still an unreviewed translation
+       * with exactly this `text` produced by this `runId`; otherwise nothing is
+       * written and `StaleTranslationError` is thrown. Checked under the write lock.
+       */
+      onlyIfCurrent?: { text: string; runId: string };
+    },
   ): Promise<StringEntry>;
   /**
    * Restores (or clears) a single language's translation record WITHOUT

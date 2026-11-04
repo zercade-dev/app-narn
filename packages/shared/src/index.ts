@@ -129,6 +129,7 @@ export {
 } from './types/runs.js';
 export type {
   RunStatus,
+  PendingCorrectionRecord,
   ProviderFailureNotice,
   ProviderFailureRouting,
   RunErrorEntry,

@@ -171,6 +171,8 @@ export class PgRunStore implements RunStore {
    * reads either one from the list:
    *   - `request.entryIds` — up to MAX_ENTRY_IDS (50 000) 64-char content ids,
    *     roughly 3.3 MB, recorded on every translation run and never cleared; and
+   *   - `pendingCorrections` — one record per string awaiting its corrective
+   *     attempt (the count survives as `pendingCorrectionCount`); and
    *   - `waitingForQuota.pairs` — one object per parked (entry, language) job,
    *     which survives even on a cancelled run.
    * Both are removed IN SQL, so they never cross the wire from Postgres and are
@@ -214,10 +216,14 @@ export class PgRunStore implements RunStore {
     const { rows } = await this.db.query<{
       data: RunStatus;
       waiting_pair_count: number;
+      pending_correction_count: number;
       created_by: string | null;
     }>(
       `select
-         (data #- '{request}') #- '{waitingForQuota,pairs}' as data,
+         ((data #- '{request}') #- '{waitingForQuota,pairs}') #- '{pendingCorrections}' as data,
+         case when jsonb_typeof(data -> 'pendingCorrections') = 'array'
+              then jsonb_array_length(data -> 'pendingCorrections')
+              else 0 end as pending_correction_count,
          case when jsonb_typeof(data #> '{waitingForQuota,pairs}') = 'array'
               then jsonb_array_length(data #> '{waitingForQuota,pairs}')
               else 0 end as waiting_pair_count,
@@ -235,6 +241,9 @@ export class PgRunStore implements RunStore {
     );
     return rows.map((r) => {
       const status = this.overlayCreatedBy(r.data, r.created_by);
+      if (Number(r.pending_correction_count) > 0) {
+        status.pendingCorrectionCount = Number(r.pending_correction_count);
+      }
       // `#-` deleted the key outright, but `pairs` is non-optional on the type
       // (and a frontend bundle predating `pairCount` still reads `pairs.length`),
       // so re-seat a well-typed empty array and carry the real size alongside it.
