@@ -126,6 +126,7 @@
     "title": "分发规则",
     "addRule": "添加规则",
     "noRules": "暂无规则，所有内容都通过 Freeway 翻译。",
+    "pseudoOnlyNote": "目前只有伪翻译测试规则，其余内容都通过 Freeway 翻译。",
     "ruleEditing": "#{{priority}}——编辑中",
     "labelSources": "来源",
     "sourcesHint": "导入条目后，来源标签会显示在这里。",

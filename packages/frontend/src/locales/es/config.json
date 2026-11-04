@@ -129,6 +129,7 @@
     "title": "Reglas de enrutamiento",
     "addRule": "Añadir regla",
     "noRules": "Aún no hay reglas: todo se traduce con Freeway.",
+    "pseudoOnlyNote": "Por ahora solo hay reglas de Pseudo Test: todo lo demás se traduce con Freeway.",
     "ruleEditing": "#{{priority}} — editando",
     "labelSources": "Orígenes",
     "sourcesHint": "Las etiquetas de origen aparecen aquí al importar las entradas.",

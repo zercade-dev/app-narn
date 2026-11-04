@@ -129,6 +129,7 @@
     "title": "Yönlendirme kuralları",
     "addRule": "Kural ekle",
     "noRules": "Henüz kural yok — her şey Freeway üzerinden çevrilir.",
+    "pseudoOnlyNote": "Şimdilik yalnızca Pseudo Test kuralları var — geri kalan her şey Freeway üzerinden çevrilir.",
     "ruleEditing": "#{{priority}} — düzenleniyor",
     "labelSources": "Kaynaklar",
     "sourcesHint": "Girdiler içe aktarıldığında kaynak etiketleri burada görünür.",

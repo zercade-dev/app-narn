@@ -126,6 +126,7 @@
     "title": "배정 규칙",
     "addRule": "규칙 추가",
     "noRules": "아직 규칙이 없어요. 모든 항목이 Freeway로 번역돼요.",
+    "pseudoOnlyNote": "지금은 슈도 테스트 규칙뿐이에요. 나머지는 모두 Freeway로 번역돼요.",
     "ruleEditing": "#{{priority}} — 편집 중",
     "labelSources": "출처",
     "sourcesHint": "항목을 가져오면 출처 라벨이 여기에 나타나요.",

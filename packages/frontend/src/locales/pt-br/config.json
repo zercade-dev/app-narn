@@ -129,6 +129,7 @@
     "title": "Regras de roteamento",
     "addRule": "Adicionar regra",
     "noRules": "Ainda sem regras: tudo é traduzido pelo Freeway.",
+    "pseudoOnlyNote": "Por enquanto só há regras do Pseudo Test: todo o resto é traduzido pelo Freeway.",
     "ruleEditing": "#{{priority}} — editando",
     "labelSources": "Origens",
     "sourcesHint": "Os rótulos de origem aparecem aqui depois que as entradas são importadas.",

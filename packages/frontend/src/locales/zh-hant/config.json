@@ -126,6 +126,7 @@
     "title": "分派規則",
     "addRule": "新增規則",
     "noRules": "尚無規則，所有內容都會透過 Freeway 翻譯。",
+    "pseudoOnlyNote": "目前只有偽翻譯測試規則，其餘內容都會透過 Freeway 翻譯。",
     "ruleEditing": "#{{priority}}——編輯中",
     "labelSources": "來源",
     "sourcesHint": "匯入條目後，來源標籤會顯示在這裡。",

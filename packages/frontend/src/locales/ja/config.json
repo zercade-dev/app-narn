@@ -126,6 +126,7 @@
     "title": "振り分けルール",
     "addRule": "ルールを追加",
     "noRules": "ルールはまだありません。すべて Freeway で翻訳されます。",
+    "pseudoOnlyNote": "今のところ疑似テストのルールのみです。それ以外はすべて Freeway で翻訳されます。",
     "ruleEditing": "#{{priority}}（編集中）",
     "labelSources": "ソース",
     "sourcesHint": "エントリをインポートすると、ここにソースラベルが表示されます。",

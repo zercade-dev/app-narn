@@ -126,6 +126,7 @@
     "title": "Aturan penyaluran",
     "addRule": "Tambah aturan",
     "noRules": "Belum ada aturan — semuanya diterjemahkan lewat Freeway.",
+    "pseudoOnlyNote": "Baru ada aturan Pseudo Test — semua yang lain diterjemahkan lewat Freeway.",
     "ruleEditing": "#{{priority}} — sedang disunting",
     "labelSources": "Sumber",
     "sourcesHint": "Label sumber muncul di sini setelah entri diimpor.",

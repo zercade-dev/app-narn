@@ -15,6 +15,7 @@ import type { JudgeChecks, RunStatus } from '@zercade-dev/narn-shared';
 import { FREEWAY_MODULE_ID, projectTargetLanguages } from '@zercade-dev/narn-shared';
 import { Sparkles } from 'lucide-react';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
+import { useFreewayUsable } from '../../hooks/use-freeway-usable.js';
 import { isOfferableModule, basesWithInstances, isEnabledModule } from '@/lib/module-options';
 import { hasNonDefaultValues } from '../../lib/advanced-modified.js';
 import type { ModuleSelectOption } from '../ui/module-select';
@@ -140,6 +141,7 @@ export function AiReviewDialog({
     sourceLanguage: activeProject?.sourceLanguage ?? '',
   });
   const modules = useModules();
+  const freewayUsable = useFreewayUsable();
   // Everything below the module/model/effort picker is tuning, not the choice
   // that defines the run — hidden behind this until ticked. Only its own
   // visibility is gated; the values it wraps are never reset by hiding it (see
@@ -156,7 +158,7 @@ export function AiReviewDialog({
   // pattern `advanced` itself uses) — so this has to be state too.
   const [userAdvanced, setUserAdvanced] = useState(false);
   // `null` means "the user hasn't chosen"; the effective values fall back to the
-  // run-derived defaults below. Reset per run via the parent's `key`.
+  // defaults below. Reset per run via the parent's `key`.
   const [userModuleId, setUserModuleId] = useState<string | null>(null);
   const [userModel, setUserModel] = useState<string | null>(null);
   // Per-run reasoning-effort override. `null` = the user hasn't chosen, so the
@@ -235,7 +237,7 @@ export function AiReviewDialog({
 
   // Apply last-used settings when the dialog opens for a run. Stored module/
   // model/effort are applied only while that module is still an offerable
-  // judge module — otherwise the saved-config/run-module default chain below
+  // judge module — otherwise the saved-config/Freeway/first-capable default chain below
   // stays in charge. (Render-time "prev prop" pattern, as in TranslateRunDialog.)
   const [prevRunId, setPrevRunId] = useState<string | undefined>(undefined);
   // Stashes a stored module/model/effort triple from the open transition below
@@ -289,14 +291,14 @@ export function AiReviewDialog({
 
   // Default chain (most → least preferred): the project's saved judge config
   // (only while its module is still judge-capable), then NARN Freeway when it
-  // is offered, then the first judge-capable module. `user*` overrides win once
-  // the user picks.
-  const freewayOffered = judgeModules.some((m) => m.id === FREEWAY_MODULE_ID);
+  // is offered and usable (a free-tier bucket is available), then the first
+  // judge-capable module. `user*` overrides win once the user picks.
+  const freewayDefault = freewayUsable && judgeModules.some((m) => m.id === FREEWAY_MODULE_ID);
   const savedIsJudgeCapable =
     judgeConfig?.moduleId !== undefined && judgeModules.some((m) => m.id === judgeConfig.moduleId);
   const defaultModuleId = savedIsJudgeCapable
     ? judgeConfig.moduleId!
-    : freewayOffered
+    : freewayDefault
       ? FREEWAY_MODULE_ID
       : (judgeModules[0]?.id ?? '');
   const moduleId = userModuleId ?? defaultModuleId;

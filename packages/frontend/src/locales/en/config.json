@@ -129,6 +129,7 @@
     "title": "Routing Rules",
     "addRule": "Add rule",
     "noRules": "No rules yet — everything is translated through Freeway.",
+    "pseudoOnlyNote": "Only Pseudo Test rules so far — everything else is translated through Freeway.",
     "ruleEditing": "#{{priority}} — editing",
     "labelSources": "Sources",
     "sourcesHint": "Source labels appear here once entries are imported.",

@@ -129,6 +129,7 @@
     "title": "Règles de routage",
     "addRule": "Ajouter une règle",
     "noRules": "Aucune règle pour l’instant : tout est traduit via Freeway.",
+    "pseudoOnlyNote": "Uniquement des règles Pseudo Test pour l’instant : tout le reste est traduit via Freeway.",
     "ruleEditing": "#{{priority}} — en cours d’édition",
     "labelSources": "Sources",
     "sourcesHint": "Les libellés d'origine apparaissent ici après l'import des entrées.",

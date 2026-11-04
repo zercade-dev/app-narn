@@ -126,6 +126,7 @@
     "title": "Quy tắc điều phối",
     "addRule": "Thêm quy tắc",
     "noRules": "Chưa có quy tắc nào — mọi thứ được dịch qua Freeway.",
+    "pseudoOnlyNote": "Hiện mới có quy tắc Pseudo Test — mọi thứ còn lại được dịch qua Freeway.",
     "ruleEditing": "#{{priority}} — đang sửa",
     "labelSources": "Nguồn",
     "sourcesHint": "Nhãn nguồn sẽ hiện ở đây sau khi các mục được nhập vào.",

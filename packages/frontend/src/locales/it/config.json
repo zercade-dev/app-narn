@@ -129,6 +129,7 @@
     "title": "Regole di routing",
     "addRule": "Aggiungi una regola",
     "noRules": "Ancora nessuna regola: tutto viene tradotto tramite Freeway.",
+    "pseudoOnlyNote": "Per ora solo regole Pseudo Test: tutto il resto viene tradotto tramite Freeway.",
     "ruleEditing": "#{{priority}} — in modifica",
     "labelSources": "Origini",
     "sourcesHint": "Le etichette di origine compaiono qui dopo l'importazione delle voci.",

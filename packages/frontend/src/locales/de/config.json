@@ -128,7 +128,8 @@
   "routing": {
     "title": "Routing-Regeln",
     "addRule": "Regel hinzufügen",
-    "noRules": "Noch keine Regeln – alles wird über Freeway übersetzt.",
+    "noRules": "Noch keine Regeln — alles wird über Freeway übersetzt.",
+    "pseudoOnlyNote": "Bisher nur Pseudo-Test-Regeln — alles andere wird über Freeway übersetzt.",
     "ruleEditing": "#{{priority}} — wird bearbeitet",
     "labelSources": "Herkunft",
     "sourcesHint": "Herkunftslabels erscheinen hier, sobald Einträge importiert wurden.",
@@ -194,7 +195,7 @@
     "modeAriaLabel": "Modus des Routing-Editors",
     "simpleLabel": "Alles übersetzen mit",
     "simpleHint": "Jeder Eintrag in diesem Projekt wird von dem hier gewählten Anbieter übersetzt.",
-    "simpleDefaultNote": "Standard – gilt, bis du einen Anbieter auswählst.",
+    "simpleDefaultNote": "Standard — gilt, bis du einen Anbieter auswählst.",
     "simpleAdvancedNotice": "Dieses Projekt nutzt erweitertes Routing, daher wird der vollständige Editor angezeigt.",
     "refreshModels": "Modelle aktualisieren",
     "selectPlaceholder": "— auswählen —",
