@@ -538,6 +538,7 @@
     "statusFailed": "Échouée",
     "statusCancelled": "Annulée",
     "stringsProgress": "{{completed}} / {{total}} entrées",
+    "fixingStrings": "Correction de {{done}} / {{total}} entrées",
     "progressFailedSuffix": "({{count}} en échec)",
     "cancel": "Annuler",
     "runFailedToast": "L'exécution de {{type}} a échoué",

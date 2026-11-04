@@ -459,6 +459,13 @@ export interface RunStatus {
   /** Epoch ms when the run was reverted. Absent unless `reverted` is true. */
   revertedAt?: number;
   /**
+   * Set while a translation run is re-attempting strings that failed the
+   * quality gate on the first pass (one batched pass at the end of the run).
+   * `total` is the strings queued for correction, `done` how many have settled.
+   * Absent otherwise.
+   */
+  correctionPhase?: { total: number; done: number };
+  /**
    * Set while the run is paused waiting on the freeway module's shared quota
    * to free up. `resumeAt` is the epoch ms the engine will retry at; `pairs`
    * are the still-pending (entry, target language) jobs. Absent otherwise.

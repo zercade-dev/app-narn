@@ -6,3 +6,5 @@ Freeway runs now pick work back up much sooner after a provider hits its limits,
 - Requests to small-allowance models are spread across the minute instead of being sent all at once.
 - Work moved to another model now waits its turn there and is split to that model's batch size.
 - The activity log shows one summary line per batch for strings that came out longer than allowed, instead of one line per string.
+- Strings that fail a quality check are now fixed together in a few grouped requests at the end of the run, instead of one request each as they come up.
+- While those fixes run, the Activity tab shows how many strings are being fixed.

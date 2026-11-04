@@ -563,6 +563,7 @@
     "statusFailed": "Ошибка",
     "statusCancelled": "Отменено",
     "stringsProgress": "Записей: {{completed}} / {{total}}",
+    "fixingStrings": "Исправление записей: {{done}} / {{total}}",
     "progressFailedSuffix": "(с ошибкой: {{count}})",
     "cancel": "Отменить",
     "runFailedToast": "Не удалось выполнить прогон: {{type}}",

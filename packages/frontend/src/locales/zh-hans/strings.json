@@ -524,6 +524,7 @@
     "statusFailed": "已失败",
     "statusCancelled": "已取消",
     "stringsProgress": "{{completed}} / {{total}} 个条目",
+    "fixingStrings": "正在修正 {{done}} / {{total}} 个条目",
     "progressFailedSuffix": "（{{count}} 个失败）",
     "cancel": "取消",
     "runFailedToast": "{{type}} 运行失败",

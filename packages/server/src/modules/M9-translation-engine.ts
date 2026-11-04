@@ -207,6 +207,40 @@ export type LqaGate = (
   project?: Project,
 ) => Promise<import('@zercade-dev/narn-shared').LQAResult | undefined>;
 
+/** A gate-failed string queued for the end-of-run corrective pass. */
+interface PendingCorrection {
+  /** Snapshot of the routing decision that produced the first-pass text. */
+  decision: RoutingDecision;
+  masked: string;
+  plan: ReturnType<typeof maskText>['plan'];
+  glossaryById: Map<string, GlossaryTerm>;
+  nonConstantTerms: GlossaryTerm[];
+  jobContext: string | undefined;
+  reference?: TranslationJob['reference'];
+  /** The MASKED first-pass output, replayed as the previous attempt. */
+  originalText: string;
+  lqaResult: import('@zercade-dev/narn-shared').LQAResult;
+  ctx: {
+    module: TranslationModule;
+    moduleConfigs: Record<string, ProjectModuleConfigEntry | undefined>;
+    sourceLanguage: string;
+    project?: Project;
+    achievementPairMap: Map<string, StringEntry[]>;
+    examplesByLanguage?: ExamplesByLanguage;
+    metricsModel: string | null;
+    /** Origin Freeway bucket; absent for directly routed modules. */
+    bucketKey?: string;
+    freewayDeps?: BucketSourceDeps;
+    freewayPriority: FreewayPriority;
+    createFreewayModule: (
+      moduleId: string,
+      modelId: string,
+      bucketKey: string,
+    ) => TranslationModule | undefined;
+    ignoreSizeLimit: boolean;
+  };
+}
+
 interface LoggerLike {
   info(message: string, metadata?: Record<string, unknown>): void;
   warn(message: string, metadata?: Record<string, unknown>): void;
@@ -300,6 +334,10 @@ const NO_FLOOR_RESUME_AT = 8_640_000_000_000_000;
 
 /** Longest a rerouted batch waits for its target bucket's governor slot before going out as a deficit. */
 const REROUTE_ADMISSION_MAX_WAIT_MS = 90_000;
+/** Longest a Freeway correction call waits for a governor slot before the strings keep their first-pass text. */
+const CORRECTION_ADMISSION_MAX_WAIT_MS = 120_000;
+/** How often a user-paused run's correction pass checks whether it was resumed. */
+const CORRECTION_PAUSE_POLL_MS = 500;
 
 /** Cooldowns up to this long (per-minute scale) wake the dispatch queue when they end. */
 const MAX_WAKE_COOLDOWN_MS = 120_000;
@@ -887,6 +925,11 @@ export class TranslationEngine {
    * In-memory only — lost on restart, like the run controllers below.
    */
   private readonly details = new Map<string, RunDetailsAcc>();
+  /** Gate-failed strings awaiting each run's end-of-run corrective pass. */
+  private readonly corrections = new Map<
+    string,
+    { items: PendingCorrection[]; started: boolean }
+  >();
   private readonly controllers = new Map<string, AbortController>();
   // Per-run "settled" deferreds + in-flight detached-task counts. A
   // settled deferred (armed when a run's tasks are dispatched, resolved once the
@@ -6318,15 +6361,6 @@ export class TranslationEngine {
        */
       let currentFreewayState: FreewayBatchState | undefined;
 
-      // Entries whose LQA gate failed, queued for a retryWithFeedback pass
-      // after the whole batch has been persisted (the LQA corrective retry;
-      // see retryLqaFailure).
-      const lqaRetryQueue: Array<{
-        entry: MaskedEntry;
-        originalText: string;
-        lqaResult: import('@zercade-dev/narn-shared').LQAResult;
-      }> = [];
-
       // Persists + LQA-gates + records progress for ONE entry's result. Called
       // either from onJobComplete (as soon as a module reports a job mid-batch)
       // or from the fallback loop after the whole dispatch batch resolves (for
@@ -6509,33 +6543,54 @@ export class TranslationEngine {
           else freewayGateOutcomes.set(bucketKey, [outcome]);
         }
         // No TM auto-record (memory holds only approved variants). On LQA
-        // failure, queue a session-reuse retry when the module supports it.
-        const retryLqaResult =
-          batchLqaResult && !batchLqaResult.passed && typeof module.retryWithFeedback === 'function'
+        // failure, defer a corrective pass to the end of the run when the
+        // serving module can take corrective feedback.
+        const deferCorrection =
+          batchLqaResult &&
+          !batchLqaResult.passed &&
+          (typeof module.correctBatch === 'function' ||
+            typeof module.retryWithFeedback === 'function')
             ? batchLqaResult
             : undefined;
         // Mark this decision settled unconditionally: its first pass DID persist,
         // so the outer catch must never double-fail it (load-bearing).
         settled.add(settleKey(e.decision));
-        if (retryLqaResult) {
-          // DEFER the completion accounting (completed++/recordSuccess/
-          // translation:done) to the retry loop. Counting a retry-queued entry
-          // here — before its retry runs — lets `status.completed` reach `total`
-          // while retries are still in flight, so a sibling dispatch group's
-          // finally finalizes the run early and the retry's usage/detail is lost.
+        // The first pass is a completed decision either way (the corrective pass
+        // never counts again); the run just cannot finalize until it has run.
+        status.completed++;
+        metricsCollector.recordSuccess(moduleId, metricsModel);
+        if (deferCorrection) {
           // Queue the MASKED first-pass output (moduleResult.translatedText),
-          // NOT the restored/unmasked text: retryWithFeedback replays it as the
-          // assistant turn against the MASKED prompt (see retryLqaFailure /
-          // TranslationModule.retryWithFeedback contract). An unmasked previous
-          // attempt makes the retry answer unmasked — tripping mask-integrity.
-          lqaRetryQueue.push({
-            entry: e,
+          // NOT the restored/unmasked text: the correction replays it against
+          // the MASKED prompt (see TranslationModule.retryWithFeedback). An
+          // unmasked previous attempt makes the answer unmasked — tripping
+          // mask-integrity.
+          this.queueCorrection(runId, {
+            decision: { ...e.decision },
+            masked: e.masked,
+            plan: e.plan,
+            glossaryById: e.glossaryById,
+            nonConstantTerms: e.nonConstantTerms,
+            jobContext: appendTmHints(e.decision.entry.context, e.tmHints),
+            ...(e.reference ? { reference: e.reference } : {}),
             originalText: moduleResult.translatedText,
-            lqaResult: retryLqaResult,
+            lqaResult: deferCorrection,
+            ctx: {
+              module,
+              moduleConfigs: projectEntries,
+              sourceLanguage,
+              ...(project ? { project } : {}),
+              achievementPairMap,
+              ...(examplesByLanguage ? { examplesByLanguage } : {}),
+              metricsModel,
+              ...(bucketKey !== undefined ? { bucketKey } : {}),
+              ...(freewayDeps ? { freewayDeps } : {}),
+              freewayPriority,
+              createFreewayModule,
+              ignoreSizeLimit: dispatchOptions?.ignoreSizeLimit === true,
+            },
           });
         } else {
-          status.completed++;
-          metricsCollector.recordSuccess(moduleId, metricsModel);
           this.logger.info('translation:done', {
             runId,
             entryId: e.decision.entry.id,
@@ -7022,217 +7077,6 @@ export class TranslationEngine {
         const authCancelled = await finalizeEntryResult(i);
         if (authCancelled) return;
       }
-
-      // The LQA corrective retry for batch runs: re-attempt each gate-failed
-      // entry with corrective feedback. Retry-queued entries were NOT counted
-      // at their first-pass site (only marked settled) — they are counted
-      // here, once their retry settles, mirroring the single path:
-      // `persisted` replaces the stored translation and its gate result,
-      // `accepted-original` keeps the first-pass text; both are a completed
-      // decision (count once). `aborted` (run cancelled) does not count — the
-      // cancel path finalizes. Deferring the count until here is what keeps a
-      // sibling dispatch group from finalizing the run while these retries
-      // are still in flight.
-      for (const item of lqaRetryQueue) {
-        if ((status.status as RunStatusCode) === RunStatusCode.Cancelled || signal?.aborted) break;
-        // Freeway escalation: a gate failure is a signal that this bucket's
-        // model is too weak for the entry, so the corrective attempt goes to a
-        // HIGHER tier with quota when one exists — a same-model retry usually
-        // just spends another free request on the same mistake. Falls back to
-        // the same-module retry when the ladder is exhausted (or the escalated
-        // module cannot take corrective feedback).
-        let retryModule = module;
-        let retryDecision = item.entry.decision;
-        let escalatedBucketKey: string | undefined;
-        /** The live view `escalatedBucketKey` was selected from — see the debit below. */
-        let escalatedBucketView: BucketView | undefined;
-        if (bucketKey !== undefined && freewayDeps) {
-          const escalationCandidates = await this.selectFreewayEscalation(
-            bucketKey,
-            item.entry.decision,
-            freewayDeps,
-            freewayPriority,
-          );
-          let escalation: (typeof escalationCandidates)[number] | undefined;
-          let escalatedModule: TranslationModule | undefined;
-          for (const candidate of escalationCandidates) {
-            let built: TranslationModule | undefined;
-            try {
-              built = createFreewayModule(
-                candidate.moduleId,
-                candidate.modelId,
-                candidate.bucketKey,
-              );
-            } catch {
-              // An unbuildable candidate (e.g. a module factory that throws
-              // on invalid config) is skipped, not terminal — try the next rung.
-              continue;
-            }
-            if (!built) continue;
-            if (typeof built.retryWithFeedback === 'function') {
-              escalation = candidate;
-              escalatedModule = built;
-              break;
-            }
-            // A higher-tier bucket whose module cannot do feedback retry
-            // (DeepL) is skipped, not terminal — the next rung may be capable.
-            this.logger.info('translation:freeway-escalation-skipped-incapable', {
-              bucketKey: candidate.bucketKey,
-            });
-          }
-          if (escalation && escalatedModule) {
-            retryModule = escalatedModule;
-            retryDecision = {
-              ...item.entry.decision,
-              moduleId: escalation.moduleId,
-              modelOverride: escalation.modelId,
-              freewayTier: escalation.qualityTier,
-              freewayBucketKey: escalation.bucketKey,
-            };
-            escalatedBucketKey = escalation.bucketKey;
-            escalatedBucketView = escalation.bucket;
-            this.logger.info('translation:freeway-escalated', {
-              runId,
-              entryId: item.entry.decision.entry.id,
-              targetLanguage: item.entry.decision.targetLanguage,
-              from: bucketKey,
-              to: escalation.bucketKey,
-            });
-            this.recordFreewayDetail(
-              runId,
-              `${item.entry.decision.targetLanguage} gate-failed on ${bucketKey} — escalated to ${escalation.bucketKey}`,
-            );
-          }
-        }
-        // Counted, not assumed: retryWithFeedback is a single-item call, but a
-        // transient-error retry inside splitAndRetry can still fire once more
-        // at that same size, so this corrective attempt can spend more than
-        // one provider request. retryLqaFailure never rethrows (its own
-        // try/catch converts every failure into 'accepted-original' or
-        // 'aborted'), so there is no separate failure-path debit to gate here
-        // — recordDispatch's own floor of 1 covers modules that do not reach a
-        // counted provider-call seam.
-        let retryMs: number | undefined;
-        let retryStrings = 0;
-        let retryProviderMs: number | undefined;
-        const outcome = await runCountingProviderCalls(
-          () =>
-            this.retryLqaFailure({
-              runId,
-              projectId,
-              status,
-              module: retryModule,
-              decision: retryDecision,
-              sourceLanguage,
-              masked: item.entry.masked,
-              plan: item.entry.plan,
-              glossaryById: item.entry.glossaryById,
-              nonConstantTerms: item.entry.nonConstantTerms,
-              jobContext: appendTmHints(item.entry.decision.entry.context, item.entry.tmHints),
-              ...(item.entry.reference ? { reference: item.entry.reference } : {}),
-              ...(examplesByLanguage?.get(item.entry.decision.targetLanguage)?.length
-                ? { examples: examplesByLanguage.get(item.entry.decision.targetLanguage) }
-                : {}),
-              originalText: item.originalText,
-              lqaResult: item.lqaResult,
-              metricsModel,
-              signal,
-              ...(project ? { project } : {}),
-              achievementPairMap,
-              onAttempt: (ms, strings) => {
-                retryMs = ms;
-                retryStrings = strings;
-              },
-            }),
-          (_calls, measuredMs) => {
-            retryProviderMs = measuredMs;
-          },
-        );
-        const retry = outcome.result;
-        // The corrective attempt is a real provider call, and may make several
-        // — debit the bucket that served it (the escalation target, or the
-        // origin bucket when the same-module retry ran) for what it actually
-        // spent.
-        if (bucketKey !== undefined && freewayDeps) {
-          const debitBucketKey = escalatedBucketKey ?? bucketKey;
-          if (retryMs !== undefined) {
-            await this.recordFreewayCall(
-              status,
-              {
-                bucketKey: debitBucketKey,
-                model: retryDecision.modelOverride ?? retryDecision.moduleId ?? moduleId,
-                requests: Math.max(1, outcome.calls),
-                translateMs: retryProviderMs ?? retryMs,
-                strings: retryStrings,
-              },
-              freewayDeps,
-            );
-            if (escalatedBucketKey) {
-              this.recordFreewayMove(status, bucketKey, escalatedBucketKey, 'lqa');
-            }
-          }
-          await this.recordFreewayDispatch(debitBucketKey, [], freewayDeps, outcome.calls);
-          // This corrective retry never goes through the queue's own
-          // admission — it dispatches directly, outside any Admission — so
-          // unlike every other real call in this engine, nothing has debited
-          // the governor for it on its own. Escalation makes that concrete:
-          // by construction `selectFreewayEscalation` only ever proposes a
-          // bucket the RUN PLAN did NOT assign (`resolveFreewayGroups` seeds
-          // just `resolution.assignedGroups`), so the governor has no entry
-          // for it at all — force-acquiring a never-seeded key is a silent
-          // no-op (`admits()`/`take()` both early-return without an entry),
-          // which would leave the escalated bucket admitting for free
-          // indefinitely. Seed it first, from the SAME live view the
-          // escalation was selected against, exactly as `resolveFreewayGroups`
-          // seeds an assigned bucket at plan time — only then does the
-          // force-acquire below actually debit anything. The same-module
-          // (non-escalated) retry needs none of this: that bucket is the
-          // run's own origin bucket, already seeded at plan time.
-          const tenantId = requireTenant().userId;
-          let debitKey: GovernorKey = { tenantId, bucketKey: debitBucketKey };
-          if (escalatedBucketView !== undefined) {
-            debitKey = {
-              tenantId,
-              bucketKey: debitBucketKey,
-              poolKey: escalatedBucketView.poolKey,
-            };
-            this.governor.seed(
-              debitKey,
-              {
-                rpm: escalatedBucketView.rpm,
-                tpm: escalatedBucketView.tpm,
-                poolRpm: escalatedBucketView.poolRpm,
-                minuteRequests: escalatedBucketView.remainingMinuteRequests,
-                minuteTokens: escalatedBucketView.remainingMinuteTokens,
-                poolMinuteRequests: escalatedBucketView.poolRemainingMinuteRequests,
-                minuteResetAt: escalatedBucketView.minuteResetAt,
-              },
-              Date.now(),
-            );
-          }
-          this.governor.forceAcquire(
-            debitKey,
-            projectedRequestTokens(escalatedBucketView ?? {}, item.originalText.length),
-            Date.now(),
-          );
-          if (outcome.calls > 1) {
-            this.governor.forceAcquireRequests(debitKey, outcome.calls - 1, Date.now());
-          }
-        }
-        if (retry.outcome === 'aborted') break;
-        status.completed++;
-        metricsCollector.recordSuccess(moduleId, metricsModel);
-        this.logger.info('translation:done', {
-          runId,
-          entryId: item.entry.decision.entry.id,
-          targetLanguage: item.entry.decision.targetLanguage,
-          moduleId,
-          lqaRetried: true,
-          context: item.entry.decision.entry.context ?? null,
-          glossaryId: retry.usedGlossaryId ?? null,
-        });
-        this.emitProgress(runId, status);
-      }
     } catch (err) {
       // Catch-all for the dispatch pipeline. Without this, an
       // unexpected throw from the batch body outside the dispatch try/catch —
@@ -7288,156 +7132,525 @@ export class TranslationEngine {
     }
   }
 
-  /**
-   * The LQA corrective retry for the dispatch pipeline (processBatchJob):
-   * re-attempts a failed-gate translation via module.retryWithFeedback on the
-   * same conversation session, re-verifies the mask, persists and re-gates
-   * the retry result, and records it in the TM when the gate passes.
-   *
-   * Outcomes: 'persisted' — the retry result replaced the original;
-   * 'accepted-original' — retry unavailable/failed, keep the first result;
-   * 'aborted' — the run was cancelled mid-retry.
-   */
-  private async retryLqaFailure(args: {
-    runId: string;
-    projectId: string;
-    status: RunStatus;
-    module: TranslationModule;
-    decision: RoutingDecision;
-    sourceLanguage: string;
-    masked: string;
-    plan: ReturnType<typeof maskText>['plan'];
-    glossaryById: Map<string, GlossaryTerm>;
-    nonConstantTerms: GlossaryTerm[];
-    jobContext: string | undefined;
-    reference?: TranslationJob['reference'];
-    examples?: TranslationJob['examples'];
-    originalText: string;
-    lqaResult: import('@zercade-dev/narn-shared').LQAResult;
-    metricsModel: string | null;
-    signal?: AbortSignal;
-    project?: Project;
-    achievementPairMap?: Map<string, StringEntry[]>;
-    onAttempt?: (ms: number, strings: number) => void;
-  }): Promise<{ outcome: 'persisted' | 'accepted-original' | 'aborted'; usedGlossaryId?: string }> {
-    const {
-      runId,
-      projectId,
-      status,
-      module,
-      decision,
-      sourceLanguage,
-      masked,
-      plan,
-      glossaryById,
-      nonConstantTerms,
-      jobContext,
-      reference,
-      examples,
-      originalText,
-      lqaResult,
-      metricsModel,
-      signal,
-      project,
-      achievementPairMap,
-    } = args;
-    if (typeof module.retryWithFeedback !== 'function' || decision.moduleId === null) {
-      return { outcome: 'accepted-original' };
+  /** Queue a gate-failed string for the end-of-run corrective pass (one per pair). */
+  private queueCorrection(runId: string, item: PendingCorrection): void {
+    let queue = this.corrections.get(runId);
+    if (!queue) {
+      queue = { items: [], started: false };
+      this.corrections.set(runId, queue);
     }
-    const { entry, targetLanguage } = decision;
-    const achievement = project
-      ? buildAchievementPromptContext(
-          entry,
-          targetLanguage,
-          project,
-          achievementPairMap ?? new Map(),
-        )
-      : undefined;
-    const feedback = buildLqaRetryFeedback(lqaResult, targetLanguage, achievement);
-    metricsCollector.recordLqaRetry(decision.moduleId, metricsModel);
-    this.recordRetry(runId, entry.id, entry.sourceText, targetLanguage);
-    this.logger.info('translation:lqa-retry', {
-      runId,
-      entryId: entry.id,
-      targetLanguage,
-      moduleId: decision.moduleId,
-      issues: lqaResult.issues.length,
-    });
+    const key = `${item.decision.entry.id}::${item.decision.targetLanguage}`;
+    const at = queue.items.findIndex(
+      (queued) => `${queued.decision.entry.id}::${queued.decision.targetLanguage}` === key,
+    );
+    if (at >= 0) queue.items[at] = item;
+    else queue.items.push(item);
+  }
+
+  private correctionHalted(status: RunStatus, signal?: AbortSignal): boolean {
+    return signal?.aborted === true || (status.status as RunStatusCode) === RunStatusCode.Cancelled;
+  }
+
+  /** Hold a user-paused run's correction calls until it resumes or is cancelled. */
+  private async waitWhileCorrectionPaused(status: RunStatus, signal?: AbortSignal): Promise<void> {
+    while (
+      (status.status as RunStatusCode) === RunStatusCode.Paused &&
+      !this.correctionHalted(status, signal)
+    ) {
+      await abortableSleep(CORRECTION_PAUSE_POLL_MS, signal);
+    }
+  }
+
+  /**
+   * The end-of-run corrective pass: every string that failed the quality gate
+   * on the first pass (its first-pass text is already stored and counted) gets
+   * one correction attempt, grouped by serving module and target language and
+   * sent through `correctBatch` in module-sized chunks (per-string
+   * `retryWithFeedback` for modules without it). Never throws; cancelling the
+   * run stops issuing calls and leaves the first-pass texts in place.
+   */
+  private async runCorrectionPhase(
+    status: RunStatus,
+    projectId: string,
+    runId: string,
+    queue: { items: PendingCorrection[]; started: boolean },
+  ): Promise<void> {
+    const signal = this.controllers.get(runId)?.signal;
+    const items = queue.items.splice(0);
+    status.correctionPhase = { total: items.length, done: 0 };
+    this.emitProgress(runId, status);
     try {
-      const retryJob: TranslationJob = {
+      const groups = new Map<string, PendingCorrection[]>();
+      for (const item of items) {
+        const d = item.decision;
+        const key = `${item.ctx.bucketKey ?? ''}|${d.moduleId ?? ''}|${d.modelOverride ?? ''}|${d.targetLanguage}`;
+        const group = groups.get(key);
+        if (group) group.push(item);
+        else groups.set(key, [item]);
+      }
+      for (const group of groups.values()) {
+        if (this.correctionHalted(status, signal)) break;
+        await this.correctGroup(status, projectId, runId, group, signal);
+      }
+    } catch (err) {
+      if (!isAbortError(err) && !signal?.aborted) {
+        this.logger.warn('translation:lqa-correction-failed', {
+          runId,
+          error: toErrorMessage(err),
+        });
+      }
+    } finally {
+      delete status.correctionPhase;
+      this.emitProgress(runId, status);
+    }
+  }
+
+  /** Corrects one (serving module, target language) group, chunk by chunk. */
+  private async correctGroup(
+    status: RunStatus,
+    projectId: string,
+    runId: string,
+    group: PendingCorrection[],
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const first = group[0];
+    if (!first) return;
+    const ctx = first.ctx;
+    const deps = ctx.freewayDeps;
+    const freeway = ctx.bucketKey !== undefined && deps !== undefined;
+    let module = ctx.module;
+    let override: Partial<RoutingDecision> | undefined;
+    let servingBucketKey = ctx.bucketKey;
+    let servingView: BucketView | undefined;
+    let escalated = false;
+    if (freeway && ctx.bucketKey !== undefined && deps) {
+      // A gate failure signals the bucket's model was too weak for the string,
+      // so the correction goes to a higher tier with quota when one exists; a
+      // same-model retry would mostly repeat the mistake.
+      const candidates = await this.selectFreewayEscalation(
+        ctx.bucketKey,
+        first.decision,
+        deps,
+        ctx.freewayPriority,
+      );
+      for (const candidate of candidates) {
+        let built: TranslationModule | undefined;
+        try {
+          built = ctx.createFreewayModule(
+            candidate.moduleId,
+            candidate.modelId,
+            candidate.bucketKey,
+          );
+        } catch {
+          continue;
+        }
+        if (!built) continue;
+        if (
+          typeof built.correctBatch === 'function' ||
+          typeof built.retryWithFeedback === 'function'
+        ) {
+          module = built;
+          override = {
+            moduleId: candidate.moduleId,
+            modelOverride: candidate.modelId,
+            freewayTier: candidate.qualityTier,
+            freewayBucketKey: candidate.bucketKey,
+          };
+          servingBucketKey = candidate.bucketKey;
+          servingView = candidate.bucket;
+          escalated = true;
+          break;
+        }
+        this.logger.info('translation:freeway-escalation-skipped-incapable', {
+          bucketKey: candidate.bucketKey,
+        });
+      }
+      if (escalated && servingBucketKey !== undefined) {
+        this.logger.info('translation:freeway-escalated', {
+          runId,
+          strings: group.length,
+          targetLanguage: first.decision.targetLanguage,
+          from: ctx.bucketKey,
+          to: servingBucketKey,
+        });
+        this.recordFreewayDetail(
+          runId,
+          `${first.decision.targetLanguage} gate-failed on ${ctx.bucketKey} — escalated to ${servingBucketKey}`,
+        );
+      } else {
+        const views = await loadBucketViews(Date.now(), deps, { onlyBucketKey: ctx.bucketKey });
+        servingView = views.find((view) => view.bucketKey === ctx.bucketKey);
+      }
+    }
+    const decisionFor = (item: PendingCorrection): RoutingDecision =>
+      override ? { ...item.decision, ...override } : item.decision;
+
+    // Chunk size: the serving bucket's character-aware batch size on Freeway,
+    // otherwise the module's configured maxBatchSize (one chunk when the run
+    // ignores the batch size limit).
+    let chunkSize: number;
+    if (freeway && servingView) {
+      chunkSize = Math.max(
+        1,
+        charCappedBatch(
+          servingView,
+          group.map((item) => ({ sourceText: item.masked })),
+        ),
+      );
+    } else if (ctx.ignoreSizeLimit) {
+      chunkSize = group.length;
+    } else {
+      const moduleId = first.decision.moduleId;
+      const global = await this.globalConfigStore.load();
+      const effective =
+        moduleId === null
+          ? undefined
+          : resolveEffectiveModuleConfig(moduleId, global, ctx.moduleConfigs[moduleId]);
+      const v = (effective?.config as { maxBatchSize?: unknown } | undefined)?.maxBatchSize;
+      chunkSize = typeof v === 'number' && v > 0 ? v : 20;
+    }
+    chunkSize = Math.max(1, chunkSize);
+
+    // Governor key for the serving bucket. An escalation target is a bucket the
+    // run plan did not seed, so seed it from the live view it was chosen from.
+    let admissionKey: GovernorKey | undefined;
+    if (freeway && servingBucketKey !== undefined) {
+      const tenantId = requireTenant().userId;
+      admissionKey = {
+        tenantId,
+        bucketKey: servingBucketKey,
+        ...(servingView?.poolKey !== undefined ? { poolKey: servingView.poolKey } : {}),
+      };
+      if (escalated && servingView) {
+        this.governor.seed(
+          admissionKey,
+          {
+            rpm: servingView.rpm,
+            tpm: servingView.tpm,
+            poolRpm: servingView.poolRpm,
+            minuteRequests: servingView.remainingMinuteRequests,
+            minuteTokens: servingView.remainingMinuteTokens,
+            poolMinuteRequests: servingView.poolRemainingMinuteRequests,
+            minuteResetAt: servingView.minuteResetAt,
+          },
+          Date.now(),
+        );
+      }
+    }
+
+    for (let start = 0; start < group.length; start += chunkSize) {
+      const chunk = group.slice(start, start + chunkSize);
+      await this.waitWhileCorrectionPaused(status, signal);
+      if (this.correctionHalted(status, signal)) return;
+      const projectedTokens = servingView
+        ? projectedRequestTokens(
+            servingView,
+            chunk.reduce((sum, item) => sum + item.originalText.length + item.masked.length, 0),
+          )
+        : 0;
+      if (admissionKey) {
+        // Wait for a slot like any queued dispatch; never force the call through.
+        // A bucket that stays saturated past the cap keeps the first-pass texts.
+        const admitted = await this.admitCorrectionCall(
+          status,
+          admissionKey,
+          projectedTokens,
+          signal,
+        );
+        if (!admitted) {
+          this.logger.warn('translation:lqa-correction-no-headroom', {
+            runId,
+            bucketKey: servingBucketKey,
+            strings: group.length - start,
+          });
+          return;
+        }
+      }
+      let retryMs: number | undefined;
+      let providerMs: number | undefined;
+      const started = performance.now();
+      const outcome = await runCountingProviderCalls(
+        () =>
+          this.correctChunk(status, projectId, runId, chunk, module, decisionFor, signal, (ms) => {
+            retryMs = ms;
+          }),
+        (_calls, measuredMs) => {
+          providerMs = measuredMs;
+        },
+      );
+      retryMs ??= performance.now() - started;
+      if (freeway && deps && servingBucketKey !== undefined && admissionKey) {
+        // A chunk may spend more than the admitted request (transient retries,
+        // per-string fallback): charge what it actually used.
+        await this.recordFreewayCall(
+          status,
+          {
+            bucketKey: servingBucketKey,
+            model:
+              override?.modelOverride ??
+              first.decision.modelOverride ??
+              first.decision.moduleId ??
+              'unknown',
+            requests: Math.max(1, outcome.calls),
+            translateMs: providerMs ?? retryMs,
+            strings: outcome.result.corrected,
+          },
+          deps,
+        );
+        if (escalated && ctx.bucketKey !== undefined) {
+          this.recordFreewayMove(status, ctx.bucketKey, servingBucketKey, 'lqa');
+        }
+        await this.recordFreewayDispatch(servingBucketKey, [], deps, outcome.calls);
+        if (outcome.calls > 1) {
+          this.governor.forceAcquireRequests(admissionKey, outcome.calls - 1, Date.now());
+        }
+      }
+      if (status.correctionPhase) {
+        status.correctionPhase.done = Math.min(
+          status.correctionPhase.total,
+          status.correctionPhase.done + outcome.result.settled,
+        );
+      }
+      this.emitProgress(runId, status);
+      if (outcome.result.aborted) return;
+    }
+  }
+
+  /**
+   * Wait for a governor slot on the correction's serving bucket. Returns false
+   * when the run was halted or the bucket stayed saturated for
+   * {@link CORRECTION_ADMISSION_MAX_WAIT_MS}.
+   */
+  private async admitCorrectionCall(
+    status: RunStatus,
+    key: GovernorKey,
+    projectedTokens: number,
+    signal?: AbortSignal,
+  ): Promise<boolean> {
+    const deadline = Date.now() + CORRECTION_ADMISSION_MAX_WAIT_MS;
+    for (;;) {
+      const now = Date.now();
+      if (this.correctionHalted(status, signal)) return false;
+      if (this.governor.tryAcquire(key, projectedTokens, now)) return true;
+      if (now >= deadline) return false;
+      const at = this.governor.nextAdmitAtFor(key, now) ?? now;
+      await abortableSleep(Math.min(Math.max(at - now, 50), 5_000, deadline - now), signal);
+    }
+  }
+
+  /**
+   * Sends one chunk through `correctBatch` (or the per-string fallback) and
+   * applies every outcome. Reports how many strings settled, how many yielded
+   * a usable corrected text, and whether the run was cancelled mid-chunk.
+   */
+  private async correctChunk(
+    status: RunStatus,
+    projectId: string,
+    runId: string,
+    chunk: PendingCorrection[],
+    module: TranslationModule,
+    decisionFor: (item: PendingCorrection) => RoutingDecision,
+    signal: AbortSignal | undefined,
+    onAttempt: (ms: number) => void,
+  ): Promise<{ settled: number; corrected: number; aborted: boolean }> {
+    const prepared = chunk.map((item) => {
+      const decision = decisionFor(item);
+      const { entry, targetLanguage } = decision;
+      const achievement = item.ctx.project
+        ? buildAchievementPromptContext(
+            entry,
+            targetLanguage,
+            item.ctx.project,
+            item.ctx.achievementPairMap,
+          )
+        : undefined;
+      const feedback = buildLqaRetryFeedback(item.lqaResult, targetLanguage, achievement);
+      const examples = item.ctx.examplesByLanguage?.get(targetLanguage);
+      const job: TranslationJob = {
         entryId: entry.id,
-        sourceText: masked,
-        sourceLanguage,
+        sourceText: item.masked,
+        sourceLanguage: item.ctx.sourceLanguage,
         targetLanguage,
-        glossary: nonConstantTerms,
+        glossary: item.nonConstantTerms,
         glossaryId: entry.assignedGlossaryIds?.[0] ?? 'project',
         promptOptions: achievement
           ? { ...effectivePromptOptions(entry, decision.promptOptions), achievement }
           : effectivePromptOptions(entry, decision.promptOptions),
-        context: jobContext,
-        ...(reference ? { reference } : {}),
+        context: item.jobContext,
+        ...(item.reference ? { reference: item.reference } : {}),
         ...(examples?.length ? { examples } : {}),
       };
-      let retryModuleResult: TranslationResult | undefined;
-      const started = performance.now();
-      try {
-        retryModuleResult = await module.retryWithFeedback(
-          retryJob,
-          originalText,
-          feedback,
-          signal,
-        );
-      } finally {
-        args.onAttempt?.(
-          performance.now() - started,
-          retryModuleResult && !retryModuleResult.error && retryModuleResult.translatedText?.trim()
-            ? 1
-            : 0,
-        );
+      if (decision.moduleId !== null) {
+        metricsCollector.recordLqaRetry(decision.moduleId, item.ctx.metricsModel);
       }
-      this.recordUsage(status, decision.moduleId, [retryModuleResult], {
-        freeway: decision.freewayBucketKey !== undefined,
-      });
-      // An errored OR empty/whitespace retry keeps the first-pass text: never
-      // overwrite good output with '' (mirrors M30's error||!translatedText).
-      if (retryModuleResult.error || !retryModuleResult.translatedText?.trim()) {
-        return { outcome: 'accepted-original' };
-      }
-      const retryDiagnostics = verifyMaskedTranslation(retryModuleResult.translatedText, plan);
-      if (signal?.aborted) return { outcome: 'aborted' };
-      const retryMaskIssues = maskDiagnosticsToIssues(retryDiagnostics);
-      const retryRestored = restoreFinal(
-        entry.sourceText,
-        retryModuleResult.translatedText,
-        plan,
-        glossaryById,
-        targetLanguage,
-      );
-      const retryResult: TranslationResult = {
+      this.recordRetry(runId, entry.id, entry.sourceText, targetLanguage);
+      this.logger.info('translation:lqa-retry', {
+        runId,
         entryId: entry.id,
         targetLanguage,
-        translatedText: retryRestored,
-        rawResponse: retryModuleResult.rawResponse,
+        moduleId: decision.moduleId,
+        issues: item.lqaResult.issues.length,
+      });
+      return { item, decision, job, feedback };
+    });
+
+    let settled = 0;
+    let corrected = 0;
+    const settle = async (
+      p: (typeof prepared)[number],
+      result: TranslationResult | undefined,
+    ): Promise<boolean> => {
+      const outcome = await this.applyCorrection(
+        status,
+        projectId,
+        runId,
+        p.item,
+        p.decision,
+        result,
+        signal,
+      );
+      if (outcome === 'aborted') return true;
+      settled++;
+      if (outcome === 'persisted') corrected++;
+      return false;
+    };
+
+    const started = performance.now();
+    try {
+      if (typeof module.correctBatch === 'function') {
+        let results: TranslationResult[] | undefined;
+        try {
+          results = await module.correctBatch(
+            prepared.map((p) => ({
+              job: p.job,
+              previousText: p.item.originalText,
+              feedback: p.feedback,
+            })),
+            signal,
+            chunk[0]?.ctx.ignoreSizeLimit ? { ignoreSizeLimit: true } : undefined,
+          );
+        } catch (err) {
+          if (isAbortError(err) || signal?.aborted) return { settled, corrected, aborted: true };
+          this.logger.warn('translation:lqa-retry-failed', {
+            runId,
+            targetLanguage: prepared[0]?.decision.targetLanguage,
+            error: toErrorMessage(err),
+          });
+        }
+        // Usage rides on the first result of each provider call.
+        const decision0 = prepared[0]?.decision;
+        if (results && decision0?.moduleId) {
+          this.recordUsage(status, decision0.moduleId, results, {
+            freeway: decision0.freewayBucketKey !== undefined,
+          });
+        }
+        for (let i = 0; i < prepared.length; i++) {
+          if (await settle(prepared[i]!, results?.[i])) {
+            return { settled, corrected, aborted: true };
+          }
+        }
+      } else {
+        for (const p of prepared) {
+          if (this.correctionHalted(status, signal)) return { settled, corrected, aborted: true };
+          let result: TranslationResult | undefined;
+          try {
+            result = await module.retryWithFeedback?.(
+              p.job,
+              p.item.originalText,
+              p.feedback,
+              signal,
+            );
+          } catch (err) {
+            if (isAbortError(err) || signal?.aborted) return { settled, corrected, aborted: true };
+            this.logger.warn('translation:lqa-retry-failed', {
+              runId,
+              entryId: p.decision.entry.id,
+              targetLanguage: p.decision.targetLanguage,
+              error: toErrorMessage(err),
+            });
+          }
+          if (result && p.decision.moduleId) {
+            this.recordUsage(status, p.decision.moduleId, [result], {
+              freeway: p.decision.freewayBucketKey !== undefined,
+            });
+          }
+          if (await settle(p, result)) return { settled, corrected, aborted: true };
+        }
+      }
+    } finally {
+      onAttempt(performance.now() - started);
+    }
+    return { settled, corrected, aborted: false };
+  }
+
+  /**
+   * Applies one correction result with the same post-processing the first pass
+   * gets: an errored/empty/missing result keeps the first-pass text; otherwise
+   * the mask is verified, the text unmasked and stored, and the gate re-run
+   * (its verdict replaces the first pass's even when it fails again).
+   */
+  private async applyCorrection(
+    status: RunStatus,
+    projectId: string,
+    runId: string,
+    item: PendingCorrection,
+    decision: RoutingDecision,
+    corrected: TranslationResult | undefined,
+    signal?: AbortSignal,
+  ): Promise<'persisted' | 'accepted-original' | 'aborted'> {
+    const { entry, targetLanguage } = decision;
+    try {
+      if (!corrected || corrected.error || !corrected.translatedText?.trim()) {
+        this.logCorrected(runId, decision, item, undefined);
+        return 'accepted-original';
+      }
+      const diagnostics = verifyMaskedTranslation(corrected.translatedText, item.plan);
+      if (this.correctionHalted(status, signal)) return 'aborted';
+      const maskIssues = maskDiagnosticsToIssues(diagnostics);
+      const restored = restoreFinal(
+        entry.sourceText,
+        corrected.translatedText,
+        item.plan,
+        item.glossaryById,
+        targetLanguage,
+      );
+      const result: TranslationResult = {
+        entryId: entry.id,
+        targetLanguage,
+        translatedText: restored,
+        rawResponse: corrected.rawResponse,
       };
-      await this.persistResult(projectId, entry, targetLanguage, retryResult, decision, runId);
-      await this.lqaGate(entry, retryResult, projectId, targetLanguage, retryMaskIssues, project);
-      // No TM auto-record — only approved translations are written to the memory.
-      return {
-        outcome: 'persisted',
-        ...(retryModuleResult.usedGlossaryId !== undefined
-          ? { usedGlossaryId: retryModuleResult.usedGlossaryId }
-          : {}),
-      };
+      await this.persistResult(projectId, entry, targetLanguage, result, decision, runId);
+      await this.lqaGate(entry, result, projectId, targetLanguage, maskIssues, item.ctx.project);
+      this.logCorrected(runId, decision, item, corrected.usedGlossaryId);
+      return 'persisted';
     } catch (err) {
-      if (isAbortError(err)) return { outcome: 'aborted' };
+      if (isAbortError(err)) return 'aborted';
       this.logger.warn('translation:lqa-retry-failed', {
         runId,
         entryId: entry.id,
         targetLanguage,
-        error: err instanceof Error ? err.message : `${err}`,
+        error: toErrorMessage(err),
       });
-      return { outcome: 'accepted-original' };
+      return 'accepted-original';
     }
+  }
+
+  private logCorrected(
+    runId: string,
+    decision: RoutingDecision,
+    item: PendingCorrection,
+    glossaryId: string | undefined,
+  ): void {
+    this.logger.info('translation:done', {
+      runId,
+      entryId: decision.entry.id,
+      targetLanguage: decision.targetLanguage,
+      moduleId: item.decision.moduleId,
+      lqaRetried: true,
+      context: decision.entry.context ?? null,
+      glossaryId: glossaryId ?? null,
+    });
   }
 
   /**
@@ -7816,6 +8029,21 @@ export class TranslationEngine {
       });
       return;
     }
+    // First pass drained with nothing parked: run the deferred corrective pass
+    // before the run is marked done. `started` is set synchronously, so only
+    // the first finalizer to get here runs it; the others (sibling groups
+    // settling meanwhile) return and leave the completion to that one.
+    const queue = this.corrections.get(runId);
+    if (queue && (queue.started || queue.items.length > 0)) {
+      if (queue.started) return;
+      queue.started = true;
+      try {
+        await this.runCorrectionPhase(status, projectId, runId, queue);
+      } finally {
+        this.corrections.delete(runId);
+      }
+      if (status.status !== RunStatusCode.Running && status.status !== RunStatusCode.Paused) return;
+    }
     status.status = RunStatusCode.Completed;
     status.finishedAt = Date.now();
     this.controllers.delete(runId);
@@ -7908,6 +8136,7 @@ export class TranslationEngine {
   private forgetRun(runId: string): void {
     this.runs.delete(runId);
     this.details.delete(runId);
+    this.corrections.delete(runId);
     this.controllers.delete(runId);
     this.queuedSessions.delete(runId);
     this.runSessions.delete(runId);

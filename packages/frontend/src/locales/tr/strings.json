@@ -537,6 +537,7 @@
     "statusFailed": "Başarısız",
     "statusCancelled": "İptal edildi",
     "stringsProgress": "{{completed}} / {{total}} girdi",
+    "fixingStrings": "{{done}} / {{total}} girdi düzeltiliyor",
     "progressFailedSuffix": "({{count}} başarısız)",
     "cancel": "İptal",
     "runFailedToast": "{{type}} çalıştırması başarısız oldu",

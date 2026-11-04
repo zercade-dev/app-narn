@@ -524,6 +524,7 @@
     "statusFailed": "실패",
     "statusCancelled": "취소됨",
     "stringsProgress": "항목 {{completed}}/{{total}}",
+    "fixingStrings": "항목 수정 중 {{done}}/{{total}}",
     "progressFailedSuffix": "({{count}}건 실패)",
     "cancel": "취소",
     "runFailedToast": "{{type}} 실행이 실패했어요",
