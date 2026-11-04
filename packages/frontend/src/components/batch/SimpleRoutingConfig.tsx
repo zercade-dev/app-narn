@@ -107,6 +107,10 @@ export function SimpleRoutingConfig({
   // name here, not read as deleted. Mirrors moduleLabel() in
   // BatchConfigEditor.tsx, which searches the unfiltered `modules` list.
   const selected = modules.find((m) => m.id === selectedModuleId);
+  // With no rule saved the router falls back to Freeway, so the selector reads
+  // as Freeway until the user picks something (picking Freeway still saves a rule).
+  const defaultLabel =
+    modules.find((m) => m.id === FREEWAY_MODULE_ID)?.name ?? t('routing.freewayLabel');
   // Only claim an instance was deleted once the module list has actually
   // loaded — an empty list is "not loaded yet", not "everything is gone".
   const deleted = selectedModuleId !== null && !selected && modules.length > 0;
@@ -135,9 +139,9 @@ export function SimpleRoutingConfig({
               className="h-9 w-full md:max-w-md"
               data-testid="routing-simple-select"
             >
-              <SelectValue placeholder={t('routing.simplePlaceholder')}>
+              <SelectValue placeholder={defaultLabel}>
                 {(v: string | null) =>
-                  v ? (modules.find((m) => m.id === v)?.name ?? v) : t('routing.simplePlaceholder')
+                  v ? (modules.find((m) => m.id === v)?.name ?? v) : defaultLabel
                 }
               </SelectValue>
             </SelectTrigger>
@@ -170,6 +174,11 @@ export function SimpleRoutingConfig({
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground">{t('routing.simpleHint')}</p>
+          {selectedModuleId === null && (
+            <p className="text-xs text-muted-foreground" data-testid="routing-simple-default-note">
+              {t('routing.simpleDefaultNote')}
+            </p>
+          )}
         </div>
 
         {disabled && (

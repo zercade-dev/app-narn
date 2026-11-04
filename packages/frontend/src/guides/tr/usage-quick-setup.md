@@ -24,7 +24,7 @@ Bir proje oluşturun, **kaynak dilini** ayarlayın, ardından kaynak girdilerini
 
 ## 5. Yönlendirmeyi kurma
 
-**Yönlendirme** sekmesini açın ve açıldığı seçiciden sağlayıcınızı seçin — bu, projedeki her girdiyi ona gönderir; tek sağlayıcılı bir kurulumun ihtiyacı olan tek şey budur. Dil, kategori veya girdi uzunluğuna göre farklı sağlayıcılar mı istiyorsunuz? Bunun yerine **Gelişmiş** moduna geçin ve orada **yönlendirme kuralları** ekleyin. Seçiminiz her iki durumda da sizin için kaydedilir. Bu adım zorunludur: eşleşen kuralı olmayan bir girdi, *“eşleşen yönlendirme kuralı yok”* hatasıyla çeviride başarısız olur.
+**Yönlendirme** sekmesini açın ve açıldığı seçiciden sağlayıcınızı seçin — bu, projedeki her girdiyi ona gönderir; tek sağlayıcılı bir kurulumun ihtiyacı olan tek şey budur. Dil, kategori veya girdi uzunluğuna göre farklı sağlayıcılar mı istiyorsunuz? Bunun yerine **Gelişmiş** moduna geçin ve orada **yönlendirme kuralları** ekleyin. Seçiminiz her iki durumda da sizin için kaydedilir. Hiç kuralı olmayan bir proje her şeyi NARN Freeway üzerinden gönderir; bu yüzden bu adım başlangıçta isteğe bağlıdır. Projede kurallar olduğunda, hiçbirine uymayan bir girdi *“eşleşen yönlendirme kuralı yok”* hatasıyla çeviride başarısız olur.
 
 ## 6. *(Optional)* Kendi içeriğinizden sözlükçeler oluşturma
 

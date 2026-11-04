@@ -8,7 +8,7 @@ Punta il routing su Freeway e non sceglierai mai più un modello: per il lavoro 
 
 ## Come attivarlo
 
-Un progetto appena creato, ancora senza regole di routing, offre il pulsante **Affida tutto a NARN Freeway** nella scheda [Routing](guide:usage-routing) — un clic crea una regola generale che punta al pool gratuito.
+Un progetto appena creato, ancora senza regole di routing, offre il pulsante **Affida tutto a NARN Freeway** nella scheda [Routing](guide:usage-routing) — un clic crea una regola generale che punta al pool gratuito. Anche senza quel clic, un progetto senza alcuna regola viene tradotto tramite Freeway finché non scegli un provider.
 
 Altrimenti scegli **NARN Freeway** come qualsiasi altro provider: nel selettore semplice della scheda Routing per mandargli l'intero progetto, oppure come modulo di una singola regola in **Avanzate** per usarlo su alcune lingue e un provider a pagamento su altre.
 

@@ -47,7 +47,7 @@ Podem. Mude a aba [Roteamento](guide:usage-routing) para **Avançado** e adicion
 
 ### A tradução não começa e diz que não há regra de roteamento. E agora?
 
-Uma execução só começa quando todo idioma nela tem para onde ir. Se um idioma de destino não casa com nenhuma regra, a execução é recusada antes de qualquer envio e a mensagem nomeia o idioma. Abra a aba [Roteamento](guide:usage-routing) e adicione uma regra que o cubra — o seletor simples de provedor cobre todos os idiomas de uma vez — e inicie de novo.
+Uma execução só começa quando todo idioma nela tem para onde ir. Se um idioma de destino não casa com nenhuma regra, a execução é recusada antes de qualquer envio e a mensagem nomeia o idioma. Abra a aba [Roteamento](guide:usage-routing) e adicione uma regra que o cubra — o seletor simples de provedor cobre todos os idiomas de uma vez — e inicie de novo. Um projeto sem nenhuma regra nunca é recusado por esse motivo: ele usa o NARN Freeway até você adicionar regras.
 
 ## Execuções, falhas e recuperação
 

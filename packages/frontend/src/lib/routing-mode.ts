@@ -8,6 +8,7 @@
  * user's mode preference says, which is what keeps a preference set once and
  * forgotten from ever hiding a configuration someone built by hand.
  */
+import { PSEUDO_MODULE_ID } from '@zercade-dev/narn-shared';
 import type { RoutingRule, RoutingRuleGroup } from '@zercade-dev/narn-shared';
 
 /**
@@ -65,5 +66,8 @@ export function makeSimpleRule(moduleId: string, existingId?: string): RoutingRu
  */
 export function simpleRuleModuleId(groups: RoutingRuleGroup[]): string | null {
   const rule = groups[0]?.rules[0];
+  // A pseudo rule never routes a real language, so it counts as nothing chosen
+  // (the router falls back to Freeway).
+  if (rule?.moduleId === PSEUDO_MODULE_ID) return null;
   return rule?.moduleId ? rule.moduleId : null;
 }

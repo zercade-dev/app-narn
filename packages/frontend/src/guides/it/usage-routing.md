@@ -3,9 +3,10 @@
 ## Panoramica
 
 La scheda **Routing** decide quale modulo e modello gestisce ogni voce. Si
-apre su un selettore di provider singolo: scegli un provider e ogni voce
-del progetto vi viene inviata. È tutto ciò di cui la maggior parte dei
-progetti ha bisogno.
+apre su un selettore di provider singolo: scegli un provider e ogni voce del
+progetto vi viene inviata. È tutto ciò di cui la maggior parte dei progetti ha
+bisogno. Finché non scegli un provider, un progetto senza regole invia tutto
+tramite NARN Freeway.
 
 Ti serve più di una destinazione? Passa la scheda ad **Avanzata** e compare
 l'editor completo delle regole, dove il routing può variare per lingua di

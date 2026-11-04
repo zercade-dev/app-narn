@@ -17,4 +17,4 @@ Her çalıştırma kendi **türünü**, **durumunu** (Sıraya alındı, Çalış
 ## Kurtarma ve inceleme
 
 * Bazı dizgiler başarısız olduysa **Başarısız girdileri yeniden dene** yalnızca onları yeniden çalıştırır.
-* Tamamlanmış bir çeviri çalıştırmasında, doğrudan o çalıştırmadan bir **yapay zekâ incelemesi** başlatın — modülü ve modeli seçin (varsayılan olarak çeviride kullanılanlar gelir), ardından verdiktleri **Çeviri yapay zekâ incelemesi** sekmesinde açın.
+* Tamamlanmış bir çeviri çalıştırmasında, doğrudan o çalıştırmadan bir **yapay zekâ incelemesi** başlatın — modülü ve modeli seçin (varsayılan olarak son seçiminiz veya NARN Freeway gelir), ardından verdiktleri **Çeviri yapay zekâ incelemesi** sekmesinde açın.

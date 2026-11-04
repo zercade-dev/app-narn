@@ -2,7 +2,7 @@
 
 ## Aperçu
 
-L’onglet **Routage** décide quel module et quel modèle traitent chaque entrée. Il s’ouvre sur un sélecteur de fournisseur unique : choisissez un fournisseur, et chaque entrée du projet lui est envoyée. C’est tout ce dont la plupart des projets ont besoin.
+L’onglet **Routage** décide quel module et quel modèle traitent chaque entrée. Il s’ouvre sur un sélecteur de fournisseur unique : choisissez un fournisseur, et chaque entrée du projet lui est envoyée. C’est tout ce dont la plupart des projets ont besoin. Tant que vous n’avez pas choisi de fournisseur, un projet sans règle envoie tout via NARN Freeway.
 
 Besoin de plus d’une destination ? Passez l’onglet en **Avancé** et le constructeur de règles complet apparaît, où le routage peut varier selon la langue cible, la catégorie ou la longueur de l’entrée, et où vous pouvez conserver plusieurs **groupes de règles** nommés. L’onglet se souvient du mode que vous avez utilisé en dernier. Un projet dont le routage est plus riche qu’un simple fournisseur affiche toujours le constructeur, quel que soit le mode choisi — une configuration existante ne vous est jamais cachée.
 

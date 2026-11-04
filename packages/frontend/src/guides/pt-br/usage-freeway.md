@@ -8,7 +8,7 @@ Aponte o roteamento para o Freeway e você nunca mais escolhe modelo: o trabalho
 
 ## Como ligar
 
-Um projeto recém-criado, ainda sem regras de roteamento, oferece o botão **Deixar o NARN Freeway cuidar de tudo** na aba [Roteamento](guide:usage-routing) — um clique cria uma regra abrangente apontando para o conjunto gratuito.
+Um projeto recém-criado, ainda sem regras de roteamento, oferece o botão **Deixar o NARN Freeway cuidar de tudo** na aba [Roteamento](guide:usage-routing) — um clique cria uma regra abrangente apontando para o conjunto gratuito. Mesmo sem esse clique, um projeto sem nenhuma regra é traduzido pelo Freeway até você escolher um provedor.
 
 Fora isso, escolha **NARN Freeway** como qualquer outro provedor: no seletor simples da aba Roteamento, para mandar o projeto inteiro, ou como módulo de uma regra específica em **Avançado**, para usá-lo em alguns idiomas e um provedor pago em outros.
 

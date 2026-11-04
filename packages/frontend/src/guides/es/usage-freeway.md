@@ -8,7 +8,7 @@ Si apuntas el enrutamiento a Freeway, no vuelves a elegir modelo: el trabajo de 
 
 ## Cómo activarlo
 
-Un proyecto recién creado que aún no tiene reglas de enrutamiento ofrece un botón **Deja que NARN Freeway se encargue de todo** en la pestaña [Enrutamiento](guide:usage-routing) — un clic crea una regla general que apunta al conjunto gratuito.
+Un proyecto recién creado que aún no tiene reglas de enrutamiento ofrece un botón **Deja que NARN Freeway se encargue de todo** en la pestaña [Enrutamiento](guide:usage-routing) — un clic crea una regla general que apunta al conjunto gratuito. Incluso sin ese clic, un proyecto sin ninguna regla se traduce con Freeway hasta que elijas un proveedor.
 
 Si no, elige **NARN Freeway** como cualquier otro proveedor: en el selector simple de la pestaña Enrutamiento para mandarle todo el proyecto, o como módulo de una regla concreta en **Avanzado** para usarlo en algunos idiomas y un proveedor de pago en otros.
 

@@ -2,7 +2,7 @@
 
 ## Genel bakış
 
-**Yönlendirme** sekmesi, hangi modülün ve modelin hangi girdiyi işleyeceğine karar verir. Tek bir sağlayıcı seçicisiyle açılır: bir sağlayıcı seçin, projedeki her girdi ona gider. Çoğu projenin ihtiyacı olan tek şey budur.
+**Yönlendirme** sekmesi, hangi modülün ve modelin hangi girdiyi işleyeceğine karar verir. Tek bir sağlayıcı seçicisiyle açılır: bir sağlayıcı seçin, projedeki her girdi ona gider. Çoğu projenin ihtiyacı olan tek şey budur. Bir sağlayıcı seçene kadar, kuralı olmayan bir proje her şeyi NARN Freeway üzerinden gönderir.
 
 Birden fazla hedefe mi ihtiyacınız var? Sekmeyi **Gelişmiş** moduna geçirin; hedef dile, kategoriye veya girdi uzunluğuna göre yönlendirmenin farklılaşabildiği ve birkaç adlandırılmış kural grubu tutabildiğiniz tam kural oluşturucu görünür. Sekme, ikisinden en son hangisini kullandığınızı hatırlar. Yönlendirmesi tek bir sağlayıcıdan zengin olan bir proje, hangi modu seçmiş olursanız olun her zaman kural oluşturucuyu gösterir — mevcut bir kurulum sizden asla gizlenmez.
 

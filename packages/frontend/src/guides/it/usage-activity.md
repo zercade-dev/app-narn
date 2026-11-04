@@ -32,6 +32,5 @@ token. Puoi copiare l'id di un'esecuzione come riferimento.
 - Se alcune voci non sono riuscite, **Riprova le non riuscite** ripete solo
   quelle.
 - Su un'esecuzione di traduzione completata, avvia una **Revisione IA**
-  direttamente dall'esecuzione — scegli il modulo e il modello (per
-  impostazione predefinita sono quelli usati per la traduzione), poi apri i
+  direttamente dall'esecuzione — scegli il modulo e il modello (per impostazione predefinita la tua ultima scelta o NARN Freeway), poi apri i
   verdetti nella scheda **Revisione IA traduzioni**.

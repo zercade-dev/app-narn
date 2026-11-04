@@ -34,6 +34,7 @@ import { useAsyncData } from '../../hooks/use-async-data.js';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useVaultRetryAction } from '../../hooks/use-vault-retry-action.js';
 import { useModules } from '../../hooks/use-modules.js';
+import { useFreewayUsable } from '../../hooks/use-freeway-usable.js';
 import { useRunStore } from '../../stores/run-store.js';
 import {
   isOfferableModule,
@@ -141,6 +142,7 @@ export function GenerateGlossaryDialog({
 
   // Discover the LLM modules each time the dialog opens (lazy fetch).
   const modules = useModules({ enabled: open });
+  const freewayUsable = useFreewayUsable({ enabled: open });
   const project = useProjectStore((s) => s.projects.find((p) => p.id === projectId));
   const { data: availableCategories } = useAsyncData<string[]>(
     async (signal) => {
@@ -357,7 +359,14 @@ export function GenerateGlossaryDialog({
     }
   }
 
-  const effectiveModuleId = moduleId || suggestModules[0]?.id || '';
+  // Default: NARN Freeway when offered and usable, else the first capable module; a
+  // remembered or user-picked module (moduleId) always wins.
+  const effectiveModuleId =
+    moduleId ||
+    (freewayUsable && suggestModules.some((m) => m.id === FREEWAY_MODULE_ID)
+      ? FREEWAY_MODULE_ID
+      : suggestModules[0]?.id) ||
+    '';
   const noModules = modules.length > 0 && suggestModules.length === 0;
 
   // How many provider calls (batches) this run will make, shown before starting

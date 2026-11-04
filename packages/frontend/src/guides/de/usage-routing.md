@@ -2,7 +2,7 @@
 
 ## Übersicht
 
-Der Tab **Routing** entscheidet, welches Modul und Modell jeden Eintrag übernimmt. Er öffnet auf einer einfachen Anbieterauswahl: einen Anbieter wählen, und jeder Eintrag im Projekt geht an ihn. Mehr brauchen die meisten Projekte nicht.
+Der Tab **Routing** entscheidet, welches Modul und Modell jeden Eintrag übernimmt. Er öffnet auf einer einfachen Anbieterauswahl: einen Anbieter wählen, und jeder Eintrag im Projekt geht an ihn. Mehr brauchen die meisten Projekte nicht. Solange kein Anbieter gewählt ist, schickt ein Projekt ohne Regeln alles über NARN Freeway.
 
 Werden mehrere Ziele gebraucht? Den Tab auf **Erweitert** umschalten, und der vollständige Regel-Editor erscheint, in dem sich das Routing nach Zielsprache, Kategorie oder Eintragslänge unterscheiden lässt und sich mehrere benannte Regelgruppen führen lassen. Der Tab merkt sich, welcher der beiden zuletzt verwendet wurde. Ein Projekt, dessen Routing über einen einzigen Anbieter hinausgeht, zeigt immer den Editor, unabhängig vom gewählten Modus — eine bestehende Einrichtung wird nie verborgen.
 

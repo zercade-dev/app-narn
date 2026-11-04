@@ -47,7 +47,7 @@ Ja. Stellen Sie den Tab [Routing](guide:usage-routing) auf **Erweitert** und leg
 
 ### Die Übersetzung startet nicht und meldet, es gebe keine passende Routing-Regel. Was nun?
 
-Ein Lauf startet erst, wenn jede beteiligte Sprache ein Ziel hat. Passt auf eine Zielsprache keine Regel, wird der Lauf abgelehnt, bevor irgendetwas gesendet wird, und die Meldung nennt die Sprache. Öffnen Sie den Tab [Routing](guide:usage-routing) und legen Sie eine Regel an, die sie abdeckt — die einfache Anbieterauswahl deckt alle Sprachen auf einmal ab — und starten Sie erneut.
+Ein Lauf startet erst, wenn jede beteiligte Sprache ein Ziel hat. Passt auf eine Zielsprache keine Regel, wird der Lauf abgelehnt, bevor irgendetwas gesendet wird, und die Meldung nennt die Sprache. Öffnen Sie den Tab [Routing](guide:usage-routing) und legen Sie eine Regel an, die sie abdeckt — die einfache Anbieterauswahl deckt alle Sprachen auf einmal ab — und starten Sie erneut. Ein Projekt ganz ohne Regeln wird aus diesem Grund nie abgelehnt: Es nutzt NARN Freeway, bis Regeln hinzukommen.
 
 ## Läufe, Fehler und Wiederherstellung
 
