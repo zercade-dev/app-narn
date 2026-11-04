@@ -357,7 +357,14 @@ export function GenerateGlossaryDialog({
     }
   }
 
-  const effectiveModuleId = moduleId || suggestModules[0]?.id || '';
+  // Default: NARN Freeway when offered, else the first capable module; a
+  // remembered or user-picked module (moduleId) always wins.
+  const effectiveModuleId =
+    moduleId ||
+    (suggestModules.some((m) => m.id === FREEWAY_MODULE_ID)
+      ? FREEWAY_MODULE_ID
+      : suggestModules[0]?.id) ||
+    '';
   const noModules = modules.length > 0 && suggestModules.length === 0;
 
   // How many provider calls (batches) this run will make, shown before starting

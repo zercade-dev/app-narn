@@ -19,4 +19,4 @@ If a model keeps failing with the same error, the run also shows a warning line 
 ## Recovering and reviewing
 
 * If some strings failed, **Retry failed** re-runs just those.
-* On a completed translation run, start an **AI review** directly from the run — choose the module and model (it defaults to the ones used for the translation), then open the verdicts in the **Translation AI review** tab.
+* On a completed translation run, start an **AI review** directly from the run — choose the module and model (it defaults to your last choice, or NARN Freeway), then open the verdicts in the **Translation AI review** tab.

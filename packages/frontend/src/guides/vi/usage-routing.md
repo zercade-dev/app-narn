@@ -2,7 +2,7 @@
 
 ## Tổng quan
 
-Tab **Điều phối** quyết định mô-đun và mô hình nào xử lý từng mục. Nó mở ra với một bộ chọn nhà cung cấp duy nhất: chọn một nhà cung cấp và mọi mục trong dự án sẽ tới đó. Đó là tất cả những gì phần lớn dự án cần.
+Tab **Điều phối** quyết định mô-đun và mô hình nào xử lý từng mục. Nó mở ra với một bộ chọn nhà cung cấp duy nhất: chọn một nhà cung cấp và mọi mục trong dự án sẽ tới đó. Đó là tất cả những gì phần lớn dự án cần. Cho đến khi bạn chọn nhà cung cấp, một dự án không có quy tắc sẽ gửi mọi thứ qua NARN Freeway.
 
 Cần nhiều hơn một đích đến? Chuyển tab sang **Nâng cao** và trình soạn quy tắc đầy đủ sẽ xuất hiện, nơi điều phối có thể khác nhau theo ngôn ngữ đích, danh mục, hoặc độ dài mục, và nơi bạn có thể giữ nhiều **nhóm quy tắc** có tên riêng. Tab này nhớ bạn đã dùng chế độ nào gần nhất. Một dự án có cách điều phối phức tạp hơn một nhà cung cấp luôn hiển thị trình soạn, bất kể bạn chọn chế độ nào — một thiết lập đã có không bao giờ bị ẩn khỏi bạn.
 

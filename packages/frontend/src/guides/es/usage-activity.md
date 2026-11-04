@@ -17,4 +17,4 @@ Cada ejecución muestra su **tipo**, **estado** (En cola, En curso, Pausada, Com
 ## Recuperar y revisar
 
 * Si algunas cadenas fallaron, **Reintentar fallidos** vuelve a ejecutar solo esos.
-* En una ejecución de traducción completada, inicia una **revisión IA** directamente desde la ejecución — elige el módulo y el modelo (por defecto se usan los mismos que la traducción) y luego abre los veredictos en la pestaña **Revisión IA de traducción**.
+* En una ejecución de traducción completada, inicia una **revisión IA** directamente desde la ejecución — elige el módulo y el modelo (por defecto, tu última elección o NARN Freeway) y luego abre los veredictos en la pestaña **Revisión IA de traducción**.

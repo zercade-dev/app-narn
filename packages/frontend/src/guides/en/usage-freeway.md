@@ -8,7 +8,7 @@ Point routing at Freeway and you never choose a model again: there is no model o
 
 ## Turning it on
 
-A brand-new project with no routing rules yet offers a **Let NARN Freeway handle everything** button on the [Routing](guide:usage-routing) tab — one click creates a catch-all rule pointing at the pool.
+A brand-new project with no routing rules yet offers a **Let NARN Freeway handle everything** button on the [Routing](guide:usage-routing) tab — one click creates a catch-all rule pointing at the pool. Even without that click, a project with no rules at all is translated through Freeway until you choose a provider.
 
 Otherwise, pick **NARN Freeway** like any other provider: in the Routing tab's simple selector to send the whole project to it, or as the module on a single rule in **Advanced** to use it for some languages and a paid provider for others.
 

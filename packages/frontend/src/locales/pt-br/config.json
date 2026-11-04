@@ -128,7 +128,7 @@
   "routing": {
     "title": "Regras de roteamento",
     "addRule": "Adicionar regra",
-    "noRules": "Nenhuma regra de roteamento. Adicione uma para começar.",
+    "noRules": "Ainda sem regras: tudo é traduzido pelo Freeway.",
     "ruleEditing": "#{{priority}} — editando",
     "labelSources": "Origens",
     "sourcesHint": "Os rótulos de origem aparecem aqui depois que as entradas são importadas.",
@@ -193,8 +193,8 @@
     "modeAdvanced": "Avançado",
     "modeAriaLabel": "Modo do editor de roteamento",
     "simpleLabel": "Traduzir tudo com",
-    "simplePlaceholder": "Escolha um provedor",
     "simpleHint": "Todas as entradas deste projeto são traduzidas pelo provedor que você escolher aqui.",
+    "simpleDefaultNote": "Padrão: usado até você escolher um provedor.",
     "simpleAdvancedNotice": "Este projeto usa roteamento avançado, portanto o editor completo é exibido.",
     "refreshModels": "Atualizar modelos",
     "selectPlaceholder": "— selecione —",

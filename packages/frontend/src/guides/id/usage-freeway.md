@@ -8,7 +8,7 @@ Arahkan penyaluran ke Freeway dan Anda tidak perlu memilih model lagi: pekerjaan
 
 ## Cara mengaktifkan
 
-Proyek yang benar-benar baru dan belum punya aturan penyaluran menampilkan tombol **Serahkan semuanya ke NARN Freeway** di tab [Penyaluran](guide:usage-routing) — satu klik membuat aturan menyeluruh yang menunjuk ke kumpulan gratis itu.
+Proyek yang benar-benar baru dan belum punya aturan penyaluran menampilkan tombol **Serahkan semuanya ke NARN Freeway** di tab [Penyaluran](guide:usage-routing) — satu klik membuat aturan menyeluruh yang menunjuk ke kumpulan gratis itu. Tanpa klik itu pun, proyek tanpa aturan sama sekali diterjemahkan lewat Freeway sampai Anda memilih penyedia.
 
 Selain itu, pilih **NARN Freeway** seperti penyedia lainnya: di pemilih sederhana tab Penyaluran untuk mengirim seluruh proyek ke sana, atau sebagai modul pada satu aturan di **Lanjutan** untuk memakainya pada sebagian bahasa dan penyedia berbayar pada sisanya.
 

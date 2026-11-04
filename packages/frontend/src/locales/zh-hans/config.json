@@ -125,7 +125,7 @@
   "routing": {
     "title": "分发规则",
     "addRule": "添加规则",
-    "noRules": "暂无分发规则。添加一条即可开始。",
+    "noRules": "暂无规则，所有内容都通过 Freeway 翻译。",
     "ruleEditing": "#{{priority}}——编辑中",
     "labelSources": "来源",
     "sourcesHint": "导入条目后，来源标签会显示在这里。",
@@ -188,8 +188,8 @@
     "modeAdvanced": "高级",
     "modeAriaLabel": "分发规则编辑器模式",
     "simpleLabel": "使用以下服务商翻译全部内容",
-    "simplePlaceholder": "选择服务商",
     "simpleHint": "本项目中的每个条目都由您在这里选择的服务商翻译。",
+    "simpleDefaultNote": "默认值，在您选择服务商之前使用。",
     "simpleAdvancedNotice": "本项目使用高级分发规则，因此显示完整编辑器。",
     "refreshModels": "刷新模型",
     "selectPlaceholder": "— 请选择 —",

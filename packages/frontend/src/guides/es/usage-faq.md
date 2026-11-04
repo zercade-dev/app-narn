@@ -47,7 +47,7 @@ Sí. Cambia la pestaña [Enrutamiento](guide:usage-routing) a **Avanzado** y añ
 
 ### La traducción no arranca y dice que no hay ninguna regla de enrutamiento. ¿Qué hago?
 
-Una ejecución solo arranca cuando todos los idiomas que incluye tienen a dónde ir. Si un idioma de destino no coincide con ninguna regla, la ejecución se rechaza antes de enviar nada y el mensaje nombra el idioma. Abre la pestaña [Enrutamiento](guide:usage-routing) y añade una regla que lo cubra — el selector simple de proveedor cubre todos los idiomas de una vez — y vuelve a lanzar la ejecución.
+Una ejecución solo arranca cuando todos los idiomas que incluye tienen a dónde ir. Si un idioma de destino no coincide con ninguna regla, la ejecución se rechaza antes de enviar nada y el mensaje nombra el idioma. Abre la pestaña [Enrutamiento](guide:usage-routing) y añade una regla que lo cubra — el selector simple de proveedor cubre todos los idiomas de una vez — y vuelve a lanzar la ejecución. Un proyecto sin ninguna regla nunca se rechaza por este motivo: usa NARN Freeway hasta que añadas reglas.
 
 ## Ejecuciones, fallos y recuperación
 

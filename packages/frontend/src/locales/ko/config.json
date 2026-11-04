@@ -125,7 +125,7 @@
   "routing": {
     "title": "배정 규칙",
     "addRule": "규칙 추가",
-    "noRules": "배정 규칙이 없어요. 하나 추가해 시작하세요.",
+    "noRules": "아직 규칙이 없어요. 모든 항목이 Freeway로 번역돼요.",
     "ruleEditing": "#{{priority}} — 편집 중",
     "labelSources": "출처",
     "sourcesHint": "항목을 가져오면 출처 라벨이 여기에 나타나요.",
@@ -188,8 +188,8 @@
     "modeAdvanced": "고급",
     "modeAriaLabel": "배정 편집기 모드",
     "simpleLabel": "전체 번역에 사용할 제공업체",
-    "simplePlaceholder": "제공업체를 선택하세요",
     "simpleHint": "이 프로젝트의 모든 항목은 여기에서 고른 제공업체가 번역해요.",
+    "simpleDefaultNote": "기본값이에요. 제공업체를 고르기 전까지 사용돼요.",
     "simpleAdvancedNotice": "이 프로젝트는 고급 배정을 사용해서 전체 편집기를 보여 줘요.",
     "refreshModels": "모델 새로 고침",
     "selectPlaceholder": "— 선택 —",

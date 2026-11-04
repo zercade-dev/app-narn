@@ -125,7 +125,7 @@
   "routing": {
     "title": "Aturan penyaluran",
     "addRule": "Tambah aturan",
-    "noRules": "Belum ada aturan penyaluran. Tambahkan satu untuk memulai.",
+    "noRules": "Belum ada aturan — semuanya diterjemahkan lewat Freeway.",
     "ruleEditing": "#{{priority}} — sedang disunting",
     "labelSources": "Sumber",
     "sourcesHint": "Label sumber muncul di sini setelah entri diimpor.",
@@ -188,8 +188,8 @@
     "modeAdvanced": "Lanjutan",
     "modeAriaLabel": "Mode penyunting penyaluran",
     "simpleLabel": "Terjemahkan semuanya dengan",
-    "simplePlaceholder": "Pilih penyedia",
     "simpleHint": "Setiap teks dalam proyek ini diterjemahkan oleh penyedia yang Anda pilih di sini.",
+    "simpleDefaultNote": "Bawaan — dipakai sampai Anda memilih penyedia.",
     "simpleAdvancedNotice": "Proyek ini memakai penyaluran lanjutan, jadi penyunting lengkap yang ditampilkan.",
     "refreshModels": "Segarkan model",
     "selectPlaceholder": "— pilih —",

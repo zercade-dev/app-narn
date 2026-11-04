@@ -564,7 +564,12 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
         isEnabledModule(m),
     );
   }, [modules, realAiModules, tConfig]);
-  const moduleId = userModuleId ?? aiModules[0]?.id ?? '';
+  // Default: NARN Freeway when offered, else the first capable module; a
+  // remembered or user-picked module (userModuleId) always wins.
+  const moduleId =
+    userModuleId ??
+    (aiModules.some((m) => m.id === FREEWAY_MODULE_ID) ? FREEWAY_MODULE_ID : aiModules[0]?.id) ??
+    '';
   const noAiModules = modules.length > 0 && aiModules.length === 0;
 
   // Apply the stashed stored module choice once the async module list has

@@ -24,7 +24,7 @@ In the **Glossary** tab, enable the glossaries that apply to your project. Auto-
 
 ## 5. Set up routing
 
-Open the **Routing** tab and pick your provider from the selector it opens on — that sends every entry in the project to it, which is all a single-provider setup needs. Want different providers per language, category, or entry length? Switch to **Advanced** and add **routing rules** there instead. Your choice is saved for you either way. This step is required: an entry with no matching rule fails translation with a *"no route"* error.
+Open the **Routing** tab and pick your provider from the selector it opens on — that sends every entry in the project to it, which is all a single-provider setup needs. Want different providers per language, category, or entry length? Switch to **Advanced** and add **routing rules** there instead. Your choice is saved for you either way. A project with no rules at all sends everything through NARN Freeway, so this step is optional to begin with. Once a project has rules, an entry that matches none fails translation with a *"no route"* error.
 
 ## 6. *(Optional)* Build glossaries from your own content
 

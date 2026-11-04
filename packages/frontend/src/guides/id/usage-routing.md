@@ -2,10 +2,11 @@
 
 ## Ringkasan
 
-Tab **Penyaluran** menentukan modul dan model mana yang menangani tiap
-entri. Tab ini terbuka pada satu pemilih penyedia: pilih sebuah penyedia
-dan setiap entri dalam proyek dikirim ke sana. Itu sudah cukup untuk
-kebanyakan proyek.
+Tab **Penyaluran** menentukan modul dan model mana yang menangani tiap entri.
+Tab ini terbuka pada satu pemilih penyedia: pilih sebuah penyedia dan setiap
+entri dalam proyek dikirim ke sana. Itu sudah cukup untuk kebanyakan proyek.
+Selama Anda belum memilih penyedia, proyek tanpa aturan mengirim semuanya
+lewat NARN Freeway.
 
 Butuh lebih dari satu tujuan? Alihkan tabnya ke **Lanjutan** dan penyusun
 aturan lengkap akan muncul, tempat penyaluran bisa berbeda menurut bahasa

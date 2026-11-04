@@ -128,7 +128,7 @@
   "routing": {
     "title": "Yönlendirme kuralları",
     "addRule": "Kural ekle",
-    "noRules": "Yönlendirme kuralı yok. Başlamak için bir tane ekleyin.",
+    "noRules": "Henüz kural yok — her şey Freeway üzerinden çevrilir.",
     "ruleEditing": "#{{priority}} — düzenleniyor",
     "labelSources": "Kaynaklar",
     "sourcesHint": "Girdiler içe aktarıldığında kaynak etiketleri burada görünür.",
@@ -193,8 +193,8 @@
     "modeAdvanced": "Gelişmiş",
     "modeAriaLabel": "Yönlendirme düzenleyici modu",
     "simpleLabel": "Her şeyi şununla çevir",
-    "simplePlaceholder": "Bir sağlayıcı seçin",
     "simpleHint": "Bu projedeki her girdi, burada seçtiğiniz sağlayıcı tarafından çevrilir.",
+    "simpleDefaultNote": "Varsayılan — bir sağlayıcı seçene kadar kullanılır.",
     "simpleAdvancedNotice": "Bu proje gelişmiş yönlendirme kullanıyor, bu yüzden tam düzenleyici gösteriliyor.",
     "refreshModels": "Modelleri yenile",
     "selectPlaceholder": "— seçin —",

@@ -128,7 +128,7 @@
   "routing": {
     "title": "Reglas de enrutamiento",
     "addRule": "Añadir regla",
-    "noRules": "Sin reglas de enrutamiento. Añade una para comenzar.",
+    "noRules": "Aún no hay reglas: todo se traduce con Freeway.",
     "ruleEditing": "#{{priority}} — editando",
     "labelSources": "Orígenes",
     "sourcesHint": "Las etiquetas de origen aparecen aquí al importar las entradas.",
@@ -193,8 +193,8 @@
     "modeAdvanced": "Avanzado",
     "modeAriaLabel": "Modo del editor de enrutamiento",
     "simpleLabel": "Traducir todo con",
-    "simplePlaceholder": "Elige un proveedor",
     "simpleHint": "Todas las cadenas de este proyecto se traducen con el proveedor que elijas aquí.",
+    "simpleDefaultNote": "Predeterminado: se usa hasta que elijas un proveedor.",
     "simpleAdvancedNotice": "Este proyecto usa enrutamiento avanzado, por eso se muestra el editor completo.",
     "refreshModels": "Actualizar modelos",
     "selectPlaceholder": "— seleccionar —",

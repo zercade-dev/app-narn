@@ -1,17 +1,17 @@
 /**
  * AI-review configuration dialog. Opened from the Activity tab's "AI review"
  * action, it lets the user pick which module and model judge a completed
- * translation run, defaulting to the module/model that produced the run's
- * translations. Only judge-capable modules (those whose metadata reports
+ * translation run, defaulting to the remembered choice, else NARN Freeway.
+ * Only judge-capable modules (those whose metadata reports
  * `supportsJudge`) are offered.
  *
  * The selection has no seeding effect: the effective module/model are derived
- * from the run each render, with `user*` state overriding once the user picks.
+ * each render, with `user*` state overriding once the user picks.
  * The parent remounts this dialog per run (via `key`) so those overrides reset.
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { JudgeChecks, RunStatus, RunUsageEntry } from '@zercade-dev/narn-shared';
+import type { JudgeChecks, RunStatus } from '@zercade-dev/narn-shared';
 import { FREEWAY_MODULE_ID, projectTargetLanguages } from '@zercade-dev/narn-shared';
 import { Sparkles } from 'lucide-react';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
@@ -102,10 +102,8 @@ export interface AiReviewOverride {
 
 export interface AiReviewDialogProps {
   /**
-   * The translation run to review, used to seed default module/model. When
-   * absent (the "review all translations" action has no single run to seed
-   * from), the existing saved-config / cheapest-judge-capable-module fallback
-   * chain takes over unchanged.
+   * The translation run to review. When absent (the "review all translations"
+   * action has no single run), the dialog opens with the same defaults.
    */
   run: RunStatus | undefined;
   /**
@@ -116,34 +114,6 @@ export interface AiReviewDialogProps {
   open?: boolean;
   onOpenChange: (open: boolean) => void;
   onStart: (override: AiReviewOverride) => void;
-}
-
-/**
- * The usage entry that contributed the most work to a run — the module that
- * most represents "what this run was translated with", used to seed the
- * review's default module/model.
- */
-function predominantUsage(run: RunStatus | undefined): RunUsageEntry | undefined {
-  const entries = run?.usageByModule;
-  if (!entries || entries.length === 0) return undefined;
-  const weight = (e: RunUsageEntry) =>
-    (e.inputTokens ?? 0) + (e.outputTokens ?? 0) + (e.characters ?? 0);
-  // Free and paid lines of one (module, model) are the same model: merge them
-  // so the free/paid split cannot change which model wins.
-  const merged = new Map<string, { moduleId: string; model?: string; weight: number }>();
-  for (const e of entries) {
-    const key = JSON.stringify([e.moduleId, e.model ?? null]);
-    const prev = merged.get(key);
-    if (prev) prev.weight += weight(e);
-    else
-      merged.set(key, {
-        moduleId: e.moduleId,
-        ...(e.model !== undefined ? { model: e.model } : {}),
-        weight: weight(e),
-      });
-  }
-  const best = [...merged.values()].reduce((a, b) => (b.weight > a.weight ? b : a));
-  return { moduleId: best.moduleId, ...(best.model !== undefined ? { model: best.model } : {}) };
 }
 
 export function AiReviewDialog({
@@ -318,29 +288,22 @@ export function AiReviewDialog({
   }
 
   // Default chain (most → least preferred): the project's saved judge config
-  // (only while its module is still judge-capable), then the run's own module
-  // when it can judge, then the first judge-capable module. `user*` overrides
-  // win once the user picks.
-  const used = predominantUsage(run);
-  const usedIsJudgeCapable = used !== undefined && judgeModules.some((m) => m.id === used.moduleId);
+  // (only while its module is still judge-capable), then NARN Freeway when it
+  // is offered, then the first judge-capable module. `user*` overrides win once
+  // the user picks.
+  const freewayOffered = judgeModules.some((m) => m.id === FREEWAY_MODULE_ID);
   const savedIsJudgeCapable =
     judgeConfig?.moduleId !== undefined && judgeModules.some((m) => m.id === judgeConfig.moduleId);
   const defaultModuleId = savedIsJudgeCapable
     ? judgeConfig.moduleId!
-    : usedIsJudgeCapable
-      ? used.moduleId
+    : freewayOffered
+      ? FREEWAY_MODULE_ID
       : (judgeModules[0]?.id ?? '');
   const moduleId = userModuleId ?? defaultModuleId;
-  // Seed the model from the saved config (when its module is the default), else
-  // from the run's own (judge-capable) module.
+  // Seed the model from the saved config when its module is the default; the
+  // Freeway default has no model to seed.
   const defaultModel =
-    userModuleId === null
-      ? savedIsJudgeCapable
-        ? (judgeConfig.model ?? '')
-        : usedIsJudgeCapable
-          ? (used.model ?? '')
-          : ''
-      : '';
+    userModuleId === null && savedIsJudgeCapable ? (judgeConfig.model ?? '') : '';
   const model = userModel ?? defaultModel;
   // Seed the effort from the saved config while still on the saved (judge-capable)
   // module; a user pick (including clearing to `''`) always wins.

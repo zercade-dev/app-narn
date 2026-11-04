@@ -47,7 +47,7 @@ Bisa. Alihkan tab [Penyaluran](guide:usage-routing) ke **Lanjutan** lalu tambahk
 
 ### Terjemahan tidak mau mulai dan menyebut tidak ada aturan penyaluran. Sekarang bagaimana?
 
-Sebuah proses baru mulai kalau setiap bahasa di dalamnya punya tujuan. Jika sebuah bahasa tujuan tidak cocok dengan aturan mana pun, proses ditolak sebelum apa pun dikirim dan pesannya menyebut bahasa tersebut. Buka tab [Penyaluran](guide:usage-routing) lalu tambahkan aturan yang mencakupnya — pemilih penyedia yang sederhana mencakup semua bahasa sekaligus — kemudian mulai lagi.
+Sebuah proses baru mulai kalau setiap bahasa di dalamnya punya tujuan. Jika sebuah bahasa tujuan tidak cocok dengan aturan mana pun, proses ditolak sebelum apa pun dikirim dan pesannya menyebut bahasa tersebut. Buka tab [Penyaluran](guide:usage-routing) lalu tambahkan aturan yang mencakupnya — pemilih penyedia yang sederhana mencakup semua bahasa sekaligus — kemudian mulai lagi. Proyek tanpa aturan sama sekali tidak pernah ditolak karena alasan ini: proyek memakai NARN Freeway sampai Anda menambahkan aturan.
 
 ## Proses, kegagalan, dan pemulihan
 

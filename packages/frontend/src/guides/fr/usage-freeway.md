@@ -8,7 +8,7 @@ Pointez le routage vers Freeway et vous ne choisissez plus jamais de modèle : l
 
 ## L'activer
 
-Un projet tout neuf, sans règle de routage, propose un bouton **Laissez NARN Freeway s'occuper de tout** dans l'onglet [Routage](guide:usage-routing) — un clic crée une règle fourre-tout pointant vers le pool gratuit.
+Un projet tout neuf, sans règle de routage, propose un bouton **Laissez NARN Freeway s'occuper de tout** dans l'onglet [Routage](guide:usage-routing) — un clic crée une règle fourre-tout pointant vers le pool gratuit. Même sans ce clic, un projet sans aucune règle est traduit via Freeway tant que vous n’avez pas choisi de fournisseur.
 
 Sinon, choisissez **NARN Freeway** comme n'importe quel autre fournisseur : dans le sélecteur simple de l'onglet Routage pour lui envoyer tout le projet, ou comme module d'une règle précise en **Avancé** pour l'utiliser sur certaines langues et un fournisseur payant sur d'autres.
 

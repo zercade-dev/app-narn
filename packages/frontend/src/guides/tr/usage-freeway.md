@@ -8,7 +8,7 @@ Yönlendirmeyi Freeway'e çevirdiğinizde bir daha model seçmezsiniz: Freeway i
 
 ## Açmak
 
-Henüz yönlendirme kuralı olmayan yepyeni bir proje, [Yönlendirme](guide:usage-routing) sekmesinde **Her şeyi NARN Freeway'e bırak** düğmesini sunar — tek tıklamayla ücretsiz havuza işaret eden kapsayıcı bir kural oluşur.
+Henüz yönlendirme kuralı olmayan yepyeni bir proje, [Yönlendirme](guide:usage-routing) sekmesinde **Her şeyi NARN Freeway'e bırak** düğmesini sunar — tek tıklamayla ücretsiz havuza işaret eden kapsayıcı bir kural oluşur. Bu tıklama olmadan da, hiç kuralı olmayan bir proje siz bir sağlayıcı seçene kadar Freeway üzerinden çevrilir.
 
 Bunun dışında **NARN Freeway**'i başka herhangi bir sağlayıcı gibi seçin: bütün projeyi ona göndermek için Yönlendirme sekmesinin basit seçicisinden, ya da bazı dillerde onu bazılarında ücretli bir sağlayıcıyı kullanmak için **Gelişmiş**'te tek bir kuralın modülü olarak.
 

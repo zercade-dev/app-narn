@@ -24,7 +24,7 @@ Im Tab **Glossar** die Glossare aktivieren, die für das eigene Projekt gelten. 
 
 ## 5. Routing einrichten
 
-Den Tab **Routing** öffnen und den eigenen Anbieter in der Auswahl wählen, mit der er startet — das schickt jeden Eintrag im Projekt an ihn, mehr braucht eine Einzelanbieter-Einrichtung nicht. Werden unterschiedliche Anbieter je Sprache, Kategorie oder Eintragslänge gebraucht? Auf **Erweitert** umschalten und stattdessen dort **Routing-Regeln** hinzufügen. So oder so wird die eigene Wahl automatisch gespeichert. Dieser Schritt ist erforderlich: Ein Eintrag ohne passende Regel schlägt bei der Übersetzung mit einem Fehler „keine passende Route“ fehl.
+Den Tab **Routing** öffnen und den eigenen Anbieter in der Auswahl wählen, mit der er startet — das schickt jeden Eintrag im Projekt an ihn, mehr braucht eine Einzelanbieter-Einrichtung nicht. Werden unterschiedliche Anbieter je Sprache, Kategorie oder Eintragslänge gebraucht? Auf **Erweitert** umschalten und stattdessen dort **Routing-Regeln** hinzufügen. So oder so wird die eigene Wahl automatisch gespeichert. Ein Projekt ganz ohne Regeln schickt alles über NARN Freeway, dieser Schritt ist also zunächst optional. Sobald ein Projekt Regeln hat, schlägt ein Eintrag, auf den keine davon passt, bei der Übersetzung mit einem Fehler „keine passende Route“ fehl.
 
 ## 6. *(Optional)* Glossare aus dem eigenen Inhalt aufbauen
 

@@ -47,7 +47,7 @@ Evet. [Yönlendirme](guide:usage-routing) sekmesini **Gelişmiş**'e alın ve di
 
 ### Çeviri başlamıyor ve yönlendirme kuralı olmadığını söylüyor. Ne yapmalıyım?
 
-Bir çalıştırma ancak içindeki her dilin gidecek bir yeri varsa başlar. Bir hedef dil hiçbir kuralla eşleşmiyorsa, hiçbir şey gönderilmeden çalıştırma reddedilir ve ileti o dili adıyla belirtir. [Yönlendirme](guide:usage-routing) sekmesini açıp onu kapsayan bir kural ekleyin — basit sağlayıcı seçici bütün dilleri tek seferde kapsar — ve çalıştırmayı yeniden başlatın.
+Bir çalıştırma ancak içindeki her dilin gidecek bir yeri varsa başlar. Bir hedef dil hiçbir kuralla eşleşmiyorsa, hiçbir şey gönderilmeden çalıştırma reddedilir ve ileti o dili adıyla belirtir. [Yönlendirme](guide:usage-routing) sekmesini açıp onu kapsayan bir kural ekleyin — basit sağlayıcı seçici bütün dilleri tek seferde kapsar — ve çalıştırmayı yeniden başlatın. Hiç kuralı olmayan bir proje bu nedenle asla reddedilmez: siz kural ekleyene kadar NARN Freeway kullanır.
 
 ## Çalıştırmalar, hatalar ve kurtarma
 

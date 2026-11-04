@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **Routing** tab decides which module and model handles each entry. It opens on a single provider selector: pick a provider and every entry in the project goes to it. That is all most projects ever need.
+The **Routing** tab decides which module and model handles each entry. It opens on a single provider selector: pick a provider and every entry in the project goes to it. That is all most projects ever need. Until you choose a provider, a project with no rules sends everything through NARN Freeway.
 
 Need more than one destination? Switch the tab to **Advanced** and the full rule builder appears, where routing can differ by target language, category, or entry length, and where you can keep several named rule groups. The tab remembers which of the two you last used. A project whose routing is richer than one provider always shows the builder, whichever mode you picked — an existing setup is never hidden from you.
 

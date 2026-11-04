@@ -24,7 +24,7 @@ Chạy **Rà soát nguồn bằng AI** trên ngôn ngữ nguồn trước khi d�
 
 ## 5. Thiết lập điều phối
 
-Mở tab **Điều phối** và chọn nhà cung cấp của bạn từ bộ chọn mà nó mở sẵn — thao tác đó gửi mọi mục trong dự án tới nhà cung cấp đó, và đó là tất cả những gì một thiết lập một-nhà-cung-cấp cần. Muốn nhà cung cấp khác nhau theo từng ngôn ngữ, danh mục, hoặc độ dài mục? Chuyển sang **Nâng cao** và thêm **quy tắc điều phối** ở đó thay vào đó. Lựa chọn của bạn được lưu lại dù theo cách nào. Bước này bắt buộc: một mục không khớp quy tắc nào sẽ dịch thất bại với lỗi *"no route"*.
+Mở tab **Điều phối** và chọn nhà cung cấp của bạn từ bộ chọn mà nó mở sẵn — thao tác đó gửi mọi mục trong dự án tới nhà cung cấp đó, và đó là tất cả những gì một thiết lập một-nhà-cung-cấp cần. Muốn nhà cung cấp khác nhau theo từng ngôn ngữ, danh mục, hoặc độ dài mục? Chuyển sang **Nâng cao** và thêm **quy tắc điều phối** ở đó thay vào đó. Lựa chọn của bạn được lưu lại dù theo cách nào. Một dự án hoàn toàn không có quy tắc sẽ gửi mọi thứ qua NARN Freeway, nên ban đầu bước này là tùy chọn. Khi dự án đã có quy tắc, một mục không khớp quy tắc nào sẽ dịch thất bại với lỗi *"no route"*.
 
 ## 6. *(Optional)* Xây dựng bảng thuật ngữ từ nội dung của chính bạn
 

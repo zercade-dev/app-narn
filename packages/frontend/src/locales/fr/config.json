@@ -128,7 +128,7 @@
   "routing": {
     "title": "Règles de routage",
     "addRule": "Ajouter une règle",
-    "noRules": "Aucune règle de routage. Ajoutez-en une pour commencer.",
+    "noRules": "Aucune règle pour l’instant : tout est traduit via Freeway.",
     "ruleEditing": "#{{priority}} — en cours d’édition",
     "labelSources": "Sources",
     "sourcesHint": "Les libellés d'origine apparaissent ici après l'import des entrées.",
@@ -193,8 +193,8 @@
     "modeAdvanced": "Avancé",
     "modeAriaLabel": "Mode de l'éditeur de routage",
     "simpleLabel": "Tout traduire avec",
-    "simplePlaceholder": "Choisissez un fournisseur",
     "simpleHint": "Toutes les chaînes de ce projet sont traduites par le fournisseur choisi ici.",
+    "simpleDefaultNote": "Par défaut : utilisé tant que vous n’avez pas choisi de fournisseur.",
     "simpleAdvancedNotice": "Ce projet utilise un routage avancé, l'éditeur complet est donc affiché.",
     "refreshModels": "Actualiser les modèles",
     "selectPlaceholder": "— sélectionner —",
