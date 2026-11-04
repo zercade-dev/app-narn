@@ -89,6 +89,7 @@ export type {
   SourceReviewItemResult,
   SourceReviewOptions,
   BatchDispatchOptions,
+  CorrectionItem,
 } from './types/module.js';
 export {
   MissingCredentialError,
@@ -271,6 +272,8 @@ export {
   coerceBooleanDefaultTrue,
   LOOPBACK_HOSTS,
   buildBatchPrompt,
+  buildCorrectionBatchPrompt,
+  parseCorrectionBatchResponse,
   parseBatchResponse,
   parseIndexedTranslationResponse,
   filterGlossaryForSource,

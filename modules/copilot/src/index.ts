@@ -9,6 +9,7 @@
 
 import type {
   BatchDispatchOptions,
+  CorrectionItem,
   CredentialProvider,
   TranslationJob,
   TranslationModule,
@@ -32,6 +33,8 @@ import {
   rethrowIfAuthOrRateLimit,
   throwIfAllChunksFailed,
   buildBatchPrompt,
+  buildCorrectionBatchPrompt,
+  parseCorrectionBatchResponse,
   parseBatchResponse,
   parseIndexedTranslationResponse,
   filterGlossaryForSource,
@@ -693,6 +696,113 @@ export function createCopilotModule(
           timeoutMs,
         ),
       );
+    },
+
+    async correctBatch(
+      items: CorrectionItem[],
+      signal?: AbortSignal,
+      options?: BatchDispatchOptions,
+    ): Promise<TranslationResult[]> {
+      if (items.length === 0) return [];
+      const chunkSize = resolveBatchSize(
+        items.length,
+        options?.ignoreSizeLimit ?? false,
+        config.maxBatchSize,
+        { default: DEFAULT_MAX_BATCH_SIZE },
+      );
+      const indexed = config.indexedBatchReplies === true;
+
+      // Prompts are single-language: group by target, keep input order in the output.
+      const byLanguage = new Map<string, number[]>();
+      items.forEach((item, i) => {
+        const list = byLanguage.get(item.job.targetLanguage) ?? [];
+        list.push(i);
+        byLanguage.set(item.job.targetLanguage, list);
+      });
+      const ordered = new Array<TranslationResult>(items.length);
+
+      await withClient(async (client) => {
+        for (const indices of byLanguage.values()) {
+          for (const indexChunk of chunkArray(indices, chunkSize)) {
+            const chunk = indexChunk.map((i) => items[i]);
+            const jobs = chunk.map((item) => item.job);
+            const place = (results: TranslationResult[]) =>
+              indexChunk.forEach((itemIndex, k) => {
+                ordered[itemIndex] = results[k];
+              });
+            const failAll = (message: string) =>
+              place(
+                jobs.map((job) => ({
+                  entryId: job.entryId,
+                  targetLanguage: job.targetLanguage,
+                  translatedText: '',
+                  error: message,
+                })),
+              );
+            if (signal?.aborted) {
+              place(jobs.map(cancelledResult));
+              continue;
+            }
+            const { system, user } = buildCorrectionBatchPrompt(
+              chunk,
+              jobs[0].targetLanguage,
+              indexed,
+            );
+            if (verbose) log('info', '[copilot] correct-batch:prompt', { system, user });
+            const eff = normalizeReasoningEffort(
+              model,
+              resolveHighestEffort(jobs, reasoningEffort),
+            );
+            let resp;
+            try {
+              resp = await runMeasuredProviderCall(() =>
+                client.complete({ model, system, user, reasoningEffort: eff, signal, timeoutMs }),
+              );
+            } catch (err) {
+              if (signal?.aborted) {
+                place(jobs.map(cancelledResult));
+                continue;
+              }
+              rethrowIfAuthOrRateLimit(err);
+              log('warn', '[copilot] correct-batch:error', {
+                count: jobs.length,
+                error: toErrorMessage(err),
+              });
+              failAll(toErrorMessage(err));
+              continue;
+            }
+            if (verbose) log('info', '[copilot] correct-batch:response', { text: resp.text });
+            const parsed = parseCorrectionBatchResponse(resp.text, jobs, indexed);
+            if (!parsed) {
+              failAll('parseBatchResponse: malformed JSON from provider');
+              continue;
+            }
+            const outputs = parsed.map((p) => p?.trim());
+            const batchUsage = toTranslationUsage(
+              resp.usage,
+              model,
+              jobs.reduce((sum, j) => sum + j.sourceText.length, 0),
+              charCounts(system + user, jobs, resp.text, outputs),
+            );
+            place(
+              jobs.map((job, i) => {
+                const out = outputs[i];
+                return {
+                  entryId: job.entryId,
+                  targetLanguage: job.targetLanguage,
+                  translatedText:
+                    out === undefined ? '' : decodeLeakedHtmlEntities(out, job.sourceText),
+                  ...(out === undefined
+                    ? { error: 'parseBatchResponse: malformed JSON from provider' }
+                    : {}),
+                  usage: i === 0 ? batchUsage : undefined,
+                };
+              }),
+            );
+          }
+        }
+      });
+      return ordered;
     },
 
     async judgeTranslations(
