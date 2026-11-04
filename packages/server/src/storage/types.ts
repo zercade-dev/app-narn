@@ -526,7 +526,16 @@ export interface RunStore {
    */
   countActiveRuns(): Promise<number>;
   getRun(projectId: string, runId: string): Promise<RunStatus | null>;
-  updateRun(projectId: string, run: RunStatus): Promise<void>;
+  /**
+   * `opts.keepPendingCorrections` marks a counter-only progress flush whose
+   * `run` omits `pendingCorrections`: the stored list is kept instead of
+   * cleared. Never persisted; every other write replaces the record.
+   */
+  updateRun(
+    projectId: string,
+    run: RunStatus,
+    opts?: { keepPendingCorrections?: boolean },
+  ): Promise<void>;
   forceCancel(projectId: string, runId: string): Promise<RunStatus | null>;
   /**
    * Project ids (RLS-scoped to the current tenant's memberships) that have at

@@ -7680,6 +7680,41 @@ export class TranslationEngine {
                   freeway: decision0.freewayBucketKey !== undefined,
                 });
               }
+              // The batch never delivered a correction for an item that came back
+              // errored, empty or missing (e.g. a malformed reply): give it its one
+              // per-string attempt. Items that came back and failed the gate again
+              // are not retried.
+              if (typeof module.retryWithFeedback === 'function') {
+                results = [...results];
+                for (let i = 0; i < prepared.length; i++) {
+                  const got = results[i];
+                  if (got && !got.error && got.translatedText?.trim()) continue;
+                  if (this.correctionHalted(status, signal)) break;
+                  const p = prepared[i]!;
+                  try {
+                    const single = await module.retryWithFeedback(
+                      p.job,
+                      p.item.record.previousText,
+                      p.feedback,
+                      signal,
+                    );
+                    if (p.decision.moduleId) {
+                      this.recordUsage(status, p.decision.moduleId, [single], {
+                        freeway: p.decision.freewayBucketKey !== undefined,
+                      });
+                    }
+                    results[i] = single;
+                  } catch (err) {
+                    if (isAbortError(err) || signal?.aborted) throw err;
+                    this.logger.warn('translation:lqa-retry-failed', {
+                      runId,
+                      entryId: p.decision.entry.id,
+                      targetLanguage: p.decision.targetLanguage,
+                      error: toErrorMessage(err),
+                    });
+                  }
+                }
+              }
             } else {
               for (const p of prepared) {
                 if (this.correctionHalted(status, signal)) break;
@@ -8564,9 +8599,8 @@ export class TranslationEngine {
       // Membership did not change: persist the counters with a count in place of
       // the list; the store keeps the list it already holds.
       const { pendingCorrections: _list, ...rest } = status;
-      emitRunProgress({ logger: this.logger, runStore: this.runStore }, 'translation', {
-        ...rest,
-        pendingCorrectionCount: pending,
+      emitRunProgress({ logger: this.logger, runStore: this.runStore }, 'translation', rest, {
+        keepPendingCorrections: true,
       });
       return;
     }
