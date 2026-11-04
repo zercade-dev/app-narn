@@ -117,6 +117,8 @@ export class PgRunStore implements RunStore {
         if (notice.routing === 'retrying') notice.routing = 'none';
       }
     }
+    // A write carrying `pendingCorrectionCount` instead of the list is a counter-only
+    // progress flush: the SQL below keeps the list already stored.
     // created_by is stamped inline from the GUC (never a param — see
     // project_backups' precedent) and deliberately absent from DO UPDATE SET:
     // the enqueue-time ambient tenant is the creator, and later status
@@ -129,7 +131,12 @@ export class PgRunStore implements RunStore {
          status=excluded.status, kind=excluded.kind, total=excluded.total, completed=excluded.completed,
          failed=excluded.failed, started_at=excluded.started_at, finished_at=excluded.finished_at,
          queue_position=excluded.queue_position, source_run_id=excluded.source_run_id,
-         ai_score=excluded.ai_score, estimated_cost_usd=excluded.estimated_cost_usd, data=excluded.data`,
+         ai_score=excluded.ai_score, estimated_cost_usd=excluded.estimated_cost_usd,
+         data=excluded.data || case
+           when excluded.data ? 'pendingCorrectionCount' and not (excluded.data ? 'pendingCorrections')
+                and runs.data ? 'pendingCorrections'
+           then jsonb_build_object('pendingCorrections', runs.data -> 'pendingCorrections')
+           else '{}'::jsonb end`,
       [
         run.runId,
         run.projectId,

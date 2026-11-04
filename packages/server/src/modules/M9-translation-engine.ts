@@ -907,6 +907,8 @@ export class TranslationEngine {
   private readonly details = new Map<string, RunDetailsAcc>();
   /** Runs whose end-of-run corrective chunks are planned or in flight. */
   private readonly correctionRuns = new Map<string, CorrectionRunState>();
+  /** Runs whose pending-correction list changed membership since it was last persisted in full. */
+  private readonly correctionListDirty = new Set<string>();
   private readonly controllers = new Map<string, AbortController>();
   // Per-run "settled" deferreds + in-flight detached-task counts. A
   // settled deferred (armed when a run's tasks are dispatched, resolved once the
@@ -2223,7 +2225,8 @@ export class TranslationEngine {
         await this.finalizeTranslationTerminal(status, projectId, runId);
         return { runId, total: 0, status: status.status };
       }
-      if (status.waitingForQuota?.pairs.length) {
+      if (status.waitingForQuota?.pairs.length || status.pendingCorrections?.length) {
+        // Parked pairs re-park, and pending corrections still have to run.
         await this.finalizeTranslationTerminal(status, projectId, runId);
         return { runId, total: 0, status: status.status };
       }
@@ -7115,6 +7118,7 @@ export class TranslationEngine {
 
   /** Queue a gate-failed string for the end-of-run corrective pass (one record per pair). */
   private queueCorrection(status: RunStatus, record: PendingCorrectionRecord): void {
+    this.correctionListDirty.add(status.runId);
     const list = (status.pendingCorrections ??= []);
     const at = list.findIndex(
       (queued) =>
@@ -7146,6 +7150,7 @@ export class TranslationEngine {
           queued.entryId === record.entryId && queued.targetLanguage === record.targetLanguage,
       ) ?? -1;
     if (!list || at < 0) return;
+    this.correctionListDirty.add(status.runId);
     list.splice(at, 1);
     if (list.length === 0) delete status.pendingCorrections;
     status.completed++;
@@ -7210,8 +7215,11 @@ export class TranslationEngine {
           error: toErrorMessage(err),
         });
       }
-      // Whatever could not be planned keeps its first-pass text.
-      for (const record of records) this.resolveCorrection(status, record, 'kept', null);
+      // Whatever could not be planned keeps its first-pass text — unless this
+      // pass was superseded (cancel + retry), whose records are not ours.
+      if (this.correctionRuns.get(runId) === current) {
+        for (const record of records) this.resolveCorrection(status, record, 'kept', null);
+      }
     } finally {
       current.outstanding--;
       await this.afterCorrectionWork(status, projectId, runId, current);
@@ -7510,8 +7518,9 @@ export class TranslationEngine {
             bucketKey: servingBucketKey,
             ...(servingView.poolKey !== undefined ? { poolKey: servingView.poolKey } : {}),
           };
-          if (escalated) {
-            // An escalation target is a bucket the run plan never seeded.
+          {
+            // An escalation target is a bucket the run plan never seeded, and after a
+            // restart neither is the origin bucket: seed so the governor paces both.
             this.governor.seed(
               key,
               {
@@ -8376,6 +8385,7 @@ export class TranslationEngine {
     this.runs.delete(runId);
     this.details.delete(runId);
     this.correctionRuns.delete(runId);
+    this.correctionListDirty.delete(runId);
     this.controllers.delete(runId);
     this.queuedSessions.delete(runId);
     this.runSessions.delete(runId);
@@ -8549,6 +8559,17 @@ export class TranslationEngine {
   }
 
   private emitProgress(runId: string, status: RunStatus): void {
+    const pending = status.pendingCorrections?.length ?? 0;
+    if (pending > 0 && !this.correctionListDirty.delete(runId)) {
+      // Membership did not change: persist the counters with a count in place of
+      // the list; the store keeps the list it already holds.
+      const { pendingCorrections: _list, ...rest } = status;
+      emitRunProgress({ logger: this.logger, runStore: this.runStore }, 'translation', {
+        ...rest,
+        pendingCorrectionCount: pending,
+      });
+      return;
+    }
     // `runId` always equals `status.runId` at every call site; the shared helper
     // keys off `status.runId`, keeping the `translation:progress` /
     // `translation:store-update-failed` output byte-identical.
