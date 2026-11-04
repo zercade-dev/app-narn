@@ -537,6 +537,7 @@
     "statusFailed": "Fehlgeschlagen",
     "statusCancelled": "Abgebrochen",
     "stringsProgress": "Einträge: {{completed}} / {{total}}",
+    "fixingStrings": "Korrektur: {{done}} / {{total}} Einträge",
     "progressFailedSuffix": "({{count}} fehlgeschlagen)",
     "cancel": "Abbrechen",
     "runFailedToast": "Durchlauf fehlgeschlagen: {{type}}",

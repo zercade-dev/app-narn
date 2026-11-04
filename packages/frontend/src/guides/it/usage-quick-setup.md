@@ -47,13 +47,14 @@ invia di nuovo dopo averli modificati.
 ## 5. Configura il routing
 
 Apri la scheda **Routing** e scegli il tuo provider dal selettore su cui si
-apre — questo invia ogni voce del progetto a quel provider, che è tutto ciò
-di cui ha bisogno una configurazione a provider singolo. Vuoi provider
-diversi per lingua, categoria o lunghezza della voce? Passa ad **Avanzata**
-e aggiungi lì le **regole di routing**. In entrambi i casi la tua scelta
-viene salvata automaticamente. Questo passaggio è obbligatorio: una voce
-senza una regola corrispondente non viene tradotta e restituisce un errore
-*"no route"*.
+apre — questo invia ogni voce del progetto a quel provider, che è tutto ciò di
+cui ha bisogno una configurazione a provider singolo. Vuoi provider diversi
+per lingua, categoria o lunghezza della voce? Passa ad **Avanzata** e aggiungi
+lì le **regole di routing**. In entrambi i casi la tua scelta viene salvata
+automaticamente. Un progetto senza alcuna regola invia tutto tramite NARN
+Freeway, quindi all'inizio questo passaggio è facoltativo. Quando il progetto
+ha delle regole, una voce che non ne soddisfa nessuna non viene tradotta e
+restituisce un errore *"no route"*.
 
 ## 6. *(Optional)* Costruisci i glossari a partire dai tuoi contenuti
 

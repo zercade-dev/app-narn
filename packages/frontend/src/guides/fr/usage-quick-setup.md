@@ -24,7 +24,7 @@ Dans l’onglet **Glossaire**, activez les glossaires qui s’appliquent à votr
 
 ## 5. Configurer le routage
 
-Ouvrez l’onglet **Routage** et choisissez votre fournisseur dans le sélecteur qui s’ouvre par défaut — cela envoie chaque entrée du projet à ce fournisseur, ce qui suffit pour une configuration à un seul fournisseur. Vous voulez des fournisseurs différents par langue, catégorie ou longueur d’entrée ? Passez en **Avancé** et ajoutez-y plutôt des **règles de routage**. Votre choix est enregistré dans les deux cas. Cette étape est obligatoire : une entrée sans règle correspondante échoue à la traduction avec une erreur *"no route"*.
+Ouvrez l’onglet **Routage** et choisissez votre fournisseur dans le sélecteur qui s’ouvre par défaut — cela envoie chaque entrée du projet à ce fournisseur, ce qui suffit pour une configuration à un seul fournisseur. Vous voulez des fournisseurs différents par langue, catégorie ou longueur d’entrée ? Passez en **Avancé** et ajoutez-y plutôt des **règles de routage**. Votre choix est enregistré dans les deux cas. Un projet sans aucune règle envoie tout via NARN Freeway : cette étape est donc facultative au départ. Dès qu’un projet a des règles, une entrée qui ne correspond à aucune échoue à la traduction avec une erreur *"no route"*.
 
 ## 6. *(Optional)* Construire des glossaires à partir de votre propre contenu
 

@@ -71,6 +71,35 @@ export function retryAfterMsOf(err: unknown): number | undefined {
  */
 export const PER_MINUTE_RATE_LIMIT_COOLDOWN_MS = 70_000;
 
+/** Shortest cooldown a provider's own per-minute retry hint may produce. */
+export const MIN_HINTED_COOLDOWN_MS = 5_000;
+
+/** "try again in 2.5s" / "retry in 1m30.5s" / "try again in 350ms" in a 429 message. */
+const MESSAGE_RETRY_HINT_RE =
+  /(?:try\s+again|retry)\s+in\s+(?:(\d+(?:\.\d+)?)\s*m(?!s))?\s*(?:(\d+(?:\.\d+)?)\s*(ms|s)\b)?/i;
+
+/** The retry delay a 429's prose states, in ms (clamped like a Retry-After), or undefined. */
+export function messageRetryHintMs(message: string): number | undefined {
+  const match = MESSAGE_RETRY_HINT_RE.exec(message);
+  if (!match) return undefined;
+  const minutes = match[1] === undefined ? 0 : Number(match[1]);
+  const rest = match[2] === undefined ? 0 : Number(match[2]) * (match[3] === 'ms' ? 1 : 1000);
+  const total = Math.round(minutes * 60_000 + rest);
+  if (!Number.isFinite(total) || total <= 0) return undefined;
+  return Math.min(total, MAX_RETRY_AFTER_MS);
+}
+
+/**
+ * Cooldown for a per-minute limit: the provider's own retry hint (header, else
+ * the message's "try again in Xs") with a {@link MIN_HINTED_COOLDOWN_MS} floor;
+ * the {@link PER_MINUTE_RATE_LIMIT_COOLDOWN_MS} window floor when it gave none.
+ */
+function perMinuteCooldownMs(retryAfter: number | undefined, message: string): number {
+  const hint = retryAfter ?? messageRetryHintMs(message);
+  if (hint === undefined) return PER_MINUTE_RATE_LIMIT_COOLDOWN_MS;
+  return Math.max(hint, MIN_HINTED_COOLDOWN_MS);
+}
+
 /**
  * A rate limit the provider named as per-MINUTE ("...-per-min",
  * "requests per minute").
@@ -108,9 +137,9 @@ const STATED_LIMIT_RE = /\blimit:?\s*(\d+)\b/i;
 
 /**
  * How long a rate-limited Freeway bucket cools. A limit the provider named as
- * per-minute gets AT LEAST the 70s floor: `Retry-After` is clamped to 60s
- * (below the floor), so honoring a short one would put the bucket back before
- * the minute window has certainly rolled over. A limit whose message names a
+ * per-minute cools for the provider's own retry hint (`Retry-After`, else the
+ * message's "try again in Xs"; 5s floor) and for the 70s window floor when it
+ * gave none. A limit whose message names a
  * day-scale quota is dead for the day regardless of any Retry-After it
  * carries. Otherwise, when the caller passes the bucket's declared `rpm`/
  * `rpd` and the 429's prose states a `limit: N` naming neither window
@@ -127,13 +156,13 @@ export function rateLimitCooldownMs(
   const retryAfter = retryAfterMsOf(err);
   const message = err instanceof Error ? err.message : String(err);
   if (PER_MINUTE_LIMIT_RE.test(message) || CAMEL_MINUTE_QUOTA_RE.test(message)) {
-    return Math.max(retryAfter ?? 0, PER_MINUTE_RATE_LIMIT_COOLDOWN_MS);
+    return perMinuteCooldownMs(retryAfter, message);
   }
   if (DAY_PROSE_RE.test(message) || CAMEL_DAY_QUOTA_RE.test(message)) return undefined;
   const stated = STATED_LIMIT_RE.exec(message);
   if (stated && limits !== undefined && limits.rpm !== limits.rpd) {
     const n = Number(stated[1]);
-    if (n === limits.rpm) return Math.max(retryAfter ?? 0, PER_MINUTE_RATE_LIMIT_COOLDOWN_MS);
+    if (n === limits.rpm) return perMinuteCooldownMs(retryAfter, message);
     if (n === limits.rpd) return undefined;
   }
   if (GENERIC_QUOTA_RE.test(message)) return undefined;
@@ -435,4 +464,46 @@ export function isAbortError(err: unknown): boolean {
     );
   }
   return err === 'cancelled';
+}
+
+/** The per-minute usage a provider 429 reports ("Limit 8000, Used 7969, Requested 573"). */
+export interface RateLimitUsage {
+  kind: 'tokens' | 'requests';
+  limit: number;
+  used: number;
+  requested?: number;
+}
+
+const USAGE_FIGURES_RE = /\blimit:?\s*(\d+)\s*,\s*used:?\s*(\d+)(?:\s*,\s*requested:?\s*(\d+))?/i;
+const TOKENS_MINUTE_RE = /tokens\s+per\s+minute|\bTPM\b/i;
+const REQUESTS_MINUTE_RE = /requests\s+per\s+minute|\bRPM\b/i;
+
+/**
+ * The usage figures a per-minute 429 states, with which allowance they speak
+ * for. Undefined unless the message names a per-minute token or request limit
+ * AND carries the Limit/Used pair.
+ */
+export function rateLimitUsageOf(err: unknown): RateLimitUsage | undefined {
+  const message = err instanceof Error ? err.message : String(err);
+  const figures = USAGE_FIGURES_RE.exec(message);
+  if (!figures) return undefined;
+  const kind = TOKENS_MINUTE_RE.test(message)
+    ? 'tokens'
+    : REQUESTS_MINUTE_RE.test(message)
+      ? 'requests'
+      : undefined;
+  if (kind === undefined) return undefined;
+  return {
+    kind,
+    limit: Number(figures[1]),
+    used: Number(figures[2]),
+    ...(figures[3] !== undefined ? { requested: Number(figures[3]) } : {}),
+  };
+}
+
+/** The retry delay a 429 carries: its Retry-After, else the message's "try again in Xs". */
+export function rateLimitRetryHintMs(err: unknown): number | undefined {
+  return (
+    retryAfterMsOf(err) ?? messageRetryHintMs(err instanceof Error ? err.message : String(err))
+  );
 }

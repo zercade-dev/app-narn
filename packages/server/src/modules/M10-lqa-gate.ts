@@ -30,6 +30,7 @@ import type { LQACheck } from './M10/types.js';
 interface LoggerLike {
   info(message: string, metadata?: Record<string, unknown>): void;
   warn(message: string, metadata?: Record<string, unknown>): void;
+  debug?(message: string, metadata?: Record<string, unknown>): void;
 }
 
 export type ProjectProvider = (projectId: string) => Promise<Project | undefined>;
@@ -56,6 +57,11 @@ export interface LQAGateContext {
   project?: Project;
   /** Issues produced outside the pipeline (M17 mask diagnostics from M9). */
   extraIssues?: LQAIssue[];
+  /**
+   * The caller reports overflow itself, once per batch: this string's overflow
+   * is logged at debug instead of as its own warning.
+   */
+  aggregateOverflow?: boolean;
 }
 
 const defaultProjectProvider: ProjectProvider = async (projectId) =>
@@ -178,7 +184,10 @@ export class LQAGate {
       overflowRatio,
       issueCount: issues.length,
     };
-    if (overflow) this.logger.warn('lqa:overflow', meta);
+    if (overflow) {
+      if (ctx.aggregateOverflow) this.logger.debug?.('lqa:overflow', meta);
+      else this.logger.warn('lqa:overflow', meta);
+    }
     if (!passed) this.logger.warn('lqa:failed', meta);
     else if (!overflow) this.logger.info('lqa:passed', meta);
 

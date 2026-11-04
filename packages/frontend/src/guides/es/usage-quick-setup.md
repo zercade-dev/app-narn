@@ -24,7 +24,7 @@ En la pestaña **Glosario**, habilita los glosarios que apliquen a tu proyecto. 
 
 ## 5. Configura el enrutamiento
 
-Abre la pestaña **Enrutamiento** y elige tu proveedor en el selector con el que se abre — eso envía cada entrada del proyecto a ese proveedor, que es todo lo que necesita una configuración de un solo proveedor. ¿Quieres proveedores distintos por idioma, categoría o longitud de entrada? Cambia a **Avanzado** y añade **reglas de enrutamiento** ahí. Tu elección se guarda sola en ambos casos. Este paso es obligatorio: una entrada sin ninguna regla que coincida falla la traducción con un error de *"no route"*.
+Abre la pestaña **Enrutamiento** y elige tu proveedor en el selector con el que se abre — eso envía cada entrada del proyecto a ese proveedor, que es todo lo que necesita una configuración de un solo proveedor. ¿Quieres proveedores distintos por idioma, categoría o longitud de entrada? Cambia a **Avanzado** y añade **reglas de enrutamiento** ahí. Tu elección se guarda sola en ambos casos. Un proyecto sin ninguna regla envía todo por NARN Freeway, así que este paso es opcional al empezar. Cuando el proyecto tiene reglas, una entrada que no coincide con ninguna falla la traducción con un error de *"no route"*.
 
 ## 6. *(Optional)* Construye glosarios a partir de tu propio contenido
 

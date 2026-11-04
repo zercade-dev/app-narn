@@ -524,6 +524,7 @@
     "statusFailed": "Gagal",
     "statusCancelled": "Dibatalkan",
     "stringsProgress": "Selesai: {{completed}} dari {{total}}",
+    "fixingStrings": "Memperbaiki: {{done}} dari {{total}}",
     "progressFailedSuffix": "({{count}} gagal)",
     "cancel": "Batal",
     "runFailedToast": "Putaran {{type}} gagal",

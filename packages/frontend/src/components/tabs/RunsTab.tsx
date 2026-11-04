@@ -1193,6 +1193,19 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                 })}
                               />
                             )}
+                            {run.correctionPhase &&
+                              (run.status === RunStatusCode.Running ||
+                                run.status === RunStatusCode.Paused) && (
+                                <div
+                                  className="mt-1 text-[10px] text-muted-foreground"
+                                  data-testid={`run-correction-phase-${run.runId}`}
+                                >
+                                  {t('runs.fixingStrings', {
+                                    done: run.correctionPhase.done,
+                                    total: run.correctionPhase.total,
+                                  })}
+                                </div>
+                              )}
                           </TableCell>
                           <TableCell>
                             <RunCostCell run={run} />

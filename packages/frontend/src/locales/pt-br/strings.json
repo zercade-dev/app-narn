@@ -538,6 +538,7 @@
     "statusFailed": "Com falha",
     "statusCancelled": "Cancelada",
     "stringsProgress": "Concluídos: {{completed}} de {{total}}",
+    "fixingStrings": "Corrigindo: {{done}} de {{total}}",
     "progressFailedSuffix": "({{count}} com falha)",
     "cancel": "Cancelar",
     "runFailedToast": "Falha na execução de {{type}}",

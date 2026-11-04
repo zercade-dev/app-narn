@@ -3,8 +3,9 @@
  *
  * Pure, synchronous routing of a (StringEntry, targetLanguage) pair through
  * a list of user-configured RoutingRules. The first matching rule (in
- * ascending priority order) wins; otherwise the decision has moduleId=null
- * and the caller (M9) must treat that as a failure.
+ * ascending priority order) wins. With no non-pseudo rule at all the decision
+ * is Freeway; otherwise an unmatched pair has moduleId=null and the caller
+ * (M9) must treat that as a failure.
  */
 import type { RoutingDecision, RoutingRule, StringEntry } from '@zercade-dev/narn-shared';
 import {
@@ -73,6 +74,18 @@ export class Router {
       };
     }
     const sorted = this.sortedRules(rules);
+    // A project with no real rule yet (pseudo rules are skipped for real
+    // languages) falls back to Freeway. Nothing is persisted; once any rule
+    // exists, an unmatched pair is a plain no-route.
+    if (sorted.every((rule) => rule.moduleId === PSEUDO_MODULE_ID)) {
+      return {
+        entry,
+        targetLanguage,
+        moduleId: FREEWAY_MODULE_ID,
+        ruleId: null,
+        promptOptions: undefined,
+      };
+    }
     for (const rule of sorted) {
       if (rule.moduleId === PSEUDO_MODULE_ID) continue;
       if (!Router.matches(rule, entry, targetLanguage)) continue;

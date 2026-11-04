@@ -524,6 +524,7 @@
     "statusFailed": "ล้มเหลว",
     "statusCancelled": "ยกเลิกแล้ว",
     "stringsProgress": "เสร็จแล้ว: {{completed}} จาก {{total}}",
+    "fixingStrings": "กำลังแก้ไข: {{done}} จาก {{total}}",
     "progressFailedSuffix": "(ล้มเหลว {{count}})",
     "cancel": "ยกเลิก",
     "runFailedToast": "รอบ {{type}} ล้มเหลว",

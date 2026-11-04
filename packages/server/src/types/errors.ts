@@ -17,6 +17,18 @@ export class EntryNotFoundError extends Error {
 }
 
 /**
+ * A guarded translation write found the stored record no longer matches what
+ * the caller expected (edited, approved or replaced meanwhile), so nothing was
+ * written.
+ */
+export class StaleTranslationError extends Error {
+  constructor(entryId: string, targetLanguage: string) {
+    super(`Translation changed since it was read: ${entryId}/${targetLanguage}`);
+    this.name = 'StaleTranslationError';
+  }
+}
+
+/**
  * A run could not be found for the caller — either it does not exist, or it
  * exists but is not visible under the named project (RLS hides another tenant's
  * project, and a run only resolves when `(project_id, run_id)` both match). The

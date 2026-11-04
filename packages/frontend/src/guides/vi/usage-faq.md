@@ -47,7 +47,7 @@ Chế độ xem đơn giản của tab Điều phối chọn **nhà cung cấp**
 
 ### Bản dịch không khởi động và báo không có quy tắc điều phối. Giờ sao?
 
-Một lần chạy chỉ bắt đầu khi mọi ngôn ngữ trong đó đều có nơi để đi. Nếu một ngôn ngữ đích không khớp quy tắc nào, lần chạy bị từ chối trước khi bất cứ thứ gì được gửi đi, và thông báo sẽ nêu tên ngôn ngữ đó. Mở tab [Điều phối](guide:usage-routing) và thêm một quy tắc bao được nó — bộ chọn nhà cung cấp đơn giản bao hết mọi ngôn ngữ cùng lúc — rồi chạy lại.
+Một lần chạy chỉ bắt đầu khi mọi ngôn ngữ trong đó đều có nơi để đi. Nếu một ngôn ngữ đích không khớp quy tắc nào, lần chạy bị từ chối trước khi bất cứ thứ gì được gửi đi, và thông báo sẽ nêu tên ngôn ngữ đó. Mở tab [Điều phối](guide:usage-routing) và thêm một quy tắc bao được nó — bộ chọn nhà cung cấp đơn giản bao hết mọi ngôn ngữ cùng lúc — rồi chạy lại. Một dự án hoàn toàn không có quy tắc sẽ không bao giờ bị từ chối vì lý do này: dự án dùng NARN Freeway cho đến khi bạn thêm quy tắc.
 
 ## Lần chạy, lỗi và khôi phục
 

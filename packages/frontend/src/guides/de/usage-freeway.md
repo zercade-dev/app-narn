@@ -8,7 +8,7 @@ Richten Sie das Routing auf Freeway, und Sie wählen nie wieder ein Modell: Für
 
 ## Einschalten
 
-Ein frisches Projekt ohne Routing-Regeln bietet im Tab [Routing](guide:usage-routing) die Schaltfläche **NARN Freeway alles überlassen** — ein Klick legt eine Auffangregel an, die auf den Pool zeigt.
+Ein frisches Projekt ohne Routing-Regeln bietet im Tab [Routing](guide:usage-routing) die Schaltfläche **NARN Freeway alles überlassen** — ein Klick legt eine Auffangregel an, die auf den Pool zeigt. Auch ohne diesen Klick wird ein Projekt ganz ohne Regeln über Freeway übersetzt, bis ein Anbieter gewählt ist.
 
 Ansonsten wählen Sie **NARN Freeway** wie jeden anderen Anbieter: in der einfachen Auswahl des Routing-Tabs, um das ganze Projekt dorthin zu schicken, oder als Modul einer einzelnen Regel unter **Erweitert**, um es für manche Sprachen zu nutzen und einen bezahlten Anbieter für andere.
 

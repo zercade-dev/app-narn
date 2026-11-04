@@ -524,6 +524,7 @@
     "statusFailed": "Thất bại",
     "statusCancelled": "Đã hủy",
     "stringsProgress": "Hoàn tất: {{completed}} / {{total}}",
+    "fixingStrings": "Đang sửa: {{done}} / {{total}}",
     "progressFailedSuffix": "({{count}} lỗi)",
     "cancel": "Hủy",
     "runFailedToast": "Lần chạy {{type}} thất bại",

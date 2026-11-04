@@ -30,6 +30,7 @@ import {
   type TranslationModule,
   type TranslationResult,
   type RunStatus,
+  type PendingCorrectionRecord,
   type RunRequest,
   type RunEntryLanguagePair,
   type RunDetails,
@@ -109,8 +110,9 @@ import { rateGovernor, type GovernorKey, type RateGovernor } from './M9/rate-gov
 import { awaitAllWithTimeout, SettledTracker } from './M9/run-settled.js';
 import { emitRunProgress, recordRunFailure } from './M9/run-status-helpers.js';
 import { assertRunCapacity, PROCESS_START_MS, sweepOrphanedRuns } from './M9/run-capacity.js';
-import { PreviewNotPossibleError } from '../types/errors.js';
+import { PreviewNotPossibleError, StaleTranslationError } from '../types/errors.js';
 import {
+  abortableSleep,
   isAbortError,
   isModelUnavailableError,
   isRateLimitError,
@@ -119,6 +121,8 @@ import {
   isTransientProviderFailure,
   providerRetryHintMs,
   rateLimitCooldownMs,
+  rateLimitRetryHintMs,
+  rateLimitUsageOf,
   retryAfterMsOf,
   withRateLimitRetry,
 } from './M9/errors.js';
@@ -203,6 +207,23 @@ export type LqaGate = (
    */
   project?: Project,
 ) => Promise<import('@zercade-dev/narn-shared').LQAResult | undefined>;
+
+/** A pending correction rebuilt for execution: the record plus everything its request needs. */
+interface PendingCorrection {
+  record: PendingCorrectionRecord;
+  decision: RoutingDecision;
+  masked: string;
+  plan: ReturnType<typeof maskText>['plan'];
+  glossaryById: Map<string, GlossaryTerm>;
+  nonConstantTerms: GlossaryTerm[];
+  reference?: TranslationJob['reference'];
+}
+
+/** Per-run bookkeeping for the queued correction chunks. */
+interface CorrectionRunState {
+  /** Chunk tasks (queued or running) plus planning passes that have not finished. */
+  outstanding: number;
+}
 
 interface LoggerLike {
   info(message: string, metadata?: Record<string, unknown>): void;
@@ -294,6 +315,12 @@ export type ResumeWithModuleResult =
  */
 const NO_BUCKETS_SKIP_REASON = 'no-free-buckets-for-session';
 const NO_FLOOR_RESUME_AT = 8_640_000_000_000_000;
+
+/** Longest a rerouted batch waits for its target bucket's governor slot before going out as a deficit. */
+const REROUTE_ADMISSION_MAX_WAIT_MS = 90_000;
+
+/** Cooldowns up to this long (per-minute scale) wake the dispatch queue when they end. */
+const MAX_WAKE_COOLDOWN_MS = 120_000;
 
 /**
  * Cooldown applied to a Freeway bucket whose provider call failed for a reason
@@ -477,7 +504,8 @@ function formatDeferralDetail(
   reason?: 'quota' | 'provider-error',
 ): string {
   const waitingFor = reason === 'provider-error' ? 'a provider to recover' : 'quota';
-  return `${pairCount} pairs waiting for ${waitingFor} — resumes ~${formatResumeTime(resumeAt)}`;
+  // A resume time already in the past means "due now"; never print a stale clock.
+  return `${pairCount} pairs waiting for ${waitingFor} — resumes ~${formatResumeTime(Math.max(Date.now(), resumeAt))}`;
 }
 
 /** One-liner for a batch dispatching below its band floor. */
@@ -618,6 +646,12 @@ interface FreewayDispatchArgs {
    * enters the governor at all.
    */
   admission?: Admission;
+  /**
+   * Largest batch the bucket this dispatch now runs on can take, when the batch
+   * was sized for a different one (a reroute before the first call). Parts are
+   * cut to it before anything is sent.
+   */
+  sizeCap?: number;
   /**
    * Reports a forced (ungoverned) call whose bucket is still far from its
    * next rate-governor refill, so the caller can surface a "paced" run
@@ -836,6 +870,8 @@ export class TranslationEngine {
   static readonly QUOTA_SWEEP_INTERVAL_MS = 60_000;
   /** Floor on how often ONE run may be auto-resumed (see {@link lastQuotaResumeAttempt}). */
   private static readonly QUOTA_RESUME_MIN_INTERVAL_MS = 60_000;
+  /** Runs with a mid-run park re-dispatch in flight. */
+  private readonly redispatchingParks = new Set<string>();
   /**
    * Ceiling on the (entry x target language) pairs ONE {@link memoryPreview}
    * call evaluates. That preview is an advisory number behind the Translate
@@ -869,6 +905,10 @@ export class TranslationEngine {
    * In-memory only — lost on restart, like the run controllers below.
    */
   private readonly details = new Map<string, RunDetailsAcc>();
+  /** Runs whose end-of-run corrective chunks are planned or in flight. */
+  private readonly correctionRuns = new Map<string, CorrectionRunState>();
+  /** Runs whose pending-correction list changed membership since it was last persisted in full. */
+  private readonly correctionListDirty = new Set<string>();
   private readonly controllers = new Map<string, AbortController>();
   // Per-run "settled" deferreds + in-flight detached-task counts. A
   // settled deferred (armed when a run's tasks are dispatched, resolved once the
@@ -1857,7 +1897,32 @@ export class TranslationEngine {
     // normal dispatch.
     moduleOverride?: string,
     quotaResume = false,
-  ): Promise<{ runId: string; total: number; status: RunStatusCode }> {
+    // Re-dispatch of due parked pairs into a run that is still Running (see
+    // {@link redispatchDueParks}): sibling tasks are live, so run-level setup
+    // (rate-limiter reset, abort controller, details hydration) is skipped.
+    midRun = false,
+  ): Promise<{ runId: string; total: number; status: RunStatusCode; skipped?: true }> {
+    if (midRun) {
+      const midInner = async () => {
+        try {
+          return await this.startRunInner(
+            runId,
+            projectId,
+            request,
+            sessionId,
+            existing,
+            retry,
+            moduleOverride,
+            quotaResume,
+            true,
+          );
+        } catch (err) {
+          await this.failUndispatchedRun(runId, projectId);
+          throw err;
+        }
+      };
+      return await (tenant ? runWithTenant(tenant, midInner) : midInner());
+    }
     // A fresh run should not inherit rate-limiter backoff state earned by a
     // previous, unrelated run against the same provider.
     resetRateLimiters();
@@ -1939,7 +2004,8 @@ export class TranslationEngine {
     retry = false,
     moduleOverride?: string,
     quotaResume = false,
-  ): Promise<{ runId: string; total: number; status: RunStatusCode }> {
+    midRun = false,
+  ): Promise<{ runId: string; total: number; status: RunStatusCode; skipped?: true }> {
     const {
       entryIds,
       targetLanguages,
@@ -2049,6 +2115,16 @@ export class TranslationEngine {
       this.startNextQueued(projectId);
       return { runId, total: existing.total, status: RunStatusCode.Cancelled };
     }
+    // A mid-run re-dispatch only joins a run that is still Running; a pause or
+    // cancel that landed during the awaits above leaves the pairs with the caller.
+    if (midRun && existing?.status !== RunStatusCode.Running) {
+      return {
+        runId,
+        total: existing?.total ?? 0,
+        status: existing?.status ?? RunStatusCode.Cancelled,
+        skipped: true,
+      };
+    }
 
     const status: RunStatus = existing ?? {
       runId,
@@ -2127,19 +2203,30 @@ export class TranslationEngine {
     this.runTenants.set(runId, getCurrentTenant());
     // A retry adds to the existing run detail (entries, retry counts, character
     // totals); a fresh run starts from an empty accumulator.
-    if (retry) {
-      await this.hydrateDetails(projectId, runId);
+    if (midRun) {
+      // The run's accumulator and abort controller are live; keep them.
+      if (!this.details.has(runId)) this.initDetails(runId);
+      if (!this.controllers.has(runId)) this.controllers.set(runId, new AbortController());
     } else {
-      this.initDetails(runId);
+      if (retry) {
+        await this.hydrateDetails(projectId, runId);
+      } else {
+        this.initDetails(runId);
+      }
+      this.controllers.set(runId, new AbortController());
     }
-    this.controllers.set(runId, new AbortController());
     await this.runStore.updateRun(projectId, status);
     // Warm the pricing feed in the background so cost finalization at run
     // completion can resolve synchronously from the cache.
     void this.pricing.ensure().catch(() => {});
 
     if (decisions.length === 0) {
-      if (status.waitingForQuota?.pairs.length) {
+      if (midRun) {
+        await this.finalizeTranslationTerminal(status, projectId, runId);
+        return { runId, total: 0, status: status.status };
+      }
+      if (status.waitingForQuota?.pairs.length || status.pendingCorrections?.length) {
+        // Parked pairs re-park, and pending corrections still have to run.
         await this.finalizeTranslationTerminal(status, projectId, runId);
         return { runId, total: 0, status: status.status };
       }
@@ -2304,6 +2391,15 @@ export class TranslationEngine {
         await this.finalizeTranslationTerminal(status, projectId, runId);
         return { runId, total: decisions.length, status: status.status };
       }
+    }
+
+    if (
+      midRun &&
+      status.status !== RunStatusCode.Running &&
+      status.status !== RunStatusCode.Paused
+    ) {
+      // Cancelled while the plan awaited: nothing is enqueued for a dead run.
+      return { runId, total: decisions.length, status: status.status };
     }
 
     // Arm this run's settled deferred before any group task is queued so a
@@ -2563,6 +2659,10 @@ export class TranslationEngine {
     this.controllers.get(runId)?.abort();
     this.controllers.delete(runId);
     this.queue.cancelRun(runId);
+    // Drop correction work so a later retry of this run starts from a clean slate.
+    this.correctionRuns.delete(runId);
+    delete status.pendingCorrections;
+    delete status.correctionPhase;
     this.queuedSessions.delete(runId);
     this.queuedTenants.delete(runId);
     // A cancelled queued-retry must not leak its carried failed-pairs request.
@@ -2846,45 +2946,7 @@ export class TranslationEngine {
   ): Promise<RunStatus> {
     const parked = [...pairs];
     const originalTotal = status.total;
-    const park = { ...status.waitingForQuota!, pairs: [...status.waitingForQuota!.pairs] };
-    const retryKeys = new Set(parked.map((pair) => `${pair.entryId}\0${pair.targetLanguage}`));
-    const remaining = park.pairs.filter(
-      (pair) => !retryKeys.has(`${pair.entryId}\0${pair.targetLanguage}`),
-    );
-    if (remaining.length > 0) {
-      // The sweep may resume feedback pairs before unrelated quota waits are
-      // due. Keep those waits parked while the selected pairs run.
-      const { belowTarget: _belowTarget, reason: _reason, pairCount: _pairCount, ...rest } = park;
-      // Pairs still waiting on consent keep the below-target park, with the
-      // summary re-derived from what is left (slow models included).
-      const pendingConsent = remaining.filter((pair) => pair.belowTargetNeededTier !== undefined);
-      const slowModelIds = slowModelIdsOf(pendingConsent);
-      status.waitingForQuota = {
-        ...rest,
-        pairs: remaining,
-        resumeAt: remaining.reduce(
-          (earliest, pair) => Math.min(earliest, pair.quotaResumeAt ?? park.resumeAt),
-          Infinity,
-        ),
-        ...(park.belowTarget && pendingConsent.length > 0
-          ? {
-              reason: 'below-target' as const,
-              belowTarget: {
-                ...omitSlowModelIds(park.belowTarget),
-                strings: new Set(pendingConsent.map((pair) => pair.entryId)).size,
-                languages: [...new Set(pendingConsent.map((pair) => pair.targetLanguage))],
-                ...(slowModelIds.length > 0 ? { slowModelIds } : {}),
-              },
-            }
-          : {
-              reason: remaining.some((pair) => pair.quotaReason === 'provider-error')
-                ? ('provider-error' as const)
-                : ('quota' as const),
-            }),
-      };
-    } else {
-      delete status.waitingForQuota;
-    }
+    const park = this.detachParkedPairs(status, parked);
     this.queue.resumeRun(runId);
     const request = this.parkedRetryRequest(status, parked);
     try {
@@ -2910,6 +2972,183 @@ export class TranslationEngine {
       throw err;
     }
     return status;
+  }
+
+  /**
+   * Take `pairs` out of the run's `waitingForQuota` park (so they are no longer
+   * counted as outstanding-but-parked) and return a snapshot of the park as it
+   * was, for {@link restoreQuotaPark} / {@link reattachParkedPairs}. Pairs that
+   * stay parked keep the park, with its summary and `resumeAt` re-derived.
+   */
+  private detachParkedPairs(
+    status: RunStatus,
+    pairs: RunEntryLanguagePair[],
+  ): NonNullable<RunStatus['waitingForQuota']> {
+    const park = { ...status.waitingForQuota!, pairs: [...status.waitingForQuota!.pairs] };
+    const retryKeys = new Set(pairs.map((pair) => `${pair.entryId}\0${pair.targetLanguage}`));
+    const remaining = park.pairs.filter(
+      (pair) => !retryKeys.has(`${pair.entryId}\0${pair.targetLanguage}`),
+    );
+    if (remaining.length > 0) {
+      // The sweep may resume feedback pairs before unrelated quota waits are
+      // due. Keep those waits parked while the selected pairs run.
+      const { belowTarget: _belowTarget, reason: _reason, pairCount: _pairCount, ...rest } = park;
+      // Pairs still waiting on consent keep the below-target park, with the
+      // summary re-derived from what is left (slow models included).
+      const pendingConsent = remaining.filter((pair) => pair.belowTargetNeededTier !== undefined);
+      const slowModelIds = slowModelIdsOf(pendingConsent);
+      status.waitingForQuota = {
+        ...rest,
+        pairs: remaining,
+        resumeAt: park.resumeAt,
+        ...(park.belowTarget && pendingConsent.length > 0
+          ? {
+              reason: 'below-target' as const,
+              belowTarget: {
+                ...omitSlowModelIds(park.belowTarget),
+                strings: new Set(pendingConsent.map((pair) => pair.entryId)).size,
+                languages: [...new Set(pendingConsent.map((pair) => pair.targetLanguage))],
+                ...(slowModelIds.length > 0 ? { slowModelIds } : {}),
+              },
+            }
+          : {
+              reason: remaining.some((pair) => pair.quotaReason === 'provider-error')
+                ? ('provider-error' as const)
+                : ('quota' as const),
+            }),
+      };
+      this.refreshWaitingResumeAt(status);
+    } else {
+      delete status.waitingForQuota;
+    }
+    return park;
+  }
+
+  /**
+   * Re-derive `waitingForQuota.resumeAt` from the pairs that are still parked:
+   * the earliest of their own resume times, never earlier than now (a past value
+   * means "due now"). Feedback (below-target) pairs wait on consent, not a
+   * clock; a park made only of them keeps its stored value.
+   */
+  private refreshWaitingResumeAt(status: RunStatus, now: number = Date.now()): void {
+    const waiting = status.waitingForQuota;
+    if (!waiting) return;
+    let earliest = Infinity;
+    for (const pair of waiting.pairs) {
+      if (pair.belowTargetNeededTier !== undefined) continue;
+      earliest = Math.min(earliest, pair.quotaResumeAt ?? waiting.resumeAt);
+    }
+    if (earliest === Infinity) return;
+    waiting.resumeAt = Math.max(now, earliest);
+  }
+
+  /**
+   * Put pairs taken by {@link detachParkedPairs} back after a mid-run
+   * re-dispatch that never got off the ground.
+   */
+  private reattachParkedPairs(
+    status: RunStatus,
+    park: NonNullable<RunStatus['waitingForQuota']>,
+    pairs: RunEntryLanguagePair[],
+  ): void {
+    const { skipReason: _skipReason, ...restored } = park;
+    const existing = status.waitingForQuota;
+    if (!existing) {
+      status.waitingForQuota = { ...restored, pairs: [...pairs] };
+    } else {
+      const have = new Set(existing.pairs.map((p) => `${p.entryId}\0${p.targetLanguage}`));
+      for (const pair of pairs) {
+        if (!have.has(`${pair.entryId}\0${pair.targetLanguage}`)) existing.pairs.push(pair);
+      }
+    }
+    this.refreshWaitingResumeAt(status);
+  }
+
+  /**
+   * Re-plan the parked pairs whose own resume time has arrived while the run is
+   * still Running, without waiting for it to drain and flip to Paused. Driven by
+   * the quota sweep and by every settling group task.
+   *
+   * Race-safety: the due pairs leave `waitingForQuota` synchronously (before any
+   * await past the bucket probe), so the finalize drain test can never count
+   * them as parked-and-done, and the same pair is never owned by two plans. A
+   * run that is paused, cancelled or already re-planning is left alone; a re-plan
+   * that still finds no quota simply parks the pairs again. The run keeps its
+   * place as the project's active run.
+   *
+   * @returns how many pairs were handed back to the dispatch queue.
+   */
+  private async redispatchDueParks(
+    projectId: string,
+    runId: string,
+    now: number = Date.now(),
+  ): Promise<number> {
+    const status = this.runs.get(runId);
+    if (!status || status.status !== RunStatusCode.Running) return 0;
+    if (this.redispatchingParks.has(runId)) return 0;
+    const dueOf = (): RunEntryLanguagePair[] => {
+      const waiting = status.waitingForQuota;
+      if (!waiting) return [];
+      return waiting.pairs.filter(
+        (pair) =>
+          pair.belowTargetNeededTier === undefined &&
+          (pair.quotaResumeAt ?? waiting.resumeAt) <= now,
+      );
+    };
+    if (dueOf().length === 0) return 0;
+    const last = this.lastQuotaResumeAttempt.get(runId);
+    if (last !== undefined && now - last < TranslationEngine.QUOTA_RESUME_MIN_INTERVAL_MS) {
+      return 0;
+    }
+    this.redispatchingParks.add(runId);
+    try {
+      const sessionId = this.runSessions.get(runId) ?? this.queuedSessions.get(runId);
+      // Same collateral-failure guard as the drained-park sweep.
+      if (!(await this.hasAnyFreewayBucket(projectId, sessionId))) return 0;
+      // State may have moved during the probe.
+      if (status.status !== RunStatusCode.Running || this.runs.get(runId) !== status) return 0;
+      const due = dueOf();
+      if (due.length === 0) return 0;
+      this.lastQuotaResumeAttempt.set(runId, now);
+      const originalTotal = status.total;
+      const park = this.detachParkedPairs(status, due);
+      const request = this.parkedRetryRequest(status, due);
+      try {
+        const started = await this.startRun(
+          runId,
+          projectId,
+          request,
+          sessionId,
+          status,
+          true,
+          this.runTenants.get(runId) ?? getCurrentTenant(),
+          undefined,
+          true,
+          true,
+        );
+        if (started.skipped) {
+          status.total = originalTotal;
+          if ((status.status as RunStatusCode) !== RunStatusCode.Cancelled) {
+            this.reattachParkedPairs(status, park, due);
+            await this.finalizeTranslationTerminal(status, projectId, runId);
+          }
+          return 0;
+        }
+      } catch (err) {
+        status.total = originalTotal;
+        this.reattachParkedPairs(status, park, due);
+        this.logger.warn('translation:quota-redispatch-failed', {
+          runId,
+          error: toErrorMessage(err),
+        });
+        await this.finalizeTranslationTerminal(status, projectId, runId);
+        return 0;
+      }
+      this.logger.info('translation:quota-redispatched', { runId, pairs: due.length });
+      return due.length;
+    } finally {
+      this.redispatchingParks.delete(runId);
+    }
   }
 
   async acceptBelowTarget(
@@ -2986,7 +3225,10 @@ export class TranslationEngine {
     if (status.status !== RunStatusCode.Paused || !waiting || waiting.pairs.length === 0) {
       return false;
     }
-    return status.completed + status.failed + waiting.pairs.length >= status.total;
+    // Strings awaiting their corrective attempt are neither completed nor failed
+    // yet; they do not keep a parked run from counting as drained.
+    const pending = status.pendingCorrections?.length ?? 0;
+    return status.completed + status.failed + waiting.pairs.length + pending >= status.total;
   }
 
   /**
@@ -3118,6 +3360,23 @@ export class TranslationEngine {
         };
         try {
           if (await (tenant ? runWithTenant(tenant, attempt) : attempt())) resumed++;
+        } catch (err) {
+          this.logger.warn('translation:quota-sweep-failed', {
+            runId,
+            error: toErrorMessage(err),
+          });
+        }
+      }
+      // Runs still Running: re-plan their own due parks in place.
+      for (const status of [...this.runs.values()]) {
+        if (status.status !== RunStatusCode.Running || !status.waitingForQuota?.pairs.length) {
+          continue;
+        }
+        const { runId, projectId } = status;
+        const tenant = this.runTenants.get(runId) ?? this.queuedTenants.get(runId);
+        const redispatch = () => this.redispatchDueParks(projectId, runId, now);
+        try {
+          if ((await (tenant ? runWithTenant(tenant, redispatch) : redispatch())) > 0) resumed++;
         } catch (err) {
           this.logger.warn('translation:quota-sweep-failed', {
             runId,
@@ -3977,6 +4236,7 @@ export class TranslationEngine {
             }
           : {}),
       };
+      this.refreshWaitingResumeAt(status);
       return;
     }
     const seen = new Map(existing.pairs.map((p) => [`${p.entryId}\0${p.targetLanguage}`, p]));
@@ -4006,6 +4266,7 @@ export class TranslationEngine {
       existing.pairs.push(pair);
     }
     existing.resumeAt = Math.min(existing.resumeAt, resumeAt);
+    this.refreshWaitingResumeAt(status);
     if (
       reason === 'below-target' ||
       (existing.reason !== 'below-target' && existing.reason !== 'provider-error' && reason)
@@ -4203,6 +4464,61 @@ export class TranslationEngine {
   }
 
   /**
+   * Take a governor slot on the bucket a rerouted batch now targets, waiting
+   * for its pacing slot / window as a queued batch would. Bounded: past
+   * {@link REROUTE_ADMISSION_MAX_WAIT_MS} the call is charged to the governor
+   * as a deficit and goes out anyway, so a saturated bucket delays a reroute
+   * rather than stranding it. Returns the instant the call was admitted.
+   */
+  private async admitReroutedCall(admission: Admission, signal?: AbortSignal): Promise<number> {
+    const deadline = Date.now() + REROUTE_ADMISSION_MAX_WAIT_MS;
+    for (;;) {
+      const now = Date.now();
+      if (this.governor.tryAcquire(admission.key, admission.projectedTokens, now)) return now;
+      // A cancelled run makes no call, so it is not charged.
+      if (signal?.aborted) return now;
+      if (now >= deadline) {
+        this.governor.forceAcquire(admission.key, admission.projectedTokens, now);
+        return now;
+      }
+      const at = this.governor.nextAdmitAtFor(admission.key, now, admission.projectedTokens) ?? now;
+      await abortableSleep(Math.min(Math.max(at - now, 50), 5_000, deadline - now), signal);
+    }
+  }
+
+  /**
+   * Fold a per-minute 429 into the rate governor (the provider's own usage
+   * count and retry delay) and wake the dispatch queue when the cooldown ends,
+   * so waiting work starts then instead of at the next window rollover.
+   */
+  private observeFreewayRateLimit(
+    err: unknown,
+    bucketKey: string,
+    admission: Admission | undefined,
+    cooldownMs: number | undefined,
+    now: number,
+  ): void {
+    const tenantId = admission?.key.tenantId ?? requireTenant().userId;
+    const key: GovernorKey =
+      admission && admission.key.bucketKey === bucketKey ? admission.key : { tenantId, bucketKey };
+    const usage = rateLimitUsageOf(err);
+    const retryAfterMs = rateLimitRetryHintMs(err);
+    if (usage !== undefined || retryAfterMs !== undefined) {
+      this.governor.observeRateLimit(
+        key,
+        {
+          ...(usage ? { kind: usage.kind, limit: usage.limit, used: usage.used } : {}),
+          ...(retryAfterMs !== undefined ? { retryAfterMs } : {}),
+        },
+        now,
+      );
+    }
+    if (cooldownMs !== undefined && cooldownMs <= MAX_WAKE_COOLDOWN_MS) {
+      this.queue.wakeAt(now + cooldownMs);
+    }
+  }
+
+  /**
    * Fire `onThrottle` for `bucketKey` when that bucket's own rate-governor
    * window is more than 5s from its next rollover — a forced (ungoverned)
    * call spent quota on a bucket that is not about to refill, so the run is
@@ -4300,6 +4616,7 @@ export class TranslationEngine {
     // or that part debits/reconciles the WRONG bucket relative to the one
     // `state` (correctly restored) is about to dispatch on.
     const plannedKey: GovernorKey | undefined = admission ? { ...admission.key } : undefined;
+    const plannedRerouted = admission?.rerouted;
     const merged: TranslationResult[] = [];
     for (const [start, end] of bounds) {
       if (signal?.aborted) {
@@ -4307,7 +4624,10 @@ export class TranslationEngine {
       }
       if (crossLanguage) {
         Object.assign(state, planned);
-        if (admission && plannedKey) admission.key = { ...plannedKey };
+        if (admission && plannedKey) {
+          admission.key = { ...plannedKey };
+          admission.rerouted = plannedRerouted;
+        }
       }
       const language = jobs[start]!.targetLanguage;
       let batchBudget = args.batchBudget;
@@ -4475,7 +4795,11 @@ export class TranslationEngine {
       return { kind: 'defer', resumeAt: now + 60_000, reason: 'provider-error' };
     };
     if (batchBudget.requests.count >= FREEWAY_BATCH_REQUEST_CAP) return parkAtLimit();
-    const strikeCap = args.splitCaps?.get(state.bucketKey);
+    const learnedCap = args.splitCaps?.get(state.bucketKey);
+    const strikeCap =
+      learnedCap !== undefined && args.sizeCap !== undefined
+        ? Math.min(learnedCap, args.sizeCap)
+        : (learnedCap ?? args.sizeCap);
     if (strikeCap !== undefined && strikeCap >= 1 && strikeCap < jobs.length) {
       const bounds = TranslationEngine.cappedLanguageBounds(jobs, strikeCap);
       onRechunk?.({ bucketKey: state.bucketKey, size: jobs.length, parts: bounds.length });
@@ -4576,6 +4900,7 @@ export class TranslationEngine {
             poolKey: rescue?.poolKey,
           };
           admission.spent = true;
+          admission.rerouted = true;
         }
         const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
         if (rescueCap >= 1 && rescueCap < jobs.length) {
@@ -4618,8 +4943,14 @@ export class TranslationEngine {
         // covers more than the one call it was actually granted for.
         if (admission) {
           if (admission.spent) {
-            const forcedAt = Date.now();
-            this.governor.forceAcquire(admission.key, admission.projectedTokens, forcedAt);
+            // A call on a rescue bucket the queue never admitted waits for that
+            // bucket's own governor slot; same-bucket extras are charged as before.
+            const forcedAt = admission.rerouted
+              ? await this.admitReroutedCall(admission, signal)
+              : Date.now();
+            if (!admission.rerouted) {
+              this.governor.forceAcquire(admission.key, admission.projectedTokens, forcedAt);
+            }
             this.reportThrottleIfSlow(
               admission.key.bucketKey,
               admission.key.tenantId,
@@ -4956,13 +5287,9 @@ export class TranslationEngine {
             }
             return { kind: 'defer', resumeAt: strikeAt + 60_000, reason: 'provider-error' };
           }
-          await this.coolFreewayBucket(
-            state.bucketKey,
-            strikeAt,
-            rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey)),
-            deps,
-            'pool',
-          );
+          const strikeCooldown = rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey));
+          await this.coolFreewayBucket(state.bucketKey, strikeAt, strikeCooldown, deps, 'pool');
+          this.observeFreewayRateLimit(err, state.bucketKey, admission, strikeCooldown, strikeAt);
           const buckets = await loadBucketViews(strikeAt, deps);
           const parked = revalidateGroup(
             { decisions, bucketKey: state.bucketKey, batchSize: jobs.length },
@@ -4988,13 +5315,9 @@ export class TranslationEngine {
         }
         const now = Date.now();
         if (rateLimited) {
-          await this.coolFreewayBucket(
-            state.bucketKey,
-            now,
-            rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey)),
-            deps,
-            'pool',
-          );
+          const hopCooldown = rateLimitCooldownMs(err, bucketRateLimits(state.bucketKey));
+          await this.coolFreewayBucket(state.bucketKey, now, hopCooldown, deps, 'pool');
+          this.observeFreewayRateLimit(err, state.bucketKey, admission, hopCooldown, now);
         } else if (providerFailure) {
           // A parse-shaped mixed chunk answered, so it is never a passing fault.
           const cooling = parseShapedMixed
@@ -5137,6 +5460,7 @@ export class TranslationEngine {
               poolKey: rescue?.poolKey,
             };
             admission.spent = true;
+            admission.rerouted = true;
           }
           const rescueCap = rescue ? charCappedBatch(rescue, jobs) : jobs.length;
           if (rescueCap >= 1 && rescueCap < jobs.length) {
@@ -5357,6 +5681,17 @@ export class TranslationEngine {
     // failed" delta, which would steal in-flight sibling decisions.
     const settled = new Set<string>();
     const settleKey = (d: RoutingDecision): string => `${d.entry.id}::${d.targetLanguage}`;
+    /** Overflow verdicts seen in this batch; logged as one line at settle. */
+    const overflowSeen = { count: 0, worstRatio: 0, languages: new Set<string>() };
+    const gateBatch: LqaGate = async (entry, result, gateProjectId, targetLanguage, ...rest) => {
+      const verdict = await this.lqaGate(entry, result, gateProjectId, targetLanguage, ...rest);
+      if (verdict?.overflow) {
+        overflowSeen.count++;
+        overflowSeen.worstRatio = Math.max(overflowSeen.worstRatio, verdict.overflowRatio ?? 0);
+        if (targetLanguage) overflowSeen.languages.add(targetLanguage);
+      }
+      return verdict;
+    };
 
     try {
       const moduleLog = (
@@ -5809,7 +6144,7 @@ export class TranslationEngine {
           persistDecision,
           runId,
         );
-        await this.lqaGate(
+        await gateBatch(
           e.decision.entry,
           result,
           projectId,
@@ -5868,7 +6203,7 @@ export class TranslationEngine {
           };
           // Gate BEFORE persisting: a rejected hit is demoted to a hint and
           // the entry joins the module batch.
-          const tmLqaResult = await this.lqaGate(
+          const tmLqaResult = await gateBatch(
             e.decision.entry,
             tmResult,
             projectId,
@@ -6014,15 +6349,6 @@ export class TranslationEngine {
        * already failed over from.
        */
       let currentFreewayState: FreewayBatchState | undefined;
-
-      // Entries whose LQA gate failed, queued for a retryWithFeedback pass
-      // after the whole batch has been persisted (the LQA corrective retry;
-      // see retryLqaFailure).
-      const lqaRetryQueue: Array<{
-        entry: MaskedEntry;
-        originalText: string;
-        lqaResult: import('@zercade-dev/narn-shared').LQAResult;
-      }> = [];
 
       // Persists + LQA-gates + records progress for ONE entry's result. Called
       // either from onJobComplete (as soon as a module reports a job mid-batch)
@@ -6189,7 +6515,7 @@ export class TranslationEngine {
           e.decision,
           runId,
         );
-        const batchLqaResult = await this.lqaGate(
+        const batchLqaResult = await gateBatch(
           e.decision.entry,
           result,
           projectId,
@@ -6206,29 +6532,45 @@ export class TranslationEngine {
           else freewayGateOutcomes.set(bucketKey, [outcome]);
         }
         // No TM auto-record (memory holds only approved variants). On LQA
-        // failure, queue a session-reuse retry when the module supports it.
-        const retryLqaResult =
-          batchLqaResult && !batchLqaResult.passed && typeof module.retryWithFeedback === 'function'
+        // failure, defer a corrective pass to the end of the run when the
+        // serving module can take corrective feedback.
+        const deferCorrection =
+          batchLqaResult &&
+          !batchLqaResult.passed &&
+          e.decision.moduleId !== null &&
+          (typeof module.correctBatch === 'function' ||
+            typeof module.retryWithFeedback === 'function')
             ? batchLqaResult
             : undefined;
         // Mark this decision settled unconditionally: its first pass DID persist,
         // so the outer catch must never double-fail it (load-bearing).
         settled.add(settleKey(e.decision));
-        if (retryLqaResult) {
+        if (deferCorrection && e.decision.moduleId !== null) {
           // DEFER the completion accounting (completed++/recordSuccess/
-          // translation:done) to the retry loop. Counting a retry-queued entry
-          // here — before its retry runs — lets `status.completed` reach `total`
-          // while retries are still in flight, so a sibling dispatch group's
-          // finally finalizes the run early and the retry's usage/detail is lost.
-          // Queue the MASKED first-pass output (moduleResult.translatedText),
-          // NOT the restored/unmasked text: retryWithFeedback replays it as the
-          // assistant turn against the MASKED prompt (see retryLqaFailure /
-          // TranslationModule.retryWithFeedback contract). An unmasked previous
-          // attempt makes the retry answer unmasked — tripping mask-integrity.
-          lqaRetryQueue.push({
-            entry: e,
-            originalText: moduleResult.translatedText,
-            lqaResult: retryLqaResult,
+          // translation:done) to the corrective pass: counting the string here
+          // would let `completed` reach `total` while its correction is still
+          // pending, making the run look idle to every per-project guard. It
+          // stays pending (and persisted with the run) until the correction
+          // settles. The MASKED first-pass output is what the correction
+          // replays as the rejected attempt (see TranslationModule.retryWithFeedback).
+          this.queueCorrection(status, {
+            entryId: e.decision.entry.id,
+            targetLanguage: e.decision.targetLanguage,
+            previousText: moduleResult.translatedText,
+            writtenText: restored,
+            issues: deferCorrection.issues,
+            moduleId: e.decision.moduleId,
+            ...(e.decision.modelOverride ? { modelOverride: e.decision.modelOverride } : {}),
+            ...(e.decision.reasoningEffortOverride
+              ? { reasoningEffortOverride: e.decision.reasoningEffortOverride }
+              : {}),
+            ...(e.decision.promptOptions ? { promptOptions: e.decision.promptOptions } : {}),
+            ...((e.decision.freewayBucketKey ?? bucketKey) !== undefined
+              ? { freewayBucketKey: (e.decision.freewayBucketKey ?? bucketKey) as string }
+              : {}),
+            ...(e.decision.freewayTier !== undefined
+              ? { freewayTier: e.decision.freewayTier }
+              : {}),
           });
         } else {
           status.completed++;
@@ -6326,26 +6668,42 @@ export class TranslationEngine {
           // dispatchFreewayBatch (and its eventual release()) would
           // force-acquire/reconcile against a bucket nothing is actually
           // dispatching to.
-          if (admission && admission.key.bucketKey !== bucketKey) {
+          // A batch planned for another bucket may be larger than this one takes.
+          const movedOffPlan = bucketKey !== freewayBucketKey;
+          let rerouteSizeCap: number | undefined;
+          if ((admission && admission.key.bucketKey !== bucketKey) || movedOffPlan) {
             const rebased = await loadBucketViews(Date.now(), freewayDeps, {
               onlyBucketKey: bucketKey,
             });
             const view = rebased.find((b) => b.bucketKey === bucketKey);
-            if (view) this.seedFreewayRescue(view, admission.key.tenantId, Date.now());
-            admission.key = { tenantId: admission.key.tenantId, bucketKey, poolKey: view?.poolKey };
-            // The queue's tryAcquire admitted the ORIGINAL (now-stale)
-            // bucket, not this one. If no call has happened on this
-            // admission yet, the imminent first call is still unadmitted —
-            // on the new bucket — so mark it spent here, BEFORE dispatch,
-            // so the "permit spent" invariant force-acquires it (request AND
-            // token cost) instead of treating it as already covered. Without
-            // this, the new bucket goes un-debited AND gets credited on
-            // success — manufactured headroom on the bucket the run is
-            // actually spending on. The stale bucket's original debit stays
-            // stranded on purpose: that call never happened there, and
-            // handing it back would let the run re-spend headroom it was
-            // never really promised on the bucket serving it.
-            admission.spent = true;
+            if (view && movedOffPlan) {
+              rerouteSizeCap = charCappedBatch(
+                view,
+                batchJobs.map(({ job }) => job),
+              );
+            }
+            if (admission && admission.key.bucketKey !== bucketKey) {
+              if (view) this.seedFreewayRescue(view, admission.key.tenantId, Date.now());
+              admission.key = {
+                tenantId: admission.key.tenantId,
+                bucketKey,
+                poolKey: view?.poolKey,
+              };
+              admission.rerouted = true;
+              // The queue's tryAcquire admitted the ORIGINAL (now-stale)
+              // bucket, not this one. If no call has happened on this
+              // admission yet, the imminent first call is still unadmitted —
+              // on the new bucket — so mark it spent here, BEFORE dispatch,
+              // so the "permit spent" invariant force-acquires it (request AND
+              // token cost) instead of treating it as already covered. Without
+              // this, the new bucket goes un-debited AND gets credited on
+              // success — manufactured headroom on the bucket the run is
+              // actually spending on. The stale bucket's original debit stays
+              // stranded on purpose: that call never happened there, and
+              // handing it back would let the run re-spend headroom it was
+              // never really promised on the bucket serving it.
+              admission.spent = true;
+            }
           }
           // Freeway batches never retry a 429 in place: the free quota they hit
           // is a day-scale budget, not a momentary burst, so the bucket is
@@ -6448,6 +6806,7 @@ export class TranslationEngine {
             onRechunk: (info) => this.recordFreewayDetail(runId, formatRechunkDetail(info)),
             onUnpack: (info) => this.recordFreewayDetail(runId, formatUnpackDetail(info)),
             admission,
+            ...(rerouteSizeCap !== undefined ? { sizeCap: rerouteSizeCap } : {}),
             onThrottle: (info) => {
               // Once per (run, bucket): a saturated bucket can force several
               // calls in one run, and the point is to tell the user the run
@@ -6702,217 +7061,6 @@ export class TranslationEngine {
         const authCancelled = await finalizeEntryResult(i);
         if (authCancelled) return;
       }
-
-      // The LQA corrective retry for batch runs: re-attempt each gate-failed
-      // entry with corrective feedback. Retry-queued entries were NOT counted
-      // at their first-pass site (only marked settled) — they are counted
-      // here, once their retry settles, mirroring the single path:
-      // `persisted` replaces the stored translation and its gate result,
-      // `accepted-original` keeps the first-pass text; both are a completed
-      // decision (count once). `aborted` (run cancelled) does not count — the
-      // cancel path finalizes. Deferring the count until here is what keeps a
-      // sibling dispatch group from finalizing the run while these retries
-      // are still in flight.
-      for (const item of lqaRetryQueue) {
-        if ((status.status as RunStatusCode) === RunStatusCode.Cancelled || signal?.aborted) break;
-        // Freeway escalation: a gate failure is a signal that this bucket's
-        // model is too weak for the entry, so the corrective attempt goes to a
-        // HIGHER tier with quota when one exists — a same-model retry usually
-        // just spends another free request on the same mistake. Falls back to
-        // the same-module retry when the ladder is exhausted (or the escalated
-        // module cannot take corrective feedback).
-        let retryModule = module;
-        let retryDecision = item.entry.decision;
-        let escalatedBucketKey: string | undefined;
-        /** The live view `escalatedBucketKey` was selected from — see the debit below. */
-        let escalatedBucketView: BucketView | undefined;
-        if (bucketKey !== undefined && freewayDeps) {
-          const escalationCandidates = await this.selectFreewayEscalation(
-            bucketKey,
-            item.entry.decision,
-            freewayDeps,
-            freewayPriority,
-          );
-          let escalation: (typeof escalationCandidates)[number] | undefined;
-          let escalatedModule: TranslationModule | undefined;
-          for (const candidate of escalationCandidates) {
-            let built: TranslationModule | undefined;
-            try {
-              built = createFreewayModule(
-                candidate.moduleId,
-                candidate.modelId,
-                candidate.bucketKey,
-              );
-            } catch {
-              // An unbuildable candidate (e.g. a module factory that throws
-              // on invalid config) is skipped, not terminal — try the next rung.
-              continue;
-            }
-            if (!built) continue;
-            if (typeof built.retryWithFeedback === 'function') {
-              escalation = candidate;
-              escalatedModule = built;
-              break;
-            }
-            // A higher-tier bucket whose module cannot do feedback retry
-            // (DeepL) is skipped, not terminal — the next rung may be capable.
-            this.logger.info('translation:freeway-escalation-skipped-incapable', {
-              bucketKey: candidate.bucketKey,
-            });
-          }
-          if (escalation && escalatedModule) {
-            retryModule = escalatedModule;
-            retryDecision = {
-              ...item.entry.decision,
-              moduleId: escalation.moduleId,
-              modelOverride: escalation.modelId,
-              freewayTier: escalation.qualityTier,
-              freewayBucketKey: escalation.bucketKey,
-            };
-            escalatedBucketKey = escalation.bucketKey;
-            escalatedBucketView = escalation.bucket;
-            this.logger.info('translation:freeway-escalated', {
-              runId,
-              entryId: item.entry.decision.entry.id,
-              targetLanguage: item.entry.decision.targetLanguage,
-              from: bucketKey,
-              to: escalation.bucketKey,
-            });
-            this.recordFreewayDetail(
-              runId,
-              `${item.entry.decision.targetLanguage} gate-failed on ${bucketKey} — escalated to ${escalation.bucketKey}`,
-            );
-          }
-        }
-        // Counted, not assumed: retryWithFeedback is a single-item call, but a
-        // transient-error retry inside splitAndRetry can still fire once more
-        // at that same size, so this corrective attempt can spend more than
-        // one provider request. retryLqaFailure never rethrows (its own
-        // try/catch converts every failure into 'accepted-original' or
-        // 'aborted'), so there is no separate failure-path debit to gate here
-        // — recordDispatch's own floor of 1 covers modules that do not reach a
-        // counted provider-call seam.
-        let retryMs: number | undefined;
-        let retryStrings = 0;
-        let retryProviderMs: number | undefined;
-        const outcome = await runCountingProviderCalls(
-          () =>
-            this.retryLqaFailure({
-              runId,
-              projectId,
-              status,
-              module: retryModule,
-              decision: retryDecision,
-              sourceLanguage,
-              masked: item.entry.masked,
-              plan: item.entry.plan,
-              glossaryById: item.entry.glossaryById,
-              nonConstantTerms: item.entry.nonConstantTerms,
-              jobContext: appendTmHints(item.entry.decision.entry.context, item.entry.tmHints),
-              ...(item.entry.reference ? { reference: item.entry.reference } : {}),
-              ...(examplesByLanguage?.get(item.entry.decision.targetLanguage)?.length
-                ? { examples: examplesByLanguage.get(item.entry.decision.targetLanguage) }
-                : {}),
-              originalText: item.originalText,
-              lqaResult: item.lqaResult,
-              metricsModel,
-              signal,
-              ...(project ? { project } : {}),
-              achievementPairMap,
-              onAttempt: (ms, strings) => {
-                retryMs = ms;
-                retryStrings = strings;
-              },
-            }),
-          (_calls, measuredMs) => {
-            retryProviderMs = measuredMs;
-          },
-        );
-        const retry = outcome.result;
-        // The corrective attempt is a real provider call, and may make several
-        // — debit the bucket that served it (the escalation target, or the
-        // origin bucket when the same-module retry ran) for what it actually
-        // spent.
-        if (bucketKey !== undefined && freewayDeps) {
-          const debitBucketKey = escalatedBucketKey ?? bucketKey;
-          if (retryMs !== undefined) {
-            await this.recordFreewayCall(
-              status,
-              {
-                bucketKey: debitBucketKey,
-                model: retryDecision.modelOverride ?? retryDecision.moduleId ?? moduleId,
-                requests: Math.max(1, outcome.calls),
-                translateMs: retryProviderMs ?? retryMs,
-                strings: retryStrings,
-              },
-              freewayDeps,
-            );
-            if (escalatedBucketKey) {
-              this.recordFreewayMove(status, bucketKey, escalatedBucketKey, 'lqa');
-            }
-          }
-          await this.recordFreewayDispatch(debitBucketKey, [], freewayDeps, outcome.calls);
-          // This corrective retry never goes through the queue's own
-          // admission — it dispatches directly, outside any Admission — so
-          // unlike every other real call in this engine, nothing has debited
-          // the governor for it on its own. Escalation makes that concrete:
-          // by construction `selectFreewayEscalation` only ever proposes a
-          // bucket the RUN PLAN did NOT assign (`resolveFreewayGroups` seeds
-          // just `resolution.assignedGroups`), so the governor has no entry
-          // for it at all — force-acquiring a never-seeded key is a silent
-          // no-op (`admits()`/`take()` both early-return without an entry),
-          // which would leave the escalated bucket admitting for free
-          // indefinitely. Seed it first, from the SAME live view the
-          // escalation was selected against, exactly as `resolveFreewayGroups`
-          // seeds an assigned bucket at plan time — only then does the
-          // force-acquire below actually debit anything. The same-module
-          // (non-escalated) retry needs none of this: that bucket is the
-          // run's own origin bucket, already seeded at plan time.
-          const tenantId = requireTenant().userId;
-          let debitKey: GovernorKey = { tenantId, bucketKey: debitBucketKey };
-          if (escalatedBucketView !== undefined) {
-            debitKey = {
-              tenantId,
-              bucketKey: debitBucketKey,
-              poolKey: escalatedBucketView.poolKey,
-            };
-            this.governor.seed(
-              debitKey,
-              {
-                rpm: escalatedBucketView.rpm,
-                tpm: escalatedBucketView.tpm,
-                poolRpm: escalatedBucketView.poolRpm,
-                minuteRequests: escalatedBucketView.remainingMinuteRequests,
-                minuteTokens: escalatedBucketView.remainingMinuteTokens,
-                poolMinuteRequests: escalatedBucketView.poolRemainingMinuteRequests,
-                minuteResetAt: escalatedBucketView.minuteResetAt,
-              },
-              Date.now(),
-            );
-          }
-          this.governor.forceAcquire(
-            debitKey,
-            projectedRequestTokens(escalatedBucketView ?? {}, item.originalText.length),
-            Date.now(),
-          );
-          if (outcome.calls > 1) {
-            this.governor.forceAcquireRequests(debitKey, outcome.calls - 1, Date.now());
-          }
-        }
-        if (retry.outcome === 'aborted') break;
-        status.completed++;
-        metricsCollector.recordSuccess(moduleId, metricsModel);
-        this.logger.info('translation:done', {
-          runId,
-          entryId: item.entry.decision.entry.id,
-          targetLanguage: item.entry.decision.targetLanguage,
-          moduleId,
-          lqaRetried: true,
-          context: item.entry.decision.entry.context ?? null,
-          glossaryId: retry.usedGlossaryId ?? null,
-        });
-        this.emitProgress(runId, status);
-      }
     } catch (err) {
       // Catch-all for the dispatch pipeline. Without this, an
       // unexpected throw from the batch body outside the dispatch try/catch —
@@ -6942,165 +7090,898 @@ export class TranslationEngine {
       this.emitProgress(runId, status);
     } finally {
       // Batch settle: one stats write per bucket this batch touched.
+      if (overflowSeen.count > 0) {
+        this.logger.warn('lqa:overflow', {
+          runId,
+          strings: overflowSeen.count,
+          worstOverflowRatio: overflowSeen.worstRatio,
+          languages: [...overflowSeen.languages],
+        });
+      }
       if (freewayGateOutcomes.size > 0) {
         await this.flushFreewayGateOutcomes(
           freewayGateOutcomes,
           freewayDeps ?? this.freewayOverrides,
         );
       }
+      // Parked pairs that came due while this run kept working go back on the
+      // queue BEFORE the drain test, so they can't be mistaken for a parked tail.
+      await this.redispatchDueParks(projectId, runId).catch((err: unknown) => {
+        this.logger.warn('translation:quota-redispatch-failed', {
+          runId,
+          error: toErrorMessage(err),
+        });
+      });
       await this.finalizeTranslationTerminal(status, projectId, runId);
     }
   }
 
+  /** Queue a gate-failed string for the end-of-run corrective pass (one record per pair). */
+  private queueCorrection(status: RunStatus, record: PendingCorrectionRecord): void {
+    this.correctionListDirty.add(status.runId);
+    const list = (status.pendingCorrections ??= []);
+    const at = list.findIndex(
+      (queued) =>
+        queued.entryId === record.entryId && queued.targetLanguage === record.targetLanguage,
+    );
+    if (at >= 0) list[at] = record;
+    else list.push(record);
+  }
+
+  private correctionHalted(status: RunStatus, signal?: AbortSignal): boolean {
+    return signal?.aborted === true || (status.status as RunStatusCode) === RunStatusCode.Cancelled;
+  }
+
   /**
-   * The LQA corrective retry for the dispatch pipeline (processBatchJob):
-   * re-attempts a failed-gate translation via module.retryWithFeedback on the
-   * same conversation session, re-verifies the mask, persists and re-gates
-   * the retry result, and records it in the TM when the gate passes.
-   *
-   * Outcomes: 'persisted' — the retry result replaced the original;
-   * 'accepted-original' — retry unavailable/failed, keep the first result;
-   * 'aborted' — the run was cancelled mid-retry.
+   * Settle one pending correction: it leaves the pending list and counts
+   * completed exactly once (the first pass deliberately did not count it).
    */
-  private async retryLqaFailure(args: {
-    runId: string;
-    projectId: string;
-    status: RunStatus;
-    module: TranslationModule;
-    decision: RoutingDecision;
-    sourceLanguage: string;
-    masked: string;
-    plan: ReturnType<typeof maskText>['plan'];
-    glossaryById: Map<string, GlossaryTerm>;
-    nonConstantTerms: GlossaryTerm[];
-    jobContext: string | undefined;
-    reference?: TranslationJob['reference'];
-    examples?: TranslationJob['examples'];
-    originalText: string;
-    lqaResult: import('@zercade-dev/narn-shared').LQAResult;
-    metricsModel: string | null;
-    signal?: AbortSignal;
-    project?: Project;
-    achievementPairMap?: Map<string, StringEntry[]>;
-    onAttempt?: (ms: number, strings: number) => void;
-  }): Promise<{ outcome: 'persisted' | 'accepted-original' | 'aborted'; usedGlossaryId?: string }> {
-    const {
-      runId,
-      projectId,
-      status,
-      module,
-      decision,
-      sourceLanguage,
-      masked,
-      plan,
-      glossaryById,
-      nonConstantTerms,
-      jobContext,
-      reference,
-      examples,
-      originalText,
-      lqaResult,
-      metricsModel,
-      signal,
-      project,
-      achievementPairMap,
-    } = args;
-    if (typeof module.retryWithFeedback !== 'function' || decision.moduleId === null) {
-      return { outcome: 'accepted-original' };
+  private resolveCorrection(
+    status: RunStatus,
+    record: PendingCorrectionRecord,
+    outcome: 'corrected' | 'kept' | 'stale',
+    metricsModel: string | null,
+    glossaryId?: string,
+  ): void {
+    const list = status.pendingCorrections;
+    const at =
+      list?.findIndex(
+        (queued) =>
+          queued.entryId === record.entryId && queued.targetLanguage === record.targetLanguage,
+      ) ?? -1;
+    if (!list || at < 0) return;
+    this.correctionListDirty.add(status.runId);
+    list.splice(at, 1);
+    if (list.length === 0) delete status.pendingCorrections;
+    status.completed++;
+    metricsCollector.recordSuccess(record.moduleId, metricsModel);
+    if (status.correctionPhase) {
+      status.correctionPhase.done = Math.min(
+        status.correctionPhase.total,
+        status.correctionPhase.done + 1,
+      );
     }
-    const { entry, targetLanguage } = decision;
-    const achievement = project
-      ? buildAchievementPromptContext(
+    this.logger.info('translation:done', {
+      runId: status.runId,
+      entryId: record.entryId,
+      targetLanguage: record.targetLanguage,
+      moduleId: record.moduleId,
+      lqaRetried: true,
+      correction: outcome,
+      glossaryId: glossaryId ?? null,
+    });
+    this.emitProgress(status.runId, status);
+  }
+
+  /**
+   * Plan the deferred corrective pass once the first pass has drained: rebuild
+   * each pending record against the run's CURRENT session and config, group by
+   * serving module + language, and queue every chunk as an ordinary task of
+   * the run (same queue, pause and cancel semantics as first-pass dispatch).
+   * Detached from the caller; never throws. `only` + `attempt` re-plan a chunk
+   * whose bucket was rate limited.
+   */
+  private async scheduleCorrections(
+    status: RunStatus,
+    projectId: string,
+    runId: string,
+    only?: PendingCorrectionRecord[],
+    attempt = 1,
+  ): Promise<void> {
+    let state = this.correctionRuns.get(runId);
+    if (!state) {
+      if (
+        only ||
+        (status.status !== RunStatusCode.Running && status.status !== RunStatusCode.Paused)
+      ) {
+        return;
+      }
+      state = { outstanding: 0 };
+      this.correctionRuns.set(runId, state);
+      status.correctionPhase = { total: status.pendingCorrections?.length ?? 0, done: 0 };
+      this.emitProgress(runId, status);
+    } else if (!only) {
+      return; // already scheduled; chunk completions finalize the run
+    }
+    const current = state;
+    current.outstanding++; // planning pass
+    const records = only ?? [...(status.pendingCorrections ?? [])];
+    try {
+      await this.planCorrections(status, projectId, runId, current, records, attempt);
+    } catch (err) {
+      if (!isAbortError(err)) {
+        this.logger.warn('translation:lqa-correction-failed', {
+          runId,
+          error: toErrorMessage(err),
+        });
+      }
+      // Whatever could not be planned keeps its first-pass text — unless this
+      // pass was superseded (cancel + retry), whose records are not ours.
+      if (this.correctionRuns.get(runId) === current) {
+        for (const record of records) this.resolveCorrection(status, record, 'kept', null);
+      }
+    } finally {
+      current.outstanding--;
+      await this.afterCorrectionWork(status, projectId, runId, current);
+    }
+  }
+
+  /** Finalize the run once its last correction task (or planning pass) is done. */
+  private async afterCorrectionWork(
+    status: RunStatus,
+    projectId: string,
+    runId: string,
+    state: CorrectionRunState,
+  ): Promise<void> {
+    if (this.correctionRuns.get(runId) !== state || state.outstanding > 0) return;
+    this.correctionRuns.delete(runId);
+    if (this.correctionHalted(status, this.controllers.get(runId)?.signal)) return;
+    // Nothing can be left pending without a task: settle strays so the run ends.
+    for (const record of [...(status.pendingCorrections ?? [])]) {
+      this.resolveCorrection(status, record, 'kept', null);
+    }
+    delete status.correctionPhase;
+    await this.finalizeTranslationTerminal(status, projectId, runId);
+  }
+
+  private async planCorrections(
+    status: RunStatus,
+    projectId: string,
+    runId: string,
+    state: CorrectionRunState,
+    records: PendingCorrectionRecord[],
+    attempt: number,
+  ): Promise<void> {
+    const signal = this.controllers.get(runId)?.signal;
+    const project = await this.projectStore.loadProject(projectId);
+    const global = await this.globalConfigStore.load();
+    const allEntries = await this.stringStore.load(projectId);
+    const entries = new Map(allEntries.map((entry) => [entry.id, entry]));
+    const achievementPairMap = buildAchievementPairMap(allEntries);
+    const sessionId = this.runSessions.get(runId) ?? this.queuedSessions.get(runId);
+    const projectEntries = project.moduleConfigs as Record<
+      string,
+      ProjectModuleConfigEntry | undefined
+    >;
+    const referenceLanguage = status.request?.referenceLanguage;
+    // The same few-shot pairs the first pass carried, resolved against the run's request.
+    const examplesByLanguage = buildExamplesByLanguage(
+      allEntries,
+      status.request?.exampleEntryIds,
+      new Set(status.request?.entryIds ?? []),
+      [...new Set(records.map((record) => record.targetLanguage))],
+    );
+    const priority = freewayPriorityOf(global);
+    const tenant = this.runTenants.get(runId) ?? getCurrentTenant();
+    const moduleLog = (
+      level: 'info' | 'warn' | 'error',
+      message: string,
+      metadata?: Record<string, unknown>,
+    ) => this.logger[level](message, metadata);
+    const glossaryCache = new Map<string, GlossaryGroup>();
+    let deps: BucketSourceDeps | undefined;
+    const freewayDeps = (): BucketSourceDeps =>
+      (deps ??= this.freewayBucketDeps(global, projectEntries, sessionId));
+
+    const buildFreewayModule = (
+      moduleId: string,
+      modelId: string,
+      bucketKey: string,
+    ): TranslationModule | undefined => {
+      const effective = resolveEffectiveModuleConfig(moduleId, global, projectEntries[moduleId]);
+      return this.moduleRegistry.createWithConfig(
+        moduleId,
+        {
+          ...effective.config,
+          ...this.rateLimitConfig(global),
+          model: modelId,
+          ...freewayModuleOverrides(freewayBucketBaseModuleId(bucketKey), modelId),
+          log: moduleLog,
+        },
+        sessionId,
+      );
+    };
+
+    // Rebuild each record; drop what the user changed (or removed) since the
+    // first pass.
+    const items: PendingCorrection[] = [];
+    for (const record of records) {
+      const entry = entries.get(record.entryId);
+      const stored = entry?.translations[record.targetLanguage];
+      if (
+        !entry ||
+        !stored ||
+        stored.status !== 'translated' ||
+        stored.text !== record.writtenText ||
+        stored.runId !== runId
+      ) {
+        this.logger.info('translation:lqa-correction-skipped', {
+          runId,
+          entryId: record.entryId,
+          targetLanguage: record.targetLanguage,
+          reason: entry ? 'changed-since-first-pass' : 'entry-removed',
+        });
+        this.resolveCorrection(status, record, 'stale', null);
+        continue;
+      }
+      const glossaryKey = this.glossaryEntryKey(record.targetLanguage, entry);
+      let glossary = glossaryCache.get(glossaryKey);
+      if (!glossary) {
+        const rawTerms = await this.glossaryProvider(projectId, record.targetLanguage, entry);
+        const constantTerms = rawTerms.filter((t) => t.constant);
+        glossary = {
+          constantTerms,
+          nonConstantTerms: rawTerms.filter((t) => !t.constant),
+          glossaryById: new Map(constantTerms.map((t) => [t.id, t])),
+        };
+        glossaryCache.set(glossaryKey, glossary);
+      }
+      const { masked, plan } = maskText(entry.sourceText, glossary.constantTerms, {
+        runtimePlaceholders: entry.collection === 'client',
+      });
+      const reference = this.jobReference(entry, record.targetLanguage, referenceLanguage);
+      items.push({
+        record,
+        decision: {
+          entry,
+          targetLanguage: record.targetLanguage,
+          moduleId: record.moduleId,
+          ruleId: null,
+          ...(record.promptOptions ? { promptOptions: record.promptOptions } : {}),
+          ...(record.modelOverride ? { modelOverride: record.modelOverride } : {}),
+          ...(record.reasoningEffortOverride
+            ? { reasoningEffortOverride: record.reasoningEffortOverride }
+            : {}),
+          ...(record.freewayTier !== undefined ? { freewayTier: record.freewayTier } : {}),
+          ...(record.freewayBucketKey ? { freewayBucketKey: record.freewayBucketKey } : {}),
+        },
+        masked,
+        plan,
+        glossaryById: glossary.glossaryById,
+        nonConstantTerms: glossary.nonConstantTerms,
+        ...(reference ? { reference } : {}),
+      });
+    }
+    if (items.length === 0) return;
+
+    // Group by serving module, model, reasoning effort, origin bucket and language.
+    const groups = new Map<string, PendingCorrection[]>();
+    for (const item of items) {
+      const r = item.record;
+      const key = `${r.moduleId}|${r.modelOverride ?? ''}|${r.reasoningEffortOverride ?? ''}|${r.freewayBucketKey ?? ''}|${r.targetLanguage}`;
+      const group = groups.get(key);
+      if (group) group.push(item);
+      else groups.set(key, [item]);
+    }
+
+    for (const group of groups.values()) {
+      if (this.correctionHalted(status, signal)) return;
+      const first = group[0]!;
+      const origin = first.record;
+      const keepGroup = (reason: string): void => {
+        this.logger.warn('translation:lqa-correction-unavailable', {
+          runId,
+          moduleId: origin.moduleId,
+          targetLanguage: origin.targetLanguage,
+          strings: group.length,
+          reason,
+        });
+        for (const item of group) this.resolveCorrection(status, item.record, 'kept', null);
+      };
+      const effective = resolveEffectiveModuleConfig(
+        origin.moduleId,
+        global,
+        projectEntries[origin.moduleId],
+      );
+      const metricsModel =
+        origin.modelOverride ??
+        (typeof effective.config.model === 'string' ? effective.config.model : null);
+      let module: TranslationModule | undefined;
+      let servingBucketKey = origin.freewayBucketKey;
+      let servingView: BucketView | undefined;
+      let override: Partial<RoutingDecision> | undefined;
+      let escalated = false;
+      const freeway = origin.freewayBucketKey !== undefined;
+      if (freeway && origin.freewayBucketKey !== undefined) {
+        const bucketDeps = freewayDeps();
+        // The hardest string decides the rung, so one escalation serves the group.
+        const hardest = group.reduce((best, item) =>
+          difficultyBand(toFreewayJob(item.decision)) > difficultyBand(toFreewayJob(best.decision))
+            ? item
+            : best,
+        );
+        const candidates = await this.selectFreewayEscalation(
+          origin.freewayBucketKey,
+          hardest.decision,
+          bucketDeps,
+          priority,
+        );
+        for (const candidate of candidates) {
+          let built: TranslationModule | undefined;
+          try {
+            built = buildFreewayModule(candidate.moduleId, candidate.modelId, candidate.bucketKey);
+          } catch {
+            continue;
+          }
+          if (!built) continue;
+          if (
+            typeof built.correctBatch === 'function' ||
+            typeof built.retryWithFeedback === 'function'
+          ) {
+            module = built;
+            override = {
+              moduleId: candidate.moduleId,
+              modelOverride: candidate.modelId,
+              freewayTier: candidate.qualityTier,
+              freewayBucketKey: candidate.bucketKey,
+            };
+            servingBucketKey = candidate.bucketKey;
+            servingView = candidate.bucket;
+            escalated = true;
+            break;
+          }
+          this.logger.info('translation:freeway-escalation-skipped-incapable', {
+            bucketKey: candidate.bucketKey,
+          });
+        }
+        if (escalated) {
+          this.logger.info('translation:freeway-escalated', {
+            runId,
+            strings: group.length,
+            targetLanguage: origin.targetLanguage,
+            from: origin.freewayBucketKey,
+            to: servingBucketKey,
+          });
+          this.recordFreewayDetail(
+            runId,
+            `${origin.targetLanguage} gate-failed on ${origin.freewayBucketKey} — escalated to ${servingBucketKey}`,
+          );
+        } else {
+          const views = await loadBucketViews(Date.now(), bucketDeps, {
+            onlyBucketKey: origin.freewayBucketKey,
+          });
+          servingView = views.find((view) => view.bucketKey === origin.freewayBucketKey);
+          module = buildFreewayModule(
+            origin.moduleId,
+            origin.modelOverride ?? '',
+            origin.freewayBucketKey,
+          );
+        }
+      } else {
+        if (!effective.enabled || effective.active === false) {
+          keepGroup('module-disabled');
+          continue;
+        }
+        module = this.moduleRegistry.createWithConfig(
+          origin.moduleId,
+          {
+            ...effective.config,
+            ...this.rateLimitConfig(global),
+            ...(origin.modelOverride ? { model: origin.modelOverride } : {}),
+            ...(origin.reasoningEffortOverride
+              ? { reasoningEffort: origin.reasoningEffortOverride }
+              : {}),
+            log: moduleLog,
+          },
+          sessionId,
+        );
+      }
+      if (
+        !module ||
+        (typeof module.correctBatch !== 'function' &&
+          typeof module.retryWithFeedback !== 'function')
+      ) {
+        keepGroup('module-cannot-correct');
+        continue;
+      }
+
+      // Chunks are always capped at the serving module's batch size, whatever
+      // size or grouping the first pass used.
+      const configured = (effective.config as { maxBatchSize?: unknown }).maxBatchSize;
+      const moduleCap = typeof configured === 'number' && configured > 0 ? configured : 20;
+      const chunkSize = Math.max(
+        1,
+        servingView
+          ? charCappedBatch(
+              servingView,
+              group.map((item) => ({ sourceText: item.masked })),
+            )
+          : moduleCap,
+      );
+      const serving = module;
+      for (let start = 0; start < group.length; start += chunkSize) {
+        const chunk = group.slice(start, start + chunkSize);
+        let admission: Admission | undefined;
+        if (freeway && servingBucketKey !== undefined && servingView) {
+          const key: GovernorKey = {
+            tenantId: requireTenant().userId,
+            bucketKey: servingBucketKey,
+            ...(servingView.poolKey !== undefined ? { poolKey: servingView.poolKey } : {}),
+          };
+          {
+            // An escalation target is a bucket the run plan never seeded, and after a
+            // restart neither is the origin bucket: seed so the governor paces both.
+            this.governor.seed(
+              key,
+              {
+                rpm: servingView.rpm,
+                tpm: servingView.tpm,
+                poolRpm: servingView.poolRpm,
+                minuteRequests: servingView.remainingMinuteRequests,
+                minuteTokens: servingView.remainingMinuteTokens,
+                poolMinuteRequests: servingView.poolRemainingMinuteRequests,
+                minuteResetAt: servingView.minuteResetAt,
+              },
+              Date.now(),
+            );
+          }
+          admission = {
+            key,
+            projectedTokens: projectedRequestTokens(
+              servingView,
+              chunk.reduce(
+                (sum, item) => sum + item.masked.length + item.record.previousText.length,
+                0,
+              ),
+            ),
+          };
+        }
+        const body = this.trackTask(runId, () =>
+          this.runCorrectionChunk({
+            status,
+            projectId,
+            runId,
+            state,
+            chunk,
+            module: serving,
+            override,
+            servingBucketKey,
+            servingView,
+            escalated,
+            admission,
+            deps: freeway ? freewayDeps() : undefined,
+            sourceLanguage: project.sourceLanguage,
+            project,
+            achievementPairMap,
+            examplesByLanguage,
+            metricsModel,
+            attempt,
+          }),
+        );
+        state.outstanding++;
+        this.queue.add(runId, tenant ? () => runWithTenant(tenant, body) : body, admission);
+      }
+    }
+  }
+
+  /** Cool a correction chunk's rate-limited bucket and fold the 429 into the governor. */
+  private async coolCorrectionBucket(
+    err: unknown,
+    bucketKey: string,
+    admission: Admission | undefined,
+    deps: BucketSourceDeps,
+  ): Promise<void> {
+    const now = Date.now();
+    const cooldown = rateLimitCooldownMs(err, bucketRateLimits(bucketKey));
+    await this.coolFreewayBucket(bucketKey, now, cooldown, deps, 'pool');
+    this.observeFreewayRateLimit(err, bucketKey, admission, cooldown, now);
+  }
+
+  /** One queued correction chunk: a single `correctBatch` call (or per-string fallback) and its results. */
+  private async runCorrectionChunk(args: {
+    status: RunStatus;
+    projectId: string;
+    runId: string;
+    state: CorrectionRunState;
+    chunk: PendingCorrection[];
+    module: TranslationModule;
+    override: Partial<RoutingDecision> | undefined;
+    servingBucketKey: string | undefined;
+    servingView?: BucketView;
+    escalated: boolean;
+    admission: Admission | undefined;
+    deps: BucketSourceDeps | undefined;
+    sourceLanguage: string;
+    project: Project;
+    achievementPairMap: Map<string, StringEntry[]>;
+    examplesByLanguage: ExamplesByLanguage | undefined;
+    metricsModel: string | null;
+    attempt: number;
+  }): Promise<void> {
+    const { status, projectId, runId, state, chunk, module, admission, deps } = args;
+    const signal = this.controllers.get(runId)?.signal;
+    let called = false;
+    let permitOpen = admission !== undefined;
+    let requeued = false;
+    const unresolved = (): PendingCorrectionRecord[] =>
+      chunk
+        .map((item) => item.record)
+        .filter((record) =>
+          status.pendingCorrections?.some(
+            (queued) =>
+              queued.entryId === record.entryId && queued.targetLanguage === record.targetLanguage,
+          ),
+        );
+    try {
+      if (this.correctionHalted(status, signal) || this.correctionRuns.get(runId) !== state) {
+        if (admission) this.governor.refund(admission.key, admission.projectedTokens);
+        permitOpen = false;
+        return;
+      }
+      const decisionFor = (item: PendingCorrection): RoutingDecision =>
+        args.override ? { ...item.decision, ...args.override } : item.decision;
+      const prepared = chunk.map((item) => {
+        const decision = decisionFor(item);
+        const { entry, targetLanguage } = decision;
+        const achievement = buildAchievementPromptContext(
           entry,
           targetLanguage,
-          project,
-          achievementPairMap ?? new Map(),
-        )
-      : undefined;
-    const feedback = buildLqaRetryFeedback(lqaResult, targetLanguage, achievement);
-    metricsCollector.recordLqaRetry(decision.moduleId, metricsModel);
-    this.recordRetry(runId, entry.id, entry.sourceText, targetLanguage);
-    this.logger.info('translation:lqa-retry', {
-      runId,
-      entryId: entry.id,
-      targetLanguage,
-      moduleId: decision.moduleId,
-      issues: lqaResult.issues.length,
-    });
-    try {
-      const retryJob: TranslationJob = {
-        entryId: entry.id,
-        sourceText: masked,
-        sourceLanguage,
-        targetLanguage,
-        glossary: nonConstantTerms,
-        glossaryId: entry.assignedGlossaryIds?.[0] ?? 'project',
-        promptOptions: achievement
-          ? { ...effectivePromptOptions(entry, decision.promptOptions), achievement }
-          : effectivePromptOptions(entry, decision.promptOptions),
-        context: jobContext,
-        ...(reference ? { reference } : {}),
-        ...(examples?.length ? { examples } : {}),
+          args.project,
+          args.achievementPairMap,
+        );
+        const feedback = buildLqaRetryFeedback(
+          { passed: false, issues: item.record.issues, overflow: false, overflowRatio: 0 },
+          targetLanguage,
+          achievement,
+        );
+        const job: TranslationJob = {
+          entryId: entry.id,
+          sourceText: item.masked,
+          sourceLanguage: args.sourceLanguage,
+          targetLanguage,
+          glossary: item.nonConstantTerms,
+          glossaryId: entry.assignedGlossaryIds?.[0] ?? 'project',
+          promptOptions: achievement
+            ? { ...effectivePromptOptions(entry, decision.promptOptions), achievement }
+            : effectivePromptOptions(entry, decision.promptOptions),
+          context: entry.context,
+          ...(item.reference ? { reference: item.reference } : {}),
+          ...(args.examplesByLanguage?.get(targetLanguage)?.length
+            ? { examples: args.examplesByLanguage.get(targetLanguage) }
+            : {}),
+        };
+        metricsCollector.recordLqaRetry(item.record.moduleId, args.metricsModel);
+        this.recordRetry(runId, entry.id, entry.sourceText, targetLanguage);
+        this.logger.info('translation:lqa-retry', {
+          runId,
+          entryId: entry.id,
+          targetLanguage,
+          moduleId: decision.moduleId,
+          issues: item.record.issues.length,
+        });
+        return { item, decision, job, feedback };
+      });
+
+      // A per-string call that hits a rate limit or a run-cancelling auth error
+      // ends this chunk's per-string calls; the items not yet corrected keep
+      // their first-pass text.
+      const singleStop: { kind?: 'rate-limit' | 'auth'; err?: unknown; moduleId?: string | null } =
+        {};
+      // Per-string calls already charged to the governor (one request plus
+      // their projected tokens each).
+      let singleCharged = 0;
+      const singleCall = async (
+        p: (typeof prepared)[number],
+        charge: boolean,
+      ): Promise<TranslationResult | undefined> => {
+        if (charge && admission && args.servingView) {
+          this.governor.forceAcquire(
+            admission.key,
+            projectedRequestTokens(
+              args.servingView,
+              p.item.masked.length + p.item.record.previousText.length,
+            ),
+            Date.now(),
+          );
+          singleCharged++;
+        }
+        try {
+          return await module.retryWithFeedback?.(
+            p.job,
+            p.item.record.previousText,
+            p.feedback,
+            signal,
+          );
+        } catch (err) {
+          if (isAbortError(err) || signal?.aborted) throw err;
+          this.logger.warn('translation:lqa-retry-failed', {
+            runId,
+            entryId: p.decision.entry.id,
+            targetLanguage: p.decision.targetLanguage,
+            error: toErrorMessage(err),
+          });
+          if (isRateLimitError(err)) {
+            Object.assign(singleStop, { kind: 'rate-limit', err, moduleId: p.decision.moduleId });
+          } else if (isRunCancellingAuthError(err)) {
+            Object.assign(singleStop, { kind: 'auth', err, moduleId: p.decision.moduleId });
+          }
+          return undefined;
+        }
       };
-      let retryModuleResult: TranslationResult | undefined;
+
       const started = performance.now();
-      try {
-        retryModuleResult = await module.retryWithFeedback(
-          retryJob,
-          originalText,
-          feedback,
+      let providerMs: number | undefined;
+      const counted = await runCountingProviderCalls(
+        async () => {
+          called = true;
+          let results: Array<TranslationResult | undefined> = [];
+          let thrown: unknown;
+          try {
+            if (typeof module.correctBatch === 'function') {
+              results = await module.correctBatch(
+                prepared.map((p) => ({
+                  job: p.job,
+                  previousText: p.item.record.previousText,
+                  feedback: p.feedback,
+                })),
+                signal,
+              );
+              const decision0 = prepared[0]?.decision;
+              if (decision0?.moduleId) {
+                this.recordUsage(status, decision0.moduleId, results as TranslationResult[], {
+                  freeway: decision0.freewayBucketKey !== undefined,
+                });
+              }
+              // The batch never delivered a correction for an item that came back
+              // errored, empty or missing (e.g. a malformed reply): give it its one
+              // per-string attempt. Items that came back and failed the gate again
+              // are not retried.
+              if (typeof module.retryWithFeedback === 'function') {
+                results = [...results];
+                for (let i = 0; i < prepared.length; i++) {
+                  const got = results[i];
+                  if (got && !got.error && got.translatedText?.trim()) continue;
+                  if (singleStop.kind || this.correctionHalted(status, signal)) break;
+                  const p = prepared[i]!;
+                  // The batch call used the chunk's admission; each extra call is charged.
+                  const single = await singleCall(p, true);
+                  if (!single) continue;
+                  if (p.decision.moduleId) {
+                    this.recordUsage(status, p.decision.moduleId, [single], {
+                      freeway: p.decision.freewayBucketKey !== undefined,
+                    });
+                  }
+                  results[i] = single;
+                }
+              }
+            } else {
+              for (const [i, p] of prepared.entries()) {
+                if (singleStop.kind || this.correctionHalted(status, signal)) break;
+                // The first call uses the chunk's admission; each later one is charged.
+                const result = await singleCall(p, i > 0);
+                if (result && p.decision.moduleId) {
+                  this.recordUsage(status, p.decision.moduleId, [result], {
+                    freeway: p.decision.freewayBucketKey !== undefined,
+                  });
+                }
+                results.push(result);
+              }
+            }
+          } catch (err) {
+            thrown = err;
+          }
+          return { results, thrown };
+        },
+        (_calls, measuredMs) => {
+          providerMs = measuredMs;
+        },
+      );
+      const { results, thrown } = counted.result;
+      const translateMs = providerMs ?? performance.now() - started;
+
+      if (deps && args.servingBucketKey !== undefined && admission) {
+        // The queue admitted one request and per-string calls were charged as
+        // they went out; anything beyond that is charged here.
+        const uncharged = counted.calls - 1 - singleCharged;
+        if (uncharged > 0) {
+          this.governor.forceAcquireRequests(admission.key, uncharged, Date.now());
+        }
+        const first = prepared[0];
+        if (first) {
+          await this.recordFreewayCall(
+            status,
+            {
+              bucketKey: args.servingBucketKey,
+              model:
+                args.override?.modelOverride ??
+                first.item.record.modelOverride ??
+                first.item.record.moduleId,
+              requests: Math.max(1, counted.calls),
+              translateMs,
+              strings: results.filter((r) => r && !r.error && r.translatedText?.trim()).length,
+            },
+            deps,
+          );
+          if (args.escalated && first.item.record.freewayBucketKey) {
+            this.recordFreewayMove(
+              status,
+              first.item.record.freewayBucketKey,
+              args.servingBucketKey,
+              'lqa',
+            );
+          }
+          await this.recordFreewayDispatch(args.servingBucketKey, [], deps, counted.calls);
+        }
+      }
+
+      if (thrown !== undefined) {
+        if (isAbortError(thrown) || signal?.aborted) return;
+        // A rate-limited bucket cools and the chunk is planned again once, so
+        // it lands on whichever bucket has headroom instead of being dropped.
+        if (
+          isRateLimitError(thrown) &&
+          deps &&
+          args.servingBucketKey !== undefined &&
+          args.attempt < 2
+        ) {
+          await this.coolCorrectionBucket(thrown, args.servingBucketKey, admission, deps);
+          requeued = true;
+          void this.scheduleCorrections(status, projectId, runId, unresolved(), args.attempt + 1);
+          return;
+        }
+        this.logger.warn('translation:lqa-retry-failed', {
+          runId,
+          targetLanguage: prepared[0]?.decision.targetLanguage,
+          error: toErrorMessage(thrown),
+        });
+      }
+
+      if (singleStop.kind === 'rate-limit' && deps && args.servingBucketKey !== undefined) {
+        await this.coolCorrectionBucket(singleStop.err, args.servingBucketKey, admission, deps);
+      }
+      const authError =
+        singleStop.kind === 'auth'
+          ? singleStop.err
+          : thrown !== undefined && isRunCancellingAuthError(thrown)
+            ? thrown
+            : undefined;
+      if (authError !== undefined) {
+        const moduleId = singleStop.moduleId ?? prepared[0]?.decision.moduleId ?? null;
+        if (deps && args.servingBucketKey !== undefined) {
+          // A Freeway credential belongs to one module: sideline it, the run goes on.
+          if (moduleId) await this.markFreewayCredentialBad(moduleId, deps);
+        } else if (await this.maybeCancelForAuth(runId, moduleId, authError)) {
+          return;
+        }
+      }
+
+      for (let i = 0; i < prepared.length; i++) {
+        if (this.correctionHalted(status, signal)) return;
+        const p = prepared[i]!;
+        await this.applyCorrection(
+          status,
+          projectId,
+          runId,
+          p.item,
+          p.decision,
+          results[i],
+          args.metricsModel,
+          args.project,
           signal,
         );
-      } finally {
-        args.onAttempt?.(
-          performance.now() - started,
-          retryModuleResult && !retryModuleResult.error && retryModuleResult.translatedText?.trim()
-            ? 1
-            : 0,
-        );
       }
-      this.recordUsage(status, decision.moduleId, [retryModuleResult], {
-        freeway: decision.freewayBucketKey !== undefined,
-      });
-      // An errored OR empty/whitespace retry keeps the first-pass text: never
-      // overwrite good output with '' (mirrors M30's error||!translatedText).
-      if (retryModuleResult.error || !retryModuleResult.translatedText?.trim()) {
-        return { outcome: 'accepted-original' };
+    } catch (err) {
+      if (!isAbortError(err) && !signal?.aborted) {
+        this.logger.warn('translation:lqa-correction-failed', {
+          runId,
+          error: toErrorMessage(err),
+        });
       }
-      const retryDiagnostics = verifyMaskedTranslation(retryModuleResult.translatedText, plan);
-      if (signal?.aborted) return { outcome: 'aborted' };
-      const retryMaskIssues = maskDiagnosticsToIssues(retryDiagnostics);
-      const retryRestored = restoreFinal(
+    } finally {
+      if (!called && permitOpen && admission && !this.correctionHalted(status, signal)) {
+        // Planned and admitted, but no call went out: give the permit back.
+        this.governor.refund(admission.key, admission.projectedTokens);
+      }
+      if (
+        !requeued &&
+        !this.correctionHalted(status, signal) &&
+        this.correctionRuns.get(runId) === state
+      ) {
+        // Anything this chunk did not settle keeps its first-pass text.
+        for (const record of unresolved()) {
+          this.resolveCorrection(status, record, 'kept', args.metricsModel);
+        }
+      }
+      state.outstanding--;
+      await this.afterCorrectionWork(status, projectId, runId, state);
+    }
+  }
+
+  /**
+   * Applies one correction result with the same post-processing the first pass
+   * gets: an errored/empty/missing result keeps the first-pass text; otherwise
+   * the mask is verified, the text unmasked and stored (only while the stored
+   * text is still this run's first pass), and the gate re-run (its verdict
+   * replaces the first pass's even when it fails again).
+   */
+  private async applyCorrection(
+    status: RunStatus,
+    projectId: string,
+    runId: string,
+    item: PendingCorrection,
+    decision: RoutingDecision,
+    corrected: TranslationResult | undefined,
+    metricsModel: string | null,
+    project: Project,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    const { entry, targetLanguage } = decision;
+    try {
+      if (!corrected || corrected.error || !corrected.translatedText?.trim()) {
+        this.resolveCorrection(status, item.record, 'kept', metricsModel);
+        return;
+      }
+      const diagnostics = verifyMaskedTranslation(corrected.translatedText, item.plan);
+      if (this.correctionHalted(status, signal)) return;
+      const maskIssues = maskDiagnosticsToIssues(diagnostics);
+      const restored = restoreFinal(
         entry.sourceText,
-        retryModuleResult.translatedText,
-        plan,
-        glossaryById,
+        corrected.translatedText,
+        item.plan,
+        item.glossaryById,
         targetLanguage,
       );
-      const retryResult: TranslationResult = {
+      const result: TranslationResult = {
         entryId: entry.id,
         targetLanguage,
-        translatedText: retryRestored,
-        rawResponse: retryModuleResult.rawResponse,
+        translatedText: restored,
+        rawResponse: corrected.rawResponse,
       };
-      await this.persistResult(projectId, entry, targetLanguage, retryResult, decision, runId);
-      await this.lqaGate(entry, retryResult, projectId, targetLanguage, retryMaskIssues, project);
-      // No TM auto-record — only approved translations are written to the memory.
-      return {
-        outcome: 'persisted',
-        ...(retryModuleResult.usedGlossaryId !== undefined
-          ? { usedGlossaryId: retryModuleResult.usedGlossaryId }
-          : {}),
-      };
+      try {
+        await this.persistResult(projectId, entry, targetLanguage, result, decision, runId, {
+          text: item.record.writtenText,
+          runId,
+        });
+      } catch (err) {
+        if (err instanceof StaleTranslationError) {
+          this.logger.info('translation:lqa-correction-skipped', {
+            runId,
+            entryId: entry.id,
+            targetLanguage,
+            reason: 'changed-since-first-pass',
+          });
+          this.resolveCorrection(status, item.record, 'stale', metricsModel);
+          return;
+        }
+        throw err;
+      }
+      await this.lqaGate(entry, result, projectId, targetLanguage, maskIssues, project);
+      this.resolveCorrection(
+        status,
+        item.record,
+        'corrected',
+        metricsModel,
+        corrected.usedGlossaryId,
+      );
     } catch (err) {
-      if (isAbortError(err)) return { outcome: 'aborted' };
+      if (isAbortError(err)) return;
       this.logger.warn('translation:lqa-retry-failed', {
         runId,
         entryId: entry.id,
         targetLanguage,
-        error: err instanceof Error ? err.message : `${err}`,
+        error: toErrorMessage(err),
       });
-      return { outcome: 'accepted-original' };
+      this.resolveCorrection(status, item.record, 'kept', metricsModel);
     }
   }
 
@@ -7142,6 +8023,8 @@ export class TranslationEngine {
     result: TranslationResult,
     decision: RoutingDecision,
     runId?: string,
+    /** Write only while the stored record is still this unreviewed first-pass text. */
+    onlyIfCurrent?: { text: string; runId: string },
   ): Promise<void> {
     if (decision.moduleId === null) return;
     const minTier = freewayMinBand(runId ? this.runs.get(runId)?.request : undefined) ?? 1;
@@ -7183,7 +8066,7 @@ export class TranslationEngine {
       // Preserve a human 'reviewed' verdict when this run re-produces the exact
       // same text (re-translate / TM auto-apply). The check runs inside the
       // write lock against the current record, so a mid-run approval survives.
-      { preserveReviewedIfSameText: true },
+      { preserveReviewedIfSameText: true, ...(onlyIfCurrent ? { onlyIfCurrent } : {}) },
     );
     // Every successful translation flows through here (first-pass, trivial, and
     // LQA-retry re-persist), so this is the single place to record the run's
@@ -7447,7 +8330,10 @@ export class TranslationEngine {
     // are what the run is still missing — it has drained once they account for
     // the remainder.
     const waitingPairs = status.waitingForQuota?.pairs.length ?? 0;
-    if (status.completed + status.failed + waitingPairs < status.total) return;
+    // Gate-failed strings awaiting their corrective attempt are not counted
+    // completed yet, but they are not outstanding first-pass work either.
+    const pendingCorrections = status.pendingCorrections?.length ?? 0;
+    if (status.completed + status.failed + waitingPairs + pendingCorrections < status.total) return;
     if (waitingPairs > 0) {
       // Not done — parked. The run stays the project's active run and resumes
       // (manually or by the quota sweep) with exactly these pairs. A run the
@@ -7457,6 +8343,7 @@ export class TranslationEngine {
         status.status = RunStatusCode.Paused;
         this.queue.pauseRun(runId);
       }
+      this.refreshWaitingResumeAt(status);
       this.logger.info('translation:waiting-for-quota', {
         runId,
         pairs: waitingPairs,
@@ -7477,6 +8364,19 @@ export class TranslationEngine {
           error: toErrorMessage(err),
         });
       });
+      return;
+    }
+    // First pass drained with nothing parked: the deferred corrective pass runs
+    // as ordinary queued tasks of this run, and its last task finalizes again.
+    if (pendingCorrections > 0) {
+      void this.trackTask(runId, () => this.scheduleCorrections(status, projectId, runId))().catch(
+        (err: unknown) => {
+          this.logger.warn('translation:lqa-correction-failed', {
+            runId,
+            error: toErrorMessage(err),
+          });
+        },
+      );
       return;
     }
     status.status = RunStatusCode.Completed;
@@ -7571,6 +8471,8 @@ export class TranslationEngine {
   private forgetRun(runId: string): void {
     this.runs.delete(runId);
     this.details.delete(runId);
+    this.correctionRuns.delete(runId);
+    this.correctionListDirty.delete(runId);
     this.controllers.delete(runId);
     this.queuedSessions.delete(runId);
     this.runSessions.delete(runId);
@@ -7744,6 +8646,16 @@ export class TranslationEngine {
   }
 
   private emitProgress(runId: string, status: RunStatus): void {
+    const pending = status.pendingCorrections?.length ?? 0;
+    if (pending > 0 && !this.correctionListDirty.delete(runId)) {
+      // Membership did not change: persist the counters with a count in place of
+      // the list; the store keeps the list it already holds.
+      const { pendingCorrections: _list, ...rest } = status;
+      emitRunProgress({ logger: this.logger, runStore: this.runStore }, 'translation', rest, {
+        keepPendingCorrections: true,
+      });
+      return;
+    }
     // `runId` always equals `status.runId` at every call site; the shared helper
     // keys off `status.runId`, keeping the `translation:progress` /
     // `translation:store-update-failed` output byte-identical.
@@ -7895,6 +8807,7 @@ export const translationEngine = new TranslationEngine({
       projectId,
       project,
       extraIssues,
+      aggregateOverflow: true,
     });
     // Pass ONLY this language's verdict. updateEntry merges it into the fresh
     // on-disk lqaResults under the write lock, so sibling languages are

@@ -12,6 +12,13 @@ export interface Admission {
    * `tryAcquire` covers it too. The queue itself never reads or sets this.
    */
   spent?: boolean;
+  /**
+   * Set (by the dispatch pipeline) once `key` has been re-pointed at a bucket
+   * other than the one the queue admitted. The queue's own permit covers the
+   * ORIGINAL bucket, so calls on the target must be admitted by the governor
+   * themselves (see TranslationEngine.admitReroutedCall).
+   */
+  rerouted?: boolean;
 }
 
 interface Entry {
@@ -234,6 +241,17 @@ export class JobQueue {
         });
     }
     this.armRefillTimer();
+  }
+
+  /**
+   * Re-run the dispatch pass at `at` (epoch ms). For events that make blocked
+   * work runnable without any task finishing or window rolling over — e.g. a
+   * rate-limit cooldown expiring. Idempotent per instant is not needed: a pump
+   * with nothing runnable is cheap.
+   */
+  wakeAt(at: number): void {
+    const timer = setTimeout(() => this.pump(), Math.max(50, at - Date.now()));
+    timer.unref?.();
   }
 
   /**

@@ -42,6 +42,7 @@ import { ApiError } from '../../hooks/use-api.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
 import { RunProgressCard } from '@/components/common/RunProgressCard';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
+import { useFreewayUsable } from '../../hooks/use-freeway-usable.js';
 import { ModuleModelSelector } from '../config/ModuleModelSelector.js';
 import { useConfidenceContext } from '../../hooks/use-confidence-context.js';
 import { ModuleReasoningEffortSelect } from '../config/ModuleReasoningEffortSelect.js';
@@ -218,6 +219,7 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
 
   // Module/model selection for the review run. `null` means "not chosen yet".
   const modules = useModules();
+  const freewayUsable = useFreewayUsable();
   const [userModuleId, setUserModuleId] = useState<string | null>(null);
   const [userModel, setUserModel] = useState<string>('');
   // Per-run reasoning-effort override. `null` = the user hasn't chosen, so the
@@ -347,13 +349,16 @@ export function SourceAiReviewTab({ projectId }: { projectId: string }) {
   }
 
   // Default chain: the project's saved selection (while its module is still
-  // review-capable), else the first review-capable module. `user*` overrides win.
+  // review-capable), else NARN Freeway when offered and usable, else the first
+  // review-capable module. `user*` overrides win.
   const savedIsReviewCapable =
     sourceReviewConfig?.moduleId !== undefined &&
     reviewModules.some((m) => m.id === sourceReviewConfig.moduleId);
   const defaultModuleId = savedIsReviewCapable
     ? sourceReviewConfig.moduleId!
-    : (reviewModules[0]?.id ?? '');
+    : freewayUsable && reviewModules.some((m) => m.id === FREEWAY_MODULE_ID)
+      ? FREEWAY_MODULE_ID
+      : (reviewModules[0]?.id ?? '');
   const moduleId = userModuleId ?? defaultModuleId;
   // Seed the model: a chosen model wins; otherwise the saved model while still on
   // the saved module (so the remembered model becomes the preferred default).

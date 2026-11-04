@@ -538,6 +538,7 @@
     "statusFailed": "Non riuscita",
     "statusCancelled": "Annullata",
     "stringsProgress": "Voci: {{completed}} / {{total}}",
+    "fixingStrings": "Correzione: {{done}} / {{total}} voci",
     "progressFailedSuffix": "(non riuscite: {{count}})",
     "cancel": "Annulla",
     "runFailedToast": "Esecuzione non riuscita: {{type}}",

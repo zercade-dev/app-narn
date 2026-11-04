@@ -47,7 +47,7 @@ Oui. Passez l'onglet [Routage](guide:usage-routing) en **Avancé** et ajoutez un
 
 ### La traduction ne démarre pas et indique qu'aucune règle de routage ne correspond. Que faire ?
 
-Une exécution ne démarre que lorsque toutes les langues qu'elle contient ont une destination. Si une langue cible ne correspond à aucune règle, l'exécution est refusée avant tout envoi et le message nomme la langue. Ouvrez l'onglet [Routage](guide:usage-routing) et ajoutez une règle qui la couvre — le sélecteur simple de fournisseur couvre toutes les langues d'un coup — puis relancez.
+Une exécution ne démarre que lorsque toutes les langues qu'elle contient ont une destination. Si une langue cible ne correspond à aucune règle, l'exécution est refusée avant tout envoi et le message nomme la langue. Ouvrez l'onglet [Routage](guide:usage-routing) et ajoutez une règle qui la couvre — le sélecteur simple de fournisseur couvre toutes les langues d'un coup — puis relancez. Un projet sans aucune règle n’est jamais refusé pour ce motif : il utilise NARN Freeway tant que vous n’ajoutez pas de règles.
 
 ## Exécutions, échecs et récupération
 

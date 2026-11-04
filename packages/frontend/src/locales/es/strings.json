@@ -538,6 +538,7 @@
     "statusFailed": "Fallida",
     "statusCancelled": "Cancelada",
     "stringsProgress": "{{completed}} / {{total}} entradas",
+    "fixingStrings": "Corrigiendo {{done}} / {{total}} entradas",
     "progressFailedSuffix": "({{count}} con error)",
     "cancel": "Cancelar",
     "runFailedToast": "La ejecución de {{type}} falló",
