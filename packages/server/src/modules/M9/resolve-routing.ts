@@ -16,7 +16,7 @@ export async function resolveRoutingRules(project: Project): Promise<RoutingRule
     return project.routingRules;
   }
   // Collaborator: their user-global routing document, or an empty rule set when
-  // never configured (routes nowhere → existing no-module fail-fast).
+  // never configured (no rules, so M7 falls back to Freeway).
   const doc = await getCollabRoutingStore().get();
   return doc?.routingRules ?? [];
 }

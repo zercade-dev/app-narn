@@ -31,6 +31,5 @@ uma execução como referência.
 - Se algumas strings falharam, **Repetir com falha** executa de novo apenas
   essas.
 - Em uma execução de tradução concluída, comece uma **revisão por IA**
-  diretamente pela execução — escolha o módulo e o modelo (por padrão, os
-  mesmos usados na tradução) e depois abra os veredictos na aba **Revisão da
+  diretamente pela execução — escolha o módulo e o modelo (por padrão, sua última escolha ou o NARN Freeway) e depois abra os veredictos na aba **Revisão da
   tradução por IA**.

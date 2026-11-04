@@ -408,7 +408,9 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
       // same reason. Billed against the resolved module id (the concrete
       // bucket for a Freeway run, matching M28's `result.moduleId`) rather
       // than the synthetic pool id, so usage attributes to what actually ran.
-      accumulateUsage(status, moduleOverride?.moduleId ?? request.moduleId, usages);
+      accumulateUsage(status, moduleOverride?.moduleId ?? request.moduleId, usages, {
+        freeway: bucketKey !== undefined,
+      });
       if (this.pricing) await finalizeUsageCosts(status, this.pricing);
 
       // A cancel that landed while the provider call was in flight wins: don't

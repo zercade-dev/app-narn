@@ -44,13 +44,14 @@ tertangkap. Menerjemahkan dengan **DeepL**? Kirim glosarium ke sana dengan
 
 ## 5. Siapkan penyaluran
 
-Buka tab **Penyaluran** dan pilih penyedia Anda dari pemilih tempat tab
-itu terbuka — itu mengirim setiap entri dalam proyek ke penyedia
-tersebut, yang sudah cukup untuk pengaturan satu-penyedia. Ingin penyedia
-berbeda per bahasa, kategori, atau panjang entri? Beralih ke **Lanjutan**
-dan tambahkan **aturan penyaluran** di sana. Pilihan Anda tersimpan
-otomatis apa pun caranya. Langkah ini wajib: entri tanpa aturan yang cocok
-gagal diterjemahkan dengan galat *“tidak ada rute”*.
+Buka tab **Penyaluran** dan pilih penyedia Anda dari pemilih tempat tab itu
+terbuka — itu mengirim setiap entri dalam proyek ke penyedia tersebut, yang
+sudah cukup untuk pengaturan satu-penyedia. Ingin penyedia berbeda per bahasa,
+kategori, atau panjang entri? Beralih ke **Lanjutan** dan tambahkan **aturan
+penyaluran** di sana. Pilihan Anda tersimpan otomatis apa pun caranya. Proyek
+tanpa aturan sama sekali mengirim semuanya lewat NARN Freeway, jadi langkah
+ini opsional di awal. Setelah proyek punya aturan, entri yang tidak cocok
+dengan satu pun gagal diterjemahkan dengan galat *“tidak ada rute”*.
 
 ## 6. *(Optional)* Bangun glosarium dari konten Anda sendiri
 

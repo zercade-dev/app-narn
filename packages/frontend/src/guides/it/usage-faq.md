@@ -47,7 +47,7 @@ Sì. Porta la scheda [Routing](guide:usage-routing) su **Avanzate** e aggiungi u
 
 ### La traduzione non parte e dice che non c'è nessuna regola di routing. E adesso?
 
-Un'esecuzione parte solo quando ogni lingua che contiene ha una destinazione. Se una lingua di destinazione non corrisponde a nessuna regola, l'esecuzione viene rifiutata prima di inviare qualsiasi cosa e il messaggio nomina la lingua. Apri la scheda [Routing](guide:usage-routing) e aggiungi una regola che la copra — il selettore semplice di provider le copre tutte in un colpo — poi rilancia.
+Un'esecuzione parte solo quando ogni lingua che contiene ha una destinazione. Se una lingua di destinazione non corrisponde a nessuna regola, l'esecuzione viene rifiutata prima di inviare qualsiasi cosa e il messaggio nomina la lingua. Apri la scheda [Routing](guide:usage-routing) e aggiungi una regola che la copra — il selettore semplice di provider le copre tutte in un colpo — poi rilancia. Un progetto senza alcuna regola non viene mai rifiutato per questo motivo: usa NARN Freeway finché non aggiungi regole.
 
 ## Esecuzioni, errori e recupero
 

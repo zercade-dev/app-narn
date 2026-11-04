@@ -17,4 +17,4 @@ Mỗi lần chạy hiển thị **loại**, **trạng thái** (Đang xếp hàng
 ## Khôi phục và rà soát
 
 * Nếu một số chuỗi thất bại, **Thử lại các mục lỗi** sẽ chạy lại đúng những chuỗi đó.
-* Với một lần chạy dịch đã hoàn tất, hãy bắt đầu một lượt **rà soát AI** ngay từ lần chạy đó — chọn mô-đun và mô hình (mặc định là mô-đun và mô hình đã dùng để dịch), rồi mở các kết luận ở tab **Rà soát bản dịch bằng AI**.
+* Với một lần chạy dịch đã hoàn tất, hãy bắt đầu một lượt **rà soát AI** ngay từ lần chạy đó — chọn mô-đun và mô hình (mặc định là lựa chọn gần nhất của bạn, hoặc NARN Freeway), rồi mở các kết luận ở tab **Rà soát bản dịch bằng AI**.

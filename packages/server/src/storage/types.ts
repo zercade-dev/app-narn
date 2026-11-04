@@ -300,7 +300,15 @@ export interface StringStore {
     entryId: string,
     targetLanguage: string,
     record: TranslationRecord,
-    opts?: { preserveReviewedIfSameText?: boolean },
+    opts?: {
+      preserveReviewedIfSameText?: boolean;
+      /**
+       * Write only while the CURRENT record is still an unreviewed translation
+       * with exactly this `text` produced by this `runId`; otherwise nothing is
+       * written and `StaleTranslationError` is thrown. Checked under the write lock.
+       */
+      onlyIfCurrent?: { text: string; runId: string };
+    },
   ): Promise<StringEntry>;
   /**
    * Restores (or clears) a single language's translation record WITHOUT
@@ -518,7 +526,16 @@ export interface RunStore {
    */
   countActiveRuns(): Promise<number>;
   getRun(projectId: string, runId: string): Promise<RunStatus | null>;
-  updateRun(projectId: string, run: RunStatus): Promise<void>;
+  /**
+   * `opts.keepPendingCorrections` marks a counter-only progress flush whose
+   * `run` omits `pendingCorrections`: the stored list is kept instead of
+   * cleared. Never persisted; every other write replaces the record.
+   */
+  updateRun(
+    projectId: string,
+    run: RunStatus,
+    opts?: { keepPendingCorrections?: boolean },
+  ): Promise<void>;
   forceCancel(projectId: string, runId: string): Promise<RunStatus | null>;
   /**
    * Project ids (RLS-scoped to the current tenant's memberships) that have at

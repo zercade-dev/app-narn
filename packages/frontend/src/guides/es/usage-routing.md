@@ -2,7 +2,7 @@
 
 ## Descripción general
 
-La pestaña **Enrutamiento** decide qué módulo y modelo gestiona cada entrada. Se abre con un selector de un único proveedor: elige un proveedor y cada entrada del proyecto va a él. Eso es todo lo que necesita la mayoría de los proyectos.
+La pestaña **Enrutamiento** decide qué módulo y modelo gestiona cada entrada. Se abre con un selector de un único proveedor: elige un proveedor y cada entrada del proyecto va a él. Eso es todo lo que necesita la mayoría de los proyectos. Hasta que elijas un proveedor, un proyecto sin reglas envía todo por NARN Freeway.
 
 ¿Necesitas más de un destino? Cambia la pestaña a **Avanzado** y aparece el generador de reglas completo, donde el enrutamiento puede variar según el idioma de destino, la categoría o la longitud de la entrada, y donde puedes mantener varios **grupos de reglas** con nombre. La pestaña recuerda cuál de los dos modos usaste por última vez. Un proyecto cuyo enrutamiento es más complejo que un solo proveedor siempre muestra el generador, sea cual sea el modo que elijas — una configuración ya existente nunca se te oculta.
 

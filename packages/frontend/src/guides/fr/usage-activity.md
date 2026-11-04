@@ -17,4 +17,4 @@ Chaque exécution affiche son **type**, son **statut** (En file d’attente, En 
 ## Récupérer et réviser
 
 * Si certaines entrées ont échoué, **Réessayer les échecs** relance uniquement celles-ci.
-* Sur une exécution de traduction terminée, lancez une **révision par IA** directement depuis l’exécution — choisissez le module et le modèle (par défaut, ceux utilisés pour la traduction), puis ouvrez les verdicts dans l’onglet **Révision IA de traduction**.
+* Sur une exécution de traduction terminée, lancez une **révision par IA** directement depuis l’exécution — choisissez le module et le modèle (par défaut, votre dernier choix ou NARN Freeway), puis ouvrez les verdicts dans l’onglet **Révision IA de traduction**.

@@ -504,6 +504,11 @@ export function BatchConfigEditor({
             {draft.length === 0 && (
               <p className="text-sm text-muted-foreground">{t('routing.noRules')}</p>
             )}
+            {draft.length > 0 && draft.every((r) => r.moduleId === PSEUDO_MODULE_ID) && (
+              <p className="text-sm text-muted-foreground" data-testid="routing-pseudo-only-note">
+                {t('routing.pseudoOnlyNote')}
+              </p>
+            )}
 
             <ul className="space-y-2">
               {draft.map((rule, index) => (

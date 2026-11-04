@@ -7,7 +7,7 @@ import type {
 } from '@zercade-dev/narn-shared';
 import { MAX_PREVIOUS_VERSIONS, entryCollection } from '@zercade-dev/narn-shared';
 import { KeyedAsyncLock } from '../utils/keyed-lock.js';
-import { EntryNotFoundError } from '../types/errors.js';
+import { EntryNotFoundError, StaleTranslationError } from '../types/errors.js';
 import type { Queryable } from './pg/pool.js';
 import { withTransaction } from './pg/pool.js';
 import type { StringStore, StringQueryFilters, RelinkCandidate } from './types.js';
@@ -362,12 +362,26 @@ export class PgStringStore implements StringStore {
     entryId: string,
     targetLanguage: string,
     record: TranslationRecord,
-    opts?: { preserveReviewedIfSameText?: boolean },
+    opts?: {
+      preserveReviewedIfSameText?: boolean;
+      onlyIfCurrent?: { text: string; runId: string };
+    },
   ): Promise<StringEntry> {
     return this.writeLock.withLock(projectId, async () => {
       const current = await this.selectOne(projectId, entryId);
       if (!current) {
         throw new EntryNotFoundError(entryId);
+      }
+      if (opts?.onlyIfCurrent) {
+        const existing = current.translations[targetLanguage];
+        if (
+          !existing ||
+          existing.status !== 'translated' ||
+          existing.text !== opts.onlyIfCurrent.text ||
+          existing.runId !== opts.onlyIfCurrent.runId
+        ) {
+          throw new StaleTranslationError(entryId, targetLanguage);
+        }
       }
       // Preserve a human 'reviewed' decision when a run re-produces byte-
       // identical text. Read the CURRENT record inside the write lock (not the

@@ -55,6 +55,7 @@ import { useRunStore } from '../../stores/run-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import { useViewStore } from '../../stores/view-store.js';
 import { useModules } from '../../hooks/use-modules.js';
+import { useFreewayUsable } from '../../hooks/use-freeway-usable.js';
 import { ModuleModelSelector } from '../config/ModuleModelSelector.js';
 import { useConfidenceContext } from '../../hooks/use-confidence-context.js';
 import { ModuleReasoningEffortSelect } from '../config/ModuleReasoningEffortSelect.js';
@@ -175,6 +176,7 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
   );
   const [aiOpen, setAiOpen] = useState(false);
   const modules = useModules();
+  const freewayUsable = useFreewayUsable();
   const [userModuleId, setUserModuleId] = useState<string | null>(null);
   const [userModel, setUserModel] = useState('');
   const [reasoningEffort, setReasoningEffort] = useState('');
@@ -564,7 +566,14 @@ export function CategoryTab({ projectId }: { readonly projectId: string }): Reac
         isEnabledModule(m),
     );
   }, [modules, realAiModules, tConfig]);
-  const moduleId = userModuleId ?? aiModules[0]?.id ?? '';
+  // Default: NARN Freeway when offered and usable, else the first capable module; a
+  // remembered or user-picked module (userModuleId) always wins.
+  const moduleId =
+    userModuleId ??
+    (freewayUsable && aiModules.some((m) => m.id === FREEWAY_MODULE_ID)
+      ? FREEWAY_MODULE_ID
+      : aiModules[0]?.id) ??
+    '';
   const noAiModules = modules.length > 0 && aiModules.length === 0;
 
   // Apply the stashed stored module choice once the async module list has

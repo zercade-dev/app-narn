@@ -89,6 +89,7 @@ export type {
   SourceReviewItemResult,
   SourceReviewOptions,
   BatchDispatchOptions,
+  CorrectionItem,
 } from './types/module.js';
 export {
   MissingCredentialError,
@@ -128,6 +129,7 @@ export {
 } from './types/runs.js';
 export type {
   RunStatus,
+  PendingCorrectionRecord,
   ProviderFailureNotice,
   ProviderFailureRouting,
   RunErrorEntry,
@@ -150,6 +152,7 @@ export type {
   RunDetails,
   RunDetailPreviousValue,
 } from './types/runs.js';
+export { isAlwaysFreeModel } from './free-model.js';
 export { TM_MODULE_ID } from './types/tm.js';
 export type { TmMatchPolicy, TmFingerprint, TmVariant, TmSegment } from './types/tm.js';
 export type { NotificationRecord, NotificationSeverity } from './types/notification.js';
@@ -270,6 +273,8 @@ export {
   coerceBooleanDefaultTrue,
   LOOPBACK_HOSTS,
   buildBatchPrompt,
+  buildCorrectionBatchPrompt,
+  parseCorrectionBatchResponse,
   parseBatchResponse,
   parseIndexedTranslationResponse,
   filterGlossaryForSource,

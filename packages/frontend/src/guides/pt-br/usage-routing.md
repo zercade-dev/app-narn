@@ -3,8 +3,9 @@
 ## Visão geral
 
 A aba **Roteamento** decide qual módulo e modelo trata cada entrada. Ela abre
-em um seletor de provedor único: escolha um provedor e toda entrada do
-projeto vai para ele. Isso é tudo que a maioria dos projetos precisa.
+em um seletor de provedor único: escolha um provedor e toda entrada do projeto
+vai para ele. Isso é tudo que a maioria dos projetos precisa. Até você
+escolher um provedor, um projeto sem regras envia tudo pelo NARN Freeway.
 
 Precisa de mais de um destino? Mude a aba para **Avançado** e o construtor
 completo de regras aparece, onde o roteamento pode variar por idioma de

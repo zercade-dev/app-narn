@@ -18,6 +18,7 @@ import {
 } from '@zercade-dev/narn-shared';
 import {
   typeTint,
+  TINT_EMERALD,
   scoreTint,
   rowAccentClass,
   formatUsd,
@@ -25,6 +26,7 @@ import {
   usageEntryKey,
   usageEntryLabel,
   sumUsage,
+  isAllFreeUsage,
   chatRunData,
   chatTypeKey,
 } from './run-status-ui.js';
@@ -102,9 +104,29 @@ function UsageEntryLine({
   className,
 }: Readonly<{ entry: RunUsageEntry; className: string }>) {
   const { t } = useTranslation('strings');
+  const free = entry.free;
   return (
     <div className={className}>
-      {usageEntryLabel(entry)}: {usageEntryFigures(entry, t)}
+      {usageEntryLabel(entry)}
+      {free && (
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <Badge
+                variant="secondary"
+                className="ml-1 align-middle text-[10px]"
+                data-testid={`usage-free-badge-${free}`}
+              />
+            }
+          >
+            {free === 'freeway' ? t('runs.freeBadgeFreeway') : t('runs.freeBadgeModel')}
+          </TooltipTrigger>
+          <TooltipContent>
+            {free === 'freeway' ? t('runs.freeTooltipFreeway') : t('runs.freeTooltipModel')}
+          </TooltipContent>
+        </Tooltip>
+      )}
+      : {usageEntryFigures(entry, t)}
     </div>
   );
 }
@@ -117,11 +139,13 @@ function RunCostCell({ run }: Readonly<{ run: RunStatus }>) {
   const usage = run.usageByModule ?? [];
   const estimatedCostUsd = run.estimatedCostUsd;
 
-  const tokens = tokenTotal(usage);
-  const characters = characterTotal(usage);
+  // Free usage was never billed, so the unpriced fallbacks count paid entries only.
+  const paid = usage.filter((e) => e.free === undefined);
+  const tokens = tokenTotal(paid);
+  const characters = characterTotal(paid);
 
   let summary: React.ReactNode;
-  if (estimatedCostUsd !== undefined) {
+  if (estimatedCostUsd !== undefined && !isAllFreeUsage(usage)) {
     summary = (
       <span className="font-medium">
         {t('runs.estimatedCost', { amount: formatUsd(estimatedCostUsd) })}{' '}
@@ -140,6 +164,10 @@ function RunCostCell({ run }: Readonly<{ run: RunStatus }>) {
       <span className="text-muted-foreground">
         {t('runs.charactersOnly', { count: characters.toLocaleString() })}
       </span>
+    );
+  } else if (usage.length > paid.length) {
+    summary = (
+      <span className={`rounded px-1 font-medium ${TINT_EMERALD}`}>{t('runs.costFree')}</span>
     );
   } else {
     summary = <span className="text-muted-foreground">—</span>;
@@ -1165,6 +1193,19 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                 })}
                               />
                             )}
+                            {run.correctionPhase &&
+                              (run.status === RunStatusCode.Running ||
+                                run.status === RunStatusCode.Paused) && (
+                                <div
+                                  className="mt-1 text-[10px] text-muted-foreground"
+                                  data-testid={`run-correction-phase-${run.runId}`}
+                                >
+                                  {t('runs.fixingStrings', {
+                                    done: run.correctionPhase.done,
+                                    total: run.correctionPhase.total,
+                                  })}
+                                </div>
+                              )}
                           </TableCell>
                           <TableCell>
                             <RunCostCell run={run} />

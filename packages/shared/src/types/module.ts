@@ -264,6 +264,16 @@ export interface BatchDispatchOptions {
   surfaceTypedErrors?: boolean;
 }
 
+/** One gate-failed translation to be corrected as part of a batched call. */
+export interface CorrectionItem {
+  /** The original job (entryId, sourceText, targetLanguage, context, promptOptions...). */
+  job: TranslationJob;
+  /** The translation that failed the quality gate (same masked form as `job.sourceText`). */
+  previousText: string;
+  /** The corrective feedback text describing the specific problems. */
+  feedback: string;
+}
+
 export interface TranslationModule {
   id: string;
   name: string;
@@ -301,6 +311,21 @@ export interface TranslationModule {
     feedbackMessage: string,
     signal?: AbortSignal,
   ): Promise<TranslationResult>;
+  /**
+   * Optional batched corrective translation: corrects many gate-failed
+   * translations per provider call instead of one `retryWithFeedback` each.
+   * Returns exactly one result per input item, in input order, keyed by
+   * (entryId, targetLanguage). An item the model omitted or returned empty
+   * carries `error` (the caller keeps the first-pass text). Batch-total usage
+   * rides on the first result of each provider call, as in `translate`. Items
+   * may mix target languages: implementations group them per language
+   * internally. Auth / rate-limit failures are rethrown as typed errors.
+   */
+  correctBatch?(
+    items: CorrectionItem[],
+    signal?: AbortSignal,
+    options?: BatchDispatchOptions,
+  ): Promise<TranslationResult[]>;
   /**
    * Optional LLM-as-judge review of restored translations (report-only).
    * Provided by the shared AI SDK layer; absent on non-LLM modules.

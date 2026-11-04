@@ -1196,7 +1196,9 @@ export abstract class BackgroundRunEngine<TRecord> {
         }
       }
 
-      accumulateUsage(status, moduleId, results.map(opts.usageOf));
+      accumulateUsage(status, moduleId, results.map(opts.usageOf), {
+        freeway: binding !== undefined,
+      });
 
       for (const result of results) {
         if ((status.status as RunStatusCode) === RunStatusCode.Cancelled || signal?.aborted) {

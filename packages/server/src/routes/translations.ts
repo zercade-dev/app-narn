@@ -389,7 +389,15 @@ translationsRouter.get(
     // Run the status payload through the credential sanitizer so any secret
     // values that surfaced inside `errors[].error` (or other free-form fields)
     // are masked before they reach the client.
-    res.json(sanitizeLogObject(status));
+    // The polled payload carries the pending-correction count, not the list.
+    const { pendingCorrections, ...rest } = status;
+    res.json(
+      sanitizeLogObject(
+        pendingCorrections
+          ? { ...rest, pendingCorrectionCount: pendingCorrections.length }
+          : status,
+      ),
+    );
   }),
 );
 

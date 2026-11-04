@@ -32,6 +32,5 @@ sebagai rujukan.
 * Jika ada teks yang gagal, **Coba ulang yang gagal** menjalankan ulang
   hanya teks tersebut.
 * Pada putaran penerjemahan yang selesai, mulai **tinjauan AI** langsung
-  dari putarannya — pilih modul dan model (bawaannya memakai yang dipakai
-  untuk penerjemahannya), lalu buka putusannya di tab **Tinjauan AI
+  dari putarannya — pilih modul dan model (bawaannya pilihan terakhir Anda atau NARN Freeway), lalu buka putusannya di tab **Tinjauan AI
   Terjemahan**.

@@ -78,8 +78,12 @@ export class PgRunStore implements RunStore {
    * scalar columns are mirrored from `run` and `data` holds the whole RunStatus.
    * Under the per-project write lock to serialize concurrent progress writes.
    */
-  async updateRun(projectId: string, run: RunStatus): Promise<void> {
-    await this.writeLock.withLock(projectId, () => this.upsert(run));
+  async updateRun(
+    projectId: string,
+    run: RunStatus,
+    opts?: { keepPendingCorrections?: boolean },
+  ): Promise<void> {
+    await this.writeLock.withLock(projectId, () => this.upsert(run, this.db, opts));
     // Emit AFTER the locked persist resolves (never inside `upsert`), so
     // `forceCancel` — which persists via `upsert` directly under the same lock —
     // emits exactly once at its own call site rather than twice. Fire-and-forget:
@@ -105,7 +109,11 @@ export class PgRunStore implements RunStore {
    * `db` defaults to `this.db`; `forceCancel` passes its transaction so the
    * read-modify-write shares one tenant tx (one role/GUC setup, atomic).
    */
-  private async upsert(run: RunStatus, db: Queryable = this.db): Promise<void> {
+  private async upsert(
+    run: RunStatus,
+    db: Queryable = this.db,
+    opts?: { keepPendingCorrections?: boolean },
+  ): Promise<void> {
     // Every way a run ends is written through here. Once it has ended nothing
     // is going to retry, so a notice must stop saying something will.
     if (
@@ -117,6 +125,8 @@ export class PgRunStore implements RunStore {
         if (notice.routing === 'retrying') notice.routing = 'none';
       }
     }
+    // `keepPendingCorrections` marks a counter-only progress flush: the SQL below
+    // keeps the list already stored. The option is never persisted.
     // created_by is stamped inline from the GUC (never a param — see
     // project_backups' precedent) and deliberately absent from DO UPDATE SET:
     // the enqueue-time ambient tenant is the creator, and later status
@@ -129,7 +139,12 @@ export class PgRunStore implements RunStore {
          status=excluded.status, kind=excluded.kind, total=excluded.total, completed=excluded.completed,
          failed=excluded.failed, started_at=excluded.started_at, finished_at=excluded.finished_at,
          queue_position=excluded.queue_position, source_run_id=excluded.source_run_id,
-         ai_score=excluded.ai_score, estimated_cost_usd=excluded.estimated_cost_usd, data=excluded.data`,
+         ai_score=excluded.ai_score, estimated_cost_usd=excluded.estimated_cost_usd,
+         data=excluded.data || case
+           when $15::boolean and not (excluded.data ? 'pendingCorrections')
+                and runs.data ? 'pendingCorrections'
+           then jsonb_build_object('pendingCorrections', runs.data -> 'pendingCorrections')
+           else '{}'::jsonb end`,
       [
         run.runId,
         run.projectId,
@@ -144,7 +159,9 @@ export class PgRunStore implements RunStore {
         run.sourceRunId ?? null,
         run.aiScore ?? null,
         run.estimatedCostUsd ?? null,
-        JSON.stringify(run),
+        // The derived count is never stored: it only exists in list/status projections.
+        JSON.stringify(stripDerivedCount(run)),
+        opts?.keepPendingCorrections === true,
       ],
     );
   }
@@ -171,6 +188,8 @@ export class PgRunStore implements RunStore {
    * reads either one from the list:
    *   - `request.entryIds` — up to MAX_ENTRY_IDS (50 000) 64-char content ids,
    *     roughly 3.3 MB, recorded on every translation run and never cleared; and
+   *   - `pendingCorrections` — one record per string awaiting its corrective
+   *     attempt (the count survives as `pendingCorrectionCount`); and
    *   - `waitingForQuota.pairs` — one object per parked (entry, language) job,
    *     which survives even on a cancelled run.
    * Both are removed IN SQL, so they never cross the wire from Postgres and are
@@ -214,10 +233,14 @@ export class PgRunStore implements RunStore {
     const { rows } = await this.db.query<{
       data: RunStatus;
       waiting_pair_count: number;
+      pending_correction_count: number;
       created_by: string | null;
     }>(
       `select
-         (data #- '{request}') #- '{waitingForQuota,pairs}' as data,
+         ((data #- '{request}') #- '{waitingForQuota,pairs}') #- '{pendingCorrections}' as data,
+         case when jsonb_typeof(data -> 'pendingCorrections') = 'array'
+              then jsonb_array_length(data -> 'pendingCorrections')
+              else 0 end as pending_correction_count,
          case when jsonb_typeof(data #> '{waitingForQuota,pairs}') = 'array'
               then jsonb_array_length(data #> '{waitingForQuota,pairs}')
               else 0 end as waiting_pair_count,
@@ -235,6 +258,9 @@ export class PgRunStore implements RunStore {
     );
     return rows.map((r) => {
       const status = this.overlayCreatedBy(r.data, r.created_by);
+      if (Number(r.pending_correction_count) > 0) {
+        status.pendingCorrectionCount = Number(r.pending_correction_count);
+      }
       // `#-` deleted the key outright, but `pairs` is non-optional on the type
       // (and a frontend bundle predating `pairCount` still reads `pairs.length`),
       // so re-seat a well-typed empty array and carry the real size alongside it.
@@ -289,7 +315,10 @@ export class PgRunStore implements RunStore {
    * carries (typically also absent, per the field's own doc comment).
    */
   private overlayCreatedBy(data: RunStatus, createdBy: string | null): RunStatus {
-    return { ...data, createdBy: createdBy ?? data.createdBy };
+    // `pendingCorrectionCount` is only ever a derived list projection; never hand
+    // back a stored one (rows written before it stopped being persisted).
+    const { pendingCorrectionCount: _derived, ...rest } = data;
+    return { ...rest, createdBy: createdBy ?? data.createdBy };
   }
 
   /**
@@ -333,6 +362,9 @@ export class PgRunStore implements RunStore {
         run.status = RunStatusCode.Cancelled;
         run.finishedAt = Date.now();
         delete run.queuePosition;
+        // A cancelled run corrects nothing further.
+        delete run.pendingCorrections;
+        delete run.correctionPhase;
 
         // Persist via the unlocked upsert — we already hold this project's lock,
         // and the lock is not reentrant (calling updateRun here would deadlock).
@@ -546,4 +578,10 @@ export class PgRunStore implements RunStore {
   ): Promise<RelinkRetranslateRecord[]> {
     return this.getSidecar<RelinkRetranslateRecord[]>(runId, 'relink-retranslate', []);
   }
+}
+
+function stripDerivedCount(run: RunStatus): RunStatus {
+  if (run.pendingCorrectionCount === undefined) return run;
+  const { pendingCorrectionCount: _count, ...rest } = run;
+  return rest;
 }

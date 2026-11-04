@@ -47,7 +47,7 @@ Yes. Switch the [Routing](guide:usage-routing) tab to **Advanced** and add one r
 
 ### Translation won't start and says there is no routing rule. What now?
 
-A run only starts when every language in it has somewhere to go. If a target language matches no rule, the run is refused before anything is sent and the message names the language. Open the [Routing](guide:usage-routing) tab and add a rule that covers it — the simple provider selector covers every language at once — then start the run again.
+A run only starts when every language in it has somewhere to go. If a target language matches no rule, the run is refused before anything is sent and the message names the language. Open the [Routing](guide:usage-routing) tab and add a rule that covers it — the simple provider selector covers every language at once — then start the run again. A project with no rules at all is never refused for this reason: it uses NARN Freeway until you add rules.
 
 ## Running, failures and recovery
 

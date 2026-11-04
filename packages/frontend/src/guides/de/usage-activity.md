@@ -17,4 +17,4 @@ Jeder Durchlauf zeigt seinen **Typ**, **Status** (In Warteschlange, Läuft, Paus
 ## Wiederherstellen und prüfen
 
 * Sind einzelne Einträge fehlgeschlagen, wiederholt **Fehlgeschlagene wiederholen** nur diese.
-* Bei einem abgeschlossenen Übersetzungsdurchlauf lässt sich direkt aus dem Durchlauf heraus ein **KI-Review** starten — Modul und Modell auswählen (standardmäßig die der Übersetzung), dann die Urteile im Tab **Übersetzungs-KI-Review** öffnen.
+* Bei einem abgeschlossenen Übersetzungsdurchlauf lässt sich direkt aus dem Durchlauf heraus ein **KI-Review** starten — Modul und Modell auswählen (standardmäßig die letzte Auswahl oder NARN Freeway), dann die Urteile im Tab **Übersetzungs-KI-Review** öffnen.

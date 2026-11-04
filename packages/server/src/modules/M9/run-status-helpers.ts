@@ -17,7 +17,11 @@ interface ProgressLogger {
 
 /** The subset of the run store these helpers need. */
 interface ProgressRunStore {
-  updateRun(projectId: string, status: RunStatus): Promise<void>;
+  updateRun(
+    projectId: string,
+    status: RunStatus,
+    opts?: { keepPendingCorrections?: boolean },
+  ): Promise<void>;
 }
 
 /**
@@ -31,6 +35,7 @@ export function emitRunProgress(
   deps: { logger: ProgressLogger; runStore: ProgressRunStore },
   logPrefix: string,
   status: RunStatus,
+  writeOpts?: { keepPendingCorrections?: boolean },
 ): void {
   deps.logger.info(`${logPrefix}:progress`, {
     runId: status.runId,
@@ -39,7 +44,7 @@ export function emitRunProgress(
     total: status.total,
     status: status.status,
   });
-  deps.runStore.updateRun(status.projectId, status).catch((err: Error) => {
+  deps.runStore.updateRun(status.projectId, status, writeOpts).catch((err: Error) => {
     deps.logger.error(`${logPrefix}:store-update-failed`, {
       runId: status.runId,
       error: err.message,

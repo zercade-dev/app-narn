@@ -137,6 +137,8 @@ export interface GenerateGlossaryResult {
   usages: TranslationUsage[];
   /** The resolved module id the suggest call actually ran against. */
   moduleId: string;
+  /** True when the call was routed through Freeway's free tier. */
+  freeway?: boolean;
 }
 
 /**
@@ -470,6 +472,7 @@ export async function generateGlossary(
     analyzed: items.length,
     usages: result.usages,
     moduleId,
+    ...(binding ? { freeway: true } : {}),
   };
 }
 

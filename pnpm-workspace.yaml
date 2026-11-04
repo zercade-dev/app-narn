@@ -107,15 +107,15 @@ catalog:
 
   # Module dependencies
   '@github/copilot-sdk': 1.0.28
-  deepl-node: 1.28.1
+  deepl-node: 1.29.0
 
   # AI SDK dependencies
-  ai: 7.0.159
-  '@ai-sdk/google': 4.0.109
-  '@ai-sdk/deepseek': 3.0.77
-  '@ai-sdk/openai': 4.0.106
-  '@ai-sdk/anthropic': 4.0.94
-  '@ai-sdk/openai-compatible': 3.0.82
+  ai: 7.0.162
+  '@ai-sdk/google': 4.0.111
+  '@ai-sdk/deepseek': 3.0.79
+  '@ai-sdk/openai': 4.0.108
+  '@ai-sdk/anthropic': 4.0.96
+  '@ai-sdk/openai-compatible': 3.0.84
 
   # Server runtime
   cors: 2.8.6
@@ -144,7 +144,7 @@ catalog:
   '@tanstack/react-virtual': 3.14.25
   class-variance-authority: 0.7.1
   clsx: 2.1.1
-  lucide-react: 1.66.0
+  lucide-react: 1.67.0
   react: 19.3.1
   react-dom: 19.3.1
   i18next: 26.7.1
@@ -162,12 +162,12 @@ catalog:
   '@fontsource/orbitron': 5.3.0
   '@fontsource/press-start-2p': 5.3.0
   '@fontsource/silkscreen': 5.3.0
-  '@tailwindcss/vite': 4.3.3
+  '@tailwindcss/vite': 4.3.4
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
   '@vitejs/plugin-react': 6.2.1
   esbuild: 0.28.2
-  tailwindcss: 4.3.3
+  tailwindcss: 4.3.4
   vite: 8.3.5
 
   # Frontend build tooling — parsers for the strip-comments Vite plugin (guarantee

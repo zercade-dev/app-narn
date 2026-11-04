@@ -39,6 +39,8 @@ export {
 export { runCountingProviderCalls, runMeasuredProviderCall } from './provider-call-counter.js';
 export {
   buildBatchPrompt,
+  buildCorrectionBatchPrompt,
+  parseCorrectionBatchResponse,
   parseBatchResponse,
   parseIndexedTranslationResponse,
   filterGlossaryForSource,

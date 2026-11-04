@@ -64,6 +64,8 @@ export async function sweepOrphanedRuns(
     if (typeof run.startedAt !== 'number' || run.startedAt >= cutoffMs) continue;
     const failed: RunStatus = { ...run, status: RunStatusCode.Failed, finishedAt: Date.now() };
     delete failed.queuePosition;
+    delete failed.correctionPhase;
+    delete failed.pendingCorrections;
     await runStore.updateRun(projectId, failed);
     swept++;
   }

@@ -8,7 +8,7 @@ Trỏ điều phối tới Freeway và bạn sẽ không bao giờ phải chọn
 
 ## Cách bật
 
-Một dự án mới tinh chưa có quy tắc điều phối sẽ hiện nút **Để NARN Freeway xử lý mọi thứ** ở tab [Điều phối](guide:usage-routing) — một cú nhấp tạo ra quy tắc bao trùm trỏ tới kho miễn phí.
+Một dự án mới tinh chưa có quy tắc điều phối sẽ hiện nút **Để NARN Freeway xử lý mọi thứ** ở tab [Điều phối](guide:usage-routing) — một cú nhấp tạo ra quy tắc bao trùm trỏ tới kho miễn phí. Dù không nhấp nút đó, một dự án hoàn toàn không có quy tắc vẫn được dịch qua Freeway cho đến khi bạn chọn nhà cung cấp.
 
 Ngoài ra, hãy chọn **NARN Freeway** như bất kỳ nhà cung cấp nào khác: ở bộ chọn đơn giản của tab Điều phối để gửi cả dự án tới đó, hoặc làm mô-đun của một quy tắc riêng trong **Nâng cao** để dùng nó cho vài ngôn ngữ và nhà cung cấp trả phí cho những ngôn ngữ còn lại.
 

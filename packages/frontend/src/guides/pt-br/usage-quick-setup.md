@@ -44,13 +44,14 @@ de editar.
 
 ## 5. Configure o roteamento
 
-Abra a aba **Roteamento** e escolha seu provedor no seletor com que ela
-abre — isso envia toda entrada do projeto para ele, o que é tudo o que uma
-configuração de provedor único precisa. Quer provedores diferentes por
-idioma, categoria ou comprimento de entrada? Mude para **Avançado** e
-adicione **regras de roteamento** lá. Sua escolha é salva de qualquer forma.
-Este passo é obrigatório: uma entrada sem regra correspondente falha na
-tradução com um erro de *“sem rota”*.
+Abra a aba **Roteamento** e escolha seu provedor no seletor com que ela abre —
+isso envia toda entrada do projeto para ele, o que é tudo o que uma
+configuração de provedor único precisa. Quer provedores diferentes por idioma,
+categoria ou comprimento de entrada? Mude para **Avançado** e adicione
+**regras de roteamento** lá. Sua escolha é salva de qualquer forma. Um projeto
+sem nenhuma regra envia tudo pelo NARN Freeway, então este passo é opcional no
+começo. Quando o projeto tem regras, uma entrada que não corresponde a nenhuma
+falha na tradução com um erro de *“sem rota”*.
 
 ## 6. *(Optional)* Construa glossários a partir do seu próprio conteúdo
 
