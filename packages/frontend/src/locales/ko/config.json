@@ -30,7 +30,7 @@
   "importModeAddOnly": "추가 및 업데이트",
   "importModeAddOnlyHint": "이 파일에 없는 기존 항목은 그대로 둬요.",
   "importModeFullReplace": "전체 교체",
-  "importModeFullReplaceHint": "이 파일에 없는 항목은 미연결로 표시돼요(재연결하거나 삭제할 때까지 AI 실행에서 빠져요).",
+  "importModeFullReplaceHint": "이 파일의 번역이 AI 번역과 수동 편집을 포함해 저장된 번역을 덮어써요. 빈 셀은 아무것도 바꾸지 않아요. 이 파일에 없는 항목은 미연결로 표시돼요(재연결하거나 삭제할 때까지 AI 실행에서 빠져요).",
   "fullReplacePreviewLoading": "미연결로 표시될 항목이 몇 개인지 확인하는 중…",
   "fullReplaceOrphanNotice": "이 파일에 없는 기존 항목 {{count}}개가 미연결로 표시돼요. 나중에 미연결 항목 탭에서 해결하세요.",
   "clientImportAddOnlyNotice": "파일에 없는 항목은 그대로 두지만, 영어가 바뀐 항목의 이전 행은 미연결 항목 탭으로 옮겨져요.",

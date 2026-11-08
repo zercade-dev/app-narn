@@ -32,7 +32,7 @@
   "importModeAddOnly": "Adicionar e atualizar",
   "importModeAddOnlyHint": "As entradas existentes ausentes deste arquivo permanecem intactas.",
   "importModeFullReplace": "Substituição total",
-  "importModeFullReplaceHint": "As entradas ausentes deste arquivo são marcadas como órfãs (ficam de fora das execuções de IA até serem revinculadas ou excluídas).",
+  "importModeFullReplaceHint": "As traduções deste arquivo substituem as salvas, incluindo traduções de IA e edições manuais; células vazias não alteram nada. As entradas ausentes deste arquivo são marcadas como órfãs (ficam de fora das execuções de IA até serem revinculadas ou excluídas).",
   "fullReplacePreviewLoading": "Verificando quantas entradas isso deixaria órfãs…",
   "fullReplaceOrphanNotice": "Entradas existentes ausentes deste arquivo, que serão marcadas como órfãs: {{count}}. Resolva-as depois na aba Órfãos.",
   "clientImportAddOnlyNotice": "As entradas ausentes permanecem, mas se o inglês de uma entrada mudou, a linha antiga vai para a aba Órfãos.",

@@ -30,7 +30,7 @@
   "importModeAddOnly": "Thêm & cập nhật",
   "importModeAddOnlyHint": "Các mục hiện có mà tệp này không nhắc tới sẽ được giữ nguyên.",
   "importModeFullReplace": "Thay thế toàn bộ",
-  "importModeFullReplaceHint": "Các mục vắng mặt trong tệp này sẽ bị đánh dấu mồ côi (bị loại khỏi mọi lần chạy AI cho tới khi được liên kết lại hoặc xóa).",
+  "importModeFullReplaceHint": "Bản dịch trong tệp này sẽ ghi đè bản đã lưu, kể cả bản dịch AI và chỉnh sửa thủ công; ô trống không thay đổi gì. Các mục vắng mặt trong tệp này sẽ bị đánh dấu mồ côi (bị loại khỏi mọi lần chạy AI cho tới khi được liên kết lại hoặc xóa).",
   "fullReplacePreviewLoading": "Đang kiểm tra xem thao tác này sẽ khiến bao nhiêu mục thành mồ côi…",
   "fullReplaceOrphanNotice": "{{count}} mục hiện có vắng mặt trong tệp này và sẽ bị đánh dấu mồ côi — hãy xử lý chúng sau ở tab Mục mồ côi.",
   "clientImportAddOnlyNotice": "Các mục vắng mặt vẫn được giữ, nhưng nếu tiếng Anh của một mục thay đổi, hàng cũ của mục đó sẽ chuyển sang tab Mục mồ côi.",

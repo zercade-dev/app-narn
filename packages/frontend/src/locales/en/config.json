@@ -32,7 +32,7 @@
   "importModeAddOnly": "Add & update",
   "importModeAddOnlyHint": "Existing entries missing from this file are kept untouched.",
   "importModeFullReplace": "Full replace",
-  "importModeFullReplaceHint": "Entries missing from this file are marked orphaned (excluded from AI runs until relinked or deleted).",
+  "importModeFullReplaceHint": "Translations in this file overwrite stored ones, including AI translations and manual edits; empty cells change nothing. Entries missing from this file are marked orphaned (excluded from AI runs until relinked or deleted).",
   "fullReplacePreviewLoading": "Checking how many entries this would orphan…",
   "fullReplaceOrphanNotice": "{{count}} existing entries are missing from this file and will be marked orphaned — resolve them later in the Relink tab.",
   "clientImportAddOnlyNotice": "Missing entries stay, but when an entry's English changed, its old row moves to the Relink tab.",
