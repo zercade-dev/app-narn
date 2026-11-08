@@ -154,7 +154,9 @@ export async function runImportPipeline(
 
   // Auto-assign applicable glossaries to each entry based on source text matching
   const { glossariesSkipped } = await assignGlossaryIds(projectId, entries);
-  const { ghostsBlocked } = await getStringStore().bulkUpsert(projectId, entries);
+  const { ghostsBlocked } = await getStringStore().bulkUpsert(projectId, entries, {
+    overwriteTranslations: mode === 'full-replace',
+  });
 
   // Soft-delete the orphaned rows by stamping orphanedAt, and surface them in
   // the Relink tab via the in-memory list. Add-only leaves rows missing from

@@ -32,7 +32,7 @@
   "importModeAddOnly": "Aggiungi e aggiorna",
   "importModeAddOnlyHint": "Le voci esistenti assenti da questo file restano invariate.",
   "importModeFullReplace": "Sostituzione completa",
-  "importModeFullReplaceHint": "Le voci assenti da questo file vengono contrassegnate come orfane (escluse dalle esecuzioni IA finché non vengono ricollegate o eliminate).",
+  "importModeFullReplaceHint": "Le traduzioni di questo file sovrascrivono quelle salvate, comprese le traduzioni IA e le modifiche manuali; le celle vuote non cambiano nulla. Le voci assenti da questo file vengono contrassegnate come orfane (escluse dalle esecuzioni IA finché non vengono ricollegate o eliminate).",
   "fullReplacePreviewLoading": "Verifica di quante voci diventerebbero orfane…",
   "fullReplaceOrphanNotice": "Voci esistenti assenti da questo file: {{count}}. Verranno contrassegnate come orfane; potrai risolverle più tardi nella scheda Orfane.",
   "clientImportAddOnlyNotice": "Le voci assenti restano, ma se l'inglese di una voce è cambiato, la sua vecchia riga passa nella scheda Orfane.",

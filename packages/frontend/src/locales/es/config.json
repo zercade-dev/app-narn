@@ -32,7 +32,7 @@
   "importModeAddOnly": "Añadir y actualizar",
   "importModeAddOnlyHint": "Las entradas existentes que falten en este archivo se conservan intactas.",
   "importModeFullReplace": "Reemplazo completo",
-  "importModeFullReplaceHint": "Las entradas que falten en este archivo se marcan como huérfanas (excluidas de las ejecuciones de IA hasta revincularlas o eliminarlas).",
+  "importModeFullReplaceHint": "Las traducciones de este archivo sobrescriben las guardadas, incluidas las traducciones de IA y las ediciones manuales; las celdas vacías no cambian nada. Las entradas que falten en este archivo se marcan como huérfanas (excluidas de las ejecuciones de IA hasta revincularlas o eliminarlas).",
   "fullReplacePreviewLoading": "Comprobando cuántas entradas quedarían huérfanas…",
   "fullReplaceOrphanNotice": "{{count}} entradas existentes faltan en este archivo y se marcarán como huérfanas — resuélvelas más tarde en la pestaña Revincular.",
   "clientImportAddOnlyNotice": "Las entradas que faltan se conservan, pero si cambió el inglés de una entrada, su fila anterior pasa a la pestaña Revincular.",

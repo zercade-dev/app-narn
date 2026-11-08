@@ -32,7 +32,7 @@
   "importModeAddOnly": "Ajouter et mettre à jour",
   "importModeAddOnlyHint": "Les entrées existantes absentes de ce fichier sont conservées telles quelles.",
   "importModeFullReplace": "Remplacement complet",
-  "importModeFullReplaceHint": "Les entrées absentes de ce fichier sont marquées orphelines (exclues des exécutions IA jusqu'à leur reliaison ou suppression).",
+  "importModeFullReplaceHint": "Les traductions de ce fichier remplacent celles enregistrées, y compris les traductions IA et les modifications manuelles ; les cellules vides ne changent rien. Les entrées absentes de ce fichier sont marquées orphelines (exclues des exécutions IA jusqu'à leur reliaison ou suppression).",
   "fullReplacePreviewLoading": "Vérification du nombre d'entrées qui deviendraient orphelines…",
   "fullReplaceOrphanNotice": "{{count}} entrées existantes sont absentes de ce fichier et seront marquées orphelines — réglez-les plus tard dans l'onglet Relier.",
   "clientImportAddOnlyNotice": "Les entrées absentes sont conservées, mais si l'anglais d'une entrée a changé, son ancienne ligne passe dans l'onglet Relier.",

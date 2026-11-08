@@ -366,9 +366,15 @@ export interface StringStore {
     opts?: { recordManualEdits?: boolean },
   ): Promise<StringEntry[]>;
   setReviewSortIndices(projectId: string, indexById: ReadonlyMap<string, number>): Promise<number>;
+  /**
+   * `overwriteTranslations` (full-replace CSV import): an incoming translation
+   * whose text differs from the stored one replaces it whatever its source
+   * (AI, DeepL, manual). Default: only csv-import-sourced records are refreshed.
+   */
   bulkUpsert(
     projectId: string,
     incoming: StringEntry[],
+    opts?: { overwriteTranslations?: boolean },
   ): Promise<{ entries: StringEntry[]; ghostsBlocked: number }>;
   /**
    * Stamps `orphanedAt = timestamp` on each listed entry (full-replace CSV
