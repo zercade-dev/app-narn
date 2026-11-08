@@ -30,7 +30,7 @@
   "importModeAddOnly": "新增并更新",
   "importModeAddOnlyHint": "文件中缺失的现有条目将保持不变。",
   "importModeFullReplace": "完全替换",
-  "importModeFullReplaceHint": "文件中缺失的条目将被标记为孤立（在重新关联或删除前不参与任何 AI 运行）。",
+  "importModeFullReplaceHint": "文件中的翻译将覆盖已保存的翻译，包括 AI 翻译和手动编辑；空单元格不做任何更改。文件中缺失的条目将被标记为孤立（在重新关联或删除前不参与任何 AI 运行）。",
   "fullReplacePreviewLoading": "正在检查此操作会使多少条目变为孤立…",
   "fullReplaceOrphanNotice": "文件中缺失 {{count}} 个现有条目，它们将被标记为孤立——请稍后在孤立条目标签页中处理。",
   "clientImportAddOnlyNotice": "文件中缺失的条目会保留，但英文发生变化的条目，其旧行会移至孤立条目标签页。",

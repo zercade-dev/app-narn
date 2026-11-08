@@ -32,7 +32,7 @@
   "importModeAddOnly": "Hinzufügen & aktualisieren",
   "importModeAddOnlyHint": "Vorhandene Einträge, die in dieser Datei fehlen, bleiben unverändert.",
   "importModeFullReplace": "Vollständig ersetzen",
-  "importModeFullReplaceHint": "Einträge, die in dieser Datei fehlen, werden als verwaist markiert (von KI-Durchläufen ausgeschlossen, bis sie neu verknüpft oder gelöscht werden).",
+  "importModeFullReplaceHint": "Übersetzungen aus dieser Datei überschreiben gespeicherte, auch KI-Übersetzungen und manuelle Bearbeitungen; leere Zellen ändern nichts. Einträge, die in dieser Datei fehlen, werden als verwaist markiert (von KI-Durchläufen ausgeschlossen, bis sie neu verknüpft oder gelöscht werden).",
   "fullReplacePreviewLoading": "Es wird geprüft, wie viele Einträge dadurch verwaisen würden…",
   "fullReplaceOrphanNotice": "Vorhandene Einträge, die in dieser Datei fehlen: {{count}}. Diese Einträge werden als verwaist markiert — im Tab Waisen lassen sie sich später auflösen.",
   "clientImportAddOnlyNotice": "Fehlende Einträge bleiben erhalten; hat sich aber der englische Text eines Eintrags geändert, wandert seine alte Zeile in den Tab Waisen.",

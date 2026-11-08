@@ -30,7 +30,7 @@
   "importModeAddOnly": "追加と更新",
   "importModeAddOnlyHint": "このファイルに含まれない既存のエントリは、そのまま保持されます。",
   "importModeFullReplace": "完全置換",
-  "importModeFullReplaceHint": "このファイルに含まれないエントリは孤立として扱われます（再リンクまたは削除するまで、AIの実行対象から除外されます）。",
+  "importModeFullReplaceHint": "このファイルの翻訳は、AI翻訳や手動編集を含め、保存済みの翻訳を上書きします。空のセルは何も変更しません。このファイルに含まれないエントリは孤立として扱われます（再リンクまたは削除するまで、AIの実行対象から除外されます）。",
   "fullReplacePreviewLoading": "孤立になるエントリの件数を確認中…",
   "fullReplaceOrphanNotice": "既存のエントリ{{count}}件がこのファイルに含まれないため、孤立として扱われます。あとで孤立エントリタブで解決してください。",
   "clientImportAddOnlyNotice": "ファイルにないエントリは保持されますが、英語が変更されたエントリの古い行は孤立エントリタブに移動します。",

@@ -714,11 +714,11 @@ export class PgStringStore implements StringStore {
    * | sortIndex             | overwritten by import (current CSV row position)                    |
    * | assignedGlossaryIds   | overwritten by import for the term-matched portion (M20 re-derives it from source text on every import pass, run before bulkUpsert), UNIONED with prev's manualGlossaryIds so a manual override survives the pass that never saw it |
    * | manualGlossaryIds     | **preserved from prev** — parseRow never sets this; a manual override survives import as-is (see the assignedGlossaryIds row above for how it's re-applied) |
-   * | translations          | merged: a csv-import-sourced language record is gap-filled/refreshed by the incoming row; any other-sourced record (manual, DeepL, judge-corrected, etc.) is preserved as-is (unchanged logic) |
+   * | translations          | merged: a csv-import-sourced language record is gap-filled/refreshed by the incoming row; any other-sourced record (manual, DeepL, judge-corrected, etc.) is preserved as-is — except under `overwriteTranslations` (full replace), where a differing CSV cell replaces it, the old text moving to `previousVersions` |
    * | categories            | **preserved from prev** — parseRow always sets `[]` (CSV carries no categories column) |
    * | metadata              | **preserved from prev** — parseRow always sets `{}` (CSV carries no metadata column) |
    * | overflowRatio         | **preserved from prev** — parseRow always sets the project's global default, never a per-entry curated value |
-   * | lqaResults            | **preserved from prev** — AI review verdicts against the existing translation text; CSV carries none |
+   * | lqaResults            | **preserved from prev** — AI review verdicts against the existing translation text; CSV carries none. A language overwritten under `overwriteTranslations` drops its stale verdict |
    * | createdAt             | **preserved from prev** — true creation time; parseRow always stamps `now` |
    * | flaggedNew            | **preserved/OR'd**: true if either side says true, else carries `prev`'s exact value forward unchanged (not forced to a fresh `false`) — a still-pending flag survives, a user-cleared flag is never resurrected, and a genuinely-untouched row stays byte-identical to `prev` for the diff above |
    * | orphanedAt            | **cleared on re-import** (both modes): an id that reappears in a CSV is live again — deliberate exception to the "preserved automatically" pattern |
@@ -728,7 +728,9 @@ export class PgStringStore implements StringStore {
   async bulkUpsert(
     projectId: string,
     incoming: StringEntry[],
+    opts?: { overwriteTranslations?: boolean },
   ): Promise<{ entries: StringEntry[]; ghostsBlocked: number }> {
+    const overwriteTranslations = opts?.overwriteTranslations === true;
     return this.writeLock.withLock(projectId, () =>
       withTransaction(this.db, async (tx) => {
         const existing = await this.loadTx(tx, projectId);
@@ -757,12 +759,19 @@ export class PgStringStore implements StringStore {
           if (prev) {
             // Merge translations: incoming fills gaps and refreshes csv-import
             // entries. Translations from other sources (DeepL, manual, etc.)
-            // are preserved.
+            // are preserved — unless this is a full replace, where a differing
+            // CSV cell wins over any source. The overwritten text goes to
+            // version history and its now-stale LQA verdict is dropped; a cell
+            // that agrees with the stored text keeps the stored record as-is.
             const mergedTranslations = { ...prev.translations };
+            const overwrittenLangs = new Set<string>();
             for (const [lang, record] of Object.entries(entry.translations)) {
               const prevRecord = prev.translations[lang];
               if (!prevRecord || prevRecord.moduleId === 'csv-import') {
                 mergedTranslations[lang] = record;
+              } else if (overwriteTranslations && prevRecord.text !== record.text) {
+                mergedTranslations[lang] = withTranslationHistory(prevRecord, record);
+                overwrittenLangs.add(lang);
               }
             }
             // entry.assignedGlossaryIds is the pre-bulkUpsert M20 pass's
@@ -793,7 +802,7 @@ export class PgStringStore implements StringStore {
               categories: prev.categories,
               metadata: prev.metadata,
               overflowRatio: prev.overflowRatio,
-              lqaResults: prev.lqaResults,
+              lqaResults: clearStaleLqaResults(prev.lqaResults, overwrittenLangs, new Set()),
               createdAt: prev.createdAt,
               // `flaggedNew` is a review flag the user dismisses explicitly
               // (see routes/strings.ts "Clear new flags"), not a live

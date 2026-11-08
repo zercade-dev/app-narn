@@ -30,7 +30,7 @@
   "importModeAddOnly": "新增與更新",
   "importModeAddOnlyHint": "此檔案中缺少的既有條目會維持原狀。",
   "importModeFullReplace": "完全取代",
-  "importModeFullReplaceHint": "此檔案中缺少的條目會標示為孤立（在重新連結或刪除前不會納入 AI 執行）。",
+  "importModeFullReplaceHint": "此檔案中的翻譯會覆寫已儲存的翻譯，包括 AI 翻譯與手動編輯；空白儲存格不做任何變更。此檔案中缺少的條目會標示為孤立（在重新連結或刪除前不會納入 AI 執行）。",
   "fullReplacePreviewLoading": "正在檢查這會使多少條目變成孤立…",
   "fullReplaceOrphanNotice": "此檔案中缺少 {{count}} 個既有條目，將標示為孤立——請稍後在孤立條目分頁中處理。",
   "clientImportAddOnlyNotice": "此檔案中缺少的條目會保留，但英文有變更的條目，其舊列會移至孤立條目分頁。",

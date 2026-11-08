@@ -32,7 +32,7 @@
   "importModeAddOnly": "Ekle ve güncelle",
   "importModeAddOnlyHint": "Bu dosyada bulunmayan mevcut girdilere dokunulmaz.",
   "importModeFullReplace": "Tam değiştirme",
-  "importModeFullReplaceHint": "Bu dosyada bulunmayan girdiler yetim olarak işaretlenir (yeniden bağlanana veya silinene kadar yapay zekâ çalıştırmalarına alınmaz).",
+  "importModeFullReplaceHint": "Bu dosyadaki çeviriler, yapay zekâ çevirileri ve elle yapılan düzenlemeler dahil kayıtlı çevirilerin üzerine yazılır; boş hücreler hiçbir şeyi değiştirmez. Bu dosyada bulunmayan girdiler yetim olarak işaretlenir (yeniden bağlanana veya silinene kadar yapay zekâ çalıştırmalarına alınmaz).",
   "fullReplacePreviewLoading": "Bunun kaç girdiyi yetim bırakacağı hesaplanıyor…",
   "fullReplaceOrphanNotice": "Mevcut {{count}} girdi bu dosyada bulunmuyor ve yetim olarak işaretlenecek — bunları daha sonra Yetimler sekmesinde çözebilirsiniz.",
   "clientImportAddOnlyNotice": "Eksik girdiler kalır, ancak bir girdinin İngilizcesi değiştiyse eski satırı Yetimler sekmesine taşınır.",
