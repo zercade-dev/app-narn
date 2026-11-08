@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-04T19:03:11.188Z",
+  "generatedAt": "2026-11-08T02:01:20.961Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
-      "scrapedAt": "2026-11-04T19:03:11.188Z",
+      "scrapedAt": "2026-11-08T02:01:20.961Z",
       "models": [
         {
           "id": "deepseek-flash",
@@ -41,7 +41,7 @@
     },
     "google": {
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
-      "scrapedAt": "2026-11-04T19:03:11.188Z",
+      "scrapedAt": "2026-11-08T02:01:20.961Z",
       "models": [
         {
           "id": "gemini-4-argon",
@@ -82,9 +82,16 @@
           "capabilityTags": ["tools", "vision", "audio"]
         },
         {
+          "id": "gemini-omni-1.2-flash",
+          "inputCostPerMillion": 1.5,
+          "outputCostPerMillion": 9,
+          "capabilityTags": ["vision"]
+        },
+        {
           "id": "gemini-omni-1.1-flash",
           "inputCostPerMillion": 1.5,
-          "outputCostPerMillion": 9
+          "outputCostPerMillion": 9,
+          "capabilityTags": ["vision"]
         },
         {
           "id": "gemini-3.8-live",
@@ -255,7 +262,7 @@
     },
     "openai": {
       "sourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "scrapedAt": "2026-11-04T19:03:11.188Z",
+      "scrapedAt": "2026-11-08T02:01:20.961Z",
       "models": [
         {
           "id": "gpt-6-astra",
@@ -294,6 +301,15 @@
           "contextLength": 1050000
         },
         {
+          "id": "gpt-6-cyber",
+          "inputCostPerMillion": 20,
+          "outputCostPerMillion": 100,
+          "cachedInputCostPerMillion": 2,
+          "cacheWriteCostPerMillion": 25,
+          "capabilityTags": ["tools", "vision"],
+          "contextLength": 1050000
+        },
+        {
           "id": "gpt-5.6-sol",
           "inputCostPerMillion": 4,
           "outputCostPerMillion": 20,
@@ -301,15 +317,6 @@
           "cacheWriteCostPerMillion": 5,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 1050000
-        },
-        {
-          "id": "gpt-5.6-cyber",
-          "inputCostPerMillion": 12.5,
-          "outputCostPerMillion": 75,
-          "cachedInputCostPerMillion": 1.25,
-          "cacheWriteCostPerMillion": 15.625,
-          "capabilityTags": ["tools", "vision"],
-          "contextLength": 400000
         },
         {
           "id": "gpt-6-rosalind",
@@ -345,12 +352,21 @@
           "cachedInputCostPerMillion": 0.175,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 400000
+        },
+        {
+          "id": "gpt-5.6-cyber",
+          "inputCostPerMillion": 12.5,
+          "outputCostPerMillion": 75,
+          "cachedInputCostPerMillion": 1.25,
+          "cacheWriteCostPerMillion": 15.625,
+          "capabilityTags": ["tools", "vision"],
+          "contextLength": 400000
         }
       ]
     },
     "anthropic": {
       "sourceUrl": "https://claude.com/pricing",
-      "scrapedAt": "2026-11-04T19:03:11.188Z",
+      "scrapedAt": "2026-11-08T02:01:20.961Z",
       "models": [
         {
           "id": "claude-fable-5-1",
