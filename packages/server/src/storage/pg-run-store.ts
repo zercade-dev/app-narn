@@ -9,9 +9,10 @@ import {
 } from '@zercade-dev/narn-shared';
 import { KeyedAsyncLock } from '../utils/keyed-lock.js';
 import type { Queryable } from './pg/pool.js';
-import { withTransaction } from './pg/pool.js';
+import { getPool, withTransaction } from './pg/pool.js';
 import { getCurrentTenant } from './pg/tenant-context.js';
 import { runEvents } from '../http/run-events.js';
+import { notifyRunTransition } from '../modules/run-notifier.js';
 import type { RunStore, SourceReviewRecord, RelinkRetranslateRecord } from './types.js';
 
 /**
@@ -77,13 +78,18 @@ export class PgRunStore implements RunStore {
    * Updates an existing run or inserts a new one. Upsert keyed on `run_id`; all
    * scalar columns are mirrored from `run` and `data` holds the whole RunStatus.
    * Under the per-project write lock to serialize concurrent progress writes.
+   * A start or end transition then notifies the run's starter, outside the
+   * lock and without awaiting it, so a notification never blocks or fails
+   * the write.
    */
   async updateRun(
     projectId: string,
     run: RunStatus,
     opts?: { keepPendingCorrections?: boolean },
   ): Promise<void> {
-    await this.writeLock.withLock(projectId, () => this.upsert(run, this.db, opts));
+    const prevStatus = await this.writeLock.withLock(projectId, () =>
+      this.upsert(run, this.db, opts),
+    );
     // Emit AFTER the locked persist resolves (never inside `upsert`), so
     // `forceCancel` — which persists via `upsert` directly under the same lock —
     // emits exactly once at its own call site rather than twice. Fire-and-forget:
@@ -100,6 +106,7 @@ export class PgRunStore implements RunStore {
       total: run.total,
       tenantId: getCurrentTenant()?.userId,
     });
+    void notifyRunTransition(getPool(), prevStatus, run);
   }
 
   /**
@@ -108,12 +115,16 @@ export class PgRunStore implements RunStore {
    * non-reentrant {@link KeyedAsyncLock}. `updateRun` wraps this under the lock.
    * `db` defaults to `this.db`; `forceCancel` passes its transaction so the
    * read-modify-write shares one tenant tx (one role/GUC setup, atomic).
+   *
+   * Returns the status the row had before this write (`undefined` for a new
+   * row), read in the same statement so it is exactly the row this write
+   * replaced.
    */
   private async upsert(
     run: RunStatus,
     db: Queryable = this.db,
     opts?: { keepPendingCorrections?: boolean },
-  ): Promise<void> {
+  ): Promise<RunStatusCode | undefined> {
     // Every way a run ends is written through here. Once it has ended nothing
     // is going to retry, so a notice must stop saying something will.
     if (
@@ -131,8 +142,11 @@ export class PgRunStore implements RunStore {
     // project_backups' precedent) and deliberately absent from DO UPDATE SET:
     // the enqueue-time ambient tenant is the creator, and later status
     // flushes must never reassign it.
-    await db.query(
-      `insert into runs (run_id, project_id, tenant_id, status, kind, total, completed, failed,
+    // The `prev` CTE reads the snapshot taken before the insert, so it sees the
+    // row as it was before this statement changed it.
+    const { rows } = await db.query<{ prev_status: RunStatusCode | null }>(
+      `with prev as (select status from runs where run_id = $1)
+       insert into runs (run_id, project_id, tenant_id, status, kind, total, completed, failed,
           started_at, finished_at, queue_position, source_run_id, ai_score, estimated_cost_usd, data, created_by)
        values ($1,$2,current_setting('app.user_id'),$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,current_setting('app.user_id'))
        on conflict (run_id) do update set
@@ -144,7 +158,8 @@ export class PgRunStore implements RunStore {
            when $15::boolean and not (excluded.data ? 'pendingCorrections')
                 and runs.data ? 'pendingCorrections'
            then jsonb_build_object('pendingCorrections', runs.data -> 'pendingCorrections')
-           else '{}'::jsonb end`,
+           else '{}'::jsonb end
+       returning (select status from prev) as prev_status`,
       [
         run.runId,
         run.projectId,
@@ -164,6 +179,7 @@ export class PgRunStore implements RunStore {
         opts?.keepPendingCorrections === true,
       ],
     );
+    return rows[0]?.prev_status ?? undefined;
   }
 
   /**
