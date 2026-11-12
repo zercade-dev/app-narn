@@ -10,6 +10,8 @@ import { useTemplateStore } from '../../stores/template-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { useNotificationStore } from '../../stores/notification-store.js';
 import { useOnboardingStore } from '../../stores/onboarding-store.js';
+import { useGuideStore } from '../../stores/guide-store.js';
+import { applySimpleRule } from '../../lib/simple-provider.js';
 import { VaultUnlockDialog } from '../vault/VaultUnlockDialog.js';
 import { ConfirmSheet } from '../ui/confirm-sheet';
 import { apiRequest } from '../../hooks/use-api.js';
@@ -322,6 +324,16 @@ export function Sidebar() {
     setCreateOpen(false);
     await fetchProjects();
     if (created) {
+      // Simple hides the Routing tab, so a project made after "Use my own
+      // provider" gets its catch-all rule here instead.
+      const simpleProvider = useGuideStore.getState().simpleProvider;
+      if (uiMode === 'simple' && simpleProvider) {
+        try {
+          await applySimpleRule(created.id, simpleProvider);
+        } catch (err) {
+          toast.error(t('createFailed', { message: (err as Error).message }));
+        }
+      }
       setView('project');
       try {
         await activateProject(created.id);
