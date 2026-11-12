@@ -42,11 +42,33 @@
     "batchFailed": "一個含 {{count}} 則譯文、目標為 {{languages}} 的批次失敗了。",
     "batchFailedCause": "一個含 {{count}} 則譯文、目標為 {{languages}} 的批次失敗了——{{cause}}",
     "batchFailedCause_other": "一個含 {{count}} 則譯文、目標為 {{languages}} 的批次失敗了——{{cause}}",
+    "batchFailedUnknown": "一個含 {{count}} 則譯文、目標為 {{languages}} 的批次失敗了——原因不明。",
+    "batchFailedUnknown_other": "一個含 {{count}} 則譯文、目標為 {{languages}} 的批次失敗了——原因不明。",
     "queueStartFailed": "無法開始這次翻譯執行。",
     "maskMismatch": "格式標記在翻譯成 {{language}} 後未能保留。",
     "tmRejected": "{{language}} 的一則已儲存譯文沒有通過品質檢查。",
     "lqaRetry": "品質檢查未通過——正在請模型再試一次。",
     "authCancel": "登入已取消，因此翻譯已停止。",
+    "batchUncaught": "一個譯文批次意外失敗了。",
+    "startAborted": "翻譯執行在送出任何條目之前就停止了。",
+    "waitingForQuota": "翻譯已暫停，直到免費模型重新有額度。",
+    "waitingForQuotaUntil": "翻譯已暫停，直到免費模型重新有額度——最早約 {{time}} 可以繼續。",
+    "quotaRedispatched": "正在繼續等待免費模型額度的譯文。",
+    "quotaParkAdopted": "已接手正在等待額度的已暫停翻譯執行。",
+    "freewayRerouted": "免費模型 {{from}} 目前無法使用——正在改用 {{to}} 嘗試。",
+    "freewayInstanceSwapped": "無法使用 {{fromModule}}——正在透過 {{toModule}} 嘗試同一個模型。",
+    "freewayDeferred": "部分譯文正在等待 {{model}}——將在約 {{time}} 再次嘗試。",
+    "freewayDegraded": "沒有一般能力的免費模型可用——正在為這個批次嘗試較輕量的模型。",
+    "freewayEscalated": "一則 {{language}} 譯文沒有通過品質檢查——正在改用 {{to}} 嘗試。",
+    "freewayCredentialDisabled": "{{module}} 拒絕了自己的 API 金鑰——在金鑰更新之前，免費模型會略過這個模組。",
+    "lqaCorrectionFailed": "無法修正沒有通過品質檢查的譯文——它們保留第一版。",
+    "lqaCorrectionSkipped": "已略過修正一則 {{language}} 譯文——它在翻譯之後已被變更。",
+    "lqaCorrectionSkippedRemoved": "已略過修正一則 {{language}} 譯文——它的條目已被刪除。",
+    "lqaCorrectionUnavailable": "{{module}} 無法修正沒有通過品質檢查的 {{language}} 譯文——它們保留第一版。",
+    "lqaRetryFailed": "重試沒有通過品質檢查的譯文並未成功。",
+    "lqaRetryFailedLanguage": "重試一則沒有通過品質檢查的 {{language}} 譯文並未成功。",
+    "splitPhaseStart": "正在使用本機模型 {{model}} 翻譯…",
+    "tmLookupFailed": "無法為一個 {{language}} 條目查詢翻譯記憶庫——將從頭翻譯。",
     "cause": {
       "auth": "{{module}} 拒絕了 API 金鑰。",
       "rateLimit": "{{module}} 已達到請求上限。",
@@ -88,10 +110,32 @@
     "done": "關卡詳情已完成——{{completed}} 項完成，{{failed}} 項失敗。",
     "failed": "關卡詳情失敗。"
   },
+  "relinkRetranslate": {
+    "done": "已把一個重新連結的條目重新翻譯成 {{language}}。",
+    "maskMismatch": "格式標記在重新翻譯成 {{language}} 後未能保留。"
+  },
+  "run": {
+    "queued": "{{task}}：執行已排入佇列。",
+    "batchFailed": "{{task}}：一個批次失敗了。",
+    "batchFailedCause": "{{task}}：一個批次失敗了——{{cause}}",
+    "batchFailedUnknown": "{{task}}：一個批次失敗了——原因不明。",
+    "batchTimedOut": "{{task}}：執行超出了時間限制，因此已停止一個批次。",
+    "freewayRerouted": "{{task}}：免費模型 {{from}} 目前無法使用——正在改用 {{to}} 嘗試。",
+    "freewayMinuteWait": "{{task}}：免費模型 {{model}} 已達到每分鐘上限——等待 {{seconds}} 秒後繼續。"
+  },
   "module": {
     "loaded": "已載入 {{module}} 模組。",
     "instanceRegistered": "已新增 {{instance}} 設定。",
-    "instanceRegisterFailed": "無法新增 {{instance}} 設定。"
+    "instanceRegisterFailed": "無法新增 {{instance}} 設定。",
+    "instanceUnregistered": "已移除 {{instance}} 實例。",
+    "configUpdated": "已儲存 {{module}} 的專案設定。"
+  },
+  "globalConfig": {
+    "instanceCreated": "已建立 {{instance}} 實例。",
+    "instanceDeleted": "已刪除 {{instance}} 實例。",
+    "instanceRenamed": "已重新命名 {{instance}} 實例。",
+    "settingsUpdated": "工作區設定已儲存。",
+    "updated": "已儲存 {{module}} 的工作區設定。"
   },
   "vault": {
     "unlocked": "保險庫已解鎖。",
@@ -110,6 +154,14 @@
   },
   "backup": {
     "restored": "已還原備份。",
-    "pruneFailed": "無法清理舊備份。"
+    "pruneFailed": "無法清理舊備份。",
+    "restoredFromPg": "已從備份還原專案。",
+    "restoredFromServer": "已從伺服器上儲存的備份還原專案。"
+  },
+  "csvExport": {
+    "roundtripUnsafe": "匯出完成，但部分儲存格可能無法順利重新匯入（{{columns}} 中有引號後接逗號或換行）。"
+  },
+  "runs": {
+    "revertEntryFailed": "已略過回溯一則 {{language}} 譯文——它的條目可能已被刪除。"
   }
 }

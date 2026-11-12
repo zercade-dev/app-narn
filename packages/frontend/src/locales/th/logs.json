@@ -42,11 +42,33 @@
     "batchFailed": "แบตช์ของคำแปล {{count}} รายการเป็น {{languages}} ล้มเหลว",
     "batchFailedCause": "แบตช์ของคำแปล {{count}} รายการเป็น {{languages}} ล้มเหลว — {{cause}}",
     "batchFailedCause_other": "แบตช์ของคำแปล {{count}} รายการเป็น {{languages}} ล้มเหลว — {{cause}}",
+    "batchFailedUnknown": "แบตช์ของคำแปล {{count}} รายการเป็น {{languages}} ล้มเหลว — ไม่ทราบสาเหตุ",
+    "batchFailedUnknown_other": "แบตช์ของคำแปล {{count}} รายการเป็น {{languages}} ล้มเหลว — ไม่ทราบสาเหตุ",
     "queueStartFailed": "เริ่มรอบการแปลไม่ได้",
     "maskMismatch": "แท็กจัดรูปแบบไม่รอดจากการแปลเป็น {{language}}",
     "tmRejected": "คำแปลที่บันทึกไว้สำหรับ {{language}} ไม่ผ่านการตรวจสอบคุณภาพ",
     "lqaRetry": "การตรวจสอบคุณภาพไม่ผ่าน — กำลังขอให้โมเดลลองใหม่",
     "authCancel": "การลงชื่อเข้าใช้ถูกยกเลิก การแปลจึงหยุดลง",
+    "batchUncaught": "แบตช์คำแปลล้มเหลวโดยไม่คาดคิด",
+    "startAborted": "รอบการแปลหยุดลงก่อนส่งรายการใดออกไป",
+    "waitingForQuota": "หยุดการแปลชั่วคราวจนกว่าโมเดลฟรีจะมีโควตาอีกครั้ง",
+    "waitingForQuotaUntil": "หยุดการแปลชั่วคราวจนกว่าโมเดลฟรีจะมีโควตาอีกครั้ง — กลับมาทำต่อได้เร็วที่สุดประมาณ {{time}}",
+    "quotaRedispatched": "กำลังทำต่อคำแปลที่รอโควตาโมเดลฟรี",
+    "quotaParkAdopted": "รับช่วงรอบการแปลที่หยุดชั่วคราวและกำลังรอโควตาแล้ว",
+    "freewayRerouted": "ตอนนี้ใช้โมเดลฟรี {{from}} ไม่ได้ — กำลังลอง {{to}} แทน",
+    "freewayInstanceSwapped": "ใช้ {{fromModule}} ไม่ได้ — กำลังลองโมเดลเดิมผ่าน {{toModule}}",
+    "freewayDeferred": "คำแปลบางส่วนกำลังรอ {{model}} — จะลองอีกครั้งประมาณ {{time}}",
+    "freewayDegraded": "ไม่มีโมเดลฟรีระดับความสามารถปกติให้ใช้ — กำลังลองโมเดลที่เบากว่าสำหรับแบตช์นี้",
+    "freewayEscalated": "คำแปลเป็น {{language}} ไม่ผ่านการตรวจสอบคุณภาพ — กำลังลอง {{to}} แทน",
+    "freewayCredentialDisabled": "{{module}} ปฏิเสธคีย์ API ของตัวเอง — โมเดลฟรีจะข้ามโมดูลนี้จนกว่าจะอัปเดตคีย์",
+    "lqaCorrectionFailed": "แก้คำแปลที่ไม่ผ่านการตรวจสอบคุณภาพไม่ได้ — คำแปลเหล่านั้นยังคงเป็นเวอร์ชันแรก",
+    "lqaCorrectionSkipped": "ข้ามการแก้คำแปลเป็น {{language}} — คำแปลเปลี่ยนไปหลังจากแปลแล้ว",
+    "lqaCorrectionSkippedRemoved": "ข้ามการแก้คำแปลเป็น {{language}} — รายการของคำแปลนี้ถูกลบแล้ว",
+    "lqaCorrectionUnavailable": "{{module}} แก้คำแปลเป็น {{language}} ที่ไม่ผ่านการตรวจสอบคุณภาพไม่ได้ — คำแปลเหล่านั้นยังคงเป็นเวอร์ชันแรก",
+    "lqaRetryFailed": "การลองใหม่กับคำแปลที่ไม่ผ่านการตรวจสอบคุณภาพไม่สำเร็จ",
+    "lqaRetryFailedLanguage": "การลองใหม่กับคำแปลเป็น {{language}} ที่ไม่ผ่านการตรวจสอบคุณภาพไม่สำเร็จ",
+    "splitPhaseStart": "กำลังแปลด้วยโมเดลในเครื่อง {{model}}…",
+    "tmLookupFailed": "ตรวจหน่วยความจำการแปลสำหรับรายการเป็น {{language}} ไม่ได้ — จะแปลใหม่ตั้งแต่ต้น",
     "cause": {
       "auth": "{{module}} ปฏิเสธคีย์ API",
       "rateLimit": "{{module}} ถึงขีดจำกัดคำขอแล้ว",
@@ -88,10 +110,32 @@
     "done": "รายละเอียดด่านเสร็จสิ้น — สำเร็จ {{completed}} ล้มเหลว {{failed}}",
     "failed": "รายละเอียดด่านล้มเหลว"
   },
+  "relinkRetranslate": {
+    "done": "แปลรายการที่เชื่อมใหม่เป็น {{language}} อีกครั้งแล้ว",
+    "maskMismatch": "แท็กจัดรูปแบบไม่รอดจากการแปลใหม่เป็น {{language}}"
+  },
+  "run": {
+    "queued": "{{task}}: รอบการทำงานเข้าคิวแล้ว",
+    "batchFailed": "{{task}}: แบตช์หนึ่งล้มเหลว",
+    "batchFailedCause": "{{task}}: แบตช์หนึ่งล้มเหลว — {{cause}}",
+    "batchFailedUnknown": "{{task}}: แบตช์หนึ่งล้มเหลว — ไม่ทราบสาเหตุ",
+    "batchTimedOut": "{{task}}: รอบการทำงานเกินเวลาที่กำหนด จึงหยุดแบตช์หนึ่งไว้",
+    "freewayRerouted": "{{task}}: ตอนนี้ใช้โมเดลฟรี {{from}} ไม่ได้ — กำลังลอง {{to}} แทน",
+    "freewayMinuteWait": "{{task}}: โมเดลฟรี {{model}} ถึงขีดจำกัดต่อนาทีแล้ว — รอ {{seconds}} วินาทีก่อนทำต่อ"
+  },
   "module": {
     "loaded": "โหลดโมดูล {{module}} แล้ว",
     "instanceRegistered": "เพิ่มการตั้งค่า {{instance}} แล้ว",
-    "instanceRegisterFailed": "เพิ่มการตั้งค่า {{instance}} ไม่ได้"
+    "instanceRegisterFailed": "เพิ่มการตั้งค่า {{instance}} ไม่ได้",
+    "instanceUnregistered": "นำอินสแตนซ์ {{instance}} ออกแล้ว",
+    "configUpdated": "บันทึกการตั้งค่าโปรเจกต์สำหรับ {{module}} แล้ว"
+  },
+  "globalConfig": {
+    "instanceCreated": "สร้างอินสแตนซ์ {{instance}} แล้ว",
+    "instanceDeleted": "ลบอินสแตนซ์ {{instance}} แล้ว",
+    "instanceRenamed": "เปลี่ยนชื่ออินสแตนซ์ {{instance}} แล้ว",
+    "settingsUpdated": "บันทึกการตั้งค่าเวิร์กสเปซแล้ว",
+    "updated": "บันทึกการตั้งค่าเวิร์กสเปซสำหรับ {{module}} แล้ว"
   },
   "vault": {
     "unlocked": "ปลดล็อกตู้นิรภัยแล้ว",
@@ -110,6 +154,14 @@
   },
   "backup": {
     "restored": "กู้คืนข้อมูลสำรองแล้ว",
-    "pruneFailed": "ล้างข้อมูลสำรองเก่าไม่ได้"
+    "pruneFailed": "ล้างข้อมูลสำรองเก่าไม่ได้",
+    "restoredFromPg": "กู้คืนโปรเจกต์จากข้อมูลสำรองแล้ว",
+    "restoredFromServer": "กู้คืนโปรเจกต์จากข้อมูลสำรองที่เก็บไว้บนเซิร์ฟเวอร์แล้ว"
+  },
+  "csvExport": {
+    "roundtripUnsafe": "ส่งออกเสร็จแล้ว แต่บางเซลล์อาจนำเข้ากลับได้ไม่สมบูรณ์ (มีเครื่องหมายคำพูดตามด้วยจุลภาคหรือการขึ้นบรรทัดใหม่ใน: {{columns}})"
+  },
+  "runs": {
+    "revertEntryFailed": "ข้ามการย้อนกลับคำแปลเป็น {{language}} — รายการของคำแปลนี้อาจถูกลบไปแล้ว"
   }
 }

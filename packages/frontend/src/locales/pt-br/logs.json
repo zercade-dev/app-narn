@@ -55,11 +55,34 @@
     "batchFailedCause": "Um lote de {{count}} traduções para {{languages}} falhou — {{cause}}",
     "batchFailedCause_one": "Um lote de {{count}} tradução para {{languages}} falhou — {{cause}}",
     "batchFailedCause_other": "Um lote de {{count}} traduções para {{languages}} falhou — {{cause}}",
+    "batchFailedUnknown": "Um lote de {{count}} traduções para {{languages}} falhou — o motivo é desconhecido.",
+    "batchFailedUnknown_one": "Um lote de {{count}} tradução para {{languages}} falhou — o motivo é desconhecido.",
+    "batchFailedUnknown_other": "Um lote de {{count}} traduções para {{languages}} falhou — o motivo é desconhecido.",
     "queueStartFailed": "Não foi possível iniciar a execução de tradução.",
     "maskMismatch": "As tags de formatação não sobreviveram à tradução para {{language}}.",
     "tmRejected": "Uma tradução salva para {{language}} não passou na verificação de qualidade.",
     "lqaRetry": "A verificação de qualidade falhou — pedindo ao modelo para tentar de novo.",
     "authCancel": "O login foi cancelado, então a tradução parou.",
+    "batchUncaught": "Um lote de traduções falhou inesperadamente.",
+    "startAborted": "A execução de tradução parou antes de enviar qualquer entrada.",
+    "waitingForQuota": "Tradução pausada até os modelos gratuitos terem cota de novo.",
+    "waitingForQuotaUntil": "Tradução pausada até os modelos gratuitos terem cota de novo — o mais cedo que ela pode continuar é por volta de {{time}}.",
+    "quotaRedispatched": "Retomando as traduções que esperavam cota dos modelos gratuitos.",
+    "quotaParkAdopted": "Execuções de tradução pausadas que esperam cota foram retomadas.",
+    "freewayRerouted": "O modelo gratuito {{from}} não está disponível agora — tentando {{to}} no lugar.",
+    "freewayInstanceSwapped": "Não foi possível usar {{fromModule}} — tentando o mesmo modelo por meio de {{toModule}}.",
+    "freewayDeferred": "Algumas traduções estão aguardando {{model}} — elas serão tentadas de novo por volta de {{time}}.",
+    "freewayDegraded": "Nenhum modelo gratuito com a capacidade de costume está disponível — tentando um mais leve para este lote.",
+    "freewayEscalated": "Uma tradução para {{language}} não passou na verificação de qualidade — tentando {{to}} no lugar.",
+    "freewayCredentialDisabled": "{{module}} recusou a própria chave de API — os modelos gratuitos vão ignorá-lo até a chave ser atualizada.",
+    "lqaCorrectionFailed": "Não foi possível corrigir as traduções que não passaram na verificação de qualidade — elas mantêm a primeira versão.",
+    "lqaCorrectionSkipped": "A correção de uma tradução para {{language}} foi ignorada — ela mudou desde que foi traduzida.",
+    "lqaCorrectionSkippedRemoved": "A correção de uma tradução para {{language}} foi ignorada — a entrada dela foi excluída.",
+    "lqaCorrectionUnavailable": "{{module}} não consegue corrigir as traduções para {{language}} que não passaram na verificação de qualidade — elas mantêm a primeira versão.",
+    "lqaRetryFailed": "A nova tentativa das traduções que não passaram na verificação de qualidade não funcionou.",
+    "lqaRetryFailedLanguage": "A nova tentativa de uma tradução para {{language}} que não passou na verificação de qualidade não funcionou.",
+    "splitPhaseStart": "Traduzindo com o modelo local {{model}}…",
+    "tmLookupFailed": "Não foi possível consultar a memória de tradução para uma entrada em {{language}} — ela será traduzida do zero.",
     "cause": {
       "auth": "{{module}} recusou a chave de API.",
       "rateLimit": "{{module}} atingiu o limite de solicitações.",
@@ -102,10 +125,32 @@
     "done": "Os detalhes da fase terminaram — concluídos: {{completed}}, com falha: {{failed}}.",
     "failed": "Os detalhes da fase falharam."
   },
+  "relinkRetranslate": {
+    "done": "Uma entrada revinculada foi retraduzida para {{language}}.",
+    "maskMismatch": "As tags de formatação não sobreviveram à retradução para {{language}}."
+  },
+  "run": {
+    "queued": "{{task}}: execução na fila.",
+    "batchFailed": "{{task}}: um lote falhou.",
+    "batchFailedCause": "{{task}}: um lote falhou — {{cause}}",
+    "batchFailedUnknown": "{{task}}: um lote falhou — o motivo é desconhecido.",
+    "batchTimedOut": "{{task}}: a execução passou do limite de tempo, então um lote foi interrompido.",
+    "freewayRerouted": "{{task}}: o modelo gratuito {{from}} não está disponível agora — tentando {{to}} no lugar.",
+    "freewayMinuteWait": "{{task}}: o modelo gratuito {{model}} atingiu o limite por minuto — aguardando {{seconds}} s antes de continuar."
+  },
   "module": {
     "loaded": "Módulo {{module}} carregado.",
     "instanceRegistered": "Configuração {{instance}} adicionada.",
-    "instanceRegisterFailed": "Não foi possível adicionar a configuração {{instance}}."
+    "instanceRegisterFailed": "Não foi possível adicionar a configuração {{instance}}.",
+    "instanceUnregistered": "Instância {{instance}} removida.",
+    "configUpdated": "Configurações do projeto para {{module}} salvas."
+  },
+  "globalConfig": {
+    "instanceCreated": "Instância {{instance}} criada.",
+    "instanceDeleted": "Instância {{instance}} excluída.",
+    "instanceRenamed": "Instância {{instance}} renomeada.",
+    "settingsUpdated": "Configurações do espaço de trabalho salvas.",
+    "updated": "Configurações do espaço de trabalho para {{module}} salvas."
   },
   "vault": {
     "unlocked": "Cofre desbloqueado.",
@@ -125,6 +170,14 @@
   },
   "backup": {
     "restored": "Backup restaurado.",
-    "pruneFailed": "Não foi possível limpar os backups antigos."
+    "pruneFailed": "Não foi possível limpar os backups antigos.",
+    "restoredFromPg": "Projeto restaurado a partir de um backup.",
+    "restoredFromServer": "Projeto restaurado a partir de um backup guardado no servidor."
+  },
+  "csvExport": {
+    "roundtripUnsafe": "Exportação concluída, mas algumas células podem não ser reimportadas corretamente (uma aspa seguida de vírgula ou quebra de linha em: {{columns}})."
+  },
+  "runs": {
+    "revertEntryFailed": "A reversão de uma tradução para {{language}} foi ignorada — a entrada dela pode ter sido excluída."
   }
 }

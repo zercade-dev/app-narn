@@ -55,11 +55,34 @@
     "batchFailedCause": "Un batch di {{count}} traduzioni in {{languages}} non è riuscito: {{cause}}",
     "batchFailedCause_one": "Un batch di {{count}} traduzione in {{languages}} non è riuscito: {{cause}}",
     "batchFailedCause_other": "Un batch di {{count}} traduzioni in {{languages}} non è riuscito: {{cause}}",
+    "batchFailedUnknown": "Un batch di {{count}} traduzioni in {{languages}} non è riuscito: la causa è sconosciuta.",
+    "batchFailedUnknown_one": "Un batch di {{count}} traduzione in {{languages}} non è riuscito: la causa è sconosciuta.",
+    "batchFailedUnknown_other": "Un batch di {{count}} traduzioni in {{languages}} non è riuscito: la causa è sconosciuta.",
     "queueStartFailed": "Impossibile avviare l'esecuzione di traduzione.",
     "maskMismatch": "I tag di formattazione non sono sopravvissuti alla traduzione in {{language}}.",
     "tmRejected": "Una traduzione salvata per {{language}} non ha superato il controllo di qualità.",
     "lqaRetry": "Controllo di qualità non superato: si chiede al modello di riprovare.",
     "authCancel": "L'accesso è stato annullato, quindi la traduzione si è interrotta.",
+    "batchUncaught": "Un batch di traduzioni non è riuscito in modo imprevisto.",
+    "startAborted": "L’esecuzione di traduzione si è fermata prima di inviare qualsiasi voce.",
+    "waitingForQuota": "Traduzione in pausa finché i modelli gratuiti non avranno di nuovo quota.",
+    "waitingForQuotaUntil": "Traduzione in pausa finché i modelli gratuiti non avranno di nuovo quota: la ripresa è possibile non prima delle {{time}} circa.",
+    "quotaRedispatched": "Ripresa delle traduzioni che aspettavano quota per i modelli gratuiti.",
+    "quotaParkAdopted": "Riprese in carico le esecuzioni di traduzione in pausa che aspettano quota.",
+    "freewayRerouted": "Il modello gratuito {{from}} non è disponibile al momento: si prova con {{to}}.",
+    "freewayInstanceSwapped": "Impossibile usare {{fromModule}}: si prova lo stesso modello tramite {{toModule}}.",
+    "freewayDeferred": "Alcune traduzioni sono in attesa di {{model}}: verranno ritentate verso le {{time}}.",
+    "freewayDegraded": "Nessun modello gratuito della potenza abituale è disponibile: per questo batch si prova con uno più leggero.",
+    "freewayEscalated": "Una traduzione in {{language}} non ha superato il controllo di qualità: si prova con {{to}}.",
+    "freewayCredentialDisabled": "{{module}} ha rifiutato la sua chiave API: i modelli gratuiti lo salteranno finché la chiave non sarà aggiornata.",
+    "lqaCorrectionFailed": "Impossibile correggere le traduzioni che non hanno superato il controllo di qualità: mantengono la prima versione.",
+    "lqaCorrectionSkipped": "Correzione di una traduzione in {{language}} saltata: è cambiata dopo essere stata tradotta.",
+    "lqaCorrectionSkippedRemoved": "Correzione di una traduzione in {{language}} saltata: la sua voce è stata eliminata.",
+    "lqaCorrectionUnavailable": "{{module}} non può correggere le traduzioni in {{language}} che non hanno superato il controllo di qualità: mantengono la prima versione.",
+    "lqaRetryFailed": "Il nuovo tentativo per le traduzioni che non hanno superato il controllo di qualità non ha funzionato.",
+    "lqaRetryFailedLanguage": "Il nuovo tentativo per una traduzione in {{language}} che non ha superato il controllo di qualità non ha funzionato.",
+    "splitPhaseStart": "Traduzione con il modello locale {{model}} in corso…",
+    "tmLookupFailed": "Impossibile consultare la memoria di traduzione per una voce in {{language}}: verrà tradotta da zero.",
     "cause": {
       "auth": "{{module}} ha rifiutato la chiave API.",
       "rateLimit": "{{module}} ha raggiunto il limite di richieste.",
@@ -102,10 +125,32 @@
     "done": "Dettagli livello terminati — completati: {{completed}}; non riusciti: {{failed}}.",
     "failed": "Dettagli livello non riusciti."
   },
+  "relinkRetranslate": {
+    "done": "Ritradotta in {{language}} una voce ricollegata.",
+    "maskMismatch": "I tag di formattazione non sono sopravvissuti alla ritraduzione in {{language}}."
+  },
+  "run": {
+    "queued": "{{task}}: esecuzione in coda.",
+    "batchFailed": "{{task}}: un batch non è riuscito.",
+    "batchFailedCause": "{{task}}: un batch non è riuscito — {{cause}}",
+    "batchFailedUnknown": "{{task}}: un batch non è riuscito — la causa è sconosciuta.",
+    "batchTimedOut": "{{task}}: l’esecuzione ha superato il limite di tempo, quindi un batch è stato interrotto.",
+    "freewayRerouted": "{{task}}: il modello gratuito {{from}} non è disponibile al momento — si prova con {{to}}.",
+    "freewayMinuteWait": "{{task}}: il modello gratuito {{model}} ha raggiunto il limite al minuto — attesa di {{seconds}} s prima di continuare."
+  },
   "module": {
     "loaded": "Modulo {{module}} caricato.",
     "instanceRegistered": "Aggiunta la configurazione {{instance}}.",
-    "instanceRegisterFailed": "Impossibile aggiungere la configurazione {{instance}}."
+    "instanceRegisterFailed": "Impossibile aggiungere la configurazione {{instance}}.",
+    "instanceUnregistered": "Rimossa l’istanza {{instance}}.",
+    "configUpdated": "Salvate le impostazioni del progetto per {{module}}."
+  },
+  "globalConfig": {
+    "instanceCreated": "Creata l’istanza {{instance}}.",
+    "instanceDeleted": "Eliminata l’istanza {{instance}}.",
+    "instanceRenamed": "Rinominata l’istanza {{instance}}.",
+    "settingsUpdated": "Impostazioni dell’area di lavoro salvate.",
+    "updated": "Salvate le impostazioni dell’area di lavoro per {{module}}."
   },
   "vault": {
     "unlocked": "Cassaforte sbloccata.",
@@ -125,6 +170,14 @@
   },
   "backup": {
     "restored": "Backup ripristinato.",
-    "pruneFailed": "Impossibile eliminare i vecchi backup."
+    "pruneFailed": "Impossibile eliminare i vecchi backup.",
+    "restoredFromPg": "Progetto ripristinato da un backup.",
+    "restoredFromServer": "Progetto ripristinato da un backup conservato sul server."
+  },
+  "csvExport": {
+    "roundtripUnsafe": "Esportazione completata, ma alcune celle potrebbero non essere reimportate correttamente (virgolette seguite da una virgola o da un’interruzione di riga in: {{columns}})."
+  },
+  "runs": {
+    "revertEntryFailed": "Una traduzione in {{language}} non è stata riportata indietro: la sua voce potrebbe essere stata eliminata."
   }
 }

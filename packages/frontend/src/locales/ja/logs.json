@@ -42,11 +42,33 @@
     "batchFailed": "翻訳{{count}}件のバッチが失敗しました（対象言語：{{languages}}）。",
     "batchFailedCause": "翻訳{{count}}件のバッチ（対象言語：{{languages}}）が失敗しました。{{cause}}",
     "batchFailedCause_other": "翻訳{{count}}件のバッチ（対象言語：{{languages}}）が失敗しました。{{cause}}",
+    "batchFailedUnknown": "翻訳{{count}}件のバッチ（対象言語：{{languages}}）が失敗しました。原因は不明です。",
+    "batchFailedUnknown_other": "翻訳{{count}}件のバッチ（対象言語：{{languages}}）が失敗しました。原因は不明です。",
     "queueStartFailed": "翻訳の実行を開始できませんでした。",
     "maskMismatch": "{{language}}への翻訳でインラインタグが保持されませんでした。",
     "tmRejected": "{{language}}の保存済みの翻訳は品質チェックに合格しませんでした。",
     "lqaRetry": "品質チェックに不合格でした。モデルに再試行を依頼しています。",
     "authCancel": "サインインがキャンセルされたため、翻訳を停止しました。",
+    "batchUncaught": "翻訳のバッチが予期せず失敗しました。",
+    "startAborted": "エントリを送信する前に翻訳の実行が停止しました。",
+    "waitingForQuota": "無料モデルの無料枠が戻るまで翻訳を一時停止しています。",
+    "waitingForQuotaUntil": "無料モデルの無料枠が戻るまで翻訳を一時停止しています。再開できるのは早くても{{time}}頃です。",
+    "quotaRedispatched": "無料モデルの無料枠を待っていた翻訳を再開しています。",
+    "quotaParkAdopted": "無料枠を待っている一時停止中の翻訳の実行を引き継ぎました。",
+    "freewayRerouted": "無料モデル{{from}}は現在利用できません。代わりに{{to}}を試しています。",
+    "freewayInstanceSwapped": "{{fromModule}}を使用できませんでした。同じモデルを{{toModule}}経由で試しています。",
+    "freewayDeferred": "一部の翻訳は{{model}}を待っています。{{time}}頃にもう一度試します。",
+    "freewayDegraded": "通常の性能の無料モデルが利用できません。このバッチにはより軽いモデルを試しています。",
+    "freewayEscalated": "{{language}}への翻訳が品質チェックに不合格でした。代わりに{{to}}を試しています。",
+    "freewayCredentialDisabled": "{{module}}のAPIキーが拒否されました。キーが更新されるまで、無料モデルはこのモジュールをスキップします。",
+    "lqaCorrectionFailed": "品質チェックに不合格だった翻訳を修正できませんでした。最初の翻訳のままです。",
+    "lqaCorrectionSkipped": "{{language}}への翻訳の修正をスキップしました。翻訳後に変更されています。",
+    "lqaCorrectionSkippedRemoved": "{{language}}への翻訳の修正をスキップしました。エントリが削除されています。",
+    "lqaCorrectionUnavailable": "{{module}}は、品質チェックに不合格だった{{language}}への翻訳を修正できません。最初の翻訳のままです。",
+    "lqaRetryFailed": "品質チェックに不合格だった翻訳の再試行はうまくいきませんでした。",
+    "lqaRetryFailedLanguage": "品質チェックに不合格だった{{language}}への翻訳の再試行はうまくいきませんでした。",
+    "splitPhaseStart": "ローカルモデル{{model}}で翻訳中…",
+    "tmLookupFailed": "{{language}}のエントリについて翻訳メモリを確認できませんでした。最初から翻訳します。",
     "cause": {
       "auth": "{{module}}がAPIキーを拒否しました。",
       "rateLimit": "{{module}}のリクエスト上限に達しました。",
@@ -88,10 +110,32 @@
     "done": "ステージ詳細の実行が完了しました（完了：{{completed}}・失敗：{{failed}}）。",
     "failed": "ステージ詳細の実行に失敗しました。"
   },
+  "relinkRetranslate": {
+    "done": "再リンクしたエントリを{{language}}に再翻訳しました。",
+    "maskMismatch": "{{language}}への再翻訳でインラインタグが保持されませんでした。"
+  },
+  "run": {
+    "queued": "{{task}}：実行をキューに追加しました。",
+    "batchFailed": "{{task}}：バッチが失敗しました。",
+    "batchFailedCause": "{{task}}：バッチが失敗しました。{{cause}}",
+    "batchFailedUnknown": "{{task}}：バッチが失敗しました。原因は不明です。",
+    "batchTimedOut": "{{task}}：実行が制限時間を超えたため、バッチを停止しました。",
+    "freewayRerouted": "{{task}}：無料モデル{{from}}は現在利用できません。代わりに{{to}}を試しています。",
+    "freewayMinuteWait": "{{task}}：無料モデル{{model}}が1分あたりの上限に達しました。{{seconds}}秒待ってから続行します。"
+  },
   "module": {
     "loaded": "{{module}}モジュールを読み込みました。",
     "instanceRegistered": "{{instance}}の設定を追加しました。",
-    "instanceRegisterFailed": "{{instance}}の設定を追加できませんでした。"
+    "instanceRegisterFailed": "{{instance}}の設定を追加できませんでした。",
+    "instanceUnregistered": "{{instance}}インスタンスを削除しました。",
+    "configUpdated": "{{module}}のプロジェクト設定を保存しました。"
+  },
+  "globalConfig": {
+    "instanceCreated": "{{instance}}インスタンスを作成しました。",
+    "instanceDeleted": "{{instance}}インスタンスを削除しました。",
+    "instanceRenamed": "{{instance}}インスタンスの名前を変更しました。",
+    "settingsUpdated": "ワークスペース設定を保存しました。",
+    "updated": "{{module}}のワークスペース設定を保存しました。"
   },
   "vault": {
     "unlocked": "保管庫のロックを解除しました。",
@@ -110,6 +154,14 @@
   },
   "backup": {
     "restored": "バックアップを復元しました。",
-    "pruneFailed": "古いバックアップを整理できませんでした。"
+    "pruneFailed": "古いバックアップを整理できませんでした。",
+    "restoredFromPg": "バックアップからプロジェクトを復元しました。",
+    "restoredFromServer": "サーバーに保存されたバックアップからプロジェクトを復元しました。"
+  },
+  "csvExport": {
+    "roundtripUnsafe": "エクスポートは完了しましたが、一部のセルは正しく再インポートできない可能性があります（引用符の直後にカンマまたは改行がある列：{{columns}}）。"
+  },
+  "runs": {
+    "revertEntryFailed": "{{language}}への翻訳の取り消しをスキップしました。エントリが削除された可能性があります。"
   }
 }

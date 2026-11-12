@@ -42,11 +42,33 @@
     "batchFailed": "Satu batch berisi {{count}} terjemahan ke {{languages}} gagal.",
     "batchFailedCause": "Satu batch berisi {{count}} terjemahan ke {{languages}} gagal — {{cause}}",
     "batchFailedCause_other": "Satu batch berisi {{count}} terjemahan ke {{languages}} gagal — {{cause}}",
+    "batchFailedUnknown": "Satu batch berisi {{count}} terjemahan ke {{languages}} gagal — penyebabnya tidak diketahui.",
+    "batchFailedUnknown_other": "Satu batch berisi {{count}} terjemahan ke {{languages}} gagal — penyebabnya tidak diketahui.",
     "queueStartFailed": "Tidak bisa memulai putaran penerjemahan.",
     "maskMismatch": "Tag pemformatan tidak selamat saat diterjemahkan ke {{language}}.",
     "tmRejected": "Terjemahan tersimpan untuk {{language}} tidak lolos pemeriksaan kualitas.",
     "lqaRetry": "Pemeriksaan kualitas gagal — model diminta mencoba lagi.",
     "authCancel": "Proses masuk dibatalkan, jadi penerjemahan berhenti.",
+    "batchUncaught": "Satu batch terjemahan gagal secara tak terduga.",
+    "startAborted": "Putaran penerjemahan berhenti sebelum ada entri yang dikirim.",
+    "waitingForQuota": "Penerjemahan dijeda sampai model gratis punya kuota lagi.",
+    "waitingForQuotaUntil": "Penerjemahan dijeda sampai model gratis punya kuota lagi — paling cepat bisa dilanjutkan sekitar {{time}}.",
+    "quotaRedispatched": "Melanjutkan terjemahan yang menunggu kuota model gratis.",
+    "quotaParkAdopted": "Mengambil alih putaran penerjemahan terjeda yang sedang menunggu kuota.",
+    "freewayRerouted": "Model gratis {{from}} sedang tidak tersedia — mencoba {{to}} sebagai gantinya.",
+    "freewayInstanceSwapped": "{{fromModule}} tidak bisa digunakan — mencoba model yang sama melalui {{toModule}}.",
+    "freewayDeferred": "Beberapa terjemahan menunggu {{model}} — akan dicoba lagi sekitar {{time}}.",
+    "freewayDegraded": "Tidak ada model gratis dengan kemampuan biasanya yang tersedia — mencoba model yang lebih ringan untuk batch ini.",
+    "freewayEscalated": "Terjemahan ke {{language}} tidak lolos pemeriksaan kualitas — mencoba {{to}} sebagai gantinya.",
+    "freewayCredentialDisabled": "{{module}} menolak kunci API-nya — model gratis akan melewatinya sampai kunci diperbarui.",
+    "lqaCorrectionFailed": "Tidak bisa memperbaiki terjemahan yang tidak lolos pemeriksaan kualitas — terjemahan itu tetap memakai versi pertamanya.",
+    "lqaCorrectionSkipped": "Perbaikan terjemahan ke {{language}} dilewati — terjemahannya sudah berubah sejak diterjemahkan.",
+    "lqaCorrectionSkippedRemoved": "Perbaikan terjemahan ke {{language}} dilewati — entrinya sudah dihapus.",
+    "lqaCorrectionUnavailable": "{{module}} tidak bisa memperbaiki terjemahan ke {{language}} yang tidak lolos pemeriksaan kualitas — terjemahan itu tetap memakai versi pertamanya.",
+    "lqaRetryFailed": "Percobaan ulang untuk terjemahan yang tidak lolos pemeriksaan kualitas tidak berhasil.",
+    "lqaRetryFailedLanguage": "Percobaan ulang untuk terjemahan ke {{language}} yang tidak lolos pemeriksaan kualitas tidak berhasil.",
+    "splitPhaseStart": "Menerjemahkan dengan model lokal {{model}}…",
+    "tmLookupFailed": "Tidak bisa memeriksa memori terjemahan untuk entri ke {{language}} — entri diterjemahkan dari awal.",
     "cause": {
       "auth": "{{module}} menolak kunci API.",
       "rateLimit": "{{module}} mencapai batas permintaan.",
@@ -88,10 +110,32 @@
     "done": "Detail Stage selesai — {{completed}} beres, {{failed}} gagal.",
     "failed": "Detail Stage gagal."
   },
+  "relinkRetranslate": {
+    "done": "Sebuah entri yang dihubungkan ulang diterjemahkan ulang ke {{language}}.",
+    "maskMismatch": "Tag pemformatan tidak selamat saat diterjemahkan ulang ke {{language}}."
+  },
+  "run": {
+    "queued": "{{task}}: putaran diantrekan.",
+    "batchFailed": "{{task}}: satu batch gagal.",
+    "batchFailedCause": "{{task}}: satu batch gagal — {{cause}}",
+    "batchFailedUnknown": "{{task}}: satu batch gagal — penyebabnya tidak diketahui.",
+    "batchTimedOut": "{{task}}: putaran melewati batas waktunya, jadi satu batch dihentikan.",
+    "freewayRerouted": "{{task}}: model gratis {{from}} sedang tidak tersedia — mencoba {{to}} sebagai gantinya.",
+    "freewayMinuteWait": "{{task}}: model gratis {{model}} mencapai batas per menitnya — menunggu {{seconds}} dtk sebelum melanjutkan."
+  },
   "module": {
     "loaded": "Modul {{module}} dimuat.",
     "instanceRegistered": "Konfigurasi {{instance}} ditambahkan.",
-    "instanceRegisterFailed": "Tidak bisa menambahkan konfigurasi {{instance}}."
+    "instanceRegisterFailed": "Tidak bisa menambahkan konfigurasi {{instance}}.",
+    "instanceUnregistered": "Instans {{instance}} dihapus dari daftar.",
+    "configUpdated": "Pengaturan proyek untuk {{module}} disimpan."
+  },
+  "globalConfig": {
+    "instanceCreated": "Instans {{instance}} dibuat.",
+    "instanceDeleted": "Instans {{instance}} dihapus.",
+    "instanceRenamed": "Instans {{instance}} diganti namanya.",
+    "settingsUpdated": "Pengaturan ruang kerja disimpan.",
+    "updated": "Pengaturan ruang kerja untuk {{module}} disimpan."
   },
   "vault": {
     "unlocked": "Kunci brankas dibuka.",
@@ -110,6 +154,14 @@
   },
   "backup": {
     "restored": "Cadangan dipulihkan.",
-    "pruneFailed": "Tidak bisa membersihkan cadangan lama."
+    "pruneFailed": "Tidak bisa membersihkan cadangan lama.",
+    "restoredFromPg": "Proyek dipulihkan dari cadangan.",
+    "restoredFromServer": "Proyek dipulihkan dari cadangan yang tersimpan di server."
+  },
+  "csvExport": {
+    "roundtripUnsafe": "Ekspor selesai, tetapi beberapa sel mungkin tidak terimpor kembali dengan bersih (tanda kutip diikuti koma atau pemisah baris pada: {{columns}})."
+  },
+  "runs": {
+    "revertEntryFailed": "Pengembalian terjemahan ke {{language}} dilewati — entrinya mungkin sudah dihapus."
   }
 }

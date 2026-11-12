@@ -42,11 +42,33 @@
     "batchFailed": "A batch of {{count}} translations into {{languages}} failed.",
     "batchFailedCause": "A batch of {{count}} translation into {{languages}} failed — {{cause}}",
     "batchFailedCause_other": "A batch of {{count}} translations into {{languages}} failed — {{cause}}",
+    "batchFailedUnknown": "A batch of {{count}} translation into {{languages}} failed for an unknown reason.",
+    "batchFailedUnknown_other": "A batch of {{count}} translations into {{languages}} failed for an unknown reason.",
     "queueStartFailed": "Couldn't start the translation run.",
     "maskMismatch": "Formatting tags didn't survive translation into {{language}}.",
     "tmRejected": "A saved translation for {{language}} didn't pass the quality check.",
     "lqaRetry": "Quality check failed — asking the model to try again.",
     "authCancel": "Sign-in was cancelled, so translation stopped.",
+    "batchUncaught": "A batch of translations failed unexpectedly.",
+    "startAborted": "The translation run stopped before any string was sent.",
+    "waitingForQuota": "Translation paused until the free models have quota again.",
+    "waitingForQuotaUntil": "Translation paused until the free models have quota again — the earliest it can resume is around {{time}}.",
+    "quotaRedispatched": "Resuming translations that were waiting for free-model quota.",
+    "quotaParkAdopted": "Picked up paused translation runs that are waiting for quota.",
+    "freewayRerouted": "Free model {{from}} isn't available right now — trying {{to}} instead.",
+    "freewayInstanceSwapped": "{{fromModule}} couldn't be used — trying the same model through {{toModule}}.",
+    "freewayDeferred": "Some translations are on hold for {{model}} — they'll be tried again around {{time}}.",
+    "freewayDegraded": "No free model of the usual strength is available — trying a lighter one for this batch.",
+    "freewayEscalated": "A {{language}} translation failed the quality check — trying {{to}} instead.",
+    "freewayCredentialDisabled": "{{module}} rejected its API key — free models will skip it until the key is updated.",
+    "lqaCorrectionFailed": "Couldn't fix translations that failed the quality check — they keep their first version.",
+    "lqaCorrectionSkipped": "Skipped fixing a {{language}} translation — it has changed since it was translated.",
+    "lqaCorrectionSkippedRemoved": "Skipped fixing a {{language}} translation — its string was deleted.",
+    "lqaCorrectionUnavailable": "{{module}} can't fix the {{language}} translations that failed the quality check — they keep their first version.",
+    "lqaRetryFailed": "Retrying translations that failed the quality check didn't work.",
+    "lqaRetryFailedLanguage": "Retrying a {{language}} translation that failed the quality check didn't work.",
+    "splitPhaseStart": "Translating with the local model {{model}}…",
+    "tmLookupFailed": "Couldn't check translation memory for a {{language}} string — translating it from scratch.",
     "cause": {
       "auth": "{{module}} rejected the API key.",
       "rateLimit": "{{module}} hit its request limit.",
@@ -88,10 +110,32 @@
     "done": "Stage details finished — {{completed}} done, {{failed}} failed.",
     "failed": "Stage details failed."
   },
+  "relinkRetranslate": {
+    "done": "Re-translated a relinked string into {{language}}.",
+    "maskMismatch": "Formatting tags didn't survive re-translation into {{language}}."
+  },
+  "run": {
+    "queued": "{{task}}: run queued.",
+    "batchFailed": "{{task}}: a batch failed.",
+    "batchFailedCause": "{{task}}: a batch failed — {{cause}}",
+    "batchFailedUnknown": "{{task}}: a batch failed for an unknown reason.",
+    "batchTimedOut": "{{task}}: the run went over its time limit, so a batch was stopped.",
+    "freewayRerouted": "{{task}}: free model {{from}} isn't available right now — trying {{to}} instead.",
+    "freewayMinuteWait": "{{task}}: free model {{model}} reached its per-minute limit — waiting {{seconds}} s before continuing."
+  },
   "module": {
     "loaded": "Loaded the {{module}} module.",
     "instanceRegistered": "Added the {{instance}} configuration.",
-    "instanceRegisterFailed": "Couldn't add the {{instance}} configuration."
+    "instanceRegisterFailed": "Couldn't add the {{instance}} configuration.",
+    "instanceUnregistered": "Removed the {{instance}} instance.",
+    "configUpdated": "Saved the project's {{module}} settings."
+  },
+  "globalConfig": {
+    "instanceCreated": "Created the {{instance}} instance.",
+    "instanceDeleted": "Deleted the {{instance}} instance.",
+    "instanceRenamed": "Renamed the {{instance}} instance.",
+    "settingsUpdated": "Workspace settings saved.",
+    "updated": "Saved the workspace settings for {{module}}."
   },
   "vault": {
     "unlocked": "Vault unlocked.",
@@ -110,6 +154,14 @@
   },
   "backup": {
     "restored": "Backup restored.",
-    "pruneFailed": "Couldn't clean up old backups."
+    "pruneFailed": "Couldn't clean up old backups.",
+    "restoredFromPg": "Project restored from a backup.",
+    "restoredFromServer": "Project restored from a backup stored on the server."
+  },
+  "csvExport": {
+    "roundtripUnsafe": "Export done, but some cells may not re-import cleanly (a quote followed by a comma or line break in: {{columns}})."
+  },
+  "runs": {
+    "revertEntryFailed": "Skipped reverting a {{language}} translation — its string may have been deleted."
   }
 }

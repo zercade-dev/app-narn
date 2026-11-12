@@ -42,11 +42,33 @@
     "batchFailed": "{{languages}} 언어로 보낸 번역 {{count}}건짜리 배치가 실패했어요.",
     "batchFailedCause": "{{languages}} 언어로 보낸 번역 {{count}}건짜리 배치가 실패했어요 — {{cause}}",
     "batchFailedCause_other": "{{languages}} 언어로 보낸 번역 {{count}}건짜리 배치가 실패했어요 — {{cause}}",
+    "batchFailedUnknown": "{{languages}} 언어로 보낸 번역 {{count}}건짜리 배치가 실패했어요 — 원인을 알 수 없어요.",
+    "batchFailedUnknown_other": "{{languages}} 언어로 보낸 번역 {{count}}건짜리 배치가 실패했어요 — 원인을 알 수 없어요.",
     "queueStartFailed": "번역 실행을 시작하지 못했어요.",
     "maskMismatch": "{{language}} 언어로 번역하는 동안 서식 태그가 그대로 남지 않았어요.",
     "tmRejected": "{{language}} 언어의 저장된 번역이 품질 검사를 통과하지 못했어요.",
     "lqaRetry": "품질 검사에 실패해서 모델에 다시 요청하고 있어요.",
     "authCancel": "로그인이 취소되어 번역을 멈췄어요.",
+    "batchUncaught": "번역 배치가 예기치 않게 실패했어요.",
+    "startAborted": "항목을 보내기 전에 번역 실행이 멈췄어요.",
+    "waitingForQuota": "무료 모델의 할당량이 다시 생길 때까지 번역을 일시 정지했어요.",
+    "waitingForQuotaUntil": "무료 모델의 할당량이 다시 생길 때까지 번역을 일시 정지했어요 — 빨라도 {{time}}쯤 다시 시작할 수 있어요.",
+    "quotaRedispatched": "무료 모델 할당량을 기다리던 번역을 다시 시작하고 있어요.",
+    "quotaParkAdopted": "할당량을 기다리며 일시 정지된 번역 실행을 이어받았어요.",
+    "freewayRerouted": "지금은 {{from}} 무료 모델을 쓸 수 없어요 — 대신 {{to}} 모델로 시도하고 있어요.",
+    "freewayInstanceSwapped": "{{fromModule}} 인스턴스를 쓸 수 없었어요 — 같은 모델을 {{toModule}} 인스턴스로 시도하고 있어요.",
+    "freewayDeferred": "일부 번역이 {{model}} 모델을 기다리고 있어요 — {{time}}쯤 다시 시도해요.",
+    "freewayDegraded": "평소 성능의 무료 모델을 쓸 수 없어요 — 이 배치에는 더 가벼운 모델로 시도하고 있어요.",
+    "freewayEscalated": "{{language}} 언어 번역이 품질 검사를 통과하지 못했어요 — 대신 {{to}} 모델로 시도하고 있어요.",
+    "freewayCredentialDisabled": "{{module}}에서 API 키를 거부했어요 — 키를 업데이트할 때까지 무료 모델 선택에서 이 모듈을 건너뛰어요.",
+    "lqaCorrectionFailed": "품질 검사를 통과하지 못한 번역을 고치지 못했어요 — 처음 번역을 그대로 유지해요.",
+    "lqaCorrectionSkipped": "{{language}} 언어 번역 수정을 건너뛰었어요 — 번역한 뒤에 바뀌었어요.",
+    "lqaCorrectionSkippedRemoved": "{{language}} 언어 번역 수정을 건너뛰었어요 — 항목이 삭제되었어요.",
+    "lqaCorrectionUnavailable": "{{module}} 모듈로는 품질 검사를 통과하지 못한 {{language}} 언어 번역을 고칠 수 없어요 — 처음 번역을 그대로 유지해요.",
+    "lqaRetryFailed": "품질 검사를 통과하지 못한 번역을 다시 시도했지만 잘 되지 않았어요.",
+    "lqaRetryFailedLanguage": "품질 검사를 통과하지 못한 {{language}} 언어 번역을 다시 시도했지만 잘 되지 않았어요.",
+    "splitPhaseStart": "{{model}} 로컬 모델로 번역하는 중…",
+    "tmLookupFailed": "{{language}} 언어 항목의 번역 메모리를 확인하지 못했어요 — 처음부터 번역해요.",
     "cause": {
       "auth": "{{module}}에서 API 키를 거부했어요.",
       "rateLimit": "{{module}}의 요청 한도에 도달했어요.",
@@ -88,10 +110,32 @@
     "done": "스테이지 상세를 마쳤어요 — {{completed}}건 완료, {{failed}}건 실패예요.",
     "failed": "스테이지 상세에 실패했어요."
   },
+  "relinkRetranslate": {
+    "done": "재연결한 항목을 {{language}} 언어로 다시 번역했어요.",
+    "maskMismatch": "{{language}} 언어로 다시 번역하는 동안 서식 태그가 그대로 남지 않았어요."
+  },
+  "run": {
+    "queued": "{{task}}: 실행을 대기열에 넣었어요.",
+    "batchFailed": "{{task}}: 배치가 실패했어요.",
+    "batchFailedCause": "{{task}}: 배치가 실패했어요 — {{cause}}",
+    "batchFailedUnknown": "{{task}}: 배치가 실패했어요 — 원인을 알 수 없어요.",
+    "batchTimedOut": "{{task}}: 실행이 제한 시간을 넘어서 배치를 중단했어요.",
+    "freewayRerouted": "{{task}}: 지금은 {{from}} 무료 모델을 쓸 수 없어요 — 대신 {{to}} 모델로 시도하고 있어요.",
+    "freewayMinuteWait": "{{task}}: {{model}} 무료 모델이 분당 한도에 도달했어요 — {{seconds}}초 기다린 뒤 계속해요."
+  },
   "module": {
     "loaded": "{{module}} 모듈을 불러왔어요.",
     "instanceRegistered": "{{instance}} 설정을 추가했어요.",
-    "instanceRegisterFailed": "{{instance}} 설정을 추가하지 못했어요."
+    "instanceRegisterFailed": "{{instance}} 설정을 추가하지 못했어요.",
+    "instanceUnregistered": "{{instance}} 인스턴스를 제거했어요.",
+    "configUpdated": "{{module}}의 프로젝트 설정을 저장했어요."
+  },
+  "globalConfig": {
+    "instanceCreated": "{{instance}} 인스턴스를 만들었어요.",
+    "instanceDeleted": "{{instance}} 인스턴스를 삭제했어요.",
+    "instanceRenamed": "{{instance}} 인스턴스의 이름을 바꿨어요.",
+    "settingsUpdated": "워크스페이스 설정을 저장했어요.",
+    "updated": "{{module}}의 워크스페이스 설정을 저장했어요."
   },
   "vault": {
     "unlocked": "보관함 잠금을 해제했어요.",
@@ -110,6 +154,14 @@
   },
   "backup": {
     "restored": "백업을 복원했어요.",
-    "pruneFailed": "오래된 백업을 정리하지 못했어요."
+    "pruneFailed": "오래된 백업을 정리하지 못했어요.",
+    "restoredFromPg": "백업에서 프로젝트를 복원했어요.",
+    "restoredFromServer": "서버에 저장된 백업에서 프로젝트를 복원했어요."
+  },
+  "csvExport": {
+    "roundtripUnsafe": "내보내기를 마쳤지만 일부 셀은 다시 가져올 때 문제가 될 수 있어요(다음 열에 따옴표 뒤 쉼표나 줄바꿈이 있어요: {{columns}})."
+  },
+  "runs": {
+    "revertEntryFailed": "{{language}} 언어 번역의 롤백을 건너뛰었어요 — 항목이 삭제되었을 수 있어요."
   }
 }
