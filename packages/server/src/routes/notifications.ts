@@ -7,9 +7,9 @@ export const notificationsRouter: Router = Router();
 
 /**
  * GET /api/notifications
- * Lists the current tenant's notifications (newest 50, newest-first) plus
- * the unread count. Ambient-tenant only — identityMiddleware has already
- * established the RLS tenant context by the time this handler runs (mirrors
+ * Lists the current tenant's notifications (newest 200 plus any older unread,
+ * newest-first) plus the unread count. Ambient-tenant only — identityMiddleware
+ * has already established the RLS tenant context by the time this handler runs (mirrors
  * tm.ts), so no explicit userId/runWithTenant wiring is needed here.
  */
 notificationsRouter.get(

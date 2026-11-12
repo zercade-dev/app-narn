@@ -671,7 +671,7 @@ export interface BackupStore {
  * later.
  */
 export interface NotificationStore {
-  listForCurrentUser(): Promise<NotificationRecord[]>; // newest 50, newest-first
+  listForCurrentUser(): Promise<NotificationRecord[]>; // newest 200 plus older unread, newest-first
   countUnread(): Promise<number>;
   markRead(id: string): Promise<void>; // idempotent; foreign/missing id is a no-op
   markAllRead(): Promise<{ count: number }>;

@@ -80,18 +80,28 @@ export class PgNotificationStore implements NotificationStore {
     this.db = db;
   }
 
-  /** Newest 50 notifications for the current tenant. No pagination in v1. */
+  /**
+   * The newest {@link NOTIFICATION_KEEP_NEWEST} notifications for the current
+   * tenant, plus every unread one older than that, newest first. The unread
+   * rows are always included so the unread count never names a row the list
+   * leaves out. No pagination.
+   */
   async listForCurrentUser(): Promise<NotificationRecord[]> {
     const { rows } = await this.db.query<NotificationRow>(
       `select ${COLUMNS}
        from notifications
-       order by created_at desc, id desc
-       limit 50`,
+       where read_at is null
+          or id in (
+            select id from notifications
+            order by created_at desc, id desc
+            limit ${NOTIFICATION_KEEP_NEWEST}
+          )
+       order by created_at desc, id desc`,
     );
     return rows.map(rowToRecord);
   }
 
-  /** Count of unread notifications for the current tenant (not windowed to the 50-row listing cap). */
+  /** Count of unread notifications for the current tenant; the listing always includes all of them. */
   async countUnread(): Promise<number> {
     const { rows } = await this.db.query<{ n: number }>(
       `select count(*)::int as n from notifications where read_at is null`,

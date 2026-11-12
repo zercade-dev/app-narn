@@ -5,8 +5,8 @@
  * app writes for one user about their runs or their project's collaborators —
  * see the server's `PgNotificationStore` / module-level
  * `insertNotificationForUser`. Users can individually dismiss (delete) or mark
- * their own notifications read; a listing is capped to the newest 50 (no
- * pagination). Typed rows are pruned on insert (age and per-user count caps);
+ * their own notifications read; a listing holds the newest 200 plus any older
+ * unread ones (no pagination). Typed rows are pruned on insert (age and per-user count caps);
  * broadcasts are never pruned.
  */
 

@@ -229,7 +229,7 @@ function engineRunPresenters(run: (typeof ENGINE_RUNS)[number]): Record<string, 
 /**
  * Hand-written presentation for the event keys a person benefits from seeing.
  * Every other server event key is listed in `RAW_ONLY_KEYS` (raw-only.ts) and
- * shows only in the Raw log; `coverage.test.ts` fails on a key in neither.
+ * shows only in the Raw log; a coverage guard in the test suite fails on a key in neither.
  * Anything unmapped that still reaches the friendly log (prose, an old entry)
  * degrades through `fallbackText`.
  */

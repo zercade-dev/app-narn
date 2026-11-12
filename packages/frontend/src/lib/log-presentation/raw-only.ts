@@ -29,7 +29,7 @@ const ENGINE_SUFFIXES = [
  * internal bookkeeping, best-effort writes whose failure changes nothing the
  * person can see or do, and boot-time housekeeping. They show only in the Raw
  * log. Every server event key is either here or in `LOG_PRESENTERS`, never
- * both; `coverage.test.ts` scans the server source to keep it that way.
+ * both; a coverage guard in the test suite scans the server source to keep it that way.
  */
 export const RAW_ONLY_KEYS: ReadonlySet<string> = new Set<string>([
   ...ENGINE_PREFIXES.flatMap((prefix) => ENGINE_SUFFIXES.map((suffix) => `${prefix}:${suffix}`)),
