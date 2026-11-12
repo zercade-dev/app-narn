@@ -58,5 +58,48 @@
     "warning": "Avviso",
     "critical": "Critico"
   },
+  "notifications": {
+    "genericTitle": "Notifica",
+    "viewInActivity": "Vedi in Attività",
+    "aCollaborator": "Un collaboratore",
+    "theProvider": "il provider di IA",
+    "otherIssues_one": "{{cause}} e {{count}} altro problema",
+    "otherIssues_other": "{{cause}} e altri {{count}} problemi",
+    "cause": {
+      "noRoute": "nessun modulo di traduzione è configurato per essa.",
+      "moduleDisabled": "il modulo necessario è disattivato.",
+      "moduleNotFound": "il modulo necessario non è stato trovato.",
+      "unknown": "la causa è sconosciuta."
+    },
+    "runStarted": {
+      "title": "{{type}} avviata",
+      "body_one": "{{count}} voce da elaborare.",
+      "body_other": "{{count}} voci da elaborare."
+    },
+    "runFinished": {
+      "title": "{{type}} completata",
+      "body_one": "{{count}} voce completata.",
+      "body_other": "{{count}} voci completate.",
+      "bodyLanguages_one": "{{count}} voce completata in {{languages}}.",
+      "bodyLanguages_other": "{{count}} voci completate in {{languages}}."
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}} completata con problemi",
+      "body": "{{completed}} completate, {{failed}} non riuscite: {{cause}}."
+    },
+    "runFailed": {
+      "title": "{{type}} non riuscita",
+      "body": "L'esecuzione si è interrotta: {{cause}}."
+    },
+    "collabDigest": {
+      "title": "Attività dei collaboratori",
+      "editsIn": "{{language}} ({{count}})",
+      "edited": "{{name}} ha modificato {{edits}}.",
+      "translated_one": "{{name}} ha tradotto {{count}} voce.",
+      "translated_other": "{{name}} ha tradotto {{count}} voci.",
+      "both_one": "{{name}} ha modificato {{edits}} e tradotto {{count}} voce.",
+      "both_other": "{{name}} ha modificato {{edits}} e tradotto {{count}} voci."
+    }
+  },
   "signOut": "Esci"
 }

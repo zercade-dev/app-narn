@@ -58,5 +58,48 @@
     "warning": "Avertissement",
     "critical": "Critique"
   },
+  "notifications": {
+    "genericTitle": "Notification",
+    "viewInActivity": "Voir dans l'activité",
+    "aCollaborator": "Un collaborateur",
+    "theProvider": "le fournisseur d'IA",
+    "otherIssues_one": "{{cause}} et {{count}} autre problème",
+    "otherIssues_other": "{{cause}} et {{count}} autres problèmes",
+    "cause": {
+      "noRoute": "aucun module de traduction n'est configuré pour elle.",
+      "moduleDisabled": "le module nécessaire est désactivé.",
+      "moduleNotFound": "le module nécessaire est introuvable.",
+      "unknown": "la cause est inconnue."
+    },
+    "runStarted": {
+      "title": "{{type}} démarrée",
+      "body_one": "{{count}} texte à traiter.",
+      "body_other": "{{count}} textes à traiter."
+    },
+    "runFinished": {
+      "title": "{{type}} terminée",
+      "body_one": "{{count}} texte traité.",
+      "body_other": "{{count}} textes traités.",
+      "bodyLanguages_one": "{{count}} texte traité en {{languages}}.",
+      "bodyLanguages_other": "{{count}} textes traités en {{languages}}."
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}} terminée avec des problèmes",
+      "body": "{{completed}} réussis, {{failed}} en échec — {{cause}}."
+    },
+    "runFailed": {
+      "title": "{{type}} en échec",
+      "body": "L'exécution s'est arrêtée : {{cause}}."
+    },
+    "collabDigest": {
+      "title": "Activité des collaborateurs",
+      "editsIn": "{{count}} en {{language}}",
+      "edited": "{{name}} a modifié {{edits}}.",
+      "translated_one": "{{name}} a traduit {{count}} texte.",
+      "translated_other": "{{name}} a traduit {{count}} textes.",
+      "both_one": "{{name}} a modifié {{edits}} et traduit {{count}} texte.",
+      "both_other": "{{name}} a modifié {{edits}} et traduit {{count}} textes."
+    }
+  },
   "signOut": "Se déconnecter"
 }

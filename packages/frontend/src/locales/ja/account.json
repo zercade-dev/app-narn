@@ -57,5 +57,42 @@
     "warning": "警告",
     "critical": "重大"
   },
+  "notifications": {
+    "genericTitle": "通知",
+    "viewInActivity": "アクティビティで表示",
+    "aCollaborator": "共同作業者",
+    "theProvider": "AIプロバイダー",
+    "otherIssues_other": "{{cause}}ほか、{{count}}件の問題",
+    "cause": {
+      "noRoute": "そのための翻訳モジュールが設定されていません。",
+      "moduleDisabled": "必要なモジュールがオフになっています。",
+      "moduleNotFound": "必要なモジュールが見つかりません。",
+      "unknown": "原因は不明です。"
+    },
+    "runStarted": {
+      "title": "{{type}}を開始しました",
+      "body_other": "処理するエントリ: {{count}}件。"
+    },
+    "runFinished": {
+      "title": "{{type}}が完了しました",
+      "body_other": "エントリ{{count}}件が完了しました。",
+      "bodyLanguages_other": "エントリ{{count}}件が完了しました（{{languages}}）。"
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}}が問題ありで完了しました",
+      "body": "完了{{completed}}件、失敗{{failed}}件。{{cause}}。"
+    },
+    "runFailed": {
+      "title": "{{type}}に失敗しました",
+      "body": "実行が停止しました。{{cause}}。"
+    },
+    "collabDigest": {
+      "title": "共同作業者のアクティビティ",
+      "editsIn": "{{language}}で{{count}}件",
+      "edited": "{{name}}が{{edits}}を編集しました。",
+      "translated_other": "{{name}}が{{count}}件を翻訳しました。",
+      "both_other": "{{name}}が{{edits}}を編集し、{{count}}件を翻訳しました。"
+    }
+  },
   "signOut": "サインアウト"
 }

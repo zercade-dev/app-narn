@@ -6,6 +6,12 @@ import {
   useNotificationStore,
   type NotificationSeverity,
 } from '../../stores/notification-store.js';
+import { useProjectStore } from '../../stores/project-store.js';
+import {
+  notificationContextFromStores,
+  presentNotification,
+} from '../../lib/notification-presentation.js';
+import type { Translate } from '../../lib/log-presentation/types.js';
 import { TINT_AMBER, TINT_SKY, TINT_RED } from '../tabs/run-status-ui.js';
 
 /**
@@ -29,7 +35,12 @@ const SEVERITY_TINT: Record<NotificationSeverity, string> = {
 };
 
 export function NotificationsTab() {
-  const { t } = useTranslation('account');
+  const { t } = useTranslation(['account', 'logs', 'strings']);
+  // Presentation keys are namespaced ('account:notifications.…'), so it gets the
+  // multi-namespace `t` as-is; the tab's own strings use the default namespace.
+  const projects = useProjectStore((s) => s.projects);
+  const activeProjectId = useProjectStore((s) => s.activeProjectId);
+  const presentationContext = notificationContextFromStores(projects, activeProjectId);
   // Scoped selectors (not a whole-store destructure) so this component only
   // re-renders on the fields it actually displays — the store also carries
   // internal poll bookkeeping (_timer/_running) that changes every 5-minute
@@ -93,6 +104,7 @@ export function NotificationsTab() {
           <ul className="space-y-2">
             {notifications.map((n) => {
               const unread = n.readAt === null;
+              const presented = presentNotification(n, t as Translate, presentationContext);
               return (
                 <li
                   key={n.id}
@@ -108,14 +120,26 @@ export function NotificationsTab() {
                       <Badge variant="secondary" className={SEVERITY_TINT[n.severity]}>
                         {t(`notificationsSeverity.${n.severity}`)}
                       </Badge>
-                      <span className="truncate font-medium">{n.title}</span>
+                      <span className="truncate font-medium">{presented.title}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{n.body}</p>
+                    <p className="text-sm text-muted-foreground">{presented.body}</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(n.createdAt).toLocaleString()}
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
+                    {presented.actions.map((action) => (
+                      <Button
+                        key={action.id}
+                        size="sm"
+                        variant="outline"
+                        disabled={action.disabled}
+                        onClick={action.run}
+                        data-testid={`notification-action-${action.id}-${n.id}`}
+                      >
+                        {action.label}
+                      </Button>
+                    ))}
                     {unread && (
                       <Button
                         size="sm"

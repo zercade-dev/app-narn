@@ -57,5 +57,42 @@
     "warning": "警告",
     "critical": "嚴重"
   },
+  "notifications": {
+    "genericTitle": "通知",
+    "viewInActivity": "在活動中檢視",
+    "aCollaborator": "一位協作者",
+    "theProvider": "AI 供應商",
+    "otherIssues_other": "{{cause}}，另有 {{count}} 個問題",
+    "cause": {
+      "noRoute": "尚未為它設定翻譯模組。",
+      "moduleDisabled": "所需的模組已關閉。",
+      "moduleNotFound": "找不到所需的模組。",
+      "unknown": "原因不明。"
+    },
+    "runStarted": {
+      "title": "{{type}}已開始",
+      "body_other": "待處理 {{count}} 個條目。"
+    },
+    "runFinished": {
+      "title": "{{type}}已完成",
+      "body_other": "已完成 {{count}} 個條目。",
+      "bodyLanguages_other": "已完成 {{count}} 個條目（{{languages}}）。"
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}}已完成，但有問題",
+      "body": "完成 {{completed}} 個，失敗 {{failed}} 個——{{cause}}。"
+    },
+    "runFailed": {
+      "title": "{{type}}失敗",
+      "body": "執行已停止：{{cause}}。"
+    },
+    "collabDigest": {
+      "title": "協作者動態",
+      "editsIn": "{{language}} {{count}} 個",
+      "edited": "{{name}} 編輯了 {{edits}}。",
+      "translated_other": "{{name}} 翻譯了 {{count}} 個條目。",
+      "both_other": "{{name}} 編輯了 {{edits}}，並翻譯了 {{count}} 個條目。"
+    }
+  },
   "signOut": "登出"
 }

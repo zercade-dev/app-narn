@@ -57,5 +57,42 @@
     "warning": "คำเตือน",
     "critical": "วิกฤต"
   },
+  "notifications": {
+    "genericTitle": "การแจ้งเตือน",
+    "viewInActivity": "ดูในกิจกรรม",
+    "aCollaborator": "ผู้ร่วมงาน",
+    "theProvider": "ผู้ให้บริการ AI",
+    "otherIssues_other": "{{cause}} และปัญหาอื่นอีก {{count}} รายการ",
+    "cause": {
+      "noRoute": "ยังไม่ได้ตั้งค่าโมดูลแปลสำหรับงานนี้",
+      "moduleDisabled": "โมดูลที่ต้องใช้ปิดอยู่",
+      "moduleNotFound": "ไม่พบโมดูลที่ต้องใช้",
+      "unknown": "ไม่ทราบสาเหตุ"
+    },
+    "runStarted": {
+      "title": "{{type}}เริ่มแล้ว",
+      "body_other": "มี {{count}} รายการที่ต้องประมวลผล"
+    },
+    "runFinished": {
+      "title": "{{type}}เสร็จสิ้น",
+      "body_other": "เสร็จแล้ว {{count}} รายการ",
+      "bodyLanguages_other": "เสร็จแล้ว {{count}} รายการใน {{languages}}"
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}}เสร็จสิ้นพร้อมปัญหา",
+      "body": "เสร็จ {{completed}} รายการ ล้มเหลว {{failed}} รายการ — {{cause}}"
+    },
+    "runFailed": {
+      "title": "{{type}}ล้มเหลว",
+      "body": "การทำงานหยุดลง: {{cause}}"
+    },
+    "collabDigest": {
+      "title": "กิจกรรมของผู้ร่วมงาน",
+      "editsIn": "{{count}} รายการใน{{language}}",
+      "edited": "{{name}} แก้ไข {{edits}}",
+      "translated_other": "{{name}} แปล {{count}} รายการ",
+      "both_other": "{{name}} แก้ไข {{edits}} และแปล {{count}} รายการ"
+    }
+  },
   "signOut": "ลงชื่อออก"
 }

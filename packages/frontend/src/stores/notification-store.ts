@@ -10,37 +10,20 @@
  * of what else is happening in the app, so there is no adaptive delay: every
  * tick waits the same POLL_MS.
  *
- * Built against the open-core /api/notifications HTTP contract only (GET
+ * Built against the open-core /api/notifications HTTP contract (GET
  * /api/notifications, POST /api/notifications/:id/read, POST
- * /api/notifications/read-all, DELETE /api/notifications/:id).
- * NotificationRecord/NotificationSeverity are redeclared locally rather than
- * imported from @zercade-dev/narn-shared — per this unit's brief: build
- * decoupled from whichever sibling unit (DB schema/storage, then the route
- * itself) was still in flight when this store was written, rather than
- * import their literal in-progress source. Both sibling units have since
- * merged to main, and `@zercade-dev/narn-shared`'s `NotificationRecord`
- * (packages/shared/src/types/notification.ts) is currently identical
- * field-for-field to the copy below — a follow-up could switch this store
- * (and NotificationsTab.tsx's `NotificationSeverity` import) to the shared
- * type now that there's no more in-flight source to decouple from; left as
- * the local copy here since swapping it wasn't part of this unit's brief.
+ * /api/notifications/read-all, POST /api/notifications/read-informational,
+ * DELETE /api/notifications/:id). Run events from the SSE stream nudge a
+ * refetch (see `onRunProgress`) so run notifications show up without waiting
+ * for the next poll.
  */
 import { create, type StoreApi } from 'zustand';
 import { apiRequest } from '../hooks/use-api.js';
+import type { NotificationRecord, NotificationSeverity } from '@zercade-dev/narn-shared';
 import { runAction } from './store-helpers.js';
+import type { RunProgressEvent } from './run-store.js';
 
-export type NotificationSeverity = 'info' | 'warning' | 'critical';
-
-export interface NotificationRecord {
-  id: string;
-  userId: string;
-  title: string;
-  body: string;
-  severity: NotificationSeverity;
-  broadcastId: string | null;
-  createdAt: string;
-  readAt: string | null;
-}
+export type { NotificationRecord, NotificationSeverity };
 
 interface NotificationsListResponse {
   notifications: NotificationRecord[];
@@ -49,6 +32,16 @@ interface NotificationsListResponse {
 
 /** Flat poll interval — matches system-status-store's IDLE_POLL_MS (5 min). */
 export const POLL_MS = 300_000;
+
+/** Wait before refetching after a run event, so the server has written the notification. */
+export const RUN_EVENT_REFETCH_MS = 1_000;
+
+/** Run statuses after which the run's notification exists. */
+const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled']);
+
+/** Runs seen `running` this session, so a start is announced once. */
+const seenRunning = new Set<string>();
+let runEventTimer: ReturnType<typeof setTimeout> | null = null;
 
 interface NotificationStore {
   notifications: NotificationRecord[];
@@ -79,6 +72,14 @@ interface NotificationStore {
   fetch: (opts?: { silent?: boolean }) => Promise<void>;
   markRead: (id: string) => Promise<void>;
   markAllRead: () => Promise<void>;
+  /** Marks everything read except notifications about problems. */
+  markInformationalRead: () => Promise<void>;
+  /**
+   * Refetches once, about a second later, when a run starts running for the first
+   * time or reaches a terminal status; ordinary progress is ignored. A burst of
+   * events shares one refetch.
+   */
+  onRunProgress: (e: RunProgressEvent) => void;
   dismiss: (id: string) => Promise<void>;
   start: () => void;
   stop: () => void;
@@ -133,6 +134,27 @@ export const useNotificationStore = create<NotificationStore>()((set, get) => ({
 
   markAllRead: () =>
     mutateThenRefetch(set, get, () => apiRequest('/notifications/read-all', { method: 'POST' })),
+
+  markInformationalRead: () =>
+    mutateThenRefetch(set, get, () =>
+      apiRequest('/notifications/read-informational', { method: 'POST' }),
+    ),
+
+  onRunProgress: (e) => {
+    let relevant = false;
+    if (TERMINAL_STATUSES.has(e.status)) {
+      seenRunning.delete(e.runId);
+      relevant = true;
+    } else if (e.status === 'running' && !seenRunning.has(e.runId)) {
+      seenRunning.add(e.runId);
+      relevant = true;
+    }
+    if (!relevant || runEventTimer !== null) return;
+    runEventTimer = setTimeout(() => {
+      runEventTimer = null;
+      void get().fetch({ silent: true });
+    }, RUN_EVENT_REFETCH_MS);
+  },
 
   dismiss: (id: string) =>
     mutateThenRefetch(set, get, () => apiRequest(`/notifications/${id}`, { method: 'DELETE' })),

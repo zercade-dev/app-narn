@@ -57,5 +57,42 @@
     "warning": "Cảnh báo",
     "critical": "Nghiêm trọng"
   },
+  "notifications": {
+    "genericTitle": "Thông báo",
+    "viewInActivity": "Xem trong Hoạt động",
+    "aCollaborator": "Một cộng tác viên",
+    "theProvider": "nhà cung cấp AI",
+    "otherIssues_other": "{{cause}} và {{count}} vấn đề khác",
+    "cause": {
+      "noRoute": "chưa có mô-đun dịch nào được thiết lập cho việc này.",
+      "moduleDisabled": "mô-đun cần dùng đang tắt.",
+      "moduleNotFound": "không tìm thấy mô-đun cần dùng.",
+      "unknown": "chưa rõ nguyên nhân."
+    },
+    "runStarted": {
+      "title": "{{type}} đã bắt đầu",
+      "body_other": "{{count}} mục cần xử lý."
+    },
+    "runFinished": {
+      "title": "{{type}} đã hoàn tất",
+      "body_other": "Đã xong {{count}} mục.",
+      "bodyLanguages_other": "Đã xong {{count}} mục sang {{languages}}."
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}} đã hoàn tất nhưng có vấn đề",
+      "body": "Xong {{completed}}, lỗi {{failed}} — {{cause}}."
+    },
+    "runFailed": {
+      "title": "{{type}} thất bại",
+      "body": "Lượt chạy đã dừng: {{cause}}."
+    },
+    "collabDigest": {
+      "title": "Hoạt động của cộng tác viên",
+      "editsIn": "{{count}} mục ở {{language}}",
+      "edited": "{{name}} đã chỉnh sửa {{edits}}.",
+      "translated_other": "{{name}} đã dịch {{count}} mục.",
+      "both_other": "{{name}} đã chỉnh sửa {{edits}} và dịch {{count}} mục."
+    }
+  },
   "signOut": "Đăng xuất"
 }

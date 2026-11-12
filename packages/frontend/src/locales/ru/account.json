@@ -60,5 +60,60 @@
     "warning": "Предупреждение",
     "critical": "Критично"
   },
+  "notifications": {
+    "genericTitle": "Уведомление",
+    "viewInActivity": "Открыть в разделе «Активность»",
+    "aCollaborator": "Один из соавторов",
+    "theProvider": "ИИ-провайдер",
+    "otherIssues_one": "{{cause}} и ещё {{count}} проблема",
+    "otherIssues_few": "{{cause}} и ещё {{count}} проблемы",
+    "otherIssues_many": "{{cause}} и ещё {{count}} проблем",
+    "otherIssues_other": "{{cause}} и ещё {{count}} проблемы",
+    "cause": {
+      "noRoute": "для неё не настроен модуль перевода.",
+      "moduleDisabled": "нужный модуль отключён.",
+      "moduleNotFound": "нужный модуль не найден.",
+      "unknown": "причина неизвестна."
+    },
+    "runStarted": {
+      "title": "Запущено: {{type}}",
+      "body_one": "{{count}} запись в обработке.",
+      "body_few": "{{count}} записи в обработке.",
+      "body_many": "{{count}} записей в обработке.",
+      "body_other": "{{count}} записи в обработке."
+    },
+    "runFinished": {
+      "title": "Завершено: {{type}}",
+      "body_one": "Обработана {{count}} запись.",
+      "body_few": "Обработано {{count}} записи.",
+      "body_many": "Обработано {{count}} записей.",
+      "body_other": "Обработано {{count}} записи.",
+      "bodyLanguages_one": "Обработана {{count}} запись: {{languages}}.",
+      "bodyLanguages_few": "Обработано {{count}} записи: {{languages}}.",
+      "bodyLanguages_many": "Обработано {{count}} записей: {{languages}}.",
+      "bodyLanguages_other": "Обработано {{count}} записи: {{languages}}."
+    },
+    "runFinishedWithProblems": {
+      "title": "Завершено с проблемами: {{type}}",
+      "body": "Выполнено: {{completed}}, с ошибкой: {{failed}} — {{cause}}."
+    },
+    "runFailed": {
+      "title": "Ошибка: {{type}}",
+      "body": "Запуск остановлен: {{cause}}."
+    },
+    "collabDigest": {
+      "title": "Активность соавторов",
+      "editsIn": "{{count}} на языке {{language}}",
+      "edited": "{{name}} изменил(а): {{edits}}.",
+      "translated_one": "{{name}} перевёл(а) {{count}} запись.",
+      "translated_few": "{{name}} перевёл(а) {{count}} записи.",
+      "translated_many": "{{name}} перевёл(а) {{count}} записей.",
+      "translated_other": "{{name}} перевёл(а) {{count}} записи.",
+      "both_one": "{{name}} изменил(а): {{edits}}, и перевёл(а) {{count}} запись.",
+      "both_few": "{{name}} изменил(а): {{edits}}, и перевёл(а) {{count}} записи.",
+      "both_many": "{{name}} изменил(а): {{edits}}, и перевёл(а) {{count}} записей.",
+      "both_other": "{{name}} изменил(а): {{edits}}, и перевёл(а) {{count}} записи."
+    }
+  },
   "signOut": "Выйти"
 }
