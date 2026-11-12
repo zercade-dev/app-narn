@@ -123,6 +123,12 @@
     "freewayRerouted": "{{task}}: ตอนนี้ใช้โมเดลฟรี {{from}} ไม่ได้ — กำลังลอง {{to}} แทน",
     "freewayMinuteWait": "{{task}}: โมเดลฟรี {{model}} ถึงขีดจำกัดต่อนาทีแล้ว — รอ {{seconds}} วินาทีก่อนทำต่อ"
   },
+  "chat": {
+    "dispatch": "ส่งข้อความถึงผู้ช่วยแล้ว ({{model}})",
+    "done": "ผู้ช่วยตอบเสร็จใน {{seconds}} วินาที ({{model}})",
+    "doneCancelled": "ยกเลิกคำตอบของผู้ช่วยหลังผ่านไป {{seconds}} วินาที ({{model}})",
+    "doneFailed": "คำตอบของผู้ช่วยล้มเหลวหลังผ่านไป {{seconds}} วินาที ({{model}})"
+  },
   "module": {
     "loaded": "โหลดโมดูล {{module}} แล้ว",
     "instanceRegistered": "เพิ่มการตั้งค่า {{instance}} แล้ว",

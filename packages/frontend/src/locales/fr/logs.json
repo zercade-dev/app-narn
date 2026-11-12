@@ -123,6 +123,12 @@
     "freewayRerouted": "{{task}} : le modèle gratuit {{from}} n’est pas disponible pour le moment — essai avec {{to}} à la place.",
     "freewayMinuteWait": "{{task}} : le modèle gratuit {{model}} a atteint sa limite par minute — attente de {{seconds}} s avant de continuer."
   },
+  "chat": {
+    "dispatch": "Message envoyé à l’assistant ({{model}}).",
+    "done": "Réponse de l’assistant terminée en {{seconds}} s ({{model}}).",
+    "doneCancelled": "Réponse de l’assistant annulée après {{seconds}} s ({{model}}).",
+    "doneFailed": "La réponse de l’assistant a échoué après {{seconds}} s ({{model}})."
+  },
   "module": {
     "loaded": "Module {{module}} chargé.",
     "instanceRegistered": "Configuration {{instance}} ajoutée.",

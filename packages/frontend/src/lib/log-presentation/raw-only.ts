@@ -70,6 +70,7 @@ export const RAW_ONLY_KEYS: ReadonlySet<string> = new Set<string>([
   'translation:quota-sweep-failed',
   'translation:quota-sweep-skipped',
 
+  'chat:prompt',
   'chat:orphaned-runs-swept',
   'chat:orphan-sweep-failed',
   'csp:invalid-connect-src-dropped',

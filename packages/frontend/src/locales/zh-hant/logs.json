@@ -123,6 +123,12 @@
     "freewayRerouted": "{{task}}：免費模型 {{from}} 目前無法使用——正在改用 {{to}} 嘗試。",
     "freewayMinuteWait": "{{task}}：免費模型 {{model}} 已達到每分鐘上限——等待 {{seconds}} 秒後繼續。"
   },
+  "chat": {
+    "dispatch": "已向助理傳送訊息（{{model}}）。",
+    "done": "助理已在 {{seconds}} 秒內完成回覆（{{model}}）。",
+    "doneCancelled": "助理的回覆在 {{seconds}} 秒後已取消（{{model}}）。",
+    "doneFailed": "助理的回覆在 {{seconds}} 秒後失敗（{{model}}）。"
+  },
   "module": {
     "loaded": "已載入 {{module}} 模組。",
     "instanceRegistered": "已新增 {{instance}} 設定。",

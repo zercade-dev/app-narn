@@ -123,6 +123,12 @@
     "freewayRerouted": "{{task}}: model gratis {{from}} sedang tidak tersedia — mencoba {{to}} sebagai gantinya.",
     "freewayMinuteWait": "{{task}}: model gratis {{model}} mencapai batas per menitnya — menunggu {{seconds}} dtk sebelum melanjutkan."
   },
+  "chat": {
+    "dispatch": "Pesan dikirim ke asisten ({{model}}).",
+    "done": "Balasan asisten selesai dalam {{seconds}} dtk ({{model}}).",
+    "doneCancelled": "Balasan asisten dibatalkan setelah {{seconds}} dtk ({{model}}).",
+    "doneFailed": "Balasan asisten gagal setelah {{seconds}} dtk ({{model}})."
+  },
   "module": {
     "loaded": "Modul {{module}} dimuat.",
     "instanceRegistered": "Konfigurasi {{instance}} ditambahkan.",

@@ -123,6 +123,12 @@
     "freewayRerouted": "{{task}}：無料モデル{{from}}は現在利用できません。代わりに{{to}}を試しています。",
     "freewayMinuteWait": "{{task}}：無料モデル{{model}}が1分あたりの上限に達しました。{{seconds}}秒待ってから続行します。"
   },
+  "chat": {
+    "dispatch": "アシスタントにメッセージを送信しました（{{model}}）。",
+    "done": "アシスタントの応答が{{seconds}}秒で完了しました（{{model}}）。",
+    "doneCancelled": "アシスタントの応答を{{seconds}}秒後にキャンセルしました（{{model}}）。",
+    "doneFailed": "アシスタントの応答が{{seconds}}秒後に失敗しました（{{model}}）。"
+  },
   "module": {
     "loaded": "{{module}}モジュールを読み込みました。",
     "instanceRegistered": "{{instance}}の設定を追加しました。",

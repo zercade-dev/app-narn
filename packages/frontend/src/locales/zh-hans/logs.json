@@ -123,6 +123,12 @@
     "freewayRerouted": "{{task}}：免费模型 {{from}} 目前不可用——正在改用 {{to}} 尝试。",
     "freewayMinuteWait": "{{task}}：免费模型 {{model}} 已达到每分钟上限——等待 {{seconds}} 秒后继续。"
   },
+  "chat": {
+    "dispatch": "已向助手发送消息（{{model}}）。",
+    "done": "助手已在 {{seconds}} 秒内完成回复（{{model}}）。",
+    "doneCancelled": "助手的回复在 {{seconds}} 秒后已取消（{{model}}）。",
+    "doneFailed": "助手的回复在 {{seconds}} 秒后失败（{{model}}）。"
+  },
   "module": {
     "loaded": "已加载 {{module}} 模块。",
     "instanceRegistered": "已添加 {{instance}} 配置。",

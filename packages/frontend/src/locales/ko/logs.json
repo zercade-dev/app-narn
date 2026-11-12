@@ -123,6 +123,12 @@
     "freewayRerouted": "{{task}}: 지금은 {{from}} 무료 모델을 쓸 수 없어요 — 대신 {{to}} 모델로 시도하고 있어요.",
     "freewayMinuteWait": "{{task}}: {{model}} 무료 모델이 분당 한도에 도달했어요 — {{seconds}}초 기다린 뒤 계속해요."
   },
+  "chat": {
+    "dispatch": "어시스턴트에게 메시지를 보냈어요 ({{model}} 모델).",
+    "done": "어시스턴트 응답이 {{seconds}}초 만에 끝났어요 ({{model}} 모델).",
+    "doneCancelled": "어시스턴트 응답이 {{seconds}}초 뒤 취소되었어요 ({{model}} 모델).",
+    "doneFailed": "어시스턴트 응답이 {{seconds}}초 뒤 실패했어요 ({{model}} 모델)."
+  },
   "module": {
     "loaded": "{{module}} 모듈을 불러왔어요.",
     "instanceRegistered": "{{instance}} 설정을 추가했어요.",

@@ -64,6 +64,18 @@ const clockTime = (v: unknown): string => {
   }
 };
 
+/** A duration in ms as seconds with at most one decimal ("2.4"), in the UI language. */
+const secondsText = (v: unknown): string => {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return '?';
+  try {
+    return new Intl.NumberFormat([i18n.resolvedLanguage ?? 'en', 'en'], {
+      maximumFractionDigits: 1,
+    }).format(v / 1000);
+  } catch {
+    return String(Math.round(v / 1000));
+  }
+};
+
 /** `count` defaults to 1 — a non-aggregated trace represents a single item. */
 const failureVars = (meta: LogMeta) => ({
   count: num(meta.count, 1),
@@ -409,6 +421,23 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     (acc, run) => Object.assign(acc, engineRunPresenters(run)),
     {},
   ),
+
+  // Verbose chat diagnostics (opt-in per turn). The prompt itself is raw-only.
+  'chat:dispatch': {
+    key: 'chat.dispatch',
+    vars: (m) => ({ model: str(m.model) }),
+  },
+  'chat:done': {
+    key: (m) =>
+      m.outcome === 'failed'
+        ? 'chat.doneFailed'
+        : m.outcome === 'cancelled'
+          ? 'chat.doneCancelled'
+          : 'chat.done',
+    vars: (m) => ({ model: str(m.model), seconds: secondsText(m.totalMs) }),
+    // The provider's error message is only in the raw entry.
+    action: (m) => (m.outcome === 'failed' ? switchToRaw('action.switchToRaw') : undefined),
+  },
 
   'module:loaded': { key: 'module.loaded', vars: (m) => ({ module: str(m.moduleId) }) },
   'module:instance-registered': {

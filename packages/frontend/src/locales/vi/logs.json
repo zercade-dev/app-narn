@@ -123,6 +123,12 @@
     "freewayRerouted": "{{task}}: mô hình miễn phí {{from}} hiện không dùng được — đang thử {{to}} thay thế.",
     "freewayMinuteWait": "{{task}}: mô hình miễn phí {{model}} đã chạm giới hạn mỗi phút — chờ {{seconds}} giây rồi tiếp tục."
   },
+  "chat": {
+    "dispatch": "Đã gửi tin nhắn tới trợ lý ({{model}}).",
+    "done": "Trợ lý đã trả lời xong trong {{seconds}} giây ({{model}}).",
+    "doneCancelled": "Đã hủy câu trả lời của trợ lý sau {{seconds}} giây ({{model}}).",
+    "doneFailed": "Câu trả lời của trợ lý đã thất bại sau {{seconds}} giây ({{model}})."
+  },
   "module": {
     "loaded": "Đã nạp mô-đun {{module}}.",
     "instanceRegistered": "Đã thêm cấu hình {{instance}}.",
