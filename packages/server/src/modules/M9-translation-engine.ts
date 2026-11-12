@@ -1330,6 +1330,8 @@ export class TranslationEngine {
     ) {
       this.queuedRetryRequests.set(runId, retryRequest);
       source.status = RunStatusCode.Queued;
+      // A fresh attempt: drop the previous stop's cause (see startRun).
+      delete source.stopCause;
       source.queuePosition = this.nextQueuePosition(projectId);
       this.queuedSessions.set(runId, sessionId);
       this.queuedTenants.set(runId, getCurrentTenant());
@@ -2190,6 +2192,9 @@ export class TranslationEngine {
       status.status = RunStatusCode.Running;
       delete status.finishedAt;
       delete status.queuePosition;
+      // A fresh attempt: the previous stop's cause (e.g. an auth cancel) no
+      // longer describes this run, however this attempt ends.
+      delete status.stopCause;
       // A run adopted from a PRIOR process generation still carries its
       // pre-restart `startedAt`, which is exactly what `sweepOrphanedRuns` reads
       // as "left behind by a dead process" — a sweep firing during this
