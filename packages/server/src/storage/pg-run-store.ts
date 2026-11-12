@@ -106,7 +106,9 @@ export class PgRunStore implements RunStore {
       total: run.total,
       tenantId: getCurrentTenant()?.userId,
     });
-    void notifyRunTransition(getPool(), prevStatus, run);
+    // `getPool` is passed uncalled so even a pool lookup that throws is caught
+    // inside the notifier and cannot reject this write.
+    void notifyRunTransition(getPool, prevStatus, run);
   }
 
   /**

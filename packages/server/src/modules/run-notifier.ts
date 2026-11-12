@@ -37,10 +37,12 @@ function isEnded(status: RunStatusCode | undefined): boolean {
  * Which notification (if any) a write of `run` produces, given the status the
  * stored row had before (`undefined` for a new row).
  *
- * - Chat runs and empty runs (`total === 0`) never notify.
+ * - Chat runs never notify.
  * - Started: the run becomes Running from anything but Running/Paused
- *   (new, pending, queued, or an ended run being retried). Born read.
+ *   (new, pending, queued, or an ended run being retried), whatever its
+ *   total (some runs learn their total after starting). Born read.
  * - Ended (only on the first write of an ended status):
+ *   - Completed with nothing in scope (`total` and `failed` both 0): nothing.
  *   - Completed with no failed strings: finished.
  *   - Completed with some failed strings: finished with problems (warning).
  *   - Completed with every string failed, Failed, or Cancelled by the app
@@ -51,7 +53,7 @@ export function decideRunNotification(
   prev: RunStatusCode | undefined,
   run: RunStatus,
 ): RunNotificationDecision | null {
-  if (run.kind === 'chat' || run.total === 0) return null;
+  if (run.kind === 'chat') return null;
   const make = (
     kind: RunNotificationDecision['kind'],
     severity: NotificationSeverity,
@@ -70,6 +72,7 @@ export function decideRunNotification(
 
   switch (run.status) {
     case RunStatusCode.Completed:
+      if (run.total === 0 && run.failed === 0) return null;
       if (run.failed === 0) return make('run-finished', 'info');
       if (run.failed < run.total) return make('run-finished-with-problems', 'warning');
       return make('run-failed', 'critical');
@@ -119,10 +122,11 @@ function aggregateCauses(run: RunStatus): RunNotificationData['causes'] {
 /**
  * Writes the notification {@link decideRunNotification} picks for this write,
  * for the run's starter. Never rejects: a failure is logged and dropped, so a
- * notification can never fail or slow a run's status write.
+ * notification can never fail or slow a run's status write. `pool` may be a
+ * getter, resolved inside the guard so a getter that throws is caught too.
  */
 export async function notifyRunTransition(
-  pool: Queryable,
+  pool: Queryable | (() => Queryable),
   prev: RunStatusCode | undefined,
   run: RunStatus,
 ): Promise<void> {
@@ -130,7 +134,8 @@ export async function notifyRunTransition(
     if (!run.createdBy) return;
     const decision = decideRunNotification(prev, run);
     if (!decision) return;
-    await insertNotificationForUser(pool, run.createdBy, decision);
+    const db = typeof pool === 'function' ? pool() : pool;
+    await insertNotificationForUser(db, run.createdBy, decision);
   } catch (err) {
     // The error name only: a driver message can quote row data.
     logger.warn('notifications:run-write-failed', {
