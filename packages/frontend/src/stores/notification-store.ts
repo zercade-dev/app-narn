@@ -182,6 +182,11 @@ export const useNotificationStore = create<NotificationStore>()((set, get) => ({
   stop: () => {
     const t = get()._timer;
     if (t !== null) clearTimeout(t);
+    // Drop run-event state too, so a pending refetch cannot fire for a signed-out
+    // session and a restarted store announces already-seen runs again.
+    if (runEventTimer !== null) clearTimeout(runEventTimer);
+    runEventTimer = null;
+    seenRunning.clear();
     set({ _timer: null, _running: false });
   },
 }));
