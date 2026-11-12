@@ -54,6 +54,8 @@ interface ProjectStore {
   projects: Project[];
   activeProjectId: string | null;
   loading: boolean;
+  /** True once a project-list fetch has succeeded (even with an empty list). Not persisted. */
+  loaded: boolean;
   error: string | null;
   /** Per-project access for the current user; refetch-derived, not persisted. */
   access: Record<string, ProjectAccessInfo>;
@@ -123,6 +125,7 @@ export const useProjectStore = create<ProjectStore>()(
       projects: [],
       activeProjectId: null,
       loading: false,
+      loaded: false,
       error: null,
       access: {},
       ownerNicknames: {},
@@ -136,6 +139,7 @@ export const useProjectStore = create<ProjectStore>()(
             const data = await apiRequest<ProjectListResponse>('/projects');
             set((s) => ({
               projects: data.projects,
+              loaded: true,
               // Adopt the server's active id only on the *initial* load (no client
               // active project chosen yet). On later fetches keep the current
               // client active id, so Back/Forward navigation (which sets the

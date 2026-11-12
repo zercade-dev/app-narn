@@ -8,6 +8,12 @@
   "switchToDark": "다크 모드로 전환",
   "languageTitle": "언어",
   "languageDescription": "사용자 인터페이스의 언어예요.",
+  "uiModeLabel": "인터페이스 모드",
+  "uiModeSimple": "간단",
+  "uiModeAdvanced": "고급",
+  "uiModeDescription": "간단 모드는 번역에 집중할 수 있도록 대부분의 탐색 메뉴를 숨깁니다. 고급 모드는 모든 것을 표시합니다.",
+  "tourOffersLabel": "가이드 투어 제안",
+  "tourOffersDescription": "앱의 각 부분을 처음 열 때 간단한 안내를 표시합니다.",
   "preview": "미리 보기",
   "previewHint": "선택한 테마로 그린 예시 컨트롤이에요.",
   "previewSamples": {

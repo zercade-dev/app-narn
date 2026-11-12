@@ -8,6 +8,12 @@
   "switchToDark": "Passa alla modalità scura",
   "languageTitle": "Lingua",
   "languageDescription": "Lingua dell'interfaccia utente.",
+  "uiModeLabel": "Modalità interfaccia",
+  "uiModeSimple": "Semplice",
+  "uiModeAdvanced": "Avanzata",
+  "uiModeDescription": "La modalità semplice nasconde gran parte della navigazione per concentrarti sulla traduzione. Quella avanzata mostra tutto.",
+  "tourOffersLabel": "Proponi tour guidati",
+  "tourOffersDescription": "Mostra una breve introduzione la prima volta che apri una parte dell'app.",
   "preview": "Anteprima",
   "previewHint": "Elementi di esempio resi con il tema selezionato.",
   "previewSamples": {

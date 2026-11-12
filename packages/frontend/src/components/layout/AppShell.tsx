@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { RestartBanners } from './RestartBanners.js';
 import { SlotRibbon } from './SlotRibbon.js';
 import { Sidebar } from './Sidebar.js';
+import { ModeSwitch } from './ModeSwitch.js';
 import { ConsolePanel } from './ConsolePanel.js';
 import { ConfigTab } from '../config/ConfigTab.js';
 import { DataTab } from '../config/DataTab.js';
@@ -462,6 +463,7 @@ export function AppShell() {
             <RestartBanners />
             <header className="flex items-center gap-1 px-2 py-1 border-b border-border">
               <SidebarTrigger data-testid="sidebar-trigger" />
+              <ModeSwitch />
             </header>
             <CopilotModelsProvider enabled={copilotGloballyEnabled}>
               {isMobile &&
