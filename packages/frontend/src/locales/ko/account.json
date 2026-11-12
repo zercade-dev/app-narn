@@ -63,6 +63,8 @@
   "notifications": {
     "genericTitle": "알림",
     "viewInActivity": "활동에서 보기",
+    "openProject": "프로젝트 열기",
+    "inProject": "프로젝트: {{project}}",
     "aCollaborator": "공동 작업자",
     "theProvider": "AI 제공업체",
     "otherIssues_other": "{{cause}} 외 문제 {{count}}건",
@@ -94,7 +96,8 @@
       "editsIn": "{{language}} {{count}}개",
       "edited": "{{name}}님이 {{edits}}을(를) 편집했어요.",
       "translated_other": "{{name}}님이 {{count}}개를 번역했어요.",
-      "both_other": "{{name}}님이 {{edits}}을(를) 편집하고 {{count}}개를 번역했어요."
+      "both_other": "{{name}}님이 {{edits}}을(를) 편집하고 {{count}}개를 번역했어요.",
+      "translatedLanguages": "번역 언어: {{languages}}."
     }
   },
   "signOut": "로그아웃"

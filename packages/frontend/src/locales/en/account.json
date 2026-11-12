@@ -64,6 +64,8 @@
   "notifications": {
     "genericTitle": "Notification",
     "viewInActivity": "View in Activity",
+    "openProject": "Open project",
+    "inProject": "Project: {{project}}",
     "aCollaborator": "A collaborator",
     "theProvider": "the AI provider",
     "otherIssues_one": "{{cause}} and {{count}} other issue",
@@ -101,7 +103,8 @@
       "translated_one": "{{name}} translated {{count}} string.",
       "translated_other": "{{name}} translated {{count}} strings.",
       "both_one": "{{name}} edited {{edits}} and translated {{count}} string.",
-      "both_other": "{{name}} edited {{edits}} and translated {{count}} strings."
+      "both_other": "{{name}} edited {{edits}} and translated {{count}} strings.",
+      "translatedLanguages": "Translated into {{languages}}."
     }
   },
   "signOut": "Sign out"

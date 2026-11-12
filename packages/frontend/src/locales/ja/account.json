@@ -63,6 +63,8 @@
   "notifications": {
     "genericTitle": "通知",
     "viewInActivity": "アクティビティで表示",
+    "openProject": "プロジェクトを開く",
+    "inProject": "プロジェクト: {{project}}",
     "aCollaborator": "共同作業者",
     "theProvider": "AIプロバイダー",
     "otherIssues_other": "{{cause}}ほか、{{count}}件の問題",
@@ -94,7 +96,8 @@
       "editsIn": "{{language}}で{{count}}件",
       "edited": "{{name}}が{{edits}}を編集しました。",
       "translated_other": "{{name}}が{{count}}件を翻訳しました。",
-      "both_other": "{{name}}が{{edits}}を編集し、{{count}}件を翻訳しました。"
+      "both_other": "{{name}}が{{edits}}を編集し、{{count}}件を翻訳しました。",
+      "translatedLanguages": "翻訳先: {{languages}}。"
     }
   },
   "signOut": "サインアウト"

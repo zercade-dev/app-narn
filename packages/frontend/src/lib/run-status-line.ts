@@ -50,8 +50,18 @@ function pick(runs: RunStatus[]): RunStatus | undefined {
   return best?.run;
 }
 
-export function statusLineFor(runs: RunStatus[], t: Translate): string | null {
-  const run = pick(runs);
+/**
+ * `activeProjectId` (when given) restricts the line to that project's runs, so a
+ * project switch never shows the previous project's run while the store catches up.
+ */
+export function statusLineFor(
+  runs: RunStatus[],
+  t: Translate,
+  activeProjectId?: string | null,
+): string | null {
+  const run = pick(
+    activeProjectId === undefined ? runs : runs.filter((r) => r.projectId === activeProjectId),
+  );
   if (!run) return null;
   const type = t(`strings:${RUN_TYPE_KEY[runTypeLabel(run.kind)]}`);
 

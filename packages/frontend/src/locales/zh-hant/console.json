@@ -1,6 +1,8 @@
 {
   "title": "主控台",
   "empty": "尚無日誌。",
+  "debugInRaw": "偵錯行會顯示在原始記錄中。",
+  "debugShowRaw": "顯示原始記錄",
   "filter_all": "全部",
   "filter_error": "錯誤",
   "filter_warn": "警告",

@@ -1,6 +1,8 @@
 {
   "title": "CONSOLE",
   "empty": "Ancora nessuna riga di log.",
+  "debugInRaw": "Le righe di debug compaiono nel log grezzo.",
+  "debugShowRaw": "Mostra log grezzo",
   "filter_all": "Tutti",
   "filter_error": "Errore",
   "filter_warn": "Avviso",

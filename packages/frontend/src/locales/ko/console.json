@@ -1,6 +1,8 @@
 {
   "title": "콘솔",
   "empty": "아직 로그가 없어요.",
+  "debugInRaw": "디버그 줄은 원본 로그에 표시됩니다.",
+  "debugShowRaw": "원본 로그 보기",
   "filter_all": "전체",
   "filter_error": "오류",
   "filter_warn": "경고",

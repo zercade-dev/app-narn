@@ -63,6 +63,8 @@
   "notifications": {
     "genericTitle": "Notifikasi",
     "viewInActivity": "Lihat di Aktivitas",
+    "openProject": "Buka proyek",
+    "inProject": "Proyek: {{project}}",
     "aCollaborator": "Seorang kolaborator",
     "theProvider": "penyedia AI",
     "otherIssues_other": "{{cause}} dan {{count}} masalah lainnya",
@@ -94,7 +96,8 @@
       "editsIn": "{{count}} di {{language}}",
       "edited": "{{name}} mengedit {{edits}}.",
       "translated_other": "{{name}} menerjemahkan {{count}} entri.",
-      "both_other": "{{name}} mengedit {{edits}} dan menerjemahkan {{count}} entri."
+      "both_other": "{{name}} mengedit {{edits}} dan menerjemahkan {{count}} entri.",
+      "translatedLanguages": "Diterjemahkan ke {{languages}}."
     }
   },
   "signOut": "Keluar"

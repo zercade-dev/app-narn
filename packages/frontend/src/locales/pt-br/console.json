@@ -1,6 +1,8 @@
 {
   "title": "CONSOLE",
   "empty": "Ainda não há linhas de log.",
+  "debugInRaw": "As linhas de depuração aparecem no registro bruto.",
+  "debugShowRaw": "Mostrar registro bruto",
   "filter_all": "Todos",
   "filter_error": "Erro",
   "filter_warn": "Aviso",

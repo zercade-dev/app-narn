@@ -64,6 +64,8 @@
   "notifications": {
     "genericTitle": "Notification",
     "viewInActivity": "Voir dans l'activité",
+    "openProject": "Ouvrir le projet",
+    "inProject": "Projet : {{project}}",
     "aCollaborator": "Un collaborateur",
     "theProvider": "le fournisseur d'IA",
     "otherIssues_one": "{{cause}} et {{count}} autre problème",
@@ -101,7 +103,8 @@
       "translated_one": "{{name}} a traduit {{count}} texte.",
       "translated_other": "{{name}} a traduit {{count}} textes.",
       "both_one": "{{name}} a modifié {{edits}} et traduit {{count}} texte.",
-      "both_other": "{{name}} a modifié {{edits}} et traduit {{count}} textes."
+      "both_other": "{{name}} a modifié {{edits}} et traduit {{count}} textes.",
+      "translatedLanguages": "Traduit en {{languages}}."
     }
   },
   "signOut": "Se déconnecter"

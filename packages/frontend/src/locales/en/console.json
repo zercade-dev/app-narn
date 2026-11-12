@@ -1,6 +1,8 @@
 {
   "title": "CONSOLE",
   "empty": "No log entries yet.",
+  "debugInRaw": "Debug lines appear in the Raw log.",
+  "debugShowRaw": "Show Raw log",
   "filter_all": "All",
   "filter_error": "Error",
   "filter_warn": "Warn",

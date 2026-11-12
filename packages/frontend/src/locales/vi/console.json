@@ -1,6 +1,8 @@
 {
   "title": "BẢNG NHẬT KÝ",
   "empty": "Chưa có dòng nhật ký nào.",
+  "debugInRaw": "Các dòng gỡ lỗi xuất hiện trong nhật ký thô.",
+  "debugShowRaw": "Hiện nhật ký thô",
   "filter_all": "Tất cả",
   "filter_error": "Lỗi",
   "filter_warn": "Cảnh báo",

@@ -1,6 +1,8 @@
 {
   "title": "KONSOL",
   "empty": "Belum ada baris log.",
+  "debugInRaw": "Baris awakutu muncul di log mentah.",
+  "debugShowRaw": "Tampilkan log mentah",
   "filter_all": "Semua",
   "filter_error": "Galat",
   "filter_warn": "Peringatan",

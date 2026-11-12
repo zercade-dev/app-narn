@@ -1,6 +1,8 @@
 {
   "title": "コンソール",
   "empty": "ログエントリはまだありません。",
+  "debugInRaw": "デバッグ行は生ログに表示されます。",
+  "debugShowRaw": "生ログを表示",
   "filter_all": "すべて",
   "filter_error": "エラー",
   "filter_warn": "警告",

@@ -16,6 +16,7 @@ import { useVaultStore } from '../../stores/vault-store.js';
 import { vaultLockedEvent } from '../../lib/vault-events.js';
 import { useUiSettings, type ConsoleFilter } from '../../stores/ui-settings-store.js';
 import { useRunStore } from '../../stores/run-store.js';
+import { useProjectStore } from '../../stores/project-store.js';
 import { statusLineFor } from '../../lib/run-status-line.js';
 import type { Translate } from '../../lib/log-presentation/types.js';
 import { toast } from '@/lib/toast';
@@ -95,7 +96,8 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // The status line names the run type, which lives in the `strings` namespace.
   const { t: tStatus } = useTranslation(['console', 'strings']);
   const runs = useRunStore((s) => s.runs);
-  const statusLine = statusLineFor(runs, tStatus as Translate);
+  const activeProjectId = useProjectStore((s) => s.activeProjectId);
+  const statusLine = statusLineFor(runs, tStatus as Translate, activeProjectId);
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const vaultExists = useVaultStore((s) => s.hasVault);
   const {
@@ -285,7 +287,9 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // entries arrived so the "Jump to latest" affordance can appear. Keyed on the
   // newest entry's id (not just length): the store caps entries at a fixed max,
   // so under heavy logging the length stops changing while content still does.
-  const newestEntryId = entries.length > 0 ? entries[entries.length - 1].id : null;
+  // Keyed on the newest VISIBLE entry: a hidden raw-only line in Friendly must
+  // not raise "Jump to latest" with nothing new to see.
+  const newestEntryId = visibleEntries.length > 0 ? visibleEntries.at(-1)!.id : null;
   useEffect(() => {
     if (!open || visibleEntries.length === 0) return;
     if (pinnedToBottom) {
@@ -628,7 +632,24 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                   {t('droppedEntries', { count: totalDropped })}
                 </div>
               )}
-              {groups.length === 0 && (
+              {groups.length === 0 && !raw && consoleFilter === 'debug' && (
+                <div
+                  data-testid="console-debug-hint"
+                  className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60"
+                >
+                  <span>{t('debugInRaw')}</span>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    className="h-6 text-[10px]"
+                    onClick={() => setConsoleRawMode(true)}
+                    data-testid="console-debug-show-raw"
+                  >
+                    {t('debugShowRaw')}
+                  </Button>
+                </div>
+              )}
+              {groups.length === 0 && !(!raw && consoleFilter === 'debug') && (
                 <div data-testid="console-empty" className="px-3 py-2 text-muted-foreground/60">
                   {t('empty')}
                 </div>

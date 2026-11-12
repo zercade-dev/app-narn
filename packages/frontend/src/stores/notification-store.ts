@@ -142,14 +142,22 @@ export const useNotificationStore = create<NotificationStore>()((set, get) => ({
 
   onRunProgress: (e) => {
     let relevant = false;
+    let terminal = false;
     if (TERMINAL_STATUSES.has(e.status)) {
       seenRunning.delete(e.runId);
       relevant = true;
+      terminal = true;
     } else if (e.status === 'running' && !seenRunning.has(e.runId)) {
       seenRunning.add(e.runId);
       relevant = true;
     }
-    if (!relevant || runEventTimer !== null) return;
+    if (!relevant) return;
+    if (runEventTimer !== null) {
+      // A pending refetch may fire before this run's end row exists, so a
+      // terminal event pushes it back; a start event rides the pending one.
+      if (!terminal) return;
+      clearTimeout(runEventTimer);
+    }
     runEventTimer = setTimeout(() => {
       runEventTimer = null;
       void get().fetch({ silent: true });

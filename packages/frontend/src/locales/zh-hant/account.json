@@ -63,6 +63,8 @@
   "notifications": {
     "genericTitle": "通知",
     "viewInActivity": "在活動中檢視",
+    "openProject": "開啟專案",
+    "inProject": "專案：{{project}}",
     "aCollaborator": "一位協作者",
     "theProvider": "AI 供應商",
     "otherIssues_other": "{{cause}}，另有 {{count}} 個問題",
@@ -94,7 +96,8 @@
       "editsIn": "{{language}} {{count}} 個",
       "edited": "{{name}} 編輯了 {{edits}}。",
       "translated_other": "{{name}} 翻譯了 {{count}} 個條目。",
-      "both_other": "{{name}} 編輯了 {{edits}}，並翻譯了 {{count}} 個條目。"
+      "both_other": "{{name}} 編輯了 {{edits}}，並翻譯了 {{count}} 個條目。",
+      "translatedLanguages": "已翻譯為 {{languages}}。"
     }
   },
   "signOut": "登出"

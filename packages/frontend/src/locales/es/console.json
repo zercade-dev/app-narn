@@ -1,6 +1,8 @@
 {
   "title": "CONSOLA",
   "empty": "Aún no hay entradas de registro.",
+  "debugInRaw": "Las líneas de depuración aparecen en el registro sin procesar.",
+  "debugShowRaw": "Mostrar registro sin procesar",
   "filter_all": "Todos",
   "filter_error": "Error",
   "filter_warn": "Aviso",

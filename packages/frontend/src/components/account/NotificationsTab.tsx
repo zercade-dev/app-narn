@@ -10,6 +10,7 @@ import { useProjectStore } from '../../stores/project-store.js';
 import {
   notificationContextFromStores,
   presentNotification,
+  runNotificationAction,
 } from '../../lib/notification-presentation.js';
 import type { Translate } from '../../lib/log-presentation/types.js';
 import { TINT_AMBER, TINT_SKY, TINT_RED } from '../tabs/run-status-ui.js';
@@ -134,7 +135,13 @@ export function NotificationsTab() {
                         size="sm"
                         variant="outline"
                         disabled={action.disabled}
-                        onClick={action.run}
+                        onClick={() =>
+                          runNotificationAction(
+                            action,
+                            { id: n.id, problem: presented.problem, unread },
+                            markRead,
+                          )
+                        }
                         data-testid={`notification-action-${action.id}-${n.id}`}
                       >
                         {action.label}

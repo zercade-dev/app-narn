@@ -1,6 +1,8 @@
 {
   "title": "KONSOL",
   "empty": "Henüz günlük girdisi yok.",
+  "debugInRaw": "Hata ayıklama satırları ham günlükte görünür.",
+  "debugShowRaw": "Ham günlüğü göster",
   "filter_all": "Tümü",
   "filter_error": "Hata",
   "filter_warn": "Uyarı",

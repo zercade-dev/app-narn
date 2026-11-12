@@ -1,6 +1,8 @@
 {
   "title": "控制台",
   "empty": "暂无日志。",
+  "debugInRaw": "调试行显示在原始日志中。",
+  "debugShowRaw": "显示原始日志",
   "filter_all": "全部",
   "filter_error": "错误",
   "filter_warn": "警告",

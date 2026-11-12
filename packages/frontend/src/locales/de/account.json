@@ -64,6 +64,8 @@
   "notifications": {
     "genericTitle": "Benachrichtigung",
     "viewInActivity": "In der Aktivität anzeigen",
+    "openProject": "Projekt öffnen",
+    "inProject": "Projekt: {{project}}",
     "aCollaborator": "Ein Mitwirkender",
     "theProvider": "der KI-Anbieter",
     "otherIssues_one": "{{cause}} und {{count}} weiteres Problem",
@@ -101,7 +103,8 @@
       "translated_one": "{{name}} hat {{count}} Text übersetzt.",
       "translated_other": "{{name}} hat {{count}} Texte übersetzt.",
       "both_one": "{{name}} hat {{edits}} bearbeitet und {{count}} Text übersetzt.",
-      "both_other": "{{name}} hat {{edits}} bearbeitet und {{count}} Texte übersetzt."
+      "both_other": "{{name}} hat {{edits}} bearbeitet und {{count}} Texte übersetzt.",
+      "translatedLanguages": "Übersetzt nach {{languages}}."
     }
   },
   "signOut": "Abmelden"

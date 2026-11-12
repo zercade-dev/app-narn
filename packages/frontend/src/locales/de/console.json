@@ -1,6 +1,8 @@
 {
   "title": "KONSOLE",
   "empty": "Noch keine Log-Einträge.",
+  "debugInRaw": "Debug-Zeilen erscheinen im Rohprotokoll.",
+  "debugShowRaw": "Rohprotokoll anzeigen",
   "filter_all": "Alle",
   "filter_error": "Fehler",
   "filter_warn": "Warnung",

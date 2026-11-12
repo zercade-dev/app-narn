@@ -15,6 +15,7 @@ import { useProjectStore } from '../../stores/project-store.js';
 import {
   notificationContextFromStores,
   presentNotification,
+  runNotificationAction,
   type NotificationAction,
   type PresentedNotification,
 } from '../../lib/notification-presentation.js';
@@ -85,8 +86,7 @@ export function NotificationSidebar({ open, onOpenChange }: Readonly<Notificatio
     )?.p.title ?? '';
 
   const runAction = (id: string, problem: boolean, unread: boolean, action: NotificationAction) => {
-    action.run();
-    if (problem && unread) void markRead(id);
+    runNotificationAction(action, { id, problem, unread }, markRead);
     onOpenChange(false);
   };
 

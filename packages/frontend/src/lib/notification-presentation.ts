@@ -23,7 +23,7 @@ import type { Translate } from './log-presentation/types.js';
  */
 
 export interface NotificationAction {
-  id: 'view-activity' | 'fix';
+  id: 'view-activity' | 'fix' | 'open-project';
   label: string;
   disabled?: boolean;
   run: () => void;
@@ -43,6 +43,19 @@ export interface NotificationContext {
   /** `undefined` means the viewer cannot reach that project. */
   projectName: (projectId: string) => string | undefined;
   activeProjectId: string | null;
+}
+
+/**
+ * Runs an entry's action. A problem entry (failed run, run with problems) stays
+ * unread until the person acts on it, so using any of its actions marks it read.
+ */
+export function runNotificationAction(
+  action: NotificationAction,
+  entry: { id: string; problem: boolean; unread: boolean },
+  markRead: (id: string) => Promise<void> | void,
+): void {
+  action.run();
+  if (entry.problem && entry.unread) void markRead(entry.id);
 }
 
 /** Context backed by the live project store, for components. */
@@ -125,6 +138,13 @@ function runTypeName(runKind: RunNotificationData['runKind'], t: Translate): str
   return t(`strings:${RUN_TYPE_KEY[runTypeLabel(runKind)]}`);
 }
 
+/** Switches to the notification's project first when it isn't the active one. */
+async function ensureProject(projectId: string, ctx: NotificationContext): Promise<void> {
+  if (ctx.activeProjectId !== projectId) {
+    await useProjectStore.getState().activateProject(projectId);
+  }
+}
+
 function viewActivityAction(
   data: RunNotificationData,
   t: Translate,
@@ -138,11 +158,70 @@ function viewActivityAction(
     run: () => {
       if (!accessible) return;
       void (async () => {
-        if (ctx.activeProjectId !== data.projectId) {
-          await useProjectStore.getState().activateProject(data.projectId);
-        }
+        await ensureProject(data.projectId, ctx);
         useViewStore.getState().openRun(data.runId);
       })();
+    },
+  };
+}
+
+/**
+ * The fix for the most common cause that has one (`causes` is most-common
+ * first). A fix that opens a project tab acts on the notification's project, not
+ * whichever one is active, so it switches there first.
+ */
+function fixAction(
+  data: RunNotificationData,
+  t: Translate,
+  ctx: NotificationContext,
+): NotificationAction | undefined {
+  for (const cause of data.causes) {
+    const fix = failureAction(cause.code);
+    if (!fix) continue;
+    const opensProjectTab = cause.code === 'no-route';
+    const accessible = ctx.projectName(data.projectId) !== undefined;
+    return {
+      id: 'fix',
+      label: t(`logs:${fix.labelKey}`),
+      disabled: opensProjectTab && !accessible ? true : undefined,
+      run: opensProjectTab
+        ? () => {
+            if (!accessible) return;
+            void (async () => {
+              await ensureProject(data.projectId, ctx);
+              fix.run();
+            })();
+          }
+        : fix.run,
+    };
+  }
+  return undefined;
+}
+
+/** Appends the project's name to a body; nothing when the viewer can't reach it. */
+function withProject(
+  body: string,
+  projectId: string,
+  t: Translate,
+  ctx: NotificationContext,
+): string {
+  const project = ctx.projectName(projectId);
+  return project ? `${body} ${t(`${NS}inProject`, { project })}` : body;
+}
+
+function openProjectAction(
+  projectId: string,
+  t: Translate,
+  ctx: NotificationContext,
+): NotificationAction {
+  const accessible = ctx.projectName(projectId) !== undefined;
+  return {
+    id: 'open-project',
+    label: t(`${NS}openProject`),
+    disabled: accessible ? undefined : true,
+    run: () => {
+      if (!accessible) return;
+      void ensureProject(projectId, ctx).then(() => useViewStore.getState().setView('project'));
     },
   };
 }
@@ -155,12 +234,14 @@ function presentRun(
 ): PresentedNotification {
   const type = runTypeName(data.runKind, t);
   const view = viewActivityAction(data, t, ctx);
+  const fix = fixAction(data, t, ctx);
+  const named = (body: string) => withProject(body, data.projectId, t, ctx);
   const languages = languageList(data.targetLanguages);
   switch (kind) {
     case 'run-started':
       return {
         title: t(`${NS}runStarted.title`, { type }),
-        body: t(`${NS}runStarted.body`, { count: data.total }),
+        body: named(t(`${NS}runStarted.body`, { count: data.total })),
         tone: 'info',
         problem: false,
         actions: [view],
@@ -168,9 +249,11 @@ function presentRun(
     case 'run-finished':
       return {
         title: t(`${NS}runFinished.title`, { type }),
-        body: languages
-          ? t(`${NS}runFinished.bodyLanguages`, { count: data.completed, languages })
-          : t(`${NS}runFinished.body`, { count: data.completed }),
+        body: named(
+          languages
+            ? t(`${NS}runFinished.bodyLanguages`, { count: data.completed, languages })
+            : t(`${NS}runFinished.body`, { count: data.completed }),
+        ),
         tone: 'success',
         problem: false,
         actions: [view],
@@ -178,33 +261,34 @@ function presentRun(
     case 'run-finished-with-problems':
       return {
         title: t(`${NS}runFinishedWithProblems.title`, { type }),
-        body: t(`${NS}runFinishedWithProblems.body`, {
-          completed: data.completed,
-          failed: data.failed,
-          cause: causeLine(data, t),
-        }),
+        body: named(
+          t(`${NS}runFinishedWithProblems.body`, {
+            completed: data.completed,
+            failed: data.failed,
+            cause: causeLine(data, t),
+          }),
+        ),
         tone: 'warning',
         problem: true,
-        actions: [view],
+        actions: fix ? [fix, view] : [view],
       };
     case 'run-failed': {
-      const actions: NotificationAction[] = [];
-      const top = data.causes[0];
-      const fix = top ? failureAction(top.code) : undefined;
-      if (fix) actions.push({ id: 'fix', label: t(`logs:${fix.labelKey}`), run: fix.run });
-      actions.push(view);
       return {
         title: t(`${NS}runFailed.title`, { type }),
-        body: t(`${NS}runFailed.body`, { cause: causeLine(data, t) }),
+        body: named(t(`${NS}runFailed.body`, { cause: causeLine(data, t) })),
         tone: 'error',
         problem: true,
-        actions,
+        actions: fix ? [fix, view] : [view],
       };
     }
   }
 }
 
-function presentDigest(data: CollabDigestData, t: Translate): PresentedNotification | undefined {
+function presentDigest(
+  data: CollabDigestData,
+  t: Translate,
+  ctx: NotificationContext,
+): PresentedNotification | undefined {
   const lines: string[] = [];
   for (const c of data.collaborators) {
     const name = c.name ?? t(`${NS}aCollaborator`);
@@ -215,21 +299,25 @@ function presentDigest(data: CollabDigestData, t: Translate): PresentedNotificat
       )
       .join(', ');
     const translated = c.translated.count;
+    const translatedIn =
+      translated > 0 && c.translated.languages?.length
+        ? ` ${t(`${NS}collabDigest.translatedLanguages`, { languages: languageList(c.translated.languages) })}`
+        : '';
     if (edits && translated > 0) {
-      lines.push(t(`${NS}collabDigest.both`, { name, edits, count: translated }));
+      lines.push(t(`${NS}collabDigest.both`, { name, edits, count: translated }) + translatedIn);
     } else if (edits) {
       lines.push(t(`${NS}collabDigest.edited`, { name, edits }));
     } else if (translated > 0) {
-      lines.push(t(`${NS}collabDigest.translated`, { name, count: translated }));
+      lines.push(t(`${NS}collabDigest.translated`, { name, count: translated }) + translatedIn);
     }
   }
   if (lines.length === 0) return undefined;
   return {
     title: t(`${NS}collabDigest.title`),
-    body: lines.join(' '),
+    body: withProject(lines.join(' '), data.projectId, t, ctx),
     tone: 'info',
     problem: false,
-    actions: [],
+    actions: [openProjectAction(data.projectId, t, ctx)],
   };
 }
 
@@ -260,7 +348,7 @@ export function presentNotification(
     }
     case 'collab-digest': {
       const data = asDigestData(n.data);
-      presented = data ? presentDigest(data, t) : undefined;
+      presented = data ? presentDigest(data, t, ctx) : undefined;
       break;
     }
   }

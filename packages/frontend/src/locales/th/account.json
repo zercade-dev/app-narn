@@ -63,6 +63,8 @@
   "notifications": {
     "genericTitle": "การแจ้งเตือน",
     "viewInActivity": "ดูในกิจกรรม",
+    "openProject": "เปิดโปรเจกต์",
+    "inProject": "โปรเจกต์: {{project}}",
     "aCollaborator": "ผู้ร่วมงาน",
     "theProvider": "ผู้ให้บริการ AI",
     "otherIssues_other": "{{cause}} และปัญหาอื่นอีก {{count}} รายการ",
@@ -94,7 +96,8 @@
       "editsIn": "{{count}} รายการใน{{language}}",
       "edited": "{{name}} แก้ไข {{edits}}",
       "translated_other": "{{name}} แปล {{count}} รายการ",
-      "both_other": "{{name}} แก้ไข {{edits}} และแปล {{count}} รายการ"
+      "both_other": "{{name}} แก้ไข {{edits}} และแปล {{count}} รายการ",
+      "translatedLanguages": "แปลเป็น {{languages}}"
     }
   },
   "signOut": "ลงชื่อออก"

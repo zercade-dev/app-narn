@@ -66,6 +66,8 @@
   "notifications": {
     "genericTitle": "Уведомление",
     "viewInActivity": "Открыть в разделе «Активность»",
+    "openProject": "Открыть проект",
+    "inProject": "Проект: {{project}}",
     "aCollaborator": "Один из соавторов",
     "theProvider": "ИИ-провайдер",
     "otherIssues_one": "{{cause}} и ещё {{count}} проблема",
@@ -115,7 +117,8 @@
       "both_one": "{{name}} изменил(а): {{edits}}, и перевёл(а) {{count}} запись.",
       "both_few": "{{name}} изменил(а): {{edits}}, и перевёл(а) {{count}} записи.",
       "both_many": "{{name}} изменил(а): {{edits}}, и перевёл(а) {{count}} записей.",
-      "both_other": "{{name}} изменил(а): {{edits}}, и перевёл(а) {{count}} записи."
+      "both_other": "{{name}} изменил(а): {{edits}}, и перевёл(а) {{count}} записи.",
+      "translatedLanguages": "Переведено на: {{languages}}."
     }
   },
   "signOut": "Выйти"

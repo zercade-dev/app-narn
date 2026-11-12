@@ -1,6 +1,8 @@
 {
   "title": "CONSOLE",
   "empty": "Aucune entrée de journal pour l’instant.",
+  "debugInRaw": "Les lignes de débogage apparaissent dans le journal brut.",
+  "debugShowRaw": "Afficher le journal brut",
   "filter_all": "Tout",
   "filter_error": "Erreur",
   "filter_warn": "Avertissement",

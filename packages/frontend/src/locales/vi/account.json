@@ -63,6 +63,8 @@
   "notifications": {
     "genericTitle": "Thông báo",
     "viewInActivity": "Xem trong Hoạt động",
+    "openProject": "Mở dự án",
+    "inProject": "Dự án: {{project}}",
     "aCollaborator": "Một cộng tác viên",
     "theProvider": "nhà cung cấp AI",
     "otherIssues_other": "{{cause}} và {{count}} vấn đề khác",
@@ -94,7 +96,8 @@
       "editsIn": "{{count}} mục ở {{language}}",
       "edited": "{{name}} đã chỉnh sửa {{edits}}.",
       "translated_other": "{{name}} đã dịch {{count}} mục.",
-      "both_other": "{{name}} đã chỉnh sửa {{edits}} và dịch {{count}} mục."
+      "both_other": "{{name}} đã chỉnh sửa {{edits}} và dịch {{count}} mục.",
+      "translatedLanguages": "Đã dịch sang {{languages}}."
     }
   },
   "signOut": "Đăng xuất"
