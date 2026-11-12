@@ -109,7 +109,29 @@ export interface RunEntryLanguagePair {
 /**
  * Error details for a single item within a translation run.
  */
+/** Closed list of reasons a translation attempt or run can fail. */
+export const FAILURE_CODES = [
+  'auth',
+  'rate-limit',
+  'timeout',
+  'model-unavailable',
+  'parse-failure',
+  'empty-reply',
+  'provider-error',
+  'no-route',
+  'module-disabled',
+  'module-not-found',
+  'unknown',
+] as const;
+export type FailureCode = (typeof FAILURE_CODES)[number];
+
+export function isFailureCode(v: unknown): v is FailureCode {
+  return typeof v === 'string' && (FAILURE_CODES as readonly string[]).includes(v);
+}
+
 export interface RunErrorEntry {
+  /** Classified failure reason; absent on entries recorded before codes existed. */
+  code?: FailureCode;
   stringId?: string;
   sourceText?: string;
   targetLang?: string;
@@ -444,6 +466,8 @@ export interface RunStatus {
   startedAt: number;
   finishedAt?: number;
   errors: RunErrorEntry[];
+  /** Why the app (not the person) stopped the run; absent when the run was not stopped by the app. */
+  stopCause?: FailureCode;
   /** Per-(module, model) usage aggregation. Additive; absent on legacy runs. */
   usageByModule?: RunUsageEntry[];
   /**

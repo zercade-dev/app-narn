@@ -126,6 +126,8 @@ export {
   runTypeLabel,
   isTranslationRunKind,
   hasRunDetailsKind,
+  FAILURE_CODES,
+  isFailureCode,
 } from './types/runs.js';
 export type {
   RunStatus,
