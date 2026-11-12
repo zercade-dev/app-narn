@@ -87,7 +87,7 @@ export class PgRunStore implements RunStore {
     run: RunStatus,
     opts?: { keepPendingCorrections?: boolean },
   ): Promise<void> {
-    const prevStatus = await this.writeLock.withLock(projectId, () =>
+    const { prevStatus, written } = await this.writeLock.withLock(projectId, () =>
       this.upsert(run, this.db, opts),
     );
     // Emit AFTER the locked persist resolves (never inside `upsert`), so
@@ -97,18 +97,24 @@ export class PgRunStore implements RunStore {
     // reject a run's progress write. The tenant stamp mirrors `LogEntry.tenantId`
     // (captured here in the emitter's async context) so the relay can scope by
     // tenant in cloud mode; undefined in open-core.
+    // Both read `written`, the run as this write stored it, never `run`: the
+    // engines keep mutating the object they passed in, so by now `run` can
+    // already carry a later status (a progress write still in flight when the
+    // run's terminal flip lands). Deciding from `run` then announced the end
+    // here AND on the terminal write that follows, whose `prev` is still the
+    // Running row this write stored.
     runEvents.emitProgress({
-      runId: run.runId,
-      projectId: run.projectId,
-      status: run.status,
-      completed: run.completed,
-      failed: run.failed,
-      total: run.total,
+      runId: written.runId,
+      projectId: written.projectId,
+      status: written.status,
+      completed: written.completed,
+      failed: written.failed,
+      total: written.total,
       tenantId: getCurrentTenant()?.userId,
     });
     // `getPool` is passed uncalled so even a pool lookup that throws is caught
     // inside the notifier and cannot reject this write.
-    void notifyRunTransition(getPool, prevStatus, run);
+    void notifyRunTransition(getPool, prevStatus, written);
   }
 
   /**
@@ -120,13 +126,17 @@ export class PgRunStore implements RunStore {
    *
    * Returns the status the row had before this write (`undefined` for a new
    * row), read in the same statement so it is exactly the row this write
-   * replaced.
+   * replaced, and `written`: a copy of the run taken as the statement's
+   * parameters are built, so it is exactly what this write stored. Under the
+   * per-project lock the writes for one run form a chain in which each write's
+   * `prevStatus` is the previous write's `written.status`, so a start or end
+   * transition is seen by exactly one write.
    */
   private async upsert(
     run: RunStatus,
     db: Queryable = this.db,
     opts?: { keepPendingCorrections?: boolean },
-  ): Promise<RunStatusCode | undefined> {
+  ): Promise<{ prevStatus: RunStatusCode | undefined; written: RunStatus }> {
     // Every way a run ends is written through here. Once it has ended nothing
     // is going to retry, so a notice must stop saying something will.
     if (
@@ -146,6 +156,10 @@ export class PgRunStore implements RunStore {
     // flushes must never reassign it.
     // The `prev` CTE reads the snapshot taken before the insert, so it sees the
     // row as it was before this statement changed it.
+    // Shallow, plus the one array the notifier reads that the run still
+    // appends to; taken with no await before the query, so it matches the
+    // parameters below.
+    const written: RunStatus = { ...run, errors: [...(run.errors ?? [])] };
     const { rows } = await db.query<{ prev_status: RunStatusCode | null }>(
       `with prev as (select status from runs where run_id = $1)
        insert into runs (run_id, project_id, tenant_id, status, kind, total, completed, failed,
@@ -181,7 +195,7 @@ export class PgRunStore implements RunStore {
         opts?.keepPendingCorrections === true,
       ],
     );
-    return rows[0]?.prev_status ?? undefined;
+    return { prevStatus: rows[0]?.prev_status ?? undefined, written };
   }
 
   /**
@@ -205,7 +219,9 @@ export class PgRunStore implements RunStore {
    * with the size of the WORK rather than of the run record, and no client
    * reads either one from the list:
    *   - `request.entryIds` — up to MAX_ENTRY_IDS (50 000) 64-char content ids,
-   *     roughly 3.3 MB, recorded on every translation run and never cleared; and
+   *     roughly 3.3 MB, recorded on every translation run and never cleared
+   *     (all of `request` goes except `request.targetLanguages`, which the
+   *     console status line reads to name the language being translated); and
    *   - `pendingCorrections` — one record per string awaiting its corrective
    *     attempt (the count survives as `pendingCorrectionCount`); and
    *   - `waitingForQuota.pairs` — one object per parked (entry, language) job,
@@ -255,7 +271,11 @@ export class PgRunStore implements RunStore {
       created_by: string | null;
     }>(
       `select
-         ((data #- '{request}') #- '{waitingForQuota,pairs}') #- '{pendingCorrections}' as data,
+         ((case when jsonb_typeof(data #> '{request,targetLanguages}') = 'array'
+                then jsonb_set(data, '{request}',
+                       jsonb_build_object('targetLanguages', data #> '{request,targetLanguages}'))
+                else data #- '{request}' end)
+           #- '{waitingForQuota,pairs}') #- '{pendingCorrections}' as data,
          case when jsonb_typeof(data -> 'pendingCorrections') = 'array'
               then jsonb_array_length(data -> 'pendingCorrections')
               else 0 end as pending_correction_count,

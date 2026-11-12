@@ -505,7 +505,8 @@ export interface RunStore {
   /**
    * The run list in its SUMMARY shape, ordered by start time, with the two
    * unbounded per-run payloads projected away in SQL — `request` (whose
-   * `entryIds` runs to tens of thousands of ids and is never cleared) and
+   * `entryIds` runs to tens of thousands of ids and is never cleared; only
+   * `request.targetLanguages` is kept) and
    * `waitingForQuota.pairs` (replaced by `waitingForQuota.pairCount`). Backs
    * `GET /api/projects/:projectId/runs`, which the Activity tab re-polls every
    * two seconds while any run is active.
