@@ -22,7 +22,7 @@ interface AnchorCache {
  * The visible element carrying `data-tour="<id>"`, or null when there is none.
  * Re-resolves (at most once per animation frame) when the DOM changes or the
  * window resizes or scrolls, so a tour can wait for a control that mounts
- * later. While the current anchor is still connected, nothing is re-queried.
+ * later. While the current anchor is still connected and visible, nothing is re-queried.
  */
 export function useTourAnchor(id: string | null): Element | null {
   const cacheRef = useRef<AnchorCache>({ id: null, el: null, dirty: true });
@@ -31,10 +31,13 @@ export function useTourAnchor(id: string | null): Element | null {
     const cache = cacheRef.current;
     let frame = 0;
     const schedule = () => {
-      // A connected anchor stays; only a missing or detached one is looked up again.
-      if (cache.el?.isConnected || frame) return;
+      if (frame) return;
       frame = requestAnimationFrame(() => {
         frame = 0;
+        // A connected, still-visible anchor stays and nothing is queried; one
+        // that is missing, detached or hidden (display:none, inactive panel)
+        // is dropped and looked up again.
+        if (cache.el?.isConnected && isVisible(cache.el)) return;
         cache.dirty = true;
         onChange();
       });

@@ -123,15 +123,39 @@ export function TourOverlay({
     return () => anchor.removeEventListener('click', onClick);
   }, [advanceKind, anchor]);
 
-  // A `state` step completes when the app state says so: once per (tour, step).
+  // Entering a step via Back: remember it, so a `state` step that is already
+  // satisfied does not immediately bounce the person forward again.
   const stepKey = `${tour.id}:${stepIndex}`;
+  const [nav, setNav] = useState({
+    key: stepKey,
+    index: stepIndex,
+    backKey: null as string | null,
+  });
+  if (nav.key !== stepKey) {
+    setNav({ key: stepKey, index: stepIndex, backKey: stepIndex < nav.index ? stepKey : null });
+  }
+  const enteredViaBack = nav.key === stepKey && nav.backKey === stepKey;
+
+  // A `state` step completes on the rising edge of its condition, once per
+  // (tour, step): the guard re-arms whenever the condition goes false. Rule for
+  // Back: a `state` step entered via Back with its condition already true does
+  // not auto-advance (that would undo Back); it shows Next instead, and a later
+  // false -> true edge advances as usual.
   const stateDone = step?.advance.kind === 'state' && step.advance.done(facts);
   const advancedKey = useRef<string | null>(null);
+  const seenKey = useRef<string | null>(null);
   useEffect(() => {
-    if (!stateDone || advancedKey.current === stepKey) return;
+    const justEntered = seenKey.current !== stepKey;
+    seenKey.current = stepKey;
+    if (!stateDone) {
+      advancedKey.current = null;
+      return;
+    }
+    if (advancedKey.current === stepKey) return;
     advancedKey.current = stepKey;
+    if (justEntered && enteredViaBack) return;
     onAdvanceRef.current();
-  }, [stateDone, stepKey]);
+  }, [stateDone, stepKey, enteredViaBack]);
 
   // Focus moves to the callout on each step.
   useEffect(() => {
@@ -145,7 +169,7 @@ export function TourOverlay({
     step,
     titleId,
     showBack: stepIndex > 0,
-    showNext: step.advance.kind === 'next',
+    showNext: step.advance.kind === 'next' || (stateDone && enteredViaBack),
     onNext: onAdvance,
     onBack,
     onExit,
