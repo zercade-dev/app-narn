@@ -58,6 +58,21 @@ notificationsRouter.post(
 );
 
 /**
+ * POST /api/notifications/read-informational
+ * Marks every unread notification read EXCEPT the problem kinds (run-failed,
+ * run-finished-with-problems), which stay unread until the user deals with
+ * them. Returns `{ count }` of rows marked.
+ */
+notificationsRouter.post(
+  '/read-informational',
+  asyncHandler(async (_req, res) => {
+    const result = await getNotificationStore().markInformationalRead();
+    logger.info('notifications:read-informational', { count: result.count });
+    res.json(result);
+  }),
+);
+
+/**
  * DELETE /api/notifications/:id
  * Dismisses one notification. Same foreign/missing-id no-op semantics as
  * markRead above — always 204.

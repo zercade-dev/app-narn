@@ -1106,4 +1106,17 @@ export const MIGRATIONS: ReadonlyArray<{ name: string; statements: readonly stri
     name: '0030_freeway_cooldown_reason',
     statements: [`alter table freeway_buckets add column if not exists cooldown_reason text`],
   },
+  {
+    // Typed notifications: the app writes per-user rows about runs and
+    // collaborator activity. `kind` null = a free-text admin broadcast (every
+    // existing row). The partial index serves the per-user pruning of kind
+    // rows that runs on each typed insert. RLS from 0017 covers the new
+    // columns unchanged.
+    name: '0031_notification_kinds',
+    statements: [
+      `alter table notifications add column if not exists kind text`,
+      `alter table notifications add column if not exists data jsonb`,
+      `create index if not exists notifications_user_kind_created on notifications (user_id, created_at desc) where kind is not null`,
+    ],
+  },
 ];

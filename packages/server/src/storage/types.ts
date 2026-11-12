@@ -674,6 +674,8 @@ export interface NotificationStore {
   countUnread(): Promise<number>;
   markRead(id: string): Promise<void>; // idempotent; foreign/missing id is a no-op
   markAllRead(): Promise<{ count: number }>;
+  // Marks unread broadcasts and non-problem kinds read; leaves PROBLEM_NOTIFICATION_KINDS unread.
+  markInformationalRead(): Promise<{ count: number }>;
   delete(id: string): Promise<void>; // foreign/missing id is a no-op
 }
 
