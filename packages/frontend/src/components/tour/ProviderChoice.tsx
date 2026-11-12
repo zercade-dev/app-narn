@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,16 +8,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { toast } from '@/lib/toast';
 import { useModules } from '../../hooks/use-modules.js';
-import {
-  applySimpleRule,
-  enableProvider,
-  ownProviderChoices,
-  providerKeyFor,
-} from '../../lib/simple-provider.js';
-import { getErrorMessage } from '../../lib/utils.js';
-import { useGuideStore } from '../../stores/guide-store.js';
+import { ownProviderChoices, providerKeyFor } from '../../lib/simple-provider.js';
 import { useProjectStore } from '../../stores/project-store.js';
 
 interface ProviderChoiceProps {
@@ -26,42 +17,22 @@ interface ProviderChoiceProps {
   onOpenChange: (open: boolean) => void;
   /** Cloud offers key-only providers; GitHub Copilot is local-only. */
   cloud: boolean;
-  /**
-   * The provider is enabled and remembered. `vaultKey` is the key it reads, so
-   * the caller can send the person to the place where it is stored.
-   */
-  onChosen: (choice: { instanceId: string; vaultKey: string | undefined }) => void;
+  /** `vaultKey` is the key the provider reads, so the caller can ask for it. */
+  onChosen: (choice: { base: string; vaultKey: string | undefined }) => void;
 }
 
 /**
- * "Use my own provider": the one place the guide performs setup for the person.
- * Picking a provider does what the hidden Global Config and Routing tabs would:
- * it enables the provider, remembers it for later projects, and points the
- * current project's routing at it.
+ * "Use my own provider": the list of providers a key alone is enough for. It
+ * only reports the choice; the guide remembers it and, once the provider's key
+ * is in an unlocked vault, enables the provider and points the project at it.
  */
 export function ProviderChoice({ open, onOpenChange, cloud, onChosen }: ProviderChoiceProps) {
   const { t } = useTranslation('guide-tour');
   const modules = useModules({ enabled: open });
-  const [busy, setBusy] = useState<string | null>(null);
-
-  const choose = async (base: string, name: string) => {
-    setBusy(base);
-    try {
-      const instanceId = await enableProvider(base);
-      useGuideStore.getState().setSimpleProvider(instanceId);
-      // Read after the await: the active project may have changed meanwhile.
-      const { projects, activeProjectId } = useProjectStore.getState();
-      if (activeProjectId && projects.some((p) => p.id === activeProjectId)) {
-        await applySimpleRule(activeProjectId, instanceId);
-      }
-      const declared = modules.find((m) => m.id === base)?.requiredEnvVars[0];
-      onChosen({ instanceId, vaultKey: declared ?? providerKeyFor(base) });
-    } catch (err) {
-      toast.error(t('providerChoice.failed', { provider: name, message: getErrorMessage(err) }));
-    } finally {
-      setBusy(null);
-    }
-  };
+  // The guide only writes routing for a project that has none.
+  const projectHasRouting = useProjectStore(
+    (s) => (s.projects.find((p) => p.id === s.activeProjectId)?.routingRules?.length ?? 0) > 0,
+  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -69,20 +40,29 @@ export function ProviderChoice({ open, onOpenChange, cloud, onChosen }: Provider
         <SheetHeader>
           <SheetTitle>{t('providerChoice.title')}</SheetTitle>
           <SheetDescription>{t('providerChoice.description')}</SheetDescription>
+          {projectHasRouting && (
+            <p className="text-sm text-muted-foreground" data-testid="provider-choice-routing-kept">
+              {t('providerChoice.existingRouting')}
+            </p>
+          )}
         </SheetHeader>
         <ul className="flex flex-col gap-2 px-4">
           {ownProviderChoices(cloud).map((base) => {
-            const name = modules.find((m) => m.id === base)?.name ?? base;
+            const module = modules.find((m) => m.id === base);
             return (
               <li key={base}>
                 <Button
                   variant="outline"
                   className="w-full justify-start"
-                  disabled={busy !== null}
                   data-testid={`provider-choice-${base}`}
-                  onClick={() => void choose(base, name)}
+                  onClick={() =>
+                    onChosen({
+                      base,
+                      vaultKey: module?.requiredEnvVars[0] ?? providerKeyFor(base),
+                    })
+                  }
                 >
-                  {name}
+                  {module?.name ?? base}
                 </Button>
               </li>
             );

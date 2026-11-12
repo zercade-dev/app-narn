@@ -37,8 +37,9 @@ function prefersReducedMotion(): boolean {
 
 /**
  * Re-renders (at most once per frame) when the window resizes, anything
- * scrolls, a transition or animation ends, or the anchor or page body changes
- * size, so the rect read in render stays current after layout shifts.
+ * scrolls, a transition or animation ends, the anchor or page body changes
+ * size, or elements on the page change, so the rect read in render stays
+ * current after layout shifts.
  */
 function useLayoutTick(anchor: Element | null): void {
   const [, tick] = useReducer((n: number) => n + 1, 0);
@@ -62,12 +63,24 @@ function useLayoutTick(anchor: Element | null): void {
       typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
     resizeObserver?.observe(anchor);
     resizeObserver?.observe(document.body);
+    // Content that loads above the anchor pushes it down without resizing it
+    // or the page (a filter row, a banner): any change to the page's elements
+    // is a reason to look again. The overlay's own writes settle in one pass,
+    // because an unchanged rect writes nothing.
+    const mutationObserver = new MutationObserver(schedule);
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style', 'hidden'],
+    });
     return () => {
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule, true);
       window.removeEventListener('transitionend', schedule, true);
       window.removeEventListener('animationend', schedule, true);
       resizeObserver?.disconnect();
+      mutationObserver.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
   }, [anchor]);
@@ -196,7 +209,15 @@ export function TourOverlay({
       <div role="status" aria-live="polite" className="sr-only" data-testid="tour-live-region">
         {title}
       </div>
-      {hole ? (
+      {step.dim === false ? (
+        hole && (
+          <div
+            data-testid="tour-spotlight"
+            className={`pointer-events-none fixed z-[55] rounded-md ring-2 ring-ring ${motion}`}
+            style={px(hole)}
+          />
+        )
+      ) : hole ? (
         <>
           {[
             { left: 0, top: 0, width: '100vw', height: hole.top },

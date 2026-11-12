@@ -413,7 +413,8 @@ export function AppShell() {
   // gating on it would race and could miss the real setupRequired value.
   //
   // The guided first run replaces Welcome for a newcomer: its first step is
-  // the same vault hand-off, shown on the real interface. Whether the guide
+  // the same vault hand-off, shown on the real interface. Welcome shows
+  // whenever the guide would not. Whether the guide
   // applies is only known once the interface mode is (it is derived from the
   // project list on a first visit), so the one-time decision waits for that.
   const setupRequired = useVaultStore((s) => s.setupRequired);
@@ -424,8 +425,9 @@ export function AppShell() {
   useEffect(() => {
     if (!setupRequired || !modeKnown || appliedWelcomeViewRef.current) return;
     appliedWelcomeViewRef.current = true;
-    if (!firstRunActive) setView('welcome');
-  }, [setupRequired, modeKnown, firstRunActive, setView]);
+    // The guide does not run on phone widths, so Welcome still shows there.
+    if (!firstRunActive || isMobile) setView('welcome');
+  }, [setupRequired, modeKnown, firstRunActive, isMobile, setView]);
 
   // Whether copilot is globally enabled, used to gate the shell-level
   // CopilotModelsProvider's `/models` fetch. Without this gate the provider

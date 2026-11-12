@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "Apri la finestra della cassaforte",
       "cloudVault": "Configura la cassaforte",
+      "openVaultPage": "Apri la pagina della cassaforte",
       "getGoogleKey": "Ottieni una chiave Google gratuita",
       "addGoogleKey": "Incolla la mia chiave Google",
       "ownProvider": "Usa il mio provider",
+      "fixKey": "Controlla la mia chiave",
+      "retry": "Riprova",
       "switchAdvanced": "Passa ad Avanzata",
       "finish": "Fine"
     },
@@ -31,6 +34,12 @@
       "title": "Creazione della cassaforte e aggiunta di una chiave gratuita",
       "what": "Scegli una password per la cassaforte, poi aggiungi una chiave gratuita. Consigliamo Google. Tornerai qui al termine.",
       "why": "Le chiavi dei tuoi provider vengono cifrate con la tua password e restano sempre sotto il tuo controllo. La chiave serve al provider di IA per riconoscerti."
+    },
+    "cloudUnlock": {
+      "what": "Sblocca la cassaforte nella pagina della cassaforte. Tornerai qui al termine."
+    },
+    "cloudKey": {
+      "what": "Aggiungi una chiave gratuita nella pagina della cassaforte. Consigliamo Google. Tornerai qui al termine."
     },
     "key": {
       "title": "Aggiunta di una chiave gratuita",
@@ -60,6 +69,13 @@
       "progressWhat": "La traduzione è in corso. Questa riga ne mostra l'avanzamento.",
       "progressWhy": "Il tour prosegue quando arrivano le prime traduzioni."
     },
+    "failed": {
+      "title": "Traduzione non riuscita",
+      "why": "La barra evidenziata qui sotto mostra che cosa è successo.",
+      "authWhat": "Il provider ha rifiutato la tua chiave. Controlla la chiave, poi riprova.",
+      "quotaWhat": "La quota gratuita è esaurita per ora. Attendi un po' o aggiungi un'altra chiave, poi riprova.",
+      "otherWhat": "Non è stato tradotto nulla. Controlla la tua chiave, poi riprova."
+    },
     "export": {
       "title": "Esportazione",
       "why": "Il tuo editor di gioco può importare questo file per portare le traduzioni nel gioco.",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "Usa il mio provider",
     "description": "Scegli il provider di cui hai una chiave. NARN gli invierà tutte le traduzioni dei tuoi progetti. Per combinare più provider, passa ad Avanzata.",
+    "existingRouting": "Questo progetto ha già un routing configurato, quindi resta com'è. Puoi cambiarlo in Avanzata.",
     "cancel": "Annulla",
     "failed": "Impossibile configurare {{provider}}: {{message}}"
   }

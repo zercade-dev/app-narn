@@ -37,6 +37,12 @@ export interface TourStep {
    * the step asks the person to use, as in a form.
    */
   side?: 'top' | 'right' | 'bottom' | 'left';
+  /**
+   * `false` leaves the rest of the screen usable (no dimming) while the step
+   * is current, for a step that waits on something the person may need to
+   * act on elsewhere. Default: dimmed.
+   */
+  dim?: false;
   /** Opened when the step becomes current. */
   navigate?: { tab?: Tab; view?: ShellView };
   /** Extra callout buttons. `labelKey` is in the `guide-tour` namespace. */

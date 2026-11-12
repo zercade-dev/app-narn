@@ -19,6 +19,8 @@ export type FirstRunAction =
   | 'get-google-key'
   | 'add-google-key'
   | 'own-provider'
+  | 'fix-key'
+  | 'retry'
   | 'switch-advanced'
   | 'finish';
 
@@ -96,19 +98,64 @@ function localVaultAndKeySteps(vaultCopy: 'vault' | 'unlock'): TourStep[] {
   ];
 }
 
-/** Cloud steps 1 and 2 happen on the `/vault` page; the guide resumes at step 3 on return. */
-const CLOUD_VAULT_AND_KEY_STEPS: TourStep[] = [
-  {
-    id: 'cloud-vault',
-    anchor: null,
-    titleKey: 'firstRun.cloudVault.title',
-    whatKey: 'firstRun.cloudVault.what',
-    whyKey: 'firstRun.cloudVault.why',
-    advance: { kind: 'state', done: (f) => vaultReady(f) && f.usableKey },
-    actions: [action('cloud-vault', 'cloudVault'), action('own-provider', 'ownProvider')],
-    major: 1,
-  },
-];
+/**
+ * Cloud steps 1 and 2 happen on the `/vault` page; the guide resumes at step 3
+ * on return. One step, worded for what is still missing there: a vault, an
+ * unlock, or a usable key.
+ */
+function cloudVaultAndKeySteps(need: 'vault' | 'unlock' | 'key'): TourStep[] {
+  const wording = {
+    vault: {
+      titleKey: 'firstRun.cloudVault.title',
+      whatKey: 'firstRun.cloudVault.what',
+      whyKey: 'firstRun.cloudVault.why',
+      label: 'cloudVault',
+    },
+    unlock: {
+      titleKey: 'firstRun.unlock.title',
+      whatKey: 'firstRun.cloudUnlock.what',
+      whyKey: 'firstRun.unlock.why',
+      label: 'openVaultPage',
+    },
+    key: {
+      titleKey: 'firstRun.key.title',
+      whatKey: 'firstRun.cloudKey.what',
+      whyKey: 'firstRun.key.why',
+      label: 'openVaultPage',
+    },
+  }[need];
+  return [
+    {
+      id: 'cloud-vault',
+      anchor: null,
+      titleKey: wording.titleKey,
+      whatKey: wording.whatKey,
+      whyKey: wording.whyKey,
+      advance: { kind: 'state', done: (f) => vaultReady(f) && f.usableKey },
+      actions: [action('cloud-vault', wording.label), action('own-provider', 'ownProvider')],
+      major: 1,
+    },
+  ];
+}
+
+/** Why the last translation run produced nothing, as far as the guide words it. */
+export type RunFailure = 'auth' | 'quota' | 'other';
+
+/** Shown in place of `translate-progress` when the run did not go through. */
+function failedStep(cause: RunFailure): TourStep {
+  return {
+    id: `translate-failed-${cause}`,
+    anchor: 'console-status',
+    titleKey: 'firstRun.failed.title',
+    whatKey: `firstRun.failed.${cause}What`,
+    whyKey: 'firstRun.failed.why',
+    advance: { kind: 'state', done: (f) => f.translationExists },
+    actions: [action('fix-key', 'fixKey'), action('retry', 'retry')],
+    // The run's own controls (cancel, Activity, the console) stay usable.
+    dim: false,
+    major: 4,
+  };
+}
 
 const SHARED_STEPS: TourStep[] = [
   {
@@ -187,6 +234,8 @@ const SHARED_STEPS: TourStep[] = [
     anchor: 'string-table-select-all',
     ...copy('translate', 'selectWhat'),
     advance: { kind: 'click' },
+    // "Try again" lands here from anywhere.
+    navigate: { view: 'project', tab: 'strings' },
     major: 4,
   },
   {
@@ -210,8 +259,13 @@ const SHARED_STEPS: TourStep[] = [
     whatKey: 'firstRun.translate.progressWhat',
     whyKey: 'firstRun.translate.progressWhy',
     advance: { kind: 'state', done: (f) => f.translationExists },
+    // A run can stall; its controls must stay reachable while the guide waits.
+    dim: false,
     major: 4,
   },
+  failedStep('auth'),
+  failedStep('quota'),
+  failedStep('other'),
   {
     id: 'export-open',
     anchor: 'tab-data',
@@ -249,16 +303,21 @@ export const FIRST_RUN_TOUR: Tour = tourOf(localVaultAndKeySteps('vault'));
 /** Same steps, worded for a vault that already exists and only needs unlocking. */
 const FIRST_RUN_TOUR_UNLOCK: Tour = tourOf(localVaultAndKeySteps('unlock'));
 /** The cloud first-run tour: steps 1 and 2 are one hand-off to the vault page. */
-export const FIRST_RUN_TOUR_CLOUD: Tour = tourOf(CLOUD_VAULT_AND_KEY_STEPS);
+export const FIRST_RUN_TOUR_CLOUD: Tour = tourOf(cloudVaultAndKeySteps('vault'));
+const FIRST_RUN_TOUR_CLOUD_UNLOCK: Tour = tourOf(cloudVaultAndKeySteps('unlock'));
+const FIRST_RUN_TOUR_CLOUD_KEY: Tour = tourOf(cloudVaultAndKeySteps('key'));
 
 /**
- * The tour for this person. Every variant shares one tour id; the two local
- * variants also share step ids and order, so switching between them (a vault
- * that now exists) never moves the person.
+ * The tour for this person. Every variant shares one tour id, and the variants
+ * of one mode share step ids and order, so switching between them (a vault
+ * that now exists, or is now unlocked) never moves the person.
  */
-export function firstRunTourFor(f: Pick<GuideFacts, 'cloud' | 'vaultExists'>): Tour {
-  if (f.cloud) return FIRST_RUN_TOUR_CLOUD;
-  return f.vaultExists ? FIRST_RUN_TOUR_UNLOCK : FIRST_RUN_TOUR;
+export function firstRunTourFor(
+  f: Pick<GuideFacts, 'cloud' | 'vaultExists'> & Partial<Pick<GuideFacts, 'vaultUnlocked'>>,
+): Tour {
+  if (!f.cloud) return f.vaultExists ? FIRST_RUN_TOUR_UNLOCK : FIRST_RUN_TOUR;
+  if (!f.vaultExists) return FIRST_RUN_TOUR_CLOUD;
+  return f.vaultUnlocked ? FIRST_RUN_TOUR_CLOUD_KEY : FIRST_RUN_TOUR_CLOUD_UNLOCK;
 }
 
 /** 1-5: the first major step that is not complete yet; 6 once all five are. */
@@ -312,20 +371,33 @@ const FORM_STEPS = [
 /** The `data-tour` anchors whose presence {@link firstRunShownIndex} needs to know. */
 export const FIRST_RUN_FORM_ANCHORS = FORM_STEPS.map((p) => p.anchor);
 
+const WAITING_STEP = 'translate-progress';
+const isWaitingStep = (id: string | undefined): boolean =>
+  id === WAITING_STEP || (id?.startsWith('translate-failed-') ?? false);
+
+/** What is true on screen right now, beyond the facts. */
+export interface FirstRunScreen {
+  isOnScreen: (anchor: string) => boolean;
+  /** Set when the latest translation run stopped without producing anything. */
+  runFailure: RunFailure | null;
+}
+
 /**
  * The step to put on screen for position `index`: the same step, except that
- * a form pair shows whichever half matches the form's real state.
+ * a form pair shows whichever half matches the form's real state, and the
+ * "translation is running" step shows a failure variant when the run did not
+ * go through.
  */
-export function firstRunShownIndex(
-  tour: Tour,
-  index: number,
-  isOnScreen: (anchor: string) => boolean,
-): number {
+export function firstRunShownIndex(tour: Tour, index: number, screen: FirstRunScreen): number {
   const id = tour.steps[index]?.id;
+  const at = (stepId: string): number => {
+    const found = tour.steps.findIndex((s) => s.id === stepId);
+    return found >= 0 ? found : index;
+  };
+  if (isWaitingStep(id)) {
+    return at(screen.runFailure ? `translate-failed-${screen.runFailure}` : WAITING_STEP);
+  }
   const pair = FORM_STEPS.find((p) => p.closed === id || p.open === id);
   if (!pair) return index;
-  const shown = tour.steps.findIndex(
-    (s) => s.id === (isOnScreen(pair.anchor) ? pair.open : pair.closed),
-  );
-  return shown >= 0 ? shown : index;
+  return at(screen.isOnScreen(pair.anchor) ? pair.open : pair.closed);
 }

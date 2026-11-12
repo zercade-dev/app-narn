@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
 import {
   useFirstRunActive,
-  useGuideEntriesReady,
+  useFirstRunFailure,
+  useGuideDataReady,
   useGuideFacts,
   type GuideFacts,
 } from '../../hooks/use-guide-facts.js';
@@ -10,7 +12,14 @@ import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
 import { useTourAnchor } from '../../hooks/use-tour-anchor.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { goToVaultSetup } from '../../lib/auth-redirect.js';
-import { enableProvider, GOOGLE_KEY_URL } from '../../lib/simple-provider.js';
+import {
+  applySimpleRule,
+  enableProvider,
+  FREE_KEY_PROVIDERS,
+  GOOGLE_KEY_URL,
+  providerInstanceId,
+  providerKeyFor,
+} from '../../lib/simple-provider.js';
 import {
   FIRST_RUN_ACTION_EVENT,
   FIRST_RUN_FORM_ANCHORS,
@@ -22,7 +31,8 @@ import {
 import { getErrorMessage } from '../../lib/utils.js';
 import { vaultEditorOpenEvent, vaultLockedEvent } from '../../lib/vault-events.js';
 import { useGuideStore } from '../../stores/guide-store.js';
-import { useProjectStore } from '../../stores/project-store.js';
+import { accessFor, useProjectStore } from '../../stores/project-store.js';
+import { useRunStore } from '../../stores/run-store.js';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { ProviderChoice } from './ProviderChoice.js';
@@ -48,8 +58,8 @@ export function FirstRunTour({ suspended }: FirstRunTourProps) {
   const facts = useGuideFacts();
   const isMobile = useIsMobile();
   const projectsLoaded = useProjectStore((s) => s.loaded);
-  // Also while skipped, so "Continue setup: step N of 5" counts imported strings.
-  const entriesReady = useGuideEntriesReady(simple && !finished && !facts.isCollaboratorOnly);
+  // Also while skipped, so "Continue setup: step N of 5" counts what was imported and translated.
+  const dataReady = useGuideDataReady(simple && !finished && !facts.isCollaboratorOnly);
 
   // Latched: the vault store's `loading` also covers later actions (unlocking,
   // saving a key), which must not hide the guide again.
@@ -57,7 +67,7 @@ export function FirstRunTour({ suspended }: FirstRunTourProps) {
   const [vaultKnown, setVaultKnown] = useState(vaultStatusSettled);
   if (vaultStatusSettled && !vaultKnown) setVaultKnown(true);
 
-  if (!active || suspended || isMobile || !projectsLoaded || !vaultKnown || !entriesReady) {
+  if (!active || suspended || isMobile || !projectsLoaded || !vaultKnown || !dataReady) {
     return null;
   }
   return <ActiveFirstRunTour facts={facts} />;
@@ -75,16 +85,23 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   if (position.derived !== derived) setPosition({ derived, index: derived });
   const index = position.derived === derived ? position.index : derived;
 
-  // "Open the form" / "use the form" sub-steps follow the form itself.
+  // "Open the form" / "use the form" sub-steps follow the form itself, and
+  // "the translation is running" follows the run.
   const [vaultFormAnchor, keyEditorAnchor] = FIRST_RUN_FORM_ANCHORS;
   const vaultFormOpen = useTourAnchor(vaultFormAnchor) !== null;
   const keyEditorOpen = useTourAnchor(keyEditorAnchor) !== null;
+  const failure = useFirstRunFailure();
+  // "Try again" sets the failed run aside, so the guide does not show its
+  // failure again while the new run has not been listed yet.
+  const [retriedRunId, setRetriedRunId] = useState<string | null>(null);
+  const runFailure = failure && failure.runId !== retriedRunId ? failure.cause : null;
   const shown = useCallback(
     (at: number) =>
-      firstRunShownIndex(tour, at, (anchor) =>
-        anchor === vaultFormAnchor ? vaultFormOpen : keyEditorOpen,
-      ),
-    [tour, vaultFormAnchor, vaultFormOpen, keyEditorOpen],
+      firstRunShownIndex(tour, at, {
+        isOnScreen: (anchor) => (anchor === vaultFormAnchor ? vaultFormOpen : keyEditorOpen),
+        runFailure,
+      }),
+    [tour, vaultFormAnchor, vaultFormOpen, keyEditorOpen, runFailure],
   );
   const shownIndex = shown(index);
 
@@ -92,8 +109,8 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const move = useCallback(
     (delta: 1 | -1) => {
       let target = Math.max(0, Math.min(lastIndex, shownIndex + delta));
-      // Next from "open the form" with the form closed: the other half of the
-      // pair would show this same step again, so go past it.
+      // Next from a step whose neighbours are other views of itself (a form
+      // pair with the form closed, the run-failure variants): go past them.
       while (delta > 0 && target < lastIndex && shown(target) <= shownIndex) target += 1;
       setPosition((p) => ({ ...p, index: target }));
     },
@@ -105,6 +122,10 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   const [choiceOpen, setChoiceOpen] = useState(false);
   const cloud = facts.cloud;
+  const failedRunId = failure?.runId ?? null;
+  const failedRunParked = failure?.parked ?? false;
+  const runQueuedBehind = failure?.queuedBehind ?? false;
+  const projectId = useProjectStore((state) => state.activeProjectId);
 
   useEffect(() => {
     const onAction = (e: Event) => {
@@ -124,6 +145,37 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'own-provider':
           setChoiceOpen(true);
           break;
+        case 'fix-key': {
+          if (cloud) {
+            goToVaultSetup();
+            break;
+          }
+          // The key translations are actually using: the chosen provider's, else a free one.
+          const { keys } = useVaultStore.getState();
+          const own = useGuideStore.getState().simpleProvider;
+          const focusKey =
+            (own ? providerKeyFor(own) : undefined) ??
+            FREE_KEY_PROVIDERS.find((p) => keys.includes(p.key))?.key ??
+            GOOGLE_KEY;
+          globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey }));
+          break;
+        }
+        case 'retry': {
+          // A parked run holds the project's queue: a new run would wait
+          // behind it, so it is cancelled first.
+          if (failedRunId && failedRunParked && projectId) {
+            void useRunStore
+              .getState()
+              .cancelRun(projectId, failedRunId)
+              .catch((err: unknown) => toast.error(getErrorMessage(err)));
+          }
+          setRetriedRunId(failedRunId);
+          // A run already waiting behind the parked one starts now: no new one needed.
+          if (runQueuedBehind) break;
+          const selectAll = tour.steps.findIndex((step) => step.id === 'select-all');
+          if (selectAll >= 0) setPosition((p) => ({ ...p, index: selectAll }));
+          break;
+        }
         case 'switch-advanced':
           useUiSettings.getState().setUiMode('advanced');
           useGuideStore.getState().finishFirstRun();
@@ -135,34 +187,15 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     };
     globalThis.addEventListener(FIRST_RUN_ACTION_EVENT, onAction);
     return () => globalThis.removeEventListener(FIRST_RUN_ACTION_EVENT, onAction);
-  }, []);
+  }, [cloud, failedRunId, failedRunParked, runQueuedBehind, projectId, tour]);
 
-  // Google path: once a Google key is usable, enable the provider so Freeway
-  // can use it. Runs on the transition (the key was just saved or the vault
-  // just unlocked), or straight away while there is no project yet (the
-  // return from the cloud vault page is a fresh page load, not a transition).
-  // Idempotent on the server; at most once per mount here.
-  const googleKeyUsable = useVaultStore((s) => s.unlocked && s.keys.includes(GOOGLE_KEY));
-  const ownProviderChosen = useGuideStore((s) => s.simpleProvider !== null);
-  const projectExists = facts.projectExists;
-  const usableAtMount = useRef(googleKeyUsable);
-  const googleEnabled = useRef(false);
-  useEffect(() => {
-    if (!googleKeyUsable) {
-      usableAtMount.current = false;
-      return;
-    }
-    if (ownProviderChosen || googleEnabled.current) return;
-    if (usableAtMount.current && projectExists) return;
-    googleEnabled.current = true;
-    void enableProvider('google').catch((err: unknown) => {
-      googleEnabled.current = false;
-      toast.error(getErrorMessage(err));
-    });
-  }, [googleKeyUsable, ownProviderChosen, projectExists]);
+  useProviderSetup();
 
   const onProviderChosen = useCallback(
-    ({ vaultKey }: { vaultKey: string | undefined }) => {
+    ({ base, vaultKey }: { base: string; vaultKey: string | undefined }) => {
+      // Remembered first: in cloud the next thing may be a trip to the vault
+      // page, and the provider is enabled when the person comes back.
+      useGuideStore.getState().setSimpleProvider(providerInstanceId(base));
       setChoiceOpen(false);
       const { unlocked, keys } = useVaultStore.getState();
       // Already usable: the facts move the guide on by themselves.
@@ -197,4 +230,72 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
       />
     </>
   );
+}
+
+/**
+ * The setup the guide performs for the person, which the hidden Global Config
+ * and Routing tabs would otherwise be needed for. Both parts wait for an
+ * unlocked vault that holds the key (enabling a provider is refused without
+ * one), so they work whichever came first, the choice or the vault.
+ *
+ * 1. Enable the provider behind each usable key: the chosen provider's, or
+ *    every free key present. Each provider is enabled once ever (remembered in
+ *    the guide store), so one the person later switches off stays off.
+ * 2. Point the active project at the chosen provider, but only when the
+ *    project is theirs and has no routing rules yet.
+ */
+function useProviderSetup(): void {
+  const { t } = useTranslation('guide-tour');
+  const unlocked = useVaultStore((s) => s.unlocked);
+  const keys = useVaultStore((s) => s.keys);
+  const simpleProvider = useGuideStore((s) => s.simpleProvider);
+  const enabledProviders = useGuideStore((s) => s.enabledProviders);
+
+  const toEnable = useMemo(() => {
+    if (!unlocked) return '';
+    const ownKey = simpleProvider ? providerKeyFor(simpleProvider) : undefined;
+    const bases = simpleProvider
+      ? ownKey !== undefined && keys.includes(ownKey)
+        ? [simpleProvider.split(':')[0]]
+        : []
+      : FREE_KEY_PROVIDERS.filter((p) => keys.includes(p.key)).map((p) => p.base);
+    return bases.filter((base) => !enabledProviders.includes(providerInstanceId(base))).join(',');
+  }, [unlocked, keys, simpleProvider, enabledProviders]);
+
+  // One attempt per provider per mount, so a failure cannot loop.
+  const attempted = useRef(new Set<string>());
+  useEffect(() => {
+    for (const base of toEnable ? toEnable.split(',') : []) {
+      if (attempted.current.has(base)) continue;
+      attempted.current.add(base);
+      void enableProvider(base)
+        .then((id) => useGuideStore.getState().markProviderEnabled(id))
+        .catch((err: unknown) => {
+          toast.error(
+            t('providerChoice.failed', { provider: base, message: getErrorMessage(err) }),
+          );
+        });
+    }
+  }, [toEnable, t]);
+
+  const ownProviderReady = simpleProvider !== null && enabledProviders.includes(simpleProvider);
+  const projectWithoutRouting = useProjectStore((s) => {
+    const project = s.projects.find((p) => p.id === s.activeProjectId);
+    if (!project || accessFor(s, project.id).role !== 'owner') return null;
+    return (project.routingRules?.length ?? 0) === 0 ? project.id : null;
+  });
+  const ruleAttempted = useRef(new Set<string>());
+  useEffect(() => {
+    if (!ownProviderReady || simpleProvider === null || projectWithoutRouting === null) return;
+    const attempt = `${projectWithoutRouting}:${simpleProvider}`;
+    if (ruleAttempted.current.has(attempt)) return;
+    ruleAttempted.current.add(attempt);
+    void applySimpleRule(projectWithoutRouting, simpleProvider)
+      .then(() => useProjectStore.getState().fetchProjects())
+      .catch((err: unknown) => {
+        toast.error(
+          t('providerChoice.failed', { provider: simpleProvider, message: getErrorMessage(err) }),
+        );
+      });
+  }, [ownProviderReady, simpleProvider, projectWithoutRouting, t]);
 }

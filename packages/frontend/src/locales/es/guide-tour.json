@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "Abrir el formulario de la bóveda",
       "cloudVault": "Configurar tu bóveda",
+      "openVaultPage": "Abrir la página de la bóveda",
       "getGoogleKey": "Conseguir una clave gratuita de Google",
       "addGoogleKey": "Pegar mi clave de Google",
       "ownProvider": "Usar mi propio proveedor",
+      "fixKey": "Revisar mi clave",
+      "retry": "Reintentar",
       "switchAdvanced": "Cambiar a Avanzado",
       "finish": "Finalizar"
     },
@@ -31,6 +34,12 @@
       "title": "Crear tu bóveda y añadir una clave gratuita",
       "what": "Elige una contraseña para la bóveda y añade una clave gratuita. Se recomienda Google. Volverás aquí al terminar.",
       "why": "Tus claves de proveedores se cifran con tu contraseña y nunca salen de tu control. La clave permite al proveedor de IA saber que eres tú."
+    },
+    "cloudUnlock": {
+      "what": "Desbloquea tu bóveda en la página de la bóveda. Volverás aquí al terminar."
+    },
+    "cloudKey": {
+      "what": "Añade una clave gratuita en la página de la bóveda. Se recomienda Google. Volverás aquí al terminar."
     },
     "key": {
       "title": "Añadir una clave gratuita",
@@ -60,6 +69,13 @@
       "progressWhat": "La traducción está en curso. Esta línea muestra su progreso.",
       "progressWhy": "El recorrido continúa cuando llegan las primeras traducciones."
     },
+    "failed": {
+      "title": "La traducción no se completó",
+      "why": "La barra resaltada de abajo muestra lo que ocurrió.",
+      "authWhat": "El proveedor rechazó tu clave. Revisa la clave y vuelve a intentarlo.",
+      "quotaWhat": "La cuota gratuita se agotó por ahora. Espera un poco o añade otra clave y vuelve a intentarlo.",
+      "otherWhat": "No se tradujo nada. Revisa tu clave y vuelve a intentarlo."
+    },
     "export": {
       "title": "Exportar",
       "why": "El editor de tu juego puede importar este archivo para llevar las traducciones al juego.",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "Usar mi propio proveedor",
     "description": "Elige el proveedor del que tienes una clave. NARN le enviará todas las traducciones de tus proyectos. Para combinar varios proveedores, cambia a Avanzado.",
+    "existingRouting": "Este proyecto ya tiene el enrutamiento configurado, así que se queda como está. Puedes cambiarlo en Avanzado.",
     "cancel": "Cancelar",
     "failed": "No se pudo configurar {{provider}}: {{message}}"
   }

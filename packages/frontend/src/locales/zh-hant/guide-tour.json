@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "開啟保險庫表單",
       "cloudVault": "設定保險庫",
+      "openVaultPage": "開啟保險庫頁面",
       "getGoogleKey": "取得免費的 Google 金鑰",
       "addGoogleKey": "貼上我的 Google 金鑰",
       "ownProvider": "使用我自己的供應商",
+      "fixKey": "檢查我的金鑰",
+      "retry": "重試",
       "switchAdvanced": "切換到進階模式",
       "finish": "完成"
     },
@@ -31,6 +34,12 @@
       "title": "建立保險庫並新增一組免費金鑰",
       "what": "設定保險庫密碼，然後新增一組免費金鑰。建議使用 Google。完成後會回到這裡。",
       "why": "供應商金鑰會以您的密碼加密，始終由您自己掌控。AI 供應商透過金鑰確認是您本人。"
+    },
+    "cloudUnlock": {
+      "what": "在保險庫頁面解鎖保險庫。完成後會回到這裡。"
+    },
+    "cloudKey": {
+      "what": "在保險庫頁面新增一組免費金鑰。建議使用 Google。完成後會回到這裡。"
     },
     "key": {
       "title": "新增一組免費金鑰",
@@ -60,6 +69,13 @@
       "progressWhat": "正在翻譯。這一行會顯示進度。",
       "progressWhy": "第一批譯文送達後，導覽會繼續。"
     },
+    "failed": {
+      "title": "翻譯未完成",
+      "why": "下方醒目標示的列顯示了發生的情況。",
+      "authWhat": "供應商拒絕了您的金鑰。請檢查金鑰，然後重試。",
+      "quotaWhat": "免費額度暫時用完了。請稍候片刻或新增其他金鑰，然後重試。",
+      "otherWhat": "沒有翻譯任何內容。請檢查金鑰，然後重試。"
+    },
     "export": {
       "title": "匯出",
       "why": "遊戲編輯器可以匯入這個檔案，把譯文帶進遊戲。",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "使用我自己的供應商",
     "description": "選擇您擁有金鑰的供應商。NARN 會把專案中的所有翻譯都交給它。若要搭配多個供應商，請切換到進階模式。",
+    "existingRouting": "這個專案已經設定了分派，因此維持不變。可以在進階模式中變更。",
     "cancel": "取消",
     "failed": "無法設定 {{provider}}：{{message}}"
   }

@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "Tresor-Formular öffnen",
       "cloudVault": "Tresor einrichten",
+      "openVaultPage": "Tresor-Seite öffnen",
       "getGoogleKey": "Kostenlosen Google-Schlüssel holen",
       "addGoogleKey": "Meinen Google-Schlüssel einfügen",
       "ownProvider": "Eigenen Anbieter verwenden",
+      "fixKey": "Meinen Schlüssel prüfen",
+      "retry": "Erneut versuchen",
       "switchAdvanced": "Zu „Erweitert“ wechseln",
       "finish": "Fertig"
     },
@@ -31,6 +34,12 @@
       "title": "Tresor erstellen und einen kostenlosen Schlüssel hinzufügen",
       "what": "Ein Tresor-Passwort festlegen und dann einen kostenlosen Schlüssel hinzufügen. Google wird empfohlen. Danach kommst du hierher zurück.",
       "why": "Deine Anbieter-Schlüssel werden mit deinem Passwort verschlüsselt und bleiben immer unter deiner Kontrolle. Am Schlüssel erkennt der KI-Anbieter, dass du es bist."
+    },
+    "cloudUnlock": {
+      "what": "Deinen Tresor auf der Tresor-Seite entsperren. Danach kommst du hierher zurück."
+    },
+    "cloudKey": {
+      "what": "Auf der Tresor-Seite einen kostenlosen Schlüssel hinzufügen. Google wird empfohlen. Danach kommst du hierher zurück."
     },
     "key": {
       "title": "Einen kostenlosen Schlüssel hinzufügen",
@@ -60,6 +69,13 @@
       "progressWhat": "Die Übersetzung läuft. Diese Zeile zeigt den Fortschritt.",
       "progressWhy": "Die Tour geht weiter, sobald die ersten Übersetzungen da sind."
     },
+    "failed": {
+      "title": "Übersetzung nicht durchgeführt",
+      "why": "Die hervorgehobene Leiste unten zeigt, was passiert ist.",
+      "authWhat": "Der Anbieter hat deinen Schlüssel abgelehnt. Den Schlüssel prüfen und es erneut versuchen.",
+      "quotaWhat": "Das kostenlose Kontingent ist vorerst aufgebraucht. Etwas warten oder einen weiteren Schlüssel hinzufügen und es erneut versuchen.",
+      "otherWhat": "Es wurde nichts übersetzt. Den Schlüssel prüfen und es erneut versuchen."
+    },
     "export": {
       "title": "Exportieren",
       "why": "Dein Spiel-Editor kann diese Datei importieren, um die Übersetzungen ins Spiel zu übernehmen.",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "Eigenen Anbieter verwenden",
     "description": "Den Anbieter auswählen, für den du einen Schlüssel hast. NARN schickt dann jede Übersetzung in deinen Projekten an ihn. Um mehrere Anbieter zu kombinieren, zu „Erweitert“ wechseln.",
+    "existingRouting": "Für dieses Projekt ist bereits Routing eingerichtet, es bleibt daher unverändert. Ändern kannst du es unter „Erweitert“.",
     "cancel": "Abbrechen",
     "failed": "{{provider}} konnte nicht eingerichtet werden: {{message}}"
   }

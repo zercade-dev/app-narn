@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "Ouvrir le formulaire du coffre",
       "cloudVault": "Configurer votre coffre",
+      "openVaultPage": "Ouvrir la page du coffre",
       "getGoogleKey": "Obtenir une clé Google gratuite",
       "addGoogleKey": "Coller ma clé Google",
       "ownProvider": "Utiliser mon propre fournisseur",
+      "fixKey": "Vérifier ma clé",
+      "retry": "Réessayer",
       "switchAdvanced": "Passer en mode Avancé",
       "finish": "Terminer"
     },
@@ -31,6 +34,12 @@
       "title": "Créer votre coffre et ajouter une clé gratuite",
       "what": "Choisissez un mot de passe pour le coffre, puis ajoutez une clé gratuite. Google est recommandé. Vous reviendrez ici une fois terminé.",
       "why": "Vos clés de fournisseurs sont chiffrées avec votre mot de passe et restent toujours sous votre contrôle. La clé permet au fournisseur d’IA de vous reconnaître."
+    },
+    "cloudUnlock": {
+      "what": "Déverrouillez votre coffre sur la page du coffre. Vous reviendrez ici une fois terminé."
+    },
+    "cloudKey": {
+      "what": "Ajoutez une clé gratuite sur la page du coffre. Google est recommandé. Vous reviendrez ici une fois terminé."
     },
     "key": {
       "title": "Ajouter une clé gratuite",
@@ -60,6 +69,13 @@
       "progressWhat": "La traduction est en cours. Cette ligne indique sa progression.",
       "progressWhy": "La visite reprend dès que les premières traductions arrivent."
     },
+    "failed": {
+      "title": "La traduction n’a pas abouti",
+      "why": "La barre mise en évidence ci-dessous indique ce qui s’est passé.",
+      "authWhat": "Le fournisseur a refusé votre clé. Vérifiez la clé, puis réessayez.",
+      "quotaWhat": "Le quota gratuit est épuisé pour le moment. Patientez un peu ou ajoutez une autre clé, puis réessayez.",
+      "otherWhat": "Rien n’a été traduit. Vérifiez votre clé, puis réessayez."
+    },
     "export": {
       "title": "Exporter",
       "why": "Votre éditeur de jeu peut importer ce fichier pour intégrer les traductions à votre jeu.",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "Utiliser mon propre fournisseur",
     "description": "Choisissez le fournisseur dont vous avez une clé. NARN lui enverra toutes les traductions de vos projets. Pour combiner plusieurs fournisseurs, passez en mode Avancé.",
+    "existingRouting": "Ce projet a déjà un routage configuré, il reste donc tel quel. Vous pouvez le modifier en mode Avancé.",
     "cancel": "Annuler",
     "failed": "Impossible de configurer {{provider}} : {{message}}"
   }

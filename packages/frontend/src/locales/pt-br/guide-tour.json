@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "Abrir o formulário do cofre",
       "cloudVault": "Configurar seu cofre",
+      "openVaultPage": "Abrir a página do cofre",
       "getGoogleKey": "Obter uma chave gratuita do Google",
       "addGoogleKey": "Colar minha chave do Google",
       "ownProvider": "Usar meu próprio provedor",
+      "fixKey": "Conferir minha chave",
+      "retry": "Tentar de novo",
       "switchAdvanced": "Mudar para Avançado",
       "finish": "Concluir"
     },
@@ -31,6 +34,12 @@
       "title": "Criação do cofre e adição de uma chave gratuita",
       "what": "Escolha uma senha para o cofre e adicione uma chave gratuita. Recomendamos o Google. Você volta para cá quando terminar.",
       "why": "Suas chaves dos provedores são criptografadas com a sua senha e nunca saem do seu controle. É pela chave que o provedor de IA sabe que é você."
+    },
+    "cloudUnlock": {
+      "what": "Desbloqueie seu cofre na página do cofre. Você volta para cá quando terminar."
+    },
+    "cloudKey": {
+      "what": "Adicione uma chave gratuita na página do cofre. Recomendamos o Google. Você volta para cá quando terminar."
     },
     "key": {
       "title": "Adição de uma chave gratuita",
@@ -60,6 +69,13 @@
       "progressWhat": "A tradução está em andamento. Esta linha mostra o progresso.",
       "progressWhy": "O tour continua quando as primeiras traduções chegarem."
     },
+    "failed": {
+      "title": "Tradução não concluída",
+      "why": "A barra destacada abaixo mostra o que aconteceu.",
+      "authWhat": "O provedor recusou sua chave. Confira a chave e tente de novo.",
+      "quotaWhat": "A cota gratuita acabou por enquanto. Espere um pouco ou adicione outra chave e tente de novo.",
+      "otherWhat": "Nada foi traduzido. Confira sua chave e tente de novo."
+    },
     "export": {
       "title": "Exportação",
       "why": "O editor do seu jogo pode importar este arquivo para levar as traduções ao jogo.",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "Usar meu próprio provedor",
     "description": "Escolha o provedor para o qual você tem uma chave. O NARN enviará todas as traduções dos seus projetos para ele. Para combinar vários provedores, mude para Avançado.",
+    "existingRouting": "Este projeto já tem roteamento configurado, então fica como está. Você pode alterá-lo no Avançado.",
     "cancel": "Cancelar",
     "failed": "Não foi possível configurar {{provider}}: {{message}}"
   }

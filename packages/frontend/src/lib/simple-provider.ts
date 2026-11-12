@@ -52,6 +52,23 @@ const PROVIDER_KEYS: Readonly<Record<string, string>> = {
   copilot: 'GITHUB_TOKEN',
 };
 
+/** Free keys in the order the guide prefers them, with the provider each one unlocks. */
+export const FREE_KEY_PROVIDERS: ReadonlyArray<{ key: (typeof FREE_KEYS)[number]; base: string }> =
+  [
+    { key: 'GOOGLE_API_KEY', base: 'google' },
+    { key: 'GROQ_API_KEY', base: 'groq' },
+    { key: 'OPENROUTER_API_KEY', base: 'openrouter' },
+    { key: 'DEEPL_API_KEY', base: 'deepl' },
+  ];
+
+/**
+ * The id `enableProvider(base)` returns, known without asking the server:
+ * `<base>:default`, or the bare id for a module with no instance layer.
+ */
+export function providerInstanceId(baseModuleId: string): string {
+  return NON_INSTANCEABLE.has(baseModuleId) ? baseModuleId : `${baseModuleId}:default`;
+}
+
 /** The vault key behind a base module or instance id (`openai`, `openai:default`), if known. */
 export function providerKeyFor(moduleId: string): string | undefined {
   return PROVIDER_KEYS[moduleId.split(':')[0]];
@@ -70,7 +87,7 @@ interface GlobalConfigDoc {
  */
 export async function enableProvider(baseModuleId: string): Promise<string> {
   const instanceable = !NON_INSTANCEABLE.has(baseModuleId);
-  const id = instanceable ? `${baseModuleId}:default` : baseModuleId;
+  const id = providerInstanceId(baseModuleId);
   let config: Record<string, unknown> = {};
   let existed = !instanceable;
   if (instanceable) {

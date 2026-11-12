@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "Kasa formunu aç",
       "cloudVault": "Kasayı kur",
+      "openVaultPage": "Kasa sayfasını aç",
       "getGoogleKey": "Ücretsiz Google anahtarı al",
       "addGoogleKey": "Google anahtarımı yapıştır",
       "ownProvider": "Kendi sağlayıcımı kullan",
+      "fixKey": "Anahtarımı kontrol et",
+      "retry": "Yeniden dene",
       "switchAdvanced": "Gelişmiş moda geç",
       "finish": "Bitir"
     },
@@ -31,6 +34,12 @@
       "title": "Kasa oluşturma ve ücretsiz anahtar ekleme",
       "what": "Bir kasa parolası belirleyin, ardından bir ücretsiz anahtar ekleyin. Google önerilir. İşlem bitince buraya dönersiniz.",
       "why": "Sağlayıcı anahtarlarınız parolanızla şifrelenir ve her zaman sizin kontrolünüzde kalır. Yapay zekâ sağlayıcısı sizi anahtar sayesinde tanır."
+    },
+    "cloudUnlock": {
+      "what": "Kasa sayfasında kasanızın kilidini açın. İşlem bitince buraya dönersiniz."
+    },
+    "cloudKey": {
+      "what": "Kasa sayfasında bir ücretsiz anahtar ekleyin. Google önerilir. İşlem bitince buraya dönersiniz."
     },
     "key": {
       "title": "Ücretsiz anahtar ekleme",
@@ -60,6 +69,13 @@
       "progressWhat": "Çeviri sürüyor. Bu satır ilerlemeyi gösterir.",
       "progressWhy": "İlk çeviriler geldiğinde tur devam eder."
     },
+    "failed": {
+      "title": "Çeviri tamamlanmadı",
+      "why": "Aşağıdaki vurgulanan çubuk ne olduğunu gösterir.",
+      "authWhat": "Sağlayıcı anahtarınızı reddetti. Anahtarı kontrol edin, ardından yeniden deneyin.",
+      "quotaWhat": "Ücretsiz kota şimdilik tükendi. Biraz bekleyin veya başka bir anahtar ekleyin, ardından yeniden deneyin.",
+      "otherWhat": "Hiçbir şey çevrilmedi. Anahtarınızı kontrol edin, ardından yeniden deneyin."
+    },
     "export": {
       "title": "Dışa aktarma",
       "why": "Oyun düzenleyiciniz, çevirileri oyununuza almak için bu dosyayı içe aktarabilir.",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "Kendi sağlayıcımı kullan",
     "description": "Anahtarına sahip olduğunuz sağlayıcıyı seçin. NARN, projelerinizdeki tüm çevirileri ona gönderir. Birden çok sağlayıcıyı birlikte kullanmak için Gelişmiş moda geçin.",
+    "existingRouting": "Bu projede yönlendirme zaten ayarlı, bu yüzden olduğu gibi kalır. Gelişmiş modda değiştirebilirsiniz.",
     "cancel": "İptal",
     "failed": "{{provider}} kurulamadı: {{message}}"
   }

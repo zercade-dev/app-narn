@@ -13,6 +13,12 @@ interface GuideState {
   /** Module instance id chosen via "Use my own provider", e.g. `openai:default`. */
   simpleProvider: string | null;
   exportedOnce: boolean;
+  /**
+   * Module ids the guide has already enabled for the person (`google:default`,
+   * `deepl`). Each is enabled once: one they later switch off in Advanced is
+   * not switched back on.
+   */
+  enabledProviders: string[];
   completedTours: string[];
   declinedTours: string[];
   /** Not persisted. */
@@ -22,6 +28,7 @@ interface GuideState {
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
   markExported: () => void;
+  markProviderEnabled: (id: string) => void;
   startTour: (id: string) => void;
   endTour: (completed: boolean) => void;
   declineTour: (id: string) => void;
@@ -37,6 +44,7 @@ export const useGuideStore = create<GuideState>()(
       firstRunFinished: false,
       simpleProvider: null,
       exportedOnce: false,
+      enabledProviders: [],
       completedTours: [],
       declinedTours: [],
       activeTourId: null,
@@ -45,6 +53,8 @@ export const useGuideStore = create<GuideState>()(
       finishFirstRun: () => set({ firstRunFinished: true }),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
       markExported: () => set({ exportedOnce: true }),
+      markProviderEnabled: (id) =>
+        set((s) => ({ enabledProviders: addOnce(s.enabledProviders, id) })),
       startTour: (id) => set({ activeTourId: id }),
       endTour: (completed) =>
         set((s) => ({
@@ -63,6 +73,7 @@ export const useGuideStore = create<GuideState>()(
         firstRunFinished: state.firstRunFinished,
         simpleProvider: state.simpleProvider,
         exportedOnce: state.exportedOnce,
+        enabledProviders: state.enabledProviders,
         completedTours: state.completedTours,
         declinedTours: state.declinedTours,
       }),

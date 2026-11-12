@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "Open the vault form",
       "cloudVault": "Set up your vault",
+      "openVaultPage": "Open the vault page",
       "getGoogleKey": "Get a free Google key",
       "addGoogleKey": "Paste my Google key",
       "ownProvider": "Use my own provider",
+      "fixKey": "Check my key",
+      "retry": "Try again",
       "switchAdvanced": "Switch to Advanced",
       "finish": "Finish"
     },
@@ -31,6 +34,12 @@
       "title": "Create your vault and add one free key",
       "what": "Choose a vault password, then add one free key. Google is recommended. You come back here when it is done.",
       "why": "Your provider keys are encrypted with your password and never leave your control. A key is how the AI provider knows it's you."
+    },
+    "cloudUnlock": {
+      "what": "Unlock your vault on the vault page. You come back here when it is done."
+    },
+    "cloudKey": {
+      "what": "Add one free key on the vault page. Google is recommended. You come back here when it is done."
     },
     "key": {
       "title": "Add one free key",
@@ -60,6 +69,13 @@
       "progressWhat": "The translation is running. This line shows its progress.",
       "progressWhy": "The tour continues when the first translations arrive."
     },
+    "failed": {
+      "title": "The translation didn't go through",
+      "why": "The highlighted bar below shows what happened.",
+      "authWhat": "The provider rejected your key. Check the key, then try again.",
+      "quotaWhat": "The free quota is used up for now. Wait a little or add another key, then try again.",
+      "otherWhat": "Nothing was translated. Check your key, then try again."
+    },
     "export": {
       "title": "Export",
       "why": "Your game editor can import this file to bring the translations into your game.",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "Use my own provider",
     "description": "Pick the provider you have a key for. NARN will send every translation in your projects to it. To combine several providers, switch to Advanced.",
+    "existingRouting": "This project already has routing set up, so it stays as it is. You can change it in Advanced.",
     "cancel": "Cancel",
     "failed": "Could not set up {{provider}}: {{message}}"
   }

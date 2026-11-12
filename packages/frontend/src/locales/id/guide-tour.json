@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "Buka formulir brankas",
       "cloudVault": "Siapkan brankas",
+      "openVaultPage": "Buka halaman brankas",
       "getGoogleKey": "Dapatkan kunci Google gratis",
       "addGoogleKey": "Tempel kunci Google saya",
       "ownProvider": "Gunakan penyedia saya sendiri",
+      "fixKey": "Periksa kunci saya",
+      "retry": "Coba lagi",
       "switchAdvanced": "Beralih ke Lanjutan",
       "finish": "Selesai"
     },
@@ -31,6 +34,12 @@
       "title": "Pembuatan brankas dan penambahan satu kunci gratis",
       "what": "Pilih kata sandi brankas, lalu tambahkan satu kunci gratis. Google direkomendasikan. Anda akan kembali ke sini setelah selesai.",
       "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda. Dengan kunci itulah penyedia AI mengenali Anda."
+    },
+    "cloudUnlock": {
+      "what": "Buka kunci brankas di halaman brankas. Anda akan kembali ke sini setelah selesai."
+    },
+    "cloudKey": {
+      "what": "Tambahkan satu kunci gratis di halaman brankas. Google direkomendasikan. Anda akan kembali ke sini setelah selesai."
     },
     "key": {
       "title": "Penambahan satu kunci gratis",
@@ -60,6 +69,13 @@
       "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
       "progressWhy": "Tur berlanjut setelah terjemahan pertama masuk."
     },
+    "failed": {
+      "title": "Penerjemahan tidak berhasil",
+      "why": "Bilah yang disorot di bawah menunjukkan apa yang terjadi.",
+      "authWhat": "Penyedia menolak kunci Anda. Periksa kuncinya, lalu coba lagi.",
+      "quotaWhat": "Kuota gratis sedang habis. Tunggu sebentar atau tambahkan kunci lain, lalu coba lagi.",
+      "otherWhat": "Tidak ada yang diterjemahkan. Periksa kunci Anda, lalu coba lagi."
+    },
     "export": {
       "title": "Ekspor",
       "why": "Editor game Anda dapat mengimpor berkas ini untuk memasukkan terjemahan ke dalam game.",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "Gunakan penyedia saya sendiri",
     "description": "Pilih penyedia yang kuncinya Anda miliki. NARN akan mengirim setiap terjemahan dalam proyek Anda ke penyedia itu. Untuk menggabungkan beberapa penyedia, beralihlah ke Lanjutan.",
+    "existingRouting": "Proyek ini sudah memiliki penyaluran, jadi dibiarkan apa adanya. Anda dapat mengubahnya di Lanjutan.",
     "cancel": "Batal",
     "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}"
   }

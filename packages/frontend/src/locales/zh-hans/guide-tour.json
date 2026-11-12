@@ -9,9 +9,12 @@
     "actions": {
       "openVault": "打开保险库表单",
       "cloudVault": "设置保险库",
+      "openVaultPage": "打开保险库页面",
       "getGoogleKey": "获取免费的 Google 密钥",
       "addGoogleKey": "粘贴我的 Google 密钥",
       "ownProvider": "使用我自己的服务商",
+      "fixKey": "检查我的密钥",
+      "retry": "重试",
       "switchAdvanced": "切换到高级模式",
       "finish": "完成"
     },
@@ -31,6 +34,12 @@
       "title": "创建保险库并添加一个免费密钥",
       "what": "设置保险库密码，然后添加一个免费密钥。推荐使用 Google。完成后会回到这里。",
       "why": "服务商密钥会用您的密码加密，始终由您自己掌控。AI 服务商通过密钥确认是您本人。"
+    },
+    "cloudUnlock": {
+      "what": "在保险库页面解锁保险库。完成后会回到这里。"
+    },
+    "cloudKey": {
+      "what": "在保险库页面添加一个免费密钥。推荐使用 Google。完成后会回到这里。"
     },
     "key": {
       "title": "添加一个免费密钥",
@@ -60,6 +69,13 @@
       "progressWhat": "正在翻译。这一行显示进度。",
       "progressWhy": "第一批译文到达后，导览会继续。"
     },
+    "failed": {
+      "title": "翻译未完成",
+      "why": "下方高亮的栏显示了发生的情况。",
+      "authWhat": "服务商拒绝了您的密钥。请检查密钥，然后重试。",
+      "quotaWhat": "免费额度暂时用完了。请稍等片刻或添加其他密钥，然后重试。",
+      "otherWhat": "没有翻译任何内容。请检查密钥，然后重试。"
+    },
     "export": {
       "title": "导出",
       "why": "游戏编辑器可以导入这个文件，把译文带入游戏。",
@@ -75,6 +91,7 @@
   "providerChoice": {
     "title": "使用我自己的服务商",
     "description": "选择您拥有密钥的服务商。NARN 会把项目中的所有翻译都交给它。要组合使用多个服务商，请切换到高级模式。",
+    "existingRouting": "这个项目已经设置了分发，因此保持不变。可以在高级模式中更改。",
     "cancel": "取消",
     "failed": "无法设置 {{provider}}：{{message}}"
   }
