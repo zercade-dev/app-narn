@@ -134,6 +134,7 @@ export type {
   PendingCorrectionRecord,
   ProviderFailureNotice,
   ProviderFailureRouting,
+  FailureCode,
   RunErrorEntry,
   RunUsageEntry,
   RunRequest,
