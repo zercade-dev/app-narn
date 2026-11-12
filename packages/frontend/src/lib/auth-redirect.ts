@@ -18,8 +18,9 @@ export function redirectTo(path: string): void {
  * VaultUnlockDialog's setup-redirect button and WelcomeView's "Set up vault"
  * button so the target URL is built in exactly one place.
  */
-export function goToVaultSetup(): void {
-  redirectTo('/vault?return=' + encodeURIComponent(location.pathname + location.search));
+export function goToVaultSetup(opts?: { guided?: boolean }): void {
+  const base = '/vault?return=' + encodeURIComponent(location.pathname + location.search);
+  redirectTo(opts?.guided ? base + '&guide=1' : base);
 }
 
 /**
