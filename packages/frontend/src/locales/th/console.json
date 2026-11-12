@@ -37,5 +37,16 @@
   "captureSlotsExhausted": "การบันทึกล็อกกำลังไม่ว่างในขณะนี้ — มีการบันทึกทำงานอยู่บนเซิร์ฟเวอร์นี้มากเกินไป โปรดลองใหม่อีกครั้งภายหลัง",
   "modeFriendly": "อ่านง่าย",
   "modeRaw": "ดิบ",
-  "modeLabel": "มุมมองบันทึก"
+  "modeLabel": "มุมมองบันทึก",
+  "notificationsBell": "การแจ้งเตือน",
+  "notificationsBellUnread_other": "การแจ้งเตือน ยังไม่ได้อ่าน {{count}} รายการ",
+  "statusLine": {
+    "translatingInto": "กำลังแปล ({{language}}): {{done}} จาก {{total}}",
+    "translatingLanguages_other": "กำลังแปล ({{count}} ภาษา): {{done}} จาก {{total}}",
+    "progress": "{{type}}: {{done}} จาก {{total}}",
+    "waiting": "{{type}}: รอทำงานต่อ {{done}} จาก {{total}}",
+    "queued": "{{type}}: อยู่ในคิว ลำดับที่ {{position}}",
+    "queuedNoPosition": "{{type}}: อยู่ในคิว",
+    "starting": "{{type}}: กำลังเริ่ม"
+  }
 }

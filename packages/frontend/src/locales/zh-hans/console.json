@@ -37,5 +37,16 @@
   "captureSlotsExhausted": "捕获功能当前繁忙——此服务器上正在运行的捕获过多。请稍后再试。",
   "modeFriendly": "易读",
   "modeRaw": "原始",
-  "modeLabel": "日志视图"
+  "modeLabel": "日志视图",
+  "notificationsBell": "通知",
+  "notificationsBellUnread_other": "通知，{{count}} 条未读",
+  "statusLine": {
+    "translatingInto": "正在翻译为{{language}}：{{done}}/{{total}}",
+    "translatingLanguages_other": "正在翻译为 {{count}} 种语言：{{done}}/{{total}}",
+    "progress": "{{type}}：{{done}}/{{total}}",
+    "waiting": "{{type}}：等待恢复，{{done}}/{{total}}",
+    "queued": "{{type}}：排队中，第 {{position}} 位",
+    "queuedNoPosition": "{{type}}：排队中",
+    "starting": "{{type}}：正在启动"
+  }
 }

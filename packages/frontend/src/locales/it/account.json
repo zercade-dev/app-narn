@@ -53,6 +53,9 @@
   "notificationsDismiss": "Elimina",
   "notificationsLoading": "Caricamento delle tue notifiche…",
   "notificationsEmpty": "Non hai notifiche.",
+  "notificationsSidebarDescription": "Aggiornamenti sulle tue esecuzioni e sui tuoi progetti.",
+  "notificationsUnread": "Non letta",
+  "notificationsDismissItem": "Elimina: {{title}}",
   "notificationsSeverity": {
     "info": "Info",
     "warning": "Avviso",

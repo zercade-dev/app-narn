@@ -41,5 +41,18 @@
   "captureSlotsExhausted": "A captura está ocupada agora — há capturas demais em execução neste servidor. Tente novamente mais tarde.",
   "modeFriendly": "Simplificado",
   "modeRaw": "Bruto",
-  "modeLabel": "Visualização do log"
+  "modeLabel": "Visualização do log",
+  "notificationsBell": "Notificações",
+  "notificationsBellUnread_one": "Notificações, {{count}} não lida",
+  "notificationsBellUnread_other": "Notificações, {{count}} não lidas",
+  "statusLine": {
+    "translatingInto": "Traduzindo para {{language}}: {{done}} de {{total}}",
+    "translatingLanguages_one": "Traduzindo para {{count}} idioma: {{done}} de {{total}}",
+    "translatingLanguages_other": "Traduzindo para {{count}} idiomas: {{done}} de {{total}}",
+    "progress": "{{type}}: {{done}} de {{total}}",
+    "waiting": "{{type}}: aguardando para retomar, {{done}} de {{total}}",
+    "queued": "{{type}}: na fila, posição {{position}}",
+    "queuedNoPosition": "{{type}}: na fila",
+    "starting": "{{type}}: iniciando"
+  }
 }

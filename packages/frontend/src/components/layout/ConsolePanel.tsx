@@ -15,6 +15,9 @@ import { useLoggerStore, type LogEntry } from '../../stores/logger-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { vaultLockedEvent } from '../../lib/vault-events.js';
 import { useUiSettings, type ConsoleFilter } from '../../stores/ui-settings-store.js';
+import { useRunStore } from '../../stores/run-store.js';
+import { statusLineFor } from '../../lib/run-status-line.js';
+import type { Translate } from '../../lib/log-presentation/types.js';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -30,6 +33,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PixelIcon } from '@/components/ui/pixel-icon';
 import { cn, downloadBlob } from '@/lib/utils';
 import { ConsoleLogRow } from './ConsoleLogRow.js';
+import { NotificationBell } from './NotificationBell.js';
 import { groupEntries } from '@/lib/log-presentation/group.js';
 import { presentEntry } from '@/lib/log-presentation/present.js';
 import { isRawOnly } from '@/lib/log-presentation/raw-only.js';
@@ -88,6 +92,10 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // React Compiler cannot memoize safely, so opt this component out.
   const { t } = useTranslation('console');
   const { t: tLogs } = useTranslation('logs');
+  // The status line names the run type, which lives in the `strings` namespace.
+  const { t: tStatus } = useTranslation(['console', 'strings']);
+  const runs = useRunStore((s) => s.runs);
+  const statusLine = statusLineFor(runs, tStatus as Translate);
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const vaultExists = useVaultStore((s) => s.hasVault);
   const {
@@ -365,17 +373,26 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
           onClick={onToggle}
           data-testid="console-toggle"
           title={connected ? t('statusConnected') : t('statusDisconnected')}
-          className="flex items-center gap-2 flex-1 text-left bg-transparent cursor-pointer h-full"
+          className="flex items-center gap-2 flex-1 min-w-0 text-left bg-transparent cursor-pointer h-full"
         >
           <Circle
             className={cn(
-              'size-2 fill-current',
+              'size-2 shrink-0 fill-current',
               // Red only when something is actually wrong: stream disconnected
               // or errors arrived unseen. At rest the dot stays quiet.
               !connected || unreadErrorCount > 0 ? 'text-status-fail' : 'text-muted-foreground/40',
             )}
           />
-          <span className="font-semibold">{t('title')}</span>
+          <span className="font-semibold shrink-0">{t('title')}</span>
+          {statusLine && (
+            <span
+              data-testid="console-status-line"
+              title={statusLine}
+              className="min-w-0 truncate text-muted-foreground"
+            >
+              {statusLine}
+            </span>
+          )}
           {vaultExists && !vaultUnlocked && (
             <span
               data-testid="vault-locked-banner"
@@ -383,7 +400,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
               tabIndex={0}
               title={t('vaultLockedUnlockHint')}
               aria-label={t('vaultLockedUnlockHint')}
-              className="inline-flex items-center gap-1 font-mono text-[12px] leading-none px-1 py-0.5 rounded bg-status-warn/15 hover:bg-status-warn/25 text-status-warn cursor-pointer"
+              className="inline-flex shrink-0 items-center gap-1 font-mono text-[12px] leading-none px-1 py-0.5 rounded bg-status-warn/15 hover:bg-status-warn/25 text-status-warn cursor-pointer"
               onClick={(e) => {
                 // Stop the click from also firing the parent console-toggle
                 // button's onClick — this chip has its own action.
@@ -408,7 +425,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
               data-testid="console-unread-errors"
               aria-label={t('unreadErrors', { count: unreadErrorCount })}
               title={t('unreadErrors', { count: unreadErrorCount })}
-              className="font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-fail/10 text-status-fail"
+              className="shrink-0 font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-fail/10 text-status-fail"
             >
               {unreadErrorCount}
             </span>
@@ -418,7 +435,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
               data-testid="console-unread-warnings"
               aria-label={t('unreadWarnings', { count: unreadWarningCount })}
               title={t('unreadWarnings', { count: unreadWarningCount })}
-              className="font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-warn/10 text-status-warn"
+              className="shrink-0 font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-warn/10 text-status-warn"
             >
               {unreadWarningCount}
             </span>
@@ -553,6 +570,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
         >
           <PixelIcon name="trash-2" fallback={Trash2} className="size-4" />
         </Button>
+        <NotificationBell />
         <button
           type="button"
           onClick={onToggle}

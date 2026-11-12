@@ -52,6 +52,9 @@
   "notificationsDismiss": "삭제",
   "notificationsLoading": "알림을 불러오는 중…",
   "notificationsEmpty": "알림이 없어요.",
+  "notificationsSidebarDescription": "실행과 프로젝트 소식이에요.",
+  "notificationsUnread": "읽지 않음",
+  "notificationsDismissItem": "삭제: {{title}}",
   "notificationsSeverity": {
     "info": "정보",
     "warning": "경고",

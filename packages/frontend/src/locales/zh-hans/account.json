@@ -52,6 +52,9 @@
   "notificationsDismiss": "清除",
   "notificationsLoading": "正在加载您的通知…",
   "notificationsEmpty": "您没有任何通知。",
+  "notificationsSidebarDescription": "有关您的运行和项目的最新动态。",
+  "notificationsUnread": "未读",
+  "notificationsDismissItem": "清除：{{title}}",
   "notificationsSeverity": {
     "info": "信息",
     "warning": "警告",

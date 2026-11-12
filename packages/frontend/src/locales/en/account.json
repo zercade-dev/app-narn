@@ -53,6 +53,9 @@
   "notificationsDismiss": "Dismiss",
   "notificationsLoading": "Loading your notifications…",
   "notificationsEmpty": "You have no notifications.",
+  "notificationsSidebarDescription": "Updates on your runs and projects.",
+  "notificationsUnread": "Unread",
+  "notificationsDismissItem": "Dismiss: {{title}}",
   "notificationsSeverity": {
     "info": "Info",
     "warning": "Warning",

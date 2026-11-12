@@ -52,6 +52,9 @@
   "notificationsDismiss": "Hapus",
   "notificationsLoading": "Memuat notifikasi Anda…",
   "notificationsEmpty": "Anda tidak punya notifikasi.",
+  "notificationsSidebarDescription": "Kabar tentang putaran dan proyek Anda.",
+  "notificationsUnread": "Belum dibaca",
+  "notificationsDismissItem": "Hapus: {{title}}",
   "notificationsSeverity": {
     "info": "Info",
     "warning": "Peringatan",

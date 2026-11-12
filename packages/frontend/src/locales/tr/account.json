@@ -53,6 +53,9 @@
   "notificationsDismiss": "Kaldır",
   "notificationsLoading": "Bildirimleriniz yükleniyor…",
   "notificationsEmpty": "Bildiriminiz yok.",
+  "notificationsSidebarDescription": "Çalıştırmalarınız ve projelerinizle ilgili gelişmeler.",
+  "notificationsUnread": "Okunmamış",
+  "notificationsDismissItem": "Kaldır: {{title}}",
   "notificationsSeverity": {
     "info": "Bilgi",
     "warning": "Uyarı",

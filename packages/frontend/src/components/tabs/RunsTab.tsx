@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRunStore } from '../../stores/run-store.js';
 import { useViewStore } from '../../stores/view-store.js';
@@ -512,6 +512,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
   const [tickAnchor] = useState(() => new Date());
   const {
     runs,
+    fetchRuns,
     cancelRun,
     judgeRun,
     retryRun,
@@ -670,6 +671,45 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
     // glanced at Activity and navigated away, silently defeating both the
     // run-failure toast and Activity's own live status for the rest of that run.
   }, [projectId, startPolling]);
+
+  // A notification's "View in Activity" asks for one run (the view store's
+  // pendingRunId): scroll its row into view, ring it for two seconds, then
+  // drop the request. A run missing from the list (not loaded yet, or newer
+  // than the last poll) gets one refetch first; still missing after that, the
+  // request is dropped so it never lingers. The ring is a `data-highlighted`
+  // attribute set on the row element directly: React never renders that
+  // attribute, so a poll re-render cannot wipe it, and the row's static classes
+  // style it.
+  const pendingRunId = useViewStore((s) => s.pendingRunId);
+  const clearPendingRunId = useViewStore((s) => s.clearPendingRunId);
+  const rowRefs = useRef(new Map<string, HTMLTableRowElement>());
+  // Outlives the effect below on purpose: clearing pendingRunId re-runs it.
+  const highlightTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(highlightTimer.current), []);
+  const refetchedFor = useRef<string | null>(null);
+  const [refetchDone, setRefetchDone] = useState(0);
+  // The rows live in the engines view (adjusted during render, not in an effect).
+  if (pendingRunId && showManualView) setActivityView('engines');
+  useEffect(() => {
+    if (!pendingRunId || showManualView) return;
+    // Rows left over from the previous project: this project's list is on its way.
+    if (runs.length > 0 && !runs.some((r) => r.projectId === projectId)) return;
+    const row = rowRefs.current.get(pendingRunId);
+    if (!row && refetchedFor.current !== pendingRunId) {
+      refetchedFor.current = pendingRunId;
+      void fetchRuns(projectId).finally(() => setRefetchDone((n) => n + 1));
+      return;
+    }
+    clearPendingRunId();
+    refetchedFor.current = null;
+    if (!row) return;
+    const reduceMotion =
+      globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    row.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+    row.dataset.highlighted = 'true';
+    clearTimeout(highlightTimer.current);
+    highlightTimer.current = setTimeout(() => delete row.dataset.highlighted, 2000);
+  }, [pendingRunId, clearPendingRunId, fetchRuns, runs, refetchDone, projectId, showManualView]);
 
   const activeRuns = runs.filter(
     (r) => r.status === RunStatusCode.Pending || r.status === RunStatusCode.Running,
@@ -981,7 +1021,14 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                     return (
                       <Fragment key={run.runId}>
                         <TableRow
-                          className={run.providerFailureNotices?.length ? 'border-b-0' : undefined}
+                          ref={(el) => {
+                            if (el) rowRefs.current.set(run.runId, el);
+                            else rowRefs.current.delete(run.runId);
+                          }}
+                          className={cn(
+                            'data-highlighted:bg-primary/10 data-highlighted:ring-2 data-highlighted:ring-inset data-highlighted:ring-primary',
+                            run.providerFailureNotices?.length && 'border-b-0',
+                          )}
                         >
                           <TableCell className={rowAccentClass(run.status)}>
                             <div className="flex items-center gap-2">

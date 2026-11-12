@@ -37,5 +37,16 @@
   "captureSlotsExhausted": "Perekaman sedang sibuk — terlalu banyak perekaman yang berjalan di server ini. Coba lagi nanti.",
   "modeFriendly": "Ringkas",
   "modeRaw": "Mentah",
-  "modeLabel": "Tampilan log"
+  "modeLabel": "Tampilan log",
+  "notificationsBell": "Notifikasi",
+  "notificationsBellUnread_other": "Notifikasi, {{count}} belum dibaca",
+  "statusLine": {
+    "translatingInto": "Menerjemahkan ke {{language}}: {{done}} dari {{total}}",
+    "translatingLanguages_other": "Menerjemahkan ke {{count}} bahasa: {{done}} dari {{total}}",
+    "progress": "{{type}}: {{done}} dari {{total}}",
+    "waiting": "{{type}}: menunggu untuk dilanjutkan, {{done}} dari {{total}}",
+    "queued": "{{type}}: dalam antrean, urutan ke-{{position}}",
+    "queuedNoPosition": "{{type}}: dalam antrean",
+    "starting": "{{type}}: sedang dimulai"
+  }
 }

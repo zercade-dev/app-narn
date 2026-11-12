@@ -53,6 +53,9 @@
   "notificationsDismiss": "Descartar",
   "notificationsLoading": "Cargando tus notificaciones…",
   "notificationsEmpty": "No tienes notificaciones.",
+  "notificationsSidebarDescription": "Novedades sobre tus ejecuciones y proyectos.",
+  "notificationsUnread": "Sin leer",
+  "notificationsDismissItem": "Descartar: {{title}}",
   "notificationsSeverity": {
     "info": "Información",
     "warning": "Advertencia",

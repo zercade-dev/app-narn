@@ -55,6 +55,9 @@
   "notificationsDismiss": "Скрыть",
   "notificationsLoading": "Загрузка уведомлений…",
   "notificationsEmpty": "Уведомлений нет.",
+  "notificationsSidebarDescription": "Новости о ваших прогонах и проектах.",
+  "notificationsUnread": "Не прочитано",
+  "notificationsDismissItem": "Скрыть: {{title}}",
   "notificationsSeverity": {
     "info": "Информация",
     "warning": "Предупреждение",

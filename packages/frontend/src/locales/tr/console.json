@@ -41,5 +41,18 @@
   "captureSlotsExhausted": "Yakalama şu anda meşgul — bu sunucuda zaten çok fazla yakalama çalışıyor. Daha sonra tekrar deneyin.",
   "modeFriendly": "Anlaşılır",
   "modeRaw": "Ham",
-  "modeLabel": "Günlük görünümü"
+  "modeLabel": "Günlük görünümü",
+  "notificationsBell": "Bildirimler",
+  "notificationsBellUnread_one": "Bildirimler, {{count}} okunmamış",
+  "notificationsBellUnread_other": "Bildirimler, {{count}} okunmamış",
+  "statusLine": {
+    "translatingInto": "Çevriliyor ({{language}}): {{done}}/{{total}}",
+    "translatingLanguages_one": "Çevriliyor ({{count}} dil): {{done}}/{{total}}",
+    "translatingLanguages_other": "Çevriliyor ({{count}} dil): {{done}}/{{total}}",
+    "progress": "{{type}}: {{done}}/{{total}}",
+    "waiting": "{{type}}: devam etmeyi bekliyor, {{done}}/{{total}}",
+    "queued": "{{type}}: sırada, konum {{position}}",
+    "queuedNoPosition": "{{type}}: sırada",
+    "starting": "{{type}}: başlatılıyor"
+  }
 }

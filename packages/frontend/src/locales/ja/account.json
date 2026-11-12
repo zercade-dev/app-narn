@@ -52,6 +52,9 @@
   "notificationsDismiss": "削除",
   "notificationsLoading": "通知を読み込み中…",
   "notificationsEmpty": "通知はありません。",
+  "notificationsSidebarDescription": "実行とプロジェクトに関するお知らせです。",
+  "notificationsUnread": "未読",
+  "notificationsDismissItem": "削除：{{title}}",
   "notificationsSeverity": {
     "info": "情報",
     "warning": "警告",

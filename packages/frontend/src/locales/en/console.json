@@ -37,5 +37,18 @@
   "captureSlotsExhausted": "Capture is busy right now — too many captures are running on this server. Try again later.",
   "modeFriendly": "Friendly",
   "modeRaw": "Raw",
-  "modeLabel": "Log view"
+  "modeLabel": "Log view",
+  "notificationsBell": "Notifications",
+  "notificationsBellUnread_one": "Notifications, {{count}} unread",
+  "notificationsBellUnread_other": "Notifications, {{count}} unread",
+  "statusLine": {
+    "translatingInto": "Translating into {{language}}: {{done}} of {{total}}",
+    "translatingLanguages_one": "Translating into {{count}} language: {{done}} of {{total}}",
+    "translatingLanguages_other": "Translating into {{count}} languages: {{done}} of {{total}}",
+    "progress": "{{type}}: {{done}} of {{total}}",
+    "waiting": "{{type}} waiting to resume: {{done}} of {{total}}",
+    "queued": "{{type}} queued, number {{position}} in line",
+    "queuedNoPosition": "{{type}} queued",
+    "starting": "{{type}} starting"
+  }
 }

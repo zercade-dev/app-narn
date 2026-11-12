@@ -37,5 +37,16 @@
   "captureSlotsExhausted": "지금은 캡처가 사용 중이에요 — 이 서버에서 이미 너무 많은 캡처가 실행 중이에요. 나중에 다시 시도해 주세요.",
   "modeFriendly": "쉬운 보기",
   "modeRaw": "원본",
-  "modeLabel": "로그 보기"
+  "modeLabel": "로그 보기",
+  "notificationsBell": "알림",
+  "notificationsBellUnread_other": "알림, 읽지 않음 {{count}}개",
+  "statusLine": {
+    "translatingInto": "번역 중({{language}}): {{done}}/{{total}}",
+    "translatingLanguages_other": "번역 중({{count}}개 언어): {{done}}/{{total}}",
+    "progress": "{{type}}: {{done}}/{{total}}",
+    "waiting": "{{type}}: 재개 대기 중, {{done}}/{{total}}",
+    "queued": "{{type}}: 대기 중, {{position}}번째",
+    "queuedNoPosition": "{{type}}: 대기 중",
+    "starting": "{{type}}: 시작하는 중"
+  }
 }

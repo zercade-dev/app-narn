@@ -53,6 +53,9 @@
   "notificationsDismiss": "Ignorer",
   "notificationsLoading": "Chargement de vos notifications…",
   "notificationsEmpty": "Vous n'avez aucune notification.",
+  "notificationsSidebarDescription": "Les nouvelles de vos exécutions et de vos projets.",
+  "notificationsUnread": "Non lue",
+  "notificationsDismissItem": "Ignorer : {{title}}",
   "notificationsSeverity": {
     "info": "Info",
     "warning": "Avertissement",

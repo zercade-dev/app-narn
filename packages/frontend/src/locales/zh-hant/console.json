@@ -37,5 +37,16 @@
   "captureSlotsExhausted": "擷取功能目前忙碌中——這台伺服器上執行中的擷取已經太多。請稍後再試。",
   "modeFriendly": "易讀",
   "modeRaw": "原始",
-  "modeLabel": "日誌檢視"
+  "modeLabel": "日誌檢視",
+  "notificationsBell": "通知",
+  "notificationsBellUnread_other": "通知，{{count}} 則未讀",
+  "statusLine": {
+    "translatingInto": "正在翻譯為{{language}}：{{done}}/{{total}}",
+    "translatingLanguages_other": "正在翻譯為 {{count}} 種語言：{{done}}/{{total}}",
+    "progress": "{{type}}：{{done}}/{{total}}",
+    "waiting": "{{type}}：等待繼續，{{done}}/{{total}}",
+    "queued": "{{type}}：排隊中，第 {{position}} 位",
+    "queuedNoPosition": "{{type}}：排隊中",
+    "starting": "{{type}}：正在啟動"
+  }
 }

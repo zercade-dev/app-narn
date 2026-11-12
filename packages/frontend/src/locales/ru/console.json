@@ -49,5 +49,22 @@
   "captureSlotsExhausted": "Захват журнала сейчас занят — на этом сервере уже выполняется слишком много захватов. Повторите попытку позже.",
   "modeFriendly": "Понятный",
   "modeRaw": "Сырой",
-  "modeLabel": "Вид журнала"
+  "modeLabel": "Вид журнала",
+  "notificationsBell": "Уведомления",
+  "notificationsBellUnread_one": "Уведомления, непрочитанных: {{count}}",
+  "notificationsBellUnread_few": "Уведомления, непрочитанных: {{count}}",
+  "notificationsBellUnread_many": "Уведомления, непрочитанных: {{count}}",
+  "notificationsBellUnread_other": "Уведомления, непрочитанных: {{count}}",
+  "statusLine": {
+    "translatingInto": "Перевод — {{language}}: {{done}} из {{total}}",
+    "translatingLanguages_one": "Перевод на {{count}} язык: {{done}} из {{total}}",
+    "translatingLanguages_few": "Перевод на {{count}} языка: {{done}} из {{total}}",
+    "translatingLanguages_many": "Перевод на {{count}} языков: {{done}} из {{total}}",
+    "translatingLanguages_other": "Перевод на {{count}} языка: {{done}} из {{total}}",
+    "progress": "{{type}}: {{done}} из {{total}}",
+    "waiting": "{{type}}: ожидание возобновления, {{done}} из {{total}}",
+    "queued": "{{type}}: в очереди, позиция {{position}}",
+    "queuedNoPosition": "{{type}}: в очереди",
+    "starting": "{{type}}: начинается"
+  }
 }

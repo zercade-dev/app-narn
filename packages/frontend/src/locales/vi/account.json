@@ -52,6 +52,9 @@
   "notificationsDismiss": "Xóa",
   "notificationsLoading": "Đang tải thông báo của bạn…",
   "notificationsEmpty": "Bạn không có thông báo nào.",
+  "notificationsSidebarDescription": "Cập nhật về các lần chạy và dự án của bạn.",
+  "notificationsUnread": "Chưa đọc",
+  "notificationsDismissItem": "Xóa: {{title}}",
   "notificationsSeverity": {
     "info": "Thông tin",
     "warning": "Cảnh báo",

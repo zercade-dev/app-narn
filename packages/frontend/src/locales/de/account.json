@@ -53,6 +53,9 @@
   "notificationsDismiss": "Entfernen",
   "notificationsLoading": "Benachrichtigungen werden geladen…",
   "notificationsEmpty": "Du hast keine Benachrichtigungen.",
+  "notificationsSidebarDescription": "Neuigkeiten zu deinen Durchläufen und Projekten.",
+  "notificationsUnread": "Ungelesen",
+  "notificationsDismissItem": "Entfernen: {{title}}",
   "notificationsSeverity": {
     "info": "Info",
     "warning": "Warnung",

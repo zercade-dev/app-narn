@@ -41,5 +41,18 @@
   "captureSlotsExhausted": "Die Erfassung ist gerade ausgelastet — auf diesem Server laufen bereits zu viele Erfassungen. Bitte später erneut versuchen.",
   "modeFriendly": "Verständlich",
   "modeRaw": "Roh",
-  "modeLabel": "Protokollansicht"
+  "modeLabel": "Protokollansicht",
+  "notificationsBell": "Benachrichtigungen",
+  "notificationsBellUnread_one": "Benachrichtigungen, {{count}} ungelesen",
+  "notificationsBellUnread_other": "Benachrichtigungen, {{count}} ungelesen",
+  "statusLine": {
+    "translatingInto": "Übersetzung in {{language}}: {{done}} von {{total}}",
+    "translatingLanguages_one": "Übersetzung in {{count}} Sprache: {{done}} von {{total}}",
+    "translatingLanguages_other": "Übersetzung in {{count}} Sprachen: {{done}} von {{total}}",
+    "progress": "{{type}}: {{done}} von {{total}}",
+    "waiting": "{{type}} wartet auf Fortsetzung: {{done}} von {{total}}",
+    "queued": "{{type}} in Warteschlange, Platz {{position}}",
+    "queuedNoPosition": "{{type}} in Warteschlange",
+    "starting": "{{type}} wird gestartet"
+  }
 }

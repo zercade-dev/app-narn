@@ -52,6 +52,9 @@
   "notificationsDismiss": "ลบ",
   "notificationsLoading": "กำลังโหลดการแจ้งเตือนของคุณ…",
   "notificationsEmpty": "คุณไม่มีการแจ้งเตือน",
+  "notificationsSidebarDescription": "ข่าวสารเกี่ยวกับรอบการทำงานและโปรเจกต์ของคุณ",
+  "notificationsUnread": "ยังไม่ได้อ่าน",
+  "notificationsDismissItem": "ลบ: {{title}}",
   "notificationsSeverity": {
     "info": "แจ้งให้ทราบ",
     "warning": "คำเตือน",
