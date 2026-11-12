@@ -9,7 +9,6 @@ import { useViewStore, type Tab } from '../../stores/view-store.js';
 import { useTemplateStore } from '../../stores/template-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { useNotificationStore } from '../../stores/notification-store.js';
-import { useOnboardingStore } from '../../stores/onboarding-store.js';
 import { useGuideStore } from '../../stores/guide-store.js';
 import { applySimpleRule } from '../../lib/simple-provider.js';
 import { VaultUnlockDialog } from '../vault/VaultUnlockDialog.js';
@@ -17,6 +16,9 @@ import { ConfirmSheet } from '../ui/confirm-sheet';
 import { apiRequest } from '../../hooks/use-api.js';
 import { visibleTabs as visibleTabsFor } from '../../lib/mode-gating.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
+import { useGuideFacts } from '../../hooks/use-guide-facts.js';
+import { firstRunMajor } from '../../lib/tour/first-run.js';
+import { MAJOR_STEP_COUNT } from '../../lib/tour/types.js';
 import { VAULT_EDITOR_OPEN_EVENT } from '../../lib/vault-events.js';
 import { goToVaultSetup } from '../../lib/auth-redirect.js';
 import { toast } from '@/lib/toast';
@@ -78,6 +80,7 @@ import {
   Unlink,
   UserCog,
   type LucideIcon,
+  ListChecks,
 } from 'lucide-react';
 import type { ShellView } from '../../stores/view-store.js';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -203,6 +206,7 @@ const PAGE_ITEMS: ReadonlyArray<{
 export function Sidebar() {
   const { t } = useTranslation('sidebar');
   const { t: tStrings } = useTranslation('strings');
+  const { t: tGuide } = useTranslation('guide-tour');
   const {
     projects,
     activeProjectId,
@@ -230,13 +234,12 @@ export function Sidebar() {
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const cloudManaged = useVaultStore((s) => s.cloudManaged ?? false);
   const unreadNotificationCount = useNotificationStore((s) => s.unreadCount);
-  // Onboarding nudge: until this browser has produced a translation — by a run
-  // or by hand — the Guide button carries a faint tint, so on a sidebar full of
-  // tabs a new reader has no use for yet, the help is the thing that stands
-  // out. `sidebar-primary` is redefined by every theme in both light and dark,
-  // so the tint follows the palette rather than pinning one colour; at /10 it
-  // stays clear of the hover and active states, which use `sidebar-accent`.
-  const firstTranslationSeen = useOnboardingStore((s) => s.firstTranslationSeen);
+  // Newcomer nudge: a skipped first-run guide stays one click away until it is
+  // finished, with the step it would resume at.
+  const guideFacts = useGuideFacts();
+  const firstRunDismissed = useGuideStore((s) => s.firstRunDismissed);
+  const firstRunFinished = useGuideStore((s) => s.firstRunFinished);
+  const restartFirstRun = useGuideStore((s) => s.restartFirstRun);
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState<string>(DEFAULT_ICON);
   const { templates, fetchTemplates, applyTemplate } = useTemplateStore();
@@ -389,6 +392,16 @@ export function Sidebar() {
     : [];
   const uiMode = useUiMode();
   const simple = uiMode === 'simple';
+  // `sidebar-primary` is redefined by every theme in both light and dark, so
+  // the item's tint follows the palette; at /10 it stays clear of the hover
+  // and active states, which use `sidebar-accent`.
+  // Not on phones: the guide itself does not run there.
+  const showContinueSetup =
+    simple && !isMobile && firstRunDismissed && !firstRunFinished && !guideFacts.isCollaboratorOnly;
+  const continueSetupLabel = tGuide('continueSetup', {
+    current: firstRunMajor(guideFacts),
+    total: MAJOR_STEP_COUNT,
+  });
   const allowedTabs = visibleTabsFor(accessFor({ access }, activeProjectId), cloudManaged, uiMode);
 
   const handleConfirmLeave = async () => {
@@ -546,6 +559,7 @@ export function Sidebar() {
           onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
           placeholder={t('projectNamePlaceholder')}
           data-testid="new-project-input"
+          data-tour="new-project-input"
         />
         <div className="flex flex-col gap-1">
           <span className="text-xs text-muted-foreground">{t('projectIconLabel')}</span>
@@ -592,6 +606,7 @@ export function Sidebar() {
           onClick={handleCreate}
           disabled={!newName.trim()}
           data-testid="create-project-button"
+          data-tour="create-project-button"
         >
           {t('create')}
         </Button>
@@ -618,6 +633,7 @@ export function Sidebar() {
         <Popover open={selectorOpen} onOpenChange={handleSelectorOpenChange}>
           <PopoverTrigger
             data-testid="project-selector-trigger"
+            data-tour="project-selector-trigger"
             aria-label={activeProject?.name ?? t('selectProject')}
             title={activeProject?.name ?? t('selectProject')}
             className={`flex h-8 w-full items-center gap-2 overflow-hidden rounded-md border border-sidebar-border p-2 text-left text-sm outline-hidden ring-sidebar-ring transition-[width,padding] focus-visible:ring-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:border-transparent group-data-[collapsible=icon]:p-2 ${
@@ -710,6 +726,7 @@ export function Sidebar() {
                 <button
                   type="button"
                   data-testid="new-project-button"
+                  data-tour="new-project-button"
                   onClick={handleNewProjectClick}
                   className="flex w-full items-center gap-2 rounded-md p-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
@@ -772,14 +789,26 @@ export function Sidebar() {
                   </SidebarMenuItem>
                 </>
               )}
+              {showContinueSetup && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    data-testid="sidebar-continue-setup"
+                    className="bg-sidebar-primary/10"
+                    onClick={() => {
+                      restartFirstRun();
+                      closeMobileNav();
+                    }}
+                    tooltip={continueSetupLabel}
+                  >
+                    <ListChecks className="size-4 shrink-0" />
+                    <span className="truncate">{continueSetupLabel}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
               <SidebarMenuItem>
                 <SidebarMenuButton
                   data-testid="sidebar-guide"
-                  data-nudge={!firstTranslationSeen && view !== 'guide' ? 'true' : undefined}
                   isActive={view === 'guide'}
-                  className={
-                    !firstTranslationSeen && view !== 'guide' ? 'bg-sidebar-primary/10' : undefined
-                  }
                   onClick={() => {
                     setView('guide');
                     closeMobileNav();
@@ -826,6 +855,7 @@ export function Sidebar() {
                     <SidebarMenuItem key={id}>
                       <SidebarMenuButton
                         data-testid={`tab-trigger-${id}`}
+                        data-tour={`tab-${id}`}
                         isActive={view === 'project' && activeTab === id}
                         onClick={() => {
                           setActiveTab(id);

@@ -155,6 +155,7 @@ export function StringTableBulkBar({
             className="text-xs text-primary hover:text-primary/80 underline underline-offset-2 cursor-pointer"
             onClick={onSelectAllFiltered}
             data-testid="bulk-select-all-filtered"
+            data-tour="bulk-select-all-filtered"
           >
             {t('bulk.selectAllFiltered', { count: entriesLength })}
           </button>
@@ -416,6 +417,7 @@ export function StringTableBulkBar({
             size="sm"
             onClick={() => void openBatchDialog()}
             data-testid="bulk-batch-translate"
+            data-tour="bulk-batch-translate"
             disabled={
               batchRunId !== null || visibleSelectedCount === 0 || batchTargetLanguagesLength === 0
             }

@@ -3,5 +3,79 @@
   "back": "Indietro",
   "skip": "Salta il tour",
   "close": "Chiudi",
-  "stepOf": "Passaggio {{current}} di {{total}}"
+  "stepOf": "Passaggio {{current}} di {{total}}",
+  "continueSetup": "Continua la configurazione: passaggio {{current}} di {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Apri la finestra della cassaforte",
+      "cloudVault": "Configura la cassaforte",
+      "getGoogleKey": "Ottieni una chiave Google gratuita",
+      "addGoogleKey": "Incolla la mia chiave Google",
+      "ownProvider": "Usa il mio provider",
+      "switchAdvanced": "Passa ad Avanzata",
+      "finish": "Fine"
+    },
+    "vault": {
+      "title": "Creazione della password della cassaforte",
+      "why": "Le chiavi dei tuoi provider vengono cifrate con questa password e restano sempre sotto il tuo controllo.",
+      "openWhat": "Apri la finestra della cassaforte per scegliere la sua password.",
+      "passwordWhat": "Digita qui una password, poi conferma con il pulsante sottostante."
+    },
+    "unlock": {
+      "title": "Sblocco della cassaforte",
+      "why": "Le chiavi dei tuoi provider restano cifrate finché non sblocchi la cassaforte.",
+      "openWhat": "Apri la finestra della cassaforte per inserire la sua password.",
+      "passwordWhat": "Digita qui la password della cassaforte, poi conferma con il pulsante sottostante."
+    },
+    "cloudVault": {
+      "title": "Creazione della cassaforte e aggiunta di una chiave gratuita",
+      "what": "Scegli una password per la cassaforte, poi aggiungi una chiave gratuita. Consigliamo Google. Tornerai qui al termine.",
+      "why": "Le chiavi dei tuoi provider vengono cifrate con la tua password e restano sempre sotto il tuo controllo. La chiave serve al provider di IA per riconoscerti."
+    },
+    "key": {
+      "title": "Aggiunta di una chiave gratuita",
+      "why": "NARN Freeway usa modelli di IA gratuiti, e la chiave serve al provider per riconoscerti.",
+      "choiceWhat": "Crea una chiave Google AI gratuita, poi incollala nella cassaforte.",
+      "pasteWhat": "Incolla qui la chiave, digita sotto la password della cassaforte, poi salva."
+    },
+    "project": {
+      "title": "Importazione del testo del gioco",
+      "why": "NARN legge ogni voce e traduce solo ciò che manca.",
+      "openWhat": "Apri l'elenco dei progetti.",
+      "newWhat": "Crea un nuovo progetto.",
+      "createWhat": "Dai un nome al progetto, poi crealo.",
+      "sourceWhat": "Scegli la lingua in cui è scritto il tuo testo.",
+      "targetsWhat": "Spunta le lingue in cui vuoi tradurre.",
+      "saveWhat": "Salva le lingue.",
+      "importWhat": "Scegli il file CSV esportato dal tuo editor di gioco.",
+      "confirmWhat": "Controlla il riepilogo, poi conferma l'importazione."
+    },
+    "translate": {
+      "title": "Traduzione",
+      "why": "Freeway sceglie automaticamente un modello gratuito adatto a ogni lingua.",
+      "openWhat": "Apri la scheda che elenca le tue voci.",
+      "selectWhat": "Seleziona tutte le voci.",
+      "pressWhat": "Apri la finestra di traduzione.",
+      "startWhat": "Avvia la traduzione.",
+      "progressWhat": "La traduzione è in corso. Questa riga ne mostra l'avanzamento.",
+      "progressWhy": "Il tour prosegue quando arrivano le prime traduzioni."
+    },
+    "export": {
+      "title": "Esportazione",
+      "why": "Il tuo editor di gioco può importare questo file per portare le traduzioni nel gioco.",
+      "openWhat": "Torna alla scheda in cui hai importato il file.",
+      "downloadWhat": "Scarica il file tradotto per il tuo editor di gioco."
+    },
+    "closing": {
+      "title": "È tutto pronto",
+      "what": "Avanzata aggiunge glossari, controlli di qualità, routing, revisioni e altro ancora.",
+      "why": "Puoi cambiare modalità in qualsiasi momento dalla barra in alto."
+    }
+  },
+  "providerChoice": {
+    "title": "Usa il mio provider",
+    "description": "Scegli il provider di cui hai una chiave. NARN gli invierà tutte le traduzioni dei tuoi progetti. Per combinare più provider, passa ad Avanzata.",
+    "cancel": "Annulla",
+    "failed": "Impossibile configurare {{provider}}: {{message}}"
+  }
 }

@@ -3,5 +3,79 @@
   "back": "Geri",
   "skip": "Turu atla",
   "close": "Kapat",
-  "stepOf": "Adım {{current}} / {{total}}"
+  "stepOf": "Adım {{current}} / {{total}}",
+  "continueSetup": "Kuruluma devam: adım {{current}} / {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Kasa formunu aç",
+      "cloudVault": "Kasayı kur",
+      "getGoogleKey": "Ücretsiz Google anahtarı al",
+      "addGoogleKey": "Google anahtarımı yapıştır",
+      "ownProvider": "Kendi sağlayıcımı kullan",
+      "switchAdvanced": "Gelişmiş moda geç",
+      "finish": "Bitir"
+    },
+    "vault": {
+      "title": "Kasa parolası oluşturma",
+      "why": "Sağlayıcı anahtarlarınız bu parolayla şifrelenir ve her zaman sizin kontrolünüzde kalır.",
+      "openWhat": "Kasanız için bir parola belirlemek üzere kasa formunu açın.",
+      "passwordWhat": "Buraya bir parola yazın, ardından alttaki düğmeyle onaylayın."
+    },
+    "unlock": {
+      "title": "Kasanın kilidini açma",
+      "why": "Kasanın kilidini açana kadar sağlayıcı anahtarlarınız şifreli kalır.",
+      "openWhat": "Kasa parolanızı girmek için kasa formunu açın.",
+      "passwordWhat": "Kasa parolanızı buraya yazın, ardından alttaki düğmeyle onaylayın."
+    },
+    "cloudVault": {
+      "title": "Kasa oluşturma ve ücretsiz anahtar ekleme",
+      "what": "Bir kasa parolası belirleyin, ardından bir ücretsiz anahtar ekleyin. Google önerilir. İşlem bitince buraya dönersiniz.",
+      "why": "Sağlayıcı anahtarlarınız parolanızla şifrelenir ve her zaman sizin kontrolünüzde kalır. Yapay zekâ sağlayıcısı sizi anahtar sayesinde tanır."
+    },
+    "key": {
+      "title": "Ücretsiz anahtar ekleme",
+      "why": "NARN Freeway ücretsiz yapay zekâ modelleri kullanır ve sağlayıcı sizi anahtar sayesinde tanır.",
+      "choiceWhat": "Ücretsiz bir Google AI anahtarı oluşturun, ardından kasanıza yapıştırın.",
+      "pasteWhat": "Anahtarı buraya yapıştırın, altına kasa parolanızı yazın, ardından kaydedin."
+    },
+    "project": {
+      "title": "Oyun metnini içe aktarma",
+      "why": "NARN her girdiyi okur ve yalnızca eksik olanı çevirir.",
+      "openWhat": "Proje listesini açın.",
+      "newWhat": "Yeni bir proje oluşturun.",
+      "createWhat": "Projenize bir ad verin, ardından oluşturun.",
+      "sourceWhat": "Metninizin yazıldığı dili seçin.",
+      "targetsWhat": "Çeviri yapmak istediğiniz dilleri işaretleyin.",
+      "saveWhat": "Dillerinizi kaydedin.",
+      "importWhat": "Oyun düzenleyicinizden dışa aktardığınız CSV dosyasını seçin.",
+      "confirmWhat": "Özeti gözden geçirin, ardından içe aktarmayı onaylayın."
+    },
+    "translate": {
+      "title": "Çeviri",
+      "why": "Freeway her dil için uygun bir ücretsiz modeli otomatik olarak seçer.",
+      "openWhat": "Girdilerinizin listelendiği sekmeyi açın.",
+      "selectWhat": "Tüm girdileri seçin.",
+      "pressWhat": "Çeviri iletişim kutusunu açın.",
+      "startWhat": "Çeviriyi başlatın.",
+      "progressWhat": "Çeviri sürüyor. Bu satır ilerlemeyi gösterir.",
+      "progressWhy": "İlk çeviriler geldiğinde tur devam eder."
+    },
+    "export": {
+      "title": "Dışa aktarma",
+      "why": "Oyun düzenleyiciniz, çevirileri oyununuza almak için bu dosyayı içe aktarabilir.",
+      "openWhat": "Dosyanızı içe aktardığınız sekmeye dönün.",
+      "downloadWhat": "Oyun düzenleyiciniz için çevrilmiş dosyayı indirin."
+    },
+    "closing": {
+      "title": "Her şey hazır",
+      "what": "Gelişmiş mod; sözlükçeler, kalite denetimleri, yönlendirme, incelemeler ve daha fazlasını ekler.",
+      "why": "Üst çubuktan istediğiniz zaman geçiş yapabilirsiniz."
+    }
+  },
+  "providerChoice": {
+    "title": "Kendi sağlayıcımı kullan",
+    "description": "Anahtarına sahip olduğunuz sağlayıcıyı seçin. NARN, projelerinizdeki tüm çevirileri ona gönderir. Birden çok sağlayıcıyı birlikte kullanmak için Gelişmiş moda geçin.",
+    "cancel": "İptal",
+    "failed": "{{provider}} kurulamadı: {{message}}"
+  }
 }

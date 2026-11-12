@@ -17,6 +17,7 @@ import {
 import { useProjectStore } from '../../stores/project-store.js';
 import { useStringStore } from '../../stores/string-store.js';
 import { apiRequest, apiDownload } from '../../hooks/use-api.js';
+import { useGuideStore } from '../../stores/guide-store.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
 import { PseudoTestHelp } from './PseudoTestHelp.js';
 import { Badge } from '@/components/ui/badge';
@@ -419,6 +420,8 @@ export function DataTab() {
         },
       });
       setExportTarget('editor');
+      // The guided first run's last step completes on a real download.
+      useGuideStore.getState().markExported();
     } catch (err) {
       toast.error(t('exportFailed', { message: (err as Error).message }));
     }
@@ -478,7 +481,11 @@ export function DataTab() {
                   if (v) handleSourceLanguageChange(v);
                 }}
               >
-                <SelectTrigger className="w-64" data-testid="source-language-select">
+                <SelectTrigger
+                  className="w-64"
+                  data-testid="source-language-select"
+                  data-tour="source-language-select"
+                >
                   <SelectValue>
                     {(v: string | null) => {
                       const lang = LANGUAGE_REGISTRY.find((l) => l.code === v);
@@ -508,7 +515,10 @@ export function DataTab() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-4 gap-y-2">
+              <div
+                data-tour="target-languages"
+                className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-4 gap-y-2"
+              >
                 {availableTargetLanguages.map((lang) => (
                   <div key={lang.code} className="flex items-center gap-2 text-sm">
                     <label
@@ -537,6 +547,7 @@ export function DataTab() {
                     onClick={handleSaveLanguages}
                     disabled={savingLanguages}
                     data-testid="save-languages-button"
+                    data-tour="save-languages-button"
                   >
                     {savingLanguages ? tCommon('saving') : tCommon('save')}
                   </Button>
@@ -574,6 +585,7 @@ export function DataTab() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
                 data-testid="import-csv-button"
+                data-tour="import-csv-button"
               >
                 {importing ? t('importing') : t('chooseCsv')}
               </Button>
@@ -839,7 +851,11 @@ export function DataTab() {
                 </div>
               )}
               <div className="flex gap-2">
-                <Button onClick={handleExport} data-testid="export-csv-button">
+                <Button
+                  onClick={handleExport}
+                  data-testid="export-csv-button"
+                  data-tour="export-csv-button"
+                >
                   {t('downloadCsv')}
                 </Button>
                 <Button
@@ -980,6 +996,7 @@ export function DataTab() {
             </Button>
             <Button
               data-testid="confirm-import"
+              data-tour="confirm-import"
               onClick={async () => {
                 setImportWarnOpen(false);
                 const file = pendingImportFile;

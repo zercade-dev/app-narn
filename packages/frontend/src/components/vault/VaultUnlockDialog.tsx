@@ -241,6 +241,7 @@ export function VaultUnlockDialog({
               <Input
                 id="vault-password-input"
                 data-testid="vault-password-input"
+                data-tour="vault-password-input"
                 type="password"
                 autoComplete="off"
                 ref={inputRef}
@@ -269,6 +270,7 @@ export function VaultUnlockDialog({
                 type="submit"
                 disabled={loading || password.trim().length === 0}
                 data-testid="vault-unlock-submit"
+                data-tour="vault-unlock-submit"
               >
                 {loading ? t('working') : hasVault ? t('unlock') : t('create')}
               </Button>

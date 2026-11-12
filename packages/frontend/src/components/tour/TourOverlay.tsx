@@ -37,8 +37,8 @@ function prefersReducedMotion(): boolean {
 
 /**
  * Re-renders (at most once per frame) when the window resizes, anything
- * scrolls, or the anchor or page body changes size, so the rect read in render
- * stays current after layout shifts.
+ * scrolls, a transition or animation ends, or the anchor or page body changes
+ * size, so the rect read in render stays current after layout shifts.
  */
 function useLayoutTick(anchor: Element | null): void {
   const [, tick] = useReducer((n: number) => n + 1, 0);
@@ -54,6 +54,10 @@ function useLayoutTick(anchor: Element | null): void {
     };
     window.addEventListener('resize', schedule);
     window.addEventListener('scroll', schedule, true);
+    // An anchor inside a sheet moves with the sheet's entry transition, which
+    // fires none of the above: re-read once the transition or animation ends.
+    window.addEventListener('transitionend', schedule, true);
+    window.addEventListener('animationend', schedule, true);
     const resizeObserver =
       typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
     resizeObserver?.observe(anchor);
@@ -61,6 +65,8 @@ function useLayoutTick(anchor: Element | null): void {
     return () => {
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule, true);
+      window.removeEventListener('transitionend', schedule, true);
+      window.removeEventListener('animationend', schedule, true);
       resizeObserver?.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
@@ -218,7 +224,7 @@ export function TourOverlay({
           <Popover.Portal>
             <Popover.Positioner
               anchor={anchor}
-              side="bottom"
+              side={step.side ?? 'bottom'}
               align="start"
               sideOffset={SPOTLIGHT_PADDING + 8}
               collisionPadding={12}

@@ -77,6 +77,7 @@ export function StringTableGrid({
             aria-label={t('table.selectAllAria')}
             className="cursor-pointer"
             data-testid="string-table-select-all"
+            data-tour="string-table-select-all"
           />
         </div>
 

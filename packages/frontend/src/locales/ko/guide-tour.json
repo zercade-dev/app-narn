@@ -3,5 +3,79 @@
   "back": "이전",
   "skip": "둘러보기 건너뛰기",
   "close": "닫기",
-  "stepOf": "{{total}}단계 중 {{current}}단계"
+  "stepOf": "{{total}}단계 중 {{current}}단계",
+  "continueSetup": "설정 계속하기: {{total}}단계 중 {{current}}단계",
+  "firstRun": {
+    "actions": {
+      "openVault": "보관함 양식 열기",
+      "cloudVault": "보관함 설정",
+      "getGoogleKey": "무료 Google 키 받기",
+      "addGoogleKey": "내 Google 키 붙여넣기",
+      "ownProvider": "내 제공업체 사용",
+      "switchAdvanced": "고급 모드로 전환",
+      "finish": "완료"
+    },
+    "vault": {
+      "title": "보관함 비밀번호 만들기",
+      "why": "제공업체 키는 이 비밀번호로 암호화되고, 다른 곳으로 나가지 않아요.",
+      "openWhat": "보관함 양식을 열어 보관함 비밀번호를 정하세요.",
+      "passwordWhat": "여기에 비밀번호를 입력하고 아래 버튼으로 확인하세요."
+    },
+    "unlock": {
+      "title": "보관함 잠금 해제",
+      "why": "보관함의 잠금을 해제하기 전까지 제공업체 키는 암호화된 상태로 있어요.",
+      "openWhat": "보관함 양식을 열어 보관함 비밀번호를 입력하세요.",
+      "passwordWhat": "여기에 보관함 비밀번호를 입력하고 아래 버튼으로 확인하세요."
+    },
+    "cloudVault": {
+      "title": "보관함 만들기와 무료 키 추가",
+      "what": "보관함 비밀번호를 정한 다음 무료 키를 하나 추가하세요. Google을 추천해요. 마치면 여기로 돌아와요.",
+      "why": "제공업체 키는 비밀번호로 암호화되고, 다른 곳으로 나가지 않아요. 키는 AI 제공업체가 사용자를 확인하는 수단이에요."
+    },
+    "key": {
+      "title": "무료 키 추가",
+      "why": "NARN Freeway는 무료 AI 모델을 사용하고, 키는 제공업체가 사용자를 확인하는 수단이에요.",
+      "choiceWhat": "무료 Google AI 키를 만든 다음 보관함에 붙여넣으세요.",
+      "pasteWhat": "여기에 키를 붙여넣고 아래에 보관함 비밀번호를 입력한 다음 저장하세요."
+    },
+    "project": {
+      "title": "게임 텍스트 가져오기",
+      "why": "NARN은 모든 항목을 읽고 빠진 부분만 번역해요.",
+      "openWhat": "프로젝트 목록을 여세요.",
+      "newWhat": "새 프로젝트를 만드세요.",
+      "createWhat": "프로젝트 이름을 정한 다음 만드세요.",
+      "sourceWhat": "텍스트가 작성된 언어를 고르세요.",
+      "targetsWhat": "번역할 대상 언어에 체크하세요.",
+      "saveWhat": "언어를 저장하세요.",
+      "importWhat": "게임 편집기에서 내보낸 CSV 파일을 선택하세요.",
+      "confirmWhat": "요약을 확인한 다음 가져오기를 확정하세요."
+    },
+    "translate": {
+      "title": "번역",
+      "why": "Freeway가 언어마다 알맞은 무료 모델을 자동으로 골라요.",
+      "openWhat": "항목 목록이 있는 탭을 여세요.",
+      "selectWhat": "모든 항목을 선택하세요.",
+      "pressWhat": "번역 대화 상자를 여세요.",
+      "startWhat": "번역을 시작하세요.",
+      "progressWhat": "번역이 진행 중이에요. 이 줄에 진행 상황이 표시돼요.",
+      "progressWhy": "첫 번역이 도착하면 둘러보기가 이어져요."
+    },
+    "export": {
+      "title": "내보내기",
+      "why": "게임 편집기에서 이 파일을 가져오면 번역을 게임에 넣을 수 있어요.",
+      "openWhat": "파일을 가져온 탭으로 돌아가세요.",
+      "downloadWhat": "게임 편집기용 번역 파일을 다운로드하세요."
+    },
+    "closing": {
+      "title": "준비 완료",
+      "what": "고급 모드에서는 용어집, 품질 검사, 배정, 검토 등을 더 쓸 수 있어요.",
+      "why": "상단 바에서 언제든지 전환할 수 있어요."
+    }
+  },
+  "providerChoice": {
+    "title": "내 제공업체 사용",
+    "description": "키가 있는 제공업체를 고르세요. NARN이 프로젝트의 모든 번역을 그 제공업체로 보내요. 여러 제공업체를 함께 쓰려면 고급 모드로 전환하세요.",
+    "cancel": "취소",
+    "failed": "{{provider}}을(를) 설정하지 못했어요: {{message}}"
+  }
 }

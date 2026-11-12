@@ -376,6 +376,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
           type="button"
           onClick={onToggle}
           data-testid="console-toggle"
+          data-tour="console-status"
           title={connected ? t('statusConnected') : t('statusDisconnected')}
           className="flex items-center gap-2 flex-1 min-w-0 text-left bg-transparent cursor-pointer h-full"
         >

@@ -3,5 +3,79 @@
   "back": "返回",
   "skip": "略過導覽",
   "close": "關閉",
-  "stepOf": "第 {{current}} 步，共 {{total}} 步"
+  "stepOf": "第 {{current}} 步，共 {{total}} 步",
+  "continueSetup": "繼續設定：第 {{current}} 步，共 {{total}} 步",
+  "firstRun": {
+    "actions": {
+      "openVault": "開啟保險庫表單",
+      "cloudVault": "設定保險庫",
+      "getGoogleKey": "取得免費的 Google 金鑰",
+      "addGoogleKey": "貼上我的 Google 金鑰",
+      "ownProvider": "使用我自己的供應商",
+      "switchAdvanced": "切換到進階模式",
+      "finish": "完成"
+    },
+    "vault": {
+      "title": "建立保險庫密碼",
+      "why": "供應商金鑰會以這組密碼加密，始終由您自己掌控。",
+      "openWhat": "開啟保險庫表單，為保險庫設定密碼。",
+      "passwordWhat": "在這裡輸入密碼，然後按下方按鈕確認。"
+    },
+    "unlock": {
+      "title": "解鎖保險庫",
+      "why": "解鎖保險庫之前，供應商金鑰會一直保持加密。",
+      "openWhat": "開啟保險庫表單，輸入保險庫密碼。",
+      "passwordWhat": "在這裡輸入保險庫密碼，然後按下方按鈕確認。"
+    },
+    "cloudVault": {
+      "title": "建立保險庫並新增一組免費金鑰",
+      "what": "設定保險庫密碼，然後新增一組免費金鑰。建議使用 Google。完成後會回到這裡。",
+      "why": "供應商金鑰會以您的密碼加密，始終由您自己掌控。AI 供應商透過金鑰確認是您本人。"
+    },
+    "key": {
+      "title": "新增一組免費金鑰",
+      "why": "NARN Freeway 使用免費的 AI 模型，供應商透過金鑰確認是您本人。",
+      "choiceWhat": "建立一組免費的 Google AI 金鑰，然後貼到保險庫中。",
+      "pasteWhat": "在這裡貼上金鑰，在下方輸入保險庫密碼，然後儲存。"
+    },
+    "project": {
+      "title": "匯入遊戲文字",
+      "why": "NARN 會讀取每個條目，只翻譯缺少的部分。",
+      "openWhat": "開啟專案清單。",
+      "newWhat": "建立新專案。",
+      "createWhat": "為專案命名，然後建立。",
+      "sourceWhat": "選擇文字所使用的語言。",
+      "targetsWhat": "勾選要翻譯成的語言。",
+      "saveWhat": "儲存語言。",
+      "importWhat": "選擇從遊戲編輯器匯出的 CSV 檔案。",
+      "confirmWhat": "檢視摘要，然後確認匯入。"
+    },
+    "translate": {
+      "title": "翻譯",
+      "why": "Freeway 會自動為每種語言選擇合適的免費模型。",
+      "openWhat": "開啟列出條目的分頁。",
+      "selectWhat": "選取所有條目。",
+      "pressWhat": "開啟翻譯對話方塊。",
+      "startWhat": "開始翻譯。",
+      "progressWhat": "正在翻譯。這一行會顯示進度。",
+      "progressWhy": "第一批譯文送達後，導覽會繼續。"
+    },
+    "export": {
+      "title": "匯出",
+      "why": "遊戲編輯器可以匯入這個檔案，把譯文帶進遊戲。",
+      "openWhat": "回到匯入檔案的分頁。",
+      "downloadWhat": "下載供遊戲編輯器使用的已翻譯檔案。"
+    },
+    "closing": {
+      "title": "一切就緒",
+      "what": "進階模式還提供術語表、品質檢查、分派、審閱等功能。",
+      "why": "隨時可以在頂端列切換。"
+    }
+  },
+  "providerChoice": {
+    "title": "使用我自己的供應商",
+    "description": "選擇您擁有金鑰的供應商。NARN 會把專案中的所有翻譯都交給它。若要搭配多個供應商，請切換到進階模式。",
+    "cancel": "取消",
+    "failed": "無法設定 {{provider}}：{{message}}"
+  }
 }

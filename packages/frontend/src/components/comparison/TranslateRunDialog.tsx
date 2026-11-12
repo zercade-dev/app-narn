@@ -371,6 +371,7 @@ export function TranslateRunDialog({
             }}
             disabled={scopeCount === 0}
             data-testid="comparison-translate-start"
+            data-tour="comparison-translate-start"
           >
             {t('compare.translateStart')}
           </Button>

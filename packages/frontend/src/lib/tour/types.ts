@@ -31,6 +31,12 @@ export interface TourStep {
   whatKey: string;
   whyKey: string;
   advance: TourAdvance;
+  /**
+   * Where the callout sits relative to the anchor (default `bottom`; it still
+   * flips when there is no room). Set it when the default would cover controls
+   * the step asks the person to use, as in a form.
+   */
+  side?: 'top' | 'right' | 'bottom' | 'left';
   /** Opened when the step becomes current. */
   navigate?: { tab?: Tab; view?: ShellView };
   /** Extra callout buttons. `labelKey` is in the `guide-tour` namespace. */

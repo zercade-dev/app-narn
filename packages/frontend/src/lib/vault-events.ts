@@ -73,3 +73,16 @@ export function vaultRetryFinishedEvent(
 
 /** Window event asking the shell to open the vault key editor (Simple mode's "Provider keys"). */
 export const VAULT_EDITOR_OPEN_EVENT = 'vault:open-editor';
+
+/** Detail payload for {@link VAULT_EDITOR_OPEN_EVENT}. */
+export interface VaultEditorOpenDetail {
+  /** Key to add (or replace) and focus, e.g. `GOOGLE_API_KEY`. */
+  focusKey?: string;
+}
+
+/** Builds the `vault:open-editor` event, optionally focused on one key. */
+export function vaultEditorOpenEvent(
+  detail: VaultEditorOpenDetail = {},
+): CustomEvent<VaultEditorOpenDetail> {
+  return new CustomEvent(VAULT_EDITOR_OPEN_EVENT, { detail });
+}

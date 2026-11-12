@@ -3,5 +3,79 @@
   "back": "Voltar",
   "skip": "Pular o tour",
   "close": "Fechar",
-  "stepOf": "Passo {{current}} de {{total}}"
+  "stepOf": "Passo {{current}} de {{total}}",
+  "continueSetup": "Continuar a configuração: passo {{current}} de {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Abrir o formulário do cofre",
+      "cloudVault": "Configurar seu cofre",
+      "getGoogleKey": "Obter uma chave gratuita do Google",
+      "addGoogleKey": "Colar minha chave do Google",
+      "ownProvider": "Usar meu próprio provedor",
+      "switchAdvanced": "Mudar para Avançado",
+      "finish": "Concluir"
+    },
+    "vault": {
+      "title": "Criação da senha do cofre",
+      "why": "Suas chaves dos provedores são criptografadas com ela e nunca saem do seu controle.",
+      "openWhat": "Abra o formulário do cofre para escolher a senha dele.",
+      "passwordWhat": "Digite uma senha aqui e confirme com o botão abaixo."
+    },
+    "unlock": {
+      "title": "Desbloqueio do cofre",
+      "why": "Suas chaves dos provedores continuam criptografadas até você desbloquear o cofre.",
+      "openWhat": "Abra o formulário do cofre para digitar a senha dele.",
+      "passwordWhat": "Digite aqui a senha do seu cofre e confirme com o botão abaixo."
+    },
+    "cloudVault": {
+      "title": "Criação do cofre e adição de uma chave gratuita",
+      "what": "Escolha uma senha para o cofre e adicione uma chave gratuita. Recomendamos o Google. Você volta para cá quando terminar.",
+      "why": "Suas chaves dos provedores são criptografadas com a sua senha e nunca saem do seu controle. É pela chave que o provedor de IA sabe que é você."
+    },
+    "key": {
+      "title": "Adição de uma chave gratuita",
+      "why": "O NARN Freeway usa modelos de IA gratuitos, e é pela chave que o provedor sabe que é você.",
+      "choiceWhat": "Crie uma chave gratuita do Google AI e cole no seu cofre.",
+      "pasteWhat": "Cole a chave aqui, digite a senha do seu cofre abaixo e salve."
+    },
+    "project": {
+      "title": "Importação do texto do jogo",
+      "why": "O NARN lê cada entrada e só traduz o que está faltando.",
+      "openWhat": "Abra a lista de projetos.",
+      "newWhat": "Crie um novo projeto.",
+      "createWhat": "Dê um nome ao seu projeto e crie-o.",
+      "sourceWhat": "Escolha o idioma em que seu texto está escrito.",
+      "targetsWhat": "Marque os idiomas para os quais você quer traduzir.",
+      "saveWhat": "Salve seus idiomas.",
+      "importWhat": "Escolha o arquivo CSV que você exportou do editor do seu jogo.",
+      "confirmWhat": "Confira o resumo e confirme a importação."
+    },
+    "translate": {
+      "title": "Tradução",
+      "why": "O Freeway escolhe automaticamente um modelo gratuito adequado para cada idioma.",
+      "openWhat": "Abra a aba que lista suas entradas.",
+      "selectWhat": "Selecione todas as entradas.",
+      "pressWhat": "Abra a janela de tradução.",
+      "startWhat": "Inicie a tradução.",
+      "progressWhat": "A tradução está em andamento. Esta linha mostra o progresso.",
+      "progressWhy": "O tour continua quando as primeiras traduções chegarem."
+    },
+    "export": {
+      "title": "Exportação",
+      "why": "O editor do seu jogo pode importar este arquivo para levar as traduções ao jogo.",
+      "openWhat": "Volte para a aba em que você importou seu arquivo.",
+      "downloadWhat": "Baixe o arquivo traduzido para o editor do seu jogo."
+    },
+    "closing": {
+      "title": "Tudo pronto",
+      "what": "O Avançado adiciona glossários, verificações de qualidade, roteamento, revisões e mais.",
+      "why": "Você pode mudar quando quiser pela barra superior."
+    }
+  },
+  "providerChoice": {
+    "title": "Usar meu próprio provedor",
+    "description": "Escolha o provedor para o qual você tem uma chave. O NARN enviará todas as traduções dos seus projetos para ele. Para combinar vários provedores, mude para Avançado.",
+    "cancel": "Cancelar",
+    "failed": "Não foi possível configurar {{provider}}: {{message}}"
+  }
 }

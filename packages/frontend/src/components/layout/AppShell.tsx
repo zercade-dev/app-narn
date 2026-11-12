@@ -5,6 +5,9 @@ import { SlotRibbon } from './SlotRibbon.js';
 import { Sidebar } from './Sidebar.js';
 import { ModeSwitch } from './ModeSwitch.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
+import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
+import { FirstRunTour } from '../tour/FirstRunTour.js';
+import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { ConsolePanel } from './ConsolePanel.js';
 import { ConfigTab } from '../config/ConfigTab.js';
 import { DataTab } from '../config/DataTab.js';
@@ -46,6 +49,7 @@ import { useModules } from '../../hooks/use-modules.js';
 import {
   VAULT_EDITOR_OPEN_EVENT,
   VAULT_LOCKED_EVENT,
+  type VaultEditorOpenDetail,
   type VaultLockedDetail,
 } from '../../lib/vault-events.js';
 import { toast } from '@/lib/toast';
@@ -386,10 +390,11 @@ export function AppShell() {
     if (!isViewVisible(view, uiMode)) useViewStore.getState().setView('project');
   }, [view, uiMode]);
 
-  // Simple mode's "Provider keys" item asks for the vault key editor.
+  // Simple mode's "Provider keys" item and the guided first run ask for the
+  // vault key editor, the guide focused on the key it wants pasted.
   useEffect(() => {
-    const open = () => {
-      setVaultFocusKey(undefined);
+    const open = (e: Event) => {
+      setVaultFocusKey((e as CustomEvent<VaultEditorOpenDetail | null>).detail?.focusKey);
       setVaultEditorOpen(true);
     };
     globalThis.addEventListener(VAULT_EDITOR_OPEN_EVENT, open);
@@ -406,15 +411,21 @@ export function AppShell() {
   // resolved value, not vault-store's statusFetched — that flag flips true
   // synchronously the instant a status fetch STARTS, before it resolves, so
   // gating on it would race and could miss the real setupRequired value.
+  //
+  // The guided first run replaces Welcome for a newcomer: its first step is
+  // the same vault hand-off, shown on the real interface. Whether the guide
+  // applies is only known once the interface mode is (it is derived from the
+  // project list on a first visit), so the one-time decision waits for that.
   const setupRequired = useVaultStore((s) => s.setupRequired);
   const setView = useViewStore((s) => s.setView);
+  const modeKnown = useUiSettings((s) => s.uiMode !== null);
+  const firstRunActive = useFirstRunActive();
   const appliedWelcomeViewRef = useRef(false);
   useEffect(() => {
-    if (setupRequired && !appliedWelcomeViewRef.current) {
-      appliedWelcomeViewRef.current = true;
-      setView('welcome');
-    }
-  }, [setupRequired, setView]);
+    if (!setupRequired || !modeKnown || appliedWelcomeViewRef.current) return;
+    appliedWelcomeViewRef.current = true;
+    if (!firstRunActive) setView('welcome');
+  }, [setupRequired, modeKnown, firstRunActive, setView]);
 
   // Whether copilot is globally enabled, used to gate the shell-level
   // CopilotModelsProvider's `/models` fetch. Without this gate the provider
@@ -473,6 +484,7 @@ export function AppShell() {
     <TooltipProvider>
       <div className="flex h-svh w-full flex-col">
         {showThemeChooser && <ThemeChooserOverlay onDone={() => setShowThemeChooser(false)} />}
+        <FirstRunTour suspended={showThemeChooser} />
         <SlotRibbon />
         <SidebarProvider className="min-h-0 flex-1">
           {/* Sidebar */}

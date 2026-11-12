@@ -3,5 +3,79 @@
   "back": "返回",
   "skip": "跳过导览",
   "close": "关闭",
-  "stepOf": "第 {{current}} 步，共 {{total}} 步"
+  "stepOf": "第 {{current}} 步，共 {{total}} 步",
+  "continueSetup": "继续设置：第 {{current}} 步，共 {{total}} 步",
+  "firstRun": {
+    "actions": {
+      "openVault": "打开保险库表单",
+      "cloudVault": "设置保险库",
+      "getGoogleKey": "获取免费的 Google 密钥",
+      "addGoogleKey": "粘贴我的 Google 密钥",
+      "ownProvider": "使用我自己的服务商",
+      "switchAdvanced": "切换到高级模式",
+      "finish": "完成"
+    },
+    "vault": {
+      "title": "创建保险库密码",
+      "why": "服务商密钥会用这个密码加密，始终由您自己掌控。",
+      "openWhat": "打开保险库表单，为保险库设置密码。",
+      "passwordWhat": "在这里输入密码，然后点击下方按钮确认。"
+    },
+    "unlock": {
+      "title": "解锁保险库",
+      "why": "解锁保险库之前，服务商密钥始终保持加密。",
+      "openWhat": "打开保险库表单，输入保险库密码。",
+      "passwordWhat": "在这里输入保险库密码，然后点击下方按钮确认。"
+    },
+    "cloudVault": {
+      "title": "创建保险库并添加一个免费密钥",
+      "what": "设置保险库密码，然后添加一个免费密钥。推荐使用 Google。完成后会回到这里。",
+      "why": "服务商密钥会用您的密码加密，始终由您自己掌控。AI 服务商通过密钥确认是您本人。"
+    },
+    "key": {
+      "title": "添加一个免费密钥",
+      "why": "NARN Freeway 使用免费的 AI 模型，服务商通过密钥确认是您本人。",
+      "choiceWhat": "创建一个免费的 Google AI 密钥，然后粘贴到保险库中。",
+      "pasteWhat": "在这里粘贴密钥，在下方输入保险库密码，然后保存。"
+    },
+    "project": {
+      "title": "导入游戏文本",
+      "why": "NARN 会读取每个条目，只翻译缺少的部分。",
+      "openWhat": "打开项目列表。",
+      "newWhat": "创建一个新项目。",
+      "createWhat": "为项目命名，然后创建。",
+      "sourceWhat": "选择文本所使用的语言。",
+      "targetsWhat": "勾选要翻译成的语言。",
+      "saveWhat": "保存语言。",
+      "importWhat": "选择从游戏编辑器导出的 CSV 文件。",
+      "confirmWhat": "查看摘要，然后确认导入。"
+    },
+    "translate": {
+      "title": "翻译",
+      "why": "Freeway 会自动为每种语言选择合适的免费模型。",
+      "openWhat": "打开列出条目的标签页。",
+      "selectWhat": "选择所有条目。",
+      "pressWhat": "打开翻译对话框。",
+      "startWhat": "开始翻译。",
+      "progressWhat": "正在翻译。这一行显示进度。",
+      "progressWhy": "第一批译文到达后，导览会继续。"
+    },
+    "export": {
+      "title": "导出",
+      "why": "游戏编辑器可以导入这个文件，把译文带入游戏。",
+      "openWhat": "回到导入文件的标签页。",
+      "downloadWhat": "下载供游戏编辑器使用的已翻译文件。"
+    },
+    "closing": {
+      "title": "一切就绪",
+      "what": "高级模式还提供术语表、质量检查、分发、审校等功能。",
+      "why": "随时可以在顶部栏切换。"
+    }
+  },
+  "providerChoice": {
+    "title": "使用我自己的服务商",
+    "description": "选择您拥有密钥的服务商。NARN 会把项目中的所有翻译都交给它。要组合使用多个服务商，请切换到高级模式。",
+    "cancel": "取消",
+    "failed": "无法设置 {{provider}}：{{message}}"
+  }
 }

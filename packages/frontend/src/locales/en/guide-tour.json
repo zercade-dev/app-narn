@@ -3,5 +3,79 @@
   "back": "Back",
   "skip": "Skip tour",
   "close": "Close",
-  "stepOf": "Step {{current}} of {{total}}"
+  "stepOf": "Step {{current}} of {{total}}",
+  "continueSetup": "Continue setup: step {{current}} of {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Open the vault form",
+      "cloudVault": "Set up your vault",
+      "getGoogleKey": "Get a free Google key",
+      "addGoogleKey": "Paste my Google key",
+      "ownProvider": "Use my own provider",
+      "switchAdvanced": "Switch to Advanced",
+      "finish": "Finish"
+    },
+    "vault": {
+      "title": "Create your vault password",
+      "why": "Your provider keys are encrypted with it and never leave your control.",
+      "openWhat": "Open the vault form to choose a password for your vault.",
+      "passwordWhat": "Type a password here, then confirm with the button below."
+    },
+    "unlock": {
+      "title": "Unlock your vault",
+      "why": "Your provider keys stay encrypted until you unlock the vault.",
+      "openWhat": "Open the vault form to enter your vault password.",
+      "passwordWhat": "Type your vault password here, then confirm with the button below."
+    },
+    "cloudVault": {
+      "title": "Create your vault and add one free key",
+      "what": "Choose a vault password, then add one free key. Google is recommended. You come back here when it is done.",
+      "why": "Your provider keys are encrypted with your password and never leave your control. A key is how the AI provider knows it's you."
+    },
+    "key": {
+      "title": "Add one free key",
+      "why": "NARN Freeway uses free AI models, and the key is how the provider knows it's you.",
+      "choiceWhat": "Create a free Google AI key, then paste it into your vault.",
+      "pasteWhat": "Paste the key here, type your vault password below, then save."
+    },
+    "project": {
+      "title": "Bring in your game's text",
+      "why": "NARN reads every entry and only translates what's missing.",
+      "openWhat": "Open the project list.",
+      "newWhat": "Create a new project.",
+      "createWhat": "Give your project a name, then create it.",
+      "sourceWhat": "Pick the language your text is written in.",
+      "targetsWhat": "Tick the languages you want to translate into.",
+      "saveWhat": "Save your languages.",
+      "importWhat": "Choose the CSV file you exported from your game editor.",
+      "confirmWhat": "Check the summary, then confirm the import."
+    },
+    "translate": {
+      "title": "Translate",
+      "why": "Freeway picks a suitable free model for each language automatically.",
+      "openWhat": "Open the tab that lists your entries.",
+      "selectWhat": "Select all entries.",
+      "pressWhat": "Open the translation dialog.",
+      "startWhat": "Start the translation.",
+      "progressWhat": "The translation is running. This line shows its progress.",
+      "progressWhy": "The tour continues when the first translations arrive."
+    },
+    "export": {
+      "title": "Export",
+      "why": "Your game editor can import this file to bring the translations into your game.",
+      "openWhat": "Go back to the tab where you imported your file.",
+      "downloadWhat": "Download the translated file for your game editor."
+    },
+    "closing": {
+      "title": "You're all set",
+      "what": "Advanced adds glossaries, quality checks, routing, reviews and more.",
+      "why": "You can switch at any time from the top bar."
+    }
+  },
+  "providerChoice": {
+    "title": "Use my own provider",
+    "description": "Pick the provider you have a key for. NARN will send every translation in your projects to it. To combine several providers, switch to Advanced.",
+    "cancel": "Cancel",
+    "failed": "Could not set up {{provider}}: {{message}}"
+  }
 }

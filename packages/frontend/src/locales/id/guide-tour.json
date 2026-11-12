@@ -3,5 +3,79 @@
   "back": "Kembali",
   "skip": "Lewati tur",
   "close": "Tutup",
-  "stepOf": "Langkah {{current}} dari {{total}}"
+  "stepOf": "Langkah {{current}} dari {{total}}",
+  "continueSetup": "Lanjutkan penyiapan: langkah {{current}} dari {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Buka formulir brankas",
+      "cloudVault": "Siapkan brankas",
+      "getGoogleKey": "Dapatkan kunci Google gratis",
+      "addGoogleKey": "Tempel kunci Google saya",
+      "ownProvider": "Gunakan penyedia saya sendiri",
+      "switchAdvanced": "Beralih ke Lanjutan",
+      "finish": "Selesai"
+    },
+    "vault": {
+      "title": "Pembuatan kata sandi brankas",
+      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi ini dan selalu berada dalam kendali Anda.",
+      "openWhat": "Buka formulir brankas untuk memilih kata sandi brankas.",
+      "passwordWhat": "Ketik kata sandi di sini, lalu konfirmasi dengan tombol di bawahnya."
+    },
+    "unlock": {
+      "title": "Pembukaan kunci brankas",
+      "why": "Kunci penyedia Anda tetap terenkripsi sampai brankas dibuka kuncinya.",
+      "openWhat": "Buka formulir brankas untuk memasukkan kata sandi brankas.",
+      "passwordWhat": "Ketik kata sandi brankas di sini, lalu konfirmasi dengan tombol di bawahnya."
+    },
+    "cloudVault": {
+      "title": "Pembuatan brankas dan penambahan satu kunci gratis",
+      "what": "Pilih kata sandi brankas, lalu tambahkan satu kunci gratis. Google direkomendasikan. Anda akan kembali ke sini setelah selesai.",
+      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda. Dengan kunci itulah penyedia AI mengenali Anda."
+    },
+    "key": {
+      "title": "Penambahan satu kunci gratis",
+      "why": "NARN Freeway memakai model AI gratis, dan dengan kunci itulah penyedia mengenali Anda.",
+      "choiceWhat": "Buat kunci Google AI gratis, lalu tempel ke brankas.",
+      "pasteWhat": "Tempel kunci di sini, ketik kata sandi brankas di bawahnya, lalu simpan."
+    },
+    "project": {
+      "title": "Pengimporan teks game",
+      "why": "NARN membaca setiap entri dan hanya menerjemahkan yang belum ada.",
+      "openWhat": "Buka daftar proyek.",
+      "newWhat": "Buat proyek baru.",
+      "createWhat": "Beri nama proyek, lalu buat.",
+      "sourceWhat": "Pilih bahasa yang dipakai untuk menulis teks Anda.",
+      "targetsWhat": "Centang bahasa target terjemahan yang diinginkan.",
+      "saveWhat": "Simpan bahasa.",
+      "importWhat": "Pilih berkas CSV yang diekspor dari editor game Anda.",
+      "confirmWhat": "Periksa ringkasannya, lalu konfirmasi impor."
+    },
+    "translate": {
+      "title": "Penerjemahan",
+      "why": "Freeway otomatis memilih model gratis yang sesuai untuk tiap bahasa.",
+      "openWhat": "Buka tab yang memuat daftar entri.",
+      "selectWhat": "Pilih semua entri.",
+      "pressWhat": "Buka dialog penerjemahan.",
+      "startWhat": "Mulai penerjemahan.",
+      "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
+      "progressWhy": "Tur berlanjut setelah terjemahan pertama masuk."
+    },
+    "export": {
+      "title": "Ekspor",
+      "why": "Editor game Anda dapat mengimpor berkas ini untuk memasukkan terjemahan ke dalam game.",
+      "openWhat": "Kembali ke tab tempat berkas diimpor.",
+      "downloadWhat": "Unduh berkas hasil terjemahan untuk editor game Anda."
+    },
+    "closing": {
+      "title": "Semua sudah siap",
+      "what": "Lanjutan menambahkan glosarium, pemeriksaan kualitas, penyaluran, tinjauan, dan lainnya.",
+      "why": "Mode dapat diganti kapan saja dari bilah atas."
+    }
+  },
+  "providerChoice": {
+    "title": "Gunakan penyedia saya sendiri",
+    "description": "Pilih penyedia yang kuncinya Anda miliki. NARN akan mengirim setiap terjemahan dalam proyek Anda ke penyedia itu. Untuk menggabungkan beberapa penyedia, beralihlah ke Lanjutan.",
+    "cancel": "Batal",
+    "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}"
+  }
 }

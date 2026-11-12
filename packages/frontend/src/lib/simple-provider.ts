@@ -36,6 +36,27 @@ export function ownProviderChoices(cloud: boolean): readonly string[] {
   return cloud ? KEY_ONLY_PROVIDERS : [...KEY_ONLY_PROVIDERS, 'copilot'];
 }
 
+/**
+ * Vault key each offered provider reads. Mirrors the module manifests'
+ * `requiredEnvVars`, so the guide can tell whether a chosen provider is usable
+ * without waiting for the module list.
+ */
+const PROVIDER_KEYS: Readonly<Record<string, string>> = {
+  anthropic: 'ANTHROPIC_API_KEY',
+  openai: 'OPENAI_API_KEY',
+  deepseek: 'DEEPSEEK_API_KEY',
+  openrouter: 'OPENROUTER_API_KEY',
+  groq: 'GROQ_API_KEY',
+  google: 'GOOGLE_API_KEY',
+  deepl: 'DEEPL_API_KEY',
+  copilot: 'GITHUB_TOKEN',
+};
+
+/** The vault key behind a base module or instance id (`openai`, `openai:default`), if known. */
+export function providerKeyFor(moduleId: string): string | undefined {
+  return PROVIDER_KEYS[moduleId.split(':')[0]];
+}
+
 interface GlobalConfigDoc {
   moduleConfigs?: Record<string, { enabled?: boolean | null; config?: Record<string, unknown> }>;
 }

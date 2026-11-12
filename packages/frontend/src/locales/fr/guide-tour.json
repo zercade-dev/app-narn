@@ -3,5 +3,79 @@
   "back": "Retour",
   "skip": "Passer la visite",
   "close": "Fermer",
-  "stepOf": "Étape {{current}} sur {{total}}"
+  "stepOf": "Étape {{current}} sur {{total}}",
+  "continueSetup": "Poursuivre la configuration : étape {{current}} sur {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Ouvrir le formulaire du coffre",
+      "cloudVault": "Configurer votre coffre",
+      "getGoogleKey": "Obtenir une clé Google gratuite",
+      "addGoogleKey": "Coller ma clé Google",
+      "ownProvider": "Utiliser mon propre fournisseur",
+      "switchAdvanced": "Passer en mode Avancé",
+      "finish": "Terminer"
+    },
+    "vault": {
+      "title": "Créer le mot de passe de votre coffre",
+      "why": "Vos clés de fournisseurs sont chiffrées avec ce mot de passe et restent toujours sous votre contrôle.",
+      "openWhat": "Ouvrez le formulaire du coffre pour choisir son mot de passe.",
+      "passwordWhat": "Saisissez un mot de passe ici, puis validez avec le bouton en dessous."
+    },
+    "unlock": {
+      "title": "Déverrouiller votre coffre",
+      "why": "Vos clés de fournisseurs restent chiffrées tant que le coffre n’est pas déverrouillé.",
+      "openWhat": "Ouvrez le formulaire du coffre pour saisir son mot de passe.",
+      "passwordWhat": "Saisissez ici le mot de passe de votre coffre, puis validez avec le bouton en dessous."
+    },
+    "cloudVault": {
+      "title": "Créer votre coffre et ajouter une clé gratuite",
+      "what": "Choisissez un mot de passe pour le coffre, puis ajoutez une clé gratuite. Google est recommandé. Vous reviendrez ici une fois terminé.",
+      "why": "Vos clés de fournisseurs sont chiffrées avec votre mot de passe et restent toujours sous votre contrôle. La clé permet au fournisseur d’IA de vous reconnaître."
+    },
+    "key": {
+      "title": "Ajouter une clé gratuite",
+      "why": "NARN Freeway utilise des modèles d’IA gratuits, et la clé permet au fournisseur de vous reconnaître.",
+      "choiceWhat": "Créez une clé Google AI gratuite, puis collez-la dans votre coffre.",
+      "pasteWhat": "Collez la clé ici, saisissez le mot de passe de votre coffre en dessous, puis enregistrez."
+    },
+    "project": {
+      "title": "Importer le texte de votre jeu",
+      "why": "NARN lit chaque texte et ne traduit que ce qui manque.",
+      "openWhat": "Ouvrez la liste des projets.",
+      "newWhat": "Créez un nouveau projet.",
+      "createWhat": "Donnez un nom à votre projet, puis créez-le.",
+      "sourceWhat": "Choisissez la langue dans laquelle votre texte est écrit.",
+      "targetsWhat": "Cochez les langues vers lesquelles vous voulez traduire.",
+      "saveWhat": "Enregistrez vos langues.",
+      "importWhat": "Choisissez le fichier CSV exporté depuis votre éditeur de jeu.",
+      "confirmWhat": "Vérifiez le récapitulatif, puis confirmez l’importation."
+    },
+    "translate": {
+      "title": "Traduire",
+      "why": "Freeway choisit automatiquement un modèle gratuit adapté à chaque langue.",
+      "openWhat": "Ouvrez l’onglet qui liste vos textes.",
+      "selectWhat": "Sélectionnez tous les textes.",
+      "pressWhat": "Ouvrez la fenêtre de traduction.",
+      "startWhat": "Démarrez la traduction.",
+      "progressWhat": "La traduction est en cours. Cette ligne indique sa progression.",
+      "progressWhy": "La visite reprend dès que les premières traductions arrivent."
+    },
+    "export": {
+      "title": "Exporter",
+      "why": "Votre éditeur de jeu peut importer ce fichier pour intégrer les traductions à votre jeu.",
+      "openWhat": "Revenez à l’onglet où vous avez importé votre fichier.",
+      "downloadWhat": "Téléchargez le fichier traduit pour votre éditeur de jeu."
+    },
+    "closing": {
+      "title": "Tout est prêt",
+      "what": "Le mode Avancé ajoute les glossaires, les contrôles qualité, le routage, les révisions et plus encore.",
+      "why": "Vous pouvez changer de mode à tout moment depuis la barre supérieure."
+    }
+  },
+  "providerChoice": {
+    "title": "Utiliser mon propre fournisseur",
+    "description": "Choisissez le fournisseur dont vous avez une clé. NARN lui enverra toutes les traductions de vos projets. Pour combiner plusieurs fournisseurs, passez en mode Avancé.",
+    "cancel": "Annuler",
+    "failed": "Impossible de configurer {{provider}} : {{message}}"
+  }
 }
