@@ -4,7 +4,8 @@
     "openModuleSettings": "Mở cài đặt mô-đun",
     "openQuality": "Mở bảng chất lượng",
     "openGlossary": "Mở bảng thuật ngữ",
-    "unlockVault": "Mở khóa kho bảo mật"
+    "unlockVault": "Mở khóa kho bảo mật",
+    "switchToRaw": "Hiện nhật ký thô"
   },
   "translation": {
     "start": "Đang dịch một mục sang {{language}}…",
@@ -22,12 +23,39 @@
     "failedModuleNotFound": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} chưa được cài.",
     "failedModuleNotFound_other": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} chưa được cài.",
     "failedGeneric": "Không dịch được một mục sang {{language}}.",
+    "failedAuth": "Không dịch được {{count}} mục sang {{language}} — {{module}} đã từ chối khóa API.",
+    "failedAuth_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} đã từ chối khóa API.",
+    "failedRateLimit": "Không dịch được {{count}} mục sang {{language}} — {{module}} đã đạt giới hạn yêu cầu.",
+    "failedRateLimit_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} đã đạt giới hạn yêu cầu.",
+    "failedTimeout": "Không dịch được {{count}} mục sang {{language}} — {{module}} phản hồi quá lâu.",
+    "failedTimeout_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} phản hồi quá lâu.",
+    "failedModelUnavailable": "Không dịch được {{count}} mục sang {{language}} — mô hình không khả dụng trên {{module}}.",
+    "failedModelUnavailable_other": "Không dịch được {{count}} mục sang {{language}} — mô hình không khả dụng trên {{module}}.",
+    "failedParse": "Không dịch được {{count}} mục sang {{language}} — {{module}} gửi về phản hồi không đọc được.",
+    "failedParse_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} gửi về phản hồi không đọc được.",
+    "failedEmptyReply": "Không dịch được {{count}} mục sang {{language}} — {{module}} gửi về phản hồi trống.",
+    "failedEmptyReply_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} gửi về phản hồi trống.",
+    "failedProvider": "Không dịch được {{count}} mục sang {{language}} — {{module}} báo lỗi.",
+    "failedProvider_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} báo lỗi.",
+    "failedUnknown": "Không dịch được {{count}} mục sang {{language}} — chưa rõ nguyên nhân.",
+    "failedUnknown_other": "Không dịch được {{count}} mục sang {{language}} — chưa rõ nguyên nhân.",
     "batchFailed": "Một lô {{count}} bản dịch sang {{languages}} đã thất bại.",
+    "batchFailedCause": "Một lô {{count}} bản dịch sang {{languages}} đã thất bại — {{cause}}",
+    "batchFailedCause_other": "Một lô {{count}} bản dịch sang {{languages}} đã thất bại — {{cause}}",
     "queueStartFailed": "Không bắt đầu được lần chạy dịch.",
     "maskMismatch": "Thẻ định dạng không còn nguyên sau khi dịch sang {{language}}.",
     "tmRejected": "Một bản dịch đã lưu cho {{language}} không qua được kiểm tra chất lượng.",
     "lqaRetry": "Kiểm tra chất lượng không đạt — đang yêu cầu mô hình thử lại.",
-    "authCancel": "Việc đăng nhập đã bị hủy, nên quá trình dịch dừng lại."
+    "authCancel": "Việc đăng nhập đã bị hủy, nên quá trình dịch dừng lại.",
+    "cause": {
+      "auth": "{{module}} đã từ chối khóa API.",
+      "rateLimit": "{{module}} đã đạt giới hạn yêu cầu.",
+      "timeout": "{{module}} phản hồi quá lâu.",
+      "modelUnavailable": "mô hình không khả dụng trên {{module}}.",
+      "parse": "{{module}} gửi về phản hồi không đọc được.",
+      "emptyReply": "{{module}} gửi về phản hồi trống.",
+      "provider": "{{module}} báo lỗi."
+    }
   },
   "lqa": {
     "passed": "Kiểm tra chất lượng đạt.",

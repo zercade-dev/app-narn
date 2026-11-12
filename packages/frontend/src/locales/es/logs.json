@@ -4,7 +4,8 @@
     "openModuleSettings": "Abrir la configuración de módulos",
     "openQuality": "Abrir los ajustes de calidad",
     "openGlossary": "Abrir el glosario",
-    "unlockVault": "Desbloquear bóveda"
+    "unlockVault": "Desbloquear bóveda",
+    "switchToRaw": "Ver registro crudo"
   },
   "translation": {
     "start": "Traduciendo un texto a {{language}}…",
@@ -22,12 +23,39 @@
     "failedModuleNotFound": "No se pudo traducir {{count}} texto a {{language}} — el módulo {{module}} no está instalado.",
     "failedModuleNotFound_other": "No se pudieron traducir {{count}} textos a {{language}} — el módulo {{module}} no está instalado.",
     "failedGeneric": "No se pudo traducir un texto a {{language}}.",
+    "failedAuth": "No se pudo traducir {{count}} texto a {{language}} — {{module}} rechazó la clave de API.",
+    "failedAuth_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} rechazó la clave de API.",
+    "failedRateLimit": "No se pudo traducir {{count}} texto a {{language}} — {{module}} alcanzó su límite de solicitudes.",
+    "failedRateLimit_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} alcanzó su límite de solicitudes.",
+    "failedTimeout": "No se pudo traducir {{count}} texto a {{language}} — {{module}} tardó demasiado en responder.",
+    "failedTimeout_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} tardó demasiado en responder.",
+    "failedModelUnavailable": "No se pudo traducir {{count}} texto a {{language}} — el modelo no está disponible en {{module}}.",
+    "failedModelUnavailable_other": "No se pudieron traducir {{count}} textos a {{language}} — el modelo no está disponible en {{module}}.",
+    "failedParse": "No se pudo traducir {{count}} texto a {{language}} — {{module}} envió una respuesta que no se pudo leer.",
+    "failedParse_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} envió una respuesta que no se pudo leer.",
+    "failedEmptyReply": "No se pudo traducir {{count}} texto a {{language}} — {{module}} devolvió una respuesta vacía.",
+    "failedEmptyReply_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} devolvió una respuesta vacía.",
+    "failedProvider": "No se pudo traducir {{count}} texto a {{language}} — {{module}} informó de un error.",
+    "failedProvider_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} informó de un error.",
+    "failedUnknown": "No se pudo traducir {{count}} texto a {{language}} — se desconoce el motivo.",
+    "failedUnknown_other": "No se pudieron traducir {{count}} textos a {{language}} — se desconoce el motivo.",
     "batchFailed": "Falló un lote de {{count}} traducciones a {{languages}}.",
+    "batchFailedCause": "Falló un lote de {{count}} traducción a {{languages}} — {{cause}}",
+    "batchFailedCause_other": "Falló un lote de {{count}} traducciones a {{languages}} — {{cause}}",
     "queueStartFailed": "No se pudo iniciar la ejecución de traducción.",
     "maskMismatch": "Las etiquetas de formato no sobrevivieron a la traducción a {{language}}.",
     "tmRejected": "Una traducción guardada para {{language}} no superó el control de calidad.",
     "lqaRetry": "Control de calidad fallido — se pidió al modelo un nuevo intento.",
-    "authCancel": "Se canceló el inicio de sesión, así que la traducción se detuvo."
+    "authCancel": "Se canceló el inicio de sesión, así que la traducción se detuvo.",
+    "cause": {
+      "auth": "{{module}} rechazó la clave de API.",
+      "rateLimit": "{{module}} alcanzó su límite de solicitudes.",
+      "timeout": "{{module}} tardó demasiado en responder.",
+      "modelUnavailable": "el modelo no está disponible en {{module}}.",
+      "parse": "{{module}} envió una respuesta que no se pudo leer.",
+      "emptyReply": "{{module}} devolvió una respuesta vacía.",
+      "provider": "{{module}} informó de un error."
+    }
   },
   "lqa": {
     "passed": "Control de calidad superado.",

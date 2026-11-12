@@ -4,7 +4,8 @@
     "openModuleSettings": "打开模块设置",
     "openQuality": "打开质量看板",
     "openGlossary": "打开术语表",
-    "unlockVault": "解锁保险库"
+    "unlockVault": "解锁保险库",
+    "switchToRaw": "显示原始日志"
   },
   "translation": {
     "start": "正在把一个条目翻译为 {{language}}…",
@@ -22,12 +23,39 @@
     "failedModuleNotFound": "无法把 {{count}} 个条目翻译为 {{language}}——未安装 {{module}} 模块。",
     "failedModuleNotFound_other": "无法把 {{count}} 个条目翻译为 {{language}}——未安装 {{module}} 模块。",
     "failedGeneric": "无法把一个条目翻译为 {{language}}。",
+    "failedAuth": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 拒绝了 API 密钥。",
+    "failedAuth_other": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 拒绝了 API 密钥。",
+    "failedRateLimit": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 已达到请求上限。",
+    "failedRateLimit_other": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 已达到请求上限。",
+    "failedTimeout": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 响应超时。",
+    "failedTimeout_other": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 响应超时。",
+    "failedModelUnavailable": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 上无法使用该模型。",
+    "failedModelUnavailable_other": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 上无法使用该模型。",
+    "failedParse": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 返回了无法读取的回复。",
+    "failedParse_other": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 返回了无法读取的回复。",
+    "failedEmptyReply": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 返回了空回复。",
+    "failedEmptyReply_other": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 返回了空回复。",
+    "failedProvider": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 报告了错误。",
+    "failedProvider_other": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 报告了错误。",
+    "failedUnknown": "无法把 {{count}} 个条目翻译为 {{language}}——原因不明。",
+    "failedUnknown_other": "无法把 {{count}} 个条目翻译为 {{language}}——原因不明。",
     "batchFailed": "一个包含 {{count}} 条译文、目标语言为 {{languages}} 的批次失败了。",
+    "batchFailedCause": "一个包含 {{count}} 条译文、目标语言为 {{languages}} 的批次失败了——{{cause}}",
+    "batchFailedCause_other": "一个包含 {{count}} 条译文、目标语言为 {{languages}} 的批次失败了——{{cause}}",
     "queueStartFailed": "无法启动翻译运行。",
     "maskMismatch": "格式标记未能在翻译为 {{language}} 的过程中保留下来。",
     "tmRejected": "{{language}} 的一条已保存译文未通过质量检查。",
     "lqaRetry": "质量检查未通过——正在请求模型重试。",
-    "authCancel": "登录已取消，因此翻译已停止。"
+    "authCancel": "登录已取消，因此翻译已停止。",
+    "cause": {
+      "auth": "{{module}} 拒绝了 API 密钥。",
+      "rateLimit": "{{module}} 已达到请求上限。",
+      "timeout": "{{module}} 响应超时。",
+      "modelUnavailable": "{{module}} 上无法使用该模型。",
+      "parse": "{{module}} 返回了无法读取的回复。",
+      "emptyReply": "{{module}} 返回了空回复。",
+      "provider": "{{module}} 报告了错误。"
+    }
   },
   "lqa": {
     "passed": "质量检查通过。",

@@ -4,7 +4,8 @@
     "openModuleSettings": "Open module settings",
     "openQuality": "Open quality settings",
     "openGlossary": "Open glossary",
-    "unlockVault": "Unlock vault"
+    "unlockVault": "Unlock vault",
+    "switchToRaw": "Show raw log"
   },
   "translation": {
     "start": "Translating a string into {{language}}…",
@@ -22,12 +23,39 @@
     "failedModuleNotFound": "Couldn't translate {{count}} string into {{language}} — the {{module}} module isn't installed.",
     "failedModuleNotFound_other": "Couldn't translate {{count}} strings into {{language}} — the {{module}} module isn't installed.",
     "failedGeneric": "Couldn't translate a string into {{language}}.",
+    "failedAuth": "Couldn't translate {{count}} string into {{language}} — {{module}} rejected the API key.",
+    "failedAuth_other": "Couldn't translate {{count}} strings into {{language}} — {{module}} rejected the API key.",
+    "failedRateLimit": "Couldn't translate {{count}} string into {{language}} — {{module}} hit its request limit.",
+    "failedRateLimit_other": "Couldn't translate {{count}} strings into {{language}} — {{module}} hit its request limit.",
+    "failedTimeout": "Couldn't translate {{count}} string into {{language}} — {{module}} took too long to respond.",
+    "failedTimeout_other": "Couldn't translate {{count}} strings into {{language}} — {{module}} took too long to respond.",
+    "failedModelUnavailable": "Couldn't translate {{count}} string into {{language}} — the model isn't available on {{module}}.",
+    "failedModelUnavailable_other": "Couldn't translate {{count}} strings into {{language}} — the model isn't available on {{module}}.",
+    "failedParse": "Couldn't translate {{count}} string into {{language}} — {{module}} sent a reply that couldn't be read.",
+    "failedParse_other": "Couldn't translate {{count}} strings into {{language}} — {{module}} sent a reply that couldn't be read.",
+    "failedEmptyReply": "Couldn't translate {{count}} string into {{language}} — {{module}} sent back an empty reply.",
+    "failedEmptyReply_other": "Couldn't translate {{count}} strings into {{language}} — {{module}} sent back an empty reply.",
+    "failedProvider": "Couldn't translate {{count}} string into {{language}} — {{module}} reported an error.",
+    "failedProvider_other": "Couldn't translate {{count}} strings into {{language}} — {{module}} reported an error.",
+    "failedUnknown": "Couldn't translate {{count}} string into {{language}} for an unknown reason.",
+    "failedUnknown_other": "Couldn't translate {{count}} strings into {{language}} for an unknown reason.",
     "batchFailed": "A batch of {{count}} translations into {{languages}} failed.",
+    "batchFailedCause": "A batch of {{count}} translation into {{languages}} failed — {{cause}}",
+    "batchFailedCause_other": "A batch of {{count}} translations into {{languages}} failed — {{cause}}",
     "queueStartFailed": "Couldn't start the translation run.",
     "maskMismatch": "Formatting tags didn't survive translation into {{language}}.",
     "tmRejected": "A saved translation for {{language}} didn't pass the quality check.",
     "lqaRetry": "Quality check failed — asking the model to try again.",
-    "authCancel": "Sign-in was cancelled, so translation stopped."
+    "authCancel": "Sign-in was cancelled, so translation stopped.",
+    "cause": {
+      "auth": "{{module}} rejected the API key.",
+      "rateLimit": "{{module}} hit its request limit.",
+      "timeout": "{{module}} took too long to respond.",
+      "modelUnavailable": "the model isn't available on {{module}}.",
+      "parse": "{{module}} sent a reply that couldn't be read.",
+      "emptyReply": "{{module}} sent back an empty reply.",
+      "provider": "{{module}} reported an error."
+    }
   },
   "lqa": {
     "passed": "Quality check passed.",

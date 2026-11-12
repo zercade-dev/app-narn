@@ -1,6 +1,7 @@
+import { isFailureCode, type FailureCode } from '@zercade-dev/narn-shared';
 import i18n from '../../i18n/index.js';
-import type { LogMeta, LogPresenter } from './types.js';
-import { openTab, openGlobalConfig, unlockVault } from './actions.js';
+import type { LogAction, LogMeta, LogPresenter } from './types.js';
+import { openTab, openGlobalConfig, switchToRaw, unlockVault } from './actions.js';
 
 /**
  * Expand a language code to a display name ("fr" -> "French" in an English UI,
@@ -49,11 +50,58 @@ const failureVars = (meta: LogMeta) => ({
   module: str(meta.moduleId),
 });
 
-const FAILURE_KEY_BY_REASON: Record<string, string> = {
+/** One sentence per failure code, so a failed row says why instead of just that it failed. */
+export const FAILURE_KEY_BY_CODE: Record<FailureCode, string> = {
+  auth: 'translation.failedAuth',
+  'rate-limit': 'translation.failedRateLimit',
+  timeout: 'translation.failedTimeout',
+  'model-unavailable': 'translation.failedModelUnavailable',
+  'parse-failure': 'translation.failedParse',
+  'empty-reply': 'translation.failedEmptyReply',
+  'provider-error': 'translation.failedProvider',
   'no-route': 'translation.failedNoRoute',
   'module-disabled': 'translation.failedModuleDisabled',
   'module-not-found': 'translation.failedModuleNotFound',
+  unknown: 'translation.failedUnknown',
 };
+
+/** Short clause naming the cause of a failed batch; codes without one keep the plain sentence. */
+const BATCH_CAUSE_KEY_BY_CODE: Partial<Record<FailureCode, string>> = {
+  auth: 'translation.cause.auth',
+  'rate-limit': 'translation.cause.rateLimit',
+  timeout: 'translation.cause.timeout',
+  'model-unavailable': 'translation.cause.modelUnavailable',
+  'parse-failure': 'translation.cause.parse',
+  'empty-reply': 'translation.cause.emptyReply',
+  'provider-error': 'translation.cause.provider',
+};
+
+/**
+ * The failure code for a log entry. Entries written before codes existed carry
+ * the controlled reason (`no-route`, ...) in `error` instead, so it stands in.
+ */
+function failureCode(meta: LogMeta): FailureCode | undefined {
+  if (isFailureCode(meta.code)) return meta.code;
+  return isFailureCode(meta.error) ? meta.error : undefined;
+}
+
+/** What the user can do about a failure, if anything. */
+export function failureAction(code: FailureCode): LogAction | undefined {
+  switch (code) {
+    case 'auth':
+    case 'rate-limit':
+    case 'model-unavailable':
+    case 'module-disabled':
+    case 'module-not-found':
+      return openGlobalConfig('action.openModuleSettings');
+    case 'no-route':
+      return openTab('routing', 'action.openRouting');
+    case 'unknown':
+      return switchToRaw('action.switchToRaw');
+    default:
+      return undefined;
+  }
+}
 
 /**
  * Hand-written presentation for the event keys users actually meet. Everything
@@ -83,28 +131,38 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
   },
   'translation:retry': { key: 'translation.retry' },
   'translation:failed': {
-    key: (m) => FAILURE_KEY_BY_REASON[str(m.error, '')] ?? 'translation.failedGeneric',
+    key: (m) => {
+      const code = failureCode(m);
+      return code ? FAILURE_KEY_BY_CODE[code] : 'translation.failedGeneric';
+    },
     vars: failureVars,
-    // Aggregate by reason + language: "no routing rule" failures to French fold
-    // together, while a provider error to German stays its own row.
-    groupKey: (m) => `${str(m.error, '')} ${str(m.targetLanguage, '')}`,
+    // Aggregate by cause + language: auth failures to French fold together,
+    // while a timeout to German stays its own row.
+    groupKey: (m) => `${failureCode(m) ?? str(m.error, '')} ${str(m.targetLanguage, '')}`,
     action: (m) => {
-      const reason = str(m.error, '');
-      if (reason === 'no-route') return openTab('routing', 'action.openRouting');
-      if (reason === 'module-disabled' || reason === 'module-not-found') {
-        return openGlobalConfig('action.openModuleSettings');
-      }
-      return undefined;
+      const code = failureCode(m);
+      return code ? failureAction(code) : undefined;
     },
   },
   'translation:batch-failed': {
-    key: 'translation.batchFailed',
-    vars: (m) => ({
-      count: num(m.batchSize, 0),
-      languages: Array.isArray(m.targetLanguages)
-        ? m.targetLanguages.map(languageName).join(', ')
-        : '?',
-    }),
+    key: (m) => {
+      const code = failureCode(m);
+      return code && BATCH_CAUSE_KEY_BY_CODE[code]
+        ? 'translation.batchFailedCause'
+        : 'translation.batchFailed';
+    },
+    vars: (m) => {
+      const code = failureCode(m);
+      const causeKey = code ? BATCH_CAUSE_KEY_BY_CODE[code] : undefined;
+      return {
+        count: num(m.batchSize, 0),
+        languages: Array.isArray(m.targetLanguages)
+          ? m.targetLanguages.map(languageName).join(', ')
+          : '?',
+        // Rendered here, not by the caller's `t`, because the cause varies by code.
+        cause: causeKey ? i18n.t(causeKey, { ns: 'logs', module: str(m.moduleId) }) : '',
+      };
+    },
   },
   'translation:queue-start-failed': { key: 'translation.queueStartFailed' },
   'translation:mask-mismatch': {

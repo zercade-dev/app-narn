@@ -4,7 +4,8 @@
     "openModuleSettings": "เปิดการตั้งค่าโมดูล",
     "openQuality": "เปิดแดชบอร์ดคุณภาพ",
     "openGlossary": "เปิดอภิธานศัพท์",
-    "unlockVault": "ปลดล็อกตู้นิรภัย"
+    "unlockVault": "ปลดล็อกตู้นิรภัย",
+    "switchToRaw": "แสดงล็อกดิบ"
   },
   "translation": {
     "start": "กำลังแปลรายการหนึ่งเป็น {{language}}…",
@@ -22,12 +23,39 @@
     "failedModuleNotFound": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่ได้ติดตั้งโมดูล {{module}}",
     "failedModuleNotFound_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่ได้ติดตั้งโมดูล {{module}}",
     "failedGeneric": "แปลรายการหนึ่งเป็น {{language}} ไม่ได้",
+    "failedAuth": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ปฏิเสธคีย์ API",
+    "failedAuth_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ปฏิเสธคีย์ API",
+    "failedRateLimit": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ถึงขีดจำกัดคำขอแล้ว",
+    "failedRateLimit_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ถึงขีดจำกัดคำขอแล้ว",
+    "failedTimeout": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ตอบกลับช้าเกินไป",
+    "failedTimeout_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ตอบกลับช้าเกินไป",
+    "failedModelUnavailable": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — โมเดลไม่พร้อมใช้งานบน {{module}}",
+    "failedModelUnavailable_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — โมเดลไม่พร้อมใช้งานบน {{module}}",
+    "failedParse": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ส่งคำตอบที่อ่านไม่ได้กลับมา",
+    "failedParse_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ส่งคำตอบที่อ่านไม่ได้กลับมา",
+    "failedEmptyReply": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ส่งคำตอบที่ว่างเปล่ากลับมา",
+    "failedEmptyReply_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} ส่งคำตอบที่ว่างเปล่ากลับมา",
+    "failedProvider": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} รายงานข้อผิดพลาด",
+    "failedProvider_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — {{module}} รายงานข้อผิดพลาด",
+    "failedUnknown": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่ทราบสาเหตุ",
+    "failedUnknown_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่ทราบสาเหตุ",
     "batchFailed": "แบตช์ของคำแปล {{count}} รายการเป็น {{languages}} ล้มเหลว",
+    "batchFailedCause": "แบตช์ของคำแปล {{count}} รายการเป็น {{languages}} ล้มเหลว — {{cause}}",
+    "batchFailedCause_other": "แบตช์ของคำแปล {{count}} รายการเป็น {{languages}} ล้มเหลว — {{cause}}",
     "queueStartFailed": "เริ่มรอบการแปลไม่ได้",
     "maskMismatch": "แท็กจัดรูปแบบไม่รอดจากการแปลเป็น {{language}}",
     "tmRejected": "คำแปลที่บันทึกไว้สำหรับ {{language}} ไม่ผ่านการตรวจสอบคุณภาพ",
     "lqaRetry": "การตรวจสอบคุณภาพไม่ผ่าน — กำลังขอให้โมเดลลองใหม่",
-    "authCancel": "การลงชื่อเข้าใช้ถูกยกเลิก การแปลจึงหยุดลง"
+    "authCancel": "การลงชื่อเข้าใช้ถูกยกเลิก การแปลจึงหยุดลง",
+    "cause": {
+      "auth": "{{module}} ปฏิเสธคีย์ API",
+      "rateLimit": "{{module}} ถึงขีดจำกัดคำขอแล้ว",
+      "timeout": "{{module}} ตอบกลับช้าเกินไป",
+      "modelUnavailable": "โมเดลไม่พร้อมใช้งานบน {{module}}",
+      "parse": "{{module}} ส่งคำตอบที่อ่านไม่ได้กลับมา",
+      "emptyReply": "{{module}} ส่งคำตอบที่ว่างเปล่ากลับมา",
+      "provider": "{{module}} รายงานข้อผิดพลาด"
+    }
   },
   "lqa": {
     "passed": "การตรวจสอบคุณภาพผ่าน",

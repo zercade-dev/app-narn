@@ -4,7 +4,8 @@
     "openModuleSettings": "Ouvrir les paramètres des modules",
     "openQuality": "Ouvrir les paramètres de qualité",
     "openGlossary": "Ouvrir le glossaire",
-    "unlockVault": "Déverrouiller le coffre"
+    "unlockVault": "Déverrouiller le coffre",
+    "switchToRaw": "Afficher le journal brut"
   },
   "translation": {
     "start": "Traduction d'un texte vers {{language}}…",
@@ -22,12 +23,39 @@
     "failedModuleNotFound": "Impossible de traduire {{count}} texte vers {{language}} — le module {{module}} n'est pas installé.",
     "failedModuleNotFound_other": "Impossible de traduire {{count}} textes vers {{language}} — le module {{module}} n'est pas installé.",
     "failedGeneric": "Impossible de traduire un texte vers {{language}}.",
+    "failedAuth": "Impossible de traduire {{count}} texte vers {{language}} — {{module}} a refusé la clé API.",
+    "failedAuth_other": "Impossible de traduire {{count}} textes vers {{language}} — {{module}} a refusé la clé API.",
+    "failedRateLimit": "Impossible de traduire {{count}} texte vers {{language}} — {{module}} a atteint sa limite de requêtes.",
+    "failedRateLimit_other": "Impossible de traduire {{count}} textes vers {{language}} — {{module}} a atteint sa limite de requêtes.",
+    "failedTimeout": "Impossible de traduire {{count}} texte vers {{language}} — {{module}} a mis trop de temps à répondre.",
+    "failedTimeout_other": "Impossible de traduire {{count}} textes vers {{language}} — {{module}} a mis trop de temps à répondre.",
+    "failedModelUnavailable": "Impossible de traduire {{count}} texte vers {{language}} — le modèle n'est pas disponible chez {{module}}.",
+    "failedModelUnavailable_other": "Impossible de traduire {{count}} textes vers {{language}} — le modèle n'est pas disponible chez {{module}}.",
+    "failedParse": "Impossible de traduire {{count}} texte vers {{language}} — {{module}} a renvoyé une réponse illisible.",
+    "failedParse_other": "Impossible de traduire {{count}} textes vers {{language}} — {{module}} a renvoyé une réponse illisible.",
+    "failedEmptyReply": "Impossible de traduire {{count}} texte vers {{language}} — {{module}} a renvoyé une réponse vide.",
+    "failedEmptyReply_other": "Impossible de traduire {{count}} textes vers {{language}} — {{module}} a renvoyé une réponse vide.",
+    "failedProvider": "Impossible de traduire {{count}} texte vers {{language}} — {{module}} a signalé une erreur.",
+    "failedProvider_other": "Impossible de traduire {{count}} textes vers {{language}} — {{module}} a signalé une erreur.",
+    "failedUnknown": "Impossible de traduire {{count}} texte vers {{language}} — la cause est inconnue.",
+    "failedUnknown_other": "Impossible de traduire {{count}} textes vers {{language}} — la cause est inconnue.",
     "batchFailed": "Un lot de {{count}} traductions vers {{languages}} a échoué.",
+    "batchFailedCause": "Un lot de {{count}} traduction vers {{languages}} a échoué — {{cause}}",
+    "batchFailedCause_other": "Un lot de {{count}} traductions vers {{languages}} a échoué — {{cause}}",
     "queueStartFailed": "Impossible de lancer l'exécution de traduction.",
     "maskMismatch": "Les balises de mise en forme n'ont pas survécu à la traduction vers {{language}}.",
     "tmRejected": "Une traduction enregistrée pour {{language}} n'a pas passé le contrôle qualité.",
     "lqaRetry": "Contrôle qualité échoué — nouvelle tentative demandée au modèle.",
-    "authCancel": "La connexion a été annulée, la traduction s'est donc arrêtée."
+    "authCancel": "La connexion a été annulée, la traduction s'est donc arrêtée.",
+    "cause": {
+      "auth": "{{module}} a refusé la clé API.",
+      "rateLimit": "{{module}} a atteint sa limite de requêtes.",
+      "timeout": "{{module}} a mis trop de temps à répondre.",
+      "modelUnavailable": "le modèle n'est pas disponible chez {{module}}.",
+      "parse": "{{module}} a renvoyé une réponse illisible.",
+      "emptyReply": "{{module}} a renvoyé une réponse vide.",
+      "provider": "{{module}} a signalé une erreur."
+    }
   },
   "lqa": {
     "passed": "Contrôle qualité réussi.",

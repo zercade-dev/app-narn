@@ -4,7 +4,8 @@
     "openModuleSettings": "Buka pengaturan modul",
     "openQuality": "Buka Dasbor Kualitas",
     "openGlossary": "Buka glosarium",
-    "unlockVault": "Buka kunci brankas"
+    "unlockVault": "Buka kunci brankas",
+    "switchToRaw": "Tampilkan log mentah"
   },
   "translation": {
     "start": "Menerjemahkan sebuah entri ke {{language}}…",
@@ -22,12 +23,39 @@
     "failedModuleNotFound": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — modul {{module}} tidak terpasang.",
     "failedModuleNotFound_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — modul {{module}} tidak terpasang.",
     "failedGeneric": "Tidak bisa menerjemahkan sebuah entri ke {{language}}.",
+    "failedAuth": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} menolak kunci API.",
+    "failedAuth_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} menolak kunci API.",
+    "failedRateLimit": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} mencapai batas permintaan.",
+    "failedRateLimit_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} mencapai batas permintaan.",
+    "failedTimeout": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} terlalu lama merespons.",
+    "failedTimeout_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} terlalu lama merespons.",
+    "failedModelUnavailable": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — model tidak tersedia di {{module}}.",
+    "failedModelUnavailable_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — model tidak tersedia di {{module}}.",
+    "failedParse": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} mengirim balasan yang tidak bisa dibaca.",
+    "failedParse_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} mengirim balasan yang tidak bisa dibaca.",
+    "failedEmptyReply": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} mengirim balasan kosong.",
+    "failedEmptyReply_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} mengirim balasan kosong.",
+    "failedProvider": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} melaporkan kesalahan.",
+    "failedProvider_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — {{module}} melaporkan kesalahan.",
+    "failedUnknown": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — penyebabnya tidak diketahui.",
+    "failedUnknown_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — penyebabnya tidak diketahui.",
     "batchFailed": "Satu batch berisi {{count}} terjemahan ke {{languages}} gagal.",
+    "batchFailedCause": "Satu batch berisi {{count}} terjemahan ke {{languages}} gagal — {{cause}}",
+    "batchFailedCause_other": "Satu batch berisi {{count}} terjemahan ke {{languages}} gagal — {{cause}}",
     "queueStartFailed": "Tidak bisa memulai putaran penerjemahan.",
     "maskMismatch": "Tag pemformatan tidak selamat saat diterjemahkan ke {{language}}.",
     "tmRejected": "Terjemahan tersimpan untuk {{language}} tidak lolos pemeriksaan kualitas.",
     "lqaRetry": "Pemeriksaan kualitas gagal — model diminta mencoba lagi.",
-    "authCancel": "Proses masuk dibatalkan, jadi penerjemahan berhenti."
+    "authCancel": "Proses masuk dibatalkan, jadi penerjemahan berhenti.",
+    "cause": {
+      "auth": "{{module}} menolak kunci API.",
+      "rateLimit": "{{module}} mencapai batas permintaan.",
+      "timeout": "{{module}} terlalu lama merespons.",
+      "modelUnavailable": "model tidak tersedia di {{module}}.",
+      "parse": "{{module}} mengirim balasan yang tidak bisa dibaca.",
+      "emptyReply": "{{module}} mengirim balasan kosong.",
+      "provider": "{{module}} melaporkan kesalahan."
+    }
   },
   "lqa": {
     "passed": "Pemeriksaan kualitas lulus.",

@@ -4,7 +4,8 @@
     "openModuleSettings": "開啟模組設定",
     "openQuality": "開啟品質儀表板",
     "openGlossary": "開啟術語表",
-    "unlockVault": "解鎖保險庫"
+    "unlockVault": "解鎖保險庫",
+    "switchToRaw": "顯示原始記錄"
   },
   "translation": {
     "start": "正在把一個條目翻譯成 {{language}}…",
@@ -22,12 +23,39 @@
     "failedModuleNotFound": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 模組未安裝。",
     "failedModuleNotFound_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 模組未安裝。",
     "failedGeneric": "無法把一個條目翻譯成 {{language}}。",
+    "failedAuth": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 拒絕了 API 金鑰。",
+    "failedAuth_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 拒絕了 API 金鑰。",
+    "failedRateLimit": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 已達到請求上限。",
+    "failedRateLimit_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 已達到請求上限。",
+    "failedTimeout": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 回應逾時。",
+    "failedTimeout_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 回應逾時。",
+    "failedModelUnavailable": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 上無法使用該模型。",
+    "failedModelUnavailable_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 上無法使用該模型。",
+    "failedParse": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 傳回了無法讀取的回覆。",
+    "failedParse_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 傳回了無法讀取的回覆。",
+    "failedEmptyReply": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 傳回了空白回覆。",
+    "failedEmptyReply_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 傳回了空白回覆。",
+    "failedProvider": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 回報了錯誤。",
+    "failedProvider_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 回報了錯誤。",
+    "failedUnknown": "無法把 {{count}} 個條目翻譯成 {{language}}——原因不明。",
+    "failedUnknown_other": "無法把 {{count}} 個條目翻譯成 {{language}}——原因不明。",
     "batchFailed": "一個含 {{count}} 則譯文、目標為 {{languages}} 的批次失敗了。",
+    "batchFailedCause": "一個含 {{count}} 則譯文、目標為 {{languages}} 的批次失敗了——{{cause}}",
+    "batchFailedCause_other": "一個含 {{count}} 則譯文、目標為 {{languages}} 的批次失敗了——{{cause}}",
     "queueStartFailed": "無法開始這次翻譯執行。",
     "maskMismatch": "格式標記在翻譯成 {{language}} 後未能保留。",
     "tmRejected": "{{language}} 的一則已儲存譯文沒有通過品質檢查。",
     "lqaRetry": "品質檢查未通過——正在請模型再試一次。",
-    "authCancel": "登入已取消，因此翻譯已停止。"
+    "authCancel": "登入已取消，因此翻譯已停止。",
+    "cause": {
+      "auth": "{{module}} 拒絕了 API 金鑰。",
+      "rateLimit": "{{module}} 已達到請求上限。",
+      "timeout": "{{module}} 回應逾時。",
+      "modelUnavailable": "{{module}} 上無法使用該模型。",
+      "parse": "{{module}} 傳回了無法讀取的回覆。",
+      "emptyReply": "{{module}} 傳回了空白回覆。",
+      "provider": "{{module}} 回報了錯誤。"
+    }
   },
   "lqa": {
     "passed": "品質檢查通過。",

@@ -4,7 +4,8 @@
     "openModuleSettings": "モジュール設定を開く",
     "openQuality": "品質ダッシュボードを開く",
     "openGlossary": "用語集を開く",
-    "unlockVault": "保管庫のロックを解除"
+    "unlockVault": "保管庫のロックを解除",
+    "switchToRaw": "生のログを表示"
   },
   "translation": {
     "start": "エントリを{{language}}に翻訳中…",
@@ -22,12 +23,39 @@
     "failedModuleNotFound": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}モジュールがインストールされていません。",
     "failedModuleNotFound_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}モジュールがインストールされていません。",
     "failedGeneric": "エントリを{{language}}に翻訳できませんでした。",
+    "failedAuth": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}がAPIキーを拒否しました。",
+    "failedAuth_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}がAPIキーを拒否しました。",
+    "failedRateLimit": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}のリクエスト上限に達しました。",
+    "failedRateLimit_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}のリクエスト上限に達しました。",
+    "failedTimeout": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}の応答に時間がかかりすぎました。",
+    "failedTimeout_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}の応答に時間がかかりすぎました。",
+    "failedModelUnavailable": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}ではそのモデルを利用できません。",
+    "failedModelUnavailable_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}ではそのモデルを利用できません。",
+    "failedParse": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}から読み取れない応答が返されました。",
+    "failedParse_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}から読み取れない応答が返されました。",
+    "failedEmptyReply": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}から空の応答が返されました。",
+    "failedEmptyReply_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}から空の応答が返されました。",
+    "failedProvider": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}がエラーを報告しました。",
+    "failedProvider_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}がエラーを報告しました。",
+    "failedUnknown": "エントリ{{count}}件を{{language}}に翻訳できませんでした。原因は不明です。",
+    "failedUnknown_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。原因は不明です。",
     "batchFailed": "翻訳{{count}}件のバッチが失敗しました（対象言語：{{languages}}）。",
+    "batchFailedCause": "翻訳{{count}}件のバッチ（対象言語：{{languages}}）が失敗しました。{{cause}}",
+    "batchFailedCause_other": "翻訳{{count}}件のバッチ（対象言語：{{languages}}）が失敗しました。{{cause}}",
     "queueStartFailed": "翻訳の実行を開始できませんでした。",
     "maskMismatch": "{{language}}への翻訳でインラインタグが保持されませんでした。",
     "tmRejected": "{{language}}の保存済みの翻訳は品質チェックに合格しませんでした。",
     "lqaRetry": "品質チェックに不合格でした。モデルに再試行を依頼しています。",
-    "authCancel": "サインインがキャンセルされたため、翻訳を停止しました。"
+    "authCancel": "サインインがキャンセルされたため、翻訳を停止しました。",
+    "cause": {
+      "auth": "{{module}}がAPIキーを拒否しました。",
+      "rateLimit": "{{module}}のリクエスト上限に達しました。",
+      "timeout": "{{module}}の応答に時間がかかりすぎました。",
+      "modelUnavailable": "{{module}}ではそのモデルを利用できません。",
+      "parse": "{{module}}から読み取れない応答が返されました。",
+      "emptyReply": "{{module}}から空の応答が返されました。",
+      "provider": "{{module}}がエラーを報告しました。"
+    }
   },
   "lqa": {
     "passed": "品質チェックに合格しました。",
