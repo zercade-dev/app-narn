@@ -38,5 +38,8 @@
   "captureTooltip": "Wenn aktiviert, behält der Server jeden Log-Eintrag dieser Sitzung, damit ein langer Lauf ohne Datenverlust analysiert werden kann.",
   "captureDownload": "Erfassung herunterladen ({{captured}})",
   "captureDropped": "+{{dropped}} verworfen",
-  "captureSlotsExhausted": "Die Erfassung ist gerade ausgelastet — auf diesem Server laufen bereits zu viele Erfassungen. Bitte später erneut versuchen."
+  "captureSlotsExhausted": "Die Erfassung ist gerade ausgelastet — auf diesem Server laufen bereits zu viele Erfassungen. Bitte später erneut versuchen.",
+  "modeFriendly": "Verständlich",
+  "modeRaw": "Roh",
+  "modeLabel": "Protokollansicht"
 }

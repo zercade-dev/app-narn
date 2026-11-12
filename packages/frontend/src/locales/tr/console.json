@@ -38,5 +38,8 @@
   "captureTooltip": "Açıkken sunucu, uzun bir çalıştırmanın kayıp olmadan incelenebilmesi için bu oturumun tüm günlük kayıtlarını tutar.",
   "captureDownload": "Yakalamayı indir ({{captured}})",
   "captureDropped": "+{{dropped}} atlandı",
-  "captureSlotsExhausted": "Yakalama şu anda meşgul — bu sunucuda zaten çok fazla yakalama çalışıyor. Daha sonra tekrar deneyin."
+  "captureSlotsExhausted": "Yakalama şu anda meşgul — bu sunucuda zaten çok fazla yakalama çalışıyor. Daha sonra tekrar deneyin.",
+  "modeFriendly": "Anlaşılır",
+  "modeRaw": "Ham",
+  "modeLabel": "Günlük görünümü"
 }

@@ -1,6 +1,6 @@
 {
   "title": "CONSOLE",
-  "empty": "Aucune entr\u00e9e de journal pour l\u2019instant.",
+  "empty": "Aucune entrée de journal pour l’instant.",
   "filter_all": "Tout",
   "filter_error": "Erreur",
   "filter_warn": "Avertissement",
@@ -34,5 +34,8 @@
   "captureTooltip": "Lorsque cette option est activée, le serveur conserve chaque entrée de journal de cette session afin qu’une longue exécution puisse être analysée sans perte.",
   "captureDownload": "Télécharger la capture ({{captured}})",
   "captureDropped": "+{{dropped}} ignorées",
-  "captureSlotsExhausted": "La capture est occupée pour le moment — trop de captures sont en cours sur ce serveur. Réessayez plus tard."
+  "captureSlotsExhausted": "La capture est occupée pour le moment — trop de captures sont en cours sur ce serveur. Réessayez plus tard.",
+  "modeFriendly": "Lisible",
+  "modeRaw": "Brut",
+  "modeLabel": "Affichage du journal"
 }

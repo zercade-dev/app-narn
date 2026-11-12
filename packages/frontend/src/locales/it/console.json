@@ -38,5 +38,8 @@
   "captureTooltip": "Quando è attiva, il server conserva ogni voce di log di questa sessione, così un'esecuzione lunga può essere analizzata senza perdite.",
   "captureDownload": "Scarica la cattura ({{captured}})",
   "captureDropped": "+{{dropped}} scartate",
-  "captureSlotsExhausted": "La cattura è occupata al momento — sul server sono già in corso troppe catture. Riprova più tardi."
+  "captureSlotsExhausted": "La cattura è occupata al momento — sul server sono già in corso troppe catture. Riprova più tardi.",
+  "modeFriendly": "Leggibile",
+  "modeRaw": "Grezzo",
+  "modeLabel": "Vista del registro"
 }

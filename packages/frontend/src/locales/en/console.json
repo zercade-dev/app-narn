@@ -34,5 +34,8 @@
   "captureTooltip": "While on, the server keeps every log entry for this session so a long run can be analyzed without losses.",
   "captureDownload": "Download capture ({{captured}})",
   "captureDropped": "+{{dropped}} dropped",
-  "captureSlotsExhausted": "Capture is busy right now — too many captures are running on this server. Try again later."
+  "captureSlotsExhausted": "Capture is busy right now — too many captures are running on this server. Try again later.",
+  "modeFriendly": "Friendly",
+  "modeRaw": "Raw",
+  "modeLabel": "Log view"
 }

@@ -40,13 +40,23 @@ function memberDetailLine(member: LogEntry): string {
   return pairs.length > 0 ? `${time} ${pairs.map(formatMetaEntry).join(' ')}` : time;
 }
 
+/** Raw row text: the event key then every metadata pair except `stack`. */
+function rawLine(entry: LogEntry): string {
+  const pairs = Object.entries(entry.metadata ?? {})
+    .filter(([k]) => k !== 'stack')
+    .map(formatMetaEntry);
+  return [entry.message, ...pairs].join(' ');
+}
+
 interface ConsoleLogRowProps {
   group: LogGroup;
+  /** Raw mode: the event key and every `k=v` pair, no sentence and no action. */
+  raw: boolean;
   expanded: boolean;
   onToggle: () => void;
 }
 
-export function ConsoleLogRow({ group, expanded, onToggle }: Readonly<ConsoleLogRowProps>) {
+export function ConsoleLogRow({ group, raw, expanded, onToggle }: Readonly<ConsoleLogRowProps>) {
   const { t } = useTranslation('logs');
   const { t: tConsole } = useTranslation('console');
   const entry = group.head;
@@ -80,11 +90,11 @@ export function ConsoleLogRow({ group, expanded, onToggle }: Readonly<ConsoleLog
         {/* Log payload: program output, not UI chrome. `data-content` opts it out
             of the theme's display/pixel font, unreadable at this length. */}
         <span className="break-words flex-1" data-content>
-          {presented.text}
+          {raw ? rawLine(entry) : presented.text}
           {/* A mapped presenter authored its whole line, so its metadata is
               redundant here. A fallback row hasn't — without this, a row like
               "Orphan — detected" would lose its count. */}
-          {presented.isFallback && visibleMeta(entry.metadata).length > 0 && (
+          {!raw && presented.isFallback && visibleMeta(entry.metadata).length > 0 && (
             <span className="text-muted-foreground/50 ml-1">
               {visibleMeta(entry.metadata).map(formatMetaEntry).join(' ')}
             </span>
@@ -99,7 +109,7 @@ export function ConsoleLogRow({ group, expanded, onToggle }: Readonly<ConsoleLog
               ×{group.count}
             </Badge>
           )}
-          {presented.action && (
+          {!raw && presented.action && (
             <button
               type="button"
               data-testid="console-log-action"

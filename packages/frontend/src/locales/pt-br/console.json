@@ -38,5 +38,8 @@
   "captureTooltip": "Enquanto estiver ativado, o servidor mantém cada entrada de log desta sessão para que uma execução longa possa ser analisada sem perdas.",
   "captureDownload": "Baixar captura ({{captured}})",
   "captureDropped": "+{{dropped}} descartados",
-  "captureSlotsExhausted": "A captura está ocupada agora — há capturas demais em execução neste servidor. Tente novamente mais tarde."
+  "captureSlotsExhausted": "A captura está ocupada agora — há capturas demais em execução neste servidor. Tente novamente mais tarde.",
+  "modeFriendly": "Simplificado",
+  "modeRaw": "Bruto",
+  "modeLabel": "Visualização do log"
 }

@@ -34,5 +34,8 @@
   "captureTooltip": "Saat aktif, server menyimpan setiap entri log sesi ini agar proses yang panjang bisa dianalisis tanpa kehilangan data.",
   "captureDownload": "Unduh rekaman ({{captured}})",
   "captureDropped": "+{{dropped}} tidak tersimpan",
-  "captureSlotsExhausted": "Perekaman sedang sibuk — terlalu banyak perekaman yang berjalan di server ini. Coba lagi nanti."
+  "captureSlotsExhausted": "Perekaman sedang sibuk — terlalu banyak perekaman yang berjalan di server ini. Coba lagi nanti.",
+  "modeFriendly": "Ringkas",
+  "modeRaw": "Mentah",
+  "modeLabel": "Tampilan log"
 }

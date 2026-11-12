@@ -34,5 +34,8 @@
   "captureTooltip": "Khi bật, máy chủ sẽ giữ lại mọi mục nhật ký của phiên này để có thể phân tích một lượt chạy dài mà không bị mất dữ liệu.",
   "captureDownload": "Tải bản ghi xuống ({{captured}})",
   "captureDropped": "+{{dropped}} bị bỏ qua",
-  "captureSlotsExhausted": "Tính năng ghi lại đang bận — máy chủ này đã có quá nhiều lượt ghi đang chạy. Vui lòng thử lại sau."
+  "captureSlotsExhausted": "Tính năng ghi lại đang bận — máy chủ này đã có quá nhiều lượt ghi đang chạy. Vui lòng thử lại sau.",
+  "modeFriendly": "Dễ đọc",
+  "modeRaw": "Thô",
+  "modeLabel": "Chế độ xem nhật ký"
 }

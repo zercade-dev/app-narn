@@ -32,6 +32,7 @@ import { cn, downloadBlob } from '@/lib/utils';
 import { ConsoleLogRow } from './ConsoleLogRow.js';
 import { groupEntries } from '@/lib/log-presentation/group.js';
 import { presentEntry } from '@/lib/log-presentation/present.js';
+import { isRawOnly } from '@/lib/log-presentation/raw-only.js';
 
 /** Distance (px) from the bottom within which the viewport counts as "pinned". */
 const PIN_THRESHOLD_PX = 32;
@@ -119,6 +120,8 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     serverDroppedCounts.priority;
   const consoleFilter = useUiSettings((s) => s.consoleFilter);
   const setConsoleFilter = useUiSettings((s) => s.setConsoleFilter);
+  const raw = useUiSettings((s) => s.consoleRawMode);
+  const setConsoleRawMode = useUiSettings((s) => s.setConsoleRawMode);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const [panelHeight, setPanelHeight] = useState(200);
   const [search, setSearch] = useState('');
@@ -158,21 +161,24 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     globalThis.addEventListener('mouseup', onUp);
   }
 
-  function getFilteredEntries() {
-    const query = search.trim().toLowerCase();
-    return entries.filter((e) => {
-      const levelOk =
-        consoleFilter === 'all'
-          ? true
-          : consoleFilter === 'notifications'
-            ? e.level === 'notification'
-            : e.level === consoleFilter;
-      if (!levelOk) return false;
-      return query === '' || entryMatchesQuery(e, query, presentEntry(e, tLogs).text);
-    });
+  function matchesLevel(e: LogEntry): boolean {
+    if (consoleFilter === 'all') return true;
+    if (consoleFilter === 'notifications') return e.level === 'notification';
+    return e.level === consoleFilter;
   }
-  const filteredEntries = getFilteredEntries();
-  const groups = groupEntries(filteredEntries);
+  // The level-filtered entries: what both modes show before the Friendly cut,
+  // and what export writes.
+  const levelEntries = entries.filter(matchesLevel);
+  const query = search.trim().toLowerCase();
+  const filteredEntries = levelEntries.filter(
+    (e) => query === '' || entryMatchesQuery(e, query, presentEntry(e, tLogs).text),
+  );
+  // Friendly hides raw-only lines and folds repeats; Raw shows everything, one
+  // row per entry.
+  const visibleEntries = raw ? filteredEntries : filteredEntries.filter((e) => !isRawOnly(e));
+  const groups = raw
+    ? visibleEntries.map((e) => ({ head: e, count: 1, members: [e] }))
+    : groupEntries(visibleEntries);
 
   // eslint-disable-next-line react-hooks/incompatible-library -- the 'use no memo' directive above opts this component out of the React Compiler, which is the documented TanStack Virtual integration.
   const virtualizer = useVirtualizer({
@@ -273,7 +279,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // so under heavy logging the length stops changing while content still does.
   const newestEntryId = entries.length > 0 ? entries[entries.length - 1].id : null;
   useEffect(() => {
-    if (!open || filteredEntries.length === 0) return;
+    if (!open || visibleEntries.length === 0) return;
     if (pinnedToBottom) {
       // Instant follow: smooth scrolling can't keep up with a high log rate and
       // its async animation fights the pin listener.
@@ -284,7 +290,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     // pinnedToBottom / filteredEntries read fresh each render; this effect fires
     // on new content, not on pin-state changes (Jump to latest re-pins itself).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newestEntryId, filteredEntries.length, open]);
+  }, [newestEntryId, visibleEntries.length, open]);
 
   // Re-measure items after expand/collapse so the virtualizer picks up the
   // new row height without waiting for the next ResizeObserver tick.
@@ -329,12 +335,13 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     setLastSeenAt(Date.now());
   }
 
-  const unreadErrorCount = open
-    ? 0
-    : entries.filter((e) => e.level === 'error' && e.timestamp > lastSeenAt).length;
-  const unreadWarningCount = open
-    ? 0
-    : entries.filter((e) => e.level === 'warn' && e.timestamp > lastSeenAt).length;
+  // Friendly hides raw-only lines, so they must not raise a count the reader
+  // can't find in the list.
+  const countUnread = (level: LogEntry['level']): number =>
+    entries.filter((e) => e.level === level && e.timestamp > lastSeenAt && (raw || !isRawOnly(e)))
+      .length;
+  const unreadErrorCount = open ? 0 : countUnread('error');
+  const unreadWarningCount = open ? 0 : countUnread('warn');
 
   return (
     <div
@@ -419,6 +426,33 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
         </button>
         {open && (
           <>
+            <div
+              role="group"
+              className="flex items-center gap-1"
+              aria-label={t('modeLabel')}
+              data-testid="console-mode-switch"
+            >
+              <Button
+                size="xs"
+                variant={raw ? 'outline' : 'default'}
+                onClick={() => setConsoleRawMode(false)}
+                aria-pressed={!raw}
+                data-testid="console-mode-friendly"
+                className="h-6 text-[10px]"
+              >
+                {t('modeFriendly')}
+              </Button>
+              <Button
+                size="xs"
+                variant={raw ? 'default' : 'outline'}
+                onClick={() => setConsoleRawMode(true)}
+                aria-pressed={raw}
+                data-testid="console-mode-raw"
+                className="h-6 text-[10px]"
+              >
+                {t('modeRaw')}
+              </Button>
+            </div>
             <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as ExportFormat)}>
               <SelectTrigger
                 size="sm"
@@ -604,6 +638,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                     >
                       <ConsoleLogRow
                         group={group}
+                        raw={raw}
                         expanded={expandedIds.has(entry.id)}
                         onToggle={() => toggleExpand(entry.id)}
                       />
