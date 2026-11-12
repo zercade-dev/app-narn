@@ -1,0 +1,7 @@
+{
+  "next": "Siguiente",
+  "back": "Atrás",
+  "skip": "Omitir el recorrido",
+  "close": "Cerrar",
+  "stepOf": "Paso {{current}} de {{total}}"
+}

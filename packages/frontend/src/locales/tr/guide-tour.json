@@ -1,0 +1,7 @@
+{
+  "next": "İleri",
+  "back": "Geri",
+  "skip": "Turu atla",
+  "close": "Kapat",
+  "stepOf": "Adım {{current}} / {{total}}"
+}

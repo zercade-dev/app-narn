@@ -1,0 +1,7 @@
+{
+  "next": "Berikutnya",
+  "back": "Kembali",
+  "skip": "Lewati tur",
+  "close": "Tutup",
+  "stepOf": "Langkah {{current}} dari {{total}}"
+}

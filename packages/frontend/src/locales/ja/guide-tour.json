@@ -1,0 +1,7 @@
+{
+  "next": "次へ",
+  "back": "戻る",
+  "skip": "ツアーをスキップ",
+  "close": "閉じる",
+  "stepOf": "ステップ {{current}}/{{total}}"
+}

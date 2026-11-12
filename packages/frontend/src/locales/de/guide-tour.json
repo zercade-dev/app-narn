@@ -1,0 +1,7 @@
+{
+  "next": "Weiter",
+  "back": "Zurück",
+  "skip": "Tour überspringen",
+  "close": "Schließen",
+  "stepOf": "Schritt {{current}} von {{total}}"
+}

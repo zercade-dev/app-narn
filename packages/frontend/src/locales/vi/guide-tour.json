@@ -1,0 +1,7 @@
+{
+  "next": "Tiếp theo",
+  "back": "Quay lại",
+  "skip": "Bỏ qua hướng dẫn",
+  "close": "Đóng",
+  "stepOf": "Bước {{current}}/{{total}}"
+}
