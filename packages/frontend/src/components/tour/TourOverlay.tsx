@@ -1,5 +1,5 @@
 import { Popover } from '@base-ui/react/popover';
-import { useEffect, useId, useReducer, useState, useSyncExternalStore } from 'react';
+import { useEffect, useId, useReducer, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTourAnchor } from '@/hooks/use-tour-anchor';
 import type { GuideFacts, Tour } from '@/lib/tour/types';
@@ -35,18 +35,36 @@ function prefersReducedMotion(): boolean {
   return typeof window.matchMedia === 'function' && window.matchMedia(REDUCED_MOTION).matches;
 }
 
-/** Re-renders when the window resizes or anything scrolls, so the rect read in render stays current. */
-function useLayoutTick(active: boolean): void {
+/**
+ * Re-renders (at most once per frame) when the window resizes, anything
+ * scrolls, or the anchor or page body changes size, so the rect read in render
+ * stays current after layout shifts.
+ */
+function useLayoutTick(anchor: Element | null): void {
   const [, tick] = useReducer((n: number) => n + 1, 0);
   useEffect(() => {
-    if (!active) return;
-    window.addEventListener('resize', tick);
-    window.addEventListener('scroll', tick, true);
-    return () => {
-      window.removeEventListener('resize', tick);
-      window.removeEventListener('scroll', tick, true);
+    if (!anchor) return;
+    let frame = 0;
+    const schedule = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        tick();
+      });
     };
-  }, [active]);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('scroll', schedule, true);
+    const resizeObserver =
+      typeof ResizeObserver === 'function' ? new ResizeObserver(schedule) : null;
+    resizeObserver?.observe(anchor);
+    resizeObserver?.observe(document.body);
+    return () => {
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('scroll', schedule, true);
+      resizeObserver?.disconnect();
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [anchor]);
 }
 
 export function TourOverlay({
@@ -63,7 +81,7 @@ export function TourOverlay({
   const anchor = useTourAnchor(step?.anchor ?? null);
   const reduced = useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false);
   const [calloutNode, setCalloutNode] = useState<HTMLElement | null>(null);
-  useLayoutTick(anchor !== null);
+  useLayoutTick(anchor);
 
   // Open the step's tab or view when it becomes current.
   const navigate = step?.navigate;
@@ -74,28 +92,46 @@ export function TourOverlay({
     if (navigate.tab) setActiveTab(navigate.tab);
   }, [navigate, stepIndex]);
 
-  // Escape leaves the tour.
+  // The latest callbacks, so effects below don't re-run for a new function identity.
+  const onAdvanceRef = useRef(onAdvance);
+  const onExitRef = useRef(onExit);
+  useEffect(() => {
+    onAdvanceRef.current = onAdvance;
+    onExitRef.current = onExit;
+  });
+
+  // Escape leaves the tour, unless it was meant for another dialog (a sheet the
+  // tour asked the person to open) or something already handled it.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !e.defaultPrevented) onExit();
+      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      const otherDialogOpen = Array.from(document.querySelectorAll('[role="dialog"]')).some(
+        (d) => d !== calloutNode,
+      );
+      if (!otherDialogOpen) onExitRef.current();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [onExit]);
+  }, [calloutNode]);
 
   // A `click` step completes when the anchored control is clicked.
   const advanceKind = step?.advance.kind;
   useEffect(() => {
     if (advanceKind !== 'click' || !anchor) return;
-    anchor.addEventListener('click', onAdvance);
-    return () => anchor.removeEventListener('click', onAdvance);
-  }, [advanceKind, anchor, onAdvance]);
+    const onClick = () => onAdvanceRef.current();
+    anchor.addEventListener('click', onClick);
+    return () => anchor.removeEventListener('click', onClick);
+  }, [advanceKind, anchor]);
 
-  // A `state` step completes when the app state says so.
-  const advance = step?.advance;
+  // A `state` step completes when the app state says so: once per (tour, step).
+  const stepKey = `${tour.id}:${stepIndex}`;
+  const stateDone = step?.advance.kind === 'state' && step.advance.done(facts);
+  const advancedKey = useRef<string | null>(null);
   useEffect(() => {
-    if (advance?.kind === 'state' && advance.done(facts)) onAdvance();
-  }, [advance, facts, onAdvance]);
+    if (!stateDone || advancedKey.current === stepKey) return;
+    advancedKey.current = stepKey;
+    onAdvanceRef.current();
+  }, [stateDone, stepKey]);
 
   // Focus moves to the callout on each step.
   useEffect(() => {

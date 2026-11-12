@@ -1,4 +1,4 @@
-import { useCallback, useSyncExternalStore } from 'react';
+import { useCallback, useRef, useSyncExternalStore } from 'react';
 
 function isVisible(el: Element): boolean {
   const r = el.getBoundingClientRect();
@@ -11,32 +11,59 @@ function resolve(id: string | null): Element | null {
   return el && isVisible(el) ? el : null;
 }
 
+interface AnchorCache {
+  id: string | null;
+  el: Element | null;
+  /** Set by a frame-coalesced change; the next snapshot re-queries. */
+  dirty: boolean;
+}
+
 /**
  * The visible element carrying `data-tour="<id>"`, or null when there is none.
- * Re-resolves when the DOM changes (elements added or removed, the attribute
- * set) and on window resize and scroll, so a tour can wait for a control that
- * mounts later.
+ * Re-resolves (at most once per animation frame) when the DOM changes or the
+ * window resizes or scrolls, so a tour can wait for a control that mounts
+ * later. While the current anchor is still connected, nothing is re-queried.
  */
 export function useTourAnchor(id: string | null): Element | null {
+  const cacheRef = useRef<AnchorCache>({ id: null, el: null, dirty: true });
+
   const subscribe = useCallback((onChange: () => void) => {
-    const observer = new MutationObserver(onChange);
+    const cache = cacheRef.current;
+    let frame = 0;
+    const schedule = () => {
+      // A connected anchor stays; only a missing or detached one is looked up again.
+      if (cache.el?.isConnected || frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        cache.dirty = true;
+        onChange();
+      });
+    };
+    const observer = new MutationObserver(schedule);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ['data-tour'],
     });
-    window.addEventListener('resize', onChange);
-    window.addEventListener('scroll', onChange, true);
+    window.addEventListener('resize', schedule);
+    window.addEventListener('scroll', schedule, true);
     return () => {
       observer.disconnect();
-      window.removeEventListener('resize', onChange);
-      window.removeEventListener('scroll', onChange, true);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('scroll', schedule, true);
+      if (frame) cancelAnimationFrame(frame);
     };
   }, []);
-  return useSyncExternalStore(
-    subscribe,
-    () => resolve(id),
-    () => null,
-  );
+
+  const getSnapshot = () => {
+    const cache = cacheRef.current;
+    if (cache.dirty || cache.id !== id) {
+      cache.id = id;
+      cache.el = resolve(id);
+      cache.dirty = false;
+    }
+    return cache.el;
+  };
+  return useSyncExternalStore(subscribe, getSnapshot, () => null);
 }
