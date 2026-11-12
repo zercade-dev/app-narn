@@ -4,13 +4,13 @@ import { toast } from '@/lib/toast';
 import {
   useFirstRunActive,
   useFirstRunStall,
+  useGuideRelevant,
   useGuideDataReady,
   useGuideFacts,
   type GuideFacts,
 } from '../../hooks/use-guide-facts.js';
 import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
 import { useTourAnchor } from '../../hooks/use-tour-anchor.js';
-import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { goToVaultSetup } from '../../lib/auth-redirect.js';
 import {
   applySimpleRule,
@@ -47,19 +47,20 @@ interface FirstRunTourProps {
 
 /**
  * The guided first run, mounted once in the app shell. Shows nothing in
- * Advanced, once skipped or finished, for a collaborator-only person, while
+ * Advanced (unless restarted from the Guide), while an area tour runs, once skipped or finished, for a collaborator-only person, while
  * `suspended`, or on phone widths: there the sidebar is an off-canvas drawer
  * and the string list has no bulk controls, so most anchors are unreachable.
  */
 export function FirstRunTour({ suspended }: FirstRunTourProps) {
   const active = useFirstRunActive();
-  const simple = useUiMode() === 'simple';
-  const finished = useGuideStore((s) => s.firstRunFinished);
+  const relevant = useGuideRelevant();
+  // An area tour is on screen: it comes first, then the guide carries on.
+  const areaTourRunning = useGuideStore((s) => s.activeTourId !== null);
   const facts = useGuideFacts();
   const isMobile = useIsMobile();
   const projectsLoaded = useProjectStore((s) => s.loaded);
   // Also while skipped, so "Continue setup: step N of 5" counts what was imported and translated.
-  const dataReady = useGuideDataReady(simple && !finished && !facts.isCollaboratorOnly);
+  const dataReady = useGuideDataReady(relevant && !facts.isCollaboratorOnly);
 
   // Latched: the vault store's `loading` also covers later actions (unlocking,
   // saving a key), which must not hide the guide again.
@@ -67,7 +68,15 @@ export function FirstRunTour({ suspended }: FirstRunTourProps) {
   const [vaultKnown, setVaultKnown] = useState(vaultStatusSettled);
   if (vaultStatusSettled && !vaultKnown) setVaultKnown(true);
 
-  if (!active || suspended || isMobile || !projectsLoaded || !vaultKnown || !dataReady) {
+  if (
+    !active ||
+    areaTourRunning ||
+    suspended ||
+    isMobile ||
+    !projectsLoaded ||
+    !vaultKnown ||
+    !dataReady
+  ) {
     return null;
   }
   return <ActiveFirstRunTour facts={facts} />;

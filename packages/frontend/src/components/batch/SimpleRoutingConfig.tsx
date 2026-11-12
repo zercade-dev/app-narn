@@ -47,6 +47,7 @@ export function RoutingModeToggle({
       aria-label={t('routing.modeAriaLabel')}
       className="flex items-center gap-1 rounded-lg border p-0.5"
       data-testid="routing-mode-toggle"
+      data-tour="routing-mode"
     >
       <Button
         size="xs"
@@ -117,7 +118,7 @@ export function SimpleRoutingConfig({
   const disabled = selectedModuleId !== null && (disabledModuleIds?.has(selectedModuleId) ?? false);
 
   return (
-    <Card data-testid="routing-rules-config">
+    <Card data-testid="routing-rules-config" data-tour="routing-config">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <CardTitle>{t('routing.title')}</CardTitle>

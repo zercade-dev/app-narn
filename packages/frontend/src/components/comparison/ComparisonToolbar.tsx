@@ -151,6 +151,7 @@ export function ComparisonToolbar({
             size="sm"
             className="w-40 text-xs"
             data-testid="comparison-language-picker"
+            data-tour="compare-target"
           >
             <SelectValue placeholder={t('compare.noTargetLanguages')} />
           </SelectTrigger>
@@ -183,6 +184,7 @@ export function ComparisonToolbar({
             size="sm"
             className="w-40 text-xs"
             data-testid="comparison-reference-picker"
+            data-tour="compare-reference"
           >
             <SelectValue />
           </SelectTrigger>
@@ -308,6 +310,7 @@ export function ComparisonToolbar({
           onClick={() => void onOpenTranslateDialog()}
           disabled={!targetLang || rowsLength === 0}
           data-testid="comparison-bulk-translate"
+          data-tour="compare-translate"
           aria-label={t('compare.translate')}
         >
           <Languages className="w-3.5 h-3.5 mr-1" />

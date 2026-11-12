@@ -375,7 +375,7 @@ export function BatchConfigEditor({
   };
 
   return (
-    <Card data-testid="routing-rules-config">
+    <Card data-testid="routing-rules-config" data-tour="routing-config">
       <CardHeader>
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">

@@ -23,8 +23,14 @@ interface GuideState {
   declinedTours: string[];
   /** Not persisted. */
   activeTourId: string | null;
+  /**
+   * Not persisted. The person restarted the first run from the Guide and
+   * chose to stay in Advanced: it runs there too, until finished or skipped.
+   */
+  firstRunForced: boolean;
   dismissFirstRun: () => void;
-  restartFirstRun: () => void;
+  /** `forced` runs it in Advanced as well (see `firstRunForced`). */
+  restartFirstRun: (forced?: boolean) => void;
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
   markExported: () => void;
@@ -48,8 +54,10 @@ export const useGuideStore = create<GuideState>()(
       completedTours: [],
       declinedTours: [],
       activeTourId: null,
+      firstRunForced: false,
       dismissFirstRun: () => set({ firstRunDismissed: true }),
-      restartFirstRun: () => set({ firstRunDismissed: false, firstRunFinished: false }),
+      restartFirstRun: (forced = false) =>
+        set({ firstRunDismissed: false, firstRunFinished: false, firstRunForced: forced }),
       finishFirstRun: () => set({ firstRunFinished: true }),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
       markExported: () => set({ exportedOnce: true }),

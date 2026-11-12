@@ -105,5 +105,128 @@
     "existingRouting": "Este projeto já tem roteamento configurado, então fica como está. Você pode alterá-lo no Avançado.",
     "cancel": "Cancelar",
     "failed": "Não foi possível configurar {{provider}}: {{message}}"
+  },
+  "offer": {
+    "start": "Mostre para mim",
+    "decline": "Não, obrigado"
+  },
+  "guideTours": {
+    "title": "Tours",
+    "firstRun": "Primeira execução guiada",
+    "area": {
+      "routing": "Roteamento",
+      "glossary": "Glossário",
+      "quality": "Qualidade",
+      "compare": "Comparação",
+      "review-translation-ai": "Revisão da tradução por IA"
+    },
+    "confirm": {
+      "title": "Mudar para o Simples na configuração guiada?",
+      "body": "A configuração guiada foi feita para o modo Simples, que oculta as abas avançadas. Você pode voltar quando quiser pela barra superior.",
+      "switch": "Mudar para o Simples",
+      "stay": "Ficar no Avançado"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "Primeira vez no roteamento?",
+        "body": "Uma olhada de 30 segundos em como o NARN decide quem traduz o quê."
+      },
+      "config": {
+        "title": "O roteamento decide quem traduz",
+        "what": "Aqui você escolhe qual provedor de tradução cuida dos seus textos.",
+        "why": "Use para mandar alguns idiomas ou tipos de texto a outro provedor, ou para manter tudo em um só."
+      },
+      "mode": {
+        "title": "Regras simples ou avançadas",
+        "what": "Aqui você alterna entre um provedor para tudo e uma lista de regras.",
+        "why": "Comece pelo simples. Passe para as regras quando quiser outro provedor para um idioma, uma categoria ou um tom."
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "Primeira vez nos glossários?",
+        "body": "Uma olhada rápida em como manter nomes e termos-chave consistentes."
+      },
+      "list": {
+        "title": "Seus glossários",
+        "what": "Cada glossário é uma lista de termos com a tradução que você quer para cada um.",
+        "why": "Assim, termos como nomes de personagens ou gírias do jogo saem sempre do mesmo jeito."
+      },
+      "create": {
+        "title": "Criar um glossário",
+        "what": "Crie um glossário vazio e adicione seus próprios termos.",
+        "why": "Faça isso quando você já souber quais palavras nunca devem ser traduzidas de outro jeito."
+      },
+      "generate": {
+        "title": "Deixar a IA sugerir termos",
+        "what": "Peça a um provedor de IA para achar possíveis termos nos seus textos.",
+        "why": "Você não precisa ler o arquivo inteiro para achá-los. Você revisa e aceita o que for sugerido."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "Primeira vez na qualidade?",
+        "body": "Uma olhada rápida em como o NARN verifica suas traduções."
+      },
+      "title": {
+        "title": "Verificações de qualidade automáticas",
+        "what": "Cada tradução é checada com regras como tags ausentes, marcadores alterados e limites de tamanho.",
+        "why": "Problemas que quebrariam seu jogo aparecem aqui, em vez de só nos testes de jogo."
+      },
+      "overview": {
+        "title": "Sua taxa de aprovação",
+        "what": "Mostra quantas verificações passaram e quantas falharam no projeto todo.",
+        "why": "Um jeito rápido de saber se as traduções estão prontas ou ainda precisam de trabalho."
+      },
+      "issues": {
+        "title": "Os problemas mais comuns",
+        "what": "Os tipos de problema que mais falham ficam listados aqui.",
+        "why": "Corrigir primeiro o mais comum elimina o maior número de falhas."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "Primeira vez na comparação?",
+        "body": "Uma olhada rápida em como revisar traduções lado a lado."
+      },
+      "target": {
+        "title": "Escolha o idioma",
+        "what": "Escolha qual idioma ver ao lado do texto de origem.",
+        "why": "Revise um idioma por vez, linha por linha, e edite conforme avança."
+      },
+      "reference": {
+        "title": "Adicione um idioma de referência",
+        "what": "Mostre um segundo idioma ao lado, como um que você lê bem.",
+        "why": "Útil quando você não lê o idioma de destino: dá para conferir o sentido com um idioma que você conhece."
+      },
+      "translate": {
+        "title": "Traduzir a partir daqui",
+        "what": "Traduza as linhas selecionadas ou todas as que combinam com seus filtros.",
+        "why": "Prático para preencher lacunas que você notar na revisão, sem sair desta aba."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "Primeira vez na revisão por IA?",
+        "body": "Uma olhada rápida em como uma IA confere suas traduções."
+      },
+      "intro": {
+        "title": "Uma segunda opinião sobre as traduções",
+        "what": "Um provedor de IA lê suas traduções ao lado do original e dá uma nota.",
+        "why": "Ela acha erros e frases estranhas que as verificações automáticas não pegam, para você corrigir antes de lançar."
+      },
+      "start": {
+        "title": "Revisar a última execução",
+        "what": "Inicie a revisão da execução de tradução mais recente.",
+        "why": "Revisar só o que foi traduzido há pouco mantém o custo e a espera baixos."
+      },
+      "all": {
+        "title": "Revisar tudo",
+        "what": "Revise todas as traduções do projeto, não só a última execução.",
+        "why": "Use antes de um lançamento ou depois de mudar o glossário ou o roteamento."
+      }
+    }
   }
 }

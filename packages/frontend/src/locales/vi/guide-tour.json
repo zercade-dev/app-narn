@@ -105,5 +105,128 @@
     "existingRouting": "Dự án này đã có điều phối được thiết lập nên sẽ được giữ nguyên. Bạn có thể thay đổi trong Nâng cao.",
     "cancel": "Hủy",
     "failed": "Không thể thiết lập {{provider}}: {{message}}"
+  },
+  "offer": {
+    "start": "Cho tôi xem",
+    "decline": "Không, cảm ơn"
+  },
+  "guideTours": {
+    "title": "Hướng dẫn",
+    "firstRun": "Lần chạy đầu có hướng dẫn",
+    "area": {
+      "routing": "Điều phối",
+      "glossary": "Bảng thuật ngữ",
+      "quality": "Chất lượng",
+      "compare": "So sánh",
+      "review-translation-ai": "Rà soát bản dịch bằng AI"
+    },
+    "confirm": {
+      "title": "Chuyển sang chế độ Đơn giản để thiết lập có hướng dẫn?",
+      "body": "Phần thiết lập có hướng dẫn được thiết kế cho chế độ Đơn giản, vốn ẩn các tab nâng cao. Bạn có thể chuyển lại bất cứ lúc nào từ thanh trên cùng.",
+      "switch": "Chuyển sang Đơn giản",
+      "stay": "Giữ chế độ Nâng cao"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "Lần đầu dùng Điều phối?",
+        "body": "Xem nhanh trong 30 giây cách NARN chọn ai dịch nội dung nào."
+      },
+      "config": {
+        "title": "Điều phối quyết định ai sẽ dịch",
+        "what": "Tại đây bạn chọn nhà cung cấp dịch thuật xử lý các chuỗi văn bản của mình.",
+        "why": "Dùng để chuyển một số ngôn ngữ hoặc loại văn bản sang nhà cung cấp khác, hoặc giữ mọi thứ ở một nhà cung cấp duy nhất."
+      },
+      "mode": {
+        "title": "Quy tắc đơn giản hoặc nâng cao",
+        "what": "Tại đây bạn chuyển giữa một nhà cung cấp cho mọi thứ và một danh sách quy tắc.",
+        "why": "Hãy bắt đầu đơn giản. Chuyển sang quy tắc khi bạn muốn dùng nhà cung cấp khác cho một ngôn ngữ, một danh mục hoặc một sắc thái."
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "Lần đầu dùng Bảng thuật ngữ?",
+        "body": "Xem nhanh cách giữ tên và thuật ngữ chính luôn nhất quán."
+      },
+      "list": {
+        "title": "Các bảng thuật ngữ của bạn",
+        "what": "Mỗi bảng thuật ngữ là một danh sách các thuật ngữ cùng bản dịch bạn muốn cho từng thuật ngữ.",
+        "why": "Nhờ vậy, những thuật ngữ như tên nhân vật hay biệt ngữ trong game luôn được dịch giống nhau."
+      },
+      "create": {
+        "title": "Tạo bảng thuật ngữ",
+        "what": "Tạo một bảng thuật ngữ trống rồi thêm các thuật ngữ của riêng bạn.",
+        "why": "Hãy làm vậy khi bạn đã biết những từ không bao giờ được dịch khác đi."
+      },
+      "generate": {
+        "title": "Để AI gợi ý thuật ngữ",
+        "what": "Nhờ một nhà cung cấp AI tìm các thuật ngữ có khả năng trong văn bản của bạn.",
+        "why": "Bạn không phải đọc cả tệp để tìm chúng. Bạn xem lại và chấp nhận những gì được đề xuất."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "Lần đầu dùng Chất lượng?",
+        "body": "Xem nhanh cách NARN kiểm tra bản dịch của bạn."
+      },
+      "title": {
+        "title": "Kiểm tra chất lượng tự động",
+        "what": "Mọi bản dịch đều được kiểm tra theo các quy tắc như thiếu thẻ, trình giữ chỗ bị đổi và giới hạn độ dài.",
+        "why": "Những lỗi có thể làm hỏng game của bạn hiện ở đây, thay vì đợi đến lúc chơi thử."
+      },
+      "overview": {
+        "title": "Tỷ lệ đạt của bạn",
+        "what": "Phần này cho biết có bao nhiêu lượt kiểm tra đạt và bao nhiêu lượt không đạt trong toàn bộ dự án.",
+        "why": "Cách nhanh để biết bản dịch đã sẵn sàng hay vẫn cần chỉnh sửa."
+      },
+      "issues": {
+        "title": "Các vấn đề phổ biến nhất",
+        "what": "Những loại vấn đề không đạt nhiều nhất được liệt kê ở đây.",
+        "why": "Sửa vấn đề phổ biến nhất trước sẽ loại bỏ được nhiều lỗi nhất."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "Lần đầu dùng So sánh?",
+        "body": "Xem nhanh cách rà soát các bản dịch cạnh nhau."
+      },
+      "target": {
+        "title": "Chọn ngôn ngữ",
+        "what": "Chọn ngôn ngữ hiển thị bên cạnh văn bản nguồn.",
+        "why": "Rà soát từng ngôn ngữ một, từng dòng một, và chỉnh sửa ngay khi đang xem."
+      },
+      "reference": {
+        "title": "Thêm ngôn ngữ tham chiếu",
+        "what": "Hiển thị thêm ngôn ngữ thứ hai bên cạnh, chẳng hạn ngôn ngữ bạn đọc tốt.",
+        "why": "Hữu ích khi bạn không đọc được ngôn ngữ đích: bạn có thể đối chiếu ý nghĩa với một ngôn ngữ bạn biết."
+      },
+      "translate": {
+        "title": "Dịch từ đây",
+        "what": "Dịch các hàng bạn đã chọn, hoặc tất cả các hàng khớp với bộ lọc của bạn.",
+        "why": "Tiện để lấp những chỗ trống bạn phát hiện khi rà soát mà không cần rời tab này."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "Lần đầu dùng rà soát bằng AI?",
+        "body": "Xem nhanh cách nhờ AI kiểm tra bản dịch của bạn."
+      },
+      "intro": {
+        "title": "Ý kiến thứ hai về bản dịch",
+        "what": "Một nhà cung cấp AI đọc bản dịch của bạn cạnh bản gốc rồi chấm điểm.",
+        "why": "AI tìm ra lỗi và cách diễn đạt gượng mà kiểm tra tự động không phát hiện được, để bạn sửa trước khi phát hành."
+      },
+      "start": {
+        "title": "Rà soát lượt chạy gần nhất",
+        "what": "Bắt đầu rà soát lượt chạy dịch gần đây nhất.",
+        "why": "Chỉ rà soát phần vừa dịch giúp chi phí và thời gian chờ ở mức thấp."
+      },
+      "all": {
+        "title": "Rà soát tất cả",
+        "what": "Rà soát mọi bản dịch trong dự án, không chỉ lượt chạy mới nhất.",
+        "why": "Dùng trước khi phát hành, hoặc sau khi bạn đổi bảng thuật ngữ hoặc điều phối."
+      }
+    }
   }
 }

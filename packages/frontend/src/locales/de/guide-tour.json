@@ -105,5 +105,128 @@
     "existingRouting": "Für dieses Projekt ist bereits Routing eingerichtet, es bleibt daher unverändert. Ändern kannst du es unter „Erweitert“.",
     "cancel": "Abbrechen",
     "failed": "{{provider}} konnte nicht eingerichtet werden: {{message}}"
+  },
+  "offer": {
+    "start": "Zeig es mir",
+    "decline": "Nein, danke"
+  },
+  "guideTours": {
+    "title": "Touren",
+    "firstRun": "Geführter Erststart",
+    "area": {
+      "routing": "Routing",
+      "glossary": "Glossar",
+      "quality": "Qualität",
+      "compare": "Vergleich",
+      "review-translation-ai": "Übersetzungs-KI-Review"
+    },
+    "confirm": {
+      "title": "Für die geführte Einrichtung zu „Einfach“ wechseln?",
+      "body": "Die geführte Einrichtung ist für den Modus „Einfach“ gemacht, der die erweiterten Tabs ausblendet. Du kannst jederzeit in der oberen Leiste zurückwechseln.",
+      "switch": "Zu „Einfach“ wechseln",
+      "stay": "In „Erweitert“ bleiben"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "Neu beim Routing?",
+        "body": "Ein 30-Sekunden-Überblick, wie NARN entscheidet, wer was übersetzt."
+      },
+      "config": {
+        "title": "Das Routing bestimmt, wer übersetzt",
+        "what": "Hier legst du fest, welcher Übersetzungsanbieter deine Texte übernimmt.",
+        "why": "So kannst du einzelne Sprachen oder Textarten an einen anderen Anbieter schicken oder für alles bei einem bleiben."
+      },
+      "mode": {
+        "title": "Einfache oder erweiterte Regeln",
+        "what": "Hier wechselst du zwischen einem Anbieter für alles und einer Liste von Regeln.",
+        "why": "Fang einfach an. Wechsle zu Regeln, wenn du für eine Sprache, eine Kategorie oder einen Ton einen anderen Anbieter willst."
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "Neu bei Glossaren?",
+        "body": "Ein kurzer Überblick, wie Namen und Fachbegriffe einheitlich bleiben."
+      },
+      "list": {
+        "title": "Deine Glossare",
+        "what": "Jedes Glossar ist eine Liste von Begriffen mit der Übersetzung, die du für jeden willst.",
+        "why": "So werden Begriffe wie Figurennamen oder Spielfachsprache jedes Mal gleich übersetzt."
+      },
+      "create": {
+        "title": "Ein Glossar anlegen",
+        "what": "Lege ein leeres Glossar an und füge eigene Begriffe hinzu.",
+        "why": "Nutze das, wenn du schon weißt, welche Wörter nie unterschiedlich übersetzt werden dürfen."
+      },
+      "generate": {
+        "title": "Begriffe von der KI vorschlagen lassen",
+        "what": "Bitte einen KI-Anbieter, mögliche Begriffe in deinen Texten zu finden.",
+        "why": "Du musst nicht die ganze Datei lesen, um sie zu finden. Du prüfst und übernimmst, was vorgeschlagen wird."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "Neu bei der Qualität?",
+        "body": "Ein kurzer Überblick, wie NARN deine Übersetzungen prüft."
+      },
+      "title": {
+        "title": "Automatische Qualitätsprüfungen",
+        "what": "Jede Übersetzung wird gegen Regeln geprüft, etwa fehlende Tags, geänderte Platzhalter und Längenlimits.",
+        "why": "Probleme, die dein Spiel kaputt machen würden, zeigen sich hier statt erst beim Testspielen."
+      },
+      "overview": {
+        "title": "Deine Bestehensquote",
+        "what": "Hier siehst du, wie viele Prüfungen im ganzen Projekt bestanden und wie viele nicht bestanden wurden.",
+        "why": "So erkennst du schnell, ob die Übersetzungen fertig sind oder noch Arbeit brauchen."
+      },
+      "issues": {
+        "title": "Die häufigsten Probleme",
+        "what": "Hier stehen die Problemarten, die am häufigsten durchfallen.",
+        "why": "Wenn du zuerst das häufigste behebst, verschwinden die meisten Fehler."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "Neu im Vergleich?",
+        "body": "Ein kurzer Überblick, wie du Übersetzungen nebeneinander prüfst."
+      },
+      "target": {
+        "title": "Sprache wählen",
+        "what": "Wähle die Sprache, die neben dem Quelltext angezeigt wird.",
+        "why": "Prüfe eine Sprache nach der anderen, Zeile für Zeile, und bearbeite direkt."
+      },
+      "reference": {
+        "title": "Referenzsprache hinzufügen",
+        "what": "Zeige daneben eine zweite Sprache, zum Beispiel eine, die du gut liest.",
+        "why": "Praktisch, wenn du die Zielsprache nicht lesen kannst: Du prüfst die Bedeutung an einer Sprache, die du kennst."
+      },
+      "translate": {
+        "title": "Von hier aus übersetzen",
+        "what": "Übersetze die ausgewählten Zeilen oder alle Zeilen, die zu deinen Filtern passen.",
+        "why": "Praktisch, um Lücken zu füllen, die dir beim Prüfen auffallen, ohne diesen Tab zu verlassen."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "Neu bei der KI-Prüfung?",
+        "body": "Ein kurzer Überblick, wie eine KI deine Übersetzungen prüft."
+      },
+      "intro": {
+        "title": "Eine zweite Meinung zu Übersetzungen",
+        "what": "Ein KI-Anbieter liest deine Übersetzungen neben dem Quelltext und bewertet sie.",
+        "why": "Er findet Fehler und holprige Formulierungen, die automatische Prüfungen nicht erkennen, sodass du sie vor der Veröffentlichung beheben kannst."
+      },
+      "start": {
+        "title": "Den letzten Lauf prüfen",
+        "what": "Starte eine Prüfung des letzten Übersetzungslaufs.",
+        "why": "Wenn du nur das Neueste prüfst, bleiben Kosten und Wartezeit gering."
+      },
+      "all": {
+        "title": "Alles prüfen",
+        "what": "Prüfe alle Übersetzungen im Projekt, nicht nur den letzten Lauf.",
+        "why": "Nutze das vor einem Release oder nachdem du Glossar oder Routing geändert hast."
+      }
+    }
   }
 }

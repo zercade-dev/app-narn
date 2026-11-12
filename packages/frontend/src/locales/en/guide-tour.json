@@ -105,5 +105,128 @@
     "existingRouting": "This project already has routing set up, so it stays as it is. You can change it in Advanced.",
     "cancel": "Cancel",
     "failed": "Could not set up {{provider}}: {{message}}"
+  },
+  "offer": {
+    "start": "Show me",
+    "decline": "No thanks"
+  },
+  "guideTours": {
+    "title": "Tours",
+    "firstRun": "Guided first run",
+    "area": {
+      "routing": "Routing",
+      "glossary": "Glossary",
+      "quality": "Quality",
+      "compare": "Compare",
+      "review-translation-ai": "AI review of translations"
+    },
+    "confirm": {
+      "title": "Switch to Simple for the guided setup?",
+      "body": "The guided setup is built for Simple mode, which hides the advanced tabs. You can switch back at any time from the top bar.",
+      "switch": "Switch to Simple",
+      "stay": "Stay in Advanced"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "New to Routing?",
+        "body": "A 30-second look at how NARN picks who translates what."
+      },
+      "config": {
+        "title": "Routing picks who translates",
+        "what": "This is where you choose which translation provider handles your strings.",
+        "why": "Use it to send some languages or kinds of text to a different provider, or to keep one provider for everything."
+      },
+      "mode": {
+        "title": "Simple or advanced rules",
+        "what": "Switch here between one provider for everything and a list of rules.",
+        "why": "Start simple. Move to rules when you want a different provider for a language, a category or a tone."
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "New to Glossaries?",
+        "body": "A short look at keeping names and key terms consistent."
+      },
+      "list": {
+        "title": "Your glossaries",
+        "what": "Each glossary is a list of terms with the translation you want for each.",
+        "why": "Terms such as character names or game jargon then come out the same way every time."
+      },
+      "create": {
+        "title": "Start a glossary",
+        "what": "Create an empty glossary and add your own terms to it.",
+        "why": "Do this when you already know the words that must never be translated differently."
+      },
+      "generate": {
+        "title": "Let AI suggest terms",
+        "what": "Ask an AI provider to find likely terms in your strings.",
+        "why": "It saves you reading the whole file to find them. You review and accept what it proposes."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "New to Quality?",
+        "body": "A short look at how NARN checks your translations."
+      },
+      "title": {
+        "title": "Automatic quality checks",
+        "what": "Every translation is checked against rules such as missing tags, changed placeholders and length limits.",
+        "why": "Problems that would break your game show up here instead of in play-testing."
+      },
+      "overview": {
+        "title": "Your pass rate",
+        "what": "This shows how many checks passed and how many failed across the project.",
+        "why": "A quick way to tell whether the translations are ready or still need work."
+      },
+      "issues": {
+        "title": "The most common problems",
+        "what": "The kinds of problem that fail most often are listed here.",
+        "why": "Fixing the most common one first clears the most failures."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "New to Compare?",
+        "body": "A short look at reviewing translations side by side."
+      },
+      "target": {
+        "title": "Pick the language",
+        "what": "Choose which language to look at next to the source text.",
+        "why": "Review one language at a time, line by line, and edit as you go."
+      },
+      "reference": {
+        "title": "Add a reference language",
+        "what": "Show a second language alongside, such as one you read well.",
+        "why": "Useful when you cannot read the target language: you can check the meaning against a language you know."
+      },
+      "translate": {
+        "title": "Translate from here",
+        "what": "Translate the rows you selected, or all rows that match your filters.",
+        "why": "Handy for filling gaps you spot while reviewing, without leaving this tab."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "New to AI review?",
+        "body": "A short look at having an AI check your translations."
+      },
+      "intro": {
+        "title": "A second opinion on translations",
+        "what": "An AI provider reads your translations next to the source and scores them.",
+        "why": "It finds mistakes and awkward wording that automatic checks cannot, so you can fix them before shipping."
+      },
+      "start": {
+        "title": "Review the last run",
+        "what": "Start a review of the most recent translation run.",
+        "why": "Reviewing just what was translated lately keeps the cost and the wait small."
+      },
+      "all": {
+        "title": "Review everything",
+        "what": "Review all translations in the project, not only the latest run.",
+        "why": "Use it before a release, or after you changed the glossary or routing."
+      }
+    }
   }
 }

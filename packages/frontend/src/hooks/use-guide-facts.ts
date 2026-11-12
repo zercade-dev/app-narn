@@ -21,11 +21,15 @@ function activeProjectIdOf(s: {
   return s.projects.some((p) => p.id === s.activeProjectId) ? s.activeProjectId : null;
 }
 
-/** Whether the guided first run can still matter: Simple mode and not finished. */
-function useGuideRelevant(): boolean {
+/**
+ * Whether the guided first run can still matter: Simple mode (or a restart
+ * from the Guide that stays in Advanced) and not finished.
+ */
+export function useGuideRelevant(): boolean {
   const simple = useUiMode() === 'simple';
+  const forced = useGuideStore((s) => s.firstRunForced);
   const finished = useGuideStore((s) => s.firstRunFinished);
-  return simple && !finished;
+  return (simple || forced) && !finished;
 }
 
 /** A translation run of `projectId` that ended having translated something. */

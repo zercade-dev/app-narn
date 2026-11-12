@@ -90,7 +90,7 @@ export function GlossarySidebar({
   }, [renamingGlossaryId, renameDraft, projectId, loadGlossaries, reportError, t]);
 
   return (
-    <div className="w-52 shrink-0 flex flex-col gap-2">
+    <div className="w-52 shrink-0 flex flex-col gap-2" data-tour="glossary-list">
       <div className="mb-1">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
           {t('glossaries')}
@@ -114,6 +114,7 @@ export function GlossarySidebar({
             className="w-full justify-start"
             onClick={() => setCreatingGlossary(true)}
             data-testid="glossary-new-btn"
+            data-tour="glossary-create"
             title={t('newGlossary')}
           >
             <Plus className="w-3.5 h-3.5 mr-1 shrink-0" />
@@ -125,6 +126,7 @@ export function GlossarySidebar({
             className="w-full justify-start"
             onClick={onGenerate}
             data-testid="glossary-generate-btn"
+            data-tour="glossary-generate"
             title={t('generateGlossariesBtn')}
           >
             <Sparkles className="w-3.5 h-3.5 mr-1 shrink-0" />
