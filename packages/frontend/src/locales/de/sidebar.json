@@ -27,6 +27,11 @@
   "createFailed": "Projekt konnte nicht erstellt werden: {{message}}",
   "activateFailed": "Zum Projekt konnte nicht gewechselt werden: {{message}}",
   "changeProjectIcon": "Projektsymbol ändern",
+  "providerKeys": "Anbieter-Schlüssel",
+  "advancedOnlyTitle": "Im erweiterten Modus verfügbar",
+  "advancedOnlyBody": "{{place}} gehört zum erweiterten Modus. Zu „Erweitert“ wechseln, um es zu öffnen?",
+  "advancedOnlySwitch": "Zu „Erweitert“ wechseln",
+  "advancedOnlyCancel": "Nicht jetzt",
   "groups": {
     "project": "Einrichtung",
     "translate": "Übersetzen",

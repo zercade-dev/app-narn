@@ -27,6 +27,11 @@
   "createFailed": "Không tạo được dự án: {{message}}",
   "activateFailed": "Không chuyển được dự án: {{message}}",
   "changeProjectIcon": "Đổi biểu tượng dự án",
+  "providerKeys": "Khóa nhà cung cấp",
+  "advancedOnlyTitle": "Có trong chế độ Nâng cao",
+  "advancedOnlyBody": "{{place}} thuộc chế độ Nâng cao. Chuyển sang Nâng cao để mở?",
+  "advancedOnlySwitch": "Chuyển sang Nâng cao",
+  "advancedOnlyCancel": "Để sau",
   "groups": {
     "project": "Thiết lập",
     "translate": "Dịch",

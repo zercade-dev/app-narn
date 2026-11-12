@@ -27,6 +27,11 @@
   "createFailed": "無法建立專案：{{message}}",
   "activateFailed": "無法切換專案：{{message}}",
   "changeProjectIcon": "變更專案圖示",
+  "providerKeys": "供應商金鑰",
+  "advancedOnlyTitle": "進階模式中可用",
+  "advancedOnlyBody": "「{{place}}」屬於進階模式。要切換到進階模式來開啟嗎？",
+  "advancedOnlySwitch": "切換到進階模式",
+  "advancedOnlyCancel": "暫不",
   "groups": {
     "project": "專案設定",
     "translate": "翻譯",

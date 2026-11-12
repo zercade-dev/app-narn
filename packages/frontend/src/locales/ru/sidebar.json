@@ -27,6 +27,11 @@
   "createFailed": "Не удалось создать проект: {{message}}",
   "activateFailed": "Не удалось переключить проект: {{message}}",
   "changeProjectIcon": "Изменить значок проекта",
+  "providerKeys": "Ключи провайдеров",
+  "advancedOnlyTitle": "Доступно в расширенном режиме",
+  "advancedOnlyBody": "{{place}} находится в расширенном режиме. Переключиться на «Расширенный», чтобы открыть?",
+  "advancedOnlySwitch": "Переключиться на «Расширенный»",
+  "advancedOnlyCancel": "Не сейчас",
   "groups": {
     "project": "Настройка",
     "translate": "Перевод",

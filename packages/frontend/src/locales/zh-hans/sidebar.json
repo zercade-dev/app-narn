@@ -27,6 +27,11 @@
   "createFailed": "创建项目失败：{{message}}",
   "activateFailed": "切换项目失败：{{message}}",
   "changeProjectIcon": "更改项目图标",
+  "providerKeys": "提供商密钥",
+  "advancedOnlyTitle": "高级模式中可用",
+  "advancedOnlyBody": "“{{place}}”属于高级模式。切换到高级模式来打开吗？",
+  "advancedOnlySwitch": "切换到高级模式",
+  "advancedOnlyCancel": "暂不",
   "groups": {
     "project": "项目准备",
     "translate": "翻译",

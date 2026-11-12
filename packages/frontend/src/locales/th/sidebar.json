@@ -27,6 +27,11 @@
   "createFailed": "สร้างโปรเจกต์ไม่สำเร็จ: {{message}}",
   "activateFailed": "สลับโปรเจกต์ไม่สำเร็จ: {{message}}",
   "changeProjectIcon": "เปลี่ยนไอคอนโปรเจกต์",
+  "providerKeys": "คีย์ผู้ให้บริการ",
+  "advancedOnlyTitle": "ใช้ได้ในโหมดขั้นสูง",
+  "advancedOnlyBody": "{{place}}อยู่ในโหมดขั้นสูง สลับไปโหมดขั้นสูงเพื่อเปิดหรือไม่",
+  "advancedOnlySwitch": "สลับไปโหมดขั้นสูง",
+  "advancedOnlyCancel": "ไว้ทีหลัง",
   "groups": {
     "project": "เริ่มต้นใช้งาน",
     "translate": "แปล",

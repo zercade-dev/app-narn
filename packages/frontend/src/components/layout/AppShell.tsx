@@ -4,6 +4,7 @@ import { RestartBanners } from './RestartBanners.js';
 import { SlotRibbon } from './SlotRibbon.js';
 import { Sidebar } from './Sidebar.js';
 import { ModeSwitch } from './ModeSwitch.js';
+import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { ConsolePanel } from './ConsolePanel.js';
 import { ConfigTab } from '../config/ConfigTab.js';
 import { DataTab } from '../config/DataTab.js';
@@ -32,7 +33,8 @@ import { useNotificationStore } from '@/stores/notification-store.js';
 import { useProjectStore, accessFor } from '../../stores/project-store.js';
 import { useViewStore } from '../../stores/view-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
-import { availableTabs, firstAvailableTab } from '../../lib/tab-gating.js';
+import { firstVisibleTab, isViewVisible, visibleTabs } from '../../lib/mode-gating.js';
+import { AdvancedOnlyDialog } from './AdvancedOnlyDialog.js';
 import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
 import { isShellViewMobileOk, isTabMobileOk } from '../../lib/mobile-gating.js';
 import { DesktopOnlyNotice } from '../common/DesktopOnlyNotice.js';
@@ -41,7 +43,11 @@ import { useRunStore } from '../../stores/run-store.js';
 import { useVaultStatus } from '../../hooks/useVaultStatus.js';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useModules } from '../../hooks/use-modules.js';
-import { VAULT_LOCKED_EVENT, type VaultLockedDetail } from '../../lib/vault-events.js';
+import {
+  VAULT_EDITOR_OPEN_EVENT,
+  VAULT_LOCKED_EVENT,
+  type VaultLockedDetail,
+} from '../../lib/vault-events.js';
 import { toast } from '@/lib/toast';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -333,6 +339,7 @@ export function AppShell() {
   >([]);
   const isMobile = useIsMobile();
   const view = useViewStore((s) => s.view);
+  const uiMode = useUiMode();
   const activeTab = useViewStore((s) => s.activeTab);
   const setActiveTab = useViewStore((s) => s.setActiveTab);
   const activeProject = useProjectStore((s) => s.projects.find((p) => p.id === s.activeProjectId));
@@ -367,11 +374,27 @@ export function AppShell() {
   // map populating after an optimistic project switch — fall back to the
   // first tab that IS available rather than showing a gated/blank panel.
   useEffect(() => {
-    const allowed = availableTabs(activeAccess, cloudManaged);
+    const allowed = visibleTabs(activeAccess, cloudManaged, uiMode);
     if (!allowed.includes(activeTab)) {
-      setActiveTab(firstAvailableTab(activeAccess, cloudManaged));
+      setActiveTab(firstVisibleTab(activeAccess, cloudManaged, uiMode));
     }
-  }, [activeProjectId, activeAccess, cloudManaged, activeTab, setActiveTab]);
+  }, [activeProjectId, activeAccess, cloudManaged, activeTab, setActiveTab, uiMode]);
+
+  // Switching to Simple while on a view it hides falls back to the project
+  // view quietly (no offer: the user just chose Simple).
+  useEffect(() => {
+    if (!isViewVisible(view, uiMode)) useViewStore.getState().setView('project');
+  }, [view, uiMode]);
+
+  // Simple mode's "Provider keys" item asks for the vault key editor.
+  useEffect(() => {
+    const open = () => {
+      setVaultFocusKey(undefined);
+      setVaultEditorOpen(true);
+    };
+    globalThis.addEventListener(VAULT_EDITOR_OPEN_EVENT, open);
+    return () => globalThis.removeEventListener(VAULT_EDITOR_OPEN_EVENT, open);
+  }, []);
 
   // First-login/first-enrollment UX: cloud mode's device-enrollment status
   // (`setupRequired`) used to trigger an immediate hard redirect to /vault
@@ -811,6 +834,7 @@ export function AppShell() {
             onOpenChange={setVaultEditorOpen}
             focusKey={vaultFocusKey}
           />
+          <AdvancedOnlyDialog />
           <WebSearchDialog />
           <Toaster
             position="bottom-right"

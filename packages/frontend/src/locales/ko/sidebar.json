@@ -27,6 +27,11 @@
   "createFailed": "프로젝트를 만들지 못했어요: {{message}}",
   "activateFailed": "프로젝트를 전환하지 못했어요: {{message}}",
   "changeProjectIcon": "프로젝트 아이콘 변경",
+  "providerKeys": "공급자 키",
+  "advancedOnlyTitle": "고급 모드에서 사용할 수 있습니다",
+  "advancedOnlyBody": "{{place}}은(는) 고급 모드에 있습니다. 고급 모드로 전환해서 열까요?",
+  "advancedOnlySwitch": "고급 모드로 전환",
+  "advancedOnlyCancel": "나중에",
   "groups": {
     "project": "준비",
     "translate": "번역 작업",

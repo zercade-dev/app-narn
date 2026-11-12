@@ -13,7 +13,10 @@ import { useOnboardingStore } from '../../stores/onboarding-store.js';
 import { VaultUnlockDialog } from '../vault/VaultUnlockDialog.js';
 import { ConfirmSheet } from '../ui/confirm-sheet';
 import { apiRequest } from '../../hooks/use-api.js';
-import { availableTabs } from '../../lib/tab-gating.js';
+import { visibleTabs as visibleTabsFor } from '../../lib/mode-gating.js';
+import { useUiMode } from '../../hooks/use-ui-mode.js';
+import { VAULT_EDITOR_OPEN_EVENT } from '../../lib/vault-events.js';
+import { goToVaultSetup } from '../../lib/auth-redirect.js';
 import { toast } from '@/lib/toast';
 import {
   Sidebar as UISidebar,
@@ -50,6 +53,7 @@ import {
   ClipboardCheck,
   Columns2,
   Database,
+  KeyRound,
   FileSearch,
   FileSpreadsheet,
   Gauge,
@@ -371,7 +375,9 @@ export function Sidebar() {
   const sharedProjects = cloudManaged
     ? filteredProjects.filter((p) => accessFor({ access }, p.id).role === 'collaborator')
     : [];
-  const allowedTabs = availableTabs(accessFor({ access }, activeProjectId), cloudManaged);
+  const uiMode = useUiMode();
+  const simple = uiMode === 'simple';
+  const allowedTabs = visibleTabsFor(accessFor({ access }, activeProjectId), cloudManaged, uiMode);
 
   const handleConfirmLeave = async () => {
     const target = leaveTarget;
@@ -707,34 +713,53 @@ export function Sidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  data-testid="sidebar-global-config"
-                  isActive={view === 'global-config'}
-                  onClick={() => {
-                    setView('global-config');
-                    closeMobileNav();
-                  }}
-                  tooltip={t('globalConfig')}
-                >
-                  <Settings className="size-4 shrink-0" />
-                  <span className="truncate">{t('globalConfig')}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  data-testid="sidebar-translation-memory"
-                  isActive={view === 'translation-memory'}
-                  onClick={() => {
-                    setView('translation-memory');
-                    closeMobileNav();
-                  }}
-                  tooltip={t('translationMemory')}
-                >
-                  <Database className="size-4 shrink-0" />
-                  <span className="truncate">{t('translationMemory')}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {simple ? (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    data-testid="sidebar-provider-keys"
+                    onClick={() => {
+                      if (cloudManaged) goToVaultSetup();
+                      else globalThis.dispatchEvent(new Event(VAULT_EDITOR_OPEN_EVENT));
+                      closeMobileNav();
+                    }}
+                    tooltip={t('providerKeys')}
+                  >
+                    <KeyRound className="size-4 shrink-0" />
+                    <span className="truncate">{t('providerKeys')}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ) : (
+                <>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      data-testid="sidebar-global-config"
+                      isActive={view === 'global-config'}
+                      onClick={() => {
+                        setView('global-config');
+                        closeMobileNav();
+                      }}
+                      tooltip={t('globalConfig')}
+                    >
+                      <Settings className="size-4 shrink-0" />
+                      <span className="truncate">{t('globalConfig')}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      data-testid="sidebar-translation-memory"
+                      isActive={view === 'translation-memory'}
+                      onClick={() => {
+                        setView('translation-memory');
+                        closeMobileNav();
+                      }}
+                      tooltip={t('translationMemory')}
+                    >
+                      <Database className="size-4 shrink-0" />
+                      <span className="truncate">{t('translationMemory')}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
+              )}
               <SidebarMenuItem>
                 <SidebarMenuButton
                   data-testid="sidebar-guide"

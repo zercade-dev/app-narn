@@ -27,6 +27,11 @@
   "createFailed": "Proje oluşturulamadı: {{message}}",
   "activateFailed": "Proje değiştirilemedi: {{message}}",
   "changeProjectIcon": "Proje simgesini değiştir",
+  "providerKeys": "Sağlayıcı anahtarları",
+  "advancedOnlyTitle": "Gelişmiş modda kullanılabilir",
+  "advancedOnlyBody": "{{place}} Gelişmiş modun bir parçasıdır. Açmak için Gelişmiş moda geçilsin mi?",
+  "advancedOnlySwitch": "Gelişmiş moda geç",
+  "advancedOnlyCancel": "Şimdi değil",
   "groups": {
     "project": "Kurulum",
     "translate": "Çeviri",

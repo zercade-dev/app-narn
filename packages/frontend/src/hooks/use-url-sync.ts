@@ -4,7 +4,9 @@ import { accessFor, useProjectStore } from '../stores/project-store.js';
 import { useUiSettings } from '../stores/ui-settings-store.js';
 import { useVaultStore } from '../stores/vault-store.js';
 import { parseUrl, buildUrl, type UrlState } from '../lib/url-state.js';
-import { availableTabs, firstAvailableTab } from '../lib/tab-gating.js';
+import { availableTabs } from '../lib/tab-gating.js';
+import { currentMode, firstVisibleTab, isViewVisible, visibleTabs } from '../lib/mode-gating.js';
+import { useModeGate } from '../stores/mode-gate-store.js';
 import type { Tab } from '../stores/view-store.js';
 
 function here(): string {
@@ -52,8 +54,14 @@ export function useUrlSync(): void {
     const projectState = useProjectStore.getState();
     const access = accessFor(projectState, projectId ?? projectState.activeProjectId);
     const cloudManaged = useVaultStore.getState().cloudManaged ?? false;
-    const allowed = availableTabs(access, cloudManaged);
-    return allowed.includes(tab) ? tab : firstAvailableTab(access, cloudManaged);
+    const mode = currentMode();
+    if (visibleTabs(access, cloudManaged, mode).includes(tab)) return tab;
+    // Reachable in Advanced but hidden in Simple: land on the first tab and
+    // offer the switch, rather than silently dropping the link.
+    if (availableTabs(access, cloudManaged).includes(tab)) {
+      useModeGate.getState().offer({ kind: 'tab', tab });
+    }
+    return firstVisibleTab(access, cloudManaged, mode);
   };
 
   const canonicalize = (): void => {
@@ -96,7 +104,12 @@ export function useUrlSync(): void {
         if (parsed.view === 'project') {
           const tab = gateTab(parsed.activeTab, parsed.projectId);
           useViewStore.getState().setActiveTab(tab);
-        } else useViewStore.getState().setView(parsed.view);
+        } else if (isViewVisible(parsed.view, currentMode())) {
+          useViewStore.getState().setView(parsed.view);
+        } else {
+          useViewStore.getState().setView('project');
+          useModeGate.getState().offer({ kind: 'view', view: parsed.view });
+        }
 
         if (parsed.lang && parsed.lang !== useUiSettings.getState().language) {
           useUiSettings.getState().setLanguage(parsed.lang);

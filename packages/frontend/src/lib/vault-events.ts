@@ -70,3 +70,6 @@ export function vaultRetryFinishedEvent(
 ): CustomEvent<VaultRetryFinishedDetail> {
   return new CustomEvent(VAULT_RETRY_FINISHED_EVENT, { detail });
 }
+
+/** Window event asking the shell to open the vault key editor (Simple mode's "Provider keys"). */
+export const VAULT_EDITOR_OPEN_EVENT = 'vault:open-editor';

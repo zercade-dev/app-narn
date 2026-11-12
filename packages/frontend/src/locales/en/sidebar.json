@@ -27,6 +27,11 @@
   "createFailed": "Failed to create project: {{message}}",
   "activateFailed": "Failed to switch project: {{message}}",
   "changeProjectIcon": "Change project icon",
+  "providerKeys": "Provider keys",
+  "advancedOnlyTitle": "Available in Advanced mode",
+  "advancedOnlyBody": "{{place}} is part of Advanced mode. Switch to Advanced to open it?",
+  "advancedOnlySwitch": "Switch to Advanced",
+  "advancedOnlyCancel": "Not now",
   "groups": {
     "project": "Setup",
     "translate": "Translate",

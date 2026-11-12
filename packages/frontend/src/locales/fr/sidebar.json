@@ -27,6 +27,11 @@
   "createFailed": "Échec de la création du projet : {{message}}",
   "activateFailed": "Échec du changement de projet : {{message}}",
   "changeProjectIcon": "Changer l’icône du projet",
+  "providerKeys": "Clés des fournisseurs",
+  "advancedOnlyTitle": "Disponible en mode avancé",
+  "advancedOnlyBody": "{{place}} fait partie du mode avancé. Passer en mode Avancé pour l’ouvrir ?",
+  "advancedOnlySwitch": "Passer en mode Avancé",
+  "advancedOnlyCancel": "Pas maintenant",
   "groups": {
     "project": "Configuration",
     "translate": "Traduire",

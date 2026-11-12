@@ -27,6 +27,11 @@
   "createFailed": "Impossibile creare il progetto: {{message}}",
   "activateFailed": "Impossibile cambiare progetto: {{message}}",
   "changeProjectIcon": "Cambia l'icona del progetto",
+  "providerKeys": "Chiavi dei provider",
+  "advancedOnlyTitle": "Disponibile in modalità Avanzata",
+  "advancedOnlyBody": "{{place}} fa parte della modalità Avanzata. Passare ad Avanzata per aprirlo?",
+  "advancedOnlySwitch": "Passa ad Avanzata",
+  "advancedOnlyCancel": "Non ora",
   "groups": {
     "project": "Preparazione",
     "translate": "Traduzione",

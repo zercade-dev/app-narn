@@ -4,7 +4,8 @@ import { useRunStore } from '../../stores/run-store.js';
 import { useViewStore } from '../../stores/view-store.js';
 import { useProjectStore, accessFor } from '../../stores/project-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
-import { availableTabs, firstAvailableTab } from '../../lib/tab-gating.js';
+import { visibleTabs, firstVisibleTab } from '../../lib/mode-gating.js';
+import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { useNicknameLabels } from '../../hooks/use-nickname-labels.js';
 import { ManualEditsView } from './ManualEditsView.js';
 import {
@@ -562,13 +563,14 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
   // firstAvailableTab (a plain tab switch, not a suggestions-reopen — there is
   // no run to show suggestions for on a tab this access can't reach) instead
   // of a gated/blank panel for one frame.
+  const uiMode = useUiMode();
   const openSuggestionsGated = useCallback(
     (tab: 'category' | 'glossary', runId: string) => {
-      const allowed = availableTabs(access, cloudManaged);
+      const allowed = visibleTabs(access, cloudManaged, uiMode);
       if (allowed.includes(tab)) openSuggestions(tab, runId);
-      else setActiveTab(firstAvailableTab(access, cloudManaged));
+      else setActiveTab(firstVisibleTab(access, cloudManaged, uiMode));
     },
-    [access, cloudManaged, openSuggestions, setActiveTab],
+    [access, cloudManaged, uiMode, openSuggestions, setActiveTab],
   );
 
   // Display nickname per run.createdBy, extracted into `useNicknameLabels`
