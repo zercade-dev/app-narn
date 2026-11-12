@@ -210,7 +210,11 @@ export function VaultUnlockDialog({
         {setupRequired || cloudManaged ? (
           <div className="px-4 py-3 space-y-3">
             <SheetFooter className="px-0">
-              <Button type="button" data-testid="vault-setup-redirect" onClick={() => goToVaultSetup()}>
+              <Button
+                type="button"
+                data-testid="vault-setup-redirect"
+                onClick={() => goToVaultSetup()}
+              >
                 {hasVault ? t('goToVault') : t('setupRedirect')}
               </Button>
             </SheetFooter>
