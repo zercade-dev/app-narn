@@ -1,6 +1,8 @@
 {
   "title": "BẢNG NHẬT KÝ",
   "empty": "Chưa có dòng nhật ký nào.",
+  "debugInRaw": "Các dòng gỡ lỗi xuất hiện trong nhật ký thô.",
+  "debugShowRaw": "Hiện nhật ký thô",
   "filter_all": "Tất cả",
   "filter_error": "Lỗi",
   "filter_warn": "Cảnh báo",
@@ -34,5 +36,19 @@
   "captureTooltip": "Khi bật, máy chủ sẽ giữ lại mọi mục nhật ký của phiên này để có thể phân tích một lượt chạy dài mà không bị mất dữ liệu.",
   "captureDownload": "Tải bản ghi xuống ({{captured}})",
   "captureDropped": "+{{dropped}} bị bỏ qua",
-  "captureSlotsExhausted": "Tính năng ghi lại đang bận — máy chủ này đã có quá nhiều lượt ghi đang chạy. Vui lòng thử lại sau."
+  "captureSlotsExhausted": "Tính năng ghi lại đang bận — máy chủ này đã có quá nhiều lượt ghi đang chạy. Vui lòng thử lại sau.",
+  "modeFriendly": "Dễ đọc",
+  "modeRaw": "Thô",
+  "modeLabel": "Chế độ xem nhật ký",
+  "notificationsBell": "Thông báo",
+  "notificationsBellUnread_other": "Thông báo, {{count}} chưa đọc",
+  "statusLine": {
+    "translatingInto": "Đang dịch sang {{language}}: {{done}}/{{total}}",
+    "translatingLanguages_other": "Đang dịch sang {{count}} ngôn ngữ: {{done}}/{{total}}",
+    "progress": "{{type}}: {{done}}/{{total}}",
+    "waiting": "{{type}}: đang chờ tiếp tục, {{done}}/{{total}}",
+    "queued": "{{type}}: đang xếp hàng, vị trí {{position}}",
+    "queuedNoPosition": "{{type}}: đang xếp hàng",
+    "starting": "{{type}}: đang bắt đầu"
+  }
 }

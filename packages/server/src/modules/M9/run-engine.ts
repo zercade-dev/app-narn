@@ -27,6 +27,7 @@ import { randomUUID } from 'node:crypto';
 import {
   type BatchDispatchOptions,
   type BatchGroupingDimension,
+  type FailureCode,
   type GlobalConfig,
   type JudgeLogEntry,
   type Project,
@@ -71,6 +72,7 @@ import {
 import type { ModuleLogFn } from './module-selection.js';
 import { JobQueue } from './queue.js';
 import { awaitAllWithTimeout, SettledTracker } from './run-settled.js';
+import { classifyFailure } from './failure-code.js';
 import { emitRunProgress, recordRunFailure } from './run-status-helpers.js';
 import { accumulateUsage, finalizeUsageCosts, type PricingProvider } from './usage-pricing.js';
 
@@ -869,7 +871,7 @@ export abstract class BackgroundRunEngine<TRecord> {
       // further down returns from inside this try for exactly this reason.
       if (Date.now() - status.startedAt > MAX_RUN_ELAPSED_MS) {
         for (const item of batch) {
-          this.recordFailure(status, opts.failureKey(item), RUN_TIMED_OUT_MESSAGE);
+          this.recordFailure(status, opts.failureKey(item), RUN_TIMED_OUT_MESSAGE, 'timeout');
         }
         return;
       }
@@ -1133,7 +1135,7 @@ export abstract class BackgroundRunEngine<TRecord> {
           // run no longer has.
           if (deadlineFired()) {
             for (const item of batch) {
-              this.recordFailure(status, opts.failureKey(item), RUN_TIMED_OUT_MESSAGE);
+              this.recordFailure(status, opts.failureKey(item), RUN_TIMED_OUT_MESSAGE, 'timeout');
             }
             this.logger.warn(`${this.logPrefix}:batch-timed-out`, { runId, moduleId });
             return;
@@ -1188,10 +1190,16 @@ export abstract class BackgroundRunEngine<TRecord> {
           // toErrorMessage's pattern redaction — a generic-ai custom key is value-only
           // detectable and would slip past the pattern stripper alone.
           const message = sanitizeLogObject({ m: toErrorMessage(err) }).m;
+          const code = classifyFailure(err);
           for (const item of batch) {
-            this.recordFailure(status, opts.failureKey(item), message);
+            this.recordFailure(status, opts.failureKey(item), message, code);
           }
-          this.logger.warn(`${this.logPrefix}:batch-failed`, { runId, moduleId, error: message });
+          this.logger.warn(`${this.logPrefix}:batch-failed`, {
+            runId,
+            moduleId,
+            error: message,
+            code,
+          });
           return;
         }
       }
@@ -1474,8 +1482,9 @@ export abstract class BackgroundRunEngine<TRecord> {
     status: RunStatus,
     item: { entryId: string; targetLanguage?: string },
     message: string,
+    code?: FailureCode,
   ): void {
-    recordRunFailure(status, item, message);
+    recordRunFailure(status, item, message, code);
   }
 
   /** Persist the run's per-item detail records to the right run-store sidecar. */

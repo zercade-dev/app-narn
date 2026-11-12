@@ -7,9 +7,9 @@ export const notificationsRouter: Router = Router();
 
 /**
  * GET /api/notifications
- * Lists the current tenant's notifications (newest 50, newest-first) plus
- * the unread count. Ambient-tenant only — identityMiddleware has already
- * established the RLS tenant context by the time this handler runs (mirrors
+ * Lists the current tenant's notifications (newest 200 plus any older unread,
+ * newest-first) plus the unread count. Ambient-tenant only — identityMiddleware
+ * has already established the RLS tenant context by the time this handler runs (mirrors
  * tm.ts), so no explicit userId/runWithTenant wiring is needed here.
  */
 notificationsRouter.get(
@@ -53,6 +53,21 @@ notificationsRouter.post(
   asyncHandler(async (_req, res) => {
     const result = await getNotificationStore().markAllRead();
     logger.info('notifications:read-all', { count: result.count });
+    res.json(result);
+  }),
+);
+
+/**
+ * POST /api/notifications/read-informational
+ * Marks every unread notification read EXCEPT the problem kinds (run-failed,
+ * run-finished-with-problems), which stay unread until the user deals with
+ * them. Returns `{ count }` of rows marked.
+ */
+notificationsRouter.post(
+  '/read-informational',
+  asyncHandler(async (_req, res) => {
+    const result = await getNotificationStore().markInformationalRead();
+    logger.info('notifications:read-informational', { count: result.count });
     res.json(result);
   }),
 );

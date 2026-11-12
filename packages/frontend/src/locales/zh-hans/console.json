@@ -1,6 +1,8 @@
 {
   "title": "控制台",
   "empty": "暂无日志。",
+  "debugInRaw": "调试行显示在原始日志中。",
+  "debugShowRaw": "显示原始日志",
   "filter_all": "全部",
   "filter_error": "错误",
   "filter_warn": "警告",
@@ -34,5 +36,19 @@
   "captureTooltip": "开启后，服务器会保留本次会话的每一条日志，以便对长时间运行进行完整分析而不丢失记录。",
   "captureDownload": "下载捕获记录（{{captured}} 条）",
   "captureDropped": "另有 {{dropped}} 条已丢弃",
-  "captureSlotsExhausted": "捕获功能当前繁忙——此服务器上正在运行的捕获过多。请稍后再试。"
+  "captureSlotsExhausted": "捕获功能当前繁忙——此服务器上正在运行的捕获过多。请稍后再试。",
+  "modeFriendly": "易读",
+  "modeRaw": "原始",
+  "modeLabel": "日志视图",
+  "notificationsBell": "通知",
+  "notificationsBellUnread_other": "通知，{{count}} 条未读",
+  "statusLine": {
+    "translatingInto": "正在翻译为{{language}}：{{done}}/{{total}}",
+    "translatingLanguages_other": "正在翻译为 {{count}} 种语言：{{done}}/{{total}}",
+    "progress": "{{type}}：{{done}}/{{total}}",
+    "waiting": "{{type}}：等待恢复，{{done}}/{{total}}",
+    "queued": "{{type}}：排队中，第 {{position}} 位",
+    "queuedNoPosition": "{{type}}：排队中",
+    "starting": "{{type}}：正在启动"
+  }
 }

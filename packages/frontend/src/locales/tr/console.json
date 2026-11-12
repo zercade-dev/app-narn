@@ -1,6 +1,8 @@
 {
   "title": "KONSOL",
   "empty": "Henüz günlük girdisi yok.",
+  "debugInRaw": "Hata ayıklama satırları ham günlükte görünür.",
+  "debugShowRaw": "Ham günlüğü göster",
   "filter_all": "Tümü",
   "filter_error": "Hata",
   "filter_warn": "Uyarı",
@@ -38,5 +40,21 @@
   "captureTooltip": "Açıkken sunucu, uzun bir çalıştırmanın kayıp olmadan incelenebilmesi için bu oturumun tüm günlük kayıtlarını tutar.",
   "captureDownload": "Yakalamayı indir ({{captured}})",
   "captureDropped": "+{{dropped}} atlandı",
-  "captureSlotsExhausted": "Yakalama şu anda meşgul — bu sunucuda zaten çok fazla yakalama çalışıyor. Daha sonra tekrar deneyin."
+  "captureSlotsExhausted": "Yakalama şu anda meşgul — bu sunucuda zaten çok fazla yakalama çalışıyor. Daha sonra tekrar deneyin.",
+  "modeFriendly": "Anlaşılır",
+  "modeRaw": "Ham",
+  "modeLabel": "Günlük görünümü",
+  "notificationsBell": "Bildirimler",
+  "notificationsBellUnread_one": "Bildirimler, {{count}} okunmamış",
+  "notificationsBellUnread_other": "Bildirimler, {{count}} okunmamış",
+  "statusLine": {
+    "translatingInto": "Çevriliyor ({{language}}): {{done}}/{{total}}",
+    "translatingLanguages_one": "Çevriliyor ({{count}} dil): {{done}}/{{total}}",
+    "translatingLanguages_other": "Çevriliyor ({{count}} dil): {{done}}/{{total}}",
+    "progress": "{{type}}: {{done}}/{{total}}",
+    "waiting": "{{type}}: devam etmeyi bekliyor, {{done}}/{{total}}",
+    "queued": "{{type}}: sırada, konum {{position}}",
+    "queuedNoPosition": "{{type}}: sırada",
+    "starting": "{{type}}: başlatılıyor"
+  }
 }

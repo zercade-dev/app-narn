@@ -25,6 +25,8 @@ import type { RunStore } from '../storage/types.js';
 import { getCurrentTenant, runWithTenant } from '../storage/pg/tenant-context.js';
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { isAbortError } from './M9/errors.js';
+import { classifyFailure } from './M9/failure-code.js';
+import { sanitizeLogObject } from './M16-credential-store.js';
 import { BackgroundRunEngine, type LoggerLike } from './M9/run-engine.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
 import { type ModuleLogFn } from './M9/module-selection.js';
@@ -234,14 +236,15 @@ export class GlossaryGenEngine extends BackgroundRunEngine<GlossarySuggestion> {
       });
     } catch (err) {
       if (isAbortError(err) || signal?.aborted) return;
-      const message = toErrorMessage(err);
+      const message = sanitizeLogObject({ m: toErrorMessage(err) }).m;
+      const code = classifyFailure(err);
       // Keep completed + failed === total (the base engines' convention) even
       // when the run failed after partial onProgress updates, so the Activity
       // tab never renders a >100% progress bar.
       status.completed = 0;
       status.failed = status.total;
-      status.errors.push({ message, timestamp: Date.now() });
-      this.logger.warn('glossary-gen:failed', { runId, error: message });
+      status.errors.push({ message, timestamp: Date.now(), code });
+      this.logger.warn('glossary-gen:failed', { runId, error: message, code });
     } finally {
       // Gated on Running: a cancelled run skips this block entirely, so its
       // partial verbose log is dropped (the base `cancel` clears the buffer).
@@ -277,7 +280,11 @@ export class GlossaryGenEngine extends BackgroundRunEngine<GlossarySuggestion> {
           // Same completed + failed === total invariant as the catch path above.
           status.completed = 0;
           status.failed = status.total;
-          status.errors.push({ message: 'failed to persist suggestions', timestamp: Date.now() });
+          status.errors.push({
+            message: 'failed to persist suggestions',
+            timestamp: Date.now(),
+            code: 'unknown',
+          });
         }
         status.status = status.failed > 0 ? RunStatusCode.Failed : RunStatusCode.Completed;
         status.finishedAt = Date.now();

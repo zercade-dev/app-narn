@@ -126,12 +126,15 @@ export {
   runTypeLabel,
   isTranslationRunKind,
   hasRunDetailsKind,
+  FAILURE_CODES,
+  isFailureCode,
 } from './types/runs.js';
 export type {
   RunStatus,
   PendingCorrectionRecord,
   ProviderFailureNotice,
   ProviderFailureRouting,
+  FailureCode,
   RunErrorEntry,
   RunUsageEntry,
   RunRequest,
@@ -155,7 +158,14 @@ export type {
 export { isAlwaysFreeModel } from './free-model.js';
 export { TM_MODULE_ID } from './types/tm.js';
 export type { TmMatchPolicy, TmFingerprint, TmVariant, TmSegment } from './types/tm.js';
-export type { NotificationRecord, NotificationSeverity } from './types/notification.js';
+export type {
+  CollabDigestData,
+  NotificationKind,
+  NotificationRecord,
+  NotificationSeverity,
+  RunNotificationData,
+} from './types/notification.js';
+export { PROBLEM_NOTIFICATION_KINDS } from './types/notification.js';
 export {
   LANGUAGE_COLUMN_ALIASES,
   SOURCE_COLUMN_NAMES,

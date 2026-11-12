@@ -1,6 +1,8 @@
 {
   "title": "主控台",
   "empty": "尚無日誌。",
+  "debugInRaw": "偵錯行會顯示在原始記錄中。",
+  "debugShowRaw": "顯示原始記錄",
   "filter_all": "全部",
   "filter_error": "錯誤",
   "filter_warn": "警告",
@@ -34,5 +36,19 @@
   "captureTooltip": "開啟後，伺服器會保留本次工作階段的每一筆日誌，讓長時間執行的內容也能完整分析、不遺漏。",
   "captureDownload": "下載擷取記錄（{{captured}} 筆）",
   "captureDropped": "另有 {{dropped}} 筆已捨棄",
-  "captureSlotsExhausted": "擷取功能目前忙碌中——這台伺服器上執行中的擷取已經太多。請稍後再試。"
+  "captureSlotsExhausted": "擷取功能目前忙碌中——這台伺服器上執行中的擷取已經太多。請稍後再試。",
+  "modeFriendly": "易讀",
+  "modeRaw": "原始",
+  "modeLabel": "日誌檢視",
+  "notificationsBell": "通知",
+  "notificationsBellUnread_other": "通知，{{count}} 則未讀",
+  "statusLine": {
+    "translatingInto": "正在翻譯為{{language}}：{{done}}/{{total}}",
+    "translatingLanguages_other": "正在翻譯為 {{count}} 種語言：{{done}}/{{total}}",
+    "progress": "{{type}}：{{done}}/{{total}}",
+    "waiting": "{{type}}：等待繼續，{{done}}/{{total}}",
+    "queued": "{{type}}：排隊中，第 {{position}} 位",
+    "queuedNoPosition": "{{type}}：排隊中",
+    "starting": "{{type}}：正在啟動"
+  }
 }

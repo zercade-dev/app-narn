@@ -1,6 +1,8 @@
 {
   "title": "คอนโซล",
   "empty": "ยังไม่มีบรรทัดล็อก",
+  "debugInRaw": "บรรทัดดีบักจะแสดงในบันทึกดิบ",
+  "debugShowRaw": "แสดงบันทึกดิบ",
   "filter_all": "ทั้งหมด",
   "filter_error": "ข้อผิดพลาด",
   "filter_warn": "คำเตือน",
@@ -34,5 +36,19 @@
   "captureTooltip": "เมื่อเปิดใช้งาน เซิร์ฟเวอร์จะเก็บบันทึกล็อกทุกรายการของเซสชันนี้ไว้ เพื่อให้วิเคราะห์การทำงานที่ยาวนานได้โดยไม่มีข้อมูลสูญหาย",
   "captureDownload": "ดาวน์โหลดล็อกที่บันทึกไว้ ({{captured}} รายการ)",
   "captureDropped": "+{{dropped}} ถูกละทิ้ง",
-  "captureSlotsExhausted": "การบันทึกล็อกกำลังไม่ว่างในขณะนี้ — มีการบันทึกทำงานอยู่บนเซิร์ฟเวอร์นี้มากเกินไป โปรดลองใหม่อีกครั้งภายหลัง"
+  "captureSlotsExhausted": "การบันทึกล็อกกำลังไม่ว่างในขณะนี้ — มีการบันทึกทำงานอยู่บนเซิร์ฟเวอร์นี้มากเกินไป โปรดลองใหม่อีกครั้งภายหลัง",
+  "modeFriendly": "อ่านง่าย",
+  "modeRaw": "ดิบ",
+  "modeLabel": "มุมมองบันทึก",
+  "notificationsBell": "การแจ้งเตือน",
+  "notificationsBellUnread_other": "การแจ้งเตือน ยังไม่ได้อ่าน {{count}} รายการ",
+  "statusLine": {
+    "translatingInto": "กำลังแปล ({{language}}): {{done}} จาก {{total}}",
+    "translatingLanguages_other": "กำลังแปล ({{count}} ภาษา): {{done}} จาก {{total}}",
+    "progress": "{{type}}: {{done}} จาก {{total}}",
+    "waiting": "{{type}}: รอทำงานต่อ {{done}} จาก {{total}}",
+    "queued": "{{type}}: อยู่ในคิว ลำดับที่ {{position}}",
+    "queuedNoPosition": "{{type}}: อยู่ในคิว",
+    "starting": "{{type}}: กำลังเริ่ม"
+  }
 }

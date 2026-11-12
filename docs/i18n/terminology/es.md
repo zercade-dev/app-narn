@@ -38,9 +38,9 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 
 | Term | Rendering | Notes |
 | --- | --- | --- |
-| project |  |  |
-| workspace |  |  |
-| entry |  |  |
+| project | proyecto | Masculine. |
+| workspace | espacio de trabajo | Always the full phrase, so it never collapses into *proyecto*. |
+| entry | texto | What the shipped Spanish counts in narration and in the failure lines; kept for every new log line. |
 | source text |  |  |
 | translation | traducción | Feminine — every standalone status word agreeing with it is feminine too. Already used throughout the shipped `strings` and `review` namespaces; the tab label is the plural "Traducciones". The verb is "traducir", and "re-translate" is "retraducir" (`review:retranslate`). |
 | source label |  |  |
@@ -53,11 +53,11 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | reference language |  |  |
 | writable language |  |  |
 | Pseudo Test |  |  |
-| run |  |  |
-| revert |  |  |
+| run | ejecución | Feminine. Never a verb; the verbs are *traducir*, *iniciar*, *generar*. |
+| revert | revertir | Verb on the control; the narration uses the infinitive (*Se omitió revertir…*). |
 | Activity |  |  |
 | log |  |  |
-| batch |  |  |
+| batch | lote | Masculine. |
 | batch grouping |  |  |
 | AI review |  |  |
 | judge |  |  |
@@ -72,9 +72,9 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | review queue |  |  |
 | back-translation |  |  |
 | module |  |  |
-| module instance |  |  |
+| module instance | instancia | Feminine. The long form *instancia de módulo* is not needed where the sentence already names the module. |
 | provider | proveedor | The outside company/service behind a module. `config:enableModuleHelp` "Añade un proveedor de IA o de traducción para usarlo en tus proyectos." The three English strings that mislabel a module-instance picker *Provider* (`colorText:assistant.instanceLabel`, `stage-details:chatInstanceLabel`, `config:routing.simplePlaceholder` "Elige un proveedor") are translated as written and must not drag *módulo* toward this word anywhere else. |
-| model |  |  |
+| model | modelo | Masculine. |
 | prompt |  |  |
 | reasoning effort |  |  |
 | routing rule |  |  |
@@ -83,7 +83,7 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | credential |  |  |
 | LQA |  |  |
 | quality gate |  |  |
-| check |  |  |
+| check | control | Masculine; *control de calidad* for a quality check. |
 | issue |  |  |
 | severity |  |  |
 | notification severity |  |  |
@@ -96,13 +96,13 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | glossary term | término | Masculine. Shortened to "término" alone inside the Glossary tab, exactly as English shortens "glossary term" to "term". Never "entrada", which is reserved for _entry_. |
 | constant |  |  |
 | match | coincidencia | Feminine. Plural "coincidencias" throughout the Matches panel ("{{count}} coincidencias", "No se encontraron coincidencias.", "Aplicar coincidencias"). The verb is "coincidir" (`config:models.noMatches` — "Ningún modelo coincide con tu búsqueda"). |
-| translation memory |  |  |
+| translation memory | memoria de traducción | Feminine. |
 | approve |  |  |
 | category |  |  |
 | tone |  |  |
 | orphan |  |  |
-| relink |  |  |
-| backup |  |  |
+| relink | reasignar | Verb; the narration uses the participle *reasignado*. |
+| backup | copia de seguridad | Feminine phrase. |
 | snapshot |  |  |
 | template |  |  |
 | omit (from an export) |  |  |

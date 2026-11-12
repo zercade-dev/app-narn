@@ -52,6 +52,9 @@ interface UiSettingsState {
    */
   routingAdvanced: boolean;
   setRoutingAdvanced: (advanced: boolean) => void;
+  /** Console shows raw log lines instead of the friendly log. Persisted per browser. */
+  consoleRawMode: boolean;
+  setConsoleRawMode: (raw: boolean) => void;
   theme: UiTheme;
   setTheme: (theme: UiTheme) => void;
 }
@@ -90,6 +93,8 @@ export const useUiSettings = create<UiSettingsState>()(
       setConsoleFilter: (consoleFilter) => set({ consoleFilter }),
       routingAdvanced: false,
       setRoutingAdvanced: (routingAdvanced) => set({ routingAdvanced }),
+      consoleRawMode: false,
+      setConsoleRawMode: (consoleRawMode) => set({ consoleRawMode }),
       theme: readStoredTheme(),
       setTheme: (theme) => {
         if (globalThis.window !== undefined) {
@@ -106,6 +111,7 @@ export const useUiSettings = create<UiSettingsState>()(
         projectIcons: state.projectIcons,
         consoleFilter: state.consoleFilter,
         routingAdvanced: state.routingAdvanced,
+        consoleRawMode: state.consoleRawMode,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.language && state.language !== 'en') {

@@ -53,10 +53,59 @@
   "notificationsDismiss": "Kaldır",
   "notificationsLoading": "Bildirimleriniz yükleniyor…",
   "notificationsEmpty": "Bildiriminiz yok.",
+  "notificationsSidebarDescription": "Çalıştırmalarınız ve projelerinizle ilgili gelişmeler.",
+  "notificationsUnread": "Okunmamış",
+  "notificationsDismissItem": "Kaldır: {{title}}",
   "notificationsSeverity": {
     "info": "Bilgi",
     "warning": "Uyarı",
     "critical": "Kritik"
+  },
+  "notifications": {
+    "genericTitle": "Bildirim",
+    "viewInActivity": "Etkinlikte göster",
+    "openProject": "Projeyi aç",
+    "inProject": "Proje: {{project}}",
+    "aCollaborator": "Bir ortak çalışan",
+    "theProvider": "yapay zekâ sağlayıcısı",
+    "otherIssues_one": "{{cause}} ve {{count}} sorun daha",
+    "otherIssues_other": "{{cause}} ve {{count}} sorun daha",
+    "cause": {
+      "noRoute": "bunun için ayarlanmış bir çeviri modülü yok.",
+      "moduleDisabled": "gereken modül kapalı.",
+      "moduleNotFound": "gereken modül bulunamadı.",
+      "unknown": "neden bilinmiyor."
+    },
+    "runStarted": {
+      "title": "{{type}} başladı",
+      "body_one": "İşlenecek {{count}} girdi.",
+      "body_other": "İşlenecek {{count}} girdi."
+    },
+    "runFinished": {
+      "title": "{{type}} tamamlandı",
+      "body_one": "{{count}} girdi tamamlandı.",
+      "body_other": "{{count}} girdi tamamlandı.",
+      "bodyLanguages_one": "{{count}} girdi tamamlandı: {{languages}}.",
+      "bodyLanguages_other": "{{count}} girdi tamamlandı: {{languages}}."
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}} sorunlarla tamamlandı",
+      "body": "{{completed}} tamamlandı, {{failed}} başarısız oldu — {{cause}}."
+    },
+    "runFailed": {
+      "title": "{{type}} başarısız oldu",
+      "body": "Çalıştırma durdu: {{cause}}."
+    },
+    "collabDigest": {
+      "title": "Ortak çalışan etkinliği",
+      "editsIn": "{{language}} dilinde {{count}}",
+      "edited": "{{name}} şunları düzenledi: {{edits}}.",
+      "translated_one": "{{name}} {{count}} girdiyi çevirdi.",
+      "translated_other": "{{name}} {{count}} girdiyi çevirdi.",
+      "both_one": "{{name}} şunları düzenledi: {{edits}}; ayrıca {{count}} girdiyi çevirdi.",
+      "both_other": "{{name}} şunları düzenledi: {{edits}}; ayrıca {{count}} girdiyi çevirdi.",
+      "translatedLanguages": "Çeviri dilleri: {{languages}}."
+    }
   },
   "signOut": "Oturumu kapat"
 }

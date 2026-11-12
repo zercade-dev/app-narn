@@ -1,6 +1,8 @@
 {
   "title": "CONSOLE",
   "empty": "Ancora nessuna riga di log.",
+  "debugInRaw": "Le righe di debug compaiono nel log grezzo.",
+  "debugShowRaw": "Mostra log grezzo",
   "filter_all": "Tutti",
   "filter_error": "Errore",
   "filter_warn": "Avviso",
@@ -38,5 +40,21 @@
   "captureTooltip": "Quando è attiva, il server conserva ogni voce di log di questa sessione, così un'esecuzione lunga può essere analizzata senza perdite.",
   "captureDownload": "Scarica la cattura ({{captured}})",
   "captureDropped": "+{{dropped}} scartate",
-  "captureSlotsExhausted": "La cattura è occupata al momento — sul server sono già in corso troppe catture. Riprova più tardi."
+  "captureSlotsExhausted": "La cattura è occupata al momento — sul server sono già in corso troppe catture. Riprova più tardi.",
+  "modeFriendly": "Leggibile",
+  "modeRaw": "Grezzo",
+  "modeLabel": "Vista del registro",
+  "notificationsBell": "Notifiche",
+  "notificationsBellUnread_one": "Notifiche, {{count}} non letta",
+  "notificationsBellUnread_other": "Notifiche, {{count}} non lette",
+  "statusLine": {
+    "translatingInto": "Traduzione in {{language}}: {{done}} di {{total}}",
+    "translatingLanguages_one": "Traduzione in {{count}} lingua: {{done}} di {{total}}",
+    "translatingLanguages_other": "Traduzione in {{count}} lingue: {{done}} di {{total}}",
+    "progress": "{{type}}: {{done}} di {{total}}",
+    "waiting": "{{type}}: in attesa di ripresa, {{done}} di {{total}}",
+    "queued": "{{type}}: in coda, posizione {{position}}",
+    "queuedNoPosition": "{{type}}: in coda",
+    "starting": "{{type}}: avvio in corso"
+  }
 }

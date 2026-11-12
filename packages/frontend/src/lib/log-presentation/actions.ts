@@ -1,3 +1,4 @@
+import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { useViewStore, type Tab } from '../../stores/view-store.js';
 import { vaultLockedEvent } from '../vault-events.js';
 import type { LogAction } from './types.js';
@@ -17,4 +18,9 @@ export function openGlobalConfig(labelKey: string): LogAction {
 
 export function unlockVault(labelKey: string): LogAction {
   return { labelKey, run: () => globalThis.dispatchEvent(vaultLockedEvent({})) };
+}
+
+/** Reveals the raw log lines, for failures the friendly log can't explain. */
+export function switchToRaw(labelKey: string): LogAction {
+  return { labelKey, run: () => useUiSettings.getState().setConsoleRawMode(true) };
 }

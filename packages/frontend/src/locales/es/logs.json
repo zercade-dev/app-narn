@@ -4,7 +4,8 @@
     "openModuleSettings": "Abrir la configuración de módulos",
     "openQuality": "Abrir los ajustes de calidad",
     "openGlossary": "Abrir el glosario",
-    "unlockVault": "Desbloquear bóveda"
+    "unlockVault": "Desbloquear bóveda",
+    "switchToRaw": "Ver registro crudo"
   },
   "translation": {
     "start": "Traduciendo un texto a {{language}}…",
@@ -22,12 +23,61 @@
     "failedModuleNotFound": "No se pudo traducir {{count}} texto a {{language}} — el módulo {{module}} no está instalado.",
     "failedModuleNotFound_other": "No se pudieron traducir {{count}} textos a {{language}} — el módulo {{module}} no está instalado.",
     "failedGeneric": "No se pudo traducir un texto a {{language}}.",
+    "failedAuth": "No se pudo traducir {{count}} texto a {{language}} — {{module}} rechazó la clave de API.",
+    "failedAuth_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} rechazó la clave de API.",
+    "failedRateLimit": "No se pudo traducir {{count}} texto a {{language}} — {{module}} alcanzó su límite de solicitudes.",
+    "failedRateLimit_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} alcanzó su límite de solicitudes.",
+    "failedTimeout": "No se pudo traducir {{count}} texto a {{language}} — {{module}} tardó demasiado en responder.",
+    "failedTimeout_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} tardó demasiado en responder.",
+    "failedModelUnavailable": "No se pudo traducir {{count}} texto a {{language}} — el modelo no está disponible en {{module}}.",
+    "failedModelUnavailable_other": "No se pudieron traducir {{count}} textos a {{language}} — el modelo no está disponible en {{module}}.",
+    "failedParse": "No se pudo traducir {{count}} texto a {{language}} — {{module}} envió una respuesta que no se pudo leer.",
+    "failedParse_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} envió una respuesta que no se pudo leer.",
+    "failedEmptyReply": "No se pudo traducir {{count}} texto a {{language}} — {{module}} devolvió una respuesta vacía.",
+    "failedEmptyReply_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} devolvió una respuesta vacía.",
+    "failedProvider": "No se pudo traducir {{count}} texto a {{language}} — {{module}} informó de un error.",
+    "failedProvider_other": "No se pudieron traducir {{count}} textos a {{language}} — {{module}} informó de un error.",
+    "failedUnknown": "No se pudo traducir {{count}} texto a {{language}} — se desconoce el motivo.",
+    "failedUnknown_other": "No se pudieron traducir {{count}} textos a {{language}} — se desconoce el motivo.",
     "batchFailed": "Falló un lote de {{count}} traducciones a {{languages}}.",
+    "batchFailedCause": "Falló un lote de {{count}} traducción a {{languages}} — {{cause}}",
+    "batchFailedCause_other": "Falló un lote de {{count}} traducciones a {{languages}} — {{cause}}",
+    "batchFailedUnknown": "Falló un lote de {{count}} traducción a {{languages}} — se desconoce el motivo.",
+    "batchFailedUnknown_other": "Falló un lote de {{count}} traducciones a {{languages}} — se desconoce el motivo.",
     "queueStartFailed": "No se pudo iniciar la ejecución de traducción.",
     "maskMismatch": "Las etiquetas de formato no sobrevivieron a la traducción a {{language}}.",
     "tmRejected": "Una traducción guardada para {{language}} no superó el control de calidad.",
     "lqaRetry": "Control de calidad fallido — se pidió al modelo un nuevo intento.",
-    "authCancel": "Se canceló el inicio de sesión, así que la traducción se detuvo."
+    "authCancel": "Se canceló el inicio de sesión, así que la traducción se detuvo.",
+    "batchUncaught": "Un lote de traducciones falló de forma inesperada.",
+    "startAborted": "La ejecución de traducción se detuvo antes de enviar ningún texto.",
+    "waitingForQuota": "Traducción en pausa hasta que los modelos gratuitos vuelvan a tener cuota.",
+    "waitingForQuotaUntil": "Traducción en pausa hasta que los modelos gratuitos vuelvan a tener cuota — lo antes que puede reanudarse es hacia las {{time}}.",
+    "quotaRedispatched": "Reanudando las traducciones que esperaban cuota de los modelos gratuitos.",
+    "quotaParkAdopted": "Se retomaron ejecuciones de traducción en pausa que esperan cuota.",
+    "freewayRerouted": "El modelo gratuito {{from}} no está disponible ahora — se intentará con {{to}}.",
+    "freewayInstanceSwapped": "No se pudo usar {{fromModule}} — se intentará el mismo modelo a través de {{toModule}}.",
+    "freewayDeferred": "Algunas traducciones esperan a {{model}} — se volverán a intentar hacia las {{time}}.",
+    "freewayDegraded": "No hay ningún modelo gratuito de la potencia habitual — se intentará con uno más ligero para este lote.",
+    "freewayEscalated": "Una traducción a {{language}} no superó el control de calidad — se intentará con {{to}}.",
+    "freewayCredentialDisabled": "{{module}} rechazó su clave de API — los modelos gratuitos lo omitirán hasta que se actualice la clave.",
+    "lqaCorrectionFailed": "No se pudieron corregir las traducciones que no superaron el control de calidad — conservan su primera versión.",
+    "lqaCorrectionSkipped": "Se omitió corregir una traducción a {{language}} — cambió después de traducirse.",
+    "lqaCorrectionSkippedRemoved": "Se omitió corregir una traducción a {{language}} — su texto se eliminó.",
+    "lqaCorrectionUnavailable": "{{module}} no puede corregir las traducciones a {{language}} que no superaron el control de calidad — conservan su primera versión.",
+    "lqaRetryFailed": "El reintento de las traducciones que no superaron el control de calidad no funcionó.",
+    "lqaRetryFailedLanguage": "El reintento de una traducción a {{language}} que no superó el control de calidad no funcionó.",
+    "splitPhaseStart": "Traduciendo con el modelo local {{model}}…",
+    "tmLookupFailed": "No se pudo consultar la memoria de traducción para un texto en {{language}} — se traducirá desde cero.",
+    "cause": {
+      "auth": "{{module}} rechazó la clave de API.",
+      "rateLimit": "{{module}} alcanzó su límite de solicitudes.",
+      "timeout": "{{module}} tardó demasiado en responder.",
+      "modelUnavailable": "el modelo no está disponible en {{module}}.",
+      "parse": "{{module}} envió una respuesta que no se pudo leer.",
+      "emptyReply": "{{module}} devolvió una respuesta vacía.",
+      "provider": "{{module}} informó de un error."
+    }
   },
   "lqa": {
     "passed": "Control de calidad superado.",
@@ -60,10 +110,38 @@
     "done": "Detalles del escenario terminados — {{completed}} hechos, {{failed}} fallidos.",
     "failed": "Los detalles del escenario fallaron."
   },
+  "relinkRetranslate": {
+    "done": "Se retradujo a {{language}} un texto reasignado.",
+    "maskMismatch": "Las etiquetas de formato no sobrevivieron a la retraducción a {{language}}."
+  },
+  "run": {
+    "queued": "{{task}}: ejecución en cola.",
+    "batchFailed": "{{task}}: falló un lote.",
+    "batchFailedCause": "{{task}}: falló un lote — {{cause}}",
+    "batchFailedUnknown": "{{task}}: falló un lote — se desconoce el motivo.",
+    "batchTimedOut": "{{task}}: la ejecución superó su límite de tiempo, así que se detuvo un lote.",
+    "freewayRerouted": "{{task}}: el modelo gratuito {{from}} no está disponible ahora — se intentará con {{to}}.",
+    "freewayMinuteWait": "{{task}}: el modelo gratuito {{model}} alcanzó su límite por minuto — se esperarán {{seconds}} s antes de continuar."
+  },
+  "chat": {
+    "dispatch": "Mensaje enviado al asistente ({{model}}).",
+    "done": "Respuesta del asistente terminada en {{seconds}} s ({{model}}).",
+    "doneCancelled": "Respuesta del asistente cancelada tras {{seconds}} s ({{model}}).",
+    "doneFailed": "La respuesta del asistente falló tras {{seconds}} s ({{model}})."
+  },
   "module": {
     "loaded": "Se cargó el módulo {{module}}.",
     "instanceRegistered": "Se añadió la configuración {{instance}}.",
-    "instanceRegisterFailed": "No se pudo añadir la configuración {{instance}}."
+    "instanceRegisterFailed": "No se pudo añadir la configuración {{instance}}.",
+    "instanceUnregistered": "Se quitó la instancia {{instance}}.",
+    "configUpdated": "Se guardó la configuración del proyecto para {{module}}."
+  },
+  "globalConfig": {
+    "instanceCreated": "Se creó la instancia {{instance}}.",
+    "instanceDeleted": "Se eliminó la instancia {{instance}}.",
+    "instanceRenamed": "Se cambió el nombre de la instancia {{instance}}.",
+    "settingsUpdated": "Configuración del espacio de trabajo guardada.",
+    "updated": "Se guardó la configuración del espacio de trabajo para {{module}}."
   },
   "vault": {
     "unlocked": "Bóveda desbloqueada.",
@@ -82,6 +160,14 @@
   },
   "backup": {
     "restored": "Copia de seguridad restaurada.",
-    "pruneFailed": "No se pudieron limpiar las copias de seguridad antiguas."
+    "pruneFailed": "No se pudieron limpiar las copias de seguridad antiguas.",
+    "restoredFromPg": "Proyecto restaurado desde una copia de seguridad.",
+    "restoredFromServer": "Proyecto restaurado desde una copia de seguridad guardada en el servidor."
+  },
+  "csvExport": {
+    "roundtripUnsafe": "Exportación lista, pero algunas celdas podrían no reimportarse correctamente (una comilla seguida de una coma o un salto de línea en: {{columns}})."
+  },
+  "runs": {
+    "revertEntryFailed": "Se omitió revertir una traducción a {{language}} — puede que su texto se haya eliminado."
   }
 }

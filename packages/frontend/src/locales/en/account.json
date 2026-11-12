@@ -53,10 +53,59 @@
   "notificationsDismiss": "Dismiss",
   "notificationsLoading": "Loading your notifications…",
   "notificationsEmpty": "You have no notifications.",
+  "notificationsSidebarDescription": "Updates on your runs and projects.",
+  "notificationsUnread": "Unread",
+  "notificationsDismissItem": "Dismiss: {{title}}",
   "notificationsSeverity": {
     "info": "Info",
     "warning": "Warning",
     "critical": "Critical"
+  },
+  "notifications": {
+    "genericTitle": "Notification",
+    "viewInActivity": "View in Activity",
+    "openProject": "Open project",
+    "inProject": "Project: {{project}}",
+    "aCollaborator": "A collaborator",
+    "theProvider": "the AI provider",
+    "otherIssues_one": "{{cause}} and {{count}} other issue",
+    "otherIssues_other": "{{cause}} and {{count}} other issues",
+    "cause": {
+      "noRoute": "no translation module is set up for it.",
+      "moduleDisabled": "the module it needs is turned off.",
+      "moduleNotFound": "the module it needs could not be found.",
+      "unknown": "the cause is unknown."
+    },
+    "runStarted": {
+      "title": "{{type}} started",
+      "body_one": "{{count}} item to process.",
+      "body_other": "{{count}} items to process."
+    },
+    "runFinished": {
+      "title": "{{type}} finished",
+      "body_one": "{{count}} item done.",
+      "body_other": "{{count}} items done.",
+      "bodyLanguages_one": "{{count}} item done in {{languages}}.",
+      "bodyLanguages_other": "{{count}} items done in {{languages}}."
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}} finished with problems",
+      "body": "{{completed}} done, {{failed}} failed — {{cause}}."
+    },
+    "runFailed": {
+      "title": "{{type}} failed",
+      "body": "The run stopped: {{cause}}."
+    },
+    "collabDigest": {
+      "title": "Collaborator activity",
+      "editsIn": "{{count}} in {{language}}",
+      "edited": "{{name}} edited {{edits}}.",
+      "translated_one": "{{name}} translated {{count}} string.",
+      "translated_other": "{{name}} translated {{count}} strings.",
+      "both_one": "{{name}} edited {{edits}} and translated {{count}} string.",
+      "both_other": "{{name}} edited {{edits}} and translated {{count}} strings.",
+      "translatedLanguages": "Translated into {{languages}}."
+    }
   },
   "signOut": "Sign out"
 }

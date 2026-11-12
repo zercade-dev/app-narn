@@ -20,6 +20,7 @@ import {
   type RoutingDecision,
   type ControlledFailureReason,
   controlledFailureHint,
+  type FailureCode,
   FREEWAY_MODULE_ID,
   PSEUDO_MODULE_ID,
   type StringEntry,
@@ -109,6 +110,7 @@ import { JobQueue, type Admission } from './M9/queue.js';
 import { rateGovernor, type GovernorKey, type RateGovernor } from './M9/rate-governor.js';
 import { awaitAllWithTimeout, SettledTracker } from './M9/run-settled.js';
 import { emitRunProgress, recordRunFailure } from './M9/run-status-helpers.js';
+import { classifyFailure } from './M9/failure-code.js';
 import { assertRunCapacity, PROCESS_START_MS, sweepOrphanedRuns } from './M9/run-capacity.js';
 import { PreviewNotPossibleError, StaleTranslationError } from '../types/errors.js';
 import {
@@ -377,6 +379,15 @@ function tmRejectionReason(lqa: import('@zercade-dev/narn-shared').LQAResult): s
   return types.length > 0
     ? `failed the current quality checks: ${types.join(', ')}`
     : 'failed the current quality checks';
+}
+
+/**
+ * The FailureCode for a controlled (pre-dispatch) failure reason. The reasons
+ * are themselves codes, except `freeway-no-buckets`: nothing could serve the
+ * pair, which the user fixes the same way as a missing route.
+ */
+function controlledFailureCode(reason: ControlledFailureReason): FailureCode {
+  return reason === 'freeway-no-buckets' ? 'no-route' : reason;
 }
 
 type GlossaryGroup = {
@@ -1319,6 +1330,8 @@ export class TranslationEngine {
     ) {
       this.queuedRetryRequests.set(runId, retryRequest);
       source.status = RunStatusCode.Queued;
+      // A fresh attempt: drop the previous stop's cause (see startRun).
+      delete source.stopCause;
       source.queuePosition = this.nextQueuePosition(projectId);
       this.queuedSessions.set(runId, sessionId);
       this.queuedTenants.set(runId, getCurrentTenant());
@@ -2179,6 +2192,9 @@ export class TranslationEngine {
       status.status = RunStatusCode.Running;
       delete status.finishedAt;
       delete status.queuePosition;
+      // A fresh attempt: the previous stop's cause (e.g. an auth cancel) no
+      // longer describes this run, however this attempt ends.
+      delete status.stopCause;
       // A run adopted from a PRIOR process generation still carries its
       // pre-restart `startedAt`, which is exactly what `sweepOrphanedRuns` reads
       // as "left behind by a dead process" — a sweep firing during this
@@ -2781,11 +2797,14 @@ export class TranslationEngine {
     if (!isRunCancellingAuthError(err)) return false;
     const status = this.runs.get(runId);
     if (status && status.status !== RunStatusCode.Cancelled) {
+      // An auth error can echo the rejected key — sanitize before logging.
       this.logger.error('translation:auth-cancel', {
         runId,
         moduleId,
-        error: err instanceof Error ? err.message : `${err}`,
+        error: sanitizeLogObject({ m: toErrorMessage(err) }).m,
       });
+      // Mark the stop as app-initiated before cancel() persists the status.
+      status.stopCause = 'auth';
       await this.cancel(runId);
     }
     return true;
@@ -3760,7 +3779,7 @@ export class TranslationEngine {
     void this.maybeStartNextQueued(projectId).catch((err) => {
       this.logger.error('translation:queue-start-failed', {
         projectId,
-        error: err instanceof Error ? err.message : `${err}`,
+        error: sanitizeLogObject({ m: toErrorMessage(err) }).m,
       });
     });
   }
@@ -3811,7 +3830,7 @@ export class TranslationEngine {
       this.logger.error('translation:queue-start-failed', {
         runId: next.runId,
         projectId,
-        error: err instanceof Error ? err.message : `${err}`,
+        error: sanitizeLogObject({ m: toErrorMessage(err) }).m,
       });
       next.status = RunStatusCode.Failed;
       next.finishedAt = Date.now();
@@ -4175,7 +4194,13 @@ export class TranslationEngine {
     if (pairs.length === 0) return;
     const groups = new Map<string, ControlledFailureGroup>();
     for (const pair of pairs) {
-      this.recordFailure(status, pair.entryId, pair.targetLanguage, 'freeway-no-buckets');
+      this.recordFailure(
+        status,
+        pair.entryId,
+        pair.targetLanguage,
+        'freeway-no-buckets',
+        controlledFailureCode('freeway-no-buckets'),
+      );
       const group = groups.get(pair.targetLanguage);
       if (group) {
         group.count++;
@@ -5713,13 +5738,14 @@ export class TranslationEngine {
       // non-batch-capable modules — flows through this one dispatch path.
       if (routedModuleId === null) {
         for (const d of decisions) {
-          this.recordFailure(status, d.entry.id, d.targetLanguage, 'no-route');
+          this.recordFailure(status, d.entry.id, d.targetLanguage, 'no-route', 'no-route');
           settled.add(settleKey(d));
           this.logger.warn('translation:failed', {
             runId,
             entryId: d.entry.id,
             targetLanguage: d.targetLanguage,
             error: 'no-route',
+            code: 'no-route',
             context: d.entry.context ?? null,
           });
         }
@@ -5936,7 +5962,13 @@ export class TranslationEngine {
 
       if (!effective.enabled || effective.active === false) {
         for (const d of decisions) {
-          this.recordFailure(status, d.entry.id, d.targetLanguage, 'module-disabled');
+          this.recordFailure(
+            status,
+            d.entry.id,
+            d.targetLanguage,
+            'module-disabled',
+            'module-disabled',
+          );
           settled.add(settleKey(d));
           metricsCollector.recordFailure(moduleId, metricsModel);
           this.logger.error('translation:failed', {
@@ -5944,6 +5976,7 @@ export class TranslationEngine {
             entryId: d.entry.id,
             targetLanguage: d.targetLanguage,
             error: 'module-disabled',
+            code: 'module-disabled',
             moduleId,
             context: d.entry.context ?? null,
           });
@@ -6029,7 +6062,13 @@ export class TranslationEngine {
       };
       if (!routedModule) {
         for (const d of decisions) {
-          this.recordFailure(status, d.entry.id, d.targetLanguage, 'module-not-found');
+          this.recordFailure(
+            status,
+            d.entry.id,
+            d.targetLanguage,
+            'module-not-found',
+            'module-not-found',
+          );
           settled.add(settleKey(d));
           metricsCollector.recordFailure(moduleId, metricsModel);
           this.logger.error('translation:failed', {
@@ -6037,6 +6076,7 @@ export class TranslationEngine {
             entryId: d.entry.id,
             targetLanguage: d.targetLanguage,
             error: 'module-not-found',
+            code: 'module-not-found',
             moduleId,
             context: d.entry.context ?? null,
           });
@@ -6411,17 +6451,23 @@ export class TranslationEngine {
           // provider auth failure quoting the key) — sanitize before it's
           // recorded/logged (pattern-strip + live-vault value scrub), same as
           // the batch-uncaught catch below.
-          const errMsg = moduleResult?.error
-            ? sanitizeLogObject({ m: toErrorMessage(moduleResult.error) }).m
+          const rawErr = moduleResult?.error
+            ? moduleResult.error
             : emptyOutput
               ? 'empty translation'
               : 'empty result';
+          // Classify from the raw value — sanitizing can mask the signal.
+          const code = classifyFailure(rawErr);
+          const errMsg = moduleResult?.error
+            ? sanitizeLogObject({ m: toErrorMessage(moduleResult.error) }).m
+            : rawErr;
           this.logger.warn('translation:failed', {
             runId,
             entryId: e.decision.entry.id,
             targetLanguage: e.decision.targetLanguage,
             moduleId,
             error: errMsg,
+            code,
             context: e.decision.entry.context ?? null,
           });
           if (moduleResult?.error && countsAsProviderFailure(moduleResult.error)) {
@@ -6433,7 +6479,7 @@ export class TranslationEngine {
               1,
             );
           }
-          this.recordFailure(status, e.decision.entry.id, e.decision.targetLanguage, errMsg);
+          this.recordFailure(status, e.decision.entry.id, e.decision.targetLanguage, errMsg, code);
           settled.add(settleKey(e.decision));
           metricsCollector.recordFailure(moduleId, metricsModel);
           this.emitProgress(runId, status);
@@ -7003,6 +7049,7 @@ export class TranslationEngine {
           // Sanitize before recording/logging — a provider error can echo a raw
           // credential (pattern-strip + live-vault value scrub), same rationale
           // as the batch-uncaught catch below.
+          const code = classifyFailure(batchError);
           const message = sanitizeLogObject({ m: toErrorMessage(batchError) }).m;
           this.logger.warn('translation:batch-failed', {
             runId,
@@ -7010,6 +7057,7 @@ export class TranslationEngine {
             batchSize: batchJobs.length,
             targetLanguages: Array.from(new Set(batchJobs.map(({ job }) => job.targetLanguage))),
             error: message,
+            code,
             ...(batchError instanceof Error ? { errorName: batchError.name } : {}),
           });
           for (const { index } of batchJobs) {
@@ -7025,10 +7073,17 @@ export class TranslationEngine {
               targetLanguage: e.decision.targetLanguage,
               moduleId,
               error: message,
+              code,
               batchFailure: true,
               context: e.decision.entry.context ?? null,
             });
-            this.recordFailure(status, e.decision.entry.id, e.decision.targetLanguage, message);
+            this.recordFailure(
+              status,
+              e.decision.entry.id,
+              e.decision.targetLanguage,
+              message,
+              code,
+            );
             settled.add(settleKey(e.decision));
             metricsCollector.recordFailure(moduleId, metricsModel);
             this.emitProgress(runId, status);
@@ -7079,12 +7134,13 @@ export class TranslationEngine {
       const stack = err instanceof Error ? err.stack : undefined;
       for (const d of decisions) {
         if (settled.has(settleKey(d))) continue;
-        this.recordFailure(status, d.entry.id, d.targetLanguage, message);
+        this.recordFailure(status, d.entry.id, d.targetLanguage, message, 'unknown');
         settled.add(settleKey(d));
       }
       this.logger.error('translation:batch-uncaught', {
         runId,
         error: message,
+        code: 'unknown',
         ...(stack ? { stack } : {}),
       });
       this.emitProgress(runId, status);
@@ -8499,8 +8555,9 @@ export class TranslationEngine {
     entryId: string,
     targetLanguage: string,
     message: string,
+    code?: FailureCode,
   ): void {
-    recordRunFailure(status, { entryId, targetLanguage }, message);
+    recordRunFailure(status, { entryId, targetLanguage }, message, code);
   }
 
   /**
@@ -8573,7 +8630,13 @@ export class TranslationEngine {
         continue;
       }
       const { reason, metricsModel } = classified;
-      this.recordFailure(status, decision.entry.id, decision.targetLanguage, reason);
+      this.recordFailure(
+        status,
+        decision.entry.id,
+        decision.targetLanguage,
+        reason,
+        controlledFailureCode(reason),
+      );
       // Mirror the per-job paths: a module-attributable failure (disabled /
       // not-found) bumps that module's health metric; `no-route` has no module
       // to attribute, so it records none.
@@ -8616,6 +8679,7 @@ export class TranslationEngine {
         runId,
         targetLanguage: group.targetLanguage,
         error: group.reason,
+        code: controlledFailureCode(group.reason),
         count: group.count,
         // The per-entry ids behind this aggregate, so the UI can rebuild the
         // per-entry recovery list and Retry-all from the (collapsed) log stream.

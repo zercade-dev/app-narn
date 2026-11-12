@@ -4,7 +4,8 @@
     "openModuleSettings": "Mở cài đặt mô-đun",
     "openQuality": "Mở bảng chất lượng",
     "openGlossary": "Mở bảng thuật ngữ",
-    "unlockVault": "Mở khóa kho bảo mật"
+    "unlockVault": "Mở khóa kho bảo mật",
+    "switchToRaw": "Hiện nhật ký thô"
   },
   "translation": {
     "start": "Đang dịch một mục sang {{language}}…",
@@ -22,12 +23,61 @@
     "failedModuleNotFound": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} chưa được cài.",
     "failedModuleNotFound_other": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} chưa được cài.",
     "failedGeneric": "Không dịch được một mục sang {{language}}.",
+    "failedAuth": "Không dịch được {{count}} mục sang {{language}} — {{module}} đã từ chối khóa API.",
+    "failedAuth_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} đã từ chối khóa API.",
+    "failedRateLimit": "Không dịch được {{count}} mục sang {{language}} — {{module}} đã đạt giới hạn yêu cầu.",
+    "failedRateLimit_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} đã đạt giới hạn yêu cầu.",
+    "failedTimeout": "Không dịch được {{count}} mục sang {{language}} — {{module}} phản hồi quá lâu.",
+    "failedTimeout_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} phản hồi quá lâu.",
+    "failedModelUnavailable": "Không dịch được {{count}} mục sang {{language}} — mô hình không khả dụng trên {{module}}.",
+    "failedModelUnavailable_other": "Không dịch được {{count}} mục sang {{language}} — mô hình không khả dụng trên {{module}}.",
+    "failedParse": "Không dịch được {{count}} mục sang {{language}} — {{module}} gửi về phản hồi không đọc được.",
+    "failedParse_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} gửi về phản hồi không đọc được.",
+    "failedEmptyReply": "Không dịch được {{count}} mục sang {{language}} — {{module}} gửi về phản hồi trống.",
+    "failedEmptyReply_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} gửi về phản hồi trống.",
+    "failedProvider": "Không dịch được {{count}} mục sang {{language}} — {{module}} báo lỗi.",
+    "failedProvider_other": "Không dịch được {{count}} mục sang {{language}} — {{module}} báo lỗi.",
+    "failedUnknown": "Không dịch được {{count}} mục sang {{language}} — chưa rõ nguyên nhân.",
+    "failedUnknown_other": "Không dịch được {{count}} mục sang {{language}} — chưa rõ nguyên nhân.",
     "batchFailed": "Một lô {{count}} bản dịch sang {{languages}} đã thất bại.",
+    "batchFailedCause": "Một lô {{count}} bản dịch sang {{languages}} đã thất bại — {{cause}}",
+    "batchFailedCause_other": "Một lô {{count}} bản dịch sang {{languages}} đã thất bại — {{cause}}",
+    "batchFailedUnknown": "Một lô {{count}} bản dịch sang {{languages}} đã thất bại — chưa rõ nguyên nhân.",
+    "batchFailedUnknown_other": "Một lô {{count}} bản dịch sang {{languages}} đã thất bại — chưa rõ nguyên nhân.",
     "queueStartFailed": "Không bắt đầu được lần chạy dịch.",
     "maskMismatch": "Thẻ định dạng không còn nguyên sau khi dịch sang {{language}}.",
     "tmRejected": "Một bản dịch đã lưu cho {{language}} không qua được kiểm tra chất lượng.",
     "lqaRetry": "Kiểm tra chất lượng không đạt — đang yêu cầu mô hình thử lại.",
-    "authCancel": "Việc đăng nhập đã bị hủy, nên quá trình dịch dừng lại."
+    "authCancel": "Việc đăng nhập đã bị hủy, nên quá trình dịch dừng lại.",
+    "batchUncaught": "Một lô bản dịch đã thất bại ngoài dự kiến.",
+    "startAborted": "Lần chạy dịch đã dừng trước khi gửi đi bất kỳ mục nào.",
+    "waitingForQuota": "Đã tạm dừng dịch cho đến khi các mô hình miễn phí có lại hạn mức.",
+    "waitingForQuotaUntil": "Đã tạm dừng dịch cho đến khi các mô hình miễn phí có lại hạn mức — sớm nhất có thể tiếp tục vào khoảng {{time}}.",
+    "quotaRedispatched": "Đang tiếp tục các bản dịch đã chờ hạn mức mô hình miễn phí.",
+    "quotaParkAdopted": "Đã tiếp nhận các lần chạy dịch đang tạm dừng để chờ hạn mức.",
+    "freewayRerouted": "Mô hình miễn phí {{from}} hiện không dùng được — đang thử {{to}} thay thế.",
+    "freewayInstanceSwapped": "Không dùng được {{fromModule}} — đang thử cùng mô hình qua {{toModule}}.",
+    "freewayDeferred": "Một số bản dịch đang chờ {{model}} — sẽ được thử lại vào khoảng {{time}}.",
+    "freewayDegraded": "Không có mô hình miễn phí nào đủ mạnh như thường lệ — đang thử một mô hình nhẹ hơn cho lô này.",
+    "freewayEscalated": "Một bản dịch sang {{language}} không qua được kiểm tra chất lượng — đang thử {{to}} thay thế.",
+    "freewayCredentialDisabled": "{{module}} đã từ chối khóa API của nó — các mô hình miễn phí sẽ bỏ qua mô-đun này cho đến khi khóa được cập nhật.",
+    "lqaCorrectionFailed": "Không sửa được các bản dịch không qua kiểm tra chất lượng — chúng giữ phiên bản đầu tiên.",
+    "lqaCorrectionSkipped": "Đã bỏ qua việc sửa một bản dịch sang {{language}} — bản dịch đã thay đổi kể từ khi được dịch.",
+    "lqaCorrectionSkippedRemoved": "Đã bỏ qua việc sửa một bản dịch sang {{language}} — mục của nó đã bị xóa.",
+    "lqaCorrectionUnavailable": "{{module}} không sửa được các bản dịch sang {{language}} không qua kiểm tra chất lượng — chúng giữ phiên bản đầu tiên.",
+    "lqaRetryFailed": "Thử lại các bản dịch không qua kiểm tra chất lượng nhưng không thành công.",
+    "lqaRetryFailedLanguage": "Thử lại một bản dịch sang {{language}} không qua kiểm tra chất lượng nhưng không thành công.",
+    "splitPhaseStart": "Đang dịch bằng mô hình cục bộ {{model}}…",
+    "tmLookupFailed": "Không kiểm tra được bộ nhớ dịch cho một mục sang {{language}} — sẽ dịch mục này từ đầu.",
+    "cause": {
+      "auth": "{{module}} đã từ chối khóa API.",
+      "rateLimit": "{{module}} đã đạt giới hạn yêu cầu.",
+      "timeout": "{{module}} phản hồi quá lâu.",
+      "modelUnavailable": "mô hình không khả dụng trên {{module}}.",
+      "parse": "{{module}} gửi về phản hồi không đọc được.",
+      "emptyReply": "{{module}} gửi về phản hồi trống.",
+      "provider": "{{module}} báo lỗi."
+    }
   },
   "lqa": {
     "passed": "Kiểm tra chất lượng đạt.",
@@ -60,10 +110,38 @@
     "done": "Chi tiết màn chơi đã xong — {{completed}} thành công, {{failed}} thất bại.",
     "failed": "Dịch chi tiết màn chơi thất bại."
   },
+  "relinkRetranslate": {
+    "done": "Đã dịch lại một mục được liên kết lại sang {{language}}.",
+    "maskMismatch": "Thẻ định dạng không còn nguyên sau khi dịch lại sang {{language}}."
+  },
+  "run": {
+    "queued": "{{task}}: đã xếp hàng lần chạy.",
+    "batchFailed": "{{task}}: một lô đã thất bại.",
+    "batchFailedCause": "{{task}}: một lô đã thất bại — {{cause}}",
+    "batchFailedUnknown": "{{task}}: một lô đã thất bại — chưa rõ nguyên nhân.",
+    "batchTimedOut": "{{task}}: lần chạy đã vượt giới hạn thời gian, nên một lô đã bị dừng.",
+    "freewayRerouted": "{{task}}: mô hình miễn phí {{from}} hiện không dùng được — đang thử {{to}} thay thế.",
+    "freewayMinuteWait": "{{task}}: mô hình miễn phí {{model}} đã chạm giới hạn mỗi phút — chờ {{seconds}} giây rồi tiếp tục."
+  },
+  "chat": {
+    "dispatch": "Đã gửi tin nhắn tới trợ lý ({{model}}).",
+    "done": "Trợ lý đã trả lời xong trong {{seconds}} giây ({{model}}).",
+    "doneCancelled": "Đã hủy câu trả lời của trợ lý sau {{seconds}} giây ({{model}}).",
+    "doneFailed": "Câu trả lời của trợ lý đã thất bại sau {{seconds}} giây ({{model}})."
+  },
   "module": {
     "loaded": "Đã nạp mô-đun {{module}}.",
     "instanceRegistered": "Đã thêm cấu hình {{instance}}.",
-    "instanceRegisterFailed": "Không thêm được cấu hình {{instance}}."
+    "instanceRegisterFailed": "Không thêm được cấu hình {{instance}}.",
+    "instanceUnregistered": "Đã gỡ thực thể {{instance}}.",
+    "configUpdated": "Đã lưu cài đặt dự án cho {{module}}."
+  },
+  "globalConfig": {
+    "instanceCreated": "Đã tạo thực thể {{instance}}.",
+    "instanceDeleted": "Đã xóa thực thể {{instance}}.",
+    "instanceRenamed": "Đã đổi tên thực thể {{instance}}.",
+    "settingsUpdated": "Đã lưu cài đặt không gian làm việc.",
+    "updated": "Đã lưu cài đặt không gian làm việc cho {{module}}."
   },
   "vault": {
     "unlocked": "Đã mở khóa kho bảo mật.",
@@ -82,6 +160,14 @@
   },
   "backup": {
     "restored": "Đã khôi phục bản sao lưu.",
-    "pruneFailed": "Không dọn được các bản sao lưu cũ."
+    "pruneFailed": "Không dọn được các bản sao lưu cũ.",
+    "restoredFromPg": "Đã khôi phục dự án từ một bản sao lưu.",
+    "restoredFromServer": "Đã khôi phục dự án từ một bản sao lưu được lưu trên máy chủ."
+  },
+  "csvExport": {
+    "roundtripUnsafe": "Đã xuất xong, nhưng một số ô có thể không nhập lại trọn vẹn (một dấu nháy đứng trước dấu phẩy hoặc ngắt dòng, ở: {{columns}})."
+  },
+  "runs": {
+    "revertEntryFailed": "Đã bỏ qua việc hoàn nguyên một bản dịch sang {{language}} — mục của nó có thể đã bị xóa."
   }
 }

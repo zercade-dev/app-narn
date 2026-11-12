@@ -4,7 +4,8 @@
     "openModuleSettings": "Modül ayarlarını aç",
     "openQuality": "Kalite panosunu aç",
     "openGlossary": "Sözlükçeyi aç",
-    "unlockVault": "Kasanın kilidini aç"
+    "unlockVault": "Kasanın kilidini aç",
+    "switchToRaw": "Ham günlüğü göster"
   },
   "translation": {
     "start": "Bir girdi {{language}} diline çevriliyor…",
@@ -26,12 +27,71 @@
     "failedModuleNotFound_one": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} modülü kurulu değil.",
     "failedModuleNotFound_other": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} modülü kurulu değil.",
     "failedGeneric": "Bir girdi {{language}} diline çevrilemedi.",
+    "failedAuth": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} API anahtarını reddetti.",
+    "failedAuth_one": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} API anahtarını reddetti.",
+    "failedAuth_other": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} API anahtarını reddetti.",
+    "failedRateLimit": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} istek sınırına ulaştı.",
+    "failedRateLimit_one": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} istek sınırına ulaştı.",
+    "failedRateLimit_other": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} istek sınırına ulaştı.",
+    "failedTimeout": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} yanıt vermekte çok gecikti.",
+    "failedTimeout_one": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} yanıt vermekte çok gecikti.",
+    "failedTimeout_other": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} yanıt vermekte çok gecikti.",
+    "failedModelUnavailable": "{{count}} girdi {{language}} diline çevrilemedi — model {{module}} üzerinde kullanılamıyor.",
+    "failedModelUnavailable_one": "{{count}} girdi {{language}} diline çevrilemedi — model {{module}} üzerinde kullanılamıyor.",
+    "failedModelUnavailable_other": "{{count}} girdi {{language}} diline çevrilemedi — model {{module}} üzerinde kullanılamıyor.",
+    "failedParse": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} okunamayan bir yanıt gönderdi.",
+    "failedParse_one": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} okunamayan bir yanıt gönderdi.",
+    "failedParse_other": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} okunamayan bir yanıt gönderdi.",
+    "failedEmptyReply": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} boş bir yanıt gönderdi.",
+    "failedEmptyReply_one": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} boş bir yanıt gönderdi.",
+    "failedEmptyReply_other": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} boş bir yanıt gönderdi.",
+    "failedProvider": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} bir hata bildirdi.",
+    "failedProvider_one": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} bir hata bildirdi.",
+    "failedProvider_other": "{{count}} girdi {{language}} diline çevrilemedi — {{module}} bir hata bildirdi.",
+    "failedUnknown": "{{count}} girdi {{language}} diline çevrilemedi — neden bilinmiyor.",
+    "failedUnknown_one": "{{count}} girdi {{language}} diline çevrilemedi — neden bilinmiyor.",
+    "failedUnknown_other": "{{count}} girdi {{language}} diline çevrilemedi — neden bilinmiyor.",
     "batchFailed": "{{languages}} için {{count}} çeviriden oluşan bir yığın başarısız oldu.",
+    "batchFailedCause": "{{languages}} için {{count}} çeviriden oluşan bir yığın başarısız oldu — {{cause}}",
+    "batchFailedCause_one": "{{languages}} için {{count}} çeviriden oluşan bir yığın başarısız oldu — {{cause}}",
+    "batchFailedCause_other": "{{languages}} için {{count}} çeviriden oluşan bir yığın başarısız oldu — {{cause}}",
+    "batchFailedUnknown": "{{languages}} için {{count}} çeviriden oluşan bir yığın başarısız oldu — neden bilinmiyor.",
+    "batchFailedUnknown_one": "{{languages}} için {{count}} çeviriden oluşan bir yığın başarısız oldu — neden bilinmiyor.",
+    "batchFailedUnknown_other": "{{languages}} için {{count}} çeviriden oluşan bir yığın başarısız oldu — neden bilinmiyor.",
     "queueStartFailed": "Çeviri çalıştırması başlatılamadı.",
     "maskMismatch": "{{language}} diline çeviri sırasında biçimlendirme etiketleri korunamadı.",
     "tmRejected": "{{language}} için kayıtlı bir çeviri kalite denetimini geçemedi.",
     "lqaRetry": "Kalite denetimi başarısız oldu — modelden yeniden denemesi isteniyor.",
-    "authCancel": "Oturum açma iptal edildiği için çeviri durduruldu."
+    "authCancel": "Oturum açma iptal edildiği için çeviri durduruldu.",
+    "batchUncaught": "Bir çeviri yığını beklenmedik şekilde başarısız oldu.",
+    "startAborted": "Çeviri çalıştırması hiçbir girdi gönderilmeden durdu.",
+    "waitingForQuota": "Ücretsiz modellerin kotası yeniden açılana kadar çeviri duraklatıldı.",
+    "waitingForQuotaUntil": "Ücretsiz modellerin kotası yeniden açılana kadar çeviri duraklatıldı — en erken saat {{time}} civarında devam edebilir.",
+    "quotaRedispatched": "Ücretsiz model kotası bekleyen çeviriler sürdürülüyor.",
+    "quotaParkAdopted": "Kota bekleyen duraklatılmış çeviri çalıştırmaları devralındı.",
+    "freewayRerouted": "Ücretsiz model şu anda kullanılamıyor: {{from}} — onun yerine şu model deneniyor: {{to}}.",
+    "freewayInstanceSwapped": "Şu modül örneği kullanılamadı: {{fromModule}} — aynı model şu örnek üzerinden deneniyor: {{toModule}}.",
+    "freewayDeferred": "Bazı çeviriler şu modeli bekliyor: {{model}} — saat {{time}} civarında yeniden denenecekler.",
+    "freewayDegraded": "Her zamanki güçte bir ücretsiz model yok — bu yığın için daha hafif bir model deneniyor.",
+    "freewayEscalated": "{{language}} diline bir çeviri kalite denetimini geçemedi — onun yerine şu model deneniyor: {{to}}.",
+    "freewayCredentialDisabled": "{{module}} kendi API anahtarını reddetti — anahtar güncellenene kadar ücretsiz modeller bu modülü atlayacak.",
+    "lqaCorrectionFailed": "Kalite denetimini geçemeyen çeviriler düzeltilemedi — ilk sürümleri korunuyor.",
+    "lqaCorrectionSkipped": "{{language}} diline bir çevirinin düzeltilmesi atlandı — çevrildikten sonra değişmiş.",
+    "lqaCorrectionSkippedRemoved": "{{language}} diline bir çevirinin düzeltilmesi atlandı — girdisi silinmiş.",
+    "lqaCorrectionUnavailable": "{{module}}, kalite denetimini geçemeyen {{language}} çevirilerini düzeltemiyor — ilk sürümleri korunuyor.",
+    "lqaRetryFailed": "Kalite denetimini geçemeyen çeviriler için yeniden deneme işe yaramadı.",
+    "lqaRetryFailedLanguage": "Kalite denetimini geçemeyen bir {{language}} çevirisi için yeniden deneme işe yaramadı.",
+    "splitPhaseStart": "Yerel model ile çevriliyor: {{model}}…",
+    "tmLookupFailed": "{{language}} diline bir girdi için çeviri belleği denetlenemedi — girdi baştan çevriliyor.",
+    "cause": {
+      "auth": "{{module}} API anahtarını reddetti.",
+      "rateLimit": "{{module}} istek sınırına ulaştı.",
+      "timeout": "{{module}} yanıt vermekte çok gecikti.",
+      "modelUnavailable": "model {{module}} üzerinde kullanılamıyor.",
+      "parse": "{{module}} okunamayan bir yanıt gönderdi.",
+      "emptyReply": "{{module}} boş bir yanıt gönderdi.",
+      "provider": "{{module}} bir hata bildirdi."
+    }
   },
   "lqa": {
     "passed": "Kalite denetimi başarılı oldu.",
@@ -65,10 +125,38 @@
     "done": "Bölüm ayrıntıları tamamlandı — {{completed}} başarılı, {{failed}} başarısız.",
     "failed": "Bölüm ayrıntıları başarısız oldu."
   },
+  "relinkRetranslate": {
+    "done": "Yeniden bağlanan bir girdi {{language}} diline yeniden çevrildi.",
+    "maskMismatch": "{{language}} diline yeniden çeviri sırasında biçimlendirme etiketleri korunamadı."
+  },
+  "run": {
+    "queued": "{{task}}: Çalıştırma sıraya alındı.",
+    "batchFailed": "{{task}}: Bir yığın başarısız oldu.",
+    "batchFailedCause": "{{task}}: Bir yığın başarısız oldu — {{cause}}",
+    "batchFailedUnknown": "{{task}}: Bir yığın başarısız oldu — neden bilinmiyor.",
+    "batchTimedOut": "{{task}}: Çalıştırma süre sınırını aştı, bu yüzden bir yığın durduruldu.",
+    "freewayRerouted": "{{task}}: Ücretsiz model şu anda kullanılamıyor: {{from}} — onun yerine şu model deneniyor: {{to}}.",
+    "freewayMinuteWait": "{{task}}: Ücretsiz model dakika başı sınırına ulaştı: {{model}} — devam etmeden önce {{seconds}} sn bekleniyor."
+  },
+  "chat": {
+    "dispatch": "Mesaj asistana gönderildi ({{model}}).",
+    "done": "Asistanın yanıtı {{seconds}} sn içinde tamamlandı ({{model}}).",
+    "doneCancelled": "Asistanın yanıtı {{seconds}} sn sonra iptal edildi ({{model}}).",
+    "doneFailed": "Asistanın yanıtı {{seconds}} sn sonra başarısız oldu ({{model}})."
+  },
   "module": {
     "loaded": "{{module}} modülü yüklendi.",
     "instanceRegistered": "{{instance}} yapılandırması eklendi.",
-    "instanceRegisterFailed": "{{instance}} yapılandırması eklenemedi."
+    "instanceRegisterFailed": "{{instance}} yapılandırması eklenemedi.",
+    "instanceUnregistered": "Modül örneği kaldırıldı: {{instance}}.",
+    "configUpdated": "Projenin modül ayarları kaydedildi: {{module}}."
+  },
+  "globalConfig": {
+    "instanceCreated": "Modül örneği oluşturuldu: {{instance}}.",
+    "instanceDeleted": "Modül örneği silindi: {{instance}}.",
+    "instanceRenamed": "Modül örneği yeniden adlandırıldı: {{instance}}.",
+    "settingsUpdated": "Çalışma alanı ayarları kaydedildi.",
+    "updated": "Çalışma alanı modül ayarları kaydedildi: {{module}}."
   },
   "vault": {
     "unlocked": "Kasanın kilidi açıldı.",
@@ -88,6 +176,14 @@
   },
   "backup": {
     "restored": "Yedek geri yüklendi.",
-    "pruneFailed": "Eski yedekler temizlenemedi."
+    "pruneFailed": "Eski yedekler temizlenemedi.",
+    "restoredFromPg": "Proje bir yedekten geri yüklendi.",
+    "restoredFromServer": "Proje, sunucuda saklanan bir yedekten geri yüklendi."
+  },
+  "csvExport": {
+    "roundtripUnsafe": "Dışa aktarma bitti, ancak bazı hücreler düzgün geri aktarılamayabilir (şu sütunlarda tırnak işaretinin ardından virgül veya satır sonu var: {{columns}})."
+  },
+  "runs": {
+    "revertEntryFailed": "{{language}} diline bir çevirinin geri döndürülmesi atlandı — girdisi silinmiş olabilir."
   }
 }

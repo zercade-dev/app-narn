@@ -7,7 +7,7 @@
  * bodies live here once and each engine keeps a thin delegating wrapper (so all
  * existing call sites and signatures compile unchanged).
  */
-import type { RunStatus } from '@zercade-dev/narn-shared';
+import type { FailureCode, RunStatus } from '@zercade-dev/narn-shared';
 
 /** The subset of a logger these helpers need (matches the engines' `LoggerLike`). */
 interface ProgressLogger {
@@ -54,13 +54,15 @@ export function emitRunProgress(
 
 /**
  * Record a per-item failure on the run status: bump `failed` and append an error
- * entry ((entry, target-language) reference + message + timestamp). Mutates
- * `status` in place, matching both engines' previous inline bodies.
+ * entry ((entry, target-language) reference + message + timestamp, plus the
+ * closed-list failure `code` when the caller classified one). Mutates `status`
+ * in place, matching both engines' previous inline bodies.
  */
 export function recordRunFailure(
   status: RunStatus,
   ref: { entryId: string; targetLanguage?: string },
   message: string,
+  code?: FailureCode,
 ): void {
   status.failed++;
   status.errors.push({
@@ -68,5 +70,6 @@ export function recordRunFailure(
     targetLang: ref.targetLanguage ?? '',
     message,
     timestamp: Date.now(),
+    ...(code !== undefined ? { code } : {}),
   });
 }

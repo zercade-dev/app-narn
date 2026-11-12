@@ -1,6 +1,8 @@
 {
   "title": "CONSOLE",
   "empty": "Ainda não há linhas de log.",
+  "debugInRaw": "As linhas de depuração aparecem no registro bruto.",
+  "debugShowRaw": "Mostrar registro bruto",
   "filter_all": "Todos",
   "filter_error": "Erro",
   "filter_warn": "Aviso",
@@ -38,5 +40,21 @@
   "captureTooltip": "Enquanto estiver ativado, o servidor mantém cada entrada de log desta sessão para que uma execução longa possa ser analisada sem perdas.",
   "captureDownload": "Baixar captura ({{captured}})",
   "captureDropped": "+{{dropped}} descartados",
-  "captureSlotsExhausted": "A captura está ocupada agora — há capturas demais em execução neste servidor. Tente novamente mais tarde."
+  "captureSlotsExhausted": "A captura está ocupada agora — há capturas demais em execução neste servidor. Tente novamente mais tarde.",
+  "modeFriendly": "Simplificado",
+  "modeRaw": "Bruto",
+  "modeLabel": "Visualização do log",
+  "notificationsBell": "Notificações",
+  "notificationsBellUnread_one": "Notificações, {{count}} não lida",
+  "notificationsBellUnread_other": "Notificações, {{count}} não lidas",
+  "statusLine": {
+    "translatingInto": "Traduzindo para {{language}}: {{done}} de {{total}}",
+    "translatingLanguages_one": "Traduzindo para {{count}} idioma: {{done}} de {{total}}",
+    "translatingLanguages_other": "Traduzindo para {{count}} idiomas: {{done}} de {{total}}",
+    "progress": "{{type}}: {{done}} de {{total}}",
+    "waiting": "{{type}}: aguardando para retomar, {{done}} de {{total}}",
+    "queued": "{{type}}: na fila, posição {{position}}",
+    "queuedNoPosition": "{{type}}: na fila",
+    "starting": "{{type}}: iniciando"
+  }
 }

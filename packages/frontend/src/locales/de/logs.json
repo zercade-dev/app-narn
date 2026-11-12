@@ -4,7 +4,8 @@
     "openModuleSettings": "Moduleinstellungen öffnen",
     "openQuality": "Qualitäts-Dashboard öffnen",
     "openGlossary": "Glossar öffnen",
-    "unlockVault": "Tresor entsperren"
+    "unlockVault": "Tresor entsperren",
+    "switchToRaw": "Rohprotokoll anzeigen"
   },
   "translation": {
     "start": "Ein Eintrag wird für {{language}} übersetzt…",
@@ -26,12 +27,71 @@
     "failedModuleNotFound_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — das Modul {{module}} ist nicht installiert.",
     "failedModuleNotFound_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — das Modul {{module}} ist nicht installiert.",
     "failedGeneric": "Ein Eintrag konnte nicht für {{language}} übersetzt werden.",
+    "failedAuth": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat den API-Schlüssel abgelehnt.",
+    "failedAuth_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — {{module}} hat den API-Schlüssel abgelehnt.",
+    "failedAuth_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat den API-Schlüssel abgelehnt.",
+    "failedRateLimit": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat das Anfragelimit erreicht.",
+    "failedRateLimit_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — {{module}} hat das Anfragelimit erreicht.",
+    "failedRateLimit_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat das Anfragelimit erreicht.",
+    "failedTimeout": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat zu lange für die Antwort gebraucht.",
+    "failedTimeout_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — {{module}} hat zu lange für die Antwort gebraucht.",
+    "failedTimeout_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat zu lange für die Antwort gebraucht.",
+    "failedModelUnavailable": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — das Modell ist bei {{module}} nicht verfügbar.",
+    "failedModelUnavailable_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — das Modell ist bei {{module}} nicht verfügbar.",
+    "failedModelUnavailable_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — das Modell ist bei {{module}} nicht verfügbar.",
+    "failedParse": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat eine Antwort gesendet, die sich nicht lesen ließ.",
+    "failedParse_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — {{module}} hat eine Antwort gesendet, die sich nicht lesen ließ.",
+    "failedParse_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat eine Antwort gesendet, die sich nicht lesen ließ.",
+    "failedEmptyReply": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat eine leere Antwort gesendet.",
+    "failedEmptyReply_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — {{module}} hat eine leere Antwort gesendet.",
+    "failedEmptyReply_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat eine leere Antwort gesendet.",
+    "failedProvider": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat einen Fehler gemeldet.",
+    "failedProvider_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — {{module}} hat einen Fehler gemeldet.",
+    "failedProvider_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — {{module}} hat einen Fehler gemeldet.",
+    "failedUnknown": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — der Grund ist unbekannt.",
+    "failedUnknown_one": "{{count}} Eintrag konnte nicht für {{language}} übersetzt werden — der Grund ist unbekannt.",
+    "failedUnknown_other": "{{count}} Einträge konnten nicht für {{language}} übersetzt werden — der Grund ist unbekannt.",
     "batchFailed": "Ein Batch ist fehlgeschlagen — Übersetzungen: {{count}}, Sprachen: {{languages}}.",
+    "batchFailedCause": "Ein Batch mit {{count}} Übersetzungen nach {{languages}} ist fehlgeschlagen — {{cause}}",
+    "batchFailedCause_one": "Ein Batch mit {{count}} Übersetzung nach {{languages}} ist fehlgeschlagen — {{cause}}",
+    "batchFailedCause_other": "Ein Batch mit {{count}} Übersetzungen nach {{languages}} ist fehlgeschlagen — {{cause}}",
+    "batchFailedUnknown": "Ein Batch mit {{count}} Übersetzungen nach {{languages}} ist fehlgeschlagen — der Grund ist unbekannt.",
+    "batchFailedUnknown_one": "Ein Batch mit {{count}} Übersetzung nach {{languages}} ist fehlgeschlagen — der Grund ist unbekannt.",
+    "batchFailedUnknown_other": "Ein Batch mit {{count}} Übersetzungen nach {{languages}} ist fehlgeschlagen — der Grund ist unbekannt.",
     "queueStartFailed": "Der Übersetzungsdurchlauf konnte nicht gestartet werden.",
     "maskMismatch": "Formatierungs-Tags sind bei der Übersetzung für {{language}} verloren gegangen.",
     "tmRejected": "Eine gespeicherte Übersetzung für {{language}} hat die Qualitätsprüfung nicht bestanden.",
     "lqaRetry": "Qualitätsprüfung nicht bestanden — das Modell wird um einen erneuten Versuch gebeten.",
-    "authCancel": "Die Anmeldung wurde abgebrochen, daher wurde die Übersetzung gestoppt."
+    "authCancel": "Die Anmeldung wurde abgebrochen, daher wurde die Übersetzung gestoppt.",
+    "batchUncaught": "Ein Batch mit Übersetzungen ist unerwartet fehlgeschlagen.",
+    "startAborted": "Der Übersetzungsdurchlauf wurde beendet, bevor ein Eintrag gesendet wurde.",
+    "waitingForQuota": "Übersetzung pausiert, bis die kostenlosen Modelle wieder Kontingent haben.",
+    "waitingForQuotaUntil": "Übersetzung pausiert, bis die kostenlosen Modelle wieder Kontingent haben — frühestens gegen {{time}} kann es weitergehen.",
+    "quotaRedispatched": "Übersetzungen, die auf Kontingent der kostenlosen Modelle gewartet haben, werden fortgesetzt.",
+    "quotaParkAdopted": "Pausierte Übersetzungsdurchläufe, die auf Kontingent warten, wurden übernommen.",
+    "freewayRerouted": "Das kostenlose Modell {{from}} ist gerade nicht verfügbar — stattdessen wird {{to}} versucht.",
+    "freewayInstanceSwapped": "{{fromModule}} konnte nicht verwendet werden — dasselbe Modell wird über {{toModule}} versucht.",
+    "freewayDeferred": "Einige Übersetzungen warten auf {{model}} — gegen {{time}} werden sie erneut versucht.",
+    "freewayDegraded": "Kein kostenloses Modell der üblichen Stärke ist verfügbar — für diesen Batch wird ein leichteres versucht.",
+    "freewayEscalated": "Eine Übersetzung für {{language}} hat die Qualitätsprüfung nicht bestanden — stattdessen wird {{to}} versucht.",
+    "freewayCredentialDisabled": "{{module}} hat seinen API-Schlüssel abgelehnt — die kostenlosen Modelle überspringen es, bis der Schlüssel aktualisiert ist.",
+    "lqaCorrectionFailed": "Übersetzungen, die die Qualitätsprüfung nicht bestanden haben, konnten nicht korrigiert werden — sie behalten ihre erste Fassung.",
+    "lqaCorrectionSkipped": "Korrektur einer Übersetzung für {{language}} übersprungen — sie wurde seit der Übersetzung geändert.",
+    "lqaCorrectionSkippedRemoved": "Korrektur einer Übersetzung für {{language}} übersprungen — ihr Eintrag wurde gelöscht.",
+    "lqaCorrectionUnavailable": "{{module}} kann die Übersetzungen für {{language}}, die die Qualitätsprüfung nicht bestanden haben, nicht korrigieren — sie behalten ihre erste Fassung.",
+    "lqaRetryFailed": "Der erneute Versuch für Übersetzungen, die die Qualitätsprüfung nicht bestanden haben, hat nicht funktioniert.",
+    "lqaRetryFailedLanguage": "Der erneute Versuch für eine Übersetzung für {{language}}, die die Qualitätsprüfung nicht bestanden hat, hat nicht funktioniert.",
+    "splitPhaseStart": "Übersetzung mit dem lokalen Modell {{model}}…",
+    "tmLookupFailed": "Translation Memory konnte für einen Eintrag für {{language}} nicht geprüft werden — er wird neu übersetzt.",
+    "cause": {
+      "auth": "{{module}} hat den API-Schlüssel abgelehnt.",
+      "rateLimit": "{{module}} hat das Anfragelimit erreicht.",
+      "timeout": "{{module}} hat zu lange für die Antwort gebraucht.",
+      "modelUnavailable": "das Modell ist bei {{module}} nicht verfügbar.",
+      "parse": "{{module}} hat eine Antwort gesendet, die sich nicht lesen ließ.",
+      "emptyReply": "{{module}} hat eine leere Antwort gesendet.",
+      "provider": "{{module}} hat einen Fehler gemeldet."
+    }
   },
   "lqa": {
     "passed": "Qualitätsprüfung bestanden.",
@@ -65,10 +125,38 @@
     "done": "Level-Details abgeschlossen — fertig: {{completed}}, fehlgeschlagen: {{failed}}.",
     "failed": "Level-Details fehlgeschlagen."
   },
+  "relinkRetranslate": {
+    "done": "Ein neu verknüpfter Eintrag wurde für {{language}} neu übersetzt.",
+    "maskMismatch": "Formatierungs-Tags sind bei der Neuübersetzung für {{language}} verloren gegangen."
+  },
+  "run": {
+    "queued": "{{task}}: Durchlauf in der Warteschlange.",
+    "batchFailed": "{{task}}: Ein Batch ist fehlgeschlagen.",
+    "batchFailedCause": "{{task}}: Ein Batch ist fehlgeschlagen — {{cause}}",
+    "batchFailedUnknown": "{{task}}: Ein Batch ist fehlgeschlagen — der Grund ist unbekannt.",
+    "batchTimedOut": "{{task}}: Der Durchlauf hat sein Zeitlimit überschritten, daher wurde ein Batch abgebrochen.",
+    "freewayRerouted": "{{task}}: Das kostenlose Modell {{from}} ist gerade nicht verfügbar — stattdessen wird {{to}} versucht.",
+    "freewayMinuteWait": "{{task}}: Das kostenlose Modell {{model}} hat sein Minutenlimit erreicht — nach {{seconds}} s Wartezeit geht es weiter."
+  },
+  "chat": {
+    "dispatch": "Nachricht an den Assistenten gesendet ({{model}}).",
+    "done": "Antwort des Assistenten nach {{seconds}} s fertig ({{model}}).",
+    "doneCancelled": "Antwort des Assistenten nach {{seconds}} s abgebrochen ({{model}}).",
+    "doneFailed": "Antwort des Assistenten nach {{seconds}} s fehlgeschlagen ({{model}})."
+  },
   "module": {
     "loaded": "Das Modul {{module}} wurde geladen.",
     "instanceRegistered": "Die Konfiguration {{instance}} wurde hinzugefügt.",
-    "instanceRegisterFailed": "Die Konfiguration {{instance}} konnte nicht hinzugefügt werden."
+    "instanceRegisterFailed": "Die Konfiguration {{instance}} konnte nicht hinzugefügt werden.",
+    "instanceUnregistered": "Die Instanz {{instance}} wurde entfernt.",
+    "configUpdated": "Die Projekteinstellungen für {{module}} wurden gespeichert."
+  },
+  "globalConfig": {
+    "instanceCreated": "Die Instanz {{instance}} wurde erstellt.",
+    "instanceDeleted": "Die Instanz {{instance}} wurde gelöscht.",
+    "instanceRenamed": "Die Instanz {{instance}} wurde umbenannt.",
+    "settingsUpdated": "Workspace-Einstellungen gespeichert.",
+    "updated": "Die Workspace-Einstellungen für {{module}} wurden gespeichert."
   },
   "vault": {
     "unlocked": "Tresor entsperrt.",
@@ -88,6 +176,14 @@
   },
   "backup": {
     "restored": "Backup wiederhergestellt.",
-    "pruneFailed": "Alte Backups konnten nicht aufgeräumt werden."
+    "pruneFailed": "Alte Backups konnten nicht aufgeräumt werden.",
+    "restoredFromPg": "Projekt aus einem Backup wiederhergestellt.",
+    "restoredFromServer": "Projekt aus einem auf dem Server gespeicherten Backup wiederhergestellt."
+  },
+  "csvExport": {
+    "roundtripUnsafe": "Export abgeschlossen, aber einige Zellen lassen sich möglicherweise nicht sauber neu importieren (ein Anführungszeichen gefolgt von einem Komma oder Zeilenumbruch in: {{columns}})."
+  },
+  "runs": {
+    "revertEntryFailed": "Zurücksetzen einer Übersetzung für {{language}} übersprungen — ihr Eintrag wurde möglicherweise gelöscht."
   }
 }

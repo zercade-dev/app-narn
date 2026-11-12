@@ -64,6 +64,7 @@ import { FREEWAY_BACKGROUND_RESERVE } from './M32/background-select.js';
 import { recordJudgeOutcomes, type BucketSourceDeps } from './M32/bucket-source.js';
 import { batchPayloadChars, createReviewBatchSizer, judgeLengthProxy } from './M32/review-batch.js';
 import type { BucketView } from './M32/types.js';
+import { classifyFailure } from './M9/failure-code.js';
 import {
   BackgroundRunEngine,
   sanitizeLLMText,
@@ -1043,18 +1044,23 @@ export class JudgeEngine extends BackgroundRunEngine<JudgeVerdictRecord> {
       },
       onResult: async (verdict, status) => {
         if (verdict.error) {
-          this.recordFailure(status, verdict, verdict.error);
+          this.recordFailure(status, verdict, verdict.error, classifyFailure(verdict.error));
           return;
         }
         const entry = entriesById.get(verdict.entryId);
         if (!entry) {
-          this.recordFailure(status, verdict, 'entry not found');
+          this.recordFailure(status, verdict, 'entry not found', 'unknown');
           return;
         }
         try {
           await this.persistVerdict(projectId, entry, verdict);
         } catch (err) {
-          this.recordFailure(status, verdict, err instanceof Error ? err.message : `${err}`);
+          this.recordFailure(
+            status,
+            verdict,
+            err instanceof Error ? err.message : `${err}`,
+            'unknown',
+          );
           return;
         }
         status.completed++;

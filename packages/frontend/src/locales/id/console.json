@@ -1,6 +1,8 @@
 {
   "title": "KONSOL",
   "empty": "Belum ada baris log.",
+  "debugInRaw": "Baris awakutu muncul di log mentah.",
+  "debugShowRaw": "Tampilkan log mentah",
   "filter_all": "Semua",
   "filter_error": "Galat",
   "filter_warn": "Peringatan",
@@ -34,5 +36,19 @@
   "captureTooltip": "Saat aktif, server menyimpan setiap entri log sesi ini agar proses yang panjang bisa dianalisis tanpa kehilangan data.",
   "captureDownload": "Unduh rekaman ({{captured}})",
   "captureDropped": "+{{dropped}} tidak tersimpan",
-  "captureSlotsExhausted": "Perekaman sedang sibuk — terlalu banyak perekaman yang berjalan di server ini. Coba lagi nanti."
+  "captureSlotsExhausted": "Perekaman sedang sibuk — terlalu banyak perekaman yang berjalan di server ini. Coba lagi nanti.",
+  "modeFriendly": "Ringkas",
+  "modeRaw": "Mentah",
+  "modeLabel": "Tampilan log",
+  "notificationsBell": "Notifikasi",
+  "notificationsBellUnread_other": "Notifikasi, {{count}} belum dibaca",
+  "statusLine": {
+    "translatingInto": "Menerjemahkan ke {{language}}: {{done}} dari {{total}}",
+    "translatingLanguages_other": "Menerjemahkan ke {{count}} bahasa: {{done}} dari {{total}}",
+    "progress": "{{type}}: {{done}} dari {{total}}",
+    "waiting": "{{type}}: menunggu untuk dilanjutkan, {{done}} dari {{total}}",
+    "queued": "{{type}}: dalam antrean, urutan ke-{{position}}",
+    "queuedNoPosition": "{{type}}: dalam antrean",
+    "starting": "{{type}}: sedang dimulai"
+  }
 }

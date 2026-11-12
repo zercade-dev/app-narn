@@ -211,7 +211,8 @@ runsRouter.post(
  * is active, and a full `RunStatus` carries two arrays that grow with the size
  * of the WORK and that no client reads from the list — a translation run's
  * `request.entryIds` (up to 50 000 ids, kept for the life of the run) and a
- * quota-parked run's `waitingForQuota.pairs`. Both are projected away in SQL;
+ * quota-parked run's `waitingForQuota.pairs`. Both are projected away in SQL
+ * (of `request`, only `targetLanguages` is kept, for the console status line);
  * the parked-pair count survives as `waitingForQuota.pairCount`. Anything that
  * writes a run back must keep using `listRuns` — see the store's doc.
  */

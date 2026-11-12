@@ -1,6 +1,8 @@
 {
   "title": "コンソール",
   "empty": "ログエントリはまだありません。",
+  "debugInRaw": "デバッグ行は生ログに表示されます。",
+  "debugShowRaw": "生ログを表示",
   "filter_all": "すべて",
   "filter_error": "エラー",
   "filter_warn": "警告",
@@ -34,5 +36,19 @@
   "captureTooltip": "オンにすると、サーバーはこのセッションのすべてのログエントリを保持するため、長時間の実行を欠落なく分析できます。",
   "captureDownload": "記録をダウンロード（{{captured}}件）",
   "captureDropped": "+{{dropped}}件破棄",
-  "captureSlotsExhausted": "現在、記録機能が混み合っています（このサーバーで実行中の記録が多すぎます）。しばらくしてからもう一度お試しください。"
+  "captureSlotsExhausted": "現在、記録機能が混み合っています（このサーバーで実行中の記録が多すぎます）。しばらくしてからもう一度お試しください。",
+  "modeFriendly": "わかりやすく",
+  "modeRaw": "生ログ",
+  "modeLabel": "ログの表示",
+  "notificationsBell": "通知",
+  "notificationsBellUnread_other": "通知（未読{{count}}件）",
+  "statusLine": {
+    "translatingInto": "{{language}}に翻訳中：{{done}} / {{total}}",
+    "translatingLanguages_other": "{{count}}言語に翻訳中：{{done}} / {{total}}",
+    "progress": "{{type}}：{{done}} / {{total}}",
+    "waiting": "{{type}}：再開待ち（{{done}} / {{total}}）",
+    "queued": "{{type}}：待機中（{{position}}番目）",
+    "queuedNoPosition": "{{type}}：待機中",
+    "starting": "{{type}}：開始しています"
+  }
 }
