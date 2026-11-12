@@ -29,7 +29,7 @@ export function NotificationBell() {
         onClick={(e) => {
           // The bar's own buttons toggle the panel; this one has its own action.
           e.stopPropagation();
-          setOpen(true);
+          setOpen((wasOpen) => !wasOpen);
         }}
         aria-label={label}
         aria-haspopup="dialog"

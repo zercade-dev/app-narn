@@ -9,7 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
+import { cn, relativeTime } from '@/lib/utils';
 import { useNotificationStore } from '../../stores/notification-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import {
@@ -55,7 +55,7 @@ interface NotificationSidebarProps {
  * failures.
  */
 export function NotificationSidebar({ open, onOpenChange }: Readonly<NotificationSidebarProps>) {
-  const { t } = useTranslation(['account', 'logs', 'strings']);
+  const { t, i18n } = useTranslation(['account', 'logs', 'strings']);
   const translate = t as Translate;
   const projects = useProjectStore((s) => s.projects);
   const activeProjectId = useProjectStore((s) => s.activeProjectId);
@@ -175,7 +175,13 @@ export function NotificationSidebar({ open, onOpenChange }: Readonly<Notificatio
                           </Button>
                         </div>
                         {p.body && (
-                          <p className="break-words text-sm text-muted-foreground">{p.body}</p>
+                          <p
+                            className="line-clamp-2 break-words text-sm text-muted-foreground"
+                            title={p.body}
+                            data-testid="notification-body"
+                          >
+                            {p.body}
+                          </p>
                         )}
                         <p className="flex items-center gap-2 text-xs text-muted-foreground">
                           {unread && (
@@ -187,8 +193,12 @@ export function NotificationSidebar({ open, onOpenChange }: Readonly<Notificatio
                               {t('notificationsUnread')}
                             </span>
                           )}
-                          <time dateTime={n.createdAt}>
-                            {new Date(n.createdAt).toLocaleString()}
+                          <time
+                            dateTime={n.createdAt}
+                            title={new Date(n.createdAt).toLocaleString(i18n.language)}
+                            data-testid="notification-time"
+                          >
+                            {relativeTime(new Date(n.createdAt), i18n.language)}
                           </time>
                         </p>
                         {p.actions.length > 0 && (
