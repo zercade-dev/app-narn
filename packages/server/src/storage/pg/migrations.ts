@@ -1148,7 +1148,11 @@ export const MIGRATIONS: ReadonlyArray<{ name: string; statements: readonly stri
            returning w.at, coalesce(at_time, now())
          $$`,
       `revoke execute on function narn_collab_digest_window(timestamptz) from public`,
-      `grant execute on function narn_collab_digest_window(timestamptz) to app_user`,
+      `do $$ begin
+         if exists (select 1 from pg_roles where rolname = 'narn_app') then
+           grant execute on function narn_collab_digest_window(timestamptz) to narn_app;
+         end if;
+       end $$`,
       `create or replace function narn_collab_activity(since timestamptz, until timestamptz)
          returns table (project_id text, owner_id text, user_id text, language text,
                         edits bigint, translated bigint, run_languages text[])
@@ -1196,20 +1200,32 @@ export const MIGRATIONS: ReadonlyArray<{ name: string; statements: readonly stri
            order by 1, 3, 4
          $$`,
       `revoke execute on function narn_collab_activity(timestamptz, timestamptz) from public`,
-      `grant execute on function narn_collab_activity(timestamptz, timestamptz) to app_user`,
+      `do $$ begin
+         if exists (select 1 from pg_roles where rolname = 'narn_app') then
+           grant execute on function narn_collab_activity(timestamptz, timestamptz) to narn_app;
+         end if;
+       end $$`,
       `create or replace function narn_collab_digest_advance(until timestamptz) returns void
          language sql security definer set search_path = public as $$
            update job_watermarks set at = greatest(at, until), locked_until = null
            where name = 'collab-digest'
          $$`,
       `revoke execute on function narn_collab_digest_advance(timestamptz) from public`,
-      `grant execute on function narn_collab_digest_advance(timestamptz) to app_user`,
+      `do $$ begin
+         if exists (select 1 from pg_roles where rolname = 'narn_app') then
+           grant execute on function narn_collab_digest_advance(timestamptz) to narn_app;
+         end if;
+       end $$`,
       `create or replace function narn_collab_digest_release() returns void
          language sql security definer set search_path = public as $$
            update job_watermarks set locked_until = null where name = 'collab-digest'
          $$`,
       `revoke execute on function narn_collab_digest_release() from public`,
-      `grant execute on function narn_collab_digest_release() to app_user`,
+      `do $$ begin
+         if exists (select 1 from pg_roles where rolname = 'narn_app') then
+           grant execute on function narn_collab_digest_release() to narn_app;
+         end if;
+       end $$`,
     ],
   },
 ];
