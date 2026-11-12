@@ -4,7 +4,7 @@ import { useRunStore } from '../../stores/run-store.js';
 import { useViewStore } from '../../stores/view-store.js';
 import { useProjectStore, accessFor } from '../../stores/project-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
-import { visibleTabs, firstVisibleTab } from '../../lib/mode-gating.js';
+import { visibleTabs, firstVisibleTab, navigateOrOffer } from '../../lib/mode-gating.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { useNicknameLabels } from '../../hooks/use-nickname-labels.js';
 import { ManualEditsView } from './ManualEditsView.js';
@@ -557,20 +557,28 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
   const showManualView = auditVisible && activityView === 'manual';
 
   // Deep-link tab gating: route the suggestions-reopen click through the
-  // same availableTabs rule as URL deep links, so a stale/shared link never
+  // same visibleTabs rule as URL deep links, so a stale/shared link never
   // lands a collaborator on a tab their access can't reach (e.g. a
   // category-gen run, whose 'category' tab is owner-only) — falls back to
-  // firstAvailableTab (a plain tab switch, not a suggestions-reopen — there is
+  // firstVisibleTab (a plain tab switch, not a suggestions-reopen — there is
   // no run to show suggestions for on a tab this access can't reach) instead
-  // of a gated/blank panel for one frame.
+  // of a gated/blank panel for one frame. A tab this access can reach but
+  // Simple hides offers the switch to Advanced and opens the run once accepted.
   const uiMode = useUiMode();
   const openSuggestionsGated = useCallback(
     (tab: 'category' | 'glossary', runId: string) => {
-      const allowed = visibleTabs(access, cloudManaged, uiMode);
-      if (allowed.includes(tab)) openSuggestions(tab, runId);
-      else setActiveTab(firstVisibleTab(access, cloudManaged, uiMode));
+      if (visibleTabs(access, cloudManaged, 'advanced').includes(tab)) {
+        navigateOrOffer({ kind: 'tab', tab }, () => openSuggestions(tab, runId));
+      } else setActiveTab(firstVisibleTab(access, cloudManaged, uiMode));
     },
     [access, cloudManaged, uiMode, openSuggestions, setActiveTab],
+  );
+
+  // Review shortcuts on a run row: Simple hides the review tabs, so offer Advanced first.
+  const openReviewGated = useCallback(
+    (sub: 'translation-ai' | 'source-ai', runId: string) =>
+      navigateOrOffer({ kind: 'tab', tab: `review-${sub}` }, () => openReview(sub, runId)),
+    [openReview],
   );
 
   // Display nickname per run.createdBy, extracted into `useNicknameLabels`
@@ -1124,7 +1132,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                                 </div>
                                 <button
                                   type="button"
-                                  onClick={() => openReview('translation-ai', run.runId)}
+                                  onClick={() => openReviewGated('translation-ai', run.runId)}
                                   className="mt-0.5 flex items-center gap-0.5 text-[10px] text-status-info hover:underline"
                                   data-testid={`run-judge-toggle-${run.runId}`}
                                 >
@@ -1135,7 +1143,7 @@ export function RunsTab({ projectId }: Readonly<RunsTabProps>) {
                             {isSourceReview && (
                               <button
                                 type="button"
-                                onClick={() => openReview('source-ai', run.runId)}
+                                onClick={() => openReviewGated('source-ai', run.runId)}
                                 className="mt-1 flex items-center gap-0.5 text-[10px] text-status-info hover:underline"
                                 data-testid={`run-source-review-toggle-${run.runId}`}
                               >

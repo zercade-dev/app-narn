@@ -17,6 +17,7 @@ import { useSelectionStore } from '../../stores/selection-store.js';
 import { useLoggerStore } from '../../stores/logger-store.js';
 import { useRunStore, type ReviewOrderMeta } from '../../stores/run-store.js';
 import { useViewStore } from '../../stores/view-store.js';
+import { navigateOrOffer } from '../../lib/mode-gating.js';
 import { filterEntries, orderByReviewSort } from '../../lib/filter-entries.js';
 import { countDistinctSourceTexts } from '../../lib/count-distinct-sources.js';
 import { StringTableFilters } from './StringTableFilters.js';
@@ -630,7 +631,8 @@ export function StringTable() {
   // and navigates there; CategoryTab picks it up on mount.
   const handleGenerateCategoriesFromSelection = () => {
     if (visibleSelectedIds.size === 0) return;
-    openCategoryGenScope(Array.from(visibleSelectedIds));
+    const ids = Array.from(visibleSelectedIds);
+    navigateOrOffer({ kind: 'tab', tab: 'category' }, () => openCategoryGenScope(ids));
   };
 
   const handleSelectAllFiltered = () => {

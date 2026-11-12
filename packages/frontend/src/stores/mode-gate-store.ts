@@ -18,19 +18,23 @@ export function goTo(target: NavTarget): void {
 
 interface ModeGateState {
   pending: NavTarget | null;
-  offer: (target: NavTarget) => void;
+  /** Runs on accept instead of a plain `goTo(pending)` — for opens that also set pending state. */
+  onAccept: (() => void) | null;
+  offer: (target: NavTarget, onAccept?: () => void) => void;
   accept: () => void;
   dismiss: () => void;
 }
 
 export const useModeGate = create<ModeGateState>((set, get) => ({
   pending: null,
-  offer: (target) => set({ pending: target }),
+  onAccept: null,
+  offer: (target, onAccept) => set({ pending: target, onAccept: onAccept ?? null }),
   accept: () => {
-    const target = get().pending;
-    set({ pending: null });
+    const { pending, onAccept } = get();
+    set({ pending: null, onAccept: null });
     useUiSettings.getState().setUiMode('advanced');
-    if (target) goTo(target);
+    if (onAccept) onAccept();
+    else if (pending) goTo(pending);
   },
-  dismiss: () => set({ pending: null }),
+  dismiss: () => set({ pending: null, onAccept: null }),
 }));

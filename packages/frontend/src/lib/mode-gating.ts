@@ -49,8 +49,13 @@ export function isTargetHidden(target: NavTarget, mode: UiMode): boolean {
     : !isViewVisible(target.view, mode);
 }
 
-/** Navigate, or — when the target is hidden in Simple — ask to switch to Advanced first. */
-export function navigateOrOffer(target: NavTarget): void {
-  if (isTargetHidden(target, currentMode())) useModeGate.getState().offer(target);
+/**
+ * Navigate, or — when the target is hidden in Simple — ask to switch to Advanced first.
+ * `open` replaces the plain navigation (for opens that also set pending state such as a
+ * run id); it runs immediately when the target is visible, or after the person accepts.
+ */
+export function navigateOrOffer(target: NavTarget, open?: () => void): void {
+  if (isTargetHidden(target, currentMode())) useModeGate.getState().offer(target, open);
+  else if (open) open();
   else goTo(target);
 }

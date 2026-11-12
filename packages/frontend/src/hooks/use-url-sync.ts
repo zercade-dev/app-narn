@@ -42,10 +42,10 @@ export function useUrlSync(): void {
     return { view, activeTab, ...(projectId ? { projectId } : {}), lang: language };
   };
 
-  // A tab from the URL, gated through the SAME availableTabs rule the
+  // A tab from the URL, gated through the SAME visibleTabs rule the
   // Sidebar/AppShell use (tab-gating.ts) — a deep link to a tab the caller's
   // current access can't reach (e.g. a collaborator opening a bookmarked
-  // `/setup/data` link) lands directly on firstAvailableTab instead of
+  // `/setup/data` link) lands directly on firstVisibleTab instead of
   // transiently rendering the gated panel for one frame. `projectId` is the
   // link's OWN target project when present (it may not be the active project
   // yet), falling back to whatever's currently active. AppShell's reset
