@@ -15,6 +15,7 @@
       "ownProvider": "Usar mi propio proveedor",
       "fixKey": "Revisar mi clave",
       "retry": "Reintentar",
+      "stopRetry": "Detener y reintentar",
       "switchAdvanced": "Cambiar a Avanzado",
       "finish": "Finalizar"
     },
@@ -67,7 +68,7 @@
       "pressWhat": "Abre el cuadro de traducción.",
       "startWhat": "Inicia la traducción.",
       "progressWhat": "La traducción está en curso. Esta línea muestra su progreso.",
-      "progressWhy": "El recorrido continúa cuando llegan las primeras traducciones."
+      "progressWhy": "El recorrido continúa cuando la traducción haya terminado."
     },
     "failed": {
       "title": "La traducción no se completó",
@@ -75,6 +76,16 @@
       "authWhat": "El proveedor rechazó tu clave. Revisa la clave y vuelve a intentarlo.",
       "quotaWhat": "La cuota gratuita se agotó por ahora. Espera un poco o añade otra clave y vuelve a intentarlo.",
       "otherWhat": "No se tradujo nada. Revisa tu clave y vuelve a intentarlo."
+    },
+    "parked": {
+      "title": "La traducción está en pausa",
+      "what": "Tu traducción está en pausa, a la espera del proveedor. Revisa tu clave, luego detén esta ejecución e inicia una nueva."
+    },
+    "waiting": {
+      "title": "La traducción está en espera",
+      "why": "La barra resaltada de abajo muestra su estado. El recorrido continúa cuando la traducción haya terminado.",
+      "quotaWhat": "La cuota gratuita se agotó por ahora. La traducción se reanuda sola cuando vuelva a haber cuota.",
+      "modelWhat": "Los modelos gratuitos disponibles ahora están por debajo de la calidad que busca esta ejecución. La traducción se reanuda sola cuando haya uno mejor."
     },
     "export": {
       "title": "Exportar",

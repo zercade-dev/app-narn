@@ -15,6 +15,7 @@
       "ownProvider": "Kendi sağlayıcımı kullan",
       "fixKey": "Anahtarımı kontrol et",
       "retry": "Yeniden dene",
+      "stopRetry": "Durdur ve yeniden dene",
       "switchAdvanced": "Gelişmiş moda geç",
       "finish": "Bitir"
     },
@@ -67,7 +68,7 @@
       "pressWhat": "Çeviri iletişim kutusunu açın.",
       "startWhat": "Çeviriyi başlatın.",
       "progressWhat": "Çeviri sürüyor. Bu satır ilerlemeyi gösterir.",
-      "progressWhy": "İlk çeviriler geldiğinde tur devam eder."
+      "progressWhy": "Çeviri bittiğinde tur devam eder."
     },
     "failed": {
       "title": "Çeviri tamamlanmadı",
@@ -75,6 +76,16 @@
       "authWhat": "Sağlayıcı anahtarınızı reddetti. Anahtarı kontrol edin, ardından yeniden deneyin.",
       "quotaWhat": "Ücretsiz kota şimdilik tükendi. Biraz bekleyin veya başka bir anahtar ekleyin, ardından yeniden deneyin.",
       "otherWhat": "Hiçbir şey çevrilmedi. Anahtarınızı kontrol edin, ardından yeniden deneyin."
+    },
+    "parked": {
+      "title": "Çeviri duraklatıldı",
+      "what": "Çeviriniz duraklatıldı ve sağlayıcıyı bekliyor. Anahtarınızı kontrol edin, ardından bu çalıştırmayı durdurup yenisini başlatın."
+    },
+    "waiting": {
+      "title": "Çeviri bekliyor",
+      "why": "Aşağıdaki vurgulanan çubuk durumu gösterir. Çeviri bittiğinde tur devam eder.",
+      "quotaWhat": "Ücretsiz kota şimdilik tükendi. Kota yeniden açıldığında çeviri kendiliğinden devam eder.",
+      "modelWhat": "Şu anda kullanılabilen ücretsiz modeller, bu çalıştırmanın hedeflediği kalitenin altında. Daha iyi bir model kullanılabilir olduğunda çeviri kendiliğinden devam eder."
     },
     "export": {
       "title": "Dışa aktarma",

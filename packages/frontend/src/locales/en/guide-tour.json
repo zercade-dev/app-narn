@@ -15,6 +15,7 @@
       "ownProvider": "Use my own provider",
       "fixKey": "Check my key",
       "retry": "Try again",
+      "stopRetry": "Stop and try again",
       "switchAdvanced": "Switch to Advanced",
       "finish": "Finish"
     },
@@ -67,7 +68,7 @@
       "pressWhat": "Open the translation dialog.",
       "startWhat": "Start the translation.",
       "progressWhat": "The translation is running. This line shows its progress.",
-      "progressWhy": "The tour continues when the first translations arrive."
+      "progressWhy": "The tour continues when the translation has finished."
     },
     "failed": {
       "title": "The translation didn't go through",
@@ -75,6 +76,16 @@
       "authWhat": "The provider rejected your key. Check the key, then try again.",
       "quotaWhat": "The free quota is used up for now. Wait a little or add another key, then try again.",
       "otherWhat": "Nothing was translated. Check your key, then try again."
+    },
+    "parked": {
+      "title": "The translation is paused",
+      "what": "Your translation is paused and waiting on the provider. Check your key, then stop this run and start a new one."
+    },
+    "waiting": {
+      "title": "The translation is waiting",
+      "why": "The highlighted bar below shows its status. The tour continues when the translation has finished.",
+      "quotaWhat": "The free quota is used up for now. The translation resumes by itself when quota is free again.",
+      "modelWhat": "The free models available right now are below the quality this run aims for. The translation resumes by itself when a better one is available."
     },
     "export": {
       "title": "Export",

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { RunStatusCode, type RunStatus } from '@zercade-dev/narn-shared';
 import { isRunActive, isTranslationRun } from '../lib/run-kind.js';
 import { FREE_KEYS, providerKeyFor } from '../lib/simple-provider.js';
-import type { RunFailure } from '../lib/tour/first-run.js';
+import type { RunStall } from '../lib/tour/first-run.js';
 import type { GuideFacts } from '../lib/tour/types.js';
 import { useGuideStore } from '../stores/guide-store.js';
 import { useProjectStore } from '../stores/project-store.js';
@@ -132,73 +132,67 @@ export function useFirstRunActive(): boolean {
   return relevant && !dismissed && !collaboratorOnly;
 }
 
-/** Why a run that translated nothing stopped, in the guide's three wordings. */
-function failureOf(run: RunStatus): RunFailure {
+/** Why a run that ended with nothing translated stopped. */
+function endedCause(run: RunStatus): 'auth' | 'quota' | 'other' {
   const codes = [run.stopCause, ...run.errors.map((e) => e.code)];
   if (codes.includes('auth')) return 'auth';
-  if (codes.includes('rate-limit') || run.waitingForQuota?.reason === 'quota') return 'quota';
+  if (codes.includes('rate-limit')) return 'quota';
   return 'other';
 }
 
-/** A run the app parked on a provider (quota, errors) before it translated anything. */
-function parkedEmpty(run: RunStatus): boolean {
-  return (
-    run.status === RunStatusCode.Paused && run.waitingForQuota !== undefined && run.completed === 0
-  );
+/** How the guide words a run that is not simply working; `null` when it is, or all is well. */
+function stallOf(run: RunStatus): RunStall | null {
+  if (run.status === RunStatusCode.Paused) {
+    // Paused by the person: their call, and theirs to resume.
+    if (!run.waitingForQuota) return null;
+    // Parked by the app. Two kinds resume by themselves; anything else
+    // (provider errors, or no reason given) holds the queue until dealt with.
+    if (run.waitingForQuota.reason === 'quota') return 'waiting-quota';
+    if (run.waitingForQuota.reason === 'below-target') return 'waiting-model';
+    return 'parked';
+  }
+  if (isRunActive(run) || run.completed > 0) return null;
+  return endedCause(run);
 }
 
-export interface FirstRunFailure {
+export interface FirstRunStall {
   runId: string;
-  cause: RunFailure;
-  /** Still parked (not ended): it holds the project's queue until cancelled or resumed. */
-  parked: boolean;
+  stall: RunStall;
   /** A newer run is already queued behind it, so there is no need to start another. */
   queuedBehind: boolean;
 }
 
 /**
- * The active project's translation run that stopped without translating
- * anything, when that is where things stand: nothing is working right now and
- * either a run is parked waiting on a provider (later runs only queue behind
- * it), or the latest run ended (failed, cancelled, or completed with every
- * string failing). `null` while a run is working, once the latest run has
- * translated something, and when there is no run.
+ * Where the active project's latest translation run stands when it is not
+ * simply working: ended with nothing translated, parked by the app, or
+ * waiting to resume. Runs still queued are skipped to find it: they only wait
+ * behind the run that matters. Older runs never count, whatever their state.
  */
-export function useFirstRunFailure(): FirstRunFailure | null {
+export function useFirstRunStall(): FirstRunStall | null {
   const relevant = useGuideRelevant();
   const activeProjectId = useProjectStore(activeProjectIdOf);
   // A string, so the selector's result is stable between unrelated run updates.
   const encoded = useRunStore((s) => {
     if (!relevant || activeProjectId === null) return null;
-    const runs = s.runs
-      .filter((run) => run.projectId === activeProjectId && isTranslationRun(run))
-      .sort((a, b) => b.startedAt - a.startedAt);
-    const working = (run: RunStatus) =>
-      run.status === RunStatusCode.Running || run.status === RunStatusCode.Pending;
-    if (runs.length === 0 || runs.some(working)) return null;
-    const parked = runs.find(parkedEmpty);
-    const failed = parked ?? runs[0];
-    if (failed.completed > 0 || isRunActive(failed)) return null;
-    if (failed.status === RunStatusCode.Paused && !parked) return null;
-    const queuedBehind = runs.some(
-      (run) => run.status === RunStatusCode.Queued && run.startedAt >= failed.startedAt,
-    );
-    return [
-      failureOf(failed),
-      parked ? 'parked' : 'ended',
-      queuedBehind ? 'queued' : 'alone',
-      failed.runId,
-    ].join(':');
+    let head: RunStatus | undefined;
+    let newestQueuedAt = -Infinity;
+    for (const run of s.runs) {
+      if (run.projectId !== activeProjectId || !isTranslationRun(run)) continue;
+      if (run.status === RunStatusCode.Queued) {
+        newestQueuedAt = Math.max(newestQueuedAt, run.startedAt);
+      } else if (!head || run.startedAt > head.startedAt) {
+        head = run;
+      }
+    }
+    const stall = head && stallOf(head);
+    if (!head || !stall) return null;
+    const queuedBehind = newestQueuedAt >= head.startedAt;
+    return [stall, queuedBehind ? 'queued' : 'alone', head.runId].join(':');
   });
   return useMemo(() => {
     if (encoded === null) return null;
-    const [cause, parked, queued, ...runId] = encoded.split(':');
-    return {
-      cause: cause as RunFailure,
-      parked: parked === 'parked',
-      queuedBehind: queued === 'queued',
-      runId: runId.join(':'),
-    };
+    const [stall, queued, ...runId] = encoded.split(':');
+    return { stall: stall as RunStall, queuedBehind: queued === 'queued', runId: runId.join(':') };
   }, [encoded]);
 }
 

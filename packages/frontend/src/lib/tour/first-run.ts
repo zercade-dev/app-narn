@@ -21,6 +21,7 @@ export type FirstRunAction =
   | 'own-provider'
   | 'fix-key'
   | 'retry'
+  | 'stop-retry'
   | 'switch-advanced'
   | 'finish';
 
@@ -138,24 +139,80 @@ function cloudVaultAndKeySteps(need: 'vault' | 'unlock' | 'key'): TourStep[] {
   ];
 }
 
-/** Why the last translation run produced nothing, as far as the guide words it. */
-export type RunFailure = 'auth' | 'quota' | 'other';
+/**
+ * Where a translation run stands when it is not simply working, in the
+ * guide's wordings:
+ * - `auth` / `quota` / `other`: it ended with nothing translated;
+ * - `parked`: the app paused it on provider errors and it holds the queue;
+ * - `waiting-quota` / `waiting-model`: it is paused and resumes by itself
+ *   (free quota used up, or no free model good enough right now).
+ */
+export type RunStall = 'auth' | 'quota' | 'other' | 'parked' | 'waiting-quota' | 'waiting-model';
 
-/** Shown in place of `translate-progress` when the run did not go through. */
-function failedStep(cause: RunFailure): TourStep {
+const STALL_STEP: Record<RunStall, string> = {
+  auth: 'translate-failed-auth',
+  quota: 'translate-failed-quota',
+  other: 'translate-failed-other',
+  parked: 'translate-parked',
+  'waiting-quota': 'translate-waiting-quota',
+  'waiting-model': 'translate-waiting-model',
+};
+
+/** Shown in place of `translate-progress` while the run is not simply working. */
+function stallStep(
+  stall: RunStall,
+  text: Pick<TourStep, 'titleKey' | 'whatKey' | 'whyKey'>,
+  actions?: TourStep['actions'],
+): TourStep {
   return {
-    id: `translate-failed-${cause}`,
+    id: STALL_STEP[stall],
     anchor: 'console-status',
-    titleKey: 'firstRun.failed.title',
-    whatKey: `firstRun.failed.${cause}What`,
-    whyKey: 'firstRun.failed.why',
+    ...text,
     advance: { kind: 'state', done: (f) => f.translationExists },
-    actions: [action('fix-key', 'fixKey'), action('retry', 'retry')],
+    actions,
     // The run's own controls (cancel, Activity, the console) stay usable.
     dim: false,
     major: 4,
   };
 }
+
+/** The run ended with nothing translated: nothing to stop, just try again. */
+const endedStep = (cause: 'auth' | 'quota' | 'other'): TourStep =>
+  stallStep(
+    cause,
+    {
+      titleKey: 'firstRun.failed.title',
+      whatKey: `firstRun.failed.${cause}What`,
+      whyKey: 'firstRun.failed.why',
+    },
+    [action('fix-key', 'fixKey'), action('retry', 'retry')],
+  );
+
+/** The run will resume by itself: explain, and offer nothing to press. */
+const waitingStep = (stall: 'waiting-quota' | 'waiting-model', what: string): TourStep =>
+  stallStep(stall, {
+    titleKey: 'firstRun.waiting.title',
+    whatKey: `firstRun.waiting.${what}`,
+    whyKey: 'firstRun.waiting.why',
+  });
+
+const STALL_STEPS: TourStep[] = [
+  endedStep('auth'),
+  endedStep('quota'),
+  endedStep('other'),
+  // Trying again here stops the paused run, and the wording says so.
+  stallStep(
+    'parked',
+    {
+      titleKey: 'firstRun.parked.title',
+      whatKey: 'firstRun.parked.what',
+      whyKey: 'firstRun.failed.why',
+    },
+    [action('fix-key', 'fixKey'), action('stop-retry', 'stopRetry')],
+  ),
+  waitingStep('waiting-quota', 'quotaWhat'),
+  waitingStep('waiting-model', 'modelWhat'),
+];
 
 const SHARED_STEPS: TourStep[] = [
   {
@@ -263,9 +320,7 @@ const SHARED_STEPS: TourStep[] = [
     dim: false,
     major: 4,
   },
-  failedStep('auth'),
-  failedStep('quota'),
-  failedStep('other'),
+  ...STALL_STEPS,
   {
     id: 'export-open',
     anchor: 'tab-data',
@@ -372,21 +427,22 @@ const FORM_STEPS = [
 export const FIRST_RUN_FORM_ANCHORS = FORM_STEPS.map((p) => p.anchor);
 
 const WAITING_STEP = 'translate-progress';
+const STALL_STEP_IDS: readonly string[] = Object.values(STALL_STEP);
 const isWaitingStep = (id: string | undefined): boolean =>
-  id === WAITING_STEP || (id?.startsWith('translate-failed-') ?? false);
+  id === WAITING_STEP || (id !== undefined && STALL_STEP_IDS.includes(id));
 
 /** What is true on screen right now, beyond the facts. */
 export interface FirstRunScreen {
   isOnScreen: (anchor: string) => boolean;
-  /** Set when the latest translation run stopped without producing anything. */
-  runFailure: RunFailure | null;
+  /** Set while the translation run is not simply working (ended empty, parked, waiting). */
+  runStall: RunStall | null;
 }
 
 /**
  * The step to put on screen for position `index`: the same step, except that
  * a form pair shows whichever half matches the form's real state, and the
- * "translation is running" step shows a failure variant when the run did not
- * go through.
+ * "translation is running" step shows the variant for a run that ended empty,
+ * is parked, or is waiting.
  */
 export function firstRunShownIndex(tour: Tour, index: number, screen: FirstRunScreen): number {
   const id = tour.steps[index]?.id;
@@ -395,7 +451,7 @@ export function firstRunShownIndex(tour: Tour, index: number, screen: FirstRunSc
     return found >= 0 ? found : index;
   };
   if (isWaitingStep(id)) {
-    return at(screen.runFailure ? `translate-failed-${screen.runFailure}` : WAITING_STEP);
+    return at(screen.runStall ? STALL_STEP[screen.runStall] : WAITING_STEP);
   }
   const pair = FORM_STEPS.find((p) => p.closed === id || p.open === id);
   if (!pair) return index;

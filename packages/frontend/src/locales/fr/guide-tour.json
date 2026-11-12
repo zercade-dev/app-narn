@@ -15,6 +15,7 @@
       "ownProvider": "Utiliser mon propre fournisseur",
       "fixKey": "Vérifier ma clé",
       "retry": "Réessayer",
+      "stopRetry": "Arrêter et réessayer",
       "switchAdvanced": "Passer en mode Avancé",
       "finish": "Terminer"
     },
@@ -67,7 +68,7 @@
       "pressWhat": "Ouvrez la fenêtre de traduction.",
       "startWhat": "Démarrez la traduction.",
       "progressWhat": "La traduction est en cours. Cette ligne indique sa progression.",
-      "progressWhy": "La visite reprend dès que les premières traductions arrivent."
+      "progressWhy": "La visite reprend une fois la traduction terminée."
     },
     "failed": {
       "title": "La traduction n’a pas abouti",
@@ -75,6 +76,16 @@
       "authWhat": "Le fournisseur a refusé votre clé. Vérifiez la clé, puis réessayez.",
       "quotaWhat": "Le quota gratuit est épuisé pour le moment. Patientez un peu ou ajoutez une autre clé, puis réessayez.",
       "otherWhat": "Rien n’a été traduit. Vérifiez votre clé, puis réessayez."
+    },
+    "parked": {
+      "title": "La traduction est en pause",
+      "what": "Votre traduction est en pause, dans l’attente du fournisseur. Vérifiez votre clé, puis arrêtez cette exécution et lancez-en une nouvelle."
+    },
+    "waiting": {
+      "title": "La traduction est en attente",
+      "why": "La barre mise en évidence ci-dessous indique son état. La visite reprend une fois la traduction terminée.",
+      "quotaWhat": "Le quota gratuit est épuisé pour le moment. La traduction reprend d’elle-même dès que du quota est de nouveau disponible.",
+      "modelWhat": "Les modèles gratuits disponibles en ce moment sont en dessous de la qualité visée par cette exécution. La traduction reprend d’elle-même dès qu’un meilleur modèle est disponible."
     },
     "export": {
       "title": "Exporter",

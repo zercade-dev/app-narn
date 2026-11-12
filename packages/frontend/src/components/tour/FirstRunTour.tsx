@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
 import {
   useFirstRunActive,
-  useFirstRunFailure,
+  useFirstRunStall,
   useGuideDataReady,
   useGuideFacts,
   type GuideFacts,
@@ -90,18 +90,18 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const [vaultFormAnchor, keyEditorAnchor] = FIRST_RUN_FORM_ANCHORS;
   const vaultFormOpen = useTourAnchor(vaultFormAnchor) !== null;
   const keyEditorOpen = useTourAnchor(keyEditorAnchor) !== null;
-  const failure = useFirstRunFailure();
+  const stalled = useFirstRunStall();
   // "Try again" sets the failed run aside, so the guide does not show its
   // failure again while the new run has not been listed yet.
   const [retriedRunId, setRetriedRunId] = useState<string | null>(null);
-  const runFailure = failure && failure.runId !== retriedRunId ? failure.cause : null;
+  const runStall = stalled && stalled.runId !== retriedRunId ? stalled.stall : null;
   const shown = useCallback(
     (at: number) =>
       firstRunShownIndex(tour, at, {
         isOnScreen: (anchor) => (anchor === vaultFormAnchor ? vaultFormOpen : keyEditorOpen),
-        runFailure,
+        runStall,
       }),
-    [tour, vaultFormAnchor, vaultFormOpen, keyEditorOpen, runFailure],
+    [tour, vaultFormAnchor, vaultFormOpen, keyEditorOpen, runStall],
   );
   const shownIndex = shown(index);
 
@@ -122,12 +122,15 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   const [choiceOpen, setChoiceOpen] = useState(false);
   const cloud = facts.cloud;
-  const failedRunId = failure?.runId ?? null;
-  const failedRunParked = failure?.parked ?? false;
-  const runQueuedBehind = failure?.queuedBehind ?? false;
+  const stalledRunId = stalled?.runId ?? null;
+  const runQueuedBehind = stalled?.queuedBehind ?? false;
   const projectId = useProjectStore((state) => state.activeProjectId);
 
   useEffect(() => {
+    const startAgain = () => {
+      const selectAll = tour.steps.findIndex((step) => step.id === 'select-all');
+      if (selectAll >= 0) setPosition((p) => ({ ...p, index: selectAll }));
+    };
     const onAction = (e: Event) => {
       switch ((e as CustomEvent<FirstRunAction>).detail) {
         case 'open-vault':
@@ -160,20 +163,25 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
           globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey }));
           break;
         }
-        case 'retry': {
-          // A parked run holds the project's queue: a new run would wait
-          // behind it, so it is cancelled first.
-          if (failedRunId && failedRunParked && projectId) {
-            void useRunStore
-              .getState()
-              .cancelRun(projectId, failedRunId)
-              .catch((err: unknown) => toast.error(getErrorMessage(err)));
-          }
-          setRetriedRunId(failedRunId);
-          // A run already waiting behind the parked one starts now: no new one needed.
-          if (runQueuedBehind) break;
-          const selectAll = tour.steps.findIndex((step) => step.id === 'select-all');
-          if (selectAll >= 0) setPosition((p) => ({ ...p, index: selectAll }));
+        case 'retry':
+          // The run has ended: nothing to stop.
+          setRetriedRunId(stalledRunId);
+          startAgain();
+          break;
+        case 'stop-retry': {
+          // The paused run holds the project's queue, so it is stopped first
+          // (the callout says so). Only once that worked is it set aside:
+          // otherwise the guide would say "running" over a queue that cannot move.
+          if (!stalledRunId || !projectId) break;
+          void useRunStore
+            .getState()
+            .cancelRun(projectId, stalledRunId)
+            .then(() => {
+              setRetriedRunId(stalledRunId);
+              // A run already waiting behind it starts now: no new one needed.
+              if (!runQueuedBehind) startAgain();
+            })
+            .catch((err: unknown) => toast.error(getErrorMessage(err)));
           break;
         }
         case 'switch-advanced':
@@ -187,7 +195,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     };
     globalThis.addEventListener(FIRST_RUN_ACTION_EVENT, onAction);
     return () => globalThis.removeEventListener(FIRST_RUN_ACTION_EVENT, onAction);
-  }, [cloud, failedRunId, failedRunParked, runQueuedBehind, projectId, tour]);
+  }, [cloud, stalledRunId, runQueuedBehind, projectId, tour]);
 
   useProviderSetup();
 

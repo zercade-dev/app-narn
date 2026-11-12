@@ -15,6 +15,7 @@
       "ownProvider": "Usar meu próprio provedor",
       "fixKey": "Conferir minha chave",
       "retry": "Tentar de novo",
+      "stopRetry": "Parar e tentar de novo",
       "switchAdvanced": "Mudar para Avançado",
       "finish": "Concluir"
     },
@@ -67,7 +68,7 @@
       "pressWhat": "Abra a janela de tradução.",
       "startWhat": "Inicie a tradução.",
       "progressWhat": "A tradução está em andamento. Esta linha mostra o progresso.",
-      "progressWhy": "O tour continua quando as primeiras traduções chegarem."
+      "progressWhy": "O tour continua quando a tradução terminar."
     },
     "failed": {
       "title": "Tradução não concluída",
@@ -75,6 +76,16 @@
       "authWhat": "O provedor recusou sua chave. Confira a chave e tente de novo.",
       "quotaWhat": "A cota gratuita acabou por enquanto. Espere um pouco ou adicione outra chave e tente de novo.",
       "otherWhat": "Nada foi traduzido. Confira sua chave e tente de novo."
+    },
+    "parked": {
+      "title": "Tradução pausada",
+      "what": "Sua tradução está pausada, aguardando o provedor. Confira sua chave, depois pare esta execução e inicie uma nova."
+    },
+    "waiting": {
+      "title": "Tradução em espera",
+      "why": "A barra destacada abaixo mostra o status. O tour continua quando a tradução terminar.",
+      "quotaWhat": "A cota gratuita acabou por enquanto. A tradução continua sozinha quando houver cota de novo.",
+      "modelWhat": "Os modelos gratuitos disponíveis agora estão abaixo da qualidade que esta execução busca. A tradução continua sozinha quando houver um melhor."
     },
     "export": {
       "title": "Exportação",

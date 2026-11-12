@@ -15,6 +15,7 @@
       "ownProvider": "Gunakan penyedia saya sendiri",
       "fixKey": "Periksa kunci saya",
       "retry": "Coba lagi",
+      "stopRetry": "Hentikan dan coba lagi",
       "switchAdvanced": "Beralih ke Lanjutan",
       "finish": "Selesai"
     },
@@ -67,7 +68,7 @@
       "pressWhat": "Buka dialog penerjemahan.",
       "startWhat": "Mulai penerjemahan.",
       "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
-      "progressWhy": "Tur berlanjut setelah terjemahan pertama masuk."
+      "progressWhy": "Tur berlanjut setelah penerjemahan selesai."
     },
     "failed": {
       "title": "Penerjemahan tidak berhasil",
@@ -75,6 +76,16 @@
       "authWhat": "Penyedia menolak kunci Anda. Periksa kuncinya, lalu coba lagi.",
       "quotaWhat": "Kuota gratis sedang habis. Tunggu sebentar atau tambahkan kunci lain, lalu coba lagi.",
       "otherWhat": "Tidak ada yang diterjemahkan. Periksa kunci Anda, lalu coba lagi."
+    },
+    "parked": {
+      "title": "Penerjemahan dijeda",
+      "what": "Penerjemahan Anda dijeda dan menunggu penyedia. Periksa kunci Anda, lalu hentikan putaran ini dan mulai yang baru."
+    },
+    "waiting": {
+      "title": "Penerjemahan menunggu",
+      "why": "Bilah yang disorot di bawah menunjukkan statusnya. Tur berlanjut setelah penerjemahan selesai.",
+      "quotaWhat": "Kuota gratis sedang habis. Penerjemahan berlanjut sendiri saat kuota tersedia lagi.",
+      "modelWhat": "Model gratis yang tersedia saat ini berada di bawah kualitas yang dituju putaran ini. Penerjemahan berlanjut sendiri saat model yang lebih baik tersedia."
     },
     "export": {
       "title": "Ekspor",

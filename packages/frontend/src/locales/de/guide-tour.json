@@ -15,6 +15,7 @@
       "ownProvider": "Eigenen Anbieter verwenden",
       "fixKey": "Meinen Schlüssel prüfen",
       "retry": "Erneut versuchen",
+      "stopRetry": "Stoppen und erneut versuchen",
       "switchAdvanced": "Zu „Erweitert“ wechseln",
       "finish": "Fertig"
     },
@@ -67,7 +68,7 @@
       "pressWhat": "Den Übersetzungsdialog öffnen.",
       "startWhat": "Die Übersetzung starten.",
       "progressWhat": "Die Übersetzung läuft. Diese Zeile zeigt den Fortschritt.",
-      "progressWhy": "Die Tour geht weiter, sobald die ersten Übersetzungen da sind."
+      "progressWhy": "Die Tour geht weiter, sobald die Übersetzung abgeschlossen ist."
     },
     "failed": {
       "title": "Übersetzung nicht durchgeführt",
@@ -75,6 +76,16 @@
       "authWhat": "Der Anbieter hat deinen Schlüssel abgelehnt. Den Schlüssel prüfen und es erneut versuchen.",
       "quotaWhat": "Das kostenlose Kontingent ist vorerst aufgebraucht. Etwas warten oder einen weiteren Schlüssel hinzufügen und es erneut versuchen.",
       "otherWhat": "Es wurde nichts übersetzt. Den Schlüssel prüfen und es erneut versuchen."
+    },
+    "parked": {
+      "title": "Übersetzung pausiert",
+      "what": "Deine Übersetzung ist pausiert und wartet auf den Anbieter. Den Schlüssel prüfen, dann diesen Durchlauf stoppen und einen neuen starten."
+    },
+    "waiting": {
+      "title": "Übersetzung wartet",
+      "why": "Die hervorgehobene Leiste unten zeigt den Status. Die Tour geht weiter, sobald die Übersetzung abgeschlossen ist.",
+      "quotaWhat": "Das kostenlose Kontingent ist vorerst aufgebraucht. Die Übersetzung wird von selbst fortgesetzt, sobald wieder Kontingent frei ist.",
+      "modelWhat": "Die derzeit verfügbaren kostenlosen Modelle liegen unter der Qualität, die dieser Durchlauf anstrebt. Die Übersetzung wird von selbst fortgesetzt, sobald ein besseres verfügbar ist."
     },
     "export": {
       "title": "Exportieren",

@@ -15,6 +15,7 @@
       "ownProvider": "Dùng nhà cung cấp của riêng tôi",
       "fixKey": "Kiểm tra khóa của tôi",
       "retry": "Thử lại",
+      "stopRetry": "Dừng và thử lại",
       "switchAdvanced": "Chuyển sang Nâng cao",
       "finish": "Hoàn tất"
     },
@@ -67,7 +68,7 @@
       "pressWhat": "Mở hộp thoại dịch.",
       "startWhat": "Bắt đầu dịch.",
       "progressWhat": "Đang dịch. Dòng này cho biết tiến độ.",
-      "progressWhy": "Hướng dẫn sẽ tiếp tục khi có những bản dịch đầu tiên."
+      "progressWhy": "Hướng dẫn sẽ tiếp tục khi dịch xong."
     },
     "failed": {
       "title": "Dịch chưa thành công",
@@ -75,6 +76,16 @@
       "authWhat": "Nhà cung cấp đã từ chối khóa của bạn. Kiểm tra khóa, rồi thử lại.",
       "quotaWhat": "Hạn mức miễn phí tạm thời đã hết. Chờ một lát hoặc thêm khóa khác, rồi thử lại.",
       "otherWhat": "Chưa có gì được dịch. Kiểm tra khóa của bạn, rồi thử lại."
+    },
+    "parked": {
+      "title": "Bản dịch đang tạm dừng",
+      "what": "Quá trình dịch của bạn đang tạm dừng và chờ nhà cung cấp. Kiểm tra khóa của bạn, rồi dừng lần chạy này và bắt đầu lần mới."
+    },
+    "waiting": {
+      "title": "Bản dịch đang chờ",
+      "why": "Thanh được làm nổi bật bên dưới cho biết trạng thái. Hướng dẫn sẽ tiếp tục khi dịch xong.",
+      "quotaWhat": "Hạn mức miễn phí tạm thời đã hết. Quá trình dịch sẽ tự tiếp tục khi có hạn mức trở lại.",
+      "modelWhat": "Các mô hình miễn phí hiện có đang thấp hơn chất lượng mà lần chạy này hướng tới. Quá trình dịch sẽ tự tiếp tục khi có mô hình tốt hơn."
     },
     "export": {
       "title": "Xuất",
