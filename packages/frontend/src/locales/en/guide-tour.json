@@ -113,14 +113,40 @@
   },
   "guideTours": {
     "title": "Tours",
-    "firstRun": "Guided first run",
-    "area": {
-      "routing": "Routing",
-      "glossary": "Glossary",
-      "quality": "Quality",
-      "compare": "Compare",
-      "review-translation-ai": "AI review of translations"
+    "first-run": {
+      "name": "Guided first run",
+      "summary": "Set up a provider, add your strings, translate and export, one step at a time."
     },
+    "advanced-sections": {
+      "name": "Advanced sections",
+      "summary": "What each tab and view that Advanced adds is for."
+    },
+    "glossaries": {
+      "name": "Glossaries",
+      "summary": "Create a glossary, add terms and apply it, so key terms stay consistent."
+    },
+    "routing": {
+      "name": "Routing",
+      "summary": "A 30-second look at how NARN picks who translates what."
+    },
+    "quality": {
+      "name": "Quality",
+      "summary": "A short look at how NARN checks your translations."
+    },
+    "compare": {
+      "name": "Compare",
+      "summary": "A short look at reviewing translations side by side."
+    },
+    "review-translation-ai": {
+      "name": "AI review of translations",
+      "summary": "A short look at having an AI check your translations."
+    },
+    "startOver": "Start from the beginning",
+    "continue": "Continue where I left off",
+    "progress": "{{current}} of {{total}} steps",
+    "completed": "Completed",
+    "needsProject": "Open a project to take this tour.",
+    "switchedToAdvanced": "Switched to Advanced mode for this tour.",
     "confirm": {
       "title": "Switch to Simple for the guided setup?",
       "body": "The guided setup is built for Simple mode, which hides the advanced tabs. You can switch back at any time from the top bar.",
@@ -228,6 +254,115 @@
         "what": "Review all translations in the project, not only the latest run.",
         "why": "Use it before a release, or after you changed the glossary or routing."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Compare",
+      "what": "The source next to one target language, row by row, with an optional reference language.",
+      "why": "Review and edit one language carefully, even one you do not read."
+    },
+    "routing": {
+      "title": "Routing",
+      "what": "Decides which provider translates each language, category or tone.",
+      "why": "Send each kind of text to the provider that handles it best."
+    },
+    "stage-details": {
+      "title": "Stage details",
+      "what": "A stage's name, gameplay details and description, with their translations.",
+      "why": "Translate the text that describes a level, outside your string file."
+    },
+    "quality": {
+      "title": "Quality",
+      "what": "The automatic checks every translation goes through, and the ones that failed.",
+      "why": "Catch broken tags, changed placeholders and text that is too long before you ship."
+    },
+    "review-source-ai": {
+      "title": "Source AI review",
+      "what": "An AI provider reads your source text and points out typos and unclear wording.",
+      "why": "Better source text gives every language a better translation."
+    },
+    "review-translation-ai": {
+      "title": "Translation AI review",
+      "what": "An AI provider reads translations next to the source and scores them.",
+      "why": "It finds wrong meanings and awkward wording that automatic checks miss."
+    },
+    "review-manual": {
+      "title": "Manual review",
+      "what": "A queue of translations that need review, to approve, edit or flag one by one.",
+      "why": "Work through doubtful translations quickly, with keyboard shortcuts."
+    },
+    "glossary": {
+      "title": "Glossary",
+      "what": "Lists of terms with the translation you want for each.",
+      "why": "Names and key terms then come out the same way every time."
+    },
+    "category": {
+      "title": "Category",
+      "what": "Groups strings by kind, such as UI labels, dialogue or item names.",
+      "why": "Routing rules and batches can then treat each kind of text differently."
+    },
+    "color-text": {
+      "title": "Text Styler",
+      "what": "A drafting tool for text with colours, bold, italics and font sizes.",
+      "why": "Write styled text without typing the markup by hand."
+    },
+    "orphans": {
+      "title": "Orphans",
+      "what": "Entries that disappeared from a later import, kept with their translations.",
+      "why": "Nothing is lost when your file changes: link them back or delete them."
+    },
+    "backup": {
+      "title": "Backup",
+      "what": "Packs the project into an archive you can download and restore.",
+      "why": "Go back to an earlier state if an import or a bulk change goes wrong."
+    },
+    "sharing": {
+      "title": "Sharing",
+      "what": "Invite collaborators and choose which languages each one may edit.",
+      "why": "Translators work on their own languages, with their own AI providers."
+    },
+    "global-config": {
+      "title": "Global Config",
+      "what": "Settings for the whole workspace: providers, models and the credential vault.",
+      "why": "Set up a provider once and use it in every project."
+    },
+    "translation-memory": {
+      "title": "Translation Memory",
+      "what": "Earlier translations, reused when the same text comes back.",
+      "why": "It saves cost and keeps repeated lines translated the same way."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "What a glossary is for",
+      "what": "A glossary lists terms with the translation you want for each, such as character names or game jargon.",
+      "why": "Translations then use your words every time instead of a new guess."
+    },
+    "create": {
+      "title": "Create a glossary",
+      "what": "Start a new, empty glossary here.",
+      "why": "One glossary is often enough. Use more to keep sets of terms apart."
+    },
+    "add-term": {
+      "title": "Add a term",
+      "what": "Type the source term and its translation for each language, then add it.",
+      "why": "Mark a term as constant when it must never be translated, such as a brand name."
+    },
+    "assign": {
+      "title": "Apply it to this project",
+      "what": "An enabled glossary is used when this project is translated. Disable it to stop using it.",
+      "why": "Keep a glossary disabled while you are still building it."
+    },
+    "effect": {
+      "title": "How it changes translation",
+      "what": "When a string contains a glossary term, the term and your translation of it are sent along with the string.",
+      "why": "The provider follows your choice instead of picking its own word."
+    },
+    "generate": {
+      "title": "Let AI suggest terms",
+      "what": "Ask an AI provider to find likely terms in your strings.",
+      "why": "You review the suggestions and keep only the ones you want."
     }
   }
 }

@@ -38,6 +38,11 @@ interface GuideState {
   /** Not persisted. The counted step index the active tour opens at. */
   activeTourStart: number;
   /**
+   * Not persisted. Bumped by every `startTour`, so a start request for the
+   * tour already running still reopens it at `activeTourStart`.
+   */
+  activeTourSeq: number;
+  /**
    * Not persisted. The person restarted the first run from the Guide and
    * chose to stay in Advanced: it runs there too, until finished or skipped.
    */
@@ -69,6 +74,9 @@ interface GuideState {
 const addOnce = (list: string[], id: string): string[] =>
   list.includes(id) ? list : [...list, id];
 
+/** The first run's id (`FIRST_RUN_TOUR_ID`), not imported to keep the store free of tour code. */
+const FIRST_RUN_PROGRESS_ID = 'first-run';
+
 const NO_PROGRESS: TourProgress = { last: 0, furthest: 0, completed: false };
 
 function withCompleted(
@@ -90,7 +98,7 @@ export function migrateGuideState(persisted: unknown, version: number): unknown 
   const ids = Array.isArray(old.completedTours)
     ? old.completedTours.filter((id): id is string => typeof id === 'string')
     : [];
-  if (old.firstRunFinished === true) ids.push('first-run');
+  if (old.firstRunFinished === true) ids.push(FIRST_RUN_PROGRESS_ID);
   const tourProgress: Record<string, TourProgress> = {};
   for (const id of ids) tourProgress[id] = { last: 0, furthest: 0, completed: true };
   return { ...persisted, tourProgress };
@@ -109,26 +117,34 @@ export const useGuideStore = create<GuideState>()(
       tourProgress: {},
       activeTourId: null,
       activeTourStart: 0,
+      activeTourSeq: 0,
       firstRunForced: false,
       dismissFirstRun: () => set({ firstRunDismissed: true }),
       restartFirstRun: (forced = false) =>
-        set({
+        set((s) => ({
           firstRunDismissed: false,
           firstRunFinished: false,
           firstRunForced: forced,
           exportedOnce: false,
-        }),
+          // A restarted run is not completed until it is finished again.
+          tourProgress: { ...s.tourProgress, [FIRST_RUN_PROGRESS_ID]: NO_PROGRESS },
+        })),
       resumeFirstRun: () => set({ firstRunDismissed: false }),
       finishFirstRun: () =>
         set((s) => ({
           firstRunFinished: true,
-          tourProgress: withCompleted(s.tourProgress, 'first-run'),
+          tourProgress: withCompleted(s.tourProgress, FIRST_RUN_PROGRESS_ID),
         })),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
       markExported: () => set({ exportedOnce: true }),
       markProviderEnabled: (id) =>
         set((s) => ({ enabledProviders: addOnce(s.enabledProviders, id) })),
-      startTour: (id, opts) => set({ activeTourId: id, activeTourStart: opts?.at ?? 0 }),
+      startTour: (id, opts) =>
+        set((s) => ({
+          activeTourId: id,
+          activeTourStart: opts?.at ?? 0,
+          activeTourSeq: s.activeTourSeq + 1,
+        })),
       recordTourStep: (id, counted) =>
         set((s) => {
           const prev = s.tourProgress[id] ?? NO_PROGRESS;

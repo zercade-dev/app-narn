@@ -8,104 +8,8 @@ import { GUIDE_GROUPS, getGuideContent } from './guides-registry.js';
 import { renderMarkdown } from './markdown.js';
 import { stripLocalOnly } from './strip-local-only.js';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { useUiMode } from '../../hooks/use-ui-mode.js';
-import { visibleTabs } from '../../lib/mode-gating.js';
-import { AREA_TOUR_IDS } from '../../lib/tour/area-tours.js';
-import { useGuideStore } from '../../stores/guide-store.js';
-import { accessFor, useProjectStore } from '../../stores/project-store.js';
+import { GuideToursList } from './GuideToursList.js';
 import { Separator } from '@/components/ui/separator';
-
-/**
- * The tours the person can start on demand: the guided first run, and one
- * short tour per area they can actually open: the active project's tabs for
- * their access and mode (so none in Simple, none without a project, and no
- * owner-only areas for a collaborator). Restarting the first run from Advanced
- * asks whether to switch to Simple for it.
- */
-function GuideTours() {
-  const { t } = useTranslation('guide-tour');
-  const mode = useUiMode();
-  const advanced = mode === 'advanced';
-  const cloudManaged = useVaultStore((s) => s.cloudManaged ?? false);
-  const activeProjectId = useProjectStore((s) =>
-    s.projects.some((p) => p.id === s.activeProjectId) ? s.activeProjectId : null,
-  );
-  const access = useProjectStore((s) => accessFor(s, activeProjectId));
-  const areaTours = useMemo(() => {
-    if (activeProjectId === null) return [];
-    const tabs = visibleTabs(access, cloudManaged, mode);
-    return AREA_TOUR_IDS.filter((id) => tabs.includes(id));
-  }, [activeProjectId, access, cloudManaged, mode]);
-  const [confirming, setConfirming] = useState(false);
-
-  const startFirstRun = (switchToSimple: boolean) => {
-    setConfirming(false);
-    if (switchToSimple) useUiSettings.getState().setUiMode('simple');
-    // Staying in Advanced still runs it: the restart is explicit.
-    useGuideStore.getState().restartFirstRun(!switchToSimple && advanced);
-    useViewStore.getState().setView('project');
-  };
-
-  return (
-    <div data-testid="guide-tours">
-      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {t('guideTours.title')}
-      </p>
-      <div className="space-y-0.5">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start text-sm"
-          data-testid="guide-tour-start-first-run"
-          onClick={() => (advanced ? setConfirming(true) : startFirstRun(false))}
-        >
-          {t('guideTours.firstRun')}
-        </Button>
-        {areaTours.map((id) => (
-          <Button
-            key={id}
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start text-sm"
-            data-testid={`guide-tour-start-${id}`}
-            onClick={() => useGuideStore.getState().startTour(id)}
-          >
-            {t(`guideTours.area.${id}`)}
-          </Button>
-        ))}
-      </div>
-      <Separator className="mt-3" />
-      <Dialog open={confirming} onOpenChange={setConfirming}>
-        <DialogContent showCloseButton={false} data-testid="guide-first-run-confirm">
-          <DialogHeader>
-            <DialogTitle>{t('guideTours.confirm.title')}</DialogTitle>
-            <DialogDescription>{t('guideTours.confirm.body')}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              data-testid="guide-first-run-stay"
-              onClick={() => startFirstRun(false)}
-            >
-              {t('guideTours.confirm.stay')}
-            </Button>
-            <Button data-testid="guide-first-run-switch" onClick={() => startFirstRun(true)}>
-              {t('guideTours.confirm.switch')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
 
 export function GuideView() {
   const { t } = useTranslation('strings');
@@ -220,7 +124,7 @@ export function GuideView() {
     <div className="flex h-full" data-testid="guide-view">
       {/* Left navigation */}
       <aside className="w-56 shrink-0 border-r overflow-y-auto p-3 space-y-4">
-        <GuideTours />
+        <GuideToursList />
         {visibleGroups.map((group) => (
           <div key={group.titleKey}>
             <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">

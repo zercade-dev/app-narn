@@ -113,14 +113,40 @@
   },
   "guideTours": {
     "title": "Turlar",
-    "firstRun": "Rehberli ilk kullanım",
-    "area": {
-      "routing": "Yönlendirme",
-      "glossary": "Sözlükçe",
-      "quality": "Kalite",
-      "compare": "Karşılaştırma",
-      "review-translation-ai": "Çeviri yapay zekâ incelemesi"
+    "first-run": {
+      "name": "Rehberli ilk kullanım",
+      "summary": "Bir sağlayıcı kurun, metinlerinizi ekleyin, çevirin ve dışa aktarın; adım adım."
     },
+    "advanced-sections": {
+      "name": "Gelişmiş bölümler",
+      "summary": "Gelişmiş modun eklediği her sekme ve görünüm ne işe yarar."
+    },
+    "glossaries": {
+      "name": "Sözlükçeler",
+      "summary": "Bir sözlükçe oluşturun, terim ekleyin ve uygulayın; böylece anahtar terimler tutarlı kalır."
+    },
+    "routing": {
+      "name": "Yönlendirme",
+      "summary": "NARN'ın neyi kimin çevireceğine nasıl karar verdiğine 30 saniyelik bir bakış."
+    },
+    "quality": {
+      "name": "Kalite",
+      "summary": "NARN'ın çevirilerinizi nasıl denetlediğine kısa bir bakış."
+    },
+    "compare": {
+      "name": "Karşılaştırma",
+      "summary": "Çevirileri yan yana incelemeye kısa bir bakış."
+    },
+    "review-translation-ai": {
+      "name": "Çeviri yapay zekâ incelemesi",
+      "summary": "Çevirilerinizi bir yapay zekâya denetletmeye kısa bir bakış."
+    },
+    "startOver": "Baştan başla",
+    "continue": "Kaldığım yerden devam et",
+    "progress": "{{current}}/{{total}} adım",
+    "completed": "Tamamlandı",
+    "needsProject": "Bu turu yapmak için bir proje açın.",
+    "switchedToAdvanced": "Bu tur için gelişmiş moda geçildi.",
     "confirm": {
       "title": "Rehberli kurulum için Basit moda geçilsin mi?",
       "body": "Rehberli kurulum, gelişmiş sekmeleri gizleyen Basit mod için hazırlandı. Üst çubuktan istediğiniz zaman geri dönebilirsiniz.",
@@ -228,6 +254,115 @@
         "what": "Yalnızca son çalıştırmayı değil, projedeki tüm çevirileri inceleyin.",
         "why": "Yayımlamadan önce ya da sözlükçeyi veya yönlendirmeyi değiştirdikten sonra kullanın."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Karşılaştırma",
+      "what": "Kaynak metin bir hedef dilin yanında, satır satır; isterseniz bir referans dille.",
+      "why": "Bir dili, okuyamadığınız bir dil olsa bile, dikkatle inceleyip düzenleyin."
+    },
+    "routing": {
+      "title": "Yönlendirme",
+      "what": "Her dili, kategoriyi veya tonu hangi sağlayıcının çevireceğini belirler.",
+      "why": "Her metin türünü onu en iyi işleyen sağlayıcıya gönderin."
+    },
+    "stage-details": {
+      "title": "Bölüm ayrıntıları",
+      "what": "Bir bölümün adı, oynanış ayrıntıları ve açıklaması, çevirileriyle birlikte.",
+      "why": "Bir bölümü anlatan metni, metin dosyanızın dışında çevirin."
+    },
+    "quality": {
+      "title": "Kalite",
+      "what": "Her çevirinin geçtiği otomatik denetimler ve başarısız olanlar.",
+      "why": "Bozuk etiketleri, değişmiş yer tutucuları ve fazla uzun metinleri yayından önce yakalayın."
+    },
+    "review-source-ai": {
+      "title": "Kaynak yapay zekâ incelemesi",
+      "what": "Bir yapay zekâ sağlayıcısı kaynak metninizi okur, yazım hatalarını ve belirsiz ifadeleri gösterir.",
+      "why": "Daha iyi bir kaynak metin her dilde daha iyi bir çeviri sağlar."
+    },
+    "review-translation-ai": {
+      "title": "Çeviri yapay zekâ incelemesi",
+      "what": "Bir yapay zekâ sağlayıcısı çevirileri kaynağın yanında okur ve puanlar.",
+      "why": "Otomatik denetimlerin kaçırdığı yanlış anlamları ve kötü ifadeleri bulur."
+    },
+    "review-manual": {
+      "title": "Elle inceleme",
+      "what": "İnceleme bekleyen çevirilerin sırası; her birini onaylayın, düzenleyin veya ayırın.",
+      "why": "Şüpheli çevirileri klavye kısayollarıyla hızla bitirin."
+    },
+    "glossary": {
+      "title": "Sözlükçe",
+      "what": "Her biri için istediğiniz çeviriyle terim listeleri.",
+      "why": "Adlar ve anahtar terimler böylece her seferinde aynı çıkar."
+    },
+    "category": {
+      "title": "Kategori",
+      "what": "Metinleri türe göre gruplar: arayüz etiketleri, diyaloglar veya eşya adları gibi.",
+      "why": "Yönlendirme kuralları ve yığınlar her metin türünü farklı ele alabilir."
+    },
+    "color-text": {
+      "title": "Metin biçimlendirici",
+      "what": "Renk, kalın, italik ve yazı boyutu içeren metinler için bir taslak aracı.",
+      "why": "Biçimlendirmeyi elle yazmadan biçimli metin yazın."
+    },
+    "orphans": {
+      "title": "Yetimler",
+      "what": "Sonraki bir içe aktarmada kaybolan girdiler, çevirileriyle birlikte saklanır.",
+      "why": "Dosyanız değiştiğinde hiçbir şey kaybolmaz: onları yeniden bağlayın veya silin."
+    },
+    "backup": {
+      "title": "Yedekleme",
+      "what": "Projeyi indirip geri yükleyebileceğiniz bir arşive paketler.",
+      "why": "Bir içe aktarma veya toplu değişiklik ters giderse önceki bir duruma dönün."
+    },
+    "sharing": {
+      "title": "Paylaşım",
+      "what": "Ortak çalışanları davet edin ve her birinin hangi dilleri düzenleyebileceğini seçin.",
+      "why": "Çevirmenler kendi dilleri üzerinde, kendi yapay zekâ sağlayıcılarıyla çalışır."
+    },
+    "global-config": {
+      "title": "Genel yapılandırma",
+      "what": "Tüm çalışma alanının ayarları: sağlayıcılar, modeller ve kimlik bilgisi kasası.",
+      "why": "Bir sağlayıcıyı bir kez kurun ve her projede kullanın."
+    },
+    "translation-memory": {
+      "title": "Çeviri belleği",
+      "what": "Önceki çeviriler; aynı metin yeniden geldiğinde tekrar kullanılır.",
+      "why": "Maliyeti düşürür ve tekrarlanan satırların aynı çevrilmesini sağlar."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "Sözlükçe ne işe yarar",
+      "what": "Sözlükçe, her biri için istediğiniz çeviriyle terimleri listeler; karakter adları veya oyun jargonu gibi.",
+      "why": "Çeviriler böylece yeni bir tahmin yerine her seferinde sizin sözcüklerinizi kullanır."
+    },
+    "create": {
+      "title": "Sözlükçe oluştur",
+      "what": "Burada yeni, boş bir sözlükçe başlatın.",
+      "why": "Çoğu zaman tek bir sözlükçe yeterlidir. Terim gruplarını ayrı tutmak için daha fazlasını kullanın."
+    },
+    "add-term": {
+      "title": "Terim ekle",
+      "what": "Kaynak terimi ve her dildeki çevirisini yazın, sonra ekleyin.",
+      "why": "Bir marka adı gibi asla çevrilmemesi gereken bir terimi sabit olarak işaretleyin."
+    },
+    "assign": {
+      "title": "Bu projeye uygula",
+      "what": "Etkin bir sözlükçe bu proje çevrilirken kullanılır. Kullanmayı bırakmak için devre dışı bırakın.",
+      "why": "Bir sözlükçeyi hazırlarken devre dışı tutun."
+    },
+    "effect": {
+      "title": "Çeviriyi nasıl değiştirir",
+      "what": "Bir metin bir sözlükçe terimi içerdiğinde, terim ve sizin çeviriniz metinle birlikte gönderilir.",
+      "why": "Sağlayıcı kendi sözcüğünü seçmek yerine sizin tercihinize uyar."
+    },
+    "generate": {
+      "title": "Terimleri yapay zekâ önersin",
+      "what": "Bir yapay zekâ sağlayıcısından metinlerinizdeki olası terimleri bulmasını isteyin.",
+      "why": "Önerileri siz inceler, yalnızca istediklerinizi tutarsınız."
     }
   }
 }

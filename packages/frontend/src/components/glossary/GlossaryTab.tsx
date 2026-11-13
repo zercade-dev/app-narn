@@ -934,6 +934,7 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                             )
                           }
                           data-testid="glossary-toggle-enabled-btn"
+                          data-tour="glossary-enabled"
                           title={(selectedGlossary.enabled ?? true) ? t('disable') : t('enable')}
                         >
                           {(selectedGlossary.enabled ?? true) ? (
@@ -1146,7 +1147,7 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                           for owners — adding a term is a 'manage' capability
                           collaborators never hold server-side). */}
                       {!isReadOnly && !isCollaborator && (
-                        <TableRow className="group">
+                        <TableRow className="group" data-tour="glossary-add-term">
                           <TableCell />
                           <TableCell>
                             <Input

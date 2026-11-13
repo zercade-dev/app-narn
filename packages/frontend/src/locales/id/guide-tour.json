@@ -113,14 +113,40 @@
   },
   "guideTours": {
     "title": "Tur",
-    "firstRun": "Awal penggunaan terpandu",
-    "area": {
-      "routing": "Penyaluran",
-      "glossary": "Glosarium",
-      "quality": "Kualitas",
-      "compare": "Bandingkan",
-      "review-translation-ai": "Tinjauan AI Terjemahan"
+    "first-run": {
+      "name": "Awal penggunaan terpandu",
+      "summary": "Siapkan penyedia, tambahkan string Anda, terjemahkan, lalu ekspor, selangkah demi selangkah."
     },
+    "advanced-sections": {
+      "name": "Bagian lanjutan",
+      "summary": "Kegunaan setiap tab dan tampilan yang ditambahkan mode lanjutan."
+    },
+    "glossaries": {
+      "name": "Glosarium",
+      "summary": "Buat glosarium, tambahkan istilah, lalu terapkan agar istilah kunci tetap konsisten."
+    },
+    "routing": {
+      "name": "Penyaluran",
+      "summary": "Sekilas 30 detik tentang cara NARN memilih siapa yang menerjemahkan apa."
+    },
+    "quality": {
+      "name": "Kualitas",
+      "summary": "Sekilas tentang cara NARN memeriksa terjemahan Anda."
+    },
+    "compare": {
+      "name": "Bandingkan",
+      "summary": "Sekilas tentang meninjau terjemahan secara berdampingan."
+    },
+    "review-translation-ai": {
+      "name": "Tinjauan AI Terjemahan",
+      "summary": "Sekilas tentang meminta AI memeriksa terjemahan Anda."
+    },
+    "startOver": "Mulai dari awal",
+    "continue": "Lanjutkan dari terakhir kali",
+    "progress": "{{current}} dari {{total}} langkah",
+    "completed": "Selesai",
+    "needsProject": "Buka proyek untuk mengikuti tur ini.",
+    "switchedToAdvanced": "Beralih ke mode lanjutan untuk tur ini.",
     "confirm": {
       "title": "Beralih ke Sederhana untuk penyiapan terpandu?",
       "body": "Penyiapan terpandu dibuat untuk mode Sederhana, yang menyembunyikan tab lanjutan. Anda bisa kembali kapan saja dari bilah atas.",
@@ -228,6 +254,115 @@
         "what": "Tinjau semua terjemahan dalam proyek, bukan hanya proses terakhir.",
         "why": "Gunakan sebelum rilis, atau setelah Anda mengubah glosarium atau penyaluran."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Bandingkan",
+      "what": "Teks sumber di samping satu bahasa target, baris demi baris, dengan bahasa rujukan opsional.",
+      "why": "Tinjau dan sunting satu bahasa dengan teliti, bahkan bahasa yang tidak Anda baca."
+    },
+    "routing": {
+      "title": "Penyaluran",
+      "what": "Menentukan penyedia mana yang menerjemahkan setiap bahasa, kategori, atau nada.",
+      "why": "Kirim setiap jenis teks ke penyedia yang paling baik menanganinya."
+    },
+    "stage-details": {
+      "title": "Detail Stage",
+      "what": "Nama, detail gameplay, dan deskripsi sebuah stage, beserta terjemahannya.",
+      "why": "Terjemahkan teks yang menjelaskan sebuah level, di luar berkas string Anda."
+    },
+    "quality": {
+      "title": "Kualitas",
+      "what": "Pemeriksaan otomatis yang dilalui setiap terjemahan, dan yang gagal.",
+      "why": "Temukan tag rusak, placeholder yang berubah, dan teks yang terlalu panjang sebelum rilis."
+    },
+    "review-source-ai": {
+      "title": "Tinjauan AI Sumber",
+      "what": "Penyedia AI membaca teks sumber Anda dan menunjukkan salah ketik serta kalimat yang kurang jelas.",
+      "why": "Teks sumber yang lebih baik menghasilkan terjemahan yang lebih baik di setiap bahasa."
+    },
+    "review-translation-ai": {
+      "title": "Tinjauan AI Terjemahan",
+      "what": "Penyedia AI membaca terjemahan di samping teks sumber dan memberinya nilai.",
+      "why": "Ia menemukan makna yang salah dan kalimat janggal yang terlewat oleh pemeriksaan otomatis."
+    },
+    "review-manual": {
+      "title": "Tinjauan Manual",
+      "what": "Antrean terjemahan yang perlu ditinjau, untuk disetujui, disunting, atau disisihkan satu per satu.",
+      "why": "Selesaikan terjemahan yang meragukan dengan cepat, memakai pintasan keyboard."
+    },
+    "glossary": {
+      "title": "Glosarium",
+      "what": "Daftar istilah dengan terjemahan yang Anda inginkan untuk masing-masing.",
+      "why": "Nama dan istilah kunci pun selalu diterjemahkan dengan cara yang sama."
+    },
+    "category": {
+      "title": "Kategori",
+      "what": "Mengelompokkan string menurut jenis, seperti label UI, dialog, atau nama item.",
+      "why": "Aturan penyaluran dan batch lalu dapat memperlakukan setiap jenis teks secara berbeda."
+    },
+    "color-text": {
+      "title": "Penata Teks",
+      "what": "Alat draf untuk teks dengan warna, tebal, miring, dan ukuran huruf.",
+      "why": "Tulis teks bergaya tanpa mengetik markup secara manual."
+    },
+    "orphans": {
+      "title": "Entri Yatim",
+      "what": "Entri yang hilang pada impor berikutnya, disimpan beserta terjemahannya.",
+      "why": "Tidak ada yang hilang saat berkas Anda berubah: tautkan kembali atau hapus."
+    },
+    "backup": {
+      "title": "Cadangan",
+      "what": "Mengemas proyek ke dalam arsip yang dapat Anda unduh dan pulihkan.",
+      "why": "Kembali ke keadaan sebelumnya jika impor atau perubahan massal gagal."
+    },
+    "sharing": {
+      "title": "Berbagi",
+      "what": "Undang kolaborator dan pilih bahasa mana yang boleh disunting masing-masing.",
+      "why": "Penerjemah mengerjakan bahasanya sendiri, dengan penyedia AI mereka sendiri."
+    },
+    "global-config": {
+      "title": "Konfigurasi Global",
+      "what": "Pengaturan untuk seluruh ruang kerja: penyedia, model, dan brankas kredensial.",
+      "why": "Siapkan penyedia sekali dan gunakan di setiap proyek."
+    },
+    "translation-memory": {
+      "title": "Memori Terjemahan",
+      "what": "Terjemahan sebelumnya, dipakai ulang saat teks yang sama muncul lagi.",
+      "why": "Menghemat biaya dan menjaga terjemahan baris yang berulang tetap sama."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "Kegunaan glosarium",
+      "what": "Glosarium berisi daftar istilah dengan terjemahan yang Anda inginkan, seperti nama karakter atau jargon game.",
+      "why": "Terjemahan pun selalu memakai kata-kata Anda, bukan tebakan baru."
+    },
+    "create": {
+      "title": "Buat glosarium",
+      "what": "Mulai glosarium baru yang kosong di sini.",
+      "why": "Satu glosarium sering kali cukup. Gunakan lebih banyak untuk memisahkan kelompok istilah."
+    },
+    "add-term": {
+      "title": "Tambahkan istilah",
+      "what": "Ketik istilah sumber dan terjemahannya untuk setiap bahasa, lalu tambahkan.",
+      "why": "Tandai istilah sebagai konstan bila tidak boleh diterjemahkan, seperti nama merek."
+    },
+    "assign": {
+      "title": "Terapkan ke proyek ini",
+      "what": "Glosarium yang aktif dipakai saat proyek ini diterjemahkan. Nonaktifkan untuk berhenti memakainya.",
+      "why": "Biarkan glosarium nonaktif selama Anda masih menyusunnya."
+    },
+    "effect": {
+      "title": "Pengaruhnya pada terjemahan",
+      "what": "Saat string berisi istilah glosarium, istilah dan terjemahan Anda dikirim bersama string itu.",
+      "why": "Penyedia mengikuti pilihan Anda alih-alih memilih katanya sendiri."
+    },
+    "generate": {
+      "title": "Biarkan AI menyarankan istilah",
+      "what": "Minta penyedia AI menemukan istilah yang mungkin ada di string Anda.",
+      "why": "Anda meninjau sarannya dan hanya menyimpan yang Anda inginkan."
     }
   }
 }

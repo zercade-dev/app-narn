@@ -113,14 +113,40 @@
   },
   "guideTours": {
     "title": "Touren",
-    "firstRun": "Geführter Erststart",
-    "area": {
-      "routing": "Routing",
-      "glossary": "Glossar",
-      "quality": "Qualität",
-      "compare": "Vergleich",
-      "review-translation-ai": "Übersetzungs-KI-Review"
+    "first-run": {
+      "name": "Geführter Erststart",
+      "summary": "Richte einen Anbieter ein, füge deine Strings hinzu, übersetze und exportiere, Schritt für Schritt."
     },
+    "advanced-sections": {
+      "name": "Erweiterte Bereiche",
+      "summary": "Wofür jeder Tab und jede Ansicht da ist, die der erweiterte Modus hinzufügt."
+    },
+    "glossaries": {
+      "name": "Glossare",
+      "summary": "Lege ein Glossar an, füge Begriffe hinzu und wende es an, damit Schlüsselbegriffe einheitlich bleiben."
+    },
+    "routing": {
+      "name": "Routing",
+      "summary": "Ein 30-Sekunden-Überblick, wie NARN entscheidet, wer was übersetzt."
+    },
+    "quality": {
+      "name": "Qualität",
+      "summary": "Ein kurzer Überblick, wie NARN deine Übersetzungen prüft."
+    },
+    "compare": {
+      "name": "Vergleich",
+      "summary": "Ein kurzer Überblick, wie du Übersetzungen nebeneinander prüfst."
+    },
+    "review-translation-ai": {
+      "name": "Übersetzungs-KI-Review",
+      "summary": "Ein kurzer Überblick, wie eine KI deine Übersetzungen prüft."
+    },
+    "startOver": "Von vorn beginnen",
+    "continue": "Dort weitermachen, wo ich aufgehört habe",
+    "progress": "{{current}} von {{total}} Schritten",
+    "completed": "Abgeschlossen",
+    "needsProject": "Öffne ein Projekt, um diese Tour zu machen.",
+    "switchedToAdvanced": "Für diese Tour wurde in den erweiterten Modus gewechselt.",
     "confirm": {
       "title": "Für die geführte Einrichtung zu „Einfach“ wechseln?",
       "body": "Die geführte Einrichtung ist für den Modus „Einfach“ gemacht, der die erweiterten Tabs ausblendet. Du kannst jederzeit in der oberen Leiste zurückwechseln.",
@@ -228,6 +254,115 @@
         "what": "Prüfe alle Übersetzungen im Projekt, nicht nur den letzten Lauf.",
         "why": "Nutze das vor einem Release oder nachdem du Glossar oder Routing geändert hast."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Vergleich",
+      "what": "Der Quelltext neben einer Zielsprache, Zeile für Zeile, auf Wunsch mit einer Referenzsprache.",
+      "why": "Prüfe und bearbeite eine Sprache sorgfältig, auch eine, die du nicht liest."
+    },
+    "routing": {
+      "title": "Routing",
+      "what": "Legt fest, welcher Anbieter jede Sprache, Kategorie oder jeden Tonfall übersetzt.",
+      "why": "Schicke jede Art von Text an den Anbieter, der sie am besten beherrscht."
+    },
+    "stage-details": {
+      "title": "Level-Details",
+      "what": "Name, Gameplay-Details und Beschreibung eines Levels, mit ihren Übersetzungen.",
+      "why": "Übersetze den Text, der ein Level beschreibt, außerhalb deiner String-Datei."
+    },
+    "quality": {
+      "title": "Qualität",
+      "what": "Die automatischen Prüfungen, die jede Übersetzung durchläuft, und welche fehlgeschlagen sind.",
+      "why": "Finde kaputte Tags, geänderte Platzhalter und zu lange Texte vor der Veröffentlichung."
+    },
+    "review-source-ai": {
+      "title": "Quelltext-KI-Review",
+      "what": "Ein KI-Anbieter liest deinen Quelltext und weist auf Tippfehler und unklare Formulierungen hin.",
+      "why": "Ein besserer Quelltext ergibt in jeder Sprache eine bessere Übersetzung."
+    },
+    "review-translation-ai": {
+      "title": "Übersetzungs-KI-Review",
+      "what": "Ein KI-Anbieter liest Übersetzungen neben dem Quelltext und bewertet sie.",
+      "why": "Er findet falsche Bedeutungen und holprige Formulierungen, die automatische Prüfungen übersehen."
+    },
+    "review-manual": {
+      "title": "Manuelles Review",
+      "what": "Eine Warteschlange von Übersetzungen, die ein Review brauchen, zum Freigeben, Bearbeiten oder Zurückstellen.",
+      "why": "Arbeite zweifelhafte Übersetzungen schnell ab, mit Tastenkürzeln."
+    },
+    "glossary": {
+      "title": "Glossar",
+      "what": "Listen von Begriffen mit der Übersetzung, die du für jeden willst.",
+      "why": "Namen und Schlüsselbegriffe werden dann jedes Mal gleich übersetzt."
+    },
+    "category": {
+      "title": "Kategorie",
+      "what": "Gruppiert Strings nach Art, etwa UI-Beschriftungen, Dialoge oder Gegenstandsnamen.",
+      "why": "Routing-Regeln und Batches können dann jede Art von Text anders behandeln."
+    },
+    "color-text": {
+      "title": "Text-Styler",
+      "what": "Ein Entwurfswerkzeug für Text mit Farben, Fett, Kursiv und Schriftgrößen.",
+      "why": "Schreibe formatierten Text, ohne das Markup von Hand zu tippen."
+    },
+    "orphans": {
+      "title": "Waisen",
+      "what": "Einträge, die bei einem späteren Import verschwunden sind, mitsamt ihren Übersetzungen.",
+      "why": "Nichts geht verloren, wenn sich deine Datei ändert: Verknüpfe sie neu oder lösche sie."
+    },
+    "backup": {
+      "title": "Backup",
+      "what": "Packt das Projekt in ein Archiv, das du herunterladen und wiederherstellen kannst.",
+      "why": "Kehre zu einem früheren Stand zurück, wenn ein Import oder eine Massenänderung schiefgeht."
+    },
+    "sharing": {
+      "title": "Zusammenarbeit",
+      "what": "Lade Mitwirkende ein und wähle, welche Sprachen jede Person bearbeiten darf.",
+      "why": "Übersetzer arbeiten an ihren eigenen Sprachen, mit ihren eigenen KI-Anbietern."
+    },
+    "global-config": {
+      "title": "Globale Konfiguration",
+      "what": "Einstellungen für den ganzen Workspace: Anbieter, Modelle und der Zugangsdaten-Tresor.",
+      "why": "Richte einen Anbieter einmal ein und nutze ihn in jedem Projekt."
+    },
+    "translation-memory": {
+      "title": "Translation Memory",
+      "what": "Frühere Übersetzungen, wiederverwendet, wenn derselbe Text erneut vorkommt.",
+      "why": "Das spart Kosten und hält wiederholte Zeilen einheitlich übersetzt."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "Wofür ein Glossar da ist",
+      "what": "Ein Glossar listet Begriffe mit der Übersetzung auf, die du für jeden willst, etwa Figurennamen oder Spieljargon.",
+      "why": "Übersetzungen verwenden dann jedes Mal deine Wörter statt einer neuen Vermutung."
+    },
+    "create": {
+      "title": "Glossar anlegen",
+      "what": "Lege hier ein neues, leeres Glossar an.",
+      "why": "Oft reicht ein Glossar. Nutze mehrere, um Begriffsgruppen getrennt zu halten."
+    },
+    "add-term": {
+      "title": "Begriff hinzufügen",
+      "what": "Gib den Quellbegriff und seine Übersetzung für jede Sprache ein und füge ihn hinzu.",
+      "why": "Markiere einen Begriff als konstant, wenn er nie übersetzt werden darf, etwa ein Markenname."
+    },
+    "assign": {
+      "title": "Auf dieses Projekt anwenden",
+      "what": "Ein aktiviertes Glossar wird beim Übersetzen dieses Projekts verwendet. Deaktiviere es, um es nicht mehr zu nutzen.",
+      "why": "Lass ein Glossar deaktiviert, solange du es noch aufbaust."
+    },
+    "effect": {
+      "title": "Wie es die Übersetzung verändert",
+      "what": "Enthält ein String einen Glossarbegriff, werden der Begriff und deine Übersetzung mit dem String mitgeschickt.",
+      "why": "Der Anbieter folgt deiner Wahl, statt ein eigenes Wort zu wählen."
+    },
+    "generate": {
+      "title": "Begriffe von der KI vorschlagen lassen",
+      "what": "Lass einen KI-Anbieter wahrscheinliche Begriffe in deinen Strings finden.",
+      "why": "Du prüfst die Vorschläge und behältst nur die, die du willst."
     }
   }
 }

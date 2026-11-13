@@ -113,14 +113,40 @@
   },
   "guideTours": {
     "title": "Tour",
-    "firstRun": "Primo avvio guidato",
-    "area": {
-      "routing": "Routing",
-      "glossary": "Glossario",
-      "quality": "Qualità",
-      "compare": "Confronto",
-      "review-translation-ai": "Revisione IA traduzioni"
+    "first-run": {
+      "name": "Primo avvio guidato",
+      "summary": "Configura un provider, aggiungi i tuoi testi, traduci ed esporta, un passo alla volta."
     },
+    "advanced-sections": {
+      "name": "Sezioni avanzate",
+      "summary": "A cosa serve ogni scheda e vista aggiunta dalla modalità avanzata."
+    },
+    "glossaries": {
+      "name": "Glossari",
+      "summary": "Crea un glossario, aggiungi termini e applicalo, così i termini chiave restano coerenti."
+    },
+    "routing": {
+      "name": "Routing",
+      "summary": "Una panoramica di 30 secondi su come NARN sceglie chi traduce cosa."
+    },
+    "quality": {
+      "name": "Qualità",
+      "summary": "Una breve panoramica su come NARN controlla le tue traduzioni."
+    },
+    "compare": {
+      "name": "Confronto",
+      "summary": "Una breve panoramica su come rivedere le traduzioni fianco a fianco."
+    },
+    "review-translation-ai": {
+      "name": "Revisione IA traduzioni",
+      "summary": "Una breve panoramica su come un’IA controlla le tue traduzioni."
+    },
+    "startOver": "Ricomincia dall’inizio",
+    "continue": "Riprendi da dove avevo lasciato",
+    "progress": "{{current}} di {{total}} passaggi",
+    "completed": "Completato",
+    "needsProject": "Apri un progetto per seguire questo tour.",
+    "switchedToAdvanced": "Passato alla modalità avanzata per questo tour.",
     "confirm": {
       "title": "Passare a Semplice per la configurazione guidata?",
       "body": "La configurazione guidata è pensata per la modalità Semplice, che nasconde le schede avanzate. Puoi tornare indietro in qualsiasi momento dalla barra in alto.",
@@ -228,6 +254,115 @@
         "what": "Rivedi tutte le traduzioni del progetto, non solo l’ultima esecuzione.",
         "why": "Usalo prima di una release o dopo aver cambiato il glossario o il routing."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Confronto",
+      "what": "Il testo di origine accanto a una lingua di destinazione, riga per riga, con una lingua di riferimento facoltativa.",
+      "why": "Rivedi e modifica una lingua con cura, anche una che non leggi."
+    },
+    "routing": {
+      "title": "Routing",
+      "what": "Decide quale provider traduce ogni lingua, categoria o tono.",
+      "why": "Invia ogni tipo di testo al provider che lo gestisce meglio."
+    },
+    "stage-details": {
+      "title": "Dettagli livello",
+      "what": "Nome, dettagli di gameplay e descrizione di un livello, con le loro traduzioni.",
+      "why": "Traduci il testo che descrive un livello, fuori dal tuo file di testi."
+    },
+    "quality": {
+      "title": "Qualità",
+      "what": "I controlli automatici che ogni traduzione supera, e quelli non superati.",
+      "why": "Trova tag rotti, segnaposto modificati e testi troppo lunghi prima della pubblicazione."
+    },
+    "review-source-ai": {
+      "title": "Revisione IA origine",
+      "what": "Un provider IA legge il testo di origine e segnala refusi e frasi poco chiare.",
+      "why": "Un testo di origine migliore dà una traduzione migliore in ogni lingua."
+    },
+    "review-translation-ai": {
+      "title": "Revisione IA traduzioni",
+      "what": "Un provider IA legge le traduzioni accanto al testo di origine e assegna un punteggio.",
+      "why": "Trova significati sbagliati e frasi goffe che i controlli automatici non vedono."
+    },
+    "review-manual": {
+      "title": "Revisione manuale",
+      "what": "Una coda di traduzioni da rivedere, da approvare, modificare o contrassegnare una per una.",
+      "why": "Smaltisci in fretta le traduzioni dubbie, con le scorciatoie da tastiera."
+    },
+    "glossary": {
+      "title": "Glossario",
+      "what": "Elenchi di termini con la traduzione che vuoi per ciascuno.",
+      "why": "Nomi e termini chiave escono così sempre allo stesso modo."
+    },
+    "category": {
+      "title": "Categoria",
+      "what": "Raggruppa i testi per tipo, come etichette dell’interfaccia, dialoghi o nomi di oggetti.",
+      "why": "Regole di routing e batch possono così trattare ogni tipo di testo in modo diverso."
+    },
+    "color-text": {
+      "title": "Stile testo",
+      "what": "Uno strumento di bozza per testo con colori, grassetto, corsivo e dimensioni del carattere.",
+      "why": "Scrivi testo formattato senza digitare il markup a mano."
+    },
+    "orphans": {
+      "title": "Orfane",
+      "what": "Voci sparite in un’importazione successiva, conservate con le loro traduzioni.",
+      "why": "Non si perde nulla quando il file cambia: ricollegale o eliminale."
+    },
+    "backup": {
+      "title": "Backup",
+      "what": "Raccoglie il progetto in un archivio che puoi scaricare e ripristinare.",
+      "why": "Torna a uno stato precedente se un’importazione o una modifica in blocco va storta."
+    },
+    "sharing": {
+      "title": "Condivisione",
+      "what": "Invita collaboratori e scegli quali lingue può modificare ciascuno.",
+      "why": "I traduttori lavorano sulle proprie lingue, con i propri provider IA."
+    },
+    "global-config": {
+      "title": "Configurazione globale",
+      "what": "Impostazioni dell’intera area di lavoro: provider, modelli e cassaforte delle credenziali.",
+      "why": "Configura un provider una volta e usalo in ogni progetto."
+    },
+    "translation-memory": {
+      "title": "Memoria di traduzione",
+      "what": "Traduzioni precedenti, riutilizzate quando torna lo stesso testo.",
+      "why": "Fa risparmiare e mantiene uguale la traduzione delle righe ripetute."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "A cosa serve un glossario",
+      "what": "Un glossario elenca termini con la traduzione che vuoi per ciascuno, come nomi di personaggi o gergo del gioco.",
+      "why": "Le traduzioni usano così sempre le tue parole invece di tirare a indovinare."
+    },
+    "create": {
+      "title": "Crea un glossario",
+      "what": "Inizia qui un glossario nuovo e vuoto.",
+      "why": "Spesso basta un glossario. Usane di più per tenere separati gruppi di termini."
+    },
+    "add-term": {
+      "title": "Aggiungi un termine",
+      "what": "Scrivi il termine di origine e la sua traduzione in ogni lingua, poi aggiungilo.",
+      "why": "Segna un termine come costante quando non va mai tradotto, come un nome di marchio."
+    },
+    "assign": {
+      "title": "Applicalo a questo progetto",
+      "what": "Un glossario attivo viene usato quando questo progetto viene tradotto. Disattivalo per smettere di usarlo.",
+      "why": "Tieni un glossario disattivato finché lo stai ancora costruendo."
+    },
+    "effect": {
+      "title": "Come cambia la traduzione",
+      "what": "Quando un testo contiene un termine del glossario, il termine e la tua traduzione vengono inviati insieme al testo.",
+      "why": "Il provider segue la tua scelta invece di sceglierne una sua."
+    },
+    "generate": {
+      "title": "Fatti suggerire i termini dall’IA",
+      "what": "Chiedi a un provider IA di trovare i termini probabili nei tuoi testi.",
+      "why": "Rivedi i suggerimenti e tieni solo quelli che vuoi."
     }
   }
 }

@@ -45,3 +45,15 @@ export function countedStepIndex(tour: Tour, at: number): number {
   const step = counted[Math.max(0, Math.min(counted.length - 1, at))];
   return tour.steps.indexOf(step);
 }
+
+/** Index of the next counted step after `index`; `undefined` past the last one. */
+export function nextCountedIndex(tour: Tour, index: number): number | undefined {
+  for (let i = index + 1; i < tour.steps.length; i++) if (isCounted(tour.steps[i])) return i;
+  return undefined;
+}
+
+/** Index of the counted step before `index`; `index` itself when there is none. */
+export function previousCountedIndex(tour: Tour, index: number): number {
+  for (let i = index - 1; i >= 0; i--) if (isCounted(tour.steps[i])) return i;
+  return index;
+}
