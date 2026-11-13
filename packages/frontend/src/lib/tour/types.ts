@@ -14,6 +14,13 @@ export interface GuideFacts {
   /** Entries of the active project are selected in the string list. */
   hasSelection: boolean;
   isCollaboratorOnly: boolean;
+  /** A translatable entry of the active project still misses a target language. */
+  untranslatedRemain: boolean;
+  /**
+   * The guide's quick test on the active project translated something, more is
+   * left, and the person has not yet chosen between the rest and export.
+   */
+  quickTestPending: boolean;
 }
 
 export type TourAdvance =

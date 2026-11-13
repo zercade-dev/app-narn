@@ -226,6 +226,16 @@ export function StringTableFilters() {
     filters.freewayTierBelow !== null ||
     filters.filterMode !== 'AND';
 
+  // The box is uncontrolled: when the search is changed from elsewhere (the
+  // guided first run clears it), show that, unless the person is typing in it.
+  const storedSearch = storedFilters.search;
+  useEffect(() => {
+    const box = searchRef.current;
+    if (box && box.value !== storedSearch && document.activeElement !== box) {
+      box.value = storedSearch;
+    }
+  }, [storedSearch]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (debounceRef.current) clearTimeout(debounceRef.current);

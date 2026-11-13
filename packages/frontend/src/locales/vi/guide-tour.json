@@ -17,8 +17,12 @@
       "fixKey": "Kiểm tra khóa của tôi",
       "retry": "Thử lại",
       "stopRetry": "Dừng và thử lại",
-      "switchAdvanced": "Chuyển sang Nâng cao",
-      "finish": "Hoàn tất"
+      "translateQuick": "Dịch thử 3 mục này",
+      "translateEverything": "Dịch tất cả",
+      "translateFew": "Dịch các mục này",
+      "translateRest": "Dịch phần còn lại ngay",
+      "skipRest": "Bỏ qua, xuất những gì đã có",
+      "maybeLater": "Để sau"
     },
     "vault": {
       "title": "Tạo mật khẩu kho bảo mật",
@@ -56,7 +60,7 @@
       "newWhat": "Tạo một dự án mới.",
       "createWhat": "Đặt tên cho dự án, rồi tạo.",
       "sourceWhat": "Chọn ngôn ngữ mà văn bản của bạn được viết.",
-      "targetsWhat": "Đánh dấu các ngôn ngữ bạn muốn dịch sang.",
+      "targetsWhat": "Đánh dấu các ngôn ngữ bạn muốn dịch sang, hoặc dùng Chọn tất cả.",
       "saveWhat": "Lưu các ngôn ngữ.",
       "importWhat": "Chọn tệp CSV bạn đã xuất từ trình chỉnh sửa game.",
       "confirmWhat": "Xem lại bản tóm tắt, rồi xác nhận nhập."
@@ -65,6 +69,8 @@
       "title": "Dịch",
       "why": "Freeway tự động chọn một mô hình miễn phí phù hợp cho từng ngôn ngữ.",
       "openWhat": "Mở tab liệt kê các mục của bạn.",
+      "quickWhat": "3 mục đầu tiên đã được chọn. Dịch thử chúng, hoặc dịch tất cả ngay bây giờ.",
+      "fewWhat": "Các mục của bạn đã được chọn. Dịch chúng ngay bây giờ.",
       "selectWhat": "Chọn tất cả các mục.",
       "pressWhat": "Mở hộp thoại dịch.",
       "startWhat": "Bắt đầu dịch.",
@@ -88,6 +94,11 @@
       "quotaWhat": "Hạn mức miễn phí tạm thời đã hết. Quá trình dịch sẽ tự tiếp tục khi có hạn mức trở lại.",
       "modelWhat": "Các mô hình miễn phí hiện có đang thấp hơn chất lượng mà lần chạy này hướng tới. Quá trình dịch sẽ tự tiếp tục khi có mô hình tốt hơn."
     },
+    "rest": {
+      "title": "Bản dịch thử đã thành công",
+      "what": "3 mục đầu tiên đã được dịch sang mọi ngôn ngữ bạn chọn. Dịch phần còn lại ngay, hoặc xuất những gì bạn đã có.",
+      "why": "Bạn có thể dịch phần còn lại sau từ danh sách mục."
+    },
     "export": {
       "title": "Xuất",
       "why": "Trình chỉnh sửa game có thể nhập tệp này để đưa bản dịch vào game.",
@@ -96,7 +107,7 @@
     },
     "closing": {
       "title": "Mọi thứ đã sẵn sàng",
-      "what": "Nâng cao có thêm bảng thuật ngữ, kiểm tra chất lượng, điều phối, rà soát và nhiều tính năng khác.",
+      "what": "Đây là giao diện đơn giản: chỉ hiển thị những gì cần để dịch và xuất. Nâng cao có thêm nhiều công cụ. Gạt công tắc sang Nâng cao để xem hướng dẫn ngắn.",
       "why": "Bạn có thể chuyển bất cứ lúc nào từ thanh trên cùng."
     }
   },

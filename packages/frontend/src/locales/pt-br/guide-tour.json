@@ -17,8 +17,12 @@
       "fixKey": "Conferir minha chave",
       "retry": "Tentar de novo",
       "stopRetry": "Parar e tentar de novo",
-      "switchAdvanced": "Mudar para Avançado",
-      "finish": "Concluir"
+      "translateQuick": "Traduzir estas 3 para testar",
+      "translateEverything": "Traduzir tudo",
+      "translateFew": "Traduzir agora",
+      "translateRest": "Traduzir o restante agora",
+      "skipRest": "Pular e exportar o que já tenho",
+      "maybeLater": "Talvez depois"
     },
     "vault": {
       "title": "Criação da senha do cofre",
@@ -56,7 +60,7 @@
       "newWhat": "Crie um novo projeto.",
       "createWhat": "Dê um nome ao seu projeto e crie-o.",
       "sourceWhat": "Escolha o idioma em que seu texto está escrito.",
-      "targetsWhat": "Marque os idiomas para os quais você quer traduzir.",
+      "targetsWhat": "Marque os idiomas para os quais você quer traduzir, ou use Selecionar tudo.",
       "saveWhat": "Salve seus idiomas.",
       "importWhat": "Escolha o arquivo CSV que você exportou do editor do seu jogo.",
       "confirmWhat": "Confira o resumo e confirme a importação."
@@ -65,6 +69,8 @@
       "title": "Tradução",
       "why": "O Freeway escolhe automaticamente um modelo gratuito adequado para cada idioma.",
       "openWhat": "Abra a aba que lista suas entradas.",
+      "quickWhat": "As 3 primeiras entradas estão selecionadas. Traduza-as para testar, ou traduza tudo agora.",
+      "fewWhat": "Suas entradas estão selecionadas. Traduza-as agora.",
       "selectWhat": "Selecione todas as entradas.",
       "pressWhat": "Abra a janela de tradução.",
       "startWhat": "Inicie a tradução.",
@@ -88,6 +94,11 @@
       "quotaWhat": "A cota gratuita acabou por enquanto. A tradução continua sozinha quando houver cota de novo.",
       "modelWhat": "Os modelos gratuitos disponíveis agora estão abaixo da qualidade que esta execução busca. A tradução continua sozinha quando houver um melhor."
     },
+    "rest": {
+      "title": "O teste funcionou",
+      "what": "Suas 3 primeiras entradas foram traduzidas para todos os idiomas escolhidos. Traduza o restante agora ou exporte o que você já tem.",
+      "why": "Você pode traduzir o restante depois, pela lista de entradas."
+    },
     "export": {
       "title": "Exportação",
       "why": "O editor do seu jogo pode importar este arquivo para levar as traduções ao jogo.",
@@ -96,7 +107,7 @@
     },
     "closing": {
       "title": "Tudo pronto",
-      "what": "O Avançado adiciona glossários, verificações de qualidade, roteamento, revisões e mais.",
+      "what": "Esta é a visualização simplificada: ela mostra só o necessário para traduzir e exportar. O Avançado tem mais ferramentas. Mude a chave para Avançado para ver um tour rápido.",
       "why": "Você pode mudar quando quiser pela barra superior."
     }
   },

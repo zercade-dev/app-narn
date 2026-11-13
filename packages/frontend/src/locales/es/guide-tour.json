@@ -17,8 +17,12 @@
       "fixKey": "Revisar mi clave",
       "retry": "Reintentar",
       "stopRetry": "Detener y reintentar",
-      "switchAdvanced": "Cambiar a Avanzado",
-      "finish": "Finalizar"
+      "translateQuick": "Traducir estos 3 para probar",
+      "translateEverything": "Traducir todo",
+      "translateFew": "Traducirlos",
+      "translateRest": "Traducir el resto ahora",
+      "skipRest": "Omitir y exportar lo que hay",
+      "maybeLater": "Quizás más tarde"
     },
     "vault": {
       "title": "Crear la contraseña de tu bóveda",
@@ -56,7 +60,7 @@
       "newWhat": "Crea un proyecto nuevo.",
       "createWhat": "Ponle un nombre a tu proyecto y créalo.",
       "sourceWhat": "Elige el idioma en el que está escrito tu texto.",
-      "targetsWhat": "Marca los idiomas a los que quieres traducir.",
+      "targetsWhat": "Marca los idiomas a los que quieres traducir, o usa Seleccionar todo.",
       "saveWhat": "Guarda tus idiomas.",
       "importWhat": "Elige el archivo CSV que exportaste desde el editor de tu juego.",
       "confirmWhat": "Revisa el resumen y confirma la importación."
@@ -65,6 +69,8 @@
       "title": "Traducir",
       "why": "Freeway elige automáticamente un modelo gratuito adecuado para cada idioma.",
       "openWhat": "Abre la pestaña que muestra tus textos.",
+      "quickWhat": "Los 3 primeros textos están seleccionados. Tradúcelos para probar, o traduce todo ahora.",
+      "fewWhat": "Tus textos están seleccionados. Tradúcelos ahora.",
       "selectWhat": "Selecciona todos los textos.",
       "pressWhat": "Abre el cuadro de traducción.",
       "startWhat": "Inicia la traducción.",
@@ -88,6 +94,11 @@
       "quotaWhat": "La cuota gratuita se agotó por ahora. La traducción se reanuda sola cuando vuelva a haber cuota.",
       "modelWhat": "Los modelos gratuitos disponibles ahora están por debajo de la calidad que busca esta ejecución. La traducción se reanuda sola cuando haya uno mejor."
     },
+    "rest": {
+      "title": "La prueba ha funcionado",
+      "what": "Tus 3 primeros textos están traducidos a todos los idiomas que elegiste. Traduce el resto ahora o exporta lo que tienes.",
+      "why": "Puedes traducir el resto más tarde desde la lista de textos."
+    },
     "export": {
       "title": "Exportar",
       "why": "El editor de tu juego puede importar este archivo para llevar las traducciones al juego.",
@@ -96,7 +107,7 @@
     },
     "closing": {
       "title": "Todo listo",
-      "what": "Avanzado añade glosarios, controles de calidad, enrutamiento, revisiones y más.",
+      "what": "Esta es la vista simplificada: solo muestra lo necesario para traducir y exportar. Avanzado tiene más herramientas. Cambia el interruptor a Avanzado para ver un recorrido breve.",
       "why": "Puedes cambiar cuando quieras desde la barra superior."
     }
   },

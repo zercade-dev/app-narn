@@ -17,8 +17,12 @@
       "fixKey": "Check my key",
       "retry": "Try again",
       "stopRetry": "Stop and try again",
-      "switchAdvanced": "Switch to Advanced",
-      "finish": "Finish"
+      "translateQuick": "Translate these 3 to try it out",
+      "translateEverything": "Translate everything",
+      "translateFew": "Translate them",
+      "translateRest": "Translate the rest now",
+      "skipRest": "Skip, export what I have",
+      "maybeLater": "Maybe later"
     },
     "vault": {
       "title": "Create your vault password",
@@ -56,7 +60,7 @@
       "newWhat": "Create a new project.",
       "createWhat": "Give your project a name, then create it.",
       "sourceWhat": "Pick the language your text is written in.",
-      "targetsWhat": "Tick the languages you want to translate into.",
+      "targetsWhat": "Tick the languages you want to translate into, or use Select all.",
       "saveWhat": "Save your languages.",
       "importWhat": "Choose the CSV file you exported from your game editor.",
       "confirmWhat": "Check the summary, then confirm the import."
@@ -65,6 +69,8 @@
       "title": "Translate",
       "why": "Freeway picks a suitable free model for each language automatically.",
       "openWhat": "Open the tab that lists your entries.",
+      "quickWhat": "The first 3 entries are selected. Translate them to try it out, or translate everything now.",
+      "fewWhat": "Your entries are selected. Translate them now.",
       "selectWhat": "Select all entries.",
       "pressWhat": "Open the translation dialog.",
       "startWhat": "Start the translation.",
@@ -88,6 +94,11 @@
       "quotaWhat": "The free quota is used up for now. The translation resumes by itself when quota is free again.",
       "modelWhat": "The free models available right now are below the quality this run aims for. The translation resumes by itself when a better one is available."
     },
+    "rest": {
+      "title": "The test worked",
+      "what": "Your first 3 entries are translated into every language you chose. Translate the rest now, or export what you have.",
+      "why": "You can translate the rest later from the list of entries."
+    },
     "export": {
       "title": "Export",
       "why": "Your game editor can import this file to bring the translations into your game.",
@@ -96,7 +107,7 @@
     },
     "closing": {
       "title": "You're all set",
-      "what": "Advanced adds glossaries, quality checks, routing, reviews and more.",
+      "what": "This is the simplified view: it shows only what you need to translate and export. Advanced has more tools. Flip the switch to Advanced for a short tour.",
       "why": "You can switch at any time from the top bar."
     }
   },

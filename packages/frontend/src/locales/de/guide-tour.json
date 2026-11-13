@@ -17,8 +17,12 @@
       "fixKey": "Meinen Schlüssel prüfen",
       "retry": "Erneut versuchen",
       "stopRetry": "Stoppen und erneut versuchen",
-      "switchAdvanced": "Zu „Erweitert“ wechseln",
-      "finish": "Fertig"
+      "translateQuick": "Diese 3 zum Ausprobieren übersetzen",
+      "translateEverything": "Alles übersetzen",
+      "translateFew": "Jetzt übersetzen",
+      "translateRest": "Den Rest jetzt übersetzen",
+      "skipRest": "Überspringen, Fertiges exportieren",
+      "maybeLater": "Vielleicht später"
     },
     "vault": {
       "title": "Tresor-Passwort erstellen",
@@ -56,7 +60,7 @@
       "newWhat": "Ein neues Projekt erstellen.",
       "createWhat": "Dem Projekt einen Namen geben und es erstellen.",
       "sourceWhat": "Die Sprache auswählen, in der dein Text geschrieben ist.",
-      "targetsWhat": "Die Sprachen ankreuzen, in die übersetzt werden soll.",
+      "targetsWhat": "Die Sprachen ankreuzen, in die übersetzt werden soll, oder „Alle auswählen“ verwenden.",
       "saveWhat": "Die Sprachen speichern.",
       "importWhat": "Die CSV-Datei auswählen, die du aus deinem Spiel-Editor exportiert hast.",
       "confirmWhat": "Die Zusammenfassung ansehen und den Import bestätigen."
@@ -65,6 +69,8 @@
       "title": "Übersetzen",
       "why": "Freeway wählt für jede Sprache automatisch ein passendes kostenloses Modell.",
       "openWhat": "Den Tab mit der Liste deiner Einträge öffnen.",
+      "quickWhat": "Die ersten 3 Einträge sind ausgewählt. Zum Ausprobieren nur diese übersetzen oder gleich alles.",
+      "fewWhat": "Deine Einträge sind ausgewählt. Jetzt übersetzen.",
       "selectWhat": "Alle Einträge auswählen.",
       "pressWhat": "Den Übersetzungsdialog öffnen.",
       "startWhat": "Die Übersetzung starten.",
@@ -88,6 +94,11 @@
       "quotaWhat": "Das kostenlose Kontingent ist vorerst aufgebraucht. Die Übersetzung wird von selbst fortgesetzt, sobald wieder Kontingent frei ist.",
       "modelWhat": "Die derzeit verfügbaren kostenlosen Modelle liegen unter der Qualität, die dieser Durchlauf anstrebt. Die Übersetzung wird von selbst fortgesetzt, sobald ein besseres verfügbar ist."
     },
+    "rest": {
+      "title": "Der Test hat geklappt",
+      "what": "Deine ersten 3 Einträge sind in jede gewählte Sprache übersetzt. Den Rest jetzt übersetzen oder exportieren, was schon fertig ist.",
+      "why": "Den Rest kannst du auch später in der Liste der Einträge übersetzen."
+    },
     "export": {
       "title": "Exportieren",
       "why": "Dein Spiel-Editor kann diese Datei importieren, um die Übersetzungen ins Spiel zu übernehmen.",
@@ -96,7 +107,7 @@
     },
     "closing": {
       "title": "Alles eingerichtet",
-      "what": "„Erweitert“ bietet zusätzlich Glossare, Qualitätsprüfungen, Routing, Reviews und mehr.",
+      "what": "Das ist die vereinfachte Ansicht: Sie zeigt nur, was du zum Übersetzen und Exportieren brauchst. „Erweitert“ bietet mehr Werkzeuge. Stell den Schalter auf „Erweitert“, um eine kurze Tour zu sehen.",
       "why": "Du kannst jederzeit in der oberen Leiste wechseln."
     }
   },

@@ -22,8 +22,12 @@ export type FirstRunAction =
   | 'fix-key'
   | 'retry'
   | 'stop-retry'
-  | 'switch-advanced'
-  | 'finish';
+  | 'translate-quick'
+  | 'translate-everything'
+  | 'translate-few'
+  | 'translate-rest'
+  | 'skip-rest'
+  | 'maybe-later';
 
 /** Window event a callout action dispatches; `detail` is the {@link FirstRunAction}. */
 export const FIRST_RUN_ACTION_EVENT = 'guide:first-run-action';
@@ -218,6 +222,30 @@ const STALL_STEPS: TourStep[] = [
   waitingStep('waiting-model', 'modelWhat'),
 ];
 
+const QUICK_STEP = 'translate-quick';
+
+/**
+ * The quick test step. With QUICK_TEST_SIZE entries or fewer (`few`) the test
+ * would be everything, so it offers just "Translate them".
+ */
+function quickTestStep(few: boolean): TourStep {
+  return {
+    id: QUICK_STEP,
+    anchor: 'bulk-batch-translate',
+    ...copy('translate', few ? 'fewWhat' : 'quickWhat'),
+    advance: { kind: 'manual' },
+    navigate: { view: 'project', tab: 'strings' },
+    actions: few
+      ? [action('translate-few', 'translateFew')]
+      : [
+          action('translate-quick', 'translateQuick'),
+          // Always one click away: the quick test must never be a detour.
+          action('translate-everything', 'translateEverything'),
+        ],
+    major: 4,
+  };
+}
+
 const SHARED_STEPS: TourStep[] = [
   {
     id: 'project-open',
@@ -290,6 +318,15 @@ const SHARED_STEPS: TourStep[] = [
     navigate: { view: 'project' },
     major: 4,
   },
+  // The quick test: the guide selects the first three entries itself and
+  // asks for them (or for everything) from the callout. Done when the request
+  // produced a run (`FirstRunTour` watches for it): one refused before a run
+  // exists (no route, a validation error) must not leave "the translation is
+  // running" on screen. Its actions depend on the project's size, see
+  // `firstRunTourFor`.
+  quickTestStep(false),
+  // "Try again" only: the person selects and starts by hand. They stand in for
+  // the quick test, so the counter does not move.
   {
     // Done once something is selected, not on the click: on entries that are
     // already selected a click would deselect them all.
@@ -300,6 +337,7 @@ const SHARED_STEPS: TourStep[] = [
     // "Try again" lands here, or on the next step, from anywhere.
     navigate: { view: 'project', tab: 'strings' },
     major: 4,
+    variantOf: QUICK_STEP,
   },
   {
     id: 'translate-selected',
@@ -308,16 +346,16 @@ const SHARED_STEPS: TourStep[] = [
     advance: { kind: 'click' },
     navigate: { view: 'project', tab: 'strings' },
     major: 4,
+    variantOf: QUICK_STEP,
   },
   {
-    // Done when the request produced a run (`FirstRunTour` watches for it):
-    // one refused before a run exists (no route, a validation error) must not
-    // leave "the translation is running" on screen.
+    // Done when the request produced a run, like the quick test.
     id: 'translate-start',
     anchor: 'comparison-translate-start',
     ...copy('translate', 'startWhat'),
     advance: { kind: 'manual' },
     major: 4,
+    variantOf: QUICK_STEP,
   },
   {
     id: WAITING_STEP,
@@ -331,6 +369,20 @@ const SHARED_STEPS: TourStep[] = [
     major: 4,
   },
   ...STALL_STEPS,
+  {
+    // After the quick test: it worked, and the rest can go now or later.
+    id: 'translate-rest',
+    anchor: null,
+    titleKey: 'firstRun.rest.title',
+    whatKey: 'firstRun.rest.what',
+    whyKey: 'firstRun.rest.why',
+    advance: { kind: 'state', done: (f) => !f.quickTestPending },
+    // The strings tab, where the request to translate the rest is answered.
+    navigate: { view: 'project', tab: 'strings' },
+    actions: [action('translate-rest', 'translateRest'), action('skip-rest', 'skipRest')],
+    major: 4,
+    variantOf: WAITING_STEP,
+  },
   {
     id: 'export-open',
     anchor: 'tab-data',
@@ -347,14 +399,15 @@ const SHARED_STEPS: TourStep[] = [
     major: 5,
   },
   {
-    // Ends only through its own actions, so it shows no Next.
+    // Ends through "Maybe later" or a flip of the switch it points at
+    // (`FirstRunTour` watches the mode), so it shows no Next.
     id: 'closing',
-    anchor: null,
+    anchor: 'mode-switch',
     titleKey: 'firstRun.closing.title',
     whatKey: 'firstRun.closing.what',
     whyKey: 'firstRun.closing.why',
     advance: { kind: 'state', done: () => false },
-    actions: [action('switch-advanced', 'switchAdvanced'), action('finish', 'finish')],
+    actions: [action('maybe-later', 'maybeLater')],
   },
 ];
 
@@ -362,6 +415,20 @@ const tourOf = (head: TourStep[]): Tour => ({
   id: FIRST_RUN_TOUR_ID,
   steps: [...head, ...SHARED_STEPS],
 });
+
+/** The same tour for a project of QUICK_TEST_SIZE entries or fewer: no choice to make. */
+const fewEntriesTours = new Map<Tour, Tour>();
+function withFewEntries(tour: Tour): Tour {
+  let few = fewEntriesTours.get(tour);
+  if (!few) {
+    few = {
+      ...tour,
+      steps: tour.steps.map((s) => (s.id === QUICK_STEP ? quickTestStep(true) : s)),
+    };
+    fewEntriesTours.set(tour, few);
+  }
+  return few;
+}
 
 /** The local first-run tour (a new vault). */
 export const FIRST_RUN_TOUR: Tour = tourOf(localVaultAndKeySteps('vault'));
@@ -375,9 +442,19 @@ const FIRST_RUN_TOUR_CLOUD_KEY: Tour = tourOf(cloudVaultAndKeySteps('key'));
 /**
  * The tour for this person. Every variant shares one tour id, and the variants
  * of one mode share step ids and order, so switching between them (a vault
- * that now exists, or is now unlocked) never moves the person.
+ * that now exists, or is now unlocked) never moves the person. `fewEntries`:
+ * the project has QUICK_TEST_SIZE translatable entries or fewer, so the quick
+ * test offers no choice.
  */
 export function firstRunTourFor(
+  f: Pick<GuideFacts, 'cloud' | 'vaultExists'> & Partial<Pick<GuideFacts, 'vaultUnlocked'>>,
+  opts: { fewEntries?: boolean } = {},
+): Tour {
+  const tour = baseTourFor(f);
+  return opts.fewEntries ? withFewEntries(tour) : tour;
+}
+
+function baseTourFor(
   f: Pick<GuideFacts, 'cloud' | 'vaultExists'> & Partial<Pick<GuideFacts, 'vaultUnlocked'>>,
 ): Tour {
   if (!f.cloud) return f.vaultExists ? FIRST_RUN_TOUR_UNLOCK : FIRST_RUN_TOUR;
@@ -385,13 +462,17 @@ export function firstRunTourFor(
   return f.vaultUnlocked ? FIRST_RUN_TOUR_CLOUD_KEY : FIRST_RUN_TOUR_CLOUD_UNLOCK;
 }
 
+/** The quick test translated something and the person has not chosen what comes next. */
+const restPending = (f: GuideFacts): boolean => f.translationExists && f.quickTestPending;
+
 /** 1-5: the first major step that is not complete yet; 6 once all five are. */
 function firstIncompleteMajor(f: GuideFacts): number {
   if (!vaultReady(f)) return 1;
   // Cloud's single hand-off step covers the vault and the key.
   if (!f.usableKey) return f.cloud ? 1 : 2;
   if (!projectReady(f)) return 3;
-  if (!f.translationExists) return 4;
+  // "Translate the rest?" after the quick test is still part of step 4.
+  if (!f.translationExists || restPending(f)) return 4;
   if (!f.exported) return 5;
   return 6;
 }
@@ -402,7 +483,7 @@ export function firstRunMajor(f: GuideFacts): number {
 }
 
 /**
- * Index (in `firstRunTourFor(f)`) of the step to show: the first sub-step of
+ * Index (in `firstRunTourFor(f)`, whatever its `fewEntries`) of the step to show: the first sub-step of
  * the first major step that is not complete. Within step 3 it resumes at the
  * sub-step the project still needs. `'done'` once the closing callout was
  * acknowledged.
@@ -418,6 +499,7 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
     if (!f.projectHasLanguages) return at('languages-source');
     return at('import');
   }
+  if (major === 4 && restPending(f)) return at('translate-rest');
   return steps.findIndex((s) => s.major === major);
 }
 

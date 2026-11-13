@@ -12,6 +12,17 @@ export interface TourProgress {
 }
 
 /**
+ * The first run's quick test (three entries translated first). `runId` is
+ * null until the run it asked for is listed; `decision` is the person's
+ * answer to "translate the rest?".
+ */
+export interface QuickTest {
+  projectId: string;
+  runId: string | null;
+  decision: 'pending' | 'rest' | 'skip';
+}
+
+/**
  * Progress through the guided first run and the per-area tours. Persisted per
  * browser; only the active tour is transient.
  */
@@ -33,6 +44,13 @@ interface GuideState {
   declinedTours: string[];
   /** Per tour id, including `first-run`. */
   tourProgress: Record<string, TourProgress>;
+  /** The first run's quick test, once one was asked for. */
+  quickTest: QuickTest | null;
+  /**
+   * Not persisted. The first run's closing step is on screen: a switch to
+   * Advanced now starts the Advanced sections tour.
+   */
+  closingShown: boolean;
   /** Not persisted. */
   activeTourId: string | null;
   /** Not persisted. The counted step index the active tour opens at. */
@@ -62,6 +80,10 @@ interface GuideState {
   resumeFirstRun: (forced?: boolean) => void;
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
+  setQuickTest: (quickTest: QuickTest | null) => void;
+  /** The answer to "translate the rest?"; nothing without a quick test. */
+  decideQuickTest: (decision: 'rest' | 'skip') => void;
+  setClosingShown: (shown: boolean) => void;
   markExported: () => void;
   markProviderEnabled: (id: string) => void;
   /** `at`: the counted step index to open at (default 0). */
@@ -118,6 +140,8 @@ export const useGuideStore = create<GuideState>()(
       completedTours: [],
       declinedTours: [],
       tourProgress: {},
+      quickTest: null,
+      closingShown: false,
       activeTourId: null,
       activeTourStart: 0,
       activeTourSeq: 0,
@@ -129,6 +153,7 @@ export const useGuideStore = create<GuideState>()(
           firstRunFinished: false,
           firstRunForced: forced,
           exportedOnce: false,
+          quickTest: null,
           // A restarted run is not completed until it is finished again.
           tourProgress: { ...s.tourProgress, [FIRST_RUN_PROGRESS_ID]: NO_PROGRESS },
         })),
@@ -139,6 +164,10 @@ export const useGuideStore = create<GuideState>()(
           tourProgress: withCompleted(s.tourProgress, FIRST_RUN_PROGRESS_ID),
         })),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
+      setQuickTest: (quickTest) => set({ quickTest }),
+      decideQuickTest: (decision) =>
+        set((s) => (s.quickTest ? { quickTest: { ...s.quickTest, decision } } : s)),
+      setClosingShown: (closingShown) => set({ closingShown }),
       markExported: () => set({ exportedOnce: true }),
       markProviderEnabled: (id) =>
         set((s) => ({ enabledProviders: addOnce(s.enabledProviders, id) })),
@@ -172,6 +201,8 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
+      // `quickTest` was added within v1: a state saved without it rehydrates
+      // with the default (null), so no version bump is needed.
       version: 1,
       // Stored fields only; the persist merge fills in the rest.
       migrate: (persisted, version) => migrateGuideState(persisted, version) as GuideState,
@@ -184,6 +215,7 @@ export const useGuideStore = create<GuideState>()(
         completedTours: state.completedTours,
         declinedTours: state.declinedTours,
         tourProgress: state.tourProgress,
+        quickTest: state.quickTest,
       }),
     },
   ),

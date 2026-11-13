@@ -17,8 +17,12 @@
       "fixKey": "Vérifier ma clé",
       "retry": "Réessayer",
       "stopRetry": "Arrêter et réessayer",
-      "switchAdvanced": "Passer en mode Avancé",
-      "finish": "Terminer"
+      "translateQuick": "Traduire ces 3 pour essayer",
+      "translateEverything": "Tout traduire",
+      "translateFew": "Les traduire",
+      "translateRest": "Traduire le reste maintenant",
+      "skipRest": "Passer et exporter l’existant",
+      "maybeLater": "Plus tard"
     },
     "vault": {
       "title": "Créer le mot de passe de votre coffre",
@@ -56,7 +60,7 @@
       "newWhat": "Créez un nouveau projet.",
       "createWhat": "Donnez un nom à votre projet, puis créez-le.",
       "sourceWhat": "Choisissez la langue dans laquelle votre texte est écrit.",
-      "targetsWhat": "Cochez les langues vers lesquelles vous voulez traduire.",
+      "targetsWhat": "Cochez les langues vers lesquelles vous voulez traduire, ou utilisez Tout sélectionner.",
       "saveWhat": "Enregistrez vos langues.",
       "importWhat": "Choisissez le fichier CSV exporté depuis votre éditeur de jeu.",
       "confirmWhat": "Vérifiez le récapitulatif, puis confirmez l’importation."
@@ -65,6 +69,8 @@
       "title": "Traduire",
       "why": "Freeway choisit automatiquement un modèle gratuit adapté à chaque langue.",
       "openWhat": "Ouvrez l’onglet qui liste vos textes.",
+      "quickWhat": "Les 3 premiers textes sont sélectionnés. Traduisez-les pour essayer, ou traduisez tout dès maintenant.",
+      "fewWhat": "Vos textes sont sélectionnés. Traduisez-les maintenant.",
       "selectWhat": "Sélectionnez tous les textes.",
       "pressWhat": "Ouvrez la fenêtre de traduction.",
       "startWhat": "Démarrez la traduction.",
@@ -88,6 +94,11 @@
       "quotaWhat": "Le quota gratuit est épuisé pour le moment. La traduction reprend d’elle-même dès que du quota est de nouveau disponible.",
       "modelWhat": "Les modèles gratuits disponibles en ce moment sont en dessous de la qualité visée par cette exécution. La traduction reprend d’elle-même dès qu’un meilleur modèle est disponible."
     },
+    "rest": {
+      "title": "Le test a fonctionné",
+      "what": "Vos 3 premiers textes sont traduits dans toutes les langues choisies. Traduisez le reste maintenant, ou exportez ce que vous avez.",
+      "why": "Vous pourrez traduire le reste plus tard depuis la liste des textes."
+    },
     "export": {
       "title": "Exporter",
       "why": "Votre éditeur de jeu peut importer ce fichier pour intégrer les traductions à votre jeu.",
@@ -96,7 +107,7 @@
     },
     "closing": {
       "title": "Tout est prêt",
-      "what": "Le mode Avancé ajoute les glossaires, les contrôles qualité, le routage, les révisions et plus encore.",
+      "what": "Ceci est la vue simplifiée : elle n’affiche que le nécessaire pour traduire et exporter. Le mode Avancé propose plus d’outils. Basculez sur Avancé pour une courte visite.",
       "why": "Vous pouvez changer de mode à tout moment depuis la barre supérieure."
     }
   },

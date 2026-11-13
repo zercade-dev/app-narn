@@ -17,8 +17,12 @@
       "fixKey": "Anahtarımı kontrol et",
       "retry": "Yeniden dene",
       "stopRetry": "Durdur ve yeniden dene",
-      "switchAdvanced": "Gelişmiş moda geç",
-      "finish": "Bitir"
+      "translateQuick": "Denemek için bu 3'ünü çevir",
+      "translateEverything": "Her şeyi çevir",
+      "translateFew": "Bunları çevir",
+      "translateRest": "Kalanını şimdi çevir",
+      "skipRest": "Atla, elimdekini dışa aktar",
+      "maybeLater": "Belki sonra"
     },
     "vault": {
       "title": "Kasa parolası oluşturma",
@@ -56,7 +60,7 @@
       "newWhat": "Yeni bir proje oluşturun.",
       "createWhat": "Projenize bir ad verin, ardından oluşturun.",
       "sourceWhat": "Metninizin yazıldığı dili seçin.",
-      "targetsWhat": "Çeviri yapmak istediğiniz dilleri işaretleyin.",
+      "targetsWhat": "Çeviri yapmak istediğiniz dilleri işaretleyin veya Tümünü seç'i kullanın.",
       "saveWhat": "Dillerinizi kaydedin.",
       "importWhat": "Oyun düzenleyicinizden dışa aktardığınız CSV dosyasını seçin.",
       "confirmWhat": "Özeti gözden geçirin, ardından içe aktarmayı onaylayın."
@@ -65,6 +69,8 @@
       "title": "Çeviri",
       "why": "Freeway her dil için uygun bir ücretsiz modeli otomatik olarak seçer.",
       "openWhat": "Girdilerinizin listelendiği sekmeyi açın.",
+      "quickWhat": "İlk 3 girdi seçili. Denemek için bunları çevirin veya hemen her şeyi çevirin.",
+      "fewWhat": "Girdileriniz seçili. Şimdi çevirin.",
       "selectWhat": "Tüm girdileri seçin.",
       "pressWhat": "Çeviri iletişim kutusunu açın.",
       "startWhat": "Çeviriyi başlatın.",
@@ -88,6 +94,11 @@
       "quotaWhat": "Ücretsiz kota şimdilik tükendi. Kota yeniden açıldığında çeviri kendiliğinden devam eder.",
       "modelWhat": "Şu anda kullanılabilen ücretsiz modeller, bu çalıştırmanın hedeflediği kalitenin altında. Daha iyi bir model kullanılabilir olduğunda çeviri kendiliğinden devam eder."
     },
+    "rest": {
+      "title": "Deneme işe yaradı",
+      "what": "İlk 3 girdiniz seçtiğiniz tüm dillere çevrildi. Kalanını şimdi çevirin veya elinizdekini dışa aktarın.",
+      "why": "Kalanını daha sonra girdi listesinden çevirebilirsiniz."
+    },
     "export": {
       "title": "Dışa aktarma",
       "why": "Oyun düzenleyiciniz, çevirileri oyununuza almak için bu dosyayı içe aktarabilir.",
@@ -96,7 +107,7 @@
     },
     "closing": {
       "title": "Her şey hazır",
-      "what": "Gelişmiş mod; sözlükçeler, kalite denetimleri, yönlendirme, incelemeler ve daha fazlasını ekler.",
+      "what": "Bu, basitleştirilmiş görünümdür: yalnızca çeviri ve dışa aktarma için gerekenleri gösterir. Gelişmiş modda daha fazla araç vardır. Kısa bir tur için anahtarı Gelişmiş'e çevirin.",
       "why": "Üst çubuktan istediğiniz zaman geçiş yapabilirsiniz."
     }
   },
