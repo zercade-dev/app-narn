@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from '@/lib/toast';
 import { useGuideFacts } from '../../hooks/use-guide-facts.js';
 import { AREA_TOURS, isAreaTourId } from '../../lib/tour/area-tours.js';
 import { catalogTour, type CatalogTourContext } from '../../lib/tour/catalog.js';
 import { FIRST_RUN_TOUR_ID } from '../../lib/tour/first-run.js';
+import { endOrphansTour } from '../../lib/tour/end-orphans-tour.js';
 import { ORPHANS_TOUR_ID } from '../../lib/tour/orphans-tour.js';
 import {
   countedStepIndex,
@@ -56,11 +56,9 @@ export function TourHost() {
   const simple = useUiSettings((s) => s.uiMode) === 'simple';
   useEffect(() => {
     if (!simple || activeTourId === null || !needsAdvanced(activeTourId)) return;
-    const store = useGuideStore.getState();
-    if (activeTourId === ORPHANS_TOUR_ID && store.orphanSim) {
-      toast.info(t('orphansTour.notices.leftOut'));
-    }
-    store.endTour(false);
+    // The Orphans tab is gone in Simple: a practice orphan still out goes back now.
+    if (activeTourId === ORPHANS_TOUR_ID) endOrphansTour(t, { putBack: true });
+    else useGuideStore.getState().endTour(false);
   }, [simple, activeTourId, t]);
 
   // A catalog tour with its own controller runs it in place of the default runner.

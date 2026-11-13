@@ -241,7 +241,13 @@ export function TourOverlay({
     showBack: canGoBack ?? stepIndex > 0,
     showNext:
       (step.advance.kind === 'next' &&
-        (nextNeeds === null || neededControl !== null || enteredViaBack)) ||
+        (nextNeeds === null ||
+          neededControl !== null ||
+          enteredViaBack ||
+          step.advance.unlessDone?.(facts) === true)) ||
+      (step.advance.kind === 'manual' &&
+        enteredViaBack &&
+        step.advance.nextOnBack?.(facts) === true) ||
       (stateDone && enteredViaBack),
     onNext: onAdvance,
     onBack,
@@ -289,6 +295,8 @@ export function TourOverlay({
           ))}
           {step.interactive === false && (
             // Look, don't touch: the hole takes clicks like the dim around it.
+            // At z-40 it covers in-page anchors only: an anchor inside a z-50
+            // sheet or dialog sits above it and stays clickable.
             <div
               aria-hidden="true"
               data-testid="tour-hole-guard"

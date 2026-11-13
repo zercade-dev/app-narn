@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from '@/lib/toast';
 import { apiRequest } from '../../hooks/use-api.js';
 import type { CatalogTourContext } from '../../lib/tour/catalog.js';
+import { endOrphansTour } from '../../lib/tour/end-orphans-tour.js';
 import {
   loadPracticeState,
   PracticeRecoverRefusedError,
@@ -334,11 +334,8 @@ export function OrphansTourController({ facts, access }: CatalogTourContext) {
     if (back !== undefined) go(back, { error: null });
   }, [back, go]);
 
-  const onExit = useCallback(() => {
-    // Leaving with the practice orphan still out: say where to put it back.
-    if (useGuideStore.getState().orphanSim) toast.info(t('orphansTour.notices.leftOut'));
-    useGuideStore.getState().endTour(false);
-  }, [t]);
+  // Leaving with the practice orphan still out: it stays, and the toast says where to put it back.
+  const onExit = useCallback(() => endOrphansTour(t, { putBack: false }), [t]);
 
   if (!run.ready) return null;
 

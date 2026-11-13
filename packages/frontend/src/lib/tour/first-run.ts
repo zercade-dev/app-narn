@@ -227,6 +227,8 @@ const STALL_STEPS: TourStep[] = [
 ];
 
 const QUICK_STEP = 'translate-quick';
+/** The quick test has been answered: something was translated. Shared, so the step keeps its identity. */
+const QUICK_DONE = (f: GuideFacts): boolean => f.translationExists;
 /** Shown in place of the quick test when every entry is already translated. */
 const NOTHING_STEP = 'translate-nothing';
 const CLOSING_STEP = 'closing';
@@ -240,7 +242,8 @@ function quickTestStep(few: boolean): TourStep {
     id: QUICK_STEP,
     anchor: 'bulk-batch-translate',
     ...copy('translate', few ? 'fewWhat' : 'quickWhat'),
-    advance: { kind: 'manual' },
+    // Reached via Back once something was translated: Next moves on without a new run.
+    advance: { kind: 'manual', nextOnBack: QUICK_DONE },
     navigate: { view: 'project', tab: 'strings' },
     actions: few
       ? [action('translate-few', 'translateFew')]
@@ -292,7 +295,12 @@ const SHARED_STEPS: TourStep[] = [
     side: 'right',
     // Next once something is ticked (Save shows then): with nothing ticked it
     // would lead to "save your languages" with nothing to save.
-    advance: { kind: 'next', needs: 'save-languages-button' },
+    // Already saved (a Back round-trip), Next needs no change.
+    advance: {
+      kind: 'next',
+      needs: 'save-languages-button',
+      unlessDone: (f) => f.projectHasLanguages,
+    },
     navigate: { view: 'project', tab: 'data' },
     major: 3,
   },

@@ -40,7 +40,12 @@ export type TourAdvance =
    * otherwise lead past something not done yet (the languages' Save button
    * shows once one is ticked).
    */
-  | { kind: 'next'; needs?: string }
+  | {
+      kind: 'next';
+      needs?: string;
+      /** `needs` is waived once this holds: the step's work is already done (saved earlier). */
+      unlessDone?: (f: GuideFacts) => boolean;
+    }
   /** Completes when the anchored control is clicked. */
   | { kind: 'click' }
   /** Completes when app state says so. */
@@ -49,7 +54,14 @@ export type TourAdvance =
    * Completed by whoever runs the tour, when something happens that no fact
    * describes (a new run appearing). The overlay shows no Next and waits.
    */
-  | { kind: 'manual' };
+  | {
+      kind: 'manual';
+      /**
+       * On a step entered via Back: show Next once this holds (what the step
+       * asks for already happened), so stepping back never strands the person.
+       */
+      nextOnBack?: (f: GuideFacts) => boolean;
+    };
 
 export interface TourStep {
   id: string;
