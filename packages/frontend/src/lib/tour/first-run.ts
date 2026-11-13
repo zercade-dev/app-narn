@@ -290,7 +290,9 @@ const SHARED_STEPS: TourStep[] = [
     ...copy('project', 'targetsWhat'),
     // Beside the list: the Save button appears right below it.
     side: 'right',
-    advance: { kind: 'next' },
+    // Next once something is ticked (Save shows then): with nothing ticked it
+    // would lead to "save your languages" with nothing to save.
+    advance: { kind: 'next', needs: 'save-languages-button' },
     navigate: { view: 'project', tab: 'data' },
     major: 3,
   },
@@ -302,10 +304,12 @@ const SHARED_STEPS: TourStep[] = [
     major: 3,
   },
   {
+    // Paired with its review sheet (see FORM_STEPS), not done on the click:
+    // the file picker can be cancelled, and then nothing is there to confirm.
     id: 'import',
     anchor: 'import-csv-button',
     ...copy('project', 'importWhat'),
-    advance: { kind: 'click' },
+    advance: { kind: 'state', done: (f) => f.projectHasEntries },
     navigate: { view: 'project', tab: 'data' },
     major: 3,
   },
@@ -572,6 +576,8 @@ const FORM_STEPS = [
   { closed: 'key-choice', open: 'key-paste', anchor: 'vault-editor-value' },
   // The translation dialog, opened from the quick test's highlighted button.
   { closed: QUICK_STEP, open: 'translate-start', anchor: 'comparison-translate-start' },
+  // The import review sheet, opened once a file was chosen.
+  { closed: 'import', open: 'import-confirm', anchor: 'confirm-import' },
 ] as const;
 
 /** The `data-tour` anchors whose presence {@link firstRunShownIndex} needs to know. */
@@ -606,4 +612,36 @@ export function firstRunShownIndex(tour: Tour, index: number, screen: FirstRunSc
   const pair = FORM_STEPS.find((p) => p.closed === id || p.open === id);
   if (!pair) return index;
   return at(screen.isOnScreen(pair.anchor) ? pair.open : pair.closed);
+}
+
+/**
+ * Where Back from the step on screen (`shownIndex`) goes. From inside a form
+ * (the open half of a pair) it closes the form (`closeForm`, the anchor of the
+ * form to close) and goes to the half that opens it. Otherwise to the nearest
+ * earlier counted step that the facts allow and that shows something other
+ * than what is on screen: a variant (the dialog's Start, the run-failure
+ * wordings, "translate the rest?") is only ever shown in place of its step,
+ * never stepped back onto. "Nothing to translate" is the exception: when it
+ * applies it stands in for all of step 4.
+ */
+export function firstRunBack(
+  tour: Tour,
+  shownIndex: number,
+  facts: GuideFacts,
+  screen: FirstRunScreen,
+): { index: number; closeForm?: string } {
+  const id = tour.steps[shownIndex]?.id;
+  const pair = FORM_STEPS.find((p) => p.open === id);
+  if (pair) {
+    const closed = tour.steps.findIndex((s) => s.id === pair.closed);
+    if (closed >= 0) return { index: closed, closeForm: pair.anchor };
+  }
+  for (let at = shownIndex - 1; at >= 0; at--) {
+    const step = tour.steps[at];
+    if (step.variantOf !== undefined && step.id !== NOTHING_STEP) continue;
+    if (!firstRunStepApplies(step, facts)) continue;
+    if (firstRunShownIndex(tour, at, screen) === shownIndex) continue;
+    return { index: at };
+  }
+  return { index: shownIndex };
 }

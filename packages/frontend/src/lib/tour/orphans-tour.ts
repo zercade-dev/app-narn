@@ -28,9 +28,10 @@ export interface OrphansTourState {
   /**
    * What the offer step proposes: the practice orphan, only the explanation
    * (it cannot be offered here), or switching to the project that still has
-   * one. Default `simulate`.
+   * one. `loading`: not known yet (the entries are loading), so no choice
+   * shows rather than a wrong one. Default `simulate`.
    */
-  offer?: 'simulate' | 'explain-only' | 'switch-project';
+  offer?: 'simulate' | 'explain-only' | 'switch-project' | 'loading';
   /** The restore step points at the backup's own Restore button instead of the list. */
   restoreSpotlit?: boolean;
 }
@@ -87,11 +88,13 @@ export function backupRestoreAnchor(backupId: string): string {
 export function orphansTour(state: OrphansTourState): Tour {
   const offer = state.offer ?? 'simulate';
   const offerActions =
-    offer === 'simulate'
-      ? [action('simulate', true), action('explain-only')]
-      : offer === 'switch-project'
-        ? [action('switch-project', true), action('explain-only')]
-        : [action('explain-only', true)];
+    offer === 'loading'
+      ? []
+      : offer === 'simulate'
+        ? [action('simulate', true), action('explain-only')]
+        : offer === 'switch-project'
+          ? [action('switch-project', true), action('explain-only')]
+          : [action('explain-only', true)];
   const head: TourStep[] = [
     { ...step('intro', null, NEXT), navigate: TO_ORPHANS },
     { ...step('offer', null, MANUAL), actions: offerActions },
@@ -132,8 +135,14 @@ export function orphansTour(state: OrphansTourState): Tour {
         actions: [action('backup-first', true), action('skip-backup')],
       },
       step('simulating', null, MANUAL),
-      { ...step('practice-row', 'orphan-practice-row', NEXT), navigate: TO_ORPHANS },
-      step('practice-options', 'orphan-practice-actions', NEXT),
+      // Shown, not offered: the practice orphan's Relink and Delete are what
+      // these steps explain, and the person must leave them alone here.
+      {
+        ...step('practice-row', 'orphan-practice-row', NEXT),
+        navigate: TO_ORPHANS,
+        interactive: false,
+      },
+      { ...step('practice-options', 'orphan-practice-actions', NEXT), interactive: false },
       { ...step('recover', 'orphan-practice-banner', MANUAL), actions: [action('recover', true)] },
       ...restore,
       done,

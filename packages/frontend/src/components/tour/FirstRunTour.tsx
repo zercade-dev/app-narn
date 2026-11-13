@@ -34,12 +34,15 @@ import {
   FIRST_RUN_ACTION_EVENT,
   FIRST_RUN_FORM_ANCHORS,
   FIRST_RUN_TOUR_ID,
+  firstRunBack,
   firstRunShownIndex,
   firstRunStepApplies,
   firstRunStepIndex,
   firstRunTourFor,
   type FirstRunAction,
+  type FirstRunScreen,
 } from '../../lib/tour/first-run.js';
+import { closeFormEvent } from '../../lib/tour/close-form.js';
 import { ADVANCED_SECTIONS_TOUR_ID } from '../../lib/tour/advanced-sections.js';
 import { tourPosition } from '../../lib/tour/position.js';
 import {
@@ -234,29 +237,38 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   // "Open the form" / "use the form" sub-steps follow the form itself, and
   // "the translation is running" follows the run.
-  const [vaultFormAnchor, keyEditorAnchor, dialogStartAnchor] = FIRST_RUN_FORM_ANCHORS;
+  const [vaultFormAnchor, keyEditorAnchor, dialogStartAnchor, importSheetAnchor] =
+    FIRST_RUN_FORM_ANCHORS;
   const vaultFormOpen = useTourAnchor(vaultFormAnchor) !== null;
   const keyEditorOpen = useTourAnchor(keyEditorAnchor) !== null;
   const dialogStart = useTourAnchor(dialogStartAnchor);
   const dialogOpen = dialogStart !== null;
+  const importSheetOpen = useTourAnchor(importSheetAnchor) !== null;
   const stalled = useFirstRunStall();
   // "Try again" sets the failed run aside, so the guide does not show its
   // failure again while the new run has not been listed yet.
   const [retriedRunId, setRetriedRunId] = useState<string | null>(null);
   const runStall = stalled && stalled.runId !== retriedRunId ? stalled.stall : null;
-  const shown = useCallback(
-    (at: number) =>
-      firstRunShownIndex(tour, at, {
-        isOnScreen: (anchor) =>
-          anchor === vaultFormAnchor
-            ? vaultFormOpen
-            : anchor === keyEditorAnchor
-              ? keyEditorOpen
-              : dialogOpen,
-        runStall,
-      }),
-    [tour, vaultFormAnchor, keyEditorAnchor, vaultFormOpen, keyEditorOpen, dialogOpen, runStall],
-  );
+  const screen: FirstRunScreen = useMemo(() => {
+    const open: Readonly<Record<string, boolean>> = {
+      [vaultFormAnchor]: vaultFormOpen,
+      [keyEditorAnchor]: keyEditorOpen,
+      [dialogStartAnchor]: dialogOpen,
+      [importSheetAnchor]: importSheetOpen,
+    };
+    return { isOnScreen: (anchor) => open[anchor] ?? false, runStall };
+  }, [
+    vaultFormAnchor,
+    keyEditorAnchor,
+    dialogStartAnchor,
+    importSheetAnchor,
+    vaultFormOpen,
+    keyEditorOpen,
+    dialogOpen,
+    importSheetOpen,
+    runStall,
+  ]);
+  const shown = useCallback((at: number) => firstRunShownIndex(tour, at, screen), [tour, screen]);
   const shownIndex = shown(index);
   const shownStep = tour.steps[shownIndex];
   const stepPosition = tourPosition(tour, shownIndex);
@@ -268,23 +280,31 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   }, [countedIndex]);
 
   const lastIndex = tour.steps.length - 1;
-  const move = useCallback(
-    (delta: 1 | -1) => {
-      let target = Math.max(0, Math.min(lastIndex, shownIndex + delta));
-      // Next from a step whose neighbours are other views of itself (a form
-      // pair with the form closed, the run-failure variants): go past them.
-      // Either way, past a step the facts rule out ("nothing to translate"
-      // when there is, the quick test when there is not).
-      const skip = (at: number): boolean =>
-        !firstRunStepApplies(tour.steps[at], facts) || (delta > 0 && shown(at) <= shownIndex);
-      while (target > 0 && target < lastIndex && skip(target)) target += delta;
-      setPosition((p) => ({ ...p, index: target }));
-    },
-    [lastIndex, shownIndex, shown, tour, facts],
-  );
-  const onAdvance = useCallback(() => move(1), [move]);
-  const onBack = useCallback(() => move(-1), [move]);
-  const onExit = useCallback(() => useGuideStore.getState().dismissFirstRun(), []);
+  const onAdvance = useCallback(() => {
+    let target = Math.min(lastIndex, shownIndex + 1);
+    // Past the steps that are other views of this one (a form pair with the
+    // form closed, the run-failure variants), and past a step the facts rule
+    // out ("nothing to translate" when there is, the quick test when there is not).
+    const skip = (at: number): boolean =>
+      !firstRunStepApplies(tour.steps[at], facts) || shown(at) <= shownIndex;
+    while (target < lastIndex && skip(target)) target += 1;
+    setPosition((p) => ({ ...p, index: target }));
+  }, [lastIndex, shownIndex, shown, tour, facts]);
+  // Back closes a form the step points into, or goes to the step before,
+  // never onto a variant (see `firstRunBack`).
+  const onBack = useCallback(() => {
+    const back = firstRunBack(tour, shownIndex, facts, screen);
+    if (back.closeForm) globalThis.dispatchEvent(closeFormEvent(back.closeForm));
+    setPosition((p) => ({ ...p, index: back.index }));
+  }, [tour, shownIndex, facts, screen]);
+  // Leaving at the closing step is the end of the first run, not a skip: it
+  // was all done, so nothing is left to continue.
+  const atClosingStep = shownStep?.id === 'closing';
+  const onExit = useCallback(() => {
+    const guide = useGuideStore.getState();
+    if (atClosingStep) guide.finishFirstRun();
+    else guide.dismissFirstRun();
+  }, [atClosingStep]);
 
   const [choiceOpen, setChoiceOpen] = useState(false);
   // The provider card, opened from "Translated by … · Change".
@@ -618,11 +638,10 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const statusRunId = useRunStore((s) => statusLineRun(s.runs, projectId)?.runId ?? null);
   const progressRunId = quickRunId ?? guideRunId ?? statusRunId;
   // The closing step is on screen: a switch to Advanced now starts a tour.
-  const atClosing = shownStep?.id === 'closing';
   useEffect(() => {
-    useGuideStore.getState().setClosingShown(atClosing);
+    useGuideStore.getState().setClosingShown(atClosingStep);
     return () => useGuideStore.getState().setClosingShown(false);
-  }, [atClosing]);
+  }, [atClosingStep]);
 
   // Who translates, for the copy and the "Translated by" line.
   const guideProvider = useGuideProvider(projectId);

@@ -79,7 +79,9 @@ export type GatedControl =
   | 'column-picker'
   | 'string-order'
   | 'translate-advanced-options'
-  | 'translate-memory-options';
+  | 'translate-memory-options'
+  /** The Config tab's expert settings (memory policy, grouping, template, module settings, checks). */
+  | 'project-expert-settings';
 
 export const SIMPLE_HIDDEN_CONTROLS: readonly GatedControl[] = [
   'bulk-operations',
@@ -97,6 +99,7 @@ export const SIMPLE_HIDDEN_CONTROLS: readonly GatedControl[] = [
   'string-order',
   'translate-advanced-options',
   'translate-memory-options',
+  'project-expert-settings',
 ];
 
 export function isControlVisible(control: GatedControl, mode: UiMode): boolean {

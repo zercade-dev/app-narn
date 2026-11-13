@@ -31,6 +31,7 @@ import {
 import { ExampleEntryPicker, type ExampleCandidate } from './ExampleEntryPicker.js';
 import { TranslatedByLine } from '../config/TranslatedByLine.js';
 import { useProjectStore } from '../../stores/project-store.js';
+import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 
 /** Last-used per-browser values (backlog: settings per modal). reTranslate and
  * exampleIds are deliberately NOT persisted: destructive mode choice / entry-specific. */
@@ -112,6 +113,8 @@ export function TranslateRunDialog({
   exampleCandidates = [],
 }: Readonly<TranslateRunDialogProps>) {
   const { t } = useTranslation('strings');
+  // The guide's Back from its Start step: closed as Cancel would.
+  useCloseOnGuideBack(open, 'comparison-translate-start', () => onOpenChange(false));
   const { read: readSettings, save: saveSettings } = useDialogSettings(
     'translate-run',
     TRANSLATE_RUN_SETTINGS_DEFAULTS,

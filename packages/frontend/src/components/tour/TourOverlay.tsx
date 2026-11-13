@@ -218,10 +218,16 @@ export function TourOverlay({
     onAdvanceRef.current();
   }, [stateDone, stepKey, enteredViaBack]);
 
-  // Focus moves to the callout on each step.
+  // Focus moves to the callout on each step, or to the field the step asks
+  // the person to type in (the vault password, the key, the project name).
   useEffect(() => {
-    calloutNode?.focus();
-  }, [calloutNode, stepIndex]);
+    if (anchor && isTextField(anchor)) anchor.focus();
+    else calloutNode?.focus();
+  }, [calloutNode, stepIndex, anchor]);
+
+  // A Next that waits for a control (see `TourAdvance`).
+  const nextNeeds = step?.advance.kind === 'next' ? (step.advance.needs ?? null) : null;
+  const neededControl = useTourAnchor(nextNeeds);
 
   if (!step) return null;
 
@@ -233,7 +239,10 @@ export function TourOverlay({
     extra,
     text,
     showBack: canGoBack ?? stepIndex > 0,
-    showNext: step.advance.kind === 'next' || (stateDone && enteredViaBack),
+    showNext:
+      (step.advance.kind === 'next' &&
+        (nextNeeds === null || neededControl !== null || enteredViaBack)) ||
+      (stateDone && enteredViaBack),
     onNext: onAdvance,
     onBack,
     onExit,
@@ -278,6 +287,15 @@ export function TourOverlay({
               style={px(box)}
             />
           ))}
+          {step.interactive === false && (
+            // Look, don't touch: the hole takes clicks like the dim around it.
+            <div
+              aria-hidden="true"
+              data-testid="tour-hole-guard"
+              className="pointer-events-auto fixed z-40"
+              style={px(hole)}
+            />
+          )}
           <div
             data-testid="tour-spotlight"
             className={`pointer-events-none fixed z-[55] rounded-md ring-2 ring-ring ${motion}`}
@@ -334,6 +352,24 @@ export function TourOverlay({
       )}
     </div>
   );
+}
+
+/** A control the person types in: focus goes there rather than to the callout. */
+function isTextField(el: Element): el is HTMLInputElement | HTMLTextAreaElement {
+  if (el instanceof HTMLTextAreaElement) return !el.disabled;
+  if (!(el instanceof HTMLInputElement) || el.disabled) return false;
+  return ![
+    'button',
+    'checkbox',
+    'radio',
+    'submit',
+    'reset',
+    'file',
+    'hidden',
+    'image',
+    'range',
+    'color',
+  ].includes(el.type);
 }
 
 type Box = { left: number; top: number; width: number | string; height: number | string };

@@ -34,8 +34,13 @@ export interface GuideFacts {
 }
 
 export type TourAdvance =
-  /** An explanation step: shows Next. */
-  | { kind: 'next' }
+  /**
+   * An explanation step: shows Next. With `needs` (a `data-tour` anchor), only
+   * while that control is on screen, or on a step entered via Back: Next would
+   * otherwise lead past something not done yet (the languages' Save button
+   * shows once one is ticked).
+   */
+  | { kind: 'next'; needs?: string }
   /** Completes when the anchored control is clicked. */
   | { kind: 'click' }
   /** Completes when app state says so. */
@@ -67,6 +72,12 @@ export interface TourStep {
    * act on elsewhere. Default: dimmed.
    */
   dim?: false;
+  /**
+   * `false`: the spotlit control is shown, not offered. The hole is covered
+   * like the rest of the screen, for a step that points at something the
+   * person must leave alone (the practice orphan's Delete).
+   */
+  interactive?: false;
   /** Opened when the step becomes current. */
   navigate?: { tab?: Tab; view?: ShellView };
   /**

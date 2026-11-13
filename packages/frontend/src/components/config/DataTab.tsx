@@ -40,6 +40,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { LangCodeChip } from '@/components/ui/lang-code-chip';
+import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 
 interface DiffSummary {
   imported: number;
@@ -351,6 +352,8 @@ export function DataTab() {
     setImportPreviews({});
     previewFileRef.current = null;
   };
+  // The guide's Back from its "confirm the import" step: the same as Cancel.
+  useCloseOnGuideBack(importWarnOpen, 'confirm-import', closeImportWarn);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

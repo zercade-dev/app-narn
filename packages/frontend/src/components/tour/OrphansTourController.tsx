@@ -169,11 +169,18 @@ export function OrphansTourController({ facts, access }: CatalogTourContext) {
   const blocker = entries === null ? null : simulationBlocker(entries, access);
   // A practice orphan is out in another project: that one comes back first.
   const otherProject = orphanSim !== null && orphanSim.projectId !== projectId;
+  // While the entries load, the offer waits rather than flash "just explain";
+  // if they cannot be loaded, explaining is all it can offer.
+  const entriesFailed = useStringStore((s) => s.error !== null && !s.loading);
   const offer = otherProject
     ? 'switch-project'
-    : entries === null || blocker !== null
-      ? 'explain-only'
-      : 'simulate';
+    : entries === null
+      ? entriesFailed
+        ? 'explain-only'
+        : 'loading'
+      : blocker !== null
+        ? 'explain-only'
+        : 'simulate';
   const tour = useMemo(
     () =>
       orphansTour({
