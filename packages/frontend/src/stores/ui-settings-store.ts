@@ -32,6 +32,7 @@ export type UiLanguage =
   | 'vi'
   | 'zh-hans'
   | 'zh-hant';
+export type UiMode = 'simple' | 'advanced';
 export type ConsoleFilter = 'all' | 'info' | 'warn' | 'error' | 'debug' | 'notifications';
 
 interface UiSettingsState {
@@ -55,6 +56,16 @@ interface UiSettingsState {
   /** Console shows raw log lines instead of the friendly log. Persisted per browser. */
   consoleRawMode: boolean;
   setConsoleRawMode: (raw: boolean) => void;
+  /**
+   * Simple hides most navigation for newcomers; Advanced is the full app.
+   * `null` means "not chosen yet" — `useUiMode()` resolves it once the project
+   * list has loaded. Persisted per browser.
+   */
+  uiMode: UiMode | null;
+  setUiMode: (mode: UiMode) => void;
+  /** Whether the guided tour may be offered. Persisted per browser. */
+  tourOffers: boolean;
+  setTourOffers: (on: boolean) => void;
   theme: UiTheme;
   setTheme: (theme: UiTheme) => void;
 }
@@ -95,6 +106,10 @@ export const useUiSettings = create<UiSettingsState>()(
       setRoutingAdvanced: (routingAdvanced) => set({ routingAdvanced }),
       consoleRawMode: false,
       setConsoleRawMode: (consoleRawMode) => set({ consoleRawMode }),
+      uiMode: null,
+      setUiMode: (uiMode) => set({ uiMode }),
+      tourOffers: true,
+      setTourOffers: (tourOffers) => set({ tourOffers }),
       theme: readStoredTheme(),
       setTheme: (theme) => {
         if (globalThis.window !== undefined) {
@@ -112,6 +127,8 @@ export const useUiSettings = create<UiSettingsState>()(
         consoleFilter: state.consoleFilter,
         routingAdvanced: state.routingAdvanced,
         consoleRawMode: state.consoleRawMode,
+        uiMode: state.uiMode,
+        tourOffers: state.tourOffers,
       }),
       onRehydrateStorage: () => (state) => {
         if (state?.language && state.language !== 'en') {

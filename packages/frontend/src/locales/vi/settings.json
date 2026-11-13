@@ -8,6 +8,12 @@
   "switchToDark": "Chuyển sang chế độ tối",
   "languageTitle": "Ngôn ngữ",
   "languageDescription": "Ngôn ngữ của giao diện người dùng.",
+  "uiModeLabel": "Chế độ giao diện",
+  "uiModeSimple": "Đơn giản",
+  "uiModeAdvanced": "Nâng cao",
+  "uiModeDescription": "Chế độ đơn giản ẩn phần lớn thanh điều hướng để bạn tập trung vào việc dịch. Chế độ nâng cao hiển thị tất cả.",
+  "tourOffersLabel": "Đề xuất hướng dẫn từng bước",
+  "tourOffersDescription": "Hiển thị phần giới thiệu ngắn khi bạn mở một phần của ứng dụng lần đầu.",
   "preview": "Xem trước",
   "previewHint": "Các điều khiển mẫu hiển thị theo chủ đề đã chọn.",
   "previewSamples": {

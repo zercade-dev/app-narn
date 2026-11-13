@@ -306,6 +306,8 @@ export function VaultEditorDialog({
                   // reliably flags an instance-specific key that may be left
                   // blank to inherit the base module's credential (see M6).
                   const isInstanceKey = row.key.includes('__');
+                  // The guided first run points at the value it asked for (or the first one).
+                  const isTourValue = focusKey ? row.key === focusKey : index === 0;
                   return (
                     <div
                       key={`${row.existing ? 'k' : 'n'}-${index}`}
@@ -373,6 +375,7 @@ export function VaultEditorDialog({
                             disabled={(row.existing && !row.replacing) || row.remove || loading}
                             onChange={(e) => updateRow(index, { value: e.target.value })}
                             data-testid={`vault-editor-value-${index}`}
+                            data-tour={isTourValue ? 'vault-editor-value' : undefined}
                             autoFocus={!row.existing && focusKey === row.key}
                           />
                           {row.existing && !row.replacing && (
@@ -465,7 +468,12 @@ export function VaultEditorDialog({
                 >
                   {t('cancel')}
                 </Button>
-                <Button type="submit" disabled={loading} data-testid="vault-editor-save">
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  data-testid="vault-editor-save"
+                  data-tour="vault-editor-save"
+                >
                   {loading ? t('working') : t('save')}
                 </Button>
               </SheetFooter>

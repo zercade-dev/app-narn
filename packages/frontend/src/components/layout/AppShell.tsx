@@ -3,6 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { RestartBanners } from './RestartBanners.js';
 import { SlotRibbon } from './SlotRibbon.js';
 import { Sidebar } from './Sidebar.js';
+import { ModeSwitch } from './ModeSwitch.js';
+import { useUiMode } from '../../hooks/use-ui-mode.js';
+import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
+import { AreaTourHost } from '../tour/AreaTourHost.js';
+import { AreaTourOffer } from '../tour/AreaTourOffer.js';
+import { FirstRunTour } from '../tour/FirstRunTour.js';
+import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { ConsolePanel } from './ConsolePanel.js';
 import { ConfigTab } from '../config/ConfigTab.js';
 import { DataTab } from '../config/DataTab.js';
@@ -31,7 +38,8 @@ import { useNotificationStore } from '@/stores/notification-store.js';
 import { useProjectStore, accessFor } from '../../stores/project-store.js';
 import { useViewStore } from '../../stores/view-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
-import { availableTabs, firstAvailableTab } from '../../lib/tab-gating.js';
+import { firstVisibleTab, isViewVisible, visibleTabs } from '../../lib/mode-gating.js';
+import { AdvancedOnlyDialog } from './AdvancedOnlyDialog.js';
 import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
 import { isShellViewMobileOk, isTabMobileOk } from '../../lib/mobile-gating.js';
 import { DesktopOnlyNotice } from '../common/DesktopOnlyNotice.js';
@@ -40,7 +48,12 @@ import { useRunStore } from '../../stores/run-store.js';
 import { useVaultStatus } from '../../hooks/useVaultStatus.js';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useModules } from '../../hooks/use-modules.js';
-import { VAULT_LOCKED_EVENT, type VaultLockedDetail } from '../../lib/vault-events.js';
+import {
+  VAULT_EDITOR_OPEN_EVENT,
+  VAULT_LOCKED_EVENT,
+  type VaultEditorOpenDetail,
+  type VaultLockedDetail,
+} from '../../lib/vault-events.js';
 import { toast } from '@/lib/toast';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -332,6 +345,7 @@ export function AppShell() {
   >([]);
   const isMobile = useIsMobile();
   const view = useViewStore((s) => s.view);
+  const uiMode = useUiMode();
   const activeTab = useViewStore((s) => s.activeTab);
   const setActiveTab = useViewStore((s) => s.setActiveTab);
   const activeProject = useProjectStore((s) => s.projects.find((p) => p.id === s.activeProjectId));
@@ -366,11 +380,28 @@ export function AppShell() {
   // map populating after an optimistic project switch — fall back to the
   // first tab that IS available rather than showing a gated/blank panel.
   useEffect(() => {
-    const allowed = availableTabs(activeAccess, cloudManaged);
+    const allowed = visibleTabs(activeAccess, cloudManaged, uiMode);
     if (!allowed.includes(activeTab)) {
-      setActiveTab(firstAvailableTab(activeAccess, cloudManaged));
+      setActiveTab(firstVisibleTab(activeAccess, cloudManaged, uiMode));
     }
-  }, [activeProjectId, activeAccess, cloudManaged, activeTab, setActiveTab]);
+  }, [activeProjectId, activeAccess, cloudManaged, activeTab, setActiveTab, uiMode]);
+
+  // Switching to Simple while on a view it hides falls back to the project
+  // view quietly (no offer: the user just chose Simple).
+  useEffect(() => {
+    if (!isViewVisible(view, uiMode)) useViewStore.getState().setView('project');
+  }, [view, uiMode]);
+
+  // Simple mode's "Provider keys" item and the guided first run ask for the
+  // vault key editor, the guide focused on the key it wants pasted.
+  useEffect(() => {
+    const open = (e: Event) => {
+      setVaultFocusKey((e as CustomEvent<VaultEditorOpenDetail | null>).detail?.focusKey);
+      setVaultEditorOpen(true);
+    };
+    globalThis.addEventListener(VAULT_EDITOR_OPEN_EVENT, open);
+    return () => globalThis.removeEventListener(VAULT_EDITOR_OPEN_EVENT, open);
+  }, []);
 
   // First-login/first-enrollment UX: cloud mode's device-enrollment status
   // (`setupRequired`) used to trigger an immediate hard redirect to /vault
@@ -382,15 +413,23 @@ export function AppShell() {
   // resolved value, not vault-store's statusFetched — that flag flips true
   // synchronously the instant a status fetch STARTS, before it resolves, so
   // gating on it would race and could miss the real setupRequired value.
+  //
+  // The guided first run replaces Welcome for a newcomer: its first step is
+  // the same vault hand-off, shown on the real interface. Welcome shows
+  // whenever the guide would not. Whether the guide
+  // applies is only known once the interface mode is (it is derived from the
+  // project list on a first visit), so the one-time decision waits for that.
   const setupRequired = useVaultStore((s) => s.setupRequired);
   const setView = useViewStore((s) => s.setView);
+  const modeKnown = useUiSettings((s) => s.uiMode !== null);
+  const firstRunActive = useFirstRunActive();
   const appliedWelcomeViewRef = useRef(false);
   useEffect(() => {
-    if (setupRequired && !appliedWelcomeViewRef.current) {
-      appliedWelcomeViewRef.current = true;
-      setView('welcome');
-    }
-  }, [setupRequired, setView]);
+    if (!setupRequired || !modeKnown || appliedWelcomeViewRef.current) return;
+    appliedWelcomeViewRef.current = true;
+    // The guide does not run on phone widths, so Welcome still shows there.
+    if (!firstRunActive || isMobile) setView('welcome');
+  }, [setupRequired, modeKnown, firstRunActive, isMobile, setView]);
 
   // Whether copilot is globally enabled, used to gate the shell-level
   // CopilotModelsProvider's `/models` fetch. Without this gate the provider
@@ -449,6 +488,8 @@ export function AppShell() {
     <TooltipProvider>
       <div className="flex h-svh w-full flex-col">
         {showThemeChooser && <ThemeChooserOverlay onDone={() => setShowThemeChooser(false)} />}
+        <FirstRunTour suspended={showThemeChooser} />
+        <AreaTourHost />
         <SlotRibbon />
         <SidebarProvider className="min-h-0 flex-1">
           {/* Sidebar */}
@@ -462,6 +503,7 @@ export function AppShell() {
             <RestartBanners />
             <header className="flex items-center gap-1 px-2 py-1 border-b border-border">
               <SidebarTrigger data-testid="sidebar-trigger" />
+              <ModeSwitch />
             </header>
             <CopilotModelsProvider enabled={copilotGloballyEnabled}>
               {isMobile &&
@@ -763,6 +805,12 @@ export function AppShell() {
               )}
             </CopilotModelsProvider>
 
+            {/* Slot for the area-tour offer: zero height, so the card it holds
+                sits just above the console bar, at the left of the content column. */}
+            <div className="relative h-0 shrink-0">
+              <AreaTourOffer />
+            </div>
+
             {/* Console panel footer — desktop-only (mobile is read-only; the log console is an operator surface) */}
             {!isMobile && (
               <ConsolePanel
@@ -809,6 +857,7 @@ export function AppShell() {
             onOpenChange={setVaultEditorOpen}
             focusKey={vaultFocusKey}
           />
+          <AdvancedOnlyDialog />
           <WebSearchDialog />
           <Toaster
             position="bottom-right"

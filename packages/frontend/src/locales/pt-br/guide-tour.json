@@ -1,0 +1,232 @@
+{
+  "next": "Próximo",
+  "back": "Voltar",
+  "skip": "Pular o tour",
+  "close": "Fechar",
+  "stepOf": "Passo {{current}} de {{total}}",
+  "continueSetup": "Continuar a configuração: passo {{current}} de {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Abrir o formulário do cofre",
+      "cloudVault": "Configurar seu cofre",
+      "openVaultPage": "Abrir a página do cofre",
+      "getGoogleKey": "Obter uma chave gratuita do Google",
+      "addGoogleKey": "Colar minha chave do Google",
+      "ownProvider": "Usar meu próprio provedor",
+      "fixKey": "Conferir minha chave",
+      "retry": "Tentar de novo",
+      "stopRetry": "Parar e tentar de novo",
+      "switchAdvanced": "Mudar para Avançado",
+      "finish": "Concluir"
+    },
+    "vault": {
+      "title": "Criação da senha do cofre",
+      "why": "Suas chaves dos provedores são criptografadas com ela e nunca saem do seu controle.",
+      "openWhat": "Abra o formulário do cofre para escolher a senha dele.",
+      "passwordWhat": "Digite uma senha aqui e confirme com o botão abaixo."
+    },
+    "unlock": {
+      "title": "Desbloqueio do cofre",
+      "why": "Suas chaves dos provedores continuam criptografadas até você desbloquear o cofre.",
+      "openWhat": "Abra o formulário do cofre para digitar a senha dele.",
+      "passwordWhat": "Digite aqui a senha do seu cofre e confirme com o botão abaixo."
+    },
+    "cloudVault": {
+      "title": "Criação do cofre e adição de uma chave gratuita",
+      "what": "Escolha uma senha para o cofre e adicione uma chave gratuita. Recomendamos o Google. Você volta para cá quando terminar.",
+      "why": "Suas chaves dos provedores são criptografadas com a sua senha e nunca saem do seu controle. É pela chave que o provedor de IA sabe que é você."
+    },
+    "cloudUnlock": {
+      "what": "Desbloqueie seu cofre na página do cofre. Você volta para cá quando terminar."
+    },
+    "cloudKey": {
+      "what": "Adicione uma chave gratuita na página do cofre. Recomendamos o Google. Você volta para cá quando terminar."
+    },
+    "key": {
+      "title": "Adição de uma chave gratuita",
+      "why": "O NARN Freeway usa modelos de IA gratuitos, e é pela chave que o provedor sabe que é você.",
+      "choiceWhat": "Crie uma chave gratuita do Google AI e cole no seu cofre.",
+      "pasteWhat": "Cole a chave aqui, digite a senha do seu cofre abaixo e salve."
+    },
+    "project": {
+      "title": "Importação do texto do jogo",
+      "why": "O NARN lê cada entrada e só traduz o que está faltando.",
+      "openWhat": "Abra a lista de projetos.",
+      "newWhat": "Crie um novo projeto.",
+      "createWhat": "Dê um nome ao seu projeto e crie-o.",
+      "sourceWhat": "Escolha o idioma em que seu texto está escrito.",
+      "targetsWhat": "Marque os idiomas para os quais você quer traduzir.",
+      "saveWhat": "Salve seus idiomas.",
+      "importWhat": "Escolha o arquivo CSV que você exportou do editor do seu jogo.",
+      "confirmWhat": "Confira o resumo e confirme a importação."
+    },
+    "translate": {
+      "title": "Tradução",
+      "why": "O Freeway escolhe automaticamente um modelo gratuito adequado para cada idioma.",
+      "openWhat": "Abra a aba que lista suas entradas.",
+      "selectWhat": "Selecione todas as entradas.",
+      "pressWhat": "Abra a janela de tradução.",
+      "startWhat": "Inicie a tradução.",
+      "progressWhat": "A tradução está em andamento. Esta linha mostra o progresso.",
+      "progressWhy": "O tour continua quando a tradução terminar."
+    },
+    "failed": {
+      "title": "Tradução não concluída",
+      "why": "A barra destacada abaixo mostra o que aconteceu.",
+      "authWhat": "O provedor recusou sua chave. Confira a chave e tente de novo.",
+      "quotaWhat": "A cota gratuita acabou por enquanto. Espere um pouco ou adicione outra chave e tente de novo.",
+      "otherWhat": "Nada foi traduzido. Confira sua chave e tente de novo."
+    },
+    "parked": {
+      "title": "Tradução pausada",
+      "what": "Sua tradução está pausada, aguardando o provedor. Confira sua chave, depois pare esta execução e inicie uma nova."
+    },
+    "waiting": {
+      "title": "Tradução em espera",
+      "why": "A barra destacada abaixo mostra o status. O tour continua quando a tradução terminar.",
+      "quotaWhat": "A cota gratuita acabou por enquanto. A tradução continua sozinha quando houver cota de novo.",
+      "modelWhat": "Os modelos gratuitos disponíveis agora estão abaixo da qualidade que esta execução busca. A tradução continua sozinha quando houver um melhor."
+    },
+    "export": {
+      "title": "Exportação",
+      "why": "O editor do seu jogo pode importar este arquivo para levar as traduções ao jogo.",
+      "openWhat": "Volte para a aba em que você importou seu arquivo.",
+      "downloadWhat": "Baixe o arquivo traduzido para o editor do seu jogo."
+    },
+    "closing": {
+      "title": "Tudo pronto",
+      "what": "O Avançado adiciona glossários, verificações de qualidade, roteamento, revisões e mais.",
+      "why": "Você pode mudar quando quiser pela barra superior."
+    }
+  },
+  "providerChoice": {
+    "title": "Usar meu próprio provedor",
+    "description": "Escolha o provedor para o qual você tem uma chave. O NARN enviará todas as traduções dos seus projetos para ele. Para combinar vários provedores, mude para Avançado.",
+    "existingRouting": "Este projeto já tem roteamento configurado, então fica como está. Você pode alterá-lo no Avançado.",
+    "cancel": "Cancelar",
+    "failed": "Não foi possível configurar {{provider}}: {{message}}"
+  },
+  "offer": {
+    "start": "Mostre para mim",
+    "decline": "Não, obrigado"
+  },
+  "guideTours": {
+    "title": "Tours",
+    "firstRun": "Primeira execução guiada",
+    "area": {
+      "routing": "Roteamento",
+      "glossary": "Glossário",
+      "quality": "Qualidade",
+      "compare": "Comparação",
+      "review-translation-ai": "Revisão da tradução por IA"
+    },
+    "confirm": {
+      "title": "Mudar para o Simples na configuração guiada?",
+      "body": "A configuração guiada foi feita para o modo Simples, que oculta as abas avançadas. Você pode voltar quando quiser pela barra superior.",
+      "switch": "Mudar para o Simples",
+      "stay": "Ficar no Avançado"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "Primeira vez no roteamento?",
+        "body": "Uma olhada de 30 segundos em como o NARN decide quem traduz o quê."
+      },
+      "config": {
+        "title": "O roteamento decide quem traduz",
+        "what": "Aqui você escolhe qual provedor de tradução cuida dos seus textos.",
+        "why": "Use para mandar alguns idiomas ou tipos de texto a outro provedor, ou para manter tudo em um só."
+      },
+      "mode": {
+        "title": "Regras simples ou avançadas",
+        "what": "Aqui você alterna entre um provedor para tudo e uma lista de regras.",
+        "why": "Comece pelo simples. Passe para as regras quando quiser outro provedor para um idioma, uma categoria ou um tom."
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "Primeira vez nos glossários?",
+        "body": "Uma olhada rápida em como manter nomes e termos-chave consistentes."
+      },
+      "list": {
+        "title": "Seus glossários",
+        "what": "Cada glossário é uma lista de termos com a tradução que você quer para cada um.",
+        "why": "Assim, termos como nomes de personagens ou gírias do jogo saem sempre do mesmo jeito."
+      },
+      "create": {
+        "title": "Criar um glossário",
+        "what": "Crie um glossário vazio e adicione seus próprios termos.",
+        "why": "Faça isso quando você já souber quais palavras nunca devem ser traduzidas de outro jeito."
+      },
+      "generate": {
+        "title": "Deixar a IA sugerir termos",
+        "what": "Peça a um provedor de IA para achar possíveis termos nos seus textos.",
+        "why": "Você não precisa ler o arquivo inteiro para achá-los. Você revisa e aceita o que for sugerido."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "Primeira vez na qualidade?",
+        "body": "Uma olhada rápida em como o NARN verifica suas traduções."
+      },
+      "title": {
+        "title": "Verificações de qualidade automáticas",
+        "what": "Cada tradução é checada com regras como tags ausentes, marcadores alterados e limites de tamanho.",
+        "why": "Problemas que quebrariam seu jogo aparecem aqui, em vez de só nos testes de jogo."
+      },
+      "overview": {
+        "title": "Sua taxa de aprovação",
+        "what": "Mostra quantas verificações passaram e quantas falharam no projeto todo.",
+        "why": "Um jeito rápido de saber se as traduções estão prontas ou ainda precisam de trabalho."
+      },
+      "issues": {
+        "title": "Os problemas mais comuns",
+        "what": "Os tipos de problema que mais falham ficam listados aqui.",
+        "why": "Corrigir primeiro o mais comum elimina o maior número de falhas."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "Primeira vez na comparação?",
+        "body": "Uma olhada rápida em como revisar traduções lado a lado."
+      },
+      "target": {
+        "title": "Escolha o idioma",
+        "what": "Escolha qual idioma ver ao lado do texto de origem.",
+        "why": "Revise um idioma por vez, linha por linha, e edite conforme avança."
+      },
+      "reference": {
+        "title": "Adicione um idioma de referência",
+        "what": "Mostre um segundo idioma ao lado, como um que você lê bem.",
+        "why": "Útil quando você não lê o idioma de destino: dá para conferir o sentido com um idioma que você conhece."
+      },
+      "translate": {
+        "title": "Traduzir a partir daqui",
+        "what": "Traduza as linhas selecionadas ou todas as que combinam com seus filtros.",
+        "why": "Prático para preencher lacunas que você notar na revisão, sem sair desta aba."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "Primeira vez na revisão por IA?",
+        "body": "Uma olhada rápida em como uma IA confere suas traduções."
+      },
+      "intro": {
+        "title": "Uma segunda opinião sobre as traduções",
+        "what": "Um provedor de IA lê suas traduções ao lado do original e dá uma nota.",
+        "why": "Ela acha erros e frases estranhas que as verificações automáticas não pegam, para você corrigir antes de lançar."
+      },
+      "start": {
+        "title": "Revisar a última execução",
+        "what": "Inicie a revisão da execução de tradução mais recente.",
+        "why": "Revisar só o que foi traduzido há pouco mantém o custo e a espera baixos."
+      },
+      "all": {
+        "title": "Revisar tudo",
+        "what": "Revise todas as traduções do projeto, não só a última execução.",
+        "why": "Use antes de um lançamento ou depois de mudar o glossário ou o roteamento."
+      }
+    }
+  }
+}

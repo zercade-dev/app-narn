@@ -8,6 +8,12 @@
   "switchToDark": "Koyu moda geç",
   "languageTitle": "Dil",
   "languageDescription": "Kullanıcı arayüzünün dili.",
+  "uiModeLabel": "Arayüz modu",
+  "uiModeSimple": "Basit",
+  "uiModeAdvanced": "Gelişmiş",
+  "uiModeDescription": "Basit mod, çeviriye odaklanabilmeniz için gezinmenin çoğunu gizler. Gelişmiş mod her şeyi gösterir.",
+  "tourOffersLabel": "Rehberli turlar öner",
+  "tourOffersDescription": "Uygulamanın bir bölümünü ilk kez açtığınızda kısa bir tanıtım göster.",
   "preview": "Önizleme",
   "previewHint": "Seçili temayla görüntülenen örnek kontroller.",
   "previewSamples": {

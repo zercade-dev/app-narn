@@ -1,0 +1,232 @@
+{
+  "next": "Next",
+  "back": "Back",
+  "skip": "Skip tour",
+  "close": "Close",
+  "stepOf": "Step {{current}} of {{total}}",
+  "continueSetup": "Continue setup: step {{current}} of {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Open the vault form",
+      "cloudVault": "Set up your vault",
+      "openVaultPage": "Open the vault page",
+      "getGoogleKey": "Get a free Google key",
+      "addGoogleKey": "Paste my Google key",
+      "ownProvider": "Use my own provider",
+      "fixKey": "Check my key",
+      "retry": "Try again",
+      "stopRetry": "Stop and try again",
+      "switchAdvanced": "Switch to Advanced",
+      "finish": "Finish"
+    },
+    "vault": {
+      "title": "Create your vault password",
+      "why": "Your provider keys are encrypted with it and never leave your control.",
+      "openWhat": "Open the vault form to choose a password for your vault.",
+      "passwordWhat": "Type a password here, then confirm with the button below."
+    },
+    "unlock": {
+      "title": "Unlock your vault",
+      "why": "Your provider keys stay encrypted until you unlock the vault.",
+      "openWhat": "Open the vault form to enter your vault password.",
+      "passwordWhat": "Type your vault password here, then confirm with the button below."
+    },
+    "cloudVault": {
+      "title": "Create your vault and add one free key",
+      "what": "Choose a vault password, then add one free key. Google is recommended. You come back here when it is done.",
+      "why": "Your provider keys are encrypted with your password and never leave your control. A key is how the AI provider knows it's you."
+    },
+    "cloudUnlock": {
+      "what": "Unlock your vault on the vault page. You come back here when it is done."
+    },
+    "cloudKey": {
+      "what": "Add one free key on the vault page. Google is recommended. You come back here when it is done."
+    },
+    "key": {
+      "title": "Add one free key",
+      "why": "NARN Freeway uses free AI models, and the key is how the provider knows it's you.",
+      "choiceWhat": "Create a free Google AI key, then paste it into your vault.",
+      "pasteWhat": "Paste the key here, type your vault password below, then save."
+    },
+    "project": {
+      "title": "Bring in your game's text",
+      "why": "NARN reads every entry and only translates what's missing.",
+      "openWhat": "Open the project list.",
+      "newWhat": "Create a new project.",
+      "createWhat": "Give your project a name, then create it.",
+      "sourceWhat": "Pick the language your text is written in.",
+      "targetsWhat": "Tick the languages you want to translate into.",
+      "saveWhat": "Save your languages.",
+      "importWhat": "Choose the CSV file you exported from your game editor.",
+      "confirmWhat": "Check the summary, then confirm the import."
+    },
+    "translate": {
+      "title": "Translate",
+      "why": "Freeway picks a suitable free model for each language automatically.",
+      "openWhat": "Open the tab that lists your entries.",
+      "selectWhat": "Select all entries.",
+      "pressWhat": "Open the translation dialog.",
+      "startWhat": "Start the translation.",
+      "progressWhat": "The translation is running. This line shows its progress.",
+      "progressWhy": "The tour continues when the translation has finished."
+    },
+    "failed": {
+      "title": "The translation didn't go through",
+      "why": "The highlighted bar below shows what happened.",
+      "authWhat": "The provider rejected your key. Check the key, then try again.",
+      "quotaWhat": "The free quota is used up for now. Wait a little or add another key, then try again.",
+      "otherWhat": "Nothing was translated. Check your key, then try again."
+    },
+    "parked": {
+      "title": "The translation is paused",
+      "what": "Your translation is paused and waiting on the provider. Check your key, then stop this run and start a new one."
+    },
+    "waiting": {
+      "title": "The translation is waiting",
+      "why": "The highlighted bar below shows its status. The tour continues when the translation has finished.",
+      "quotaWhat": "The free quota is used up for now. The translation resumes by itself when quota is free again.",
+      "modelWhat": "The free models available right now are below the quality this run aims for. The translation resumes by itself when a better one is available."
+    },
+    "export": {
+      "title": "Export",
+      "why": "Your game editor can import this file to bring the translations into your game.",
+      "openWhat": "Go back to the tab where you imported your file.",
+      "downloadWhat": "Download the translated file for your game editor."
+    },
+    "closing": {
+      "title": "You're all set",
+      "what": "Advanced adds glossaries, quality checks, routing, reviews and more.",
+      "why": "You can switch at any time from the top bar."
+    }
+  },
+  "providerChoice": {
+    "title": "Use my own provider",
+    "description": "Pick the provider you have a key for. NARN will send every translation in your projects to it. To combine several providers, switch to Advanced.",
+    "existingRouting": "This project already has routing set up, so it stays as it is. You can change it in Advanced.",
+    "cancel": "Cancel",
+    "failed": "Could not set up {{provider}}: {{message}}"
+  },
+  "offer": {
+    "start": "Show me",
+    "decline": "No thanks"
+  },
+  "guideTours": {
+    "title": "Tours",
+    "firstRun": "Guided first run",
+    "area": {
+      "routing": "Routing",
+      "glossary": "Glossary",
+      "quality": "Quality",
+      "compare": "Compare",
+      "review-translation-ai": "AI review of translations"
+    },
+    "confirm": {
+      "title": "Switch to Simple for the guided setup?",
+      "body": "The guided setup is built for Simple mode, which hides the advanced tabs. You can switch back at any time from the top bar.",
+      "switch": "Switch to Simple",
+      "stay": "Stay in Advanced"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "New to Routing?",
+        "body": "A 30-second look at how NARN picks who translates what."
+      },
+      "config": {
+        "title": "Routing picks who translates",
+        "what": "This is where you choose which translation provider handles your strings.",
+        "why": "Use it to send some languages or kinds of text to a different provider, or to keep one provider for everything."
+      },
+      "mode": {
+        "title": "Simple or advanced rules",
+        "what": "Switch here between one provider for everything and a list of rules.",
+        "why": "Start simple. Move to rules when you want a different provider for a language, a category or a tone."
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "New to Glossaries?",
+        "body": "A short look at keeping names and key terms consistent."
+      },
+      "list": {
+        "title": "Your glossaries",
+        "what": "Each glossary is a list of terms with the translation you want for each.",
+        "why": "Terms such as character names or game jargon then come out the same way every time."
+      },
+      "create": {
+        "title": "Start a glossary",
+        "what": "Create an empty glossary and add your own terms to it.",
+        "why": "Do this when you already know the words that must never be translated differently."
+      },
+      "generate": {
+        "title": "Let AI suggest terms",
+        "what": "Ask an AI provider to find likely terms in your strings.",
+        "why": "It saves you reading the whole file to find them. You review and accept what it proposes."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "New to Quality?",
+        "body": "A short look at how NARN checks your translations."
+      },
+      "title": {
+        "title": "Automatic quality checks",
+        "what": "Every translation is checked against rules such as missing tags, changed placeholders and length limits.",
+        "why": "Problems that would break your game show up here instead of in play-testing."
+      },
+      "overview": {
+        "title": "Your pass rate",
+        "what": "This shows how many checks passed and how many failed across the project.",
+        "why": "A quick way to tell whether the translations are ready or still need work."
+      },
+      "issues": {
+        "title": "The most common problems",
+        "what": "The kinds of problem that fail most often are listed here.",
+        "why": "Fixing the most common one first clears the most failures."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "New to Compare?",
+        "body": "A short look at reviewing translations side by side."
+      },
+      "target": {
+        "title": "Pick the language",
+        "what": "Choose which language to look at next to the source text.",
+        "why": "Review one language at a time, line by line, and edit as you go."
+      },
+      "reference": {
+        "title": "Add a reference language",
+        "what": "Show a second language alongside, such as one you read well.",
+        "why": "Useful when you cannot read the target language: you can check the meaning against a language you know."
+      },
+      "translate": {
+        "title": "Translate from here",
+        "what": "Translate the rows you selected, or all rows that match your filters.",
+        "why": "Handy for filling gaps you spot while reviewing, without leaving this tab."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "New to AI review?",
+        "body": "A short look at having an AI check your translations."
+      },
+      "intro": {
+        "title": "A second opinion on translations",
+        "what": "An AI provider reads your translations next to the source and scores them.",
+        "why": "It finds mistakes and awkward wording that automatic checks cannot, so you can fix them before shipping."
+      },
+      "start": {
+        "title": "Review the last run",
+        "what": "Start a review of the most recent translation run.",
+        "why": "Reviewing just what was translated lately keeps the cost and the wait small."
+      },
+      "all": {
+        "title": "Review everything",
+        "what": "Review all translations in the project, not only the latest run.",
+        "why": "Use it before a release, or after you changed the glossary or routing."
+      }
+    }
+  }
+}

@@ -1,0 +1,232 @@
+{
+  "next": "Siguiente",
+  "back": "Atrás",
+  "skip": "Omitir el recorrido",
+  "close": "Cerrar",
+  "stepOf": "Paso {{current}} de {{total}}",
+  "continueSetup": "Continuar la configuración: paso {{current}} de {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Abrir el formulario de la bóveda",
+      "cloudVault": "Configurar tu bóveda",
+      "openVaultPage": "Abrir la página de la bóveda",
+      "getGoogleKey": "Conseguir una clave gratuita de Google",
+      "addGoogleKey": "Pegar mi clave de Google",
+      "ownProvider": "Usar mi propio proveedor",
+      "fixKey": "Revisar mi clave",
+      "retry": "Reintentar",
+      "stopRetry": "Detener y reintentar",
+      "switchAdvanced": "Cambiar a Avanzado",
+      "finish": "Finalizar"
+    },
+    "vault": {
+      "title": "Crear la contraseña de tu bóveda",
+      "why": "Tus claves de proveedores se cifran con ella y nunca salen de tu control.",
+      "openWhat": "Abre el formulario de la bóveda para elegir su contraseña.",
+      "passwordWhat": "Escribe aquí una contraseña y confirma con el botón de abajo."
+    },
+    "unlock": {
+      "title": "Desbloquear tu bóveda",
+      "why": "Tus claves de proveedores siguen cifradas hasta que desbloqueas la bóveda.",
+      "openWhat": "Abre el formulario de la bóveda para introducir su contraseña.",
+      "passwordWhat": "Escribe aquí la contraseña de tu bóveda y confirma con el botón de abajo."
+    },
+    "cloudVault": {
+      "title": "Crear tu bóveda y añadir una clave gratuita",
+      "what": "Elige una contraseña para la bóveda y añade una clave gratuita. Se recomienda Google. Volverás aquí al terminar.",
+      "why": "Tus claves de proveedores se cifran con tu contraseña y nunca salen de tu control. La clave permite al proveedor de IA saber que eres tú."
+    },
+    "cloudUnlock": {
+      "what": "Desbloquea tu bóveda en la página de la bóveda. Volverás aquí al terminar."
+    },
+    "cloudKey": {
+      "what": "Añade una clave gratuita en la página de la bóveda. Se recomienda Google. Volverás aquí al terminar."
+    },
+    "key": {
+      "title": "Añadir una clave gratuita",
+      "why": "NARN Freeway usa modelos de IA gratuitos, y la clave permite al proveedor saber que eres tú.",
+      "choiceWhat": "Crea una clave gratuita de Google AI y pégala en tu bóveda.",
+      "pasteWhat": "Pega la clave aquí, escribe abajo la contraseña de tu bóveda y guarda."
+    },
+    "project": {
+      "title": "Importar el texto de tu juego",
+      "why": "NARN lee cada texto y solo traduce lo que falta.",
+      "openWhat": "Abre la lista de proyectos.",
+      "newWhat": "Crea un proyecto nuevo.",
+      "createWhat": "Ponle un nombre a tu proyecto y créalo.",
+      "sourceWhat": "Elige el idioma en el que está escrito tu texto.",
+      "targetsWhat": "Marca los idiomas a los que quieres traducir.",
+      "saveWhat": "Guarda tus idiomas.",
+      "importWhat": "Elige el archivo CSV que exportaste desde el editor de tu juego.",
+      "confirmWhat": "Revisa el resumen y confirma la importación."
+    },
+    "translate": {
+      "title": "Traducir",
+      "why": "Freeway elige automáticamente un modelo gratuito adecuado para cada idioma.",
+      "openWhat": "Abre la pestaña que muestra tus textos.",
+      "selectWhat": "Selecciona todos los textos.",
+      "pressWhat": "Abre el cuadro de traducción.",
+      "startWhat": "Inicia la traducción.",
+      "progressWhat": "La traducción está en curso. Esta línea muestra su progreso.",
+      "progressWhy": "El recorrido continúa cuando la traducción haya terminado."
+    },
+    "failed": {
+      "title": "La traducción no se completó",
+      "why": "La barra resaltada de abajo muestra lo que ocurrió.",
+      "authWhat": "El proveedor rechazó tu clave. Revisa la clave y vuelve a intentarlo.",
+      "quotaWhat": "La cuota gratuita se agotó por ahora. Espera un poco o añade otra clave y vuelve a intentarlo.",
+      "otherWhat": "No se tradujo nada. Revisa tu clave y vuelve a intentarlo."
+    },
+    "parked": {
+      "title": "La traducción está en pausa",
+      "what": "Tu traducción está en pausa, a la espera del proveedor. Revisa tu clave, luego detén esta ejecución e inicia una nueva."
+    },
+    "waiting": {
+      "title": "La traducción está en espera",
+      "why": "La barra resaltada de abajo muestra su estado. El recorrido continúa cuando la traducción haya terminado.",
+      "quotaWhat": "La cuota gratuita se agotó por ahora. La traducción se reanuda sola cuando vuelva a haber cuota.",
+      "modelWhat": "Los modelos gratuitos disponibles ahora están por debajo de la calidad que busca esta ejecución. La traducción se reanuda sola cuando haya uno mejor."
+    },
+    "export": {
+      "title": "Exportar",
+      "why": "El editor de tu juego puede importar este archivo para llevar las traducciones al juego.",
+      "openWhat": "Vuelve a la pestaña donde importaste tu archivo.",
+      "downloadWhat": "Descarga el archivo traducido para el editor de tu juego."
+    },
+    "closing": {
+      "title": "Todo listo",
+      "what": "Avanzado añade glosarios, controles de calidad, enrutamiento, revisiones y más.",
+      "why": "Puedes cambiar cuando quieras desde la barra superior."
+    }
+  },
+  "providerChoice": {
+    "title": "Usar mi propio proveedor",
+    "description": "Elige el proveedor del que tienes una clave. NARN le enviará todas las traducciones de tus proyectos. Para combinar varios proveedores, cambia a Avanzado.",
+    "existingRouting": "Este proyecto ya tiene el enrutamiento configurado, así que se queda como está. Puedes cambiarlo en Avanzado.",
+    "cancel": "Cancelar",
+    "failed": "No se pudo configurar {{provider}}: {{message}}"
+  },
+  "offer": {
+    "start": "Enséñamelo",
+    "decline": "No, gracias"
+  },
+  "guideTours": {
+    "title": "Recorridos",
+    "firstRun": "Primer uso guiado",
+    "area": {
+      "routing": "Enrutamiento",
+      "glossary": "Glosario",
+      "quality": "Calidad",
+      "compare": "Comparar",
+      "review-translation-ai": "Revisión IA de traducción"
+    },
+    "confirm": {
+      "title": "¿Cambiar a Simple para la configuración guiada?",
+      "body": "La configuración guiada está pensada para el modo Simple, que oculta las pestañas avanzadas. Puedes volver cuando quieras desde la barra superior.",
+      "switch": "Cambiar a Simple",
+      "stay": "Seguir en Avanzado"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "¿Primera vez con el enrutamiento?",
+        "body": "Un vistazo de 30 segundos a cómo NARN decide quién traduce qué."
+      },
+      "config": {
+        "title": "El enrutamiento decide quién traduce",
+        "what": "Aquí eliges qué proveedor de traducción se encarga de tus textos.",
+        "why": "Úsalo para enviar algunos idiomas o tipos de texto a otro proveedor, o para dejarlo todo con uno solo."
+      },
+      "mode": {
+        "title": "Reglas simples o avanzadas",
+        "what": "Aquí alternas entre un solo proveedor para todo y una lista de reglas.",
+        "why": "Empieza por lo simple. Pasa a las reglas cuando quieras otro proveedor para un idioma, una categoría o un tono."
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "¿Es tu primera vez con los glosarios?",
+        "body": "Un vistazo rápido a cómo mantener coherentes los nombres y los términos clave."
+      },
+      "list": {
+        "title": "Tus glosarios",
+        "what": "Cada glosario es una lista de términos con la traducción que quieres para cada uno.",
+        "why": "Así, términos como los nombres de personajes o la jerga del juego salen igual siempre."
+      },
+      "create": {
+        "title": "Crear un glosario",
+        "what": "Crea un glosario vacío y añade tus propios términos.",
+        "why": "Hazlo cuando ya sepas qué palabras no deben traducirse nunca de otra manera."
+      },
+      "generate": {
+        "title": "Que la IA sugiera términos",
+        "what": "Pide a un proveedor de IA que encuentre posibles términos en tus textos.",
+        "why": "Te ahorras leer todo el archivo para buscarlos. Tú revisas y aceptas lo que proponga."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "¿Es tu primera vez con la calidad?",
+        "body": "Un vistazo rápido a cómo NARN comprueba tus traducciones."
+      },
+      "title": {
+        "title": "Controles de calidad automáticos",
+        "what": "Cada traducción se comprueba con reglas como etiquetas que faltan, marcadores cambiados y límites de longitud.",
+        "why": "Los problemas que romperían tu juego aparecen aquí en lugar de en las pruebas de juego."
+      },
+      "overview": {
+        "title": "Tu tasa de aciertos",
+        "what": "Muestra cuántos controles se han superado y cuántos han fallado en todo el proyecto.",
+        "why": "Es una forma rápida de saber si las traducciones están listas o aún necesitan trabajo."
+      },
+      "issues": {
+        "title": "Los problemas más comunes",
+        "what": "Aquí se listan los tipos de problema que fallan con más frecuencia.",
+        "why": "Si corriges primero el más común, eliminas la mayoría de los fallos."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "¿Es tu primera vez con Comparar?",
+        "body": "Un vistazo rápido a cómo revisar traducciones lado a lado."
+      },
+      "target": {
+        "title": "Elige el idioma",
+        "what": "Elige qué idioma ver junto al texto de origen.",
+        "why": "Revisa un idioma cada vez, línea por línea, y edita sobre la marcha."
+      },
+      "reference": {
+        "title": "Añade un idioma de referencia",
+        "what": "Muestra un segundo idioma al lado, por ejemplo uno que leas bien.",
+        "why": "Es útil cuando no puedes leer el idioma de destino: compruebas el significado con un idioma que conoces."
+      },
+      "translate": {
+        "title": "Traducir desde aquí",
+        "what": "Traduce las filas seleccionadas o todas las que cumplan tus filtros.",
+        "why": "Útil para rellenar huecos que detectes al revisar, sin salir de esta pestaña."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "¿Es tu primera vez con la revisión IA?",
+        "body": "Un vistazo rápido a cómo una IA revisa tus traducciones."
+      },
+      "intro": {
+        "title": "Una segunda opinión sobre las traducciones",
+        "what": "Un proveedor de IA lee tus traducciones junto al original y las puntúa.",
+        "why": "Encuentra errores y redacciones torpes que los controles automáticos no detectan, para que los corrijas antes de publicar."
+      },
+      "start": {
+        "title": "Revisar la última ejecución",
+        "what": "Inicia una revisión de la ejecución de traducción más reciente.",
+        "why": "Revisar solo lo traducido hace poco mantiene el coste y la espera bajos."
+      },
+      "all": {
+        "title": "Revisarlo todo",
+        "what": "Revisa todas las traducciones del proyecto, no solo la última ejecución.",
+        "why": "Úsalo antes de una versión o después de cambiar el glosario o el enrutamiento."
+      }
+    }
+  }
+}

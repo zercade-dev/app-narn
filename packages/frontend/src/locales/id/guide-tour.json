@@ -1,0 +1,232 @@
+{
+  "next": "Berikutnya",
+  "back": "Kembali",
+  "skip": "Lewati tur",
+  "close": "Tutup",
+  "stepOf": "Langkah {{current}} dari {{total}}",
+  "continueSetup": "Lanjutkan penyiapan: langkah {{current}} dari {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Buka formulir brankas",
+      "cloudVault": "Siapkan brankas",
+      "openVaultPage": "Buka halaman brankas",
+      "getGoogleKey": "Dapatkan kunci Google gratis",
+      "addGoogleKey": "Tempel kunci Google saya",
+      "ownProvider": "Gunakan penyedia saya sendiri",
+      "fixKey": "Periksa kunci saya",
+      "retry": "Coba lagi",
+      "stopRetry": "Hentikan dan coba lagi",
+      "switchAdvanced": "Beralih ke Lanjutan",
+      "finish": "Selesai"
+    },
+    "vault": {
+      "title": "Pembuatan kata sandi brankas",
+      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi ini dan selalu berada dalam kendali Anda.",
+      "openWhat": "Buka formulir brankas untuk memilih kata sandi brankas.",
+      "passwordWhat": "Ketik kata sandi di sini, lalu konfirmasi dengan tombol di bawahnya."
+    },
+    "unlock": {
+      "title": "Pembukaan kunci brankas",
+      "why": "Kunci penyedia Anda tetap terenkripsi sampai brankas dibuka kuncinya.",
+      "openWhat": "Buka formulir brankas untuk memasukkan kata sandi brankas.",
+      "passwordWhat": "Ketik kata sandi brankas di sini, lalu konfirmasi dengan tombol di bawahnya."
+    },
+    "cloudVault": {
+      "title": "Pembuatan brankas dan penambahan satu kunci gratis",
+      "what": "Pilih kata sandi brankas, lalu tambahkan satu kunci gratis. Google direkomendasikan. Anda akan kembali ke sini setelah selesai.",
+      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda. Dengan kunci itulah penyedia AI mengenali Anda."
+    },
+    "cloudUnlock": {
+      "what": "Buka kunci brankas di halaman brankas. Anda akan kembali ke sini setelah selesai."
+    },
+    "cloudKey": {
+      "what": "Tambahkan satu kunci gratis di halaman brankas. Google direkomendasikan. Anda akan kembali ke sini setelah selesai."
+    },
+    "key": {
+      "title": "Penambahan satu kunci gratis",
+      "why": "NARN Freeway memakai model AI gratis, dan dengan kunci itulah penyedia mengenali Anda.",
+      "choiceWhat": "Buat kunci Google AI gratis, lalu tempel ke brankas.",
+      "pasteWhat": "Tempel kunci di sini, ketik kata sandi brankas di bawahnya, lalu simpan."
+    },
+    "project": {
+      "title": "Pengimporan teks game",
+      "why": "NARN membaca setiap entri dan hanya menerjemahkan yang belum ada.",
+      "openWhat": "Buka daftar proyek.",
+      "newWhat": "Buat proyek baru.",
+      "createWhat": "Beri nama proyek, lalu buat.",
+      "sourceWhat": "Pilih bahasa yang dipakai untuk menulis teks Anda.",
+      "targetsWhat": "Centang bahasa target terjemahan yang diinginkan.",
+      "saveWhat": "Simpan bahasa.",
+      "importWhat": "Pilih berkas CSV yang diekspor dari editor game Anda.",
+      "confirmWhat": "Periksa ringkasannya, lalu konfirmasi impor."
+    },
+    "translate": {
+      "title": "Penerjemahan",
+      "why": "Freeway otomatis memilih model gratis yang sesuai untuk tiap bahasa.",
+      "openWhat": "Buka tab yang memuat daftar entri.",
+      "selectWhat": "Pilih semua entri.",
+      "pressWhat": "Buka dialog penerjemahan.",
+      "startWhat": "Mulai penerjemahan.",
+      "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
+      "progressWhy": "Tur berlanjut setelah penerjemahan selesai."
+    },
+    "failed": {
+      "title": "Penerjemahan tidak berhasil",
+      "why": "Bilah yang disorot di bawah menunjukkan apa yang terjadi.",
+      "authWhat": "Penyedia menolak kunci Anda. Periksa kuncinya, lalu coba lagi.",
+      "quotaWhat": "Kuota gratis sedang habis. Tunggu sebentar atau tambahkan kunci lain, lalu coba lagi.",
+      "otherWhat": "Tidak ada yang diterjemahkan. Periksa kunci Anda, lalu coba lagi."
+    },
+    "parked": {
+      "title": "Penerjemahan dijeda",
+      "what": "Penerjemahan Anda dijeda dan menunggu penyedia. Periksa kunci Anda, lalu hentikan putaran ini dan mulai yang baru."
+    },
+    "waiting": {
+      "title": "Penerjemahan menunggu",
+      "why": "Bilah yang disorot di bawah menunjukkan statusnya. Tur berlanjut setelah penerjemahan selesai.",
+      "quotaWhat": "Kuota gratis sedang habis. Penerjemahan berlanjut sendiri saat kuota tersedia lagi.",
+      "modelWhat": "Model gratis yang tersedia saat ini berada di bawah kualitas yang dituju putaran ini. Penerjemahan berlanjut sendiri saat model yang lebih baik tersedia."
+    },
+    "export": {
+      "title": "Ekspor",
+      "why": "Editor game Anda dapat mengimpor berkas ini untuk memasukkan terjemahan ke dalam game.",
+      "openWhat": "Kembali ke tab tempat berkas diimpor.",
+      "downloadWhat": "Unduh berkas hasil terjemahan untuk editor game Anda."
+    },
+    "closing": {
+      "title": "Semua sudah siap",
+      "what": "Lanjutan menambahkan glosarium, pemeriksaan kualitas, penyaluran, tinjauan, dan lainnya.",
+      "why": "Mode dapat diganti kapan saja dari bilah atas."
+    }
+  },
+  "providerChoice": {
+    "title": "Gunakan penyedia saya sendiri",
+    "description": "Pilih penyedia yang kuncinya Anda miliki. NARN akan mengirim setiap terjemahan dalam proyek Anda ke penyedia itu. Untuk menggabungkan beberapa penyedia, beralihlah ke Lanjutan.",
+    "existingRouting": "Proyek ini sudah memiliki penyaluran, jadi dibiarkan apa adanya. Anda dapat mengubahnya di Lanjutan.",
+    "cancel": "Batal",
+    "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}"
+  },
+  "offer": {
+    "start": "Tunjukkan",
+    "decline": "Tidak, terima kasih"
+  },
+  "guideTours": {
+    "title": "Tur",
+    "firstRun": "Awal penggunaan terpandu",
+    "area": {
+      "routing": "Penyaluran",
+      "glossary": "Glosarium",
+      "quality": "Kualitas",
+      "compare": "Bandingkan",
+      "review-translation-ai": "Tinjauan AI Terjemahan"
+    },
+    "confirm": {
+      "title": "Beralih ke Sederhana untuk penyiapan terpandu?",
+      "body": "Penyiapan terpandu dibuat untuk mode Sederhana, yang menyembunyikan tab lanjutan. Anda bisa kembali kapan saja dari bilah atas.",
+      "switch": "Beralih ke Sederhana",
+      "stay": "Tetap di Lanjutan"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "Baru mengenal Penyaluran?",
+        "body": "Sekilas 30 detik tentang cara NARN memilih siapa yang menerjemahkan apa."
+      },
+      "config": {
+        "title": "Penyaluran menentukan siapa yang menerjemahkan",
+        "what": "Di sini Anda memilih penyedia terjemahan yang menangani teks Anda.",
+        "why": "Gunakan untuk mengirim bahasa atau jenis teks tertentu ke penyedia lain, atau tetap memakai satu penyedia untuk semuanya."
+      },
+      "mode": {
+        "title": "Aturan sederhana atau lanjutan",
+        "what": "Di sini Anda beralih antara satu penyedia untuk semuanya dan daftar aturan.",
+        "why": "Mulailah dari yang sederhana. Beralihlah ke aturan saat Anda ingin penyedia berbeda untuk suatu bahasa, kategori, atau nada."
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "Baru mengenal Glosarium?",
+        "body": "Sekilas tentang menjaga nama dan istilah penting tetap konsisten."
+      },
+      "list": {
+        "title": "Glosarium Anda",
+        "what": "Setiap glosarium adalah daftar istilah beserta terjemahan yang Anda inginkan untuk masing-masing.",
+        "why": "Istilah seperti nama karakter atau jargon game pun selalu diterjemahkan dengan cara yang sama."
+      },
+      "create": {
+        "title": "Buat glosarium",
+        "what": "Buat glosarium kosong lalu tambahkan istilah Anda sendiri.",
+        "why": "Lakukan ini jika Anda sudah tahu kata-kata yang tidak boleh diterjemahkan secara berbeda."
+      },
+      "generate": {
+        "title": "Biarkan AI menyarankan istilah",
+        "what": "Minta penyedia AI mencari calon istilah di teks Anda.",
+        "why": "Anda tidak perlu membaca seluruh berkas untuk menemukannya. Anda yang meninjau dan menerima usulannya."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "Baru mengenal Kualitas?",
+        "body": "Sekilas tentang cara NARN memeriksa terjemahan Anda."
+      },
+      "title": {
+        "title": "Pemeriksaan kualitas otomatis",
+        "what": "Setiap terjemahan diperiksa dengan aturan seperti tag yang hilang, placeholder yang berubah, dan batas panjang.",
+        "why": "Masalah yang bisa merusak game Anda muncul di sini, bukan saat uji coba bermain."
+      },
+      "overview": {
+        "title": "Tingkat kelulusan Anda",
+        "what": "Ini menunjukkan berapa banyak pemeriksaan yang lulus dan yang gagal di seluruh proyek.",
+        "why": "Cara cepat untuk tahu apakah terjemahan sudah siap atau masih perlu dikerjakan."
+      },
+      "issues": {
+        "title": "Masalah yang paling sering muncul",
+        "what": "Jenis masalah yang paling sering gagal tercantum di sini.",
+        "why": "Memperbaiki yang paling sering muncul lebih dulu akan menghapus kegagalan terbanyak."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "Baru mengenal Bandingkan?",
+        "body": "Sekilas tentang meninjau terjemahan secara berdampingan."
+      },
+      "target": {
+        "title": "Pilih bahasa",
+        "what": "Pilih bahasa yang ditampilkan di samping teks sumber.",
+        "why": "Tinjau satu bahasa dalam satu waktu, baris demi baris, dan sunting sambil jalan."
+      },
+      "reference": {
+        "title": "Tambahkan bahasa rujukan",
+        "what": "Tampilkan bahasa kedua di sampingnya, misalnya bahasa yang Anda kuasai.",
+        "why": "Berguna saat Anda tidak bisa membaca bahasa target: Anda bisa mencocokkan maknanya dengan bahasa yang Anda kenal."
+      },
+      "translate": {
+        "title": "Terjemahkan dari sini",
+        "what": "Terjemahkan baris yang dipilih, atau semua baris yang cocok dengan filter Anda.",
+        "why": "Praktis untuk mengisi celah yang Anda temukan saat meninjau, tanpa keluar dari tab ini."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "Baru mengenal Tinjauan AI?",
+        "body": "Sekilas tentang meminta AI memeriksa terjemahan Anda."
+      },
+      "intro": {
+        "title": "Pendapat kedua untuk terjemahan",
+        "what": "Penyedia AI membaca terjemahan Anda di samping teks sumber dan memberinya nilai.",
+        "why": "Ia menemukan kesalahan dan susunan kata yang janggal yang tidak terdeteksi pemeriksaan otomatis, sehingga bisa Anda perbaiki sebelum dirilis."
+      },
+      "start": {
+        "title": "Tinjau proses terakhir",
+        "what": "Mulai peninjauan atas proses terjemahan terbaru.",
+        "why": "Meninjau hanya yang baru diterjemahkan membuat biaya dan waktu tunggu tetap kecil."
+      },
+      "all": {
+        "title": "Tinjau semuanya",
+        "what": "Tinjau semua terjemahan dalam proyek, bukan hanya proses terakhir.",
+        "why": "Gunakan sebelum rilis, atau setelah Anda mengubah glosarium atau penyaluran."
+      }
+    }
+  }
+}

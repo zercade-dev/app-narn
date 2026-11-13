@@ -101,7 +101,9 @@ export function QualityTab({ projectId, onNavigateToStrings }: QualityTabProps) 
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">{t('title')}</h2>
+      <h2 className="text-xl font-semibold" data-tour="quality-title">
+        {t('title')}
+      </h2>
 
       {!loading && !error && summary && (
         <div
@@ -153,6 +155,7 @@ export function QualityTab({ projectId, onNavigateToStrings }: QualityTabProps) 
             <CardContent
               className="flex flex-wrap items-center gap-6 pt-6"
               data-testid="quality-overview"
+              data-tour="quality-overview"
             >
               <PassRateDonut
                 passRate={summary.overall.passRate}
@@ -186,7 +189,7 @@ export function QualityTab({ projectId, onNavigateToStrings }: QualityTabProps) 
             </CardContent>
           </Card>
 
-          <Card>
+          <Card data-tour="quality-issues">
             <CardHeader>
               <CardTitle>{t('mostCommonIssues.title')}</CardTitle>
               <CardDescription>{t('mostCommonIssues.description')}</CardDescription>

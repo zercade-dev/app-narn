@@ -8,6 +8,12 @@
   "switchToDark": "Beralih ke mode gelap",
   "languageTitle": "Bahasa",
   "languageDescription": "Bahasa antarmuka pengguna.",
+  "uiModeLabel": "Mode antarmuka",
+  "uiModeSimple": "Sederhana",
+  "uiModeAdvanced": "Lanjutan",
+  "uiModeDescription": "Mode sederhana menyembunyikan sebagian besar navigasi agar Anda fokus menerjemahkan. Mode lanjutan menampilkan semuanya.",
+  "tourOffersLabel": "Tawarkan tur terpandu",
+  "tourOffersDescription": "Tampilkan panduan singkat saat pertama kali Anda membuka bagian aplikasi.",
   "preview": "Pratinjau",
   "previewHint": "Contoh kontrol yang digambar dengan tema terpilih.",
   "previewSamples": {

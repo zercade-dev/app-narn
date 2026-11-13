@@ -210,7 +210,11 @@ export function VaultUnlockDialog({
         {setupRequired || cloudManaged ? (
           <div className="px-4 py-3 space-y-3">
             <SheetFooter className="px-0">
-              <Button type="button" data-testid="vault-setup-redirect" onClick={goToVaultSetup}>
+              <Button
+                type="button"
+                data-testid="vault-setup-redirect"
+                onClick={() => goToVaultSetup()}
+              >
                 {hasVault ? t('goToVault') : t('setupRedirect')}
               </Button>
             </SheetFooter>
@@ -237,6 +241,7 @@ export function VaultUnlockDialog({
               <Input
                 id="vault-password-input"
                 data-testid="vault-password-input"
+                data-tour="vault-password-input"
                 type="password"
                 autoComplete="off"
                 ref={inputRef}
@@ -265,6 +270,7 @@ export function VaultUnlockDialog({
                 type="submit"
                 disabled={loading || password.trim().length === 0}
                 data-testid="vault-unlock-submit"
+                data-tour="vault-unlock-submit"
               >
                 {loading ? t('working') : hasVault ? t('unlock') : t('create')}
               </Button>
