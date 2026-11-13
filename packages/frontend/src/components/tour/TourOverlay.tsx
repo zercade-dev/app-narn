@@ -259,6 +259,7 @@ export function TourOverlay({
                 role="dialog"
                 aria-labelledby={titleId}
                 data-testid="tour-callout"
+                data-step-id={step.id}
                 className="w-[min(24rem,calc(100vw-2rem))] rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
               >
                 <TourCallout {...calloutProps} />
@@ -273,6 +274,7 @@ export function TourOverlay({
           role="dialog"
           aria-labelledby={titleId}
           data-testid="tour-callout"
+          data-step-id={step.id}
           className="fixed top-1/2 left-1/2 z-[60] w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
         >
           <TourCallout {...calloutProps} />
