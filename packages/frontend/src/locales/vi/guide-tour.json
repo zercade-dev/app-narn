@@ -88,6 +88,7 @@
       "authWhat": "Nhà cung cấp đã từ chối khóa của bạn. Kiểm tra khóa, rồi thử lại.",
       "quotaWhat": "Hạn mức miễn phí tạm thời đã hết. Chờ một lát hoặc thêm khóa khác, rồi thử lại.",
       "quotaWhatOwn": "{{provider}} tạm thời từ chối: hạn mức hoặc tín dụng trong tài khoản của bạn đã hết. Hãy kiểm tra gói của bạn với nhà cung cấp, rồi thử lại.",
+      "quotaWhatCustom": "Một nhà cung cấp trong điều phối của dự án này tạm thời từ chối: hạn mức hoặc tín dụng đã hết. Chờ một lát hoặc kiểm tra gói với nhà cung cấp, rồi thử lại.",
       "otherWhat": "Chưa có gì được dịch. Kiểm tra khóa của bạn, rồi thử lại."
     },
     "parked": {
@@ -127,7 +128,9 @@
     "cancel": "Hủy",
     "failed": "Không thể thiết lập {{provider}}: {{message}}",
     "switchedOff": "{{provider}} đang tắt trong Nâng cao nên không được dùng. Hãy bật lại trong Cấu hình chung, hoặc chọn nhà cung cấp khác.",
-    "waitingForKey": "Kho bảo mật của bạn chưa có khóa {{provider}}, nên tạm thời NARN Freeway sẽ dịch. Hãy thêm khóa của nó, hoặc chọn NARN Freeway trong thẻ Cấu hình của dự án."
+    "waitingForKey": "Kho bảo mật của bạn chưa có khóa {{provider}}, nên tạm thời NARN Freeway sẽ dịch. Hãy thêm khóa của nó, hoặc chọn NARN Freeway trong thẻ Cấu hình của dự án.",
+    "applied": "{{provider}} giờ sẽ dịch {{project}}.",
+    "appliedCollab": "{{provider}} giờ sẽ dịch các dự án được chia sẻ với bạn."
   },
   "offer": {
     "start": "Cho tôi xem",

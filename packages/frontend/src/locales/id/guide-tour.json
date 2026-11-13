@@ -88,6 +88,7 @@
       "authWhat": "Penyedia menolak kunci Anda. Periksa kuncinya, lalu coba lagi.",
       "quotaWhat": "Kuota gratis sedang habis. Tunggu sebentar atau tambahkan kunci lain, lalu coba lagi.",
       "quotaWhatOwn": "{{provider}} menolak untuk sementara: kuota atau kredit akun Anda habis. Periksa paket Anda di penyedia, lalu coba lagi.",
+      "quotaWhatCustom": "Salah satu penyedia dalam penyaluran proyek ini menolak untuk sementara: kuota atau kredit habis. Tunggu sebentar atau periksa paket di penyedia, lalu coba lagi.",
       "otherWhat": "Tidak ada yang diterjemahkan. Periksa kunci Anda, lalu coba lagi."
     },
     "parked": {
@@ -127,7 +128,9 @@
     "cancel": "Batal",
     "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}",
     "switchedOff": "{{provider}} dimatikan di Lanjutan, jadi tidak dipakai. Nyalakan lagi di Konfigurasi Global, atau pilih penyedia lain.",
-    "waitingForKey": "Belum ada kunci {{provider}} di brankas Anda, jadi untuk sementara NARN Freeway yang menerjemahkan. Tambahkan kuncinya, atau pilih NARN Freeway di tab Konfigurasi proyek."
+    "waitingForKey": "Belum ada kunci {{provider}} di brankas Anda, jadi untuk sementara NARN Freeway yang menerjemahkan. Tambahkan kuncinya, atau pilih NARN Freeway di tab Konfigurasi proyek.",
+    "applied": "{{provider}} sekarang menerjemahkan {{project}}.",
+    "appliedCollab": "{{provider}} sekarang menerjemahkan proyek yang dibagikan kepada Anda."
   },
   "offer": {
     "start": "Tunjukkan",

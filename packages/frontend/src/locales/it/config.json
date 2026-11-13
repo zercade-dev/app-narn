@@ -538,6 +538,7 @@
     "paidNote": "Pagato dal tuo account {{provider}}.",
     "freeOnlyNote": "Traduce solo {{provider}}, senza gli altri modelli gratuiti del pool di NARN Freeway.",
     "pendingNote": "{{provider}} verrà usato appena salvi la sua chiave. Fino ad allora traduce NARN Freeway.",
+    "pendingNoteOwn": "{{provider}} verrà usato appena salvi la sua chiave. Fino ad allora traduce {{current}}.",
     "customRouting": "Questo progetto usa un routing personalizzato configurato in Avanzata, quindi qui non viene modificato.",
     "openAdvanced": "Apri in Avanzata",
     "loading": "Caricamento della tua scelta di provider…",

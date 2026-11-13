@@ -54,7 +54,12 @@ export type ProviderChoiceResult =
    */
   | { status: 'unavailable' }
   /** The project no longer exists: nothing to write to. */
-  | { status: 'gone' };
+  | { status: 'gone' }
+  /**
+   * A pending choice whose target was routed elsewhere since it was stored
+   * (changed in Advanced, or in another tab): that later change stands.
+   */
+  | { status: 'superseded' };
 
 /** A routing document as groups: a project saved before groups existed has only `rules`. */
 export function routingGroupsOf(
@@ -70,6 +75,30 @@ export function effectiveProviderOf(groups: RoutingRuleGroup[]): EffectiveProvid
   const moduleId = simpleRuleModuleId(groups);
   if (moduleId === null || moduleId === FREEWAY_MODULE_ID) return { kind: 'freeway' };
   return { kind: 'own', moduleId };
+}
+
+/** What a routing document sends work to, as one string: `freeway`, a module id, or `custom`. */
+export function routedModuleOf(groups: RoutingRuleGroup[]): string {
+  const provider = effectiveProviderOf(groups);
+  return provider.kind === 'own' ? provider.moduleId : provider.kind;
+}
+
+/**
+ * What the target is routed to right now, from what is already loaded (no
+ * request); undefined when that is not known (a collaborator document not
+ * read yet, a project not listed).
+ */
+export function routedModuleNow(target: ProviderTarget): string | undefined {
+  if (target.kind === 'collab') {
+    const { doc, state } = useCollabRoutingStore.getState();
+    return state === 'loaded' && doc
+      ? routedModuleOf(routingGroupsOf(doc.routingRules, doc.routingRuleGroups))
+      : undefined;
+  }
+  const project = useProjectStore.getState().projects.find((p) => p.id === target.projectId);
+  return project
+    ? routedModuleOf(routingGroupsOf(project.routingRules, project.routingRuleGroups))
+    : undefined;
 }
 
 /**
@@ -91,7 +120,8 @@ async function currentGroups(
   }
   const projects = useProjectStore.getState();
   const project = projects.projects.find((p) => p.id === target.projectId);
-  if (!project) return 'gone';
+  // Not listed yet is not deleted: only a loaded list can say it is gone.
+  if (!project) return projects.loaded ? 'gone' : 'unavailable';
   if (accessFor(projects, project.id).role !== 'owner') return 'unavailable';
   return routingGroupsOf(project.routingRules, project.routingRuleGroups);
 }
@@ -107,13 +137,19 @@ export function targetOfKey(key: string): ProviderTarget {
 /**
  * Point the target's routing at `moduleId` with one catch-all rule, unless the
  * routing is custom (built in Advanced), which is never overwritten.
+ * `routedFrom` (a pending choice's) is what the target was routed to when the
+ * choice was made: routing changed since then is left as it is.
  */
 export async function applyProviderTo(
   target: ProviderTarget,
   moduleId: string,
+  routedFrom?: string,
 ): Promise<ProviderChoiceResult> {
   const groups = await currentGroups(target);
   if (groups === 'unavailable' || groups === 'gone') return { status: groups };
+  if (routedFrom !== undefined && routedModuleOf(groups) !== routedFrom) {
+    return { status: 'superseded' };
+  }
   if (!isSimpleRouting(groups)) return { status: 'routing-kept' };
   if (target.kind === 'collab') {
     const rule = makeSimpleRule(moduleId, groups[0]?.rules[0]?.id);
@@ -156,7 +192,13 @@ export async function chooseProvider(
   const { unlocked, keys } = useVaultStore.getState();
   if (vaultKey !== undefined && !(unlocked && keys.includes(vaultKey))) {
     guide.setSimpleProvider(providerInstanceId(base));
-    if (target) guide.setPendingProvider(targetKey(target), providerInstanceId(base));
+    if (target) {
+      guide.setPendingProvider(
+        targetKey(target),
+        providerInstanceId(base),
+        routedModuleNow(target),
+      );
+    }
     return { status: 'needs-key', vaultKey };
   }
 

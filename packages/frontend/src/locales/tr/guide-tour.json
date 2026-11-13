@@ -88,6 +88,7 @@
       "authWhat": "Sağlayıcı anahtarınızı reddetti. Anahtarı kontrol edin, ardından yeniden deneyin.",
       "quotaWhat": "Ücretsiz kota şimdilik tükendi. Biraz bekleyin veya başka bir anahtar ekleyin, ardından yeniden deneyin.",
       "quotaWhatOwn": "{{provider}} şimdilik istekleri reddediyor: hesabınızın kotası veya kredisi tükendi. Sağlayıcıdaki planınızı kontrol edin, ardından yeniden deneyin.",
+      "quotaWhatCustom": "Bu projenin yönlendirmesindeki bir sağlayıcı şimdilik istekleri reddediyor: bir kota veya kredi tükendi. Biraz bekleyin veya sağlayıcıdaki planı kontrol edin, ardından yeniden deneyin.",
       "otherWhat": "Hiçbir şey çevrilmedi. Anahtarınızı kontrol edin, ardından yeniden deneyin."
     },
     "parked": {
@@ -127,7 +128,9 @@
     "cancel": "İptal",
     "failed": "{{provider}} kurulamadı: {{message}}",
     "switchedOff": "{{provider}} Gelişmiş modda kapalı olduğu için kullanılmadı. Genel yapılandırmada yeniden açın veya başka bir sağlayıcı seçin.",
-    "waitingForKey": "Kasanızda henüz {{provider}} anahtarı yok, bu yüzden şimdilik NARN Freeway çeviriyor. Anahtarını ekleyin veya projenin Yapılandırma sekmesinden NARN Freeway'i seçin."
+    "waitingForKey": "Kasanızda henüz {{provider}} anahtarı yok, bu yüzden şimdilik NARN Freeway çeviriyor. Anahtarını ekleyin veya projenin Yapılandırma sekmesinden NARN Freeway'i seçin.",
+    "applied": "{{project}} artık {{provider}} ile çevriliyor.",
+    "appliedCollab": "Sizinle paylaşılan projeler artık {{provider}} ile çevriliyor."
   },
   "offer": {
     "start": "Göster",

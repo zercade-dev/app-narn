@@ -537,6 +537,7 @@
     "paidNote": "Wird über dein {{provider}}-Konto bezahlt.",
     "freeOnlyNote": "Nur {{provider}} übersetzt, ohne die anderen kostenlosen Modelle im NARN-Freeway-Pool.",
     "pendingNote": "{{provider}} wird verwendet, sobald sein Schlüssel gespeichert ist. Bis dahin übersetzt NARN Freeway.",
+    "pendingNoteOwn": "{{provider}} wird verwendet, sobald sein Schlüssel gespeichert ist. Bis dahin übersetzt {{current}}.",
     "customRouting": "Dieses Projekt nutzt eigenes Routing, das unter „Erweitert“ eingerichtet wurde, und wird daher hier nicht geändert.",
     "openAdvanced": "In „Erweitert“ öffnen",
     "loading": "Deine Anbieterwahl wird geladen …",

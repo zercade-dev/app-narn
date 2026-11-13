@@ -11,6 +11,7 @@ import { useVaultStore } from '../../stores/vault-store.js';
 import { useNotificationStore } from '../../stores/notification-store.js';
 import { useGuideStore } from '../../stores/guide-store.js';
 import { applySimpleRule } from '../../lib/simple-provider.js';
+import { routedModuleOf, routingGroupsOf } from '../../lib/provider-choice.js';
 import { VaultUnlockDialog } from '../vault/VaultUnlockDialog.js';
 import { ConfirmSheet } from '../ui/confirm-sheet';
 import { apiRequest } from '../../hooks/use-api.js';
@@ -337,7 +338,11 @@ export function Sidebar() {
       if (wantsProvider && !enabledProviders.includes(simpleProvider)) {
         // Its key is not saved yet: `useProviderSetup` points this project at
         // it once the key arrives (Freeway translates until then).
-        setPendingProvider(created.id, simpleProvider);
+        setPendingProvider(
+          created.id,
+          simpleProvider,
+          routedModuleOf(routingGroupsOf(created.routingRules, created.routingRuleGroups)),
+        );
       } else if (wantsProvider) {
         try {
           await applySimpleRule(created.id, simpleProvider);

@@ -88,6 +88,7 @@
       "authWhat": "Il provider ha rifiutato la tua chiave. Controlla la chiave, poi riprova.",
       "quotaWhat": "La quota gratuita è esaurita per ora. Attendi un po' o aggiungi un'altra chiave, poi riprova.",
       "quotaWhatOwn": "{{provider}} rifiuta per ora: la quota o il credito del tuo account è esaurito. Controlla il tuo piano presso il provider, poi riprova.",
+      "quotaWhatCustom": "Un provider del routing di questo progetto rifiuta per ora: una quota o un credito è esaurito. Attendi un po' o controlla il piano presso il provider, poi riprova.",
       "otherWhat": "Non è stato tradotto nulla. Controlla la tua chiave, poi riprova."
     },
     "parked": {
@@ -127,7 +128,9 @@
     "cancel": "Annulla",
     "failed": "Impossibile configurare {{provider}}: {{message}}",
     "switchedOff": "{{provider}} è disattivato in Avanzata, quindi non è stato usato. Riattivalo in Configurazione globale o scegli un altro provider.",
-    "waitingForKey": "Nella tua cassaforte non c'è ancora una chiave {{provider}}, quindi per ora traduce NARN Freeway. Aggiungi la sua chiave o scegli NARN Freeway nella scheda Configurazione del progetto."
+    "waitingForKey": "Nella tua cassaforte non c'è ancora una chiave {{provider}}, quindi per ora traduce NARN Freeway. Aggiungi la sua chiave o scegli NARN Freeway nella scheda Configurazione del progetto.",
+    "applied": "Ora {{provider}} traduce {{project}}.",
+    "appliedCollab": "Ora {{provider}} traduce i progetti condivisi con te."
   },
   "offer": {
     "start": "Mostrami",

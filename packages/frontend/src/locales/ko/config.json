@@ -530,6 +530,7 @@
     "paidNote": "{{provider}} 계정으로 요금이 청구돼요.",
     "freeOnlyNote": "{{provider}}만 번역하고, NARN Freeway 풀의 다른 무료 모델은 쓰지 않아요.",
     "pendingNote": "키를 저장하면 {{provider}}를 써요. 그전까지는 NARN Freeway가 번역해요.",
+    "pendingNoteOwn": "키를 저장하면 {{provider}}를 써요. 그전까지는 {{current}}가 번역해요.",
     "customRouting": "이 프로젝트는 고급 모드에서 설정한 사용자 지정 배정을 쓰므로 여기서는 바꾸지 않아요.",
     "openAdvanced": "고급 모드에서 열기",
     "loading": "제공업체 선택을 불러오는 중…",

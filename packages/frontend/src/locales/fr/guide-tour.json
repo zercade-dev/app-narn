@@ -88,6 +88,7 @@
       "authWhat": "Le fournisseur a refusé votre clé. Vérifiez la clé, puis réessayez.",
       "quotaWhat": "Le quota gratuit est épuisé pour le moment. Patientez un peu ou ajoutez une autre clé, puis réessayez.",
       "quotaWhatOwn": "{{provider}} refuse pour le moment : le quota ou le crédit de votre compte est épuisé. Vérifiez votre forfait auprès du fournisseur, puis réessayez.",
+      "quotaWhatCustom": "Un fournisseur du routage de ce projet refuse pour le moment : un quota ou un crédit est épuisé. Patientez un peu ou vérifiez le forfait auprès du fournisseur, puis réessayez.",
       "otherWhat": "Rien n’a été traduit. Vérifiez votre clé, puis réessayez."
     },
     "parked": {
@@ -127,7 +128,9 @@
     "cancel": "Annuler",
     "failed": "Impossible de configurer {{provider}} : {{message}}",
     "switchedOff": "{{provider}} est désactivé en mode Avancé, il n’a donc pas été utilisé. Réactivez-le dans Configuration globale, ou choisissez un autre fournisseur.",
-    "waitingForKey": "Aucune clé {{provider}} dans votre coffre pour l’instant : NARN Freeway traduit en attendant. Ajoutez sa clé, ou choisissez NARN Freeway dans l’onglet Configuration du projet."
+    "waitingForKey": "Aucune clé {{provider}} dans votre coffre pour l’instant : NARN Freeway traduit en attendant. Ajoutez sa clé, ou choisissez NARN Freeway dans l’onglet Configuration du projet.",
+    "applied": "{{provider}} traduit désormais {{project}}.",
+    "appliedCollab": "{{provider}} traduit désormais les projets partagés avec vous."
   },
   "offer": {
     "start": "Montrez-moi",

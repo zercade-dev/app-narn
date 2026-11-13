@@ -530,6 +530,7 @@
     "paidNote": "Dibayar dari akun {{provider}} Anda.",
     "freeOnlyNote": "Hanya {{provider}} yang menerjemahkan, tanpa model gratis lain dalam kumpulan NARN Freeway.",
     "pendingNote": "{{provider}} dipakai setelah kuncinya disimpan. Sampai saat itu, NARN Freeway yang menerjemahkan.",
+    "pendingNoteOwn": "{{provider}} dipakai setelah kuncinya disimpan. Sampai saat itu, {{current}} yang menerjemahkan.",
     "customRouting": "Proyek ini memakai penyaluran kustom yang diatur di Lanjutan, jadi tidak diubah di sini.",
     "openAdvanced": "Buka di Lanjutan",
     "loading": "Memuat pilihan penyedia Anda…",

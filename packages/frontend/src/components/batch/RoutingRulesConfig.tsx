@@ -14,6 +14,7 @@ import {
 } from './BatchConfigEditor.js';
 import { basesWithInstances } from '@/lib/module-options';
 import { useStringStore } from '../../stores/string-store.js';
+import { useGuideStore } from '../../stores/guide-store.js';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { isSimpleRouting, makeSimpleRule, simpleRuleModuleId } from '@/lib/routing-mode';
 import { SimpleRoutingConfig } from './SimpleRoutingConfig.js';
@@ -247,6 +248,10 @@ export function RoutingRulesConfig({
           body: JSON.stringify(payload),
         });
       }
+      // Routing set here is the person's latest word: a Simple-mode choice
+      // still waiting for its key must not overwrite it later.
+      const guide = useGuideStore.getState();
+      guide.setPendingProvider(routingBackend ? 'collab' : projectId, null);
       onSave?.(payload.rules);
     },
   });

@@ -88,6 +88,7 @@
       "authWhat": "El proveedor rechazó tu clave. Revisa la clave y vuelve a intentarlo.",
       "quotaWhat": "La cuota gratuita se agotó por ahora. Espera un poco o añade otra clave y vuelve a intentarlo.",
       "quotaWhatOwn": "{{provider}} rechaza las solicitudes por ahora: se agotó la cuota o el crédito de tu cuenta. Revisa tu plan con el proveedor y vuelve a intentarlo.",
+      "quotaWhatCustom": "Un proveedor del enrutamiento de este proyecto rechaza las solicitudes por ahora: se agotó una cuota o un crédito. Espera un poco o revisa el plan con el proveedor y vuelve a intentarlo.",
       "otherWhat": "No se tradujo nada. Revisa tu clave y vuelve a intentarlo."
     },
     "parked": {
@@ -127,7 +128,9 @@
     "cancel": "Cancelar",
     "failed": "No se pudo configurar {{provider}}: {{message}}",
     "switchedOff": "{{provider}} está desactivado en Avanzado, así que no se usó. Vuelve a activarlo en Configuración global o elige otro proveedor.",
-    "waitingForKey": "Todavía no hay ninguna clave de {{provider}} en tu bóveda, así que por ahora traduce NARN Freeway. Añade su clave o elige NARN Freeway en la pestaña Configuración del proyecto."
+    "waitingForKey": "Todavía no hay ninguna clave de {{provider}} en tu bóveda, así que por ahora traduce NARN Freeway. Añade su clave o elige NARN Freeway en la pestaña Configuración del proyecto.",
+    "applied": "{{provider}} traduce ahora {{project}}.",
+    "appliedCollab": "{{provider}} traduce ahora los proyectos compartidos contigo."
   },
   "offer": {
     "start": "Enséñamelo",

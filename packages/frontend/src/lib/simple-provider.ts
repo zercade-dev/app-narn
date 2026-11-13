@@ -109,8 +109,20 @@ export function isFreeKeyProvider(moduleId: string): boolean {
  * The first offered paid-tier provider whose key is in `keys`, for a vault
  * that holds such a key and no free one. Free-key providers are left out: their
  * key already makes Freeway usable.
+ *
+ * `routed` is the own provider the project already routes to (a module id),
+ * if any. It is the only one offered, so the guide never offers to replace
+ * it: its base when its key is saved, else nothing.
  */
-export function foundOwnProviderKey(keys: readonly string[], cloud: boolean): string | null {
+export function foundOwnProviderKey(
+  keys: readonly string[],
+  cloud: boolean,
+  routed?: string | null,
+): string | null {
+  if (routed) {
+    const key = providerKeyFor(routed);
+    return key !== undefined && keys.includes(key) ? routed.split(':')[0] : null;
+  }
   return (
     ownProviderChoices(cloud).find((base) => {
       const key = PROVIDER_KEYS[base];

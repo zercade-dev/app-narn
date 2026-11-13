@@ -6,4 +6,4 @@ You can now choose who translates for you in Simple mode, and the guided setup f
 - The quick test picks entries that still need translating, and the guide tells you when your file has nothing left to translate.
 - Back, Skip and the import steps in the guide are steadier: Back closes the open form, and Skip at the end finishes the guide.
 - Simple mode's Config tab is tidier, showing only the project name, the provider and the danger zone.
-- Tours are safer: the Orphans practice orphan can't be deleted by accident, and the Glossaries tour never blocks Next.
+- Tours are safer: the Orphans tour's practice entry can't be deleted by accident, and the Glossaries tour never blocks Next.

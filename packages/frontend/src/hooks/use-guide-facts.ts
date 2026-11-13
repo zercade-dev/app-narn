@@ -9,8 +9,10 @@ import {
   realTargetLanguages,
 } from '../lib/tour/quick-test.js';
 import type { GuideFacts } from '../lib/tour/types.js';
+import { routedModuleOf, routingGroupsOf } from '../lib/provider-choice.js';
+import { useCollabRoutingStore } from '../stores/collab-routing-store.js';
 import { useGuideStore } from '../stores/guide-store.js';
-import { useProjectStore } from '../stores/project-store.js';
+import { accessFor, useProjectStore } from '../stores/project-store.js';
 import { useRunStore } from '../stores/run-store.js';
 import { useSelectionStore } from '../stores/selection-store.js';
 import { useStringStore } from '../stores/string-store.js';
@@ -67,13 +69,34 @@ export function useGuideFacts(): GuideFacts {
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const simpleProvider = useGuideStore((s) => s.simpleProvider);
   const ownKey = simpleProvider ? providerKeyFor(simpleProvider) : undefined;
+  // What the active project routes to now (its owner's routing, or the
+  // collaborator's own): that provider's key is usable too, whatever was
+  // chosen in the guide.
+  const activeRole = useProjectStore((s) => {
+    const id = activeProjectIdOf(s);
+    return id === null ? null : accessFor(s, id).role;
+  });
+  const projectRouted = useProjectStore((s) => {
+    const project = s.projects.find((p) => p.id === s.activeProjectId);
+    return project
+      ? routedModuleOf(routingGroupsOf(project.routingRules, project.routingRuleGroups))
+      : null;
+  });
+  const collabRouted = useCollabRoutingStore((s) =>
+    s.state === 'loaded' && s.doc
+      ? routedModuleOf(routingGroupsOf(s.doc.routingRules, s.doc.routingRuleGroups))
+      : null,
+  );
+  const routed = activeRole === 'collaborator' ? collabRouted : projectRouted;
+  const routedKey = routed ? providerKeyFor(routed) : undefined;
   // `keys` is only trusted while unlocked: a list seen earlier says nothing
   // about what the person can use now.
   const usableKey = useVaultStore(
     (s) =>
       s.unlocked &&
       (FREE_KEYS.some((k) => s.keys.includes(k)) ||
-        (ownKey !== undefined && s.keys.includes(ownKey))),
+        (ownKey !== undefined && s.keys.includes(ownKey)) ||
+        (routedKey !== undefined && s.keys.includes(routedKey))),
   );
   const aiKeyUsable = useVaultStore((s) => s.unlocked && s.keys.some(isAiProviderKey));
   const exported = useGuideStore((s) => s.exportedOnce);
@@ -127,7 +150,10 @@ export function useGuideFacts(): GuideFacts {
           (isRunActive(r) || r.status === RunStatusCode.Paused),
       ),
   );
-  const nothingToTranslate = projectHasEntries && !untranslatedRemain && !translationGoing;
+  // Only with a real target language: a project with none (or Pseudo-test
+  // only) has not had its translations done, it has nothing chosen.
+  const nothingToTranslate =
+    projectHasEntries && targetLanguages !== '' && !untranslatedRemain && !translationGoing;
   const quickTest = useGuideStore((s) => s.quickTest);
   // Recorded, or listed since it was asked for: a run finished before the
   // guide recorded it still makes the test pending.

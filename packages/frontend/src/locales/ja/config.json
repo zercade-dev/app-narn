@@ -530,6 +530,7 @@
     "paidNote": "{{provider}}のアカウントに課金されます。",
     "freeOnlyNote": "{{provider}}だけが翻訳します。NARN Freewayのプールにある他の無料モデルは使いません。",
     "pendingNote": "キーが保存されると{{provider}}が使われます。それまではNARN Freewayが翻訳します。",
+    "pendingNoteOwn": "キーが保存されると{{provider}}が使われます。それまでは{{current}}が翻訳します。",
     "customRouting": "このプロジェクトは詳細モードで設定したカスタムの振り分けを使っているため、ここでは変更しません。",
     "openAdvanced": "詳細モードで開く",
     "loading": "プロバイダーの選択を読み込んでいます…",

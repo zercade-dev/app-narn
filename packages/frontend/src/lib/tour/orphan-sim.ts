@@ -34,6 +34,7 @@ import {
 } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useGuideStore, type OrphanSim } from '../../stores/guide-store.js';
+import { ORPHANS_TOUR_ID } from './orphans-tour.js';
 import { useProjectStore, type ProjectAccessInfo } from '../../stores/project-store.js';
 import { useStringStore } from '../../stores/string-store.js';
 
@@ -221,11 +222,20 @@ export async function loadPracticeState(sim: OrphanSim): Promise<{
   return { state, live, orphan };
 }
 
+/** The Orphans tour ended while the practice was being prepared; nothing was changed. */
+export class PracticeTourEndedError extends Error {
+  constructor() {
+    super('The Orphans tour ended before the practice entry was removed; nothing was changed.');
+    this.name = 'PracticeTourEndedError';
+  }
+}
+
 /**
  * Removes the practice entry with a full-replace import of every other live
  * main entry. `orphanSim` is saved before the import, so the entry can be put
  * back even if the page closes mid-way. Throws (with nothing changed) when the
- * project cannot round-trip.
+ * project cannot round-trip, or when the Orphans tour is no longer the active
+ * tour by the time the import would start.
  */
 export async function simulateOrphan(
   projectId: string,
@@ -244,6 +254,9 @@ export async function simulateOrphan(
 
   const sim: OrphanSim = { projectId, entryId: pick.entry.id, position: pick.position, backupId };
   const guide = useGuideStore.getState();
+  // The checks above take a few requests: a tour closed (or replaced) in the
+  // meantime must not leave an entry removed with nothing to put it back.
+  if (guide.activeTourId !== ORPHANS_TOUR_ID) throw new PracticeTourEndedError();
   guide.setOrphanSim(sim);
   try {
     await postImport(projectId, csv, 'full-replace');

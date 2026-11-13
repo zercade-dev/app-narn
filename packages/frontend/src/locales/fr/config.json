@@ -538,6 +538,7 @@
     "paidNote": "Facturé sur votre compte {{provider}}.",
     "freeOnlyNote": "Seul {{provider}} traduit, sans les autres modèles gratuits du pool NARN Freeway.",
     "pendingNote": "{{provider}} sera utilisé dès que sa clé sera enregistrée. D’ici là, NARN Freeway traduit.",
+    "pendingNoteOwn": "{{provider}} sera utilisé dès que sa clé sera enregistrée. D’ici là, {{current}} traduit.",
     "customRouting": "Ce projet utilise un routage personnalisé configuré en mode Avancé, il n’est donc pas modifié ici.",
     "openAdvanced": "Ouvrir en mode Avancé",
     "loading": "Chargement de votre choix de fournisseur…",

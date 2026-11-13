@@ -530,6 +530,7 @@
     "paidNote": "費用從您的 {{provider}} 帳戶支付。",
     "freeOnlyNote": "只由 {{provider}} 翻譯，不使用 NARN Freeway 模型池中的其他免費模型。",
     "pendingNote": "儲存金鑰後即使用 {{provider}}。在此之前由 NARN Freeway 翻譯。",
+    "pendingNoteOwn": "儲存金鑰後即使用 {{provider}}。在此之前由 {{current}} 翻譯。",
     "customRouting": "此專案使用在進階模式中設定的自訂分派，因此不在這裡變更。",
     "openAdvanced": "在進階模式中開啟",
     "loading": "正在載入您的供應商選擇…",

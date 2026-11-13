@@ -72,16 +72,18 @@ export function TranslationProviderCard({ projectId }: Readonly<{ projectId: str
   const [notice, setNotice] = useState<Notice>(null);
 
   const keySaved = (key: string | undefined) => unlocked && key !== undefined && keys.includes(key);
-  // A choice made before its key was saved, for this project: shown as chosen.
+  // A choice made before its key was saved, for this project: shown as chosen
+  // whenever it is not what translates now (Freeway, or another own provider).
   const pendingChoice = pendingProviders[target?.kind === 'collab' ? 'collab' : projectId];
+  const currentBase = provider?.kind === 'own' ? provider.moduleId.split(':')[0] : null;
   const pendingBase =
-    provider?.kind === 'freeway' &&
+    (provider?.kind === 'freeway' || provider?.kind === 'own') &&
     pendingChoice !== undefined &&
+    pendingChoice.split(':')[0] !== currentBase &&
     !keySaved(providerKeyFor(pendingChoice))
       ? pendingChoice.split(':')[0]
       : null;
-  const ownBase =
-    provider?.kind === 'own' ? provider.moduleId.split(':')[0] : (pendingBase ?? null);
+  const ownBase = pendingBase ?? currentBase;
   const ownSelected = ownBase !== null || ownPicked;
 
   const choose = (base: string | null) => {
@@ -287,7 +289,12 @@ export function TranslationProviderCard({ projectId }: Readonly<{ projectId: str
               )}
               {pendingBase !== null && (
                 <p className="text-xs text-status-warn" data-testid="provider-card-pending">
-                  {t('providerCard.pendingNote', { provider: providerName(pendingBase) })}
+                  {currentBase === null
+                    ? t('providerCard.pendingNote', { provider: providerName(pendingBase) })
+                    : t('providerCard.pendingNoteOwn', {
+                        provider: providerName(pendingBase),
+                        current: providerName(currentBase),
+                      })}
                 </p>
               )}
             </div>

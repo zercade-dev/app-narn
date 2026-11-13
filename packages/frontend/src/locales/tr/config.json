@@ -537,6 +537,7 @@
     "paidNote": "Ücreti {{provider}} hesabınızdan ödenir.",
     "freeOnlyNote": "Yalnızca {{provider}} çevirir; NARN Freeway havuzundaki diğer ücretsiz modeller kullanılmaz.",
     "pendingNote": "{{provider}}, anahtarı kaydedilince kullanılır. O zamana kadar NARN Freeway çevirir.",
+    "pendingNoteOwn": "{{provider}}, anahtarı kaydedilince kullanılır. O zamana kadar {{current}} çevirir.",
     "customRouting": "Bu proje, Gelişmiş modda ayarlanmış özel yönlendirme kullanıyor; bu yüzden burada değiştirilmez.",
     "openAdvanced": "Gelişmiş modda aç",
     "loading": "Sağlayıcı seçiminiz yükleniyor…",

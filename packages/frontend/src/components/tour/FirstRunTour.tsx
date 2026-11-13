@@ -20,6 +20,7 @@ import { statusLineRun } from '../../lib/run-status-line.js';
 import { useProjectProvider } from '../../hooks/use-project-provider.js';
 import {
   chooseProvider,
+  routedModuleNow,
   type ProviderChoiceResult,
   type ProviderTarget,
 } from '../../lib/provider-choice.js';
@@ -137,6 +138,8 @@ const TRANSLATED_BY_STEPS = new Set([
   'translate-open',
   'translate-quick',
   'translate-start',
+  // Before "Translate the rest": a paid provider's cost note comes first.
+  'translate-rest',
   'translate-failed-auth',
   'translate-failed-quota',
   'translate-failed-other',
@@ -150,6 +153,8 @@ const OWN_PROVIDER_COPY: Readonly<Record<string, string>> = {
 };
 const CUSTOM_ROUTING_COPY: Readonly<Record<string, string>> = {
   'firstRun.translate.why': 'firstRun.translate.whyCustom',
+  // Custom routing may not use Freeway at all: no "free quota" wording.
+  'firstRun.failed.quotaWhat': 'firstRun.failed.quotaWhatCustom',
 };
 
 /**
@@ -194,6 +199,20 @@ const translatedSomething = (run: RunStatus | undefined): boolean =>
   !isRunActive(run) &&
   run.status !== RunStatusCode.Paused;
 
+/**
+ * The own provider the active project already routes to (a module id), if
+ * any: its key counts as the one to use, and it is never offered a replacement.
+ */
+function routedOwnNow(): string | null {
+  const s = useProjectStore.getState();
+  const id = s.activeProjectId;
+  if (id === null || !s.projects.some((p) => p.id === id)) return null;
+  const target: ProviderTarget =
+    accessFor(s, id).role === 'owner' ? { kind: 'project', projectId: id } : { kind: 'collab' };
+  const routed = routedModuleNow(target);
+  return routed === undefined || routed === 'freeway' || routed === 'custom' ? null : routed;
+}
+
 /** The active project as a place to write a provider choice, when it is the person's own. */
 function ownedTarget(): ProviderTarget | null {
   const s = useProjectStore.getState();
@@ -219,9 +238,12 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   // The vault holds a key the person could use, but no free key and no choice:
   // offer it in one click instead of a step they cannot get past.
   const simpleProvider = useGuideStore((s) => s.simpleProvider);
+  const activeId = useProjectStore((s) => s.activeProjectId);
+  const { provider: routedProvider } = useProjectProvider(activeId);
+  const routedOwn = routedProvider?.kind === 'own' ? routedProvider.moduleId : null;
   const foundBase = useVaultStore((s) =>
     s.unlocked && !facts.usableKey && simpleProvider === null
-      ? foundOwnProviderKey(s.keys, facts.cloud)
+      ? foundOwnProviderKey(s.keys, facts.cloud, routedOwn)
       : null,
   );
   const tour = firstRunTourFor(facts, { fewEntries, advanced, foundKey: foundBase !== null });
@@ -391,7 +413,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
           break;
         case 'use-found-key': {
           const { keys } = useVaultStore.getState();
-          const base = foundOwnProviderKey(keys, cloud);
+          const base = foundOwnProviderKey(keys, cloud, routedOwnNow());
           if (base) reportChoice(base, chooseProvider(base, ownedTarget()));
           break;
         }

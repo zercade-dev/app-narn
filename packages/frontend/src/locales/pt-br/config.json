@@ -538,6 +538,7 @@
     "paidNote": "Pago pela sua conta do {{provider}}.",
     "freeOnlyNote": "Só o {{provider}} traduz, sem os outros modelos gratuitos do grupo do NARN Freeway.",
     "pendingNote": "O {{provider}} será usado assim que a chave dele for salva. Até lá, o NARN Freeway traduz.",
+    "pendingNoteOwn": "O {{provider}} será usado assim que a chave dele for salva. Até lá, o {{current}} traduz.",
     "customRouting": "Este projeto usa um roteamento personalizado configurado no Avançado, então ele não é alterado aqui.",
     "openAdvanced": "Abrir no Avançado",
     "loading": "Carregando sua escolha de provedor…",

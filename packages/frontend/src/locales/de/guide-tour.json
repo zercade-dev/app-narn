@@ -88,6 +88,7 @@
       "authWhat": "Der Anbieter hat deinen Schlüssel abgelehnt. Den Schlüssel prüfen und es erneut versuchen.",
       "quotaWhat": "Das kostenlose Kontingent ist vorerst aufgebraucht. Etwas warten oder einen weiteren Schlüssel hinzufügen und es erneut versuchen.",
       "quotaWhatOwn": "{{provider}} lehnt vorerst ab: Kontingent oder Guthaben deines Kontos ist aufgebraucht. Prüfe deinen Tarif beim Anbieter und versuche es dann erneut.",
+      "quotaWhatCustom": "Ein Anbieter aus dem Routing dieses Projekts lehnt vorerst ab: Ein Kontingent oder Guthaben ist aufgebraucht. Etwas warten oder den Tarif beim Anbieter prüfen und es erneut versuchen.",
       "otherWhat": "Es wurde nichts übersetzt. Den Schlüssel prüfen und es erneut versuchen."
     },
     "parked": {
@@ -127,7 +128,9 @@
     "cancel": "Abbrechen",
     "failed": "{{provider}} konnte nicht eingerichtet werden: {{message}}",
     "switchedOff": "{{provider}} ist unter „Erweitert“ ausgeschaltet und wurde daher nicht verwendet. Schalte ihn in der Globalen Konfiguration wieder ein oder wähle einen anderen Anbieter.",
-    "waitingForKey": "Für {{provider}} ist noch kein Schlüssel in deinem Tresor, daher übersetzt vorerst NARN Freeway. Füge seinen Schlüssel hinzu oder wähle NARN Freeway im Tab „Konfiguration“ des Projekts."
+    "waitingForKey": "Für {{provider}} ist noch kein Schlüssel in deinem Tresor, daher übersetzt vorerst NARN Freeway. Füge seinen Schlüssel hinzu oder wähle NARN Freeway im Tab „Konfiguration“ des Projekts.",
+    "applied": "{{provider}} übersetzt jetzt {{project}}.",
+    "appliedCollab": "{{provider}} übersetzt jetzt die Projekte, die mit dir geteilt werden."
   },
   "offer": {
     "start": "Zeig es mir",

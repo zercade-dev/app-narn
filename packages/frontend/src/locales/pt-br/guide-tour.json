@@ -88,6 +88,7 @@
       "authWhat": "O provedor recusou sua chave. Confira a chave e tente de novo.",
       "quotaWhat": "A cota gratuita acabou por enquanto. Espere um pouco ou adicione outra chave e tente de novo.",
       "quotaWhatOwn": "O {{provider}} está recusando por enquanto: a cota ou o crédito da sua conta acabou. Confira seu plano com o provedor e tente de novo.",
+      "quotaWhatCustom": "Um provedor do roteamento deste projeto está recusando por enquanto: uma cota ou um crédito acabou. Espere um pouco ou confira o plano com o provedor e tente de novo.",
       "otherWhat": "Nada foi traduzido. Confira sua chave e tente de novo."
     },
     "parked": {
@@ -127,7 +128,9 @@
     "cancel": "Cancelar",
     "failed": "Não foi possível configurar {{provider}}: {{message}}",
     "switchedOff": "O {{provider}} está desativado no Avançado, então não foi usado. Ative-o de novo na Configuração global ou escolha outro provedor.",
-    "waitingForKey": "Ainda não há nenhuma chave do {{provider}} no seu cofre, então o NARN Freeway traduz por enquanto. Adicione a chave dele ou escolha o NARN Freeway na aba Configuração do projeto."
+    "waitingForKey": "Ainda não há nenhuma chave do {{provider}} no seu cofre, então o NARN Freeway traduz por enquanto. Adicione a chave dele ou escolha o NARN Freeway na aba Configuração do projeto.",
+    "applied": "O {{provider}} agora traduz {{project}}.",
+    "appliedCollab": "O {{provider}} agora traduz os projetos compartilhados com você."
   },
   "offer": {
     "start": "Mostre para mim",

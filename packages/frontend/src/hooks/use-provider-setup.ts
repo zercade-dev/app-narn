@@ -11,6 +11,7 @@ import {
 } from '../lib/simple-provider.js';
 import { getErrorMessage } from '../lib/utils.js';
 import { useGuideStore } from '../stores/guide-store.js';
+import { useProjectStore } from '../stores/project-store.js';
 import { useVaultStore } from '../stores/vault-store.js';
 
 /** Choices already told "no key yet, Freeway translates meanwhile" in this tab. */
@@ -37,7 +38,9 @@ export function resetProviderNotices(): void {
  *    `chooseProvider`'s `needs-key`, or a project created meanwhile): point
  *    each target at its provider. A target is forgotten once written, once
  *    its routing turns out to be custom (it says so), or quietly when the
- *    project is gone; one whose routing could not be read is kept.
+ *    project is gone or its routing was changed since the choice (in
+ *    Advanced, or another tab); one whose routing could not be read is kept.
+ *    A choice written now is announced, since it lands long after the click.
  * 3. Never drop an explicit choice. A free key saved while the chosen
  *    provider's key is missing only gets a notice: Freeway translates until
  *    the person saves that key or chooses Freeway on the provider card.
@@ -133,7 +136,8 @@ export function useProviderSetup(enabled: boolean): void {
       const at = line.indexOf('=');
       const target = line.slice(0, at);
       const moduleId = line.slice(at + 1);
-      void applyProviderTo(targetOfKey(target), moduleId)
+      const routedFrom = useGuideStore.getState().pendingRoutedFrom?.[target];
+      void applyProviderTo(targetOfKey(target), moduleId, routedFrom)
         .then((result) => {
           // Not read (a collaborator document that failed to load): kept for later.
           if (result.status === 'unavailable') return;
@@ -141,6 +145,17 @@ export function useProviderSetup(enabled: boolean): void {
           // Only the choice this attempt was for: a newer one stays pending.
           if (guide.pendingProviders[target] === moduleId) guide.setPendingProvider(target, null);
           if (result.status === 'routing-kept') toast.info(t('providerChoice.existingRouting'));
+          if (result.status === 'applied') {
+            // Written later than it was chosen, so the person is told it happened.
+            const provider = providerName(moduleId);
+            const project =
+              useProjectStore.getState().projects.find((p) => p.id === target)?.name ?? target;
+            toast.success(
+              target === 'collab'
+                ? t('providerChoice.appliedCollab', { provider })
+                : t('providerChoice.applied', { provider, project }),
+            );
+          }
         })
         .catch((err: unknown) => {
           toast.error(

@@ -530,6 +530,7 @@
     "paidNote": "Tính phí vào tài khoản {{provider}} của bạn.",
     "freeOnlyNote": "Chỉ {{provider}} dịch, không dùng các mô hình miễn phí khác trong nhóm NARN Freeway.",
     "pendingNote": "{{provider}} sẽ được dùng khi khóa của nó được lưu. Trong lúc chờ, NARN Freeway sẽ dịch.",
+    "pendingNoteOwn": "{{provider}} sẽ được dùng khi khóa của nó được lưu. Trong lúc chờ, {{current}} sẽ dịch.",
     "customRouting": "Dự án này dùng điều phối tùy chỉnh được thiết lập trong Nâng cao, nên không thay đổi ở đây.",
     "openAdvanced": "Mở trong Nâng cao",
     "loading": "Đang tải lựa chọn nhà cung cấp của bạn…",

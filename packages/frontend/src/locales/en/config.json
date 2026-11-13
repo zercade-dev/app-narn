@@ -537,6 +537,7 @@
     "paidNote": "Paid from your {{provider}} account.",
     "freeOnlyNote": "Only {{provider}} translates, without the other free models in the NARN Freeway pool.",
     "pendingNote": "{{provider}} is used once its key is saved. Until then NARN Freeway translates.",
+    "pendingNoteOwn": "{{provider}} is used once its key is saved. Until then {{current}} translates.",
     "customRouting": "This project uses custom routing set up in Advanced, so it is not changed here.",
     "openAdvanced": "Open in Advanced",
     "loading": "Loading your provider choice…",
