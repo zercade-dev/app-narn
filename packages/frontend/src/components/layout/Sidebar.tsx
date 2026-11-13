@@ -331,13 +331,14 @@ export function Sidebar() {
       // provider" gets its catch-all rule here instead. Only once that
       // provider was really enabled (its key was saved), and only on a project
       // with no rules of its own: any rule switches the Freeway fallback off.
-      const { simpleProvider, enabledProviders } = useGuideStore.getState();
-      if (
-        uiMode === 'simple' &&
-        simpleProvider &&
-        enabledProviders.includes(simpleProvider) &&
-        (created.routingRules?.length ?? 0) === 0
-      ) {
+      const { simpleProvider, enabledProviders, setPendingProvider } = useGuideStore.getState();
+      const wantsProvider =
+        uiMode === 'simple' && simpleProvider !== null && (created.routingRules?.length ?? 0) === 0;
+      if (wantsProvider && !enabledProviders.includes(simpleProvider)) {
+        // Its key is not saved yet: `useProviderSetup` points this project at
+        // it once the key arrives (Freeway translates until then).
+        setPendingProvider(created.id, simpleProvider);
+      } else if (wantsProvider) {
         try {
           await applySimpleRule(created.id, simpleProvider);
         } catch (err) {

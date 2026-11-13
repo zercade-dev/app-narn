@@ -5,7 +5,7 @@
  * provider" sheet uses, so the two cannot drift. Routing built in Advanced
  * that one choice cannot describe is shown read-only and never overwritten.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Check, X } from 'lucide-react';
 import { toast } from '@/lib/toast';
@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
 import { useProjectProvider } from '../../hooks/use-project-provider.js';
 import { goToVaultSetup } from '../../lib/auth-redirect.js';
 import { navigateOrOffer } from '../../lib/mode-gating.js';
@@ -38,13 +39,16 @@ import { useVaultStore } from '../../stores/vault-store.js';
 
 const GOOGLE_KEY = 'GOOGLE_API_KEY';
 
-/** Ask for `key`: the in-app key editor locally, the vault page in cloud. */
-function askForKey(key: string, cloud: boolean): void {
-  if (cloud) goToVaultSetup();
+/**
+ * Ask for `key`: the in-app key editor locally, the vault page in cloud
+ * (guided while the first run is on, so the person comes back to it).
+ */
+function askForKey(key: string, cloud: boolean, guided: boolean): void {
+  if (cloud) goToVaultSetup({ guided, key });
   else globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey: key }));
 }
 
-type Notice = { kind: 'switched-off' | 'routing-kept'; base: string } | null;
+type Notice = { kind: 'switched-off' | 'routing-kept' | 'unavailable'; base: string } | null;
 
 export function TranslationProviderCard({ projectId }: Readonly<{ projectId: string }>) {
   const { t } = useTranslation('config');
@@ -54,22 +58,27 @@ export function TranslationProviderCard({ projectId }: Readonly<{ projectId: str
   const cloud = useVaultStore((s) => (s.cloudManaged ?? false) || (s.setupRequired ?? false));
   const unlocked = useVaultStore((s) => s.unlocked);
   const keys = useVaultStore((s) => s.keys);
-  const simpleProvider = useGuideStore((s) => s.simpleProvider);
-  const pendingTarget = useGuideStore((s) => s.pendingProviderTarget);
+  const pendingProviders = useGuideStore((s) => s.pendingProviders);
+  const guideActive = useFirstRunActive();
   const retryLoad = useCollabRoutingStore((s) => s.load);
+  // A collaborator's routing is saved by the Routing tab through its own copy:
+  // re-read it whenever the card opens, so it never shows a stale choice.
+  const isCollaborator = role === 'collaborator';
+  useEffect(() => {
+    if (isCollaborator) void retryLoad(true);
+  }, [isCollaborator, retryLoad]);
   const [ownPicked, setOwnPicked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
 
   const keySaved = (key: string | undefined) => unlocked && key !== undefined && keys.includes(key);
   // A choice made before its key was saved, for this project: shown as chosen.
-  const pendingKey = target?.kind === 'collab' ? 'collab' : projectId;
+  const pendingChoice = pendingProviders[target?.kind === 'collab' ? 'collab' : projectId];
   const pendingBase =
     provider?.kind === 'freeway' &&
-    simpleProvider !== null &&
-    pendingTarget === pendingKey &&
-    !keySaved(providerKeyFor(simpleProvider))
-      ? simpleProvider.split(':')[0]
+    pendingChoice !== undefined &&
+    !keySaved(providerKeyFor(pendingChoice))
+      ? pendingChoice.split(':')[0]
       : null;
   const ownBase =
     provider?.kind === 'own' ? provider.moduleId.split(':')[0] : (pendingBase ?? null);
@@ -81,7 +90,11 @@ export function TranslationProviderCard({ projectId }: Readonly<{ projectId: str
     setNotice(null);
     void chooseProvider(base, target)
       .then((result: ProviderChoiceResult) => {
-        if (result.status === 'switched-off' || result.status === 'routing-kept') {
+        if (
+          result.status === 'switched-off' ||
+          result.status === 'routing-kept' ||
+          result.status === 'unavailable'
+        ) {
           setNotice({ kind: result.status, base: base ?? '' });
           return;
         }
@@ -186,7 +199,7 @@ export function TranslationProviderCard({ projectId }: Readonly<{ projectId: str
                 variant="outline"
                 size="sm"
                 data-testid="provider-card-add-free-key"
-                onClick={() => askForKey(GOOGLE_KEY, cloud)}
+                onClick={() => askForKey(GOOGLE_KEY, cloud, guideActive)}
               >
                 {t('providerCard.addFreeKey')}
               </Button>
@@ -255,7 +268,7 @@ export function TranslationProviderCard({ projectId }: Readonly<{ projectId: str
                       variant="outline"
                       size="xs"
                       data-testid="provider-card-add-key"
-                      onClick={() => askForKey(ownKey, cloud)}
+                      onClick={() => askForKey(ownKey, cloud, guideActive)}
                     >
                       {t('providerCard.addKey')}
                     </Button>
@@ -300,7 +313,9 @@ export function TranslationProviderCard({ projectId }: Readonly<{ projectId: str
             <AlertTriangle className="mt-0.5 size-3 shrink-0" aria-hidden="true" />
             {notice.kind === 'switched-off'
               ? tGuide('providerChoice.switchedOff', { provider: providerName(notice.base) })
-              : t('providerCard.customRouting')}
+              : notice.kind === 'unavailable'
+                ? t('collab:routing.loadFailed')
+                : t('providerCard.customRouting')}
           </p>
         )}
         {translationsInProgress && (

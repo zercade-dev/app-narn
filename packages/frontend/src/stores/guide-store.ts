@@ -49,11 +49,12 @@ interface GuideState {
   /** Module instance id chosen via "Use my own provider", e.g. `openai:default`. */
   simpleProvider: string | null;
   /**
-   * Where `simpleProvider` still has to be applied once its key is saved: a
-   * project id, or `collab` for the person's own collaborator routing. Set
-   * when the provider was chosen before its key was in the vault.
+   * Choices still to be applied once their provider's key is saved, keyed by
+   * target (a project id, or `collab` for the person's own collaborator
+   * routing), valued by module instance id. Set when a provider was chosen
+   * for a target, or a project was created, before the key was in the vault.
    */
-  pendingProviderTarget: string | null;
+  pendingProviders: Record<string, string>;
   exportedOnce: boolean;
   /**
    * Module ids the guide has already enabled for the person (`google:default`,
@@ -103,7 +104,9 @@ interface GuideState {
   resumeFirstRun: (forced?: boolean) => void;
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
-  setPendingProviderTarget: (target: string | null) => void;
+  /** Remember (`moduleId`) or forget (`null`) the pending choice for `target`. */
+  setPendingProvider: (target: string, moduleId: string | null) => void;
+  clearPendingProviders: () => void;
   setQuickTest: (quickTest: QuickTest | null) => void;
   /** The answer to "translate the rest?"; nothing without a quick test. */
   decideQuickTest: (decision: 'rest' | 'skip') => void;
@@ -161,7 +164,7 @@ export const useGuideStore = create<GuideState>()(
       firstRunDismissed: false,
       firstRunFinished: false,
       simpleProvider: null,
-      pendingProviderTarget: null,
+      pendingProviders: {},
       exportedOnce: false,
       enabledProviders: [],
       completedTours: [],
@@ -192,7 +195,12 @@ export const useGuideStore = create<GuideState>()(
           tourProgress: withCompleted(s.tourProgress, FIRST_RUN_PROGRESS_ID),
         })),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
-      setPendingProviderTarget: (pendingProviderTarget) => set({ pendingProviderTarget }),
+      setPendingProvider: (target, moduleId) =>
+        set((s) => {
+          const { [target]: _dropped, ...rest } = s.pendingProviders;
+          return { pendingProviders: moduleId === null ? rest : { ...rest, [target]: moduleId } };
+        }),
+      clearPendingProviders: () => set({ pendingProviders: {} }),
       setQuickTest: (quickTest) => set({ quickTest }),
       decideQuickTest: (decision) =>
         set((s) => (s.quickTest ? { quickTest: { ...s.quickTest, decision } } : s)),
@@ -232,7 +240,7 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
-      // `quickTest`, `orphanSim` and `pendingProviderTarget` were added within v1: a state saved
+      // `quickTest`, `orphanSim` and `pendingProviders` were added within v1: a state saved
       // without them rehydrates with the default (null), so no version bump
       // is needed.
       version: 1,
@@ -242,7 +250,7 @@ export const useGuideStore = create<GuideState>()(
         firstRunDismissed: state.firstRunDismissed,
         firstRunFinished: state.firstRunFinished,
         simpleProvider: state.simpleProvider,
-        pendingProviderTarget: state.pendingProviderTarget,
+        pendingProviders: state.pendingProviders,
         exportedOnce: state.exportedOnce,
         enabledProviders: state.enabledProviders,
         completedTours: state.completedTours,

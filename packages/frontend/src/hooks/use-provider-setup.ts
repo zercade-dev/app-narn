@@ -33,8 +33,11 @@ export function resetProviderNotices(): void {
  *    its key is saved, else every free key present (Freeway translates until
  *    then). Each provider is enabled once ever (remembered in the guide
  *    store), and one the person has switched off stays off, with a notice.
- * 2. Finish a choice made before its key was saved (`chooseProvider`'s
- *    `needs-key`): point the project it was made for at the provider.
+ * 2. Finish each choice made before its key was saved (`pendingProviders`:
+ *    `chooseProvider`'s `needs-key`, or a project created meanwhile): point
+ *    each target at its provider. A target is forgotten once written, once
+ *    its routing turns out to be custom (it says so), or quietly when the
+ *    project is gone; one whose routing could not be read is kept.
  * 3. Never drop an explicit choice. A free key saved while the chosen
  *    provider's key is missing only gets a notice: Freeway translates until
  *    the person saves that key or chooses Freeway on the provider card.
@@ -45,7 +48,7 @@ export function useProviderSetup(enabled: boolean): void {
   const keys = useVaultStore((s) => s.keys);
   const simpleProvider = useGuideStore((s) => s.simpleProvider);
   const enabledProviders = useGuideStore((s) => s.enabledProviders);
-  const pendingTarget = useGuideStore((s) => s.pendingProviderTarget);
+  const pendingProviders = useGuideStore((s) => s.pendingProviders);
   const ready = enabled && unlocked;
 
   const ownKey = simpleProvider ? providerKeyFor(simpleProvider) : undefined;
@@ -69,12 +72,22 @@ export function useProviderSetup(enabled: boolean): void {
 
   const toEnable = useMemo(() => {
     if (!ready) return '';
-    const bases =
-      simpleProvider && ownKeySaved
-        ? [simpleProvider.split(':')[0]]
-        : FREE_KEY_PROVIDERS.filter((p) => keys.includes(p.key)).map((p) => p.base);
-    return bases.filter((base) => !enabledProviders.includes(providerInstanceId(base))).join(',');
-  }, [ready, keys, simpleProvider, ownKeySaved, enabledProviders]);
+    const withKey = (id: string) => {
+      const key = providerKeyFor(id);
+      return key !== undefined && keys.includes(key);
+    };
+    // Pending choices whose key has arrived, whatever is chosen now.
+    const pending = Object.values(pendingProviders).filter(withKey);
+    const bases = [
+      ...(simpleProvider && ownKeySaved
+        ? [simpleProvider]
+        : FREE_KEY_PROVIDERS.filter((p) => keys.includes(p.key)).map((p) => p.base)),
+      ...pending,
+    ].map((id) => id.split(':')[0]);
+    return [...new Set(bases)]
+      .filter((base) => !enabledProviders.includes(providerInstanceId(base)))
+      .join(',');
+  }, [ready, keys, simpleProvider, ownKeySaved, enabledProviders, pendingProviders]);
 
   // One attempt per provider per mount, so a failure cannot loop.
   const attempted = useRef(new Set<string>());
@@ -100,26 +113,43 @@ export function useProviderSetup(enabled: boolean): void {
     }
   }, [toEnable, t]);
 
-  const ownProviderReady =
-    ready && simpleProvider !== null && enabledProviders.includes(simpleProvider);
+  // Pending targets whose provider is enabled now, as "target=module" lines.
+  const applicable = useMemo(
+    () =>
+      ready
+        ? Object.entries(pendingProviders)
+            .filter(([, moduleId]) => enabledProviders.includes(moduleId))
+            .map(([target, moduleId]) => `${target}=${moduleId}`)
+            .join('\n')
+        : '',
+    [ready, pendingProviders, enabledProviders],
+  );
+  // One attempt per target and provider per mount, so a failure cannot loop.
   const ruleAttempted = useRef(new Set<string>());
   useEffect(() => {
-    if (!ownProviderReady || simpleProvider === null || pendingTarget === null) return;
-    const attempt = `${pendingTarget}:${simpleProvider}`;
-    if (ruleAttempted.current.has(attempt)) return;
-    ruleAttempted.current.add(attempt);
-    void applyProviderTo(targetOfKey(pendingTarget), simpleProvider)
-      .then((result) => {
-        useGuideStore.getState().setPendingProviderTarget(null);
-        if (result.status === 'routing-kept') toast.info(t('providerChoice.existingRouting'));
-      })
-      .catch((err: unknown) => {
-        toast.error(
-          t('providerChoice.failed', {
-            provider: providerName(simpleProvider),
-            message: getErrorMessage(err),
-          }),
-        );
-      });
-  }, [ownProviderReady, simpleProvider, pendingTarget, t]);
+    for (const line of applicable ? applicable.split('\n') : []) {
+      if (ruleAttempted.current.has(line)) continue;
+      ruleAttempted.current.add(line);
+      const at = line.indexOf('=');
+      const target = line.slice(0, at);
+      const moduleId = line.slice(at + 1);
+      void applyProviderTo(targetOfKey(target), moduleId)
+        .then((result) => {
+          // Not read (a collaborator document that failed to load): kept for later.
+          if (result.status === 'unavailable') return;
+          const guide = useGuideStore.getState();
+          // Only the choice this attempt was for: a newer one stays pending.
+          if (guide.pendingProviders[target] === moduleId) guide.setPendingProvider(target, null);
+          if (result.status === 'routing-kept') toast.info(t('providerChoice.existingRouting'));
+        })
+        .catch((err: unknown) => {
+          toast.error(
+            t('providerChoice.failed', {
+              provider: providerName(moduleId),
+              message: getErrorMessage(err),
+            }),
+          );
+        });
+    }
+  }, [applicable, t]);
 }

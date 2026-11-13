@@ -45,8 +45,16 @@ export type ProviderChoiceResult =
   | { status: 'needs-key'; vaultKey: string | undefined }
   /** The provider is switched off in Advanced (Global Config): nothing written. */
   | { status: 'switched-off' }
-  /** The routing is custom, not someone else's to change, or not loaded: nothing written. */
-  | { status: 'routing-kept' };
+  /** The routing is custom (built in Advanced): never overwritten, nothing written. */
+  | { status: 'routing-kept' }
+  /**
+   * The routing could not be read (a collaborator document that failed to
+   * load) or is not the person's: nothing written. Not a decision, so a
+   * pending choice is kept and retried.
+   */
+  | { status: 'unavailable' }
+  /** The project no longer exists: nothing to write to. */
+  | { status: 'gone' };
 
 /** A routing document as groups: a project saved before groups existed has only `rules`. */
 export function routingGroupsOf(
@@ -64,21 +72,31 @@ export function effectiveProviderOf(groups: RoutingRuleGroup[]): EffectiveProvid
   return { kind: 'own', moduleId };
 }
 
-/** The target's routing, or null when it is not known or not the person's to change. */
-function writableGroups(target: ProviderTarget): RoutingRuleGroup[] | null {
+/**
+ * The target's routing as it is now. A collaborator's document is always
+ * re-read first: the Routing tab saves it through its own copy, so the cached
+ * one may be stale, and judging "simple or custom" on a stale copy could
+ * overwrite routing built in Advanced.
+ */
+async function currentGroups(
+  target: ProviderTarget,
+): Promise<RoutingRuleGroup[] | 'unavailable' | 'gone'> {
   if (target.kind === 'collab') {
+    const store = useCollabRoutingStore.getState();
+    await store.load(true);
     const { doc, state } = useCollabRoutingStore.getState();
     // Never write over a document that was not read: it would replace the saved one.
-    if (state !== 'loaded' || !doc) return null;
+    if (state !== 'loaded' || !doc) return 'unavailable';
     return routingGroupsOf(doc.routingRules, doc.routingRuleGroups);
   }
   const projects = useProjectStore.getState();
   const project = projects.projects.find((p) => p.id === target.projectId);
-  if (!project || accessFor(projects, project.id).role !== 'owner') return null;
+  if (!project) return 'gone';
+  if (accessFor(projects, project.id).role !== 'owner') return 'unavailable';
   return routingGroupsOf(project.routingRules, project.routingRuleGroups);
 }
 
-/** `pendingProviderTarget`'s encoding of a target. */
+/** The key of a target in `pendingProviders`. */
 export const targetKey = (target: ProviderTarget): string =>
   target.kind === 'collab' ? 'collab' : target.projectId;
 
@@ -94,8 +112,9 @@ export async function applyProviderTo(
   target: ProviderTarget,
   moduleId: string,
 ): Promise<ProviderChoiceResult> {
-  const groups = writableGroups(target);
-  if (groups === null || !isSimpleRouting(groups)) return { status: 'routing-kept' };
+  const groups = await currentGroups(target);
+  if (groups === 'unavailable' || groups === 'gone') return { status: groups };
+  if (!isSimpleRouting(groups)) return { status: 'routing-kept' };
   if (target.kind === 'collab') {
     const rule = makeSimpleRule(moduleId, groups[0]?.rules[0]?.id);
     const groupId = groups[0]?.id ?? 'default-group';
@@ -127,7 +146,7 @@ export async function chooseProvider(
   const guide = useGuideStore.getState();
   if (base === null) {
     guide.setSimpleProvider(null);
-    guide.setPendingProviderTarget(null);
+    if (target) guide.setPendingProvider(targetKey(target), null);
     return target
       ? applyProviderTo(target, FREEWAY_MODULE_ID)
       : { status: 'applied', moduleId: FREEWAY_MODULE_ID };
@@ -137,7 +156,7 @@ export async function chooseProvider(
   const { unlocked, keys } = useVaultStore.getState();
   if (vaultKey !== undefined && !(unlocked && keys.includes(vaultKey))) {
     guide.setSimpleProvider(providerInstanceId(base));
-    guide.setPendingProviderTarget(target ? targetKey(target) : null);
+    if (target) guide.setPendingProvider(targetKey(target), providerInstanceId(base));
     return { status: 'needs-key', vaultKey };
   }
 
@@ -147,6 +166,6 @@ export async function chooseProvider(
   // without the mark and enables it a second time.
   guide.markProviderEnabled(moduleId);
   guide.setSimpleProvider(moduleId);
-  guide.setPendingProviderTarget(null);
+  if (target) guide.setPendingProvider(targetKey(target), null);
   return target ? applyProviderTo(target, moduleId) : { status: 'applied', moduleId };
 }
