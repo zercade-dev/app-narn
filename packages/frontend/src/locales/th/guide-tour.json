@@ -3,7 +3,8 @@
   "back": "ย้อนกลับ",
   "skip": "ข้ามการแนะนำ",
   "close": "ปิด",
-  "stepOf": "ขั้นตอนที่ {{current}} จาก {{total}}",
+  "stepOfSub": "ขั้นตอนที่ {{major}} จาก {{majorTotal}} · {{sub}} จาก {{subTotal}}",
+  "stepCount": "{{current}} จาก {{total}}",
   "continueSetup": "ตั้งค่าต่อ: ขั้นตอนที่ {{current}} จาก {{total}}",
   "firstRun": {
     "actions": {

@@ -56,6 +56,11 @@ export interface TourStep {
   actions?: Array<{ labelKey: string; run: () => void; testId: string }>;
   /** 1..MAJOR_STEP_COUNT for the first-run tour's "Step N of 5". */
   major?: number;
+  /**
+   * Id of the step this one stands in for (a variant shown in its place). A
+   * variant is not counted: it reports the position of the step it names.
+   */
+  variantOf?: string;
 }
 
 export interface Tour {

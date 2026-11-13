@@ -3,7 +3,8 @@
   "back": "Geri",
   "skip": "Turu atla",
   "close": "Kapat",
-  "stepOf": "Adım {{current}} / {{total}}",
+  "stepOfSub": "Adım {{major}} / {{majorTotal}} · {{sub}} / {{subTotal}}",
+  "stepCount": "{{current}} / {{total}}",
   "continueSetup": "Kuruluma devam: adım {{current}} / {{total}}",
   "firstRun": {
     "actions": {

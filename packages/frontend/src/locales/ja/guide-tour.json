@@ -3,7 +3,8 @@
   "back": "戻る",
   "skip": "ツアーをスキップ",
   "close": "閉じる",
-  "stepOf": "ステップ {{current}}/{{total}}",
+  "stepOfSub": "ステップ {{major}}/{{majorTotal}} · {{sub}}/{{subTotal}}",
+  "stepCount": "{{current}}/{{total}}",
   "continueSetup": "セットアップを続行：ステップ {{current}}/{{total}}",
   "firstRun": {
     "actions": {

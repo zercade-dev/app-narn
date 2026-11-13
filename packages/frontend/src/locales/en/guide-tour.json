@@ -3,7 +3,8 @@
   "back": "Back",
   "skip": "Skip tour",
   "close": "Close",
-  "stepOf": "Step {{current}} of {{total}}",
+  "stepOfSub": "Step {{major}} of {{majorTotal}} · {{sub}} of {{subTotal}}",
+  "stepCount": "{{current}} of {{total}}",
   "continueSetup": "Continue setup: step {{current}} of {{total}}",
   "firstRun": {
     "actions": {

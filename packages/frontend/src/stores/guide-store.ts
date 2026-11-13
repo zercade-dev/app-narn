@@ -2,6 +2,16 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 /**
+ * Where a person is in one tour. `last` and `furthest` are 0-based indices
+ * among the tour's counted steps (variants are not counted, see `variantOf`).
+ */
+export interface TourProgress {
+  last: number;
+  furthest: number;
+  completed: boolean;
+}
+
+/**
  * Progress through the guided first run and the per-area tours. Persisted per
  * browser; only the active tour is transient.
  */
@@ -21,8 +31,12 @@ interface GuideState {
   enabledProviders: string[];
   completedTours: string[];
   declinedTours: string[];
+  /** Per tour id, including `first-run`. */
+  tourProgress: Record<string, TourProgress>;
   /** Not persisted. */
   activeTourId: string | null;
+  /** Not persisted. The counted step index the active tour opens at. */
+  activeTourStart: number;
   /**
    * Not persisted. The person restarted the first run from the Guide and
    * chose to stay in Advanced: it runs there too, until finished or skipped.
@@ -42,13 +56,45 @@ interface GuideState {
   setSimpleProvider: (id: string | null) => void;
   markExported: () => void;
   markProviderEnabled: (id: string) => void;
-  startTour: (id: string) => void;
+  /** `at`: the counted step index to open at (default 0). */
+  startTour: (id: string, opts?: { at?: number }) => void;
+  /** The person is on counted step `counted` (0-based) of tour `id`. */
+  recordTourStep: (id: string, counted: number) => void;
+  /** Tour `id` was finished: it reopens at its start. */
+  completeTour: (id: string) => void;
   endTour: (completed: boolean) => void;
   declineTour: (id: string) => void;
 }
 
 const addOnce = (list: string[], id: string): string[] =>
   list.includes(id) ? list : [...list, id];
+
+const NO_PROGRESS: TourProgress = { last: 0, furthest: 0, completed: false };
+
+function withCompleted(
+  progress: Record<string, TourProgress>,
+  id: string,
+): Record<string, TourProgress> {
+  const prev = progress[id] ?? NO_PROGRESS;
+  return { ...progress, [id]: { ...prev, last: 0, completed: true } };
+}
+
+/**
+ * v0 (unversioned) had no `tourProgress`: every field is kept, and each tour
+ * already completed, plus the first run when it was finished, counts as
+ * completed.
+ */
+export function migrateGuideState(persisted: unknown, version: number): unknown {
+  if (version !== 0 || typeof persisted !== 'object' || persisted === null) return persisted;
+  const old = persisted as { completedTours?: unknown; firstRunFinished?: unknown };
+  const ids = Array.isArray(old.completedTours)
+    ? old.completedTours.filter((id): id is string => typeof id === 'string')
+    : [];
+  if (old.firstRunFinished === true) ids.push('first-run');
+  const tourProgress: Record<string, TourProgress> = {};
+  for (const id of ids) tourProgress[id] = { last: 0, furthest: 0, completed: true };
+  return { ...persisted, tourProgress };
+}
 
 export const useGuideStore = create<GuideState>()(
   persist(
@@ -60,7 +106,9 @@ export const useGuideStore = create<GuideState>()(
       enabledProviders: [],
       completedTours: [],
       declinedTours: [],
+      tourProgress: {},
       activeTourId: null,
+      activeTourStart: 0,
       firstRunForced: false,
       dismissFirstRun: () => set({ firstRunDismissed: true }),
       restartFirstRun: (forced = false) =>
@@ -71,15 +119,31 @@ export const useGuideStore = create<GuideState>()(
           exportedOnce: false,
         }),
       resumeFirstRun: () => set({ firstRunDismissed: false }),
-      finishFirstRun: () => set({ firstRunFinished: true }),
+      finishFirstRun: () =>
+        set((s) => ({
+          firstRunFinished: true,
+          tourProgress: withCompleted(s.tourProgress, 'first-run'),
+        })),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
       markExported: () => set({ exportedOnce: true }),
       markProviderEnabled: (id) =>
         set((s) => ({ enabledProviders: addOnce(s.enabledProviders, id) })),
-      startTour: (id) => set({ activeTourId: id }),
+      startTour: (id, opts) => set({ activeTourId: id, activeTourStart: opts?.at ?? 0 }),
+      recordTourStep: (id, counted) =>
+        set((s) => {
+          const prev = s.tourProgress[id] ?? NO_PROGRESS;
+          return {
+            tourProgress: {
+              ...s.tourProgress,
+              [id]: { ...prev, last: counted, furthest: Math.max(prev.furthest, counted) },
+            },
+          };
+        }),
+      completeTour: (id) => set((s) => ({ tourProgress: withCompleted(s.tourProgress, id) })),
       endTour: (completed) =>
         set((s) => ({
           activeTourId: null,
+          activeTourStart: 0,
           completedTours:
             completed && s.activeTourId
               ? addOnce(s.completedTours, s.activeTourId)
@@ -89,6 +153,9 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
+      version: 1,
+      // Stored fields only; the persist merge fills in the rest.
+      migrate: (persisted, version) => migrateGuideState(persisted, version) as GuideState,
       partialize: (state) => ({
         firstRunDismissed: state.firstRunDismissed,
         firstRunFinished: state.firstRunFinished,
@@ -97,6 +164,7 @@ export const useGuideStore = create<GuideState>()(
         enabledProviders: state.enabledProviders,
         completedTours: state.completedTours,
         declinedTours: state.declinedTours,
+        tourProgress: state.tourProgress,
       }),
     },
   ),

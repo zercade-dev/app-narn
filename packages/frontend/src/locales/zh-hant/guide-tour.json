@@ -3,7 +3,8 @@
   "back": "返回",
   "skip": "略過導覽",
   "close": "關閉",
-  "stepOf": "第 {{current}} 步，共 {{total}} 步",
+  "stepOfSub": "第 {{major}} 步，共 {{majorTotal}} 步 · 第 {{sub}} 項，共 {{subTotal}} 項",
+  "stepCount": "第 {{current}} 項，共 {{total}} 項",
   "continueSetup": "繼續設定：第 {{current}} 步，共 {{total}} 步",
   "firstRun": {
     "actions": {

@@ -3,7 +3,8 @@
   "back": "Retour",
   "skip": "Passer la visite",
   "close": "Fermer",
-  "stepOf": "Étape {{current}} sur {{total}}",
+  "stepOfSub": "Étape {{major}} sur {{majorTotal}} · {{sub}} sur {{subTotal}}",
+  "stepCount": "{{current}} sur {{total}}",
   "continueSetup": "Poursuivre la configuration : étape {{current}} sur {{total}}",
   "firstRun": {
     "actions": {

@@ -3,7 +3,8 @@
   "back": "返回",
   "skip": "跳过导览",
   "close": "关闭",
-  "stepOf": "第 {{current}} 步，共 {{total}} 步",
+  "stepOfSub": "第 {{major}} 步，共 {{majorTotal}} 步 · 第 {{sub}} 项，共 {{subTotal}} 项",
+  "stepCount": "第 {{current}} 项，共 {{total}} 项",
   "continueSetup": "继续设置：第 {{current}} 步，共 {{total}} 步",
   "firstRun": {
     "actions": {

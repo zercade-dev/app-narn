@@ -3,7 +3,8 @@
   "back": "Kembali",
   "skip": "Lewati tur",
   "close": "Tutup",
-  "stepOf": "Langkah {{current}} dari {{total}}",
+  "stepOfSub": "Langkah {{major}} dari {{majorTotal}} · {{sub}} dari {{subTotal}}",
+  "stepCount": "{{current}} dari {{total}}",
   "continueSetup": "Lanjutkan penyiapan: langkah {{current}} dari {{total}}",
   "firstRun": {
     "actions": {

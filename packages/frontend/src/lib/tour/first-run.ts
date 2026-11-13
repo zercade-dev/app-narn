@@ -149,6 +149,9 @@ function cloudVaultAndKeySteps(need: 'vault' | 'unlock' | 'key'): TourStep[] {
  */
 export type RunStall = 'auth' | 'quota' | 'other' | 'parked' | 'waiting-quota' | 'waiting-model';
 
+/** The "translation is running" step; the stall steps are shown in its place. */
+const WAITING_STEP = 'translate-progress';
+
 const STALL_STEP: Record<RunStall, string> = {
   auth: 'translate-failed-auth',
   quota: 'translate-failed-quota',
@@ -173,6 +176,7 @@ function stallStep(
     // The run's own controls (cancel, Activity, the console) stay usable.
     dim: false,
     major: 4,
+    variantOf: WAITING_STEP,
   };
 }
 
@@ -316,7 +320,7 @@ const SHARED_STEPS: TourStep[] = [
     major: 4,
   },
   {
-    id: 'translate-progress',
+    id: WAITING_STEP,
     anchor: 'console-status',
     titleKey: 'firstRun.translate.title',
     whatKey: 'firstRun.translate.progressWhat',
@@ -432,7 +436,6 @@ const FORM_STEPS = [
 /** The `data-tour` anchors whose presence {@link firstRunShownIndex} needs to know. */
 export const FIRST_RUN_FORM_ANCHORS = FORM_STEPS.map((p) => p.anchor);
 
-const WAITING_STEP = 'translate-progress';
 const STALL_STEP_IDS: readonly string[] = Object.values(STALL_STEP);
 const isWaitingStep = (id: string | undefined): boolean =>
   id === WAITING_STEP || (id !== undefined && STALL_STEP_IDS.includes(id));

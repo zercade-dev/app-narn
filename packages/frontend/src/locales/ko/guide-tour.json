@@ -3,7 +3,8 @@
   "back": "이전",
   "skip": "둘러보기 건너뛰기",
   "close": "닫기",
-  "stepOf": "{{total}}단계 중 {{current}}단계",
+  "stepOfSub": "{{majorTotal}}단계 중 {{major}}단계 · {{subTotal}}개 중 {{sub}}번째",
+  "stepCount": "{{total}}개 중 {{current}}번째",
   "continueSetup": "설정 계속하기: {{total}}단계 중 {{current}}단계",
   "firstRun": {
     "actions": {

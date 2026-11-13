@@ -3,7 +3,8 @@
   "back": "Indietro",
   "skip": "Salta il tour",
   "close": "Chiudi",
-  "stepOf": "Passaggio {{current}} di {{total}}",
+  "stepOfSub": "Passaggio {{major}} di {{majorTotal}} · {{sub}} di {{subTotal}}",
+  "stepCount": "{{current}} di {{total}}",
   "continueSetup": "Continua la configurazione: passaggio {{current}} di {{total}}",
   "firstRun": {
     "actions": {

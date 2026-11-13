@@ -3,7 +3,8 @@
   "back": "Quay lại",
   "skip": "Bỏ qua hướng dẫn",
   "close": "Đóng",
-  "stepOf": "Bước {{current}}/{{total}}",
+  "stepOfSub": "Bước {{major}}/{{majorTotal}} · {{sub}}/{{subTotal}}",
+  "stepCount": "{{current}}/{{total}}",
   "continueSetup": "Tiếp tục thiết lập: bước {{current}}/{{total}}",
   "firstRun": {
     "actions": {

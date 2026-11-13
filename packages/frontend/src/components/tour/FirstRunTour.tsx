@@ -23,11 +23,13 @@ import {
 import {
   FIRST_RUN_ACTION_EVENT,
   FIRST_RUN_FORM_ANCHORS,
+  FIRST_RUN_TOUR_ID,
   firstRunShownIndex,
   firstRunStepIndex,
   firstRunTourFor,
   type FirstRunAction,
 } from '../../lib/tour/first-run.js';
+import { tourPosition } from '../../lib/tour/position.js';
 import { getErrorMessage } from '../../lib/utils.js';
 import { vaultEditorOpenEvent, vaultLockedEvent } from '../../lib/vault-events.js';
 import { useGuideStore } from '../../stores/guide-store.js';
@@ -127,6 +129,13 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     [tour, vaultFormAnchor, vaultFormOpen, keyEditorOpen, runStall],
   );
   const shownIndex = shown(index);
+  const stepPosition = tourPosition(tour, shownIndex);
+
+  // Where the person is in the first run, for the tour list.
+  const countedIndex = stepPosition.counted - 1;
+  useEffect(() => {
+    useGuideStore.getState().recordTourStep(FIRST_RUN_TOUR_ID, countedIndex);
+  }, [countedIndex]);
 
   const lastIndex = tour.steps.length - 1;
   const move = useCallback(
@@ -276,6 +285,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
           tour={tour}
           stepIndex={shownIndex}
           facts={facts}
+          position={stepPosition}
           onAdvance={onAdvance}
           onBack={onBack}
           onExit={onExit}

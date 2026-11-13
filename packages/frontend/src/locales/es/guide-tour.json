@@ -3,7 +3,8 @@
   "back": "Atrás",
   "skip": "Omitir el recorrido",
   "close": "Cerrar",
-  "stepOf": "Paso {{current}} de {{total}}",
+  "stepOfSub": "Paso {{major}} de {{majorTotal}} · {{sub}} de {{subTotal}}",
+  "stepCount": "{{current}} de {{total}}",
   "continueSetup": "Continuar la configuración: paso {{current}} de {{total}}",
   "firstRun": {
     "actions": {

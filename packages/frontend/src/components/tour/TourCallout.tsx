@@ -1,11 +1,17 @@
 import { X } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { MAJOR_STEP_COUNT, type TourStep } from '@/lib/tour/types';
+import type { TourPosition } from '@/lib/tour/position';
+import type { TourStep } from '@/lib/tour/types';
 
 interface TourCalloutProps {
   step: TourStep;
   titleId: string;
+  /** Where the step sits in its tour; no counter or bar without it. */
+  position?: TourPosition;
+  /** Shown under the why text. */
+  extra?: ReactNode;
   showBack: boolean;
   showNext: boolean;
   onNext: () => void;
@@ -17,6 +23,8 @@ interface TourCalloutProps {
 export function TourCallout({
   step,
   titleId,
+  position,
+  extra,
   showBack,
   showNext,
   onNext,
@@ -28,10 +36,28 @@ export function TourCallout({
     <div className="flex flex-col gap-2 p-1">
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-0.5">
-          {step.major !== undefined && (
-            <span data-testid="tour-step-of" className="text-xs text-muted-foreground">
-              {t('stepOf', { current: step.major, total: MAJOR_STEP_COUNT })}
-            </span>
+          {position && (
+            <>
+              <span data-testid="tour-step-of" className="text-xs text-muted-foreground">
+                {position.major !== undefined
+                  ? t('stepOfSub', {
+                      major: position.major,
+                      majorTotal: position.majorTotal,
+                      sub: position.sub,
+                      subTotal: position.subTotal,
+                    })
+                  : t('stepCount', { current: position.counted, total: position.total })}
+              </span>
+              <div aria-hidden="true" className="h-1 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  data-testid="tour-progress-bar"
+                  className="h-full rounded-full bg-primary"
+                  style={{
+                    width: `${position.total > 0 ? (position.counted / position.total) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+            </>
           )}
           <h2 id={titleId} className="text-sm font-semibold">
             {t(step.titleKey)}
@@ -49,6 +75,7 @@ export function TourCallout({
       </div>
       <p className="text-sm">{t(step.whatKey)}</p>
       <p className="text-sm text-muted-foreground">{t(step.whyKey)}</p>
+      {extra}
       <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
         <Button variant="ghost" size="sm" data-testid="tour-skip" onClick={onExit}>
           {t('skip')}
