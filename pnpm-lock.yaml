@@ -145,8 +145,8 @@ catalogs:
       specifier: 2.5.0
       version: 2.5.0
     papaparse:
-      specifier: 5.7.0
-      version: 5.7.0
+      specifier: 5.7.1
+      version: 5.7.1
     parse5:
       specifier: 8.1.0
       version: 8.1.0
@@ -578,7 +578,7 @@ importers:
         version: 2.5.0
       papaparse:
         specifier: 'catalog:'
-        version: 5.7.0
+        version: 5.7.1
       pg:
         specifier: 'catalog:'
         version: 8.23.1
@@ -2566,8 +2566,8 @@ packages:
     resolution: {integrity: sha512-LaNjtRWUBY++zB5nE/NwcaoMylSPk+S+ZHNB1TzdbMJMny6dynpAGt7X/tl/QYq3TIeE6nxHppbo2LGymrG5Pw==}
     engines: {node: '>=10'}
 
-  papaparse@5.7.0:
-    resolution: {integrity: sha512-qBGxg/7Q3Kl9Wfhrz2Z74UnvnHTXLNG6jmKJFeBvP2+y4lV7So+7SR62+Zd47JvdrCkX+nDcnr0ObPzek/+6RA==}
+  papaparse@5.7.1:
+    resolution: {integrity: sha512-qOR+UDWv6D3hMxnWWOk0ZpBdCkd+kw5Yh7aXOaNSQU8A+73EA2bhW7EiUix/hY0yulUi5FRvt7PpYSI2VDvY0g==}
 
   parse-entities@4.0.2:
     resolution: {integrity: sha512-GG2AQYWoLgL877gQIKeRPGO1xF9+eG1ujIb5soS5gPvLQ1y2o8FL90w2QWNdf9I361Mpp7726c+lj3U0qK1uGw==}
@@ -4941,7 +4941,7 @@ snapshots:
     dependencies:
       p-limit: 3.1.0
 
-  papaparse@5.7.0: {}
+  papaparse@5.7.1: {}
 
   parse-entities@4.0.2:
     dependencies:
