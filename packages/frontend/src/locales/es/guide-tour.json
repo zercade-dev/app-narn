@@ -3,9 +3,9 @@
   "back": "Atrás",
   "skip": "Omitir el recorrido",
   "close": "Cerrar",
-  "stepOfSub": "Paso {{major}} de {{majorTotal}} · {{sub}} de {{subTotal}}",
+  "stepOfSub": "Sección {{major}} de {{majorTotal}} · Paso {{sub}} de {{subTotal}}",
   "stepCount": "{{current}} de {{total}}",
-  "continueSetup": "Continuar la configuración: paso {{current}} de {{total}}",
+  "continueSetup": "Continuar la configuración: sección {{current}} de {{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Abrir el formulario de la bóveda",
@@ -161,6 +161,7 @@
     "startOver": "Empezar desde el principio",
     "continue": "Seguir donde lo dejé",
     "progress": "{{current}} de {{total}} pasos",
+    "progressSections": "{{current}} de {{total}} secciones",
     "completed": "Completado",
     "needsProject": "Abre un proyecto para hacer este recorrido.",
     "switchedToAdvanced": "Se cambió al modo avanzado para este recorrido.",

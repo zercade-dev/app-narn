@@ -3,9 +3,9 @@
   "back": "Retour",
   "skip": "Passer la visite",
   "close": "Fermer",
-  "stepOfSub": "Étape {{major}} sur {{majorTotal}} · {{sub}} sur {{subTotal}}",
+  "stepOfSub": "Section {{major}} sur {{majorTotal}} · Étape {{sub}} sur {{subTotal}}",
   "stepCount": "{{current}} sur {{total}}",
-  "continueSetup": "Poursuivre la configuration : étape {{current}} sur {{total}}",
+  "continueSetup": "Poursuivre la configuration : section {{current}} sur {{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Ouvrir le formulaire du coffre",
@@ -161,6 +161,7 @@
     "startOver": "Recommencer depuis le début",
     "continue": "Reprendre là où je me suis arrêté",
     "progress": "{{current}} sur {{total}} étapes",
+    "progressSections": "{{current}} sur {{total}} sections",
     "completed": "Terminé",
     "needsProject": "Ouvrez un projet pour suivre cette visite.",
     "switchedToAdvanced": "Passage en mode avancé pour cette visite.",

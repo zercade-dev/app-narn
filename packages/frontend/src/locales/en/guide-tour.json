@@ -3,9 +3,9 @@
   "back": "Back",
   "skip": "Skip tour",
   "close": "Close",
-  "stepOfSub": "Step {{major}} of {{majorTotal}} · {{sub}} of {{subTotal}}",
+  "stepOfSub": "Section {{major}} of {{majorTotal}} · Step {{sub}} of {{subTotal}}",
   "stepCount": "{{current}} of {{total}}",
-  "continueSetup": "Continue setup: step {{current}} of {{total}}",
+  "continueSetup": "Continue setup: section {{current}} of {{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Open the vault form",
@@ -161,6 +161,7 @@
     "startOver": "Start from the beginning",
     "continue": "Continue where I left off",
     "progress": "{{current}} of {{total}} steps",
+    "progressSections": "{{current}} of {{total}} sections",
     "completed": "Completed",
     "needsProject": "Open a project to take this tour.",
     "switchedToAdvanced": "Switched to Advanced mode for this tour.",

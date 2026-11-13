@@ -3,9 +3,9 @@
   "back": "Voltar",
   "skip": "Pular o tour",
   "close": "Fechar",
-  "stepOfSub": "Passo {{major}} de {{majorTotal}} · {{sub}} de {{subTotal}}",
+  "stepOfSub": "Seção {{major}} de {{majorTotal}} · Passo {{sub}} de {{subTotal}}",
   "stepCount": "{{current}} de {{total}}",
-  "continueSetup": "Continuar a configuração: passo {{current}} de {{total}}",
+  "continueSetup": "Continuar a configuração: seção {{current}} de {{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Abrir o formulário do cofre",
@@ -161,6 +161,7 @@
     "startOver": "Começar do início",
     "continue": "Continuar de onde parei",
     "progress": "{{current}} de {{total}} etapas",
+    "progressSections": "{{current}} de {{total}} seções",
     "completed": "Concluído",
     "needsProject": "Abra um projeto para fazer este tour.",
     "switchedToAdvanced": "Mudamos para o modo avançado para este tour.",

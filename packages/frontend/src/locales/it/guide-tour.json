@@ -3,9 +3,9 @@
   "back": "Indietro",
   "skip": "Salta il tour",
   "close": "Chiudi",
-  "stepOfSub": "Passaggio {{major}} di {{majorTotal}} · {{sub}} di {{subTotal}}",
+  "stepOfSub": "Sezione {{major}} di {{majorTotal}} · Passaggio {{sub}} di {{subTotal}}",
   "stepCount": "{{current}} di {{total}}",
-  "continueSetup": "Continua la configurazione: passaggio {{current}} di {{total}}",
+  "continueSetup": "Continua la configurazione: sezione {{current}} di {{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Apri la finestra della cassaforte",
@@ -161,6 +161,7 @@
     "startOver": "Ricomincia dall’inizio",
     "continue": "Riprendi da dove avevo lasciato",
     "progress": "{{current}} di {{total}} passaggi",
+    "progressSections": "{{current}} di {{total}} sezioni",
     "completed": "Completato",
     "needsProject": "Apri un progetto per seguire questo tour.",
     "switchedToAdvanced": "Passato alla modalità avanzata per questo tour.",

@@ -3,9 +3,9 @@
   "back": "戻る",
   "skip": "ツアーをスキップ",
   "close": "閉じる",
-  "stepOfSub": "ステップ {{major}}/{{majorTotal}} · {{sub}}/{{subTotal}}",
+  "stepOfSub": "セクション {{major}}/{{majorTotal}} · ステップ {{sub}}/{{subTotal}}",
   "stepCount": "{{current}}/{{total}}",
-  "continueSetup": "セットアップを続行：ステップ {{current}}/{{total}}",
+  "continueSetup": "セットアップを続行：セクション {{current}}/{{total}}",
   "firstRun": {
     "actions": {
       "openVault": "保管庫のフォームを開く",
@@ -161,6 +161,7 @@
     "startOver": "最初から始める",
     "continue": "前回の続きから再開",
     "progress": "{{total}}ステップ中{{current}}",
+    "progressSections": "{{total}}セクション中{{current}}",
     "completed": "完了",
     "needsProject": "このツアーを始めるにはプロジェクトを開いてください。",
     "switchedToAdvanced": "このツアーのために詳細モードに切り替えました。",

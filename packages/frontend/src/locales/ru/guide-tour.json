@@ -3,9 +3,9 @@
   "back": "Назад",
   "skip": "Пропустить обзор",
   "close": "Закрыть",
-  "stepOfSub": "Шаг {{major}} из {{majorTotal}} · {{sub}} из {{subTotal}}",
+  "stepOfSub": "Раздел {{major}} из {{majorTotal}} · Шаг {{sub}} из {{subTotal}}",
   "stepCount": "{{current}} из {{total}}",
-  "continueSetup": "Продолжить настройку: шаг {{current}} из {{total}}",
+  "continueSetup": "Продолжить настройку: раздел {{current}} из {{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Открыть форму хранилища",
@@ -161,6 +161,7 @@
     "startOver": "Начать сначала",
     "continue": "Продолжить с того же места",
     "progress": "Пройдено шагов: {{current}} из {{total}}",
+    "progressSections": "Пройдено разделов: {{current}} из {{total}}",
     "completed": "Пройдено",
     "needsProject": "Откройте проект, чтобы пройти этот тур.",
     "switchedToAdvanced": "Для этого тура включён расширенный режим.",

@@ -3,9 +3,9 @@
   "back": "Kembali",
   "skip": "Lewati tur",
   "close": "Tutup",
-  "stepOfSub": "Langkah {{major}} dari {{majorTotal}} · {{sub}} dari {{subTotal}}",
+  "stepOfSub": "Bagian {{major}} dari {{majorTotal}} · Langkah {{sub}} dari {{subTotal}}",
   "stepCount": "{{current}} dari {{total}}",
-  "continueSetup": "Lanjutkan penyiapan: langkah {{current}} dari {{total}}",
+  "continueSetup": "Lanjutkan penyiapan: bagian {{current}} dari {{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Buka formulir brankas",
@@ -161,6 +161,7 @@
     "startOver": "Mulai dari awal",
     "continue": "Lanjutkan dari terakhir kali",
     "progress": "{{current}} dari {{total}} langkah",
+    "progressSections": "{{current}} dari {{total}} bagian",
     "completed": "Selesai",
     "needsProject": "Buka proyek untuk mengikuti tur ini.",
     "switchedToAdvanced": "Beralih ke mode lanjutan untuk tur ini.",

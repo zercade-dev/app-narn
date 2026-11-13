@@ -3,9 +3,9 @@
   "back": "Quay lại",
   "skip": "Bỏ qua hướng dẫn",
   "close": "Đóng",
-  "stepOfSub": "Bước {{major}}/{{majorTotal}} · {{sub}}/{{subTotal}}",
+  "stepOfSub": "Phần {{major}}/{{majorTotal}} · Bước {{sub}}/{{subTotal}}",
   "stepCount": "{{current}}/{{total}}",
-  "continueSetup": "Tiếp tục thiết lập: bước {{current}}/{{total}}",
+  "continueSetup": "Tiếp tục thiết lập: phần {{current}}/{{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Mở biểu mẫu kho bảo mật",
@@ -161,6 +161,7 @@
     "startOver": "Bắt đầu lại từ đầu",
     "continue": "Tiếp tục từ chỗ đã dừng",
     "progress": "{{current}}/{{total}} bước",
+    "progressSections": "{{current}}/{{total}} phần",
     "completed": "Đã hoàn tất",
     "needsProject": "Hãy mở một dự án để xem hướng dẫn này.",
     "switchedToAdvanced": "Đã chuyển sang chế độ nâng cao cho hướng dẫn này.",
