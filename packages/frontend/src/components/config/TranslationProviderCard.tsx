@@ -59,6 +59,7 @@ export function TranslationProviderCard({ projectId }: Readonly<{ projectId: str
   const unlocked = useVaultStore((s) => s.unlocked);
   const keys = useVaultStore((s) => s.keys);
   const pendingProviders = useGuideStore((s) => s.pendingProviders);
+  const pendingRoutedFrom = useGuideStore((s) => s.pendingRoutedFrom);
   const guideActive = useFirstRunActive();
   const retryLoad = useCollabRoutingStore((s) => s.load);
   // A collaborator's routing is saved by the Routing tab through its own copy:
@@ -74,11 +75,19 @@ export function TranslationProviderCard({ projectId }: Readonly<{ projectId: str
   const keySaved = (key: string | undefined) => unlocked && key !== undefined && keys.includes(key);
   // A choice made before its key was saved, for this project: shown as chosen
   // whenever it is not what translates now (Freeway, or another own provider).
-  const pendingChoice = pendingProviders[target?.kind === 'collab' ? 'collab' : projectId];
+  // A choice made over routing that has changed since will not be written
+  // (`superseded`), so it is not shown as coming.
+  const pendingKey = target?.kind === 'collab' ? 'collab' : projectId;
+  const pendingChoice = pendingProviders[pendingKey];
+  const routedFrom = pendingRoutedFrom?.[pendingKey];
+  // The same string `routedModuleOf` gives for this routing.
+  const currentRouted =
+    provider === null ? null : provider.kind === 'own' ? provider.moduleId : provider.kind;
   const currentBase = provider?.kind === 'own' ? provider.moduleId.split(':')[0] : null;
   const pendingBase =
     (provider?.kind === 'freeway' || provider?.kind === 'own') &&
     pendingChoice !== undefined &&
+    (routedFrom === undefined || routedFrom === currentRouted) &&
     pendingChoice.split(':')[0] !== currentBase &&
     !keySaved(providerKeyFor(pendingChoice))
       ? pendingChoice.split(':')[0]
