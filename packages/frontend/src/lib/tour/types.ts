@@ -21,6 +21,11 @@ export interface GuideFacts {
    * left, and the person has not yet chosen between the rest and export.
    */
   quickTestPending: boolean;
+  /**
+   * The person chose "translate the rest" after the quick test and the run it
+   * produced has not settled yet (still pending, queued, running or paused).
+   */
+  restRunning: boolean;
 }
 
 export type TourAdvance =

@@ -129,7 +129,9 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const fewEntries = useStringStore(
     (s) => s.entries.filter(isTranslatableEntry).length <= QUICK_TEST_SIZE,
   );
-  const tour = firstRunTourFor(facts, { fewEntries });
+  // Running in Advanced (restarted there from the Guide): no switch to flip at the end.
+  const advanced = useUiMode() !== 'simple';
+  const tour = firstRunTourFor(facts, { fewEntries, advanced });
   const resumeAt = firstRunStepIndex(facts);
   const derived = resumeAt === 'done' ? tour.steps.length - 1 : resumeAt;
 
@@ -191,6 +193,9 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   // The run the guide asked for (its progress shows in the callout).
   const [guideRunId, setGuideRunId] = useState<string | null>(null);
+  // "Translate everything" / "Translate them" was asked for: the run that
+  // appears is not a quick test, so none is recorded for it.
+  const translatingAll = useRef(false);
 
   useEffect(() => {
     const startAgain = () => {
@@ -258,6 +263,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         }
         case 'translate-quick': {
           if (!projectId) break;
+          translatingAll.current = false;
           // The run id is filled in once the run is listed (see below).
           useGuideStore.getState().setQuickTest({ projectId, runId: null, decision: 'pending' });
           requestGuideTranslation(quickTestEntryIds(useStringStore.getState().entries));
@@ -265,11 +271,13 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         }
         case 'translate-everything':
         case 'translate-few':
+          translatingAll.current = true;
           useGuideStore.getState().setQuickTest(null);
           requestGuideTranslation(translatableEntryIds(useStringStore.getState().entries));
           break;
         case 'translate-rest': {
-          useGuideStore.getState().decideQuickTest('rest');
+          // The decision is recorded with the run it produced (see below): a
+          // request refused before a run exists leaves the choice on screen.
           const project = useProjectStore.getState().projects.find((p) => p.id === projectId);
           const targets = (project?.activeLanguages ?? []).filter(
             (lang) => lang !== project?.sourceLanguage,
@@ -281,6 +289,12 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'skip-rest':
           useGuideStore.getState().decideQuickTest('skip');
           break;
+        case 'tour-sections': {
+          const guide = useGuideStore.getState();
+          guide.finishFirstRun();
+          guide.startTour(ADVANCED_SECTIONS_TOUR_ID);
+          break;
+        }
         case 'maybe-later':
           useGuideStore.getState().finishFirstRun();
           break;
@@ -295,22 +309,29 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const atQuick = shownStep?.id === 'translate-quick';
   useEffect(() => {
     if (!atQuick) return;
+    translatingAll.current = false;
     const strings = useStringStore.getState();
     strings.setFilter(quickTestFilters(strings.filters));
     useSelectionStore.getState().selectAll(quickTestEntryIds(strings.entries));
   }, [atQuick]);
 
-  // The quick test and "Start the translation" are done when the request
-  // produced a run: the ids listed when the step came up are the baseline,
-  // and any other is new.
+  // The quick test, "Start the translation" and "Translate the rest" are done
+  // when the request produced a run: the ids listed when the step came up are
+  // the baseline, and any other is new.
   const translationRunIds = useRunStore((s) =>
     s.runs
       .filter((r) => r.projectId === projectId && isTranslationRun(r))
       .map((r) => r.runId)
       .join('\n'),
   );
-  const waitingFor = atQuick ? 'quick' : shownStep?.id === 'translate-start' ? 'start' : null;
-  const runsBefore = useRef<Set<string> | null>(null);
+  const waitingFor = atQuick
+    ? 'quick'
+    : shownStep?.id === 'translate-start'
+      ? 'start'
+      : shownStep?.id === 'translate-rest'
+        ? 'rest'
+        : null;
+  const runsBefore = useRef<{ for: string; ids: Set<string> } | null>(null);
   const progressIndex = tour.steps.findIndex((s) => s.id === 'translate-progress');
   useEffect(() => {
     if (waitingFor === null) {
@@ -318,11 +339,11 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
       return;
     }
     const ids = translationRunIds ? translationRunIds.split('\n') : [];
-    if (runsBefore.current === null) {
-      runsBefore.current = new Set(ids);
+    if (runsBefore.current?.for !== waitingFor) {
+      runsBefore.current = { for: waitingFor, ids: new Set(ids) };
       return;
     }
-    const known = runsBefore.current;
+    const known = runsBefore.current.ids;
     const fresh = ids.find((id) => !known.has(id));
     if (fresh === undefined) return;
     setGuideRunId(fresh);
@@ -330,9 +351,21 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
       onAdvance();
       return;
     }
-    const quick = useGuideStore.getState().quickTest;
-    if (quick?.projectId === projectId && quick.decision === 'pending' && quick.runId === null) {
-      useGuideStore.getState().setQuickTest({ ...quick, runId: fresh });
+    const guide = useGuideStore.getState();
+    const quick = guide.quickTest;
+    if (waitingFor === 'rest') {
+      // The facts then hold the guide on this run's progress until it settles.
+      if (quick) guide.setQuickTest({ ...quick, decision: 'rest', restRunId: fresh });
+      return;
+    }
+    if (projectId && (quick === null || quick.projectId !== projectId)) {
+      // The highlighted button was pressed instead of a callout action: the
+      // run is the three entries selected for the quick test.
+      if (!translatingAll.current) {
+        guide.setQuickTest({ projectId, runId: fresh, decision: 'pending' });
+      }
+    } else if (quick?.decision === 'pending' && quick.runId === null) {
+      guide.setQuickTest({ ...quick, runId: fresh });
     }
     // Past the "Try again" steps that stand in for this one.
     setPosition((p) => ({ ...p, index: progressIndex }));

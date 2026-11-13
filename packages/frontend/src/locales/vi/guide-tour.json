@@ -22,6 +22,7 @@
       "translateFew": "Dịch các mục này",
       "translateRest": "Dịch phần còn lại ngay",
       "skipRest": "Bỏ qua, xuất những gì đã có",
+      "tourSections": "Xem các mục",
       "maybeLater": "Để sau"
     },
     "vault": {
@@ -108,6 +109,7 @@
     "closing": {
       "title": "Mọi thứ đã sẵn sàng",
       "what": "Đây là giao diện đơn giản: chỉ hiển thị những gì cần để dịch và xuất. Nâng cao có thêm nhiều công cụ. Gạt công tắc sang Nâng cao để xem hướng dẫn ngắn.",
+      "whatAdvanced": "Bạn đang ở chế độ nâng cao, nơi hiển thị mọi công cụ. Hướng dẫn ngắn sẽ giải thích công dụng của từng mục.",
       "why": "Bạn có thể chuyển bất cứ lúc nào từ thanh trên cùng."
     }
   },

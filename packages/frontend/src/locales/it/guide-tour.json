@@ -22,6 +22,7 @@
       "translateFew": "Traducile",
       "translateRest": "Traduci il resto ora",
       "skipRest": "Salta ed esporta ciò che c'è",
+      "tourSections": "Mostrami le sezioni",
       "maybeLater": "Magari più tardi"
     },
     "vault": {
@@ -108,6 +109,7 @@
     "closing": {
       "title": "È tutto pronto",
       "what": "Questa è la vista semplificata: mostra solo ciò che serve per tradurre ed esportare. Avanzata offre altri strumenti. Sposta l'interruttore su Avanzata per un breve tour.",
+      "whatAdvanced": "Stai usando la modalità avanzata, che mostra tutti gli strumenti. Un breve tour spiega a cosa serve ogni sezione.",
       "why": "Puoi cambiare modalità in qualsiasi momento dalla barra in alto."
     }
   },

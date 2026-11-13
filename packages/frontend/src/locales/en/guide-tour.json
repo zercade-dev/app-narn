@@ -22,6 +22,7 @@
       "translateFew": "Translate them",
       "translateRest": "Translate the rest now",
       "skipRest": "Skip, export what I have",
+      "tourSections": "Show me the sections",
       "maybeLater": "Maybe later"
     },
     "vault": {
@@ -108,6 +109,7 @@
     "closing": {
       "title": "You're all set",
       "what": "This is the simplified view: it shows only what you need to translate and export. Advanced has more tools. Flip the switch to Advanced for a short tour.",
+      "whatAdvanced": "You're using Advanced, which shows every tool. A short tour explains what each section is for.",
       "why": "You can switch at any time from the top bar."
     }
   },

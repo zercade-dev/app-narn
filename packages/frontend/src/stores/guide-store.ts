@@ -14,12 +14,14 @@ export interface TourProgress {
 /**
  * The first run's quick test (three entries translated first). `runId` is
  * null until the run it asked for is listed; `decision` is the person's
- * answer to "translate the rest?".
+ * answer to "translate the rest?". `restRunId` is the run that answer
+ * produced: the decision is recorded together with it, once it is listed.
  */
 export interface QuickTest {
   projectId: string;
   runId: string | null;
   decision: 'pending' | 'rest' | 'skip';
+  restRunId?: string;
 }
 
 /**

@@ -27,6 +27,7 @@ export type FirstRunAction =
   | 'translate-few'
   | 'translate-rest'
   | 'skip-rest'
+  | 'tour-sections'
   | 'maybe-later';
 
 /** Window event a callout action dispatches; `detail` is the {@link FirstRunAction}. */
@@ -45,6 +46,8 @@ function action(name: FirstRunAction, label: string): NonNullable<TourStep['acti
 }
 
 const vaultReady = (f: GuideFacts): boolean => f.vaultExists && f.vaultUnlocked;
+/** The translation step's wait is over: something was translated, and no rest run is still going. */
+const translationSettled = (f: GuideFacts): boolean => f.translationExists && !f.restRunning;
 const projectReady = (f: GuideFacts): boolean =>
   f.projectExists && f.projectHasLanguages && f.projectHasEntries;
 
@@ -175,7 +178,7 @@ function stallStep(
     id: STALL_STEP[stall],
     anchor: 'console-status',
     ...text,
-    advance: { kind: 'state', done: (f) => f.translationExists },
+    advance: { kind: 'state', done: translationSettled },
     actions,
     // The run's own controls (cancel, Activity, the console) stay usable.
     dim: false,
@@ -223,6 +226,7 @@ const STALL_STEPS: TourStep[] = [
 ];
 
 const QUICK_STEP = 'translate-quick';
+const CLOSING_STEP = 'closing';
 
 /**
  * The quick test step. With QUICK_TEST_SIZE entries or fewer (`few`) the test
@@ -363,7 +367,7 @@ const SHARED_STEPS: TourStep[] = [
     titleKey: 'firstRun.translate.title',
     whatKey: 'firstRun.translate.progressWhat',
     whyKey: 'firstRun.translate.progressWhy',
-    advance: { kind: 'state', done: (f) => f.translationExists },
+    advance: { kind: 'state', done: translationSettled },
     // A run can stall; its controls must stay reachable while the guide waits.
     dim: false,
     major: 4,
@@ -398,36 +402,51 @@ const SHARED_STEPS: TourStep[] = [
     advance: { kind: 'state', done: (f) => f.exported },
     major: 5,
   },
-  {
-    // Ends through "Maybe later" or a flip of the switch it points at
-    // (`FirstRunTour` watches the mode), so it shows no Next.
-    id: 'closing',
-    anchor: 'mode-switch',
+  closingStep(false),
+];
+
+/**
+ * The closing callout. Ends through its actions, or in Simple a flip of the
+ * switch it points at (`FirstRunTour` watches the mode), so it shows no Next.
+ * `advanced`: the first run was restarted in Advanced and stayed there, so
+ * there is no switch to flip; it offers the Advanced sections tour instead.
+ */
+function closingStep(advanced: boolean): TourStep {
+  return {
+    id: CLOSING_STEP,
+    anchor: advanced ? null : 'mode-switch',
     titleKey: 'firstRun.closing.title',
-    whatKey: 'firstRun.closing.what',
+    whatKey: advanced ? 'firstRun.closing.whatAdvanced' : 'firstRun.closing.what',
     whyKey: 'firstRun.closing.why',
     advance: { kind: 'state', done: () => false },
-    actions: [action('maybe-later', 'maybeLater')],
-  },
-];
+    actions: advanced
+      ? [action('tour-sections', 'tourSections'), action('maybe-later', 'maybeLater')]
+      : [action('maybe-later', 'maybeLater')],
+  };
+}
 
 const tourOf = (head: TourStep[]): Tour => ({
   id: FIRST_RUN_TOUR_ID,
   steps: [...head, ...SHARED_STEPS],
 });
 
-/** The same tour for a project of QUICK_TEST_SIZE entries or fewer: no choice to make. */
-const fewEntriesTours = new Map<Tour, Tour>();
-function withFewEntries(tour: Tour): Tour {
-  let few = fewEntriesTours.get(tour);
-  if (!few) {
-    few = {
-      ...tour,
-      steps: tour.steps.map((s) => (s.id === QUICK_STEP ? quickTestStep(true) : s)),
-    };
-    fewEntriesTours.set(tour, few);
+/**
+ * `tour` with step `id` replaced by `make()`, built once per (tour, id) so a
+ * tour keeps its identity from one render to the next.
+ */
+const replacedTours = new Map<string, Map<Tour, Tour>>();
+function withStep(tour: Tour, id: string, make: () => TourStep): Tour {
+  let byTour = replacedTours.get(id);
+  if (!byTour) {
+    byTour = new Map();
+    replacedTours.set(id, byTour);
   }
-  return few;
+  let replaced = byTour.get(tour);
+  if (!replaced) {
+    replaced = { ...tour, steps: tour.steps.map((s) => (s.id === id ? make() : s)) };
+    byTour.set(tour, replaced);
+  }
+  return replaced;
 }
 
 /** The local first-run tour (a new vault). */
@@ -444,14 +463,17 @@ const FIRST_RUN_TOUR_CLOUD_KEY: Tour = tourOf(cloudVaultAndKeySteps('key'));
  * of one mode share step ids and order, so switching between them (a vault
  * that now exists, or is now unlocked) never moves the person. `fewEntries`:
  * the project has QUICK_TEST_SIZE translatable entries or fewer, so the quick
- * test offers no choice.
+ * test offers no choice. `advanced`: the guide runs in Advanced (restarted
+ * there from the Guide), so the closing step is worded for it.
  */
 export function firstRunTourFor(
   f: Pick<GuideFacts, 'cloud' | 'vaultExists'> & Partial<Pick<GuideFacts, 'vaultUnlocked'>>,
-  opts: { fewEntries?: boolean } = {},
+  opts: { fewEntries?: boolean; advanced?: boolean } = {},
 ): Tour {
-  const tour = baseTourFor(f);
-  return opts.fewEntries ? withFewEntries(tour) : tour;
+  let tour = baseTourFor(f);
+  if (opts.advanced) tour = withStep(tour, CLOSING_STEP, () => closingStep(true));
+  if (opts.fewEntries) tour = withStep(tour, QUICK_STEP, () => quickTestStep(true));
+  return tour;
 }
 
 function baseTourFor(
@@ -471,8 +493,9 @@ function firstIncompleteMajor(f: GuideFacts): number {
   // Cloud's single hand-off step covers the vault and the key.
   if (!f.usableKey) return f.cloud ? 1 : 2;
   if (!projectReady(f)) return 3;
-  // "Translate the rest?" after the quick test is still part of step 4.
-  if (!f.translationExists || restPending(f)) return 4;
+  // "Translate the rest?" after the quick test, and the rest's own run, are
+  // still part of step 4.
+  if (!f.translationExists || restPending(f) || f.restRunning) return 4;
   if (!f.exported) return 5;
   return 6;
 }
@@ -493,13 +516,14 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
   const steps = firstRunTourFor(f).steps;
   const at = (id: string): number => steps.findIndex((s) => s.id === id);
   const major = firstIncompleteMajor(f);
-  if (major === 6) return at('closing');
+  if (major === 6) return at(CLOSING_STEP);
   if (major === 3) {
     if (!f.projectExists) return at('project-open');
     if (!f.projectHasLanguages) return at('languages-source');
     return at('import');
   }
   if (major === 4 && restPending(f)) return at('translate-rest');
+  if (major === 4 && f.translationExists && f.restRunning) return at(WAITING_STEP);
   return steps.findIndex((s) => s.major === major);
 }
 

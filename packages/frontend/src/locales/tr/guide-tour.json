@@ -22,6 +22,7 @@
       "translateFew": "Bunları çevir",
       "translateRest": "Kalanını şimdi çevir",
       "skipRest": "Atla, elimdekini dışa aktar",
+      "tourSections": "Bölümleri göster",
       "maybeLater": "Belki sonra"
     },
     "vault": {
@@ -108,6 +109,7 @@
     "closing": {
       "title": "Her şey hazır",
       "what": "Bu, basitleştirilmiş görünümdür: yalnızca çeviri ve dışa aktarma için gerekenleri gösterir. Gelişmiş modda daha fazla araç vardır. Kısa bir tur için anahtarı Gelişmiş'e çevirin.",
+      "whatAdvanced": "Tüm araçları gösteren Gelişmiş moddasınız. Kısa bir tur, her bölümün ne işe yaradığını açıklar.",
       "why": "Üst çubuktan istediğiniz zaman geçiş yapabilirsiniz."
     }
   },

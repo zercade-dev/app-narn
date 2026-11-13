@@ -118,6 +118,19 @@ export function useGuideFacts(): GuideFacts {
     quickTest.runId !== null &&
     translationExists &&
     untranslatedRemain;
+  const restRunId =
+    quickTest?.decision === 'rest' && quickTest.projectId === activeProjectId
+      ? quickTest.restRunId
+      : undefined;
+  // Settled: ended, whatever the outcome. A paused run has not (it resumes).
+  const restRunning = useRunStore(
+    (s) =>
+      relevant &&
+      restRunId !== undefined &&
+      s.runs.some(
+        (r) => r.runId === restRunId && (isRunActive(r) || r.status === RunStatusCode.Paused),
+      ),
+  );
 
   return useMemo(() => {
     const cloud = cloudManaged || setupRequired;
@@ -135,6 +148,7 @@ export function useGuideFacts(): GuideFacts {
       isCollaboratorOnly,
       untranslatedRemain,
       quickTestPending,
+      restRunning,
     };
   }, [
     cloudManaged,
@@ -151,6 +165,7 @@ export function useGuideFacts(): GuideFacts {
     isCollaboratorOnly,
     untranslatedRemain,
     quickTestPending,
+    restRunning,
   ]);
 }
 
