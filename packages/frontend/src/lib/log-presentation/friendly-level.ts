@@ -7,11 +7,14 @@ import type { LogEntry } from './types.js';
 export type FriendlyLevel = LogEntry['level'] | 'hidden';
 
 /**
- * Raw-only lines are hidden. A presenter's `friendly` field then wins over the
- * entry's own level, so run bookkeeping can be demoted to debug.
+ * Raw-only lines are hidden. For info and debug lines a presenter's `friendly`
+ * field then wins over the entry's own level, so run bookkeeping can be demoted to debug.
  */
 export function friendlyLevel(entry: LogEntry): FriendlyLevel {
   const presenter = LOG_PRESENTERS[entry.message];
+  // Warnings, errors and notifications always keep their own level.
+  const demotable = entry.level === 'info' || entry.level === 'debug';
+  if (!demotable) return isRawOnly(entry) ? 'hidden' : entry.level;
   if (presenter?.friendly === 'hidden') return 'hidden';
   if (presenter?.friendly === 'debug') return 'debug';
   if (isRawOnly(entry)) return 'hidden';
