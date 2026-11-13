@@ -3,7 +3,8 @@
   "back": "Quay lại",
   "skip": "Bỏ qua hướng dẫn",
   "close": "Đóng",
-  "stepOf": "Bước {{current}}/{{total}}",
+  "stepOfSub": "Bước {{major}}/{{majorTotal}} · {{sub}}/{{subTotal}}",
+  "stepCount": "{{current}}/{{total}}",
   "continueSetup": "Tiếp tục thiết lập: bước {{current}}/{{total}}",
   "firstRun": {
     "actions": {
@@ -16,8 +17,13 @@
       "fixKey": "Kiểm tra khóa của tôi",
       "retry": "Thử lại",
       "stopRetry": "Dừng và thử lại",
-      "switchAdvanced": "Chuyển sang Nâng cao",
-      "finish": "Hoàn tất"
+      "translateQuick": "Dịch thử 3 mục này",
+      "translateEverything": "Dịch tất cả",
+      "translateFew": "Dịch các mục này",
+      "translateRest": "Dịch phần còn lại ngay",
+      "skipRest": "Bỏ qua, xuất những gì đã có",
+      "tourSections": "Xem các mục",
+      "maybeLater": "Để sau"
     },
     "vault": {
       "title": "Tạo mật khẩu kho bảo mật",
@@ -55,7 +61,7 @@
       "newWhat": "Tạo một dự án mới.",
       "createWhat": "Đặt tên cho dự án, rồi tạo.",
       "sourceWhat": "Chọn ngôn ngữ mà văn bản của bạn được viết.",
-      "targetsWhat": "Đánh dấu các ngôn ngữ bạn muốn dịch sang.",
+      "targetsWhat": "Đánh dấu các ngôn ngữ bạn muốn dịch sang, hoặc dùng Chọn tất cả.",
       "saveWhat": "Lưu các ngôn ngữ.",
       "importWhat": "Chọn tệp CSV bạn đã xuất từ trình chỉnh sửa game.",
       "confirmWhat": "Xem lại bản tóm tắt, rồi xác nhận nhập."
@@ -64,6 +70,8 @@
       "title": "Dịch",
       "why": "Freeway tự động chọn một mô hình miễn phí phù hợp cho từng ngôn ngữ.",
       "openWhat": "Mở tab liệt kê các mục của bạn.",
+      "quickWhat": "3 mục đầu tiên đã được chọn. Dịch thử chúng, hoặc dịch tất cả ngay bây giờ.",
+      "fewWhat": "Các mục của bạn đã được chọn. Dịch chúng ngay bây giờ.",
       "selectWhat": "Chọn tất cả các mục.",
       "pressWhat": "Mở hộp thoại dịch.",
       "startWhat": "Bắt đầu dịch.",
@@ -87,6 +95,11 @@
       "quotaWhat": "Hạn mức miễn phí tạm thời đã hết. Quá trình dịch sẽ tự tiếp tục khi có hạn mức trở lại.",
       "modelWhat": "Các mô hình miễn phí hiện có đang thấp hơn chất lượng mà lần chạy này hướng tới. Quá trình dịch sẽ tự tiếp tục khi có mô hình tốt hơn."
     },
+    "rest": {
+      "title": "Bản dịch thử đã thành công",
+      "what": "3 mục đầu tiên đã được dịch sang mọi ngôn ngữ bạn chọn. Dịch phần còn lại ngay, hoặc xuất những gì bạn đã có.",
+      "why": "Bạn có thể dịch phần còn lại sau từ danh sách mục."
+    },
     "export": {
       "title": "Xuất",
       "why": "Trình chỉnh sửa game có thể nhập tệp này để đưa bản dịch vào game.",
@@ -95,7 +108,8 @@
     },
     "closing": {
       "title": "Mọi thứ đã sẵn sàng",
-      "what": "Nâng cao có thêm bảng thuật ngữ, kiểm tra chất lượng, điều phối, rà soát và nhiều tính năng khác.",
+      "what": "Đây là giao diện đơn giản: chỉ hiển thị những gì cần để dịch và xuất. Nâng cao có thêm nhiều công cụ. Gạt công tắc sang Nâng cao để xem hướng dẫn ngắn.",
+      "whatAdvanced": "Bạn đang ở chế độ nâng cao, nơi hiển thị mọi công cụ. Hướng dẫn ngắn sẽ giải thích công dụng của từng mục.",
       "why": "Bạn có thể chuyển bất cứ lúc nào từ thanh trên cùng."
     }
   },
@@ -112,14 +126,44 @@
   },
   "guideTours": {
     "title": "Hướng dẫn",
-    "firstRun": "Lần chạy đầu có hướng dẫn",
-    "area": {
-      "routing": "Điều phối",
-      "glossary": "Bảng thuật ngữ",
-      "quality": "Chất lượng",
-      "compare": "So sánh",
-      "review-translation-ai": "Rà soát bản dịch bằng AI"
+    "first-run": {
+      "name": "Lần chạy đầu có hướng dẫn",
+      "summary": "Thiết lập nhà cung cấp, thêm chuỗi, dịch và xuất, từng bước một."
     },
+    "advanced-sections": {
+      "name": "Các mục nâng cao",
+      "summary": "Công dụng của từng thẻ và chế độ xem mà chế độ nâng cao thêm vào."
+    },
+    "glossaries": {
+      "name": "Bảng thuật ngữ",
+      "summary": "Tạo bảng thuật ngữ, thêm thuật ngữ rồi áp dụng để các thuật ngữ chính luôn nhất quán."
+    },
+    "routing": {
+      "name": "Điều phối",
+      "summary": "Xem nhanh trong 30 giây cách NARN chọn ai dịch nội dung nào."
+    },
+    "quality": {
+      "name": "Chất lượng",
+      "summary": "Xem nhanh cách NARN kiểm tra bản dịch của bạn."
+    },
+    "compare": {
+      "name": "So sánh",
+      "summary": "Xem nhanh cách rà soát các bản dịch cạnh nhau."
+    },
+    "review-translation-ai": {
+      "name": "Rà soát bản dịch bằng AI",
+      "summary": "Xem nhanh cách nhờ AI kiểm tra bản dịch của bạn."
+    },
+    "orphans": {
+      "name": "Mục mồ côi",
+      "summary": "Xem điều gì xảy ra với một mục không có trong tệp của bạn, bằng một mục mồ côi tập dượt mà hướng dẫn sẽ đưa trở lại."
+    },
+    "startOver": "Bắt đầu lại từ đầu",
+    "continue": "Tiếp tục từ chỗ đã dừng",
+    "progress": "{{current}}/{{total}} bước",
+    "completed": "Đã hoàn tất",
+    "needsProject": "Hãy mở một dự án để xem hướng dẫn này.",
+    "switchedToAdvanced": "Đã chuyển sang chế độ nâng cao cho hướng dẫn này.",
     "confirm": {
       "title": "Chuyển sang chế độ Đơn giản để thiết lập có hướng dẫn?",
       "body": "Phần thiết lập có hướng dẫn được thiết kế cho chế độ Đơn giản, vốn ẩn các tab nâng cao. Bạn có thể chuyển lại bất cứ lúc nào từ thanh trên cùng.",
@@ -227,6 +271,205 @@
         "what": "Rà soát mọi bản dịch trong dự án, không chỉ lượt chạy mới nhất.",
         "why": "Dùng trước khi phát hành, hoặc sau khi bạn đổi bảng thuật ngữ hoặc điều phối."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "So sánh",
+      "what": "Văn bản nguồn bên cạnh một ngôn ngữ đích, từng dòng một, có thể kèm ngôn ngữ tham chiếu.",
+      "why": "Xem lại và sửa kỹ một ngôn ngữ, kể cả ngôn ngữ bạn không đọc được."
+    },
+    "routing": {
+      "title": "Điều phối",
+      "what": "Quyết định nhà cung cấp nào dịch từng ngôn ngữ, danh mục hoặc sắc thái.",
+      "why": "Gửi mỗi loại văn bản đến nhà cung cấp xử lý nó tốt nhất."
+    },
+    "stage-details": {
+      "title": "Chi tiết màn chơi",
+      "what": "Tên, chi tiết lối chơi và mô tả của một màn chơi, kèm các bản dịch.",
+      "why": "Dịch phần văn bản mô tả một màn chơi, nằm ngoài tệp chuỗi của bạn."
+    },
+    "quality": {
+      "title": "Chất lượng",
+      "what": "Các bước kiểm tra tự động mà mỗi bản dịch phải qua, và những bước không đạt.",
+      "why": "Phát hiện thẻ hỏng, phần giữ chỗ bị đổi và văn bản quá dài trước khi phát hành."
+    },
+    "review-source-ai": {
+      "title": "Rà soát nguồn bằng AI",
+      "what": "Một nhà cung cấp AI đọc văn bản nguồn và chỉ ra lỗi chính tả, câu chữ khó hiểu.",
+      "why": "Văn bản nguồn tốt hơn cho bản dịch tốt hơn ở mọi ngôn ngữ."
+    },
+    "review-translation-ai": {
+      "title": "Rà soát bản dịch bằng AI",
+      "what": "Một nhà cung cấp AI đọc bản dịch bên cạnh văn bản nguồn và chấm điểm.",
+      "why": "Nó tìm ra nghĩa sai và câu chữ gượng mà kiểm tra tự động bỏ sót."
+    },
+    "review-manual": {
+      "title": "Duyệt thủ công",
+      "what": "Hàng đợi các bản dịch cần duyệt, để chấp thuận, sửa hoặc gắn cờ từng bản.",
+      "why": "Xử lý nhanh các bản dịch đáng ngờ bằng phím tắt."
+    },
+    "glossary": {
+      "title": "Bảng thuật ngữ",
+      "what": "Danh sách thuật ngữ kèm bản dịch bạn muốn cho từng thuật ngữ.",
+      "why": "Tên riêng và thuật ngữ chính khi đó luôn được dịch giống nhau."
+    },
+    "category": {
+      "title": "Danh mục",
+      "what": "Nhóm các chuỗi theo loại, như nhãn giao diện, hội thoại hoặc tên vật phẩm.",
+      "why": "Quy tắc điều phối và các lô khi đó có thể xử lý từng loại văn bản khác nhau."
+    },
+    "color-text": {
+      "title": "Tạo kiểu văn bản",
+      "what": "Công cụ soạn nháp văn bản có màu, in đậm, in nghiêng và cỡ chữ.",
+      "why": "Viết văn bản có định dạng mà không phải gõ mã đánh dấu bằng tay."
+    },
+    "orphans": {
+      "title": "Mục mồ côi",
+      "what": "Các mục biến mất sau một lần nhập sau đó, được giữ lại cùng bản dịch.",
+      "why": "Không mất gì khi tệp của bạn thay đổi: liên kết lại hoặc xóa chúng."
+    },
+    "backup": {
+      "title": "Sao lưu",
+      "what": "Đóng gói dự án thành một tệp lưu trữ mà bạn có thể tải xuống và khôi phục.",
+      "why": "Quay lại trạng thái trước nếu một lần nhập hoặc thay đổi hàng loạt gặp sự cố."
+    },
+    "sharing": {
+      "title": "Chia sẻ",
+      "what": "Mời cộng tác viên và chọn ngôn ngữ mỗi người được sửa.",
+      "why": "Người dịch làm việc trên ngôn ngữ của mình, với nhà cung cấp AI của riêng họ."
+    },
+    "global-config": {
+      "title": "Cấu hình chung",
+      "what": "Cài đặt cho toàn bộ không gian làm việc: nhà cung cấp, mô hình và kho bảo mật.",
+      "why": "Thiết lập nhà cung cấp một lần và dùng nó trong mọi dự án."
+    },
+    "translation-memory": {
+      "title": "Bộ nhớ dịch",
+      "what": "Các bản dịch trước đây, được dùng lại khi cùng một văn bản xuất hiện lại.",
+      "why": "Giúp tiết kiệm chi phí và giữ các dòng lặp lại được dịch như nhau."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "Bảng thuật ngữ dùng để làm gì",
+      "what": "Bảng thuật ngữ liệt kê các thuật ngữ kèm bản dịch bạn muốn, như tên nhân vật hay biệt ngữ trong game.",
+      "why": "Khi đó bản dịch luôn dùng từ của bạn thay vì đoán mới mỗi lần."
+    },
+    "create": {
+      "title": "Tạo bảng thuật ngữ",
+      "what": "Bắt đầu một bảng thuật ngữ mới, trống tại đây.",
+      "why": "Thường một bảng thuật ngữ là đủ. Dùng nhiều bảng để tách riêng các nhóm thuật ngữ."
+    },
+    "add-term": {
+      "title": "Thêm thuật ngữ",
+      "what": "Nhập thuật ngữ nguồn và bản dịch cho từng ngôn ngữ, rồi thêm vào.",
+      "why": "Đánh dấu thuật ngữ là cố định khi nó không bao giờ được dịch, như tên thương hiệu."
+    },
+    "assign": {
+      "title": "Áp dụng cho dự án này",
+      "what": "Bảng thuật ngữ đang bật sẽ được dùng khi dịch dự án này. Tắt nó để ngừng sử dụng.",
+      "why": "Hãy để bảng thuật ngữ ở trạng thái tắt khi bạn vẫn đang soạn nó."
+    },
+    "effect": {
+      "title": "Nó thay đổi bản dịch thế nào",
+      "what": "Khi một chuỗi chứa thuật ngữ trong bảng, thuật ngữ đó và bản dịch của bạn được gửi kèm theo chuỗi.",
+      "why": "Nhà cung cấp làm theo lựa chọn của bạn thay vì tự chọn từ."
+    },
+    "generate": {
+      "title": "Để AI gợi ý thuật ngữ",
+      "what": "Nhờ một nhà cung cấp AI tìm các thuật ngữ có thể có trong chuỗi của bạn.",
+      "why": "Bạn xem lại các gợi ý và chỉ giữ những gì bạn muốn."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Mục mồ côi là gì",
+      "what": "Mục mồ côi là một mục không có trong tệp gần nhất bạn nhập bằng “Thay thế toàn bộ”.",
+      "why": "NARN giữ nó ở đây cùng bản dịch thay vì xóa, nên không có gì bị mất do vô tình."
+    },
+    "offer": {
+      "title": "Thử với một mục mồ côi tập dượt",
+      "what": "Hướng dẫn có thể biến một mục của bạn thành mồ côi trong chốc lát, rồi đưa nó trở lại. Không có gì bị mất: mục vẫn giữ bản dịch và trở về đúng chỗ.",
+      "why": "Thấy một mục mồ côi thật giúp bạn dùng thẻ này dễ hơn về sau. Hoặc để hướng dẫn chỉ giải thích."
+    },
+    "backup": {
+      "title": "Sao lưu trước",
+      "what": "Một bản sao lưu dự án được tạo trước khi tạo mục mồ côi tập dượt. Dù chọn thế nào cũng không mất gì: hướng dẫn sẽ đưa mục trở lại.",
+      "why": "Có bản sao lưu, bạn luôn có thể quay về đúng trạng thái này từ thẻ “Sao lưu”."
+    },
+    "simulating": {
+      "title": "Đang tạo mục mồ côi tập dượt",
+      "what": "Hướng dẫn nhập lại các mục của bạn, trừ một mục. Việc này mất một lát.",
+      "why": "Đây là điều xảy ra khi một mục biến mất khỏi tệp bạn nhập bằng “Thay thế toàn bộ”."
+    },
+    "practice-row": {
+      "title": "Mục mồ côi tập dượt của bạn",
+      "what": "Mục này giờ là mục mồ côi. Nó không còn hiện trong thẻ “Bản dịch”, và bản dịch của nó vẫn được giữ.",
+      "why": "Mục mồ côi xuất hiện ở đây sau một lần nhập “Thay thế toàn bộ”, để bạn quyết định xử lý từng mục."
+    },
+    "practice-options": {
+      "title": "Bạn có thể làm gì với mục mồ côi",
+      "what": "“Liên kết lại” chuyển bản dịch của nó sang mục khác, ví dụ một mục chỉ được diễn đạt lại. “Xóa” loại bỏ nó vĩnh viễn.",
+      "why": "Đừng dùng chúng với mục này: hướng dẫn sẽ đưa nó trở lại ở bước tiếp theo."
+    },
+    "recover": {
+      "title": "Đưa trở lại",
+      "what": "Nhấn “Đưa trở lại”, mục sẽ trở về đúng chỗ trong danh sách cùng bản dịch.",
+      "why": "Hướng dẫn nhập lại mục đó, giống như một mục quay lại khi tệp tiếp theo của bạn có nó."
+    },
+    "restore": {
+      "title": "Bản sao lưu của bạn",
+      "what": "Bản sao lưu tạo trước khi tập dượt nằm ở đây. “Khôi phục bản sao lưu” chỉ cho bạn nút “Khôi phục” của nó; có nhấn hay không là do bạn.",
+      "why": "Bạn không cần đến nó: mục đã trở lại. Chỉ khôi phục bản sao lưu khi có sự cố."
+    },
+    "done": {
+      "title": "Đó là mục mồ côi",
+      "what": "Mục mồ côi giữ các mục và bản dịch mà lần nhập gần nhất bỏ sót, cho đến khi bạn liên kết lại hoặc xóa chúng.",
+      "why": "Hãy xem thẻ này sau mỗi lần nhập “Thay thế toàn bộ”."
+    },
+    "explain-list": {
+      "title": "Danh sách mục mồ côi",
+      "what": "Mỗi mục mồ côi hiện văn bản nguồn và số bản dịch nó còn giữ.",
+      "why": "Mục có nhiều bản dịch nhất đứng đầu: làm lại chúng tốn công nhất."
+    },
+    "explain-options": {
+      "title": "Liên kết lại hoặc xóa",
+      "what": "“Liên kết lại” chuyển bản dịch của một mục mồ côi sang mục khác, ví dụ một mục chỉ được diễn đạt lại. “Xóa” loại bỏ nó vĩnh viễn.",
+      "why": "Liên kết lại khi văn bản vẫn còn ở dạng khác; xóa khi nó thật sự không còn."
+    },
+    "actions": {
+      "simulate": "Tạo mục mồ côi tập dượt",
+      "explainOnly": "Chỉ giải thích",
+      "backupFirst": "Sao lưu trước (khuyên dùng)",
+      "skipBackup": "Tiếp tục không sao lưu",
+      "recover": "Đưa trở lại",
+      "restoreBackup": "Khôi phục bản sao lưu",
+      "switchProject": "Chuyển dự án"
+    },
+    "notices": {
+      "alreadyRecovered": "Mục mồ côi tập dượt đã trở lại thẻ “Bản dịch”.",
+      "alreadyDeleted": "Mục mồ côi tập dượt đã bị xóa, nên hướng dẫn không thể đưa nó trở lại. Nếu đã sao lưu, bạn có thể khôi phục từ thẻ “Sao lưu”.",
+      "otherProject": "Một mục mồ côi tập dượt của hướng dẫn này vẫn còn ở dự án khác. Hãy chuyển sang dự án đó để đưa nó trở lại trước.",
+      "leftOut": "Mục mồ côi tập dượt vẫn ở thẻ “Mục mồ côi”. Nhấn “Đưa trở lại” ở đó để khôi phục nó."
+    },
+    "blocked": {
+      "noEntries": "Chưa có mục nào để tập dượt, nên hướng dẫn chỉ giải thích.",
+      "collaborator": "Chỉ chủ dự án mới quản lý được mục mồ côi, nên hướng dẫn chỉ giải thích.",
+      "sourcelessRows": "Một số mục không có văn bản nguồn, và việc nhập không thể dựng lại chúng chính xác. Hướng dẫn chỉ giải thích, nên không có gì thay đổi.",
+      "unsafeText": "Có văn bản nguồn chứa dấu ngoặc kép ngay trước dấu phẩy hoặc dấu xuống dòng, điều mà việc nhập không thể dựng lại chính xác. Hướng dẫn chỉ giải thích, nên không có gì thay đổi.",
+      "commaInSourceLabel": "Có nhãn nguồn chứa dấu phẩy hoặc khoảng trắng ở hai đầu, điều mà việc nhập không thể dựng lại chính xác. Hướng dẫn chỉ giải thích, nên không có gì thay đổi."
+    },
+    "errors": {
+      "backup": "Không tạo được bản sao lưu. Không có gì bị thay đổi.",
+      "simulate": "Không tạo được mục mồ côi tập dượt. Không có gì bị thay đổi.",
+      "recover": "Chưa đưa mục trở lại được. Mục vẫn an toàn trong thẻ “Mục mồ côi”; hãy thử lại.",
+      "recoverRefused": "Hướng dẫn không thể đưa mục này trở lại mà không thay đổi các mục khác, nên không có gì bị thay đổi. Hãy dùng “Liên kết lại” trong thẻ “Mục mồ côi” để chuyển bản dịch của nó, hoặc khôi phục bản sao lưu nếu bạn đã tạo.",
+      "load": "Không kiểm tra được mục mồ côi tập dượt. Nhấn “Đưa trở lại” để thử lại."
+    },
+    "banner": {
+      "text": "Đây là mục mồ côi tập dượt của phần hướng dẫn. Hãy đưa nó trở lại để nó quay về thẻ “Bản dịch” cùng bản dịch.",
+      "recovered": "Mục mồ côi tập dượt đã trở lại thẻ “Bản dịch”."
     }
   }
 }

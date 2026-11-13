@@ -770,6 +770,7 @@ export function Sidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       data-testid="sidebar-global-config"
+                      data-tour="sidebar-global-config"
                       isActive={view === 'global-config'}
                       onClick={() => {
                         setView('global-config');
@@ -784,6 +785,7 @@ export function Sidebar() {
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       data-testid="sidebar-translation-memory"
+                      data-tour="sidebar-translation-memory"
                       isActive={view === 'translation-memory'}
                       onClick={() => {
                         setView('translation-memory');

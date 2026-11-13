@@ -23,9 +23,10 @@
  * immediately followed by a delimiter (e.g. `a","b`) cannot be distinguished
  * from a cell boundary and will mis-split. The game format itself cannot
  * represent such content unambiguously, so fidelity with the game wins over
- * strict-RFC self-consistency. (The server's `utils/game-csv.ts` covers this
- * case separately as `isRoundTripUnsafe`/`findRoundTripUnsafeCells`.)
+ * strict-RFC self-consistency. `isRoundTripUnsafe` below detects such content
+ * (the server's `utils/game-csv.ts` adds `findRoundTripUnsafeCells` on top).
  */
+import { escapeForReimport, escapeFormulaGuard } from './formula-guard.js';
 import { LANGUAGE_REGISTRY } from './types/language.js';
 import { LANGUAGE_COLUMN_ALIASES } from './csv-headers.js';
 
@@ -257,4 +258,53 @@ export function findRawNewlineLanguages(
   return [...found].sort(
     (a, b) => (order.get(a) ?? Number.MAX_SAFE_INTEGER) - (order.get(b) ?? Number.MAX_SAFE_INTEGER),
   );
+}
+
+/**
+ * - `full`: apostrophe before any formula-trigger cell, safe to open in a spreadsheet.
+ * - `reimport-safe`: only text that genuinely starts with apostrophes and a
+ *   trigger gets one, so the main-text import strip restores it.
+ * - `off`: cells are written exactly as stored.
+ */
+export type FormulaGuardMode = 'full' | 'reimport-safe' | 'off';
+
+const GUARDS: Record<FormulaGuardMode, (value: string) => string> = {
+  full: escapeFormulaGuard,
+  'reimport-safe': escapeForReimport,
+  off: (value) => value,
+};
+
+/**
+ * Serializes rows to game-dialect CSV: every cell (headers included) wrapped
+ * in exactly one pair of double quotes, inner quotes emitted literally
+ * (no RFC doubling), rows joined with CRLF. `formulaGuard` picks what each cell
+ * gets: see {@link FormulaGuardMode}.
+ */
+export function serializeGameCSV(
+  headers: string[],
+  rows: Record<string, string>[],
+  options: { formulaGuard?: FormulaGuardMode } = {},
+): string {
+  const guard = GUARDS[options.formulaGuard ?? 'full'];
+  const cell = (value: string): string => `"${guard(value)}"`;
+  const lines: string[] = [headers.map(cell).join(',')];
+  for (const row of rows) {
+    lines.push(headers.map((h) => cell(row[h] ?? '')).join(','));
+  }
+  return lines.join('\r\n');
+}
+
+/**
+ * A cell value is round-trip-unsafe when it contains a `"` immediately followed
+ * (modulo spaces/tabs) by a `,` or a line break — the exact sequence the
+ * parser's cell-closing rule treats as a cell boundary (see the file header).
+ * Such content (e.g. a JSON array `["a","b"]` or a leaked LLM payload)
+ * serializes fine but mis-splits on re-import, shifting every following
+ * column. A trailing `"` at the cell's end is safe (it round-trips), so only an
+ * *internal* quote+delimiter is flagged.
+ */
+const ROUNDTRIP_UNSAFE = /"[ \t]*[\r\n,]/;
+
+export function isRoundTripUnsafe(value: string): boolean {
+  return ROUNDTRIP_UNSAFE.test(value);
 }

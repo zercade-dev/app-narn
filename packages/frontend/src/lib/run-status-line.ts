@@ -50,6 +50,11 @@ function pick(runs: RunStatus[]): RunStatus | undefined {
   return best?.run;
 }
 
+/** The run the status line describes for `projectId`: the most relevant one in flight. */
+export function statusLineRun(runs: RunStatus[], projectId: string | null): RunStatus | undefined {
+  return pick(runs.filter((r) => r.projectId === projectId));
+}
+
 /**
  * `activeProjectId` (when given) restricts the line to that project's runs, so a
  * project switch never shows the previous project's run while the store catches up.

@@ -7,6 +7,7 @@
   "filter_error": "Hata",
   "filter_warn": "Uyarı",
   "filter_info": "Bilgi",
+  "filter_infoAndUp": "Bilgi ve üzeri",
   "filter_debug": "Hata ayıklama",
   "filter_notifications": "Bildirimler",
   "statusConnected": "Sunucu günlük akışına bağlanıldı",
@@ -56,5 +57,20 @@
     "queued": "{{type}}: sırada, konum {{position}}",
     "queuedNoPosition": "{{type}}: sırada",
     "starting": "{{type}}: başlatılıyor"
+  },
+  "progress": {
+    "counts": "{{done}}/{{total}}",
+    "failed": "{{count}} başarısız",
+    "elapsed": "{{time}} geçti",
+    "estimating": "tahmin ediliyor…",
+    "waiting": "devam etmek için bekliyor",
+    "etaUnderMinute": "bir dakikadan az kaldı",
+    "etaMinutes": "yaklaşık {{count}} dk kaldı",
+    "etaHours": "yaklaşık {{hours}} sa {{minutes}} dk kaldı",
+    "outcome": {
+      "completed": "Tamamlandı",
+      "failed": "Başarısız",
+      "cancelled": "İptal edildi"
+    }
   }
 }

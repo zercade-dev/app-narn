@@ -31,6 +31,7 @@ import {
   type TranslationModule,
   type TranslationResult,
   type RunStatus,
+  type LanguageProgress,
   type PendingCorrectionRecord,
   type RunRequest,
   type RunEntryLanguagePair,
@@ -109,7 +110,12 @@ import {
 import { JobQueue, type Admission } from './M9/queue.js';
 import { rateGovernor, type GovernorKey, type RateGovernor } from './M9/rate-governor.js';
 import { awaitAllWithTimeout, SettledTracker } from './M9/run-settled.js';
-import { emitRunProgress, recordRunFailure } from './M9/run-status-helpers.js';
+import {
+  emitRunProgress,
+  initLanguageProgress,
+  recordRunCompleted,
+  recordRunFailure,
+} from './M9/run-status-helpers.js';
 import { classifyFailure } from './M9/failure-code.js';
 import { assertRunCapacity, PROCESS_START_MS, sweepOrphanedRuns } from './M9/run-capacity.js';
 import { PreviewNotPossibleError, StaleTranslationError } from '../types/errors.js';
@@ -2175,6 +2181,19 @@ export class TranslationEngine {
           (pair) => !selected.has(`${pair.entryId}\0${pair.targetLanguage}`),
         );
         status.total -= skipped.length;
+        if (midRun) {
+          // A mid-run re-dispatch keeps the attempt's per-language map (its
+          // parked pairs were already counted in their languages' totals), so
+          // the dropped pairs leave those totals here.
+          for (const pair of skipped) {
+            const progress = status.languageProgress?.[pair.targetLanguage];
+            if (!progress || progress.total === 0) continue;
+            progress.total--;
+            if (progress.completed + progress.failed === progress.total) {
+              this.announceLanguageDone(status, pair.targetLanguage, { ...progress });
+            }
+          }
+        }
       }
       if (startedCancelled) {
         // A cancelled source leaves the accounting SHORT: pairs still queued or
@@ -2210,6 +2229,14 @@ export class TranslationEngine {
       status.total = decisions.length;
       status.startedAt = Date.now();
       delete status.queuePosition;
+    }
+    if (!midRun) {
+      // Per-language progress describes THIS attempt: the pairs it dispatches,
+      // plus any corrections a resumed run still owes (they settle within it).
+      status.languageProgress = initLanguageProgress([
+        ...decisions,
+        ...(status.pendingCorrections ?? []),
+      ]);
     }
     this.runs.set(runId, status);
     this.runSessions.set(runId, sessionId);
@@ -5699,7 +5726,7 @@ export class TranslationEngine {
     let freewayDeps: BucketSourceDeps | undefined;
 
     // Per-call record of which of THIS batch's decisions have already been
-    // counted (recordFailure or status.completed++). The run-global
+    // counted (recordFailure or countCompleted). The run-global
     // completed/failed counters are shared across concurrently-running sibling
     // batches/singles of the same run, so the outer catch below must fail only
     // the decisions this call left unsettled — never a "total − completed −
@@ -6184,7 +6211,7 @@ export class TranslationEngine {
           persistDecision,
           runId,
         );
-        await gateBatch(
+        const constantVerdict = await gateBatch(
           e.decision.entry,
           result,
           projectId,
@@ -6192,7 +6219,7 @@ export class TranslationEngine {
           [],
           project,
         );
-        status.completed++;
+        this.countCompleted(status, e.decision.targetLanguage, constantVerdict?.passed === false);
         settled.add(settleKey(e.decision));
         this.logger.info('translation:done', {
           runId,
@@ -6268,7 +6295,8 @@ export class TranslationEngine {
               },
               runId,
             );
-            status.completed++;
+            // Persisted only when the gate passed (or had no verdict).
+            this.countCompleted(status, e.decision.targetLanguage, false);
             settled.add(settleKey(e.decision));
             this.logger.info('translation:done', {
               runId,
@@ -6619,7 +6647,8 @@ export class TranslationEngine {
               : {}),
           });
         } else {
-          status.completed++;
+          // No correction possible: a failed verdict stays for review.
+          this.countCompleted(status, e.decision.targetLanguage, batchLqaResult?.passed === false);
           metricsCollector.recordSuccess(moduleId, metricsModel);
           this.logger.info('translation:done', {
             runId,
@@ -7197,6 +7226,12 @@ export class TranslationEngine {
     record: PendingCorrectionRecord,
     outcome: 'corrected' | 'kept' | 'stale',
     metricsModel: string | null,
+    /**
+     * The pair's final verdict failed: true for `'kept'` (the first pass stays),
+     * the post-correction gate's verdict for `'corrected'`, false for `'stale'`
+     * (the text was changed by someone else since).
+     */
+    needsReview: boolean,
     glossaryId?: string,
   ): void {
     const list = status.pendingCorrections;
@@ -7209,7 +7244,7 @@ export class TranslationEngine {
     this.correctionListDirty.add(status.runId);
     list.splice(at, 1);
     if (list.length === 0) delete status.pendingCorrections;
-    status.completed++;
+    this.countCompleted(status, record.targetLanguage, needsReview);
     metricsCollector.recordSuccess(record.moduleId, metricsModel);
     if (status.correctionPhase) {
       status.correctionPhase.done = Math.min(
@@ -7274,7 +7309,7 @@ export class TranslationEngine {
       // Whatever could not be planned keeps its first-pass text — unless this
       // pass was superseded (cancel + retry), whose records are not ours.
       if (this.correctionRuns.get(runId) === current) {
-        for (const record of records) this.resolveCorrection(status, record, 'kept', null);
+        for (const record of records) this.resolveCorrection(status, record, 'kept', null, true);
       }
     } finally {
       current.outstanding--;
@@ -7294,7 +7329,7 @@ export class TranslationEngine {
     if (this.correctionHalted(status, this.controllers.get(runId)?.signal)) return;
     // Nothing can be left pending without a task: settle strays so the run ends.
     for (const record of [...(status.pendingCorrections ?? [])]) {
-      this.resolveCorrection(status, record, 'kept', null);
+      this.resolveCorrection(status, record, 'kept', null, true);
     }
     delete status.correctionPhase;
     await this.finalizeTranslationTerminal(status, projectId, runId);
@@ -7377,7 +7412,7 @@ export class TranslationEngine {
           targetLanguage: record.targetLanguage,
           reason: entry ? 'changed-since-first-pass' : 'entry-removed',
         });
-        this.resolveCorrection(status, record, 'stale', null);
+        this.resolveCorrection(status, record, 'stale', null, false);
         continue;
       }
       const glossaryKey = this.glossaryEntryKey(record.targetLanguage, entry);
@@ -7442,7 +7477,7 @@ export class TranslationEngine {
           strings: group.length,
           reason,
         });
-        for (const item of group) this.resolveCorrection(status, item.record, 'kept', null);
+        for (const item of group) this.resolveCorrection(status, item.record, 'kept', null, true);
       };
       const effective = resolveEffectiveModuleConfig(
         origin.moduleId,
@@ -7955,7 +7990,7 @@ export class TranslationEngine {
       ) {
         // Anything this chunk did not settle keeps its first-pass text.
         for (const record of unresolved()) {
-          this.resolveCorrection(status, record, 'kept', args.metricsModel);
+          this.resolveCorrection(status, record, 'kept', args.metricsModel, true);
         }
       }
       state.outstanding--;
@@ -7984,7 +8019,7 @@ export class TranslationEngine {
     const { entry, targetLanguage } = decision;
     try {
       if (!corrected || corrected.error || !corrected.translatedText?.trim()) {
-        this.resolveCorrection(status, item.record, 'kept', metricsModel);
+        this.resolveCorrection(status, item.record, 'kept', metricsModel, true);
         return;
       }
       const diagnostics = verifyMaskedTranslation(corrected.translatedText, item.plan);
@@ -8016,17 +8051,25 @@ export class TranslationEngine {
             targetLanguage,
             reason: 'changed-since-first-pass',
           });
-          this.resolveCorrection(status, item.record, 'stale', metricsModel);
+          this.resolveCorrection(status, item.record, 'stale', metricsModel, false);
           return;
         }
         throw err;
       }
-      await this.lqaGate(entry, result, projectId, targetLanguage, maskIssues, project);
+      const correctedVerdict = await this.lqaGate(
+        entry,
+        result,
+        projectId,
+        targetLanguage,
+        maskIssues,
+        project,
+      );
       this.resolveCorrection(
         status,
         item.record,
         'corrected',
         metricsModel,
+        correctedVerdict?.passed === false,
         corrected.usedGlossaryId,
       );
     } catch (err) {
@@ -8037,7 +8080,7 @@ export class TranslationEngine {
         targetLanguage,
         error: toErrorMessage(err),
       });
-      this.resolveCorrection(status, item.record, 'kept', metricsModel);
+      this.resolveCorrection(status, item.record, 'kept', metricsModel, true);
     }
   }
 
@@ -8557,7 +8600,41 @@ export class TranslationEngine {
     message: string,
     code?: FailureCode,
   ): void {
-    recordRunFailure(status, { entryId, targetLanguage }, message, code);
+    this.announceLanguageDone(
+      status,
+      targetLanguage,
+      recordRunFailure(status, { entryId, targetLanguage }, message, code),
+    );
+  }
+
+  /** Count one pair completed, announcing its language if that settled it. */
+  private countCompleted(status: RunStatus, targetLanguage: string, needsReview: boolean): void {
+    this.announceLanguageDone(
+      status,
+      targetLanguage,
+      recordRunCompleted(status, targetLanguage, { needsReview }),
+    );
+  }
+
+  /**
+   * Log `translation:language-done` for a language whose last pair of this
+   * attempt just settled. The helpers return progress only on that one bump,
+   * so each language is announced once per attempt.
+   */
+  private announceLanguageDone(
+    status: RunStatus,
+    targetLanguage: string,
+    progress: LanguageProgress | null,
+  ): void {
+    if (!progress) return;
+    this.logger.info('translation:language-done', {
+      runId: status.runId,
+      targetLanguage,
+      total: progress.total,
+      completed: progress.completed,
+      failed: progress.failed,
+      needsReview: progress.needsReview,
+    });
   }
 
   /**
@@ -8834,8 +8911,8 @@ export class TranslationEngine {
       persistDecision,
       status.runId,
     );
-    await this.lqaGate(d.entry, result, projectId, d.targetLanguage, [], project);
-    status.completed++;
+    const verdict = await this.lqaGate(d.entry, result, projectId, d.targetLanguage, [], project);
+    this.countCompleted(status, d.targetLanguage, verdict?.passed === false);
     this.logger.info('translation:done', {
       runId: status.runId,
       entryId: d.entry.id,

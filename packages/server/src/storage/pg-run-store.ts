@@ -110,6 +110,7 @@ export class PgRunStore implements RunStore {
       completed: written.completed,
       failed: written.failed,
       total: written.total,
+      ...(written.languageProgress ? { languageProgress: written.languageProgress } : {}),
       tenantId: getCurrentTenant()?.userId,
     });
     // `getPool` is passed uncalled so even a pool lookup that throws is caught
@@ -157,9 +158,20 @@ export class PgRunStore implements RunStore {
     // The `prev` CTE reads the snapshot taken before the insert, so it sees the
     // row as it was before this statement changed it.
     // Shallow, plus the one array the notifier reads that the run still
-    // appends to; taken with no await before the query, so it matches the
-    // parameters below.
-    const written: RunStatus = { ...run, errors: [...(run.errors ?? [])] };
+    // appends to, and the per-language counters the progress event carries
+    // (the engine keeps bumping them in place); taken with no await before the
+    // query, so it matches the parameters below.
+    const written: RunStatus = {
+      ...run,
+      errors: [...(run.errors ?? [])],
+      ...(run.languageProgress
+        ? {
+            languageProgress: Object.fromEntries(
+              Object.entries(run.languageProgress).map(([lang, p]) => [lang, { ...p }]),
+            ),
+          }
+        : {}),
+    };
     const { rows } = await db.query<{ prev_status: RunStatusCode | null }>(
       `with prev as (select status from runs where run_id = $1)
        insert into runs (run_id, project_id, tenant_id, status, kind, total, completed, failed,
@@ -422,6 +434,7 @@ export class PgRunStore implements RunStore {
         completed: run.completed,
         failed: run.failed,
         total: run.total,
+        ...(run.languageProgress ? { languageProgress: run.languageProgress } : {}),
         tenantId: getCurrentTenant()?.userId,
       });
     }

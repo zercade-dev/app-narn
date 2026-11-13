@@ -321,7 +321,7 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
             </p>
           )}
           {!loadingList && backups.length > 0 && (
-            <div className="space-y-4" data-testid="backup-list">
+            <div className="space-y-4" data-testid="backup-list" data-tour="backup-list">
               {groupedBackups.map(({ trigger, items }) => (
                 <div key={trigger} data-testid={`backup-group-${trigger}`}>
                   <h4 className="mb-2 text-sm font-medium">{t(TRIGGER_LABEL_KEYS[trigger])}</h4>
@@ -340,6 +340,7 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
                             onClick={() => void handleOpenServerRestore(b)}
                             disabled={restoring}
                             data-testid="backup-server-restore-btn"
+                            data-tour={`backup-restore-${b.id}`}
                           >
                             {t('restoreButton')}
                           </Button>

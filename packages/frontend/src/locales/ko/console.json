@@ -7,6 +7,7 @@
   "filter_error": "오류",
   "filter_warn": "경고",
   "filter_info": "정보",
+  "filter_infoAndUp": "정보 이상",
   "filter_debug": "디버그",
   "filter_notifications": "알림",
   "statusConnected": "서버 로그 스트림에 연결됨",
@@ -50,5 +51,20 @@
     "queued": "{{type}}: 대기 중, {{position}}번째",
     "queuedNoPosition": "{{type}}: 대기 중",
     "starting": "{{type}}: 시작하는 중"
+  },
+  "progress": {
+    "counts": "{{done}}/{{total}}",
+    "failed": "{{count}}개 실패",
+    "elapsed": "{{time}} 경과",
+    "estimating": "예상 시간 계산 중…",
+    "waiting": "재개 대기 중",
+    "etaUnderMinute": "1분 미만 남음",
+    "etaMinutes": "약 {{count}}분 남음",
+    "etaHours": "약 {{hours}}시간 {{minutes}}분 남음",
+    "outcome": {
+      "completed": "완료됨",
+      "failed": "실패함",
+      "cancelled": "취소됨"
+    }
   }
 }

@@ -14,6 +14,18 @@ export interface GuideFacts {
   /** Entries of the active project are selected in the string list. */
   hasSelection: boolean;
   isCollaboratorOnly: boolean;
+  /** A translatable entry of the active project still misses a target language. */
+  untranslatedRemain: boolean;
+  /**
+   * The guide's quick test on the active project translated something, more is
+   * left, and the person has not yet chosen between the rest and export.
+   */
+  quickTestPending: boolean;
+  /**
+   * The person chose "translate the rest" after the quick test and the run it
+   * produced has not settled yet (still pending, queued, running or paused).
+   */
+  restRunning: boolean;
 }
 
 export type TourAdvance =
@@ -52,10 +64,18 @@ export interface TourStep {
   dim?: false;
   /** Opened when the step becomes current. */
   navigate?: { tab?: Tab; view?: ShellView };
-  /** Extra callout buttons. `labelKey` is in the `guide-tour` namespace. */
-  actions?: Array<{ labelKey: string; run: () => void; testId: string }>;
+  /**
+   * Extra callout buttons. `labelKey` is in the `guide-tour` namespace;
+   * `primary` marks the recommended choice.
+   */
+  actions?: Array<{ labelKey: string; run: () => void; testId: string; primary?: true }>;
   /** 1..MAJOR_STEP_COUNT for the first-run tour's "Step N of 5". */
   major?: number;
+  /**
+   * Id of the step this one stands in for (a variant shown in its place). A
+   * variant is not counted: it reports the position of the step it names.
+   */
+  variantOf?: string;
 }
 
 export interface Tour {

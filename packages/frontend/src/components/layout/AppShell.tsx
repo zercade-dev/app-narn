@@ -6,7 +6,7 @@ import { Sidebar } from './Sidebar.js';
 import { ModeSwitch } from './ModeSwitch.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
-import { AreaTourHost } from '../tour/AreaTourHost.js';
+import { TourHost } from '../tour/TourHost.js';
 import { AreaTourOffer } from '../tour/AreaTourOffer.js';
 import { FirstRunTour } from '../tour/FirstRunTour.js';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
@@ -489,7 +489,7 @@ export function AppShell() {
       <div className="flex h-svh w-full flex-col">
         {showThemeChooser && <ThemeChooserOverlay onDone={() => setShowThemeChooser(false)} />}
         <FirstRunTour suspended={showThemeChooser} />
-        <AreaTourHost />
+        <TourHost />
         <SlotRibbon />
         <SidebarProvider className="min-h-0 flex-1">
           {/* Sidebar */}

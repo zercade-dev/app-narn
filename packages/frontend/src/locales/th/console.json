@@ -7,6 +7,7 @@
   "filter_error": "ข้อผิดพลาด",
   "filter_warn": "คำเตือน",
   "filter_info": "แจ้งให้ทราบ",
+  "filter_infoAndUp": "ข้อมูลขึ้นไป",
   "filter_debug": "ดีบัก",
   "filter_notifications": "การแจ้งเตือน",
   "statusConnected": "เชื่อมต่อกับสตรีมล็อกของเซิร์ฟเวอร์แล้ว",
@@ -50,5 +51,20 @@
     "queued": "{{type}}: อยู่ในคิว ลำดับที่ {{position}}",
     "queuedNoPosition": "{{type}}: อยู่ในคิว",
     "starting": "{{type}}: กำลังเริ่ม"
+  },
+  "progress": {
+    "counts": "{{done}}/{{total}}",
+    "failed": "ล้มเหลว {{count}}",
+    "elapsed": "ผ่านไป {{time}}",
+    "estimating": "กำลังประเมิน…",
+    "waiting": "รอดำเนินการต่อ",
+    "etaUnderMinute": "เหลือไม่ถึงหนึ่งนาที",
+    "etaMinutes": "เหลือประมาณ {{count}} นาที",
+    "etaHours": "เหลือประมาณ {{hours}} ชม. {{minutes}} นาที",
+    "outcome": {
+      "completed": "เสร็จสมบูรณ์",
+      "failed": "ล้มเหลว",
+      "cancelled": "ยกเลิกแล้ว"
+    }
   }
 }

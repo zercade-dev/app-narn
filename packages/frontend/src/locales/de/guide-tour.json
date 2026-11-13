@@ -3,7 +3,8 @@
   "back": "Zurück",
   "skip": "Tour überspringen",
   "close": "Schließen",
-  "stepOf": "Schritt {{current}} von {{total}}",
+  "stepOfSub": "Schritt {{major}} von {{majorTotal}} · {{sub}} von {{subTotal}}",
+  "stepCount": "{{current}} von {{total}}",
   "continueSetup": "Einrichtung fortsetzen: Schritt {{current}} von {{total}}",
   "firstRun": {
     "actions": {
@@ -16,8 +17,13 @@
       "fixKey": "Meinen Schlüssel prüfen",
       "retry": "Erneut versuchen",
       "stopRetry": "Stoppen und erneut versuchen",
-      "switchAdvanced": "Zu „Erweitert“ wechseln",
-      "finish": "Fertig"
+      "translateQuick": "Diese 3 zum Ausprobieren übersetzen",
+      "translateEverything": "Alles übersetzen",
+      "translateFew": "Jetzt übersetzen",
+      "translateRest": "Den Rest jetzt übersetzen",
+      "skipRest": "Überspringen, Fertiges exportieren",
+      "tourSections": "Zeig mir die Bereiche",
+      "maybeLater": "Vielleicht später"
     },
     "vault": {
       "title": "Tresor-Passwort erstellen",
@@ -55,7 +61,7 @@
       "newWhat": "Ein neues Projekt erstellen.",
       "createWhat": "Dem Projekt einen Namen geben und es erstellen.",
       "sourceWhat": "Die Sprache auswählen, in der dein Text geschrieben ist.",
-      "targetsWhat": "Die Sprachen ankreuzen, in die übersetzt werden soll.",
+      "targetsWhat": "Die Sprachen ankreuzen, in die übersetzt werden soll, oder „Alle auswählen“ verwenden.",
       "saveWhat": "Die Sprachen speichern.",
       "importWhat": "Die CSV-Datei auswählen, die du aus deinem Spiel-Editor exportiert hast.",
       "confirmWhat": "Die Zusammenfassung ansehen und den Import bestätigen."
@@ -64,6 +70,8 @@
       "title": "Übersetzen",
       "why": "Freeway wählt für jede Sprache automatisch ein passendes kostenloses Modell.",
       "openWhat": "Den Tab mit der Liste deiner Einträge öffnen.",
+      "quickWhat": "Die ersten 3 Einträge sind ausgewählt. Zum Ausprobieren nur diese übersetzen oder gleich alles.",
+      "fewWhat": "Deine Einträge sind ausgewählt. Jetzt übersetzen.",
       "selectWhat": "Alle Einträge auswählen.",
       "pressWhat": "Den Übersetzungsdialog öffnen.",
       "startWhat": "Die Übersetzung starten.",
@@ -87,6 +95,11 @@
       "quotaWhat": "Das kostenlose Kontingent ist vorerst aufgebraucht. Die Übersetzung wird von selbst fortgesetzt, sobald wieder Kontingent frei ist.",
       "modelWhat": "Die derzeit verfügbaren kostenlosen Modelle liegen unter der Qualität, die dieser Durchlauf anstrebt. Die Übersetzung wird von selbst fortgesetzt, sobald ein besseres verfügbar ist."
     },
+    "rest": {
+      "title": "Der Test hat geklappt",
+      "what": "Deine ersten 3 Einträge sind in jede gewählte Sprache übersetzt. Den Rest jetzt übersetzen oder exportieren, was schon fertig ist.",
+      "why": "Den Rest kannst du auch später in der Liste der Einträge übersetzen."
+    },
     "export": {
       "title": "Exportieren",
       "why": "Dein Spiel-Editor kann diese Datei importieren, um die Übersetzungen ins Spiel zu übernehmen.",
@@ -95,7 +108,8 @@
     },
     "closing": {
       "title": "Alles eingerichtet",
-      "what": "„Erweitert“ bietet zusätzlich Glossare, Qualitätsprüfungen, Routing, Reviews und mehr.",
+      "what": "Das ist die vereinfachte Ansicht: Sie zeigt nur, was du zum Übersetzen und Exportieren brauchst. „Erweitert“ bietet mehr Werkzeuge. Stell den Schalter auf „Erweitert“, um eine kurze Tour zu sehen.",
+      "whatAdvanced": "Du nutzt den erweiterten Modus, der alle Werkzeuge zeigt. Eine kurze Tour erklärt, wofür jeder Bereich da ist.",
       "why": "Du kannst jederzeit in der oberen Leiste wechseln."
     }
   },
@@ -112,14 +126,44 @@
   },
   "guideTours": {
     "title": "Touren",
-    "firstRun": "Geführter Erststart",
-    "area": {
-      "routing": "Routing",
-      "glossary": "Glossar",
-      "quality": "Qualität",
-      "compare": "Vergleich",
-      "review-translation-ai": "Übersetzungs-KI-Review"
+    "first-run": {
+      "name": "Geführter Erststart",
+      "summary": "Richte einen Anbieter ein, füge deine Strings hinzu, übersetze und exportiere, Schritt für Schritt."
     },
+    "advanced-sections": {
+      "name": "Erweiterte Bereiche",
+      "summary": "Wofür jeder Tab und jede Ansicht da ist, die der erweiterte Modus hinzufügt."
+    },
+    "glossaries": {
+      "name": "Glossare",
+      "summary": "Lege ein Glossar an, füge Begriffe hinzu und wende es an, damit Schlüsselbegriffe einheitlich bleiben."
+    },
+    "routing": {
+      "name": "Routing",
+      "summary": "Ein 30-Sekunden-Überblick, wie NARN entscheidet, wer was übersetzt."
+    },
+    "quality": {
+      "name": "Qualität",
+      "summary": "Ein kurzer Überblick, wie NARN deine Übersetzungen prüft."
+    },
+    "compare": {
+      "name": "Vergleich",
+      "summary": "Ein kurzer Überblick, wie du Übersetzungen nebeneinander prüfst."
+    },
+    "review-translation-ai": {
+      "name": "Übersetzungs-KI-Review",
+      "summary": "Ein kurzer Überblick, wie eine KI deine Übersetzungen prüft."
+    },
+    "orphans": {
+      "name": "Waisen",
+      "summary": "Sieh dir an, was mit einem Eintrag passiert, der in deiner Datei fehlt – mit einer Übungswaise, die die Tour zurückholt."
+    },
+    "startOver": "Von vorn beginnen",
+    "continue": "Dort weitermachen, wo ich aufgehört habe",
+    "progress": "{{current}} von {{total}} Schritten",
+    "completed": "Abgeschlossen",
+    "needsProject": "Öffne ein Projekt, um diese Tour zu machen.",
+    "switchedToAdvanced": "Für diese Tour wurde in den erweiterten Modus gewechselt.",
     "confirm": {
       "title": "Für die geführte Einrichtung zu „Einfach“ wechseln?",
       "body": "Die geführte Einrichtung ist für den Modus „Einfach“ gemacht, der die erweiterten Tabs ausblendet. Du kannst jederzeit in der oberen Leiste zurückwechseln.",
@@ -227,6 +271,205 @@
         "what": "Prüfe alle Übersetzungen im Projekt, nicht nur den letzten Lauf.",
         "why": "Nutze das vor einem Release oder nachdem du Glossar oder Routing geändert hast."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Vergleich",
+      "what": "Der Quelltext neben einer Zielsprache, Zeile für Zeile, auf Wunsch mit einer Referenzsprache.",
+      "why": "Prüfe und bearbeite eine Sprache sorgfältig, auch eine, die du nicht liest."
+    },
+    "routing": {
+      "title": "Routing",
+      "what": "Legt fest, welcher Anbieter jede Sprache, Kategorie oder jeden Tonfall übersetzt.",
+      "why": "Schicke jede Art von Text an den Anbieter, der sie am besten beherrscht."
+    },
+    "stage-details": {
+      "title": "Level-Details",
+      "what": "Name, Gameplay-Details und Beschreibung eines Levels, mit ihren Übersetzungen.",
+      "why": "Übersetze den Text, der ein Level beschreibt, außerhalb deiner String-Datei."
+    },
+    "quality": {
+      "title": "Qualität",
+      "what": "Die automatischen Prüfungen, die jede Übersetzung durchläuft, und welche fehlgeschlagen sind.",
+      "why": "Finde kaputte Tags, geänderte Platzhalter und zu lange Texte vor der Veröffentlichung."
+    },
+    "review-source-ai": {
+      "title": "Quelltext-KI-Review",
+      "what": "Ein KI-Anbieter liest deinen Quelltext und weist auf Tippfehler und unklare Formulierungen hin.",
+      "why": "Ein besserer Quelltext ergibt in jeder Sprache eine bessere Übersetzung."
+    },
+    "review-translation-ai": {
+      "title": "Übersetzungs-KI-Review",
+      "what": "Ein KI-Anbieter liest Übersetzungen neben dem Quelltext und bewertet sie.",
+      "why": "Er findet falsche Bedeutungen und holprige Formulierungen, die automatische Prüfungen übersehen."
+    },
+    "review-manual": {
+      "title": "Manuelles Review",
+      "what": "Eine Warteschlange von Übersetzungen, die ein Review brauchen, zum Freigeben, Bearbeiten oder Zurückstellen.",
+      "why": "Arbeite zweifelhafte Übersetzungen schnell ab, mit Tastenkürzeln."
+    },
+    "glossary": {
+      "title": "Glossar",
+      "what": "Listen von Begriffen mit der Übersetzung, die du für jeden willst.",
+      "why": "Namen und Schlüsselbegriffe werden dann jedes Mal gleich übersetzt."
+    },
+    "category": {
+      "title": "Kategorie",
+      "what": "Gruppiert Strings nach Art, etwa UI-Beschriftungen, Dialoge oder Gegenstandsnamen.",
+      "why": "Routing-Regeln und Batches können dann jede Art von Text anders behandeln."
+    },
+    "color-text": {
+      "title": "Text-Styler",
+      "what": "Ein Entwurfswerkzeug für Text mit Farben, Fett, Kursiv und Schriftgrößen.",
+      "why": "Schreibe formatierten Text, ohne das Markup von Hand zu tippen."
+    },
+    "orphans": {
+      "title": "Waisen",
+      "what": "Einträge, die bei einem späteren Import verschwunden sind, mitsamt ihren Übersetzungen.",
+      "why": "Nichts geht verloren, wenn sich deine Datei ändert: Verknüpfe sie neu oder lösche sie."
+    },
+    "backup": {
+      "title": "Backup",
+      "what": "Packt das Projekt in ein Archiv, das du herunterladen und wiederherstellen kannst.",
+      "why": "Kehre zu einem früheren Stand zurück, wenn ein Import oder eine Massenänderung schiefgeht."
+    },
+    "sharing": {
+      "title": "Zusammenarbeit",
+      "what": "Lade Mitwirkende ein und wähle, welche Sprachen jede Person bearbeiten darf.",
+      "why": "Übersetzer arbeiten an ihren eigenen Sprachen, mit ihren eigenen KI-Anbietern."
+    },
+    "global-config": {
+      "title": "Globale Konfiguration",
+      "what": "Einstellungen für den ganzen Workspace: Anbieter, Modelle und der Zugangsdaten-Tresor.",
+      "why": "Richte einen Anbieter einmal ein und nutze ihn in jedem Projekt."
+    },
+    "translation-memory": {
+      "title": "Translation Memory",
+      "what": "Frühere Übersetzungen, wiederverwendet, wenn derselbe Text erneut vorkommt.",
+      "why": "Das spart Kosten und hält wiederholte Zeilen einheitlich übersetzt."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "Wofür ein Glossar da ist",
+      "what": "Ein Glossar listet Begriffe mit der Übersetzung auf, die du für jeden willst, etwa Figurennamen oder Spieljargon.",
+      "why": "Übersetzungen verwenden dann jedes Mal deine Wörter statt einer neuen Vermutung."
+    },
+    "create": {
+      "title": "Glossar anlegen",
+      "what": "Lege hier ein neues, leeres Glossar an.",
+      "why": "Oft reicht ein Glossar. Nutze mehrere, um Begriffsgruppen getrennt zu halten."
+    },
+    "add-term": {
+      "title": "Begriff hinzufügen",
+      "what": "Gib den Quellbegriff und seine Übersetzung für jede Sprache ein und füge ihn hinzu.",
+      "why": "Markiere einen Begriff als konstant, wenn er nie übersetzt werden darf, etwa ein Markenname."
+    },
+    "assign": {
+      "title": "Auf dieses Projekt anwenden",
+      "what": "Ein aktiviertes Glossar wird beim Übersetzen dieses Projekts verwendet. Deaktiviere es, um es nicht mehr zu nutzen.",
+      "why": "Lass ein Glossar deaktiviert, solange du es noch aufbaust."
+    },
+    "effect": {
+      "title": "Wie es die Übersetzung verändert",
+      "what": "Enthält ein String einen Glossarbegriff, werden der Begriff und deine Übersetzung mit dem String mitgeschickt.",
+      "why": "Der Anbieter folgt deiner Wahl, statt ein eigenes Wort zu wählen."
+    },
+    "generate": {
+      "title": "Begriffe von der KI vorschlagen lassen",
+      "what": "Lass einen KI-Anbieter wahrscheinliche Begriffe in deinen Strings finden.",
+      "why": "Du prüfst die Vorschläge und behältst nur die, die du willst."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Was eine Waise ist",
+      "what": "Eine Waise ist ein Eintrag, der in der zuletzt mit „Vollständig ersetzen“ importierten Datei fehlt.",
+      "why": "NARN bewahrt ihn hier mitsamt Übersetzungen auf, statt ihn zu löschen. So geht nichts versehentlich verloren."
+    },
+    "offer": {
+      "title": "Mit einer Übungswaise ausprobieren",
+      "what": "Die Tour kann einen deiner Einträge kurz zur Waise machen und ihn danach zurückholen. Nichts geht verloren: Der Eintrag behält seine Übersetzungen und kommt an seinen Platz zurück.",
+      "why": "Mit einer echten Waise fällt dir dieser Tab später leichter. Oder lass dir alles nur erklären."
+    },
+    "backup": {
+      "title": "Zuerst ein Backup",
+      "what": "Vor der Übungswaise wird ein Backup des Projekts angelegt. So oder so geht nichts verloren: Die Tour holt den Eintrag zurück.",
+      "why": "Mit einem Backup kommst du über den Tab „Backup“ jederzeit genau zu diesem Stand zurück."
+    },
+    "simulating": {
+      "title": "Übungswaise wird erstellt",
+      "what": "Die Tour importiert deine Einträge erneut, einen davon ausgenommen. Das dauert einen Moment.",
+      "why": "Genau das passiert, wenn ein Eintrag aus einer Datei verschwindet, die du mit „Vollständig ersetzen“ importierst."
+    },
+    "practice-row": {
+      "title": "Deine Übungswaise",
+      "what": "Dieser Eintrag ist jetzt eine Waise. Er erscheint nicht mehr im Tab „Übersetzungen“, seine Übersetzungen bleiben erhalten.",
+      "why": "Waisen erscheinen hier nach einem Import mit „Vollständig ersetzen“, damit du für jede entscheiden kannst."
+    },
+    "practice-options": {
+      "title": "Was du mit einer Waise tun kannst",
+      "what": "„Neu verknüpfen“ überträgt ihre Übersetzungen auf einen anderen Eintrag, etwa einen, dessen Text nur umformuliert wurde. „Löschen“ entfernt sie endgültig.",
+      "why": "Lass bei dieser beides sein: Die Tour holt sie im nächsten Schritt zurück."
+    },
+    "recover": {
+      "title": "Zurückholen",
+      "what": "Klicke auf „Zurückholen“, und der Eintrag kehrt mit seinen Übersetzungen an seinen Platz in der Liste zurück.",
+      "why": "Die Tour importiert ihn erneut – so wie ein Eintrag zurückkommt, wenn deine nächste Datei ihn enthält."
+    },
+    "restore": {
+      "title": "Dein Backup",
+      "what": "Das Backup von vor der Übung steht hier. „Backup wiederherstellen“ zeigt dir seine Schaltfläche „Wiederherstellen“; ob du sie drückst, entscheidest du.",
+      "why": "Du brauchst es nicht: Der Eintrag ist schon zurück. Stelle ein Backup nur wieder her, wenn etwas schiefgegangen ist."
+    },
+    "done": {
+      "title": "Das waren die Waisen",
+      "what": "Waisen bewahren die Einträge und Übersetzungen auf, die dein letzter Import ausgelassen hat, bis du sie neu verknüpfst oder löschst.",
+      "why": "Wirf nach jedem Import mit „Vollständig ersetzen“ einen Blick in diesen Tab."
+    },
+    "explain-list": {
+      "title": "Die Liste der Waisen",
+      "what": "Jede Waise zeigt ihren Quelltext und wie viele Übersetzungen sie behält.",
+      "why": "Die mit den meisten Übersetzungen stehen oben: Sie neu zu machen kostet am meisten."
+    },
+    "explain-options": {
+      "title": "Neu verknüpfen oder löschen",
+      "what": "„Neu verknüpfen“ überträgt die Übersetzungen einer Waise auf einen anderen Eintrag, etwa einen, dessen Text nur umformuliert wurde. „Löschen“ entfernt sie endgültig.",
+      "why": "Verknüpfe neu, wenn es den Text in anderer Form noch gibt; lösche, wenn er wirklich weg ist."
+    },
+    "actions": {
+      "simulate": "Übungswaise erstellen",
+      "explainOnly": "Nur erklären",
+      "backupFirst": "Zuerst Backup (empfohlen)",
+      "skipBackup": "Ohne Backup weiter",
+      "recover": "Zurückholen",
+      "restoreBackup": "Backup wiederherstellen",
+      "switchProject": "Projekt wechseln"
+    },
+    "notices": {
+      "alreadyRecovered": "Die Übungswaise ist schon wieder im Tab „Übersetzungen“.",
+      "alreadyDeleted": "Die Übungswaise wurde gelöscht, daher kann die Tour sie nicht zurückholen. Falls du ein Backup angelegt hast, kannst du es im Tab „Backup“ wiederherstellen.",
+      "otherProject": "Eine Übungswaise aus dieser Tour liegt noch in einem anderen Projekt. Wechsle zu diesem Projekt, um sie zuerst zurückzuholen.",
+      "leftOut": "Die Übungswaise ist noch im Tab „Waisen“. Klicke dort auf „Zurückholen“, um sie zurückzubringen."
+    },
+    "blocked": {
+      "noEntries": "Es gibt noch keinen Eintrag zum Üben, daher erklärt die Tour nur.",
+      "collaborator": "Nur der Projektinhaber kann Waisen verwalten, daher erklärt die Tour nur.",
+      "sourcelessRows": "Manche Einträge haben keinen Quelltext und lassen sich durch einen Import nicht exakt wiederherstellen. Die Tour erklärt nur, es ändert sich nichts.",
+      "unsafeText": "Ein Quelltext hat ein Anführungszeichen direkt vor einem Komma oder Zeilenumbruch, was ein Import nicht exakt wiederherstellen kann. Die Tour erklärt nur, es ändert sich nichts.",
+      "commaInSourceLabel": "Ein Herkunftslabel enthält ein Komma oder Leerzeichen am Rand, was ein Import nicht exakt wiederherstellen kann. Die Tour erklärt nur, es ändert sich nichts."
+    },
+    "errors": {
+      "backup": "Das Backup konnte nicht angelegt werden. Es wurde nichts geändert.",
+      "simulate": "Die Übungswaise konnte nicht erstellt werden. Es wurde nichts geändert.",
+      "recover": "Der Eintrag konnte noch nicht zurückgeholt werden. Er ist im Tab „Waisen“ sicher; versuche es noch einmal.",
+      "recoverRefused": "Die Tour kann diesen Eintrag nicht zurückholen, ohne andere Einträge zu ändern, daher wurde nichts geändert. Übertrage seine Übersetzungen mit „Neu verknüpfen“ im Tab „Waisen“ oder stelle dein Backup wieder her, falls du eines angelegt hast.",
+      "load": "Der Stand der Übungswaise ließ sich nicht prüfen. Klicke auf „Zurückholen“, um es noch einmal zu versuchen."
+    },
+    "banner": {
+      "text": "Das ist die Übungswaise der geführten Tour. Hol sie zurück, damit sie mit ihren Übersetzungen wieder im Tab „Übersetzungen“ steht.",
+      "recovered": "Die Übungswaise ist wieder im Tab „Übersetzungen“."
     }
   }
 }

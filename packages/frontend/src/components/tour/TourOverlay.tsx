@@ -1,7 +1,16 @@
 import { Popover } from '@base-ui/react/popover';
-import { useEffect, useId, useReducer, useRef, useState, useSyncExternalStore } from 'react';
+import {
+  useEffect,
+  useId,
+  useReducer,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTourAnchor } from '@/hooks/use-tour-anchor';
+import type { TourPosition } from '@/lib/tour/position';
 import type { GuideFacts, Tour } from '@/lib/tour/types';
 import { useViewStore } from '@/stores/view-store';
 import { TourCallout } from './TourCallout';
@@ -22,6 +31,12 @@ interface TourOverlayProps {
   tour: Tour;
   stepIndex: number;
   facts: GuideFacts;
+  /** The counter and progress bar; none without it. */
+  position?: TourPosition;
+  /** Content under the callout's why text. */
+  extra?: ReactNode;
+  /** Whether Back shows (default: on every step but the first). */
+  canGoBack?: boolean;
   onAdvance: () => void;
   onBack: () => void;
   onExit: () => void;
@@ -95,6 +110,9 @@ export function TourOverlay({
   tour,
   stepIndex,
   facts,
+  position,
+  extra,
+  canGoBack,
   onAdvance,
   onBack,
   onExit,
@@ -208,7 +226,9 @@ export function TourOverlay({
   const calloutProps = {
     step,
     titleId,
-    showBack: stepIndex > 0,
+    position,
+    extra,
+    showBack: canGoBack ?? stepIndex > 0,
     showNext: step.advance.kind === 'next' || (stateDone && enteredViaBack),
     onNext: onAdvance,
     onBack,

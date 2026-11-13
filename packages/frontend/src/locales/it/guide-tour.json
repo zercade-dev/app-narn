@@ -3,7 +3,8 @@
   "back": "Indietro",
   "skip": "Salta il tour",
   "close": "Chiudi",
-  "stepOf": "Passaggio {{current}} di {{total}}",
+  "stepOfSub": "Passaggio {{major}} di {{majorTotal}} · {{sub}} di {{subTotal}}",
+  "stepCount": "{{current}} di {{total}}",
   "continueSetup": "Continua la configurazione: passaggio {{current}} di {{total}}",
   "firstRun": {
     "actions": {
@@ -16,8 +17,13 @@
       "fixKey": "Controlla la mia chiave",
       "retry": "Riprova",
       "stopRetry": "Interrompi e riprova",
-      "switchAdvanced": "Passa ad Avanzata",
-      "finish": "Fine"
+      "translateQuick": "Traduci queste 3 per provare",
+      "translateEverything": "Traduci tutto",
+      "translateFew": "Traducile",
+      "translateRest": "Traduci il resto ora",
+      "skipRest": "Salta ed esporta ciò che c'è",
+      "tourSections": "Mostrami le sezioni",
+      "maybeLater": "Magari più tardi"
     },
     "vault": {
       "title": "Creazione della password della cassaforte",
@@ -55,7 +61,7 @@
       "newWhat": "Crea un nuovo progetto.",
       "createWhat": "Dai un nome al progetto, poi crealo.",
       "sourceWhat": "Scegli la lingua in cui è scritto il tuo testo.",
-      "targetsWhat": "Spunta le lingue in cui vuoi tradurre.",
+      "targetsWhat": "Spunta le lingue in cui vuoi tradurre, oppure usa Seleziona tutto.",
       "saveWhat": "Salva le lingue.",
       "importWhat": "Scegli il file CSV esportato dal tuo editor di gioco.",
       "confirmWhat": "Controlla il riepilogo, poi conferma l'importazione."
@@ -64,6 +70,8 @@
       "title": "Traduzione",
       "why": "Freeway sceglie automaticamente un modello gratuito adatto a ogni lingua.",
       "openWhat": "Apri la scheda che elenca le tue voci.",
+      "quickWhat": "Le prime 3 voci sono selezionate. Traducile per provare, oppure traduci tutto subito.",
+      "fewWhat": "Le tue voci sono selezionate. Traducile ora.",
       "selectWhat": "Seleziona tutte le voci.",
       "pressWhat": "Apri la finestra di traduzione.",
       "startWhat": "Avvia la traduzione.",
@@ -87,6 +95,11 @@
       "quotaWhat": "La quota gratuita è esaurita per ora. La traduzione riprende da sola quando la quota torna disponibile.",
       "modelWhat": "I modelli gratuiti disponibili in questo momento sono sotto la qualità a cui punta questa esecuzione. La traduzione riprende da sola quando ne è disponibile uno migliore."
     },
+    "rest": {
+      "title": "La prova è riuscita",
+      "what": "Le tue prime 3 voci sono tradotte in tutte le lingue scelte. Traduci il resto ora, oppure esporta ciò che hai.",
+      "why": "Puoi tradurre il resto più tardi dall'elenco delle voci."
+    },
     "export": {
       "title": "Esportazione",
       "why": "Il tuo editor di gioco può importare questo file per portare le traduzioni nel gioco.",
@@ -95,7 +108,8 @@
     },
     "closing": {
       "title": "È tutto pronto",
-      "what": "Avanzata aggiunge glossari, controlli di qualità, routing, revisioni e altro ancora.",
+      "what": "Questa è la vista semplificata: mostra solo ciò che serve per tradurre ed esportare. Avanzata offre altri strumenti. Sposta l'interruttore su Avanzata per un breve tour.",
+      "whatAdvanced": "Stai usando la modalità avanzata, che mostra tutti gli strumenti. Un breve tour spiega a cosa serve ogni sezione.",
       "why": "Puoi cambiare modalità in qualsiasi momento dalla barra in alto."
     }
   },
@@ -112,14 +126,44 @@
   },
   "guideTours": {
     "title": "Tour",
-    "firstRun": "Primo avvio guidato",
-    "area": {
-      "routing": "Routing",
-      "glossary": "Glossario",
-      "quality": "Qualità",
-      "compare": "Confronto",
-      "review-translation-ai": "Revisione IA traduzioni"
+    "first-run": {
+      "name": "Primo avvio guidato",
+      "summary": "Configura un provider, aggiungi i tuoi testi, traduci ed esporta, un passo alla volta."
     },
+    "advanced-sections": {
+      "name": "Sezioni avanzate",
+      "summary": "A cosa serve ogni scheda e vista aggiunta dalla modalità avanzata."
+    },
+    "glossaries": {
+      "name": "Glossari",
+      "summary": "Crea un glossario, aggiungi termini e applicalo, così i termini chiave restano coerenti."
+    },
+    "routing": {
+      "name": "Routing",
+      "summary": "Una panoramica di 30 secondi su come NARN sceglie chi traduce cosa."
+    },
+    "quality": {
+      "name": "Qualità",
+      "summary": "Una breve panoramica su come NARN controlla le tue traduzioni."
+    },
+    "compare": {
+      "name": "Confronto",
+      "summary": "Una breve panoramica su come rivedere le traduzioni fianco a fianco."
+    },
+    "review-translation-ai": {
+      "name": "Revisione IA traduzioni",
+      "summary": "Una breve panoramica su come un’IA controlla le tue traduzioni."
+    },
+    "orphans": {
+      "name": "Orfane",
+      "summary": "Guarda cosa succede a una voce che manca nel tuo file, con un’orfana di prova che il tour rimette al suo posto."
+    },
+    "startOver": "Ricomincia dall’inizio",
+    "continue": "Riprendi da dove avevo lasciato",
+    "progress": "{{current}} di {{total}} passaggi",
+    "completed": "Completato",
+    "needsProject": "Apri un progetto per seguire questo tour.",
+    "switchedToAdvanced": "Passato alla modalità avanzata per questo tour.",
     "confirm": {
       "title": "Passare a Semplice per la configurazione guidata?",
       "body": "La configurazione guidata è pensata per la modalità Semplice, che nasconde le schede avanzate. Puoi tornare indietro in qualsiasi momento dalla barra in alto.",
@@ -227,6 +271,205 @@
         "what": "Rivedi tutte le traduzioni del progetto, non solo l’ultima esecuzione.",
         "why": "Usalo prima di una release o dopo aver cambiato il glossario o il routing."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Confronto",
+      "what": "Il testo di origine accanto a una lingua di destinazione, riga per riga, con una lingua di riferimento facoltativa.",
+      "why": "Rivedi e modifica una lingua con cura, anche una che non leggi."
+    },
+    "routing": {
+      "title": "Routing",
+      "what": "Decide quale provider traduce ogni lingua, categoria o tono.",
+      "why": "Invia ogni tipo di testo al provider che lo gestisce meglio."
+    },
+    "stage-details": {
+      "title": "Dettagli livello",
+      "what": "Nome, dettagli di gameplay e descrizione di un livello, con le loro traduzioni.",
+      "why": "Traduci il testo che descrive un livello, fuori dal tuo file di testi."
+    },
+    "quality": {
+      "title": "Qualità",
+      "what": "I controlli automatici che ogni traduzione supera, e quelli non superati.",
+      "why": "Trova tag rotti, segnaposto modificati e testi troppo lunghi prima della pubblicazione."
+    },
+    "review-source-ai": {
+      "title": "Revisione IA origine",
+      "what": "Un provider IA legge il testo di origine e segnala refusi e frasi poco chiare.",
+      "why": "Un testo di origine migliore dà una traduzione migliore in ogni lingua."
+    },
+    "review-translation-ai": {
+      "title": "Revisione IA traduzioni",
+      "what": "Un provider IA legge le traduzioni accanto al testo di origine e assegna un punteggio.",
+      "why": "Trova significati sbagliati e frasi goffe che i controlli automatici non vedono."
+    },
+    "review-manual": {
+      "title": "Revisione manuale",
+      "what": "Una coda di traduzioni da rivedere, da approvare, modificare o contrassegnare una per una.",
+      "why": "Smaltisci in fretta le traduzioni dubbie, con le scorciatoie da tastiera."
+    },
+    "glossary": {
+      "title": "Glossario",
+      "what": "Elenchi di termini con la traduzione che vuoi per ciascuno.",
+      "why": "Nomi e termini chiave escono così sempre allo stesso modo."
+    },
+    "category": {
+      "title": "Categoria",
+      "what": "Raggruppa i testi per tipo, come etichette dell’interfaccia, dialoghi o nomi di oggetti.",
+      "why": "Regole di routing e batch possono così trattare ogni tipo di testo in modo diverso."
+    },
+    "color-text": {
+      "title": "Stile testo",
+      "what": "Uno strumento di bozza per testo con colori, grassetto, corsivo e dimensioni del carattere.",
+      "why": "Scrivi testo formattato senza digitare il markup a mano."
+    },
+    "orphans": {
+      "title": "Orfane",
+      "what": "Voci sparite in un’importazione successiva, conservate con le loro traduzioni.",
+      "why": "Non si perde nulla quando il file cambia: ricollegale o eliminale."
+    },
+    "backup": {
+      "title": "Backup",
+      "what": "Raccoglie il progetto in un archivio che puoi scaricare e ripristinare.",
+      "why": "Torna a uno stato precedente se un’importazione o una modifica in blocco va storta."
+    },
+    "sharing": {
+      "title": "Condivisione",
+      "what": "Invita collaboratori e scegli quali lingue può modificare ciascuno.",
+      "why": "I traduttori lavorano sulle proprie lingue, con i propri provider IA."
+    },
+    "global-config": {
+      "title": "Configurazione globale",
+      "what": "Impostazioni dell’intera area di lavoro: provider, modelli e cassaforte delle credenziali.",
+      "why": "Configura un provider una volta e usalo in ogni progetto."
+    },
+    "translation-memory": {
+      "title": "Memoria di traduzione",
+      "what": "Traduzioni precedenti, riutilizzate quando torna lo stesso testo.",
+      "why": "Fa risparmiare e mantiene uguale la traduzione delle righe ripetute."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "A cosa serve un glossario",
+      "what": "Un glossario elenca termini con la traduzione che vuoi per ciascuno, come nomi di personaggi o gergo del gioco.",
+      "why": "Le traduzioni usano così sempre le tue parole invece di tirare a indovinare."
+    },
+    "create": {
+      "title": "Crea un glossario",
+      "what": "Inizia qui un glossario nuovo e vuoto.",
+      "why": "Spesso basta un glossario. Usane di più per tenere separati gruppi di termini."
+    },
+    "add-term": {
+      "title": "Aggiungi un termine",
+      "what": "Scrivi il termine di origine e la sua traduzione in ogni lingua, poi aggiungilo.",
+      "why": "Segna un termine come costante quando non va mai tradotto, come un nome di marchio."
+    },
+    "assign": {
+      "title": "Applicalo a questo progetto",
+      "what": "Un glossario attivo viene usato quando questo progetto viene tradotto. Disattivalo per smettere di usarlo.",
+      "why": "Tieni un glossario disattivato finché lo stai ancora costruendo."
+    },
+    "effect": {
+      "title": "Come cambia la traduzione",
+      "what": "Quando un testo contiene un termine del glossario, il termine e la tua traduzione vengono inviati insieme al testo.",
+      "why": "Il provider segue la tua scelta invece di sceglierne una sua."
+    },
+    "generate": {
+      "title": "Fatti suggerire i termini dall’IA",
+      "what": "Chiedi a un provider IA di trovare i termini probabili nei tuoi testi.",
+      "why": "Rivedi i suggerimenti e tieni solo quelli che vuoi."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Cos’è un’orfana",
+      "what": "Un’orfana è una voce che manca nell’ultimo file che hai importato con “Sostituzione completa”.",
+      "why": "NARN la conserva qui con le sue traduzioni invece di eliminarla, così niente va perso per sbaglio."
+    },
+    "offer": {
+      "title": "Provalo con un’orfana di prova",
+      "what": "Il tour può trasformare per un momento una delle tue voci in un’orfana e poi rimetterla a posto. Non si perde nulla: la voce mantiene le sue traduzioni e torna al suo posto.",
+      "why": "Vedere un’orfana vera rende questa scheda più facile da usare in seguito. Oppure lascia che il tour si limiti a spiegare."
+    },
+    "backup": {
+      "title": "Prima un backup",
+      "what": "Prima di creare l’orfana di prova viene creato un backup del progetto. In ogni caso non si perde nulla: il tour rimette a posto la voce.",
+      "why": "Con un backup puoi sempre tornare esattamente a questo stato dalla scheda “Backup”."
+    },
+    "simulating": {
+      "title": "Creazione dell’orfana di prova",
+      "what": "Il tour importa di nuovo le tue voci tranne una. Ci vuole un momento.",
+      "why": "È ciò che succede quando una voce sparisce da un file che importi con “Sostituzione completa”."
+    },
+    "practice-row": {
+      "title": "La tua orfana di prova",
+      "what": "Questa voce ora è un’orfana. Non compare più nella scheda “Traduzioni” e le sue traduzioni restano conservate.",
+      "why": "Le orfane compaiono qui dopo un’importazione con “Sostituzione completa”, così puoi decidere cosa fare di ciascuna."
+    },
+    "practice-options": {
+      "title": "Cosa puoi fare con un’orfana",
+      "what": "“Ricollega” sposta le sue traduzioni su un’altra voce, per esempio una il cui testo è stato solo riformulato. “Elimina” la rimuove per sempre.",
+      "why": "Con questa lasciali stare: il tour la rimette a posto nel passaggio successivo."
+    },
+    "recover": {
+      "title": "Rimettila a posto",
+      "what": "Premi “Rimetti a posto” e la voce torna al suo posto nell’elenco, con le sue traduzioni.",
+      "why": "Il tour la importa di nuovo, proprio come una voce ritorna quando il tuo prossimo file la contiene."
+    },
+    "restore": {
+      "title": "Il tuo backup",
+      "what": "Qui trovi il backup creato prima della prova. “Ripristina il backup” ti indica il suo pulsante “Ripristina”; se premerlo lo decidi tu.",
+      "why": "Non ti serve: la voce è già tornata. Ripristina un backup solo se qualcosa è andato storto."
+    },
+    "done": {
+      "title": "Ecco le orfane",
+      "what": "Le orfane conservano le voci e le traduzioni che la tua ultima importazione ha lasciato fuori, finché non le ricolleghi o le elimini.",
+      "why": "Dai un’occhiata a questa scheda dopo ogni importazione con “Sostituzione completa”."
+    },
+    "explain-list": {
+      "title": "L’elenco delle orfane",
+      "what": "Ogni orfana mostra il suo testo di origine e quante traduzioni conserva.",
+      "why": "Quelle con più traduzioni vengono prima: sono le più faticose da rifare."
+    },
+    "explain-options": {
+      "title": "Ricollega o elimina",
+      "what": "“Ricollega” sposta le traduzioni di un’orfana su un’altra voce, per esempio una il cui testo è stato solo riformulato. “Elimina” la rimuove per sempre.",
+      "why": "Ricollega quando il testo esiste ancora in un’altra forma; elimina quando è davvero sparito."
+    },
+    "actions": {
+      "simulate": "Crea un’orfana di prova",
+      "explainOnly": "Spiega soltanto",
+      "backupFirst": "Prima il backup (consigliato)",
+      "skipBackup": "Continua senza backup",
+      "recover": "Rimetti a posto",
+      "restoreBackup": "Ripristina il backup",
+      "switchProject": "Cambia progetto"
+    },
+    "notices": {
+      "alreadyRecovered": "L’orfana di prova è già tornata nella scheda “Traduzioni”.",
+      "alreadyDeleted": "L’orfana di prova è stata eliminata, quindi il tour non può rimetterla a posto. Se hai creato un backup, puoi ripristinarlo dalla scheda “Backup”.",
+      "otherProject": "Un’orfana di prova di questo tour è ancora in un altro progetto. Passa a quel progetto per rimetterla a posto prima.",
+      "leftOut": "L’orfana di prova è ancora nella scheda “Orfane”. Premi lì “Rimetti a posto” per recuperarla."
+    },
+    "blocked": {
+      "noEntries": "Non c’è ancora nessuna voce con cui esercitarsi, quindi il tour si limita a spiegare.",
+      "collaborator": "Solo il proprietario del progetto può gestire le orfane, quindi il tour si limita a spiegare.",
+      "sourcelessRows": "Alcune voci non hanno un testo di origine e un’importazione non può ricostruirle esattamente. Il tour si limita a spiegare, quindi non cambia nulla.",
+      "unsafeText": "Un testo di origine ha una virgoletta subito prima di una virgola o di un a capo, che un’importazione non può ricostruire esattamente. Il tour si limita a spiegare, quindi non cambia nulla.",
+      "commaInSourceLabel": "Un’etichetta di origine contiene una virgola o spazi alle estremità, che un’importazione non può ricostruire esattamente. Il tour si limita a spiegare, quindi non cambia nulla."
+    },
+    "errors": {
+      "backup": "Impossibile creare il backup. Non è stato modificato nulla.",
+      "simulate": "Impossibile creare l’orfana di prova. Non è stato modificato nulla.",
+      "recover": "Non è stato ancora possibile rimettere a posto la voce. È al sicuro nella scheda “Orfane”; riprova.",
+      "recoverRefused": "Il tour non può rimettere a posto questa voce senza modificare altre voci, quindi non è stato modificato nulla. Usa “Ricollega” nella scheda “Orfane” per spostarne le traduzioni, oppure ripristina il backup se ne hai creato uno.",
+      "load": "Impossibile controllare l’orfana di prova. Premi “Rimetti a posto” per riprovare."
+    },
+    "banner": {
+      "text": "Questa è l’orfana di prova del tour guidato. Rimettila a posto perché torni, con le sue traduzioni, nella scheda “Traduzioni”.",
+      "recovered": "L’orfana di prova è tornata nella scheda “Traduzioni”."
     }
   }
 }

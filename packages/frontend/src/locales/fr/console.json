@@ -7,6 +7,7 @@
   "filter_error": "Erreur",
   "filter_warn": "Avertissement",
   "filter_info": "Info",
+  "filter_infoAndUp": "Info et plus",
   "filter_debug": "Débogage",
   "filter_notifications": "Notifications",
   "statusConnected": "Connecté au flux de journaux du serveur",
@@ -52,5 +53,20 @@
     "queued": "{{type}} : en file d'attente, position {{position}}",
     "queuedNoPosition": "{{type}} : en file d'attente",
     "starting": "{{type}} : démarrage"
+  },
+  "progress": {
+    "counts": "{{done}} sur {{total}}",
+    "failed": "{{count}} en échec",
+    "elapsed": "{{time}} écoulées",
+    "estimating": "estimation en cours…",
+    "waiting": "en attente de reprise",
+    "etaUnderMinute": "moins d’une minute restante",
+    "etaMinutes": "environ {{count}} min restantes",
+    "etaHours": "environ {{hours}} h {{minutes}} min restantes",
+    "outcome": {
+      "completed": "Terminée",
+      "failed": "Échouée",
+      "cancelled": "Annulée"
+    }
   }
 }

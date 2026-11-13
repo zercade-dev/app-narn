@@ -8,12 +8,15 @@ export function ModeSwitch({ testId = 'mode-switch' }: { testId?: string }) {
   const { t } = useTranslation('settings');
   const mode = useUiMode();
   const setUiMode = useUiSettings((s) => s.setUiMode);
+  // The header's switch is the one the first run's closing step points at.
+  const tourAnchor = testId === 'mode-switch' ? 'mode-switch' : undefined;
   return (
     <div
       className="ml-auto flex items-center gap-1"
       role="group"
       aria-label={t('uiModeLabel')}
       data-testid={testId}
+      data-tour={tourAnchor}
     >
       <Button
         size="sm"

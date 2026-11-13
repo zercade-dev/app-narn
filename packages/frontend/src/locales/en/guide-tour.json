@@ -3,7 +3,8 @@
   "back": "Back",
   "skip": "Skip tour",
   "close": "Close",
-  "stepOf": "Step {{current}} of {{total}}",
+  "stepOfSub": "Step {{major}} of {{majorTotal}} · {{sub}} of {{subTotal}}",
+  "stepCount": "{{current}} of {{total}}",
   "continueSetup": "Continue setup: step {{current}} of {{total}}",
   "firstRun": {
     "actions": {
@@ -16,8 +17,13 @@
       "fixKey": "Check my key",
       "retry": "Try again",
       "stopRetry": "Stop and try again",
-      "switchAdvanced": "Switch to Advanced",
-      "finish": "Finish"
+      "translateQuick": "Translate these 3 to try it out",
+      "translateEverything": "Translate everything",
+      "translateFew": "Translate them",
+      "translateRest": "Translate the rest now",
+      "skipRest": "Skip, export what I have",
+      "tourSections": "Show me the sections",
+      "maybeLater": "Maybe later"
     },
     "vault": {
       "title": "Create your vault password",
@@ -55,7 +61,7 @@
       "newWhat": "Create a new project.",
       "createWhat": "Give your project a name, then create it.",
       "sourceWhat": "Pick the language your text is written in.",
-      "targetsWhat": "Tick the languages you want to translate into.",
+      "targetsWhat": "Tick the languages you want to translate into, or use Select all.",
       "saveWhat": "Save your languages.",
       "importWhat": "Choose the CSV file you exported from your game editor.",
       "confirmWhat": "Check the summary, then confirm the import."
@@ -64,6 +70,8 @@
       "title": "Translate",
       "why": "Freeway picks a suitable free model for each language automatically.",
       "openWhat": "Open the tab that lists your entries.",
+      "quickWhat": "The first 3 entries are selected. Translate them to try it out, or translate everything now.",
+      "fewWhat": "Your entries are selected. Translate them now.",
       "selectWhat": "Select all entries.",
       "pressWhat": "Open the translation dialog.",
       "startWhat": "Start the translation.",
@@ -87,6 +95,11 @@
       "quotaWhat": "The free quota is used up for now. The translation resumes by itself when quota is free again.",
       "modelWhat": "The free models available right now are below the quality this run aims for. The translation resumes by itself when a better one is available."
     },
+    "rest": {
+      "title": "The test worked",
+      "what": "Your first 3 entries are translated into every language you chose. Translate the rest now, or export what you have.",
+      "why": "You can translate the rest later from the list of entries."
+    },
     "export": {
       "title": "Export",
       "why": "Your game editor can import this file to bring the translations into your game.",
@@ -95,7 +108,8 @@
     },
     "closing": {
       "title": "You're all set",
-      "what": "Advanced adds glossaries, quality checks, routing, reviews and more.",
+      "what": "This is the simplified view: it shows only what you need to translate and export. Advanced has more tools. Flip the switch to Advanced for a short tour.",
+      "whatAdvanced": "You're using Advanced, which shows every tool. A short tour explains what each section is for.",
       "why": "You can switch at any time from the top bar."
     }
   },
@@ -112,14 +126,44 @@
   },
   "guideTours": {
     "title": "Tours",
-    "firstRun": "Guided first run",
-    "area": {
-      "routing": "Routing",
-      "glossary": "Glossary",
-      "quality": "Quality",
-      "compare": "Compare",
-      "review-translation-ai": "AI review of translations"
+    "first-run": {
+      "name": "Guided first run",
+      "summary": "Set up a provider, add your strings, translate and export, one step at a time."
     },
+    "advanced-sections": {
+      "name": "Advanced sections",
+      "summary": "What each tab and view that Advanced adds is for."
+    },
+    "glossaries": {
+      "name": "Glossaries",
+      "summary": "Create a glossary, add terms and apply it, so key terms stay consistent."
+    },
+    "routing": {
+      "name": "Routing",
+      "summary": "A 30-second look at how NARN picks who translates what."
+    },
+    "quality": {
+      "name": "Quality",
+      "summary": "A short look at how NARN checks your translations."
+    },
+    "compare": {
+      "name": "Compare",
+      "summary": "A short look at reviewing translations side by side."
+    },
+    "review-translation-ai": {
+      "name": "AI review of translations",
+      "summary": "A short look at having an AI check your translations."
+    },
+    "orphans": {
+      "name": "Orphans",
+      "summary": "See what happens to an entry your file leaves out, with a practice orphan the tour puts back."
+    },
+    "startOver": "Start from the beginning",
+    "continue": "Continue where I left off",
+    "progress": "{{current}} of {{total}} steps",
+    "completed": "Completed",
+    "needsProject": "Open a project to take this tour.",
+    "switchedToAdvanced": "Switched to Advanced mode for this tour.",
     "confirm": {
       "title": "Switch to Simple for the guided setup?",
       "body": "The guided setup is built for Simple mode, which hides the advanced tabs. You can switch back at any time from the top bar.",
@@ -227,6 +271,205 @@
         "what": "Review all translations in the project, not only the latest run.",
         "why": "Use it before a release, or after you changed the glossary or routing."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Compare",
+      "what": "The source next to one target language, row by row, with an optional reference language.",
+      "why": "Review and edit one language carefully, even one you do not read."
+    },
+    "routing": {
+      "title": "Routing",
+      "what": "Decides which provider translates each language, category or tone.",
+      "why": "Send each kind of text to the provider that handles it best."
+    },
+    "stage-details": {
+      "title": "Stage details",
+      "what": "A stage's name, gameplay details and description, with their translations.",
+      "why": "Translate the text that describes a level, outside your string file."
+    },
+    "quality": {
+      "title": "Quality",
+      "what": "The automatic checks every translation goes through, and the ones that failed.",
+      "why": "Catch broken tags, changed placeholders and text that is too long before you ship."
+    },
+    "review-source-ai": {
+      "title": "Source AI review",
+      "what": "An AI provider reads your source text and points out typos and unclear wording.",
+      "why": "Better source text gives every language a better translation."
+    },
+    "review-translation-ai": {
+      "title": "Translation AI review",
+      "what": "An AI provider reads translations next to the source and scores them.",
+      "why": "It finds wrong meanings and awkward wording that automatic checks miss."
+    },
+    "review-manual": {
+      "title": "Manual review",
+      "what": "A queue of translations that need review, to approve, edit or flag one by one.",
+      "why": "Work through doubtful translations quickly, with keyboard shortcuts."
+    },
+    "glossary": {
+      "title": "Glossary",
+      "what": "Lists of terms with the translation you want for each.",
+      "why": "Names and key terms then come out the same way every time."
+    },
+    "category": {
+      "title": "Category",
+      "what": "Groups strings by kind, such as UI labels, dialogue or item names.",
+      "why": "Routing rules and batches can then treat each kind of text differently."
+    },
+    "color-text": {
+      "title": "Text Styler",
+      "what": "A drafting tool for text with colours, bold, italics and font sizes.",
+      "why": "Write styled text without typing the markup by hand."
+    },
+    "orphans": {
+      "title": "Orphans",
+      "what": "Entries that disappeared from a later import, kept with their translations.",
+      "why": "Nothing is lost when your file changes: link them back or delete them."
+    },
+    "backup": {
+      "title": "Backup",
+      "what": "Packs the project into an archive you can download and restore.",
+      "why": "Go back to an earlier state if an import or a bulk change goes wrong."
+    },
+    "sharing": {
+      "title": "Sharing",
+      "what": "Invite collaborators and choose which languages each one may edit.",
+      "why": "Translators work on their own languages, with their own AI providers."
+    },
+    "global-config": {
+      "title": "Global Config",
+      "what": "Settings for the whole workspace: providers, models and the credential vault.",
+      "why": "Set up a provider once and use it in every project."
+    },
+    "translation-memory": {
+      "title": "Translation Memory",
+      "what": "Earlier translations, reused when the same text comes back.",
+      "why": "It saves cost and keeps repeated lines translated the same way."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "What a glossary is for",
+      "what": "A glossary lists terms with the translation you want for each, such as character names or game jargon.",
+      "why": "Translations then use your words every time instead of a new guess."
+    },
+    "create": {
+      "title": "Create a glossary",
+      "what": "Start a new, empty glossary here.",
+      "why": "One glossary is often enough. Use more to keep sets of terms apart."
+    },
+    "add-term": {
+      "title": "Add a term",
+      "what": "Type the source term and its translation for each language, then add it.",
+      "why": "Mark a term as constant when it must never be translated, such as a brand name."
+    },
+    "assign": {
+      "title": "Apply it to this project",
+      "what": "An enabled glossary is used when this project is translated. Disable it to stop using it.",
+      "why": "Keep a glossary disabled while you are still building it."
+    },
+    "effect": {
+      "title": "How it changes translation",
+      "what": "When a string contains a glossary term, the term and your translation of it are sent along with the string.",
+      "why": "The provider follows your choice instead of picking its own word."
+    },
+    "generate": {
+      "title": "Let AI suggest terms",
+      "what": "Ask an AI provider to find likely terms in your strings.",
+      "why": "You review the suggestions and keep only the ones you want."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "What an orphan is",
+      "what": "An orphan is an entry that is missing from the last file you imported with Full replace.",
+      "why": "NARN keeps it here with its translations instead of deleting it, so nothing is lost by accident."
+    },
+    "offer": {
+      "title": "Try it with a practice orphan",
+      "what": "The tour can turn one of your entries into an orphan for a moment, then put it back. Nothing is lost: the entry keeps its translations and returns to its place.",
+      "why": "A real orphan makes this tab easier to use later. Or let the tour just explain."
+    },
+    "backup": {
+      "title": "Back up first",
+      "what": "A backup of the project is taken before the practice orphan is created. Nothing is lost either way: the tour puts the entry back.",
+      "why": "With a backup you can always return to this exact state from the Backup tab."
+    },
+    "simulating": {
+      "title": "Creating the practice orphan",
+      "what": "The tour imports your entries again without one of them. This takes a moment.",
+      "why": "This is what happens when an entry disappears from a file you import with Full replace."
+    },
+    "practice-row": {
+      "title": "Your practice orphan",
+      "what": "This entry is now an orphan. It no longer shows on the Translations tab, and its translations are kept.",
+      "why": "Orphans appear here after a Full replace import, so you can decide what to do with each one."
+    },
+    "practice-options": {
+      "title": "What you can do with an orphan",
+      "what": "Relink moves its translations onto another entry, for example one whose text was only reworded. Delete removes it for good.",
+      "why": "Leave them alone for this one: the tour puts it back in the next step."
+    },
+    "recover": {
+      "title": "Put it back",
+      "what": "Press “Put it back” and the entry returns to its place in the list, with its translations.",
+      "why": "The tour imports it again, the same way an entry comes back when your next file includes it."
+    },
+    "restore": {
+      "title": "Your backup",
+      "what": "The backup taken before the practice is listed here. “Restore the backup” shows its Restore button; whether to press it is up to you.",
+      "why": "You don't need it: the entry is already back. Restore a backup only when something went wrong."
+    },
+    "done": {
+      "title": "That's orphans",
+      "what": "Orphans keep the entries and translations your last import left out, until you relink or delete them.",
+      "why": "Have a look at this tab after each Full replace import."
+    },
+    "explain-list": {
+      "title": "The orphans list",
+      "what": "Each orphan shows its source text and how many translations it keeps.",
+      "why": "The ones with the most translations come first: they are the most work to redo."
+    },
+    "explain-options": {
+      "title": "Relink or delete",
+      "what": "Relink moves an orphan's translations onto another entry, for example one whose text was only reworded. Delete removes it for good.",
+      "why": "Relink when the text still exists in another form; delete when it is really gone."
+    },
+    "actions": {
+      "simulate": "Create a practice orphan",
+      "explainOnly": "Just explain",
+      "backupFirst": "Back up first (recommended)",
+      "skipBackup": "Continue without a backup",
+      "recover": "Put it back",
+      "restoreBackup": "Restore the backup",
+      "switchProject": "Switch project"
+    },
+    "notices": {
+      "alreadyRecovered": "The practice orphan is already back on the Translations tab.",
+      "alreadyDeleted": "The practice orphan was deleted, so the tour cannot put it back. If you took a backup, you can restore it from the Backup tab.",
+      "otherProject": "A practice orphan from this tour is still in another project. Switch to that project to put it back first.",
+      "leftOut": "The practice orphan is still in the Orphans tab. Press “Put it back” there to return it."
+    },
+    "blocked": {
+      "noEntries": "There is no entry to practice with yet, so the tour only explains.",
+      "collaborator": "Only the project owner can manage orphans, so the tour only explains.",
+      "sourcelessRows": "Some entries have no source text, and an import cannot rebuild them exactly. The tour only explains, so nothing changes.",
+      "unsafeText": "Some source text has a quote right before a comma or line break, which an import cannot rebuild exactly. The tour only explains, so nothing changes.",
+      "commaInSourceLabel": "A source label has a comma or spaces at its ends, which an import cannot rebuild exactly. The tour only explains, so nothing changes."
+    },
+    "errors": {
+      "backup": "The backup could not be created. Nothing was changed.",
+      "simulate": "The practice orphan could not be created. Nothing was changed.",
+      "recover": "The entry could not be put back yet. It is safe in the Orphans tab; try again.",
+      "recoverRefused": "The tour cannot put this entry back without changing other entries, so nothing was changed. Use Relink in the Orphans tab to move its translations, or restore the backup if you took one.",
+      "load": "Could not check on the practice orphan. Press “Put it back” to try again."
+    },
+    "banner": {
+      "text": "This is the guided tour's practice orphan. Put it back to return it, with its translations, to the Translations tab.",
+      "recovered": "The practice orphan is back on the Translations tab."
     }
   }
 }

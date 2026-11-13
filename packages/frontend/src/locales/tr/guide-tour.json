@@ -3,7 +3,8 @@
   "back": "Geri",
   "skip": "Turu atla",
   "close": "Kapat",
-  "stepOf": "Adım {{current}} / {{total}}",
+  "stepOfSub": "Adım {{major}} / {{majorTotal}} · {{sub}} / {{subTotal}}",
+  "stepCount": "{{current}} / {{total}}",
   "continueSetup": "Kuruluma devam: adım {{current}} / {{total}}",
   "firstRun": {
     "actions": {
@@ -16,8 +17,13 @@
       "fixKey": "Anahtarımı kontrol et",
       "retry": "Yeniden dene",
       "stopRetry": "Durdur ve yeniden dene",
-      "switchAdvanced": "Gelişmiş moda geç",
-      "finish": "Bitir"
+      "translateQuick": "Denemek için bu 3'ünü çevir",
+      "translateEverything": "Her şeyi çevir",
+      "translateFew": "Bunları çevir",
+      "translateRest": "Kalanını şimdi çevir",
+      "skipRest": "Atla, elimdekini dışa aktar",
+      "tourSections": "Bölümleri göster",
+      "maybeLater": "Belki sonra"
     },
     "vault": {
       "title": "Kasa parolası oluşturma",
@@ -55,7 +61,7 @@
       "newWhat": "Yeni bir proje oluşturun.",
       "createWhat": "Projenize bir ad verin, ardından oluşturun.",
       "sourceWhat": "Metninizin yazıldığı dili seçin.",
-      "targetsWhat": "Çeviri yapmak istediğiniz dilleri işaretleyin.",
+      "targetsWhat": "Çeviri yapmak istediğiniz dilleri işaretleyin veya Tümünü seç'i kullanın.",
       "saveWhat": "Dillerinizi kaydedin.",
       "importWhat": "Oyun düzenleyicinizden dışa aktardığınız CSV dosyasını seçin.",
       "confirmWhat": "Özeti gözden geçirin, ardından içe aktarmayı onaylayın."
@@ -64,6 +70,8 @@
       "title": "Çeviri",
       "why": "Freeway her dil için uygun bir ücretsiz modeli otomatik olarak seçer.",
       "openWhat": "Girdilerinizin listelendiği sekmeyi açın.",
+      "quickWhat": "İlk 3 girdi seçili. Denemek için bunları çevirin veya hemen her şeyi çevirin.",
+      "fewWhat": "Girdileriniz seçili. Şimdi çevirin.",
       "selectWhat": "Tüm girdileri seçin.",
       "pressWhat": "Çeviri iletişim kutusunu açın.",
       "startWhat": "Çeviriyi başlatın.",
@@ -87,6 +95,11 @@
       "quotaWhat": "Ücretsiz kota şimdilik tükendi. Kota yeniden açıldığında çeviri kendiliğinden devam eder.",
       "modelWhat": "Şu anda kullanılabilen ücretsiz modeller, bu çalıştırmanın hedeflediği kalitenin altında. Daha iyi bir model kullanılabilir olduğunda çeviri kendiliğinden devam eder."
     },
+    "rest": {
+      "title": "Deneme işe yaradı",
+      "what": "İlk 3 girdiniz seçtiğiniz tüm dillere çevrildi. Kalanını şimdi çevirin veya elinizdekini dışa aktarın.",
+      "why": "Kalanını daha sonra girdi listesinden çevirebilirsiniz."
+    },
     "export": {
       "title": "Dışa aktarma",
       "why": "Oyun düzenleyiciniz, çevirileri oyununuza almak için bu dosyayı içe aktarabilir.",
@@ -95,7 +108,8 @@
     },
     "closing": {
       "title": "Her şey hazır",
-      "what": "Gelişmiş mod; sözlükçeler, kalite denetimleri, yönlendirme, incelemeler ve daha fazlasını ekler.",
+      "what": "Bu, basitleştirilmiş görünümdür: yalnızca çeviri ve dışa aktarma için gerekenleri gösterir. Gelişmiş modda daha fazla araç vardır. Kısa bir tur için anahtarı Gelişmiş'e çevirin.",
+      "whatAdvanced": "Tüm araçları gösteren Gelişmiş moddasınız. Kısa bir tur, her bölümün ne işe yaradığını açıklar.",
       "why": "Üst çubuktan istediğiniz zaman geçiş yapabilirsiniz."
     }
   },
@@ -112,14 +126,44 @@
   },
   "guideTours": {
     "title": "Turlar",
-    "firstRun": "Rehberli ilk kullanım",
-    "area": {
-      "routing": "Yönlendirme",
-      "glossary": "Sözlükçe",
-      "quality": "Kalite",
-      "compare": "Karşılaştırma",
-      "review-translation-ai": "Çeviri yapay zekâ incelemesi"
+    "first-run": {
+      "name": "Rehberli ilk kullanım",
+      "summary": "Bir sağlayıcı kurun, metinlerinizi ekleyin, çevirin ve dışa aktarın; adım adım."
     },
+    "advanced-sections": {
+      "name": "Gelişmiş bölümler",
+      "summary": "Gelişmiş modun eklediği her sekme ve görünüm ne işe yarar."
+    },
+    "glossaries": {
+      "name": "Sözlükçeler",
+      "summary": "Bir sözlükçe oluşturun, terim ekleyin ve uygulayın; böylece anahtar terimler tutarlı kalır."
+    },
+    "routing": {
+      "name": "Yönlendirme",
+      "summary": "NARN'ın neyi kimin çevireceğine nasıl karar verdiğine 30 saniyelik bir bakış."
+    },
+    "quality": {
+      "name": "Kalite",
+      "summary": "NARN'ın çevirilerinizi nasıl denetlediğine kısa bir bakış."
+    },
+    "compare": {
+      "name": "Karşılaştırma",
+      "summary": "Çevirileri yan yana incelemeye kısa bir bakış."
+    },
+    "review-translation-ai": {
+      "name": "Çeviri yapay zekâ incelemesi",
+      "summary": "Çevirilerinizi bir yapay zekâya denetletmeye kısa bir bakış."
+    },
+    "orphans": {
+      "name": "Yetimler",
+      "summary": "Dosyanızda olmayan bir girdiye ne olduğunu, turun yerine geri koyduğu bir alıştırma yetimiyle görün."
+    },
+    "startOver": "Baştan başla",
+    "continue": "Kaldığım yerden devam et",
+    "progress": "{{current}}/{{total}} adım",
+    "completed": "Tamamlandı",
+    "needsProject": "Bu turu yapmak için bir proje açın.",
+    "switchedToAdvanced": "Bu tur için gelişmiş moda geçildi.",
     "confirm": {
       "title": "Rehberli kurulum için Basit moda geçilsin mi?",
       "body": "Rehberli kurulum, gelişmiş sekmeleri gizleyen Basit mod için hazırlandı. Üst çubuktan istediğiniz zaman geri dönebilirsiniz.",
@@ -227,6 +271,205 @@
         "what": "Yalnızca son çalıştırmayı değil, projedeki tüm çevirileri inceleyin.",
         "why": "Yayımlamadan önce ya da sözlükçeyi veya yönlendirmeyi değiştirdikten sonra kullanın."
       }
+    }
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Karşılaştırma",
+      "what": "Kaynak metin bir hedef dilin yanında, satır satır; isterseniz bir referans dille.",
+      "why": "Bir dili, okuyamadığınız bir dil olsa bile, dikkatle inceleyip düzenleyin."
+    },
+    "routing": {
+      "title": "Yönlendirme",
+      "what": "Her dili, kategoriyi veya tonu hangi sağlayıcının çevireceğini belirler.",
+      "why": "Her metin türünü onu en iyi işleyen sağlayıcıya gönderin."
+    },
+    "stage-details": {
+      "title": "Bölüm ayrıntıları",
+      "what": "Bir bölümün adı, oynanış ayrıntıları ve açıklaması, çevirileriyle birlikte.",
+      "why": "Bir bölümü anlatan metni, metin dosyanızın dışında çevirin."
+    },
+    "quality": {
+      "title": "Kalite",
+      "what": "Her çevirinin geçtiği otomatik denetimler ve başarısız olanlar.",
+      "why": "Bozuk etiketleri, değişmiş yer tutucuları ve fazla uzun metinleri yayından önce yakalayın."
+    },
+    "review-source-ai": {
+      "title": "Kaynak yapay zekâ incelemesi",
+      "what": "Bir yapay zekâ sağlayıcısı kaynak metninizi okur, yazım hatalarını ve belirsiz ifadeleri gösterir.",
+      "why": "Daha iyi bir kaynak metin her dilde daha iyi bir çeviri sağlar."
+    },
+    "review-translation-ai": {
+      "title": "Çeviri yapay zekâ incelemesi",
+      "what": "Bir yapay zekâ sağlayıcısı çevirileri kaynağın yanında okur ve puanlar.",
+      "why": "Otomatik denetimlerin kaçırdığı yanlış anlamları ve kötü ifadeleri bulur."
+    },
+    "review-manual": {
+      "title": "Elle inceleme",
+      "what": "İnceleme bekleyen çevirilerin sırası; her birini onaylayın, düzenleyin veya ayırın.",
+      "why": "Şüpheli çevirileri klavye kısayollarıyla hızla bitirin."
+    },
+    "glossary": {
+      "title": "Sözlükçe",
+      "what": "Her biri için istediğiniz çeviriyle terim listeleri.",
+      "why": "Adlar ve anahtar terimler böylece her seferinde aynı çıkar."
+    },
+    "category": {
+      "title": "Kategori",
+      "what": "Metinleri türe göre gruplar: arayüz etiketleri, diyaloglar veya eşya adları gibi.",
+      "why": "Yönlendirme kuralları ve yığınlar her metin türünü farklı ele alabilir."
+    },
+    "color-text": {
+      "title": "Metin biçimlendirici",
+      "what": "Renk, kalın, italik ve yazı boyutu içeren metinler için bir taslak aracı.",
+      "why": "Biçimlendirmeyi elle yazmadan biçimli metin yazın."
+    },
+    "orphans": {
+      "title": "Yetimler",
+      "what": "Sonraki bir içe aktarmada kaybolan girdiler, çevirileriyle birlikte saklanır.",
+      "why": "Dosyanız değiştiğinde hiçbir şey kaybolmaz: onları yeniden bağlayın veya silin."
+    },
+    "backup": {
+      "title": "Yedekleme",
+      "what": "Projeyi indirip geri yükleyebileceğiniz bir arşive paketler.",
+      "why": "Bir içe aktarma veya toplu değişiklik ters giderse önceki bir duruma dönün."
+    },
+    "sharing": {
+      "title": "Paylaşım",
+      "what": "Ortak çalışanları davet edin ve her birinin hangi dilleri düzenleyebileceğini seçin.",
+      "why": "Çevirmenler kendi dilleri üzerinde, kendi yapay zekâ sağlayıcılarıyla çalışır."
+    },
+    "global-config": {
+      "title": "Genel yapılandırma",
+      "what": "Tüm çalışma alanının ayarları: sağlayıcılar, modeller ve kimlik bilgisi kasası.",
+      "why": "Bir sağlayıcıyı bir kez kurun ve her projede kullanın."
+    },
+    "translation-memory": {
+      "title": "Çeviri belleği",
+      "what": "Önceki çeviriler; aynı metin yeniden geldiğinde tekrar kullanılır.",
+      "why": "Maliyeti düşürür ve tekrarlanan satırların aynı çevrilmesini sağlar."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "Sözlükçe ne işe yarar",
+      "what": "Sözlükçe, her biri için istediğiniz çeviriyle terimleri listeler; karakter adları veya oyun jargonu gibi.",
+      "why": "Çeviriler böylece yeni bir tahmin yerine her seferinde sizin sözcüklerinizi kullanır."
+    },
+    "create": {
+      "title": "Sözlükçe oluştur",
+      "what": "Burada yeni, boş bir sözlükçe başlatın.",
+      "why": "Çoğu zaman tek bir sözlükçe yeterlidir. Terim gruplarını ayrı tutmak için daha fazlasını kullanın."
+    },
+    "add-term": {
+      "title": "Terim ekle",
+      "what": "Kaynak terimi ve her dildeki çevirisini yazın, sonra ekleyin.",
+      "why": "Bir marka adı gibi asla çevrilmemesi gereken bir terimi sabit olarak işaretleyin."
+    },
+    "assign": {
+      "title": "Bu projeye uygula",
+      "what": "Etkin bir sözlükçe bu proje çevrilirken kullanılır. Kullanmayı bırakmak için devre dışı bırakın.",
+      "why": "Bir sözlükçeyi hazırlarken devre dışı tutun."
+    },
+    "effect": {
+      "title": "Çeviriyi nasıl değiştirir",
+      "what": "Bir metin bir sözlükçe terimi içerdiğinde, terim ve sizin çeviriniz metinle birlikte gönderilir.",
+      "why": "Sağlayıcı kendi sözcüğünü seçmek yerine sizin tercihinize uyar."
+    },
+    "generate": {
+      "title": "Terimleri yapay zekâ önersin",
+      "what": "Bir yapay zekâ sağlayıcısından metinlerinizdeki olası terimleri bulmasını isteyin.",
+      "why": "Önerileri siz inceler, yalnızca istediklerinizi tutarsınız."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Yetim nedir",
+      "what": "Yetim, “Tam değiştirme” ile içe aktardığınız son dosyada bulunmayan bir girdidir.",
+      "why": "NARN onu silmek yerine çevirileriyle birlikte burada saklar; böylece hiçbir şey yanlışlıkla kaybolmaz."
+    },
+    "offer": {
+      "title": "Bir alıştırma yetimiyle deneyin",
+      "what": "Tur, girdilerinizden birini kısa bir süre yetime dönüştürüp sonra geri koyabilir. Hiçbir şey kaybolmaz: girdi çevirilerini korur ve yerine döner.",
+      "why": "Gerçek bir yetim görmek bu sekmeyi sonra kullanmayı kolaylaştırır. Ya da tur yalnızca anlatsın."
+    },
+    "backup": {
+      "title": "Önce bir yedek",
+      "what": "Alıştırma yetimi oluşturulmadan önce projenin bir yedeği alınır. Her durumda hiçbir şey kaybolmaz: tur girdiyi geri koyar.",
+      "why": "Bir yedekle “Yedekleme” sekmesinden her zaman tam olarak bu duruma dönebilirsiniz."
+    },
+    "simulating": {
+      "title": "Alıştırma yetimi oluşturuluyor",
+      "what": "Tur, girdilerinizi biri hariç yeniden içe aktarıyor. Bu biraz sürer.",
+      "why": "“Tam değiştirme” ile içe aktardığınız bir dosyadan bir girdi kaybolduğunda olan tam olarak budur."
+    },
+    "practice-row": {
+      "title": "Alıştırma yetiminiz",
+      "what": "Bu girdi artık bir yetim. “Çeviriler” sekmesinde artık görünmüyor ve çevirileri korunuyor.",
+      "why": "Yetimler, her biri için karar verebilmeniz için “Tam değiştirme” ile içe aktarmadan sonra burada görünür."
+    },
+    "practice-options": {
+      "title": "Bir yetimle neler yapabilirsiniz",
+      "what": "“Yeniden bağla”, çevirilerini başka bir girdiye taşır; örneğin metni yalnızca yeniden ifade edilmiş bir girdiye. “Sil” onu kalıcı olarak kaldırır.",
+      "why": "Bunda ikisini de kullanmayın: tur onu bir sonraki adımda geri koyar."
+    },
+    "recover": {
+      "title": "Geri koyun",
+      "what": "“Geri koy”a basın; girdi çevirileriyle birlikte listedeki yerine döner.",
+      "why": "Tur onu yeniden içe aktarır; bir sonraki dosyanız bir girdiyi içerdiğinde de girdi aynı şekilde geri gelir."
+    },
+    "restore": {
+      "title": "Yedeğiniz",
+      "what": "Alıştırmadan önce alınan yedek burada. “Yedeği geri yükle” onun “Geri yükle” düğmesini gösterir; basıp basmamak size kalmış.",
+      "why": "Ona ihtiyacınız yok: girdi zaten geri geldi. Yedeği yalnızca bir şeyler ters gittiğinde geri yükleyin."
+    },
+    "done": {
+      "title": "Yetimler bu kadar",
+      "what": "Yetimler, son içe aktarmanızın dışarıda bıraktığı girdileri ve çevirileri siz yeniden bağlayana ya da silene kadar saklar.",
+      "why": "Her “Tam değiştirme” içe aktarmasından sonra bu sekmeye bir göz atın."
+    },
+    "explain-list": {
+      "title": "Yetim listesi",
+      "what": "Her yetim kaynak metnini ve kaç çeviri sakladığını gösterir.",
+      "why": "En çok çevirisi olanlar önce gelir: yeniden yapmaları en çok emek isteyenler onlardır."
+    },
+    "explain-options": {
+      "title": "Yeniden bağlayın ya da silin",
+      "what": "“Yeniden bağla”, bir yetimin çevirilerini başka bir girdiye taşır; örneğin metni yalnızca yeniden ifade edilmiş bir girdiye. “Sil” onu kalıcı olarak kaldırır.",
+      "why": "Metin başka bir biçimde hâlâ varsa yeniden bağlayın; gerçekten yoksa silin."
+    },
+    "actions": {
+      "simulate": "Alıştırma yetimi oluştur",
+      "explainOnly": "Yalnızca anlat",
+      "backupFirst": "Önce yedekle (önerilir)",
+      "skipBackup": "Yedeksiz devam et",
+      "recover": "Geri koy",
+      "restoreBackup": "Yedeği geri yükle",
+      "switchProject": "Projeyi değiştir"
+    },
+    "notices": {
+      "alreadyRecovered": "Alıştırma yetimi zaten “Çeviriler” sekmesine geri döndü.",
+      "alreadyDeleted": "Alıştırma yetimi silindi, bu yüzden tur onu geri koyamaz. Bir yedek aldıysanız onu “Yedekleme” sekmesinden geri yükleyebilirsiniz.",
+      "otherProject": "Bu turdan bir alıştırma yetimi hâlâ başka bir projede. Önce onu geri koymak için o projeye geçin.",
+      "leftOut": "Alıştırma yetimi hâlâ “Yetimler” sekmesinde. Geri getirmek için oradaki “Geri koy”a basın."
+    },
+    "blocked": {
+      "noEntries": "Henüz alıştırma yapılacak bir girdi yok, bu yüzden tur yalnızca anlatıyor.",
+      "collaborator": "Yetimleri yalnızca proje sahibi yönetebilir, bu yüzden tur yalnızca anlatıyor.",
+      "sourcelessRows": "Bazı girdilerin kaynak metni yok ve bir içe aktarma onları birebir yeniden oluşturamaz. Tur yalnızca anlatıyor, hiçbir şey değişmiyor.",
+      "unsafeText": "Bir kaynak metinde virgülden ya da satır sonundan hemen önce tırnak işareti var; bir içe aktarma bunu birebir yeniden oluşturamaz. Tur yalnızca anlatıyor, hiçbir şey değişmiyor.",
+      "commaInSourceLabel": "Bir kaynak etiketinde virgül ya da uçlarında boşluk var; bir içe aktarma bunu birebir yeniden oluşturamaz. Tur yalnızca anlatıyor, hiçbir şey değişmiyor."
+    },
+    "errors": {
+      "backup": "Yedek oluşturulamadı. Hiçbir şey değiştirilmedi.",
+      "simulate": "Alıştırma yetimi oluşturulamadı. Hiçbir şey değiştirilmedi.",
+      "recover": "Girdi henüz geri konamadı. “Yetimler” sekmesinde güvende; yeniden deneyin.",
+      "recoverRefused": "Tur bu girdiyi başka girdileri değiştirmeden geri koyamıyor, bu yüzden hiçbir şey değiştirilmedi. Çevirilerini taşımak için “Yetimler” sekmesindeki “Yeniden bağla”yı kullanın ya da bir yedek aldıysanız onu geri yükleyin.",
+      "load": "Alıştırma yetimi kontrol edilemedi. Yeniden denemek için “Geri koy”a basın."
+    },
+    "banner": {
+      "text": "Bu, rehberli turun alıştırma yetimi. Çevirileriyle birlikte “Çeviriler” sekmesine dönmesi için onu geri koyun.",
+      "recovered": "Alıştırma yetimi “Çeviriler” sekmesine geri döndü."
     }
   }
 }

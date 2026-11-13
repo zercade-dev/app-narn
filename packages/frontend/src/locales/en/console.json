@@ -7,6 +7,7 @@
   "filter_error": "Error",
   "filter_warn": "Warn",
   "filter_info": "Info",
+  "filter_infoAndUp": "Info & up",
   "filter_debug": "Debug",
   "filter_notifications": "Notifications",
   "statusConnected": "Connected to server log stream",
@@ -52,5 +53,20 @@
     "queued": "{{type}} queued, number {{position}} in line",
     "queuedNoPosition": "{{type}} queued",
     "starting": "{{type}} starting"
+  },
+  "progress": {
+    "counts": "{{done}} / {{total}}",
+    "failed": "{{count}} failed",
+    "elapsed": "{{time}} elapsed",
+    "estimating": "estimating…",
+    "waiting": "waiting to resume",
+    "etaUnderMinute": "less than a minute left",
+    "etaMinutes": "about {{count}} min left",
+    "etaHours": "about {{hours}} h {{minutes}} min left",
+    "outcome": {
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    }
   }
 }

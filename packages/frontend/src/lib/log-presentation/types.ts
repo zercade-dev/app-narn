@@ -25,6 +25,11 @@ export interface LogPresenter {
   vars?: (meta: LogMeta) => Record<string, unknown>;
   /** Extra grouping discriminator beyond level + event key. */
   groupKey?: (meta: LogMeta) => string;
+  /**
+   * Friendly-console treatment. `debug` demotes the line to the All and Debug
+   * tabs; `hidden` keeps it to the Raw log. Absent: it keeps its own level.
+   */
+  friendly?: 'debug' | 'hidden';
   /** Optional quick action offered on the row. */
   action?: (meta: LogMeta) => LogAction | undefined;
 }

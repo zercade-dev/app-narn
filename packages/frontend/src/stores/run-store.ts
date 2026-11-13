@@ -11,6 +11,7 @@ import {
   type SourceReviewFinding,
   type GlossarySuggestion,
   type CategorySuggestion,
+  type LanguageProgress,
 } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../hooks/use-api.js';
 import {
@@ -90,6 +91,8 @@ export interface RunProgressEvent {
   completed: number;
   failed: number;
   total: number;
+  /** Per-language progress of a translation run's current attempt; absent otherwise. */
+  languageProgress?: Record<string, LanguageProgress>;
 }
 
 interface RunStore {
@@ -323,7 +326,7 @@ const notifiedFailedRunIds = new Set<string>();
  * "Translation run failed" regardless of which chat actually failed).
  *
  * `errors` is optional in the caller's view because the SSE payload carries no
- * error list (`RunProgressEvent` is six scalar fields); an absent/empty list
+ * error list (`RunProgressEvent` carries only counters); an absent/empty list
  * just falls back to the bare "{{type}} run failed" label.
  */
 function notifyFailedRun(
@@ -856,6 +859,7 @@ export const useRunStore = create<RunStore>((set, get) => {
         completed: e.completed,
         failed: e.failed,
         total: e.total,
+        ...(e.languageProgress ? { languageProgress: e.languageProgress } : {}),
       };
       nextRuns[idx] = merged;
       set({ runs: nextRuns });

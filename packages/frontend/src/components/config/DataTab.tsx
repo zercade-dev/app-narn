@@ -504,21 +504,24 @@ export function DataTab() {
             </CardContent>
           </Card>
 
-          {/* Active target languages */}
-          <Card>
+          {/* Active target languages. The whole card is the tour's spotlight,
+              so "Select all" in its header is inside it. */}
+          <Card data-tour="target-languages">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{t('targetLanguages')}</CardTitle>
-                <Button variant="link" size="sm" onClick={handleToggleAll}>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={handleToggleAll}
+                  data-testid="target-languages-toggle-all"
+                >
                   {allChecked ? t('deselectAll') : t('selectAll')}
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div
-                data-tour="target-languages"
-                className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-4 gap-y-2"
-              >
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-4 gap-y-2">
                 {availableTargetLanguages.map((lang) => (
                   <div key={lang.code} className="flex items-center gap-2 text-sm">
                     <label

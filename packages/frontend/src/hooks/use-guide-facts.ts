@@ -3,6 +3,7 @@ import { RunStatusCode, type RunStatus } from '@zercade-dev/narn-shared';
 import { isRunActive, isTranslationRun } from '../lib/run-kind.js';
 import { FREE_KEYS, providerKeyFor } from '../lib/simple-provider.js';
 import type { RunStall } from '../lib/tour/first-run.js';
+import { hasUntranslatedEntry } from '../lib/tour/quick-test.js';
 import type { GuideFacts } from '../lib/tour/types.js';
 import { useGuideStore } from '../stores/guide-store.js';
 import { useProjectStore } from '../stores/project-store.js';
@@ -96,6 +97,40 @@ export function useGuideFacts(): GuideFacts {
   const hasSelection = useSelectionStore(
     (s) => relevant && activeProjectId !== null && s.selectedIds.size > 0,
   );
+  // The project's target languages, as a string so the selector stays stable.
+  const targetLanguages = useProjectStore((s) => {
+    const p = s.projects.find((x) => x.id === s.activeProjectId);
+    return p ? p.activeLanguages.filter((l) => l !== p.sourceLanguage).join('\n') : '';
+  });
+  const untranslatedRemain = useStringStore(
+    (s) =>
+      relevant &&
+      activeProjectId !== null &&
+      s.loadedProjectId === activeProjectId &&
+      targetLanguages !== '' &&
+      hasUntranslatedEntry(s.entries, targetLanguages.split('\n')),
+  );
+  const quickTest = useGuideStore((s) => s.quickTest);
+  const quickTestPending =
+    quickTest !== null &&
+    quickTest.projectId === activeProjectId &&
+    quickTest.decision === 'pending' &&
+    quickTest.runId !== null &&
+    translationExists &&
+    untranslatedRemain;
+  const restRunId =
+    quickTest?.decision === 'rest' && quickTest.projectId === activeProjectId
+      ? quickTest.restRunId
+      : undefined;
+  // Settled: ended, whatever the outcome. A paused run has not (it resumes).
+  const restRunning = useRunStore(
+    (s) =>
+      relevant &&
+      restRunId !== undefined &&
+      s.runs.some(
+        (r) => r.runId === restRunId && (isRunActive(r) || r.status === RunStatusCode.Paused),
+      ),
+  );
 
   return useMemo(() => {
     const cloud = cloudManaged || setupRequired;
@@ -111,6 +146,9 @@ export function useGuideFacts(): GuideFacts {
       exported,
       hasSelection,
       isCollaboratorOnly,
+      untranslatedRemain,
+      quickTestPending,
+      restRunning,
     };
   }, [
     cloudManaged,
@@ -125,6 +163,9 @@ export function useGuideFacts(): GuideFacts {
     projectHasEntries,
     translationExists,
     isCollaboratorOnly,
+    untranslatedRemain,
+    quickTestPending,
+    restRunning,
   ]);
 }
 

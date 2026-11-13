@@ -44,6 +44,9 @@ interface UiSettingsState {
   setProjectIcon: (id: string, icon: string) => void;
   consoleFilter: ConsoleFilter;
   setConsoleFilter: (filter: ConsoleFilter) => void;
+  /** The Friendly console's own tab; Raw keeps `consoleFilter`. Defaults to Info & up. */
+  consoleFriendlyFilter: ConsoleFilter;
+  setConsoleFriendlyFilter: (filter: ConsoleFilter) => void;
   /**
    * Routing tab mode preference (issue #60). False (the default) shows the
    * single-provider selector; true shows the full rule editor. Persisted per
@@ -102,6 +105,8 @@ export const useUiSettings = create<UiSettingsState>()(
         set((s) => ({ projectIcons: { ...s.projectIcons, [id]: icon } })),
       consoleFilter: 'all',
       setConsoleFilter: (consoleFilter) => set({ consoleFilter }),
+      consoleFriendlyFilter: 'info',
+      setConsoleFriendlyFilter: (consoleFriendlyFilter) => set({ consoleFriendlyFilter }),
       routingAdvanced: false,
       setRoutingAdvanced: (routingAdvanced) => set({ routingAdvanced }),
       consoleRawMode: false,
@@ -125,6 +130,7 @@ export const useUiSettings = create<UiSettingsState>()(
         language: state.language,
         projectIcons: state.projectIcons,
         consoleFilter: state.consoleFilter,
+        consoleFriendlyFilter: state.consoleFriendlyFilter,
         routingAdvanced: state.routingAdvanced,
         consoleRawMode: state.consoleRawMode,
         uiMode: state.uiMode,
