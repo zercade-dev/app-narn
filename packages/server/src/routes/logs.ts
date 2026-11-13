@@ -229,7 +229,7 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
   const pendingProgress = new Map<string, RunProgressEvent>();
   const progressTimers = new Map<string, NodeJS.Timeout>();
 
-  // Forward ONLY the six client-contract fields — `tenantId` is server-side
+  // Forward ONLY the client-contract fields — `tenantId` is server-side
   // scoping and must never leave the process.
   const sendProgress = (e: RunProgressEvent): void => {
     sse.send('run-progress', {
@@ -239,6 +239,7 @@ logsRouter.get('/stream', requireUnlockedVault, (req: Request, res: Response) =>
       completed: e.completed,
       failed: e.failed,
       total: e.total,
+      ...(e.languageProgress ? { languageProgress: e.languageProgress } : {}),
     });
   };
 

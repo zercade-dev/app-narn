@@ -451,6 +451,19 @@ export interface PendingCorrectionRecord {
   freewayTier?: number;
 }
 
+/**
+ * One target language's share of a translation run's current attempt. A
+ * language is settled once `completed + failed === total`. `needsReview` counts
+ * the completed pairs whose final quality-gate verdict failed (no correction
+ * possible, the correction was kept, or the corrected text failed again).
+ */
+export interface LanguageProgress {
+  total: number;
+  completed: number;
+  failed: number;
+  needsReview: number;
+}
+
 export interface RunStatus {
   runId: string;
   projectId: string;
@@ -513,6 +526,13 @@ export interface RunStatus {
    * Absent otherwise.
    */
   correctionPhase?: { total: number; done: number };
+  /**
+   * For translation runs: progress per target language, keyed by language
+   * code. Describes the current dispatch (fresh run, retry or quota resume),
+   * set from that dispatch's pairs. Absent on non-translation runs and on runs
+   * recorded before it existed.
+   */
+  languageProgress?: Record<string, LanguageProgress>;
   /**
    * Strings that failed the quality gate and have not had their corrective
    * attempt yet. They are not counted completed until it resolves. Persisted so

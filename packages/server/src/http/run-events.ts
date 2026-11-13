@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events';
-import { RunStatusCode } from '@zercade-dev/narn-shared';
+import { RunStatusCode, type LanguageProgress } from '@zercade-dev/narn-shared';
 
 /**
  * A single run-progress notification. `PgRunStore` emits one after every
@@ -16,11 +16,16 @@ export interface RunProgressEvent {
   failed: number;
   total: number;
   /**
+   * Per-language progress of a translation run's current attempt
+   * (`RunStatus.languageProgress`). Absent on other run kinds and older runs.
+   */
+  languageProgress?: Record<string, LanguageProgress>;
+  /**
    * User id of the tenant whose request produced this event, captured from the
    * ambient tenant context at emit time (mirrors `LogEntry.tenantId`). This is a
    * SERVER-SIDE scoping field ONLY: the SSE relay filters on it in cloud mode so
    * a subscriber never sees another tenant's progress, and it is NEVER forwarded
-   * to the client (the relay sends only the six contract fields above).
+   * to the client (the relay sends only the client-contract fields above).
    * Undefined in open-core / outside a tenant context.
    */
   tenantId?: string;

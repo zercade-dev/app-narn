@@ -242,6 +242,25 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     key: (m) => (m.tmHit ? 'translation.doneFromMemory' : 'translation.done'),
     vars: (m) => ({ language: languageName(m.targetLanguage) }),
   },
+  // One line per target language as its last pair of the attempt settles.
+  // `count` is the needs-review figure because i18next plurals on `count`, and
+  // only the review phrase inflects ("1 needs review", "2 need review").
+  'translation:language-done': {
+    key: (m) => {
+      const review = num(m.needsReview, 0) > 0;
+      const failed = num(m.failed, 0) > 0;
+      if (review && failed) return 'translation.languageDoneMixed';
+      if (review) return 'translation.languageDoneReview';
+      if (failed) return 'translation.languageDoneFailed';
+      return 'translation.languageDone';
+    },
+    vars: (m) => ({
+      language: languageName(m.targetLanguage),
+      translated: num(m.completed, 0),
+      count: num(m.needsReview, 0),
+      failed: num(m.failed, 0),
+    }),
+  },
   'translation:queued': {
     key: 'translation.queued',
     vars: (m) => ({ count: num(m.total, 0), total: num(m.total, 0) }),
