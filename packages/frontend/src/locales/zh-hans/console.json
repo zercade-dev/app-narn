@@ -7,6 +7,7 @@
   "filter_error": "错误",
   "filter_warn": "警告",
   "filter_info": "信息",
+  "filter_infoAndUp": "信息及以上",
   "filter_debug": "调试",
   "filter_notifications": "通知",
   "statusConnected": "已连接到服务器日志流",

@@ -7,6 +7,7 @@
   "filter_error": "Ошибка",
   "filter_warn": "Предупреждение",
   "filter_info": "Информация",
+  "filter_infoAndUp": "Инфо и выше",
   "filter_debug": "Отладка",
   "filter_notifications": "Уведомления",
   "statusConnected": "Подключено к потоку журнала сервера",

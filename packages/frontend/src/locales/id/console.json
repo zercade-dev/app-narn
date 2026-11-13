@@ -7,6 +7,7 @@
   "filter_error": "Galat",
   "filter_warn": "Peringatan",
   "filter_info": "Info",
+  "filter_infoAndUp": "Info ke atas",
   "filter_debug": "Awakutu",
   "filter_notifications": "Notifikasi",
   "statusConnected": "Tersambung ke aliran log server",

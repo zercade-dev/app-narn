@@ -235,10 +235,12 @@ function engineRunPresenters(run: (typeof ENGINE_RUNS)[number]): Record<string, 
  */
 export const LOG_PRESENTERS: Record<string, LogPresenter> = {
   'translation:start': {
+    friendly: 'hidden',
     key: 'translation.start',
     vars: (m) => ({ language: languageName(m.targetLanguage) }),
   },
   'translation:done': {
+    friendly: 'hidden',
     key: (m) => (m.tmHit ? 'translation.doneFromMemory' : 'translation.done'),
     vars: (m) => ({ language: languageName(m.targetLanguage) }),
   },
@@ -262,6 +264,7 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     }),
   },
   'translation:queued': {
+    friendly: 'debug',
     key: 'translation.queued',
     vars: (m) => ({ count: num(m.total, 0), total: num(m.total, 0) }),
   },
@@ -315,10 +318,11 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     groupKey: (m) => str(m.targetLanguage, ''),
   },
   'translation:tm-rejected': {
+    friendly: 'debug',
     key: 'translation.tmRejected',
     vars: (m) => ({ language: languageName(m.targetLanguage) }),
   },
-  'translation:lqa-retry': { key: 'translation.lqaRetry' },
+  'translation:lqa-retry': { friendly: 'debug', key: 'translation.lqaRetry' },
   'translation:auth-cancel': { key: 'translation.authCancel' },
   'translation:start-aborted': { key: 'translation.startAborted' },
   'translation:waiting-for-quota': {
@@ -330,12 +334,14 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     vars: (m) => ({ time: clockTime(m.resumeAt) }),
   },
   'translation:quota-redispatched': { key: 'translation.quotaRedispatched' },
-  'translation:quota-park-adopted': { key: 'translation.quotaParkAdopted' },
+  'translation:quota-park-adopted': { friendly: 'debug', key: 'translation.quotaParkAdopted' },
   'translation:freeway-rerouted': {
+    friendly: 'debug',
     key: 'translation.freewayRerouted',
     vars: (m) => ({ from: bucketModel(m.from), to: bucketModel(m.to) }),
   },
   'translation:freeway-instance-swapped': {
+    friendly: 'debug',
     key: 'translation.freewayInstanceSwapped',
     vars: (m) => ({ fromModule: str(m.fromModuleId), toModule: str(m.toModuleId) }),
   },
@@ -343,8 +349,9 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     key: 'translation.freewayDeferred',
     vars: (m) => ({ model: bucketModel(m.bucketKey), time: clockTime(m.resumeAt) }),
   },
-  'translation:freeway-degraded': { key: 'translation.freewayDegraded' },
+  'translation:freeway-degraded': { friendly: 'debug', key: 'translation.freewayDegraded' },
   'translation:freeway-escalated': {
+    friendly: 'debug',
     key: 'translation.freewayEscalated',
     vars: (m) => ({ language: languageName(m.targetLanguage), to: bucketModel(m.to) }),
   },
@@ -355,6 +362,7 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
   },
   'translation:lqa-correction-failed': { key: 'translation.lqaCorrectionFailed' },
   'translation:lqa-correction-skipped': {
+    friendly: 'debug',
     key: (m) =>
       m.reason === 'entry-removed'
         ? 'translation.lqaCorrectionSkippedRemoved'
@@ -374,6 +382,7 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     vars: (m) => ({ language: languageName(m.targetLanguage) }),
   },
   'translation:split-phase-start': {
+    friendly: 'debug',
     key: 'translation.splitPhaseStart',
     vars: (m) => ({ model: str(m.model) }),
   },
@@ -382,7 +391,7 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     vars: (m) => ({ language: languageName(m.targetLanguage) }),
   },
 
-  'lqa:passed': { key: 'lqa.passed' },
+  'lqa:passed': { friendly: 'debug', key: 'lqa.passed' },
   'lqa:failed': { key: 'lqa.failed' },
   'lqa:overflow': { key: 'lqa.overflow', action: () => openTab('quality', 'action.openQuality') },
   'lqa:check-error': { key: 'lqa.checkError' },
@@ -443,6 +452,7 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
 
   // Verbose chat diagnostics (opt-in per turn). The prompt itself is raw-only.
   'chat:dispatch': {
+    friendly: 'debug',
     key: 'chat.dispatch',
     vars: (m) => ({ model: str(m.model) }),
   },
@@ -458,8 +468,13 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     action: (m) => (m.outcome === 'failed' ? switchToRaw('action.switchToRaw') : undefined),
   },
 
-  'module:loaded': { key: 'module.loaded', vars: (m) => ({ module: str(m.moduleId) }) },
+  'module:loaded': {
+    friendly: 'debug',
+    key: 'module.loaded',
+    vars: (m) => ({ module: str(m.moduleId) }),
+  },
   'module:instance-registered': {
+    friendly: 'debug',
     key: 'module.instanceRegistered',
     vars: (m) => ({ instance: str(m.instanceId) }),
   },
@@ -468,6 +483,7 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     vars: (m) => ({ instance: str(m.instanceId) }),
   },
   'module:instance-unregistered': {
+    friendly: 'debug',
     key: 'module.instanceUnregistered',
     vars: (m) => ({ instance: str(m.instanceId) }),
   },

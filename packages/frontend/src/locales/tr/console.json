@@ -7,6 +7,7 @@
   "filter_error": "Hata",
   "filter_warn": "Uyarı",
   "filter_info": "Bilgi",
+  "filter_infoAndUp": "Bilgi ve üzeri",
   "filter_debug": "Hata ayıklama",
   "filter_notifications": "Bildirimler",
   "statusConnected": "Sunucu günlük akışına bağlanıldı",

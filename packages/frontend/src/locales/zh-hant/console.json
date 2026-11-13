@@ -7,6 +7,7 @@
   "filter_error": "錯誤",
   "filter_warn": "警告",
   "filter_info": "資訊",
+  "filter_infoAndUp": "資訊及以上",
   "filter_debug": "偵錯",
   "filter_notifications": "通知",
   "statusConnected": "已連線至伺服器日誌串流",

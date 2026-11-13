@@ -7,6 +7,7 @@
   "filter_error": "Erreur",
   "filter_warn": "Avertissement",
   "filter_info": "Info",
+  "filter_infoAndUp": "Info et plus",
   "filter_debug": "Débogage",
   "filter_notifications": "Notifications",
   "statusConnected": "Connecté au flux de journaux du serveur",

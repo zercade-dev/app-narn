@@ -38,6 +38,9 @@ import { NotificationBell } from './NotificationBell.js';
 import { groupEntries } from '@/lib/log-presentation/group.js';
 import { presentEntry } from '@/lib/log-presentation/present.js';
 import { isRawOnly } from '@/lib/log-presentation/raw-only.js';
+import { friendlyLevel, matchesFriendlyFilter } from '@/lib/log-presentation/friendly-level.js';
+import { RunProgressCard } from '../runs/RunProgressCard.js';
+import { useActiveRunCards } from '../../stores/run-progress-store.js';
 
 /** Distance (px) from the bottom within which the viewport counts as "pinned". */
 const PIN_THRESHOLD_PX = 32;
@@ -130,7 +133,12 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     serverDroppedCounts.priority;
   const consoleFilter = useUiSettings((s) => s.consoleFilter);
   const setConsoleFilter = useUiSettings((s) => s.setConsoleFilter);
+  const consoleFriendlyFilter = useUiSettings((s) => s.consoleFriendlyFilter) ?? 'info';
+  const setConsoleFriendlyFilter = useUiSettings((s) => s.setConsoleFriendlyFilter);
   const raw = useUiSettings((s) => s.consoleRawMode);
+  const activeRunIds = useActiveRunCards(activeProjectId);
+  // Each mode keeps its own tab.
+  const activeFilter = raw ? consoleFilter : consoleFriendlyFilter;
   const setConsoleRawMode = useUiSettings((s) => s.setConsoleRawMode);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const [panelHeight, setPanelHeight] = useState(200);
@@ -176,16 +184,23 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     if (consoleFilter === 'notifications') return e.level === 'notification';
     return e.level === consoleFilter;
   }
-  // The level-filtered entries: what both modes show before the Friendly cut,
-  // and what export writes.
-  const levelEntries = entries.filter(matchesLevel);
-  const query = search.trim().toLowerCase();
-  const filteredEntries = levelEntries.filter(
-    (e) => query === '' || entryMatchesQuery(e, query, presentEntry(e, tLogs).text),
+  // The level-filtered entries: what export writes. Friendly matches on the
+  // entry's own level here, so export never depends on which lines Friendly
+  // hides or demotes.
+  const levelEntries = entries.filter((e) =>
+    raw ? matchesLevel(e) : matchesFriendlyFilter(e.level, consoleFriendlyFilter),
   );
-  // Friendly hides raw-only lines and folds repeats; Raw shows everything, one
-  // row per entry.
-  const visibleEntries = raw ? filteredEntries : filteredEntries.filter((e) => !isRawOnly(e));
+  const query = search.trim().toLowerCase();
+  const matchesQuery = (e: LogEntry): boolean =>
+    query === '' || entryMatchesQuery(e, query, presentEntry(e, tLogs).text);
+  const filteredEntries = levelEntries.filter(matchesQuery);
+  // Friendly judges each line by its friendly level (hidden and demoted lines
+  // included) and folds repeats; Raw shows everything, one row per entry.
+  const visibleEntries = raw
+    ? filteredEntries
+    : entries
+        .filter((e) => matchesFriendlyFilter(friendlyLevel(e), consoleFriendlyFilter))
+        .filter(matchesQuery);
   const groups = raw
     ? visibleEntries.map((e) => ({ head: e, count: 1, members: [e] }))
     : groupEntries(visibleEntries);
@@ -596,8 +611,10 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
           {/* Level filter bar + search */}
           <div className="flex items-center gap-1 px-3 py-0.5 shrink-0 border-b border-border/40">
             <Tabs
-              value={consoleFilter}
-              onValueChange={(v) => v && setConsoleFilter(v as ConsoleFilter)}
+              value={activeFilter}
+              onValueChange={(v) =>
+                v && (raw ? setConsoleFilter : setConsoleFriendlyFilter)(v as ConsoleFilter)
+              }
             >
               <TabsList variant="line" className="group-data-horizontal/tabs:h-fit gap-0.5 p-0">
                 {FILTER_LEVELS.map((level) => (
@@ -607,7 +624,9 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                     data-testid={`filter-${level}`}
                     className="flex-none px-1.5 py-0 text-[10px] font-mono uppercase leading-5"
                   >
-                    {t(`filter_${level}`, { defaultValue: level === 'all' ? 'All' : level })}
+                    {t(!raw && level === 'info' ? 'filter_infoAndUp' : `filter_${level}`, {
+                      defaultValue: level === 'all' ? 'All' : level,
+                    })}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -625,6 +644,13 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
 
           <div className="relative flex-1 min-h-0 flex flex-col">
             <div ref={parentRef} className="flex-1 overflow-auto font-mono text-[11px]">
+              {!raw && activeRunIds.length > 0 && (
+                <div data-testid="console-run-cards" className="flex flex-col gap-1 px-3 py-1">
+                  {activeRunIds.map((id) => (
+                    <RunProgressCard key={id} runId={id} variant="console" />
+                  ))}
+                </div>
+              )}
               {totalDropped > 0 && (
                 <div
                   data-testid="console-dropped-marker"
@@ -633,7 +659,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                   {t('droppedEntries', { count: totalDropped })}
                 </div>
               )}
-              {groups.length === 0 && !raw && consoleFilter === 'debug' && (
+              {groups.length === 0 && !raw && activeFilter === 'debug' && (
                 <div
                   data-testid="console-debug-hint"
                   className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60"
@@ -650,7 +676,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                   </Button>
                 </div>
               )}
-              {groups.length === 0 && !(!raw && consoleFilter === 'debug') && (
+              {groups.length === 0 && !(!raw && activeFilter === 'debug') && (
                 <div data-testid="console-empty" className="px-3 py-2 text-muted-foreground/60">
                   {t('empty')}
                 </div>
@@ -669,6 +695,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                       ref={virtualizer.measureElement}
                       className={cn(
                         'absolute top-0 left-0 w-full flex flex-col py-0.5 px-3',
+                        !raw && friendlyLevel(entry) === 'debug' && 'text-muted-foreground',
                         (isLqaFailed || entry.level === 'error') && 'text-status-fail',
                         !isLqaFailed &&
                           (isLqaOverflow || entry.level === 'warn') &&

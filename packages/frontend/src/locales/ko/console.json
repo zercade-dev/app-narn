@@ -7,6 +7,7 @@
   "filter_error": "오류",
   "filter_warn": "경고",
   "filter_info": "정보",
+  "filter_infoAndUp": "정보 이상",
   "filter_debug": "디버그",
   "filter_notifications": "알림",
   "statusConnected": "서버 로그 스트림에 연결됨",

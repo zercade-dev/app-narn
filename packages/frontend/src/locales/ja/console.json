@@ -7,6 +7,7 @@
   "filter_error": "エラー",
   "filter_warn": "警告",
   "filter_info": "情報",
+  "filter_infoAndUp": "情報以上",
   "filter_debug": "デバッグ",
   "filter_notifications": "通知",
   "statusConnected": "サーバーのログストリームに接続済み",
