@@ -328,9 +328,16 @@ export function Sidebar() {
     await fetchProjects();
     if (created) {
       // Simple hides the Routing tab, so a project made after "Use my own
-      // provider" gets its catch-all rule here instead.
-      const simpleProvider = useGuideStore.getState().simpleProvider;
-      if (uiMode === 'simple' && simpleProvider) {
+      // provider" gets its catch-all rule here instead. Only once that
+      // provider was really enabled (its key was saved), and only on a project
+      // with no rules of its own: any rule switches the Freeway fallback off.
+      const { simpleProvider, enabledProviders } = useGuideStore.getState();
+      if (
+        uiMode === 'simple' &&
+        simpleProvider &&
+        enabledProviders.includes(simpleProvider) &&
+        (created.routingRules?.length ?? 0) === 0
+      ) {
         try {
           await applySimpleRule(created.id, simpleProvider);
         } catch (err) {

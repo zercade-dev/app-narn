@@ -17,10 +17,15 @@ export function redirectTo(path: string): void {
  * a same-origin `?return=` so the user lands back where they were. Shared by
  * VaultUnlockDialog's setup-redirect button and WelcomeView's "Set up vault"
  * button so the target URL is built in exactly one place.
+ *
+ * `guided` shows the page's "step N of 5" header. With it, `key` names the
+ * vault key the guide is asking for (the person chose their own provider); the
+ * page preselects it only if it is a key name it knows.
  */
-export function goToVaultSetup(opts?: { guided?: boolean }): void {
+export function goToVaultSetup(opts?: { guided?: boolean; key?: string }): void {
   const base = '/vault?return=' + encodeURIComponent(location.pathname + location.search);
-  redirectTo(opts?.guided ? base + '&guide=1' : base);
+  if (!opts?.guided) return redirectTo(base);
+  redirectTo(base + '&guide=1' + (opts.key ? '&key=' + encodeURIComponent(opts.key) : ''));
 }
 
 /**

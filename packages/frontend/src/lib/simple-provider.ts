@@ -83,9 +83,14 @@ interface GlobalConfigDoc {
  * "Enable a module" picker does), so Freeway or a routing rule can use it.
  * Idempotent: an existing instance (409) is reused with its stored config
  * untouched, and one that is already enabled is left alone. Non-instanceable
- * modules (deepl) are enabled directly. Returns the id to route to.
+ * modules (deepl) are enabled directly.
+ *
+ * Returns the id to route to, or `null` when the stored entry says
+ * `enabled: false`: the person switched the provider off, and that is theirs
+ * to undo. An entry that is absent, or was never given an `enabled` value, has
+ * not been decided and is enabled.
  */
-export async function enableProvider(baseModuleId: string): Promise<string> {
+export async function enableProvider(baseModuleId: string): Promise<string | null> {
   const instanceable = !NON_INSTANCEABLE.has(baseModuleId);
   const id = providerInstanceId(baseModuleId);
   let config: Record<string, unknown> = {};
@@ -106,6 +111,7 @@ export async function enableProvider(baseModuleId: string): Promise<string> {
     const doc = await apiRequest<GlobalConfigDoc>('/global-config');
     const current = doc.moduleConfigs?.[id];
     if (current?.enabled === true) return id;
+    if (current?.enabled === false) return null;
     config = current?.config ?? {};
   } else {
     // Brand-new instance: same first-enable default as the Global Config flow.
