@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGuideFacts } from '../../hooks/use-guide-facts.js';
-import { AREA_TOURS, isAreaTourId } from '../../lib/tour/area-tours.js';
+import { areaTourFor, isAreaTourId } from '../../lib/tour/area-tours.js';
 import { catalogTour, type CatalogTourContext } from '../../lib/tour/catalog.js';
 import { FIRST_RUN_TOUR_ID } from '../../lib/tour/first-run.js';
 import { endOrphansTour } from '../../lib/tour/end-orphans-tour.js';
@@ -28,7 +28,7 @@ function tourFor(id: string | null, ctx: CatalogTourContext): Tour | undefined {
   if (id === null || id === FIRST_RUN_TOUR_ID) return undefined;
   const entry = catalogTour(id);
   if (entry) return entry.build(ctx);
-  return isAreaTourId(id) ? AREA_TOURS[id] : undefined;
+  return isAreaTourId(id) ? areaTourFor(id, ctx.facts) : undefined;
 }
 
 /**

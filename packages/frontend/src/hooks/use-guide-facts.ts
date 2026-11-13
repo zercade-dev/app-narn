@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { RunStatusCode, type RunStatus } from '@zercade-dev/narn-shared';
 import { isRunActive, isTranslationRun } from '../lib/run-kind.js';
-import { FREE_KEYS, providerKeyFor } from '../lib/simple-provider.js';
+import { FREE_KEYS, isAiProviderKey, providerKeyFor } from '../lib/simple-provider.js';
 import type { RunStall } from '../lib/tour/first-run.js';
 import {
   hasUntranslatedEntry,
@@ -75,6 +75,7 @@ export function useGuideFacts(): GuideFacts {
       (FREE_KEYS.some((k) => s.keys.includes(k)) ||
         (ownKey !== undefined && s.keys.includes(ownKey))),
   );
+  const aiKeyUsable = useVaultStore((s) => s.unlocked && s.keys.some(isAiProviderKey));
   const exported = useGuideStore((s) => s.exportedOnce);
   const activeProjectId = useProjectStore(activeProjectIdOf);
   const projectHasLanguages = useProjectStore(
@@ -161,6 +162,7 @@ export function useGuideFacts(): GuideFacts {
       vaultExists: cloud ? !setupRequired : hasVault,
       vaultUnlocked,
       usableKey,
+      aiKeyUsable,
       projectExists: activeProjectId !== null,
       projectHasLanguages,
       projectHasEntries,
@@ -179,6 +181,7 @@ export function useGuideFacts(): GuideFacts {
     hasVault,
     vaultUnlocked,
     usableKey,
+    aiKeyUsable,
     exported,
     hasSelection,
     activeProjectId,

@@ -7,14 +7,18 @@ import type { GuideFacts, Tour, TourStep } from './types.js';
 
 export const GLOSSARIES_TOUR_ID = 'glossaries';
 
-function step(id: string, anchor: string | null): TourStep {
+function step(
+  id: string,
+  anchor: string | null,
+  advance: TourStep['advance'] = { kind: 'next' },
+): TourStep {
   return {
     id,
     anchor,
     titleKey: `glossariesTour.${id}.title`,
     whatKey: `glossariesTour.${id}.what`,
     whyKey: `glossariesTour.${id}.why`,
-    advance: { kind: 'next' },
+    advance,
   };
 }
 
@@ -24,18 +28,27 @@ function step(id: string, anchor: string | null): TourStep {
  */
 const TO_GLOSSARY: NonNullable<TourStep['navigate']> = { tab: 'glossary' };
 
-/** The AI generation step is shown only when an AI provider key is usable. */
+/**
+ * Waits for the control the step is about, which exists only once a glossary is
+ * selected. A collaborator has no editing controls, so they are never held.
+ */
+function needs(anchor: string): TourStep['advance'] {
+  return { kind: 'next', needs: anchor, unlessDone: (f) => f.isCollaboratorOnly };
+}
+
+/** The AI generation step is shown only when an AI provider key is in the vault. */
 export function glossariesTour(f: GuideFacts): Tour {
   return {
     id: GLOSSARIES_TOUR_ID,
     steps: [
       { ...step('purpose', 'glossary-list'), navigate: TO_GLOSSARY },
-      step('create', 'glossary-create'),
-      step('add-term', 'glossary-add-term'),
+      // Next waits for a glossary to exist (its enable button shows once one is selected).
+      step('create', 'glossary-create', needs('glossary-enabled')),
+      step('add-term', 'glossary-add-term', needs('glossary-add-term')),
       // Enabling a glossary is what applies it to this project.
-      step('assign', 'glossary-enabled'),
+      step('assign', 'glossary-enabled', needs('glossary-enabled')),
       step('effect', null),
-      ...(f.usableKey ? [step('generate', 'glossary-generate')] : []),
+      ...(f.aiKeyUsable ? [step('generate', 'glossary-generate')] : []),
     ],
   };
 }

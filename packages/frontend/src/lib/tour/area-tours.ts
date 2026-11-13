@@ -4,7 +4,7 @@
  * the tab id, so the tab that is open picks the tour to offer.
  */
 import type { Tab } from '@/stores/view-store';
-import type { Tour, TourStep } from './types.js';
+import type { GuideFacts, Tour, TourStep } from './types.js';
 
 export type AreaTourId = 'routing' | 'glossary' | 'quality' | 'compare' | 'review-translation-ai';
 
@@ -62,6 +62,19 @@ export const AREA_TOURS: Record<AreaTourId, Tour> = {
     ],
   },
 };
+
+/**
+ * The tour to run for `id`. The glossary tour drops its AI generation step
+ * when no AI provider key is usable. Built once, so step identity is stable.
+ */
+const GLOSSARY_WITHOUT_AI: Tour = {
+  id: 'glossary',
+  steps: AREA_TOURS.glossary.steps.filter((s) => s.id !== 'generate'),
+};
+
+export function areaTourFor(id: AreaTourId, f: GuideFacts): Tour {
+  return id === 'glossary' && !f.aiKeyUsable ? GLOSSARY_WITHOUT_AI : AREA_TOURS[id];
+}
 
 export const AREA_TOUR_IDS = Object.keys(AREA_TOURS) as AreaTourId[];
 

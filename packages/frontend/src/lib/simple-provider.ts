@@ -31,6 +31,14 @@ const KEY_ONLY_PROVIDERS = [
   'deepl',
 ] as const;
 
+/**
+ * Vault keys that unlock an AI model (DeepL translates but cannot generate
+ * glossaries or review text), for features that need one whatever the mode.
+ */
+export function isAiProviderKey(key: string): boolean {
+  return Object.values(PROVIDER_KEYS).includes(key) && key !== PROVIDER_KEYS.deepl;
+}
+
 /** Base ids offered under "Use my own provider"; GitHub Copilot is local-only. */
 export function ownProviderChoices(cloud: boolean): readonly string[] {
   return cloud ? KEY_ONLY_PROVIDERS : [...KEY_ONLY_PROVIDERS, 'copilot'];

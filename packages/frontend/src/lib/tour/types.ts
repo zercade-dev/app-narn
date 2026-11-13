@@ -6,6 +6,12 @@ export interface GuideFacts {
   vaultExists: boolean;
   vaultUnlocked: boolean;
   usableKey: boolean;
+  /**
+   * An AI provider key is in the unlocked vault. Unlike `usableKey` it ignores
+   * the Simple provider choice, so Advanced tours can tell whether the AI
+   * features (glossary generation) can run.
+   */
+  aiKeyUsable: boolean;
   projectExists: boolean;
   projectHasLanguages: boolean;
   projectHasEntries: boolean;
