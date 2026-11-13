@@ -55,8 +55,11 @@ interface GuideState {
    * `firstRunForced`).
    */
   restartFirstRun: (forced?: boolean) => void;
-  /** "Continue setup" after a skip: the guide comes back where it was. */
-  resumeFirstRun: () => void;
+  /**
+   * "Continue setup" after a skip: the guide comes back where it was.
+   * `forced` runs it in Advanced as well (see `firstRunForced`).
+   */
+  resumeFirstRun: (forced?: boolean) => void;
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
   markExported: () => void;
@@ -129,7 +132,7 @@ export const useGuideStore = create<GuideState>()(
           // A restarted run is not completed until it is finished again.
           tourProgress: { ...s.tourProgress, [FIRST_RUN_PROGRESS_ID]: NO_PROGRESS },
         })),
-      resumeFirstRun: () => set({ firstRunDismissed: false }),
+      resumeFirstRun: (forced = false) => set({ firstRunDismissed: false, firstRunForced: forced }),
       finishFirstRun: () =>
         set((s) => ({
           firstRunFinished: true,

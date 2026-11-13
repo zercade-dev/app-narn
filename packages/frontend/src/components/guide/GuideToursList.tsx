@@ -38,8 +38,8 @@ interface RowState {
  * per catalog tour they can open, with its progress, "Start from the
  * beginning" and, when they stopped part way, "Continue where I left off".
  * A tour of a project area needs an open project; one that runs in Advanced
- * switches there first and says so. Restarting the first run from Advanced
- * asks whether to switch to Simple for it.
+ * switches there first and says so. Restarting or continuing the first run
+ * from Advanced asks whether to switch to Simple for it.
  */
 export function GuideToursList() {
   const { t } = useTranslation('guide-tour');
@@ -54,7 +54,8 @@ export function GuideToursList() {
   const tourProgress = useGuideStore((s) => s.tourProgress);
   const firstRunDismissed = useGuideStore((s) => s.firstRunDismissed);
   const firstRunFinished = useGuideStore((s) => s.firstRunFinished);
-  const [confirming, setConfirming] = useState(false);
+  /** The first-run action waiting on the Simple/Advanced question, if any. */
+  const [confirming, setConfirming] = useState<'restart' | 'resume' | null>(null);
 
   const tours = useMemo(() => listedTours(access, cloudManaged), [access, cloudManaged]);
 
@@ -81,21 +82,25 @@ export function GuideToursList() {
     };
   };
 
-  const startFirstRun = (switchToSimple: boolean) => {
-    setConfirming(false);
+  /**
+   * Restart or resume the first run. Staying in Advanced still runs it (it is
+   * forced there): the person asked for it explicitly.
+   */
+  const runFirstRun = (action: 'restart' | 'resume', switchToSimple: boolean) => {
+    setConfirming(null);
     if (switchToSimple) useUiSettings.getState().setUiMode('simple');
-    // Staying in Advanced still runs it: the restart is explicit.
-    useGuideStore.getState().restartFirstRun(!switchToSimple && advanced);
+    const forced = !switchToSimple && advanced;
+    const store = useGuideStore.getState();
+    if (action === 'restart') store.restartFirstRun(forced);
+    else store.resumeFirstRun(forced);
     useViewStore.getState().setView('project');
   };
 
   const start = (entry: CatalogTour, at?: number) => {
     if (entry.id === FIRST_RUN_TOUR_ID) {
-      if (at !== undefined) {
-        useGuideStore.getState().resumeFirstRun();
-        useViewStore.getState().setView('project');
-      } else if (advanced) setConfirming(true);
-      else startFirstRun(false);
+      const action = at === undefined ? 'restart' : 'resume';
+      if (advanced) setConfirming(action);
+      else runFirstRun(action, false);
       return;
     }
     if (entry.needsAdvanced && !advanced) {
@@ -170,7 +175,12 @@ export function GuideToursList() {
         })}
       </ul>
       <Separator className="mt-3" />
-      <Dialog open={confirming} onOpenChange={setConfirming}>
+      <Dialog
+        open={confirming !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirming(null);
+        }}
+      >
         <DialogContent showCloseButton={false} data-testid="guide-first-run-confirm">
           <DialogHeader>
             <DialogTitle>{t('guideTours.confirm.title')}</DialogTitle>
@@ -180,11 +190,14 @@ export function GuideToursList() {
             <Button
               variant="outline"
               data-testid="guide-first-run-stay"
-              onClick={() => startFirstRun(false)}
+              onClick={() => confirming && runFirstRun(confirming, false)}
             >
               {t('guideTours.confirm.stay')}
             </Button>
-            <Button data-testid="guide-first-run-switch" onClick={() => startFirstRun(true)}>
+            <Button
+              data-testid="guide-first-run-switch"
+              onClick={() => confirming && runFirstRun(confirming, true)}
+            >
               {t('guideTours.confirm.switch')}
             </Button>
           </DialogFooter>
