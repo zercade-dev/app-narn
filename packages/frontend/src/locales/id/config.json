@@ -510,5 +510,31 @@
   "templateImportFailed": "Impor templat gagal: {{message}}",
   "templateDeleted": "Templat “{{name}}” dihapus.",
   "templateDeleteFailed": "Gagal menghapus templat: {{message}}",
-  "templateExportFailed": "Ekspor templat gagal: {{message}}"
+  "templateExportFailed": "Ekspor templat gagal: {{message}}",
+  "providerCard": {
+    "title": "Penyedia terjemahan",
+    "scope": "Proyek ini. Proyek baru yang Anda buat memakai yang sama.",
+    "scopeCollab": "Pilihan Anda sendiri, dipakai di setiap proyek yang dibagikan kepada Anda.",
+    "freeway": "NARN Freeway (gratis)",
+    "freewayHint": "Memilih model gratis yang sesuai untuk tiap bahasa, memakai kunci gratis di brankas Anda.",
+    "noFreeKey": "Belum ada kunci gratis di brankas Anda. NARN Freeway memerlukan setidaknya satu.",
+    "addFreeKey": "Tambahkan kunci gratis",
+    "own": "Penyedia saya sendiri",
+    "ownPlaceholder": "Pilih penyedia",
+    "freeOnlyOption": "{{provider}} (sendiri, tanpa kumpulan Freeway)",
+    "keySaved": "Kunci tersimpan",
+    "noKey": "Tidak ada kunci",
+    "keyMissing": "Belum ada kunci {{provider}} di brankas Anda.",
+    "vaultLocked": "Buka kunci brankas Anda untuk memeriksa kunci.",
+    "addKey": "Tambahkan kunci",
+    "paidNote": "Dibayar dari akun {{provider}} Anda.",
+    "freeOnlyNote": "Hanya {{provider}} yang menerjemahkan, tanpa model gratis lain dalam kumpulan NARN Freeway.",
+    "pendingNote": "{{provider}} dipakai setelah kuncinya disimpan. Sampai saat itu, NARN Freeway yang menerjemahkan.",
+    "customRouting": "Proyek ini memakai penyaluran kustom yang diatur di Lanjutan, jadi tidak diubah di sini.",
+    "openAdvanced": "Buka di Lanjutan",
+    "loading": "Memuat pilihan penyedia Anda…",
+    "translatedBy": "Diterjemahkan oleh {{provider}}",
+    "translatedByCustom": "Diterjemahkan dengan penyaluran kustom proyek ini",
+    "change": "Ubah"
+  }
 }

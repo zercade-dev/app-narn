@@ -518,5 +518,31 @@
   "templateImportFailed": "Falha ao importar o template: {{message}}",
   "templateDeleted": "Template “{{name}}” excluído.",
   "templateDeleteFailed": "Falha ao excluir o template: {{message}}",
-  "templateExportFailed": "Falha ao exportar o template: {{message}}"
+  "templateExportFailed": "Falha ao exportar o template: {{message}}",
+  "providerCard": {
+    "title": "Provedor de tradução",
+    "scope": "Este projeto. Os novos projetos que você criar usam o mesmo.",
+    "scopeCollab": "Sua própria escolha, usada em todos os projetos compartilhados com você.",
+    "freeway": "NARN Freeway (grátis)",
+    "freewayHint": "Escolhe um modelo gratuito adequado para cada idioma, usando as chaves gratuitas do seu cofre.",
+    "noFreeKey": "Ainda não há nenhuma chave gratuita no seu cofre. O NARN Freeway precisa de pelo menos uma.",
+    "addFreeKey": "Adicionar uma chave gratuita",
+    "own": "Meu próprio provedor",
+    "ownPlaceholder": "Escolha um provedor",
+    "freeOnlyOption": "{{provider}} (sozinho, sem o grupo do Freeway)",
+    "keySaved": "Chave salva",
+    "noKey": "Sem chave",
+    "keyMissing": "Ainda não há nenhuma chave do {{provider}} no seu cofre.",
+    "vaultLocked": "Desbloqueie seu cofre para verificar a chave.",
+    "addKey": "Adicionar chave",
+    "paidNote": "Pago pela sua conta do {{provider}}.",
+    "freeOnlyNote": "Só o {{provider}} traduz, sem os outros modelos gratuitos do grupo do NARN Freeway.",
+    "pendingNote": "O {{provider}} será usado assim que a chave dele for salva. Até lá, o NARN Freeway traduz.",
+    "customRouting": "Este projeto usa um roteamento personalizado configurado no Avançado, então ele não é alterado aqui.",
+    "openAdvanced": "Abrir no Avançado",
+    "loading": "Carregando sua escolha de provedor…",
+    "translatedBy": "Traduzido por {{provider}}",
+    "translatedByCustom": "Traduzido pelo roteamento personalizado deste projeto",
+    "change": "Alterar"
+  }
 }

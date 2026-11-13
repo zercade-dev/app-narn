@@ -517,5 +517,31 @@
   "templateImportFailed": "Template import failed: {{message}}",
   "templateDeleted": "Template \"{{name}}\" deleted.",
   "templateDeleteFailed": "Failed to delete template: {{message}}",
-  "templateExportFailed": "Template export failed: {{message}}"
+  "templateExportFailed": "Template export failed: {{message}}",
+  "providerCard": {
+    "title": "Translation provider",
+    "scope": "This project. New projects you create use the same.",
+    "scopeCollab": "Your own choice, used in every project shared with you.",
+    "freeway": "NARN Freeway (free)",
+    "freewayHint": "Picks a suitable free model for each language, using the free keys in your vault.",
+    "noFreeKey": "No free key in your vault yet. NARN Freeway needs at least one.",
+    "addFreeKey": "Add a free key",
+    "own": "My own provider",
+    "ownPlaceholder": "Choose a provider",
+    "freeOnlyOption": "{{provider}} (on its own, without the Freeway pool)",
+    "keySaved": "Key saved",
+    "noKey": "No key",
+    "keyMissing": "No {{provider}} key in your vault yet.",
+    "vaultLocked": "Unlock your vault to check the key.",
+    "addKey": "Add key",
+    "paidNote": "Paid from your {{provider}} account.",
+    "freeOnlyNote": "Only {{provider}} translates, without the other free models in the NARN Freeway pool.",
+    "pendingNote": "{{provider}} is used once its key is saved. Until then NARN Freeway translates.",
+    "customRouting": "This project uses custom routing set up in Advanced, so it is not changed here.",
+    "openAdvanced": "Open in Advanced",
+    "loading": "Loading your provider choice…",
+    "translatedBy": "Translated by {{provider}}",
+    "translatedByCustom": "Translated by this project's custom routing",
+    "change": "Change"
+  }
 }

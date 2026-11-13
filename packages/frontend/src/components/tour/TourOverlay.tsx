@@ -13,7 +13,7 @@ import { useTourAnchor } from '@/hooks/use-tour-anchor';
 import type { TourPosition } from '@/lib/tour/position';
 import type { GuideFacts, Tour } from '@/lib/tour/types';
 import { useViewStore } from '@/stores/view-store';
-import { TourCallout } from './TourCallout';
+import { TourCallout, type TourText } from './TourCallout';
 
 /**
  * Stacking: the dim layer sits at z-40 (above app content, below the z-50
@@ -35,6 +35,8 @@ interface TourOverlayProps {
   position?: TourPosition;
   /** Content under the callout's why text. */
   extra?: ReactNode;
+  /** Copy swaps and placeholder values for the callout. */
+  text?: TourText;
   /** Whether Back shows (default: on every step but the first). */
   canGoBack?: boolean;
   onAdvance: () => void;
@@ -112,6 +114,7 @@ export function TourOverlay({
   facts,
   position,
   extra,
+  text,
   canGoBack,
   onAdvance,
   onBack,
@@ -228,6 +231,7 @@ export function TourOverlay({
     titleId,
     position,
     extra,
+    text,
     showBack: canGoBack ?? stepIndex > 0,
     showNext: step.advance.kind === 'next' || (stateDone && enteredViaBack),
     onNext: onAdvance,

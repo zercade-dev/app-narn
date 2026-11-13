@@ -517,5 +517,31 @@
   "templateImportFailed": "Şablon içe aktarma başarısız: {{message}}",
   "templateDeleted": "“{{name}}” şablonu silindi.",
   "templateDeleteFailed": "Şablon silinemedi: {{message}}",
-  "templateExportFailed": "Şablon dışa aktarma başarısız: {{message}}"
+  "templateExportFailed": "Şablon dışa aktarma başarısız: {{message}}",
+  "providerCard": {
+    "title": "Çeviri sağlayıcısı",
+    "scope": "Bu proje. Oluşturduğunuz yeni projeler de aynısını kullanır.",
+    "scopeCollab": "Kendi seçiminiz; sizinle paylaşılan her projede kullanılır.",
+    "freeway": "NARN Freeway (ücretsiz)",
+    "freewayHint": "Kasanızdaki ücretsiz anahtarları kullanarak her dil için uygun bir ücretsiz model seçer.",
+    "noFreeKey": "Kasanızda henüz ücretsiz anahtar yok. NARN Freeway en az bir tane gerektirir.",
+    "addFreeKey": "Ücretsiz anahtar ekle",
+    "own": "Kendi sağlayıcım",
+    "ownPlaceholder": "Bir sağlayıcı seçin",
+    "freeOnlyOption": "{{provider}} (tek başına, Freeway havuzu olmadan)",
+    "keySaved": "Anahtar kaydedildi",
+    "noKey": "Anahtar yok",
+    "keyMissing": "Kasanızda henüz {{provider}} anahtarı yok.",
+    "vaultLocked": "Anahtarı kontrol etmek için kasanızın kilidini açın.",
+    "addKey": "Anahtar ekle",
+    "paidNote": "Ücreti {{provider}} hesabınızdan ödenir.",
+    "freeOnlyNote": "Yalnızca {{provider}} çevirir; NARN Freeway havuzundaki diğer ücretsiz modeller kullanılmaz.",
+    "pendingNote": "{{provider}}, anahtarı kaydedilince kullanılır. O zamana kadar NARN Freeway çevirir.",
+    "customRouting": "Bu proje, Gelişmiş modda ayarlanmış özel yönlendirme kullanıyor; bu yüzden burada değiştirilmez.",
+    "openAdvanced": "Gelişmiş modda aç",
+    "loading": "Sağlayıcı seçiminiz yükleniyor…",
+    "translatedBy": "Çeviren: {{provider}}",
+    "translatedByCustom": "Bu projenin özel yönlendirmesiyle çevrilir",
+    "change": "Değiştir"
+  }
 }

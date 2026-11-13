@@ -19,6 +19,7 @@ export type FirstRunAction =
   | 'get-google-key'
   | 'add-google-key'
   | 'own-provider'
+  | 'use-found-key'
   | 'fix-key'
   | 'retry'
   | 'stop-retry'
@@ -435,19 +436,34 @@ const tourOf = (head: TourStep[]): Tour => ({
  * tour keeps its identity from one render to the next.
  */
 const replacedTours = new Map<string, Map<Tour, Tour>>();
-function withStep(tour: Tour, id: string, make: () => TourStep): Tour {
-  let byTour = replacedTours.get(id);
+function withStep(
+  tour: Tour,
+  id: string,
+  make: (step: TourStep) => TourStep,
+  variant = 'default',
+): Tour {
+  const cacheKey = `${id}:${variant}`;
+  let byTour = replacedTours.get(cacheKey);
   if (!byTour) {
     byTour = new Map();
-    replacedTours.set(id, byTour);
+    replacedTours.set(cacheKey, byTour);
   }
   let replaced = byTour.get(tour);
   if (!replaced) {
-    replaced = { ...tour, steps: tour.steps.map((s) => (s.id === id ? make() : s)) };
+    replaced = { ...tour, steps: tour.steps.map((s) => (s.id === id ? make(s) : s)) };
     byTour.set(tour, replaced);
   }
   return replaced;
 }
+
+/** The step that asks for a key: `key-choice` locally, the vault hand-off in cloud. */
+const KEY_STEPS = ['key-choice', 'cloud-vault'];
+
+/** `step` with "Use <provider> for your translations" first among its actions. */
+const withFoundKeyAction = (step: TourStep): TourStep => ({
+  ...step,
+  actions: [{ ...action('use-found-key', 'useFoundKey'), primary: true }, ...(step.actions ?? [])],
+});
 
 /** The local first-run tour (a new vault). */
 export const FIRST_RUN_TOUR: Tour = tourOf(localVaultAndKeySteps('vault'));
@@ -464,15 +480,20 @@ const FIRST_RUN_TOUR_CLOUD_KEY: Tour = tourOf(cloudVaultAndKeySteps('key'));
  * that now exists, or is now unlocked) never moves the person. `fewEntries`:
  * the project has QUICK_TEST_SIZE translatable entries or fewer, so the quick
  * test offers no choice. `advanced`: the guide runs in Advanced (restarted
- * there from the Guide), so the closing step is worded for it.
+ * there from the Guide), so the closing step is worded for it. `foundKey`:
+ * the vault already holds the key of a provider the person could use (and no
+ * free key), so the key step offers it in one click.
  */
 export function firstRunTourFor(
   f: Pick<GuideFacts, 'cloud' | 'vaultExists'> & Partial<Pick<GuideFacts, 'vaultUnlocked'>>,
-  opts: { fewEntries?: boolean; advanced?: boolean } = {},
+  opts: { fewEntries?: boolean; advanced?: boolean; foundKey?: boolean } = {},
 ): Tour {
   let tour = baseTourFor(f);
   if (opts.advanced) tour = withStep(tour, CLOSING_STEP, () => closingStep(true));
   if (opts.fewEntries) tour = withStep(tour, QUICK_STEP, () => quickTestStep(true));
+  if (opts.foundKey) {
+    for (const id of KEY_STEPS) tour = withStep(tour, id, withFoundKeyAction, 'found-key');
+  }
   return tour;
 }
 

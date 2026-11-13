@@ -62,6 +62,56 @@ export const FREE_KEY_PROVIDERS: ReadonlyArray<{ key: (typeof FREE_KEYS)[number]
   ];
 
 /**
+ * Display names of the offered providers, the same as their module manifests'
+ * `name`, so a label never falls back to a raw id while the module list loads.
+ * Product names: not translated.
+ */
+const PROVIDER_NAMES: Readonly<Record<string, string>> = {
+  anthropic: 'Anthropic (Claude)',
+  openai: 'OpenAI (GPT)',
+  deepseek: 'DeepSeek',
+  openrouter: 'OpenRouter',
+  groq: 'Groq',
+  google: 'Google AI (Gemini)',
+  deepl: 'DeepL',
+  copilot: 'GitHub Copilot',
+};
+
+/** The provider's name for a base module or instance id; the base id when unknown. */
+export function providerName(moduleId: string): string {
+  const base = moduleId.split(':')[0];
+  return PROVIDER_NAMES[base] ?? base;
+}
+
+/** Providers billed per use to the person's own account. */
+const PAID_PROVIDERS = new Set(['anthropic', 'openai', 'deepseek', 'copilot']);
+
+/** Whether translating with this provider costs the person money. */
+export function isPaidProvider(moduleId: string): boolean {
+  return PAID_PROVIDERS.has(moduleId.split(':')[0]);
+}
+
+/** Whether this provider is one of the free-key providers NARN Freeway pools. */
+export function isFreeKeyProvider(moduleId: string): boolean {
+  const base = moduleId.split(':')[0];
+  return FREE_KEY_PROVIDERS.some((p) => p.base === base);
+}
+
+/**
+ * The first offered paid-tier provider whose key is in `keys`, for a vault
+ * that holds such a key and no free one. Free-key providers are left out: their
+ * key already makes Freeway usable.
+ */
+export function foundOwnProviderKey(keys: readonly string[], cloud: boolean): string | null {
+  return (
+    ownProviderChoices(cloud).find((base) => {
+      const key = PROVIDER_KEYS[base];
+      return !isFreeKeyProvider(base) && key !== undefined && keys.includes(key);
+    }) ?? null
+  );
+}
+
+/**
  * The id `enableProvider(base)` returns, known without asking the server:
  * `<base>:default`, or the bare id for a module with no instance layer.
  */

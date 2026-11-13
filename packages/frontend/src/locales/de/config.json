@@ -517,5 +517,31 @@
   "templateImportFailed": "Import der Vorlage fehlgeschlagen: {{message}}",
   "templateDeleted": "Vorlage „{{name}}“ gelöscht.",
   "templateDeleteFailed": "Vorlage konnte nicht gelöscht werden: {{message}}",
-  "templateExportFailed": "Export der Vorlage fehlgeschlagen: {{message}}"
+  "templateExportFailed": "Export der Vorlage fehlgeschlagen: {{message}}",
+  "providerCard": {
+    "title": "Übersetzungsanbieter",
+    "scope": "Dieses Projekt. Neue Projekte, die du erstellst, verwenden dasselbe.",
+    "scopeCollab": "Deine eigene Wahl, verwendet in jedem Projekt, das mit dir geteilt wird.",
+    "freeway": "NARN Freeway (kostenlos)",
+    "freewayHint": "Wählt für jede Sprache ein passendes kostenloses Modell und nutzt dafür die kostenlosen Schlüssel in deinem Tresor.",
+    "noFreeKey": "Noch kein kostenloser Schlüssel in deinem Tresor. NARN Freeway braucht mindestens einen.",
+    "addFreeKey": "Kostenlosen Schlüssel hinzufügen",
+    "own": "Mein eigener Anbieter",
+    "ownPlaceholder": "Anbieter auswählen",
+    "freeOnlyOption": "{{provider}} (allein, ohne den Freeway-Pool)",
+    "keySaved": "Schlüssel gespeichert",
+    "noKey": "Kein Schlüssel",
+    "keyMissing": "Noch kein {{provider}}-Schlüssel in deinem Tresor.",
+    "vaultLocked": "Entsperre deinen Tresor, um den Schlüssel zu prüfen.",
+    "addKey": "Schlüssel hinzufügen",
+    "paidNote": "Wird über dein {{provider}}-Konto bezahlt.",
+    "freeOnlyNote": "Nur {{provider}} übersetzt, ohne die anderen kostenlosen Modelle im NARN-Freeway-Pool.",
+    "pendingNote": "{{provider}} wird verwendet, sobald sein Schlüssel gespeichert ist. Bis dahin übersetzt NARN Freeway.",
+    "customRouting": "Dieses Projekt nutzt eigenes Routing, das unter „Erweitert“ eingerichtet wurde, und wird daher hier nicht geändert.",
+    "openAdvanced": "In „Erweitert“ öffnen",
+    "loading": "Deine Anbieterwahl wird geladen …",
+    "translatedBy": "Übersetzt von {{provider}}",
+    "translatedByCustom": "Übersetzt über das eigene Routing dieses Projekts",
+    "change": "Ändern"
+  }
 }

@@ -14,6 +14,7 @@
       "getGoogleKey": "Kostenlosen Google-Schlüssel holen",
       "addGoogleKey": "Meinen Google-Schlüssel einfügen",
       "ownProvider": "Eigenen Anbieter verwenden",
+      "useFoundKey": "{{provider}} für deine Übersetzungen verwenden",
       "fixKey": "Meinen Schlüssel prüfen",
       "retry": "Erneut versuchen",
       "stopRetry": "Stoppen und erneut versuchen",
@@ -38,20 +39,21 @@
       "passwordWhat": "Hier dein Tresor-Passwort eingeben und mit der Schaltfläche darunter bestätigen."
     },
     "cloudVault": {
-      "title": "Tresor erstellen und einen kostenlosen Schlüssel hinzufügen",
-      "what": "Ein Tresor-Passwort festlegen und dann einen kostenlosen Schlüssel hinzufügen. Google wird empfohlen. Danach kommst du hierher zurück.",
+      "title": "Tresor erstellen und einen Schlüssel hinzufügen",
+      "what": "Ein Tresor-Passwort festlegen und dann einen Schlüssel hinzufügen. Für einen schnellen Test einen kostenlosen Google-AI-Schlüssel erstellen. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann zuerst „Eigenen Anbieter verwenden“ wählen. Danach kommst du hierher zurück.",
       "why": "Deine Anbieter-Schlüssel werden mit deinem Passwort verschlüsselt und bleiben immer unter deiner Kontrolle. Am Schlüssel erkennt der KI-Anbieter, dass du es bist."
     },
     "cloudUnlock": {
       "what": "Deinen Tresor auf der Tresor-Seite entsperren. Danach kommst du hierher zurück."
     },
     "cloudKey": {
-      "what": "Auf der Tresor-Seite einen kostenlosen Schlüssel hinzufügen. Google wird empfohlen. Danach kommst du hierher zurück."
+      "what": "Auf der Tresor-Seite einen Schlüssel hinzufügen. Für einen schnellen Test einen kostenlosen Google-AI-Schlüssel erstellen. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann zuerst „Eigenen Anbieter verwenden“ wählen. Danach kommst du hierher zurück."
     },
     "key": {
-      "title": "Einen kostenlosen Schlüssel hinzufügen",
-      "why": "NARN Freeway nutzt kostenlose KI-Modelle, und am Schlüssel erkennt der Anbieter, dass du es bist.",
-      "choiceWhat": "Einen kostenlosen Google-AI-Schlüssel erstellen und in deinen Tresor einfügen.",
+      "title": "Einen Schlüssel hinzufügen, um mit dem Übersetzen zu beginnen",
+      "why": "Mit einem kostenlosen Schlüssel übersetzt NARN Freeway dein Spiel kostenlos, während du es ausprobierst. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
+      "whyOwn": "Am {{provider}}-Schlüssel erkennt {{provider}}, dass du es bist. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
+      "choiceWhat": "Für einen schnellen Test einen kostenlosen Google-AI-Schlüssel erstellen und in deinen Tresor einfügen. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann „Eigenen Anbieter verwenden“ wählen.",
       "pasteWhat": "Den Schlüssel hier einfügen, darunter dein Tresor-Passwort eingeben und speichern."
     },
     "project": {
@@ -69,6 +71,8 @@
     "translate": {
       "title": "Übersetzen",
       "why": "Freeway wählt für jede Sprache automatisch ein passendes kostenloses Modell.",
+      "whyOwn": "{{provider}} übersetzt dieses Projekt mit deinem eigenen Schlüssel.",
+      "whyCustom": "Das Routing dieses Projekts, eingerichtet unter „Erweitert“, wählt den Anbieter für jeden Eintrag.",
       "openWhat": "Den Tab mit der Liste deiner Einträge öffnen.",
       "quickWhat": "Die ersten 3 Einträge sind ausgewählt. Zum Ausprobieren nur diese übersetzen oder gleich alles.",
       "fewWhat": "Deine Einträge sind ausgewählt. Jetzt übersetzen.",
@@ -83,6 +87,7 @@
       "why": "Die hervorgehobene Leiste unten zeigt, was passiert ist.",
       "authWhat": "Der Anbieter hat deinen Schlüssel abgelehnt. Den Schlüssel prüfen und es erneut versuchen.",
       "quotaWhat": "Das kostenlose Kontingent ist vorerst aufgebraucht. Etwas warten oder einen weiteren Schlüssel hinzufügen und es erneut versuchen.",
+      "quotaWhatOwn": "{{provider}} lehnt vorerst ab: Kontingent oder Guthaben deines Kontos ist aufgebraucht. Prüfe deinen Tarif beim Anbieter und versuche es dann erneut.",
       "otherWhat": "Es wurde nichts übersetzt. Den Schlüssel prüfen und es erneut versuchen."
     },
     "parked": {
@@ -115,10 +120,13 @@
   },
   "providerChoice": {
     "title": "Eigenen Anbieter verwenden",
-    "description": "Den Anbieter auswählen, für den du einen Schlüssel hast. NARN schickt dann jede Übersetzung in deinen Projekten an ihn. Um mehrere Anbieter zu kombinieren, zu „Erweitert“ wechseln.",
+    "description": "Den Anbieter auswählen, für den du einen Schlüssel hast. Er übersetzt dieses Projekt und die neuen Projekte, die du erstellst. Um mehrere Anbieter zu kombinieren, zu „Erweitert“ wechseln.",
     "existingRouting": "Für dieses Projekt ist bereits Routing eingerichtet, es bleibt daher unverändert. Ändern kannst du es unter „Erweitert“.",
+    "freeHeading": "Für diese gibt es kostenlose Schlüssel. Wenn du einen davon wählst, übersetzt nur er, ohne die anderen kostenlosen Modelle im NARN-Freeway-Pool.",
     "cancel": "Abbrechen",
-    "failed": "{{provider}} konnte nicht eingerichtet werden: {{message}}"
+    "failed": "{{provider}} konnte nicht eingerichtet werden: {{message}}",
+    "switchedOff": "{{provider}} ist unter „Erweitert“ ausgeschaltet und wurde daher nicht verwendet. Schalte ihn in der Globalen Konfiguration wieder ein oder wähle einen anderen Anbieter.",
+    "waitingForKey": "Für {{provider}} ist noch kein Schlüssel in deinem Tresor, daher übersetzt vorerst NARN Freeway. Füge seinen Schlüssel hinzu oder wähle NARN Freeway im Tab „Konfiguration“ des Projekts."
   },
   "offer": {
     "start": "Zeig es mir",

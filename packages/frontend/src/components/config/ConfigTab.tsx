@@ -7,6 +7,8 @@ import { useTemplateStore } from '../../stores/template-store.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
 import { ModuleSettingsPanel } from './ModuleSettingsPanel.js';
 import { LqaChecksPanel } from './LqaChecksPanel.js';
+import { TranslationProviderCard } from './TranslationProviderCard.js';
+import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -63,6 +65,8 @@ export function ConfigTab() {
   const [templateName, setTemplateName] = useState('');
 
   const activeProject = projects.find((p) => p.id === activeProjectId);
+  // Simple hides the Routing tab: who translates is chosen here instead.
+  const simple = useUiMode() === 'simple';
 
   useEffect(() => {
     fetchProjects();
@@ -233,6 +237,8 @@ export function ConfigTab() {
             </Button>
           </div>
         )}
+
+        {simple && <TranslationProviderCard projectId={activeProject.id} />}
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {/* Translation memory policy */}

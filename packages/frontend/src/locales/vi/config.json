@@ -510,5 +510,31 @@
   "templateImportFailed": "Nhập mẫu thất bại: {{message}}",
   "templateDeleted": "Đã xóa mẫu “{{name}}”.",
   "templateDeleteFailed": "Không xóa được mẫu: {{message}}",
-  "templateExportFailed": "Xuất mẫu thất bại: {{message}}"
+  "templateExportFailed": "Xuất mẫu thất bại: {{message}}",
+  "providerCard": {
+    "title": "Nhà cung cấp dịch",
+    "scope": "Dự án này. Các dự án mới bạn tạo sẽ dùng cùng lựa chọn.",
+    "scopeCollab": "Lựa chọn của riêng bạn, dùng trong mọi dự án được chia sẻ với bạn.",
+    "freeway": "NARN Freeway (miễn phí)",
+    "freewayHint": "Chọn một mô hình miễn phí phù hợp cho từng ngôn ngữ, dùng các khóa miễn phí trong kho bảo mật của bạn.",
+    "noFreeKey": "Kho bảo mật của bạn chưa có khóa miễn phí nào. NARN Freeway cần ít nhất một khóa.",
+    "addFreeKey": "Thêm khóa miễn phí",
+    "own": "Nhà cung cấp của riêng tôi",
+    "ownPlaceholder": "Chọn nhà cung cấp",
+    "freeOnlyOption": "{{provider}} (dùng riêng, không có nhóm Freeway)",
+    "keySaved": "Đã lưu khóa",
+    "noKey": "Không có khóa",
+    "keyMissing": "Kho bảo mật của bạn chưa có khóa {{provider}}.",
+    "vaultLocked": "Mở khóa kho bảo mật để kiểm tra khóa.",
+    "addKey": "Thêm khóa",
+    "paidNote": "Tính phí vào tài khoản {{provider}} của bạn.",
+    "freeOnlyNote": "Chỉ {{provider}} dịch, không dùng các mô hình miễn phí khác trong nhóm NARN Freeway.",
+    "pendingNote": "{{provider}} sẽ được dùng khi khóa của nó được lưu. Trong lúc chờ, NARN Freeway sẽ dịch.",
+    "customRouting": "Dự án này dùng điều phối tùy chỉnh được thiết lập trong Nâng cao, nên không thay đổi ở đây.",
+    "openAdvanced": "Mở trong Nâng cao",
+    "loading": "Đang tải lựa chọn nhà cung cấp của bạn…",
+    "translatedBy": "Dịch bởi {{provider}}",
+    "translatedByCustom": "Dịch theo điều phối tùy chỉnh của dự án này",
+    "change": "Thay đổi"
+  }
 }

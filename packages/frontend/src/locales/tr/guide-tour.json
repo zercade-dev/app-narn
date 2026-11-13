@@ -14,6 +14,7 @@
       "getGoogleKey": "Ücretsiz Google anahtarı al",
       "addGoogleKey": "Google anahtarımı yapıştır",
       "ownProvider": "Kendi sağlayıcımı kullan",
+      "useFoundKey": "Çevirileriniz için {{provider}} kullanın",
       "fixKey": "Anahtarımı kontrol et",
       "retry": "Yeniden dene",
       "stopRetry": "Durdur ve yeniden dene",
@@ -38,20 +39,21 @@
       "passwordWhat": "Kasa parolanızı buraya yazın, ardından alttaki düğmeyle onaylayın."
     },
     "cloudVault": {
-      "title": "Kasa oluşturma ve ücretsiz anahtar ekleme",
-      "what": "Bir kasa parolası belirleyin, ardından bir ücretsiz anahtar ekleyin. Google önerilir. İşlem bitince buraya dönersiniz.",
+      "title": "Kasanızı oluşturun ve bir anahtar ekleyin",
+      "what": "Bir kasa parolası belirleyin, ardından bir anahtar ekleyin. Hızlı bir deneme için ücretsiz bir Google AI anahtarı oluşturun. Desteklenen bir sağlayıcının anahtarı zaten sizde mi? Önce “Kendi sağlayıcımı kullan”ı seçin. İşlem bitince buraya dönersiniz.",
       "why": "Sağlayıcı anahtarlarınız parolanızla şifrelenir ve her zaman sizin kontrolünüzde kalır. Yapay zekâ sağlayıcısı sizi anahtar sayesinde tanır."
     },
     "cloudUnlock": {
       "what": "Kasa sayfasında kasanızın kilidini açın. İşlem bitince buraya dönersiniz."
     },
     "cloudKey": {
-      "what": "Kasa sayfasında bir ücretsiz anahtar ekleyin. Google önerilir. İşlem bitince buraya dönersiniz."
+      "what": "Kasa sayfasında bir anahtar ekleyin. Hızlı bir deneme için ücretsiz bir Google AI anahtarı oluşturun. Desteklenen bir sağlayıcının anahtarı zaten sizde mi? Önce “Kendi sağlayıcımı kullan”ı seçin. İşlem bitince buraya dönersiniz."
     },
     "key": {
-      "title": "Ücretsiz anahtar ekleme",
-      "why": "NARN Freeway ücretsiz yapay zekâ modelleri kullanır ve sağlayıcı sizi anahtar sayesinde tanır.",
-      "choiceWhat": "Ücretsiz bir Google AI anahtarı oluşturun, ardından kasanıza yapıştırın.",
+      "title": "Çeviriye başlamak için bir anahtar ekleyin",
+      "why": "Ücretsiz bir anahtarla NARN Freeway, siz denerken oyununuzu ücretsiz çevirir. Sağlayıcıyı istediğiniz zaman projenin Yapılandırma sekmesinden değiştirebilirsiniz.",
+      "whyOwn": "{{provider}} sizi {{provider}} anahtarınız sayesinde tanır. Sağlayıcıyı istediğiniz zaman projenin Yapılandırma sekmesinden değiştirebilirsiniz.",
+      "choiceWhat": "Hızlı bir deneme için ücretsiz bir Google AI anahtarı oluşturup kasanıza yapıştırın. Desteklenen bir sağlayıcının anahtarı zaten sizde mi? “Kendi sağlayıcımı kullan”ı seçin.",
       "pasteWhat": "Anahtarı buraya yapıştırın, altına kasa parolanızı yazın, ardından kaydedin."
     },
     "project": {
@@ -69,6 +71,8 @@
     "translate": {
       "title": "Çeviri",
       "why": "Freeway her dil için uygun bir ücretsiz modeli otomatik olarak seçer.",
+      "whyOwn": "{{provider}} bu projeyi kendi anahtarınızla çeviriyor.",
+      "whyCustom": "Bu projenin Gelişmiş modda ayarlanan yönlendirmesi, her girdi için sağlayıcıyı seçer.",
       "openWhat": "Girdilerinizin listelendiği sekmeyi açın.",
       "quickWhat": "İlk 3 girdi seçili. Denemek için bunları çevirin veya hemen her şeyi çevirin.",
       "fewWhat": "Girdileriniz seçili. Şimdi çevirin.",
@@ -83,6 +87,7 @@
       "why": "Aşağıdaki vurgulanan çubuk ne olduğunu gösterir.",
       "authWhat": "Sağlayıcı anahtarınızı reddetti. Anahtarı kontrol edin, ardından yeniden deneyin.",
       "quotaWhat": "Ücretsiz kota şimdilik tükendi. Biraz bekleyin veya başka bir anahtar ekleyin, ardından yeniden deneyin.",
+      "quotaWhatOwn": "{{provider}} şimdilik istekleri reddediyor: hesabınızın kotası veya kredisi tükendi. Sağlayıcıdaki planınızı kontrol edin, ardından yeniden deneyin.",
       "otherWhat": "Hiçbir şey çevrilmedi. Anahtarınızı kontrol edin, ardından yeniden deneyin."
     },
     "parked": {
@@ -115,10 +120,13 @@
   },
   "providerChoice": {
     "title": "Kendi sağlayıcımı kullan",
-    "description": "Anahtarına sahip olduğunuz sağlayıcıyı seçin. NARN, projelerinizdeki tüm çevirileri ona gönderir. Birden çok sağlayıcıyı birlikte kullanmak için Gelişmiş moda geçin.",
+    "description": "Anahtarına sahip olduğunuz sağlayıcıyı seçin. Bu projeyi ve oluşturduğunuz yeni projeleri o çevirir. Birden çok sağlayıcıyı birlikte kullanmak için Gelişmiş moda geçin.",
     "existingRouting": "Bu projede yönlendirme zaten ayarlı, bu yüzden olduğu gibi kalır. Gelişmiş modda değiştirebilirsiniz.",
+    "freeHeading": "Bunların ücretsiz anahtarları var. Birini seçerseniz yalnızca o çevirir; NARN Freeway havuzundaki diğer ücretsiz modeller kullanılmaz.",
     "cancel": "İptal",
-    "failed": "{{provider}} kurulamadı: {{message}}"
+    "failed": "{{provider}} kurulamadı: {{message}}",
+    "switchedOff": "{{provider}} Gelişmiş modda kapalı olduğu için kullanılmadı. Genel yapılandırmada yeniden açın veya başka bir sağlayıcı seçin.",
+    "waitingForKey": "Kasanızda henüz {{provider}} anahtarı yok, bu yüzden şimdilik NARN Freeway çeviriyor. Anahtarını ekleyin veya projenin Yapılandırma sekmesinden NARN Freeway'i seçin."
   },
   "offer": {
     "start": "Göster",

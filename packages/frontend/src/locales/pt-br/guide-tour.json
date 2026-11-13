@@ -14,6 +14,7 @@
       "getGoogleKey": "Obter uma chave gratuita do Google",
       "addGoogleKey": "Colar minha chave do Google",
       "ownProvider": "Usar meu próprio provedor",
+      "useFoundKey": "Usar {{provider}} nas suas traduções",
       "fixKey": "Conferir minha chave",
       "retry": "Tentar de novo",
       "stopRetry": "Parar e tentar de novo",
@@ -38,20 +39,21 @@
       "passwordWhat": "Digite aqui a senha do seu cofre e confirme com o botão abaixo."
     },
     "cloudVault": {
-      "title": "Criação do cofre e adição de uma chave gratuita",
-      "what": "Escolha uma senha para o cofre e adicione uma chave gratuita. Recomendamos o Google. Você volta para cá quando terminar.",
+      "title": "Crie seu cofre e adicione uma chave",
+      "what": "Escolha uma senha para o cofre e adicione uma chave. Para um teste rápido, crie uma chave gratuita do Google AI. Já tem uma chave de um provedor compatível? Escolha primeiro “Usar meu próprio provedor”. Você volta para cá quando terminar.",
       "why": "Suas chaves dos provedores são criptografadas com a sua senha e nunca saem do seu controle. É pela chave que o provedor de IA sabe que é você."
     },
     "cloudUnlock": {
       "what": "Desbloqueie seu cofre na página do cofre. Você volta para cá quando terminar."
     },
     "cloudKey": {
-      "what": "Adicione uma chave gratuita na página do cofre. Recomendamos o Google. Você volta para cá quando terminar."
+      "what": "Adicione uma chave na página do cofre. Para um teste rápido, crie uma chave gratuita do Google AI. Já tem uma chave de um provedor compatível? Escolha primeiro “Usar meu próprio provedor”. Você volta para cá quando terminar."
     },
     "key": {
-      "title": "Adição de uma chave gratuita",
-      "why": "O NARN Freeway usa modelos de IA gratuitos, e é pela chave que o provedor sabe que é você.",
-      "choiceWhat": "Crie uma chave gratuita do Google AI e cole no seu cofre.",
+      "title": "Adicione uma chave para começar a traduzir",
+      "why": "Com uma chave gratuita, o NARN Freeway traduz seu jogo sem custo enquanto você testa. Você pode trocar de provedor a qualquer momento na aba Configuração do projeto.",
+      "whyOwn": "É pela sua chave do {{provider}} que o {{provider}} sabe que é você. Você pode trocar de provedor a qualquer momento na aba Configuração do projeto.",
+      "choiceWhat": "Para um teste rápido, crie uma chave gratuita do Google AI e cole no seu cofre. Já tem uma chave de um provedor compatível? Escolha “Usar meu próprio provedor”.",
       "pasteWhat": "Cole a chave aqui, digite a senha do seu cofre abaixo e salve."
     },
     "project": {
@@ -69,6 +71,8 @@
     "translate": {
       "title": "Tradução",
       "why": "O Freeway escolhe automaticamente um modelo gratuito adequado para cada idioma.",
+      "whyOwn": "O {{provider}} traduz este projeto com a sua própria chave.",
+      "whyCustom": "O roteamento deste projeto, configurado no Avançado, escolhe o provedor de cada entrada.",
       "openWhat": "Abra a aba que lista suas entradas.",
       "quickWhat": "As 3 primeiras entradas estão selecionadas. Traduza-as para testar, ou traduza tudo agora.",
       "fewWhat": "Suas entradas estão selecionadas. Traduza-as agora.",
@@ -83,6 +87,7 @@
       "why": "A barra destacada abaixo mostra o que aconteceu.",
       "authWhat": "O provedor recusou sua chave. Confira a chave e tente de novo.",
       "quotaWhat": "A cota gratuita acabou por enquanto. Espere um pouco ou adicione outra chave e tente de novo.",
+      "quotaWhatOwn": "O {{provider}} está recusando por enquanto: a cota ou o crédito da sua conta acabou. Confira seu plano com o provedor e tente de novo.",
       "otherWhat": "Nada foi traduzido. Confira sua chave e tente de novo."
     },
     "parked": {
@@ -115,10 +120,13 @@
   },
   "providerChoice": {
     "title": "Usar meu próprio provedor",
-    "description": "Escolha o provedor para o qual você tem uma chave. O NARN enviará todas as traduções dos seus projetos para ele. Para combinar vários provedores, mude para Avançado.",
+    "description": "Escolha o provedor para o qual você tem uma chave. Ele traduz este projeto e os novos projetos que você criar. Para combinar vários provedores, mude para Avançado.",
     "existingRouting": "Este projeto já tem roteamento configurado, então fica como está. Você pode alterá-lo no Avançado.",
+    "freeHeading": "Estes têm chaves gratuitas. Se você escolher um, só ele traduz, sem os outros modelos gratuitos do grupo do NARN Freeway.",
     "cancel": "Cancelar",
-    "failed": "Não foi possível configurar {{provider}}: {{message}}"
+    "failed": "Não foi possível configurar {{provider}}: {{message}}",
+    "switchedOff": "O {{provider}} está desativado no Avançado, então não foi usado. Ative-o de novo na Configuração global ou escolha outro provedor.",
+    "waitingForKey": "Ainda não há nenhuma chave do {{provider}} no seu cofre, então o NARN Freeway traduz por enquanto. Adicione a chave dele ou escolha o NARN Freeway na aba Configuração do projeto."
   },
   "offer": {
     "start": "Mostre para mim",

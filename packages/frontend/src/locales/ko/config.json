@@ -510,5 +510,31 @@
   "templateImportFailed": "템플릿을 가져오지 못했어요: {{message}}",
   "templateDeleted": "“{{name}}” 템플릿을 삭제했어요.",
   "templateDeleteFailed": "템플릿을 삭제하지 못했어요: {{message}}",
-  "templateExportFailed": "템플릿을 내보내지 못했어요: {{message}}"
+  "templateExportFailed": "템플릿을 내보내지 못했어요: {{message}}",
+  "providerCard": {
+    "title": "번역 제공업체",
+    "scope": "이 프로젝트에 적용돼요. 새로 만드는 프로젝트도 같은 설정을 써요.",
+    "scopeCollab": "내가 직접 고른 설정으로, 나와 공유된 모든 프로젝트에서 쓰여요.",
+    "freeway": "NARN Freeway(무료)",
+    "freewayHint": "보관함의 무료 키로 언어마다 알맞은 무료 모델을 골라요.",
+    "noFreeKey": "보관함에 아직 무료 키가 없어요. NARN Freeway에는 최소 하나가 필요해요.",
+    "addFreeKey": "무료 키 추가",
+    "own": "내 제공업체",
+    "ownPlaceholder": "제공업체 선택",
+    "freeOnlyOption": "{{provider}}(단독, Freeway 풀 없이)",
+    "keySaved": "키 저장됨",
+    "noKey": "키 없음",
+    "keyMissing": "보관함에 아직 {{provider}} 키가 없어요.",
+    "vaultLocked": "키를 확인하려면 보관함 잠금을 해제하세요.",
+    "addKey": "키 추가",
+    "paidNote": "{{provider}} 계정으로 요금이 청구돼요.",
+    "freeOnlyNote": "{{provider}}만 번역하고, NARN Freeway 풀의 다른 무료 모델은 쓰지 않아요.",
+    "pendingNote": "키를 저장하면 {{provider}}를 써요. 그전까지는 NARN Freeway가 번역해요.",
+    "customRouting": "이 프로젝트는 고급 모드에서 설정한 사용자 지정 배정을 쓰므로 여기서는 바꾸지 않아요.",
+    "openAdvanced": "고급 모드에서 열기",
+    "loading": "제공업체 선택을 불러오는 중…",
+    "translatedBy": "번역: {{provider}}",
+    "translatedByCustom": "이 프로젝트의 사용자 지정 배정으로 번역",
+    "change": "변경"
+  }
 }

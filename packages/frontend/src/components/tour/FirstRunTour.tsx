@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
 import {
   useFirstRunActive,
@@ -15,11 +16,18 @@ import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { goToVaultSetup } from '../../lib/auth-redirect.js';
 import { isTranslationRun } from '../../lib/run-kind.js';
 import { statusLineRun } from '../../lib/run-status-line.js';
+import { useProjectProvider } from '../../hooks/use-project-provider.js';
+import {
+  chooseProvider,
+  type ProviderChoiceResult,
+  type ProviderTarget,
+} from '../../lib/provider-choice.js';
 import {
   FREE_KEY_PROVIDERS,
+  foundOwnProviderKey,
   GOOGLE_KEY_URL,
-  providerInstanceId,
   providerKeyFor,
+  providerName,
 } from '../../lib/simple-provider.js';
 import {
   FIRST_RUN_ACTION_EVENT,
@@ -44,13 +52,15 @@ import {
 import { getErrorMessage } from '../../lib/utils.js';
 import { vaultEditorOpenEvent, vaultLockedEvent } from '../../lib/vault-events.js';
 import { useGuideStore } from '../../stores/guide-store.js';
-import { useProjectStore } from '../../stores/project-store.js';
+import { accessFor, useProjectStore } from '../../stores/project-store.js';
 import { useRunStore } from '../../stores/run-store.js';
 import { useSelectionStore } from '../../stores/selection-store.js';
 import { useStringStore } from '../../stores/string-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
+import { ProviderSheet, TranslatedByLine } from '../config/TranslatedByLine.js';
 import { RunProgressCard } from '../runs/RunProgressCard.js';
 import { ProviderChoice } from './ProviderChoice.js';
+import type { TourText } from './TourCallout.js';
 import { TourOverlay } from './TourOverlay.js';
 
 const GOOGLE_KEY = 'GOOGLE_API_KEY';
@@ -117,6 +127,42 @@ export function FirstRunTour({ suspended }: FirstRunTourProps) {
   return <ActiveFirstRunTour facts={facts} />;
 }
 
+/** Steps that say who will translate ("Translated by <provider> · Change"). */
+const TRANSLATED_BY_STEPS = new Set([
+  'translate-open',
+  'translate-quick',
+  'select-all',
+  'translate-selected',
+  'translate-start',
+  'translate-failed-auth',
+  'translate-failed-quota',
+  'translate-failed-other',
+]);
+
+/** Own-provider wordings of the Freeway sentences, keyed by the Freeway key. */
+const OWN_PROVIDER_COPY: Readonly<Record<string, string>> = {
+  'firstRun.translate.why': 'firstRun.translate.whyOwn',
+  'firstRun.key.why': 'firstRun.key.whyOwn',
+  'firstRun.failed.quotaWhat': 'firstRun.failed.quotaWhatOwn',
+};
+const CUSTOM_ROUTING_COPY: Readonly<Record<string, string>> = {
+  'firstRun.translate.why': 'firstRun.translate.whyCustom',
+};
+
+/**
+ * The provider the guide's copy is about: the active project's (its real
+ * routing), else, before there is a project, the person's choice.
+ */
+function useGuideProvider(projectId: string | null): {
+  kind: 'freeway' | 'own' | 'custom';
+  moduleId?: string;
+} {
+  const { provider } = useProjectProvider(projectId);
+  const chosen = useGuideStore((s) => s.simpleProvider);
+  if (provider) return provider;
+  return chosen ? { kind: 'own', moduleId: chosen } : { kind: 'freeway' };
+}
+
 /** `{ key }` for the vault page when the person chose their own provider. */
 function chosenKey(): { key?: string } {
   const own = useGuideStore.getState().simpleProvider;
@@ -124,14 +170,32 @@ function chosenKey(): { key?: string } {
   return key ? { key } : {};
 }
 
+/** The active project as a place to write a provider choice, when it is the person's own. */
+function ownedTarget(): ProviderTarget | null {
+  const s = useProjectStore.getState();
+  const project = s.projects.find((p) => p.id === s.activeProjectId);
+  return project && accessFor(s, project.id).role === 'owner'
+    ? { kind: 'project', projectId: project.id }
+    : null;
+}
+
 function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
+  const { t: tGuide } = useTranslation('guide-tour');
   // Three entries or fewer: the quick test would be everything, so no choice.
   const fewEntries = useStringStore(
     (s) => s.entries.filter(isTranslatableEntry).length <= QUICK_TEST_SIZE,
   );
   // Running in Advanced (restarted there from the Guide): no switch to flip at the end.
   const advanced = useUiMode() !== 'simple';
-  const tour = firstRunTourFor(facts, { fewEntries, advanced });
+  // The vault holds a key the person could use, but no free key and no choice:
+  // offer it in one click instead of a step they cannot get past.
+  const simpleProvider = useGuideStore((s) => s.simpleProvider);
+  const foundBase = useVaultStore((s) =>
+    s.unlocked && !facts.usableKey && simpleProvider === null
+      ? foundOwnProviderKey(s.keys, facts.cloud)
+      : null,
+  );
+  const tour = firstRunTourFor(facts, { fewEntries, advanced, foundKey: foundBase !== null });
   const resumeAt = firstRunStepIndex(facts);
   const derived = resumeAt === 'done' ? tour.steps.length - 1 : resumeAt;
 
@@ -186,10 +250,51 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const onExit = useCallback(() => useGuideStore.getState().dismissFirstRun(), []);
 
   const [choiceOpen, setChoiceOpen] = useState(false);
+  // The provider card, opened from "Translated by … · Change".
+  const [cardOpen, setCardOpen] = useState(false);
   const cloud = facts.cloud;
   const stalledRunId = stalled?.runId ?? null;
   const runQueuedBehind = stalled?.queuedBehind ?? false;
   const projectId = useProjectStore((state) => state.activeProjectId);
+
+  // What became of a provider choice, said where the person is looking.
+  const onProviderChosen = useCallback(
+    ({ base, result }: { base: string; result: ProviderChoiceResult }) => {
+      setChoiceOpen(false);
+      const name = providerName(base);
+      switch (result.status) {
+        case 'applied':
+          // Usable now: the facts move the guide on by themselves.
+          return;
+        case 'switched-off':
+          toast.warning(tGuide('providerChoice.switchedOff', { provider: name }));
+          return;
+        case 'routing-kept':
+          toast.info(tGuide('providerChoice.existingRouting'));
+          return;
+        case 'needs-key':
+          if (!result.vaultKey) return;
+          if (cloud) goToVaultSetup({ guided: true, key: result.vaultKey });
+          else globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey: result.vaultKey }));
+      }
+    },
+    [cloud, tGuide],
+  );
+  const reportChoice = useCallback(
+    (base: string, pending: Promise<ProviderChoiceResult>) => {
+      void pending
+        .then((result) => onProviderChosen({ base, result }))
+        .catch((err: unknown) =>
+          toast.error(
+            tGuide('providerChoice.failed', {
+              provider: providerName(base),
+              message: getErrorMessage(err),
+            }),
+          ),
+        );
+    },
+    [onProviderChosen, tGuide],
+  );
 
   // The run the guide asked for (its progress shows in the callout).
   const [guideRunId, setGuideRunId] = useState<string | null>(null);
@@ -225,6 +330,12 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'own-provider':
           setChoiceOpen(true);
           break;
+        case 'use-found-key': {
+          const { keys } = useVaultStore.getState();
+          const base = foundOwnProviderKey(keys, cloud);
+          if (base) reportChoice(base, chooseProvider(base, ownedTarget()));
+          break;
+        }
         case 'fix-key': {
           if (cloud) {
             goToVaultSetup();
@@ -302,7 +413,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     };
     globalThis.addEventListener(FIRST_RUN_ACTION_EVENT, onAction);
     return () => globalThis.removeEventListener(FIRST_RUN_ACTION_EVENT, onAction);
-  }, [cloud, stalledRunId, runQueuedBehind, projectId, tour]);
+  }, [cloud, stalledRunId, runQueuedBehind, projectId, tour, reportChoice]);
 
   // Entering the quick test: the table shows every entry in import order, and
   // the three to try are selected, so the checked rows are the ones on screen.
@@ -375,11 +486,6 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   // started, else the one the console's status line describes.
   const statusRunId = useRunStore((s) => statusLineRun(s.runs, projectId)?.runId ?? null);
   const progressRunId = guideRunId ?? statusRunId;
-  const extra =
-    shownStep?.id === 'translate-progress' && progressRunId ? (
-      <RunProgressCard runId={progressRunId} variant="callout" />
-    ) : undefined;
-
   // The closing step is on screen: a switch to Advanced now starts a tour.
   const atClosing = shownStep?.id === 'closing';
   useEffect(() => {
@@ -387,28 +493,34 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     return () => useGuideStore.getState().setClosingShown(false);
   }, [atClosing]);
 
-  const onProviderChosen = useCallback(
-    ({ base, vaultKey }: { base: string; vaultKey: string | undefined }) => {
-      // Remembered first: in cloud the next thing may be a trip to the vault
-      // page, and the provider is enabled when the person comes back.
-      useGuideStore.getState().setSimpleProvider(providerInstanceId(base));
-      setChoiceOpen(false);
-      const { unlocked, keys } = useVaultStore.getState();
-      // Already usable: the facts move the guide on by themselves.
-      if (!vaultKey || (unlocked && keys.includes(vaultKey))) return;
-      if (cloud) {
-        goToVaultSetup({ guided: true, key: vaultKey });
-        return;
-      }
-      globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey: vaultKey }));
-    },
-    [cloud],
-  );
+  // Who translates, for the copy and the "Translated by" line.
+  const guideProvider = useGuideProvider(projectId);
+  const text: TourText = useMemo(() => {
+    if (foundBase !== null) return { values: { provider: providerName(foundBase) } };
+    if (guideProvider.kind === 'custom') return { keys: CUSTOM_ROUTING_COPY };
+    if (guideProvider.kind === 'own' && guideProvider.moduleId) {
+      return {
+        keys: OWN_PROVIDER_COPY,
+        values: { provider: providerName(guideProvider.moduleId) },
+      };
+    }
+    return {};
+  }, [foundBase, guideProvider.kind, guideProvider.moduleId]);
+
+  const progressCard =
+    shownStep?.id === 'translate-progress' && progressRunId ? (
+      <RunProgressCard runId={progressRunId} variant="callout" />
+    ) : undefined;
+  const extra =
+    progressCard ??
+    (shownStep && TRANSLATED_BY_STEPS.has(shownStep.id) ? (
+      <TranslatedByLine projectId={projectId} onChange={() => setCardOpen(true)} />
+    ) : undefined);
 
   return (
     <>
-      {/* The provider list replaces the callout while it is open. */}
-      {!choiceOpen && (
+      {/* The provider list and the provider card replace the callout while open. */}
+      {!choiceOpen && !cardOpen && (
         <TourOverlay
           tour={tour}
           stepIndex={shownIndex}
@@ -416,6 +528,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
           // No counter on a step outside the five (the closing step).
           position={shownStep?.major !== undefined ? stepPosition : undefined}
           extra={extra}
+          text={text}
           onAdvance={onAdvance}
           onBack={onBack}
           onExit={onExit}
@@ -427,6 +540,9 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         cloud={cloud}
         onChosen={onProviderChosen}
       />
+      {projectId && (
+        <ProviderSheet projectId={projectId} open={cardOpen} onOpenChange={setCardOpen} />
+      )}
     </>
   );
 }

@@ -5,6 +5,16 @@ import { Button } from '@/components/ui/button';
 import type { TourPosition } from '@/lib/tour/position';
 import type { TourStep } from '@/lib/tour/types';
 
+/**
+ * Wording that depends on what the app knows beyond the step: `keys` swaps a
+ * step's copy key for another (e.g. the own-provider variant of a Freeway
+ * sentence), `values` fills the copy's `{{placeholders}}`.
+ */
+export interface TourText {
+  keys?: Readonly<Record<string, string>>;
+  values?: Readonly<Record<string, string>>;
+}
+
 interface TourCalloutProps {
   step: TourStep;
   titleId: string;
@@ -12,6 +22,7 @@ interface TourCalloutProps {
   position?: TourPosition;
   /** Shown under the why text. */
   extra?: ReactNode;
+  text?: TourText;
   showBack: boolean;
   showNext: boolean;
   onNext: () => void;
@@ -25,13 +36,16 @@ export function TourCallout({
   titleId,
   position,
   extra,
+  text,
   showBack,
   showNext,
   onNext,
   onBack,
   onExit,
 }: TourCalloutProps) {
-  const { t } = useTranslation('guide-tour');
+  const { t: translate } = useTranslation('guide-tour');
+  const t = (key: string, values?: Record<string, unknown>): string =>
+    translate(text?.keys?.[key] ?? key, { ...text?.values, ...values });
   return (
     <div className="flex flex-col gap-2 p-1">
       <div className="flex items-start justify-between gap-2">

@@ -14,6 +14,7 @@
       "getGoogleKey": "Get a free Google key",
       "addGoogleKey": "Paste my Google key",
       "ownProvider": "Use my own provider",
+      "useFoundKey": "Use {{provider}} for your translations",
       "fixKey": "Check my key",
       "retry": "Try again",
       "stopRetry": "Stop and try again",
@@ -38,20 +39,21 @@
       "passwordWhat": "Type your vault password here, then confirm with the button below."
     },
     "cloudVault": {
-      "title": "Create your vault and add one free key",
-      "what": "Choose a vault password, then add one free key. Google is recommended. You come back here when it is done.",
+      "title": "Create your vault and add a key",
+      "what": "Choose a vault password, then add a key. For a quick test, create a free Google AI key. Already have a key for a supported provider? Choose \"Use my own provider\" first. You come back here when it is done.",
       "why": "Your provider keys are encrypted with your password and never leave your control. A key is how the AI provider knows it's you."
     },
     "cloudUnlock": {
       "what": "Unlock your vault on the vault page. You come back here when it is done."
     },
     "cloudKey": {
-      "what": "Add one free key on the vault page. Google is recommended. You come back here when it is done."
+      "what": "Add a key on the vault page. For a quick test, create a free Google AI key. Already have a key for a supported provider? Choose \"Use my own provider\" first. You come back here when it is done."
     },
     "key": {
-      "title": "Add one free key",
-      "why": "NARN Freeway uses free AI models, and the key is how the provider knows it's you.",
-      "choiceWhat": "Create a free Google AI key, then paste it into your vault.",
+      "title": "Add a key to start translating",
+      "why": "A free key lets NARN Freeway translate your game at no cost while you try it out. You can change the provider at any time in the project's Config tab.",
+      "whyOwn": "Your {{provider}} key is how {{provider}} knows it's you. You can change the provider at any time in the project's Config tab.",
+      "choiceWhat": "For a quick test, create a free Google AI key and paste it into your vault. Already have a key for a supported provider? Choose \"Use my own provider\".",
       "pasteWhat": "Paste the key here, type your vault password below, then save."
     },
     "project": {
@@ -69,6 +71,8 @@
     "translate": {
       "title": "Translate",
       "why": "Freeway picks a suitable free model for each language automatically.",
+      "whyOwn": "{{provider}} translates this project with your own key.",
+      "whyCustom": "This project's routing, set up in Advanced, picks the provider for each entry.",
       "openWhat": "Open the tab that lists your entries.",
       "quickWhat": "The first 3 entries are selected. Translate them to try it out, or translate everything now.",
       "fewWhat": "Your entries are selected. Translate them now.",
@@ -83,6 +87,7 @@
       "why": "The highlighted bar below shows what happened.",
       "authWhat": "The provider rejected your key. Check the key, then try again.",
       "quotaWhat": "The free quota is used up for now. Wait a little or add another key, then try again.",
+      "quotaWhatOwn": "{{provider}} refused for now: your account's quota or credit is used up. Check your plan with the provider, then try again.",
       "otherWhat": "Nothing was translated. Check your key, then try again."
     },
     "parked": {
@@ -115,10 +120,13 @@
   },
   "providerChoice": {
     "title": "Use my own provider",
-    "description": "Pick the provider you have a key for. NARN will send every translation in your projects to it. To combine several providers, switch to Advanced.",
+    "description": "Pick the provider you have a key for. It translates this project and the new projects you create. To combine several providers, switch to Advanced.",
     "existingRouting": "This project already has routing set up, so it stays as it is. You can change it in Advanced.",
+    "freeHeading": "These have free keys. Picking one translates with it alone, without the other free models in the NARN Freeway pool.",
     "cancel": "Cancel",
-    "failed": "Could not set up {{provider}}: {{message}}"
+    "failed": "Could not set up {{provider}}: {{message}}",
+    "switchedOff": "{{provider}} is switched off in Advanced, so it was not used. Switch it back on in Global Config, or choose another provider.",
+    "waitingForKey": "{{provider}} has no key in your vault yet, so NARN Freeway translates for now. Add its key, or choose NARN Freeway in the project's Config tab."
   },
   "offer": {
     "start": "Show me",

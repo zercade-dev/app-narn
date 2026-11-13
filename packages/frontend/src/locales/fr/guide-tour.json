@@ -14,6 +14,7 @@
       "getGoogleKey": "Obtenir une clé Google gratuite",
       "addGoogleKey": "Coller ma clé Google",
       "ownProvider": "Utiliser mon propre fournisseur",
+      "useFoundKey": "Utiliser {{provider}} pour vos traductions",
       "fixKey": "Vérifier ma clé",
       "retry": "Réessayer",
       "stopRetry": "Arrêter et réessayer",
@@ -38,20 +39,21 @@
       "passwordWhat": "Saisissez ici le mot de passe de votre coffre, puis validez avec le bouton en dessous."
     },
     "cloudVault": {
-      "title": "Créer votre coffre et ajouter une clé gratuite",
-      "what": "Choisissez un mot de passe pour le coffre, puis ajoutez une clé gratuite. Google est recommandé. Vous reviendrez ici une fois terminé.",
+      "title": "Créer votre coffre et ajouter une clé",
+      "what": "Choisissez un mot de passe pour le coffre, puis ajoutez une clé. Pour un test rapide, créez une clé Google AI gratuite. Vous avez déjà une clé pour un fournisseur pris en charge ? Choisissez d’abord « Utiliser mon propre fournisseur ». Vous reviendrez ici une fois terminé.",
       "why": "Vos clés de fournisseurs sont chiffrées avec votre mot de passe et restent toujours sous votre contrôle. La clé permet au fournisseur d’IA de vous reconnaître."
     },
     "cloudUnlock": {
       "what": "Déverrouillez votre coffre sur la page du coffre. Vous reviendrez ici une fois terminé."
     },
     "cloudKey": {
-      "what": "Ajoutez une clé gratuite sur la page du coffre. Google est recommandé. Vous reviendrez ici une fois terminé."
+      "what": "Ajoutez une clé sur la page du coffre. Pour un test rapide, créez une clé Google AI gratuite. Vous avez déjà une clé pour un fournisseur pris en charge ? Choisissez d’abord « Utiliser mon propre fournisseur ». Vous reviendrez ici une fois terminé."
     },
     "key": {
-      "title": "Ajouter une clé gratuite",
-      "why": "NARN Freeway utilise des modèles d’IA gratuits, et la clé permet au fournisseur de vous reconnaître.",
-      "choiceWhat": "Créez une clé Google AI gratuite, puis collez-la dans votre coffre.",
+      "title": "Ajouter une clé pour commencer à traduire",
+      "why": "Avec une clé gratuite, NARN Freeway traduit votre jeu sans frais pendant que vous l’essayez. Vous pouvez changer de fournisseur à tout moment dans l’onglet Configuration du projet.",
+      "whyOwn": "Votre clé {{provider}} permet à {{provider}} de vous reconnaître. Vous pouvez changer de fournisseur à tout moment dans l’onglet Configuration du projet.",
+      "choiceWhat": "Pour un test rapide, créez une clé Google AI gratuite et collez-la dans votre coffre. Vous avez déjà une clé pour un fournisseur pris en charge ? Choisissez « Utiliser mon propre fournisseur ».",
       "pasteWhat": "Collez la clé ici, saisissez le mot de passe de votre coffre en dessous, puis enregistrez."
     },
     "project": {
@@ -69,6 +71,8 @@
     "translate": {
       "title": "Traduire",
       "why": "Freeway choisit automatiquement un modèle gratuit adapté à chaque langue.",
+      "whyOwn": "{{provider}} traduit ce projet avec votre propre clé.",
+      "whyCustom": "Le routage de ce projet, configuré en mode Avancé, choisit le fournisseur de chaque entrée.",
       "openWhat": "Ouvrez l’onglet qui liste vos textes.",
       "quickWhat": "Les 3 premiers textes sont sélectionnés. Traduisez-les pour essayer, ou traduisez tout dès maintenant.",
       "fewWhat": "Vos textes sont sélectionnés. Traduisez-les maintenant.",
@@ -83,6 +87,7 @@
       "why": "La barre mise en évidence ci-dessous indique ce qui s’est passé.",
       "authWhat": "Le fournisseur a refusé votre clé. Vérifiez la clé, puis réessayez.",
       "quotaWhat": "Le quota gratuit est épuisé pour le moment. Patientez un peu ou ajoutez une autre clé, puis réessayez.",
+      "quotaWhatOwn": "{{provider}} refuse pour le moment : le quota ou le crédit de votre compte est épuisé. Vérifiez votre forfait auprès du fournisseur, puis réessayez.",
       "otherWhat": "Rien n’a été traduit. Vérifiez votre clé, puis réessayez."
     },
     "parked": {
@@ -115,10 +120,13 @@
   },
   "providerChoice": {
     "title": "Utiliser mon propre fournisseur",
-    "description": "Choisissez le fournisseur dont vous avez une clé. NARN lui enverra toutes les traductions de vos projets. Pour combiner plusieurs fournisseurs, passez en mode Avancé.",
+    "description": "Choisissez le fournisseur dont vous avez une clé. Il traduit ce projet et les nouveaux projets que vous créez. Pour combiner plusieurs fournisseurs, passez en mode Avancé.",
     "existingRouting": "Ce projet a déjà un routage configuré, il reste donc tel quel. Vous pouvez le modifier en mode Avancé.",
+    "freeHeading": "Ceux-ci ont des clés gratuites. En choisir un le fait traduire seul, sans les autres modèles gratuits du pool NARN Freeway.",
     "cancel": "Annuler",
-    "failed": "Impossible de configurer {{provider}} : {{message}}"
+    "failed": "Impossible de configurer {{provider}} : {{message}}",
+    "switchedOff": "{{provider}} est désactivé en mode Avancé, il n’a donc pas été utilisé. Réactivez-le dans Configuration globale, ou choisissez un autre fournisseur.",
+    "waitingForKey": "Aucune clé {{provider}} dans votre coffre pour l’instant : NARN Freeway traduit en attendant. Ajoutez sa clé, ou choisissez NARN Freeway dans l’onglet Configuration du projet."
   },
   "offer": {
     "start": "Montrez-moi",

@@ -48,6 +48,12 @@ interface GuideState {
   firstRunFinished: boolean;
   /** Module instance id chosen via "Use my own provider", e.g. `openai:default`. */
   simpleProvider: string | null;
+  /**
+   * Where `simpleProvider` still has to be applied once its key is saved: a
+   * project id, or `collab` for the person's own collaborator routing. Set
+   * when the provider was chosen before its key was in the vault.
+   */
+  pendingProviderTarget: string | null;
   exportedOnce: boolean;
   /**
    * Module ids the guide has already enabled for the person (`google:default`,
@@ -97,6 +103,7 @@ interface GuideState {
   resumeFirstRun: (forced?: boolean) => void;
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
+  setPendingProviderTarget: (target: string | null) => void;
   setQuickTest: (quickTest: QuickTest | null) => void;
   /** The answer to "translate the rest?"; nothing without a quick test. */
   decideQuickTest: (decision: 'rest' | 'skip') => void;
@@ -154,6 +161,7 @@ export const useGuideStore = create<GuideState>()(
       firstRunDismissed: false,
       firstRunFinished: false,
       simpleProvider: null,
+      pendingProviderTarget: null,
       exportedOnce: false,
       enabledProviders: [],
       completedTours: [],
@@ -184,6 +192,7 @@ export const useGuideStore = create<GuideState>()(
           tourProgress: withCompleted(s.tourProgress, FIRST_RUN_PROGRESS_ID),
         })),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
+      setPendingProviderTarget: (pendingProviderTarget) => set({ pendingProviderTarget }),
       setQuickTest: (quickTest) => set({ quickTest }),
       decideQuickTest: (decision) =>
         set((s) => (s.quickTest ? { quickTest: { ...s.quickTest, decision } } : s)),
@@ -223,7 +232,7 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
-      // `quickTest` and `orphanSim` were added within v1: a state saved
+      // `quickTest`, `orphanSim` and `pendingProviderTarget` were added within v1: a state saved
       // without them rehydrates with the default (null), so no version bump
       // is needed.
       version: 1,
@@ -233,6 +242,7 @@ export const useGuideStore = create<GuideState>()(
         firstRunDismissed: state.firstRunDismissed,
         firstRunFinished: state.firstRunFinished,
         simpleProvider: state.simpleProvider,
+        pendingProviderTarget: state.pendingProviderTarget,
         exportedOnce: state.exportedOnce,
         enabledProviders: state.enabledProviders,
         completedTours: state.completedTours,
