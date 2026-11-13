@@ -3,9 +3,9 @@
   "back": "이전",
   "skip": "둘러보기 건너뛰기",
   "close": "닫기",
-  "stepOfSub": "{{majorTotal}}단계 중 {{major}}단계 · {{subTotal}}개 중 {{sub}}번째",
+  "stepOfSub": "{{majorTotal}}개 섹션 중 {{major}}번째 · {{subTotal}}단계 중 {{sub}}단계",
   "stepCount": "{{total}}개 중 {{current}}번째",
-  "continueSetup": "설정 계속하기: {{total}}단계 중 {{current}}단계",
+  "continueSetup": "설정 계속하기: {{total}}개 섹션 중 {{current}}번째",
   "firstRun": {
     "actions": {
       "openVault": "보관함 양식 열기",
@@ -161,6 +161,7 @@
     "startOver": "처음부터 시작",
     "continue": "멈춘 곳에서 계속",
     "progress": "{{total}}단계 중 {{current}}단계",
+    "progressSections": "{{total}}개 섹션 중 {{current}}개",
     "completed": "완료됨",
     "needsProject": "이 투어를 하려면 프로젝트를 여세요.",
     "switchedToAdvanced": "이 투어를 위해 고급 모드로 전환했어요.",

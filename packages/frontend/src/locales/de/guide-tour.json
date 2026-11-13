@@ -3,9 +3,9 @@
   "back": "Zurück",
   "skip": "Tour überspringen",
   "close": "Schließen",
-  "stepOfSub": "Schritt {{major}} von {{majorTotal}} · {{sub}} von {{subTotal}}",
+  "stepOfSub": "Abschnitt {{major}} von {{majorTotal}} · Schritt {{sub}} von {{subTotal}}",
   "stepCount": "{{current}} von {{total}}",
-  "continueSetup": "Einrichtung fortsetzen: Schritt {{current}} von {{total}}",
+  "continueSetup": "Einrichtung fortsetzen: Abschnitt {{current}} von {{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Tresor-Formular öffnen",
@@ -161,6 +161,7 @@
     "startOver": "Von vorn beginnen",
     "continue": "Dort weitermachen, wo ich aufgehört habe",
     "progress": "{{current}} von {{total}} Schritten",
+    "progressSections": "{{current}} von {{total}} Abschnitten",
     "completed": "Abgeschlossen",
     "needsProject": "Öffne ein Projekt, um diese Tour zu machen.",
     "switchedToAdvanced": "Für diese Tour wurde in den erweiterten Modus gewechselt.",

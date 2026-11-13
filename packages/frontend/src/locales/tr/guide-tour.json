@@ -3,9 +3,9 @@
   "back": "Geri",
   "skip": "Turu atla",
   "close": "Kapat",
-  "stepOfSub": "Adım {{major}} / {{majorTotal}} · {{sub}} / {{subTotal}}",
+  "stepOfSub": "Bölüm {{major}} / {{majorTotal}} · Adım {{sub}} / {{subTotal}}",
   "stepCount": "{{current}} / {{total}}",
-  "continueSetup": "Kuruluma devam: adım {{current}} / {{total}}",
+  "continueSetup": "Kuruluma devam: bölüm {{current}} / {{total}}",
   "firstRun": {
     "actions": {
       "openVault": "Kasa formunu aç",
@@ -161,6 +161,7 @@
     "startOver": "Baştan başla",
     "continue": "Kaldığım yerden devam et",
     "progress": "{{current}}/{{total}} adım",
+    "progressSections": "{{current}}/{{total}} bölüm",
     "completed": "Tamamlandı",
     "needsProject": "Bu turu yapmak için bir proje açın.",
     "switchedToAdvanced": "Bu tur için gelişmiş moda geçildi.",

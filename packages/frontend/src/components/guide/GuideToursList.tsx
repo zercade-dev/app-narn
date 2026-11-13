@@ -28,6 +28,8 @@ import { useViewStore } from '../../stores/view-store.js';
 interface RowState {
   current: number;
   total: number;
+  /** The first run counts its five big parts as sections; other tours count steps. */
+  unit: 'sections' | 'steps';
   completed: boolean;
   /** Counted step index "Continue" opens at; null hides it. */
   continueAt: number | null;
@@ -66,6 +68,7 @@ export function GuideToursList() {
       return {
         current: firstRunMajor(facts),
         total: MAJOR_STEP_COUNT,
+        unit: 'sections',
         completed: firstRunFinished,
         // Its own resume: the guide comes back where the app says it is.
         continueAt: firstRunDismissed && !firstRunFinished ? 0 : null,
@@ -79,6 +82,7 @@ export function GuideToursList() {
     return {
       current: saved ? Math.min(saved.furthest + 1, total) : 0,
       total,
+      unit: 'steps',
       completed,
       continueAt: !completed && last > 0 && last < total - 1 ? last : null,
     };
@@ -143,7 +147,13 @@ export function GuideToursList() {
                     {t('guideTours.completed')}
                   </>
                 ) : (
-                  t('guideTours.progress', { current: row.current, total: row.total })
+                  t(
+                    row.unit === 'sections' ? 'guideTours.progressSections' : 'guideTours.progress',
+                    {
+                      current: row.current,
+                      total: row.total,
+                    },
+                  )
                 )}
               </p>
               {blocked && (

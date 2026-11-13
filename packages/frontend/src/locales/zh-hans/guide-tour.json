@@ -3,9 +3,9 @@
   "back": "返回",
   "skip": "跳过导览",
   "close": "关闭",
-  "stepOfSub": "第 {{major}} 步，共 {{majorTotal}} 步 · 第 {{sub}} 项，共 {{subTotal}} 项",
+  "stepOfSub": "第 {{major}} 部分，共 {{majorTotal}} 部分 · 第 {{sub}} 步，共 {{subTotal}} 步",
   "stepCount": "第 {{current}} 项，共 {{total}} 项",
-  "continueSetup": "继续设置：第 {{current}} 步，共 {{total}} 步",
+  "continueSetup": "继续设置：第 {{current}} 部分，共 {{total}} 部分",
   "firstRun": {
     "actions": {
       "openVault": "打开保险库表单",
@@ -161,6 +161,7 @@
     "startOver": "从头开始",
     "continue": "从上次离开的地方继续",
     "progress": "已完成 {{current}}/{{total}} 步",
+    "progressSections": "{{current}}/{{total}} 部分",
     "completed": "已完成",
     "needsProject": "请先打开一个项目再开始此导览。",
     "switchedToAdvanced": "已为此导览切换到高级模式。",

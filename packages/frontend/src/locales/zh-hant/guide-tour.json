@@ -3,9 +3,9 @@
   "back": "返回",
   "skip": "略過導覽",
   "close": "關閉",
-  "stepOfSub": "第 {{major}} 步，共 {{majorTotal}} 步 · 第 {{sub}} 項，共 {{subTotal}} 項",
+  "stepOfSub": "第 {{major}} 部分，共 {{majorTotal}} 部分 · 第 {{sub}} 步，共 {{subTotal}} 步",
   "stepCount": "第 {{current}} 項，共 {{total}} 項",
-  "continueSetup": "繼續設定：第 {{current}} 步，共 {{total}} 步",
+  "continueSetup": "繼續設定：第 {{current}} 部分，共 {{total}} 部分",
   "firstRun": {
     "actions": {
       "openVault": "開啟保險庫表單",
@@ -161,6 +161,7 @@
     "startOver": "從頭開始",
     "continue": "從上次離開的地方繼續",
     "progress": "已完成 {{current}}/{{total}} 步",
+    "progressSections": "{{current}}/{{total}} 個部分",
     "completed": "已完成",
     "needsProject": "請先開啟一個專案再開始此導覽。",
     "switchedToAdvanced": "已為此導覽切換到進階模式。",
