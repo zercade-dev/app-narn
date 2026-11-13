@@ -643,14 +643,22 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
           </div>
 
           <div className="relative flex-1 min-h-0 flex flex-col">
-            <div ref={parentRef} className="flex-1 overflow-auto font-mono text-[11px]">
-              {!raw && activeRunIds.length > 0 && (
-                <div data-testid="console-run-cards" className="flex flex-col gap-1 px-3 py-1">
-                  {activeRunIds.map((id) => (
-                    <RunProgressCard key={id} runId={id} variant="console" />
-                  ))}
-                </div>
-              )}
+            {/* Pinned above the log, outside its scroll: following the newest line never hides it. */}
+            {!raw && activeRunIds.length > 0 && (
+              <div
+                data-testid="console-run-cards"
+                className="flex flex-col gap-1 px-3 py-1 shrink-0 font-mono text-[11px] border-b border-border/40"
+              >
+                {activeRunIds.map((id) => (
+                  <RunProgressCard key={id} runId={id} variant="console" />
+                ))}
+              </div>
+            )}
+            <div
+              ref={parentRef}
+              data-testid="console-log-scroll"
+              className="flex-1 min-h-0 overflow-auto font-mono text-[11px]"
+            >
               {totalDropped > 0 && (
                 <div
                   data-testid="console-dropped-marker"
