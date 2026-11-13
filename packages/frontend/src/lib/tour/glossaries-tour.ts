@@ -18,12 +18,18 @@ function step(id: string, anchor: string | null): TourStep {
   };
 }
 
+/**
+ * One object for every build: the overlay re-runs `navigate` when its
+ * identity changes, which would pull the person back to the tab.
+ */
+const TO_GLOSSARY: NonNullable<TourStep['navigate']> = { tab: 'glossary' };
+
 /** The AI generation step is shown only when an AI provider key is usable. */
 export function glossariesTour(f: GuideFacts): Tour {
   return {
     id: GLOSSARIES_TOUR_ID,
     steps: [
-      { ...step('purpose', 'glossary-list'), navigate: { tab: 'glossary' } },
+      { ...step('purpose', 'glossary-list'), navigate: TO_GLOSSARY },
       step('create', 'glossary-create'),
       step('add-term', 'glossary-add-term'),
       // Enabling a glossary is what applies it to this project.
