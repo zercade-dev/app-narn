@@ -239,7 +239,7 @@ export function Sidebar() {
   const guideFacts = useGuideFacts();
   const firstRunDismissed = useGuideStore((s) => s.firstRunDismissed);
   const firstRunFinished = useGuideStore((s) => s.firstRunFinished);
-  const restartFirstRun = useGuideStore((s) => s.restartFirstRun);
+  const resumeFirstRun = useGuideStore((s) => s.resumeFirstRun);
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState<string>(DEFAULT_ICON);
   const { templates, fetchTemplates, applyTemplate } = useTemplateStore();
@@ -802,7 +802,7 @@ export function Sidebar() {
                     data-testid="sidebar-continue-setup"
                     className="bg-sidebar-primary/10"
                     onClick={() => {
-                      restartFirstRun();
+                      resumeFirstRun();
                       closeMobileNav();
                     }}
                     tooltip={continueSetupLabel}

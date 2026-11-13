@@ -29,8 +29,15 @@ interface GuideState {
    */
   firstRunForced: boolean;
   dismissFirstRun: () => void;
-  /** `forced` runs it in Advanced as well (see `firstRunForced`). */
+  /**
+   * Start over from the Guide. The earlier export stops counting (it is the
+   * one fact kept here rather than read from the app), so the tour does not
+   * open on its last step. `forced` runs it in Advanced as well (see
+   * `firstRunForced`).
+   */
   restartFirstRun: (forced?: boolean) => void;
+  /** "Continue setup" after a skip: the guide comes back where it was. */
+  resumeFirstRun: () => void;
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
   markExported: () => void;
@@ -57,7 +64,13 @@ export const useGuideStore = create<GuideState>()(
       firstRunForced: false,
       dismissFirstRun: () => set({ firstRunDismissed: true }),
       restartFirstRun: (forced = false) =>
-        set({ firstRunDismissed: false, firstRunFinished: false, firstRunForced: forced }),
+        set({
+          firstRunDismissed: false,
+          firstRunFinished: false,
+          firstRunForced: forced,
+          exportedOnce: false,
+        }),
+      resumeFirstRun: () => set({ firstRunDismissed: false }),
       finishFirstRun: () => set({ firstRunFinished: true }),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
       markExported: () => set({ exportedOnce: true }),

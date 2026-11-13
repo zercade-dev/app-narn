@@ -10,6 +10,11 @@ import { TourCallout } from './TourCallout';
  * Stacking: the dim layer sits at z-40 (above app content, below the z-50
  * dialogs and sheets a step may ask the person to open), the spotlight ring at
  * z-[55] and the callout at z-[60], so both stay visible above such a sheet.
+ *
+ * Blocking: around a spotlight the dim boxes take clicks, so only the
+ * highlighted control can be used. A centred step (no anchor, or one that is
+ * not on screen) has nothing to protect: its dim layer is for the eye only and
+ * the sidebar, Settings and the mode switch stay usable under it.
  */
 const SPOTLIGHT_PADDING = 8;
 
@@ -119,18 +124,34 @@ export function TourOverlay({
     onExitRef.current = onExit;
   });
 
-  // Escape leaves the tour, unless it was meant for another dialog (a sheet the
-  // tour asked the person to open) or something already handled it.
+  // Escape leaves the tour, unless it was meant for something else: another
+  // dialog (a sheet the tour asked the person to open), an open select or menu
+  // (it closes that), or something that already handled it. Whether a popup
+  // was open is read on the way down, because by the time the key bubbles up
+  // the popup has usually closed itself.
   useEffect(() => {
+    let forPopup = false;
+    const onKeyCapture = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      const target = e.target instanceof Element ? e.target : null;
+      forPopup =
+        target !== null &&
+        (target.closest('[role="listbox"], [role="menu"]') !== null ||
+          target.getAttribute('aria-expanded') === 'true');
+    };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape' || e.defaultPrevented) return;
+      if (e.key !== 'Escape' || e.defaultPrevented || forPopup) return;
       const otherDialogOpen = Array.from(document.querySelectorAll('[role="dialog"]')).some(
         (d) => d !== calloutNode,
       );
       if (!otherDialogOpen) onExitRef.current();
     };
+    document.addEventListener('keydown', onKeyCapture, true);
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('keydown', onKeyCapture, true);
+      document.removeEventListener('keydown', onKey);
+    };
   }, [calloutNode]);
 
   // A `click` step completes when the anchored control is clicked.
@@ -202,7 +223,7 @@ export function TourOverlay({
     width: rect.width + SPOTLIGHT_PADDING * 2,
     height: rect.height + SPOTLIGHT_PADDING * 2,
   };
-  const dimClass = `pointer-events-auto fixed z-40 bg-background/70 ${motion}`;
+  const dimBase = `fixed z-40 bg-background/70 ${motion}`;
 
   return (
     <div data-testid="tour-overlay">
@@ -225,7 +246,13 @@ export function TourOverlay({
             { left: 0, top: hole.top, width: hole.left, height: hole.height },
             { left: hole.left + hole.width, top: hole.top, width: '100vw', height: hole.height },
           ].map((box, i) => (
-            <div key={i} data-testid="tour-dim" className={dimClass} style={px(box)} />
+            <div
+              key={i}
+              aria-hidden="true"
+              data-testid="tour-dim"
+              className={`pointer-events-auto ${dimBase}`}
+              style={px(box)}
+            />
           ))}
           <div
             data-testid="tour-spotlight"
@@ -235,8 +262,9 @@ export function TourOverlay({
         </>
       ) : (
         <div
+          aria-hidden="true"
           data-testid="tour-dim"
-          className={`${dimClass} inset-0`}
+          className={`pointer-events-none ${dimBase} inset-0`}
           style={{ left: 0, top: 0, width: '100vw', height: '100vh' }}
         />
       )}
