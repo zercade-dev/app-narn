@@ -26,6 +26,7 @@
   "templateWarningUnknownGlossary": "Шаблон ссылается на неизвестный глоссарий «{{id}}»",
   "createFailed": "Не удалось создать проект: {{message}}",
   "activateFailed": "Не удалось переключить проект: {{message}}",
+  "providerSetupFailed": "Проект создан, но настроить поставщика не удалось. Откройте «Ключи провайдеров», чтобы проверить. ({{message}})",
   "changeProjectIcon": "Изменить значок проекта",
   "providerKeys": "Ключи провайдеров",
   "advancedOnlyTitle": "Доступно в расширенном режиме",

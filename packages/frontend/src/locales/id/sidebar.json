@@ -26,6 +26,7 @@
   "templateWarningUnknownGlossary": "Templat merujuk glosarium tak dikenal “{{id}}”",
   "createFailed": "Gagal membuat proyek: {{message}}",
   "activateFailed": "Gagal berpindah proyek: {{message}}",
+  "providerSetupFailed": "Proyek dibuat, tetapi penyedianya tidak dapat disiapkan. Buka “Kunci penyedia” untuk memeriksanya. ({{message}})",
   "changeProjectIcon": "Ganti ikon proyek",
   "providerKeys": "Kunci penyedia",
   "advancedOnlyTitle": "Tersedia di mode Lanjutan",

@@ -13,6 +13,12 @@ import { useViewStore } from '../../stores/view-store.js';
  * Only in Advanced, with tour offers on, for a tour that was neither finished
  * nor declined, and never while another tour (or the guided first run) is on
  * screen. Declining is remembered, so the offer never returns on its own.
+ *
+ * Placement: the app shell mounts it in a zero-height slot at the bottom of
+ * the content column, right above the console bar, and the card hangs from the
+ * slot's left edge. That keeps it off the toaster (bottom-right of the window)
+ * and off the console header and its right-hand controls, whatever height the
+ * console is dragged to.
  */
 export function AreaTourOffer() {
   const { t } = useTranslation('guide-tour');
@@ -34,7 +40,7 @@ export function AreaTourOffer() {
     <section
       aria-labelledby="area-tour-offer-title"
       data-testid="area-tour-offer"
-      className="fixed right-4 bottom-4 z-30 w-[min(20rem,calc(100vw-2rem))] space-y-2 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md"
+      className="absolute bottom-3 left-4 z-30 w-[min(20rem,calc(100vw-2rem))] space-y-2 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md"
     >
       <h2 id="area-tour-offer-title" className="text-sm font-medium">
         {t(`area.${tab}.offer.title`)}

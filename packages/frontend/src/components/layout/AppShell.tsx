@@ -7,6 +7,7 @@ import { ModeSwitch } from './ModeSwitch.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
 import { AreaTourHost } from '../tour/AreaTourHost.js';
+import { AreaTourOffer } from '../tour/AreaTourOffer.js';
 import { FirstRunTour } from '../tour/FirstRunTour.js';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { ConsolePanel } from './ConsolePanel.js';
@@ -803,6 +804,12 @@ export function AppShell() {
                 </div>
               )}
             </CopilotModelsProvider>
+
+            {/* Slot for the area-tour offer: zero height, so the card it holds
+                sits just above the console bar, at the left of the content column. */}
+            <div className="relative h-0 shrink-0">
+              <AreaTourOffer />
+            </div>
 
             {/* Console panel footer — desktop-only (mobile is read-only; the log console is an operator surface) */}
             {!isMobile && (

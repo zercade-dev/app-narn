@@ -26,6 +26,7 @@
   "templateWarningUnknownGlossary": "Le modèle référence un glossaire inconnu « {{id}} »",
   "createFailed": "Échec de la création du projet : {{message}}",
   "activateFailed": "Échec du changement de projet : {{message}}",
+  "providerSetupFailed": "Projet créé, mais son fournisseur n’a pas pu être configuré. Ouvrez « Clés des fournisseurs » pour le vérifier. ({{message}})",
   "changeProjectIcon": "Changer l’icône du projet",
   "providerKeys": "Clés des fournisseurs",
   "advancedOnlyTitle": "Disponible en mode avancé",

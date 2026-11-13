@@ -26,6 +26,7 @@
   "templateWarningUnknownGlossary": "Template references unknown glossary \"{{id}}\"",
   "createFailed": "Failed to create project: {{message}}",
   "activateFailed": "Failed to switch project: {{message}}",
+  "providerSetupFailed": "Project created, but its provider couldn't be set up. Open Provider keys to check it. ({{message}})",
   "changeProjectIcon": "Change project icon",
   "providerKeys": "Provider keys",
   "advancedOnlyTitle": "Available in Advanced mode",

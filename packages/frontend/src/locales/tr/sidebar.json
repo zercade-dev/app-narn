@@ -26,6 +26,7 @@
   "templateWarningUnknownGlossary": "Şablon, bilinmeyen “{{id}}” sözlükçesine başvuruyor",
   "createFailed": "Proje oluşturulamadı: {{message}}",
   "activateFailed": "Proje değiştirilemedi: {{message}}",
+  "providerSetupFailed": "Proje oluşturuldu ancak sağlayıcısı ayarlanamadı. Kontrol etmek için “Sağlayıcı anahtarları”nı açın. ({{message}})",
   "changeProjectIcon": "Proje simgesini değiştir",
   "providerKeys": "Sağlayıcı anahtarları",
   "advancedOnlyTitle": "Gelişmiş modda kullanılabilir",

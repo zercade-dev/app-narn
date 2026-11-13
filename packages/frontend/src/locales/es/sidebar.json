@@ -26,6 +26,7 @@
   "templateWarningUnknownGlossary": "La plantilla hace referencia al glosario desconocido \"{{id}}\"",
   "createFailed": "Error al crear el proyecto: {{message}}",
   "activateFailed": "Error al cambiar de proyecto: {{message}}",
+  "providerSetupFailed": "Proyecto creado, pero no se pudo configurar su proveedor. Abre «Claves de proveedores» para revisarlo. ({{message}})",
   "changeProjectIcon": "Cambiar icono del proyecto",
   "providerKeys": "Claves de proveedores",
   "advancedOnlyTitle": "Disponible en modo avanzado",

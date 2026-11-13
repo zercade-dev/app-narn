@@ -26,6 +26,7 @@
   "templateWarningUnknownGlossary": "Lo schema fa riferimento a un glossario sconosciuto: “{{id}}”",
   "createFailed": "Impossibile creare il progetto: {{message}}",
   "activateFailed": "Impossibile cambiare progetto: {{message}}",
+  "providerSetupFailed": "Progetto creato, ma non è stato possibile configurare il provider. Apri «Chiavi dei provider» per controllarlo. ({{message}})",
   "changeProjectIcon": "Cambia l'icona del progetto",
   "providerKeys": "Chiavi dei provider",
   "advancedOnlyTitle": "Disponibile in modalità Avanzata",

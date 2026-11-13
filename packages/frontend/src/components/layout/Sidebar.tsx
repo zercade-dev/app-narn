@@ -341,7 +341,8 @@ export function Sidebar() {
         try {
           await applySimpleRule(created.id, simpleProvider);
         } catch (err) {
-          toast.error(t('createFailed', { message: (err as Error).message }));
+          // The project exists; only its provider is not set up.
+          toast.error(t('providerSetupFailed', { message: (err as Error).message }));
         }
       }
       setView('project');
