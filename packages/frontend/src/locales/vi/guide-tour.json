@@ -74,11 +74,11 @@
       "whyOwn": "{{provider}} dịch dự án này bằng khóa của riêng bạn.",
       "whyCustom": "Điều phối của dự án này, được thiết lập trong Nâng cao, chọn nhà cung cấp cho từng mục.",
       "openWhat": "Mở tab liệt kê các mục của bạn.",
-      "quickWhat": "3 mục đầu tiên đã được chọn. Dịch thử chúng, hoặc dịch tất cả ngay bây giờ.",
+      "quickWhat": "Đã chọn 3 mục vẫn cần dịch. Dịch thử chúng, hoặc dịch tất cả ngay bây giờ.",
       "fewWhat": "Các mục của bạn đã được chọn. Dịch chúng ngay bây giờ.",
-      "selectWhat": "Chọn tất cả các mục.",
-      "pressWhat": "Mở hộp thoại dịch.",
       "startWhat": "Bắt đầu dịch.",
+      "nothingWhat": "Tệp của bạn đã có bản dịch cho mọi ngôn ngữ bạn chọn, nên không còn gì để dịch.",
+      "nothingWhy": "Để thêm ngôn ngữ, hãy đánh dấu nó ở tab Dữ liệu rồi lưu. Nếu không, hãy tiếp tục xuất tệp của bạn.",
       "progressWhat": "Đang dịch. Dòng này cho biết tiến độ.",
       "progressWhy": "Hướng dẫn sẽ tiếp tục khi dịch xong."
     },
@@ -102,8 +102,9 @@
     },
     "rest": {
       "title": "Bản dịch thử đã thành công",
-      "what": "3 mục đầu tiên đã được dịch sang mọi ngôn ngữ bạn chọn. Dịch phần còn lại ngay, hoặc xuất những gì bạn đã có.",
-      "why": "Bạn có thể dịch phần còn lại sau từ danh sách mục."
+      "what": "3 mục thử nghiệm của bạn đã được dịch sang mọi ngôn ngữ bạn chọn. Dịch phần còn lại ngay, hoặc xuất những gì bạn đã có.",
+      "why": "Bạn có thể dịch phần còn lại sau từ danh sách mục.",
+      "skipped": "Phần còn lại có thể để sau. Hãy tải xuống những gì đã dịch."
     },
     "export": {
       "title": "Xuất",

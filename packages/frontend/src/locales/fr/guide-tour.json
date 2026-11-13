@@ -74,11 +74,11 @@
       "whyOwn": "{{provider}} traduit ce projet avec votre propre clé.",
       "whyCustom": "Le routage de ce projet, configuré en mode Avancé, choisit le fournisseur de chaque entrée.",
       "openWhat": "Ouvrez l’onglet qui liste vos textes.",
-      "quickWhat": "Les 3 premiers textes sont sélectionnés. Traduisez-les pour essayer, ou traduisez tout dès maintenant.",
+      "quickWhat": "3 textes encore à traduire sont sélectionnés. Traduisez-les pour essayer, ou traduisez tout dès maintenant.",
       "fewWhat": "Vos textes sont sélectionnés. Traduisez-les maintenant.",
-      "selectWhat": "Sélectionnez tous les textes.",
-      "pressWhat": "Ouvrez la fenêtre de traduction.",
       "startWhat": "Démarrez la traduction.",
+      "nothingWhat": "Votre fichier contient déjà une traduction pour chaque langue choisie : il n’y a rien à traduire.",
+      "nothingWhy": "Pour ajouter une langue, cochez-la dans l’onglet Données et enregistrez. Sinon, passez à l’export de votre fichier.",
       "progressWhat": "La traduction est en cours. Cette ligne indique sa progression.",
       "progressWhy": "La visite reprend une fois la traduction terminée."
     },
@@ -102,8 +102,9 @@
     },
     "rest": {
       "title": "Le test a fonctionné",
-      "what": "Vos 3 premiers textes sont traduits dans toutes les langues choisies. Traduisez le reste maintenant, ou exportez ce que vous avez.",
-      "why": "Vous pourrez traduire le reste plus tard depuis la liste des textes."
+      "what": "Vos 3 textes d’essai sont traduits dans toutes les langues choisies. Traduisez le reste maintenant, ou exportez ce que vous avez.",
+      "why": "Vous pourrez traduire le reste plus tard depuis la liste des textes.",
+      "skipped": "Le reste peut attendre. Téléchargez ce qui est déjà traduit."
     },
     "export": {
       "title": "Exporter",

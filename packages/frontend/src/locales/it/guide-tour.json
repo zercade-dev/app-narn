@@ -74,11 +74,11 @@
       "whyOwn": "{{provider}} traduce questo progetto con la tua chiave.",
       "whyCustom": "Il routing di questo progetto, configurato in Avanzata, sceglie il provider per ogni voce.",
       "openWhat": "Apri la scheda che elenca le tue voci.",
-      "quickWhat": "Le prime 3 voci sono selezionate. Traducile per provare, oppure traduci tutto subito.",
+      "quickWhat": "Sono selezionate 3 voci ancora da tradurre. Traducile per provare, oppure traduci tutto subito.",
       "fewWhat": "Le tue voci sono selezionate. Traducile ora.",
-      "selectWhat": "Seleziona tutte le voci.",
-      "pressWhat": "Apri la finestra di traduzione.",
       "startWhat": "Avvia la traduzione.",
+      "nothingWhat": "Il tuo file ha già una traduzione per ogni lingua scelta, quindi non c'è niente da tradurre.",
+      "nothingWhy": "Per aggiungere una lingua, spuntala nella scheda Dati e salva. Altrimenti, prosegui ed esporta il file.",
       "progressWhat": "La traduzione è in corso. Questa riga ne mostra l'avanzamento.",
       "progressWhy": "Il tour prosegue quando la traduzione è terminata."
     },
@@ -102,8 +102,9 @@
     },
     "rest": {
       "title": "La prova è riuscita",
-      "what": "Le tue prime 3 voci sono tradotte in tutte le lingue scelte. Traduci il resto ora, oppure esporta ciò che hai.",
-      "why": "Puoi tradurre il resto più tardi dall'elenco delle voci."
+      "what": "Le tue 3 voci di prova sono tradotte in tutte le lingue scelte. Traduci il resto ora, oppure esporta ciò che hai.",
+      "why": "Puoi tradurre il resto più tardi dall'elenco delle voci.",
+      "skipped": "Il resto può aspettare. Scarica ciò che è già tradotto."
     },
     "export": {
       "title": "Esportazione",

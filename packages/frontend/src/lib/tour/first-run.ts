@@ -227,6 +227,8 @@ const STALL_STEPS: TourStep[] = [
 ];
 
 const QUICK_STEP = 'translate-quick';
+/** Shown in place of the quick test when every entry is already translated. */
+const NOTHING_STEP = 'translate-nothing';
 const CLOSING_STEP = 'closing';
 
 /**
@@ -323,38 +325,17 @@ const SHARED_STEPS: TourStep[] = [
     navigate: { view: 'project' },
     major: 4,
   },
-  // The quick test: the guide selects the first three entries itself and
-  // asks for them (or for everything) from the callout. Done when the request
-  // produced a run (`FirstRunTour` watches for it): one refused before a run
-  // exists (no route, a validation error) must not leave "the translation is
-  // running" on screen. Its actions depend on the project's size, see
-  // `firstRunTourFor`.
+  // The quick test: the guide selects three entries that still need
+  // translating and asks for them (or for everything) from the callout. Done
+  // when the request produced a run (`FirstRunTour` watches for it): one
+  // refused before a run exists (no route, a validation error) must not leave
+  // "the translation is running" on screen. Its actions depend on how much is
+  // left to translate, see `firstRunTourFor`. "Try again" comes back here.
   quickTestStep(false),
-  // "Try again" only: the person selects and starts by hand. They stand in for
-  // the quick test, so the counter does not move.
   {
-    // Done once something is selected, not on the click: on entries that are
-    // already selected a click would deselect them all.
-    id: 'select-all',
-    anchor: 'string-table-select-all',
-    ...copy('translate', 'selectWhat'),
-    advance: { kind: 'state', done: (f) => f.hasSelection },
-    // "Try again" lands here, or on the next step, from anywhere.
-    navigate: { view: 'project', tab: 'strings' },
-    major: 4,
-    variantOf: QUICK_STEP,
-  },
-  {
-    id: 'translate-selected',
-    anchor: 'bulk-batch-translate',
-    ...copy('translate', 'pressWhat'),
-    advance: { kind: 'click' },
-    navigate: { view: 'project', tab: 'strings' },
-    major: 4,
-    variantOf: QUICK_STEP,
-  },
-  {
-    // Done when the request produced a run, like the quick test.
+    // The quick test's other half: the translation dialog, opened from the
+    // highlighted button, is on screen (see FORM_STEPS). Its run is the quick
+    // test, done when it is listed like the callout's.
     id: 'translate-start',
     anchor: 'comparison-translate-start',
     ...copy('translate', 'startWhat'),
@@ -389,6 +370,19 @@ const SHARED_STEPS: TourStep[] = [
     variantOf: WAITING_STEP,
   },
   {
+    // In place of the quick test when the file already has every real
+    // translation: nothing to do, and Next moves on to the export.
+    id: NOTHING_STEP,
+    anchor: null,
+    titleKey: 'firstRun.translate.title',
+    whatKey: 'firstRun.translate.nothingWhat',
+    whyKey: 'firstRun.translate.nothingWhy',
+    advance: { kind: 'next' },
+    navigate: { view: 'project' },
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
     id: 'export-open',
     anchor: 'tab-data',
     ...copy('export', 'openWhat'),
@@ -401,6 +395,8 @@ const SHARED_STEPS: TourStep[] = [
     anchor: 'export-csv-button',
     ...copy('export', 'downloadWhat'),
     advance: { kind: 'state', done: (f) => f.exported },
+    // "Skip, export what I have" lands here straight from the strings tab.
+    navigate: { view: 'project', tab: 'data' },
     major: 5,
   },
   closingStep(false),
@@ -543,9 +539,22 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
     if (!f.projectHasLanguages) return at('languages-source');
     return at('import');
   }
+  if (major === 4 && !f.translationExists && f.nothingToTranslate) return at(NOTHING_STEP);
   if (major === 4 && restPending(f)) return at('translate-rest');
   if (major === 4 && f.translationExists && f.restRunning) return at(WAITING_STEP);
   return steps.findIndex((s) => s.major === major);
+}
+
+/**
+ * Whether Next / Back may stop at `step` given the facts: "nothing to
+ * translate" only when that is so, and then none of the quick test's steps
+ * (there is nothing for them to translate).
+ */
+export function firstRunStepApplies(step: TourStep | undefined, f: GuideFacts): boolean {
+  if (!step) return false;
+  if (step.id === NOTHING_STEP) return f.nothingToTranslate && !f.translationExists;
+  if (f.nothingToTranslate && !f.translationExists) return step.major !== 4;
+  return true;
 }
 
 /**
@@ -558,6 +567,8 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
 const FORM_STEPS = [
   { closed: 'vault-open', open: 'vault-password', anchor: 'vault-password-input' },
   { closed: 'key-choice', open: 'key-paste', anchor: 'vault-editor-value' },
+  // The translation dialog, opened from the quick test's highlighted button.
+  { closed: QUICK_STEP, open: 'translate-start', anchor: 'comparison-translate-start' },
 ] as const;
 
 /** The `data-tour` anchors whose presence {@link firstRunShownIndex} needs to know. */

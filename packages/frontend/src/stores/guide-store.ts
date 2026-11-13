@@ -16,12 +16,16 @@ export interface TourProgress {
  * null until the run it asked for is listed; `decision` is the person's
  * answer to "translate the rest?". `restRunId` is the run that answer
  * produced: the decision is recorded together with it, once it is listed.
+ * `runsBefore`: the project's translation runs listed when the test was asked
+ * for, so the run it produced is known as soon as it is listed (see
+ * `quickTestRunId`), even one that is already finished by then.
  */
 export interface QuickTest {
   projectId: string;
   runId: string | null;
   decision: 'pending' | 'rest' | 'skip';
   restRunId?: string;
+  runsBefore?: string[];
 }
 
 /**

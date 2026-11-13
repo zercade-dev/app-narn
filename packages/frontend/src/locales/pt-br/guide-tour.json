@@ -74,11 +74,11 @@
       "whyOwn": "O {{provider}} traduz este projeto com a sua própria chave.",
       "whyCustom": "O roteamento deste projeto, configurado no Avançado, escolhe o provedor de cada entrada.",
       "openWhat": "Abra a aba que lista suas entradas.",
-      "quickWhat": "As 3 primeiras entradas estão selecionadas. Traduza-as para testar, ou traduza tudo agora.",
+      "quickWhat": "3 entradas que ainda precisam de tradução estão selecionadas. Traduza-as para testar, ou traduza tudo agora.",
       "fewWhat": "Suas entradas estão selecionadas. Traduza-as agora.",
-      "selectWhat": "Selecione todas as entradas.",
-      "pressWhat": "Abra a janela de tradução.",
       "startWhat": "Inicie a tradução.",
+      "nothingWhat": "Seu arquivo já tem tradução para todos os idiomas escolhidos, então não há nada para traduzir.",
+      "nothingWhy": "Para adicionar um idioma, marque-o na aba Dados e salve. Caso contrário, siga para exportar seu arquivo.",
       "progressWhat": "A tradução está em andamento. Esta linha mostra o progresso.",
       "progressWhy": "O tour continua quando a tradução terminar."
     },
@@ -102,8 +102,9 @@
     },
     "rest": {
       "title": "O teste funcionou",
-      "what": "Suas 3 primeiras entradas foram traduzidas para todos os idiomas escolhidos. Traduza o restante agora ou exporte o que você já tem.",
-      "why": "Você pode traduzir o restante depois, pela lista de entradas."
+      "what": "Suas 3 entradas de teste foram traduzidas para todos os idiomas escolhidos. Traduza o restante agora ou exporte o que você já tem.",
+      "why": "Você pode traduzir o restante depois, pela lista de entradas.",
+      "skipped": "O restante pode esperar. Baixe o que já está traduzido."
     },
     "export": {
       "title": "Exportação",

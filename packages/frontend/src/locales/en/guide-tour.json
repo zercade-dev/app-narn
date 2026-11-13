@@ -74,11 +74,11 @@
       "whyOwn": "{{provider}} translates this project with your own key.",
       "whyCustom": "This project's routing, set up in Advanced, picks the provider for each entry.",
       "openWhat": "Open the tab that lists your entries.",
-      "quickWhat": "The first 3 entries are selected. Translate them to try it out, or translate everything now.",
+      "quickWhat": "3 entries that still need translating are selected. Translate them to try it out, or translate everything now.",
       "fewWhat": "Your entries are selected. Translate them now.",
-      "selectWhat": "Select all entries.",
-      "pressWhat": "Open the translation dialog.",
       "startWhat": "Start the translation.",
+      "nothingWhat": "Your file already has a translation for every language you chose, so there is nothing to translate.",
+      "nothingWhy": "To add a language, tick it on the Data tab and save. Otherwise, go on to export your file.",
       "progressWhat": "The translation is running. This line shows its progress.",
       "progressWhy": "The tour continues when the translation has finished."
     },
@@ -102,8 +102,9 @@
     },
     "rest": {
       "title": "The test worked",
-      "what": "Your first 3 entries are translated into every language you chose. Translate the rest now, or export what you have.",
-      "why": "You can translate the rest later from the list of entries."
+      "what": "Your 3 test entries are translated into every language you chose. Translate the rest now, or export what you have.",
+      "why": "You can translate the rest later from the list of entries.",
+      "skipped": "The rest can wait. Download what is translated so far."
     },
     "export": {
       "title": "Export",

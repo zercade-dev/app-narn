@@ -74,11 +74,11 @@
       "whyOwn": "{{provider}} menerjemahkan proyek ini dengan kunci Anda sendiri.",
       "whyCustom": "Penyaluran proyek ini, yang diatur di Lanjutan, memilih penyedia untuk tiap entri.",
       "openWhat": "Buka tab yang memuat daftar entri.",
-      "quickWhat": "3 entri pertama sudah dipilih. Terjemahkan untuk mencoba, atau terjemahkan semuanya sekarang.",
+      "quickWhat": "3 entri yang belum diterjemahkan sudah dipilih. Terjemahkan untuk mencoba, atau terjemahkan semuanya sekarang.",
       "fewWhat": "Entri Anda sudah dipilih. Terjemahkan sekarang.",
-      "selectWhat": "Pilih semua entri.",
-      "pressWhat": "Buka dialog penerjemahan.",
       "startWhat": "Mulai penerjemahan.",
+      "nothingWhat": "File Anda sudah memiliki terjemahan untuk setiap bahasa yang dipilih, jadi tidak ada yang perlu diterjemahkan.",
+      "nothingWhy": "Untuk menambah bahasa, centang di tab Data lalu simpan. Jika tidak, lanjutkan untuk mengekspor file Anda.",
       "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
       "progressWhy": "Tur berlanjut setelah penerjemahan selesai."
     },
@@ -102,8 +102,9 @@
     },
     "rest": {
       "title": "Uji coba berhasil",
-      "what": "3 entri pertama Anda sudah diterjemahkan ke semua bahasa yang dipilih. Terjemahkan sisanya sekarang, atau ekspor yang sudah ada.",
-      "why": "Sisanya bisa diterjemahkan nanti dari daftar entri."
+      "what": "3 entri uji Anda sudah diterjemahkan ke semua bahasa yang dipilih. Terjemahkan sisanya sekarang, atau ekspor yang sudah ada.",
+      "why": "Sisanya bisa diterjemahkan nanti dari daftar entri.",
+      "skipped": "Sisanya bisa menunggu. Unduh yang sudah diterjemahkan."
     },
     "export": {
       "title": "Ekspor",

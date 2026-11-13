@@ -14,8 +14,13 @@ export interface GuideFacts {
   /** Entries of the active project are selected in the string list. */
   hasSelection: boolean;
   isCollaboratorOnly: boolean;
-  /** A translatable entry of the active project still misses a target language. */
+  /** A translatable entry of the active project still misses a real target language (Pseudo-test aside). */
   untranslatedRemain: boolean;
+  /**
+   * The active project's entries are loaded and none misses a real target
+   * language, with no translation of it going: the file came translated.
+   */
+  nothingToTranslate: boolean;
   /**
    * The guide's quick test on the active project translated something, more is
    * left, and the person has not yet chosen between the rest and export.

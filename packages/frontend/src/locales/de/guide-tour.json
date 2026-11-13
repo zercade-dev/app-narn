@@ -74,11 +74,11 @@
       "whyOwn": "{{provider}} übersetzt dieses Projekt mit deinem eigenen Schlüssel.",
       "whyCustom": "Das Routing dieses Projekts, eingerichtet unter „Erweitert“, wählt den Anbieter für jeden Eintrag.",
       "openWhat": "Den Tab mit der Liste deiner Einträge öffnen.",
-      "quickWhat": "Die ersten 3 Einträge sind ausgewählt. Zum Ausprobieren nur diese übersetzen oder gleich alles.",
+      "quickWhat": "3 Einträge, die noch übersetzt werden müssen, sind ausgewählt. Zum Ausprobieren nur diese übersetzen oder gleich alles.",
       "fewWhat": "Deine Einträge sind ausgewählt. Jetzt übersetzen.",
-      "selectWhat": "Alle Einträge auswählen.",
-      "pressWhat": "Den Übersetzungsdialog öffnen.",
       "startWhat": "Die Übersetzung starten.",
+      "nothingWhat": "Deine Datei enthält schon für jede gewählte Sprache eine Übersetzung, es gibt also nichts zu übersetzen.",
+      "nothingWhy": "Für eine weitere Sprache diese im Tab „Daten“ ankreuzen und speichern. Sonst weiter zum Export deiner Datei.",
       "progressWhat": "Die Übersetzung läuft. Diese Zeile zeigt den Fortschritt.",
       "progressWhy": "Die Tour geht weiter, sobald die Übersetzung abgeschlossen ist."
     },
@@ -102,8 +102,9 @@
     },
     "rest": {
       "title": "Der Test hat geklappt",
-      "what": "Deine ersten 3 Einträge sind in jede gewählte Sprache übersetzt. Den Rest jetzt übersetzen oder exportieren, was schon fertig ist.",
-      "why": "Den Rest kannst du auch später in der Liste der Einträge übersetzen."
+      "what": "Deine 3 Testeinträge sind in jede gewählte Sprache übersetzt. Den Rest jetzt übersetzen oder exportieren, was schon fertig ist.",
+      "why": "Den Rest kannst du auch später in der Liste der Einträge übersetzen.",
+      "skipped": "Der Rest kann warten. Lade herunter, was schon übersetzt ist."
     },
     "export": {
       "title": "Exportieren",

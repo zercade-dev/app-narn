@@ -182,9 +182,14 @@ export function DataTab() {
     : (exportCollection ?? (hasMainStrings ? 'main' : 'client'));
   const currentLanguages = pendingLanguages ?? activeProject?.activeLanguages ?? [];
   const isDirty = pendingLanguages !== null;
+  // "Select all" means every real language: Pseudo-test is a QA tool, ticked
+  // only on purpose (and kept when it was).
+  const selectableTargetCodes = availableTargetLanguages
+    .map((l) => l.code)
+    .filter((code) => code !== PSEUDO_LANGUAGE_CODE);
   const allChecked =
-    availableTargetLanguages.length > 0 &&
-    availableTargetLanguages.every((l) => currentLanguages.includes(l.code));
+    selectableTargetCodes.length > 0 &&
+    selectableTargetCodes.every((code) => currentLanguages.includes(code));
 
   const handleLanguageToggle = (code: string, checked: boolean) => {
     const base = pendingLanguages ?? activeProject?.activeLanguages ?? [];
@@ -196,7 +201,10 @@ export function DataTab() {
     if (allChecked) {
       setPendingLanguages([]);
     } else {
-      setPendingLanguages(availableTargetLanguages.map((l) => l.code));
+      const keepPseudo = currentLanguages.includes(PSEUDO_LANGUAGE_CODE);
+      setPendingLanguages(
+        keepPseudo ? [...selectableTargetCodes, PSEUDO_LANGUAGE_CODE] : selectableTargetCodes,
+      );
     }
   };
 
