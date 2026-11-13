@@ -17,7 +17,7 @@ import { useSelectionStore } from '../../stores/selection-store.js';
 import { useLoggerStore } from '../../stores/logger-store.js';
 import { useRunStore, type ReviewOrderMeta } from '../../stores/run-store.js';
 import { useViewStore } from '../../stores/view-store.js';
-import { navigateOrOffer } from '../../lib/mode-gating.js';
+import { navigateOrOffer, useEffectiveFilters } from '../../lib/mode-gating.js';
 import { filterEntries, orderByReviewSort } from '../../lib/filter-entries.js';
 import { countDistinctSourceTexts } from '../../lib/count-distinct-sources.js';
 import { StringTableFilters } from './StringTableFilters.js';
@@ -68,7 +68,9 @@ export function StringTable() {
 
   const fetchEntries = useStringStore((s) => s.fetchEntries);
   const allEntries = useStringStore((s) => s.entries);
-  const filters = useStringStore((s) => s.filters);
+  const storedFilters = useStringStore((s) => s.filters);
+  // View-only: in Simple, fields behind hidden controls read as defaults (never written back).
+  const filters = useEffectiveFilters(storedFilters);
   const setFilter = useStringStore((s) => s.setFilter);
   const updateEntry = useStringStore((s) => s.updateEntry);
   const bulkUpdate = useStringStore((s) => s.bulkUpdate);

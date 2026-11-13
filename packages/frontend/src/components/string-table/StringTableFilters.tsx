@@ -7,6 +7,7 @@ import { useStringStore } from '../../stores/string-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useAsyncData } from '../../hooks/use-async-data.js';
+import { useControlVisible, useEffectiveFilters } from '../../lib/mode-gating.js';
 import { RunFilterSelect } from './RunFilterSelect.js';
 import {
   DEFAULT_FILTERS,
@@ -31,7 +32,18 @@ const FREEWAY_TIER_BELOW_OPTIONS = [2, 3, 4] as const;
 export function StringTableFilters() {
   const { t, i18n } = useTranslation('strings');
   const lang = i18n.language;
-  const filters = useStringStore((s) => s.filters);
+  const storedFilters = useStringStore((s) => s.filters);
+  // View-only: in Simple, fields behind hidden controls read as defaults (never written back).
+  const filters = useEffectiveFilters(storedFilters);
+  const showMatchMode = useControlVisible('filter-match-mode');
+  const showExtraStatus = useControlVisible('filter-extra-status');
+  const showFreewayTier = useControlVisible('filter-freeway-tier');
+  const showCategory = useControlVisible('filter-category');
+  const showTone = useControlVisible('filter-tone');
+  const showGlossary = useControlVisible('filter-glossary');
+  const showRun = useControlVisible('filter-run');
+  const showSource = useControlVisible('filter-source');
+  const showColumnPicker = useControlVisible('column-picker');
   const setFilter = useStringStore((s) => s.setFilter);
   const entries = useStringStore((s) => s.entries);
   const bulkUpdate = useStringStore((s) => s.bulkUpdate);
@@ -223,7 +235,12 @@ export function StringTableFilters() {
   };
 
   const handleClearFilters = () => {
-    setFilter(DEFAULT_FILTERS);
+    // Simple only owns the kept filters; the rest stay as saved (and neutralised in the view).
+    setFilter(
+      showExtraStatus
+        ? DEFAULT_FILTERS
+        : { search: '', untranslatedOnly: false, needsReview: false, lqaFailed: false },
+    );
     if (searchRef.current) {
       searchRef.current.value = '';
     }
@@ -284,39 +301,41 @@ export function StringTableFilters() {
       <div aria-hidden className="self-stretch w-px bg-border/70 mx-0.5" />
 
       {/* Global AND/OR toggle across all active filter dimensions */}
-      <div className="flex items-center gap-1 text-xs" data-testid="filter-mode-toggle">
-        <span className="text-muted-foreground">{t('filters.matchMode')}</span>
-        <div className="flex border rounded overflow-hidden">
-          <button
-            type="button"
-            className={cn(
-              'px-2 h-7 cursor-pointer',
-              filters.filterMode === 'AND'
-                ? 'bg-primary/10 text-primary font-semibold'
-                : 'bg-background hover:bg-accent',
-            )}
-            aria-pressed={filters.filterMode === 'AND'}
-            onClick={() => setFilter({ filterMode: 'AND' })}
-            data-testid="filter-mode-and"
-          >
-            {t('filters.matchAll')}
-          </button>
-          <button
-            type="button"
-            className={cn(
-              'px-2 h-7 cursor-pointer border-l',
-              filters.filterMode === 'OR'
-                ? 'bg-primary/10 text-primary font-semibold'
-                : 'bg-background hover:bg-accent',
-            )}
-            aria-pressed={filters.filterMode === 'OR'}
-            onClick={() => setFilter({ filterMode: 'OR' })}
-            data-testid="filter-mode-or"
-          >
-            {t('filters.matchAny')}
-          </button>
+      {showMatchMode && (
+        <div className="flex items-center gap-1 text-xs" data-testid="filter-mode-toggle">
+          <span className="text-muted-foreground">{t('filters.matchMode')}</span>
+          <div className="flex border rounded overflow-hidden">
+            <button
+              type="button"
+              className={cn(
+                'px-2 h-7 cursor-pointer',
+                filters.filterMode === 'AND'
+                  ? 'bg-primary/10 text-primary font-semibold'
+                  : 'bg-background hover:bg-accent',
+              )}
+              aria-pressed={filters.filterMode === 'AND'}
+              onClick={() => setFilter({ filterMode: 'AND' })}
+              data-testid="filter-mode-and"
+            >
+              {t('filters.matchAll')}
+            </button>
+            <button
+              type="button"
+              className={cn(
+                'px-2 h-7 cursor-pointer border-l',
+                filters.filterMode === 'OR'
+                  ? 'bg-primary/10 text-primary font-semibold'
+                  : 'bg-background hover:bg-accent',
+              )}
+              aria-pressed={filters.filterMode === 'OR'}
+              onClick={() => setFilter({ filterMode: 'OR' })}
+              data-testid="filter-mode-or"
+            >
+              {t('filters.matchAny')}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Filter-dimension controls, grouped so they wrap together as a coherent
           block at ≤1440px instead of a single control orphaning onto a new row. */}
@@ -381,31 +400,35 @@ export function StringTableFilters() {
                 {t('filters.lqaFailed')}
               </label>
 
-              <label
-                htmlFor="filter-overflow"
-                className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
-              >
-                <Checkbox
-                  id="filter-overflow"
-                  data-testid="filter-overflow"
-                  checked={filters.overflowOnly}
-                  onCheckedChange={(v) => setFilter({ overflowOnly: v === true })}
-                />
-                {t('filters.overflowOnly')}
-              </label>
+              {showExtraStatus && (
+                <label
+                  htmlFor="filter-overflow"
+                  className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
+                >
+                  <Checkbox
+                    id="filter-overflow"
+                    data-testid="filter-overflow"
+                    checked={filters.overflowOnly}
+                    onCheckedChange={(v) => setFilter({ overflowOnly: v === true })}
+                  />
+                  {t('filters.overflowOnly')}
+                </label>
+              )}
 
-              <label
-                htmlFor="filter-too-long"
-                className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
-              >
-                <Checkbox
-                  id="filter-too-long"
-                  data-testid="filter-too-long"
-                  checked={filters.tooLong === true}
-                  onCheckedChange={(v) => setFilter({ tooLong: v === true })}
-                />
-                {t('filters.tooLong')}
-              </label>
+              {showExtraStatus && (
+                <label
+                  htmlFor="filter-too-long"
+                  className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
+                >
+                  <Checkbox
+                    id="filter-too-long"
+                    data-testid="filter-too-long"
+                    checked={filters.tooLong === true}
+                    onCheckedChange={(v) => setFilter({ tooLong: v === true })}
+                  />
+                  {t('filters.tooLong')}
+                </label>
+              )}
 
               <label
                 htmlFor="filter-needs-review"
@@ -420,66 +443,74 @@ export function StringTableFilters() {
                 {t('filters.needsReview')}
               </label>
 
-              <label
-                htmlFor="filter-same-as-source"
-                className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
-              >
-                <Checkbox
-                  id="filter-same-as-source"
-                  data-testid="filter-same-as-source"
-                  checked={filters.sameAsSource}
-                  onCheckedChange={(v) => setFilter({ sameAsSource: v === true })}
-                />
-                {t('filters.sameAsSource')}
-              </label>
+              {showExtraStatus && (
+                <label
+                  htmlFor="filter-same-as-source"
+                  className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
+                >
+                  <Checkbox
+                    id="filter-same-as-source"
+                    data-testid="filter-same-as-source"
+                    checked={filters.sameAsSource}
+                    onCheckedChange={(v) => setFilter({ sameAsSource: v === true })}
+                  />
+                  {t('filters.sameAsSource')}
+                </label>
+              )}
 
-              <label
-                htmlFor="filter-placeholder-mismatch"
-                className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
-              >
-                <Checkbox
-                  id="filter-placeholder-mismatch"
-                  data-testid="filter-placeholder-mismatch"
-                  checked={filters.placeholderMismatch}
-                  onCheckedChange={(v) => setFilter({ placeholderMismatch: v === true })}
-                />
-                {t('filters.placeholderMismatch')}
-              </label>
+              {showExtraStatus && (
+                <label
+                  htmlFor="filter-placeholder-mismatch"
+                  className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
+                >
+                  <Checkbox
+                    id="filter-placeholder-mismatch"
+                    data-testid="filter-placeholder-mismatch"
+                    checked={filters.placeholderMismatch}
+                    onCheckedChange={(v) => setFilter({ placeholderMismatch: v === true })}
+                  />
+                  {t('filters.placeholderMismatch')}
+                </label>
+              )}
 
-              <label
-                htmlFor="filter-freeway-below-target"
-                className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
-              >
-                <Checkbox
-                  id="filter-freeway-below-target"
-                  data-testid="filter-freeway-below-target"
-                  checked={filters.freewayBelowTarget === true}
-                  onCheckedChange={(v) => setFilter({ freewayBelowTarget: v === true })}
-                />
-                {t('filters.freewayBelowTarget')}
-              </label>
+              {showExtraStatus && (
+                <label
+                  htmlFor="filter-freeway-below-target"
+                  className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
+                >
+                  <Checkbox
+                    id="filter-freeway-below-target"
+                    data-testid="filter-freeway-below-target"
+                    checked={filters.freewayBelowTarget === true}
+                    onCheckedChange={(v) => setFilter({ freewayBelowTarget: v === true })}
+                  />
+                  {t('filters.freewayBelowTarget')}
+                </label>
+              )}
 
-              <label
-                htmlFor="filter-flagged-new"
-                className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
-              >
-                <Checkbox
-                  id="filter-flagged-new"
-                  data-testid="filter-flagged-new"
-                  checked={filters.flaggedNewOnly}
-                  onCheckedChange={(v) => setFilter({ flaggedNewOnly: v === true })}
-                />
-                <span>{t('filters.newOnly')}</span>
-                {flaggedNewIds.length > 0 && (
-                  <span
-                    className="ml-auto text-[10px] bg-status-info/15 text-status-info px-1.5 py-0.5 rounded-full font-semibold tabular-nums"
-                    data-testid="filter-flagged-new-count"
-                  >
-                    {flaggedNewIds.length.toLocaleString()}
-                  </span>
-                )}
-              </label>
-              {flaggedNewIds.length > 0 && (
+              {showExtraStatus && (
+                <label
+                  htmlFor="filter-flagged-new"
+                  className="flex items-center gap-1.5 text-xs py-0.5 cursor-pointer hover:bg-accent rounded-sm px-1"
+                >
+                  <Checkbox
+                    id="filter-flagged-new"
+                    data-testid="filter-flagged-new"
+                    checked={filters.flaggedNewOnly}
+                    onCheckedChange={(v) => setFilter({ flaggedNewOnly: v === true })}
+                  />
+                  <span>{t('filters.newOnly')}</span>
+                  {flaggedNewIds.length > 0 && (
+                    <span
+                      className="ml-auto text-[10px] bg-status-info/15 text-status-info px-1.5 py-0.5 rounded-full font-semibold tabular-nums"
+                      data-testid="filter-flagged-new-count"
+                    >
+                      {flaggedNewIds.length.toLocaleString()}
+                    </span>
+                  )}
+                </label>
+              )}
+              {showExtraStatus && flaggedNewIds.length > 0 && (
                 <button
                   type="button"
                   className="mt-0.5 w-full text-left text-[11px] text-primary hover:underline px-1 cursor-pointer"
@@ -510,51 +541,53 @@ export function StringTableFilters() {
             the status dropdown above) because its popup content portals to
             document.body, outside the status dropdown's outside-click ref, which
             would otherwise close the dropdown before onValueChange fires. */}
-        <div className="flex items-center gap-1.5 text-xs">
-          <span className="text-muted-foreground">{t('filters.freewayTierBelow')}</span>
-          <Select
-            value={filters.freewayTierBelow === null ? 'off' : String(filters.freewayTierBelow)}
-            onValueChange={(v) => setFilter({ freewayTierBelow: v === 'off' ? null : Number(v) })}
-          >
-            <SelectTrigger
-              size="sm"
-              className={cn(
-                'w-20 h-7 text-xs',
-                filters.freewayTierBelow !== null && 'border-primary bg-primary/10 text-primary',
-              )}
-              data-testid="filter-freeway-tier-below"
+        {showFreewayTier && (
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="text-muted-foreground">{t('filters.freewayTierBelow')}</span>
+            <Select
+              value={filters.freewayTierBelow === null ? 'off' : String(filters.freewayTierBelow)}
+              onValueChange={(v) => setFilter({ freewayTierBelow: v === 'off' ? null : Number(v) })}
             >
-              {/* base-ui shows the raw value without a render-function. */}
-              <SelectValue>
-                {(value: string | null) =>
-                  value === 'off' || value === null ? t('filters.freewayTierBelowOff') : value
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem
-                value="off"
-                className="text-xs"
-                data-testid="filter-freeway-tier-below-off"
+              <SelectTrigger
+                size="sm"
+                className={cn(
+                  'w-20 h-7 text-xs',
+                  filters.freewayTierBelow !== null && 'border-primary bg-primary/10 text-primary',
+                )}
+                data-testid="filter-freeway-tier-below"
               >
-                {t('filters.freewayTierBelowOff')}
-              </SelectItem>
-              {FREEWAY_TIER_BELOW_OPTIONS.map((n) => (
+                {/* base-ui shows the raw value without a render-function. */}
+                <SelectValue>
+                  {(value: string | null) =>
+                    value === 'off' || value === null ? t('filters.freewayTierBelowOff') : value
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
                 <SelectItem
-                  key={n}
-                  value={String(n)}
+                  value="off"
                   className="text-xs"
-                  data-testid={`filter-freeway-tier-below-${n}`}
+                  data-testid="filter-freeway-tier-below-off"
                 >
-                  {n}
+                  {t('filters.freewayTierBelowOff')}
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+                {FREEWAY_TIER_BELOW_OPTIONS.map((n) => (
+                  <SelectItem
+                    key={n}
+                    value={String(n)}
+                    className="text-xs"
+                    data-testid={`filter-freeway-tier-below-${n}`}
+                  >
+                    {n}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         {/* Category multi-select */}
-        {availableCategories.length > 0 && (
+        {showCategory && availableCategories.length > 0 && (
           <div className="relative" ref={categoryPickerRef}>
             <button
               type="button"
@@ -607,7 +640,7 @@ export function StringTableFilters() {
         )}
 
         {/* Tone multi-select */}
-        {availableTones.length > 0 && (
+        {showTone && availableTones.length > 0 && (
           <div className="relative" ref={tonePickerRef}>
             <button
               type="button"
@@ -660,7 +693,7 @@ export function StringTableFilters() {
         )}
 
         {/* Glossary multi-select */}
-        {availableGlossaries.length > 0 && (
+        {showGlossary && availableGlossaries.length > 0 && (
           <div className="relative" ref={glossaryPickerRef}>
             <button
               type="button"
@@ -713,15 +746,17 @@ export function StringTableFilters() {
         )}
 
         {/* Run-id filter */}
-        <RunFilterSelect
-          projectId={activeProjectId}
-          value={filters.runId}
-          onChange={(runId) => setFilter({ runId })}
-          data-testid="filter-run-id-top"
-        />
+        {showRun && (
+          <RunFilterSelect
+            projectId={activeProjectId}
+            value={filters.runId}
+            onChange={(runId) => setFilter({ runId })}
+            data-testid="filter-run-id-top"
+          />
+        )}
 
         {/* Source file filter */}
-        {availableSources.length > 0 && (
+        {showSource && availableSources.length > 0 && (
           <div className="relative" ref={sourcePickerRef}>
             <button
               type="button"
@@ -789,7 +824,7 @@ export function StringTableFilters() {
         )}
 
         {/* Column visibility picker */}
-        {activeLanguages.length > 0 && (
+        {showColumnPicker && activeLanguages.length > 0 && (
           <div className="relative" ref={colPickerRef}>
             <button
               type="button"
