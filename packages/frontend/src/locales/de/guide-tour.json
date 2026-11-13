@@ -462,6 +462,7 @@
       "backup": "Das Backup konnte nicht angelegt werden. Es wurde nichts geändert.",
       "simulate": "Die Übungswaise konnte nicht erstellt werden. Es wurde nichts geändert.",
       "recover": "Der Eintrag konnte noch nicht zurückgeholt werden. Er ist im Tab „Waisen“ sicher; versuche es noch einmal.",
+      "recoverRefused": "Die Tour kann diesen Eintrag nicht zurückholen, ohne andere Einträge zu ändern, daher wurde nichts geändert. Übertrage seine Übersetzungen mit „Neu verknüpfen“ im Tab „Waisen“ oder stelle dein Backup wieder her, falls du eines angelegt hast.",
       "load": "Der Stand der Übungswaise ließ sich nicht prüfen. Klicke auf „Zurückholen“, um es noch einmal zu versuchen."
     },
     "banner": {

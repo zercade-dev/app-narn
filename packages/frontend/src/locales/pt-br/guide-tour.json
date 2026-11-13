@@ -462,6 +462,7 @@
       "backup": "Não foi possível criar o backup. Nada foi alterado.",
       "simulate": "Não foi possível criar o órfão de prática. Nada foi alterado.",
       "recover": "Ainda não foi possível colocar a entrada de volta. Ela está segura na aba “Órfãos”; tente de novo.",
+      "recoverRefused": "O tour não consegue colocar esta entrada de volta sem alterar outras entradas, então nada foi alterado. Use “Revincular” na aba “Órfãos” para passar as traduções dela, ou restaure o backup se você criou um.",
       "load": "Não foi possível verificar o órfão de prática. Clique em “Colocar de volta” para tentar de novo."
     },
     "banner": {

@@ -462,6 +462,7 @@
       "backup": "La sauvegarde n’a pas pu être créée. Rien n’a été modifié.",
       "simulate": "L’orphelin d’essai n’a pas pu être créé. Rien n’a été modifié.",
       "recover": "L’entrée n’a pas encore pu être remise en place. Elle est en sécurité dans l’onglet « Orphelins » ; réessayez.",
+      "recoverRefused": "La visite ne peut pas remettre cette entrée en place sans modifier d’autres entrées, rien n’a donc été modifié. Utilisez « Réaffecter » dans l’onglet « Orphelins » pour transférer ses traductions, ou restaurez la sauvegarde si vous en avez créé une.",
       "load": "Impossible de vérifier l’orphelin d’essai. Cliquez sur « Remettre en place » pour réessayer."
     },
     "banner": {

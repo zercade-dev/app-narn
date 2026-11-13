@@ -462,6 +462,7 @@
       "backup": "The backup could not be created. Nothing was changed.",
       "simulate": "The practice orphan could not be created. Nothing was changed.",
       "recover": "The entry could not be put back yet. It is safe in the Orphans tab; try again.",
+      "recoverRefused": "The tour cannot put this entry back without changing other entries, so nothing was changed. Use Relink in the Orphans tab to move its translations, or restore the backup if you took one.",
       "load": "Could not check on the practice orphan. Press “Put it back” to try again."
     },
     "banner": {

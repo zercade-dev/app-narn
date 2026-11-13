@@ -462,6 +462,7 @@
       "backup": "Không tạo được bản sao lưu. Không có gì bị thay đổi.",
       "simulate": "Không tạo được mục mồ côi tập dượt. Không có gì bị thay đổi.",
       "recover": "Chưa đưa mục trở lại được. Mục vẫn an toàn trong thẻ “Mục mồ côi”; hãy thử lại.",
+      "recoverRefused": "Hướng dẫn không thể đưa mục này trở lại mà không thay đổi các mục khác, nên không có gì bị thay đổi. Hãy dùng “Liên kết lại” trong thẻ “Mục mồ côi” để chuyển bản dịch của nó, hoặc khôi phục bản sao lưu nếu bạn đã tạo.",
       "load": "Không kiểm tra được mục mồ côi tập dượt. Nhấn “Đưa trở lại” để thử lại."
     },
     "banner": {

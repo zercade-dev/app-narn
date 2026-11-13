@@ -83,10 +83,19 @@ export function simulationBlocker(
 ): SimBlocker | null {
   if (access.role === 'collaborator') return 'collaborator';
   if (pickPracticeEntry(entries) === null) return 'no-entries';
-  const main = liveMainEntries(entries);
-  if (main.some((e) => e.sourceText === '')) return 'sourceless-rows';
-  if (main.some((e) => isRoundTripUnsafe(e.sourceText))) return 'unsafe-text';
-  if (main.some((e) => (e.sources ?? []).some((label) => !labelRoundTrips(label)))) {
+  return rowsBlocker(liveMainEntries(entries));
+}
+
+/**
+ * Why an import file of these rows would not give every one of them back
+ * unchanged (id, source text and labels), or null when it would.
+ */
+function rowsBlocker(
+  rows: StringEntry[],
+): Exclude<SimBlocker, 'collaborator' | 'no-entries'> | null {
+  if (rows.some((e) => e.sourceText === '')) return 'sourceless-rows';
+  if (rows.some((e) => isRoundTripUnsafe(e.sourceText))) return 'unsafe-text';
+  if (rows.some((e) => (e.sources ?? []).some((label) => !labelRoundTrips(label)))) {
     return 'comma-in-source-label';
   }
   return null;
@@ -150,6 +159,19 @@ export class PracticeImportCheckError extends Error {
   constructor() {
     super('The practice import would not rebuild the entries; nothing was changed.');
     this.name = 'PracticeImportCheckError';
+  }
+}
+
+/**
+ * The automatic put-back was refused, with nothing changed: the entries changed
+ * since the practice orphan was created so that a re-import would alter one
+ * (a label with a comma, say), or the dry run did not map every row. Trying
+ * again keeps failing; the person relinks the orphan or restores the backup.
+ */
+export class PracticeRecoverRefusedError extends Error {
+  constructor() {
+    super('The practice orphan cannot be put back automatically; nothing was changed.');
+    this.name = 'PracticeRecoverRefusedError';
   }
 }
 
@@ -256,12 +278,19 @@ export async function recoverPracticeOrphan(): Promise<RecoverOutcome> {
   }
   const rows = liveMainEntries(live);
   rows.splice(Math.min(sim.position, rows.length), 0, orphan);
-  await checkedImport(
-    sim.projectId,
-    buildImportCsv(projectFor(sim.projectId), rows),
-    rows.length,
-    'add-only',
-  );
+  // The entries may have changed since the simulation checked them: the same
+  // checks again, so the put-back never rewrites another entry's labels.
+  if (rowsBlocker(rows) !== null) throw new PracticeRecoverRefusedError();
+  try {
+    await checkedImport(
+      sim.projectId,
+      buildImportCsv(projectFor(sim.projectId), rows),
+      rows.length,
+      'add-only',
+    );
+  } catch (err) {
+    throw err instanceof PracticeImportCheckError ? new PracticeRecoverRefusedError() : err;
+  }
   useGuideStore.getState().clearOrphanSim();
   afterChange(sim.projectId);
   return 'recovered';

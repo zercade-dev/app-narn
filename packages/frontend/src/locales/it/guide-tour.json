@@ -462,6 +462,7 @@
       "backup": "Impossibile creare il backup. Non è stato modificato nulla.",
       "simulate": "Impossibile creare l’orfana di prova. Non è stato modificato nulla.",
       "recover": "Non è stato ancora possibile rimettere a posto la voce. È al sicuro nella scheda “Orfane”; riprova.",
+      "recoverRefused": "Il tour non può rimettere a posto questa voce senza modificare altre voci, quindi non è stato modificato nulla. Usa “Ricollega” nella scheda “Orfane” per spostarne le traduzioni, oppure ripristina il backup se ne hai creato uno.",
       "load": "Impossibile controllare l’orfana di prova. Premi “Rimetti a posto” per riprovare."
     },
     "banner": {

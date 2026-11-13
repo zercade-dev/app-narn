@@ -5,7 +5,11 @@ import { toast } from '@/lib/toast';
 import { errorMessage } from '@/lib/utils';
 import type { OrphanEntry, StringEntry } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../../hooks/use-api.js';
-import { ORPHANS_CHANGED_EVENT, recoverPracticeOrphan } from '../../lib/tour/orphan-sim.js';
+import {
+  ORPHANS_CHANGED_EVENT,
+  PracticeRecoverRefusedError,
+  recoverPracticeOrphan,
+} from '../../lib/tour/orphan-sim.js';
 import { useGuideStore } from '../../stores/guide-store.js';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
 import {
@@ -158,7 +162,11 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
       await recoverPracticeOrphan();
       toast.success(tTour('orphansTour.banner.recovered'));
     } catch (err) {
-      toast.error(errorMessage(err, tTour('orphansTour.errors.recover')));
+      toast.error(
+        err instanceof PracticeRecoverRefusedError
+          ? tTour('orphansTour.errors.recoverRefused')
+          : errorMessage(err, tTour('orphansTour.errors.recover')),
+      );
     } finally {
       setRecovering(false);
       void reload();

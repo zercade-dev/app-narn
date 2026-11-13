@@ -462,6 +462,7 @@
       "backup": "No se pudo crear la copia de seguridad. No se cambió nada.",
       "simulate": "No se pudo crear la huérfana de práctica. No se cambió nada.",
       "recover": "Aún no se pudo devolver la entrada. Está a salvo en la pestaña «Huérfanas»; inténtalo de nuevo.",
+      "recoverRefused": "El recorrido no puede devolver esta entrada sin cambiar otras entradas, así que no se cambió nada. Usa «Reasignar» en la pestaña «Huérfanas» para pasar sus traducciones, o restaura la copia de seguridad si hiciste una.",
       "load": "No se pudo comprobar la huérfana de práctica. Pulsa «Devolver» para intentarlo de nuevo."
     },
     "banner": {

@@ -462,6 +462,7 @@
       "backup": "Yedek oluşturulamadı. Hiçbir şey değiştirilmedi.",
       "simulate": "Alıştırma yetimi oluşturulamadı. Hiçbir şey değiştirilmedi.",
       "recover": "Girdi henüz geri konamadı. “Yetimler” sekmesinde güvende; yeniden deneyin.",
+      "recoverRefused": "Tur bu girdiyi başka girdileri değiştirmeden geri koyamıyor, bu yüzden hiçbir şey değiştirilmedi. Çevirilerini taşımak için “Yetimler” sekmesindeki “Yeniden bağla”yı kullanın ya da bir yedek aldıysanız onu geri yükleyin.",
       "load": "Alıştırma yetimi kontrol edilemedi. Yeniden denemek için “Geri koy”a basın."
     },
     "banner": {

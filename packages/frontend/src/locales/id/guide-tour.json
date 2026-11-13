@@ -462,6 +462,7 @@
       "backup": "Cadangan tidak dapat dibuat. Tidak ada yang diubah.",
       "simulate": "Entri yatim latihan tidak dapat dibuat. Tidak ada yang diubah.",
       "recover": "Entri belum bisa dikembalikan. Entri itu aman di tab “Entri Yatim”; coba lagi.",
+      "recoverRefused": "Tur tidak dapat mengembalikan entri ini tanpa mengubah entri lain, jadi tidak ada yang diubah. Gunakan “Hubungkan ulang” di tab “Entri Yatim” untuk memindahkan terjemahannya, atau pulihkan cadangan jika Anda membuatnya.",
       "load": "Tidak dapat memeriksa entri yatim latihan. Tekan “Kembalikan” untuk mencoba lagi."
     },
     "banner": {

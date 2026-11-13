@@ -5,6 +5,7 @@ import { apiRequest } from '../../hooks/use-api.js';
 import type { CatalogTourContext } from '../../lib/tour/catalog.js';
 import {
   loadPracticeState,
+  PracticeRecoverRefusedError,
   recoverPracticeOrphan,
   simulateOrphan,
   simulationBlocker,
@@ -24,7 +25,7 @@ import { useViewStore } from '../../stores/view-store.js';
 import { TourOverlay } from './TourOverlay.js';
 
 type Notice = 'alreadyRecovered' | 'alreadyDeleted';
-type ErrorKind = 'backup' | 'simulate' | 'recover' | 'load';
+type ErrorKind = 'backup' | 'simulate' | 'recover' | 'recoverRefused' | 'load';
 
 interface RunState {
   /** False while the controller checks where a practice orphan left out earlier is. */
@@ -277,8 +278,10 @@ export function OrphansTourController({ facts, access }: CatalogTourContext) {
                       ? 'alreadyRecovered'
                       : 'alreadyDeleted',
               });
-            } catch {
-              setRun((r) => ({ ...r, error: 'recover' }));
+            } catch (err) {
+              const kind =
+                err instanceof PracticeRecoverRefusedError ? 'recoverRefused' : 'recover';
+              setRun((r) => ({ ...r, error: kind }));
             }
           });
           return;
