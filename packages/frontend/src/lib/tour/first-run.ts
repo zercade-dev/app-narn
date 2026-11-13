@@ -512,7 +512,9 @@ function firstIncompleteMajor(f: GuideFacts): number {
   if (!projectReady(f)) return 3;
   // "Translate the rest?" after the quick test, and the rest's own run, are
   // still part of step 4.
-  if (!f.translationExists || restPending(f) || f.restRunning) return 4;
+  // A file that came translated has nothing for step 4 to do.
+  const translated = f.translationExists || f.nothingToTranslate;
+  if (!translated || restPending(f) || f.restRunning) return 4;
   if (!f.exported) return 5;
   return 6;
 }
@@ -539,7 +541,8 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
     if (!f.projectHasLanguages) return at('languages-source');
     return at('import');
   }
-  if (major === 4 && !f.translationExists && f.nothingToTranslate) return at(NOTHING_STEP);
+  // Said once, on the way to the export: the guide's way into step 5.
+  if (major === 5 && !f.translationExists && f.nothingToTranslate) return at(NOTHING_STEP);
   if (major === 4 && restPending(f)) return at('translate-rest');
   if (major === 4 && f.translationExists && f.restRunning) return at(WAITING_STEP);
   return steps.findIndex((s) => s.major === major);

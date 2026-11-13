@@ -40,11 +40,6 @@ function importOrder(entries: StringEntry[]): StringEntry[] {
     .map((x) => x.entry);
 }
 
-/** Every entry that can be translated (has source text, needs translation), in import order. */
-export function translatableEntryIds(entries: StringEntry[]): string[] {
-  return importOrder(entries.filter(isTranslatableEntry)).map((e) => e.id);
-}
-
 /**
  * The languages the guide translates into: the project's targets without the
  * source and without the Pseudo-test QA language (pseudo text says nothing
@@ -83,10 +78,18 @@ export function hasUntranslatedEntry(entries: StringEntry[], targetLanguages: st
 }
 
 /**
+ * How far a run's (server) start may precede the (browser) request and still
+ * be its run: room for a server clock behind the browser's.
+ */
+const CLOCK_SKEW_MS = 60_000;
+
+/**
  * The run a pending quick test produced: the recorded one, else the first
- * translation run of its project listed after the request (any run not in
- * `runsBefore`). Read straight from the run list, so a run that is already
- * finished the first time it is listed still counts, before anything records it.
+ * translation run of its project listed after the request (not in
+ * `runsBefore`, and not started well before `requestedAt`, which also covers a
+ * run list that had not loaded yet). Read straight from the run list, so a run
+ * that is already finished the first time it is listed still counts, before
+ * anything records it.
  */
 export function quickTestRunId(
   quickTest: QuickTest | null,
@@ -96,8 +99,13 @@ export function quickTestRunId(
   if (quickTest.runId !== null) return quickTest.runId;
   const before = quickTest.runsBefore;
   if (!before) return null;
+  const since = (quickTest.requestedAt ?? 0) - CLOCK_SKEW_MS;
   const fresh = runs.find(
-    (r) => r.projectId === quickTest.projectId && isTranslationRun(r) && !before.includes(r.runId),
+    (r) =>
+      r.projectId === quickTest.projectId &&
+      isTranslationRun(r) &&
+      !before.includes(r.runId) &&
+      (r.startedAt ?? 0) >= since,
   );
   return fresh?.runId ?? null;
 }

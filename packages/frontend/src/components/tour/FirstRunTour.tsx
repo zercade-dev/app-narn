@@ -237,7 +237,8 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const [vaultFormAnchor, keyEditorAnchor, dialogStartAnchor] = FIRST_RUN_FORM_ANCHORS;
   const vaultFormOpen = useTourAnchor(vaultFormAnchor) !== null;
   const keyEditorOpen = useTourAnchor(keyEditorAnchor) !== null;
-  const dialogOpen = useTourAnchor(dialogStartAnchor) !== null;
+  const dialogStart = useTourAnchor(dialogStartAnchor);
+  const dialogOpen = dialogStart !== null;
   const stalled = useFirstRunStall();
   // "Try again" sets the failed run aside, so the guide does not show its
   // failure again while the new run has not been listed yet.
@@ -421,6 +422,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
             runId: null,
             decision: 'pending',
             runsBefore: translationRunIdsOf(projectId),
+            requestedAt: Date.now(),
           });
           requestGuideTranslation(
             quickTestEntryIds(useStringStore.getState().entries, activeTargets()),
@@ -447,9 +449,14 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'skip-rest': {
           // Decided, whatever was recorded: a quick test the guide never saw
           // (or reached via Back) must not leave this button doing nothing.
+          // A rest run already asked for keeps its decision (the facts follow it).
           const guide = useGuideStore.getState();
-          if (guide.quickTest?.projectId === projectId) guide.decideQuickTest('skip');
-          else if (projectId) guide.setQuickTest({ projectId, runId: null, decision: 'skip' });
+          const quick = guide.quickTest;
+          if (quick?.projectId === projectId) {
+            if (quick.decision !== 'rest') guide.decideQuickTest('skip');
+          } else if (projectId) {
+            guide.setQuickTest({ projectId, runId: null, decision: 'skip' });
+          }
           // Straight to the download (its step opens the Data tab), keeping
           // the position the facts will point at once the decision is in.
           const next = firstRunStepIndex({ ...factsRef.current, quickTestPending: false });
@@ -483,29 +490,41 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   // FORM_STEPS). Back from the progress step lands on that Start too.
   const positionId = tour.steps[index]?.id;
   const atQuick = positionId === 'translate-quick' || positionId === 'translate-start';
-  const dialogOverQuick = atQuick && shownStep?.id === 'translate-start';
 
-  // Entering the quick test: the table shows every entry in import order, and
-  // the three to try are selected, so the checked rows are the ones on screen.
+  // Entering the quick test: the table shows every entry in import order, the
+  // three to try are selected, and the table opens the page that holds the
+  // first of them (it may sit after many rows the file already translates),
+  // so the checked rows are the ones on screen.
   useEffect(() => {
     if (!atQuick) return;
     translatingAll.current = false;
     const strings = useStringStore.getState();
     strings.setFilter(quickTestFilters(strings.filters));
-    useSelectionStore.getState().selectAll(quickTestEntryIds(strings.entries, activeTargets()));
+    const picks = quickTestEntryIds(strings.entries, activeTargets());
+    useSelectionStore.getState().selectAll(picks);
+    strings.revealEntry(picks[0] ?? null);
+    return () => useStringStore.getState().revealEntry(null);
   }, [atQuick]);
 
-  // The dialog opened over the quick test: the run its Start produces is the
-  // quick test, known from the run list as soon as it is listed.
+  // Start pressed in the dialog opened over the quick test: the run it
+  // produces is the quick test, known from the run list as soon as it is
+  // listed. Read before the dialog sends the request (capture phase), and only
+  // on Start: a dialog closed without starting leaves nothing behind.
   useEffect(() => {
-    if (!dialogOverQuick || !projectId || translatingAll.current) return;
-    useGuideStore.getState().setQuickTest({
-      projectId,
-      runId: null,
-      decision: 'pending',
-      runsBefore: translationRunIdsOf(projectId),
-    });
-  }, [dialogOverQuick, projectId]);
+    if (!dialogStart || !atQuick || !projectId) return;
+    const onStart = () => {
+      if (translatingAll.current) return;
+      useGuideStore.getState().setQuickTest({
+        projectId,
+        runId: null,
+        decision: 'pending',
+        runsBefore: translationRunIdsOf(projectId),
+        requestedAt: Date.now(),
+      });
+    };
+    dialogStart.addEventListener('click', onStart, true);
+    return () => dialogStart.removeEventListener('click', onStart, true);
+  }, [dialogStart, atQuick, projectId]);
 
   const progressIndex = tour.steps.findIndex((s) => s.id === 'translate-progress');
 
@@ -581,9 +600,9 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
       if (quick) guide.setQuickTest({ ...quick, decision: 'rest', restRunId: fresh });
       return;
     }
-    // A quick test asked for is recorded above.
-    if (quick?.projectId === projectId && quick.decision === 'pending' && quick.runsBefore) return;
+    // A quick test asked for is recorded above, once its run is recognised.
     if (quick?.projectId === projectId && quick.runId === fresh) return;
+    if (quickTestRunId(quick, useRunStore.getState().runs) === fresh) return;
     setGuideRunId(fresh);
     if (projectId && !translatingAll.current) {
       // The highlighted button was used some other way than the dialog the

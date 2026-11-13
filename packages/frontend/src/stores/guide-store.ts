@@ -18,7 +18,8 @@ export interface TourProgress {
  * produced: the decision is recorded together with it, once it is listed.
  * `runsBefore`: the project's translation runs listed when the test was asked
  * for, so the run it produced is known as soon as it is listed (see
- * `quickTestRunId`), even one that is already finished by then.
+ * `quickTestRunId`), even one that is already finished by then; `requestedAt`
+ * (browser time) rules out older runs a run list not yet loaded would miss.
  */
 export interface QuickTest {
   projectId: string;
@@ -26,6 +27,7 @@ export interface QuickTest {
   decision: 'pending' | 'rest' | 'skip';
   restRunId?: string;
   runsBefore?: string[];
+  requestedAt?: number;
 }
 
 /**
