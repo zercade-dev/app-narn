@@ -11,6 +11,8 @@ export interface GuideFacts {
   projectHasEntries: boolean;
   translationExists: boolean;
   exported: boolean;
+  /** Entries of the active project are selected in the string list. */
+  hasSelection: boolean;
   isCollaboratorOnly: boolean;
 }
 
@@ -20,7 +22,12 @@ export type TourAdvance =
   /** Completes when the anchored control is clicked. */
   | { kind: 'click' }
   /** Completes when app state says so. */
-  | { kind: 'state'; done: (f: GuideFacts) => boolean };
+  | { kind: 'state'; done: (f: GuideFacts) => boolean }
+  /**
+   * Completed by whoever runs the tour, when something happens that no fact
+   * describes (a new run appearing). The overlay shows no Next and waits.
+   */
+  | { kind: 'manual' };
 
 export interface TourStep {
   id: string;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from '@/lib/toast';
 import {
   useFirstRunActive,
@@ -13,6 +13,7 @@ import { useProviderSetup } from '../../hooks/use-provider-setup.js';
 import { useTourAnchor } from '../../hooks/use-tour-anchor.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { goToVaultSetup } from '../../lib/auth-redirect.js';
+import { isTranslationRun } from '../../lib/run-kind.js';
 import {
   FREE_KEY_PROVIDERS,
   GOOGLE_KEY_URL,
@@ -32,6 +33,7 @@ import { vaultEditorOpenEvent, vaultLockedEvent } from '../../lib/vault-events.j
 import { useGuideStore } from '../../stores/guide-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import { useRunStore } from '../../stores/run-store.js';
+import { useSelectionStore } from '../../stores/selection-store.js';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { ProviderChoice } from './ProviderChoice.js';
@@ -149,8 +151,12 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   useEffect(() => {
     const startAgain = () => {
-      const selectAll = tour.steps.findIndex((step) => step.id === 'select-all');
-      if (selectAll >= 0) setPosition((p) => ({ ...p, index: selectAll }));
+      // Entries from the failed attempt are usually still selected: go straight
+      // to the button that needs them, not to a ticked "select all".
+      const selected = useSelectionStore.getState().selectedIds.size > 0;
+      const target = selected ? 'translate-selected' : 'select-all';
+      const at = tour.steps.findIndex((step) => step.id === target);
+      if (at >= 0) setPosition((p) => ({ ...p, index: at }));
     };
     const onAction = (e: Event) => {
       switch ((e as CustomEvent<FirstRunAction>).detail) {
@@ -219,6 +225,30 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     globalThis.addEventListener(FIRST_RUN_ACTION_EVENT, onAction);
     return () => globalThis.removeEventListener(FIRST_RUN_ACTION_EVENT, onAction);
   }, [cloud, stalledRunId, runQueuedBehind, projectId, tour]);
+
+  // "Start the translation" is done when the request produced a run: the ids
+  // listed when the step came up are the baseline, and any other is new.
+  const translationRunIds = useRunStore((s) =>
+    s.runs
+      .filter((r) => r.projectId === projectId && isTranslationRun(r))
+      .map((r) => r.runId)
+      .join('\n'),
+  );
+  const atStart = tour.steps[shownIndex]?.id === 'translate-start';
+  const runsBeforeStart = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!atStart) {
+      runsBeforeStart.current = null;
+      return;
+    }
+    const ids = translationRunIds ? translationRunIds.split('\n') : [];
+    if (runsBeforeStart.current === null) {
+      runsBeforeStart.current = new Set(ids);
+      return;
+    }
+    const known = runsBeforeStart.current;
+    if (ids.some((id) => !known.has(id))) onAdvance();
+  }, [atStart, translationRunIds, onAdvance]);
 
   const onProviderChosen = useCallback(
     ({ base, vaultKey }: { base: string; vaultKey: string | undefined }) => {

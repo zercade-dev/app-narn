@@ -7,6 +7,7 @@ import type { GuideFacts } from '../lib/tour/types.js';
 import { useGuideStore } from '../stores/guide-store.js';
 import { useProjectStore } from '../stores/project-store.js';
 import { useRunStore } from '../stores/run-store.js';
+import { useSelectionStore } from '../stores/selection-store.js';
 import { useStringStore } from '../stores/string-store.js';
 import { useVaultStore } from '../stores/vault-store.js';
 import { useUiMode } from './use-ui-mode.js';
@@ -49,9 +50,9 @@ function producedTranslations(run: RunStatus, projectId: string): boolean {
  * in the right place after a reload or on another device. Read-only: it
  * fetches nothing. The returned object keeps its identity until a fact changes.
  *
- * The project's strings and runs are only looked at while the guide can still
- * matter (Simple mode, not finished); otherwise those two facts read false and
- * a string or run update re-renders nothing.
+ * The project's strings, runs and selection are only looked at while the guide
+ * can still matter (Simple mode, not finished); otherwise those facts read
+ * false and a string, run or selection update re-renders nothing.
  */
 export function useGuideFacts(): GuideFacts {
   const relevant = useGuideRelevant();
@@ -91,6 +92,10 @@ export function useGuideFacts(): GuideFacts {
       activeProjectId !== null &&
       s.runs.some((run) => producedTranslations(run, activeProjectId)),
   );
+  // The selection store drops its ids itself when the active project changes.
+  const hasSelection = useSelectionStore(
+    (s) => relevant && activeProjectId !== null && s.selectedIds.size > 0,
+  );
 
   return useMemo(() => {
     const cloud = cloudManaged || setupRequired;
@@ -104,6 +109,7 @@ export function useGuideFacts(): GuideFacts {
       projectHasEntries,
       translationExists,
       exported,
+      hasSelection,
       isCollaboratorOnly,
     };
   }, [
@@ -113,6 +119,7 @@ export function useGuideFacts(): GuideFacts {
     vaultUnlocked,
     usableKey,
     exported,
+    hasSelection,
     activeProjectId,
     projectHasLanguages,
     projectHasEntries,

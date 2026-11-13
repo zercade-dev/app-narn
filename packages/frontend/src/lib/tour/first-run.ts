@@ -287,11 +287,13 @@ const SHARED_STEPS: TourStep[] = [
     major: 4,
   },
   {
+    // Done once something is selected, not on the click: on entries that are
+    // already selected a click would deselect them all.
     id: 'select-all',
     anchor: 'string-table-select-all',
     ...copy('translate', 'selectWhat'),
-    advance: { kind: 'click' },
-    // "Try again" lands here from anywhere.
+    advance: { kind: 'state', done: (f) => f.hasSelection },
+    // "Try again" lands here, or on the next step, from anywhere.
     navigate: { view: 'project', tab: 'strings' },
     major: 4,
   },
@@ -300,13 +302,17 @@ const SHARED_STEPS: TourStep[] = [
     anchor: 'bulk-batch-translate',
     ...copy('translate', 'pressWhat'),
     advance: { kind: 'click' },
+    navigate: { view: 'project', tab: 'strings' },
     major: 4,
   },
   {
+    // Done when the request produced a run (`FirstRunTour` watches for it):
+    // one refused before a run exists (no route, a validation error) must not
+    // leave "the translation is running" on screen.
     id: 'translate-start',
     anchor: 'comparison-translate-start',
     ...copy('translate', 'startWhat'),
-    advance: { kind: 'click' },
+    advance: { kind: 'manual' },
     major: 4,
   },
   {
