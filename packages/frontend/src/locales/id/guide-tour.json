@@ -152,6 +152,10 @@
       "name": "Tinjauan AI Terjemahan",
       "summary": "Sekilas tentang meminta AI memeriksa terjemahan Anda."
     },
+    "orphans": {
+      "name": "Entri Yatim",
+      "summary": "Lihat apa yang terjadi pada entri yang tidak ada di file Anda, dengan entri yatim latihan yang dikembalikan oleh tur."
+    },
     "startOver": "Mulai dari awal",
     "continue": "Lanjutkan dari terakhir kali",
     "progress": "{{current}} dari {{total}} langkah",
@@ -374,6 +378,95 @@
       "title": "Biarkan AI menyarankan istilah",
       "what": "Minta penyedia AI menemukan istilah yang mungkin ada di string Anda.",
       "why": "Anda meninjau sarannya dan hanya menyimpan yang Anda inginkan."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Apa itu entri yatim",
+      "what": "Entri yatim adalah entri yang tidak ada di file terakhir yang Anda impor dengan “Ganti seluruhnya”.",
+      "why": "NARN menyimpannya di sini beserta terjemahannya alih-alih menghapusnya, jadi tidak ada yang hilang secara tidak sengaja."
+    },
+    "offer": {
+      "title": "Coba dengan entri yatim latihan",
+      "what": "Tur ini dapat menjadikan salah satu entri Anda yatim sebentar, lalu mengembalikannya. Tidak ada yang hilang: entri tetap menyimpan terjemahannya dan kembali ke tempatnya.",
+      "why": "Melihat entri yatim sungguhan membuat tab ini lebih mudah dipakai nanti. Atau biarkan tur hanya menjelaskan."
+    },
+    "backup": {
+      "title": "Buat cadangan dulu",
+      "what": "Cadangan proyek dibuat sebelum entri yatim latihan dibuat. Apa pun pilihannya, tidak ada yang hilang: tur mengembalikan entri itu.",
+      "why": "Dengan cadangan, Anda selalu bisa kembali ke kondisi persis ini dari tab “Cadangan”."
+    },
+    "simulating": {
+      "title": "Membuat entri yatim latihan",
+      "what": "Tur mengimpor ulang entri Anda tanpa salah satunya. Ini butuh sebentar.",
+      "why": "Inilah yang terjadi saat sebuah entri hilang dari file yang Anda impor dengan “Ganti seluruhnya”."
+    },
+    "practice-row": {
+      "title": "Entri yatim latihan Anda",
+      "what": "Entri ini sekarang yatim. Entri ini tidak lagi tampil di tab “Terjemahan”, dan terjemahannya tetap disimpan.",
+      "why": "Entri yatim muncul di sini setelah impor “Ganti seluruhnya”, agar Anda bisa memutuskan nasib masing-masing."
+    },
+    "practice-options": {
+      "title": "Yang bisa dilakukan pada entri yatim",
+      "what": "“Hubungkan ulang” memindahkan terjemahannya ke entri lain, misalnya entri yang teksnya hanya diubah susunan katanya. “Hapus” menghapusnya selamanya.",
+      "why": "Jangan pakai keduanya untuk yang ini: tur mengembalikannya di langkah berikutnya."
+    },
+    "recover": {
+      "title": "Kembalikan",
+      "what": "Tekan “Kembalikan” dan entri kembali ke tempatnya di daftar, beserta terjemahannya.",
+      "why": "Tur mengimpornya lagi, sama seperti entri kembali saat file Anda berikutnya memuatnya."
+    },
+    "restore": {
+      "title": "Cadangan Anda",
+      "what": "Cadangan yang dibuat sebelum latihan ada di sini. “Pulihkan cadangan” menunjukkan tombol “Pulihkan” miliknya; menekannya atau tidak, Anda yang memutuskan.",
+      "why": "Anda tidak memerlukannya: entri sudah kembali. Pulihkan cadangan hanya jika ada yang salah."
+    },
+    "done": {
+      "title": "Itulah entri yatim",
+      "what": "Entri yatim menyimpan entri dan terjemahan yang terlewat oleh impor terakhir Anda, sampai Anda menghubungkannya ulang atau menghapusnya.",
+      "why": "Periksa tab ini setelah setiap impor “Ganti seluruhnya”."
+    },
+    "explain-list": {
+      "title": "Daftar entri yatim",
+      "what": "Setiap entri yatim menampilkan teks sumbernya dan berapa terjemahan yang disimpannya.",
+      "why": "Yang terjemahannya paling banyak tampil lebih dulu: merekalah yang paling repot dibuat ulang."
+    },
+    "explain-options": {
+      "title": "Hubungkan ulang atau hapus",
+      "what": "“Hubungkan ulang” memindahkan terjemahan entri yatim ke entri lain, misalnya entri yang teksnya hanya diubah susunan katanya. “Hapus” menghapusnya selamanya.",
+      "why": "Hubungkan ulang jika teksnya masih ada dalam bentuk lain; hapus jika memang sudah tidak ada."
+    },
+    "actions": {
+      "simulate": "Buat entri yatim latihan",
+      "explainOnly": "Jelaskan saja",
+      "backupFirst": "Cadangkan dulu (disarankan)",
+      "skipBackup": "Lanjut tanpa cadangan",
+      "recover": "Kembalikan",
+      "restoreBackup": "Pulihkan cadangan",
+      "switchProject": "Ganti proyek"
+    },
+    "notices": {
+      "alreadyRecovered": "Entri yatim latihan sudah kembali di tab “Terjemahan”.",
+      "alreadyDeleted": "Entri yatim latihan sudah dihapus, jadi tur tidak bisa mengembalikannya. Jika Anda membuat cadangan, Anda bisa memulihkannya dari tab “Cadangan”.",
+      "otherProject": "Entri yatim latihan dari tur ini masih ada di proyek lain. Pindah ke proyek itu untuk mengembalikannya lebih dulu.",
+      "leftOut": "Entri yatim latihan masih ada di tab “Entri Yatim”. Tekan “Kembalikan” di sana untuk mengembalikannya."
+    },
+    "blocked": {
+      "noEntries": "Belum ada entri untuk latihan, jadi tur hanya menjelaskan.",
+      "collaborator": "Hanya pemilik proyek yang bisa mengelola entri yatim, jadi tur hanya menjelaskan.",
+      "sourcelessRows": "Beberapa entri tidak punya teks sumber, dan impor tidak bisa membangunnya ulang dengan persis. Tur hanya menjelaskan, jadi tidak ada yang berubah.",
+      "unsafeText": "Ada teks sumber dengan tanda kutip tepat sebelum koma atau baris baru, yang tidak bisa dibangun ulang dengan persis oleh impor. Tur hanya menjelaskan, jadi tidak ada yang berubah.",
+      "commaInSourceLabel": "Ada label sumber yang berisi koma atau spasi di ujungnya, yang tidak bisa dibangun ulang dengan persis oleh impor. Tur hanya menjelaskan, jadi tidak ada yang berubah."
+    },
+    "errors": {
+      "backup": "Cadangan tidak dapat dibuat. Tidak ada yang diubah.",
+      "simulate": "Entri yatim latihan tidak dapat dibuat. Tidak ada yang diubah.",
+      "recover": "Entri belum bisa dikembalikan. Entri itu aman di tab “Entri Yatim”; coba lagi.",
+      "load": "Tidak dapat memeriksa entri yatim latihan. Tekan “Kembalikan” untuk mencoba lagi."
+    },
+    "banner": {
+      "text": "Ini entri yatim latihan dari tur terpandu. Kembalikan agar entri ini kembali ke tab “Terjemahan” beserta terjemahannya.",
+      "recovered": "Entri yatim latihan sudah kembali di tab “Terjemahan”."
     }
   }
 }

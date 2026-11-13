@@ -152,6 +152,10 @@
       "name": "Çeviri yapay zekâ incelemesi",
       "summary": "Çevirilerinizi bir yapay zekâya denetletmeye kısa bir bakış."
     },
+    "orphans": {
+      "name": "Yetimler",
+      "summary": "Dosyanızda olmayan bir girdiye ne olduğunu, turun yerine geri koyduğu bir alıştırma yetimiyle görün."
+    },
     "startOver": "Baştan başla",
     "continue": "Kaldığım yerden devam et",
     "progress": "{{current}}/{{total}} adım",
@@ -374,6 +378,95 @@
       "title": "Terimleri yapay zekâ önersin",
       "what": "Bir yapay zekâ sağlayıcısından metinlerinizdeki olası terimleri bulmasını isteyin.",
       "why": "Önerileri siz inceler, yalnızca istediklerinizi tutarsınız."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Yetim nedir",
+      "what": "Yetim, “Tam değiştirme” ile içe aktardığınız son dosyada bulunmayan bir girdidir.",
+      "why": "NARN onu silmek yerine çevirileriyle birlikte burada saklar; böylece hiçbir şey yanlışlıkla kaybolmaz."
+    },
+    "offer": {
+      "title": "Bir alıştırma yetimiyle deneyin",
+      "what": "Tur, girdilerinizden birini kısa bir süre yetime dönüştürüp sonra geri koyabilir. Hiçbir şey kaybolmaz: girdi çevirilerini korur ve yerine döner.",
+      "why": "Gerçek bir yetim görmek bu sekmeyi sonra kullanmayı kolaylaştırır. Ya da tur yalnızca anlatsın."
+    },
+    "backup": {
+      "title": "Önce bir yedek",
+      "what": "Alıştırma yetimi oluşturulmadan önce projenin bir yedeği alınır. Her durumda hiçbir şey kaybolmaz: tur girdiyi geri koyar.",
+      "why": "Bir yedekle “Yedekleme” sekmesinden her zaman tam olarak bu duruma dönebilirsiniz."
+    },
+    "simulating": {
+      "title": "Alıştırma yetimi oluşturuluyor",
+      "what": "Tur, girdilerinizi biri hariç yeniden içe aktarıyor. Bu biraz sürer.",
+      "why": "“Tam değiştirme” ile içe aktardığınız bir dosyadan bir girdi kaybolduğunda olan tam olarak budur."
+    },
+    "practice-row": {
+      "title": "Alıştırma yetiminiz",
+      "what": "Bu girdi artık bir yetim. “Çeviriler” sekmesinde artık görünmüyor ve çevirileri korunuyor.",
+      "why": "Yetimler, her biri için karar verebilmeniz için “Tam değiştirme” ile içe aktarmadan sonra burada görünür."
+    },
+    "practice-options": {
+      "title": "Bir yetimle neler yapabilirsiniz",
+      "what": "“Yeniden bağla”, çevirilerini başka bir girdiye taşır; örneğin metni yalnızca yeniden ifade edilmiş bir girdiye. “Sil” onu kalıcı olarak kaldırır.",
+      "why": "Bunda ikisini de kullanmayın: tur onu bir sonraki adımda geri koyar."
+    },
+    "recover": {
+      "title": "Geri koyun",
+      "what": "“Geri koy”a basın; girdi çevirileriyle birlikte listedeki yerine döner.",
+      "why": "Tur onu yeniden içe aktarır; bir sonraki dosyanız bir girdiyi içerdiğinde de girdi aynı şekilde geri gelir."
+    },
+    "restore": {
+      "title": "Yedeğiniz",
+      "what": "Alıştırmadan önce alınan yedek burada. “Yedeği geri yükle” onun “Geri yükle” düğmesini gösterir; basıp basmamak size kalmış.",
+      "why": "Ona ihtiyacınız yok: girdi zaten geri geldi. Yedeği yalnızca bir şeyler ters gittiğinde geri yükleyin."
+    },
+    "done": {
+      "title": "Yetimler bu kadar",
+      "what": "Yetimler, son içe aktarmanızın dışarıda bıraktığı girdileri ve çevirileri siz yeniden bağlayana ya da silene kadar saklar.",
+      "why": "Her “Tam değiştirme” içe aktarmasından sonra bu sekmeye bir göz atın."
+    },
+    "explain-list": {
+      "title": "Yetim listesi",
+      "what": "Her yetim kaynak metnini ve kaç çeviri sakladığını gösterir.",
+      "why": "En çok çevirisi olanlar önce gelir: yeniden yapmaları en çok emek isteyenler onlardır."
+    },
+    "explain-options": {
+      "title": "Yeniden bağlayın ya da silin",
+      "what": "“Yeniden bağla”, bir yetimin çevirilerini başka bir girdiye taşır; örneğin metni yalnızca yeniden ifade edilmiş bir girdiye. “Sil” onu kalıcı olarak kaldırır.",
+      "why": "Metin başka bir biçimde hâlâ varsa yeniden bağlayın; gerçekten yoksa silin."
+    },
+    "actions": {
+      "simulate": "Alıştırma yetimi oluştur",
+      "explainOnly": "Yalnızca anlat",
+      "backupFirst": "Önce yedekle (önerilir)",
+      "skipBackup": "Yedeksiz devam et",
+      "recover": "Geri koy",
+      "restoreBackup": "Yedeği geri yükle",
+      "switchProject": "Projeyi değiştir"
+    },
+    "notices": {
+      "alreadyRecovered": "Alıştırma yetimi zaten “Çeviriler” sekmesine geri döndü.",
+      "alreadyDeleted": "Alıştırma yetimi silindi, bu yüzden tur onu geri koyamaz. Bir yedek aldıysanız onu “Yedekleme” sekmesinden geri yükleyebilirsiniz.",
+      "otherProject": "Bu turdan bir alıştırma yetimi hâlâ başka bir projede. Önce onu geri koymak için o projeye geçin.",
+      "leftOut": "Alıştırma yetimi hâlâ “Yetimler” sekmesinde. Geri getirmek için oradaki “Geri koy”a basın."
+    },
+    "blocked": {
+      "noEntries": "Henüz alıştırma yapılacak bir girdi yok, bu yüzden tur yalnızca anlatıyor.",
+      "collaborator": "Yetimleri yalnızca proje sahibi yönetebilir, bu yüzden tur yalnızca anlatıyor.",
+      "sourcelessRows": "Bazı girdilerin kaynak metni yok ve bir içe aktarma onları birebir yeniden oluşturamaz. Tur yalnızca anlatıyor, hiçbir şey değişmiyor.",
+      "unsafeText": "Bir kaynak metinde virgülden ya da satır sonundan hemen önce tırnak işareti var; bir içe aktarma bunu birebir yeniden oluşturamaz. Tur yalnızca anlatıyor, hiçbir şey değişmiyor.",
+      "commaInSourceLabel": "Bir kaynak etiketinde virgül ya da uçlarında boşluk var; bir içe aktarma bunu birebir yeniden oluşturamaz. Tur yalnızca anlatıyor, hiçbir şey değişmiyor."
+    },
+    "errors": {
+      "backup": "Yedek oluşturulamadı. Hiçbir şey değiştirilmedi.",
+      "simulate": "Alıştırma yetimi oluşturulamadı. Hiçbir şey değiştirilmedi.",
+      "recover": "Girdi henüz geri konamadı. “Yetimler” sekmesinde güvende; yeniden deneyin.",
+      "load": "Alıştırma yetimi kontrol edilemedi. Yeniden denemek için “Geri koy”a basın."
+    },
+    "banner": {
+      "text": "Bu, rehberli turun alıştırma yetimi. Çevirileriyle birlikte “Çeviriler” sekmesine dönmesi için onu geri koyun.",
+      "recovered": "Alıştırma yetimi “Çeviriler” sekmesine geri döndü."
     }
   }
 }

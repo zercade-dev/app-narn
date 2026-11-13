@@ -35,6 +35,8 @@ interface TourOverlayProps {
   position?: TourPosition;
   /** Content under the callout's why text. */
   extra?: ReactNode;
+  /** Whether Back shows (default: on every step but the first). */
+  canGoBack?: boolean;
   onAdvance: () => void;
   onBack: () => void;
   onExit: () => void;
@@ -110,6 +112,7 @@ export function TourOverlay({
   facts,
   position,
   extra,
+  canGoBack,
   onAdvance,
   onBack,
   onExit,
@@ -225,7 +228,7 @@ export function TourOverlay({
     titleId,
     position,
     extra,
-    showBack: stepIndex > 0,
+    showBack: canGoBack ?? stepIndex > 0,
     showNext: step.advance.kind === 'next' || (stateDone && enteredViaBack),
     onNext: onAdvance,
     onBack,

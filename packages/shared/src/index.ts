@@ -178,8 +178,21 @@ export {
   detectCsvCollection,
   csvHasKeyAndSourceColumns,
 } from './csv-headers.js';
-export { parseGameCSV, buildCsvColumnMap, findRawNewlineLanguages } from './game-csv.js';
-export type { ParsedGameCSV } from './game-csv.js';
+export {
+  parseGameCSV,
+  buildCsvColumnMap,
+  findRawNewlineLanguages,
+  serializeGameCSV,
+  isRoundTripUnsafe,
+} from './game-csv.js';
+export type { ParsedGameCSV, FormulaGuardMode } from './game-csv.js';
+export {
+  FORMULA_TRIGGER,
+  escapeFormulaGuard,
+  escapeForReimport,
+  hasFormulaGuard,
+  stripFormulaGuard,
+} from './formula-guard.js';
 
 export { PROJECT_ICONS, DEFAULT_PROJECT_ICON } from './types/project.js';
 export type {

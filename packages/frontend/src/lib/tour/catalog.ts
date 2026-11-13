@@ -4,13 +4,17 @@
  * host). The glossary area tour is not listed: the Glossaries tour replaces it
  * here, and it stays as the offer when the Glossary tab opens.
  */
+import type { ComponentType } from 'react';
 import type { ProjectAccessInfo } from '@/stores/project-store';
+import { OrphansTourController } from '@/components/tour/OrphansTourController';
+import { useGuideStore } from '@/stores/guide-store';
 import type { Tab } from '@/stores/view-store';
 import { visibleTabs } from '../mode-gating.js';
 import { ADVANCED_SECTIONS_TOUR_ID, advancedSectionsTour } from './advanced-sections.js';
 import { AREA_TOURS, type AreaTourId } from './area-tours.js';
 import { FIRST_RUN_TOUR_ID, firstRunTourFor } from './first-run.js';
 import { GLOSSARIES_TOUR_ID, glossariesTour } from './glossaries-tour.js';
+import { ORPHANS_TOUR_ID, orphansTour } from './orphans-tour.js';
 import type { GuideFacts, Tour } from './types.js';
 
 export interface CatalogTourContext {
@@ -26,7 +30,17 @@ export interface CatalogTour {
   needsAdvanced: boolean;
   /** Listed only when `visibleTabs(access, cloud, 'advanced')` includes it. */
   tab?: Tab;
+  /**
+   * The tour as listed (its steps and progress). For a tour that runs with a
+   * `controller`, the shape it opens with.
+   */
   build(ctx: CatalogTourContext): Tour;
+  /**
+   * Runs the tour instead of `TourHost`'s default runner, for a tour whose
+   * steps act on the project (the Orphans tour). It is remounted on every
+   * start request, and reads `activeTourStart` itself.
+   */
+  controller?: ComponentType<CatalogTourContext>;
 }
 
 function areaTour(id: Exclude<AreaTourId, 'glossary'>): CatalogTour {
@@ -57,6 +71,20 @@ export const TOUR_CATALOG: readonly CatalogTour[] = [
   areaTour('quality'),
   areaTour('compare'),
   areaTour('review-translation-ai'),
+  {
+    id: ORPHANS_TOUR_ID,
+    needsProject: true,
+    needsAdvanced: true,
+    // Owner-only: collaborators have no Orphans tab, so it is not listed for them.
+    tab: 'orphans',
+    // While a practice orphan is out, the tour is listed with the steps it
+    // resumes in (the controller reopens it at "Put it back").
+    build: () => {
+      const sim = useGuideStore.getState().orphanSim;
+      return orphansTour({ simulated: sim !== null, backupId: sim?.backupId ?? null });
+    },
+    controller: OrphansTourController,
+  },
 ];
 
 export function catalogTour(id: string): CatalogTour | undefined {

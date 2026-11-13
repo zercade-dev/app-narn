@@ -152,6 +152,10 @@
       "name": "Revisione IA traduzioni",
       "summary": "Una breve panoramica su come un’IA controlla le tue traduzioni."
     },
+    "orphans": {
+      "name": "Orfane",
+      "summary": "Guarda cosa succede a una voce che manca nel tuo file, con un’orfana di prova che il tour rimette al suo posto."
+    },
     "startOver": "Ricomincia dall’inizio",
     "continue": "Riprendi da dove avevo lasciato",
     "progress": "{{current}} di {{total}} passaggi",
@@ -374,6 +378,95 @@
       "title": "Fatti suggerire i termini dall’IA",
       "what": "Chiedi a un provider IA di trovare i termini probabili nei tuoi testi.",
       "why": "Rivedi i suggerimenti e tieni solo quelli che vuoi."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Cos’è un’orfana",
+      "what": "Un’orfana è una voce che manca nell’ultimo file che hai importato con “Sostituzione completa”.",
+      "why": "NARN la conserva qui con le sue traduzioni invece di eliminarla, così niente va perso per sbaglio."
+    },
+    "offer": {
+      "title": "Provalo con un’orfana di prova",
+      "what": "Il tour può trasformare per un momento una delle tue voci in un’orfana e poi rimetterla a posto. Non si perde nulla: la voce mantiene le sue traduzioni e torna al suo posto.",
+      "why": "Vedere un’orfana vera rende questa scheda più facile da usare in seguito. Oppure lascia che il tour si limiti a spiegare."
+    },
+    "backup": {
+      "title": "Prima un backup",
+      "what": "Prima di creare l’orfana di prova viene creato un backup del progetto. In ogni caso non si perde nulla: il tour rimette a posto la voce.",
+      "why": "Con un backup puoi sempre tornare esattamente a questo stato dalla scheda “Backup”."
+    },
+    "simulating": {
+      "title": "Creazione dell’orfana di prova",
+      "what": "Il tour importa di nuovo le tue voci tranne una. Ci vuole un momento.",
+      "why": "È ciò che succede quando una voce sparisce da un file che importi con “Sostituzione completa”."
+    },
+    "practice-row": {
+      "title": "La tua orfana di prova",
+      "what": "Questa voce ora è un’orfana. Non compare più nella scheda “Traduzioni” e le sue traduzioni restano conservate.",
+      "why": "Le orfane compaiono qui dopo un’importazione con “Sostituzione completa”, così puoi decidere cosa fare di ciascuna."
+    },
+    "practice-options": {
+      "title": "Cosa puoi fare con un’orfana",
+      "what": "“Ricollega” sposta le sue traduzioni su un’altra voce, per esempio una il cui testo è stato solo riformulato. “Elimina” la rimuove per sempre.",
+      "why": "Con questa lasciali stare: il tour la rimette a posto nel passaggio successivo."
+    },
+    "recover": {
+      "title": "Rimettila a posto",
+      "what": "Premi “Rimetti a posto” e la voce torna al suo posto nell’elenco, con le sue traduzioni.",
+      "why": "Il tour la importa di nuovo, proprio come una voce ritorna quando il tuo prossimo file la contiene."
+    },
+    "restore": {
+      "title": "Il tuo backup",
+      "what": "Qui trovi il backup creato prima della prova. “Ripristina il backup” ti indica il suo pulsante “Ripristina”; se premerlo lo decidi tu.",
+      "why": "Non ti serve: la voce è già tornata. Ripristina un backup solo se qualcosa è andato storto."
+    },
+    "done": {
+      "title": "Ecco le orfane",
+      "what": "Le orfane conservano le voci e le traduzioni che la tua ultima importazione ha lasciato fuori, finché non le ricolleghi o le elimini.",
+      "why": "Dai un’occhiata a questa scheda dopo ogni importazione con “Sostituzione completa”."
+    },
+    "explain-list": {
+      "title": "L’elenco delle orfane",
+      "what": "Ogni orfana mostra il suo testo di origine e quante traduzioni conserva.",
+      "why": "Quelle con più traduzioni vengono prima: sono le più faticose da rifare."
+    },
+    "explain-options": {
+      "title": "Ricollega o elimina",
+      "what": "“Ricollega” sposta le traduzioni di un’orfana su un’altra voce, per esempio una il cui testo è stato solo riformulato. “Elimina” la rimuove per sempre.",
+      "why": "Ricollega quando il testo esiste ancora in un’altra forma; elimina quando è davvero sparito."
+    },
+    "actions": {
+      "simulate": "Crea un’orfana di prova",
+      "explainOnly": "Spiega soltanto",
+      "backupFirst": "Prima il backup (consigliato)",
+      "skipBackup": "Continua senza backup",
+      "recover": "Rimetti a posto",
+      "restoreBackup": "Ripristina il backup",
+      "switchProject": "Cambia progetto"
+    },
+    "notices": {
+      "alreadyRecovered": "L’orfana di prova è già tornata nella scheda “Traduzioni”.",
+      "alreadyDeleted": "L’orfana di prova è stata eliminata, quindi il tour non può rimetterla a posto. Se hai creato un backup, puoi ripristinarlo dalla scheda “Backup”.",
+      "otherProject": "Un’orfana di prova di questo tour è ancora in un altro progetto. Passa a quel progetto per rimetterla a posto prima.",
+      "leftOut": "L’orfana di prova è ancora nella scheda “Orfane”. Premi lì “Rimetti a posto” per recuperarla."
+    },
+    "blocked": {
+      "noEntries": "Non c’è ancora nessuna voce con cui esercitarsi, quindi il tour si limita a spiegare.",
+      "collaborator": "Solo il proprietario del progetto può gestire le orfane, quindi il tour si limita a spiegare.",
+      "sourcelessRows": "Alcune voci non hanno un testo di origine e un’importazione non può ricostruirle esattamente. Il tour si limita a spiegare, quindi non cambia nulla.",
+      "unsafeText": "Un testo di origine ha una virgoletta subito prima di una virgola o di un a capo, che un’importazione non può ricostruire esattamente. Il tour si limita a spiegare, quindi non cambia nulla.",
+      "commaInSourceLabel": "Un’etichetta di origine contiene una virgola o spazi alle estremità, che un’importazione non può ricostruire esattamente. Il tour si limita a spiegare, quindi non cambia nulla."
+    },
+    "errors": {
+      "backup": "Impossibile creare il backup. Non è stato modificato nulla.",
+      "simulate": "Impossibile creare l’orfana di prova. Non è stato modificato nulla.",
+      "recover": "Non è stato ancora possibile rimettere a posto la voce. È al sicuro nella scheda “Orfane”; riprova.",
+      "load": "Impossibile controllare l’orfana di prova. Premi “Rimetti a posto” per riprovare."
+    },
+    "banner": {
+      "text": "Questa è l’orfana di prova del tour guidato. Rimettila a posto perché torni, con le sue traduzioni, nella scheda “Traduzioni”.",
+      "recovered": "L’orfana di prova è tornata nella scheda “Traduzioni”."
     }
   }
 }

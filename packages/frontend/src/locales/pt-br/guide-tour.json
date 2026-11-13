@@ -152,6 +152,10 @@
       "name": "Revisão da tradução por IA",
       "summary": "Uma olhada rápida em como uma IA confere suas traduções."
     },
+    "orphans": {
+      "name": "Órfãos",
+      "summary": "Veja o que acontece com uma entrada que falta no seu arquivo, com um órfão de prática que o tour coloca de volta."
+    },
     "startOver": "Começar do início",
     "continue": "Continuar de onde parei",
     "progress": "{{current}} de {{total}} etapas",
@@ -374,6 +378,95 @@
       "title": "Deixar a IA sugerir termos",
       "what": "Peça a um provedor de IA para encontrar termos prováveis nos seus textos.",
       "why": "Você revisa as sugestões e fica só com as que quiser."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "O que é um órfão",
+      "what": "Um órfão é uma entrada que falta no último arquivo que você importou com “Substituição total”.",
+      "why": "O NARN a guarda aqui com as traduções em vez de excluí-la, então nada se perde por engano."
+    },
+    "offer": {
+      "title": "Experimente com um órfão de prática",
+      "what": "O tour pode transformar uma das suas entradas em órfão por um momento e depois colocá-la de volta. Nada se perde: a entrada mantém as traduções e volta ao seu lugar.",
+      "why": "Ver um órfão de verdade deixa esta aba mais fácil de usar depois. Ou deixe o tour só explicar."
+    },
+    "backup": {
+      "title": "Primeiro, um backup",
+      "what": "Um backup do projeto é criado antes do órfão de prática. De qualquer forma, nada se perde: o tour coloca a entrada de volta.",
+      "why": "Com um backup, você sempre pode voltar a este estado exato pela aba “Backup”."
+    },
+    "simulating": {
+      "title": "Criando o órfão de prática",
+      "what": "O tour importa suas entradas de novo, menos uma. Isso leva um momento.",
+      "why": "É o que acontece quando uma entrada some de um arquivo que você importa com “Substituição total”."
+    },
+    "practice-row": {
+      "title": "Seu órfão de prática",
+      "what": "Esta entrada agora é um órfão. Ela não aparece mais na aba “Traduções”, e as traduções dela são mantidas.",
+      "why": "Os órfãos aparecem aqui depois de uma importação com “Substituição total”, para você decidir o que fazer com cada um."
+    },
+    "practice-options": {
+      "title": "O que fazer com um órfão",
+      "what": "“Revincular” passa as traduções dele para outra entrada, por exemplo uma cujo texto só foi reescrito. “Excluir” o remove de vez.",
+      "why": "Não mexa neste: o tour o coloca de volta na próxima etapa."
+    },
+    "recover": {
+      "title": "Colocar de volta",
+      "what": "Clique em “Colocar de volta” e a entrada volta ao seu lugar na lista, com as traduções.",
+      "why": "O tour a importa de novo, do mesmo jeito que uma entrada volta quando seu próximo arquivo a inclui."
+    },
+    "restore": {
+      "title": "Seu backup",
+      "what": "O backup criado antes da prática aparece aqui. “Restaurar o backup” mostra o botão “Restaurar” dele; clicar ou não é com você.",
+      "why": "Você não precisa dele: a entrada já voltou. Restaure um backup só se algo der errado."
+    },
+    "done": {
+      "title": "Isso é tudo sobre órfãos",
+      "what": "Os órfãos guardam as entradas e traduções que sua última importação deixou de fora, até você revinculá-las ou excluí-las.",
+      "why": "Dê uma olhada nesta aba depois de cada importação com “Substituição total”."
+    },
+    "explain-list": {
+      "title": "A lista de órfãos",
+      "what": "Cada órfão mostra o texto de origem e quantas traduções mantém.",
+      "why": "Os que têm mais traduções vêm primeiro: são os que dão mais trabalho para refazer."
+    },
+    "explain-options": {
+      "title": "Revincular ou excluir",
+      "what": "“Revincular” passa as traduções de um órfão para outra entrada, por exemplo uma cujo texto só foi reescrito. “Excluir” o remove de vez.",
+      "why": "Revincule quando o texto ainda existe de outra forma; exclua quando ele realmente sumiu."
+    },
+    "actions": {
+      "simulate": "Criar um órfão de prática",
+      "explainOnly": "Só explicar",
+      "backupFirst": "Fazer backup antes (recomendado)",
+      "skipBackup": "Continuar sem backup",
+      "recover": "Colocar de volta",
+      "restoreBackup": "Restaurar o backup",
+      "switchProject": "Trocar de projeto"
+    },
+    "notices": {
+      "alreadyRecovered": "O órfão de prática já está de volta na aba “Traduções”.",
+      "alreadyDeleted": "O órfão de prática foi excluído, então o tour não pode colocá-lo de volta. Se você criou um backup, pode restaurá-lo pela aba “Backup”.",
+      "otherProject": "Um órfão de prática deste tour ainda está em outro projeto. Troque para esse projeto para colocá-lo de volta primeiro.",
+      "leftOut": "O órfão de prática ainda está na aba “Órfãos”. Clique em “Colocar de volta” lá para recuperá-lo."
+    },
+    "blocked": {
+      "noEntries": "Ainda não há nenhuma entrada para praticar, então o tour só explica.",
+      "collaborator": "Só o dono do projeto pode gerenciar órfãos, então o tour só explica.",
+      "sourcelessRows": "Algumas entradas não têm texto de origem, e uma importação não consegue reconstruí-las exatamente. O tour só explica, então nada muda.",
+      "unsafeText": "Algum texto de origem tem aspas logo antes de uma vírgula ou quebra de linha, o que uma importação não consegue reconstruir exatamente. O tour só explica, então nada muda.",
+      "commaInSourceLabel": "Um rótulo de origem tem vírgula ou espaços nas pontas, o que uma importação não consegue reconstruir exatamente. O tour só explica, então nada muda."
+    },
+    "errors": {
+      "backup": "Não foi possível criar o backup. Nada foi alterado.",
+      "simulate": "Não foi possível criar o órfão de prática. Nada foi alterado.",
+      "recover": "Ainda não foi possível colocar a entrada de volta. Ela está segura na aba “Órfãos”; tente de novo.",
+      "load": "Não foi possível verificar o órfão de prática. Clique em “Colocar de volta” para tentar de novo."
+    },
+    "banner": {
+      "text": "Este é o órfão de prática do tour guiado. Coloque-o de volta para que ele volte, com as traduções, à aba “Traduções”.",
+      "recovered": "O órfão de prática está de volta na aba “Traduções”."
     }
   }
 }

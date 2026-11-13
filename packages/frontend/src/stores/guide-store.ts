@@ -23,6 +23,19 @@ export interface QuickTest {
 }
 
 /**
+ * The orphans tour's practice orphan: the entry the tour removed with a
+ * re-import, so it can be put back even after a reload or an abandoned tour.
+ * `position` is its index among the project's live main entries (sortIndex
+ * order) when it was removed; `backupId` is the backup taken first, if any.
+ */
+export interface OrphanSim {
+  projectId: string;
+  entryId: string;
+  position: number;
+  backupId: string | null;
+}
+
+/**
  * Progress through the guided first run and the per-area tours. Persisted per
  * browser; only the active tour is transient.
  */
@@ -46,6 +59,8 @@ interface GuideState {
   tourProgress: Record<string, TourProgress>;
   /** The first run's quick test, once one was asked for. */
   quickTest: QuickTest | null;
+  /** The orphans tour's practice orphan, until it is put back. */
+  orphanSim: OrphanSim | null;
   /**
    * Not persisted. The first run's closing step is on screen: a switch to
    * Advanced now starts the Advanced sections tour.
@@ -84,6 +99,8 @@ interface GuideState {
   /** The answer to "translate the rest?"; nothing without a quick test. */
   decideQuickTest: (decision: 'rest' | 'skip') => void;
   setClosingShown: (shown: boolean) => void;
+  setOrphanSim: (sim: OrphanSim) => void;
+  clearOrphanSim: () => void;
   markExported: () => void;
   markProviderEnabled: (id: string) => void;
   /** `at`: the counted step index to open at (default 0). */
@@ -141,6 +158,7 @@ export const useGuideStore = create<GuideState>()(
       declinedTours: [],
       tourProgress: {},
       quickTest: null,
+      orphanSim: null,
       closingShown: false,
       activeTourId: null,
       activeTourStart: 0,
@@ -168,6 +186,8 @@ export const useGuideStore = create<GuideState>()(
       decideQuickTest: (decision) =>
         set((s) => (s.quickTest ? { quickTest: { ...s.quickTest, decision } } : s)),
       setClosingShown: (closingShown) => set({ closingShown }),
+      setOrphanSim: (orphanSim) => set({ orphanSim }),
+      clearOrphanSim: () => set({ orphanSim: null }),
       markExported: () => set({ exportedOnce: true }),
       markProviderEnabled: (id) =>
         set((s) => ({ enabledProviders: addOnce(s.enabledProviders, id) })),
@@ -201,8 +221,9 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
-      // `quickTest` was added within v1: a state saved without it rehydrates
-      // with the default (null), so no version bump is needed.
+      // `quickTest` and `orphanSim` were added within v1: a state saved
+      // without them rehydrates with the default (null), so no version bump
+      // is needed.
       version: 1,
       // Stored fields only; the persist merge fills in the rest.
       migrate: (persisted, version) => migrateGuideState(persisted, version) as GuideState,
@@ -216,6 +237,7 @@ export const useGuideStore = create<GuideState>()(
         declinedTours: state.declinedTours,
         tourProgress: state.tourProgress,
         quickTest: state.quickTest,
+        orphanSim: state.orphanSim,
       }),
     },
   ),

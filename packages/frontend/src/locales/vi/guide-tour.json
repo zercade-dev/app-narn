@@ -152,6 +152,10 @@
       "name": "Rà soát bản dịch bằng AI",
       "summary": "Xem nhanh cách nhờ AI kiểm tra bản dịch của bạn."
     },
+    "orphans": {
+      "name": "Mục mồ côi",
+      "summary": "Xem điều gì xảy ra với một mục không có trong tệp của bạn, bằng một mục mồ côi tập dượt mà hướng dẫn sẽ đưa trở lại."
+    },
     "startOver": "Bắt đầu lại từ đầu",
     "continue": "Tiếp tục từ chỗ đã dừng",
     "progress": "{{current}}/{{total}} bước",
@@ -374,6 +378,95 @@
       "title": "Để AI gợi ý thuật ngữ",
       "what": "Nhờ một nhà cung cấp AI tìm các thuật ngữ có thể có trong chuỗi của bạn.",
       "why": "Bạn xem lại các gợi ý và chỉ giữ những gì bạn muốn."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Mục mồ côi là gì",
+      "what": "Mục mồ côi là một mục không có trong tệp gần nhất bạn nhập bằng “Thay thế toàn bộ”.",
+      "why": "NARN giữ nó ở đây cùng bản dịch thay vì xóa, nên không có gì bị mất do vô tình."
+    },
+    "offer": {
+      "title": "Thử với một mục mồ côi tập dượt",
+      "what": "Hướng dẫn có thể biến một mục của bạn thành mồ côi trong chốc lát, rồi đưa nó trở lại. Không có gì bị mất: mục vẫn giữ bản dịch và trở về đúng chỗ.",
+      "why": "Thấy một mục mồ côi thật giúp bạn dùng thẻ này dễ hơn về sau. Hoặc để hướng dẫn chỉ giải thích."
+    },
+    "backup": {
+      "title": "Sao lưu trước",
+      "what": "Một bản sao lưu dự án được tạo trước khi tạo mục mồ côi tập dượt. Dù chọn thế nào cũng không mất gì: hướng dẫn sẽ đưa mục trở lại.",
+      "why": "Có bản sao lưu, bạn luôn có thể quay về đúng trạng thái này từ thẻ “Sao lưu”."
+    },
+    "simulating": {
+      "title": "Đang tạo mục mồ côi tập dượt",
+      "what": "Hướng dẫn nhập lại các mục của bạn, trừ một mục. Việc này mất một lát.",
+      "why": "Đây là điều xảy ra khi một mục biến mất khỏi tệp bạn nhập bằng “Thay thế toàn bộ”."
+    },
+    "practice-row": {
+      "title": "Mục mồ côi tập dượt của bạn",
+      "what": "Mục này giờ là mục mồ côi. Nó không còn hiện trong thẻ “Bản dịch”, và bản dịch của nó vẫn được giữ.",
+      "why": "Mục mồ côi xuất hiện ở đây sau một lần nhập “Thay thế toàn bộ”, để bạn quyết định xử lý từng mục."
+    },
+    "practice-options": {
+      "title": "Bạn có thể làm gì với mục mồ côi",
+      "what": "“Liên kết lại” chuyển bản dịch của nó sang mục khác, ví dụ một mục chỉ được diễn đạt lại. “Xóa” loại bỏ nó vĩnh viễn.",
+      "why": "Đừng dùng chúng với mục này: hướng dẫn sẽ đưa nó trở lại ở bước tiếp theo."
+    },
+    "recover": {
+      "title": "Đưa trở lại",
+      "what": "Nhấn “Đưa trở lại”, mục sẽ trở về đúng chỗ trong danh sách cùng bản dịch.",
+      "why": "Hướng dẫn nhập lại mục đó, giống như một mục quay lại khi tệp tiếp theo của bạn có nó."
+    },
+    "restore": {
+      "title": "Bản sao lưu của bạn",
+      "what": "Bản sao lưu tạo trước khi tập dượt nằm ở đây. “Khôi phục bản sao lưu” chỉ cho bạn nút “Khôi phục” của nó; có nhấn hay không là do bạn.",
+      "why": "Bạn không cần đến nó: mục đã trở lại. Chỉ khôi phục bản sao lưu khi có sự cố."
+    },
+    "done": {
+      "title": "Đó là mục mồ côi",
+      "what": "Mục mồ côi giữ các mục và bản dịch mà lần nhập gần nhất bỏ sót, cho đến khi bạn liên kết lại hoặc xóa chúng.",
+      "why": "Hãy xem thẻ này sau mỗi lần nhập “Thay thế toàn bộ”."
+    },
+    "explain-list": {
+      "title": "Danh sách mục mồ côi",
+      "what": "Mỗi mục mồ côi hiện văn bản nguồn và số bản dịch nó còn giữ.",
+      "why": "Mục có nhiều bản dịch nhất đứng đầu: làm lại chúng tốn công nhất."
+    },
+    "explain-options": {
+      "title": "Liên kết lại hoặc xóa",
+      "what": "“Liên kết lại” chuyển bản dịch của một mục mồ côi sang mục khác, ví dụ một mục chỉ được diễn đạt lại. “Xóa” loại bỏ nó vĩnh viễn.",
+      "why": "Liên kết lại khi văn bản vẫn còn ở dạng khác; xóa khi nó thật sự không còn."
+    },
+    "actions": {
+      "simulate": "Tạo mục mồ côi tập dượt",
+      "explainOnly": "Chỉ giải thích",
+      "backupFirst": "Sao lưu trước (khuyên dùng)",
+      "skipBackup": "Tiếp tục không sao lưu",
+      "recover": "Đưa trở lại",
+      "restoreBackup": "Khôi phục bản sao lưu",
+      "switchProject": "Chuyển dự án"
+    },
+    "notices": {
+      "alreadyRecovered": "Mục mồ côi tập dượt đã trở lại thẻ “Bản dịch”.",
+      "alreadyDeleted": "Mục mồ côi tập dượt đã bị xóa, nên hướng dẫn không thể đưa nó trở lại. Nếu đã sao lưu, bạn có thể khôi phục từ thẻ “Sao lưu”.",
+      "otherProject": "Một mục mồ côi tập dượt của hướng dẫn này vẫn còn ở dự án khác. Hãy chuyển sang dự án đó để đưa nó trở lại trước.",
+      "leftOut": "Mục mồ côi tập dượt vẫn ở thẻ “Mục mồ côi”. Nhấn “Đưa trở lại” ở đó để khôi phục nó."
+    },
+    "blocked": {
+      "noEntries": "Chưa có mục nào để tập dượt, nên hướng dẫn chỉ giải thích.",
+      "collaborator": "Chỉ chủ dự án mới quản lý được mục mồ côi, nên hướng dẫn chỉ giải thích.",
+      "sourcelessRows": "Một số mục không có văn bản nguồn, và việc nhập không thể dựng lại chúng chính xác. Hướng dẫn chỉ giải thích, nên không có gì thay đổi.",
+      "unsafeText": "Có văn bản nguồn chứa dấu ngoặc kép ngay trước dấu phẩy hoặc dấu xuống dòng, điều mà việc nhập không thể dựng lại chính xác. Hướng dẫn chỉ giải thích, nên không có gì thay đổi.",
+      "commaInSourceLabel": "Có nhãn nguồn chứa dấu phẩy hoặc khoảng trắng ở hai đầu, điều mà việc nhập không thể dựng lại chính xác. Hướng dẫn chỉ giải thích, nên không có gì thay đổi."
+    },
+    "errors": {
+      "backup": "Không tạo được bản sao lưu. Không có gì bị thay đổi.",
+      "simulate": "Không tạo được mục mồ côi tập dượt. Không có gì bị thay đổi.",
+      "recover": "Chưa đưa mục trở lại được. Mục vẫn an toàn trong thẻ “Mục mồ côi”; hãy thử lại.",
+      "load": "Không kiểm tra được mục mồ côi tập dượt. Nhấn “Đưa trở lại” để thử lại."
+    },
+    "banner": {
+      "text": "Đây là mục mồ côi tập dượt của phần hướng dẫn. Hãy đưa nó trở lại để nó quay về thẻ “Bản dịch” cùng bản dịch.",
+      "recovered": "Mục mồ côi tập dượt đã trở lại thẻ “Bản dịch”."
     }
   }
 }

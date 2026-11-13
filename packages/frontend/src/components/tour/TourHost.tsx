@@ -42,10 +42,14 @@ export function TourHost() {
   const facts = useGuideFacts();
   const cloudManaged = useVaultStore((s) => s.cloudManaged ?? false);
   const access = useProjectStore((s) => accessFor(s, s.activeProjectId));
+  const ctx = useMemo(() => ({ facts, access, cloudManaged }), [facts, access, cloudManaged]);
+  // A catalog tour with its own controller runs it in place of the default runner.
+  const Controller = activeTourId === null ? undefined : catalogTour(activeTourId)?.controller;
   const tour = useMemo(
-    () => tourFor(activeTourId, { facts, access, cloudManaged }),
-    [activeTourId, facts, access, cloudManaged],
+    () => (Controller ? undefined : tourFor(activeTourId, ctx)),
+    [Controller, activeTourId, ctx],
   );
+  if (Controller) return <Controller key={`${activeTourId}:${startSeq}`} {...ctx} />;
   if (!tour) return null;
   return <RunningTour key={`${tour.id}:${startSeq}`} tour={tour} facts={facts} />;
 }

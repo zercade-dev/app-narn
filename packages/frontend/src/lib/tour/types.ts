@@ -59,8 +59,11 @@ export interface TourStep {
   dim?: false;
   /** Opened when the step becomes current. */
   navigate?: { tab?: Tab; view?: ShellView };
-  /** Extra callout buttons. `labelKey` is in the `guide-tour` namespace. */
-  actions?: Array<{ labelKey: string; run: () => void; testId: string }>;
+  /**
+   * Extra callout buttons. `labelKey` is in the `guide-tour` namespace;
+   * `primary` marks the recommended choice.
+   */
+  actions?: Array<{ labelKey: string; run: () => void; testId: string; primary?: true }>;
   /** 1..MAJOR_STEP_COUNT for the first-run tour's "Step N of 5". */
   major?: number;
   /**

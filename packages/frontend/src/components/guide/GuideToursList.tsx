@@ -52,6 +52,8 @@ export function GuideToursList() {
   );
   const access = useProjectStore((s) => accessFor(s, activeProjectId));
   const tourProgress = useGuideStore((s) => s.tourProgress);
+  // The Orphans tour lists the steps it resumes in while a practice orphan is out.
+  useGuideStore((s) => s.orphanSim);
   const firstRunDismissed = useGuideStore((s) => s.firstRunDismissed);
   const firstRunFinished = useGuideStore((s) => s.firstRunFinished);
   /** The first-run action waiting on the Simple/Advanced question, if any. */

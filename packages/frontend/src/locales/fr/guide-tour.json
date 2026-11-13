@@ -152,6 +152,10 @@
       "name": "Révision IA de traduction",
       "summary": "Un aperçu rapide de la façon dont une IA contrôle vos traductions."
     },
+    "orphans": {
+      "name": "Orphelins",
+      "summary": "Voyez ce que devient une entrée absente de votre fichier, avec un orphelin d’essai que la visite remet en place."
+    },
     "startOver": "Recommencer depuis le début",
     "continue": "Reprendre là où je me suis arrêté",
     "progress": "{{current}} sur {{total}} étapes",
@@ -374,6 +378,95 @@
       "title": "Laisser l’IA proposer des termes",
       "what": "Demandez à un fournisseur d’IA de trouver les termes probables dans vos textes.",
       "why": "Vous relisez les suggestions et ne gardez que celles qui vous conviennent."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Qu’est-ce qu’un orphelin ?",
+      "what": "Un orphelin est une entrée absente du dernier fichier que vous avez importé en « Remplacement complet ».",
+      "why": "NARN la conserve ici avec ses traductions au lieu de la supprimer : rien ne se perd par accident."
+    },
+    "offer": {
+      "title": "Essayer avec un orphelin d’essai",
+      "what": "La visite peut transformer une de vos entrées en orphelin un instant, puis la remettre en place. Rien n’est perdu : l’entrée garde ses traductions et revient à sa place.",
+      "why": "Voir un vrai orphelin rend cet onglet plus simple à utiliser ensuite. Sinon, laissez la visite simplement expliquer."
+    },
+    "backup": {
+      "title": "D’abord une sauvegarde",
+      "what": "Une sauvegarde du projet est créée avant l’orphelin d’essai. Dans tous les cas rien n’est perdu : la visite remet l’entrée en place.",
+      "why": "Avec une sauvegarde, vous pouvez toujours revenir à cet état exact depuis l’onglet « Sauvegarde »."
+    },
+    "simulating": {
+      "title": "Création de l’orphelin d’essai",
+      "what": "La visite réimporte vos entrées sauf une. Cela prend un instant.",
+      "why": "C’est ce qui se passe quand une entrée disparaît d’un fichier importé en « Remplacement complet »."
+    },
+    "practice-row": {
+      "title": "Votre orphelin d’essai",
+      "what": "Cette entrée est maintenant un orphelin. Elle n’apparaît plus dans l’onglet « Traductions », et ses traductions sont conservées.",
+      "why": "Les orphelins apparaissent ici après un import en « Remplacement complet », pour que vous décidiez quoi faire de chacun."
+    },
+    "practice-options": {
+      "title": "Que faire d’un orphelin",
+      "what": "« Réaffecter » transfère ses traductions vers une autre entrée, par exemple une dont le texte a seulement été reformulé. « Supprimer » l’efface définitivement.",
+      "why": "N’y touchez pas pour celui-ci : la visite le remet en place à l’étape suivante."
+    },
+    "recover": {
+      "title": "Le remettre en place",
+      "what": "Cliquez sur « Remettre en place » et l’entrée retrouve sa place dans la liste, avec ses traductions.",
+      "why": "La visite la réimporte, comme une entrée revient quand votre prochain fichier la contient."
+    },
+    "restore": {
+      "title": "Votre sauvegarde",
+      "what": "La sauvegarde créée avant l’essai figure ici. « Restaurer la sauvegarde » vous montre son bouton « Restaurer » ; c’est à vous de décider de cliquer ou non.",
+      "why": "Vous n’en avez pas besoin : l’entrée est déjà revenue. Ne restaurez une sauvegarde qu’en cas de problème."
+    },
+    "done": {
+      "title": "Voilà pour les orphelins",
+      "what": "Les orphelins conservent les entrées et traductions que votre dernier import a laissées de côté, jusqu’à ce que vous les réaffectiez ou les supprimiez.",
+      "why": "Jetez un œil à cet onglet après chaque import en « Remplacement complet »."
+    },
+    "explain-list": {
+      "title": "La liste des orphelins",
+      "what": "Chaque orphelin affiche son texte source et le nombre de traductions qu’il conserve.",
+      "why": "Ceux qui ont le plus de traductions viennent en premier : ce sont les plus longs à refaire."
+    },
+    "explain-options": {
+      "title": "Réaffecter ou supprimer",
+      "what": "« Réaffecter » transfère les traductions d’un orphelin vers une autre entrée, par exemple une dont le texte a seulement été reformulé. « Supprimer » l’efface définitivement.",
+      "why": "Réaffectez quand le texte existe encore sous une autre forme ; supprimez quand il a vraiment disparu."
+    },
+    "actions": {
+      "simulate": "Créer un orphelin d’essai",
+      "explainOnly": "Expliquer seulement",
+      "backupFirst": "Sauvegarder d’abord (recommandé)",
+      "skipBackup": "Continuer sans sauvegarde",
+      "recover": "Remettre en place",
+      "restoreBackup": "Restaurer la sauvegarde",
+      "switchProject": "Changer de projet"
+    },
+    "notices": {
+      "alreadyRecovered": "L’orphelin d’essai est déjà de retour dans l’onglet « Traductions ».",
+      "alreadyDeleted": "L’orphelin d’essai a été supprimé, la visite ne peut donc pas le remettre en place. Si vous avez créé une sauvegarde, vous pouvez la restaurer depuis l’onglet « Sauvegarde ».",
+      "otherProject": "Un orphelin d’essai de cette visite se trouve encore dans un autre projet. Passez à ce projet pour le remettre en place d’abord.",
+      "leftOut": "L’orphelin d’essai est toujours dans l’onglet « Orphelins ». Cliquez sur « Remettre en place » pour le récupérer."
+    },
+    "blocked": {
+      "noEntries": "Il n’y a pas encore d’entrée pour s’exercer, la visite se contente donc d’expliquer.",
+      "collaborator": "Seul le propriétaire du projet peut gérer les orphelins, la visite se contente donc d’expliquer.",
+      "sourcelessRows": "Certaines entrées n’ont pas de texte source et un import ne peut pas les reconstruire à l’identique. La visite se contente d’expliquer, rien ne change.",
+      "unsafeText": "Un texte source contient un guillemet juste avant une virgule ou un saut de ligne, ce qu’un import ne peut pas reconstruire à l’identique. La visite se contente d’expliquer, rien ne change.",
+      "commaInSourceLabel": "Une étiquette d’origine contient une virgule ou des espaces aux extrémités, ce qu’un import ne peut pas reconstruire à l’identique. La visite se contente d’expliquer, rien ne change."
+    },
+    "errors": {
+      "backup": "La sauvegarde n’a pas pu être créée. Rien n’a été modifié.",
+      "simulate": "L’orphelin d’essai n’a pas pu être créé. Rien n’a été modifié.",
+      "recover": "L’entrée n’a pas encore pu être remise en place. Elle est en sécurité dans l’onglet « Orphelins » ; réessayez.",
+      "load": "Impossible de vérifier l’orphelin d’essai. Cliquez sur « Remettre en place » pour réessayer."
+    },
+    "banner": {
+      "text": "Voici l’orphelin d’essai de la visite guidée. Remettez-le en place pour qu’il revienne, avec ses traductions, dans l’onglet « Traductions ».",
+      "recovered": "L’orphelin d’essai est de retour dans l’onglet « Traductions »."
     }
   }
 }

@@ -1,65 +1,20 @@
 /**
- * Server-only CSV helpers for the game's dialect. The parser itself
- * (`parseGameCSV`/`ParsedGameCSV`) lives in `@zercade-dev/narn-shared` so the
- * frontend can run the identical dialect parser client-side (e.g. the
- * pre-import raw-newline check in DataTab.tsx) without duplicating it. This
- * file re-exports it and keeps the serialize/round-trip-safety helpers below,
- * which depend on the server-only `escapeFormulaGuard`.
+ * Server-only CSV helpers for the game's dialect. The parser, the serializer
+ * and the round-trip check live in `@zercade-dev/narn-shared` so the frontend
+ * runs the identical dialect rules client-side (DataTab's pre-import checks,
+ * the orphans tour's import file). This file re-exports them and keeps the
+ * export path's unsafe-cell scan below.
  */
 
-import { escapeForReimport, escapeFormulaGuard } from './formula-guard.js';
+import { isRoundTripUnsafe } from '@zercade-dev/narn-shared';
 
-export { parseGameCSV, type ParsedGameCSV } from '@zercade-dev/narn-shared';
-
-/**
- * - `full`: apostrophe before any formula-trigger cell, safe to open in a spreadsheet.
- * - `reimport-safe`: only text that genuinely starts with apostrophes and a
- *   trigger gets one, so the main-text import strip restores it.
- * - `off`: cells are written exactly as stored.
- */
-export type FormulaGuardMode = 'full' | 'reimport-safe' | 'off';
-
-const GUARDS: Record<FormulaGuardMode, (value: string) => string> = {
-  full: escapeFormulaGuard,
-  'reimport-safe': escapeForReimport,
-  off: (value) => value,
-};
-
-/**
- * Serializes rows to game-dialect CSV: every cell (headers included) wrapped
- * in exactly one pair of double quotes, inner quotes emitted literally
- * (no RFC doubling), rows joined with CRLF. `formulaGuard` picks what each cell
- * gets: see {@link FormulaGuardMode}.
- */
-export function serializeGameCSV(
-  headers: string[],
-  rows: Record<string, string>[],
-  options: { formulaGuard?: FormulaGuardMode } = {},
-): string {
-  const guard = GUARDS[options.formulaGuard ?? 'full'];
-  const cell = (value: string): string => `"${guard(value)}"`;
-  const lines: string[] = [headers.map(cell).join(',')];
-  for (const row of rows) {
-    lines.push(headers.map((h) => cell(row[h] ?? '')).join(','));
-  }
-  return lines.join('\r\n');
-}
-
-/**
- * A cell value is round-trip-unsafe when it contains a `"` immediately followed
- * (modulo spaces/tabs) by a `,` or a line break — the exact sequence the
- * shared parser's cell-closing rule treats as a cell boundary (see the file
- * header in `@zercade-dev/narn-shared`'s `game-csv.ts`). Such content (e.g. a
- * JSON array `["a","b"]` or a leaked LLM payload) serializes fine but
- * mis-splits on re-import, shifting every following column. A trailing `"` at
- * the cell's end is safe (it round-trips), so only an *internal* quote+delimiter
- * is flagged.
- */
-const ROUNDTRIP_UNSAFE = /"[ \t]*[\r\n,]/;
-
-export function isRoundTripUnsafe(value: string): boolean {
-  return ROUNDTRIP_UNSAFE.test(value);
-}
+export {
+  parseGameCSV,
+  serializeGameCSV,
+  isRoundTripUnsafe,
+  type ParsedGameCSV,
+  type FormulaGuardMode,
+} from '@zercade-dev/narn-shared';
 
 /**
  * Scans serialized rows for cells that will not survive a re-import (see

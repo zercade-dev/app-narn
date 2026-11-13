@@ -84,7 +84,7 @@ export function TourCallout({
           {step.actions?.map((a) => (
             <Button
               key={a.testId}
-              variant="outline"
+              variant={a.primary ? 'default' : 'outline'}
               size="sm"
               data-testid={a.testId}
               onClick={a.run}

@@ -152,6 +152,10 @@
       "name": "AI review of translations",
       "summary": "A short look at having an AI check your translations."
     },
+    "orphans": {
+      "name": "Orphans",
+      "summary": "See what happens to an entry your file leaves out, with a practice orphan the tour puts back."
+    },
     "startOver": "Start from the beginning",
     "continue": "Continue where I left off",
     "progress": "{{current}} of {{total}} steps",
@@ -374,6 +378,95 @@
       "title": "Let AI suggest terms",
       "what": "Ask an AI provider to find likely terms in your strings.",
       "why": "You review the suggestions and keep only the ones you want."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "What an orphan is",
+      "what": "An orphan is an entry that is missing from the last file you imported with Full replace.",
+      "why": "NARN keeps it here with its translations instead of deleting it, so nothing is lost by accident."
+    },
+    "offer": {
+      "title": "Try it with a practice orphan",
+      "what": "The tour can turn one of your entries into an orphan for a moment, then put it back. Nothing is lost: the entry keeps its translations and returns to its place.",
+      "why": "A real orphan makes this tab easier to use later. Or let the tour just explain."
+    },
+    "backup": {
+      "title": "Back up first",
+      "what": "A backup of the project is taken before the practice orphan is created. Nothing is lost either way: the tour puts the entry back.",
+      "why": "With a backup you can always return to this exact state from the Backup tab."
+    },
+    "simulating": {
+      "title": "Creating the practice orphan",
+      "what": "The tour imports your entries again without one of them. This takes a moment.",
+      "why": "This is what happens when an entry disappears from a file you import with Full replace."
+    },
+    "practice-row": {
+      "title": "Your practice orphan",
+      "what": "This entry is now an orphan. It no longer shows on the Translations tab, and its translations are kept.",
+      "why": "Orphans appear here after a Full replace import, so you can decide what to do with each one."
+    },
+    "practice-options": {
+      "title": "What you can do with an orphan",
+      "what": "Relink moves its translations onto another entry, for example one whose text was only reworded. Delete removes it for good.",
+      "why": "Leave them alone for this one: the tour puts it back in the next step."
+    },
+    "recover": {
+      "title": "Put it back",
+      "what": "Press “Put it back” and the entry returns to its place in the list, with its translations.",
+      "why": "The tour imports it again, the same way an entry comes back when your next file includes it."
+    },
+    "restore": {
+      "title": "Your backup",
+      "what": "The backup taken before the practice is listed here. “Restore the backup” shows its Restore button; whether to press it is up to you.",
+      "why": "You don't need it: the entry is already back. Restore a backup only when something went wrong."
+    },
+    "done": {
+      "title": "That's orphans",
+      "what": "Orphans keep the entries and translations your last import left out, until you relink or delete them.",
+      "why": "Have a look at this tab after each Full replace import."
+    },
+    "explain-list": {
+      "title": "The orphans list",
+      "what": "Each orphan shows its source text and how many translations it keeps.",
+      "why": "The ones with the most translations come first: they are the most work to redo."
+    },
+    "explain-options": {
+      "title": "Relink or delete",
+      "what": "Relink moves an orphan's translations onto another entry, for example one whose text was only reworded. Delete removes it for good.",
+      "why": "Relink when the text still exists in another form; delete when it is really gone."
+    },
+    "actions": {
+      "simulate": "Create a practice orphan",
+      "explainOnly": "Just explain",
+      "backupFirst": "Back up first (recommended)",
+      "skipBackup": "Continue without a backup",
+      "recover": "Put it back",
+      "restoreBackup": "Restore the backup",
+      "switchProject": "Switch project"
+    },
+    "notices": {
+      "alreadyRecovered": "The practice orphan is already back on the Translations tab.",
+      "alreadyDeleted": "The practice orphan was deleted, so the tour cannot put it back. If you took a backup, you can restore it from the Backup tab.",
+      "otherProject": "A practice orphan from this tour is still in another project. Switch to that project to put it back first.",
+      "leftOut": "The practice orphan is still in the Orphans tab. Press “Put it back” there to return it."
+    },
+    "blocked": {
+      "noEntries": "There is no entry to practice with yet, so the tour only explains.",
+      "collaborator": "Only the project owner can manage orphans, so the tour only explains.",
+      "sourcelessRows": "Some entries have no source text, and an import cannot rebuild them exactly. The tour only explains, so nothing changes.",
+      "unsafeText": "Some source text has a quote right before a comma or line break, which an import cannot rebuild exactly. The tour only explains, so nothing changes.",
+      "commaInSourceLabel": "A source label has a comma or spaces at its ends, which an import cannot rebuild exactly. The tour only explains, so nothing changes."
+    },
+    "errors": {
+      "backup": "The backup could not be created. Nothing was changed.",
+      "simulate": "The practice orphan could not be created. Nothing was changed.",
+      "recover": "The entry could not be put back yet. It is safe in the Orphans tab; try again.",
+      "load": "Could not check on the practice orphan. Press “Put it back” to try again."
+    },
+    "banner": {
+      "text": "This is the guided tour's practice orphan. Put it back to return it, with its translations, to the Translations tab.",
+      "recovered": "The practice orphan is back on the Translations tab."
     }
   }
 }

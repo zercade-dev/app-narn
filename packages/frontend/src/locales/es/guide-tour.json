@@ -152,6 +152,10 @@
       "name": "Revisión IA de traducción",
       "summary": "Un vistazo rápido a cómo una IA revisa tus traducciones."
     },
+    "orphans": {
+      "name": "Huérfanas",
+      "summary": "Mira qué le pasa a una entrada que falta en tu archivo, con una huérfana de práctica que el recorrido devuelve a su sitio."
+    },
     "startOver": "Empezar desde el principio",
     "continue": "Seguir donde lo dejé",
     "progress": "{{current}} de {{total}} pasos",
@@ -374,6 +378,95 @@
       "title": "Deja que la IA sugiera términos",
       "what": "Pide a un proveedor de IA que encuentre términos probables en tus textos.",
       "why": "Tú revisas las sugerencias y te quedas solo con las que quieras."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Qué es una huérfana",
+      "what": "Una huérfana es una entrada que falta en el último archivo que importaste con «Reemplazo completo».",
+      "why": "NARN la guarda aquí con sus traducciones en vez de borrarla, así nada se pierde por accidente."
+    },
+    "offer": {
+      "title": "Pruébalo con una huérfana de práctica",
+      "what": "El recorrido puede convertir una de tus entradas en huérfana un momento y luego devolverla. No se pierde nada: la entrada conserva sus traducciones y vuelve a su sitio.",
+      "why": "Ver una huérfana real hace que esta pestaña sea más fácil de usar después. O deja que el recorrido solo te lo explique."
+    },
+    "backup": {
+      "title": "Primero, una copia de seguridad",
+      "what": "Antes de crear la huérfana de práctica se hace una copia de seguridad del proyecto. En cualquier caso no se pierde nada: el recorrido devuelve la entrada.",
+      "why": "Con una copia de seguridad siempre puedes volver a este mismo estado desde la pestaña «Copia de seguridad»."
+    },
+    "simulating": {
+      "title": "Creando la huérfana de práctica",
+      "what": "El recorrido vuelve a importar tus entradas sin una de ellas. Tarda un momento.",
+      "why": "Es lo que ocurre cuando una entrada desaparece de un archivo que importas con «Reemplazo completo»."
+    },
+    "practice-row": {
+      "title": "Tu huérfana de práctica",
+      "what": "Esta entrada ahora es huérfana. Ya no aparece en la pestaña «Traducciones» y conserva sus traducciones.",
+      "why": "Las huérfanas aparecen aquí tras una importación con «Reemplazo completo», para que decidas qué hacer con cada una."
+    },
+    "practice-options": {
+      "title": "Qué puedes hacer con una huérfana",
+      "what": "«Reasignar» pasa sus traducciones a otra entrada, por ejemplo una cuyo texto solo se reformuló. «Eliminar» la borra para siempre.",
+      "why": "No los uses con esta: el recorrido la devuelve en el siguiente paso."
+    },
+    "recover": {
+      "title": "Devolverla",
+      "what": "Pulsa «Devolver» y la entrada vuelve a su sitio en la lista, con sus traducciones.",
+      "why": "El recorrido la importa de nuevo, igual que vuelve una entrada cuando tu siguiente archivo la incluye."
+    },
+    "restore": {
+      "title": "Tu copia de seguridad",
+      "what": "Aquí aparece la copia hecha antes de la práctica. «Restaurar la copia» te señala su botón «Restaurar»; pulsarlo o no lo decides tú.",
+      "why": "No la necesitas: la entrada ya volvió. Restaura una copia solo si algo salió mal."
+    },
+    "done": {
+      "title": "Eso es todo sobre las huérfanas",
+      "what": "Las huérfanas guardan las entradas y traducciones que tu última importación dejó fuera, hasta que las reasignes o elimines.",
+      "why": "Echa un vistazo a esta pestaña después de cada importación con «Reemplazo completo»."
+    },
+    "explain-list": {
+      "title": "La lista de huérfanas",
+      "what": "Cada huérfana muestra su texto de origen y cuántas traducciones conserva.",
+      "why": "Las que tienen más traducciones van primero: son las que más cuesta rehacer."
+    },
+    "explain-options": {
+      "title": "Reasignar o eliminar",
+      "what": "«Reasignar» pasa las traducciones de una huérfana a otra entrada, por ejemplo una cuyo texto solo se reformuló. «Eliminar» la borra para siempre.",
+      "why": "Reasigna cuando el texto sigue existiendo de otra forma; elimina cuando de verdad ya no está."
+    },
+    "actions": {
+      "simulate": "Crear una huérfana de práctica",
+      "explainOnly": "Solo explicar",
+      "backupFirst": "Copia de seguridad primero (recomendado)",
+      "skipBackup": "Seguir sin copia de seguridad",
+      "recover": "Devolver",
+      "restoreBackup": "Restaurar la copia",
+      "switchProject": "Cambiar de proyecto"
+    },
+    "notices": {
+      "alreadyRecovered": "La huérfana de práctica ya está de vuelta en la pestaña «Traducciones».",
+      "alreadyDeleted": "La huérfana de práctica se eliminó, así que el recorrido no puede devolverla. Si hiciste una copia de seguridad, puedes restaurarla desde la pestaña «Copia de seguridad».",
+      "otherProject": "Una huérfana de práctica de este recorrido sigue en otro proyecto. Cambia a ese proyecto para devolverla primero.",
+      "leftOut": "La huérfana de práctica sigue en la pestaña «Huérfanas». Pulsa «Devolver» allí para recuperarla."
+    },
+    "blocked": {
+      "noEntries": "Todavía no hay ninguna entrada para practicar, así que el recorrido solo explica.",
+      "collaborator": "Solo el propietario del proyecto puede gestionar las huérfanas, así que el recorrido solo explica.",
+      "sourcelessRows": "Algunas entradas no tienen texto de origen y una importación no puede reconstruirlas con exactitud. El recorrido solo explica, así que nada cambia.",
+      "unsafeText": "Algún texto de origen tiene una comilla justo antes de una coma o un salto de línea, algo que una importación no puede reconstruir con exactitud. El recorrido solo explica, así que nada cambia.",
+      "commaInSourceLabel": "Una etiqueta de origen tiene una coma o espacios en los extremos, algo que una importación no puede reconstruir con exactitud. El recorrido solo explica, así que nada cambia."
+    },
+    "errors": {
+      "backup": "No se pudo crear la copia de seguridad. No se cambió nada.",
+      "simulate": "No se pudo crear la huérfana de práctica. No se cambió nada.",
+      "recover": "Aún no se pudo devolver la entrada. Está a salvo en la pestaña «Huérfanas»; inténtalo de nuevo.",
+      "load": "No se pudo comprobar la huérfana de práctica. Pulsa «Devolver» para intentarlo de nuevo."
+    },
+    "banner": {
+      "text": "Esta es la huérfana de práctica del recorrido guiado. Devuélvela para que vuelva, con sus traducciones, a la pestaña «Traducciones».",
+      "recovered": "La huérfana de práctica está de vuelta en la pestaña «Traducciones»."
     }
   }
 }
