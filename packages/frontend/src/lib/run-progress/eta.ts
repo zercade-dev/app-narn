@@ -41,7 +41,8 @@ export function estimateEta(a: {
   if (inWindow.length < 2) return { kind: 'estimating' };
   const first = inWindow[0];
   const last = inWindow[inWindow.length - 1];
-  const spanMs = last.at - first.at;
+  // Measured to `now`, not to the last sample, so a stall dilutes the rate.
+  const spanMs = a.now - first.at;
   const gained = last.done - first.done;
   if (spanMs < ETA_MIN_SPAN_MS || gained <= 0) return { kind: 'estimating' };
 

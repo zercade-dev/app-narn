@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { create } from 'zustand';
 import { RunStatusCode, type RunStatus } from '@zercade-dev/narn-shared';
 import { useRunStore } from './run-store.js';
@@ -80,36 +80,74 @@ useRunStore.subscribe((state) => {
 });
 
 /**
- * Per-run cache so every card showing one run computes the ETA once a second
- * and shows the same value (smoothing is applied once per tick, not per card).
+ * One module-level 1 s ticker shared by every hook. Each tick takes the clock
+ * once and computes every in-flight run's ETA once (smoothing applied once per
+ * tick), so any number of mounted cards show identical elapsed and ETA text.
+ * It runs only while something is subscribed.
  */
-const etaCache = new Map<string, { at: number; waiting: boolean; value: Eta }>();
-
-function etaFor(run: RunStatus, now: number): Eta {
-  const hit = etaCache.get(run.runId);
-  const waiting = isRunWaiting(run);
-  if (hit && hit.waiting === waiting && Math.abs(now - hit.at) < 900) return hit.value;
-  const { samples, eta, setEta } = useRunProgressStore.getState();
-  const value = estimateEta({
-    samples: samples[run.runId] ?? [],
-    total: run.total,
-    startedAt: run.startedAt,
-    now,
-    waiting,
-    previous: eta[run.runId],
-  });
-  setEta(run.runId, value.kind === 'eta' ? value.seconds : undefined);
-  etaCache.set(run.runId, { at: now, waiting, value });
-  return value;
+interface Tick {
+  now: number;
+  etas: Record<string, Eta>;
 }
 
-function useNow(intervalMs: number): number {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), intervalMs);
-    return () => clearInterval(id);
-  }, [intervalMs]);
-  return now;
+let tickSnapshot: Tick | null = null;
+let tickTimer: ReturnType<typeof setInterval> | undefined;
+const tickListeners = new Set<() => void>();
+
+function computeTick(): Tick {
+  const now = Date.now();
+  const { samples, eta } = useRunProgressStore.getState();
+  const etas: Record<string, Eta> = {};
+  const nextEta = { ...eta };
+  for (const run of useRunStore.getState().runs) {
+    if (run.finishedAt !== undefined) continue;
+    const value = estimateEta({
+      samples: samples[run.runId] ?? [],
+      total: run.total,
+      startedAt: run.startedAt,
+      now,
+      waiting: isRunWaiting(run),
+      previous: eta[run.runId],
+    });
+    etas[run.runId] = value;
+    if (value.kind === 'eta') nextEta[run.runId] = value.seconds;
+    else delete nextEta[run.runId];
+  }
+  useRunProgressStore.setState({ eta: nextEta });
+  return { now, etas };
+}
+
+function subscribeTick(listener: () => void): () => void {
+  tickListeners.add(listener);
+  if (tickListeners.size === 1) {
+    tickSnapshot = computeTick();
+    tickTimer = setInterval(() => {
+      tickSnapshot = computeTick();
+      for (const l of [...tickListeners]) l();
+    }, 1000);
+  }
+  return () => {
+    tickListeners.delete(listener);
+    if (tickListeners.size === 0) {
+      clearInterval(tickTimer);
+      tickTimer = undefined;
+      tickSnapshot = null;
+    }
+  };
+}
+
+function getTick(): Tick {
+  tickSnapshot ??= computeTick();
+  return tickSnapshot;
+}
+
+function useTick(): Tick {
+  return useSyncExternalStore(subscribeTick, getTick);
+}
+
+/** Before a run's first tick (just appeared): waiting is known at once, anything else is estimating. */
+function fallbackEta(run: RunStatus): Eta {
+  return isRunWaiting(run) ? { kind: 'waiting' } : { kind: 'estimating' };
 }
 
 export interface RunProgress {
@@ -124,14 +162,14 @@ export interface RunProgress {
 /** Live progress of one run, re-evaluated on a 1 s clock. */
 export function useRunProgress(runId: string): RunProgress | null {
   const run = useRunStore((s) => s.runs.find((r) => r.runId === runId));
-  const now = useNow(1000);
+  const { now, etas } = useTick();
   if (!run) return null;
   const ended = run.finishedAt !== undefined;
   return {
     run,
     done: settled(run),
     elapsedMs: Math.max(0, (run.finishedAt ?? now) - run.startedAt),
-    eta: ended ? { kind: 'estimating' } : etaFor(run, now),
+    eta: ended ? { kind: 'estimating' } : (etas[run.runId] ?? fallbackEta(run)),
     now,
   };
 }
@@ -141,7 +179,7 @@ const ACTIVE = new Set([RunStatusCode.Running, RunStatusCode.Pending, RunStatusC
 /** Run ids to show a progress card for: in flight, or ended less than 5 s ago. */
 export function useActiveRunCards(projectId: string | null): string[] {
   const runs = useRunStore((s) => s.runs);
-  const now = useNow(1000);
+  const { now } = useTick();
   const [stable, setStable] = useState<string[]>([]);
   const ids =
     projectId === null

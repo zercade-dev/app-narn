@@ -72,7 +72,9 @@ export function RunProgressCard({
         {run.failed > 0 && (
           <span className="text-status-fail">{t('progress.failed', { count: run.failed })}</span>
         )}
-        <span>{t('progress.elapsed', { time: formatElapsed(elapsedMs) })}</span>
+        <span data-testid="run-progress-elapsed">
+          {t('progress.elapsed', { time: formatElapsed(elapsedMs) })}
+        </span>
         {etaText !== null && <span data-testid="run-progress-eta">{etaText}</span>}
         {ended && outcomeKey && (
           <span data-testid="run-progress-outcome" className="font-medium text-foreground">
