@@ -68,5 +68,20 @@
     "queued": "{{type}}: в очереди, позиция {{position}}",
     "queuedNoPosition": "{{type}}: в очереди",
     "starting": "{{type}}: начинается"
+  },
+  "progress": {
+    "counts": "{{done}} из {{total}}",
+    "failed": "не удалось: {{count}}",
+    "elapsed": "прошло {{time}}",
+    "estimating": "оценка времени…",
+    "waiting": "ожидание возобновления",
+    "etaUnderMinute": "осталось меньше минуты",
+    "etaMinutes": "осталось около {{count}} мин",
+    "etaHours": "осталось около {{hours}} ч {{minutes}} мин",
+    "outcome": {
+      "completed": "Завершён",
+      "failed": "Не удался",
+      "cancelled": "Отменён"
+    }
   }
 }

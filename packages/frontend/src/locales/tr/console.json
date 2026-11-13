@@ -56,5 +56,20 @@
     "queued": "{{type}}: sırada, konum {{position}}",
     "queuedNoPosition": "{{type}}: sırada",
     "starting": "{{type}}: başlatılıyor"
+  },
+  "progress": {
+    "counts": "{{done}}/{{total}}",
+    "failed": "{{count}} başarısız",
+    "elapsed": "{{time}} geçti",
+    "estimating": "tahmin ediliyor…",
+    "waiting": "devam etmek için bekliyor",
+    "etaUnderMinute": "bir dakikadan az kaldı",
+    "etaMinutes": "yaklaşık {{count}} dk kaldı",
+    "etaHours": "yaklaşık {{hours}} sa {{minutes}} dk kaldı",
+    "outcome": {
+      "completed": "Tamamlandı",
+      "failed": "Başarısız",
+      "cancelled": "İptal edildi"
+    }
   }
 }

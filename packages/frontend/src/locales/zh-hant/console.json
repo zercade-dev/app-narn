@@ -50,5 +50,20 @@
     "queued": "{{type}}：排隊中，第 {{position}} 位",
     "queuedNoPosition": "{{type}}：排隊中",
     "starting": "{{type}}：正在啟動"
+  },
+  "progress": {
+    "counts": "{{done}}/{{total}}",
+    "failed": "{{count}} 項失敗",
+    "elapsed": "已用時 {{time}}",
+    "estimating": "正在估算…",
+    "waiting": "等待繼續",
+    "etaUnderMinute": "剩餘不到一分鐘",
+    "etaMinutes": "約剩 {{count}} 分鐘",
+    "etaHours": "約剩 {{hours}} 小時 {{minutes}} 分鐘",
+    "outcome": {
+      "completed": "已完成",
+      "failed": "失敗",
+      "cancelled": "已取消"
+    }
   }
 }

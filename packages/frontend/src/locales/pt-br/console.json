@@ -56,5 +56,20 @@
     "queued": "{{type}}: na fila, posição {{position}}",
     "queuedNoPosition": "{{type}}: na fila",
     "starting": "{{type}}: iniciando"
+  },
+  "progress": {
+    "counts": "{{done}} de {{total}}",
+    "failed": "{{count}} com falha",
+    "elapsed": "{{time}} decorridos",
+    "estimating": "estimando…",
+    "waiting": "aguardando para retomar",
+    "etaUnderMinute": "menos de um minuto restante",
+    "etaMinutes": "cerca de {{count}} min restantes",
+    "etaHours": "cerca de {{hours}} h {{minutes}} min restantes",
+    "outcome": {
+      "completed": "Concluída",
+      "failed": "Falhou",
+      "cancelled": "Cancelada"
+    }
   }
 }

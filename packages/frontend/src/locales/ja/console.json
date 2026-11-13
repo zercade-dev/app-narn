@@ -50,5 +50,20 @@
     "queued": "{{type}}：待機中（{{position}}番目）",
     "queuedNoPosition": "{{type}}：待機中",
     "starting": "{{type}}：開始しています"
+  },
+  "progress": {
+    "counts": "{{done}}/{{total}}",
+    "failed": "{{count}} 件失敗",
+    "elapsed": "経過 {{time}}",
+    "estimating": "見積もり中…",
+    "waiting": "再開を待機中",
+    "etaUnderMinute": "残り1分未満",
+    "etaMinutes": "残り約 {{count}} 分",
+    "etaHours": "残り約 {{hours}} 時間 {{minutes}} 分",
+    "outcome": {
+      "completed": "完了",
+      "failed": "失敗",
+      "cancelled": "キャンセル済み"
+    }
   }
 }

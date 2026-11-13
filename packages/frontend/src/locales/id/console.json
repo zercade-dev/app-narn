@@ -50,5 +50,20 @@
     "queued": "{{type}}: dalam antrean, urutan ke-{{position}}",
     "queuedNoPosition": "{{type}}: dalam antrean",
     "starting": "{{type}}: sedang dimulai"
+  },
+  "progress": {
+    "counts": "{{done}} dari {{total}}",
+    "failed": "{{count}} gagal",
+    "elapsed": "{{time}} berlalu",
+    "estimating": "memperkirakan…",
+    "waiting": "menunggu untuk dilanjutkan",
+    "etaUnderMinute": "kurang dari satu menit lagi",
+    "etaMinutes": "sekitar {{count}} mnt lagi",
+    "etaHours": "sekitar {{hours}} j {{minutes}} mnt lagi",
+    "outcome": {
+      "completed": "Selesai",
+      "failed": "Gagal",
+      "cancelled": "Dibatalkan"
+    }
   }
 }

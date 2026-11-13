@@ -50,5 +50,20 @@
     "queued": "{{type}}: đang xếp hàng, vị trí {{position}}",
     "queuedNoPosition": "{{type}}: đang xếp hàng",
     "starting": "{{type}}: đang bắt đầu"
+  },
+  "progress": {
+    "counts": "{{done}}/{{total}}",
+    "failed": "{{count}} thất bại",
+    "elapsed": "đã trôi qua {{time}}",
+    "estimating": "đang ước tính…",
+    "waiting": "đang chờ tiếp tục",
+    "etaUnderMinute": "còn chưa đến một phút",
+    "etaMinutes": "còn khoảng {{count}} phút",
+    "etaHours": "còn khoảng {{hours}} giờ {{minutes}} phút",
+    "outcome": {
+      "completed": "Hoàn tất",
+      "failed": "Thất bại",
+      "cancelled": "Đã hủy"
+    }
   }
 }

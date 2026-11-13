@@ -56,5 +56,20 @@
     "queued": "{{type}} in Warteschlange, Platz {{position}}",
     "queuedNoPosition": "{{type}} in Warteschlange",
     "starting": "{{type}} wird gestartet"
+  },
+  "progress": {
+    "counts": "{{done}} von {{total}}",
+    "failed": "{{count}} fehlgeschlagen",
+    "elapsed": "{{time}} vergangen",
+    "estimating": "wird geschätzt …",
+    "waiting": "wartet auf Fortsetzung",
+    "etaUnderMinute": "weniger als eine Minute übrig",
+    "etaMinutes": "noch etwa {{count}} Min.",
+    "etaHours": "noch etwa {{hours}} Std. {{minutes}} Min.",
+    "outcome": {
+      "completed": "Abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "cancelled": "Abgebrochen"
+    }
   }
 }
