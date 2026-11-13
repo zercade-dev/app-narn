@@ -36,6 +36,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 
 interface VaultEditorDialogProps {
   open: boolean;
@@ -66,6 +67,8 @@ export function VaultEditorDialog({
   focusKey,
 }: Readonly<VaultEditorDialogProps>) {
   const { t } = useTranslation('vault');
+  // The guide's Back from its paste step: closed as Cancel would.
+  useCloseOnGuideBack(open, 'vault-editor-value', () => onOpenChange(false));
   const keys = useVaultStore((s) => s.keys);
   const loading = useVaultStore((s) => s.loading);
   const updateCredentials = useVaultStore((s) => s.updateCredentials);

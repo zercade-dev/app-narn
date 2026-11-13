@@ -502,6 +502,28 @@ export function StringTable() {
     setPrevPageReset({ entriesLength: entries.length, pageSize });
     setPage(1);
   }
+  // An entry to keep on screen (the guide's quick test): open its page, on
+  // arrival and again whenever the list or the page size changes. Paging by
+  // hand in between is left alone.
+  const revealEntryId = useStringStore((s) => s.revealEntryId) ?? null;
+  const [revealed, setRevealed] = useState<{
+    id: string | null;
+    entriesLength: number;
+    pageSize: number;
+  }>({ id: null, entriesLength: -1, pageSize });
+  if (
+    revealEntryId !== null &&
+    (revealed.id !== revealEntryId ||
+      revealed.entriesLength !== entries.length ||
+      revealed.pageSize !== pageSize)
+  ) {
+    setRevealed({ id: revealEntryId, entriesLength: entries.length, pageSize });
+    const at = entries.findIndex((e) => e.id === revealEntryId);
+    if (at >= 0) setPage(Math.floor(at / pageSize) + 1);
+  } else if (revealEntryId === null && revealed.id !== null) {
+    // Released: the same entry asked for again later is shown again.
+    setRevealed({ id: null, entriesLength: -1, pageSize });
+  }
 
   // Start/stop polling while a batch run is in-flight. The shared poller is a
   // SINGLE global interval (see run-store.ts), so an unconditional `stopPolling()`

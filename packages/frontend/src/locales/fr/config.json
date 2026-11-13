@@ -518,5 +518,32 @@
   "templateImportFailed": "Échec de l'import du modèle : {{message}}",
   "templateDeleted": "Modèle « {{name}} » supprimé.",
   "templateDeleteFailed": "Échec de la suppression du modèle : {{message}}",
-  "templateExportFailed": "Échec de l'export du modèle : {{message}}"
+  "templateExportFailed": "Échec de l'export du modèle : {{message}}",
+  "providerCard": {
+    "title": "Fournisseur de traduction",
+    "scope": "Ce projet. Les nouveaux projets que vous créez utilisent le même.",
+    "scopeCollab": "Votre propre choix, utilisé dans chaque projet partagé avec vous.",
+    "freeway": "NARN Freeway (gratuit)",
+    "freewayHint": "Choisit un modèle gratuit adapté à chaque langue, avec les clés gratuites de votre coffre.",
+    "noFreeKey": "Aucune clé gratuite dans votre coffre pour l’instant. NARN Freeway en a besoin d’au moins une.",
+    "addFreeKey": "Ajouter une clé gratuite",
+    "own": "Mon propre fournisseur",
+    "ownPlaceholder": "Choisir un fournisseur",
+    "freeOnlyOption": "{{provider}} (seul, sans le pool Freeway)",
+    "keySaved": "Clé enregistrée",
+    "noKey": "Aucune clé",
+    "keyMissing": "Aucune clé {{provider}} dans votre coffre pour l’instant.",
+    "vaultLocked": "Déverrouillez votre coffre pour vérifier la clé.",
+    "addKey": "Ajouter la clé",
+    "paidNote": "Facturé sur votre compte {{provider}}.",
+    "freeOnlyNote": "Seul {{provider}} traduit, sans les autres modèles gratuits du pool NARN Freeway.",
+    "pendingNote": "{{provider}} sera utilisé dès que sa clé sera enregistrée. D’ici là, NARN Freeway traduit.",
+    "pendingNoteOwn": "{{provider}} sera utilisé dès que sa clé sera enregistrée. D’ici là, {{current}} traduit.",
+    "customRouting": "Ce projet utilise un routage personnalisé configuré en mode Avancé, il n’est donc pas modifié ici.",
+    "openAdvanced": "Ouvrir en mode Avancé",
+    "loading": "Chargement de votre choix de fournisseur…",
+    "translatedBy": "Traduit par {{provider}}",
+    "translatedByCustom": "Traduit selon le routage personnalisé de ce projet",
+    "change": "Modifier"
+  }
 }

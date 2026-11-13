@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
+import { GLOSSARIES_TOUR_ID } from '../../lib/tour/glossaries-tour.js';
 import { isAreaTourId } from '../../lib/tour/area-tours.js';
 import { useGuideStore } from '../../stores/guide-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
@@ -30,7 +31,11 @@ export function AreaTourOffer() {
   const firstRunActive = useFirstRunActive();
   const taken = useGuideStore(
     (s) =>
-      s.activeTourId !== null || s.completedTours.includes(tab) || s.declinedTours.includes(tab),
+      s.activeTourId !== null ||
+      s.completedTours.includes(tab) ||
+      s.declinedTours.includes(tab) ||
+      // The Glossaries tour from the Guide covers what the short offer shows.
+      (tab === 'glossary' && s.completedTours.includes(GLOSSARIES_TOUR_ID)),
   );
 
   if (!advanced || !tourOffers || !inProject || !hasProject || firstRunActive || taken) return null;

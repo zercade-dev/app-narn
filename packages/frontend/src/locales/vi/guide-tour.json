@@ -14,6 +14,7 @@
       "getGoogleKey": "Lấy khóa Google miễn phí",
       "addGoogleKey": "Dán khóa Google của tôi",
       "ownProvider": "Dùng nhà cung cấp của riêng tôi",
+      "useFoundKey": "Dùng {{provider}} cho bản dịch của bạn",
       "fixKey": "Kiểm tra khóa của tôi",
       "retry": "Thử lại",
       "stopRetry": "Dừng và thử lại",
@@ -38,20 +39,21 @@
       "passwordWhat": "Nhập mật khẩu kho bảo mật vào đây, rồi xác nhận bằng nút bên dưới."
     },
     "cloudVault": {
-      "title": "Tạo kho bảo mật và thêm một khóa miễn phí",
-      "what": "Chọn mật khẩu cho kho, rồi thêm một khóa miễn phí. Nên dùng Google. Bạn sẽ quay lại đây khi xong.",
+      "title": "Tạo kho bảo mật và thêm khóa",
+      "what": "Chọn mật khẩu cho kho, rồi thêm một khóa. Để thử nhanh, hãy tạo một khóa Google AI miễn phí. Bạn đã có khóa của một nhà cung cấp được hỗ trợ? Hãy chọn “Dùng nhà cung cấp của riêng tôi” trước. Bạn sẽ quay lại đây khi xong.",
       "why": "Khóa nhà cung cấp của bạn được mã hóa bằng mật khẩu của bạn và luôn nằm trong tầm kiểm soát của bạn. Khóa là cách nhà cung cấp AI biết đó là bạn."
     },
     "cloudUnlock": {
       "what": "Mở khóa kho bảo mật trên trang kho bảo mật. Bạn sẽ quay lại đây khi xong."
     },
     "cloudKey": {
-      "what": "Thêm một khóa miễn phí trên trang kho bảo mật. Nên dùng Google. Bạn sẽ quay lại đây khi xong."
+      "what": "Thêm một khóa trên trang kho bảo mật. Để thử nhanh, hãy tạo một khóa Google AI miễn phí. Bạn đã có khóa của một nhà cung cấp được hỗ trợ? Hãy chọn “Dùng nhà cung cấp của riêng tôi” trước. Bạn sẽ quay lại đây khi xong."
     },
     "key": {
-      "title": "Thêm một khóa miễn phí",
-      "why": "NARN Freeway dùng các mô hình AI miễn phí, và khóa là cách nhà cung cấp biết đó là bạn.",
-      "choiceWhat": "Tạo một khóa Google AI miễn phí, rồi dán vào kho bảo mật.",
+      "title": "Thêm khóa để bắt đầu dịch",
+      "why": "Với một khóa miễn phí, NARN Freeway dịch trò chơi của bạn miễn phí trong lúc bạn dùng thử. Bạn có thể đổi nhà cung cấp bất cứ lúc nào trong thẻ Cấu hình của dự án.",
+      "whyOwn": "Khóa {{provider}} là cách {{provider}} biết đó là bạn. Bạn có thể đổi nhà cung cấp bất cứ lúc nào trong thẻ Cấu hình của dự án.",
+      "choiceWhat": "Để thử nhanh, hãy tạo một khóa Google AI miễn phí rồi dán vào kho bảo mật. Bạn đã có khóa của một nhà cung cấp được hỗ trợ? Hãy chọn “Dùng nhà cung cấp của riêng tôi”.",
       "pasteWhat": "Dán khóa vào đây, nhập mật khẩu kho bảo mật bên dưới, rồi lưu."
     },
     "project": {
@@ -69,12 +71,14 @@
     "translate": {
       "title": "Dịch",
       "why": "Freeway tự động chọn một mô hình miễn phí phù hợp cho từng ngôn ngữ.",
+      "whyOwn": "{{provider}} dịch dự án này bằng khóa của riêng bạn.",
+      "whyCustom": "Điều phối của dự án này, được thiết lập trong Nâng cao, chọn nhà cung cấp cho từng mục.",
       "openWhat": "Mở tab liệt kê các mục của bạn.",
-      "quickWhat": "3 mục đầu tiên đã được chọn. Dịch thử chúng, hoặc dịch tất cả ngay bây giờ.",
+      "quickWhat": "Đã chọn 3 mục vẫn cần dịch. Dịch thử chúng, hoặc dịch tất cả ngay bây giờ.",
       "fewWhat": "Các mục của bạn đã được chọn. Dịch chúng ngay bây giờ.",
-      "selectWhat": "Chọn tất cả các mục.",
-      "pressWhat": "Mở hộp thoại dịch.",
       "startWhat": "Bắt đầu dịch.",
+      "nothingWhat": "Tệp của bạn đã có bản dịch cho mọi ngôn ngữ bạn chọn, nên không còn gì để dịch.",
+      "nothingWhy": "Để thêm ngôn ngữ, hãy đánh dấu nó ở tab Dữ liệu rồi lưu. Nếu không, hãy tiếp tục xuất tệp của bạn.",
       "progressWhat": "Đang dịch. Dòng này cho biết tiến độ.",
       "progressWhy": "Hướng dẫn sẽ tiếp tục khi dịch xong."
     },
@@ -83,6 +87,8 @@
       "why": "Thanh được làm nổi bật bên dưới cho biết điều gì đã xảy ra.",
       "authWhat": "Nhà cung cấp đã từ chối khóa của bạn. Kiểm tra khóa, rồi thử lại.",
       "quotaWhat": "Hạn mức miễn phí tạm thời đã hết. Chờ một lát hoặc thêm khóa khác, rồi thử lại.",
+      "quotaWhatOwn": "{{provider}} tạm thời từ chối: hạn mức hoặc tín dụng trong tài khoản của bạn đã hết. Hãy kiểm tra gói của bạn với nhà cung cấp, rồi thử lại.",
+      "quotaWhatCustom": "Một nhà cung cấp trong điều phối của dự án này tạm thời từ chối: hạn mức hoặc tín dụng đã hết. Chờ một lát hoặc kiểm tra gói với nhà cung cấp, rồi thử lại.",
       "otherWhat": "Chưa có gì được dịch. Kiểm tra khóa của bạn, rồi thử lại."
     },
     "parked": {
@@ -97,8 +103,9 @@
     },
     "rest": {
       "title": "Bản dịch thử đã thành công",
-      "what": "3 mục đầu tiên đã được dịch sang mọi ngôn ngữ bạn chọn. Dịch phần còn lại ngay, hoặc xuất những gì bạn đã có.",
-      "why": "Bạn có thể dịch phần còn lại sau từ danh sách mục."
+      "what": "3 mục thử nghiệm của bạn đã được dịch sang mọi ngôn ngữ bạn chọn. Dịch phần còn lại ngay, hoặc xuất những gì bạn đã có.",
+      "why": "Bạn có thể dịch phần còn lại sau từ danh sách mục.",
+      "skipped": "Phần còn lại có thể để sau. Hãy tải xuống những gì đã dịch."
     },
     "export": {
       "title": "Xuất",
@@ -115,10 +122,15 @@
   },
   "providerChoice": {
     "title": "Dùng nhà cung cấp của riêng tôi",
-    "description": "Chọn nhà cung cấp mà bạn có khóa. NARN sẽ gửi mọi bản dịch trong các dự án của bạn đến nhà cung cấp đó. Để kết hợp nhiều nhà cung cấp, hãy chuyển sang Nâng cao.",
+    "description": "Chọn nhà cung cấp mà bạn có khóa. Nhà cung cấp đó sẽ dịch dự án này và các dự án mới bạn tạo. Để kết hợp nhiều nhà cung cấp, hãy chuyển sang Nâng cao.",
     "existingRouting": "Dự án này đã có điều phối được thiết lập nên sẽ được giữ nguyên. Bạn có thể thay đổi trong Nâng cao.",
+    "freeHeading": "Các nhà cung cấp này có khóa miễn phí. Nếu chọn một trong số đó, chỉ nhà cung cấp đó dịch, không dùng các mô hình miễn phí khác trong nhóm NARN Freeway.",
     "cancel": "Hủy",
-    "failed": "Không thể thiết lập {{provider}}: {{message}}"
+    "failed": "Không thể thiết lập {{provider}}: {{message}}",
+    "switchedOff": "{{provider}} đang tắt trong Nâng cao nên không được dùng. Hãy bật lại trong Cấu hình chung, hoặc chọn nhà cung cấp khác.",
+    "waitingForKey": "Kho bảo mật của bạn chưa có khóa {{provider}}, nên tạm thời NARN Freeway sẽ dịch. Hãy thêm khóa của nó, hoặc chọn NARN Freeway trong thẻ Cấu hình của dự án.",
+    "applied": "{{provider}} giờ sẽ dịch {{project}}.",
+    "appliedCollab": "{{provider}} giờ sẽ dịch các dự án được chia sẻ với bạn."
   },
   "offer": {
     "start": "Cho tôi xem",
@@ -359,7 +371,7 @@
     },
     "create": {
       "title": "Tạo bảng thuật ngữ",
-      "what": "Bắt đầu một bảng thuật ngữ mới, trống tại đây.",
+      "what": "Bắt đầu một bảng thuật ngữ mới, trống tại đây, hoặc nhấn Tiếp theo để đọc tiếp.",
       "why": "Thường một bảng thuật ngữ là đủ. Dùng nhiều bảng để tách riêng các nhóm thuật ngữ."
     },
     "add-term": {

@@ -518,5 +518,32 @@
   "templateImportFailed": "Error al importar la plantilla: {{message}}",
   "templateDeleted": "Plantilla \"{{name}}\" eliminada.",
   "templateDeleteFailed": "Error al eliminar la plantilla: {{message}}",
-  "templateExportFailed": "Error al exportar la plantilla: {{message}}"
+  "templateExportFailed": "Error al exportar la plantilla: {{message}}",
+  "providerCard": {
+    "title": "Proveedor de traducción",
+    "scope": "Este proyecto. Los proyectos nuevos que crees usan el mismo.",
+    "scopeCollab": "Tu propia elección, usada en todos los proyectos compartidos contigo.",
+    "freeway": "NARN Freeway (gratis)",
+    "freewayHint": "Elige un modelo gratuito adecuado para cada idioma con las claves gratuitas de tu bóveda.",
+    "noFreeKey": "Todavía no hay ninguna clave gratuita en tu bóveda. NARN Freeway necesita al menos una.",
+    "addFreeKey": "Añadir una clave gratuita",
+    "own": "Mi propio proveedor",
+    "ownPlaceholder": "Elige un proveedor",
+    "freeOnlyOption": "{{provider}} (solo, sin el grupo de Freeway)",
+    "keySaved": "Clave guardada",
+    "noKey": "Sin clave",
+    "keyMissing": "Todavía no hay ninguna clave de {{provider}} en tu bóveda.",
+    "vaultLocked": "Desbloquea tu bóveda para comprobar la clave.",
+    "addKey": "Añadir clave",
+    "paidNote": "Se paga desde tu cuenta de {{provider}}.",
+    "freeOnlyNote": "Solo traduce {{provider}}, sin los demás modelos gratuitos del grupo de NARN Freeway.",
+    "pendingNote": "{{provider}} se usará en cuanto guardes su clave. Hasta entonces traduce NARN Freeway.",
+    "pendingNoteOwn": "{{provider}} se usará en cuanto guardes su clave. Hasta entonces traduce {{current}}.",
+    "customRouting": "Este proyecto usa un enrutamiento personalizado configurado en Avanzado, así que aquí no se cambia.",
+    "openAdvanced": "Abrir en Avanzado",
+    "loading": "Cargando tu elección de proveedor…",
+    "translatedBy": "Traducido por {{provider}}",
+    "translatedByCustom": "Traducido con el enrutamiento personalizado de este proyecto",
+    "change": "Cambiar"
+  }
 }

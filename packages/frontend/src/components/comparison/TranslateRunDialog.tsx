@@ -29,6 +29,9 @@ import {
   type GroupingChoice,
 } from '../config/BatchGroupingControls.js';
 import { ExampleEntryPicker, type ExampleCandidate } from './ExampleEntryPicker.js';
+import { TranslatedByLine } from '../config/TranslatedByLine.js';
+import { useProjectStore } from '../../stores/project-store.js';
+import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 
 /** Last-used per-browser values (backlog: settings per modal). reTranslate and
  * exampleIds are deliberately NOT persisted: destructive mode choice / entry-specific. */
@@ -110,6 +113,8 @@ export function TranslateRunDialog({
   exampleCandidates = [],
 }: Readonly<TranslateRunDialogProps>) {
   const { t } = useTranslation('strings');
+  // The guide's Back from its Start step: closed as Cancel would.
+  useCloseOnGuideBack(open, 'comparison-translate-start', () => onOpenChange(false));
   const { read: readSettings, save: saveSettings } = useDialogSettings(
     'translate-run',
     TRANSLATE_RUN_SETTINGS_DEFAULTS,
@@ -117,6 +122,7 @@ export function TranslateRunDialog({
   // Simple hides every tuning control, so saved tuning must not silently apply either.
   const showAdvancedOptions = useControlVisible('translate-advanced-options');
   const showMemoryOptions = useControlVisible('translate-memory-options');
+  const activeProjectId = useProjectStore((s) => s.activeProjectId);
   const [reTranslate, setReTranslate] = useState(false);
   // Everything below the mode radio is tuning, not the choice that defines the
   // run — hidden behind this until ticked. Only its own visibility is gated;
@@ -196,6 +202,8 @@ export function TranslateRunDialog({
               ? t('compare.translateScopeSelected', { count: scopeCount })
               : t('compare.translateScopeAll', { count: scopeCount })}
           </DialogDescription>
+          {/* Simple hides the Routing tab: say who will translate, and offer to change it. */}
+          {!showAdvancedOptions && <TranslatedByLine projectId={activeProjectId} />}
         </DialogHeader>
         <div className="-mx-1 min-h-0 flex-1 space-y-3 overflow-y-auto px-1 py-1">
           <fieldset className="space-y-1.5">

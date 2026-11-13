@@ -14,6 +14,7 @@
       "getGoogleKey": "Conseguir una clave gratuita de Google",
       "addGoogleKey": "Pegar mi clave de Google",
       "ownProvider": "Usar mi propio proveedor",
+      "useFoundKey": "Usar {{provider}} para tus traducciones",
       "fixKey": "Revisar mi clave",
       "retry": "Reintentar",
       "stopRetry": "Detener y reintentar",
@@ -38,20 +39,21 @@
       "passwordWhat": "Escribe aquí la contraseña de tu bóveda y confirma con el botón de abajo."
     },
     "cloudVault": {
-      "title": "Crear tu bóveda y añadir una clave gratuita",
-      "what": "Elige una contraseña para la bóveda y añade una clave gratuita. Se recomienda Google. Volverás aquí al terminar.",
+      "title": "Crea tu bóveda y añade una clave",
+      "what": "Elige una contraseña para la bóveda y añade una clave. Para una prueba rápida, crea una clave gratuita de Google AI. ¿Ya tienes una clave de un proveedor compatible? Elige primero «Usar mi propio proveedor». Volverás aquí al terminar.",
       "why": "Tus claves de proveedores se cifran con tu contraseña y nunca salen de tu control. La clave permite al proveedor de IA saber que eres tú."
     },
     "cloudUnlock": {
       "what": "Desbloquea tu bóveda en la página de la bóveda. Volverás aquí al terminar."
     },
     "cloudKey": {
-      "what": "Añade una clave gratuita en la página de la bóveda. Se recomienda Google. Volverás aquí al terminar."
+      "what": "Añade una clave en la página de la bóveda. Para una prueba rápida, crea una clave gratuita de Google AI. ¿Ya tienes una clave de un proveedor compatible? Elige primero «Usar mi propio proveedor». Volverás aquí al terminar."
     },
     "key": {
-      "title": "Añadir una clave gratuita",
-      "why": "NARN Freeway usa modelos de IA gratuitos, y la clave permite al proveedor saber que eres tú.",
-      "choiceWhat": "Crea una clave gratuita de Google AI y pégala en tu bóveda.",
+      "title": "Añade una clave para empezar a traducir",
+      "why": "Con una clave gratuita, NARN Freeway traduce tu juego sin coste mientras lo pruebas. Puedes cambiar de proveedor cuando quieras en la pestaña Configuración del proyecto.",
+      "whyOwn": "Tu clave de {{provider}} es la forma en que {{provider}} sabe que eres tú. Puedes cambiar de proveedor cuando quieras en la pestaña Configuración del proyecto.",
+      "choiceWhat": "Para una prueba rápida, crea una clave gratuita de Google AI y pégala en tu bóveda. ¿Ya tienes una clave de un proveedor compatible? Elige «Usar mi propio proveedor».",
       "pasteWhat": "Pega la clave aquí, escribe abajo la contraseña de tu bóveda y guarda."
     },
     "project": {
@@ -69,12 +71,14 @@
     "translate": {
       "title": "Traducir",
       "why": "Freeway elige automáticamente un modelo gratuito adecuado para cada idioma.",
+      "whyOwn": "{{provider}} traduce este proyecto con tu propia clave.",
+      "whyCustom": "El enrutamiento de este proyecto, configurado en Avanzado, elige el proveedor de cada entrada.",
       "openWhat": "Abre la pestaña que muestra tus textos.",
-      "quickWhat": "Los 3 primeros textos están seleccionados. Tradúcelos para probar, o traduce todo ahora.",
+      "quickWhat": "Hay 3 textos sin traducir seleccionados. Tradúcelos para probar, o traduce todo ahora.",
       "fewWhat": "Tus textos están seleccionados. Tradúcelos ahora.",
-      "selectWhat": "Selecciona todos los textos.",
-      "pressWhat": "Abre el cuadro de traducción.",
       "startWhat": "Inicia la traducción.",
+      "nothingWhat": "Tu archivo ya tiene traducción para todos los idiomas que elegiste, así que no hay nada que traducir.",
+      "nothingWhy": "Para añadir un idioma, márcalo en la pestaña Datos y guarda. Si no, continúa y exporta tu archivo.",
       "progressWhat": "La traducción está en curso. Esta línea muestra su progreso.",
       "progressWhy": "El recorrido continúa cuando la traducción haya terminado."
     },
@@ -83,6 +87,8 @@
       "why": "La barra resaltada de abajo muestra lo que ocurrió.",
       "authWhat": "El proveedor rechazó tu clave. Revisa la clave y vuelve a intentarlo.",
       "quotaWhat": "La cuota gratuita se agotó por ahora. Espera un poco o añade otra clave y vuelve a intentarlo.",
+      "quotaWhatOwn": "{{provider}} rechaza las solicitudes por ahora: se agotó la cuota o el crédito de tu cuenta. Revisa tu plan con el proveedor y vuelve a intentarlo.",
+      "quotaWhatCustom": "Un proveedor del enrutamiento de este proyecto rechaza las solicitudes por ahora: se agotó una cuota o un crédito. Espera un poco o revisa el plan con el proveedor y vuelve a intentarlo.",
       "otherWhat": "No se tradujo nada. Revisa tu clave y vuelve a intentarlo."
     },
     "parked": {
@@ -97,8 +103,9 @@
     },
     "rest": {
       "title": "La prueba ha funcionado",
-      "what": "Tus 3 primeros textos están traducidos a todos los idiomas que elegiste. Traduce el resto ahora o exporta lo que tienes.",
-      "why": "Puedes traducir el resto más tarde desde la lista de textos."
+      "what": "Tus 3 textos de prueba están traducidos a todos los idiomas que elegiste. Traduce el resto ahora o exporta lo que tienes.",
+      "why": "Puedes traducir el resto más tarde desde la lista de textos.",
+      "skipped": "El resto puede esperar. Descarga lo que ya está traducido."
     },
     "export": {
       "title": "Exportar",
@@ -115,10 +122,15 @@
   },
   "providerChoice": {
     "title": "Usar mi propio proveedor",
-    "description": "Elige el proveedor del que tienes una clave. NARN le enviará todas las traducciones de tus proyectos. Para combinar varios proveedores, cambia a Avanzado.",
+    "description": "Elige el proveedor del que tienes una clave. Traduce este proyecto y los proyectos nuevos que crees. Para combinar varios proveedores, cambia a Avanzado.",
     "existingRouting": "Este proyecto ya tiene el enrutamiento configurado, así que se queda como está. Puedes cambiarlo en Avanzado.",
+    "freeHeading": "Estos tienen claves gratuitas. Si eliges uno, traduce solo él, sin los demás modelos gratuitos del grupo de NARN Freeway.",
     "cancel": "Cancelar",
-    "failed": "No se pudo configurar {{provider}}: {{message}}"
+    "failed": "No se pudo configurar {{provider}}: {{message}}",
+    "switchedOff": "{{provider}} está desactivado en Avanzado, así que no se usó. Vuelve a activarlo en Configuración global o elige otro proveedor.",
+    "waitingForKey": "Todavía no hay ninguna clave de {{provider}} en tu bóveda, así que por ahora traduce NARN Freeway. Añade su clave o elige NARN Freeway en la pestaña Configuración del proyecto.",
+    "applied": "{{provider}} traduce ahora {{project}}.",
+    "appliedCollab": "{{provider}} traduce ahora los proyectos compartidos contigo."
   },
   "offer": {
     "start": "Enséñamelo",
@@ -359,7 +371,7 @@
     },
     "create": {
       "title": "Crear un glosario",
-      "what": "Empieza aquí un glosario nuevo y vacío.",
+      "what": "Empieza aquí un glosario nuevo y vacío, o pulsa Siguiente para seguir leyendo.",
       "why": "Suele bastar con un glosario. Usa más para mantener separados grupos de términos."
     },
     "add-term": {

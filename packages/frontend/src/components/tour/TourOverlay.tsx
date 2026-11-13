@@ -13,7 +13,7 @@ import { useTourAnchor } from '@/hooks/use-tour-anchor';
 import type { TourPosition } from '@/lib/tour/position';
 import type { GuideFacts, Tour } from '@/lib/tour/types';
 import { useViewStore } from '@/stores/view-store';
-import { TourCallout } from './TourCallout';
+import { TourCallout, type TourText } from './TourCallout';
 
 /**
  * Stacking: the dim layer sits at z-40 (above app content, below the z-50
@@ -35,6 +35,8 @@ interface TourOverlayProps {
   position?: TourPosition;
   /** Content under the callout's why text. */
   extra?: ReactNode;
+  /** Copy swaps and placeholder values for the callout. */
+  text?: TourText;
   /** Whether Back shows (default: on every step but the first). */
   canGoBack?: boolean;
   onAdvance: () => void;
@@ -112,6 +114,7 @@ export function TourOverlay({
   facts,
   position,
   extra,
+  text,
   canGoBack,
   onAdvance,
   onBack,
@@ -215,10 +218,38 @@ export function TourOverlay({
     onAdvanceRef.current();
   }, [stateDone, stepKey, enteredViaBack]);
 
-  // Focus moves to the callout on each step.
+  // Focus moves to the callout on each step, or to the field the step asks
+  // the person to type in (the vault password, the key, the project name).
   useEffect(() => {
-    calloutNode?.focus();
-  }, [calloutNode, stepIndex]);
+    if (anchor && isTextField(anchor)) anchor.focus();
+    else calloutNode?.focus();
+  }, [calloutNode, stepIndex, anchor]);
+
+  // A Next that waits for a control (see `TourAdvance`).
+  const nextNeeds = step?.advance.kind === 'next' ? (step.advance.needs ?? null) : null;
+  const neededControl = useTourAnchor(nextNeeds);
+  // A `next` step that moves on when a control appears (see `TourAdvance`).
+  const appearAnchor =
+    step?.advance.kind === 'next' ? (step.advance.advanceOnAppear ?? null) : null;
+  const appeared = useTourAnchor(appearAnchor) !== null;
+  const wasAbsent = useRef<string | null>(null);
+  const appearStepKey = useRef<string | null>(null);
+  useEffect(() => {
+    // A new step forgets an absence seen on an earlier visit, so re-entering
+    // via Back with the control already there never moves on by itself.
+    if (appearStepKey.current !== stepKey) {
+      appearStepKey.current = stepKey;
+      wasAbsent.current = null;
+    }
+    if (appearAnchor === null) return;
+    if (!appeared) {
+      wasAbsent.current = stepKey;
+      return;
+    }
+    if (wasAbsent.current !== stepKey) return;
+    wasAbsent.current = null;
+    onAdvanceRef.current();
+  }, [appeared, appearAnchor, stepKey]);
 
   if (!step) return null;
 
@@ -228,8 +259,18 @@ export function TourOverlay({
     titleId,
     position,
     extra,
+    text,
     showBack: canGoBack ?? stepIndex > 0,
-    showNext: step.advance.kind === 'next' || (stateDone && enteredViaBack),
+    showNext:
+      (step.advance.kind === 'next' &&
+        (nextNeeds === null ||
+          neededControl !== null ||
+          enteredViaBack ||
+          step.advance.unlessDone?.(facts) === true)) ||
+      (step.advance.kind === 'manual' &&
+        enteredViaBack &&
+        step.advance.nextOnBack?.(facts) === true) ||
+      (stateDone && enteredViaBack),
     onNext: onAdvance,
     onBack,
     onExit,
@@ -274,6 +315,17 @@ export function TourOverlay({
               style={px(box)}
             />
           ))}
+          {step.interactive === false && (
+            // Look, don't touch: the hole takes clicks like the dim around it.
+            // At z-40 it covers in-page anchors only: an anchor inside a z-50
+            // sheet or dialog sits above it and stays clickable.
+            <div
+              aria-hidden="true"
+              data-testid="tour-hole-guard"
+              className="pointer-events-auto fixed z-40"
+              style={px(hole)}
+            />
+          )}
           <div
             data-testid="tour-spotlight"
             className={`pointer-events-none fixed z-[55] rounded-md ring-2 ring-ring ${motion}`}
@@ -330,6 +382,24 @@ export function TourOverlay({
       )}
     </div>
   );
+}
+
+/** A control the person types in: focus goes there rather than to the callout. */
+function isTextField(el: Element): el is HTMLInputElement | HTMLTextAreaElement {
+  if (el instanceof HTMLTextAreaElement) return !el.disabled;
+  if (!(el instanceof HTMLInputElement) || el.disabled) return false;
+  return ![
+    'button',
+    'checkbox',
+    'radio',
+    'submit',
+    'reset',
+    'file',
+    'hidden',
+    'image',
+    'range',
+    'color',
+  ].includes(el.type);
 }
 
 type Box = { left: number; top: number; width: number | string; height: number | string };

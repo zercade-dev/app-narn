@@ -19,6 +19,7 @@ export type FirstRunAction =
   | 'get-google-key'
   | 'add-google-key'
   | 'own-provider'
+  | 'use-found-key'
   | 'fix-key'
   | 'retry'
   | 'stop-retry'
@@ -226,6 +227,10 @@ const STALL_STEPS: TourStep[] = [
 ];
 
 const QUICK_STEP = 'translate-quick';
+/** The quick test has been answered: something was translated. Shared, so the step keeps its identity. */
+const QUICK_DONE = (f: GuideFacts): boolean => f.translationExists;
+/** Shown in place of the quick test when every entry is already translated. */
+const NOTHING_STEP = 'translate-nothing';
 const CLOSING_STEP = 'closing';
 
 /**
@@ -237,7 +242,8 @@ function quickTestStep(few: boolean): TourStep {
     id: QUICK_STEP,
     anchor: 'bulk-batch-translate',
     ...copy('translate', few ? 'fewWhat' : 'quickWhat'),
-    advance: { kind: 'manual' },
+    // Reached via Back once something was translated: Next moves on without a new run.
+    advance: { kind: 'manual', nextOnBack: QUICK_DONE },
     navigate: { view: 'project', tab: 'strings' },
     actions: few
       ? [action('translate-few', 'translateFew')]
@@ -287,7 +293,14 @@ const SHARED_STEPS: TourStep[] = [
     ...copy('project', 'targetsWhat'),
     // Beside the list: the Save button appears right below it.
     side: 'right',
-    advance: { kind: 'next' },
+    // Next once something is ticked (Save shows then): with nothing ticked it
+    // would lead to "save your languages" with nothing to save.
+    // Already saved (a Back round-trip), Next needs no change.
+    advance: {
+      kind: 'next',
+      needs: 'save-languages-button',
+      unlessDone: (f) => f.projectHasLanguages,
+    },
     navigate: { view: 'project', tab: 'data' },
     major: 3,
   },
@@ -299,10 +312,12 @@ const SHARED_STEPS: TourStep[] = [
     major: 3,
   },
   {
+    // Paired with its review sheet (see FORM_STEPS), not done on the click:
+    // the file picker can be cancelled, and then nothing is there to confirm.
     id: 'import',
     anchor: 'import-csv-button',
     ...copy('project', 'importWhat'),
-    advance: { kind: 'click' },
+    advance: { kind: 'state', done: (f) => f.projectHasEntries },
     navigate: { view: 'project', tab: 'data' },
     major: 3,
   },
@@ -322,38 +337,17 @@ const SHARED_STEPS: TourStep[] = [
     navigate: { view: 'project' },
     major: 4,
   },
-  // The quick test: the guide selects the first three entries itself and
-  // asks for them (or for everything) from the callout. Done when the request
-  // produced a run (`FirstRunTour` watches for it): one refused before a run
-  // exists (no route, a validation error) must not leave "the translation is
-  // running" on screen. Its actions depend on the project's size, see
-  // `firstRunTourFor`.
+  // The quick test: the guide selects three entries that still need
+  // translating and asks for them (or for everything) from the callout. Done
+  // when the request produced a run (`FirstRunTour` watches for it): one
+  // refused before a run exists (no route, a validation error) must not leave
+  // "the translation is running" on screen. Its actions depend on how much is
+  // left to translate, see `firstRunTourFor`. "Try again" comes back here.
   quickTestStep(false),
-  // "Try again" only: the person selects and starts by hand. They stand in for
-  // the quick test, so the counter does not move.
   {
-    // Done once something is selected, not on the click: on entries that are
-    // already selected a click would deselect them all.
-    id: 'select-all',
-    anchor: 'string-table-select-all',
-    ...copy('translate', 'selectWhat'),
-    advance: { kind: 'state', done: (f) => f.hasSelection },
-    // "Try again" lands here, or on the next step, from anywhere.
-    navigate: { view: 'project', tab: 'strings' },
-    major: 4,
-    variantOf: QUICK_STEP,
-  },
-  {
-    id: 'translate-selected',
-    anchor: 'bulk-batch-translate',
-    ...copy('translate', 'pressWhat'),
-    advance: { kind: 'click' },
-    navigate: { view: 'project', tab: 'strings' },
-    major: 4,
-    variantOf: QUICK_STEP,
-  },
-  {
-    // Done when the request produced a run, like the quick test.
+    // The quick test's other half: the translation dialog, opened from the
+    // highlighted button, is on screen (see FORM_STEPS). Its run is the quick
+    // test, done when it is listed like the callout's.
     id: 'translate-start',
     anchor: 'comparison-translate-start',
     ...copy('translate', 'startWhat'),
@@ -388,6 +382,19 @@ const SHARED_STEPS: TourStep[] = [
     variantOf: WAITING_STEP,
   },
   {
+    // In place of the quick test when the file already has every real
+    // translation: nothing to do, and Next moves on to the export.
+    id: NOTHING_STEP,
+    anchor: null,
+    titleKey: 'firstRun.translate.title',
+    whatKey: 'firstRun.translate.nothingWhat',
+    whyKey: 'firstRun.translate.nothingWhy',
+    advance: { kind: 'next' },
+    navigate: { view: 'project' },
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
     id: 'export-open',
     anchor: 'tab-data',
     ...copy('export', 'openWhat'),
@@ -400,6 +407,8 @@ const SHARED_STEPS: TourStep[] = [
     anchor: 'export-csv-button',
     ...copy('export', 'downloadWhat'),
     advance: { kind: 'state', done: (f) => f.exported },
+    // "Skip, export what I have" lands here straight from the strings tab.
+    navigate: { view: 'project', tab: 'data' },
     major: 5,
   },
   closingStep(false),
@@ -435,19 +444,34 @@ const tourOf = (head: TourStep[]): Tour => ({
  * tour keeps its identity from one render to the next.
  */
 const replacedTours = new Map<string, Map<Tour, Tour>>();
-function withStep(tour: Tour, id: string, make: () => TourStep): Tour {
-  let byTour = replacedTours.get(id);
+function withStep(
+  tour: Tour,
+  id: string,
+  make: (step: TourStep) => TourStep,
+  variant = 'default',
+): Tour {
+  const cacheKey = `${id}:${variant}`;
+  let byTour = replacedTours.get(cacheKey);
   if (!byTour) {
     byTour = new Map();
-    replacedTours.set(id, byTour);
+    replacedTours.set(cacheKey, byTour);
   }
   let replaced = byTour.get(tour);
   if (!replaced) {
-    replaced = { ...tour, steps: tour.steps.map((s) => (s.id === id ? make() : s)) };
+    replaced = { ...tour, steps: tour.steps.map((s) => (s.id === id ? make(s) : s)) };
     byTour.set(tour, replaced);
   }
   return replaced;
 }
+
+/** The step that asks for a key: `key-choice` locally, the vault hand-off in cloud. */
+const KEY_STEPS = ['key-choice', 'cloud-vault'];
+
+/** `step` with "Use <provider> for your translations" first among its actions. */
+const withFoundKeyAction = (step: TourStep): TourStep => ({
+  ...step,
+  actions: [{ ...action('use-found-key', 'useFoundKey'), primary: true }, ...(step.actions ?? [])],
+});
 
 /** The local first-run tour (a new vault). */
 export const FIRST_RUN_TOUR: Tour = tourOf(localVaultAndKeySteps('vault'));
@@ -464,15 +488,20 @@ const FIRST_RUN_TOUR_CLOUD_KEY: Tour = tourOf(cloudVaultAndKeySteps('key'));
  * that now exists, or is now unlocked) never moves the person. `fewEntries`:
  * the project has QUICK_TEST_SIZE translatable entries or fewer, so the quick
  * test offers no choice. `advanced`: the guide runs in Advanced (restarted
- * there from the Guide), so the closing step is worded for it.
+ * there from the Guide), so the closing step is worded for it. `foundKey`:
+ * the vault already holds the key of a provider the person could use (and no
+ * free key), so the key step offers it in one click.
  */
 export function firstRunTourFor(
   f: Pick<GuideFacts, 'cloud' | 'vaultExists'> & Partial<Pick<GuideFacts, 'vaultUnlocked'>>,
-  opts: { fewEntries?: boolean; advanced?: boolean } = {},
+  opts: { fewEntries?: boolean; advanced?: boolean; foundKey?: boolean } = {},
 ): Tour {
   let tour = baseTourFor(f);
   if (opts.advanced) tour = withStep(tour, CLOSING_STEP, () => closingStep(true));
   if (opts.fewEntries) tour = withStep(tour, QUICK_STEP, () => quickTestStep(true));
+  if (opts.foundKey) {
+    for (const id of KEY_STEPS) tour = withStep(tour, id, withFoundKeyAction, 'found-key');
+  }
   return tour;
 }
 
@@ -495,7 +524,9 @@ function firstIncompleteMajor(f: GuideFacts): number {
   if (!projectReady(f)) return 3;
   // "Translate the rest?" after the quick test, and the rest's own run, are
   // still part of step 4.
-  if (!f.translationExists || restPending(f) || f.restRunning) return 4;
+  // A file that came translated has nothing for step 4 to do.
+  const translated = f.translationExists || f.nothingToTranslate;
+  if (!translated || restPending(f) || f.restRunning) return 4;
   if (!f.exported) return 5;
   return 6;
 }
@@ -522,9 +553,23 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
     if (!f.projectHasLanguages) return at('languages-source');
     return at('import');
   }
+  // Said once, on the way to the export: the guide's way into step 5.
+  if (major === 5 && !f.translationExists && f.nothingToTranslate) return at(NOTHING_STEP);
   if (major === 4 && restPending(f)) return at('translate-rest');
   if (major === 4 && f.translationExists && f.restRunning) return at(WAITING_STEP);
   return steps.findIndex((s) => s.major === major);
+}
+
+/**
+ * Whether Next / Back may stop at `step` given the facts: "nothing to
+ * translate" only when that is so, and then none of the quick test's steps
+ * (there is nothing for them to translate).
+ */
+export function firstRunStepApplies(step: TourStep | undefined, f: GuideFacts): boolean {
+  if (!step) return false;
+  if (step.id === NOTHING_STEP) return f.nothingToTranslate && !f.translationExists;
+  if (f.nothingToTranslate && !f.translationExists) return step.major !== 4;
+  return true;
 }
 
 /**
@@ -537,6 +582,10 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
 const FORM_STEPS = [
   { closed: 'vault-open', open: 'vault-password', anchor: 'vault-password-input' },
   { closed: 'key-choice', open: 'key-paste', anchor: 'vault-editor-value' },
+  // The translation dialog, opened from the quick test's highlighted button.
+  { closed: QUICK_STEP, open: 'translate-start', anchor: 'comparison-translate-start' },
+  // The import review sheet, opened once a file was chosen.
+  { closed: 'import', open: 'import-confirm', anchor: 'confirm-import' },
 ] as const;
 
 /** The `data-tour` anchors whose presence {@link firstRunShownIndex} needs to know. */
@@ -571,4 +620,36 @@ export function firstRunShownIndex(tour: Tour, index: number, screen: FirstRunSc
   const pair = FORM_STEPS.find((p) => p.closed === id || p.open === id);
   if (!pair) return index;
   return at(screen.isOnScreen(pair.anchor) ? pair.open : pair.closed);
+}
+
+/**
+ * Where Back from the step on screen (`shownIndex`) goes. From inside a form
+ * (the open half of a pair) it closes the form (`closeForm`, the anchor of the
+ * form to close) and goes to the half that opens it. Otherwise to the nearest
+ * earlier counted step that the facts allow and that shows something other
+ * than what is on screen: a variant (the dialog's Start, the run-failure
+ * wordings, "translate the rest?") is only ever shown in place of its step,
+ * never stepped back onto. "Nothing to translate" is the exception: when it
+ * applies it stands in for all of step 4.
+ */
+export function firstRunBack(
+  tour: Tour,
+  shownIndex: number,
+  facts: GuideFacts,
+  screen: FirstRunScreen,
+): { index: number; closeForm?: string } {
+  const id = tour.steps[shownIndex]?.id;
+  const pair = FORM_STEPS.find((p) => p.open === id);
+  if (pair) {
+    const closed = tour.steps.findIndex((s) => s.id === pair.closed);
+    if (closed >= 0) return { index: closed, closeForm: pair.anchor };
+  }
+  for (let at = shownIndex - 1; at >= 0; at--) {
+    const step = tour.steps[at];
+    if (step.variantOf !== undefined && step.id !== NOTHING_STEP) continue;
+    if (!firstRunStepApplies(step, facts)) continue;
+    if (firstRunShownIndex(tour, at, screen) === shownIndex) continue;
+    return { index: at };
+  }
+  return { index: shownIndex };
 }

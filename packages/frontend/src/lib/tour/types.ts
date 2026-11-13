@@ -6,6 +6,12 @@ export interface GuideFacts {
   vaultExists: boolean;
   vaultUnlocked: boolean;
   usableKey: boolean;
+  /**
+   * An AI provider key is in the unlocked vault. Unlike `usableKey` it ignores
+   * the Simple provider choice, so Advanced tours can tell whether the AI
+   * features (glossary generation) can run.
+   */
+  aiKeyUsable: boolean;
   projectExists: boolean;
   projectHasLanguages: boolean;
   projectHasEntries: boolean;
@@ -14,8 +20,13 @@ export interface GuideFacts {
   /** Entries of the active project are selected in the string list. */
   hasSelection: boolean;
   isCollaboratorOnly: boolean;
-  /** A translatable entry of the active project still misses a target language. */
+  /** A translatable entry of the active project still misses a real target language (Pseudo-test aside). */
   untranslatedRemain: boolean;
+  /**
+   * The active project's entries are loaded and none misses a real target
+   * language, with no translation of it going: the file came translated.
+   */
+  nothingToTranslate: boolean;
   /**
    * The guide's quick test on the active project translated something, more is
    * left, and the person has not yet chosen between the rest and export.
@@ -29,8 +40,24 @@ export interface GuideFacts {
 }
 
 export type TourAdvance =
-  /** An explanation step: shows Next. */
-  | { kind: 'next' }
+  /**
+   * An explanation step: shows Next. With `needs` (a `data-tour` anchor), only
+   * while that control is on screen, or on a step entered via Back: Next would
+   * otherwise lead past something not done yet (the languages' Save button
+   * shows once one is ticked).
+   */
+  | {
+      kind: 'next';
+      needs?: string;
+      /** `needs` is waived once this holds: the step's work is already done (saved earlier). */
+      unlessDone?: (f: GuideFacts) => boolean;
+      /**
+       * Advances by itself when this anchor appears while the step is shown
+       * (absent, then present). Already present on entry does not count, and
+       * Next stays available throughout.
+       */
+      advanceOnAppear?: string;
+    }
   /** Completes when the anchored control is clicked. */
   | { kind: 'click' }
   /** Completes when app state says so. */
@@ -39,7 +66,14 @@ export type TourAdvance =
    * Completed by whoever runs the tour, when something happens that no fact
    * describes (a new run appearing). The overlay shows no Next and waits.
    */
-  | { kind: 'manual' };
+  | {
+      kind: 'manual';
+      /**
+       * On a step entered via Back: show Next once this holds (what the step
+       * asks for already happened), so stepping back never strands the person.
+       */
+      nextOnBack?: (f: GuideFacts) => boolean;
+    };
 
 export interface TourStep {
   id: string;
@@ -62,6 +96,12 @@ export interface TourStep {
    * act on elsewhere. Default: dimmed.
    */
   dim?: false;
+  /**
+   * `false`: the spotlit control is shown, not offered. The hole is covered
+   * like the rest of the screen, for a step that points at something the
+   * person must leave alone (the practice orphan's Delete).
+   */
+  interactive?: false;
   /** Opened when the step becomes current. */
   navigate?: { tab?: Tab; view?: ShellView };
   /**

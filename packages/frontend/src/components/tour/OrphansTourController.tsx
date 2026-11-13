@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { toast } from '@/lib/toast';
 import { apiRequest } from '../../hooks/use-api.js';
 import type { CatalogTourContext } from '../../lib/tour/catalog.js';
+import { endOrphansTour } from '../../lib/tour/end-orphans-tour.js';
 import {
   loadPracticeState,
   PracticeRecoverRefusedError,
@@ -169,11 +169,18 @@ export function OrphansTourController({ facts, access }: CatalogTourContext) {
   const blocker = entries === null ? null : simulationBlocker(entries, access);
   // A practice orphan is out in another project: that one comes back first.
   const otherProject = orphanSim !== null && orphanSim.projectId !== projectId;
+  // While the entries load, the offer waits rather than flash "just explain";
+  // if they cannot be loaded, explaining is all it can offer.
+  const entriesFailed = useStringStore((s) => s.error !== null && !s.loading);
   const offer = otherProject
     ? 'switch-project'
-    : entries === null || blocker !== null
-      ? 'explain-only'
-      : 'simulate';
+    : entries === null
+      ? entriesFailed
+        ? 'explain-only'
+        : 'loading'
+      : blocker !== null
+        ? 'explain-only'
+        : 'simulate';
   const tour = useMemo(
     () =>
       orphansTour({
@@ -327,11 +334,8 @@ export function OrphansTourController({ facts, access }: CatalogTourContext) {
     if (back !== undefined) go(back, { error: null });
   }, [back, go]);
 
-  const onExit = useCallback(() => {
-    // Leaving with the practice orphan still out: say where to put it back.
-    if (useGuideStore.getState().orphanSim) toast.info(t('orphansTour.notices.leftOut'));
-    useGuideStore.getState().endTour(false);
-  }, [t]);
+  // Leaving with the practice orphan still out: it stays, and the toast says where to put it back.
+  const onExit = useCallback(() => endOrphansTour(t, { putBack: false }), [t]);
 
   if (!run.ready) return null;
 

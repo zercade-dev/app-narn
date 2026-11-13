@@ -11,6 +11,7 @@ import {
   recoverPracticeOrphan,
 } from '../../lib/tour/orphan-sim.js';
 import { useGuideStore } from '../../stores/guide-store.js';
+import { ORPHANS_TOUR_ID } from '../../lib/tour/orphans-tour.js';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
 import {
   basesWithInstances,
@@ -155,6 +156,11 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
     orphanSim?.projectId === projectId && orphans.some((o) => o.id === orphanSim.entryId)
       ? orphanSim.entryId
       : null;
+  // While the Orphans tour shows the practice orphan, its row is for looking
+  // at: its Relink and Delete (and its box for the bulk Delete) wait until the
+  // tour is over, so the tour never destroys or rewires the person's entry.
+  const tourHoldsPractice = useGuideStore((s) => s.activeTourId === ORPHANS_TOUR_ID);
+  const heldByTour = (id: string): boolean => tourHoldsPractice && id === practiceId;
   const [recovering, setRecovering] = useState(false);
   const handleRecoverPractice = useCallback(async () => {
     setRecovering(true);
@@ -183,11 +189,11 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
   }, []);
 
   const toggleAll = useCallback(() => {
-    setSelectedIds((prev) => {
-      if (prev.size === orphans.length) return new Set();
-      return new Set(orphans.map((o) => o.id));
-    });
-  }, [orphans]);
+    // Never the practice orphan the tour is showing (see `heldByTour`).
+    const held = tourHoldsPractice ? practiceId : null;
+    const selectable = orphans.filter((o) => o.id !== held).map((o) => o.id);
+    setSelectedIds((prev) => (prev.size === selectable.length ? new Set() : new Set(selectable)));
+  }, [orphans, tourHoldsPractice, practiceId]);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -352,7 +358,8 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
     return all.slice(0, 50);
   }, [candidates, candidateQuery]);
 
-  const allSelected = orphans.length > 0 && selectedIds.size === orphans.length;
+  const selectableCount = orphans.length - (tourHoldsPractice && practiceId !== null ? 1 : 0);
+  const allSelected = selectableCount > 0 && selectedIds.size === selectableCount;
 
   return (
     <Card>
@@ -431,6 +438,7 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
                       <Checkbox
                         checked={selectedIds.has(orphan.id)}
                         onCheckedChange={() => toggleId(orphan.id)}
+                        disabled={heldByTour(orphan.id)}
                         aria-label={t('columns.select')}
                       />
                     </TableCell>
@@ -458,6 +466,7 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
                         size="sm"
                         variant="outline"
                         onClick={() => void openRelink(orphan)}
+                        disabled={heldByTour(orphan.id)}
                         data-testid={`orphan-relink-${orphan.id}`}
                       >
                         {t('actions.relink')}
@@ -466,6 +475,7 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
                         size="sm"
                         variant="destructive"
                         onClick={() => setPendingDelete(orphan)}
+                        disabled={heldByTour(orphan.id)}
                         data-testid={`orphan-delete-${orphan.id}`}
                       >
                         {t('actions.delete')}

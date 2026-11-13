@@ -510,5 +510,32 @@
   "templateImportFailed": "テンプレートのインポートに失敗しました：{{message}}",
   "templateDeleted": "テンプレート「{{name}}」を削除しました。",
   "templateDeleteFailed": "テンプレートの削除に失敗しました：{{message}}",
-  "templateExportFailed": "テンプレートのエクスポートに失敗しました：{{message}}"
+  "templateExportFailed": "テンプレートのエクスポートに失敗しました：{{message}}",
+  "providerCard": {
+    "title": "翻訳プロバイダー",
+    "scope": "このプロジェクトに適用されます。今後作成する新しいプロジェクトも同じ設定を使います。",
+    "scopeCollab": "あなた自身の選択です。共有されているすべてのプロジェクトで使われます。",
+    "freeway": "NARN Freeway（無料）",
+    "freewayHint": "保管庫にある無料キーを使い、言語ごとに適した無料モデルを選びます。",
+    "noFreeKey": "保管庫にはまだ無料キーがありません。NARN Freewayには少なくとも1つ必要です。",
+    "addFreeKey": "無料キーを追加",
+    "own": "自分のプロバイダー",
+    "ownPlaceholder": "プロバイダーを選択",
+    "freeOnlyOption": "{{provider}}（単独、Freewayのプールなし）",
+    "keySaved": "キー保存済み",
+    "noKey": "キーなし",
+    "keyMissing": "保管庫にはまだ{{provider}}のキーがありません。",
+    "vaultLocked": "キーを確認するには保管庫のロックを解除してください。",
+    "addKey": "キーを追加",
+    "paidNote": "{{provider}}のアカウントに課金されます。",
+    "freeOnlyNote": "{{provider}}だけが翻訳します。NARN Freewayのプールにある他の無料モデルは使いません。",
+    "pendingNote": "キーが保存されると{{provider}}が使われます。それまではNARN Freewayが翻訳します。",
+    "pendingNoteOwn": "キーが保存されると{{provider}}が使われます。それまでは{{current}}が翻訳します。",
+    "customRouting": "このプロジェクトは詳細モードで設定したカスタムの振り分けを使っているため、ここでは変更しません。",
+    "openAdvanced": "詳細モードで開く",
+    "loading": "プロバイダーの選択を読み込んでいます…",
+    "translatedBy": "翻訳：{{provider}}",
+    "translatedByCustom": "このプロジェクトのカスタムの振り分けで翻訳",
+    "change": "変更"
+  }
 }

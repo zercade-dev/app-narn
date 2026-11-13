@@ -16,12 +16,18 @@ export interface TourProgress {
  * null until the run it asked for is listed; `decision` is the person's
  * answer to "translate the rest?". `restRunId` is the run that answer
  * produced: the decision is recorded together with it, once it is listed.
+ * `runsBefore`: the project's translation runs listed when the test was asked
+ * for, so the run it produced is known as soon as it is listed (see
+ * `quickTestRunId`), even one that is already finished by then; `requestedAt`
+ * (browser time) rules out older runs a run list not yet loaded would miss.
  */
 export interface QuickTest {
   projectId: string;
   runId: string | null;
   decision: 'pending' | 'rest' | 'skip';
   restRunId?: string;
+  runsBefore?: string[];
+  requestedAt?: number;
 }
 
 /**
@@ -48,6 +54,20 @@ interface GuideState {
   firstRunFinished: boolean;
   /** Module instance id chosen via "Use my own provider", e.g. `openai:default`. */
   simpleProvider: string | null;
+  /**
+   * Choices still to be applied once their provider's key is saved, keyed by
+   * target (a project id, or `collab` for the person's own collaborator
+   * routing), valued by module instance id. Set when a provider was chosen
+   * for a target, or a project was created, before the key was in the vault.
+   */
+  pendingProviders: Record<string, string>;
+  /**
+   * For each pending choice, the module the target was routed to when the
+   * choice was stored (`freeway`, a module id, or `custom`). A target whose
+   * routing has changed since (in Advanced, or another tab) is not written.
+   * Absent for a choice stored before this was recorded: no check.
+   */
+  pendingRoutedFrom: Record<string, string>;
   exportedOnce: boolean;
   /**
    * Module ids the guide has already enabled for the person (`google:default`,
@@ -97,6 +117,12 @@ interface GuideState {
   resumeFirstRun: (forced?: boolean) => void;
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
+  /**
+   * Remember (`moduleId`) or forget (`null`) the pending choice for `target`.
+   * `routedFrom` is what the target is routed to now (see `pendingRoutedFrom`).
+   */
+  setPendingProvider: (target: string, moduleId: string | null, routedFrom?: string) => void;
+  clearPendingProviders: () => void;
   setQuickTest: (quickTest: QuickTest | null) => void;
   /** The answer to "translate the rest?"; nothing without a quick test. */
   decideQuickTest: (decision: 'rest' | 'skip') => void;
@@ -154,6 +180,8 @@ export const useGuideStore = create<GuideState>()(
       firstRunDismissed: false,
       firstRunFinished: false,
       simpleProvider: null,
+      pendingProviders: {},
+      pendingRoutedFrom: {},
       exportedOnce: false,
       enabledProviders: [],
       completedTours: [],
@@ -184,6 +212,19 @@ export const useGuideStore = create<GuideState>()(
           tourProgress: withCompleted(s.tourProgress, FIRST_RUN_PROGRESS_ID),
         })),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
+      setPendingProvider: (target, moduleId, routedFrom) =>
+        set((s) => {
+          const { [target]: _dropped, ...rest } = s.pendingProviders;
+          const { [target]: _droppedFrom, ...restFrom } = s.pendingRoutedFrom ?? {};
+          return {
+            pendingProviders: moduleId === null ? rest : { ...rest, [target]: moduleId },
+            pendingRoutedFrom:
+              moduleId === null || routedFrom === undefined
+                ? restFrom
+                : { ...restFrom, [target]: routedFrom },
+          };
+        }),
+      clearPendingProviders: () => set({ pendingProviders: {}, pendingRoutedFrom: {} }),
       setQuickTest: (quickTest) => set({ quickTest }),
       decideQuickTest: (decision) =>
         set((s) => (s.quickTest ? { quickTest: { ...s.quickTest, decision } } : s)),
@@ -223,7 +264,7 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
-      // `quickTest` and `orphanSim` were added within v1: a state saved
+      // `quickTest`, `orphanSim`, `pendingProviders` and `pendingRoutedFrom` were added within v1: a state saved
       // without them rehydrates with the default (null), so no version bump
       // is needed.
       version: 1,
@@ -233,6 +274,8 @@ export const useGuideStore = create<GuideState>()(
         firstRunDismissed: state.firstRunDismissed,
         firstRunFinished: state.firstRunFinished,
         simpleProvider: state.simpleProvider,
+        pendingProviders: state.pendingProviders,
+        pendingRoutedFrom: state.pendingRoutedFrom,
         exportedOnce: state.exportedOnce,
         enabledProviders: state.enabledProviders,
         completedTours: state.completedTours,

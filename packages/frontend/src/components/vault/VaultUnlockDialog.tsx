@@ -21,6 +21,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 
 interface VaultUnlockDialogProps {
   open: boolean;
@@ -92,6 +93,8 @@ export function VaultUnlockDialog({
   onUnlocked,
 }: Readonly<VaultUnlockDialogProps>) {
   const { t } = useTranslation('vault');
+  // The guide's Back from its password step: closed as a dismiss would.
+  useCloseOnGuideBack(open, 'vault-password-input', () => onOpenChange(false));
   const hasVault = useVaultStore((s) => s.hasVault);
   const setupRequired = useVaultStore((s) => s.setupRequired);
   const cloudManaged = useVaultStore((s) => s.cloudManaged);

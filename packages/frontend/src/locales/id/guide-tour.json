@@ -14,6 +14,7 @@
       "getGoogleKey": "Dapatkan kunci Google gratis",
       "addGoogleKey": "Tempel kunci Google saya",
       "ownProvider": "Gunakan penyedia saya sendiri",
+      "useFoundKey": "Gunakan {{provider}} untuk terjemahan Anda",
       "fixKey": "Periksa kunci saya",
       "retry": "Coba lagi",
       "stopRetry": "Hentikan dan coba lagi",
@@ -38,20 +39,21 @@
       "passwordWhat": "Ketik kata sandi brankas di sini, lalu konfirmasi dengan tombol di bawahnya."
     },
     "cloudVault": {
-      "title": "Pembuatan brankas dan penambahan satu kunci gratis",
-      "what": "Pilih kata sandi brankas, lalu tambahkan satu kunci gratis. Google direkomendasikan. Anda akan kembali ke sini setelah selesai.",
+      "title": "Buat brankas Anda dan tambahkan kunci",
+      "what": "Pilih kata sandi brankas, lalu tambahkan kunci. Untuk uji cepat, buat kunci Google AI gratis. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai.",
       "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda. Dengan kunci itulah penyedia AI mengenali Anda."
     },
     "cloudUnlock": {
       "what": "Buka kunci brankas di halaman brankas. Anda akan kembali ke sini setelah selesai."
     },
     "cloudKey": {
-      "what": "Tambahkan satu kunci gratis di halaman brankas. Google direkomendasikan. Anda akan kembali ke sini setelah selesai."
+      "what": "Tambahkan kunci di halaman brankas. Untuk uji cepat, buat kunci Google AI gratis. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai."
     },
     "key": {
-      "title": "Penambahan satu kunci gratis",
-      "why": "NARN Freeway memakai model AI gratis, dan dengan kunci itulah penyedia mengenali Anda.",
-      "choiceWhat": "Buat kunci Google AI gratis, lalu tempel ke brankas.",
+      "title": "Tambahkan kunci untuk mulai menerjemahkan",
+      "why": "Dengan kunci gratis, NARN Freeway menerjemahkan game Anda tanpa biaya selama Anda mencobanya. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
+      "whyOwn": "Dengan kunci {{provider}} Anda, {{provider}} mengenali Anda. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
+      "choiceWhat": "Untuk uji cepat, buat kunci Google AI gratis lalu tempelkan ke brankas Anda. Sudah punya kunci untuk penyedia yang didukung? Pilih “Gunakan penyedia saya sendiri”.",
       "pasteWhat": "Tempel kunci di sini, ketik kata sandi brankas di bawahnya, lalu simpan."
     },
     "project": {
@@ -69,12 +71,14 @@
     "translate": {
       "title": "Penerjemahan",
       "why": "Freeway otomatis memilih model gratis yang sesuai untuk tiap bahasa.",
+      "whyOwn": "{{provider}} menerjemahkan proyek ini dengan kunci Anda sendiri.",
+      "whyCustom": "Penyaluran proyek ini, yang diatur di Lanjutan, memilih penyedia untuk tiap entri.",
       "openWhat": "Buka tab yang memuat daftar entri.",
-      "quickWhat": "3 entri pertama sudah dipilih. Terjemahkan untuk mencoba, atau terjemahkan semuanya sekarang.",
+      "quickWhat": "3 entri yang belum diterjemahkan sudah dipilih. Terjemahkan untuk mencoba, atau terjemahkan semuanya sekarang.",
       "fewWhat": "Entri Anda sudah dipilih. Terjemahkan sekarang.",
-      "selectWhat": "Pilih semua entri.",
-      "pressWhat": "Buka dialog penerjemahan.",
       "startWhat": "Mulai penerjemahan.",
+      "nothingWhat": "File Anda sudah memiliki terjemahan untuk setiap bahasa yang dipilih, jadi tidak ada yang perlu diterjemahkan.",
+      "nothingWhy": "Untuk menambah bahasa, centang di tab Data lalu simpan. Jika tidak, lanjutkan untuk mengekspor file Anda.",
       "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
       "progressWhy": "Tur berlanjut setelah penerjemahan selesai."
     },
@@ -83,6 +87,8 @@
       "why": "Bilah yang disorot di bawah menunjukkan apa yang terjadi.",
       "authWhat": "Penyedia menolak kunci Anda. Periksa kuncinya, lalu coba lagi.",
       "quotaWhat": "Kuota gratis sedang habis. Tunggu sebentar atau tambahkan kunci lain, lalu coba lagi.",
+      "quotaWhatOwn": "{{provider}} menolak untuk sementara: kuota atau kredit akun Anda habis. Periksa paket Anda di penyedia, lalu coba lagi.",
+      "quotaWhatCustom": "Salah satu penyedia dalam penyaluran proyek ini menolak untuk sementara: kuota atau kredit habis. Tunggu sebentar atau periksa paket di penyedia, lalu coba lagi.",
       "otherWhat": "Tidak ada yang diterjemahkan. Periksa kunci Anda, lalu coba lagi."
     },
     "parked": {
@@ -97,8 +103,9 @@
     },
     "rest": {
       "title": "Uji coba berhasil",
-      "what": "3 entri pertama Anda sudah diterjemahkan ke semua bahasa yang dipilih. Terjemahkan sisanya sekarang, atau ekspor yang sudah ada.",
-      "why": "Sisanya bisa diterjemahkan nanti dari daftar entri."
+      "what": "3 entri uji Anda sudah diterjemahkan ke semua bahasa yang dipilih. Terjemahkan sisanya sekarang, atau ekspor yang sudah ada.",
+      "why": "Sisanya bisa diterjemahkan nanti dari daftar entri.",
+      "skipped": "Sisanya bisa menunggu. Unduh yang sudah diterjemahkan."
     },
     "export": {
       "title": "Ekspor",
@@ -115,10 +122,15 @@
   },
   "providerChoice": {
     "title": "Gunakan penyedia saya sendiri",
-    "description": "Pilih penyedia yang kuncinya Anda miliki. NARN akan mengirim setiap terjemahan dalam proyek Anda ke penyedia itu. Untuk menggabungkan beberapa penyedia, beralihlah ke Lanjutan.",
+    "description": "Pilih penyedia yang kuncinya Anda miliki. Penyedia itu menerjemahkan proyek ini dan proyek baru yang Anda buat. Untuk menggabungkan beberapa penyedia, beralihlah ke Lanjutan.",
     "existingRouting": "Proyek ini sudah memiliki penyaluran, jadi dibiarkan apa adanya. Anda dapat mengubahnya di Lanjutan.",
+    "freeHeading": "Penyedia ini memiliki kunci gratis. Jika Anda memilih salah satunya, hanya penyedia itu yang menerjemahkan, tanpa model gratis lain dalam kumpulan NARN Freeway.",
     "cancel": "Batal",
-    "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}"
+    "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}",
+    "switchedOff": "{{provider}} dimatikan di Lanjutan, jadi tidak dipakai. Nyalakan lagi di Konfigurasi Global, atau pilih penyedia lain.",
+    "waitingForKey": "Belum ada kunci {{provider}} di brankas Anda, jadi untuk sementara NARN Freeway yang menerjemahkan. Tambahkan kuncinya, atau pilih NARN Freeway di tab Konfigurasi proyek.",
+    "applied": "{{provider}} sekarang menerjemahkan {{project}}.",
+    "appliedCollab": "{{provider}} sekarang menerjemahkan proyek yang dibagikan kepada Anda."
   },
   "offer": {
     "start": "Tunjukkan",
@@ -359,7 +371,7 @@
     },
     "create": {
       "title": "Buat glosarium",
-      "what": "Mulai glosarium baru yang kosong di sini.",
+      "what": "Mulai glosarium baru yang kosong di sini, atau tekan Berikutnya untuk lanjut membaca.",
       "why": "Satu glosarium sering kali cukup. Gunakan lebih banyak untuk memisahkan kelompok istilah."
     },
     "add-term": {

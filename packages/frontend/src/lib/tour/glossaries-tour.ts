@@ -7,14 +7,18 @@ import type { GuideFacts, Tour, TourStep } from './types.js';
 
 export const GLOSSARIES_TOUR_ID = 'glossaries';
 
-function step(id: string, anchor: string | null): TourStep {
+function step(
+  id: string,
+  anchor: string | null,
+  advance: TourStep['advance'] = { kind: 'next' },
+): TourStep {
   return {
     id,
     anchor,
     titleKey: `glossariesTour.${id}.title`,
     whatKey: `glossariesTour.${id}.what`,
     whyKey: `glossariesTour.${id}.why`,
-    advance: { kind: 'next' },
+    advance,
   };
 }
 
@@ -24,18 +28,22 @@ function step(id: string, anchor: string | null): TourStep {
  */
 const TO_GLOSSARY: NonNullable<TourStep['navigate']> = { tab: 'glossary' };
 
-/** The AI generation step is shown only when an AI provider key is usable. */
+/** The AI generation step is shown only when an AI provider key is in the vault. */
 export function glossariesTour(f: GuideFacts): Tour {
   return {
     id: GLOSSARIES_TOUR_ID,
     steps: [
       { ...step('purpose', 'glossary-list'), navigate: TO_GLOSSARY },
-      step('create', 'glossary-create'),
+      // Next is always there; creating the first glossary selects it, and its
+      // enable button appearing moves the tour on.
+      step('create', 'glossary-create', { kind: 'next', advanceOnAppear: 'glossary-enabled' }),
+      // The anchors below exist only for a selected, editable glossary: without
+      // one, the step is a centred callout with Next.
       step('add-term', 'glossary-add-term'),
       // Enabling a glossary is what applies it to this project.
       step('assign', 'glossary-enabled'),
       step('effect', null),
-      ...(f.usableKey ? [step('generate', 'glossary-generate')] : []),
+      ...(f.aiKeyUsable ? [step('generate', 'glossary-generate')] : []),
     ],
   };
 }

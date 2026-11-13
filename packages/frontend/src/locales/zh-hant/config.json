@@ -510,5 +510,32 @@
   "templateImportFailed": "範本匯入失敗：{{message}}",
   "templateDeleted": "已刪除範本「{{name}}」。",
   "templateDeleteFailed": "無法刪除範本：{{message}}",
-  "templateExportFailed": "範本匯出失敗：{{message}}"
+  "templateExportFailed": "範本匯出失敗：{{message}}",
+  "providerCard": {
+    "title": "翻譯供應商",
+    "scope": "套用於此專案。您之後新建的專案也會使用相同設定。",
+    "scopeCollab": "您自己的選擇，用於與您共用的每個專案。",
+    "freeway": "NARN Freeway（免費）",
+    "freewayHint": "使用保險庫中的免費金鑰，為每種語言選擇合適的免費模型。",
+    "noFreeKey": "保險庫中還沒有免費金鑰。NARN Freeway 至少需要一組。",
+    "addFreeKey": "新增免費金鑰",
+    "own": "我自己的供應商",
+    "ownPlaceholder": "選擇供應商",
+    "freeOnlyOption": "{{provider}}（單獨使用，不含 Freeway 模型池）",
+    "keySaved": "金鑰已儲存",
+    "noKey": "無金鑰",
+    "keyMissing": "保險庫中還沒有 {{provider}} 的金鑰。",
+    "vaultLocked": "請解鎖保險庫以檢查金鑰。",
+    "addKey": "新增金鑰",
+    "paidNote": "費用從您的 {{provider}} 帳戶支付。",
+    "freeOnlyNote": "只由 {{provider}} 翻譯，不使用 NARN Freeway 模型池中的其他免費模型。",
+    "pendingNote": "儲存金鑰後即使用 {{provider}}。在此之前由 NARN Freeway 翻譯。",
+    "pendingNoteOwn": "儲存金鑰後即使用 {{provider}}。在此之前由 {{current}} 翻譯。",
+    "customRouting": "此專案使用在進階模式中設定的自訂分派，因此不在這裡變更。",
+    "openAdvanced": "在進階模式中開啟",
+    "loading": "正在載入您的供應商選擇…",
+    "translatedBy": "由 {{provider}} 翻譯",
+    "translatedByCustom": "依此專案的自訂分派翻譯",
+    "change": "變更"
+  }
 }

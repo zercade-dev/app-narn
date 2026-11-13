@@ -518,5 +518,32 @@
   "templateImportFailed": "Importazione dello schema non riuscita: {{message}}",
   "templateDeleted": "Schema “{{name}}” eliminato.",
   "templateDeleteFailed": "Impossibile eliminare lo schema: {{message}}",
-  "templateExportFailed": "Esportazione dello schema non riuscita: {{message}}"
+  "templateExportFailed": "Esportazione dello schema non riuscita: {{message}}",
+  "providerCard": {
+    "title": "Provider di traduzione",
+    "scope": "Questo progetto. I nuovi progetti che crei usano lo stesso.",
+    "scopeCollab": "La tua scelta personale, usata in ogni progetto condiviso con te.",
+    "freeway": "NARN Freeway (gratis)",
+    "freewayHint": "Sceglie un modello gratuito adatto a ogni lingua, usando le chiavi gratuite della tua cassaforte.",
+    "noFreeKey": "Nessuna chiave gratuita nella tua cassaforte per ora. NARN Freeway ne richiede almeno una.",
+    "addFreeKey": "Aggiungi una chiave gratuita",
+    "own": "Il mio provider",
+    "ownPlaceholder": "Scegli un provider",
+    "freeOnlyOption": "{{provider}} (da solo, senza il pool di Freeway)",
+    "keySaved": "Chiave salvata",
+    "noKey": "Nessuna chiave",
+    "keyMissing": "Nessuna chiave {{provider}} nella tua cassaforte per ora.",
+    "vaultLocked": "Sblocca la cassaforte per controllare la chiave.",
+    "addKey": "Aggiungi chiave",
+    "paidNote": "Pagato dal tuo account {{provider}}.",
+    "freeOnlyNote": "Traduce solo {{provider}}, senza gli altri modelli gratuiti del pool di NARN Freeway.",
+    "pendingNote": "{{provider}} verrà usato appena salvi la sua chiave. Fino ad allora traduce NARN Freeway.",
+    "pendingNoteOwn": "{{provider}} verrà usato appena salvi la sua chiave. Fino ad allora traduce {{current}}.",
+    "customRouting": "Questo progetto usa un routing personalizzato configurato in Avanzata, quindi qui non viene modificato.",
+    "openAdvanced": "Apri in Avanzata",
+    "loading": "Caricamento della tua scelta di provider…",
+    "translatedBy": "Tradotto da {{provider}}",
+    "translatedByCustom": "Tradotto con il routing personalizzato di questo progetto",
+    "change": "Cambia"
+  }
 }

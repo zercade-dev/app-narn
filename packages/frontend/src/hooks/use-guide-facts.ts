@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { RunStatusCode, type RunStatus } from '@zercade-dev/narn-shared';
 import { isRunActive, isTranslationRun } from '../lib/run-kind.js';
-import { FREE_KEYS, providerKeyFor } from '../lib/simple-provider.js';
+import { FREE_KEYS, isAiProviderKey, providerKeyFor } from '../lib/simple-provider.js';
 import type { RunStall } from '../lib/tour/first-run.js';
-import { hasUntranslatedEntry } from '../lib/tour/quick-test.js';
+import {
+  hasUntranslatedEntry,
+  quickTestRunId,
+  realTargetLanguages,
+} from '../lib/tour/quick-test.js';
 import type { GuideFacts } from '../lib/tour/types.js';
+import { routedModuleOf, routingGroupsOf } from '../lib/provider-choice.js';
+import { useCollabRoutingStore } from '../stores/collab-routing-store.js';
 import { useGuideStore } from '../stores/guide-store.js';
-import { useProjectStore } from '../stores/project-store.js';
+import { accessFor, useProjectStore } from '../stores/project-store.js';
 import { useRunStore } from '../stores/run-store.js';
 import { useSelectionStore } from '../stores/selection-store.js';
 import { useStringStore } from '../stores/string-store.js';
@@ -63,14 +69,36 @@ export function useGuideFacts(): GuideFacts {
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const simpleProvider = useGuideStore((s) => s.simpleProvider);
   const ownKey = simpleProvider ? providerKeyFor(simpleProvider) : undefined;
+  // What the active project routes to now (its owner's routing, or the
+  // collaborator's own): that provider's key is usable too, whatever was
+  // chosen in the guide.
+  const activeRole = useProjectStore((s) => {
+    const id = activeProjectIdOf(s);
+    return id === null ? null : accessFor(s, id).role;
+  });
+  const projectRouted = useProjectStore((s) => {
+    const project = s.projects.find((p) => p.id === s.activeProjectId);
+    return project
+      ? routedModuleOf(routingGroupsOf(project.routingRules, project.routingRuleGroups))
+      : null;
+  });
+  const collabRouted = useCollabRoutingStore((s) =>
+    s.state === 'loaded' && s.doc
+      ? routedModuleOf(routingGroupsOf(s.doc.routingRules, s.doc.routingRuleGroups))
+      : null,
+  );
+  const routed = activeRole === 'collaborator' ? collabRouted : projectRouted;
+  const routedKey = routed ? providerKeyFor(routed) : undefined;
   // `keys` is only trusted while unlocked: a list seen earlier says nothing
   // about what the person can use now.
   const usableKey = useVaultStore(
     (s) =>
       s.unlocked &&
       (FREE_KEYS.some((k) => s.keys.includes(k)) ||
-        (ownKey !== undefined && s.keys.includes(ownKey))),
+        (ownKey !== undefined && s.keys.includes(ownKey)) ||
+        (routedKey !== undefined && s.keys.includes(routedKey))),
   );
+  const aiKeyUsable = useVaultStore((s) => s.unlocked && s.keys.some(isAiProviderKey));
   const exported = useGuideStore((s) => s.exportedOnce);
   const activeProjectId = useProjectStore(activeProjectIdOf);
   const projectHasLanguages = useProjectStore(
@@ -97,11 +125,11 @@ export function useGuideFacts(): GuideFacts {
   const hasSelection = useSelectionStore(
     (s) => relevant && activeProjectId !== null && s.selectedIds.size > 0,
   );
-  // The project's target languages, as a string so the selector stays stable.
-  const targetLanguages = useProjectStore((s) => {
-    const p = s.projects.find((x) => x.id === s.activeProjectId);
-    return p ? p.activeLanguages.filter((l) => l !== p.sourceLanguage).join('\n') : '';
-  });
+  // The project's real target languages (no source, no Pseudo-test), as a
+  // string so the selector stays stable.
+  const targetLanguages = useProjectStore((s) =>
+    realTargetLanguages(s.projects.find((x) => x.id === s.activeProjectId)).join('\n'),
+  );
   const untranslatedRemain = useStringStore(
     (s) =>
       relevant &&
@@ -110,12 +138,33 @@ export function useGuideFacts(): GuideFacts {
       targetLanguages !== '' &&
       hasUntranslatedEntry(s.entries, targetLanguages.split('\n')),
   );
+  // A translation of the project still going (it may be what fills the entries in).
+  const translationGoing = useRunStore(
+    (s) =>
+      relevant &&
+      activeProjectId !== null &&
+      s.runs.some(
+        (r) =>
+          r.projectId === activeProjectId &&
+          isTranslationRun(r) &&
+          (isRunActive(r) || r.status === RunStatusCode.Paused),
+      ),
+  );
+  // Only with a real target language: a project with none (or Pseudo-test
+  // only) has not had its translations done, it has nothing chosen.
+  const nothingToTranslate =
+    projectHasEntries && targetLanguages !== '' && !untranslatedRemain && !translationGoing;
   const quickTest = useGuideStore((s) => s.quickTest);
+  // Recorded, or listed since it was asked for: a run finished before the
+  // guide recorded it still makes the test pending.
+  const quickTestRunKnown = useRunStore(
+    (s) => relevant && quickTestRunId(quickTest, s.runs) !== null,
+  );
   const quickTestPending =
     quickTest !== null &&
     quickTest.projectId === activeProjectId &&
     quickTest.decision === 'pending' &&
-    quickTest.runId !== null &&
+    quickTestRunKnown &&
     translationExists &&
     untranslatedRemain;
   const restRunId =
@@ -139,6 +188,7 @@ export function useGuideFacts(): GuideFacts {
       vaultExists: cloud ? !setupRequired : hasVault,
       vaultUnlocked,
       usableKey,
+      aiKeyUsable,
       projectExists: activeProjectId !== null,
       projectHasLanguages,
       projectHasEntries,
@@ -147,6 +197,7 @@ export function useGuideFacts(): GuideFacts {
       hasSelection,
       isCollaboratorOnly,
       untranslatedRemain,
+      nothingToTranslate,
       quickTestPending,
       restRunning,
     };
@@ -156,6 +207,7 @@ export function useGuideFacts(): GuideFacts {
     hasVault,
     vaultUnlocked,
     usableKey,
+    aiKeyUsable,
     exported,
     hasSelection,
     activeProjectId,
@@ -164,6 +216,7 @@ export function useGuideFacts(): GuideFacts {
     translationExists,
     isCollaboratorOnly,
     untranslatedRemain,
+    nothingToTranslate,
     quickTestPending,
     restRunning,
   ]);

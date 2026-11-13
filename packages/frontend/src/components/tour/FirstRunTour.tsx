@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
 import {
   useFirstRunActive,
@@ -13,44 +14,59 @@ import { useProviderSetup } from '../../hooks/use-provider-setup.js';
 import { useTourAnchor } from '../../hooks/use-tour-anchor.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { goToVaultSetup } from '../../lib/auth-redirect.js';
-import { isTranslationRun } from '../../lib/run-kind.js';
+import { isRunActive, isTranslationRun } from '../../lib/run-kind.js';
+import { RunStatusCode, type RunStatus } from '@zercade-dev/narn-shared';
 import { statusLineRun } from '../../lib/run-status-line.js';
+import { useProjectProvider } from '../../hooks/use-project-provider.js';
+import {
+  chooseProvider,
+  routedModuleNow,
+  type ProviderChoiceResult,
+  type ProviderTarget,
+} from '../../lib/provider-choice.js';
 import {
   FREE_KEY_PROVIDERS,
+  foundOwnProviderKey,
   GOOGLE_KEY_URL,
-  providerInstanceId,
   providerKeyFor,
+  providerName,
 } from '../../lib/simple-provider.js';
 import {
   FIRST_RUN_ACTION_EVENT,
   FIRST_RUN_FORM_ANCHORS,
   FIRST_RUN_TOUR_ID,
+  firstRunBack,
   firstRunShownIndex,
+  firstRunStepApplies,
   firstRunStepIndex,
   firstRunTourFor,
   type FirstRunAction,
+  type FirstRunScreen,
 } from '../../lib/tour/first-run.js';
+import { closeFormEvent } from '../../lib/tour/close-form.js';
 import { ADVANCED_SECTIONS_TOUR_ID } from '../../lib/tour/advanced-sections.js';
 import { tourPosition } from '../../lib/tour/position.js';
 import {
-  isTranslatableEntry,
   QUICK_TEST_SIZE,
   quickTestEntryIds,
   quickTestFilters,
+  quickTestRunId,
+  realTargetLanguages,
   requestGuideTranslation,
-  translatableEntryIds,
   untranslatedEntryIds,
 } from '../../lib/tour/quick-test.js';
 import { getErrorMessage } from '../../lib/utils.js';
 import { vaultEditorOpenEvent, vaultLockedEvent } from '../../lib/vault-events.js';
 import { useGuideStore } from '../../stores/guide-store.js';
-import { useProjectStore } from '../../stores/project-store.js';
+import { accessFor, useProjectStore } from '../../stores/project-store.js';
 import { useRunStore } from '../../stores/run-store.js';
 import { useSelectionStore } from '../../stores/selection-store.js';
 import { useStringStore } from '../../stores/string-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
+import { ProviderSheet, TranslatedByLine } from '../config/TranslatedByLine.js';
 import { RunProgressCard } from '../runs/RunProgressCard.js';
 import { ProviderChoice } from './ProviderChoice.js';
+import type { TourText } from './TourCallout.js';
 import { TourOverlay } from './TourOverlay.js';
 
 const GOOGLE_KEY = 'GOOGLE_API_KEY';
@@ -117,6 +133,44 @@ export function FirstRunTour({ suspended }: FirstRunTourProps) {
   return <ActiveFirstRunTour facts={facts} />;
 }
 
+/** Steps that say who will translate ("Translated by <provider> · Change"). */
+const TRANSLATED_BY_STEPS = new Set([
+  'translate-open',
+  'translate-quick',
+  'translate-start',
+  // Before "Translate the rest": a paid provider's cost note comes first.
+  'translate-rest',
+  'translate-failed-auth',
+  'translate-failed-quota',
+  'translate-failed-other',
+]);
+
+/** Own-provider wordings of the Freeway sentences, keyed by the Freeway key. */
+const OWN_PROVIDER_COPY: Readonly<Record<string, string>> = {
+  'firstRun.translate.why': 'firstRun.translate.whyOwn',
+  'firstRun.key.why': 'firstRun.key.whyOwn',
+  'firstRun.failed.quotaWhat': 'firstRun.failed.quotaWhatOwn',
+};
+const CUSTOM_ROUTING_COPY: Readonly<Record<string, string>> = {
+  'firstRun.translate.why': 'firstRun.translate.whyCustom',
+  // Custom routing may not use Freeway at all: no "free quota" wording.
+  'firstRun.failed.quotaWhat': 'firstRun.failed.quotaWhatCustom',
+};
+
+/**
+ * The provider the guide's copy is about: the active project's (its real
+ * routing), else, before there is a project, the person's choice.
+ */
+function useGuideProvider(projectId: string | null): {
+  kind: 'freeway' | 'own' | 'custom';
+  moduleId?: string;
+} {
+  const { provider } = useProjectProvider(projectId);
+  const chosen = useGuideStore((s) => s.simpleProvider);
+  if (provider) return provider;
+  return chosen ? { kind: 'own', moduleId: chosen } : { kind: 'freeway' };
+}
+
 /** `{ key }` for the vault page when the person chose their own provider. */
 function chosenKey(): { key?: string } {
   const own = useGuideStore.getState().simpleProvider;
@@ -124,14 +178,75 @@ function chosenKey(): { key?: string } {
   return key ? { key } : {};
 }
 
+/** The active project's real target languages (no source, no Pseudo-test). */
+function activeTargets(): string[] {
+  const s = useProjectStore.getState();
+  return realTargetLanguages(s.projects.find((p) => p.id === s.activeProjectId));
+}
+
+/** Translation runs of `projectId` listed right now. */
+function translationRunIdsOf(projectId: string): string[] {
+  return useRunStore
+    .getState()
+    .runs.filter((r) => r.projectId === projectId && isTranslationRun(r))
+    .map((r) => r.runId);
+}
+
+/** Ended having translated something: the facts then know where the guide goes. */
+const translatedSomething = (run: RunStatus | undefined): boolean =>
+  run !== undefined &&
+  run.completed > 0 &&
+  !isRunActive(run) &&
+  run.status !== RunStatusCode.Paused;
+
+/**
+ * The own provider the active project already routes to (a module id), if
+ * any: its key counts as the one to use, and it is never offered a replacement.
+ */
+function routedOwnNow(): string | null {
+  const s = useProjectStore.getState();
+  const id = s.activeProjectId;
+  if (id === null || !s.projects.some((p) => p.id === id)) return null;
+  const target: ProviderTarget =
+    accessFor(s, id).role === 'owner' ? { kind: 'project', projectId: id } : { kind: 'collab' };
+  const routed = routedModuleNow(target);
+  return routed === undefined || routed === 'freeway' || routed === 'custom' ? null : routed;
+}
+
+/** The active project as a place to write a provider choice, when it is the person's own. */
+function ownedTarget(): ProviderTarget | null {
+  const s = useProjectStore.getState();
+  const project = s.projects.find((p) => p.id === s.activeProjectId);
+  return project && accessFor(s, project.id).role === 'owner'
+    ? { kind: 'project', projectId: project.id }
+    : null;
+}
+
 function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
-  // Three entries or fewer: the quick test would be everything, so no choice.
+  const { t: tGuide } = useTranslation('guide-tour');
+  // Three entries or fewer still to translate: the quick test would be
+  // everything, so no choice.
+  const targets = useProjectStore((s) =>
+    realTargetLanguages(s.projects.find((p) => p.id === s.activeProjectId)).join('\n'),
+  );
   const fewEntries = useStringStore(
-    (s) => s.entries.filter(isTranslatableEntry).length <= QUICK_TEST_SIZE,
+    (s) =>
+      untranslatedEntryIds(s.entries, targets ? targets.split('\n') : []).length <= QUICK_TEST_SIZE,
   );
   // Running in Advanced (restarted there from the Guide): no switch to flip at the end.
   const advanced = useUiMode() !== 'simple';
-  const tour = firstRunTourFor(facts, { fewEntries, advanced });
+  // The vault holds a key the person could use, but no free key and no choice:
+  // offer it in one click instead of a step they cannot get past.
+  const simpleProvider = useGuideStore((s) => s.simpleProvider);
+  const activeId = useProjectStore((s) => s.activeProjectId);
+  const { provider: routedProvider } = useProjectProvider(activeId);
+  const routedOwn = routedProvider?.kind === 'own' ? routedProvider.moduleId : null;
+  const foundBase = useVaultStore((s) =>
+    s.unlocked && !facts.usableKey && simpleProvider === null
+      ? foundOwnProviderKey(s.keys, facts.cloud, routedOwn)
+      : null,
+  );
+  const tour = firstRunTourFor(facts, { fewEntries, advanced, foundKey: foundBase !== null });
   const resumeAt = firstRunStepIndex(facts);
   const derived = resumeAt === 'done' ? tour.steps.length - 1 : resumeAt;
 
@@ -144,22 +259,38 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   // "Open the form" / "use the form" sub-steps follow the form itself, and
   // "the translation is running" follows the run.
-  const [vaultFormAnchor, keyEditorAnchor] = FIRST_RUN_FORM_ANCHORS;
+  const [vaultFormAnchor, keyEditorAnchor, dialogStartAnchor, importSheetAnchor] =
+    FIRST_RUN_FORM_ANCHORS;
   const vaultFormOpen = useTourAnchor(vaultFormAnchor) !== null;
   const keyEditorOpen = useTourAnchor(keyEditorAnchor) !== null;
+  const dialogStart = useTourAnchor(dialogStartAnchor);
+  const dialogOpen = dialogStart !== null;
+  const importSheetOpen = useTourAnchor(importSheetAnchor) !== null;
   const stalled = useFirstRunStall();
   // "Try again" sets the failed run aside, so the guide does not show its
   // failure again while the new run has not been listed yet.
   const [retriedRunId, setRetriedRunId] = useState<string | null>(null);
   const runStall = stalled && stalled.runId !== retriedRunId ? stalled.stall : null;
-  const shown = useCallback(
-    (at: number) =>
-      firstRunShownIndex(tour, at, {
-        isOnScreen: (anchor) => (anchor === vaultFormAnchor ? vaultFormOpen : keyEditorOpen),
-        runStall,
-      }),
-    [tour, vaultFormAnchor, vaultFormOpen, keyEditorOpen, runStall],
-  );
+  const screen: FirstRunScreen = useMemo(() => {
+    const open: Readonly<Record<string, boolean>> = {
+      [vaultFormAnchor]: vaultFormOpen,
+      [keyEditorAnchor]: keyEditorOpen,
+      [dialogStartAnchor]: dialogOpen,
+      [importSheetAnchor]: importSheetOpen,
+    };
+    return { isOnScreen: (anchor) => open[anchor] ?? false, runStall };
+  }, [
+    vaultFormAnchor,
+    keyEditorAnchor,
+    dialogStartAnchor,
+    importSheetAnchor,
+    vaultFormOpen,
+    keyEditorOpen,
+    dialogOpen,
+    importSheetOpen,
+    runStall,
+  ]);
+  const shown = useCallback((at: number) => firstRunShownIndex(tour, at, screen), [tour, screen]);
   const shownIndex = shown(index);
   const shownStep = tour.steps[shownIndex];
   const stepPosition = tourPosition(tour, shownIndex);
@@ -171,39 +302,94 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   }, [countedIndex]);
 
   const lastIndex = tour.steps.length - 1;
-  const move = useCallback(
-    (delta: 1 | -1) => {
-      let target = Math.max(0, Math.min(lastIndex, shownIndex + delta));
-      // Next from a step whose neighbours are other views of itself (a form
-      // pair with the form closed, the run-failure variants): go past them.
-      while (delta > 0 && target < lastIndex && shown(target) <= shownIndex) target += 1;
-      setPosition((p) => ({ ...p, index: target }));
-    },
-    [lastIndex, shownIndex, shown],
-  );
-  const onAdvance = useCallback(() => move(1), [move]);
-  const onBack = useCallback(() => move(-1), [move]);
-  const onExit = useCallback(() => useGuideStore.getState().dismissFirstRun(), []);
+  const onAdvance = useCallback(() => {
+    let target = Math.min(lastIndex, shownIndex + 1);
+    // Past the steps that are other views of this one (a form pair with the
+    // form closed, the run-failure variants), and past a step the facts rule
+    // out ("nothing to translate" when there is, the quick test when there is not).
+    const skip = (at: number): boolean =>
+      !firstRunStepApplies(tour.steps[at], facts) || shown(at) <= shownIndex;
+    while (target < lastIndex && skip(target)) target += 1;
+    setPosition((p) => ({ ...p, index: target }));
+  }, [lastIndex, shownIndex, shown, tour, facts]);
+  // Back closes a form the step points into, or goes to the step before,
+  // never onto a variant (see `firstRunBack`).
+  const onBack = useCallback(() => {
+    const back = firstRunBack(tour, shownIndex, facts, screen);
+    if (back.closeForm) globalThis.dispatchEvent(closeFormEvent(back.closeForm));
+    setPosition((p) => ({ ...p, index: back.index }));
+  }, [tour, shownIndex, facts, screen]);
+  // Leaving at the closing step is the end of the first run, not a skip: it
+  // was all done, so nothing is left to continue.
+  const atClosingStep = shownStep?.id === 'closing';
+  const onExit = useCallback(() => {
+    const guide = useGuideStore.getState();
+    if (atClosingStep) guide.finishFirstRun();
+    else guide.dismissFirstRun();
+  }, [atClosingStep]);
 
   const [choiceOpen, setChoiceOpen] = useState(false);
+  // The provider card, opened from "Translated by … · Change".
+  const [cardOpen, setCardOpen] = useState(false);
   const cloud = facts.cloud;
   const stalledRunId = stalled?.runId ?? null;
   const runQueuedBehind = stalled?.queuedBehind ?? false;
   const projectId = useProjectStore((state) => state.activeProjectId);
+
+  // What became of a provider choice, said where the person is looking.
+  const onProviderChosen = useCallback(
+    ({ base, result }: { base: string; result: ProviderChoiceResult }) => {
+      setChoiceOpen(false);
+      const name = providerName(base);
+      switch (result.status) {
+        case 'applied':
+          // Usable now: the facts move the guide on by themselves.
+          return;
+        case 'switched-off':
+          toast.warning(tGuide('providerChoice.switchedOff', { provider: name }));
+          return;
+        case 'routing-kept':
+          toast.info(tGuide('providerChoice.existingRouting'));
+          return;
+        case 'needs-key':
+          if (!result.vaultKey) return;
+          if (cloud) goToVaultSetup({ guided: true, key: result.vaultKey });
+          else globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey: result.vaultKey }));
+      }
+    },
+    [cloud, tGuide],
+  );
+  const reportChoice = useCallback(
+    (base: string, pending: Promise<ProviderChoiceResult>) => {
+      void pending
+        .then((result) => onProviderChosen({ base, result }))
+        .catch((err: unknown) =>
+          toast.error(
+            tGuide('providerChoice.failed', {
+              provider: providerName(base),
+              message: getErrorMessage(err),
+            }),
+          ),
+        );
+    },
+    [onProviderChosen, tGuide],
+  );
 
   // The run the guide asked for (its progress shows in the callout).
   const [guideRunId, setGuideRunId] = useState<string | null>(null);
   // "Translate everything" / "Translate them" was asked for: the run that
   // appears is not a quick test, so none is recorded for it.
   const translatingAll = useRef(false);
+  // The facts as last rendered, for an action that must know where they lead.
+  const factsRef = useRef(facts);
+  useEffect(() => {
+    factsRef.current = facts;
+  });
 
   useEffect(() => {
+    // The quick test again, with its choices (it re-selects its entries).
     const startAgain = () => {
-      // Entries from the failed attempt are usually still selected: go straight
-      // to the button that needs them, not to a ticked "select all".
-      const selected = useSelectionStore.getState().selectedIds.size > 0;
-      const target = selected ? 'translate-selected' : 'select-all';
-      const at = tour.steps.findIndex((step) => step.id === target);
+      const at = tour.steps.findIndex((step) => step.id === 'translate-quick');
       if (at >= 0) setPosition((p) => ({ ...p, index: at }));
     };
     const onAction = (e: Event) => {
@@ -225,9 +411,16 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'own-provider':
           setChoiceOpen(true);
           break;
+        case 'use-found-key': {
+          const { keys } = useVaultStore.getState();
+          const base = foundOwnProviderKey(keys, cloud, routedOwnNow());
+          if (base) reportChoice(base, chooseProvider(base, ownedTarget()));
+          break;
+        }
         case 'fix-key': {
           if (cloud) {
-            goToVaultSetup();
+            // Guided: the vault page keeps the step indicator and comes back here.
+            goToVaultSetup({ guided: true, ...chosenKey() });
             break;
           }
           // The key translations are actually using: the chosen provider's, else a free one.
@@ -264,31 +457,61 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'translate-quick': {
           if (!projectId) break;
           translatingAll.current = false;
-          // The run id is filled in once the run is listed (see below).
-          useGuideStore.getState().setQuickTest({ projectId, runId: null, decision: 'pending' });
-          requestGuideTranslation(quickTestEntryIds(useStringStore.getState().entries));
+          // The run is known as soon as it is listed, finished or not (see
+          // `quickTestRunId`); its id is recorded below.
+          useGuideStore.getState().setQuickTest({
+            projectId,
+            runId: null,
+            decision: 'pending',
+            runsBefore: translationRunIdsOf(projectId),
+            requestedAt: Date.now(),
+          });
+          requestGuideTranslation(
+            quickTestEntryIds(useStringStore.getState().entries, activeTargets()),
+          );
           break;
         }
         case 'translate-everything':
         case 'translate-few':
           translatingAll.current = true;
           useGuideStore.getState().setQuickTest(null);
-          requestGuideTranslation(translatableEntryIds(useStringStore.getState().entries));
+          // What still needs translating: the server skips the rest anyway.
+          requestGuideTranslation(
+            untranslatedEntryIds(useStringStore.getState().entries, activeTargets()),
+          );
           break;
-        case 'translate-rest': {
+        case 'translate-rest':
           // The decision is recorded with the run it produced (see below): a
           // request refused before a run exists leaves the choice on screen.
-          const project = useProjectStore.getState().projects.find((p) => p.id === projectId);
-          const targets = (project?.activeLanguages ?? []).filter(
-            (lang) => lang !== project?.sourceLanguage,
-          );
           // Untranslated only (the dialog's default), so the three already done are skipped.
-          requestGuideTranslation(untranslatedEntryIds(useStringStore.getState().entries, targets));
+          requestGuideTranslation(
+            untranslatedEntryIds(useStringStore.getState().entries, activeTargets()),
+          );
+          break;
+        case 'skip-rest': {
+          // Decided, whatever was recorded: a quick test the guide never saw
+          // (or reached via Back) must not leave this button doing nothing.
+          // A rest run already asked for keeps its decision (the facts follow it).
+          const guide = useGuideStore.getState();
+          const quick = guide.quickTest;
+          if (quick?.projectId === projectId) {
+            if (quick.decision !== 'rest') guide.decideQuickTest('skip');
+          } else if (projectId) {
+            guide.setQuickTest({ projectId, runId: null, decision: 'skip' });
+          }
+          // Straight to the download (its step opens the Data tab), keeping
+          // the position the facts will point at once the decision is in.
+          const next = firstRunStepIndex({ ...factsRef.current, quickTestPending: false });
+          const exportAt = tour.steps.findIndex((step) => step.id === 'export');
+          if (exportAt >= 0) {
+            setPosition({
+              derived: next === 'done' ? tour.steps.length - 1 : next,
+              index: exportAt,
+            });
+          }
+          toast.success(tGuide('firstRun.rest.skipped'));
           break;
         }
-        case 'skip-rest':
-          useGuideStore.getState().decideQuickTest('skip');
-          break;
         case 'tour-sections': {
           const guide = useGuideStore.getState();
           guide.finishFirstRun();
@@ -302,37 +525,101 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     };
     globalThis.addEventListener(FIRST_RUN_ACTION_EVENT, onAction);
     return () => globalThis.removeEventListener(FIRST_RUN_ACTION_EVENT, onAction);
-  }, [cloud, stalledRunId, runQueuedBehind, projectId, tour]);
+  }, [cloud, stalledRunId, runQueuedBehind, projectId, tour, reportChoice, tGuide]);
 
-  // Entering the quick test: the table shows every entry in import order, and
-  // the three to try are selected, so the checked rows are the ones on screen.
-  const atQuick = shownStep?.id === 'translate-quick';
+  // The quick test is the position, whichever half shows: the callout's
+  // choices, or Start in the dialog opened from the highlighted button (see
+  // FORM_STEPS). Back from the progress step lands on that Start too.
+  const positionId = tour.steps[index]?.id;
+  const atQuick = positionId === 'translate-quick' || positionId === 'translate-start';
+
+  // Entering the quick test: the table shows every entry in import order, the
+  // three to try are selected, and the table opens the page that holds the
+  // first of them (it may sit after many rows the file already translates),
+  // so the checked rows are the ones on screen.
   useEffect(() => {
     if (!atQuick) return;
     translatingAll.current = false;
     const strings = useStringStore.getState();
     strings.setFilter(quickTestFilters(strings.filters));
-    useSelectionStore.getState().selectAll(quickTestEntryIds(strings.entries));
+    const picks = quickTestEntryIds(strings.entries, activeTargets());
+    useSelectionStore.getState().selectAll(picks);
+    strings.revealEntry(picks[0] ?? null);
+    return () => useStringStore.getState().revealEntry(null);
   }, [atQuick]);
 
-  // The quick test, "Start the translation" and "Translate the rest" are done
-  // when the request produced a run: the ids listed when the step came up are
-  // the baseline, and any other is new.
+  // Start pressed in the dialog opened over the quick test: the run it
+  // produces is the quick test, known from the run list as soon as it is
+  // listed. Read before the dialog sends the request (capture phase), and only
+  // on Start: a dialog closed without starting leaves nothing behind.
+  useEffect(() => {
+    if (!dialogStart || !atQuick || !projectId) return;
+    const onStart = () => {
+      if (translatingAll.current) return;
+      useGuideStore.getState().setQuickTest({
+        projectId,
+        runId: null,
+        decision: 'pending',
+        runsBefore: translationRunIdsOf(projectId),
+        requestedAt: Date.now(),
+      });
+    };
+    dialogStart.addEventListener('click', onStart, true);
+    return () => dialogStart.removeEventListener('click', onStart, true);
+  }, [dialogStart, atQuick, projectId]);
+
+  const progressIndex = tour.steps.findIndex((s) => s.id === 'translate-progress');
+
+  // A quick test asked for (callout or dialog) whose run is now listed: record
+  // it, whatever is on screen. The facts already count it (`quickTestRunId`),
+  // so a run that is finished the first time it is listed goes straight to
+  // "translate the rest?"; a run still going, or one that translated nothing,
+  // is followed on the progress step.
+  const quickTest = useGuideStore((s) => s.quickTest);
+  const listedQuickRunId = useRunStore((s) =>
+    quickTest?.decision === 'pending' && quickTest.runId === null
+      ? quickTestRunId(quickTest, s.runs)
+      : null,
+  );
+  const listedQuickRun = useRunStore((s) =>
+    listedQuickRunId === null ? undefined : s.runs.find((r) => r.runId === listedQuickRunId),
+  );
+  const [followedRunId, setFollowedRunId] = useState<string | null>(null);
+  if (listedQuickRunId !== null && followedRunId !== listedQuickRunId) {
+    setFollowedRunId(listedQuickRunId);
+    if (!translatedSomething(listedQuickRun)) {
+      setPosition((p) => ({ ...p, index: progressIndex }));
+    }
+  }
+  useEffect(() => {
+    if (listedQuickRunId === null) return;
+    const guide = useGuideStore.getState();
+    const quick = guide.quickTest;
+    if (!quick || quick.runId !== null || quick.decision !== 'pending') return;
+    guide.setQuickTest({
+      projectId: quick.projectId,
+      runId: listedQuickRunId,
+      decision: 'pending',
+    });
+  }, [listedQuickRunId]);
+  // The quick test's run, for its progress in the callout.
+  const quickRunId =
+    quickTest?.decision === 'pending' && quickTest.projectId === projectId
+      ? (quickTest.runId ?? listedQuickRunId)
+      : null;
+
+  // The other runs the guide asks for ("Translate everything", "Translate the
+  // rest", the highlighted button pressed without the callout) are done when
+  // the request produced a run: the ids listed when the step came up are the
+  // baseline, and any other is new.
   const translationRunIds = useRunStore((s) =>
     s.runs
       .filter((r) => r.projectId === projectId && isTranslationRun(r))
       .map((r) => r.runId)
       .join('\n'),
   );
-  const waitingFor = atQuick
-    ? 'quick'
-    : shownStep?.id === 'translate-start'
-      ? 'start'
-      : shownStep?.id === 'translate-rest'
-        ? 'rest'
-        : null;
+  const waitingFor = atQuick ? 'quick' : shownStep?.id === 'translate-rest' ? 'rest' : null;
   const runsBefore = useRef<{ for: string; ids: Set<string> } | null>(null);
-  const progressIndex = tour.steps.findIndex((s) => s.id === 'translate-progress');
   useEffect(() => {
     if (waitingFor === null) {
       runsBefore.current = null;
@@ -346,69 +633,66 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     const known = runsBefore.current.ids;
     const fresh = ids.find((id) => !known.has(id));
     if (fresh === undefined) return;
-    setGuideRunId(fresh);
-    if (waitingFor === 'start') {
-      onAdvance();
-      return;
-    }
+    known.add(fresh);
     const guide = useGuideStore.getState();
     const quick = guide.quickTest;
     if (waitingFor === 'rest') {
+      setGuideRunId(fresh);
       // The facts then hold the guide on this run's progress until it settles.
       if (quick) guide.setQuickTest({ ...quick, decision: 'rest', restRunId: fresh });
       return;
     }
-    if (projectId && (quick === null || quick.projectId !== projectId)) {
-      // The highlighted button was pressed instead of a callout action: the
-      // run is the three entries selected for the quick test.
-      if (!translatingAll.current) {
-        guide.setQuickTest({ projectId, runId: fresh, decision: 'pending' });
-      }
-    } else if (quick?.decision === 'pending' && quick.runId === null) {
-      guide.setQuickTest({ ...quick, runId: fresh });
+    // A quick test asked for is recorded above, once its run is recognised.
+    if (quick?.projectId === projectId && quick.runId === fresh) return;
+    if (quickTestRunId(quick, useRunStore.getState().runs) === fresh) return;
+    setGuideRunId(fresh);
+    if (projectId && !translatingAll.current) {
+      // The highlighted button was used some other way than the dialog the
+      // guide follows: the run is the entries selected for the quick test.
+      guide.setQuickTest({ projectId, runId: fresh, decision: 'pending' });
     }
-    // Past the "Try again" steps that stand in for this one.
+    // Past the steps that stand in for this one.
     setPosition((p) => ({ ...p, index: progressIndex }));
-  }, [waitingFor, translationRunIds, onAdvance, projectId, progressIndex]);
+  }, [waitingFor, translationRunIds, projectId, progressIndex]);
 
   // While the run goes, the callout shows its progress: the run the guide
   // started, else the one the console's status line describes.
   const statusRunId = useRunStore((s) => statusLineRun(s.runs, projectId)?.runId ?? null);
-  const progressRunId = guideRunId ?? statusRunId;
-  const extra =
+  const progressRunId = quickRunId ?? guideRunId ?? statusRunId;
+  // The closing step is on screen: a switch to Advanced now starts a tour.
+  useEffect(() => {
+    useGuideStore.getState().setClosingShown(atClosingStep);
+    return () => useGuideStore.getState().setClosingShown(false);
+  }, [atClosingStep]);
+
+  // Who translates, for the copy and the "Translated by" line.
+  const guideProvider = useGuideProvider(projectId);
+  const text: TourText = useMemo(() => {
+    if (foundBase !== null) return { values: { provider: providerName(foundBase) } };
+    if (guideProvider.kind === 'custom') return { keys: CUSTOM_ROUTING_COPY };
+    if (guideProvider.kind === 'own' && guideProvider.moduleId) {
+      return {
+        keys: OWN_PROVIDER_COPY,
+        values: { provider: providerName(guideProvider.moduleId) },
+      };
+    }
+    return {};
+  }, [foundBase, guideProvider.kind, guideProvider.moduleId]);
+
+  const progressCard =
     shownStep?.id === 'translate-progress' && progressRunId ? (
       <RunProgressCard runId={progressRunId} variant="callout" />
     ) : undefined;
-
-  // The closing step is on screen: a switch to Advanced now starts a tour.
-  const atClosing = shownStep?.id === 'closing';
-  useEffect(() => {
-    useGuideStore.getState().setClosingShown(atClosing);
-    return () => useGuideStore.getState().setClosingShown(false);
-  }, [atClosing]);
-
-  const onProviderChosen = useCallback(
-    ({ base, vaultKey }: { base: string; vaultKey: string | undefined }) => {
-      // Remembered first: in cloud the next thing may be a trip to the vault
-      // page, and the provider is enabled when the person comes back.
-      useGuideStore.getState().setSimpleProvider(providerInstanceId(base));
-      setChoiceOpen(false);
-      const { unlocked, keys } = useVaultStore.getState();
-      // Already usable: the facts move the guide on by themselves.
-      if (!vaultKey || (unlocked && keys.includes(vaultKey))) return;
-      if (cloud) {
-        goToVaultSetup({ guided: true, key: vaultKey });
-        return;
-      }
-      globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey: vaultKey }));
-    },
-    [cloud],
-  );
+  const extra =
+    progressCard ??
+    (shownStep && TRANSLATED_BY_STEPS.has(shownStep.id) ? (
+      <TranslatedByLine projectId={projectId} onChange={() => setCardOpen(true)} />
+    ) : undefined);
 
   return (
     <>
-      {/* The provider list replaces the callout while it is open. */}
-      {!choiceOpen && (
+      {/* The provider list and the provider card replace the callout while open. */}
+      {!choiceOpen && !cardOpen && (
         <TourOverlay
           tour={tour}
           stepIndex={shownIndex}
@@ -416,6 +700,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
           // No counter on a step outside the five (the closing step).
           position={shownStep?.major !== undefined ? stepPosition : undefined}
           extra={extra}
+          text={text}
           onAdvance={onAdvance}
           onBack={onBack}
           onExit={onExit}
@@ -427,6 +712,9 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         cloud={cloud}
         onChosen={onProviderChosen}
       />
+      {projectId && (
+        <ProviderSheet projectId={projectId} open={cardOpen} onOpenChange={setCardOpen} />
+      )}
     </>
   );
 }

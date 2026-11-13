@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGuideFacts } from '../../hooks/use-guide-facts.js';
-import { AREA_TOURS, isAreaTourId } from '../../lib/tour/area-tours.js';
+import { areaTourFor, isAreaTourId } from '../../lib/tour/area-tours.js';
 import { catalogTour, type CatalogTourContext } from '../../lib/tour/catalog.js';
 import { FIRST_RUN_TOUR_ID } from '../../lib/tour/first-run.js';
+import { endOrphansTour } from '../../lib/tour/end-orphans-tour.js';
+import { ORPHANS_TOUR_ID } from '../../lib/tour/orphans-tour.js';
 import {
   countedStepIndex,
   nextCountedIndex,
@@ -12,6 +15,7 @@ import {
 import type { Tour } from '../../lib/tour/types.js';
 import { useGuideStore } from '../../stores/guide-store.js';
 import { accessFor, useProjectStore } from '../../stores/project-store.js';
+import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { TourOverlay } from './TourOverlay.js';
 
@@ -24,7 +28,7 @@ function tourFor(id: string | null, ctx: CatalogTourContext): Tour | undefined {
   if (id === null || id === FIRST_RUN_TOUR_ID) return undefined;
   const entry = catalogTour(id);
   if (entry) return entry.build(ctx);
-  return isAreaTourId(id) ? AREA_TOURS[id] : undefined;
+  return isAreaTourId(id) ? areaTourFor(id, ctx.facts) : undefined;
 }
 
 /**
@@ -43,6 +47,20 @@ export function TourHost() {
   const cloudManaged = useVaultStore((s) => s.cloudManaged ?? false);
   const access = useProjectStore((s) => accessFor(s, s.activeProjectId));
   const ctx = useMemo(() => ({ facts, access, cloudManaged }), [facts, access, cloudManaged]);
+
+  // A tour of what Advanced adds cannot go on in Simple: its tabs and views
+  // are gone, and the callouts would describe things no longer on screen. It
+  // ends (its place is kept, so the Guide can continue it); it is not a "no
+  // thanks", so an area offer may still come back.
+  const { t } = useTranslation('guide-tour');
+  const simple = useUiSettings((s) => s.uiMode) === 'simple';
+  useEffect(() => {
+    if (!simple || activeTourId === null || !needsAdvanced(activeTourId)) return;
+    // The Orphans tab is gone in Simple: a practice orphan still out goes back now.
+    if (activeTourId === ORPHANS_TOUR_ID) endOrphansTour(t, { putBack: true });
+    else useGuideStore.getState().endTour(false);
+  }, [simple, activeTourId, t]);
+
   // A catalog tour with its own controller runs it in place of the default runner.
   const Controller = activeTourId === null ? undefined : catalogTour(activeTourId)?.controller;
   const tour = useMemo(
@@ -52,6 +70,12 @@ export function TourHost() {
   if (Controller) return <Controller key={`${activeTourId}:${startSeq}`} {...ctx} />;
   if (!tour) return null;
   return <RunningTour key={`${tour.id}:${startSeq}`} tour={tour} facts={facts} />;
+}
+
+/** Whether tour `id` shows areas only Advanced has (an area tour always does). */
+function needsAdvanced(id: string): boolean {
+  if (id === FIRST_RUN_TOUR_ID) return false;
+  return catalogTour(id)?.needsAdvanced ?? isAreaTourId(id);
 }
 
 function RunningTour({ tour, facts }: { tour: Tour; facts: CatalogTourContext['facts'] }) {
