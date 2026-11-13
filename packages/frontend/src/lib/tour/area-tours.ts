@@ -63,15 +63,16 @@ export const AREA_TOURS: Record<AreaTourId, Tour> = {
   },
 };
 
-/**
- * The tour to run for `id`. The glossary tour drops its AI generation step
- * when no AI provider key is usable. Built once, so step identity is stable.
- */
+/** Built once, so step identity is stable. */
 const GLOSSARY_WITHOUT_AI: Tour = {
   id: 'glossary',
   steps: AREA_TOURS.glossary.steps.filter((s) => s.id !== 'generate'),
 };
 
+/**
+ * The tour to run for `id`. The glossary tour drops its AI generation step
+ * when no AI provider key is usable.
+ */
 export function areaTourFor(id: AreaTourId, f: GuideFacts): Tour {
   return id === 'glossary' && !f.aiKeyUsable ? GLOSSARY_WITHOUT_AI : AREA_TOURS[id];
 }

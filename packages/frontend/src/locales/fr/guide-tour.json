@@ -368,7 +368,7 @@
     },
     "create": {
       "title": "Créer un glossaire",
-      "what": "Commencez ici un nouveau glossaire vide.",
+      "what": "Commencez ici un nouveau glossaire vide, ou appuyez sur Suivant pour poursuivre la lecture.",
       "why": "Un seul glossaire suffit souvent. Utilisez-en plusieurs pour séparer des groupes de termes."
     },
     "add-term": {

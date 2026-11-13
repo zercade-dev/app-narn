@@ -228,6 +228,21 @@ export function TourOverlay({
   // A Next that waits for a control (see `TourAdvance`).
   const nextNeeds = step?.advance.kind === 'next' ? (step.advance.needs ?? null) : null;
   const neededControl = useTourAnchor(nextNeeds);
+  // A `next` step that moves on when a control appears (see `TourAdvance`).
+  const appearAnchor =
+    step?.advance.kind === 'next' ? (step.advance.advanceOnAppear ?? null) : null;
+  const appeared = useTourAnchor(appearAnchor) !== null;
+  const wasAbsent = useRef<string | null>(null);
+  useEffect(() => {
+    if (appearAnchor === null) return;
+    if (!appeared) {
+      wasAbsent.current = stepKey;
+      return;
+    }
+    if (wasAbsent.current !== stepKey) return;
+    wasAbsent.current = null;
+    onAdvanceRef.current();
+  }, [appeared, appearAnchor, stepKey]);
 
   if (!step) return null;
 

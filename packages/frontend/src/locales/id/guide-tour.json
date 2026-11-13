@@ -368,7 +368,7 @@
     },
     "create": {
       "title": "Buat glosarium",
-      "what": "Mulai glosarium baru yang kosong di sini.",
+      "what": "Mulai glosarium baru yang kosong di sini, atau tekan Berikutnya untuk lanjut membaca.",
       "why": "Satu glosarium sering kali cukup. Gunakan lebih banyak untuk memisahkan kelompok istilah."
     },
     "add-term": {

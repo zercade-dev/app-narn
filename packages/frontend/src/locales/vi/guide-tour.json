@@ -368,7 +368,7 @@
     },
     "create": {
       "title": "Tạo bảng thuật ngữ",
-      "what": "Bắt đầu một bảng thuật ngữ mới, trống tại đây.",
+      "what": "Bắt đầu một bảng thuật ngữ mới, trống tại đây, hoặc nhấn Tiếp theo để đọc tiếp.",
       "why": "Thường một bảng thuật ngữ là đủ. Dùng nhiều bảng để tách riêng các nhóm thuật ngữ."
     },
     "add-term": {

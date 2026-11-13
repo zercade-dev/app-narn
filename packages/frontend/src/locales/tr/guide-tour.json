@@ -368,7 +368,7 @@
     },
     "create": {
       "title": "Sözlükçe oluştur",
-      "what": "Burada yeni, boş bir sözlükçe başlatın.",
+      "what": "Burada yeni, boş bir sözlükçe başlatın ya da okumaya devam etmek için İleri'ye basın.",
       "why": "Çoğu zaman tek bir sözlükçe yeterlidir. Terim gruplarını ayrı tutmak için daha fazlasını kullanın."
     },
     "add-term": {

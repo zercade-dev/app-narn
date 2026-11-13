@@ -28,25 +28,20 @@ function step(
  */
 const TO_GLOSSARY: NonNullable<TourStep['navigate']> = { tab: 'glossary' };
 
-/**
- * Waits for the control the step is about, which exists only once a glossary is
- * selected. A collaborator has no editing controls, so they are never held.
- */
-function needs(anchor: string): TourStep['advance'] {
-  return { kind: 'next', needs: anchor, unlessDone: (f) => f.isCollaboratorOnly };
-}
-
 /** The AI generation step is shown only when an AI provider key is in the vault. */
 export function glossariesTour(f: GuideFacts): Tour {
   return {
     id: GLOSSARIES_TOUR_ID,
     steps: [
       { ...step('purpose', 'glossary-list'), navigate: TO_GLOSSARY },
-      // Next waits for a glossary to exist (its enable button shows once one is selected).
-      step('create', 'glossary-create', needs('glossary-enabled')),
-      step('add-term', 'glossary-add-term', needs('glossary-add-term')),
+      // Next is always there; creating the first glossary selects it, and its
+      // enable button appearing moves the tour on.
+      step('create', 'glossary-create', { kind: 'next', advanceOnAppear: 'glossary-enabled' }),
+      // The anchors below exist only for a selected, editable glossary: without
+      // one, the step is a centred callout with Next.
+      step('add-term', 'glossary-add-term'),
       // Enabling a glossary is what applies it to this project.
-      step('assign', 'glossary-enabled', needs('glossary-enabled')),
+      step('assign', 'glossary-enabled'),
       step('effect', null),
       ...(f.aiKeyUsable ? [step('generate', 'glossary-generate')] : []),
     ],

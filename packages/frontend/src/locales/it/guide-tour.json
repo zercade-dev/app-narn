@@ -368,7 +368,7 @@
     },
     "create": {
       "title": "Crea un glossario",
-      "what": "Inizia qui un glossario nuovo e vuoto.",
+      "what": "Inizia qui un glossario nuovo e vuoto, oppure premi Avanti per continuare a leggere.",
       "why": "Spesso basta un glossario. Usane di più per tenere separati gruppi di termini."
     },
     "add-term": {

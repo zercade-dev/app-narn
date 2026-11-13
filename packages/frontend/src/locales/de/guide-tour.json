@@ -368,7 +368,7 @@
     },
     "create": {
       "title": "Glossar anlegen",
-      "what": "Lege hier ein neues, leeres Glossar an.",
+      "what": "Lege hier ein neues, leeres Glossar an oder klicke auf Weiter, um weiterzulesen.",
       "why": "Oft reicht ein Glossar. Nutze mehrere, um Begriffsgruppen getrennt zu halten."
     },
     "add-term": {

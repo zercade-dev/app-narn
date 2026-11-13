@@ -51,6 +51,12 @@ export type TourAdvance =
       needs?: string;
       /** `needs` is waived once this holds: the step's work is already done (saved earlier). */
       unlessDone?: (f: GuideFacts) => boolean;
+      /**
+       * Advances by itself when this anchor appears while the step is shown
+       * (absent, then present). Already present on entry does not count, and
+       * Next stays available throughout.
+       */
+      advanceOnAppear?: string;
     }
   /** Completes when the anchored control is clicked. */
   | { kind: 'click' }

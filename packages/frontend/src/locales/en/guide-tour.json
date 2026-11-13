@@ -368,7 +368,7 @@
     },
     "create": {
       "title": "Create a glossary",
-      "what": "Start a new, empty glossary here.",
+      "what": "Start a new, empty glossary here, or press Next to read on.",
       "why": "One glossary is often enough. Use more to keep sets of terms apart."
     },
     "add-term": {
