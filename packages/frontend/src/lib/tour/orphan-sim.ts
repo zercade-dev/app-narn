@@ -3,8 +3,8 @@
  * re-import and put back the same way, so the person sees a real orphan
  * without losing anything.
  *
- * Why a re-import is reversible (verified by
- * `tests/unit/server/src/__tests__/orphan-simulation-roundtrip.test.ts`):
+ * Why a re-import is reversible (a server round-trip test holds the import
+ * route to each of these):
  * - A main entry's id hashes its source text, so a file of source texts
  *   rebuilds the same ids.
  * - A full replace marks every main entry missing from the file as orphaned
@@ -248,11 +248,12 @@ export async function simulateOrphan(
   try {
     await postImport(projectId, csv, 'full-replace');
   } catch (err) {
-    // The request may have failed after the server wrote: keep the handle
-    // only when the entry did become an orphan.
+    // The request may have failed after the server wrote: drop the handle
+    // only when the entry is known not to be an orphan. When even that check
+    // fails, it may be one, so the handle stays and it can still be put back.
     const now = await loadPracticeState(sim).catch(() => null);
     if (now?.state !== 'orphaned') {
-      useGuideStore.getState().clearOrphanSim();
+      if (now !== null) useGuideStore.getState().clearOrphanSim();
       throw err;
     }
   }
