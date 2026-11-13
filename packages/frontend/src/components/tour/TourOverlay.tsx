@@ -233,7 +233,14 @@ export function TourOverlay({
     step?.advance.kind === 'next' ? (step.advance.advanceOnAppear ?? null) : null;
   const appeared = useTourAnchor(appearAnchor) !== null;
   const wasAbsent = useRef<string | null>(null);
+  const appearStepKey = useRef<string | null>(null);
   useEffect(() => {
+    // A new step forgets an absence seen on an earlier visit, so re-entering
+    // via Back with the control already there never moves on by itself.
+    if (appearStepKey.current !== stepKey) {
+      appearStepKey.current = stepKey;
+      wasAbsent.current = null;
+    }
     if (appearAnchor === null) return;
     if (!appeared) {
       wasAbsent.current = stepKey;
