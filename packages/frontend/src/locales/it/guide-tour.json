@@ -11,9 +11,8 @@
       "openVault": "Apri la finestra della cassaforte",
       "cloudVault": "Configura la cassaforte",
       "openVaultPage": "Apri la pagina della cassaforte",
-      "getGoogleKey": "Ottieni una chiave Google (piano gratuito)",
-      "addGoogleKey": "Incolla la mia chiave Google",
-      "ownProvider": "Usa il mio provider",
+      "chooseProvider": "Scegli un provider",
+      "getKey": "Dove trovo questa chiave?",
       "useFoundKey": "Usa {{provider}} per le tue traduzioni",
       "fixKey": "Controlla la mia chiave",
       "retry": "Riprova",
@@ -43,21 +42,31 @@
     },
     "cloudVault": {
       "title": "Crea la tua cassaforte e aggiungi una chiave",
-      "what": "Scegli una password per la cassaforte, poi aggiungi una chiave. Per una prova veloce, crea una chiave Google AI: il suo piano gratuito non costa nulla. Hai già una chiave di un provider supportato? Scegli prima “Usa il mio provider”. Tornerai qui al termine.",
+      "what": "Scegli una password per la cassaforte, poi aggiungi una chiave: scegli prima un provider. Per una prova veloce, sceglierne uno con piano gratuito. Tornerai qui al termine.",
       "why": "Le chiavi dei tuoi provider vengono cifrate con la tua password e restano sempre sotto il tuo controllo. La chiave serve al provider di IA per riconoscerti."
     },
     "cloudUnlock": {
       "what": "Sblocca la cassaforte nella pagina della cassaforte. Tornerai qui al termine."
     },
     "cloudKey": {
-      "what": "Aggiungi una chiave nella pagina della cassaforte. Per una prova veloce, crea una chiave Google AI: il suo piano gratuito non costa nulla. Hai già una chiave di un provider supportato? Scegli prima “Usa il mio provider”. Tornerai qui al termine."
+      "what": "Aggiungi una chiave nella pagina della cassaforte: scegli prima un provider. Per una prova veloce, sceglierne uno con piano gratuito. Tornerai qui al termine."
     },
     "key": {
       "title": "Aggiungi una chiave per iniziare a tradurre",
-      "why": "Google AI, Groq e OpenRouter hanno un piano gratuito: con una chiave di uno qualsiasi di loro, NARN Freeway traduce il tuo gioco senza costi mentre lo provi. Puoi cambiare provider in qualsiasi momento nella scheda Configurazione del progetto.",
+      "why": "La chiave è il modo in cui il provider sa che sei tu. Puoi cambiare provider in qualsiasi momento nella scheda Configurazione del progetto.",
       "whyOwn": "La tua chiave {{provider}} serve a {{provider}} per riconoscerti. Puoi cambiare provider in qualsiasi momento nella scheda Configurazione del progetto.",
-      "choiceWhat": "Per una prova veloce, crea una chiave Google AI: il suo piano gratuito non costa nulla. Hai già una chiave di un provider supportato? Scegli “Usa il mio provider”.",
+      "choiceWhat": "Scegli un provider e aggiungi la sua chiave. Per una prova veloce, scegline uno con piano gratuito.",
       "pasteWhat": "Incolla qui la chiave, digita sotto la password della cassaforte, poi salva."
+    },
+    "providerList": {
+      "title": "Scegli un provider",
+      "what": "Hai già una chiave? Seleziona il suo provider. Non ne hai ancora una? Premi Ottieni una chiave accanto a un provider per crearne una sul suo sito, poi selezionalo.",
+      "why": "Per una prova veloce, usa un provider con piano gratuito."
+    },
+    "providerCard": {
+      "title": "Chi traduce questo progetto",
+      "what": "Scegli chi traduce questo progetto.",
+      "why": "Premi Indietro per chiudere questo pannello e continuare con la guida."
     },
     "project": {
       "title": "Importazione del testo del gioco",
@@ -133,11 +142,13 @@
     }
   },
   "providerChoice": {
-    "title": "Usa il mio provider",
-    "description": "Scegli il provider di cui hai una chiave. Traduce questo progetto e i nuovi progetti che crei. Per combinare più provider, passa ad Avanzata.",
+    "title": "Scegli un provider",
+    "description": "Traduce questo progetto e i nuovi progetti che crei.",
     "existingRouting": "Questo progetto ha già un routing configurato, quindi resta com'è. Puoi cambiarlo in Avanzata.",
-    "freeHeading": "Piano gratuito. Se ne scegli uno, traduce solo quello, senza gli altri modelli gratuiti del pool di NARN Freeway.",
-    "paidHeading": "A pagamento, addebitato sul tuo account presso il provider.",
+    "freeHeading": "Con piano gratuito",
+    "paidHeading": "Senza piano gratuito",
+    "getKey": "Ottieni una chiave",
+    "getKeyAria": "Ottieni una chiave {{provider}} (apre il sito del provider)",
     "cancel": "Annulla",
     "failed": "Impossibile configurare {{provider}}: {{message}}",
     "switchedOff": "{{provider}} è disattivato in Avanzata, quindi non è stato usato. Riattivalo in Configurazione globale o scegli un altro provider.",

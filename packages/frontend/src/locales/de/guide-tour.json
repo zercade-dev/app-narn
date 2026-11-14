@@ -11,9 +11,8 @@
       "openVault": "Tresor-Formular öffnen",
       "cloudVault": "Tresor einrichten",
       "openVaultPage": "Tresor-Seite öffnen",
-      "getGoogleKey": "Google-Schlüssel holen (Gratis-Tarif)",
-      "addGoogleKey": "Meinen Google-Schlüssel einfügen",
-      "ownProvider": "Eigenen Anbieter verwenden",
+      "chooseProvider": "Anbieter wählen",
+      "getKey": "Wo bekomme ich diesen Schlüssel?",
       "useFoundKey": "{{provider}} für deine Übersetzungen verwenden",
       "fixKey": "Meinen Schlüssel prüfen",
       "retry": "Erneut versuchen",
@@ -43,21 +42,31 @@
     },
     "cloudVault": {
       "title": "Tresor erstellen und einen Schlüssel hinzufügen",
-      "what": "Wähle ein Tresor-Passwort und füge dann einen Schlüssel hinzu. Für einen schnellen Test erstelle einen Google-AI-Schlüssel: Der Gratis-Tarif kostet nichts. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann wähle zuerst „Eigenen Anbieter verwenden“. Danach kommst du hierher zurück.",
+      "what": "Wähle ein Tresor-Passwort und füge dann einen Schlüssel hinzu: Wähle zuerst einen Anbieter. Für einen schnellen Test nimm einen mit Gratis-Tarif. Danach kommst du hierher zurück.",
       "why": "Deine Anbieter-Schlüssel werden mit deinem Passwort verschlüsselt und bleiben immer unter deiner Kontrolle. Am Schlüssel erkennt der KI-Anbieter, dass du es bist."
     },
     "cloudUnlock": {
       "what": "Deinen Tresor auf der Tresor-Seite entsperren. Danach kommst du hierher zurück."
     },
     "cloudKey": {
-      "what": "Füge auf der Tresor-Seite einen Schlüssel hinzu. Für einen schnellen Test erstelle einen Google-AI-Schlüssel: Der Gratis-Tarif kostet nichts. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann wähle zuerst „Eigenen Anbieter verwenden“. Danach kommst du hierher zurück."
+      "what": "Füge auf der Tresor-Seite einen Schlüssel hinzu: Wähle zuerst einen Anbieter. Für einen schnellen Test nimm einen mit Gratis-Tarif. Danach kommst du hierher zurück."
     },
     "key": {
       "title": "Einen Schlüssel hinzufügen, um mit dem Übersetzen zu beginnen",
-      "why": "Google AI, Groq und OpenRouter haben einen Gratis-Tarif: Mit einem Schlüssel von einem dieser Anbieter übersetzt NARN Freeway dein Spiel kostenlos, während du es ausprobierst. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
+      "why": "Am Schlüssel erkennt der Anbieter, dass du es bist. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
       "whyOwn": "Am {{provider}}-Schlüssel erkennt {{provider}}, dass du es bist. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
-      "choiceWhat": "Für einen schnellen Test erstelle einen Google-AI-Schlüssel: Der Gratis-Tarif kostet nichts. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann wähle „Eigenen Anbieter verwenden“.",
+      "choiceWhat": "Wähle einen Anbieter und füge seinen Schlüssel hinzu. Für einen schnellen Test nimm einen mit Gratis-Tarif.",
       "pasteWhat": "Den Schlüssel hier einfügen, darunter dein Tresor-Passwort eingeben und speichern."
+    },
+    "providerList": {
+      "title": "Anbieter wählen",
+      "what": "Du hast schon einen Schlüssel? Wähle seinen Anbieter aus. Noch keinen? Drücke neben einem Anbieter auf „Schlüssel holen“, um auf dessen Seite einen zu erstellen, und wähle ihn dann aus.",
+      "why": "Für einen schnellen Test nimm einen Anbieter mit Gratis-Tarif."
+    },
+    "providerCard": {
+      "title": "Wer dieses Projekt übersetzt",
+      "what": "Wähle, wer dieses Projekt übersetzt.",
+      "why": "Drücke auf „Zurück“, um diesen Bereich zu schließen und mit der Anleitung weiterzumachen."
     },
     "project": {
       "title": "Text deines Spiels importieren",
@@ -133,11 +142,13 @@
     }
   },
   "providerChoice": {
-    "title": "Eigenen Anbieter verwenden",
-    "description": "Den Anbieter auswählen, für den du einen Schlüssel hast. Er übersetzt dieses Projekt und die neuen Projekte, die du erstellst. Um mehrere Anbieter zu kombinieren, zu „Erweitert“ wechseln.",
+    "title": "Anbieter wählen",
+    "description": "Er übersetzt dieses Projekt und die neuen Projekte, die du erstellst.",
     "existingRouting": "Für dieses Projekt ist bereits Routing eingerichtet, es bleibt daher unverändert. Ändern kannst du es unter „Erweitert“.",
-    "freeHeading": "Gratis-Tarif. Wenn du einen davon wählst, übersetzt nur er, ohne die anderen kostenlosen Modelle im NARN-Freeway-Pool.",
-    "paidHeading": "Kostenpflichtig, wird über dein Konto beim Anbieter abgerechnet.",
+    "freeHeading": "Mit Gratis-Tarif",
+    "paidHeading": "Ohne Gratis-Tarif",
+    "getKey": "Schlüssel holen",
+    "getKeyAria": "{{provider}}-Schlüssel holen (öffnet die Seite des Anbieters)",
     "cancel": "Abbrechen",
     "failed": "{{provider}} konnte nicht eingerichtet werden: {{message}}",
     "switchedOff": "{{provider}} ist unter „Erweitert“ ausgeschaltet und wurde daher nicht verwendet. Schalte ihn in der Globalen Konfiguration wieder ein oder wähle einen anderen Anbieter.",

@@ -11,9 +11,8 @@
       "openVault": "Kasa formunu aç",
       "cloudVault": "Kasayı kur",
       "openVaultPage": "Kasa sayfasını aç",
-      "getGoogleKey": "Google anahtarı al (ücretsiz katman)",
-      "addGoogleKey": "Google anahtarımı yapıştır",
-      "ownProvider": "Kendi sağlayıcımı kullan",
+      "chooseProvider": "Bir sağlayıcı seç",
+      "getKey": "Bu anahtarı nereden alırım?",
       "useFoundKey": "Çevirileriniz için {{provider}} kullanın",
       "fixKey": "Anahtarımı kontrol et",
       "retry": "Yeniden dene",
@@ -43,21 +42,31 @@
     },
     "cloudVault": {
       "title": "Kasanızı oluşturun ve bir anahtar ekleyin",
-      "what": "Bir kasa parolası belirleyin, ardından bir anahtar ekleyin. Hızlı bir deneme için bir Google AI anahtarı oluşturun: ücretsiz katmanı hiçbir şeye mal olmaz. Desteklenen bir sağlayıcının anahtarı zaten sizde mi? Önce “Kendi sağlayıcımı kullan”ı seçin. İşlem bitince buraya dönersiniz.",
+      "what": "Bir kasa parolası belirleyin, ardından bir anahtar ekleyin: önce bir sağlayıcı seçin. Hızlı bir deneme için ücretsiz katmanı olan birini seçin. İşlem bitince buraya dönersiniz.",
       "why": "Sağlayıcı anahtarlarınız parolanızla şifrelenir ve her zaman sizin kontrolünüzde kalır. Yapay zekâ sağlayıcısı sizi anahtar sayesinde tanır."
     },
     "cloudUnlock": {
       "what": "Kasa sayfasında kasanızın kilidini açın. İşlem bitince buraya dönersiniz."
     },
     "cloudKey": {
-      "what": "Kasa sayfasında bir anahtar ekleyin. Hızlı bir deneme için bir Google AI anahtarı oluşturun: ücretsiz katmanı hiçbir şeye mal olmaz. Desteklenen bir sağlayıcının anahtarı zaten sizde mi? Önce “Kendi sağlayıcımı kullan”ı seçin. İşlem bitince buraya dönersiniz."
+      "what": "Kasa sayfasından bir anahtar ekleyin: önce bir sağlayıcı seçin. Hızlı bir deneme için ücretsiz katmanı olan birini seçin. İşlem bitince buraya dönersiniz."
     },
     "key": {
       "title": "Çeviriye başlamak için bir anahtar ekleyin",
-      "why": "Google AI, Groq ve OpenRouter’ın ücretsiz katmanı var: bunlardan birinin anahtarıyla NARN Freeway, siz denerken oyununuzu ücretsiz çevirir. Sağlayıcıyı istediğiniz zaman projenin Yapılandırma sekmesinden değiştirebilirsiniz.",
+      "why": "Anahtar, sağlayıcının sizi tanımasını sağlar. Sağlayıcıyı istediğiniz zaman projenin Yapılandırma sekmesinden değiştirebilirsiniz.",
       "whyOwn": "{{provider}} sizi {{provider}} anahtarınız sayesinde tanır. Sağlayıcıyı istediğiniz zaman projenin Yapılandırma sekmesinden değiştirebilirsiniz.",
-      "choiceWhat": "Hızlı bir deneme için bir Google AI anahtarı oluşturun: ücretsiz katmanı hiçbir şeye mal olmaz. Desteklenen bir sağlayıcının anahtarı zaten sizde mi? “Kendi sağlayıcımı kullan”ı seçin.",
+      "choiceWhat": "Bir sağlayıcı seçin ve anahtarını ekleyin. Hızlı bir deneme için ücretsiz katmanı olan birini seçin.",
       "pasteWhat": "Anahtarı buraya yapıştırın, altına kasa parolanızı yazın, ardından kaydedin."
+    },
+    "providerList": {
+      "title": "Bir sağlayıcı seç",
+      "what": "Zaten bir anahtarınız var mı? Sağlayıcısını seçin. Henüz yoksa bir sağlayıcının yanındaki Anahtar al düğmesine basıp onun sitesinde bir anahtar oluşturun, sonra o sağlayıcıyı seçin.",
+      "why": "Hızlı bir deneme için ücretsiz katmanı olan bir sağlayıcı kullanın."
+    },
+    "providerCard": {
+      "title": "Bu projeyi kim çeviriyor",
+      "what": "Bu projeyi kimin çevireceğini seçin.",
+      "why": "Bu paneli kapatıp rehbere devam etmek için Geri'ye basın."
     },
     "project": {
       "title": "Oyun metnini içe aktarma",
@@ -133,11 +142,13 @@
     }
   },
   "providerChoice": {
-    "title": "Kendi sağlayıcımı kullan",
-    "description": "Anahtarına sahip olduğunuz sağlayıcıyı seçin. Bu projeyi ve oluşturduğunuz yeni projeleri o çevirir. Birden çok sağlayıcıyı birlikte kullanmak için Gelişmiş moda geçin.",
+    "title": "Bir sağlayıcı seç",
+    "description": "Bu projeyi ve oluşturduğunuz yeni projeleri o çevirir.",
     "existingRouting": "Bu projede yönlendirme zaten ayarlı, bu yüzden olduğu gibi kalır. Gelişmiş modda değiştirebilirsiniz.",
-    "freeHeading": "Ücretsiz katman. Birini seçerseniz yalnızca o çevirir; NARN Freeway havuzundaki diğer ücretsiz modeller kullanılmaz.",
-    "paidHeading": "Ücretli, sağlayıcıdaki hesabınıza faturalanır.",
+    "freeHeading": "Ücretsiz katmanı var",
+    "paidHeading": "Ücretsiz katmanı yok",
+    "getKey": "Anahtar al",
+    "getKeyAria": "{{provider}} anahtarı al (sağlayıcının sitesini açar)",
     "cancel": "İptal",
     "failed": "{{provider}} kurulamadı: {{message}}",
     "switchedOff": "{{provider}} Gelişmiş modda kapalı olduğu için kullanılmadı. Genel yapılandırmada yeniden açın veya başka bir sağlayıcı seçin.",

@@ -17,6 +17,23 @@ export const FREE_KEYS = [
 
 export const GOOGLE_KEY_URL = 'https://aistudio.google.com/apikey';
 
+/** Where each offered provider's API keys are made. */
+const PROVIDER_KEY_URLS: Readonly<Record<string, string>> = {
+  google: GOOGLE_KEY_URL,
+  groq: 'https://console.groq.com/keys',
+  openrouter: 'https://openrouter.ai/keys',
+  deepl: 'https://www.deepl.com/your-account/keys',
+  anthropic: 'https://console.anthropic.com/settings/keys',
+  openai: 'https://platform.openai.com/api-keys',
+  deepseek: 'https://platform.deepseek.com/api_keys',
+  copilot: 'https://github.com/settings/tokens',
+};
+
+/** The page where `moduleId`'s provider makes API keys; Google's when unknown. */
+export function providerKeyUrl(moduleId: string): string {
+  return PROVIDER_KEY_URLS[moduleId.split(':')[0]] ?? GOOGLE_KEY_URL;
+}
+
 /** Providers that work from an API key alone and have no instance layer. */
 const NON_INSTANCEABLE = new Set(['deepl']);
 

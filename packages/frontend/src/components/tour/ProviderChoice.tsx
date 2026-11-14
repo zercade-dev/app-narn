@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-react';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import {
   Sheet,
   SheetContent,
@@ -20,6 +22,7 @@ import {
   isFreeKeyProvider,
   ownProviderChoices,
   providerKeyFor,
+  providerKeyUrl,
   providerName,
 } from '../../lib/simple-provider.js';
 import { getErrorMessage } from '../../lib/utils.js';
@@ -40,6 +43,11 @@ interface ProviderChoiceProps {
     vaultKey: string | undefined;
     result: ProviderChoiceResult;
   }) => void;
+  /**
+   * A provider with a free tier was picked: the caller asks for its key and
+   * NARN Freeway translates with it, instead of the provider alone.
+   */
+  onFreeTier?: (base: string) => void;
 }
 
 /**
@@ -47,7 +55,13 @@ interface ProviderChoiceProps {
  * A thin wrapper over `chooseProvider`, the same write the project's provider
  * card makes, applied to the active project when it is the person's own.
  */
-export function ProviderChoice({ open, onOpenChange, cloud, onChosen }: ProviderChoiceProps) {
+export function ProviderChoice({
+  open,
+  onOpenChange,
+  cloud,
+  onChosen,
+  onFreeTier,
+}: ProviderChoiceProps) {
   const { t } = useTranslation('guide-tour');
   const [busy, setBusy] = useState(false);
   // The active project, when it is the person's own to change.
@@ -66,6 +80,10 @@ export function ProviderChoice({ open, onOpenChange, cloud, onChosen }: Provider
   });
 
   const choose = (base: string) => {
+    if (onFreeTier && isFreeKeyProvider(base)) {
+      onFreeTier(base);
+      return;
+    }
     setBusy(true);
     void chooseProvider(base, target)
       .then((result) => onChosen({ base, vaultKey: providerKeyFor(base), result }))
@@ -83,23 +101,35 @@ export function ProviderChoice({ open, onOpenChange, cloud, onChosen }: Provider
   const choices = ownProviderChoices(cloud);
   const paid = choices.filter((base) => !isFreeKeyProvider(base));
   const free = choices.filter((base) => isFreeKeyProvider(base));
+  // Select the provider (a key is already at hand), or make a key on its site first.
   const button = (base: string) => (
-    <li key={base}>
+    <li key={base} className="flex items-center gap-2">
       <Button
         variant="outline"
-        className="w-full justify-start"
+        className="min-w-0 flex-1 justify-start"
         data-testid={`provider-choice-${base}`}
         disabled={busy}
         onClick={() => choose(base)}
       >
         {providerName(base)}
       </Button>
+      <a
+        href={providerKeyUrl(base)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'shrink-0')}
+        data-testid={`provider-choice-get-key-${base}`}
+        aria-label={t('providerChoice.getKeyAria', { provider: providerName(base) })}
+      >
+        {t('providerChoice.getKey')}
+        <ExternalLink className="size-3.5" aria-hidden="true" />
+      </a>
     </li>
   );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent data-testid="provider-choice">
+      <SheetContent data-testid="provider-choice" data-tour="provider-choice">
         <SheetHeader>
           <SheetTitle>{t('providerChoice.title')}</SheetTitle>
           <SheetDescription>{t('providerChoice.description')}</SheetDescription>

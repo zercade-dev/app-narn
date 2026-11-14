@@ -11,9 +11,8 @@
       "openVault": "Buka formulir brankas",
       "cloudVault": "Siapkan brankas",
       "openVaultPage": "Buka halaman brankas",
-      "getGoogleKey": "Dapatkan kunci Google (paket gratis)",
-      "addGoogleKey": "Tempel kunci Google saya",
-      "ownProvider": "Gunakan penyedia saya sendiri",
+      "chooseProvider": "Pilih penyedia",
+      "getKey": "Di mana saya mendapatkan kunci ini?",
       "useFoundKey": "Gunakan {{provider}} untuk terjemahan Anda",
       "fixKey": "Periksa kunci saya",
       "retry": "Coba lagi",
@@ -43,21 +42,31 @@
     },
     "cloudVault": {
       "title": "Buat brankas Anda dan tambahkan kunci",
-      "what": "Pilih kata sandi brankas, lalu tambahkan kunci. Untuk uji cepat, buat kunci Google AI: paket gratisnya tidak dipungut biaya. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai.",
+      "what": "Pilih kata sandi brankas, lalu tambahkan kunci: pilih penyedia dulu. Untuk uji cepat, pilih yang punya paket gratis. Anda akan kembali ke sini setelah selesai.",
       "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda. Dengan kunci itulah penyedia AI mengenali Anda."
     },
     "cloudUnlock": {
       "what": "Buka kunci brankas di halaman brankas. Anda akan kembali ke sini setelah selesai."
     },
     "cloudKey": {
-      "what": "Tambahkan kunci di halaman brankas. Untuk uji cepat, buat kunci Google AI: paket gratisnya tidak dipungut biaya. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai."
+      "what": "Tambahkan kunci di halaman brankas: pilih penyedia dulu. Untuk uji cepat, pilih yang punya paket gratis. Anda akan kembali ke sini setelah selesai."
     },
     "key": {
       "title": "Tambahkan kunci untuk mulai menerjemahkan",
-      "why": "Google AI, Groq, dan OpenRouter punya paket gratis: dengan kunci dari salah satunya, NARN Freeway menerjemahkan game Anda tanpa biaya selama Anda mencobanya. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
+      "why": "Kunci adalah cara penyedia mengenali Anda. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
       "whyOwn": "Dengan kunci {{provider}} Anda, {{provider}} mengenali Anda. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
-      "choiceWhat": "Untuk uji cepat, buat kunci Google AI: paket gratisnya tidak dipungut biaya. Sudah punya kunci untuk penyedia yang didukung? Pilih “Gunakan penyedia saya sendiri”.",
+      "choiceWhat": "Pilih penyedia lalu tambahkan kuncinya. Untuk uji cepat, pilih yang punya paket gratis.",
       "pasteWhat": "Tempel kunci di sini, ketik kata sandi brankas di bawahnya, lalu simpan."
+    },
+    "providerList": {
+      "title": "Pilih penyedia",
+      "what": "Sudah punya kunci? Pilih penyedianya. Belum punya? Tekan Dapatkan kunci di samping penyedia untuk membuatnya di situsnya, lalu pilih penyedia itu.",
+      "why": "Untuk uji cepat, gunakan penyedia yang punya paket gratis."
+    },
+    "providerCard": {
+      "title": "Siapa yang menerjemahkan proyek ini",
+      "what": "Pilih siapa yang menerjemahkan proyek ini.",
+      "why": "Tekan Kembali untuk menutup panel ini dan melanjutkan panduan."
     },
     "project": {
       "title": "Pengimporan teks game",
@@ -133,11 +142,13 @@
     }
   },
   "providerChoice": {
-    "title": "Gunakan penyedia saya sendiri",
-    "description": "Pilih penyedia yang kuncinya Anda miliki. Penyedia itu menerjemahkan proyek ini dan proyek baru yang Anda buat. Untuk menggabungkan beberapa penyedia, beralihlah ke Lanjutan.",
+    "title": "Pilih penyedia",
+    "description": "Penyedia itu menerjemahkan proyek ini dan proyek baru yang Anda buat.",
     "existingRouting": "Proyek ini sudah memiliki penyaluran, jadi dibiarkan apa adanya. Anda dapat mengubahnya di Lanjutan.",
-    "freeHeading": "Paket gratis. Jika Anda memilih salah satunya, hanya penyedia itu yang menerjemahkan, tanpa model gratis lain dalam kumpulan NARN Freeway.",
-    "paidHeading": "Berbayar, ditagihkan ke akun Anda di penyedia.",
+    "freeHeading": "Punya paket gratis",
+    "paidHeading": "Tidak punya paket gratis",
+    "getKey": "Dapatkan kunci",
+    "getKeyAria": "Dapatkan kunci {{provider}} (membuka situs penyedia)",
     "cancel": "Batal",
     "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}",
     "switchedOff": "{{provider}} dimatikan di Lanjutan, jadi tidak dipakai. Nyalakan lagi di Konfigurasi Global, atau pilih penyedia lain.",

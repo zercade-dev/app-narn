@@ -27,14 +27,16 @@ import {
 import {
   FREE_KEY_PROVIDERS,
   foundOwnProviderKey,
-  GOOGLE_KEY_URL,
   providerKeyFor,
+  providerKeyUrl,
   providerName,
 } from '../../lib/simple-provider.js';
 import {
   FIRST_RUN_ACTION_EVENT,
   FIRST_RUN_FORM_ANCHORS,
   FIRST_RUN_TOUR_ID,
+  PROVIDER_CARD_STEP,
+  PROVIDER_LIST_STEP,
   firstRunBack,
   firstRunShownIndex,
   firstRunStepApplies,
@@ -68,6 +70,7 @@ import { useVaultStore } from '../../stores/vault-store.js';
 import { ProviderSheet, TranslatedByLine } from '../config/TranslatedByLine.js';
 import { RunProgressCard } from '../runs/RunProgressCard.js';
 import { ProviderChoice } from './ProviderChoice.js';
+import type { Tour } from '../../lib/tour/types.js';
 import type { TourText } from './TourCallout.js';
 import { TourOverlay } from './TourOverlay.js';
 
@@ -175,7 +178,8 @@ function useGuideProvider(projectId: string | null): {
 
 /** `{ key }` for the vault page when the person chose their own provider. */
 function chosenKey(): { key?: string } {
-  const own = useGuideStore.getState().simpleProvider;
+  const guide = useGuideStore.getState();
+  const own = guide.simpleProvider ?? guide.keyProvider;
   const key = own ? providerKeyFor(own) : undefined;
   return key ? { key } : {};
 }
@@ -346,6 +350,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const onProviderChosen = useCallback(
     ({ base, result }: { base: string; result: ProviderChoiceResult }) => {
       setChoiceOpen(false);
+      useGuideStore.getState().setKeyProvider(base);
       const name = providerName(base);
       switch (result.status) {
         case 'applied':
@@ -364,6 +369,21 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
       }
     },
     [cloud, tGuide],
+  );
+  // A provider with a free tier: NARN Freeway translates with its key, so the
+  // guide only asks for that key (an earlier own-provider choice no longer holds).
+  const onFreeTierChosen = useCallback(
+    (base: string) => {
+      setChoiceOpen(false);
+      const guide = useGuideStore.getState();
+      guide.setSimpleProvider(null);
+      guide.setKeyProvider(base);
+      const focusKey = providerKeyFor(base);
+      if (!focusKey) return;
+      if (cloud) goToVaultSetup({ guided: true, key: focusKey });
+      else globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey }));
+    },
+    [cloud],
   );
   const reportChoice = useCallback(
     (base: string, pending: Promise<ProviderChoiceResult>) => {
@@ -415,14 +435,13 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'cloud-vault':
           goToVaultSetup({ guided: true, ...chosenKey() });
           break;
-        case 'get-google-key':
-          globalThis.open(GOOGLE_KEY_URL, '_blank', 'noopener,noreferrer');
+        case 'get-key': {
+          // The provider whose key is being added: the free-tier pick, else the chosen one.
+          const guide = useGuideStore.getState();
+          const base = guide.keyProvider ?? guide.simpleProvider ?? 'google';
+          globalThis.open(providerKeyUrl(base), '_blank', 'noopener,noreferrer');
           break;
-        case 'add-google-key':
-          // The free-key path: an earlier "Use my own provider" no longer holds.
-          useGuideStore.getState().setSimpleProvider(null);
-          globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey: GOOGLE_KEY }));
-          break;
+        }
         case 'own-provider':
           setChoiceOpen(true);
           break;
@@ -749,6 +768,13 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     return {};
   }, [foundBase, guideProvider.kind, guideProvider.moduleId]);
 
+  // A panel the guide opened is on screen: the guide's step for it.
+  const sheetStep = choiceOpen ? PROVIDER_LIST_STEP : cardOpen ? PROVIDER_CARD_STEP : null;
+  const sheetTour: Tour = useMemo(
+    () => ({ id: FIRST_RUN_TOUR_ID, steps: sheetStep ? [sheetStep] : [] }),
+    [sheetStep],
+  );
+
   const progressCard =
     shownStep?.id === 'translate-progress' && progressRunId ? (
       <RunProgressCard runId={progressRunId} variant="callout" />
@@ -761,8 +787,23 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   return (
     <>
-      {/* The provider list and the provider card replace the callout while open. */}
-      {!choiceOpen && !cardOpen && (
+      {/* Over the provider list or the provider card, the guide stays on screen
+          and points at the panel; Back closes it. */}
+      {sheetStep !== null ? (
+        <TourOverlay
+          tour={sheetTour}
+          stepIndex={0}
+          facts={facts}
+          position={shownStep?.major !== undefined ? stepPosition : undefined}
+          canGoBack
+          onAdvance={() => {}}
+          onBack={() => {
+            setChoiceOpen(false);
+            setCardOpen(false);
+          }}
+          onExit={onExit}
+        />
+      ) : (
         <TourOverlay
           tour={tour}
           stepIndex={shownIndex}
@@ -781,6 +822,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         onOpenChange={setChoiceOpen}
         cloud={cloud}
         onChosen={onProviderChosen}
+        onFreeTier={onFreeTierChosen}
       />
       {projectId && (
         <ProviderSheet projectId={projectId} open={cardOpen} onOpenChange={setCardOpen} />

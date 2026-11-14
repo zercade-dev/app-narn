@@ -15,7 +15,11 @@ export function ProviderSheet({
   const { t } = useTranslation('config');
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent data-testid="provider-sheet" className="overflow-y-auto p-4">
+      <SheetContent
+        data-testid="provider-sheet"
+        data-tour="provider-sheet"
+        className="overflow-y-auto p-4"
+      >
         <SheetTitle className="sr-only">{t('providerCard.title')}</SheetTitle>
         <TranslationProviderCard projectId={projectId} />
       </SheetContent>
@@ -26,8 +30,8 @@ export function ProviderSheet({
 /**
  * "Translated by <provider> · Change", with a cost note for a paid provider:
  * says who will translate before anything is sent. `onChange` replaces the
- * built-in sheet, for a caller that must take something off screen first (the
- * guide's callout).
+ * built-in sheet, for a caller that shows its own (the guide, which keeps
+ * its callout over it).
  */
 export function TranslatedByLine({
   projectId,

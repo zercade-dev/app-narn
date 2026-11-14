@@ -64,6 +64,11 @@ interface GuideState {
   /** Module instance id chosen via "Use my own provider", e.g. `openai:default`. */
   simpleProvider: string | null;
   /**
+   * The provider whose key the guide last asked for (a free-tier pick keeps
+   * NARN Freeway, so `simpleProvider` stays null), for "Where do I get this key?".
+   */
+  keyProvider: string | null;
+  /**
    * Choices still to be applied once their provider's key is saved, keyed by
    * target (a project id, or `collab` for the person's own collaborator
    * routing), valued by module instance id. Set when a provider was chosen
@@ -126,6 +131,7 @@ interface GuideState {
   resumeFirstRun: (forced?: boolean) => void;
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
+  setKeyProvider: (base: string | null) => void;
   /**
    * Remember (`moduleId`) or forget (`null`) the pending choice for `target`.
    * `routedFrom` is what the target is routed to now (see `pendingRoutedFrom`).
@@ -189,6 +195,7 @@ export const useGuideStore = create<GuideState>()(
       firstRunDismissed: false,
       firstRunFinished: false,
       simpleProvider: null,
+      keyProvider: null,
       pendingProviders: {},
       pendingRoutedFrom: {},
       exportedOnce: false,
@@ -221,6 +228,7 @@ export const useGuideStore = create<GuideState>()(
           tourProgress: withCompleted(s.tourProgress, FIRST_RUN_PROGRESS_ID),
         })),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
+      setKeyProvider: (keyProvider) => set({ keyProvider }),
       setPendingProvider: (target, moduleId, routedFrom) =>
         set((s) => {
           const { [target]: _dropped, ...rest } = s.pendingProviders;

@@ -16,8 +16,7 @@ export const FIRST_RUN_TOUR_ID = 'first-run';
 export type FirstRunAction =
   | 'open-vault'
   | 'cloud-vault'
-  | 'get-google-key'
-  | 'add-google-key'
+  | 'get-key'
   | 'own-provider'
   | 'use-found-key'
   | 'fix-key'
@@ -92,11 +91,8 @@ function localVaultAndKeySteps(vaultCopy: 'vault' | 'unlock'): TourStep[] {
       anchor: null,
       ...copy('key', 'choiceWhat'),
       advance: { kind: 'state', done: (f) => f.usableKey },
-      actions: [
-        action('get-google-key', 'getGoogleKey'),
-        action('add-google-key', 'addGoogleKey'),
-        action('own-provider', 'ownProvider'),
-      ],
+      // One way in: the provider list, free tiers first.
+      actions: [{ ...action('own-provider', 'chooseProvider'), primary: true }],
       major: 2,
     },
     {
@@ -104,6 +100,7 @@ function localVaultAndKeySteps(vaultCopy: 'vault' | 'unlock'): TourStep[] {
       anchor: 'vault-editor-value',
       ...copy('key', 'pasteWhat'),
       side: 'right',
+      actions: [action('get-key', 'getKey')],
       advance: { kind: 'state', done: (f) => f.usableKey },
       major: 2,
     },
@@ -144,7 +141,7 @@ function cloudVaultAndKeySteps(need: 'vault' | 'unlock' | 'key'): TourStep[] {
       whatKey: wording.whatKey,
       whyKey: wording.whyKey,
       advance: { kind: 'state', done: (f) => vaultReady(f) && f.usableKey },
-      actions: [action('cloud-vault', wording.label), action('own-provider', 'ownProvider')],
+      actions: [action('cloud-vault', wording.label), action('own-provider', 'chooseProvider')],
       major: 1,
     },
   ];
@@ -238,6 +235,32 @@ const NOTHING_STEP = 'translate-nothing';
 const RESTORE_STEP = 'translate-restore';
 const RESTORE_STEPS: readonly string[] = [RESTORE_STEP, 'restore-pick', 'restore-confirm'];
 const CLOSING_STEP = 'closing';
+
+/**
+ * Shown over the provider list the guide opened ("Choose a provider"), so the
+ * guide stays on screen while it is open. Not part of the tour's steps: the
+ * list can open from several steps, and the counter keeps the step's place.
+ */
+export const PROVIDER_LIST_STEP: TourStep = {
+  id: 'provider-list',
+  anchor: 'provider-choice',
+  titleKey: 'firstRun.providerList.title',
+  whatKey: 'firstRun.providerList.what',
+  whyKey: 'firstRun.providerList.why',
+  side: 'left',
+  advance: { kind: 'manual' },
+};
+
+/** Shown over the provider card opened from "Translated by · Change", likewise. */
+export const PROVIDER_CARD_STEP: TourStep = {
+  id: 'provider-card',
+  anchor: 'provider-sheet',
+  titleKey: 'firstRun.providerCard.title',
+  whatKey: 'firstRun.providerCard.what',
+  whyKey: 'firstRun.providerCard.why',
+  side: 'left',
+  advance: { kind: 'manual' },
+};
 
 /** `data-tour` of the Backups row holding the retranslate test's restore point. */
 export const RESTORE_POINT_ANCHOR = 'guide-restore-point';
@@ -526,7 +549,11 @@ const KEY_STEPS = ['key-choice', 'cloud-vault'];
 /** `step` with "Use <provider> for your translations" first among its actions. */
 const withFoundKeyAction = (step: TourStep): TourStep => ({
   ...step,
-  actions: [{ ...action('use-found-key', 'useFoundKey'), primary: true }, ...(step.actions ?? [])],
+  actions: [
+    { ...action('use-found-key', 'useFoundKey'), primary: true },
+    // One primary at a time: the found key's.
+    ...(step.actions ?? []).map(({ primary: _primary, ...rest }) => rest),
+  ],
 });
 
 /** The local first-run tour (a new vault). */
