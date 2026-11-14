@@ -12,7 +12,6 @@
       "cloudVault": "设置保险库",
       "openVaultPage": "打开保险库页面",
       "chooseProvider": "选择服务商",
-      "getKey": "在哪里获取这个密钥？",
       "useFoundKey": "使用 {{provider}} 进行翻译",
       "fixKey": "检查我的密钥",
       "retry": "重试",

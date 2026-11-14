@@ -12,7 +12,6 @@
       "cloudVault": "Thiết lập kho bảo mật",
       "openVaultPage": "Mở trang kho bảo mật",
       "chooseProvider": "Chọn nhà cung cấp",
-      "getKey": "Tôi lấy khóa này ở đâu?",
       "useFoundKey": "Dùng {{provider}} cho bản dịch của bạn",
       "fixKey": "Kiểm tra khóa của tôi",
       "retry": "Thử lại",

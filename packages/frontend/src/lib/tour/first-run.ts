@@ -16,7 +16,6 @@ export const FIRST_RUN_TOUR_ID = 'first-run';
 export type FirstRunAction =
   | 'open-vault'
   | 'cloud-vault'
-  | 'get-key'
   | 'own-provider'
   | 'use-found-key'
   | 'fix-key'
@@ -99,8 +98,9 @@ function localVaultAndKeySteps(vaultCopy: 'vault' | 'unlock'): TourStep[] {
       id: 'key-paste',
       anchor: 'vault-editor-value',
       ...copy('key', 'pasteWhat'),
-      side: 'right',
-      actions: [action('get-key', 'getKey')],
+      // Above the key row: below it are the password and Save, which a callout
+      // beside the field would cover in a narrow window.
+      side: 'top',
       advance: { kind: 'state', done: (f) => f.usableKey },
       major: 2,
     },

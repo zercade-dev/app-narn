@@ -28,7 +28,6 @@ import {
   FREE_KEY_PROVIDERS,
   foundOwnProviderKey,
   providerKeyFor,
-  providerKeyUrl,
   providerName,
 } from '../../lib/simple-provider.js';
 import {
@@ -448,13 +447,6 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'cloud-vault':
           goToVaultSetup({ guided: true, ...chosenKey() });
           break;
-        case 'get-key': {
-          // The provider whose key is being added: the free-tier pick, else the chosen one.
-          const guide = useGuideStore.getState();
-          const base = guide.keyProvider ?? guide.simpleProvider ?? 'google';
-          globalThis.open(providerKeyUrl(base), '_blank', 'noopener,noreferrer');
-          break;
-        }
         case 'own-provider':
           setChoiceOpen(true);
           break;

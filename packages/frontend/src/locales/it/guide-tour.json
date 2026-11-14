@@ -12,7 +12,6 @@
       "cloudVault": "Configura la cassaforte",
       "openVaultPage": "Apri la pagina della cassaforte",
       "chooseProvider": "Scegli un provider",
-      "getKey": "Dove trovo questa chiave?",
       "useFoundKey": "Usa {{provider}} per le tue traduzioni",
       "fixKey": "Controlla la mia chiave",
       "retry": "Riprova",

@@ -12,7 +12,6 @@
       "cloudVault": "保管庫をセットアップ",
       "openVaultPage": "保管庫のページを開く",
       "chooseProvider": "プロバイダーを選択",
-      "getKey": "このキーはどこで入手できますか？",
       "useFoundKey": "翻訳に{{provider}}を使用",
       "fixKey": "キーを確認",
       "retry": "やり直す",

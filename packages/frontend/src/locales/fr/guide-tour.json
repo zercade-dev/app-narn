@@ -12,7 +12,6 @@
       "cloudVault": "Configurer votre coffre",
       "openVaultPage": "Ouvrir la page du coffre",
       "chooseProvider": "Choisir un fournisseur",
-      "getKey": "Où obtenir cette clé ?",
       "useFoundKey": "Utiliser {{provider}} pour vos traductions",
       "fixKey": "Vérifier ma clé",
       "retry": "Réessayer",

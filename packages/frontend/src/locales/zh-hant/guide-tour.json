@@ -12,7 +12,6 @@
       "cloudVault": "設定保險庫",
       "openVaultPage": "開啟保險庫頁面",
       "chooseProvider": "選擇供應商",
-      "getKey": "在哪裡取得這組金鑰？",
       "useFoundKey": "使用 {{provider}} 進行翻譯",
       "fixKey": "檢查我的金鑰",
       "retry": "重試",

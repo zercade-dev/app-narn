@@ -12,7 +12,6 @@
       "cloudVault": "Set up your vault",
       "openVaultPage": "Open the vault page",
       "chooseProvider": "Choose a provider",
-      "getKey": "Where do I get this key?",
       "useFoundKey": "Use {{provider}} for your translations",
       "fixKey": "Check my key",
       "retry": "Try again",

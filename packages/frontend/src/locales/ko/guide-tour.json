@@ -12,7 +12,6 @@
       "cloudVault": "보관함 설정",
       "openVaultPage": "보관함 페이지 열기",
       "chooseProvider": "제공업체 선택",
-      "getKey": "이 키는 어디서 받나요?",
       "useFoundKey": "번역에 {{provider}} 사용",
       "fixKey": "내 키 확인",
       "retry": "다시 시도",
