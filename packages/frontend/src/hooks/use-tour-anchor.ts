@@ -1,5 +1,8 @@
 import { useCallback, useRef, useSyncExternalStore } from 'react';
 
+/** How often a missing anchor is looked for again (see `subscribe`). */
+const ANCHOR_POLL_MS = 250;
+
 function isVisible(el: Element): boolean {
   const r = el.getBoundingClientRect();
   return r.width > 0 && r.height > 0;
@@ -51,8 +54,13 @@ export function useTourAnchor(id: string | null): Element | null {
     });
     window.addEventListener('resize', schedule);
     window.addEventListener('scroll', schedule, true);
+    // An anchor can be revealed or hidden without a mutation the observer
+    // sees (a class or style change): look again on a slow tick. A held,
+    // still-visible anchor makes this a no-op (see `schedule`).
+    const poll = setInterval(schedule, ANCHOR_POLL_MS);
     return () => {
       observer.disconnect();
+      clearInterval(poll);
       window.removeEventListener('resize', schedule);
       window.removeEventListener('scroll', schedule, true);
       if (frame) cancelAnimationFrame(frame);
