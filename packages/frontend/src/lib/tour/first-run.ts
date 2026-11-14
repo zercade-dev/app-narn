@@ -297,7 +297,9 @@ const SHARED_STEPS: TourStep[] = [
     ...copy('project', 'openWhat'),
     // Beside the sidebar: the project list opens right below the trigger.
     side: 'right',
-    advance: { kind: 'click' },
+    // No click advance: the list opening shows "New project" (the pair in
+    // FORM_STEPS), and a click advance on top of it would skip that step.
+    advance: { kind: 'manual' },
     major: 3,
   },
   {
