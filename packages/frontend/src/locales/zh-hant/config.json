@@ -41,7 +41,7 @@
   "orphanedCount": "孤立 {{count}}",
   "importWarningsTitle": "匯入前請先確認",
   "unknownHeadersSummary": "無法辨識的欄位，已忽略：{{headers}}",
-  "rawNewlineSummary_other": "{{count}} 種語言含有實際換行。若要在遊戲中換行，請使用 \\n 標記。",
+  "rawNewlineSummary_other": "{{count}} 種語言含有實際換行：請改用 \n。",
   "rawNewlineShowLanguages": "顯示語言",
   "continueImport": "繼續匯入",
   "cancelImport": "取消",

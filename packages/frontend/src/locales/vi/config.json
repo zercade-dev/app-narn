@@ -41,7 +41,7 @@
   "orphanedCount": "{{count}} mục mồ côi",
   "importWarningsTitle": "Xem lại trước khi nhập",
   "unknownHeadersSummary": "Cột không nhận ra, sẽ bị bỏ qua: {{headers}}",
-  "rawNewlineSummary_other": "Có ngắt dòng thật trong {{count}} ngôn ngữ. Để ngắt dòng trong trò chơi, hãy dùng ký hiệu \\n.",
+  "rawNewlineSummary_other": "Có ngắt dòng thật trong {{count}} ngôn ngữ: hãy dùng \n.",
   "rawNewlineShowLanguages": "Hiện các ngôn ngữ",
   "continueImport": "Tiếp tục nhập",
   "cancelImport": "Hủy",

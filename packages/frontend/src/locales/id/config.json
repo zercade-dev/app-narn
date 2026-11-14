@@ -41,7 +41,7 @@
   "orphanedCount": "{{count}} jadi yatim",
   "importWarningsTitle": "Periksa dulu sebelum mengimpor",
   "unknownHeadersSummary": "Kolom tidak dikenali, diabaikan: {{headers}}",
-  "rawNewlineSummary_other": "Pemisah baris sungguhan di {{count}} bahasa. Untuk pemisah baris dalam game, gunakan penanda \\n.",
+  "rawNewlineSummary_other": "Pemisah baris sungguhan di {{count}} bahasa: gunakan \n.",
   "rawNewlineShowLanguages": "Tampilkan bahasa",
   "continueImport": "Lanjutkan impor",
   "cancelImport": "Batal",

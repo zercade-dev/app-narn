@@ -1,3 +1,4 @@
+import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PROJECT_ICONS, DEFAULT_PROJECT_ICON, type Project } from '@zercade-dev/narn-shared';
@@ -300,6 +301,8 @@ export function Sidebar() {
       setSearch('');
     }
   };
+  // The guide's Back from "Create a new project" closes the list it points into.
+  useCloseOnGuideBack(selectorOpen, 'new-project-button', () => handleSelectorOpenChange(false));
 
   const handleCreate = async () => {
     if (!newName.trim()) return;

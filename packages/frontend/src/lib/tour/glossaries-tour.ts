@@ -36,7 +36,12 @@ export function glossariesTour(f: GuideFacts): Tour {
       { ...step('purpose', 'glossary-list'), navigate: TO_GLOSSARY },
       // Next is always there; creating the first glossary selects it, and its
       // enable button appearing moves the tour on.
-      step('create', 'glossary-create', { kind: 'next', advanceOnAppear: 'glossary-enabled' }),
+      {
+        ...step('create', 'glossary-create', { kind: 'next', advanceOnAppear: 'glossary-enabled' }),
+        // Not dimmed: "New glossary" opens a name field beside the button,
+        // outside the spotlight, which must stay usable.
+        dim: false,
+      },
       // The anchors below exist only for a selected, editable glossary: without
       // one, the step is a centred callout with Next.
       step('add-term', 'glossary-add-term'),

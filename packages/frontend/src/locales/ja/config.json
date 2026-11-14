@@ -41,7 +41,7 @@
   "orphanedCount": "孤立{{count}}件",
   "importWarningsTitle": "インポート前の確認",
   "unknownHeadersSummary": "認識されなかった列（無視されます）：{{headers}}",
-  "rawNewlineSummary_other": "{{count}}言語に生の改行があります。ゲーム内で改行するには、\\nの表記を使ってください。",
+  "rawNewlineSummary_other": "{{count}}言語に生の改行があります。代わりに\nを使ってください。",
   "rawNewlineShowLanguages": "言語を表示",
   "continueImport": "インポートを続行",
   "cancelImport": "キャンセル",

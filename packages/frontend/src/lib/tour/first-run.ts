@@ -295,6 +295,8 @@ const SHARED_STEPS: TourStep[] = [
     id: 'project-open',
     anchor: 'project-selector-trigger',
     ...copy('project', 'openWhat'),
+    // Beside the sidebar: the project list opens right below the trigger.
+    side: 'right',
     advance: { kind: 'click' },
     major: 3,
   },
@@ -302,6 +304,7 @@ const SHARED_STEPS: TourStep[] = [
     id: 'project-new',
     anchor: 'new-project-button',
     ...copy('project', 'newWhat'),
+    side: 'right',
     advance: { kind: 'click' },
     major: 3,
   },
@@ -681,7 +684,29 @@ const FORM_STEPS = [
   { closed: 'import', open: 'import-confirm', anchor: 'confirm-import' },
   // The restore confirmation, opened from the restore point's row.
   { closed: 'restore-pick', open: 'restore-confirm', anchor: RESTORE_CONFIRM_ANCHOR },
+  // The project list: "New project" is shown only while the list is open, so
+  // the step follows the list (it closes on a click outside, or Escape).
+  { closed: 'project-open', open: 'project-new', anchor: 'new-project-button' },
 ] as const;
+
+/**
+ * Whether Back shows on the step on screen. Not on a step that reports a
+ * done deed with nothing before it to redo: the retranslate test's result, or
+ * its run while it goes (a stopped run's failure offers Back, see
+ * {@link firstRunBack}).
+ */
+export function firstRunCanGoBack(
+  tour: Tour,
+  shownIndex: number,
+  facts: GuideFacts,
+  screen: FirstRunScreen,
+): boolean {
+  if (shownIndex <= 0) return false;
+  const id = tour.steps[shownIndex]?.id;
+  if (id === RESTORE_STEP) return false;
+  if (isWaitingStep(id) && facts.retestRunning && !screen.runStall) return false;
+  return true;
+}
 
 /** The `data-tour` anchors whose presence {@link firstRunShownIndex} needs to know. */
 export const FIRST_RUN_FORM_ANCHORS = FORM_STEPS.map((p) => p.anchor);
@@ -732,8 +757,19 @@ export function firstRunBack(
   shownIndex: number,
   facts: GuideFacts,
   screen: FirstRunScreen,
-): { index: number; closeForm?: string } {
+): { index: number; closeForm?: string; dropRetest?: boolean } {
   const id = tour.steps[shownIndex]?.id;
+  const indexOf = (stepId: string): number => {
+    const at = tour.steps.findIndex((s) => s.id === stepId);
+    return at >= 0 ? at : shownIndex;
+  };
+  // The retranslate test runs from "nothing to translate" and comes back
+  // there: from its failure, Back sets the failed test aside and offers it
+  // again; from the restore point, Back returns to the choice it came from.
+  if (isWaitingStep(id) && facts.retestRunning && screen.runStall) {
+    return { index: indexOf(NOTHING_STEP), dropRetest: true };
+  }
+  if (id === 'restore-pick') return { index: indexOf(RESTORE_STEP) };
   const pair = FORM_STEPS.find((p) => p.open === id);
   if (pair) {
     const closed = tour.steps.findIndex((s) => s.id === pair.closed);

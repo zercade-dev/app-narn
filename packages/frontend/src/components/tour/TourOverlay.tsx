@@ -46,6 +46,9 @@ interface TourOverlayProps {
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
 
+/** How long a control must have been missing for its appearance to advance a step. */
+const APPEAR_MIN_ABSENCE_MS = 300;
+
 function subscribeReducedMotion(onChange: () => void): () => void {
   if (typeof window.matchMedia !== 'function') return () => {};
   const mq = window.matchMedia(REDUCED_MOTION);
@@ -218,10 +221,13 @@ export function TourOverlay({
     onAdvanceRef.current();
   }, [stateDone, stepKey, enteredViaBack]);
 
-  // Focus moves to the callout on each step, or to the field the step asks
-  // the person to type in (the vault password, the key, the project name).
+  // Focus moves to the callout on each step, or to the control itself when it
+  // is a field to type in (the vault password, the key, the project name) or
+  // sits in a popup or dialog: a popover closes when focus leaves it (the
+  // project list), and a modal pulls focus back anyway.
   useEffect(() => {
     if (anchor && isTextField(anchor)) anchor.focus();
+    else if (anchor instanceof HTMLElement && isInPopup(anchor, calloutNode)) anchor.focus();
     else calloutNode?.focus();
   }, [calloutNode, stepIndex, anchor]);
 
@@ -232,7 +238,7 @@ export function TourOverlay({
   const appearAnchor =
     step?.advance.kind === 'next' ? (step.advance.advanceOnAppear ?? null) : null;
   const appeared = useTourAnchor(appearAnchor) !== null;
-  const wasAbsent = useRef<string | null>(null);
+  const wasAbsent = useRef<{ key: string; since: number } | null>(null);
   const appearStepKey = useRef<string | null>(null);
   useEffect(() => {
     // A new step forgets an absence seen on an earlier visit, so re-entering
@@ -243,11 +249,17 @@ export function TourOverlay({
     }
     if (appearAnchor === null) return;
     if (!appeared) {
-      wasAbsent.current = stepKey;
+      if (wasAbsent.current?.key !== stepKey) {
+        wasAbsent.current = { key: stepKey, since: performance.now() };
+      }
       return;
     }
-    if (wasAbsent.current !== stepKey) return;
+    const absence = wasAbsent.current;
     wasAbsent.current = null;
+    if (absence?.key !== stepKey) return;
+    // A blink (a list refetched, a panel re-rendered) is not the control
+    // appearing: only an absence the person could have acted on counts.
+    if (performance.now() - absence.since < APPEAR_MIN_ABSENCE_MS) return;
     onAdvanceRef.current();
   }, [appeared, appearAnchor, stepKey]);
 
@@ -382,6 +394,12 @@ export function TourOverlay({
       )}
     </div>
   );
+}
+
+/** Inside a popup or dialog other than the callout itself. */
+function isInPopup(el: Element, callout: Element | null): boolean {
+  const popup = el.closest('[role="dialog"], [role="menu"], [role="listbox"], [data-side]');
+  return popup !== null && popup !== callout && !popup.contains(callout);
 }
 
 /** A control the person types in: focus goes there rather than to the callout. */

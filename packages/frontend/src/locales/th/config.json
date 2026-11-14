@@ -41,7 +41,7 @@
   "orphanedCount": "รายการกำพร้า {{count}} รายการ",
   "importWarningsTitle": "ตรวจทานก่อนนำเข้า",
   "unknownHeadersSummary": "คอลัมน์ที่ไม่รู้จัก (จะถูกข้าม): {{headers}}",
-  "rawNewlineSummary_other": "มีการขึ้นบรรทัดใหม่จริงใน {{count}} ภาษา หากต้องการให้ขึ้นบรรทัดใหม่ในเกม ให้ใช้เครื่องหมาย \\n",
+  "rawNewlineSummary_other": "มีการขึ้นบรรทัดใหม่จริงใน {{count}} ภาษา: ให้ใช้ \n แทน",
   "rawNewlineShowLanguages": "แสดงภาษา",
   "continueImport": "นำเข้าต่อ",
   "cancelImport": "ยกเลิก",

@@ -41,7 +41,7 @@
   "orphanedCount": "{{count}} 个已孤立",
   "importWarningsTitle": "导入前请检查",
   "unknownHeadersSummary": "无法识别的列，已忽略：{{headers}}",
-  "rawNewlineSummary_other": "{{count}} 种语言含有实际换行。如需在游戏内换行，请使用 \\n 标记。",
+  "rawNewlineSummary_other": "{{count}} 种语言含有实际换行：请改用 \n。",
   "rawNewlineShowLanguages": "显示语言",
   "continueImport": "继续导入",
   "cancelImport": "取消",

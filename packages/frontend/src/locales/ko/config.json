@@ -41,7 +41,7 @@
   "orphanedCount": "미연결 {{count}}개",
   "importWarningsTitle": "가져오기 전 확인 사항",
   "unknownHeadersSummary": "인식되지 않은 열(무시됨): {{headers}}",
-  "rawNewlineSummary_other": "{{count}}개 언어에 실제 줄바꿈이 있어요. 게임에서 줄바꿈하려면 \\n 표시를 쓰세요.",
+  "rawNewlineSummary_other": "{{count}}개 언어에 실제 줄바꿈이 있어요. 대신 \n을 쓰세요.",
   "rawNewlineShowLanguages": "언어 보기",
   "continueImport": "가져오기 계속",
   "cancelImport": "취소",

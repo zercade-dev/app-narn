@@ -38,6 +38,7 @@ import {
   PROVIDER_CARD_STEP,
   PROVIDER_LIST_STEP,
   firstRunBack,
+  firstRunCanGoBack,
   firstRunShownIndex,
   firstRunStepApplies,
   firstRunStepIndex,
@@ -265,14 +266,21 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   // "Open the form" / "use the form" sub-steps follow the form itself, and
   // "the translation is running" follows the run.
-  const [vaultFormAnchor, keyEditorAnchor, dialogStartAnchor, importSheetAnchor, restoreAnchor] =
-    FIRST_RUN_FORM_ANCHORS;
+  const [
+    vaultFormAnchor,
+    keyEditorAnchor,
+    dialogStartAnchor,
+    importSheetAnchor,
+    restoreAnchor,
+    projectListAnchor,
+  ] = FIRST_RUN_FORM_ANCHORS;
   const vaultFormOpen = useTourAnchor(vaultFormAnchor) !== null;
   const keyEditorOpen = useTourAnchor(keyEditorAnchor) !== null;
   const dialogStart = useTourAnchor(dialogStartAnchor);
   const dialogOpen = dialogStart !== null;
   const importSheetOpen = useTourAnchor(importSheetAnchor) !== null;
   const restoreConfirmOpen = useTourAnchor(restoreAnchor) !== null;
+  const projectListOpen = useTourAnchor(projectListAnchor) !== null;
   const stalled = useFirstRunStall();
   // "Try again" sets the failed run aside, so the guide does not show its
   // failure again while the new run has not been listed yet.
@@ -285,6 +293,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
       [dialogStartAnchor]: dialogOpen,
       [importSheetAnchor]: importSheetOpen,
       [restoreAnchor]: restoreConfirmOpen,
+      [projectListAnchor]: projectListOpen,
     };
     return { isOnScreen: (anchor) => open[anchor] ?? false, runStall };
   }, [
@@ -293,11 +302,13 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     dialogStartAnchor,
     importSheetAnchor,
     restoreAnchor,
+    projectListAnchor,
     vaultFormOpen,
     keyEditorOpen,
     dialogOpen,
     importSheetOpen,
     restoreConfirmOpen,
+    projectListOpen,
     runStall,
   ]);
   const shown = useCallback((at: number) => firstRunShownIndex(tour, at, screen), [tour, screen]);
@@ -327,8 +338,10 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const onBack = useCallback(() => {
     const back = firstRunBack(tour, shownIndex, facts, screen);
     if (back.closeForm) globalThis.dispatchEvent(closeFormEvent(back.closeForm));
+    if (back.dropRetest) useGuideStore.getState().setQuickTest(null);
     setPosition((p) => ({ ...p, index: back.index }));
   }, [tour, shownIndex, facts, screen]);
+  const canGoBack = firstRunCanGoBack(tour, shownIndex, facts, screen);
   // Leaving at the closing step is the end of the first run, not a skip: it
   // was all done, so nothing is left to continue.
   const atClosingStep = shownStep?.id === 'closing';
@@ -812,6 +825,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
           position={shownStep?.major !== undefined ? stepPosition : undefined}
           extra={extra}
           text={text}
+          canGoBack={canGoBack}
           onAdvance={onAdvance}
           onBack={onBack}
           onExit={onExit}
