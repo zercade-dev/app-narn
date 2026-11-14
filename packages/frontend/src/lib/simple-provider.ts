@@ -20,15 +20,18 @@ export const GOOGLE_KEY_URL = 'https://aistudio.google.com/apikey';
 /** Providers that work from an API key alone and have no instance layer. */
 const NON_INSTANCEABLE = new Set(['deepl']);
 
-/** Providers offered under "Use my own provider" (key alone is enough). */
+/**
+ * Providers offered under "Use my own provider" (key alone is enough). Those
+ * with a free tier come first, in the order the guide prefers them.
+ */
 const KEY_ONLY_PROVIDERS = [
+  'google',
+  'groq',
+  'openrouter',
+  'deepl',
   'anthropic',
   'openai',
   'deepseek',
-  'openrouter',
-  'groq',
-  'google',
-  'deepl',
 ] as const;
 
 /**

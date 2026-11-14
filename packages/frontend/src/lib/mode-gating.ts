@@ -1,6 +1,6 @@
 /**
- * Simple/Advanced mode rules for navigation. Simple shows only the four tabs a
- * first translation needs and hides the workspace-wide Global Config and
+ * Simple/Advanced mode rules for navigation. Simple shows only the tabs a
+ * first translation needs (and Backups, to undo a test) and hides the workspace-wide Global Config and
  * Translation Memory views; Advanced shows everything the caller's access
  * allows. Tab access rules stay in `tab-gating.ts` — this narrows them.
  */
@@ -15,7 +15,7 @@ import type { ShellView, Tab } from '../stores/view-store.js';
 
 export type { NavTarget };
 
-export const SIMPLE_TABS: readonly Tab[] = ['config', 'data', 'strings', 'runs'];
+export const SIMPLE_TABS: readonly Tab[] = ['config', 'data', 'strings', 'runs', 'backup'];
 export const SIMPLE_HIDDEN_VIEWS: readonly ShellView[] = ['global-config', 'translation-memory'];
 
 export function visibleTabs(

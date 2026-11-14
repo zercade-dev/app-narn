@@ -889,17 +889,14 @@ export function DataTab() {
         <SheetContent side="bottom" className="max-w-md mx-auto rounded-t-xl px-6 pb-6">
           <SheetHeader className="text-center">
             <SheetTitle>{t('importWarningsTitle')}</SheetTitle>
-            <SheetDescription>
-              {unknownHeaders.length > 0 || rawNewlineLanguages.length > 0
-                ? t('importWarningsDescription')
-                : t('importSheetDescription')}
+            <SheetDescription data-testid="import-detected-collection">
+              {t('detectedCollection', {
+                collection: t(
+                  pendingCollection === 'client' ? 'collectionClient' : 'collectionMain',
+                ),
+              })}
             </SheetDescription>
           </SheetHeader>
-          <p className="mt-3 text-center text-sm" data-testid="import-detected-collection">
-            {t('detectedCollection', {
-              collection: t(pendingCollection === 'client' ? 'collectionClient' : 'collectionMain'),
-            })}
-          </p>
           <div
             className="mt-3 flex flex-col items-center gap-1.5 text-center"
             data-testid="import-mode-control"
@@ -934,45 +931,56 @@ export function DataTab() {
                 ? t('importModeAddOnlyHint')
                 : t('importModeFullReplaceHint')}
             </p>
-            {pendingCollection === 'main' && importMode === 'full-replace' && (
-              <p className="text-xs text-status-warn mt-2" data-testid="full-replace-orphan-notice">
-                {currentPreview === 'loading'
-                  ? t('fullReplacePreviewLoading')
-                  : t('fullReplaceOrphanNotice', { count: currentPreview?.orphans ?? 0 })}
-              </p>
-            )}
-            {pendingCollection === 'client' && (
-              <div
-                className="text-xs text-status-warn mt-2 space-y-1"
-                data-testid="client-import-notice"
-              >
-                <p>
-                  {importMode === 'add-only'
-                    ? t('clientImportAddOnlyNotice')
-                    : t('clientImportFullReplaceNotice')}
+            {pendingCollection === 'main' &&
+              importMode === 'full-replace' &&
+              (currentPreview === 'loading' || (currentPreview?.orphans ?? 0) > 0) && (
+                <p
+                  className="text-xs text-status-warn mt-2"
+                  data-testid="full-replace-orphan-notice"
+                >
+                  {currentPreview === 'loading'
+                    ? t('fullReplacePreviewLoading')
+                    : t('fullReplaceOrphanNotice', { count: currentPreview?.orphans ?? 0 })}
                 </p>
-                {currentPreview === 'loading' && <p>{t('fullReplacePreviewLoading')}</p>}
-                {currentPreview && currentPreview !== 'loading' && (
-                  <p data-testid="client-import-preview-counts">
-                    {t('clientImportPreviewCounts', {
-                      changed: currentPreview.changed,
-                      orphans: currentPreview.orphans,
-                    })}
-                  </p>
-                )}
-              </div>
-            )}
+              )}
+            {/* Said when something moves to the Relink tab, or when the preview
+                could not tell (then the general rule is said instead). */}
+            {pendingCollection === 'client' &&
+              (currentPreview == null ||
+                currentPreview === 'loading' ||
+                currentPreview.changed + currentPreview.orphans > 0) && (
+                <div
+                  className="text-xs text-status-warn mt-2 space-y-1"
+                  data-testid="client-import-notice"
+                >
+                  {currentPreview == null && (
+                    <p>
+                      {importMode === 'add-only'
+                        ? t('clientImportAddOnlyNotice')
+                        : t('clientImportFullReplaceNotice')}
+                    </p>
+                  )}
+                  {currentPreview === 'loading' && <p>{t('fullReplacePreviewLoading')}</p>}
+                  {currentPreview && currentPreview !== 'loading' && (
+                    <p data-testid="client-import-preview-counts">
+                      {t(
+                        importMode === 'add-only'
+                          ? 'clientImportPreviewCountsAddOnly'
+                          : 'clientImportPreviewCounts',
+                        { changed: currentPreview.changed, orphans: currentPreview.orphans },
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
           </div>
           {unknownHeaders.length > 0 && (
-            <div className="mt-3" data-testid="import-unknown-headers-warning">
-              <p className="text-sm font-medium">{t('unknownHeadersTitle')}</p>
-              <p className="text-sm text-muted-foreground">{t('unknownHeadersDescription')}</p>
-              <ul className="mt-1 mb-1 list-disc pl-5 text-sm space-y-0.5">
-                {unknownHeaders.map((h) => (
-                  <li key={h}>{h}</li>
-                ))}
-              </ul>
-            </div>
+            <p
+              className="mt-3 text-sm text-status-warn"
+              data-testid="import-unknown-headers-warning"
+            >
+              {t('unknownHeadersSummary', { headers: unknownHeaders.join(', ') })}
+            </p>
           )}
           {currentPreview &&
             currentPreview !== 'loading' &&
@@ -994,14 +1002,19 @@ export function DataTab() {
               </p>
             )}
           {rawNewlineLanguages.length > 0 && (
-            <div className="mt-3" data-testid="import-raw-newline-warning">
-              <p className="text-sm font-medium">{t('rawNewlineLanguagesTitle')}</p>
-              <p className="text-sm text-muted-foreground">{t('rawNewlineLanguagesDescription')}</p>
-              <ul className="mt-1 mb-1 list-disc pl-5 text-sm space-y-0.5">
-                {rawNewlineLanguages.map((code) => (
-                  <li key={code}>{LANGUAGE_REGISTRY.find((l) => l.code === code)?.name ?? code}</li>
-                ))}
-              </ul>
+            <div className="mt-3 text-sm" data-testid="import-raw-newline-warning">
+              <p className="text-status-warn">
+                {t('rawNewlineSummary', { count: rawNewlineLanguages.length })}
+              </p>
+              {/* The list stays one click away for whoever fixes the file. */}
+              <details className="mt-1 text-muted-foreground">
+                <summary className="cursor-pointer text-xs">{t('rawNewlineShowLanguages')}</summary>
+                <p className="mt-1 text-xs">
+                  {rawNewlineLanguages
+                    .map((code) => LANGUAGE_REGISTRY.find((l) => l.code === code)?.name ?? code)
+                    .join(', ')}
+                </p>
+              </details>
             </div>
           )}
           <SheetFooter className="mt-4 flex gap-2">

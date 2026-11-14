@@ -11,7 +11,7 @@
       "openVault": "Abrir el formulario de la bóveda",
       "cloudVault": "Configurar tu bóveda",
       "openVaultPage": "Abrir la página de la bóveda",
-      "getGoogleKey": "Conseguir una clave gratuita de Google",
+      "getGoogleKey": "Conseguir una clave de Google (plan gratuito)",
       "addGoogleKey": "Pegar mi clave de Google",
       "ownProvider": "Usar mi propio proveedor",
       "useFoundKey": "Usar {{provider}} para tus traducciones",
@@ -23,6 +23,9 @@
       "translateFew": "Traducirlos",
       "translateRest": "Traducir el resto ahora",
       "skipRest": "Omitir y exportar lo que hay",
+      "retranslateTest": "Retraducir 3 entradas para probar",
+      "restoreTest": "Recuperar mis traducciones",
+      "keepTest": "Conservar las traducciones nuevas",
       "tourSections": "Muéstrame las secciones",
       "maybeLater": "Quizás más tarde"
     },
@@ -40,29 +43,29 @@
     },
     "cloudVault": {
       "title": "Crea tu bóveda y añade una clave",
-      "what": "Elige una contraseña para la bóveda y añade una clave. Para una prueba rápida, crea una clave gratuita de Google AI. ¿Ya tienes una clave de un proveedor compatible? Elige primero «Usar mi propio proveedor». Volverás aquí al terminar.",
+      "what": "Elige una contraseña para la bóveda y añade una clave. Para una prueba rápida, crea una clave de Google AI: su plan gratuito no cuesta nada. ¿Ya tienes una clave de un proveedor compatible? Elige primero «Usar mi propio proveedor». Volverás aquí al terminar.",
       "why": "Tus claves de proveedores se cifran con tu contraseña y nunca salen de tu control. La clave permite al proveedor de IA saber que eres tú."
     },
     "cloudUnlock": {
       "what": "Desbloquea tu bóveda en la página de la bóveda. Volverás aquí al terminar."
     },
     "cloudKey": {
-      "what": "Añade una clave en la página de la bóveda. Para una prueba rápida, crea una clave gratuita de Google AI. ¿Ya tienes una clave de un proveedor compatible? Elige primero «Usar mi propio proveedor». Volverás aquí al terminar."
+      "what": "Añade una clave en la página de la bóveda. Para una prueba rápida, crea una clave de Google AI: su plan gratuito no cuesta nada. ¿Ya tienes una clave de un proveedor compatible? Elige primero «Usar mi propio proveedor». Volverás aquí al terminar."
     },
     "key": {
       "title": "Añade una clave para empezar a traducir",
-      "why": "Con una clave gratuita, NARN Freeway traduce tu juego sin coste mientras lo pruebas. Puedes cambiar de proveedor cuando quieras en la pestaña Configuración del proyecto.",
+      "why": "Google AI, Groq y OpenRouter tienen un plan gratuito: con una clave de cualquiera de ellos, NARN Freeway traduce tu juego sin coste mientras lo pruebas. Puedes cambiar de proveedor cuando quieras en la pestaña Configuración del proyecto.",
       "whyOwn": "Tu clave de {{provider}} es la forma en que {{provider}} sabe que eres tú. Puedes cambiar de proveedor cuando quieras en la pestaña Configuración del proyecto.",
-      "choiceWhat": "Para una prueba rápida, crea una clave gratuita de Google AI y pégala en tu bóveda. ¿Ya tienes una clave de un proveedor compatible? Elige «Usar mi propio proveedor».",
+      "choiceWhat": "Para una prueba rápida, crea una clave de Google AI: su plan gratuito no cuesta nada. ¿Ya tienes una clave de un proveedor compatible? Elige «Usar mi propio proveedor».",
       "pasteWhat": "Pega la clave aquí, escribe abajo la contraseña de tu bóveda y guarda."
     },
     "project": {
       "title": "Importar el texto de tu juego",
-      "why": "NARN lee cada texto y solo traduce lo que falta.",
+      "why": "Al importar, eliges si el archivo reemplaza lo guardado o solo añade entradas nuevas y actualiza las modificadas.",
       "openWhat": "Abre la lista de proyectos.",
       "newWhat": "Crea un proyecto nuevo.",
       "createWhat": "Ponle un nombre a tu proyecto y créalo.",
-      "sourceWhat": "Elige el idioma en el que está escrito tu texto.",
+      "sourceWhat": "Elige tu idioma de origen: el idioma en el que está escrito el texto de tu juego.",
       "targetsWhat": "Marca los idiomas a los que quieres traducir, o usa Seleccionar todo.",
       "saveWhat": "Guarda tus idiomas.",
       "importWhat": "Elige el archivo CSV que exportaste desde el editor de tu juego.",
@@ -77,8 +80,8 @@
       "quickWhat": "Hay 3 textos sin traducir seleccionados. Tradúcelos para probar, o traduce todo ahora.",
       "fewWhat": "Tus textos están seleccionados. Tradúcelos ahora.",
       "startWhat": "Inicia la traducción.",
-      "nothingWhat": "Tu archivo ya tiene traducción para todos los idiomas que elegiste, así que no hay nada que traducir.",
-      "nothingWhy": "Para añadir un idioma, márcalo en la pestaña Datos y guarda. Si no, continúa y exporta tu archivo.",
+      "nothingWhat": "Tu archivo ya tiene traducción para todos los idiomas que elegiste. Para ver una traducción en acción, retraduce 3 entradas: se reemplazan sus traducciones y después puedes recuperarlas.",
+      "nothingWhy": "O pulsa Siguiente para pasar a la exportación. Para añadir un idioma, márcalo en la pestaña Datos y guarda.",
       "progressWhat": "La traducción está en curso. Esta línea muestra su progreso.",
       "progressWhy": "El recorrido continúa cuando la traducción haya terminado."
     },
@@ -107,6 +110,15 @@
       "why": "Puedes traducir el resto más tarde desde la lista de textos.",
       "skipped": "El resto puede esperar. Descarga lo que ya está traducido."
     },
+    "restore": {
+      "title": "La prueba funcionó",
+      "what": "Tus 3 entradas de prueba tienen traducciones nuevas. Recupera las traducciones de tu archivo o conserva las nuevas.",
+      "why": "NARN guardó un punto de restauración justo antes de la prueba.",
+      "pickWhat": "Este punto de restauración se guardó justo antes de la prueba. Pulsa Restaurar para recuperar las traducciones de tu archivo.",
+      "pickWhy": "Al restaurar, todo el proyecto vuelve a como estaba entonces.",
+      "confirmWhat": "Confirma para restaurar.",
+      "notFound": "No se encontró el punto de restauración de la prueba. Restaura uno desde Copias de seguridad o conserva las traducciones nuevas."
+    },
     "export": {
       "title": "Exportar",
       "why": "El editor de tu juego puede importar este archivo para llevar las traducciones al juego.",
@@ -124,7 +136,8 @@
     "title": "Usar mi propio proveedor",
     "description": "Elige el proveedor del que tienes una clave. Traduce este proyecto y los proyectos nuevos que crees. Para combinar varios proveedores, cambia a Avanzado.",
     "existingRouting": "Este proyecto ya tiene el enrutamiento configurado, así que se queda como está. Puedes cambiarlo en Avanzado.",
-    "freeHeading": "Estos tienen claves gratuitas. Si eliges uno, traduce solo él, sin los demás modelos gratuitos del grupo de NARN Freeway.",
+    "freeHeading": "Plan gratuito. Si eliges uno, traduce solo él, sin los demás modelos gratuitos del grupo de NARN Freeway.",
+    "paidHeading": "De pago, se factura a tu cuenta con el proveedor.",
     "cancel": "Cancelar",
     "failed": "No se pudo configurar {{provider}}: {{message}}",
     "switchedOff": "{{provider}} está desactivado en Avanzado, así que no se usó. Vuelve a activarlo en Configuración global o elige otro proveedor.",

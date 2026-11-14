@@ -43,5 +43,6 @@
   "toastBackupCreated": "Резервная копия создана.",
   "toastBackupFailed": "Не удалось создать резервную копию: {{message}}",
   "toastRestoreSuccess": "Резервная копия восстановлена.",
-  "toastRestoreFailed": "Не удалось восстановить: {{message}}"
+  "toastRestoreFailed": "Не удалось восстановить: {{message}}",
+  "toastGuideRestored": "Переводы из вашего файла возвращены."
 }

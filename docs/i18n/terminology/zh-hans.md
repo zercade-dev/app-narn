@@ -92,7 +92,7 @@ the quote convention this locale's strings use.
 | category | 类别 | Not 分类, which names the act of classifying, and not 标签, spent on *source label*. `config:batchGroupingCategory` is “按类别” |
 | tone | 语气 | The authoring instruction. 语调 would be the acoustic reading and 风格 would read as the model's writing style, which the term rules out. `config:routing.labelTones` is “语气” |
 | orphan | 孤立条目 | Built on 条目 so the object is unmistakable, with 孤立 (isolated, cut off) as the figurative noun the term asks for; the bare adjective 孤立 is what the state badge uses. `config:orphanedCount` is “{{count}} 个已孤立”. 孤儿 (the literal orphan) was rejected: it reads as a person in Chinese and would be jarring in a count chip |
-| relink | 重新关联 | One verb for the row button, the dialog title, the confirm step and the import warning. `config:importModeFullReplaceHint` is “文件中缺失的条目将被标记为孤立（在重新关联或删除前不参与任何 AI 运行）。” |
+| relink | 重新关联 | One verb for the row button, the dialog title, the confirm step and the import warning. `config:importModeFullReplaceHint` is “文件中缺失的条目将变为孤立条目。” |
 | backup | 备份 | The noun; the verb is 创建备份, never a bare 备份 used verbally. `config:maxBackupsLabel` is “每个项目的最大备份数”. Kept apart from 导出 (*export*) and 快照 (*snapshot*) |
 | snapshot | 快照 | `config:importSnapshotNote` is “本次导入前已创建安全快照（{{date}}）。您可以在备份标签页中恢复它。” — the one string that uses both this and 备份, which is why they cannot share a word |
 | template | 模板 | `config:templatesTitle` is “项目模板”. The *model* trap the terminology file warns about does not exist here: 模型 and 模板 are separate words and neither is anyone's second choice for the other |

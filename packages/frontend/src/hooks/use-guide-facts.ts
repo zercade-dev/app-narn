@@ -167,6 +167,22 @@ export function useGuideFacts(): GuideFacts {
     quickTestRunKnown &&
     translationExists &&
     untranslatedRemain;
+  // The retranslate test: its run replaces translations the file already had.
+  const retest =
+    quickTest?.retranslate === true &&
+    quickTest.projectId === activeProjectId &&
+    quickTest.decision === 'pending' &&
+    quickTestRunKnown;
+  // Until it translated something: running, or ended empty (the progress
+  // step then says why, and offers to try again).
+  const retestRunning = retest && (translationGoing || !translationExists);
+  const retestPending = retest && !translationGoing && translationExists;
+  // Answered (restored or kept): a restore also brings back the runs from
+  // before the test, so "nothing to translate" must not come back.
+  const retestDone =
+    quickTest?.retranslate === true &&
+    quickTest.projectId === activeProjectId &&
+    (quickTest.decision === 'restored' || quickTest.decision === 'skip');
   const restRunId =
     quickTest?.decision === 'rest' && quickTest.projectId === activeProjectId
       ? quickTest.restRunId
@@ -200,6 +216,9 @@ export function useGuideFacts(): GuideFacts {
       nothingToTranslate,
       quickTestPending,
       restRunning,
+      retestRunning,
+      retestPending,
+      retestDone,
     };
   }, [
     cloudManaged,
@@ -219,6 +238,9 @@ export function useGuideFacts(): GuideFacts {
     nothingToTranslate,
     quickTestPending,
     restRunning,
+    retestRunning,
+    retestPending,
+    retestDone,
   ]);
 }
 

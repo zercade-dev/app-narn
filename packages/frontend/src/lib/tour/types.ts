@@ -37,6 +37,19 @@ export interface GuideFacts {
    * produced has not settled yet (still pending, queued, running or paused).
    */
   restRunning: boolean;
+  /**
+   * The retranslate test (asked for when the file already had every
+   * translation) has a run that has not translated anything yet: still
+   * going, or ended empty.
+   */
+  retestRunning: boolean;
+  /**
+   * The retranslate test translated something, and the person has not yet
+   * chosen between putting the file's translations back and keeping the new ones.
+   */
+  retestPending: boolean;
+  /** The retranslate test was answered: its translations were put back, or kept. */
+  retestDone: boolean;
 }
 
 export type TourAdvance =

@@ -362,7 +362,7 @@
     "belowTargetConfirm": "それでも続行",
     "waitingResumesAt": "再開：{{time}}",
     "waitingPairsCount_other": "保留中のペア{{count}}件",
-    "waitingSkipReasonWarning": "自動再開で利用できる無料キーが見つかりませんでした。下の「別のモジュールで再開…」からモジュールを選択してください。",
+    "waitingSkipReasonWarning": "自動再開で利用できる無料枠のキーが見つかりませんでした。下の「別のモジュールで再開…」からモジュールを選択してください。",
     "waitingProviderErrorReason": "プロバイダーでエラーが発生したため、自動的に再試行します。",
     "pause": "一時停止",
     "resume": "再開",

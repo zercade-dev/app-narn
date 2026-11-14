@@ -24,7 +24,16 @@ export interface TourProgress {
 export interface QuickTest {
   projectId: string;
   runId: string | null;
-  decision: 'pending' | 'rest' | 'skip';
+  /** `restored`: a retranslate test whose restore point was put back. */
+  decision: 'pending' | 'rest' | 'skip' | 'restored';
+  /**
+   * Asked for from "nothing to translate": the test translated entries that
+   * were already translated, replacing their text (the server takes a
+   * pre-retranslate restore point first).
+   */
+  retranslate?: boolean;
+  /** For a retranslate test: the restore point the guide points at, once found. */
+  backupId?: string;
   restRunId?: string;
   runsBefore?: string[];
   requestedAt?: number;
@@ -125,7 +134,7 @@ interface GuideState {
   clearPendingProviders: () => void;
   setQuickTest: (quickTest: QuickTest | null) => void;
   /** The answer to "translate the rest?"; nothing without a quick test. */
-  decideQuickTest: (decision: 'rest' | 'skip') => void;
+  decideQuickTest: (decision: 'rest' | 'skip' | 'restored') => void;
   setClosingShown: (shown: boolean) => void;
   setOrphanSim: (sim: OrphanSim) => void;
   clearOrphanSim: () => void;

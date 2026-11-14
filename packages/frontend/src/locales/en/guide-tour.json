@@ -11,7 +11,7 @@
       "openVault": "Open the vault form",
       "cloudVault": "Set up your vault",
       "openVaultPage": "Open the vault page",
-      "getGoogleKey": "Get a free Google key",
+      "getGoogleKey": "Get a Google key (free tier)",
       "addGoogleKey": "Paste my Google key",
       "ownProvider": "Use my own provider",
       "useFoundKey": "Use {{provider}} for your translations",
@@ -23,6 +23,9 @@
       "translateFew": "Translate them",
       "translateRest": "Translate the rest now",
       "skipRest": "Skip, export what I have",
+      "retranslateTest": "Retranslate 3 entries to test",
+      "restoreTest": "Put my translations back",
+      "keepTest": "Keep the new translations",
       "tourSections": "Show me the sections",
       "maybeLater": "Maybe later"
     },
@@ -40,29 +43,29 @@
     },
     "cloudVault": {
       "title": "Create your vault and add a key",
-      "what": "Choose a vault password, then add a key. For a quick test, create a free Google AI key. Already have a key for a supported provider? Choose \"Use my own provider\" first. You come back here when it is done.",
+      "what": "Choose a vault password, then add a key. For a quick test, create a Google AI key: its free tier costs nothing. Already have a key for a supported provider? Choose \"Use my own provider\" first. You come back here when it is done.",
       "why": "Your provider keys are encrypted with your password and never leave your control. A key is how the AI provider knows it's you."
     },
     "cloudUnlock": {
       "what": "Unlock your vault on the vault page. You come back here when it is done."
     },
     "cloudKey": {
-      "what": "Add a key on the vault page. For a quick test, create a free Google AI key. Already have a key for a supported provider? Choose \"Use my own provider\" first. You come back here when it is done."
+      "what": "Add a key on the vault page. For a quick test, create a Google AI key: its free tier costs nothing. Already have a key for a supported provider? Choose \"Use my own provider\" first. You come back here when it is done."
     },
     "key": {
       "title": "Add a key to start translating",
-      "why": "A free key lets NARN Freeway translate your game at no cost while you try it out. You can change the provider at any time in the project's Config tab.",
+      "why": "Google AI, Groq and OpenRouter have a free tier: with a key from any of them, NARN Freeway translates your game at no cost while you try it out. You can change the provider at any time in the project's Config tab.",
       "whyOwn": "Your {{provider}} key is how {{provider}} knows it's you. You can change the provider at any time in the project's Config tab.",
-      "choiceWhat": "For a quick test, create a free Google AI key and paste it into your vault. Already have a key for a supported provider? Choose \"Use my own provider\".",
+      "choiceWhat": "For a quick test, create a Google AI key: its free tier costs nothing. Already have a key for a supported provider? Choose \"Use my own provider\".",
       "pasteWhat": "Paste the key here, type your vault password below, then save."
     },
     "project": {
       "title": "Bring in your game's text",
-      "why": "NARN reads every entry and only translates what's missing.",
+      "why": "When you import, you choose whether the file replaces what is stored or only adds new entries and updates changed ones.",
       "openWhat": "Open the project list.",
       "newWhat": "Create a new project.",
       "createWhat": "Give your project a name, then create it.",
-      "sourceWhat": "Pick the language your text is written in.",
+      "sourceWhat": "Choose your source language: the one your game's text is written in.",
       "targetsWhat": "Tick the languages you want to translate into, or use Select all.",
       "saveWhat": "Save your languages.",
       "importWhat": "Choose the CSV file you exported from your game editor.",
@@ -77,8 +80,8 @@
       "quickWhat": "3 entries that still need translating are selected. Translate them to try it out, or translate everything now.",
       "fewWhat": "Your entries are selected. Translate them now.",
       "startWhat": "Start the translation.",
-      "nothingWhat": "Your file already has a translation for every language you chose, so there is nothing to translate.",
-      "nothingWhy": "To add a language, tick it on the Data tab and save. Otherwise, go on to export your file.",
+      "nothingWhat": "Your file already has a translation for every language you chose. To see a translation happen, retranslate 3 entries: their translations are replaced, and you can put them back afterwards.",
+      "nothingWhy": "Or press Next to go on to the export. To add a language, tick it on the Data tab and save.",
       "progressWhat": "The translation is running. This line shows its progress.",
       "progressWhy": "The tour continues when the translation has finished."
     },
@@ -107,6 +110,15 @@
       "why": "You can translate the rest later from the list of entries.",
       "skipped": "The rest can wait. Download what is translated so far."
     },
+    "restore": {
+      "title": "The test worked",
+      "what": "Your 3 test entries have new translations. Put your file's translations back, or keep the new ones.",
+      "why": "NARN saved a restore point just before the test.",
+      "pickWhat": "This restore point was saved just before the test. Press Restore to put your file's translations back.",
+      "pickWhy": "Restoring brings the whole project back to how it was then.",
+      "confirmWhat": "Confirm to restore.",
+      "notFound": "The test's restore point was not found. Restore one from Backups, or keep the new translations."
+    },
     "export": {
       "title": "Export",
       "why": "Your game editor can import this file to bring the translations into your game.",
@@ -124,7 +136,8 @@
     "title": "Use my own provider",
     "description": "Pick the provider you have a key for. It translates this project and the new projects you create. To combine several providers, switch to Advanced.",
     "existingRouting": "This project already has routing set up, so it stays as it is. You can change it in Advanced.",
-    "freeHeading": "These have free keys. Picking one translates with it alone, without the other free models in the NARN Freeway pool.",
+    "freeHeading": "Free tier. Picking one translates with it alone, without the other free models in the NARN Freeway pool.",
+    "paidHeading": "Paid, billed to your account with the provider.",
     "cancel": "Cancel",
     "failed": "Could not set up {{provider}}: {{message}}",
     "switchedOff": "{{provider}} is switched off in Advanced, so it was not used. Switch it back on in Global Config, or choose another provider.",

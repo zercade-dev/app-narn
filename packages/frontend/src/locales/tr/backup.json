@@ -43,5 +43,6 @@
   "toastBackupCreated": "Yedek oluşturuldu.",
   "toastBackupFailed": "Yedek oluşturulamadı: {{message}}",
   "toastRestoreSuccess": "Yedek geri yüklendi.",
-  "toastRestoreFailed": "Geri yüklenemedi: {{message}}"
+  "toastRestoreFailed": "Geri yüklenemedi: {{message}}",
+  "toastGuideRestored": "Dosyanızdaki çeviriler geri geldi."
 }

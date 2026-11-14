@@ -11,7 +11,7 @@
       "openVault": "Apri la finestra della cassaforte",
       "cloudVault": "Configura la cassaforte",
       "openVaultPage": "Apri la pagina della cassaforte",
-      "getGoogleKey": "Ottieni una chiave Google gratuita",
+      "getGoogleKey": "Ottieni una chiave Google (piano gratuito)",
       "addGoogleKey": "Incolla la mia chiave Google",
       "ownProvider": "Usa il mio provider",
       "useFoundKey": "Usa {{provider}} per le tue traduzioni",
@@ -23,6 +23,9 @@
       "translateFew": "Traducile",
       "translateRest": "Traduci il resto ora",
       "skipRest": "Salta ed esporta ciò che c'è",
+      "retranslateTest": "Ritraduci 3 voci per provare",
+      "restoreTest": "Rimetti le mie traduzioni",
+      "keepTest": "Mantieni le nuove traduzioni",
       "tourSections": "Mostrami le sezioni",
       "maybeLater": "Magari più tardi"
     },
@@ -40,29 +43,29 @@
     },
     "cloudVault": {
       "title": "Crea la tua cassaforte e aggiungi una chiave",
-      "what": "Scegli una password per la cassaforte, poi aggiungi una chiave. Per una prova veloce, crea una chiave Google AI gratuita. Hai già una chiave di un provider supportato? Scegli prima “Usa il mio provider”. Tornerai qui al termine.",
+      "what": "Scegli una password per la cassaforte, poi aggiungi una chiave. Per una prova veloce, crea una chiave Google AI: il suo piano gratuito non costa nulla. Hai già una chiave di un provider supportato? Scegli prima “Usa il mio provider”. Tornerai qui al termine.",
       "why": "Le chiavi dei tuoi provider vengono cifrate con la tua password e restano sempre sotto il tuo controllo. La chiave serve al provider di IA per riconoscerti."
     },
     "cloudUnlock": {
       "what": "Sblocca la cassaforte nella pagina della cassaforte. Tornerai qui al termine."
     },
     "cloudKey": {
-      "what": "Aggiungi una chiave nella pagina della cassaforte. Per una prova veloce, crea una chiave Google AI gratuita. Hai già una chiave di un provider supportato? Scegli prima “Usa il mio provider”. Tornerai qui al termine."
+      "what": "Aggiungi una chiave nella pagina della cassaforte. Per una prova veloce, crea una chiave Google AI: il suo piano gratuito non costa nulla. Hai già una chiave di un provider supportato? Scegli prima “Usa il mio provider”. Tornerai qui al termine."
     },
     "key": {
       "title": "Aggiungi una chiave per iniziare a tradurre",
-      "why": "Con una chiave gratuita, NARN Freeway traduce il tuo gioco senza costi mentre lo provi. Puoi cambiare provider in qualsiasi momento nella scheda Configurazione del progetto.",
+      "why": "Google AI, Groq e OpenRouter hanno un piano gratuito: con una chiave di uno qualsiasi di loro, NARN Freeway traduce il tuo gioco senza costi mentre lo provi. Puoi cambiare provider in qualsiasi momento nella scheda Configurazione del progetto.",
       "whyOwn": "La tua chiave {{provider}} serve a {{provider}} per riconoscerti. Puoi cambiare provider in qualsiasi momento nella scheda Configurazione del progetto.",
-      "choiceWhat": "Per una prova veloce, crea una chiave Google AI gratuita e incollala nella tua cassaforte. Hai già una chiave di un provider supportato? Scegli “Usa il mio provider”.",
+      "choiceWhat": "Per una prova veloce, crea una chiave Google AI: il suo piano gratuito non costa nulla. Hai già una chiave di un provider supportato? Scegli “Usa il mio provider”.",
       "pasteWhat": "Incolla qui la chiave, digita sotto la password della cassaforte, poi salva."
     },
     "project": {
       "title": "Importazione del testo del gioco",
-      "why": "NARN legge ogni voce e traduce solo ciò che manca.",
+      "why": "Quando importi, scegli se il file sostituisce ciò che è salvato o se aggiunge solo le voci nuove e aggiorna quelle modificate.",
       "openWhat": "Apri l'elenco dei progetti.",
       "newWhat": "Crea un nuovo progetto.",
       "createWhat": "Dai un nome al progetto, poi crealo.",
-      "sourceWhat": "Scegli la lingua in cui è scritto il tuo testo.",
+      "sourceWhat": "Scegli la lingua di origine: quella in cui è scritto il testo del tuo gioco.",
       "targetsWhat": "Spunta le lingue in cui vuoi tradurre, oppure usa Seleziona tutto.",
       "saveWhat": "Salva le lingue.",
       "importWhat": "Scegli il file CSV esportato dal tuo editor di gioco.",
@@ -77,8 +80,8 @@
       "quickWhat": "Sono selezionate 3 voci ancora da tradurre. Traducile per provare, oppure traduci tutto subito.",
       "fewWhat": "Le tue voci sono selezionate. Traducile ora.",
       "startWhat": "Avvia la traduzione.",
-      "nothingWhat": "Il tuo file ha già una traduzione per ogni lingua scelta, quindi non c'è niente da tradurre.",
-      "nothingWhy": "Per aggiungere una lingua, spuntala nella scheda Dati e salva. Altrimenti, prosegui ed esporta il file.",
+      "nothingWhat": "Il tuo file ha già una traduzione per ogni lingua scelta. Per vedere una traduzione in azione, ritraduci 3 voci: le loro traduzioni vengono sostituite e poi puoi rimetterle.",
+      "nothingWhy": "Oppure premi Avanti per passare all’esportazione. Per aggiungere una lingua, spuntala nella scheda Dati e salva.",
       "progressWhat": "La traduzione è in corso. Questa riga ne mostra l'avanzamento.",
       "progressWhy": "Il tour prosegue quando la traduzione è terminata."
     },
@@ -107,6 +110,15 @@
       "why": "Puoi tradurre il resto più tardi dall'elenco delle voci.",
       "skipped": "Il resto può aspettare. Scarica ciò che è già tradotto."
     },
+    "restore": {
+      "title": "Il test è riuscito",
+      "what": "Le tue 3 voci di prova hanno nuove traduzioni. Rimetti le traduzioni del tuo file oppure mantieni quelle nuove.",
+      "why": "NARN ha salvato un punto di ripristino subito prima del test.",
+      "pickWhat": "Questo punto di ripristino è stato salvato subito prima del test. Premi Ripristina per rimettere le traduzioni del tuo file.",
+      "pickWhy": "Il ripristino riporta l’intero progetto a com’era allora.",
+      "confirmWhat": "Conferma per ripristinare.",
+      "notFound": "Il punto di ripristino del test non è stato trovato. Ripristinane uno dai Backup oppure mantieni le nuove traduzioni."
+    },
     "export": {
       "title": "Esportazione",
       "why": "Il tuo editor di gioco può importare questo file per portare le traduzioni nel gioco.",
@@ -124,7 +136,8 @@
     "title": "Usa il mio provider",
     "description": "Scegli il provider di cui hai una chiave. Traduce questo progetto e i nuovi progetti che crei. Per combinare più provider, passa ad Avanzata.",
     "existingRouting": "Questo progetto ha già un routing configurato, quindi resta com'è. Puoi cambiarlo in Avanzata.",
-    "freeHeading": "Questi hanno chiavi gratuite. Se ne scegli uno, traduce solo quello, senza gli altri modelli gratuiti del pool di NARN Freeway.",
+    "freeHeading": "Piano gratuito. Se ne scegli uno, traduce solo quello, senza gli altri modelli gratuiti del pool di NARN Freeway.",
+    "paidHeading": "A pagamento, addebitato sul tuo account presso il provider.",
     "cancel": "Annulla",
     "failed": "Impossibile configurare {{provider}}: {{message}}",
     "switchedOff": "{{provider}} è disattivato in Avanzata, quindi non è stato usato. Riattivalo in Configurazione globale o scegli un altro provider.",
