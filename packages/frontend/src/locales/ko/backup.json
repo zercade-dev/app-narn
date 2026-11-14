@@ -43,5 +43,6 @@
   "toastBackupCreated": "백업을 만들었어요.",
   "toastBackupFailed": "백업 실패: {{message}}",
   "toastRestoreSuccess": "백업을 복원했어요.",
-  "toastRestoreFailed": "복원 실패: {{message}}"
+  "toastRestoreFailed": "복원 실패: {{message}}",
+  "toastGuideRestored": "파일의 번역이 돌아왔어요."
 }

@@ -368,7 +368,7 @@
     "waitingResumesAt": "Resumes {{time}}",
     "waitingPairsCount_one": "{{count}} pair pending",
     "waitingPairsCount_other": "{{count}} pairs pending",
-    "waitingSkipReasonWarning": "Auto-resume couldn't find a usable free key — use \"Resume now with…\" below to pick a module.",
+    "waitingSkipReasonWarning": "Auto-resume couldn't find a usable free-tier key — use \"Resume now with…\" below to pick a module.",
     "waitingProviderErrorReason": "A provider had an error, so this will retry automatically.",
     "pause": "Pause",
     "resume": "Resume",

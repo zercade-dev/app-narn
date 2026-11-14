@@ -28,6 +28,9 @@ export type FirstRunAction =
   | 'translate-few'
   | 'translate-rest'
   | 'skip-rest'
+  | 'retranslate-test'
+  | 'restore-test'
+  | 'keep-test'
   | 'tour-sections'
   | 'maybe-later';
 
@@ -231,7 +234,15 @@ const QUICK_STEP = 'translate-quick';
 const QUICK_DONE = (f: GuideFacts): boolean => f.translationExists;
 /** Shown in place of the quick test when every entry is already translated. */
 const NOTHING_STEP = 'translate-nothing';
+/** After a retranslate test: put the file's translations back, or keep the new ones. */
+const RESTORE_STEP = 'translate-restore';
+const RESTORE_STEPS: readonly string[] = [RESTORE_STEP, 'restore-pick', 'restore-confirm'];
 const CLOSING_STEP = 'closing';
+
+/** `data-tour` of the Backups row holding the retranslate test's restore point. */
+export const RESTORE_POINT_ANCHOR = 'guide-restore-point';
+/** `data-tour` of the confirm button of a restore from that row. */
+export const RESTORE_CONFIRM_ANCHOR = 'guide-restore-confirm';
 
 /**
  * The quick test step. With QUICK_TEST_SIZE entries or fewer (`few`) the test
@@ -390,9 +401,54 @@ const SHARED_STEPS: TourStep[] = [
     whatKey: 'firstRun.translate.nothingWhat',
     whyKey: 'firstRun.translate.nothingWhy',
     advance: { kind: 'next' },
-    navigate: { view: 'project' },
+    // The entries tab: its table answers the retranslate test's request.
+    navigate: { view: 'project', tab: 'strings' },
+    // A test that replaces 3 translations; the restore point the server takes
+    // first puts them back (see RESTORE_STEP).
+    actions: [{ ...action('retranslate-test', 'retranslateTest'), primary: true }],
     major: 4,
     variantOf: QUICK_STEP,
+  },
+  {
+    // After the retranslate test: its run replaced 3 translations.
+    id: RESTORE_STEP,
+    anchor: null,
+    titleKey: 'firstRun.restore.title',
+    whatKey: 'firstRun.restore.what',
+    whyKey: 'firstRun.restore.why',
+    advance: { kind: 'state', done: (f) => !f.retestPending },
+    navigate: { view: 'project', tab: 'strings' },
+    actions: [
+      { ...action('restore-test', 'restoreTest'), primary: true },
+      action('keep-test', 'keepTest'),
+    ],
+    major: 4,
+    variantOf: WAITING_STEP,
+  },
+  {
+    // The restore point taken just before the test, on the Backups page
+    // (paired with its confirmation, see FORM_STEPS).
+    id: 'restore-pick',
+    anchor: RESTORE_POINT_ANCHOR,
+    titleKey: 'firstRun.restore.title',
+    whatKey: 'firstRun.restore.pickWhat',
+    whyKey: 'firstRun.restore.pickWhy',
+    advance: { kind: 'state', done: (f) => !f.retestPending },
+    navigate: { view: 'project', tab: 'backup' },
+    actions: [action('keep-test', 'keepTest')],
+    major: 4,
+    variantOf: WAITING_STEP,
+  },
+  {
+    id: 'restore-confirm',
+    anchor: RESTORE_CONFIRM_ANCHOR,
+    titleKey: 'firstRun.restore.title',
+    whatKey: 'firstRun.restore.confirmWhat',
+    whyKey: 'firstRun.restore.pickWhy',
+    side: 'left',
+    advance: { kind: 'state', done: (f) => !f.retestPending },
+    major: 4,
+    variantOf: WAITING_STEP,
   },
   {
     id: 'export-open',
@@ -527,6 +583,8 @@ function firstIncompleteMajor(f: GuideFacts): number {
   // A file that came translated has nothing for step 4 to do.
   const translated = f.translationExists || f.nothingToTranslate;
   if (!translated || restPending(f) || f.restRunning) return 4;
+  // The retranslate test, while it runs and until its translations are kept or put back.
+  if (f.retestRunning || f.retestPending) return 4;
   if (!f.exported) return 5;
   return 6;
 }
@@ -554,7 +612,11 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
     return at('import');
   }
   // Said once, on the way to the export: the guide's way into step 5.
-  if (major === 5 && !f.translationExists && f.nothingToTranslate) return at(NOTHING_STEP);
+  if (major === 5 && !f.translationExists && f.nothingToTranslate && !f.retestDone) {
+    return at(NOTHING_STEP);
+  }
+  if (major === 4 && f.retestPending) return at(RESTORE_STEP);
+  if (major === 4 && f.retestRunning) return at(WAITING_STEP);
   if (major === 4 && restPending(f)) return at('translate-rest');
   if (major === 4 && f.translationExists && f.restRunning) return at(WAITING_STEP);
   return steps.findIndex((s) => s.major === major);
@@ -567,7 +629,11 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
  */
 export function firstRunStepApplies(step: TourStep | undefined, f: GuideFacts): boolean {
   if (!step) return false;
-  if (step.id === NOTHING_STEP) return f.nothingToTranslate && !f.translationExists;
+  if (step.id === NOTHING_STEP) {
+    return f.nothingToTranslate && !f.translationExists && !f.retestDone;
+  }
+  // The retranslate test's restore steps, only while its choice is open.
+  if (RESTORE_STEPS.includes(step.id)) return f.retestPending;
   if (f.nothingToTranslate && !f.translationExists) return step.major !== 4;
   return true;
 }
@@ -586,6 +652,8 @@ const FORM_STEPS = [
   { closed: QUICK_STEP, open: 'translate-start', anchor: 'comparison-translate-start' },
   // The import review sheet, opened once a file was chosen.
   { closed: 'import', open: 'import-confirm', anchor: 'confirm-import' },
+  // The restore confirmation, opened from the restore point's row.
+  { closed: 'restore-pick', open: 'restore-confirm', anchor: RESTORE_CONFIRM_ANCHOR },
 ] as const;
 
 /** The `data-tour` anchors whose presence {@link firstRunShownIndex} needs to know. */

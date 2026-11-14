@@ -4,7 +4,11 @@ import { toast } from '@/lib/toast';
 import { Download } from 'lucide-react';
 import { cn, getErrorMessage } from '@/lib/utils';
 import { apiRequest } from '../../hooks/use-api.js';
+import { useUiMode } from '../../hooks/use-ui-mode.js';
+import { RESTORE_CONFIRM_ANCHOR, RESTORE_POINT_ANCHOR } from '../../lib/tour/first-run.js';
+import { useGuideStore } from '../../stores/guide-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
+import { useRunStore } from '../../stores/run-store.js';
 import { useStringStore } from '../../stores/string-store.js';
 import { useProjectScopedFetch } from '../orphans/use-project-scoped-fetch.js';
 import { Button, buttonVariants } from '../ui/button';
@@ -86,6 +90,16 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
   const [deleteEntry, setDeleteEntry] = useState<BackupEntry | null>(null);
   const [deleting, setDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Simple shows a short view: make a backup, and restore or download one.
+  const simple = useUiMode() === 'simple';
+  // The restore point of the guide's retranslate test, which the guide points at.
+  const guideBackupId = useGuideStore((s) =>
+    s.quickTest?.projectId === projectId &&
+    s.quickTest.retranslate === true &&
+    s.quickTest.decision === 'pending'
+      ? (s.quickTest.backupId ?? null)
+      : null,
+  );
 
   // Backups list fetch is project-scoped: a project change re-fetches and the
   // explicit reloads after create/delete pass nothing (never stale). List fetch
@@ -209,11 +223,18 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
         `/projects/${projectId}/backups/${serverRestoreEntry.id}/restore`,
         { method: 'POST' },
       );
-      toast.success(t('toastRestoreSuccess'));
+      if (serverRestoreEntry.id === guideBackupId) {
+        useGuideStore.getState().decideQuickTest('restored');
+        toast.success(t('toastGuideRestored'));
+      } else {
+        toast.success(t('toastRestoreSuccess'));
+      }
       // Same client-state refresh as the file-upload restore path above — see
       // that comment. This restore is always scoped to the current `projectId`.
       void useProjectStore.getState().fetchProjects();
       void useStringStore.getState().fetchEntries(projectId);
+      // The restore brings back the project's runs as they were too.
+      void useRunStore.getState().fetchRuns(projectId);
     } catch (err) {
       toast.error(t('toastRestoreFailed', { message: getErrorMessage(err) }));
     } finally {
@@ -261,7 +282,7 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
     <div className="mx-auto w-full max-w-5xl space-y-4">
       <h2 className="text-xl font-semibold">{t('title')}</h2>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className={cn('grid gap-4', !simple && 'lg:grid-cols-2')}>
         <Card>
           <CardHeader>
             <CardTitle>{t('createSection')}</CardTitle>
@@ -278,32 +299,34 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('restoreSection')}</CardTitle>
-            <CardDescription>{t('restoreDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="space-y-2">
-              <Label htmlFor="backup-restore-file">{t('restoreSelectFile')}</Label>
-              <Input
-                id="backup-restore-file"
-                ref={fileInputRef}
-                type="file"
-                accept=".zip,application/zip"
-                onChange={handleFileChange}
-                data-testid="backup-restore-input"
-              />
-            </div>
-            <Button
-              onClick={() => void handleOpenUploadRestore()}
-              disabled={!selectedFile || restoring}
-              data-testid="backup-restore-btn"
-            >
-              {restoring ? t('restoring') : t('restoreButton')}
-            </Button>
-          </CardContent>
-        </Card>
+        {!simple && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('restoreSection')}</CardTitle>
+              <CardDescription>{t('restoreDescription')}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="backup-restore-file">{t('restoreSelectFile')}</Label>
+                <Input
+                  id="backup-restore-file"
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".zip,application/zip"
+                  onChange={handleFileChange}
+                  data-testid="backup-restore-input"
+                />
+              </div>
+              <Button
+                onClick={() => void handleOpenUploadRestore()}
+                disabled={!selectedFile || restoring}
+                data-testid="backup-restore-btn"
+              >
+                {restoring ? t('restoring') : t('restoreButton')}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Card>
@@ -340,7 +363,11 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
                             onClick={() => void handleOpenServerRestore(b)}
                             disabled={restoring}
                             data-testid="backup-server-restore-btn"
-                            data-tour={`backup-restore-${b.id}`}
+                            data-tour={
+                              b.id === guideBackupId
+                                ? RESTORE_POINT_ANCHOR
+                                : `backup-restore-${b.id}`
+                            }
                           >
                             {t('restoreButton')}
                           </Button>
@@ -355,16 +382,18 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
                             <Download className="size-3.5" />
                             {t('download')}
                           </a>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => setDeleteEntry(b)}
-                            disabled={deleting}
-                            data-testid="backup-delete-btn"
-                          >
-                            {t('deleteButton')}
-                          </Button>
+                          {!simple && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() => setDeleteEntry(b)}
+                              disabled={deleting}
+                              data-testid="backup-delete-btn"
+                            >
+                              {t('deleteButton')}
+                            </Button>
+                          )}
                         </div>
                       </li>
                     ))}
@@ -446,6 +475,11 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
         cancelLabel={t('confirmCancel')}
         cancelTestId="backup-server-restore-cancel"
         confirmTestId="backup-server-restore-confirm"
+        confirmTourId={
+          serverRestoreEntry !== null && serverRestoreEntry.id === guideBackupId
+            ? RESTORE_CONFIRM_ANCHOR
+            : undefined
+        }
       >
         {loadingManifest && (
           <p className="px-4 py-2 text-sm text-muted-foreground">{t('previewLoading')}</p>

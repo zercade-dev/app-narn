@@ -11,7 +11,7 @@
       "openVault": "Tresor-Formular öffnen",
       "cloudVault": "Tresor einrichten",
       "openVaultPage": "Tresor-Seite öffnen",
-      "getGoogleKey": "Kostenlosen Google-Schlüssel holen",
+      "getGoogleKey": "Google-Schlüssel holen (Gratis-Tarif)",
       "addGoogleKey": "Meinen Google-Schlüssel einfügen",
       "ownProvider": "Eigenen Anbieter verwenden",
       "useFoundKey": "{{provider}} für deine Übersetzungen verwenden",
@@ -23,6 +23,9 @@
       "translateFew": "Jetzt übersetzen",
       "translateRest": "Den Rest jetzt übersetzen",
       "skipRest": "Überspringen, Fertiges exportieren",
+      "retranslateTest": "3 Einträge zum Test neu übersetzen",
+      "restoreTest": "Meine Übersetzungen zurückholen",
+      "keepTest": "Neue Übersetzungen behalten",
       "tourSections": "Zeig mir die Bereiche",
       "maybeLater": "Vielleicht später"
     },
@@ -40,29 +43,29 @@
     },
     "cloudVault": {
       "title": "Tresor erstellen und einen Schlüssel hinzufügen",
-      "what": "Ein Tresor-Passwort festlegen und dann einen Schlüssel hinzufügen. Für einen schnellen Test einen kostenlosen Google-AI-Schlüssel erstellen. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann zuerst „Eigenen Anbieter verwenden“ wählen. Danach kommst du hierher zurück.",
+      "what": "Wähle ein Tresor-Passwort und füge dann einen Schlüssel hinzu. Für einen schnellen Test erstelle einen Google-AI-Schlüssel: Der Gratis-Tarif kostet nichts. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann wähle zuerst „Eigenen Anbieter verwenden“. Danach kommst du hierher zurück.",
       "why": "Deine Anbieter-Schlüssel werden mit deinem Passwort verschlüsselt und bleiben immer unter deiner Kontrolle. Am Schlüssel erkennt der KI-Anbieter, dass du es bist."
     },
     "cloudUnlock": {
       "what": "Deinen Tresor auf der Tresor-Seite entsperren. Danach kommst du hierher zurück."
     },
     "cloudKey": {
-      "what": "Auf der Tresor-Seite einen Schlüssel hinzufügen. Für einen schnellen Test einen kostenlosen Google-AI-Schlüssel erstellen. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann zuerst „Eigenen Anbieter verwenden“ wählen. Danach kommst du hierher zurück."
+      "what": "Füge auf der Tresor-Seite einen Schlüssel hinzu. Für einen schnellen Test erstelle einen Google-AI-Schlüssel: Der Gratis-Tarif kostet nichts. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann wähle zuerst „Eigenen Anbieter verwenden“. Danach kommst du hierher zurück."
     },
     "key": {
       "title": "Einen Schlüssel hinzufügen, um mit dem Übersetzen zu beginnen",
-      "why": "Mit einem kostenlosen Schlüssel übersetzt NARN Freeway dein Spiel kostenlos, während du es ausprobierst. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
+      "why": "Google AI, Groq und OpenRouter haben einen Gratis-Tarif: Mit einem Schlüssel von einem dieser Anbieter übersetzt NARN Freeway dein Spiel kostenlos, während du es ausprobierst. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
       "whyOwn": "Am {{provider}}-Schlüssel erkennt {{provider}}, dass du es bist. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
-      "choiceWhat": "Für einen schnellen Test einen kostenlosen Google-AI-Schlüssel erstellen und in deinen Tresor einfügen. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann „Eigenen Anbieter verwenden“ wählen.",
+      "choiceWhat": "Für einen schnellen Test erstelle einen Google-AI-Schlüssel: Der Gratis-Tarif kostet nichts. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann wähle „Eigenen Anbieter verwenden“.",
       "pasteWhat": "Den Schlüssel hier einfügen, darunter dein Tresor-Passwort eingeben und speichern."
     },
     "project": {
       "title": "Text deines Spiels importieren",
-      "why": "NARN liest jeden Eintrag und übersetzt nur, was noch fehlt.",
+      "why": "Beim Import wählst du, ob die Datei Gespeichertes ersetzt oder nur neue Einträge hinzufügt und geänderte aktualisiert.",
       "openWhat": "Die Projektliste öffnen.",
       "newWhat": "Ein neues Projekt erstellen.",
       "createWhat": "Dem Projekt einen Namen geben und es erstellen.",
-      "sourceWhat": "Die Sprache auswählen, in der dein Text geschrieben ist.",
+      "sourceWhat": "Wähle deine Quellsprache: die Sprache, in der der Text deines Spiels geschrieben ist.",
       "targetsWhat": "Die Sprachen ankreuzen, in die übersetzt werden soll, oder „Alle auswählen“ verwenden.",
       "saveWhat": "Die Sprachen speichern.",
       "importWhat": "Die CSV-Datei auswählen, die du aus deinem Spiel-Editor exportiert hast.",
@@ -77,8 +80,8 @@
       "quickWhat": "3 Einträge, die noch übersetzt werden müssen, sind ausgewählt. Zum Ausprobieren nur diese übersetzen oder gleich alles.",
       "fewWhat": "Deine Einträge sind ausgewählt. Jetzt übersetzen.",
       "startWhat": "Die Übersetzung starten.",
-      "nothingWhat": "Deine Datei enthält schon für jede gewählte Sprache eine Übersetzung, es gibt also nichts zu übersetzen.",
-      "nothingWhy": "Für eine weitere Sprache diese im Tab „Daten“ ankreuzen und speichern. Sonst weiter zum Export deiner Datei.",
+      "nothingWhat": "Deine Datei enthält schon für jede gewählte Sprache eine Übersetzung. Um eine Übersetzung live zu sehen, übersetze 3 Einträge neu: Ihre Übersetzungen werden ersetzt und lassen sich danach zurückholen.",
+      "nothingWhy": "Oder klicke auf „Weiter“, um zum Export zu gehen. Um eine Sprache hinzuzufügen, hake sie im Tab „Daten“ an und speichere.",
       "progressWhat": "Die Übersetzung läuft. Diese Zeile zeigt den Fortschritt.",
       "progressWhy": "Die Tour geht weiter, sobald die Übersetzung abgeschlossen ist."
     },
@@ -107,6 +110,15 @@
       "why": "Den Rest kannst du auch später in der Liste der Einträge übersetzen.",
       "skipped": "Der Rest kann warten. Lade herunter, was schon übersetzt ist."
     },
+    "restore": {
+      "title": "Der Test hat geklappt",
+      "what": "Deine 3 Testeinträge haben neue Übersetzungen. Hole die Übersetzungen deiner Datei zurück oder behalte die neuen.",
+      "why": "NARN hat direkt vor dem Test einen Wiederherstellungspunkt gespeichert.",
+      "pickWhat": "Dieser Wiederherstellungspunkt wurde direkt vor dem Test gespeichert. Klicke auf „Wiederherstellen“, um die Übersetzungen deiner Datei zurückzuholen.",
+      "pickWhy": "Beim Wiederherstellen kehrt das ganze Projekt zum damaligen Stand zurück.",
+      "confirmWhat": "Bestätige die Wiederherstellung.",
+      "notFound": "Der Wiederherstellungspunkt des Tests wurde nicht gefunden. Stelle einen unter „Backups“ wieder her oder behalte die neuen Übersetzungen."
+    },
     "export": {
       "title": "Exportieren",
       "why": "Dein Spiel-Editor kann diese Datei importieren, um die Übersetzungen ins Spiel zu übernehmen.",
@@ -124,7 +136,8 @@
     "title": "Eigenen Anbieter verwenden",
     "description": "Den Anbieter auswählen, für den du einen Schlüssel hast. Er übersetzt dieses Projekt und die neuen Projekte, die du erstellst. Um mehrere Anbieter zu kombinieren, zu „Erweitert“ wechseln.",
     "existingRouting": "Für dieses Projekt ist bereits Routing eingerichtet, es bleibt daher unverändert. Ändern kannst du es unter „Erweitert“.",
-    "freeHeading": "Für diese gibt es kostenlose Schlüssel. Wenn du einen davon wählst, übersetzt nur er, ohne die anderen kostenlosen Modelle im NARN-Freeway-Pool.",
+    "freeHeading": "Gratis-Tarif. Wenn du einen davon wählst, übersetzt nur er, ohne die anderen kostenlosen Modelle im NARN-Freeway-Pool.",
+    "paidHeading": "Kostenpflichtig, wird über dein Konto beim Anbieter abgerechnet.",
     "cancel": "Abbrechen",
     "failed": "{{provider}} konnte nicht eingerichtet werden: {{message}}",
     "switchedOff": "{{provider}} ist unter „Erweitert“ ausgeschaltet und wurde daher nicht verwendet. Schalte ihn in der Globalen Konfiguration wieder ein oder wähle einen anderen Anbieter.",

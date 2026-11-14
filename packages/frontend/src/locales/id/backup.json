@@ -43,5 +43,6 @@
   "toastBackupCreated": "Cadangan dibuat.",
   "toastBackupFailed": "Pencadangan gagal: {{message}}",
   "toastRestoreSuccess": "Cadangan dipulihkan.",
-  "toastRestoreFailed": "Pemulihan gagal: {{message}}"
+  "toastRestoreFailed": "Pemulihan gagal: {{message}}",
+  "toastGuideRestored": "Terjemahan file Anda sudah kembali."
 }

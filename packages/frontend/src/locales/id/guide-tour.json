@@ -11,7 +11,7 @@
       "openVault": "Buka formulir brankas",
       "cloudVault": "Siapkan brankas",
       "openVaultPage": "Buka halaman brankas",
-      "getGoogleKey": "Dapatkan kunci Google gratis",
+      "getGoogleKey": "Dapatkan kunci Google (paket gratis)",
       "addGoogleKey": "Tempel kunci Google saya",
       "ownProvider": "Gunakan penyedia saya sendiri",
       "useFoundKey": "Gunakan {{provider}} untuk terjemahan Anda",
@@ -23,6 +23,9 @@
       "translateFew": "Terjemahkan",
       "translateRest": "Terjemahkan sisanya sekarang",
       "skipRest": "Lewati, ekspor yang sudah ada",
+      "retranslateTest": "Terjemahkan ulang 3 entri untuk uji coba",
+      "restoreTest": "Kembalikan terjemahan saya",
+      "keepTest": "Pertahankan terjemahan baru",
       "tourSections": "Tunjukkan bagiannya",
       "maybeLater": "Nanti saja"
     },
@@ -40,29 +43,29 @@
     },
     "cloudVault": {
       "title": "Buat brankas Anda dan tambahkan kunci",
-      "what": "Pilih kata sandi brankas, lalu tambahkan kunci. Untuk uji cepat, buat kunci Google AI gratis. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai.",
+      "what": "Pilih kata sandi brankas, lalu tambahkan kunci. Untuk uji cepat, buat kunci Google AI: paket gratisnya tidak dipungut biaya. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai.",
       "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda. Dengan kunci itulah penyedia AI mengenali Anda."
     },
     "cloudUnlock": {
       "what": "Buka kunci brankas di halaman brankas. Anda akan kembali ke sini setelah selesai."
     },
     "cloudKey": {
-      "what": "Tambahkan kunci di halaman brankas. Untuk uji cepat, buat kunci Google AI gratis. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai."
+      "what": "Tambahkan kunci di halaman brankas. Untuk uji cepat, buat kunci Google AI: paket gratisnya tidak dipungut biaya. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai."
     },
     "key": {
       "title": "Tambahkan kunci untuk mulai menerjemahkan",
-      "why": "Dengan kunci gratis, NARN Freeway menerjemahkan game Anda tanpa biaya selama Anda mencobanya. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
+      "why": "Google AI, Groq, dan OpenRouter punya paket gratis: dengan kunci dari salah satunya, NARN Freeway menerjemahkan game Anda tanpa biaya selama Anda mencobanya. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
       "whyOwn": "Dengan kunci {{provider}} Anda, {{provider}} mengenali Anda. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
-      "choiceWhat": "Untuk uji cepat, buat kunci Google AI gratis lalu tempelkan ke brankas Anda. Sudah punya kunci untuk penyedia yang didukung? Pilih “Gunakan penyedia saya sendiri”.",
+      "choiceWhat": "Untuk uji cepat, buat kunci Google AI: paket gratisnya tidak dipungut biaya. Sudah punya kunci untuk penyedia yang didukung? Pilih “Gunakan penyedia saya sendiri”.",
       "pasteWhat": "Tempel kunci di sini, ketik kata sandi brankas di bawahnya, lalu simpan."
     },
     "project": {
       "title": "Pengimporan teks game",
-      "why": "NARN membaca setiap entri dan hanya menerjemahkan yang belum ada.",
+      "why": "Saat mengimpor, Anda memilih apakah berkas menggantikan data yang tersimpan atau hanya menambah entri baru dan memperbarui yang berubah.",
       "openWhat": "Buka daftar proyek.",
       "newWhat": "Buat proyek baru.",
       "createWhat": "Beri nama proyek, lalu buat.",
-      "sourceWhat": "Pilih bahasa yang dipakai untuk menulis teks Anda.",
+      "sourceWhat": "Pilih bahasa sumber: bahasa yang dipakai untuk menulis teks game Anda.",
       "targetsWhat": "Centang bahasa target terjemahan yang diinginkan, atau gunakan Pilih semua.",
       "saveWhat": "Simpan bahasa.",
       "importWhat": "Pilih berkas CSV yang diekspor dari editor game Anda.",
@@ -77,8 +80,8 @@
       "quickWhat": "3 entri yang belum diterjemahkan sudah dipilih. Terjemahkan untuk mencoba, atau terjemahkan semuanya sekarang.",
       "fewWhat": "Entri Anda sudah dipilih. Terjemahkan sekarang.",
       "startWhat": "Mulai penerjemahan.",
-      "nothingWhat": "File Anda sudah memiliki terjemahan untuk setiap bahasa yang dipilih, jadi tidak ada yang perlu diterjemahkan.",
-      "nothingWhy": "Untuk menambah bahasa, centang di tab Data lalu simpan. Jika tidak, lanjutkan untuk mengekspor file Anda.",
+      "nothingWhat": "File Anda sudah memiliki terjemahan untuk setiap bahasa yang dipilih. Untuk melihat terjemahan berjalan, terjemahkan ulang 3 entri: terjemahannya diganti, dan Anda bisa mengembalikannya setelahnya.",
+      "nothingWhy": "Atau tekan Berikutnya untuk lanjut ke ekspor. Untuk menambah bahasa, centang di tab Data lalu simpan.",
       "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
       "progressWhy": "Tur berlanjut setelah penerjemahan selesai."
     },
@@ -107,6 +110,15 @@
       "why": "Sisanya bisa diterjemahkan nanti dari daftar entri.",
       "skipped": "Sisanya bisa menunggu. Unduh yang sudah diterjemahkan."
     },
+    "restore": {
+      "title": "Uji coba berhasil",
+      "what": "3 entri uji coba Anda memiliki terjemahan baru. Kembalikan terjemahan file Anda, atau pertahankan yang baru.",
+      "why": "NARN menyimpan titik pemulihan tepat sebelum uji coba.",
+      "pickWhat": "Titik pemulihan ini disimpan tepat sebelum uji coba. Tekan Pulihkan untuk mengembalikan terjemahan file Anda.",
+      "pickWhy": "Pemulihan mengembalikan seluruh proyek seperti saat itu.",
+      "confirmWhat": "Konfirmasi untuk memulihkan.",
+      "notFound": "Titik pemulihan uji coba tidak ditemukan. Pulihkan satu dari Cadangan, atau pertahankan terjemahan baru."
+    },
     "export": {
       "title": "Ekspor",
       "why": "Editor game Anda dapat mengimpor berkas ini untuk memasukkan terjemahan ke dalam game.",
@@ -124,7 +136,8 @@
     "title": "Gunakan penyedia saya sendiri",
     "description": "Pilih penyedia yang kuncinya Anda miliki. Penyedia itu menerjemahkan proyek ini dan proyek baru yang Anda buat. Untuk menggabungkan beberapa penyedia, beralihlah ke Lanjutan.",
     "existingRouting": "Proyek ini sudah memiliki penyaluran, jadi dibiarkan apa adanya. Anda dapat mengubahnya di Lanjutan.",
-    "freeHeading": "Penyedia ini memiliki kunci gratis. Jika Anda memilih salah satunya, hanya penyedia itu yang menerjemahkan, tanpa model gratis lain dalam kumpulan NARN Freeway.",
+    "freeHeading": "Paket gratis. Jika Anda memilih salah satunya, hanya penyedia itu yang menerjemahkan, tanpa model gratis lain dalam kumpulan NARN Freeway.",
+    "paidHeading": "Berbayar, ditagihkan ke akun Anda di penyedia.",
     "cancel": "Batal",
     "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}",
     "switchedOff": "{{provider}} dimatikan di Lanjutan, jadi tidak dipakai. Nyalakan lagi di Konfigurasi Global, atau pilih penyedia lain.",

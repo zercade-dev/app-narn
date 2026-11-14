@@ -110,10 +110,13 @@ export function ProviderChoice({ open, onOpenChange, cloud, onChosen }: Provider
           )}
         </SheetHeader>
         <div className="flex flex-col gap-4 overflow-y-auto px-4">
-          <ul className="flex flex-col gap-2">{paid.map(button)}</ul>
           <div className="flex flex-col gap-2" data-testid="provider-choice-free">
             <p className="text-sm text-muted-foreground">{t('providerChoice.freeHeading')}</p>
             <ul className="flex flex-col gap-2">{free.map(button)}</ul>
+          </div>
+          <div className="flex flex-col gap-2" data-testid="provider-choice-paid">
+            <p className="text-sm text-muted-foreground">{t('providerChoice.paidHeading')}</p>
+            <ul className="flex flex-col gap-2">{paid.map(button)}</ul>
           </div>
         </div>
         <SheetFooter>

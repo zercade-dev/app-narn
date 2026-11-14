@@ -53,8 +53,10 @@ import {
   quickTestRunId,
   realTargetLanguages,
   requestGuideTranslation,
+  retranslateTestEntryIds,
   untranslatedEntryIds,
 } from '../../lib/tour/quick-test.js';
+import { findRestorePoint } from '../../lib/tour/restore-point.js';
 import { getErrorMessage } from '../../lib/utils.js';
 import { vaultEditorOpenEvent, vaultLockedEvent } from '../../lib/vault-events.js';
 import { useGuideStore } from '../../stores/guide-store.js';
@@ -259,13 +261,14 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   // "Open the form" / "use the form" sub-steps follow the form itself, and
   // "the translation is running" follows the run.
-  const [vaultFormAnchor, keyEditorAnchor, dialogStartAnchor, importSheetAnchor] =
+  const [vaultFormAnchor, keyEditorAnchor, dialogStartAnchor, importSheetAnchor, restoreAnchor] =
     FIRST_RUN_FORM_ANCHORS;
   const vaultFormOpen = useTourAnchor(vaultFormAnchor) !== null;
   const keyEditorOpen = useTourAnchor(keyEditorAnchor) !== null;
   const dialogStart = useTourAnchor(dialogStartAnchor);
   const dialogOpen = dialogStart !== null;
   const importSheetOpen = useTourAnchor(importSheetAnchor) !== null;
+  const restoreConfirmOpen = useTourAnchor(restoreAnchor) !== null;
   const stalled = useFirstRunStall();
   // "Try again" sets the failed run aside, so the guide does not show its
   // failure again while the new run has not been listed yet.
@@ -277,6 +280,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
       [keyEditorAnchor]: keyEditorOpen,
       [dialogStartAnchor]: dialogOpen,
       [importSheetAnchor]: importSheetOpen,
+      [restoreAnchor]: restoreConfirmOpen,
     };
     return { isOnScreen: (anchor) => open[anchor] ?? false, runStall };
   }, [
@@ -284,10 +288,12 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     keyEditorAnchor,
     dialogStartAnchor,
     importSheetAnchor,
+    restoreAnchor,
     vaultFormOpen,
     keyEditorOpen,
     dialogOpen,
     importSheetOpen,
+    restoreConfirmOpen,
     runStall,
   ]);
   const shown = useCallback((at: number) => firstRunShownIndex(tour, at, screen), [tour, screen]);
@@ -388,7 +394,16 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
 
   useEffect(() => {
     // The quick test again, with its choices (it re-selects its entries).
+    // A retranslate test that failed goes back to "nothing to translate",
+    // where it is offered again: the quick test has nothing to pick there.
     const startAgain = () => {
+      const guide = useGuideStore.getState();
+      if (guide.quickTest?.retranslate && guide.quickTest.projectId === projectId) {
+        guide.setQuickTest(null);
+        const nothingAt = tour.steps.findIndex((step) => step.id === 'translate-nothing');
+        if (nothingAt >= 0) setPosition((p) => ({ ...p, index: nothingAt }));
+        return;
+      }
       const at = tour.steps.findIndex((step) => step.id === 'translate-quick');
       if (at >= 0) setPosition((p) => ({ ...p, index: at }));
     };
@@ -512,6 +527,65 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
           toast.success(tGuide('firstRun.rest.skipped'));
           break;
         }
+        case 'retranslate-test': {
+          if (!projectId) break;
+          translatingAll.current = false;
+          const ids = retranslateTestEntryIds(useStringStore.getState().entries);
+          if (ids.length === 0) break;
+          useGuideStore.getState().setQuickTest({
+            projectId,
+            runId: null,
+            decision: 'pending',
+            retranslate: true,
+            runsBefore: translationRunIdsOf(projectId),
+            requestedAt: Date.now(),
+          });
+          // The three on screen and checked, as for the quick test.
+          const strings = useStringStore.getState();
+          strings.setFilter(quickTestFilters(strings.filters));
+          useSelectionStore.getState().selectAll(ids);
+          strings.revealEntry(ids[0] ?? null);
+          requestGuideTranslation(ids, { reTranslate: true });
+          break;
+        }
+        case 'restore-test': {
+          const quick = useGuideStore.getState().quickTest;
+          if (!projectId || quick?.projectId !== projectId || !quick.retranslate) break;
+          // The run's start is server time, like the backup's: no clock skew between them.
+          const testRun = useRunStore
+            .getState()
+            .runs.find(
+              (r) =>
+                r.runId === (quick.runId ?? quickTestRunId(quick, useRunStore.getState().runs)),
+            );
+          void findRestorePoint(projectId, testRun?.startedAt ?? quick.requestedAt ?? 0)
+            .then((backupId) => {
+              if (backupId === null) {
+                toast.error(tGuide('firstRun.restore.notFound'));
+                return;
+              }
+              const now = useGuideStore.getState().quickTest;
+              if (now?.projectId !== projectId) return;
+              useGuideStore.getState().setQuickTest({ ...now, backupId });
+              const at = tour.steps.findIndex((step) => step.id === 'restore-pick');
+              if (at >= 0) setPosition((p) => ({ ...p, index: at }));
+            })
+            .catch((err: unknown) => toast.error(getErrorMessage(err)));
+          break;
+        }
+        case 'keep-test': {
+          useGuideStore.getState().decideQuickTest('skip');
+          // On to the export, as "Skip, export what I have" does.
+          const next = firstRunStepIndex({ ...factsRef.current, retestPending: false });
+          const exportAt = tour.steps.findIndex((step) => step.id === 'export-open');
+          if (exportAt >= 0) {
+            setPosition({
+              derived: next === 'done' ? tour.steps.length - 1 : next,
+              index: exportAt,
+            });
+          }
+          break;
+        }
         case 'tour-sections': {
           const guide = useGuideStore.getState();
           guide.finishFirstRun();
@@ -596,11 +670,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     const guide = useGuideStore.getState();
     const quick = guide.quickTest;
     if (!quick || quick.runId !== null || quick.decision !== 'pending') return;
-    guide.setQuickTest({
-      projectId: quick.projectId,
-      runId: listedQuickRunId,
-      decision: 'pending',
-    });
+    guide.setQuickTest({ ...quick, runId: listedQuickRunId });
   }, [listedQuickRunId]);
   // The quick test's run, for its progress in the callout.
   const quickRunId =
