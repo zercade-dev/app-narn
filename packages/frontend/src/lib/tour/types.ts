@@ -95,7 +95,8 @@ export interface TourStep {
   /** Keys in the `guide-tour` namespace. */
   titleKey: string;
   whatKey: string;
-  whyKey: string;
+  /** Optional: a step that only says where to go needs no explanation. */
+  whyKey?: string;
   advance: TourAdvance;
   /**
    * Where the callout sits relative to the anchor (default `bottom`; it still

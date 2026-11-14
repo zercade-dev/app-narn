@@ -152,12 +152,9 @@ const TRANSLATED_BY_STEPS = new Set([
 
 /** Own-provider wordings of the Freeway sentences, keyed by the Freeway key. */
 const OWN_PROVIDER_COPY: Readonly<Record<string, string>> = {
-  'firstRun.translate.why': 'firstRun.translate.whyOwn',
-  'firstRun.key.why': 'firstRun.key.whyOwn',
   'firstRun.failed.quotaWhat': 'firstRun.failed.quotaWhatOwn',
 };
 const CUSTOM_ROUTING_COPY: Readonly<Record<string, string>> = {
-  'firstRun.translate.why': 'firstRun.translate.whyCustom',
   // Custom routing may not use Freeway at all: no "free quota" wording.
   'firstRun.failed.quotaWhat': 'firstRun.failed.quotaWhatCustom',
 };

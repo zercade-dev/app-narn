@@ -54,11 +54,20 @@ const projectReady = (f: GuideFacts): boolean =>
   f.projectExists && f.projectHasLanguages && f.projectHasEntries;
 
 /** `firstRun.<group>.title` / `.why`, with the step's own `what`. */
-function copy(group: string, what: string): Pick<TourStep, 'titleKey' | 'whatKey' | 'whyKey'> {
+/**
+ * `firstRun.<group>.title` and the step's own `what`; `why` only when given:
+ * most steps just say where to go, and the explanation sits on the one step
+ * where it matters (said once, not on every step of the group).
+ */
+function copy(
+  group: string,
+  what: string,
+  why?: string,
+): Pick<TourStep, 'titleKey' | 'whatKey' | 'whyKey'> {
   return {
     titleKey: `firstRun.${group}.title`,
     whatKey: `firstRun.${group}.${what}`,
-    whyKey: `firstRun.${group}.why`,
+    ...(why ? { whyKey: `firstRun.${group}.${why}` } : {}),
   };
 }
 
@@ -72,7 +81,7 @@ function localVaultAndKeySteps(vaultCopy: 'vault' | 'unlock'): TourStep[] {
     {
       id: 'vault-open',
       anchor: null,
-      ...copy(vaultCopy, 'openWhat'),
+      ...copy(vaultCopy, 'openWhat', 'why'),
       advance: { kind: 'state', done: vaultReady },
       actions: [action('open-vault', 'openVault')],
       major: 1,
@@ -88,7 +97,7 @@ function localVaultAndKeySteps(vaultCopy: 'vault' | 'unlock'): TourStep[] {
     {
       id: 'key-choice',
       anchor: null,
-      ...copy('key', 'choiceWhat'),
+      ...copy('key', 'choiceWhat', 'why'),
       advance: { kind: 'state', done: (f) => f.usableKey },
       // One way in: the provider list, free tiers first.
       actions: [{ ...action('own-provider', 'chooseProvider'), primary: true }],
@@ -412,7 +421,6 @@ const SHARED_STEPS: TourStep[] = [
     anchor: null,
     titleKey: 'firstRun.rest.title',
     whatKey: 'firstRun.rest.what',
-    whyKey: 'firstRun.rest.why',
     advance: { kind: 'state', done: (f) => !f.quickTestPending },
     // The strings tab, where the request to translate the rest is answered.
     navigate: { view: 'project', tab: 'strings' },
@@ -472,7 +480,6 @@ const SHARED_STEPS: TourStep[] = [
     anchor: RESTORE_CONFIRM_ANCHOR,
     titleKey: 'firstRun.restore.title',
     whatKey: 'firstRun.restore.confirmWhat',
-    whyKey: 'firstRun.restore.pickWhy',
     side: 'left',
     advance: { kind: 'state', done: (f) => !f.retestPending },
     major: 4,
@@ -489,7 +496,7 @@ const SHARED_STEPS: TourStep[] = [
   {
     id: 'export',
     anchor: 'export-csv-button',
-    ...copy('export', 'downloadWhat'),
+    ...copy('export', 'downloadWhat', 'why'),
     advance: { kind: 'state', done: (f) => f.exported },
     // "Skip, export what I have" lands here straight from the strings tab.
     navigate: { view: 'project', tab: 'data' },

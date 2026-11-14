@@ -42,7 +42,7 @@
     "cloudVault": {
       "title": "Crea tu bóveda y añade una clave",
       "what": "Elige una contraseña para la bóveda y añade una clave: elige primero un proveedor. Para una prueba rápida, escoge uno con plan gratuito. Volverás aquí al terminar.",
-      "why": "Tus claves de proveedores se cifran con tu contraseña y nunca salen de tu control. La clave permite al proveedor de IA saber que eres tú."
+      "why": "Tus claves de proveedores se cifran con tu contraseña y nunca salen de tu control."
     },
     "cloudUnlock": {
       "what": "Desbloquea tu bóveda en la página de la bóveda. Volverás aquí al terminar."
@@ -52,8 +52,7 @@
     },
     "key": {
       "title": "Añade una clave para empezar a traducir",
-      "why": "La clave es cómo el proveedor sabe que eres tú. Puedes cambiar de proveedor cuando quieras en la pestaña Configuración del proyecto.",
-      "whyOwn": "Tu clave de {{provider}} es la forma en que {{provider}} sabe que eres tú. Puedes cambiar de proveedor cuando quieras en la pestaña Configuración del proyecto.",
+      "why": "Puedes cambiar de proveedor más adelante en la pestaña Configuración del proyecto.",
       "choiceWhat": "Elige un proveedor y añade su clave. Para una prueba rápida, escoge uno con plan gratuito.",
       "pasteWhat": "Pega la clave aquí, escribe abajo la contraseña de tu bóveda y guarda."
     },
@@ -69,7 +68,6 @@
     },
     "project": {
       "title": "Importar el texto de tu juego",
-      "why": "Al importar, eliges si el archivo reemplaza lo guardado o solo añade entradas nuevas y actualiza las modificadas.",
       "openWhat": "Abre la lista de proyectos.",
       "newWhat": "Crea un proyecto nuevo.",
       "createWhat": "Ponle un nombre a tu proyecto y créalo.",
@@ -81,15 +79,12 @@
     },
     "translate": {
       "title": "Traducir",
-      "why": "Freeway elige automáticamente un modelo gratuito adecuado para cada idioma.",
-      "whyOwn": "{{provider}} traduce este proyecto con tu propia clave.",
-      "whyCustom": "El enrutamiento de este proyecto, configurado en Avanzado, elige el proveedor de cada entrada.",
       "openWhat": "Abre la pestaña que muestra tus textos.",
       "quickWhat": "Hay 3 textos sin traducir seleccionados. Tradúcelos para probar, o traduce todo ahora.",
       "fewWhat": "Tus textos están seleccionados. Tradúcelos ahora.",
       "startWhat": "Inicia la traducción.",
-      "nothingWhat": "Tu archivo ya tiene traducción para todos los idiomas que elegiste. Para ver una traducción en acción, retraduce 3 entradas: se reemplazan sus traducciones y después puedes recuperarlas.",
-      "nothingWhy": "O pulsa Siguiente para pasar a la exportación. Para añadir un idioma, márcalo en la pestaña Datos y guarda.",
+      "nothingWhat": "Tu archivo ya tiene todas las traducciones. Para ver una en acción, retraduce 3 entradas: después puedes recuperar sus traducciones.",
+      "nothingWhy": "O pulsa Siguiente para exportar. Para añadir un idioma, márcalo en la pestaña Datos y guarda.",
       "progressWhat": "La traducción está en curso. Esta línea muestra su progreso.",
       "progressWhy": "El recorrido continúa cuando la traducción haya terminado."
     },
@@ -115,7 +110,6 @@
     "rest": {
       "title": "La prueba ha funcionado",
       "what": "Tus 3 textos de prueba están traducidos a todos los idiomas que elegiste. Traduce el resto ahora o exporta lo que tienes.",
-      "why": "Puedes traducir el resto más tarde desde la lista de textos.",
       "skipped": "El resto puede esperar. Descarga lo que ya está traducido."
     },
     "restore": {

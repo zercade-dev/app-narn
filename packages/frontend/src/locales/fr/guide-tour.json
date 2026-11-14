@@ -42,7 +42,7 @@
     "cloudVault": {
       "title": "Créer votre coffre et ajouter une clé",
       "what": "Choisissez un mot de passe pour le coffre, puis ajoutez une clé : choisissez d’abord un fournisseur. Pour un test rapide, prenez-en un avec une offre gratuite. Vous reviendrez ici une fois terminé.",
-      "why": "Vos clés de fournisseurs sont chiffrées avec votre mot de passe et restent toujours sous votre contrôle. La clé permet au fournisseur d’IA de vous reconnaître."
+      "why": "Vos clés de fournisseurs sont chiffrées avec votre mot de passe et restent toujours sous votre contrôle."
     },
     "cloudUnlock": {
       "what": "Déverrouillez votre coffre sur la page du coffre. Vous reviendrez ici une fois terminé."
@@ -52,8 +52,7 @@
     },
     "key": {
       "title": "Ajouter une clé pour commencer à traduire",
-      "why": "La clé permet au fournisseur de savoir que c’est vous. Vous pouvez changer de fournisseur à tout moment dans l’onglet Configuration du projet.",
-      "whyOwn": "Votre clé {{provider}} permet à {{provider}} de vous reconnaître. Vous pouvez changer de fournisseur à tout moment dans l’onglet Configuration du projet.",
+      "why": "Vous pourrez changer de fournisseur plus tard dans l’onglet Configuration du projet.",
       "choiceWhat": "Choisissez un fournisseur et ajoutez sa clé. Pour un test rapide, prenez-en un avec une offre gratuite.",
       "pasteWhat": "Collez la clé ici, saisissez le mot de passe de votre coffre en dessous, puis enregistrez."
     },
@@ -69,7 +68,6 @@
     },
     "project": {
       "title": "Importer le texte de votre jeu",
-      "why": "À l’import, vous choisissez si le fichier remplace ce qui est enregistré ou s’il ajoute seulement les nouvelles entrées et met à jour celles qui ont changé.",
       "openWhat": "Ouvrez la liste des projets.",
       "newWhat": "Créez un nouveau projet.",
       "createWhat": "Donnez un nom à votre projet, puis créez-le.",
@@ -81,15 +79,12 @@
     },
     "translate": {
       "title": "Traduire",
-      "why": "Freeway choisit automatiquement un modèle gratuit adapté à chaque langue.",
-      "whyOwn": "{{provider}} traduit ce projet avec votre propre clé.",
-      "whyCustom": "Le routage de ce projet, configuré en mode Avancé, choisit le fournisseur de chaque entrée.",
       "openWhat": "Ouvrez l’onglet qui liste vos textes.",
       "quickWhat": "3 textes encore à traduire sont sélectionnés. Traduisez-les pour essayer, ou traduisez tout dès maintenant.",
       "fewWhat": "Vos textes sont sélectionnés. Traduisez-les maintenant.",
       "startWhat": "Démarrez la traduction.",
-      "nothingWhat": "Votre fichier contient déjà une traduction pour chaque langue choisie. Pour voir une traduction en action, retraduisez 3 entrées : leurs traductions sont remplacées et vous pourrez les remettre ensuite.",
-      "nothingWhy": "Ou appuyez sur Suivant pour passer à l’export. Pour ajouter une langue, cochez-la dans l’onglet Données et enregistrez.",
+      "nothingWhat": "Votre fichier contient déjà toutes les traductions. Pour en voir une en action, retraduisez 3 entrées : vous pourrez remettre leurs traductions ensuite.",
+      "nothingWhy": "Ou appuyez sur Suivant pour exporter. Pour ajouter une langue, cochez-la dans l’onglet Données et enregistrez.",
       "progressWhat": "La traduction est en cours. Cette ligne indique sa progression.",
       "progressWhy": "La visite reprend une fois la traduction terminée."
     },
@@ -115,7 +110,6 @@
     "rest": {
       "title": "Le test a fonctionné",
       "what": "Vos 3 textes d’essai sont traduits dans toutes les langues choisies. Traduisez le reste maintenant, ou exportez ce que vous avez.",
-      "why": "Vous pourrez traduire le reste plus tard depuis la liste des textes.",
       "skipped": "Le reste peut attendre. Téléchargez ce qui est déjà traduit."
     },
     "restore": {

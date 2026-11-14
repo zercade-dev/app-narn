@@ -42,7 +42,7 @@
     "cloudVault": {
       "title": "Buat brankas Anda dan tambahkan kunci",
       "what": "Pilih kata sandi brankas, lalu tambahkan kunci: pilih penyedia dulu. Untuk uji cepat, pilih yang punya paket gratis. Anda akan kembali ke sini setelah selesai.",
-      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda. Dengan kunci itulah penyedia AI mengenali Anda."
+      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda."
     },
     "cloudUnlock": {
       "what": "Buka kunci brankas di halaman brankas. Anda akan kembali ke sini setelah selesai."
@@ -52,8 +52,7 @@
     },
     "key": {
       "title": "Tambahkan kunci untuk mulai menerjemahkan",
-      "why": "Kunci adalah cara penyedia mengenali Anda. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
-      "whyOwn": "Dengan kunci {{provider}} Anda, {{provider}} mengenali Anda. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
+      "why": "Anda dapat mengganti penyedia nanti di tab Konfigurasi proyek.",
       "choiceWhat": "Pilih penyedia lalu tambahkan kuncinya. Untuk uji cepat, pilih yang punya paket gratis.",
       "pasteWhat": "Tempel kunci di sini, ketik kata sandi brankas di bawahnya, lalu simpan."
     },
@@ -69,7 +68,6 @@
     },
     "project": {
       "title": "Pengimporan teks game",
-      "why": "Saat mengimpor, Anda memilih apakah berkas menggantikan data yang tersimpan atau hanya menambah entri baru dan memperbarui yang berubah.",
       "openWhat": "Buka daftar proyek.",
       "newWhat": "Buat proyek baru.",
       "createWhat": "Beri nama proyek, lalu buat.",
@@ -81,15 +79,12 @@
     },
     "translate": {
       "title": "Penerjemahan",
-      "why": "Freeway otomatis memilih model gratis yang sesuai untuk tiap bahasa.",
-      "whyOwn": "{{provider}} menerjemahkan proyek ini dengan kunci Anda sendiri.",
-      "whyCustom": "Penyaluran proyek ini, yang diatur di Lanjutan, memilih penyedia untuk tiap entri.",
       "openWhat": "Buka tab yang memuat daftar entri.",
       "quickWhat": "3 entri yang belum diterjemahkan sudah dipilih. Terjemahkan untuk mencoba, atau terjemahkan semuanya sekarang.",
       "fewWhat": "Entri Anda sudah dipilih. Terjemahkan sekarang.",
       "startWhat": "Mulai penerjemahan.",
-      "nothingWhat": "File Anda sudah memiliki terjemahan untuk setiap bahasa yang dipilih. Untuk melihat terjemahan berjalan, terjemahkan ulang 3 entri: terjemahannya diganti, dan Anda bisa mengembalikannya setelahnya.",
-      "nothingWhy": "Atau tekan Berikutnya untuk lanjut ke ekspor. Untuk menambah bahasa, centang di tab Data lalu simpan.",
+      "nothingWhat": "File Anda sudah memiliki semua terjemahan. Untuk melihatnya berjalan, terjemahkan ulang 3 entri: terjemahannya bisa Anda kembalikan setelahnya.",
+      "nothingWhy": "Atau tekan Berikutnya untuk mengekspor. Untuk menambah bahasa, centang di tab Data lalu simpan.",
       "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
       "progressWhy": "Tur berlanjut setelah penerjemahan selesai."
     },
@@ -115,7 +110,6 @@
     "rest": {
       "title": "Uji coba berhasil",
       "what": "3 entri uji Anda sudah diterjemahkan ke semua bahasa yang dipilih. Terjemahkan sisanya sekarang, atau ekspor yang sudah ada.",
-      "why": "Sisanya bisa diterjemahkan nanti dari daftar entri.",
       "skipped": "Sisanya bisa menunggu. Unduh yang sudah diterjemahkan."
     },
     "restore": {

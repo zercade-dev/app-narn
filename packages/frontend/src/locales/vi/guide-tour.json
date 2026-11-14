@@ -42,7 +42,7 @@
     "cloudVault": {
       "title": "Tạo kho bảo mật và thêm khóa",
       "what": "Chọn mật khẩu cho kho, rồi thêm một khóa: hãy chọn nhà cung cấp trước. Để thử nhanh, hãy chọn nhà cung cấp có gói miễn phí. Bạn sẽ quay lại đây khi xong.",
-      "why": "Khóa nhà cung cấp của bạn được mã hóa bằng mật khẩu của bạn và luôn nằm trong tầm kiểm soát của bạn. Khóa là cách nhà cung cấp AI biết đó là bạn."
+      "why": "Khóa nhà cung cấp của bạn được mã hóa bằng mật khẩu của bạn và luôn nằm trong tầm kiểm soát của bạn."
     },
     "cloudUnlock": {
       "what": "Mở khóa kho bảo mật trên trang kho bảo mật. Bạn sẽ quay lại đây khi xong."
@@ -52,8 +52,7 @@
     },
     "key": {
       "title": "Thêm khóa để bắt đầu dịch",
-      "why": "Khóa là cách nhà cung cấp biết đó là bạn. Bạn có thể đổi nhà cung cấp bất cứ lúc nào trong thẻ Cấu hình của dự án.",
-      "whyOwn": "Khóa {{provider}} là cách {{provider}} biết đó là bạn. Bạn có thể đổi nhà cung cấp bất cứ lúc nào trong thẻ Cấu hình của dự án.",
+      "why": "Bạn có thể đổi nhà cung cấp sau trong thẻ Cấu hình của dự án.",
       "choiceWhat": "Chọn một nhà cung cấp và thêm khóa của họ. Để thử nhanh, hãy chọn nhà cung cấp có gói miễn phí.",
       "pasteWhat": "Dán khóa vào đây, nhập mật khẩu kho bảo mật bên dưới, rồi lưu."
     },
@@ -69,7 +68,6 @@
     },
     "project": {
       "title": "Nhập văn bản của game",
-      "why": "Khi nhập, bạn chọn tệp sẽ thay thế dữ liệu đã lưu hay chỉ thêm mục mới và cập nhật mục đã thay đổi.",
       "openWhat": "Mở danh sách dự án.",
       "newWhat": "Tạo một dự án mới.",
       "createWhat": "Đặt tên cho dự án, rồi tạo.",
@@ -81,15 +79,12 @@
     },
     "translate": {
       "title": "Dịch",
-      "why": "Freeway tự động chọn một mô hình miễn phí phù hợp cho từng ngôn ngữ.",
-      "whyOwn": "{{provider}} dịch dự án này bằng khóa của riêng bạn.",
-      "whyCustom": "Điều phối của dự án này, được thiết lập trong Nâng cao, chọn nhà cung cấp cho từng mục.",
       "openWhat": "Mở tab liệt kê các mục của bạn.",
       "quickWhat": "Đã chọn 3 mục vẫn cần dịch. Dịch thử chúng, hoặc dịch tất cả ngay bây giờ.",
       "fewWhat": "Các mục của bạn đã được chọn. Dịch chúng ngay bây giờ.",
       "startWhat": "Bắt đầu dịch.",
-      "nothingWhat": "Tệp của bạn đã có bản dịch cho mọi ngôn ngữ bạn chọn. Để xem một bản dịch chạy thế nào, hãy dịch lại 3 mục: bản dịch của chúng sẽ bị thay thế, và sau đó bạn có thể khôi phục lại.",
-      "nothingWhy": "Hoặc nhấn Tiếp theo để chuyển sang xuất tệp. Để thêm ngôn ngữ, hãy đánh dấu nó ở tab Dữ liệu rồi lưu.",
+      "nothingWhat": "Tệp của bạn đã có mọi bản dịch. Để xem một bản dịch chạy thế nào, hãy dịch lại 3 mục: sau đó bạn có thể khôi phục bản dịch của chúng.",
+      "nothingWhy": "Hoặc nhấn Tiếp theo để xuất tệp. Để thêm ngôn ngữ, hãy đánh dấu nó ở tab Dữ liệu rồi lưu.",
       "progressWhat": "Đang dịch. Dòng này cho biết tiến độ.",
       "progressWhy": "Hướng dẫn sẽ tiếp tục khi dịch xong."
     },
@@ -115,7 +110,6 @@
     "rest": {
       "title": "Bản dịch thử đã thành công",
       "what": "3 mục thử nghiệm của bạn đã được dịch sang mọi ngôn ngữ bạn chọn. Dịch phần còn lại ngay, hoặc xuất những gì bạn đã có.",
-      "why": "Bạn có thể dịch phần còn lại sau từ danh sách mục.",
       "skipped": "Phần còn lại có thể để sau. Hãy tải xuống những gì đã dịch."
     },
     "restore": {

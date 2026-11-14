@@ -42,7 +42,7 @@
     "cloudVault": {
       "title": "Tresor erstellen und einen Schlüssel hinzufügen",
       "what": "Wähle ein Tresor-Passwort und füge dann einen Schlüssel hinzu: Wähle zuerst einen Anbieter. Für einen schnellen Test nimm einen mit Gratis-Tarif. Danach kommst du hierher zurück.",
-      "why": "Deine Anbieter-Schlüssel werden mit deinem Passwort verschlüsselt und bleiben immer unter deiner Kontrolle. Am Schlüssel erkennt der KI-Anbieter, dass du es bist."
+      "why": "Deine Anbieter-Schlüssel werden mit deinem Passwort verschlüsselt und bleiben immer unter deiner Kontrolle."
     },
     "cloudUnlock": {
       "what": "Deinen Tresor auf der Tresor-Seite entsperren. Danach kommst du hierher zurück."
@@ -52,8 +52,7 @@
     },
     "key": {
       "title": "Einen Schlüssel hinzufügen, um mit dem Übersetzen zu beginnen",
-      "why": "Am Schlüssel erkennt der Anbieter, dass du es bist. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
-      "whyOwn": "Am {{provider}}-Schlüssel erkennt {{provider}}, dass du es bist. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
+      "why": "Den Anbieter kannst du später im Tab „Konfiguration“ des Projekts ändern.",
       "choiceWhat": "Wähle einen Anbieter und füge seinen Schlüssel hinzu. Für einen schnellen Test nimm einen mit Gratis-Tarif.",
       "pasteWhat": "Den Schlüssel hier einfügen, darunter dein Tresor-Passwort eingeben und speichern."
     },
@@ -69,7 +68,6 @@
     },
     "project": {
       "title": "Text deines Spiels importieren",
-      "why": "Beim Import wählst du, ob die Datei Gespeichertes ersetzt oder nur neue Einträge hinzufügt und geänderte aktualisiert.",
       "openWhat": "Die Projektliste öffnen.",
       "newWhat": "Ein neues Projekt erstellen.",
       "createWhat": "Dem Projekt einen Namen geben und es erstellen.",
@@ -81,15 +79,12 @@
     },
     "translate": {
       "title": "Übersetzen",
-      "why": "Freeway wählt für jede Sprache automatisch ein passendes kostenloses Modell.",
-      "whyOwn": "{{provider}} übersetzt dieses Projekt mit deinem eigenen Schlüssel.",
-      "whyCustom": "Das Routing dieses Projekts, eingerichtet unter „Erweitert“, wählt den Anbieter für jeden Eintrag.",
       "openWhat": "Den Tab mit der Liste deiner Einträge öffnen.",
       "quickWhat": "3 Einträge, die noch übersetzt werden müssen, sind ausgewählt. Zum Ausprobieren nur diese übersetzen oder gleich alles.",
       "fewWhat": "Deine Einträge sind ausgewählt. Jetzt übersetzen.",
       "startWhat": "Die Übersetzung starten.",
-      "nothingWhat": "Deine Datei enthält schon für jede gewählte Sprache eine Übersetzung. Um eine Übersetzung live zu sehen, übersetze 3 Einträge neu: Ihre Übersetzungen werden ersetzt und lassen sich danach zurückholen.",
-      "nothingWhy": "Oder klicke auf „Weiter“, um zum Export zu gehen. Um eine Sprache hinzuzufügen, hake sie im Tab „Daten“ an und speichere.",
+      "nothingWhat": "Deine Datei enthält schon alle Übersetzungen. Um eine live zu sehen, übersetze 3 Einträge neu: Ihre Übersetzungen kannst du danach zurückholen.",
+      "nothingWhy": "Oder klicke auf „Weiter“, um zu exportieren. Um eine Sprache hinzuzufügen, hake sie im Tab „Daten“ an und speichere.",
       "progressWhat": "Die Übersetzung läuft. Diese Zeile zeigt den Fortschritt.",
       "progressWhy": "Die Tour geht weiter, sobald die Übersetzung abgeschlossen ist."
     },
@@ -115,7 +110,6 @@
     "rest": {
       "title": "Der Test hat geklappt",
       "what": "Deine 3 Testeinträge sind in jede gewählte Sprache übersetzt. Den Rest jetzt übersetzen oder exportieren, was schon fertig ist.",
-      "why": "Den Rest kannst du auch später in der Liste der Einträge übersetzen.",
       "skipped": "Der Rest kann warten. Lade herunter, was schon übersetzt ist."
     },
     "restore": {

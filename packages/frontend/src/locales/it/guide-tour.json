@@ -42,7 +42,7 @@
     "cloudVault": {
       "title": "Crea la tua cassaforte e aggiungi una chiave",
       "what": "Scegli una password per la cassaforte, poi aggiungi una chiave: scegli prima un provider. Per una prova veloce, sceglierne uno con piano gratuito. Tornerai qui al termine.",
-      "why": "Le chiavi dei tuoi provider vengono cifrate con la tua password e restano sempre sotto il tuo controllo. La chiave serve al provider di IA per riconoscerti."
+      "why": "Le chiavi dei tuoi provider vengono cifrate con la tua password e restano sempre sotto il tuo controllo."
     },
     "cloudUnlock": {
       "what": "Sblocca la cassaforte nella pagina della cassaforte. Tornerai qui al termine."
@@ -52,8 +52,7 @@
     },
     "key": {
       "title": "Aggiungi una chiave per iniziare a tradurre",
-      "why": "La chiave è il modo in cui il provider sa che sei tu. Puoi cambiare provider in qualsiasi momento nella scheda Configurazione del progetto.",
-      "whyOwn": "La tua chiave {{provider}} serve a {{provider}} per riconoscerti. Puoi cambiare provider in qualsiasi momento nella scheda Configurazione del progetto.",
+      "why": "Puoi cambiare provider più avanti nella scheda Configurazione del progetto.",
       "choiceWhat": "Scegli un provider e aggiungi la sua chiave. Per una prova veloce, scegline uno con piano gratuito.",
       "pasteWhat": "Incolla qui la chiave, digita sotto la password della cassaforte, poi salva."
     },
@@ -69,7 +68,6 @@
     },
     "project": {
       "title": "Importazione del testo del gioco",
-      "why": "Quando importi, scegli se il file sostituisce ciò che è salvato o se aggiunge solo le voci nuove e aggiorna quelle modificate.",
       "openWhat": "Apri l'elenco dei progetti.",
       "newWhat": "Crea un nuovo progetto.",
       "createWhat": "Dai un nome al progetto, poi crealo.",
@@ -81,15 +79,12 @@
     },
     "translate": {
       "title": "Traduzione",
-      "why": "Freeway sceglie automaticamente un modello gratuito adatto a ogni lingua.",
-      "whyOwn": "{{provider}} traduce questo progetto con la tua chiave.",
-      "whyCustom": "Il routing di questo progetto, configurato in Avanzata, sceglie il provider per ogni voce.",
       "openWhat": "Apri la scheda che elenca le tue voci.",
       "quickWhat": "Sono selezionate 3 voci ancora da tradurre. Traducile per provare, oppure traduci tutto subito.",
       "fewWhat": "Le tue voci sono selezionate. Traducile ora.",
       "startWhat": "Avvia la traduzione.",
-      "nothingWhat": "Il tuo file ha già una traduzione per ogni lingua scelta. Per vedere una traduzione in azione, ritraduci 3 voci: le loro traduzioni vengono sostituite e poi puoi rimetterle.",
-      "nothingWhy": "Oppure premi Avanti per passare all’esportazione. Per aggiungere una lingua, spuntala nella scheda Dati e salva.",
+      "nothingWhat": "Il tuo file ha già tutte le traduzioni. Per vederne una in azione, ritraduci 3 voci: potrai rimettere le loro traduzioni dopo.",
+      "nothingWhy": "Oppure premi Avanti per esportare. Per aggiungere una lingua, spuntala nella scheda Dati e salva.",
       "progressWhat": "La traduzione è in corso. Questa riga ne mostra l'avanzamento.",
       "progressWhy": "Il tour prosegue quando la traduzione è terminata."
     },
@@ -115,7 +110,6 @@
     "rest": {
       "title": "La prova è riuscita",
       "what": "Le tue 3 voci di prova sono tradotte in tutte le lingue scelte. Traduci il resto ora, oppure esporta ciò che hai.",
-      "why": "Puoi tradurre il resto più tardi dall'elenco delle voci.",
       "skipped": "Il resto può aspettare. Scarica ciò che è già tradotto."
     },
     "restore": {
