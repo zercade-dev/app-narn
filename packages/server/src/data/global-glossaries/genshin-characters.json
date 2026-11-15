@@ -2250,22 +2250,21 @@
     {
       "id": "genshin-characters-traveler",
       "source": "Traveler",
-      "constant": true,
       "translations": {
         "zh-hans": "旅行者",
         "zh-hant": "旅行者",
-        "ko": "‍여행자",
+        "ko": "여행자",
         "ja": "旅人",
-        "es": "Viajero‍",
-        "fr": "Voyageur‍",
-        "ru": "Путешественник‍",
+        "es": "Viajero",
+        "fr": "Voyageur",
+        "ru": "Путешественник",
         "th": "นักเดินทาง",
-        "vi": "Nhà ‍Lữ Hành",
-        "de": "Reisender‍",
+        "vi": "Nhà Lữ Hành",
+        "de": "Reisender",
         "id": "Pengembara",
         "pt-br": "Viajante",
         "tr": "Gezgin",
-        "it": "Viaggiatore‍"
+        "it": "Viaggiatore"
       }
     },
     {
@@ -2334,7 +2333,6 @@
     {
       "id": "genshin-characters-wanderer",
       "source": "Wanderer",
-      "constant": true,
       "translations": {
         "zh-hans": "流浪者",
         "zh-hant": "流浪者",

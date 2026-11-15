@@ -17,9 +17,9 @@ Certains glossaires sont en **lecture seule** (gérés globalement) et fournisse
 ## Termes constants
 
 * Un terme constant **n’est jamais envoyé au moteur de traduction**. NARN le remplace par un marqueur avant de traduire, puis met à sa place la traduction du glossaire : un nom de personnage comme *Diluc* ressort toujours exactement tel qu’il est écrit dans le glossaire.
-* **La casse compte.** Seul un texte écrit exactement comme le terme est protégé : *Razor* (le personnage) l’est, *a razor* ne l’est pas. Toute autre graphie est envoyée au moteur comme une indication de glossaire ordinaire, marquée comme nom, pour qu’il distingue le nom du mot courant.
+* **La casse compte.** Seul un texte écrit exactement comme le terme est protégé : *Venti* (le personnage) l’est, *a venti latte* ne l’est pas. Toute autre graphie est envoyée au moteur comme une indication de glossaire ordinaire, marquée comme nom, pour qu’il distingue le nom du mot courant.
 * **Le moteur ne peut pas modifier le mot.** Comme il ne voit jamais le terme, il ne peut ni le décliner ni accorder d’autres mots avec lui : dans des langues comme le russe, le coréen ou le turc, un nom constant apparaît toujours sous sa forme de base. Réservez constante aux noms et codes qui doivent rester fixes.
-* Laissez en termes normaux les noms qui sont aussi des mots courants, car les titres et les libellés leur mettent souvent une majuscule (*Gaming Settings*). Dans le glossaire fourni **Genshin Characters**, tous les noms sont constants sauf Gaming, Amber, Razor, Sucrose et Prune.
+* Laissez en termes normaux les noms qui sont aussi des mots courants, car les titres et les libellés leur mettent souvent une majuscule (*Gaming Settings*). Dans les glossaires fournis, les noms de personnages, les nations et les noms de produit Genshin Impact, Miliastra Sandbox et Miliastra Wonderland sont constants, sauf Gaming, Amber, Razor, Sucrose, Prune, Traveler et Wanderer.
 
 ## Importer et exporter
 

@@ -120,14 +120,16 @@ export interface GlossaryTermJson {
 /**
  * Glossaries whose terms are protected names: a new term from the sheet is
  * made constant. The sheet has no constant column, so this is where the flag
- * comes from; an existing term keeps whatever flag it already has.
+ * comes from; an existing term keeps whatever flag it already has. The
+ * term-by-term review behind these choices is in
+ * packages/server/src/data/global-glossaries/CONSTANT-TERMS.md.
  */
-const CONSTANT_GLOSSARIES: ReadonlySet<string> = new Set(['genshin-characters']);
+const CONSTANT_GLOSSARIES: ReadonlySet<string> = new Set(['genshin-characters', 'genshin-nations']);
 
 /**
  * Names in those glossaries that are also everyday English words, often
- * capitalised in titles and UI labels ("Gaming Settings"), where an exact
- * match would still be masked. They stay reference terms.
+ * capitalised in titles and UI labels ("Gaming Settings", "A Traveler's
+ * Guide"), where an exact match would still be masked. They stay reference terms.
  */
 export const NOT_CONSTANT_SOURCES: ReadonlySet<string> = new Set([
   'Gaming',
@@ -135,6 +137,8 @@ export const NOT_CONSTANT_SOURCES: ReadonlySet<string> = new Set([
   'Razor',
   'Sucrose',
   'Prune',
+  'Traveler',
+  'Wanderer',
 ]);
 
 function constantFor(glossaryId: string, source: string): boolean {
@@ -247,7 +251,9 @@ export function parseCSV(csvContent: string): Array<Record<string, string>> {
 
 /** Normalize a CSV cell: trim, strip `|`-separated plural variants, empty → undefined. */
 export function normalizeCell(raw: string | undefined): string | undefined {
-  const trimmed = raw?.trim() ?? '';
+  // Zero-width characters (U+200B–U+200D, U+2060, U+FEFF) creep in from the
+  // sheet and would be pasted into translations.
+  const trimmed = raw?.replace(/[\u200B-\u200D\u2060\uFEFF]/g, '').trim() ?? '';
   if (!trimmed) return undefined;
   const [primary] = trimmed.split('|');
   const primaryTrimmed = primary.trim();

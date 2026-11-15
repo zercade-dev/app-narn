@@ -17,9 +17,9 @@ Some glossaries are **read-only** (managed globally) and contribute terms withou
 ## Constant terms
 
 * A constant term is **never sent to the translation engine**. NARN swaps it for a placeholder before translating and puts the glossary translation in its place afterwards, so a character name like *Diluc* always comes out exactly as written in the glossary.
-* **Letter case matters.** Only text spelled exactly like the term is protected: *Razor* (the character) is, *a razor* is not. Any other spelling is sent to the engine as an ordinary glossary hint, marked as a name, so it can tell the name from the everyday word.
+* **Letter case matters.** Only text spelled exactly like the term is protected: *Venti* (the character) is, *a venti latte* is not. Any other spelling is sent to the engine as an ordinary glossary hint, marked as a name, so it can tell the name from the everyday word.
 * **The engine can't change the word.** Because it never sees the term, it can't decline it or make other words agree with it: in languages such as Russian, Korean or Turkish, a constant name always appears in its base form. Keep constant for names and codes that must stay fixed.
-* Leave names that are also everyday words as normal terms, since titles and labels often capitalise them (*Gaming Settings*). In the bundled **Genshin Characters** glossary, every name is constant except Gaming, Amber, Razor, Sucrose and Prune.
+* Leave names that are also everyday words as normal terms, since titles and labels often capitalise them (*Gaming Settings*). In the bundled glossaries, character names, nations and the product names Genshin Impact, Miliastra Sandbox and Miliastra Wonderland are constant, except Gaming, Amber, Razor, Sucrose, Prune, Traveler and Wanderer.
 
 ## Import and export
 

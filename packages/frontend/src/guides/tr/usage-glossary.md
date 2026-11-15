@@ -17,9 +17,9 @@ Bazı sözlükçeler **salt okunurdur** (genel düzeyde yönetilir) ve burada d�
 ## Sabit terimler
 
 * Sabit bir terim **çeviri motoruna asla gönderilmez**. NARN çeviriden önce onu bir yer tutucuyla değiştirir, ardından yerine sözlükçedeki çeviriyi koyar; böylece *Diluc* gibi bir karakter adı her zaman sözlükçede yazıldığı gibi çıkar.
-* **Büyük-küçük harf önemlidir.** Yalnızca terimle tam olarak aynı yazılan metin korunur: *Razor* (karakter) korunur, *a razor* korunmaz. Diğer yazımlar, motorun adı gündelik sözcükten ayırabilmesi için ad olarak işaretlenmiş sıradan bir sözlükçe ipucu olarak gönderilir.
+* **Büyük-küçük harf önemlidir.** Yalnızca terimle tam olarak aynı yazılan metin korunur: *Venti* (karakter) korunur, *a venti latte* korunmaz. Diğer yazımlar, motorun adı gündelik sözcükten ayırabilmesi için ad olarak işaretlenmiş sıradan bir sözlükçe ipucu olarak gönderilir.
 * **Motor sözcüğü değiştiremez.** Terimi hiç görmediği için onu çekimleyemez ya da diğer sözcükleri ona uyduramaz: Rusça, Korece veya Türkçe gibi dillerde sabit bir ad her zaman yalın haliyle görünür. Sabiti, değişmemesi gereken adlar ve kodlar için kullanın.
-* Gündelik sözcük de olan adları normal terim olarak bırakın; başlıklar ve etiketler onları sık sık büyük harfle yazar (*Gaming Settings*). Uygulamayla gelen **Genshin Characters** sözlükçesinde Gaming, Amber, Razor, Sucrose ve Prune dışındaki tüm adlar sabittir.
+* Gündelik sözcük de olan adları normal terim olarak bırakın; başlıklar ve etiketler onları sık sık büyük harfle yazar (*Gaming Settings*). Uygulamayla gelen sözlükçelerde karakter adları, ülke adları ve Genshin Impact, Miliastra Sandbox ile Miliastra Wonderland ürün adları sabittir; Gaming, Amber, Razor, Sucrose, Prune, Traveler ve Wanderer hariç.
 
 ## İçe ve dışa aktarma
 

@@ -11,6 +11,6 @@ The Glossaries tour now enables a ready-made glossary that fits your text and sh
 - The last step of a tour now says Complete tour.
 - A glossary's terms and its matches are now two tabs under a header that always shows the glossary's name and whether it's on, so the panel never looks empty.
 - Long or wide glossaries scroll inside their own box, with the column headers kept in view, like the Translations list.
-- Constant glossary terms are now protected only where the text spells them exactly as the glossary does, so "Razor" the character stays fixed while "a razor" is translated normally.
-- Character names in the bundled Genshin Characters glossary are now constant, except names that are also everyday words.
+- Constant glossary terms are now protected only where the text spells them exactly as the glossary does, so "Venti" the character stays fixed while "a venti latte" is translated normally.
+- Character names, nations and three product names in the bundled glossaries are now constant, except names that are also everyday words; invisible characters copied from the source sheet are removed.
 - The Glossary guide explains how constant terms work and their trade-offs.
