@@ -60,18 +60,20 @@ export function GlossarySidebar({
     const name = newGlossaryName.trim();
     if (!name) return;
     try {
-      await apiRequest<Glossary>(`/projects/${projectId}/glossaries`, {
+      const created = await apiRequest<Glossary>(`/projects/${projectId}/glossaries`, {
         method: 'POST',
         body: JSON.stringify({ name }),
       });
       setNewGlossaryName('');
       setCreatingGlossary(false);
       await loadGlossaries();
+      // The new glossary is the one to fill: select it.
+      if (created?.id) onSelectGlossary(created.id);
       toast.success(t('toastGlossaryCreated'));
     } catch (err) {
       reportError(err, 'toastGlossaryCreateError');
     }
-  }, [newGlossaryName, projectId, loadGlossaries, reportError, t]);
+  }, [newGlossaryName, projectId, loadGlossaries, onSelectGlossary, reportError, t]);
 
   const handleRenameGlossary = useCallback(async () => {
     if (!renamingGlossaryId || !renameDraft.trim()) return;

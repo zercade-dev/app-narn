@@ -154,7 +154,8 @@ export function TourOverlay({
 
   // Escape leaves the tour, unless it was meant for something else: another
   // dialog (a sheet the tour asked the person to open), an open select or menu
-  // (it closes that), or something that already handled it. Whether a popup
+  // (it closes that), a field being typed in (it cancels that: a glossary's
+  // new name), or something that already handled it. Whether a popup
   // was open is read on the way down, because by the time the key bubbles up
   // the popup has usually closed itself.
   useEffect(() => {
@@ -165,7 +166,8 @@ export function TourOverlay({
       forPopup =
         target !== null &&
         (target.closest('[role="listbox"], [role="menu"]') !== null ||
-          target.getAttribute('aria-expanded') === 'true');
+          target.getAttribute('aria-expanded') === 'true' ||
+          isTextField(target));
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || e.defaultPrevented || forPopup) return;
