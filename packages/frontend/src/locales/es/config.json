@@ -417,7 +417,7 @@
       },
       "glossary-adherence": {
         "name": "Adhesión al glosario",
-        "description": "Los términos del glosario presentes en el original deben aparecer traducidos en el resultado (coincidencia de palabra completa). Con severidad de advertencia el problema es solo informativo; configura la severidad como bloqueante para activar el reintento automático."
+        "description": "Los términos del glosario encontrados en el origen deben aparecer traducidos en el resultado. Cuenta también una forma declinada, como una terminación de caso en ruso. Los términos constantes se omiten: el enmascaramiento ya los mantiene exactos. Con gravedad de advertencia el aviso es solo informativo; ponla en bloqueante para reintentar la traducción una vez cuando falte un término o se haya cambiado."
       },
       "forbidden-terms": {
         "name": "Términos prohibidos",

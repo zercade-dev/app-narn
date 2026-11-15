@@ -262,6 +262,7 @@ export { maskSecret } from './mask.js';
 export {
   escapeRegExp,
   buildTermBoundaryRegex,
+  buildInflectedTermRegex,
   glossaryScanText,
   termMatchesText,
 } from './term-match.js';

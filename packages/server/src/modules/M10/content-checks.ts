@@ -3,19 +3,22 @@
  * user-authored regex assertions. All three are opt-in per project.
  */
 import { runInNewContext } from 'node:vm';
-import type { LQAIssue } from '@zercade-dev/narn-shared';
+import { buildInflectedTermRegex, termMatchesText, type LQAIssue } from '@zercade-dev/narn-shared';
 import { wordBoundaryRegExp, type LQACheck } from './types.js';
 
 /**
  * Glossary terms matched in the source must appear (translated) in the
- * output. Both sides use Unicode word-boundary matching — a bare substring
- * match would accept "cat" inside "catalogue".
+ * output. The source side uses the shared matcher (whole words, `{…}`
+ * placeholders skipped); the target side accepts the required translation
+ * with an inflectional ending (`buildInflectedTermRegex`), so a correctly
+ * declined term ("меч Дилюка" for "Дилюк") is not reported as missing.
  *
- * Stays `defaultEnabled: false`: constant glossary terms are already masked
- * (M17) before translation, so for this project most terminology never
- * reaches the model as translatable text and the check would mostly re-flag
- * stylistic variants. Severity stays `warning` — only `blocking` issues feed
- * the auto-retry (see the UI description).
+ * Constant terms are skipped: their exact spellings are masked and restored
+ * verbatim (M17), and any other spelling is left to the model on purpose.
+ *
+ * Off by default, as a warning. Set to blocking per project, it makes NARN
+ * retry a translation once, with feedback, when a reference term was dropped
+ * or reworded (only `blocking` issues feed the auto-retry).
  */
 export const glossaryAdherenceCheck: LQACheck = {
   id: 'glossary-adherence',
@@ -25,11 +28,11 @@ export const glossaryAdherenceCheck: LQACheck = {
   run(entry, translatedText, targetLanguage, ctx) {
     const issues: LQAIssue[] = [];
     for (const term of ctx.glossaryTerms) {
-      if (!term.source) continue;
+      if (!term.source || term.constant) continue;
       const expected = term.translations[targetLanguage];
       if (typeof expected !== 'string' || expected.length === 0) continue;
-      if (!wordBoundaryRegExp(term.source).test(entry.sourceText)) continue;
-      if (!wordBoundaryRegExp(expected).test(translatedText)) {
+      if (!termMatchesText(term.source, entry.sourceText)) continue;
+      if (!buildInflectedTermRegex(expected).test(translatedText)) {
         issues.push({
           type: 'glossary-term-missing',
           detail: `glossary term "${term.source}" should appear as "${expected}" in the translation`,

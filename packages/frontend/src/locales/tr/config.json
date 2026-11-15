@@ -415,7 +415,7 @@
       },
       "glossary-adherence": {
         "name": "Sözlükçeye uyum",
-        "description": "Kaynakta eşleşen sözlükçe terimleri, çıktıda çevrilmiş olarak görünmelidir (tam sözcük eşleşmesi). Uyarı önem derecesinde sorun yalnızca bilgilendiricidir; otomatik yeniden denemeyi tetiklemek için önem derecesini engelleyici yapın."
+        "description": "Kaynakta eşleşen sözlükçe terimleri çıktıda çevirileriyle yer almalıdır. Rusçadaki hâl ekleri gibi çekimli bir biçim de sayılır. Sabit terimler atlanır: maskeleme onları zaten aynen korur. Uyarı önem derecesinde sorun yalnızca bilgi amaçlıdır; bir terim atlandığında ya da başka sözcüklerle ifade edildiğinde çevirinin bir kez yeniden denenmesi için önem derecesini engelleyici yapın."
       },
       "forbidden-terms": {
         "name": "Yasaklı terimler",

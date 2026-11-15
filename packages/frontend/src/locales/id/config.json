@@ -408,7 +408,7 @@
       },
       "glossary-adherence": {
         "name": "Kepatuhan glosarium",
-        "description": "Istilah glosarium yang cocok di sumber harus muncul dalam bentuk terjemahannya pada keluaran (kecocokan seluruh kata). Pada keparahan peringatan, isunya hanya bersifat informatif; setel keparahan ke memblokir untuk memicu percobaan ulang otomatis."
+        "description": "Istilah glosarium yang cocok di sumber harus muncul dalam bentuk terjemahannya di hasil. Bentuk yang terinfleksi, seperti akhiran kasus dalam bahasa Rusia, juga dihitung. Istilah konstan dilewati: penyamaran sudah menjaganya tetap persis. Dengan tingkat keparahan peringatan, masalah hanya bersifat informasi; setel tingkat keparahan ke pemblokir agar terjemahan dicoba ulang sekali saat istilah hilang atau diubah susunannya."
       },
       "forbidden-terms": {
         "name": "Istilah terlarang",

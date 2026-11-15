@@ -14,3 +14,4 @@ The Glossaries tour now enables a ready-made glossary that fits your text and sh
 - Constant glossary terms are now protected only where the text spells them exactly as the glossary does, so "Venti" the character stays fixed while "a venti latte" is translated normally.
 - Character names, nations and three product names in the bundled glossaries are now constant, except names that are also everyday words; invisible characters copied from the source sheet are removed.
 - The Glossary guide explains how constant terms work and their trade-offs.
+- The Glossary adherence quality check accepts a correctly declined term (such as a Russian case ending) and skips constant terms, so it can be set to blocking to retry translations that drop or reword a glossary term.

@@ -417,7 +417,7 @@
       },
       "glossary-adherence": {
         "name": "Aderência ao glossário",
-        "description": "Os termos de glossário encontrados na origem devem aparecer traduzidos no resultado (correspondência de palavra inteira). Na severidade de aviso, o problema é apenas informativo; defina a severidade como bloqueante para disparar a nova tentativa automática."
+        "description": "Os termos do glossário encontrados na origem precisam aparecer traduzidos no resultado. Uma forma flexionada também conta, como uma terminação de caso em russo. Termos constantes são ignorados: o mascaramento já os mantém exatos. Com severidade de aviso, o problema é apenas informativo; defina como bloqueante para tentar a tradução de novo uma vez quando um termo ficar de fora ou for reformulado."
       },
       "forbidden-terms": {
         "name": "Termos proibidos",

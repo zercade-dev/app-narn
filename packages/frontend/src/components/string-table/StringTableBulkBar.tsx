@@ -141,7 +141,10 @@ export function StringTableBulkBar({
   const showRetranslateTier = useControlVisible('retranslate-below-tier');
 
   return (
-    <div className="flex flex-col gap-1.5 mt-2 px-3 py-2 bg-primary/8 border border-primary/20 rounded-md text-sm">
+    <div
+      className="flex flex-col gap-1.5 mt-2 px-3 py-2 bg-primary/8 border border-primary/20 rounded-md text-sm"
+      data-tour="bulk-bar"
+    >
       <div className="flex flex-wrap items-center gap-3 gap-y-2">
         <span className="text-primary font-medium text-xs" data-testid="bulk-selection">
           {/* Reflects only actionable (currently-visible-under-filter) rows —

@@ -415,7 +415,7 @@
       },
       "glossary-adherence": {
         "name": "Glossartreue",
-        "description": "Im Quelltext getroffene Glossarbegriffe müssen übersetzt in der Ausgabe erscheinen (Treffer auf ganze Wörter). Beim Schweregrad „Warnung“ ist die Beanstandung rein informativ; für die automatische Wiederholung den Schweregrad auf „Blockierend“ setzen."
+        "description": "Im Quelltext gefundene Glossarbegriffe müssen übersetzt in der Ausgabe stehen. Eine gebeugte Form zählt mit, etwa eine russische Kasusendung. Konstante Begriffe werden übersprungen: Die Maskierung hält sie bereits exakt. Mit Schweregrad Warnung ist das Problem nur ein Hinweis; stelle ihn auf blockierend, damit die Übersetzung einmal wiederholt wird, wenn ein Begriff fehlt oder umformuliert wurde."
       },
       "forbidden-terms": {
         "name": "Verbotene Begriffe",

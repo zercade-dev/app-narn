@@ -417,7 +417,7 @@
       },
       "glossary-adherence": {
         "name": "Respect du glossaire",
-        "description": "Les termes du glossaire présents dans la source doivent apparaître traduits dans le résultat (correspondance de mot entier). En sévérité avertissement le problème est seulement informatif ; définissez la sévérité sur bloquant pour déclencher la nouvelle tentative automatique."
+        "description": "Les termes du glossaire trouvés dans la source doivent apparaître traduits dans le résultat. Une forme déclinée compte aussi, comme une terminaison de cas en russe. Les termes constants sont ignorés : le masquage les garde déjà exacts. En gravité avertissement, le problème est seulement informatif ; passez-la en bloquant pour relancer la traduction une fois quand un terme a été omis ou reformulé."
       },
       "forbidden-terms": {
         "name": "Termes interdits",

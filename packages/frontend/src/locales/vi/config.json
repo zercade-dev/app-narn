@@ -408,7 +408,7 @@
       },
       "glossary-adherence": {
         "name": "Tuân thủ bảng thuật ngữ",
-        "description": "Thuật ngữ khớp được trong văn bản nguồn phải xuất hiện ở dạng đã dịch trong đầu ra (khớp trọn từ). Ở mức cảnh báo, vấn đề chỉ mang tính thông tin; hãy đặt mức nghiêm trọng thành chặn để kích hoạt lần thử lại tự động."
+        "description": "Các thuật ngữ trong bảng thuật ngữ khớp ở văn bản nguồn phải xuất hiện dưới dạng bản dịch trong kết quả. Dạng đã biến cách, như đuôi cách trong tiếng Nga, cũng được tính. Thuật ngữ cố định được bỏ qua: việc che đã giữ chúng chính xác. Ở mức cảnh báo, vấn đề chỉ mang tính thông tin; đặt mức chặn để dịch lại một lần khi một thuật ngữ bị bỏ sót hoặc bị diễn đạt khác."
       },
       "forbidden-terms": {
         "name": "Thuật ngữ bị cấm",

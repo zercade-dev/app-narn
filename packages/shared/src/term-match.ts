@@ -82,6 +82,31 @@ export function buildTermBoundaryRegex(term: string): RegExp {
   return new RegExp(`${LEFT_BOUNDARY}${escaped}${RIGHT_BOUNDARY}`, 'iu');
 }
 
+/** Vowels a declined word may lose before its ending (Latin, Cyrillic, Greek). */
+const STEM_VOWELS = /[aeiouyàáâãäåèéêëìíîïòóôõöùúûüаеёиоуыэюяіїєαεηιουω]{1,2}$/iu;
+
+/**
+ * Like {@link buildTermBoundaryRegex}, but each word of `term` may also carry
+ * an inflectional ending: up to four letters, after dropping up to two final
+ * vowels from a word of five letters or more. "Дилюк" accepts "Дилюка",
+ * "Снежная" accepts "Снежной", "Маг Бездны" accepts "мага Бездны". Words under
+ * three letters, and terms in an unsegmented script (CJK/Thai, which do not
+ * inflect this way), must match exactly. For checking that a target text uses
+ * a required translation, where the grammar may have declined it.
+ */
+export function buildInflectedTermRegex(term: string): RegExp {
+  if (isUnsegmentedScript(term)) return buildTermBoundaryRegex(term);
+  const words = term
+    .trim()
+    .split(/\s+/u)
+    .map((word) => {
+      if ([...word].length < 3) return escapeRegExp(word);
+      const stem = [...word].length >= 5 ? word.replace(STEM_VOWELS, '') : word;
+      return `${escapeRegExp(stem)}\\p{L}{0,4}`;
+    });
+  return new RegExp(`${LEFT_BOUNDARY}${words.join(String.raw`\s+`)}${RIGHT_BOUNDARY}`, 'iu');
+}
+
 /**
  * A `{…}` placeholder: its contents are an opaque variable name (`{player}`,
  * `{1:lv.ReadySystem.Player Ready}`), not translatable wording.

@@ -193,6 +193,8 @@ function stallStep(
     // Above the console: below it is the window's edge, and a callout over
     // the console would cover its header (opening it) and its progress.
     side: 'top',
+    // …and above the selection bar too: its Translate button is the way to try again.
+    clearOf: 'bulk-bar',
     ...text,
     advance: { kind: 'state', done: translationSettled },
     actions,

@@ -126,6 +126,7 @@ export function TourOverlay({
   const step = tour.steps[stepIndex];
   const titleId = useId();
   const anchor = useTourAnchor(step?.anchor ?? null);
+  const clearOfControl = useTourAnchor(step?.clearOf ?? null);
   const reduced = useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false);
   // A dropdown list or menu is open: the callout steps aside so it never
   // covers the options (it comes back when the list closes).
@@ -310,6 +311,22 @@ export function TourOverlay({
   const title = t(step.titleKey);
 
   const rect = anchor?.getBoundingClientRect();
+  // Extra distance so the callout lands beyond `clearOf` (on the step's side).
+  const clearRect = clearOfControl?.getBoundingClientRect();
+  const side = step.side ?? 'bottom';
+  const clearOffset =
+    !rect || !clearRect
+      ? 0
+      : Math.max(
+          0,
+          side === 'top'
+            ? rect.top - clearRect.top
+            : side === 'bottom'
+              ? clearRect.bottom - rect.bottom
+              : side === 'left'
+                ? rect.left - clearRect.left
+                : clearRect.right - rect.right,
+        );
   const hole = rect && {
     left: Math.max(0, rect.left - SPOTLIGHT_PADDING),
     top: Math.max(0, rect.top - SPOTLIGHT_PADDING),
@@ -391,9 +408,9 @@ export function TourOverlay({
           <Popover.Portal>
             <Popover.Positioner
               anchor={anchor}
-              side={step.side ?? 'bottom'}
+              side={side}
               align="start"
-              sideOffset={SPOTLIGHT_PADDING + 8}
+              sideOffset={SPOTLIGHT_PADDING + 8 + clearOffset}
               collisionPadding={12}
               {...(step.overlap
                 ? {

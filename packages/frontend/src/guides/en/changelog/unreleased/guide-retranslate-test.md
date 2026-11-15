@@ -15,3 +15,4 @@ The guide can now test-translate a file that is already fully translated, and pu
 - The first run copes better with a reload, a closed New project panel, an empty language choice and a failed translation.
 - The retranslate test keeps Start disabled until you choose Re-translate existing translations, and its spotlight on the entries leaves out Select all.
 - The import review names the file type with the key word highlighted: Client script text or Server translations (previously Main text).
+- When a translation fails, the guide's message no longer covers the Translate selected button.

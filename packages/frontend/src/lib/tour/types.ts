@@ -138,6 +138,12 @@ export interface TourStep {
    */
   overlap?: true;
   /**
+   * A `data-tour` control between the anchor and the callout that the callout
+   * must not cover: it moves out past it, on its `side` (the failure step's
+   * callout above the console clears the selection bar's Translate button).
+   */
+  clearOf?: string;
+  /**
    * `false` leaves the rest of the screen usable (no dimming) while the step
    * is current, for a step that waits on something the person may need to
    * act on elsewhere. Default: dimmed.

@@ -417,7 +417,7 @@
       },
       "glossary-adherence": {
         "name": "Aderenza al glossario",
-        "description": "I termini del glossario trovati nell'origine devono comparire tradotti nel risultato (corrispondenza a parola intera). Con gravità “Avviso” l'anomalia è solo informativa; imposta la gravità su “Bloccante” per attivare il tentativo automatico."
+        "description": "I termini del glossario trovati nel testo di origine devono comparire tradotti nel risultato. Vale anche una forma declinata, come una desinenza di caso russa. I termini costanti vengono saltati: il mascheramento li mantiene già esatti. Con gravità avviso il problema è solo informativo; impostala su bloccante per ritentare la traduzione una volta quando un termine manca o è stato riformulato."
       },
       "forbidden-terms": {
         "name": "Termini vietati",

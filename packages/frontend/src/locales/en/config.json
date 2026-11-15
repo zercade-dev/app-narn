@@ -415,7 +415,7 @@
       },
       "glossary-adherence": {
         "name": "Glossary adherence",
-        "description": "Glossary terms matched in the source must appear translated in the output (whole-word match). At warning severity the issue is informational only; set severity to blocking to trigger the automatic retry."
+        "description": "Glossary terms matched in the source must appear translated in the output. A declined form counts, such as a Russian case ending. Constant terms are skipped: masking already keeps them exact. At warning severity the issue is informational only; set severity to blocking to retry the translation once when a term was dropped or reworded."
       },
       "forbidden-terms": {
         "name": "Forbidden terms",
