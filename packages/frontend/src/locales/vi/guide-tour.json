@@ -95,7 +95,8 @@
       "filterWhat": "Mở Trạng thái và bỏ chọn Chỉ hiện mục chưa dịch, để danh sách hiện cả các mục đã dịch.",
       "selectWhat": "Đánh dấu ô của 3 mục trên trang này.",
       "translateWhat": "Nhấn Dịch mục đã chọn.",
-      "startWhat": "Chọn Dịch lại các bản dịch hiện có, rồi nhấn Bắt đầu."
+      "startWhat": "Chọn Dịch lại các bản dịch hiện có, rồi nhấn Bắt đầu.",
+      "nothingPicked": "Chưa có gì được dịch lại: các mục đó đã có bản dịch. Nhấn lại Dịch mục đã chọn và chọn Dịch lại các bản dịch hiện có."
     },
     "failed": {
       "title": "Dịch chưa thành công",
@@ -474,6 +475,7 @@
     "explain-list": {
       "title": "Danh sách mục mồ côi",
       "what": "Mỗi mục mồ côi hiện văn bản nguồn và số bản dịch nó còn giữ.",
+      "absentWhat": "Dự án này hiện không có mục mồ côi. Khi một lần nhập bỏ sót mục, từng mục sẽ hiện ở đây cùng văn bản nguồn và số bản dịch nó còn giữ.",
       "why": "Mục có nhiều bản dịch nhất đứng đầu: làm lại chúng tốn công nhất."
     },
     "explain-options": {

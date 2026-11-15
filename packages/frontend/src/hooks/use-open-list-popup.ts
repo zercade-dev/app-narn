@@ -29,3 +29,34 @@ export function useOpenListPopup(): boolean {
   }, []);
   return useSyncExternalStore(subscribe, listPopupOpen, () => false);
 }
+
+/**
+ * Whether a dialog other than the guide's callout is open and does not hold
+ * the step's control: one the person opened from the step (the batch
+ * translate dialog, glossary generation). The callout steps aside for it, as
+ * for a list. A dialog holding the step's control (the key editor, the
+ * translation dialog's Start) is what the callout points into: it stays.
+ */
+export function useOpenForeignDialog(callout: Element | null, anchor: Element | null): boolean {
+  const subscribe = useCallback((onChange: () => void) => {
+    const observer = new MutationObserver(onChange);
+    observer.observe(document.body, { childList: true, subtree: true });
+    const poll = setInterval(onChange, POLL_MS);
+    return () => {
+      observer.disconnect();
+      clearInterval(poll);
+    };
+  }, []);
+  const snapshot = () => {
+    for (const el of document.querySelectorAll('[role="dialog"], [role="alertdialog"]')) {
+      if (callout !== null && (el === callout || callout.contains(el) || el.contains(callout))) {
+        continue;
+      }
+      if (anchor !== null && el.contains(anchor)) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) return true;
+    }
+    return false;
+  };
+  return useSyncExternalStore(subscribe, snapshot, () => false);
+}

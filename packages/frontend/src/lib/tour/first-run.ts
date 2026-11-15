@@ -223,6 +223,9 @@ const waitingStep = (stall: 'waiting-quota' | 'waiting-model', what: string): To
     whyKey: 'firstRun.waiting.why',
   });
 
+/** The key editor, opened by "Check my key" on a run's failure. */
+const FIX_KEY_STEP = 'translate-fix-key';
+
 const STALL_STEPS: TourStep[] = [
   endedStep('auth'),
   endedStep('quota'),
@@ -239,6 +242,18 @@ const STALL_STEPS: TourStep[] = [
   ),
   waitingStep('waiting-quota', 'quotaWhat'),
   waitingStep('waiting-model', 'modelWhat'),
+  {
+    // Over the key editor "Check my key" opened. Not the key step itself: a
+    // key is already saved, so that step would move on at once. Closing the
+    // editor (saved or not) shows the failure again.
+    id: FIX_KEY_STEP,
+    anchor: 'vault-editor-value',
+    ...copy('key', 'pasteWhat'),
+    side: 'top',
+    advance: { kind: 'manual' },
+    major: 4,
+    variantOf: WAITING_STEP,
+  },
 ];
 
 const QUICK_STEP = 'translate-quick';
@@ -331,7 +346,8 @@ const SHARED_STEPS: TourStep[] = [
     side: 'right',
     // No click advance: the list opening shows "New project" (the pair in
     // FORM_STEPS), and a click advance on top of it would skip that step.
-    advance: { kind: 'manual' },
+    // Back here with the project made: Next goes on to its languages.
+    advance: { kind: 'manual', nextOnBack: (f) => f.projectExists },
     major: 3,
   },
   {
@@ -491,8 +507,10 @@ const SHARED_STEPS: TourStep[] = [
     whatKey: 'firstRun.retest.selectWhat',
     advance: { kind: 'state', done: (f) => f.selectedCount >= QUICK_TEST_SIZE },
     navigate: { view: 'project', tab: 'strings' },
-    // Above the list: its rows are what the person ticks.
-    side: 'top',
+    // The list fills the page, with no room beside it: the callout rests at
+    // the window's foot, over its last rows, and the first rows stay free.
+    side: 'bottom',
+    overlap: true,
     major: 4,
     variantOf: QUICK_STEP,
   },
@@ -746,6 +764,8 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
   if (major === 4 && f.retestAsked) return at(retestStepFor(f));
   if (major === 4 && f.retestPending) return at(RESTORE_STEP);
   if (major === 4 && f.retestRunning) return at(WAITING_STEP);
+  // Back after a reload: the quick test's run is going, or ended empty.
+  if (major === 4 && f.quickTestRunning) return at(WAITING_STEP);
   if (major === 4 && restPending(f)) return at('translate-rest');
   if (major === 4 && f.translationExists && f.restRunning) return at(WAITING_STEP);
   return steps.findIndex((s) => s.major === major);
@@ -768,6 +788,11 @@ export function firstRunStepApplies(step: TourStep | undefined, f: GuideFacts): 
   if (step.id === NOTHING_STEP) {
     return f.nothingToTranslate && !f.translationExists && !f.retestDone;
   }
+  // Shown over the key editor only (see firstRunShownIndex), never stepped onto.
+  if (step.id === FIX_KEY_STEP) return false;
+  // Naming a new project, only while there is none: Back from the languages
+  // must not land on a sheet that is no longer open.
+  if (step.id === 'project-create') return !f.projectExists;
   // The retranslate test's own steps, only while it is being set up.
   if (step.id === RETEST_FILTER_STEP) return f.retestAsked && f.untranslatedFilterOn;
   if (RETEST_STEPS.includes(step.id)) return f.retestAsked;
@@ -776,6 +801,9 @@ export function firstRunStepApplies(step: TourStep | undefined, f: GuideFacts): 
   if (f.nothingToTranslate && !f.translationExists) return step.major !== 4;
   return true;
 }
+
+/** The key editor's value field: on screen while the editor is open. */
+const KEY_EDITOR_ANCHOR = 'vault-editor-value';
 
 /**
  * Sub-step pairs that are two views of one question, "is the form on screen?":
@@ -786,7 +814,7 @@ export function firstRunStepApplies(step: TourStep | undefined, f: GuideFacts): 
  */
 const FORM_STEPS = [
   { closed: 'vault-open', open: 'vault-password', anchor: 'vault-password-input' },
-  { closed: 'key-choice', open: 'key-paste', anchor: 'vault-editor-value' },
+  { closed: 'key-choice', open: 'key-paste', anchor: KEY_EDITOR_ANCHOR },
   // The translation dialog, opened from the quick test's highlighted button.
   { closed: QUICK_STEP, open: 'translate-start', anchor: 'comparison-translate-start' },
   // The import review sheet, opened once a file was chosen.
@@ -819,6 +847,9 @@ export function firstRunCanGoBack(
   return true;
 }
 
+/** The New project sheet's name field: "Name your project" shows only while the sheet is open. */
+export const PROJECT_SHEET_ANCHOR = 'new-project-input';
+
 /** The `data-tour` anchors whose presence {@link firstRunShownIndex} needs to know. */
 export const FIRST_RUN_FORM_ANCHORS = FORM_STEPS.map((p) => p.anchor);
 
@@ -846,7 +877,19 @@ export function firstRunShownIndex(tour: Tour, index: number, screen: FirstRunSc
     return found >= 0 ? found : index;
   };
   if (isWaitingStep(id)) {
+    // "Check my key" opened the key editor: its own step shows over it.
+    if (screen.isOnScreen(KEY_EDITOR_ANCHOR)) return at(FIX_KEY_STEP);
     return at(screen.runStall ? STALL_STEP[screen.runStall] : WAITING_STEP);
+  }
+  // The New project sheet closed (Escape, ×, a click outside): back to the
+  // list. Not while the list is still open: "New project" was just pressed
+  // there, and the sheet is about to open.
+  if (
+    id === 'project-create' &&
+    !screen.isOnScreen(PROJECT_SHEET_ANCHOR) &&
+    !screen.isOnScreen('new-project-button')
+  ) {
+    return firstRunShownIndex(tour, at('project-open'), screen);
   }
   const pair = FORM_STEPS.find((p) => p.closed === id || p.open === id);
   if (!pair) return index;
@@ -868,6 +911,8 @@ export function firstRunBack(
   shownIndex: number,
   facts: GuideFacts,
   screen: FirstRunScreen,
+  /** The position the shown step stands for (default: the shown step itself). */
+  position: number = shownIndex,
 ): { index: number; closeForm?: string; dropRetest?: boolean } {
   const id = tour.steps[shownIndex]?.id;
   const indexOf = (stepId: string): number => {
@@ -881,7 +926,16 @@ export function firstRunBack(
     return { index: indexOf(NOTHING_STEP), dropRetest: true };
   }
   if (id === 'restore-pick') return { index: indexOf(RESTORE_STEP) };
+  // From the New project sheet: it closes, and the list is offered again.
+  if (id === 'project-create') {
+    return { index: indexOf('project-open'), closeForm: PROJECT_SHEET_ANCHOR };
+  }
   if (id === MORE_TOURS_STEP) return { index: indexOf(CLOSING_STEP) };
+  // The key editor opened from a run's failure: Back closes it, and the
+  // failure shows again.
+  if (id === FIX_KEY_STEP) {
+    return { index: position, closeForm: KEY_EDITOR_ANCHOR };
+  }
   const pair = FORM_STEPS.find((p) => p.open === id);
   if (pair) {
     const closed = tour.steps.findIndex((s) => s.id === pair.closed);

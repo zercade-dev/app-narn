@@ -402,7 +402,8 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
           </div>
         )}
 
-        <div data-tour="orphans-list">
+        {/* The guide's list step points here only when there is a list to show. */}
+        <div data-tour={orphans.length === 0 ? undefined : 'orphans-list'}>
           {orphans.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-10 text-center">
               <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">

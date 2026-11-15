@@ -176,6 +176,16 @@ export function useGuideFacts(): GuideFacts {
     quickTest.projectId === activeProjectId &&
     quickTest.decision === 'pending' &&
     quickTestRunKnown;
+  // The quick test's run is listed and has not translated anything yet: still
+  // going, or ended empty (the progress step then says why). Kept across a
+  // reload, so the guide comes back to its progress, not to the tab.
+  const quickTestRunning =
+    quickTest !== null &&
+    quickTest.retranslate !== true &&
+    quickTest.projectId === activeProjectId &&
+    quickTest.decision === 'pending' &&
+    quickTestRunKnown &&
+    !translationExists;
   // Asked for from "nothing to translate", and the person is choosing its
   // entries and starting it: no run of it yet.
   const retestAsked =
@@ -227,6 +237,7 @@ export function useGuideFacts(): GuideFacts {
       untranslatedRemain,
       nothingToTranslate,
       quickTestPending,
+      quickTestRunning,
       restRunning,
       retestAsked,
       retestRunning,
@@ -252,6 +263,7 @@ export function useGuideFacts(): GuideFacts {
     untranslatedRemain,
     nothingToTranslate,
     quickTestPending,
+    quickTestRunning,
     restRunning,
     retestAsked,
     retestRunning,

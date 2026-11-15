@@ -375,7 +375,7 @@ export function BatchConfigEditor({
   };
 
   return (
-    <Card data-testid="routing-rules-config" data-tour="routing-config">
+    <Card data-testid="routing-rules-config">
       <CardHeader>
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">
@@ -450,7 +450,9 @@ export function BatchConfigEditor({
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      {/* The rules, for the Routing tour: not the header with its Simple/Advanced
+          switch, which the tour's next step is about. */}
+      <CardContent className="space-y-3" data-tour="routing-config">
         <div className="flex min-w-0 items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-sm">
           <div className="flex min-w-0 items-center gap-2 text-muted-foreground">
             <span className="flex min-w-0 items-center gap-1">

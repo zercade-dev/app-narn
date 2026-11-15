@@ -95,7 +95,8 @@
       "filterWhat": "Öffne Status und entferne das Häkchen bei Nur unübersetzte Einträge anzeigen, damit die Liste auch deine übersetzten Einträge zeigt.",
       "selectWhat": "Setze bei 3 Einträgen auf dieser Seite ein Häkchen.",
       "translateWhat": "Drücke Auswahl übersetzen.",
-      "startWhat": "Wähle Vorhandene Übersetzungen neu übersetzen und drücke dann Starten."
+      "startWhat": "Wähle Vorhandene Übersetzungen neu übersetzen und drücke dann Starten.",
+      "nothingPicked": "Nichts wurde neu übersetzt: Diese Einträge hatten schon Übersetzungen. Drücke noch einmal Auswahl übersetzen und wähle Vorhandene Übersetzungen neu übersetzen."
     },
     "failed": {
       "title": "Übersetzung nicht durchgeführt",
@@ -474,6 +475,7 @@
     "explain-list": {
       "title": "Die Liste der Waisen",
       "what": "Jede Waise zeigt ihren Quelltext und wie viele Übersetzungen sie behält.",
+      "absentWhat": "Dieses Projekt hat gerade keine Waisen. Wenn ein Import Einträge auslässt, erscheint hier jede mit ihrem Quelltext und der Zahl der Übersetzungen, die sie behält.",
       "why": "Die mit den meisten Übersetzungen stehen oben: Sie neu zu machen kostet am meisten."
     },
     "explain-options": {

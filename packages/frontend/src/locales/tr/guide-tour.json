@@ -95,7 +95,8 @@
       "filterWhat": "Durum'u açın ve Yalnızca çevrilmemişleri göster işaretini kaldırın; liste çevrilmiş girdilerinizi de göstersin.",
       "selectWhat": "Bu sayfadaki 3 girdinin kutusunu işaretleyin.",
       "translateWhat": "Seçilenleri çevir'e basın.",
-      "startWhat": "Mevcut çevirileri yeniden çevir'i seçin, sonra Başlat'a basın."
+      "startWhat": "Mevcut çevirileri yeniden çevir'i seçin, sonra Başlat'a basın.",
+      "nothingPicked": "Hiçbir şey yeniden çevrilmedi: bu girdilerin zaten çevirileri vardı. Seçilenleri çevir'e yeniden basın ve Mevcut çevirileri yeniden çevir'i seçin."
     },
     "failed": {
       "title": "Çeviri tamamlanmadı",
@@ -474,6 +475,7 @@
     "explain-list": {
       "title": "Yetim listesi",
       "what": "Her yetim kaynak metnini ve kaç çeviri sakladığını gösterir.",
+      "absentWhat": "Bu projede şu anda yetim yok. Bir içe aktarma girdileri dışarıda bıraktığında, her biri kaynak metni ve kaç çeviri sakladığıyla burada görünür.",
       "why": "En çok çevirisi olanlar önce gelir: yeniden yapmaları en çok emek isteyenler onlardır."
     },
     "explain-options": {

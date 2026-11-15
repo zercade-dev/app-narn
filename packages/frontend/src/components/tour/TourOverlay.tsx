@@ -1,4 +1,4 @@
-import { useOpenListPopup } from '../../hooks/use-open-list-popup.js';
+import { useOpenForeignDialog, useOpenListPopup } from '../../hooks/use-open-list-popup.js';
 import { Popover } from '@base-ui/react/popover';
 import {
   useEffect,
@@ -131,16 +131,23 @@ export function TourOverlay({
   // covers the options (it comes back when the list closes).
   const listOpen = useOpenListPopup();
   const [calloutNode, setCalloutNode] = useState<HTMLElement | null>(null);
+  // A dialog the person opened from the step, not the one it points into: the
+  // callout steps aside for it too.
+  const dialogOpen = useOpenForeignDialog(calloutNode, anchor);
   useLayoutTick(anchor);
 
   // Open the step's tab or view when it becomes current.
   const navigate = step?.navigate;
+  // And again if the person leaves it while the step is up (a tab opened with
+  // the keyboard, past the dim): the step's words are about that place.
+  const shellView = useViewStore((s) => s.view);
+  const activeTab = useViewStore((s) => s.activeTab);
   useEffect(() => {
     if (!navigate) return;
     const { setView, setActiveTab } = useViewStore.getState();
-    if (navigate.view) setView(navigate.view);
-    if (navigate.tab) setActiveTab(navigate.tab);
-  }, [navigate, stepIndex]);
+    if (navigate.view && navigate.view !== shellView) setView(navigate.view);
+    if (navigate.tab && navigate.tab !== activeTab) setActiveTab(navigate.tab);
+  }, [navigate, stepIndex, shellView, activeTab]);
 
   // The latest callbacks, so effects below don't re-run for a new function identity.
   const onAdvanceRef = useRef(onAdvance);
@@ -166,6 +173,13 @@ export function TourOverlay({
         (target.closest('[role="listbox"], [role="menu"]') !== null ||
           target.getAttribute('aria-expanded') === 'true' ||
           isTextField(target));
+      // Focus in the callout itself (where each step puts it): the popover
+      // holding the callout swallows the key before it bubbles, so the tour
+      // leaves on the way down.
+      if (!forPopup && target !== null && calloutNode?.contains(target)) {
+        forPopup = true;
+        onExitRef.current();
+      }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || e.defaultPrevented || forPopup) return;
@@ -247,6 +261,13 @@ export function TourOverlay({
   const neededControl = useTourAnchor(nextNeeds);
   const nextBlockedBy = step?.advance.kind === 'next' ? (step.advance.blockedBy ?? null) : null;
   const blockingControl = useTourAnchor(nextBlockedBy);
+  // A double click on Next is one Next: its second click lands on the next
+  // step's Next, which the person never saw, and would skip that step.
+  const onNext = (e?: { detail?: number }) => {
+    if ((e?.detail ?? 1) > 1) return;
+    onAdvance();
+  };
+
   // A `next` step that moves on when the app reports its deed (see `TourAdvance`).
   const awaitedSignal =
     step?.advance.kind === 'next' ? (step.advance.advanceOnSignal ?? null) : null;
@@ -282,7 +303,7 @@ export function TourOverlay({
         enteredViaBack &&
         step.advance.nextOnBack?.(facts) === true) ||
       (stateDone && enteredViaBack),
-    onNext: onAdvance,
+    onNext,
     onBack,
     onExit,
   };
@@ -344,10 +365,13 @@ export function TourOverlay({
           />
         </>
       ) : (
+        // A centred callout leaves the page usable, except on a look-only
+        // step (`interactive: false`): the page waits, as during a change
+        // the tour is making.
         <div
           aria-hidden="true"
           data-testid="tour-dim"
-          className={`pointer-events-none ${dimBase} inset-0`}
+          className={`${step.interactive === false ? 'pointer-events-auto' : 'pointer-events-none'} ${dimBase} inset-0`}
           style={{ left: 0, top: 0, width: '100vw', height: '100vh' }}
         />
       )}
@@ -360,6 +384,11 @@ export function TourOverlay({
               align="start"
               sideOffset={SPOTLIGHT_PADDING + 8}
               collisionPadding={12}
+              {...(step.overlap
+                ? {
+                    collisionAvoidance: { side: 'shift', align: 'shift', fallbackAxisSide: 'none' },
+                  }
+                : {})}
               positionMethod="fixed"
               className="z-[60]"
             >
@@ -371,7 +400,7 @@ export function TourOverlay({
                 aria-labelledby={titleId}
                 data-testid="tour-callout"
                 data-step-id={step.id}
-                data-stepped-aside={listOpen || undefined}
+                data-stepped-aside={listOpen || dialogOpen || undefined}
                 className="w-[min(24rem,calc(100vw-2rem))] data-[stepped-aside]:invisible rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
               >
                 <TourCallout {...calloutProps} />
@@ -387,7 +416,7 @@ export function TourOverlay({
           aria-labelledby={titleId}
           data-testid="tour-callout"
           data-step-id={step.id}
-          data-stepped-aside={listOpen || undefined}
+          data-stepped-aside={listOpen || dialogOpen || undefined}
           className="data-[stepped-aside]:invisible fixed top-1/2 left-1/2 z-[60] w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
         >
           <TourCallout {...calloutProps} />

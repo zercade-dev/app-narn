@@ -95,7 +95,8 @@
       "filterWhat": "Abre Estado y desmarca Mostrar solo sin traducir, para que la lista muestre también tus entradas traducidas.",
       "selectWhat": "Marca las casillas de 3 entradas de esta página.",
       "translateWhat": "Pulsa Traducir seleccionadas.",
-      "startWhat": "Elige Retraducir traducciones existentes y pulsa Iniciar."
+      "startWhat": "Elige Retraducir traducciones existentes y pulsa Iniciar.",
+      "nothingPicked": "No se retradujo nada: esas entradas ya tenían traducciones. Pulsa de nuevo Traducir seleccionadas y elige Retraducir traducciones existentes."
     },
     "failed": {
       "title": "La traducción no se completó",
@@ -474,6 +475,7 @@
     "explain-list": {
       "title": "La lista de huérfanas",
       "what": "Cada huérfana muestra su texto de origen y cuántas traducciones conserva.",
+      "absentWhat": "Este proyecto no tiene huérfanas ahora. Cuando una importación deja entradas fuera, cada una aparece aquí con su texto de origen y cuántas traducciones conserva.",
       "why": "Las que tienen más traducciones van primero: son las que más cuesta rehacer."
     },
     "explain-options": {

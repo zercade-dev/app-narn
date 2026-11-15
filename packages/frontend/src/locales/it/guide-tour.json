@@ -95,7 +95,8 @@
       "filterWhat": "Apri Stato e togli la spunta a Mostra solo le non tradotte, così l'elenco mostra anche le voci già tradotte.",
       "selectWhat": "Spunta le caselle di 3 voci in questa pagina.",
       "translateWhat": "Premi Traduci la selezione.",
-      "startWhat": "Scegli Ritraduci le traduzioni esistenti, poi premi Avvia."
+      "startWhat": "Scegli Ritraduci le traduzioni esistenti, poi premi Avvia.",
+      "nothingPicked": "Non è stato ritradotto nulla: quelle voci avevano già delle traduzioni. Premi di nuovo Traduci la selezione e scegli Ritraduci le traduzioni esistenti."
     },
     "failed": {
       "title": "Traduzione non riuscita",
@@ -474,6 +475,7 @@
     "explain-list": {
       "title": "L’elenco delle orfane",
       "what": "Ogni orfana mostra il suo testo di origine e quante traduzioni conserva.",
+      "absentWhat": "Questo progetto non ha orfane al momento. Quando un'importazione lascia fuori delle voci, ognuna compare qui con il suo testo di origine e quante traduzioni conserva.",
       "why": "Quelle con più traduzioni vengono prima: sono le più faticose da rifare."
     },
     "explain-options": {

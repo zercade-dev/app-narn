@@ -182,7 +182,13 @@ export function DataTab() {
     ? 'main'
     : (exportCollection ?? (hasMainStrings ? 'main' : 'client'));
   const currentLanguages = pendingLanguages ?? activeProject?.activeLanguages ?? [];
-  const isDirty = pendingLanguages !== null;
+  // Changed only when the ticks differ from what is saved: ticking a language
+  // and unticking it again leaves nothing to save.
+  const savedLanguages = activeProject?.activeLanguages ?? [];
+  const isDirty =
+    pendingLanguages !== null &&
+    (pendingLanguages.length !== savedLanguages.length ||
+      pendingLanguages.some((code) => !savedLanguages.includes(code)));
   // "Select all" means every real language: Pseudo-test is a QA tool, ticked
   // only on purpose (and kept when it was).
   const selectableTargetCodes = availableTargetLanguages

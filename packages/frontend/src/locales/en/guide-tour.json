@@ -95,7 +95,8 @@
       "filterWhat": "Open Status and untick Show untranslated only, so the list shows your translated entries too.",
       "selectWhat": "Tick the boxes of 3 entries on this page.",
       "translateWhat": "Press Translate selected.",
-      "startWhat": "Choose Re-translate existing translations, then press Start."
+      "startWhat": "Choose Re-translate existing translations, then press Start.",
+      "nothingPicked": "Nothing was retranslated: those entries already had translations. Press Translate selected again and choose Re-translate existing translations."
     },
     "failed": {
       "title": "The translation didn't go through",
@@ -474,6 +475,7 @@
     "explain-list": {
       "title": "The orphans list",
       "what": "Each orphan shows its source text and how many translations it keeps.",
+      "absentWhat": "This project has no orphans right now. When an import leaves entries out, each one shows here with its source text and how many translations it keeps.",
       "why": "The ones with the most translations come first: they are the most work to redo."
     },
     "explain-options": {

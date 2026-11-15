@@ -95,7 +95,8 @@
       "filterWhat": "Ouvrez Statut et décochez Afficher uniquement les non traduits, pour que la liste montre aussi vos entrées traduites.",
       "selectWhat": "Cochez les cases de 3 entrées de cette page.",
       "translateWhat": "Appuyez sur Traduire la sélection.",
-      "startWhat": "Choisissez Retraduire les traductions existantes, puis appuyez sur Démarrer."
+      "startWhat": "Choisissez Retraduire les traductions existantes, puis appuyez sur Démarrer.",
+      "nothingPicked": "Rien n’a été retraduit : ces entrées avaient déjà des traductions. Appuyez de nouveau sur Traduire la sélection et choisissez Retraduire les traductions existantes."
     },
     "failed": {
       "title": "La traduction n’a pas abouti",
@@ -474,6 +475,7 @@
     "explain-list": {
       "title": "La liste des orphelins",
       "what": "Chaque orphelin affiche son texte source et le nombre de traductions qu’il conserve.",
+      "absentWhat": "Ce projet n’a aucun orphelin pour l’instant. Quand un import laisse des entrées de côté, chacune s’affiche ici avec son texte source et le nombre de traductions qu’elle conserve.",
       "why": "Ceux qui ont le plus de traductions viennent en premier : ce sont les plus longs à refaire."
     },
     "explain-options": {

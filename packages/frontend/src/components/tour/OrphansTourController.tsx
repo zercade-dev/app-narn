@@ -5,6 +5,7 @@ import type { CatalogTourContext } from '../../lib/tour/catalog.js';
 import { endOrphansTour } from '../../lib/tour/end-orphans-tour.js';
 import {
   loadPracticeState,
+  practiceImportSettled,
   PracticeRecoverRefusedError,
   recoverPracticeOrphan,
   simulateOrphan,
@@ -131,11 +132,19 @@ export function OrphansTourController({ facts, access }: CatalogTourContext) {
   // Resuming: where is the practice orphan now?
   useEffect(() => {
     if (run.ready) return;
-    const sim = useGuideStore.getState().orphanSim;
     let stale = false;
-    const opened = { simulated: true, backupId: sim?.backupId ?? null, ready: true };
-    // Put back since this was asked for: nothing to resume.
-    const where = sim ? loadPracticeState(sim) : Promise.resolve(null);
+    // A practice import still going (the tour restarted mid-way) is waited
+    // for: until it lands, the entry looks live.
+    const where = practiceImportSettled().then(() => {
+      const sim = useGuideStore.getState().orphanSim;
+      // Put back since this was asked for: nothing to resume.
+      return sim ? loadPracticeState(sim) : null;
+    });
+    const opened = () => ({
+      simulated: true,
+      backupId: useGuideStore.getState().orphanSim?.backupId ?? null,
+      ready: true,
+    });
     where.then(
       (found) => {
         if (stale) return;
@@ -145,20 +154,21 @@ export function OrphansTourController({ facts, access }: CatalogTourContext) {
         }
         const { state } = found;
         if (state === 'orphaned') {
-          setRun((r) => ({ ...r, ...opened, stepId: 'recover' }));
+          setRun((r) => ({ ...r, ...opened(), stepId: 'recover' }));
           return;
         }
+        const resumed = opened();
         useGuideStore.getState().clearOrphanSim();
         setRun((r) => ({
           ...r,
-          ...opened,
+          ...resumed,
           stepId: 'done',
           notice: state === 'live' ? 'alreadyRecovered' : 'alreadyDeleted',
         }));
       },
       () => {
         // "Put it back" checks again before it writes anything.
-        if (!stale) setRun((r) => ({ ...r, ...opened, stepId: 'recover', error: 'load' }));
+        if (!stale) setRun((r) => ({ ...r, ...opened(), stepId: 'recover', error: 'load' }));
       },
     );
     return () => {
@@ -335,7 +345,8 @@ export function OrphansTourController({ facts, access }: CatalogTourContext) {
   }, [back, go]);
 
   // Leaving with the practice orphan still out: it stays, and the toast says where to put it back.
-  const onExit = useCallback(() => endOrphansTour(t, { putBack: false }), [t]);
+  // Leaving puts a practice orphan back: the person's entry is never left missing.
+  const onExit = useCallback(() => endOrphansTour(t, { putBack: true }), [t]);
 
   if (!run.ready) return null;
 

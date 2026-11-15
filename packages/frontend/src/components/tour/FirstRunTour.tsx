@@ -35,6 +35,7 @@ import {
   FIRST_RUN_FORM_ANCHORS,
   FIRST_RUN_TOUR_ID,
   MORE_TOURS_STEP,
+  PROJECT_SHEET_ANCHOR,
   PROVIDER_CARD_STEP,
   PROVIDER_LIST_STEP,
   firstRunBack,
@@ -279,6 +280,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const importSheetOpen = useTourAnchor(importSheetAnchor) !== null;
   const restoreConfirmOpen = useTourAnchor(restoreAnchor) !== null;
   const projectListOpen = useTourAnchor(projectListAnchor) !== null;
+  const projectSheetOpen = useTourAnchor(PROJECT_SHEET_ANCHOR) !== null;
   const stalled = useFirstRunStall();
   // "Try again" sets the failed run aside, so the guide does not show its
   // failure again while the new run has not been listed yet.
@@ -292,6 +294,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
       [importSheetAnchor]: importSheetOpen,
       [restoreAnchor]: restoreConfirmOpen,
       [projectListAnchor]: projectListOpen,
+      [PROJECT_SHEET_ANCHOR]: projectSheetOpen,
     };
     return { isOnScreen: (anchor) => open[anchor] ?? false, runStall };
   }, [
@@ -307,6 +310,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     importSheetOpen,
     restoreConfirmOpen,
     projectListOpen,
+    projectSheetOpen,
     runStall,
   ]);
   const shown = useCallback((at: number) => firstRunShownIndex(tour, at, screen), [tour, screen]);
@@ -334,11 +338,11 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   // Back closes a form the step points into, or goes to the step before,
   // never onto a variant (see `firstRunBack`).
   const onBack = useCallback(() => {
-    const back = firstRunBack(tour, shownIndex, facts, screen);
+    const back = firstRunBack(tour, shownIndex, facts, screen, index);
     if (back.closeForm) globalThis.dispatchEvent(closeFormEvent(back.closeForm));
     if (back.dropRetest) useGuideStore.getState().setQuickTest(null);
     setPosition((p) => ({ ...p, index: back.index }));
-  }, [tour, shownIndex, facts, screen]);
+  }, [tour, shownIndex, facts, screen, index]);
   const canGoBack = firstRunCanGoBack(tour, shownIndex, facts, screen);
   // Leaving at the closing step is the end of the first run, not a skip: it
   // was all done, so nothing is left to continue.
@@ -705,6 +709,38 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     if (!quick || quick.runId !== null || quick.decision !== 'pending') return;
     guide.setQuickTest({ ...quick, runId: listedQuickRunId });
   }, [listedQuickRunId]);
+  // A retranslate test started with "Only fill untranslated entries": every
+  // entry is translated, so the run had nothing to do. That is not a failure
+  // (no key to check): the test is asked for again, and the guide goes back
+  // to Translate selected with the three still ticked.
+  const retestRun = useRunStore((s) => {
+    if (!quickTest?.retranslate || quickTest.decision !== 'pending') return undefined;
+    if (quickTest.projectId !== projectId) return undefined;
+    const id = quickTest.runId ?? quickTestRunId(quickTest, s.runs);
+    return id === null ? undefined : s.runs.find((r) => r.runId === id);
+  });
+  const emptyRetestRunId =
+    retestRun !== undefined &&
+    !isRunActive(retestRun) &&
+    retestRun.status !== RunStatusCode.Paused &&
+    retestRun.total === 0 &&
+    retestRun.errors.length === 0
+      ? retestRun.runId
+      : null;
+  useEffect(() => {
+    if (emptyRetestRunId === null || !projectId) return;
+    const guide = useGuideStore.getState();
+    const quick = guide.quickTest;
+    if (!quick?.retranslate) return;
+    guide.setQuickTest({
+      ...quick,
+      runId: null,
+      runsBefore: translationRunIdsOf(projectId),
+      requestedAt: Date.now(),
+    });
+    toast.info(tGuide('firstRun.retest.nothingPicked'));
+  }, [emptyRetestRunId, projectId, tGuide]);
+
   // The quick test's run, for its progress in the callout.
   const quickRunId =
     quickTest?.decision === 'pending' && quickTest.projectId === projectId

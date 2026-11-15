@@ -25,7 +25,8 @@ interface TourCalloutProps {
   text?: TourText;
   showBack: boolean;
   showNext: boolean;
-  onNext: () => void;
+  /** Gets the click: the second click of a double click is ignored. */
+  onNext: (e?: { detail?: number }) => void;
   onBack: () => void;
   onExit: () => void;
 }

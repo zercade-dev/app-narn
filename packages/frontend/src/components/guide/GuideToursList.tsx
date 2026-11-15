@@ -84,7 +84,9 @@ export function GuideToursList() {
       total,
       unit: 'steps',
       completed,
-      continueAt: !completed && last > 0 && last < total - 1 ? last : null,
+      // Left on any step after the first, the last one included: it is not
+      // done until finished, so it shows Continue rather than "N of N" alone.
+      continueAt: !completed && last > 0 && last <= total - 1 ? last : null,
     };
   };
 

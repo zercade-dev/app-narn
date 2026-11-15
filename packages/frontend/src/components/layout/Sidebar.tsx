@@ -303,6 +303,11 @@ export function Sidebar() {
   };
   // The guide's Back from "Create a new project" closes the list it points into.
   useCloseOnGuideBack(selectorOpen, 'new-project-button', () => handleSelectorOpenChange(false));
+  // And Back from "Name your project" closes the New project sheet.
+  useCloseOnGuideBack(createOpen, 'new-project-input', () => {
+    setCreateOpen(false);
+    setCreateTab('create');
+  });
 
   const handleCreate = async () => {
     if (!newName.trim()) return;

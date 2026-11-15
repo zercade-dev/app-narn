@@ -95,7 +95,8 @@
       "filterWhat": "Abra Status e desmarque Mostrar apenas as não traduzidas, para a lista mostrar também as entradas já traduzidas.",
       "selectWhat": "Marque as caixas de 3 entradas desta página.",
       "translateWhat": "Pressione Traduzir as selecionadas.",
-      "startWhat": "Escolha Retraduzir as traduções existentes e pressione Iniciar."
+      "startWhat": "Escolha Retraduzir as traduções existentes e pressione Iniciar.",
+      "nothingPicked": "Nada foi retraduzido: essas entradas já tinham traduções. Pressione Traduzir as selecionadas de novo e escolha Retraduzir as traduções existentes."
     },
     "failed": {
       "title": "Tradução não concluída",
@@ -474,6 +475,7 @@
     "explain-list": {
       "title": "A lista de órfãos",
       "what": "Cada órfão mostra o texto de origem e quantas traduções mantém.",
+      "absentWhat": "Este projeto não tem órfãos agora. Quando uma importação deixa entradas de fora, cada uma aparece aqui com o texto de origem e quantas traduções mantém.",
       "why": "Os que têm mais traduções vêm primeiro: são os que dão mais trabalho para refazer."
     },
     "explain-options": {

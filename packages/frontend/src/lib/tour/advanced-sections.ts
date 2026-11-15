@@ -22,14 +22,18 @@ function sectionStep(section: string, anchor: string): TourStep {
   };
 }
 
-/** One `next` step per tab in availableTabs(access, cloud) \ SIMPLE_TABS (anchor `tab-<id>`) then per SIMPLE_HIDDEN_VIEWS (anchor `sidebar-<view>`). */
+/**
+ * In the sidebar's order, top to bottom: one `next` step per SIMPLE_HIDDEN_VIEWS
+ * entry (anchor `sidebar-<view>`, at the top of the sidebar), then per tab in
+ * availableTabs(access, cloud) \ SIMPLE_TABS (anchor `tab-<id>`).
+ */
 export function advancedSectionsTour(access: ProjectAccessInfo, cloudManaged: boolean): Tour {
   const tabs = availableTabs(access, cloudManaged).filter((tab) => !SIMPLE_TABS.includes(tab));
   return {
     id: ADVANCED_SECTIONS_TOUR_ID,
     steps: [
-      ...tabs.map((tab) => sectionStep(tab, `tab-${tab}`)),
       ...SIMPLE_HIDDEN_VIEWS.map((view) => sectionStep(view, `sidebar-${view}`)),
+      ...tabs.map((tab) => sectionStep(tab, `tab-${tab}`)),
     ],
   };
 }

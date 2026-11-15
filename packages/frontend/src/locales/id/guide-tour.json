@@ -95,7 +95,8 @@
       "filterWhat": "Buka Status dan hapus centang Tampilkan yang belum diterjemahkan saja, agar daftar juga menampilkan entri yang sudah diterjemahkan.",
       "selectWhat": "Centang kotak 3 entri di halaman ini.",
       "translateWhat": "Tekan Terjemahkan yang dipilih.",
-      "startWhat": "Pilih Terjemahkan ulang terjemahan yang sudah ada, lalu tekan Mulai."
+      "startWhat": "Pilih Terjemahkan ulang terjemahan yang sudah ada, lalu tekan Mulai.",
+      "nothingPicked": "Tidak ada yang diterjemahkan ulang: entri itu sudah punya terjemahan. Tekan lagi Terjemahkan yang dipilih dan pilih Terjemahkan ulang terjemahan yang sudah ada."
     },
     "failed": {
       "title": "Penerjemahan tidak berhasil",
@@ -474,6 +475,7 @@
     "explain-list": {
       "title": "Daftar entri yatim",
       "what": "Setiap entri yatim menampilkan teks sumbernya dan berapa terjemahan yang disimpannya.",
+      "absentWhat": "Proyek ini belum punya entri yatim. Saat impor meninggalkan entri, masing-masing muncul di sini dengan teks sumbernya dan berapa terjemahan yang disimpannya.",
       "why": "Yang terjemahannya paling banyak tampil lebih dulu: merekalah yang paling repot dibuat ulang."
     },
     "explain-options": {

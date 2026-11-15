@@ -38,6 +38,11 @@ export interface GuideFacts {
    */
   quickTestPending: boolean;
   /**
+   * The guide's quick test has a run that has not translated anything yet:
+   * still going, or ended empty.
+   */
+  quickTestRunning: boolean;
+  /**
    * The person chose "translate the rest" after the quick test and the run it
    * produced has not settled yet (still pending, queued, running or paused).
    */
@@ -127,6 +132,12 @@ export interface TourStep {
    */
   side?: 'top' | 'right' | 'bottom' | 'left';
   /**
+   * The callout keeps `side` and stays inside the window even when that puts
+   * it over the anchor, for an anchor too big to sit beside (a whole table):
+   * with `side: 'bottom'` it rests at the window's foot, over the anchor's end.
+   */
+  overlap?: true;
+  /**
    * `false` leaves the rest of the screen usable (no dimming) while the step
    * is current, for a step that waits on something the person may need to
    * act on elsewhere. Default: dimmed.
@@ -135,7 +146,9 @@ export interface TourStep {
   /**
    * `false`: the spotlit control is shown, not offered. The hole is covered
    * like the rest of the screen, for a step that points at something the
-   * person must leave alone (the practice orphan's Delete).
+   * person must leave alone (the practice orphan's Delete). On a centred
+   * step, the whole page is covered: it waits while the tour changes
+   * something (the practice orphan being made).
    */
   interactive?: false;
   /** Opened when the step becomes current. */

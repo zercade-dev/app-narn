@@ -8,23 +8,26 @@ import type { GuideFacts, Tour, TourStep } from './types.js';
 
 export type AreaTourId = 'routing' | 'glossary' | 'quality' | 'compare' | 'review-translation-ai';
 
-function step(
-  tab: AreaTourId,
-  id: string,
-  anchor: string,
-  first = false,
-  side?: TourStep['side'],
-): TourStep {
+/** One object per tab, so the overlay does not re-run `navigate` on every build. */
+const NAVIGATE: Partial<Record<AreaTourId, NonNullable<TourStep['navigate']>>> = {};
+function navigateTo(tab: AreaTourId): NonNullable<TourStep['navigate']> {
+  return (NAVIGATE[tab] ??= { tab: tab satisfies Tab });
+}
+
+function step(tab: AreaTourId, id: string, anchor: string, side?: TourStep['side']): TourStep {
   return {
     id,
     anchor,
-    ...(side ? { side } : {}),
+    // Beside the anchor when it fits; a tall one (Advanced routing's rules)
+    // still keeps the callout, and its Next, inside the window.
+    ...(side ? { side, overlap: true as const } : {}),
     titleKey: `area.${tab}.${id}.title`,
     whatKey: `area.${tab}.${id}.what`,
     whyKey: `area.${tab}.${id}.why`,
     advance: { kind: 'next' },
-    // The first step opens the tab, so a tour started from the Guide lands on it.
-    ...(first ? { navigate: { tab: tab satisfies Tab } } : {}),
+    // Every step opens the tab: a tour started from the Guide lands on it,
+    // and one left by keyboard comes back to it.
+    navigate: navigateTo(tab),
   };
 }
 
@@ -32,14 +35,14 @@ export const AREA_TOURS: Record<AreaTourId, Tour> = {
   routing: {
     id: 'routing',
     steps: [
-      step('routing', 'config', 'routing-config', true, 'right'),
+      step('routing', 'config', 'routing-config', 'bottom'),
       step('routing', 'mode', 'routing-mode'),
     ],
   },
   glossary: {
     id: 'glossary',
     steps: [
-      step('glossary', 'list', 'glossary-items', true),
+      step('glossary', 'list', 'glossary-items'),
       step('glossary', 'create', 'glossary-create'),
       step('glossary', 'generate', 'glossary-generate'),
     ],
@@ -47,7 +50,7 @@ export const AREA_TOURS: Record<AreaTourId, Tour> = {
   quality: {
     id: 'quality',
     steps: [
-      step('quality', 'title', 'quality-title', true),
+      step('quality', 'title', 'quality-title'),
       step('quality', 'overview', 'quality-overview'),
       step('quality', 'issues', 'quality-issues'),
     ],
@@ -55,7 +58,7 @@ export const AREA_TOURS: Record<AreaTourId, Tour> = {
   compare: {
     id: 'compare',
     steps: [
-      step('compare', 'target', 'compare-target', true),
+      step('compare', 'target', 'compare-target'),
       step('compare', 'reference', 'compare-reference'),
       step('compare', 'translate', 'compare-translate'),
     ],
@@ -63,7 +66,7 @@ export const AREA_TOURS: Record<AreaTourId, Tour> = {
   'review-translation-ai': {
     id: 'review-translation-ai',
     steps: [
-      step('review-translation-ai', 'intro', 'ai-review-intro', true),
+      step('review-translation-ai', 'intro', 'ai-review-intro'),
       step('review-translation-ai', 'start', 'ai-review-start'),
       step('review-translation-ai', 'all', 'ai-review-all'),
     ],
