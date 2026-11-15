@@ -259,7 +259,12 @@ export {
   DEFAULT_ACHIEVEMENT_DESCRIPTION_MAX_BYTES,
 } from './achievement-budget.js';
 export { maskSecret } from './mask.js';
-export { escapeRegExp, buildTermBoundaryRegex, termMatchesText } from './term-match.js';
+export {
+  escapeRegExp,
+  buildTermBoundaryRegex,
+  glossaryScanText,
+  termMatchesText,
+} from './term-match.js';
 export { debug } from './debug.js';
 export { tokenize, computeSimilarityOrder } from './similarity/index.js';
 export { isComplete, projectTargetLanguages } from './glossary-completeness.js';

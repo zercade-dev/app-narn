@@ -36,6 +36,7 @@ import {
   FIRST_RUN_TOUR_ID,
   MORE_TOURS_STEP,
   PROJECT_SHEET_ANCHOR,
+  RETRANSLATE_CHOSEN_ANCHOR,
   PROVIDER_CARD_STEP,
   PROVIDER_LIST_STEP,
   firstRunBack,
@@ -281,6 +282,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   const restoreConfirmOpen = useTourAnchor(restoreAnchor) !== null;
   const projectListOpen = useTourAnchor(projectListAnchor) !== null;
   const projectSheetOpen = useTourAnchor(PROJECT_SHEET_ANCHOR) !== null;
+  const retranslateChosen = useTourAnchor(RETRANSLATE_CHOSEN_ANCHOR) !== null;
   const stalled = useFirstRunStall();
   // "Try again" sets the failed run aside, so the guide does not show its
   // failure again while the new run has not been listed yet.
@@ -295,6 +297,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
       [restoreAnchor]: restoreConfirmOpen,
       [projectListAnchor]: projectListOpen,
       [PROJECT_SHEET_ANCHOR]: projectSheetOpen,
+      [RETRANSLATE_CHOSEN_ANCHOR]: retranslateChosen,
     };
     return { isOnScreen: (anchor) => open[anchor] ?? false, runStall };
   }, [
@@ -311,6 +314,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     restoreConfirmOpen,
     projectListOpen,
     projectSheetOpen,
+    retranslateChosen,
     runStall,
   ]);
   const shown = useCallback((at: number) => firstRunShownIndex(tour, at, screen), [tour, screen]);

@@ -59,7 +59,7 @@ export function StringTableGrid({
   const { t } = useTranslation('strings');
 
   return (
-    <div className="flex-1 min-h-0 overflow-auto border rounded-md" data-tour="string-table-rows">
+    <div className="flex-1 min-h-0 overflow-auto border rounded-md">
       {/* Sticky header */}
       <div
         className="sticky top-0 z-10 flex bg-muted border-b-2 border-border items-center"
@@ -139,7 +139,9 @@ export function StringTableGrid({
           {t('empty.noStrings')}
         </div>
       ) : (
-        <div style={{ minWidth: totalWidth }}>
+        // The guide's "tick 3 entries" spotlight: the rows only, so the header's
+        // select-all box stays outside it.
+        <div style={{ minWidth: totalWidth }} data-tour="string-table-rows">
           {pageEntries.map((entry, index) => (
             <StringTableRow
               key={entry.id}

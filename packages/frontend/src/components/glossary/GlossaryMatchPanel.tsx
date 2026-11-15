@@ -176,7 +176,8 @@ export function GlossaryMatchPanel({
                 {canAssign && (
                   <Button
                     size="sm"
-                    variant="outline"
+                    // Highlighted once there is something to (un)assign.
+                    variant={selectedEntryIds.size === 0 || assigningBusy ? 'outline' : 'default'}
                     className="h-6 px-2 text-[10px]"
                     disabled={selectedEntryIds.size === 0 || assigningBusy}
                     onClick={matchAssignment === 'with' ? onUnassignGlossary : onAssignGlossary}

@@ -13,3 +13,5 @@ The guide can now test-translate a file that is already fully translated, and pu
 - Guided tours: Escape closes them, a double click on Next no longer skips a step, and each step keeps its own tab.
 - The Advanced sections tour follows the sidebar's order, and a tour left on its last step can be continued.
 - The first run copes better with a reload, a closed New project panel, an empty language choice and a failed translation.
+- The retranslate test keeps Start disabled until you choose Re-translate existing translations, and its spotlight on the entries leaves out Select all.
+- The import review names the file type with the key word highlighted: Client script text or Server translations (previously Main text).

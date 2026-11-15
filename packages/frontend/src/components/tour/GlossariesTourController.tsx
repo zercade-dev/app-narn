@@ -22,8 +22,12 @@ import { onTourSignal } from '../../lib/tour/signal.js';
 import { useGuideStore } from '../../stores/guide-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import { useStringStore } from '../../stores/string-store.js';
+import { useTourAnchor } from '../../hooks/use-tour-anchor.js';
 import { TourOverlay } from './TourOverlay.js';
 import type { TourText } from './TourCallout.js';
+
+/** The prompt Enable opens, asking whether to apply the glossary's matches. */
+const ENABLE_PROMPT_ANCHOR = 'glossary-enable-prompt';
 
 /** Steps that show the picked glossary's card (its terms, its Enable button). */
 const ON_CARD = new Set(['picked', 'constant', 'enable']);
@@ -98,15 +102,20 @@ export function GlossariesTourController({ facts, access }: CatalogTourContext) 
   const [shown, setIndex] = useState(() =>
     countedStepIndex(tour, useGuideStore.getState().activeTourStart),
   );
-  const index = Math.min(shown, tour.steps.length - 1);
+  const counted = Math.min(shown, tour.steps.length - 1);
+  // The enable prompt open: the step about its two answers shows instead.
+  const promptOpen = useTourAnchor(ENABLE_PROMPT_ANCHOR) !== null;
+  const choiceIndex = tour.steps.findIndex((s) => s.id === 'choice');
+  const index =
+    tour.steps[counted]?.id === 'enable' && promptOpen && choiceIndex >= 0 ? choiceIndex : counted;
   const step = tour.steps[index];
   const position = tourPosition(tour, index);
   const stepId = step?.id ?? '';
 
-  const counted = position.counted - 1;
+  const reached = position.counted - 1;
   useEffect(() => {
-    useGuideStore.getState().recordTourStep(GLOSSARIES_TOUR_ID, counted);
-  }, [counted]);
+    useGuideStore.getState().recordTourStep(GLOSSARIES_TOUR_ID, reached);
+  }, [reached]);
 
   // The tab shows what the step is about.
   const pickId = pick?.id ?? null;
@@ -122,7 +131,7 @@ export function GlossariesTourController({ facts, access }: CatalogTourContext) 
   useEffect(() => () => void takeGlossaryTourCommand(), []);
 
   const onAdvance = useCallback(() => {
-    const next = nextCountedIndex(tour, index);
+    const next = nextCountedIndex(tour, counted);
     if (next === undefined) {
       const store = useGuideStore.getState();
       store.completeTour(GLOSSARIES_TOUR_ID);
@@ -130,8 +139,8 @@ export function GlossariesTourController({ facts, access }: CatalogTourContext) 
       return;
     }
     setIndex(next);
-  }, [tour, index]);
-  const onBack = useCallback(() => setIndex(previousCountedIndex(tour, index)), [tour, index]);
+  }, [tour, counted]);
+  const onBack = useCallback(() => setIndex(previousCountedIndex(tour, counted)), [tour, counted]);
   const onExit = useCallback(() => {
     const store = useGuideStore.getState();
     // Leaving it is a "no thanks" to the Glossary tab's short offer too.
@@ -141,7 +150,7 @@ export function GlossariesTourController({ facts, access }: CatalogTourContext) 
 
   // Enabling it, by either answer to the prompt, moves the enable step on.
   useEffect(() => {
-    if (stepId !== 'enable' || pick?.enabled !== false) return;
+    if ((stepId !== 'enable' && stepId !== 'choice') || pick?.enabled !== false) return;
     return onTourSignal((signal) => {
       setApplied(signal === 'glossary-enabled-applied');
       setPick((p) => (p ? { ...p, enabled: true } : p));

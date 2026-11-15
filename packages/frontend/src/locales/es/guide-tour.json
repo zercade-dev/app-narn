@@ -1,5 +1,6 @@
 {
   "next": "Siguiente",
+  "completeTour": "Completar recorrido",
   "back": "Atrás",
   "skip": "Omitir el recorrido",
   "close": "Cerrar",
@@ -95,7 +96,8 @@
       "filterWhat": "Abre Estado y desmarca Mostrar solo sin traducir, para que la lista muestre también tus entradas traducidas.",
       "selectWhat": "Marca las casillas de 3 entradas de esta página.",
       "translateWhat": "Pulsa Traducir seleccionadas.",
-      "startWhat": "Elige Retraducir traducciones existentes y pulsa Iniciar.",
+      "modeWhat": "Elige Retraducir traducciones existentes. Con Solo completar entradas sin traducir, las 3 entradas se omitirían: ya están traducidas.",
+      "startWhat": "Pulsa Iniciar para retraducir las 3 entradas.",
       "nothingPicked": "No se retradujo nada: esas entradas ya tenían traducciones. Pulsa de nuevo Traducir seleccionadas y elige Retraducir traducciones existentes."
     },
     "failed": {
@@ -407,9 +409,9 @@
     },
     "constant": {
       "title": "La columna Constante",
-      "what": "Una marca en Constante indica que el término nunca se traduce: queda tal cual en todos los idiomas, como una marca o el nombre de un personaje.",
+      "what": "Un término constante nunca se envía al motor de traducción. En su lugar, NARN pone tu traducción del glosario directamente en el resultado, así que un nombre de personaje como Paimon siempre sale tal como está escrito aquí.",
       "absentWhat": "Selecciona un glosario a la izquierda para ver sus términos y su columna Constante.",
-      "why": "NARN oculta el término constante al proveedor mientras traduce y luego lo devuelve sin cambios."
+      "why": "Los demás términos se envían junto con el texto como referencia que el motor debe seguir."
     },
     "enable": {
       "title": "Habilítalo",
@@ -417,6 +419,10 @@
       "absentWhat": "Selecciona un glosario a la izquierda y pulsa Habilitar junto a su nombre.",
       "onWhat": "{{name}} ya está habilitado, así que este proyecto lo usa.",
       "why": "Al traducir este proyecto solo se usan los glosarios habilitados."
+    },
+    "choice": {
+      "title": "¿Solo habilitar o Aplicar coincidencias?",
+      "what": "Aplicar coincidencias asigna el glosario ahora mismo a cada entrada que contiene uno de sus términos. Solo habilitar lo activa y deja tus entradas como están; puedes asignarlo después desde Coincidencias."
     },
     "matches": {
       "title": "Coincidencias encontradas",

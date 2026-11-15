@@ -1,5 +1,6 @@
 {
   "next": "Weiter",
+  "completeTour": "Tour abschließen",
   "back": "Zurück",
   "skip": "Tour überspringen",
   "close": "Schließen",
@@ -95,7 +96,8 @@
       "filterWhat": "Öffne Status und entferne das Häkchen bei Nur unübersetzte Einträge anzeigen, damit die Liste auch deine übersetzten Einträge zeigt.",
       "selectWhat": "Setze bei 3 Einträgen auf dieser Seite ein Häkchen.",
       "translateWhat": "Drücke Auswahl übersetzen.",
-      "startWhat": "Wähle Vorhandene Übersetzungen neu übersetzen und drücke dann Starten.",
+      "modeWhat": "Wähle Vorhandene Übersetzungen neu übersetzen. Mit Nur unübersetzte Einträge füllen würden die 3 Einträge übersprungen, weil sie schon übersetzt sind.",
+      "startWhat": "Drücke Starten, um die 3 Einträge neu zu übersetzen.",
       "nothingPicked": "Nichts wurde neu übersetzt: Diese Einträge hatten schon Übersetzungen. Drücke noch einmal Auswahl übersetzen und wähle Vorhandene Übersetzungen neu übersetzen."
     },
     "failed": {
@@ -407,9 +409,9 @@
     },
     "constant": {
       "title": "Die Spalte Konstant",
-      "what": "Ein Haken bei Konstant heißt: Der Begriff wird nie übersetzt und bleibt in jeder Sprache, wie er ist, etwa ein Markenname oder ein Figurenname.",
+      "what": "Ein konstanter Begriff wird nie an die Übersetzungs-Engine geschickt. NARN setzt stattdessen deine Glossar-Übersetzung direkt ins Ergebnis, sodass ein Figurenname wie Paimon immer genau so herauskommt, wie er hier steht.",
       "absentWhat": "Wähle links ein Glossar, um seine Begriffe und die Spalte Konstant zu sehen.",
-      "why": "NARN verbirgt einen konstanten Begriff beim Übersetzen vor dem Anbieter und setzt ihn danach unverändert wieder ein."
+      "why": "Andere Begriffe gehen mit dem Text als Vorgabe mit, der die Engine folgen soll."
     },
     "enable": {
       "title": "Aktiviere es",
@@ -417,6 +419,10 @@
       "absentWhat": "Wähle links ein Glossar und drücke dann Aktivieren neben seinem Namen.",
       "onWhat": "{{name}} ist schon aktiviert, dieses Projekt nutzt es also.",
       "why": "Beim Übersetzen dieses Projekts werden nur aktivierte Glossare genutzt."
+    },
+    "choice": {
+      "title": "Nur aktivieren oder Treffer anwenden?",
+      "what": "Treffer anwenden weist das Glossar sofort jedem Eintrag zu, der einen seiner Begriffe enthält. Nur aktivieren schaltet es nur ein und lässt deine Einträge, wie sie sind; zuweisen kannst du es später unter Treffer."
     },
     "matches": {
       "title": "Gefundene Treffer",

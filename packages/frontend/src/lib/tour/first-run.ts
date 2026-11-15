@@ -269,11 +269,15 @@ const NOTHING_STEP = 'translate-nothing';
 const RETEST_FILTER_STEP = 'retest-filter';
 const RETEST_SELECT_STEP = 'retest-select';
 const RETEST_TRANSLATE_STEP = 'retest-translate';
+const RETEST_MODE_STEP = 'retest-mode';
 const RETEST_START_STEP = 'retest-start';
+/** On the dialog's mode choice while "Re-translate existing translations" is picked. */
+export const RETRANSLATE_CHOSEN_ANCHOR = 'translate-retranslate-chosen';
 const RETEST_STEPS: readonly string[] = [
   RETEST_FILTER_STEP,
   RETEST_SELECT_STEP,
   RETEST_TRANSLATE_STEP,
+  RETEST_MODE_STEP,
   RETEST_START_STEP,
 ];
 /** After a retranslate test: put the file's translations back, or keep the new ones. */
@@ -526,12 +530,26 @@ const SHARED_STEPS: TourStep[] = [
     variantOf: QUICK_STEP,
   },
   {
+    // The dialog is open with "Only fill untranslated entries" picked: the
+    // test means nothing that way, so this step points at "Re-translate
+    // existing translations" (see firstRunShownIndex), and the dialog keeps
+    // Start disabled until it is picked.
+    id: RETEST_MODE_STEP,
+    anchor: 'translate-mode-retranslate',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.modeWhat',
+    // Below the choice, over Start (disabled until the choice is made), so the
+    // dialog's title and its other choice stay in view.
+    side: 'bottom',
+    advance: { kind: 'manual' },
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
     id: RETEST_START_STEP,
-    anchor: 'translate-dialog',
+    anchor: 'comparison-translate-start',
     titleKey: 'firstRun.retest.title',
     whatKey: 'firstRun.retest.startWhat',
-    // Above the dialog: beside it there is little room, and its mode choice
-    // and Start are both what the step asks for.
     side: 'top',
     advance: { kind: 'manual' },
     major: 4,
@@ -891,9 +909,15 @@ export function firstRunShownIndex(tour: Tour, index: number, screen: FirstRunSc
   ) {
     return firstRunShownIndex(tour, at('project-open'), screen);
   }
-  const pair = FORM_STEPS.find((p) => p.closed === id || p.open === id);
+  const pairId = id === RETEST_MODE_STEP ? RETEST_START_STEP : id;
+  const pair = FORM_STEPS.find((p) => p.closed === pairId || p.open === pairId);
   if (!pair) return index;
-  return at(screen.isOnScreen(pair.anchor) ? pair.open : pair.closed);
+  if (!screen.isOnScreen(pair.anchor)) return at(pair.closed);
+  // The retranslate test's dialog: its mode is picked before Start is offered.
+  if (pair.open === RETEST_START_STEP && !screen.isOnScreen(RETRANSLATE_CHOSEN_ANCHOR)) {
+    return at(RETEST_MODE_STEP);
+  }
+  return at(pair.open);
 }
 
 /**
@@ -936,7 +960,9 @@ export function firstRunBack(
   if (id === FIX_KEY_STEP) {
     return { index: position, closeForm: KEY_EDITOR_ANCHOR };
   }
-  const pair = FORM_STEPS.find((p) => p.open === id);
+  const pair = FORM_STEPS.find(
+    (p) => p.open === (id === RETEST_MODE_STEP ? RETEST_START_STEP : id),
+  );
   if (pair) {
     const closed = tour.steps.findIndex((s) => s.id === pair.closed);
     if (closed >= 0) return { index: closed, closeForm: pair.anchor };

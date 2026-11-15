@@ -82,8 +82,26 @@ export function buildTermBoundaryRegex(term: string): RegExp {
   return new RegExp(`${LEFT_BOUNDARY}${escaped}${RIGHT_BOUNDARY}`, 'iu');
 }
 
-/** Whether `term`'s wording occurs (word-boundary) in `text`. Empty term → false. */
+/**
+ * A `{…}` placeholder: its contents are an opaque variable name (`{player}`,
+ * `{1:lv.ReadySystem.Player Ready}`), not translatable wording.
+ */
+const PLACEHOLDER_RE = /\{[^{}]*\}/g;
+
+/**
+ * `text` with every `{…}` placeholder replaced by a space (keeping the word
+ * boundaries around it), so a glossary term that appears only inside a
+ * variable name ("Player" in `{player} (you)`) is not a match.
+ */
+export function glossaryScanText(text: string): string {
+  return text.replace(PLACEHOLDER_RE, ' ');
+}
+
+/**
+ * Whether `term`'s wording occurs (word-boundary) in `text`, outside any `{…}`
+ * placeholder (see {@link glossaryScanText}). Empty term → false.
+ */
 export function termMatchesText(term: string, text: string): boolean {
   if (!term) return false;
-  return buildTermBoundaryRegex(term).test(text);
+  return buildTermBoundaryRegex(term).test(glossaryScanText(text));
 }

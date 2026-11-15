@@ -91,10 +91,10 @@
       "translations": {
         "zh-hans": "丘丘王",
         "zh-hant": "丘丘王",
-        "ko": "츄츄 왕",
-        "ja": "ヒルチャール王",
+        "ko": "츄츄왕",
+        "ja": "ヒルチャールの王",
         "es": "Lawachurl",
-        "fr": "Brutoroi",
+        "fr": "Chef Brutocollinus",
         "ru": "Лавачурл",
         "th": "Lawachurl",
         "vi": "Vua Hilichurl",
@@ -181,7 +181,7 @@
         "de": "Vaniloqua",
         "id": "Whopperflower",
         "pt-br": "Flor Gigante",
-        "tr": "Aldatıcı Çiçek",
+        "tr": "Yalancı Çiçek",
         "it": "Malefiore"
       }
     },

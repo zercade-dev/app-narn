@@ -1,5 +1,6 @@
 {
   "next": "İleri",
+  "completeTour": "Turu tamamla",
   "back": "Geri",
   "skip": "Turu atla",
   "close": "Kapat",
@@ -95,7 +96,8 @@
       "filterWhat": "Durum'u açın ve Yalnızca çevrilmemişleri göster işaretini kaldırın; liste çevrilmiş girdilerinizi de göstersin.",
       "selectWhat": "Bu sayfadaki 3 girdinin kutusunu işaretleyin.",
       "translateWhat": "Seçilenleri çevir'e basın.",
-      "startWhat": "Mevcut çevirileri yeniden çevir'i seçin, sonra Başlat'a basın.",
+      "modeWhat": "Mevcut çevirileri yeniden çevir seçeneğini seçin. Yalnızca çevrilmemiş girdileri doldur ile bu 3 girdi zaten çevrildiği için atlanır.",
+      "startWhat": "3 girdiyi yeniden çevirmek için Başlat'a basın.",
       "nothingPicked": "Hiçbir şey yeniden çevrilmedi: bu girdilerin zaten çevirileri vardı. Seçilenleri çevir'e yeniden basın ve Mevcut çevirileri yeniden çevir'i seçin."
     },
     "failed": {
@@ -407,9 +409,9 @@
     },
     "constant": {
       "title": "Sabit sütunu",
-      "what": "Sabit sütunundaki onay, terimin hiç çevrilmediği anlamına gelir: marka veya karakter adı gibi her dilde olduğu gibi kalır.",
+      "what": "Sabit bir terim çeviri motoruna hiç gönderilmez. NARN bunun yerine sözlükçedeki çevirinizi doğrudan sonuca koyar; böylece Paimon gibi bir karakter adı her zaman burada yazıldığı gibi çıkar.",
       "absentWhat": "Terimlerini ve Sabit sütununu görmek için soldan bir sözlükçe seçin.",
-      "why": "NARN çeviri sırasında sabit terimi sağlayıcıdan gizler, sonra değiştirmeden geri koyar."
+      "why": "Diğer terimler, motorun uyması gereken bir başvuru olarak metinle birlikte gönderilir."
     },
     "enable": {
       "title": "Etkinleştirin",
@@ -417,6 +419,10 @@
       "absentWhat": "Soldan bir sözlükçe seçin, ardından adının yanındaki Etkinleştir'e basın.",
       "onWhat": "{{name}} zaten etkin, bu yüzden bu proje onu kullanıyor.",
       "why": "Bu proje çevrilirken yalnızca etkin sözlükçeler kullanılır."
+    },
+    "choice": {
+      "title": "Yalnızca etkinleştir mi, Eşleşmeleri uygula mı?",
+      "what": "Eşleşmeleri uygula, sözlükçeyi terimlerinden birini içeren her girdiye hemen atar. Yalnızca etkinleştir yalnızca onu açar ve girdilerinizi olduğu gibi bırakır; daha sonra Eşleşmeler bölümünden atayabilirsiniz."
     },
     "matches": {
       "title": "Bulunan eşleşmeler",

@@ -1,5 +1,6 @@
 {
   "next": "Next",
+  "completeTour": "Complete tour",
   "back": "Back",
   "skip": "Skip tour",
   "close": "Close",
@@ -95,7 +96,8 @@
       "filterWhat": "Open Status and untick Show untranslated only, so the list shows your translated entries too.",
       "selectWhat": "Tick the boxes of 3 entries on this page.",
       "translateWhat": "Press Translate selected.",
-      "startWhat": "Choose Re-translate existing translations, then press Start.",
+      "modeWhat": "Choose Re-translate existing translations. With Only fill untranslated entries, the 3 entries would be skipped: they are already translated.",
+      "startWhat": "Press Start to retranslate the 3 entries.",
       "nothingPicked": "Nothing was retranslated: those entries already had translations. Press Translate selected again and choose Re-translate existing translations."
     },
     "failed": {
@@ -407,9 +409,9 @@
     },
     "constant": {
       "title": "The Constant column",
-      "what": "A tick under Constant means the term is never translated: it stays as written in every language, like a brand or a character name.",
+      "what": "A constant term is never sent to the translation engine. NARN puts your glossary translation straight into the result instead, so a character name like Paimon always comes out exactly as written here.",
       "absentWhat": "Select a glossary on the left to see its terms and their Constant column.",
-      "why": "NARN hides a constant term from the provider while it translates, then puts it back unchanged."
+      "why": "Other terms are sent along with the text as a reference the engine should follow."
     },
     "enable": {
       "title": "Enable it",
@@ -417,6 +419,10 @@
       "absentWhat": "Select a glossary on the left, then press Enable beside its name.",
       "onWhat": "{{name}} is already enabled, so this project uses it.",
       "why": "Only enabled glossaries are used when this project is translated."
+    },
+    "choice": {
+      "title": "Enable only or Apply matches?",
+      "what": "Apply matches assigns the glossary right away to every entry that contains one of its terms. Enable only turns it on and leaves your entries as they are; you can assign it later from Matches."
     },
     "matches": {
       "title": "Matches found for you",

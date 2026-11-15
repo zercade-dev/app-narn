@@ -4,3 +4,8 @@ The Glossaries tour now enables a ready-made glossary that fits your text and sh
 - After you enable the glossary, the tour lists the entries it matched.
 - The tour no longer asks you to create a glossary or covers AI generation.
 - Common Phrases and Creation factions now have every language filled in, so none of their terms are left out.
+- While the Apply matches prompt is open, the tour explains the difference between Enable only and Apply matches.
+- The Constant step now explains that a constant term is never sent to the engine: your glossary translation goes straight into the result.
+- Glossary terms no longer match words inside variables, such as "Player" in "{player} (you)".
+- Assign glossary and Unassign glossary are highlighted once you tick an entry.
+- The last step of a tour now says Complete tour.

@@ -1,5 +1,6 @@
 {
   "next": "Berikutnya",
+  "completeTour": "Selesaikan tur",
   "back": "Kembali",
   "skip": "Lewati tur",
   "close": "Tutup",
@@ -95,7 +96,8 @@
       "filterWhat": "Buka Status dan hapus centang Tampilkan yang belum diterjemahkan saja, agar daftar juga menampilkan entri yang sudah diterjemahkan.",
       "selectWhat": "Centang kotak 3 entri di halaman ini.",
       "translateWhat": "Tekan Terjemahkan yang dipilih.",
-      "startWhat": "Pilih Terjemahkan ulang terjemahan yang sudah ada, lalu tekan Mulai.",
+      "modeWhat": "Pilih Terjemahkan ulang terjemahan yang sudah ada. Dengan Hanya isi entri yang belum diterjemahkan, 3 entri itu akan dilewati karena sudah diterjemahkan.",
+      "startWhat": "Tekan Mulai untuk menerjemahkan ulang 3 entri itu.",
       "nothingPicked": "Tidak ada yang diterjemahkan ulang: entri itu sudah punya terjemahan. Tekan lagi Terjemahkan yang dipilih dan pilih Terjemahkan ulang terjemahan yang sudah ada."
     },
     "failed": {
@@ -407,9 +409,9 @@
     },
     "constant": {
       "title": "Kolom Konstan",
-      "what": "Centang di Konstan berarti istilah itu tidak pernah diterjemahkan: istilah tetap apa adanya di semua bahasa, seperti nama merek atau nama karakter.",
+      "what": "Istilah konstan tidak pernah dikirim ke mesin terjemahan. NARN langsung memasukkan terjemahan glosarium Anda ke hasilnya, jadi nama karakter seperti Paimon selalu keluar persis seperti yang tertulis di sini.",
       "absentWhat": "Pilih glosarium di sebelah kiri untuk melihat istilahnya dan kolom Konstan.",
-      "why": "Saat menerjemahkan, NARN menyembunyikan istilah konstan dari penyedia, lalu mengembalikannya tanpa perubahan."
+      "why": "Istilah lain dikirim bersama teks sebagai acuan yang harus diikuti mesin."
     },
     "enable": {
       "title": "Aktifkan",
@@ -417,6 +419,10 @@
       "absentWhat": "Pilih glosarium di sebelah kiri, lalu tekan Aktifkan di samping namanya.",
       "onWhat": "{{name}} sudah aktif, jadi proyek ini memakainya.",
       "why": "Saat proyek ini diterjemahkan, hanya glosarium yang aktif yang dipakai."
+    },
+    "choice": {
+      "title": "Aktifkan saja atau Terapkan kecocokan?",
+      "what": "Terapkan kecocokan langsung menugaskan glosarium ke setiap entri yang berisi salah satu istilahnya. Aktifkan saja hanya mengaktifkannya dan membiarkan entri Anda apa adanya; Anda bisa menugaskannya nanti dari Kecocokan."
     },
     "matches": {
       "title": "Kecocokan yang ditemukan",

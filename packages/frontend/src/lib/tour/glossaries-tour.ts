@@ -80,6 +80,13 @@ export function glossariesTour(
               ...step('enable', 'glossary-enabled', { kind: 'manual' }),
               absentWhatKey: 'glossariesTour.enable.absentWhat',
             },
+        // Shown in place of "enable" while its prompt is open: what each answer does.
+        {
+          ...step('choice', 'glossary-enable-prompt', { kind: 'manual' }),
+          whyKey: undefined,
+          side: 'top' as const,
+          variantOf: 'enable',
+        },
         // The match panel, listing what enabling it found. It opens at the top
         // (the card above it folds away), so the callout sits below it.
         step('matches', 'glossary-matches'),

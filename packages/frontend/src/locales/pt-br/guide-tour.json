@@ -1,5 +1,6 @@
 {
   "next": "Próximo",
+  "completeTour": "Concluir tour",
   "back": "Voltar",
   "skip": "Pular o tour",
   "close": "Fechar",
@@ -95,7 +96,8 @@
       "filterWhat": "Abra Status e desmarque Mostrar apenas as não traduzidas, para a lista mostrar também as entradas já traduzidas.",
       "selectWhat": "Marque as caixas de 3 entradas desta página.",
       "translateWhat": "Pressione Traduzir as selecionadas.",
-      "startWhat": "Escolha Retraduzir as traduções existentes e pressione Iniciar.",
+      "modeWhat": "Escolha Retraduzir as traduções existentes. Com Preencher apenas as entradas não traduzidas, as 3 entradas seriam ignoradas: elas já estão traduzidas.",
+      "startWhat": "Pressione Iniciar para retraduzir as 3 entradas.",
       "nothingPicked": "Nada foi retraduzido: essas entradas já tinham traduções. Pressione Traduzir as selecionadas de novo e escolha Retraduzir as traduções existentes."
     },
     "failed": {
@@ -407,9 +409,9 @@
     },
     "constant": {
       "title": "A coluna Constante",
-      "what": "Uma marca em Constante significa que o termo nunca é traduzido: ele fica como está em todos os idiomas, como uma marca ou o nome de um personagem.",
+      "what": "Um termo constante nunca é enviado ao mecanismo de tradução. Em vez disso, o NARN coloca a sua tradução do glossário direto no resultado, então um nome de personagem como Paimon sempre sai exatamente como está escrito aqui.",
       "absentWhat": "Selecione um glossário à esquerda para ver os termos e a coluna Constante.",
-      "why": "Ao traduzir, o NARN esconde o termo constante do provedor e depois o devolve sem mudanças."
+      "why": "Os outros termos são enviados com o texto como referência que o mecanismo deve seguir."
     },
     "enable": {
       "title": "Ative-o",
@@ -417,6 +419,10 @@
       "absentWhat": "Selecione um glossário à esquerda e pressione Ativar ao lado do nome.",
       "onWhat": "{{name}} já está ativado, então este projeto o usa.",
       "why": "Ao traduzir este projeto, só os glossários ativados são usados."
+    },
+    "choice": {
+      "title": "Apenas ativar ou Aplicar correspondências?",
+      "what": "Aplicar correspondências atribui o glossário na hora a cada entrada que contém um dos termos dele. Apenas ativar só o ativa e deixa suas entradas como estão; você pode atribuí-lo depois em Correspondências."
     },
     "matches": {
       "title": "Correspondências encontradas",

@@ -1,5 +1,6 @@
 {
   "next": "Suivant",
+  "completeTour": "Terminer la visite",
   "back": "Retour",
   "skip": "Passer la visite",
   "close": "Fermer",
@@ -95,7 +96,8 @@
       "filterWhat": "Ouvrez Statut et décochez Afficher uniquement les non traduits, pour que la liste montre aussi vos entrées traduites.",
       "selectWhat": "Cochez les cases de 3 entrées de cette page.",
       "translateWhat": "Appuyez sur Traduire la sélection.",
-      "startWhat": "Choisissez Retraduire les traductions existantes, puis appuyez sur Démarrer.",
+      "modeWhat": "Choisissez Retraduire les traductions existantes. Avec Compléter uniquement les entrées non traduites, les 3 entrées seraient ignorées : elles sont déjà traduites.",
+      "startWhat": "Appuyez sur Démarrer pour retraduire les 3 entrées.",
       "nothingPicked": "Rien n’a été retraduit : ces entrées avaient déjà des traductions. Appuyez de nouveau sur Traduire la sélection et choisissez Retraduire les traductions existantes."
     },
     "failed": {
@@ -407,9 +409,9 @@
     },
     "constant": {
       "title": "La colonne Constante",
-      "what": "Une coche dans Constante signifie que le terme n’est jamais traduit : il reste tel quel dans toutes les langues, comme une marque ou un nom de personnage.",
+      "what": "Un terme constant n’est jamais envoyé au moteur de traduction. NARN place directement votre traduction du glossaire dans le résultat : un nom de personnage comme Paimon ressort toujours exactement tel qu’il est écrit ici.",
       "absentWhat": "Sélectionnez un glossaire à gauche pour voir ses termes et leur colonne Constante.",
-      "why": "NARN cache le terme constant au fournisseur pendant la traduction, puis le remet tel quel."
+      "why": "Les autres termes sont envoyés avec le texte comme référence que le moteur doit suivre."
     },
     "enable": {
       "title": "Activez-le",
@@ -417,6 +419,10 @@
       "absentWhat": "Sélectionnez un glossaire à gauche, puis appuyez sur Activer à côté de son nom.",
       "onWhat": "{{name}} est déjà activé : ce projet l’utilise.",
       "why": "Seuls les glossaires activés servent quand ce projet est traduit."
+    },
+    "choice": {
+      "title": "Activer seulement ou Appliquer les correspondances ?",
+      "what": "Appliquer les correspondances attribue tout de suite le glossaire à chaque entrée qui contient l’un de ses termes. Activer seulement l’active et laisse vos entrées telles quelles ; vous pourrez l’attribuer plus tard depuis Correspondances."
     },
     "matches": {
       "title": "Correspondances trouvées",

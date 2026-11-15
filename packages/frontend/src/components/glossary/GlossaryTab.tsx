@@ -1446,7 +1446,11 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
           if (!open) setPendingEnableGlossaryId(null);
         }}
       >
-        <SheetContent side="bottom" className="max-w-md mx-auto rounded-t-xl">
+        <SheetContent
+          side="bottom"
+          className="max-w-md mx-auto rounded-t-xl"
+          data-tour="glossary-enable-prompt"
+        >
           <SheetHeader>
             <SheetTitle>{t('confirmEnableApplyTitle')}</SheetTitle>
             <SheetDescription>{t('confirmEnableApplyDescription')}</SheetDescription>

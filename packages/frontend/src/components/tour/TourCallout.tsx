@@ -114,7 +114,11 @@ export function TourCallout({
           )}
           {showNext && (
             <Button size="sm" data-testid="tour-next" onClick={onNext}>
-              {t('next')}
+              {/* On a tour's last step, Next ends it. (The first run's steps
+                  count sections, not the end.) */}
+              {position && position.major === undefined && position.counted === position.total
+                ? t('completeTour')
+                : t('next')}
             </Button>
           )}
         </div>

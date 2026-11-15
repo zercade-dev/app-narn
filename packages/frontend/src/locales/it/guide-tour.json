@@ -1,5 +1,6 @@
 {
   "next": "Avanti",
+  "completeTour": "Completa il tour",
   "back": "Indietro",
   "skip": "Salta il tour",
   "close": "Chiudi",
@@ -95,7 +96,8 @@
       "filterWhat": "Apri Stato e togli la spunta a Mostra solo le non tradotte, così l'elenco mostra anche le voci già tradotte.",
       "selectWhat": "Spunta le caselle di 3 voci in questa pagina.",
       "translateWhat": "Premi Traduci la selezione.",
-      "startWhat": "Scegli Ritraduci le traduzioni esistenti, poi premi Avvia.",
+      "modeWhat": "Scegli Ritraduci le traduzioni esistenti. Con Compila solo le voci non tradotte le 3 voci verrebbero saltate: sono già tradotte.",
+      "startWhat": "Premi Avvia per ritradurre le 3 voci.",
       "nothingPicked": "Non è stato ritradotto nulla: quelle voci avevano già delle traduzioni. Premi di nuovo Traduci la selezione e scegli Ritraduci le traduzioni esistenti."
     },
     "failed": {
@@ -407,9 +409,9 @@
     },
     "constant": {
       "title": "La colonna Costante",
-      "what": "Una spunta in Costante significa che il termine non viene mai tradotto: resta così com’è in ogni lingua, come un marchio o il nome di un personaggio.",
+      "what": "Un termine costante non viene mai inviato al motore di traduzione. NARN inserisce invece la tua traduzione del glossario direttamente nel risultato, così un nome di personaggio come Paimon esce sempre esattamente come scritto qui.",
       "absentWhat": "Seleziona un glossario a sinistra per vederne i termini e la colonna Costante.",
-      "why": "Durante la traduzione, NARN nasconde il termine costante al provider e poi lo rimette invariato."
+      "why": "Gli altri termini vengono inviati con il testo come riferimento che il motore deve seguire."
     },
     "enable": {
       "title": "Attivalo",
@@ -417,6 +419,10 @@
       "absentWhat": "Seleziona un glossario a sinistra, poi premi Attiva accanto al suo nome.",
       "onWhat": "{{name}} è già attivo, quindi questo progetto lo usa.",
       "why": "Quando questo progetto viene tradotto si usano solo i glossari attivi."
+    },
+    "choice": {
+      "title": "Attiva soltanto o Applica le corrispondenze?",
+      "what": "Applica le corrispondenze assegna subito il glossario a ogni voce che contiene uno dei suoi termini. Attiva soltanto lo attiva soltanto e lascia le voci come sono; puoi assegnarlo in seguito da Corrispondenze."
     },
     "matches": {
       "title": "Corrispondenze trovate",

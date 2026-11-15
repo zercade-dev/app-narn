@@ -1,5 +1,6 @@
 {
   "next": "Tiếp theo",
+  "completeTour": "Hoàn tất hướng dẫn",
   "back": "Quay lại",
   "skip": "Bỏ qua hướng dẫn",
   "close": "Đóng",
@@ -95,7 +96,8 @@
       "filterWhat": "Mở Trạng thái và bỏ chọn Chỉ hiện mục chưa dịch, để danh sách hiện cả các mục đã dịch.",
       "selectWhat": "Đánh dấu ô của 3 mục trên trang này.",
       "translateWhat": "Nhấn Dịch mục đã chọn.",
-      "startWhat": "Chọn Dịch lại các bản dịch hiện có, rồi nhấn Bắt đầu.",
+      "modeWhat": "Chọn Dịch lại các bản dịch hiện có. Nếu chọn Chỉ điền vào các mục chưa dịch, 3 mục sẽ bị bỏ qua vì đã được dịch.",
+      "startWhat": "Nhấn Bắt đầu để dịch lại 3 mục.",
       "nothingPicked": "Chưa có gì được dịch lại: các mục đó đã có bản dịch. Nhấn lại Dịch mục đã chọn và chọn Dịch lại các bản dịch hiện có."
     },
     "failed": {
@@ -407,9 +409,9 @@
     },
     "constant": {
       "title": "Cột Cố định",
-      "what": "Dấu tích ở cột Cố định nghĩa là thuật ngữ không bao giờ được dịch: nó giữ nguyên trong mọi ngôn ngữ, như tên thương hiệu hay tên nhân vật.",
+      "what": "Thuật ngữ cố định không bao giờ được gửi đến công cụ dịch. Thay vào đó, NARN đặt thẳng bản dịch trong bảng thuật ngữ vào kết quả, nên tên nhân vật như Paimon luôn ra đúng như viết ở đây.",
       "absentWhat": "Chọn một bảng thuật ngữ bên trái để xem các thuật ngữ và cột Cố định.",
-      "why": "Khi dịch, NARN ẩn thuật ngữ cố định khỏi nhà cung cấp rồi đặt lại nguyên vẹn."
+      "why": "Các thuật ngữ khác được gửi kèm văn bản làm tham chiếu mà công cụ cần tuân theo."
     },
     "enable": {
       "title": "Bật nó lên",
@@ -417,6 +419,10 @@
       "absentWhat": "Chọn một bảng thuật ngữ bên trái, rồi nhấn Bật cạnh tên của nó.",
       "onWhat": "{{name}} đã được bật, nên dự án này đang dùng nó.",
       "why": "Khi dịch dự án này, chỉ các bảng thuật ngữ đã bật mới được dùng."
+    },
+    "choice": {
+      "title": "Chỉ bật thôi hay Áp dụng các chỗ khớp?",
+      "what": "Áp dụng các chỗ khớp gán bảng thuật ngữ ngay cho mọi mục chứa một thuật ngữ của nó. Chỉ bật thôi chỉ bật nó và giữ nguyên các mục; bạn có thể gán sau ở Chỗ khớp."
     },
     "matches": {
       "title": "Các chỗ khớp đã tìm thấy",

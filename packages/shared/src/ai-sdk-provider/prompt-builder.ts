@@ -2,7 +2,7 @@ import type { GlossaryTerm } from '../types/glossary.js';
 import type { PromptOptions, TranslationJob } from '../types/module.js';
 import type { LengthLimit } from '../length-limits.js';
 import { isRecord, extractJsonBetween, salvageIndexedRows } from './json.js';
-import { buildTermBoundaryRegex } from '../term-match.js';
+import { buildTermBoundaryRegex, glossaryScanText } from '../term-match.js';
 import { LANGUAGE_REGISTRY } from '../types/language.js';
 import { MASK_TOKEN_SOURCE } from '../masking/tokens.js';
 
@@ -146,14 +146,6 @@ export function renderLengthLimitRule(limit: LengthLimit): string {
 }
 
 /**
- * Curly-brace placeholders, e.g. `{0}`, `{1:lv.ReadySystem.Player Ready}`. The
- * text inside the braces is an opaque source-language variable identifier — a
- * glossary term appearing only there (a field name like `Player`) is not a real
- * translatable occurrence, so it must not be surfaced to the prompt.
- */
-const GLOSSARY_PLACEHOLDER_RE = /\{[^{}]*\}/g;
-
-/**
  * Filters glossary terms to only those whose source text appears in
  * `sourceText` as a whole word or phrase, outside any placeholder. Avoids
  * injecting irrelevant entries and keeps prompts concise.
@@ -173,7 +165,7 @@ export function filterGlossaryForSource(
 ): GlossaryTerm[] {
   if (!terms || terms.length === 0) return [];
   // Replace each placeholder with a space so surrounding word boundaries stay intact.
-  const scannable = sourceText.replace(GLOSSARY_PLACEHOLDER_RE, ' ');
+  const scannable = glossaryScanText(sourceText);
   return terms.filter((term) => buildTermBoundaryRegex(term.source).test(scannable));
 }
 
