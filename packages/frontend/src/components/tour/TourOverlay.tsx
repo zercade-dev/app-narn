@@ -318,6 +318,11 @@ export function TourOverlay({
   };
   const dimBase = `fixed z-40 bg-background/70 ${motion}`;
 
+  // A list or dialog the person opened from the step is up: the callout and
+  // the ring leave it alone until it closes (removed, not faded, so no piece
+  // of either lingers over it).
+  const steppedAside = listOpen || dialogOpen;
+
   return (
     <div data-testid="tour-overlay">
       <div role="status" aria-live="polite" className="sr-only" data-testid="tour-live-region">
@@ -327,7 +332,10 @@ export function TourOverlay({
         hole && (
           <div
             data-testid="tour-spotlight"
-            className={`pointer-events-none fixed z-[55] rounded-md ring-2 ring-ring ${motion}`}
+            // Out of the way, with the callout, while a list or dialog opened
+            // from the step is up: the ring would cut across its options.
+            data-stepped-aside={steppedAside || undefined}
+            className={`pointer-events-none fixed z-[55] rounded-md ring-2 ring-ring data-[stepped-aside]:hidden ${motion}`}
             style={px(hole)}
           />
         )
@@ -360,7 +368,10 @@ export function TourOverlay({
           )}
           <div
             data-testid="tour-spotlight"
-            className={`pointer-events-none fixed z-[55] rounded-md ring-2 ring-ring ${motion}`}
+            // Out of the way, with the callout, while a list or dialog opened
+            // from the step is up: the ring would cut across its options.
+            data-stepped-aside={steppedAside || undefined}
+            className={`pointer-events-none fixed z-[55] rounded-md ring-2 ring-ring data-[stepped-aside]:hidden ${motion}`}
             style={px(hole)}
           />
         </>
@@ -400,8 +411,8 @@ export function TourOverlay({
                 aria-labelledby={titleId}
                 data-testid="tour-callout"
                 data-step-id={step.id}
-                data-stepped-aside={listOpen || dialogOpen || undefined}
-                className="w-[min(24rem,calc(100vw-2rem))] data-[stepped-aside]:invisible rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
+                data-stepped-aside={steppedAside || undefined}
+                className="w-[min(24rem,calc(100vw-2rem))] data-[stepped-aside]:hidden rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
               >
                 <TourCallout {...calloutProps} />
               </Popover.Popup>
@@ -416,8 +427,8 @@ export function TourOverlay({
           aria-labelledby={titleId}
           data-testid="tour-callout"
           data-step-id={step.id}
-          data-stepped-aside={listOpen || dialogOpen || undefined}
-          className="data-[stepped-aside]:invisible fixed top-1/2 left-1/2 z-[60] w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
+          data-stepped-aside={steppedAside || undefined}
+          className="data-[stepped-aside]:hidden fixed top-1/2 left-1/2 z-[60] w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
         >
           <TourCallout {...calloutProps} />
         </div>

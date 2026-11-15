@@ -99,7 +99,9 @@ export function orphansTour(state: OrphansTourState): Tour {
     { ...step('intro', null, NEXT), navigate: TO_ORPHANS },
     { ...step('offer', null, MANUAL), actions: offerActions },
   ];
-  const done = step('done', null, NEXT);
+  // Back on the Orphans tab: its words ("this tab") are about it, and the step
+  // before it may be on Backup.
+  const done = { ...step('done', null, NEXT), navigate: TO_ORPHANS };
   if (!state.simulated) {
     return {
       id: ORPHANS_TOUR_ID,
