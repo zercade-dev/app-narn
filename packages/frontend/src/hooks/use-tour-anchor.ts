@@ -40,7 +40,15 @@ export function useTourAnchor(id: string | null): Element | null {
         // A connected, still-visible anchor stays and nothing is queried; one
         // that is missing, detached or hidden (display:none, inactive panel)
         // is dropped and looked up again.
-        if (cache.el?.isConnected && isVisible(cache.el)) return;
+        // It must also still carry the anchor's name: the attribute can move
+        // to another element (the console's progress when it opens).
+        if (
+          cache.el?.isConnected &&
+          isVisible(cache.el) &&
+          cache.el.getAttribute('data-tour') === cache.id
+        ) {
+          return;
+        }
         cache.dirty = true;
         onChange();
       });
