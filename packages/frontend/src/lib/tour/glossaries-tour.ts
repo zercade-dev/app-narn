@@ -37,7 +37,14 @@ export function glossariesTour(f: GuideFacts): Tour {
       // Next is always there; creating the first glossary selects it, and its
       // enable button appearing moves the tour on.
       {
-        ...step('create', 'glossary-create', { kind: 'next', advanceOnAppear: 'glossary-enabled' }),
+        ...step('create', 'glossary-create', {
+          kind: 'next',
+          advanceOnAppear: 'glossary-enabled',
+          // Typing a name: ✓ creates it (or × cancels) before the tour moves on.
+          blockedBy: 'glossary-name-form',
+        }),
+        // The instruction says it all: no explanation line.
+        whyKey: undefined,
         // Not dimmed: "New glossary" opens a name field below the button,
         // outside the spotlight, which must stay usable; the callout sits
         // beside the list so it does not cover that field.

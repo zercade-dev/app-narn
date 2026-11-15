@@ -30,7 +30,9 @@ export type FirstRunAction =
   | 'restore-test'
   | 'keep-test'
   | 'tour-sections'
-  | 'maybe-later';
+  | 'maybe-later'
+  | 'open-tours'
+  | 'tours-done';
 
 /** Window event a callout action dispatches; `detail` is the {@link FirstRunAction}. */
 export const FIRST_RUN_ACTION_EVENT = 'guide:first-run-action';
@@ -244,6 +246,8 @@ const NOTHING_STEP = 'translate-nothing';
 const RESTORE_STEP = 'translate-restore';
 const RESTORE_STEPS: readonly string[] = [RESTORE_STEP, 'restore-pick', 'restore-confirm'];
 const CLOSING_STEP = 'closing';
+/** After the closing step: points at the Guide, where the other tours are. */
+export const MORE_TOURS_STEP = 'more-tours';
 
 /**
  * Shown over the provider list the guide opened ("Choose a provider"), so the
@@ -503,6 +507,20 @@ const SHARED_STEPS: TourStep[] = [
     major: 5,
   },
   closingStep(false),
+  {
+    // Last: where the other guided tours are. Reached from "Maybe later".
+    id: MORE_TOURS_STEP,
+    anchor: 'sidebar-guide',
+    titleKey: 'firstRun.moreTours.title',
+    whatKey: 'firstRun.moreTours.what',
+    side: 'right',
+    advance: { kind: 'manual' },
+    actions: [
+      { ...action('open-tours', 'openTours'), primary: true },
+      action('tours-done', 'toursDone'),
+    ],
+    variantOf: CLOSING_STEP,
+  },
 ];
 
 /**
@@ -779,6 +797,7 @@ export function firstRunBack(
     return { index: indexOf(NOTHING_STEP), dropRetest: true };
   }
   if (id === 'restore-pick') return { index: indexOf(RESTORE_STEP) };
+  if (id === MORE_TOURS_STEP) return { index: indexOf(CLOSING_STEP) };
   const pair = FORM_STEPS.find((p) => p.open === id);
   if (pair) {
     const closed = tour.steps.findIndex((s) => s.id === pair.closed);

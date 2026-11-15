@@ -23,6 +23,7 @@
   "notesPlaceholder": "Observações",
   "glossaries": "Glossários",
   "newGlossary": "Novo glossário",
+  "createGlossaryConfirm": "Criar glossário",
   "glossaryNamePlaceholder": "Nome do glossário…",
   "readOnly": "Somente leitura",
   "sourceLabel": "Fonte:",

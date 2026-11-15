@@ -25,7 +25,9 @@
       "restoreTest": "Colocar minhas traduções de volta",
       "keepTest": "Manter as novas traduções",
       "tourSections": "Mostrar as seções",
-      "maybeLater": "Talvez depois"
+      "maybeLater": "Talvez depois",
+      "openTours": "Mostrar os tours",
+      "toursDone": "Concluir"
     },
     "vault": {
       "title": "Criação da senha do cofre",
@@ -132,6 +134,10 @@
       "what": "Esta é a visualização simplificada: ela mostra só o necessário para traduzir e exportar. O Avançado tem mais ferramentas. Mude a chave para Avançado para ver um tour rápido.",
       "whatAdvanced": "Você está no modo avançado, que mostra todas as ferramentas. Um tour rápido explica para que serve cada seção.",
       "why": "Você pode mudar quando quiser pela barra superior."
+    },
+    "moreTours": {
+      "title": "Mais tours guiados",
+      "what": "No Guia há tours rápidos sobre glossários, órfãos, roteamento e mais. Comece um quando quiser."
     }
   },
   "providerChoice": {
@@ -388,12 +394,11 @@
     },
     "create": {
       "title": "Criar um glossário",
-      "what": "Comece aqui um glossário novo e vazio, ou toque em Próximo para continuar lendo.",
-      "why": "Um glossário costuma bastar. Use mais para manter grupos de termos separados."
+      "what": "Toque em Novo glossário, digite um nome e toque em ✓ para criá-lo. Ou toque em Próximo para continuar lendo."
     },
     "add-term": {
       "title": "Adicionar um termo",
-      "what": "Digite o termo de origem e sua tradução em cada idioma e adicione-o.",
+      "what": "Digite o termo de origem e sua tradução em cada idioma e toque em Adicionar. O termo vai para o glossário selecionado à esquerda.",
       "why": "Marque um termo como constante quando ele nunca deve ser traduzido, como um nome de marca."
     },
     "assign": {

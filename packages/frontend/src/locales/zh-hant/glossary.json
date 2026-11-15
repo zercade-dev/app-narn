@@ -23,6 +23,7 @@
   "notesPlaceholder": "備註",
   "glossaries": "術語表",
   "newGlossary": "新增術語表",
+  "createGlossaryConfirm": "建立術語表",
   "glossaryNamePlaceholder": "術語表名稱…",
   "readOnly": "唯讀",
   "sourceLabel": "來源：",

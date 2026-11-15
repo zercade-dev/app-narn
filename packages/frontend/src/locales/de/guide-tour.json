@@ -25,7 +25,9 @@
       "restoreTest": "Meine Übersetzungen zurückholen",
       "keepTest": "Neue Übersetzungen behalten",
       "tourSections": "Zeig mir die Bereiche",
-      "maybeLater": "Vielleicht später"
+      "maybeLater": "Vielleicht später",
+      "openTours": "Touren anzeigen",
+      "toursDone": "Fertig"
     },
     "vault": {
       "title": "Tresor-Passwort erstellen",
@@ -132,6 +134,10 @@
       "what": "Das ist die vereinfachte Ansicht: Sie zeigt nur, was du zum Übersetzen und Exportieren brauchst. „Erweitert“ bietet mehr Werkzeuge. Stell den Schalter auf „Erweitert“, um eine kurze Tour zu sehen.",
       "whatAdvanced": "Du nutzt den erweiterten Modus, der alle Werkzeuge zeigt. Eine kurze Tour erklärt, wofür jeder Bereich da ist.",
       "why": "Du kannst jederzeit in der oberen Leiste wechseln."
+    },
+    "moreTours": {
+      "title": "Weitere geführte Touren",
+      "what": "Kurze Touren zu Glossaren, Waisen, Routing und mehr findest du im Guide. Starte eine, wann immer du möchtest."
     }
   },
   "providerChoice": {
@@ -388,12 +394,11 @@
     },
     "create": {
       "title": "Glossar anlegen",
-      "what": "Lege hier ein neues, leeres Glossar an oder klicke auf Weiter, um weiterzulesen.",
-      "why": "Oft reicht ein Glossar. Nutze mehrere, um Begriffsgruppen getrennt zu halten."
+      "what": "Klicke auf Neues Glossar, gib einen Namen ein und klicke dann auf ✓, um es zu erstellen. Oder klicke auf Weiter, um weiterzulesen."
     },
     "add-term": {
       "title": "Begriff hinzufügen",
-      "what": "Gib den Quellbegriff und seine Übersetzung für jede Sprache ein und füge ihn hinzu.",
+      "what": "Gib den Quellbegriff und seine Übersetzung für jede Sprache ein und klicke dann auf Hinzufügen. Der Begriff landet im links ausgewählten Glossar.",
       "why": "Markiere einen Begriff als konstant, wenn er nie übersetzt werden darf, etwa ein Markenname."
     },
     "assign": {

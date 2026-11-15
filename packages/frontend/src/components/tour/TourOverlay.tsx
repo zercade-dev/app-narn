@@ -1,3 +1,4 @@
+import { useOpenListPopup } from '../../hooks/use-open-list-popup.js';
 import { Popover } from '@base-ui/react/popover';
 import {
   useEffect,
@@ -128,6 +129,9 @@ export function TourOverlay({
   const titleId = useId();
   const anchor = useTourAnchor(step?.anchor ?? null);
   const reduced = useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false);
+  // A dropdown list or menu is open: the callout steps aside so it never
+  // covers the options (it comes back when the list closes).
+  const listOpen = useOpenListPopup();
   const [calloutNode, setCalloutNode] = useState<HTMLElement | null>(null);
   useLayoutTick(anchor);
 
@@ -234,6 +238,8 @@ export function TourOverlay({
   // A Next that waits for a control (see `TourAdvance`).
   const nextNeeds = step?.advance.kind === 'next' ? (step.advance.needs ?? null) : null;
   const neededControl = useTourAnchor(nextNeeds);
+  const nextBlockedBy = step?.advance.kind === 'next' ? (step.advance.blockedBy ?? null) : null;
+  const blockingControl = useTourAnchor(nextBlockedBy);
   // A `next` step that moves on when a control appears (see `TourAdvance`).
   const appearAnchor =
     step?.advance.kind === 'next' ? (step.advance.advanceOnAppear ?? null) : null;
@@ -275,6 +281,7 @@ export function TourOverlay({
     showBack: canGoBack ?? stepIndex > 0,
     showNext:
       (step.advance.kind === 'next' &&
+        blockingControl === null &&
         (nextNeeds === null ||
           neededControl !== null ||
           enteredViaBack ||
@@ -372,7 +379,8 @@ export function TourOverlay({
                 aria-labelledby={titleId}
                 data-testid="tour-callout"
                 data-step-id={step.id}
-                className="w-[min(24rem,calc(100vw-2rem))] rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
+                data-stepped-aside={listOpen || undefined}
+                className="w-[min(24rem,calc(100vw-2rem))] data-[stepped-aside]:invisible rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
               >
                 <TourCallout {...calloutProps} />
               </Popover.Popup>
@@ -387,7 +395,8 @@ export function TourOverlay({
           aria-labelledby={titleId}
           data-testid="tour-callout"
           data-step-id={step.id}
-          className="fixed top-1/2 left-1/2 z-[60] w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
+          data-stepped-aside={listOpen || undefined}
+          className="data-[stepped-aside]:invisible fixed top-1/2 left-1/2 z-[60] w-[min(24rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-md border border-border bg-popover p-3 text-popover-foreground shadow-md outline-none"
         >
           <TourCallout {...calloutProps} />
         </div>

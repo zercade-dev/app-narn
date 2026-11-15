@@ -23,6 +23,7 @@
   "notesPlaceholder": "메모",
   "glossaries": "용어집",
   "newGlossary": "새 용어집",
+  "createGlossaryConfirm": "용어집 만들기",
   "glossaryNamePlaceholder": "용어집 이름…",
   "readOnly": "읽기 전용",
   "sourceLabel": "출처:",

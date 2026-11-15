@@ -23,6 +23,7 @@
   "notesPlaceholder": "メモを入力",
   "glossaries": "用語集",
   "newGlossary": "新規用語集",
+  "createGlossaryConfirm": "用語集を作成",
   "glossaryNamePlaceholder": "用語集の名前を入力…",
   "readOnly": "読み取り専用",
   "sourceLabel": "出典：",

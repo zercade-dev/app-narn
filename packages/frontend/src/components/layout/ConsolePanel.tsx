@@ -391,7 +391,9 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
           type="button"
           onClick={onToggle}
           data-testid="console-toggle"
-          data-tour="console-status"
+          // The guide points here while the console is closed; open, it
+          // points at the run's progress below instead (see console-run-cards).
+          data-tour={open && !raw && activeRunIds.length > 0 ? undefined : 'console-status'}
           title={connected ? t('statusConnected') : t('statusDisconnected')}
           className="flex items-center gap-2 flex-1 min-w-0 text-left bg-transparent cursor-pointer h-full"
         >
@@ -647,6 +649,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
             {!raw && activeRunIds.length > 0 && (
               <div
                 data-testid="console-run-cards"
+                data-tour="console-status"
                 className="flex flex-col gap-1 px-3 py-1 shrink-0 font-mono text-[11px] border-b border-border/40"
               >
                 {activeRunIds.map((id) => (

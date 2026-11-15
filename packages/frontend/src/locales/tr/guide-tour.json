@@ -25,7 +25,9 @@
       "restoreTest": "Çevirilerimi geri koy",
       "keepTest": "Yeni çevirileri koru",
       "tourSections": "Bölümleri göster",
-      "maybeLater": "Belki sonra"
+      "maybeLater": "Belki sonra",
+      "openTours": "Turları göster",
+      "toursDone": "Bitti"
     },
     "vault": {
       "title": "Kasa parolası oluşturma",
@@ -132,6 +134,10 @@
       "what": "Bu, basitleştirilmiş görünümdür: yalnızca çeviri ve dışa aktarma için gerekenleri gösterir. Gelişmiş modda daha fazla araç vardır. Kısa bir tur için anahtarı Gelişmiş'e çevirin.",
       "whatAdvanced": "Tüm araçları gösteren Gelişmiş moddasınız. Kısa bir tur, her bölümün ne işe yaradığını açıklar.",
       "why": "Üst çubuktan istediğiniz zaman geçiş yapabilirsiniz."
+    },
+    "moreTours": {
+      "title": "Daha fazla rehberli tur",
+      "what": "Sözlükçeler, yetimler, yönlendirme ve daha fazlası hakkındaki kısa turlar Kılavuz'da. İstediğiniz zaman birini başlatın."
     }
   },
   "providerChoice": {
@@ -388,12 +394,11 @@
     },
     "create": {
       "title": "Sözlükçe oluştur",
-      "what": "Burada yeni, boş bir sözlükçe başlatın ya da okumaya devam etmek için İleri'ye basın.",
-      "why": "Çoğu zaman tek bir sözlükçe yeterlidir. Terim gruplarını ayrı tutmak için daha fazlasını kullanın."
+      "what": "Yeni sözlükçe'ye basın, bir ad yazın, sonra oluşturmak için ✓'e basın. Ya da okumaya devam etmek için İleri'ye basın."
     },
     "add-term": {
       "title": "Terim ekle",
-      "what": "Kaynak terimi ve her dildeki çevirisini yazın, sonra ekleyin.",
+      "what": "Kaynak terimi ve her dildeki çevirisini yazın, sonra Ekle'ye basın. Terim, solda seçili sözlükçeye eklenir.",
       "why": "Bir marka adı gibi asla çevrilmemesi gereken bir terimi sabit olarak işaretleyin."
     },
     "assign": {

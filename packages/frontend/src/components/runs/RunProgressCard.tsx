@@ -65,7 +65,8 @@ export function RunProgressCard({
           style={{ width: `${pct}%` }}
         />
       </div>
-      <div className="flex flex-wrap items-baseline gap-x-3 text-muted-foreground">
+      {/* A vertical divider between the parts: counts | elapsed | time left. */}
+      <div className="flex flex-wrap items-baseline gap-x-3 text-muted-foreground [&>*+*]:border-l [&>*+*]:border-border [&>*+*]:pl-3">
         <span data-testid="run-progress-counts" className="font-medium text-foreground">
           {t('progress.counts', { done, total: run.total })}
         </span>

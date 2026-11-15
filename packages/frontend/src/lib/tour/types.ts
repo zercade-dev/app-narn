@@ -62,6 +62,12 @@ export type TourAdvance =
   | {
       kind: 'next';
       needs?: string;
+      /**
+       * Next hides while this control is on screen: a form opened from the
+       * step (a name to type and confirm) is finished or cancelled first, so
+       * Next never moves on past it half-done.
+       */
+      blockedBy?: string;
       /** `needs` is waived once this holds: the step's work is already done (saved earlier). */
       unlessDone?: (f: GuideFacts) => boolean;
       /**

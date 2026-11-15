@@ -34,6 +34,7 @@ import {
   FIRST_RUN_ACTION_EVENT,
   FIRST_RUN_FORM_ANCHORS,
   FIRST_RUN_TOUR_ID,
+  MORE_TOURS_STEP,
   PROVIDER_CARD_STEP,
   PROVIDER_LIST_STEP,
   firstRunBack,
@@ -66,7 +67,9 @@ import { accessFor, useProjectStore } from '../../stores/project-store.js';
 import { useRunStore } from '../../stores/run-store.js';
 import { useSelectionStore } from '../../stores/selection-store.js';
 import { useStringStore } from '../../stores/string-store.js';
+import { useViewStore } from '../../stores/view-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
+import { TOURS_SLUG } from '../../lib/guide-slugs.js';
 import { ProviderSheet, TranslatedByLine } from '../config/TranslatedByLine.js';
 import { RunProgressCard } from '../runs/RunProgressCard.js';
 import { ProviderChoice } from './ProviderChoice.js';
@@ -341,11 +344,13 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
   // Leaving at the closing step is the end of the first run, not a skip: it
   // was all done, so nothing is left to continue.
   const atClosingStep = shownStep?.id === 'closing';
+  // Leaving from the closing step or the card after it finishes the first run.
+  const atEnd = atClosingStep || shownStep?.id === MORE_TOURS_STEP;
   const onExit = useCallback(() => {
     const guide = useGuideStore.getState();
-    if (atClosingStep) guide.finishFirstRun();
+    if (atEnd) guide.finishFirstRun();
     else guide.dismissFirstRun();
-  }, [atClosingStep]);
+  }, [atEnd]);
 
   const [choiceOpen, setChoiceOpen] = useState(false);
   // The provider card, opened from "Translated by … · Change".
@@ -613,7 +618,18 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
           guide.startTour(ADVANCED_SECTIONS_TOUR_ID);
           break;
         }
-        case 'maybe-later':
+        case 'maybe-later': {
+          // One more card first: where the other guided tours are.
+          const at = tour.steps.findIndex((step) => step.id === MORE_TOURS_STEP);
+          if (at >= 0) setPosition((p) => ({ ...p, index: at }));
+          else useGuideStore.getState().finishFirstRun();
+          break;
+        }
+        case 'open-tours':
+          useGuideStore.getState().finishFirstRun();
+          useViewStore.getState().openGuide(TOURS_SLUG);
+          break;
+        case 'tours-done':
           useGuideStore.getState().finishFirstRun();
           break;
       }

@@ -120,16 +120,18 @@ export function GuideToursList() {
 
   return (
     <div data-testid="guide-tours">
-      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {t('guideTours.title')}
-      </p>
-      <ul className="space-y-2">
+      <h1 className="mb-4 text-xl font-semibold">{t('guideTours.title')}</h1>
+      <ul className="grid gap-3 sm:grid-cols-2">
         {tours.map((entry) => {
           const { id } = entry;
           const row = rowState(entry);
           const blocked = entry.needsProject && activeProjectId === null;
           return (
-            <li key={id} data-testid={`guide-tour-${id}`} className="rounded-md border p-2">
+            <li
+              key={id}
+              data-testid={`guide-tour-${id}`}
+              className="flex flex-col gap-1 rounded-md border p-3"
+            >
               <p className="text-sm font-medium">{t(`guideTours.${id}.name`)}</p>
               <p className="text-xs text-muted-foreground">{t(`guideTours.${id}.summary`)}</p>
               <p

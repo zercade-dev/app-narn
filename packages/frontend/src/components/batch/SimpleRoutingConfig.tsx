@@ -118,7 +118,7 @@ export function SimpleRoutingConfig({
   const disabled = selectedModuleId !== null && (disabledModuleIds?.has(selectedModuleId) ?? false);
 
   return (
-    <Card data-testid="routing-rules-config" data-tour="routing-config">
+    <Card data-testid="routing-rules-config">
       <CardHeader>
         <div className="flex items-center justify-between gap-2">
           <CardTitle>{t('routing.title')}</CardTitle>
@@ -126,7 +126,9 @@ export function SimpleRoutingConfig({
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="space-y-1.5">
+        {/* The routing tour points at the choice itself, not the whole card,
+            so its callout sits beside the select and clear of its options. */}
+        <div className="space-y-1.5 md:max-w-md" data-tour="routing-config">
           <Label htmlFor="routing-simple-select">{t('routing.simpleLabel')}</Label>
           <Select
             value={selectedModuleId}

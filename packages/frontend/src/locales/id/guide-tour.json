@@ -25,7 +25,9 @@
       "restoreTest": "Kembalikan terjemahan saya",
       "keepTest": "Pertahankan terjemahan baru",
       "tourSections": "Tunjukkan bagiannya",
-      "maybeLater": "Nanti saja"
+      "maybeLater": "Nanti saja",
+      "openTours": "Tampilkan tur",
+      "toursDone": "Selesai"
     },
     "vault": {
       "title": "Pembuatan kata sandi brankas",
@@ -132,6 +134,10 @@
       "what": "Ini tampilan sederhana: hanya menampilkan yang diperlukan untuk menerjemahkan dan mengekspor. Lanjutan punya lebih banyak alat. Ubah sakelar ke Lanjutan untuk tur singkat.",
       "whatAdvanced": "Mode lanjutan sedang aktif dan menampilkan semua alat. Tur singkat menjelaskan kegunaan setiap bagian.",
       "why": "Mode dapat diganti kapan saja dari bilah atas."
+    },
+    "moreTours": {
+      "title": "Tur terpandu lainnya",
+      "what": "Tur singkat tentang glosarium, entri yatim, penyaluran, dan lainnya ada di Panduan. Mulai kapan saja."
     }
   },
   "providerChoice": {
@@ -388,12 +394,11 @@
     },
     "create": {
       "title": "Buat glosarium",
-      "what": "Mulai glosarium baru yang kosong di sini, atau tekan Berikutnya untuk lanjut membaca.",
-      "why": "Satu glosarium sering kali cukup. Gunakan lebih banyak untuk memisahkan kelompok istilah."
+      "what": "Tekan Glosarium baru, ketik nama, lalu tekan ✓ untuk membuatnya. Atau tekan Berikutnya untuk lanjut membaca."
     },
     "add-term": {
       "title": "Tambahkan istilah",
-      "what": "Ketik istilah sumber dan terjemahannya untuk setiap bahasa, lalu tambahkan.",
+      "what": "Ketik istilah sumber dan terjemahannya untuk setiap bahasa, lalu tekan Tambah. Istilah masuk ke glosarium yang dipilih di sebelah kiri.",
       "why": "Tandai istilah sebagai konstan bila tidak boleh diterjemahkan, seperti nama merek."
     },
     "assign": {

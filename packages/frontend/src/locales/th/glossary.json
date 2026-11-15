@@ -23,6 +23,7 @@
   "notesPlaceholder": "หมายเหตุ",
   "glossaries": "อภิธานศัพท์",
   "newGlossary": "อภิธานศัพท์ชุดใหม่",
+  "createGlossaryConfirm": "สร้างอภิธานศัพท์",
   "glossaryNamePlaceholder": "ชื่ออภิธานศัพท์…",
   "readOnly": "อ่านอย่างเดียว",
   "sourceLabel": "แหล่งที่มา:",

@@ -23,6 +23,7 @@
   "notesPlaceholder": "Notizen",
   "glossaries": "Glossare",
   "newGlossary": "Neues Glossar",
+  "createGlossaryConfirm": "Erstellen",
   "glossaryNamePlaceholder": "Glossarname…",
   "readOnly": "Schreibgeschützt",
   "sourceLabel": "Quelle:",

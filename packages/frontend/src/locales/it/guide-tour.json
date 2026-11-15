@@ -25,7 +25,9 @@
       "restoreTest": "Rimetti le mie traduzioni",
       "keepTest": "Mantieni le nuove traduzioni",
       "tourSections": "Mostrami le sezioni",
-      "maybeLater": "Magari più tardi"
+      "maybeLater": "Magari più tardi",
+      "openTours": "Mostrami i tour",
+      "toursDone": "Fatto"
     },
     "vault": {
       "title": "Creazione della password della cassaforte",
@@ -132,6 +134,10 @@
       "what": "Questa è la vista semplificata: mostra solo ciò che serve per tradurre ed esportare. Avanzata offre altri strumenti. Sposta l'interruttore su Avanzata per un breve tour.",
       "whatAdvanced": "Stai usando la modalità avanzata, che mostra tutti gli strumenti. Un breve tour spiega a cosa serve ogni sezione.",
       "why": "Puoi cambiare modalità in qualsiasi momento dalla barra in alto."
+    },
+    "moreTours": {
+      "title": "Altri tour guidati",
+      "what": "Nella Guida trovi brevi tour su glossari, orfane, routing e altro. Avviane uno quando vuoi."
     }
   },
   "providerChoice": {
@@ -388,12 +394,11 @@
     },
     "create": {
       "title": "Crea un glossario",
-      "what": "Inizia qui un glossario nuovo e vuoto, oppure premi Avanti per continuare a leggere.",
-      "why": "Spesso basta un glossario. Usane di più per tenere separati gruppi di termini."
+      "what": "Premi Nuovo glossario, scrivi un nome, poi premi ✓ per crearlo. Oppure premi Avanti per continuare a leggere."
     },
     "add-term": {
       "title": "Aggiungi un termine",
-      "what": "Scrivi il termine di origine e la sua traduzione in ogni lingua, poi aggiungilo.",
+      "what": "Scrivi il termine di origine e la sua traduzione in ogni lingua, poi premi Aggiungi. Il termine va nel glossario selezionato a sinistra.",
       "why": "Segna un termine come costante quando non va mai tradotto, come un nome di marchio."
     },
     "assign": {

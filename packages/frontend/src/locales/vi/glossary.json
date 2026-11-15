@@ -23,6 +23,7 @@
   "notesPlaceholder": "Ghi chú",
   "glossaries": "Bảng thuật ngữ",
   "newGlossary": "Bảng thuật ngữ mới",
+  "createGlossaryConfirm": "Tạo bảng thuật ngữ",
   "glossaryNamePlaceholder": "Tên bảng thuật ngữ…",
   "readOnly": "Chỉ đọc",
   "sourceLabel": "Nguồn:",

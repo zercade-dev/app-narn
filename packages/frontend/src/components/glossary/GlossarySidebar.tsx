@@ -110,16 +110,59 @@ export function GlossarySidebar({
           the labelled generate button. */}
       {!isCollaborator && (
         <>
-          <Button
-            className="w-full justify-start"
-            onClick={() => setCreatingGlossary(true)}
-            data-testid="glossary-new-btn"
-            data-tour="glossary-create"
-            title={t('newGlossary')}
-          >
-            <Plus className="w-3.5 h-3.5 mr-1 shrink-0" />
-            <span className="min-w-0 truncate">{t('newGlossary')}</span>
-          </Button>
+          {/* "New glossary" and the name form it opens, one spotlight for the
+              guide: the form's ✓ is what creates the glossary. */}
+          <div className="flex flex-col gap-2" data-tour="glossary-create">
+            <Button
+              className="w-full justify-start"
+              onClick={() => setCreatingGlossary(true)}
+              data-testid="glossary-new-btn"
+              title={t('newGlossary')}
+            >
+              <Plus className="w-3.5 h-3.5 mr-1 shrink-0" />
+              <span className="min-w-0 truncate">{t('newGlossary')}</span>
+            </Button>
+            {creatingGlossary && (
+              <div className="flex items-center gap-1" data-tour="glossary-name-form">
+                <Input
+                  autoFocus
+                  value={newGlossaryName}
+                  onChange={(e) => setNewGlossaryName(e.target.value)}
+                  placeholder={t('glossaryNamePlaceholder')}
+                  className="h-7 text-xs"
+                  data-testid="glossary-name-input"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') void handleCreateGlossary();
+                    if (e.key === 'Escape') {
+                      setCreatingGlossary(false);
+                      setNewGlossaryName('');
+                    }
+                  }}
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 shrink-0"
+                  onClick={handleCreateGlossary}
+                  data-testid="glossary-name-confirm"
+                  aria-label={t('createGlossaryConfirm')}
+                >
+                  <Check className="w-3 h-3" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 shrink-0"
+                  onClick={() => {
+                    setCreatingGlossary(false);
+                    setNewGlossaryName('');
+                  }}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
+          </div>
 
           <Button
             variant="outline"
@@ -133,45 +176,6 @@ export function GlossarySidebar({
             <span className="min-w-0 truncate">{t('generateGlossariesBtn')}</span>
           </Button>
         </>
-      )}
-
-      {creatingGlossary && (
-        <div className="flex items-center gap-1">
-          <Input
-            autoFocus
-            value={newGlossaryName}
-            onChange={(e) => setNewGlossaryName(e.target.value)}
-            placeholder={t('glossaryNamePlaceholder')}
-            className="h-7 text-xs"
-            data-testid="glossary-name-input"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') void handleCreateGlossary();
-              if (e.key === 'Escape') {
-                setCreatingGlossary(false);
-                setNewGlossaryName('');
-              }
-            }}
-          />
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-7 w-7 shrink-0"
-            onClick={handleCreateGlossary}
-          >
-            <Check className="w-3 h-3" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-7 w-7 shrink-0"
-            onClick={() => {
-              setCreatingGlossary(false);
-              setNewGlossaryName('');
-            }}
-          >
-            <X className="w-3 h-3" />
-          </Button>
-        </div>
       )}
 
       <div className="flex flex-col gap-0.5">

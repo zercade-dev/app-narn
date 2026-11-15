@@ -827,6 +827,7 @@ export function Sidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   data-testid="sidebar-guide"
+                  data-tour="sidebar-guide"
                   isActive={view === 'guide'}
                   onClick={() => {
                     setView('guide');

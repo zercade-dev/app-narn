@@ -23,6 +23,7 @@
   "notesPlaceholder": "Заметки",
   "glossaries": "Глоссарии",
   "newGlossary": "Новый глоссарий",
+  "createGlossaryConfirm": "Создать глоссарий",
   "glossaryNamePlaceholder": "Название глоссария…",
   "readOnly": "Только для чтения",
   "sourceLabel": "Источник:",

@@ -25,7 +25,9 @@
       "restoreTest": "Put my translations back",
       "keepTest": "Keep the new translations",
       "tourSections": "Show me the sections",
-      "maybeLater": "Maybe later"
+      "maybeLater": "Maybe later",
+      "openTours": "Show me the tours",
+      "toursDone": "Done"
     },
     "vault": {
       "title": "Create your vault password",
@@ -132,6 +134,10 @@
       "what": "This is the simplified view: it shows only what you need to translate and export. Advanced has more tools. Flip the switch to Advanced for a short tour.",
       "whatAdvanced": "You're using Advanced, which shows every tool. A short tour explains what each section is for.",
       "why": "You can switch at any time from the top bar."
+    },
+    "moreTours": {
+      "title": "More guided tours",
+      "what": "Short tours of glossaries, orphans, routing and more are in Guide. Start one whenever you like."
     }
   },
   "providerChoice": {
@@ -388,12 +394,11 @@
     },
     "create": {
       "title": "Create a glossary",
-      "what": "Start a new, empty glossary here, or press Next to read on.",
-      "why": "One glossary is often enough. Use more to keep sets of terms apart."
+      "what": "Press New glossary, type a name, then press ✓ to create it. Or press Next to read on."
     },
     "add-term": {
       "title": "Add a term",
-      "what": "Type the source term and its translation for each language, then add it.",
+      "what": "Type the source term and its translation for each language, then press Add. The term goes into the glossary selected on the left.",
       "why": "Mark a term as constant when it must never be translated, such as a brand name."
     },
     "assign": {

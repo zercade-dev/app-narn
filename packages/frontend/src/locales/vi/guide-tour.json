@@ -25,7 +25,9 @@
       "restoreTest": "Khôi phục bản dịch của tôi",
       "keepTest": "Giữ bản dịch mới",
       "tourSections": "Xem các mục",
-      "maybeLater": "Để sau"
+      "maybeLater": "Để sau",
+      "openTours": "Xem các hướng dẫn",
+      "toursDone": "Xong"
     },
     "vault": {
       "title": "Tạo mật khẩu kho bảo mật",
@@ -132,6 +134,10 @@
       "what": "Đây là giao diện đơn giản: chỉ hiển thị những gì cần để dịch và xuất. Nâng cao có thêm nhiều công cụ. Gạt công tắc sang Nâng cao để xem hướng dẫn ngắn.",
       "whatAdvanced": "Bạn đang ở chế độ nâng cao, nơi hiển thị mọi công cụ. Hướng dẫn ngắn sẽ giải thích công dụng của từng mục.",
       "why": "Bạn có thể chuyển bất cứ lúc nào từ thanh trên cùng."
+    },
+    "moreTours": {
+      "title": "Thêm hướng dẫn có dẫn dắt",
+      "what": "Các hướng dẫn ngắn về bảng thuật ngữ, mục mồ côi, điều phối và nhiều nội dung khác nằm trong Hướng dẫn. Bắt đầu bất cứ lúc nào."
     }
   },
   "providerChoice": {
@@ -388,12 +394,11 @@
     },
     "create": {
       "title": "Tạo bảng thuật ngữ",
-      "what": "Bắt đầu một bảng thuật ngữ mới, trống tại đây, hoặc nhấn Tiếp theo để đọc tiếp.",
-      "why": "Thường một bảng thuật ngữ là đủ. Dùng nhiều bảng để tách riêng các nhóm thuật ngữ."
+      "what": "Nhấn Bảng thuật ngữ mới, nhập tên, rồi nhấn ✓ để tạo. Hoặc nhấn Tiếp theo để đọc tiếp."
     },
     "add-term": {
       "title": "Thêm thuật ngữ",
-      "what": "Nhập thuật ngữ nguồn và bản dịch cho từng ngôn ngữ, rồi thêm vào.",
+      "what": "Nhập thuật ngữ nguồn và bản dịch cho từng ngôn ngữ, rồi nhấn Thêm. Thuật ngữ sẽ vào bảng thuật ngữ đang chọn ở bên trái.",
       "why": "Đánh dấu thuật ngữ là cố định khi nó không bao giờ được dịch, như tên thương hiệu."
     },
     "assign": {

@@ -8,10 +8,17 @@ import type { GuideFacts, Tour, TourStep } from './types.js';
 
 export type AreaTourId = 'routing' | 'glossary' | 'quality' | 'compare' | 'review-translation-ai';
 
-function step(tab: AreaTourId, id: string, anchor: string, first = false): TourStep {
+function step(
+  tab: AreaTourId,
+  id: string,
+  anchor: string,
+  first = false,
+  side?: TourStep['side'],
+): TourStep {
   return {
     id,
     anchor,
+    ...(side ? { side } : {}),
     titleKey: `area.${tab}.${id}.title`,
     whatKey: `area.${tab}.${id}.what`,
     whyKey: `area.${tab}.${id}.why`,
@@ -25,7 +32,7 @@ export const AREA_TOURS: Record<AreaTourId, Tour> = {
   routing: {
     id: 'routing',
     steps: [
-      step('routing', 'config', 'routing-config', true),
+      step('routing', 'config', 'routing-config', true, 'right'),
       step('routing', 'mode', 'routing-mode'),
     ],
   },

@@ -25,7 +25,9 @@
       "restoreTest": "Recuperar mis traducciones",
       "keepTest": "Conservar las traducciones nuevas",
       "tourSections": "Muéstrame las secciones",
-      "maybeLater": "Quizás más tarde"
+      "maybeLater": "Quizás más tarde",
+      "openTours": "Mostrar los recorridos",
+      "toursDone": "Hecho"
     },
     "vault": {
       "title": "Crear la contraseña de tu bóveda",
@@ -132,6 +134,10 @@
       "what": "Esta es la vista simplificada: solo muestra lo necesario para traducir y exportar. Avanzado tiene más herramientas. Cambia el interruptor a Avanzado para ver un recorrido breve.",
       "whatAdvanced": "Estás en el modo avanzado, que muestra todas las herramientas. Un recorrido breve explica para qué sirve cada sección.",
       "why": "Puedes cambiar cuando quieras desde la barra superior."
+    },
+    "moreTours": {
+      "title": "Más recorridos guiados",
+      "what": "En Guía hay recorridos breves sobre glosarios, huérfanas, enrutamiento y más. Empieza uno cuando quieras."
     }
   },
   "providerChoice": {
@@ -388,12 +394,11 @@
     },
     "create": {
       "title": "Crear un glosario",
-      "what": "Empieza aquí un glosario nuevo y vacío, o pulsa Siguiente para seguir leyendo.",
-      "why": "Suele bastar con un glosario. Usa más para mantener separados grupos de términos."
+      "what": "Pulsa Nuevo glosario, escribe un nombre y pulsa ✓ para crearlo. O pulsa Siguiente para seguir leyendo."
     },
     "add-term": {
       "title": "Añadir un término",
-      "what": "Escribe el término original y su traducción en cada idioma, y añádelo.",
+      "what": "Escribe el término original y su traducción en cada idioma, y pulsa Añadir. El término se guarda en el glosario seleccionado a la izquierda.",
       "why": "Marca un término como constante cuando nunca deba traducirse, como un nombre de marca."
     },
     "assign": {

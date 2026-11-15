@@ -23,6 +23,7 @@
   "notesPlaceholder": "Notlar",
   "glossaries": "Sözlükçeler",
   "newGlossary": "Yeni sözlükçe",
+  "createGlossaryConfirm": "Sözlükçe oluştur",
   "glossaryNamePlaceholder": "Sözlükçe adı…",
   "readOnly": "Salt okunur",
   "sourceLabel": "Kaynak:",
