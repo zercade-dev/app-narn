@@ -181,7 +181,7 @@
     },
     "glossaries": {
       "name": "Sözlükçeler",
-      "summary": "Bir sözlükçe oluşturun, terim ekleyin ve uygulayın; böylece anahtar terimler tutarlı kalır."
+      "summary": "Metninize uyan hazır bir sözlükçeyi etkinleştirin ve bulduğu eşleşmeleri görün."
     },
     "routing": {
       "name": "Yönlendirme",

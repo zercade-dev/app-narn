@@ -181,7 +181,7 @@
     },
     "glossaries": {
       "name": "Bảng thuật ngữ",
-      "summary": "Tạo bảng thuật ngữ, thêm thuật ngữ rồi áp dụng để các thuật ngữ chính luôn nhất quán."
+      "summary": "Bật một bảng thuật ngữ có sẵn phù hợp với văn bản của bạn và xem các chỗ khớp nó tìm thấy."
     },
     "routing": {
       "name": "Điều phối",

@@ -181,7 +181,7 @@
     },
     "glossaries": {
       "name": "Glossari",
-      "summary": "Crea un glossario, aggiungi termini e applicalo, così i termini chiave restano coerenti."
+      "summary": "Attiva un glossario già pronto adatto al tuo testo e guarda le corrispondenze che trova."
     },
     "routing": {
       "name": "Routing",

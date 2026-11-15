@@ -181,7 +181,7 @@
     },
     "glossaries": {
       "name": "Glossários",
-      "summary": "Crie um glossário, adicione termos e aplique-o para manter os termos-chave consistentes."
+      "summary": "Ative um glossário pronto que combine com o seu texto e veja as correspondências que ele encontra."
     },
     "routing": {
       "name": "Roteamento",

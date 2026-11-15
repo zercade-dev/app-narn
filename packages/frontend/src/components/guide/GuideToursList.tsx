@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check } from 'lucide-react';
+import { Check, FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -160,8 +160,15 @@ export function GuideToursList() {
                   )
                 )}
               </p>
+              {/* Why Start is greyed out: easy to miss in muted text. */}
               {blocked && (
-                <p className="mt-1 text-xs text-muted-foreground">{t('guideTours.needsProject')}</p>
+                <p
+                  className="mt-1 flex items-center gap-1 text-xs font-medium text-status-warn"
+                  data-testid={`guide-tour-needs-project-${id}`}
+                >
+                  <FolderOpen className="size-3.5 shrink-0" aria-hidden />
+                  {t('guideTours.needsProject')}
+                </p>
               )}
               <div className="mt-1.5 flex flex-col gap-1">
                 <Button

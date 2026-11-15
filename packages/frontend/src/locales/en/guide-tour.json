@@ -181,7 +181,7 @@
     },
     "glossaries": {
       "name": "Glossaries",
-      "summary": "Create a glossary, add terms and apply it, so key terms stay consistent."
+      "summary": "Enable a ready-made glossary that fits your text, and see the matches it finds."
     },
     "routing": {
       "name": "Routing",
