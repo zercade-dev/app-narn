@@ -409,7 +409,7 @@
     },
     "constant": {
       "title": "The Constant column",
-      "what": "A constant term is never sent to the translation engine. NARN puts your glossary translation straight into the result instead, so a character name like Paimon always comes out exactly as written here.",
+      "what": "A constant term is never sent to the translation engine. NARN puts your glossary translation straight into the result instead, so a character name like Diluc always comes out exactly as written here.",
       "absentWhat": "Select a glossary on the left to see its terms and their Constant column.",
       "why": "Other terms are sent along with the text as a reference the engine should follow."
     },

@@ -9,9 +9,17 @@ Der Tab **Glossar** hält die Terminologie konsistent. Ein Projekt kann mehrere 
 * Mit **Neues Glossar** ein Glossar anlegen; später umbenennen oder löschen.
 * Ein Glossar **aktivieren** oder **deaktivieren** — ein deaktiviertes Glossar wird beim Import und bei der Übersetzung ignoriert.
 * Begriffe mit einer **Quelle**, einer **Übersetzung je Sprache** und optionalen **Notizen** hinzufügen.
-* Einen Begriff als **konstant** markieren, wenn er nie übersetzt werden darf (Markennamen, Codes). Konstante Begriffe werden bei der Übersetzung maskiert, damit sie unverändert durchgereicht werden.
+* Einen Begriff als **konstant** markieren, wenn er genau so herauskommen muss, wie er im Glossar steht, etwa ein Figuren- oder Markenname — siehe *Konstante Begriffe* unten.
+* Ein Glossar hat zwei Tabs: **Begriffe** listet seine Begriffe, und **Treffer** listet die Einträge, die sie enthalten; dort kannst du das Glossar Einträgen zuweisen oder es entfernen.
 
 Manche Glossare sind **schreibgeschützt** (global verwaltet) und liefern Begriffe, ohne hier bearbeitbar zu sein.
+
+## Konstante Begriffe
+
+* Ein konstanter Begriff wird **nie an die Übersetzungs-Engine geschickt**. NARN ersetzt ihn vor dem Übersetzen durch einen Platzhalter und setzt danach die Glossar-Übersetzung an seine Stelle, sodass ein Figurenname wie *Diluc* immer genau so herauskommt, wie er im Glossar steht.
+* **Groß- und Kleinschreibung zählt.** Geschützt wird nur Text, der genau wie der Begriff geschrieben ist: *Razor* (die Figur) ja, *a razor* nicht. Jede andere Schreibweise geht als normaler Glossar-Hinweis an die Engine, als Name markiert, damit sie den Namen vom Alltagswort unterscheiden kann.
+* **Die Engine kann das Wort nicht anpassen.** Da sie den Begriff nie sieht, kann sie ihn nicht beugen und keine anderen Wörter an ihn angleichen: In Sprachen wie Russisch, Koreanisch oder Türkisch steht ein konstanter Name immer in seiner Grundform. Nutze konstant für Namen und Codes, die unverändert bleiben müssen.
+* Namen, die auch Alltagswörter sind, besser als normale Begriffe lassen, weil Titel und Beschriftungen sie oft großschreiben (*Gaming Settings*). Im mitgelieferten Glossar **Genshin Characters** sind alle Namen konstant außer Gaming, Amber, Razor, Sucrose und Prune.
 
 ## Import und Export
 

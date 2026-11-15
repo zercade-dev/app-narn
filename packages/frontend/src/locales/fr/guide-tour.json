@@ -409,7 +409,7 @@
     },
     "constant": {
       "title": "La colonne Constante",
-      "what": "Un terme constant n’est jamais envoyé au moteur de traduction. NARN place directement votre traduction du glossaire dans le résultat : un nom de personnage comme Paimon ressort toujours exactement tel qu’il est écrit ici.",
+      "what": "Un terme constant n’est jamais envoyé au moteur de traduction. NARN place directement votre traduction du glossaire dans le résultat : un nom de personnage comme Diluc ressort toujours exactement tel qu’il est écrit ici.",
       "absentWhat": "Sélectionnez un glossaire à gauche pour voir ses termes et leur colonne Constante.",
       "why": "Les autres termes sont envoyés avec le texte comme référence que le moteur doit suivre."
     },

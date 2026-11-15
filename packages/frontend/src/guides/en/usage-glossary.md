@@ -9,9 +9,17 @@ The **Glossary** tab keeps terminology consistent. A project can hold several gl
 * Create a glossary with **New glossary**; rename or delete it later.
 * **Enable** or **disable** a glossary — a disabled glossary is ignored during import and translation.
 * Add terms with a **source**, a **translation per language**, and optional **notes**.
-* Mark a term **constant** when it must never be translated (brand names, codes). Constant terms are masked during translation so they pass through unchanged.
+* Mark a term **constant** when it must come out exactly as written in the glossary, such as a character name or a brand — see *Constant terms* below.
+* A glossary has two tabs: **Terms** lists its terms, and **Matches** lists the entries that contain them, where you can assign the glossary to entries or remove it.
 
 Some glossaries are **read-only** (managed globally) and contribute terms without being editable here.
+
+## Constant terms
+
+* A constant term is **never sent to the translation engine**. NARN swaps it for a placeholder before translating and puts the glossary translation in its place afterwards, so a character name like *Diluc* always comes out exactly as written in the glossary.
+* **Letter case matters.** Only text spelled exactly like the term is protected: *Razor* (the character) is, *a razor* is not. Any other spelling is sent to the engine as an ordinary glossary hint, marked as a name, so it can tell the name from the everyday word.
+* **The engine can't change the word.** Because it never sees the term, it can't decline it or make other words agree with it: in languages such as Russian, Korean or Turkish, a constant name always appears in its base form. Keep constant for names and codes that must stay fixed.
+* Leave names that are also everyday words as normal terms, since titles and labels often capitalise them (*Gaming Settings*). In the bundled **Genshin Characters** glossary, every name is constant except Gaming, Amber, Razor, Sucrose and Prune.
 
 ## Import and export
 

@@ -409,7 +409,7 @@
     },
     "constant": {
       "title": "Sabit sütunu",
-      "what": "Sabit bir terim çeviri motoruna hiç gönderilmez. NARN bunun yerine sözlükçedeki çevirinizi doğrudan sonuca koyar; böylece Paimon gibi bir karakter adı her zaman burada yazıldığı gibi çıkar.",
+      "what": "Sabit bir terim çeviri motoruna hiç gönderilmez. NARN bunun yerine sözlükçedeki çevirinizi doğrudan sonuca koyar; böylece Diluc gibi bir karakter adı her zaman burada yazıldığı gibi çıkar.",
       "absentWhat": "Terimlerini ve Sabit sütununu görmek için soldan bir sözlükçe seçin.",
       "why": "Diğer terimler, motorun uyması gereken bir başvuru olarak metinle birlikte gönderilir."
     },

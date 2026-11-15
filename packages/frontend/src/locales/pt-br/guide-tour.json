@@ -409,7 +409,7 @@
     },
     "constant": {
       "title": "A coluna Constante",
-      "what": "Um termo constante nunca é enviado ao mecanismo de tradução. Em vez disso, o NARN coloca a sua tradução do glossário direto no resultado, então um nome de personagem como Paimon sempre sai exatamente como está escrito aqui.",
+      "what": "Um termo constante nunca é enviado ao mecanismo de tradução. Em vez disso, o NARN coloca a sua tradução do glossário direto no resultado, então um nome de personagem como Diluc sempre sai exatamente como está escrito aqui.",
       "absentWhat": "Selecione um glossário à esquerda para ver os termos e a coluna Constante.",
       "why": "Os outros termos são enviados com o texto como referência que o mecanismo deve seguir."
     },

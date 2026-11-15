@@ -13,9 +13,10 @@
  *  - Constant glossary term match   → `{g:1}` (original casing preserved)
  *  - Escape sequences `\n` `\t` `\r` → `{e:1}` (literal two-char form preserved)
  *
- * Constant glossary terms are restored using the target-language translation
- * with the original occurrence's case pattern re-applied (lower / UPPER /
- * Title / mixed). When the masked text contains only placeholders and
+ * Constant glossary terms are masked only where the source writes them exactly
+ * as the glossary does (letter case included) and restored with the
+ * target-language translation as written in the glossary. Other spellings are
+ * left for the model, which gets the term as a glossary item marked as a name. When the masked text contains only placeholders and
  * whitespace, `trivial` is true and the translation engine can skip the
  * remote module call entirely and synthesise the result locally.
  *
@@ -180,7 +181,10 @@ export function constantTermRegex(source: string): RegExp {
   if (cached) return cached;
   const pattern = new RegExp(
     String.raw`(^|[^\p{L}\p{N}_])(` + escapeRegExp(source) + String.raw`)(?=[^\p{L}\p{N}_]|$)`,
-    'giu',
+    // Case-sensitive: only the exact spelling is protected ("Razor", not "a
+    // razor"). Other spellings reach the model as ordinary glossary items
+    // marked as names (see the prompt builder's NAME_TERM_RULE).
+    'gu',
   );
   if (termRegexCache.size >= MAX_TERM_REGEX_CACHE) {
     const oldest = termRegexCache.keys().next().value;
@@ -298,7 +302,7 @@ export function maskText(
         return `{v:${id}}`;
       });
     }
-    // Pass 3: constant glossary matches (word-boundary, case-insensitive).
+    // Pass 3: constant glossary matches (word-boundary, exact letter case).
     // Glossary replacement runs only on the text spans *between* the `{e:N}`/
     // `{v:N}` tokens inserted above. A term whose source happens to be a token
     // internal (`t`/`v`/`g`/`e`, or a digit) would otherwise match inside an
@@ -389,7 +393,10 @@ export function restoreText(
       const term = glossaryById.get(slot.termId);
       const translation = term?.translations[targetLanguage];
       if (!translation) return slot.original;
-      return applyCase(translation, slot.caseKind);
+      // Masking matches the glossary's exact spelling, so the occurrence has the
+      // glossary's own casing: the translation goes in as written there (a
+      // re-cased "Chef brutocollinus" would spoil it).
+      return translation;
     })
     .replace(/\{e:(\d+)\}/g, (_match, n: string) => {
       const slot = plan.escapes.get(Number(n));

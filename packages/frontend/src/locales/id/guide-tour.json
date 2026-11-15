@@ -409,7 +409,7 @@
     },
     "constant": {
       "title": "Kolom Konstan",
-      "what": "Istilah konstan tidak pernah dikirim ke mesin terjemahan. NARN langsung memasukkan terjemahan glosarium Anda ke hasilnya, jadi nama karakter seperti Paimon selalu keluar persis seperti yang tertulis di sini.",
+      "what": "Istilah konstan tidak pernah dikirim ke mesin terjemahan. NARN langsung memasukkan terjemahan glosarium Anda ke hasilnya, jadi nama karakter seperti Diluc selalu keluar persis seperti yang tertulis di sini.",
       "absentWhat": "Pilih glosarium di sebelah kiri untuk melihat istilahnya dan kolom Konstan.",
       "why": "Istilah lain dikirim bersama teks sebagai acuan yang harus diikuti mesin."
     },

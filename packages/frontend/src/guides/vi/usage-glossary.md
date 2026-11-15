@@ -9,9 +9,17 @@ Tab **Bảng thuật ngữ** giữ cho thuật ngữ luôn nhất quán. Một d
 * Tạo một bảng thuật ngữ bằng **Bảng thuật ngữ mới**; đổi tên hoặc xóa sau đó.
 * **Bật** hoặc **tắt** một bảng thuật ngữ — một bảng đã tắt sẽ bị bỏ qua khi nhập và khi dịch.
 * Thêm thuật ngữ với một **nguồn**, một **bản dịch cho mỗi ngôn ngữ**, và **ghi chú** tùy chọn.
-* Đánh dấu một thuật ngữ là **cố định** khi nó không bao giờ được dịch (tên thương hiệu, mã). Thuật ngữ cố định được che trong lúc dịch để đi qua nguyên vẹn.
+* Đánh dấu một thuật ngữ là **cố định** khi nó phải ra đúng như viết trong bảng thuật ngữ, như tên nhân vật hay thương hiệu — xem *Thuật ngữ cố định* bên dưới.
+* Bảng thuật ngữ có hai thẻ: **Thuật ngữ** liệt kê các thuật ngữ, còn **Chỗ khớp** liệt kê các mục chứa chúng, nơi bạn có thể gán bảng thuật ngữ cho các mục hoặc gỡ bỏ.
 
 Một số bảng thuật ngữ là **chỉ đọc** (được quản lý ở cấp chung) và chỉ đóng góp thuật ngữ mà không thể sửa ở đây.
+
+## Thuật ngữ cố định
+
+* Thuật ngữ cố định **không bao giờ được gửi đến công cụ dịch**. NARN thay nó bằng một ký hiệu giữ chỗ trước khi dịch, rồi đặt bản dịch trong bảng thuật ngữ vào chỗ đó, nên tên nhân vật như *Diluc* luôn ra đúng như viết trong bảng thuật ngữ.
+* **Chữ hoa và chữ thường có phân biệt.** Chỉ văn bản viết đúng y như thuật ngữ mới được bảo vệ: *Razor* (nhân vật) được bảo vệ, *a razor* thì không. Cách viết khác được gửi đến công cụ như một gợi ý thuật ngữ thông thường, có đánh dấu là tên, để nó phân biệt tên với từ thông thường.
+* **Công cụ dịch không thể thay đổi từ đó.** Vì không nhìn thấy thuật ngữ, nó không thể biến cách hay làm các từ khác hợp với nó: trong các ngôn ngữ như tiếng Nga, tiếng Hàn hay tiếng Thổ Nhĩ Kỳ, tên cố định luôn ở dạng gốc. Chỉ dùng cố định cho tên và mã phải giữ nguyên.
+* Hãy để các tên đồng thời là từ thông thường ở dạng thuật ngữ bình thường, vì tiêu đề và nhãn thường viết hoa chúng (*Gaming Settings*). Trong bảng thuật ngữ có sẵn **Genshin Characters**, mọi tên đều cố định trừ Gaming, Amber, Razor, Sucrose và Prune.
 
 ## Nhập và xuất
 

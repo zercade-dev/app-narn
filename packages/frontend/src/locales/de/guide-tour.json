@@ -409,7 +409,7 @@
     },
     "constant": {
       "title": "Die Spalte Konstant",
-      "what": "Ein konstanter Begriff wird nie an die Übersetzungs-Engine geschickt. NARN setzt stattdessen deine Glossar-Übersetzung direkt ins Ergebnis, sodass ein Figurenname wie Paimon immer genau so herauskommt, wie er hier steht.",
+      "what": "Ein konstanter Begriff wird nie an die Übersetzungs-Engine geschickt. NARN setzt stattdessen deine Glossar-Übersetzung direkt ins Ergebnis, sodass ein Figurenname wie Diluc immer genau so herauskommt, wie er hier steht.",
       "absentWhat": "Wähle links ein Glossar, um seine Begriffe und die Spalte Konstant zu sehen.",
       "why": "Andere Begriffe gehen mit dem Text als Vorgabe mit, der die Engine folgen soll."
     },

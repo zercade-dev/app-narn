@@ -223,7 +223,7 @@ interface PendingCorrection {
   masked: string;
   plan: ReturnType<typeof maskText>['plan'];
   glossaryById: Map<string, GlossaryTerm>;
-  nonConstantTerms: GlossaryTerm[];
+  referenceTerms: GlossaryTerm[];
   reference?: TranslationJob['reference'];
 }
 
@@ -398,7 +398,12 @@ function controlledFailureCode(reason: ControlledFailureReason): FailureCode {
 
 type GlossaryGroup = {
   constantTerms: GlossaryTerm[];
-  nonConstantTerms: GlossaryTerm[];
+  /**
+   * Every term, sent to the model as glossary reference. A constant term only
+   * survives the prompt's filter where the source spells it differently than
+   * the glossary: its exact spellings are masked before the filter runs.
+   */
+  referenceTerms: GlossaryTerm[];
   glossaryById: Map<string, GlossaryTerm>;
 };
 
@@ -6150,7 +6155,7 @@ export class TranslationEngine {
         masked: string;
         plan: ReturnType<typeof maskText>['plan'];
         trivial: boolean;
-        nonConstantTerms: GlossaryTerm[];
+        referenceTerms: GlossaryTerm[];
         glossaryById: Map<string, GlossaryTerm>;
         tmFingerprint: TmFingerprint;
         /** "Similar prior translation" hints appended to the job context. */
@@ -6171,7 +6176,7 @@ export class TranslationEngine {
           masked,
           plan,
           trivial,
-          nonConstantTerms: glossary?.nonConstantTerms ?? [],
+          referenceTerms: glossary?.referenceTerms ?? [],
           glossaryById: glossary?.glossaryById ?? new Map<string, GlossaryTerm>(),
           tmFingerprint: buildTmFingerprint(d.entry, d.promptOptions),
           ...(reference ? { reference } : {}),
@@ -6367,7 +6372,7 @@ export class TranslationEngine {
           sourceText: entry.masked,
           sourceLanguage,
           targetLanguage: entry.decision.targetLanguage,
-          glossary: entry.nonConstantTerms,
+          glossary: entry.referenceTerms,
           glossaryId: entry.decision.entry.assignedGlossaryIds?.[0] ?? 'project',
           promptOptions: achievement
             ? {
@@ -7422,7 +7427,9 @@ export class TranslationEngine {
         const constantTerms = rawTerms.filter((t) => t.constant);
         glossary = {
           constantTerms,
-          nonConstantTerms: rawTerms.filter((t) => !t.constant),
+          // Every term: a constant one only reaches the model where the source
+          // spells it differently than the glossary (exact spellings are masked).
+          referenceTerms: rawTerms,
           glossaryById: new Map(constantTerms.map((t) => [t.id, t])),
         };
         glossaryCache.set(glossaryKey, glossary);
@@ -7449,7 +7456,7 @@ export class TranslationEngine {
         masked,
         plan,
         glossaryById: glossary.glossaryById,
-        nonConstantTerms: glossary.nonConstantTerms,
+        referenceTerms: glossary.referenceTerms,
         ...(reference ? { reference } : {}),
       });
     }
@@ -7740,7 +7747,7 @@ export class TranslationEngine {
           sourceText: item.masked,
           sourceLanguage: args.sourceLanguage,
           targetLanguage,
-          glossary: item.nonConstantTerms,
+          glossary: item.referenceTerms,
           glossaryId: entry.assignedGlossaryIds?.[0] ?? 'project',
           promptOptions: achievement
             ? { ...effectivePromptOptions(entry, decision.promptOptions), achievement }
@@ -8817,10 +8824,11 @@ export class TranslationEngine {
       if (!glossaryCache.has(key)) {
         const rawTerms = await this.glossaryProvider(projectId, d.targetLanguage, d.entry);
         const constantTerms = rawTerms.filter((t) => t.constant);
-        const nonConstantTerms = rawTerms.filter((t) => !t.constant);
         glossaryCache.set(key, {
           constantTerms,
-          nonConstantTerms,
+          // Every term: a constant one only reaches the model where the source
+          // spells it differently than the glossary (exact spellings are masked).
+          referenceTerms: rawTerms,
           glossaryById: new Map(constantTerms.map((t) => [t.id, t])),
         });
       }
@@ -8853,12 +8861,11 @@ export class TranslationEngine {
 
       if (trivialHit === null && glossaryForTarget) {
         const trimmed = d.entry.sourceText.trim();
-        const allTerms = [
-          ...glossaryForTarget.constantTerms,
-          ...glossaryForTarget.nonConstantTerms,
-        ];
-        const matchingTerm = allTerms.find(
-          (t) => t.source.trim().toLowerCase() === trimmed.toLowerCase(),
+        // A constant term counts only in its exact spelling; others ignore case.
+        const matchingTerm = glossaryForTarget.referenceTerms.find((t) =>
+          t.constant
+            ? t.source.trim() === trimmed
+            : t.source.trim().toLowerCase() === trimmed.toLowerCase(),
         );
         if (matchingTerm) {
           const targetTranslation = matchingTerm.translations[d.targetLanguage];

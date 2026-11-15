@@ -409,7 +409,7 @@
     },
     "constant": {
       "title": "Cột Cố định",
-      "what": "Thuật ngữ cố định không bao giờ được gửi đến công cụ dịch. Thay vào đó, NARN đặt thẳng bản dịch trong bảng thuật ngữ vào kết quả, nên tên nhân vật như Paimon luôn ra đúng như viết ở đây.",
+      "what": "Thuật ngữ cố định không bao giờ được gửi đến công cụ dịch. Thay vào đó, NARN đặt thẳng bản dịch trong bảng thuật ngữ vào kết quả, nên tên nhân vật như Diluc luôn ra đúng như viết ở đây.",
       "absentWhat": "Chọn một bảng thuật ngữ bên trái để xem các thuật ngữ và cột Cố định.",
       "why": "Các thuật ngữ khác được gửi kèm văn bản làm tham chiếu mà công cụ cần tuân theo."
     },
