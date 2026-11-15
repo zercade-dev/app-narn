@@ -1,19 +1,17 @@
 /**
- * Glossary-to-entry match panel: pick a term (or "all"), filter by
- * assigned/unassigned, and bulk-assign the selected glossary to the matching
- * project strings. Split out of GlossaryTab.tsx as a purely presentational
+ * Glossary-to-entry match panel (the glossary's Matches tab): pick a term (or
+ * "all"), filter by assigned/unassigned, and bulk-assign the selected glossary
+ * to the matching project strings. Split out of GlossaryTab.tsx as a purely presentational
  * panel — it owns no state; every value and handler is prop-drilled from the
  * parent so the debounced auto-search effect and selection resets keep their
  * original timing.
  */
 import { useTranslation } from 'react-i18next';
-import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { GlossaryTerm } from '@zercade-dev/narn-shared';
 import { Button } from '../ui/button';
 import { Checkbox } from '../ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 import type { MatchResult } from './glossary-tab-types.js';
 
 interface GlossaryMatchPanelProps {
@@ -23,7 +21,6 @@ interface GlossaryMatchPanelProps {
   readonly visibleTerms: GlossaryTerm[];
   readonly selectedEntryIds: Set<string>;
   readonly assigningBusy: boolean;
-  readonly canOpenMatches: boolean;
   /**
    * Whether the viewer may write the assignment. Assigning or unassigning a
    * glossary PATCHes each matched entry's `assignedGlossaryIds`, which
@@ -33,9 +30,6 @@ interface GlossaryMatchPanelProps {
   readonly canAssign: boolean;
   readonly onMatchTermIdChange: (v: string | null) => void;
   readonly onMatchAssignmentChange: (v: 'with' | 'without') => void;
-  readonly onSetMainOpen: (open: boolean) => void;
-  readonly onSetMatchResults: (results: MatchResult[] | null) => void;
-  readonly onSearch: () => void;
   readonly onToggleAllEntriesSelected: (checked: boolean) => void;
   readonly onToggleEntrySelected: (id: string, checked: boolean) => void;
   readonly onAssignGlossary: () => void;
@@ -49,13 +43,9 @@ export function GlossaryMatchPanel({
   visibleTerms,
   selectedEntryIds,
   assigningBusy,
-  canOpenMatches,
   canAssign,
   onMatchTermIdChange,
   onMatchAssignmentChange,
-  onSetMainOpen,
-  onSetMatchResults,
-  onSearch,
   onToggleAllEntriesSelected,
   onToggleEntrySelected,
   onAssignGlossary,
@@ -64,28 +54,9 @@ export function GlossaryMatchPanel({
   const { t } = useTranslation('glossary');
 
   return (
-    <Collapsible
-      open={matchResults !== null}
-      onOpenChange={(open) => {
-        if (open && !canOpenMatches) return;
-        if (!open) onSetMatchResults(null);
-        if (open) {
-          onSetMainOpen(false);
-          onSearch();
-        }
-      }}
-    >
+    <div className="flex min-h-0 flex-1 flex-col gap-2" data-testid="glossary-match-panel">
       {/* Criteria row */}
-      <div className="flex items-center gap-2 py-1 flex-wrap">
-        <CollapsibleTrigger>
-          <div className="flex items-center gap-1 cursor-pointer">
-            <ChevronRight
-              className={cn('size-4 transition-transform', matchResults !== null && 'rotate-90')}
-            />
-            <span className="font-semibold text-sm">{t('matchesPanel')}</span>
-          </div>
-        </CollapsibleTrigger>
-
+      <div className="flex shrink-0 flex-wrap items-center gap-2 py-1">
         <Select value={matchTermId ?? ''} onValueChange={(v) => onMatchTermIdChange(v)}>
           <SelectTrigger size="sm" className="h-7 text-xs w-48">
             <SelectValue placeholder={t('matchTermSelectPlaceholder')} data-content>
@@ -150,7 +121,8 @@ export function GlossaryMatchPanel({
         </div>
       </div>
 
-      <CollapsibleContent>
+      {/* The results scroll in their own box, like the terms. */}
+      <div className="min-h-0 flex-1 overflow-auto" data-testid="glossary-match-results">
         {matchResults !== null && matchResults.length === 0 && (
           <p className="text-xs text-muted-foreground px-2 py-3">{t('matchNoResults')}</p>
         )}
@@ -205,7 +177,7 @@ export function GlossaryMatchPanel({
             </div>
           </>
         )}
-      </CollapsibleContent>
-    </Collapsible>
+      </div>
+    </div>
   );
 }

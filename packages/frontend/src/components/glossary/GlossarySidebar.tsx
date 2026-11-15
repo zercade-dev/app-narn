@@ -92,7 +92,7 @@ export function GlossarySidebar({
   }, [renamingGlossaryId, renameDraft, projectId, loadGlossaries, reportError, t]);
 
   return (
-    <div className="w-52 shrink-0 flex flex-col gap-2">
+    <div className="w-52 shrink-0 flex min-h-0 flex-col gap-2 overflow-y-auto">
       <div className="mb-1">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
           {t('glossaries')}

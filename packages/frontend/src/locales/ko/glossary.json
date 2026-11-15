@@ -97,6 +97,7 @@
   "bulkClearConstant": "{{count}}건의 불변 해제",
   "selectAll": "모든 행 선택",
   "selectRow": "행 선택",
+  "tabTerms": "용어",
   "matchesPanel": "일치",
   "matchTermSelectPlaceholder": "용어를 선택하세요…",
   "matchTermAll": "모든 용어",

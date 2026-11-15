@@ -674,7 +674,9 @@ export function AppShell() {
                     </div>
                   )}
                   {activeTab === 'glossary' && (
-                    <div className="flex-1 overflow-auto p-4">
+                    // A full-height column, like Translations: the glossary
+                    // panels scroll inside rather than the whole page.
+                    <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4">
                       {activeProject ? (
                         <Suspense fallback={<TabFallback />}>
                           <GlossaryTab

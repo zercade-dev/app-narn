@@ -100,6 +100,7 @@
   "bulkClearConstant": "Quitar constante de {{count}}",
   "selectAll": "Seleccionar todas las filas",
   "selectRow": "Seleccionar fila",
+  "tabTerms": "Términos",
   "matchesPanel": "Coincidencias",
   "matchTermSelectPlaceholder": "Selecciona un término…",
   "matchTermAll": "Todos los términos",

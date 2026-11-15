@@ -97,6 +97,7 @@
   "bulkClearConstant": "Bỏ đánh dấu cố định trên {{count}}",
   "selectAll": "Chọn mọi hàng",
   "selectRow": "Chọn hàng",
+  "tabTerms": "Thuật ngữ",
   "matchesPanel": "Chỗ khớp",
   "matchTermSelectPlaceholder": "Chọn một thuật ngữ…",
   "matchTermAll": "Mọi thuật ngữ",

@@ -97,6 +97,7 @@
   "bulkClearConstant": "{{count}}語の定数を解除",
   "selectAll": "すべての行を選択",
   "selectRow": "行を選択",
+  "tabTerms": "用語",
   "matchesPanel": "一致箇所",
   "matchTermSelectPlaceholder": "用語を選択…",
   "matchTermAll": "すべての用語",

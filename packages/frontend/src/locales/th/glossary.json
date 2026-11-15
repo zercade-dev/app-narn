@@ -97,6 +97,7 @@
   "bulkClearConstant": "ล้างสถานะคงที่ของ {{count}} คำ",
   "selectAll": "เลือกทุกแถว",
   "selectRow": "เลือกแถว",
+  "tabTerms": "คำศัพท์",
   "matchesPanel": "จุดที่ตรงกัน",
   "matchTermSelectPlaceholder": "เลือกคำศัพท์…",
   "matchTermAll": "ทุกคำศัพท์",

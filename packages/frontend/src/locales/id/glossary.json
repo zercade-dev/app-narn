@@ -97,6 +97,7 @@
   "bulkClearConstant": "Hapus konstan pada {{count}}",
   "selectAll": "Pilih semua baris",
   "selectRow": "Pilih baris",
+  "tabTerms": "Istilah",
   "matchesPanel": "Kecocokan",
   "matchTermSelectPlaceholder": "Pilih istilah…",
   "matchTermAll": "Semua istilah",

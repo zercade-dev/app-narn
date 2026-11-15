@@ -97,6 +97,7 @@
   "bulkClearConstant": "清除 {{count}} 個的常數標記",
   "selectAll": "選取所有列",
   "selectRow": "選取列",
+  "tabTerms": "術語",
   "matchesPanel": "符合項",
   "matchTermSelectPlaceholder": "選擇術語…",
   "matchTermAll": "所有術語",

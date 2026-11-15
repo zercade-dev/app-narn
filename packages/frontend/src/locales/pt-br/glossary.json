@@ -100,6 +100,7 @@
   "bulkClearConstant": "Limpar constante ({{count}})",
   "selectAll": "Selecionar todas as linhas",
   "selectRow": "Selecionar linha",
+  "tabTerms": "Termos",
   "matchesPanel": "Correspondências",
   "matchTermSelectPlaceholder": "Selecione um termo…",
   "matchTermAll": "Todos os termos",

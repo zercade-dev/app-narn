@@ -106,6 +106,7 @@
   "bulkClearConstant": "Снять отметку «константа»: {{count}}",
   "selectAll": "Выбрать все",
   "selectRow": "Выбрать термин",
+  "tabTerms": "Термины",
   "matchesPanel": "Совпадения",
   "matchTermSelectPlaceholder": "Выберите термин…",
   "matchTermAll": "Все термины",

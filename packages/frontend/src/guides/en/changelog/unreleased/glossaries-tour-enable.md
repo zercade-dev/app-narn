@@ -9,3 +9,5 @@ The Glossaries tour now enables a ready-made glossary that fits your text and sh
 - Glossary terms no longer match words inside variables, such as "Player" in "{player} (you)".
 - Assign glossary and Unassign glossary are highlighted once you tick an entry.
 - The last step of a tour now says Complete tour.
+- A glossary's terms and its matches are now two tabs under a header that always shows the glossary's name and whether it's on, so the panel never looks empty.
+- Long or wide glossaries scroll inside their own box, with the column headers kept in view, like the Translations list.
