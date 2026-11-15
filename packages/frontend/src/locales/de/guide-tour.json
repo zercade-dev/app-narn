@@ -90,6 +90,13 @@
       "progressWhat": "Die Übersetzung läuft. Diese Zeile zeigt den Fortschritt.",
       "progressWhy": "Die Tour geht weiter, sobald die Übersetzung abgeschlossen ist."
     },
+    "retest": {
+      "title": "3 Einträge neu übersetzen",
+      "filterWhat": "Öffne Status und entferne das Häkchen bei Nur unübersetzte Einträge anzeigen, damit die Liste auch deine übersetzten Einträge zeigt.",
+      "selectWhat": "Setze bei 3 Einträgen auf dieser Seite ein Häkchen.",
+      "translateWhat": "Drücke Auswahl übersetzen.",
+      "startWhat": "Wähle Vorhandene Übersetzungen neu übersetzen und drücke dann Starten."
+    },
     "failed": {
       "title": "Übersetzung nicht durchgeführt",
       "why": "Die hervorgehobene Leiste unten zeigt, was passiert ist.",
@@ -399,12 +406,13 @@
     "add-term": {
       "title": "Begriff hinzufügen",
       "what": "Gib den Quellbegriff und seine Übersetzung für jede Sprache ein und klicke dann auf Hinzufügen. Der Begriff landet im links ausgewählten Glossar.",
+      "absentWhat": "Wähle links ein Glossar aus, das du bearbeiten kannst, oder erstelle eins, um Begriffe hinzuzufügen.",
       "why": "Markiere einen Begriff als konstant, wenn er nie übersetzt werden darf, etwa ein Markenname."
     },
     "assign": {
       "title": "Auf dieses Projekt anwenden",
-      "what": "Ein aktiviertes Glossar wird beim Übersetzen dieses Projekts verwendet. Deaktiviere es, um es nicht mehr zu nutzen.",
-      "why": "Lass ein Glossar deaktiviert, solange du es noch aufbaust."
+      "what": "Neue Glossare sind von Anfang an aktiviert. Ein aktiviertes Glossar wird beim Übersetzen dieses Projekts verwendet; Deaktivieren beendet das.",
+      "absentWhat": "Wähle links ein Glossar aus. Der Button Aktivieren oder Deaktivieren neben seinem Namen legt fest, ob dieses Projekt es verwendet."
     },
     "effect": {
       "title": "Wie es die Übersetzung verändert",

@@ -90,6 +90,13 @@
       "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
       "progressWhy": "Tur berlanjut setelah penerjemahan selesai."
     },
+    "retest": {
+      "title": "Terjemahkan ulang 3 entri",
+      "filterWhat": "Buka Status dan hapus centang Tampilkan yang belum diterjemahkan saja, agar daftar juga menampilkan entri yang sudah diterjemahkan.",
+      "selectWhat": "Centang kotak 3 entri di halaman ini.",
+      "translateWhat": "Tekan Terjemahkan yang dipilih.",
+      "startWhat": "Pilih Terjemahkan ulang terjemahan yang sudah ada, lalu tekan Mulai."
+    },
     "failed": {
       "title": "Penerjemahan tidak berhasil",
       "why": "Bilah yang disorot di bawah menunjukkan apa yang terjadi.",
@@ -399,12 +406,13 @@
     "add-term": {
       "title": "Tambahkan istilah",
       "what": "Ketik istilah sumber dan terjemahannya untuk setiap bahasa, lalu tekan Tambah. Istilah masuk ke glosarium yang dipilih di sebelah kiri.",
+      "absentWhat": "Pilih glosarium yang bisa Anda edit di sebelah kiri, atau buat satu, untuk menambahkan istilah.",
       "why": "Tandai istilah sebagai konstan bila tidak boleh diterjemahkan, seperti nama merek."
     },
     "assign": {
       "title": "Terapkan ke proyek ini",
-      "what": "Glosarium yang aktif dipakai saat proyek ini diterjemahkan. Nonaktifkan untuk berhenti memakainya.",
-      "why": "Biarkan glosarium nonaktif selama Anda masih menyusunnya."
+      "what": "Glosarium baru langsung aktif. Glosarium yang aktif dipakai saat proyek ini diterjemahkan; Nonaktifkan menghentikannya.",
+      "absentWhat": "Pilih glosarium di sebelah kiri. Tombol Aktifkan atau Nonaktifkan di samping namanya menentukan apakah proyek ini memakainya."
     },
     "effect": {
       "title": "Pengaruhnya pada terjemahan",

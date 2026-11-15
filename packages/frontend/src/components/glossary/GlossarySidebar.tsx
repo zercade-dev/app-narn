@@ -18,6 +18,7 @@ import type { Glossary, GlossarySummary } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../../hooks/use-api.js';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { sendTourSignal } from '@/lib/tour/signal';
 
 interface GlossarySidebarProps {
   readonly projectId: string;
@@ -70,6 +71,8 @@ export function GlossarySidebar({
       // The new glossary is the one to fill: select it.
       if (created?.id) onSelectGlossary(created.id);
       toast.success(t('toastGlossaryCreated'));
+      // The Glossaries tour's "create a glossary" step moves on.
+      sendTourSignal('glossary-created');
     } catch (err) {
       reportError(err, 'toastGlossaryCreateError');
     }
@@ -92,7 +95,7 @@ export function GlossarySidebar({
   }, [renamingGlossaryId, renameDraft, projectId, loadGlossaries, reportError, t]);
 
   return (
-    <div className="w-52 shrink-0 flex flex-col gap-2" data-tour="glossary-list">
+    <div className="w-52 shrink-0 flex flex-col gap-2">
       <div className="mb-1">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
           {t('glossaries')}
@@ -180,7 +183,8 @@ export function GlossarySidebar({
         </>
       )}
 
-      <div className="flex flex-col gap-0.5">
+      {/* The guide points here to show the glossaries, without the buttons above. */}
+      <div className="flex flex-col gap-0.5" data-tour="glossary-items">
         {sortedGlossaries.map((summary) => {
           const isSelected = summary.id === selectedGlossaryId;
           const isRenaming = renamingGlossaryId === summary.id;

@@ -90,6 +90,13 @@
       "progressWhat": "Çeviri sürüyor. Bu satır ilerlemeyi gösterir.",
       "progressWhy": "Çeviri bittiğinde tur devam eder."
     },
+    "retest": {
+      "title": "3 girdiyi yeniden çevirin",
+      "filterWhat": "Durum'u açın ve Yalnızca çevrilmemişleri göster işaretini kaldırın; liste çevrilmiş girdilerinizi de göstersin.",
+      "selectWhat": "Bu sayfadaki 3 girdinin kutusunu işaretleyin.",
+      "translateWhat": "Seçilenleri çevir'e basın.",
+      "startWhat": "Mevcut çevirileri yeniden çevir'i seçin, sonra Başlat'a basın."
+    },
     "failed": {
       "title": "Çeviri tamamlanmadı",
       "why": "Aşağıdaki vurgulanan çubuk ne olduğunu gösterir.",
@@ -399,12 +406,13 @@
     "add-term": {
       "title": "Terim ekle",
       "what": "Kaynak terimi ve her dildeki çevirisini yazın, sonra Ekle'ye basın. Terim, solda seçili sözlükçeye eklenir.",
+      "absentWhat": "Terim eklemek için solda düzenleyebileceğiniz bir sözlükçe seçin ya da yeni bir tane oluşturun.",
       "why": "Bir marka adı gibi asla çevrilmemesi gereken bir terimi sabit olarak işaretleyin."
     },
     "assign": {
       "title": "Bu projeye uygula",
-      "what": "Etkin bir sözlükçe bu proje çevrilirken kullanılır. Kullanmayı bırakmak için devre dışı bırakın.",
-      "why": "Bir sözlükçeyi hazırlarken devre dışı tutun."
+      "what": "Yeni sözlükçeler etkin olarak başlar. Etkin bir sözlükçe bu proje çevrilirken kullanılır; Devre dışı bırak bunu durdurur.",
+      "absentWhat": "Solda bir sözlükçe seçin. Adının yanındaki Etkinleştir veya Devre dışı bırak düğmesi, bu projenin onu kullanıp kullanmayacağını belirler."
     },
     "effect": {
       "title": "Çeviriyi nasıl değiştirir",

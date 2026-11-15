@@ -90,6 +90,13 @@
       "progressWhat": "Đang dịch. Dòng này cho biết tiến độ.",
       "progressWhy": "Hướng dẫn sẽ tiếp tục khi dịch xong."
     },
+    "retest": {
+      "title": "Dịch lại 3 mục",
+      "filterWhat": "Mở Trạng thái và bỏ chọn Chỉ hiện mục chưa dịch, để danh sách hiện cả các mục đã dịch.",
+      "selectWhat": "Đánh dấu ô của 3 mục trên trang này.",
+      "translateWhat": "Nhấn Dịch mục đã chọn.",
+      "startWhat": "Chọn Dịch lại các bản dịch hiện có, rồi nhấn Bắt đầu."
+    },
     "failed": {
       "title": "Dịch chưa thành công",
       "why": "Thanh được làm nổi bật bên dưới cho biết điều gì đã xảy ra.",
@@ -399,12 +406,13 @@
     "add-term": {
       "title": "Thêm thuật ngữ",
       "what": "Nhập thuật ngữ nguồn và bản dịch cho từng ngôn ngữ, rồi nhấn Thêm. Thuật ngữ sẽ vào bảng thuật ngữ đang chọn ở bên trái.",
+      "absentWhat": "Chọn một bảng thuật ngữ bạn có thể sửa ở bên trái, hoặc tạo mới, để thêm thuật ngữ.",
       "why": "Đánh dấu thuật ngữ là cố định khi nó không bao giờ được dịch, như tên thương hiệu."
     },
     "assign": {
       "title": "Áp dụng cho dự án này",
-      "what": "Bảng thuật ngữ đang bật sẽ được dùng khi dịch dự án này. Tắt nó để ngừng sử dụng.",
-      "why": "Hãy để bảng thuật ngữ ở trạng thái tắt khi bạn vẫn đang soạn nó."
+      "what": "Bảng thuật ngữ mới được bật ngay từ đầu. Bảng thuật ngữ đang bật sẽ được dùng khi dịch dự án này; nhấn Tắt để ngừng.",
+      "absentWhat": "Chọn một bảng thuật ngữ ở bên trái. Nút Bật hoặc Tắt cạnh tên quyết định dự án này có dùng nó hay không."
     },
     "effect": {
       "title": "Nó thay đổi bản dịch thế nào",

@@ -59,7 +59,7 @@ export function StringTableGrid({
   const { t } = useTranslation('strings');
 
   return (
-    <div className="flex-1 min-h-0 overflow-auto border rounded-md">
+    <div className="flex-1 min-h-0 overflow-auto border rounded-md" data-tour="string-table-rows">
       {/* Sticky header */}
       <div
         className="sticky top-0 z-10 flex bg-muted border-b-2 border-border items-center"

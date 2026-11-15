@@ -122,9 +122,12 @@ export function useGuideFacts(): GuideFacts {
       s.runs.some((run) => producedTranslations(run, activeProjectId)),
   );
   // The selection store drops its ids itself when the active project changes.
-  const hasSelection = useSelectionStore(
-    (s) => relevant && activeProjectId !== null && s.selectedIds.size > 0,
+  const selectedCount = useSelectionStore((s) =>
+    relevant && activeProjectId !== null ? s.selectedIds.size : 0,
   );
+  const hasSelection = selectedCount > 0;
+  // The string table hides what is already translated.
+  const untranslatedFilterOn = useStringStore((s) => relevant && s.filters.untranslatedOnly);
   // The project's real target languages (no source, no Pseudo-test), as a
   // string so the selector stays stable.
   const targetLanguages = useProjectStore((s) =>
@@ -173,6 +176,13 @@ export function useGuideFacts(): GuideFacts {
     quickTest.projectId === activeProjectId &&
     quickTest.decision === 'pending' &&
     quickTestRunKnown;
+  // Asked for from "nothing to translate", and the person is choosing its
+  // entries and starting it: no run of it yet.
+  const retestAsked =
+    quickTest?.retranslate === true &&
+    quickTest.projectId === activeProjectId &&
+    quickTest.decision === 'pending' &&
+    !quickTestRunKnown;
   // Until it translated something: running, or ended empty (the progress
   // step then says why, and offers to try again).
   const retestRunning = retest && (translationGoing || !translationExists);
@@ -211,11 +221,14 @@ export function useGuideFacts(): GuideFacts {
       translationExists,
       exported,
       hasSelection,
+      selectedCount,
+      untranslatedFilterOn,
       isCollaboratorOnly,
       untranslatedRemain,
       nothingToTranslate,
       quickTestPending,
       restRunning,
+      retestAsked,
       retestRunning,
       retestPending,
       retestDone,
@@ -229,6 +242,8 @@ export function useGuideFacts(): GuideFacts {
     aiKeyUsable,
     exported,
     hasSelection,
+    selectedCount,
+    untranslatedFilterOn,
     activeProjectId,
     projectHasLanguages,
     projectHasEntries,
@@ -238,6 +253,7 @@ export function useGuideFacts(): GuideFacts {
     nothingToTranslate,
     quickTestPending,
     restRunning,
+    retestAsked,
     retestRunning,
     retestPending,
     retestDone,

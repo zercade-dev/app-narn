@@ -90,6 +90,13 @@
       "progressWhat": "The translation is running. This line shows its progress.",
       "progressWhy": "The tour continues when the translation has finished."
     },
+    "retest": {
+      "title": "Retranslate 3 entries",
+      "filterWhat": "Open Status and untick Show untranslated only, so the list shows your translated entries too.",
+      "selectWhat": "Tick the boxes of 3 entries on this page.",
+      "translateWhat": "Press Translate selected.",
+      "startWhat": "Choose Re-translate existing translations, then press Start."
+    },
     "failed": {
       "title": "The translation didn't go through",
       "why": "The highlighted bar below shows what happened.",
@@ -399,12 +406,13 @@
     "add-term": {
       "title": "Add a term",
       "what": "Type the source term and its translation for each language, then press Add. The term goes into the glossary selected on the left.",
+      "absentWhat": "Select a glossary you can edit on the left, or create one, to add terms to it.",
       "why": "Mark a term as constant when it must never be translated, such as a brand name."
     },
     "assign": {
       "title": "Apply it to this project",
-      "what": "An enabled glossary is used when this project is translated. Disable it to stop using it.",
-      "why": "Keep a glossary disabled while you are still building it."
+      "what": "New glossaries start enabled. An enabled glossary is used when this project is translated; Disable stops that.",
+      "absentWhat": "Select a glossary on the left. The Enable or Disable button beside its name decides whether this project uses it."
     },
     "effect": {
       "title": "How it changes translation",

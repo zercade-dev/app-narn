@@ -90,6 +90,13 @@
       "progressWhat": "La traduzione è in corso. Questa riga ne mostra l'avanzamento.",
       "progressWhy": "Il tour prosegue quando la traduzione è terminata."
     },
+    "retest": {
+      "title": "Ritraduci 3 voci",
+      "filterWhat": "Apri Stato e togli la spunta a Mostra solo le non tradotte, così l'elenco mostra anche le voci già tradotte.",
+      "selectWhat": "Spunta le caselle di 3 voci in questa pagina.",
+      "translateWhat": "Premi Traduci la selezione.",
+      "startWhat": "Scegli Ritraduci le traduzioni esistenti, poi premi Avvia."
+    },
     "failed": {
       "title": "Traduzione non riuscita",
       "why": "La barra evidenziata qui sotto mostra che cosa è successo.",
@@ -399,12 +406,13 @@
     "add-term": {
       "title": "Aggiungi un termine",
       "what": "Scrivi il termine di origine e la sua traduzione in ogni lingua, poi premi Aggiungi. Il termine va nel glossario selezionato a sinistra.",
+      "absentWhat": "Seleziona a sinistra un glossario che puoi modificare, oppure creane uno, per aggiungervi termini.",
       "why": "Segna un termine come costante quando non va mai tradotto, come un nome di marchio."
     },
     "assign": {
       "title": "Applicalo a questo progetto",
-      "what": "Un glossario attivo viene usato quando questo progetto viene tradotto. Disattivalo per smettere di usarlo.",
-      "why": "Tieni un glossario disattivato finché lo stai ancora costruendo."
+      "what": "I nuovi glossari partono attivi. Un glossario attivo viene usato quando questo progetto viene tradotto; Disattiva lo interrompe.",
+      "absentWhat": "Seleziona un glossario a sinistra. Il pulsante Attiva o Disattiva accanto al nome decide se questo progetto lo usa."
     },
     "effect": {
       "title": "Come cambia la traduzione",

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { GuideToursList } from './GuideToursList.js';
 import { TOURS_SLUG } from '../../lib/guide-slugs.js';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 export function GuideView() {
   const { t } = useTranslation('strings');
@@ -133,10 +134,16 @@ export function GuideView() {
       <aside className="w-56 shrink-0 border-r overflow-y-auto p-3 space-y-4">
         {/* One entry for every guided tour; the tours themselves list in the content. */}
         <div>
+          {/* Tinted with the accent colour, so the tours stand out from the reading topics. */}
           <Button
-            variant={activeSlug === TOURS_SLUG ? 'secondary' : 'ghost'}
+            variant="ghost"
             size="sm"
-            className="w-full justify-start text-sm"
+            className={cn(
+              'w-full justify-start text-sm font-medium',
+              activeSlug === TOURS_SLUG
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                : 'bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary',
+            )}
             onClick={() => setActiveSlug(TOURS_SLUG)}
             data-testid="guide-topic-tours"
             data-tour="guide-topic-tours"

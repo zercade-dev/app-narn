@@ -28,36 +28,64 @@ function step(
  */
 const TO_GLOSSARY: NonNullable<TourStep['navigate']> = { tab: 'glossary' };
 
-/** The AI generation step is shown only when an AI provider key is in the vault. */
-export function glossariesTour(f: GuideFacts): Tour {
+/**
+ * The AI generation step is shown only when an AI provider key is in the
+ * vault. A collaborator cannot create, fill, enable or generate glossaries
+ * (those controls are hidden for them), so their tour only explains.
+ */
+export function glossariesTour(f: GuideFacts, collaborator = false): Tour {
+  const here = (s: TourStep): TourStep => ({ ...s, navigate: TO_GLOSSARY });
+  if (collaborator) {
+    return {
+      id: GLOSSARIES_TOUR_ID,
+      steps: [step('purpose', 'glossary-items'), step('effect', null)].map(here),
+    };
+  }
   return {
     id: GLOSSARIES_TOUR_ID,
-    steps: [
-      { ...step('purpose', 'glossary-list'), navigate: TO_GLOSSARY },
-      // Next is always there; creating the first glossary selects it, and its
-      // enable button appearing moves the tour on.
-      {
-        ...step('create', 'glossary-create', {
-          kind: 'next',
-          advanceOnAppear: 'glossary-enabled',
-          // Typing a name: ✓ creates it (or × cancels) before the tour moves on.
-          blockedBy: 'glossary-name-form',
-        }),
-        // The instruction says it all: no explanation line.
-        whyKey: undefined,
-        // Not dimmed: "New glossary" opens a name field below the button,
-        // outside the spotlight, which must stay usable; the callout sits
-        // beside the list so it does not cover that field.
-        dim: false,
-        side: 'right',
-      },
-      // The anchors below exist only for a selected, editable glossary: without
-      // one, the step is a centred callout with Next.
-      step('add-term', 'glossary-add-term'),
-      // Enabling a glossary is what applies it to this project.
-      step('assign', 'glossary-enabled'),
-      step('effect', null),
-      ...(f.aiKeyUsable ? [step('generate', 'glossary-generate')] : []),
-    ],
+    // Every step opens the tab: the person can wander off on an undimmed step.
+    steps: (
+      [
+        // The glossaries listed, not the buttons above them: creating one is the
+        // next step's. With none yet, a centred callout.
+        step('purpose', 'glossary-items'),
+        // Next is always there; creating a glossary (the first or another one)
+        // selects it and moves the tour on.
+        {
+          ...step('create', 'glossary-create', {
+            kind: 'next',
+            advanceOnSignal: 'glossary-created',
+            // Typing a name: ✓ creates it (or × cancels) before the tour moves on.
+            blockedBy: 'glossary-name-form',
+          }),
+          // The instruction says it all: no explanation line.
+          whyKey: undefined,
+          // Not dimmed: "New glossary" opens a name field below the button,
+          // outside the spotlight, which must stay usable; the callout sits
+          // beside the list so it does not cover that field.
+          dim: false,
+          side: 'right',
+        },
+        // The anchors below exist only for a selected, editable glossary with
+        // its card open: without one, a centred callout saying so.
+        {
+          ...step('add-term', 'glossary-add-term'),
+          absentWhatKey: 'glossariesTour.add-term.absentWhat',
+        },
+        // Enabling a glossary is what applies it to this project. Shown, not
+        // offered: a new glossary is on, and the button would turn it off.
+        {
+          ...step('assign', 'glossary-enabled'),
+          whyKey: undefined,
+          interactive: false,
+          absentWhatKey: 'glossariesTour.assign.absentWhat',
+        },
+        step('effect', null),
+        // Shown, not offered: its dialog would open under the callout.
+        ...(f.aiKeyUsable
+          ? [{ ...step('generate', 'glossary-generate'), interactive: false as const }]
+          : []),
+      ] satisfies TourStep[]
+    ).map(here),
   };
 }

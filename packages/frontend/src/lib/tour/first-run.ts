@@ -9,6 +9,7 @@
  * performs them, because they need its state (the current step, the provider
  * dialog).
  */
+import { QUICK_TEST_SIZE } from './quick-test-size.js';
 import type { GuideFacts, Tour, TourStep } from './types.js';
 
 export const FIRST_RUN_TOUR_ID = 'first-run';
@@ -245,6 +246,21 @@ const QUICK_STEP = 'translate-quick';
 const QUICK_DONE = (f: GuideFacts): boolean => f.translationExists;
 /** Shown in place of the quick test when every entry is already translated. */
 const NOTHING_STEP = 'translate-nothing';
+/**
+ * The retranslate test, done by the person: the list shows translated entries
+ * (only if "Untranslated only" hides them), they tick 3, press Translate, and
+ * start a retranslation in the dialog (FORM_STEPS pairs the last two).
+ */
+const RETEST_FILTER_STEP = 'retest-filter';
+const RETEST_SELECT_STEP = 'retest-select';
+const RETEST_TRANSLATE_STEP = 'retest-translate';
+const RETEST_START_STEP = 'retest-start';
+const RETEST_STEPS: readonly string[] = [
+  RETEST_FILTER_STEP,
+  RETEST_SELECT_STEP,
+  RETEST_TRANSLATE_STEP,
+  RETEST_START_STEP,
+];
 /** After a retranslate test: put the file's translations back, or keep the new ones. */
 const RESTORE_STEP = 'translate-restore';
 const RESTORE_STEPS: readonly string[] = [RESTORE_STEP, 'restore-pick', 'restore-confirm'];
@@ -445,11 +461,61 @@ const SHARED_STEPS: TourStep[] = [
     whatKey: 'firstRun.translate.nothingWhat',
     whyKey: 'firstRun.translate.nothingWhy',
     advance: { kind: 'next' },
-    // The entries tab: its table answers the retranslate test's request.
+    // The entries tab, where the person does the retranslate test.
     navigate: { view: 'project', tab: 'strings' },
     // A test that replaces 3 translations; the restore point the server takes
-    // first puts them back (see RESTORE_STEP).
+    // first puts them back (see RESTORE_STEP). The action only starts the
+    // walk through it (RETEST_STEPS): the person picks and starts it.
     actions: [{ ...action('retranslate-test', 'retranslateTest'), primary: true }],
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
+    // Only while "Untranslated only" hides the translated entries.
+    id: RETEST_FILTER_STEP,
+    anchor: 'status-filter',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.filterWhat',
+    advance: { kind: 'state', done: (f) => !f.untranslatedFilterOn },
+    navigate: { view: 'project', tab: 'strings' },
+    // Its list opens below the button, outside the spotlight: left usable.
+    dim: false,
+    side: 'right',
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
+    id: RETEST_SELECT_STEP,
+    anchor: 'string-table-rows',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.selectWhat',
+    advance: { kind: 'state', done: (f) => f.selectedCount >= QUICK_TEST_SIZE },
+    navigate: { view: 'project', tab: 'strings' },
+    // Above the list: its rows are what the person ticks.
+    side: 'top',
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
+    // Paired with the dialog it opens (see FORM_STEPS); the run it starts is
+    // the test (`FirstRunTour` follows it from the run list).
+    id: RETEST_TRANSLATE_STEP,
+    anchor: 'bulk-batch-translate',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.translateWhat',
+    advance: { kind: 'manual' },
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
+    id: RETEST_START_STEP,
+    anchor: 'translate-dialog',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.startWhat',
+    // Above the dialog: beside it there is little room, and its mode choice
+    // and Start are both what the step asks for.
+    side: 'top',
+    advance: { kind: 'manual' },
     major: 4,
     variantOf: QUICK_STEP,
   },
@@ -644,8 +710,9 @@ function firstIncompleteMajor(f: GuideFacts): number {
   // A file that came translated has nothing for step 4 to do.
   const translated = f.translationExists || f.nothingToTranslate;
   if (!translated || restPending(f) || f.restRunning) return 4;
-  // The retranslate test, while it runs and until its translations are kept or put back.
-  if (f.retestRunning || f.retestPending) return 4;
+  // The retranslate test, from the moment it is asked for until its
+  // translations are kept or put back.
+  if (f.retestAsked || f.retestRunning || f.retestPending) return 4;
   if (!f.exported) return 5;
   return 6;
 }
@@ -676,11 +743,19 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
   if (major === 5 && !f.translationExists && f.nothingToTranslate && !f.retestDone) {
     return at(NOTHING_STEP);
   }
+  if (major === 4 && f.retestAsked) return at(retestStepFor(f));
   if (major === 4 && f.retestPending) return at(RESTORE_STEP);
   if (major === 4 && f.retestRunning) return at(WAITING_STEP);
   if (major === 4 && restPending(f)) return at('translate-rest');
   if (major === 4 && f.translationExists && f.restRunning) return at(WAITING_STEP);
   return steps.findIndex((s) => s.major === major);
+}
+
+/** Where the retranslate test's set-up stands: the first thing it still needs. */
+function retestStepFor(f: GuideFacts): string {
+  if (f.untranslatedFilterOn) return RETEST_FILTER_STEP;
+  if (f.selectedCount < QUICK_TEST_SIZE) return RETEST_SELECT_STEP;
+  return RETEST_TRANSLATE_STEP;
 }
 
 /**
@@ -693,6 +768,9 @@ export function firstRunStepApplies(step: TourStep | undefined, f: GuideFacts): 
   if (step.id === NOTHING_STEP) {
     return f.nothingToTranslate && !f.translationExists && !f.retestDone;
   }
+  // The retranslate test's own steps, only while it is being set up.
+  if (step.id === RETEST_FILTER_STEP) return f.retestAsked && f.untranslatedFilterOn;
+  if (RETEST_STEPS.includes(step.id)) return f.retestAsked;
   // The retranslate test's restore steps, only while its choice is open.
   if (RESTORE_STEPS.includes(step.id)) return f.retestPending;
   if (f.nothingToTranslate && !f.translationExists) return step.major !== 4;
@@ -718,6 +796,8 @@ const FORM_STEPS = [
   // The project list: "New project" is shown only while the list is open, so
   // the step follows the list (it closes on a click outside, or Escape).
   { closed: 'project-open', open: 'project-new', anchor: 'new-project-button' },
+  // The same dialog, opened for the retranslate test.
+  { closed: RETEST_TRANSLATE_STEP, open: RETEST_START_STEP, anchor: 'comparison-translate-start' },
 ] as const;
 
 /**
@@ -806,6 +886,11 @@ export function firstRunBack(
   if (pair) {
     const closed = tour.steps.findIndex((s) => s.id === pair.closed);
     if (closed >= 0) return { index: closed, closeForm: pair.anchor };
+  }
+  // Back out of setting up the retranslate test: it is set aside, and
+  // "nothing to translate" offers it again.
+  if (id !== undefined && RETEST_STEPS.includes(id)) {
+    return { index: indexOf(NOTHING_STEP), dropRetest: true };
   }
   for (let at = shownIndex - 1; at >= 0; at--) {
     const step = tour.steps[at];

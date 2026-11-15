@@ -12,6 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useTourAnchor } from '@/hooks/use-tour-anchor';
 import type { TourPosition } from '@/lib/tour/position';
+import { TOUR_SIGNAL_EVENT } from '@/lib/tour/signal';
 import type { GuideFacts, Tour } from '@/lib/tour/types';
 import { useViewStore } from '@/stores/view-store';
 import { TourCallout, type TourText } from './TourCallout';
@@ -46,9 +47,6 @@ interface TourOverlayProps {
 }
 
 const REDUCED_MOTION = '(prefers-reduced-motion: reduce)';
-
-/** How long a control must have been missing for its appearance to advance a step. */
-const APPEAR_MIN_ABSENCE_MS = 300;
 
 function subscribeReducedMotion(onChange: () => void): () => void {
   if (typeof window.matchMedia !== 'function') return () => {};
@@ -237,45 +235,37 @@ export function TourOverlay({
     else calloutNode?.focus();
   }, [calloutNode, stepIndex, anchor]);
 
+  // A control below the fold of a scrolling area is brought into view: the
+  // dim covers the page and takes the wheel, so the person could not scroll to it.
+  useEffect(() => {
+    if (anchor instanceof HTMLElement)
+      anchor.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }, [anchor, stepKey]);
+
   // A Next that waits for a control (see `TourAdvance`).
   const nextNeeds = step?.advance.kind === 'next' ? (step.advance.needs ?? null) : null;
   const neededControl = useTourAnchor(nextNeeds);
   const nextBlockedBy = step?.advance.kind === 'next' ? (step.advance.blockedBy ?? null) : null;
   const blockingControl = useTourAnchor(nextBlockedBy);
-  // A `next` step that moves on when a control appears (see `TourAdvance`).
-  const appearAnchor =
-    step?.advance.kind === 'next' ? (step.advance.advanceOnAppear ?? null) : null;
-  const appeared = useTourAnchor(appearAnchor) !== null;
-  const wasAbsent = useRef<{ key: string; since: number } | null>(null);
-  const appearStepKey = useRef<string | null>(null);
+  // A `next` step that moves on when the app reports its deed (see `TourAdvance`).
+  const awaitedSignal =
+    step?.advance.kind === 'next' ? (step.advance.advanceOnSignal ?? null) : null;
   useEffect(() => {
-    // A new step forgets an absence seen on an earlier visit, so re-entering
-    // via Back with the control already there never moves on by itself.
-    if (appearStepKey.current !== stepKey) {
-      appearStepKey.current = stepKey;
-      wasAbsent.current = null;
-    }
-    if (appearAnchor === null) return;
-    if (!appeared) {
-      if (wasAbsent.current?.key !== stepKey) {
-        wasAbsent.current = { key: stepKey, since: performance.now() };
-      }
-      return;
-    }
-    const absence = wasAbsent.current;
-    wasAbsent.current = null;
-    if (absence?.key !== stepKey) return;
-    // A blink (a list refetched, a panel re-rendered) is not the control
-    // appearing: only an absence the person could have acted on counts.
-    if (performance.now() - absence.since < APPEAR_MIN_ABSENCE_MS) return;
-    onAdvanceRef.current();
-  }, [appeared, appearAnchor, stepKey]);
+    if (awaitedSignal === null) return;
+    const onSignal = (e: Event) => {
+      if ((e as CustomEvent<string>).detail === awaitedSignal) onAdvanceRef.current();
+    };
+    globalThis.addEventListener(TOUR_SIGNAL_EVENT, onSignal);
+    return () => globalThis.removeEventListener(TOUR_SIGNAL_EVENT, onSignal);
+  }, [awaitedSignal, stepKey]);
 
   if (!step) return null;
 
   const motion = reduced ? '' : 'transition-all duration-200 motion-reduce:transition-none';
   const calloutProps = {
-    step,
+    // A step whose words describe its control says something else while that
+    // control is not on screen.
+    step: anchor === null && step.absentWhatKey ? { ...step, whatKey: step.absentWhatKey } : step,
     titleId,
     position,
     extra,

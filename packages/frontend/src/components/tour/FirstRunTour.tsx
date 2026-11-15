@@ -56,7 +56,6 @@ import {
   quickTestRunId,
   realTargetLanguages,
   requestGuideTranslation,
-  retranslateTestEntryIds,
   untranslatedEntryIds,
 } from '../../lib/tour/quick-test.js';
 import { findRestorePoint } from '../../lib/tour/restore-point.js';
@@ -556,8 +555,9 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'retranslate-test': {
           if (!projectId) break;
           translatingAll.current = false;
-          const ids = retranslateTestEntryIds(useStringStore.getState().entries);
-          if (ids.length === 0) break;
+          // Asked for: the person picks the entries and starts it (the facts
+          // then lead through RETEST_STEPS). The next translation run of the
+          // project is the test.
           useGuideStore.getState().setQuickTest({
             projectId,
             runId: null,
@@ -566,12 +566,8 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
             runsBefore: translationRunIdsOf(projectId),
             requestedAt: Date.now(),
           });
-          // The three on screen and checked, as for the quick test.
-          const strings = useStringStore.getState();
-          strings.setFilter(quickTestFilters(strings.filters));
-          useSelectionStore.getState().selectAll(ids);
-          strings.revealEntry(ids[0] ?? null);
-          requestGuideTranslation(ids, { reTranslate: true });
+          // The person ticks the three: none ticked beforehand.
+          useSelectionStore.getState().clear();
           break;
         }
         case 'restore-test': {

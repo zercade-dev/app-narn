@@ -39,7 +39,7 @@ export const AREA_TOURS: Record<AreaTourId, Tour> = {
   glossary: {
     id: 'glossary',
     steps: [
-      step('glossary', 'list', 'glossary-list', true),
+      step('glossary', 'list', 'glossary-items', true),
       step('glossary', 'create', 'glossary-create'),
       step('glossary', 'generate', 'glossary-generate'),
     ],
@@ -76,12 +76,21 @@ const GLOSSARY_WITHOUT_AI: Tour = {
   steps: AREA_TOURS.glossary.steps.filter((s) => s.id !== 'generate'),
 };
 
+/** A collaborator has no create or generate buttons: only the list is shown. */
+const GLOSSARY_LIST_ONLY: Tour = {
+  id: 'glossary',
+  steps: AREA_TOURS.glossary.steps.filter((s) => s.id === 'list'),
+};
+
 /**
  * The tour to run for `id`. The glossary tour drops its AI generation step
- * when no AI provider key is usable.
+ * when no AI provider key is usable, and keeps only its list for a
+ * collaborator.
  */
-export function areaTourFor(id: AreaTourId, f: GuideFacts): Tour {
-  return id === 'glossary' && !f.aiKeyUsable ? GLOSSARY_WITHOUT_AI : AREA_TOURS[id];
+export function areaTourFor(id: AreaTourId, f: GuideFacts, collaborator = false): Tour {
+  if (id !== 'glossary') return AREA_TOURS[id];
+  if (collaborator) return GLOSSARY_LIST_ONLY;
+  return f.aiKeyUsable ? AREA_TOURS[id] : GLOSSARY_WITHOUT_AI;
 }
 
 export const AREA_TOUR_IDS = Object.keys(AREA_TOURS) as AreaTourId[];

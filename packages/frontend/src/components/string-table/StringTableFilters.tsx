@@ -351,7 +351,7 @@ export function StringTableFilters() {
           block at ≤1440px instead of a single control orphaning onto a new row. */}
       <div className="flex flex-wrap items-center gap-x-2 gap-y-2 min-w-0">
         {/* Status filter dropdown */}
-        <div className="relative" ref={statusPickerRef}>
+        <div className="relative" ref={statusPickerRef} data-tour="status-filter">
           <button
             type="button"
             className={`flex items-center gap-1 text-xs border rounded px-2 h-7 cursor-pointer ${

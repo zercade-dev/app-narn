@@ -192,6 +192,7 @@ export function TranslateRunDialog({
       <DialogContent
         className="flex max-h-[85vh] w-full max-w-2xl flex-col"
         data-testid="comparison-translate-dialog"
+        data-tour="translate-dialog"
       >
         <DialogHeader>
           <DialogTitle data-testid="comparison-translate-dialog-title">

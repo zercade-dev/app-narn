@@ -90,6 +90,13 @@
       "progressWhat": "La traduction est en cours. Cette ligne indique sa progression.",
       "progressWhy": "La visite reprend une fois la traduction terminée."
     },
+    "retest": {
+      "title": "Retraduisez 3 entrées",
+      "filterWhat": "Ouvrez Statut et décochez Afficher uniquement les non traduits, pour que la liste montre aussi vos entrées traduites.",
+      "selectWhat": "Cochez les cases de 3 entrées de cette page.",
+      "translateWhat": "Appuyez sur Traduire la sélection.",
+      "startWhat": "Choisissez Retraduire les traductions existantes, puis appuyez sur Démarrer."
+    },
     "failed": {
       "title": "La traduction n’a pas abouti",
       "why": "La barre mise en évidence ci-dessous indique ce qui s’est passé.",
@@ -399,12 +406,13 @@
     "add-term": {
       "title": "Ajouter un terme",
       "what": "Saisissez le terme source et sa traduction dans chaque langue, puis appuyez sur Ajouter. Le terme est placé dans le glossaire sélectionné à gauche.",
+      "absentWhat": "Sélectionnez à gauche un glossaire que vous pouvez modifier, ou créez-en un, pour y ajouter des termes.",
       "why": "Marquez un terme comme constant quand il ne doit jamais être traduit, comme un nom de marque."
     },
     "assign": {
       "title": "L’appliquer à ce projet",
-      "what": "Un glossaire activé est utilisé quand ce projet est traduit. Désactivez-le pour ne plus l’utiliser.",
-      "why": "Laissez un glossaire désactivé tant que vous le construisez."
+      "what": "Les nouveaux glossaires sont activés d’emblée. Un glossaire activé est utilisé quand ce projet est traduit ; Désactiver arrête cela.",
+      "absentWhat": "Sélectionnez un glossaire à gauche. Le bouton Activer ou Désactiver à côté de son nom décide si ce projet l’utilise."
     },
     "effect": {
       "title": "Ce que cela change à la traduction",

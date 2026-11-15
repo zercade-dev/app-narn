@@ -65,7 +65,7 @@ export const TOUR_CATALOG: readonly CatalogTour[] = [
     needsProject: true,
     needsAdvanced: true,
     tab: 'glossary',
-    build: ({ facts }) => glossariesTour(facts),
+    build: ({ facts, access }) => glossariesTour(facts, access.role === 'collaborator'),
   },
   areaTour('routing'),
   areaTour('quality'),

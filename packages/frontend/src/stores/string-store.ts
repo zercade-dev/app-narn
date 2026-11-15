@@ -57,8 +57,9 @@ let entriesFetchToken = 0;
 /** The store's initial filter set — also the reset base for drill-downs. */
 export const DEFAULT_STRING_FILTERS: EntryFilters = {
   search: '',
-  // Default to true so new projects show only untranslated entries — the most actionable view.
-  untranslatedOnly: true,
+  // Off: a new project lists every entry, translated or not, so a file that
+  // came translated does not open on an empty list.
+  untranslatedOnly: false,
   overflowOnly: false,
   tooLong: false,
   lqaFailed: false,

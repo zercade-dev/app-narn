@@ -1,4 +1,5 @@
 import type { ShellView, Tab } from '@/stores/view-store';
+import type { TourSignal } from './signal.js';
 
 /** What the app knows about the person's progress; the guide derives it, tours read it. */
 export interface GuideFacts {
@@ -19,6 +20,10 @@ export interface GuideFacts {
   exported: boolean;
   /** Entries of the active project are selected in the string list. */
   hasSelection: boolean;
+  /** How many entries of the active project are selected. */
+  selectedCount: number;
+  /** The string list shows only entries still missing a translation ("Untranslated only"). */
+  untranslatedFilterOn: boolean;
   isCollaboratorOnly: boolean;
   /** A translatable entry of the active project still misses a real target language (Pseudo-test aside). */
   untranslatedRemain: boolean;
@@ -37,6 +42,11 @@ export interface GuideFacts {
    * produced has not settled yet (still pending, queued, running or paused).
    */
   restRunning: boolean;
+  /**
+   * The retranslate test was asked for, and the person is picking its entries
+   * and starting it: no run of it is listed yet.
+   */
+  retestAsked: boolean;
   /**
    * The retranslate test (asked for when the file already had every
    * translation) has a run that has not translated anything yet: still
@@ -71,11 +81,11 @@ export type TourAdvance =
       /** `needs` is waived once this holds: the step's work is already done (saved earlier). */
       unlessDone?: (f: GuideFacts) => boolean;
       /**
-       * Advances by itself when this anchor appears while the step is shown
-       * (absent, then present). Already present on entry does not count, and
-       * Next stays available throughout.
+       * Advances by itself when the app sends this signal while the step is
+       * shown (see `sendTourSignal`): something the step asks for was done,
+       * however many were done before. Next stays available throughout.
        */
-      advanceOnAppear?: string;
+      advanceOnSignal?: TourSignal;
     }
   /** Completes when the anchored control is clicked. */
   | { kind: 'click' }
@@ -103,6 +113,12 @@ export interface TourStep {
   whatKey: string;
   /** Optional: a step that only says where to go needs no explanation. */
   whyKey?: string;
+  /**
+   * Said instead of `whatKey` while the anchor is not on screen (the step
+   * shows centred), when the step's own words would describe a control that
+   * is not there.
+   */
+  absentWhatKey?: string;
   advance: TourAdvance;
   /**
    * Where the callout sits relative to the anchor (default `bottom`; it still
