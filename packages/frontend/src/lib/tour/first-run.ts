@@ -189,6 +189,9 @@ function stallStep(
   return {
     id: STALL_STEP[stall],
     anchor: 'console-status',
+    // Above the console: below it is the window's edge, and a callout over
+    // the console would cover its header (opening it) and its progress.
+    side: 'top',
     ...text,
     advance: { kind: 'state', done: translationSettled },
     actions,
@@ -410,6 +413,7 @@ const SHARED_STEPS: TourStep[] = [
   {
     id: WAITING_STEP,
     anchor: 'console-status',
+    side: 'top',
     titleKey: 'firstRun.translate.title',
     whatKey: 'firstRun.translate.progressWhat',
     whyKey: 'firstRun.translate.progressWhy',
