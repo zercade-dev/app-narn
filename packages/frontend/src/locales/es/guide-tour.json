@@ -400,30 +400,35 @@
       "what": "Un glosario reúne términos con la traducción que quieres para cada uno, como nombres de personajes o jerga del juego.",
       "why": "Las traducciones usan entonces siempre tus palabras en vez de una nueva suposición."
     },
-    "create": {
-      "title": "Crear un glosario",
-      "what": "Pulsa Nuevo glosario, escribe un nombre y pulsa ✓ para crearlo. O pulsa Siguiente para seguir leyendo."
+    "picked": {
+      "title": "Un glosario para tus entradas",
+      "what": "El recorrido eligió {{name}} porque sus términos aparecen en tus entradas. Entradas que coinciden: {{count}}.",
+      "noneWhat": "Ninguno de tus glosarios coincide todavía con tus entradas, así que el recorrido usa {{name}}."
     },
-    "add-term": {
-      "title": "Añadir un término",
-      "what": "Escribe el término original y su traducción en cada idioma, y pulsa Añadir. El término se guarda en el glosario seleccionado a la izquierda.",
-      "absentWhat": "Selecciona a la izquierda un glosario que puedas editar, o crea uno, para añadirle términos.",
-      "why": "Marca un término como constante cuando nunca deba traducirse, como un nombre de marca."
+    "constant": {
+      "title": "La columna Constante",
+      "what": "Una marca en Constante indica que el término nunca se traduce: queda tal cual en todos los idiomas, como una marca o el nombre de un personaje.",
+      "absentWhat": "Selecciona un glosario a la izquierda para ver sus términos y su columna Constante.",
+      "why": "NARN oculta el término constante al proveedor mientras traduce y luego lo devuelve sin cambios."
     },
-    "assign": {
-      "title": "Aplicarlo a este proyecto",
-      "what": "Los glosarios nuevos empiezan activados. Un glosario activado se usa al traducir este proyecto; Deshabilitar lo detiene.",
-      "absentWhat": "Selecciona un glosario a la izquierda. El botón Habilitar o Deshabilitar junto a su nombre decide si este proyecto lo usa."
+    "enable": {
+      "title": "Habilítalo",
+      "what": "Pulsa Habilitar. NARN pregunta si aplicar sus coincidencias: Aplicar coincidencias asigna el glosario a cada entrada que contiene uno de sus términos.",
+      "absentWhat": "Selecciona un glosario a la izquierda y pulsa Habilitar junto a su nombre.",
+      "onWhat": "{{name}} ya está habilitado, así que este proyecto lo usa.",
+      "why": "Al traducir este proyecto solo se usan los glosarios habilitados."
+    },
+    "matches": {
+      "title": "Coincidencias encontradas",
+      "what": "NARN encontró estas entradas por sí solo: cada una contiene un término de {{name}}, y ahora tienen el glosario asignado.",
+      "onlyWhat": "NARN encontró estas entradas por sí solo: cada una contiene un término de {{name}}. Márcalas y pulsa Asignar glosario para usarlo en ellas.",
+      "noneWhat": "Aún ninguna entrada contiene un término de {{name}}. Las que lo contengan aparecerán aquí.",
+      "why": "Un glosario se usa en las entradas que lo tienen asignado."
     },
     "effect": {
       "title": "Cómo cambia la traducción",
       "what": "Cuando un texto contiene un término del glosario, el término y tu traducción se envían junto con el texto.",
       "why": "El proveedor sigue tu elección en vez de elegir su propia palabra."
-    },
-    "generate": {
-      "title": "Deja que la IA sugiera términos",
-      "what": "Pide a un proveedor de IA que encuentre términos probables en tus textos.",
-      "why": "Tú revisas las sugerencias y te quedas solo con las que quieras."
     }
   },
   "orphansTour": {

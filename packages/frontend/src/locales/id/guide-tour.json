@@ -400,30 +400,35 @@
       "what": "Glosarium berisi daftar istilah dengan terjemahan yang Anda inginkan, seperti nama karakter atau jargon game.",
       "why": "Terjemahan pun selalu memakai kata-kata Anda, bukan tebakan baru."
     },
-    "create": {
-      "title": "Buat glosarium",
-      "what": "Tekan Glosarium baru, ketik nama, lalu tekan ✓ untuk membuatnya. Atau tekan Berikutnya untuk lanjut membaca."
+    "picked": {
+      "title": "Glosarium untuk entri Anda",
+      "what": "Tur ini memilih {{name}} karena istilahnya muncul di entri Anda. Entri yang cocok: {{count}}.",
+      "noneWhat": "Belum ada glosarium Anda yang cocok dengan entri Anda, jadi tur ini memakai {{name}}."
     },
-    "add-term": {
-      "title": "Tambahkan istilah",
-      "what": "Ketik istilah sumber dan terjemahannya untuk setiap bahasa, lalu tekan Tambah. Istilah masuk ke glosarium yang dipilih di sebelah kiri.",
-      "absentWhat": "Pilih glosarium yang bisa Anda edit di sebelah kiri, atau buat satu, untuk menambahkan istilah.",
-      "why": "Tandai istilah sebagai konstan bila tidak boleh diterjemahkan, seperti nama merek."
+    "constant": {
+      "title": "Kolom Konstan",
+      "what": "Centang di Konstan berarti istilah itu tidak pernah diterjemahkan: istilah tetap apa adanya di semua bahasa, seperti nama merek atau nama karakter.",
+      "absentWhat": "Pilih glosarium di sebelah kiri untuk melihat istilahnya dan kolom Konstan.",
+      "why": "Saat menerjemahkan, NARN menyembunyikan istilah konstan dari penyedia, lalu mengembalikannya tanpa perubahan."
     },
-    "assign": {
-      "title": "Terapkan ke proyek ini",
-      "what": "Glosarium baru langsung aktif. Glosarium yang aktif dipakai saat proyek ini diterjemahkan; Nonaktifkan menghentikannya.",
-      "absentWhat": "Pilih glosarium di sebelah kiri. Tombol Aktifkan atau Nonaktifkan di samping namanya menentukan apakah proyek ini memakainya."
+    "enable": {
+      "title": "Aktifkan",
+      "what": "Tekan Aktifkan. NARN akan bertanya apakah kecocokannya diterapkan: Terapkan kecocokan menugaskan glosarium ke setiap entri yang berisi salah satu istilahnya.",
+      "absentWhat": "Pilih glosarium di sebelah kiri, lalu tekan Aktifkan di samping namanya.",
+      "onWhat": "{{name}} sudah aktif, jadi proyek ini memakainya.",
+      "why": "Saat proyek ini diterjemahkan, hanya glosarium yang aktif yang dipakai."
+    },
+    "matches": {
+      "title": "Kecocokan yang ditemukan",
+      "what": "NARN menemukan entri ini sendiri: masing-masing berisi istilah dari {{name}}, dan glosarium kini ditugaskan ke entri tersebut.",
+      "onlyWhat": "NARN menemukan entri ini sendiri: masing-masing berisi istilah dari {{name}}. Centang entri itu lalu tekan Tugaskan glosarium untuk memakainya.",
+      "noneWhat": "Belum ada entri yang berisi istilah dari {{name}}. Entri yang berisi akan tampil di sini.",
+      "why": "Glosarium dipakai untuk entri yang ditugaskan kepadanya."
     },
     "effect": {
       "title": "Pengaruhnya pada terjemahan",
       "what": "Saat string berisi istilah glosarium, istilah dan terjemahan Anda dikirim bersama string itu.",
       "why": "Penyedia mengikuti pilihan Anda alih-alih memilih katanya sendiri."
-    },
-    "generate": {
-      "title": "Biarkan AI menyarankan istilah",
-      "what": "Minta penyedia AI menemukan istilah yang mungkin ada di string Anda.",
-      "why": "Anda meninjau sarannya dan hanya menyimpan yang Anda inginkan."
     }
   },
   "orphansTour": {

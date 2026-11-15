@@ -1,7 +1,11 @@
 /**
  * The Glossaries tour, started only from the Guide: a fuller walk through
  * glossaries than the short area offer (`AREA_TOURS.glossary`), which stays
- * as the offer when the tab opens.
+ * as the offer when the tab opens. The owner's tour enables a glossary that
+ * comes with NARN, picked for matching the project's entries
+ * (`pickTourGlossary`), and shows the matches it found. It runs under
+ * `GlossariesTourController`, which picks the glossary and moves the enable
+ * step on.
  */
 import type { GuideFacts, Tour, TourStep } from './types.js';
 
@@ -28,12 +32,20 @@ function step(
  */
 const TO_GLOSSARY: NonNullable<TourStep['navigate']> = { tab: 'glossary' };
 
+export interface GlossariesTourOptions {
+  /** The picked glossary is on already: the enable step only says so. */
+  pickEnabled?: boolean;
+}
+
 /**
- * The AI generation step is shown only when an AI provider key is in the
- * vault. A collaborator cannot create, fill, enable or generate glossaries
- * (those controls are hidden for them), so their tour only explains.
+ * A collaborator cannot enable glossaries (that control is hidden for them),
+ * so their tour only explains.
  */
-export function glossariesTour(f: GuideFacts, collaborator = false): Tour {
+export function glossariesTour(
+  _f: GuideFacts,
+  collaborator = false,
+  { pickEnabled = false }: GlossariesTourOptions = {},
+): Tour {
   const here = (s: TourStep): TourStep => ({ ...s, navigate: TO_GLOSSARY });
   if (collaborator) {
     return {
@@ -46,45 +58,32 @@ export function glossariesTour(f: GuideFacts, collaborator = false): Tour {
     // Every step opens the tab: the person can wander off on an undimmed step.
     steps: (
       [
-        // The glossaries listed, not the buttons above them: creating one is the
-        // next step's. With none yet, a centred callout.
         step('purpose', 'glossary-items'),
-        // Next is always there; creating a glossary (the first or another one)
-        // selects it and moves the tour on.
+        // The picked glossary in the list, selected by the tour. Shown, not
+        // offered: picking another would leave the tour's choice.
+        { ...step('picked', 'glossary-selected'), whyKey: undefined, interactive: false },
+        // Its terms' Constant column, in the card the tour opened.
         {
-          ...step('create', 'glossary-create', {
-            kind: 'next',
-            advanceOnSignal: 'glossary-created',
-            // Typing a name: ✓ creates it (or × cancels) before the tour moves on.
-            blockedBy: 'glossary-name-form',
-          }),
-          // The instruction says it all: no explanation line.
-          whyKey: undefined,
-          // Not dimmed: "New glossary" opens a name field below the button,
-          // outside the spotlight, which must stay usable; the callout sits
-          // beside the list so it does not cover that field.
-          dim: false,
-          side: 'right',
+          ...step('constant', 'glossary-col-constant'),
+          absentWhatKey: 'glossariesTour.constant.absentWhat',
         },
-        // The anchors below exist only for a selected, editable glossary with
-        // its card open: without one, a centred callout saying so.
-        {
-          ...step('add-term', 'glossary-add-term'),
-          absentWhatKey: 'glossariesTour.add-term.absentWhat',
-        },
-        // Enabling a glossary is what applies it to this project. Shown, not
-        // offered: a new glossary is on, and the button would turn it off.
-        {
-          ...step('assign', 'glossary-enabled'),
-          whyKey: undefined,
-          interactive: false,
-          absentWhatKey: 'glossariesTour.assign.absentWhat',
-        },
+        pickEnabled
+          ? {
+              ...step('enable', 'glossary-enabled'),
+              whatKey: 'glossariesTour.enable.onWhat',
+              // Shown, not offered: the button would turn it off.
+              interactive: false as const,
+            }
+          : {
+              // The controller moves on once the glossary is enabled, matches
+              // applied or not; the prompt that asks opens beside the callout.
+              ...step('enable', 'glossary-enabled', { kind: 'manual' }),
+              absentWhatKey: 'glossariesTour.enable.absentWhat',
+            },
+        // The match panel, listing what enabling it found. It opens at the top
+        // (the card above it folds away), so the callout sits below it.
+        step('matches', 'glossary-matches'),
         step('effect', null),
-        // Shown, not offered: its dialog would open under the callout.
-        ...(f.aiKeyUsable
-          ? [{ ...step('generate', 'glossary-generate'), interactive: false as const }]
-          : []),
       ] satisfies TourStep[]
     ).map(here),
   };

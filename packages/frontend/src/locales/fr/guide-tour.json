@@ -400,30 +400,35 @@
       "what": "Un glossaire liste des termes avec la traduction voulue pour chacun, comme des noms de personnages ou le jargon du jeu.",
       "why": "Les traductions reprennent alors vos mots à chaque fois au lieu d’une nouvelle supposition."
     },
-    "create": {
-      "title": "Créer un glossaire",
-      "what": "Appuyez sur Nouveau glossaire, saisissez un nom, puis appuyez sur ✓ pour le créer. Ou appuyez sur Suivant pour poursuivre la lecture."
+    "picked": {
+      "title": "Un glossaire pour vos entrées",
+      "what": "La visite a choisi {{name}}, car ses termes figurent dans vos entrées. Entrées correspondantes : {{count}}.",
+      "noneWhat": "Aucun de vos glossaires ne correspond encore à vos entrées, la visite utilise donc {{name}}."
     },
-    "add-term": {
-      "title": "Ajouter un terme",
-      "what": "Saisissez le terme source et sa traduction dans chaque langue, puis appuyez sur Ajouter. Le terme est placé dans le glossaire sélectionné à gauche.",
-      "absentWhat": "Sélectionnez à gauche un glossaire que vous pouvez modifier, ou créez-en un, pour y ajouter des termes.",
-      "why": "Marquez un terme comme constant quand il ne doit jamais être traduit, comme un nom de marque."
+    "constant": {
+      "title": "La colonne Constante",
+      "what": "Une coche dans Constante signifie que le terme n’est jamais traduit : il reste tel quel dans toutes les langues, comme une marque ou un nom de personnage.",
+      "absentWhat": "Sélectionnez un glossaire à gauche pour voir ses termes et leur colonne Constante.",
+      "why": "NARN cache le terme constant au fournisseur pendant la traduction, puis le remet tel quel."
     },
-    "assign": {
-      "title": "L’appliquer à ce projet",
-      "what": "Les nouveaux glossaires sont activés d’emblée. Un glossaire activé est utilisé quand ce projet est traduit ; Désactiver arrête cela.",
-      "absentWhat": "Sélectionnez un glossaire à gauche. Le bouton Activer ou Désactiver à côté de son nom décide si ce projet l’utilise."
+    "enable": {
+      "title": "Activez-le",
+      "what": "Appuyez sur Activer. NARN demande s’il faut appliquer ses correspondances : Appliquer les correspondances attribue le glossaire à chaque entrée qui contient l’un de ses termes.",
+      "absentWhat": "Sélectionnez un glossaire à gauche, puis appuyez sur Activer à côté de son nom.",
+      "onWhat": "{{name}} est déjà activé : ce projet l’utilise.",
+      "why": "Seuls les glossaires activés servent quand ce projet est traduit."
+    },
+    "matches": {
+      "title": "Correspondances trouvées",
+      "what": "NARN a trouvé ces entrées tout seul : chacune contient un terme de {{name}}, et le glossaire leur est maintenant attribué.",
+      "onlyWhat": "NARN a trouvé ces entrées tout seul : chacune contient un terme de {{name}}. Cochez-les et appuyez sur Attribuer le glossaire pour l’utiliser avec elles.",
+      "noneWhat": "Aucune entrée ne contient encore de terme de {{name}}. Celles qui en contiennent s’afficheront ici.",
+      "why": "Un glossaire sert pour les entrées auxquelles il est attribué."
     },
     "effect": {
       "title": "Ce que cela change à la traduction",
       "what": "Quand un texte contient un terme du glossaire, le terme et votre traduction sont envoyés avec le texte.",
       "why": "Le fournisseur suit votre choix au lieu de choisir son propre mot."
-    },
-    "generate": {
-      "title": "Laisser l’IA proposer des termes",
-      "what": "Demandez à un fournisseur d’IA de trouver les termes probables dans vos textes.",
-      "why": "Vous relisez les suggestions et ne gardez que celles qui vous conviennent."
     }
   },
   "orphansTour": {

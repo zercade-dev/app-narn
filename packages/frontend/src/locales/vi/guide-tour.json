@@ -400,30 +400,35 @@
       "what": "Bảng thuật ngữ liệt kê các thuật ngữ kèm bản dịch bạn muốn, như tên nhân vật hay biệt ngữ trong game.",
       "why": "Khi đó bản dịch luôn dùng từ của bạn thay vì đoán mới mỗi lần."
     },
-    "create": {
-      "title": "Tạo bảng thuật ngữ",
-      "what": "Nhấn Bảng thuật ngữ mới, nhập tên, rồi nhấn ✓ để tạo. Hoặc nhấn Tiếp theo để đọc tiếp."
+    "picked": {
+      "title": "Bảng thuật ngữ cho các mục của bạn",
+      "what": "Hướng dẫn đã chọn {{name}} vì các thuật ngữ của nó xuất hiện trong các mục của bạn. Số mục khớp: {{count}}.",
+      "noneWhat": "Chưa có bảng thuật ngữ nào khớp với các mục của bạn, nên hướng dẫn dùng {{name}}."
     },
-    "add-term": {
-      "title": "Thêm thuật ngữ",
-      "what": "Nhập thuật ngữ nguồn và bản dịch cho từng ngôn ngữ, rồi nhấn Thêm. Thuật ngữ sẽ vào bảng thuật ngữ đang chọn ở bên trái.",
-      "absentWhat": "Chọn một bảng thuật ngữ bạn có thể sửa ở bên trái, hoặc tạo mới, để thêm thuật ngữ.",
-      "why": "Đánh dấu thuật ngữ là cố định khi nó không bao giờ được dịch, như tên thương hiệu."
+    "constant": {
+      "title": "Cột Cố định",
+      "what": "Dấu tích ở cột Cố định nghĩa là thuật ngữ không bao giờ được dịch: nó giữ nguyên trong mọi ngôn ngữ, như tên thương hiệu hay tên nhân vật.",
+      "absentWhat": "Chọn một bảng thuật ngữ bên trái để xem các thuật ngữ và cột Cố định.",
+      "why": "Khi dịch, NARN ẩn thuật ngữ cố định khỏi nhà cung cấp rồi đặt lại nguyên vẹn."
     },
-    "assign": {
-      "title": "Áp dụng cho dự án này",
-      "what": "Bảng thuật ngữ mới được bật ngay từ đầu. Bảng thuật ngữ đang bật sẽ được dùng khi dịch dự án này; nhấn Tắt để ngừng.",
-      "absentWhat": "Chọn một bảng thuật ngữ ở bên trái. Nút Bật hoặc Tắt cạnh tên quyết định dự án này có dùng nó hay không."
+    "enable": {
+      "title": "Bật nó lên",
+      "what": "Nhấn Bật. NARN sẽ hỏi có áp dụng các chỗ khớp không: Áp dụng các chỗ khớp sẽ gán bảng thuật ngữ cho mọi mục chứa một thuật ngữ của nó.",
+      "absentWhat": "Chọn một bảng thuật ngữ bên trái, rồi nhấn Bật cạnh tên của nó.",
+      "onWhat": "{{name}} đã được bật, nên dự án này đang dùng nó.",
+      "why": "Khi dịch dự án này, chỉ các bảng thuật ngữ đã bật mới được dùng."
+    },
+    "matches": {
+      "title": "Các chỗ khớp đã tìm thấy",
+      "what": "NARN tự tìm thấy các mục này: mỗi mục chứa một thuật ngữ từ {{name}}, và giờ bảng thuật ngữ đã được gán cho chúng.",
+      "onlyWhat": "NARN tự tìm thấy các mục này: mỗi mục chứa một thuật ngữ từ {{name}}. Đánh dấu chúng rồi nhấn Gán bảng thuật ngữ để dùng cho chúng.",
+      "noneWhat": "Chưa có mục nào chứa thuật ngữ từ {{name}}. Các mục có chứa sẽ hiện ở đây.",
+      "why": "Bảng thuật ngữ được dùng cho các mục đã được gán nó."
     },
     "effect": {
       "title": "Nó thay đổi bản dịch thế nào",
       "what": "Khi một chuỗi chứa thuật ngữ trong bảng, thuật ngữ đó và bản dịch của bạn được gửi kèm theo chuỗi.",
       "why": "Nhà cung cấp làm theo lựa chọn của bạn thay vì tự chọn từ."
-    },
-    "generate": {
-      "title": "Để AI gợi ý thuật ngữ",
-      "what": "Nhờ một nhà cung cấp AI tìm các thuật ngữ có thể có trong chuỗi của bạn.",
-      "why": "Bạn xem lại các gợi ý và chỉ giữ những gì bạn muốn."
     }
   },
   "orphansTour": {

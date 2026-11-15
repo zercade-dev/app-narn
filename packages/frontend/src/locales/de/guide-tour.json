@@ -400,30 +400,35 @@
       "what": "Ein Glossar listet Begriffe mit der Übersetzung auf, die du für jeden willst, etwa Figurennamen oder Spieljargon.",
       "why": "Übersetzungen verwenden dann jedes Mal deine Wörter statt einer neuen Vermutung."
     },
-    "create": {
-      "title": "Glossar anlegen",
-      "what": "Klicke auf Neues Glossar, gib einen Namen ein und klicke dann auf ✓, um es zu erstellen. Oder klicke auf Weiter, um weiterzulesen."
+    "picked": {
+      "title": "Ein Glossar für deine Einträge",
+      "what": "Die Tour hat {{name}} gewählt, weil seine Begriffe in deinen Einträgen vorkommen. Passende Einträge: {{count}}.",
+      "noneWhat": "Noch passt keines deiner Glossare zu deinen Einträgen, deshalb nutzt die Tour {{name}}."
     },
-    "add-term": {
-      "title": "Begriff hinzufügen",
-      "what": "Gib den Quellbegriff und seine Übersetzung für jede Sprache ein und klicke dann auf Hinzufügen. Der Begriff landet im links ausgewählten Glossar.",
-      "absentWhat": "Wähle links ein Glossar aus, das du bearbeiten kannst, oder erstelle eins, um Begriffe hinzuzufügen.",
-      "why": "Markiere einen Begriff als konstant, wenn er nie übersetzt werden darf, etwa ein Markenname."
+    "constant": {
+      "title": "Die Spalte Konstant",
+      "what": "Ein Haken bei Konstant heißt: Der Begriff wird nie übersetzt und bleibt in jeder Sprache, wie er ist, etwa ein Markenname oder ein Figurenname.",
+      "absentWhat": "Wähle links ein Glossar, um seine Begriffe und die Spalte Konstant zu sehen.",
+      "why": "NARN verbirgt einen konstanten Begriff beim Übersetzen vor dem Anbieter und setzt ihn danach unverändert wieder ein."
     },
-    "assign": {
-      "title": "Auf dieses Projekt anwenden",
-      "what": "Neue Glossare sind von Anfang an aktiviert. Ein aktiviertes Glossar wird beim Übersetzen dieses Projekts verwendet; Deaktivieren beendet das.",
-      "absentWhat": "Wähle links ein Glossar aus. Der Button Aktivieren oder Deaktivieren neben seinem Namen legt fest, ob dieses Projekt es verwendet."
+    "enable": {
+      "title": "Aktiviere es",
+      "what": "Drücke Aktivieren. NARN fragt, ob die Treffer angewendet werden sollen: Treffer anwenden weist das Glossar jedem Eintrag zu, der einen seiner Begriffe enthält.",
+      "absentWhat": "Wähle links ein Glossar und drücke dann Aktivieren neben seinem Namen.",
+      "onWhat": "{{name}} ist schon aktiviert, dieses Projekt nutzt es also.",
+      "why": "Beim Übersetzen dieses Projekts werden nur aktivierte Glossare genutzt."
+    },
+    "matches": {
+      "title": "Gefundene Treffer",
+      "what": "NARN hat diese Einträge selbst gefunden: Jeder enthält einen Begriff aus {{name}}, und das Glossar ist ihnen jetzt zugewiesen.",
+      "onlyWhat": "NARN hat diese Einträge selbst gefunden: Jeder enthält einen Begriff aus {{name}}. Hake sie an und drücke Glossar zuweisen, um es für sie zu nutzen.",
+      "noneWhat": "Noch enthält kein Eintrag einen Begriff aus {{name}}. Einträge, die einen enthalten, erscheinen hier.",
+      "why": "Ein Glossar wird für die Einträge genutzt, denen es zugewiesen ist."
     },
     "effect": {
       "title": "Wie es die Übersetzung verändert",
       "what": "Enthält ein String einen Glossarbegriff, werden der Begriff und deine Übersetzung mit dem String mitgeschickt.",
       "why": "Der Anbieter folgt deiner Wahl, statt ein eigenes Wort zu wählen."
-    },
-    "generate": {
-      "title": "Begriffe von der KI vorschlagen lassen",
-      "what": "Lass einen KI-Anbieter wahrscheinliche Begriffe in deinen Strings finden.",
-      "why": "Du prüfst die Vorschläge und behältst nur die, die du willst."
     }
   },
   "orphansTour": {

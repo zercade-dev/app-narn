@@ -6,6 +6,7 @@
  */
 import type { ComponentType } from 'react';
 import type { ProjectAccessInfo } from '@/stores/project-store';
+import { GlossariesTourController } from '@/components/tour/GlossariesTourController';
 import { OrphansTourController } from '@/components/tour/OrphansTourController';
 import { useGuideStore } from '@/stores/guide-store';
 import type { Tab } from '@/stores/view-store';
@@ -66,6 +67,8 @@ export const TOUR_CATALOG: readonly CatalogTour[] = [
     needsAdvanced: true,
     tab: 'glossary',
     build: ({ facts, access }) => glossariesTour(facts, access.role === 'collaborator'),
+    // Picks the glossary to enable and has the tab show it.
+    controller: GlossariesTourController,
   },
   areaTour('routing'),
   areaTour('quality'),

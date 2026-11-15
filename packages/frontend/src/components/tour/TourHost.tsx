@@ -4,7 +4,6 @@ import { useGuideFacts } from '../../hooks/use-guide-facts.js';
 import { areaTourFor, isAreaTourId } from '../../lib/tour/area-tours.js';
 import { catalogTour, type CatalogTourContext } from '../../lib/tour/catalog.js';
 import { FIRST_RUN_TOUR_ID } from '../../lib/tour/first-run.js';
-import { GLOSSARIES_TOUR_ID } from '../../lib/tour/glossaries-tour.js';
 import { endOrphansTour } from '../../lib/tour/end-orphans-tour.js';
 import { ORPHANS_TOUR_ID } from '../../lib/tour/orphans-tour.js';
 import {
@@ -115,8 +114,6 @@ function RunningTour({ tour, facts }: { tour: Tour; facts: CatalogTourContext['f
     // Leaving an area tour (one the app offers by itself) is a "no thanks":
     // the offer does not come back.
     if (isAreaTourId(id)) store.declineTour(id);
-    // Leaving the Glossaries tour is a "no thanks" to its short offer too.
-    if (id === GLOSSARIES_TOUR_ID) store.declineTour('glossary');
     store.endTour(false);
   }, [id]);
 

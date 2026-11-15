@@ -18,7 +18,6 @@ import type { Glossary, GlossarySummary } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../../hooks/use-api.js';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { sendTourSignal } from '@/lib/tour/signal';
 
 interface GlossarySidebarProps {
   readonly projectId: string;
@@ -71,8 +70,6 @@ export function GlossarySidebar({
       // The new glossary is the one to fill: select it.
       if (created?.id) onSelectGlossary(created.id);
       toast.success(t('toastGlossaryCreated'));
-      // The Glossaries tour's "create a glossary" step moves on.
-      sendTourSignal('glossary-created');
     } catch (err) {
       reportError(err, 'toastGlossaryCreateError');
     }
@@ -200,6 +197,8 @@ export function GlossarySidebar({
                 summary.enabled === false && 'opacity-60',
               )}
               data-testid={`glossary-item-${summary.id}`}
+              // The Glossaries tour shows the glossary it picked and selected.
+              data-tour={isSelected ? 'glossary-selected' : undefined}
             >
               {isRenaming ? (
                 <div className="flex items-center gap-1 w-full">

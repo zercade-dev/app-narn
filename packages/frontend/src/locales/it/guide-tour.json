@@ -400,30 +400,35 @@
       "what": "Un glossario elenca termini con la traduzione che vuoi per ciascuno, come nomi di personaggi o gergo del gioco.",
       "why": "Le traduzioni usano così sempre le tue parole invece di tirare a indovinare."
     },
-    "create": {
-      "title": "Crea un glossario",
-      "what": "Premi Nuovo glossario, scrivi un nome, poi premi ✓ per crearlo. Oppure premi Avanti per continuare a leggere."
+    "picked": {
+      "title": "Un glossario per le tue voci",
+      "what": "Il tour ha scelto {{name}} perché i suoi termini compaiono nelle tue voci. Voci corrispondenti: {{count}}.",
+      "noneWhat": "Nessuno dei tuoi glossari corrisponde ancora alle tue voci, quindi il tour usa {{name}}."
     },
-    "add-term": {
-      "title": "Aggiungi un termine",
-      "what": "Scrivi il termine di origine e la sua traduzione in ogni lingua, poi premi Aggiungi. Il termine va nel glossario selezionato a sinistra.",
-      "absentWhat": "Seleziona a sinistra un glossario che puoi modificare, oppure creane uno, per aggiungervi termini.",
-      "why": "Segna un termine come costante quando non va mai tradotto, come un nome di marchio."
+    "constant": {
+      "title": "La colonna Costante",
+      "what": "Una spunta in Costante significa che il termine non viene mai tradotto: resta così com’è in ogni lingua, come un marchio o il nome di un personaggio.",
+      "absentWhat": "Seleziona un glossario a sinistra per vederne i termini e la colonna Costante.",
+      "why": "Durante la traduzione, NARN nasconde il termine costante al provider e poi lo rimette invariato."
     },
-    "assign": {
-      "title": "Applicalo a questo progetto",
-      "what": "I nuovi glossari partono attivi. Un glossario attivo viene usato quando questo progetto viene tradotto; Disattiva lo interrompe.",
-      "absentWhat": "Seleziona un glossario a sinistra. Il pulsante Attiva o Disattiva accanto al nome decide se questo progetto lo usa."
+    "enable": {
+      "title": "Attivalo",
+      "what": "Premi Attiva. NARN chiede se applicare le corrispondenze: Applica le corrispondenze assegna il glossario a ogni voce che contiene uno dei suoi termini.",
+      "absentWhat": "Seleziona un glossario a sinistra, poi premi Attiva accanto al suo nome.",
+      "onWhat": "{{name}} è già attivo, quindi questo progetto lo usa.",
+      "why": "Quando questo progetto viene tradotto si usano solo i glossari attivi."
+    },
+    "matches": {
+      "title": "Corrispondenze trovate",
+      "what": "NARN ha trovato da solo queste voci: ognuna contiene un termine di {{name}}, e ora il glossario è assegnato a loro.",
+      "onlyWhat": "NARN ha trovato da solo queste voci: ognuna contiene un termine di {{name}}. Spuntale e premi Assegna il glossario per usarlo con loro.",
+      "noneWhat": "Nessuna voce contiene ancora un termine di {{name}}. Quelle che lo contengono compariranno qui.",
+      "why": "Un glossario si usa per le voci a cui è assegnato."
     },
     "effect": {
       "title": "Come cambia la traduzione",
       "what": "Quando un testo contiene un termine del glossario, il termine e la tua traduzione vengono inviati insieme al testo.",
       "why": "Il provider segue la tua scelta invece di sceglierne una sua."
-    },
-    "generate": {
-      "title": "Fatti suggerire i termini dall’IA",
-      "what": "Chiedi a un provider IA di trovare i termini probabili nei tuoi testi.",
-      "why": "Rivedi i suggerimenti e tieni solo quelli che vuoi."
     }
   },
   "orphansTour": {

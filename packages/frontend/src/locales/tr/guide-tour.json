@@ -400,30 +400,35 @@
       "what": "Sözlükçe, her biri için istediğiniz çeviriyle terimleri listeler; karakter adları veya oyun jargonu gibi.",
       "why": "Çeviriler böylece yeni bir tahmin yerine her seferinde sizin sözcüklerinizi kullanır."
     },
-    "create": {
-      "title": "Sözlükçe oluştur",
-      "what": "Yeni sözlükçe'ye basın, bir ad yazın, sonra oluşturmak için ✓'e basın. Ya da okumaya devam etmek için İleri'ye basın."
+    "picked": {
+      "title": "Girdileriniz için bir sözlükçe",
+      "what": "Tur, terimleri girdilerinizde geçtiği için {{name}} sözlükçesini seçti. Eşleşen girdi: {{count}}.",
+      "noneWhat": "Sözlükçelerinizden hiçbiri henüz girdilerinizle eşleşmiyor, bu yüzden tur {{name}} sözlükçesini kullanıyor."
     },
-    "add-term": {
-      "title": "Terim ekle",
-      "what": "Kaynak terimi ve her dildeki çevirisini yazın, sonra Ekle'ye basın. Terim, solda seçili sözlükçeye eklenir.",
-      "absentWhat": "Terim eklemek için solda düzenleyebileceğiniz bir sözlükçe seçin ya da yeni bir tane oluşturun.",
-      "why": "Bir marka adı gibi asla çevrilmemesi gereken bir terimi sabit olarak işaretleyin."
+    "constant": {
+      "title": "Sabit sütunu",
+      "what": "Sabit sütunundaki onay, terimin hiç çevrilmediği anlamına gelir: marka veya karakter adı gibi her dilde olduğu gibi kalır.",
+      "absentWhat": "Terimlerini ve Sabit sütununu görmek için soldan bir sözlükçe seçin.",
+      "why": "NARN çeviri sırasında sabit terimi sağlayıcıdan gizler, sonra değiştirmeden geri koyar."
     },
-    "assign": {
-      "title": "Bu projeye uygula",
-      "what": "Yeni sözlükçeler etkin olarak başlar. Etkin bir sözlükçe bu proje çevrilirken kullanılır; Devre dışı bırak bunu durdurur.",
-      "absentWhat": "Solda bir sözlükçe seçin. Adının yanındaki Etkinleştir veya Devre dışı bırak düğmesi, bu projenin onu kullanıp kullanmayacağını belirler."
+    "enable": {
+      "title": "Etkinleştirin",
+      "what": "Etkinleştir'e basın. NARN eşleşmelerin uygulanıp uygulanmayacağını sorar: Eşleşmeleri uygula, sözlükçeyi terimlerinden birini içeren her girdiye atar.",
+      "absentWhat": "Soldan bir sözlükçe seçin, ardından adının yanındaki Etkinleştir'e basın.",
+      "onWhat": "{{name}} zaten etkin, bu yüzden bu proje onu kullanıyor.",
+      "why": "Bu proje çevrilirken yalnızca etkin sözlükçeler kullanılır."
+    },
+    "matches": {
+      "title": "Bulunan eşleşmeler",
+      "what": "NARN bu girdileri kendisi buldu: her biri {{name}} sözlükçesinden bir terim içeriyor ve sözlükçe artık onlara atandı.",
+      "onlyWhat": "NARN bu girdileri kendisi buldu: her biri {{name}} sözlükçesinden bir terim içeriyor. Onları işaretleyip Sözlükçe ata'ya basarak sözlükçeyi onlar için kullanın.",
+      "noneWhat": "Henüz hiçbir girdi {{name}} sözlükçesinden bir terim içermiyor. İçeren girdiler burada listelenir.",
+      "why": "Bir sözlükçe, atandığı girdiler için kullanılır."
     },
     "effect": {
       "title": "Çeviriyi nasıl değiştirir",
       "what": "Bir metin bir sözlükçe terimi içerdiğinde, terim ve sizin çeviriniz metinle birlikte gönderilir.",
       "why": "Sağlayıcı kendi sözcüğünü seçmek yerine sizin tercihinize uyar."
-    },
-    "generate": {
-      "title": "Terimleri yapay zekâ önersin",
-      "what": "Bir yapay zekâ sağlayıcısından metinlerinizdeki olası terimleri bulmasını isteyin.",
-      "why": "Önerileri siz inceler, yalnızca istediklerinizi tutarsınız."
     }
   },
   "orphansTour": {

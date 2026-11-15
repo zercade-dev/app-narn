@@ -400,30 +400,35 @@
       "what": "Um glossário lista termos com a tradução que você quer para cada um, como nomes de personagens ou jargão do jogo.",
       "why": "As traduções passam a usar suas palavras sempre, em vez de um novo palpite."
     },
-    "create": {
-      "title": "Criar um glossário",
-      "what": "Toque em Novo glossário, digite um nome e toque em ✓ para criá-lo. Ou toque em Próximo para continuar lendo."
+    "picked": {
+      "title": "Um glossário para suas entradas",
+      "what": "O tour escolheu {{name}} porque os termos dele aparecem nas suas entradas. Entradas correspondentes: {{count}}.",
+      "noneWhat": "Nenhum dos seus glossários corresponde às suas entradas ainda, então o tour usa {{name}}."
     },
-    "add-term": {
-      "title": "Adicionar um termo",
-      "what": "Digite o termo de origem e sua tradução em cada idioma e toque em Adicionar. O termo vai para o glossário selecionado à esquerda.",
-      "absentWhat": "Selecione à esquerda um glossário que você pode editar, ou crie um, para adicionar termos a ele.",
-      "why": "Marque um termo como constante quando ele nunca deve ser traduzido, como um nome de marca."
+    "constant": {
+      "title": "A coluna Constante",
+      "what": "Uma marca em Constante significa que o termo nunca é traduzido: ele fica como está em todos os idiomas, como uma marca ou o nome de um personagem.",
+      "absentWhat": "Selecione um glossário à esquerda para ver os termos e a coluna Constante.",
+      "why": "Ao traduzir, o NARN esconde o termo constante do provedor e depois o devolve sem mudanças."
     },
-    "assign": {
-      "title": "Aplicar a este projeto",
-      "what": "Glossários novos já começam ativados. Um glossário ativado é usado quando este projeto é traduzido; Desativar interrompe isso.",
-      "absentWhat": "Selecione um glossário à esquerda. O botão Ativar ou Desativar ao lado do nome decide se este projeto o usa."
+    "enable": {
+      "title": "Ative-o",
+      "what": "Pressione Ativar. O NARN pergunta se deve aplicar as correspondências: Aplicar correspondências atribui o glossário a cada entrada que contém um dos termos dele.",
+      "absentWhat": "Selecione um glossário à esquerda e pressione Ativar ao lado do nome.",
+      "onWhat": "{{name}} já está ativado, então este projeto o usa.",
+      "why": "Ao traduzir este projeto, só os glossários ativados são usados."
+    },
+    "matches": {
+      "title": "Correspondências encontradas",
+      "what": "O NARN encontrou estas entradas sozinho: cada uma contém um termo de {{name}}, e agora o glossário está atribuído a elas.",
+      "onlyWhat": "O NARN encontrou estas entradas sozinho: cada uma contém um termo de {{name}}. Marque-as e pressione Atribuir glossário para usá-lo nelas.",
+      "noneWhat": "Nenhuma entrada contém um termo de {{name}} ainda. As que contiverem aparecerão aqui.",
+      "why": "Um glossário é usado nas entradas às quais está atribuído."
     },
     "effect": {
       "title": "Como ele muda a tradução",
       "what": "Quando um texto contém um termo do glossário, o termo e a sua tradução são enviados junto com o texto.",
       "why": "O provedor segue a sua escolha em vez de escolher a própria palavra."
-    },
-    "generate": {
-      "title": "Deixar a IA sugerir termos",
-      "what": "Peça a um provedor de IA para encontrar termos prováveis nos seus textos.",
-      "why": "Você revisa as sugestões e fica só com as que quiser."
     }
   },
   "orphansTour": {

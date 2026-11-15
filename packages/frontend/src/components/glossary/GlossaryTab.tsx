@@ -14,6 +14,12 @@ import {
 } from 'lucide-react';
 import { cn, errorMessage } from '@/lib/utils';
 import { apiRequest, apiDownload, ApiError } from '../../hooks/use-api.js';
+import {
+  GLOSSARY_TOUR_COMMAND_EVENT,
+  takeGlossaryTourCommand,
+  type GlossaryTourCommand,
+} from '@/lib/tour/glossary-tour-command';
+import { sendTourSignal } from '@/lib/tour/signal';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Input } from '../ui/input';
@@ -247,6 +253,10 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
           body: JSON.stringify({ enabled: true, ...(applyMatches === false && { applyMatches }) }),
         });
         await loadGlossaries();
+        // The Glossaries tour's enable step moves on.
+        sendTourSignal(
+          applyMatches === false ? 'glossary-enabled-only' : 'glossary-enabled-applied',
+        );
       } catch (err) {
         reportError(err, 'toastUpdateError');
       }
@@ -860,6 +870,45 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
     return () => clearTimeout(handle);
   }, [canOpenMatches, glossary, handleSearch, userPickedMatchCriteria]);
 
+  // The Glossaries tour shows the glossary it picked, then the entries its
+  // terms match (`GlossaryTourCommand`). Matching is by the terms alone: the
+  // assignment that "Apply matches" makes lands in the background.
+  const [tourMatches, setTourMatches] = useState<string | null>(null);
+  useEffect(() => {
+    const apply = (command: GlossaryTourCommand) => {
+      setSelectedGlossaryId(command.id);
+      if (command.kind === 'select') {
+        setTourMatches(null);
+        setMainOpen(true);
+        setMatchResults(null);
+        return;
+      }
+      setMatchTermId('__all__');
+      setMatchAssignment(command.applied ? 'with' : 'without');
+      setTourMatches(command.id);
+      // The assignments the sync made, for the panel's own filters afterwards.
+      void Promise.resolve(fetchEntries(projectId)).catch(() => {});
+    };
+    const onCommand = () => {
+      const command = takeGlossaryTourCommand();
+      if (command) apply(command);
+    };
+    // One sent before this tab mounted.
+    onCommand();
+    globalThis.addEventListener(GLOSSARY_TOUR_COMMAND_EVENT, onCommand);
+    return () => globalThis.removeEventListener(GLOSSARY_TOUR_COMMAND_EVENT, onCommand);
+  }, [fetchEntries, projectId]);
+  // Once the glossary asked for is loaded, during render like the resets above.
+  if (tourMatches !== null && glossary?.id === tourMatches) {
+    setTourMatches(null);
+    setMainOpen(false);
+    setSelectedEntryIds(new Set());
+    const sources = visibleTerms.map((trm) => trm.source);
+    setMatchResults(
+      allEntries.filter((entry) => sources.some((src) => termMatchesText(src, entry.sourceText))),
+    );
+  }
+
   // DeepL copy is stale when the glossary changed (e.g. via import) after the
   // last recorded push.
   const repushNeeded =
@@ -1113,7 +1162,9 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                         {activeLanguages.map((lang) => (
                           <TableHead key={lang}>{LANG_NAMES[lang] ?? lang}</TableHead>
                         ))}
-                        <TableHead className="w-24">{t('colConstant')}</TableHead>
+                        <TableHead className="w-24" data-tour="glossary-col-constant">
+                          {t('colConstant')}
+                        </TableHead>
                         {!isReadOnly && <TableHead>{t('colNotes')}</TableHead>}
                         {!isReadOnly && (
                           <TableHead className="sticky right-0 z-10 w-32 bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted">
@@ -1265,25 +1316,27 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
 
         {/* Matches panel — only shown when a glossary is selected */}
         {glossary && (
-          <GlossaryMatchPanel
-            matchResults={matchResults}
-            matchTermId={matchTermId}
-            matchAssignment={matchAssignment}
-            visibleTerms={visibleTerms}
-            selectedEntryIds={selectedEntryIds}
-            assigningBusy={assigningBusy}
-            canOpenMatches={canOpenMatches}
-            canAssign={!isCollaborator}
-            onMatchTermIdChange={handleMatchTermIdChange}
-            onMatchAssignmentChange={handleMatchAssignmentChange}
-            onSetMainOpen={setMainOpen}
-            onSetMatchResults={setMatchResults}
-            onSearch={handleSearch}
-            onToggleAllEntriesSelected={toggleAllEntriesSelected}
-            onToggleEntrySelected={toggleEntrySelected}
-            onAssignGlossary={handleAssignGlossary}
-            onUnassignGlossary={handleUnassignGlossary}
-          />
+          <div data-tour="glossary-matches">
+            <GlossaryMatchPanel
+              matchResults={matchResults}
+              matchTermId={matchTermId}
+              matchAssignment={matchAssignment}
+              visibleTerms={visibleTerms}
+              selectedEntryIds={selectedEntryIds}
+              assigningBusy={assigningBusy}
+              canOpenMatches={canOpenMatches}
+              canAssign={!isCollaborator}
+              onMatchTermIdChange={handleMatchTermIdChange}
+              onMatchAssignmentChange={handleMatchAssignmentChange}
+              onSetMainOpen={setMainOpen}
+              onSetMatchResults={setMatchResults}
+              onSearch={handleSearch}
+              onToggleAllEntriesSelected={toggleAllEntriesSelected}
+              onToggleEntrySelected={toggleEntrySelected}
+              onAssignGlossary={handleAssignGlossary}
+              onUnassignGlossary={handleUnassignGlossary}
+            />
+          </div>
         )}
       </div>
 

@@ -400,30 +400,35 @@
       "what": "A glossary lists terms with the translation you want for each, such as character names or game jargon.",
       "why": "Translations then use your words every time instead of a new guess."
     },
-    "create": {
-      "title": "Create a glossary",
-      "what": "Press New glossary, type a name, then press ✓ to create it. Or press Next to read on."
+    "picked": {
+      "title": "A glossary for your entries",
+      "what": "The tour picked {{name}} because its terms appear in your entries. Matching entries: {{count}}.",
+      "noneWhat": "None of your glossaries match your entries yet, so the tour uses {{name}}."
     },
-    "add-term": {
-      "title": "Add a term",
-      "what": "Type the source term and its translation for each language, then press Add. The term goes into the glossary selected on the left.",
-      "absentWhat": "Select a glossary you can edit on the left, or create one, to add terms to it.",
-      "why": "Mark a term as constant when it must never be translated, such as a brand name."
+    "constant": {
+      "title": "The Constant column",
+      "what": "A tick under Constant means the term is never translated: it stays as written in every language, like a brand or a character name.",
+      "absentWhat": "Select a glossary on the left to see its terms and their Constant column.",
+      "why": "NARN hides a constant term from the provider while it translates, then puts it back unchanged."
     },
-    "assign": {
-      "title": "Apply it to this project",
-      "what": "New glossaries start enabled. An enabled glossary is used when this project is translated; Disable stops that.",
-      "absentWhat": "Select a glossary on the left. The Enable or Disable button beside its name decides whether this project uses it."
+    "enable": {
+      "title": "Enable it",
+      "what": "Press Enable. NARN asks whether to apply its matches: Apply matches assigns the glossary to every entry that contains one of its terms.",
+      "absentWhat": "Select a glossary on the left, then press Enable beside its name.",
+      "onWhat": "{{name}} is already enabled, so this project uses it.",
+      "why": "Only enabled glossaries are used when this project is translated."
+    },
+    "matches": {
+      "title": "Matches found for you",
+      "what": "NARN found these entries by itself: each contains a term from {{name}}, and the glossary is now assigned to them.",
+      "onlyWhat": "NARN found these entries by itself: each contains a term from {{name}}. Tick them and press Assign glossary to use it for them.",
+      "noneWhat": "No entry contains a term from {{name}} yet. Entries that do will be listed here.",
+      "why": "A glossary is used for the entries it is assigned to."
     },
     "effect": {
       "title": "How it changes translation",
       "what": "When a string contains a glossary term, the term and your translation of it are sent along with the string.",
       "why": "The provider follows your choice instead of picking its own word."
-    },
-    "generate": {
-      "title": "Let AI suggest terms",
-      "what": "Ask an AI provider to find likely terms in your strings.",
-      "why": "You review the suggestions and keep only the ones you want."
     }
   },
   "orphansTour": {
