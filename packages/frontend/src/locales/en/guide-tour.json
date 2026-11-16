@@ -147,7 +147,7 @@
     },
     "moreTours": {
       "title": "More guided tours",
-      "what": "Short tours of glossaries, orphans, routing and more are in Guide. Start one whenever you like."
+      "what": "Short tours of glossaries, routing and more are in Guide. Start one whenever you like."
     }
   },
   "providerChoice": {
@@ -186,6 +186,10 @@
     "routing": {
       "name": "Routing",
       "summary": "A 30-second look at how NARN picks who translates what."
+    },
+    "routing-advanced": {
+      "name": "Advanced routing rules",
+      "summary": "Rules that send each language or kind of text to the provider you choose."
     },
     "quality": {
       "name": "Quality",
@@ -231,7 +235,8 @@
       "mode": {
         "title": "Simple or advanced rules",
         "what": "Switch here between one provider for everything and a list of rules.",
-        "why": "Start simple. Move to rules when you want a different provider for a language, a category or a tone."
+        "why": "Start simple. Move to rules when you want a different provider for a language, a category or a tone.",
+        "advancedAction": "Explain Advanced rules"
       }
     },
     "glossary": {
@@ -317,6 +322,38 @@
         "what": "Review all translations in the project, not only the latest run.",
         "why": "Use it before a release, or after you changed the glossary or routing."
       }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Rules, checked from the top",
+      "what": "Each rule names a provider and the entries it handles. NARN checks the rules from the top, and the first rule that fits an entry translates it.",
+      "why": "An entry no rule fits is not translated, so end with a rule that fits everything."
+    },
+    "add": {
+      "title": "Add a rule",
+      "what": "Add rule creates one: pick its provider, then narrow it down by target language, source, category, tone or entry length.",
+      "why": "A filter you leave empty fits every entry."
+    },
+    "templates": {
+      "title": "Templates",
+      "what": "Ready-made rules. Use template adds one to this project's rules.",
+      "why": "A quick start you can adjust afterwards."
+    },
+    "groups": {
+      "title": "Rule groups",
+      "what": "A rule group is a separate set of rules. Translations use the group selected here.",
+      "why": "Keep another set ready, for example to test a provider, and switch between them."
+    },
+    "import": {
+      "title": "Import / Export",
+      "what": "Save the rules as a JSON file, or load rules from one.",
+      "why": "Reuse the same routing in another project."
+    },
+    "back": {
+      "title": "Back to Simple",
+      "what": "Press Simple to see the one-provider view again. Your rules stay as they are.",
+      "why": "Simple shows when your rules amount to one provider for everything."
     }
   },
   "advancedSections": {

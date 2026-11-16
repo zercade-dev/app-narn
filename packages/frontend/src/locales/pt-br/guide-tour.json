@@ -147,7 +147,7 @@
     },
     "moreTours": {
       "title": "Mais tours guiados",
-      "what": "No Guia há tours rápidos sobre glossários, órfãos, roteamento e mais. Comece um quando quiser."
+      "what": "No Guia há tours rápidos sobre glossários, roteamento e mais. Comece um quando quiser."
     }
   },
   "providerChoice": {
@@ -186,6 +186,10 @@
     "routing": {
       "name": "Roteamento",
       "summary": "Uma olhada de 30 segundos em como o NARN decide quem traduz o quê."
+    },
+    "routing-advanced": {
+      "name": "Regras de roteamento avançadas",
+      "summary": "Regras que mandam cada idioma ou tipo de texto para o provedor que você escolher."
     },
     "quality": {
       "name": "Qualidade",
@@ -231,7 +235,8 @@
       "mode": {
         "title": "Regras simples ou avançadas",
         "what": "Aqui você alterna entre um provedor para tudo e uma lista de regras.",
-        "why": "Comece pelo simples. Passe para as regras quando quiser outro provedor para um idioma, uma categoria ou um tom."
+        "why": "Comece pelo simples. Passe para as regras quando quiser outro provedor para um idioma, uma categoria ou um tom.",
+        "advancedAction": "Explicar as regras avançadas"
       }
     },
     "glossary": {
@@ -317,6 +322,38 @@
         "what": "Revise todas as traduções do projeto, não só a última execução.",
         "why": "Use antes de um lançamento ou depois de mudar o glossário ou o roteamento."
       }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Regras, lidas de cima para baixo",
+      "what": "Cada regra indica um provedor e as entradas que ele cuida. O NARN confere as regras de cima para baixo, e a primeira que serve para uma entrada a traduz.",
+      "why": "Uma entrada que nenhuma regra atende não é traduzida, então termine com uma regra que sirva para tudo."
+    },
+    "add": {
+      "title": "Adicionar uma regra",
+      "what": "Adicionar regra cria uma: escolha o provedor e restrinja por idioma de destino, origem, categoria, tom ou tamanho da entrada.",
+      "why": "Um filtro deixado vazio serve para todas as entradas."
+    },
+    "templates": {
+      "title": "Templates",
+      "what": "Regras prontas. Usar template adiciona uma às regras deste projeto.",
+      "why": "Um começo rápido que você ajusta depois."
+    },
+    "groups": {
+      "title": "Grupos de regras",
+      "what": "Um grupo de regras é um conjunto separado de regras. As traduções usam o grupo selecionado aqui.",
+      "why": "Deixe outro conjunto pronto, por exemplo para testar um provedor, e alterne entre eles."
+    },
+    "import": {
+      "title": "Importação / Exportação",
+      "what": "Salve as regras em um arquivo JSON ou carregue regras de um.",
+      "why": "Reaproveite o mesmo roteamento em outro projeto."
+    },
+    "back": {
+      "title": "Voltar ao Simples",
+      "what": "Pressione Simples para ver de novo a visão com um só provedor. Suas regras ficam como estão.",
+      "why": "Simples aparece quando suas regras equivalem a um só provedor para tudo."
     }
   },
   "advancedSections": {

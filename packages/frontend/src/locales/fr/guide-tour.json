@@ -147,7 +147,7 @@
     },
     "moreTours": {
       "title": "Plus de visites guidées",
-      "what": "Des visites courtes sur les glossaires, les orphelins, le routage et plus encore se trouvent dans Guide. Lancez-en une quand vous voulez."
+      "what": "Des visites courtes sur les glossaires, le routage et plus encore se trouvent dans Guide. Lancez-en une quand vous voulez."
     }
   },
   "providerChoice": {
@@ -186,6 +186,10 @@
     "routing": {
       "name": "Routage",
       "summary": "Un aperçu de 30 secondes de la façon dont NARN choisit qui traduit quoi."
+    },
+    "routing-advanced": {
+      "name": "Règles de routage avancées",
+      "summary": "Des règles qui envoient chaque langue ou type de texte au fournisseur de votre choix."
     },
     "quality": {
       "name": "Qualité",
@@ -231,7 +235,8 @@
       "mode": {
         "title": "Règles simples ou avancées",
         "what": "Basculez ici entre un seul fournisseur pour tout et une liste de règles.",
-        "why": "Commencez simple. Passez aux règles quand vous voulez un autre fournisseur pour une langue, une catégorie ou un ton."
+        "why": "Commencez simple. Passez aux règles quand vous voulez un autre fournisseur pour une langue, une catégorie ou un ton.",
+        "advancedAction": "Expliquer les règles avancées"
       }
     },
     "glossary": {
@@ -317,6 +322,38 @@
         "what": "Révisez toutes les traductions du projet, pas seulement la dernière exécution.",
         "why": "À utiliser avant une version, ou après avoir modifié le glossaire ou le routage."
       }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Des règles lues de haut en bas",
+      "what": "Chaque règle désigne un fournisseur et les entrées qu’il traite. NARN lit les règles de haut en bas, et la première qui convient à une entrée la traduit.",
+      "why": "Une entrée qu’aucune règle ne couvre n’est pas traduite : terminez par une règle qui couvre tout."
+    },
+    "add": {
+      "title": "Ajouter une règle",
+      "what": "Ajouter une règle en crée une : choisissez son fournisseur, puis restreignez-la par langue cible, source, catégorie, ton ou longueur d’entrée.",
+      "why": "Un filtre laissé vide convient à toutes les entrées."
+    },
+    "templates": {
+      "title": "Modèles",
+      "what": "Des règles toutes prêtes. Utiliser le modèle en ajoute une aux règles de ce projet.",
+      "why": "Un départ rapide que vous ajustez ensuite."
+    },
+    "groups": {
+      "title": "Groupes de règles",
+      "what": "Un groupe de règles est un ensemble de règles à part. Les traductions utilisent le groupe sélectionné ici.",
+      "why": "Gardez un autre ensemble prêt, par exemple pour tester un fournisseur, et passez de l’un à l’autre."
+    },
+    "import": {
+      "title": "Importer / Exporter",
+      "what": "Enregistrez les règles dans un fichier JSON, ou chargez des règles depuis un tel fichier.",
+      "why": "Réutilisez le même routage dans un autre projet."
+    },
+    "back": {
+      "title": "Revenir à Simple",
+      "what": "Appuyez sur Simple pour retrouver la vue à un seul fournisseur. Vos règles restent telles quelles.",
+      "why": "Simple s’affiche quand vos règles reviennent à un seul fournisseur pour tout."
     }
   },
   "advancedSections": {

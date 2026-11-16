@@ -147,7 +147,7 @@
     },
     "moreTours": {
       "title": "Thêm hướng dẫn có dẫn dắt",
-      "what": "Các hướng dẫn ngắn về bảng thuật ngữ, mục mồ côi, điều phối và nhiều nội dung khác nằm trong Hướng dẫn. Bắt đầu bất cứ lúc nào."
+      "what": "Các hướng dẫn ngắn về bảng thuật ngữ, điều phối và nhiều nội dung khác nằm trong Hướng dẫn. Bắt đầu bất cứ lúc nào."
     }
   },
   "providerChoice": {
@@ -186,6 +186,10 @@
     "routing": {
       "name": "Điều phối",
       "summary": "Xem nhanh trong 30 giây cách NARN chọn ai dịch nội dung nào."
+    },
+    "routing-advanced": {
+      "name": "Quy tắc định tuyến nâng cao",
+      "summary": "Các quy tắc gửi từng ngôn ngữ hoặc loại văn bản đến nhà cung cấp bạn chọn."
     },
     "quality": {
       "name": "Chất lượng",
@@ -231,7 +235,8 @@
       "mode": {
         "title": "Quy tắc đơn giản hoặc nâng cao",
         "what": "Tại đây bạn chuyển giữa một nhà cung cấp cho mọi thứ và một danh sách quy tắc.",
-        "why": "Hãy bắt đầu đơn giản. Chuyển sang quy tắc khi bạn muốn dùng nhà cung cấp khác cho một ngôn ngữ, một danh mục hoặc một sắc thái."
+        "why": "Hãy bắt đầu đơn giản. Chuyển sang quy tắc khi bạn muốn dùng nhà cung cấp khác cho một ngôn ngữ, một danh mục hoặc một sắc thái.",
+        "advancedAction": "Giải thích quy tắc nâng cao"
       }
     },
     "glossary": {
@@ -317,6 +322,38 @@
         "what": "Rà soát mọi bản dịch trong dự án, không chỉ lượt chạy mới nhất.",
         "why": "Dùng trước khi phát hành, hoặc sau khi bạn đổi bảng thuật ngữ hoặc điều phối."
       }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Quy tắc được xét từ trên xuống",
+      "what": "Mỗi quy tắc chỉ định một nhà cung cấp và các mục nó xử lý. NARN xét các quy tắc từ trên xuống, và quy tắc đầu tiên khớp với một mục sẽ dịch mục đó.",
+      "why": "Mục không khớp quy tắc nào sẽ không được dịch, nên hãy kết thúc bằng một quy tắc áp dụng cho mọi thứ."
+    },
+    "add": {
+      "title": "Thêm một quy tắc",
+      "what": "Thêm quy tắc tạo một quy tắc: chọn nhà cung cấp, rồi thu hẹp theo ngôn ngữ đích, nguồn, danh mục, giọng điệu hoặc độ dài mục.",
+      "why": "Bộ lọc để trống áp dụng cho mọi mục."
+    },
+    "templates": {
+      "title": "Mẫu",
+      "what": "Các quy tắc soạn sẵn. Dùng mẫu thêm một mẫu vào quy tắc của dự án này.",
+      "why": "Một khởi đầu nhanh bạn có thể chỉnh sau."
+    },
+    "groups": {
+      "title": "Nhóm quy tắc",
+      "what": "Nhóm quy tắc là một bộ quy tắc riêng. Bản dịch dùng nhóm được chọn ở đây.",
+      "why": "Chuẩn bị sẵn một bộ khác, chẳng hạn để thử một nhà cung cấp, và chuyển qua lại."
+    },
+    "import": {
+      "title": "Nhập / Xuất",
+      "what": "Lưu quy tắc thành tệp JSON hoặc nạp quy tắc từ tệp.",
+      "why": "Dùng lại cùng cách định tuyến trong dự án khác."
+    },
+    "back": {
+      "title": "Quay lại Đơn giản",
+      "what": "Nhấn Đơn giản để xem lại chế độ một nhà cung cấp. Quy tắc của bạn vẫn giữ nguyên.",
+      "why": "Đơn giản hiển thị khi quy tắc của bạn tương đương một nhà cung cấp cho mọi thứ."
     }
   },
   "advancedSections": {

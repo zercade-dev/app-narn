@@ -160,6 +160,11 @@ export interface TourStep {
   /** Opened when the step becomes current. */
   navigate?: { tab?: Tab; view?: ShellView };
   /**
+   * Run when the step becomes current, after `navigate`: shows what the step
+   * is about inside the page (a tab of the routing editor).
+   */
+  onEnter?: () => void;
+  /**
    * Extra callout buttons. `labelKey` is in the `guide-tour` namespace;
    * `primary` marks the recommended choice.
    */

@@ -1,4 +1,8 @@
-import { useState, useRef, useContext } from 'react';
+import { useState, useRef, useContext, useEffect } from 'react';
+import {
+  ROUTING_EDITOR_TAB_EVENT,
+  takeRoutingEditorTab,
+} from '../../lib/tour/routing-advanced-tour.js';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowDown,
@@ -365,6 +369,17 @@ export function BatchConfigEditor({
   const { t: tBatch } = useTranslation('batch');
   const importRef = useRef<HTMLInputElement>(null);
   const [editorTab, setEditorTab] = useState<EditorTab>('rules');
+  // The Advanced routing rules tour opens the tab its step is about (one asked
+  // for before this editor mounted is taken on mount).
+  useEffect(() => {
+    const onAsk = () => {
+      const tab = takeRoutingEditorTab();
+      if (tab) setEditorTab(tab);
+    };
+    onAsk();
+    globalThis.addEventListener(ROUTING_EDITOR_TAB_EVENT, onAsk);
+    return () => globalThis.removeEventListener(ROUTING_EDITOR_TAB_EVENT, onAsk);
+  }, []);
   // Base modules that already have named instances are routed via those
   // instances, not the bare base; instanceable bases without instances stay
   // selectable as themselves.
@@ -392,7 +407,10 @@ export function BatchConfigEditor({
             </p>
           )}
 
-          <div className="grid gap-2 md:grid-cols-[220px_1fr_auto_auto] md:items-end">
+          <div
+            className="grid gap-2 md:grid-cols-[220px_1fr_auto_auto] md:items-end"
+            data-tour="routing-groups"
+          >
             <div>
               <Label htmlFor="routing-group-select">{t('routing.groupSelectLabel')}</Label>
               <Select
@@ -502,7 +520,7 @@ export function BatchConfigEditor({
             <TabsTrigger value="advanced">{t('routing.tabImportExport')}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="rules" className="space-y-3 pt-3">
+          <TabsContent value="rules" className="space-y-3 pt-3" data-tour="routing-rules">
             {draft.length === 0 && (
               <p className="text-sm text-muted-foreground">{t('routing.noRules')}</p>
             )}
@@ -1234,7 +1252,13 @@ export function BatchConfigEditor({
 
             <div className="flex flex-col items-end gap-1 pt-1">
               <div className="flex w-full items-center justify-between gap-3">
-                <Button onClick={onAdd} variant="outline" size="sm" data-testid="routing-add">
+                <Button
+                  onClick={onAdd}
+                  variant="outline"
+                  size="sm"
+                  data-testid="routing-add"
+                  data-tour="routing-add"
+                >
                   {t('routing.addRule')}
                 </Button>
               </div>
@@ -1244,11 +1268,18 @@ export function BatchConfigEditor({
             </div>
           </TabsContent>
 
-          <TabsContent value="templates" className="pt-3">
+          {/* The Advanced routing rules tour points at the first template (with
+              its Use template), or at the tab while there is none. */}
+          <TabsContent
+            value="templates"
+            className="pt-3"
+            data-tour={defaultRules.length === 0 ? 'routing-templates' : undefined}
+          >
             <div className="space-y-1">
-              {defaultRules.map((dr) => (
+              {defaultRules.map((dr, i) => (
                 <div
                   key={dr.id}
+                  data-tour={i === 0 ? 'routing-templates' : undefined}
                   className="flex items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground"
                 >
                   <div className="flex items-center gap-1">
@@ -1274,7 +1305,7 @@ export function BatchConfigEditor({
             </div>
           </TabsContent>
 
-          <TabsContent value="advanced" className="pt-3 space-y-3">
+          <TabsContent value="advanced" className="pt-3 space-y-3" data-tour="routing-import">
             <p className="text-sm text-muted-foreground">{t('routing.importExportHint')}</p>
             <div className="flex gap-2">
               <Button

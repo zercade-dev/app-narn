@@ -147,7 +147,7 @@
     },
     "moreTours": {
       "title": "Tur terpandu lainnya",
-      "what": "Tur singkat tentang glosarium, entri yatim, penyaluran, dan lainnya ada di Panduan. Mulai kapan saja."
+      "what": "Tur singkat tentang glosarium, penyaluran, dan lainnya ada di Panduan. Mulai kapan saja."
     }
   },
   "providerChoice": {
@@ -186,6 +186,10 @@
     "routing": {
       "name": "Penyaluran",
       "summary": "Sekilas 30 detik tentang cara NARN memilih siapa yang menerjemahkan apa."
+    },
+    "routing-advanced": {
+      "name": "Aturan perutean lanjutan",
+      "summary": "Aturan yang mengirim setiap bahasa atau jenis teks ke penyedia pilihan Anda."
     },
     "quality": {
       "name": "Kualitas",
@@ -231,7 +235,8 @@
       "mode": {
         "title": "Aturan sederhana atau lanjutan",
         "what": "Di sini Anda beralih antara satu penyedia untuk semuanya dan daftar aturan.",
-        "why": "Mulailah dari yang sederhana. Beralihlah ke aturan saat Anda ingin penyedia berbeda untuk suatu bahasa, kategori, atau nada."
+        "why": "Mulailah dari yang sederhana. Beralihlah ke aturan saat Anda ingin penyedia berbeda untuk suatu bahasa, kategori, atau nada.",
+        "advancedAction": "Jelaskan aturan lanjutan"
       }
     },
     "glossary": {
@@ -317,6 +322,38 @@
         "what": "Tinjau semua terjemahan dalam proyek, bukan hanya proses terakhir.",
         "why": "Gunakan sebelum rilis, atau setelah Anda mengubah glosarium atau penyaluran."
       }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Aturan diperiksa dari atas",
+      "what": "Setiap aturan menyebut penyedia dan entri yang ditanganinya. NARN memeriksa aturan dari atas, dan aturan pertama yang cocok dengan sebuah entri yang menerjemahkannya.",
+      "why": "Entri yang tidak cocok dengan aturan mana pun tidak diterjemahkan, jadi akhiri dengan aturan yang cocok untuk semuanya."
+    },
+    "add": {
+      "title": "Tambahkan aturan",
+      "what": "Tambah aturan membuat aturan: pilih penyedianya, lalu persempit menurut bahasa target, sumber, kategori, nada, atau panjang entri.",
+      "why": "Filter yang dibiarkan kosong cocok untuk semua entri."
+    },
+    "templates": {
+      "title": "Templat",
+      "what": "Aturan siap pakai. Pakai templat menambahkan satu ke aturan proyek ini.",
+      "why": "Awal cepat yang bisa Anda sesuaikan nanti."
+    },
+    "groups": {
+      "title": "Grup aturan",
+      "what": "Grup aturan adalah kumpulan aturan tersendiri. Terjemahan memakai grup yang dipilih di sini.",
+      "why": "Siapkan kumpulan lain, misalnya untuk menguji penyedia, lalu beralih di antara keduanya."
+    },
+    "import": {
+      "title": "Impor / Ekspor",
+      "what": "Simpan aturan sebagai file JSON, atau muat aturan dari file.",
+      "why": "Pakai perutean yang sama di proyek lain."
+    },
+    "back": {
+      "title": "Kembali ke Sederhana",
+      "what": "Tekan Sederhana untuk melihat lagi tampilan satu penyedia. Aturan Anda tetap seperti semula.",
+      "why": "Sederhana muncul jika aturan Anda sama dengan satu penyedia untuk semuanya."
     }
   },
   "advancedSections": {

@@ -147,7 +147,7 @@
     },
     "moreTours": {
       "title": "Altri tour guidati",
-      "what": "Nella Guida trovi brevi tour su glossari, orfane, routing e altro. Avviane uno quando vuoi."
+      "what": "Nella Guida trovi brevi tour su glossari, routing e altro. Avviane uno quando vuoi."
     }
   },
   "providerChoice": {
@@ -186,6 +186,10 @@
     "routing": {
       "name": "Routing",
       "summary": "Una panoramica di 30 secondi su come NARN sceglie chi traduce cosa."
+    },
+    "routing-advanced": {
+      "name": "Regole di routing avanzate",
+      "summary": "Regole che inviano ogni lingua o tipo di testo al provider che scegli."
     },
     "quality": {
       "name": "Qualità",
@@ -231,7 +235,8 @@
       "mode": {
         "title": "Regole semplici o avanzate",
         "what": "Qui passi da un solo provider per tutto a un elenco di regole.",
-        "why": "Parti dal semplice. Passa alle regole quando vuoi un provider diverso per una lingua, una categoria o un tono."
+        "why": "Parti dal semplice. Passa alle regole quando vuoi un provider diverso per una lingua, una categoria o un tono.",
+        "advancedAction": "Spiega le regole avanzate"
       }
     },
     "glossary": {
@@ -317,6 +322,38 @@
         "what": "Rivedi tutte le traduzioni del progetto, non solo l’ultima esecuzione.",
         "why": "Usalo prima di una release o dopo aver cambiato il glossario o il routing."
       }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Regole, lette dall’alto",
+      "what": "Ogni regola indica un provider e le voci che gestisce. NARN controlla le regole dall’alto, e la prima che si adatta a una voce la traduce.",
+      "why": "Una voce a cui non si adatta nessuna regola non viene tradotta: chiudi l’elenco con una regola valida per tutto."
+    },
+    "add": {
+      "title": "Aggiungi una regola",
+      "what": "Aggiungi una regola ne crea una: scegli il provider, poi restringila per lingua di destinazione, origine, categoria, tono o lunghezza della voce.",
+      "why": "Un filtro lasciato vuoto vale per tutte le voci."
+    },
+    "templates": {
+      "title": "Schemi",
+      "what": "Regole già pronte. Usa uno schema ne aggiunge una alle regole di questo progetto.",
+      "why": "Un avvio rapido da regolare poi."
+    },
+    "groups": {
+      "title": "Gruppi di regole",
+      "what": "Un gruppo di regole è un insieme di regole a parte. Le traduzioni usano il gruppo selezionato qui.",
+      "why": "Tieni pronto un altro insieme, ad esempio per provare un provider, e passa dall’uno all’altro."
+    },
+    "import": {
+      "title": "Importazione / Esportazione",
+      "what": "Salva le regole in un file JSON o carica regole da un file.",
+      "why": "Riusa lo stesso routing in un altro progetto."
+    },
+    "back": {
+      "title": "Torna a Semplice",
+      "what": "Premi Semplice per rivedere la vista con un solo provider. Le tue regole restano come sono.",
+      "why": "Semplice compare quando le tue regole equivalgono a un solo provider per tutto."
     }
   },
   "advancedSections": {

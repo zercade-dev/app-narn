@@ -4,6 +4,7 @@ import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { GLOSSARIES_TOUR_ID } from '../../lib/tour/glossaries-tour.js';
 import { isAreaTourId } from '../../lib/tour/area-tours.js';
+import { tourHidden } from '../../lib/tour/catalog.js';
 import { useGuideStore } from '../../stores/guide-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
@@ -39,7 +40,8 @@ export function AreaTourOffer() {
   );
 
   if (!advanced || !tourOffers || !inProject || !hasProject || firstRunActive || taken) return null;
-  if (!isAreaTourId(tab)) return null;
+  // A tour held back from this release is not offered either.
+  if (!isAreaTourId(tab) || tourHidden(tab)) return null;
 
   return (
     <section

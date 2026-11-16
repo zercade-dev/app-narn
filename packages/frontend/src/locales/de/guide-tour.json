@@ -147,7 +147,7 @@
     },
     "moreTours": {
       "title": "Weitere geführte Touren",
-      "what": "Kurze Touren zu Glossaren, Waisen, Routing und mehr findest du im Guide. Starte eine, wann immer du möchtest."
+      "what": "Kurze Touren zu Glossaren, Routing und mehr findest du im Guide. Starte eine, wann immer du möchtest."
     }
   },
   "providerChoice": {
@@ -186,6 +186,10 @@
     "routing": {
       "name": "Routing",
       "summary": "Ein 30-Sekunden-Überblick, wie NARN entscheidet, wer was übersetzt."
+    },
+    "routing-advanced": {
+      "name": "Erweiterte Routing-Regeln",
+      "summary": "Regeln, die jede Sprache oder Textart an den Anbieter deiner Wahl schicken."
     },
     "quality": {
       "name": "Qualität",
@@ -231,7 +235,8 @@
       "mode": {
         "title": "Einfache oder erweiterte Regeln",
         "what": "Hier wechselst du zwischen einem Anbieter für alles und einer Liste von Regeln.",
-        "why": "Fang einfach an. Wechsle zu Regeln, wenn du für eine Sprache, eine Kategorie oder einen Ton einen anderen Anbieter willst."
+        "why": "Fang einfach an. Wechsle zu Regeln, wenn du für eine Sprache, eine Kategorie oder einen Ton einen anderen Anbieter willst.",
+        "advancedAction": "Erweiterte Regeln erklären"
       }
     },
     "glossary": {
@@ -317,6 +322,38 @@
         "what": "Prüfe alle Übersetzungen im Projekt, nicht nur den letzten Lauf.",
         "why": "Nutze das vor einem Release oder nachdem du Glossar oder Routing geändert hast."
       }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Regeln, von oben geprüft",
+      "what": "Jede Regel nennt einen Anbieter und die Einträge, die er übernimmt. NARN prüft die Regeln von oben, und die erste passende Regel übersetzt den Eintrag.",
+      "why": "Ein Eintrag, auf den keine Regel passt, wird nicht übersetzt – beende die Liste also mit einer Regel, die auf alles passt."
+    },
+    "add": {
+      "title": "Eine Regel hinzufügen",
+      "what": "Regel hinzufügen legt eine an: Wähle den Anbieter und grenze sie nach Zielsprache, Quelle, Kategorie, Ton oder Eintragslänge ein.",
+      "why": "Ein leer gelassener Filter passt auf jeden Eintrag."
+    },
+    "templates": {
+      "title": "Vorlagen",
+      "what": "Fertige Regeln. Vorlage verwenden fügt eine zu den Regeln dieses Projekts hinzu.",
+      "why": "Ein schneller Start, den du danach anpasst."
+    },
+    "groups": {
+      "title": "Regelgruppen",
+      "what": "Eine Regelgruppe ist ein eigener Satz Regeln. Übersetzungen nutzen die hier gewählte Gruppe.",
+      "why": "Halte einen zweiten Satz bereit, etwa um einen Anbieter zu testen, und wechsle zwischen ihnen."
+    },
+    "import": {
+      "title": "Importieren und exportieren",
+      "what": "Speichere die Regeln als JSON-Datei oder lade Regeln aus einer.",
+      "why": "Nutze dasselbe Routing in einem anderen Projekt."
+    },
+    "back": {
+      "title": "Zurück zu Einfach",
+      "what": "Drücke Einfach, um wieder die Ansicht mit einem Anbieter zu sehen. Deine Regeln bleiben, wie sie sind.",
+      "why": "Einfach erscheint, wenn deine Regeln auf einen Anbieter für alles hinauslaufen."
     }
   },
   "advancedSections": {

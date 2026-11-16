@@ -16,6 +16,11 @@ import { AREA_TOURS, type AreaTourId } from './area-tours.js';
 import { FIRST_RUN_TOUR_ID, firstRunTourFor } from './first-run.js';
 import { GLOSSARIES_TOUR_ID, glossariesTour } from './glossaries-tour.js';
 import { ORPHANS_TOUR_ID, orphansTour } from './orphans-tour.js';
+import {
+  ROUTING_ADVANCED_TOUR,
+  ROUTING_ADVANCED_TOUR_ID,
+  showAdvancedRouting,
+} from './routing-advanced-tour.js';
 import type { GuideFacts, Tour } from './types.js';
 
 export interface CatalogTourContext {
@@ -42,6 +47,8 @@ export interface CatalogTour {
    * start request, and reads `activeTourStart` itself.
    */
   controller?: ComponentType<CatalogTourContext>;
+  /** Run when the Guide starts it, before its first step (the Advanced routing editor shown). */
+  onStart?: () => void;
 }
 
 function areaTour(id: Exclude<AreaTourId, 'glossary'>): CatalogTour {
@@ -71,6 +78,14 @@ export const TOUR_CATALOG: readonly CatalogTour[] = [
     controller: GlossariesTourController,
   },
   areaTour('routing'),
+  {
+    id: ROUTING_ADVANCED_TOUR_ID,
+    needsProject: true,
+    needsAdvanced: true,
+    tab: 'routing',
+    build: () => ROUTING_ADVANCED_TOUR,
+    onStart: showAdvancedRouting,
+  },
   areaTour('quality'),
   areaTour('compare'),
   areaTour('review-translation-ai'),
@@ -90,6 +105,30 @@ export const TOUR_CATALOG: readonly CatalogTour[] = [
   },
 ];
 
+/**
+ * Tours held back from a release: not listed in the Guide, and their area
+ * offers stay off. They still run (from code, or with the switch below).
+ */
+export const UNRELEASED_TOUR_IDS: ReadonlySet<string> = new Set([
+  'quality',
+  'compare',
+  'review-translation-ai',
+  ORPHANS_TOUR_ID,
+]);
+
+/** localStorage key that shows the unreleased tours anyway (tests and development). */
+export const SHOW_UNRELEASED_TOURS_KEY = 'narn:show-unreleased-tours';
+
+/** Whether tour `id` is held back here (see `UNRELEASED_TOUR_IDS`). */
+export function tourHidden(id: string): boolean {
+  if (!UNRELEASED_TOUR_IDS.has(id)) return false;
+  try {
+    return globalThis.localStorage?.getItem(SHOW_UNRELEASED_TOURS_KEY) !== '1';
+  } catch {
+    return true;
+  }
+}
+
 export function catalogTour(id: string): CatalogTour | undefined {
   return TOUR_CATALOG.find((tour) => tour.id === id);
 }
@@ -100,5 +139,7 @@ export function listedTours(
   cloudManaged: boolean,
 ): readonly CatalogTour[] {
   const tabs = visibleTabs(access, cloudManaged, 'advanced');
-  return TOUR_CATALOG.filter((tour) => tour.tab === undefined || tabs.includes(tour.tab));
+  return TOUR_CATALOG.filter(
+    (tour) => !tourHidden(tour.id) && (tour.tab === undefined || tabs.includes(tour.tab)),
+  );
 }

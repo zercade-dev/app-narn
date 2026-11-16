@@ -150,6 +150,12 @@ export function TourOverlay({
     if (navigate.tab && navigate.tab !== activeTab) setActiveTab(navigate.tab);
   }, [navigate, stepIndex, shellView, activeTab]);
 
+  // Whatever else the step shows when it becomes current (an editor's tab).
+  const onEnter = step?.onEnter;
+  useEffect(() => {
+    onEnter?.();
+  }, [onEnter, stepIndex]);
+
   // The latest callbacks, so effects below don't re-run for a new function identity.
   const onAdvanceRef = useRef(onAdvance);
   const onExitRef = useRef(onExit);

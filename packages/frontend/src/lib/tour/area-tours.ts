@@ -4,6 +4,7 @@
  * the tab id, so the tab that is open picks the tour to offer.
  */
 import type { Tab } from '@/stores/view-store';
+import { startRoutingAdvancedTour } from './routing-advanced-tour.js';
 import type { GuideFacts, Tour, TourStep } from './types.js';
 
 export type AreaTourId = 'routing' | 'glossary' | 'quality' | 'compare' | 'review-translation-ai';
@@ -36,7 +37,17 @@ export const AREA_TOURS: Record<AreaTourId, Tour> = {
     id: 'routing',
     steps: [
       step('routing', 'config', 'routing-config', 'bottom'),
-      step('routing', 'mode', 'routing-mode'),
+      {
+        ...step('routing', 'mode', 'routing-mode'),
+        // For whoever wants more: the Advanced editor, explained (its own tour).
+        actions: [
+          {
+            labelKey: 'area.routing.mode.advancedAction',
+            run: startRoutingAdvancedTour,
+            testId: 'tour-action-routing-advanced',
+          },
+        ],
+      },
     ],
   },
   glossary: {

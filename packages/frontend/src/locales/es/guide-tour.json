@@ -147,7 +147,7 @@
     },
     "moreTours": {
       "title": "Más recorridos guiados",
-      "what": "En Guía hay recorridos breves sobre glosarios, huérfanas, enrutamiento y más. Empieza uno cuando quieras."
+      "what": "En Guía hay recorridos breves sobre glosarios, enrutamiento y más. Empieza uno cuando quieras."
     }
   },
   "providerChoice": {
@@ -186,6 +186,10 @@
     "routing": {
       "name": "Enrutamiento",
       "summary": "Un vistazo de 30 segundos a cómo NARN decide quién traduce qué."
+    },
+    "routing-advanced": {
+      "name": "Reglas de enrutamiento avanzadas",
+      "summary": "Reglas que envían cada idioma o tipo de texto al proveedor que elijas."
     },
     "quality": {
       "name": "Calidad",
@@ -231,7 +235,8 @@
       "mode": {
         "title": "Reglas simples o avanzadas",
         "what": "Aquí alternas entre un solo proveedor para todo y una lista de reglas.",
-        "why": "Empieza por lo simple. Pasa a las reglas cuando quieras otro proveedor para un idioma, una categoría o un tono."
+        "why": "Empieza por lo simple. Pasa a las reglas cuando quieras otro proveedor para un idioma, una categoría o un tono.",
+        "advancedAction": "Explicar las reglas avanzadas"
       }
     },
     "glossary": {
@@ -317,6 +322,38 @@
         "what": "Revisa todas las traducciones del proyecto, no solo la última ejecución.",
         "why": "Úsalo antes de una versión o después de cambiar el glosario o el enrutamiento."
       }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Reglas, de arriba abajo",
+      "what": "Cada regla indica un proveedor y las entradas que gestiona. NARN revisa las reglas de arriba abajo, y la primera que encaja con una entrada la traduce.",
+      "why": "Una entrada que no encaja con ninguna regla no se traduce, así que termina con una regla que valga para todo."
+    },
+    "add": {
+      "title": "Añadir una regla",
+      "what": "Añadir regla crea una: elige su proveedor y acótala por idioma de destino, origen, categoría, tono o longitud de la entrada.",
+      "why": "Un filtro que dejes vacío vale para todas las entradas."
+    },
+    "templates": {
+      "title": "Plantillas",
+      "what": "Reglas ya preparadas. Usar plantilla añade una a las reglas de este proyecto.",
+      "why": "Un comienzo rápido que luego puedes ajustar."
+    },
+    "groups": {
+      "title": "Grupos de reglas",
+      "what": "Un grupo de reglas es un conjunto aparte de reglas. Las traducciones usan el grupo seleccionado aquí.",
+      "why": "Ten otro conjunto preparado, por ejemplo para probar un proveedor, y cambia entre ellos."
+    },
+    "import": {
+      "title": "Importar / Exportar",
+      "what": "Guarda las reglas en un archivo JSON o carga reglas desde uno.",
+      "why": "Reutiliza el mismo enrutamiento en otro proyecto."
+    },
+    "back": {
+      "title": "Volver a Sencillo",
+      "what": "Pulsa Sencillo para ver de nuevo la vista de un solo proveedor. Tus reglas no cambian.",
+      "why": "Sencillo aparece cuando tus reglas equivalen a un solo proveedor para todo."
     }
   },
   "advancedSections": {

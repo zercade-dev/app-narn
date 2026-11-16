@@ -147,7 +147,7 @@
     },
     "moreTours": {
       "title": "Daha fazla rehberli tur",
-      "what": "Sözlükçeler, yetimler, yönlendirme ve daha fazlası hakkındaki kısa turlar Kılavuz'da. İstediğiniz zaman birini başlatın."
+      "what": "Sözlükçeler, yönlendirme ve daha fazlası hakkındaki kısa turlar Kılavuz'da. İstediğiniz zaman birini başlatın."
     }
   },
   "providerChoice": {
@@ -186,6 +186,10 @@
     "routing": {
       "name": "Yönlendirme",
       "summary": "NARN'ın neyi kimin çevireceğine nasıl karar verdiğine 30 saniyelik bir bakış."
+    },
+    "routing-advanced": {
+      "name": "Gelişmiş yönlendirme kuralları",
+      "summary": "Her dili veya metin türünü seçtiğiniz sağlayıcıya gönderen kurallar."
     },
     "quality": {
       "name": "Kalite",
@@ -231,7 +235,8 @@
       "mode": {
         "title": "Basit veya gelişmiş kurallar",
         "what": "Burada her şey için tek bir sağlayıcı ile bir kural listesi arasında geçiş yaparsınız.",
-        "why": "Basit başlayın. Bir dil, kategori veya ton için farklı bir sağlayıcı istediğinizde kurallara geçin."
+        "why": "Basit başlayın. Bir dil, kategori veya ton için farklı bir sağlayıcı istediğinizde kurallara geçin.",
+        "advancedAction": "Gelişmiş kuralları açıkla"
       }
     },
     "glossary": {
@@ -317,6 +322,38 @@
         "what": "Yalnızca son çalıştırmayı değil, projedeki tüm çevirileri inceleyin.",
         "why": "Yayımlamadan önce ya da sözlükçeyi veya yönlendirmeyi değiştirdikten sonra kullanın."
       }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Kurallar yukarıdan denetlenir",
+      "what": "Her kural bir sağlayıcıyı ve onun ele alacağı girdileri belirtir. NARN kuralları yukarıdan aşağı denetler ve bir girdiye uyan ilk kural onu çevirir.",
+      "why": "Hiçbir kurala uymayan bir girdi çevrilmez; bu yüzden listeyi her şeye uyan bir kuralla bitirin."
+    },
+    "add": {
+      "title": "Kural ekleyin",
+      "what": "Kural ekle bir kural oluşturur: sağlayıcısını seçin, sonra hedef dil, kaynak, kategori, ton veya girdi uzunluğuna göre daraltın.",
+      "why": "Boş bıraktığınız bir filtre her girdiye uyar."
+    },
+    "templates": {
+      "title": "Şablonlar",
+      "what": "Hazır kurallar. Şablon kullan birini bu projenin kurallarına ekler.",
+      "why": "Sonradan ayarlayabileceğiniz hızlı bir başlangıç."
+    },
+    "groups": {
+      "title": "Kural grupları",
+      "what": "Kural grubu ayrı bir kural takımıdır. Çeviriler burada seçili grubu kullanır.",
+      "why": "Örneğin bir sağlayıcıyı denemek için başka bir takımı hazır tutun ve aralarında geçiş yapın."
+    },
+    "import": {
+      "title": "İçe / dışa aktarma",
+      "what": "Kuralları bir JSON dosyasına kaydedin veya bir dosyadan yükleyin.",
+      "why": "Aynı yönlendirmeyi başka bir projede yeniden kullanın."
+    },
+    "back": {
+      "title": "Basit görünüme dönün",
+      "what": "Tek sağlayıcılı görünümü yeniden görmek için Basit düğmesine basın. Kurallarınız olduğu gibi kalır.",
+      "why": "Basit, kurallarınız her şey için tek bir sağlayıcıya denk geldiğinde görünür."
     }
   },
   "advancedSections": {

@@ -117,6 +117,7 @@ export function GuideToursList() {
     }
     // Land on the tour's tab, so a tour continued part way opens where it applies.
     if (entry.tab) useViewStore.getState().setActiveTab(entry.tab);
+    entry.onStart?.();
     useGuideStore.getState().startTour(entry.id, at === undefined ? undefined : { at });
   };
 
