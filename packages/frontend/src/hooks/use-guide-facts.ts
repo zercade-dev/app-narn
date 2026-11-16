@@ -3,6 +3,7 @@ import { RunStatusCode, type RunStatus } from '@zercade-dev/narn-shared';
 import { isRunActive, isTranslationRun } from '../lib/run-kind.js';
 import { FREE_KEYS, isAiProviderKey, providerKeyFor } from '../lib/simple-provider.js';
 import type { RunStall } from '../lib/tour/first-run.js';
+import { FREEWAY_NO_PROVIDER } from '../lib/log-presentation/registry.js';
 import {
   hasUntranslatedEntry,
   quickTestRunId,
@@ -288,8 +289,11 @@ export function useFirstRunActive(): boolean {
 }
 
 /** Why a run that ended with nothing translated stopped. */
-function endedCause(run: RunStatus): 'auth' | 'quota' | 'other' {
+function endedCause(run: RunStatus): 'auth' | 'quota' | 'no-provider' | 'other' {
   const codes = [run.stopCause, ...run.errors.map((e) => e.code)];
+  // Freeway found no provider switched on: not the key's fault (the server's
+  // config may have lost it). A custom rule that fits nothing stays 'other'.
+  if (run.errors.some((e) => e.message === FREEWAY_NO_PROVIDER)) return 'no-provider';
   if (codes.includes('auth')) return 'auth';
   if (codes.includes('rate-limit')) return 'quota';
   return 'other';

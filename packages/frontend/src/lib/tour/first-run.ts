@@ -167,7 +167,8 @@ function cloudVaultAndKeySteps(need: 'vault' | 'unlock' | 'key'): TourStep[] {
  * - `waiting-quota` / `waiting-model`: it is paused and resumes by itself
  *   (free quota used up, or no free model good enough right now).
  */
-export type RunStall = 'auth' | 'quota' | 'other' | 'parked' | 'waiting-quota' | 'waiting-model';
+export type RunStall =
+  'auth' | 'quota' | 'no-provider' | 'other' | 'parked' | 'waiting-quota' | 'waiting-model';
 
 /** The "translation is running" step; the stall steps are shown in its place. */
 const WAITING_STEP = 'translate-progress';
@@ -175,6 +176,7 @@ const WAITING_STEP = 'translate-progress';
 const STALL_STEP: Record<RunStall, string> = {
   auth: 'translate-failed-auth',
   quota: 'translate-failed-quota',
+  'no-provider': 'translate-failed-no-provider',
   other: 'translate-failed-other',
   parked: 'translate-parked',
   'waiting-quota': 'translate-waiting-quota',
@@ -206,15 +208,19 @@ function stallStep(
 }
 
 /** The run ended with nothing translated: nothing to stop, just try again. */
-const endedStep = (cause: 'auth' | 'quota' | 'other'): TourStep =>
+const endedStep = (cause: 'auth' | 'quota' | 'no-provider' | 'other'): TourStep =>
   stallStep(
     cause,
     {
       titleKey: 'firstRun.failed.title',
-      whatKey: `firstRun.failed.${cause}What`,
+      whatKey: `firstRun.failed.${cause === 'no-provider' ? 'noProvider' : cause}What`,
       whyKey: 'firstRun.failed.why',
     },
-    [action('fix-key', 'fixKey'), action('retry', 'retry')],
+    // No provider was on: the key is not the problem, so no "Check my key";
+    // trying again switches on the provider behind the saved key first.
+    cause === 'no-provider'
+      ? [action('retry', 'retry')]
+      : [action('fix-key', 'fixKey'), action('retry', 'retry')],
   );
 
 /** The run will resume by itself: explain, and offer nothing to press. */
@@ -231,6 +237,7 @@ const FIX_KEY_STEP = 'translate-fix-key';
 const STALL_STEPS: TourStep[] = [
   endedStep('auth'),
   endedStep('quota'),
+  endedStep('no-provider'),
   endedStep('other'),
   // Trying again here stops the paused run, and the wording says so.
   stallStep(

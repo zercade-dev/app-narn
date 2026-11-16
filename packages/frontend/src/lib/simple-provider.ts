@@ -180,6 +180,28 @@ interface GlobalConfigDoc {
  * to undo. An entry that is absent, or was never given an `enabled` value, has
  * not been decided and is enabled.
  */
+/**
+ * Base modules whose enabled state was checked with the server since the page
+ * loaded (by the guide's setup or by a provider choice). Once per load is
+ * enough to recover a config that was reset or restored: a reload checks again.
+ */
+const checkedThisLoad = new Set<string>();
+
+/** Whether `base` was already checked with the server in this page load. */
+export function providerCheckedThisLoad(base: string): boolean {
+  return checkedThisLoad.has(base);
+}
+
+/** Record that `base` was checked (or is being checked) in this page load. */
+export function markProviderChecked(base: string): void {
+  checkedThisLoad.add(base);
+}
+
+/** For tests: forget the checks (a page load). */
+export function resetProviderChecks(): void {
+  checkedThisLoad.clear();
+}
+
 export async function enableProvider(baseModuleId: string): Promise<string | null> {
   const instanceable = !NON_INSTANCEABLE.has(baseModuleId);
   const id = providerInstanceId(baseModuleId);

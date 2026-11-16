@@ -107,6 +107,7 @@
       "quotaWhat": "A cota gratuita acabou por enquanto. Espere um pouco ou adicione outra chave e tente de novo.",
       "quotaWhatOwn": "O {{provider}} está recusando por enquanto: a cota ou o crédito da sua conta acabou. Confira seu plano com o provedor e tente de novo.",
       "quotaWhatCustom": "Um provedor do roteamento deste projeto está recusando por enquanto: uma cota ou um crédito acabou. Espere um pouco ou confira o plano com o provedor e tente de novo.",
+      "noProviderWhat": "Nada foi traduzido: nenhum provedor estava ativado para isso. Pressione Tentar de novo: o NARN primeiro ativa o provedor da sua chave salva.",
       "otherWhat": "Nada foi traduzido. Confira sua chave e tente de novo."
     },
     "parked": {

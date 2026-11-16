@@ -24,6 +24,8 @@
     "retry": "正在重試一則失敗的翻譯。",
     "failedNoRoute": "無法把 {{count}} 個條目翻譯成 {{language}}——沒有符合的分派規則。",
     "failedNoRoute_other": "無法把 {{count}} 個條目翻譯成 {{language}}——沒有符合的分派規則。",
+    "failedNoProvider": "無法把 {{count}} 個條目翻譯成 {{language}}——NARN Freeway 沒有已啟用的服務商。",
+    "failedNoProvider_other": "無法把 {{count}} 個條目翻譯成 {{language}}——NARN Freeway 沒有已啟用的服務商。",
     "failedModuleDisabled": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 模組已關閉。",
     "failedModuleDisabled_other": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 模組已關閉。",
     "failedModuleNotFound": "無法把 {{count}} 個條目翻譯成 {{language}}——{{module}} 模組未安裝。",

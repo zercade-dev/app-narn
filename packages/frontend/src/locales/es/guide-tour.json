@@ -107,6 +107,7 @@
       "quotaWhat": "La cuota gratuita se agotó por ahora. Espera un poco o añade otra clave y vuelve a intentarlo.",
       "quotaWhatOwn": "{{provider}} rechaza las solicitudes por ahora: se agotó la cuota o el crédito de tu cuenta. Revisa tu plan con el proveedor y vuelve a intentarlo.",
       "quotaWhatCustom": "Un proveedor del enrutamiento de este proyecto rechaza las solicitudes por ahora: se agotó una cuota o un crédito. Espera un poco o revisa el plan con el proveedor y vuelve a intentarlo.",
+      "noProviderWhat": "No se tradujo nada: no había ningún proveedor activado para hacerlo. Pulsa Reintentar: NARN activa primero el proveedor de tu clave guardada.",
       "otherWhat": "No se tradujo nada. Revisa tu clave y vuelve a intentarlo."
     },
     "parked": {

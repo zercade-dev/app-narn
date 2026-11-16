@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { enableProvidersWithKeys } from '../../hooks/use-provider-setup.js';
 import { toast } from '@/lib/toast';
 import {
   useFirstRunActive,
@@ -484,7 +485,13 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
         case 'retry':
           // The run has ended: nothing to stop.
           setRetriedRunId(stalledRunId);
-          startAgain();
+          // Nothing could translate it: switch on the provider behind the
+          // saved key first (the server's config may have lost it), then go.
+          if (runStall === 'no-provider') {
+            void enableProvidersWithKeys(tGuide).finally(startAgain);
+          } else {
+            startAgain();
+          }
           break;
         case 'stop-retry': {
           // The paused run holds the project's queue, so it is stopped first
@@ -640,7 +647,7 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     };
     globalThis.addEventListener(FIRST_RUN_ACTION_EVENT, onAction);
     return () => globalThis.removeEventListener(FIRST_RUN_ACTION_EVENT, onAction);
-  }, [cloud, stalledRunId, runQueuedBehind, projectId, tour, reportChoice, tGuide]);
+  }, [cloud, stalledRunId, runStall, runQueuedBehind, projectId, tour, reportChoice, tGuide]);
 
   // The quick test is the position, whichever half shows: the callout's
   // choices, or Start in the dialog opened from the highlighted button (see

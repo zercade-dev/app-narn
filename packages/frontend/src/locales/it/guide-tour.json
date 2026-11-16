@@ -107,6 +107,7 @@
       "quotaWhat": "La quota gratuita è esaurita per ora. Attendi un po' o aggiungi un'altra chiave, poi riprova.",
       "quotaWhatOwn": "{{provider}} rifiuta per ora: la quota o il credito del tuo account è esaurito. Controlla il tuo piano presso il provider, poi riprova.",
       "quotaWhatCustom": "Un provider del routing di questo progetto rifiuta per ora: una quota o un credito è esaurito. Attendi un po' o controlla il piano presso il provider, poi riprova.",
+      "noProviderWhat": "Non è stato tradotto nulla: nessun provider era attivo per farlo. Premi Riprova: NARN attiva prima il provider della tua chiave salvata.",
       "otherWhat": "Non è stato tradotto nulla. Controlla la tua chiave, poi riprova."
     },
     "parked": {

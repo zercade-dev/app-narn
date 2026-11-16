@@ -24,6 +24,8 @@
     "retry": "失敗した翻訳を再試行しています。",
     "failedNoRoute": "エントリ{{count}}件を{{language}}に翻訳できませんでした。一致する振り分けルールがありません。",
     "failedNoRoute_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。一致する振り分けルールがありません。",
+    "failedNoProvider": "エントリ{{count}}件を{{language}}に翻訳できませんでした。NARN Freeway で有効なプロバイダーがありません。",
+    "failedNoProvider_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。NARN Freeway で有効なプロバイダーがありません。",
     "failedModuleDisabled": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}モジュールが無効になっています。",
     "failedModuleDisabled_other": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}モジュールが無効になっています。",
     "failedModuleNotFound": "エントリ{{count}}件を{{language}}に翻訳できませんでした。{{module}}モジュールがインストールされていません。",

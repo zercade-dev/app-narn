@@ -107,6 +107,7 @@
       "quotaWhat": "The free quota is used up for now. Wait a little or add another key, then try again.",
       "quotaWhatOwn": "{{provider}} refused for now: your account's quota or credit is used up. Check your plan with the provider, then try again.",
       "quotaWhatCustom": "A provider in this project's routing refused for now: a quota or credit is used up. Wait a little or check the provider's plan, then try again.",
+      "noProviderWhat": "Nothing was translated: no provider was switched on to take it. Press Try again: NARN first switches on the provider behind your saved key.",
       "otherWhat": "Nothing was translated. Check your key, then try again."
     },
     "parked": {

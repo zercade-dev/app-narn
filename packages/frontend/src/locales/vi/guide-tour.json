@@ -107,6 +107,7 @@
       "quotaWhat": "Hạn mức miễn phí tạm thời đã hết. Chờ một lát hoặc thêm khóa khác, rồi thử lại.",
       "quotaWhatOwn": "{{provider}} tạm thời từ chối: hạn mức hoặc tín dụng trong tài khoản của bạn đã hết. Hãy kiểm tra gói của bạn với nhà cung cấp, rồi thử lại.",
       "quotaWhatCustom": "Một nhà cung cấp trong điều phối của dự án này tạm thời từ chối: hạn mức hoặc tín dụng đã hết. Chờ một lát hoặc kiểm tra gói với nhà cung cấp, rồi thử lại.",
+      "noProviderWhat": "Chưa có gì được dịch: không có nhà cung cấp nào được bật để xử lý. Nhấn Thử lại: NARN sẽ bật trước nhà cung cấp của khóa bạn đã lưu.",
       "otherWhat": "Chưa có gì được dịch. Kiểm tra khóa của bạn, rồi thử lại."
     },
     "parked": {

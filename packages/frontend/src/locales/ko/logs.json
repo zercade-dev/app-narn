@@ -24,6 +24,8 @@
     "retry": "실패한 번역을 다시 시도하는 중이에요.",
     "failedNoRoute": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — 맞는 배정 규칙이 없어요.",
     "failedNoRoute_other": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — 맞는 배정 규칙이 없어요.",
+    "failedNoProvider": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — NARN Freeway에 켜진 제공업체가 없어요.",
+    "failedNoProvider_other": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — NARN Freeway에 켜진 제공업체가 없어요.",
     "failedModuleDisabled": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — {{module}} 모듈이 꺼져 있어요.",
     "failedModuleDisabled_other": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — {{module}} 모듈이 꺼져 있어요.",
     "failedModuleNotFound": "항목 {{count}}개를 {{language}} 언어로 번역하지 못했어요 — {{module}} 모듈이 설치되어 있지 않아요.",

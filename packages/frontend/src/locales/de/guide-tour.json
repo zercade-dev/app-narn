@@ -107,6 +107,7 @@
       "quotaWhat": "Das kostenlose Kontingent ist vorerst aufgebraucht. Etwas warten oder einen weiteren Schlüssel hinzufügen und es erneut versuchen.",
       "quotaWhatOwn": "{{provider}} lehnt vorerst ab: Kontingent oder Guthaben deines Kontos ist aufgebraucht. Prüfe deinen Tarif beim Anbieter und versuche es dann erneut.",
       "quotaWhatCustom": "Ein Anbieter aus dem Routing dieses Projekts lehnt vorerst ab: Ein Kontingent oder Guthaben ist aufgebraucht. Etwas warten oder den Tarif beim Anbieter prüfen und es erneut versuchen.",
+      "noProviderWhat": "Es wurde nichts übersetzt: Kein Anbieter war dafür eingeschaltet. Drücke Erneut versuchen: NARN schaltet zuerst den Anbieter deines gespeicherten Schlüssels ein.",
       "otherWhat": "Es wurde nichts übersetzt. Den Schlüssel prüfen und es erneut versuchen."
     },
     "parked": {

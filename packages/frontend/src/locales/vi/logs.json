@@ -24,6 +24,8 @@
     "retry": "Đang thử lại một bản dịch thất bại.",
     "failedNoRoute": "Không dịch được {{count}} mục sang {{language}} — không có quy tắc điều phối nào khớp.",
     "failedNoRoute_other": "Không dịch được {{count}} mục sang {{language}} — không có quy tắc điều phối nào khớp.",
+    "failedNoProvider": "Không dịch được {{count}} mục sang {{language}} — không có nhà cung cấp nào được bật cho NARN Freeway.",
+    "failedNoProvider_other": "Không dịch được {{count}} mục sang {{language}} — không có nhà cung cấp nào được bật cho NARN Freeway.",
     "failedModuleDisabled": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} đang tắt.",
     "failedModuleDisabled_other": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} đang tắt.",
     "failedModuleNotFound": "Không dịch được {{count}} mục sang {{language}} — mô-đun {{module}} chưa được cài.",

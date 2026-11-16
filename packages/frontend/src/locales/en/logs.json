@@ -24,6 +24,8 @@
     "retry": "Retrying a failed translation.",
     "failedNoRoute": "Couldn't translate {{count}} string into {{language}} — no routing rule matches.",
     "failedNoRoute_other": "Couldn't translate {{count}} strings into {{language}} — no routing rule matches.",
+    "failedNoProvider": "Couldn't translate {{count}} string into {{language}} — no provider is switched on for NARN Freeway.",
+    "failedNoProvider_other": "Couldn't translate {{count}} strings into {{language}} — no provider is switched on for NARN Freeway.",
     "failedModuleDisabled": "Couldn't translate {{count}} string into {{language}} — the {{module}} module is turned off.",
     "failedModuleDisabled_other": "Couldn't translate {{count}} strings into {{language}} — the {{module}} module is turned off.",
     "failedModuleNotFound": "Couldn't translate {{count}} string into {{language}} — the {{module}} module isn't installed.",

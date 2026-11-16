@@ -107,6 +107,7 @@
       "quotaWhat": "Kuota gratis sedang habis. Tunggu sebentar atau tambahkan kunci lain, lalu coba lagi.",
       "quotaWhatOwn": "{{provider}} menolak untuk sementara: kuota atau kredit akun Anda habis. Periksa paket Anda di penyedia, lalu coba lagi.",
       "quotaWhatCustom": "Salah satu penyedia dalam penyaluran proyek ini menolak untuk sementara: kuota atau kredit habis. Tunggu sebentar atau periksa paket di penyedia, lalu coba lagi.",
+      "noProviderWhat": "Tidak ada yang diterjemahkan: tidak ada penyedia yang diaktifkan untuk mengerjakannya. Tekan Coba lagi: NARN lebih dulu mengaktifkan penyedia dari kunci yang Anda simpan.",
       "otherWhat": "Tidak ada yang diterjemahkan. Periksa kunci Anda, lalu coba lagi."
     },
     "parked": {

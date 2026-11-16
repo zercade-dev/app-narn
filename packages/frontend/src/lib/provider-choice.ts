@@ -16,6 +16,7 @@ import {
   enableProvider,
   providerInstanceId,
   providerKeyFor,
+  markProviderChecked,
 } from './simple-provider.js';
 import { useCollabRoutingStore } from '../stores/collab-routing-store.js';
 import { useGuideStore } from '../stores/guide-store.js';
@@ -202,6 +203,7 @@ export async function chooseProvider(
     return { status: 'needs-key', vaultKey };
   }
 
+  markProviderChecked(base);
   const moduleId = await enableProvider(base);
   if (moduleId === null) return { status: 'switched-off' };
   // Marked before it is chosen, so `useProviderSetup` never sees the choice

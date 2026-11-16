@@ -84,11 +84,14 @@ interface GuideState {
   pendingRoutedFrom: Record<string, string>;
   exportedOnce: boolean;
   /**
-   * Module ids the guide has already enabled for the person (`google:default`,
-   * `deepl`). Each is enabled once: one they later switch off in Advanced is
-   * not switched back on.
+   * Module ids the guide has seen enabled for the person (`google:default`,
+   * `deepl`), so a provider choice waiting on it can be applied. Not a reason
+   * to skip enabling: the server's config is checked every time (it can be
+   * reset or restored), and one the person switched off there stays off.
    */
   enabledProviders: string[];
+  /** Providers the person switched off whose "switched off" notice was shown (once each). */
+  switchedOffNoticed: string[];
   completedTours: string[];
   declinedTours: string[];
   /** Per tour id, including `first-run`. */
@@ -146,6 +149,7 @@ interface GuideState {
   clearOrphanSim: () => void;
   markExported: () => void;
   markProviderEnabled: (id: string) => void;
+  markSwitchedOffNoticed: (id: string) => void;
   /** `at`: the counted step index to open at (default 0). */
   startTour: (id: string, opts?: { at?: number }) => void;
   /** The person is on counted step `counted` (0-based) of tour `id`. */
@@ -200,6 +204,7 @@ export const useGuideStore = create<GuideState>()(
       pendingRoutedFrom: {},
       exportedOnce: false,
       enabledProviders: [],
+      switchedOffNoticed: [],
       completedTours: [],
       declinedTours: [],
       tourProgress: {},
@@ -250,7 +255,13 @@ export const useGuideStore = create<GuideState>()(
       clearOrphanSim: () => set({ orphanSim: null }),
       markExported: () => set({ exportedOnce: true }),
       markProviderEnabled: (id) =>
-        set((s) => ({ enabledProviders: addOnce(s.enabledProviders, id) })),
+        set((s) => ({
+          enabledProviders: addOnce(s.enabledProviders, id),
+          // Back on: a later switch-off is worth telling again.
+          switchedOffNoticed: s.switchedOffNoticed.filter((x) => x !== id),
+        })),
+      markSwitchedOffNoticed: (id) =>
+        set((s) => ({ switchedOffNoticed: addOnce(s.switchedOffNoticed, id) })),
       startTour: (id, opts) =>
         set((s) => ({
           activeTourId: id,
@@ -281,7 +292,7 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
-      // `quickTest`, `orphanSim`, `pendingProviders` and `pendingRoutedFrom` were added within v1: a state saved
+      // `quickTest`, `orphanSim`, `pendingProviders`, `pendingRoutedFrom` and `switchedOffNoticed` were added within v1: a state saved
       // without them rehydrates with the default (null), so no version bump
       // is needed.
       version: 1,
@@ -295,6 +306,7 @@ export const useGuideStore = create<GuideState>()(
         pendingRoutedFrom: state.pendingRoutedFrom,
         exportedOnce: state.exportedOnce,
         enabledProviders: state.enabledProviders,
+        switchedOffNoticed: state.switchedOffNoticed,
         completedTours: state.completedTours,
         declinedTours: state.declinedTours,
         tourProgress: state.tourProgress,
