@@ -333,12 +333,12 @@
     },
     "add": {
       "title": "Add a rule",
-      "what": "Add rule creates one: pick its provider, then narrow it down by target language, source, category, tone or entry length.",
-      "why": "A filter you leave empty fits every entry."
+      "what": "Add rule adds a rule at the bottom of the list: you pick its provider, then narrow it down by target language, source, category, tone or entry length.",
+      "why": "Below a rule that fits everything, a new rule is never reached: move it up with its arrows."
     },
     "templates": {
       "title": "Templates",
-      "what": "Ready-made rules. Use template adds one to this project's rules.",
+      "what": "Ready-made rules. Use template adds one at the bottom of this project's rules.",
       "why": "A quick start you can adjust afterwards."
     },
     "groups": {

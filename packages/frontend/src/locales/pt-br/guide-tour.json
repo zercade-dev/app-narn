@@ -333,12 +333,12 @@
     },
     "add": {
       "title": "Adicionar uma regra",
-      "what": "Adicionar regra cria uma: escolha o provedor e restrinja por idioma de destino, origem, categoria, tom ou tamanho da entrada.",
-      "why": "Um filtro deixado vazio serve para todas as entradas."
+      "what": "Adicionar regra adiciona uma regra no fim da lista: você escolhe o provedor e restringe por idioma de destino, origem, categoria, tom ou tamanho da entrada.",
+      "why": "Abaixo de uma regra que serve para tudo, uma regra nova nunca é alcançada: suba-a com as setas dela."
     },
     "templates": {
       "title": "Templates",
-      "what": "Regras prontas. Usar template adiciona uma às regras deste projeto.",
+      "what": "Regras prontas. Usar template adiciona uma no fim das regras deste projeto.",
       "why": "Um começo rápido que você ajusta depois."
     },
     "groups": {

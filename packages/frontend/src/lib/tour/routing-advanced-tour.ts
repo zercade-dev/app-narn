@@ -56,17 +56,25 @@ function step(
   };
 }
 
+function lookOnly(s: TourStep): TourStep {
+  return { ...s, interactive: false };
+}
+
 export const ROUTING_ADVANCED_TOUR: Tour = {
   id: ROUTING_ADVANCED_TOUR_ID,
   steps: [
+    // Shown, not offered: these controls change the project's real routing
+    // (a rule added below a catch-all is never reached; a new group becomes
+    // the one translations use), so the tour points at them without letting
+    // a click through. Only the view switch, the last step, is offered.
     // The rules list (or the line saying there are none yet).
-    step('rules', 'routing-rules', ON_RULES, 'bottom'),
-    step('add', 'routing-add'),
+    lookOnly(step('rules', 'routing-rules', ON_RULES, 'bottom')),
+    lookOnly(step('add', 'routing-add')),
     // These two open their tab of the editor, so what they describe is on screen.
-    step('templates', 'routing-templates', showEditorTab('templates'), 'bottom'),
-    step('groups', 'routing-groups'),
-    step('import', 'routing-import', showEditorTab('advanced'), 'bottom'),
-    // Back to Simple, from the switch itself.
+    lookOnly(step('templates', 'routing-templates', showEditorTab('templates'), 'bottom')),
+    lookOnly(step('groups', 'routing-groups')),
+    lookOnly(step('import', 'routing-import', showEditorTab('advanced'), 'bottom')),
+    // Back to Simple, from the switch itself (a view preference: rules untouched).
     step('back', 'routing-mode'),
   ],
 };

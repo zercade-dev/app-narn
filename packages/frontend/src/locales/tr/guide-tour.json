@@ -333,12 +333,12 @@
     },
     "add": {
       "title": "Kural ekleyin",
-      "what": "Kural ekle bir kural oluşturur: sağlayıcısını seçin, sonra hedef dil, kaynak, kategori, ton veya girdi uzunluğuna göre daraltın.",
-      "why": "Boş bıraktığınız bir filtre her girdiye uyar."
+      "what": "Kural ekle listenin sonuna bir kural ekler: sağlayıcısını seçer, sonra hedef dil, kaynak, kategori, ton veya girdi uzunluğuna göre daraltırsınız.",
+      "why": "Her şeye uyan bir kuralın altındaki yeni kurala hiç sıra gelmez: oklarıyla yukarı taşıyın."
     },
     "templates": {
       "title": "Şablonlar",
-      "what": "Hazır kurallar. Şablon kullan birini bu projenin kurallarına ekler.",
+      "what": "Hazır kurallar. Şablon kullan birini bu projenin kurallarının sonuna ekler.",
       "why": "Sonradan ayarlayabileceğiniz hızlı bir başlangıç."
     },
     "groups": {

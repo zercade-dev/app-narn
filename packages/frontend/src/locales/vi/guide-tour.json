@@ -333,12 +333,12 @@
     },
     "add": {
       "title": "Thêm một quy tắc",
-      "what": "Thêm quy tắc tạo một quy tắc: chọn nhà cung cấp, rồi thu hẹp theo ngôn ngữ đích, nguồn, danh mục, giọng điệu hoặc độ dài mục.",
-      "why": "Bộ lọc để trống áp dụng cho mọi mục."
+      "what": "Thêm quy tắc thêm một quy tắc vào cuối danh sách: bạn chọn nhà cung cấp, rồi thu hẹp theo ngôn ngữ đích, nguồn, danh mục, giọng điệu hoặc độ dài mục.",
+      "why": "Nằm dưới một quy tắc áp dụng cho mọi thứ, quy tắc mới sẽ không bao giờ được dùng: hãy đưa nó lên bằng các mũi tên."
     },
     "templates": {
       "title": "Mẫu",
-      "what": "Các quy tắc soạn sẵn. Dùng mẫu thêm một mẫu vào quy tắc của dự án này.",
+      "what": "Các quy tắc soạn sẵn. Dùng mẫu thêm một mẫu vào cuối các quy tắc của dự án này.",
       "why": "Một khởi đầu nhanh bạn có thể chỉnh sau."
     },
     "groups": {

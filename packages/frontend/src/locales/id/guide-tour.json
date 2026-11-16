@@ -333,12 +333,12 @@
     },
     "add": {
       "title": "Tambahkan aturan",
-      "what": "Tambah aturan membuat aturan: pilih penyedianya, lalu persempit menurut bahasa target, sumber, kategori, nada, atau panjang entri.",
-      "why": "Filter yang dibiarkan kosong cocok untuk semua entri."
+      "what": "Tambah aturan menambahkan aturan di bagian bawah daftar: Anda memilih penyedianya, lalu mempersempit menurut bahasa target, sumber, kategori, nada, atau panjang entri.",
+      "why": "Di bawah aturan yang cocok untuk semuanya, aturan baru tidak pernah tercapai: naikkan dengan tanda panahnya."
     },
     "templates": {
       "title": "Templat",
-      "what": "Aturan siap pakai. Pakai templat menambahkan satu ke aturan proyek ini.",
+      "what": "Aturan siap pakai. Pakai templat menambahkan satu di bagian bawah aturan proyek ini.",
       "why": "Awal cepat yang bisa Anda sesuaikan nanti."
     },
     "groups": {

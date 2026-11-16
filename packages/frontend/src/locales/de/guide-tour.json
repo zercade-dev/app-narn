@@ -333,12 +333,12 @@
     },
     "add": {
       "title": "Eine Regel hinzufügen",
-      "what": "Regel hinzufügen legt eine an: Wähle den Anbieter und grenze sie nach Zielsprache, Quelle, Kategorie, Ton oder Eintragslänge ein.",
-      "why": "Ein leer gelassener Filter passt auf jeden Eintrag."
+      "what": "Regel hinzufügen fügt unten in der Liste eine Regel hinzu: Du wählst ihren Anbieter und grenzt sie nach Zielsprache, Quelle, Kategorie, Ton oder Eintragslänge ein.",
+      "why": "Unter einer Regel, die auf alles passt, wird eine neue Regel nie erreicht: Schiebe sie mit ihren Pfeilen nach oben."
     },
     "templates": {
       "title": "Vorlagen",
-      "what": "Fertige Regeln. Vorlage verwenden fügt eine zu den Regeln dieses Projekts hinzu.",
+      "what": "Fertige Regeln. Vorlage verwenden fügt eine unten an die Regeln dieses Projekts an.",
       "why": "Ein schneller Start, den du danach anpasst."
     },
     "groups": {

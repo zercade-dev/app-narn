@@ -333,12 +333,12 @@
     },
     "add": {
       "title": "Ajouter une règle",
-      "what": "Ajouter une règle en crée une : choisissez son fournisseur, puis restreignez-la par langue cible, source, catégorie, ton ou longueur d’entrée.",
-      "why": "Un filtre laissé vide convient à toutes les entrées."
+      "what": "Ajouter une règle ajoute une règle en bas de la liste : vous choisissez son fournisseur, puis la restreignez par langue cible, source, catégorie, ton ou longueur d’entrée.",
+      "why": "Sous une règle qui couvre tout, une nouvelle règle n’est jamais atteinte : remontez-la avec ses flèches."
     },
     "templates": {
       "title": "Modèles",
-      "what": "Des règles toutes prêtes. Utiliser le modèle en ajoute une aux règles de ce projet.",
+      "what": "Des règles toutes prêtes. Utiliser le modèle en ajoute une en bas des règles de ce projet.",
       "why": "Un départ rapide que vous ajustez ensuite."
     },
     "groups": {

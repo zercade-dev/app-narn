@@ -333,12 +333,12 @@
     },
     "add": {
       "title": "Aggiungi una regola",
-      "what": "Aggiungi una regola ne crea una: scegli il provider, poi restringila per lingua di destinazione, origine, categoria, tono o lunghezza della voce.",
-      "why": "Un filtro lasciato vuoto vale per tutte le voci."
+      "what": "Aggiungi una regola aggiunge una regola in fondo all’elenco: scegli il provider, poi la restringi per lingua di destinazione, origine, categoria, tono o lunghezza della voce.",
+      "why": "Sotto una regola valida per tutto, una nuova regola non viene mai raggiunta: spostala in alto con le sue frecce."
     },
     "templates": {
       "title": "Schemi",
-      "what": "Regole già pronte. Usa uno schema ne aggiunge una alle regole di questo progetto.",
+      "what": "Regole già pronte. Usa uno schema ne aggiunge una in fondo alle regole di questo progetto.",
       "why": "Un avvio rapido da regolare poi."
     },
     "groups": {

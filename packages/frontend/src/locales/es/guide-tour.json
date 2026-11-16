@@ -333,12 +333,12 @@
     },
     "add": {
       "title": "Añadir una regla",
-      "what": "Añadir regla crea una: elige su proveedor y acótala por idioma de destino, origen, categoría, tono o longitud de la entrada.",
-      "why": "Un filtro que dejes vacío vale para todas las entradas."
+      "what": "Añadir regla añade una regla al final de la lista: eliges su proveedor y la acotas por idioma de destino, origen, categoría, tono o longitud de la entrada.",
+      "why": "Debajo de una regla que vale para todo, una regla nueva nunca se alcanza: súbela con sus flechas."
     },
     "templates": {
       "title": "Plantillas",
-      "what": "Reglas ya preparadas. Usar plantilla añade una a las reglas de este proyecto.",
+      "what": "Reglas ya preparadas. Usar plantilla añade una al final de las reglas de este proyecto.",
       "why": "Un comienzo rápido que luego puedes ajustar."
     },
     "groups": {
