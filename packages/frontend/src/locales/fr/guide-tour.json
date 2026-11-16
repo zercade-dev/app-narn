@@ -329,13 +329,46 @@
   "routingAdvanced": {
     "rules": {
       "title": "Des règles lues de haut en bas",
-      "what": "Chaque règle désigne un fournisseur et les entrées qu’il traite. NARN lit les règles de haut en bas, et la première qui convient à une entrée la traduit.",
-      "why": "Une entrée qu’aucune règle ne couvre n’est pas traduite : terminez par une règle qui couvre tout."
+      "what": "NARN lit les règles de haut en bas, et la première qui convient à une entrée la traduit. Dans cette visite, vous envoyez les langues asiatiques à un fournisseur et toutes les autres langues à un autre.",
+      "why": "Une entrée qu’aucune règle ne couvre n’est pas traduite : la dernière règle doit donc couvrir tout."
+    },
+    "edit": {
+      "title": "Ouvrez la règle n°1",
+      "what": "Appuyez sur le crayon pour modifier la règle n°1. Elle traitera les langues asiatiques."
+    },
+    "filter": {
+      "title": "Ouvrez Filtrage",
+      "what": "Appuyez sur Filtrage pour voir quelles entrées cette règle prend.",
+      "why": "Une règle sans rien de coché ici prend toutes les entrées."
+    },
+    "langs": {
+      "title": "Cochez les langues asiatiques",
+      "what": "Cochez les langues asiatiques parmi les langues de votre projet, par exemple ja, ko et zh. S’il n’y en a aucune dans ce projet, cochez n’importe quelle langue pour essayer. Suivant apparaît dès qu’une langue est cochée.",
+      "why": "La règle n°1 ne prend plus que ces langues. Toutes les autres langues passent aux règles en dessous."
+    },
+    "module": {
+      "title": "Choisissez son fournisseur",
+      "what": "Dans Module, choisissez le fournisseur pour ces langues. Pour utiliser un autre modèle du même fournisseur, ouvrez Paramètres de l'agent plus bas.",
+      "why": "Vos modifications s’enregistrent toutes seules."
+    },
+    "done": {
+      "title": "Fermez la règle",
+      "what": "Appuyez sur Terminé."
     },
     "add": {
-      "title": "Ajouter une règle",
-      "what": "Ajouter une règle ajoute une règle en bas de la liste : vous choisissez son fournisseur, puis la restreignez par langue cible, source, catégorie, ton ou longueur d’entrée.",
-      "why": "Sous une règle qui couvre tout, une nouvelle règle n’est jamais atteinte : remontez-la avec ses flèches."
+      "title": "Ajoutez une règle pour les autres langues",
+      "what": "Appuyez sur Ajouter une règle. La nouvelle règle se place en bas, sous la règle n°1.",
+      "why": "Les règles sont lues de haut en bas, donc une règle en bas ne reçoit que ce que les règles au-dessus ont laissé."
+    },
+    "newModule": {
+      "title": "Choisissez un fournisseur, rien d’autre",
+      "what": "Dans Module, choisissez le fournisseur pour toutes les autres langues. Laissez Filtrage vide. Suivant apparaît dès qu’un fournisseur est choisi.",
+      "why": "Aucun filtre n’est nécessaire : les langues asiatiques s’arrêtent à la règle n°1, donc seules les autres langues atteignent cette règle."
+    },
+    "order": {
+      "title": "L’ordre fait le travail",
+      "what": "La règle n°1 prend les langues asiatiques et la règle n°2 prend le reste. Inversée, la règle sans filtre passerait en premier, prendrait toutes les langues, et la règle n°1 ne servirait jamais.",
+      "why": "Pour changer l’ordre, utilisez les flèches à côté d’une règle."
     },
     "templates": {
       "title": "Modèles",
@@ -354,8 +387,8 @@
     },
     "back": {
       "title": "Revenir à Simple",
-      "what": "Appuyez sur Simple pour retrouver la vue à un seul fournisseur. Vos règles restent telles quelles.",
-      "why": "Simple s’affiche quand vos règles reviennent à un seul fournisseur pour tout."
+      "what": "Appuyez sur Simple pour revenir à la vue à un seul fournisseur. Vos règles restent telles quelles.",
+      "why": "Avec plus d’un fournisseur, comme maintenant, l’éditeur continue d’afficher vos règles et indique pourquoi."
     }
   },
   "advancedSections": {

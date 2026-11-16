@@ -329,13 +329,46 @@
   "routingAdvanced": {
     "rules": {
       "title": "Quy tắc được xét từ trên xuống",
-      "what": "Mỗi quy tắc chỉ định một nhà cung cấp và các mục nó xử lý. NARN xét các quy tắc từ trên xuống, và quy tắc đầu tiên khớp với một mục sẽ dịch mục đó.",
-      "why": "Mục không khớp quy tắc nào sẽ không được dịch, nên hãy kết thúc bằng một quy tắc áp dụng cho mọi thứ."
+      "what": "NARN xét các quy tắc từ trên xuống, và quy tắc đầu tiên khớp với một mục sẽ dịch mục đó. Trong chuyến tham quan này, bạn gửi các ngôn ngữ châu Á đến một nhà cung cấp và mọi ngôn ngữ khác đến một nhà cung cấp khác.",
+      "why": "Mục không khớp quy tắc nào sẽ không được dịch, nên quy tắc cuối cùng cần áp dụng cho mọi thứ."
+    },
+    "edit": {
+      "title": "Mở quy tắc #1",
+      "what": "Nhấn biểu tượng bút chì để sửa quy tắc #1. Quy tắc này sẽ xử lý các ngôn ngữ châu Á."
+    },
+    "filter": {
+      "title": "Mở Lọc",
+      "what": "Nhấn Lọc để xem quy tắc này nhận những mục nào.",
+      "why": "Quy tắc không đánh dấu gì ở đây sẽ nhận mọi mục."
+    },
+    "langs": {
+      "title": "Đánh dấu các ngôn ngữ châu Á",
+      "what": "Đánh dấu các ngôn ngữ châu Á trong số ngôn ngữ của dự án, ví dụ ja, ko và zh. Nếu dự án không có, hãy đánh dấu một ngôn ngữ bất kỳ để thử. Tiếp theo sẽ hiện ra khi bạn đánh dấu một ngôn ngữ.",
+      "why": "Giờ quy tắc #1 chỉ nhận các ngôn ngữ này. Mọi ngôn ngữ khác được chuyển xuống các quy tắc bên dưới."
+    },
+    "module": {
+      "title": "Chọn nhà cung cấp cho nó",
+      "what": "Trong Mô-đun, chọn nhà cung cấp cho các ngôn ngữ này. Để dùng một mô hình khác của cùng nhà cung cấp, hãy mở Cài đặt tác tử ở phía dưới.",
+      "why": "Thay đổi của bạn tự động được lưu."
+    },
+    "done": {
+      "title": "Đóng quy tắc",
+      "what": "Nhấn Xong."
     },
     "add": {
-      "title": "Thêm một quy tắc",
-      "what": "Thêm quy tắc thêm một quy tắc vào cuối danh sách: bạn chọn nhà cung cấp, rồi thu hẹp theo ngôn ngữ đích, nguồn, danh mục, giọng điệu hoặc độ dài mục.",
-      "why": "Nằm dưới một quy tắc áp dụng cho mọi thứ, quy tắc mới sẽ không bao giờ được dùng: hãy đưa nó lên bằng các mũi tên."
+      "title": "Thêm quy tắc cho các ngôn ngữ khác",
+      "what": "Nhấn Thêm quy tắc. Quy tắc mới nằm ở cuối, bên dưới quy tắc #1.",
+      "why": "Các quy tắc được xét từ trên xuống, nên quy tắc ở cuối chỉ nhận phần mà các quy tắc phía trên để lại."
+    },
+    "newModule": {
+      "title": "Chỉ chọn nhà cung cấp",
+      "what": "Trong Mô-đun, chọn nhà cung cấp cho mọi ngôn ngữ khác. Để trống Lọc. Tiếp theo sẽ hiện ra khi bạn chọn một nhà cung cấp.",
+      "why": "Không cần bộ lọc: các ngôn ngữ châu Á dừng ở quy tắc #1, nên chỉ các ngôn ngữ khác đến được quy tắc này."
+    },
+    "order": {
+      "title": "Thứ tự quyết định tất cả",
+      "what": "Quy tắc #1 nhận các ngôn ngữ châu Á và quy tắc #2 nhận phần còn lại. Nếu đổi chỗ, quy tắc không có bộ lọc sẽ đứng trước, nhận mọi ngôn ngữ, và quy tắc #1 sẽ không bao giờ được dùng.",
+      "why": "Để đổi thứ tự, hãy dùng các mũi tên bên cạnh quy tắc."
     },
     "templates": {
       "title": "Mẫu",
@@ -354,8 +387,8 @@
     },
     "back": {
       "title": "Quay lại Đơn giản",
-      "what": "Nhấn Đơn giản để xem lại chế độ một nhà cung cấp. Quy tắc của bạn vẫn giữ nguyên.",
-      "why": "Đơn giản hiển thị khi quy tắc của bạn tương đương một nhà cung cấp cho mọi thứ."
+      "what": "Nhấn Đơn giản để quay lại chế độ một nhà cung cấp. Quy tắc của bạn vẫn giữ nguyên.",
+      "why": "Khi có nhiều hơn một nhà cung cấp, như lúc này, trình chỉnh sửa vẫn hiển thị quy tắc của bạn và cho biết lý do."
     }
   },
   "advancedSections": {

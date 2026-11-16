@@ -384,6 +384,18 @@ export function BatchConfigEditor({
   // instances, not the bare base; instanceable bases without instances stay
   // selectable as themselves.
   const baseInstanceSet = basesWithInstances(modules);
+  // Anchors for the Advanced routing rules tour, which has the person edit the
+  // first rule and fill in the one they add (the last, once there are two).
+  const isNewRule = (index: number): boolean => index > 0 && index === draft.length - 1;
+  const tourMark = (index: number, what: 'module' | 'done'): string | undefined =>
+    index === 0 ? `routing-first-${what}` : isNewRule(index) ? `routing-new-${what}` : undefined;
+  /** Shown once the step's part is done: the first rule has languages, the new one a provider. */
+  const readyMarker = (index: number, rule: RoutingRule): string | undefined =>
+    index === 0 && (rule.targetLanguages?.length ?? 0) > 0
+      ? 'routing-first-langs-set'
+      : isNewRule(index) && rule.moduleId
+        ? 'routing-new-set'
+        : undefined;
   const handleAddFromTemplate = (template: RoutingRule) => {
     onAddFromTemplate(template);
     setEditorTab('rules');
@@ -559,7 +571,10 @@ export function BatchConfigEditor({
                               </Button>
                             </>
                           )}
-                          <span className="text-xs text-muted-foreground font-mono">
+                          <span
+                            className="text-xs text-muted-foreground font-mono"
+                            data-tour={readyMarker(index, rule)}
+                          >
                             {t('routing.ruleEditing', { priority: rule.priority })}
                           </span>
                         </div>
@@ -578,6 +593,7 @@ export function BatchConfigEditor({
                             variant="outline"
                             className="h-6 text-xs px-2"
                             onClick={() => onDoneEdit(rule.id)}
+                            data-tour={tourMark(index, 'done')}
                           >
                             {t('routing.doneEdit')}
                           </Button>
@@ -605,6 +621,7 @@ export function BatchConfigEditor({
                               id={`mod-${rule.id}`}
                               className="h-9 w-full"
                               data-testid={`routing-module-select-${rule.id}`}
+                              data-tour={tourMark(index, 'module')}
                             >
                               <SelectValue placeholder={t('routing.selectPlaceholder')}>
                                 {(v: string | null) =>
@@ -689,6 +706,7 @@ export function BatchConfigEditor({
                               variant="ghost"
                               size="sm"
                               className="flex w-full items-center justify-between px-2 text-sm font-medium"
+                              data-tour={index === 0 ? 'routing-first-filter' : undefined}
                             >
                               <span>{t('routing.sectionFiltering')}</span>
                               <ChevronDown className="h-4 w-4 transition-transform [[data-open]_&]:rotate-180" />
@@ -918,7 +936,7 @@ export function BatchConfigEditor({
                               )}
                             </div>
 
-                            <div>
+                            <div data-tour={index === 0 ? 'routing-first-langs' : undefined}>
                               <Label>{t('routing.labelTargetLanguage')}</Label>
                               <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1.5">
                                 {availableLanguages.map((lang) => (
@@ -1230,6 +1248,7 @@ export function BatchConfigEditor({
                           className="h-7 w-7 p-0"
                           onClick={() => onStartEdit(rule.id)}
                           aria-label="edit"
+                          data-tour={index === 0 ? 'routing-first-edit' : undefined}
                         >
                           <Pencil className="size-3.5" />
                         </Button>

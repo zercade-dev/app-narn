@@ -329,13 +329,46 @@
   "routingAdvanced": {
     "rules": {
       "title": "Aturan diperiksa dari atas",
-      "what": "Setiap aturan menyebut penyedia dan entri yang ditanganinya. NARN memeriksa aturan dari atas, dan aturan pertama yang cocok dengan sebuah entri yang menerjemahkannya.",
-      "why": "Entri yang tidak cocok dengan aturan mana pun tidak diterjemahkan, jadi akhiri dengan aturan yang cocok untuk semuanya."
+      "what": "NARN memeriksa aturan dari atas, dan aturan pertama yang cocok dengan sebuah entri yang menerjemahkannya. Dalam tur ini, Anda mengirim bahasa Asia ke satu penyedia dan semua bahasa lain ke penyedia lain.",
+      "why": "Entri yang tidak cocok dengan aturan mana pun tidak diterjemahkan, jadi aturan terakhir sebaiknya cocok untuk semuanya."
+    },
+    "edit": {
+      "title": "Buka aturan #1",
+      "what": "Tekan ikon pensil untuk mengedit aturan #1. Aturan ini akan menangani bahasa Asia."
+    },
+    "filter": {
+      "title": "Buka Penyaringan",
+      "what": "Tekan Penyaringan untuk melihat entri mana yang diambil aturan ini.",
+      "why": "Aturan yang tidak dicentang apa pun di sini mengambil semua entri."
+    },
+    "langs": {
+      "title": "Centang bahasa Asia",
+      "what": "Centang bahasa Asia di antara bahasa proyek Anda, misalnya ja, ko, dan zh. Jika proyek ini tidak punya, centang bahasa apa saja untuk mencobanya. Berikutnya muncul setelah satu bahasa dicentang.",
+      "why": "Aturan #1 kini hanya mengambil bahasa-bahasa ini. Semua bahasa lain diteruskan ke aturan di bawahnya."
+    },
+    "module": {
+      "title": "Pilih penyedianya",
+      "what": "Di Modul, pilih penyedia untuk bahasa-bahasa ini. Untuk memakai model lain dari penyedia yang sama, buka Pengaturan agen di bagian bawah.",
+      "why": "Perubahan Anda tersimpan otomatis."
+    },
+    "done": {
+      "title": "Tutup aturan",
+      "what": "Tekan Selesai."
     },
     "add": {
-      "title": "Tambahkan aturan",
-      "what": "Tambah aturan menambahkan aturan di bagian bawah daftar: Anda memilih penyedianya, lalu mempersempit menurut bahasa target, sumber, kategori, nada, atau panjang entri.",
-      "why": "Di bawah aturan yang cocok untuk semuanya, aturan baru tidak pernah tercapai: naikkan dengan tanda panahnya."
+      "title": "Tambahkan aturan untuk bahasa lainnya",
+      "what": "Tekan Tambah aturan. Aturan baru ditempatkan di bagian bawah, di bawah aturan #1.",
+      "why": "Aturan diperiksa dari atas, jadi aturan di bagian bawah hanya mendapat sisa dari aturan di atasnya."
+    },
+    "newModule": {
+      "title": "Pilih penyedia, tidak lebih",
+      "what": "Di Modul, pilih penyedia untuk semua bahasa lain. Biarkan Penyaringan kosong. Berikutnya muncul setelah penyedia dipilih.",
+      "why": "Tidak perlu filter: bahasa Asia berhenti di aturan #1, jadi hanya bahasa lain yang sampai ke aturan ini."
+    },
+    "order": {
+      "title": "Urutan yang bekerja",
+      "what": "Aturan #1 mengambil bahasa Asia dan aturan #2 mengambil sisanya. Jika ditukar, aturan tanpa filter akan berada di atas, mengambil semua bahasa, dan aturan #1 tidak akan pernah dipakai.",
+      "why": "Untuk mengubah urutan, gunakan tanda panah di samping aturan."
     },
     "templates": {
       "title": "Templat",
@@ -354,8 +387,8 @@
     },
     "back": {
       "title": "Kembali ke Sederhana",
-      "what": "Tekan Sederhana untuk melihat lagi tampilan satu penyedia. Aturan Anda tetap seperti semula.",
-      "why": "Sederhana muncul jika aturan Anda sama dengan satu penyedia untuk semuanya."
+      "what": "Tekan Sederhana untuk kembali ke tampilan satu penyedia. Aturan Anda tetap seperti semula.",
+      "why": "Dengan lebih dari satu penyedia, seperti sekarang, editor tetap menampilkan aturan Anda dan menjelaskan alasannya."
     }
   },
   "advancedSections": {

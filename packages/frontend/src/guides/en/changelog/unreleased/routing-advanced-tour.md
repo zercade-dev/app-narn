@@ -1,6 +1,6 @@
-A new tour explains Advanced routing rules, from the Routing tour or from the Guide.
-- On the Routing tour's last step, Explain Advanced rules shows the Advanced editor and walks through its parts.
-- It covers how rules are checked from the top, adding a rule, templates, rule groups, Import / Export and going back to Simple.
-- Switching to the Advanced editor only changes the view: your rules stay as they are.
-- The tour points at Add rule, templates, rule groups and Import / Export without letting a click through, so following it never changes your routing; it explains that a new rule goes to the bottom of the list and must sit above a rule that fits everything to be used.
+A new tour teaches Advanced routing rules by doing: one provider for Asian languages, another for the rest.
+- On the Routing tour's last step, Explain Advanced rules shows the Advanced editor; the tour is also in the Guide.
+- You edit rule #1 to take the Asian languages with the provider you choose, then add a rule below it that takes every other language.
+- The tour explains why the second rule needs no filter: rules are checked from the top, and the first one that fits an entry is used.
+- It then shows templates, rule groups, Import / Export and the way back to Simple, without letting a click through on those.
 - A control the tour only shows has a not-allowed cursor, and clicking it (or pressing Enter on it) explains that it can be used once the tour ends, instead of silently doing nothing.

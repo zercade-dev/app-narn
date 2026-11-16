@@ -329,13 +329,46 @@
   "routingAdvanced": {
     "rules": {
       "title": "Regole, lette dall’alto",
-      "what": "Ogni regola indica un provider e le voci che gestisce. NARN controlla le regole dall’alto, e la prima che si adatta a una voce la traduce.",
-      "why": "Una voce a cui non si adatta nessuna regola non viene tradotta: chiudi l’elenco con una regola valida per tutto."
+      "what": "NARN controlla le regole dall’alto, e la prima che si adatta a una voce la traduce. In questo tour mandi le lingue asiatiche a un provider e tutte le altre lingue a un altro.",
+      "why": "Una voce a cui non si adatta nessuna regola non viene tradotta, quindi l’ultima regola dovrebbe valere per tutto."
+    },
+    "edit": {
+      "title": "Apri la regola n. 1",
+      "what": "Premi la matita per modificare la regola n. 1. Gestirà le lingue asiatiche."
+    },
+    "filter": {
+      "title": "Apri Filtri",
+      "what": "Premi Filtri per vedere quali voci prende questa regola.",
+      "why": "Una regola senza nulla spuntato qui prende tutte le voci."
+    },
+    "langs": {
+      "title": "Spunta le lingue asiatiche",
+      "what": "Spunta le lingue asiatiche tra le lingue del progetto, per esempio ja, ko e zh. Se il progetto non ne ha, spunta una lingua qualsiasi per provare. Avanti compare appena ne spunti una.",
+      "why": "Ora la regola n. 1 prende solo queste lingue. Tutte le altre lingue passano alle regole sotto."
+    },
+    "module": {
+      "title": "Scegli il suo provider",
+      "what": "In Modulo, scegli il provider per queste lingue. Per usare un altro modello dello stesso provider, apri Impostazioni dell'agente più in basso.",
+      "why": "Le modifiche si salvano da sole."
+    },
+    "done": {
+      "title": "Chiudi la regola",
+      "what": "Premi Fatto."
     },
     "add": {
-      "title": "Aggiungi una regola",
-      "what": "Aggiungi una regola aggiunge una regola in fondo all’elenco: scegli il provider, poi la restringi per lingua di destinazione, origine, categoria, tono o lunghezza della voce.",
-      "why": "Sotto una regola valida per tutto, una nuova regola non viene mai raggiunta: spostala in alto con le sue frecce."
+      "title": "Aggiungi una regola per le altre lingue",
+      "what": "Premi Aggiungi una regola. La nuova regola va in fondo, sotto la regola n. 1.",
+      "why": "Le regole sono controllate dall’alto, quindi una regola in fondo riceve solo ciò che le regole sopra hanno lasciato."
+    },
+    "newModule": {
+      "title": "Scegli un provider, nient’altro",
+      "what": "In Modulo, scegli il provider per tutte le altre lingue. Lascia vuoto Filtri. Avanti compare appena scegli un provider.",
+      "why": "Non serve alcun filtro: le lingue asiatiche si fermano alla regola n. 1, quindi solo le altre lingue arrivano a questa regola."
+    },
+    "order": {
+      "title": "È l’ordine a fare il lavoro",
+      "what": "La regola n. 1 prende le lingue asiatiche e la regola n. 2 il resto. Scambiandole, la regola senza filtro verrebbe prima, prenderebbe tutte le lingue e la regola n. 1 non verrebbe mai usata.",
+      "why": "Per cambiare l’ordine, usa le frecce accanto a una regola."
     },
     "templates": {
       "title": "Schemi",
@@ -354,8 +387,8 @@
     },
     "back": {
       "title": "Torna a Semplice",
-      "what": "Premi Semplice per rivedere la vista con un solo provider. Le tue regole restano come sono.",
-      "why": "Semplice compare quando le tue regole equivalgono a un solo provider per tutto."
+      "what": "Premi Semplice per tornare alla vista con un solo provider. Le tue regole restano come sono.",
+      "why": "Con più di un provider, come ora, l’editor continua a mostrare le tue regole e spiega perché."
     }
   },
   "advancedSections": {

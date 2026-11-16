@@ -40,40 +40,89 @@ const ON_RULES = showEditorTab('rules');
 function step(
   id: string,
   anchor: string,
-  onEnter: () => void = ON_RULES,
-  side?: TourStep['side'],
+  advance: TourStep['advance'] = { kind: 'next' },
+  opts: Partial<Pick<TourStep, 'onEnter' | 'side' | 'overlap' | 'interactive'>> & {
+    copy?: string;
+    noWhy?: true;
+  } = {},
 ): TourStep {
+  const { copy = id, noWhy, ...rest } = opts;
   return {
     id,
     anchor,
-    onEnter,
-    ...(side ? { side, overlap: true as const } : {}),
-    titleKey: `routingAdvanced.${id}.title`,
-    whatKey: `routingAdvanced.${id}.what`,
-    whyKey: `routingAdvanced.${id}.why`,
-    advance: { kind: 'next' },
+    onEnter: ON_RULES,
+    ...rest,
+    titleKey: `routingAdvanced.${copy}.title`,
+    whatKey: `routingAdvanced.${copy}.what`,
+    ...(noWhy ? {} : { whyKey: `routingAdvanced.${copy}.why` }),
+    advance,
     navigate: TO_ROUTING,
   };
 }
 
-function lookOnly(s: TourStep): TourStep {
-  return { ...s, interactive: false };
-}
+const CLICK: TourStep['advance'] = { kind: 'click' };
+
+/**
+ * Shown, not offered: these controls change the project's real routing (a
+ * template adds a rule, a new group becomes the one translations use), and
+ * the tour has nothing for them to do.
+ */
+const LOOK = { interactive: false } as const;
 
 export const ROUTING_ADVANCED_TOUR: Tour = {
   id: ROUTING_ADVANCED_TOUR_ID,
   steps: [
-    // Shown, not offered: these controls change the project's real routing
-    // (a rule added below a catch-all is never reached; a new group becomes
-    // the one translations use), so the tour points at them without letting
-    // a click through. Only the view switch, the last step, is offered.
-    // The rules list (or the line saying there are none yet).
-    lookOnly(step('rules', 'routing-rules', ON_RULES, 'bottom')),
-    lookOnly(step('add', 'routing-add')),
+    // The worked example: Asian languages to one provider, the rest to
+    // another. Rule #1 gets the language filter; the rule added below it
+    // needs none, because the first rule that fits an entry is the one used.
+    step('rules', 'routing-rules', { kind: 'next' }, { ...LOOK, side: 'bottom', overlap: true }),
+    step('edit', 'routing-first-edit', CLICK, { noWhy: true }),
+    step('filter', 'routing-first-filter', CLICK),
+    // Next once a language is ticked (the marker shows then).
+    step(
+      'langs',
+      'routing-first-langs',
+      { kind: 'next', needs: 'routing-first-langs-set' },
+      {
+        side: 'top',
+      },
+    ),
+    step('module', 'routing-first-module', { kind: 'next' }, { side: 'right' }),
+    step('done', 'routing-first-done', CLICK, { copy: 'done', noWhy: true }),
+    step('add', 'routing-add', CLICK),
+    // Next once the new rule has a provider.
+    step(
+      'newModule',
+      'routing-new-module',
+      { kind: 'next', needs: 'routing-new-set' },
+      {
+        side: 'right',
+      },
+    ),
+    step('newDone', 'routing-new-done', CLICK, { copy: 'done', noWhy: true }),
+    step('order', 'routing-rules', { kind: 'next' }, { ...LOOK, side: 'bottom', overlap: true }),
     // These two open their tab of the editor, so what they describe is on screen.
-    lookOnly(step('templates', 'routing-templates', showEditorTab('templates'), 'bottom')),
-    lookOnly(step('groups', 'routing-groups')),
-    lookOnly(step('import', 'routing-import', showEditorTab('advanced'), 'bottom')),
+    step(
+      'templates',
+      'routing-templates',
+      { kind: 'next' },
+      {
+        ...LOOK,
+        onEnter: showEditorTab('templates'),
+        side: 'bottom',
+      },
+    ),
+    step('groups', 'routing-groups', { kind: 'next' }, LOOK),
+    step(
+      'import',
+      'routing-import',
+      { kind: 'next' },
+      {
+        ...LOOK,
+        onEnter: showEditorTab('advanced'),
+        side: 'bottom',
+      },
+    ),
     // Back to Simple, from the switch itself (a view preference: rules untouched).
     step('back', 'routing-mode'),
   ],

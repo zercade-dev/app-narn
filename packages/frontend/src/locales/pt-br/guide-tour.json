@@ -329,13 +329,46 @@
   "routingAdvanced": {
     "rules": {
       "title": "Regras, lidas de cima para baixo",
-      "what": "Cada regra indica um provedor e as entradas que ele cuida. O NARN confere as regras de cima para baixo, e a primeira que serve para uma entrada a traduz.",
-      "why": "Uma entrada que nenhuma regra atende não é traduzida, então termine com uma regra que sirva para tudo."
+      "what": "O NARN confere as regras de cima para baixo, e a primeira que serve para uma entrada a traduz. Neste tour, você envia os idiomas asiáticos para um provedor e todos os outros idiomas para outro.",
+      "why": "Uma entrada que nenhuma regra atende não é traduzida, então a última regra deve servir para tudo."
+    },
+    "edit": {
+      "title": "Abra a regra nº 1",
+      "what": "Clique no lápis para editar a regra nº 1. Ela vai cuidar dos idiomas asiáticos."
+    },
+    "filter": {
+      "title": "Abra Filtragem",
+      "what": "Clique em Filtragem para ver quais entradas esta regra pega.",
+      "why": "Uma regra sem nada marcado aqui pega todas as entradas."
+    },
+    "langs": {
+      "title": "Marque os idiomas asiáticos",
+      "what": "Marque os idiomas asiáticos entre os idiomas do seu projeto, por exemplo ja, ko e zh. Se o projeto não tiver nenhum, marque qualquer idioma para testar. Próximo aparece assim que um for marcado.",
+      "why": "Agora a regra nº 1 pega só esses idiomas. Todos os outros idiomas seguem para as regras abaixo dela."
+    },
+    "module": {
+      "title": "Escolha o provedor dela",
+      "what": "Em Módulo, escolha o provedor para esses idiomas. Para usar outro modelo do mesmo provedor, abra Configurações do agente mais abaixo.",
+      "why": "Suas alterações são salvas sozinhas."
+    },
+    "done": {
+      "title": "Feche a regra",
+      "what": "Clique em Concluir."
     },
     "add": {
-      "title": "Adicionar uma regra",
-      "what": "Adicionar regra adiciona uma regra no fim da lista: você escolhe o provedor e restringe por idioma de destino, origem, categoria, tom ou tamanho da entrada.",
-      "why": "Abaixo de uma regra que serve para tudo, uma regra nova nunca é alcançada: suba-a com as setas dela."
+      "title": "Adicione uma regra para os outros idiomas",
+      "what": "Clique em Adicionar regra. A nova regra vai para o fim, abaixo da regra nº 1.",
+      "why": "As regras são conferidas de cima para baixo, então uma regra no fim só recebe o que as regras acima dela deixaram."
+    },
+    "newModule": {
+      "title": "Escolha um provedor e nada mais",
+      "what": "Em Módulo, escolha o provedor para todos os outros idiomas. Deixe Filtragem vazio. Próximo aparece assim que um provedor for escolhido.",
+      "why": "Nenhum filtro é necessário: os idiomas asiáticos param na regra nº 1, então só os outros idiomas chegam a esta regra."
+    },
+    "order": {
+      "title": "A ordem faz o trabalho",
+      "what": "A regra nº 1 pega os idiomas asiáticos e a regra nº 2 pega o resto. Se fossem trocadas, a regra sem filtro viria primeiro, pegaria todos os idiomas, e a regra nº 1 nunca seria usada.",
+      "why": "Para mudar a ordem, use as setas ao lado de uma regra."
     },
     "templates": {
       "title": "Templates",
@@ -354,8 +387,8 @@
     },
     "back": {
       "title": "Voltar ao Simples",
-      "what": "Pressione Simples para ver de novo a visão com um só provedor. Suas regras ficam como estão.",
-      "why": "Simples aparece quando suas regras equivalem a um só provedor para tudo."
+      "what": "Clique em Simples para voltar à visão com um só provedor. Suas regras ficam como estão.",
+      "why": "Com mais de um provedor, como agora, o editor continua mostrando suas regras e explica por quê."
     }
   },
   "advancedSections": {

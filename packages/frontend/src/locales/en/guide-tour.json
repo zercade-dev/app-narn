@@ -329,13 +329,46 @@
   "routingAdvanced": {
     "rules": {
       "title": "Rules, checked from the top",
-      "what": "Each rule names a provider and the entries it handles. NARN checks the rules from the top, and the first rule that fits an entry translates it.",
-      "why": "An entry no rule fits is not translated, so end with a rule that fits everything."
+      "what": "NARN checks the rules from the top, and the first rule that fits an entry translates it. In this tour you send Asian languages to one provider and every other language to another.",
+      "why": "An entry no rule fits is not translated, so the last rule should fit everything."
+    },
+    "edit": {
+      "title": "Open rule #1",
+      "what": "Press the pencil to edit rule #1. It will handle the Asian languages."
+    },
+    "filter": {
+      "title": "Open Filtering",
+      "what": "Press Filtering to see which entries this rule takes.",
+      "why": "A rule with nothing ticked here takes every entry."
+    },
+    "langs": {
+      "title": "Tick the Asian languages",
+      "what": "Tick the Asian languages among your project's languages, for example ja, ko and zh. With none in this project, tick any language to try it. Next appears once one is ticked.",
+      "why": "Rule #1 now takes only these languages. Every other language moves on to the rules below it."
+    },
+    "module": {
+      "title": "Choose its provider",
+      "what": "In Module, pick the provider for these languages. To use a different model of the same provider, open Agent settings further down.",
+      "why": "Your changes save by themselves."
+    },
+    "done": {
+      "title": "Close the rule",
+      "what": "Press Done."
     },
     "add": {
-      "title": "Add a rule",
-      "what": "Add rule adds a rule at the bottom of the list: you pick its provider, then narrow it down by target language, source, category, tone or entry length.",
-      "why": "Below a rule that fits everything, a new rule is never reached: move it up with its arrows."
+      "title": "Add a rule for the other languages",
+      "what": "Press Add rule. The new rule goes at the bottom, below rule #1.",
+      "why": "Rules are checked from the top, so a rule at the bottom only gets what the rules above it left."
+    },
+    "newModule": {
+      "title": "Choose a provider, and nothing else",
+      "what": "In Module, pick the provider for every other language. Leave Filtering empty. Next appears once a provider is picked.",
+      "why": "No filter is needed: Asian languages stop at rule #1, so only the other languages reach this rule."
+    },
+    "order": {
+      "title": "The order does the work",
+      "what": "Rule #1 takes the Asian languages and rule #2 takes the rest. Swapped, the rule with no filter would come first, take every language, and rule #1 would never be used.",
+      "why": "To change the order, use the arrows beside a rule."
     },
     "templates": {
       "title": "Templates",
@@ -354,8 +387,8 @@
     },
     "back": {
       "title": "Back to Simple",
-      "what": "Press Simple to see the one-provider view again. Your rules stay as they are.",
-      "why": "Simple shows when your rules amount to one provider for everything."
+      "what": "Press Simple to go back to the one-provider view. Your rules stay as they are.",
+      "why": "With more than one provider, as now, the editor keeps showing your rules and says why."
     }
   },
   "advancedSections": {

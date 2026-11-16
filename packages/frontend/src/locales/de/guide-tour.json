@@ -329,13 +329,46 @@
   "routingAdvanced": {
     "rules": {
       "title": "Regeln, von oben geprüft",
-      "what": "Jede Regel nennt einen Anbieter und die Einträge, die er übernimmt. NARN prüft die Regeln von oben, und die erste passende Regel übersetzt den Eintrag.",
-      "why": "Ein Eintrag, auf den keine Regel passt, wird nicht übersetzt – beende die Liste also mit einer Regel, die auf alles passt."
+      "what": "NARN prüft die Regeln von oben, und die erste Regel, die auf einen Eintrag passt, übersetzt ihn. In dieser Tour schickst du asiatische Sprachen an einen Anbieter und alle anderen Sprachen an einen anderen.",
+      "why": "Ein Eintrag, auf den keine Regel passt, wird nicht übersetzt – die letzte Regel sollte also auf alles passen."
+    },
+    "edit": {
+      "title": "Regel #1 öffnen",
+      "what": "Klicke auf den Stift, um Regel #1 zu bearbeiten. Sie übernimmt die asiatischen Sprachen."
+    },
+    "filter": {
+      "title": "„Filterung“ öffnen",
+      "what": "Klicke auf „Filterung“, um zu sehen, welche Einträge diese Regel übernimmt.",
+      "why": "Eine Regel, bei der hier nichts angehakt ist, übernimmt jeden Eintrag."
+    },
+    "langs": {
+      "title": "Die asiatischen Sprachen anhaken",
+      "what": "Hake unter den Sprachen deines Projekts die asiatischen an, zum Beispiel ja, ko und zh. Hat dein Projekt keine, hake zum Ausprobieren eine beliebige Sprache an. „Weiter“ erscheint, sobald eine angehakt ist.",
+      "why": "Regel #1 übernimmt jetzt nur diese Sprachen. Alle anderen Sprachen gehen weiter an die Regeln darunter."
+    },
+    "module": {
+      "title": "Ihren Anbieter wählen",
+      "what": "Wähle unter „Modul“ den Anbieter für diese Sprachen. Um ein anderes Modell desselben Anbieters zu nutzen, öffne weiter unten „Agent-Einstellungen“.",
+      "why": "Deine Änderungen werden automatisch gespeichert."
+    },
+    "done": {
+      "title": "Die Regel schließen",
+      "what": "Klicke auf „Fertig“."
     },
     "add": {
-      "title": "Eine Regel hinzufügen",
-      "what": "Regel hinzufügen fügt unten in der Liste eine Regel hinzu: Du wählst ihren Anbieter und grenzt sie nach Zielsprache, Quelle, Kategorie, Ton oder Eintragslänge ein.",
-      "why": "Unter einer Regel, die auf alles passt, wird eine neue Regel nie erreicht: Schiebe sie mit ihren Pfeilen nach oben."
+      "title": "Eine Regel für die anderen Sprachen hinzufügen",
+      "what": "Klicke auf „Regel hinzufügen“. Die neue Regel kommt ganz nach unten, unter Regel #1.",
+      "why": "Die Regeln werden von oben geprüft, also bekommt eine Regel ganz unten nur, was die Regeln darüber übrig gelassen haben."
+    },
+    "newModule": {
+      "title": "Nur einen Anbieter wählen",
+      "what": "Wähle unter „Modul“ den Anbieter für alle anderen Sprachen. Lass „Filterung“ leer. „Weiter“ erscheint, sobald ein Anbieter gewählt ist.",
+      "why": "Ein Filter ist nicht nötig: Asiatische Sprachen bleiben bei Regel #1 hängen, also erreichen nur die anderen Sprachen diese Regel."
+    },
+    "order": {
+      "title": "Die Reihenfolge macht die Arbeit",
+      "what": "Regel #1 übernimmt die asiatischen Sprachen und Regel #2 den Rest. Vertauscht käme die Regel ohne Filter zuerst, würde jede Sprache übernehmen, und Regel #1 würde nie verwendet.",
+      "why": "Um die Reihenfolge zu ändern, nutze die Pfeile neben einer Regel."
     },
     "templates": {
       "title": "Vorlagen",
@@ -354,8 +387,8 @@
     },
     "back": {
       "title": "Zurück zu Einfach",
-      "what": "Drücke Einfach, um wieder die Ansicht mit einem Anbieter zu sehen. Deine Regeln bleiben, wie sie sind.",
-      "why": "Einfach erscheint, wenn deine Regeln auf einen Anbieter für alles hinauslaufen."
+      "what": "Klicke auf „Einfach“, um zur Ansicht mit einem Anbieter zurückzukehren. Deine Regeln bleiben, wie sie sind.",
+      "why": "Bei mehr als einem Anbieter, wie jetzt, zeigt der Editor weiter deine Regeln an und sagt, warum."
     }
   },
   "advancedSections": {

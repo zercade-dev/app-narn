@@ -329,13 +329,46 @@
   "routingAdvanced": {
     "rules": {
       "title": "Reglas, de arriba abajo",
-      "what": "Cada regla indica un proveedor y las entradas que gestiona. NARN revisa las reglas de arriba abajo, y la primera que encaja con una entrada la traduce.",
-      "why": "Una entrada que no encaja con ninguna regla no se traduce, así que termina con una regla que valga para todo."
+      "what": "NARN revisa las reglas de arriba abajo, y la primera que encaja con una entrada la traduce. En este recorrido envías los idiomas asiáticos a un proveedor y todos los demás idiomas a otro.",
+      "why": "Una entrada que no encaja con ninguna regla no se traduce, así que la última regla debería valer para todo."
+    },
+    "edit": {
+      "title": "Abre la regla n.º 1",
+      "what": "Pulsa el lápiz para editar la regla n.º 1. Se encargará de los idiomas asiáticos."
+    },
+    "filter": {
+      "title": "Abre Filtrado",
+      "what": "Pulsa Filtrado para ver qué entradas toma esta regla.",
+      "why": "Una regla sin nada marcado aquí toma todas las entradas."
+    },
+    "langs": {
+      "title": "Marca los idiomas asiáticos",
+      "what": "Marca los idiomas asiáticos entre los idiomas de tu proyecto, por ejemplo ja, ko y zh. Si tu proyecto no tiene ninguno, marca cualquier idioma para probarlo. Siguiente aparece en cuanto marcas uno.",
+      "why": "Ahora la regla n.º 1 solo toma estos idiomas. Los demás idiomas pasan a las reglas de debajo."
+    },
+    "module": {
+      "title": "Elige su proveedor",
+      "what": "En Módulo, elige el proveedor para estos idiomas. Para usar otro modelo del mismo proveedor, abre Ajustes del agente más abajo.",
+      "why": "Tus cambios se guardan solos."
+    },
+    "done": {
+      "title": "Cierra la regla",
+      "what": "Pulsa Listo."
     },
     "add": {
-      "title": "Añadir una regla",
-      "what": "Añadir regla añade una regla al final de la lista: eliges su proveedor y la acotas por idioma de destino, origen, categoría, tono o longitud de la entrada.",
-      "why": "Debajo de una regla que vale para todo, una regla nueva nunca se alcanza: súbela con sus flechas."
+      "title": "Añade una regla para los demás idiomas",
+      "what": "Pulsa Añadir regla. La nueva regla va al final, debajo de la regla n.º 1.",
+      "why": "Las reglas se revisan de arriba abajo, así que una regla al final solo recibe lo que dejaron las reglas de encima."
+    },
+    "newModule": {
+      "title": "Elige un proveedor y nada más",
+      "what": "En Módulo, elige el proveedor para todos los demás idiomas. Deja Filtrado vacío. Siguiente aparece en cuanto eliges un proveedor.",
+      "why": "No hace falta ningún filtro: los idiomas asiáticos se quedan en la regla n.º 1, así que solo los demás idiomas llegan a esta regla."
+    },
+    "order": {
+      "title": "El orden hace el trabajo",
+      "what": "La regla n.º 1 toma los idiomas asiáticos y la regla n.º 2 el resto. Si las intercambias, la regla sin filtro iría primero, tomaría todos los idiomas y la regla n.º 1 nunca se usaría.",
+      "why": "Para cambiar el orden, usa las flechas junto a una regla."
     },
     "templates": {
       "title": "Plantillas",
@@ -354,8 +387,8 @@
     },
     "back": {
       "title": "Volver a Sencillo",
-      "what": "Pulsa Sencillo para ver de nuevo la vista de un solo proveedor. Tus reglas no cambian.",
-      "why": "Sencillo aparece cuando tus reglas equivalen a un solo proveedor para todo."
+      "what": "Pulsa Sencillo para volver a la vista de un solo proveedor. Tus reglas no cambian.",
+      "why": "Con más de un proveedor, como ahora, el editor sigue mostrando tus reglas y explica por qué."
     }
   },
   "advancedSections": {

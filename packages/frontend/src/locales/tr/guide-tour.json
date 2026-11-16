@@ -329,13 +329,46 @@
   "routingAdvanced": {
     "rules": {
       "title": "Kurallar yukarıdan denetlenir",
-      "what": "Her kural bir sağlayıcıyı ve onun ele alacağı girdileri belirtir. NARN kuralları yukarıdan aşağı denetler ve bir girdiye uyan ilk kural onu çevirir.",
-      "why": "Hiçbir kurala uymayan bir girdi çevrilmez; bu yüzden listeyi her şeye uyan bir kuralla bitirin."
+      "what": "NARN kuralları yukarıdan aşağı denetler ve bir girdiye uyan ilk kural onu çevirir. Bu turda Asya dillerini bir sağlayıcıya, diğer tüm dilleri başka bir sağlayıcıya gönderiyorsunuz.",
+      "why": "Hiçbir kurala uymayan bir girdi çevrilmez; bu yüzden son kural her şeye uymalıdır."
+    },
+    "edit": {
+      "title": "1 numaralı kuralı açın",
+      "what": "1 numaralı kuralı düzenlemek için kaleme basın. Bu kural Asya dillerini ele alacak."
+    },
+    "filter": {
+      "title": "Filtreleme’yi açın",
+      "what": "Bu kuralın hangi girdileri aldığını görmek için Filtreleme’ye basın.",
+      "why": "Burada hiçbir şey işaretlenmemiş bir kural her girdiyi alır."
+    },
+    "langs": {
+      "title": "Asya dillerini işaretleyin",
+      "what": "Projenizin dilleri arasından Asya dillerini işaretleyin, örneğin ja, ko ve zh. Projede hiç yoksa denemek için herhangi bir dili işaretleyin. Biri işaretlenince İleri görünür.",
+      "why": "1 numaralı kural artık yalnızca bu dilleri alır. Diğer tüm diller altındaki kurallara geçer."
+    },
+    "module": {
+      "title": "Sağlayıcısını seçin",
+      "what": "Modül alanında bu diller için sağlayıcıyı seçin. Aynı sağlayıcının farklı bir modelini kullanmak için aşağıdaki Aracı ayarları’nı açın.",
+      "why": "Değişiklikleriniz kendiliğinden kaydedilir."
+    },
+    "done": {
+      "title": "Kuralı kapatın",
+      "what": "Bitti’ye basın."
     },
     "add": {
-      "title": "Kural ekleyin",
-      "what": "Kural ekle listenin sonuna bir kural ekler: sağlayıcısını seçer, sonra hedef dil, kaynak, kategori, ton veya girdi uzunluğuna göre daraltırsınız.",
-      "why": "Her şeye uyan bir kuralın altındaki yeni kurala hiç sıra gelmez: oklarıyla yukarı taşıyın."
+      "title": "Diğer diller için bir kural ekleyin",
+      "what": "Kural ekle’ye basın. Yeni kural en alta, 1 numaralı kuralın altına gelir.",
+      "why": "Kurallar yukarıdan denetlendiği için en alttaki kural yalnızca üstündeki kuralların bıraktığını alır."
+    },
+    "newModule": {
+      "title": "Yalnızca bir sağlayıcı seçin",
+      "what": "Modül alanında diğer tüm diller için sağlayıcıyı seçin. Filtreleme’yi boş bırakın. Bir sağlayıcı seçilince İleri görünür.",
+      "why": "Filtre gerekmez: Asya dilleri 1 numaralı kuralda durur, bu yüzden bu kurala yalnızca diğer diller ulaşır."
+    },
+    "order": {
+      "title": "İşi sıra yapar",
+      "what": "1 numaralı kural Asya dillerini, 2 numaralı kural da geri kalanını alır. Yerleri değişirse filtresiz kural önce gelir, her dili alır ve 1 numaralı kural hiç kullanılmaz.",
+      "why": "Sırayı değiştirmek için bir kuralın yanındaki okları kullanın."
     },
     "templates": {
       "title": "Şablonlar",
@@ -354,8 +387,8 @@
     },
     "back": {
       "title": "Basit görünüme dönün",
-      "what": "Tek sağlayıcılı görünümü yeniden görmek için Basit düğmesine basın. Kurallarınız olduğu gibi kalır.",
-      "why": "Basit, kurallarınız her şey için tek bir sağlayıcıya denk geldiğinde görünür."
+      "what": "Tek sağlayıcılı görünüme dönmek için Basit düğmesine basın. Kurallarınız olduğu gibi kalır.",
+      "why": "Şimdiki gibi birden fazla sağlayıcı olduğunda düzenleyici kurallarınızı göstermeye devam eder ve nedenini söyler."
     }
   },
   "advancedSections": {
