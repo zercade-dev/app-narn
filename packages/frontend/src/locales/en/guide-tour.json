@@ -1,6 +1,7 @@
 {
   "next": "Next",
   "completeTour": "Complete tour",
+  "lookOnly": "This is only shown during the tour. You can use it once the tour ends.",
   "back": "Back",
   "skip": "Skip tour",
   "close": "Close",

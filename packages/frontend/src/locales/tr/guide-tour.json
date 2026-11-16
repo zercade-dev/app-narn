@@ -1,6 +1,7 @@
 {
   "next": "İleri",
   "completeTour": "Turu tamamla",
+  "lookOnly": "Tur sırasında bu yalnızca gösterilir. Tur bitince kullanabilirsiniz.",
   "back": "Geri",
   "skip": "Turu atla",
   "close": "Kapat",

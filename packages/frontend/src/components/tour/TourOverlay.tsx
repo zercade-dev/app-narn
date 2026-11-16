@@ -215,6 +215,29 @@ export function TourOverlay({
   // Entering a step via Back: remember it, so a `state` step that is already
   // satisfied does not immediately bounce the person forward again.
   const stepKey = `${tour.id}:${stepIndex}`;
+  // A click on a look-only step's control (blocked by the guard); cleared per step.
+  const [lookOnlyTapped, setLookOnlyTapped] = useState(false);
+  const [lookOnlyStep, setLookOnlyStep] = useState(stepKey);
+  if (lookOnlyStep !== stepKey) {
+    setLookOnlyStep(stepKey);
+    setLookOnlyTapped(false);
+  }
+  // The keyboard reaches the control past the guard: Enter or Space on it is
+  // stopped too, with the same note.
+  const lookOnly = step?.interactive === false;
+  useEffect(() => {
+    if (!lookOnly || !anchor) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const target = e.target;
+      if (!(target instanceof Node) || !anchor.contains(target)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setLookOnlyTapped(true);
+    };
+    globalThis.addEventListener('keydown', onKey, true);
+    return () => globalThis.removeEventListener('keydown', onKey, true);
+  }, [lookOnly, anchor]);
   const [nav, setNav] = useState({
     key: stepKey,
     index: stepIndex,
@@ -296,7 +319,17 @@ export function TourOverlay({
     step: anchor === null && step.absentWhatKey ? { ...step, whatKey: step.absentWhatKey } : step,
     titleId,
     position,
-    extra,
+    extra: lookOnlyTapped ? (
+      <>
+        {extra}
+        {/* A look-only control was clicked: say why nothing happened. */}
+        <p className="text-xs font-medium text-status-warn" data-testid="tour-look-only-note">
+          {t('lookOnly')}
+        </p>
+      </>
+    ) : (
+      extra
+    ),
     text,
     showBack: canGoBack ?? stepIndex > 0,
     showNext:
@@ -385,8 +418,10 @@ export function TourOverlay({
             <div
               aria-hidden="true"
               data-testid="tour-hole-guard"
-              className="pointer-events-auto fixed z-40"
+              // Shown, not offered: the cursor says so, and a click says why.
+              className="pointer-events-auto fixed z-40 cursor-not-allowed"
               style={px(hole)}
+              onClick={() => setLookOnlyTapped(true)}
             />
           )}
           <div

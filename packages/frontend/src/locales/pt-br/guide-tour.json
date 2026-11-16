@@ -1,6 +1,7 @@
 {
   "next": "Próximo",
   "completeTour": "Concluir tour",
+  "lookOnly": "Isto só é mostrado durante o tour. Você pode usar quando o tour terminar.",
   "back": "Voltar",
   "skip": "Pular o tour",
   "close": "Fechar",

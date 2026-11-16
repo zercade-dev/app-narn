@@ -1,6 +1,7 @@
 {
   "next": "Suivant",
   "completeTour": "Terminer la visite",
+  "lookOnly": "Ceci est seulement montré pendant la visite. Vous pourrez l’utiliser une fois la visite terminée.",
   "back": "Retour",
   "skip": "Passer la visite",
   "close": "Fermer",

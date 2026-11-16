@@ -1,6 +1,7 @@
 {
   "next": "Siguiente",
   "completeTour": "Completar recorrido",
+  "lookOnly": "Esto solo se muestra durante el recorrido. Podrás usarlo cuando termine.",
   "back": "Atrás",
   "skip": "Omitir el recorrido",
   "close": "Cerrar",
