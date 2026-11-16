@@ -247,7 +247,7 @@
       "list": {
         "title": "Your glossaries",
         "what": "Each glossary is a list of terms with the translation you want for each.",
-        "why": "Terms such as character names or game jargon then come out the same way every time."
+        "why": "Terms such as character names, skills or item names then come out the same way every time."
       },
       "create": {
         "title": "Start a glossary",
@@ -436,7 +436,7 @@
   "glossariesTour": {
     "purpose": {
       "title": "What a glossary is for",
-      "what": "A glossary lists terms with the translation you want for each, such as character names or game jargon.",
+      "what": "A glossary lists terms with the translation you want for each, such as character names, skills or item names.",
       "why": "Translations then use your words every time instead of a new guess."
     },
     "picked": {

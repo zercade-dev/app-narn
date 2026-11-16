@@ -247,7 +247,7 @@
       "list": {
         "title": "Các bảng thuật ngữ của bạn",
         "what": "Mỗi bảng thuật ngữ là một danh sách các thuật ngữ cùng bản dịch bạn muốn cho từng thuật ngữ.",
-        "why": "Nhờ vậy, những thuật ngữ như tên nhân vật hay biệt ngữ trong game luôn được dịch giống nhau."
+        "why": "Nhờ vậy, những thuật ngữ như tên nhân vật, kỹ năng hay tên vật phẩm luôn được dịch giống nhau."
       },
       "create": {
         "title": "Tạo bảng thuật ngữ",
@@ -436,7 +436,7 @@
   "glossariesTour": {
     "purpose": {
       "title": "Bảng thuật ngữ dùng để làm gì",
-      "what": "Bảng thuật ngữ liệt kê các thuật ngữ kèm bản dịch bạn muốn, như tên nhân vật hay biệt ngữ trong game.",
+      "what": "Bảng thuật ngữ liệt kê các thuật ngữ kèm bản dịch bạn muốn, như tên nhân vật, kỹ năng hay tên vật phẩm.",
       "why": "Khi đó bản dịch luôn dùng từ của bạn thay vì đoán mới mỗi lần."
     },
     "picked": {

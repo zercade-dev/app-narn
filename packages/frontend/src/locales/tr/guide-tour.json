@@ -247,7 +247,7 @@
       "list": {
         "title": "Sözlükçeleriniz",
         "what": "Her sözlükçe, terimlerden ve her biri için istediğiniz çeviriden oluşan bir listedir.",
-        "why": "Karakter adları veya oyun jargonu gibi terimler böylece her seferinde aynı şekilde çevrilir."
+        "why": "Karakter adları, yetenekler veya eşya adları gibi terimler böylece her seferinde aynı şekilde çevrilir."
       },
       "create": {
         "title": "Sözlükçe oluşturun",
@@ -436,7 +436,7 @@
   "glossariesTour": {
     "purpose": {
       "title": "Sözlükçe ne işe yarar",
-      "what": "Sözlükçe, her biri için istediğiniz çeviriyle terimleri listeler; karakter adları veya oyun jargonu gibi.",
+      "what": "Sözlükçe, her biri için istediğiniz çeviriyle terimleri listeler; karakter adları, yetenekler veya eşya adları gibi.",
       "why": "Çeviriler böylece yeni bir tahmin yerine her seferinde sizin sözcüklerinizi kullanır."
     },
     "picked": {

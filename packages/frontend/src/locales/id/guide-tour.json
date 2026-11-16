@@ -247,7 +247,7 @@
       "list": {
         "title": "Glosarium Anda",
         "what": "Setiap glosarium adalah daftar istilah beserta terjemahan yang Anda inginkan untuk masing-masing.",
-        "why": "Istilah seperti nama karakter atau jargon game pun selalu diterjemahkan dengan cara yang sama."
+        "why": "Istilah seperti nama karakter, keterampilan, atau nama item pun selalu diterjemahkan dengan cara yang sama."
       },
       "create": {
         "title": "Buat glosarium",
@@ -436,7 +436,7 @@
   "glossariesTour": {
     "purpose": {
       "title": "Kegunaan glosarium",
-      "what": "Glosarium berisi daftar istilah dengan terjemahan yang Anda inginkan, seperti nama karakter atau jargon game.",
+      "what": "Glosarium berisi daftar istilah dengan terjemahan yang Anda inginkan, seperti nama karakter, keterampilan, atau nama item.",
       "why": "Terjemahan pun selalu memakai kata-kata Anda, bukan tebakan baru."
     },
     "picked": {

@@ -247,7 +247,7 @@
       "list": {
         "title": "Deine Glossare",
         "what": "Jedes Glossar ist eine Liste von Begriffen mit der Übersetzung, die du für jeden willst.",
-        "why": "So werden Begriffe wie Figurennamen oder Spielfachsprache jedes Mal gleich übersetzt."
+        "why": "So werden Begriffe wie Figurennamen, Fähigkeiten oder Gegenstandsnamen jedes Mal gleich übersetzt."
       },
       "create": {
         "title": "Ein Glossar anlegen",
@@ -436,7 +436,7 @@
   "glossariesTour": {
     "purpose": {
       "title": "Wofür ein Glossar da ist",
-      "what": "Ein Glossar listet Begriffe mit der Übersetzung auf, die du für jeden willst, etwa Figurennamen oder Spieljargon.",
+      "what": "Ein Glossar listet Begriffe mit der Übersetzung auf, die du für jeden willst, etwa Figurennamen, Fähigkeiten oder Gegenstandsnamen.",
       "why": "Übersetzungen verwenden dann jedes Mal deine Wörter statt einer neuen Vermutung."
     },
     "picked": {

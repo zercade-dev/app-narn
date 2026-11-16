@@ -247,7 +247,7 @@
       "list": {
         "title": "I tuoi glossari",
         "what": "Ogni glossario è un elenco di termini con la traduzione che vuoi per ciascuno.",
-        "why": "Così termini come i nomi dei personaggi o il gergo del gioco escono sempre allo stesso modo."
+        "why": "Così termini come nomi di personaggi, abilità o nomi di oggetti escono sempre allo stesso modo."
       },
       "create": {
         "title": "Crea un glossario",
@@ -436,7 +436,7 @@
   "glossariesTour": {
     "purpose": {
       "title": "A cosa serve un glossario",
-      "what": "Un glossario elenca termini con la traduzione che vuoi per ciascuno, come nomi di personaggi o gergo del gioco.",
+      "what": "Un glossario elenca termini con la traduzione che vuoi per ciascuno, come nomi di personaggi, abilità o nomi di oggetti.",
       "why": "Le traduzioni usano così sempre le tue parole invece di tirare a indovinare."
     },
     "picked": {
