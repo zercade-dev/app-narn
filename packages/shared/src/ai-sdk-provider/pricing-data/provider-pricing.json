@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-11-08T02:01:20.961Z",
+  "generatedAt": "2026-11-17T22:11:36.170Z",
   "providers": {
     "deepseek": {
       "sourceUrl": "https://api-docs.deepseek.com/quick_start/pricing",
-      "scrapedAt": "2026-11-08T02:01:20.961Z",
+      "scrapedAt": "2026-11-17T22:11:36.170Z",
       "models": [
         {
           "id": "deepseek-flash",
@@ -41,13 +41,27 @@
     },
     "google": {
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
-      "scrapedAt": "2026-11-08T02:01:20.961Z",
+      "scrapedAt": "2026-11-17T22:11:36.170Z",
       "models": [
+        {
+          "id": "gemini-4-carbon",
+          "inputCostPerMillion": 2,
+          "outputCostPerMillion": 10,
+          "cachedInputCostPerMillion": 0.1,
+          "capabilityTags": ["tools", "vision", "audio"]
+        },
         {
           "id": "gemini-4-argon",
           "inputCostPerMillion": 2,
           "outputCostPerMillion": 10,
           "cachedInputCostPerMillion": 0.1,
+          "capabilityTags": ["tools", "vision", "audio"]
+        },
+        {
+          "id": "gemini-4-hydrogen",
+          "inputCostPerMillion": 1.5,
+          "outputCostPerMillion": 7.5,
+          "cachedInputCostPerMillion": 0.075,
           "capabilityTags": ["tools", "vision", "audio"]
         },
         {
@@ -262,8 +276,26 @@
     },
     "openai": {
       "sourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "scrapedAt": "2026-11-08T02:01:20.961Z",
+      "scrapedAt": "2026-11-17T22:11:36.170Z",
       "models": [
+        {
+          "id": "gpt-6.2-astra",
+          "inputCostPerMillion": 8,
+          "outputCostPerMillion": 40,
+          "cachedInputCostPerMillion": 0.4,
+          "cacheWriteCostPerMillion": 10,
+          "capabilityTags": ["tools", "vision"],
+          "contextLength": 1050000
+        },
+        {
+          "id": "gpt-6.2-sol",
+          "inputCostPerMillion": 2,
+          "outputCostPerMillion": 10,
+          "cachedInputCostPerMillion": 0.1,
+          "cacheWriteCostPerMillion": 2.5,
+          "capabilityTags": ["tools", "vision"],
+          "contextLength": 1050000
+        },
         {
           "id": "gpt-6-astra",
           "inputCostPerMillion": 10,
@@ -284,19 +316,19 @@
         },
         {
           "id": "gpt-6.1-terra",
-          "inputCostPerMillion": 1,
-          "outputCostPerMillion": 5,
-          "cachedInputCostPerMillion": 0.05,
-          "cacheWriteCostPerMillion": 1.25,
+          "inputCostPerMillion": 0.5,
+          "outputCostPerMillion": 2.5,
+          "cachedInputCostPerMillion": 0.025,
+          "cacheWriteCostPerMillion": 0.625,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 1050000
         },
         {
           "id": "gpt-6-luna",
-          "inputCostPerMillion": 0.1,
-          "outputCostPerMillion": 0.5,
-          "cachedInputCostPerMillion": 0.01,
-          "cacheWriteCostPerMillion": 0.125,
+          "inputCostPerMillion": 0.05,
+          "outputCostPerMillion": 0.25,
+          "cachedInputCostPerMillion": 0.005,
+          "cacheWriteCostPerMillion": 0.0625,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 1050000
         },
@@ -310,6 +342,34 @@
           "contextLength": 1050000
         },
         {
+          "id": "gpt-6-rosalind",
+          "inputCostPerMillion": 10,
+          "outputCostPerMillion": 50,
+          "cachedInputCostPerMillion": 1,
+          "cacheWriteCostPerMillion": 12.5
+        },
+        {
+          "id": "gpt-6.2-astra-law",
+          "inputCostPerMillion": 8,
+          "outputCostPerMillion": 40,
+          "cachedInputCostPerMillion": 0.4,
+          "cacheWriteCostPerMillion": 10
+        },
+        {
+          "id": "gpt-6-astra-law",
+          "inputCostPerMillion": 10,
+          "outputCostPerMillion": 50,
+          "cachedInputCostPerMillion": 1
+        },
+        {
+          "id": "chat-latest",
+          "inputCostPerMillion": 5,
+          "outputCostPerMillion": 30,
+          "cachedInputCostPerMillion": 0.5,
+          "capabilityTags": ["tools", "vision"],
+          "contextLength": 400000
+        },
+        {
           "id": "gpt-5.6-sol",
           "inputCostPerMillion": 4,
           "outputCostPerMillion": 20,
@@ -317,13 +377,6 @@
           "cacheWriteCostPerMillion": 5,
           "capabilityTags": ["tools", "vision"],
           "contextLength": 1050000
-        },
-        {
-          "id": "gpt-6-rosalind",
-          "inputCostPerMillion": 15,
-          "outputCostPerMillion": 75,
-          "cachedInputCostPerMillion": 1.5,
-          "cacheWriteCostPerMillion": 18.75
         },
         {
           "id": "gpt-rosalind-research",
@@ -336,14 +389,6 @@
           "inputCostPerMillion": 5,
           "outputCostPerMillion": 25,
           "cachedInputCostPerMillion": 0.5
-        },
-        {
-          "id": "chat-latest",
-          "inputCostPerMillion": 5,
-          "outputCostPerMillion": 30,
-          "cachedInputCostPerMillion": 0.5,
-          "capabilityTags": ["tools", "vision"],
-          "contextLength": 400000
         },
         {
           "id": "gpt-5.3-codex",
@@ -366,14 +411,14 @@
     },
     "anthropic": {
       "sourceUrl": "https://claude.com/pricing",
-      "scrapedAt": "2026-11-08T02:01:20.961Z",
+      "scrapedAt": "2026-11-17T22:11:36.170Z",
       "models": [
         {
-          "id": "claude-fable-5-1",
-          "cachedInputCostPerMillion": 0.25,
-          "cacheWriteCostPerMillion": 12.5,
-          "inputCostPerMillion": 10,
-          "outputCostPerMillion": 50
+          "id": "claude-fable-5-2",
+          "cachedInputCostPerMillion": 0.2,
+          "cacheWriteCostPerMillion": 10,
+          "inputCostPerMillion": 8,
+          "outputCostPerMillion": 40
         },
         {
           "id": "claude-opus-5-5",
@@ -395,6 +440,13 @@
           "cacheWriteCostPerMillion": 0.125,
           "inputCostPerMillion": 0.1,
           "outputCostPerMillion": 0.5
+        },
+        {
+          "id": "claude-fable-5-1",
+          "cachedInputCostPerMillion": 0.25,
+          "cacheWriteCostPerMillion": 12.5,
+          "inputCostPerMillion": 10,
+          "outputCostPerMillion": 50
         },
         {
           "id": "claude-haiku-4-5",
