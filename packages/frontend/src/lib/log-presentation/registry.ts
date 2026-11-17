@@ -83,6 +83,9 @@ const failureVars = (meta: LogMeta) => ({
   module: str(meta.moduleId),
 });
 
+/** The engine's reason when Freeway had no provider switched on (logged with code `no-route`). */
+export const FREEWAY_NO_PROVIDER = 'freeway-no-buckets';
+
 /** One sentence per failure code, so a failed row says why instead of just that it failed. */
 export const FAILURE_KEY_BY_CODE: Record<FailureCode, string> = {
   auth: 'translation.failedAuth',
@@ -279,6 +282,8 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
   'translation:retry': { key: 'translation.retry' },
   'translation:failed': {
     key: (m) => {
+      // Freeway found no provider switched on: not a routing rule problem.
+      if (str(m.error, '') === FREEWAY_NO_PROVIDER) return 'translation.failedNoProvider';
       const code = failureCode(m);
       return code ? FAILURE_KEY_BY_CODE[code] : 'translation.failedGeneric';
     },
@@ -287,6 +292,9 @@ export const LOG_PRESENTERS: Record<string, LogPresenter> = {
     // while a timeout to German stays its own row.
     groupKey: (m) => `${failureCode(m) ?? str(m.error, '')} ${str(m.targetLanguage, '')}`,
     action: (m) => {
+      if (str(m.error, '') === FREEWAY_NO_PROVIDER) {
+        return openGlobalConfig('action.openModuleSettings');
+      }
       const code = failureCode(m);
       return code ? failureAction(code) : undefined;
     },

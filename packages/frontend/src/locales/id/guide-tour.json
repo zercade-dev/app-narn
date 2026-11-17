@@ -1,5 +1,7 @@
 {
   "next": "Berikutnya",
+  "completeTour": "Selesaikan tur",
+  "lookOnly": "Selama tur, ini hanya ditampilkan. Anda bisa memakainya setelah tur selesai.",
   "back": "Kembali",
   "skip": "Lewati tur",
   "close": "Tutup",
@@ -11,9 +13,7 @@
       "openVault": "Buka formulir brankas",
       "cloudVault": "Siapkan brankas",
       "openVaultPage": "Buka halaman brankas",
-      "getGoogleKey": "Dapatkan kunci Google (paket gratis)",
-      "addGoogleKey": "Tempel kunci Google saya",
-      "ownProvider": "Gunakan penyedia saya sendiri",
+      "chooseProvider": "Pilih penyedia",
       "useFoundKey": "Gunakan {{provider}} untuk terjemahan Anda",
       "fixKey": "Periksa kunci saya",
       "retry": "Coba lagi",
@@ -27,7 +27,9 @@
       "restoreTest": "Kembalikan terjemahan saya",
       "keepTest": "Pertahankan terjemahan baru",
       "tourSections": "Tunjukkan bagiannya",
-      "maybeLater": "Nanti saja"
+      "maybeLater": "Nanti saja",
+      "openTours": "Tampilkan tur",
+      "toursDone": "Selesai"
     },
     "vault": {
       "title": "Pembuatan kata sandi brankas",
@@ -43,25 +45,33 @@
     },
     "cloudVault": {
       "title": "Buat brankas Anda dan tambahkan kunci",
-      "what": "Pilih kata sandi brankas, lalu tambahkan kunci. Untuk uji cepat, buat kunci Google AI: paket gratisnya tidak dipungut biaya. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai.",
-      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda. Dengan kunci itulah penyedia AI mengenali Anda."
+      "what": "Pilih kata sandi brankas, lalu tambahkan kunci: pilih penyedia dulu. Untuk uji cepat, pilih yang punya paket gratis. Anda akan kembali ke sini setelah selesai.",
+      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda."
     },
     "cloudUnlock": {
       "what": "Buka kunci brankas di halaman brankas. Anda akan kembali ke sini setelah selesai."
     },
     "cloudKey": {
-      "what": "Tambahkan kunci di halaman brankas. Untuk uji cepat, buat kunci Google AI: paket gratisnya tidak dipungut biaya. Sudah punya kunci untuk penyedia yang didukung? Pilih dulu “Gunakan penyedia saya sendiri”. Anda akan kembali ke sini setelah selesai."
+      "what": "Tambahkan kunci di halaman brankas: pilih penyedia dulu. Untuk uji cepat, pilih yang punya paket gratis. Anda akan kembali ke sini setelah selesai."
     },
     "key": {
       "title": "Tambahkan kunci untuk mulai menerjemahkan",
-      "why": "Google AI, Groq, dan OpenRouter punya paket gratis: dengan kunci dari salah satunya, NARN Freeway menerjemahkan game Anda tanpa biaya selama Anda mencobanya. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
-      "whyOwn": "Dengan kunci {{provider}} Anda, {{provider}} mengenali Anda. Anda dapat mengganti penyedia kapan saja di tab Konfigurasi proyek.",
-      "choiceWhat": "Untuk uji cepat, buat kunci Google AI: paket gratisnya tidak dipungut biaya. Sudah punya kunci untuk penyedia yang didukung? Pilih “Gunakan penyedia saya sendiri”.",
+      "why": "Anda dapat mengganti penyedia nanti di tab Konfigurasi proyek.",
+      "choiceWhat": "Pilih penyedia lalu tambahkan kuncinya. Untuk uji cepat, pilih yang punya paket gratis.",
       "pasteWhat": "Tempel kunci di sini, ketik kata sandi brankas di bawahnya, lalu simpan."
+    },
+    "providerList": {
+      "title": "Pilih penyedia",
+      "what": "Sudah punya kunci? Pilih penyedianya. Belum punya? Tekan Dapatkan kunci di samping penyedia untuk membuatnya di situsnya, lalu pilih penyedia itu.",
+      "why": "Untuk uji cepat, gunakan penyedia yang punya paket gratis."
+    },
+    "providerCard": {
+      "title": "Siapa yang menerjemahkan proyek ini",
+      "what": "Pilih siapa yang menerjemahkan proyek ini.",
+      "why": "Tekan Kembali untuk menutup panel ini dan melanjutkan panduan."
     },
     "project": {
       "title": "Pengimporan teks game",
-      "why": "Saat mengimpor, Anda memilih apakah berkas menggantikan data yang tersimpan atau hanya menambah entri baru dan memperbarui yang berubah.",
       "openWhat": "Buka daftar proyek.",
       "newWhat": "Buat proyek baru.",
       "createWhat": "Beri nama proyek, lalu buat.",
@@ -73,17 +83,23 @@
     },
     "translate": {
       "title": "Penerjemahan",
-      "why": "Freeway otomatis memilih model gratis yang sesuai untuk tiap bahasa.",
-      "whyOwn": "{{provider}} menerjemahkan proyek ini dengan kunci Anda sendiri.",
-      "whyCustom": "Penyaluran proyek ini, yang diatur di Lanjutan, memilih penyedia untuk tiap entri.",
       "openWhat": "Buka tab yang memuat daftar entri.",
       "quickWhat": "3 entri yang belum diterjemahkan sudah dipilih. Terjemahkan untuk mencoba, atau terjemahkan semuanya sekarang.",
       "fewWhat": "Entri Anda sudah dipilih. Terjemahkan sekarang.",
       "startWhat": "Mulai penerjemahan.",
-      "nothingWhat": "File Anda sudah memiliki terjemahan untuk setiap bahasa yang dipilih. Untuk melihat terjemahan berjalan, terjemahkan ulang 3 entri: terjemahannya diganti, dan Anda bisa mengembalikannya setelahnya.",
-      "nothingWhy": "Atau tekan Berikutnya untuk lanjut ke ekspor. Untuk menambah bahasa, centang di tab Data lalu simpan.",
+      "nothingWhat": "File Anda sudah memiliki semua terjemahan. Untuk melihatnya berjalan, terjemahkan ulang 3 entri: terjemahannya bisa Anda kembalikan setelahnya.",
+      "nothingWhy": "Atau tekan Berikutnya untuk mengekspor. Untuk menambah bahasa, centang di tab Data lalu simpan.",
       "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
       "progressWhy": "Tur berlanjut setelah penerjemahan selesai."
+    },
+    "retest": {
+      "title": "Terjemahkan ulang 3 entri",
+      "filterWhat": "Buka Status dan hapus centang Tampilkan yang belum diterjemahkan saja, agar daftar juga menampilkan entri yang sudah diterjemahkan.",
+      "selectWhat": "Centang kotak 3 entri di halaman ini.",
+      "translateWhat": "Tekan Terjemahkan yang dipilih.",
+      "modeWhat": "Pilih Terjemahkan ulang terjemahan yang sudah ada. Dengan Hanya isi entri yang belum diterjemahkan, 3 entri itu akan dilewati karena sudah diterjemahkan.",
+      "startWhat": "Tekan Mulai untuk menerjemahkan ulang 3 entri itu.",
+      "nothingPicked": "Tidak ada yang diterjemahkan ulang: entri itu sudah punya terjemahan. Tekan lagi Terjemahkan yang dipilih dan pilih Terjemahkan ulang terjemahan yang sudah ada."
     },
     "failed": {
       "title": "Penerjemahan tidak berhasil",
@@ -92,6 +108,7 @@
       "quotaWhat": "Kuota gratis sedang habis. Tunggu sebentar atau tambahkan kunci lain, lalu coba lagi.",
       "quotaWhatOwn": "{{provider}} menolak untuk sementara: kuota atau kredit akun Anda habis. Periksa paket Anda di penyedia, lalu coba lagi.",
       "quotaWhatCustom": "Salah satu penyedia dalam penyaluran proyek ini menolak untuk sementara: kuota atau kredit habis. Tunggu sebentar atau periksa paket di penyedia, lalu coba lagi.",
+      "noProviderWhat": "Tidak ada yang diterjemahkan: tidak ada penyedia yang diaktifkan untuk mengerjakannya. Tekan Coba lagi: NARN lebih dulu mengaktifkan penyedia dari kunci yang Anda simpan.",
       "otherWhat": "Tidak ada yang diterjemahkan. Periksa kunci Anda, lalu coba lagi."
     },
     "parked": {
@@ -107,7 +124,6 @@
     "rest": {
       "title": "Uji coba berhasil",
       "what": "3 entri uji Anda sudah diterjemahkan ke semua bahasa yang dipilih. Terjemahkan sisanya sekarang, atau ekspor yang sudah ada.",
-      "why": "Sisanya bisa diterjemahkan nanti dari daftar entri.",
       "skipped": "Sisanya bisa menunggu. Unduh yang sudah diterjemahkan."
     },
     "restore": {
@@ -130,14 +146,20 @@
       "what": "Ini tampilan sederhana: hanya menampilkan yang diperlukan untuk menerjemahkan dan mengekspor. Lanjutan punya lebih banyak alat. Ubah sakelar ke Lanjutan untuk tur singkat.",
       "whatAdvanced": "Mode lanjutan sedang aktif dan menampilkan semua alat. Tur singkat menjelaskan kegunaan setiap bagian.",
       "why": "Mode dapat diganti kapan saja dari bilah atas."
+    },
+    "moreTours": {
+      "title": "Tur terpandu lainnya",
+      "what": "Tur singkat tentang glosarium, penyaluran, dan lainnya ada di Panduan. Mulai kapan saja."
     }
   },
   "providerChoice": {
-    "title": "Gunakan penyedia saya sendiri",
-    "description": "Pilih penyedia yang kuncinya Anda miliki. Penyedia itu menerjemahkan proyek ini dan proyek baru yang Anda buat. Untuk menggabungkan beberapa penyedia, beralihlah ke Lanjutan.",
+    "title": "Pilih penyedia",
+    "description": "Penyedia itu menerjemahkan proyek ini dan proyek baru yang Anda buat.",
     "existingRouting": "Proyek ini sudah memiliki penyaluran, jadi dibiarkan apa adanya. Anda dapat mengubahnya di Lanjutan.",
-    "freeHeading": "Paket gratis. Jika Anda memilih salah satunya, hanya penyedia itu yang menerjemahkan, tanpa model gratis lain dalam kumpulan NARN Freeway.",
-    "paidHeading": "Berbayar, ditagihkan ke akun Anda di penyedia.",
+    "freeHeading": "Punya paket gratis",
+    "paidHeading": "Tidak punya paket gratis",
+    "getKey": "Dapatkan kunci",
+    "getKeyAria": "Dapatkan kunci {{provider}} (membuka situs penyedia)",
     "cancel": "Batal",
     "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}",
     "switchedOff": "{{provider}} dimatikan di Lanjutan, jadi tidak dipakai. Nyalakan lagi di Konfigurasi Global, atau pilih penyedia lain.",
@@ -161,11 +183,15 @@
     },
     "glossaries": {
       "name": "Glosarium",
-      "summary": "Buat glosarium, tambahkan istilah, lalu terapkan agar istilah kunci tetap konsisten."
+      "summary": "Aktifkan glosarium siap pakai yang cocok dengan teks Anda, lalu lihat kecocokan yang ditemukannya."
     },
     "routing": {
       "name": "Penyaluran",
       "summary": "Sekilas 30 detik tentang cara NARN memilih siapa yang menerjemahkan apa."
+    },
+    "routing-advanced": {
+      "name": "Aturan perutean lanjutan",
+      "summary": "Aturan yang mengirim setiap bahasa atau jenis teks ke penyedia pilihan Anda."
     },
     "quality": {
       "name": "Kualitas",
@@ -189,6 +215,7 @@
     "progressSections": "{{current}} dari {{total}} bagian",
     "completed": "Selesai",
     "needsProject": "Buka proyek untuk mengikuti tur ini.",
+    "needsDesktop": "Tur memerlukan layar yang lebih lebar. Buka aplikasi di komputer untuk mengikuti tur.",
     "switchedToAdvanced": "Beralih ke mode lanjutan untuk tur ini.",
     "confirm": {
       "title": "Beralih ke Sederhana untuk penyiapan terpandu?",
@@ -211,7 +238,8 @@
       "mode": {
         "title": "Aturan sederhana atau lanjutan",
         "what": "Di sini Anda beralih antara satu penyedia untuk semuanya dan daftar aturan.",
-        "why": "Mulailah dari yang sederhana. Beralihlah ke aturan saat Anda ingin penyedia berbeda untuk suatu bahasa, kategori, atau nada."
+        "why": "Mulailah dari yang sederhana. Beralihlah ke aturan saat Anda ingin penyedia berbeda untuk suatu bahasa, kategori, atau nada.",
+        "advancedAction": "Jelaskan aturan lanjutan"
       }
     },
     "glossary": {
@@ -222,7 +250,7 @@
       "list": {
         "title": "Glosarium Anda",
         "what": "Setiap glosarium adalah daftar istilah beserta terjemahan yang Anda inginkan untuk masing-masing.",
-        "why": "Istilah seperti nama karakter atau jargon game pun selalu diterjemahkan dengan cara yang sama."
+        "why": "Istilah seperti nama karakter, keterampilan, atau nama item pun selalu diterjemahkan dengan cara yang sama."
       },
       "create": {
         "title": "Buat glosarium",
@@ -298,6 +326,73 @@
         "why": "Gunakan sebelum rilis, atau setelah Anda mengubah glosarium atau penyaluran."
       }
     }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Aturan diperiksa dari atas",
+      "what": "NARN memeriksa aturan dari atas, dan aturan pertama yang cocok dengan sebuah entri yang menerjemahkannya. Dalam tur ini, Anda mengirim bahasa Asia ke satu penyedia dan semua bahasa lain ke penyedia lain.",
+      "why": "Entri yang tidak cocok dengan aturan mana pun tidak diterjemahkan, jadi aturan terakhir sebaiknya cocok untuk semuanya."
+    },
+    "edit": {
+      "title": "Buka aturan #1",
+      "what": "Tekan ikon pensil untuk mengedit aturan #1. Aturan ini akan menangani bahasa Asia.",
+      "noRulesWhat": "Proyek ini belum punya aturan. Tekan Tambah aturan untuk membuat aturan #1. Aturan ini akan menangani bahasa Asia."
+    },
+    "filter": {
+      "title": "Buka Penyaringan",
+      "what": "Tekan Penyaringan untuk melihat entri mana yang diambil aturan ini.",
+      "why": "Aturan yang tidak dicentang apa pun di sini mengambil semua entri."
+    },
+    "langs": {
+      "title": "Centang bahasa Asia",
+      "what": "Centang bahasa Asia di antara bahasa proyek Anda, misalnya ja, ko, dan zh-hans, lalu hapus centang bahasa lainnya. Jika proyek ini tidak punya, centang bahasa apa saja untuk mencobanya. Berikutnya muncul setelah Anda mencentang atau menghapus centang satu bahasa.",
+      "why": "Aturan #1 kini hanya mengambil bahasa-bahasa ini. Semua bahasa lain diteruskan ke aturan di bawahnya."
+    },
+    "module": {
+      "title": "Pilih penyedianya",
+      "what": "Di Modul, pilih penyedia untuk bahasa-bahasa ini. Untuk memakai model lain dari penyedia yang sama, buka Pengaturan agen di bagian bawah.",
+      "why": "Perubahan Anda tersimpan otomatis."
+    },
+    "done": {
+      "title": "Tutup aturan",
+      "what": "Tekan Selesai."
+    },
+    "add": {
+      "title": "Tambahkan aturan untuk bahasa lainnya",
+      "what": "Tekan Tambah aturan. Aturan baru ditempatkan di bagian bawah, di bawah aturan yang sudah ada.",
+      "why": "Aturan diperiksa dari atas, jadi aturan di bagian bawah hanya mendapat sisa dari aturan di atasnya."
+    },
+    "newModule": {
+      "title": "Pilih penyedia, tidak lebih",
+      "what": "Di Modul, pilih penyedia untuk semua bahasa lain. Biarkan Penyaringan kosong. Berikutnya muncul setelah penyedia dipilih.",
+      "why": "Tidak perlu filter: bahasa yang Anda centang berhenti di aturan #1, jadi hanya bahasa lain yang sampai ke aturan di bawahnya."
+    },
+    "order": {
+      "title": "Urutan yang bekerja",
+      "what": "Aturan #1 mengambil bahasa yang Anda centang, dan aturan di bawahnya hanya mendapat sisanya. Jika aturan tanpa filter berada di atas, aturan itu akan mengambil semua bahasa, dan aturan #1 tidak akan pernah dipakai.",
+      "why": "Untuk mengubah urutan, gunakan tanda panah di samping aturan."
+    },
+    "templates": {
+      "title": "Templat",
+      "what": "Aturan siap pakai. Pakai templat menambahkan satu di bagian bawah aturan proyek ini.",
+      "why": "Awal cepat yang bisa Anda sesuaikan nanti."
+    },
+    "groups": {
+      "title": "Grup aturan",
+      "what": "Grup aturan adalah kumpulan aturan tersendiri. Terjemahan memakai grup yang dipilih di sini.",
+      "why": "Siapkan kumpulan lain, misalnya untuk menguji penyedia, lalu beralih di antara keduanya."
+    },
+    "import": {
+      "title": "Impor / Ekspor",
+      "what": "Simpan aturan sebagai file JSON, atau muat aturan dari file.",
+      "why": "Pakai perutean yang sama di proyek lain."
+    },
+    "back": {
+      "title": "Kembali ke Sederhana",
+      "what": "Sederhana adalah tampilan satu penyedia. Memilihnya akan menyisihkan aturan Anda, sehingga satu penyedia menerjemahkan semuanya.",
+      "why": "Aturan Anda disimpan, tidak dihapus. Pilih Lanjutan untuk memakainya lagi."
+    },
+    "absentWhat": "Yang ditunjuk langkah ini sedang tidak ada di layar. Tekan Berikutnya untuk lanjut, atau Kembali untuk mengulang langkah sebelumnya."
   },
   "advancedSections": {
     "compare": {
@@ -379,33 +474,42 @@
   "glossariesTour": {
     "purpose": {
       "title": "Kegunaan glosarium",
-      "what": "Glosarium berisi daftar istilah dengan terjemahan yang Anda inginkan, seperti nama karakter atau jargon game.",
+      "what": "Glosarium berisi daftar istilah dengan terjemahan yang Anda inginkan, seperti nama karakter, keterampilan, atau nama item.",
       "why": "Terjemahan pun selalu memakai kata-kata Anda, bukan tebakan baru."
     },
-    "create": {
-      "title": "Buat glosarium",
-      "what": "Mulai glosarium baru yang kosong di sini, atau tekan Berikutnya untuk lanjut membaca.",
-      "why": "Satu glosarium sering kali cukup. Gunakan lebih banyak untuk memisahkan kelompok istilah."
+    "picked": {
+      "title": "Glosarium untuk entri Anda",
+      "what": "Tur ini memilih {{name}} karena istilahnya muncul di entri Anda. Entri yang cocok: {{count}}.",
+      "noneWhat": "Belum ada glosarium Anda yang cocok dengan entri Anda, jadi tur ini memakai {{name}}."
     },
-    "add-term": {
-      "title": "Tambahkan istilah",
-      "what": "Ketik istilah sumber dan terjemahannya untuk setiap bahasa, lalu tambahkan.",
-      "why": "Tandai istilah sebagai konstan bila tidak boleh diterjemahkan, seperti nama merek."
+    "constant": {
+      "title": "Kolom Konstan",
+      "what": "Jika teks menulis istilah konstan persis seperti di glosarium, istilah itu tidak pernah dikirim ke mesin terjemahan. NARN langsung memasukkan terjemahan glosarium Anda ke hasilnya, jadi nama karakter seperti Diluc selalu keluar persis seperti yang tertulis di sini.",
+      "absentWhat": "Pilih glosarium di sebelah kiri untuk melihat istilahnya dan kolom Konstan.",
+      "why": "Istilah lain dikirim bersama teks sebagai acuan yang harus diikuti mesin."
     },
-    "assign": {
-      "title": "Terapkan ke proyek ini",
-      "what": "Glosarium yang aktif dipakai saat proyek ini diterjemahkan. Nonaktifkan untuk berhenti memakainya.",
-      "why": "Biarkan glosarium nonaktif selama Anda masih menyusunnya."
+    "enable": {
+      "title": "Aktifkan",
+      "what": "Tekan Aktifkan. NARN akan bertanya apakah kecocokannya diterapkan: Terapkan kecocokan menugaskan glosarium ke setiap entri yang berisi salah satu istilahnya.",
+      "absentWhat": "Pilih glosarium di sebelah kiri, lalu tekan Aktifkan di samping namanya.",
+      "onWhat": "{{name}} sudah aktif, jadi proyek ini memakainya.",
+      "why": "Saat proyek ini diterjemahkan, hanya glosarium yang aktif yang dipakai."
+    },
+    "choice": {
+      "title": "Aktifkan saja atau Terapkan kecocokan?",
+      "what": "Terapkan kecocokan langsung menugaskan glosarium ke setiap entri yang berisi salah satu istilahnya. Aktifkan saja hanya mengaktifkannya dan membiarkan entri Anda apa adanya; Anda bisa menugaskannya nanti dari Kecocokan."
+    },
+    "matches": {
+      "title": "Kecocokan yang ditemukan",
+      "what": "NARN menemukan entri ini sendiri: masing-masing berisi istilah dari {{name}}, dan glosarium kini ditugaskan ke entri tersebut.",
+      "onlyWhat": "NARN menemukan entri ini sendiri: masing-masing berisi istilah dari {{name}}. Centang entri itu lalu tekan Tugaskan glosarium untuk memakainya.",
+      "noneWhat": "Belum ada entri yang berisi istilah dari {{name}}. Entri yang berisi akan tampil di sini.",
+      "why": "Glosarium dipakai untuk entri yang ditugaskan kepadanya."
     },
     "effect": {
       "title": "Pengaruhnya pada terjemahan",
       "what": "Saat string berisi istilah glosarium, istilah dan terjemahan Anda dikirim bersama string itu.",
       "why": "Penyedia mengikuti pilihan Anda alih-alih memilih katanya sendiri."
-    },
-    "generate": {
-      "title": "Biarkan AI menyarankan istilah",
-      "what": "Minta penyedia AI menemukan istilah yang mungkin ada di string Anda.",
-      "why": "Anda meninjau sarannya dan hanya menyimpan yang Anda inginkan."
     }
   },
   "orphansTour": {
@@ -457,6 +561,7 @@
     "explain-list": {
       "title": "Daftar entri yatim",
       "what": "Setiap entri yatim menampilkan teks sumbernya dan berapa terjemahan yang disimpannya.",
+      "absentWhat": "Proyek ini belum punya entri yatim. Saat impor meninggalkan entri, masing-masing muncul di sini dengan teks sumbernya dan berapa terjemahan yang disimpannya.",
       "why": "Yang terjemahannya paling banyak tampil lebih dulu: merekalah yang paling repot dibuat ulang."
     },
     "explain-options": {

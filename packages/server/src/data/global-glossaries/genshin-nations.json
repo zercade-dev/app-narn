@@ -8,6 +8,7 @@
     {
       "id": "genshin-nations-fontaine",
       "source": "Fontaine",
+      "constant": true,
       "translations": {
         "zh-hans": "枫丹",
         "zh-hant": "楓丹",
@@ -28,6 +29,7 @@
     {
       "id": "genshin-nations-inazuma",
       "source": "Inazuma",
+      "constant": true,
       "translations": {
         "zh-hans": "稻妻",
         "zh-hant": "稻妻",
@@ -48,6 +50,7 @@
     {
       "id": "genshin-nations-khaenriah",
       "source": "Khaenri'ah",
+      "constant": true,
       "translations": {
         "zh-hans": "坎瑞亚",
         "zh-hant": "坎瑞亞",
@@ -68,10 +71,11 @@
     {
       "id": "genshin-nations-liyue",
       "source": "Liyue",
+      "constant": true,
       "translations": {
         "zh-hans": "璃月",
         "zh-hant": "璃月",
-        "ko": "‍리월",
+        "ko": "리월",
         "ja": "璃月",
         "es": "Liyue",
         "fr": "Liyue",
@@ -88,6 +92,7 @@
     {
       "id": "genshin-nations-mondstadt",
       "source": "Mondstadt",
+      "constant": true,
       "translations": {
         "zh-hans": "蒙德",
         "zh-hant": "蒙德",
@@ -108,6 +113,7 @@
     {
       "id": "genshin-nations-natlan",
       "source": "Natlan",
+      "constant": true,
       "translations": {
         "zh-hans": "纳塔",
         "zh-hant": "納塔",
@@ -128,6 +134,7 @@
     {
       "id": "genshin-nations-nod-krai",
       "source": "Nod-Krai",
+      "constant": true,
       "translations": {
         "zh-hans": "挪德卡莱",
         "zh-hant": "挪德卡萊",
@@ -148,6 +155,7 @@
     {
       "id": "genshin-nations-snezhnaya",
       "source": "Snezhnaya",
+      "constant": true,
       "translations": {
         "zh-hans": "至冬",
         "zh-hant": "至冬",
@@ -168,6 +176,7 @@
     {
       "id": "genshin-nations-sumeru",
       "source": "Sumeru",
+      "constant": true,
       "translations": {
         "zh-hans": "须弥",
         "zh-hant": "須彌",
@@ -188,6 +197,7 @@
     {
       "id": "genshin-nations-teyvat",
       "source": "Teyvat",
+      "constant": true,
       "translations": {
         "zh-hans": "提瓦特",
         "zh-hant": "提瓦特",

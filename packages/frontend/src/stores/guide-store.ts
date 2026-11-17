@@ -64,6 +64,11 @@ interface GuideState {
   /** Module instance id chosen via "Use my own provider", e.g. `openai:default`. */
   simpleProvider: string | null;
   /**
+   * The provider whose key the guide last asked for (a free-tier pick keeps
+   * NARN Freeway, so `simpleProvider` stays null), for "Where do I get this key?".
+   */
+  keyProvider: string | null;
+  /**
    * Choices still to be applied once their provider's key is saved, keyed by
    * target (a project id, or `collab` for the person's own collaborator
    * routing), valued by module instance id. Set when a provider was chosen
@@ -79,11 +84,14 @@ interface GuideState {
   pendingRoutedFrom: Record<string, string>;
   exportedOnce: boolean;
   /**
-   * Module ids the guide has already enabled for the person (`google:default`,
-   * `deepl`). Each is enabled once: one they later switch off in Advanced is
-   * not switched back on.
+   * Module ids the guide has seen enabled for the person (`google:default`,
+   * `deepl`), so a provider choice waiting on it can be applied. Not a reason
+   * to skip enabling: the server's config is checked every time (it can be
+   * reset or restored), and one the person switched off there stays off.
    */
   enabledProviders: string[];
+  /** Providers the person switched off whose "switched off" notice was shown (once each). */
+  switchedOffNoticed: string[];
   completedTours: string[];
   declinedTours: string[];
   /** Per tour id, including `first-run`. */
@@ -126,6 +134,7 @@ interface GuideState {
   resumeFirstRun: (forced?: boolean) => void;
   finishFirstRun: () => void;
   setSimpleProvider: (id: string | null) => void;
+  setKeyProvider: (base: string | null) => void;
   /**
    * Remember (`moduleId`) or forget (`null`) the pending choice for `target`.
    * `routedFrom` is what the target is routed to now (see `pendingRoutedFrom`).
@@ -140,6 +149,7 @@ interface GuideState {
   clearOrphanSim: () => void;
   markExported: () => void;
   markProviderEnabled: (id: string) => void;
+  markSwitchedOffNoticed: (id: string) => void;
   /** `at`: the counted step index to open at (default 0). */
   startTour: (id: string, opts?: { at?: number }) => void;
   /** The person is on counted step `counted` (0-based) of tour `id`. */
@@ -166,6 +176,11 @@ function withCompleted(
   return { ...progress, [id]: { ...prev, last: 0, completed: true } };
 }
 
+/** A retranslate quick test the guide asked for whose run was never listed. */
+function isUnstartedRetest(q: QuickTest | null): boolean {
+  return q?.retranslate === true && q.decision === 'pending' && q.runId === null;
+}
+
 /**
  * v0 (unversioned) had no `tourProgress`: every field is kept, and each tour
  * already completed, plus the first run when it was finished, counts as
@@ -189,10 +204,12 @@ export const useGuideStore = create<GuideState>()(
       firstRunDismissed: false,
       firstRunFinished: false,
       simpleProvider: null,
+      keyProvider: null,
       pendingProviders: {},
       pendingRoutedFrom: {},
       exportedOnce: false,
       enabledProviders: [],
+      switchedOffNoticed: [],
       completedTours: [],
       declinedTours: [],
       tourProgress: {},
@@ -203,7 +220,13 @@ export const useGuideStore = create<GuideState>()(
       activeTourStart: 0,
       activeTourSeq: 0,
       firstRunForced: false,
-      dismissFirstRun: () => set({ firstRunDismissed: true }),
+      dismissFirstRun: () =>
+        set((s) => ({
+          firstRunDismissed: true,
+          // A retranslate test asked for but never started would otherwise
+          // outlive the guide (it is persisted) and wait for a run forever.
+          quickTest: isUnstartedRetest(s.quickTest) ? null : s.quickTest,
+        })),
       restartFirstRun: (forced = false) =>
         set((s) => ({
           firstRunDismissed: false,
@@ -221,6 +244,7 @@ export const useGuideStore = create<GuideState>()(
           tourProgress: withCompleted(s.tourProgress, FIRST_RUN_PROGRESS_ID),
         })),
       setSimpleProvider: (simpleProvider) => set({ simpleProvider }),
+      setKeyProvider: (keyProvider) => set({ keyProvider }),
       setPendingProvider: (target, moduleId, routedFrom) =>
         set((s) => {
           const { [target]: _dropped, ...rest } = s.pendingProviders;
@@ -242,7 +266,13 @@ export const useGuideStore = create<GuideState>()(
       clearOrphanSim: () => set({ orphanSim: null }),
       markExported: () => set({ exportedOnce: true }),
       markProviderEnabled: (id) =>
-        set((s) => ({ enabledProviders: addOnce(s.enabledProviders, id) })),
+        set((s) => ({
+          enabledProviders: addOnce(s.enabledProviders, id),
+          // Back on: a later switch-off is worth telling again.
+          switchedOffNoticed: s.switchedOffNoticed.filter((x) => x !== id),
+        })),
+      markSwitchedOffNoticed: (id) =>
+        set((s) => ({ switchedOffNoticed: addOnce(s.switchedOffNoticed, id) })),
       startTour: (id, opts) =>
         set((s) => ({
           activeTourId: id,
@@ -273,9 +303,9 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
-      // `quickTest`, `orphanSim`, `pendingProviders` and `pendingRoutedFrom` were added within v1: a state saved
-      // without them rehydrates with the default (null), so no version bump
-      // is needed.
+      // `quickTest`, `orphanSim`, `pendingProviders`, `pendingRoutedFrom`, `switchedOffNoticed`
+      // and `keyProvider` were added within v1: a state saved without them
+      // rehydrates with the default, so no version bump is needed.
       version: 1,
       // Stored fields only; the persist merge fills in the rest.
       migrate: (persisted, version) => migrateGuideState(persisted, version) as GuideState,
@@ -283,10 +313,14 @@ export const useGuideStore = create<GuideState>()(
         firstRunDismissed: state.firstRunDismissed,
         firstRunFinished: state.firstRunFinished,
         simpleProvider: state.simpleProvider,
+        // Survives the cloud vault's full-page redirect, so the vault page can
+        // still focus the key the guide asked for.
+        keyProvider: state.keyProvider,
         pendingProviders: state.pendingProviders,
         pendingRoutedFrom: state.pendingRoutedFrom,
         exportedOnce: state.exportedOnce,
         enabledProviders: state.enabledProviders,
+        switchedOffNoticed: state.switchedOffNoticed,
         completedTours: state.completedTours,
         declinedTours: state.declinedTours,
         tourProgress: state.tourProgress,

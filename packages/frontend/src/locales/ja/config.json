@@ -41,7 +41,7 @@
   "orphanedCount": "孤立{{count}}件",
   "importWarningsTitle": "インポート前の確認",
   "unknownHeadersSummary": "認識されなかった列（無視されます）：{{headers}}",
-  "rawNewlineSummary_other": "{{count}}言語に生の改行があります。ゲーム内で改行するには、\\nの表記を使ってください。",
+  "rawNewlineSummary_other": "{{count}}言語に生の改行があります。代わりに\nを使ってください。",
   "rawNewlineShowLanguages": "言語を表示",
   "continueImport": "インポートを続行",
   "cancelImport": "キャンセル",
@@ -59,9 +59,10 @@
   "formulaGuardKeptNotice": "= + - @ の前にアポストロフィがあるセル：{{cells}}。そのまま保持されるため、確認してください。以前の保護付きエクスポートで追加された可能性があります。",
   "exportLanguages": "言語",
   "exportCollection": "コレクション",
-  "collectionMain": "メインテキスト",
+  "collectionMain": "サーバー翻訳",
   "collectionClient": "クライアントスクリプトテキスト",
-  "detectedCollection": "検出: {{collection}}",
+  "detectedClient": "検出: <hl>クライアント</hl>スクリプトテキスト",
+  "detectedMain": "検出: <hl>サーバー</hl>翻訳",
   "exportLanguagesHint": "このエクスポートに含める列",
   "pseudoExportAs": "疑似テキストの出力先",
   "pseudoExportNone": "置き換えなし",
@@ -189,7 +190,8 @@
     "simpleLabel": "すべての翻訳に使用",
     "simpleHint": "このプロジェクトのすべてのエントリは、ここで選んだプロバイダーによって翻訳されます。",
     "simpleDefaultNote": "デフォルト：プロバイダーを選ぶまで使われます。",
-    "simpleAdvancedNotice": "このプロジェクトは詳細な振り分けを使用しているため、完全なエディターを表示しています。",
+    "simpleAdvancedNotice": "このプロジェクトには独自のルールがあるため、完全なエディターを表示しています。「シンプル」を選ぶと、ルールを保留にして 1 つのプロバイダーですべてを翻訳します。",
+    "simpleSetAsideNote": "詳細ルールは保留中です。もう一度使うには「詳細」を選んでください。",
     "refreshModels": "モデルを更新",
     "selectPlaceholder": "— 選択 —",
     "exportFailed": "振り分けルールのエクスポートに失敗しました。",
@@ -407,7 +409,7 @@
       },
       "glossary-adherence": {
         "name": "用語集の遵守",
-        "description": "原文で一致した用語は、出力にも翻訳された形で現れる必要があります（単語単位の一致）。重大度が警告の場合、問題は情報提供のみです。自動再試行を行うには、重大度をブロッキングに設定してください。"
+        "description": "原文で見つかった用語集の用語は、訳文に翻訳されて含まれている必要があります。ロシア語の格変化のような語形変化も一致とみなします。定数の用語は対象外です（マスキングですでに正確に保たれます）。重大度が警告の場合は情報のみです。用語の欠落や言い換えがあったときに翻訳を 1 回やり直すには、重大度をブロッキングにしてください。"
       },
       "forbidden-terms": {
         "name": "禁止用語",

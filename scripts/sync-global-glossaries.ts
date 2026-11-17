@@ -112,7 +112,37 @@ export interface SheetTerm {
 export interface GlossaryTermJson {
   id: string;
   source: string;
+  /** Protected term (masked where spelled exactly so); the sheet has no such column. */
+  constant?: boolean;
   translations: Record<string, string>;
+}
+
+/**
+ * Glossaries whose terms are protected names: a new term from the sheet is
+ * made constant. The sheet has no constant column, so this is where the flag
+ * comes from; an existing term keeps whatever flag it already has. The
+ * term-by-term review behind these choices is in
+ * packages/server/src/data/global-glossaries/CONSTANT-TERMS.md.
+ */
+const CONSTANT_GLOSSARIES: ReadonlySet<string> = new Set(['genshin-characters', 'genshin-nations']);
+
+/**
+ * Names in those glossaries that are also everyday English words, often
+ * capitalised in titles and UI labels ("Gaming Settings", "A Traveler's
+ * Guide"), where an exact match would still be masked. They stay reference terms.
+ */
+export const NOT_CONSTANT_SOURCES: ReadonlySet<string> = new Set([
+  'Gaming',
+  'Amber',
+  'Razor',
+  'Sucrose',
+  'Prune',
+  'Traveler',
+  'Wanderer',
+]);
+
+function constantFor(glossaryId: string, source: string): boolean {
+  return CONSTANT_GLOSSARIES.has(glossaryId) && !NOT_CONSTANT_SOURCES.has(source);
 }
 
 export interface GlossaryJson {
@@ -221,7 +251,9 @@ export function parseCSV(csvContent: string): Array<Record<string, string>> {
 
 /** Normalize a CSV cell: trim, strip `|`-separated plural variants, empty → undefined. */
 export function normalizeCell(raw: string | undefined): string | undefined {
-  const trimmed = raw?.trim() ?? '';
+  // Zero-width characters (U+200B–U+200D, U+2060, U+FEFF) creep in from the
+  // sheet and would be pasted into translations.
+  const trimmed = raw?.replace(/[\u200B-\u200D\u2060\uFEFF]/g, '').trim() ?? '';
   if (!trimmed) return undefined;
   const [primary] = trimmed.split('|');
   const primaryTrimmed = primary.trim();
@@ -395,6 +427,8 @@ export function mergeGlossary(
   const terms: GlossaryTermJson[] = existing.terms.map((t) => ({
     id: t.id,
     source: t.source,
+    // Kept as stored: the sheet never says.
+    ...(t.constant ? { constant: true } : {}),
     translations: { ...t.translations },
   }));
   const bySource = new Map(terms.map((t) => [t.source, t]));
@@ -433,6 +467,7 @@ export function mergeGlossary(
       const term: GlossaryTermJson = {
         id,
         source: inc.source,
+        ...(constantFor(existing.id, inc.source) ? { constant: true } : {}),
         translations: { ...inc.translations },
       };
       terms.push(term);
@@ -442,9 +477,7 @@ export function mergeGlossary(
     }
   }
 
-  const removedKept = existing.terms
-    .filter((t) => !seenSources.has(t.source))
-    .map((t) => t.source);
+  const removedKept = existing.terms.filter((t) => !seenSources.has(t.source)).map((t) => t.source);
 
   terms.sort((a, b) => a.id.localeCompare(b.id));
 
@@ -622,7 +655,8 @@ async function main(): Promise<void> {
     );
     for (const u of routed.unclassified) console.log(`  ? "${u.tag}" — ${u.source}`);
   }
-  if (skippedEmpty > 0) console.log(`\nSkipped ${skippedEmpty} row(s) with an empty English column.`);
+  if (skippedEmpty > 0)
+    console.log(`\nSkipped ${skippedEmpty} row(s) with an empty English column.`);
   console.log('\nDone.');
 }
 

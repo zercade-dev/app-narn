@@ -1,7 +1,16 @@
 The guide can now test-translate a file that is already fully translated, and put your translations back afterwards.
 
-- When your file already has every translation, the guide offers to retranslate 3 entries so you can see a translation happen.
+- When your file already has every translation, the guide walks you through retranslating 3 entries yourself, so you can see a translation happen.
 - After that test, the guide walks you to the restore point saved just before it, or you can keep the new translations.
 - Simple mode now has a short Backups page for making, restoring and downloading backups.
-- Providers with a free tier are listed first when you choose a provider, and the guide talks about free tiers rather than free keys.
+- The guide's key step opens one provider list, with free-tier providers first and a Get a key link beside each one.
+- The guide stays on screen while the provider list or the provider panel is open, and says what to do there.
 - The import review is shorter: one line per warning, with the language list for raw line breaks one click away.
+- The Translations list now shows every entry by default, not only the untranslated ones.
+- Tours stand out in the Guide menu.
+- Guided tours: Escape closes them, a double click on Next no longer skips a step, and each step keeps its own tab.
+- The Advanced sections tour follows the sidebar's order, and a tour left on its last step can be continued.
+- The first run copes better with a reload, a closed New project panel, an empty language choice and a failed translation.
+- The retranslate test keeps Start disabled until you choose Re-translate existing translations, and its spotlight on the entries leaves out Select all.
+- The import review names the file type with the key word highlighted: Client script text or Server translations (previously Main text).
+- When a translation fails, the guide's message no longer covers the Translate selected button.

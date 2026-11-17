@@ -9,20 +9,15 @@ import type { EntryFilters } from '../filter-entries.js';
 import { isTranslationRun } from '../run-kind.js';
 import type { QuickTest } from '../../stores/guide-store.js';
 import { DEFAULT_STRING_FILTERS } from '../../stores/string-store.js';
+import { QUICK_TEST_SIZE } from './quick-test-size.js';
 
-export const QUICK_TEST_SIZE = 3;
+export { QUICK_TEST_SIZE } from './quick-test-size.js';
 
 /** Window event the string table answers by translating `detail.entryIds`. */
 export const GUIDE_TRANSLATE_EVENT = 'guide:translate';
 
 export interface GuideTranslateDetail {
   entryIds: string[];
-  /**
-   * Translate again what is already translated (the retranslate test), with
-   * translation memory off so the result is a fresh translation, not the
-   * stored one handed back.
-   */
-  reTranslate?: boolean;
 }
 
 /** Has source text, needs translation, and is not orphaned. */
@@ -67,16 +62,6 @@ export function realTargetLanguages(
  */
 export function quickTestEntryIds(entries: StringEntry[], targetLanguages: string[]): string[] {
   return untranslatedEntryIds(entries, targetLanguages).slice(0, QUICK_TEST_SIZE);
-}
-
-/**
- * The retranslate test's entries: the first QUICK_TEST_SIZE translatable
- * entries in import order, translated or not.
- */
-export function retranslateTestEntryIds(entries: StringEntry[]): string[] {
-  return importOrder(entries.filter(isTranslatableEntry))
-    .slice(0, QUICK_TEST_SIZE)
-    .map((e) => e.id);
 }
 
 const isUntranslated = (e: StringEntry, targetLanguages: string[]): boolean =>
@@ -136,18 +121,9 @@ export function quickTestFilters(current: EntryFilters): EntryFilters {
   };
 }
 
-/**
- * Asks the string table to translate `entryIds`, as the dialog's Start does
- * with its defaults (`reTranslate`: see {@link GuideTranslateDetail}).
- */
-export function requestGuideTranslation(
-  entryIds: string[],
-  opts: { reTranslate?: boolean } = {},
-): void {
-  const detail: GuideTranslateDetail = opts.reTranslate
-    ? { entryIds, reTranslate: true }
-    : { entryIds };
+/** Asks the string table to translate `entryIds`, as the dialog's Start does with its defaults. */
+export function requestGuideTranslation(entryIds: string[]): void {
   globalThis.dispatchEvent(
-    new CustomEvent<GuideTranslateDetail>(GUIDE_TRANSLATE_EVENT, { detail }),
+    new CustomEvent<GuideTranslateDetail>(GUIDE_TRANSLATE_EVENT, { detail: { entryIds } }),
   );
 }

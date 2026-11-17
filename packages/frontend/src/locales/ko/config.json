@@ -41,7 +41,7 @@
   "orphanedCount": "미연결 {{count}}개",
   "importWarningsTitle": "가져오기 전 확인 사항",
   "unknownHeadersSummary": "인식되지 않은 열(무시됨): {{headers}}",
-  "rawNewlineSummary_other": "{{count}}개 언어에 실제 줄바꿈이 있어요. 게임에서 줄바꿈하려면 \\n 표시를 쓰세요.",
+  "rawNewlineSummary_other": "{{count}}개 언어에 실제 줄바꿈이 있어요. 대신 \n을 쓰세요.",
   "rawNewlineShowLanguages": "언어 보기",
   "continueImport": "가져오기 계속",
   "cancelImport": "취소",
@@ -59,9 +59,10 @@
   "formulaGuardKeptNotice": "= + - @ 앞에 아포스트로피가 있는 셀: {{cells}}. 그대로 유지되니 확인해 주세요. 이전에 보호 옵션으로 내보낼 때 추가되었을 수 있어요.",
   "exportLanguages": "언어",
   "exportCollection": "컬렉션",
-  "collectionMain": "메인 텍스트",
+  "collectionMain": "서버 번역",
   "collectionClient": "클라이언트 스크립트 텍스트",
-  "detectedCollection": "감지됨: {{collection}}",
+  "detectedClient": "감지됨: <hl>클라이언트</hl> 스크립트 텍스트",
+  "detectedMain": "감지됨: <hl>서버</hl> 번역",
   "exportLanguagesHint": "이번 내보내기에 포함할 열",
   "pseudoExportAs": "슈도 텍스트를 내보낼 언어",
   "pseudoExportNone": "대체 없음",
@@ -189,7 +190,8 @@
     "simpleLabel": "전체 번역에 사용할 제공업체",
     "simpleHint": "이 프로젝트의 모든 항목은 여기에서 고른 제공업체가 번역해요.",
     "simpleDefaultNote": "기본값이에요. 제공업체를 고르기 전까지 사용돼요.",
-    "simpleAdvancedNotice": "이 프로젝트는 고급 배정을 사용해서 전체 편집기를 보여 줘요.",
+    "simpleAdvancedNotice": "이 프로젝트에는 자체 규칙이 있어서 전체 편집기를 보여 줘요. “간단”을 고르면 규칙을 보류하고 제공업체 하나로 모두 번역해요.",
+    "simpleSetAsideNote": "고급 규칙은 보류되어 있어요. 다시 쓰려면 “고급”을 고르세요.",
     "refreshModels": "모델 새로 고침",
     "selectPlaceholder": "— 선택 —",
     "exportFailed": "배정 규칙을 내보내지 못했어요.",
@@ -407,7 +409,7 @@
       },
       "glossary-adherence": {
         "name": "용어집 준수",
-        "description": "원문에서 일치한 용어집 용어는 번역 결과에도 번역되어 나타나야 해요(단어 단위 일치). 경고 심각도에서는 알려 주기만 하고, 자동 재시도를 일으키려면 심각도를 차단으로 설정하세요."
+        "description": "원문에서 찾은 용어집 용어는 번역 결과에 번역되어 나와야 해요. 러시아어 격 어미처럼 변화한 형태도 인정돼요. 불변 용어는 건너뛰어요. 마스킹이 이미 정확하게 지켜 주니까요. 심각도가 경고면 정보 표시일 뿐이고, 용어가 빠지거나 바뀌었을 때 번역을 한 번 다시 하려면 심각도를 차단으로 설정하세요."
       },
       "forbidden-terms": {
         "name": "금지 용어",

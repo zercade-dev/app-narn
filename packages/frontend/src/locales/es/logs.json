@@ -24,6 +24,8 @@
     "retry": "Reintentando una traducción fallida.",
     "failedNoRoute": "No se pudo traducir {{count}} texto a {{language}} — ninguna regla de enrutamiento coincide.",
     "failedNoRoute_other": "No se pudieron traducir {{count}} textos a {{language}} — ninguna regla de enrutamiento coincide.",
+    "failedNoProvider": "No se pudo traducir {{count}} texto a {{language}} — no hay ningún proveedor activado para NARN Freeway.",
+    "failedNoProvider_other": "No se pudieron traducir {{count}} textos a {{language}} — no hay ningún proveedor activado para NARN Freeway.",
     "failedModuleDisabled": "No se pudo traducir {{count}} texto a {{language}} — el módulo {{module}} está desactivado.",
     "failedModuleDisabled_other": "No se pudieron traducir {{count}} textos a {{language}} — el módulo {{module}} está desactivado.",
     "failedModuleNotFound": "No se pudo traducir {{count}} texto a {{language}} — el módulo {{module}} no está instalado.",

@@ -1,5 +1,7 @@
 {
   "next": "Tiếp theo",
+  "completeTour": "Hoàn tất hướng dẫn",
+  "lookOnly": "Trong lúc hướng dẫn, mục này chỉ để xem. Bạn có thể dùng khi hướng dẫn kết thúc.",
   "back": "Quay lại",
   "skip": "Bỏ qua hướng dẫn",
   "close": "Đóng",
@@ -11,9 +13,7 @@
       "openVault": "Mở biểu mẫu kho bảo mật",
       "cloudVault": "Thiết lập kho bảo mật",
       "openVaultPage": "Mở trang kho bảo mật",
-      "getGoogleKey": "Lấy khóa Google (gói miễn phí)",
-      "addGoogleKey": "Dán khóa Google của tôi",
-      "ownProvider": "Dùng nhà cung cấp của riêng tôi",
+      "chooseProvider": "Chọn nhà cung cấp",
       "useFoundKey": "Dùng {{provider}} cho bản dịch của bạn",
       "fixKey": "Kiểm tra khóa của tôi",
       "retry": "Thử lại",
@@ -27,7 +27,9 @@
       "restoreTest": "Khôi phục bản dịch của tôi",
       "keepTest": "Giữ bản dịch mới",
       "tourSections": "Xem các mục",
-      "maybeLater": "Để sau"
+      "maybeLater": "Để sau",
+      "openTours": "Xem các hướng dẫn",
+      "toursDone": "Xong"
     },
     "vault": {
       "title": "Tạo mật khẩu kho bảo mật",
@@ -43,25 +45,33 @@
     },
     "cloudVault": {
       "title": "Tạo kho bảo mật và thêm khóa",
-      "what": "Chọn mật khẩu cho kho, rồi thêm một khóa. Để thử nhanh, hãy tạo một khóa Google AI: gói miễn phí của nó không tốn phí. Bạn đã có khóa của một nhà cung cấp được hỗ trợ? Hãy chọn “Dùng nhà cung cấp của riêng tôi” trước. Bạn sẽ quay lại đây khi xong.",
-      "why": "Khóa nhà cung cấp của bạn được mã hóa bằng mật khẩu của bạn và luôn nằm trong tầm kiểm soát của bạn. Khóa là cách nhà cung cấp AI biết đó là bạn."
+      "what": "Chọn mật khẩu cho kho, rồi thêm một khóa: hãy chọn nhà cung cấp trước. Để thử nhanh, hãy chọn nhà cung cấp có gói miễn phí. Bạn sẽ quay lại đây khi xong.",
+      "why": "Khóa nhà cung cấp của bạn được mã hóa bằng mật khẩu của bạn và luôn nằm trong tầm kiểm soát của bạn."
     },
     "cloudUnlock": {
       "what": "Mở khóa kho bảo mật trên trang kho bảo mật. Bạn sẽ quay lại đây khi xong."
     },
     "cloudKey": {
-      "what": "Thêm một khóa ở trang kho bảo mật. Để thử nhanh, hãy tạo một khóa Google AI: gói miễn phí của nó không tốn phí. Bạn đã có khóa của một nhà cung cấp được hỗ trợ? Hãy chọn “Dùng nhà cung cấp của riêng tôi” trước. Bạn sẽ quay lại đây khi xong."
+      "what": "Thêm một khóa ở trang kho: hãy chọn nhà cung cấp trước. Để thử nhanh, hãy chọn nhà cung cấp có gói miễn phí. Bạn sẽ quay lại đây khi xong."
     },
     "key": {
       "title": "Thêm khóa để bắt đầu dịch",
-      "why": "Google AI, Groq và OpenRouter có gói miễn phí: với khóa của bất kỳ nhà nào trong số đó, NARN Freeway dịch trò chơi của bạn miễn phí trong lúc bạn dùng thử. Bạn có thể đổi nhà cung cấp bất cứ lúc nào trong thẻ Cấu hình của dự án.",
-      "whyOwn": "Khóa {{provider}} là cách {{provider}} biết đó là bạn. Bạn có thể đổi nhà cung cấp bất cứ lúc nào trong thẻ Cấu hình của dự án.",
-      "choiceWhat": "Để thử nhanh, hãy tạo một khóa Google AI: gói miễn phí của nó không tốn phí. Bạn đã có khóa của một nhà cung cấp được hỗ trợ? Hãy chọn “Dùng nhà cung cấp của riêng tôi”.",
+      "why": "Bạn có thể đổi nhà cung cấp sau trong thẻ Cấu hình của dự án.",
+      "choiceWhat": "Chọn một nhà cung cấp và thêm khóa của họ. Để thử nhanh, hãy chọn nhà cung cấp có gói miễn phí.",
       "pasteWhat": "Dán khóa vào đây, nhập mật khẩu kho bảo mật bên dưới, rồi lưu."
+    },
+    "providerList": {
+      "title": "Chọn nhà cung cấp",
+      "what": "Bạn đã có khóa? Hãy chọn nhà cung cấp của khóa đó. Chưa có? Nhấn Lấy khóa cạnh một nhà cung cấp để tạo khóa trên trang của họ, rồi chọn nhà cung cấp đó.",
+      "why": "Để thử nhanh, hãy dùng nhà cung cấp có gói miễn phí."
+    },
+    "providerCard": {
+      "title": "Ai dịch dự án này",
+      "what": "Chọn ai sẽ dịch dự án này.",
+      "why": "Nhấn Quay lại để đóng bảng này và tiếp tục với hướng dẫn."
     },
     "project": {
       "title": "Nhập văn bản của game",
-      "why": "Khi nhập, bạn chọn tệp sẽ thay thế dữ liệu đã lưu hay chỉ thêm mục mới và cập nhật mục đã thay đổi.",
       "openWhat": "Mở danh sách dự án.",
       "newWhat": "Tạo một dự án mới.",
       "createWhat": "Đặt tên cho dự án, rồi tạo.",
@@ -73,17 +83,23 @@
     },
     "translate": {
       "title": "Dịch",
-      "why": "Freeway tự động chọn một mô hình miễn phí phù hợp cho từng ngôn ngữ.",
-      "whyOwn": "{{provider}} dịch dự án này bằng khóa của riêng bạn.",
-      "whyCustom": "Điều phối của dự án này, được thiết lập trong Nâng cao, chọn nhà cung cấp cho từng mục.",
       "openWhat": "Mở tab liệt kê các mục của bạn.",
       "quickWhat": "Đã chọn 3 mục vẫn cần dịch. Dịch thử chúng, hoặc dịch tất cả ngay bây giờ.",
       "fewWhat": "Các mục của bạn đã được chọn. Dịch chúng ngay bây giờ.",
       "startWhat": "Bắt đầu dịch.",
-      "nothingWhat": "Tệp của bạn đã có bản dịch cho mọi ngôn ngữ bạn chọn. Để xem một bản dịch chạy thế nào, hãy dịch lại 3 mục: bản dịch của chúng sẽ bị thay thế, và sau đó bạn có thể khôi phục lại.",
-      "nothingWhy": "Hoặc nhấn Tiếp theo để chuyển sang xuất tệp. Để thêm ngôn ngữ, hãy đánh dấu nó ở tab Dữ liệu rồi lưu.",
+      "nothingWhat": "Tệp của bạn đã có mọi bản dịch. Để xem một bản dịch chạy thế nào, hãy dịch lại 3 mục: sau đó bạn có thể khôi phục bản dịch của chúng.",
+      "nothingWhy": "Hoặc nhấn Tiếp theo để xuất tệp. Để thêm ngôn ngữ, hãy đánh dấu nó ở tab Dữ liệu rồi lưu.",
       "progressWhat": "Đang dịch. Dòng này cho biết tiến độ.",
       "progressWhy": "Hướng dẫn sẽ tiếp tục khi dịch xong."
+    },
+    "retest": {
+      "title": "Dịch lại 3 mục",
+      "filterWhat": "Mở Trạng thái và bỏ chọn Chỉ hiện mục chưa dịch, để danh sách hiện cả các mục đã dịch.",
+      "selectWhat": "Đánh dấu ô của 3 mục trên trang này.",
+      "translateWhat": "Nhấn Dịch mục đã chọn.",
+      "modeWhat": "Chọn Dịch lại các bản dịch hiện có. Nếu chọn Chỉ điền vào các mục chưa dịch, 3 mục sẽ bị bỏ qua vì đã được dịch.",
+      "startWhat": "Nhấn Bắt đầu để dịch lại 3 mục.",
+      "nothingPicked": "Chưa có gì được dịch lại: các mục đó đã có bản dịch. Nhấn lại Dịch mục đã chọn và chọn Dịch lại các bản dịch hiện có."
     },
     "failed": {
       "title": "Dịch chưa thành công",
@@ -92,6 +108,7 @@
       "quotaWhat": "Hạn mức miễn phí tạm thời đã hết. Chờ một lát hoặc thêm khóa khác, rồi thử lại.",
       "quotaWhatOwn": "{{provider}} tạm thời từ chối: hạn mức hoặc tín dụng trong tài khoản của bạn đã hết. Hãy kiểm tra gói của bạn với nhà cung cấp, rồi thử lại.",
       "quotaWhatCustom": "Một nhà cung cấp trong điều phối của dự án này tạm thời từ chối: hạn mức hoặc tín dụng đã hết. Chờ một lát hoặc kiểm tra gói với nhà cung cấp, rồi thử lại.",
+      "noProviderWhat": "Chưa có gì được dịch: không có nhà cung cấp nào được bật để xử lý. Nhấn Thử lại: NARN sẽ bật trước nhà cung cấp của khóa bạn đã lưu.",
       "otherWhat": "Chưa có gì được dịch. Kiểm tra khóa của bạn, rồi thử lại."
     },
     "parked": {
@@ -107,7 +124,6 @@
     "rest": {
       "title": "Bản dịch thử đã thành công",
       "what": "3 mục thử nghiệm của bạn đã được dịch sang mọi ngôn ngữ bạn chọn. Dịch phần còn lại ngay, hoặc xuất những gì bạn đã có.",
-      "why": "Bạn có thể dịch phần còn lại sau từ danh sách mục.",
       "skipped": "Phần còn lại có thể để sau. Hãy tải xuống những gì đã dịch."
     },
     "restore": {
@@ -130,14 +146,20 @@
       "what": "Đây là giao diện đơn giản: chỉ hiển thị những gì cần để dịch và xuất. Nâng cao có thêm nhiều công cụ. Gạt công tắc sang Nâng cao để xem hướng dẫn ngắn.",
       "whatAdvanced": "Bạn đang ở chế độ nâng cao, nơi hiển thị mọi công cụ. Hướng dẫn ngắn sẽ giải thích công dụng của từng mục.",
       "why": "Bạn có thể chuyển bất cứ lúc nào từ thanh trên cùng."
+    },
+    "moreTours": {
+      "title": "Thêm hướng dẫn có dẫn dắt",
+      "what": "Các hướng dẫn ngắn về bảng thuật ngữ, điều phối và nhiều nội dung khác nằm trong Hướng dẫn. Bắt đầu bất cứ lúc nào."
     }
   },
   "providerChoice": {
-    "title": "Dùng nhà cung cấp của riêng tôi",
-    "description": "Chọn nhà cung cấp mà bạn có khóa. Nhà cung cấp đó sẽ dịch dự án này và các dự án mới bạn tạo. Để kết hợp nhiều nhà cung cấp, hãy chuyển sang Nâng cao.",
+    "title": "Chọn nhà cung cấp",
+    "description": "Nhà cung cấp đó sẽ dịch dự án này và các dự án mới bạn tạo.",
     "existingRouting": "Dự án này đã có điều phối được thiết lập nên sẽ được giữ nguyên. Bạn có thể thay đổi trong Nâng cao.",
-    "freeHeading": "Gói miễn phí. Nếu chọn một trong số đó, chỉ nhà cung cấp đó dịch, không dùng các mô hình miễn phí khác trong nhóm NARN Freeway.",
-    "paidHeading": "Có phí, tính vào tài khoản của bạn tại nhà cung cấp.",
+    "freeHeading": "Có gói miễn phí",
+    "paidHeading": "Không có gói miễn phí",
+    "getKey": "Lấy khóa",
+    "getKeyAria": "Lấy khóa {{provider}} (mở trang web của nhà cung cấp)",
     "cancel": "Hủy",
     "failed": "Không thể thiết lập {{provider}}: {{message}}",
     "switchedOff": "{{provider}} đang tắt trong Nâng cao nên không được dùng. Hãy bật lại trong Cấu hình chung, hoặc chọn nhà cung cấp khác.",
@@ -161,11 +183,15 @@
     },
     "glossaries": {
       "name": "Bảng thuật ngữ",
-      "summary": "Tạo bảng thuật ngữ, thêm thuật ngữ rồi áp dụng để các thuật ngữ chính luôn nhất quán."
+      "summary": "Bật một bảng thuật ngữ có sẵn phù hợp với văn bản của bạn và xem các chỗ khớp nó tìm thấy."
     },
     "routing": {
       "name": "Điều phối",
       "summary": "Xem nhanh trong 30 giây cách NARN chọn ai dịch nội dung nào."
+    },
+    "routing-advanced": {
+      "name": "Quy tắc định tuyến nâng cao",
+      "summary": "Các quy tắc gửi từng ngôn ngữ hoặc loại văn bản đến nhà cung cấp bạn chọn."
     },
     "quality": {
       "name": "Chất lượng",
@@ -189,6 +215,7 @@
     "progressSections": "{{current}}/{{total}} phần",
     "completed": "Đã hoàn tất",
     "needsProject": "Hãy mở một dự án để xem hướng dẫn này.",
+    "needsDesktop": "Các hướng dẫn cần màn hình rộng hơn. Hãy mở ứng dụng trên máy tính để xem hướng dẫn.",
     "switchedToAdvanced": "Đã chuyển sang chế độ nâng cao cho hướng dẫn này.",
     "confirm": {
       "title": "Chuyển sang chế độ Đơn giản để thiết lập có hướng dẫn?",
@@ -211,7 +238,8 @@
       "mode": {
         "title": "Quy tắc đơn giản hoặc nâng cao",
         "what": "Tại đây bạn chuyển giữa một nhà cung cấp cho mọi thứ và một danh sách quy tắc.",
-        "why": "Hãy bắt đầu đơn giản. Chuyển sang quy tắc khi bạn muốn dùng nhà cung cấp khác cho một ngôn ngữ, một danh mục hoặc một sắc thái."
+        "why": "Hãy bắt đầu đơn giản. Chuyển sang quy tắc khi bạn muốn dùng nhà cung cấp khác cho một ngôn ngữ, một danh mục hoặc một sắc thái.",
+        "advancedAction": "Giải thích quy tắc nâng cao"
       }
     },
     "glossary": {
@@ -222,7 +250,7 @@
       "list": {
         "title": "Các bảng thuật ngữ của bạn",
         "what": "Mỗi bảng thuật ngữ là một danh sách các thuật ngữ cùng bản dịch bạn muốn cho từng thuật ngữ.",
-        "why": "Nhờ vậy, những thuật ngữ như tên nhân vật hay biệt ngữ trong game luôn được dịch giống nhau."
+        "why": "Nhờ vậy, những thuật ngữ như tên nhân vật, kỹ năng hay tên vật phẩm luôn được dịch giống nhau."
       },
       "create": {
         "title": "Tạo bảng thuật ngữ",
@@ -298,6 +326,73 @@
         "why": "Dùng trước khi phát hành, hoặc sau khi bạn đổi bảng thuật ngữ hoặc điều phối."
       }
     }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Quy tắc được xét từ trên xuống",
+      "what": "NARN xét các quy tắc từ trên xuống, và quy tắc đầu tiên khớp với một mục sẽ dịch mục đó. Trong chuyến tham quan này, bạn gửi các ngôn ngữ châu Á đến một nhà cung cấp và mọi ngôn ngữ khác đến một nhà cung cấp khác.",
+      "why": "Mục không khớp quy tắc nào sẽ không được dịch, nên quy tắc cuối cùng cần áp dụng cho mọi thứ."
+    },
+    "edit": {
+      "title": "Mở quy tắc #1",
+      "what": "Nhấn biểu tượng bút chì để sửa quy tắc #1. Quy tắc này sẽ xử lý các ngôn ngữ châu Á.",
+      "noRulesWhat": "Dự án này chưa có quy tắc nào. Nhấn Thêm quy tắc để tạo quy tắc #1. Quy tắc này sẽ xử lý các ngôn ngữ châu Á."
+    },
+    "filter": {
+      "title": "Mở Lọc",
+      "what": "Nhấn Lọc để xem quy tắc này nhận những mục nào.",
+      "why": "Quy tắc không đánh dấu gì ở đây sẽ nhận mọi mục."
+    },
+    "langs": {
+      "title": "Đánh dấu các ngôn ngữ châu Á",
+      "what": "Đánh dấu các ngôn ngữ châu Á trong số ngôn ngữ của dự án, ví dụ ja, ko và zh-hans, rồi bỏ đánh dấu các ngôn ngữ khác. Nếu dự án không có, hãy đánh dấu một ngôn ngữ bất kỳ để thử. Tiếp theo sẽ hiện ra khi bạn đánh dấu hoặc bỏ đánh dấu một ngôn ngữ.",
+      "why": "Giờ quy tắc #1 chỉ nhận các ngôn ngữ này. Mọi ngôn ngữ khác được chuyển xuống các quy tắc bên dưới."
+    },
+    "module": {
+      "title": "Chọn nhà cung cấp cho nó",
+      "what": "Trong Mô-đun, chọn nhà cung cấp cho các ngôn ngữ này. Để dùng một mô hình khác của cùng nhà cung cấp, hãy mở Cài đặt tác tử ở phía dưới.",
+      "why": "Thay đổi của bạn tự động được lưu."
+    },
+    "done": {
+      "title": "Đóng quy tắc",
+      "what": "Nhấn Xong."
+    },
+    "add": {
+      "title": "Thêm quy tắc cho các ngôn ngữ khác",
+      "what": "Nhấn Thêm quy tắc. Quy tắc mới nằm ở cuối, bên dưới các quy tắc đã có.",
+      "why": "Các quy tắc được xét từ trên xuống, nên quy tắc ở cuối chỉ nhận phần mà các quy tắc phía trên để lại."
+    },
+    "newModule": {
+      "title": "Chỉ chọn nhà cung cấp",
+      "what": "Trong Mô-đun, chọn nhà cung cấp cho mọi ngôn ngữ khác. Để trống Lọc. Tiếp theo sẽ hiện ra khi bạn chọn một nhà cung cấp.",
+      "why": "Không cần bộ lọc: các ngôn ngữ bạn đã đánh dấu dừng ở quy tắc #1, nên chỉ các ngôn ngữ khác đến được các quy tắc bên dưới."
+    },
+    "order": {
+      "title": "Thứ tự quyết định tất cả",
+      "what": "Quy tắc #1 nhận các ngôn ngữ bạn đã đánh dấu, còn các quy tắc bên dưới chỉ nhận phần còn lại. Nếu quy tắc không có bộ lọc đứng trước, nó sẽ nhận mọi ngôn ngữ, và quy tắc #1 sẽ không bao giờ được dùng.",
+      "why": "Để đổi thứ tự, hãy dùng các mũi tên bên cạnh quy tắc."
+    },
+    "templates": {
+      "title": "Mẫu",
+      "what": "Các quy tắc soạn sẵn. Dùng mẫu thêm một mẫu vào cuối các quy tắc của dự án này.",
+      "why": "Một khởi đầu nhanh bạn có thể chỉnh sau."
+    },
+    "groups": {
+      "title": "Nhóm quy tắc",
+      "what": "Nhóm quy tắc là một bộ quy tắc riêng. Bản dịch dùng nhóm được chọn ở đây.",
+      "why": "Chuẩn bị sẵn một bộ khác, chẳng hạn để thử một nhà cung cấp, và chuyển qua lại."
+    },
+    "import": {
+      "title": "Nhập / Xuất",
+      "what": "Lưu quy tắc thành tệp JSON hoặc nạp quy tắc từ tệp.",
+      "why": "Dùng lại cùng cách định tuyến trong dự án khác."
+    },
+    "back": {
+      "title": "Quay lại Đơn giản",
+      "what": "Đơn giản là chế độ một nhà cung cấp. Khi chọn, quy tắc của bạn được tạm gác và một nhà cung cấp dịch mọi thứ.",
+      "why": "Quy tắc của bạn vẫn được giữ, không bị xóa. Chọn Nâng cao để dùng lại."
+    },
+    "absentWhat": "Mục mà bước này chỉ tới hiện không có trên màn hình. Nhấn Tiếp theo để tiếp tục, hoặc Quay lại để làm lại bước trước."
   },
   "advancedSections": {
     "compare": {
@@ -379,33 +474,42 @@
   "glossariesTour": {
     "purpose": {
       "title": "Bảng thuật ngữ dùng để làm gì",
-      "what": "Bảng thuật ngữ liệt kê các thuật ngữ kèm bản dịch bạn muốn, như tên nhân vật hay biệt ngữ trong game.",
+      "what": "Bảng thuật ngữ liệt kê các thuật ngữ kèm bản dịch bạn muốn, như tên nhân vật, kỹ năng hay tên vật phẩm.",
       "why": "Khi đó bản dịch luôn dùng từ của bạn thay vì đoán mới mỗi lần."
     },
-    "create": {
-      "title": "Tạo bảng thuật ngữ",
-      "what": "Bắt đầu một bảng thuật ngữ mới, trống tại đây, hoặc nhấn Tiếp theo để đọc tiếp.",
-      "why": "Thường một bảng thuật ngữ là đủ. Dùng nhiều bảng để tách riêng các nhóm thuật ngữ."
+    "picked": {
+      "title": "Bảng thuật ngữ cho các mục của bạn",
+      "what": "Hướng dẫn đã chọn {{name}} vì các thuật ngữ của nó xuất hiện trong các mục của bạn. Số mục khớp: {{count}}.",
+      "noneWhat": "Chưa có bảng thuật ngữ nào khớp với các mục của bạn, nên hướng dẫn dùng {{name}}."
     },
-    "add-term": {
-      "title": "Thêm thuật ngữ",
-      "what": "Nhập thuật ngữ nguồn và bản dịch cho từng ngôn ngữ, rồi thêm vào.",
-      "why": "Đánh dấu thuật ngữ là cố định khi nó không bao giờ được dịch, như tên thương hiệu."
+    "constant": {
+      "title": "Cột Cố định",
+      "what": "Ở những chỗ văn bản viết thuật ngữ cố định đúng y như bảng thuật ngữ, thuật ngữ đó không bao giờ được gửi đến công cụ dịch. Thay vào đó, NARN đặt thẳng bản dịch trong bảng thuật ngữ vào kết quả, nên tên nhân vật như Diluc luôn ra đúng như viết ở đây.",
+      "absentWhat": "Chọn một bảng thuật ngữ bên trái để xem các thuật ngữ và cột Cố định.",
+      "why": "Các thuật ngữ khác được gửi kèm văn bản làm tham chiếu mà công cụ cần tuân theo."
     },
-    "assign": {
-      "title": "Áp dụng cho dự án này",
-      "what": "Bảng thuật ngữ đang bật sẽ được dùng khi dịch dự án này. Tắt nó để ngừng sử dụng.",
-      "why": "Hãy để bảng thuật ngữ ở trạng thái tắt khi bạn vẫn đang soạn nó."
+    "enable": {
+      "title": "Bật nó lên",
+      "what": "Nhấn Bật. NARN sẽ hỏi có áp dụng các chỗ khớp không: Áp dụng các chỗ khớp sẽ gán bảng thuật ngữ cho mọi mục chứa một thuật ngữ của nó.",
+      "absentWhat": "Chọn một bảng thuật ngữ bên trái, rồi nhấn Bật cạnh tên của nó.",
+      "onWhat": "{{name}} đã được bật, nên dự án này đang dùng nó.",
+      "why": "Khi dịch dự án này, chỉ các bảng thuật ngữ đã bật mới được dùng."
+    },
+    "choice": {
+      "title": "Chỉ bật thôi hay Áp dụng các chỗ khớp?",
+      "what": "Áp dụng các chỗ khớp gán bảng thuật ngữ ngay cho mọi mục chứa một thuật ngữ của nó. Chỉ bật thôi chỉ bật nó và giữ nguyên các mục; bạn có thể gán sau ở Chỗ khớp."
+    },
+    "matches": {
+      "title": "Các chỗ khớp đã tìm thấy",
+      "what": "NARN tự tìm thấy các mục này: mỗi mục chứa một thuật ngữ từ {{name}}, và giờ bảng thuật ngữ đã được gán cho chúng.",
+      "onlyWhat": "NARN tự tìm thấy các mục này: mỗi mục chứa một thuật ngữ từ {{name}}. Đánh dấu chúng rồi nhấn Gán bảng thuật ngữ để dùng cho chúng.",
+      "noneWhat": "Chưa có mục nào chứa thuật ngữ từ {{name}}. Các mục có chứa sẽ hiện ở đây.",
+      "why": "Bảng thuật ngữ được dùng cho các mục đã được gán nó."
     },
     "effect": {
       "title": "Nó thay đổi bản dịch thế nào",
       "what": "Khi một chuỗi chứa thuật ngữ trong bảng, thuật ngữ đó và bản dịch của bạn được gửi kèm theo chuỗi.",
       "why": "Nhà cung cấp làm theo lựa chọn của bạn thay vì tự chọn từ."
-    },
-    "generate": {
-      "title": "Để AI gợi ý thuật ngữ",
-      "what": "Nhờ một nhà cung cấp AI tìm các thuật ngữ có thể có trong chuỗi của bạn.",
-      "why": "Bạn xem lại các gợi ý và chỉ giữ những gì bạn muốn."
     }
   },
   "orphansTour": {
@@ -457,6 +561,7 @@
     "explain-list": {
       "title": "Danh sách mục mồ côi",
       "what": "Mỗi mục mồ côi hiện văn bản nguồn và số bản dịch nó còn giữ.",
+      "absentWhat": "Dự án này hiện không có mục mồ côi. Khi một lần nhập bỏ sót mục, từng mục sẽ hiện ở đây cùng văn bản nguồn và số bản dịch nó còn giữ.",
       "why": "Mục có nhiều bản dịch nhất đứng đầu: làm lại chúng tốn công nhất."
     },
     "explain-options": {

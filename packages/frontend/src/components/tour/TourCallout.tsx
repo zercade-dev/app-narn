@@ -25,7 +25,8 @@ interface TourCalloutProps {
   text?: TourText;
   showBack: boolean;
   showNext: boolean;
-  onNext: () => void;
+  /** Gets the click: the second click of a double click is ignored. */
+  onNext: (e?: { detail?: number }) => void;
   onBack: () => void;
   onExit: () => void;
 }
@@ -88,7 +89,7 @@ export function TourCallout({
         </Button>
       </div>
       <p className="text-sm">{t(step.whatKey)}</p>
-      <p className="text-sm text-muted-foreground">{t(step.whyKey)}</p>
+      {step.whyKey && <p className="text-sm text-muted-foreground">{t(step.whyKey)}</p>}
       {extra}
       <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
         <Button variant="ghost" size="sm" data-testid="tour-skip" onClick={onExit}>
@@ -113,7 +114,11 @@ export function TourCallout({
           )}
           {showNext && (
             <Button size="sm" data-testid="tour-next" onClick={onNext}>
-              {t('next')}
+              {/* On a tour's last step, Next ends it. (The first run's steps
+                  count sections, not the end.) */}
+              {position && position.major === undefined && position.counted === position.total
+                ? t('completeTour')
+                : t('next')}
             </Button>
           )}
         </div>

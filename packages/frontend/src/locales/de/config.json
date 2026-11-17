@@ -43,8 +43,8 @@
   "orphanedCount": "{{count}} verwaist",
   "importWarningsTitle": "Prüfung vor dem Import",
   "unknownHeadersSummary": "Nicht erkannte Spalten, ignoriert: {{headers}}",
-  "rawNewlineSummary_one": "Echte Zeilenumbrüche in {{count}} Sprache. Für einen Zeilenumbruch im Spiel die Markierung \\n verwenden.",
-  "rawNewlineSummary_other": "Echte Zeilenumbrüche in {{count}} Sprachen. Für einen Zeilenumbruch im Spiel die Markierung \\n verwenden.",
+  "rawNewlineSummary_one": "Echte Zeilenumbrüche in {{count}} Sprache: stattdessen \n verwenden.",
+  "rawNewlineSummary_other": "Echte Zeilenumbrüche in {{count}} Sprachen: stattdessen \n verwenden.",
   "rawNewlineShowLanguages": "Sprachen anzeigen",
   "continueImport": "Import fortsetzen",
   "cancelImport": "Abbrechen",
@@ -62,9 +62,10 @@
   "formulaGuardKeptNotice": "Zellen mit einem Apostroph vor = + - oder @: {{cells}}. Sie bleiben unverändert, prüfe sie also: Ein früherer geschützter Export könnte das Apostroph hinzugefügt haben.",
   "exportLanguages": "Sprachen",
   "exportCollection": "Sammlung",
-  "collectionMain": "Haupttext",
+  "collectionMain": "Server-Übersetzungen",
   "collectionClient": "Client-Skript-Text",
-  "detectedCollection": "Erkannt: {{collection}}",
+  "detectedClient": "Erkannt: <hl>Client</hl>-Skript-Text",
+  "detectedMain": "Erkannt: <hl>Server</hl>-Übersetzungen",
   "exportLanguagesHint": "Welche Spalten in diesen Export aufgenommen werden",
   "pseudoExportAs": "Pseudo-Text exportieren als",
   "pseudoExportNone": "Keine Ersetzung",
@@ -195,7 +196,8 @@
     "simpleLabel": "Alles übersetzen mit",
     "simpleHint": "Jeder Eintrag in diesem Projekt wird von dem hier gewählten Anbieter übersetzt.",
     "simpleDefaultNote": "Standard — gilt, bis du einen Anbieter auswählst.",
-    "simpleAdvancedNotice": "Dieses Projekt nutzt erweitertes Routing, daher wird der vollständige Editor angezeigt.",
+    "simpleAdvancedNotice": "Dieses Projekt hat eigene Regeln, daher wird der vollständige Editor angezeigt. Wähle „Einfach“, um sie beiseitezulegen und einen Anbieter für alles zu nutzen.",
+    "simpleSetAsideNote": "Deine erweiterten Regeln sind beiseitegelegt. Wähle „Erweitert“, um sie wieder zu nutzen.",
     "refreshModels": "Modelle aktualisieren",
     "selectPlaceholder": "— auswählen —",
     "exportFailed": "Routing-Regeln konnten nicht exportiert werden.",
@@ -414,7 +416,7 @@
       },
       "glossary-adherence": {
         "name": "Glossartreue",
-        "description": "Im Quelltext getroffene Glossarbegriffe müssen übersetzt in der Ausgabe erscheinen (Treffer auf ganze Wörter). Beim Schweregrad „Warnung“ ist die Beanstandung rein informativ; für die automatische Wiederholung den Schweregrad auf „Blockierend“ setzen."
+        "description": "Im Quelltext gefundene Glossarbegriffe müssen übersetzt in der Ausgabe stehen. Eine gebeugte Form zählt mit, etwa eine russische Kasusendung. Konstante Begriffe werden übersprungen: Die Maskierung hält sie bereits exakt. Mit Schweregrad Warnung ist das Problem nur ein Hinweis; stelle ihn auf blockierend, damit die Übersetzung einmal wiederholt wird, wenn ein Begriff fehlt oder umformuliert wurde."
       },
       "forbidden-terms": {
         "name": "Verbotene Begriffe",

@@ -159,7 +159,12 @@ import {
   resolveDispatchModuleId,
   resolveFreewayProbeCredential,
 } from './M32/bucket-source.js';
-import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
+import {
+  badCredentialModule,
+  resolveFreewayDecisions,
+  revalidateGroup,
+  toFreewayJob,
+} from './M32/resolve.js';
 import {
   effectiveRemainingRequests,
   findMinuteStarvedEscalation,
@@ -223,7 +228,7 @@ interface PendingCorrection {
   masked: string;
   plan: ReturnType<typeof maskText>['plan'];
   glossaryById: Map<string, GlossaryTerm>;
-  nonConstantTerms: GlossaryTerm[];
+  referenceTerms: GlossaryTerm[];
   reference?: TranslationJob['reference'];
 }
 
@@ -389,16 +394,25 @@ function tmRejectionReason(lqa: import('@zercade-dev/narn-shared').LQAResult): s
 
 /**
  * The FailureCode for a controlled (pre-dispatch) failure reason. The reasons
- * are themselves codes, except `freeway-no-buckets`: nothing could serve the
- * pair, which the user fixes the same way as a missing route.
+ * are themselves codes, except the Freeway ones: `freeway-no-buckets` (no
+ * provider could serve the pair) is fixed the same way as a missing route, and
+ * `freeway-bad-credentials` (only a provider whose key was rejected could) is
+ * fixed by correcting that key, like any other auth failure.
  */
 function controlledFailureCode(reason: ControlledFailureReason): FailureCode {
-  return reason === 'freeway-no-buckets' ? 'no-route' : reason;
+  if (reason === 'freeway-no-buckets') return 'no-route';
+  if (reason === 'freeway-bad-credentials') return 'auth';
+  return reason;
 }
 
 type GlossaryGroup = {
   constantTerms: GlossaryTerm[];
-  nonConstantTerms: GlossaryTerm[];
+  /**
+   * Every term, sent to the model as glossary reference. A constant term only
+   * survives the prompt's filter where the source spells it differently than
+   * the glossary: its exact spellings are masked before the filter runs.
+   */
+  referenceTerms: GlossaryTerm[];
   glossaryById: Map<string, GlossaryTerm>;
 };
 
@@ -4086,7 +4100,7 @@ export class TranslationEngine {
       );
     }
     if (resolution.blocked.length > 0) {
-      this.recordFreewayBlocked(runId, status, resolution.blocked);
+      this.recordFreewayBlocked(runId, status, resolution.blocked, buckets);
     }
     if (resolution.deferred) {
       this.deferPairsForQuota(
@@ -4212,21 +4226,31 @@ export class TranslationEngine {
    * Record (entry, language) pairs Freeway can never serve as controlled
    * failures — same accounting and aggregated logging as the pre-dispatch
    * reasons, so the UI's per-entry error list and fix hint stay complete.
+   *
+   * `buckets` are the views the pairs were found blocked against. When one of
+   * them would take the language but for its rejected key, the pairs fail as
+   * `freeway-bad-credentials` (code `auth`, naming that provider) instead of
+   * `freeway-no-buckets`: the fix is the key, not switching a provider on.
    */
   private recordFreewayBlocked(
     runId: string,
     status: RunStatus,
     pairs: RunEntryLanguagePair[],
+    buckets: readonly BucketView[] | undefined,
   ): void {
     if (pairs.length === 0) return;
     const groups = new Map<string, ControlledFailureGroup>();
     for (const pair of pairs) {
+      const badModule = buckets ? badCredentialModule(buckets, pair.targetLanguage) : undefined;
+      const reason: ControlledFailureReason = badModule
+        ? 'freeway-bad-credentials'
+        : 'freeway-no-buckets';
       this.recordFailure(
         status,
         pair.entryId,
         pair.targetLanguage,
-        'freeway-no-buckets',
-        controlledFailureCode('freeway-no-buckets'),
+        reason,
+        controlledFailureCode(reason),
       );
       const group = groups.get(pair.targetLanguage);
       if (group) {
@@ -4234,9 +4258,9 @@ export class TranslationEngine {
         group.entryIds.push(pair.entryId);
       } else {
         groups.set(pair.targetLanguage, {
-          reason: 'freeway-no-buckets',
+          reason,
           targetLanguage: pair.targetLanguage,
-          moduleId: FREEWAY_MODULE_ID,
+          moduleId: badModule ?? FREEWAY_MODULE_ID,
           count: 1,
           entryIds: [pair.entryId],
         });
@@ -5885,9 +5909,13 @@ export class TranslationEngine {
           }
           return;
         }
+        // The views a 'blocked' verdict below was reached against, so the
+        // failure can say whether a rejected key is why.
+        let blockedViews: BucketView[] | undefined;
         if (revalidated.kind === 'defer' || revalidated.kind === 'blocked') {
           const now = Date.now();
           const views = await loadBucketViews(now, freewayDeps);
+          blockedViews = views;
           const minBand = freewayMinBand(status.request);
           const resolution = resolveFreewayDecisions(decisions, views, now, {
             ...(minBand !== undefined ? { minBand } : {}),
@@ -5974,6 +6002,7 @@ export class TranslationEngine {
             runId,
             status,
             decisions.map((d) => ({ entryId: d.entry.id, targetLanguage: d.targetLanguage })),
+            blockedViews,
           );
           for (const d of decisions) settled.add(settleKey(d));
           refundUnusedAdmission();
@@ -6150,7 +6179,7 @@ export class TranslationEngine {
         masked: string;
         plan: ReturnType<typeof maskText>['plan'];
         trivial: boolean;
-        nonConstantTerms: GlossaryTerm[];
+        referenceTerms: GlossaryTerm[];
         glossaryById: Map<string, GlossaryTerm>;
         tmFingerprint: TmFingerprint;
         /** "Similar prior translation" hints appended to the job context. */
@@ -6171,7 +6200,7 @@ export class TranslationEngine {
           masked,
           plan,
           trivial,
-          nonConstantTerms: glossary?.nonConstantTerms ?? [],
+          referenceTerms: glossary?.referenceTerms ?? [],
           glossaryById: glossary?.glossaryById ?? new Map<string, GlossaryTerm>(),
           tmFingerprint: buildTmFingerprint(d.entry, d.promptOptions),
           ...(reference ? { reference } : {}),
@@ -6367,7 +6396,7 @@ export class TranslationEngine {
           sourceText: entry.masked,
           sourceLanguage,
           targetLanguage: entry.decision.targetLanguage,
-          glossary: entry.nonConstantTerms,
+          glossary: entry.referenceTerms,
           glossaryId: entry.decision.entry.assignedGlossaryIds?.[0] ?? 'project',
           promptOptions: achievement
             ? {
@@ -6963,6 +6992,8 @@ export class TranslationEngine {
               deferredIndices.add(index);
             }
             let remainingPairs = pairs;
+            // What a 'blocked' outcome is recorded against (see recordFreewayBlocked).
+            let blockedViews: BucketView[] | undefined;
             if (
               remainingDecisions.length > 0 &&
               (outcome.kind === 'blocked' ||
@@ -6970,6 +7001,7 @@ export class TranslationEngine {
             ) {
               const now = Date.now();
               const views = await loadBucketViews(now, freewayDeps);
+              blockedViews = views;
               const minBand = freewayMinBand(status.request);
               const resolution = resolveFreewayDecisions(remainingDecisions, views, now, {
                 ...(minBand !== undefined ? { minBand } : {}),
@@ -7004,7 +7036,7 @@ export class TranslationEngine {
               );
               this.emitProgress(runId, status);
             } else {
-              this.recordFreewayBlocked(runId, status, remainingPairs);
+              this.recordFreewayBlocked(runId, status, remainingPairs, blockedViews);
             }
             if (remainingPairs.length === 0) this.emitProgress(runId, status);
             continue;
@@ -7422,7 +7454,9 @@ export class TranslationEngine {
         const constantTerms = rawTerms.filter((t) => t.constant);
         glossary = {
           constantTerms,
-          nonConstantTerms: rawTerms.filter((t) => !t.constant),
+          // Every term: a constant one only reaches the model where the source
+          // spells it differently than the glossary (exact spellings are masked).
+          referenceTerms: rawTerms,
           glossaryById: new Map(constantTerms.map((t) => [t.id, t])),
         };
         glossaryCache.set(glossaryKey, glossary);
@@ -7449,7 +7483,7 @@ export class TranslationEngine {
         masked,
         plan,
         glossaryById: glossary.glossaryById,
-        nonConstantTerms: glossary.nonConstantTerms,
+        referenceTerms: glossary.referenceTerms,
         ...(reference ? { reference } : {}),
       });
     }
@@ -7740,7 +7774,7 @@ export class TranslationEngine {
           sourceText: item.masked,
           sourceLanguage: args.sourceLanguage,
           targetLanguage,
-          glossary: item.nonConstantTerms,
+          glossary: item.referenceTerms,
           glossaryId: entry.assignedGlossaryIds?.[0] ?? 'project',
           promptOptions: achievement
             ? { ...effectivePromptOptions(entry, decision.promptOptions), achievement }
@@ -8817,10 +8851,11 @@ export class TranslationEngine {
       if (!glossaryCache.has(key)) {
         const rawTerms = await this.glossaryProvider(projectId, d.targetLanguage, d.entry);
         const constantTerms = rawTerms.filter((t) => t.constant);
-        const nonConstantTerms = rawTerms.filter((t) => !t.constant);
         glossaryCache.set(key, {
           constantTerms,
-          nonConstantTerms,
+          // Every term: a constant one only reaches the model where the source
+          // spells it differently than the glossary (exact spellings are masked).
+          referenceTerms: rawTerms,
           glossaryById: new Map(constantTerms.map((t) => [t.id, t])),
         });
       }
@@ -8853,12 +8888,11 @@ export class TranslationEngine {
 
       if (trivialHit === null && glossaryForTarget) {
         const trimmed = d.entry.sourceText.trim();
-        const allTerms = [
-          ...glossaryForTarget.constantTerms,
-          ...glossaryForTarget.nonConstantTerms,
-        ];
-        const matchingTerm = allTerms.find(
-          (t) => t.source.trim().toLowerCase() === trimmed.toLowerCase(),
+        // A constant term counts only in its exact spelling; others ignore case.
+        const matchingTerm = glossaryForTarget.referenceTerms.find((t) =>
+          t.constant
+            ? t.source.trim() === trimmed
+            : t.source.trim().toLowerCase() === trimmed.toLowerCase(),
         );
         if (matchingTerm) {
           const targetTranslation = matchingTerm.translations[d.targetLanguage];

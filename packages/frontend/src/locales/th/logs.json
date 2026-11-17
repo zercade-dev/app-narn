@@ -24,6 +24,8 @@
     "retry": "กำลังลองแปลรายการที่ล้มเหลวใหม่",
     "failedNoRoute": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่มีกฎการจ่ายงานที่ตรงกัน",
     "failedNoRoute_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่มีกฎการจ่ายงานที่ตรงกัน",
+    "failedNoProvider": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่มีผู้ให้บริการที่เปิดใช้งานสำหรับ NARN Freeway",
+    "failedNoProvider_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่มีผู้ให้บริการที่เปิดใช้งานสำหรับ NARN Freeway",
     "failedModuleDisabled": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — โมดูล {{module}} ถูกปิดใช้งาน",
     "failedModuleDisabled_other": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — โมดูล {{module}} ถูกปิดใช้งาน",
     "failedModuleNotFound": "แปล {{count}} รายการเป็น {{language}} ไม่ได้ — ไม่ได้ติดตั้งโมดูล {{module}}",

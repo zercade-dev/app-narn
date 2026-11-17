@@ -16,12 +16,18 @@ modello durante la traduzione.
   ignorato durante l'importazione e la traduzione.
 - Aggiungi termini con un'**origine**, una **traduzione per lingua** e
   **note** facoltative.
-- Contrassegna un termine come **costante** quando non deve mai essere
-  tradotto (nomi di marchi, codici). I termini costanti vengono mascherati
-  durante la traduzione così passano invariati.
+- Contrassegna un termine come **costante** quando deve uscire esattamente come è scritto nel glossario, come il nome di un personaggio o un marchio — vedi *Termini costanti* più sotto.
+- Un glossario ha due schede: **Termini** elenca i suoi termini e **Corrispondenze** elenca le voci che li contengono, dove puoi assegnare il glossario alle voci o toglierlo.
 
 Alcuni glossari sono **di sola lettura** (gestiti a livello globale) e
 contribuiscono termini senza essere modificabili qui.
+
+## Termini costanti
+
+- Un termine costante **non viene mai inviato al motore di traduzione**. NARN lo sostituisce con un segnaposto prima di tradurre e poi mette al suo posto la traduzione del glossario, così un nome di personaggio come *Diluc* esce sempre esattamente come è scritto nel glossario.
+- **Le maiuscole contano.** È protetto solo il testo scritto esattamente come il termine: *Venti* (il personaggio) sì, *a venti latte* no. Ogni altra grafia viene inviata al motore come un normale suggerimento del glossario, segnato come nome, così può distinguere il nome dalla parola comune.
+- **Il motore non può modificare la parola.** Dato che non vede mai il termine, non può declinarlo né accordarvi altre parole: in lingue come il russo, il coreano o il turco un nome costante compare sempre nella sua forma base. Usa costante per nomi e codici che devono restare fissi.
+- Lascia come termini normali i nomi che sono anche parole comuni, perché titoli ed etichette spesso li scrivono con la maiuscola (*Gaming Settings*). Nei glossari inclusi sono costanti i nomi dei personaggi, le nazioni e i nomi di prodotto Genshin Impact, Miliastra Sandbox e Miliastra Wonderland, tranne Gaming, Amber, Razor, Sucrose, Prune, Traveler e Wanderer.
 
 ## Importazione ed esportazione
 

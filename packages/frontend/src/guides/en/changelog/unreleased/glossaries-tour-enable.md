@@ -1,0 +1,17 @@
+The Glossaries tour now enables a ready-made glossary that fits your text and shows the matches it finds for you.
+
+- The tour picks the built-in glossary whose terms appear most in your entries, or Common Phrases when none do.
+- A new step explains the Constant column: where your text spells a constant term exactly as the glossary does, it is never sent to the engine and your glossary translation goes straight into the result.
+- After you enable the glossary, the tour lists the entries it matched.
+- The tour no longer asks you to create a glossary or covers AI generation.
+- Common Phrases and Creation factions now have every language filled in, so none of their terms are left out.
+- While the Apply matches prompt is open, the tour explains the difference between Enable only and Apply matches.
+- Glossary terms no longer match words inside variables, such as "Player" in "{player} (you)".
+- Assign glossary and Unassign glossary are highlighted once you tick an entry.
+- The last step of a tour now says Complete tour.
+- A glossary's terms and its matches are now two tabs under a header that always shows the glossary's name and whether it's on, so the panel never looks empty.
+- Long or wide glossaries scroll inside their own box, with the column headers kept in view, like the Translations list.
+- Constant glossary terms are now protected only where the text spells them exactly as the glossary does, so "Venti" the character stays fixed while "a venti latte" is translated normally.
+- Character names, nations and three product names in the bundled glossaries are now constant, except names that are also everyday words; invisible characters copied from the source sheet are removed.
+- The Glossary guide explains how constant terms work and their trade-offs.
+- The Glossary adherence quality check accepts a correctly declined term (such as a Russian case ending) and skips constant terms, so it can be set to blocking to retry translations that drop or reword a glossary term.

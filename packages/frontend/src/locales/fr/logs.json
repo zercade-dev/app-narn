@@ -24,6 +24,8 @@
     "retry": "Nouvelle tentative de traduction après un échec.",
     "failedNoRoute": "Impossible de traduire {{count}} texte vers {{language}} — aucune règle de routage ne correspond.",
     "failedNoRoute_other": "Impossible de traduire {{count}} textes vers {{language}} — aucune règle de routage ne correspond.",
+    "failedNoProvider": "Impossible de traduire {{count}} texte vers {{language}} — aucun fournisseur n’est activé pour NARN Freeway.",
+    "failedNoProvider_other": "Impossible de traduire {{count}} textes vers {{language}} — aucun fournisseur n’est activé pour NARN Freeway.",
     "failedModuleDisabled": "Impossible de traduire {{count}} texte vers {{language}} — le module {{module}} est désactivé.",
     "failedModuleDisabled_other": "Impossible de traduire {{count}} textes vers {{language}} — le module {{module}} est désactivé.",
     "failedModuleNotFound": "Impossible de traduire {{count}} texte vers {{language}} — le module {{module}} n'est pas installé.",

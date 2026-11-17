@@ -1212,6 +1212,10 @@ export const IDENTICAL_ALLOWLIST = {
     '"Importieren / Exportieren", which is the wrong control shape. Requested by the ' +
     'translator and granted rather than absorbed into the string: a guard rejecting copy ' +
     'the translator believes is correct is a finding against the guard.',
+  'de:guide-tour:routingAdvanced.import.title':
+    'The tour step names the tab it points at, so it must read exactly as ' +
+    'de:config:routing.tabImportExport does (same nouns, same reason as that entry); a ' +
+    'different title made the callout disagree with the tab under it.',
   '*:glossary:sourceLink':
     'Proper name of an external spreadsheet ("GI: MW Glossary / Common Translation Sheet") — ' +
     'it is a link target users must be able to find, not prose',

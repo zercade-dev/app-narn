@@ -1,4 +1,10 @@
-import { useState, useRef, useContext } from 'react';
+import { useState, useRef, useContext, useEffect, useLayoutEffect } from 'react';
+import {
+  ROUTING_EDITOR_TAB_EVENT,
+  takeRoutingEditorView,
+  tourReusesEmptyRule,
+  type RoutingEditorView,
+} from '../../lib/tour/routing-advanced-tour.js';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowDown,
@@ -271,6 +277,23 @@ function DeleteRuleControls({
 
 type EditorTab = 'rules' | 'templates' | 'advanced';
 
+/** A rule's languages as one comparable value. */
+function langsKey(rule: RoutingRule | undefined): string {
+  return [...(rule?.targetLanguages ?? [])].sort().join(',');
+}
+
+/** A rule as Add rule makes it: no provider, no name, no filter or setting of any kind. */
+function isEmptyRule(rule: RoutingRule): boolean {
+  return Object.entries(rule).every(
+    ([key, value]) =>
+      key === 'id' ||
+      key === 'priority' ||
+      value === undefined ||
+      value === '' ||
+      (Array.isArray(value) && value.length === 0),
+  );
+}
+
 export interface BatchConfigEditorProps {
   // Group state
   mergedGroups: RoutingRuleGroup[];
@@ -365,17 +388,109 @@ export function BatchConfigEditor({
   const { t: tBatch } = useTranslation('batch');
   const importRef = useRef<HTMLInputElement>(null);
   const [editorTab, setEditorTab] = useState<EditorTab>('rules');
+  // Rules whose Filtering section is open (closed again when the rule closes).
+  const [filteringOpen, setFilteringOpen] = useState<ReadonlySet<string>>(() => new Set());
+  const setFiltering = (id: string, open: boolean) =>
+    setFilteringOpen((prev) => {
+      if (prev.has(id) === open) return prev;
+      const next = new Set(prev);
+      if (open) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  const doneEdit = (id: string) => {
+    setFiltering(id, false);
+    onDoneEdit(id);
+  };
+  // Rule #1's languages when the tour's languages step began: its Next waits
+  // for a change from these (null: no such step is waiting).
+  const [langsBaseline, setLangsBaseline] = useState<string | null>(null);
+
+  // The Advanced routing rules tour has the editor show what its step is about:
+  // a tab, which rule is open, rule #1's Filtering (one asked for before this
+  // editor mounted is taken on mount). Applied a moment after the ask, once the
+  // click that moved the tour on has done its own work (Add rule, Done), with
+  // the rules as they are then.
+  const latest = useRef({ draft, editingIds, onStartEdit, onDoneEdit });
+  useLayoutEffect(() => {
+    latest.current = { draft, editingIds, onStartEdit, onDoneEdit };
+  });
+  useEffect(() => {
+    const apply = (view: RoutingEditorView) => {
+      setEditorTab(view.tab);
+      const {
+        draft: rules,
+        editingIds: open,
+        onStartEdit: start,
+        onDoneEdit: close,
+      } = latest.current;
+      const first = rules[0];
+      if (view.open !== undefined) {
+        const keep =
+          view.open === 'first' ? first : view.open === 'last' ? rules.at(-1) : undefined;
+        // "The last rule" is a rule added below rule #1, never rule #1 itself.
+        const target = view.open === 'last' && rules.length < 2 ? undefined : keep;
+        for (const id of open) {
+          if (id === target?.id) continue;
+          setFiltering(id, false);
+          close(id);
+        }
+        if (target && !open.has(target.id)) start(target.id);
+      }
+      if (view.filtering !== undefined && first) setFiltering(first.id, view.filtering);
+      setLangsBaseline(view.markLangs ? langsKey(first) : null);
+    };
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const onAsk = () => {
+      const view = takeRoutingEditorView();
+      if (!view) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => apply(view), 0);
+    };
+    onAsk();
+    globalThis.addEventListener(ROUTING_EDITOR_TAB_EVENT, onAsk);
+    return () => {
+      clearTimeout(timer);
+      globalThis.removeEventListener(ROUTING_EDITOR_TAB_EVENT, onAsk);
+    };
+  }, []);
   // Base modules that already have named instances are routed via those
   // instances, not the bare base; instanceable bases without instances stay
   // selectable as themselves.
   const baseInstanceSet = basesWithInstances(modules);
+  // Anchors for the Advanced routing rules tour, which has the person edit the
+  // first rule and fill in the one they add (the last, once there are two).
+  const isNewRule = (index: number): boolean => index > 0 && index === draft.length - 1;
+  const tourMark = (index: number, what: 'module' | 'done'): string | undefined =>
+    index === 0 ? `routing-first-${what}` : isNewRule(index) ? `routing-new-${what}` : undefined;
+  /**
+   * Shown once the step's part is done: the first rule's languages were
+   * changed during the languages step (and it has some), the new rule has a
+   * provider.
+   */
+  const readyMarker = (index: number, rule: RoutingRule): string | undefined =>
+    index === 0 &&
+    (rule.targetLanguages?.length ?? 0) > 0 &&
+    (langsBaseline === null || langsKey(rule) !== langsBaseline)
+      ? 'routing-first-langs-set'
+      : isNewRule(index) && rule.moduleId
+        ? 'routing-new-set'
+        : undefined;
+  // Add rule during the tour: an empty rule left at the bottom (added on an
+  // earlier pass, then left by Back or Skip) is the new rule; the tour's next
+  // step opens it.
+  const handleAdd = () => {
+    const last = draft.at(-1);
+    if (draft.length > 1 && last && isEmptyRule(last) && tourReusesEmptyRule()) return;
+    onAdd();
+  };
   const handleAddFromTemplate = (template: RoutingRule) => {
     onAddFromTemplate(template);
     setEditorTab('rules');
   };
 
   return (
-    <Card data-testid="routing-rules-config" data-tour="routing-config">
+    <Card data-testid="routing-rules-config">
       <CardHeader>
         <div className="space-y-3">
           <div className="flex items-center justify-between gap-2">
@@ -392,7 +507,10 @@ export function BatchConfigEditor({
             </p>
           )}
 
-          <div className="grid gap-2 md:grid-cols-[220px_1fr_auto_auto] md:items-end">
+          <div
+            className="grid gap-2 md:grid-cols-[220px_1fr_auto_auto] md:items-end"
+            data-tour="routing-groups"
+          >
             <div>
               <Label htmlFor="routing-group-select">{t('routing.groupSelectLabel')}</Label>
               <Select
@@ -450,7 +568,9 @@ export function BatchConfigEditor({
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+      {/* The rules, for the Routing tour: not the header with its Simple/Advanced
+          switch, which the tour's next step is about. */}
+      <CardContent className="space-y-3" data-tour="routing-config">
         <div className="flex min-w-0 items-center justify-between rounded-md bg-muted/40 px-3 py-2 text-sm">
           <div className="flex min-w-0 items-center gap-2 text-muted-foreground">
             <span className="flex min-w-0 items-center gap-1">
@@ -500,7 +620,7 @@ export function BatchConfigEditor({
             <TabsTrigger value="advanced">{t('routing.tabImportExport')}</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="rules" className="space-y-3 pt-3">
+          <TabsContent value="rules" className="space-y-3 pt-3" data-tour="routing-rules">
             {draft.length === 0 && (
               <p className="text-sm text-muted-foreground">{t('routing.noRules')}</p>
             )}
@@ -539,7 +659,10 @@ export function BatchConfigEditor({
                               </Button>
                             </>
                           )}
-                          <span className="text-xs text-muted-foreground font-mono">
+                          <span
+                            className="text-xs text-muted-foreground font-mono"
+                            data-tour={readyMarker(index, rule)}
+                          >
                             {t('routing.ruleEditing', { priority: rule.priority })}
                           </span>
                         </div>
@@ -557,7 +680,8 @@ export function BatchConfigEditor({
                             size="sm"
                             variant="outline"
                             className="h-6 text-xs px-2"
-                            onClick={() => onDoneEdit(rule.id)}
+                            onClick={() => doneEdit(rule.id)}
+                            data-tour={tourMark(index, 'done')}
                           >
                             {t('routing.doneEdit')}
                           </Button>
@@ -565,7 +689,8 @@ export function BatchConfigEditor({
                       </div>
 
                       <div className="grid grid-cols-[1fr_2fr] gap-2 items-start">
-                        <div>
+                        {/* The tour's ring takes in the label with the select. */}
+                        <div data-tour={tourMark(index, 'module')}>
                           <Label htmlFor={`mod-${rule.id}`}>{t('routing.labelModule')}</Label>
                           <Select
                             value={rule.moduleId || null}
@@ -662,13 +787,17 @@ export function BatchConfigEditor({
                         </div>
                       </div>
 
-                      <Collapsible defaultOpen={false}>
+                      <Collapsible
+                        open={filteringOpen.has(rule.id)}
+                        onOpenChange={(open) => setFiltering(rule.id, open)}
+                      >
                         <CollapsibleTrigger
                           render={
                             <Button
                               variant="ghost"
                               size="sm"
                               className="flex w-full items-center justify-between px-2 text-sm font-medium"
+                              data-tour={index === 0 ? 'routing-first-filter' : undefined}
                             >
                               <span>{t('routing.sectionFiltering')}</span>
                               <ChevronDown className="h-4 w-4 transition-transform [[data-open]_&]:rotate-180" />
@@ -898,7 +1027,7 @@ export function BatchConfigEditor({
                               )}
                             </div>
 
-                            <div>
+                            <div data-tour={index === 0 ? 'routing-first-langs' : undefined}>
                               <Label>{t('routing.labelTargetLanguage')}</Label>
                               <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1.5">
                                 {availableLanguages.map((lang) => (
@@ -1210,6 +1339,7 @@ export function BatchConfigEditor({
                           className="h-7 w-7 p-0"
                           onClick={() => onStartEdit(rule.id)}
                           aria-label="edit"
+                          data-tour={index === 0 ? 'routing-first-edit' : undefined}
                         >
                           <Pencil className="size-3.5" />
                         </Button>
@@ -1232,7 +1362,14 @@ export function BatchConfigEditor({
 
             <div className="flex flex-col items-end gap-1 pt-1">
               <div className="flex w-full items-center justify-between gap-3">
-                <Button onClick={onAdd} variant="outline" size="sm" data-testid="routing-add">
+                <Button
+                  onClick={handleAdd}
+                  variant="outline"
+                  size="sm"
+                  data-testid="routing-add"
+                  // With no rule yet, the tour has Add rule make rule #1.
+                  data-tour={draft.length === 0 ? 'routing-first-add' : 'routing-add'}
+                >
                   {t('routing.addRule')}
                 </Button>
               </div>
@@ -1242,11 +1379,18 @@ export function BatchConfigEditor({
             </div>
           </TabsContent>
 
-          <TabsContent value="templates" className="pt-3">
+          {/* The Advanced routing rules tour points at the first template (with
+              its Use template), or at the tab while there is none. */}
+          <TabsContent
+            value="templates"
+            className="pt-3"
+            data-tour={defaultRules.length === 0 ? 'routing-templates' : undefined}
+          >
             <div className="space-y-1">
-              {defaultRules.map((dr) => (
+              {defaultRules.map((dr, i) => (
                 <div
                   key={dr.id}
+                  data-tour={i === 0 ? 'routing-templates' : undefined}
                   className="flex items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground"
                 >
                   <div className="flex items-center gap-1">
@@ -1272,7 +1416,7 @@ export function BatchConfigEditor({
             </div>
           </TabsContent>
 
-          <TabsContent value="advanced" className="pt-3 space-y-3">
+          <TabsContent value="advanced" className="pt-3 space-y-3" data-tour="routing-import">
             <p className="text-sm text-muted-foreground">{t('routing.importExportHint')}</p>
             <div className="flex gap-2">
               <Button

@@ -259,7 +259,14 @@ export {
   DEFAULT_ACHIEVEMENT_DESCRIPTION_MAX_BYTES,
 } from './achievement-budget.js';
 export { maskSecret } from './mask.js';
-export { escapeRegExp, buildTermBoundaryRegex, termMatchesText } from './term-match.js';
+export {
+  escapeRegExp,
+  buildTermBoundaryRegex,
+  termBoundaryPattern,
+  buildInflectedTermRegex,
+  glossaryScanText,
+  termMatchesText,
+} from './term-match.js';
 export { debug } from './debug.js';
 export { tokenize, computeSimilarityOrder } from './similarity/index.js';
 export { isComplete, projectTargetLanguages } from './glossary-completeness.js';
@@ -390,6 +397,7 @@ export {
   languageLabel,
   renderTargetLanguagesLine,
   GLOSSARY_SEMANTICS_RULE,
+  NAME_TERM_RULE,
   renderLengthLimitRule,
   effectivePromptOptions,
 } from './ai-sdk-provider/prompt-builder.js';

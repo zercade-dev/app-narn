@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import {
@@ -182,7 +182,13 @@ export function DataTab() {
     ? 'main'
     : (exportCollection ?? (hasMainStrings ? 'main' : 'client'));
   const currentLanguages = pendingLanguages ?? activeProject?.activeLanguages ?? [];
-  const isDirty = pendingLanguages !== null;
+  // Changed only when the ticks differ from what is saved: ticking a language
+  // and unticking it again leaves nothing to save.
+  const savedLanguages = activeProject?.activeLanguages ?? [];
+  const isDirty =
+    pendingLanguages !== null &&
+    (pendingLanguages.length !== savedLanguages.length ||
+      pendingLanguages.some((code) => !savedLanguages.includes(code)));
   // "Select all" means every real language: Pseudo-test is a QA tool, ticked
   // only on purpose (and kept when it was).
   const selectableTargetCodes = availableTargetLanguages
@@ -890,11 +896,12 @@ export function DataTab() {
           <SheetHeader className="text-center">
             <SheetTitle>{t('importWarningsTitle')}</SheetTitle>
             <SheetDescription data-testid="import-detected-collection">
-              {t('detectedCollection', {
-                collection: t(
-                  pendingCollection === 'client' ? 'collectionClient' : 'collectionMain',
-                ),
-              })}
+              {/* The word that tells the two files apart stands out. */}
+              <Trans
+                t={t}
+                i18nKey={pendingCollection === 'client' ? 'detectedClient' : 'detectedMain'}
+                components={{ hl: <strong className="font-semibold text-primary" /> }}
+              />
             </SheetDescription>
           </SheetHeader>
           <div

@@ -4,7 +4,6 @@ import { toast } from '@/lib/toast';
 import {
   Lock,
   Languages,
-  ChevronRight,
   Eye,
   EyeOff,
   Download,
@@ -12,14 +11,21 @@ import {
   AlertTriangle,
   BookText,
 } from 'lucide-react';
-import { cn, errorMessage } from '@/lib/utils';
+import { errorMessage } from '@/lib/utils';
 import { apiRequest, apiDownload, ApiError } from '../../hooks/use-api.js';
+import {
+  GLOSSARY_TOUR_COMMAND_EVENT,
+  takeGlossaryTourCommand,
+  type GlossaryTourCommand,
+} from '@/lib/tour/glossary-tour-command';
+import { sendTourSignal } from '@/lib/tour/signal';
 import { Button } from '../ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { CardTitle } from '../ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Input } from '../ui/input';
 import { Checkbox } from '../ui/checkbox';
 import { Label } from '../ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import {
   Sheet,
   SheetContent,
@@ -28,25 +34,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from '../ui/sheet';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-import {
-  LANG_NAMES,
-  termMatchesText,
-  isComplete,
-  projectTargetLanguages,
-} from '@zercade-dev/narn-shared';
-import type {
-  Glossary,
-  GlossarySummary,
-  GlossaryTerm,
-  StringEntry,
-} from '@zercade-dev/narn-shared';
+import { LANG_NAMES, isComplete, projectTargetLanguages } from '@zercade-dev/narn-shared';
+import type { Glossary, GlossarySummary, GlossaryTerm } from '@zercade-dev/narn-shared';
 import { useProjectStore, accessFor } from '../../stores/project-store.js';
 import { writableSubset } from '@/lib/collab-locks';
 import { useStringStore } from '../../stores/string-store.js';
 import { useViewStore } from '../../stores/view-store.js';
 import { useGlossaryGenAccept } from '../../hooks/use-glossary-gen-accept.js';
 import { countDistinctSourceTexts } from '../../lib/count-distinct-sources.js';
+import { entryScanText, matchesAny, termMatchers } from '../../lib/glossary-match.js';
 import { GenerateGlossaryDialog } from './GenerateGlossaryDialog.js';
 import { GenerateTermTranslationsDialog } from './GenerateTermTranslationsDialog.js';
 import {
@@ -104,13 +100,17 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
   // Set to the glossary id being enabled while we ask the user whether to
   // auto-apply its matches to the project's strings. Disabling never prompts.
   const [pendingEnableGlossaryId, setPendingEnableGlossaryId] = useState<string | null>(null);
-  const [mainOpen, setMainOpen] = useState(true);
+  // Which half of the selected glossary shows: its terms, or the entries they match.
+  const [panel, setPanel] = useState<'terms' | 'matches'>('terms');
   const [matchTermId, setMatchTermId] = useState<string | null>('__all__');
   // For the glossary-to-entry search: 'without' shows matching entries that do
   // NOT yet have this glossary assigned (the common "needs assignment" case, so
   // it is the default); 'with' shows the ones already assigned to it.
   const [matchAssignment, setMatchAssignment] = useState<'with' | 'without'>('without');
-  const [matchResults, setMatchResults] = useState<MatchResult[] | null>(null);
+  // The Glossaries tour's list: entries its terms match, whatever the
+  // assignment filter says (the assignment its "Apply matches" made lands in
+  // the background). Any filter the person picks, or an (un)assign, ends it.
+  const [tourTermsOnly, setTourTermsOnly] = useState(false);
   const allEntries = useStringStore((s) => s.entries);
   const fetchEntries = useStringStore((s) => s.fetchEntries);
   const updateEntry = useStringStore((s) => s.updateEntry);
@@ -247,6 +247,10 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
           body: JSON.stringify({ enabled: true, ...(applyMatches === false && { applyMatches }) }),
         });
         await loadGlossaries();
+        // The Glossaries tour's enable step moves on.
+        sendTourSignal(
+          applyMatches === false ? 'glossary-enabled-only' : 'glossary-enabled-applied',
+        );
       } catch (err) {
         reportError(err, 'toastUpdateError');
       }
@@ -618,6 +622,34 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
     bulkAbortRef.current = null;
   }, [selectedGlossaryId, glossaryId]);
 
+  // The Matches list, derived rather than stored, so it follows an assign or
+  // unassign and fills in when the glossary or the entries land late. None
+  // until the selected glossary's own terms and this project's entries are
+  // in: the previous glossary's terms (or another project's entries) would
+  // list the wrong rows, and Assign would write this glossary onto them.
+  // Matching uses only `visibleTerms`, like the active table and M20. One
+  // matcher per term and one scan text per entry keep a large project quick.
+  const matchers = useMemo(() => {
+    if (panel !== 'matches' || !termsLoaded || matchTermId === null) return null;
+    const sources = visibleTerms
+      .filter((trm) => matchTermId === '__all__' || trm.id === matchTermId)
+      .map((trm) => trm.source);
+    return termMatchers(sources);
+  }, [panel, termsLoaded, matchTermId, visibleTerms]);
+  const entriesLoaded = loadedProjectId === projectId;
+  const matchResults = useMemo<MatchResult[] | null>(() => {
+    if (!matchers || !entriesLoaded || !glossaryId) return null;
+    // Keep only entries whose assignment to this glossary matches the
+    // selected filter (default: entries NOT yet assigned).
+    const wantAssigned = matchAssignment === 'with';
+    return allEntries.filter(
+      (entry) =>
+        (tourTermsOnly ||
+          (entry.assignedGlossaryIds ?? []).includes(glossaryId) === wantAssigned) &&
+        matchesAny(matchers, entryScanText(entry)),
+    );
+  }, [matchers, entriesLoaded, glossaryId, allEntries, tourTermsOnly, matchAssignment]);
+
   useEffect(() => () => bulkAbortRef.current?.abort(), []);
 
   const toggleTermSelected = useCallback((id: string, checked: boolean) => {
@@ -715,6 +747,8 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
         }),
       );
       setSelectedEntryIds(new Set());
+      // The list follows the new assignments under the panel's own filter.
+      setTourTermsOnly(false);
       toast.success(t('toastAssigned'));
     } catch (err) {
       reportError(err, 'toastUpdateError');
@@ -740,6 +774,8 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
         }),
       );
       setSelectedEntryIds(new Set());
+      // The list follows the new assignments under the panel's own filter.
+      setTourTermsOnly(false);
       toast.success(t('toastAssigned'));
     } catch (err) {
       reportError(err, 'toastUpdateError');
@@ -748,65 +784,13 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
     }
   }, [selectedGlossaryId, selectedEntryIds, allEntries, updateEntry, projectId, reportError, t]);
 
-  const canOpenMatches = matchTermId !== null;
-
-  const handleSearch = useCallback(() => {
-    if (!canOpenMatches || !glossary) return;
-    setMainOpen(false);
-    setSelectedEntryIds(new Set());
-
-    // Keep only entries whose assignment to this glossary matches the selected
-    // filter (default: entries NOT yet assigned).
-    const glossaryId = glossary.id;
-    const matchesAssignment = (entry: StringEntry) => {
-      const assigned = (entry.assignedGlossaryIds ?? []).includes(glossaryId);
-      return matchAssignment === 'with' ? assigned : !assigned;
-    };
-
-    // Matching/finding entries uses only `visibleTerms` — a read-only
-    // glossary's flagged/incomplete terms are excluded from matching just
-    // like they're excluded from the active table and from M20's assignment.
-    if (matchTermId === '__all__') {
-      const termSources = visibleTerms.map((trm) => trm.source);
-      setMatchResults(
-        allEntries.filter(
-          (entry) =>
-            matchesAssignment(entry) &&
-            termSources.some((src) => termMatchesText(src, entry.sourceText)),
-        ),
-      );
-      return;
-    }
-
-    const selectedTerm = visibleTerms.find((trm) => trm.id === matchTermId);
-    if (!selectedTerm) {
-      setMatchResults([]);
-      return;
-    }
-
-    setMatchResults(
-      allEntries.filter(
-        (entry) =>
-          matchesAssignment(entry) && termMatchesText(selectedTerm.source, entry.sourceText),
-      ),
-    );
-  }, [canOpenMatches, glossary, visibleTerms, matchTermId, matchAssignment, allEntries]);
-
-  // Tracks whether matchTermId/matchAssignment last changed via an explicit
-  // user pick (the term Select or the with/without toggle below) rather than
-  // the '__all__' default or the automatic glossary-switch reset — only a
-  // real pick should auto-run the debounced search effect further down (see
-  // its comment for why: now that matchTermId always starts non-null,
-  // canOpenMatches alone can no longer distinguish "user asked for this" from
-  // "just mounted/switched"). State (not a ref) because the reset below needs
-  // to clear it during render, alongside its sibling setState calls there.
-  const [userPickedMatchCriteria, setUserPickedMatchCriteria] = useState(false);
+  // The person's own pick of a term or of with/without: the list follows it.
   const handleMatchTermIdChange = useCallback((v: string | null) => {
-    setUserPickedMatchCriteria(true);
+    setTourTermsOnly(false);
     setMatchTermId(v);
   }, []);
   const handleMatchAssignmentChange = useCallback((v: 'with' | 'without') => {
-    setUserPickedMatchCriteria(true);
+    setTourTermsOnly(false);
     setMatchAssignment(v);
   }, []);
 
@@ -816,11 +800,21 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
   const [prevMatchGlossaryId, setPrevMatchGlossaryId] = useState(selectedGlossaryId);
   if (prevMatchGlossaryId !== selectedGlossaryId) {
     setPrevMatchGlossaryId(selectedGlossaryId);
-    setMatchResults(null);
     setMatchTermId('__all__');
-    setUserPickedMatchCriteria(false);
+    setTourTermsOnly(false);
+    setPanel('terms');
     if (!selectedGlossaryId) setGlossary(null);
   }
+
+  // Opening Matches lists them under the current criteria, nothing ticked;
+  // Terms leaves them be.
+  const openPanel = useCallback((next: 'terms' | 'matches') => {
+    setPanel(next);
+    if (next === 'matches') {
+      setSelectedEntryIds(new Set());
+      setTourTermsOnly(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!selectedGlossaryId) return;
@@ -841,24 +835,41 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
     };
   }, [selectedGlossaryId, projectId, reportError]);
 
-  // Auto-run the search (debounced) whenever the criteria feeding it change, so
-  // there is no explicit Search button: picking a term or toggling the
-  // with/without filter both refresh the results (and, via handleSearch,
-  // collapse the main editor to reveal them). Debounced to avoid firing on
-  // every keystroke.
-  //
-  // Gated on `userPickedMatchCriteria` (see its declaration above): now that
-  // `matchTermId` defaults to '__all__' (never null), `canOpenMatches` is true
-  // from first render, so without this guard every mount/glossary-switch would
-  // auto-run a search and collapse the main editor — surprising behavior
-  // nobody asked for. Opening the panel explicitly (GlossaryMatchPanel's
-  // `onOpenChange`) still calls `onSearch()` directly, so that path is
-  // unaffected by this gate.
+  // The Glossaries tour shows the glossary it picked, then the entries its
+  // terms match (`GlossaryTourCommand`). Matching is by the terms alone: the
+  // assignment that "Apply matches" makes lands in the background.
+  const [tourMatches, setTourMatches] = useState<string | null>(null);
   useEffect(() => {
-    if (!canOpenMatches || !glossary || !userPickedMatchCriteria) return;
-    const handle = setTimeout(() => handleSearch(), 275);
-    return () => clearTimeout(handle);
-  }, [canOpenMatches, glossary, handleSearch, userPickedMatchCriteria]);
+    const apply = (command: GlossaryTourCommand) => {
+      setSelectedGlossaryId(command.id);
+      if (command.kind === 'select') {
+        setTourMatches(null);
+        setPanel('terms');
+        setTourTermsOnly(false);
+        return;
+      }
+      setMatchTermId('__all__');
+      setMatchAssignment(command.applied ? 'with' : 'without');
+      setTourMatches(command.id);
+      // The assignments the sync made, for the panel's own filters afterwards.
+      void Promise.resolve(fetchEntries(projectId)).catch(() => {});
+    };
+    const onCommand = () => {
+      const command = takeGlossaryTourCommand();
+      if (command) apply(command);
+    };
+    // One sent before this tab mounted.
+    onCommand();
+    globalThis.addEventListener(GLOSSARY_TOUR_COMMAND_EVENT, onCommand);
+    return () => globalThis.removeEventListener(GLOSSARY_TOUR_COMMAND_EVENT, onCommand);
+  }, [fetchEntries, projectId]);
+  // Once the glossary asked for is loaded, during render like the resets above.
+  if (tourMatches !== null && glossary?.id === tourMatches) {
+    setTourMatches(null);
+    setPanel('matches');
+    setSelectedEntryIds(new Set());
+    setTourTermsOnly(true);
+  }
 
   // DeepL copy is stale when the glossary changed (e.g. via import) after the
   // last recorded push.
@@ -869,7 +880,8 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
     glossary.updatedAt > glossary.pushedToDeepLAt;
 
   return (
-    <div data-testid="glossary-tab" className="flex gap-4">
+    // Fills the tab's height: each panel scrolls inside, like Translations.
+    <div data-testid="glossary-tab" className="flex min-h-0 flex-1 gap-4">
       {/* Glossary sidebar */}
       <GlossarySidebar
         projectId={projectId}
@@ -884,220 +896,222 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
       />
 
       {/* Main glossary content */}
-      <div className="flex-1 min-w-0 space-y-4">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-3">
         {isCollaborator && (
           <div className="text-xs text-muted-foreground" data-testid="glossary-collab-hint">
             {t('collab:locks.glossaryEditScoped')}
           </div>
         )}
-        <Collapsible
-          open={mainOpen}
-          onOpenChange={(open) => {
-            setMainOpen(open);
-            if (open) setMatchResults(null);
-          }}
-        >
-          <CollapsibleTrigger>
-            <div className="flex items-center gap-2 cursor-pointer py-1">
-              <ChevronRight
-                className={cn('size-4 transition-transform', mainOpen && 'rotate-90')}
-              />
-              <span className="font-semibold text-sm">
-                {glossary?.name ?? selectedGlossary?.name ?? ''}
-              </span>
-            </div>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            {selectedGlossary ? (
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div className="flex flex-col gap-0.5">
-                    <CardTitle className="flex items-center gap-2">
-                      {selectedGlossary.name}
-                      {isReadOnly && (
-                        <span className="text-xs font-normal text-muted-foreground flex items-center gap-1">
-                          <Lock className="w-3 h-3" /> {t('readOnly')}
-                        </span>
-                      )}
-                      {/* Enabling/disabling PATCHes the glossary, which asserts
+        {selectedGlossary ? (
+          <>
+            {/* Always on screen: which glossary this is, and whether it is on. */}
+            <div className="flex shrink-0 flex-col gap-2">
+              <div className="flex flex-col gap-0.5">
+                <CardTitle className="flex items-center gap-2">
+                  {selectedGlossary.name}
+                  {isReadOnly && (
+                    <span className="text-xs font-normal text-muted-foreground flex items-center gap-1">
+                      <Lock className="w-3 h-3" /> {t('readOnly')}
+                    </span>
+                  )}
+                  {/* Enabling/disabling PATCHes the glossary, which asserts
                           manage access — hidden for collaborators rather than
                           offered only to 403. */}
-                      {!isCollaborator && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="h-6 px-2 text-xs font-normal"
-                          onClick={() =>
-                            handleToggleEnabled(
-                              selectedGlossary.id,
-                              selectedGlossary.enabled ?? true,
-                            )
-                          }
-                          data-testid="glossary-toggle-enabled-btn"
-                          data-tour="glossary-enabled"
-                          title={(selectedGlossary.enabled ?? true) ? t('disable') : t('enable')}
-                        >
-                          {(selectedGlossary.enabled ?? true) ? (
-                            <>
-                              <EyeOff className="w-3 h-3 mr-1" />
-                              {t('disable')}
-                            </>
-                          ) : (
-                            <>
-                              <Eye className="w-3 h-3 mr-1" />
-                              {t('enable')}
-                            </>
-                          )}
-                        </Button>
-                      )}
-                    </CardTitle>
-                    {isReadOnly && (
-                      <p className="text-xs text-muted-foreground">
-                        {t('sourceLabel')}{' '}
-                        <a
-                          href="https://docs.google.com/spreadsheets/d/1-KqhQMcI6wydUwjqYPFsg-rMYYfiOejHgWDWNHQc3zE"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline hover:text-foreground"
-                        >
-                          {t('sourceLink')}
-                        </a>
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-                    {repushNeeded && (
-                      <span
-                        className="flex items-center gap-1 rounded-md border border-status-warn/40 bg-status-warn/10 px-2 py-1 text-xs text-status-warn"
-                        data-testid="glossary-repush-required"
-                        title={t('toastRepushRequired')}
-                      >
-                        <AlertTriangle className="w-3 h-3 shrink-0" />
-                        {t('repushRequired')}
-                      </span>
-                    )}
-
-                    {/* Group: export + import. Kept as one non-wrapping unit so the
-                        toolbar wraps between groups rather than mid-group. */}
-                    <div className="flex flex-nowrap items-center gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => handleExport('csv')}
-                        data-testid="glossary-export-csv-btn"
-                      >
-                        <Download className="w-3.5 h-3.5 mr-1" />
-                        {t('exportCsv')}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleExport('tbx')}
-                        data-testid="glossary-export-tbx-btn"
-                      >
-                        <Download className="w-3.5 h-3.5 mr-1" />
-                        {t('exportTbx')}
-                      </Button>
-                      {/* Import rewrites the glossary's terms — 'manage'-only
-                          server-side, so both the trigger and the hidden file
-                          input are withheld from collaborators. */}
-                      {!isReadOnly && !isCollaborator && (
+                  {!isCollaborator && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-6 px-2 text-xs font-normal"
+                      onClick={() =>
+                        handleToggleEnabled(selectedGlossary.id, selectedGlossary.enabled ?? true)
+                      }
+                      data-testid="glossary-toggle-enabled-btn"
+                      data-tour="glossary-enabled"
+                      title={(selectedGlossary.enabled ?? true) ? t('disable') : t('enable')}
+                    >
+                      {(selectedGlossary.enabled ?? true) ? (
                         <>
-                          <input
-                            ref={importFileInputRef}
-                            type="file"
-                            accept=".csv,.tbx,.xml,text/csv,application/xml"
-                            className="hidden"
-                            data-testid="glossary-import-file-input"
-                            onChange={handleImportFileChange}
-                          />
-                          <Button
-                            variant="outline"
-                            disabled={importBusy}
-                            onClick={() => importFileInputRef.current?.click()}
-                            data-testid="glossary-import-btn"
-                          >
-                            <Upload className="w-3.5 h-3.5 mr-1" />
-                            {t('importBtn')}
-                          </Button>
+                          <EyeOff className="w-3 h-3 mr-1" />
+                          {t('disable')}
+                        </>
+                      ) : (
+                        <>
+                          <Eye className="w-3 h-3 mr-1" />
+                          {t('enable')}
                         </>
                       )}
-                    </div>
+                    </Button>
+                  )}
+                </CardTitle>
+                {isReadOnly && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('sourceLabel')}{' '}
+                    <a
+                      href="https://docs.google.com/spreadsheets/d/1-KqhQMcI6wydUwjqYPFsg-rMYYfiOejHgWDWNHQc3zE"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-foreground"
+                    >
+                      {t('sourceLink')}
+                    </a>
+                  </p>
+                )}
+              </div>
+              {selectedGlossary?.enabled === false && (
+                <div
+                  className="flex items-center gap-2 rounded-md border border-status-warn/40 bg-status-warn/10 px-3 py-2 text-sm text-status-warn"
+                  data-testid="glossary-disabled-banner"
+                >
+                  <EyeOff className="w-4 h-4 shrink-0" />
+                  {t('disabledBanner')}
+                </div>
+              )}
+            </div>
+            {/* Its terms and the entries they match, one at a time: switching
+                glossary always opens on its terms. */}
+            <Tabs
+              value={panel}
+              onValueChange={(value) => openPanel(value as 'terms' | 'matches')}
+              className="min-h-0 flex-1"
+            >
+              <TabsList data-testid="glossary-panel-tabs">
+                <TabsTrigger value="terms" data-testid="glossary-tab-terms">
+                  {t('tabTerms')} ({terms.length})
+                </TabsTrigger>
+                <TabsTrigger value="matches" data-testid="glossary-tab-matches">
+                  {t('matchesPanel')}
+                  {panel === 'matches' && matchResults !== null ? ` (${matchResults.length})` : ''}
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="terms" className="flex min-h-0 flex-col gap-3">
+                <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
+                  {repushNeeded && (
+                    <span
+                      className="flex items-center gap-1 rounded-md border border-status-warn/40 bg-status-warn/10 px-2 py-1 text-xs text-status-warn"
+                      data-testid="glossary-repush-required"
+                      title={t('toastRepushRequired')}
+                    >
+                      <AlertTriangle className="w-3 h-3 shrink-0" />
+                      {t('repushRequired')}
+                    </span>
+                  )}
 
-                    {/* Bulk mark/clear-constant PATCHes non-translation fields —
+                  {/* Group: export + import. Kept as one non-wrapping unit so the
+                        toolbar wraps between groups rather than mid-group. */}
+                  <div className="flex flex-nowrap items-center gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleExport('csv')}
+                      data-testid="glossary-export-csv-btn"
+                    >
+                      <Download className="w-3.5 h-3.5 mr-1" />
+                      {t('exportCsv')}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleExport('tbx')}
+                      data-testid="glossary-export-tbx-btn"
+                    >
+                      <Download className="w-3.5 h-3.5 mr-1" />
+                      {t('exportTbx')}
+                    </Button>
+                    {/* Import rewrites the glossary's terms — 'manage'-only
+                          server-side, so both the trigger and the hidden file
+                          input are withheld from collaborators. */}
+                    {!isReadOnly && !isCollaborator && (
+                      <>
+                        <input
+                          ref={importFileInputRef}
+                          type="file"
+                          accept=".csv,.tbx,.xml,text/csv,application/xml"
+                          className="hidden"
+                          data-testid="glossary-import-file-input"
+                          onChange={handleImportFileChange}
+                        />
+                        <Button
+                          variant="outline"
+                          disabled={importBusy}
+                          onClick={() => importFileInputRef.current?.click()}
+                          data-testid="glossary-import-btn"
+                        >
+                          <Upload className="w-3.5 h-3.5 mr-1" />
+                          {t('importBtn')}
+                        </Button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Bulk mark/clear-constant PATCHes non-translation fields —
                         'manage'-only server-side (assertGlossaryTermEditAllowed
                         rejects `constant` for collaborators), so hidden for them
                         rather than offered only to fail per-term. Its own group:
                         only present while terms are selected. */}
-                    {!isReadOnly && !isCollaborator && selectedTermIds.size > 0 && (
-                      <div className="flex flex-nowrap items-center gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => applyBulkConstant(true)}
-                          disabled={bulkBusy}
-                          data-testid="glossary-bulk-mark-constant-btn"
-                        >
-                          {t('bulkMarkConstant', { count: selectedTermIds.size })}
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => applyBulkConstant(false)}
-                          disabled={bulkBusy}
-                          data-testid="glossary-bulk-clear-constant-btn"
-                        >
-                          {t('bulkClearConstant', { count: selectedTermIds.size })}
-                        </Button>
-                      </div>
-                    )}
+                  {!isReadOnly && !isCollaborator && selectedTermIds.size > 0 && (
+                    <div className="flex flex-nowrap items-center gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => applyBulkConstant(true)}
+                        disabled={bulkBusy}
+                        data-testid="glossary-bulk-mark-constant-btn"
+                      >
+                        {t('bulkMarkConstant', { count: selectedTermIds.size })}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => applyBulkConstant(false)}
+                        disabled={bulkBusy}
+                        data-testid="glossary-bulk-clear-constant-btn"
+                      >
+                        {t('bulkClearConstant', { count: selectedTermIds.size })}
+                      </Button>
+                    </div>
+                  )}
 
-                    {/* Group: AI generation + DeepL push, in that order. Also kept
+                  {/* Group: AI generation + DeepL push, in that order. Also kept
                         as one non-wrapping unit (see above). Every action in it is
                         'manage'-only server-side — the translate-terms route and
                         both push-to-DeepL routes assert manage access — so the
                         whole group is hidden for collaborators rather than left as
                         dead clicks. The translate-terms dialog is likewise not
                         rendered for them below. */}
-                    {!isCollaborator && (
-                      <div className="flex flex-nowrap items-center gap-2">
-                        {!isReadOnly && (
-                          <Button
-                            onClick={() => setTranslateTermsOpen(true)}
-                            data-testid="glossary-translate-terms-btn"
-                          >
-                            <Languages className="w-3.5 h-3.5 mr-1" />
-                            {t('translateTerms')}
-                          </Button>
-                        )}
+                  {!isCollaborator && (
+                    <div className="flex flex-nowrap items-center gap-2">
+                      {!isReadOnly && (
                         <Button
-                          variant="outline"
-                          onClick={() => void handlePushDeepL(false)}
-                          data-testid="glossary-push-deepl-btn"
-                          disabled={!isDeepLEnabled || selectedGlossary?.enabled === false}
+                          onClick={() => setTranslateTermsOpen(true)}
+                          data-testid="glossary-translate-terms-btn"
                         >
-                          {t('pushToDeepL')}
+                          <Languages className="w-3.5 h-3.5 mr-1" />
+                          {t('translateTerms')}
                         </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => setPushReplaceConfirmOpen(true)}
-                          data-testid="glossary-push-deepl-replace-btn"
-                          disabled={!isDeepLEnabled || selectedGlossary?.enabled === false}
-                        >
-                          {t('pushToDeepLReplace')}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {selectedGlossary?.enabled === false && (
-                    <div
-                      className="mb-3 flex items-center gap-2 rounded-md border border-status-warn/40 bg-status-warn/10 px-3 py-2 text-sm text-status-warn"
-                      data-testid="glossary-disabled-banner"
-                    >
-                      <EyeOff className="w-4 h-4 shrink-0" />
-                      {t('disabledBanner')}
+                      )}
+                      <Button
+                        variant="outline"
+                        onClick={() => void handlePushDeepL(false)}
+                        data-testid="glossary-push-deepl-btn"
+                        disabled={!isDeepLEnabled || selectedGlossary?.enabled === false}
+                      >
+                        {t('pushToDeepL')}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setPushReplaceConfirmOpen(true)}
+                        data-testid="glossary-push-deepl-replace-btn"
+                        disabled={!isDeepLEnabled || selectedGlossary?.enabled === false}
+                      >
+                        {t('pushToDeepLReplace')}
+                      </Button>
                     </div>
                   )}
-                  <Table>
-                    <TableHeader>
+                </div>
+                {/* The table scrolls in here, both ways, like the Translations
+                    list: its scrollbars stay in view however long or wide it is. */}
+                <div
+                  className="min-h-0 flex-1 overflow-auto rounded-md border"
+                  data-testid="glossary-terms-scroll"
+                >
+                  <table className="w-full caption-bottom text-sm">
+                    <TableHeader className="sticky top-0 z-20 bg-background">
                       <TableRow className="group">
                         {!isReadOnly && (
                           <TableHead className="w-10">
@@ -1113,7 +1127,9 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                         {activeLanguages.map((lang) => (
                           <TableHead key={lang}>{LANG_NAMES[lang] ?? lang}</TableHead>
                         ))}
-                        <TableHead className="w-24">{t('colConstant')}</TableHead>
+                        <TableHead className="w-24" data-tour="glossary-col-constant">
+                          {t('colConstant')}
+                        </TableHead>
                         {!isReadOnly && <TableHead>{t('colNotes')}</TableHead>}
                         {!isReadOnly && (
                           <TableHead className="sticky right-0 z-10 w-32 bg-background group-hover:bg-muted/50 group-data-[state=selected]:bg-muted">
@@ -1200,10 +1216,11 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                         </TableRow>
                       )}
                     </TableBody>
-                  </Table>
+                  </table>
+
                   {termsLoaded && terms.length === 0 && (
                     <div
-                      className="mt-4 flex flex-col items-center gap-1.5 rounded-md border border-dashed border-border/70 px-4 py-6 text-center"
+                      className="m-3 flex flex-col items-center gap-1.5 rounded-md border border-dashed border-border/70 px-4 py-6 text-center"
                       data-testid="glossary-empty-terms"
                     >
                       <BookText className="size-5 text-muted-foreground" />
@@ -1213,7 +1230,7 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                       </p>
                     </div>
                   )}
-                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                  <div className="m-3 flex items-center gap-2 text-xs text-muted-foreground">
                     <Label>{t('totalTerms')}</Label>
                     <span>{terms.length}</span>
                   </div>
@@ -1224,7 +1241,7 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                       matching, assignment, or translation reference in the meantime). */}
                   {isReadOnly && flaggedTerms.length > 0 && (
                     <div
-                      className="mt-4 rounded-md border border-dashed border-status-warn/40 bg-status-warn/10 px-3 py-2"
+                      className="m-3 rounded-md border border-dashed border-status-warn/40 bg-status-warn/10 px-3 py-2"
                       data-testid="glossary-flagged-terms"
                     >
                       <div className="flex items-center gap-2 text-xs font-medium text-status-warn">
@@ -1255,35 +1272,35 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                       </ul>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="text-muted-foreground text-sm p-4">{t('noGlossarySelected')}</div>
-            )}
-          </CollapsibleContent>
-        </Collapsible>
-
-        {/* Matches panel — only shown when a glossary is selected */}
-        {glossary && (
-          <GlossaryMatchPanel
-            matchResults={matchResults}
-            matchTermId={matchTermId}
-            matchAssignment={matchAssignment}
-            visibleTerms={visibleTerms}
-            selectedEntryIds={selectedEntryIds}
-            assigningBusy={assigningBusy}
-            canOpenMatches={canOpenMatches}
-            canAssign={!isCollaborator}
-            onMatchTermIdChange={handleMatchTermIdChange}
-            onMatchAssignmentChange={handleMatchAssignmentChange}
-            onSetMainOpen={setMainOpen}
-            onSetMatchResults={setMatchResults}
-            onSearch={handleSearch}
-            onToggleAllEntriesSelected={toggleAllEntriesSelected}
-            onToggleEntrySelected={toggleEntrySelected}
-            onAssignGlossary={handleAssignGlossary}
-            onUnassignGlossary={handleUnassignGlossary}
-          />
+                </div>
+              </TabsContent>
+              <TabsContent
+                value="matches"
+                className="flex min-h-0 flex-col"
+                data-tour="glossary-matches"
+              >
+                {termsLoaded && (
+                  <GlossaryMatchPanel
+                    matchResults={matchResults}
+                    matchTermId={matchTermId}
+                    matchAssignment={matchAssignment}
+                    visibleTerms={visibleTerms}
+                    selectedEntryIds={selectedEntryIds}
+                    assigningBusy={assigningBusy}
+                    canAssign={!isCollaborator}
+                    onMatchTermIdChange={handleMatchTermIdChange}
+                    onMatchAssignmentChange={handleMatchAssignmentChange}
+                    onToggleAllEntriesSelected={toggleAllEntriesSelected}
+                    onToggleEntrySelected={toggleEntrySelected}
+                    onAssignGlossary={handleAssignGlossary}
+                    onUnassignGlossary={handleUnassignGlossary}
+                  />
+                )}
+              </TabsContent>
+            </Tabs>
+          </>
+        ) : (
+          <div className="text-muted-foreground text-sm p-4">{t('noGlossarySelected')}</div>
         )}
       </div>
 
@@ -1393,7 +1410,11 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
           if (!open) setPendingEnableGlossaryId(null);
         }}
       >
-        <SheetContent side="bottom" className="max-w-md mx-auto rounded-t-xl">
+        <SheetContent
+          side="bottom"
+          className="max-w-md mx-auto rounded-t-xl"
+          data-tour="glossary-enable-prompt"
+        >
           <SheetHeader>
             <SheetTitle>{t('confirmEnableApplyTitle')}</SheetTitle>
             <SheetDescription>{t('confirmEnableApplyDescription')}</SheetDescription>

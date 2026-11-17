@@ -3,6 +3,7 @@ import { RunStatusCode, type RunStatus } from '@zercade-dev/narn-shared';
 import { isRunActive, isTranslationRun } from '../lib/run-kind.js';
 import { FREE_KEYS, isAiProviderKey, providerKeyFor } from '../lib/simple-provider.js';
 import type { RunStall } from '../lib/tour/first-run.js';
+import { FREEWAY_NO_PROVIDER } from '../lib/log-presentation/registry.js';
 import {
   hasUntranslatedEntry,
   quickTestRunId,
@@ -79,12 +80,24 @@ export function useGuideFacts(): GuideFacts {
   const projectRouted = useProjectStore((s) => {
     const project = s.projects.find((p) => p.id === s.activeProjectId);
     return project
-      ? routedModuleOf(routingGroupsOf(project.routingRules, project.routingRuleGroups))
+      ? routedModuleOf(
+          routingGroupsOf(
+            project.routingRules,
+            project.routingRuleGroups,
+            project.activeRoutingRuleGroupId,
+          ),
+        )
       : null;
   });
   const collabRouted = useCollabRoutingStore((s) =>
     s.state === 'loaded' && s.doc
-      ? routedModuleOf(routingGroupsOf(s.doc.routingRules, s.doc.routingRuleGroups))
+      ? routedModuleOf(
+          routingGroupsOf(
+            s.doc.routingRules,
+            s.doc.routingRuleGroups,
+            s.doc.activeRoutingRuleGroupId,
+          ),
+        )
       : null,
   );
   const routed = activeRole === 'collaborator' ? collabRouted : projectRouted;
@@ -122,9 +135,12 @@ export function useGuideFacts(): GuideFacts {
       s.runs.some((run) => producedTranslations(run, activeProjectId)),
   );
   // The selection store drops its ids itself when the active project changes.
-  const hasSelection = useSelectionStore(
-    (s) => relevant && activeProjectId !== null && s.selectedIds.size > 0,
+  const selectedCount = useSelectionStore((s) =>
+    relevant && activeProjectId !== null ? s.selectedIds.size : 0,
   );
+  const hasSelection = selectedCount > 0;
+  // The string table hides what is already translated.
+  const untranslatedFilterOn = useStringStore((s) => relevant && s.filters.untranslatedOnly);
   // The project's real target languages (no source, no Pseudo-test), as a
   // string so the selector stays stable.
   const targetLanguages = useProjectStore((s) =>
@@ -173,6 +189,23 @@ export function useGuideFacts(): GuideFacts {
     quickTest.projectId === activeProjectId &&
     quickTest.decision === 'pending' &&
     quickTestRunKnown;
+  // The quick test's run is listed and has not translated anything yet: still
+  // going, or ended empty (the progress step then says why). Kept across a
+  // reload, so the guide comes back to its progress, not to the tab.
+  const quickTestRunning =
+    quickTest !== null &&
+    quickTest.retranslate !== true &&
+    quickTest.projectId === activeProjectId &&
+    quickTest.decision === 'pending' &&
+    quickTestRunKnown &&
+    !translationExists;
+  // Asked for from "nothing to translate", and the person is choosing its
+  // entries and starting it: no run of it yet.
+  const retestAsked =
+    quickTest?.retranslate === true &&
+    quickTest.projectId === activeProjectId &&
+    quickTest.decision === 'pending' &&
+    !quickTestRunKnown;
   // Until it translated something: running, or ended empty (the progress
   // step then says why, and offers to try again).
   const retestRunning = retest && (translationGoing || !translationExists);
@@ -211,11 +244,15 @@ export function useGuideFacts(): GuideFacts {
       translationExists,
       exported,
       hasSelection,
+      selectedCount,
+      untranslatedFilterOn,
       isCollaboratorOnly,
       untranslatedRemain,
       nothingToTranslate,
       quickTestPending,
+      quickTestRunning,
       restRunning,
+      retestAsked,
       retestRunning,
       retestPending,
       retestDone,
@@ -229,6 +266,8 @@ export function useGuideFacts(): GuideFacts {
     aiKeyUsable,
     exported,
     hasSelection,
+    selectedCount,
+    untranslatedFilterOn,
     activeProjectId,
     projectHasLanguages,
     projectHasEntries,
@@ -237,7 +276,9 @@ export function useGuideFacts(): GuideFacts {
     untranslatedRemain,
     nothingToTranslate,
     quickTestPending,
+    quickTestRunning,
     restRunning,
+    retestAsked,
     retestRunning,
     retestPending,
     retestDone,
@@ -260,9 +301,14 @@ export function useFirstRunActive(): boolean {
 }
 
 /** Why a run that ended with nothing translated stopped. */
-function endedCause(run: RunStatus): 'auth' | 'quota' | 'other' {
+function endedCause(run: RunStatus): 'auth' | 'quota' | 'no-provider' | 'other' {
   const codes = [run.stopCause, ...run.errors.map((e) => e.code)];
+  // A rejected key comes first: Freeway reports a provider sidelined by its
+  // rejected key as `auth` too, and "Check my key" is the way out of that.
   if (codes.includes('auth')) return 'auth';
+  // Freeway found no provider switched on: not the key's fault (the server's
+  // config may have lost it). A custom rule that fits nothing stays 'other'.
+  if (run.errors.some((e) => e.message === FREEWAY_NO_PROVIDER)) return 'no-provider';
   if (codes.includes('rate-limit')) return 'quota';
   return 'other';
 }

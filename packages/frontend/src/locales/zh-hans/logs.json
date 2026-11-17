@@ -24,6 +24,8 @@
     "retry": "正在重试一次失败的翻译。",
     "failedNoRoute": "无法把 {{count}} 个条目翻译为 {{language}}——没有匹配的分发规则。",
     "failedNoRoute_other": "无法把 {{count}} 个条目翻译为 {{language}}——没有匹配的分发规则。",
+    "failedNoProvider": "无法把 {{count}} 个条目翻译为 {{language}}——NARN Freeway 没有已启用的服务商。",
+    "failedNoProvider_other": "无法把 {{count}} 个条目翻译为 {{language}}——NARN Freeway 没有已启用的服务商。",
     "failedModuleDisabled": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 模块已停用。",
     "failedModuleDisabled_other": "无法把 {{count}} 个条目翻译为 {{language}}——{{module}} 模块已停用。",
     "failedModuleNotFound": "无法把 {{count}} 个条目翻译为 {{language}}——未安装 {{module}} 模块。",

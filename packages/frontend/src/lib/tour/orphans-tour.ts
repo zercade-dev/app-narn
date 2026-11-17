@@ -99,13 +99,20 @@ export function orphansTour(state: OrphansTourState): Tour {
     { ...step('intro', null, NEXT), navigate: TO_ORPHANS },
     { ...step('offer', null, MANUAL), actions: offerActions },
   ];
-  const done = step('done', null, NEXT);
+  // Back on the Orphans tab: its words ("this tab") are about it, and the step
+  // before it may be on Backup.
+  const done = { ...step('done', null, NEXT), navigate: TO_ORPHANS };
   if (!state.simulated) {
     return {
       id: ORPHANS_TOUR_ID,
       steps: [
         ...head,
-        { ...step('explain-list', 'orphans-list', NEXT), navigate: TO_ORPHANS },
+        {
+          ...step('explain-list', 'orphans-list', NEXT),
+          navigate: TO_ORPHANS,
+          // No orphans: no list to point at, and the words say so.
+          absentWhatKey: 'orphansTour.explain-list.absentWhat',
+        },
         step('explain-options', null, NEXT),
         done,
       ],
@@ -134,7 +141,8 @@ export function orphansTour(state: OrphansTourState): Tour {
         ...step('backup', null, MANUAL),
         actions: [action('backup-first', true), action('skip-backup')],
       },
-      step('simulating', null, MANUAL),
+      // The page waits: a tab, project or Guide opened mid-way would race the import.
+      { ...step('simulating', null, MANUAL), interactive: false },
       // Shown, not offered: the practice orphan's Relink and Delete are what
       // these steps explain, and the person must leave them alone here.
       {

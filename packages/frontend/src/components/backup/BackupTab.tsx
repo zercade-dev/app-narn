@@ -6,6 +6,7 @@ import { cn, getErrorMessage } from '@/lib/utils';
 import { apiRequest } from '../../hooks/use-api.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { RESTORE_CONFIRM_ANCHOR, RESTORE_POINT_ANCHOR } from '../../lib/tour/first-run.js';
+import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 import { useGuideStore } from '../../stores/guide-store.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import { useRunStore } from '../../stores/run-store.js';
@@ -211,6 +212,12 @@ export function BackupTab({ projectId }: Readonly<BackupTabProps>) {
       setLoadingManifest(false);
     }
   };
+
+  // The guide's Back from "Confirm to restore" closes the confirmation.
+  useCloseOnGuideBack(serverRestoreEntry !== null, RESTORE_CONFIRM_ANCHOR, () => {
+    setServerRestoreEntry(null);
+    setServerRestoreManifest(null);
+  });
 
   const handleConfirmServerRestore = async () => {
     if (!serverRestoreEntry) {

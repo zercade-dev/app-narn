@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check } from 'lucide-react';
+import { Check, FolderOpen, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { useGuideFacts } from '../../hooks/use-guide-facts.js';
+import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { toast } from '../../lib/toast.js';
 import { listedTours, type CatalogTour } from '../../lib/tour/catalog.js';
@@ -62,6 +63,9 @@ export function GuideToursList() {
   const [confirming, setConfirming] = useState<'restart' | 'resume' | null>(null);
 
   const tours = useMemo(() => listedTours(access, cloudManaged), [access, cloudManaged]);
+  // A phone-sized window shows "designed for desktop" where the tours point:
+  // they are listed, not started.
+  const isMobile = useIsMobile();
 
   const rowState = (entry: CatalogTour): RowState => {
     if (entry.id === FIRST_RUN_TOUR_ID) {
@@ -84,7 +88,9 @@ export function GuideToursList() {
       total,
       unit: 'steps',
       completed,
-      continueAt: !completed && last > 0 && last < total - 1 ? last : null,
+      // Left on any step after the first, the last one included: it is not
+      // done until finished, so it shows Continue rather than "N of N" alone.
+      continueAt: !completed && last > 0 && last <= total - 1 ? last : null,
     };
   };
 
@@ -115,21 +121,34 @@ export function GuideToursList() {
     }
     // Land on the tour's tab, so a tour continued part way opens where it applies.
     if (entry.tab) useViewStore.getState().setActiveTab(entry.tab);
+    entry.onStart?.();
     useGuideStore.getState().startTour(entry.id, at === undefined ? undefined : { at });
   };
 
   return (
     <div data-testid="guide-tours">
-      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-        {t('guideTours.title')}
-      </p>
-      <ul className="space-y-2">
+      <h1 className="mb-4 text-xl font-semibold">{t('guideTours.title')}</h1>
+      {isMobile && (
+        <p
+          className="mb-3 flex items-center gap-1 text-xs font-medium text-status-warn"
+          data-testid="guide-tours-needs-desktop"
+        >
+          <Monitor className="size-3.5 shrink-0" aria-hidden />
+          {t('guideTours.needsDesktop')}
+        </p>
+      )}
+      <ul className="grid gap-3 sm:grid-cols-2">
         {tours.map((entry) => {
           const { id } = entry;
           const row = rowState(entry);
-          const blocked = entry.needsProject && activeProjectId === null;
+          const needsProject = entry.needsProject && activeProjectId === null;
+          const blocked = needsProject || isMobile;
           return (
-            <li key={id} data-testid={`guide-tour-${id}`} className="rounded-md border p-2">
+            <li
+              key={id}
+              data-testid={`guide-tour-${id}`}
+              className="flex flex-col gap-1 rounded-md border p-3"
+            >
               <p className="text-sm font-medium">{t(`guideTours.${id}.name`)}</p>
               <p className="text-xs text-muted-foreground">{t(`guideTours.${id}.summary`)}</p>
               <p
@@ -156,8 +175,15 @@ export function GuideToursList() {
                   )
                 )}
               </p>
-              {blocked && (
-                <p className="mt-1 text-xs text-muted-foreground">{t('guideTours.needsProject')}</p>
+              {/* Why Start is greyed out: easy to miss in muted text. */}
+              {needsProject && (
+                <p
+                  className="mt-1 flex items-center gap-1 text-xs font-medium text-status-warn"
+                  data-testid={`guide-tour-needs-project-${id}`}
+                >
+                  <FolderOpen className="size-3.5 shrink-0" aria-hidden />
+                  {t('guideTours.needsProject')}
+                </p>
               )}
               <div className="mt-1.5 flex flex-col gap-1">
                 <Button

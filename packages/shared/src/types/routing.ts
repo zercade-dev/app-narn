@@ -84,7 +84,11 @@ export interface RoutingDecision {
  * attaches a fix hint instead of repeating the same line per entry.
  */
 export type ControlledFailureReason =
-  'no-route' | 'module-disabled' | 'module-not-found' | 'freeway-no-buckets';
+  | 'no-route'
+  | 'module-disabled'
+  | 'module-not-found'
+  | 'freeway-no-buckets'
+  | 'freeway-bad-credentials';
 
 /**
  * Maps a {@link ControlledFailureReason} to a short, user-actionable hint
@@ -98,6 +102,8 @@ export const CONTROLLED_FAILURE_HINTS: Record<ControlledFailureReason, string> =
   'module-not-found': 'Module is not installed/registered.',
   'freeway-no-buckets':
     'Add a free-plan API key in Freeway settings, or pin a rule to a specific provider.',
+  'freeway-bad-credentials':
+    'The provider rejected the saved API key. Update the key in your vault, then try again.',
 };
 
 /**

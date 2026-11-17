@@ -1,3 +1,4 @@
+import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PROJECT_ICONS, DEFAULT_PROJECT_ICON, type Project } from '@zercade-dev/narn-shared';
@@ -300,6 +301,13 @@ export function Sidebar() {
       setSearch('');
     }
   };
+  // The guide's Back from "Create a new project" closes the list it points into.
+  useCloseOnGuideBack(selectorOpen, 'new-project-button', () => handleSelectorOpenChange(false));
+  // And Back from "Name your project" closes the New project sheet.
+  useCloseOnGuideBack(createOpen, 'new-project-input', () => {
+    setCreateOpen(false);
+    setCreateTab('create');
+  });
 
   const handleCreate = async () => {
     if (!newName.trim()) return;
@@ -341,7 +349,13 @@ export function Sidebar() {
         setPendingProvider(
           created.id,
           simpleProvider,
-          routedModuleOf(routingGroupsOf(created.routingRules, created.routingRuleGroups)),
+          routedModuleOf(
+            routingGroupsOf(
+              created.routingRules,
+              created.routingRuleGroups,
+              created.activeRoutingRuleGroupId,
+            ),
+          ),
         );
       } else if (wantsProvider) {
         try {
@@ -824,6 +838,7 @@ export function Sidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   data-testid="sidebar-guide"
+                  data-tour="sidebar-guide"
                   isActive={view === 'guide'}
                   onClick={() => {
                     setView('guide');

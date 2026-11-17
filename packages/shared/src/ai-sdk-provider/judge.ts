@@ -19,6 +19,7 @@ import {
   renderTargetLanguagesLine,
 } from './prompt-builder.js';
 import { isRecord, parseIndexedArray } from './json.js';
+import { glossaryScanText, termBoundaryPattern } from '../term-match.js';
 
 export const JUDGE_SYSTEM_PROMPT = [
   'You are a professional video-game localization quality reviewer.',
@@ -42,6 +43,16 @@ export const JUDGE_SYSTEM_PROMPT = [
   'Score guide: 95-100 flawless; 85-94 publishable with minor polish; 70-84 usable but needs edits; 40-69 significant problems; below 40 unusable or wrong language.',
   'Return ONLY JSON. Do not include markdown, code fences, analysis, or extra explanation.',
 ].join('\n');
+
+/**
+ * The judge's counterpart of the translate prompt's NAME_TERM_RULE: a constant
+ * term is masked (so forced) only where the source spells it exactly as the
+ * glossary does; any other spelling reached the translator as an optional
+ * "name" item, so the judge must not fail an ordinary-word translation of it.
+ * Appended to the system prompt only when a batch item carries such an item.
+ */
+export const JUDGE_NAME_TERM_RULE =
+  'A "g" item with "name":true is a proper name that the source writes in a different letter case than the glossary (e.g. "a razor" for the name "Razor"). Its "tt" is required only where the source word refers to that name; where the source word is the ordinary word, an ordinary translation of it is correct and MUST NOT be flagged as a glossary or terminology violation.';
 
 /**
  * Formatting tokens a suggestion must carry over from the reviewed translation.
@@ -177,12 +188,15 @@ export function judgeResponseSchema(checks?: JudgeChecks): Record<string, unknow
  * code, or an absent code keep the default (English) behavior unchanged — the
  * reviewing/scoring logic is never affected, only the natural-language output.
  */
-function judgeSystemPrompt(responseLanguage?: string): string {
-  if (!responseLanguage || responseLanguage === 'en') return JUDGE_SYSTEM_PROMPT;
+function judgeSystemPrompt(responseLanguage?: string, anyNameTerm = false): string {
+  const base = anyNameTerm
+    ? `${JUDGE_SYSTEM_PROMPT}\n${JUDGE_NAME_TERM_RULE}`
+    : JUDGE_SYSTEM_PROMPT;
+  if (!responseLanguage || responseLanguage === 'en') return base;
   const language = LANGUAGE_REGISTRY.find((l) => l.code === responseLanguage);
-  if (!language) return JUDGE_SYSTEM_PROMPT;
+  if (!language) return base;
   return (
-    JUDGE_SYSTEM_PROMPT +
+    base +
     `\nWrite all findings and explanations (the "detail" text of every issue) in ${language.name}. ` +
     'This affects only your prose explanations — keep the JSON structure, field names, ' +
     '"verdict"/"type" enum values, and any "suggestion" replacement string exactly as specified.'
@@ -197,7 +211,17 @@ function buildItemContext(item: JudgeItem): Record<string, unknown> | undefined 
   return Object.keys(ctx).length > 0 ? ctx : undefined;
 }
 
+/**
+ * True when `source` contains `term` spelled exactly (letter case included) as
+ * a whole word outside `{…}` placeholders — where M17 masks a constant term, so
+ * the translation is forced to use it.
+ */
+function spelledExactly(term: string, source: string): boolean {
+  return new RegExp(termBoundaryPattern(term), 'u').test(glossaryScanText(source));
+}
+
 export function buildJudgePrompt(items: JudgeItem[]): { system: string; user: string } {
+  let anyNameTerm = false;
   const payload = items.map((item, i) => {
     const obj: Record<string, unknown> = {
       i,
@@ -210,9 +234,16 @@ export function buildJudgePrompt(items: JudgeItem[]): { system: string; user: st
     const terms = filterGlossaryForSource(item.glossary, item.sourceText)
       .map((term) => {
         const expected = term.translations[item.targetLanguage];
-        return expected ? { s: term.source, tt: expected } : undefined;
+        if (!expected) return undefined;
+        // A constant term the source writes in another letter case reached the
+        // translator as an optional name (see JUDGE_NAME_TERM_RULE).
+        if (term.constant && !spelledExactly(term.source, item.sourceText)) {
+          anyNameTerm = true;
+          return { s: term.source, tt: expected, name: true as const };
+        }
+        return { s: term.source, tt: expected };
       })
-      .filter((g): g is { s: string; tt: string } => Boolean(g));
+      .filter((g): g is { s: string; tt: string; name?: true } => Boolean(g));
     if (terms.length > 0) obj.g = terms;
     return obj;
   });
@@ -277,7 +308,7 @@ export function buildJudgePrompt(items: JudgeItem[]): { system: string; user: st
   // each batch with the project's review language), so taking item[0]'s here
   // localizes the whole batch correctly. If batches ever mixed languages, this
   // would localize them all to item[0]'s — derive a shared value upstream first.
-  return { system: judgeSystemPrompt(items[0]?.responseLanguage), user };
+  return { system: judgeSystemPrompt(items[0]?.responseLanguage, anyNameTerm), user };
 }
 
 /**

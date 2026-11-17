@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { toast } from '@/lib/toast';
 import { applyProviderTo, targetOfKey } from '../lib/provider-choice.js';
 import {
   enableProvider,
   FREE_KEY_PROVIDERS,
+  markProviderChecked,
+  providerCheckedThisLoad,
   providerInstanceId,
   providerKeyFor,
   providerName,
+  resetProviderChecks,
 } from '../lib/simple-provider.js';
 import { getErrorMessage } from '../lib/utils.js';
 import { useGuideStore } from '../stores/guide-store.js';
@@ -17,9 +21,10 @@ import { useVaultStore } from '../stores/vault-store.js';
 /** Choices already told "no key yet, Freeway translates meanwhile" in this tab. */
 const waitingNoticeShown = new Set<string>();
 
-/** For tests: forget which notices were shown. */
+/** For tests: forget which notices were shown and which providers were checked (a page load). */
 export function resetProviderNotices(): void {
   waitingNoticeShown.clear();
+  resetProviderChecks();
 }
 
 /**
@@ -46,6 +51,67 @@ export function resetProviderNotices(): void {
  *    provider's key is missing only gets a notice: Freeway translates until
  *    the person saves that key or chooses Freeway on the provider card.
  */
+/**
+ * The base modules to enable for the keys in the vault: the chosen provider's
+ * once its key is saved (else every free provider with a key), plus pending
+ * choices whose key has arrived.
+ */
+export function providersWithKeys(
+  keys: readonly string[],
+  simpleProvider: string | null,
+  pendingProviders: Readonly<Record<string, string>>,
+): string[] {
+  const withKey = (id: string) => {
+    const key = providerKeyFor(id);
+    return key !== undefined && keys.includes(key);
+  };
+  const ownKeySaved = simpleProvider !== null && withKey(simpleProvider);
+  const bases = [
+    ...(simpleProvider && ownKeySaved
+      ? [simpleProvider]
+      : FREE_KEY_PROVIDERS.filter((p) => keys.includes(p.key)).map((p) => p.base)),
+    ...Object.values(pendingProviders).filter(withKey),
+  ].map((id) => id.split(':')[0]);
+  return [...new Set(bases)];
+}
+
+/**
+ * Enable one provider and record the outcome: marked when on; when the person
+ * switched it off themselves it stays off, and they are told once.
+ */
+async function enableOne(base: string, t: TFunction<'guide-tour'>): Promise<void> {
+  try {
+    const id = await enableProvider(base);
+    const guide = useGuideStore.getState();
+    if (id !== null) {
+      guide.markProviderEnabled(id);
+      return;
+    }
+    const instance = providerInstanceId(base);
+    if (guide.switchedOffNoticed.includes(instance)) return;
+    guide.markSwitchedOffNoticed(instance);
+    toast.warning(t('providerChoice.switchedOff', { provider: providerName(base) }));
+  } catch (err) {
+    toast.error(
+      t('providerChoice.failed', { provider: providerName(base), message: getErrorMessage(err) }),
+    );
+    throw err;
+  }
+}
+
+/**
+ * Enable now every provider the vault has a key for (see `providersWithKeys`),
+ * for a retry after a run found nothing able to translate. Resolves when done.
+ */
+export async function enableProvidersWithKeys(t: TFunction<'guide-tour'>): Promise<void> {
+  const { keys, unlocked } = useVaultStore.getState();
+  if (!unlocked) return;
+  const { simpleProvider, pendingProviders } = useGuideStore.getState();
+  await Promise.allSettled(
+    providersWithKeys(keys, simpleProvider, pendingProviders).map((base) => enableOne(base, t)),
+  );
+}
+
 export function useProviderSetup(enabled: boolean): void {
   const { t } = useTranslation('guide-tour');
   const unlocked = useVaultStore((s) => s.unlocked);
@@ -74,46 +140,21 @@ export function useProviderSetup(enabled: boolean): void {
     toast.warning(t('providerChoice.waitingForKey', { provider: providerName(simpleProvider) }));
   }, [ready, keys, simpleProvider, ownKeySaved, t]);
 
-  const toEnable = useMemo(() => {
-    if (!ready) return '';
-    const withKey = (id: string) => {
-      const key = providerKeyFor(id);
-      return key !== undefined && keys.includes(key);
-    };
-    // Pending choices whose key has arrived, whatever is chosen now.
-    const pending = Object.values(pendingProviders).filter(withKey);
-    const bases = [
-      ...(simpleProvider && ownKeySaved
-        ? [simpleProvider]
-        : FREE_KEY_PROVIDERS.filter((p) => keys.includes(p.key)).map((p) => p.base)),
-      ...pending,
-    ].map((id) => id.split(':')[0]);
-    return [...new Set(bases)]
-      .filter((base) => !enabledProviders.includes(providerInstanceId(base)))
-      .join(',');
-  }, [ready, keys, simpleProvider, ownKeySaved, enabledProviders, pendingProviders]);
+  // Every provider with a usable key, enabled or not: the server's config is
+  // the truth (it can be reset or restored), so each is checked once per page
+  // load. `enableProvider` leaves one the person switched off alone.
+  const toEnable = useMemo(
+    () => (ready ? providersWithKeys(keys, simpleProvider, pendingProviders).join(',') : ''),
+    [ready, keys, simpleProvider, pendingProviders],
+  );
 
-  // One attempt per provider per mount, so a failure cannot loop.
-  const attempted = useRef(new Set<string>());
+  // One attempt per provider per page load, so a failure cannot loop.
   useEffect(() => {
     for (const base of toEnable ? toEnable.split(',') : []) {
-      if (attempted.current.has(base)) continue;
-      attempted.current.add(base);
-      void enableProvider(base)
-        .then((id) => {
-          // null: the person switched it off themselves. Not theirs to undo,
-          // and not marked, so nothing is pointed at it; they are told.
-          if (id !== null) useGuideStore.getState().markProviderEnabled(id);
-          else toast.warning(t('providerChoice.switchedOff', { provider: providerName(base) }));
-        })
-        .catch((err: unknown) => {
-          toast.error(
-            t('providerChoice.failed', {
-              provider: providerName(base),
-              message: getErrorMessage(err),
-            }),
-          );
-        });
+      // Checked already in this page load (here, or by a provider choice).
+      if (providerCheckedThisLoad(base)) continue;
+      markProviderChecked(base);
+      void enableOne(base, t).catch(() => {});
     }
   }, [toEnable, t]);
 

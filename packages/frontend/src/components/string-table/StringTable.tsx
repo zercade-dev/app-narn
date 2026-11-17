@@ -69,18 +69,14 @@ const DIALOG_DEFAULT_START: TranslateStartOptions = {
  * Answers the guided first run's GUIDE_TRANSLATE_EVENT (its quick test, or
  * the rest) while the table is on screen.
  */
-function GuideTranslateListener({
-  onTranslate,
-}: {
-  onTranslate: (detail: GuideTranslateDetail) => void;
-}) {
+function GuideTranslateListener({ onTranslate }: { onTranslate: (entryIds: string[]) => void }) {
   const latest = useRef(onTranslate);
   useEffect(() => {
     latest.current = onTranslate;
   });
   useEffect(() => {
     const onGuideTranslate = (e: Event) => {
-      latest.current((e as CustomEvent<GuideTranslateDetail>).detail);
+      latest.current((e as CustomEvent<GuideTranslateDetail>).detail.entryIds);
     };
     globalThis.addEventListener(GUIDE_TRANSLATE_EVENT, onGuideTranslate);
     return () => globalThis.removeEventListener(GUIDE_TRANSLATE_EVENT, onGuideTranslate);
@@ -821,12 +817,8 @@ export function StringTable() {
   };
 
   /** The dialog's Start, also used by the guided first run (with the dialog's defaults). */
-  const startBatch = (
-    opts: TranslateStartOptions,
-    scopeIds?: string[],
-    { remember = true }: { remember?: boolean } = {},
-  ) => {
-    if (remember) setReTranslate(opts.reTranslate);
+  const startBatch = (opts: TranslateStartOptions, scopeIds?: string[]) => {
+    setReTranslate(opts.reTranslate);
     void handleBatchTranslate(
       opts.reTranslate,
       opts.disableMemory,
@@ -993,18 +985,7 @@ export function StringTable() {
       )}
 
       {/* The guide's request: the same as Start in the dialog, left at its defaults. */}
-      <GuideTranslateListener
-        onTranslate={({ entryIds, reTranslate }) =>
-          startBatch(
-            reTranslate
-              ? { ...DIALOG_DEFAULT_START, reTranslate: true, disableMemory: true }
-              : DIALOG_DEFAULT_START,
-            entryIds,
-            // The guide's own request: the bulk bar's saved choice stays as it was.
-            { remember: false },
-          )
-        }
-      />
+      <GuideTranslateListener onTranslate={(ids) => startBatch(DIALOG_DEFAULT_START, ids)} />
 
       <TranslateRunDialog
         open={confirmBatchOpen}

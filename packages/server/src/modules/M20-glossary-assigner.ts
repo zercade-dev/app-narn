@@ -2,6 +2,7 @@ import {
   type StringEntry,
   type Glossary,
   toErrorMessage,
+  glossaryScanText,
   isComplete,
   projectTargetLanguages,
 } from '@zercade-dev/narn-shared';
@@ -88,8 +89,10 @@ export async function assignGlossaryIds(
 
   for (const entry of entries) {
     const matched: string[] = [];
+    // A term only inside a `{…}` placeholder (a variable name) is no match.
+    const scannable = glossaryScanText(entry.sourceText);
     for (const g of matchersByGlossary) {
-      if (g.matchers.some((re) => re.test(entry.sourceText))) matched.push(g.id);
+      if (g.matchers.some((re) => re.test(scannable))) matched.push(g.id);
     }
     // Each glossary contributes its id at most once (one matcher set per
     // glossary), so `matched` is already duplicate-free — no Set needed.

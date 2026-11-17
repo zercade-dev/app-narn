@@ -1,5 +1,7 @@
 {
   "next": "Next",
+  "completeTour": "Complete tour",
+  "lookOnly": "This is only shown during the tour. You can use it once the tour ends.",
   "back": "Back",
   "skip": "Skip tour",
   "close": "Close",
@@ -11,9 +13,7 @@
       "openVault": "Open the vault form",
       "cloudVault": "Set up your vault",
       "openVaultPage": "Open the vault page",
-      "getGoogleKey": "Get a Google key (free tier)",
-      "addGoogleKey": "Paste my Google key",
-      "ownProvider": "Use my own provider",
+      "chooseProvider": "Choose a provider",
       "useFoundKey": "Use {{provider}} for your translations",
       "fixKey": "Check my key",
       "retry": "Try again",
@@ -27,7 +27,9 @@
       "restoreTest": "Put my translations back",
       "keepTest": "Keep the new translations",
       "tourSections": "Show me the sections",
-      "maybeLater": "Maybe later"
+      "maybeLater": "Maybe later",
+      "openTours": "Show me the tours",
+      "toursDone": "Done"
     },
     "vault": {
       "title": "Create your vault password",
@@ -43,25 +45,33 @@
     },
     "cloudVault": {
       "title": "Create your vault and add a key",
-      "what": "Choose a vault password, then add a key. For a quick test, create a Google AI key: its free tier costs nothing. Already have a key for a supported provider? Choose \"Use my own provider\" first. You come back here when it is done.",
-      "why": "Your provider keys are encrypted with your password and never leave your control. A key is how the AI provider knows it's you."
+      "what": "Choose a vault password, then add a key: choose a provider first. For a quick test, pick one with a free tier. You come back here when it is done.",
+      "why": "Your provider keys are encrypted with your password and never leave your control."
     },
     "cloudUnlock": {
       "what": "Unlock your vault on the vault page. You come back here when it is done."
     },
     "cloudKey": {
-      "what": "Add a key on the vault page. For a quick test, create a Google AI key: its free tier costs nothing. Already have a key for a supported provider? Choose \"Use my own provider\" first. You come back here when it is done."
+      "what": "Add a key on the vault page: choose a provider first. For a quick test, pick one with a free tier. You come back here when it is done."
     },
     "key": {
       "title": "Add a key to start translating",
-      "why": "Google AI, Groq and OpenRouter have a free tier: with a key from any of them, NARN Freeway translates your game at no cost while you try it out. You can change the provider at any time in the project's Config tab.",
-      "whyOwn": "Your {{provider}} key is how {{provider}} knows it's you. You can change the provider at any time in the project's Config tab.",
-      "choiceWhat": "For a quick test, create a Google AI key: its free tier costs nothing. Already have a key for a supported provider? Choose \"Use my own provider\".",
+      "why": "You can change the provider later in the project's Config tab.",
+      "choiceWhat": "Choose a provider and add its key. For a quick test, pick one with a free tier.",
       "pasteWhat": "Paste the key here, type your vault password below, then save."
+    },
+    "providerList": {
+      "title": "Choose a provider",
+      "what": "Already have a key? Select its provider. No key yet? Press Get a key next to a provider to make one on its site, then select it.",
+      "why": "For a quick test, use a provider with a free tier."
+    },
+    "providerCard": {
+      "title": "Who translates this project",
+      "what": "Choose who translates this project.",
+      "why": "Press Back to close this panel and carry on with the guide."
     },
     "project": {
       "title": "Bring in your game's text",
-      "why": "When you import, you choose whether the file replaces what is stored or only adds new entries and updates changed ones.",
       "openWhat": "Open the project list.",
       "newWhat": "Create a new project.",
       "createWhat": "Give your project a name, then create it.",
@@ -73,17 +83,23 @@
     },
     "translate": {
       "title": "Translate",
-      "why": "Freeway picks a suitable free model for each language automatically.",
-      "whyOwn": "{{provider}} translates this project with your own key.",
-      "whyCustom": "This project's routing, set up in Advanced, picks the provider for each entry.",
       "openWhat": "Open the tab that lists your entries.",
       "quickWhat": "3 entries that still need translating are selected. Translate them to try it out, or translate everything now.",
       "fewWhat": "Your entries are selected. Translate them now.",
       "startWhat": "Start the translation.",
-      "nothingWhat": "Your file already has a translation for every language you chose. To see a translation happen, retranslate 3 entries: their translations are replaced, and you can put them back afterwards.",
-      "nothingWhy": "Or press Next to go on to the export. To add a language, tick it on the Data tab and save.",
+      "nothingWhat": "Your file already has every translation. To see one happen, retranslate 3 entries: you can put their translations back afterwards.",
+      "nothingWhy": "Or press Next to export. To add a language, tick it on the Data tab and save.",
       "progressWhat": "The translation is running. This line shows its progress.",
       "progressWhy": "The tour continues when the translation has finished."
+    },
+    "retest": {
+      "title": "Retranslate 3 entries",
+      "filterWhat": "Open Status and untick Show untranslated only, so the list shows your translated entries too.",
+      "selectWhat": "Tick the boxes of 3 entries on this page.",
+      "translateWhat": "Press Translate selected.",
+      "modeWhat": "Choose Re-translate existing translations. With Only fill untranslated entries, the 3 entries would be skipped: they are already translated.",
+      "startWhat": "Press Start to retranslate the 3 entries.",
+      "nothingPicked": "Nothing was retranslated: those entries already had translations. Press Translate selected again and choose Re-translate existing translations."
     },
     "failed": {
       "title": "The translation didn't go through",
@@ -92,6 +108,7 @@
       "quotaWhat": "The free quota is used up for now. Wait a little or add another key, then try again.",
       "quotaWhatOwn": "{{provider}} refused for now: your account's quota or credit is used up. Check your plan with the provider, then try again.",
       "quotaWhatCustom": "A provider in this project's routing refused for now: a quota or credit is used up. Wait a little or check the provider's plan, then try again.",
+      "noProviderWhat": "Nothing was translated: no provider was switched on to take it. Press Try again: NARN first switches on the provider behind your saved key.",
       "otherWhat": "Nothing was translated. Check your key, then try again."
     },
     "parked": {
@@ -107,7 +124,6 @@
     "rest": {
       "title": "The test worked",
       "what": "Your 3 test entries are translated into every language you chose. Translate the rest now, or export what you have.",
-      "why": "You can translate the rest later from the list of entries.",
       "skipped": "The rest can wait. Download what is translated so far."
     },
     "restore": {
@@ -130,14 +146,20 @@
       "what": "This is the simplified view: it shows only what you need to translate and export. Advanced has more tools. Flip the switch to Advanced for a short tour.",
       "whatAdvanced": "You're using Advanced, which shows every tool. A short tour explains what each section is for.",
       "why": "You can switch at any time from the top bar."
+    },
+    "moreTours": {
+      "title": "More guided tours",
+      "what": "Short tours of glossaries, routing and more are in Guide. Start one whenever you like."
     }
   },
   "providerChoice": {
-    "title": "Use my own provider",
-    "description": "Pick the provider you have a key for. It translates this project and the new projects you create. To combine several providers, switch to Advanced.",
+    "title": "Choose a provider",
+    "description": "It translates this project and the new projects you create.",
     "existingRouting": "This project already has routing set up, so it stays as it is. You can change it in Advanced.",
-    "freeHeading": "Free tier. Picking one translates with it alone, without the other free models in the NARN Freeway pool.",
-    "paidHeading": "Paid, billed to your account with the provider.",
+    "freeHeading": "Has a free tier",
+    "paidHeading": "Does not have a free tier",
+    "getKey": "Get a key",
+    "getKeyAria": "Get a {{provider}} key (opens the provider's site)",
     "cancel": "Cancel",
     "failed": "Could not set up {{provider}}: {{message}}",
     "switchedOff": "{{provider}} is switched off in Advanced, so it was not used. Switch it back on in Global Config, or choose another provider.",
@@ -161,11 +183,15 @@
     },
     "glossaries": {
       "name": "Glossaries",
-      "summary": "Create a glossary, add terms and apply it, so key terms stay consistent."
+      "summary": "Enable a ready-made glossary that fits your text, and see the matches it finds."
     },
     "routing": {
       "name": "Routing",
       "summary": "A 30-second look at how NARN picks who translates what."
+    },
+    "routing-advanced": {
+      "name": "Advanced routing rules",
+      "summary": "Rules that send each language or kind of text to the provider you choose."
     },
     "quality": {
       "name": "Quality",
@@ -189,6 +215,7 @@
     "progressSections": "{{current}} of {{total}} sections",
     "completed": "Completed",
     "needsProject": "Open a project to take this tour.",
+    "needsDesktop": "Tours need a wider screen. Open the app on a computer to take one.",
     "switchedToAdvanced": "Switched to Advanced mode for this tour.",
     "confirm": {
       "title": "Switch to Simple for the guided setup?",
@@ -211,7 +238,8 @@
       "mode": {
         "title": "Simple or advanced rules",
         "what": "Switch here between one provider for everything and a list of rules.",
-        "why": "Start simple. Move to rules when you want a different provider for a language, a category or a tone."
+        "why": "Start simple. Move to rules when you want a different provider for a language, a category or a tone.",
+        "advancedAction": "Explain Advanced rules"
       }
     },
     "glossary": {
@@ -222,7 +250,7 @@
       "list": {
         "title": "Your glossaries",
         "what": "Each glossary is a list of terms with the translation you want for each.",
-        "why": "Terms such as character names or game jargon then come out the same way every time."
+        "why": "Terms such as character names, skills or item names then come out the same way every time."
       },
       "create": {
         "title": "Start a glossary",
@@ -298,6 +326,73 @@
         "why": "Use it before a release, or after you changed the glossary or routing."
       }
     }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Rules, checked from the top",
+      "what": "NARN checks the rules from the top, and the first rule that fits an entry translates it. In this tour you send Asian languages to one provider and every other language to another.",
+      "why": "An entry no rule fits is not translated, so the last rule should fit everything."
+    },
+    "edit": {
+      "title": "Open rule #1",
+      "what": "Press the pencil to edit rule #1. It will handle the Asian languages.",
+      "noRulesWhat": "This project has no rules yet. Press Add rule to create rule #1. It will handle the Asian languages."
+    },
+    "filter": {
+      "title": "Open Filtering",
+      "what": "Press Filtering to see which entries this rule takes.",
+      "why": "A rule with nothing ticked here takes every entry."
+    },
+    "langs": {
+      "title": "Tick the Asian languages",
+      "what": "Tick the Asian languages among your project's languages, for example ja, ko and zh-hans, and untick any others. With none in this project, tick any language to try it. Next appears once you tick or untick one.",
+      "why": "Rule #1 now takes only these languages. Every other language moves on to the rules below it."
+    },
+    "module": {
+      "title": "Choose its provider",
+      "what": "In Module, pick the provider for these languages. To use a different model of the same provider, open Agent settings further down.",
+      "why": "Your changes save by themselves."
+    },
+    "done": {
+      "title": "Close the rule",
+      "what": "Press Done."
+    },
+    "add": {
+      "title": "Add a rule for the other languages",
+      "what": "Press Add rule. The new rule goes at the bottom, below the rules already there.",
+      "why": "Rules are checked from the top, so a rule at the bottom only gets what the rules above it left."
+    },
+    "newModule": {
+      "title": "Choose a provider, and nothing else",
+      "what": "In Module, pick the provider for every other language. Leave Filtering empty. Next appears once a provider is picked.",
+      "why": "No filter is needed: the languages you ticked stop at rule #1, so only the other languages reach the rules below it."
+    },
+    "order": {
+      "title": "The order does the work",
+      "what": "Rule #1 takes the languages you ticked, and the rules below it get only what is left. If the rule with no filter came first, it would take every language, and rule #1 would never be used.",
+      "why": "To change the order, use the arrows beside a rule."
+    },
+    "templates": {
+      "title": "Templates",
+      "what": "Ready-made rules. Use template adds one at the bottom of this project's rules.",
+      "why": "A quick start you can adjust afterwards."
+    },
+    "groups": {
+      "title": "Rule groups",
+      "what": "A rule group is a separate set of rules. Translations use the group selected here.",
+      "why": "Keep another set ready, for example to test a provider, and switch between them."
+    },
+    "import": {
+      "title": "Import / Export",
+      "what": "Save the rules as a JSON file, or load rules from one.",
+      "why": "Reuse the same routing in another project."
+    },
+    "back": {
+      "title": "Back to Simple",
+      "what": "Simple is the one-provider view. Choosing it sets your rules aside, so one provider translates everything.",
+      "why": "Your rules are kept, not deleted. Choose Advanced to use them again."
+    },
+    "absentWhat": "What this step points at is not on screen right now. Press Next to go on, or Back to do the step before again."
   },
   "advancedSections": {
     "compare": {
@@ -379,33 +474,42 @@
   "glossariesTour": {
     "purpose": {
       "title": "What a glossary is for",
-      "what": "A glossary lists terms with the translation you want for each, such as character names or game jargon.",
+      "what": "A glossary lists terms with the translation you want for each, such as character names, skills or item names.",
       "why": "Translations then use your words every time instead of a new guess."
     },
-    "create": {
-      "title": "Create a glossary",
-      "what": "Start a new, empty glossary here, or press Next to read on.",
-      "why": "One glossary is often enough. Use more to keep sets of terms apart."
+    "picked": {
+      "title": "A glossary for your entries",
+      "what": "The tour picked {{name}} because its terms appear in your entries. Matching entries: {{count}}.",
+      "noneWhat": "None of your glossaries match your entries yet, so the tour uses {{name}}."
     },
-    "add-term": {
-      "title": "Add a term",
-      "what": "Type the source term and its translation for each language, then add it.",
-      "why": "Mark a term as constant when it must never be translated, such as a brand name."
+    "constant": {
+      "title": "The Constant column",
+      "what": "Where the text spells a constant term exactly as the glossary does, it is never sent to the translation engine. NARN puts your glossary translation straight into the result instead, so a character name like Diluc always comes out exactly as written here.",
+      "absentWhat": "Select a glossary on the left to see its terms and their Constant column.",
+      "why": "Other terms are sent along with the text as a reference the engine should follow."
     },
-    "assign": {
-      "title": "Apply it to this project",
-      "what": "An enabled glossary is used when this project is translated. Disable it to stop using it.",
-      "why": "Keep a glossary disabled while you are still building it."
+    "enable": {
+      "title": "Enable it",
+      "what": "Press Enable. NARN asks whether to apply its matches: Apply matches assigns the glossary to every entry that contains one of its terms.",
+      "absentWhat": "Select a glossary on the left, then press Enable beside its name.",
+      "onWhat": "{{name}} is already enabled, so this project uses it.",
+      "why": "Only enabled glossaries are used when this project is translated."
+    },
+    "choice": {
+      "title": "Enable only or Apply matches?",
+      "what": "Apply matches assigns the glossary right away to every entry that contains one of its terms. Enable only turns it on and leaves your entries as they are; you can assign it later from Matches."
+    },
+    "matches": {
+      "title": "Matches found for you",
+      "what": "NARN found these entries by itself: each contains a term from {{name}}, and the glossary is now assigned to them.",
+      "onlyWhat": "NARN found these entries by itself: each contains a term from {{name}}. Tick them and press Assign glossary to use it for them.",
+      "noneWhat": "No entry contains a term from {{name}} yet. Entries that do will be listed here.",
+      "why": "A glossary is used for the entries it is assigned to."
     },
     "effect": {
       "title": "How it changes translation",
       "what": "When a string contains a glossary term, the term and your translation of it are sent along with the string.",
       "why": "The provider follows your choice instead of picking its own word."
-    },
-    "generate": {
-      "title": "Let AI suggest terms",
-      "what": "Ask an AI provider to find likely terms in your strings.",
-      "why": "You review the suggestions and keep only the ones you want."
     }
   },
   "orphansTour": {
@@ -457,6 +561,7 @@
     "explain-list": {
       "title": "The orphans list",
       "what": "Each orphan shows its source text and how many translations it keeps.",
+      "absentWhat": "This project has no orphans right now. When an import leaves entries out, each one shows here with its source text and how many translations it keeps.",
       "why": "The ones with the most translations come first: they are the most work to redo."
     },
     "explain-options": {

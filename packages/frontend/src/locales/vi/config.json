@@ -41,7 +41,7 @@
   "orphanedCount": "{{count}} mục mồ côi",
   "importWarningsTitle": "Xem lại trước khi nhập",
   "unknownHeadersSummary": "Cột không nhận ra, sẽ bị bỏ qua: {{headers}}",
-  "rawNewlineSummary_other": "Có ngắt dòng thật trong {{count}} ngôn ngữ. Để ngắt dòng trong trò chơi, hãy dùng ký hiệu \\n.",
+  "rawNewlineSummary_other": "Có ngắt dòng thật trong {{count}} ngôn ngữ: hãy dùng \n.",
   "rawNewlineShowLanguages": "Hiện các ngôn ngữ",
   "continueImport": "Tiếp tục nhập",
   "cancelImport": "Hủy",
@@ -59,9 +59,10 @@
   "formulaGuardKeptNotice": "Ô có dấu nháy đơn trước = + - hoặc @: {{cells}}. Các ô này được giữ nguyên, vì vậy hãy kiểm tra: một lần xuất có bảo vệ trước đó có thể đã thêm dấu nháy.",
   "exportLanguages": "Ngôn ngữ",
   "exportCollection": "Bộ sưu tập",
-  "collectionMain": "Văn bản chính",
+  "collectionMain": "Bản dịch phía máy chủ",
   "collectionClient": "Văn bản tập lệnh máy khách",
-  "detectedCollection": "Đã phát hiện: {{collection}}",
+  "detectedClient": "Đã phát hiện: văn bản tập lệnh <hl>máy khách</hl>",
+  "detectedMain": "Đã phát hiện: bản dịch phía <hl>máy chủ</hl>",
   "exportLanguagesHint": "Những cột nào sẽ có mặt trong lần xuất này",
   "pseudoExportAs": "Xuất văn bản pseudo dưới dạng",
   "pseudoExportNone": "Không thay thế",
@@ -189,7 +190,8 @@
     "simpleLabel": "Dịch mọi thứ bằng",
     "simpleHint": "Mọi chuỗi trong dự án này đều do nhà cung cấp bạn chọn ở đây dịch.",
     "simpleDefaultNote": "Mặc định — được dùng cho đến khi bạn chọn nhà cung cấp.",
-    "simpleAdvancedNotice": "Dự án này dùng điều phối nâng cao, nên trình soạn đầy đủ được hiển thị.",
+    "simpleAdvancedNotice": "Dự án này có quy tắc riêng, nên trình soạn đầy đủ được hiển thị. Chọn Đơn giản để tạm gác các quy tắc đó và dùng một nhà cung cấp cho mọi thứ.",
+    "simpleSetAsideNote": "Các quy tắc nâng cao của bạn đang được tạm gác. Chọn Nâng cao để dùng lại.",
     "refreshModels": "Làm mới danh sách mô hình",
     "selectPlaceholder": "— chọn —",
     "exportFailed": "Không xuất được quy tắc điều phối.",
@@ -407,7 +409,7 @@
       },
       "glossary-adherence": {
         "name": "Tuân thủ bảng thuật ngữ",
-        "description": "Thuật ngữ khớp được trong văn bản nguồn phải xuất hiện ở dạng đã dịch trong đầu ra (khớp trọn từ). Ở mức cảnh báo, vấn đề chỉ mang tính thông tin; hãy đặt mức nghiêm trọng thành chặn để kích hoạt lần thử lại tự động."
+        "description": "Các thuật ngữ trong bảng thuật ngữ khớp ở văn bản nguồn phải xuất hiện dưới dạng bản dịch trong kết quả. Dạng đã biến cách, như đuôi cách trong tiếng Nga, cũng được tính. Thuật ngữ cố định được bỏ qua: việc che đã giữ chúng chính xác. Ở mức cảnh báo, vấn đề chỉ mang tính thông tin; đặt mức chặn để dịch lại một lần khi một thuật ngữ bị bỏ sót hoặc bị diễn đạt khác."
       },
       "forbidden-terms": {
         "name": "Thuật ngữ bị cấm",

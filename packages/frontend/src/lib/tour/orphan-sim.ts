@@ -222,6 +222,19 @@ export async function loadPracticeState(sim: OrphanSim): Promise<{
   return { state, live, orphan };
 }
 
+/**
+ * The import that removes the practice entry, while it is going. Whatever
+ * looks at where the entry is (resuming the tour, putting it back) waits for
+ * it first: read mid-import, the entry still looks live, its record would be
+ * dropped, and the import would then orphan it with nothing to put it back.
+ */
+let inFlight: Promise<void> | null = null;
+
+/** Settles once no practice import is going. */
+export function practiceImportSettled(): Promise<void> {
+  return inFlight ?? Promise.resolve();
+}
+
 /** The Orphans tour ended while the practice was being prepared; nothing was changed. */
 export class PracticeTourEndedError extends Error {
   constructor() {
@@ -258,8 +271,13 @@ export async function simulateOrphan(
   // meantime must not leave an entry removed with nothing to put it back.
   if (guide.activeTourId !== ORPHANS_TOUR_ID) throw new PracticeTourEndedError();
   guide.setOrphanSim(sim);
+  const importing = postImport(projectId, csv, 'full-replace');
+  inFlight = importing.then(
+    () => {},
+    () => {},
+  );
   try {
-    await postImport(projectId, csv, 'full-replace');
+    await importing;
   } catch (err) {
     // The request may have failed after the server wrote: drop the handle
     // only when the entry is known not to be an orphan. When even that check
@@ -269,6 +287,8 @@ export async function simulateOrphan(
       if (now !== null) useGuideStore.getState().clearOrphanSim();
       throw err;
     }
+  } finally {
+    inFlight = null;
   }
   afterChange(projectId);
   return sim;
@@ -283,6 +303,7 @@ export type RecoverOutcome = 'recovered' | 'already-live' | 'absent';
  * practice banner.
  */
 export async function recoverPracticeOrphan(): Promise<RecoverOutcome> {
+  await practiceImportSettled();
   const sim = useGuideStore.getState().orphanSim;
   if (!sim) return 'already-live';
   const { state, live, orphan } = await loadPracticeState(sim);

@@ -1,5 +1,7 @@
 {
   "next": "Weiter",
+  "completeTour": "Tour abschließen",
+  "lookOnly": "Das wird während der Tour nur gezeigt. Du kannst es nach der Tour benutzen.",
   "back": "Zurück",
   "skip": "Tour überspringen",
   "close": "Schließen",
@@ -11,9 +13,7 @@
       "openVault": "Tresor-Formular öffnen",
       "cloudVault": "Tresor einrichten",
       "openVaultPage": "Tresor-Seite öffnen",
-      "getGoogleKey": "Google-Schlüssel holen (Gratis-Tarif)",
-      "addGoogleKey": "Meinen Google-Schlüssel einfügen",
-      "ownProvider": "Eigenen Anbieter verwenden",
+      "chooseProvider": "Anbieter wählen",
       "useFoundKey": "{{provider}} für deine Übersetzungen verwenden",
       "fixKey": "Meinen Schlüssel prüfen",
       "retry": "Erneut versuchen",
@@ -27,7 +27,9 @@
       "restoreTest": "Meine Übersetzungen zurückholen",
       "keepTest": "Neue Übersetzungen behalten",
       "tourSections": "Zeig mir die Bereiche",
-      "maybeLater": "Vielleicht später"
+      "maybeLater": "Vielleicht später",
+      "openTours": "Touren anzeigen",
+      "toursDone": "Fertig"
     },
     "vault": {
       "title": "Tresor-Passwort erstellen",
@@ -43,25 +45,33 @@
     },
     "cloudVault": {
       "title": "Tresor erstellen und einen Schlüssel hinzufügen",
-      "what": "Wähle ein Tresor-Passwort und füge dann einen Schlüssel hinzu. Für einen schnellen Test erstelle einen Google-AI-Schlüssel: Der Gratis-Tarif kostet nichts. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann wähle zuerst „Eigenen Anbieter verwenden“. Danach kommst du hierher zurück.",
-      "why": "Deine Anbieter-Schlüssel werden mit deinem Passwort verschlüsselt und bleiben immer unter deiner Kontrolle. Am Schlüssel erkennt der KI-Anbieter, dass du es bist."
+      "what": "Wähle ein Tresor-Passwort und füge dann einen Schlüssel hinzu: Wähle zuerst einen Anbieter. Für einen schnellen Test nimm einen mit Gratis-Tarif. Danach kommst du hierher zurück.",
+      "why": "Deine Anbieter-Schlüssel werden mit deinem Passwort verschlüsselt und bleiben immer unter deiner Kontrolle."
     },
     "cloudUnlock": {
       "what": "Deinen Tresor auf der Tresor-Seite entsperren. Danach kommst du hierher zurück."
     },
     "cloudKey": {
-      "what": "Füge auf der Tresor-Seite einen Schlüssel hinzu. Für einen schnellen Test erstelle einen Google-AI-Schlüssel: Der Gratis-Tarif kostet nichts. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann wähle zuerst „Eigenen Anbieter verwenden“. Danach kommst du hierher zurück."
+      "what": "Füge auf der Tresor-Seite einen Schlüssel hinzu: Wähle zuerst einen Anbieter. Für einen schnellen Test nimm einen mit Gratis-Tarif. Danach kommst du hierher zurück."
     },
     "key": {
       "title": "Einen Schlüssel hinzufügen, um mit dem Übersetzen zu beginnen",
-      "why": "Google AI, Groq und OpenRouter haben einen Gratis-Tarif: Mit einem Schlüssel von einem dieser Anbieter übersetzt NARN Freeway dein Spiel kostenlos, während du es ausprobierst. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
-      "whyOwn": "Am {{provider}}-Schlüssel erkennt {{provider}}, dass du es bist. Den Anbieter kannst du jederzeit im Tab „Konfiguration“ des Projekts ändern.",
-      "choiceWhat": "Für einen schnellen Test erstelle einen Google-AI-Schlüssel: Der Gratis-Tarif kostet nichts. Du hast schon einen Schlüssel für einen unterstützten Anbieter? Dann wähle „Eigenen Anbieter verwenden“.",
+      "why": "Den Anbieter kannst du später im Tab „Konfiguration“ des Projekts ändern.",
+      "choiceWhat": "Wähle einen Anbieter und füge seinen Schlüssel hinzu. Für einen schnellen Test nimm einen mit Gratis-Tarif.",
       "pasteWhat": "Den Schlüssel hier einfügen, darunter dein Tresor-Passwort eingeben und speichern."
+    },
+    "providerList": {
+      "title": "Anbieter wählen",
+      "what": "Du hast schon einen Schlüssel? Wähle seinen Anbieter aus. Noch keinen? Drücke neben einem Anbieter auf „Schlüssel holen“, um auf dessen Seite einen zu erstellen, und wähle ihn dann aus.",
+      "why": "Für einen schnellen Test nimm einen Anbieter mit Gratis-Tarif."
+    },
+    "providerCard": {
+      "title": "Wer dieses Projekt übersetzt",
+      "what": "Wähle, wer dieses Projekt übersetzt.",
+      "why": "Drücke auf „Zurück“, um diesen Bereich zu schließen und mit der Anleitung weiterzumachen."
     },
     "project": {
       "title": "Text deines Spiels importieren",
-      "why": "Beim Import wählst du, ob die Datei Gespeichertes ersetzt oder nur neue Einträge hinzufügt und geänderte aktualisiert.",
       "openWhat": "Die Projektliste öffnen.",
       "newWhat": "Ein neues Projekt erstellen.",
       "createWhat": "Dem Projekt einen Namen geben und es erstellen.",
@@ -73,17 +83,23 @@
     },
     "translate": {
       "title": "Übersetzen",
-      "why": "Freeway wählt für jede Sprache automatisch ein passendes kostenloses Modell.",
-      "whyOwn": "{{provider}} übersetzt dieses Projekt mit deinem eigenen Schlüssel.",
-      "whyCustom": "Das Routing dieses Projekts, eingerichtet unter „Erweitert“, wählt den Anbieter für jeden Eintrag.",
       "openWhat": "Den Tab mit der Liste deiner Einträge öffnen.",
       "quickWhat": "3 Einträge, die noch übersetzt werden müssen, sind ausgewählt. Zum Ausprobieren nur diese übersetzen oder gleich alles.",
       "fewWhat": "Deine Einträge sind ausgewählt. Jetzt übersetzen.",
       "startWhat": "Die Übersetzung starten.",
-      "nothingWhat": "Deine Datei enthält schon für jede gewählte Sprache eine Übersetzung. Um eine Übersetzung live zu sehen, übersetze 3 Einträge neu: Ihre Übersetzungen werden ersetzt und lassen sich danach zurückholen.",
-      "nothingWhy": "Oder klicke auf „Weiter“, um zum Export zu gehen. Um eine Sprache hinzuzufügen, hake sie im Tab „Daten“ an und speichere.",
+      "nothingWhat": "Deine Datei enthält schon alle Übersetzungen. Um eine live zu sehen, übersetze 3 Einträge neu: Ihre Übersetzungen kannst du danach zurückholen.",
+      "nothingWhy": "Oder klicke auf „Weiter“, um zu exportieren. Um eine Sprache hinzuzufügen, hake sie im Tab „Daten“ an und speichere.",
       "progressWhat": "Die Übersetzung läuft. Diese Zeile zeigt den Fortschritt.",
       "progressWhy": "Die Tour geht weiter, sobald die Übersetzung abgeschlossen ist."
+    },
+    "retest": {
+      "title": "3 Einträge neu übersetzen",
+      "filterWhat": "Öffne Status und entferne das Häkchen bei Nur unübersetzte Einträge anzeigen, damit die Liste auch deine übersetzten Einträge zeigt.",
+      "selectWhat": "Setze bei 3 Einträgen auf dieser Seite ein Häkchen.",
+      "translateWhat": "Drücke Auswahl übersetzen.",
+      "modeWhat": "Wähle Vorhandene Übersetzungen neu übersetzen. Mit Nur unübersetzte Einträge füllen würden die 3 Einträge übersprungen, weil sie schon übersetzt sind.",
+      "startWhat": "Drücke Starten, um die 3 Einträge neu zu übersetzen.",
+      "nothingPicked": "Nichts wurde neu übersetzt: Diese Einträge hatten schon Übersetzungen. Drücke noch einmal Auswahl übersetzen und wähle Vorhandene Übersetzungen neu übersetzen."
     },
     "failed": {
       "title": "Übersetzung nicht durchgeführt",
@@ -92,6 +108,7 @@
       "quotaWhat": "Das kostenlose Kontingent ist vorerst aufgebraucht. Etwas warten oder einen weiteren Schlüssel hinzufügen und es erneut versuchen.",
       "quotaWhatOwn": "{{provider}} lehnt vorerst ab: Kontingent oder Guthaben deines Kontos ist aufgebraucht. Prüfe deinen Tarif beim Anbieter und versuche es dann erneut.",
       "quotaWhatCustom": "Ein Anbieter aus dem Routing dieses Projekts lehnt vorerst ab: Ein Kontingent oder Guthaben ist aufgebraucht. Etwas warten oder den Tarif beim Anbieter prüfen und es erneut versuchen.",
+      "noProviderWhat": "Es wurde nichts übersetzt: Kein Anbieter war dafür eingeschaltet. Drücke Erneut versuchen: NARN schaltet zuerst den Anbieter deines gespeicherten Schlüssels ein.",
       "otherWhat": "Es wurde nichts übersetzt. Den Schlüssel prüfen und es erneut versuchen."
     },
     "parked": {
@@ -107,7 +124,6 @@
     "rest": {
       "title": "Der Test hat geklappt",
       "what": "Deine 3 Testeinträge sind in jede gewählte Sprache übersetzt. Den Rest jetzt übersetzen oder exportieren, was schon fertig ist.",
-      "why": "Den Rest kannst du auch später in der Liste der Einträge übersetzen.",
       "skipped": "Der Rest kann warten. Lade herunter, was schon übersetzt ist."
     },
     "restore": {
@@ -130,14 +146,20 @@
       "what": "Das ist die vereinfachte Ansicht: Sie zeigt nur, was du zum Übersetzen und Exportieren brauchst. „Erweitert“ bietet mehr Werkzeuge. Stell den Schalter auf „Erweitert“, um eine kurze Tour zu sehen.",
       "whatAdvanced": "Du nutzt den erweiterten Modus, der alle Werkzeuge zeigt. Eine kurze Tour erklärt, wofür jeder Bereich da ist.",
       "why": "Du kannst jederzeit in der oberen Leiste wechseln."
+    },
+    "moreTours": {
+      "title": "Weitere geführte Touren",
+      "what": "Kurze Touren zu Glossaren, Routing und mehr findest du im Guide. Starte eine, wann immer du möchtest."
     }
   },
   "providerChoice": {
-    "title": "Eigenen Anbieter verwenden",
-    "description": "Den Anbieter auswählen, für den du einen Schlüssel hast. Er übersetzt dieses Projekt und die neuen Projekte, die du erstellst. Um mehrere Anbieter zu kombinieren, zu „Erweitert“ wechseln.",
+    "title": "Anbieter wählen",
+    "description": "Er übersetzt dieses Projekt und die neuen Projekte, die du erstellst.",
     "existingRouting": "Für dieses Projekt ist bereits Routing eingerichtet, es bleibt daher unverändert. Ändern kannst du es unter „Erweitert“.",
-    "freeHeading": "Gratis-Tarif. Wenn du einen davon wählst, übersetzt nur er, ohne die anderen kostenlosen Modelle im NARN-Freeway-Pool.",
-    "paidHeading": "Kostenpflichtig, wird über dein Konto beim Anbieter abgerechnet.",
+    "freeHeading": "Mit Gratis-Tarif",
+    "paidHeading": "Ohne Gratis-Tarif",
+    "getKey": "Schlüssel holen",
+    "getKeyAria": "{{provider}}-Schlüssel holen (öffnet die Seite des Anbieters)",
     "cancel": "Abbrechen",
     "failed": "{{provider}} konnte nicht eingerichtet werden: {{message}}",
     "switchedOff": "{{provider}} ist unter „Erweitert“ ausgeschaltet und wurde daher nicht verwendet. Schalte ihn in der Globalen Konfiguration wieder ein oder wähle einen anderen Anbieter.",
@@ -161,11 +183,15 @@
     },
     "glossaries": {
       "name": "Glossare",
-      "summary": "Lege ein Glossar an, füge Begriffe hinzu und wende es an, damit Schlüsselbegriffe einheitlich bleiben."
+      "summary": "Aktiviere ein fertiges Glossar, das zu deinem Text passt, und sieh dir die Treffer an, die es findet."
     },
     "routing": {
       "name": "Routing",
       "summary": "Ein 30-Sekunden-Überblick, wie NARN entscheidet, wer was übersetzt."
+    },
+    "routing-advanced": {
+      "name": "Erweiterte Routing-Regeln",
+      "summary": "Regeln, die jede Sprache oder Textart an den Anbieter deiner Wahl schicken."
     },
     "quality": {
       "name": "Qualität",
@@ -189,6 +215,7 @@
     "progressSections": "{{current}} von {{total}} Abschnitten",
     "completed": "Abgeschlossen",
     "needsProject": "Öffne ein Projekt, um diese Tour zu machen.",
+    "needsDesktop": "Touren brauchen einen breiteren Bildschirm. Öffne die App auf einem Computer, um eine zu machen.",
     "switchedToAdvanced": "Für diese Tour wurde in den erweiterten Modus gewechselt.",
     "confirm": {
       "title": "Für die geführte Einrichtung zu „Einfach“ wechseln?",
@@ -211,7 +238,8 @@
       "mode": {
         "title": "Einfache oder erweiterte Regeln",
         "what": "Hier wechselst du zwischen einem Anbieter für alles und einer Liste von Regeln.",
-        "why": "Fang einfach an. Wechsle zu Regeln, wenn du für eine Sprache, eine Kategorie oder einen Ton einen anderen Anbieter willst."
+        "why": "Fang einfach an. Wechsle zu Regeln, wenn du für eine Sprache, eine Kategorie oder einen Ton einen anderen Anbieter willst.",
+        "advancedAction": "Erweiterte Regeln erklären"
       }
     },
     "glossary": {
@@ -222,7 +250,7 @@
       "list": {
         "title": "Deine Glossare",
         "what": "Jedes Glossar ist eine Liste von Begriffen mit der Übersetzung, die du für jeden willst.",
-        "why": "So werden Begriffe wie Figurennamen oder Spielfachsprache jedes Mal gleich übersetzt."
+        "why": "So werden Begriffe wie Figurennamen, Fähigkeiten oder Gegenstandsnamen jedes Mal gleich übersetzt."
       },
       "create": {
         "title": "Ein Glossar anlegen",
@@ -298,6 +326,73 @@
         "why": "Nutze das vor einem Release oder nachdem du Glossar oder Routing geändert hast."
       }
     }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Regeln, von oben geprüft",
+      "what": "NARN prüft die Regeln von oben, und die erste Regel, die auf einen Eintrag passt, übersetzt ihn. In dieser Tour schickst du asiatische Sprachen an einen Anbieter und alle anderen Sprachen an einen anderen.",
+      "why": "Ein Eintrag, auf den keine Regel passt, wird nicht übersetzt – die letzte Regel sollte also auf alles passen."
+    },
+    "edit": {
+      "title": "Regel #1 öffnen",
+      "what": "Klicke auf den Stift, um Regel #1 zu bearbeiten. Sie übernimmt die asiatischen Sprachen.",
+      "noRulesWhat": "Dieses Projekt hat noch keine Regeln. Klicke auf „Regel hinzufügen“, um Regel #1 anzulegen. Sie übernimmt die asiatischen Sprachen."
+    },
+    "filter": {
+      "title": "„Filterung“ öffnen",
+      "what": "Klicke auf „Filterung“, um zu sehen, welche Einträge diese Regel übernimmt.",
+      "why": "Eine Regel, bei der hier nichts angehakt ist, übernimmt jeden Eintrag."
+    },
+    "langs": {
+      "title": "Die asiatischen Sprachen anhaken",
+      "what": "Hake unter den Sprachen deines Projekts die asiatischen an, zum Beispiel ja, ko und zh-hans, und entferne die Haken bei allen anderen. Hat dein Projekt keine, hake zum Ausprobieren eine beliebige Sprache an. „Weiter“ erscheint, sobald du einen Haken setzt oder entfernst.",
+      "why": "Regel #1 übernimmt jetzt nur diese Sprachen. Alle anderen Sprachen gehen weiter an die Regeln darunter."
+    },
+    "module": {
+      "title": "Ihren Anbieter wählen",
+      "what": "Wähle unter „Modul“ den Anbieter für diese Sprachen. Um ein anderes Modell desselben Anbieters zu nutzen, öffne weiter unten „Agent-Einstellungen“.",
+      "why": "Deine Änderungen werden automatisch gespeichert."
+    },
+    "done": {
+      "title": "Die Regel schließen",
+      "what": "Klicke auf „Fertig“."
+    },
+    "add": {
+      "title": "Eine Regel für die anderen Sprachen hinzufügen",
+      "what": "Klicke auf „Regel hinzufügen“. Die neue Regel kommt ganz nach unten, unter die vorhandenen Regeln.",
+      "why": "Die Regeln werden von oben geprüft, also bekommt eine Regel ganz unten nur, was die Regeln darüber übrig gelassen haben."
+    },
+    "newModule": {
+      "title": "Nur einen Anbieter wählen",
+      "what": "Wähle unter „Modul“ den Anbieter für alle anderen Sprachen. Lass „Filterung“ leer. „Weiter“ erscheint, sobald ein Anbieter gewählt ist.",
+      "why": "Ein Filter ist nicht nötig: Die angehakten Sprachen bleiben bei Regel #1 hängen, also erreichen nur die anderen Sprachen die Regeln darunter."
+    },
+    "order": {
+      "title": "Die Reihenfolge macht die Arbeit",
+      "what": "Regel #1 übernimmt die angehakten Sprachen, und die Regeln darunter bekommen nur, was übrig bleibt. Käme die Regel ohne Filter zuerst, würde sie jede Sprache übernehmen, und Regel #1 würde nie verwendet.",
+      "why": "Um die Reihenfolge zu ändern, nutze die Pfeile neben einer Regel."
+    },
+    "templates": {
+      "title": "Vorlagen",
+      "what": "Fertige Regeln. Vorlage verwenden fügt eine unten an die Regeln dieses Projekts an.",
+      "why": "Ein schneller Start, den du danach anpasst."
+    },
+    "groups": {
+      "title": "Regelgruppen",
+      "what": "Eine Regelgruppe ist ein eigener Satz Regeln. Übersetzungen nutzen die hier gewählte Gruppe.",
+      "why": "Halte einen zweiten Satz bereit, etwa um einen Anbieter zu testen, und wechsle zwischen ihnen."
+    },
+    "import": {
+      "title": "Import / Export",
+      "what": "Speichere die Regeln als JSON-Datei oder lade Regeln aus einer.",
+      "why": "Nutze dasselbe Routing in einem anderen Projekt."
+    },
+    "back": {
+      "title": "Zurück zu Einfach",
+      "what": "„Einfach“ ist die Ansicht mit einem Anbieter. Wählst du sie, werden deine Regeln beiseitegelegt und ein Anbieter übersetzt alles.",
+      "why": "Deine Regeln bleiben erhalten und werden nicht gelöscht. Wähle „Erweitert“, um sie wieder zu nutzen."
+    },
+    "absentWhat": "Worauf dieser Schritt zeigt, ist gerade nicht zu sehen. Klicke auf „Weiter“, um fortzufahren, oder auf „Zurück“, um den Schritt davor zu wiederholen."
   },
   "advancedSections": {
     "compare": {
@@ -379,33 +474,42 @@
   "glossariesTour": {
     "purpose": {
       "title": "Wofür ein Glossar da ist",
-      "what": "Ein Glossar listet Begriffe mit der Übersetzung auf, die du für jeden willst, etwa Figurennamen oder Spieljargon.",
+      "what": "Ein Glossar listet Begriffe mit der Übersetzung auf, die du für jeden willst, etwa Figurennamen, Fähigkeiten oder Gegenstandsnamen.",
       "why": "Übersetzungen verwenden dann jedes Mal deine Wörter statt einer neuen Vermutung."
     },
-    "create": {
-      "title": "Glossar anlegen",
-      "what": "Lege hier ein neues, leeres Glossar an oder klicke auf Weiter, um weiterzulesen.",
-      "why": "Oft reicht ein Glossar. Nutze mehrere, um Begriffsgruppen getrennt zu halten."
+    "picked": {
+      "title": "Ein Glossar für deine Einträge",
+      "what": "Die Tour hat {{name}} gewählt, weil seine Begriffe in deinen Einträgen vorkommen. Passende Einträge: {{count}}.",
+      "noneWhat": "Noch passt keines deiner Glossare zu deinen Einträgen, deshalb nutzt die Tour {{name}}."
     },
-    "add-term": {
-      "title": "Begriff hinzufügen",
-      "what": "Gib den Quellbegriff und seine Übersetzung für jede Sprache ein und füge ihn hinzu.",
-      "why": "Markiere einen Begriff als konstant, wenn er nie übersetzt werden darf, etwa ein Markenname."
+    "constant": {
+      "title": "Die Spalte Konstant",
+      "what": "Wo der Text einen konstanten Begriff genau so schreibt wie das Glossar, wird er nie an die Übersetzungs-Engine geschickt. NARN setzt stattdessen deine Glossar-Übersetzung direkt ins Ergebnis, sodass ein Figurenname wie Diluc immer genau so herauskommt, wie er hier steht.",
+      "absentWhat": "Wähle links ein Glossar, um seine Begriffe und die Spalte Konstant zu sehen.",
+      "why": "Andere Begriffe gehen mit dem Text als Vorgabe mit, der die Engine folgen soll."
     },
-    "assign": {
-      "title": "Auf dieses Projekt anwenden",
-      "what": "Ein aktiviertes Glossar wird beim Übersetzen dieses Projekts verwendet. Deaktiviere es, um es nicht mehr zu nutzen.",
-      "why": "Lass ein Glossar deaktiviert, solange du es noch aufbaust."
+    "enable": {
+      "title": "Aktiviere es",
+      "what": "Drücke Aktivieren. NARN fragt, ob die Treffer angewendet werden sollen: Treffer anwenden weist das Glossar jedem Eintrag zu, der einen seiner Begriffe enthält.",
+      "absentWhat": "Wähle links ein Glossar und drücke dann Aktivieren neben seinem Namen.",
+      "onWhat": "{{name}} ist schon aktiviert, dieses Projekt nutzt es also.",
+      "why": "Beim Übersetzen dieses Projekts werden nur aktivierte Glossare genutzt."
+    },
+    "choice": {
+      "title": "Nur aktivieren oder Treffer anwenden?",
+      "what": "Treffer anwenden weist das Glossar sofort jedem Eintrag zu, der einen seiner Begriffe enthält. Nur aktivieren schaltet es nur ein und lässt deine Einträge, wie sie sind; zuweisen kannst du es später unter Treffer."
+    },
+    "matches": {
+      "title": "Gefundene Treffer",
+      "what": "NARN hat diese Einträge selbst gefunden: Jeder enthält einen Begriff aus {{name}}, und das Glossar ist ihnen jetzt zugewiesen.",
+      "onlyWhat": "NARN hat diese Einträge selbst gefunden: Jeder enthält einen Begriff aus {{name}}. Hake sie an und drücke Glossar zuweisen, um es für sie zu nutzen.",
+      "noneWhat": "Noch enthält kein Eintrag einen Begriff aus {{name}}. Einträge, die einen enthalten, erscheinen hier.",
+      "why": "Ein Glossar wird für die Einträge genutzt, denen es zugewiesen ist."
     },
     "effect": {
       "title": "Wie es die Übersetzung verändert",
       "what": "Enthält ein String einen Glossarbegriff, werden der Begriff und deine Übersetzung mit dem String mitgeschickt.",
       "why": "Der Anbieter folgt deiner Wahl, statt ein eigenes Wort zu wählen."
-    },
-    "generate": {
-      "title": "Begriffe von der KI vorschlagen lassen",
-      "what": "Lass einen KI-Anbieter wahrscheinliche Begriffe in deinen Strings finden.",
-      "why": "Du prüfst die Vorschläge und behältst nur die, die du willst."
     }
   },
   "orphansTour": {
@@ -457,6 +561,7 @@
     "explain-list": {
       "title": "Die Liste der Waisen",
       "what": "Jede Waise zeigt ihren Quelltext und wie viele Übersetzungen sie behält.",
+      "absentWhat": "Dieses Projekt hat gerade keine Waisen. Wenn ein Import Einträge auslässt, erscheint hier jede mit ihrem Quelltext und der Zahl der Übersetzungen, die sie behält.",
       "why": "Die mit den meisten Übersetzungen stehen oben: Sie neu zu machen kostet am meisten."
     },
     "explain-options": {

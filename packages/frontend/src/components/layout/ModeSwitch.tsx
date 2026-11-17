@@ -12,7 +12,10 @@ export function ModeSwitch({ testId = 'mode-switch' }: { testId?: string }) {
   const tourAnchor = testId === 'mode-switch' ? 'mode-switch' : undefined;
   return (
     <div
-      className="ml-auto flex items-center gap-1"
+      // The header's switch sits above a tour's dim layer (z-40): switching
+      // mode is always a way out of a tour (the Orphans tour puts its
+      // practice orphan back when it happens).
+      className={`ml-auto flex items-center gap-1${tourAnchor ? ' relative z-[45]' : ''}`}
       role="group"
       aria-label={t('uiModeLabel')}
       data-testid={testId}

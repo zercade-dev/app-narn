@@ -43,8 +43,8 @@
   "orphanedCount": "{{count}} orphaned",
   "importWarningsTitle": "Review before importing",
   "unknownHeadersSummary": "Unrecognized columns, ignored: {{headers}}",
-  "rawNewlineSummary_one": "Raw line breaks in {{count}} language. For an in-game line break, use the \\n marker.",
-  "rawNewlineSummary_other": "Raw line breaks in {{count}} languages. For an in-game line break, use the \\n marker.",
+  "rawNewlineSummary_one": "Raw line breaks in {{count}} language: use \\n instead.",
+  "rawNewlineSummary_other": "Raw line breaks in {{count}} languages: use \\n instead.",
   "rawNewlineShowLanguages": "Show languages",
   "continueImport": "Continue import",
   "cancelImport": "Cancel",
@@ -62,9 +62,10 @@
   "formulaGuardKeptNotice": "Cells starting with an apostrophe before = + - or @: {{cells}}. They are kept as written, so check them: an earlier spreadsheet-protected export may have added it.",
   "exportLanguages": "Languages",
   "exportCollection": "Collection",
-  "collectionMain": "Main text",
+  "collectionMain": "Server translations",
   "collectionClient": "Client script text",
-  "detectedCollection": "Detected: {{collection}}",
+  "detectedClient": "Detected: <hl>Client</hl> script text",
+  "detectedMain": "Detected: <hl>Server</hl> translations",
   "exportLanguagesHint": "Which columns to include in this export",
   "pseudoExportAs": "Export pseudo text as",
   "pseudoExportNone": "No substitution",
@@ -195,7 +196,8 @@
     "simpleLabel": "Translate everything with",
     "simpleHint": "Every string in this project is translated by the provider you pick here.",
     "simpleDefaultNote": "Default — used until you choose a provider.",
-    "simpleAdvancedNotice": "This project uses advanced routing, so the full editor is shown.",
+    "simpleAdvancedNotice": "This project has its own rules, so the full editor is shown. Choose Simple to set them aside and use one provider for everything.",
+    "simpleSetAsideNote": "Your Advanced rules are set aside. Choose Advanced to use them again.",
     "refreshModels": "Refresh models",
     "selectPlaceholder": "— select —",
     "exportFailed": "Failed to export routing rules.",
@@ -414,7 +416,7 @@
       },
       "glossary-adherence": {
         "name": "Glossary adherence",
-        "description": "Glossary terms matched in the source must appear translated in the output (whole-word match). At warning severity the issue is informational only; set severity to blocking to trigger the automatic retry."
+        "description": "Glossary terms matched in the source must appear translated in the output. A declined form counts, such as a Russian case ending. Constant terms are skipped: masking already keeps them exact. At warning severity the issue is informational only; set severity to blocking to retry the translation once when a term was dropped or reworded."
       },
       "forbidden-terms": {
         "name": "Forbidden terms",

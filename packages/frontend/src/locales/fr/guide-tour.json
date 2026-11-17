@@ -1,5 +1,7 @@
 {
   "next": "Suivant",
+  "completeTour": "Terminer la visite",
+  "lookOnly": "Ceci est seulement montré pendant la visite. Vous pourrez l’utiliser une fois la visite terminée.",
   "back": "Retour",
   "skip": "Passer la visite",
   "close": "Fermer",
@@ -11,9 +13,7 @@
       "openVault": "Ouvrir le formulaire du coffre",
       "cloudVault": "Configurer votre coffre",
       "openVaultPage": "Ouvrir la page du coffre",
-      "getGoogleKey": "Obtenir une clé Google (offre gratuite)",
-      "addGoogleKey": "Coller ma clé Google",
-      "ownProvider": "Utiliser mon propre fournisseur",
+      "chooseProvider": "Choisir un fournisseur",
       "useFoundKey": "Utiliser {{provider}} pour vos traductions",
       "fixKey": "Vérifier ma clé",
       "retry": "Réessayer",
@@ -27,7 +27,9 @@
       "restoreTest": "Remettre mes traductions",
       "keepTest": "Garder les nouvelles traductions",
       "tourSections": "Montrez-moi les sections",
-      "maybeLater": "Plus tard"
+      "maybeLater": "Plus tard",
+      "openTours": "Afficher les visites",
+      "toursDone": "Terminé"
     },
     "vault": {
       "title": "Créer le mot de passe de votre coffre",
@@ -43,25 +45,33 @@
     },
     "cloudVault": {
       "title": "Créer votre coffre et ajouter une clé",
-      "what": "Choisissez un mot de passe pour le coffre, puis ajoutez une clé. Pour un test rapide, créez une clé Google AI : son offre gratuite ne coûte rien. Vous avez déjà une clé pour un fournisseur pris en charge ? Choisissez d’abord « Utiliser mon propre fournisseur ». Vous reviendrez ici une fois terminé.",
-      "why": "Vos clés de fournisseurs sont chiffrées avec votre mot de passe et restent toujours sous votre contrôle. La clé permet au fournisseur d’IA de vous reconnaître."
+      "what": "Choisissez un mot de passe pour le coffre, puis ajoutez une clé : choisissez d’abord un fournisseur. Pour un test rapide, prenez-en un avec une offre gratuite. Vous reviendrez ici une fois terminé.",
+      "why": "Vos clés de fournisseurs sont chiffrées avec votre mot de passe et restent toujours sous votre contrôle."
     },
     "cloudUnlock": {
       "what": "Déverrouillez votre coffre sur la page du coffre. Vous reviendrez ici une fois terminé."
     },
     "cloudKey": {
-      "what": "Ajoutez une clé sur la page du coffre. Pour un test rapide, créez une clé Google AI : son offre gratuite ne coûte rien. Vous avez déjà une clé pour un fournisseur pris en charge ? Choisissez d’abord « Utiliser mon propre fournisseur ». Vous reviendrez ici une fois terminé."
+      "what": "Ajoutez une clé sur la page du coffre : choisissez d’abord un fournisseur. Pour un test rapide, prenez-en un avec une offre gratuite. Vous reviendrez ici une fois terminé."
     },
     "key": {
       "title": "Ajouter une clé pour commencer à traduire",
-      "why": "Google AI, Groq et OpenRouter proposent une offre gratuite : avec une clé de l’un d’eux, NARN Freeway traduit votre jeu sans frais pendant que vous l’essayez. Vous pouvez changer de fournisseur à tout moment dans l’onglet Configuration du projet.",
-      "whyOwn": "Votre clé {{provider}} permet à {{provider}} de vous reconnaître. Vous pouvez changer de fournisseur à tout moment dans l’onglet Configuration du projet.",
-      "choiceWhat": "Pour un test rapide, créez une clé Google AI : son offre gratuite ne coûte rien. Vous avez déjà une clé pour un fournisseur pris en charge ? Choisissez « Utiliser mon propre fournisseur ».",
+      "why": "Vous pourrez changer de fournisseur plus tard dans l’onglet Configuration du projet.",
+      "choiceWhat": "Choisissez un fournisseur et ajoutez sa clé. Pour un test rapide, prenez-en un avec une offre gratuite.",
       "pasteWhat": "Collez la clé ici, saisissez le mot de passe de votre coffre en dessous, puis enregistrez."
+    },
+    "providerList": {
+      "title": "Choisir un fournisseur",
+      "what": "Vous avez déjà une clé ? Sélectionnez son fournisseur. Pas encore de clé ? Appuyez sur Obtenir une clé à côté d’un fournisseur pour en créer une sur son site, puis sélectionnez-le.",
+      "why": "Pour un test rapide, utilisez un fournisseur avec une offre gratuite."
+    },
+    "providerCard": {
+      "title": "Qui traduit ce projet",
+      "what": "Choisissez qui traduit ce projet.",
+      "why": "Appuyez sur Retour pour fermer ce panneau et poursuivre le guide."
     },
     "project": {
       "title": "Importer le texte de votre jeu",
-      "why": "À l’import, vous choisissez si le fichier remplace ce qui est enregistré ou s’il ajoute seulement les nouvelles entrées et met à jour celles qui ont changé.",
       "openWhat": "Ouvrez la liste des projets.",
       "newWhat": "Créez un nouveau projet.",
       "createWhat": "Donnez un nom à votre projet, puis créez-le.",
@@ -73,17 +83,23 @@
     },
     "translate": {
       "title": "Traduire",
-      "why": "Freeway choisit automatiquement un modèle gratuit adapté à chaque langue.",
-      "whyOwn": "{{provider}} traduit ce projet avec votre propre clé.",
-      "whyCustom": "Le routage de ce projet, configuré en mode Avancé, choisit le fournisseur de chaque entrée.",
       "openWhat": "Ouvrez l’onglet qui liste vos textes.",
       "quickWhat": "3 textes encore à traduire sont sélectionnés. Traduisez-les pour essayer, ou traduisez tout dès maintenant.",
       "fewWhat": "Vos textes sont sélectionnés. Traduisez-les maintenant.",
       "startWhat": "Démarrez la traduction.",
-      "nothingWhat": "Votre fichier contient déjà une traduction pour chaque langue choisie. Pour voir une traduction en action, retraduisez 3 entrées : leurs traductions sont remplacées et vous pourrez les remettre ensuite.",
-      "nothingWhy": "Ou appuyez sur Suivant pour passer à l’export. Pour ajouter une langue, cochez-la dans l’onglet Données et enregistrez.",
+      "nothingWhat": "Votre fichier contient déjà toutes les traductions. Pour en voir une en action, retraduisez 3 entrées : vous pourrez remettre leurs traductions ensuite.",
+      "nothingWhy": "Ou appuyez sur Suivant pour exporter. Pour ajouter une langue, cochez-la dans l’onglet Données et enregistrez.",
       "progressWhat": "La traduction est en cours. Cette ligne indique sa progression.",
       "progressWhy": "La visite reprend une fois la traduction terminée."
+    },
+    "retest": {
+      "title": "Retraduisez 3 entrées",
+      "filterWhat": "Ouvrez Statut et décochez Afficher uniquement les non traduits, pour que la liste montre aussi vos entrées traduites.",
+      "selectWhat": "Cochez les cases de 3 entrées de cette page.",
+      "translateWhat": "Appuyez sur Traduire la sélection.",
+      "modeWhat": "Choisissez Retraduire les traductions existantes. Avec Compléter uniquement les entrées non traduites, les 3 entrées seraient ignorées : elles sont déjà traduites.",
+      "startWhat": "Appuyez sur Démarrer pour retraduire les 3 entrées.",
+      "nothingPicked": "Rien n’a été retraduit : ces entrées avaient déjà des traductions. Appuyez de nouveau sur Traduire la sélection et choisissez Retraduire les traductions existantes."
     },
     "failed": {
       "title": "La traduction n’a pas abouti",
@@ -92,6 +108,7 @@
       "quotaWhat": "Le quota gratuit est épuisé pour le moment. Patientez un peu ou ajoutez une autre clé, puis réessayez.",
       "quotaWhatOwn": "{{provider}} refuse pour le moment : le quota ou le crédit de votre compte est épuisé. Vérifiez votre forfait auprès du fournisseur, puis réessayez.",
       "quotaWhatCustom": "Un fournisseur du routage de ce projet refuse pour le moment : un quota ou un crédit est épuisé. Patientez un peu ou vérifiez le forfait auprès du fournisseur, puis réessayez.",
+      "noProviderWhat": "Rien n’a été traduit : aucun fournisseur n’était activé pour s’en charger. Appuyez sur Réessayer : NARN active d’abord le fournisseur de votre clé enregistrée.",
       "otherWhat": "Rien n’a été traduit. Vérifiez votre clé, puis réessayez."
     },
     "parked": {
@@ -107,7 +124,6 @@
     "rest": {
       "title": "Le test a fonctionné",
       "what": "Vos 3 textes d’essai sont traduits dans toutes les langues choisies. Traduisez le reste maintenant, ou exportez ce que vous avez.",
-      "why": "Vous pourrez traduire le reste plus tard depuis la liste des textes.",
       "skipped": "Le reste peut attendre. Téléchargez ce qui est déjà traduit."
     },
     "restore": {
@@ -130,14 +146,20 @@
       "what": "Ceci est la vue simplifiée : elle n’affiche que le nécessaire pour traduire et exporter. Le mode Avancé propose plus d’outils. Basculez sur Avancé pour une courte visite.",
       "whatAdvanced": "Vous êtes en mode Avancé, qui affiche tous les outils. Une courte visite explique à quoi sert chaque section.",
       "why": "Vous pouvez changer de mode à tout moment depuis la barre supérieure."
+    },
+    "moreTours": {
+      "title": "Plus de visites guidées",
+      "what": "Des visites courtes sur les glossaires, le routage et plus encore se trouvent dans Guide. Lancez-en une quand vous voulez."
     }
   },
   "providerChoice": {
-    "title": "Utiliser mon propre fournisseur",
-    "description": "Choisissez le fournisseur dont vous avez une clé. Il traduit ce projet et les nouveaux projets que vous créez. Pour combiner plusieurs fournisseurs, passez en mode Avancé.",
+    "title": "Choisir un fournisseur",
+    "description": "Il traduit ce projet et les nouveaux projets que vous créez.",
     "existingRouting": "Ce projet a déjà un routage configuré, il reste donc tel quel. Vous pouvez le modifier en mode Avancé.",
-    "freeHeading": "Offre gratuite. En choisir un le fait traduire seul, sans les autres modèles gratuits du pool NARN Freeway.",
-    "paidHeading": "Payant, facturé sur votre compte chez le fournisseur.",
+    "freeHeading": "Avec offre gratuite",
+    "paidHeading": "Sans offre gratuite",
+    "getKey": "Obtenir une clé",
+    "getKeyAria": "Obtenir une clé {{provider}} (ouvre le site du fournisseur)",
     "cancel": "Annuler",
     "failed": "Impossible de configurer {{provider}} : {{message}}",
     "switchedOff": "{{provider}} est désactivé en mode Avancé, il n’a donc pas été utilisé. Réactivez-le dans Configuration globale, ou choisissez un autre fournisseur.",
@@ -161,11 +183,15 @@
     },
     "glossaries": {
       "name": "Glossaires",
-      "summary": "Créez un glossaire, ajoutez des termes et appliquez-le pour garder des termes clés cohérents."
+      "summary": "Activez un glossaire prêt à l’emploi adapté à votre texte et voyez les correspondances qu’il trouve."
     },
     "routing": {
       "name": "Routage",
       "summary": "Un aperçu de 30 secondes de la façon dont NARN choisit qui traduit quoi."
+    },
+    "routing-advanced": {
+      "name": "Règles de routage avancées",
+      "summary": "Des règles qui envoient chaque langue ou type de texte au fournisseur de votre choix."
     },
     "quality": {
       "name": "Qualité",
@@ -189,6 +215,7 @@
     "progressSections": "{{current}} sur {{total}} sections",
     "completed": "Terminé",
     "needsProject": "Ouvrez un projet pour suivre cette visite.",
+    "needsDesktop": "Les visites demandent un écran plus large. Ouvrez l’application sur un ordinateur pour en suivre une.",
     "switchedToAdvanced": "Passage en mode avancé pour cette visite.",
     "confirm": {
       "title": "Passer en mode Simple pour la configuration guidée ?",
@@ -211,7 +238,8 @@
       "mode": {
         "title": "Règles simples ou avancées",
         "what": "Basculez ici entre un seul fournisseur pour tout et une liste de règles.",
-        "why": "Commencez simple. Passez aux règles quand vous voulez un autre fournisseur pour une langue, une catégorie ou un ton."
+        "why": "Commencez simple. Passez aux règles quand vous voulez un autre fournisseur pour une langue, une catégorie ou un ton.",
+        "advancedAction": "Expliquer les règles avancées"
       }
     },
     "glossary": {
@@ -222,7 +250,7 @@
       "list": {
         "title": "Vos glossaires",
         "what": "Chaque glossaire est une liste de termes avec la traduction voulue pour chacun.",
-        "why": "Les termes comme les noms de personnages ou le jargon du jeu sortent alors toujours de la même façon."
+        "why": "Les termes comme les noms de personnages, les compétences ou les noms d’objets sortent alors toujours de la même façon."
       },
       "create": {
         "title": "Créer un glossaire",
@@ -298,6 +326,73 @@
         "why": "À utiliser avant une version, ou après avoir modifié le glossaire ou le routage."
       }
     }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Des règles lues de haut en bas",
+      "what": "NARN lit les règles de haut en bas, et la première qui convient à une entrée la traduit. Dans cette visite, vous envoyez les langues asiatiques à un fournisseur et toutes les autres langues à un autre.",
+      "why": "Une entrée qu’aucune règle ne couvre n’est pas traduite : la dernière règle doit donc couvrir tout."
+    },
+    "edit": {
+      "title": "Ouvrez la règle n°1",
+      "what": "Appuyez sur le crayon pour modifier la règle n°1. Elle traitera les langues asiatiques.",
+      "noRulesWhat": "Ce projet n’a pas encore de règle. Appuyez sur Ajouter une règle pour créer la règle n°1. Elle traitera les langues asiatiques."
+    },
+    "filter": {
+      "title": "Ouvrez Filtrage",
+      "what": "Appuyez sur Filtrage pour voir quelles entrées cette règle prend.",
+      "why": "Une règle sans rien de coché ici prend toutes les entrées."
+    },
+    "langs": {
+      "title": "Cochez les langues asiatiques",
+      "what": "Cochez les langues asiatiques parmi les langues de votre projet, par exemple ja, ko et zh-hans, et décochez les autres. S’il n’y en a aucune dans ce projet, cochez n’importe quelle langue pour essayer. Suivant apparaît dès que vous cochez ou décochez une langue.",
+      "why": "La règle n°1 ne prend plus que ces langues. Toutes les autres langues passent aux règles en dessous."
+    },
+    "module": {
+      "title": "Choisissez son fournisseur",
+      "what": "Dans Module, choisissez le fournisseur pour ces langues. Pour utiliser un autre modèle du même fournisseur, ouvrez Paramètres de l'agent plus bas.",
+      "why": "Vos modifications s’enregistrent toutes seules."
+    },
+    "done": {
+      "title": "Fermez la règle",
+      "what": "Appuyez sur Terminé."
+    },
+    "add": {
+      "title": "Ajoutez une règle pour les autres langues",
+      "what": "Appuyez sur Ajouter une règle. La nouvelle règle se place en bas, sous les règles déjà présentes.",
+      "why": "Les règles sont lues de haut en bas, donc une règle en bas ne reçoit que ce que les règles au-dessus ont laissé."
+    },
+    "newModule": {
+      "title": "Choisissez un fournisseur, rien d’autre",
+      "what": "Dans Module, choisissez le fournisseur pour toutes les autres langues. Laissez Filtrage vide. Suivant apparaît dès qu’un fournisseur est choisi.",
+      "why": "Aucun filtre n’est nécessaire : les langues cochées s’arrêtent à la règle n°1, donc seules les autres langues atteignent les règles en dessous."
+    },
+    "order": {
+      "title": "L’ordre fait le travail",
+      "what": "La règle n°1 prend les langues cochées, et les règles en dessous ne reçoivent que ce qui reste. Si la règle sans filtre passait en premier, elle prendrait toutes les langues, et la règle n°1 ne servirait jamais.",
+      "why": "Pour changer l’ordre, utilisez les flèches à côté d’une règle."
+    },
+    "templates": {
+      "title": "Modèles",
+      "what": "Des règles toutes prêtes. Utiliser le modèle en ajoute une en bas des règles de ce projet.",
+      "why": "Un départ rapide que vous ajustez ensuite."
+    },
+    "groups": {
+      "title": "Groupes de règles",
+      "what": "Un groupe de règles est un ensemble de règles à part. Les traductions utilisent le groupe sélectionné ici.",
+      "why": "Gardez un autre ensemble prêt, par exemple pour tester un fournisseur, et passez de l’un à l’autre."
+    },
+    "import": {
+      "title": "Importer / Exporter",
+      "what": "Enregistrez les règles dans un fichier JSON, ou chargez des règles depuis un tel fichier.",
+      "why": "Réutilisez le même routage dans un autre projet."
+    },
+    "back": {
+      "title": "Revenir à Simple",
+      "what": "Simple est la vue à un seul fournisseur. La choisir met vos règles de côté : un seul fournisseur traduit tout.",
+      "why": "Vos règles sont conservées, pas supprimées. Choisissez Avancé pour les utiliser à nouveau."
+    },
+    "absentWhat": "Ce que montre cette étape n’est pas à l’écran pour le moment. Appuyez sur Suivant pour continuer, ou sur Retour pour refaire l’étape précédente."
   },
   "advancedSections": {
     "compare": {
@@ -379,33 +474,42 @@
   "glossariesTour": {
     "purpose": {
       "title": "À quoi sert un glossaire",
-      "what": "Un glossaire liste des termes avec la traduction voulue pour chacun, comme des noms de personnages ou le jargon du jeu.",
+      "what": "Un glossaire liste des termes avec la traduction voulue pour chacun, comme des noms de personnages, des compétences ou des noms d’objets.",
       "why": "Les traductions reprennent alors vos mots à chaque fois au lieu d’une nouvelle supposition."
     },
-    "create": {
-      "title": "Créer un glossaire",
-      "what": "Commencez ici un nouveau glossaire vide, ou appuyez sur Suivant pour poursuivre la lecture.",
-      "why": "Un seul glossaire suffit souvent. Utilisez-en plusieurs pour séparer des groupes de termes."
+    "picked": {
+      "title": "Un glossaire pour vos entrées",
+      "what": "La visite a choisi {{name}}, car ses termes figurent dans vos entrées. Entrées correspondantes : {{count}}.",
+      "noneWhat": "Aucun de vos glossaires ne correspond encore à vos entrées, la visite utilise donc {{name}}."
     },
-    "add-term": {
-      "title": "Ajouter un terme",
-      "what": "Saisissez le terme source et sa traduction dans chaque langue, puis ajoutez-le.",
-      "why": "Marquez un terme comme constant quand il ne doit jamais être traduit, comme un nom de marque."
+    "constant": {
+      "title": "La colonne Constante",
+      "what": "Là où le texte écrit un terme constant exactement comme le glossaire, il n’est jamais envoyé au moteur de traduction. NARN place directement votre traduction du glossaire dans le résultat : un nom de personnage comme Diluc ressort toujours exactement tel qu’il est écrit ici.",
+      "absentWhat": "Sélectionnez un glossaire à gauche pour voir ses termes et leur colonne Constante.",
+      "why": "Les autres termes sont envoyés avec le texte comme référence que le moteur doit suivre."
     },
-    "assign": {
-      "title": "L’appliquer à ce projet",
-      "what": "Un glossaire activé est utilisé quand ce projet est traduit. Désactivez-le pour ne plus l’utiliser.",
-      "why": "Laissez un glossaire désactivé tant que vous le construisez."
+    "enable": {
+      "title": "Activez-le",
+      "what": "Appuyez sur Activer. NARN demande s’il faut appliquer ses correspondances : Appliquer les correspondances attribue le glossaire à chaque entrée qui contient l’un de ses termes.",
+      "absentWhat": "Sélectionnez un glossaire à gauche, puis appuyez sur Activer à côté de son nom.",
+      "onWhat": "{{name}} est déjà activé : ce projet l’utilise.",
+      "why": "Seuls les glossaires activés servent quand ce projet est traduit."
+    },
+    "choice": {
+      "title": "Activer seulement ou Appliquer les correspondances ?",
+      "what": "Appliquer les correspondances attribue tout de suite le glossaire à chaque entrée qui contient l’un de ses termes. Activer seulement l’active et laisse vos entrées telles quelles ; vous pourrez l’attribuer plus tard depuis Correspondances."
+    },
+    "matches": {
+      "title": "Correspondances trouvées",
+      "what": "NARN a trouvé ces entrées tout seul : chacune contient un terme de {{name}}, et le glossaire leur est maintenant attribué.",
+      "onlyWhat": "NARN a trouvé ces entrées tout seul : chacune contient un terme de {{name}}. Cochez-les et appuyez sur Attribuer le glossaire pour l’utiliser avec elles.",
+      "noneWhat": "Aucune entrée ne contient encore de terme de {{name}}. Celles qui en contiennent s’afficheront ici.",
+      "why": "Un glossaire sert pour les entrées auxquelles il est attribué."
     },
     "effect": {
       "title": "Ce que cela change à la traduction",
       "what": "Quand un texte contient un terme du glossaire, le terme et votre traduction sont envoyés avec le texte.",
       "why": "Le fournisseur suit votre choix au lieu de choisir son propre mot."
-    },
-    "generate": {
-      "title": "Laisser l’IA proposer des termes",
-      "what": "Demandez à un fournisseur d’IA de trouver les termes probables dans vos textes.",
-      "why": "Vous relisez les suggestions et ne gardez que celles qui vous conviennent."
     }
   },
   "orphansTour": {
@@ -457,6 +561,7 @@
     "explain-list": {
       "title": "La liste des orphelins",
       "what": "Chaque orphelin affiche son texte source et le nombre de traductions qu’il conserve.",
+      "absentWhat": "Ce projet n’a aucun orphelin pour l’instant. Quand un import laisse des entrées de côté, chacune s’affiche ici avec son texte source et le nombre de traductions qu’elle conserve.",
       "why": "Ceux qui ont le plus de traductions viennent en premier : ce sont les plus longs à refaire."
     },
     "explain-options": {

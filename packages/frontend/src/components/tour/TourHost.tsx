@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGuideFacts } from '../../hooks/use-guide-facts.js';
+import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
+import { toast } from '../../lib/toast.js';
 import { areaTourFor, isAreaTourId } from '../../lib/tour/area-tours.js';
 import { catalogTour, type CatalogTourContext } from '../../lib/tour/catalog.js';
 import { FIRST_RUN_TOUR_ID } from '../../lib/tour/first-run.js';
@@ -28,7 +30,9 @@ function tourFor(id: string | null, ctx: CatalogTourContext): Tour | undefined {
   if (id === null || id === FIRST_RUN_TOUR_ID) return undefined;
   const entry = catalogTour(id);
   if (entry) return entry.build(ctx);
-  return isAreaTourId(id) ? areaTourFor(id, ctx.facts) : undefined;
+  return isAreaTourId(id)
+    ? areaTourFor(id, ctx.facts, ctx.access.role === 'collaborator')
+    : undefined;
 }
 
 /**
@@ -60,6 +64,17 @@ export function TourHost() {
     if (activeTourId === ORPHANS_TOUR_ID) endOrphansTour(t, { putBack: true });
     else useGuideStore.getState().endTour(false);
   }, [simple, activeTourId, t]);
+
+  // On a phone-sized window the project areas show "designed for desktop"
+  // instead of the controls a tour points at: the tour ends the same way (its
+  // place kept, for Continue on a wider screen), and says why.
+  const isMobile = useIsMobile();
+  useEffect(() => {
+    if (!isMobile || activeTourId === null) return;
+    if (activeTourId === ORPHANS_TOUR_ID) endOrphansTour(t, { putBack: true });
+    else useGuideStore.getState().endTour(false);
+    toast.info(t('guideTours.needsDesktop'));
+  }, [isMobile, activeTourId, t]);
 
   // A catalog tour with its own controller runs it in place of the default runner.
   const Controller = activeTourId === null ? undefined : catalogTour(activeTourId)?.controller;

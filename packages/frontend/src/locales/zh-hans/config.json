@@ -41,7 +41,7 @@
   "orphanedCount": "{{count}} 个已孤立",
   "importWarningsTitle": "导入前请检查",
   "unknownHeadersSummary": "无法识别的列，已忽略：{{headers}}",
-  "rawNewlineSummary_other": "{{count}} 种语言含有实际换行。如需在游戏内换行，请使用 \\n 标记。",
+  "rawNewlineSummary_other": "{{count}} 种语言含有实际换行：请改用 \n。",
   "rawNewlineShowLanguages": "显示语言",
   "continueImport": "继续导入",
   "cancelImport": "取消",
@@ -59,9 +59,10 @@
   "formulaGuardKeptNotice": "= + - @ 前带撇号的单元格：{{cells}}。这些内容会按原样保留，请检查：可能是之前的受保护导出添加的。",
   "exportLanguages": "语言",
   "exportCollection": "文本集",
-  "collectionMain": "主文本",
+  "collectionMain": "服务端译文",
   "collectionClient": "客户端脚本文本",
-  "detectedCollection": "检测到：{{collection}}",
+  "detectedClient": "检测到：<hl>客户端</hl>脚本文本",
+  "detectedMain": "检测到：<hl>服务端</hl>译文",
   "exportLanguagesHint": "本次导出包含哪些列",
   "pseudoExportAs": "将伪翻译文本导出为",
   "pseudoExportNone": "不替换",
@@ -189,7 +190,8 @@
     "simpleLabel": "使用以下服务商翻译全部内容",
     "simpleHint": "本项目中的每个条目都由您在这里选择的服务商翻译。",
     "simpleDefaultNote": "默认值，在您选择服务商之前使用。",
-    "simpleAdvancedNotice": "本项目使用高级分发规则，因此显示完整编辑器。",
+    "simpleAdvancedNotice": "本项目有自己的规则，因此显示完整编辑器。选择“简单”可将这些规则搁置，并用一个服务商翻译全部内容。",
+    "simpleSetAsideNote": "你的高级规则已搁置。选择“高级”即可再次使用。",
     "refreshModels": "刷新模型",
     "selectPlaceholder": "— 请选择 —",
     "exportFailed": "导出分发规则失败。",
@@ -407,7 +409,7 @@
       },
       "glossary-adherence": {
         "name": "术语表遵循",
-        "description": "在原文中匹配到的术语必须以译文形式出现在输出中（全词匹配）。严重级别为警告时，该问题仅作提示；将严重级别设为阻断即可触发自动重试。"
+        "description": "原文中匹配到的术语表术语必须在译文中以译法出现。变格后的形式（例如俄语的格词尾）也算作出现。常量术语会被跳过：掩码处理已经保证它们完全一致。严重级别为警告时，该问题仅作提示；将严重级别设为阻断即可触发自动重试。"
       },
       "forbidden-terms": {
         "name": "禁用词",

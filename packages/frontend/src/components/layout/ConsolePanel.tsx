@@ -374,6 +374,9 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     <div
       role="region"
       aria-label={t('title')}
+      // The guide points at the whole console while it is open (its header,
+      // to close it again, and the run's progress), at the header when closed.
+      data-tour={open ? 'console-status' : undefined}
       className="border-t bg-muted text-muted-foreground flex flex-col overflow-hidden transition-[height] duration-200 ease-out shrink-0"
       style={{ height: open ? panelHeight : 32 }}
     >
@@ -391,7 +394,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
           type="button"
           onClick={onToggle}
           data-testid="console-toggle"
-          data-tour="console-status"
+          data-tour={open ? undefined : 'console-status'}
           title={connected ? t('statusConnected') : t('statusDisconnected')}
           className="flex items-center gap-2 flex-1 min-w-0 text-left bg-transparent cursor-pointer h-full"
         >

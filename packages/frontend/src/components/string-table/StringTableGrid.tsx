@@ -139,7 +139,9 @@ export function StringTableGrid({
           {t('empty.noStrings')}
         </div>
       ) : (
-        <div style={{ minWidth: totalWidth }}>
+        // The guide's "tick 3 entries" spotlight: the rows only, so the header's
+        // select-all box stays outside it.
+        <div style={{ minWidth: totalWidth }} data-tour="string-table-rows">
           {pageEntries.map((entry, index) => (
             <StringTableRow
               key={entry.id}

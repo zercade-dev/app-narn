@@ -32,6 +32,8 @@ import { ExampleEntryPicker, type ExampleCandidate } from './ExampleEntryPicker.
 import { TranslatedByLine } from '../config/TranslatedByLine.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
+import { useGuideStore } from '../../stores/guide-store.js';
+import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
 
 /** Last-used per-browser values (backlog: settings per modal). reTranslate and
  * exampleIds are deliberately NOT persisted: destructive mode choice / entry-specific. */
@@ -124,6 +126,21 @@ export function TranslateRunDialog({
   const showMemoryOptions = useControlVisible('translate-memory-options');
   const activeProjectId = useProjectStore((s) => s.activeProjectId);
   const [reTranslate, setReTranslate] = useState(false);
+  // The guide's retranslate test: its entries are already translated, so the
+  // run only means something with "Re-translate existing translations". Start
+  // waits for that choice (the guide points at it; its dim stays below dialogs),
+  // but only while the guide is on: a test it left behind never holds Start.
+  const firstRunActive = useFirstRunActive();
+  const guideRetest = useGuideStore((s) => {
+    const q = s.quickTest;
+    return (
+      firstRunActive &&
+      q?.retranslate === true &&
+      q.decision === 'pending' &&
+      q.runId === null &&
+      q.projectId === activeProjectId
+    );
+  });
   // Everything below the mode radio is tuning, not the choice that defines the
   // run — hidden behind this until ticked. Only its own visibility is gated;
   // the values it wraps are never reset by hiding it (see the open-reset block).
@@ -192,6 +209,7 @@ export function TranslateRunDialog({
       <DialogContent
         className="flex max-h-[85vh] w-full max-w-2xl flex-col"
         data-testid="comparison-translate-dialog"
+        data-tour="translate-dialog"
       >
         <DialogHeader>
           <DialogTitle data-testid="comparison-translate-dialog-title">
@@ -206,7 +224,11 @@ export function TranslateRunDialog({
           {!showAdvancedOptions && <TranslatedByLine projectId={activeProjectId} />}
         </DialogHeader>
         <div className="-mx-1 min-h-0 flex-1 space-y-3 overflow-y-auto px-1 py-1">
-          <fieldset className="space-y-1.5">
+          {/* The guide's retranslate test asks for this choice before Start. */}
+          <fieldset
+            className="space-y-1.5"
+            data-tour={reTranslate ? 'translate-retranslate-chosen' : undefined}
+          >
             <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
               <input
                 type="radio"
@@ -217,7 +239,10 @@ export function TranslateRunDialog({
               />
               {t('compare.translateModeUntranslated')}
             </label>
-            <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
+            <label
+              className="flex items-center gap-2 text-sm cursor-pointer select-none"
+              data-tour="translate-mode-retranslate"
+            >
               <input
                 type="radio"
                 name="comparison-translate-mode"
@@ -395,7 +420,7 @@ export function TranslateRunDialog({
                 ...(enableExamples && exampleIds.length > 0 ? { exampleEntryIds: exampleIds } : {}),
               });
             }}
-            disabled={scopeCount === 0}
+            disabled={scopeCount === 0 || (guideRetest && !reTranslate)}
             data-testid="comparison-translate-start"
             data-tour="comparison-translate-start"
           >

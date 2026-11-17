@@ -41,7 +41,7 @@
   "orphanedCount": "孤立 {{count}}",
   "importWarningsTitle": "匯入前請先確認",
   "unknownHeadersSummary": "無法辨識的欄位，已忽略：{{headers}}",
-  "rawNewlineSummary_other": "{{count}} 種語言含有實際換行。若要在遊戲中換行，請使用 \\n 標記。",
+  "rawNewlineSummary_other": "{{count}} 種語言含有實際換行：請改用 \n。",
   "rawNewlineShowLanguages": "顯示語言",
   "continueImport": "繼續匯入",
   "cancelImport": "取消",
@@ -59,9 +59,10 @@
   "formulaGuardKeptNotice": "= + - @ 前帶撇號的儲存格：{{cells}}。這些內容會按原樣保留，請檢查：可能是先前的受保護匯出加上的。",
   "exportLanguages": "語言",
   "exportCollection": "文字集",
-  "collectionMain": "主要文字",
+  "collectionMain": "伺服器端譯文",
   "collectionClient": "用戶端指令碼文字",
-  "detectedCollection": "偵測到：{{collection}}",
+  "detectedClient": "偵測到：<hl>用戶端</hl>指令碼文字",
+  "detectedMain": "偵測到：<hl>伺服器端</hl>譯文",
   "exportLanguagesHint": "本次匯出要包含哪些欄",
   "pseudoExportAs": "將偽翻譯文字匯出為",
   "pseudoExportNone": "不替換",
@@ -189,7 +190,8 @@
     "simpleLabel": "用來翻譯全部內容的供應商",
     "simpleHint": "這個專案中的每個條目，都會由您在這裡選擇的供應商翻譯。",
     "simpleDefaultNote": "預設值，在您選擇供應商之前使用。",
-    "simpleAdvancedNotice": "這個專案使用進階分派，因此顯示完整編輯器。",
+    "simpleAdvancedNotice": "這個專案有自己的規則，因此顯示完整編輯器。選擇「簡易」可將這些規則擱置，並用一個服務商翻譯全部內容。",
+    "simpleSetAsideNote": "你的進階規則已擱置。選擇「進階」即可再次使用。",
     "refreshModels": "重新整理模型",
     "selectPlaceholder": "— 請選擇 —",
     "exportFailed": "無法匯出分派規則。",
@@ -407,7 +409,7 @@
       },
       "glossary-adherence": {
         "name": "術語表遵循",
-        "description": "在原文中符合的術語表術語，必須以譯文形式出現在輸出中（全詞比對）。在警告級嚴重程度下，這個問題僅供參考；若要觸發自動重試，請將嚴重程度設為阻斷。"
+        "description": "原文中符合的術語表術語必須在譯文中以譯法出現。變格後的形式（例如俄語的格詞尾）也算出現。常數術語會被略過：遮罩處理已確保它們完全一致。嚴重程度為警告時問題僅供參考；將其設為封鎖，可在術語缺漏或遭改寫時自動重新翻譯一次。"
       },
       "forbidden-terms": {
         "name": "禁用術語",

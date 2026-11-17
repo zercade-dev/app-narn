@@ -9,6 +9,7 @@
  * performs them, because they need its state (the current step, the provider
  * dialog).
  */
+import { QUICK_TEST_SIZE } from './quick-test-size.js';
 import type { GuideFacts, Tour, TourStep } from './types.js';
 
 export const FIRST_RUN_TOUR_ID = 'first-run';
@@ -16,8 +17,6 @@ export const FIRST_RUN_TOUR_ID = 'first-run';
 export type FirstRunAction =
   | 'open-vault'
   | 'cloud-vault'
-  | 'get-google-key'
-  | 'add-google-key'
   | 'own-provider'
   | 'use-found-key'
   | 'fix-key'
@@ -32,7 +31,9 @@ export type FirstRunAction =
   | 'restore-test'
   | 'keep-test'
   | 'tour-sections'
-  | 'maybe-later';
+  | 'maybe-later'
+  | 'open-tours'
+  | 'tours-done';
 
 /** Window event a callout action dispatches; `detail` is the {@link FirstRunAction}. */
 export const FIRST_RUN_ACTION_EVENT = 'guide:first-run-action';
@@ -56,11 +57,20 @@ const projectReady = (f: GuideFacts): boolean =>
   f.projectExists && f.projectHasLanguages && f.projectHasEntries;
 
 /** `firstRun.<group>.title` / `.why`, with the step's own `what`. */
-function copy(group: string, what: string): Pick<TourStep, 'titleKey' | 'whatKey' | 'whyKey'> {
+/**
+ * `firstRun.<group>.title` and the step's own `what`; `why` only when given:
+ * most steps just say where to go, and the explanation sits on the one step
+ * where it matters (said once, not on every step of the group).
+ */
+function copy(
+  group: string,
+  what: string,
+  why?: string,
+): Pick<TourStep, 'titleKey' | 'whatKey' | 'whyKey'> {
   return {
     titleKey: `firstRun.${group}.title`,
     whatKey: `firstRun.${group}.${what}`,
-    whyKey: `firstRun.${group}.why`,
+    ...(why ? { whyKey: `firstRun.${group}.${why}` } : {}),
   };
 }
 
@@ -74,7 +84,7 @@ function localVaultAndKeySteps(vaultCopy: 'vault' | 'unlock'): TourStep[] {
     {
       id: 'vault-open',
       anchor: null,
-      ...copy(vaultCopy, 'openWhat'),
+      ...copy(vaultCopy, 'openWhat', 'why'),
       advance: { kind: 'state', done: vaultReady },
       actions: [action('open-vault', 'openVault')],
       major: 1,
@@ -90,20 +100,19 @@ function localVaultAndKeySteps(vaultCopy: 'vault' | 'unlock'): TourStep[] {
     {
       id: 'key-choice',
       anchor: null,
-      ...copy('key', 'choiceWhat'),
+      ...copy('key', 'choiceWhat', 'why'),
       advance: { kind: 'state', done: (f) => f.usableKey },
-      actions: [
-        action('get-google-key', 'getGoogleKey'),
-        action('add-google-key', 'addGoogleKey'),
-        action('own-provider', 'ownProvider'),
-      ],
+      // One way in: the provider list, free tiers first.
+      actions: [{ ...action('own-provider', 'chooseProvider'), primary: true }],
       major: 2,
     },
     {
       id: 'key-paste',
       anchor: 'vault-editor-value',
       ...copy('key', 'pasteWhat'),
-      side: 'right',
+      // Above the key row: below it are the password and Save, which a callout
+      // beside the field would cover in a narrow window.
+      side: 'top',
       advance: { kind: 'state', done: (f) => f.usableKey },
       major: 2,
     },
@@ -144,7 +153,7 @@ function cloudVaultAndKeySteps(need: 'vault' | 'unlock' | 'key'): TourStep[] {
       whatKey: wording.whatKey,
       whyKey: wording.whyKey,
       advance: { kind: 'state', done: (f) => vaultReady(f) && f.usableKey },
-      actions: [action('cloud-vault', wording.label), action('own-provider', 'ownProvider')],
+      actions: [action('cloud-vault', wording.label), action('own-provider', 'chooseProvider')],
       major: 1,
     },
   ];
@@ -158,7 +167,8 @@ function cloudVaultAndKeySteps(need: 'vault' | 'unlock' | 'key'): TourStep[] {
  * - `waiting-quota` / `waiting-model`: it is paused and resumes by itself
  *   (free quota used up, or no free model good enough right now).
  */
-export type RunStall = 'auth' | 'quota' | 'other' | 'parked' | 'waiting-quota' | 'waiting-model';
+export type RunStall =
+  'auth' | 'quota' | 'no-provider' | 'other' | 'parked' | 'waiting-quota' | 'waiting-model';
 
 /** The "translation is running" step; the stall steps are shown in its place. */
 const WAITING_STEP = 'translate-progress';
@@ -166,6 +176,7 @@ const WAITING_STEP = 'translate-progress';
 const STALL_STEP: Record<RunStall, string> = {
   auth: 'translate-failed-auth',
   quota: 'translate-failed-quota',
+  'no-provider': 'translate-failed-no-provider',
   other: 'translate-failed-other',
   parked: 'translate-parked',
   'waiting-quota': 'translate-waiting-quota',
@@ -181,6 +192,11 @@ function stallStep(
   return {
     id: STALL_STEP[stall],
     anchor: 'console-status',
+    // Above the console: below it is the window's edge, and a callout over
+    // the console would cover its header (opening it) and its progress.
+    side: 'top',
+    // …and above the selection bar too: its Translate button is the way to try again.
+    clearOf: 'bulk-bar',
     ...text,
     advance: { kind: 'state', done: translationSettled },
     actions,
@@ -192,15 +208,19 @@ function stallStep(
 }
 
 /** The run ended with nothing translated: nothing to stop, just try again. */
-const endedStep = (cause: 'auth' | 'quota' | 'other'): TourStep =>
+const endedStep = (cause: 'auth' | 'quota' | 'no-provider' | 'other'): TourStep =>
   stallStep(
     cause,
     {
       titleKey: 'firstRun.failed.title',
-      whatKey: `firstRun.failed.${cause}What`,
+      whatKey: `firstRun.failed.${cause === 'no-provider' ? 'noProvider' : cause}What`,
       whyKey: 'firstRun.failed.why',
     },
-    [action('fix-key', 'fixKey'), action('retry', 'retry')],
+    // No provider was on: the key is not the problem, so no "Check my key";
+    // trying again switches on the provider behind the saved key first.
+    cause === 'no-provider'
+      ? [action('retry', 'retry')]
+      : [action('fix-key', 'fixKey'), action('retry', 'retry')],
   );
 
 /** The run will resume by itself: explain, and offer nothing to press. */
@@ -211,9 +231,13 @@ const waitingStep = (stall: 'waiting-quota' | 'waiting-model', what: string): To
     whyKey: 'firstRun.waiting.why',
   });
 
+/** The key editor, opened by "Check my key" on a run's failure. */
+const FIX_KEY_STEP = 'translate-fix-key';
+
 const STALL_STEPS: TourStep[] = [
   endedStep('auth'),
   endedStep('quota'),
+  endedStep('no-provider'),
   endedStep('other'),
   // Trying again here stops the paused run, and the wording says so.
   stallStep(
@@ -227,6 +251,18 @@ const STALL_STEPS: TourStep[] = [
   ),
   waitingStep('waiting-quota', 'quotaWhat'),
   waitingStep('waiting-model', 'modelWhat'),
+  {
+    // Over the key editor "Check my key" opened. Not the key step itself: a
+    // key is already saved, so that step would move on at once. Closing the
+    // editor (saved or not) shows the failure again.
+    id: FIX_KEY_STEP,
+    anchor: 'vault-editor-value',
+    ...copy('key', 'pasteWhat'),
+    side: 'top',
+    advance: { kind: 'manual' },
+    major: 4,
+    variantOf: WAITING_STEP,
+  },
 ];
 
 const QUICK_STEP = 'translate-quick';
@@ -234,10 +270,57 @@ const QUICK_STEP = 'translate-quick';
 const QUICK_DONE = (f: GuideFacts): boolean => f.translationExists;
 /** Shown in place of the quick test when every entry is already translated. */
 const NOTHING_STEP = 'translate-nothing';
+/**
+ * The retranslate test, done by the person: the list shows translated entries
+ * (only if "Untranslated only" hides them), they tick 3, press Translate, and
+ * start a retranslation in the dialog (FORM_STEPS pairs the last two).
+ */
+const RETEST_FILTER_STEP = 'retest-filter';
+const RETEST_SELECT_STEP = 'retest-select';
+const RETEST_TRANSLATE_STEP = 'retest-translate';
+const RETEST_MODE_STEP = 'retest-mode';
+const RETEST_START_STEP = 'retest-start';
+/** On the dialog's mode choice while "Re-translate existing translations" is picked. */
+export const RETRANSLATE_CHOSEN_ANCHOR = 'translate-retranslate-chosen';
+const RETEST_STEPS: readonly string[] = [
+  RETEST_FILTER_STEP,
+  RETEST_SELECT_STEP,
+  RETEST_TRANSLATE_STEP,
+  RETEST_MODE_STEP,
+  RETEST_START_STEP,
+];
 /** After a retranslate test: put the file's translations back, or keep the new ones. */
 const RESTORE_STEP = 'translate-restore';
 const RESTORE_STEPS: readonly string[] = [RESTORE_STEP, 'restore-pick', 'restore-confirm'];
 const CLOSING_STEP = 'closing';
+/** After the closing step: points at the Guide, where the other tours are. */
+export const MORE_TOURS_STEP = 'more-tours';
+
+/**
+ * Shown over the provider list the guide opened ("Choose a provider"), so the
+ * guide stays on screen while it is open. Not part of the tour's steps: the
+ * list can open from several steps, and the counter keeps the step's place.
+ */
+export const PROVIDER_LIST_STEP: TourStep = {
+  id: 'provider-list',
+  anchor: 'provider-choice',
+  titleKey: 'firstRun.providerList.title',
+  whatKey: 'firstRun.providerList.what',
+  whyKey: 'firstRun.providerList.why',
+  side: 'left',
+  advance: { kind: 'manual' },
+};
+
+/** Shown over the provider card opened from "Translated by · Change", likewise. */
+export const PROVIDER_CARD_STEP: TourStep = {
+  id: 'provider-card',
+  anchor: 'provider-sheet',
+  titleKey: 'firstRun.providerCard.title',
+  whatKey: 'firstRun.providerCard.what',
+  whyKey: 'firstRun.providerCard.why',
+  side: 'left',
+  advance: { kind: 'manual' },
+};
 
 /** `data-tour` of the Backups row holding the retranslate test's restore point. */
 export const RESTORE_POINT_ANCHOR = 'guide-restore-point';
@@ -272,13 +355,19 @@ const SHARED_STEPS: TourStep[] = [
     id: 'project-open',
     anchor: 'project-selector-trigger',
     ...copy('project', 'openWhat'),
-    advance: { kind: 'click' },
+    // Beside the sidebar: the project list opens right below the trigger.
+    side: 'right',
+    // No click advance: the list opening shows "New project" (the pair in
+    // FORM_STEPS), and a click advance on top of it would skip that step.
+    // Back here with the project made: Next goes on to its languages.
+    advance: { kind: 'manual', nextOnBack: (f) => f.projectExists },
     major: 3,
   },
   {
     id: 'project-new',
     anchor: 'new-project-button',
     ...copy('project', 'newWhat'),
+    side: 'right',
     advance: { kind: 'click' },
     major: 3,
   },
@@ -369,6 +458,7 @@ const SHARED_STEPS: TourStep[] = [
   {
     id: WAITING_STEP,
     anchor: 'console-status',
+    side: 'top',
     titleKey: 'firstRun.translate.title',
     whatKey: 'firstRun.translate.progressWhat',
     whyKey: 'firstRun.translate.progressWhy',
@@ -384,7 +474,6 @@ const SHARED_STEPS: TourStep[] = [
     anchor: null,
     titleKey: 'firstRun.rest.title',
     whatKey: 'firstRun.rest.what',
-    whyKey: 'firstRun.rest.why',
     advance: { kind: 'state', done: (f) => !f.quickTestPending },
     // The strings tab, where the request to translate the rest is answered.
     navigate: { view: 'project', tab: 'strings' },
@@ -401,11 +490,77 @@ const SHARED_STEPS: TourStep[] = [
     whatKey: 'firstRun.translate.nothingWhat',
     whyKey: 'firstRun.translate.nothingWhy',
     advance: { kind: 'next' },
-    // The entries tab: its table answers the retranslate test's request.
+    // The entries tab, where the person does the retranslate test.
     navigate: { view: 'project', tab: 'strings' },
     // A test that replaces 3 translations; the restore point the server takes
-    // first puts them back (see RESTORE_STEP).
+    // first puts them back (see RESTORE_STEP). The action only starts the
+    // walk through it (RETEST_STEPS): the person picks and starts it.
     actions: [{ ...action('retranslate-test', 'retranslateTest'), primary: true }],
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
+    // Only while "Untranslated only" hides the translated entries.
+    id: RETEST_FILTER_STEP,
+    anchor: 'status-filter',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.filterWhat',
+    advance: { kind: 'state', done: (f) => !f.untranslatedFilterOn },
+    navigate: { view: 'project', tab: 'strings' },
+    // Its list opens below the button, outside the spotlight: left usable.
+    dim: false,
+    side: 'right',
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
+    id: RETEST_SELECT_STEP,
+    anchor: 'string-table-rows',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.selectWhat',
+    advance: { kind: 'state', done: (f) => f.selectedCount >= QUICK_TEST_SIZE },
+    navigate: { view: 'project', tab: 'strings' },
+    // The list fills the page, with no room beside it: the callout rests at
+    // the window's foot, over its last rows, and the first rows stay free.
+    side: 'bottom',
+    overlap: true,
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
+    // Paired with the dialog it opens (see FORM_STEPS); the run it starts is
+    // the test (`FirstRunTour` follows it from the run list).
+    id: RETEST_TRANSLATE_STEP,
+    anchor: 'bulk-batch-translate',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.translateWhat',
+    advance: { kind: 'manual' },
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
+    // The dialog is open with "Only fill untranslated entries" picked: the
+    // test means nothing that way, so this step points at "Re-translate
+    // existing translations" (see firstRunShownIndex), and the dialog keeps
+    // Start disabled until it is picked.
+    id: RETEST_MODE_STEP,
+    anchor: 'translate-mode-retranslate',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.modeWhat',
+    // Below the choice, over Start (disabled until the choice is made), so the
+    // dialog's title and its other choice stay in view.
+    side: 'bottom',
+    advance: { kind: 'manual' },
+    major: 4,
+    variantOf: QUICK_STEP,
+  },
+  {
+    id: RETEST_START_STEP,
+    anchor: 'comparison-translate-start',
+    titleKey: 'firstRun.retest.title',
+    whatKey: 'firstRun.retest.startWhat',
+    side: 'top',
+    advance: { kind: 'manual' },
     major: 4,
     variantOf: QUICK_STEP,
   },
@@ -444,7 +599,6 @@ const SHARED_STEPS: TourStep[] = [
     anchor: RESTORE_CONFIRM_ANCHOR,
     titleKey: 'firstRun.restore.title',
     whatKey: 'firstRun.restore.confirmWhat',
-    whyKey: 'firstRun.restore.pickWhy',
     side: 'left',
     advance: { kind: 'state', done: (f) => !f.retestPending },
     major: 4,
@@ -461,13 +615,27 @@ const SHARED_STEPS: TourStep[] = [
   {
     id: 'export',
     anchor: 'export-csv-button',
-    ...copy('export', 'downloadWhat'),
+    ...copy('export', 'downloadWhat', 'why'),
     advance: { kind: 'state', done: (f) => f.exported },
     // "Skip, export what I have" lands here straight from the strings tab.
     navigate: { view: 'project', tab: 'data' },
     major: 5,
   },
   closingStep(false),
+  {
+    // Last: where the other guided tours are. Reached from "Maybe later".
+    id: MORE_TOURS_STEP,
+    anchor: 'sidebar-guide',
+    titleKey: 'firstRun.moreTours.title',
+    whatKey: 'firstRun.moreTours.what',
+    side: 'right',
+    advance: { kind: 'manual' },
+    actions: [
+      { ...action('open-tours', 'openTours'), primary: true },
+      action('tours-done', 'toursDone'),
+    ],
+    variantOf: CLOSING_STEP,
+  },
 ];
 
 /**
@@ -526,7 +694,11 @@ const KEY_STEPS = ['key-choice', 'cloud-vault'];
 /** `step` with "Use <provider> for your translations" first among its actions. */
 const withFoundKeyAction = (step: TourStep): TourStep => ({
   ...step,
-  actions: [{ ...action('use-found-key', 'useFoundKey'), primary: true }, ...(step.actions ?? [])],
+  actions: [
+    { ...action('use-found-key', 'useFoundKey'), primary: true },
+    // One primary at a time: the found key's.
+    ...(step.actions ?? []).map(({ primary: _primary, ...rest }) => rest),
+  ],
 });
 
 /** The local first-run tour (a new vault). */
@@ -583,8 +755,9 @@ function firstIncompleteMajor(f: GuideFacts): number {
   // A file that came translated has nothing for step 4 to do.
   const translated = f.translationExists || f.nothingToTranslate;
   if (!translated || restPending(f) || f.restRunning) return 4;
-  // The retranslate test, while it runs and until its translations are kept or put back.
-  if (f.retestRunning || f.retestPending) return 4;
+  // The retranslate test, from the moment it is asked for until its
+  // translations are kept or put back.
+  if (f.retestAsked || f.retestRunning || f.retestPending) return 4;
   if (!f.exported) return 5;
   return 6;
 }
@@ -615,11 +788,21 @@ export function firstRunStepIndex(f: GuideFacts, finished = false): number | 'do
   if (major === 5 && !f.translationExists && f.nothingToTranslate && !f.retestDone) {
     return at(NOTHING_STEP);
   }
+  if (major === 4 && f.retestAsked) return at(retestStepFor(f));
   if (major === 4 && f.retestPending) return at(RESTORE_STEP);
   if (major === 4 && f.retestRunning) return at(WAITING_STEP);
+  // Back after a reload: the quick test's run is going, or ended empty.
+  if (major === 4 && f.quickTestRunning) return at(WAITING_STEP);
   if (major === 4 && restPending(f)) return at('translate-rest');
   if (major === 4 && f.translationExists && f.restRunning) return at(WAITING_STEP);
   return steps.findIndex((s) => s.major === major);
+}
+
+/** Where the retranslate test's set-up stands: the first thing it still needs. */
+function retestStepFor(f: GuideFacts): string {
+  if (f.untranslatedFilterOn) return RETEST_FILTER_STEP;
+  if (f.selectedCount < QUICK_TEST_SIZE) return RETEST_SELECT_STEP;
+  return RETEST_TRANSLATE_STEP;
 }
 
 /**
@@ -632,11 +815,22 @@ export function firstRunStepApplies(step: TourStep | undefined, f: GuideFacts): 
   if (step.id === NOTHING_STEP) {
     return f.nothingToTranslate && !f.translationExists && !f.retestDone;
   }
+  // Shown over the key editor only (see firstRunShownIndex), never stepped onto.
+  if (step.id === FIX_KEY_STEP) return false;
+  // Naming a new project, only while there is none: Back from the languages
+  // must not land on a sheet that is no longer open.
+  if (step.id === 'project-create') return !f.projectExists;
+  // The retranslate test's own steps, only while it is being set up.
+  if (step.id === RETEST_FILTER_STEP) return f.retestAsked && f.untranslatedFilterOn;
+  if (RETEST_STEPS.includes(step.id)) return f.retestAsked;
   // The retranslate test's restore steps, only while its choice is open.
   if (RESTORE_STEPS.includes(step.id)) return f.retestPending;
   if (f.nothingToTranslate && !f.translationExists) return step.major !== 4;
   return true;
 }
+
+/** The key editor's value field: on screen while the editor is open. */
+const KEY_EDITOR_ANCHOR = 'vault-editor-value';
 
 /**
  * Sub-step pairs that are two views of one question, "is the form on screen?":
@@ -647,14 +841,41 @@ export function firstRunStepApplies(step: TourStep | undefined, f: GuideFacts): 
  */
 const FORM_STEPS = [
   { closed: 'vault-open', open: 'vault-password', anchor: 'vault-password-input' },
-  { closed: 'key-choice', open: 'key-paste', anchor: 'vault-editor-value' },
+  { closed: 'key-choice', open: 'key-paste', anchor: KEY_EDITOR_ANCHOR },
   // The translation dialog, opened from the quick test's highlighted button.
   { closed: QUICK_STEP, open: 'translate-start', anchor: 'comparison-translate-start' },
   // The import review sheet, opened once a file was chosen.
   { closed: 'import', open: 'import-confirm', anchor: 'confirm-import' },
   // The restore confirmation, opened from the restore point's row.
   { closed: 'restore-pick', open: 'restore-confirm', anchor: RESTORE_CONFIRM_ANCHOR },
+  // The project list: "New project" is shown only while the list is open, so
+  // the step follows the list (it closes on a click outside, or Escape).
+  { closed: 'project-open', open: 'project-new', anchor: 'new-project-button' },
+  // The same dialog, opened for the retranslate test.
+  { closed: RETEST_TRANSLATE_STEP, open: RETEST_START_STEP, anchor: 'comparison-translate-start' },
 ] as const;
+
+/**
+ * Whether Back shows on the step on screen. Not on a step that reports a
+ * done deed with nothing before it to redo: the retranslate test's result, or
+ * its run while it goes (a stopped run's failure offers Back, see
+ * {@link firstRunBack}).
+ */
+export function firstRunCanGoBack(
+  tour: Tour,
+  shownIndex: number,
+  facts: GuideFacts,
+  screen: FirstRunScreen,
+): boolean {
+  if (shownIndex <= 0) return false;
+  const id = tour.steps[shownIndex]?.id;
+  if (id === RESTORE_STEP) return false;
+  if (isWaitingStep(id) && facts.retestRunning && !screen.runStall) return false;
+  return true;
+}
+
+/** The New project sheet's name field: "Name your project" shows only while the sheet is open. */
+export const PROJECT_SHEET_ANCHOR = 'new-project-input';
 
 /** The `data-tour` anchors whose presence {@link firstRunShownIndex} needs to know. */
 export const FIRST_RUN_FORM_ANCHORS = FORM_STEPS.map((p) => p.anchor);
@@ -683,11 +904,29 @@ export function firstRunShownIndex(tour: Tour, index: number, screen: FirstRunSc
     return found >= 0 ? found : index;
   };
   if (isWaitingStep(id)) {
+    // "Check my key" opened the key editor: its own step shows over it.
+    if (screen.isOnScreen(KEY_EDITOR_ANCHOR)) return at(FIX_KEY_STEP);
     return at(screen.runStall ? STALL_STEP[screen.runStall] : WAITING_STEP);
   }
-  const pair = FORM_STEPS.find((p) => p.closed === id || p.open === id);
+  // The New project sheet closed (Escape, ×, a click outside): back to the
+  // list. Not while the list is still open: "New project" was just pressed
+  // there, and the sheet is about to open.
+  if (
+    id === 'project-create' &&
+    !screen.isOnScreen(PROJECT_SHEET_ANCHOR) &&
+    !screen.isOnScreen('new-project-button')
+  ) {
+    return firstRunShownIndex(tour, at('project-open'), screen);
+  }
+  const pairId = id === RETEST_MODE_STEP ? RETEST_START_STEP : id;
+  const pair = FORM_STEPS.find((p) => p.closed === pairId || p.open === pairId);
   if (!pair) return index;
-  return at(screen.isOnScreen(pair.anchor) ? pair.open : pair.closed);
+  if (!screen.isOnScreen(pair.anchor)) return at(pair.closed);
+  // The retranslate test's dialog: its mode is picked before Start is offered.
+  if (pair.open === RETEST_START_STEP && !screen.isOnScreen(RETRANSLATE_CHOSEN_ANCHOR)) {
+    return at(RETEST_MODE_STEP);
+  }
+  return at(pair.open);
 }
 
 /**
@@ -705,12 +944,42 @@ export function firstRunBack(
   shownIndex: number,
   facts: GuideFacts,
   screen: FirstRunScreen,
-): { index: number; closeForm?: string } {
+  /** The position the shown step stands for (default: the shown step itself). */
+  position: number = shownIndex,
+): { index: number; closeForm?: string; dropRetest?: boolean } {
   const id = tour.steps[shownIndex]?.id;
-  const pair = FORM_STEPS.find((p) => p.open === id);
+  const indexOf = (stepId: string): number => {
+    const at = tour.steps.findIndex((s) => s.id === stepId);
+    return at >= 0 ? at : shownIndex;
+  };
+  // The retranslate test runs from "nothing to translate" and comes back
+  // there: from its failure, Back sets the failed test aside and offers it
+  // again; from the restore point, Back returns to the choice it came from.
+  if (isWaitingStep(id) && facts.retestRunning && screen.runStall) {
+    return { index: indexOf(NOTHING_STEP), dropRetest: true };
+  }
+  if (id === 'restore-pick') return { index: indexOf(RESTORE_STEP) };
+  // From the New project sheet: it closes, and the list is offered again.
+  if (id === 'project-create') {
+    return { index: indexOf('project-open'), closeForm: PROJECT_SHEET_ANCHOR };
+  }
+  if (id === MORE_TOURS_STEP) return { index: indexOf(CLOSING_STEP) };
+  // The key editor opened from a run's failure: Back closes it, and the
+  // failure shows again.
+  if (id === FIX_KEY_STEP) {
+    return { index: position, closeForm: KEY_EDITOR_ANCHOR };
+  }
+  const pair = FORM_STEPS.find(
+    (p) => p.open === (id === RETEST_MODE_STEP ? RETEST_START_STEP : id),
+  );
   if (pair) {
     const closed = tour.steps.findIndex((s) => s.id === pair.closed);
     if (closed >= 0) return { index: closed, closeForm: pair.anchor };
+  }
+  // Back out of setting up the retranslate test: it is set aside, and
+  // "nothing to translate" offers it again.
+  if (id !== undefined && RETEST_STEPS.includes(id)) {
+    return { index: indexOf(NOTHING_STEP), dropRetest: true };
   }
   for (let at = shownIndex - 1; at >= 0; at--) {
     const step = tour.steps[at];

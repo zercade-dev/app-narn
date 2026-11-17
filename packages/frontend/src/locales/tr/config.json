@@ -43,8 +43,8 @@
   "orphanedCount": "{{count}} yetim",
   "importWarningsTitle": "İçe aktarmadan önce gözden geçirin",
   "unknownHeadersSummary": "Tanınmayan sütunlar, yok sayıldı: {{headers}}",
-  "rawNewlineSummary_one": "{{count}} dilde gerçek satır sonu var. Oyun içi satır sonu için \\n işaretini kullanın.",
-  "rawNewlineSummary_other": "{{count}} dilde gerçek satır sonu var. Oyun içi satır sonu için \\n işaretini kullanın.",
+  "rawNewlineSummary_one": "{{count}} dilde gerçek satır sonu var: bunun yerine \n kullanın.",
+  "rawNewlineSummary_other": "{{count}} dilde gerçek satır sonu var: bunun yerine \n kullanın.",
   "rawNewlineShowLanguages": "Dilleri göster",
   "continueImport": "İçe aktarmaya devam et",
   "cancelImport": "İptal",
@@ -62,9 +62,10 @@
   "formulaGuardKeptNotice": "= + - veya @ önünde kesme işareti olan hücreler: {{cells}}. Oldukları gibi korunur, bu yüzden kontrol edin: işareti önceki korumalı bir dışa aktarma eklemiş olabilir.",
   "exportLanguages": "Diller",
   "exportCollection": "Koleksiyon",
-  "collectionMain": "Ana metin",
+  "collectionMain": "Sunucu çevirileri",
   "collectionClient": "İstemci betiği metni",
-  "detectedCollection": "Algılanan: {{collection}}",
+  "detectedClient": "Algılanan: <hl>İstemci</hl> betiği metni",
+  "detectedMain": "Algılanan: <hl>Sunucu</hl> çevirileri",
   "exportLanguagesHint": "Bu dışa aktarmaya hangi sütunların ekleneceği",
   "pseudoExportAs": "Pseudo metni şu dil olarak dışa aktar",
   "pseudoExportNone": "Değiştirme yok",
@@ -195,7 +196,8 @@
     "simpleLabel": "Her şeyi şununla çevir",
     "simpleHint": "Bu projedeki her girdi, burada seçtiğiniz sağlayıcı tarafından çevrilir.",
     "simpleDefaultNote": "Varsayılan — bir sağlayıcı seçene kadar kullanılır.",
-    "simpleAdvancedNotice": "Bu proje gelişmiş yönlendirme kullanıyor, bu yüzden tam düzenleyici gösteriliyor.",
+    "simpleAdvancedNotice": "Bu projenin kendi kuralları var, bu yüzden tam düzenleyici gösteriliyor. Kuralları bir kenara bırakıp her şey için tek sağlayıcı kullanmak için Basit'i seçin.",
+    "simpleSetAsideNote": "Gelişmiş kurallarınız bir kenara bırakıldı. Yeniden kullanmak için Gelişmiş'i seçin.",
     "refreshModels": "Modelleri yenile",
     "selectPlaceholder": "— seçin —",
     "exportFailed": "Yönlendirme kuralları dışa aktarılamadı.",
@@ -414,7 +416,7 @@
       },
       "glossary-adherence": {
         "name": "Sözlükçeye uyum",
-        "description": "Kaynakta eşleşen sözlükçe terimleri, çıktıda çevrilmiş olarak görünmelidir (tam sözcük eşleşmesi). Uyarı önem derecesinde sorun yalnızca bilgilendiricidir; otomatik yeniden denemeyi tetiklemek için önem derecesini engelleyici yapın."
+        "description": "Kaynakta eşleşen sözlükçe terimleri çıktıda çevirileriyle yer almalıdır. Rusçadaki hâl ekleri gibi çekimli bir biçim de sayılır. Sabit terimler atlanır: maskeleme onları zaten aynen korur. Uyarı önem derecesinde sorun yalnızca bilgi amaçlıdır; bir terim atlandığında ya da başka sözcüklerle ifade edildiğinde çevirinin bir kez yeniden denenmesi için önem derecesini engelleyici yapın."
       },
       "forbidden-terms": {
         "name": "Yasaklı terimler",

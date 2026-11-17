@@ -10,12 +10,19 @@ import {
   type RoutingRule,
   type RoutingRuleGroup,
 } from '@zercade-dev/narn-shared';
-import { isSimpleRouting, makeSimpleRule, simpleRuleModuleId } from './routing-mode.js';
+import {
+  effectiveRoutingGroups,
+  isSimpleRouting,
+  simpleRuleModuleId,
+  withSimpleRule,
+  type RoutingDoc,
+} from './routing-mode.js';
 import {
   applySimpleRule,
   enableProvider,
   providerInstanceId,
   providerKeyFor,
+  markProviderChecked,
 } from './simple-provider.js';
 import { useCollabRoutingStore } from '../stores/collab-routing-store.js';
 import { useGuideStore } from '../stores/guide-store.js';
@@ -61,13 +68,31 @@ export type ProviderChoiceResult =
    */
   | { status: 'superseded' };
 
-/** A routing document as groups: a project saved before groups existed has only `rules`. */
+/** A routing document's groups and active group: one saved before groups existed has only `rules`. */
+export function routingDocOf(
+  rules: RoutingRule[] | undefined,
+  groups: RoutingRuleGroup[] | undefined,
+  activeGroupId?: string | null,
+): RoutingDoc {
+  const all =
+    groups && groups.length > 0
+      ? groups
+      : [{ id: 'default-group', name: 'Default Group', rules: rules ?? [] }];
+  const active = all.find((g) => g.id === activeGroupId) ?? all[0];
+  return { groups: all, activeGroupId: active?.id ?? 'default-group' };
+}
+
+/**
+ * The groups that decide who translates (see `effectiveRoutingGroups`): rules
+ * Simple set aside do not count.
+ */
 export function routingGroupsOf(
   rules: RoutingRule[] | undefined,
   groups: RoutingRuleGroup[] | undefined,
+  activeGroupId?: string | null,
 ): RoutingRuleGroup[] {
-  if (groups && groups.length > 0) return groups;
-  return [{ id: 'default-group', name: 'Default Group', rules: rules ?? [] }];
+  const doc = routingDocOf(rules, groups, activeGroupId);
+  return effectiveRoutingGroups(doc.groups, doc.activeGroupId);
 }
 
 export function effectiveProviderOf(groups: RoutingRuleGroup[]): EffectiveProvider {
@@ -92,12 +117,20 @@ export function routedModuleNow(target: ProviderTarget): string | undefined {
   if (target.kind === 'collab') {
     const { doc, state } = useCollabRoutingStore.getState();
     return state === 'loaded' && doc
-      ? routedModuleOf(routingGroupsOf(doc.routingRules, doc.routingRuleGroups))
+      ? routedModuleOf(
+          routingGroupsOf(doc.routingRules, doc.routingRuleGroups, doc.activeRoutingRuleGroupId),
+        )
       : undefined;
   }
   const project = useProjectStore.getState().projects.find((p) => p.id === target.projectId);
   return project
-    ? routedModuleOf(routingGroupsOf(project.routingRules, project.routingRuleGroups))
+    ? routedModuleOf(
+        routingGroupsOf(
+          project.routingRules,
+          project.routingRuleGroups,
+          project.activeRoutingRuleGroupId,
+        ),
+      )
     : undefined;
 }
 
@@ -107,23 +140,25 @@ export function routedModuleNow(target: ProviderTarget): string | undefined {
  * one may be stale, and judging "simple or custom" on a stale copy could
  * overwrite routing built in Advanced.
  */
-async function currentGroups(
-  target: ProviderTarget,
-): Promise<RoutingRuleGroup[] | 'unavailable' | 'gone'> {
+async function currentDoc(target: ProviderTarget): Promise<RoutingDoc | 'unavailable' | 'gone'> {
   if (target.kind === 'collab') {
     const store = useCollabRoutingStore.getState();
     await store.load(true);
     const { doc, state } = useCollabRoutingStore.getState();
     // Never write over a document that was not read: it would replace the saved one.
     if (state !== 'loaded' || !doc) return 'unavailable';
-    return routingGroupsOf(doc.routingRules, doc.routingRuleGroups);
+    return routingDocOf(doc.routingRules, doc.routingRuleGroups, doc.activeRoutingRuleGroupId);
   }
   const projects = useProjectStore.getState();
   const project = projects.projects.find((p) => p.id === target.projectId);
   // Not listed yet is not deleted: only a loaded list can say it is gone.
   if (!project) return projects.loaded ? 'gone' : 'unavailable';
   if (accessFor(projects, project.id).role !== 'owner') return 'unavailable';
-  return routingGroupsOf(project.routingRules, project.routingRuleGroups);
+  return routingDocOf(
+    project.routingRules,
+    project.routingRuleGroups,
+    project.activeRoutingRuleGroupId,
+  );
 }
 
 /** The key of a target in `pendingProviders`. */
@@ -145,22 +180,20 @@ export async function applyProviderTo(
   moduleId: string,
   routedFrom?: string,
 ): Promise<ProviderChoiceResult> {
-  const groups = await currentGroups(target);
-  if (groups === 'unavailable' || groups === 'gone') return { status: groups };
+  const doc = await currentDoc(target);
+  if (doc === 'unavailable' || doc === 'gone') return { status: doc };
+  const groups = effectiveRoutingGroups(doc.groups, doc.activeGroupId);
   if (routedFrom !== undefined && routedModuleOf(groups) !== routedFrom) {
     return { status: 'superseded' };
   }
   if (!isSimpleRouting(groups)) return { status: 'routing-kept' };
+  // Written to the group that applies; rules Simple set aside stay as they are.
+  const next = withSimpleRule(doc, moduleId);
   if (target.kind === 'collab') {
-    const rule = makeSimpleRule(moduleId, groups[0]?.rules[0]?.id);
-    const groupId = groups[0]?.id ?? 'default-group';
-    await useCollabRoutingStore.getState().save({
-      rules: [rule],
-      groups: [{ id: groupId, name: groups[0]?.name ?? 'Default Group', rules: [rule] }],
-      activeGroupId: groupId,
-    });
+    await useCollabRoutingStore.getState().save(next);
   } else {
-    await applySimpleRule(target.projectId, moduleId);
+    if (doc.groups.length > 1) await applySimpleRule(target.projectId, moduleId, next);
+    else await applySimpleRule(target.projectId, moduleId);
     await useProjectStore.getState().fetchProjects();
   }
   return { status: 'applied', moduleId };
@@ -202,6 +235,7 @@ export async function chooseProvider(
     return { status: 'needs-key', vaultKey };
   }
 
+  markProviderChecked(base);
   const moduleId = await enableProvider(base);
   if (moduleId === null) return { status: 'switched-off' };
   // Marked before it is chosen, so `useProviderSetup` never sees the choice

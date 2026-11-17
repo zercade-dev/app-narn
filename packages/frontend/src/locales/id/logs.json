@@ -24,6 +24,8 @@
     "retry": "Mencoba ulang sebuah terjemahan yang gagal.",
     "failedNoRoute": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — tidak ada aturan penyaluran yang cocok.",
     "failedNoRoute_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — tidak ada aturan penyaluran yang cocok.",
+    "failedNoProvider": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — tidak ada penyedia yang aktif untuk NARN Freeway.",
+    "failedNoProvider_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — tidak ada penyedia yang aktif untuk NARN Freeway.",
     "failedModuleDisabled": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — modul {{module}} sedang nonaktif.",
     "failedModuleDisabled_other": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — modul {{module}} sedang nonaktif.",
     "failedModuleNotFound": "Tidak bisa menerjemahkan {{count}} entri ke {{language}} — modul {{module}} tidak terpasang.",
