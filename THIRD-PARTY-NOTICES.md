@@ -387,7 +387,7 @@ hosted NARN service: `modules/copilot/manifest.json` sets `"cloudDisabled": true
 
 ### `@github/copilot-sdk` — MIT License
 
-`@github/copilot-sdk` 1.0.31 declares `"license": "MIT"` and `"author": "GitHub"` in its
+`@github/copilot-sdk` 1.0.34 declares `"license": "MIT"` and `"author": "GitHub"` in its
 manifest, but its published tarball contains no licence file. Its repository field
 names <https://github.com/github/copilot-agent-runtime>, with the SDK under
 `src/sdk/nodejs`. That repository is not publicly accessible. The text below is the
@@ -432,13 +432,13 @@ pnpm install
 pnpm licenses list --prod          # add --json for machine-readable output
 ```
 
-Measured on 2026-11-13 on a linux-x64 host, that command reported **242** packages: 211
+Measured on 2026-11-17 on a linux-x64 host, that command reported **241** packages: 210
 MIT (among them `@github/copilot-sdk` and `@base-ui/react`), 14 Apache-2.0, 8 ISC, 6
 OFL-1.1 — the six font families, see _Fonts_ — 1 BSD-2-Clause, 1 BSD-3-Clause, and 1
 `(AFL-2.1 OR BSD-3-Clause)`. Every package in that frame names an SPDX identifier. The two
 entries pnpm previously reported as `Unknown` were `@github/copilot` and the platform
 binary it pulled in, whose manifests pointed at a licence file instead; both left the tree
-when SDK 1.0.13 dropped the CLI dependency. No copyleft licence appears among those 242.
+when SDK 1.0.13 dropped the CLI dependency. No copyleft licence appears among those 241.
 
 The host matters to what that list names. At least three of the 242 are platform-specific
 — `@github/copilot-sdk-linux-x64` (MIT), `@koromix/koffi-linux-x64` (MIT) and
