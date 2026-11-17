@@ -389,8 +389,8 @@
     },
     "back": {
       "title": "Zurück zu Einfach",
-      "what": "„Einfach“ ist die Ansicht mit einem Anbieter. Deine Regeln bleiben, wie sie sind.",
-      "why": "Bei mehr als einem Anbieter, wie jetzt, zeigt der Editor weiter deine Regeln an und sagt, warum."
+      "what": "„Einfach“ ist die Ansicht mit einem Anbieter. Wählst du sie, werden deine Regeln beiseitegelegt und ein Anbieter übersetzt alles.",
+      "why": "Deine Regeln bleiben erhalten und werden nicht gelöscht. Wähle „Erweitert“, um sie wieder zu nutzen."
     },
     "absentWhat": "Worauf dieser Schritt zeigt, ist gerade nicht zu sehen. Klicke auf „Weiter“, um fortzufahren, oder auf „Zurück“, um den Schritt davor zu wiederholen."
   },

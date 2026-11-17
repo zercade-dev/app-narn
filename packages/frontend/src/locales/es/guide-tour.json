@@ -389,8 +389,8 @@
     },
     "back": {
       "title": "Volver a Sencillo",
-      "what": "Sencillo es la vista de un solo proveedor. Tus reglas no cambian.",
-      "why": "Con más de un proveedor, como ahora, el editor sigue mostrando tus reglas y explica por qué."
+      "what": "Sencillo es la vista de un solo proveedor. Al elegirla, tus reglas se apartan y un solo proveedor lo traduce todo.",
+      "why": "Tus reglas se conservan, no se eliminan. Elige Avanzado para volver a usarlas."
     },
     "absentWhat": "Lo que señala este paso no está en pantalla ahora mismo. Pulsa Siguiente para continuar, o Atrás para repetir el paso anterior."
   },

@@ -349,7 +349,13 @@ export function Sidebar() {
         setPendingProvider(
           created.id,
           simpleProvider,
-          routedModuleOf(routingGroupsOf(created.routingRules, created.routingRuleGroups)),
+          routedModuleOf(
+            routingGroupsOf(
+              created.routingRules,
+              created.routingRuleGroups,
+              created.activeRoutingRuleGroupId,
+            ),
+          ),
         );
       } else if (wantsProvider) {
         try {

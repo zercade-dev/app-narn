@@ -389,8 +389,8 @@
     },
     "back": {
       "title": "Back to Simple",
-      "what": "Simple is the one-provider view. Your rules stay as they are.",
-      "why": "With more than one provider, as now, the editor keeps showing your rules and says why."
+      "what": "Simple is the one-provider view. Choosing it sets your rules aside, so one provider translates everything.",
+      "why": "Your rules are kept, not deleted. Choose Advanced to use them again."
     },
     "absentWhat": "What this step points at is not on screen right now. Press Next to go on, or Back to do the step before again."
   },

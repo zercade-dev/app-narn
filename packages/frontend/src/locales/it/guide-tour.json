@@ -389,8 +389,8 @@
     },
     "back": {
       "title": "Torna a Semplice",
-      "what": "Semplice è la vista con un solo provider. Le tue regole restano come sono.",
-      "why": "Con più di un provider, come ora, l’editor continua a mostrare le tue regole e spiega perché."
+      "what": "Semplice è la vista con un solo provider. Sceglierla mette da parte le tue regole, così un solo provider traduce tutto.",
+      "why": "Le tue regole restano salvate, non vengono eliminate. Scegli Avanzata per usarle di nuovo."
     },
     "absentWhat": "Ciò che indica questo passaggio non è sullo schermo in questo momento. Premi Avanti per proseguire, o Indietro per ripetere il passaggio precedente."
   },

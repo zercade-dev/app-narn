@@ -80,12 +80,24 @@ export function useGuideFacts(): GuideFacts {
   const projectRouted = useProjectStore((s) => {
     const project = s.projects.find((p) => p.id === s.activeProjectId);
     return project
-      ? routedModuleOf(routingGroupsOf(project.routingRules, project.routingRuleGroups))
+      ? routedModuleOf(
+          routingGroupsOf(
+            project.routingRules,
+            project.routingRuleGroups,
+            project.activeRoutingRuleGroupId,
+          ),
+        )
       : null;
   });
   const collabRouted = useCollabRoutingStore((s) =>
     s.state === 'loaded' && s.doc
-      ? routedModuleOf(routingGroupsOf(s.doc.routingRules, s.doc.routingRuleGroups))
+      ? routedModuleOf(
+          routingGroupsOf(
+            s.doc.routingRules,
+            s.doc.routingRuleGroups,
+            s.doc.activeRoutingRuleGroupId,
+          ),
+        )
       : null,
   );
   const routed = activeRole === 'collaborator' ? collabRouted : projectRouted;

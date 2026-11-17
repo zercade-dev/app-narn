@@ -56,6 +56,20 @@ interface UiSettingsState {
    */
   routingAdvanced: boolean;
   setRoutingAdvanced: (advanced: boolean) => void;
+  /**
+   * Advanced asked for from outside the Routing tab (the Advanced routing
+   * tour): the tab brings back rules Simple set aside, then clears it. Not
+   * persisted.
+   */
+  routingAdvancedAsked: boolean;
+  askRoutingAdvanced: () => void;
+  clearRoutingAdvancedAsked: () => void;
+  /**
+   * Per routing target (a project id, or `collab`), the group Simple mode set
+   * aside, so Advanced brings back that one. Persisted per browser.
+   */
+  routingSetAside: Record<string, string>;
+  setRoutingSetAside: (key: string, groupId: string | null) => void;
   /** Console shows raw log lines instead of the friendly log. Persisted per browser. */
   consoleRawMode: boolean;
   setConsoleRawMode: (raw: boolean) => void;
@@ -109,6 +123,17 @@ export const useUiSettings = create<UiSettingsState>()(
       setConsoleFriendlyFilter: (consoleFriendlyFilter) => set({ consoleFriendlyFilter }),
       routingAdvanced: false,
       setRoutingAdvanced: (routingAdvanced) => set({ routingAdvanced }),
+      routingAdvancedAsked: false,
+      askRoutingAdvanced: () => set({ routingAdvanced: true, routingAdvancedAsked: true }),
+      clearRoutingAdvancedAsked: () => set({ routingAdvancedAsked: false }),
+      routingSetAside: {},
+      setRoutingSetAside: (key, groupId) =>
+        set((s) => {
+          const next = { ...s.routingSetAside };
+          if (groupId === null) delete next[key];
+          else next[key] = groupId;
+          return { routingSetAside: next };
+        }),
       consoleRawMode: false,
       setConsoleRawMode: (consoleRawMode) => set({ consoleRawMode }),
       uiMode: null,
@@ -132,6 +157,7 @@ export const useUiSettings = create<UiSettingsState>()(
         consoleFilter: state.consoleFilter,
         consoleFriendlyFilter: state.consoleFriendlyFilter,
         routingAdvanced: state.routingAdvanced,
+        routingSetAside: state.routingSetAside,
         consoleRawMode: state.consoleRawMode,
         uiMode: state.uiMode,
         tourOffers: state.tourOffers,

@@ -81,6 +81,10 @@ export interface SimpleRoutingConfigProps {
   translationsInProgress?: boolean;
   autoSaveStatus: AutoSaveStatusValue;
   autoSaveError: string | null;
+  /** Advanced rules are set aside (not applied) while this view's choice applies. */
+  rulesSetAside?: boolean;
+  /** A mode switch refused (a translation is running). */
+  error?: string | null;
   advanced: boolean;
   onToggleAdvanced: (advanced: boolean) => void;
   onSelectModule: (moduleId: string) => void;
@@ -93,6 +97,8 @@ export function SimpleRoutingConfig({
   translationsInProgress,
   autoSaveStatus,
   autoSaveError,
+  rulesSetAside,
+  error,
   advanced,
   onToggleAdvanced,
   onSelectModule,
@@ -182,7 +188,21 @@ export function SimpleRoutingConfig({
               {t('routing.simpleDefaultNote')}
             </p>
           )}
+          {rulesSetAside && (
+            <p
+              className="text-xs text-muted-foreground"
+              data-testid="routing-simple-set-aside-note"
+            >
+              {t('routing.simpleSetAsideNote')}
+            </p>
+          )}
         </div>
+
+        {error && (
+          <p className="text-xs text-destructive" role="alert" data-testid="routing-simple-error">
+            {error}
+          </p>
+        )}
 
         {disabled && (
           <p

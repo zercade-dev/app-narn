@@ -5,6 +5,7 @@
  */
 import { ApiError, apiRequest } from '../hooks/use-api.js';
 import { resolveDefaultReasoningEffort } from './default-reasoning-effort.js';
+import type { RoutingRule, RoutingRuleGroup } from '@zercade-dev/narn-shared';
 import { makeSimpleRule } from './routing-mode.js';
 
 /** Vault keys of the providers Freeway can use for free. */
@@ -239,17 +240,24 @@ export async function enableProvider(baseModuleId: string): Promise<string | nul
 
 /**
  * Write the single catch-all rule for `instanceId` on a project: the same
- * document the Routing tab's simple selector saves.
+ * document the Routing tab's simple selector saves. `doc` is that document
+ * already built from the project's own (keeping rules Simple set aside);
+ * without it the project gets one group holding the rule.
  */
-export async function applySimpleRule(projectId: string, instanceId: string): Promise<void> {
+export async function applySimpleRule(
+  projectId: string,
+  instanceId: string,
+  doc?: { rules: RoutingRule[]; groups: RoutingRuleGroup[]; activeGroupId: string },
+): Promise<void> {
   const rule = makeSimpleRule(instanceId);
   const groupId = 'default-group';
+  const body = doc ?? {
+    rules: [rule],
+    groups: [{ id: groupId, name: 'Default Group', rules: [rule] }],
+    activeGroupId: groupId,
+  };
   await apiRequest(`/projects/${projectId}/routing-rules`, {
     method: 'PUT',
-    body: JSON.stringify({
-      rules: [rule],
-      groups: [{ id: groupId, name: 'Default Group', rules: [rule] }],
-      activeGroupId: groupId,
-    }),
+    body: JSON.stringify(body),
   });
 }

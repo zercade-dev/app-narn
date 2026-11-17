@@ -389,8 +389,8 @@
     },
     "back": {
       "title": "Kembali ke Sederhana",
-      "what": "Sederhana adalah tampilan satu penyedia. Aturan Anda tetap seperti semula.",
-      "why": "Dengan lebih dari satu penyedia, seperti sekarang, editor tetap menampilkan aturan Anda dan menjelaskan alasannya."
+      "what": "Sederhana adalah tampilan satu penyedia. Memilihnya akan menyisihkan aturan Anda, sehingga satu penyedia menerjemahkan semuanya.",
+      "why": "Aturan Anda disimpan, tidak dihapus. Pilih Lanjutan untuk memakainya lagi."
     },
     "absentWhat": "Yang ditunjuk langkah ini sedang tidak ada di layar. Tekan Berikutnya untuk lanjut, atau Kembali untuk mengulang langkah sebelumnya."
   },

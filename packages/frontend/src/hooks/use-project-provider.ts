@@ -36,6 +36,9 @@ export function useProjectProvider(projectId: string | null): ProjectProvider {
   const groups = useProjectStore(
     (s) => s.projects.find((p) => p.id === projectId)?.routingRuleGroups,
   );
+  const activeGroupId = useProjectStore(
+    (s) => s.projects.find((p) => p.id === projectId)?.activeRoutingRuleGroupId,
+  );
   const projectKnown = useProjectStore((s) => s.projects.some((p) => p.id === projectId));
   const collabDoc = useCollabRoutingStore((s) => s.doc);
   const collabState = useCollabRoutingStore((s) => s.state);
@@ -67,7 +70,11 @@ export function useProjectProvider(projectId: string | null): ProjectProvider {
       return {
         provider: loaded
           ? effectiveProviderOf(
-              routingGroupsOf(collabDoc.routingRules, collabDoc.routingRuleGroups),
+              routingGroupsOf(
+                collabDoc.routingRules,
+                collabDoc.routingRuleGroups,
+                collabDoc.activeRoutingRuleGroupId,
+              ),
             )
           : null,
         target: { kind: 'collab' },
@@ -77,7 +84,7 @@ export function useProjectProvider(projectId: string | null): ProjectProvider {
       };
     }
     return {
-      provider: effectiveProviderOf(routingGroupsOf(rules, groups)),
+      provider: effectiveProviderOf(routingGroupsOf(rules, groups, activeGroupId)),
       target: { kind: 'project', projectId },
       role,
       loadState: 'loaded',
@@ -91,6 +98,7 @@ export function useProjectProvider(projectId: string | null): ProjectProvider {
     collabDoc,
     rules,
     groups,
+    activeGroupId,
     role,
     translationsInProgress,
   ]);

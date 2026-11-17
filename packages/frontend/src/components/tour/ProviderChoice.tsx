@@ -75,7 +75,11 @@ export function ProviderChoice({
   const routingKept = useProjectStore((s) => {
     const project = s.projects.find((p) => p.id === s.activeProjectId);
     if (!project) return false;
-    const groups = routingGroupsOf(project.routingRules, project.routingRuleGroups);
+    const groups = routingGroupsOf(
+      project.routingRules,
+      project.routingRuleGroups,
+      project.activeRoutingRuleGroupId,
+    );
     return effectiveProviderOf(groups).kind === 'custom';
   });
 

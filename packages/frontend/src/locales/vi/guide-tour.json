@@ -389,8 +389,8 @@
     },
     "back": {
       "title": "Quay lại Đơn giản",
-      "what": "Đơn giản là chế độ một nhà cung cấp. Quy tắc của bạn vẫn giữ nguyên.",
-      "why": "Khi có nhiều hơn một nhà cung cấp, như lúc này, trình chỉnh sửa vẫn hiển thị quy tắc của bạn và cho biết lý do."
+      "what": "Đơn giản là chế độ một nhà cung cấp. Khi chọn, quy tắc của bạn được tạm gác và một nhà cung cấp dịch mọi thứ.",
+      "why": "Quy tắc của bạn vẫn được giữ, không bị xóa. Chọn Nâng cao để dùng lại."
     },
     "absentWhat": "Mục mà bước này chỉ tới hiện không có trên màn hình. Nhấn Tiếp theo để tiếp tục, hoặc Quay lại để làm lại bước trước."
   },

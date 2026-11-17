@@ -1,9 +1,9 @@
 /**
  * The "Advanced routing rules" tour: what the Advanced routing editor offers,
  * for someone who asked to see it (the Routing tour's "Explain Advanced
- * rules", or the Guide's list). Advanced is only how the editor shows the
- * rules (`routingAdvanced`, a display preference): switching to it changes no
- * rule, so the tour switches it for the person.
+ * rules", or the Guide's list). The tour switches the editor to Advanced for
+ * the person; rules Simple set aside come back with it, which is what
+ * choosing Advanced does by hand.
  */
 import { useGuideStore } from '@/stores/guide-store';
 import { useUiSettings } from '@/stores/ui-settings-store';
@@ -186,14 +186,14 @@ export const ROUTING_ADVANCED_TOUR: Tour = {
         side: 'bottom',
       },
     ),
-    // Back to Simple, from the switch itself (a view preference: rules untouched).
+    // Back to Simple, from the switch itself (choosing it sets the rules aside).
     step('back', 'routing-mode', { kind: 'next' }, { onEnter: showEditor({ tab: 'rules' }) }),
   ],
 };
 
-/** The Routing tab shows its Advanced editor (the rules themselves are unchanged). */
+/** The Routing tab shows its Advanced editor, with any rules Simple set aside back. */
 export function showAdvancedRouting(): void {
-  useUiSettings.getState().setRoutingAdvanced(true);
+  useUiSettings.getState().askRoutingAdvanced();
 }
 
 /**
