@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
+import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
 import { GLOSSARIES_TOUR_ID } from '../../lib/tour/glossaries-tour.js';
 import { isAreaTourId } from '../../lib/tour/area-tours.js';
 import { tourHidden } from '../../lib/tour/catalog.js';
@@ -30,6 +31,8 @@ export function AreaTourOffer() {
   const tab = useViewStore((s) => s.activeTab);
   const hasProject = useProjectStore((s) => s.activeProjectId !== null);
   const firstRunActive = useFirstRunActive();
+  // A phone-sized window has no room for a tour (see `TourHost`).
+  const isMobile = useIsMobile();
   const taken = useGuideStore(
     (s) =>
       s.activeTourId !== null ||
@@ -39,7 +42,8 @@ export function AreaTourOffer() {
       (tab === 'glossary' && s.completedTours.includes(GLOSSARIES_TOUR_ID)),
   );
 
-  if (!advanced || !tourOffers || !inProject || !hasProject || firstRunActive || taken) return null;
+  if (!advanced || !tourOffers || !inProject || !hasProject || firstRunActive || taken || isMobile)
+    return null;
   // A tour held back from this release is not offered either.
   if (!isAreaTourId(tab) || tourHidden(tab)) return null;
 

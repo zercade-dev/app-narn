@@ -215,6 +215,7 @@
     "progressSections": "{{current}} von {{total}} Abschnitten",
     "completed": "Abgeschlossen",
     "needsProject": "Öffne ein Projekt, um diese Tour zu machen.",
+    "needsDesktop": "Touren brauchen einen breiteren Bildschirm. Öffne die App auf einem Computer, um eine zu machen.",
     "switchedToAdvanced": "Für diese Tour wurde in den erweiterten Modus gewechselt.",
     "confirm": {
       "title": "Für die geführte Einrichtung zu „Einfach“ wechseln?",
@@ -334,7 +335,8 @@
     },
     "edit": {
       "title": "Regel #1 öffnen",
-      "what": "Klicke auf den Stift, um Regel #1 zu bearbeiten. Sie übernimmt die asiatischen Sprachen."
+      "what": "Klicke auf den Stift, um Regel #1 zu bearbeiten. Sie übernimmt die asiatischen Sprachen.",
+      "noRulesWhat": "Dieses Projekt hat noch keine Regeln. Klicke auf „Regel hinzufügen“, um Regel #1 anzulegen. Sie übernimmt die asiatischen Sprachen."
     },
     "filter": {
       "title": "„Filterung“ öffnen",
@@ -343,7 +345,7 @@
     },
     "langs": {
       "title": "Die asiatischen Sprachen anhaken",
-      "what": "Hake unter den Sprachen deines Projekts die asiatischen an, zum Beispiel ja, ko und zh. Hat dein Projekt keine, hake zum Ausprobieren eine beliebige Sprache an. „Weiter“ erscheint, sobald eine angehakt ist.",
+      "what": "Hake unter den Sprachen deines Projekts die asiatischen an, zum Beispiel ja, ko und zh-hans, und entferne die Haken bei allen anderen. Hat dein Projekt keine, hake zum Ausprobieren eine beliebige Sprache an. „Weiter“ erscheint, sobald du einen Haken setzt oder entfernst.",
       "why": "Regel #1 übernimmt jetzt nur diese Sprachen. Alle anderen Sprachen gehen weiter an die Regeln darunter."
     },
     "module": {
@@ -357,17 +359,17 @@
     },
     "add": {
       "title": "Eine Regel für die anderen Sprachen hinzufügen",
-      "what": "Klicke auf „Regel hinzufügen“. Die neue Regel kommt ganz nach unten, unter Regel #1.",
+      "what": "Klicke auf „Regel hinzufügen“. Die neue Regel kommt ganz nach unten, unter die vorhandenen Regeln.",
       "why": "Die Regeln werden von oben geprüft, also bekommt eine Regel ganz unten nur, was die Regeln darüber übrig gelassen haben."
     },
     "newModule": {
       "title": "Nur einen Anbieter wählen",
       "what": "Wähle unter „Modul“ den Anbieter für alle anderen Sprachen. Lass „Filterung“ leer. „Weiter“ erscheint, sobald ein Anbieter gewählt ist.",
-      "why": "Ein Filter ist nicht nötig: Asiatische Sprachen bleiben bei Regel #1 hängen, also erreichen nur die anderen Sprachen diese Regel."
+      "why": "Ein Filter ist nicht nötig: Die angehakten Sprachen bleiben bei Regel #1 hängen, also erreichen nur die anderen Sprachen die Regeln darunter."
     },
     "order": {
       "title": "Die Reihenfolge macht die Arbeit",
-      "what": "Regel #1 übernimmt die asiatischen Sprachen und Regel #2 den Rest. Vertauscht käme die Regel ohne Filter zuerst, würde jede Sprache übernehmen, und Regel #1 würde nie verwendet.",
+      "what": "Regel #1 übernimmt die angehakten Sprachen, und die Regeln darunter bekommen nur, was übrig bleibt. Käme die Regel ohne Filter zuerst, würde sie jede Sprache übernehmen, und Regel #1 würde nie verwendet.",
       "why": "Um die Reihenfolge zu ändern, nutze die Pfeile neben einer Regel."
     },
     "templates": {
@@ -381,15 +383,16 @@
       "why": "Halte einen zweiten Satz bereit, etwa um einen Anbieter zu testen, und wechsle zwischen ihnen."
     },
     "import": {
-      "title": "Importieren und exportieren",
+      "title": "Import / Export",
       "what": "Speichere die Regeln als JSON-Datei oder lade Regeln aus einer.",
       "why": "Nutze dasselbe Routing in einem anderen Projekt."
     },
     "back": {
       "title": "Zurück zu Einfach",
-      "what": "Klicke auf „Einfach“, um zur Ansicht mit einem Anbieter zurückzukehren. Deine Regeln bleiben, wie sie sind.",
+      "what": "„Einfach“ ist die Ansicht mit einem Anbieter. Deine Regeln bleiben, wie sie sind.",
       "why": "Bei mehr als einem Anbieter, wie jetzt, zeigt der Editor weiter deine Regeln an und sagt, warum."
-    }
+    },
+    "absentWhat": "Worauf dieser Schritt zeigt, ist gerade nicht zu sehen. Klicke auf „Weiter“, um fortzufahren, oder auf „Zurück“, um den Schritt davor zu wiederholen."
   },
   "advancedSections": {
     "compare": {
@@ -481,7 +484,7 @@
     },
     "constant": {
       "title": "Die Spalte Konstant",
-      "what": "Ein konstanter Begriff wird nie an die Übersetzungs-Engine geschickt. NARN setzt stattdessen deine Glossar-Übersetzung direkt ins Ergebnis, sodass ein Figurenname wie Diluc immer genau so herauskommt, wie er hier steht.",
+      "what": "Wo der Text einen konstanten Begriff genau so schreibt wie das Glossar, wird er nie an die Übersetzungs-Engine geschickt. NARN setzt stattdessen deine Glossar-Übersetzung direkt ins Ergebnis, sodass ein Figurenname wie Diluc immer genau so herauskommt, wie er hier steht.",
       "absentWhat": "Wähle links ein Glossar, um seine Begriffe und die Spalte Konstant zu sehen.",
       "why": "Andere Begriffe gehen mit dem Text als Vorgabe mit, der die Engine folgen soll."
     },

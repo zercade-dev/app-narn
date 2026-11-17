@@ -215,6 +215,7 @@
     "progressSections": "{{current}}/{{total}} bölüm",
     "completed": "Tamamlandı",
     "needsProject": "Bu turu yapmak için bir proje açın.",
+    "needsDesktop": "Turlar için daha geniş bir ekran gerekir. Bir tur yapmak için uygulamayı bilgisayarda açın.",
     "switchedToAdvanced": "Bu tur için gelişmiş moda geçildi.",
     "confirm": {
       "title": "Rehberli kurulum için Basit moda geçilsin mi?",
@@ -334,7 +335,8 @@
     },
     "edit": {
       "title": "1 numaralı kuralı açın",
-      "what": "1 numaralı kuralı düzenlemek için kaleme basın. Bu kural Asya dillerini ele alacak."
+      "what": "1 numaralı kuralı düzenlemek için kaleme basın. Bu kural Asya dillerini ele alacak.",
+      "noRulesWhat": "Bu projede henüz kural yok. 1 numaralı kuralı oluşturmak için Kural ekle’ye basın. Bu kural Asya dillerini ele alacak."
     },
     "filter": {
       "title": "Filtreleme’yi açın",
@@ -343,7 +345,7 @@
     },
     "langs": {
       "title": "Asya dillerini işaretleyin",
-      "what": "Projenizin dilleri arasından Asya dillerini işaretleyin, örneğin ja, ko ve zh. Projede hiç yoksa denemek için herhangi bir dili işaretleyin. Biri işaretlenince İleri görünür.",
+      "what": "Projenizin dilleri arasından Asya dillerini işaretleyin, örneğin ja, ko ve zh-hans, diğerlerinin işaretini kaldırın. Projede hiç yoksa denemek için herhangi bir dili işaretleyin. Bir dili işaretleyince ya da işaretini kaldırınca İleri görünür.",
       "why": "1 numaralı kural artık yalnızca bu dilleri alır. Diğer tüm diller altındaki kurallara geçer."
     },
     "module": {
@@ -357,17 +359,17 @@
     },
     "add": {
       "title": "Diğer diller için bir kural ekleyin",
-      "what": "Kural ekle’ye basın. Yeni kural en alta, 1 numaralı kuralın altına gelir.",
+      "what": "Kural ekle’ye basın. Yeni kural en alta, mevcut kuralların altına gelir.",
       "why": "Kurallar yukarıdan denetlendiği için en alttaki kural yalnızca üstündeki kuralların bıraktığını alır."
     },
     "newModule": {
       "title": "Yalnızca bir sağlayıcı seçin",
       "what": "Modül alanında diğer tüm diller için sağlayıcıyı seçin. Filtreleme’yi boş bırakın. Bir sağlayıcı seçilince İleri görünür.",
-      "why": "Filtre gerekmez: Asya dilleri 1 numaralı kuralda durur, bu yüzden bu kurala yalnızca diğer diller ulaşır."
+      "why": "Filtre gerekmez: işaretlediğiniz diller 1 numaralı kuralda durur, bu yüzden alttaki kurallara yalnızca diğer diller ulaşır."
     },
     "order": {
       "title": "İşi sıra yapar",
-      "what": "1 numaralı kural Asya dillerini, 2 numaralı kural da geri kalanını alır. Yerleri değişirse filtresiz kural önce gelir, her dili alır ve 1 numaralı kural hiç kullanılmaz.",
+      "what": "1 numaralı kural işaretlediğiniz dilleri alır, alttaki kurallar da yalnızca geriye kalanı alır. Filtresiz kural önce gelseydi her dili alırdı ve 1 numaralı kural hiç kullanılmazdı.",
       "why": "Sırayı değiştirmek için bir kuralın yanındaki okları kullanın."
     },
     "templates": {
@@ -387,9 +389,10 @@
     },
     "back": {
       "title": "Basit görünüme dönün",
-      "what": "Tek sağlayıcılı görünüme dönmek için Basit düğmesine basın. Kurallarınız olduğu gibi kalır.",
+      "what": "Basit, tek sağlayıcılı görünümdür. Kurallarınız olduğu gibi kalır.",
       "why": "Şimdiki gibi birden fazla sağlayıcı olduğunda düzenleyici kurallarınızı göstermeye devam eder ve nedenini söyler."
-    }
+    },
+    "absentWhat": "Bu adımın gösterdiği öğe şu anda ekranda değil. Devam etmek için İleri’ye, önceki adımı yeniden yapmak için Geri’ye basın."
   },
   "advancedSections": {
     "compare": {
@@ -481,7 +484,7 @@
     },
     "constant": {
       "title": "Sabit sütunu",
-      "what": "Sabit bir terim çeviri motoruna hiç gönderilmez. NARN bunun yerine sözlükçedeki çevirinizi doğrudan sonuca koyar; böylece Diluc gibi bir karakter adı her zaman burada yazıldığı gibi çıkar.",
+      "what": "Metnin sabit bir terimi tam olarak sözlükçedeki gibi yazdığı yerlerde, terim çeviri motoruna hiç gönderilmez. NARN bunun yerine sözlükçedeki çevirinizi doğrudan sonuca koyar; böylece Diluc gibi bir karakter adı her zaman burada yazıldığı gibi çıkar.",
       "absentWhat": "Terimlerini ve Sabit sütununu görmek için soldan bir sözlükçe seçin.",
       "why": "Diğer terimler, motorun uyması gereken bir başvuru olarak metinle birlikte gönderilir."
     },

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check, FolderOpen } from 'lucide-react';
+import { Check, FolderOpen, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { useGuideFacts } from '../../hooks/use-guide-facts.js';
+import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
 import { useUiMode } from '../../hooks/use-ui-mode.js';
 import { toast } from '../../lib/toast.js';
 import { listedTours, type CatalogTour } from '../../lib/tour/catalog.js';
@@ -62,6 +63,9 @@ export function GuideToursList() {
   const [confirming, setConfirming] = useState<'restart' | 'resume' | null>(null);
 
   const tours = useMemo(() => listedTours(access, cloudManaged), [access, cloudManaged]);
+  // A phone-sized window shows "designed for desktop" where the tours point:
+  // they are listed, not started.
+  const isMobile = useIsMobile();
 
   const rowState = (entry: CatalogTour): RowState => {
     if (entry.id === FIRST_RUN_TOUR_ID) {
@@ -124,11 +128,21 @@ export function GuideToursList() {
   return (
     <div data-testid="guide-tours">
       <h1 className="mb-4 text-xl font-semibold">{t('guideTours.title')}</h1>
+      {isMobile && (
+        <p
+          className="mb-3 flex items-center gap-1 text-xs font-medium text-status-warn"
+          data-testid="guide-tours-needs-desktop"
+        >
+          <Monitor className="size-3.5 shrink-0" aria-hidden />
+          {t('guideTours.needsDesktop')}
+        </p>
+      )}
       <ul className="grid gap-3 sm:grid-cols-2">
         {tours.map((entry) => {
           const { id } = entry;
           const row = rowState(entry);
-          const blocked = entry.needsProject && activeProjectId === null;
+          const needsProject = entry.needsProject && activeProjectId === null;
+          const blocked = needsProject || isMobile;
           return (
             <li
               key={id}
@@ -162,7 +176,7 @@ export function GuideToursList() {
                 )}
               </p>
               {/* Why Start is greyed out: easy to miss in muted text. */}
-              {blocked && (
+              {needsProject && (
                 <p
                   className="mt-1 flex items-center gap-1 text-xs font-medium text-status-warn"
                   data-testid={`guide-tour-needs-project-${id}`}

@@ -262,6 +262,7 @@ export { maskSecret } from './mask.js';
 export {
   escapeRegExp,
   buildTermBoundaryRegex,
+  termBoundaryPattern,
   buildInflectedTermRegex,
   glossaryScanText,
   termMatchesText,
@@ -396,6 +397,7 @@ export {
   languageLabel,
   renderTargetLanguagesLine,
   GLOSSARY_SEMANTICS_RULE,
+  NAME_TERM_RULE,
   renderLengthLimitRule,
   effectivePromptOptions,
 } from './ai-sdk-provider/prompt-builder.js';

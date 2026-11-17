@@ -32,7 +32,7 @@ import {
   type TagNode,
   MASK_TOKEN_SOURCE,
   RUNTIME_PLACEHOLDER_SOURCE,
-  escapeRegExp,
+  termBoundaryPattern,
 } from '@zercade-dev/narn-shared';
 import { parse } from './M14-tag-parser.js';
 
@@ -107,7 +107,7 @@ const ESCAPE_SEQUENCE_RE = /\\[ntr]/g;
 
 /**
  * Letter class used for case detection/application. Deliberately Latin-1 only
- * (not the Unicode-aware `\p{L}` used by `constantTermRegex`): non-Latin-1
+ * (not the Unicode-aware `\p{L}` of the constant-term boundary): non-Latin-1
  * scripts (Greek/Cyrillic/CJK) have no meaningful case pattern to re-apply, so
  * they fall through to `asis`. Widening this would be a behavior change.
  */
@@ -156,9 +156,11 @@ export function applyCase(s: string, kind: CaseKind): string {
  * `String.replace` (which resets `lastIndex` each call) — as `maskPlainText`
  * does — so a cached instance is safe to share.
  *
- * M17 deliberately uses a different boundary than the shared `buildTermBoundaryRegex`
- * (it treats `_` as a word char and is a capture-group replacement form), so the
- * regex itself is built here; only the literal escaping is shared (`escapeRegExp`).
+ * The boundary is the shared `termBoundaryPattern` (the one the prompt glossary
+ * filter uses), only case-sensitive and global: a constant term is masked
+ * exactly where the filter would otherwise send its exact spelling to the model
+ * — `_` is not a word character, an unsegmented-script neighbour (`残りDilucが`)
+ * is a boundary, and a CJK/Thai term matches wherever it occurs.
  */
 const termRegexCache = new Map<string, RegExp>();
 
@@ -180,7 +182,7 @@ export function constantTermRegex(source: string): RegExp {
   const cached = termRegexCache.get(source);
   if (cached) return cached;
   const pattern = new RegExp(
-    String.raw`(^|[^\p{L}\p{N}_])(` + escapeRegExp(source) + String.raw`)(?=[^\p{L}\p{N}_]|$)`,
+    termBoundaryPattern(source),
     // Case-sensitive: only the exact spelling is protected ("Razor", not "a
     // razor"). Other spellings reach the model as ordinary glossary items
     // marked as names (see the prompt builder's NAME_TERM_RULE).
@@ -313,14 +315,14 @@ export function maskText(
       if (!term.source) continue;
       const pattern = constantTermRegex(term.source);
       out = replaceOutsideMaskTokens(out, (segment) =>
-        segment.replace(pattern, (_full, before: string, match: string) => {
+        segment.replace(pattern, (match: string) => {
           const id = ++glossaryCounter;
           glossary.set(id, {
             termId: term.id,
             caseKind: detectCase(match),
             original: match,
           });
-          return `${before}{g:${id}}`;
+          return `{g:${id}}`;
         }),
       );
     }

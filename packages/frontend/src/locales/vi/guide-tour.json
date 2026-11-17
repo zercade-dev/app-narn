@@ -215,6 +215,7 @@
     "progressSections": "{{current}}/{{total}} phần",
     "completed": "Đã hoàn tất",
     "needsProject": "Hãy mở một dự án để xem hướng dẫn này.",
+    "needsDesktop": "Các hướng dẫn cần màn hình rộng hơn. Hãy mở ứng dụng trên máy tính để xem hướng dẫn.",
     "switchedToAdvanced": "Đã chuyển sang chế độ nâng cao cho hướng dẫn này.",
     "confirm": {
       "title": "Chuyển sang chế độ Đơn giản để thiết lập có hướng dẫn?",
@@ -334,7 +335,8 @@
     },
     "edit": {
       "title": "Mở quy tắc #1",
-      "what": "Nhấn biểu tượng bút chì để sửa quy tắc #1. Quy tắc này sẽ xử lý các ngôn ngữ châu Á."
+      "what": "Nhấn biểu tượng bút chì để sửa quy tắc #1. Quy tắc này sẽ xử lý các ngôn ngữ châu Á.",
+      "noRulesWhat": "Dự án này chưa có quy tắc nào. Nhấn Thêm quy tắc để tạo quy tắc #1. Quy tắc này sẽ xử lý các ngôn ngữ châu Á."
     },
     "filter": {
       "title": "Mở Lọc",
@@ -343,7 +345,7 @@
     },
     "langs": {
       "title": "Đánh dấu các ngôn ngữ châu Á",
-      "what": "Đánh dấu các ngôn ngữ châu Á trong số ngôn ngữ của dự án, ví dụ ja, ko và zh. Nếu dự án không có, hãy đánh dấu một ngôn ngữ bất kỳ để thử. Tiếp theo sẽ hiện ra khi bạn đánh dấu một ngôn ngữ.",
+      "what": "Đánh dấu các ngôn ngữ châu Á trong số ngôn ngữ của dự án, ví dụ ja, ko và zh-hans, rồi bỏ đánh dấu các ngôn ngữ khác. Nếu dự án không có, hãy đánh dấu một ngôn ngữ bất kỳ để thử. Tiếp theo sẽ hiện ra khi bạn đánh dấu hoặc bỏ đánh dấu một ngôn ngữ.",
       "why": "Giờ quy tắc #1 chỉ nhận các ngôn ngữ này. Mọi ngôn ngữ khác được chuyển xuống các quy tắc bên dưới."
     },
     "module": {
@@ -357,17 +359,17 @@
     },
     "add": {
       "title": "Thêm quy tắc cho các ngôn ngữ khác",
-      "what": "Nhấn Thêm quy tắc. Quy tắc mới nằm ở cuối, bên dưới quy tắc #1.",
+      "what": "Nhấn Thêm quy tắc. Quy tắc mới nằm ở cuối, bên dưới các quy tắc đã có.",
       "why": "Các quy tắc được xét từ trên xuống, nên quy tắc ở cuối chỉ nhận phần mà các quy tắc phía trên để lại."
     },
     "newModule": {
       "title": "Chỉ chọn nhà cung cấp",
       "what": "Trong Mô-đun, chọn nhà cung cấp cho mọi ngôn ngữ khác. Để trống Lọc. Tiếp theo sẽ hiện ra khi bạn chọn một nhà cung cấp.",
-      "why": "Không cần bộ lọc: các ngôn ngữ châu Á dừng ở quy tắc #1, nên chỉ các ngôn ngữ khác đến được quy tắc này."
+      "why": "Không cần bộ lọc: các ngôn ngữ bạn đã đánh dấu dừng ở quy tắc #1, nên chỉ các ngôn ngữ khác đến được các quy tắc bên dưới."
     },
     "order": {
       "title": "Thứ tự quyết định tất cả",
-      "what": "Quy tắc #1 nhận các ngôn ngữ châu Á và quy tắc #2 nhận phần còn lại. Nếu đổi chỗ, quy tắc không có bộ lọc sẽ đứng trước, nhận mọi ngôn ngữ, và quy tắc #1 sẽ không bao giờ được dùng.",
+      "what": "Quy tắc #1 nhận các ngôn ngữ bạn đã đánh dấu, còn các quy tắc bên dưới chỉ nhận phần còn lại. Nếu quy tắc không có bộ lọc đứng trước, nó sẽ nhận mọi ngôn ngữ, và quy tắc #1 sẽ không bao giờ được dùng.",
       "why": "Để đổi thứ tự, hãy dùng các mũi tên bên cạnh quy tắc."
     },
     "templates": {
@@ -387,9 +389,10 @@
     },
     "back": {
       "title": "Quay lại Đơn giản",
-      "what": "Nhấn Đơn giản để quay lại chế độ một nhà cung cấp. Quy tắc của bạn vẫn giữ nguyên.",
+      "what": "Đơn giản là chế độ một nhà cung cấp. Quy tắc của bạn vẫn giữ nguyên.",
       "why": "Khi có nhiều hơn một nhà cung cấp, như lúc này, trình chỉnh sửa vẫn hiển thị quy tắc của bạn và cho biết lý do."
-    }
+    },
+    "absentWhat": "Mục mà bước này chỉ tới hiện không có trên màn hình. Nhấn Tiếp theo để tiếp tục, hoặc Quay lại để làm lại bước trước."
   },
   "advancedSections": {
     "compare": {
@@ -481,7 +484,7 @@
     },
     "constant": {
       "title": "Cột Cố định",
-      "what": "Thuật ngữ cố định không bao giờ được gửi đến công cụ dịch. Thay vào đó, NARN đặt thẳng bản dịch trong bảng thuật ngữ vào kết quả, nên tên nhân vật như Diluc luôn ra đúng như viết ở đây.",
+      "what": "Ở những chỗ văn bản viết thuật ngữ cố định đúng y như bảng thuật ngữ, thuật ngữ đó không bao giờ được gửi đến công cụ dịch. Thay vào đó, NARN đặt thẳng bản dịch trong bảng thuật ngữ vào kết quả, nên tên nhân vật như Diluc luôn ra đúng như viết ở đây.",
       "absentWhat": "Chọn một bảng thuật ngữ bên trái để xem các thuật ngữ và cột Cố định.",
       "why": "Các thuật ngữ khác được gửi kèm văn bản làm tham chiếu mà công cụ cần tuân theo."
     },

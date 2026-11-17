@@ -34,24 +34,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from '../ui/sheet';
-import {
-  LANG_NAMES,
-  termMatchesText,
-  isComplete,
-  projectTargetLanguages,
-} from '@zercade-dev/narn-shared';
-import type {
-  Glossary,
-  GlossarySummary,
-  GlossaryTerm,
-  StringEntry,
-} from '@zercade-dev/narn-shared';
+import { LANG_NAMES, isComplete, projectTargetLanguages } from '@zercade-dev/narn-shared';
+import type { Glossary, GlossarySummary, GlossaryTerm } from '@zercade-dev/narn-shared';
 import { useProjectStore, accessFor } from '../../stores/project-store.js';
 import { writableSubset } from '@/lib/collab-locks';
 import { useStringStore } from '../../stores/string-store.js';
 import { useViewStore } from '../../stores/view-store.js';
 import { useGlossaryGenAccept } from '../../hooks/use-glossary-gen-accept.js';
 import { countDistinctSourceTexts } from '../../lib/count-distinct-sources.js';
+import { entryScanText, matchesAny, termMatchers } from '../../lib/glossary-match.js';
 import { GenerateGlossaryDialog } from './GenerateGlossaryDialog.js';
 import { GenerateTermTranslationsDialog } from './GenerateTermTranslationsDialog.js';
 import {
@@ -116,7 +107,10 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
   // NOT yet have this glossary assigned (the common "needs assignment" case, so
   // it is the default); 'with' shows the ones already assigned to it.
   const [matchAssignment, setMatchAssignment] = useState<'with' | 'without'>('without');
-  const [matchResults, setMatchResults] = useState<MatchResult[] | null>(null);
+  // The Glossaries tour's list: entries its terms match, whatever the
+  // assignment filter says (the assignment its "Apply matches" made lands in
+  // the background). Any filter the person picks, or an (un)assign, ends it.
+  const [tourTermsOnly, setTourTermsOnly] = useState(false);
   const allEntries = useStringStore((s) => s.entries);
   const fetchEntries = useStringStore((s) => s.fetchEntries);
   const updateEntry = useStringStore((s) => s.updateEntry);
@@ -628,6 +622,34 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
     bulkAbortRef.current = null;
   }, [selectedGlossaryId, glossaryId]);
 
+  // The Matches list, derived rather than stored, so it follows an assign or
+  // unassign and fills in when the glossary or the entries land late. None
+  // until the selected glossary's own terms and this project's entries are
+  // in: the previous glossary's terms (or another project's entries) would
+  // list the wrong rows, and Assign would write this glossary onto them.
+  // Matching uses only `visibleTerms`, like the active table and M20. One
+  // matcher per term and one scan text per entry keep a large project quick.
+  const matchers = useMemo(() => {
+    if (panel !== 'matches' || !termsLoaded || matchTermId === null) return null;
+    const sources = visibleTerms
+      .filter((trm) => matchTermId === '__all__' || trm.id === matchTermId)
+      .map((trm) => trm.source);
+    return termMatchers(sources);
+  }, [panel, termsLoaded, matchTermId, visibleTerms]);
+  const entriesLoaded = loadedProjectId === projectId;
+  const matchResults = useMemo<MatchResult[] | null>(() => {
+    if (!matchers || !entriesLoaded || !glossaryId) return null;
+    // Keep only entries whose assignment to this glossary matches the
+    // selected filter (default: entries NOT yet assigned).
+    const wantAssigned = matchAssignment === 'with';
+    return allEntries.filter(
+      (entry) =>
+        (tourTermsOnly ||
+          (entry.assignedGlossaryIds ?? []).includes(glossaryId) === wantAssigned) &&
+        matchesAny(matchers, entryScanText(entry)),
+    );
+  }, [matchers, entriesLoaded, glossaryId, allEntries, tourTermsOnly, matchAssignment]);
+
   useEffect(() => () => bulkAbortRef.current?.abort(), []);
 
   const toggleTermSelected = useCallback((id: string, checked: boolean) => {
@@ -725,6 +747,8 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
         }),
       );
       setSelectedEntryIds(new Set());
+      // The list follows the new assignments under the panel's own filter.
+      setTourTermsOnly(false);
       toast.success(t('toastAssigned'));
     } catch (err) {
       reportError(err, 'toastUpdateError');
@@ -750,6 +774,8 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
         }),
       );
       setSelectedEntryIds(new Set());
+      // The list follows the new assignments under the panel's own filter.
+      setTourTermsOnly(false);
       toast.success(t('toastAssigned'));
     } catch (err) {
       reportError(err, 'toastUpdateError');
@@ -758,64 +784,13 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
     }
   }, [selectedGlossaryId, selectedEntryIds, allEntries, updateEntry, projectId, reportError, t]);
 
-  const canOpenMatches = matchTermId !== null;
-
-  const handleSearch = useCallback(() => {
-    if (!canOpenMatches || !glossary) return;
-    setSelectedEntryIds(new Set());
-
-    // Keep only entries whose assignment to this glossary matches the selected
-    // filter (default: entries NOT yet assigned).
-    const glossaryId = glossary.id;
-    const matchesAssignment = (entry: StringEntry) => {
-      const assigned = (entry.assignedGlossaryIds ?? []).includes(glossaryId);
-      return matchAssignment === 'with' ? assigned : !assigned;
-    };
-
-    // Matching/finding entries uses only `visibleTerms` — a read-only
-    // glossary's flagged/incomplete terms are excluded from matching just
-    // like they're excluded from the active table and from M20's assignment.
-    if (matchTermId === '__all__') {
-      const termSources = visibleTerms.map((trm) => trm.source);
-      setMatchResults(
-        allEntries.filter(
-          (entry) =>
-            matchesAssignment(entry) &&
-            termSources.some((src) => termMatchesText(src, entry.sourceText)),
-        ),
-      );
-      return;
-    }
-
-    const selectedTerm = visibleTerms.find((trm) => trm.id === matchTermId);
-    if (!selectedTerm) {
-      setMatchResults([]);
-      return;
-    }
-
-    setMatchResults(
-      allEntries.filter(
-        (entry) =>
-          matchesAssignment(entry) && termMatchesText(selectedTerm.source, entry.sourceText),
-      ),
-    );
-  }, [canOpenMatches, glossary, visibleTerms, matchTermId, matchAssignment, allEntries]);
-
-  // Tracks whether matchTermId/matchAssignment last changed via an explicit
-  // user pick (the term Select or the with/without toggle below) rather than
-  // the '__all__' default or the automatic glossary-switch reset — only a
-  // real pick should auto-run the debounced search effect further down (see
-  // its comment for why: now that matchTermId always starts non-null,
-  // canOpenMatches alone can no longer distinguish "user asked for this" from
-  // "just mounted/switched"). State (not a ref) because the reset below needs
-  // to clear it during render, alongside its sibling setState calls there.
-  const [userPickedMatchCriteria, setUserPickedMatchCriteria] = useState(false);
+  // The person's own pick of a term or of with/without: the list follows it.
   const handleMatchTermIdChange = useCallback((v: string | null) => {
-    setUserPickedMatchCriteria(true);
+    setTourTermsOnly(false);
     setMatchTermId(v);
   }, []);
   const handleMatchAssignmentChange = useCallback((v: 'with' | 'without') => {
-    setUserPickedMatchCriteria(true);
+    setTourTermsOnly(false);
     setMatchAssignment(v);
   }, []);
 
@@ -825,21 +800,21 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
   const [prevMatchGlossaryId, setPrevMatchGlossaryId] = useState(selectedGlossaryId);
   if (prevMatchGlossaryId !== selectedGlossaryId) {
     setPrevMatchGlossaryId(selectedGlossaryId);
-    setMatchResults(null);
     setMatchTermId('__all__');
-    setUserPickedMatchCriteria(false);
+    setTourTermsOnly(false);
     setPanel('terms');
     if (!selectedGlossaryId) setGlossary(null);
   }
 
-  // Opening Matches searches with the current criteria; Terms leaves them be.
-  const openPanel = useCallback(
-    (next: 'terms' | 'matches') => {
-      setPanel(next);
-      if (next === 'matches') handleSearch();
-    },
-    [handleSearch],
-  );
+  // Opening Matches lists them under the current criteria, nothing ticked;
+  // Terms leaves them be.
+  const openPanel = useCallback((next: 'terms' | 'matches') => {
+    setPanel(next);
+    if (next === 'matches') {
+      setSelectedEntryIds(new Set());
+      setTourTermsOnly(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!selectedGlossaryId) return;
@@ -860,22 +835,6 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
     };
   }, [selectedGlossaryId, projectId, reportError]);
 
-  // Auto-run the search (debounced) whenever the criteria feeding it change, so
-  // there is no explicit Search button: picking a term or toggling the
-  // with/without filter both refresh the results. Debounced to avoid firing on
-  // every keystroke.
-  //
-  // Gated on `userPickedMatchCriteria` (see its declaration above): now that
-  // `matchTermId` defaults to '__all__' (never null), `canOpenMatches` is true
-  // from first render, so without this guard every mount/glossary-switch would
-  // auto-run a search nobody asked for. Opening the Matches tab (`openPanel`)
-  // still searches directly, so that path is unaffected by this gate.
-  useEffect(() => {
-    if (!canOpenMatches || !glossary || !userPickedMatchCriteria) return;
-    const handle = setTimeout(() => handleSearch(), 275);
-    return () => clearTimeout(handle);
-  }, [canOpenMatches, glossary, handleSearch, userPickedMatchCriteria]);
-
   // The Glossaries tour shows the glossary it picked, then the entries its
   // terms match (`GlossaryTourCommand`). Matching is by the terms alone: the
   // assignment that "Apply matches" makes lands in the background.
@@ -886,7 +845,7 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
       if (command.kind === 'select') {
         setTourMatches(null);
         setPanel('terms');
-        setMatchResults(null);
+        setTourTermsOnly(false);
         return;
       }
       setMatchTermId('__all__');
@@ -909,10 +868,7 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
     setTourMatches(null);
     setPanel('matches');
     setSelectedEntryIds(new Set());
-    const sources = visibleTerms.map((trm) => trm.source);
-    setMatchResults(
-      allEntries.filter((entry) => sources.some((src) => termMatchesText(src, entry.sourceText))),
-    );
+    setTourTermsOnly(true);
   }
 
   // DeepL copy is stale when the glossary changed (e.g. via import) after the
@@ -1323,7 +1279,7 @@ export function GlossaryTab({ projectId, activeLanguages }: Readonly<GlossaryTab
                 className="flex min-h-0 flex-col"
                 data-tour="glossary-matches"
               >
-                {glossary && (
+                {termsLoaded && (
                   <GlossaryMatchPanel
                     matchResults={matchResults}
                     matchTermId={matchTermId}

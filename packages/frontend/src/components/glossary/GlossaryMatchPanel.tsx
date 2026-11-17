@@ -3,8 +3,7 @@
  * "all"), filter by assigned/unassigned, and bulk-assign the selected glossary
  * to the matching project strings. Split out of GlossaryTab.tsx as a purely presentational
  * panel — it owns no state; every value and handler is prop-drilled from the
- * parent so the debounced auto-search effect and selection resets keep their
- * original timing.
+ * parent, which derives the results from its criteria, glossary and entries.
  */
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';

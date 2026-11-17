@@ -215,6 +215,7 @@
     "progressSections": "{{current}} dari {{total}} bagian",
     "completed": "Selesai",
     "needsProject": "Buka proyek untuk mengikuti tur ini.",
+    "needsDesktop": "Tur memerlukan layar yang lebih lebar. Buka aplikasi di komputer untuk mengikuti tur.",
     "switchedToAdvanced": "Beralih ke mode lanjutan untuk tur ini.",
     "confirm": {
       "title": "Beralih ke Sederhana untuk penyiapan terpandu?",
@@ -334,7 +335,8 @@
     },
     "edit": {
       "title": "Buka aturan #1",
-      "what": "Tekan ikon pensil untuk mengedit aturan #1. Aturan ini akan menangani bahasa Asia."
+      "what": "Tekan ikon pensil untuk mengedit aturan #1. Aturan ini akan menangani bahasa Asia.",
+      "noRulesWhat": "Proyek ini belum punya aturan. Tekan Tambah aturan untuk membuat aturan #1. Aturan ini akan menangani bahasa Asia."
     },
     "filter": {
       "title": "Buka Penyaringan",
@@ -343,7 +345,7 @@
     },
     "langs": {
       "title": "Centang bahasa Asia",
-      "what": "Centang bahasa Asia di antara bahasa proyek Anda, misalnya ja, ko, dan zh. Jika proyek ini tidak punya, centang bahasa apa saja untuk mencobanya. Berikutnya muncul setelah satu bahasa dicentang.",
+      "what": "Centang bahasa Asia di antara bahasa proyek Anda, misalnya ja, ko, dan zh-hans, lalu hapus centang bahasa lainnya. Jika proyek ini tidak punya, centang bahasa apa saja untuk mencobanya. Berikutnya muncul setelah Anda mencentang atau menghapus centang satu bahasa.",
       "why": "Aturan #1 kini hanya mengambil bahasa-bahasa ini. Semua bahasa lain diteruskan ke aturan di bawahnya."
     },
     "module": {
@@ -357,17 +359,17 @@
     },
     "add": {
       "title": "Tambahkan aturan untuk bahasa lainnya",
-      "what": "Tekan Tambah aturan. Aturan baru ditempatkan di bagian bawah, di bawah aturan #1.",
+      "what": "Tekan Tambah aturan. Aturan baru ditempatkan di bagian bawah, di bawah aturan yang sudah ada.",
       "why": "Aturan diperiksa dari atas, jadi aturan di bagian bawah hanya mendapat sisa dari aturan di atasnya."
     },
     "newModule": {
       "title": "Pilih penyedia, tidak lebih",
       "what": "Di Modul, pilih penyedia untuk semua bahasa lain. Biarkan Penyaringan kosong. Berikutnya muncul setelah penyedia dipilih.",
-      "why": "Tidak perlu filter: bahasa Asia berhenti di aturan #1, jadi hanya bahasa lain yang sampai ke aturan ini."
+      "why": "Tidak perlu filter: bahasa yang Anda centang berhenti di aturan #1, jadi hanya bahasa lain yang sampai ke aturan di bawahnya."
     },
     "order": {
       "title": "Urutan yang bekerja",
-      "what": "Aturan #1 mengambil bahasa Asia dan aturan #2 mengambil sisanya. Jika ditukar, aturan tanpa filter akan berada di atas, mengambil semua bahasa, dan aturan #1 tidak akan pernah dipakai.",
+      "what": "Aturan #1 mengambil bahasa yang Anda centang, dan aturan di bawahnya hanya mendapat sisanya. Jika aturan tanpa filter berada di atas, aturan itu akan mengambil semua bahasa, dan aturan #1 tidak akan pernah dipakai.",
       "why": "Untuk mengubah urutan, gunakan tanda panah di samping aturan."
     },
     "templates": {
@@ -387,9 +389,10 @@
     },
     "back": {
       "title": "Kembali ke Sederhana",
-      "what": "Tekan Sederhana untuk kembali ke tampilan satu penyedia. Aturan Anda tetap seperti semula.",
+      "what": "Sederhana adalah tampilan satu penyedia. Aturan Anda tetap seperti semula.",
       "why": "Dengan lebih dari satu penyedia, seperti sekarang, editor tetap menampilkan aturan Anda dan menjelaskan alasannya."
-    }
+    },
+    "absentWhat": "Yang ditunjuk langkah ini sedang tidak ada di layar. Tekan Berikutnya untuk lanjut, atau Kembali untuk mengulang langkah sebelumnya."
   },
   "advancedSections": {
     "compare": {
@@ -481,7 +484,7 @@
     },
     "constant": {
       "title": "Kolom Konstan",
-      "what": "Istilah konstan tidak pernah dikirim ke mesin terjemahan. NARN langsung memasukkan terjemahan glosarium Anda ke hasilnya, jadi nama karakter seperti Diluc selalu keluar persis seperti yang tertulis di sini.",
+      "what": "Jika teks menulis istilah konstan persis seperti di glosarium, istilah itu tidak pernah dikirim ke mesin terjemahan. NARN langsung memasukkan terjemahan glosarium Anda ke hasilnya, jadi nama karakter seperti Diluc selalu keluar persis seperti yang tertulis di sini.",
       "absentWhat": "Pilih glosarium di sebelah kiri untuk melihat istilahnya dan kolom Konstan.",
       "why": "Istilah lain dikirim bersama teks sebagai acuan yang harus diikuti mesin."
     },

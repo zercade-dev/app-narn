@@ -159,7 +159,12 @@ import {
   resolveDispatchModuleId,
   resolveFreewayProbeCredential,
 } from './M32/bucket-source.js';
-import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
+import {
+  badCredentialModule,
+  resolveFreewayDecisions,
+  revalidateGroup,
+  toFreewayJob,
+} from './M32/resolve.js';
 import {
   effectiveRemainingRequests,
   findMinuteStarvedEscalation,
@@ -389,11 +394,15 @@ function tmRejectionReason(lqa: import('@zercade-dev/narn-shared').LQAResult): s
 
 /**
  * The FailureCode for a controlled (pre-dispatch) failure reason. The reasons
- * are themselves codes, except `freeway-no-buckets`: nothing could serve the
- * pair, which the user fixes the same way as a missing route.
+ * are themselves codes, except the Freeway ones: `freeway-no-buckets` (no
+ * provider could serve the pair) is fixed the same way as a missing route, and
+ * `freeway-bad-credentials` (only a provider whose key was rejected could) is
+ * fixed by correcting that key, like any other auth failure.
  */
 function controlledFailureCode(reason: ControlledFailureReason): FailureCode {
-  return reason === 'freeway-no-buckets' ? 'no-route' : reason;
+  if (reason === 'freeway-no-buckets') return 'no-route';
+  if (reason === 'freeway-bad-credentials') return 'auth';
+  return reason;
 }
 
 type GlossaryGroup = {
@@ -4091,7 +4100,7 @@ export class TranslationEngine {
       );
     }
     if (resolution.blocked.length > 0) {
-      this.recordFreewayBlocked(runId, status, resolution.blocked);
+      this.recordFreewayBlocked(runId, status, resolution.blocked, buckets);
     }
     if (resolution.deferred) {
       this.deferPairsForQuota(
@@ -4217,21 +4226,31 @@ export class TranslationEngine {
    * Record (entry, language) pairs Freeway can never serve as controlled
    * failures — same accounting and aggregated logging as the pre-dispatch
    * reasons, so the UI's per-entry error list and fix hint stay complete.
+   *
+   * `buckets` are the views the pairs were found blocked against. When one of
+   * them would take the language but for its rejected key, the pairs fail as
+   * `freeway-bad-credentials` (code `auth`, naming that provider) instead of
+   * `freeway-no-buckets`: the fix is the key, not switching a provider on.
    */
   private recordFreewayBlocked(
     runId: string,
     status: RunStatus,
     pairs: RunEntryLanguagePair[],
+    buckets: readonly BucketView[] | undefined,
   ): void {
     if (pairs.length === 0) return;
     const groups = new Map<string, ControlledFailureGroup>();
     for (const pair of pairs) {
+      const badModule = buckets ? badCredentialModule(buckets, pair.targetLanguage) : undefined;
+      const reason: ControlledFailureReason = badModule
+        ? 'freeway-bad-credentials'
+        : 'freeway-no-buckets';
       this.recordFailure(
         status,
         pair.entryId,
         pair.targetLanguage,
-        'freeway-no-buckets',
-        controlledFailureCode('freeway-no-buckets'),
+        reason,
+        controlledFailureCode(reason),
       );
       const group = groups.get(pair.targetLanguage);
       if (group) {
@@ -4239,9 +4258,9 @@ export class TranslationEngine {
         group.entryIds.push(pair.entryId);
       } else {
         groups.set(pair.targetLanguage, {
-          reason: 'freeway-no-buckets',
+          reason,
           targetLanguage: pair.targetLanguage,
-          moduleId: FREEWAY_MODULE_ID,
+          moduleId: badModule ?? FREEWAY_MODULE_ID,
           count: 1,
           entryIds: [pair.entryId],
         });
@@ -5890,9 +5909,13 @@ export class TranslationEngine {
           }
           return;
         }
+        // The views a 'blocked' verdict below was reached against, so the
+        // failure can say whether a rejected key is why.
+        let blockedViews: BucketView[] | undefined;
         if (revalidated.kind === 'defer' || revalidated.kind === 'blocked') {
           const now = Date.now();
           const views = await loadBucketViews(now, freewayDeps);
+          blockedViews = views;
           const minBand = freewayMinBand(status.request);
           const resolution = resolveFreewayDecisions(decisions, views, now, {
             ...(minBand !== undefined ? { minBand } : {}),
@@ -5979,6 +6002,7 @@ export class TranslationEngine {
             runId,
             status,
             decisions.map((d) => ({ entryId: d.entry.id, targetLanguage: d.targetLanguage })),
+            blockedViews,
           );
           for (const d of decisions) settled.add(settleKey(d));
           refundUnusedAdmission();
@@ -6968,6 +6992,8 @@ export class TranslationEngine {
               deferredIndices.add(index);
             }
             let remainingPairs = pairs;
+            // What a 'blocked' outcome is recorded against (see recordFreewayBlocked).
+            let blockedViews: BucketView[] | undefined;
             if (
               remainingDecisions.length > 0 &&
               (outcome.kind === 'blocked' ||
@@ -6975,6 +7001,7 @@ export class TranslationEngine {
             ) {
               const now = Date.now();
               const views = await loadBucketViews(now, freewayDeps);
+              blockedViews = views;
               const minBand = freewayMinBand(status.request);
               const resolution = resolveFreewayDecisions(remainingDecisions, views, now, {
                 ...(minBand !== undefined ? { minBand } : {}),
@@ -7009,7 +7036,7 @@ export class TranslationEngine {
               );
               this.emitProgress(runId, status);
             } else {
-              this.recordFreewayBlocked(runId, status, remainingPairs);
+              this.recordFreewayBlocked(runId, status, remainingPairs, blockedViews);
             }
             if (remainingPairs.length === 0) this.emitProgress(runId, status);
             continue;

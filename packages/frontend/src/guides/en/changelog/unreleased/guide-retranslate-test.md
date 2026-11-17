@@ -7,7 +7,6 @@ The guide can now test-translate a file that is already fully translated, and pu
 - The guide stays on screen while the provider list or the provider panel is open, and says what to do there.
 - The import review is shorter: one line per warning, with the language list for raw line breaks one click away.
 - The Translations list now shows every entry by default, not only the untranslated ones.
-- The Glossaries tour moves on as soon as you create a glossary, even when the project already has one.
 - Tours stand out in the Guide menu.
 - Guided tours: Escape closes them, a double click on Next no longer skips a step, and each step keeps its own tab.
 - The Advanced sections tour follows the sidebar's order, and a tour left on its last step can be continued.

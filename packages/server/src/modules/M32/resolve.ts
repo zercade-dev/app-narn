@@ -13,6 +13,7 @@ import { difficultyBand, groupJobs } from './difficulty.js';
 import { chooseBelowTargetBucket, isTooSlow, planRun, tooSlowAlternative } from './planner.js';
 import { bucketResumeAt, deferralReason, isEligible, selectBucket } from './selector.js';
 import type { FreewayCooldownReason } from '../../storage/types.js';
+import { FREEWAY_BAD_CREDENTIALS_REASON } from './types.js';
 import type { Assignment, BucketView, DifficultyBand, FreewayJob, JobGroup } from './types.js';
 
 /**
@@ -211,6 +212,24 @@ export function resolveFreewayDecisions(
     ),
     blocked,
   };
+}
+
+/**
+ * The provider whose rejected key is why nothing can serve `targetLanguage`:
+ * a bucket that only its credential mark keeps out (it takes the language).
+ * `undefined` when no such bucket exists, i.e. no provider is switched on that
+ * could serve it at all. Tier is ignored on purpose: a fixed key at least
+ * offers a lower tier, so the key is still what to fix.
+ */
+export function badCredentialModule(
+  buckets: readonly BucketView[],
+  targetLanguage: string,
+): string | undefined {
+  return buckets.find(
+    (bucket) =>
+      bucket.disabledReason === FREEWAY_BAD_CREDENTIALS_REASON &&
+      !bucket.blockedLanguages?.includes(targetLanguage),
+  )?.moduleId;
 }
 
 /**

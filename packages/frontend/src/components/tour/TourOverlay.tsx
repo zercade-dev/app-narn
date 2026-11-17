@@ -25,9 +25,26 @@ import { TourCallout, type TourText } from './TourCallout';
  * Blocking: around a spotlight the dim boxes take clicks, so only the
  * highlighted control can be used. A centred step (no anchor, or one that is
  * not on screen) has nothing to protect: its dim layer is for the eye only and
- * the sidebar, Settings and the mode switch stay usable under it.
+ * the sidebar, Settings and the mode switch stay usable under it. The keyboard
+ * gets no further than the pointer: while the dim blocks the page, focus can
+ * only rest in the callout, in an interactive step's control, or in a layer
+ * above the dim (a dialog, a sheet, an open list), and a look-only control is
+ * `inert`.
  */
 const SPOTLIGHT_PADDING = 8;
+
+/**
+ * How long a `click` step, or a Next waiting for a control, may miss its
+ * control before Next shows anyway (it is not coming: a rule closed, a
+ * project with nothing to point at).
+ */
+export const ABSENT_GRACE_MS = 1200;
+
+/** A second click on Next this soon after the step changed belongs to a double click. */
+const NEXT_SETTLE_MS = 300;
+
+/** The dim's z-index: a layer stacked above it takes the pointer, so it may take focus too. */
+const DIM_Z = 40;
 
 interface TourOverlayProps {
   tour: Tour;
@@ -125,7 +142,11 @@ export function TourOverlay({
   const { t } = useTranslation('guide-tour');
   const step = tour.steps[stepIndex];
   const titleId = useId();
-  const anchor = useTourAnchor(step?.anchor ?? null);
+  const ownAnchor = useTourAnchor(step?.anchor ?? null);
+  // While the step's own control is not on screen, the one it falls back to.
+  const fallbackAnchor = useTourAnchor(step?.fallback?.anchor ?? null);
+  const anchor = ownAnchor ?? fallbackAnchor;
+  const onFallback = ownAnchor === null && fallbackAnchor !== null;
   const clearOfControl = useTourAnchor(step?.clearOf ?? null);
   const reduced = useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false);
   // A dropdown list or menu is open: the callout steps aside so it never
@@ -147,7 +168,10 @@ export function TourOverlay({
     if (!navigate) return;
     const { setView, setActiveTab } = useViewStore.getState();
     if (navigate.view && navigate.view !== shellView) setView(navigate.view);
-    if (navigate.tab && navigate.tab !== activeTab) setActiveTab(navigate.tab);
+    // A tab is in the project view: on the right tab with another view open
+    // (Settings), the project view comes back too.
+    if (navigate.tab && (navigate.tab !== activeTab || shellView !== 'project'))
+      setActiveTab(navigate.tab);
   }, [navigate, stepIndex, shellView, activeTab]);
 
   // Whatever else the step shows when it becomes current (an editor's tab).
@@ -272,12 +296,73 @@ export function TourOverlay({
   // Focus moves to the callout on each step, or to the control itself when it
   // is a field to type in (the vault password, the key, the project name) or
   // sits in a popup or dialog: a popover closes when focus leaves it (the
-  // project list), and a modal pulls focus back anyway.
+  // project list), and a modal pulls focus back anyway. Never to a control
+  // that is only shown.
   useEffect(() => {
-    if (anchor && isTextField(anchor)) anchor.focus();
-    else if (anchor instanceof HTMLElement && isInPopup(anchor, calloutNode)) anchor.focus();
+    if (anchor && !lookOnly && isTextField(anchor)) anchor.focus();
+    else if (anchor instanceof HTMLElement && !lookOnly && isInPopup(anchor, calloutNode))
+      anchor.focus();
     else calloutNode?.focus();
-  }, [calloutNode, stepIndex, anchor]);
+  }, [calloutNode, stepIndex, anchor, lookOnly]);
+
+  // While the dim blocks the page, the keyboard reaches what the pointer can
+  // (see the top of this file). A look-only control is made `inert`: it
+  // cannot take focus, keys or clicks. Focus that lands anywhere else is sent
+  // back to the callout (with the look-only note, on a look-only step), and
+  // Tab moves between what is allowed, skipping the rest.
+  const blocksPage =
+    step !== undefined && step.dim !== false && (anchor !== null || step.interactive === false);
+  useEffect(() => {
+    if (!blocksPage || !lookOnly || !anchor) return;
+    const had = anchor.hasAttribute('inert');
+    anchor.setAttribute('inert', '');
+    return () => {
+      if (!had) anchor.removeAttribute('inert');
+    };
+  }, [blocksPage, lookOnly, anchor]);
+  useEffect(() => {
+    if (!blocksPage) return;
+    const allowed = (el: Element): boolean => {
+      // A popup's focus guard only passes focus on into its popup (the callout's own, too).
+      if (calloutNode?.contains(el) || el.hasAttribute('data-base-ui-focus-guard')) return true;
+      if (anchor?.contains(el)) return !lookOnly;
+      return aboveDim(el);
+    };
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target;
+      if (!(target instanceof Element) || allowed(target)) return;
+      if (lookOnly) setLookOnlyTapped(true);
+      if (calloutNode) calloutNode.focus();
+      else if (target instanceof HTMLElement) target.blur();
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+      const order = tabbables(calloutNode);
+      const from = document.activeElement ?? document.body;
+      const forward = !e.shiftKey;
+      // Where the browser would go, then on round the page past what is not allowed.
+      const start = nextInOrder(order, from, forward);
+      const count = order.length;
+      for (let k = 0; k < count; k++) {
+        const at = start === -1 ? (forward ? k : count - 1 - k) : start + (forward ? k : -k);
+        const candidate = order[((at % count) + count) % count];
+        if (!candidate || !allowed(candidate)) continue;
+        // The browser's own move lands there: leave it alone (a list may react to Tab).
+        if (k === 0 && start !== -1 && candidate.tabIndex >= 0) return;
+        e.preventDefault();
+        candidate.focus();
+        return;
+      }
+      e.preventDefault();
+      calloutNode?.focus();
+    };
+    document.addEventListener('focusin', onFocusIn, true);
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => {
+      document.removeEventListener('focusin', onFocusIn, true);
+      document.removeEventListener('keydown', onKeyDown, true);
+    };
+  }, [blocksPage, calloutNode, anchor, lookOnly]);
 
   // A control below the fold of a scrolling area is brought into view: the
   // dim covers the page and takes the wheel, so the person could not scroll to it.
@@ -291,10 +376,28 @@ export function TourOverlay({
   const neededControl = useTourAnchor(nextNeeds);
   const nextBlockedBy = step?.advance.kind === 'next' ? (step.advance.blockedBy ?? null) : null;
   const blockingControl = useTourAnchor(nextBlockedBy);
+
+  // A step that waits on its control (a `click` step, a Next that needs one)
+  // whose control has been missing for a moment shows Next: it is not coming.
+  const waitsForControl = advanceKind === 'click' || nextNeeds !== null;
+  const [absentKey, setAbsentKey] = useState<string | null>(null);
+  useEffect(() => {
+    if (!waitsForControl || anchor) return;
+    const timer = setTimeout(() => setAbsentKey(stepKey), ABSENT_GRACE_MS);
+    return () => clearTimeout(timer);
+  }, [waitsForControl, anchor, stepKey]);
+  const absentLong = anchor === null && absentKey === stepKey;
+
   // A double click on Next is one Next: its second click lands on the next
-  // step's Next, which the person never saw, and would skip that step.
+  // step's Next, which the person never saw, and would skip that step. Only a
+  // click that follows another this soon after the step changed is dropped:
+  // deliberate quick clicks, each on a step that has been up a moment, count.
+  const shownAt = useRef(0);
+  useEffect(() => {
+    shownAt.current = performance.now();
+  }, [stepKey]);
   const onNext = (e?: { detail?: number }) => {
-    if ((e?.detail ?? 1) > 1) return;
+    if ((e?.detail ?? 1) > 1 && performance.now() - shownAt.current < NEXT_SETTLE_MS) return;
     onAdvance();
   };
 
@@ -313,10 +416,21 @@ export function TourOverlay({
   if (!step) return null;
 
   const motion = reduced ? '' : 'transition-all duration-200 motion-reduce:transition-none';
+  // The dim fades but does not glide: a hole that slid to the new control
+  // would take a click on it in the first moments of a step.
+  const dimMotion = reduced
+    ? ''
+    : 'transition-[background-color,opacity] duration-200 motion-reduce:transition-none';
+  // A step whose words describe its control says something else while that
+  // control is not on screen (for a step waiting on it, once it has been
+  // missing a moment, as Next shows), or while it points at its fallback.
+  const whatKey = onFallback
+    ? step.fallback?.whatKey
+    : anchor === null && step.absentWhatKey && (!waitsForControl || absentLong)
+      ? step.absentWhatKey
+      : undefined;
   const calloutProps = {
-    // A step whose words describe its control says something else while that
-    // control is not on screen.
-    step: anchor === null && step.absentWhatKey ? { ...step, whatKey: step.absentWhatKey } : step,
+    step: whatKey ? { ...step, whatKey } : step,
     titleId,
     position,
     extra: lookOnlyTapped ? (
@@ -338,7 +452,11 @@ export function TourOverlay({
         (nextNeeds === null ||
           neededControl !== null ||
           enteredViaBack ||
+          absentLong ||
           step.advance.unlessDone?.(facts) === true)) ||
+      // A control to press: also on a step entered via Back (it may be
+      // pressed already), and once it has been missing a moment.
+      (step.advance.kind === 'click' && (enteredViaBack || absentLong)) ||
       (step.advance.kind === 'manual' &&
         enteredViaBack &&
         step.advance.nextOnBack?.(facts) === true) ||
@@ -372,7 +490,7 @@ export function TourOverlay({
     width: rect.width + SPOTLIGHT_PADDING * 2,
     height: rect.height + SPOTLIGHT_PADDING * 2,
   };
-  const dimBase = `fixed z-40 bg-background/70 ${motion}`;
+  const dimBase = `fixed z-40 bg-background/70 ${dimMotion}`;
 
   // A list or dialog the person opened from the step is up: the callout and
   // the ring leave it alone until it closes (removed, not faded, so no piece
@@ -493,6 +611,62 @@ export function TourOverlay({
       )}
     </div>
   );
+}
+
+const TABBABLE =
+  'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable="true"]';
+
+/**
+ * What Tab can reach, in document order. The callout's buttons count even
+ * while its popover has taken them out of the order (it does while focus is
+ * outside it, and lets a focus guard pass focus in); the guards themselves
+ * do not, since the tour moves focus in directly.
+ */
+function tabbables(callout: HTMLElement | null): HTMLElement[] {
+  return Array.from(document.querySelectorAll<HTMLElement>(TABBABLE)).filter(
+    (el) =>
+      (el.tabIndex >= 0 || (el !== callout && callout?.contains(el) === true)) &&
+      !el.hasAttribute('data-base-ui-focus-guard') &&
+      !(el as HTMLButtonElement).disabled &&
+      !(el instanceof HTMLInputElement && el.type === 'hidden') &&
+      el.closest('[inert]') === null &&
+      (typeof el.checkVisibility !== 'function' ||
+        el.checkVisibility({ visibilityProperty: true })),
+  );
+}
+
+/** Index in `order` of the element Tab (or Shift+Tab) moves to from `from`; -1 past either end. */
+function nextInOrder(order: HTMLElement[], from: Element, forward: boolean): number {
+  const at = order.indexOf(from as HTMLElement);
+  if (at !== -1) return forward ? (at + 1 < order.length ? at + 1 : -1) : at - 1;
+  if (forward) {
+    return order.findIndex(
+      (el) => (from.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+    );
+  }
+  for (let i = order.length - 1; i >= 0; i--) {
+    const pos = from.compareDocumentPosition(order[i]);
+    if (pos & Node.DOCUMENT_POSITION_PRECEDING && !(pos & Node.DOCUMENT_POSITION_CONTAINS))
+      return i;
+  }
+  return -1;
+}
+
+/**
+ * In a layer the pointer reaches over the dim: a dialog, a sheet, an open
+ * list or menu, or anything else stacked above it (the outermost positioned
+ * ancestor with a z-index decides).
+ */
+function aboveDim(el: Element): boolean {
+  if (el.closest('[role="dialog"], [role="alertdialog"], [role="listbox"], [role="menu"]')) {
+    return true;
+  }
+  let z: number | null = null;
+  for (let n: Element | null = el; n && n !== document.body; n = n.parentElement) {
+    const style = getComputedStyle(n);
+    if (style.position !== 'static' && style.zIndex !== 'auto') z = Number(style.zIndex);
+  }
+  return z !== null && z > DIM_Z;
 }
 
 /** Inside a popup or dialog other than the callout itself. */

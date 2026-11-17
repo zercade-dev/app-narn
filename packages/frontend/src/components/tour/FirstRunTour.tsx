@@ -393,19 +393,38 @@ function ActiveFirstRunTour({ facts }: { facts: GuideFacts }) {
     [cloud, tGuide],
   );
   // A provider with a free tier: NARN Freeway translates with its key, so the
-  // guide only asks for that key (an earlier own-provider choice no longer holds).
+  // guide only asks for that key. An earlier own-provider choice no longer
+  // holds: the project goes back to Freeway and a choice still waiting for its
+  // key is dropped, so saving that key later cannot reroute it.
   const onFreeTierChosen = useCallback(
     (base: string) => {
       setChoiceOpen(false);
-      const guide = useGuideStore.getState();
-      guide.setSimpleProvider(null);
-      guide.setKeyProvider(base);
+      useGuideStore.getState().setKeyProvider(base);
       const focusKey = providerKeyFor(base);
-      if (!focusKey) return;
-      if (cloud) goToVaultSetup({ guided: true, key: focusKey });
-      else globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey }));
+      const openKey = () => {
+        if (!focusKey) return;
+        if (cloud) goToVaultSetup({ guided: true, key: focusKey });
+        else globalThis.dispatchEvent(vaultEditorOpenEvent({ focusKey }));
+      };
+      // Written before the key editor opens: the cloud one is a full-page
+      // redirect, which would cut the write short.
+      void chooseProvider(null, ownedTarget())
+        .then((result) => {
+          if (result.status === 'routing-kept') {
+            toast.info(tGuide('providerChoice.existingRouting'));
+          }
+        })
+        .catch((err: unknown) =>
+          toast.error(
+            tGuide('providerChoice.failed', {
+              provider: providerName(base),
+              message: getErrorMessage(err),
+            }),
+          ),
+        )
+        .finally(openKey);
     },
-    [cloud],
+    [cloud, tGuide],
   );
   const reportChoice = useCallback(
     (base: string, pending: Promise<ProviderChoiceResult>) => {

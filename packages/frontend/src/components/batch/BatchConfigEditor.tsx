@@ -1,7 +1,9 @@
-import { useState, useRef, useContext, useEffect } from 'react';
+import { useState, useRef, useContext, useEffect, useLayoutEffect } from 'react';
 import {
   ROUTING_EDITOR_TAB_EVENT,
-  takeRoutingEditorTab,
+  takeRoutingEditorView,
+  tourReusesEmptyRule,
+  type RoutingEditorView,
 } from '../../lib/tour/routing-advanced-tour.js';
 import { useTranslation } from 'react-i18next';
 import {
@@ -275,6 +277,23 @@ function DeleteRuleControls({
 
 type EditorTab = 'rules' | 'templates' | 'advanced';
 
+/** A rule's languages as one comparable value. */
+function langsKey(rule: RoutingRule | undefined): string {
+  return [...(rule?.targetLanguages ?? [])].sort().join(',');
+}
+
+/** A rule as Add rule makes it: no provider, no name, no filter or setting of any kind. */
+function isEmptyRule(rule: RoutingRule): boolean {
+  return Object.entries(rule).every(
+    ([key, value]) =>
+      key === 'id' ||
+      key === 'priority' ||
+      value === undefined ||
+      value === '' ||
+      (Array.isArray(value) && value.length === 0),
+  );
+}
+
 export interface BatchConfigEditorProps {
   // Group state
   mergedGroups: RoutingRuleGroup[];
@@ -369,16 +388,71 @@ export function BatchConfigEditor({
   const { t: tBatch } = useTranslation('batch');
   const importRef = useRef<HTMLInputElement>(null);
   const [editorTab, setEditorTab] = useState<EditorTab>('rules');
-  // The Advanced routing rules tour opens the tab its step is about (one asked
-  // for before this editor mounted is taken on mount).
+  // Rules whose Filtering section is open (closed again when the rule closes).
+  const [filteringOpen, setFilteringOpen] = useState<ReadonlySet<string>>(() => new Set());
+  const setFiltering = (id: string, open: boolean) =>
+    setFilteringOpen((prev) => {
+      if (prev.has(id) === open) return prev;
+      const next = new Set(prev);
+      if (open) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  const doneEdit = (id: string) => {
+    setFiltering(id, false);
+    onDoneEdit(id);
+  };
+  // Rule #1's languages when the tour's languages step began: its Next waits
+  // for a change from these (null: no such step is waiting).
+  const [langsBaseline, setLangsBaseline] = useState<string | null>(null);
+
+  // The Advanced routing rules tour has the editor show what its step is about:
+  // a tab, which rule is open, rule #1's Filtering (one asked for before this
+  // editor mounted is taken on mount). Applied a moment after the ask, once the
+  // click that moved the tour on has done its own work (Add rule, Done), with
+  // the rules as they are then.
+  const latest = useRef({ draft, editingIds, onStartEdit, onDoneEdit });
+  useLayoutEffect(() => {
+    latest.current = { draft, editingIds, onStartEdit, onDoneEdit };
+  });
   useEffect(() => {
+    const apply = (view: RoutingEditorView) => {
+      setEditorTab(view.tab);
+      const {
+        draft: rules,
+        editingIds: open,
+        onStartEdit: start,
+        onDoneEdit: close,
+      } = latest.current;
+      const first = rules[0];
+      if (view.open !== undefined) {
+        const keep =
+          view.open === 'first' ? first : view.open === 'last' ? rules.at(-1) : undefined;
+        // "The last rule" is a rule added below rule #1, never rule #1 itself.
+        const target = view.open === 'last' && rules.length < 2 ? undefined : keep;
+        for (const id of open) {
+          if (id === target?.id) continue;
+          setFiltering(id, false);
+          close(id);
+        }
+        if (target && !open.has(target.id)) start(target.id);
+      }
+      if (view.filtering !== undefined && first) setFiltering(first.id, view.filtering);
+      setLangsBaseline(view.markLangs ? langsKey(first) : null);
+    };
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const onAsk = () => {
-      const tab = takeRoutingEditorTab();
-      if (tab) setEditorTab(tab);
+      const view = takeRoutingEditorView();
+      if (!view) return;
+      clearTimeout(timer);
+      timer = setTimeout(() => apply(view), 0);
     };
     onAsk();
     globalThis.addEventListener(ROUTING_EDITOR_TAB_EVENT, onAsk);
-    return () => globalThis.removeEventListener(ROUTING_EDITOR_TAB_EVENT, onAsk);
+    return () => {
+      clearTimeout(timer);
+      globalThis.removeEventListener(ROUTING_EDITOR_TAB_EVENT, onAsk);
+    };
   }, []);
   // Base modules that already have named instances are routed via those
   // instances, not the bare base; instanceable bases without instances stay
@@ -389,13 +463,27 @@ export function BatchConfigEditor({
   const isNewRule = (index: number): boolean => index > 0 && index === draft.length - 1;
   const tourMark = (index: number, what: 'module' | 'done'): string | undefined =>
     index === 0 ? `routing-first-${what}` : isNewRule(index) ? `routing-new-${what}` : undefined;
-  /** Shown once the step's part is done: the first rule has languages, the new one a provider. */
+  /**
+   * Shown once the step's part is done: the first rule's languages were
+   * changed during the languages step (and it has some), the new rule has a
+   * provider.
+   */
   const readyMarker = (index: number, rule: RoutingRule): string | undefined =>
-    index === 0 && (rule.targetLanguages?.length ?? 0) > 0
+    index === 0 &&
+    (rule.targetLanguages?.length ?? 0) > 0 &&
+    (langsBaseline === null || langsKey(rule) !== langsBaseline)
       ? 'routing-first-langs-set'
       : isNewRule(index) && rule.moduleId
         ? 'routing-new-set'
         : undefined;
+  // Add rule during the tour: an empty rule left at the bottom (added on an
+  // earlier pass, then left by Back or Skip) is the new rule; the tour's next
+  // step opens it.
+  const handleAdd = () => {
+    const last = draft.at(-1);
+    if (draft.length > 1 && last && isEmptyRule(last) && tourReusesEmptyRule()) return;
+    onAdd();
+  };
   const handleAddFromTemplate = (template: RoutingRule) => {
     onAddFromTemplate(template);
     setEditorTab('rules');
@@ -592,7 +680,7 @@ export function BatchConfigEditor({
                             size="sm"
                             variant="outline"
                             className="h-6 text-xs px-2"
-                            onClick={() => onDoneEdit(rule.id)}
+                            onClick={() => doneEdit(rule.id)}
                             data-tour={tourMark(index, 'done')}
                           >
                             {t('routing.doneEdit')}
@@ -601,7 +689,8 @@ export function BatchConfigEditor({
                       </div>
 
                       <div className="grid grid-cols-[1fr_2fr] gap-2 items-start">
-                        <div>
+                        {/* The tour's ring takes in the label with the select. */}
+                        <div data-tour={tourMark(index, 'module')}>
                           <Label htmlFor={`mod-${rule.id}`}>{t('routing.labelModule')}</Label>
                           <Select
                             value={rule.moduleId || null}
@@ -621,7 +710,6 @@ export function BatchConfigEditor({
                               id={`mod-${rule.id}`}
                               className="h-9 w-full"
                               data-testid={`routing-module-select-${rule.id}`}
-                              data-tour={tourMark(index, 'module')}
                             >
                               <SelectValue placeholder={t('routing.selectPlaceholder')}>
                                 {(v: string | null) =>
@@ -699,7 +787,10 @@ export function BatchConfigEditor({
                         </div>
                       </div>
 
-                      <Collapsible defaultOpen={false}>
+                      <Collapsible
+                        open={filteringOpen.has(rule.id)}
+                        onOpenChange={(open) => setFiltering(rule.id, open)}
+                      >
                         <CollapsibleTrigger
                           render={
                             <Button
@@ -1272,11 +1363,12 @@ export function BatchConfigEditor({
             <div className="flex flex-col items-end gap-1 pt-1">
               <div className="flex w-full items-center justify-between gap-3">
                 <Button
-                  onClick={onAdd}
+                  onClick={handleAdd}
                   variant="outline"
                   size="sm"
                   data-testid="routing-add"
-                  data-tour="routing-add"
+                  // With no rule yet, the tour has Add rule make rule #1.
+                  data-tour={draft.length === 0 ? 'routing-first-add' : 'routing-add'}
                 >
                   {t('routing.addRule')}
                 </Button>

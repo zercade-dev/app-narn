@@ -291,10 +291,12 @@ export function useFirstRunActive(): boolean {
 /** Why a run that ended with nothing translated stopped. */
 function endedCause(run: RunStatus): 'auth' | 'quota' | 'no-provider' | 'other' {
   const codes = [run.stopCause, ...run.errors.map((e) => e.code)];
+  // A rejected key comes first: Freeway reports a provider sidelined by its
+  // rejected key as `auth` too, and "Check my key" is the way out of that.
+  if (codes.includes('auth')) return 'auth';
   // Freeway found no provider switched on: not the key's fault (the server's
   // config may have lost it). A custom rule that fits nothing stays 'other'.
   if (run.errors.some((e) => e.message === FREEWAY_NO_PROVIDER)) return 'no-provider';
-  if (codes.includes('auth')) return 'auth';
   if (codes.includes('rate-limit')) return 'quota';
   return 'other';
 }

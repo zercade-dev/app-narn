@@ -215,6 +215,7 @@
     "progressSections": "{{current}} of {{total}} sections",
     "completed": "Completed",
     "needsProject": "Open a project to take this tour.",
+    "needsDesktop": "Tours need a wider screen. Open the app on a computer to take one.",
     "switchedToAdvanced": "Switched to Advanced mode for this tour.",
     "confirm": {
       "title": "Switch to Simple for the guided setup?",
@@ -334,7 +335,8 @@
     },
     "edit": {
       "title": "Open rule #1",
-      "what": "Press the pencil to edit rule #1. It will handle the Asian languages."
+      "what": "Press the pencil to edit rule #1. It will handle the Asian languages.",
+      "noRulesWhat": "This project has no rules yet. Press Add rule to create rule #1. It will handle the Asian languages."
     },
     "filter": {
       "title": "Open Filtering",
@@ -343,7 +345,7 @@
     },
     "langs": {
       "title": "Tick the Asian languages",
-      "what": "Tick the Asian languages among your project's languages, for example ja, ko and zh. With none in this project, tick any language to try it. Next appears once one is ticked.",
+      "what": "Tick the Asian languages among your project's languages, for example ja, ko and zh-hans, and untick any others. With none in this project, tick any language to try it. Next appears once you tick or untick one.",
       "why": "Rule #1 now takes only these languages. Every other language moves on to the rules below it."
     },
     "module": {
@@ -357,17 +359,17 @@
     },
     "add": {
       "title": "Add a rule for the other languages",
-      "what": "Press Add rule. The new rule goes at the bottom, below rule #1.",
+      "what": "Press Add rule. The new rule goes at the bottom, below the rules already there.",
       "why": "Rules are checked from the top, so a rule at the bottom only gets what the rules above it left."
     },
     "newModule": {
       "title": "Choose a provider, and nothing else",
       "what": "In Module, pick the provider for every other language. Leave Filtering empty. Next appears once a provider is picked.",
-      "why": "No filter is needed: Asian languages stop at rule #1, so only the other languages reach this rule."
+      "why": "No filter is needed: the languages you ticked stop at rule #1, so only the other languages reach the rules below it."
     },
     "order": {
       "title": "The order does the work",
-      "what": "Rule #1 takes the Asian languages and rule #2 takes the rest. Swapped, the rule with no filter would come first, take every language, and rule #1 would never be used.",
+      "what": "Rule #1 takes the languages you ticked, and the rules below it get only what is left. If the rule with no filter came first, it would take every language, and rule #1 would never be used.",
       "why": "To change the order, use the arrows beside a rule."
     },
     "templates": {
@@ -387,9 +389,10 @@
     },
     "back": {
       "title": "Back to Simple",
-      "what": "Press Simple to go back to the one-provider view. Your rules stay as they are.",
+      "what": "Simple is the one-provider view. Your rules stay as they are.",
       "why": "With more than one provider, as now, the editor keeps showing your rules and says why."
-    }
+    },
+    "absentWhat": "What this step points at is not on screen right now. Press Next to go on, or Back to do the step before again."
   },
   "advancedSections": {
     "compare": {
@@ -481,7 +484,7 @@
     },
     "constant": {
       "title": "The Constant column",
-      "what": "A constant term is never sent to the translation engine. NARN puts your glossary translation straight into the result instead, so a character name like Diluc always comes out exactly as written here.",
+      "what": "Where the text spells a constant term exactly as the glossary does, it is never sent to the translation engine. NARN puts your glossary translation straight into the result instead, so a character name like Diluc always comes out exactly as written here.",
       "absentWhat": "Select a glossary on the left to see its terms and their Constant column.",
       "why": "Other terms are sent along with the text as a reference the engine should follow."
     },

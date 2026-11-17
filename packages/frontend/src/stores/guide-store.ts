@@ -176,6 +176,11 @@ function withCompleted(
   return { ...progress, [id]: { ...prev, last: 0, completed: true } };
 }
 
+/** A retranslate quick test the guide asked for whose run was never listed. */
+function isUnstartedRetest(q: QuickTest | null): boolean {
+  return q?.retranslate === true && q.decision === 'pending' && q.runId === null;
+}
+
 /**
  * v0 (unversioned) had no `tourProgress`: every field is kept, and each tour
  * already completed, plus the first run when it was finished, counts as
@@ -215,7 +220,13 @@ export const useGuideStore = create<GuideState>()(
       activeTourStart: 0,
       activeTourSeq: 0,
       firstRunForced: false,
-      dismissFirstRun: () => set({ firstRunDismissed: true }),
+      dismissFirstRun: () =>
+        set((s) => ({
+          firstRunDismissed: true,
+          // A retranslate test asked for but never started would otherwise
+          // outlive the guide (it is persisted) and wait for a run forever.
+          quickTest: isUnstartedRetest(s.quickTest) ? null : s.quickTest,
+        })),
       restartFirstRun: (forced = false) =>
         set((s) => ({
           firstRunDismissed: false,
@@ -292,9 +303,9 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
-      // `quickTest`, `orphanSim`, `pendingProviders`, `pendingRoutedFrom` and `switchedOffNoticed` were added within v1: a state saved
-      // without them rehydrates with the default (null), so no version bump
-      // is needed.
+      // `quickTest`, `orphanSim`, `pendingProviders`, `pendingRoutedFrom`, `switchedOffNoticed`
+      // and `keyProvider` were added within v1: a state saved without them
+      // rehydrates with the default, so no version bump is needed.
       version: 1,
       // Stored fields only; the persist merge fills in the rest.
       migrate: (persisted, version) => migrateGuideState(persisted, version) as GuideState,
@@ -302,6 +313,9 @@ export const useGuideStore = create<GuideState>()(
         firstRunDismissed: state.firstRunDismissed,
         firstRunFinished: state.firstRunFinished,
         simpleProvider: state.simpleProvider,
+        // Survives the cloud vault's full-page redirect, so the vault page can
+        // still focus the key the guide asked for.
+        keyProvider: state.keyProvider,
         pendingProviders: state.pendingProviders,
         pendingRoutedFrom: state.pendingRoutedFrom,
         exportedOnce: state.exportedOnce,

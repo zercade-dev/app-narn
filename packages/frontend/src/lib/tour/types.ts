@@ -70,9 +70,10 @@ export interface GuideFacts {
 export type TourAdvance =
   /**
    * An explanation step: shows Next. With `needs` (a `data-tour` anchor), only
-   * while that control is on screen, or on a step entered via Back: Next would
-   * otherwise lead past something not done yet (the languages' Save button
-   * shows once one is ticked).
+   * while that control is on screen, on a step entered via Back, or once the
+   * step's own anchor has been missing a moment (nothing to do it with): Next
+   * would otherwise lead past something not done yet (the languages' Save
+   * button shows once one is ticked).
    */
   | {
       kind: 'next';
@@ -92,7 +93,11 @@ export type TourAdvance =
        */
       advanceOnSignal?: TourSignal;
     }
-  /** Completes when the anchored control is clicked. */
+  /**
+   * Completes when the anchored control is clicked. Next shows too on a step
+   * entered via Back (the control may already be used) and once the control
+   * has been missing for a moment, so the step is never a dead end.
+   */
   | { kind: 'click' }
   /** Completes when app state says so. */
   | { kind: 'state'; done: (f: GuideFacts) => boolean }
@@ -124,6 +129,12 @@ export interface TourStep {
    * is not there.
    */
   absentWhatKey?: string;
+  /**
+   * Another control the step points at, saying `whatKey`, while its own
+   * anchor is not on screen and this one is (rule #1's pencil, in a project
+   * with no rule yet: Add rule makes it). A `click` step completes on it too.
+   */
+  fallback?: { anchor: string; whatKey: string };
   advance: TourAdvance;
   /**
    * Where the callout sits relative to the anchor (default `bottom`; it still

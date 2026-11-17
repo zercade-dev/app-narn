@@ -215,6 +215,7 @@
     "progressSections": "{{current}} de {{total}} secciones",
     "completed": "Completado",
     "needsProject": "Abre un proyecto para hacer este recorrido.",
+    "needsDesktop": "Los recorridos necesitan una pantalla más ancha. Abre la aplicación en un ordenador para hacer uno.",
     "switchedToAdvanced": "Se cambió al modo avanzado para este recorrido.",
     "confirm": {
       "title": "¿Cambiar a Simple para la configuración guiada?",
@@ -334,7 +335,8 @@
     },
     "edit": {
       "title": "Abre la regla n.º 1",
-      "what": "Pulsa el lápiz para editar la regla n.º 1. Se encargará de los idiomas asiáticos."
+      "what": "Pulsa el lápiz para editar la regla n.º 1. Se encargará de los idiomas asiáticos.",
+      "noRulesWhat": "Este proyecto aún no tiene reglas. Pulsa Añadir regla para crear la regla n.º 1. Se encargará de los idiomas asiáticos."
     },
     "filter": {
       "title": "Abre Filtrado",
@@ -343,7 +345,7 @@
     },
     "langs": {
       "title": "Marca los idiomas asiáticos",
-      "what": "Marca los idiomas asiáticos entre los idiomas de tu proyecto, por ejemplo ja, ko y zh. Si tu proyecto no tiene ninguno, marca cualquier idioma para probarlo. Siguiente aparece en cuanto marcas uno.",
+      "what": "Marca los idiomas asiáticos entre los idiomas de tu proyecto, por ejemplo ja, ko y zh-hans, y desmarca los demás. Si tu proyecto no tiene ninguno, marca cualquier idioma para probarlo. Siguiente aparece en cuanto marcas o desmarcas uno.",
       "why": "Ahora la regla n.º 1 solo toma estos idiomas. Los demás idiomas pasan a las reglas de debajo."
     },
     "module": {
@@ -357,17 +359,17 @@
     },
     "add": {
       "title": "Añade una regla para los demás idiomas",
-      "what": "Pulsa Añadir regla. La nueva regla va al final, debajo de la regla n.º 1.",
+      "what": "Pulsa Añadir regla. La nueva regla va al final, debajo de las reglas que ya hay.",
       "why": "Las reglas se revisan de arriba abajo, así que una regla al final solo recibe lo que dejaron las reglas de encima."
     },
     "newModule": {
       "title": "Elige un proveedor y nada más",
       "what": "En Módulo, elige el proveedor para todos los demás idiomas. Deja Filtrado vacío. Siguiente aparece en cuanto eliges un proveedor.",
-      "why": "No hace falta ningún filtro: los idiomas asiáticos se quedan en la regla n.º 1, así que solo los demás idiomas llegan a esta regla."
+      "why": "No hace falta ningún filtro: los idiomas que marcaste se quedan en la regla n.º 1, así que solo los demás idiomas llegan a las reglas de debajo."
     },
     "order": {
       "title": "El orden hace el trabajo",
-      "what": "La regla n.º 1 toma los idiomas asiáticos y la regla n.º 2 el resto. Si las intercambias, la regla sin filtro iría primero, tomaría todos los idiomas y la regla n.º 1 nunca se usaría.",
+      "what": "La regla n.º 1 toma los idiomas que marcaste, y las reglas de debajo solo reciben lo que queda. Si la regla sin filtro fuera primero, tomaría todos los idiomas y la regla n.º 1 nunca se usaría.",
       "why": "Para cambiar el orden, usa las flechas junto a una regla."
     },
     "templates": {
@@ -387,9 +389,10 @@
     },
     "back": {
       "title": "Volver a Sencillo",
-      "what": "Pulsa Sencillo para volver a la vista de un solo proveedor. Tus reglas no cambian.",
+      "what": "Sencillo es la vista de un solo proveedor. Tus reglas no cambian.",
       "why": "Con más de un proveedor, como ahora, el editor sigue mostrando tus reglas y explica por qué."
-    }
+    },
+    "absentWhat": "Lo que señala este paso no está en pantalla ahora mismo. Pulsa Siguiente para continuar, o Atrás para repetir el paso anterior."
   },
   "advancedSections": {
     "compare": {
@@ -481,7 +484,7 @@
     },
     "constant": {
       "title": "La columna Constante",
-      "what": "Un término constante nunca se envía al motor de traducción. En su lugar, NARN pone tu traducción del glosario directamente en el resultado, así que un nombre de personaje como Diluc siempre sale tal como está escrito aquí.",
+      "what": "Donde el texto escribe un término constante exactamente como el glosario, nunca se envía al motor de traducción. En su lugar, NARN pone tu traducción del glosario directamente en el resultado, así que un nombre de personaje como Diluc siempre sale tal como está escrito aquí.",
       "absentWhat": "Selecciona un glosario a la izquierda para ver sus términos y su columna Constante.",
       "why": "Los demás términos se envían junto con el texto como referencia que el motor debe seguir."
     },

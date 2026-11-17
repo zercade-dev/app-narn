@@ -25,9 +25,10 @@
  * forbidden-term and glossary-adherence checks) — while "concatenate" still
  * hides no "cat".
  *
- * Note: M17's constant-glossary masker uses a deliberately different boundary
- * (it also treats `_` as a word character and uses a replacement form), so it is
- * NOT built from this helper.
+ * M17's constant-glossary masker builds its (case-sensitive) pattern from
+ * {@link termBoundaryPattern} too, so a constant term is masked exactly where
+ * the prompt filter would otherwise send it to the model — `_` is not a word
+ * character for either, and both accept an unsegmented-script neighbour.
  */
 
 /** Escape a literal string for safe embedding in a RegExp. */
@@ -75,35 +76,74 @@ const RIGHT_BOUNDARY = String.raw`(?:(?![\p{L}\p{N}])|(?=${UNSEGMENTED_CHAR_CLAS
  * as-is to avoid speculative complexity.
  */
 export function buildTermBoundaryRegex(term: string): RegExp {
-  const escaped = escapeRegExp(term);
-  if (isUnsegmentedScript(term)) {
-    return new RegExp(escaped, 'iu');
-  }
-  return new RegExp(`${LEFT_BOUNDARY}${escaped}${RIGHT_BOUNDARY}`, 'iu');
+  return new RegExp(termBoundaryPattern(term), 'iu');
 }
 
-/** Vowels a declined word may lose before its ending (Latin, Cyrillic, Greek). */
-const STEM_VOWELS = /[aeiouyàáâãäåèéêëìíîïòóôõöùúûüаеёиоуыэюяіїєαεηιουω]{1,2}$/iu;
+/**
+ * The RegExp source behind {@link buildTermBoundaryRegex}, without flags, so a
+ * caller that needs different flags (M17's case-sensitive, global constant-term
+ * masker) shares the exact same boundary definition. Contains no capture group.
+ */
+export function termBoundaryPattern(term: string): string {
+  const escaped = escapeRegExp(term);
+  if (isUnsegmentedScript(term)) return escaped;
+  return `${LEFT_BOUNDARY}${escaped}${RIGHT_BOUNDARY}`;
+}
+
+/** Vowels (Latin, Cyrillic, Greek), as a character-class body. */
+const VOWELS = 'aeiouyàáâãäåèéêëìíîïòóôõöùúûüаеёиоуыэюяіїєαεηιουω';
+
+/**
+ * The part of a word's end a declension may replace: a vowel + `й` or a lone
+ * `й`/`ь` ("Большой", "Рыцарь"), else one or two vowels ("Сила", "Снежная").
+ */
+const REPLACEABLE_ENDING = new RegExp(`(?:[${VOWELS}]?[йь]|[${VOWELS}]{1,2})$`, 'iu');
+
+/** Longest ending a whole (unshortened) word of `length` letters may take. */
+function maxEndingFor(length: number): number {
+  if (length <= 3) return 2;
+  if (length <= 5) return 3;
+  return 5;
+}
+
+/** One word of an inflected-term pattern; see {@link buildInflectedTermRegex}. */
+function inflectedWordPattern(word: string): string {
+  const letters = [...word];
+  if (letters.length < 3) return escapeRegExp(word);
+  const whole = `${escapeRegExp(word)}\\p{L}{0,${maxEndingFor(letters.length)}}`;
+  if (letters.length < 4) return whole;
+  const replaceable = REPLACEABLE_ENDING.exec(word)?.[0];
+  if (!replaceable) return whole;
+  // Keep at least three stem letters.
+  const cut = Math.min([...replaceable].length, letters.length - 3);
+  const stem = letters.slice(0, letters.length - cut).join('');
+  const shortEnding = String.raw`(?:\p{L}{0,2}|\p{L}{2}[${VOWELS}])`;
+  return `(?:${whole}|${escapeRegExp(stem)}${shortEnding})`;
+}
 
 /**
  * Like {@link buildTermBoundaryRegex}, but each word of `term` may also carry
- * an inflectional ending: up to four letters, after dropping up to two final
- * vowels from a word of five letters or more. "Дилюк" accepts "Дилюка",
- * "Снежная" accepts "Снежной", "Маг Бездны" accepts "мага Бездны". Words under
- * three letters, and terms in an unsegmented script (CJK/Thai, which do not
- * inflect this way), must match exactly. For checking that a target text uses
- * a required translation, where the grammar may have declined it.
+ * an inflectional ending. For checking that a target text uses a required
+ * translation, where the grammar may have declined it. Per word:
+ *
+ * - under three letters ("HP"): exact.
+ * - three letters ("Маг"): plus an ending of at most two letters — "мага",
+ *   "магов", but not "Магазин"; "Geo" does not match "Geology".
+ * - four letters or more: the whole word plus an ending of up to three letters
+ *   (up to five for a word of six letters or more: Turkish "Oyuncu" →
+ *   "oyuncuların"), OR the word with its final vowel(s) — or `й`/`ь`, with the
+ *   vowel before a `й` — dropped, keeping at least three stem letters, plus an
+ *   ending of at most two letters, or three letters ending in a vowel:
+ *   "Сила" → "силу", "Снежная" → "Снежной", "Большой" → "Большого",
+ *   "Рыцарь" → "Рыцаря"/"рыцарями". The short, vowel-final cap is what keeps
+ *   "Hydro" off "Hydrant" (Hydr + "ant").
+ *
+ * Terms in an unsegmented script (CJK/Thai, which do not inflect this way)
+ * match exactly. "Дилюк" accepts "Дилюка", "Маг Бездны" accepts "мага Бездны".
  */
 export function buildInflectedTermRegex(term: string): RegExp {
   if (isUnsegmentedScript(term)) return buildTermBoundaryRegex(term);
-  const words = term
-    .trim()
-    .split(/\s+/u)
-    .map((word) => {
-      if ([...word].length < 3) return escapeRegExp(word);
-      const stem = [...word].length >= 5 ? word.replace(STEM_VOWELS, '') : word;
-      return `${escapeRegExp(stem)}\\p{L}{0,4}`;
-    });
+  const words = term.trim().split(/\s+/u).map(inflectedWordPattern);
   return new RegExp(`${LEFT_BOUNDARY}${words.join(String.raw`\s+`)}${RIGHT_BOUNDARY}`, 'iu');
 }
 

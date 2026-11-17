@@ -33,6 +33,7 @@ import { TranslatedByLine } from '../config/TranslatedByLine.js';
 import { useProjectStore } from '../../stores/project-store.js';
 import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 import { useGuideStore } from '../../stores/guide-store.js';
+import { useFirstRunActive } from '../../hooks/use-guide-facts.js';
 
 /** Last-used per-browser values (backlog: settings per modal). reTranslate and
  * exampleIds are deliberately NOT persisted: destructive mode choice / entry-specific. */
@@ -127,10 +128,13 @@ export function TranslateRunDialog({
   const [reTranslate, setReTranslate] = useState(false);
   // The guide's retranslate test: its entries are already translated, so the
   // run only means something with "Re-translate existing translations". Start
-  // waits for that choice (the guide points at it; its dim stays below dialogs).
+  // waits for that choice (the guide points at it; its dim stays below dialogs),
+  // but only while the guide is on: a test it left behind never holds Start.
+  const firstRunActive = useFirstRunActive();
   const guideRetest = useGuideStore((s) => {
     const q = s.quickTest;
     return (
+      firstRunActive &&
       q?.retranslate === true &&
       q.decision === 'pending' &&
       q.runId === null &&

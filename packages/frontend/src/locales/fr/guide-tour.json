@@ -215,6 +215,7 @@
     "progressSections": "{{current}} sur {{total}} sections",
     "completed": "Terminé",
     "needsProject": "Ouvrez un projet pour suivre cette visite.",
+    "needsDesktop": "Les visites demandent un écran plus large. Ouvrez l’application sur un ordinateur pour en suivre une.",
     "switchedToAdvanced": "Passage en mode avancé pour cette visite.",
     "confirm": {
       "title": "Passer en mode Simple pour la configuration guidée ?",
@@ -334,7 +335,8 @@
     },
     "edit": {
       "title": "Ouvrez la règle n°1",
-      "what": "Appuyez sur le crayon pour modifier la règle n°1. Elle traitera les langues asiatiques."
+      "what": "Appuyez sur le crayon pour modifier la règle n°1. Elle traitera les langues asiatiques.",
+      "noRulesWhat": "Ce projet n’a pas encore de règle. Appuyez sur Ajouter une règle pour créer la règle n°1. Elle traitera les langues asiatiques."
     },
     "filter": {
       "title": "Ouvrez Filtrage",
@@ -343,7 +345,7 @@
     },
     "langs": {
       "title": "Cochez les langues asiatiques",
-      "what": "Cochez les langues asiatiques parmi les langues de votre projet, par exemple ja, ko et zh. S’il n’y en a aucune dans ce projet, cochez n’importe quelle langue pour essayer. Suivant apparaît dès qu’une langue est cochée.",
+      "what": "Cochez les langues asiatiques parmi les langues de votre projet, par exemple ja, ko et zh-hans, et décochez les autres. S’il n’y en a aucune dans ce projet, cochez n’importe quelle langue pour essayer. Suivant apparaît dès que vous cochez ou décochez une langue.",
       "why": "La règle n°1 ne prend plus que ces langues. Toutes les autres langues passent aux règles en dessous."
     },
     "module": {
@@ -357,17 +359,17 @@
     },
     "add": {
       "title": "Ajoutez une règle pour les autres langues",
-      "what": "Appuyez sur Ajouter une règle. La nouvelle règle se place en bas, sous la règle n°1.",
+      "what": "Appuyez sur Ajouter une règle. La nouvelle règle se place en bas, sous les règles déjà présentes.",
       "why": "Les règles sont lues de haut en bas, donc une règle en bas ne reçoit que ce que les règles au-dessus ont laissé."
     },
     "newModule": {
       "title": "Choisissez un fournisseur, rien d’autre",
       "what": "Dans Module, choisissez le fournisseur pour toutes les autres langues. Laissez Filtrage vide. Suivant apparaît dès qu’un fournisseur est choisi.",
-      "why": "Aucun filtre n’est nécessaire : les langues asiatiques s’arrêtent à la règle n°1, donc seules les autres langues atteignent cette règle."
+      "why": "Aucun filtre n’est nécessaire : les langues cochées s’arrêtent à la règle n°1, donc seules les autres langues atteignent les règles en dessous."
     },
     "order": {
       "title": "L’ordre fait le travail",
-      "what": "La règle n°1 prend les langues asiatiques et la règle n°2 prend le reste. Inversée, la règle sans filtre passerait en premier, prendrait toutes les langues, et la règle n°1 ne servirait jamais.",
+      "what": "La règle n°1 prend les langues cochées, et les règles en dessous ne reçoivent que ce qui reste. Si la règle sans filtre passait en premier, elle prendrait toutes les langues, et la règle n°1 ne servirait jamais.",
       "why": "Pour changer l’ordre, utilisez les flèches à côté d’une règle."
     },
     "templates": {
@@ -387,9 +389,10 @@
     },
     "back": {
       "title": "Revenir à Simple",
-      "what": "Appuyez sur Simple pour revenir à la vue à un seul fournisseur. Vos règles restent telles quelles.",
+      "what": "Simple est la vue à un seul fournisseur. Vos règles restent telles quelles.",
       "why": "Avec plus d’un fournisseur, comme maintenant, l’éditeur continue d’afficher vos règles et indique pourquoi."
-    }
+    },
+    "absentWhat": "Ce que montre cette étape n’est pas à l’écran pour le moment. Appuyez sur Suivant pour continuer, ou sur Retour pour refaire l’étape précédente."
   },
   "advancedSections": {
     "compare": {
@@ -481,7 +484,7 @@
     },
     "constant": {
       "title": "La colonne Constante",
-      "what": "Un terme constant n’est jamais envoyé au moteur de traduction. NARN place directement votre traduction du glossaire dans le résultat : un nom de personnage comme Diluc ressort toujours exactement tel qu’il est écrit ici.",
+      "what": "Là où le texte écrit un terme constant exactement comme le glossaire, il n’est jamais envoyé au moteur de traduction. NARN place directement votre traduction du glossaire dans le résultat : un nom de personnage comme Diluc ressort toujours exactement tel qu’il est écrit ici.",
       "absentWhat": "Sélectionnez un glossaire à gauche pour voir ses termes et leur colonne Constante.",
       "why": "Les autres termes sont envoyés avec le texte comme référence que le moteur doit suivre."
     },
