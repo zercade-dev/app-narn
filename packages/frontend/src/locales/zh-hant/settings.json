@@ -8,6 +8,12 @@
   "switchToDark": "切換至深色模式",
   "languageTitle": "語言",
   "languageDescription": "使用者介面的語言。",
+  "uiModeLabel": "介面模式",
+  "uiModeSimple": "簡易",
+  "uiModeAdvanced": "進階",
+  "uiModeDescription": "簡易模式會隱藏大部分導覽，讓你專注於翻譯；進階模式顯示所有內容。",
+  "tourOffersLabel": "提供引導教學",
+  "tourOffersDescription": "首次開啟應用程式的某個部分時，顯示簡短的引導。",
   "preview": "預覽",
   "previewHint": "以所選主題呈現的範例控制項。",
   "previewSamples": {

@@ -2,12 +2,23 @@
 
 ## Visão geral
 
-O caminho completo para um novo projeto: ative provedores, importe suas
-entradas, configure glossários e roteamento, traduza e revise. Passos
-marcados como *(Optional)* melhoram a qualidade, mas não são obrigatórios
-para uma primeira tradução — pule-os numa primeira passagem e volte depois.
+Novo no NARN? O caminho curto abaixo leva você do zero a uma tradução exportada em cinco passos. A configuração guiada no aplicativo conduz você pelos mesmos passos, e você pode pulá-la e retomá-la depois — **Continuar a configuração** na barra lateral continua de onde você parou, e você pode reiniciá-la a partir deste Guia. Tudo o que vem depois do caminho curto é para quando você quiser mais controle.
 
-## 1. Ative os provedores e armazene as credenciais
+## O caminho curto
+
+1. **Crie a senha do seu cofre.** Suas chaves de provedor são criptografadas com ela — veja o guia [Cofre de credenciais](guide:usage-vault). Na versão em nuvem, os passos 1 e 2 acontecem juntos na página do cofre.
+2. **Adicione uma chave gratuita.** Uma chave do Google AI é o começo mais fácil — obtenha uma em [aistudio.google.com/apikey](https://aistudio.google.com/apikey), ou escolha **Usar meu próprio provedor**. O [NARN Freeway](guide:usage-freeway) então escolhe modelos gratuitos para você.
+3. **Crie um projeto e importe seu texto.** Crie um projeto, depois na aba **Dados** escolha o idioma de origem e os idiomas para os quais traduzir, e use **Importação de CSV**.
+4. **Traduza.** Em **Traduções**, selecione todas as entradas e clique em **Traduzir**. O NARN Freeway escolhe modelos gratuitos para você; acompanhe o progresso em **Atividade**.
+5. **Exporte.** Baixe o arquivo traduzido a partir do projeto.
+
+Novos usuários começam no **modo Simples**, que mostra só Configuração, Dados, Traduções e Atividade (mais Guia, Preferências e **Chaves dos provedores**). Alterne entre **Simples** e **Avançado** pela barra superior ou nas Preferências quando quiser.
+
+## Quando você quiser mais
+
+Estes passos ficam no **modo Avançado** e melhoram a qualidade ou dão um controle mais fino. Os passos marcados *(Optional)* não são necessários para uma primeira tradução — pule-os e volte depois. Na primeira vez que você abrir Roteamento, Glossário, Qualidade, Comparação ou Revisão da tradução por IA no modo Avançado, um tour curto é oferecido; você pode iniciar qualquer tour de novo a partir deste Guia, ou desativar as ofertas nas Preferências.
+
+## Adicione mais provedores e credenciais
 
 1. Abra a **Configuração global** e **ative um módulo** para cada provedor que você quiser (Anthropic, OpenAI, DeepL, e assim por diante) na lista **Ativar um módulo** — o DeepL aparece pelo nome, enquanto os provedores de IA aparecem como **Adicionar outra instância de …**, que cria a primeira instância do provedor. Um módulo pode ter várias **instâncias nomeadas** — útil para duas configurações do mesmo provedor com chaves ou padrões diferentes.
 2. As credenciais dos provedores são armazenadas no **cofre de credenciais**
@@ -19,13 +30,7 @@ para uma primeira tradução — pule-os numa primeira passagem e volte depois.
    **esforço de raciocínio** — em modelos de raciocínio (thinking models) ele
    pode multiplicar a cobrança rapidamente.
 
-## 2. Crie o projeto e importe as entradas
-
-Crie um projeto, defina seu **idioma de origem**, depois use **Importação de
-CSV** na aba **Dados** para carregar suas entradas de origem (e quaisquer
-traduções que o arquivo já tenha).
-
-## 3. *(Optional)* Revise seu texto de origem primeiro
+## *(Optional)* Revise seu texto de origem primeiro
 
 Execute a **Revisão da origem por IA** sobre o idioma de origem antes de
 traduzir — corrigir erros de digitação e frases pouco claras aqui beneficia
@@ -33,7 +38,7 @@ toda tradução feita depois. Se uma correção alterar uma entrada que já tinh
 traduções, as traduções antigas caem na aba **Órfãos** — **revincule-as**,
 com retradução opcional.
 
-## 4. *(Optional)* Ative glossários
+## *(Optional)* Ative glossários
 
 Na aba **Glossário**, ative os glossários que se aplicam ao seu projeto. A
 aplicação automática combina termos como **palavras inteiras, sem diferenciar
@@ -42,7 +47,7 @@ são reconhecidas. Traduzindo com o **DeepL**? Envie os glossários para ele
 com **Enviar para o DeepL** (canto superior direito), e envie de novo depois
 de editar.
 
-## 5. Configure o roteamento
+## Configure o roteamento
 
 Abra a aba **Roteamento** e escolha seu provedor no seletor com que ela abre —
 isso envia toda entrada do projeto para ele, o que é tudo o que uma
@@ -53,7 +58,7 @@ sem nenhuma regra envia tudo pelo NARN Freeway, então este passo é opcional no
 começo. Quando o projeto tem regras, uma entrada que não corresponde a nenhuma
 falha na tradução com um erro de *“sem rota”*.
 
-## 6. *(Optional)* Construa glossários a partir do seu próprio conteúdo
+## *(Optional)* Construa glossários a partir do seu próprio conteúdo
 
 Faça seus glossários crescerem antes de uma tradução em massa: adicione
 termos manualmente, execute **Gerar glossários** sobre toda a origem, ou —
@@ -62,7 +67,7 @@ de forma mais direcionada — selecione boas entradas candidatas em
 traduções existentes). Use um modelo capaz aqui; a qualidade do glossário se
 acumula em tudo que for traduzido depois.
 
-## 7. *(Optional)* Refine a qualidade primeiro na Comparação
+## *(Optional)* Refine a qualidade primeiro na Comparação
 
 Antes de uma execução de tradução completa, use a aba **Comparação** para
 ajustar um idioma que você mesmo consegue avaliar:
@@ -79,7 +84,7 @@ ajustar um idioma que você mesmo consegue avaliar:
 - Satisfeito com os resultados? Traduza o lote completo uma vez com as mesmas
   configurações para confirmar que ele se sustenta em massa.
 
-## 8. Traduza
+## Traduza em lote
 
 Duas formas de rodar a tradução de verdade:
 
@@ -96,7 +101,7 @@ O agrupamento em lote é automático por padrão; para um projeto pequeno com
 muitas entradas curtas, um tamanho de lote personalizado de **0** (o idioma
 inteiro em uma única requisição) pode funcionar melhor com um modelo capaz.
 
-## 9. Revise a execução
+## Revise a execução
 
 Escolha uma opção:
 

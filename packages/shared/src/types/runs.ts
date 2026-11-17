@@ -109,7 +109,29 @@ export interface RunEntryLanguagePair {
 /**
  * Error details for a single item within a translation run.
  */
+/** Closed list of reasons a translation attempt or run can fail. */
+export const FAILURE_CODES = [
+  'auth',
+  'rate-limit',
+  'timeout',
+  'model-unavailable',
+  'parse-failure',
+  'empty-reply',
+  'provider-error',
+  'no-route',
+  'module-disabled',
+  'module-not-found',
+  'unknown',
+] as const;
+export type FailureCode = (typeof FAILURE_CODES)[number];
+
+export function isFailureCode(v: unknown): v is FailureCode {
+  return typeof v === 'string' && (FAILURE_CODES as readonly string[]).includes(v);
+}
+
 export interface RunErrorEntry {
+  /** Classified failure reason; absent on entries recorded before codes existed. */
+  code?: FailureCode;
   stringId?: string;
   sourceText?: string;
   targetLang?: string;
@@ -429,6 +451,19 @@ export interface PendingCorrectionRecord {
   freewayTier?: number;
 }
 
+/**
+ * One target language's share of a translation run's current attempt. A
+ * language is settled once `completed + failed === total`. `needsReview` counts
+ * the completed pairs whose final quality-gate verdict failed (no correction
+ * possible, the correction was kept, or the corrected text failed again).
+ */
+export interface LanguageProgress {
+  total: number;
+  completed: number;
+  failed: number;
+  needsReview: number;
+}
+
 export interface RunStatus {
   runId: string;
   projectId: string;
@@ -444,6 +479,8 @@ export interface RunStatus {
   startedAt: number;
   finishedAt?: number;
   errors: RunErrorEntry[];
+  /** Why the app (not the person) stopped the run; absent when the run was not stopped by the app. */
+  stopCause?: FailureCode;
   /** Per-(module, model) usage aggregation. Additive; absent on legacy runs. */
   usageByModule?: RunUsageEntry[];
   /**
@@ -489,6 +526,13 @@ export interface RunStatus {
    * Absent otherwise.
    */
   correctionPhase?: { total: number; done: number };
+  /**
+   * For translation runs: progress per target language, keyed by language
+   * code. Describes the current dispatch (fresh run, retry or quota resume),
+   * set from that dispatch's pairs. Absent on non-translation runs and on runs
+   * recorded before it existed.
+   */
+  languageProgress?: Record<string, LanguageProgress>;
   /**
    * Strings that failed the quality gate and have not had their corrective
    * attempt yet. They are not counted completed until it resolves. Persisted so

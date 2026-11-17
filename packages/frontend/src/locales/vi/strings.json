@@ -362,7 +362,7 @@
     "belowTargetConfirm": "Vẫn tiếp tục",
     "waitingResumesAt": "Tiếp tục {{time}}",
     "waitingPairsCount_other": "{{count}} cặp đang chờ",
-    "waitingSkipReasonWarning": "Tự động tiếp tục không tìm được khóa miễn phí khả dụng — hãy dùng “Tiếp tục ngay với…” bên dưới để chọn một mô-đun.",
+    "waitingSkipReasonWarning": "Tự động tiếp tục không tìm được khóa gói miễn phí khả dụng — hãy dùng “Tiếp tục ngay với…” bên dưới để chọn một mô-đun.",
     "waitingProviderErrorReason": "Một nhà cung cấp gặp lỗi nên hệ thống sẽ tự động thử lại.",
     "pause": "Tạm dừng",
     "resume": "Tiếp tục",

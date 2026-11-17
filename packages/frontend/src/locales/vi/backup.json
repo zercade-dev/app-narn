@@ -43,5 +43,6 @@
   "toastBackupCreated": "Đã tạo bản sao lưu.",
   "toastBackupFailed": "Sao lưu thất bại: {{message}}",
   "toastRestoreSuccess": "Đã khôi phục bản sao lưu.",
-  "toastRestoreFailed": "Khôi phục thất bại: {{message}}"
+  "toastRestoreFailed": "Khôi phục thất bại: {{message}}",
+  "toastGuideRestored": "Bản dịch trong tệp của bạn đã trở lại."
 }

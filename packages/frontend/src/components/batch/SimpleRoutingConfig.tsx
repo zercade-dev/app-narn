@@ -47,6 +47,7 @@ export function RoutingModeToggle({
       aria-label={t('routing.modeAriaLabel')}
       className="flex items-center gap-1 rounded-lg border p-0.5"
       data-testid="routing-mode-toggle"
+      data-tour="routing-mode"
     >
       <Button
         size="xs"
@@ -80,6 +81,10 @@ export interface SimpleRoutingConfigProps {
   translationsInProgress?: boolean;
   autoSaveStatus: AutoSaveStatusValue;
   autoSaveError: string | null;
+  /** Advanced rules are set aside (not applied) while this view's choice applies. */
+  rulesSetAside?: boolean;
+  /** A mode switch refused (a translation is running). */
+  error?: string | null;
   advanced: boolean;
   onToggleAdvanced: (advanced: boolean) => void;
   onSelectModule: (moduleId: string) => void;
@@ -92,6 +97,8 @@ export function SimpleRoutingConfig({
   translationsInProgress,
   autoSaveStatus,
   autoSaveError,
+  rulesSetAside,
+  error,
   advanced,
   onToggleAdvanced,
   onSelectModule,
@@ -125,7 +132,9 @@ export function SimpleRoutingConfig({
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="space-y-1.5">
+        {/* The routing tour points at the choice itself, not the whole card,
+            so its callout sits beside the select and clear of its options. */}
+        <div className="space-y-1.5 md:max-w-md" data-tour="routing-config">
           <Label htmlFor="routing-simple-select">{t('routing.simpleLabel')}</Label>
           <Select
             value={selectedModuleId}
@@ -179,7 +188,21 @@ export function SimpleRoutingConfig({
               {t('routing.simpleDefaultNote')}
             </p>
           )}
+          {rulesSetAside && (
+            <p
+              className="text-xs text-muted-foreground"
+              data-testid="routing-simple-set-aside-note"
+            >
+              {t('routing.simpleSetAsideNote')}
+            </p>
+          )}
         </div>
+
+        {error && (
+          <p className="text-xs text-destructive" role="alert" data-testid="routing-simple-error">
+            {error}
+          </p>
+        )}
 
         {disabled && (
           <p

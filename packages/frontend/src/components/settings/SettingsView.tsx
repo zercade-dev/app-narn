@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/select';
 import { useUiSettings, type UiLanguage } from '../../stores/ui-settings-store.js';
 import { UI_LANGS } from '../../lib/url-state.js';
+import { ModeSwitch } from '../layout/ModeSwitch.js';
 import { THEMES } from '../../themes/theme-registry.js';
 
 /**
@@ -65,10 +66,34 @@ export function SettingsView() {
   const setDarkMode = useUiSettings((s) => s.setDarkMode);
   const theme = useUiSettings((s) => s.theme);
   const setTheme = useUiSettings((s) => s.setTheme);
+  const tourOffers = useUiSettings((s) => s.tourOffers);
+  const setTourOffers = useUiSettings((s) => s.setTourOffers);
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-8" data-testid="settings-view">
       <h1 className="text-2xl font-semibold">{t('title')}</h1>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('uiModeLabel')}</CardTitle>
+          <CardDescription>{t('uiModeDescription')}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <ModeSwitch testId="settings-ui-mode" />
+          <div className="flex items-start gap-2">
+            <Checkbox
+              id="settings-tour-offers"
+              checked={tourOffers}
+              onCheckedChange={(checked) => setTourOffers(checked === true)}
+              data-testid="settings-tour-offers"
+            />
+            <div className="space-y-1">
+              <Label htmlFor="settings-tour-offers">{t('tourOffersLabel')}</Label>
+              <p className="text-xs text-muted-foreground">{t('tourOffersDescription')}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

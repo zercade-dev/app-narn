@@ -15,6 +15,10 @@ import { useLoggerStore, type LogEntry } from '../../stores/logger-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { vaultLockedEvent } from '../../lib/vault-events.js';
 import { useUiSettings, type ConsoleFilter } from '../../stores/ui-settings-store.js';
+import { useRunStore } from '../../stores/run-store.js';
+import { useProjectStore } from '../../stores/project-store.js';
+import { statusLineFor } from '../../lib/run-status-line.js';
+import type { Translate } from '../../lib/log-presentation/types.js';
 import { toast } from '@/lib/toast';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -30,8 +34,13 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PixelIcon } from '@/components/ui/pixel-icon';
 import { cn, downloadBlob } from '@/lib/utils';
 import { ConsoleLogRow } from './ConsoleLogRow.js';
+import { NotificationBell } from './NotificationBell.js';
 import { groupEntries } from '@/lib/log-presentation/group.js';
 import { presentEntry } from '@/lib/log-presentation/present.js';
+import { isRawOnly } from '@/lib/log-presentation/raw-only.js';
+import { friendlyLevel, matchesFriendlyFilter } from '@/lib/log-presentation/friendly-level.js';
+import { RunProgressCard } from '../runs/RunProgressCard.js';
+import { useActiveRunCards } from '../../stores/run-progress-store.js';
 
 /** Distance (px) from the bottom within which the viewport counts as "pinned". */
 const PIN_THRESHOLD_PX = 32;
@@ -87,6 +96,11 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // React Compiler cannot memoize safely, so opt this component out.
   const { t } = useTranslation('console');
   const { t: tLogs } = useTranslation('logs');
+  // The status line names the run type, which lives in the `strings` namespace.
+  const { t: tStatus } = useTranslation(['console', 'strings']);
+  const runs = useRunStore((s) => s.runs);
+  const activeProjectId = useProjectStore((s) => s.activeProjectId);
+  const statusLine = statusLineFor(runs, tStatus as Translate, activeProjectId);
   const vaultUnlocked = useVaultStore((s) => s.unlocked);
   const vaultExists = useVaultStore((s) => s.hasVault);
   const {
@@ -119,6 +133,13 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     serverDroppedCounts.priority;
   const consoleFilter = useUiSettings((s) => s.consoleFilter);
   const setConsoleFilter = useUiSettings((s) => s.setConsoleFilter);
+  const consoleFriendlyFilter = useUiSettings((s) => s.consoleFriendlyFilter) ?? 'info';
+  const setConsoleFriendlyFilter = useUiSettings((s) => s.setConsoleFriendlyFilter);
+  const raw = useUiSettings((s) => s.consoleRawMode);
+  const activeRunIds = useActiveRunCards(activeProjectId);
+  // Each mode keeps its own tab.
+  const activeFilter = raw ? consoleFilter : consoleFriendlyFilter;
+  const setConsoleRawMode = useUiSettings((s) => s.setConsoleRawMode);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
   const [panelHeight, setPanelHeight] = useState(200);
   const [search, setSearch] = useState('');
@@ -158,21 +179,31 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     globalThis.addEventListener('mouseup', onUp);
   }
 
-  function getFilteredEntries() {
-    const query = search.trim().toLowerCase();
-    return entries.filter((e) => {
-      const levelOk =
-        consoleFilter === 'all'
-          ? true
-          : consoleFilter === 'notifications'
-            ? e.level === 'notification'
-            : e.level === consoleFilter;
-      if (!levelOk) return false;
-      return query === '' || entryMatchesQuery(e, query, presentEntry(e, tLogs).text);
-    });
+  function matchesLevel(e: LogEntry): boolean {
+    if (consoleFilter === 'all') return true;
+    if (consoleFilter === 'notifications') return e.level === 'notification';
+    return e.level === consoleFilter;
   }
-  const filteredEntries = getFilteredEntries();
-  const groups = groupEntries(filteredEntries);
+  // The level-filtered entries: what export writes. Friendly matches on the
+  // entry's own level here, so export never depends on which lines Friendly
+  // hides or demotes.
+  const levelEntries = entries.filter((e) =>
+    raw ? matchesLevel(e) : matchesFriendlyFilter(e.level, consoleFriendlyFilter),
+  );
+  const query = search.trim().toLowerCase();
+  const matchesQuery = (e: LogEntry): boolean =>
+    query === '' || entryMatchesQuery(e, query, presentEntry(e, tLogs).text);
+  const filteredEntries = levelEntries.filter(matchesQuery);
+  // Friendly judges each line by its friendly level (hidden and demoted lines
+  // included) and folds repeats; Raw shows everything, one row per entry.
+  const visibleEntries = raw
+    ? filteredEntries
+    : entries
+        .filter((e) => matchesFriendlyFilter(friendlyLevel(e), consoleFriendlyFilter))
+        .filter(matchesQuery);
+  const groups = raw
+    ? visibleEntries.map((e) => ({ head: e, count: 1, members: [e] }))
+    : groupEntries(visibleEntries);
 
   // eslint-disable-next-line react-hooks/incompatible-library -- the 'use no memo' directive above opts this component out of the React Compiler, which is the documented TanStack Virtual integration.
   const virtualizer = useVirtualizer({
@@ -271,9 +302,11 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
   // entries arrived so the "Jump to latest" affordance can appear. Keyed on the
   // newest entry's id (not just length): the store caps entries at a fixed max,
   // so under heavy logging the length stops changing while content still does.
-  const newestEntryId = entries.length > 0 ? entries[entries.length - 1].id : null;
+  // Keyed on the newest VISIBLE entry: a hidden raw-only line in Friendly must
+  // not raise "Jump to latest" with nothing new to see.
+  const newestEntryId = visibleEntries.length > 0 ? visibleEntries.at(-1)!.id : null;
   useEffect(() => {
-    if (!open || filteredEntries.length === 0) return;
+    if (!open || visibleEntries.length === 0) return;
     if (pinnedToBottom) {
       // Instant follow: smooth scrolling can't keep up with a high log rate and
       // its async animation fights the pin listener.
@@ -284,7 +317,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     // pinnedToBottom / filteredEntries read fresh each render; this effect fires
     // on new content, not on pin-state changes (Jump to latest re-pins itself).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [newestEntryId, filteredEntries.length, open]);
+  }, [newestEntryId, visibleEntries.length, open]);
 
   // Re-measure items after expand/collapse so the virtualizer picks up the
   // new row height without waiting for the next ResizeObserver tick.
@@ -329,17 +362,21 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
     setLastSeenAt(Date.now());
   }
 
-  const unreadErrorCount = open
-    ? 0
-    : entries.filter((e) => e.level === 'error' && e.timestamp > lastSeenAt).length;
-  const unreadWarningCount = open
-    ? 0
-    : entries.filter((e) => e.level === 'warn' && e.timestamp > lastSeenAt).length;
+  // Friendly hides raw-only lines, so they must not raise a count the reader
+  // can't find in the list.
+  const countUnread = (level: LogEntry['level']): number =>
+    entries.filter((e) => e.level === level && e.timestamp > lastSeenAt && (raw || !isRawOnly(e)))
+      .length;
+  const unreadErrorCount = open ? 0 : countUnread('error');
+  const unreadWarningCount = open ? 0 : countUnread('warn');
 
   return (
     <div
       role="region"
       aria-label={t('title')}
+      // The guide points at the whole console while it is open (its header,
+      // to close it again, and the run's progress), at the header when closed.
+      data-tour={open ? 'console-status' : undefined}
       className="border-t bg-muted text-muted-foreground flex flex-col overflow-hidden transition-[height] duration-200 ease-out shrink-0"
       style={{ height: open ? panelHeight : 32 }}
     >
@@ -357,18 +394,28 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
           type="button"
           onClick={onToggle}
           data-testid="console-toggle"
+          data-tour={open ? undefined : 'console-status'}
           title={connected ? t('statusConnected') : t('statusDisconnected')}
-          className="flex items-center gap-2 flex-1 text-left bg-transparent cursor-pointer h-full"
+          className="flex items-center gap-2 flex-1 min-w-0 text-left bg-transparent cursor-pointer h-full"
         >
           <Circle
             className={cn(
-              'size-2 fill-current',
+              'size-2 shrink-0 fill-current',
               // Red only when something is actually wrong: stream disconnected
               // or errors arrived unseen. At rest the dot stays quiet.
               !connected || unreadErrorCount > 0 ? 'text-status-fail' : 'text-muted-foreground/40',
             )}
           />
-          <span className="font-semibold">{t('title')}</span>
+          <span className="font-semibold shrink-0">{t('title')}</span>
+          {statusLine && (
+            <span
+              data-testid="console-status-line"
+              title={statusLine}
+              className="min-w-0 truncate text-muted-foreground"
+            >
+              {statusLine}
+            </span>
+          )}
           {vaultExists && !vaultUnlocked && (
             <span
               data-testid="vault-locked-banner"
@@ -376,7 +423,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
               tabIndex={0}
               title={t('vaultLockedUnlockHint')}
               aria-label={t('vaultLockedUnlockHint')}
-              className="inline-flex items-center gap-1 font-mono text-[12px] leading-none px-1 py-0.5 rounded bg-status-warn/15 hover:bg-status-warn/25 text-status-warn cursor-pointer"
+              className="inline-flex shrink-0 items-center gap-1 font-mono text-[12px] leading-none px-1 py-0.5 rounded bg-status-warn/15 hover:bg-status-warn/25 text-status-warn cursor-pointer"
               onClick={(e) => {
                 // Stop the click from also firing the parent console-toggle
                 // button's onClick — this chip has its own action.
@@ -401,7 +448,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
               data-testid="console-unread-errors"
               aria-label={t('unreadErrors', { count: unreadErrorCount })}
               title={t('unreadErrors', { count: unreadErrorCount })}
-              className="font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-fail/10 text-status-fail"
+              className="shrink-0 font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-fail/10 text-status-fail"
             >
               {unreadErrorCount}
             </span>
@@ -411,7 +458,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
               data-testid="console-unread-warnings"
               aria-label={t('unreadWarnings', { count: unreadWarningCount })}
               title={t('unreadWarnings', { count: unreadWarningCount })}
-              className="font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-warn/10 text-status-warn"
+              className="shrink-0 font-mono text-[11px] leading-none px-1 py-0.5 rounded bg-status-warn/10 text-status-warn"
             >
               {unreadWarningCount}
             </span>
@@ -419,6 +466,33 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
         </button>
         {open && (
           <>
+            <div
+              role="group"
+              className="flex items-center gap-1"
+              aria-label={t('modeLabel')}
+              data-testid="console-mode-switch"
+            >
+              <Button
+                size="xs"
+                variant={raw ? 'outline' : 'default'}
+                onClick={() => setConsoleRawMode(false)}
+                aria-pressed={!raw}
+                data-testid="console-mode-friendly"
+                className="h-6 text-[10px]"
+              >
+                {t('modeFriendly')}
+              </Button>
+              <Button
+                size="xs"
+                variant={raw ? 'default' : 'outline'}
+                onClick={() => setConsoleRawMode(true)}
+                aria-pressed={raw}
+                data-testid="console-mode-raw"
+                className="h-6 text-[10px]"
+              >
+                {t('modeRaw')}
+              </Button>
+            </div>
             <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as ExportFormat)}>
               <SelectTrigger
                 size="sm"
@@ -519,6 +593,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
         >
           <PixelIcon name="trash-2" fallback={Trash2} className="size-4" />
         </Button>
+        <NotificationBell />
         <button
           type="button"
           onClick={onToggle}
@@ -539,8 +614,10 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
           {/* Level filter bar + search */}
           <div className="flex items-center gap-1 px-3 py-0.5 shrink-0 border-b border-border/40">
             <Tabs
-              value={consoleFilter}
-              onValueChange={(v) => v && setConsoleFilter(v as ConsoleFilter)}
+              value={activeFilter}
+              onValueChange={(v) =>
+                v && (raw ? setConsoleFilter : setConsoleFriendlyFilter)(v as ConsoleFilter)
+              }
             >
               <TabsList variant="line" className="group-data-horizontal/tabs:h-fit gap-0.5 p-0">
                 {FILTER_LEVELS.map((level) => (
@@ -550,7 +627,9 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                     data-testid={`filter-${level}`}
                     className="flex-none px-1.5 py-0 text-[10px] font-mono uppercase leading-5"
                   >
-                    {t(`filter_${level}`, { defaultValue: level === 'all' ? 'All' : level })}
+                    {t(!raw && level === 'info' ? 'filter_infoAndUp' : `filter_${level}`, {
+                      defaultValue: level === 'all' ? 'All' : level,
+                    })}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -567,7 +646,22 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
           </div>
 
           <div className="relative flex-1 min-h-0 flex flex-col">
-            <div ref={parentRef} className="flex-1 overflow-auto font-mono text-[11px]">
+            {/* Pinned above the log, outside its scroll: following the newest line never hides it. */}
+            {!raw && activeRunIds.length > 0 && (
+              <div
+                data-testid="console-run-cards"
+                className="flex flex-col gap-1 px-3 py-1 shrink-0 font-mono text-[11px] border-b border-border/40"
+              >
+                {activeRunIds.map((id) => (
+                  <RunProgressCard key={id} runId={id} variant="console" />
+                ))}
+              </div>
+            )}
+            <div
+              ref={parentRef}
+              data-testid="console-log-scroll"
+              className="flex-1 min-h-0 overflow-auto font-mono text-[11px]"
+            >
               {totalDropped > 0 && (
                 <div
                   data-testid="console-dropped-marker"
@@ -576,7 +670,24 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                   {t('droppedEntries', { count: totalDropped })}
                 </div>
               )}
-              {groups.length === 0 && (
+              {groups.length === 0 && !raw && activeFilter === 'debug' && (
+                <div
+                  data-testid="console-debug-hint"
+                  className="flex items-center gap-2 px-3 py-2 text-muted-foreground/60"
+                >
+                  <span>{t('debugInRaw')}</span>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    className="h-6 text-[10px]"
+                    onClick={() => setConsoleRawMode(true)}
+                    data-testid="console-debug-show-raw"
+                  >
+                    {t('debugShowRaw')}
+                  </Button>
+                </div>
+              )}
+              {groups.length === 0 && !(!raw && activeFilter === 'debug') && (
                 <div data-testid="console-empty" className="px-3 py-2 text-muted-foreground/60">
                   {t('empty')}
                 </div>
@@ -595,6 +706,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                       ref={virtualizer.measureElement}
                       className={cn(
                         'absolute top-0 left-0 w-full flex flex-col py-0.5 px-3',
+                        !raw && friendlyLevel(entry) === 'debug' && 'text-muted-foreground',
                         (isLqaFailed || entry.level === 'error') && 'text-status-fail',
                         !isLqaFailed &&
                           (isLqaOverflow || entry.level === 'warn') &&
@@ -604,6 +716,7 @@ export function ConsolePanel({ open, onToggle }: Readonly<ConsolePanelProps>) {
                     >
                       <ConsoleLogRow
                         group={group}
+                        raw={raw}
                         expanded={expandedIds.has(entry.id)}
                         onToggle={() => toggleExpand(entry.id)}
                       />

@@ -53,10 +53,59 @@
   "notificationsDismiss": "Entfernen",
   "notificationsLoading": "Benachrichtigungen werden geladen…",
   "notificationsEmpty": "Du hast keine Benachrichtigungen.",
+  "notificationsSidebarDescription": "Neuigkeiten zu deinen Durchläufen und Projekten.",
+  "notificationsUnread": "Ungelesen",
+  "notificationsDismissItem": "Entfernen: {{title}}",
   "notificationsSeverity": {
     "info": "Info",
     "warning": "Warnung",
     "critical": "Kritisch"
+  },
+  "notifications": {
+    "genericTitle": "Benachrichtigung",
+    "viewInActivity": "In der Aktivität anzeigen",
+    "openProject": "Projekt öffnen",
+    "inProject": "Projekt: {{project}}",
+    "aCollaborator": "Ein Mitwirkender",
+    "theProvider": "der KI-Anbieter",
+    "otherIssues_one": "{{cause}} und {{count}} weiteres Problem",
+    "otherIssues_other": "{{cause}} und {{count}} weitere Probleme",
+    "cause": {
+      "noRoute": "für sie ist kein Übersetzungsmodul eingerichtet.",
+      "moduleDisabled": "das benötigte Modul ist ausgeschaltet.",
+      "moduleNotFound": "das benötigte Modul wurde nicht gefunden.",
+      "unknown": "der Grund ist unbekannt."
+    },
+    "runStarted": {
+      "title": "{{type}} gestartet",
+      "body_one": "{{count}} Eintrag zu verarbeiten.",
+      "body_other": "{{count}} Einträge zu verarbeiten."
+    },
+    "runFinished": {
+      "title": "{{type}} abgeschlossen",
+      "body_one": "{{count}} Eintrag erledigt.",
+      "body_other": "{{count}} Einträge erledigt.",
+      "bodyLanguages_one": "{{count}} Eintrag erledigt in {{languages}}.",
+      "bodyLanguages_other": "{{count}} Einträge erledigt in {{languages}}."
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}} mit Problemen abgeschlossen",
+      "body": "{{completed}} erledigt, {{failed}} fehlgeschlagen — {{cause}}."
+    },
+    "runFailed": {
+      "title": "{{type}} fehlgeschlagen",
+      "body": "Der Lauf wurde beendet: {{cause}}."
+    },
+    "collabDigest": {
+      "title": "Aktivität der Mitwirkenden",
+      "editsIn": "{{language}} ({{count}})",
+      "edited": "{{name}} hat {{edits}} bearbeitet.",
+      "translated_one": "{{name}} hat {{count}} Text übersetzt.",
+      "translated_other": "{{name}} hat {{count}} Texte übersetzt.",
+      "both_one": "{{name}} hat {{edits}} bearbeitet und {{count}} Text übersetzt.",
+      "both_other": "{{name}} hat {{edits}} bearbeitet und {{count}} Texte übersetzt.",
+      "translatedLanguages": "Übersetzt nach {{languages}}."
+    }
   },
   "signOut": "Abmelden"
 }

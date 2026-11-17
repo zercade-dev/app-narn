@@ -1,0 +1,606 @@
+{
+  "next": "Siguiente",
+  "completeTour": "Completar recorrido",
+  "lookOnly": "Esto solo se muestra durante el recorrido. Podrás usarlo cuando termine.",
+  "back": "Atrás",
+  "skip": "Omitir el recorrido",
+  "close": "Cerrar",
+  "stepOfSub": "Sección {{major}} de {{majorTotal}} · Paso {{sub}} de {{subTotal}}",
+  "stepCount": "{{current}} de {{total}}",
+  "continueSetup": "Continuar la configuración: sección {{current}} de {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Abrir el formulario de la bóveda",
+      "cloudVault": "Configurar tu bóveda",
+      "openVaultPage": "Abrir la página de la bóveda",
+      "chooseProvider": "Elegir un proveedor",
+      "useFoundKey": "Usar {{provider}} para tus traducciones",
+      "fixKey": "Revisar mi clave",
+      "retry": "Reintentar",
+      "stopRetry": "Detener y reintentar",
+      "translateQuick": "Traducir estos 3 para probar",
+      "translateEverything": "Traducir todo",
+      "translateFew": "Traducirlos",
+      "translateRest": "Traducir el resto ahora",
+      "skipRest": "Omitir y exportar lo que hay",
+      "retranslateTest": "Retraducir 3 entradas para probar",
+      "restoreTest": "Recuperar mis traducciones",
+      "keepTest": "Conservar las traducciones nuevas",
+      "tourSections": "Muéstrame las secciones",
+      "maybeLater": "Quizás más tarde",
+      "openTours": "Mostrar los recorridos",
+      "toursDone": "Hecho"
+    },
+    "vault": {
+      "title": "Crear la contraseña de tu bóveda",
+      "why": "Tus claves de proveedores se cifran con ella y nunca salen de tu control.",
+      "openWhat": "Abre el formulario de la bóveda para elegir su contraseña.",
+      "passwordWhat": "Escribe aquí una contraseña y confirma con el botón de abajo."
+    },
+    "unlock": {
+      "title": "Desbloquear tu bóveda",
+      "why": "Tus claves de proveedores siguen cifradas hasta que desbloqueas la bóveda.",
+      "openWhat": "Abre el formulario de la bóveda para introducir su contraseña.",
+      "passwordWhat": "Escribe aquí la contraseña de tu bóveda y confirma con el botón de abajo."
+    },
+    "cloudVault": {
+      "title": "Crea tu bóveda y añade una clave",
+      "what": "Elige una contraseña para la bóveda y añade una clave: elige primero un proveedor. Para una prueba rápida, escoge uno con plan gratuito. Volverás aquí al terminar.",
+      "why": "Tus claves de proveedores se cifran con tu contraseña y nunca salen de tu control."
+    },
+    "cloudUnlock": {
+      "what": "Desbloquea tu bóveda en la página de la bóveda. Volverás aquí al terminar."
+    },
+    "cloudKey": {
+      "what": "Añade una clave en la página de la bóveda: elige primero un proveedor. Para una prueba rápida, escoge uno con plan gratuito. Volverás aquí al terminar."
+    },
+    "key": {
+      "title": "Añade una clave para empezar a traducir",
+      "why": "Puedes cambiar de proveedor más adelante en la pestaña Configuración del proyecto.",
+      "choiceWhat": "Elige un proveedor y añade su clave. Para una prueba rápida, escoge uno con plan gratuito.",
+      "pasteWhat": "Pega la clave aquí, escribe abajo la contraseña de tu bóveda y guarda."
+    },
+    "providerList": {
+      "title": "Elegir un proveedor",
+      "what": "¿Ya tienes una clave? Selecciona su proveedor. ¿Aún no? Pulsa Obtener una clave junto a un proveedor para crear una en su sitio y luego selecciónalo.",
+      "why": "Para una prueba rápida, usa un proveedor con plan gratuito."
+    },
+    "providerCard": {
+      "title": "Quién traduce este proyecto",
+      "what": "Elige quién traduce este proyecto.",
+      "why": "Pulsa Atrás para cerrar este panel y seguir con la guía."
+    },
+    "project": {
+      "title": "Importar el texto de tu juego",
+      "openWhat": "Abre la lista de proyectos.",
+      "newWhat": "Crea un proyecto nuevo.",
+      "createWhat": "Ponle un nombre a tu proyecto y créalo.",
+      "sourceWhat": "Elige tu idioma de origen: el idioma en el que está escrito el texto de tu juego.",
+      "targetsWhat": "Marca los idiomas a los que quieres traducir, o usa Seleccionar todo.",
+      "saveWhat": "Guarda tus idiomas.",
+      "importWhat": "Elige el archivo CSV que exportaste desde el editor de tu juego.",
+      "confirmWhat": "Revisa el resumen y confirma la importación."
+    },
+    "translate": {
+      "title": "Traducir",
+      "openWhat": "Abre la pestaña que muestra tus textos.",
+      "quickWhat": "Hay 3 textos sin traducir seleccionados. Tradúcelos para probar, o traduce todo ahora.",
+      "fewWhat": "Tus textos están seleccionados. Tradúcelos ahora.",
+      "startWhat": "Inicia la traducción.",
+      "nothingWhat": "Tu archivo ya tiene todas las traducciones. Para ver una en acción, retraduce 3 entradas: después puedes recuperar sus traducciones.",
+      "nothingWhy": "O pulsa Siguiente para exportar. Para añadir un idioma, márcalo en la pestaña Datos y guarda.",
+      "progressWhat": "La traducción está en curso. Esta línea muestra su progreso.",
+      "progressWhy": "El recorrido continúa cuando la traducción haya terminado."
+    },
+    "retest": {
+      "title": "Retraduce 3 entradas",
+      "filterWhat": "Abre Estado y desmarca Mostrar solo sin traducir, para que la lista muestre también tus entradas traducidas.",
+      "selectWhat": "Marca las casillas de 3 entradas de esta página.",
+      "translateWhat": "Pulsa Traducir seleccionadas.",
+      "modeWhat": "Elige Retraducir traducciones existentes. Con Solo completar entradas sin traducir, las 3 entradas se omitirían: ya están traducidas.",
+      "startWhat": "Pulsa Iniciar para retraducir las 3 entradas.",
+      "nothingPicked": "No se retradujo nada: esas entradas ya tenían traducciones. Pulsa de nuevo Traducir seleccionadas y elige Retraducir traducciones existentes."
+    },
+    "failed": {
+      "title": "La traducción no se completó",
+      "why": "La barra resaltada de abajo muestra lo que ocurrió.",
+      "authWhat": "El proveedor rechazó tu clave. Revisa la clave y vuelve a intentarlo.",
+      "quotaWhat": "La cuota gratuita se agotó por ahora. Espera un poco o añade otra clave y vuelve a intentarlo.",
+      "quotaWhatOwn": "{{provider}} rechaza las solicitudes por ahora: se agotó la cuota o el crédito de tu cuenta. Revisa tu plan con el proveedor y vuelve a intentarlo.",
+      "quotaWhatCustom": "Un proveedor del enrutamiento de este proyecto rechaza las solicitudes por ahora: se agotó una cuota o un crédito. Espera un poco o revisa el plan con el proveedor y vuelve a intentarlo.",
+      "noProviderWhat": "No se tradujo nada: no había ningún proveedor activado para hacerlo. Pulsa Reintentar: NARN activa primero el proveedor de tu clave guardada.",
+      "otherWhat": "No se tradujo nada. Revisa tu clave y vuelve a intentarlo."
+    },
+    "parked": {
+      "title": "La traducción está en pausa",
+      "what": "Tu traducción está en pausa, a la espera del proveedor. Revisa tu clave, luego detén esta ejecución e inicia una nueva."
+    },
+    "waiting": {
+      "title": "La traducción está en espera",
+      "why": "La barra resaltada de abajo muestra su estado. El recorrido continúa cuando la traducción haya terminado.",
+      "quotaWhat": "La cuota gratuita se agotó por ahora. La traducción se reanuda sola cuando vuelva a haber cuota.",
+      "modelWhat": "Los modelos gratuitos disponibles ahora están por debajo de la calidad que busca esta ejecución. La traducción se reanuda sola cuando haya uno mejor."
+    },
+    "rest": {
+      "title": "La prueba ha funcionado",
+      "what": "Tus 3 textos de prueba están traducidos a todos los idiomas que elegiste. Traduce el resto ahora o exporta lo que tienes.",
+      "skipped": "El resto puede esperar. Descarga lo que ya está traducido."
+    },
+    "restore": {
+      "title": "La prueba funcionó",
+      "what": "Tus 3 entradas de prueba tienen traducciones nuevas. Recupera las traducciones de tu archivo o conserva las nuevas.",
+      "why": "NARN guardó un punto de restauración justo antes de la prueba.",
+      "pickWhat": "Este punto de restauración se guardó justo antes de la prueba. Pulsa Restaurar para recuperar las traducciones de tu archivo.",
+      "pickWhy": "Al restaurar, todo el proyecto vuelve a como estaba entonces.",
+      "confirmWhat": "Confirma para restaurar.",
+      "notFound": "No se encontró el punto de restauración de la prueba. Restaura uno desde Copias de seguridad o conserva las traducciones nuevas."
+    },
+    "export": {
+      "title": "Exportar",
+      "why": "El editor de tu juego puede importar este archivo para llevar las traducciones al juego.",
+      "openWhat": "Vuelve a la pestaña donde importaste tu archivo.",
+      "downloadWhat": "Descarga el archivo traducido para el editor de tu juego."
+    },
+    "closing": {
+      "title": "Todo listo",
+      "what": "Esta es la vista simplificada: solo muestra lo necesario para traducir y exportar. Avanzado tiene más herramientas. Cambia el interruptor a Avanzado para ver un recorrido breve.",
+      "whatAdvanced": "Estás en el modo avanzado, que muestra todas las herramientas. Un recorrido breve explica para qué sirve cada sección.",
+      "why": "Puedes cambiar cuando quieras desde la barra superior."
+    },
+    "moreTours": {
+      "title": "Más recorridos guiados",
+      "what": "En Guía hay recorridos breves sobre glosarios, enrutamiento y más. Empieza uno cuando quieras."
+    }
+  },
+  "providerChoice": {
+    "title": "Elegir un proveedor",
+    "description": "Traduce este proyecto y los proyectos nuevos que crees.",
+    "existingRouting": "Este proyecto ya tiene el enrutamiento configurado, así que se queda como está. Puedes cambiarlo en Avanzado.",
+    "freeHeading": "Con plan gratuito",
+    "paidHeading": "Sin plan gratuito",
+    "getKey": "Obtener una clave",
+    "getKeyAria": "Obtener una clave de {{provider}} (abre el sitio del proveedor)",
+    "cancel": "Cancelar",
+    "failed": "No se pudo configurar {{provider}}: {{message}}",
+    "switchedOff": "{{provider}} está desactivado en Avanzado, así que no se usó. Vuelve a activarlo en Configuración global o elige otro proveedor.",
+    "waitingForKey": "Todavía no hay ninguna clave de {{provider}} en tu bóveda, así que por ahora traduce NARN Freeway. Añade su clave o elige NARN Freeway en la pestaña Configuración del proyecto.",
+    "applied": "{{provider}} traduce ahora {{project}}.",
+    "appliedCollab": "{{provider}} traduce ahora los proyectos compartidos contigo."
+  },
+  "offer": {
+    "start": "Enséñamelo",
+    "decline": "No, gracias"
+  },
+  "guideTours": {
+    "title": "Recorridos",
+    "first-run": {
+      "name": "Primer uso guiado",
+      "summary": "Configura un proveedor, añade tus textos, traduce y exporta, paso a paso."
+    },
+    "advanced-sections": {
+      "name": "Secciones avanzadas",
+      "summary": "Para qué sirve cada pestaña y vista que añade el modo avanzado."
+    },
+    "glossaries": {
+      "name": "Glosarios",
+      "summary": "Activa un glosario listo para usar que encaje con tu texto y mira las coincidencias que encuentra."
+    },
+    "routing": {
+      "name": "Enrutamiento",
+      "summary": "Un vistazo de 30 segundos a cómo NARN decide quién traduce qué."
+    },
+    "routing-advanced": {
+      "name": "Reglas de enrutamiento avanzadas",
+      "summary": "Reglas que envían cada idioma o tipo de texto al proveedor que elijas."
+    },
+    "quality": {
+      "name": "Calidad",
+      "summary": "Un vistazo rápido a cómo NARN comprueba tus traducciones."
+    },
+    "compare": {
+      "name": "Comparar",
+      "summary": "Un vistazo rápido a cómo revisar traducciones lado a lado."
+    },
+    "review-translation-ai": {
+      "name": "Revisión IA de traducción",
+      "summary": "Un vistazo rápido a cómo una IA revisa tus traducciones."
+    },
+    "orphans": {
+      "name": "Huérfanas",
+      "summary": "Mira qué le pasa a una entrada que falta en tu archivo, con una huérfana de práctica que el recorrido devuelve a su sitio."
+    },
+    "startOver": "Empezar desde el principio",
+    "continue": "Seguir donde lo dejé",
+    "progress": "{{current}} de {{total}} pasos",
+    "progressSections": "{{current}} de {{total}} secciones",
+    "completed": "Completado",
+    "needsProject": "Abre un proyecto para hacer este recorrido.",
+    "needsDesktop": "Los recorridos necesitan una pantalla más ancha. Abre la aplicación en un ordenador para hacer uno.",
+    "switchedToAdvanced": "Se cambió al modo avanzado para este recorrido.",
+    "confirm": {
+      "title": "¿Cambiar a Simple para la configuración guiada?",
+      "body": "La configuración guiada está pensada para el modo Simple, que oculta las pestañas avanzadas. Puedes volver cuando quieras desde la barra superior.",
+      "switch": "Cambiar a Simple",
+      "stay": "Seguir en Avanzado"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "¿Primera vez con el enrutamiento?",
+        "body": "Un vistazo de 30 segundos a cómo NARN decide quién traduce qué."
+      },
+      "config": {
+        "title": "El enrutamiento decide quién traduce",
+        "what": "Aquí eliges qué proveedor de traducción se encarga de tus textos.",
+        "why": "Úsalo para enviar algunos idiomas o tipos de texto a otro proveedor, o para dejarlo todo con uno solo."
+      },
+      "mode": {
+        "title": "Reglas simples o avanzadas",
+        "what": "Aquí alternas entre un solo proveedor para todo y una lista de reglas.",
+        "why": "Empieza por lo simple. Pasa a las reglas cuando quieras otro proveedor para un idioma, una categoría o un tono.",
+        "advancedAction": "Explicar las reglas avanzadas"
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "¿Es tu primera vez con los glosarios?",
+        "body": "Un vistazo rápido a cómo mantener coherentes los nombres y los términos clave."
+      },
+      "list": {
+        "title": "Tus glosarios",
+        "what": "Cada glosario es una lista de términos con la traducción que quieres para cada uno.",
+        "why": "Así, términos como nombres de personajes, habilidades o nombres de objetos salen igual siempre."
+      },
+      "create": {
+        "title": "Crear un glosario",
+        "what": "Crea un glosario vacío y añade tus propios términos.",
+        "why": "Hazlo cuando ya sepas qué palabras no deben traducirse nunca de otra manera."
+      },
+      "generate": {
+        "title": "Que la IA sugiera términos",
+        "what": "Pide a un proveedor de IA que encuentre posibles términos en tus textos.",
+        "why": "Te ahorras leer todo el archivo para buscarlos. Tú revisas y aceptas lo que proponga."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "¿Es tu primera vez con la calidad?",
+        "body": "Un vistazo rápido a cómo NARN comprueba tus traducciones."
+      },
+      "title": {
+        "title": "Controles de calidad automáticos",
+        "what": "Cada traducción se comprueba con reglas como etiquetas que faltan, marcadores cambiados y límites de longitud.",
+        "why": "Los problemas que romperían tu juego aparecen aquí en lugar de en las pruebas de juego."
+      },
+      "overview": {
+        "title": "Tu tasa de aciertos",
+        "what": "Muestra cuántos controles se han superado y cuántos han fallado en todo el proyecto.",
+        "why": "Es una forma rápida de saber si las traducciones están listas o aún necesitan trabajo."
+      },
+      "issues": {
+        "title": "Los problemas más comunes",
+        "what": "Aquí se listan los tipos de problema que fallan con más frecuencia.",
+        "why": "Si corriges primero el más común, eliminas la mayoría de los fallos."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "¿Es tu primera vez con Comparar?",
+        "body": "Un vistazo rápido a cómo revisar traducciones lado a lado."
+      },
+      "target": {
+        "title": "Elige el idioma",
+        "what": "Elige qué idioma ver junto al texto de origen.",
+        "why": "Revisa un idioma cada vez, línea por línea, y edita sobre la marcha."
+      },
+      "reference": {
+        "title": "Añade un idioma de referencia",
+        "what": "Muestra un segundo idioma al lado, por ejemplo uno que leas bien.",
+        "why": "Es útil cuando no puedes leer el idioma de destino: compruebas el significado con un idioma que conoces."
+      },
+      "translate": {
+        "title": "Traducir desde aquí",
+        "what": "Traduce las filas seleccionadas o todas las que cumplan tus filtros.",
+        "why": "Útil para rellenar huecos que detectes al revisar, sin salir de esta pestaña."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "¿Es tu primera vez con la revisión IA?",
+        "body": "Un vistazo rápido a cómo una IA revisa tus traducciones."
+      },
+      "intro": {
+        "title": "Una segunda opinión sobre las traducciones",
+        "what": "Un proveedor de IA lee tus traducciones junto al original y las puntúa.",
+        "why": "Encuentra errores y redacciones torpes que los controles automáticos no detectan, para que los corrijas antes de publicar."
+      },
+      "start": {
+        "title": "Revisar la última ejecución",
+        "what": "Inicia una revisión de la ejecución de traducción más reciente.",
+        "why": "Revisar solo lo traducido hace poco mantiene el coste y la espera bajos."
+      },
+      "all": {
+        "title": "Revisarlo todo",
+        "what": "Revisa todas las traducciones del proyecto, no solo la última ejecución.",
+        "why": "Úsalo antes de una versión o después de cambiar el glosario o el enrutamiento."
+      }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Reglas, de arriba abajo",
+      "what": "NARN revisa las reglas de arriba abajo, y la primera que encaja con una entrada la traduce. En este recorrido envías los idiomas asiáticos a un proveedor y todos los demás idiomas a otro.",
+      "why": "Una entrada que no encaja con ninguna regla no se traduce, así que la última regla debería valer para todo."
+    },
+    "edit": {
+      "title": "Abre la regla n.º 1",
+      "what": "Pulsa el lápiz para editar la regla n.º 1. Se encargará de los idiomas asiáticos.",
+      "noRulesWhat": "Este proyecto aún no tiene reglas. Pulsa Añadir regla para crear la regla n.º 1. Se encargará de los idiomas asiáticos."
+    },
+    "filter": {
+      "title": "Abre Filtrado",
+      "what": "Pulsa Filtrado para ver qué entradas toma esta regla.",
+      "why": "Una regla sin nada marcado aquí toma todas las entradas."
+    },
+    "langs": {
+      "title": "Marca los idiomas asiáticos",
+      "what": "Marca los idiomas asiáticos entre los idiomas de tu proyecto, por ejemplo ja, ko y zh-hans, y desmarca los demás. Si tu proyecto no tiene ninguno, marca cualquier idioma para probarlo. Siguiente aparece en cuanto marcas o desmarcas uno.",
+      "why": "Ahora la regla n.º 1 solo toma estos idiomas. Los demás idiomas pasan a las reglas de debajo."
+    },
+    "module": {
+      "title": "Elige su proveedor",
+      "what": "En Módulo, elige el proveedor para estos idiomas. Para usar otro modelo del mismo proveedor, abre Ajustes del agente más abajo.",
+      "why": "Tus cambios se guardan solos."
+    },
+    "done": {
+      "title": "Cierra la regla",
+      "what": "Pulsa Listo."
+    },
+    "add": {
+      "title": "Añade una regla para los demás idiomas",
+      "what": "Pulsa Añadir regla. La nueva regla va al final, debajo de las reglas que ya hay.",
+      "why": "Las reglas se revisan de arriba abajo, así que una regla al final solo recibe lo que dejaron las reglas de encima."
+    },
+    "newModule": {
+      "title": "Elige un proveedor y nada más",
+      "what": "En Módulo, elige el proveedor para todos los demás idiomas. Deja Filtrado vacío. Siguiente aparece en cuanto eliges un proveedor.",
+      "why": "No hace falta ningún filtro: los idiomas que marcaste se quedan en la regla n.º 1, así que solo los demás idiomas llegan a las reglas de debajo."
+    },
+    "order": {
+      "title": "El orden hace el trabajo",
+      "what": "La regla n.º 1 toma los idiomas que marcaste, y las reglas de debajo solo reciben lo que queda. Si la regla sin filtro fuera primero, tomaría todos los idiomas y la regla n.º 1 nunca se usaría.",
+      "why": "Para cambiar el orden, usa las flechas junto a una regla."
+    },
+    "templates": {
+      "title": "Plantillas",
+      "what": "Reglas ya preparadas. Usar plantilla añade una al final de las reglas de este proyecto.",
+      "why": "Un comienzo rápido que luego puedes ajustar."
+    },
+    "groups": {
+      "title": "Grupos de reglas",
+      "what": "Un grupo de reglas es un conjunto aparte de reglas. Las traducciones usan el grupo seleccionado aquí.",
+      "why": "Ten otro conjunto preparado, por ejemplo para probar un proveedor, y cambia entre ellos."
+    },
+    "import": {
+      "title": "Importar / Exportar",
+      "what": "Guarda las reglas en un archivo JSON o carga reglas desde uno.",
+      "why": "Reutiliza el mismo enrutamiento en otro proyecto."
+    },
+    "back": {
+      "title": "Volver a Sencillo",
+      "what": "Sencillo es la vista de un solo proveedor. Al elegirla, tus reglas se apartan y un solo proveedor lo traduce todo.",
+      "why": "Tus reglas se conservan, no se eliminan. Elige Avanzado para volver a usarlas."
+    },
+    "absentWhat": "Lo que señala este paso no está en pantalla ahora mismo. Pulsa Siguiente para continuar, o Atrás para repetir el paso anterior."
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Comparar",
+      "what": "El texto original junto a un idioma de destino, fila por fila, con un idioma de referencia opcional.",
+      "why": "Revisa y edita un idioma con cuidado, incluso uno que no lees."
+    },
+    "routing": {
+      "title": "Enrutamiento",
+      "what": "Decide qué proveedor traduce cada idioma, categoría o tono.",
+      "why": "Envía cada tipo de texto al proveedor que mejor lo maneja."
+    },
+    "stage-details": {
+      "title": "Detalles del escenario",
+      "what": "El nombre, los detalles de juego y la descripción de un escenario, con sus traducciones.",
+      "why": "Traduce el texto que describe un nivel, fuera de tu archivo de textos."
+    },
+    "quality": {
+      "title": "Calidad",
+      "what": "Las comprobaciones automáticas por las que pasa cada traducción, y las que fallaron.",
+      "why": "Detecta etiquetas rotas, marcadores cambiados y textos demasiado largos antes de publicar."
+    },
+    "review-source-ai": {
+      "title": "Revisión IA del original",
+      "what": "Un proveedor de IA lee tu texto original y señala erratas y frases poco claras.",
+      "why": "Un texto original mejor da una traducción mejor en cada idioma."
+    },
+    "review-translation-ai": {
+      "title": "Revisión IA de traducción",
+      "what": "Un proveedor de IA lee las traducciones junto al original y las puntúa.",
+      "why": "Encuentra significados erróneos y frases torpes que las comprobaciones automáticas no ven."
+    },
+    "review-manual": {
+      "title": "Revisión manual",
+      "what": "Una cola de traducciones pendientes de revisión, para aprobar, editar o marcar una a una.",
+      "why": "Repasa rápido las traducciones dudosas, con atajos de teclado."
+    },
+    "glossary": {
+      "title": "Glosario",
+      "what": "Listas de términos con la traducción que quieres para cada uno.",
+      "why": "Los nombres y términos clave salen siempre igual."
+    },
+    "category": {
+      "title": "Categoría",
+      "what": "Agrupa los textos por tipo, como etiquetas de la interfaz, diálogos o nombres de objetos.",
+      "why": "Las reglas de enrutamiento y los lotes pueden tratar cada tipo de texto de forma distinta."
+    },
+    "color-text": {
+      "title": "Estilizador de texto",
+      "what": "Una herramienta de borrador para texto con colores, negrita, cursiva y tamaños de letra.",
+      "why": "Escribe texto con estilo sin teclear el marcado a mano."
+    },
+    "orphans": {
+      "title": "Huérfanas",
+      "what": "Textos que desaparecieron en una importación posterior, guardados con sus traducciones.",
+      "why": "No se pierde nada cuando cambia tu archivo: vuelve a vincularlos o elimínalos."
+    },
+    "backup": {
+      "title": "Copia de seguridad",
+      "what": "Empaqueta el proyecto en un archivo que puedes descargar y restaurar.",
+      "why": "Vuelve a un estado anterior si una importación o un cambio masivo sale mal."
+    },
+    "sharing": {
+      "title": "Compartir",
+      "what": "Invita a colaboradores y elige qué idiomas puede editar cada uno.",
+      "why": "Los traductores trabajan en sus propios idiomas, con sus propios proveedores de IA."
+    },
+    "global-config": {
+      "title": "Configuración global",
+      "what": "Ajustes de todo el espacio de trabajo: proveedores, modelos y la bóveda de credenciales.",
+      "why": "Configura un proveedor una vez y úsalo en todos los proyectos."
+    },
+    "translation-memory": {
+      "title": "Memoria de traducción",
+      "what": "Traducciones anteriores, reutilizadas cuando vuelve el mismo texto.",
+      "why": "Ahorra costes y mantiene igual la traducción de las líneas repetidas."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "Para qué sirve un glosario",
+      "what": "Un glosario reúne términos con la traducción que quieres para cada uno, como nombres de personajes, habilidades o nombres de objetos.",
+      "why": "Las traducciones usan entonces siempre tus palabras en vez de una nueva suposición."
+    },
+    "picked": {
+      "title": "Un glosario para tus entradas",
+      "what": "El recorrido eligió {{name}} porque sus términos aparecen en tus entradas. Entradas que coinciden: {{count}}.",
+      "noneWhat": "Ninguno de tus glosarios coincide todavía con tus entradas, así que el recorrido usa {{name}}."
+    },
+    "constant": {
+      "title": "La columna Constante",
+      "what": "Donde el texto escribe un término constante exactamente como el glosario, nunca se envía al motor de traducción. En su lugar, NARN pone tu traducción del glosario directamente en el resultado, así que un nombre de personaje como Diluc siempre sale tal como está escrito aquí.",
+      "absentWhat": "Selecciona un glosario a la izquierda para ver sus términos y su columna Constante.",
+      "why": "Los demás términos se envían junto con el texto como referencia que el motor debe seguir."
+    },
+    "enable": {
+      "title": "Habilítalo",
+      "what": "Pulsa Habilitar. NARN pregunta si aplicar sus coincidencias: Aplicar coincidencias asigna el glosario a cada entrada que contiene uno de sus términos.",
+      "absentWhat": "Selecciona un glosario a la izquierda y pulsa Habilitar junto a su nombre.",
+      "onWhat": "{{name}} ya está habilitado, así que este proyecto lo usa.",
+      "why": "Al traducir este proyecto solo se usan los glosarios habilitados."
+    },
+    "choice": {
+      "title": "¿Solo habilitar o Aplicar coincidencias?",
+      "what": "Aplicar coincidencias asigna el glosario ahora mismo a cada entrada que contiene uno de sus términos. Solo habilitar lo activa y deja tus entradas como están; puedes asignarlo después desde Coincidencias."
+    },
+    "matches": {
+      "title": "Coincidencias encontradas",
+      "what": "NARN encontró estas entradas por sí solo: cada una contiene un término de {{name}}, y ahora tienen el glosario asignado.",
+      "onlyWhat": "NARN encontró estas entradas por sí solo: cada una contiene un término de {{name}}. Márcalas y pulsa Asignar glosario para usarlo en ellas.",
+      "noneWhat": "Aún ninguna entrada contiene un término de {{name}}. Las que lo contengan aparecerán aquí.",
+      "why": "Un glosario se usa en las entradas que lo tienen asignado."
+    },
+    "effect": {
+      "title": "Cómo cambia la traducción",
+      "what": "Cuando un texto contiene un término del glosario, el término y tu traducción se envían junto con el texto.",
+      "why": "El proveedor sigue tu elección en vez de elegir su propia palabra."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Qué es una huérfana",
+      "what": "Una huérfana es una entrada que falta en el último archivo que importaste con «Reemplazo completo».",
+      "why": "NARN la guarda aquí con sus traducciones en vez de borrarla, así nada se pierde por accidente."
+    },
+    "offer": {
+      "title": "Pruébalo con una huérfana de práctica",
+      "what": "El recorrido puede convertir una de tus entradas en huérfana un momento y luego devolverla. No se pierde nada: la entrada conserva sus traducciones y vuelve a su sitio.",
+      "why": "Ver una huérfana real hace que esta pestaña sea más fácil de usar después. O deja que el recorrido solo te lo explique."
+    },
+    "backup": {
+      "title": "Primero, una copia de seguridad",
+      "what": "Antes de crear la huérfana de práctica se hace una copia de seguridad del proyecto. En cualquier caso no se pierde nada: el recorrido devuelve la entrada.",
+      "why": "Con una copia de seguridad siempre puedes volver a este mismo estado desde la pestaña «Copia de seguridad»."
+    },
+    "simulating": {
+      "title": "Creando la huérfana de práctica",
+      "what": "El recorrido vuelve a importar tus entradas sin una de ellas. Tarda un momento.",
+      "why": "Es lo que ocurre cuando una entrada desaparece de un archivo que importas con «Reemplazo completo»."
+    },
+    "practice-row": {
+      "title": "Tu huérfana de práctica",
+      "what": "Esta entrada ahora es huérfana. Ya no aparece en la pestaña «Traducciones» y conserva sus traducciones.",
+      "why": "Las huérfanas aparecen aquí tras una importación con «Reemplazo completo», para que decidas qué hacer con cada una."
+    },
+    "practice-options": {
+      "title": "Qué puedes hacer con una huérfana",
+      "what": "«Reasignar» pasa sus traducciones a otra entrada, por ejemplo una cuyo texto solo se reformuló. «Eliminar» la borra para siempre.",
+      "why": "No los uses con esta: el recorrido la devuelve en el siguiente paso."
+    },
+    "recover": {
+      "title": "Devolverla",
+      "what": "Pulsa «Devolver» y la entrada vuelve a su sitio en la lista, con sus traducciones.",
+      "why": "El recorrido la importa de nuevo, igual que vuelve una entrada cuando tu siguiente archivo la incluye."
+    },
+    "restore": {
+      "title": "Tu copia de seguridad",
+      "what": "Aquí aparece la copia hecha antes de la práctica. «Restaurar la copia» te señala su botón «Restaurar»; pulsarlo o no lo decides tú.",
+      "why": "No la necesitas: la entrada ya volvió. Restaura una copia solo si algo salió mal."
+    },
+    "done": {
+      "title": "Eso es todo sobre las huérfanas",
+      "what": "Las huérfanas guardan las entradas y traducciones que tu última importación dejó fuera, hasta que las reasignes o elimines.",
+      "why": "Echa un vistazo a esta pestaña después de cada importación con «Reemplazo completo»."
+    },
+    "explain-list": {
+      "title": "La lista de huérfanas",
+      "what": "Cada huérfana muestra su texto de origen y cuántas traducciones conserva.",
+      "absentWhat": "Este proyecto no tiene huérfanas ahora. Cuando una importación deja entradas fuera, cada una aparece aquí con su texto de origen y cuántas traducciones conserva.",
+      "why": "Las que tienen más traducciones van primero: son las que más cuesta rehacer."
+    },
+    "explain-options": {
+      "title": "Reasignar o eliminar",
+      "what": "«Reasignar» pasa las traducciones de una huérfana a otra entrada, por ejemplo una cuyo texto solo se reformuló. «Eliminar» la borra para siempre.",
+      "why": "Reasigna cuando el texto sigue existiendo de otra forma; elimina cuando de verdad ya no está."
+    },
+    "actions": {
+      "simulate": "Crear una huérfana de práctica",
+      "explainOnly": "Solo explicar",
+      "backupFirst": "Copia de seguridad primero (recomendado)",
+      "skipBackup": "Seguir sin copia de seguridad",
+      "recover": "Devolver",
+      "restoreBackup": "Restaurar la copia",
+      "switchProject": "Cambiar de proyecto"
+    },
+    "notices": {
+      "alreadyRecovered": "La huérfana de práctica ya está de vuelta en la pestaña «Traducciones».",
+      "alreadyDeleted": "La huérfana de práctica se eliminó, así que el recorrido no puede devolverla. Si hiciste una copia de seguridad, puedes restaurarla desde la pestaña «Copia de seguridad».",
+      "otherProject": "Una huérfana de práctica de este recorrido sigue en otro proyecto. Cambia a ese proyecto para devolverla primero.",
+      "leftOut": "La huérfana de práctica sigue en la pestaña «Huérfanas». Pulsa «Devolver» allí para recuperarla."
+    },
+    "blocked": {
+      "noEntries": "Todavía no hay ninguna entrada para practicar, así que el recorrido solo explica.",
+      "collaborator": "Solo el propietario del proyecto puede gestionar las huérfanas, así que el recorrido solo explica.",
+      "sourcelessRows": "Algunas entradas no tienen texto de origen y una importación no puede reconstruirlas con exactitud. El recorrido solo explica, así que nada cambia.",
+      "unsafeText": "Algún texto de origen tiene una comilla justo antes de una coma o un salto de línea, algo que una importación no puede reconstruir con exactitud. El recorrido solo explica, así que nada cambia.",
+      "commaInSourceLabel": "Una etiqueta de origen tiene una coma o espacios en los extremos, algo que una importación no puede reconstruir con exactitud. El recorrido solo explica, así que nada cambia."
+    },
+    "errors": {
+      "backup": "No se pudo crear la copia de seguridad. No se cambió nada.",
+      "simulate": "No se pudo crear la huérfana de práctica. No se cambió nada.",
+      "recover": "Aún no se pudo devolver la entrada. Está a salvo en la pestaña «Huérfanas»; inténtalo de nuevo.",
+      "recoverRefused": "El recorrido no puede devolver esta entrada sin cambiar otras entradas, así que no se cambió nada. Usa «Reasignar» en la pestaña «Huérfanas» para pasar sus traducciones, o restaura la copia de seguridad si hiciste una.",
+      "load": "No se pudo comprobar la huérfana de práctica. Pulsa «Devolver» para intentarlo de nuevo."
+    },
+    "banner": {
+      "text": "Esta es la huérfana de práctica del recorrido guiado. Devuélvela para que vuelva, con sus traducciones, a la pestaña «Traducciones».",
+      "recovered": "La huérfana de práctica está de vuelta en la pestaña «Traducciones»."
+    }
+  }
+}

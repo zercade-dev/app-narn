@@ -1,0 +1,606 @@
+{
+  "next": "Suivant",
+  "completeTour": "Terminer la visite",
+  "lookOnly": "Ceci est seulement montré pendant la visite. Vous pourrez l’utiliser une fois la visite terminée.",
+  "back": "Retour",
+  "skip": "Passer la visite",
+  "close": "Fermer",
+  "stepOfSub": "Section {{major}} sur {{majorTotal}} · Étape {{sub}} sur {{subTotal}}",
+  "stepCount": "{{current}} sur {{total}}",
+  "continueSetup": "Poursuivre la configuration : section {{current}} sur {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Ouvrir le formulaire du coffre",
+      "cloudVault": "Configurer votre coffre",
+      "openVaultPage": "Ouvrir la page du coffre",
+      "chooseProvider": "Choisir un fournisseur",
+      "useFoundKey": "Utiliser {{provider}} pour vos traductions",
+      "fixKey": "Vérifier ma clé",
+      "retry": "Réessayer",
+      "stopRetry": "Arrêter et réessayer",
+      "translateQuick": "Traduire ces 3 pour essayer",
+      "translateEverything": "Tout traduire",
+      "translateFew": "Les traduire",
+      "translateRest": "Traduire le reste maintenant",
+      "skipRest": "Passer et exporter l’existant",
+      "retranslateTest": "Retraduire 3 entrées pour tester",
+      "restoreTest": "Remettre mes traductions",
+      "keepTest": "Garder les nouvelles traductions",
+      "tourSections": "Montrez-moi les sections",
+      "maybeLater": "Plus tard",
+      "openTours": "Afficher les visites",
+      "toursDone": "Terminé"
+    },
+    "vault": {
+      "title": "Créer le mot de passe de votre coffre",
+      "why": "Vos clés de fournisseurs sont chiffrées avec ce mot de passe et restent toujours sous votre contrôle.",
+      "openWhat": "Ouvrez le formulaire du coffre pour choisir son mot de passe.",
+      "passwordWhat": "Saisissez un mot de passe ici, puis validez avec le bouton en dessous."
+    },
+    "unlock": {
+      "title": "Déverrouiller votre coffre",
+      "why": "Vos clés de fournisseurs restent chiffrées tant que le coffre n’est pas déverrouillé.",
+      "openWhat": "Ouvrez le formulaire du coffre pour saisir son mot de passe.",
+      "passwordWhat": "Saisissez ici le mot de passe de votre coffre, puis validez avec le bouton en dessous."
+    },
+    "cloudVault": {
+      "title": "Créer votre coffre et ajouter une clé",
+      "what": "Choisissez un mot de passe pour le coffre, puis ajoutez une clé : choisissez d’abord un fournisseur. Pour un test rapide, prenez-en un avec une offre gratuite. Vous reviendrez ici une fois terminé.",
+      "why": "Vos clés de fournisseurs sont chiffrées avec votre mot de passe et restent toujours sous votre contrôle."
+    },
+    "cloudUnlock": {
+      "what": "Déverrouillez votre coffre sur la page du coffre. Vous reviendrez ici une fois terminé."
+    },
+    "cloudKey": {
+      "what": "Ajoutez une clé sur la page du coffre : choisissez d’abord un fournisseur. Pour un test rapide, prenez-en un avec une offre gratuite. Vous reviendrez ici une fois terminé."
+    },
+    "key": {
+      "title": "Ajouter une clé pour commencer à traduire",
+      "why": "Vous pourrez changer de fournisseur plus tard dans l’onglet Configuration du projet.",
+      "choiceWhat": "Choisissez un fournisseur et ajoutez sa clé. Pour un test rapide, prenez-en un avec une offre gratuite.",
+      "pasteWhat": "Collez la clé ici, saisissez le mot de passe de votre coffre en dessous, puis enregistrez."
+    },
+    "providerList": {
+      "title": "Choisir un fournisseur",
+      "what": "Vous avez déjà une clé ? Sélectionnez son fournisseur. Pas encore de clé ? Appuyez sur Obtenir une clé à côté d’un fournisseur pour en créer une sur son site, puis sélectionnez-le.",
+      "why": "Pour un test rapide, utilisez un fournisseur avec une offre gratuite."
+    },
+    "providerCard": {
+      "title": "Qui traduit ce projet",
+      "what": "Choisissez qui traduit ce projet.",
+      "why": "Appuyez sur Retour pour fermer ce panneau et poursuivre le guide."
+    },
+    "project": {
+      "title": "Importer le texte de votre jeu",
+      "openWhat": "Ouvrez la liste des projets.",
+      "newWhat": "Créez un nouveau projet.",
+      "createWhat": "Donnez un nom à votre projet, puis créez-le.",
+      "sourceWhat": "Choisissez votre langue source : celle dans laquelle le texte de votre jeu est écrit.",
+      "targetsWhat": "Cochez les langues vers lesquelles vous voulez traduire, ou utilisez Tout sélectionner.",
+      "saveWhat": "Enregistrez vos langues.",
+      "importWhat": "Choisissez le fichier CSV exporté depuis votre éditeur de jeu.",
+      "confirmWhat": "Vérifiez le récapitulatif, puis confirmez l’importation."
+    },
+    "translate": {
+      "title": "Traduire",
+      "openWhat": "Ouvrez l’onglet qui liste vos textes.",
+      "quickWhat": "3 textes encore à traduire sont sélectionnés. Traduisez-les pour essayer, ou traduisez tout dès maintenant.",
+      "fewWhat": "Vos textes sont sélectionnés. Traduisez-les maintenant.",
+      "startWhat": "Démarrez la traduction.",
+      "nothingWhat": "Votre fichier contient déjà toutes les traductions. Pour en voir une en action, retraduisez 3 entrées : vous pourrez remettre leurs traductions ensuite.",
+      "nothingWhy": "Ou appuyez sur Suivant pour exporter. Pour ajouter une langue, cochez-la dans l’onglet Données et enregistrez.",
+      "progressWhat": "La traduction est en cours. Cette ligne indique sa progression.",
+      "progressWhy": "La visite reprend une fois la traduction terminée."
+    },
+    "retest": {
+      "title": "Retraduisez 3 entrées",
+      "filterWhat": "Ouvrez Statut et décochez Afficher uniquement les non traduits, pour que la liste montre aussi vos entrées traduites.",
+      "selectWhat": "Cochez les cases de 3 entrées de cette page.",
+      "translateWhat": "Appuyez sur Traduire la sélection.",
+      "modeWhat": "Choisissez Retraduire les traductions existantes. Avec Compléter uniquement les entrées non traduites, les 3 entrées seraient ignorées : elles sont déjà traduites.",
+      "startWhat": "Appuyez sur Démarrer pour retraduire les 3 entrées.",
+      "nothingPicked": "Rien n’a été retraduit : ces entrées avaient déjà des traductions. Appuyez de nouveau sur Traduire la sélection et choisissez Retraduire les traductions existantes."
+    },
+    "failed": {
+      "title": "La traduction n’a pas abouti",
+      "why": "La barre mise en évidence ci-dessous indique ce qui s’est passé.",
+      "authWhat": "Le fournisseur a refusé votre clé. Vérifiez la clé, puis réessayez.",
+      "quotaWhat": "Le quota gratuit est épuisé pour le moment. Patientez un peu ou ajoutez une autre clé, puis réessayez.",
+      "quotaWhatOwn": "{{provider}} refuse pour le moment : le quota ou le crédit de votre compte est épuisé. Vérifiez votre forfait auprès du fournisseur, puis réessayez.",
+      "quotaWhatCustom": "Un fournisseur du routage de ce projet refuse pour le moment : un quota ou un crédit est épuisé. Patientez un peu ou vérifiez le forfait auprès du fournisseur, puis réessayez.",
+      "noProviderWhat": "Rien n’a été traduit : aucun fournisseur n’était activé pour s’en charger. Appuyez sur Réessayer : NARN active d’abord le fournisseur de votre clé enregistrée.",
+      "otherWhat": "Rien n’a été traduit. Vérifiez votre clé, puis réessayez."
+    },
+    "parked": {
+      "title": "La traduction est en pause",
+      "what": "Votre traduction est en pause, dans l’attente du fournisseur. Vérifiez votre clé, puis arrêtez cette exécution et lancez-en une nouvelle."
+    },
+    "waiting": {
+      "title": "La traduction est en attente",
+      "why": "La barre mise en évidence ci-dessous indique son état. La visite reprend une fois la traduction terminée.",
+      "quotaWhat": "Le quota gratuit est épuisé pour le moment. La traduction reprend d’elle-même dès que du quota est de nouveau disponible.",
+      "modelWhat": "Les modèles gratuits disponibles en ce moment sont en dessous de la qualité visée par cette exécution. La traduction reprend d’elle-même dès qu’un meilleur modèle est disponible."
+    },
+    "rest": {
+      "title": "Le test a fonctionné",
+      "what": "Vos 3 textes d’essai sont traduits dans toutes les langues choisies. Traduisez le reste maintenant, ou exportez ce que vous avez.",
+      "skipped": "Le reste peut attendre. Téléchargez ce qui est déjà traduit."
+    },
+    "restore": {
+      "title": "Le test a fonctionné",
+      "what": "Vos 3 entrées de test ont de nouvelles traductions. Remettez les traductions de votre fichier, ou gardez les nouvelles.",
+      "why": "NARN a enregistré un point de restauration juste avant le test.",
+      "pickWhat": "Ce point de restauration a été enregistré juste avant le test. Appuyez sur Restaurer pour remettre les traductions de votre fichier.",
+      "pickWhy": "La restauration ramène tout le projet à son état d’alors.",
+      "confirmWhat": "Confirmez pour restaurer.",
+      "notFound": "Le point de restauration du test est introuvable. Restaurez-en un depuis les Sauvegardes, ou gardez les nouvelles traductions."
+    },
+    "export": {
+      "title": "Exporter",
+      "why": "Votre éditeur de jeu peut importer ce fichier pour intégrer les traductions à votre jeu.",
+      "openWhat": "Revenez à l’onglet où vous avez importé votre fichier.",
+      "downloadWhat": "Téléchargez le fichier traduit pour votre éditeur de jeu."
+    },
+    "closing": {
+      "title": "Tout est prêt",
+      "what": "Ceci est la vue simplifiée : elle n’affiche que le nécessaire pour traduire et exporter. Le mode Avancé propose plus d’outils. Basculez sur Avancé pour une courte visite.",
+      "whatAdvanced": "Vous êtes en mode Avancé, qui affiche tous les outils. Une courte visite explique à quoi sert chaque section.",
+      "why": "Vous pouvez changer de mode à tout moment depuis la barre supérieure."
+    },
+    "moreTours": {
+      "title": "Plus de visites guidées",
+      "what": "Des visites courtes sur les glossaires, le routage et plus encore se trouvent dans Guide. Lancez-en une quand vous voulez."
+    }
+  },
+  "providerChoice": {
+    "title": "Choisir un fournisseur",
+    "description": "Il traduit ce projet et les nouveaux projets que vous créez.",
+    "existingRouting": "Ce projet a déjà un routage configuré, il reste donc tel quel. Vous pouvez le modifier en mode Avancé.",
+    "freeHeading": "Avec offre gratuite",
+    "paidHeading": "Sans offre gratuite",
+    "getKey": "Obtenir une clé",
+    "getKeyAria": "Obtenir une clé {{provider}} (ouvre le site du fournisseur)",
+    "cancel": "Annuler",
+    "failed": "Impossible de configurer {{provider}} : {{message}}",
+    "switchedOff": "{{provider}} est désactivé en mode Avancé, il n’a donc pas été utilisé. Réactivez-le dans Configuration globale, ou choisissez un autre fournisseur.",
+    "waitingForKey": "Aucune clé {{provider}} dans votre coffre pour l’instant : NARN Freeway traduit en attendant. Ajoutez sa clé, ou choisissez NARN Freeway dans l’onglet Configuration du projet.",
+    "applied": "{{provider}} traduit désormais {{project}}.",
+    "appliedCollab": "{{provider}} traduit désormais les projets partagés avec vous."
+  },
+  "offer": {
+    "start": "Montrez-moi",
+    "decline": "Non merci"
+  },
+  "guideTours": {
+    "title": "Visites",
+    "first-run": {
+      "name": "Premier lancement guidé",
+      "summary": "Configurez un fournisseur, ajoutez vos textes, traduisez et exportez, étape par étape."
+    },
+    "advanced-sections": {
+      "name": "Sections avancées",
+      "summary": "À quoi sert chaque onglet et chaque vue qu’ajoute le mode avancé."
+    },
+    "glossaries": {
+      "name": "Glossaires",
+      "summary": "Activez un glossaire prêt à l’emploi adapté à votre texte et voyez les correspondances qu’il trouve."
+    },
+    "routing": {
+      "name": "Routage",
+      "summary": "Un aperçu de 30 secondes de la façon dont NARN choisit qui traduit quoi."
+    },
+    "routing-advanced": {
+      "name": "Règles de routage avancées",
+      "summary": "Des règles qui envoient chaque langue ou type de texte au fournisseur de votre choix."
+    },
+    "quality": {
+      "name": "Qualité",
+      "summary": "Un aperçu rapide de la façon dont NARN contrôle vos traductions."
+    },
+    "compare": {
+      "name": "Comparer",
+      "summary": "Un aperçu rapide pour relire les traductions côte à côte."
+    },
+    "review-translation-ai": {
+      "name": "Révision IA de traduction",
+      "summary": "Un aperçu rapide de la façon dont une IA contrôle vos traductions."
+    },
+    "orphans": {
+      "name": "Orphelins",
+      "summary": "Voyez ce que devient une entrée absente de votre fichier, avec un orphelin d’essai que la visite remet en place."
+    },
+    "startOver": "Recommencer depuis le début",
+    "continue": "Reprendre là où je me suis arrêté",
+    "progress": "{{current}} sur {{total}} étapes",
+    "progressSections": "{{current}} sur {{total}} sections",
+    "completed": "Terminé",
+    "needsProject": "Ouvrez un projet pour suivre cette visite.",
+    "needsDesktop": "Les visites demandent un écran plus large. Ouvrez l’application sur un ordinateur pour en suivre une.",
+    "switchedToAdvanced": "Passage en mode avancé pour cette visite.",
+    "confirm": {
+      "title": "Passer en mode Simple pour la configuration guidée ?",
+      "body": "La configuration guidée est conçue pour le mode Simple, qui masque les onglets avancés. Vous pouvez revenir à tout moment depuis la barre supérieure.",
+      "switch": "Passer en mode Simple",
+      "stay": "Rester en mode Avancé"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "Première fois avec le routage ?",
+        "body": "Un aperçu de 30 secondes de la façon dont NARN choisit qui traduit quoi."
+      },
+      "config": {
+        "title": "Le routage choisit qui traduit",
+        "what": "C’est ici que vous choisissez quel fournisseur de traduction s’occupe de vos textes.",
+        "why": "Servez-vous-en pour envoyer certaines langues ou certains types de texte à un autre fournisseur, ou pour tout garder chez un seul."
+      },
+      "mode": {
+        "title": "Règles simples ou avancées",
+        "what": "Basculez ici entre un seul fournisseur pour tout et une liste de règles.",
+        "why": "Commencez simple. Passez aux règles quand vous voulez un autre fournisseur pour une langue, une catégorie ou un ton.",
+        "advancedAction": "Expliquer les règles avancées"
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "Première fois avec les glossaires ?",
+        "body": "Un aperçu rapide pour garder les noms et les termes clés cohérents."
+      },
+      "list": {
+        "title": "Vos glossaires",
+        "what": "Chaque glossaire est une liste de termes avec la traduction voulue pour chacun.",
+        "why": "Les termes comme les noms de personnages, les compétences ou les noms d’objets sortent alors toujours de la même façon."
+      },
+      "create": {
+        "title": "Créer un glossaire",
+        "what": "Créez un glossaire vide et ajoutez-y vos propres termes.",
+        "why": "Faites-le quand vous savez déjà quels mots ne doivent jamais être traduits autrement."
+      },
+      "generate": {
+        "title": "Laisser l’IA proposer des termes",
+        "what": "Demandez à un fournisseur d’IA de repérer des termes probables dans vos textes.",
+        "why": "Vous évitez de lire tout le fichier pour les trouver. Vous relisez et acceptez ce qui est proposé."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "Première fois avec la qualité ?",
+        "body": "Un aperçu rapide de la façon dont NARN contrôle vos traductions."
+      },
+      "title": {
+        "title": "Des contrôles qualité automatiques",
+        "what": "Chaque traduction est vérifiée selon des règles : balises manquantes, espaces réservés modifiés, limites de longueur.",
+        "why": "Les problèmes qui casseraient votre jeu apparaissent ici plutôt qu’en phase de test."
+      },
+      "overview": {
+        "title": "Votre taux de réussite",
+        "what": "Ceci indique combien de contrôles ont réussi et combien ont échoué dans le projet.",
+        "why": "Un moyen rapide de savoir si les traductions sont prêtes ou demandent encore du travail."
+      },
+      "issues": {
+        "title": "Les problèmes les plus fréquents",
+        "what": "Les types de problème qui échouent le plus souvent sont listés ici.",
+        "why": "Corriger d’abord le plus fréquent supprime le plus d’échecs."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "Première fois avec Comparer ?",
+        "body": "Un aperçu rapide pour relire les traductions côte à côte."
+      },
+      "target": {
+        "title": "Choisir la langue",
+        "what": "Choisissez la langue à afficher à côté du texte source.",
+        "why": "Relisez une langue à la fois, ligne par ligne, et corrigez au fur et à mesure."
+      },
+      "reference": {
+        "title": "Ajouter une langue de référence",
+        "what": "Affichez une deuxième langue à côté, par exemple une que vous lisez bien.",
+        "why": "Utile quand vous ne lisez pas la langue cible : vous vérifiez le sens avec une langue que vous connaissez."
+      },
+      "translate": {
+        "title": "Traduire depuis ici",
+        "what": "Traduisez les lignes sélectionnées, ou toutes celles qui correspondent à vos filtres.",
+        "why": "Pratique pour combler les trous repérés à la relecture, sans quitter cet onglet."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "Première fois avec la révision IA ?",
+        "body": "Un aperçu rapide de la façon dont une IA contrôle vos traductions."
+      },
+      "intro": {
+        "title": "Un deuxième avis sur les traductions",
+        "what": "Un fournisseur d’IA lit vos traductions à côté du texte source et leur donne une note.",
+        "why": "Il repère des erreurs et des tournures maladroites que les contrôles automatiques ne voient pas, pour les corriger avant la publication."
+      },
+      "start": {
+        "title": "Réviser la dernière exécution",
+        "what": "Lancez une révision de l’exécution de traduction la plus récente.",
+        "why": "Ne réviser que les traductions récentes limite le coût et l’attente."
+      },
+      "all": {
+        "title": "Tout réviser",
+        "what": "Révisez toutes les traductions du projet, pas seulement la dernière exécution.",
+        "why": "À utiliser avant une version, ou après avoir modifié le glossaire ou le routage."
+      }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Des règles lues de haut en bas",
+      "what": "NARN lit les règles de haut en bas, et la première qui convient à une entrée la traduit. Dans cette visite, vous envoyez les langues asiatiques à un fournisseur et toutes les autres langues à un autre.",
+      "why": "Une entrée qu’aucune règle ne couvre n’est pas traduite : la dernière règle doit donc couvrir tout."
+    },
+    "edit": {
+      "title": "Ouvrez la règle n°1",
+      "what": "Appuyez sur le crayon pour modifier la règle n°1. Elle traitera les langues asiatiques.",
+      "noRulesWhat": "Ce projet n’a pas encore de règle. Appuyez sur Ajouter une règle pour créer la règle n°1. Elle traitera les langues asiatiques."
+    },
+    "filter": {
+      "title": "Ouvrez Filtrage",
+      "what": "Appuyez sur Filtrage pour voir quelles entrées cette règle prend.",
+      "why": "Une règle sans rien de coché ici prend toutes les entrées."
+    },
+    "langs": {
+      "title": "Cochez les langues asiatiques",
+      "what": "Cochez les langues asiatiques parmi les langues de votre projet, par exemple ja, ko et zh-hans, et décochez les autres. S’il n’y en a aucune dans ce projet, cochez n’importe quelle langue pour essayer. Suivant apparaît dès que vous cochez ou décochez une langue.",
+      "why": "La règle n°1 ne prend plus que ces langues. Toutes les autres langues passent aux règles en dessous."
+    },
+    "module": {
+      "title": "Choisissez son fournisseur",
+      "what": "Dans Module, choisissez le fournisseur pour ces langues. Pour utiliser un autre modèle du même fournisseur, ouvrez Paramètres de l'agent plus bas.",
+      "why": "Vos modifications s’enregistrent toutes seules."
+    },
+    "done": {
+      "title": "Fermez la règle",
+      "what": "Appuyez sur Terminé."
+    },
+    "add": {
+      "title": "Ajoutez une règle pour les autres langues",
+      "what": "Appuyez sur Ajouter une règle. La nouvelle règle se place en bas, sous les règles déjà présentes.",
+      "why": "Les règles sont lues de haut en bas, donc une règle en bas ne reçoit que ce que les règles au-dessus ont laissé."
+    },
+    "newModule": {
+      "title": "Choisissez un fournisseur, rien d’autre",
+      "what": "Dans Module, choisissez le fournisseur pour toutes les autres langues. Laissez Filtrage vide. Suivant apparaît dès qu’un fournisseur est choisi.",
+      "why": "Aucun filtre n’est nécessaire : les langues cochées s’arrêtent à la règle n°1, donc seules les autres langues atteignent les règles en dessous."
+    },
+    "order": {
+      "title": "L’ordre fait le travail",
+      "what": "La règle n°1 prend les langues cochées, et les règles en dessous ne reçoivent que ce qui reste. Si la règle sans filtre passait en premier, elle prendrait toutes les langues, et la règle n°1 ne servirait jamais.",
+      "why": "Pour changer l’ordre, utilisez les flèches à côté d’une règle."
+    },
+    "templates": {
+      "title": "Modèles",
+      "what": "Des règles toutes prêtes. Utiliser le modèle en ajoute une en bas des règles de ce projet.",
+      "why": "Un départ rapide que vous ajustez ensuite."
+    },
+    "groups": {
+      "title": "Groupes de règles",
+      "what": "Un groupe de règles est un ensemble de règles à part. Les traductions utilisent le groupe sélectionné ici.",
+      "why": "Gardez un autre ensemble prêt, par exemple pour tester un fournisseur, et passez de l’un à l’autre."
+    },
+    "import": {
+      "title": "Importer / Exporter",
+      "what": "Enregistrez les règles dans un fichier JSON, ou chargez des règles depuis un tel fichier.",
+      "why": "Réutilisez le même routage dans un autre projet."
+    },
+    "back": {
+      "title": "Revenir à Simple",
+      "what": "Simple est la vue à un seul fournisseur. La choisir met vos règles de côté : un seul fournisseur traduit tout.",
+      "why": "Vos règles sont conservées, pas supprimées. Choisissez Avancé pour les utiliser à nouveau."
+    },
+    "absentWhat": "Ce que montre cette étape n’est pas à l’écran pour le moment. Appuyez sur Suivant pour continuer, ou sur Retour pour refaire l’étape précédente."
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Comparer",
+      "what": "Le texte source à côté d’une langue cible, ligne par ligne, avec une langue de référence en option.",
+      "why": "Relisez et modifiez une langue avec soin, même une que vous ne lisez pas."
+    },
+    "routing": {
+      "title": "Routage",
+      "what": "Décide quel fournisseur traduit chaque langue, catégorie ou ton.",
+      "why": "Envoyez chaque type de texte au fournisseur qui le traite le mieux."
+    },
+    "stage-details": {
+      "title": "Détails du niveau",
+      "what": "Le nom, les détails de gameplay et la description d’un niveau, avec leurs traductions.",
+      "why": "Traduisez le texte qui décrit un niveau, en dehors de votre fichier de textes."
+    },
+    "quality": {
+      "title": "Qualité",
+      "what": "Les contrôles automatiques que passe chaque traduction, et ceux qui ont échoué.",
+      "why": "Repérez les balises cassées, les espaces réservés modifiés et les textes trop longs avant la publication."
+    },
+    "review-source-ai": {
+      "title": "Révision IA de la source",
+      "what": "Un fournisseur d’IA lit votre texte source et signale les fautes de frappe et les formulations floues.",
+      "why": "Un meilleur texte source donne une meilleure traduction dans chaque langue."
+    },
+    "review-translation-ai": {
+      "title": "Révision IA de traduction",
+      "what": "Un fournisseur d’IA lit les traductions à côté du texte source et leur donne une note.",
+      "why": "Il repère les contresens et les tournures maladroites que les contrôles automatiques ne voient pas."
+    },
+    "review-manual": {
+      "title": "Révision manuelle",
+      "what": "Une file de traductions à réviser, à approuver, modifier ou signaler une par une.",
+      "why": "Passez vite en revue les traductions douteuses, avec des raccourcis clavier."
+    },
+    "glossary": {
+      "title": "Glossaire",
+      "what": "Des listes de termes avec la traduction voulue pour chacun.",
+      "why": "Les noms et termes clés sont alors traduits de la même façon à chaque fois."
+    },
+    "category": {
+      "title": "Catégorie",
+      "what": "Regroupe les textes par type, comme les libellés d’interface, les dialogues ou les noms d’objets.",
+      "why": "Les règles de routage et les lots peuvent alors traiter chaque type de texte différemment."
+    },
+    "color-text": {
+      "title": "Styliseur de texte",
+      "what": "Un outil de brouillon pour du texte avec couleurs, gras, italique et tailles de police.",
+      "why": "Écrivez du texte mis en forme sans taper le balisage à la main."
+    },
+    "orphans": {
+      "title": "Orphelins",
+      "what": "Les textes disparus lors d’un import ultérieur, conservés avec leurs traductions.",
+      "why": "Rien n’est perdu quand votre fichier change : reliez-les de nouveau ou supprimez-les."
+    },
+    "backup": {
+      "title": "Sauvegarde",
+      "what": "Regroupe le projet dans une archive que vous pouvez télécharger et restaurer.",
+      "why": "Revenez à un état antérieur si un import ou une modification en masse tourne mal."
+    },
+    "sharing": {
+      "title": "Partage",
+      "what": "Invitez des collaborateurs et choisissez les langues que chacun peut modifier.",
+      "why": "Les traducteurs travaillent sur leurs propres langues, avec leurs propres fournisseurs d’IA."
+    },
+    "global-config": {
+      "title": "Configuration globale",
+      "what": "Les réglages de tout l’espace de travail : fournisseurs, modèles et coffre de credentials.",
+      "why": "Configurez un fournisseur une fois et utilisez-le dans tous vos projets."
+    },
+    "translation-memory": {
+      "title": "Mémoire de traduction",
+      "what": "Les traductions précédentes, réutilisées quand le même texte revient.",
+      "why": "Cela réduit les coûts et garde la même traduction pour les lignes répétées."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "À quoi sert un glossaire",
+      "what": "Un glossaire liste des termes avec la traduction voulue pour chacun, comme des noms de personnages, des compétences ou des noms d’objets.",
+      "why": "Les traductions reprennent alors vos mots à chaque fois au lieu d’une nouvelle supposition."
+    },
+    "picked": {
+      "title": "Un glossaire pour vos entrées",
+      "what": "La visite a choisi {{name}}, car ses termes figurent dans vos entrées. Entrées correspondantes : {{count}}.",
+      "noneWhat": "Aucun de vos glossaires ne correspond encore à vos entrées, la visite utilise donc {{name}}."
+    },
+    "constant": {
+      "title": "La colonne Constante",
+      "what": "Là où le texte écrit un terme constant exactement comme le glossaire, il n’est jamais envoyé au moteur de traduction. NARN place directement votre traduction du glossaire dans le résultat : un nom de personnage comme Diluc ressort toujours exactement tel qu’il est écrit ici.",
+      "absentWhat": "Sélectionnez un glossaire à gauche pour voir ses termes et leur colonne Constante.",
+      "why": "Les autres termes sont envoyés avec le texte comme référence que le moteur doit suivre."
+    },
+    "enable": {
+      "title": "Activez-le",
+      "what": "Appuyez sur Activer. NARN demande s’il faut appliquer ses correspondances : Appliquer les correspondances attribue le glossaire à chaque entrée qui contient l’un de ses termes.",
+      "absentWhat": "Sélectionnez un glossaire à gauche, puis appuyez sur Activer à côté de son nom.",
+      "onWhat": "{{name}} est déjà activé : ce projet l’utilise.",
+      "why": "Seuls les glossaires activés servent quand ce projet est traduit."
+    },
+    "choice": {
+      "title": "Activer seulement ou Appliquer les correspondances ?",
+      "what": "Appliquer les correspondances attribue tout de suite le glossaire à chaque entrée qui contient l’un de ses termes. Activer seulement l’active et laisse vos entrées telles quelles ; vous pourrez l’attribuer plus tard depuis Correspondances."
+    },
+    "matches": {
+      "title": "Correspondances trouvées",
+      "what": "NARN a trouvé ces entrées tout seul : chacune contient un terme de {{name}}, et le glossaire leur est maintenant attribué.",
+      "onlyWhat": "NARN a trouvé ces entrées tout seul : chacune contient un terme de {{name}}. Cochez-les et appuyez sur Attribuer le glossaire pour l’utiliser avec elles.",
+      "noneWhat": "Aucune entrée ne contient encore de terme de {{name}}. Celles qui en contiennent s’afficheront ici.",
+      "why": "Un glossaire sert pour les entrées auxquelles il est attribué."
+    },
+    "effect": {
+      "title": "Ce que cela change à la traduction",
+      "what": "Quand un texte contient un terme du glossaire, le terme et votre traduction sont envoyés avec le texte.",
+      "why": "Le fournisseur suit votre choix au lieu de choisir son propre mot."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Qu’est-ce qu’un orphelin ?",
+      "what": "Un orphelin est une entrée absente du dernier fichier que vous avez importé en « Remplacement complet ».",
+      "why": "NARN la conserve ici avec ses traductions au lieu de la supprimer : rien ne se perd par accident."
+    },
+    "offer": {
+      "title": "Essayer avec un orphelin d’essai",
+      "what": "La visite peut transformer une de vos entrées en orphelin un instant, puis la remettre en place. Rien n’est perdu : l’entrée garde ses traductions et revient à sa place.",
+      "why": "Voir un vrai orphelin rend cet onglet plus simple à utiliser ensuite. Sinon, laissez la visite simplement expliquer."
+    },
+    "backup": {
+      "title": "D’abord une sauvegarde",
+      "what": "Une sauvegarde du projet est créée avant l’orphelin d’essai. Dans tous les cas rien n’est perdu : la visite remet l’entrée en place.",
+      "why": "Avec une sauvegarde, vous pouvez toujours revenir à cet état exact depuis l’onglet « Sauvegarde »."
+    },
+    "simulating": {
+      "title": "Création de l’orphelin d’essai",
+      "what": "La visite réimporte vos entrées sauf une. Cela prend un instant.",
+      "why": "C’est ce qui se passe quand une entrée disparaît d’un fichier importé en « Remplacement complet »."
+    },
+    "practice-row": {
+      "title": "Votre orphelin d’essai",
+      "what": "Cette entrée est maintenant un orphelin. Elle n’apparaît plus dans l’onglet « Traductions », et ses traductions sont conservées.",
+      "why": "Les orphelins apparaissent ici après un import en « Remplacement complet », pour que vous décidiez quoi faire de chacun."
+    },
+    "practice-options": {
+      "title": "Que faire d’un orphelin",
+      "what": "« Réaffecter » transfère ses traductions vers une autre entrée, par exemple une dont le texte a seulement été reformulé. « Supprimer » l’efface définitivement.",
+      "why": "N’y touchez pas pour celui-ci : la visite le remet en place à l’étape suivante."
+    },
+    "recover": {
+      "title": "Le remettre en place",
+      "what": "Cliquez sur « Remettre en place » et l’entrée retrouve sa place dans la liste, avec ses traductions.",
+      "why": "La visite la réimporte, comme une entrée revient quand votre prochain fichier la contient."
+    },
+    "restore": {
+      "title": "Votre sauvegarde",
+      "what": "La sauvegarde créée avant l’essai figure ici. « Restaurer la sauvegarde » vous montre son bouton « Restaurer » ; c’est à vous de décider de cliquer ou non.",
+      "why": "Vous n’en avez pas besoin : l’entrée est déjà revenue. Ne restaurez une sauvegarde qu’en cas de problème."
+    },
+    "done": {
+      "title": "Voilà pour les orphelins",
+      "what": "Les orphelins conservent les entrées et traductions que votre dernier import a laissées de côté, jusqu’à ce que vous les réaffectiez ou les supprimiez.",
+      "why": "Jetez un œil à cet onglet après chaque import en « Remplacement complet »."
+    },
+    "explain-list": {
+      "title": "La liste des orphelins",
+      "what": "Chaque orphelin affiche son texte source et le nombre de traductions qu’il conserve.",
+      "absentWhat": "Ce projet n’a aucun orphelin pour l’instant. Quand un import laisse des entrées de côté, chacune s’affiche ici avec son texte source et le nombre de traductions qu’elle conserve.",
+      "why": "Ceux qui ont le plus de traductions viennent en premier : ce sont les plus longs à refaire."
+    },
+    "explain-options": {
+      "title": "Réaffecter ou supprimer",
+      "what": "« Réaffecter » transfère les traductions d’un orphelin vers une autre entrée, par exemple une dont le texte a seulement été reformulé. « Supprimer » l’efface définitivement.",
+      "why": "Réaffectez quand le texte existe encore sous une autre forme ; supprimez quand il a vraiment disparu."
+    },
+    "actions": {
+      "simulate": "Créer un orphelin d’essai",
+      "explainOnly": "Expliquer seulement",
+      "backupFirst": "Sauvegarder d’abord (recommandé)",
+      "skipBackup": "Continuer sans sauvegarde",
+      "recover": "Remettre en place",
+      "restoreBackup": "Restaurer la sauvegarde",
+      "switchProject": "Changer de projet"
+    },
+    "notices": {
+      "alreadyRecovered": "L’orphelin d’essai est déjà de retour dans l’onglet « Traductions ».",
+      "alreadyDeleted": "L’orphelin d’essai a été supprimé, la visite ne peut donc pas le remettre en place. Si vous avez créé une sauvegarde, vous pouvez la restaurer depuis l’onglet « Sauvegarde ».",
+      "otherProject": "Un orphelin d’essai de cette visite se trouve encore dans un autre projet. Passez à ce projet pour le remettre en place d’abord.",
+      "leftOut": "L’orphelin d’essai est toujours dans l’onglet « Orphelins ». Cliquez sur « Remettre en place » pour le récupérer."
+    },
+    "blocked": {
+      "noEntries": "Il n’y a pas encore d’entrée pour s’exercer, la visite se contente donc d’expliquer.",
+      "collaborator": "Seul le propriétaire du projet peut gérer les orphelins, la visite se contente donc d’expliquer.",
+      "sourcelessRows": "Certaines entrées n’ont pas de texte source et un import ne peut pas les reconstruire à l’identique. La visite se contente d’expliquer, rien ne change.",
+      "unsafeText": "Un texte source contient un guillemet juste avant une virgule ou un saut de ligne, ce qu’un import ne peut pas reconstruire à l’identique. La visite se contente d’expliquer, rien ne change.",
+      "commaInSourceLabel": "Une étiquette d’origine contient une virgule ou des espaces aux extrémités, ce qu’un import ne peut pas reconstruire à l’identique. La visite se contente d’expliquer, rien ne change."
+    },
+    "errors": {
+      "backup": "La sauvegarde n’a pas pu être créée. Rien n’a été modifié.",
+      "simulate": "L’orphelin d’essai n’a pas pu être créé. Rien n’a été modifié.",
+      "recover": "L’entrée n’a pas encore pu être remise en place. Elle est en sécurité dans l’onglet « Orphelins » ; réessayez.",
+      "recoverRefused": "La visite ne peut pas remettre cette entrée en place sans modifier d’autres entrées, rien n’a donc été modifié. Utilisez « Réaffecter » dans l’onglet « Orphelins » pour transférer ses traductions, ou restaurez la sauvegarde si vous en avez créé une.",
+      "load": "Impossible de vérifier l’orphelin d’essai. Cliquez sur « Remettre en place » pour réessayer."
+    },
+    "banner": {
+      "text": "Voici l’orphelin d’essai de la visite guidée. Remettez-le en place pour qu’il revienne, avec ses traductions, dans l’onglet « Traductions ».",
+      "recovered": "L’orphelin d’essai est de retour dans l’onglet « Traductions »."
+    }
+  }
+}

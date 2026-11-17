@@ -8,6 +8,12 @@
   "switchToDark": "切换到深色模式",
   "languageTitle": "语言",
   "languageDescription": "用户界面的语言。",
+  "uiModeLabel": "界面模式",
+  "uiModeSimple": "简单",
+  "uiModeAdvanced": "高级",
+  "uiModeDescription": "简单模式会隐藏大部分导航，让你专注于翻译；高级模式显示全部内容。",
+  "tourOffersLabel": "提供引导教程",
+  "tourOffersDescription": "首次打开应用的某个部分时，显示简短的引导。",
   "preview": "预览",
   "previewHint": "使用所选主题渲染的示例控件。",
   "previewSamples": {

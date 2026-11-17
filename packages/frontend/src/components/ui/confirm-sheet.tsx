@@ -33,6 +33,7 @@ export function ConfirmSheet({
   cancelDisabled,
   cancelTestId,
   confirmTestId,
+  confirmTourId,
   side = 'right',
   contentClassName,
   children,
@@ -50,6 +51,8 @@ export function ConfirmSheet({
   cancelDisabled?: boolean;
   cancelTestId?: string;
   confirmTestId?: string;
+  /** `data-tour` of the confirm button, for a guide that points at it. */
+  confirmTourId?: string;
   side?: 'top' | 'right' | 'bottom' | 'left';
   contentClassName?: string;
   children?: React.ReactNode;
@@ -76,6 +79,7 @@ export function ConfirmSheet({
             onClick={onConfirm}
             disabled={confirmDisabled}
             data-testid={confirmTestId}
+            data-tour={confirmTourId}
           >
             {confirmLabel}
           </Button>

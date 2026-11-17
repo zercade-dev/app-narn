@@ -26,7 +26,13 @@
   "templateWarningUnknownGlossary": "Mẫu trỏ tới bảng thuật ngữ không rõ “{{id}}”",
   "createFailed": "Không tạo được dự án: {{message}}",
   "activateFailed": "Không chuyển được dự án: {{message}}",
+  "providerSetupFailed": "Đã tạo dự án, nhưng không thiết lập được nhà cung cấp. Mở “Khóa nhà cung cấp” để kiểm tra. ({{message}})",
   "changeProjectIcon": "Đổi biểu tượng dự án",
+  "providerKeys": "Khóa nhà cung cấp",
+  "advancedOnlyTitle": "Có trong chế độ Nâng cao",
+  "advancedOnlyBody": "{{place}} thuộc chế độ Nâng cao. Chuyển sang Nâng cao để mở?",
+  "advancedOnlySwitch": "Chuyển sang Nâng cao",
+  "advancedOnlyCancel": "Để sau",
   "groups": {
     "project": "Thiết lập",
     "translate": "Dịch",

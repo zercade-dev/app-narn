@@ -21,9 +21,9 @@
   "restoreSelectFile": "Seleccionar archivo .zip",
   "restoreButton": "Restaurar",
   "restoring": "Restaurando…",
-  "confirmTitle": "\u00bfReemplazar los datos actuales del proyecto?",
-  "confirmBody": "Al restaurar se sobrescribir\u00e1n la configuraci\u00f3n, las entradas y el glosario existentes. Esta acci\u00f3n no se puede deshacer.",
-  "previewLoading": "Cargando detalles de la copia de seguridad\u2026",
+  "confirmTitle": "¿Reemplazar los datos actuales del proyecto?",
+  "confirmBody": "Al restaurar se sobrescribirán la configuración, las entradas y el glosario existentes. Esta acción no se puede deshacer.",
+  "previewLoading": "Cargando detalles de la copia de seguridad…",
   "previewProject": "Proyecto:",
   "previewFiles": "Archivos en la copia:",
   "previewCreatedAt": "Creada:",
@@ -31,7 +31,7 @@
   "previewCreates": "Esta copia de seguridad es de un proyecto que aún no existe aquí, así que al restaurar se creará.",
   "previewDifferentProject": "Ese no es el proyecto que estás viendo.",
   "previewUnavailable": "No se ha podido leer esta copia de seguridad, así que no hay nada que mostrar.",
-  "confirmConfirm": "S\u00ed, restaurar",
+  "confirmConfirm": "Sí, restaurar",
   "confirmCancel": "Cancelar",
   "deleteButton": "Eliminar",
   "deleteConfirmTitle": "Eliminar copia de seguridad",
@@ -43,5 +43,6 @@
   "toastBackupCreated": "Copia de seguridad creada.",
   "toastBackupFailed": "Error al crear la copia: {{message}}",
   "toastRestoreSuccess": "Copia de seguridad restaurada.",
-  "toastRestoreFailed": "Error al restaurar: {{message}}"
+  "toastRestoreFailed": "Error al restaurar: {{message}}",
+  "toastGuideRestored": "Las traducciones de tu archivo han vuelto."
 }

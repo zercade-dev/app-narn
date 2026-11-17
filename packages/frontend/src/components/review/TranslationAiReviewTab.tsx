@@ -1032,7 +1032,7 @@ export function TranslationAiReviewTab({ projectId }: { projectId: string }) {
     >
       {/* Page header — matches the source-AI sibling so the three review tabs
           share one orientation pattern (icon + title + one-line description). */}
-      <div className="space-y-1">
+      <div className="space-y-1" data-tour="ai-review-intro">
         <div className="flex items-center gap-2">
           <Sparkles className="size-4" />
           <h3 className="text-sm font-semibold">{tr('translationAi.title')}</h3>
@@ -1049,6 +1049,7 @@ export function TranslationAiReviewTab({ projectId }: { projectId: string }) {
           disabled={!latestTranslationRun || judgeInFlight}
           title={latestTranslationRun ? undefined : tr('translationAi.runReviewNoRun')}
           data-testid="translation-ai-review-run-review"
+          data-tour="ai-review-start"
         >
           <Sparkles className="size-4" aria-hidden />
           {tr('translationAi.runReview')}
@@ -1058,6 +1059,7 @@ export function TranslationAiReviewTab({ projectId }: { projectId: string }) {
           onClick={() => setReviewingAll(true)}
           disabled={judgeInFlight}
           data-testid="translation-ai-review-review-all"
+          data-tour="ai-review-all"
         >
           <Sparkles className="size-4" aria-hidden />
           {tr('translationAi.reviewAll')}

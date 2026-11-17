@@ -8,6 +8,12 @@
   "switchToDark": "ダークモードに切り替える",
   "languageTitle": "言語",
   "languageDescription": "ユーザーインターフェースの言語です。",
+  "uiModeLabel": "インターフェースモード",
+  "uiModeSimple": "シンプル",
+  "uiModeAdvanced": "詳細",
+  "uiModeDescription": "シンプルでは、翻訳に集中できるようナビゲーションの大半を非表示にします。詳細ではすべてを表示します。",
+  "tourOffersLabel": "ガイドツアーを表示する",
+  "tourOffersDescription": "アプリの各機能を初めて開いたときに、簡単な案内を表示します。",
   "preview": "プレビュー",
   "previewHint": "選択中のテーマで表示したコントロールの例です。",
   "previewSamples": {

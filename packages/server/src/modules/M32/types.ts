@@ -6,6 +6,9 @@
  */
 import type { FreewayBucketStats, FreewayCooldownReason } from '../../storage/types.js';
 
+/** The `disabledReason` a bucket carries while a provider has rejected its key (cleared when the key is rewritten). */
+export const FREEWAY_BAD_CREDENTIALS_REASON = 'bad credentials';
+
 export type DifficultyBand = 1 | 2 | 3 | 4;
 
 export interface BucketView {
@@ -102,6 +105,7 @@ export interface BucketView {
   cooldownUntil?: number;
   /** Set when a provider failure caused the cooldown; absent means a quota wait. */
   cooldownReason?: FreewayCooldownReason;
+  /** Why the bucket is out of play; {@link FREEWAY_BAD_CREDENTIALS_REASON} while its key is rejected. */
   disabledReason?: string;
   stats: FreewayBucketStats;
 }

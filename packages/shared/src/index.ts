@@ -126,12 +126,16 @@ export {
   runTypeLabel,
   isTranslationRunKind,
   hasRunDetailsKind,
+  FAILURE_CODES,
+  isFailureCode,
 } from './types/runs.js';
 export type {
   RunStatus,
+  LanguageProgress,
   PendingCorrectionRecord,
   ProviderFailureNotice,
   ProviderFailureRouting,
+  FailureCode,
   RunErrorEntry,
   RunUsageEntry,
   RunRequest,
@@ -155,7 +159,14 @@ export type {
 export { isAlwaysFreeModel } from './free-model.js';
 export { TM_MODULE_ID } from './types/tm.js';
 export type { TmMatchPolicy, TmFingerprint, TmVariant, TmSegment } from './types/tm.js';
-export type { NotificationRecord, NotificationSeverity } from './types/notification.js';
+export type {
+  CollabDigestData,
+  NotificationKind,
+  NotificationRecord,
+  NotificationSeverity,
+  RunNotificationData,
+} from './types/notification.js';
+export { PROBLEM_NOTIFICATION_KINDS } from './types/notification.js';
 export {
   LANGUAGE_COLUMN_ALIASES,
   SOURCE_COLUMN_NAMES,
@@ -167,8 +178,21 @@ export {
   detectCsvCollection,
   csvHasKeyAndSourceColumns,
 } from './csv-headers.js';
-export { parseGameCSV, buildCsvColumnMap, findRawNewlineLanguages } from './game-csv.js';
-export type { ParsedGameCSV } from './game-csv.js';
+export {
+  parseGameCSV,
+  buildCsvColumnMap,
+  findRawNewlineLanguages,
+  serializeGameCSV,
+  isRoundTripUnsafe,
+} from './game-csv.js';
+export type { ParsedGameCSV, FormulaGuardMode } from './game-csv.js';
+export {
+  FORMULA_TRIGGER,
+  escapeFormulaGuard,
+  escapeForReimport,
+  hasFormulaGuard,
+  stripFormulaGuard,
+} from './formula-guard.js';
 
 export { PROJECT_ICONS, DEFAULT_PROJECT_ICON } from './types/project.js';
 export type {
@@ -235,7 +259,14 @@ export {
   DEFAULT_ACHIEVEMENT_DESCRIPTION_MAX_BYTES,
 } from './achievement-budget.js';
 export { maskSecret } from './mask.js';
-export { escapeRegExp, buildTermBoundaryRegex, termMatchesText } from './term-match.js';
+export {
+  escapeRegExp,
+  buildTermBoundaryRegex,
+  termBoundaryPattern,
+  buildInflectedTermRegex,
+  glossaryScanText,
+  termMatchesText,
+} from './term-match.js';
 export { debug } from './debug.js';
 export { tokenize, computeSimilarityOrder } from './similarity/index.js';
 export { isComplete, projectTargetLanguages } from './glossary-completeness.js';
@@ -366,6 +397,7 @@ export {
   languageLabel,
   renderTargetLanguagesLine,
   GLOSSARY_SEMANTICS_RULE,
+  NAME_TERM_RULE,
   renderLengthLimitRule,
   effectivePromptOptions,
 } from './ai-sdk-provider/prompt-builder.js';

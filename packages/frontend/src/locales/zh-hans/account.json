@@ -52,10 +52,53 @@
   "notificationsDismiss": "清除",
   "notificationsLoading": "正在加载您的通知…",
   "notificationsEmpty": "您没有任何通知。",
+  "notificationsSidebarDescription": "有关您的运行和项目的最新动态。",
+  "notificationsUnread": "未读",
+  "notificationsDismissItem": "清除：{{title}}",
   "notificationsSeverity": {
     "info": "信息",
     "warning": "警告",
     "critical": "严重"
+  },
+  "notifications": {
+    "genericTitle": "通知",
+    "viewInActivity": "在活动中查看",
+    "openProject": "打开项目",
+    "inProject": "项目：{{project}}",
+    "aCollaborator": "一位协作者",
+    "theProvider": "AI 提供商",
+    "otherIssues_other": "{{cause}}，另有 {{count}} 个问题",
+    "cause": {
+      "noRoute": "没有为它设置翻译模块。",
+      "moduleDisabled": "所需的模块已关闭。",
+      "moduleNotFound": "找不到所需的模块。",
+      "unknown": "原因不明。"
+    },
+    "runStarted": {
+      "title": "{{type}}已开始",
+      "body_other": "待处理 {{count}} 个条目。"
+    },
+    "runFinished": {
+      "title": "{{type}}已完成",
+      "body_other": "已完成 {{count}} 个条目。",
+      "bodyLanguages_other": "已完成 {{count}} 个条目（{{languages}}）。"
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}}已完成，但有问题",
+      "body": "完成 {{completed}} 个，失败 {{failed}} 个——{{cause}}。"
+    },
+    "runFailed": {
+      "title": "{{type}}失败",
+      "body": "运行已停止：{{cause}}。"
+    },
+    "collabDigest": {
+      "title": "协作者动态",
+      "editsIn": "{{language}} {{count}} 个",
+      "edited": "{{name}} 编辑了 {{edits}}。",
+      "translated_other": "{{name}} 翻译了 {{count}} 个条目。",
+      "both_other": "{{name}} 编辑了 {{edits}}，并翻译了 {{count}} 个条目。",
+      "translatedLanguages": "已翻译为 {{languages}}。"
+    }
   },
   "signOut": "退出登录"
 }

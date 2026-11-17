@@ -93,37 +93,37 @@ overrides:
 catalog:
   # Shared tooling
   typescript: 7.0.2
-  prettier: 3.9.10
-  eslint: 10.14.0
+  prettier: 3.10.1
+  eslint: 10.15.0
   # Maintenance scripts (e.g. scripts/update-provider-pricing.ts) — the browser
   # automation used to scrape provider pricing and capability pages.
-  playwright: 1.64.1
+  playwright: 1.65.1
   '@eslint/js': 10.0.1
   globals: 17.14.0
   eslint-config-prettier: 10.1.8
   eslint-plugin-react-hooks: 7.1.1
-  '@typescript-eslint/eslint-plugin': 8.72.1
-  '@typescript-eslint/parser': 8.72.1
+  '@typescript-eslint/eslint-plugin': 8.72.2
+  '@typescript-eslint/parser': 8.72.2
 
   # Module dependencies
-  '@github/copilot-sdk': 1.0.28
+  '@github/copilot-sdk': 1.0.34
   deepl-node: 1.29.0
 
   # AI SDK dependencies
-  ai: 7.0.162
-  '@ai-sdk/google': 4.0.111
-  '@ai-sdk/deepseek': 3.0.79
-  '@ai-sdk/openai': 4.0.108
-  '@ai-sdk/anthropic': 4.0.96
-  '@ai-sdk/openai-compatible': 3.0.84
+  ai: 7.0.173
+  '@ai-sdk/google': 4.0.121
+  '@ai-sdk/deepseek': 3.0.87
+  '@ai-sdk/openai': 4.0.118
+  '@ai-sdk/anthropic': 4.0.105
+  '@ai-sdk/openai-compatible': 3.0.92
 
   # Server runtime
   cors: 2.8.6
-  dotenv: 18.0.9
+  dotenv: 18.0.10
   express: 5.3.0
   helmet: 8.3.0
   multer: 2.5.0
-  papaparse: 5.7.0
+  papaparse: 5.7.1
   zod: 4.6.7
   yauzl: 3.4.0
   yazl: 3.3.1
@@ -141,18 +141,18 @@ catalog:
 
   # Frontend runtime
   '@base-ui/react': 1.9.0
-  '@tanstack/react-virtual': 3.14.25
+  '@tanstack/react-virtual': 3.14.26
   class-variance-authority: 0.7.1
   clsx: 2.1.1
-  lucide-react: 1.67.0
+  lucide-react: 1.73.0
   react: 19.3.1
   react-dom: 19.3.1
-  i18next: 26.7.1
-  react-i18next: 17.1.11
+  i18next: 27.1.3
+  react-i18next: 18.0.2
   react-markdown: 10.1.0
   sonner: 2.0.8
   tailwind-merge: 3.7.0
-  zustand: 5.0.16
+  zustand: 5.1.0
 
   # Frontend dev
   '@axe-core/react': 4.14.0
@@ -162,20 +162,20 @@ catalog:
   '@fontsource/orbitron': 5.3.0
   '@fontsource/press-start-2p': 5.3.0
   '@fontsource/silkscreen': 5.3.0
-  '@tailwindcss/vite': 4.3.4
+  '@tailwindcss/vite': 4.3.5
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
-  '@vitejs/plugin-react': 6.2.1
+  '@vitejs/plugin-react': 6.3.0
   esbuild: 0.28.2
-  tailwindcss: 4.3.4
-  vite: 8.3.5
+  tailwindcss: 4.3.5
+  vite: 8.3.8
 
   # Frontend build tooling — parsers for the strip-comments Vite plugin (guarantee
   # no shipped comments). Real parsers, never regex (// and /* appear in string and
   # regex literals, so a regex stripper would corrupt code).
-  parse5: 8.1.0
+  parse5: 8.1.1
   acorn: 8.19.0
-  postcss: 8.5.32
+  postcss: 8.5.33
 
 # Supply-chain cooldown: refuse dependency versions published fewer than this many
 # minutes ago (1440 = 1 day), which blunts compromised "just-published" package attacks

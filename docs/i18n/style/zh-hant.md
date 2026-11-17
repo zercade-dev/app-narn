@@ -359,7 +359,7 @@ exclusive states of one popover, so they can never be painted together.
   `zh-hans` fails silently.
 - **列 and 欄 are reversed against mainland usage.** Taiwan reads 列 as a *row* and 欄 as a
   *column*; mainland copy uses 行 for a row and 列 for a column. `config:rowsProcessed`
-  counts 列 and `config:unknownHeadersTitle` is 「無法辨識的欄標題」. A converter cannot see
+  counts 列 and `config:unknownHeadersSummary` says 「無法辨識的欄位」. A converter cannot see
   this, and getting it backwards inverts the meaning of every CSV message.
 - **Hong Kong Traditional is a third variety.** It shares the characters but not all the
   vocabulary (網絡 rather than 網路, different loanword transliterations). This file is

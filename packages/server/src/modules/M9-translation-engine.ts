@@ -20,6 +20,7 @@ import {
   type RoutingDecision,
   type ControlledFailureReason,
   controlledFailureHint,
+  type FailureCode,
   FREEWAY_MODULE_ID,
   PSEUDO_MODULE_ID,
   type StringEntry,
@@ -30,6 +31,7 @@ import {
   type TranslationModule,
   type TranslationResult,
   type RunStatus,
+  type LanguageProgress,
   type PendingCorrectionRecord,
   type RunRequest,
   type RunEntryLanguagePair,
@@ -108,7 +110,13 @@ import {
 import { JobQueue, type Admission } from './M9/queue.js';
 import { rateGovernor, type GovernorKey, type RateGovernor } from './M9/rate-governor.js';
 import { awaitAllWithTimeout, SettledTracker } from './M9/run-settled.js';
-import { emitRunProgress, recordRunFailure } from './M9/run-status-helpers.js';
+import {
+  emitRunProgress,
+  initLanguageProgress,
+  recordRunCompleted,
+  recordRunFailure,
+} from './M9/run-status-helpers.js';
+import { classifyFailure } from './M9/failure-code.js';
 import { assertRunCapacity, PROCESS_START_MS, sweepOrphanedRuns } from './M9/run-capacity.js';
 import { PreviewNotPossibleError, StaleTranslationError } from '../types/errors.js';
 import {
@@ -151,7 +159,12 @@ import {
   resolveDispatchModuleId,
   resolveFreewayProbeCredential,
 } from './M32/bucket-source.js';
-import { resolveFreewayDecisions, revalidateGroup, toFreewayJob } from './M32/resolve.js';
+import {
+  badCredentialModule,
+  resolveFreewayDecisions,
+  revalidateGroup,
+  toFreewayJob,
+} from './M32/resolve.js';
 import {
   effectiveRemainingRequests,
   findMinuteStarvedEscalation,
@@ -215,7 +228,7 @@ interface PendingCorrection {
   masked: string;
   plan: ReturnType<typeof maskText>['plan'];
   glossaryById: Map<string, GlossaryTerm>;
-  nonConstantTerms: GlossaryTerm[];
+  referenceTerms: GlossaryTerm[];
   reference?: TranslationJob['reference'];
 }
 
@@ -379,9 +392,27 @@ function tmRejectionReason(lqa: import('@zercade-dev/narn-shared').LQAResult): s
     : 'failed the current quality checks';
 }
 
+/**
+ * The FailureCode for a controlled (pre-dispatch) failure reason. The reasons
+ * are themselves codes, except the Freeway ones: `freeway-no-buckets` (no
+ * provider could serve the pair) is fixed the same way as a missing route, and
+ * `freeway-bad-credentials` (only a provider whose key was rejected could) is
+ * fixed by correcting that key, like any other auth failure.
+ */
+function controlledFailureCode(reason: ControlledFailureReason): FailureCode {
+  if (reason === 'freeway-no-buckets') return 'no-route';
+  if (reason === 'freeway-bad-credentials') return 'auth';
+  return reason;
+}
+
 type GlossaryGroup = {
   constantTerms: GlossaryTerm[];
-  nonConstantTerms: GlossaryTerm[];
+  /**
+   * Every term, sent to the model as glossary reference. A constant term only
+   * survives the prompt's filter where the source spells it differently than
+   * the glossary: its exact spellings are masked before the filter runs.
+   */
+  referenceTerms: GlossaryTerm[];
   glossaryById: Map<string, GlossaryTerm>;
 };
 
@@ -1319,6 +1350,8 @@ export class TranslationEngine {
     ) {
       this.queuedRetryRequests.set(runId, retryRequest);
       source.status = RunStatusCode.Queued;
+      // A fresh attempt: drop the previous stop's cause (see startRun).
+      delete source.stopCause;
       source.queuePosition = this.nextQueuePosition(projectId);
       this.queuedSessions.set(runId, sessionId);
       this.queuedTenants.set(runId, getCurrentTenant());
@@ -2162,6 +2195,19 @@ export class TranslationEngine {
           (pair) => !selected.has(`${pair.entryId}\0${pair.targetLanguage}`),
         );
         status.total -= skipped.length;
+        if (midRun) {
+          // A mid-run re-dispatch keeps the attempt's per-language map (its
+          // parked pairs were already counted in their languages' totals), so
+          // the dropped pairs leave those totals here.
+          for (const pair of skipped) {
+            const progress = status.languageProgress?.[pair.targetLanguage];
+            if (!progress || progress.total === 0) continue;
+            progress.total--;
+            if (progress.completed + progress.failed === progress.total) {
+              this.announceLanguageDone(status, pair.targetLanguage, { ...progress });
+            }
+          }
+        }
       }
       if (startedCancelled) {
         // A cancelled source leaves the accounting SHORT: pairs still queued or
@@ -2179,6 +2225,9 @@ export class TranslationEngine {
       status.status = RunStatusCode.Running;
       delete status.finishedAt;
       delete status.queuePosition;
+      // A fresh attempt: the previous stop's cause (e.g. an auth cancel) no
+      // longer describes this run, however this attempt ends.
+      delete status.stopCause;
       // A run adopted from a PRIOR process generation still carries its
       // pre-restart `startedAt`, which is exactly what `sweepOrphanedRuns` reads
       // as "left behind by a dead process" — a sweep firing during this
@@ -2194,6 +2243,14 @@ export class TranslationEngine {
       status.total = decisions.length;
       status.startedAt = Date.now();
       delete status.queuePosition;
+    }
+    if (!midRun) {
+      // Per-language progress describes THIS attempt: the pairs it dispatches,
+      // plus any corrections a resumed run still owes (they settle within it).
+      status.languageProgress = initLanguageProgress([
+        ...decisions,
+        ...(status.pendingCorrections ?? []),
+      ]);
     }
     this.runs.set(runId, status);
     this.runSessions.set(runId, sessionId);
@@ -2781,11 +2838,14 @@ export class TranslationEngine {
     if (!isRunCancellingAuthError(err)) return false;
     const status = this.runs.get(runId);
     if (status && status.status !== RunStatusCode.Cancelled) {
+      // An auth error can echo the rejected key — sanitize before logging.
       this.logger.error('translation:auth-cancel', {
         runId,
         moduleId,
-        error: err instanceof Error ? err.message : `${err}`,
+        error: sanitizeLogObject({ m: toErrorMessage(err) }).m,
       });
+      // Mark the stop as app-initiated before cancel() persists the status.
+      status.stopCause = 'auth';
       await this.cancel(runId);
     }
     return true;
@@ -3760,7 +3820,7 @@ export class TranslationEngine {
     void this.maybeStartNextQueued(projectId).catch((err) => {
       this.logger.error('translation:queue-start-failed', {
         projectId,
-        error: err instanceof Error ? err.message : `${err}`,
+        error: sanitizeLogObject({ m: toErrorMessage(err) }).m,
       });
     });
   }
@@ -3811,7 +3871,7 @@ export class TranslationEngine {
       this.logger.error('translation:queue-start-failed', {
         runId: next.runId,
         projectId,
-        error: err instanceof Error ? err.message : `${err}`,
+        error: sanitizeLogObject({ m: toErrorMessage(err) }).m,
       });
       next.status = RunStatusCode.Failed;
       next.finishedAt = Date.now();
@@ -4040,7 +4100,7 @@ export class TranslationEngine {
       );
     }
     if (resolution.blocked.length > 0) {
-      this.recordFreewayBlocked(runId, status, resolution.blocked);
+      this.recordFreewayBlocked(runId, status, resolution.blocked, buckets);
     }
     if (resolution.deferred) {
       this.deferPairsForQuota(
@@ -4166,25 +4226,41 @@ export class TranslationEngine {
    * Record (entry, language) pairs Freeway can never serve as controlled
    * failures — same accounting and aggregated logging as the pre-dispatch
    * reasons, so the UI's per-entry error list and fix hint stay complete.
+   *
+   * `buckets` are the views the pairs were found blocked against. When one of
+   * them would take the language but for its rejected key, the pairs fail as
+   * `freeway-bad-credentials` (code `auth`, naming that provider) instead of
+   * `freeway-no-buckets`: the fix is the key, not switching a provider on.
    */
   private recordFreewayBlocked(
     runId: string,
     status: RunStatus,
     pairs: RunEntryLanguagePair[],
+    buckets: readonly BucketView[] | undefined,
   ): void {
     if (pairs.length === 0) return;
     const groups = new Map<string, ControlledFailureGroup>();
     for (const pair of pairs) {
-      this.recordFailure(status, pair.entryId, pair.targetLanguage, 'freeway-no-buckets');
+      const badModule = buckets ? badCredentialModule(buckets, pair.targetLanguage) : undefined;
+      const reason: ControlledFailureReason = badModule
+        ? 'freeway-bad-credentials'
+        : 'freeway-no-buckets';
+      this.recordFailure(
+        status,
+        pair.entryId,
+        pair.targetLanguage,
+        reason,
+        controlledFailureCode(reason),
+      );
       const group = groups.get(pair.targetLanguage);
       if (group) {
         group.count++;
         group.entryIds.push(pair.entryId);
       } else {
         groups.set(pair.targetLanguage, {
-          reason: 'freeway-no-buckets',
+          reason,
           targetLanguage: pair.targetLanguage,
-          moduleId: FREEWAY_MODULE_ID,
+          moduleId: badModule ?? FREEWAY_MODULE_ID,
           count: 1,
           entryIds: [pair.entryId],
         });
@@ -5674,7 +5750,7 @@ export class TranslationEngine {
     let freewayDeps: BucketSourceDeps | undefined;
 
     // Per-call record of which of THIS batch's decisions have already been
-    // counted (recordFailure or status.completed++). The run-global
+    // counted (recordFailure or countCompleted). The run-global
     // completed/failed counters are shared across concurrently-running sibling
     // batches/singles of the same run, so the outer catch below must fail only
     // the decisions this call left unsettled — never a "total − completed −
@@ -5713,13 +5789,14 @@ export class TranslationEngine {
       // non-batch-capable modules — flows through this one dispatch path.
       if (routedModuleId === null) {
         for (const d of decisions) {
-          this.recordFailure(status, d.entry.id, d.targetLanguage, 'no-route');
+          this.recordFailure(status, d.entry.id, d.targetLanguage, 'no-route', 'no-route');
           settled.add(settleKey(d));
           this.logger.warn('translation:failed', {
             runId,
             entryId: d.entry.id,
             targetLanguage: d.targetLanguage,
             error: 'no-route',
+            code: 'no-route',
             context: d.entry.context ?? null,
           });
         }
@@ -5832,9 +5909,13 @@ export class TranslationEngine {
           }
           return;
         }
+        // The views a 'blocked' verdict below was reached against, so the
+        // failure can say whether a rejected key is why.
+        let blockedViews: BucketView[] | undefined;
         if (revalidated.kind === 'defer' || revalidated.kind === 'blocked') {
           const now = Date.now();
           const views = await loadBucketViews(now, freewayDeps);
+          blockedViews = views;
           const minBand = freewayMinBand(status.request);
           const resolution = resolveFreewayDecisions(decisions, views, now, {
             ...(minBand !== undefined ? { minBand } : {}),
@@ -5921,6 +6002,7 @@ export class TranslationEngine {
             runId,
             status,
             decisions.map((d) => ({ entryId: d.entry.id, targetLanguage: d.targetLanguage })),
+            blockedViews,
           );
           for (const d of decisions) settled.add(settleKey(d));
           refundUnusedAdmission();
@@ -5936,7 +6018,13 @@ export class TranslationEngine {
 
       if (!effective.enabled || effective.active === false) {
         for (const d of decisions) {
-          this.recordFailure(status, d.entry.id, d.targetLanguage, 'module-disabled');
+          this.recordFailure(
+            status,
+            d.entry.id,
+            d.targetLanguage,
+            'module-disabled',
+            'module-disabled',
+          );
           settled.add(settleKey(d));
           metricsCollector.recordFailure(moduleId, metricsModel);
           this.logger.error('translation:failed', {
@@ -5944,6 +6032,7 @@ export class TranslationEngine {
             entryId: d.entry.id,
             targetLanguage: d.targetLanguage,
             error: 'module-disabled',
+            code: 'module-disabled',
             moduleId,
             context: d.entry.context ?? null,
           });
@@ -6029,7 +6118,13 @@ export class TranslationEngine {
       };
       if (!routedModule) {
         for (const d of decisions) {
-          this.recordFailure(status, d.entry.id, d.targetLanguage, 'module-not-found');
+          this.recordFailure(
+            status,
+            d.entry.id,
+            d.targetLanguage,
+            'module-not-found',
+            'module-not-found',
+          );
           settled.add(settleKey(d));
           metricsCollector.recordFailure(moduleId, metricsModel);
           this.logger.error('translation:failed', {
@@ -6037,6 +6132,7 @@ export class TranslationEngine {
             entryId: d.entry.id,
             targetLanguage: d.targetLanguage,
             error: 'module-not-found',
+            code: 'module-not-found',
             moduleId,
             context: d.entry.context ?? null,
           });
@@ -6083,7 +6179,7 @@ export class TranslationEngine {
         masked: string;
         plan: ReturnType<typeof maskText>['plan'];
         trivial: boolean;
-        nonConstantTerms: GlossaryTerm[];
+        referenceTerms: GlossaryTerm[];
         glossaryById: Map<string, GlossaryTerm>;
         tmFingerprint: TmFingerprint;
         /** "Similar prior translation" hints appended to the job context. */
@@ -6104,7 +6200,7 @@ export class TranslationEngine {
           masked,
           plan,
           trivial,
-          nonConstantTerms: glossary?.nonConstantTerms ?? [],
+          referenceTerms: glossary?.referenceTerms ?? [],
           glossaryById: glossary?.glossaryById ?? new Map<string, GlossaryTerm>(),
           tmFingerprint: buildTmFingerprint(d.entry, d.promptOptions),
           ...(reference ? { reference } : {}),
@@ -6144,7 +6240,7 @@ export class TranslationEngine {
           persistDecision,
           runId,
         );
-        await gateBatch(
+        const constantVerdict = await gateBatch(
           e.decision.entry,
           result,
           projectId,
@@ -6152,7 +6248,7 @@ export class TranslationEngine {
           [],
           project,
         );
-        status.completed++;
+        this.countCompleted(status, e.decision.targetLanguage, constantVerdict?.passed === false);
         settled.add(settleKey(e.decision));
         this.logger.info('translation:done', {
           runId,
@@ -6228,7 +6324,8 @@ export class TranslationEngine {
               },
               runId,
             );
-            status.completed++;
+            // Persisted only when the gate passed (or had no verdict).
+            this.countCompleted(status, e.decision.targetLanguage, false);
             settled.add(settleKey(e.decision));
             this.logger.info('translation:done', {
               runId,
@@ -6299,7 +6396,7 @@ export class TranslationEngine {
           sourceText: entry.masked,
           sourceLanguage,
           targetLanguage: entry.decision.targetLanguage,
-          glossary: entry.nonConstantTerms,
+          glossary: entry.referenceTerms,
           glossaryId: entry.decision.entry.assignedGlossaryIds?.[0] ?? 'project',
           promptOptions: achievement
             ? {
@@ -6411,17 +6508,23 @@ export class TranslationEngine {
           // provider auth failure quoting the key) — sanitize before it's
           // recorded/logged (pattern-strip + live-vault value scrub), same as
           // the batch-uncaught catch below.
-          const errMsg = moduleResult?.error
-            ? sanitizeLogObject({ m: toErrorMessage(moduleResult.error) }).m
+          const rawErr = moduleResult?.error
+            ? moduleResult.error
             : emptyOutput
               ? 'empty translation'
               : 'empty result';
+          // Classify from the raw value — sanitizing can mask the signal.
+          const code = classifyFailure(rawErr);
+          const errMsg = moduleResult?.error
+            ? sanitizeLogObject({ m: toErrorMessage(moduleResult.error) }).m
+            : rawErr;
           this.logger.warn('translation:failed', {
             runId,
             entryId: e.decision.entry.id,
             targetLanguage: e.decision.targetLanguage,
             moduleId,
             error: errMsg,
+            code,
             context: e.decision.entry.context ?? null,
           });
           if (moduleResult?.error && countsAsProviderFailure(moduleResult.error)) {
@@ -6433,7 +6536,7 @@ export class TranslationEngine {
               1,
             );
           }
-          this.recordFailure(status, e.decision.entry.id, e.decision.targetLanguage, errMsg);
+          this.recordFailure(status, e.decision.entry.id, e.decision.targetLanguage, errMsg, code);
           settled.add(settleKey(e.decision));
           metricsCollector.recordFailure(moduleId, metricsModel);
           this.emitProgress(runId, status);
@@ -6573,7 +6676,8 @@ export class TranslationEngine {
               : {}),
           });
         } else {
-          status.completed++;
+          // No correction possible: a failed verdict stays for review.
+          this.countCompleted(status, e.decision.targetLanguage, batchLqaResult?.passed === false);
           metricsCollector.recordSuccess(moduleId, metricsModel);
           this.logger.info('translation:done', {
             runId,
@@ -6888,6 +6992,8 @@ export class TranslationEngine {
               deferredIndices.add(index);
             }
             let remainingPairs = pairs;
+            // What a 'blocked' outcome is recorded against (see recordFreewayBlocked).
+            let blockedViews: BucketView[] | undefined;
             if (
               remainingDecisions.length > 0 &&
               (outcome.kind === 'blocked' ||
@@ -6895,6 +7001,7 @@ export class TranslationEngine {
             ) {
               const now = Date.now();
               const views = await loadBucketViews(now, freewayDeps);
+              blockedViews = views;
               const minBand = freewayMinBand(status.request);
               const resolution = resolveFreewayDecisions(remainingDecisions, views, now, {
                 ...(minBand !== undefined ? { minBand } : {}),
@@ -6929,7 +7036,7 @@ export class TranslationEngine {
               );
               this.emitProgress(runId, status);
             } else {
-              this.recordFreewayBlocked(runId, status, remainingPairs);
+              this.recordFreewayBlocked(runId, status, remainingPairs, blockedViews);
             }
             if (remainingPairs.length === 0) this.emitProgress(runId, status);
             continue;
@@ -7003,6 +7110,7 @@ export class TranslationEngine {
           // Sanitize before recording/logging — a provider error can echo a raw
           // credential (pattern-strip + live-vault value scrub), same rationale
           // as the batch-uncaught catch below.
+          const code = classifyFailure(batchError);
           const message = sanitizeLogObject({ m: toErrorMessage(batchError) }).m;
           this.logger.warn('translation:batch-failed', {
             runId,
@@ -7010,6 +7118,7 @@ export class TranslationEngine {
             batchSize: batchJobs.length,
             targetLanguages: Array.from(new Set(batchJobs.map(({ job }) => job.targetLanguage))),
             error: message,
+            code,
             ...(batchError instanceof Error ? { errorName: batchError.name } : {}),
           });
           for (const { index } of batchJobs) {
@@ -7025,10 +7134,17 @@ export class TranslationEngine {
               targetLanguage: e.decision.targetLanguage,
               moduleId,
               error: message,
+              code,
               batchFailure: true,
               context: e.decision.entry.context ?? null,
             });
-            this.recordFailure(status, e.decision.entry.id, e.decision.targetLanguage, message);
+            this.recordFailure(
+              status,
+              e.decision.entry.id,
+              e.decision.targetLanguage,
+              message,
+              code,
+            );
             settled.add(settleKey(e.decision));
             metricsCollector.recordFailure(moduleId, metricsModel);
             this.emitProgress(runId, status);
@@ -7079,12 +7195,13 @@ export class TranslationEngine {
       const stack = err instanceof Error ? err.stack : undefined;
       for (const d of decisions) {
         if (settled.has(settleKey(d))) continue;
-        this.recordFailure(status, d.entry.id, d.targetLanguage, message);
+        this.recordFailure(status, d.entry.id, d.targetLanguage, message, 'unknown');
         settled.add(settleKey(d));
       }
       this.logger.error('translation:batch-uncaught', {
         runId,
         error: message,
+        code: 'unknown',
         ...(stack ? { stack } : {}),
       });
       this.emitProgress(runId, status);
@@ -7141,6 +7258,12 @@ export class TranslationEngine {
     record: PendingCorrectionRecord,
     outcome: 'corrected' | 'kept' | 'stale',
     metricsModel: string | null,
+    /**
+     * The pair's final verdict failed: true for `'kept'` (the first pass stays),
+     * the post-correction gate's verdict for `'corrected'`, false for `'stale'`
+     * (the text was changed by someone else since).
+     */
+    needsReview: boolean,
     glossaryId?: string,
   ): void {
     const list = status.pendingCorrections;
@@ -7153,7 +7276,7 @@ export class TranslationEngine {
     this.correctionListDirty.add(status.runId);
     list.splice(at, 1);
     if (list.length === 0) delete status.pendingCorrections;
-    status.completed++;
+    this.countCompleted(status, record.targetLanguage, needsReview);
     metricsCollector.recordSuccess(record.moduleId, metricsModel);
     if (status.correctionPhase) {
       status.correctionPhase.done = Math.min(
@@ -7218,7 +7341,7 @@ export class TranslationEngine {
       // Whatever could not be planned keeps its first-pass text — unless this
       // pass was superseded (cancel + retry), whose records are not ours.
       if (this.correctionRuns.get(runId) === current) {
-        for (const record of records) this.resolveCorrection(status, record, 'kept', null);
+        for (const record of records) this.resolveCorrection(status, record, 'kept', null, true);
       }
     } finally {
       current.outstanding--;
@@ -7238,7 +7361,7 @@ export class TranslationEngine {
     if (this.correctionHalted(status, this.controllers.get(runId)?.signal)) return;
     // Nothing can be left pending without a task: settle strays so the run ends.
     for (const record of [...(status.pendingCorrections ?? [])]) {
-      this.resolveCorrection(status, record, 'kept', null);
+      this.resolveCorrection(status, record, 'kept', null, true);
     }
     delete status.correctionPhase;
     await this.finalizeTranslationTerminal(status, projectId, runId);
@@ -7321,7 +7444,7 @@ export class TranslationEngine {
           targetLanguage: record.targetLanguage,
           reason: entry ? 'changed-since-first-pass' : 'entry-removed',
         });
-        this.resolveCorrection(status, record, 'stale', null);
+        this.resolveCorrection(status, record, 'stale', null, false);
         continue;
       }
       const glossaryKey = this.glossaryEntryKey(record.targetLanguage, entry);
@@ -7331,7 +7454,9 @@ export class TranslationEngine {
         const constantTerms = rawTerms.filter((t) => t.constant);
         glossary = {
           constantTerms,
-          nonConstantTerms: rawTerms.filter((t) => !t.constant),
+          // Every term: a constant one only reaches the model where the source
+          // spells it differently than the glossary (exact spellings are masked).
+          referenceTerms: rawTerms,
           glossaryById: new Map(constantTerms.map((t) => [t.id, t])),
         };
         glossaryCache.set(glossaryKey, glossary);
@@ -7358,7 +7483,7 @@ export class TranslationEngine {
         masked,
         plan,
         glossaryById: glossary.glossaryById,
-        nonConstantTerms: glossary.nonConstantTerms,
+        referenceTerms: glossary.referenceTerms,
         ...(reference ? { reference } : {}),
       });
     }
@@ -7386,7 +7511,7 @@ export class TranslationEngine {
           strings: group.length,
           reason,
         });
-        for (const item of group) this.resolveCorrection(status, item.record, 'kept', null);
+        for (const item of group) this.resolveCorrection(status, item.record, 'kept', null, true);
       };
       const effective = resolveEffectiveModuleConfig(
         origin.moduleId,
@@ -7649,7 +7774,7 @@ export class TranslationEngine {
           sourceText: item.masked,
           sourceLanguage: args.sourceLanguage,
           targetLanguage,
-          glossary: item.nonConstantTerms,
+          glossary: item.referenceTerms,
           glossaryId: entry.assignedGlossaryIds?.[0] ?? 'project',
           promptOptions: achievement
             ? { ...effectivePromptOptions(entry, decision.promptOptions), achievement }
@@ -7899,7 +8024,7 @@ export class TranslationEngine {
       ) {
         // Anything this chunk did not settle keeps its first-pass text.
         for (const record of unresolved()) {
-          this.resolveCorrection(status, record, 'kept', args.metricsModel);
+          this.resolveCorrection(status, record, 'kept', args.metricsModel, true);
         }
       }
       state.outstanding--;
@@ -7928,7 +8053,7 @@ export class TranslationEngine {
     const { entry, targetLanguage } = decision;
     try {
       if (!corrected || corrected.error || !corrected.translatedText?.trim()) {
-        this.resolveCorrection(status, item.record, 'kept', metricsModel);
+        this.resolveCorrection(status, item.record, 'kept', metricsModel, true);
         return;
       }
       const diagnostics = verifyMaskedTranslation(corrected.translatedText, item.plan);
@@ -7960,17 +8085,25 @@ export class TranslationEngine {
             targetLanguage,
             reason: 'changed-since-first-pass',
           });
-          this.resolveCorrection(status, item.record, 'stale', metricsModel);
+          this.resolveCorrection(status, item.record, 'stale', metricsModel, false);
           return;
         }
         throw err;
       }
-      await this.lqaGate(entry, result, projectId, targetLanguage, maskIssues, project);
+      const correctedVerdict = await this.lqaGate(
+        entry,
+        result,
+        projectId,
+        targetLanguage,
+        maskIssues,
+        project,
+      );
       this.resolveCorrection(
         status,
         item.record,
         'corrected',
         metricsModel,
+        correctedVerdict?.passed === false,
         corrected.usedGlossaryId,
       );
     } catch (err) {
@@ -7981,7 +8114,7 @@ export class TranslationEngine {
         targetLanguage,
         error: toErrorMessage(err),
       });
-      this.resolveCorrection(status, item.record, 'kept', metricsModel);
+      this.resolveCorrection(status, item.record, 'kept', metricsModel, true);
     }
   }
 
@@ -8499,8 +8632,43 @@ export class TranslationEngine {
     entryId: string,
     targetLanguage: string,
     message: string,
+    code?: FailureCode,
   ): void {
-    recordRunFailure(status, { entryId, targetLanguage }, message);
+    this.announceLanguageDone(
+      status,
+      targetLanguage,
+      recordRunFailure(status, { entryId, targetLanguage }, message, code),
+    );
+  }
+
+  /** Count one pair completed, announcing its language if that settled it. */
+  private countCompleted(status: RunStatus, targetLanguage: string, needsReview: boolean): void {
+    this.announceLanguageDone(
+      status,
+      targetLanguage,
+      recordRunCompleted(status, targetLanguage, { needsReview }),
+    );
+  }
+
+  /**
+   * Log `translation:language-done` for a language whose last pair of this
+   * attempt just settled. The helpers return progress only on that one bump,
+   * so each language is announced once per attempt.
+   */
+  private announceLanguageDone(
+    status: RunStatus,
+    targetLanguage: string,
+    progress: LanguageProgress | null,
+  ): void {
+    if (!progress) return;
+    this.logger.info('translation:language-done', {
+      runId: status.runId,
+      targetLanguage,
+      total: progress.total,
+      completed: progress.completed,
+      failed: progress.failed,
+      needsReview: progress.needsReview,
+    });
   }
 
   /**
@@ -8573,7 +8741,13 @@ export class TranslationEngine {
         continue;
       }
       const { reason, metricsModel } = classified;
-      this.recordFailure(status, decision.entry.id, decision.targetLanguage, reason);
+      this.recordFailure(
+        status,
+        decision.entry.id,
+        decision.targetLanguage,
+        reason,
+        controlledFailureCode(reason),
+      );
       // Mirror the per-job paths: a module-attributable failure (disabled /
       // not-found) bumps that module's health metric; `no-route` has no module
       // to attribute, so it records none.
@@ -8616,6 +8790,7 @@ export class TranslationEngine {
         runId,
         targetLanguage: group.targetLanguage,
         error: group.reason,
+        code: controlledFailureCode(group.reason),
         count: group.count,
         // The per-entry ids behind this aggregate, so the UI can rebuild the
         // per-entry recovery list and Retry-all from the (collapsed) log stream.
@@ -8676,10 +8851,11 @@ export class TranslationEngine {
       if (!glossaryCache.has(key)) {
         const rawTerms = await this.glossaryProvider(projectId, d.targetLanguage, d.entry);
         const constantTerms = rawTerms.filter((t) => t.constant);
-        const nonConstantTerms = rawTerms.filter((t) => !t.constant);
         glossaryCache.set(key, {
           constantTerms,
-          nonConstantTerms,
+          // Every term: a constant one only reaches the model where the source
+          // spells it differently than the glossary (exact spellings are masked).
+          referenceTerms: rawTerms,
           glossaryById: new Map(constantTerms.map((t) => [t.id, t])),
         });
       }
@@ -8712,12 +8888,11 @@ export class TranslationEngine {
 
       if (trivialHit === null && glossaryForTarget) {
         const trimmed = d.entry.sourceText.trim();
-        const allTerms = [
-          ...glossaryForTarget.constantTerms,
-          ...glossaryForTarget.nonConstantTerms,
-        ];
-        const matchingTerm = allTerms.find(
-          (t) => t.source.trim().toLowerCase() === trimmed.toLowerCase(),
+        // A constant term counts only in its exact spelling; others ignore case.
+        const matchingTerm = glossaryForTarget.referenceTerms.find((t) =>
+          t.constant
+            ? t.source.trim() === trimmed
+            : t.source.trim().toLowerCase() === trimmed.toLowerCase(),
         );
         if (matchingTerm) {
           const targetTranslation = matchingTerm.translations[d.targetLanguage];
@@ -8770,8 +8945,8 @@ export class TranslationEngine {
       persistDecision,
       status.runId,
     );
-    await this.lqaGate(d.entry, result, projectId, d.targetLanguage, [], project);
-    status.completed++;
+    const verdict = await this.lqaGate(d.entry, result, projectId, d.targetLanguage, [], project);
+    this.countCompleted(status, d.targetLanguage, verdict?.passed === false);
     this.logger.info('translation:done', {
       runId: status.runId,
       entryId: d.entry.id,

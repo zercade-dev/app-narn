@@ -52,10 +52,53 @@
   "notificationsDismiss": "Hapus",
   "notificationsLoading": "Memuat notifikasi Anda…",
   "notificationsEmpty": "Anda tidak punya notifikasi.",
+  "notificationsSidebarDescription": "Kabar tentang putaran dan proyek Anda.",
+  "notificationsUnread": "Belum dibaca",
+  "notificationsDismissItem": "Hapus: {{title}}",
   "notificationsSeverity": {
     "info": "Info",
     "warning": "Peringatan",
     "critical": "Kritis"
+  },
+  "notifications": {
+    "genericTitle": "Notifikasi",
+    "viewInActivity": "Lihat di Aktivitas",
+    "openProject": "Buka proyek",
+    "inProject": "Proyek: {{project}}",
+    "aCollaborator": "Seorang kolaborator",
+    "theProvider": "penyedia AI",
+    "otherIssues_other": "{{cause}} dan {{count}} masalah lainnya",
+    "cause": {
+      "noRoute": "belum ada modul terjemahan yang diatur untuknya.",
+      "moduleDisabled": "modul yang dibutuhkan sedang nonaktif.",
+      "moduleNotFound": "modul yang dibutuhkan tidak ditemukan.",
+      "unknown": "penyebabnya tidak diketahui."
+    },
+    "runStarted": {
+      "title": "{{type}} dimulai",
+      "body_other": "{{count}} entri untuk diproses."
+    },
+    "runFinished": {
+      "title": "{{type}} selesai",
+      "body_other": "{{count}} entri selesai.",
+      "bodyLanguages_other": "{{count}} entri selesai dalam {{languages}}."
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}} selesai dengan masalah",
+      "body": "{{completed}} selesai, {{failed}} gagal — {{cause}}."
+    },
+    "runFailed": {
+      "title": "{{type}} gagal",
+      "body": "Proses berhenti: {{cause}}."
+    },
+    "collabDigest": {
+      "title": "Aktivitas kolaborator",
+      "editsIn": "{{count}} di {{language}}",
+      "edited": "{{name}} mengedit {{edits}}.",
+      "translated_other": "{{name}} menerjemahkan {{count}} entri.",
+      "both_other": "{{name}} mengedit {{edits}} dan menerjemahkan {{count}} entri.",
+      "translatedLanguages": "Diterjemahkan ke {{languages}}."
+    }
   },
   "signOut": "Keluar"
 }

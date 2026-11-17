@@ -8,6 +8,12 @@
   "switchToDark": "Zum dunklen Modus wechseln",
   "languageTitle": "Sprache",
   "languageDescription": "Sprache der Benutzeroberfläche.",
+  "uiModeLabel": "Oberflächenmodus",
+  "uiModeSimple": "Einfach",
+  "uiModeAdvanced": "Erweitert",
+  "uiModeDescription": "Einfach blendet den Großteil der Navigation aus, damit du dich aufs Übersetzen konzentrieren kannst. Erweitert zeigt alles.",
+  "tourOffersLabel": "Geführte Touren anbieten",
+  "tourOffersDescription": "Beim ersten Öffnen eines Bereichs der App eine kurze Einführung anzeigen.",
   "preview": "Vorschau",
   "previewHint": "Beispiel-Steuerelemente im ausgewählten Theme.",
   "previewSamples": {

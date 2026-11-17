@@ -15,12 +15,18 @@ menerjemahkan.
   nonaktif diabaikan saat impor dan penerjemahan.
 * Tambahkan istilah dengan **sumber**, **terjemahan per bahasa**, dan
   **catatan** opsional.
-* Tandai sebuah istilah **konstan** jika tidak boleh pernah diterjemahkan
-  (nama merek, kode). Istilah konstan disamarkan saat penerjemahan
-  sehingga lolos tanpa berubah.
+* Tandai sebuah istilah **konstan** jika harus keluar persis seperti yang tertulis di glosarium, seperti nama karakter atau merek — lihat *Istilah konstan* di bawah.
+* Glosarium punya dua tab: **Istilah** menampilkan istilahnya, dan **Kecocokan** menampilkan entri yang berisi istilah itu, tempat Anda bisa menugaskan glosarium ke entri atau melepasnya.
 
 Beberapa glosarium bersifat **hanya-baca** (dikelola secara global) dan
 menyumbangkan istilah tanpa bisa disunting di sini.
+
+## Istilah konstan
+
+* Istilah konstan **tidak pernah dikirim ke mesin terjemahan**. NARN menggantinya dengan penanda sebelum menerjemahkan, lalu memasukkan terjemahan glosarium di tempatnya, jadi nama karakter seperti *Diluc* selalu keluar persis seperti yang tertulis di glosarium.
+* **Huruf besar dan kecil berpengaruh.** Hanya teks yang ditulis persis seperti istilahnya yang dilindungi: *Venti* (karakter) dilindungi, *a venti latte* tidak. Ejaan lain dikirim ke mesin sebagai petunjuk glosarium biasa yang ditandai sebagai nama, agar mesin bisa membedakan nama dari kata sehari-hari.
+* **Mesin tidak bisa mengubah kata itu.** Karena tidak pernah melihat istilahnya, mesin tidak bisa mengubah bentuknya atau menyesuaikan kata lain dengannya: dalam bahasa seperti Rusia, Korea, atau Turki, nama konstan selalu muncul dalam bentuk dasarnya. Gunakan konstan untuk nama dan kode yang harus tetap.
+* Biarkan nama yang juga kata sehari-hari sebagai istilah biasa, karena judul dan label sering menulisnya dengan huruf besar (*Gaming Settings*). Di glosarium bawaan, nama karakter, nama negara, dan nama produk Genshin Impact, Miliastra Sandbox dan Miliastra Wonderland bersifat konstan, kecuali Gaming, Amber, Razor, Sucrose, Prune, Traveler, dan Wanderer.
 
 ## Impor dan ekspor
 

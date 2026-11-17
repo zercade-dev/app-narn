@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Route } from 'lucide-react';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
 import { useVaultStore } from '../../stores/vault-store.js';
 import { useViewStore } from '../../stores/view-store.js';
@@ -8,7 +8,10 @@ import { GUIDE_GROUPS, getGuideContent } from './guides-registry.js';
 import { renderMarkdown } from './markdown.js';
 import { stripLocalOnly } from './strip-local-only.js';
 import { Button } from '@/components/ui/button';
+import { GuideToursList } from './GuideToursList.js';
+import { TOURS_SLUG } from '../../lib/guide-slugs.js';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 export function GuideView() {
   const { t } = useTranslation('strings');
@@ -26,7 +29,11 @@ export function GuideView() {
   }, [cloudManaged]);
 
   const visibleSlugs = useMemo(
-    () => new Set(visibleGroups.flatMap((group) => group.topics.map((topic) => topic.slug))),
+    () =>
+      new Set([
+        TOURS_SLUG,
+        ...visibleGroups.flatMap((group) => group.topics.map((topic) => topic.slug)),
+      ]),
     [visibleGroups],
   );
   const firstVisibleSlug = visibleGroups[0]?.topics[0]?.slug;
@@ -87,6 +94,8 @@ export function GuideView() {
   useEffect(() => {
     let ignore = false;
     const key = `${language}::${activeSlug}`;
+    // The tours list is not a markdown topic: nothing to load.
+    if (activeSlug === TOURS_SLUG) return;
     getGuideContent(activeSlug, language).then(
       (md) => {
         if (!ignore) setLoadedGuide({ key, status: 'ready', content: md });
@@ -123,6 +132,27 @@ export function GuideView() {
     <div className="flex h-full" data-testid="guide-view">
       {/* Left navigation */}
       <aside className="w-56 shrink-0 border-r overflow-y-auto p-3 space-y-4">
+        {/* One entry for every guided tour; the tours themselves list in the content. */}
+        <div>
+          {/* Tinted with the accent colour, so the tours stand out from the reading topics. */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={cn(
+              'w-full justify-start text-sm font-medium',
+              activeSlug === TOURS_SLUG
+                ? 'bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground'
+                : 'bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary',
+            )}
+            onClick={() => setActiveSlug(TOURS_SLUG)}
+            data-testid="guide-topic-tours"
+            data-tour="guide-topic-tours"
+          >
+            <Route className="size-4 shrink-0" aria-hidden />
+            {t('guide-tour:guideTours.title')}
+          </Button>
+          <Separator className="mt-3" />
+        </div>
         {visibleGroups.map((group) => (
           <div key={group.titleKey}>
             <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -150,7 +180,9 @@ export function GuideView() {
       {/* Content area — capped to a comfortable reading measure (~70ch). */}
       <main className="flex-1 overflow-auto px-6 py-8">
         <div className="mx-auto max-w-[72ch]">
-          {hasLoadError ? (
+          {activeSlug === TOURS_SLUG ? (
+            <GuideToursList />
+          ) : hasLoadError ? (
             <div className="space-y-3 py-3" data-testid="guide-content-error">
               <p className="text-sm text-destructive">{t('account:errorGeneric')}</p>
               <Button

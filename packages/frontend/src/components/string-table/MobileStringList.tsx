@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useProjectStore } from '../../stores/project-store.js';
 import { useStringStore } from '../../stores/string-store.js';
 import { filterEntries } from '../../lib/filter-entries.js';
+import { useEffectiveFilters } from '../../lib/mode-gating.js';
 import { Input } from '../ui/input';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
@@ -28,7 +29,8 @@ export function MobileStringList() {
   const activeProject = useProjectStore((s) => s.projects.find((p) => p.id === s.activeProjectId));
   const fetchEntries = useStringStore((s) => s.fetchEntries);
   const allEntries = useStringStore((s) => s.entries);
-  const filters = useStringStore((s) => s.filters);
+  const storedFilters = useStringStore((s) => s.filters);
+  const filters = useEffectiveFilters(storedFilters);
   const setFilter = useStringStore((s) => s.setFilter);
   const loading = useStringStore((s) => s.loading);
   const [page, setPage] = useState(1);

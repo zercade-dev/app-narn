@@ -8,6 +8,12 @@
   "switchToDark": "Switch to dark mode",
   "languageTitle": "Language",
   "languageDescription": "Language of the user interface.",
+  "uiModeLabel": "Interface mode",
+  "uiModeSimple": "Simple",
+  "uiModeAdvanced": "Advanced",
+  "uiModeDescription": "Simple hides most navigation so you can focus on translating. Advanced shows everything.",
+  "tourOffersLabel": "Offer guided tours",
+  "tourOffersDescription": "Show a short walkthrough the first time you open a part of the app.",
   "preview": "Preview",
   "previewHint": "Sample controls rendered with the selected theme.",
   "previewSamples": {

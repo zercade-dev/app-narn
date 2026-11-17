@@ -49,6 +49,7 @@ import {
   needsMaskRule,
   languageLabel,
   GLOSSARY_SEMANTICS_RULE,
+  NAME_TERM_RULE,
   renderGlossary,
   renderContext,
   needsEscapeRule,
@@ -170,6 +171,8 @@ export function buildPrompt(
   if (needsMaskRule([job])) systemParts.push(MASK_TOKEN_RULE);
   if (glossaryBlock) systemParts.push(glossaryBlock);
   if (glossaryBlock) systemParts.push(GLOSSARY_SEMANTICS_RULE);
+  // Constant terms render with "name":true (see renderGlossary); explain the mark.
+  if (glossaryBlock && matchedGlossary.some((t) => t.constant)) systemParts.push(NAME_TERM_RULE);
   if (contextBlock) systemParts.push(contextBlock);
   if (contextBlock) systemParts.push(COPILOT_CONTEXT_RULE);
   if (job.reference) systemParts.push(REFERENCE_CONTEXT_RULE);

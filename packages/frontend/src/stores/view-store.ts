@@ -84,6 +84,11 @@ interface ViewStore {
    */
   suggestionRunId: string | null;
   /**
+   * Run id to focus in the Activity tab, set by `openRun` (a notification's
+   * "View in Activity"). Cleared by the tab once consumed.
+   */
+  pendingRunId: string | null;
+  /**
    * Pending entry-id scope for a category-generation run requested from
    * elsewhere (the String Table's "Generate Categories from Selection" bulk
    * action). Set together with a navigation to the Category tab by
@@ -115,6 +120,10 @@ interface ViewStore {
    * the Activity tab to deep-link into an AI-review run.
    */
   openReview: (sub: ReviewSubTab, runId?: string) => void;
+  /** Opens the Activity tab focused on `runId`. */
+  openRun: (runId: string) => void;
+  /** Clears the pending run id (call after consuming it). */
+  clearPendingRunId: () => void;
   /** Clears the focused review run id (call after consuming it). */
   clearReviewRunId: () => void;
   /**
@@ -147,6 +156,7 @@ export const useViewStore = create<ViewStore>()((set) => ({
   activeTab: 'config',
   reviewRunId: null,
   suggestionRunId: null,
+  pendingRunId: null,
   pendingCategoryGenScope: null,
   pendingGuideSlug: null,
   setView: (view) => set({ view, pendingGuideSlug: null }),
@@ -154,6 +164,8 @@ export const useViewStore = create<ViewStore>()((set) => ({
   openReview: (sub, runId) =>
     set({ activeTab: REVIEW_TAB[sub], view: 'project', reviewRunId: runId ?? null }),
   clearReviewRunId: () => set({ reviewRunId: null }),
+  openRun: (runId) => set({ activeTab: 'runs', view: 'project', pendingRunId: runId }),
+  clearPendingRunId: () => set({ pendingRunId: null }),
   openSuggestions: (tab, runId) => set({ activeTab: tab, view: 'project', suggestionRunId: runId }),
   clearSuggestionRunId: () => set({ suggestionRunId: null }),
   openCategoryGenScope: (entryIds) =>

@@ -28,6 +28,7 @@
     {
       "id": "miliastra-terms-genshin-impact",
       "source": "Genshin Impact",
+      "constant": true,
       "translations": {
         "zh-hans": "原神",
         "zh-hant": "原神",
@@ -88,6 +89,7 @@
     {
       "id": "miliastra-terms-miliastra-sandbox",
       "source": "Miliastra Sandbox",
+      "constant": true,
       "translations": {
         "zh-hans": "千星沙箱",
         "zh-hant": "千星沙箱",
@@ -108,6 +110,7 @@
     {
       "id": "miliastra-terms-miliastra-wonderland",
       "source": "Miliastra Wonderland",
+      "constant": true,
       "translations": {
         "zh-hans": "千星奇域",
         "zh-hant": "千星奇域",

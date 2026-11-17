@@ -368,7 +368,7 @@
     "waitingResumesAt": "{{time}} sürdürülecek",
     "waitingPairsCount_one": "{{count}} çift bekliyor",
     "waitingPairsCount_other": "{{count}} çift bekliyor",
-    "waitingSkipReasonWarning": "Otomatik sürdürme, kullanılabilir bir ücretsiz anahtar bulamadı — bir modül seçmek için aşağıdaki “Şimdi başka modülle sürdür…” seçeneğini kullanın.",
+    "waitingSkipReasonWarning": "Otomatik sürdürme, kullanılabilir bir ücretsiz katman anahtarı bulamadı — bir modül seçmek için aşağıdaki “Şimdi başka modülle sürdür…” seçeneğini kullanın.",
     "waitingProviderErrorReason": "Bir sağlayıcıda hata oluştu, bu nedenle otomatik olarak yeniden denenecek.",
     "pause": "Duraklat",
     "resume": "Sürdür",

@@ -23,7 +23,7 @@
   "restoring": "Restoring…",
   "confirmTitle": "Replace current project data?",
   "confirmBody": "Restoring will overwrite the project's existing config, entries, and glossary files. This action cannot be undone.",
-  "previewLoading": "Loading backup details\u2026",
+  "previewLoading": "Loading backup details…",
   "previewProject": "Project:",
   "previewFiles": "Files in backup:",
   "previewCreatedAt": "Created:",
@@ -43,5 +43,6 @@
   "toastBackupCreated": "Backup created.",
   "toastBackupFailed": "Backup failed: {{message}}",
   "toastRestoreSuccess": "Backup restored.",
-  "toastRestoreFailed": "Restore failed: {{message}}"
+  "toastRestoreFailed": "Restore failed: {{message}}",
+  "toastGuideRestored": "Your file's translations are back."
 }

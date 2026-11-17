@@ -43,5 +43,6 @@
   "toastBackupCreated": "สร้างข้อมูลสำรองแล้ว",
   "toastBackupFailed": "สร้างข้อมูลสำรองไม่สำเร็จ: {{message}}",
   "toastRestoreSuccess": "กู้คืนข้อมูลสำรองแล้ว",
-  "toastRestoreFailed": "กู้คืนไม่สำเร็จ: {{message}}"
+  "toastRestoreFailed": "กู้คืนไม่สำเร็จ: {{message}}",
+  "toastGuideRestored": "คืนคำแปลของไฟล์คุณแล้ว"
 }

@@ -17,6 +17,7 @@ import { useSelectionStore } from '../../stores/selection-store.js';
 import { useLoggerStore } from '../../stores/logger-store.js';
 import { useRunStore, type ReviewOrderMeta } from '../../stores/run-store.js';
 import { useViewStore } from '../../stores/view-store.js';
+import { navigateOrOffer, useEffectiveFilters } from '../../lib/mode-gating.js';
 import { filterEntries, orderByReviewSort } from '../../lib/filter-entries.js';
 import { countDistinctSourceTexts } from '../../lib/count-distinct-sources.js';
 import { StringTableFilters } from './StringTableFilters.js';
@@ -36,6 +37,7 @@ import {
   type Selection,
 } from './string-table-view-types.js';
 import { TranslateRunDialog } from '../comparison/TranslateRunDialog.js';
+import { GUIDE_TRANSLATE_EVENT, type GuideTranslateDetail } from '../../lib/tour/quick-test.js';
 import type { ExampleCandidate } from '../comparison/ExampleEntryPicker.js';
 import { GenerateGlossaryDialog } from '../glossary/GenerateGlossaryDialog.js';
 import {
@@ -48,6 +50,39 @@ import {
   type GlossarySummary,
 } from '@zercade-dev/narn-shared';
 import { Skeleton } from '@/components/ui/skeleton';
+
+type TranslateStartOptions = Parameters<
+  React.ComponentProps<typeof TranslateRunDialog>['onStart']
+>[0];
+
+/**
+ * What the dialog's Start sends when nothing in it was changed (as in Simple):
+ * untranslated only, memory on, the project's own batching.
+ */
+const DIALOG_DEFAULT_START: TranslateStartOptions = {
+  reTranslate: false,
+  useReference: false,
+  disableMemory: false,
+};
+
+/**
+ * Answers the guided first run's GUIDE_TRANSLATE_EVENT (its quick test, or
+ * the rest) while the table is on screen.
+ */
+function GuideTranslateListener({ onTranslate }: { onTranslate: (entryIds: string[]) => void }) {
+  const latest = useRef(onTranslate);
+  useEffect(() => {
+    latest.current = onTranslate;
+  });
+  useEffect(() => {
+    const onGuideTranslate = (e: Event) => {
+      latest.current((e as CustomEvent<GuideTranslateDetail>).detail.entryIds);
+    };
+    globalThis.addEventListener(GUIDE_TRANSLATE_EVENT, onGuideTranslate);
+    return () => globalThis.removeEventListener(GUIDE_TRANSLATE_EVENT, onGuideTranslate);
+  }, []);
+  return null;
+}
 
 export function StringTable() {
   const { t } = useTranslation('strings');
@@ -67,7 +102,9 @@ export function StringTable() {
 
   const fetchEntries = useStringStore((s) => s.fetchEntries);
   const allEntries = useStringStore((s) => s.entries);
-  const filters = useStringStore((s) => s.filters);
+  const storedFilters = useStringStore((s) => s.filters);
+  // View-only: in Simple, fields behind hidden controls read as defaults (never written back).
+  const filters = useEffectiveFilters(storedFilters);
   const setFilter = useStringStore((s) => s.setFilter);
   const updateEntry = useStringStore((s) => s.updateEntry);
   const bulkUpdate = useStringStore((s) => s.bulkUpdate);
@@ -465,6 +502,28 @@ export function StringTable() {
     setPrevPageReset({ entriesLength: entries.length, pageSize });
     setPage(1);
   }
+  // An entry to keep on screen (the guide's quick test): open its page, on
+  // arrival and again whenever the list or the page size changes. Paging by
+  // hand in between is left alone.
+  const revealEntryId = useStringStore((s) => s.revealEntryId) ?? null;
+  const [revealed, setRevealed] = useState<{
+    id: string | null;
+    entriesLength: number;
+    pageSize: number;
+  }>({ id: null, entriesLength: -1, pageSize });
+  if (
+    revealEntryId !== null &&
+    (revealed.id !== revealEntryId ||
+      revealed.entriesLength !== entries.length ||
+      revealed.pageSize !== pageSize)
+  ) {
+    setRevealed({ id: revealEntryId, entriesLength: entries.length, pageSize });
+    const at = entries.findIndex((e) => e.id === revealEntryId);
+    if (at >= 0) setPage(Math.floor(at / pageSize) + 1);
+  } else if (revealEntryId === null && revealed.id !== null) {
+    // Released: the same entry asked for again later is shown again.
+    setRevealed({ id: null, entriesLength: -1, pageSize });
+  }
 
   // Start/stop polling while a batch run is in-flight. The shared poller is a
   // SINGLE global interval (see run-store.ts), so an unconditional `stopPolling()`
@@ -630,7 +689,8 @@ export function StringTable() {
   // and navigates there; CategoryTab picks it up on mount.
   const handleGenerateCategoriesFromSelection = () => {
     if (visibleSelectedIds.size === 0) return;
-    openCategoryGenScope(Array.from(visibleSelectedIds));
+    const ids = Array.from(visibleSelectedIds);
+    navigateOrOffer({ kind: 'tab', tab: 'category' }, () => openCategoryGenScope(ids));
   };
 
   const handleSelectAllFiltered = () => {
@@ -725,14 +785,18 @@ export function StringTable() {
     },
     runSplitByModel?: boolean,
     exampleEntryIds?: string[],
+    /** The entries to translate; default: the visible selection. */
+    scopeIds?: string[],
   ) => {
-    if (!activeProjectId || visibleSelectedIds.size === 0 || batchTargetLanguages.length === 0)
-      return;
+    const entryIds = scopeIds
+      ? scopeIds.filter((id) => entriesById.has(id))
+      : Array.from(visibleSelectedIds);
+    if (!activeProjectId || entryIds.length === 0 || batchTargetLanguages.length === 0) return;
     setConfirmBatchOpen(false);
     batchRequestRef.current = {
       projectId: activeProjectId,
       body: JSON.stringify({
-        entryIds: Array.from(visibleSelectedIds),
+        entryIds,
         targetLanguages: batchTargetLanguages,
         reTranslate: runReTranslate,
         ...(runDisableMemory ? { disableMemory: true } : {}),
@@ -750,6 +814,23 @@ export function StringTable() {
       }),
     };
     await batchTranslate.invoke();
+  };
+
+  /** The dialog's Start, also used by the guided first run (with the dialog's defaults). */
+  const startBatch = (opts: TranslateStartOptions, scopeIds?: string[]) => {
+    setReTranslate(opts.reTranslate);
+    void handleBatchTranslate(
+      opts.reTranslate,
+      opts.disableMemory,
+      {
+        batchGrouping: opts.batchGrouping,
+        ignoreBatchSizeLimit: opts.ignoreBatchSizeLimit,
+        customBatchSize: opts.customBatchSize,
+      },
+      opts.splitByModel,
+      opts.exampleEntryIds,
+      scopeIds,
+    );
   };
 
   const handleBatchCancel = async () => {
@@ -903,6 +984,9 @@ export function StringTable() {
         />
       )}
 
+      {/* The guide's request: the same as Start in the dialog, left at its defaults. */}
+      <GuideTranslateListener onTranslate={(ids) => startBatch(DIALOG_DEFAULT_START, ids)} />
+
       <TranslateRunDialog
         open={confirmBatchOpen}
         onOpenChange={setConfirmBatchOpen}
@@ -914,20 +998,7 @@ export function StringTable() {
         localModelCount={batchLocalModelCount}
         enableExamples
         exampleCandidates={exampleCandidates}
-        onStart={(opts) => {
-          setReTranslate(opts.reTranslate);
-          void handleBatchTranslate(
-            opts.reTranslate,
-            opts.disableMemory,
-            {
-              batchGrouping: opts.batchGrouping,
-              ignoreBatchSizeLimit: opts.ignoreBatchSizeLimit,
-              customBatchSize: opts.customBatchSize,
-            },
-            opts.splitByModel,
-            opts.exampleEntryIds,
-          );
-        }}
+        onStart={(opts) => startBatch(opts)}
       />
 
       {/* AI Generation → "Generate Glossary from Selection": a second,

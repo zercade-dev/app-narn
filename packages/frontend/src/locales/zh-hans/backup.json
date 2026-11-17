@@ -43,5 +43,6 @@
   "toastBackupCreated": "备份已创建。",
   "toastBackupFailed": "备份失败：{{message}}",
   "toastRestoreSuccess": "备份已恢复。",
-  "toastRestoreFailed": "恢复失败：{{message}}"
+  "toastRestoreFailed": "恢复失败：{{message}}",
+  "toastGuideRestored": "文件中的翻译已恢复。"
 }

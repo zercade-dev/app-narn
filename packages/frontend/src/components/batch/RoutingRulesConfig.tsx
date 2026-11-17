@@ -14,8 +14,18 @@ import {
 } from './BatchConfigEditor.js';
 import { basesWithInstances } from '@/lib/module-options';
 import { useStringStore } from '../../stores/string-store.js';
+import { useGuideStore } from '../../stores/guide-store.js';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
-import { isSimpleRouting, makeSimpleRule, simpleRuleModuleId } from '@/lib/routing-mode';
+import {
+  effectiveRoutingGroups,
+  isSimpleRouting,
+  makeSimpleRule,
+  setAsideGroups,
+  simpleRuleModuleId,
+  toAdvancedRouting,
+  toSimpleRouting,
+  type RoutingDoc,
+} from '@/lib/routing-mode';
 import { SimpleRoutingConfig } from './SimpleRoutingConfig.js';
 
 /** The whole-document payload `save()` PUTs — same shape for both the
@@ -210,11 +220,20 @@ export function RoutingRulesConfig({
 
   const routingAdvanced = useUiSettings((s) => s.routingAdvanced);
   const setRoutingAdvanced = useUiSettings((s) => s.setRoutingAdvanced);
+  const routingAdvancedAsked = useUiSettings((s) => s.routingAdvancedAsked);
+  // Whose routing this is, for remembering which group Simple set aside.
+  const targetKey = routingBackend ? 'collab' : projectId;
   // The preference only *asks* for the simple view. A project whose rules are
   // richer than one catch-all cannot be represented by a single selector, so it
   // renders the full editor regardless — a preference set once and forgotten
-  // must never hide a configuration the user built by hand.
-  const simpleEligible = useMemo(() => isSimpleRouting(mergedGroups), [mergedGroups]);
+  // must never hide a configuration the user built by hand. Rules Simple set
+  // aside (an explicit choice) do not count: they do not apply.
+  const effectiveGroups = useMemo(
+    () => effectiveRoutingGroups(mergedGroups, activeGroupId),
+    [mergedGroups, activeGroupId],
+  );
+  const simpleEligible = useMemo(() => isSimpleRouting(effectiveGroups), [effectiveGroups]);
+  const rulesSetAside = setAsideGroups(mergedGroups, activeGroupId).length > 0;
   // Latch: set once the full editor has been shown *because* the document was
   // not simple, and held for the rest of this mount so an edit that happens to
   // make the document simple (clearing a rule's max length, deleting the second
@@ -247,6 +266,10 @@ export function RoutingRulesConfig({
           body: JSON.stringify(payload),
         });
       }
+      // Routing set here is the person's latest word: a Simple-mode choice
+      // still waiting for its key must not overwrite it later.
+      const guide = useGuideStore.getState();
+      guide.setPendingProvider(routingBackend ? 'collab' : projectId, null);
       onSave?.(payload.rules);
     },
   });
@@ -288,13 +311,57 @@ export function RoutingRulesConfig({
     setEditorLatched(true);
   }
   // Safety is evaluated live on every render: not-simple ⇒ never the simple view.
-  const showSimple = !routingAdvanced && simpleEligible && !editorLatched;
+  // A project whose rules Simple set aside is in Simple mode whatever the
+  // preference (set in another project, say): choosing Advanced brings them back.
+  const showSimple = simpleEligible && !editorLatched && (!routingAdvanced || rulesSetAside);
 
-  /** Mode clicks are an explicit decision, so they re-evaluate from scratch. */
+  /** Make `next` the document: the editor shows its active group, and it is saved. */
+  function applyDoc(next: RoutingDoc): void {
+    const nextDraft = normalizeRules(
+      next.groups.find((group) => group.id === next.activeGroupId)?.rules ?? [],
+    );
+    setError(null);
+    setGroups(next.groups);
+    setActiveGroupId(next.activeGroupId);
+    setDraft(nextDraft);
+    setEditingIds(new Set());
+    setPendingDeleteId(null);
+    schedule(buildPayload(next.groups, next.activeGroupId, nextDraft));
+  }
+
+  /**
+   * Mode clicks are an explicit decision, so they re-evaluate from scratch.
+   * Simple on rules it cannot show sets them aside (only its one provider then
+   * applies); Advanced brings back rules set aside. Both switch the active
+   * group, which waits for a running translation to finish.
+   */
   function toggleAdvanced(advanced: boolean): void {
+    const doc: RoutingDoc = { groups: mergedGroups, activeGroupId };
+    const setAside = useUiSettings.getState().routingSetAside[targetKey];
+    const toSimple = advanced ? null : toSimpleRouting(doc);
+    const next = advanced ? toAdvancedRouting(doc, setAside) : toSimple;
+    if (next && translationsInProgress) {
+      setError(t('routing.groupSwitchInProgress'));
+      return;
+    }
     setEditorLatched(false);
     setRoutingAdvanced(advanced);
+    if (!next) return;
+    useUiSettings.getState().setRoutingSetAside(targetKey, toSimple?.setAside ?? null);
+    applyDoc(next);
   }
+
+  // Advanced asked for from outside (the Advanced routing tour): bring back
+  // rules set aside, as choosing Advanced here does.
+  const toggleRef = useRef(toggleAdvanced);
+  useEffect(() => {
+    toggleRef.current = toggleAdvanced;
+  });
+  useEffect(() => {
+    if (!routingAdvancedAsked) return;
+    useUiSettings.getState().clearRoutingAdvancedAsked();
+    toggleRef.current(true);
+  }, [routingAdvancedAsked]);
 
   const handleExport = () => {
     try {
@@ -543,12 +610,14 @@ export function RoutingRulesConfig({
         {freewayOnboarding}
         <SimpleRoutingConfig
           modules={modules}
-          selectedModuleId={simpleRuleModuleId(mergedGroups)}
+          selectedModuleId={simpleRuleModuleId(effectiveGroups)}
           disabledModuleIds={disabledModuleIds}
           translationsInProgress={translationsInProgress}
           autoSaveStatus={autoSaveStatus}
           autoSaveError={autoSaveError}
-          advanced={routingAdvanced}
+          rulesSetAside={rulesSetAside}
+          error={error}
+          advanced={false}
           onToggleAdvanced={toggleAdvanced}
           onSelectModule={selectSimpleModule}
         />
@@ -571,7 +640,7 @@ export function RoutingRulesConfig({
         autoSaveError={autoSaveError}
         onFlush={flush}
         translationsInProgress={translationsInProgress}
-        advanced={routingAdvanced}
+        advanced
         onToggleAdvanced={toggleAdvanced}
         simpleFallbackNotice={!routingAdvanced && !simpleEligible}
         modules={modules}

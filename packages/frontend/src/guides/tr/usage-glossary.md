@@ -9,9 +9,17 @@
 * **Yeni sözlükçe** ile bir sözlükçe oluşturun; daha sonra yeniden adlandırın veya silin.
 * Bir sözlükçeyi **etkinleştirin** veya **devre dışı bırakın** — devre dışı bir sözlükçe, içe aktarma ve çeviri sırasında yok sayılır.
 * Terimleri bir **kaynak**, dil başına bir **çeviri** ve isteğe bağlı **notlarla** ekleyin.
-* Bir terimi asla çevrilmemesi gerektiğinde (marka adları, kodlar) **sabit** olarak işaretleyin. Sabit terimler çeviri sırasında maskelenir; böylece değişmeden geçer.
+* Bir terimin, karakter ya da marka adı gibi, sözlükçede yazıldığı haliyle çıkması gerektiğinde onu **sabit** olarak işaretleyin — aşağıdaki *Sabit terimler* bölümüne bakın.
+* Bir sözlükçenin iki sekmesi vardır: **Terimler** terimlerini, **Eşleşmeler** ise onları içeren girdileri listeler; orada sözlükçeyi girdilere atayabilir ya da kaldırabilirsiniz.
 
 Bazı sözlükçeler **salt okunurdur** (genel düzeyde yönetilir) ve burada düzenlenemeden terim katkısında bulunur.
+
+## Sabit terimler
+
+* Sabit bir terim **çeviri motoruna asla gönderilmez**. NARN çeviriden önce onu bir yer tutucuyla değiştirir, ardından yerine sözlükçedeki çeviriyi koyar; böylece *Diluc* gibi bir karakter adı her zaman sözlükçede yazıldığı gibi çıkar.
+* **Büyük-küçük harf önemlidir.** Yalnızca terimle tam olarak aynı yazılan metin korunur: *Venti* (karakter) korunur, *a venti latte* korunmaz. Diğer yazımlar, motorun adı gündelik sözcükten ayırabilmesi için ad olarak işaretlenmiş sıradan bir sözlükçe ipucu olarak gönderilir.
+* **Motor sözcüğü değiştiremez.** Terimi hiç görmediği için onu çekimleyemez ya da diğer sözcükleri ona uyduramaz: Rusça, Korece veya Türkçe gibi dillerde sabit bir ad her zaman yalın haliyle görünür. Sabiti, değişmemesi gereken adlar ve kodlar için kullanın.
+* Gündelik sözcük de olan adları normal terim olarak bırakın; başlıklar ve etiketler onları sık sık büyük harfle yazar (*Gaming Settings*). Uygulamayla gelen sözlükçelerde karakter adları, ülke adları ve Genshin Impact, Miliastra Sandbox ile Miliastra Wonderland ürün adları sabittir; Gaming, Amber, Razor, Sucrose, Prune, Traveler ve Wanderer hariç.
 
 ## İçe ve dışa aktarma
 

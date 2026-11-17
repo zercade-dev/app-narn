@@ -505,7 +505,8 @@ export interface RunStore {
   /**
    * The run list in its SUMMARY shape, ordered by start time, with the two
    * unbounded per-run payloads projected away in SQL — `request` (whose
-   * `entryIds` runs to tens of thousands of ids and is never cleared) and
+   * `entryIds` runs to tens of thousands of ids and is never cleared; only
+   * `request.targetLanguages` is kept) and
    * `waitingForQuota.pairs` (replaced by `waitingForQuota.pairCount`). Backs
    * `GET /api/projects/:projectId/runs`, which the Activity tab re-polls every
    * two seconds while any run is active.
@@ -670,10 +671,12 @@ export interface BackupStore {
  * later.
  */
 export interface NotificationStore {
-  listForCurrentUser(): Promise<NotificationRecord[]>; // newest 50, newest-first
+  listForCurrentUser(): Promise<NotificationRecord[]>; // newest 200 plus older unread, newest-first
   countUnread(): Promise<number>;
   markRead(id: string): Promise<void>; // idempotent; foreign/missing id is a no-op
   markAllRead(): Promise<{ count: number }>;
+  // Marks unread broadcasts and non-problem kinds read; leaves PROBLEM_NOTIFICATION_KINDS unread.
+  markInformationalRead(): Promise<{ count: number }>;
   delete(id: string): Promise<void>; // foreign/missing id is a no-op
 }
 

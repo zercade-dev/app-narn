@@ -1,10 +1,17 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link2Off } from 'lucide-react';
 import { toast } from '@/lib/toast';
 import { errorMessage } from '@/lib/utils';
 import type { OrphanEntry, StringEntry } from '@zercade-dev/narn-shared';
 import { apiRequest } from '../../hooks/use-api.js';
+import {
+  ORPHANS_CHANGED_EVENT,
+  PracticeRecoverRefusedError,
+  recoverPracticeOrphan,
+} from '../../lib/tour/orphan-sim.js';
+import { useGuideStore } from '../../stores/guide-store.js';
+import { ORPHANS_TOUR_ID } from '../../lib/tour/orphans-tour.js';
 import { useModules, useConfiguredModels } from '../../hooks/use-modules.js';
 import {
   basesWithInstances,
@@ -60,6 +67,7 @@ type OverrideMode = 'all' | 'empty-only';
 
 export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
   const { t } = useTranslation('orphans');
+  const { t: tTour } = useTranslation('guide-tour');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [relinkOrphan, setRelinkOrphan] = useState<OrphanEntry | null>(null);
   // Two-step relink flow: 'pick' shows the ranked candidate list, 'confirm'
@@ -132,6 +140,45 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
     void reload();
   }, [reload, setLoading]);
 
+  // The orphans tour created or put back its practice orphan.
+  useEffect(() => {
+    const onChanged = (e: Event) => {
+      if ((e as CustomEvent<string>).detail === projectId) void reload();
+    };
+    globalThis.addEventListener(ORPHANS_CHANGED_EVENT, onChanged);
+    return () => globalThis.removeEventListener(ORPHANS_CHANGED_EVENT, onChanged);
+  }, [projectId, reload]);
+
+  // The tour's practice orphan, when it is in this list: marked, and one
+  // click puts it back (also after the tour was left part way).
+  const orphanSim = useGuideStore((s) => s.orphanSim);
+  const practiceId =
+    orphanSim?.projectId === projectId && orphans.some((o) => o.id === orphanSim.entryId)
+      ? orphanSim.entryId
+      : null;
+  // While the Orphans tour shows the practice orphan, its row is for looking
+  // at: its Relink and Delete (and its box for the bulk Delete) wait until the
+  // tour is over, so the tour never destroys or rewires the person's entry.
+  const tourHoldsPractice = useGuideStore((s) => s.activeTourId === ORPHANS_TOUR_ID);
+  const heldByTour = (id: string): boolean => tourHoldsPractice && id === practiceId;
+  const [recovering, setRecovering] = useState(false);
+  const handleRecoverPractice = useCallback(async () => {
+    setRecovering(true);
+    try {
+      await recoverPracticeOrphan();
+      toast.success(tTour('orphansTour.banner.recovered'));
+    } catch (err) {
+      toast.error(
+        err instanceof PracticeRecoverRefusedError
+          ? tTour('orphansTour.errors.recoverRefused')
+          : errorMessage(err, tTour('orphansTour.errors.recover')),
+      );
+    } finally {
+      setRecovering(false);
+      void reload();
+    }
+  }, [reload, tTour]);
+
   const toggleId = useCallback((id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -142,11 +189,11 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
   }, []);
 
   const toggleAll = useCallback(() => {
-    setSelectedIds((prev) => {
-      if (prev.size === orphans.length) return new Set();
-      return new Set(orphans.map((o) => o.id));
-    });
-  }, [orphans]);
+    // Never the practice orphan the tour is showing (see `heldByTour`).
+    const held = tourHoldsPractice ? practiceId : null;
+    const selectable = orphans.filter((o) => o.id !== held).map((o) => o.id);
+    setSelectedIds((prev) => (prev.size === selectable.length ? new Set() : new Set(selectable)));
+  }, [orphans, tourHoldsPractice, practiceId]);
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -311,7 +358,8 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
     return all.slice(0, 50);
   }, [candidates, candidateQuery]);
 
-  const allSelected = orphans.length > 0 && selectedIds.size === orphans.length;
+  const selectableCount = orphans.length - (tourHoldsPractice && practiceId !== null ? 1 : 0);
+  const allSelected = selectableCount > 0 && selectedIds.size === selectableCount;
 
   return (
     <Card>
@@ -335,79 +383,111 @@ export function OrphansTab({ projectId }: Readonly<OrphansTabProps>) {
           </Button>
         </div>
 
-        {orphans.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-10 text-center">
-            <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <Link2Off className="size-5" />
-            </div>
-            <p className="text-sm font-medium">{t('emptyTitle')}</p>
-            <p className="max-w-sm text-sm text-muted-foreground">{t('empty')}</p>
+        {practiceId !== null && (
+          <div
+            role="status"
+            data-testid="orphan-practice-banner"
+            data-tour="orphan-practice-banner"
+            className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border bg-muted p-3 text-sm"
+          >
+            <p>{tTour('orphansTour.banner.text')}</p>
+            <Button
+              size="sm"
+              onClick={() => void handleRecoverPractice()}
+              disabled={recovering}
+              data-testid="orphan-practice-recover"
+            >
+              {tTour('orphansTour.actions.recover')}
+            </Button>
           </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-10">
-                  <Checkbox
-                    checked={allSelected}
-                    onCheckedChange={toggleAll}
-                    aria-label={t('columns.select')}
-                  />
-                </TableHead>
-                <TableHead>{t('columns.source')}</TableHead>
-                <TableHead className="w-32 text-right">{t('columns.translations')}</TableHead>
-                <TableHead className="w-48 text-right">{t('columns.actions')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orphans.map((orphan) => (
-                <TableRow key={orphan.id} data-testid={`orphan-row-${orphan.id}`}>
-                  <TableCell>
+        )}
+
+        {/* The guide's list step points here only when there is a list to show. */}
+        <div data-tour={orphans.length === 0 ? undefined : 'orphans-list'}>
+          {orphans.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-10 text-center">
+              <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <Link2Off className="size-5" />
+              </div>
+              <p className="text-sm font-medium">{t('emptyTitle')}</p>
+              <p className="max-w-sm text-sm text-muted-foreground">{t('empty')}</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-10">
                     <Checkbox
-                      checked={selectedIds.has(orphan.id)}
-                      onCheckedChange={() => toggleId(orphan.id)}
+                      checked={allSelected}
+                      onCheckedChange={toggleAll}
                       aria-label={t('columns.select')}
                     />
-                  </TableCell>
-                  <TableCell className="w-full max-w-0 whitespace-normal font-mono text-sm">
-                    {orphan.textKey !== undefined && (
-                      <div
-                        className="text-xs text-muted-foreground break-all"
-                        data-testid={`orphan-key-${orphan.id}`}
-                      >
-                        {orphan.textKey}
-                      </div>
-                    )}
-                    <div className="line-clamp-3 break-words" title={orphan.sourceText}>
-                      {orphan.sourceText}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {countTranslations(orphan)}
-                  </TableCell>
-                  <TableCell className="text-right space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => void openRelink(orphan)}
-                      data-testid={`orphan-relink-${orphan.id}`}
-                    >
-                      {t('actions.relink')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => setPendingDelete(orphan)}
-                      data-testid={`orphan-delete-${orphan.id}`}
-                    >
-                      {t('actions.delete')}
-                    </Button>
-                  </TableCell>
+                  </TableHead>
+                  <TableHead>{t('columns.source')}</TableHead>
+                  <TableHead className="w-32 text-right">{t('columns.translations')}</TableHead>
+                  <TableHead className="w-48 text-right">{t('columns.actions')}</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+              </TableHeader>
+              <TableBody>
+                {orphans.map((orphan) => (
+                  <TableRow
+                    key={orphan.id}
+                    data-testid={`orphan-row-${orphan.id}`}
+                    data-tour={orphan.id === practiceId ? 'orphan-practice-row' : undefined}
+                  >
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedIds.has(orphan.id)}
+                        onCheckedChange={() => toggleId(orphan.id)}
+                        disabled={heldByTour(orphan.id)}
+                        aria-label={t('columns.select')}
+                      />
+                    </TableCell>
+                    <TableCell className="w-full max-w-0 whitespace-normal font-mono text-sm">
+                      {orphan.textKey !== undefined && (
+                        <div
+                          className="text-xs text-muted-foreground break-all"
+                          data-testid={`orphan-key-${orphan.id}`}
+                        >
+                          {orphan.textKey}
+                        </div>
+                      )}
+                      <div className="line-clamp-3 break-words" title={orphan.sourceText}>
+                        {orphan.sourceText}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right tabular-nums">
+                      {countTranslations(orphan)}
+                    </TableCell>
+                    <TableCell
+                      className="text-right space-x-2"
+                      data-tour={orphan.id === practiceId ? 'orphan-practice-actions' : undefined}
+                    >
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void openRelink(orphan)}
+                        disabled={heldByTour(orphan.id)}
+                        data-testid={`orphan-relink-${orphan.id}`}
+                      >
+                        {t('actions.relink')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => setPendingDelete(orphan)}
+                        disabled={heldByTour(orphan.id)}
+                        data-testid={`orphan-delete-${orphan.id}`}
+                      >
+                        {t('actions.delete')}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </div>
       </CardContent>
 
       <Sheet

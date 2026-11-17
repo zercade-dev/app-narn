@@ -53,10 +53,59 @@
   "notificationsDismiss": "Remover",
   "notificationsLoading": "Carregando as suas notificações…",
   "notificationsEmpty": "Você não tem notificações.",
+  "notificationsSidebarDescription": "Novidades sobre as suas execuções e projetos.",
+  "notificationsUnread": "Não lida",
+  "notificationsDismissItem": "Remover: {{title}}",
   "notificationsSeverity": {
     "info": "Informação",
     "warning": "Aviso",
     "critical": "Crítico"
+  },
+  "notifications": {
+    "genericTitle": "Notificação",
+    "viewInActivity": "Ver em Atividade",
+    "openProject": "Abrir projeto",
+    "inProject": "Projeto: {{project}}",
+    "aCollaborator": "Um colaborador",
+    "theProvider": "o provedor de IA",
+    "otherIssues_one": "{{cause}} e mais {{count}} problema",
+    "otherIssues_other": "{{cause}} e mais {{count}} problemas",
+    "cause": {
+      "noRoute": "nenhum módulo de tradução está configurado para ela.",
+      "moduleDisabled": "o módulo necessário está desativado.",
+      "moduleNotFound": "o módulo necessário não foi encontrado.",
+      "unknown": "o motivo é desconhecido."
+    },
+    "runStarted": {
+      "title": "{{type}} iniciada",
+      "body_one": "{{count}} entrada para processar.",
+      "body_other": "{{count}} entradas para processar."
+    },
+    "runFinished": {
+      "title": "{{type}} concluída",
+      "body_one": "{{count}} entrada concluída.",
+      "body_other": "{{count}} entradas concluídas.",
+      "bodyLanguages_one": "{{count}} entrada concluída em {{languages}}.",
+      "bodyLanguages_other": "{{count}} entradas concluídas em {{languages}}."
+    },
+    "runFinishedWithProblems": {
+      "title": "{{type}} concluída com problemas",
+      "body": "{{completed}} concluídas, {{failed}} com falha — {{cause}}."
+    },
+    "runFailed": {
+      "title": "{{type}} com falha",
+      "body": "A execução parou: {{cause}}."
+    },
+    "collabDigest": {
+      "title": "Atividade dos colaboradores",
+      "editsIn": "{{count}} em {{language}}",
+      "edited": "{{name}} editou {{edits}}.",
+      "translated_one": "{{name}} traduziu {{count}} entrada.",
+      "translated_other": "{{name}} traduziu {{count}} entradas.",
+      "both_one": "{{name}} editou {{edits}} e traduziu {{count}} entrada.",
+      "both_other": "{{name}} editou {{edits}} e traduziu {{count}} entradas.",
+      "translatedLanguages": "Traduzido para {{languages}}."
+    }
   },
   "signOut": "Sair"
 }

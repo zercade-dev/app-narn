@@ -77,6 +77,7 @@ import {
 import { defaultPricingProvider, type PricingProvider } from './M9/usage-pricing.js';
 import { selectCapableModule, type ModuleLogFn } from './M9/module-selection.js';
 import { BackgroundRunEngine, type LoggerLike } from './M9/run-engine.js';
+import { classifyFailure } from './M9/failure-code.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
 
 export class RelinkRetranslateNotPossibleError extends Error {
@@ -553,6 +554,7 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
             status,
             { entryId: result.entryId, targetLanguage: result.targetLanguage },
             message,
+            classifyFailure(result.error ?? message),
           );
           const summary = (status.relinkRetranslateSummary ??= { updated: 0, failed: 0 });
           summary.failed++;
@@ -632,6 +634,7 @@ export class RelinkRetranslateEngine extends BackgroundRunEngine<RelinkRetransla
             status,
             { entryId: result.entryId, targetLanguage: result.targetLanguage },
             message,
+            classifyFailure(err),
           );
           const summary = (status.relinkRetranslateSummary ??= { updated: 0, failed: 0 });
           summary.failed++;

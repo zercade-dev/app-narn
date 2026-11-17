@@ -50,7 +50,7 @@ export function WelcomeView() {
             type="button"
             size="sm"
             data-testid="welcome-setup-vault"
-            onClick={goToVaultSetup}
+            onClick={() => goToVaultSetup()}
           >
             {t('setupVaultButton')}
           </Button>

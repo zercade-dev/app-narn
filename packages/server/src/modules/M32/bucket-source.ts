@@ -31,7 +31,7 @@ import { moduleRegistry } from '../M6-module-registry.js';
 import { COPILOT_MODULE_ID } from '../../utils/copilot-config.js';
 import { KeyedAsyncLock } from '../../utils/keyed-lock.js';
 import type { RateGovernor } from '../M9/rate-governor.js';
-import type { BucketView } from './types.js';
+import { FREEWAY_BAD_CREDENTIALS_REASON, type BucketView } from './types.js';
 import { decayStats, recordGatePass, recordJudgeScore, recordSpeed } from './stats.js';
 
 const FLAP_WINDOW_MS = 5 * 60_000;
@@ -842,7 +842,7 @@ export async function loadBucketViews(
         // deliberately no longer read here — a credential mark lives under
         // `freewayCredentialKey`, keyed on the module that actually failed,
         // not the shared bucket.
-        disabledReason: badCredentials ? 'bad credentials' : undefined,
+        disabledReason: badCredentials ? FREEWAY_BAD_CREDENTIALS_REASON : undefined,
         // Aged to `now` for every consumer at once: this is the sole producer
         // of a BucketView, so scoring never needs a clock of its own. Read-only
         // — `t` is the age of the evidence, and reading does not refresh it.

@@ -26,7 +26,13 @@
   "templateWarningUnknownGlossary": "テンプレートが不明な用語集「{{id}}」を参照しています",
   "createFailed": "プロジェクトの作成に失敗しました：{{message}}",
   "activateFailed": "プロジェクトの切り替えに失敗しました：{{message}}",
+  "providerSetupFailed": "プロジェクトは作成されましたが、プロバイダーを設定できませんでした。「プロバイダーのキー」を開いて確認してください。（{{message}}）",
   "changeProjectIcon": "プロジェクトのアイコンを変更",
+  "providerKeys": "プロバイダーのキー",
+  "advancedOnlyTitle": "詳細モードで利用できます",
+  "advancedOnlyBody": "{{place}}は詳細モードの機能です。詳細モードに切り替えて開きますか？",
+  "advancedOnlySwitch": "詳細モードに切り替える",
+  "advancedOnlyCancel": "今はしない",
   "groups": {
     "project": "セットアップ",
     "translate": "翻訳作業",

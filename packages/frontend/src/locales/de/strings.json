@@ -368,7 +368,7 @@
     "waitingResumesAt": "Wird fortgesetzt {{time}}",
     "waitingPairsCount_one": "{{count}} Paar wartet",
     "waitingPairsCount_other": "{{count}} Paare warten",
-    "waitingSkipReasonWarning": "Die automatische Fortsetzung konnte keinen nutzbaren kostenlosen Schlüssel finden — nutze unten „Jetzt fortsetzen mit…“, um ein Modul auszuwählen.",
+    "waitingSkipReasonWarning": "Die automatische Fortsetzung konnte keinen nutzbaren Schlüssel für den Gratis-Tarif finden — nutze unten „Jetzt fortsetzen mit…“, um ein Modul auszuwählen.",
     "waitingProviderErrorReason": "Ein Anbieter hatte einen Fehler, daher wird es automatisch erneut versucht.",
     "pause": "Pausieren",
     "resume": "Fortsetzen",

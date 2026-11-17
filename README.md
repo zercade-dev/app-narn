@@ -48,6 +48,22 @@ and stored on your machine, never sent anywhere but the AI provider you connect.
 [Self-hosting in detail](#self-hosting-in-detail) below for the plain-Docker alternative and
 building from source.
 
+### Your first translation
+
+New to NARN? The app walks you through this on first run (it starts in Simple mode, and you can
+skip the walkthrough and pick it up again from the sidebar or the Guide). The short version:
+
+1. **Create your vault password.** Your provider keys are encrypted with it.
+2. **Add one free key.** A [Google AI key](https://aistudio.google.com/apikey) is the easiest
+   start, or choose "Use my own provider". NARN Freeway then picks free models for you.
+3. **Create a project and import your text.** In the Data tab, choose the source language and
+   the languages to translate into, then import your CSV.
+4. **Translate.** Select all entries in Translations and click Translate.
+5. **Export** the translated file from the project.
+
+Switch to Advanced mode (top bar or Settings) when you want routing rules, glossaries, quality
+checks, Compare and AI review.
+
 ## What you can do with it
 
 - **Glossaries** keep names, terms, and tone consistent everywhere they appear.

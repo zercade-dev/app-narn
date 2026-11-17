@@ -1,0 +1,606 @@
+{
+  "next": "İleri",
+  "completeTour": "Turu tamamla",
+  "lookOnly": "Tur sırasında bu yalnızca gösterilir. Tur bitince kullanabilirsiniz.",
+  "back": "Geri",
+  "skip": "Turu atla",
+  "close": "Kapat",
+  "stepOfSub": "Bölüm {{major}} / {{majorTotal}} · Adım {{sub}} / {{subTotal}}",
+  "stepCount": "{{current}} / {{total}}",
+  "continueSetup": "Kuruluma devam: bölüm {{current}} / {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Kasa formunu aç",
+      "cloudVault": "Kasayı kur",
+      "openVaultPage": "Kasa sayfasını aç",
+      "chooseProvider": "Bir sağlayıcı seç",
+      "useFoundKey": "Çevirileriniz için {{provider}} kullanın",
+      "fixKey": "Anahtarımı kontrol et",
+      "retry": "Yeniden dene",
+      "stopRetry": "Durdur ve yeniden dene",
+      "translateQuick": "Denemek için bu 3'ünü çevir",
+      "translateEverything": "Her şeyi çevir",
+      "translateFew": "Bunları çevir",
+      "translateRest": "Kalanını şimdi çevir",
+      "skipRest": "Atla, elimdekini dışa aktar",
+      "retranslateTest": "Denemek için 3 girdiyi yeniden çevir",
+      "restoreTest": "Çevirilerimi geri koy",
+      "keepTest": "Yeni çevirileri koru",
+      "tourSections": "Bölümleri göster",
+      "maybeLater": "Belki sonra",
+      "openTours": "Turları göster",
+      "toursDone": "Bitti"
+    },
+    "vault": {
+      "title": "Kasa parolası oluşturma",
+      "why": "Sağlayıcı anahtarlarınız bu parolayla şifrelenir ve her zaman sizin kontrolünüzde kalır.",
+      "openWhat": "Kasanız için bir parola belirlemek üzere kasa formunu açın.",
+      "passwordWhat": "Buraya bir parola yazın, ardından alttaki düğmeyle onaylayın."
+    },
+    "unlock": {
+      "title": "Kasanın kilidini açma",
+      "why": "Kasanın kilidini açana kadar sağlayıcı anahtarlarınız şifreli kalır.",
+      "openWhat": "Kasa parolanızı girmek için kasa formunu açın.",
+      "passwordWhat": "Kasa parolanızı buraya yazın, ardından alttaki düğmeyle onaylayın."
+    },
+    "cloudVault": {
+      "title": "Kasanızı oluşturun ve bir anahtar ekleyin",
+      "what": "Bir kasa parolası belirleyin, ardından bir anahtar ekleyin: önce bir sağlayıcı seçin. Hızlı bir deneme için ücretsiz katmanı olan birini seçin. İşlem bitince buraya dönersiniz.",
+      "why": "Sağlayıcı anahtarlarınız parolanızla şifrelenir ve her zaman sizin kontrolünüzde kalır."
+    },
+    "cloudUnlock": {
+      "what": "Kasa sayfasında kasanızın kilidini açın. İşlem bitince buraya dönersiniz."
+    },
+    "cloudKey": {
+      "what": "Kasa sayfasından bir anahtar ekleyin: önce bir sağlayıcı seçin. Hızlı bir deneme için ücretsiz katmanı olan birini seçin. İşlem bitince buraya dönersiniz."
+    },
+    "key": {
+      "title": "Çeviriye başlamak için bir anahtar ekleyin",
+      "why": "Sağlayıcıyı daha sonra projenin Yapılandırma sekmesinden değiştirebilirsiniz.",
+      "choiceWhat": "Bir sağlayıcı seçin ve anahtarını ekleyin. Hızlı bir deneme için ücretsiz katmanı olan birini seçin.",
+      "pasteWhat": "Anahtarı buraya yapıştırın, altına kasa parolanızı yazın, ardından kaydedin."
+    },
+    "providerList": {
+      "title": "Bir sağlayıcı seç",
+      "what": "Zaten bir anahtarınız var mı? Sağlayıcısını seçin. Henüz yoksa bir sağlayıcının yanındaki Anahtar al düğmesine basıp onun sitesinde bir anahtar oluşturun, sonra o sağlayıcıyı seçin.",
+      "why": "Hızlı bir deneme için ücretsiz katmanı olan bir sağlayıcı kullanın."
+    },
+    "providerCard": {
+      "title": "Bu projeyi kim çeviriyor",
+      "what": "Bu projeyi kimin çevireceğini seçin.",
+      "why": "Bu paneli kapatıp rehbere devam etmek için Geri'ye basın."
+    },
+    "project": {
+      "title": "Oyun metnini içe aktarma",
+      "openWhat": "Proje listesini açın.",
+      "newWhat": "Yeni bir proje oluşturun.",
+      "createWhat": "Projenize bir ad verin, ardından oluşturun.",
+      "sourceWhat": "Kaynak dilinizi seçin: oyununuzun metninin yazıldığı dil.",
+      "targetsWhat": "Çeviri yapmak istediğiniz dilleri işaretleyin veya Tümünü seç'i kullanın.",
+      "saveWhat": "Dillerinizi kaydedin.",
+      "importWhat": "Oyun düzenleyicinizden dışa aktardığınız CSV dosyasını seçin.",
+      "confirmWhat": "Özeti gözden geçirin, ardından içe aktarmayı onaylayın."
+    },
+    "translate": {
+      "title": "Çeviri",
+      "openWhat": "Girdilerinizin listelendiği sekmeyi açın.",
+      "quickWhat": "Henüz çevrilmesi gereken 3 girdi seçili. Denemek için bunları çevirin veya hemen her şeyi çevirin.",
+      "fewWhat": "Girdileriniz seçili. Şimdi çevirin.",
+      "startWhat": "Çeviriyi başlatın.",
+      "nothingWhat": "Dosyanızda tüm çeviriler zaten var. Birinin nasıl yapıldığını görmek için 3 girdiyi yeniden çevirin: çevirilerini sonradan geri koyabilirsiniz.",
+      "nothingWhy": "Ya da dışa aktarmak için İleri’ye basın. Bir dil eklemek için Veri sekmesinde işaretleyip kaydedin.",
+      "progressWhat": "Çeviri sürüyor. Bu satır ilerlemeyi gösterir.",
+      "progressWhy": "Çeviri bittiğinde tur devam eder."
+    },
+    "retest": {
+      "title": "3 girdiyi yeniden çevirin",
+      "filterWhat": "Durum'u açın ve Yalnızca çevrilmemişleri göster işaretini kaldırın; liste çevrilmiş girdilerinizi de göstersin.",
+      "selectWhat": "Bu sayfadaki 3 girdinin kutusunu işaretleyin.",
+      "translateWhat": "Seçilenleri çevir'e basın.",
+      "modeWhat": "Mevcut çevirileri yeniden çevir seçeneğini seçin. Yalnızca çevrilmemiş girdileri doldur ile bu 3 girdi zaten çevrildiği için atlanır.",
+      "startWhat": "3 girdiyi yeniden çevirmek için Başlat'a basın.",
+      "nothingPicked": "Hiçbir şey yeniden çevrilmedi: bu girdilerin zaten çevirileri vardı. Seçilenleri çevir'e yeniden basın ve Mevcut çevirileri yeniden çevir'i seçin."
+    },
+    "failed": {
+      "title": "Çeviri tamamlanmadı",
+      "why": "Aşağıdaki vurgulanan çubuk ne olduğunu gösterir.",
+      "authWhat": "Sağlayıcı anahtarınızı reddetti. Anahtarı kontrol edin, ardından yeniden deneyin.",
+      "quotaWhat": "Ücretsiz kota şimdilik tükendi. Biraz bekleyin veya başka bir anahtar ekleyin, ardından yeniden deneyin.",
+      "quotaWhatOwn": "{{provider}} şimdilik istekleri reddediyor: hesabınızın kotası veya kredisi tükendi. Sağlayıcıdaki planınızı kontrol edin, ardından yeniden deneyin.",
+      "quotaWhatCustom": "Bu projenin yönlendirmesindeki bir sağlayıcı şimdilik istekleri reddediyor: bir kota veya kredi tükendi. Biraz bekleyin veya sağlayıcıdaki planı kontrol edin, ardından yeniden deneyin.",
+      "noProviderWhat": "Hiçbir şey çevrilmedi: bunu üstlenecek etkin bir sağlayıcı yoktu. Yeniden dene düğmesine basın: NARN önce kayıtlı anahtarınızın sağlayıcısını etkinleştirir.",
+      "otherWhat": "Hiçbir şey çevrilmedi. Anahtarınızı kontrol edin, ardından yeniden deneyin."
+    },
+    "parked": {
+      "title": "Çeviri duraklatıldı",
+      "what": "Çeviriniz duraklatıldı ve sağlayıcıyı bekliyor. Anahtarınızı kontrol edin, ardından bu çalıştırmayı durdurup yenisini başlatın."
+    },
+    "waiting": {
+      "title": "Çeviri bekliyor",
+      "why": "Aşağıdaki vurgulanan çubuk durumu gösterir. Çeviri bittiğinde tur devam eder.",
+      "quotaWhat": "Ücretsiz kota şimdilik tükendi. Kota yeniden açıldığında çeviri kendiliğinden devam eder.",
+      "modelWhat": "Şu anda kullanılabilen ücretsiz modeller, bu çalıştırmanın hedeflediği kalitenin altında. Daha iyi bir model kullanılabilir olduğunda çeviri kendiliğinden devam eder."
+    },
+    "rest": {
+      "title": "Deneme işe yaradı",
+      "what": "3 deneme girdiniz seçtiğiniz tüm dillere çevrildi. Kalanını şimdi çevirin veya elinizdekini dışa aktarın.",
+      "skipped": "Kalanı bekleyebilir. Şimdiye kadar çevrilenleri indirin."
+    },
+    "restore": {
+      "title": "Test işe yaradı",
+      "what": "3 test girdisinin yeni çevirileri var. Dosyanızdaki çevirileri geri koyun ya da yenilerini koruyun.",
+      "why": "NARN, testten hemen önce bir geri yükleme noktası kaydetti.",
+      "pickWhat": "Bu geri yükleme noktası testten hemen önce kaydedildi. Dosyanızdaki çevirileri geri koymak için Geri yükle’ye basın.",
+      "pickWhy": "Geri yükleme, projenin tamamını o zamanki hâline döndürür.",
+      "confirmWhat": "Geri yüklemek için onaylayın.",
+      "notFound": "Testin geri yükleme noktası bulunamadı. Yedeklemeden birini geri yükleyin ya da yeni çevirileri koruyun."
+    },
+    "export": {
+      "title": "Dışa aktarma",
+      "why": "Oyun düzenleyiciniz, çevirileri oyununuza almak için bu dosyayı içe aktarabilir.",
+      "openWhat": "Dosyanızı içe aktardığınız sekmeye dönün.",
+      "downloadWhat": "Oyun düzenleyiciniz için çevrilmiş dosyayı indirin."
+    },
+    "closing": {
+      "title": "Her şey hazır",
+      "what": "Bu, basitleştirilmiş görünümdür: yalnızca çeviri ve dışa aktarma için gerekenleri gösterir. Gelişmiş modda daha fazla araç vardır. Kısa bir tur için anahtarı Gelişmiş'e çevirin.",
+      "whatAdvanced": "Tüm araçları gösteren Gelişmiş moddasınız. Kısa bir tur, her bölümün ne işe yaradığını açıklar.",
+      "why": "Üst çubuktan istediğiniz zaman geçiş yapabilirsiniz."
+    },
+    "moreTours": {
+      "title": "Daha fazla rehberli tur",
+      "what": "Sözlükçeler, yönlendirme ve daha fazlası hakkındaki kısa turlar Kılavuz'da. İstediğiniz zaman birini başlatın."
+    }
+  },
+  "providerChoice": {
+    "title": "Bir sağlayıcı seç",
+    "description": "Bu projeyi ve oluşturduğunuz yeni projeleri o çevirir.",
+    "existingRouting": "Bu projede yönlendirme zaten ayarlı, bu yüzden olduğu gibi kalır. Gelişmiş modda değiştirebilirsiniz.",
+    "freeHeading": "Ücretsiz katmanı var",
+    "paidHeading": "Ücretsiz katmanı yok",
+    "getKey": "Anahtar al",
+    "getKeyAria": "{{provider}} anahtarı al (sağlayıcının sitesini açar)",
+    "cancel": "İptal",
+    "failed": "{{provider}} kurulamadı: {{message}}",
+    "switchedOff": "{{provider}} Gelişmiş modda kapalı olduğu için kullanılmadı. Genel yapılandırmada yeniden açın veya başka bir sağlayıcı seçin.",
+    "waitingForKey": "Kasanızda henüz {{provider}} anahtarı yok, bu yüzden şimdilik NARN Freeway çeviriyor. Anahtarını ekleyin veya projenin Yapılandırma sekmesinden NARN Freeway'i seçin.",
+    "applied": "{{project}} artık {{provider}} ile çevriliyor.",
+    "appliedCollab": "Sizinle paylaşılan projeler artık {{provider}} ile çevriliyor."
+  },
+  "offer": {
+    "start": "Göster",
+    "decline": "Hayır, teşekkürler"
+  },
+  "guideTours": {
+    "title": "Turlar",
+    "first-run": {
+      "name": "Rehberli ilk kullanım",
+      "summary": "Bir sağlayıcı kurun, metinlerinizi ekleyin, çevirin ve dışa aktarın; adım adım."
+    },
+    "advanced-sections": {
+      "name": "Gelişmiş bölümler",
+      "summary": "Gelişmiş modun eklediği her sekme ve görünüm ne işe yarar."
+    },
+    "glossaries": {
+      "name": "Sözlükçeler",
+      "summary": "Metninize uyan hazır bir sözlükçeyi etkinleştirin ve bulduğu eşleşmeleri görün."
+    },
+    "routing": {
+      "name": "Yönlendirme",
+      "summary": "NARN'ın neyi kimin çevireceğine nasıl karar verdiğine 30 saniyelik bir bakış."
+    },
+    "routing-advanced": {
+      "name": "Gelişmiş yönlendirme kuralları",
+      "summary": "Her dili veya metin türünü seçtiğiniz sağlayıcıya gönderen kurallar."
+    },
+    "quality": {
+      "name": "Kalite",
+      "summary": "NARN'ın çevirilerinizi nasıl denetlediğine kısa bir bakış."
+    },
+    "compare": {
+      "name": "Karşılaştırma",
+      "summary": "Çevirileri yan yana incelemeye kısa bir bakış."
+    },
+    "review-translation-ai": {
+      "name": "Çeviri yapay zekâ incelemesi",
+      "summary": "Çevirilerinizi bir yapay zekâya denetletmeye kısa bir bakış."
+    },
+    "orphans": {
+      "name": "Yetimler",
+      "summary": "Dosyanızda olmayan bir girdiye ne olduğunu, turun yerine geri koyduğu bir alıştırma yetimiyle görün."
+    },
+    "startOver": "Baştan başla",
+    "continue": "Kaldığım yerden devam et",
+    "progress": "{{current}}/{{total}} adım",
+    "progressSections": "{{current}}/{{total}} bölüm",
+    "completed": "Tamamlandı",
+    "needsProject": "Bu turu yapmak için bir proje açın.",
+    "needsDesktop": "Turlar için daha geniş bir ekran gerekir. Bir tur yapmak için uygulamayı bilgisayarda açın.",
+    "switchedToAdvanced": "Bu tur için gelişmiş moda geçildi.",
+    "confirm": {
+      "title": "Rehberli kurulum için Basit moda geçilsin mi?",
+      "body": "Rehberli kurulum, gelişmiş sekmeleri gizleyen Basit mod için hazırlandı. Üst çubuktan istediğiniz zaman geri dönebilirsiniz.",
+      "switch": "Basit moda geç",
+      "stay": "Gelişmiş modda kal"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "Yönlendirme sizin için yeni mi?",
+        "body": "NARN'ın neyi kimin çevireceğine nasıl karar verdiğine 30 saniyelik bir bakış."
+      },
+      "config": {
+        "title": "Yönlendirme, kimin çevireceğini seçer",
+        "what": "Burada metinlerinizi hangi çeviri sağlayıcısının üstleneceğini seçersiniz.",
+        "why": "Bazı dilleri veya metin türlerini başka bir sağlayıcıya göndermek ya da her şey için tek sağlayıcıyı kullanmak istediğinizde işe yarar."
+      },
+      "mode": {
+        "title": "Basit veya gelişmiş kurallar",
+        "what": "Burada her şey için tek bir sağlayıcı ile bir kural listesi arasında geçiş yaparsınız.",
+        "why": "Basit başlayın. Bir dil, kategori veya ton için farklı bir sağlayıcı istediğinizde kurallara geçin.",
+        "advancedAction": "Gelişmiş kuralları açıkla"
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "Sözlükçeler sizin için yeni mi?",
+        "body": "Adların ve anahtar terimlerin tutarlı kalmasını sağlamaya kısa bir bakış."
+      },
+      "list": {
+        "title": "Sözlükçeleriniz",
+        "what": "Her sözlükçe, terimlerden ve her biri için istediğiniz çeviriden oluşan bir listedir.",
+        "why": "Karakter adları, yetenekler veya eşya adları gibi terimler böylece her seferinde aynı şekilde çevrilir."
+      },
+      "create": {
+        "title": "Sözlükçe oluşturun",
+        "what": "Boş bir sözlükçe oluşturun ve kendi terimlerinizi ekleyin.",
+        "why": "Farklı çevrilmemesi gereken sözcükleri zaten biliyorsanız bunu yapın."
+      },
+      "generate": {
+        "title": "Terimleri yapay zekâ önersin",
+        "what": "Bir yapay zekâ sağlayıcısından metinlerinizdeki olası terimleri bulmasını isteyin.",
+        "why": "Bulmak için dosyanın tamamını okumak zorunda kalmazsınız. Önerilenleri siz inceler ve kabul edersiniz."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "Kalite sizin için yeni mi?",
+        "body": "NARN'ın çevirilerinizi nasıl denetlediğine kısa bir bakış."
+      },
+      "title": {
+        "title": "Otomatik kalite denetimleri",
+        "what": "Her çeviri; eksik etiketler, değişen yer tutucular ve uzunluk sınırları gibi kurallara göre denetlenir.",
+        "why": "Oyununuzu bozacak sorunlar, oyun testine kalmadan burada görünür."
+      },
+      "overview": {
+        "title": "Başarı oranınız",
+        "what": "Projede kaç denetimin geçtiğini, kaçının başarısız olduğunu gösterir.",
+        "why": "Çevirilerin hazır olup olmadığını ya da hâlâ çalışma gerektirip gerektirmediğini hızlıca anlamanın yolu."
+      },
+      "issues": {
+        "title": "En sık görülen sorunlar",
+        "what": "En sık başarısız olan sorun türleri burada listelenir.",
+        "why": "Önce en sık görüleni düzeltmek, en çok başarısızlığı ortadan kaldırır."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "Karşılaştırma sizin için yeni mi?",
+        "body": "Çevirileri yan yana incelemeye kısa bir bakış."
+      },
+      "target": {
+        "title": "Dili seçin",
+        "what": "Kaynak metnin yanında hangi dilin gösterileceğini seçin.",
+        "why": "Bir seferde tek dili, satır satır inceleyin ve giderken düzenleyin."
+      },
+      "reference": {
+        "title": "Başvuru dili ekleyin",
+        "what": "Yanında ikinci bir dil gösterin; örneğin iyi okuduğunuz bir dil.",
+        "why": "Hedef dili okuyamadığınızda işe yarar: anlamı bildiğiniz bir dille karşılaştırabilirsiniz."
+      },
+      "translate": {
+        "title": "Buradan çevirin",
+        "what": "Seçtiğiniz satırları ya da filtrelerinize uyan tüm satırları çevirin.",
+        "why": "İnceleme sırasında fark ettiğiniz boşlukları bu sekmeden ayrılmadan doldurmak için kullanışlıdır."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "Yapay zekâ incelemesi yeni mi?",
+        "body": "Çevirilerinizi bir yapay zekâya denetletmeye kısa bir bakış."
+      },
+      "intro": {
+        "title": "Çeviriler için ikinci bir görüş",
+        "what": "Bir yapay zekâ sağlayıcısı çevirilerinizi kaynak metnin yanında okur ve puanlar.",
+        "why": "Otomatik denetimlerin yakalayamadığı hataları ve garip ifadeleri bulur; böylece yayımlamadan önce düzeltebilirsiniz."
+      },
+      "start": {
+        "title": "Son çalıştırmayı inceleyin",
+        "what": "En son çeviri çalıştırmasının incelemesini başlatın.",
+        "why": "Yalnızca yakın zamanda çevrilenleri incelemek maliyeti ve bekleme süresini düşük tutar."
+      },
+      "all": {
+        "title": "Hepsini inceleyin",
+        "what": "Yalnızca son çalıştırmayı değil, projedeki tüm çevirileri inceleyin.",
+        "why": "Yayımlamadan önce ya da sözlükçeyi veya yönlendirmeyi değiştirdikten sonra kullanın."
+      }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Kurallar yukarıdan denetlenir",
+      "what": "NARN kuralları yukarıdan aşağı denetler ve bir girdiye uyan ilk kural onu çevirir. Bu turda Asya dillerini bir sağlayıcıya, diğer tüm dilleri başka bir sağlayıcıya gönderiyorsunuz.",
+      "why": "Hiçbir kurala uymayan bir girdi çevrilmez; bu yüzden son kural her şeye uymalıdır."
+    },
+    "edit": {
+      "title": "1 numaralı kuralı açın",
+      "what": "1 numaralı kuralı düzenlemek için kaleme basın. Bu kural Asya dillerini ele alacak.",
+      "noRulesWhat": "Bu projede henüz kural yok. 1 numaralı kuralı oluşturmak için Kural ekle’ye basın. Bu kural Asya dillerini ele alacak."
+    },
+    "filter": {
+      "title": "Filtreleme’yi açın",
+      "what": "Bu kuralın hangi girdileri aldığını görmek için Filtreleme’ye basın.",
+      "why": "Burada hiçbir şey işaretlenmemiş bir kural her girdiyi alır."
+    },
+    "langs": {
+      "title": "Asya dillerini işaretleyin",
+      "what": "Projenizin dilleri arasından Asya dillerini işaretleyin, örneğin ja, ko ve zh-hans, diğerlerinin işaretini kaldırın. Projede hiç yoksa denemek için herhangi bir dili işaretleyin. Bir dili işaretleyince ya da işaretini kaldırınca İleri görünür.",
+      "why": "1 numaralı kural artık yalnızca bu dilleri alır. Diğer tüm diller altındaki kurallara geçer."
+    },
+    "module": {
+      "title": "Sağlayıcısını seçin",
+      "what": "Modül alanında bu diller için sağlayıcıyı seçin. Aynı sağlayıcının farklı bir modelini kullanmak için aşağıdaki Aracı ayarları’nı açın.",
+      "why": "Değişiklikleriniz kendiliğinden kaydedilir."
+    },
+    "done": {
+      "title": "Kuralı kapatın",
+      "what": "Bitti’ye basın."
+    },
+    "add": {
+      "title": "Diğer diller için bir kural ekleyin",
+      "what": "Kural ekle’ye basın. Yeni kural en alta, mevcut kuralların altına gelir.",
+      "why": "Kurallar yukarıdan denetlendiği için en alttaki kural yalnızca üstündeki kuralların bıraktığını alır."
+    },
+    "newModule": {
+      "title": "Yalnızca bir sağlayıcı seçin",
+      "what": "Modül alanında diğer tüm diller için sağlayıcıyı seçin. Filtreleme’yi boş bırakın. Bir sağlayıcı seçilince İleri görünür.",
+      "why": "Filtre gerekmez: işaretlediğiniz diller 1 numaralı kuralda durur, bu yüzden alttaki kurallara yalnızca diğer diller ulaşır."
+    },
+    "order": {
+      "title": "İşi sıra yapar",
+      "what": "1 numaralı kural işaretlediğiniz dilleri alır, alttaki kurallar da yalnızca geriye kalanı alır. Filtresiz kural önce gelseydi her dili alırdı ve 1 numaralı kural hiç kullanılmazdı.",
+      "why": "Sırayı değiştirmek için bir kuralın yanındaki okları kullanın."
+    },
+    "templates": {
+      "title": "Şablonlar",
+      "what": "Hazır kurallar. Şablon kullan birini bu projenin kurallarının sonuna ekler.",
+      "why": "Sonradan ayarlayabileceğiniz hızlı bir başlangıç."
+    },
+    "groups": {
+      "title": "Kural grupları",
+      "what": "Kural grubu ayrı bir kural takımıdır. Çeviriler burada seçili grubu kullanır.",
+      "why": "Örneğin bir sağlayıcıyı denemek için başka bir takımı hazır tutun ve aralarında geçiş yapın."
+    },
+    "import": {
+      "title": "İçe / dışa aktarma",
+      "what": "Kuralları bir JSON dosyasına kaydedin veya bir dosyadan yükleyin.",
+      "why": "Aynı yönlendirmeyi başka bir projede yeniden kullanın."
+    },
+    "back": {
+      "title": "Basit görünüme dönün",
+      "what": "Basit, tek sağlayıcılı görünümdür. Seçtiğinizde kurallarınız bir kenara bırakılır ve her şeyi tek sağlayıcı çevirir.",
+      "why": "Kurallarınız silinmez, saklanır. Yeniden kullanmak için Gelişmiş'i seçin."
+    },
+    "absentWhat": "Bu adımın gösterdiği öğe şu anda ekranda değil. Devam etmek için İleri’ye, önceki adımı yeniden yapmak için Geri’ye basın."
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Karşılaştırma",
+      "what": "Kaynak metin bir hedef dilin yanında, satır satır; isterseniz bir referans dille.",
+      "why": "Bir dili, okuyamadığınız bir dil olsa bile, dikkatle inceleyip düzenleyin."
+    },
+    "routing": {
+      "title": "Yönlendirme",
+      "what": "Her dili, kategoriyi veya tonu hangi sağlayıcının çevireceğini belirler.",
+      "why": "Her metin türünü onu en iyi işleyen sağlayıcıya gönderin."
+    },
+    "stage-details": {
+      "title": "Bölüm ayrıntıları",
+      "what": "Bir bölümün adı, oynanış ayrıntıları ve açıklaması, çevirileriyle birlikte.",
+      "why": "Bir bölümü anlatan metni, metin dosyanızın dışında çevirin."
+    },
+    "quality": {
+      "title": "Kalite",
+      "what": "Her çevirinin geçtiği otomatik denetimler ve başarısız olanlar.",
+      "why": "Bozuk etiketleri, değişmiş yer tutucuları ve fazla uzun metinleri yayından önce yakalayın."
+    },
+    "review-source-ai": {
+      "title": "Kaynak yapay zekâ incelemesi",
+      "what": "Bir yapay zekâ sağlayıcısı kaynak metninizi okur, yazım hatalarını ve belirsiz ifadeleri gösterir.",
+      "why": "Daha iyi bir kaynak metin her dilde daha iyi bir çeviri sağlar."
+    },
+    "review-translation-ai": {
+      "title": "Çeviri yapay zekâ incelemesi",
+      "what": "Bir yapay zekâ sağlayıcısı çevirileri kaynağın yanında okur ve puanlar.",
+      "why": "Otomatik denetimlerin kaçırdığı yanlış anlamları ve kötü ifadeleri bulur."
+    },
+    "review-manual": {
+      "title": "Elle inceleme",
+      "what": "İnceleme bekleyen çevirilerin sırası; her birini onaylayın, düzenleyin veya ayırın.",
+      "why": "Şüpheli çevirileri klavye kısayollarıyla hızla bitirin."
+    },
+    "glossary": {
+      "title": "Sözlükçe",
+      "what": "Her biri için istediğiniz çeviriyle terim listeleri.",
+      "why": "Adlar ve anahtar terimler böylece her seferinde aynı çıkar."
+    },
+    "category": {
+      "title": "Kategori",
+      "what": "Metinleri türe göre gruplar: arayüz etiketleri, diyaloglar veya eşya adları gibi.",
+      "why": "Yönlendirme kuralları ve yığınlar her metin türünü farklı ele alabilir."
+    },
+    "color-text": {
+      "title": "Metin biçimlendirici",
+      "what": "Renk, kalın, italik ve yazı boyutu içeren metinler için bir taslak aracı.",
+      "why": "Biçimlendirmeyi elle yazmadan biçimli metin yazın."
+    },
+    "orphans": {
+      "title": "Yetimler",
+      "what": "Sonraki bir içe aktarmada kaybolan girdiler, çevirileriyle birlikte saklanır.",
+      "why": "Dosyanız değiştiğinde hiçbir şey kaybolmaz: onları yeniden bağlayın veya silin."
+    },
+    "backup": {
+      "title": "Yedekleme",
+      "what": "Projeyi indirip geri yükleyebileceğiniz bir arşive paketler.",
+      "why": "Bir içe aktarma veya toplu değişiklik ters giderse önceki bir duruma dönün."
+    },
+    "sharing": {
+      "title": "Paylaşım",
+      "what": "Ortak çalışanları davet edin ve her birinin hangi dilleri düzenleyebileceğini seçin.",
+      "why": "Çevirmenler kendi dilleri üzerinde, kendi yapay zekâ sağlayıcılarıyla çalışır."
+    },
+    "global-config": {
+      "title": "Genel yapılandırma",
+      "what": "Tüm çalışma alanının ayarları: sağlayıcılar, modeller ve kimlik bilgisi kasası.",
+      "why": "Bir sağlayıcıyı bir kez kurun ve her projede kullanın."
+    },
+    "translation-memory": {
+      "title": "Çeviri belleği",
+      "what": "Önceki çeviriler; aynı metin yeniden geldiğinde tekrar kullanılır.",
+      "why": "Maliyeti düşürür ve tekrarlanan satırların aynı çevrilmesini sağlar."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "Sözlükçe ne işe yarar",
+      "what": "Sözlükçe, her biri için istediğiniz çeviriyle terimleri listeler; karakter adları, yetenekler veya eşya adları gibi.",
+      "why": "Çeviriler böylece yeni bir tahmin yerine her seferinde sizin sözcüklerinizi kullanır."
+    },
+    "picked": {
+      "title": "Girdileriniz için bir sözlükçe",
+      "what": "Tur, terimleri girdilerinizde geçtiği için {{name}} sözlükçesini seçti. Eşleşen girdi: {{count}}.",
+      "noneWhat": "Sözlükçelerinizden hiçbiri henüz girdilerinizle eşleşmiyor, bu yüzden tur {{name}} sözlükçesini kullanıyor."
+    },
+    "constant": {
+      "title": "Sabit sütunu",
+      "what": "Metnin sabit bir terimi tam olarak sözlükçedeki gibi yazdığı yerlerde, terim çeviri motoruna hiç gönderilmez. NARN bunun yerine sözlükçedeki çevirinizi doğrudan sonuca koyar; böylece Diluc gibi bir karakter adı her zaman burada yazıldığı gibi çıkar.",
+      "absentWhat": "Terimlerini ve Sabit sütununu görmek için soldan bir sözlükçe seçin.",
+      "why": "Diğer terimler, motorun uyması gereken bir başvuru olarak metinle birlikte gönderilir."
+    },
+    "enable": {
+      "title": "Etkinleştirin",
+      "what": "Etkinleştir'e basın. NARN eşleşmelerin uygulanıp uygulanmayacağını sorar: Eşleşmeleri uygula, sözlükçeyi terimlerinden birini içeren her girdiye atar.",
+      "absentWhat": "Soldan bir sözlükçe seçin, ardından adının yanındaki Etkinleştir'e basın.",
+      "onWhat": "{{name}} zaten etkin, bu yüzden bu proje onu kullanıyor.",
+      "why": "Bu proje çevrilirken yalnızca etkin sözlükçeler kullanılır."
+    },
+    "choice": {
+      "title": "Yalnızca etkinleştir mi, Eşleşmeleri uygula mı?",
+      "what": "Eşleşmeleri uygula, sözlükçeyi terimlerinden birini içeren her girdiye hemen atar. Yalnızca etkinleştir yalnızca onu açar ve girdilerinizi olduğu gibi bırakır; daha sonra Eşleşmeler bölümünden atayabilirsiniz."
+    },
+    "matches": {
+      "title": "Bulunan eşleşmeler",
+      "what": "NARN bu girdileri kendisi buldu: her biri {{name}} sözlükçesinden bir terim içeriyor ve sözlükçe artık onlara atandı.",
+      "onlyWhat": "NARN bu girdileri kendisi buldu: her biri {{name}} sözlükçesinden bir terim içeriyor. Onları işaretleyip Sözlükçe ata'ya basarak sözlükçeyi onlar için kullanın.",
+      "noneWhat": "Henüz hiçbir girdi {{name}} sözlükçesinden bir terim içermiyor. İçeren girdiler burada listelenir.",
+      "why": "Bir sözlükçe, atandığı girdiler için kullanılır."
+    },
+    "effect": {
+      "title": "Çeviriyi nasıl değiştirir",
+      "what": "Bir metin bir sözlükçe terimi içerdiğinde, terim ve sizin çeviriniz metinle birlikte gönderilir.",
+      "why": "Sağlayıcı kendi sözcüğünü seçmek yerine sizin tercihinize uyar."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Yetim nedir",
+      "what": "Yetim, “Tam değiştirme” ile içe aktardığınız son dosyada bulunmayan bir girdidir.",
+      "why": "NARN onu silmek yerine çevirileriyle birlikte burada saklar; böylece hiçbir şey yanlışlıkla kaybolmaz."
+    },
+    "offer": {
+      "title": "Bir alıştırma yetimiyle deneyin",
+      "what": "Tur, girdilerinizden birini kısa bir süre yetime dönüştürüp sonra geri koyabilir. Hiçbir şey kaybolmaz: girdi çevirilerini korur ve yerine döner.",
+      "why": "Gerçek bir yetim görmek bu sekmeyi sonra kullanmayı kolaylaştırır. Ya da tur yalnızca anlatsın."
+    },
+    "backup": {
+      "title": "Önce bir yedek",
+      "what": "Alıştırma yetimi oluşturulmadan önce projenin bir yedeği alınır. Her durumda hiçbir şey kaybolmaz: tur girdiyi geri koyar.",
+      "why": "Bir yedekle “Yedekleme” sekmesinden her zaman tam olarak bu duruma dönebilirsiniz."
+    },
+    "simulating": {
+      "title": "Alıştırma yetimi oluşturuluyor",
+      "what": "Tur, girdilerinizi biri hariç yeniden içe aktarıyor. Bu biraz sürer.",
+      "why": "“Tam değiştirme” ile içe aktardığınız bir dosyadan bir girdi kaybolduğunda olan tam olarak budur."
+    },
+    "practice-row": {
+      "title": "Alıştırma yetiminiz",
+      "what": "Bu girdi artık bir yetim. “Çeviriler” sekmesinde artık görünmüyor ve çevirileri korunuyor.",
+      "why": "Yetimler, her biri için karar verebilmeniz için “Tam değiştirme” ile içe aktarmadan sonra burada görünür."
+    },
+    "practice-options": {
+      "title": "Bir yetimle neler yapabilirsiniz",
+      "what": "“Yeniden bağla”, çevirilerini başka bir girdiye taşır; örneğin metni yalnızca yeniden ifade edilmiş bir girdiye. “Sil” onu kalıcı olarak kaldırır.",
+      "why": "Bunda ikisini de kullanmayın: tur onu bir sonraki adımda geri koyar."
+    },
+    "recover": {
+      "title": "Geri koyun",
+      "what": "“Geri koy”a basın; girdi çevirileriyle birlikte listedeki yerine döner.",
+      "why": "Tur onu yeniden içe aktarır; bir sonraki dosyanız bir girdiyi içerdiğinde de girdi aynı şekilde geri gelir."
+    },
+    "restore": {
+      "title": "Yedeğiniz",
+      "what": "Alıştırmadan önce alınan yedek burada. “Yedeği geri yükle” onun “Geri yükle” düğmesini gösterir; basıp basmamak size kalmış.",
+      "why": "Ona ihtiyacınız yok: girdi zaten geri geldi. Yedeği yalnızca bir şeyler ters gittiğinde geri yükleyin."
+    },
+    "done": {
+      "title": "Yetimler bu kadar",
+      "what": "Yetimler, son içe aktarmanızın dışarıda bıraktığı girdileri ve çevirileri siz yeniden bağlayana ya da silene kadar saklar.",
+      "why": "Her “Tam değiştirme” içe aktarmasından sonra bu sekmeye bir göz atın."
+    },
+    "explain-list": {
+      "title": "Yetim listesi",
+      "what": "Her yetim kaynak metnini ve kaç çeviri sakladığını gösterir.",
+      "absentWhat": "Bu projede şu anda yetim yok. Bir içe aktarma girdileri dışarıda bıraktığında, her biri kaynak metni ve kaç çeviri sakladığıyla burada görünür.",
+      "why": "En çok çevirisi olanlar önce gelir: yeniden yapmaları en çok emek isteyenler onlardır."
+    },
+    "explain-options": {
+      "title": "Yeniden bağlayın ya da silin",
+      "what": "“Yeniden bağla”, bir yetimin çevirilerini başka bir girdiye taşır; örneğin metni yalnızca yeniden ifade edilmiş bir girdiye. “Sil” onu kalıcı olarak kaldırır.",
+      "why": "Metin başka bir biçimde hâlâ varsa yeniden bağlayın; gerçekten yoksa silin."
+    },
+    "actions": {
+      "simulate": "Alıştırma yetimi oluştur",
+      "explainOnly": "Yalnızca anlat",
+      "backupFirst": "Önce yedekle (önerilir)",
+      "skipBackup": "Yedeksiz devam et",
+      "recover": "Geri koy",
+      "restoreBackup": "Yedeği geri yükle",
+      "switchProject": "Projeyi değiştir"
+    },
+    "notices": {
+      "alreadyRecovered": "Alıştırma yetimi zaten “Çeviriler” sekmesine geri döndü.",
+      "alreadyDeleted": "Alıştırma yetimi silindi, bu yüzden tur onu geri koyamaz. Bir yedek aldıysanız onu “Yedekleme” sekmesinden geri yükleyebilirsiniz.",
+      "otherProject": "Bu turdan bir alıştırma yetimi hâlâ başka bir projede. Önce onu geri koymak için o projeye geçin.",
+      "leftOut": "Alıştırma yetimi hâlâ “Yetimler” sekmesinde. Geri getirmek için oradaki “Geri koy”a basın."
+    },
+    "blocked": {
+      "noEntries": "Henüz alıştırma yapılacak bir girdi yok, bu yüzden tur yalnızca anlatıyor.",
+      "collaborator": "Yetimleri yalnızca proje sahibi yönetebilir, bu yüzden tur yalnızca anlatıyor.",
+      "sourcelessRows": "Bazı girdilerin kaynak metni yok ve bir içe aktarma onları birebir yeniden oluşturamaz. Tur yalnızca anlatıyor, hiçbir şey değişmiyor.",
+      "unsafeText": "Bir kaynak metinde virgülden ya da satır sonundan hemen önce tırnak işareti var; bir içe aktarma bunu birebir yeniden oluşturamaz. Tur yalnızca anlatıyor, hiçbir şey değişmiyor.",
+      "commaInSourceLabel": "Bir kaynak etiketinde virgül ya da uçlarında boşluk var; bir içe aktarma bunu birebir yeniden oluşturamaz. Tur yalnızca anlatıyor, hiçbir şey değişmiyor."
+    },
+    "errors": {
+      "backup": "Yedek oluşturulamadı. Hiçbir şey değiştirilmedi.",
+      "simulate": "Alıştırma yetimi oluşturulamadı. Hiçbir şey değiştirilmedi.",
+      "recover": "Girdi henüz geri konamadı. “Yetimler” sekmesinde güvende; yeniden deneyin.",
+      "recoverRefused": "Tur bu girdiyi başka girdileri değiştirmeden geri koyamıyor, bu yüzden hiçbir şey değiştirilmedi. Çevirilerini taşımak için “Yetimler” sekmesindeki “Yeniden bağla”yı kullanın ya da bir yedek aldıysanız onu geri yükleyin.",
+      "load": "Alıştırma yetimi kontrol edilemedi. Yeniden denemek için “Geri koy”a basın."
+    },
+    "banner": {
+      "text": "Bu, rehberli turun alıştırma yetimi. Çevirileriyle birlikte “Çeviriler” sekmesine dönmesi için onu geri koyun.",
+      "recovered": "Alıştırma yetimi “Çeviriler” sekmesine geri döndü."
+    }
+  }
+}

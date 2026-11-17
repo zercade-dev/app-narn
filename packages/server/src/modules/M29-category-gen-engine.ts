@@ -46,6 +46,7 @@ import { getGlobalConfigStore, getProjectStore } from '../storage/registry.js';
 import { getCurrentTenant, runWithTenant } from '../storage/pg/tenant-context.js';
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { isAbortError, isRateLimitError, rateLimitCooldownMs } from './M9/errors.js';
+import { classifyFailure } from './M9/failure-code.js';
 import { BackgroundRunEngine, type LoggerLike } from './M9/run-engine.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
 import { selectFreewayBackgroundModule, type ModuleLogFn } from './M9/module-selection.js';
@@ -445,10 +446,11 @@ export class CategoryGenEngine extends BackgroundRunEngine<CategorySuggestion> {
       status.status = RunStatusCode.Failed;
       status.finishedAt = Date.now();
       const message = toErrorMessage(err);
-      status.errors.push({ message, timestamp: Date.now() });
+      const code = classifyFailure(err);
+      status.errors.push({ message, timestamp: Date.now(), code });
       // A genuine failure keeps its verbose log for debugging (matches M28).
       await this.flushLogs(projectId, runId);
-      this.logger.error('category-gen:failed', { runId, projectId, error: message });
+      this.logger.error('category-gen:failed', { runId, projectId, error: message, code });
     } finally {
       this.controllers.delete(runId);
       this.clearExtraBuffers(runId);

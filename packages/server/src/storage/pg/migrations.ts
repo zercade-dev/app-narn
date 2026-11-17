@@ -1106,4 +1106,126 @@ export const MIGRATIONS: ReadonlyArray<{ name: string; statements: readonly stri
     name: '0030_freeway_cooldown_reason',
     statements: [`alter table freeway_buckets add column if not exists cooldown_reason text`],
   },
+  {
+    // Typed notifications: the app writes per-user rows about runs and
+    // collaborator activity. `kind` null = a free-text admin broadcast (every
+    // existing row). The partial index serves the per-user pruning of kind
+    // rows that runs on each typed insert. RLS from 0017 covers the new
+    // columns unchanged.
+    name: '0031_notification_kinds',
+    statements: [
+      `alter table notifications add column if not exists kind text`,
+      `alter table notifications add column if not exists data jsonb`,
+      `create index if not exists notifications_user_kind_created on notifications (user_id, created_at desc) where kind is not null`,
+    ],
+  },
+  {
+    // Collaborator digest (cloud): an hourly job tells each project owner which
+    // collaborators changed translations and how much. It reads across every
+    // tenant, so the reads go through SECURITY DEFINER functions and the job's
+    // state lives in `job_watermarks`, which app_user cannot touch directly.
+    //
+    // `locked_until` is a lease: `narn_collab_digest_window()` claims it in the
+    // same statement that reads the window and returns no row while another
+    // runner holds it, so two replicas never digest the same window. It works
+    // through a pool (no session-level lock to leak across connections) and an
+    // expired lease is reclaimed, so a crashed runner never wedges the job.
+    name: '0032_collab_digest',
+    statements: [
+      `create table if not exists job_watermarks (
+         name text primary key,
+         at timestamptz not null,
+         locked_until timestamptz
+       )`,
+      `revoke all on job_watermarks from app_user`,
+      `create or replace function narn_collab_digest_window(at_time timestamptz default null)
+         returns table (since timestamptz, until timestamptz)
+         language sql security definer set search_path = public as $$
+           insert into job_watermarks as w (name, at, locked_until)
+           values ('collab-digest', coalesce(at_time, now()) - interval '1 hour', now() + interval '30 minutes')
+           on conflict (name) do update set locked_until = excluded.locked_until
+             where w.locked_until is null or w.locked_until <= now()
+           returning w.at, coalesce(at_time, now())
+         $$`,
+      `revoke execute on function narn_collab_digest_window(timestamptz) from public`,
+      `do $$ begin
+         if exists (select 1 from pg_roles where rolname = 'narn_app') then
+           grant execute on function narn_collab_digest_window(timestamptz) to narn_app;
+         end if;
+       end $$`,
+      `create or replace function narn_collab_activity(since timestamptz, until timestamptz)
+         returns table (project_id text, owner_id text, user_id text, language text,
+                        edits bigint, translated bigint, run_languages text[])
+         language sql stable security definer set search_path = public as $$
+           with e as (
+             select m.project_id, narn_project_owner(m.project_id) as owner_id,
+                    m.created_by as user_id, m.language, count(*)::bigint as edits
+             from manual_edits m
+             where m.created_at > since and m.created_at <= until
+             group by m.project_id, m.created_by, m.language
+           ),
+           r as (
+             select r.project_id, r.created_by, r.completed, r.data
+             from runs r
+             where r.finished_at > (extract(epoch from since) * 1000)
+               and r.finished_at <= (extract(epoch from until) * 1000)
+               and (r.kind is null or r.kind in ('translate', 'relink-retranslate'))
+               and r.created_by is not null
+               and r.completed > 0
+           ),
+           sums as (
+             select r.project_id, r.created_by, sum(r.completed)::bigint as translated
+             from r group by r.project_id, r.created_by
+           ),
+           langs as (
+             select r.project_id, r.created_by, array_agg(distinct l.lang order by l.lang) as run_languages
+             from r
+             cross join lateral jsonb_array_elements_text(
+               case when jsonb_typeof(r.data->'request'->'targetLanguages') = 'array'
+                    then r.data->'request'->'targetLanguages' else '[]'::jsonb end
+             ) as l(lang)
+             group by r.project_id, r.created_by
+           ),
+           t as (
+             select s.project_id, narn_project_owner(s.project_id) as owner_id, s.created_by as user_id,
+                    s.translated, coalesce(g.run_languages, '{}'::text[]) as run_languages
+             from sums s
+             left join langs g on g.project_id = s.project_id and g.created_by = s.created_by
+           )
+           select e.project_id, e.owner_id, e.user_id, e.language, e.edits, 0::bigint, null::text[]
+           from e where e.owner_id is not null and e.user_id <> e.owner_id
+           union all
+           select t.project_id, t.owner_id, t.user_id, null::text, 0::bigint, t.translated, t.run_languages
+           from t where t.owner_id is not null and t.user_id <> t.owner_id
+           order by 1, 3, 4
+         $$`,
+      `revoke execute on function narn_collab_activity(timestamptz, timestamptz) from public`,
+      `do $$ begin
+         if exists (select 1 from pg_roles where rolname = 'narn_app') then
+           grant execute on function narn_collab_activity(timestamptz, timestamptz) to narn_app;
+         end if;
+       end $$`,
+      `create or replace function narn_collab_digest_advance(until timestamptz) returns void
+         language sql security definer set search_path = public as $$
+           update job_watermarks set at = greatest(at, until), locked_until = null
+           where name = 'collab-digest'
+         $$`,
+      `revoke execute on function narn_collab_digest_advance(timestamptz) from public`,
+      `do $$ begin
+         if exists (select 1 from pg_roles where rolname = 'narn_app') then
+           grant execute on function narn_collab_digest_advance(timestamptz) to narn_app;
+         end if;
+       end $$`,
+      `create or replace function narn_collab_digest_release() returns void
+         language sql security definer set search_path = public as $$
+           update job_watermarks set locked_until = null where name = 'collab-digest'
+         $$`,
+      `revoke execute on function narn_collab_digest_release() from public`,
+      `do $$ begin
+         if exists (select 1 from pg_roles where rolname = 'narn_app') then
+           grant execute on function narn_collab_digest_release() to narn_app;
+         end if;
+       end $$`,
+    ],
+  },
 ];

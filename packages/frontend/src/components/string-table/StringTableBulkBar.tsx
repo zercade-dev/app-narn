@@ -15,6 +15,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeft, Loader2, Sparkles } from 'lucide-react';
 import type { RunStatusCode } from '@zercade-dev/narn-shared';
+import { useControlVisible } from '../../lib/mode-gating.js';
 import { ComboboxInput } from '@/components/ui/combobox-input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -135,9 +136,15 @@ export function StringTableBulkBar({
 }: Readonly<StringTableBulkBarProps>): React.JSX.Element {
   const { t } = useTranslation('strings');
   const { t: tBatch } = useTranslation('batch');
+  const showBulkOperations = useControlVisible('bulk-operations');
+  const showAiGeneration = useControlVisible('bulk-ai-generation');
+  const showRetranslateTier = useControlVisible('retranslate-below-tier');
 
   return (
-    <div className="flex flex-col gap-1.5 mt-2 px-3 py-2 bg-primary/8 border border-primary/20 rounded-md text-sm">
+    <div
+      className="flex flex-col gap-1.5 mt-2 px-3 py-2 bg-primary/8 border border-primary/20 rounded-md text-sm"
+      data-tour="bulk-bar"
+    >
       <div className="flex flex-wrap items-center gap-3 gap-y-2">
         <span className="text-primary font-medium text-xs" data-testid="bulk-selection">
           {/* Reflects only actionable (currently-visible-under-filter) rows —
@@ -155,6 +162,7 @@ export function StringTableBulkBar({
             className="text-xs text-primary hover:text-primary/80 underline underline-offset-2 cursor-pointer"
             onClick={onSelectAllFiltered}
             data-testid="bulk-select-all-filtered"
+            data-tour="bulk-select-all-filtered"
           >
             {t('bulk.selectAllFiltered', { count: entriesLength })}
           </button>
@@ -173,7 +181,7 @@ export function StringTableBulkBar({
             Every action here patches a non-`translations` field —
             'manage'-only server-side (`assertEntryPatchAllowed`) — so hidden
             outright for collaborators rather than offered only to 403. */}
-        {!isCollaborator && (
+        {!isCollaborator && showBulkOperations && (
           <Popover
             open={bulkOpOpen}
             onOpenChange={(open) => {
@@ -341,42 +349,44 @@ export function StringTableBulkBar({
 
         {/* AI Generation: opens the selection-scoped glossary dialog, or
             hands the selection off to the Category tab. */}
-        <Popover open={aiGenOpen} onOpenChange={setAiGenOpen}>
-          <PopoverTrigger
-            render={
-              <Button size="sm" variant="outline" data-testid="bulk-ai-generation-trigger">
-                <Sparkles className="size-3.5 mr-1" />
-                {t('bulk.aiGeneration')}
-              </Button>
-            }
-          />
-          <PopoverContent className="w-64 p-2" align="start">
-            <div className="flex flex-col gap-0.5">
-              <button
-                type="button"
-                className="rounded px-2 py-1.5 text-left text-xs hover:bg-accent cursor-pointer"
-                onClick={() => {
-                  setAiGenOpen(false);
-                  setGlossaryGenOpen(true);
-                }}
-                data-testid="bulk-ai-generate-glossary"
-              >
-                {t('bulk.generateGlossaryFromSelection')}
-              </button>
-              <button
-                type="button"
-                className="rounded px-2 py-1.5 text-left text-xs hover:bg-accent cursor-pointer"
-                onClick={() => {
-                  setAiGenOpen(false);
-                  handleGenerateCategoriesFromSelection();
-                }}
-                data-testid="bulk-ai-generate-categories"
-              >
-                {t('bulk.generateCategoriesFromSelection')}
-              </button>
-            </div>
-          </PopoverContent>
-        </Popover>
+        {showAiGeneration && (
+          <Popover open={aiGenOpen} onOpenChange={setAiGenOpen}>
+            <PopoverTrigger
+              render={
+                <Button size="sm" variant="outline" data-testid="bulk-ai-generation-trigger">
+                  <Sparkles className="size-3.5 mr-1" />
+                  {t('bulk.aiGeneration')}
+                </Button>
+              }
+            />
+            <PopoverContent className="w-64 p-2" align="start">
+              <div className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  className="rounded px-2 py-1.5 text-left text-xs hover:bg-accent cursor-pointer"
+                  onClick={() => {
+                    setAiGenOpen(false);
+                    setGlossaryGenOpen(true);
+                  }}
+                  data-testid="bulk-ai-generate-glossary"
+                >
+                  {t('bulk.generateGlossaryFromSelection')}
+                </button>
+                <button
+                  type="button"
+                  className="rounded px-2 py-1.5 text-left text-xs hover:bg-accent cursor-pointer"
+                  onClick={() => {
+                    setAiGenOpen(false);
+                    handleGenerateCategoriesFromSelection();
+                  }}
+                  data-testid="bulk-ai-generate-categories"
+                >
+                  {t('bulk.generateCategoriesFromSelection')}
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
 
         <span className="text-muted-foreground">|</span>
         {batchRunId ? (
@@ -416,6 +426,7 @@ export function StringTableBulkBar({
             size="sm"
             onClick={() => void openBatchDialog()}
             data-testid="bulk-batch-translate"
+            data-tour="bulk-batch-translate"
             disabled={
               batchRunId !== null || visibleSelectedCount === 0 || batchTargetLanguagesLength === 0
             }
@@ -427,71 +438,79 @@ export function StringTableBulkBar({
           {tBatch('toTranslateCount', { count: translatableCount })}
         </span>
 
-        <span className="text-muted-foreground">|</span>
+        {showRetranslateTier && (
+          <>
+            <span className="text-muted-foreground">|</span>
 
-        {/* "Retranslate below tier N": scopes to exactly the selection's weak
+            {/* "Retranslate below tier N": scopes to exactly the selection's weak
             Freeway pairs (see collectFreewayRetranslatePairs in
             string-table-helpers.ts) rather than the full entryIds ×
             targetLanguages product, so it never overwrites a good
             translation in another language. Own testids
             (bulk-retranslate-tier-*), distinct from the filter's
             filter-freeway-tier-below-* ids. */}
-        <div className="flex items-center gap-1.5 text-xs">
-          <span className="text-muted-foreground">{t('bulk.retranslateBelowTier')}</span>
-          <Select
-            value={retranslateBelowTier === null ? 'off' : String(retranslateBelowTier)}
-            onValueChange={(v) => setRetranslateBelowTier(v === 'off' ? null : Number(v))}
-          >
-            <SelectTrigger
-              size="sm"
-              className="w-16 h-7 text-xs"
-              data-testid="bulk-retranslate-tier-select"
-            >
-              {/* base-ui shows the raw value without a render-function. */}
-              <SelectValue>
-                {(value: string | null) =>
-                  value === 'off' || value === null ? t('filters.freewayTierBelowOff') : value
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="off" className="text-xs" data-testid="bulk-retranslate-tier-off">
-                {t('filters.freewayTierBelowOff')}
-              </SelectItem>
-              {RETRANSLATE_BELOW_TIER_OPTIONS.map((n) => (
-                <SelectItem
-                  key={n}
-                  value={String(n)}
-                  className="text-xs"
-                  data-testid={`bulk-retranslate-tier-${n}`}
+            <div className="flex items-center gap-1.5 text-xs">
+              <span className="text-muted-foreground">{t('bulk.retranslateBelowTier')}</span>
+              <Select
+                value={retranslateBelowTier === null ? 'off' : String(retranslateBelowTier)}
+                onValueChange={(v) => setRetranslateBelowTier(v === 'off' ? null : Number(v))}
+              >
+                <SelectTrigger
+                  size="sm"
+                  className="w-16 h-7 text-xs"
+                  data-testid="bulk-retranslate-tier-select"
                 >
-                  {n}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onRetranslateBelowTier}
-            disabled={batchRunId !== null || retranslateBelowTierPairCount === 0}
-            data-testid="bulk-retranslate-tier-apply"
-            // The button being disabled with no qualifying pairs has no
-            // other explanation on screen (the filter dimension scopes to
-            // ANY language; this action scopes to writable ∩ active) — the
-            // title surfaces the actual count so that's discoverable on hover.
-            title={
-              retranslateBelowTier === null
-                ? undefined
-                : t('bulk.retranslateBelowTierApplyHint', {
-                    count: retranslateBelowTierPairCount,
-                    tier: retranslateBelowTier,
-                  })
-            }
-          >
-            {t('bulk.retranslateBelowTierApply')}
-          </Button>
-        </div>
+                  {/* base-ui shows the raw value without a render-function. */}
+                  <SelectValue>
+                    {(value: string | null) =>
+                      value === 'off' || value === null ? t('filters.freewayTierBelowOff') : value
+                    }
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    value="off"
+                    className="text-xs"
+                    data-testid="bulk-retranslate-tier-off"
+                  >
+                    {t('filters.freewayTierBelowOff')}
+                  </SelectItem>
+                  {RETRANSLATE_BELOW_TIER_OPTIONS.map((n) => (
+                    <SelectItem
+                      key={n}
+                      value={String(n)}
+                      className="text-xs"
+                      data-testid={`bulk-retranslate-tier-${n}`}
+                    >
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onRetranslateBelowTier}
+                disabled={batchRunId !== null || retranslateBelowTierPairCount === 0}
+                data-testid="bulk-retranslate-tier-apply"
+                // The button being disabled with no qualifying pairs has no
+                // other explanation on screen (the filter dimension scopes to
+                // ANY language; this action scopes to writable ∩ active) — the
+                // title surfaces the actual count so that's discoverable on hover.
+                title={
+                  retranslateBelowTier === null
+                    ? undefined
+                    : t('bulk.retranslateBelowTierApplyHint', {
+                        count: retranslateBelowTierPairCount,
+                        tier: retranslateBelowTier,
+                      })
+                }
+              >
+                {t('bulk.retranslateBelowTierApply')}
+              </Button>
+            </div>
+          </>
+        )}
 
         <Button
           variant="link"

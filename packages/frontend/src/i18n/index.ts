@@ -1,6 +1,17 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+// i18next 27 turns strict interpolation checks on by default, which makes the
+// options argument of `t` required whenever it is passed (`t(key, undefined)`
+// stops type-checking). The app wraps `t` as `(key, vars?) => string` in many
+// places, so keep the v26 typing. Declared here, not in a bare `.d.ts`, so it
+// extends the module instead of replacing it.
+declare module 'i18next' {
+  interface CustomTypeOptions {
+    strictInterpolationChecks: false;
+  }
+}
+
 // English is the reference locale, loaded statically. Eagerly globbing the
 // namespace files (instead of a hand-maintained import list) keeps the static
 // English chunk while guaranteeing every `en/<ns>.json` on disk is registered —

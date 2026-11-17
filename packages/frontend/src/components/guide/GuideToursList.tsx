@@ -1,0 +1,246 @@
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Check, FolderOpen, Monitor } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
+import { useGuideFacts } from '../../hooks/use-guide-facts.js';
+import { useIsMobile } from '../../hooks/use-mobile-viewport.js';
+import { useUiMode } from '../../hooks/use-ui-mode.js';
+import { toast } from '../../lib/toast.js';
+import { listedTours, type CatalogTour } from '../../lib/tour/catalog.js';
+import { FIRST_RUN_TOUR_ID, firstRunMajor } from '../../lib/tour/first-run.js';
+import { tourPosition } from '../../lib/tour/position.js';
+import { MAJOR_STEP_COUNT } from '../../lib/tour/types.js';
+import { useGuideStore } from '../../stores/guide-store.js';
+import { accessFor, useProjectStore } from '../../stores/project-store.js';
+import { useUiSettings } from '../../stores/ui-settings-store.js';
+import { useVaultStore } from '../../stores/vault-store.js';
+import { useViewStore } from '../../stores/view-store.js';
+
+/** What one row shows: how far the person got, and whether they can pick up there. */
+interface RowState {
+  current: number;
+  total: number;
+  /** The first run counts its five big parts as sections; other tours count steps. */
+  unit: 'sections' | 'steps';
+  completed: boolean;
+  /** Counted step index "Continue" opens at; null hides it. */
+  continueAt: number | null;
+}
+
+/**
+ * The tours the person can start on demand (the Guide's left column): one row
+ * per catalog tour they can open, with its progress, "Start from the
+ * beginning" and, when they stopped part way, "Continue where I left off".
+ * A tour of a project area needs an open project; one that runs in Advanced
+ * switches there first and says so. Restarting or continuing the first run
+ * from Advanced asks whether to switch to Simple for it.
+ */
+export function GuideToursList() {
+  const { t } = useTranslation('guide-tour');
+  const mode = useUiMode();
+  const advanced = mode === 'advanced';
+  const facts = useGuideFacts();
+  const cloudManaged = useVaultStore((s) => s.cloudManaged ?? false);
+  const activeProjectId = useProjectStore((s) =>
+    s.projects.some((p) => p.id === s.activeProjectId) ? s.activeProjectId : null,
+  );
+  const access = useProjectStore((s) => accessFor(s, activeProjectId));
+  const tourProgress = useGuideStore((s) => s.tourProgress);
+  // The Orphans tour lists the steps it resumes in while a practice orphan is out.
+  useGuideStore((s) => s.orphanSim);
+  const firstRunDismissed = useGuideStore((s) => s.firstRunDismissed);
+  const firstRunFinished = useGuideStore((s) => s.firstRunFinished);
+  /** The first-run action waiting on the Simple/Advanced question, if any. */
+  const [confirming, setConfirming] = useState<'restart' | 'resume' | null>(null);
+
+  const tours = useMemo(() => listedTours(access, cloudManaged), [access, cloudManaged]);
+  // A phone-sized window shows "designed for desktop" where the tours point:
+  // they are listed, not started.
+  const isMobile = useIsMobile();
+
+  const rowState = (entry: CatalogTour): RowState => {
+    if (entry.id === FIRST_RUN_TOUR_ID) {
+      return {
+        current: firstRunMajor(facts),
+        total: MAJOR_STEP_COUNT,
+        unit: 'sections',
+        completed: firstRunFinished,
+        // Its own resume: the guide comes back where the app says it is.
+        continueAt: firstRunDismissed && !firstRunFinished ? 0 : null,
+      };
+    }
+    const tour = entry.build({ facts, access, cloudManaged });
+    const total = tourPosition(tour, 0).total;
+    const saved = tourProgress[entry.id];
+    const completed = saved?.completed ?? false;
+    const last = saved?.last ?? 0;
+    return {
+      current: saved ? Math.min(saved.furthest + 1, total) : 0,
+      total,
+      unit: 'steps',
+      completed,
+      // Left on any step after the first, the last one included: it is not
+      // done until finished, so it shows Continue rather than "N of N" alone.
+      continueAt: !completed && last > 0 && last <= total - 1 ? last : null,
+    };
+  };
+
+  /**
+   * Restart or resume the first run. Staying in Advanced still runs it (it is
+   * forced there): the person asked for it explicitly.
+   */
+  const runFirstRun = (action: 'restart' | 'resume', switchToSimple: boolean) => {
+    setConfirming(null);
+    if (switchToSimple) useUiSettings.getState().setUiMode('simple');
+    const forced = !switchToSimple && advanced;
+    const store = useGuideStore.getState();
+    if (action === 'restart') store.restartFirstRun(forced);
+    else store.resumeFirstRun(forced);
+    useViewStore.getState().setView('project');
+  };
+
+  const start = (entry: CatalogTour, at?: number) => {
+    if (entry.id === FIRST_RUN_TOUR_ID) {
+      const action = at === undefined ? 'restart' : 'resume';
+      if (advanced) setConfirming(action);
+      else runFirstRun(action, false);
+      return;
+    }
+    if (entry.needsAdvanced && !advanced) {
+      useUiSettings.getState().setUiMode('advanced');
+      toast.info(t('guideTours.switchedToAdvanced'));
+    }
+    // Land on the tour's tab, so a tour continued part way opens where it applies.
+    if (entry.tab) useViewStore.getState().setActiveTab(entry.tab);
+    entry.onStart?.();
+    useGuideStore.getState().startTour(entry.id, at === undefined ? undefined : { at });
+  };
+
+  return (
+    <div data-testid="guide-tours">
+      <h1 className="mb-4 text-xl font-semibold">{t('guideTours.title')}</h1>
+      {isMobile && (
+        <p
+          className="mb-3 flex items-center gap-1 text-xs font-medium text-status-warn"
+          data-testid="guide-tours-needs-desktop"
+        >
+          <Monitor className="size-3.5 shrink-0" aria-hidden />
+          {t('guideTours.needsDesktop')}
+        </p>
+      )}
+      <ul className="grid gap-3 sm:grid-cols-2">
+        {tours.map((entry) => {
+          const { id } = entry;
+          const row = rowState(entry);
+          const needsProject = entry.needsProject && activeProjectId === null;
+          const blocked = needsProject || isMobile;
+          return (
+            <li
+              key={id}
+              data-testid={`guide-tour-${id}`}
+              className="flex flex-col gap-1 rounded-md border p-3"
+            >
+              <p className="text-sm font-medium">{t(`guideTours.${id}.name`)}</p>
+              <p className="text-xs text-muted-foreground">{t(`guideTours.${id}.summary`)}</p>
+              <p
+                data-testid={`guide-tour-progress-${id}`}
+                data-completed={row.completed ? '' : undefined}
+                className={
+                  row.completed
+                    ? 'mt-1 flex items-center gap-1 text-xs font-medium text-status-pass'
+                    : 'mt-1 text-xs text-muted-foreground'
+                }
+              >
+                {row.completed ? (
+                  <>
+                    <Check className="size-3.5 shrink-0" aria-hidden />
+                    {t('guideTours.completed')}
+                  </>
+                ) : (
+                  t(
+                    row.unit === 'sections' ? 'guideTours.progressSections' : 'guideTours.progress',
+                    {
+                      current: row.current,
+                      total: row.total,
+                    },
+                  )
+                )}
+              </p>
+              {/* Why Start is greyed out: easy to miss in muted text. */}
+              {needsProject && (
+                <p
+                  className="mt-1 flex items-center gap-1 text-xs font-medium text-status-warn"
+                  data-testid={`guide-tour-needs-project-${id}`}
+                >
+                  <FolderOpen className="size-3.5 shrink-0" aria-hidden />
+                  {t('guideTours.needsProject')}
+                </p>
+              )}
+              <div className="mt-1.5 flex flex-col gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-auto min-h-7 w-full justify-start whitespace-normal py-1 text-left text-xs"
+                  data-testid={`guide-tour-start-${id}`}
+                  disabled={blocked}
+                  onClick={() => start(entry)}
+                >
+                  {t('guideTours.startOver')}
+                </Button>
+                {row.continueAt !== null && !blocked && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto min-h-7 w-full justify-start whitespace-normal py-1 text-left text-xs"
+                    data-testid={`guide-tour-continue-${id}`}
+                    onClick={() => start(entry, row.continueAt ?? 0)}
+                  >
+                    {t('guideTours.continue')}
+                  </Button>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <Separator className="mt-3" />
+      <Dialog
+        open={confirming !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirming(null);
+        }}
+      >
+        <DialogContent showCloseButton={false} data-testid="guide-first-run-confirm">
+          <DialogHeader>
+            <DialogTitle>{t('guideTours.confirm.title')}</DialogTitle>
+            <DialogDescription>{t('guideTours.confirm.body')}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              data-testid="guide-first-run-stay"
+              onClick={() => confirming && runFirstRun(confirming, false)}
+            >
+              {t('guideTours.confirm.stay')}
+            </Button>
+            <Button
+              data-testid="guide-first-run-switch"
+              onClick={() => confirming && runFirstRun(confirming, true)}
+            >
+              {t('guideTours.confirm.switch')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

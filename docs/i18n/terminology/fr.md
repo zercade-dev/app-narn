@@ -37,9 +37,9 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 
 | Term | Rendering | Notes |
 | --- | --- | --- |
-| project |  |  |
-| workspace |  |  |
-| entry |  |  |
+| project | projet | Masculine. |
+| workspace | espace de travail | Masculine; always the full phrase, so it never collapses into *projet*. |
+| entry | texte | What the shipped French counts in narration and in the failure lines; kept for every new log line. |
 | source text |  |  |
 | translation | traduction | Feminine. Already used throughout the shipped `strings` and `review` namespaces; the tab label is the plural "Traductions". The verb is "traduire", and "re-translate" is "retraduire" (`review:retranslate`). |
 | source label |  |  |
@@ -53,7 +53,7 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | writable language |  |  |
 | Pseudo Test |  |  |
 | run | exécution | Feminine. Already shipped: `batch:cancelRun` "Annuler l'exécution", `batch:runCancelled` "Exécution annulée :", `logs:translation.runQueued` "Exécution de traduction en file d'attente — position {{position}}." Noun only — never the anglicism "un run" (see `style/fr.md`); the verbs stay "traduire", "lancer", "générer". The Activity tab that lists runs is "Activité", a separate term. |
-| revert |  |  |
+| revert | annuler | Verb on the control; the badge and the toast agree the participle (*annulée*, *annulées*). The narration uses the noun *annulation*. |
 | Activity |  |  |
 | log |  |  |
 | batch | lot | Masculine. Already shipped: `config:module.batchMode` "Mode de lot", `config:batchGroupingLabel` "Regroupement des lots", `config:batchGroupingDescription` "…dans le même lot…". Keep it distinct from *run* ("exécution"), which contains several lots, and do not reuse "lot" for bulk operations over selected rows. |
@@ -71,7 +71,7 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | review queue |  |  |
 | back-translation |  |  |
 | module |  |  |
-| module instance |  |  |
+| module instance | instance | Feminine. |
 | provider | fournisseur | The outside company/service behind a module. `config:enableModuleHelp` "Ajoutez un fournisseur d'IA ou de traduction à utiliser dans vos projets." The three English strings that mislabel a module-instance picker *Provider* (`colorText:assistant.instanceLabel`, `stage-details:chatInstanceLabel`, `config:routing.simplePlaceholder` "Choisissez un fournisseur") are translated as written and must not drag *module* toward this word anywhere else. |
 | model | modèle | Masculine. Already shipped: `config:routing.labelModelOverride` "Modèle personnalisé", `config:freeway.colModel` "Modèle", and throughout the Freeway guide. The collision `style/fr.md` warns about is still live — `sidebar:templateNone` ships as "Aucun modèle" — and the word stays with *model*: it is *template* that has to move to another rendering. Model ids themselves are never translated. |
 | prompt |  |  |
@@ -82,7 +82,7 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | credential |  |  |
 | LQA |  |  |
 | quality gate |  |  |
-| check |  |  |
+| check | contrôle | Masculine; *contrôle qualité* for a quality check. |
 | issue |  |  |
 | severity |  |  |
 | notification severity |  |  |
@@ -95,13 +95,13 @@ enregistrer, **Maj**+**Entrée** pour un saut de ligne, **Échap** pour annuler)
 | glossary term | terme | Masculine. Shortened to "terme" alone inside the Glossary tab. Never "entrée", which is reserved for _entry_. |
 | constant |  |  |
 | match | correspondance | Feminine. Plural "correspondances" throughout the Matches panel ("{{count}} correspondances", "Aucune correspondance trouvée.", "Appliquer les correspondances"). The verb is "correspondre" (`config:models.noMatches` — "Aucun modèle ne correspond à votre recherche"). |
-| translation memory |  |  |
+| translation memory | mémoire de traduction | Feminine. |
 | approve |  |  |
 | category |  |  |
 | tone |  |  |
 | orphan |  |  |
-| relink |  |  |
-| backup |  |  |
+| relink | réaffecter | Verb; the narration uses the participle *réaffecté*. |
+| backup | sauvegarde | Feminine. |
 | snapshot |  |  |
 | template |  |  |
 | omit (from an export) |  |  |

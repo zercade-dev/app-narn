@@ -8,6 +8,12 @@
   "switchToDark": "สลับไปโหมดมืด",
   "languageTitle": "ภาษา",
   "languageDescription": "ภาษาของส่วนติดต่อผู้ใช้",
+  "uiModeLabel": "โหมดอินเทอร์เฟซ",
+  "uiModeSimple": "แบบง่าย",
+  "uiModeAdvanced": "ขั้นสูง",
+  "uiModeDescription": "โหมดแบบง่ายซ่อนเมนูนำทางส่วนใหญ่เพื่อให้คุณโฟกัสกับการแปล ส่วนโหมดขั้นสูงจะแสดงทุกอย่าง",
+  "tourOffersLabel": "เสนอการแนะนำการใช้งาน",
+  "tourOffersDescription": "แสดงคำแนะนำสั้นๆ เมื่อคุณเปิดส่วนใดส่วนหนึ่งของแอปเป็นครั้งแรก",
   "preview": "ตัวอย่าง",
   "previewHint": "ตัวควบคุมตัวอย่างที่แสดงผลด้วยธีมที่เลือก",
   "previewSamples": {

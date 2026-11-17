@@ -93,7 +93,7 @@ use.
 | category | 類別 | `config:routing.labelCategories` is 「類別」. Not reused for 規則群組 or for 來源標籤 |
 | tone | 語氣 | The authoring instruction, per entry. The acoustic readings (音調, 聲調) and the model's writing style (文風) are exactly the traps the term names. `config:routing.labelTones` is 「語氣」 |
 | orphan | 孤立條目 | The figurative noun, built on 條目 so the count chip, the tab and the log lines all count the same object. `config:importModeFullReplaceHint` says such entries 會標示為孤立, and `config:fullReplaceOrphanNotice` names the tab 孤立條目分頁 — English calls it the *Relink tab* there, which does not exist, and that defect is not mirrored |
-| relink | 重新連結 | One verb for the row button, the dialog title, the confirm step and the import warning. `config:importModeFullReplaceHint` is 「…在重新連結或刪除前不會納入 AI 執行」 |
+| relink | 重新連結 | One verb for the row button, the dialog title, the confirm step and the import warning. `config:importModeFullReplaceHint` is 「此檔案中缺少的條目會變為孤立條目」 |
 | backup | 備份 | `config:maxBackupsLabel` is 「每個專案的備份數量上限」. Kept apart from 匯出 (*export*) and from 快照 below, which share sentences with it |
 | snapshot | 快照 | The automatic pre-operation backup. `config:importSnapshotNote` is 「本次匯入前已建立安全快照（{{date}}）。您可以在備份分頁中還原它。」 — one sentence carrying both this term and *backup*, which is why they cannot share a word |
 | template | 範本 | **Taiwanese usage prefers 範本 over the mainland 模板**, and that preference resolves the terminology file's warning for free: 範本 shares no character with 模型, so *template* and *model* can never be confused here. `config:templatesTitle` is 「專案範本」 |

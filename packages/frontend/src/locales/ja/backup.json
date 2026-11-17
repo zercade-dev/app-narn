@@ -43,5 +43,6 @@
   "toastBackupCreated": "バックアップを作成しました。",
   "toastBackupFailed": "バックアップに失敗しました：{{message}}",
   "toastRestoreSuccess": "バックアップを復元しました。",
-  "toastRestoreFailed": "復元に失敗しました：{{message}}"
+  "toastRestoreFailed": "復元に失敗しました：{{message}}",
+  "toastGuideRestored": "ファイルの翻訳を元に戻しました。"
 }

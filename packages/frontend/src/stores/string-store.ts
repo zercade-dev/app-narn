@@ -28,6 +28,12 @@ interface StringStoreState {
   error: string | null;
   /** The project ID whose entries are currently in the store. */
   loadedProjectId: string | null;
+  /**
+   * An entry the string table keeps on screen: it opens the page holding it
+   * (again after a filter or page-size change). The guide's quick test sets
+   * it to its first pick; `null` leaves paging alone. Not persisted.
+   */
+  revealEntryId: string | null;
 
   fetchEntries: (projectId: string) => Promise<void>;
   fetchEntry: (projectId: string, id: string) => Promise<void>;
@@ -35,6 +41,7 @@ interface StringStoreState {
   deleteEntry: (projectId: string, id: string) => Promise<void>;
   bulkUpdate: (projectId: string, ids: string[], partial: StringEntryBulkPatch) => Promise<void>;
   setFilter: (patch: Partial<StringFilters>) => void;
+  revealEntry: (entryId: string | null) => void;
   getFilteredEntries: () => StringEntry[];
 }
 
@@ -50,8 +57,9 @@ let entriesFetchToken = 0;
 /** The store's initial filter set — also the reset base for drill-downs. */
 export const DEFAULT_STRING_FILTERS: EntryFilters = {
   search: '',
-  // Default to true so new projects show only untranslated entries — the most actionable view.
-  untranslatedOnly: true,
+  // Off: a new project lists every entry, translated or not, so a file that
+  // came translated does not open on an empty list.
+  untranslatedOnly: false,
   overflowOnly: false,
   tooLong: false,
   lqaFailed: false,
@@ -77,6 +85,7 @@ export const useStringStore = create<StringStoreState>()(
     (set, get) => ({
       entries: [],
       filters: { ...DEFAULT_STRING_FILTERS },
+      revealEntryId: null,
       loading: false,
       error: null,
       loadedProjectId: null,
@@ -157,6 +166,7 @@ export const useStringStore = create<StringStoreState>()(
         }));
       },
 
+      revealEntry: (revealEntryId) => set({ revealEntryId }),
       setFilter: (patch) => {
         set((s) => ({ filters: { ...s.filters, ...patch } }));
       },

@@ -8,6 +8,12 @@
   "switchToDark": "Passer au mode sombre",
   "languageTitle": "Langue",
   "languageDescription": "Langue de l'interface.",
+  "uiModeLabel": "Mode d'interface",
+  "uiModeSimple": "Simple",
+  "uiModeAdvanced": "Avancé",
+  "uiModeDescription": "Le mode simple masque la plupart de la navigation pour vous concentrer sur la traduction. Le mode avancé affiche tout.",
+  "tourOffersLabel": "Proposer des visites guidées",
+  "tourOffersDescription": "Afficher une courte présentation la première fois que vous ouvrez une partie de l'application.",
   "preview": "Aperçu",
   "previewHint": "Contrôles d'exemple rendus avec le thème sélectionné.",
   "previewSamples": {

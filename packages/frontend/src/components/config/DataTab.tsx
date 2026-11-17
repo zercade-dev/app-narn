@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import {
@@ -17,6 +17,7 @@ import {
 import { useProjectStore } from '../../stores/project-store.js';
 import { useStringStore } from '../../stores/string-store.js';
 import { apiRequest, apiDownload } from '../../hooks/use-api.js';
+import { useGuideStore } from '../../stores/guide-store.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
 import { PseudoTestHelp } from './PseudoTestHelp.js';
 import { Badge } from '@/components/ui/badge';
@@ -39,6 +40,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { LangCodeChip } from '@/components/ui/lang-code-chip';
+import { useCloseOnGuideBack } from '../../lib/tour/close-form.js';
 
 interface DiffSummary {
   imported: number;
@@ -180,10 +182,21 @@ export function DataTab() {
     ? 'main'
     : (exportCollection ?? (hasMainStrings ? 'main' : 'client'));
   const currentLanguages = pendingLanguages ?? activeProject?.activeLanguages ?? [];
-  const isDirty = pendingLanguages !== null;
+  // Changed only when the ticks differ from what is saved: ticking a language
+  // and unticking it again leaves nothing to save.
+  const savedLanguages = activeProject?.activeLanguages ?? [];
+  const isDirty =
+    pendingLanguages !== null &&
+    (pendingLanguages.length !== savedLanguages.length ||
+      pendingLanguages.some((code) => !savedLanguages.includes(code)));
+  // "Select all" means every real language: Pseudo-test is a QA tool, ticked
+  // only on purpose (and kept when it was).
+  const selectableTargetCodes = availableTargetLanguages
+    .map((l) => l.code)
+    .filter((code) => code !== PSEUDO_LANGUAGE_CODE);
   const allChecked =
-    availableTargetLanguages.length > 0 &&
-    availableTargetLanguages.every((l) => currentLanguages.includes(l.code));
+    selectableTargetCodes.length > 0 &&
+    selectableTargetCodes.every((code) => currentLanguages.includes(code));
 
   const handleLanguageToggle = (code: string, checked: boolean) => {
     const base = pendingLanguages ?? activeProject?.activeLanguages ?? [];
@@ -195,7 +208,10 @@ export function DataTab() {
     if (allChecked) {
       setPendingLanguages([]);
     } else {
-      setPendingLanguages(availableTargetLanguages.map((l) => l.code));
+      const keepPseudo = currentLanguages.includes(PSEUDO_LANGUAGE_CODE);
+      setPendingLanguages(
+        keepPseudo ? [...selectableTargetCodes, PSEUDO_LANGUAGE_CODE] : selectableTargetCodes,
+      );
     }
   };
 
@@ -342,6 +358,8 @@ export function DataTab() {
     setImportPreviews({});
     previewFileRef.current = null;
   };
+  // The guide's Back from its "confirm the import" step: the same as Cancel.
+  useCloseOnGuideBack(importWarnOpen, 'confirm-import', closeImportWarn);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -419,6 +437,8 @@ export function DataTab() {
         },
       });
       setExportTarget('editor');
+      // The guided first run's last step completes on a real download.
+      useGuideStore.getState().markExported();
     } catch (err) {
       toast.error(t('exportFailed', { message: (err as Error).message }));
     }
@@ -478,7 +498,11 @@ export function DataTab() {
                   if (v) handleSourceLanguageChange(v);
                 }}
               >
-                <SelectTrigger className="w-64" data-testid="source-language-select">
+                <SelectTrigger
+                  className="w-64"
+                  data-testid="source-language-select"
+                  data-tour="source-language-select"
+                >
                   <SelectValue>
                     {(v: string | null) => {
                       const lang = LANGUAGE_REGISTRY.find((l) => l.code === v);
@@ -497,12 +521,18 @@ export function DataTab() {
             </CardContent>
           </Card>
 
-          {/* Active target languages */}
-          <Card>
+          {/* Active target languages. The whole card is the tour's spotlight,
+              so "Select all" in its header is inside it. */}
+          <Card data-tour="target-languages">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>{t('targetLanguages')}</CardTitle>
-                <Button variant="link" size="sm" onClick={handleToggleAll}>
+                <Button
+                  variant="link"
+                  size="sm"
+                  onClick={handleToggleAll}
+                  data-testid="target-languages-toggle-all"
+                >
                   {allChecked ? t('deselectAll') : t('selectAll')}
                 </Button>
               </div>
@@ -537,6 +567,7 @@ export function DataTab() {
                     onClick={handleSaveLanguages}
                     disabled={savingLanguages}
                     data-testid="save-languages-button"
+                    data-tour="save-languages-button"
                   >
                     {savingLanguages ? tCommon('saving') : tCommon('save')}
                   </Button>
@@ -574,6 +605,7 @@ export function DataTab() {
                 onClick={() => fileInputRef.current?.click()}
                 disabled={importing}
                 data-testid="import-csv-button"
+                data-tour="import-csv-button"
               >
                 {importing ? t('importing') : t('chooseCsv')}
               </Button>
@@ -839,7 +871,11 @@ export function DataTab() {
                 </div>
               )}
               <div className="flex gap-2">
-                <Button onClick={handleExport} data-testid="export-csv-button">
+                <Button
+                  onClick={handleExport}
+                  data-testid="export-csv-button"
+                  data-tour="export-csv-button"
+                >
                   {t('downloadCsv')}
                 </Button>
                 <Button
@@ -859,17 +895,15 @@ export function DataTab() {
         <SheetContent side="bottom" className="max-w-md mx-auto rounded-t-xl px-6 pb-6">
           <SheetHeader className="text-center">
             <SheetTitle>{t('importWarningsTitle')}</SheetTitle>
-            <SheetDescription>
-              {unknownHeaders.length > 0 || rawNewlineLanguages.length > 0
-                ? t('importWarningsDescription')
-                : t('importSheetDescription')}
+            <SheetDescription data-testid="import-detected-collection">
+              {/* The word that tells the two files apart stands out. */}
+              <Trans
+                t={t}
+                i18nKey={pendingCollection === 'client' ? 'detectedClient' : 'detectedMain'}
+                components={{ hl: <strong className="font-semibold text-primary" /> }}
+              />
             </SheetDescription>
           </SheetHeader>
-          <p className="mt-3 text-center text-sm" data-testid="import-detected-collection">
-            {t('detectedCollection', {
-              collection: t(pendingCollection === 'client' ? 'collectionClient' : 'collectionMain'),
-            })}
-          </p>
           <div
             className="mt-3 flex flex-col items-center gap-1.5 text-center"
             data-testid="import-mode-control"
@@ -904,45 +938,56 @@ export function DataTab() {
                 ? t('importModeAddOnlyHint')
                 : t('importModeFullReplaceHint')}
             </p>
-            {pendingCollection === 'main' && importMode === 'full-replace' && (
-              <p className="text-xs text-status-warn mt-2" data-testid="full-replace-orphan-notice">
-                {currentPreview === 'loading'
-                  ? t('fullReplacePreviewLoading')
-                  : t('fullReplaceOrphanNotice', { count: currentPreview?.orphans ?? 0 })}
-              </p>
-            )}
-            {pendingCollection === 'client' && (
-              <div
-                className="text-xs text-status-warn mt-2 space-y-1"
-                data-testid="client-import-notice"
-              >
-                <p>
-                  {importMode === 'add-only'
-                    ? t('clientImportAddOnlyNotice')
-                    : t('clientImportFullReplaceNotice')}
+            {pendingCollection === 'main' &&
+              importMode === 'full-replace' &&
+              (currentPreview === 'loading' || (currentPreview?.orphans ?? 0) > 0) && (
+                <p
+                  className="text-xs text-status-warn mt-2"
+                  data-testid="full-replace-orphan-notice"
+                >
+                  {currentPreview === 'loading'
+                    ? t('fullReplacePreviewLoading')
+                    : t('fullReplaceOrphanNotice', { count: currentPreview?.orphans ?? 0 })}
                 </p>
-                {currentPreview === 'loading' && <p>{t('fullReplacePreviewLoading')}</p>}
-                {currentPreview && currentPreview !== 'loading' && (
-                  <p data-testid="client-import-preview-counts">
-                    {t('clientImportPreviewCounts', {
-                      changed: currentPreview.changed,
-                      orphans: currentPreview.orphans,
-                    })}
-                  </p>
-                )}
-              </div>
-            )}
+              )}
+            {/* Said when something moves to the Relink tab, or when the preview
+                could not tell (then the general rule is said instead). */}
+            {pendingCollection === 'client' &&
+              (currentPreview == null ||
+                currentPreview === 'loading' ||
+                currentPreview.changed + currentPreview.orphans > 0) && (
+                <div
+                  className="text-xs text-status-warn mt-2 space-y-1"
+                  data-testid="client-import-notice"
+                >
+                  {currentPreview == null && (
+                    <p>
+                      {importMode === 'add-only'
+                        ? t('clientImportAddOnlyNotice')
+                        : t('clientImportFullReplaceNotice')}
+                    </p>
+                  )}
+                  {currentPreview === 'loading' && <p>{t('fullReplacePreviewLoading')}</p>}
+                  {currentPreview && currentPreview !== 'loading' && (
+                    <p data-testid="client-import-preview-counts">
+                      {t(
+                        importMode === 'add-only'
+                          ? 'clientImportPreviewCountsAddOnly'
+                          : 'clientImportPreviewCounts',
+                        { changed: currentPreview.changed, orphans: currentPreview.orphans },
+                      )}
+                    </p>
+                  )}
+                </div>
+              )}
           </div>
           {unknownHeaders.length > 0 && (
-            <div className="mt-3" data-testid="import-unknown-headers-warning">
-              <p className="text-sm font-medium">{t('unknownHeadersTitle')}</p>
-              <p className="text-sm text-muted-foreground">{t('unknownHeadersDescription')}</p>
-              <ul className="mt-1 mb-1 list-disc pl-5 text-sm space-y-0.5">
-                {unknownHeaders.map((h) => (
-                  <li key={h}>{h}</li>
-                ))}
-              </ul>
-            </div>
+            <p
+              className="mt-3 text-sm text-status-warn"
+              data-testid="import-unknown-headers-warning"
+            >
+              {t('unknownHeadersSummary', { headers: unknownHeaders.join(', ') })}
+            </p>
           )}
           {currentPreview &&
             currentPreview !== 'loading' &&
@@ -964,14 +1009,19 @@ export function DataTab() {
               </p>
             )}
           {rawNewlineLanguages.length > 0 && (
-            <div className="mt-3" data-testid="import-raw-newline-warning">
-              <p className="text-sm font-medium">{t('rawNewlineLanguagesTitle')}</p>
-              <p className="text-sm text-muted-foreground">{t('rawNewlineLanguagesDescription')}</p>
-              <ul className="mt-1 mb-1 list-disc pl-5 text-sm space-y-0.5">
-                {rawNewlineLanguages.map((code) => (
-                  <li key={code}>{LANGUAGE_REGISTRY.find((l) => l.code === code)?.name ?? code}</li>
-                ))}
-              </ul>
+            <div className="mt-3 text-sm" data-testid="import-raw-newline-warning">
+              <p className="text-status-warn">
+                {t('rawNewlineSummary', { count: rawNewlineLanguages.length })}
+              </p>
+              {/* The list stays one click away for whoever fixes the file. */}
+              <details className="mt-1 text-muted-foreground">
+                <summary className="cursor-pointer text-xs">{t('rawNewlineShowLanguages')}</summary>
+                <p className="mt-1 text-xs">
+                  {rawNewlineLanguages
+                    .map((code) => LANGUAGE_REGISTRY.find((l) => l.code === code)?.name ?? code)
+                    .join(', ')}
+                </p>
+              </details>
             </div>
           )}
           <SheetFooter className="mt-4 flex gap-2">
@@ -980,6 +1030,7 @@ export function DataTab() {
             </Button>
             <Button
               data-testid="confirm-import"
+              data-tour="confirm-import"
               onClick={async () => {
                 setImportWarnOpen(false);
                 const file = pendingImportFile;

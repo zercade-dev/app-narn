@@ -60,18 +60,20 @@ export function GlossarySidebar({
     const name = newGlossaryName.trim();
     if (!name) return;
     try {
-      await apiRequest<Glossary>(`/projects/${projectId}/glossaries`, {
+      const created = await apiRequest<Glossary>(`/projects/${projectId}/glossaries`, {
         method: 'POST',
         body: JSON.stringify({ name }),
       });
       setNewGlossaryName('');
       setCreatingGlossary(false);
       await loadGlossaries();
+      // The new glossary is the one to fill: select it.
+      if (created?.id) onSelectGlossary(created.id);
       toast.success(t('toastGlossaryCreated'));
     } catch (err) {
       reportError(err, 'toastGlossaryCreateError');
     }
-  }, [newGlossaryName, projectId, loadGlossaries, reportError, t]);
+  }, [newGlossaryName, projectId, loadGlossaries, onSelectGlossary, reportError, t]);
 
   const handleRenameGlossary = useCallback(async () => {
     if (!renamingGlossaryId || !renameDraft.trim()) return;
@@ -90,7 +92,7 @@ export function GlossarySidebar({
   }, [renamingGlossaryId, renameDraft, projectId, loadGlossaries, reportError, t]);
 
   return (
-    <div className="w-52 shrink-0 flex flex-col gap-2">
+    <div className="w-52 shrink-0 flex min-h-0 flex-col gap-2 overflow-y-auto">
       <div className="mb-1">
         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
           {t('glossaries')}
@@ -110,21 +112,66 @@ export function GlossarySidebar({
           the labelled generate button. */}
       {!isCollaborator && (
         <>
-          <Button
-            className="w-full justify-start"
-            onClick={() => setCreatingGlossary(true)}
-            data-testid="glossary-new-btn"
-            title={t('newGlossary')}
-          >
-            <Plus className="w-3.5 h-3.5 mr-1 shrink-0" />
-            <span className="min-w-0 truncate">{t('newGlossary')}</span>
-          </Button>
+          {/* "New glossary" and the name form it opens, one spotlight for the
+              guide: the form's ✓ is what creates the glossary. */}
+          <div className="flex flex-col gap-2" data-tour="glossary-create">
+            <Button
+              className="w-full justify-start"
+              onClick={() => setCreatingGlossary(true)}
+              data-testid="glossary-new-btn"
+              title={t('newGlossary')}
+            >
+              <Plus className="w-3.5 h-3.5 mr-1 shrink-0" />
+              <span className="min-w-0 truncate">{t('newGlossary')}</span>
+            </Button>
+            {creatingGlossary && (
+              <div className="flex items-center gap-1" data-tour="glossary-name-form">
+                <Input
+                  autoFocus
+                  value={newGlossaryName}
+                  onChange={(e) => setNewGlossaryName(e.target.value)}
+                  placeholder={t('glossaryNamePlaceholder')}
+                  className="h-7 text-xs"
+                  data-testid="glossary-name-input"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') void handleCreateGlossary();
+                    if (e.key === 'Escape') {
+                      setCreatingGlossary(false);
+                      setNewGlossaryName('');
+                    }
+                  }}
+                />
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 shrink-0"
+                  onClick={handleCreateGlossary}
+                  data-testid="glossary-name-confirm"
+                  aria-label={t('createGlossaryConfirm')}
+                >
+                  <Check className="w-3 h-3" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-7 w-7 shrink-0"
+                  onClick={() => {
+                    setCreatingGlossary(false);
+                    setNewGlossaryName('');
+                  }}
+                >
+                  <X className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
+          </div>
 
           <Button
             variant="outline"
             className="w-full justify-start"
             onClick={onGenerate}
             data-testid="glossary-generate-btn"
+            data-tour="glossary-generate"
             title={t('generateGlossariesBtn')}
           >
             <Sparkles className="w-3.5 h-3.5 mr-1 shrink-0" />
@@ -133,46 +180,8 @@ export function GlossarySidebar({
         </>
       )}
 
-      {creatingGlossary && (
-        <div className="flex items-center gap-1">
-          <Input
-            autoFocus
-            value={newGlossaryName}
-            onChange={(e) => setNewGlossaryName(e.target.value)}
-            placeholder={t('glossaryNamePlaceholder')}
-            className="h-7 text-xs"
-            data-testid="glossary-name-input"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') void handleCreateGlossary();
-              if (e.key === 'Escape') {
-                setCreatingGlossary(false);
-                setNewGlossaryName('');
-              }
-            }}
-          />
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-7 w-7 shrink-0"
-            onClick={handleCreateGlossary}
-          >
-            <Check className="w-3 h-3" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-7 w-7 shrink-0"
-            onClick={() => {
-              setCreatingGlossary(false);
-              setNewGlossaryName('');
-            }}
-          >
-            <X className="w-3 h-3" />
-          </Button>
-        </div>
-      )}
-
-      <div className="flex flex-col gap-0.5">
+      {/* The guide points here to show the glossaries, without the buttons above. */}
+      <div className="flex flex-col gap-0.5" data-tour="glossary-items">
         {sortedGlossaries.map((summary) => {
           const isSelected = summary.id === selectedGlossaryId;
           const isRenaming = renamingGlossaryId === summary.id;
@@ -188,6 +197,8 @@ export function GlossarySidebar({
                 summary.enabled === false && 'opacity-60',
               )}
               data-testid={`glossary-item-${summary.id}`}
+              // The Glossaries tour shows the glossary it picked and selected.
+              data-tour={isSelected ? 'glossary-selected' : undefined}
             >
               {isRenaming ? (
                 <div className="flex items-center gap-1 w-full">

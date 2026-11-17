@@ -8,6 +8,7 @@
     {
       "id": "genshin-characters-aether",
       "source": "Aether",
+      "constant": true,
       "translations": {
         "zh-hans": "空",
         "zh-hant": "空",
@@ -28,6 +29,7 @@
     {
       "id": "genshin-characters-aino",
       "source": "Aino",
+      "constant": true,
       "translations": {
         "zh-hans": "爱诺",
         "zh-hant": "愛諾",
@@ -48,6 +50,7 @@
     {
       "id": "genshin-characters-albedo",
       "source": "Albedo",
+      "constant": true,
       "translations": {
         "zh-hans": "阿贝多",
         "zh-hant": "阿貝多",
@@ -68,6 +71,7 @@
     {
       "id": "genshin-characters-alhaitham",
       "source": "Alhaitham",
+      "constant": true,
       "translations": {
         "zh-hans": "艾尔海森",
         "zh-hant": "艾爾海森",
@@ -88,6 +92,7 @@
     {
       "id": "genshin-characters-aloy",
       "source": "Aloy",
+      "constant": true,
       "translations": {
         "zh-hans": "埃洛伊",
         "zh-hant": "亞蘿伊",
@@ -108,6 +113,7 @@
     {
       "id": "genshin-characters-alyosha",
       "source": "Alyosha",
+      "constant": true,
       "translations": {
         "zh-hans": "阿罗夏",
         "zh-hant": "阿羅夏",
@@ -148,6 +154,7 @@
     {
       "id": "genshin-characters-arataki-itto",
       "source": "Arataki Itto",
+      "constant": true,
       "translations": {
         "zh-hans": "荒泷一斗",
         "zh-hant": "荒瀧一斗",
@@ -168,6 +175,7 @@
     {
       "id": "genshin-characters-arlecchino",
       "source": "Arlecchino",
+      "constant": true,
       "translations": {
         "zh-hans": "阿蕾奇诺",
         "zh-hant": "阿蕾奇諾",
@@ -188,6 +196,7 @@
     {
       "id": "genshin-characters-ayaka",
       "source": "Ayaka",
+      "constant": true,
       "translations": {
         "zh-hans": "绫华",
         "zh-hant": "綾華",
@@ -208,6 +217,7 @@
     {
       "id": "genshin-characters-ayato",
       "source": "Ayato",
+      "constant": true,
       "translations": {
         "zh-hans": "绫人",
         "zh-hant": "綾人",
@@ -228,6 +238,7 @@
     {
       "id": "genshin-characters-baizhu",
       "source": "Baizhu",
+      "constant": true,
       "translations": {
         "zh-hans": "白术",
         "zh-hant": "白朮",
@@ -248,6 +259,7 @@
     {
       "id": "genshin-characters-barbara",
       "source": "Barbara",
+      "constant": true,
       "translations": {
         "zh-hans": "芭芭拉",
         "zh-hant": "芭芭拉",
@@ -268,6 +280,7 @@
     {
       "id": "genshin-characters-beidou",
       "source": "Beidou",
+      "constant": true,
       "translations": {
         "zh-hans": "北斗",
         "zh-hant": "北斗",
@@ -288,6 +301,7 @@
     {
       "id": "genshin-characters-bennett",
       "source": "Bennett",
+      "constant": true,
       "translations": {
         "zh-hans": "班尼特",
         "zh-hant": "班尼特",
@@ -308,6 +322,7 @@
     {
       "id": "genshin-characters-candace",
       "source": "Candace",
+      "constant": true,
       "translations": {
         "zh-hans": "坎蒂丝",
         "zh-hant": "坎蒂絲",
@@ -328,6 +343,7 @@
     {
       "id": "genshin-characters-charlotte",
       "source": "Charlotte",
+      "constant": true,
       "translations": {
         "zh-hans": "夏洛蒂",
         "zh-hant": "夏洛蒂",
@@ -348,6 +364,7 @@
     {
       "id": "genshin-characters-chasca",
       "source": "Chasca",
+      "constant": true,
       "translations": {
         "zh-hans": "恰斯卡",
         "zh-hant": "恰斯卡",
@@ -368,6 +385,7 @@
     {
       "id": "genshin-characters-chevreuse",
       "source": "Chevreuse",
+      "constant": true,
       "translations": {
         "zh-hans": "夏沃蕾",
         "zh-hant": "夏沃蕾",
@@ -388,6 +406,7 @@
     {
       "id": "genshin-characters-chiori",
       "source": "Chiori",
+      "constant": true,
       "translations": {
         "zh-hans": "千织",
         "zh-hant": "千織",
@@ -408,6 +427,7 @@
     {
       "id": "genshin-characters-chongyun",
       "source": "Chongyun",
+      "constant": true,
       "translations": {
         "zh-hans": "重云",
         "zh-hant": "重雲",
@@ -428,6 +448,7 @@
     {
       "id": "genshin-characters-citlali",
       "source": "Citlali",
+      "constant": true,
       "translations": {
         "zh-hans": "茜特菈莉",
         "zh-hant": "茜特菈莉",
@@ -448,6 +469,7 @@
     {
       "id": "genshin-characters-clorinde",
       "source": "Clorinde",
+      "constant": true,
       "translations": {
         "zh-hans": "克洛琳德",
         "zh-hant": "克洛琳德",
@@ -468,6 +490,7 @@
     {
       "id": "genshin-characters-collei",
       "source": "Collei",
+      "constant": true,
       "translations": {
         "zh-hans": "柯莱",
         "zh-hant": "柯萊",
@@ -488,6 +511,7 @@
     {
       "id": "genshin-characters-columbina",
       "source": "Columbina",
+      "constant": true,
       "translations": {
         "zh-hans": "哥伦比娅",
         "zh-hant": "哥倫比婭",
@@ -508,6 +532,7 @@
     {
       "id": "genshin-characters-cyno",
       "source": "Cyno",
+      "constant": true,
       "translations": {
         "zh-hans": "赛诺",
         "zh-hant": "賽諾",
@@ -528,6 +553,7 @@
     {
       "id": "genshin-characters-dahlia",
       "source": "Dahlia",
+      "constant": true,
       "translations": {
         "zh-hans": "塔利雅",
         "zh-hant": "塔利雅",
@@ -548,6 +574,7 @@
     {
       "id": "genshin-characters-dehya",
       "source": "Dehya",
+      "constant": true,
       "translations": {
         "zh-hans": "迪希雅",
         "zh-hant": "迪希雅",
@@ -568,6 +595,7 @@
     {
       "id": "genshin-characters-diluc",
       "source": "Diluc",
+      "constant": true,
       "translations": {
         "zh-hans": "迪卢克",
         "zh-hant": "迪盧克",
@@ -588,6 +616,7 @@
     {
       "id": "genshin-characters-diona",
       "source": "Diona",
+      "constant": true,
       "translations": {
         "zh-hans": "迪奥娜",
         "zh-hant": "迪奧娜",
@@ -608,6 +637,7 @@
     {
       "id": "genshin-characters-dori",
       "source": "Dori",
+      "constant": true,
       "translations": {
         "zh-hans": "多莉",
         "zh-hant": "多莉",
@@ -628,6 +658,7 @@
     {
       "id": "genshin-characters-durin",
       "source": "Durin",
+      "constant": true,
       "translations": {
         "zh-hans": "杜林",
         "zh-hant": "杜林",
@@ -648,6 +679,7 @@
     {
       "id": "genshin-characters-emilie",
       "source": "Emilie",
+      "constant": true,
       "translations": {
         "zh-hans": "艾梅莉埃",
         "zh-hant": "艾梅莉埃",
@@ -668,6 +700,7 @@
     {
       "id": "genshin-characters-escoffier",
       "source": "Escoffier",
+      "constant": true,
       "translations": {
         "zh-hans": "爱可菲",
         "zh-hant": "愛可菲",
@@ -688,6 +721,7 @@
     {
       "id": "genshin-characters-eula",
       "source": "Eula",
+      "constant": true,
       "translations": {
         "zh-hans": "优菈",
         "zh-hant": "優菈",
@@ -708,6 +742,7 @@
     {
       "id": "genshin-characters-faruzan",
       "source": "Faruzan",
+      "constant": true,
       "translations": {
         "zh-hans": "珐露珊",
         "zh-hant": "琺露珊",
@@ -728,6 +763,7 @@
     {
       "id": "genshin-characters-fischl",
       "source": "Fischl",
+      "constant": true,
       "translations": {
         "zh-hans": "菲谢尔",
         "zh-hant": "菲謝爾",
@@ -748,6 +784,7 @@
     {
       "id": "genshin-characters-flins",
       "source": "Flins",
+      "constant": true,
       "translations": {
         "zh-hans": "菲林斯",
         "zh-hant": "菲林斯",
@@ -768,6 +805,7 @@
     {
       "id": "genshin-characters-freminet",
       "source": "Freminet",
+      "constant": true,
       "translations": {
         "zh-hans": "菲米尼",
         "zh-hant": "菲米尼",
@@ -788,6 +826,7 @@
     {
       "id": "genshin-characters-furina",
       "source": "Furina",
+      "constant": true,
       "translations": {
         "zh-hans": "芙宁娜",
         "zh-hant": "芙寧娜",
@@ -828,6 +867,7 @@
     {
       "id": "genshin-characters-ganyu",
       "source": "Ganyu",
+      "constant": true,
       "translations": {
         "zh-hans": "甘雨",
         "zh-hant": "甘雨",
@@ -848,6 +888,7 @@
     {
       "id": "genshin-characters-gorou",
       "source": "Gorou",
+      "constant": true,
       "translations": {
         "zh-hans": "五郎",
         "zh-hant": "五郎",
@@ -868,6 +909,7 @@
     {
       "id": "genshin-characters-heizou",
       "source": "Heizou",
+      "constant": true,
       "translations": {
         "zh-hans": "平藏",
         "zh-hant": "平藏",
@@ -888,6 +930,7 @@
     {
       "id": "genshin-characters-hu-tao",
       "source": "Hu Tao",
+      "constant": true,
       "translations": {
         "zh-hans": "胡桃",
         "zh-hant": "胡桃",
@@ -908,6 +951,7 @@
     {
       "id": "genshin-characters-iansan",
       "source": "Iansan",
+      "constant": true,
       "translations": {
         "zh-hans": "伊安珊",
         "zh-hant": "伊安珊",
@@ -928,6 +972,7 @@
     {
       "id": "genshin-characters-ifa",
       "source": "Ifa",
+      "constant": true,
       "translations": {
         "zh-hans": "伊法",
         "zh-hant": "伊法",
@@ -948,6 +993,7 @@
     {
       "id": "genshin-characters-illuga",
       "source": "Illuga",
+      "constant": true,
       "translations": {
         "zh-hans": "叶洛亚",
         "zh-hant": "葉洛亞",
@@ -968,6 +1014,7 @@
     {
       "id": "genshin-characters-ineffa",
       "source": "Ineffa",
+      "constant": true,
       "translations": {
         "zh-hans": "伊涅芙",
         "zh-hant": "伊涅芙",
@@ -988,6 +1035,7 @@
     {
       "id": "genshin-characters-itto",
       "source": "Itto",
+      "constant": true,
       "translations": {
         "zh-hans": "一斗",
         "zh-hant": "一斗",
@@ -1008,6 +1056,7 @@
     {
       "id": "genshin-characters-jahoda",
       "source": "Jahoda",
+      "constant": true,
       "translations": {
         "zh-hans": "雅珂达",
         "zh-hant": "雅珂達",
@@ -1028,6 +1077,7 @@
     {
       "id": "genshin-characters-jean",
       "source": "Jean",
+      "constant": true,
       "translations": {
         "zh-hans": "琴",
         "zh-hant": "琴",
@@ -1048,6 +1098,7 @@
     {
       "id": "genshin-characters-kachina",
       "source": "Kachina",
+      "constant": true,
       "translations": {
         "zh-hans": "卡齐娜",
         "zh-hant": "卡齊娜",
@@ -1068,6 +1119,7 @@
     {
       "id": "genshin-characters-kaedehara-kazuha",
       "source": "Kaedehara Kazuha",
+      "constant": true,
       "translations": {
         "zh-hans": "枫原万叶",
         "zh-hant": "楓原萬葉",
@@ -1088,6 +1140,7 @@
     {
       "id": "genshin-characters-kaeya",
       "source": "Kaeya",
+      "constant": true,
       "translations": {
         "zh-hans": "凯亚",
         "zh-hant": "凱亞",
@@ -1108,6 +1161,7 @@
     {
       "id": "genshin-characters-kamisato-ayaka",
       "source": "Kamisato Ayaka",
+      "constant": true,
       "translations": {
         "zh-hans": "神里绫华",
         "zh-hant": "神里綾華",
@@ -1128,6 +1182,7 @@
     {
       "id": "genshin-characters-kamisato-ayato",
       "source": "Kamisato Ayato",
+      "constant": true,
       "translations": {
         "zh-hans": "神里绫人",
         "zh-hant": "神里綾人",
@@ -1148,6 +1203,7 @@
     {
       "id": "genshin-characters-kaveh",
       "source": "Kaveh",
+      "constant": true,
       "translations": {
         "zh-hans": "卡维",
         "zh-hant": "卡維",
@@ -1168,6 +1224,7 @@
     {
       "id": "genshin-characters-kazuha",
       "source": "Kazuha",
+      "constant": true,
       "translations": {
         "zh-hans": "万叶",
         "zh-hant": "萬葉",
@@ -1188,6 +1245,7 @@
     {
       "id": "genshin-characters-keqing",
       "source": "Keqing",
+      "constant": true,
       "translations": {
         "zh-hans": "刻晴",
         "zh-hant": "刻晴",
@@ -1208,6 +1266,7 @@
     {
       "id": "genshin-characters-kinich",
       "source": "Kinich",
+      "constant": true,
       "translations": {
         "zh-hans": "基尼奇",
         "zh-hant": "基尼奇",
@@ -1228,6 +1287,7 @@
     {
       "id": "genshin-characters-kirara",
       "source": "Kirara",
+      "constant": true,
       "translations": {
         "zh-hans": "绮良良",
         "zh-hant": "綺良良",
@@ -1248,6 +1308,7 @@
     {
       "id": "genshin-characters-klee",
       "source": "Klee",
+      "constant": true,
       "translations": {
         "zh-hans": "可莉",
         "zh-hant": "可莉",
@@ -1268,6 +1329,7 @@
     {
       "id": "genshin-characters-kokomi",
       "source": "Kokomi",
+      "constant": true,
       "translations": {
         "zh-hans": "心海",
         "zh-hant": "心海",
@@ -1288,6 +1350,7 @@
     {
       "id": "genshin-characters-kujou-sara",
       "source": "Kujou Sara",
+      "constant": true,
       "translations": {
         "zh-hans": "九条裟罗",
         "zh-hant": "九條裟羅",
@@ -1308,6 +1371,7 @@
     {
       "id": "genshin-characters-kuki-shinobu",
       "source": "Kuki Shinobu",
+      "constant": true,
       "translations": {
         "zh-hans": "久岐忍",
         "zh-hant": "久岐忍",
@@ -1328,6 +1392,7 @@
     {
       "id": "genshin-characters-lan-yan",
       "source": "Lan Yan",
+      "constant": true,
       "translations": {
         "zh-hans": "蓝砚",
         "zh-hant": "藍硯",
@@ -1348,6 +1413,7 @@
     {
       "id": "genshin-characters-lauma",
       "source": "Lauma",
+      "constant": true,
       "translations": {
         "zh-hans": "菈乌玛",
         "zh-hant": "菈烏瑪",
@@ -1368,6 +1434,7 @@
     {
       "id": "genshin-characters-layla",
       "source": "Layla",
+      "constant": true,
       "translations": {
         "zh-hans": "莱依拉",
         "zh-hant": "萊依拉",
@@ -1388,6 +1455,7 @@
     {
       "id": "genshin-characters-linnea",
       "source": "Linnea",
+      "constant": true,
       "translations": {
         "zh-hans": "莉奈娅",
         "zh-hant": "莉奈婭",
@@ -1408,6 +1476,7 @@
     {
       "id": "genshin-characters-lisa",
       "source": "Lisa",
+      "constant": true,
       "translations": {
         "zh-hans": "丽莎",
         "zh-hant": "麗莎",
@@ -1428,6 +1497,7 @@
     {
       "id": "genshin-characters-lohen",
       "source": "Lohen",
+      "constant": true,
       "translations": {
         "zh-hans": "洛恩",
         "zh-hant": "洛恩",
@@ -1448,6 +1518,7 @@
     {
       "id": "genshin-characters-lumine",
       "source": "Lumine",
+      "constant": true,
       "translations": {
         "zh-hans": "荧",
         "zh-hant": "熒",
@@ -1468,6 +1539,7 @@
     {
       "id": "genshin-characters-lynette",
       "source": "Lynette",
+      "constant": true,
       "translations": {
         "zh-hans": "琳妮特",
         "zh-hant": "琳妮特",
@@ -1488,6 +1560,7 @@
     {
       "id": "genshin-characters-lyney",
       "source": "Lyney",
+      "constant": true,
       "translations": {
         "zh-hans": "林尼",
         "zh-hant": "林尼",
@@ -1508,6 +1581,7 @@
     {
       "id": "genshin-characters-mavuika",
       "source": "Mavuika",
+      "constant": true,
       "translations": {
         "zh-hans": "玛薇卡",
         "zh-hant": "瑪薇卡",
@@ -1528,6 +1602,7 @@
     {
       "id": "genshin-characters-mika",
       "source": "Mika",
+      "constant": true,
       "translations": {
         "zh-hans": "米卡",
         "zh-hant": "米卡",
@@ -1548,6 +1623,7 @@
     {
       "id": "genshin-characters-mizuki",
       "source": "Mizuki",
+      "constant": true,
       "translations": {
         "zh-hans": "瑞希",
         "zh-hant": "瑞希",
@@ -1568,6 +1644,7 @@
     {
       "id": "genshin-characters-mona",
       "source": "Mona",
+      "constant": true,
       "translations": {
         "zh-hans": "莫娜",
         "zh-hant": "莫娜",
@@ -1588,6 +1665,7 @@
     {
       "id": "genshin-characters-mualani",
       "source": "Mualani",
+      "constant": true,
       "translations": {
         "zh-hans": "玛拉妮",
         "zh-hant": "瑪拉妮",
@@ -1608,6 +1686,7 @@
     {
       "id": "genshin-characters-nahida",
       "source": "Nahida",
+      "constant": true,
       "translations": {
         "zh-hans": "纳西妲",
         "zh-hant": "納西妲",
@@ -1628,6 +1707,7 @@
     {
       "id": "genshin-characters-navia",
       "source": "Navia",
+      "constant": true,
       "translations": {
         "zh-hans": "娜维娅",
         "zh-hant": "娜維婭",
@@ -1648,6 +1728,7 @@
     {
       "id": "genshin-characters-nefer",
       "source": "Nefer",
+      "constant": true,
       "translations": {
         "zh-hans": "奈芙尔",
         "zh-hant": "奈芙爾",
@@ -1668,6 +1749,7 @@
     {
       "id": "genshin-characters-neuvillette",
       "source": "Neuvillette",
+      "constant": true,
       "translations": {
         "zh-hans": "那维莱特",
         "zh-hant": "那維萊特",
@@ -1688,6 +1770,7 @@
     {
       "id": "genshin-characters-nicole",
       "source": "Nicole",
+      "constant": true,
       "translations": {
         "zh-hans": "尼可",
         "zh-hant": "尼可",
@@ -1708,6 +1791,7 @@
     {
       "id": "genshin-characters-nilou",
       "source": "Nilou",
+      "constant": true,
       "translations": {
         "zh-hans": "妮露",
         "zh-hant": "妮露",
@@ -1728,6 +1812,7 @@
     {
       "id": "genshin-characters-ningguang",
       "source": "Ningguang",
+      "constant": true,
       "translations": {
         "zh-hans": "凝光",
         "zh-hant": "凝光",
@@ -1748,6 +1833,7 @@
     {
       "id": "genshin-characters-noelle",
       "source": "Noelle",
+      "constant": true,
       "translations": {
         "zh-hans": "诺艾尔",
         "zh-hant": "諾艾爾",
@@ -1768,6 +1854,7 @@
     {
       "id": "genshin-characters-odette",
       "source": "Odette",
+      "constant": true,
       "translations": {
         "zh-hans": "奥黛塔",
         "zh-hant": "奧黛塔",
@@ -1788,6 +1875,7 @@
     {
       "id": "genshin-characters-ororon",
       "source": "Ororon",
+      "constant": true,
       "translations": {
         "zh-hans": "欧洛伦",
         "zh-hant": "歐洛倫",
@@ -1828,6 +1916,7 @@
     {
       "id": "genshin-characters-qiqi",
       "source": "Qiqi",
+      "constant": true,
       "translations": {
         "zh-hans": "七七",
         "zh-hant": "七七",
@@ -1848,6 +1937,7 @@
     {
       "id": "genshin-characters-raiden-shogun",
       "source": "Raiden Shogun",
+      "constant": true,
       "translations": {
         "zh-hans": "雷电将军",
         "zh-hant": "雷電將軍",
@@ -1888,6 +1978,7 @@
     {
       "id": "genshin-characters-rosaria",
       "source": "Rosaria",
+      "constant": true,
       "translations": {
         "zh-hans": "罗莎莉亚",
         "zh-hant": "蘿莎莉亞",
@@ -1908,6 +1999,7 @@
     {
       "id": "genshin-characters-sandrone",
       "source": "Sandrone",
+      "constant": true,
       "translations": {
         "zh-hans": "桑多涅",
         "zh-hant": "桑多涅",
@@ -1928,6 +2020,7 @@
     {
       "id": "genshin-characters-sangonomiya-kokomi",
       "source": "Sangonomiya Kokomi",
+      "constant": true,
       "translations": {
         "zh-hans": "珊瑚宫心海",
         "zh-hant": "珊瑚宮心海",
@@ -1948,6 +2041,7 @@
     {
       "id": "genshin-characters-sayu",
       "source": "Sayu",
+      "constant": true,
       "translations": {
         "zh-hans": "早柚",
         "zh-hant": "早柚",
@@ -1968,6 +2062,7 @@
     {
       "id": "genshin-characters-sethos",
       "source": "Sethos",
+      "constant": true,
       "translations": {
         "zh-hans": "赛索斯",
         "zh-hant": "賽索斯",
@@ -1988,6 +2083,7 @@
     {
       "id": "genshin-characters-shenhe",
       "source": "Shenhe",
+      "constant": true,
       "translations": {
         "zh-hans": "申鹤",
         "zh-hant": "申鶴",
@@ -2008,6 +2104,7 @@
     {
       "id": "genshin-characters-shikanoin-heizou",
       "source": "Shikanoin Heizou",
+      "constant": true,
       "translations": {
         "zh-hans": "鹿野院平藏",
         "zh-hant": "鹿野院平藏",
@@ -2028,6 +2125,7 @@
     {
       "id": "genshin-characters-sigewinne",
       "source": "Sigewinne",
+      "constant": true,
       "translations": {
         "zh-hans": "希格雯",
         "zh-hant": "希格雯",
@@ -2048,6 +2146,7 @@
     {
       "id": "genshin-characters-skirk",
       "source": "Skirk",
+      "constant": true,
       "translations": {
         "zh-hans": "丝柯克",
         "zh-hant": "絲柯克",
@@ -2088,6 +2187,7 @@
     {
       "id": "genshin-characters-tartaglia",
       "source": "Tartaglia",
+      "constant": true,
       "translations": {
         "zh-hans": "达达利亚",
         "zh-hant": "達達利亞",
@@ -2108,6 +2208,7 @@
     {
       "id": "genshin-characters-thoma",
       "source": "Thoma",
+      "constant": true,
       "translations": {
         "zh-hans": "托马",
         "zh-hant": "托馬",
@@ -2128,6 +2229,7 @@
     {
       "id": "genshin-characters-tighnari",
       "source": "Tighnari",
+      "constant": true,
       "translations": {
         "zh-hans": "提纳里",
         "zh-hant": "提納里",
@@ -2151,23 +2253,24 @@
       "translations": {
         "zh-hans": "旅行者",
         "zh-hant": "旅行者",
-        "ko": "‍여행자",
+        "ko": "여행자",
         "ja": "旅人",
-        "es": "Viajero‍",
-        "fr": "Voyageur‍",
-        "ru": "Путешественник‍",
+        "es": "Viajero",
+        "fr": "Voyageur",
+        "ru": "Путешественник",
         "th": "นักเดินทาง",
-        "vi": "Nhà ‍Lữ Hành",
-        "de": "Reisender‍",
+        "vi": "Nhà Lữ Hành",
+        "de": "Reisender",
         "id": "Pengembara",
         "pt-br": "Viajante",
         "tr": "Gezgin",
-        "it": "Viaggiatore‍"
+        "it": "Viaggiatore"
       }
     },
     {
       "id": "genshin-characters-varesa",
       "source": "Varesa",
+      "constant": true,
       "translations": {
         "zh-hans": "瓦雷莎",
         "zh-hant": "瓦雷莎",
@@ -2188,6 +2291,7 @@
     {
       "id": "genshin-characters-varka",
       "source": "Varka",
+      "constant": true,
       "translations": {
         "zh-hans": "法尔伽",
         "zh-hant": "法爾伽",
@@ -2208,6 +2312,7 @@
     {
       "id": "genshin-characters-venti",
       "source": "Venti",
+      "constant": true,
       "translations": {
         "zh-hans": "温迪",
         "zh-hant": "溫迪",
@@ -2248,6 +2353,7 @@
     {
       "id": "genshin-characters-wriothesley",
       "source": "Wriothesley",
+      "constant": true,
       "translations": {
         "zh-hans": "莱欧斯利",
         "zh-hant": "萊歐斯利",
@@ -2268,6 +2374,7 @@
     {
       "id": "genshin-characters-xiangling",
       "source": "Xiangling",
+      "constant": true,
       "translations": {
         "zh-hans": "香菱",
         "zh-hant": "香菱",
@@ -2288,6 +2395,7 @@
     {
       "id": "genshin-characters-xianyun",
       "source": "Xianyun",
+      "constant": true,
       "translations": {
         "zh-hans": "闲云",
         "zh-hant": "閒雲",
@@ -2308,6 +2416,7 @@
     {
       "id": "genshin-characters-xiao",
       "source": "Xiao",
+      "constant": true,
       "translations": {
         "zh-hans": "魈",
         "zh-hant": "魈",
@@ -2328,6 +2437,7 @@
     {
       "id": "genshin-characters-xilonen",
       "source": "Xilonen",
+      "constant": true,
       "translations": {
         "zh-hans": "希诺宁",
         "zh-hant": "希諾寧",
@@ -2348,6 +2458,7 @@
     {
       "id": "genshin-characters-xingqiu",
       "source": "Xingqiu",
+      "constant": true,
       "translations": {
         "zh-hans": "行秋",
         "zh-hant": "行秋",
@@ -2368,6 +2479,7 @@
     {
       "id": "genshin-characters-xinyan",
       "source": "Xinyan",
+      "constant": true,
       "translations": {
         "zh-hans": "辛焱",
         "zh-hant": "辛焱",
@@ -2388,6 +2500,7 @@
     {
       "id": "genshin-characters-yae-miko",
       "source": "Yae Miko",
+      "constant": true,
       "translations": {
         "zh-hans": "八重神子",
         "zh-hant": "八重神子",
@@ -2408,6 +2521,7 @@
     {
       "id": "genshin-characters-yanfei",
       "source": "Yanfei",
+      "constant": true,
       "translations": {
         "zh-hans": "烟绯",
         "zh-hant": "煙緋",
@@ -2428,6 +2542,7 @@
     {
       "id": "genshin-characters-yaoyao",
       "source": "Yaoyao",
+      "constant": true,
       "translations": {
         "zh-hans": "瑶瑶",
         "zh-hant": "瑤瑤",
@@ -2448,6 +2563,7 @@
     {
       "id": "genshin-characters-yelan",
       "source": "Yelan",
+      "constant": true,
       "translations": {
         "zh-hans": "夜兰",
         "zh-hant": "夜蘭",
@@ -2468,6 +2584,7 @@
     {
       "id": "genshin-characters-yoimiya",
       "source": "Yoimiya",
+      "constant": true,
       "translations": {
         "zh-hans": "宵宫",
         "zh-hant": "宵宮",
@@ -2488,6 +2605,7 @@
     {
       "id": "genshin-characters-yumemizuki-mizuki",
       "source": "Yumemizuki Mizuki",
+      "constant": true,
       "translations": {
         "zh-hans": "梦见月瑞希",
         "zh-hant": "夢見月瑞希",
@@ -2508,6 +2626,7 @@
     {
       "id": "genshin-characters-yun-jin",
       "source": "Yun Jin",
+      "constant": true,
       "translations": {
         "zh-hans": "云堇",
         "zh-hant": "雲堇",
@@ -2528,6 +2647,7 @@
     {
       "id": "genshin-characters-zhongli",
       "source": "Zhongli",
+      "constant": true,
       "translations": {
         "zh-hans": "钟离",
         "zh-hant": "鍾離",
@@ -2548,6 +2668,7 @@
     {
       "id": "genshin-characters-zibai",
       "source": "Zibai",
+      "constant": true,
       "translations": {
         "zh-hans": "兹白",
         "zh-hant": "茲白",

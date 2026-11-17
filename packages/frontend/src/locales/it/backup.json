@@ -43,5 +43,6 @@
   "toastBackupCreated": "Backup creato.",
   "toastBackupFailed": "Backup non riuscito: {{message}}",
   "toastRestoreSuccess": "Backup ripristinato.",
-  "toastRestoreFailed": "Ripristino non riuscito: {{message}}"
+  "toastRestoreFailed": "Ripristino non riuscito: {{message}}",
+  "toastGuideRestored": "Le traduzioni del tuo file sono tornate."
 }

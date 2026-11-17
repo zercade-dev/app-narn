@@ -50,19 +50,39 @@
       "source": "Get Ready",
       "translations": {
         "zh-hans": "准备",
+        "zh-hant": "準備",
+        "ko": "준비",
+        "ja": "準備",
         "es": "Prepararse",
+        "fr": "Préparez-vous",
         "ru": "Готов",
         "th": "เตรียมพร้อม",
         "vi": "Sẵn Sàng",
-        "id": "Bersiap"
+        "de": "Bereit machen",
+        "id": "Bersiap",
+        "pt-br": "Prepare-se",
+        "tr": "Hazırlan",
+        "it": "Preparati"
       }
     },
     {
       "id": "genshin-phrases-hit-v",
       "source": "Hit (v)",
       "translations": {
+        "zh-hans": "击打",
+        "zh-hant": "擊打",
+        "ko": "치기",
+        "ja": "叩く",
+        "es": "Golpear",
+        "fr": "Frapper",
         "ru": "Ударить",
-        "id": "Hit (v)"
+        "th": "ตี",
+        "vi": "Đánh",
+        "de": "Schlagen",
+        "id": "Pukul",
+        "pt-br": "Golpear",
+        "tr": "Vur",
+        "it": "Colpisci"
       }
     },
     {
@@ -130,10 +150,19 @@
       "source": "Players Ready:",
       "translations": {
         "zh-hans": "已准备玩家：",
+        "zh-hant": "已準備玩家：",
+        "ko": "준비된 플레이어:",
+        "ja": "準備完了プレイヤー：",
         "es": "Jugadores Listos:",
+        "fr": "Joueurs prêts :",
         "ru": "Игроков готово:",
+        "th": "ผู้เล่นที่พร้อม:",
         "vi": "Người chơi sẵn sàng:",
-        "id": "Pemain Bersiap:"
+        "de": "Spieler bereit:",
+        "id": "Pemain Bersiap:",
+        "pt-br": "Jogadores prontos:",
+        "tr": "Hazır oyuncular:",
+        "it": "Giocatori pronti:"
       }
     },
     {
@@ -141,10 +170,19 @@
       "source": "Press",
       "translations": {
         "zh-hans": "按",
+        "zh-hant": "按",
+        "ko": "누르기",
+        "ja": "押す",
         "es": "Presionar",
+        "fr": "Appuyer",
         "ru": "Нажать",
+        "th": "กด",
         "vi": "Nhấn",
-        "id": "Tekan"
+        "de": "Drücken",
+        "id": "Tekan",
+        "pt-br": "Pressionar",
+        "tr": "Bas",
+        "it": "Premi"
       }
     },
     {
@@ -212,11 +250,19 @@
       "source": "Push the button",
       "translations": {
         "zh-hans": "按下按钮",
+        "zh-hant": "按下按鈕",
+        "ko": "버튼 누르기",
+        "ja": "ボタンを押す",
         "es": "Presionar el botón",
+        "fr": "Appuyer sur le bouton",
         "ru": "Нажать на кнопку",
         "th": "กดปุ่ม",
         "vi": "Nhấn nút",
-        "id": "Tekan tombol"
+        "de": "Knopf drücken",
+        "id": "Tekan tombol",
+        "pt-br": "Apertar o botão",
+        "tr": "Düğmeye bas",
+        "it": "Premi il pulsante"
       }
     },
     {
@@ -225,12 +271,18 @@
       "translations": {
         "zh-hans": "规则",
         "zh-hant": "規則",
+        "ko": "규칙",
         "ja": "ルール",
-        "es": "Reglas:",
+        "es": "Reglas",
+        "fr": "Règles",
         "ru": "Правила",
         "th": "กติกา",
         "vi": "Quy tắc",
-        "id": "Aturan"
+        "de": "Regeln",
+        "id": "Aturan",
+        "pt-br": "Regras",
+        "tr": "Kurallar",
+        "it": "Regole"
       }
     },
     {

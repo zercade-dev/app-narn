@@ -1,10 +1,13 @@
 {
   "title": "КОНСОЛЬ",
   "empty": "Записей в журнале пока нет.",
+  "debugInRaw": "Строки отладки отображаются в сыром журнале.",
+  "debugShowRaw": "Показать сырой журнал",
   "filter_all": "Все",
   "filter_error": "Ошибка",
   "filter_warn": "Предупреждение",
   "filter_info": "Информация",
+  "filter_infoAndUp": "Инфо и выше",
   "filter_debug": "Отладка",
   "filter_notifications": "Уведомления",
   "statusConnected": "Подключено к потоку журнала сервера",
@@ -45,6 +48,41 @@
   "captureLabel": "Записывать весь журнал",
   "captureTooltip": "Пока эта функция включена, сервер сохраняет каждую запись журнала за эту сессию, чтобы долгий запуск можно было проанализировать без потерь.",
   "captureDownload": "Скачать захваченный журнал ({{captured}})",
-  "captureDropped": "ещё {{dropped}} потеряно",
-  "captureSlotsExhausted": "Захват журнала сейчас занят — на этом сервере уже выполняется слишком много захватов. Повторите попытку позже."
+  "captureDropped": "еще {{dropped}} потеряно",
+  "captureSlotsExhausted": "Захват журнала сейчас занят — на этом сервере уже выполняется слишком много захватов. Повторите попытку позже.",
+  "modeFriendly": "Понятный",
+  "modeRaw": "Сырой",
+  "modeLabel": "Вид журнала",
+  "notificationsBell": "Уведомления",
+  "notificationsBellUnread_one": "Уведомления, непрочитанных: {{count}}",
+  "notificationsBellUnread_few": "Уведомления, непрочитанных: {{count}}",
+  "notificationsBellUnread_many": "Уведомления, непрочитанных: {{count}}",
+  "notificationsBellUnread_other": "Уведомления, непрочитанных: {{count}}",
+  "statusLine": {
+    "translatingInto": "Перевод — {{language}}: {{done}} из {{total}}",
+    "translatingLanguages_one": "Перевод на {{count}} язык: {{done}} из {{total}}",
+    "translatingLanguages_few": "Перевод на {{count}} языка: {{done}} из {{total}}",
+    "translatingLanguages_many": "Перевод на {{count}} языков: {{done}} из {{total}}",
+    "translatingLanguages_other": "Перевод на {{count}} языка: {{done}} из {{total}}",
+    "progress": "{{type}}: {{done}} из {{total}}",
+    "waiting": "{{type}}: ожидание возобновления, {{done}} из {{total}}",
+    "queued": "{{type}}: в очереди, позиция {{position}}",
+    "queuedNoPosition": "{{type}}: в очереди",
+    "starting": "{{type}}: начинается"
+  },
+  "progress": {
+    "counts": "{{done}} из {{total}}",
+    "failed": "не удалось: {{count}}",
+    "elapsed": "прошло {{time}}",
+    "estimating": "оценка времени…",
+    "waiting": "ожидание возобновления",
+    "etaUnderMinute": "осталось меньше минуты",
+    "etaMinutes": "осталось около {{count}} мин",
+    "etaHours": "осталось около {{hours}} ч {{minutes}} мин",
+    "outcome": {
+      "completed": "Завершен",
+      "failed": "Не удался",
+      "cancelled": "Отменен"
+    }
+  }
 }

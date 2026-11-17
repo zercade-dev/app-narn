@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { ConfirmSheet } from '@/components/ui/confirm-sheet';
 import { ApiError } from './use-api.js';
 import { languageName } from '../lib/log-presentation/registry.js';
-import { useViewStore } from '../stores/view-store.js';
+import { navigateOrOffer } from '../lib/mode-gating.js';
 
 /**
  * The language codes carried by a no-route refusal, or null when `err` is
@@ -46,7 +46,6 @@ export interface NoRouteDialog {
 export function useNoRouteDialog(): NoRouteDialog {
   const { t } = useTranslation(['errors', 'logs', 'common']);
   const [languages, setLanguages] = useState<string[] | null>(null);
-  const setActiveTab = useViewStore((s) => s.setActiveTab);
 
   const handle = useCallback((err: unknown): boolean => {
     const codes = noRouteLanguages(err);
@@ -75,7 +74,7 @@ export function useNoRouteDialog(): NoRouteDialog {
       cancelTestId="no-route-cancel"
       onConfirm={() => {
         setLanguages(null);
-        setActiveTab('routing');
+        navigateOrOffer({ kind: 'tab', tab: 'routing' });
       }}
     />
   );

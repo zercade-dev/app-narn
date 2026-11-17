@@ -48,6 +48,7 @@ import { getCurrentTenant, runWithTenant } from '../storage/pg/tenant-context.js
 import { logger as defaultLogger } from './M15-console-logger.js';
 import { isAbortError } from './M9/errors.js';
 import { BackgroundRunEngine, type LoggerLike } from './M9/run-engine.js';
+import { classifyFailure } from './M9/failure-code.js';
 import { assertRunCapacity } from './M9/run-capacity.js';
 import {
   savedTuningForRequest,
@@ -329,6 +330,7 @@ export class StageDetailsEngine extends BackgroundRunEngine<never> {
             status,
             { entryId: `stage:${lang}`, targetLanguage: lang },
             toErrorMessage(err),
+            classifyFailure(err),
           );
           this.emitProgress(status);
           continue;
@@ -390,6 +392,7 @@ export class StageDetailsEngine extends BackgroundRunEngine<never> {
             status,
             { entryId: `stage:${lang}`, targetLanguage: lang },
             toErrorMessage(err),
+            classifyFailure(err),
           );
           this.emitProgress(status);
           continue;
@@ -431,6 +434,7 @@ export class StageDetailsEngine extends BackgroundRunEngine<never> {
                   status,
                   { entryId: `stage:${fieldId}`, targetLanguage: lang },
                   result.error,
+                  classifyFailure(result.error),
                 );
               }
               continue;
@@ -471,7 +475,7 @@ export class StageDetailsEngine extends BackgroundRunEngine<never> {
       status.status = RunStatusCode.Failed;
       status.finishedAt = Date.now();
       const message = toErrorMessage(err);
-      status.errors.push({ message, timestamp: Date.now() });
+      status.errors.push({ message, timestamp: Date.now(), code: classifyFailure(err) });
       await this.flushLogs(projectId, runId);
       this.logger.error('stage-details:failed', { runId, projectId, error: message });
     } finally {

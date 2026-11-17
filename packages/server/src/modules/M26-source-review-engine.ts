@@ -57,6 +57,7 @@ import {
   sourceReviewLengthProxy,
 } from './M32/review-batch.js';
 import type { BucketView } from './M32/types.js';
+import { classifyFailure } from './M9/failure-code.js';
 import {
   BackgroundRunEngine,
   sanitizeLLMText,
@@ -513,12 +514,17 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
       ...(freewayReroute ? { freewayReroute } : {}),
       onResult: async (result, status) => {
         if (result.error) {
-          this.recordFailure(status, { entryId: result.entryId }, result.error);
+          this.recordFailure(
+            status,
+            { entryId: result.entryId },
+            result.error,
+            classifyFailure(result.error),
+          );
           return;
         }
         const entry = entriesById.get(result.entryId);
         if (!entry) {
-          this.recordFailure(status, { entryId: result.entryId }, 'entry not found');
+          this.recordFailure(status, { entryId: result.entryId }, 'entry not found', 'unknown');
           return;
         }
         const findings = result.findings.map(sanitizeFinding);
@@ -536,6 +542,7 @@ export class SourceReviewEngine extends BackgroundRunEngine<SourceReviewRecord> 
             status,
             { entryId: result.entryId },
             err instanceof Error ? err.message : `${err}`,
+            'unknown',
           );
           return;
         }

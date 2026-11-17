@@ -7,6 +7,9 @@ import { useTemplateStore } from '../../stores/template-store.js';
 import { useAsyncAction } from '../../hooks/use-async-action.js';
 import { ModuleSettingsPanel } from './ModuleSettingsPanel.js';
 import { LqaChecksPanel } from './LqaChecksPanel.js';
+import { TranslationProviderCard } from './TranslationProviderCard.js';
+import { useUiMode } from '../../hooks/use-ui-mode.js';
+import { useControlVisible } from '../../lib/mode-gating.js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -63,6 +66,9 @@ export function ConfigTab() {
   const [templateName, setTemplateName] = useState('');
 
   const activeProject = projects.find((p) => p.id === activeProjectId);
+  // Simple hides the Routing tab: who translates is chosen here instead.
+  const simple = useUiMode() === 'simple';
+  const showExpertSettings = useControlVisible('project-expert-settings');
 
   useEffect(() => {
     fetchProjects();
@@ -234,126 +240,133 @@ export function ConfigTab() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {/* Translation memory policy */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('tm.policyTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t('tm.policyDescription')}</p>
-              <Select
-                value={activeProject.tmPolicy ?? 'disabled'}
-                onValueChange={(v) => {
-                  if (v) handleTmPolicyChange(v as TmMatchPolicy);
-                }}
-              >
-                <SelectTrigger className="w-64" data-testid="tm-policy-select">
-                  <SelectValue>
-                    {(v: string | null) => {
-                      if (v === 'relaxed') return t('tm.policyRelaxed');
-                      if (v === 'source-only') return t('tm.policySourceOnly');
-                      if (v === 'disabled') return t('tm.policyDisabled');
-                      return t('tm.policyStrict');
+        {simple && <TranslationProviderCard projectId={activeProject.id} />}
+
+        {/* Expert settings: Simple shows only the provider card and the danger zone. */}
+        {showExpertSettings && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              {/* Translation memory policy */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('tm.policyTitle')}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-muted-foreground">{t('tm.policyDescription')}</p>
+                  <Select
+                    value={activeProject.tmPolicy ?? 'disabled'}
+                    onValueChange={(v) => {
+                      if (v) handleTmPolicyChange(v as TmMatchPolicy);
                     }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="strict" data-testid="tm-policy-strict">
-                    {t('tm.policyStrict')}
-                  </SelectItem>
-                  <SelectItem value="relaxed" data-testid="tm-policy-relaxed">
-                    {t('tm.policyRelaxed')}
-                  </SelectItem>
-                  <SelectItem value="source-only" data-testid="tm-policy-source-only">
-                    {t('tm.policySourceOnly')}
-                  </SelectItem>
-                  <SelectItem value="disabled" data-testid="tm-policy-disabled">
-                    {t('tm.policyDisabled')}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
+                  >
+                    <SelectTrigger className="w-64" data-testid="tm-policy-select">
+                      <SelectValue>
+                        {(v: string | null) => {
+                          if (v === 'relaxed') return t('tm.policyRelaxed');
+                          if (v === 'source-only') return t('tm.policySourceOnly');
+                          if (v === 'disabled') return t('tm.policyDisabled');
+                          return t('tm.policyStrict');
+                        }}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="strict" data-testid="tm-policy-strict">
+                        {t('tm.policyStrict')}
+                      </SelectItem>
+                      <SelectItem value="relaxed" data-testid="tm-policy-relaxed">
+                        {t('tm.policyRelaxed')}
+                      </SelectItem>
+                      <SelectItem value="source-only" data-testid="tm-policy-source-only">
+                        {t('tm.policySourceOnly')}
+                      </SelectItem>
+                      <SelectItem value="disabled" data-testid="tm-policy-disabled">
+                        {t('tm.policyDisabled')}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </CardContent>
+              </Card>
 
-          {/* Batch grouping (project default; per-run dialogs can override) */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('batchGroupingLabel')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-sm text-muted-foreground">{t('batchGroupingDescription')}</p>
-              <Select
-                value={activeProject.batchGrouping ?? 'default'}
-                onValueChange={(v) => {
-                  if (v) handleBatchGroupingChange(v as ProjectGroupingChoice);
-                }}
-              >
-                <SelectTrigger className="w-64" data-testid="project-batch-grouping-select">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">{t('batchGroupingDefaultOption')}</SelectItem>
-                  <SelectItem value="none">{t('batchGroupingNone')}</SelectItem>
-                  <SelectItem value="category">{t('batchGroupingCategory')}</SelectItem>
-                  <SelectItem value="glossary">{t('batchGroupingGlossary')}</SelectItem>
-                  <SelectItem value="both">{t('batchGroupingBoth')}</SelectItem>
-                  <SelectItem value="tone">{t('batchGroupingTone')}</SelectItem>
-                </SelectContent>
-              </Select>
-              {(activeProject.batchGrouping ?? 'default') !== 'default' && (
-                <label className="flex items-center gap-1.5 text-sm pt-0.5">
-                  <Checkbox
-                    data-testid="project-batch-grouping-ignore"
-                    checked={activeProject.ignoreBatchSizeLimit ?? false}
-                    onCheckedChange={(checked) => handleIgnoreLimitChange(checked === true)}
-                  />
-                  {t('ignoreBatchSizeLimitLabel')}
-                </label>
-              )}
-            </CardContent>
-          </Card>
+              {/* Batch grouping (project default; per-run dialogs can override) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>{t('batchGroupingLabel')}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-muted-foreground">{t('batchGroupingDescription')}</p>
+                  <Select
+                    value={activeProject.batchGrouping ?? 'default'}
+                    onValueChange={(v) => {
+                      if (v) handleBatchGroupingChange(v as ProjectGroupingChoice);
+                    }}
+                  >
+                    <SelectTrigger className="w-64" data-testid="project-batch-grouping-select">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">{t('batchGroupingDefaultOption')}</SelectItem>
+                      <SelectItem value="none">{t('batchGroupingNone')}</SelectItem>
+                      <SelectItem value="category">{t('batchGroupingCategory')}</SelectItem>
+                      <SelectItem value="glossary">{t('batchGroupingGlossary')}</SelectItem>
+                      <SelectItem value="both">{t('batchGroupingBoth')}</SelectItem>
+                      <SelectItem value="tone">{t('batchGroupingTone')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {(activeProject.batchGrouping ?? 'default') !== 'default' && (
+                    <label className="flex items-center gap-1.5 text-sm pt-0.5">
+                      <Checkbox
+                        data-testid="project-batch-grouping-ignore"
+                        checked={activeProject.ignoreBatchSizeLimit ?? false}
+                        onCheckedChange={(checked) => handleIgnoreLimitChange(checked === true)}
+                      />
+                      {t('ignoreBatchSizeLimitLabel')}
+                    </label>
+                  )}
+                </CardContent>
+              </Card>
 
-          {/* Save as template — at the 2-col breakpoint (md–xl) this would
+              {/* Save as template — at the 2-col breakpoint (md–xl) this would
               otherwise be the odd one out, leaving a dangling empty cell
               next to it; span both columns there instead, then drop back to
               a single column once xl gives us a balanced 3-up row. */}
-          <Card className="md:col-span-2 xl:col-span-1">
-            <CardHeader>
-              <CardTitle>{t('saveAsTemplateTitle')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <p className="text-sm text-muted-foreground">{t('saveAsTemplateDescription')}</p>
-              <div className="flex items-center gap-2">
-                <Input
-                  value={templateName}
-                  maxLength={128}
-                  placeholder={activeProject.name}
-                  onChange={(e) => setTemplateName(e.target.value)}
-                  className="max-w-xs"
-                  data-testid="template-name-input"
-                />
-                <Button
-                  onClick={handleSaveTemplate}
-                  disabled={savingTemplate}
-                  data-testid="save-template-button"
-                >
-                  {savingTemplate ? tCommon('saving') : t('saveAsTemplate')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              <Card className="md:col-span-2 xl:col-span-1">
+                <CardHeader>
+                  <CardTitle>{t('saveAsTemplateTitle')}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">{t('saveAsTemplateDescription')}</p>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={templateName}
+                      maxLength={128}
+                      placeholder={activeProject.name}
+                      onChange={(e) => setTemplateName(e.target.value)}
+                      className="max-w-xs"
+                      data-testid="template-name-input"
+                    />
+                    <Button
+                      onClick={handleSaveTemplate}
+                      disabled={savingTemplate}
+                      data-testid="save-template-button"
+                    >
+                      {savingTemplate ? tCommon('saving') : t('saveAsTemplate')}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-        <Separator />
+            <Separator />
 
-        {/* Module settings — full width, collapsible per module */}
-        <ModuleSettingsPanel projectId={activeProject.id} />
+            {/* Module settings — full width, collapsible per module */}
+            <ModuleSettingsPanel projectId={activeProject.id} />
 
-        <Separator />
+            <Separator />
 
-        {/* LQA check pipeline — per-project toggles and options */}
-        <LqaChecksPanel project={activeProject} />
+            {/* LQA check pipeline — per-project toggles and options */}
+            <LqaChecksPanel project={activeProject} />
+          </>
+        )}
 
         <Separator />
 

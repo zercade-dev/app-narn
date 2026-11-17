@@ -362,7 +362,7 @@
     "belowTargetConfirm": "仍然繼續",
     "waitingResumesAt": "{{time}} 繼續",
     "waitingPairsCount_other": "{{count}} 對待處理",
-    "waitingSkipReasonWarning": "自動繼續未找到可用的免費金鑰——請使用下方的「立即換模組繼續…」來選擇模組。",
+    "waitingSkipReasonWarning": "自動繼續未找到可用的免費額度金鑰——請使用下方的「立即換模組繼續…」來選擇模組。",
     "waitingProviderErrorReason": "某個供應商發生錯誤，系統將自動重試。",
     "pause": "暫停",
     "resume": "繼續",

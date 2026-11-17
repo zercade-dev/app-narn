@@ -89,9 +89,15 @@
       "id": "genshin-creation-factions-lawachurl",
       "source": "Lawachurl",
       "translations": {
+        "zh-hans": "丘丘王",
+        "zh-hant": "丘丘王",
+        "ko": "츄츄왕",
+        "ja": "ヒルチャールの王",
         "es": "Lawachurl",
+        "fr": "Chef Brutocollinus",
         "ru": "Лавачурл",
         "th": "Lawachurl",
+        "vi": "Vua Hilichurl",
         "de": "Lawachurl",
         "id": "Lawachurl",
         "pt-br": "Lawachurl",
@@ -115,6 +121,7 @@
         "de": "Abgrundmagier",
         "id": "Abyss Mage",
         "pt-br": "Feiticeiro do Abismo",
+        "tr": "Hiçlik Büyücüsü",
         "it": "Mago dell'Abisso"
       }
     },
@@ -174,6 +181,7 @@
         "de": "Vaniloqua",
         "id": "Whopperflower",
         "pt-br": "Flor Gigante",
+        "tr": "Yalancı Çiçek",
         "it": "Malefiore"
       }
     },

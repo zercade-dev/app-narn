@@ -26,7 +26,13 @@
   "templateWarningUnknownGlossary": "O template referencia um glossário desconhecido: “{{id}}”",
   "createFailed": "Falha ao criar o projeto: {{message}}",
   "activateFailed": "Falha ao trocar de projeto: {{message}}",
+  "providerSetupFailed": "Projeto criado, mas não foi possível configurar o provedor. Abra “Chaves dos provedores” para conferir. ({{message}})",
   "changeProjectIcon": "Alterar o ícone do projeto",
+  "providerKeys": "Chaves dos provedores",
+  "advancedOnlyTitle": "Disponível no modo Avançado",
+  "advancedOnlyBody": "{{place}} faz parte do modo Avançado. Mudar para Avançado para abrir?",
+  "advancedOnlySwitch": "Mudar para Avançado",
+  "advancedOnlyCancel": "Agora não",
   "groups": {
     "project": "Preparação",
     "translate": "Traduzir",

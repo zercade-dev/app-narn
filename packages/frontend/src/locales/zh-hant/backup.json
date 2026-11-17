@@ -43,5 +43,6 @@
   "toastBackupCreated": "已建立備份。",
   "toastBackupFailed": "備份失敗：{{message}}",
   "toastRestoreSuccess": "已還原備份。",
-  "toastRestoreFailed": "還原失敗：{{message}}"
+  "toastRestoreFailed": "還原失敗：{{message}}",
+  "toastGuideRestored": "檔案中的翻譯已還原。"
 }

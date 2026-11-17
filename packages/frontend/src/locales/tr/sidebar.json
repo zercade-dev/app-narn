@@ -26,7 +26,13 @@
   "templateWarningUnknownGlossary": "Şablon, bilinmeyen “{{id}}” sözlükçesine başvuruyor",
   "createFailed": "Proje oluşturulamadı: {{message}}",
   "activateFailed": "Proje değiştirilemedi: {{message}}",
+  "providerSetupFailed": "Proje oluşturuldu ancak sağlayıcısı ayarlanamadı. Kontrol etmek için “Sağlayıcı anahtarları”nı açın. ({{message}})",
   "changeProjectIcon": "Proje simgesini değiştir",
+  "providerKeys": "Sağlayıcı anahtarları",
+  "advancedOnlyTitle": "Gelişmiş modda kullanılabilir",
+  "advancedOnlyBody": "{{place}} Gelişmiş modun bir parçasıdır. Açmak için Gelişmiş moda geçilsin mi?",
+  "advancedOnlySwitch": "Gelişmiş moda geç",
+  "advancedOnlyCancel": "Şimdi değil",
   "groups": {
     "project": "Kurulum",
     "translate": "Çeviri",

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { LogEntryPools, type LogPoolDropCounts } from '@zercade-dev/narn-shared';
 import { useRunStore, type RunProgressEvent } from './run-store.js';
 import { useVaultStore } from './vault-store.js';
+import { useNotificationStore } from './notification-store.js';
 import { apiRequest, apiDownload, ApiError } from '../hooks/use-api.js';
 
 export interface LogEntry {
@@ -329,6 +330,7 @@ export const useLoggerStore = create<LoggerStoreState>()((set, get) => {
         try {
           const progress = JSON.parse(event.data as string) as RunProgressEvent;
           useRunStore.getState().applyProgressEvent(progress);
+          useNotificationStore.getState().onRunProgress(progress);
         } catch {
           // ignore malformed SSE data
         }

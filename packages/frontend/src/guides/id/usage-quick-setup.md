@@ -2,12 +2,23 @@
 
 ## Ringkasan
 
-Jalur lengkap untuk proyek baru: aktifkan penyedia, impor entri Anda,
-konfigurasikan glosarium dan penyaluran, terjemahkan, lalu tinjau. Langkah
-yang ditandai *(Optional)* meningkatkan kualitas tetapi tidak wajib untuk
-penerjemahan pertama — lewati di percobaan pertama dan kembali lagi nanti.
+Baru di NARN? Jalur singkat di bawah membawa Anda dari nol hingga terjemahan yang diekspor dalam lima langkah. Penyiapan terpandu di dalam aplikasi menuntun Anda melalui langkah yang sama, dan Anda bisa melewatinya lalu melanjutkannya nanti — **Lanjutkan penyiapan** di bilah samping melanjutkan dari tempat Anda berhenti, dan Anda bisa memulainya ulang dari Panduan ini. Semua yang ada setelah jalur singkat ditujukan bagi Anda yang ingin kontrol lebih.
 
-## 1. Aktifkan penyedia dan simpan kredensial
+## Jalur singkat
+
+1. **Buat kata sandi brankas Anda.** Kunci penyedia Anda dienkripsi dengannya — lihat panduan [Brankas Kredensial](guide:usage-vault). Pada versi cloud, langkah 1 dan 2 dilakukan bersamaan di halaman brankas.
+2. **Tambahkan satu kunci gratis.** Kunci Google AI adalah awal yang paling mudah — dapatkan di [aistudio.google.com/apikey](https://aistudio.google.com/apikey), atau pilih **Gunakan penyedia saya sendiri**. [NARN Freeway](guide:usage-freeway) lalu memilihkan model gratis untuk Anda.
+3. **Buat proyek dan impor teks Anda.** Buat proyek, lalu di tab **Data** pilih bahasa sumber dan bahasa tujuan terjemahan, dan gunakan **Impor CSV**.
+4. **Terjemahkan.** Di **Terjemahan**, pilih semua entri lalu klik **Terjemahkan**. NARN Freeway memilihkan model gratis untuk Anda; pantau kemajuan di **Aktivitas**.
+5. **Ekspor.** Unduh berkas terjemahan Anda dari proyek.
+
+Pengguna baru memulai dalam **mode Sederhana**, yang hanya menampilkan Konfigurasi, Data, Terjemahan, dan Aktivitas (plus Panduan, Pengaturan, dan **Kunci penyedia**). Beralihlah antara **Sederhana** dan **Lanjutan** dari bilah atas atau di Pengaturan kapan saja.
+
+## Jika Anda ingin lebih
+
+Langkah-langkah ini ada di **mode Lanjutan** dan meningkatkan kualitas atau memberi kontrol yang lebih halus. Langkah bertanda *(Optional)* tidak diperlukan untuk terjemahan pertama — lewati dan kembali nanti. Saat pertama kali Anda membuka Penyaluran, Glosarium, Kualitas, Bandingkan, atau Tinjauan AI Terjemahan di mode Lanjutan, tur singkat ditawarkan; Anda bisa memulai tur mana pun lagi dari Panduan ini, atau mematikan tawarannya di Pengaturan.
+
+## Tambahkan penyedia dan kredensial lain
 
 1. Buka **Konfigurasi Global** dan **aktifkan sebuah modul** untuk setiap penyedia yang Anda inginkan (Anthropic, OpenAI, DeepL, dan sebagainya) dari daftar **Aktifkan sebuah modul** — DeepL tercantum dengan namanya, sedangkan penyedia AI muncul sebagai **Tambahkan instans … lagi…**, yang membuat instans pertama penyedia itu. Sebuah modul bisa memiliki beberapa **instans bernama** — berguna untuk dua konfigurasi dari penyedia yang sama dengan kunci atau bawaan yang berbeda.
 2. Kredensial penyedia disimpan dalam **brankas kredensial** terenkripsi —
@@ -19,13 +30,7 @@ penerjemahan pertama — lewati di percobaan pertama dan kembali lagi nanti.
    Perhatikan **upaya penalaran** — pada model thinking hal ini bisa
    melipatgandakan biaya dengan cepat.
 
-## 2. Buat proyek dan impor entri
-
-Buat sebuah proyek, atur **bahasa sumber**-nya, lalu gunakan **Impor CSV**
-di tab **Data** untuk memuat entri sumber Anda (beserta terjemahan apa pun
-yang sudah ada dalam berkasnya).
-
-## 3. *(Optional)* Tinjau dulu teks sumber Anda
+## *(Optional)* Tinjau dulu teks sumber Anda
 
 Jalankan **Tinjauan AI Sumber** pada bahasa sumber sebelum menerjemahkan —
 memperbaiki salah ketik dan frasa yang tidak jelas di sini memberi manfaat
@@ -34,7 +39,7 @@ mengubah entri yang sudah punya terjemahan, terjemahan lamanya berpindah
 ke tab **Entri Yatim** — **hubungkan ulang** entri itu, dengan
 penerjemahan ulang opsional.
 
-## 4. *(Optional)* Aktifkan glosarium
+## *(Optional)* Aktifkan glosarium
 
 Di tab **Glosarium**, aktifkan glosarium yang berlaku untuk proyek Anda.
 Terapan otomatisnya mencocokkan istilah sebagai **kata utuh, tanpa peduli
@@ -42,7 +47,7 @@ huruf besar/kecil** — bentuk berimbuhan (jamak, konjugasi) tidak akan
 tertangkap. Menerjemahkan dengan **DeepL**? Kirim glosarium ke sana dengan
 **Kirim ke DeepL** (kanan atas), dan kirim ulang setelah menyunting.
 
-## 5. Siapkan penyaluran
+## Siapkan penyaluran
 
 Buka tab **Penyaluran** dan pilih penyedia Anda dari pemilih tempat tab itu
 terbuka — itu mengirim setiap entri dalam proyek ke penyedia tersebut, yang
@@ -53,7 +58,7 @@ tanpa aturan sama sekali mengirim semuanya lewat NARN Freeway, jadi langkah
 ini opsional di awal. Setelah proyek punya aturan, entri yang tidak cocok
 dengan satu pun gagal diterjemahkan dengan galat *“tidak ada rute”*.
 
-## 6. *(Optional)* Bangun glosarium dari konten Anda sendiri
+## *(Optional)* Bangun glosarium dari konten Anda sendiri
 
 Kembangkan glosarium Anda sebelum penerjemahan massal: tambahkan istilah
 secara manual, jalankan **Buat glosarium** pada seluruh sumber, atau — lebih
@@ -62,7 +67,7 @@ tertarget — pilih entri kandidat yang baik di **Terjemahan** dan gunakan
 Pakai model yang mumpuni di sini; kualitas glosarium terakumulasi pada
 semua yang diterjemahkan sesudahnya.
 
-## 7. *(Optional)* Sempurnakan kualitas di Bandingkan dulu
+## *(Optional)* Sempurnakan kualitas di Bandingkan dulu
 
 Sebelum putaran penerjemahan penuh, gunakan tab **Bandingkan** untuk
 menyempurnakan satu bahasa yang bisa Anda nilai sendiri:
@@ -79,7 +84,7 @@ menyempurnakan satu bahasa yang bisa Anda nilai sendiri:
 - Puas dengan hasilnya? Terjemahkan seluruh batch sekali dengan pengaturan
   yang sama untuk memastikan hasilnya tetap bagus dalam jumlah besar.
 
-## 8. Terjemahkan
+## Terjemahkan secara massal
 
 Ada dua cara menjalankan penerjemahan sungguhan:
 
@@ -96,7 +101,7 @@ Pengelompokan batch otomatis secara bawaan; untuk proyek kecil dengan
 banyak entri pendek, ukuran batch khusus **0** (seluruh bahasa dalam satu
 permintaan) bisa bekerja lebih baik dengan model yang mumpuni.
 
-## 9. Tinjau putarannya
+## Tinjau putarannya
 
 Pilih salah satu:
 

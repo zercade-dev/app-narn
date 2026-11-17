@@ -1,0 +1,606 @@
+{
+  "next": "Berikutnya",
+  "completeTour": "Selesaikan tur",
+  "lookOnly": "Selama tur, ini hanya ditampilkan. Anda bisa memakainya setelah tur selesai.",
+  "back": "Kembali",
+  "skip": "Lewati tur",
+  "close": "Tutup",
+  "stepOfSub": "Bagian {{major}} dari {{majorTotal}} · Langkah {{sub}} dari {{subTotal}}",
+  "stepCount": "{{current}} dari {{total}}",
+  "continueSetup": "Lanjutkan penyiapan: bagian {{current}} dari {{total}}",
+  "firstRun": {
+    "actions": {
+      "openVault": "Buka formulir brankas",
+      "cloudVault": "Siapkan brankas",
+      "openVaultPage": "Buka halaman brankas",
+      "chooseProvider": "Pilih penyedia",
+      "useFoundKey": "Gunakan {{provider}} untuk terjemahan Anda",
+      "fixKey": "Periksa kunci saya",
+      "retry": "Coba lagi",
+      "stopRetry": "Hentikan dan coba lagi",
+      "translateQuick": "Terjemahkan 3 ini untuk mencoba",
+      "translateEverything": "Terjemahkan semuanya",
+      "translateFew": "Terjemahkan",
+      "translateRest": "Terjemahkan sisanya sekarang",
+      "skipRest": "Lewati, ekspor yang sudah ada",
+      "retranslateTest": "Terjemahkan ulang 3 entri untuk uji coba",
+      "restoreTest": "Kembalikan terjemahan saya",
+      "keepTest": "Pertahankan terjemahan baru",
+      "tourSections": "Tunjukkan bagiannya",
+      "maybeLater": "Nanti saja",
+      "openTours": "Tampilkan tur",
+      "toursDone": "Selesai"
+    },
+    "vault": {
+      "title": "Pembuatan kata sandi brankas",
+      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi ini dan selalu berada dalam kendali Anda.",
+      "openWhat": "Buka formulir brankas untuk memilih kata sandi brankas.",
+      "passwordWhat": "Ketik kata sandi di sini, lalu konfirmasi dengan tombol di bawahnya."
+    },
+    "unlock": {
+      "title": "Pembukaan kunci brankas",
+      "why": "Kunci penyedia Anda tetap terenkripsi sampai brankas dibuka kuncinya.",
+      "openWhat": "Buka formulir brankas untuk memasukkan kata sandi brankas.",
+      "passwordWhat": "Ketik kata sandi brankas di sini, lalu konfirmasi dengan tombol di bawahnya."
+    },
+    "cloudVault": {
+      "title": "Buat brankas Anda dan tambahkan kunci",
+      "what": "Pilih kata sandi brankas, lalu tambahkan kunci: pilih penyedia dulu. Untuk uji cepat, pilih yang punya paket gratis. Anda akan kembali ke sini setelah selesai.",
+      "why": "Kunci penyedia Anda dienkripsi dengan kata sandi Anda dan selalu berada dalam kendali Anda."
+    },
+    "cloudUnlock": {
+      "what": "Buka kunci brankas di halaman brankas. Anda akan kembali ke sini setelah selesai."
+    },
+    "cloudKey": {
+      "what": "Tambahkan kunci di halaman brankas: pilih penyedia dulu. Untuk uji cepat, pilih yang punya paket gratis. Anda akan kembali ke sini setelah selesai."
+    },
+    "key": {
+      "title": "Tambahkan kunci untuk mulai menerjemahkan",
+      "why": "Anda dapat mengganti penyedia nanti di tab Konfigurasi proyek.",
+      "choiceWhat": "Pilih penyedia lalu tambahkan kuncinya. Untuk uji cepat, pilih yang punya paket gratis.",
+      "pasteWhat": "Tempel kunci di sini, ketik kata sandi brankas di bawahnya, lalu simpan."
+    },
+    "providerList": {
+      "title": "Pilih penyedia",
+      "what": "Sudah punya kunci? Pilih penyedianya. Belum punya? Tekan Dapatkan kunci di samping penyedia untuk membuatnya di situsnya, lalu pilih penyedia itu.",
+      "why": "Untuk uji cepat, gunakan penyedia yang punya paket gratis."
+    },
+    "providerCard": {
+      "title": "Siapa yang menerjemahkan proyek ini",
+      "what": "Pilih siapa yang menerjemahkan proyek ini.",
+      "why": "Tekan Kembali untuk menutup panel ini dan melanjutkan panduan."
+    },
+    "project": {
+      "title": "Pengimporan teks game",
+      "openWhat": "Buka daftar proyek.",
+      "newWhat": "Buat proyek baru.",
+      "createWhat": "Beri nama proyek, lalu buat.",
+      "sourceWhat": "Pilih bahasa sumber: bahasa yang dipakai untuk menulis teks game Anda.",
+      "targetsWhat": "Centang bahasa target terjemahan yang diinginkan, atau gunakan Pilih semua.",
+      "saveWhat": "Simpan bahasa.",
+      "importWhat": "Pilih berkas CSV yang diekspor dari editor game Anda.",
+      "confirmWhat": "Periksa ringkasannya, lalu konfirmasi impor."
+    },
+    "translate": {
+      "title": "Penerjemahan",
+      "openWhat": "Buka tab yang memuat daftar entri.",
+      "quickWhat": "3 entri yang belum diterjemahkan sudah dipilih. Terjemahkan untuk mencoba, atau terjemahkan semuanya sekarang.",
+      "fewWhat": "Entri Anda sudah dipilih. Terjemahkan sekarang.",
+      "startWhat": "Mulai penerjemahan.",
+      "nothingWhat": "File Anda sudah memiliki semua terjemahan. Untuk melihatnya berjalan, terjemahkan ulang 3 entri: terjemahannya bisa Anda kembalikan setelahnya.",
+      "nothingWhy": "Atau tekan Berikutnya untuk mengekspor. Untuk menambah bahasa, centang di tab Data lalu simpan.",
+      "progressWhat": "Penerjemahan sedang berjalan. Baris ini menampilkan progresnya.",
+      "progressWhy": "Tur berlanjut setelah penerjemahan selesai."
+    },
+    "retest": {
+      "title": "Terjemahkan ulang 3 entri",
+      "filterWhat": "Buka Status dan hapus centang Tampilkan yang belum diterjemahkan saja, agar daftar juga menampilkan entri yang sudah diterjemahkan.",
+      "selectWhat": "Centang kotak 3 entri di halaman ini.",
+      "translateWhat": "Tekan Terjemahkan yang dipilih.",
+      "modeWhat": "Pilih Terjemahkan ulang terjemahan yang sudah ada. Dengan Hanya isi entri yang belum diterjemahkan, 3 entri itu akan dilewati karena sudah diterjemahkan.",
+      "startWhat": "Tekan Mulai untuk menerjemahkan ulang 3 entri itu.",
+      "nothingPicked": "Tidak ada yang diterjemahkan ulang: entri itu sudah punya terjemahan. Tekan lagi Terjemahkan yang dipilih dan pilih Terjemahkan ulang terjemahan yang sudah ada."
+    },
+    "failed": {
+      "title": "Penerjemahan tidak berhasil",
+      "why": "Bilah yang disorot di bawah menunjukkan apa yang terjadi.",
+      "authWhat": "Penyedia menolak kunci Anda. Periksa kuncinya, lalu coba lagi.",
+      "quotaWhat": "Kuota gratis sedang habis. Tunggu sebentar atau tambahkan kunci lain, lalu coba lagi.",
+      "quotaWhatOwn": "{{provider}} menolak untuk sementara: kuota atau kredit akun Anda habis. Periksa paket Anda di penyedia, lalu coba lagi.",
+      "quotaWhatCustom": "Salah satu penyedia dalam penyaluran proyek ini menolak untuk sementara: kuota atau kredit habis. Tunggu sebentar atau periksa paket di penyedia, lalu coba lagi.",
+      "noProviderWhat": "Tidak ada yang diterjemahkan: tidak ada penyedia yang diaktifkan untuk mengerjakannya. Tekan Coba lagi: NARN lebih dulu mengaktifkan penyedia dari kunci yang Anda simpan.",
+      "otherWhat": "Tidak ada yang diterjemahkan. Periksa kunci Anda, lalu coba lagi."
+    },
+    "parked": {
+      "title": "Penerjemahan dijeda",
+      "what": "Penerjemahan Anda dijeda dan menunggu penyedia. Periksa kunci Anda, lalu hentikan putaran ini dan mulai yang baru."
+    },
+    "waiting": {
+      "title": "Penerjemahan menunggu",
+      "why": "Bilah yang disorot di bawah menunjukkan statusnya. Tur berlanjut setelah penerjemahan selesai.",
+      "quotaWhat": "Kuota gratis sedang habis. Penerjemahan berlanjut sendiri saat kuota tersedia lagi.",
+      "modelWhat": "Model gratis yang tersedia saat ini berada di bawah kualitas yang dituju putaran ini. Penerjemahan berlanjut sendiri saat model yang lebih baik tersedia."
+    },
+    "rest": {
+      "title": "Uji coba berhasil",
+      "what": "3 entri uji Anda sudah diterjemahkan ke semua bahasa yang dipilih. Terjemahkan sisanya sekarang, atau ekspor yang sudah ada.",
+      "skipped": "Sisanya bisa menunggu. Unduh yang sudah diterjemahkan."
+    },
+    "restore": {
+      "title": "Uji coba berhasil",
+      "what": "3 entri uji coba Anda memiliki terjemahan baru. Kembalikan terjemahan file Anda, atau pertahankan yang baru.",
+      "why": "NARN menyimpan titik pemulihan tepat sebelum uji coba.",
+      "pickWhat": "Titik pemulihan ini disimpan tepat sebelum uji coba. Tekan Pulihkan untuk mengembalikan terjemahan file Anda.",
+      "pickWhy": "Pemulihan mengembalikan seluruh proyek seperti saat itu.",
+      "confirmWhat": "Konfirmasi untuk memulihkan.",
+      "notFound": "Titik pemulihan uji coba tidak ditemukan. Pulihkan satu dari Cadangan, atau pertahankan terjemahan baru."
+    },
+    "export": {
+      "title": "Ekspor",
+      "why": "Editor game Anda dapat mengimpor berkas ini untuk memasukkan terjemahan ke dalam game.",
+      "openWhat": "Kembali ke tab tempat berkas diimpor.",
+      "downloadWhat": "Unduh berkas hasil terjemahan untuk editor game Anda."
+    },
+    "closing": {
+      "title": "Semua sudah siap",
+      "what": "Ini tampilan sederhana: hanya menampilkan yang diperlukan untuk menerjemahkan dan mengekspor. Lanjutan punya lebih banyak alat. Ubah sakelar ke Lanjutan untuk tur singkat.",
+      "whatAdvanced": "Mode lanjutan sedang aktif dan menampilkan semua alat. Tur singkat menjelaskan kegunaan setiap bagian.",
+      "why": "Mode dapat diganti kapan saja dari bilah atas."
+    },
+    "moreTours": {
+      "title": "Tur terpandu lainnya",
+      "what": "Tur singkat tentang glosarium, penyaluran, dan lainnya ada di Panduan. Mulai kapan saja."
+    }
+  },
+  "providerChoice": {
+    "title": "Pilih penyedia",
+    "description": "Penyedia itu menerjemahkan proyek ini dan proyek baru yang Anda buat.",
+    "existingRouting": "Proyek ini sudah memiliki penyaluran, jadi dibiarkan apa adanya. Anda dapat mengubahnya di Lanjutan.",
+    "freeHeading": "Punya paket gratis",
+    "paidHeading": "Tidak punya paket gratis",
+    "getKey": "Dapatkan kunci",
+    "getKeyAria": "Dapatkan kunci {{provider}} (membuka situs penyedia)",
+    "cancel": "Batal",
+    "failed": "Tidak dapat menyiapkan {{provider}}: {{message}}",
+    "switchedOff": "{{provider}} dimatikan di Lanjutan, jadi tidak dipakai. Nyalakan lagi di Konfigurasi Global, atau pilih penyedia lain.",
+    "waitingForKey": "Belum ada kunci {{provider}} di brankas Anda, jadi untuk sementara NARN Freeway yang menerjemahkan. Tambahkan kuncinya, atau pilih NARN Freeway di tab Konfigurasi proyek.",
+    "applied": "{{provider}} sekarang menerjemahkan {{project}}.",
+    "appliedCollab": "{{provider}} sekarang menerjemahkan proyek yang dibagikan kepada Anda."
+  },
+  "offer": {
+    "start": "Tunjukkan",
+    "decline": "Tidak, terima kasih"
+  },
+  "guideTours": {
+    "title": "Tur",
+    "first-run": {
+      "name": "Awal penggunaan terpandu",
+      "summary": "Siapkan penyedia, tambahkan string Anda, terjemahkan, lalu ekspor, selangkah demi selangkah."
+    },
+    "advanced-sections": {
+      "name": "Bagian lanjutan",
+      "summary": "Kegunaan setiap tab dan tampilan yang ditambahkan mode lanjutan."
+    },
+    "glossaries": {
+      "name": "Glosarium",
+      "summary": "Aktifkan glosarium siap pakai yang cocok dengan teks Anda, lalu lihat kecocokan yang ditemukannya."
+    },
+    "routing": {
+      "name": "Penyaluran",
+      "summary": "Sekilas 30 detik tentang cara NARN memilih siapa yang menerjemahkan apa."
+    },
+    "routing-advanced": {
+      "name": "Aturan perutean lanjutan",
+      "summary": "Aturan yang mengirim setiap bahasa atau jenis teks ke penyedia pilihan Anda."
+    },
+    "quality": {
+      "name": "Kualitas",
+      "summary": "Sekilas tentang cara NARN memeriksa terjemahan Anda."
+    },
+    "compare": {
+      "name": "Bandingkan",
+      "summary": "Sekilas tentang meninjau terjemahan secara berdampingan."
+    },
+    "review-translation-ai": {
+      "name": "Tinjauan AI Terjemahan",
+      "summary": "Sekilas tentang meminta AI memeriksa terjemahan Anda."
+    },
+    "orphans": {
+      "name": "Entri Yatim",
+      "summary": "Lihat apa yang terjadi pada entri yang tidak ada di file Anda, dengan entri yatim latihan yang dikembalikan oleh tur."
+    },
+    "startOver": "Mulai dari awal",
+    "continue": "Lanjutkan dari terakhir kali",
+    "progress": "{{current}} dari {{total}} langkah",
+    "progressSections": "{{current}} dari {{total}} bagian",
+    "completed": "Selesai",
+    "needsProject": "Buka proyek untuk mengikuti tur ini.",
+    "needsDesktop": "Tur memerlukan layar yang lebih lebar. Buka aplikasi di komputer untuk mengikuti tur.",
+    "switchedToAdvanced": "Beralih ke mode lanjutan untuk tur ini.",
+    "confirm": {
+      "title": "Beralih ke Sederhana untuk penyiapan terpandu?",
+      "body": "Penyiapan terpandu dibuat untuk mode Sederhana, yang menyembunyikan tab lanjutan. Anda bisa kembali kapan saja dari bilah atas.",
+      "switch": "Beralih ke Sederhana",
+      "stay": "Tetap di Lanjutan"
+    }
+  },
+  "area": {
+    "routing": {
+      "offer": {
+        "title": "Baru mengenal Penyaluran?",
+        "body": "Sekilas 30 detik tentang cara NARN memilih siapa yang menerjemahkan apa."
+      },
+      "config": {
+        "title": "Penyaluran menentukan siapa yang menerjemahkan",
+        "what": "Di sini Anda memilih penyedia terjemahan yang menangani teks Anda.",
+        "why": "Gunakan untuk mengirim bahasa atau jenis teks tertentu ke penyedia lain, atau tetap memakai satu penyedia untuk semuanya."
+      },
+      "mode": {
+        "title": "Aturan sederhana atau lanjutan",
+        "what": "Di sini Anda beralih antara satu penyedia untuk semuanya dan daftar aturan.",
+        "why": "Mulailah dari yang sederhana. Beralihlah ke aturan saat Anda ingin penyedia berbeda untuk suatu bahasa, kategori, atau nada.",
+        "advancedAction": "Jelaskan aturan lanjutan"
+      }
+    },
+    "glossary": {
+      "offer": {
+        "title": "Baru mengenal Glosarium?",
+        "body": "Sekilas tentang menjaga nama dan istilah penting tetap konsisten."
+      },
+      "list": {
+        "title": "Glosarium Anda",
+        "what": "Setiap glosarium adalah daftar istilah beserta terjemahan yang Anda inginkan untuk masing-masing.",
+        "why": "Istilah seperti nama karakter, keterampilan, atau nama item pun selalu diterjemahkan dengan cara yang sama."
+      },
+      "create": {
+        "title": "Buat glosarium",
+        "what": "Buat glosarium kosong lalu tambahkan istilah Anda sendiri.",
+        "why": "Lakukan ini jika Anda sudah tahu kata-kata yang tidak boleh diterjemahkan secara berbeda."
+      },
+      "generate": {
+        "title": "Biarkan AI menyarankan istilah",
+        "what": "Minta penyedia AI mencari calon istilah di teks Anda.",
+        "why": "Anda tidak perlu membaca seluruh berkas untuk menemukannya. Anda yang meninjau dan menerima usulannya."
+      }
+    },
+    "quality": {
+      "offer": {
+        "title": "Baru mengenal Kualitas?",
+        "body": "Sekilas tentang cara NARN memeriksa terjemahan Anda."
+      },
+      "title": {
+        "title": "Pemeriksaan kualitas otomatis",
+        "what": "Setiap terjemahan diperiksa dengan aturan seperti tag yang hilang, placeholder yang berubah, dan batas panjang.",
+        "why": "Masalah yang bisa merusak game Anda muncul di sini, bukan saat uji coba bermain."
+      },
+      "overview": {
+        "title": "Tingkat kelulusan Anda",
+        "what": "Ini menunjukkan berapa banyak pemeriksaan yang lulus dan yang gagal di seluruh proyek.",
+        "why": "Cara cepat untuk tahu apakah terjemahan sudah siap atau masih perlu dikerjakan."
+      },
+      "issues": {
+        "title": "Masalah yang paling sering muncul",
+        "what": "Jenis masalah yang paling sering gagal tercantum di sini.",
+        "why": "Memperbaiki yang paling sering muncul lebih dulu akan menghapus kegagalan terbanyak."
+      }
+    },
+    "compare": {
+      "offer": {
+        "title": "Baru mengenal Bandingkan?",
+        "body": "Sekilas tentang meninjau terjemahan secara berdampingan."
+      },
+      "target": {
+        "title": "Pilih bahasa",
+        "what": "Pilih bahasa yang ditampilkan di samping teks sumber.",
+        "why": "Tinjau satu bahasa dalam satu waktu, baris demi baris, dan sunting sambil jalan."
+      },
+      "reference": {
+        "title": "Tambahkan bahasa rujukan",
+        "what": "Tampilkan bahasa kedua di sampingnya, misalnya bahasa yang Anda kuasai.",
+        "why": "Berguna saat Anda tidak bisa membaca bahasa target: Anda bisa mencocokkan maknanya dengan bahasa yang Anda kenal."
+      },
+      "translate": {
+        "title": "Terjemahkan dari sini",
+        "what": "Terjemahkan baris yang dipilih, atau semua baris yang cocok dengan filter Anda.",
+        "why": "Praktis untuk mengisi celah yang Anda temukan saat meninjau, tanpa keluar dari tab ini."
+      }
+    },
+    "review-translation-ai": {
+      "offer": {
+        "title": "Baru mengenal Tinjauan AI?",
+        "body": "Sekilas tentang meminta AI memeriksa terjemahan Anda."
+      },
+      "intro": {
+        "title": "Pendapat kedua untuk terjemahan",
+        "what": "Penyedia AI membaca terjemahan Anda di samping teks sumber dan memberinya nilai.",
+        "why": "Ia menemukan kesalahan dan susunan kata yang janggal yang tidak terdeteksi pemeriksaan otomatis, sehingga bisa Anda perbaiki sebelum dirilis."
+      },
+      "start": {
+        "title": "Tinjau proses terakhir",
+        "what": "Mulai peninjauan atas proses terjemahan terbaru.",
+        "why": "Meninjau hanya yang baru diterjemahkan membuat biaya dan waktu tunggu tetap kecil."
+      },
+      "all": {
+        "title": "Tinjau semuanya",
+        "what": "Tinjau semua terjemahan dalam proyek, bukan hanya proses terakhir.",
+        "why": "Gunakan sebelum rilis, atau setelah Anda mengubah glosarium atau penyaluran."
+      }
+    }
+  },
+  "routingAdvanced": {
+    "rules": {
+      "title": "Aturan diperiksa dari atas",
+      "what": "NARN memeriksa aturan dari atas, dan aturan pertama yang cocok dengan sebuah entri yang menerjemahkannya. Dalam tur ini, Anda mengirim bahasa Asia ke satu penyedia dan semua bahasa lain ke penyedia lain.",
+      "why": "Entri yang tidak cocok dengan aturan mana pun tidak diterjemahkan, jadi aturan terakhir sebaiknya cocok untuk semuanya."
+    },
+    "edit": {
+      "title": "Buka aturan #1",
+      "what": "Tekan ikon pensil untuk mengedit aturan #1. Aturan ini akan menangani bahasa Asia.",
+      "noRulesWhat": "Proyek ini belum punya aturan. Tekan Tambah aturan untuk membuat aturan #1. Aturan ini akan menangani bahasa Asia."
+    },
+    "filter": {
+      "title": "Buka Penyaringan",
+      "what": "Tekan Penyaringan untuk melihat entri mana yang diambil aturan ini.",
+      "why": "Aturan yang tidak dicentang apa pun di sini mengambil semua entri."
+    },
+    "langs": {
+      "title": "Centang bahasa Asia",
+      "what": "Centang bahasa Asia di antara bahasa proyek Anda, misalnya ja, ko, dan zh-hans, lalu hapus centang bahasa lainnya. Jika proyek ini tidak punya, centang bahasa apa saja untuk mencobanya. Berikutnya muncul setelah Anda mencentang atau menghapus centang satu bahasa.",
+      "why": "Aturan #1 kini hanya mengambil bahasa-bahasa ini. Semua bahasa lain diteruskan ke aturan di bawahnya."
+    },
+    "module": {
+      "title": "Pilih penyedianya",
+      "what": "Di Modul, pilih penyedia untuk bahasa-bahasa ini. Untuk memakai model lain dari penyedia yang sama, buka Pengaturan agen di bagian bawah.",
+      "why": "Perubahan Anda tersimpan otomatis."
+    },
+    "done": {
+      "title": "Tutup aturan",
+      "what": "Tekan Selesai."
+    },
+    "add": {
+      "title": "Tambahkan aturan untuk bahasa lainnya",
+      "what": "Tekan Tambah aturan. Aturan baru ditempatkan di bagian bawah, di bawah aturan yang sudah ada.",
+      "why": "Aturan diperiksa dari atas, jadi aturan di bagian bawah hanya mendapat sisa dari aturan di atasnya."
+    },
+    "newModule": {
+      "title": "Pilih penyedia, tidak lebih",
+      "what": "Di Modul, pilih penyedia untuk semua bahasa lain. Biarkan Penyaringan kosong. Berikutnya muncul setelah penyedia dipilih.",
+      "why": "Tidak perlu filter: bahasa yang Anda centang berhenti di aturan #1, jadi hanya bahasa lain yang sampai ke aturan di bawahnya."
+    },
+    "order": {
+      "title": "Urutan yang bekerja",
+      "what": "Aturan #1 mengambil bahasa yang Anda centang, dan aturan di bawahnya hanya mendapat sisanya. Jika aturan tanpa filter berada di atas, aturan itu akan mengambil semua bahasa, dan aturan #1 tidak akan pernah dipakai.",
+      "why": "Untuk mengubah urutan, gunakan tanda panah di samping aturan."
+    },
+    "templates": {
+      "title": "Templat",
+      "what": "Aturan siap pakai. Pakai templat menambahkan satu di bagian bawah aturan proyek ini.",
+      "why": "Awal cepat yang bisa Anda sesuaikan nanti."
+    },
+    "groups": {
+      "title": "Grup aturan",
+      "what": "Grup aturan adalah kumpulan aturan tersendiri. Terjemahan memakai grup yang dipilih di sini.",
+      "why": "Siapkan kumpulan lain, misalnya untuk menguji penyedia, lalu beralih di antara keduanya."
+    },
+    "import": {
+      "title": "Impor / Ekspor",
+      "what": "Simpan aturan sebagai file JSON, atau muat aturan dari file.",
+      "why": "Pakai perutean yang sama di proyek lain."
+    },
+    "back": {
+      "title": "Kembali ke Sederhana",
+      "what": "Sederhana adalah tampilan satu penyedia. Memilihnya akan menyisihkan aturan Anda, sehingga satu penyedia menerjemahkan semuanya.",
+      "why": "Aturan Anda disimpan, tidak dihapus. Pilih Lanjutan untuk memakainya lagi."
+    },
+    "absentWhat": "Yang ditunjuk langkah ini sedang tidak ada di layar. Tekan Berikutnya untuk lanjut, atau Kembali untuk mengulang langkah sebelumnya."
+  },
+  "advancedSections": {
+    "compare": {
+      "title": "Bandingkan",
+      "what": "Teks sumber di samping satu bahasa target, baris demi baris, dengan bahasa rujukan opsional.",
+      "why": "Tinjau dan sunting satu bahasa dengan teliti, bahkan bahasa yang tidak Anda baca."
+    },
+    "routing": {
+      "title": "Penyaluran",
+      "what": "Menentukan penyedia mana yang menerjemahkan setiap bahasa, kategori, atau nada.",
+      "why": "Kirim setiap jenis teks ke penyedia yang paling baik menanganinya."
+    },
+    "stage-details": {
+      "title": "Detail Stage",
+      "what": "Nama, detail gameplay, dan deskripsi sebuah stage, beserta terjemahannya.",
+      "why": "Terjemahkan teks yang menjelaskan sebuah level, di luar berkas string Anda."
+    },
+    "quality": {
+      "title": "Kualitas",
+      "what": "Pemeriksaan otomatis yang dilalui setiap terjemahan, dan yang gagal.",
+      "why": "Temukan tag rusak, placeholder yang berubah, dan teks yang terlalu panjang sebelum rilis."
+    },
+    "review-source-ai": {
+      "title": "Tinjauan AI Sumber",
+      "what": "Penyedia AI membaca teks sumber Anda dan menunjukkan salah ketik serta kalimat yang kurang jelas.",
+      "why": "Teks sumber yang lebih baik menghasilkan terjemahan yang lebih baik di setiap bahasa."
+    },
+    "review-translation-ai": {
+      "title": "Tinjauan AI Terjemahan",
+      "what": "Penyedia AI membaca terjemahan di samping teks sumber dan memberinya nilai.",
+      "why": "Ia menemukan makna yang salah dan kalimat janggal yang terlewat oleh pemeriksaan otomatis."
+    },
+    "review-manual": {
+      "title": "Tinjauan Manual",
+      "what": "Antrean terjemahan yang perlu ditinjau, untuk disetujui, disunting, atau disisihkan satu per satu.",
+      "why": "Selesaikan terjemahan yang meragukan dengan cepat, memakai pintasan keyboard."
+    },
+    "glossary": {
+      "title": "Glosarium",
+      "what": "Daftar istilah dengan terjemahan yang Anda inginkan untuk masing-masing.",
+      "why": "Nama dan istilah kunci pun selalu diterjemahkan dengan cara yang sama."
+    },
+    "category": {
+      "title": "Kategori",
+      "what": "Mengelompokkan string menurut jenis, seperti label UI, dialog, atau nama item.",
+      "why": "Aturan penyaluran dan batch lalu dapat memperlakukan setiap jenis teks secara berbeda."
+    },
+    "color-text": {
+      "title": "Penata Teks",
+      "what": "Alat draf untuk teks dengan warna, tebal, miring, dan ukuran huruf.",
+      "why": "Tulis teks bergaya tanpa mengetik markup secara manual."
+    },
+    "orphans": {
+      "title": "Entri Yatim",
+      "what": "Entri yang hilang pada impor berikutnya, disimpan beserta terjemahannya.",
+      "why": "Tidak ada yang hilang saat berkas Anda berubah: tautkan kembali atau hapus."
+    },
+    "backup": {
+      "title": "Cadangan",
+      "what": "Mengemas proyek ke dalam arsip yang dapat Anda unduh dan pulihkan.",
+      "why": "Kembali ke keadaan sebelumnya jika impor atau perubahan massal gagal."
+    },
+    "sharing": {
+      "title": "Berbagi",
+      "what": "Undang kolaborator dan pilih bahasa mana yang boleh disunting masing-masing.",
+      "why": "Penerjemah mengerjakan bahasanya sendiri, dengan penyedia AI mereka sendiri."
+    },
+    "global-config": {
+      "title": "Konfigurasi Global",
+      "what": "Pengaturan untuk seluruh ruang kerja: penyedia, model, dan brankas kredensial.",
+      "why": "Siapkan penyedia sekali dan gunakan di setiap proyek."
+    },
+    "translation-memory": {
+      "title": "Memori Terjemahan",
+      "what": "Terjemahan sebelumnya, dipakai ulang saat teks yang sama muncul lagi.",
+      "why": "Menghemat biaya dan menjaga terjemahan baris yang berulang tetap sama."
+    }
+  },
+  "glossariesTour": {
+    "purpose": {
+      "title": "Kegunaan glosarium",
+      "what": "Glosarium berisi daftar istilah dengan terjemahan yang Anda inginkan, seperti nama karakter, keterampilan, atau nama item.",
+      "why": "Terjemahan pun selalu memakai kata-kata Anda, bukan tebakan baru."
+    },
+    "picked": {
+      "title": "Glosarium untuk entri Anda",
+      "what": "Tur ini memilih {{name}} karena istilahnya muncul di entri Anda. Entri yang cocok: {{count}}.",
+      "noneWhat": "Belum ada glosarium Anda yang cocok dengan entri Anda, jadi tur ini memakai {{name}}."
+    },
+    "constant": {
+      "title": "Kolom Konstan",
+      "what": "Jika teks menulis istilah konstan persis seperti di glosarium, istilah itu tidak pernah dikirim ke mesin terjemahan. NARN langsung memasukkan terjemahan glosarium Anda ke hasilnya, jadi nama karakter seperti Diluc selalu keluar persis seperti yang tertulis di sini.",
+      "absentWhat": "Pilih glosarium di sebelah kiri untuk melihat istilahnya dan kolom Konstan.",
+      "why": "Istilah lain dikirim bersama teks sebagai acuan yang harus diikuti mesin."
+    },
+    "enable": {
+      "title": "Aktifkan",
+      "what": "Tekan Aktifkan. NARN akan bertanya apakah kecocokannya diterapkan: Terapkan kecocokan menugaskan glosarium ke setiap entri yang berisi salah satu istilahnya.",
+      "absentWhat": "Pilih glosarium di sebelah kiri, lalu tekan Aktifkan di samping namanya.",
+      "onWhat": "{{name}} sudah aktif, jadi proyek ini memakainya.",
+      "why": "Saat proyek ini diterjemahkan, hanya glosarium yang aktif yang dipakai."
+    },
+    "choice": {
+      "title": "Aktifkan saja atau Terapkan kecocokan?",
+      "what": "Terapkan kecocokan langsung menugaskan glosarium ke setiap entri yang berisi salah satu istilahnya. Aktifkan saja hanya mengaktifkannya dan membiarkan entri Anda apa adanya; Anda bisa menugaskannya nanti dari Kecocokan."
+    },
+    "matches": {
+      "title": "Kecocokan yang ditemukan",
+      "what": "NARN menemukan entri ini sendiri: masing-masing berisi istilah dari {{name}}, dan glosarium kini ditugaskan ke entri tersebut.",
+      "onlyWhat": "NARN menemukan entri ini sendiri: masing-masing berisi istilah dari {{name}}. Centang entri itu lalu tekan Tugaskan glosarium untuk memakainya.",
+      "noneWhat": "Belum ada entri yang berisi istilah dari {{name}}. Entri yang berisi akan tampil di sini.",
+      "why": "Glosarium dipakai untuk entri yang ditugaskan kepadanya."
+    },
+    "effect": {
+      "title": "Pengaruhnya pada terjemahan",
+      "what": "Saat string berisi istilah glosarium, istilah dan terjemahan Anda dikirim bersama string itu.",
+      "why": "Penyedia mengikuti pilihan Anda alih-alih memilih katanya sendiri."
+    }
+  },
+  "orphansTour": {
+    "intro": {
+      "title": "Apa itu entri yatim",
+      "what": "Entri yatim adalah entri yang tidak ada di file terakhir yang Anda impor dengan “Ganti seluruhnya”.",
+      "why": "NARN menyimpannya di sini beserta terjemahannya alih-alih menghapusnya, jadi tidak ada yang hilang secara tidak sengaja."
+    },
+    "offer": {
+      "title": "Coba dengan entri yatim latihan",
+      "what": "Tur ini dapat menjadikan salah satu entri Anda yatim sebentar, lalu mengembalikannya. Tidak ada yang hilang: entri tetap menyimpan terjemahannya dan kembali ke tempatnya.",
+      "why": "Melihat entri yatim sungguhan membuat tab ini lebih mudah dipakai nanti. Atau biarkan tur hanya menjelaskan."
+    },
+    "backup": {
+      "title": "Buat cadangan dulu",
+      "what": "Cadangan proyek dibuat sebelum entri yatim latihan dibuat. Apa pun pilihannya, tidak ada yang hilang: tur mengembalikan entri itu.",
+      "why": "Dengan cadangan, Anda selalu bisa kembali ke kondisi persis ini dari tab “Cadangan”."
+    },
+    "simulating": {
+      "title": "Membuat entri yatim latihan",
+      "what": "Tur mengimpor ulang entri Anda tanpa salah satunya. Ini butuh sebentar.",
+      "why": "Inilah yang terjadi saat sebuah entri hilang dari file yang Anda impor dengan “Ganti seluruhnya”."
+    },
+    "practice-row": {
+      "title": "Entri yatim latihan Anda",
+      "what": "Entri ini sekarang yatim. Entri ini tidak lagi tampil di tab “Terjemahan”, dan terjemahannya tetap disimpan.",
+      "why": "Entri yatim muncul di sini setelah impor “Ganti seluruhnya”, agar Anda bisa memutuskan nasib masing-masing."
+    },
+    "practice-options": {
+      "title": "Yang bisa dilakukan pada entri yatim",
+      "what": "“Hubungkan ulang” memindahkan terjemahannya ke entri lain, misalnya entri yang teksnya hanya diubah susunan katanya. “Hapus” menghapusnya selamanya.",
+      "why": "Jangan pakai keduanya untuk yang ini: tur mengembalikannya di langkah berikutnya."
+    },
+    "recover": {
+      "title": "Kembalikan",
+      "what": "Tekan “Kembalikan” dan entri kembali ke tempatnya di daftar, beserta terjemahannya.",
+      "why": "Tur mengimpornya lagi, sama seperti entri kembali saat file Anda berikutnya memuatnya."
+    },
+    "restore": {
+      "title": "Cadangan Anda",
+      "what": "Cadangan yang dibuat sebelum latihan ada di sini. “Pulihkan cadangan” menunjukkan tombol “Pulihkan” miliknya; menekannya atau tidak, Anda yang memutuskan.",
+      "why": "Anda tidak memerlukannya: entri sudah kembali. Pulihkan cadangan hanya jika ada yang salah."
+    },
+    "done": {
+      "title": "Itulah entri yatim",
+      "what": "Entri yatim menyimpan entri dan terjemahan yang terlewat oleh impor terakhir Anda, sampai Anda menghubungkannya ulang atau menghapusnya.",
+      "why": "Periksa tab ini setelah setiap impor “Ganti seluruhnya”."
+    },
+    "explain-list": {
+      "title": "Daftar entri yatim",
+      "what": "Setiap entri yatim menampilkan teks sumbernya dan berapa terjemahan yang disimpannya.",
+      "absentWhat": "Proyek ini belum punya entri yatim. Saat impor meninggalkan entri, masing-masing muncul di sini dengan teks sumbernya dan berapa terjemahan yang disimpannya.",
+      "why": "Yang terjemahannya paling banyak tampil lebih dulu: merekalah yang paling repot dibuat ulang."
+    },
+    "explain-options": {
+      "title": "Hubungkan ulang atau hapus",
+      "what": "“Hubungkan ulang” memindahkan terjemahan entri yatim ke entri lain, misalnya entri yang teksnya hanya diubah susunan katanya. “Hapus” menghapusnya selamanya.",
+      "why": "Hubungkan ulang jika teksnya masih ada dalam bentuk lain; hapus jika memang sudah tidak ada."
+    },
+    "actions": {
+      "simulate": "Buat entri yatim latihan",
+      "explainOnly": "Jelaskan saja",
+      "backupFirst": "Cadangkan dulu (disarankan)",
+      "skipBackup": "Lanjut tanpa cadangan",
+      "recover": "Kembalikan",
+      "restoreBackup": "Pulihkan cadangan",
+      "switchProject": "Ganti proyek"
+    },
+    "notices": {
+      "alreadyRecovered": "Entri yatim latihan sudah kembali di tab “Terjemahan”.",
+      "alreadyDeleted": "Entri yatim latihan sudah dihapus, jadi tur tidak bisa mengembalikannya. Jika Anda membuat cadangan, Anda bisa memulihkannya dari tab “Cadangan”.",
+      "otherProject": "Entri yatim latihan dari tur ini masih ada di proyek lain. Pindah ke proyek itu untuk mengembalikannya lebih dulu.",
+      "leftOut": "Entri yatim latihan masih ada di tab “Entri Yatim”. Tekan “Kembalikan” di sana untuk mengembalikannya."
+    },
+    "blocked": {
+      "noEntries": "Belum ada entri untuk latihan, jadi tur hanya menjelaskan.",
+      "collaborator": "Hanya pemilik proyek yang bisa mengelola entri yatim, jadi tur hanya menjelaskan.",
+      "sourcelessRows": "Beberapa entri tidak punya teks sumber, dan impor tidak bisa membangunnya ulang dengan persis. Tur hanya menjelaskan, jadi tidak ada yang berubah.",
+      "unsafeText": "Ada teks sumber dengan tanda kutip tepat sebelum koma atau baris baru, yang tidak bisa dibangun ulang dengan persis oleh impor. Tur hanya menjelaskan, jadi tidak ada yang berubah.",
+      "commaInSourceLabel": "Ada label sumber yang berisi koma atau spasi di ujungnya, yang tidak bisa dibangun ulang dengan persis oleh impor. Tur hanya menjelaskan, jadi tidak ada yang berubah."
+    },
+    "errors": {
+      "backup": "Cadangan tidak dapat dibuat. Tidak ada yang diubah.",
+      "simulate": "Entri yatim latihan tidak dapat dibuat. Tidak ada yang diubah.",
+      "recover": "Entri belum bisa dikembalikan. Entri itu aman di tab “Entri Yatim”; coba lagi.",
+      "recoverRefused": "Tur tidak dapat mengembalikan entri ini tanpa mengubah entri lain, jadi tidak ada yang diubah. Gunakan “Hubungkan ulang” di tab “Entri Yatim” untuk memindahkan terjemahannya, atau pulihkan cadangan jika Anda membuatnya.",
+      "load": "Tidak dapat memeriksa entri yatim latihan. Tekan “Kembalikan” untuk mencoba lagi."
+    },
+    "banner": {
+      "text": "Ini entri yatim latihan dari tur terpandu. Kembalikan agar entri ini kembali ke tab “Terjemahan” beserta terjemahannya.",
+      "recovered": "Entri yatim latihan sudah kembali di tab “Terjemahan”."
+    }
+  }
+}

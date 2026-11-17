@@ -10,6 +10,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowDownWideNarrow, Loader2 } from 'lucide-react';
+import { useControlVisible } from '../../lib/mode-gating.js';
 import type { ReviewOrderMeta } from '../../stores/run-store.js';
 import {
   Select,
@@ -55,6 +56,7 @@ export function StringTablePagination({
   setPage,
 }: Readonly<StringTablePaginationProps>): React.JSX.Element {
   const { t } = useTranslation('strings');
+  const showOrder = useControlVisible('string-order');
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-y-2 text-xs text-muted-foreground px-1">
@@ -88,55 +90,57 @@ export function StringTablePagination({
       </span>
 
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-1.5">
-          <span>{t('order.label')}</span>
-          <Select
-            value={orderMode ?? 'import'}
-            onValueChange={(v) => onOrderModeChange(v as 'import' | 'custom')}
-          >
-            <SelectTrigger size="sm" className="w-44 h-7 text-xs" data-testid="string-order-mode">
-              {/* base-ui shows the raw value without a render-function. */}
-              <SelectValue>
-                {(value: string | null) =>
-                  value === 'custom' ? t('order.custom') : t('order.import')
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="import" className="text-xs">
-                {t('order.import')}
-              </SelectItem>
-              <SelectItem value="custom" className="text-xs">
-                {t('order.custom')}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-          {orderMode === 'custom' && (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 gap-1 text-xs"
-                disabled={presorting || !activeProjectId}
-                onClick={onPresort}
-                title={t('order.presortHint')}
-                data-testid="string-order-presort"
-              >
-                {presorting ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <ArrowDownWideNarrow className="h-3.5 w-3.5" />
-                )}
-                {t('order.presort')}
-              </Button>
-              <span className="text-muted-foreground" data-testid="string-order-presort-meta">
-                {orderMeta && orderMeta.computed !== false && orderMeta.count !== undefined
-                  ? t('order.presortLast', { count: orderMeta.count })
-                  : t('order.presortNever')}
-              </span>
-            </>
-          )}
-        </div>
+        {showOrder && (
+          <div className="flex items-center gap-1.5">
+            <span>{t('order.label')}</span>
+            <Select
+              value={orderMode ?? 'import'}
+              onValueChange={(v) => onOrderModeChange(v as 'import' | 'custom')}
+            >
+              <SelectTrigger size="sm" className="w-44 h-7 text-xs" data-testid="string-order-mode">
+                {/* base-ui shows the raw value without a render-function. */}
+                <SelectValue>
+                  {(value: string | null) =>
+                    value === 'custom' ? t('order.custom') : t('order.import')
+                  }
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="import" className="text-xs">
+                  {t('order.import')}
+                </SelectItem>
+                <SelectItem value="custom" className="text-xs">
+                  {t('order.custom')}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {orderMode === 'custom' && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1 text-xs"
+                  disabled={presorting || !activeProjectId}
+                  onClick={onPresort}
+                  title={t('order.presortHint')}
+                  data-testid="string-order-presort"
+                >
+                  {presorting ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <ArrowDownWideNarrow className="h-3.5 w-3.5" />
+                  )}
+                  {t('order.presort')}
+                </Button>
+                <span className="text-muted-foreground" data-testid="string-order-presort-meta">
+                  {orderMeta && orderMeta.computed !== false && orderMeta.count !== undefined
+                    ? t('order.presortLast', { count: orderMeta.count })
+                    : t('order.presortNever')}
+                </span>
+              </>
+            )}
+          </div>
+        )}
         {/* testids: enable E2E pagination assertions (page size + nav + status) */}
         <div className="flex items-center gap-1.5">
           <span>{t('pagination.rowsPerPage')}</span>

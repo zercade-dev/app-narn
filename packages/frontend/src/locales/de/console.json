@@ -1,10 +1,13 @@
 {
   "title": "KONSOLE",
   "empty": "Noch keine Log-Einträge.",
+  "debugInRaw": "Debug-Zeilen erscheinen im Rohprotokoll.",
+  "debugShowRaw": "Rohprotokoll anzeigen",
   "filter_all": "Alle",
   "filter_error": "Fehler",
   "filter_warn": "Warnung",
   "filter_info": "Info",
+  "filter_infoAndUp": "Info und mehr",
   "filter_debug": "Debug",
   "filter_notifications": "Benachrichtigungen",
   "statusConnected": "Mit dem Log-Stream des Servers verbunden",
@@ -38,5 +41,36 @@
   "captureTooltip": "Wenn aktiviert, behält der Server jeden Log-Eintrag dieser Sitzung, damit ein langer Lauf ohne Datenverlust analysiert werden kann.",
   "captureDownload": "Erfassung herunterladen ({{captured}})",
   "captureDropped": "+{{dropped}} verworfen",
-  "captureSlotsExhausted": "Die Erfassung ist gerade ausgelastet — auf diesem Server laufen bereits zu viele Erfassungen. Bitte später erneut versuchen."
+  "captureSlotsExhausted": "Die Erfassung ist gerade ausgelastet — auf diesem Server laufen bereits zu viele Erfassungen. Bitte später erneut versuchen.",
+  "modeFriendly": "Verständlich",
+  "modeRaw": "Roh",
+  "modeLabel": "Protokollansicht",
+  "notificationsBell": "Benachrichtigungen",
+  "notificationsBellUnread_one": "Benachrichtigungen, {{count}} ungelesen",
+  "notificationsBellUnread_other": "Benachrichtigungen, {{count}} ungelesen",
+  "statusLine": {
+    "translatingInto": "Übersetzung in {{language}}: {{done}} von {{total}}",
+    "translatingLanguages_one": "Übersetzung in {{count}} Sprache: {{done}} von {{total}}",
+    "translatingLanguages_other": "Übersetzung in {{count}} Sprachen: {{done}} von {{total}}",
+    "progress": "{{type}}: {{done}} von {{total}}",
+    "waiting": "{{type}} wartet auf Fortsetzung: {{done}} von {{total}}",
+    "queued": "{{type}} in Warteschlange, Platz {{position}}",
+    "queuedNoPosition": "{{type}} in Warteschlange",
+    "starting": "{{type}} wird gestartet"
+  },
+  "progress": {
+    "counts": "{{done}} von {{total}}",
+    "failed": "{{count}} fehlgeschlagen",
+    "elapsed": "{{time}} vergangen",
+    "estimating": "wird geschätzt …",
+    "waiting": "wartet auf Fortsetzung",
+    "etaUnderMinute": "weniger als eine Minute übrig",
+    "etaMinutes": "noch etwa {{count}} Min.",
+    "etaHours": "noch etwa {{hours}} Std. {{minutes}} Min.",
+    "outcome": {
+      "completed": "Abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "cancelled": "Abgebrochen"
+    }
+  }
 }
