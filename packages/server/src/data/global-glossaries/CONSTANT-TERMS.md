@@ -22,10 +22,10 @@ A term is made constant only when all of these hold:
    constant term is masked inside longer phrases too.
 
 The community sheet has no constant column, so the flag lives only in these
-JSON files. `app/scripts/sync-global-glossaries.ts` keeps every existing flag
+JSON files. `scripts/sync-global-glossaries.ts` keeps every existing flag
 and makes new terms of Characters and Nations constant by default, except the
-everyday words listed below. The legacy `tests/tooling/csv-to-glossaries.ts`
-keeps the flags too.
+everyday words listed below. The legacy CSV-to-glossaries tool keeps the flags
+too.
 
 ## Reviewed term by term (2026-11-15)
 
