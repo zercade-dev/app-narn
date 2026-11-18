@@ -17,7 +17,7 @@ Một số bảng thuật ngữ là **chỉ đọc** (được quản lý ở c�
 ## Thuật ngữ cố định
 
 * Thuật ngữ cố định **không bao giờ được gửi đến công cụ dịch**. NARN thay nó bằng một ký hiệu giữ chỗ trước khi dịch, rồi đặt bản dịch trong bảng thuật ngữ vào chỗ đó, nên tên nhân vật như *Diluc* luôn ra đúng như viết trong bảng thuật ngữ.
-* **Chữ hoa và chữ thường có phân biệt.** Chỉ văn bản viết đúng y như thuật ngữ mới được bảo vệ: *Venti* (nhân vật) được bảo vệ, *a venti latte* thì không. Cách viết khác được gửi đến công cụ như một gợi ý thuật ngữ thông thường, có đánh dấu là tên, để nó phân biệt tên với từ thông thường.
+* **Chữ hoa và chữ thường có phân biệt.** Chỉ văn bản viết đúng y như thuật ngữ mới được bảo vệ: *Venti* (nhân vật) được bảo vệ, *a venti latte* thì không. Viết toàn chữ hoa được tính là cùng một cách viết: *VENTI* trong tiêu đề cũng được bảo vệ, và bản dịch được viết bằng chữ hoa. Cách viết khác được gửi đến công cụ như một gợi ý thuật ngữ thông thường, có đánh dấu là tên, để nó phân biệt tên với từ thông thường.
 * **Công cụ dịch không thể thay đổi từ đó.** Vì không nhìn thấy thuật ngữ, nó không thể biến cách hay làm các từ khác hợp với nó: trong các ngôn ngữ như tiếng Nga, tiếng Hàn hay tiếng Thổ Nhĩ Kỳ, tên cố định luôn ở dạng gốc. Chỉ dùng cố định cho tên và mã phải giữ nguyên.
 * Hãy để các tên đồng thời là từ thông thường ở dạng thuật ngữ bình thường, vì tiêu đề và nhãn thường viết hoa chúng (*Gaming Settings*). Trong các bảng thuật ngữ có sẵn, tên nhân vật, tên quốc gia và tên sản phẩm Genshin Impact, Miliastra Sandbox và Miliastra Wonderland đều cố định, trừ Gaming, Amber, Razor, Sucrose, Prune, Traveler và Wanderer.
 

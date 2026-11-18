@@ -5,8 +5,11 @@
  * the person; rules Simple set aside come back with it, which is what
  * choosing Advanced does by hand.
  */
-import { useGuideStore } from '@/stores/guide-store';
+import type { RoutingDoc } from '@/lib/routing-mode';
+import { toast } from '@/lib/toast';
+import { useGuideStore, type RoutingTourCopy } from '@/stores/guide-store';
 import { useUiSettings } from '@/stores/ui-settings-store';
+import i18n from '../../i18n/index.js';
 import type { Tour, TourStep } from './types.js';
 
 export const ROUTING_ADVANCED_TOUR_ID = 'routing-advanced';
@@ -208,3 +211,100 @@ export function startRoutingAdvancedTour(): void {
   store.endTour(true);
   store.startTour(ROUTING_ADVANCED_TOUR_ID);
 }
+
+// ─── Leaving with broken routing puts it back ────────────────────────────────
+//
+// The tour has the person edit real rules, and they save as they change, so
+// leaving halfway (Skip, a switch to Simple, a phone-sized window, another
+// tour) could leave the project routing only the languages ticked on rule #1,
+// or a rule with no provider. The routing editor gives a copy of its document
+// as the tour begins. On the way out the routing is judged by what it does,
+// not by the step reached: if it still works (`routingStillWorks`: a provider
+// for the rest is already there), it is kept; otherwise the copy goes back.
+
+/** Puts a routing document back through an open editor; false when kept (it works, or already matches). */
+export type RoutingRestorer = (doc: RoutingDoc) => boolean;
+
+/** The open routing editors, by whose routing they edit (see `RoutingTourCopy.target`). */
+const editors = new Map<string, RoutingRestorer>();
+
+/**
+ * The tour run (`activeTourSeq`) the copy was taken for, or null when the tour
+ * has not run since the page loaded or has ended. In memory only: after a
+ * reload, a copy left from an earlier run is not trusted for a fresh start.
+ */
+let copiedForSeq: number | null = null;
+
+/** The counted index of `order`: a run that begins there or later edits nothing to put back. */
+const ORDER_INDEX = ROUTING_ADVANCED_TOUR.steps.findIndex((s) => s.id === 'order');
+
+/**
+ * Called by the routing editor whenever this tour may have begun (and once its
+ * switch to Advanced has applied): keeps the routing as it is now, unless this
+ * run already has its copy. A run continued from where it stopped, or started
+ * over without leaving, keeps the copy from before the tour.
+ */
+export function captureRoutingBeforeTour(target: string, doc: RoutingDoc): void {
+  const guide = useGuideStore.getState();
+  if (guide.activeTourId !== ROUTING_ADVANCED_TOUR_ID) return;
+  if (copiedForSeq === guide.activeTourSeq) return;
+  const restarted = copiedForSeq !== null;
+  copiedForSeq = guide.activeTourSeq;
+  const copy = guide.routingTourCopy;
+  if (copy?.target === target && (restarted || guide.activeTourStart > 0)) {
+    // Back in the tour: what it put back on leaving is the person's to finish now.
+    if (copy.restorePending) guide.setRoutingTourCopy({ target, doc: copy.doc });
+    return;
+  }
+  if (guide.activeTourStart >= ORDER_INDEX) return;
+  guide.setRoutingTourCopy({ target, doc: structuredClone(doc) });
+}
+
+/** The copy is used up (a switch to Simple decided from it): nothing to put back. */
+export function dropRoutingTourCopy(): void {
+  useGuideStore.getState().setRoutingTourCopy(null);
+}
+
+/**
+ * The routing of `target` as it was before this tour, while the tour runs and
+ * has not reached its complete rules: a switch to Simple starts from it, as if
+ * Simple had been chosen before the tour.
+ */
+export function routingBeforeTour(target: string): RoutingDoc | null {
+  const { routingTourCopy: copy, activeTourId } = useGuideStore.getState();
+  if (activeTourId !== ROUTING_ADVANCED_TOUR_ID || !copy || copy.restorePending) return null;
+  return copy.target === target ? copy.doc : null;
+}
+
+/**
+ * The routing editor for `target` is open (until the returned function runs).
+ * A copy waiting for it (the tour ended while no editor was open) goes back now.
+ */
+export function registerRoutingTourEditor(target: string, restore: RoutingRestorer): () => void {
+  editors.set(target, restore);
+  const { routingTourCopy: copy, activeTourId } = useGuideStore.getState();
+  if (copy?.restorePending && copy.target === target && activeTourId !== ROUTING_ADVANCED_TOUR_ID) {
+    putBack(copy);
+  }
+  return () => {
+    if (editors.get(target) === restore) editors.delete(target);
+  };
+}
+
+function putBack(copy: RoutingTourCopy): void {
+  const guide = useGuideStore.getState();
+  const restore = editors.get(copy.target);
+  if (!restore) {
+    if (!copy.restorePending) guide.setRoutingTourCopy({ ...copy, restorePending: true });
+    return;
+  }
+  guide.setRoutingTourCopy(null);
+  if (restore(copy.doc)) toast.info(i18n.t('guide-tour:routingAdvanced.restored'));
+}
+
+useGuideStore.subscribe((state, prev) => {
+  if (prev.activeTourId !== ROUTING_ADVANCED_TOUR_ID) return;
+  if (state.activeTourId === ROUTING_ADVANCED_TOUR_ID) return;
+  copiedForSeq = null;
+  if (state.routingTourCopy) putBack(state.routingTourCopy);
+});

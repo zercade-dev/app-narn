@@ -15,6 +15,9 @@
  *   pick the data up through the normal build/publish pipeline.
  * - Merge semantics: adds new sources, updates changed non-empty
  *   translations (sheet wins), NEVER deletes terms or stored translations.
+ * - Local overrides (`sync-global-glossaries.overrides.json`) are applied
+ *   last, so a hand correction survives a sheet that still has the old value.
+ *   The summary names each one, and says when the sheet has caught up.
  *   Terms missing from the sheet and unclassifiable Main Sheet tags are
  *   reported in the summary, never fatal.
  * - Idempotent: a second run immediately after a sync is a no-op.
@@ -154,8 +157,36 @@ export interface GlossaryJson {
   terms: GlossaryTermJson[];
 }
 
+/**
+ * A hand correction that wins over the sheet, kept in
+ * `sync-global-glossaries.overrides.json`. Remove it once the sheet agrees
+ * (the sync reports that).
+ */
+export interface GlossaryOverride {
+  glossary: string;
+  source: string;
+  lang: string;
+  value: string;
+  /** Why the sheet's value is wrong; shown nowhere, kept for the next reader. */
+  reason: string;
+}
+
+export interface OverrideReport {
+  source: string;
+  lang: string;
+  value: string;
+  /** The sheet's cell for this term and language (undefined: empty or absent). */
+  sheet: string | undefined;
+}
+
 export interface MergeResult {
   glossary: GlossaryJson;
+  /** Overrides applied where the sheet says something else (the override is doing work). */
+  overridesHeld: OverrideReport[];
+  /** Overrides the sheet now agrees with: safe to delete. */
+  overridesRedundant: OverrideReport[];
+  /** Overrides naming a source this glossary does not have. */
+  overridesUnmatched: OverrideReport[];
   /** Sources newly added from the sheet. */
   added: string[];
   /** Existing sources whose translations changed (sheet wins on non-empty cells). */
@@ -416,6 +447,7 @@ export function routeMiscRows(
  * - existing source → non-empty sheet cells overwrite stored translations;
  *   empty cells never delete;
  * - stored terms absent from the sheet are kept and reported;
+ * - `overrides` for this glossary are applied last and win over the sheet;
  * - terms are re-sorted by id; `updatedAt` is bumped to `now` only when
  *   content actually changed.
  */
@@ -423,6 +455,7 @@ export function mergeGlossary(
   existing: GlossaryJson,
   incoming: SheetTerm[],
   now: number,
+  overrides: GlossaryOverride[] = [],
 ): MergeResult {
   const terms: GlossaryTermJson[] = existing.terms.map((t) => ({
     id: t.id,
@@ -435,24 +468,20 @@ export function mergeGlossary(
   const usedIds = new Set(terms.map((t) => t.id));
 
   const seenSources = new Set<string>();
+  const sheetBySource = new Map<string, SheetTerm>();
   const added: string[] = [];
-  const updated: string[] = [];
   const idConflicts: string[] = [];
 
   for (const inc of incoming) {
     if (seenSources.has(inc.source)) continue;
     seenSources.add(inc.source);
+    sheetBySource.set(inc.source, inc);
 
     const existingTerm = bySource.get(inc.source);
     if (existingTerm) {
-      let termChanged = false;
       for (const [code, val] of Object.entries(inc.translations)) {
-        if (val && existingTerm.translations[code] !== val) {
-          existingTerm.translations[code] = val;
-          termChanged = true;
-        }
+        if (val) existingTerm.translations[code] = val;
       }
-      if (termChanged) updated.push(inc.source);
     } else {
       const kebabSource = kebab(inc.source);
       if (kebabSource === '') {
@@ -477,6 +506,35 @@ export function mergeGlossary(
     }
   }
 
+  // Overrides last: they win over the sheet, on existing and new terms alike.
+  const overridesHeld: OverrideReport[] = [];
+  const overridesRedundant: OverrideReport[] = [];
+  const overridesUnmatched: OverrideReport[] = [];
+  for (const o of overrides) {
+    if (o.glossary !== existing.id) continue;
+    const sheet = sheetBySource.get(o.source)?.translations[o.lang] || undefined;
+    const report: OverrideReport = { source: o.source, lang: o.lang, value: o.value, sheet };
+    const term = bySource.get(o.source);
+    if (!term) {
+      overridesUnmatched.push(report);
+      continue;
+    }
+    term.translations[o.lang] = o.value;
+    (sheet === o.value ? overridesRedundant : overridesHeld).push(report);
+  }
+
+  // A stored term counts as updated only when its final translations differ
+  // from what was stored, so a sheet change an override undoes is no change.
+  const storedBySource = new Map(existing.terms.map((t) => [t.source, t.translations]));
+  const updated = terms
+    .filter((t) => {
+      const before = storedBySource.get(t.source);
+      if (!before) return false;
+      const codes = new Set([...Object.keys(before), ...Object.keys(t.translations)]);
+      return [...codes].some((c) => before[c] !== t.translations[c]);
+    })
+    .map((t) => t.source);
+
   const removedKept = existing.terms.filter((t) => !seenSources.has(t.source)).map((t) => t.source);
 
   terms.sort((a, b) => a.id.localeCompare(b.id));
@@ -496,7 +554,43 @@ export function mergeGlossary(
     removedKept,
     idConflicts,
     changed,
+    overridesHeld,
+    overridesRedundant,
+    overridesUnmatched,
   };
+}
+
+/**
+ * Validates the overrides file's shape against the known glossaries and
+ * language codes. Returns human-readable errors (empty when valid).
+ */
+export function validateOverrides(raw: unknown, glossaryIds: readonly string[]): string[] {
+  if (!Array.isArray(raw)) return ['overrides: the file must hold a JSON array'];
+  const errors: string[] = [];
+  const seen = new Set<string>();
+  raw.forEach((o: unknown, i) => {
+    const at = `overrides[${i}]`;
+    if (typeof o !== 'object' || o === null) {
+      errors.push(`${at}: not an object`);
+      return;
+    }
+    const r = o as Record<string, unknown>;
+    for (const key of ['glossary', 'source', 'lang', 'value', 'reason'] as const) {
+      if (typeof r[key] !== 'string' || (r[key] as string).trim() === '') {
+        errors.push(`${at}: "${key}" must be a non-empty string`);
+      }
+    }
+    if (typeof r.glossary === 'string' && !glossaryIds.includes(r.glossary)) {
+      errors.push(`${at}: unknown glossary "${r.glossary}"`);
+    }
+    if (typeof r.lang === 'string' && !KNOWN_LANG_CODES.has(r.lang)) {
+      errors.push(`${at}: unknown language code "${r.lang}"`);
+    }
+    const key = `${String(r.glossary)}\0${String(r.source)}\0${String(r.lang)}`;
+    if (seen.has(key)) errors.push(`${at}: duplicate of an earlier override`);
+    seen.add(key);
+  });
+  return errors;
 }
 
 /** Validate the glossary-template.schema.json shape. Returns human-readable errors. */
@@ -594,6 +688,18 @@ async function main(): Promise<void> {
     incoming.set(bucket, terms);
   }
 
+  const overridesPath = fileURLToPath(
+    new URL('./sync-global-glossaries.overrides.json', import.meta.url),
+  );
+  const rawOverrides: unknown = fs.existsSync(overridesPath)
+    ? JSON.parse(fs.readFileSync(overridesPath, 'utf-8'))
+    : [];
+  const overrideErrors = validateOverrides(rawOverrides, ALL_BUCKET_IDS);
+  if (overrideErrors.length > 0) {
+    throw new Error(`Invalid ${path.basename(overridesPath)}:\n  ${overrideErrors.join('\n  ')}`);
+  }
+  const overrides = rawOverrides as GlossaryOverride[];
+
   // Merge into the existing JSON files. Writes are deferred until every
   // glossary validates, so a validation failure writes NOTHING (all-or-nothing).
   const now = Date.now();
@@ -610,7 +716,7 @@ async function main(): Promise<void> {
       );
     }
     const existing = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as GlossaryJson;
-    const result = mergeGlossary(existing, incoming.get(bucketId) ?? [], now);
+    const result = mergeGlossary(existing, incoming.get(bucketId) ?? [], now, overrides);
     validationErrors.push(...validateGlossary(result.glossary));
     results.push(result);
 
@@ -647,6 +753,31 @@ async function main(): Promise<void> {
     for (const r of results) {
       for (const s of r.removedKept) console.log(`  - [${r.glossary.id}] ${s}`);
     }
+  }
+  const held = results.flatMap((r) => r.overridesHeld.map((o) => ({ id: r.glossary.id, o })));
+  if (held.length > 0) {
+    console.log(`\nKept ${held.length} local override(s) over the sheet:`);
+    for (const { id, o } of held) {
+      console.log(
+        `  = [${id}] ${o.source} (${o.lang}): "${o.value}", sheet says ${o.sheet === undefined ? 'nothing' : `"${o.sheet}"`}`,
+      );
+    }
+  }
+  const redundant = results.flatMap((r) =>
+    r.overridesRedundant.map((o) => ({ id: r.glossary.id, o })),
+  );
+  if (redundant.length > 0) {
+    console.log(
+      `\nThe sheet now agrees with ${redundant.length} override(s); remove them from the overrides file:`,
+    );
+    for (const { id, o } of redundant) console.log(`  - [${id}] ${o.source} (${o.lang})`);
+  }
+  const unmatched = results.flatMap((r) =>
+    r.overridesUnmatched.map((o) => ({ id: r.glossary.id, o })),
+  );
+  if (unmatched.length > 0) {
+    console.log(`\n${unmatched.length} override(s) name a term the glossary does not have:`);
+    for (const { id, o } of unmatched) console.log(`  ? [${id}] ${o.source} (${o.lang})`);
   }
   if (routed.unclassified.length > 0) {
     console.log(

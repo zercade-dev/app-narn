@@ -392,7 +392,8 @@
       "what": "Simples é a visão com um só provedor. Escolhê-la deixa suas regras de lado, e um só provedor traduz tudo.",
       "why": "Suas regras são mantidas, não excluídas. Escolha Avançado para usá-las de novo."
     },
-    "absentWhat": "O que esta etapa aponta não está na tela agora. Clique em Próximo para continuar, ou em Voltar para refazer a etapa anterior."
+    "absentWhat": "O que esta etapa aponta não está na tela agora. Clique em Próximo para continuar, ou em Voltar para refazer a etapa anterior.",
+    "restored": "O tour terminou antes de as regras ficarem prontas, então suas regras de roteamento voltaram a ser como antes."
   },
   "advancedSections": {
     "compare": {

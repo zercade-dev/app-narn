@@ -1,0 +1,16 @@
+[
+  {
+    "glossary": "genshin-phrases",
+    "source": "Rules",
+    "lang": "es",
+    "value": "Reglas",
+    "reason": "The sheet's Spanish cell carries a trailing colon, which the term itself does not have."
+  },
+  {
+    "glossary": "genshin-phrases",
+    "source": "Hit (v)",
+    "lang": "id",
+    "value": "Pukul",
+    "reason": "The sheet's Indonesian cell is the untranslated English \"Hit (v)\"."
+  }
+]

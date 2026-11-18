@@ -392,7 +392,8 @@
       "what": "„Einfach“ ist die Ansicht mit einem Anbieter. Wählst du sie, werden deine Regeln beiseitegelegt und ein Anbieter übersetzt alles.",
       "why": "Deine Regeln bleiben erhalten und werden nicht gelöscht. Wähle „Erweitert“, um sie wieder zu nutzen."
     },
-    "absentWhat": "Worauf dieser Schritt zeigt, ist gerade nicht zu sehen. Klicke auf „Weiter“, um fortzufahren, oder auf „Zurück“, um den Schritt davor zu wiederholen."
+    "absentWhat": "Worauf dieser Schritt zeigt, ist gerade nicht zu sehen. Klicke auf „Weiter“, um fortzufahren, oder auf „Zurück“, um den Schritt davor zu wiederholen.",
+    "restored": "Die Tour wurde beendet, bevor ihre Regeln fertig waren. Deine Routing-Regeln sind wieder wie vorher."
   },
   "advancedSections": {
     "compare": {

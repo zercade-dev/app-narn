@@ -392,7 +392,8 @@
       "what": "Simple is the one-provider view. Choosing it sets your rules aside, so one provider translates everything.",
       "why": "Your rules are kept, not deleted. Choose Advanced to use them again."
     },
-    "absentWhat": "What this step points at is not on screen right now. Press Next to go on, or Back to do the step before again."
+    "absentWhat": "What this step points at is not on screen right now. Press Next to go on, or Back to do the step before again.",
+    "restored": "The tour ended before its rules were finished, so your routing rules are back the way they were."
   },
   "advancedSections": {
     "compare": {
