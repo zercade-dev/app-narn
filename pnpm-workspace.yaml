@@ -15,17 +15,6 @@ overrides:
   # crosses a major until upstream moves to 11.
   minimatch: 11.0.3
 
-auditConfig:
-  ignoreGhsas:
-    # GHSA-fc5q-39xc-vjpf (high): picomatch <=4.0.7 has a ReDoS on
-    # single-branch repeated extglobs, and no patched release exists yet, so
-    # neither a bump nor an override can clear it. Dev-only: every path runs
-    # through build, lint or test tooling (vite, eslint, tinyglobby, ...), which
-    # only compiles glob patterns from our own config files, never user input.
-    # The production audit is clean. Remove this entry once picomatch ships a
-    # fix; GitHub's Dependabot alert for it stays open until then.
-    - GHSA-fc5q-39xc-vjpf
-
 catalog:
   # Shared tooling
   typescript: 7.0.2
