@@ -392,7 +392,8 @@
       "what": "Sencillo es la vista de un solo proveedor. Al elegirla, tus reglas se apartan y un solo proveedor lo traduce todo.",
       "why": "Tus reglas se conservan, no se eliminan. Elige Avanzado para volver a usarlas."
     },
-    "absentWhat": "Lo que señala este paso no está en pantalla ahora mismo. Pulsa Siguiente para continuar, o Atrás para repetir el paso anterior."
+    "absentWhat": "Lo que señala este paso no está en pantalla ahora mismo. Pulsa Siguiente para continuar, o Atrás para repetir el paso anterior.",
+    "restored": "El recorrido terminó antes de completar sus reglas, así que tus reglas de enrutamiento vuelven a estar como antes."
   },
   "advancedSections": {
     "compare": {

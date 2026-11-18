@@ -2,8 +2,10 @@
 
 A **constant** term is masked before translation wherever the source spells it
 exactly as the glossary does (letter case included) and replaced afterwards
-with its glossary translation, verbatim. The engine never sees it. Any other
-spelling is sent to the engine as an ordinary glossary hint marked as a name.
+with its glossary translation, verbatim. Its all-caps form counts as the same
+spelling ("MILIASTRA WONDERLAND" in a heading), and there the translation goes
+in upper-cased. The engine never sees either. Any other spelling ("a venti
+latte") is sent to the engine as an ordinary glossary hint marked as a name.
 
 That buys an exact, official form. It costs grammar: the engine cannot decline
 the term or make other words agree with it (Russian cases, Korean particles,
@@ -38,7 +40,7 @@ Kept constant, with the risk noted:
 
 - *Aether, Albedo, Dahlia, Venti*: also words (archaic "aether", the physics
   term, the flower, the coffee size), but rare in game text, and lowercase uses
-  are not masked.
+  are not masked (an all-caps one, "VENTI LATTE", is).
 - *Barbara, Charlotte, Jean, Lisa, Mona, Nicole* and other ordinary first
   names: masked if the text names someone else with that name.
 - Russian declines many of these names ("меч Дилюка"); a constant one stays

@@ -128,6 +128,59 @@ export interface RoutingDoc {
 }
 
 /**
+ * Whether `rule` sends every string in `language` to its provider: no filter
+ * other than the language, which must include `language` (or be a wildcard).
+ */
+function routesWholeLanguage(rule: RoutingRule, language: string): boolean {
+  if (!rule.moduleId || rule.moduleId === PSEUDO_MODULE_ID) return false;
+  if (!matchesEverything({ ...rule, targetLanguages: undefined, targetLanguage: undefined })) {
+    return false;
+  }
+  if (rule.targetLanguages !== undefined && rule.targetLanguages.length > 0) {
+    return rule.targetLanguages.includes('*') || rule.targetLanguages.includes(language);
+  }
+  return (
+    rule.targetLanguage === undefined ||
+    rule.targetLanguage === '*' ||
+    rule.targetLanguage === language
+  );
+}
+
+/**
+ * The languages among `languages` that `doc` gives a provider for every
+ * string, as the server's router decides: with no real rule yet (pseudo rules
+ * do not count) Freeway takes them all; otherwise some rule with a provider
+ * must take the whole language.
+ */
+export function languagesAlwaysRouted(doc: RoutingDoc, languages: readonly string[]): Set<string> {
+  const rules = doc.groups.find((group) => group.id === doc.activeGroupId)?.rules ?? [];
+  if (rules.every((rule) => rule.moduleId === PSEUDO_MODULE_ID)) return new Set(languages);
+  return new Set(languages.filter((lang) => rules.some((rule) => routesWholeLanguage(rule, lang))));
+}
+
+/**
+ * Whether `after` is routing that works, measured against `before`: no rule
+ * added without a provider, and every language `before` gave a provider still
+ * has one. The Advanced routing tour keeps the person's edits when this holds
+ * (a provider for the rest is already there), and puts `before` back when not.
+ */
+export function routingStillWorks(
+  before: RoutingDoc,
+  after: RoutingDoc,
+  languages: readonly string[],
+): boolean {
+  const beforeIds = new Set(
+    (before.groups.find((group) => group.id === before.activeGroupId)?.rules ?? []).map(
+      (r) => r.id,
+    ),
+  );
+  const rules = after.groups.find((group) => group.id === after.activeGroupId)?.rules ?? [];
+  if (rules.some((rule) => !rule.moduleId && !beforeIds.has(rule.id))) return false;
+  const now = languagesAlwaysRouted(after, languages);
+  return [...languagesAlwaysRouted(before, languages)].every((lang) => now.has(lang));
+}
+
+/**
  * Simple mode on a document Simple cannot show: its rules are set aside, not
  * deleted. A Simple group left by an earlier switch is made active again with
  * its own choice; otherwise a new one sends everything to the provider the

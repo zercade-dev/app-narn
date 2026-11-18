@@ -392,7 +392,8 @@
       "what": "Đơn giản là chế độ một nhà cung cấp. Khi chọn, quy tắc của bạn được tạm gác và một nhà cung cấp dịch mọi thứ.",
       "why": "Quy tắc của bạn vẫn được giữ, không bị xóa. Chọn Nâng cao để dùng lại."
     },
-    "absentWhat": "Mục mà bước này chỉ tới hiện không có trên màn hình. Nhấn Tiếp theo để tiếp tục, hoặc Quay lại để làm lại bước trước."
+    "absentWhat": "Mục mà bước này chỉ tới hiện không có trên màn hình. Nhấn Tiếp theo để tiếp tục, hoặc Quay lại để làm lại bước trước.",
+    "restored": "Hướng dẫn đã kết thúc trước khi các quy tắc hoàn tất, nên quy tắc điều phối của bạn đã được trả về như trước."
   },
   "advancedSections": {
     "compare": {

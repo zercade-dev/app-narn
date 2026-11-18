@@ -77,7 +77,7 @@ guardar, **Mayús**+**Intro** para nueva línea, **Esc** para cancelar)…";
 | model | modelo | Masculine. |
 | prompt |  |  |
 | reasoning effort |  |  |
-| routing rule |  |  |
+| routing rule | regla de enrutamiento | Feminine; pl. *reglas de enrutamiento*. Already shipped: `config:routing.title` "Reglas de enrutamiento". |
 | rule group |  |  |
 | credential vault | bóveda de credenciales | Feminine. Full form for naming the term (`vault:statusLabel` "Bóveda de credenciales", `vault:unlockTitle` "Desbloquear bóveda de credenciales", `vault:createTitle` "Crear bóveda de credenciales"). Shortened to "la bóveda" where the context is unambiguous — `config:credentialsVaultLockedChip` "Bóveda bloqueada", `config:credentialsUnlockButton` "Desbloquear bóveda", `console:vaultLocked` "Bóveda bloqueada". The standalone status word is feminine too: "Bloqueada", "Desbloqueada". |
 | credential |  |  |

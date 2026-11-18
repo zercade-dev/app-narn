@@ -392,7 +392,8 @@
       "what": "Basit, tek sağlayıcılı görünümdür. Seçtiğinizde kurallarınız bir kenara bırakılır ve her şeyi tek sağlayıcı çevirir.",
       "why": "Kurallarınız silinmez, saklanır. Yeniden kullanmak için Gelişmiş'i seçin."
     },
-    "absentWhat": "Bu adımın gösterdiği öğe şu anda ekranda değil. Devam etmek için İleri’ye, önceki adımı yeniden yapmak için Geri’ye basın."
+    "absentWhat": "Bu adımın gösterdiği öğe şu anda ekranda değil. Devam etmek için İleri’ye, önceki adımı yeniden yapmak için Geri’ye basın.",
+    "restored": "Tur, kurallar tamamlanmadan sona erdi; yönlendirme kurallarınız eski hâline döndürüldü."
   },
   "advancedSections": {
     "compare": {
