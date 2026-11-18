@@ -129,10 +129,9 @@
    on the same element regardless of which rule wins the box-shadow property itself; when
    unfocused the vars hold the transparent default (identity unaffected), and when
    `:focus-visible` triggers, the appended layers pick up the real ring value. The
-   focus ring surviving the theme box-shadow override is covered by a parity test
-   (jsdom can't resolve var() inside box-shadow or recompute :focus-visible
-   dynamically, so that test checks cascade-winner selection and literal
-   composition rather than final resolved pixel/color values). */
+   focus ring surviving the theme box-shadow override is covered by a parity test,
+   which (under jsdom 31, which resolves var()) asserts the resolved box-shadow
+   layers: the ring layer is present only on the focused checkbox. */
 /* A parity test locates these two rules by matching this exact single-line
    box-shadow text — keep both on one line; prettier-ignored below. */
 /* prettier-ignore */
@@ -230,15 +229,10 @@
    covered by a parity test against the real compiled utility text.
 
    border-width/border-style/border-color are written as three longhands here rather than the
-   equivalent `border: 2px solid var(--border)` shorthand — same rendered result in a real
-   browser, but jsdom's CSS engine (this project's test environment) invalidates an entire
-   shorthand declaration when any one of its components is a var() reference, which would make
-   border-width/border-style unverifiable too, not just border-color (verified empirically: a
-   var()-bearing `border:` shorthand left border-top-width computed as the initial `medium` in
-   jsdom even with `--border` defined and reachable, while the same values split into
-   longhands resolved border-width/border-style correctly, leaving only the var()-bearing
-   border-color longhand itself unresolved — consistent with this file's other documented
-   var()-in-declaration limitation). Longhands sidestep that without changing behavior. */
+   equivalent `border: 2px solid var(--border)` shorthand. Same rendered result in a real
+   browser; the split dates from jsdom 30, which invalidated a whole shorthand when any
+   component was a var() reference. jsdom 31 resolves var() in shorthands and longhands
+   alike, so the longhands are now simply the established form, not a workaround. */
 [data-theme='pixel']
   :is([data-slot='tooltip-content'], [data-slot='popover-content'], [data-slot='select-content']) {
   border-width: 2px;
@@ -316,8 +310,7 @@
    border longhands.
 
    border-*-width/style/color are longhands rather than the equivalent border shorthand, for
-   the same jsdom var()-in-shorthand-invalidation reason documented in the overlay comment
-   above (border-color here is `var(--border)`, not a literal).
+   the same historical (jsdom 30) reason documented in the overlay comment above.
 
    Selector for each rule is `[data-theme='pixel'] [data-slot='tooltip-arrow'][data-side=...]`
    — three selector-level components (0,3,0), which unconditionally outranks
@@ -417,14 +410,9 @@
    mechanism as techno's version of this rule below, for consistency).
 
    outline-width/outline-style/outline-offset are written as separate longhands rather than the
-   equivalent `outline: 2px solid var(--ring)` shorthand, same jsdom var()-in-shorthand
-   reasoning documented in the tooltip-content overlay comment above: empirically, jsdom
-   invalidates the ENTIRE `outline` shorthand when any component is a var() reference (verified
-   directly — `outlineWidth`/`outlineStyle` came back as the initial `medium`/`none` even while
-   genuinely `:focus-visible`, with only the raw `outline` getter returning the literal
-   specified text), whereas splitting into longhands lets `outlineWidth`/`outlineStyle` resolve
-   correctly per real focus state, leaving only the var()-bearing `outline-color` longhand
-   itself unresolved (asserted as literal text, like `border-color` elsewhere in this file). */
+   equivalent `outline: 2px solid var(--ring)` shorthand, for the same historical (jsdom 30)
+   reason documented in the tooltip-content overlay comment above. Under jsdom 31 the tests
+   read the resolved outline width, style and `--ring` color per real focus state. */
 [data-theme='pixel'] [data-row-action]:focus-visible {
   outline-width: 2px;
   outline-style: solid;

@@ -162,9 +162,8 @@
 
    border-width/border-style/border-color are three longhands rather than the equivalent
    `border: 1px solid color-mix(...)` shorthand — see pixel.css's overlay comment for why
-   (jsdom invalidates an entire border shorthand when any component is non-literal, e.g. a
-   color-mix()/var() expression; splitting into longhands keeps width/style verifiable without
-   changing real-browser rendering). */
+   (a jsdom 30 limitation with non-literal shorthand components; jsdom 31 resolves them, and
+   the longhands render the same in a real browser). */
 [data-theme='techno']
   :is([data-slot='tooltip-content'], [data-slot='popover-content'], [data-slot='select-content']) {
   border-width: 1px;
@@ -192,8 +191,8 @@
    so it would risk a faint halo bleeding out from behind the popup's own edge — the "thin
    bright edge" the arrow needs is fully carried by border-color alone.
 
-   border-*-width/style/color are longhands, same jsdom var()/color-mix()-in-shorthand
-   reasoning as the overlay rule above. */
+   border-*-width/style/color are longhands, for the same historical reason as the overlay
+   rule above. */
 [data-theme='techno'] [data-slot='tooltip-arrow'][data-side='top'] {
   border-right-width: 1px;
   border-right-style: solid;
@@ -312,12 +311,8 @@
    this file sets `outline` on this element.
 
    outline-width/outline-style/outline-offset are separate longhands rather than the equivalent
-   `outline: 2px solid var(--ring)` shorthand — same jsdom var()-in-shorthand invalidation
-   reasoning as the overlay/tooltip-arrow blocks above (verified directly: jsdom invalidates the
-   whole `outline` shorthand when any component is a var() reference, leaving `outlineWidth`/
-   `outlineStyle` stuck at the initial `medium`/`none` even while genuinely `:focus-visible`;
-   longhands let those two resolve correctly per real focus state, leaving only the var()-bearing
-   `outline-color` longhand itself unresolved, same as `border-color` elsewhere in this file). */
+   `outline: 2px solid var(--ring)` shorthand, for the same historical (jsdom 30) reason as the
+   overlay/tooltip-arrow blocks above; jsdom 31 resolves the shorthand too. */
 [data-theme='techno'] [data-row-action]:focus-visible {
   outline-width: 2px;
   outline-style: solid;
