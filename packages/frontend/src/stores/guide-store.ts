@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { RoutingDoc } from '@/lib/routing-mode';
 
 /**
  * Where a person is in one tour. `last` and `furthest` are 0-based indices
@@ -53,6 +54,20 @@ export interface OrphanSim {
 }
 
 /**
+ * The routing as it was when the Advanced routing tour began, so leaving the
+ * tour before its rules are complete puts it back (the tour edits real rules,
+ * and they save as they change). `target` is whose routing it is: a project
+ * id, or `collab` for a collaborator's own rules. `restorePending`: the tour
+ * ended while no routing editor was open, so the next one for `target` puts
+ * it back.
+ */
+export interface RoutingTourCopy {
+  target: string;
+  doc: RoutingDoc;
+  restorePending?: true;
+}
+
+/**
  * Progress through the guided first run and the per-area tours. Persisted per
  * browser; only the active tour is transient.
  */
@@ -100,6 +115,8 @@ interface GuideState {
   quickTest: QuickTest | null;
   /** The orphans tour's practice orphan, until it is put back. */
   orphanSim: OrphanSim | null;
+  /** The routing before the Advanced routing tour, until its rules are complete. */
+  routingTourCopy: RoutingTourCopy | null;
   /**
    * Not persisted. The first run's closing step is on screen: a switch to
    * Advanced now starts the Advanced sections tour.
@@ -147,6 +164,7 @@ interface GuideState {
   setClosingShown: (shown: boolean) => void;
   setOrphanSim: (sim: OrphanSim) => void;
   clearOrphanSim: () => void;
+  setRoutingTourCopy: (copy: RoutingTourCopy | null) => void;
   markExported: () => void;
   markProviderEnabled: (id: string) => void;
   markSwitchedOffNoticed: (id: string) => void;
@@ -215,6 +233,7 @@ export const useGuideStore = create<GuideState>()(
       tourProgress: {},
       quickTest: null,
       orphanSim: null,
+      routingTourCopy: null,
       closingShown: false,
       activeTourId: null,
       activeTourStart: 0,
@@ -264,6 +283,7 @@ export const useGuideStore = create<GuideState>()(
       setClosingShown: (closingShown) => set({ closingShown }),
       setOrphanSim: (orphanSim) => set({ orphanSim }),
       clearOrphanSim: () => set({ orphanSim: null }),
+      setRoutingTourCopy: (routingTourCopy) => set({ routingTourCopy }),
       markExported: () => set({ exportedOnce: true }),
       markProviderEnabled: (id) =>
         set((s) => ({
@@ -303,8 +323,8 @@ export const useGuideStore = create<GuideState>()(
     }),
     {
       name: 'translator-guide',
-      // `quickTest`, `orphanSim`, `pendingProviders`, `pendingRoutedFrom`, `switchedOffNoticed`
-      // and `keyProvider` were added within v1: a state saved without them
+      // `quickTest`, `orphanSim`, `pendingProviders`, `pendingRoutedFrom`, `switchedOffNoticed`,
+      // `keyProvider` and `routingTourCopy` were added within v1: a state saved without them
       // rehydrates with the default, so no version bump is needed.
       version: 1,
       // Stored fields only; the persist merge fills in the rest.
@@ -326,6 +346,7 @@ export const useGuideStore = create<GuideState>()(
         tourProgress: state.tourProgress,
         quickTest: state.quickTest,
         orphanSim: state.orphanSim,
+        routingTourCopy: state.routingTourCopy,
       }),
     },
   ),

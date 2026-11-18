@@ -392,7 +392,8 @@
       "what": "Simple est la vue à un seul fournisseur. La choisir met vos règles de côté : un seul fournisseur traduit tout.",
       "why": "Vos règles sont conservées, pas supprimées. Choisissez Avancé pour les utiliser à nouveau."
     },
-    "absentWhat": "Ce que montre cette étape n’est pas à l’écran pour le moment. Appuyez sur Suivant pour continuer, ou sur Retour pour refaire l’étape précédente."
+    "absentWhat": "Ce que montre cette étape n’est pas à l’écran pour le moment. Appuyez sur Suivant pour continuer, ou sur Retour pour refaire l’étape précédente.",
+    "restored": "La visite s’est arrêtée avant que ses règles soient terminées, donc vos règles de routage sont revenues comme avant."
   },
   "advancedSections": {
     "compare": {

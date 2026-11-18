@@ -392,7 +392,8 @@
       "what": "Sederhana adalah tampilan satu penyedia. Memilihnya akan menyisihkan aturan Anda, sehingga satu penyedia menerjemahkan semuanya.",
       "why": "Aturan Anda disimpan, tidak dihapus. Pilih Lanjutan untuk memakainya lagi."
     },
-    "absentWhat": "Yang ditunjuk langkah ini sedang tidak ada di layar. Tekan Berikutnya untuk lanjut, atau Kembali untuk mengulang langkah sebelumnya."
+    "absentWhat": "Yang ditunjuk langkah ini sedang tidak ada di layar. Tekan Berikutnya untuk lanjut, atau Kembali untuk mengulang langkah sebelumnya.",
+    "restored": "Tur berakhir sebelum aturannya selesai, jadi aturan penyaluran Anda kembali seperti semula."
   },
   "advancedSections": {
     "compare": {

@@ -15,6 +15,12 @@ import {
 import { basesWithInstances } from '@/lib/module-options';
 import { useStringStore } from '../../stores/string-store.js';
 import { useGuideStore } from '../../stores/guide-store.js';
+import {
+  captureRoutingBeforeTour,
+  dropRoutingTourCopy,
+  registerRoutingTourEditor,
+  routingBeforeTour,
+} from '../../lib/tour/routing-advanced-tour.js';
 import { useUiSettings } from '../../stores/ui-settings-store.js';
 import {
   effectiveRoutingGroups,
@@ -336,18 +342,25 @@ export function RoutingRulesConfig({
    * group, which waits for a running translation to finish.
    */
   function toggleAdvanced(advanced: boolean): void {
-    const doc: RoutingDoc = { groups: mergedGroups, activeGroupId };
+    // Simple chosen halfway through the Advanced routing tour starts from the
+    // routing as it was before the tour, not the half-edited rules (the tour
+    // ends with the switch, and its copy is used up here).
+    const beforeTour = advanced ? null : routingBeforeTour(targetKey);
+    const doc: RoutingDoc = beforeTour ?? { groups: mergedGroups, activeGroupId };
     const setAside = useUiSettings.getState().routingSetAside[targetKey];
     const toSimple = advanced ? null : toSimpleRouting(doc);
-    const next = advanced ? toAdvancedRouting(doc, setAside) : toSimple;
+    const next = advanced ? toAdvancedRouting(doc, setAside) : (toSimple ?? beforeTour);
     if (next && translationsInProgress) {
       setError(t('routing.groupSwitchInProgress'));
       return;
     }
+    if (beforeTour) dropRoutingTourCopy();
     setEditorLatched(false);
     setRoutingAdvanced(advanced);
     if (!next) return;
-    useUiSettings.getState().setRoutingSetAside(targetKey, toSimple?.setAside ?? null);
+    if (next !== beforeTour) {
+      useUiSettings.getState().setRoutingSetAside(targetKey, toSimple?.setAside ?? null);
+    }
     applyDoc(next);
   }
 
@@ -362,6 +375,38 @@ export function RoutingRulesConfig({
     useUiSettings.getState().clearRoutingAdvancedAsked();
     toggleRef.current(true);
   }, [routingAdvancedAsked]);
+
+  // The Advanced routing tour edits these rules for real; leaving it before they
+  // are complete puts back the copy given here (see `captureRoutingBeforeTour`).
+  // The copy waits for the tour's own switch to Advanced above.
+  const docRef = useRef<RoutingDoc>({ groups: mergedGroups, activeGroupId });
+  const restoreRef = useRef<(doc: RoutingDoc) => boolean>(() => false);
+  useEffect(() => {
+    docRef.current = { groups: mergedGroups, activeGroupId };
+    restoreRef.current = (doc) => {
+      const docDraft = doc.groups.find((group) => group.id === doc.activeGroupId)?.rules ?? [];
+      const now = buildPayload(groups, activeGroupId, draft);
+      if (
+        JSON.stringify(buildPayload(doc.groups, doc.activeGroupId, docDraft)) ===
+        JSON.stringify(now)
+      ) {
+        return false;
+      }
+      applyDoc(doc);
+      void flush();
+      return true;
+    };
+  });
+  const tourId = useGuideStore((s) => s.activeTourId);
+  const tourSeq = useGuideStore((s) => s.activeTourSeq);
+  useEffect(() => {
+    if (routingAdvancedAsked) return;
+    captureRoutingBeforeTour(targetKey, docRef.current);
+  }, [tourId, tourSeq, routingAdvancedAsked, targetKey]);
+  useEffect(
+    () => registerRoutingTourEditor(targetKey, (doc) => restoreRef.current(doc)),
+    [targetKey],
+  );
 
   const handleExport = () => {
     try {
