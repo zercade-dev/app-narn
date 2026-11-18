@@ -165,22 +165,7 @@ export const ROUTING_ADVANCED_TOUR: Tour = {
       noWhy: true,
       absentWhatKey: ABSENT,
     }),
-    // From here the rules are complete (rule #1 filtered, the new one with a
-    // provider): they are the person's now, and leaving keeps them.
-    step(
-      'order',
-      'routing-rules',
-      { kind: 'next' },
-      {
-        ...LOOK,
-        onEnter: () => {
-          dropRoutingTourCopy();
-          RULES_CLOSED();
-        },
-        side: 'bottom',
-        overlap: true,
-      },
-    ),
+    step('order', 'routing-rules', { kind: 'next' }, { ...LOOK, side: 'bottom', overlap: true }),
     // These two open their tab of the editor, so what they describe is on screen.
     step(
       'templates',
@@ -227,16 +212,17 @@ export function startRoutingAdvancedTour(): void {
   store.startTour(ROUTING_ADVANCED_TOUR_ID);
 }
 
-// ─── Leaving early puts the routing back ─────────────────────────────────────
+// ─── Leaving with broken routing puts it back ────────────────────────────────
 //
 // The tour has the person edit real rules, and they save as they change, so
 // leaving halfway (Skip, a switch to Simple, a phone-sized window, another
-// tour) would leave the project routing only the languages ticked on rule #1,
+// tour) could leave the project routing only the languages ticked on rule #1,
 // or a rule with no provider. The routing editor gives a copy of its document
-// as the tour begins; the `order` step, where the rules are complete, drops
-// it; any other way out puts the copy back.
+// as the tour begins. On the way out the routing is judged by what it does,
+// not by the step reached: if it still works (`routingStillWorks`: a provider
+// for the rest is already there), it is kept; otherwise the copy goes back.
 
-/** Puts a routing document back through an open editor; false when it already matches. */
+/** Puts a routing document back through an open editor; false when kept (it works, or already matches). */
 export type RoutingRestorer = (doc: RoutingDoc) => boolean;
 
 /** The open routing editors, by whose routing they edit (see `RoutingTourCopy.target`). */
@@ -249,7 +235,7 @@ const editors = new Map<string, RoutingRestorer>();
  */
 let copiedForSeq: number | null = null;
 
-/** The counted index of `order`: a run that begins there or later has nothing to put back. */
+/** The counted index of `order`: a run that begins there or later edits nothing to put back. */
 const ORDER_INDEX = ROUTING_ADVANCED_TOUR.steps.findIndex((s) => s.id === 'order');
 
 /**
@@ -274,7 +260,7 @@ export function captureRoutingBeforeTour(target: string, doc: RoutingDoc): void 
   guide.setRoutingTourCopy({ target, doc: structuredClone(doc) });
 }
 
-/** Leaving the tour from here keeps the rules: they are complete, or put back already. */
+/** The copy is used up (a switch to Simple decided from it): nothing to put back. */
 export function dropRoutingTourCopy(): void {
   useGuideStore.getState().setRoutingTourCopy(null);
 }

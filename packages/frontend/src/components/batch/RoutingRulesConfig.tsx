@@ -26,6 +26,7 @@ import {
   effectiveRoutingGroups,
   isSimpleRouting,
   makeSimpleRule,
+  routingStillWorks,
   setAsideGroups,
   simpleRuleModuleId,
   toAdvancedRouting,
@@ -345,8 +346,12 @@ export function RoutingRulesConfig({
     // Simple chosen halfway through the Advanced routing tour starts from the
     // routing as it was before the tour, not the half-edited rules (the tour
     // ends with the switch, and its copy is used up here).
-    const beforeTour = advanced ? null : routingBeforeTour(targetKey);
-    const doc: RoutingDoc = beforeTour ?? { groups: mergedGroups, activeGroupId };
+    const current: RoutingDoc = { groups: mergedGroups, activeGroupId };
+    const copy = advanced ? null : routingBeforeTour(targetKey);
+    // Rules that already work (a provider for the rest is there) are the
+    // person's: Simple sets them aside as usual.
+    const beforeTour = copy && !routingStillWorks(copy, current, availableLanguages) ? copy : null;
+    const doc: RoutingDoc = beforeTour ?? current;
     const setAside = useUiSettings.getState().routingSetAside[targetKey];
     const toSimple = advanced ? null : toSimpleRouting(doc);
     const next = advanced ? toAdvancedRouting(doc, setAside) : (toSimple ?? beforeTour);
@@ -354,7 +359,7 @@ export function RoutingRulesConfig({
       setError(t('routing.groupSwitchInProgress'));
       return;
     }
-    if (beforeTour) dropRoutingTourCopy();
+    if (copy) dropRoutingTourCopy();
     setEditorLatched(false);
     setRoutingAdvanced(advanced);
     if (!next) return;
@@ -384,6 +389,11 @@ export function RoutingRulesConfig({
   useEffect(() => {
     docRef.current = { groups: mergedGroups, activeGroupId };
     restoreRef.current = (doc) => {
+      // Routing that works is kept: every language that had a provider still
+      // has one, and no rule was left without one.
+      if (routingStillWorks(doc, { groups: mergedGroups, activeGroupId }, availableLanguages)) {
+        return false;
+      }
       const docDraft = doc.groups.find((group) => group.id === doc.activeGroupId)?.rules ?? [];
       const now = buildPayload(groups, activeGroupId, draft);
       if (
