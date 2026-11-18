@@ -212,12 +212,15 @@ function buildItemContext(item: JudgeItem): Record<string, unknown> | undefined 
 }
 
 /**
- * True when `source` contains `term` spelled exactly (letter case included) as
- * a whole word outside `{…}` placeholders — where M17 masks a constant term, so
- * the translation is forced to use it.
+ * True when `source` contains `term` spelled exactly (letter case included), or
+ * in all capitals, as a whole word outside `{…}` placeholders — where M17 masks
+ * a constant term, so the translation is forced to use it.
  */
 function spelledExactly(term: string, source: string): boolean {
-  return new RegExp(termBoundaryPattern(term), 'u').test(glossaryScanText(source));
+  const scan = glossaryScanText(source);
+  return [term, term.toUpperCase()].some((spelling) =>
+    new RegExp(termBoundaryPattern(spelling), 'u').test(scan),
+  );
 }
 
 export function buildJudgePrompt(items: JudgeItem[]): { system: string; user: string } {

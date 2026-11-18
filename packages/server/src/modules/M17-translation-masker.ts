@@ -13,10 +13,12 @@
  *  - Constant glossary term match   → `{g:1}` (original casing preserved)
  *  - Escape sequences `\n` `\t` `\r` → `{e:1}` (literal two-char form preserved)
  *
- * Constant glossary terms are masked only where the source writes them exactly
- * as the glossary does (letter case included) and restored with the
- * target-language translation as written in the glossary. Other spellings are
- * left for the model, which gets the term as a glossary item marked as a name. When the masked text contains only placeholders and
+ * Constant glossary terms are masked where the source writes them exactly as
+ * the glossary does (letter case included) and restored with the
+ * target-language translation as written in the glossary. The term's all-caps
+ * form ("VENTI", "MILIASTRA WONDERLAND" in a heading) is masked too and restored
+ * in capitals. Other spellings ("a venti latte") are left for the model, which
+ * gets the term as a glossary item marked as a name. When the masked text contains only placeholders and
  * whitespace, `trivial` is true and the translation engine can skip the
  * remote module call entirely and synthesise the result locally.
  *
@@ -80,6 +82,8 @@ interface GlossarySlot {
   termId: string;
   caseKind: CaseKind;
   original: string;
+  /** Matched as the term's all-caps form ("VENTI" for "Venti"): restored in capitals. */
+  allCaps?: true;
 }
 
 interface EscapeSlot {
@@ -183,9 +187,10 @@ export function constantTermRegex(source: string): RegExp {
   if (cached) return cached;
   const pattern = new RegExp(
     termBoundaryPattern(source),
-    // Case-sensitive: only the exact spelling is protected ("Razor", not "a
-    // razor"). Other spellings reach the model as ordinary glossary items
-    // marked as names (see the prompt builder's NAME_TERM_RULE).
+    // Case-sensitive: only the spelling compiled here is protected ("Venti", or
+    // "VENTI" for the all-caps pass; not "a venti latte"). Other spellings reach
+    // the model as ordinary glossary items marked as names (see the prompt
+    // builder's NAME_TERM_RULE).
     'gu',
   );
   if (termRegexCache.size >= MAX_TERM_REGEX_CACHE) {
@@ -311,20 +316,31 @@ export function maskText(
     // inserted placeholder — `{` and `:`/`}` are non-word boundary chars — and
     // corrupt it so `restoreText` no longer recognises the token, silently
     // dropping the masked variable or escape.
+    // The term's all-caps form counts as its spelling too: headings and labels
+    // write names in capitals ("MILIASTRA WONDERLAND"), and there it is still the
+    // name. Mixed or lower case ("a venti latte") stays with the model.
     for (const term of sortedTerms) {
       if (!term.source) continue;
-      const pattern = constantTermRegex(term.source);
-      out = replaceOutsideMaskTokens(out, (segment) =>
-        segment.replace(pattern, (match: string) => {
-          const id = ++glossaryCounter;
-          glossary.set(id, {
-            termId: term.id,
-            caseKind: detectCase(match),
-            original: match,
-          });
-          return `{g:${id}}`;
-        }),
-      );
+      const spellings: Array<{ text: string; allCaps: boolean }> = [
+        { text: term.source, allCaps: false },
+      ];
+      const upper = term.source.toUpperCase();
+      if (upper !== term.source) spellings.push({ text: upper, allCaps: true });
+      for (const spelling of spellings) {
+        const pattern = constantTermRegex(spelling.text);
+        out = replaceOutsideMaskTokens(out, (segment) =>
+          segment.replace(pattern, (match: string) => {
+            const id = ++glossaryCounter;
+            glossary.set(id, {
+              termId: term.id,
+              caseKind: detectCase(match),
+              original: match,
+              ...(spelling.allCaps && { allCaps: true as const }),
+            });
+            return `{g:${id}}`;
+          }),
+        );
+      }
     }
     return out;
   };
@@ -368,6 +384,18 @@ export function maskText(
   return { masked, plan: { tags, vars, glossary, escapes }, trivial };
 }
 
+/**
+ * Upper-cases with the target language's rules (Turkish "i" -> "İ"), falling back
+ * to the default mapping for a code the runtime does not know (e.g. "pseudo-test").
+ */
+function upperFor(text: string, language: string): string {
+  try {
+    return text.toLocaleUpperCase(language);
+  } catch {
+    return text.toUpperCase();
+  }
+}
+
 export function restoreText(
   maskedTranslated: string,
   plan: MaskPlan,
@@ -395,10 +423,11 @@ export function restoreText(
       const term = glossaryById.get(slot.termId);
       const translation = term?.translations[targetLanguage];
       if (!translation) return slot.original;
-      // Masking matches the glossary's exact spelling, so the occurrence has the
-      // glossary's own casing: the translation goes in as written there (a
-      // re-cased "Chef brutocollinus" would spoil it).
-      return translation;
+      // An all-caps occurrence gets the translation in capitals, to match its
+      // heading. Otherwise masking matched the glossary's exact spelling, so the
+      // translation goes in as written there (a re-cased "Chef brutocollinus"
+      // would spoil it).
+      return slot.allCaps ? upperFor(translation, targetLanguage) : translation;
     })
     .replace(/\{e:(\d+)\}/g, (_match, n: string) => {
       const slot = plan.escapes.get(Number(n));
