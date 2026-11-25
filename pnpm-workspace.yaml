@@ -27,8 +27,8 @@ catalog:
   globals: 17.14.0
   eslint-config-prettier: 10.1.8
   eslint-plugin-react-hooks: 7.1.1
-  '@typescript-eslint/eslint-plugin': 8.73.0
-  '@typescript-eslint/parser': 8.73.0
+  '@typescript-eslint/eslint-plugin': 8.74.0
+  '@typescript-eslint/parser': 8.74.0
 
   # Module dependencies
   '@github/copilot-sdk': 1.0.34
