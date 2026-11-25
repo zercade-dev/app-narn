@@ -88,11 +88,11 @@ catalogs:
       specifier: 3.3.1
       version: 3.3.1
     '@typescript-eslint/eslint-plugin':
-      specifier: 8.73.0
-      version: 8.73.0
+      specifier: 8.74.0
+      version: 8.74.0
     '@typescript-eslint/parser':
-      specifier: 8.73.0
-      version: 8.73.0
+      specifier: 8.74.0
+      version: 8.74.0
     '@vitejs/plugin-react':
       specifier: 6.3.0
       version: 6.3.0
@@ -219,10 +219,10 @@ importers:
         version: 10.0.1(eslint@10.15.0(jiti@2.7.0))
       '@typescript-eslint/eslint-plugin':
         specifier: 'catalog:'
-        version: 8.73.0(@typescript-eslint/parser@8.73.0(eslint@10.15.0(jiti@2.7.0)))(eslint@10.15.0(jiti@2.7.0))
+        version: 8.74.0(@typescript-eslint/parser@8.74.0(eslint@10.15.0(jiti@2.7.0)))(eslint@10.15.0(jiti@2.7.0))
       '@typescript-eslint/parser':
         specifier: 'catalog:'
-        version: 8.73.0(eslint@10.15.0(jiti@2.7.0))
+        version: 8.74.0(eslint@10.15.0(jiti@2.7.0))
       eslint:
         specifier: 'catalog:'
         version: 10.15.0(jiti@2.7.0)
@@ -1037,49 +1037,58 @@ packages:
     resolution: {integrity: sha512-zJDSa0Psmtvv2Sn394wqel1AMuzaM/Bm+8rFOw9mLO/bXzPmUIKUutNcn4RkRz3FTxnbeB/914VwL7KB4IFRZQ==}
     cpu: [arm64]
     os: [darwin]
+    deprecated: 'Legacy platform dependency. Migrate the parent SDK to @microsoft/copilot-sdk. Migration docs: https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md'
 
   '@github/copilot-sdk-darwin-x64@1.0.34':
     resolution: {integrity: sha512-bRnCZBbSnkLpKfHEO3harCa1UXwUIDG/tCuwCLhAIUrC9A6vK4Dr7uMPGqPXN+47A3Zpzk/5JmadczY1S0UQdQ==}
     cpu: [x64]
     os: [darwin]
+    deprecated: 'Legacy platform dependency. Migrate the parent SDK to @microsoft/copilot-sdk. Migration docs: https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md'
 
   '@github/copilot-sdk-linux-arm64@1.0.34':
     resolution: {integrity: sha512-T1UWVZLQ/6yQIoXvLEepNqLi+15+BxBkkyQW4BbN1n+WJ6SMcUJFVBOVIXXbDFhG7e+xLL2ITzRBS/oRZH06Xw==}
     cpu: [arm64]
     os: [linux]
     libc: [glibc]
+    deprecated: 'Legacy platform dependency. Migrate the parent SDK to @microsoft/copilot-sdk. Migration docs: https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md'
 
   '@github/copilot-sdk-linux-x64@1.0.34':
     resolution: {integrity: sha512-/3BS48gnx1mEfXXkCO/reFZudVdEb3+BOG+h7SdC/zg25wHg5FvDR0zesNYFfv47W9zOGo6SInVnKf9O1MhJ7g==}
     cpu: [x64]
     os: [linux]
     libc: [glibc]
+    deprecated: 'Legacy platform dependency. Migrate the parent SDK to @microsoft/copilot-sdk. Migration docs: https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md'
 
   '@github/copilot-sdk-linuxmusl-arm64@1.0.34':
     resolution: {integrity: sha512-l5U3Z2/vzPXaKLbmiP0b2iX5Y29lfL+ZhCfHQyaZu/jW2otlF8TjhHedFiSDC2u1fQVfiIRM+L5vpcboLP0/yA==}
     cpu: [arm64]
     os: [linux]
     libc: [musl]
+    deprecated: 'Legacy platform dependency. Migrate the parent SDK to @microsoft/copilot-sdk. Migration docs: https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md'
 
   '@github/copilot-sdk-linuxmusl-x64@1.0.34':
     resolution: {integrity: sha512-Ahe0w7JkW40cWtVd1BD2O4AsWzVB2yQw9dcgTuE5hHv1esLNHzun2BKr+kU+ueSFr/tRbJR8EF6UbtGcaYSbmA==}
     cpu: [x64]
     os: [linux]
     libc: [musl]
+    deprecated: 'Legacy platform dependency. Migrate the parent SDK to @microsoft/copilot-sdk. Migration docs: https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md'
 
   '@github/copilot-sdk-win32-arm64@1.0.34':
     resolution: {integrity: sha512-UEpFWlJyaBhTr12JOrFKF6Pp2ydQoLzWSs+t26OJhNDKOcoJ0O/85iIFHJx+/PN/b6FsF/gcsTPdhVeM5aq6Fg==}
     cpu: [arm64]
     os: [win32]
+    deprecated: 'Legacy platform dependency. Migrate the parent SDK to @microsoft/copilot-sdk. Migration docs: https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md'
 
   '@github/copilot-sdk-win32-x64@1.0.34':
     resolution: {integrity: sha512-d8H8C/UBgx06JILbn+AaxpjNlygi2M48T4rHBufiDYHZIeqdGkNk4Idh9dDAYM/Vze1QXS75I7kgzoBa+p49qw==}
     cpu: [x64]
     os: [win32]
+    deprecated: 'Legacy platform dependency. Migrate the parent SDK to @microsoft/copilot-sdk. Migration docs: https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md'
 
   '@github/copilot-sdk@1.0.34':
     resolution: {integrity: sha512-dwqeNhR71lPDdzRE4QKTFXmax+dAzWfkXK4/4DKJBZp+kFrK660z+4evYdvS8Dw8yaQs1EVGAa63plrbn8MSPw==}
     engines: {node: ^20.19.0 || >=22.12.0}
+    deprecated: 'Deprecated: migrate to @microsoft/copilot-sdk. Migration docs: https://github.com/microsoft/copilot-sdk/blob/main/docs/v2-breaking-changes.md'
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -1543,43 +1552,43 @@ packages:
   '@types/yazl@3.3.1':
     resolution: {integrity: sha512-DIWfCKpsTp6hE5BDBHV3+fIL/bLUF9Bv13iDrWnMlmhQpH67buNvI291ZauQ1xcccxK3FqQ9honnXpq4R8NMuQ==}
 
-  '@typescript-eslint/eslint-plugin@8.73.0':
-    resolution: {integrity: sha512-UkygMFer53Yzn29MCYFTHf34hGXf5KJhiDWfIm1tXtXRrym1CS6l5H9Y3yCtPWChpC0/f93H88gdj8tN0dd4kw==}
+  '@typescript-eslint/eslint-plugin@8.74.0':
+    resolution: {integrity: sha512-z3KXk1+Vm+d82ZRplOoC89ho4Rf1da5ju6sx8//92GnN532U62DGPjECXkkVqtYzIv0zoJlpO39SX2Z9tk6LVw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      '@typescript-eslint/parser': ^8.73.0
+      '@typescript-eslint/parser': ^8.74.0
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
 
-  '@typescript-eslint/parser@8.73.0':
-    resolution: {integrity: sha512-AuL45bVcmssHfZ3Di3cs9Q0l4gBm4ZFVrJOQEE7VpqW+PVgQaEwSwazz4TVIiFabXkk6U51EprYDwqw+HR8ePw==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-    peerDependencies:
-      eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
-
-  '@typescript-eslint/project-service@8.73.0':
-    resolution: {integrity: sha512-/pEf8Rc4Mjk+qJnY0uO1+Gadeal8uv50xpuic+srG2vIVatA0XxvWMUeMtFvs6OCHqftiQ7/+qH4aehG5stzIA==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/scope-manager@8.73.0':
-    resolution: {integrity: sha512-/TjD738Iq2rzj5z0ixVOi+TsvgjAzZPLPaH1yWdDBytR/HTR5gMpyYWZeCe5WTQZLwk3ho8AV7U3muoQCRtXBQ==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/tsconfig-utils@8.73.0':
-    resolution: {integrity: sha512-lmtCFOfYaJfpqZywGuXi4FpNtE+NQ+YLe3T0K9rtEDcW8ZuGWvfI++pj8r05sYMI8vWT2CYK4rWyedmD6Rp4og==}
-    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
-
-  '@typescript-eslint/type-utils@8.73.0':
-    resolution: {integrity: sha512-MOC9i4xy1F7KcDde7Ip8jf1SrRiALb2Km4UWxGNjUE2YlhjIEo1ayE27GHIwIQyfWuHTmEonQT14uyurlyC6aA==}
+  '@typescript-eslint/parser@8.74.0':
+    resolution: {integrity: sha512-ecr8AYdig7avVkxaHdQvxHnIJ/mOyliO4Gv/uWF8q69vBew/z3sexqBwHUZX5Vql+Ns0w4sH6gBLkICGbOvJkA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
 
-  '@typescript-eslint/types@8.73.0':
-    resolution: {integrity: sha512-O/1ytYzflF16QDKXx4/qOXg1IuZp+n7hr9t+S0nv7N/2Tl8rJiNCshztV1gcSUvHbPtoX3+zmNbtSAyVbzxVfw==}
+  '@typescript-eslint/project-service@8.74.0':
+    resolution: {integrity: sha512-z/mymuE+JlEeSFIv3Mo70EvgG1Zz74Hl0IDfExfXutARAP834bt+MppTD7mVAwmZO0GdxdOAi0jbTam749eH6g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@typescript-eslint/typescript-estree@8.73.0':
-    resolution: {integrity: sha512-InjlBkSdWceIwIBWSwS3ENUp+i0O02PGX3Zv2wnihWJC1WDVGvG7mTHuf8b57uAaITj94d6tRPDH+sUEtXdRQQ==}
+  '@typescript-eslint/scope-manager@8.74.0':
+    resolution: {integrity: sha512-kpOdpu4CpWN5U38ox3f727DwWRBtUAVhyUJtqTBYe5gf2wYoxac7PgKP14txrxN7ICVtcjlLdzjqfRgpSnDKvQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/tsconfig-utils@8.74.0':
+    resolution: {integrity: sha512-p07wAuaS6BjCYgOSXKJi4YhvTnAf7fiG37e9THcpnYaQEt2QiTTYZWKwUFNgeRiywiMudazhzgddAirZ0GgHtQ==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/type-utils@8.74.0':
+    resolution: {integrity: sha512-CV3Y3la8l3F9ANfxcfpgSSiQgJTe4IeLEoZV4O/gcW86Ugp8X6SKiQ0vm+QegXaRIbbDMokZZSF3A1CgiU/kPw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    peerDependencies:
+      eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
+
+  '@typescript-eslint/types@8.74.0':
+    resolution: {integrity: sha512-MpnMrJCVNpP1iVL8NiHkQZgQqIMBH5ewDGUPBh1pqQXwFtMFjsl1M03QcYPXmv6stCKEiF0PN7CGbU1ZbXFzEA==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@typescript-eslint/typescript-estree@8.74.0':
+    resolution: {integrity: sha512-wL348k6l92DNG+kPP5rVpKwNBoz7a3xRZy3TPKc1uymQttd7u7gcMv3eENmcuh4CjC4mO3FTM0DYstFXMyDLuw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       '@typescript/native': npm:typescript@>=7.1.0-dev.20261009.1 || >=7.1.0-beta <7.1.0-dev
@@ -1587,14 +1596,14 @@ packages:
       '@typescript/native':
         optional: true
 
-  '@typescript-eslint/utils@8.73.0':
-    resolution: {integrity: sha512-j2SVJJvVkXdUL0WcEzo4vEH1mO1vIi8KlVukcYA2MgMZvYN2LlZR4PmsW+GTSxSW24j6Q/EP7+MOifLtg5hmsA==}
+  '@typescript-eslint/utils@8.74.0':
+    resolution: {integrity: sha512-IpWXPxXXomzxyTcvjhZJexgdvtTR1TooLAPpuxzaGqQ8BHll1lf4Ysp/BTE/l0U5TJ+x1j7B4bEM8pLRrvY+XA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
 
-  '@typescript-eslint/visitor-keys@8.73.0':
-    resolution: {integrity: sha512-k4lsFVpRZICbltkIEEH4hZRkwXkqDF1GHBpClKQOHQY+RkoZAAuyc1ci3I6p+CB6v3U4jaHIUshc4RzzQXZWLg==}
+  '@typescript-eslint/visitor-keys@8.74.0':
+    resolution: {integrity: sha512-XSZmOtMUbWCBIM+2BK134FyMFxmll1mW2mPLk/PSwYQYzGIPMgJAqL929U4qXVizLv7Xq5b7r41/o7Ombuwk0g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@typescript/typescript-aix-ppc64@7.0.2':
@@ -3848,14 +3857,14 @@ snapshots:
     dependencies:
       '@types/node': 26.6.5
 
-  '@typescript-eslint/eslint-plugin@8.73.0(@typescript-eslint/parser@8.73.0(eslint@10.15.0(jiti@2.7.0)))(eslint@10.15.0(jiti@2.7.0))':
+  '@typescript-eslint/eslint-plugin@8.74.0(@typescript-eslint/parser@8.74.0(eslint@10.15.0(jiti@2.7.0)))(eslint@10.15.0(jiti@2.7.0))':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
-      '@typescript-eslint/parser': 8.73.0(eslint@10.15.0(jiti@2.7.0))
-      '@typescript-eslint/scope-manager': 8.73.0
-      '@typescript-eslint/type-utils': 8.73.0(eslint@10.15.0(jiti@2.7.0))
-      '@typescript-eslint/utils': 8.73.0(eslint@10.15.0(jiti@2.7.0))
-      '@typescript-eslint/visitor-keys': 8.73.0
+      '@typescript-eslint/parser': 8.74.0(eslint@10.15.0(jiti@2.7.0))
+      '@typescript-eslint/scope-manager': 8.74.0
+      '@typescript-eslint/type-utils': 8.74.0(eslint@10.15.0(jiti@2.7.0))
+      '@typescript-eslint/utils': 8.74.0(eslint@10.15.0(jiti@2.7.0))
+      '@typescript-eslint/visitor-keys': 8.74.0
       eslint: 10.15.0(jiti@2.7.0)
       ignore: 7.0.9
       natural-compare: 1.4.0
@@ -3865,12 +3874,12 @@ snapshots:
       - '@typescript/native'
       - supports-color
 
-  '@typescript-eslint/parser@8.73.0(eslint@10.15.0(jiti@2.7.0))':
+  '@typescript-eslint/parser@8.74.0(eslint@10.15.0(jiti@2.7.0))':
     dependencies:
-      '@typescript-eslint/scope-manager': 8.73.0
-      '@typescript-eslint/types': 8.73.0
-      '@typescript-eslint/typescript-estree': 8.73.0
-      '@typescript-eslint/visitor-keys': 8.73.0
+      '@typescript-eslint/scope-manager': 8.74.0
+      '@typescript-eslint/types': 8.74.0
+      '@typescript-eslint/typescript-estree': 8.74.0
+      '@typescript-eslint/visitor-keys': 8.74.0
       debug: 4.4.3
       eslint: 10.15.0(jiti@2.7.0)
       typescript: 6.0.3
@@ -3878,29 +3887,29 @@ snapshots:
       - '@typescript/native'
       - supports-color
 
-  '@typescript-eslint/project-service@8.73.0':
+  '@typescript-eslint/project-service@8.74.0':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.73.0
-      '@typescript-eslint/types': 8.73.0
+      '@typescript-eslint/tsconfig-utils': 8.74.0
+      '@typescript-eslint/types': 8.74.0
       debug: 4.4.3
       typescript: 6.0.3
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/scope-manager@8.73.0':
+  '@typescript-eslint/scope-manager@8.74.0':
     dependencies:
-      '@typescript-eslint/types': 8.73.0
-      '@typescript-eslint/visitor-keys': 8.73.0
+      '@typescript-eslint/types': 8.74.0
+      '@typescript-eslint/visitor-keys': 8.74.0
 
-  '@typescript-eslint/tsconfig-utils@8.73.0':
+  '@typescript-eslint/tsconfig-utils@8.74.0':
     dependencies:
       typescript: 6.0.3
 
-  '@typescript-eslint/type-utils@8.73.0(eslint@10.15.0(jiti@2.7.0))':
+  '@typescript-eslint/type-utils@8.74.0(eslint@10.15.0(jiti@2.7.0))':
     dependencies:
-      '@typescript-eslint/types': 8.73.0
-      '@typescript-eslint/typescript-estree': 8.73.0
-      '@typescript-eslint/utils': 8.73.0(eslint@10.15.0(jiti@2.7.0))
+      '@typescript-eslint/types': 8.74.0
+      '@typescript-eslint/typescript-estree': 8.74.0
+      '@typescript-eslint/utils': 8.74.0(eslint@10.15.0(jiti@2.7.0))
       debug: 4.4.3
       eslint: 10.15.0(jiti@2.7.0)
       ts-api-utils: 2.5.0(typescript@6.0.3)
@@ -3909,14 +3918,14 @@ snapshots:
       - '@typescript/native'
       - supports-color
 
-  '@typescript-eslint/types@8.73.0': {}
+  '@typescript-eslint/types@8.74.0': {}
 
-  '@typescript-eslint/typescript-estree@8.73.0':
+  '@typescript-eslint/typescript-estree@8.74.0':
     dependencies:
-      '@typescript-eslint/project-service': 8.73.0
-      '@typescript-eslint/tsconfig-utils': 8.73.0
-      '@typescript-eslint/types': 8.73.0
-      '@typescript-eslint/visitor-keys': 8.73.0
+      '@typescript-eslint/project-service': 8.74.0
+      '@typescript-eslint/tsconfig-utils': 8.74.0
+      '@typescript-eslint/types': 8.74.0
+      '@typescript-eslint/visitor-keys': 8.74.0
       debug: 4.4.3
       minimatch: 11.0.3
       semver: 7.8.5
@@ -3926,21 +3935,21 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@typescript-eslint/utils@8.73.0(eslint@10.15.0(jiti@2.7.0))':
+  '@typescript-eslint/utils@8.74.0(eslint@10.15.0(jiti@2.7.0))':
     dependencies:
       '@eslint-community/eslint-utils': 4.10.1(eslint@10.15.0(jiti@2.7.0))
-      '@typescript-eslint/scope-manager': 8.73.0
-      '@typescript-eslint/types': 8.73.0
-      '@typescript-eslint/typescript-estree': 8.73.0
+      '@typescript-eslint/scope-manager': 8.74.0
+      '@typescript-eslint/types': 8.74.0
+      '@typescript-eslint/typescript-estree': 8.74.0
       eslint: 10.15.0(jiti@2.7.0)
       typescript: 6.0.3
     transitivePeerDependencies:
       - '@typescript/native'
       - supports-color
 
-  '@typescript-eslint/visitor-keys@8.73.0':
+  '@typescript-eslint/visitor-keys@8.74.0':
     dependencies:
-      '@typescript-eslint/types': 8.73.0
+      '@typescript-eslint/types': 8.74.0
       eslint-visitor-keys: 5.0.1
 
   '@typescript/typescript-aix-ppc64@7.0.2':
