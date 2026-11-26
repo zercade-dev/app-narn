@@ -32,7 +32,7 @@ catalog:
 
   # Module dependencies
   '@github/copilot-sdk': 1.0.34
-  deepl-node: 1.29.0
+  deepl-node: 2.0.0
 
   # AI SDK dependencies
   ai: 7.0.173
